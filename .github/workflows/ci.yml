@@ -1,0 +1,266 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# `api/go.mod` declares `go 1.24.5` and `gostman-gui/go.mod` declares `go 1.23`.
+# A Go toolchain older than a module's `go` directive refuses to build it, so
+# CI must use >= 1.24.5 to satisfy BOTH modules with a single Go version.
+env:
+  GO_VERSION: '1.24.5'
+  NODE_VERSION: '20'
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Vercel serverless functions (module `handler`). Independent of the
+  # frontend, so it runs as its own fast job.
+  # ---------------------------------------------------------------------------
+  go-api:
+    name: Go checks (api)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          # `api/` is a separate module from `gostman-gui/`; point the module
+          # cache at its own go.sum so the cache key is correct.
+          cache-dependency-path: api/go.sum
+
+      - name: go build ./...
+        working-directory: ./api
+        run: go build ./...
+
+      - name: go vet ./...
+        working-directory: ./api
+        run: go vet ./...
+
+  # ---------------------------------------------------------------------------
+  # Frontend builds + the entry-point regression guard + the Wails Go module.
+  #
+  # These share one job because `gostman-gui/main.go` does:
+  #     //go:embed all:frontend/dist
+  # so the Go build CANNOT run until `npm run build` has produced
+  # `frontend/dist`. Splitting them would fail with
+  # "pattern all:frontend/dist: no matching files found".
+  # ---------------------------------------------------------------------------
+  build-and-verify:
+    name: Frontend builds, entry-point guard, Go checks (gostman-gui)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: gostman-gui/frontend/package-lock.json
+
+      # package-lock.json IS committed, so `npm ci` is the correct reproducible
+      # install. The fallback keeps CI working if the lockfile is ever dropped.
+      - name: Install frontend dependencies
+        working-directory: ./gostman-gui/frontend
+        shell: bash
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            echo "No package-lock.json found; falling back to npm install."
+            npm install
+          fi
+
+      # Desktop target: index.html -> src/main.jsx -> App.jsx (Wails bindings).
+      - name: Build desktop frontend (dist/)
+        working-directory: ./gostman-gui/frontend
+        run: npm run build
+
+      # Web target: index-web.html -> src/web-main.jsx -> WebApp.jsx (HTTP proxy).
+      - name: Build web frontend (dist-web/)
+        working-directory: ./gostman-gui/frontend
+        run: npm run build:web
+
+      # -----------------------------------------------------------------------
+      # THE REGRESSION GUARD.
+      #
+      # Background: one React codebase is built into two different apps. A build
+      # script used to overwrite the desktop `index.html` with the web one, so
+      # `npm run build` silently emitted the WEB app into `dist/`. `wails build`
+      # still compiled and the release still went green, because a successful
+      # compile says nothing about WHICH entry point got bundled.
+      #
+      # This step asserts the two outputs really are two different apps, using
+      # markers that exist on only one side:
+      #   * `api/proxy`   - web-only HTTP proxy endpoint (src/lib/api.js)
+      #   * `SendRequest` - desktop-only Wails binding (wailsjs/go/main/App)
+      # -----------------------------------------------------------------------
+      - name: Verify desktop and web bundles are different apps
+        working-directory: ./gostman-gui/frontend
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          DESKTOP_DIR="dist"
+          WEB_DIR="dist-web"
+          failed=0
+
+          # Report every problem in one run rather than dying on the first, so a
+          # broken build gives the full picture in a single CI log.
+          fail() {
+            echo "FAIL: $*"
+            failed=1
+          }
+
+          # Resolve the entry chunk from the <script src> of the built HTML
+          # instead of globbing `assets/index.*.js`. Filenames are
+          # content-hashed, and the emitted chunk name follows the input HTML
+          # name (the web entry is `index-web.html`), so a hardcoded glob is
+          # fragile. The script tag is authoritative: it is what the app loads.
+          entry_bundle() {
+            local dir="$1" html="$1/index.html" src
+            src="$(grep -o '<script[^>]*src="[^"]*"' "$html" \
+                   | grep -o 'src="[^"]*"' \
+                   | head -n1 \
+                   | sed 's/^src="//; s/"$//')"
+            if [ -z "$src" ]; then
+              echo "Could not find a <script src=...> in $html" >&2
+              return 1
+            fi
+            # Strip a leading "./" or "/" so the path resolves inside the outdir.
+            src="${src#./}"
+            src="${src#/}"
+            echo "$dir/$src"
+          }
+
+          echo "== Checking both entry HTML files exist =="
+          for f in "$DESKTOP_DIR/index.html" "$WEB_DIR/index.html"; do
+            if [ -f "$f" ]; then
+              echo "  ok: $f"
+            else
+              fail "missing $f - the build did not produce an entry HTML file."
+            fi
+          done
+
+          # The bundle checks below need both HTML files to resolve.
+          if [ "$failed" -ne 0 ]; then
+            echo
+            echo "Cannot continue bundle checks without both index.html files."
+            exit 1
+          fi
+
+          DESKTOP_JS="$(entry_bundle "$DESKTOP_DIR")"
+          WEB_JS="$(entry_bundle "$WEB_DIR")"
+
+          echo
+          echo "== Resolved entry bundles =="
+          echo "  desktop: $DESKTOP_JS"
+          echo "  web:     $WEB_JS"
+
+          for f in "$DESKTOP_JS" "$WEB_JS"; do
+            [ -f "$f" ] || fail "entry bundle $f referenced by index.html does not exist."
+          done
+          if [ "$failed" -ne 0 ]; then
+            exit 1
+          fi
+
+          echo
+          echo "== Desktop bundle must NOT contain the web-only proxy call =="
+          if grep -q 'api/proxy' "$DESKTOP_JS"; then
+            fail "desktop bundle $DESKTOP_JS contains 'api/proxy' (web-only)."
+          else
+            echo "  ok: no 'api/proxy' in desktop bundle"
+          fi
+
+          echo
+          echo "== Desktop bundle MUST contain the Wails binding call =="
+          if grep -q 'SendRequest' "$DESKTOP_JS"; then
+            echo "  ok: found 'SendRequest' in desktop bundle"
+          else
+            fail "desktop bundle $DESKTOP_JS does not contain 'SendRequest' (desktop-only Wails binding)."
+          fi
+
+          echo
+          echo "== Web bundle MUST contain the proxy endpoint =="
+          if grep -q 'api/proxy' "$WEB_JS"; then
+            echo "  ok: found 'api/proxy' in web bundle"
+          else
+            fail "web bundle $WEB_JS does not contain 'api/proxy' (expected in the web build)."
+          fi
+
+          echo
+          echo "== Desktop and web bundles must not be byte-identical =="
+          # Identical content means the same app was bundled twice, which is the
+          # exact signature of one entry point clobbering the other.
+          if cmp -s "$DESKTOP_JS" "$WEB_JS"; then
+            fail "desktop and web entry bundles are byte-identical - the same app was built twice."
+          else
+            echo "  ok: bundles differ"
+          fi
+
+          echo
+          if [ "$failed" -ne 0 ]; then
+            echo "=============================================================================="
+            echo "ENTRY-POINT REGRESSION DETECTED"
+            echo "=============================================================================="
+            echo "The desktop and web builds must be two DIFFERENT applications built from one"
+            echo "React codebase:"
+            echo
+            echo "  desktop (Wails): index.html     -> src/main.jsx     -> App.jsx"
+            echo "                   npm run build      -> dist/"
+            echo "                   talks to Go via Wails bindings (e.g. SendRequest)"
+            echo
+            echo "  web (Vercel)   : index-web.html -> src/web-main.jsx -> WebApp.jsx"
+            echo "                   npm run build:web  -> dist-web/"
+            echo "                   talks to the serverless function at /api/proxy"
+            echo
+            echo "A failure here almost always means one entry point clobbered the other - for"
+            echo "example a build step overwriting index.html with the web entry, or a Vite"
+            echo "config losing its explicit build.rollupOptions.input. The compile still"
+            echo "succeeds and the release still goes green, so nothing else catches it: the"
+            echo "desktop app silently ships the web UI and its Wails calls are gone."
+            echo
+            echo "To debug:"
+            echo "  1. Check index.html points at ./src/main.jsx and index-web.html at"
+            echo "     ./src/web-main.jsx."
+            echo "  2. Check vite.config.js and vite.web.config.js each set an explicit"
+            echo "     build.rollupOptions.input."
+            echo "  3. Confirm no build script copies one index.html over the other."
+            echo "=============================================================================="
+            exit 1
+          fi
+
+          echo "All entry-point checks passed: desktop and web are distinct apps."
+
+      # Installed after the frontend build, before the Go build: the Wails
+      # dependency needs Linux GUI dev headers to compile.
+      - name: Install Linux GUI dev headers for Wails
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: gostman-gui/go.sum
+
+      # `-tags webkit2_41` matches the release workflow's Linux build and is
+      # required when compiling against libwebkit2gtk-4.1.
+      - name: go build ./...
+        working-directory: ./gostman-gui
+        run: go build -tags webkit2_41 ./...
+
+      - name: go vet ./...
+        working-directory: ./gostman-gui
+        run: go vet -tags webkit2_41 ./...
