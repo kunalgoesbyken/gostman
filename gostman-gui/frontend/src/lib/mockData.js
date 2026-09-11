@@ -6,6 +6,8 @@ export const DEFAULT_REQUEST = {
     headers: "{}",
     body: "",
     queryParams: "{}",
+    graphqlQuery: "",
+    graphqlVariables: "{}",
     response: "",
     responseHeaders: {},
     responseType: "text" // text, image, html

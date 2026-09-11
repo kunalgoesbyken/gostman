@@ -9,7 +9,7 @@ import { substitute } from "./variables"
  * desktop behave identically.
  */
 export function prepareRequest(activeRequest, variablesMap) {
-    // Normalize method (uppercase + trim) — matches app.go:233
+    // Normalize method (uppercase + trim) — matches app.go:326
     let method = (activeRequest.method || "").trim().toUpperCase()
 
     let bodyStr = activeRequest.body || ""
@@ -17,13 +17,28 @@ export function prepareRequest(activeRequest, variablesMap) {
     let paramsStr = activeRequest.queryParams || "{}"
     let urlStr = activeRequest.url || ""
 
-    // GraphQL handling — matches app.go:162-193
+    // GraphQL handling — matches app.go:229-280
     if (method === "GRAPHQL") {
         method = "POST"
-        const graphqlReq = { query: bodyStr }
-        // Parse queryParams as the GraphQL variables object; omit on failure
+
+        // Dedicated GraphQL tab fields win when present, else fall back to
+        // body/queryParams so saved requests and Postman imports keep working
+        // — matches app.go:237-245
+        const queryStr =
+            typeof activeRequest.graphqlQuery === "string" &&
+            activeRequest.graphqlQuery.trim() !== ""
+                ? activeRequest.graphqlQuery
+                : bodyStr
+        const varsStr =
+            typeof activeRequest.graphqlVariables === "string" &&
+            activeRequest.graphqlVariables.trim() !== ""
+                ? activeRequest.graphqlVariables
+                : paramsStr
+
+        const graphqlReq = { query: queryStr }
+        // Parse variables as the GraphQL variables object; omit on failure
         try {
-            graphqlReq.variables = JSON.parse(paramsStr)
+            graphqlReq.variables = JSON.parse(varsStr)
         } catch (e) {
             // omit variables
         }
@@ -44,11 +59,19 @@ export function prepareRequest(activeRequest, variablesMap) {
         }
     }
 
-    // Variable substitution — matches app.go:202-206
+    // Variable substitution — matches app.go:290-294
     urlStr = substitute(urlStr, variablesMap)
     headersStr = substitute(headersStr, variablesMap)
     paramsStr = substitute(paramsStr, variablesMap)
     bodyStr = substitute(bodyStr, variablesMap)
+
+    // Default scheme to https if missing — matches app.go:320-323 ("4b").
+    // app.go can run this after query-param assembly because url.Parse tolerates
+    // scheme-less input; the WHATWG `new URL()` below does not, so it must run
+    // first here. Net result is identical.
+    if (urlStr !== "" && !urlStr.includes("://")) {
+        urlStr = "https://" + urlStr
+    }
 
     // Parse headers
     let headersObj = {}
@@ -59,7 +82,7 @@ export function prepareRequest(activeRequest, variablesMap) {
     }
 
     // Query params: overwrite existing URL keys (no duplicates, single
-    // string values, sorted) — matches app.go:215-230 (url.Values.Set + Encode)
+    // string values, sorted) — matches app.go:302-318 (url.Values.Set + Encode)
     let fetchUrl = urlStr
     try {
         const queryObj = JSON.parse(paramsStr || "{}")
@@ -77,7 +100,7 @@ export function prepareRequest(activeRequest, variablesMap) {
         console.error("Failed to parse query params", e)
     }
 
-    // Body attachment for any method when non-empty — matches app.go:238-243
+    // Body attachment for any method when non-empty — matches app.go:335-340
     return {
         url: fetchUrl,
         method,

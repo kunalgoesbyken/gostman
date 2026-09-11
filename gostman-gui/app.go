@@ -44,18 +44,29 @@ func (a *App) startup(ctx context.Context) {
 type SavedData struct {
 	Variables string    `json:"variables"`
 	Requests  []Request `json:"requests"`
+	Folders   []Folder  `json:"folders"`
+	History   []Request `json:"history"`
+}
+
+type Folder struct {
+	Id     string `json:"id"`
+	Name   string `json:"name"`
+	IsOpen bool   `json:"isOpen"`
 }
 
 type Request struct {
-	Id          string `json:"id"`
-	Name        string `json:"name"`
-	URL         string `json:"url"`
-	Method      string `json:"method"`
-	Headers     string `json:"headers"`
-	Body        string `json:"body"`
-	QueryParams string `json:"queryParams"`
-	Response    string `json:"response"`
-	FolderId    string `json:"folderId"`
+	Id               string `json:"id"`
+	Name             string `json:"name"`
+	URL              string `json:"url"`
+	Method           string `json:"method"`
+	Headers          string `json:"headers"`
+	Body             string `json:"body"`
+	QueryParams      string `json:"queryParams"`
+	Response         string `json:"response"`
+	FolderId         string `json:"folderId"`
+	GraphqlQuery     string `json:"graphqlQuery"`
+	GraphqlVariables string `json:"graphqlVariables"`
+	Timestamp        string `json:"timestamp"`
 }
 
 type ResponseMsg struct {
@@ -208,7 +219,12 @@ func replacePlaceholders(input string, variables map[string]string) string {
 
 // --- Exported Methods (Callable from JS) ---
 
-func (a *App) SendRequest(method, urlStr, headersJSON, bodyStr, paramsJSON string) ResponseMsg {
+// SendRequest executes an HTTP (or GraphQL) request.
+//
+// graphqlQuery/graphqlVariables come from the dedicated GraphQL tab fields and
+// take precedence when non-empty; otherwise we fall back to bodyStr/paramsJSON
+// so previously saved requests and Postman imports keep working.
+func (a *App) SendRequest(method, urlStr, headersJSON, bodyStr, paramsJSON, graphqlQuery, graphqlVariables string) ResponseMsg {
 	// Handle GraphQL requests - convert to POST with JSON body
 	if method == "GRAPHQL" {
 		method = "POST"
@@ -217,11 +233,21 @@ func (a *App) SendRequest(method, urlStr, headersJSON, bodyStr, paramsJSON strin
 			Query     string `json:"query"`
 			Variables any    `json:"variables"`
 		}
-		graphqlReq.Query = bodyStr
+
+		// Dedicated GraphQL fields win when present, else fall back.
+		queryStr := bodyStr
+		if strings.TrimSpace(graphqlQuery) != "" {
+			queryStr = graphqlQuery
+		}
+		varsStr := paramsJSON
+		if strings.TrimSpace(graphqlVariables) != "" {
+			varsStr = graphqlVariables
+		}
+		graphqlReq.Query = queryStr
 
 		// Parse variables if provided
 		var vars map[string]any
-		if err := json.Unmarshal([]byte(paramsJSON), &vars); err == nil {
+		if err := json.Unmarshal([]byte(varsStr), &vars); err == nil {
 			graphqlReq.Variables = vars
 		}
 
@@ -475,6 +501,44 @@ func (a *App) SaveVariables(variableString string) string {
 		return "Failed to save variables: " + err.Error()
 	}
 	return "Environment Variables Saved Successfully"
+}
+
+func (a *App) GetFolders() []Folder {
+	data := getSavedData()
+	result := make([]Folder, len(data.Folders))
+	copy(result, data.Folders)
+	return result
+}
+
+func (a *App) SaveFolders(folders []Folder) string {
+	if folders == nil {
+		folders = []Folder{}
+	}
+	if err := a.mutateSavedData(func(data *SavedData) {
+		data.Folders = folders
+	}); err != nil {
+		return "Failed to save folders: " + err.Error()
+	}
+	return "Folders Saved Successfully"
+}
+
+func (a *App) GetHistory() []Request {
+	data := getSavedData()
+	result := make([]Request, len(data.History))
+	copy(result, data.History)
+	return result
+}
+
+func (a *App) SaveHistory(history []Request) string {
+	if history == nil {
+		history = []Request{}
+	}
+	if err := a.mutateSavedData(func(data *SavedData) {
+		data.History = history
+	}); err != nil {
+		return "Failed to save history: " + err.Error()
+	}
+	return "History Saved Successfully"
 }
 
 // ResetData clears all saved data (requests + variables) on disk so the app

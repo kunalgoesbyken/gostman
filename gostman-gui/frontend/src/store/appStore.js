@@ -4,7 +4,8 @@ import { parseRequest } from '../lib/dataUtils'
 
 const DEFAULT_REQUEST = {
   id: '', name: 'New Request', method: 'GET', url: '',
-  headers: '{}', body: '', queryParams: '{}', response: ''
+  headers: '{}', body: '', queryParams: '{}',
+  graphqlQuery: '', graphqlVariables: '{}', response: ''
 }
 
 export const useAppStore = create(
@@ -44,7 +45,13 @@ export const useAppStore = create(
         deleteRequest: (id) => set((state) => ({ requests: state.requests.filter(r => r.id !== id) })),
 
         // Folders
-        setFolders: (folders) => set({ folders: Array.isArray(folders) ? folders : [] }),
+        // Accepts either an array or an updater fn (prev) => next, like React setState.
+        setFolders: (foldersOrUpdater) => set((state) => {
+          const next = typeof foldersOrUpdater === 'function'
+            ? foldersOrUpdater(state.folders)
+            : foldersOrUpdater
+          return { folders: Array.isArray(next) ? next : [] }
+        }),
         addFolder: (name) => {
           const id = `folder-${Date.now()}`
           set((state) => ({ folders: [...state.folders, { id, name, isOpen: true }] }))

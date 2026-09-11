@@ -24,6 +24,22 @@ export namespace main {
 	        this.httpOnly = source["httpOnly"];
 	    }
 	}
+	export class Folder {
+	    id: string;
+	    name: string;
+	    isOpen: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Folder(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.isOpen = source["isOpen"];
+	    }
+	}
 	export class HeaderEntry {
 	    key: string;
 	    value: string;
@@ -47,6 +63,10 @@ export namespace main {
 	    body: string;
 	    queryParams: string;
 	    response: string;
+	    folderId: string;
+	    graphqlQuery: string;
+	    graphqlVariables: string;
+	    timestamp: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Request(source);
@@ -62,6 +82,10 @@ export namespace main {
 	        this.body = source["body"];
 	        this.queryParams = source["queryParams"];
 	        this.response = source["response"];
+	        this.folderId = source["folderId"];
+	        this.graphqlQuery = source["graphqlQuery"];
+	        this.graphqlVariables = source["graphqlVariables"];
+	        this.timestamp = source["timestamp"];
 	    }
 	}
 	export class ResponseMsg {

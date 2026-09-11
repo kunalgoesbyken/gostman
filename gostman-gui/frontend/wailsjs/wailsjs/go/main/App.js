@@ -6,12 +6,32 @@ export function DeleteRequest(arg1) {
   return window['go']['main']['App']['DeleteRequest'](arg1);
 }
 
+export function GetFolders() {
+  return window['go']['main']['App']['GetFolders']();
+}
+
+export function GetHistory() {
+  return window['go']['main']['App']['GetHistory']();
+}
+
 export function GetRequests() {
   return window['go']['main']['App']['GetRequests']();
 }
 
 export function GetVariables() {
   return window['go']['main']['App']['GetVariables']();
+}
+
+export function ResetData() {
+  return window['go']['main']['App']['ResetData']();
+}
+
+export function SaveFolders(arg1) {
+  return window['go']['main']['App']['SaveFolders'](arg1);
+}
+
+export function SaveHistory(arg1) {
+  return window['go']['main']['App']['SaveHistory'](arg1);
 }
 
 export function SaveRequest(arg1) {
@@ -22,6 +42,6 @@ export function SaveVariables(arg1) {
   return window['go']['main']['App']['SaveVariables'](arg1);
 }
 
-export function SendRequest(arg1, arg2, arg3, arg4, arg5) {
-  return window['go']['main']['App']['SendRequest'](arg1, arg2, arg3, arg4, arg5);
+export function SendRequest(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
+  return window['go']['main']['App']['SendRequest'](arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 }

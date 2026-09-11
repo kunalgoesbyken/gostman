@@ -4,14 +4,22 @@ import {main} from '../models';
 
 export function DeleteRequest(arg1:string):Promise<void>;
 
+export function GetFolders():Promise<Array<main.Folder>>;
+
+export function GetHistory():Promise<Array<main.Request>>;
+
 export function GetRequests():Promise<Array<main.Request>>;
 
 export function GetVariables():Promise<string>;
 
 export function ResetData():Promise<void>;
 
+export function SaveFolders(arg1:Array<main.Folder>):Promise<string>;
+
+export function SaveHistory(arg1:Array<main.Request>):Promise<string>;
+
 export function SaveRequest(arg1:main.Request):Promise<string>;
 
 export function SaveVariables(arg1:string):Promise<string>;
 
-export function SendRequest(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string):Promise<main.ResponseMsg>;
+export function SendRequest(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string,arg6:string,arg7:string):Promise<main.ResponseMsg>;

@@ -1,6 +1,6 @@
-import { useEffect, useCallback, lazy, Suspense } from 'react'
+import { useEffect, useState, useCallback, lazy, Suspense } from 'react'
 import { RotateCcw, Import, Loader2 } from "lucide-react"
-import { SendRequest, GetRequests, SaveRequest, DeleteRequest, GetVariables, SaveVariables, ResetData } from "../wailsjs/go/main/App"
+import { SendRequest, GetRequests, SaveRequest, DeleteRequest, GetVariables, SaveVariables, ResetData, GetFolders, SaveFolders, GetHistory, SaveHistory } from "../wailsjs/go/main/App"
 import { Sidebar } from "./components/Sidebar"
 import { RequestBar } from "./components/RequestBar"
 import { ResponsePanel } from "./components/ResponsePanel"
@@ -22,6 +22,10 @@ import { validateEnvVariables } from "./lib/validation"
 import logo from "./assets/logo.jpg"
 
 function App() {
+  // Guards the folder/history persistence effects until the initial disk load
+  // completes (see fetchInitialData below).
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false)
+
   // Zustand store hooks
   const requests = useAppStore((s) => s.requests)
   const requestHistory = useAppStore((s) => s.requestHistory)
@@ -43,6 +47,7 @@ function App() {
   // Store actions
   const setRequests = useAppStore((s) => s.setRequests)
   const setFolders = useAppStore((s) => s.setFolders)
+  const setRequestHistory = useAppStore((s) => s.setRequestHistory)
   const setVariables = useAppStore((s) => s.setVariables)
   const setActiveTab = useAppStore((s) => s.setActiveTab)
   const newTab = useAppStore((s) => s.newTab)
@@ -91,17 +96,36 @@ function App() {
 
   const fetchInitialData = useCallback(async () => {
     try {
-      const [reqs, vars] = await Promise.all([GetRequests(), GetVariables()])
+      const [reqs, vars, flds, hist] = await Promise.all([
+        GetRequests(), GetVariables(), GetFolders(), GetHistory()
+      ])
       setRequests(reqs || [])
       setVariables(vars || "{}")
+      setFolders(flds || [])
+      setRequestHistory(hist || [])
     } catch (e) {
       console.error("Failed to load data:", e)
+    } finally {
+      setInitialDataLoaded(true)
     }
-  }, [setRequests, setVariables])
+  }, [setRequests, setVariables, setFolders, setRequestHistory])
 
   useEffect(() => {
     fetchInitialData()
   }, [fetchInitialData])
+
+  // Persist folders / history to disk whenever they change (desktop only).
+  // Skipped until the initial load finishes so we never overwrite saved data
+  // with the empty pre-load state.
+  useEffect(() => {
+    if (!initialDataLoaded) return
+    SaveFolders(folders || []).catch((e) => console.error("Failed to save folders:", e))
+  }, [folders, initialDataLoaded])
+
+  useEffect(() => {
+    if (!initialDataLoaded) return
+    SaveHistory(requestHistory || []).catch((e) => console.error("Failed to save history:", e))
+  }, [requestHistory, initialDataLoaded])
 
   const refreshRequests = useCallback(async () => {
     const reqs = await GetRequests()
@@ -212,7 +236,9 @@ function App() {
         activeRequest.url,
         activeRequest.headers,
         activeRequest.body,
-        activeRequest.queryParams
+        activeRequest.queryParams,
+        activeRequest.graphqlQuery || "",
+        activeRequest.graphqlVariables || ""
       )
 
       updateActiveRequest({ response: resp.body })
@@ -381,34 +407,30 @@ function App() {
               showConfirm(
                 'Reset App',
                 'Clear all data?',
-              async () => {
-                try {
-                  await ResetData()
+                async () => {
                   try {
-                    localStorage.clear()
+                    await ResetData()
+                    try {
+                      localStorage.clear()
+                    } catch (e) {
+                      console.warn("Could not clear localStorage:", e)
+                    }
+                    window.location.reload()
                   } catch (e) {
-                    console.warn("Could not clear localStorage:", e)
+                    showAlert('Error', `Reset failed: ${e.message || String(e)}`, 'OK', 'warning')
                   }
-                  window.location.reload()
-                } catch (e) {
-                  showAlert('Error', `Reset failed: ${e.message || String(e)}`, 'OK', 'warning')
-                }
-              },
-              null,
-              'destructive'
-            )
-          },
-          null,
-          'destructive'
-        )
-      }}
-      className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors"
-      title="Reset to default (Clear data)"
-    >
-      <RotateCcw className="h-4 w-4" />
-    </Button>
-  </div>
-</header>
+                },
+                null,
+                'destructive'
+              )
+            }}
+            className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors"
+            title="Reset to default (Clear data)"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </Button>
+        </div>
+      </header>
 
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
