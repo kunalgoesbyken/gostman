@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "dev:web": "node scripts/copy-index.js && vite --config vite.web.config.js",
-    "build:web": "node scripts/copy-index.js && vite build --config vite.web.config.js",
+    "dev:web": "vite --config vite.web.config.js",
+    "build:web": "vite build --config vite.web.config.js",
     "preview": "vite preview"
   },
   "dependencies": {
