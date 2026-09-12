@@ -96,13 +96,13 @@ export const RequestBar = memo(function RequestBar({ activeRequest, onMethodChan
             onPaste={handlePaste}
             className={cn(
               "pl-9 pr-24 font-mono text-sm",
-              isWebSocket && "border-cyan-500/50 focus-visible:border-cyan-500"
+              isWebSocket && "border-primary/50 focus-visible:border-primary"
             )}
           />
           {/* WebSocket indicator badge */}
           {isWebSocket && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              <Badge className="gap-1 bg-cyan-500/10 text-cyan-400 border-cyan-500/20 text-xs">
+              <Badge className="gap-1 bg-primary/10 text-primary border-primary/20 text-xs">
                 <Radio className="h-3 w-3" />
                 WebSocket
               </Badge>

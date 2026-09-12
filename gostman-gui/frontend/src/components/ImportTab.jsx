@@ -374,7 +374,7 @@ export function ImportTab({ onImport, onClose }) {
                     className={`
                         rounded-xl p-4 border
                         ${importResult.success
-                            ? 'bg-emerald-500/10 border-emerald-500/20'
+                            ? 'bg-success/10 border-success/20'
                             : 'bg-destructive/10 border-destructive/20'
                         }
                     `}
@@ -383,14 +383,14 @@ export function ImportTab({ onImport, onClose }) {
                 >
                     <div className="flex items-start gap-3">
                         {importResult.success ? (
-                            <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
+                            <Check className="h-5 w-5 text-success shrink-0 mt-0.5" />
                         ) : (
                             <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
                         )}
                         <div className="flex-1 min-w-0">
                             {importResult.success ? (
                                 <div>
-                                    <p className="text-sm font-medium text-emerald-500">
+                                    <p className="text-sm font-medium text-success">
                                         Successfully imported {importResult.format} collection
                                         {fileName && ` from ${fileName}`}
                                     </p>
@@ -402,14 +402,14 @@ export function ImportTab({ onImport, onClose }) {
                                             {importResult.foldersCount} folders
                                         </Badge>
                                         {Array.isArray(importResult.warnings) && importResult.warnings.length > 0 && (
-                                            <Badge variant="outline" className="text-xs text-amber-600 border-amber-600">
+                                            <Badge variant="outline" className="text-xs text-warning border-warning">
                                                 {importResult.warnings.length} warning{importResult.warnings.length > 1 ? 's' : ''}
                                             </Badge>
                                         )}
                                     </div>
                                     {Array.isArray(importResult.warnings) && importResult.warnings.length > 0 && (
-                                        <div className="mt-2 p-2 bg-amber-500/10 border border-amber-500/20 rounded">
-                                            <p className="text-xs text-amber-700 dark:text-amber-400">
+                                        <div className="mt-2 p-2 bg-warning/10 border border-warning/20 rounded">
+                                            <p className="text-xs text-warning dark:text-warning">
                                                 {importResult.warnings.map((w, i) => (
                                                     <span key={i}>• {w}</span>
                                                 )).reduce((acc, curr) => (

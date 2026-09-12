@@ -352,17 +352,17 @@ export function ParamsPanel({
         className="relative overflow-hidden"
         variants={listItem}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10" />
+        
         <div className="relative px-4 py-3 border-b border-border/50 bg-muted/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <motion.div
                 animate={wiggle}
               >
-                <Hash className="h-5 w-5 text-cyan-500" />
+                <Hash className="h-5 w-5 text-primary" />
               </motion.div>
               <div>
-                <span className="text-sm font-semibold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                <span className="text-sm font-semibold text-foreground">
                   Query Parameters
                 </span>
                 <div className="flex items-center gap-2 mt-0.5">
@@ -377,7 +377,7 @@ export function ParamsPanel({
       </motion.div>
 
       <motion.div
-        className="px-4 py-3 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 border-b border-cyan-500/10"
+        className="px-4 py-3 bg-gradient-to-r from-primary/5 to-info/5 border-b border-primary/10"
         variants={listItem}
       >
         <p className="text-xs text-muted-foreground">
@@ -489,7 +489,7 @@ export function ParamsPanel({
         <p className="text-xs text-muted-foreground">
           {enabledCount > 0 ? (
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+              <CheckCircle2 className="h-3.5 w-3.5 text-success" />
               {enabledCount} parameter{enabledCount > 1 ? 's' : ''} will be sent
             </span>
           ) : (

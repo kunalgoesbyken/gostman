@@ -52,7 +52,7 @@ export const RequestTabs = memo(function RequestTabs({
     const handleQueryParamsChange = useCallback((newParams) => onUpdateField('queryParams', newParams), [onUpdateField])
 
     return (
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-1 flex-col">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-1 flex-col min-h-0">
             <div className="border-b border-border/60 bg-muted/10 px-4 backdrop-blur-md">
                 <TabsList>
                     <TabsTrigger value="body" icon={Braces}>Body</TabsTrigger>
@@ -142,7 +142,7 @@ export const RequestTabs = memo(function RequestTabs({
                         </div>
 
                         {/* Validation status bar */}
-                        <div className={`px-4 py-2 flex items-center gap-2 text-xs border-t ${envVarValidation.error ? 'bg-destructive/10 border-destructive/20' : 'bg-emerald-500/10 border-emerald-500/20'
+                        <div className={`px-4 py-2 flex items-center gap-2 text-xs border-t ${envVarValidation.error ? 'bg-destructive/10 border-destructive/20' : 'bg-success/10 border-success/20'
                             }`}>
                             {envVarValidation.error ? (
                                 <>
@@ -151,8 +151,8 @@ export const RequestTabs = memo(function RequestTabs({
                                 </>
                             ) : (
                                 <>
-                                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
-                                    <span className="text-emerald-600 dark:text-emerald-400">Valid JSON</span>
+                                    <CheckCircle2 className="h-3.5 w-3.5 text-success flex-shrink-0" />
+                                    <span className="text-success dark:text-success">Valid JSON</span>
                                 </>
                             )}
                         </div>

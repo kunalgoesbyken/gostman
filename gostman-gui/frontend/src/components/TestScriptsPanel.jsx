@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Play, Plus, Trash2, Code2, FolderOpen, Info, Link2, Sparkles, ChevronDown, CheckCircle2, Target } from "lucide-react"
+import { Play, Plus, Trash2, Code2, FolderOpen, Info, Link2, Zap, ChevronDown, CheckCircle2, Target } from "lucide-react"
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { Input } from "./ui/input"
@@ -26,9 +26,9 @@ import {
 } from "../lib/motion"
 
 const scopeConfig = {
-  environment: { label: 'Environment', color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
-  local: { label: 'Local', color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-  global: { label: 'Global', color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/20' }
+  environment: { label: 'Environment', color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/20' },
+  local: { label: 'Local', color: 'text-info', bg: 'bg-info/10', border: 'border-info/20' },
+  global: { label: 'Global', color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20' }
 }
 
 export function TestScriptsPanel({
@@ -140,17 +140,17 @@ export function TestScriptsPanel({
         className="relative overflow-hidden"
         variants={listItem}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-orange-500/10" />
+        
         <div className="relative px-4 py-3 border-b border-border/50 bg-muted/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <motion.div
                 animate={wiggle}
               >
-                <Link2 className="h-5 w-5 text-purple-500" />
+                <Link2 className="h-5 w-5 text-primary" />
               </motion.div>
               <div>
-                <span className="text-sm font-semibold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                <span className="text-sm font-semibold text-foreground">
                   Request Chaining
                 </span>
                 <div className="flex items-center gap-2 mt-0.5">
@@ -158,13 +158,13 @@ export function TestScriptsPanel({
                     <motion.div
                       key={extractedCount}
                       {...popIn}
-                      className="flex items-center gap-1 text-[10px] text-emerald-400"
+                      className="flex items-center gap-1 text-[10px] text-success"
                     >
                       <CheckCircle2 className="h-3 w-3" />
                       {extractedCount} variable{extractedCount > 1 ? 's' : ''} extracted
                     </motion.div>
                   ) : hasResponse ? (
-                    <span className="text-[10px] text-emerald-400">Response ready</span>
+                    <span className="text-[10px] text-success">Response ready</span>
                   ) : (
                     <span className="text-[10px] text-muted-foreground">Send a request first</span>
                   )}
@@ -174,7 +174,7 @@ export function TestScriptsPanel({
             <AnimatePresence>
               {hasResponse && (
                 <motion.div {...popInOut}>
-                  <Badge className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/20 gap-1">
+                  <Badge className="text-xs bg-success/10 text-success border-success/20 gap-1">
                     <Target className="h-3 w-3" />
                     Ready
                   </Badge>
@@ -186,19 +186,19 @@ export function TestScriptsPanel({
       </motion.div>
 
       <motion.div
-        className="px-4 py-3 bg-gradient-to-r from-purple-500/5 to-pink-500/5 border-b border-purple-500/10"
+        className="px-4 py-3 bg-muted/10 border-b border-border/40"
         variants={listItem}
       >
         <div className="flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-purple-500/10">
-            <Info className="h-4 w-4 text-purple-400" />
+          <div className="p-2 rounded-lg bg-primary/10">
+            <Info className="h-4 w-4 text-primary" />
           </div>
           <div className="flex-1">
             <p className="text-xs text-muted-foreground leading-relaxed">
               Extract values from responses to use in subsequent requests.
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Use <span className="text-purple-400 font-mono">dot.notation</span> for nested values.
+              Use <span className="text-primary font-mono">dot.notation</span> for nested values.
             </p>
           </div>
         </div>
@@ -255,7 +255,7 @@ export function TestScriptsPanel({
                         variant={previewResult[idx].found ? "default" : "secondary"}
                         className={`gap-1 ${
                           previewResult[idx].found
-                            ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                            ? "bg-success/20 text-success border-success/30"
                             : "bg-destructive/20 text-destructive border-destructive/30"
                         }`}
                       >
@@ -331,10 +331,10 @@ export function TestScriptsPanel({
                     key={idx}
                     {...liftOnHover}
                     onClick={() => useTemplate(template)}
-                    className="text-left p-3 text-xs rounded-lg border border-border/30 hover:border-purple-500/30 hover:bg-purple-500/5 cursor-pointer transition-all"
+                    className="text-left p-3 text-xs rounded-lg border border-border/30 hover:border-primary/30 hover:bg-primary/5 cursor-pointer transition-all"
                   >
                     <div className="flex items-center gap-2 font-medium">
-                      <Sparkles className="h-3 w-3 text-purple-400" />
+                      <Zap className="h-3 w-3 text-primary" />
                       {template.name}
                     </div>
                     <div className="text-muted-foreground font-mono text-[10px] mt-1 bg-background/50 rounded px-1.5 py-0.5">
@@ -379,7 +379,7 @@ export function TestScriptsPanel({
         <p className="text-xs text-muted-foreground">
           {hasResponse ? (
             <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="w-1.5 h-1.5 rounded-full bg-success/40" />
               Response available
             </span>
           ) : (

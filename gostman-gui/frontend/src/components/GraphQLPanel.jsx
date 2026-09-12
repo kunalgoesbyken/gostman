@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ChevronRight, FileJson, Check, AlertCircle, Sparkles, Code, Wand2, Copy, CheckCircle2 } from "lucide-react"
+import { ChevronRight, FileJson, Check, AlertCircle, Loader2, Code, Wand2, Copy, CheckCircle2, Search, PencilLine, RefreshCw, Braces } from "lucide-react"
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { Textarea } from "./ui/textarea"
@@ -195,7 +195,7 @@ export function GraphQLPanel({
         className="relative overflow-hidden"
         variants={listItem}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-cyan-500/10" />
+        
         <div className="relative px-4 py-3 border-b border-border/50 bg-muted/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -203,7 +203,7 @@ export function GraphQLPanel({
                 className="relative"
                 animate={validation.valid && query ? pulseGlow : {}}
               >
-                <Sparkles className="h-5 w-5 text-purple-500" />
+                <Braces className="h-5 w-5 text-primary" />
                 {!validation.valid && query && (
                   <motion.div
                     className="absolute -top-1 -right-1 h-2 w-2 bg-destructive rounded-full"
@@ -213,14 +213,14 @@ export function GraphQLPanel({
                 )}
               </motion.div>
               <div>
-                <span className="text-sm font-semibold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                <span className="text-sm font-semibold text-foreground">
                   GraphQL
                 </span>
                 <div className="flex items-center gap-2 mt-0.5">
                   {validation.valid ? (
                     <motion.div {...popIn} className="flex items-center gap-1">
-                      <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                      <span className="text-[10px] text-emerald-500">Valid</span>
+                      <CheckCircle2 className="h-3 w-3 text-success" />
+                      <span className="text-[10px] text-success">Valid</span>
                     </motion.div>
                   ) : query ? (
                     <motion.div
@@ -239,12 +239,12 @@ export function GraphQLPanel({
             </div>
             <div className="flex items-center gap-2">
               <motion.div {...pressableStrong}>
-                <Badge variant="secondary" className="text-xs bg-purple-500/10 text-purple-400 border-purple-500/20 font-mono">
+                <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20 font-mono">
                   POST
                 </Badge>
               </motion.div>
               <motion.div {...pressableStrong}>
-                <Badge variant="secondary" className="text-xs bg-cyan-500/10 text-cyan-400 border-cyan-500/20">
+                <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20">
                   {extractOperationName(query)}
                 </Badge>
               </motion.div>
@@ -284,7 +284,7 @@ export function GraphQLPanel({
         {showExamples && (
           <motion.div
             {...collapse}
-            className="px-4 py-3 border-b border-border/50 bg-gradient-to-r from-purple-500/5 to-pink-500/5"
+            className="px-4 py-3 border-b border-border/50 bg-muted/10"
           >
             <p className="text-xs text-muted-foreground mb-3 flex items-center gap-2">
               <Wand2 className="h-3 w-3" />
@@ -297,18 +297,18 @@ export function GraphQLPanel({
               className="grid grid-cols-2 sm:grid-cols-4 gap-2"
             >
               {[
-                { type: 'query', label: 'Query', icon: '🔍', color: 'from-blue-500/10 to-cyan-500/10', border: 'border-cyan-500/20' },
-                { type: 'mutation', label: 'Mutation', icon: '✏️', color: 'from-purple-500/10 to-pink-500/10', border: 'border-purple-500/20' },
-                { type: 'subscription', label: 'Subscription', icon: '🔄', color: 'from-green-500/10 to-emerald-500/10', border: 'border-emerald-500/20' },
-                { type: 'variables', label: 'Variables', icon: '{ }', color: 'from-orange-500/10 to-yellow-500/10', border: 'border-orange-500/20' },
+                { type: 'query', label: 'Query', icon: Search },
+                { type: 'mutation', label: 'Mutation', icon: PencilLine },
+                { type: 'subscription', label: 'Subscription', icon: RefreshCw },
+                { type: 'variables', label: 'Variables', icon: Braces },
               ].map((template) => (
                 <motion.div key={template.type} variants={listItem}>
                   <motion.button
                     {...liftOnHover}
                     onClick={() => insertExample(template.type)}
-                    className={`p-3 rounded-lg border ${template.border} bg-gradient-to-br ${template.color} hover:shadow-lg hover:shadow-${template.color.split('-')[1]}-500/10 transition-all`}
+                    className="w-full p-3 rounded-lg border border-border/60 bg-muted/10 hover:border-primary/40 hover:bg-muted/30 transition-colors"
                   >
-                    <div className="text-lg mb-1">{template.icon}</div>
+                    <template.icon className="h-4 w-4 mb-1.5 mx-auto text-muted-foreground/60" strokeWidth={1.5} />
                     <div className="text-xs font-medium">{template.label}</div>
                   </motion.button>
                 </motion.div>
@@ -322,7 +322,7 @@ export function GraphQLPanel({
         {detectedVars.length > 0 && (
           <motion.div
             {...collapse}
-            className="px-4 py-2 border-b border-border/50 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 flex items-center gap-2 flex-wrap"
+            className="px-4 py-2 border-b border-border/50 bg-gradient-to-r from-primary/5 to-info/5 flex items-center gap-2 flex-wrap"
           >
             <span className="text-xs text-muted-foreground flex items-center gap-1.5">
               <Code className="h-3 w-3" />
@@ -338,11 +338,11 @@ export function GraphQLPanel({
                 <motion.div key={v.name} variants={listItem}>
                   <Badge
                     variant="outline"
-                    className="text-xs bg-cyan-500/10 text-cyan-400 border-cyan-500/30 font-mono"
+                    className="text-xs bg-primary/10 text-primary border-primary/30 font-mono"
                   >
                     ${v.name}
-                    <span className="text-cyan-400/50 mx-1">:</span>
-                    <span className="text-purple-400">{v.type}</span>
+                    <span className="text-primary/50 mx-1">:</span>
+                    <span className="text-primary">{v.type}</span>
                   </Badge>
                 </motion.div>
               ))}
@@ -369,7 +369,7 @@ export function GraphQLPanel({
               >
                 {copied ? (
                   <>
-                    <Check className="h-3 w-3 text-emerald-500" />
+                    <Check className="h-3 w-3 text-success" />
                     Copied!
                   </>
                 ) : (
@@ -391,7 +391,7 @@ export function GraphQLPanel({
                 {isPrettifying ? (
                   <>
                     <motion.div animate={spin}>
-                      <Sparkles className="h-3 w-3" />
+                      <Loader2 className="h-3 w-3" />
                     </motion.div>
                     Prettifying...
                   </>
@@ -410,7 +410,7 @@ export function GraphQLPanel({
           className="flex-1 p-4 relative"
         >
           <div className="absolute inset-4 rounded-lg opacity-0 focus-within:opacity-100 transition-opacity pointer-events-none">
-            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-cyan-500/20 blur-xl" />
+            
           </div>
           <Textarea
             ref={queryRef}
@@ -418,7 +418,7 @@ export function GraphQLPanel({
             onChange={(e) => onQueryChange(e.target.value)}
             placeholder={GRAPHQL_EXAMPLES.query}
             className={`w-full h-full font-mono text-sm resize-none relative z-10 ${!validation.valid ? 'border-destructive/50' : ''
-              } bg-background/80 backdrop-blur-sm border-border/50 focus:border-purple-500/50 transition-colors`}
+              } bg-background/80 backdrop-blur-sm border-border/50 focus:border-primary/50 transition-colors`}
             spellCheck={false}
           />
         </motion.div>
@@ -524,14 +524,14 @@ export function GraphQLPanel({
         className="px-4 py-2 border-t border-border/50 bg-muted/20 flex items-center justify-between"
       >
         <p className="text-xs text-muted-foreground">
-          GraphQL requests sent as <span className="font-mono text-purple-400">POST</span> with <span className="font-mono text-cyan-400">application/json</span>
+          GraphQL requests sent as <span className="font-mono text-primary">POST</span> with <span className="font-mono text-primary">application/json</span>
         </p>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             Powered by
-            <span className="font-mono text-pink-400">graphql</span>
+            <span className="font-mono text-foreground/70">graphql</span>
             <span>+</span>
-            <span className="font-mono text-purple-400">graphql-request</span>
+            <span className="font-mono text-foreground/70">graphql-request</span>
           </div>
         </div>
       </motion.div>

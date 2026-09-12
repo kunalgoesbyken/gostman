@@ -2,7 +2,7 @@ import React, { memo, useState, useMemo, useEffect, useRef, useCallback } from '
 import { JsonView } from 'react-json-view-lite'
 import 'react-json-view-lite/dist/index.css'
 import { Badge } from "./ui/badge"
-import { Code, Eye, List, Cookie, Maximize2, Minimize2, ChevronDown, ChevronUp, Copy, Check, FileText, Braces } from "lucide-react"
+import { Code, Eye, List, Cookie, Maximize2, Minimize2, ChevronDown, ChevronUp, Copy, Check, FileText, Braces, Minus, AlertTriangle } from "lucide-react"
 import { parseError, getErrorConfig } from "../lib/errors"
 import { DataTable } from "./ui/dataTable"
 import { tryParseJSON, formatSize, parseCookieString, normalizeHeaders } from "../lib/dataUtils"
@@ -56,7 +56,7 @@ function CopyButton({ content }) {
       className="p-1.5 rounded-md hover:bg-primary/20 text-muted-foreground hover:text-primary transition-all duration-200"
       title={copied ? "Copied!" : "Copy"}
     >
-      {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
+      {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
     </button>
   )
 }
@@ -246,10 +246,14 @@ export const ResponsePanel = memo(function ResponsePanel({ response, status, res
   const toggleCollapse = useCallback(() => setIsCollapsed(p => !p), [])
 
   // Panel style
+  // The panel is a flex child of a column whose own height comes from `flex-1`,
+  // so a percentage flex-basis has no definite parent height to resolve against
+  // and collapses to the header. Measuring the parent and basing off pixels
+  // keeps the drag handle and the collapse toggle honest.
   const panelStyle = useMemo(() => {
-    if (isFullscreen) return { height: '100vh', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 50 }
-    if (isCollapsed) return { height: `${COLLAPSED_HEIGHT}px` }
-    return { height: `${panelHeight}%` }
+    if (isFullscreen) return { position: 'fixed', inset: 0, zIndex: 50 }
+    if (isCollapsed) return { flex: `0 0 ${COLLAPSED_HEIGHT}px`, minHeight: `${COLLAPSED_HEIGHT}px` }
+    return { flex: `0 0 ${panelHeight}%`, minHeight: `${COLLAPSED_HEIGHT}px` }
   }, [isFullscreen, isCollapsed, panelHeight])
 
   // Table columns
@@ -265,10 +269,10 @@ export const ResponsePanel = memo(function ResponsePanel({ response, status, res
     { header: 'Path', key: 'path', cellClassName: 'whitespace-nowrap', render: (c) => c.path || '/' },
     { header: 'Expires', key: 'expires', cellClassName: 'whitespace-nowrap', render: (c) => c.expires || 'Session' },
     { header: 'Secure', render: (c) => (
-      <div className="text-center">{c.secure ? <span className="text-green-400 font-bold">✓</span> : <span className="text-muted-foreground/30">—</span>}</div>
+      <div className="flex justify-center">{c.secure ? <Check className="h-3.5 w-3.5 text-success" strokeWidth={2.5} /> : <Minus className="h-3.5 w-3.5 text-muted-foreground/30" strokeWidth={2} />}</div>
     )},
     { header: 'HttpOnly', render: (c) => (
-      <div className="text-center">{c.httpOnly ? <span className="text-green-400 font-bold">✓</span> : <span className="text-muted-foreground/30">—</span>}</div>
+      <div className="flex justify-center">{c.httpOnly ? <Check className="h-3.5 w-3.5 text-success" strokeWidth={2.5} /> : <Minus className="h-3.5 w-3.5 text-muted-foreground/30" strokeWidth={2} />}</div>
     )},
   ]
 
@@ -306,7 +310,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, status, res
             )}
             {responseTime != null && (
               <span className="text-[11px] text-muted-foreground/60 font-mono flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400/40" />{responseTime}ms
+                <span className="w-1.5 h-1.5 rounded-full bg-success/40" />{responseTime}ms
               </span>
             )}
           </div>
@@ -350,10 +354,10 @@ export const ResponsePanel = memo(function ResponsePanel({ response, status, res
         {!isCollapsed && (
           <div className="flex-1 overflow-hidden relative">
             {isError && errorObj ? (
-              <div className={`h-full overflow-auto custom-scrollbar ${errorConfig.bg} border-l-4 ${errorConfig.border}`}>
+              <div className={`h-full overflow-auto custom-scrollbar ${errorConfig.bg}`}>
                 <div className="flex items-start gap-4 p-6">
                   <div className={`p-3 rounded-xl ${errorConfig.bg} flex-shrink-0 ring-1 ${errorConfig.border}`}>
-                    <span className={`text-lg ${errorConfig.color}`}>⚠</span>
+                    <AlertTriangle className={`h-5 w-5 ${errorConfig.color}`} strokeWidth={2} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className={`text-lg font-semibold ${errorConfig.color}`}>{errorConfig.title}</h3>

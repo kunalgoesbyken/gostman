@@ -4,16 +4,16 @@ import logo from "../assets/logo.jpg"
 
 export function AppHeader({ className, onImport, onReset, onBack }) {
   return (
-    <header className={`flex items-center justify-between bg-muted/10 backdrop-blur-md px-6 ${className}`}>
+    <header className={`flex items-center gap-6 bg-muted/10 backdrop-blur-md px-6 ${className}`}>
       <div className="flex items-center gap-3">
-        <img src={logo} alt="Gostman Logo" className="h-9 w-9 rounded-lg shadow-lg shadow-primary/25" />
+        <img src={logo} alt="Gostman Logo" className="h-9 w-9 rounded-lg" />
         <div>
           <h1 className="text-base font-brand font-bold tracking-tight">Gostman</h1>
           <p className="text-[10px] text-muted-foreground/70 uppercase tracking-wider">HTTP Client</p>
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         <Button variant="outline" size="sm" onClick={onImport} className="gap-2">
           <Import className="h-4 w-4" />
           Import

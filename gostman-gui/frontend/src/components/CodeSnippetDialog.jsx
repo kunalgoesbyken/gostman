@@ -87,7 +87,7 @@ export function CodeSnippetDialog({ snippets, onClose }) {
                       className={`
                         gap-2 shadow-lg transition-all duration-200
                         ${copiedLang === lang.id
-                          ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                          ? 'bg-success hover:bg-success text-white'
                           : 'bg-muted/80 hover:bg-muted text-foreground backdrop-blur-sm'
                         }
                       `}

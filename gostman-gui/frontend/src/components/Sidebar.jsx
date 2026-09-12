@@ -1,5 +1,5 @@
 import React, { memo } from "react"
-import { Plus, Trash2, FileJson, Search, Clock, RotateCcw, Sparkles, Zap, Folder, FolderOpen, ChevronRight, ChevronDown, FolderPlus } from "lucide-react"
+import { Plus, Trash2, FileJson, Search, Clock, RotateCcw, Zap, Folder, FolderOpen, ChevronRight, ChevronDown, FolderPlus } from "lucide-react"
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { Input } from "./ui/input"
@@ -33,11 +33,11 @@ const EmptyState = memo(({ icon: Icon, title, description, variant = "default" }
       animate: false
     },
     blue: {
-      bg: "bg-blue-500/10",
-      gradient: "from-blue-500/20 to-blue-500/5",
-      border: "border-blue-500/10",
-      shadow: "shadow-blue-500/5",
-      text: "text-blue-400",
+      bg: "bg-info/10",
+      gradient: "from-info/20 to-info/5",
+      border: "border-info/10",
+      shadow: "shadow-info/5",
+      text: "text-info",
       animate: true
     }
   }
@@ -162,7 +162,7 @@ export const Sidebar = memo(function Sidebar({
           <div className="flex-1 overflow-y-auto scrollbar-thin">
             {filteredRequests.length === 0 && folders.length === 0 ? (
               <EmptyState
-                icon={searchQuery ? Search : Sparkles}
+                icon={searchQuery ? Search : FileJson}
                 title={searchQuery ? "No results" : "No requests yet"}
                 description={searchQuery ? "Try different terms" : "Press Ctrl+N to start"}
                 variant="default"
@@ -175,7 +175,7 @@ export const Sidebar = memo(function Sidebar({
                     <div className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-accent/40 cursor-pointer group"
                       onClick={() => onToggleFolder(folder.id)}>
                       {folder.isOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
-                      {folder.isOpen ? <FolderOpen className="h-4 w-4 text-amber-400" /> : <Folder className="h-4 w-4 text-amber-400/70" />}
+                      {folder.isOpen ? <FolderOpen className="h-4 w-4 text-warning" /> : <Folder className="h-4 w-4 text-warning/70" />}
                       <span className="flex-1 text-sm font-medium truncate">{folder.name}</span>
 
                       <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">

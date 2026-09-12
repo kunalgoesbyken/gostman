@@ -32,16 +32,16 @@ export function AlertDialog({
       iconColor: "text-primary"
     },
     info: {
-      iconBg: "bg-blue-500/10",
-      iconColor: "text-blue-500"
+      iconBg: "bg-info/10",
+      iconColor: "text-info"
     },
     warning: {
-      iconBg: "bg-orange-500/10",
-      iconColor: "text-orange-500"
+      iconBg: "bg-warning/10",
+      iconColor: "text-warning"
     },
     success: {
-      iconBg: "bg-emerald-500/10",
-      iconColor: "text-emerald-500"
+      iconBg: "bg-success/10",
+      iconColor: "text-success"
     }
   }
 

@@ -1981,19 +1981,9 @@ export function exportToMarkdown(requests, options = {}) {
     groupRequests.forEach(request => {
       const method = (request.method || 'GET').toUpperCase()
 
-      const methodColors = {
-        GET: '🟢',
-        POST: '🔵',
-        PUT: '🟠',
-        DELETE: '🔴',
-        PATCH: '🟡',
-        HEAD: '🟣',
-        OPTIONS: '🟣',
-        GRAPHQL: '🩷'
-      }
 
       md += `### ${request.name || 'Untitled Request'}\n\n`
-      md += `${methodColors[method] || '⚪'} **${method}** \`${request.url || ''}\`\n\n`
+      md += `**${method}** \`${request.url || ''}\`\n\n`
 
       if (request.description) {
         md += `${request.description}\n\n`

@@ -50,44 +50,32 @@ const FEATURES = [
   {
     icon: Network,
     title: "Multi-Protocol",
-    description: "Native support for REST, GraphQL, and WebSockets. One tool for everything.",
-    gradient: "from-blue-500/20 to-cyan-500/20",
-    iconColor: "text-blue-400",
+    description: "REST, GraphQL and WebSocket requests in one window, with no mode switching.",
   },
   {
     icon: Workflow,
     title: "Request Chaining",
-    description: "Extract data from responses and use it in subsequent requests comfortably.",
-    gradient: "from-violet-500/20 to-purple-500/20",
-    iconColor: "text-violet-400",
+    description: "Pull a token or id out of one response with JSONPath and feed it to the next request.",
   },
   {
     icon: TestTube,
-    title: "Test Automation",
-    description: "Write JavaScript tests to verify your API responses automatically.",
-    gradient: "from-amber-500/20 to-orange-500/20",
-    iconColor: "text-amber-400",
+    title: "Response Extraction",
+    description: "Capture any field into an environment variable the moment a response lands.",
   },
   {
     icon: Import,
-    title: "Easy Migration",
-    description: "Import your Postman collections instantly. No lock-in, ever.",
-    gradient: "from-emerald-500/20 to-green-500/20",
-    iconColor: "text-emerald-400",
+    title: "Postman Import",
+    description: "Bring collections and environments across as they are. Export whenever you want out.",
   },
   {
     icon: Zap,
-    title: "Lightning Fast",
-    description: "Built with Go for instant startup and blazing-fast response times.",
-    gradient: "from-yellow-500/20 to-amber-500/20",
-    iconColor: "text-yellow-400",
+    title: "Opens Instantly",
+    description: "A Go backend and a native window. No splash screen, no sign-in, no workspace sync.",
   },
   {
     icon: Shield,
-    title: "Local & Private",
-    description: "All data stays on your machine. No cloud sync, no tracking, no accounts.",
-    gradient: "from-rose-500/20 to-red-500/20",
-    iconColor: "text-rose-400",
+    title: "Stays On Your Machine",
+    description: "Requests, history and secrets are written to local disk. Nothing leaves the device.",
   },
 ]
 
@@ -333,7 +321,7 @@ export function LandingPage({ onGetStarted }) {
                 transition={{ delay: 0.3, duration: 0.8 }}
               >
                 <span className="block">The HTTP Client</span>
-                <span className="block mt-2 bg-gradient-to-r from-foreground via-foreground/80 to-foreground/60 bg-clip-text text-transparent">
+                <span className="block mt-2 text-muted-foreground">
                   For the Go Era
                 </span>
               </motion.h1>
@@ -469,44 +457,32 @@ export function LandingPage({ onGetStarted }) {
         {/* Features Section */}
         <section className="relative py-20 px-6">
           <div className="max-w-6xl mx-auto">
-            <AnimatedSection className="text-center mb-12" delay={0.1}>
+            <AnimatedSection className="mb-12" delay={0.1}>
               <h2 className="text-3xl md:text-4xl font-semibold mb-3">
                 Everything You Need
               </h2>
-              <p className="text-muted-foreground max-w-xl mx-auto">
+              <p className="text-muted-foreground max-w-xl">
                 Crafted by developers, for developers
               </p>
             </AnimatedSection>
 
-            <StaggerContainer className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <StaggerContainer className="grid sm:grid-cols-2 gap-x-14 border-t border-border/40">
               {FEATURES.map((feature) => (
-                <motion.div
+                <div
                   key={feature.title}
-                  whileHover={{ y: -4 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="group flex items-start gap-4 py-7 border-b border-border/40"
                 >
-                  <Card className={cn(
-                    "group h-full border border-border/60 bg-background/40 backdrop-blur-sm transition-all duration-200",
-                    "hover:border-border hover:bg-background/60 hover:shadow-lg"
-                  )}>
-                    <CardContent className="p-5">
-                      <motion.div
-                        className={cn(
-                          "flex h-12 w-12 items-center justify-center rounded-xl mb-4 bg-gradient-to-br",
-                          feature.gradient
-                        )}
-                        whileHover={{ scale: 1.05, rotate: 5 }}
-                        transition={{ type: "spring", stiffness: 300 }}
-                      >
-                        <feature.icon className={cn("h-6 w-6", feature.iconColor)} />
-                      </motion.div>
-                      <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                      <p className="text-sm text-muted-foreground/80 leading-relaxed">
-                        {feature.description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+                  <feature.icon
+                    className="mt-0.5 h-[18px] w-[18px] shrink-0 text-muted-foreground/50 transition-colors group-hover:text-primary"
+                    strokeWidth={1.5}
+                  />
+                  <div className="min-w-0">
+                    <h3 className="text-[15px] font-medium tracking-tight">{feature.title}</h3>
+                    <p className="mt-1.5 text-sm text-muted-foreground/70 leading-relaxed">
+                      {feature.description}
+                    </p>
+                  </div>
+                </div>
               ))}
             </StaggerContainer>
           </div>
