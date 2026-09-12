@@ -193,7 +193,10 @@ function App() {
         activeRequest.body,
         activeRequest.queryParams,
         activeRequest.graphqlQuery || "",
-        activeRequest.graphqlVariables || ""
+        activeRequest.graphqlVariables || "",
+        // Live editor state, not the saved-to-disk copy, so unsaved Env Vars
+        // edits apply immediately — matching the web target.
+        variables || ""
       )
 
       updateActiveRequest({ response: resp.body })
@@ -220,7 +223,7 @@ function App() {
 
       addToHistory(activeRequest)
     }
-  }, [activeRequest])
+  }, [activeRequest, variables])
 
   const handleImport = useCallback(async (importData) => {
     try {

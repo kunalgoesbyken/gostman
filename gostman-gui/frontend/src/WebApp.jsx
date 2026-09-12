@@ -8,16 +8,18 @@ import { AppHeader } from "./components/AppHeader"
 const MonacoEditor = lazy(() => import("./components/MonacoEditor").then(module => ({ default: module.MonacoEditor })))
 import { Loader2 } from "lucide-react"
 import { RequestTabs } from "./components/RequestTabs"
+import { TabBar } from "./components/TabBar"
 const CodeSnippetDialog = lazy(() => import("./components/CodeSnippetDialog").then(module => ({ default: module.CodeSnippetDialog })))
 const ImportExportDialog = lazy(() => import("./components/ImportExportDialog").then(module => ({ default: module.ImportExportDialog })))
 import { parseVariables } from "./lib/variables"
 import { prepareRequest } from "./lib/requestUtils"
 import { sendProxyRequest } from "./lib/api"
-import { DEFAULT_REQUEST, mockRequests, mockFolders } from "./lib/mockData"
+import { mockRequests, mockFolders } from "./lib/mockData"
 import { loadState, saveState, resetState, KEYS } from "./lib/storage"
-import { useAppStore } from "./store/appStore"
+import { useAppStore, useActiveTab } from "./store/appStore"
 import { useDialogActions } from "./hooks/useDialogActions"
 import { useRequestFieldHandlers } from "./hooks/useRequestFieldHandlers"
+import { useRoute } from "./hooks/useRoute"
 import { useClearHistoryHandler, useCommandHandler, useCreateFolderHandler, useGenerateCodeHandler, useSaveVarsHandler } from "./hooks/useSharedHandlers"
 import { parseJSON } from "./lib/dataUtils"
 
@@ -26,14 +28,13 @@ import { parseJSON } from "./lib/dataUtils"
 const persistVariables = async () => 'Variables saved!'
 
 function WebApp() {
-  const showLanding = useAppStore((s) => s.showLanding)
+  const { route, navigate } = useRoute()
   const requests = useAppStore((s) => s.requests)
   const folders = useAppStore((s) => s.folders)
   const requestHistory = useAppStore((s) => s.requestHistory)
   const variables = useAppStore((s) => s.variables)
-  const status = useAppStore((s) => s.webStatus)
-  const loading = useAppStore((s) => s.webLoading)
-  const responseTime = useAppStore((s) => s.webResponseTime)
+  const tabs = useAppStore((s) => s.tabs)
+  const activeTabId = useAppStore((s) => s.activeTabId)
   const codeDialogOpen = useAppStore((s) => s.codeDialogOpen)
   const codeSnippets = useAppStore((s) => s.codeSnippets)
   const importDialogOpen = useAppStore((s) => s.importDialogOpen)
@@ -42,15 +43,17 @@ function WebApp() {
   const setRequests = useAppStore((s) => s.setRequests)
   const setFolders = useAppStore((s) => s.setFolders)
   const setRequestHistory = useAppStore((s) => s.setRequestHistory)
-  const setActiveRequest = useAppStore((s) => s.setActiveRequest)
   const setVariables = useAppStore((s) => s.setVariables)
-  const setWebStatus = useAppStore((s) => s.setWebStatus)
-  const setWebLoading = useAppStore((s) => s.setWebLoading)
-  const setWebResponseTime = useAppStore((s) => s.setWebResponseTime)
+  const setActiveTab = useAppStore((s) => s.setActiveTab)
+  const newTab = useAppStore((s) => s.newTab)
+  const closeTab = useAppStore((s) => s.closeTab)
+  const updateActiveTab = useAppStore((s) => s.updateActiveTab)
+  const updateActiveRequest = useAppStore((s) => s.updateActiveRequest)
+  const loadRequestIntoTab = useAppStore((s) => s.loadRequestIntoTab)
+  const loadHistoryIntoTab = useAppStore((s) => s.loadHistoryIntoTab)
   const closeCodeDialog = useAppStore((s) => s.closeCodeDialog)
   const openImportDialog = useAppStore((s) => s.openImportDialog)
   const closeImportDialog = useAppStore((s) => s.closeImportDialog)
-  const setShowLanding = useAppStore((s) => s.setShowLanding)
   const deleteFolder = useAppStore((s) => s.deleteFolder)
   const toggleFolder = useAppStore((s) => s.toggleFolder)
   const addToHistory = useAppStore((s) => s.addToHistory)
@@ -58,8 +61,8 @@ function WebApp() {
 
   const { showAlert, showConfirm, openCommandPalette } = useDialogActions()
 
-  // Web version uses a single active request rather than tabs.
-  const activeRequest = useAppStore((s) => s.activeRequest || DEFAULT_REQUEST)
+  const activeTab = useActiveTab()
+  const activeRequest = activeTab?.request || {}
 
   useEffect(() => {
     setRequests(loadState(KEYS.REQUESTS, mockRequests))
@@ -71,7 +74,7 @@ function WebApp() {
   // Declared before the field handlers that close over it: moving it later
   // reintroduces a TDZ crash (see commit 80c683a).
   const updateField = useCallback((field, value) => {
-    setActiveRequest(prev => ({ ...prev, [field]: value }))
+    updateActiveRequest({ [field]: value })
   }, [])
   const fieldHandlers = useRequestFieldHandlers(updateField)
 
@@ -81,26 +84,6 @@ function WebApp() {
     saveState(KEYS.HISTORY, requestHistory)
     saveState(KEYS.VARS, variables)
   }, [requests, folders, requestHistory, variables])
-
-  const handleSelectRequest = useCallback((req) => {
-    setActiveRequest({
-      ...req,
-      response: '',
-      responseHeaders: null,
-      responseCookies: null,
-      responseSize: null,
-      responseType: 'text'
-    })
-    setWebStatus("")
-    setWebResponseTime(null)
-  }, [])
-
-  const handleNewRequest = useCallback((folderId = null) => {
-    const newReq = { ...DEFAULT_REQUEST, folderId }
-    setActiveRequest(newReq)
-    setWebStatus("")
-    setWebResponseTime(null)
-  }, [])
 
   const handleCreateFolder = useCreateFolderHandler()
   const handleClearHistory = useClearHistoryHandler()
@@ -112,33 +95,23 @@ function WebApp() {
       'Delete Folder',
       'Move requests to root?',
       () => {
-        setRequests(prev => prev.map(r => r.folderId === folderId ? { ...r, folderId: null } : r))
+        setRequests(requests.map(r => r.folderId === folderId ? { ...r, folderId: null } : r))
         deleteFolder(folderId)
       },
       null,
       'default'
     )
-  }, [])
-
-  const handleToggleFolder = useCallback((folderId) => {
-    toggleFolder(folderId)
-  }, [])
+  }, [requests])
 
   const handleSave = useCallback(async () => {
-    const newRequest = {
-      ...activeRequest,
-      id: activeRequest.id || crypto.randomUUID()
-    }
+    const saved = { ...activeRequest, id: activeRequest.id || crypto.randomUUID() }
 
-    if (activeRequest.id) {
-      setRequests(prev => prev.map(r => r.id === activeRequest.id ? newRequest : r))
-    } else {
-      setRequests(prev => [...prev, newRequest])
-    }
-
-    setActiveRequest(newRequest)
+    setRequests(activeRequest.id
+      ? requests.map(r => r.id === activeRequest.id ? saved : r)
+      : [...requests, saved])
+    updateActiveRequest({ id: saved.id })
     showAlert('Success', 'Request saved!', 'OK', 'success')
-  }, [activeRequest])
+  }, [activeRequest, requests])
 
   const handleDelete = useCallback(async (id) => {
     if (!id) return
@@ -146,85 +119,63 @@ function WebApp() {
       'Delete Request',
       'Can\'t be undone.',
       () => {
-        setRequests(prev => prev.filter(r => r.id !== id))
-        if (activeRequest.id === id) {
-          setActiveRequest({ ...DEFAULT_REQUEST })
-        }
+        setRequests(requests.filter(r => r.id !== id))
+        newTab()
       },
       null,
       'destructive'
     )
-  }, [activeRequest, handleNewRequest])
-
-  const handleSelectHistoryItem = useCallback((item) => {
-    setActiveRequest({
-      ...item,
-      id: "",
-      name: item.name || "History Request"
-    })
-    setWebStatus(item.response ? "Loaded from history" : "")
-    setWebResponseTime(null)
-  }, [])
+  }, [requests])
 
   const handleSend = useCallback(async () => {
-    setWebLoading(true)
-    setWebStatus("Sending...")
-    setWebResponseTime(null)
+    updateActiveTab({ loading: true, status: 'Sending...', responseTime: null })
     const startTime = performance.now()
 
     const getResponseTime = () => Math.round(performance.now() - startTime)
 
+    let prepared
     try {
-      const varsMap = parseVariables(variables)
+      prepared = prepareRequest(activeRequest, parseVariables(variables))
+    } catch (e) {
+      updateActiveRequest({ response: e.message })
+      updateActiveTab({
+        status: 'Error',
+        responseTime: null,
+        loading: false,
+        responseHeaders: null,
+        responseCookies: null,
+        responseSize: null
+      })
+      return
+    }
 
-      let url, method, headers, body
-      try {
-        const prepared = prepareRequest(activeRequest, varsMap)
-        url = prepared.url
-        method = prepared.method
-        headers = prepared.headers
-        body = prepared.body
-      } catch (e) {
-        setActiveRequest(prev => ({
-          ...prev,
-          response: e.message,
-        }))
-        setWebStatus("Error")
-        setWebLoading(false)
-        return
-      }
-
-      const response = await sendProxyRequest({ method, url, headers, body })
+    try {
       // Proxy returns JSON: {status, headers: [{key, value}], body, cookies, size}
+      const response = await sendProxyRequest(prepared)
       const proxyResponse = await response.json()
 
-      const responseData = proxyResponse.body || ''
-      const responseHeaders = proxyResponse.headers || []
-      const responseCookies = proxyResponse.cookies || null
-      const responseSize = (proxyResponse.size != null) ? proxyResponse.size : null
-      const statusText = proxyResponse.status || 'Error'
-
-      setWebResponseTime(getResponseTime())
-      setActiveRequest(prev => ({
-        ...prev,
-        response: responseData,
-        responseHeaders,
-        responseCookies,
-        responseSize
-      }))
-      setWebStatus(statusText)
-      addToHistory(activeRequest)
+      updateActiveRequest({ response: proxyResponse.body || '' })
+      updateActiveTab({
+        status: proxyResponse.status || 'Error',
+        responseTime: getResponseTime(),
+        loading: false,
+        responseHeaders: proxyResponse.headers || null,
+        responseCookies: proxyResponse.cookies || null,
+        responseSize: proxyResponse.size ?? null
+      })
     } catch (e) {
-      setWebResponseTime(getResponseTime())
-      setActiveRequest(prev => ({
-        ...prev,
-        response: "Error: " + e.message
-      }))
-      setWebStatus("Error")
-      addToHistory(activeRequest)
-    } finally {
-      setWebLoading(false)
+      updateActiveRequest({ response: `Error: ${e.message}` })
+      updateActiveTab({
+        status: 'Error',
+        responseTime: getResponseTime(),
+        loading: false,
+        responseHeaders: null,
+        responseCookies: null,
+        responseSize: null
+      })
     }
+
+    addToHistory(activeRequest)
   }, [activeRequest, variables])
 
   const handleImport = useCallback((importData) => {
@@ -260,13 +211,9 @@ function WebApp() {
     }
   }, [])
 
-  const handleGetStarted = useCallback(() => {
-    setShowLanding(false)
-  }, [])
+  const handleGetStarted = useCallback(() => navigate("/web"), [navigate])
 
-  const handleBackToLanding = useCallback(() => {
-    setShowLanding(true)
-  }, [])
+  const handleBackToLanding = useCallback(() => navigate("/"), [navigate])
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -276,13 +223,13 @@ function WebApp() {
       }
       if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
         e.preventDefault()
-        handleNewRequest(null)
+        newTab()
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [handleNewRequest, openCommandPalette])
+  }, [newTab, openCommandPalette])
 
   const handleReset = useCallback((message = 'Clear all data?', successMessage = 'Cleared!') => {
     showConfirm(
@@ -308,16 +255,14 @@ function WebApp() {
 
   const handleHeaderReset = useCallback(() => handleReset(), [handleReset])
 
-  const handleNewRootRequest = useCallback(() => handleNewRequest(null), [handleNewRequest])
-
   const handleCommand = useCommandHandler({
-    onNewRequest: handleNewRootRequest,
+    onNewRequest: newTab,
     onSave: handleSave,
     onCreateFolder: handleCreateFolder,
     onReset: handleCommandReset
   })
 
-  if (showLanding) {
+  if (route === "/") {
     return <LandingPage onGetStarted={handleGetStarted} />
   }
 
@@ -336,26 +281,34 @@ function WebApp() {
           folders={folders}
           requestHistory={requestHistory}
           activeRequest={activeRequest}
-          onSelectRequest={handleSelectRequest}
-          onSelectHistoryItem={handleSelectHistoryItem}
+          onSelectRequest={loadRequestIntoTab}
+          onSelectHistoryItem={loadHistoryIntoTab}
           onDeleteHistoryItem={deleteHistoryItem}
           onClearHistory={handleClearHistory}
-          onNewRequest={() => handleNewRequest(null)}
+          onNewRequest={newTab}
           onDeleteRequest={handleDelete}
           onCreateFolder={handleCreateFolder}
           onDeleteFolder={handleDeleteFolder}
-          onToggleFolder={handleToggleFolder}
-          onNewRequestInFolder={handleNewRequest}
+          onToggleFolder={toggleFolder}
+          onNewRequestInFolder={newTab}
         />
 
         <div className="flex flex-1 flex-col overflow-hidden">
+          <TabBar
+            tabs={tabs}
+            activeTabId={activeTabId}
+            onTabSelect={setActiveTab}
+            onTabClose={closeTab}
+            onNewTab={newTab}
+          />
+
           <RequestBar
             activeRequest={activeRequest}
             {...fieldHandlers}
             onSend={handleSend}
             onSave={handleSave}
             onGenerateCode={handleGenerateCode}
-            loading={loading}
+            loading={activeTab?.loading || false}
           />
 
           <div className="flex flex-1 flex-col overflow-hidden">
@@ -365,20 +318,20 @@ function WebApp() {
               variables={variables}
               onUpdateVariables={setVariables}
               onSaveVars={handleSaveVars}
-              response={activeRequest.response}
-              responseStatus={status}
-              responseHeaders={activeRequest.responseHeaders}
+              response={activeRequest.response || ''}
+              responseStatus={activeTab?.status || ''}
+              responseHeaders={activeTab?.responseHeaders || null}
               EditorComponent={MonacoEditor}
               defaultTab={activeRequestTab || 'body'}
             />
 
             <ResponsePanel
-              response={activeRequest.response}
-              status={status}
-              responseHeaders={activeRequest.responseHeaders}
-              responseCookies={activeRequest.responseCookies}
-              responseSize={activeRequest.responseSize}
-              responseTime={responseTime}
+              response={activeRequest.response || ''}
+              status={activeTab?.status || ''}
+              responseTime={activeTab?.responseTime}
+              responseHeaders={activeTab?.responseHeaders || null}
+              responseCookies={activeTab?.responseCookies || null}
+              responseSize={activeTab?.responseSize || null}
             />
           </div>
         </div>

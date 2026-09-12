@@ -38,7 +38,14 @@ function serveWebEntryInDev(entry) {
       server.middlewares.use((req, _res, next) => {
         if (!req.url) return next()
         const [pathname] = req.url.split('?')
-        if (pathname === '/' || pathname === '/index.html') {
+        // SPA fallback: every app route is served the web entry so deep links
+        // like /web work on refresh, matching the rewrite in vercel.json.
+        // Anything with a file extension, plus Vite's own internals and the
+        // API proxy, must fall through untouched.
+        const isAsset = /\.[^/]+$/.test(pathname)
+        const isInternal = pathname.startsWith('/@') || pathname.startsWith('/node_modules/')
+        const isApi = pathname.startsWith('/api/')
+        if (!isAsset && !isInternal && !isApi) {
           req.url = `/${entry}${req.url.slice(pathname.length)}`
         }
         next()
@@ -92,7 +99,7 @@ export default defineConfig({
     proxy: {
       // During local dev, forward /api/proxy to the local Go server.
       // In production, Vercel handles this route via api/proxy.go.
-      // Run the local server with: go run api/local_server.go
+      // Run the local server with: go run ./cmd/local (from the repo root)
       '/api/proxy': 'http://localhost:8787'
     }
   }
