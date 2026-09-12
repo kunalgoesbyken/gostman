@@ -85,8 +85,8 @@ export const ChainingShowcase = () => {
     <div className="w-full h-full flex flex-col">
       <ShowcaseHeader
         icon={Link2}
-        iconClassName="text-violet-400"
-        tint="bg-violet-500/10"
+        iconClassName="text-primary"
+        tint="bg-primary/10"
         title="Request Chaining"
         subtitle="Chain requests together with extracted data"
       />
@@ -117,19 +117,19 @@ export const ChainingShowcase = () => {
                 <div className="relative z-10">
                   <motion.div
                     className={`w-14 h-14 rounded-xl flex items-center justify-center border-2 transition-colors ${isCompleted
-                        ? "bg-emerald-500/10 border-emerald-500/30"
+                        ? "bg-success/10 border-success/30"
                         : isCurrent
-                          ? "bg-violet-500/10 border-violet-500/30"
+                          ? "bg-primary/10 border-primary/30"
                           : "bg-muted/30 border-border/30"
                       }`}
                     animate={isCurrent ? { scale: [1, 1.03, 1] } : {}}
                     transition={{ duration: 2, repeat: isCurrent ? Infinity : 0, ease: "easeInOut" }}
                   >
                     {isCompleted ? (
-                      <CheckCircle className="w-6 h-6 text-emerald-400" />
+                      <CheckCircle className="w-6 h-6 text-success" />
                     ) : isCurrent ? (
                       <motion.div
-                        className="w-6 h-6 border-2 border-violet-400 border-t-transparent rounded-full"
+                        className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full"
                         animate={spin}
                       />
                     ) : (
@@ -161,7 +161,7 @@ export const ChainingShowcase = () => {
                       >
                         <div className="font-mono text-xs">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className={`text-xs font-bold ${isCompleted ? "text-emerald-400" : "text-muted-foreground"}`}>
+                            <span className={`text-xs font-bold ${isCompleted ? "text-success" : "text-muted-foreground"}`}>
                               {isCompleted ? "200 OK" : "Loading..."}
                             </span>
                             {isCompleted && <span className="text-muted-foreground/60 text-[10px]">~25ms</span>}
@@ -179,14 +179,14 @@ export const ChainingShowcase = () => {
                             </div>
                           ) : (
                             <div className="space-y-0.5 text-muted-foreground text-[10px]">
-                              <span className="text-amber-300">{"{"}</span>
+                              <span className="text-syntax-punctuation">{"{"}</span>
                               {Object.entries(step.response).slice(0, 2).map(([key, value]) => (
                                 <div key={key} className="pl-3">
-                                  <span className="text-blue-300">"{key}"</span>:{" "}
-                                  <span className="text-emerald-300">{previewValue(value)}</span>
+                                  <span className="text-syntax-key">"{key}"</span>:{" "}
+                                  <span className="text-syntax-string">{previewValue(value)}</span>
                                 </div>
                               ))}
-                              <span className="text-amber-300">{"}"}</span>
+                              <span className="text-syntax-punctuation">{"}"}</span>
                             </div>
                           )}
                         </div>
@@ -206,12 +206,12 @@ export const ChainingShowcase = () => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.3 }}
-              className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20"
+              className="p-4 rounded-xl bg-success/10 border border-success/20"
             >
               <div className="flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-emerald-400" />
+                <CheckCircle className="w-5 h-5 text-success" />
                 <div>
-                  <p className="text-sm font-semibold text-emerald-400">Chain Complete</p>
+                  <p className="text-sm font-semibold text-success">Chain Complete</p>
                   <p className="text-xs text-muted-foreground">
                     {CHAIN_STEPS.length} requests executed • 2 values extracted
                   </p>
@@ -222,9 +222,9 @@ export const ChainingShowcase = () => {
         </AnimatePresence>
       </div>
 
-      <ShowcaseFooter tag="JSONPath" tagClassName="bg-violet-500/10 text-violet-400">
+      <ShowcaseFooter tag="JSONPath" tagClassName="bg-primary/10 text-primary">
         <span>Use</span>
-        <code className="px-1.5 py-0.5 rounded bg-muted/50 font-mono text-violet-300 text-[10px]">
+        <code className="px-1.5 py-0.5 rounded bg-muted/50 font-mono text-syntax-number text-[10px]">
           $.data[0].id
         </code>
         <span>to extract values</span>

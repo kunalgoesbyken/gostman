@@ -7,14 +7,14 @@ import { springLayout } from '../lib/motion'
 export const TabBar = memo(function TabBar({ tabs, activeTabId, onTabSelect, onTabClose, onNewTab }) {
     const getMethodColor = (method) => {
         const colors = {
-            GET: 'text-blue-400',
-            POST: 'text-green-400',
-            PUT: 'text-orange-400',
-            DELETE: 'text-red-400',
-            PATCH: 'text-purple-400',
-            HEAD: 'text-cyan-400',
+            GET: 'text-info',
+            POST: 'text-success',
+            PUT: 'text-warning',
+            DELETE: 'text-destructive',
+            PATCH: 'text-primary',
+            HEAD: 'text-primary',
         }
-        return colors[method] || 'text-gray-400'
+        return colors[method] || 'text-muted-foreground'
     }
 
     return (

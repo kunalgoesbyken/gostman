@@ -150,9 +150,9 @@ export function ExportTab({ requests, folders, variables }) {
 
             {/* Preview */}
             <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 rounded-xl" />
+                <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background rounded-xl" />
                 <pre className="relative overflow-x-auto rounded-xl p-4 text-sm leading-relaxed border border-white/5 shadow-xl max-h-80">
-                    <code className="font-mono text-slate-300 whitespace-pre-wrap">{exportPreview || '// Export preview will appear here'}</code>
+                    <code className="font-mono text-foreground whitespace-pre-wrap">{exportPreview || '// Export preview will appear here'}</code>
                 </pre>
 
                 {/* Action buttons */}

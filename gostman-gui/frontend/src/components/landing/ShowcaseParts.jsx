@@ -1,14 +1,9 @@
 import { motion } from "framer-motion"
 import { fadeIn, spin } from "../../lib/motion"
+import { METHOD_CHIPS } from "../../lib/constants"
 
-export const METHOD_STYLES = {
-  GET: "text-blue-400 bg-blue-400/10",
-  POST: "text-emerald-400 bg-emerald-400/10",
-  PUT: "text-amber-400 bg-amber-400/10",
-  DELETE: "text-red-400 bg-red-400/10",
-}
-
-export const methodStyle = (method) => METHOD_STYLES[method] || "text-gray-400 bg-gray-400/10"
+export const methodStyle = (method) =>
+  METHOD_CHIPS[method] || "text-muted-foreground bg-muted-foreground/10"
 
 export const Spinner = ({ className }) => (
   <motion.span

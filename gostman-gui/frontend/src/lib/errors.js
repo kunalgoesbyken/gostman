@@ -47,30 +47,30 @@ export function getErrorConfig(error) {
   const configs = {
     [ErrorType.NETWORK]: {
       icon: 'WifiOff',
-      color: 'text-orange-500',
-      bg: 'bg-orange-500/10',
-      border: 'border-orange-500/20',
+      color: 'text-warning',
+      bg: 'bg-warning/10',
+      border: 'border-warning/20',
       title: 'Network Error'
     },
     [ErrorType.VALIDATION]: {
       icon: 'AlertCircle',
-      color: 'text-blue-500',
-      bg: 'bg-blue-500/10',
-      border: 'border-blue-500/20',
+      color: 'text-info',
+      bg: 'bg-info/10',
+      border: 'border-info/20',
       title: 'Validation Error'
     },
     [ErrorType.TIMEOUT]: {
       icon: 'Clock',
-      color: 'text-yellow-500',
-      bg: 'bg-yellow-500/10',
-      border: 'border-yellow-500/20',
+      color: 'text-warning',
+      bg: 'bg-warning/10',
+      border: 'border-warning/20',
       title: 'Request Timeout'
     },
     [ErrorType.SERVER]: {
       icon: 'Server',
-      color: 'text-red-500',
-      bg: 'bg-red-500/10',
-      border: 'border-red-500/20',
+      color: 'text-destructive',
+      bg: 'bg-destructive/10',
+      border: 'border-destructive/20',
       title: 'Server Error'
     },
     [ErrorType.UNKNOWN]: {

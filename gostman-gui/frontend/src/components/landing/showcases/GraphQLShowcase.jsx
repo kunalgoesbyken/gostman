@@ -39,43 +39,43 @@ const DEMO_SEQUENCE = [
 const QueryValue = ({ value }) => {
   if (typeof value === "string") {
     return (
-      <span className="text-emerald-300">"{value.slice(0, 40)}{value.length > 40 ? "..." : ""}"</span>
+      <span className="text-syntax-string">"{value.slice(0, 40)}{value.length > 40 ? "..." : ""}"</span>
     )
   }
   if (Array.isArray(value)) {
     return (
       <>
-        <span className="text-amber-300">[</span>
+        <span className="text-syntax-punctuation">[</span>
         <span className="text-muted-foreground/50">...{value.length} items</span>
-        <span className="text-amber-300">]</span>
+        <span className="text-syntax-punctuation">]</span>
       </>
     )
   }
-  if (typeof value === "object") return <span className="text-amber-300">{"{...}"}</span>
-  return <span className="text-purple-300">{value}</span>
+  if (typeof value === "object") return <span className="text-syntax-punctuation">{"{...}"}</span>
+  return <span className="text-syntax-number">{value}</span>
 }
 
 const renderJSON = (obj, depth = 0) => {
   if (typeof obj !== "object" || obj === null) {
-    return <span className="text-emerald-300">"{obj}"</span>
+    return <span className="text-syntax-string">"{obj}"</span>
   }
 
   return (
     <div className="space-y-0.5">
-      <span className="text-amber-300">{"{"}</span>
+      <span className="text-syntax-punctuation">{"{"}</span>
       {Object.entries(obj).slice(0, depth === 0 ? 3 : 2).map(([key, value], i, arr) => (
         <div key={key} className="pl-4">
-          <span className="text-blue-300">"{key}"</span>:{" "}
+          <span className="text-syntax-key">"{key}"</span>:{" "}
           <QueryValue value={value} />
           {i < arr.length - 1 && ","}
         </div>
       ))}
-      <span className="text-amber-300">{"}"}</span>
+      <span className="text-syntax-punctuation">{"}"}</span>
     </div>
   )
 }
 
-const QueryField = ({ name }) => <div className="text-blue-300">{name}</div>
+const QueryField = ({ name }) => <div className="text-syntax-key">{name}</div>
 
 export const GraphQLShowcase = () => {
   const [isExecuting, setIsExecuting] = useState(false)
@@ -111,15 +111,15 @@ export const GraphQLShowcase = () => {
     <div className="w-full h-full flex flex-col">
       <ShowcaseHeader
         icon={Braces}
-        iconClassName="text-pink-400"
-        tint="bg-pink-500/10"
+        iconClassName="text-syntax-boolean"
+        tint="bg-syntax-boolean/10"
         title="GraphQL Request"
         subtitle={status}
       >
         <motion.button
           className={`px-4 py-2 rounded-md font-semibold text-sm flex items-center gap-2 ${isExecuting
               ? "bg-muted text-muted-foreground"
-              : "bg-pink-500/10 text-pink-400"
+              : "bg-syntax-boolean/10 text-syntax-boolean"
             }`}
           animate={isExecuting ? { scale: [1, 0.98, 1] } : {}}
           transition={{ duration: 1, repeat: isExecuting ? Infinity : 0 }}
@@ -147,19 +147,19 @@ export const GraphQLShowcase = () => {
           <div className="flex-1 overflow-auto p-4 font-mono text-xs leading-relaxed">
             <div className="space-y-1 text-muted-foreground">
               <div>
-                <span className="text-purple-400">query</span>{" "}
-                <span className="text-blue-400">GetUserProfile</span>(
-                <span className="text-amber-400">$username</span>:{" "}
-                <span className="text-cyan-400">String!</span>) {"{"}
+                <span className="text-primary">query</span>{" "}
+                <span className="text-info">GetUserProfile</span>(
+                <span className="text-warning">$username</span>:{" "}
+                <span className="text-primary">String!</span>) {"{"}
               </div>
               <div className="pl-4">
-                <span className="text-blue-400">user</span>(username: <span className="text-amber-400">$username</span>) {"{"}
+                <span className="text-info">user</span>(username: <span className="text-warning">$username</span>) {"{"}
               </div>
               <div className="pl-8 space-y-0.5">
                 {["id", "username", "email"].map((field) => (
                   <QueryField key={field} name={field} />
                 ))}
-                <div className="text-blue-300 space-y-0.5">
+                <div className="text-syntax-key space-y-0.5">
                   <div>profile {"{"}</div>
                   <div className="pl-4 space-y-0.5">
                     {["avatar", "bio", "location"].map((field) => (
@@ -183,7 +183,7 @@ export const GraphQLShowcase = () => {
                 <motion.span
                   {...popIn}
                   exit={{ scale: 0 }}
-                  className="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/10 text-emerald-400"
+                  className="px-2 py-0.5 rounded text-xs font-semibold bg-success/10 text-success"
                 >
                   200 OK
                 </motion.span>
@@ -210,7 +210,7 @@ export const GraphQLShowcase = () => {
         </ShowcasePanel>
       </div>
 
-      <ShowcaseFooter tag="No over-fetching" tagClassName="bg-blue-500/10 text-blue-400">
+      <ShowcaseFooter tag="No over-fetching" tagClassName="bg-info/10 text-info">
         <span>Get exactly the data you need, nothing more.</span>
       </ShowcaseFooter>
     </div>

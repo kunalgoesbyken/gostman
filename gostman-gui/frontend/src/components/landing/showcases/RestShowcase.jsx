@@ -2,7 +2,7 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Send, Copy, Check } from "lucide-react"
 import { collapse, fadeIn, pressableStrong, scaleInOut } from "../../../lib/motion"
-import { EmptyState, METHOD_STYLES, ShowcasePanel, Spinner } from "../ShowcaseParts"
+import { EmptyState, ShowcasePanel, Spinner, methodStyle } from "../ShowcaseParts"
 import { useDemoSequence } from "../useDemoSequence"
 
 const REQUEST = {
@@ -69,7 +69,7 @@ export const RestShowcase = () => {
       <ShowcasePanel className="flex-1">
         <div className="flex items-center gap-3 p-4 border-b border-border/40 bg-muted/20">
           <motion.div
-            className={`px-3 py-1.5 rounded-md font-bold text-sm ${METHOD_STYLES[REQUEST.method]}`}
+            className={`px-3 py-1.5 rounded-md font-bold text-sm ${methodStyle(REQUEST.method)}`}
             key={REQUEST.method}
             {...scaleInOut}
           >
@@ -113,9 +113,9 @@ export const RestShowcase = () => {
               transition={{ duration: 0.4 }}
               className="flex-1 flex flex-col min-h-0"
             >
-              <div className="flex items-center justify-between px-4 py-2 border-b border-border/40 bg-emerald-500/5">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-border/40 bg-success/5">
                 <div className="flex items-center gap-4 text-sm">
-                  <span className="text-emerald-400 font-bold">{response.status}</span>
+                  <span className="text-success font-bold">{response.status}</span>
                   <span className="text-muted-foreground">{response.statusText}</span>
                   <div className="h-4 w-px bg-border/40" />
                   <span className="text-muted-foreground/70">{response.time}</span>
@@ -127,7 +127,7 @@ export const RestShowcase = () => {
                   {...pressableStrong}
                 >
                   {copied ? (
-                    <Check className="w-4 h-4 text-emerald-400" />
+                    <Check className="w-4 h-4 text-success" />
                   ) : (
                     <Copy className="w-4 h-4 text-muted-foreground" />
                   )}
@@ -137,15 +137,15 @@ export const RestShowcase = () => {
               <div className="flex-1 p-4 font-mono text-sm overflow-auto">
                 <motion.div {...fadeIn} transition={{ delay: 0.2 }} className="space-y-1">
                   <div>
-                    <span className="text-amber-300">{"{"}</span>
+                    <span className="text-syntax-punctuation">{"{"}</span>
                   </div>
                   <div className="pl-4">
-                    <span className="text-blue-300">"status"</span>:
-                    <span className="text-emerald-300"> "success"</span>,
+                    <span className="text-syntax-key">"status"</span>:
+                    <span className="text-syntax-string"> "success"</span>,
                   </div>
                   <div className="pl-4">
-                    <span className="text-blue-300">"data"</span>:
-                    <span className="text-amber-300"> ["</span>
+                    <span className="text-syntax-key">"data"</span>:
+                    <span className="text-syntax-punctuation"> ["</span>
                   </div>
                   {response.body.data.map((user, i) => (
                     <motion.div
@@ -155,27 +155,27 @@ export const RestShowcase = () => {
                       transition={{ delay: 0.15 + i * 0.07 }}
                       className="pl-8"
                     >
-                      <span className="text-amber-300">{"{"}</span>
+                      <span className="text-syntax-punctuation">{"{"}</span>
                       <div className="pl-4">
-                        <span className="text-blue-300">"id"</span>:{" "}
-                        <span className="text-purple-300">{user.id}</span>,
+                        <span className="text-syntax-key">"id"</span>:{" "}
+                        <span className="text-syntax-number">{user.id}</span>,
                       </div>
                       <div className="pl-4">
-                        <span className="text-blue-300">"username"</span>:{" "}
-                        <span className="text-emerald-300">"{user.username}"</span>,
+                        <span className="text-syntax-key">"username"</span>:{" "}
+                        <span className="text-syntax-string">"{user.username}"</span>,
                       </div>
                       <div className="pl-4">
-                        <span className="text-blue-300">"role"</span>:{" "}
-                        <span className="text-emerald-300">"{user.role}"</span>
+                        <span className="text-syntax-key">"role"</span>:{" "}
+                        <span className="text-syntax-string">"{user.role}"</span>
                       </div>
-                      <span className="text-amber-300">{"},"}</span>
+                      <span className="text-syntax-punctuation">{"},"}</span>
                     </motion.div>
                   ))}
                   <div className="pl-4">
-                    <span className="text-amber-300">{"]"}</span>
+                    <span className="text-syntax-punctuation">{"]"}</span>
                   </div>
                   <div>
-                    <span className="text-amber-300">{"}"}</span>
+                    <span className="text-syntax-punctuation">{"}"}</span>
                   </div>
                 </motion.div>
               </div>

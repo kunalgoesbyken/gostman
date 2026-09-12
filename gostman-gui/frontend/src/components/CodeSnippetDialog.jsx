@@ -74,9 +74,9 @@ export function CodeSnippetDialog({ snippets, onClose }) {
               <TabsContent key={lang.id} value={lang.id} className="mt-0 animate-in fade-in-50 duration-200">
                 <div className="relative group">
                   {/* Code block with enhanced styling */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 rounded-xl" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background rounded-xl" />
                   <pre className="relative overflow-x-auto rounded-xl p-5 text-sm leading-relaxed border border-white/5 shadow-xl">
-                    <code className="font-mono text-slate-300">{snippets[lang.id]}</code>
+                    <code className="font-mono text-foreground">{snippets[lang.id]}</code>
                   </pre>
 
                   {/* Floating copy button */}

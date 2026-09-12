@@ -205,10 +205,10 @@ export function LandingPage({ onGetStarted }) {
 
           {/* Animated gradient orbs */}
           <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] animate-pulse bg-orb" />
-          <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[120px] animate-pulse bg-orb"
+          <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-success/5 rounded-full blur-[120px] animate-pulse bg-orb"
             style={{ animationDuration: "4s", animationDelay: "1s" }}
           />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-cyan-500/3 rounded-full blur-[100px] animate-pulse bg-orb"
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] animate-pulse bg-orb"
             style={{ animationDuration: "5s", animationDelay: "2s" }}
           />
 
@@ -291,7 +291,7 @@ export function LandingPage({ onGetStarted }) {
               >
                 <Badge variant="outline" className="px-3 py-1 text-xs font-medium border-border/60 bg-muted/30">
                   <motion.span
-                    className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2"
+                    className="inline-block w-1.5 h-1.5 rounded-full bg-success mr-2"
                     animate={{ scale: [1, 1.2, 1] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   />
@@ -377,7 +377,7 @@ export function LandingPage({ onGetStarted }) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8 + i * 0.1 }}
                   >
-                    <Check className="h-3.5 w-3.5 text-emerald-400/70" />
+                    <Check className="h-3.5 w-3.5 text-success/70" />
                     <span>{text}</span>
                   </motion.div>
                 ))}
@@ -535,7 +535,7 @@ export function LandingPage({ onGetStarted }) {
                               viewport={VIEWPORT_ONCE}
                               transition={{ delay: index * 0.05 + 0.1, type: "spring", stiffness: 200 }}
                             >
-                              <Check className="h-5 w-5 text-emerald-400/70" strokeWidth={2.5} />
+                              <Check className="h-5 w-5 text-success/70" strokeWidth={2.5} />
                             </motion.div>
                           ) : (
                             <span className="text-muted-foreground/60">-</span>
@@ -543,7 +543,7 @@ export function LandingPage({ onGetStarted }) {
                         </div>
                         <div className="flex items-center justify-center">
                           {item.others ? (
-                            <Check className="h-5 w-5 text-emerald-400/70" strokeWidth={2.5} />
+                            <Check className="h-5 w-5 text-success/70" strokeWidth={2.5} />
                           ) : (
                             <X className="h-5 w-5 text-muted-foreground/30" strokeWidth={2} />
                           )}
@@ -569,7 +569,7 @@ export function LandingPage({ onGetStarted }) {
                 {/* Animated background elements - contained in overflow-hidden wrapper */}
                 <div className="absolute inset-0 overflow-hidden rounded-2xl">
                   <div className="absolute top-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-[80px]" />
-                  <div className="absolute bottom-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[80px]" />
+                  <div className="absolute bottom-0 right-0 w-64 h-64 bg-success/5 rounded-full blur-[80px]" />
                 </div>
 
                 <div className="relative">

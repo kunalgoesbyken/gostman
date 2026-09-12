@@ -53,6 +53,16 @@
     /* Spacing radius */
     --radius: 0.375rem;
 
+    /* Code syntax palette. Deliberately separate from the feedback tokens: a
+       JSON string is not "successful", it is a string. Shared by the response
+       highlighter and the landing showcases so both speak one language. */
+    --syntax-key: 191 96% 54%;
+    --syntax-string: 142 76% 56%;
+    --syntax-number: 25 95% 53%;
+    --syntax-boolean: 280 74% 64%;
+    --syntax-null: 0 84% 60%;
+    --syntax-punctuation: 38 92% 60%;
+
     /* Status code colors */
     --status-2xx: 142 76% 36%;
     --status-3xx: 199 89% 48%;
@@ -340,24 +350,24 @@
 
   /* Restore specific colors for JSON syntax */
   .json-tree-wrapper .json-view__key {
-    color: hsl(191 96% 54%) !important;
+    color: hsl(var(--syntax-key)) !important;
     font-weight: 500 !important;
   }
 
   .json-tree-wrapper .json-view__string {
-    color: hsl(142 76% 56%) !important;
+    color: hsl(var(--syntax-string)) !important;
   }
 
   .json-tree-wrapper .json-view__number {
-    color: hsl(25 95% 53%) !important;
+    color: hsl(var(--syntax-number)) !important;
   }
 
   .json-tree-wrapper .json-view__boolean {
-    color: hsl(280 74% 64%) !important;
+    color: hsl(var(--syntax-boolean)) !important;
   }
 
   .json-tree-wrapper .json-view__null {
-    color: hsl(0 84% 60%) !important;
+    color: hsl(var(--syntax-null)) !important;
     font-style: italic !important;
   }
 
@@ -414,19 +424,19 @@
 
   /* Syntax highlighter classes for Raw mode (non-tree view) */
   .json-key {
-    color: hsl(191 96% 54%) !important;
+    color: hsl(var(--syntax-key)) !important;
     font-weight: 500 !important;
   }
   .json-string {
-    color: hsl(142 76% 56%) !important;
+    color: hsl(var(--syntax-string)) !important;
   }
   .json-number {
-    color: hsl(25 95% 53%) !important;
+    color: hsl(var(--syntax-number)) !important;
   }
   .json-boolean {
-    color: hsl(280 74% 64%) !important;
+    color: hsl(var(--syntax-boolean)) !important;
   }
   .json-null {
-    color: hsl(0 84% 60%) !important;
+    color: hsl(var(--syntax-null)) !important;
   }
 }

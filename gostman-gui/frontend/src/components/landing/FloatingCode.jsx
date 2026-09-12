@@ -8,17 +8,17 @@ export const FloatingCode = () => (
 Host: api.example.com`}</pre>
         </div>
         <div className="absolute top-40 right-20 animate-float-delayed opacity-10">
-            <pre className="font-mono text-xs text-emerald-400">{`{
+            <pre className="font-mono text-xs text-success">{`{
   "status": "success",
   "data": []
 }`}</pre>
         </div>
         <div className="absolute bottom-40 left-20 animate-float-slow opacity-10">
-            <pre className="font-mono text-xs text-cyan-400">{`POST /api/auth
+            <pre className="font-mono text-xs text-primary">{`POST /api/auth
 Content-Type: application/json`}</pre>
         </div>
         <div className="absolute bottom-20 right-10 animate-float-delayed opacity-10">
-            <pre className="font-mono text-xs text-purple-400">{`X-Rate-Limit: 100
+            <pre className="font-mono text-xs text-primary">{`X-Rate-Limit: 100
 X-Response-Time: 42ms`}</pre>
         </div>
     </div>
