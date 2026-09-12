@@ -65,7 +65,7 @@ export const RestShowcase = () => {
   }
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="flex h-full w-full flex-col">
       <ShowcasePanel className="flex-1">
         <div className="flex items-center gap-3 p-4 border-b border-border/40 bg-muted/20">
           <motion.div
@@ -134,7 +134,7 @@ export const RestShowcase = () => {
                 </motion.button>
               </div>
 
-              <div className="flex-1 p-4 font-mono text-sm overflow-auto">
+              <div className="min-h-0 flex-1 overflow-auto p-4 font-mono text-sm">
                 <motion.div {...fadeIn} transition={{ delay: 0.2 }} className="space-y-1">
                   <div>
                     <span className="text-syntax-punctuation">{"{"}</span>

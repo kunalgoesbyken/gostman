@@ -108,7 +108,7 @@ export const GraphQLShowcase = () => {
       : "Write your query"
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="flex h-full w-full flex-col">
       <ShowcaseHeader
         icon={Braces}
         iconClassName="text-syntax-boolean"
@@ -138,7 +138,7 @@ export const GraphQLShowcase = () => {
         </motion.button>
       </ShowcaseHeader>
 
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 min-h-0">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 md:grid-cols-2">
         <ShowcasePanel from="left">
           <div className="px-4 py-2 border-b border-border/40 bg-muted/20">
             <PanelLabel>Query</PanelLabel>

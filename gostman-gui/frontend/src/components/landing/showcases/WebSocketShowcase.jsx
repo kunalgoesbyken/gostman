@@ -27,7 +27,7 @@ const bubbleStyle = (msg) => {
   if (msg.type === "client") return "bg-primary/20 text-foreground border border-primary/20"
   if (msg.event === "open" || msg.event === "close")
     return "bg-muted/30 text-muted-foreground border border-border/30"
-  return "bg-success/10 text-success-foreground border border-success/20"
+  return "bg-success/10 text-success border border-success/20"
 }
 
 export const WebSocketShowcase = () => {
@@ -57,7 +57,7 @@ export const WebSocketShowcase = () => {
   }, [messages])
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="flex h-full w-full flex-col">
       <ShowcaseHeader
         icon={Radio}
         iconClassName="text-primary"
@@ -108,12 +108,15 @@ export const WebSocketShowcase = () => {
       </motion.div>
 
       <motion.div
-        ref={scrollRef}
-        className="flex-1 rounded-lg bg-background/40 border border-border/60 overflow-hidden flex flex-col"
+        className="flex-1 min-h-0 rounded-lg bg-background/40 border border-border/60 overflow-hidden flex flex-col"
         {...fadeIn}
         transition={{ delay: 0.1 }}
       >
-        <div className="flex-1 p-4 space-y-2.5 overflow-auto font-mono text-xs">
+        <div
+          ref={scrollRef}
+          className="flex min-h-0 flex-1 flex-col overflow-auto p-4 font-mono text-xs"
+        >
+          <div className="mt-auto space-y-2.5">
           <AnimatePresence initial={false}>
             {messages.map((msg) => (
               <motion.div
@@ -130,9 +133,12 @@ export const WebSocketShowcase = () => {
                     ) : (
                       <MessageSquare className="w-3 h-3 text-success/60" />
                     )}
-                    <span className="text-[10px] opacity-60">{formatTime(msg.timestamp)}</span>
+                    <span className="text-[10px] tabular-nums opacity-70">{formatTime(msg.timestamp)}</span>
                     {msg.event !== "message" && (
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-background/50">
+                      <span
+                        className="rounded px-1.5 py-0.5 text-[10px] font-mono uppercase tracking-wide opacity-90"
+                        style={{ backgroundColor: "color-mix(in srgb, currentColor 15%, transparent)" }}
+                      >
                         {msg.event}
                       </span>
                     )}
@@ -148,6 +154,7 @@ export const WebSocketShowcase = () => {
               </motion.div>
             ))}
           </AnimatePresence>
+          </div>
         </div>
 
         <AnimatePresence>

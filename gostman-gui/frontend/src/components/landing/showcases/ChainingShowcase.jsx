@@ -82,7 +82,7 @@ export const ChainingShowcase = () => {
   })
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="flex h-full w-full flex-col">
       <ShowcaseHeader
         icon={Link2}
         iconClassName="text-primary"
@@ -91,7 +91,7 @@ export const ChainingShowcase = () => {
         subtitle="Chain requests together with extracted data"
       />
 
-      <div className="flex-1 flex flex-col space-y-3 overflow-auto">
+      <div className="flex min-h-0 flex-1 flex-col space-y-3 overflow-auto">
         {CHAIN_STEPS.map((step, index) => {
           const isCompleted = completedSteps.includes(index)
           const isCurrent = activeStep === index

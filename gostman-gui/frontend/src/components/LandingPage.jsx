@@ -36,11 +36,20 @@ import { DownloadDropdown } from "./landing/DownloadDropdown"
 
 function ShowcaseSkeleton() {
   return (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="space-y-4 w-full max-w-md">
-        <div className="h-4 bg-muted/20 rounded animate-pulse w-1/3" />
-        <div className="h-32 bg-muted/10 rounded animate-pulse" />
-        <div className="h-24 bg-muted/10 rounded animate-pulse" />
+    <div className="flex h-full w-full flex-col gap-3" aria-hidden="true">
+      <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-background/40 p-4">
+        <div className="h-7 w-16 shrink-0 rounded-md bg-muted/30 animate-shimmer" />
+        <div className="h-8 flex-1 rounded-md bg-muted/20 animate-shimmer" />
+        <div className="h-8 w-24 shrink-0 rounded-md bg-muted/30 animate-shimmer" />
+      </div>
+      <div className="flex-1 space-y-2.5 rounded-lg border border-border/60 bg-background/40 p-4">
+        {[80, 55, 65, 40, 70, 50].map((width, i) => (
+          <div
+            key={i}
+            className="h-3 rounded bg-muted/20 animate-shimmer"
+            style={{ width: `${width}%`, animationDelay: `${i * 90}ms` }}
+          />
+        ))}
       </div>
     </div>
   )
@@ -162,27 +171,34 @@ const TabButton = ({ tab, isActive, onClick }) => {
   return (
     <motion.button
       onClick={onClick}
-      aria-pressed={isActive}
-      aria-selected={isActive}
       role="tab"
-      tabIndex={0}
+      aria-selected={isActive}
+      aria-controls={`showcase-panel-${tab.id}`}
+      id={`showcase-tab-${tab.id}`}
+      tabIndex={isActive ? 0 : -1}
       className={cn(
-        "relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors",
-        isActive
-          ? "text-foreground bg-background/80 shadow-lg border border-border/60"
-          : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+        "relative flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors duration-200",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
       )}
       {...pressable}
     >
-      <Icon className={cn("w-4 h-4", isActive ? "text-primary" : "")} aria-hidden="true" />
-      <span>{tab.label}</span>
       {isActive && (
-        <motion.div
-          layoutId="activeTab"
-          className="absolute inset-0 bg-background/80 rounded-lg border border-border/60 -z-10"
+        <motion.span
+          layoutId="activeShowcaseTab"
+          className={cn(
+            "absolute inset-0 -z-10 rounded-lg border border-border/60 bg-card",
+            "shadow-[inset_0_1px_0_hsl(var(--foreground)/0.06)]"
+          )}
           transition={springLayout}
         />
       )}
+      <Icon
+        className={cn("h-4 w-4 transition-colors", isActive && "text-primary")}
+        strokeWidth={2}
+        aria-hidden="true"
+      />
+      <span className="whitespace-nowrap">{tab.label}</span>
     </motion.button>
   )
 }
@@ -190,6 +206,24 @@ const TabButton = ({ tab, isActive, onClick }) => {
 export function LandingPage({ onGetStarted }) {
   const [activeTab, setActiveTab] = useState("rest")
   const { stars, isLoading } = useGitHubStars()
+
+  const activeDescription =
+    SHOWCASE_TABS.find((tab) => tab.id === activeTab)?.description ?? ""
+
+  const handleTabKeyDown = (event) => {
+    const keyOffset = { ArrowRight: 1, ArrowLeft: -1 }[event.key]
+    const isEdge = event.key === "Home" || event.key === "End"
+    if (keyOffset === undefined && !isEdge) return
+
+    event.preventDefault()
+    const current = SHOWCASE_TABS.findIndex((tab) => tab.id === activeTab)
+    const next = isEdge
+      ? (event.key === "Home" ? 0 : SHOWCASE_TABS.length - 1)
+      : (current + keyOffset + SHOWCASE_TABS.length) % SHOWCASE_TABS.length
+
+    setActiveTab(SHOWCASE_TABS[next].id)
+    document.getElementById(`showcase-tab-${SHOWCASE_TABS[next].id}`)?.focus()
+  }
 
   return (
     <>
@@ -399,22 +433,23 @@ export function LandingPage({ onGetStarted }) {
         {/* Features in Action Section */}
         <section className="relative py-16 px-6">
           <div className="max-w-5xl mx-auto">
-            <AnimatedSection className="text-center mb-8" delay={0.1}>
-              <Badge variant="outline" className="px-3 py-1 text-xs font-medium border-primary/30 bg-primary/5 text-primary mb-4">
-                Interactive Demo
-              </Badge>
-              <h2 className="text-3xl md:text-4xl font-semibold mb-3">
-                See It In Action
+            <AnimatedSection className="mb-6" delay={0.1}>
+              <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
+                Watch a request go out and come back
               </h2>
-              <p className="text-muted-foreground max-w-xl mx-auto">
-                See it handle any API protocol
+              <p className="mt-3 max-w-xl text-muted-foreground leading-relaxed">
+                {activeDescription}
               </p>
             </AnimatedSection>
 
-            {/* Tab Navigation */}
-            <AnimatedSection delay={0.2}>
-              <div className="flex justify-center mb-6">
-                <div className="inline-flex items-center gap-2 p-1.5 rounded-xl bg-muted/20 border border-border/40">
+            <AnimatedSection className="mb-5" delay={0.2}>
+              <div
+                role="tablist"
+                aria-label="Protocol demos"
+                onKeyDown={handleTabKeyDown}
+                className="flex -mx-6 overflow-x-auto px-6 scrollbar-none"
+              >
+                <div className="inline-flex shrink-0 items-center gap-1 rounded-xl border border-border/40 bg-muted/20 p-1">
                   {SHOWCASE_TABS.map((tab) => (
                     <TabButton
                       key={tab.id}
@@ -430,17 +465,24 @@ export function LandingPage({ onGetStarted }) {
             {/* Showcase Panel */}
             <ScaleIn delay={0.3}>
               <motion.div
-                className="bg-background/40 backdrop-blur-sm rounded-2xl border border-border/60 p-6 min-h-[480px]"
-                layout
+                className={cn(
+                  "relative flex h-[600px] flex-col rounded-2xl p-4 sm:p-6",
+                  "border border-border/60 bg-card/40 backdrop-blur-sm",
+                  "shadow-[inset_0_1px_0_hsl(var(--foreground)/0.05),0_24px_48px_-24px_hsl(var(--background))]"
+                )}
               >
                 <AnimatePresence mode="wait">
                   <Suspense fallback={<ShowcaseSkeleton />}>
                     <motion.div
                       key={activeTab}
-                      initial={{ opacity: 0, x: 20 }}
+                      role="tabpanel"
+                      id={`showcase-panel-${activeTab}`}
+                      aria-labelledby={`showcase-tab-${activeTab}`}
+                      className="flex-1 min-h-0"
+                      initial={{ opacity: 0, x: 16 }}
                       animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.3 }}
+                      exit={{ opacity: 0, x: -16 }}
+                      transition={{ duration: 0.28, ease: easeSmooth }}
                     >
                       {activeTab === "rest" && <RestShowcase />}
                       {activeTab === "graphql" && <GraphQLShowcase />}
@@ -457,28 +499,27 @@ export function LandingPage({ onGetStarted }) {
         {/* Features Section */}
         <section className="relative py-20 px-6">
           <div className="max-w-6xl mx-auto">
-            <AnimatedSection className="mb-12" delay={0.1}>
-              <h2 className="text-3xl md:text-4xl font-semibold mb-3">
-                Everything You Need
+            <AnimatedSection className="mb-12 max-w-lg" delay={0.1}>
+              <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
+                Six things it does without asking you to sign in
               </h2>
-              <p className="text-muted-foreground max-w-xl">
-                Crafted by developers, for developers
+              <p className="mt-3 text-muted-foreground leading-relaxed">
+                No plugins, no paid tier, and no workspace to join before the first request.
               </p>
             </AnimatedSection>
 
-            <StaggerContainer className="grid sm:grid-cols-2 gap-x-14 border-t border-border/40">
+            <StaggerContainer className="grid border-t border-border/40 sm:grid-cols-2">
               {FEATURES.map((feature) => (
                 <div
                   key={feature.title}
-                  className="group flex items-start gap-4 py-7 border-b border-border/40"
+                  className="group relative flex items-start gap-4 border-b border-border/40 py-8 sm:odd:pr-10 sm:even:pl-10 sm:even:border-l"
                 >
-                  <feature.icon
-                    className="mt-0.5 h-[18px] w-[18px] shrink-0 text-muted-foreground/50 transition-colors group-hover:text-primary"
-                    strokeWidth={1.5}
-                  />
+                  <span className="mt-px flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-muted/30 text-foreground/80 transition-colors duration-200 group-hover:border-primary/40 group-hover:bg-primary/10 group-hover:text-primary">
+                    <feature.icon className="h-[18px] w-[18px]" strokeWidth={2} />
+                  </span>
                   <div className="min-w-0">
                     <h3 className="text-[15px] font-medium tracking-tight">{feature.title}</h3>
-                    <p className="mt-1.5 text-sm text-muted-foreground/70 leading-relaxed">
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                       {feature.description}
                     </p>
                   </div>
