@@ -208,6 +208,23 @@ jobs:
             echo "  ok: bundles differ"
           fi
 
+          # The web entry bundle must never eagerly pull in the Wails bindings.
+          # We assert on the binding namespace itself, NOT on a `window.go`
+          # feature-detect: a runtime check like `if (!window.go)` is the
+          # correct way for shared code to branch per target, and it has to
+          # ship to the browser to work. Desktop-only code reached through a
+          # dynamic import() lands in its own lazy chunk that a browser never
+          # fetches, so only the entry bundle is inspected here.
+          echo
+          echo "== Web entry bundle must not eagerly import the Wails bindings =="
+          for marker in "go.main.App" "wailsjs/go/main"; do
+            if grep -qF "$marker" "$WEB_JS"; then
+              fail "found '$marker' in the web entry bundle ($WEB_JS)"
+            else
+              echo "  ok: no '$marker' in web entry bundle"
+            fi
+          done
+
           echo
           if [ "$failed" -ne 0 ]; then
             echo "=============================================================================="

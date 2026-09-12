@@ -166,14 +166,97 @@ function generateGo(method, url, headers, body, queryParams) {
   return code
 }
 
+function phpString(value) {
+  return `'${String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`
+}
+
 function generatePhp(method, url, headers, body, queryParams) {
-  const curl = buildCurlCommand(method, url, headers, body, queryParams)
-  return `// PHP code generation not available\n// Curl command:\n${curl}`
+  const headersObj = parseJSON(headers)
+  const bodyObj = parseJSON(body)
+  const paramsObj = parseJSON(queryParams)
+
+  const fullUrl = buildUrl(url, paramsObj)
+  const hasBody = ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase()) && Object.keys(bodyObj).length > 0
+
+  let code = `<?php\n\n`
+  code += `$ch = curl_init();\n\n`
+  code += `curl_setopt($ch, CURLOPT_URL, ${phpString(fullUrl)});\n`
+  code += `curl_setopt($ch, CURLOPT_CUSTOMREQUEST, ${phpString(method)});\n`
+  code += `curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);\n`
+
+  if (Object.keys(headersObj).length > 0) {
+    const headerLines = Object.entries(headersObj)
+      .map(([key, value]) => `    ${phpString(`${key}: ${value}`)},`)
+      .join('\n')
+    code += `curl_setopt($ch, CURLOPT_HTTPHEADER, [\n${headerLines}\n]);\n`
+  }
+
+  if (hasBody) {
+    const bodyString = JSON.stringify(bodyObj, null, 2)
+    code += `curl_setopt($ch, CURLOPT_POSTFIELDS, ${phpString(bodyString)});\n`
+  }
+
+  code += `\n$response = curl_exec($ch);\n`
+  code += `$statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);\n`
+  code += `curl_close($ch);\n\n`
+  code += `echo $statusCode . PHP_EOL;\n`
+  code += `echo $response . PHP_EOL;`
+
+  return code
+}
+
+function javaString(value) {
+  const escaped = String(value)
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\r/g, '\\r')
+    .replace(/\n/g, '\\n')
+    .replace(/\t/g, '\\t')
+  return `"${escaped}"`
 }
 
 function generateJava(method, url, headers, body, queryParams) {
-  const curl = buildCurlCommand(method, url, headers, body, queryParams)
-  return `// Java code generation not available\n// Curl command:\n${curl}`
+  const headersObj = parseJSON(headers)
+  const bodyObj = parseJSON(body)
+  const paramsObj = parseJSON(queryParams)
+
+  const fullUrl = buildUrl(url, paramsObj)
+  const hasBody = ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase()) && Object.keys(bodyObj).length > 0
+
+  let code = `import java.net.URI;\n`
+  code += `import java.net.http.HttpClient;\n`
+  code += `import java.net.http.HttpRequest;\n`
+  code += `import java.net.http.HttpResponse;\n\n`
+
+  code += `public class Main {\n`
+  code += `    public static void main(String[] args) throws Exception {\n`
+  code += `        HttpClient client = HttpClient.newHttpClient();\n\n`
+
+  if (hasBody) {
+    const bodyString = JSON.stringify(bodyObj, null, 2)
+    code += `        String requestBody = ${javaString(bodyString)};\n\n`
+  }
+
+  code += `        HttpRequest request = HttpRequest.newBuilder()\n`
+  code += `            .uri(URI.create(${javaString(fullUrl)}))\n`
+
+  Object.entries(headersObj).forEach(([key, value]) => {
+    code += `            .header(${javaString(key)}, ${javaString(value)})\n`
+  })
+
+  const bodyPublisher = hasBody
+    ? 'HttpRequest.BodyPublishers.ofString(requestBody)'
+    : 'HttpRequest.BodyPublishers.noBody()'
+  code += `            .method(${javaString(method)}, ${bodyPublisher})\n`
+  code += `            .build();\n\n`
+
+  code += `        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());\n\n`
+  code += `        System.out.println(response.statusCode());\n`
+  code += `        System.out.println(response.body());\n`
+  code += `    }\n`
+  code += `}`
+
+  return code
 }
 
 export function generateAllSnippets(method, url, headers, body, queryParams) {
