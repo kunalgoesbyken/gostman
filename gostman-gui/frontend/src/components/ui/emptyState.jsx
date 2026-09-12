@@ -4,7 +4,7 @@ import { cn } from "../../lib/utils"
 export const EmptyState = memo(({ icon: Icon, title, description, className, action }) => (
   <div
     className={cn(
-      "flex h-full flex-col items-center justify-center p-8 text-center",
+      "flex min-h-full flex-col items-center justify-center gap-0 p-6 text-center",
       className
     )}
   >

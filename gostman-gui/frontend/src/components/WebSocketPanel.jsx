@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Plug, Unplug, Send, Trash2, Clock, CheckCircle, XCircle, AlertCircle, Radio, Waves, Copy } from "lucide-react"
+import { EmptyState } from "./ui/emptyState"
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { Textarea } from "./ui/textarea"
@@ -19,7 +20,6 @@ import {
   pulseOpacity,
   heartbeat,
   spin,
-  float,
   spring,
   springSnappy,
   durationBase,
@@ -425,30 +425,24 @@ export function WebSocketPanel({
       </motion.div>
 
       <motion.div
-        className="flex-1 overflow-y-auto p-4 space-y-2 bg-background"
+        className="min-h-0 flex-1 overflow-y-auto bg-background p-4 space-y-2"
         {...fadeIn}
         {...enterDelay(0.2)}
       >
         <AnimatePresence mode="popLayout">
           {messages.length === 0 ? (
-            <motion.div
-              key="empty"
-              {...scaleInOutSubtle}
-              className="flex items-center justify-center h-full text-muted-foreground text-sm"
-            >
-              <div className="text-center">
-                <motion.div
-                  animate={float}
-                >
-                  <Waves className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                </motion.div>
-                <p className="text-sm font-medium">Ready to connect</p>
-                <p className="text-xs mt-1 text-muted-foreground">Enter a WebSocket URL to begin messaging</p>
-                <div className="mt-4 inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 border border-border/30 text-xs font-mono">
-                  <span className="text-muted-foreground">Try:</span>
-                  <span className="text-primary">wss://echo.websocket.org</span>
-                </div>
-              </div>
+            <motion.div key="empty" {...scaleInOutSubtle}>
+              <EmptyState
+                icon={Waves}
+                title="Ready to connect"
+                description="Enter a WebSocket URL to begin messaging"
+                action={
+                  <div className="inline-flex items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 font-mono text-xs">
+                    <span className="text-muted-foreground">Try</span>
+                    <span className="text-primary">wss://echo.websocket.org</span>
+                  </div>
+                }
+              />
             </motion.div>
           ) : (
             <>
