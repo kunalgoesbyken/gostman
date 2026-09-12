@@ -22,4 +22,10 @@ export function SaveRequest(arg1:main.Request):Promise<string>;
 
 export function SaveVariables(arg1:string):Promise<string>;
 
-export function SendRequest(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string,arg6:string,arg7:string):Promise<main.ResponseMsg>;
+export function SendRequest(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string,arg6:string,arg7:string,arg8:string):Promise<main.ResponseMsg>;
+
+export function WSClose(arg1:string):Promise<void>;
+
+export function WSConnect(arg1:string,arg2:string):Promise<string>;
+
+export function WSSend(arg1:string,arg2:string):Promise<void>;

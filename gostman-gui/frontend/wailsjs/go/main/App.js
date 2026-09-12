@@ -42,6 +42,18 @@ export function SaveVariables(arg1) {
   return window['go']['main']['App']['SaveVariables'](arg1);
 }
 
-export function SendRequest(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
-  return window['go']['main']['App']['SendRequest'](arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+export function SendRequest(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) {
+  return window['go']['main']['App']['SendRequest'](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+}
+
+export function WSClose(arg1) {
+  return window['go']['main']['App']['WSClose'](arg1);
+}
+
+export function WSConnect(arg1, arg2) {
+  return window['go']['main']['App']['WSConnect'](arg1, arg2);
+}
+
+export function WSSend(arg1, arg2) {
+  return window['go']['main']['App']['WSSend'](arg1, arg2);
 }

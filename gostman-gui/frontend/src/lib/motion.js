@@ -199,3 +199,6 @@ export const wiggle = {
 }
 
 export const rotateTo = (deg) => ({ animate: { rotate: deg }, transition: spring })
+
+/** Offsets a section's entrance so stacked panels cascade instead of popping together. */
+export const enterDelay = (seconds) => ({ transition: { ...durationBase, delay: seconds } })

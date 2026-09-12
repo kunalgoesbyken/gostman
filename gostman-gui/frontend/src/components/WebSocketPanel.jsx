@@ -23,14 +23,68 @@ import {
   spring,
   springSnappy,
   durationBase,
+  enterDelay,
 } from "../lib/motion"
 
 const CONNECTED_RING_RGB = '34, 211, 238'
+const RECONNECT_DELAY_MS = 3000
 
 /**
- * WebSocket Testing Panel with Enhanced Visuals
- * Allows testing WebSocket connections with real-time messaging and animations
+ * Picks the transport for the current target.
+ *
+ * The desktop build routes through Go, which can set arbitrary handshake
+ * headers; the web build is stuck with the browser API. The `go` global only
+ * exists under Wails, and the desktop module is loaded lazily behind that
+ * check, so the web app never evaluates desktop code - this module is part of
+ * the web bundle too, because RequestBar and RequestTabs import
+ * `isWebSocketURL` from it.
  */
+async function resolveTransport() {
+  if (!globalThis.go) return openBrowserSocket
+  const { openDesktopSocket } = await import("./websocketDesktop")
+  return openDesktopSocket
+}
+
+const parseHeaders = (headers) => {
+  try {
+    return JSON.parse(headers || '{}')
+  } catch {
+    return {}
+  }
+}
+
+// Pretty-prints JSON payloads, returning the text to show and its message type.
+const formatPayload = (payload) => {
+  try {
+    return [JSON.stringify(JSON.parse(payload), null, 2), 'json']
+  } catch {
+    return [payload, 'message']
+  }
+}
+
+/**
+ * Both transports resolve to the same shape - `{ send(text), close() }` - and
+ * report activity through a handlers object of
+ * `{ onOpen, onMessage, onError, onClose }`.
+ */
+function openBrowserSocket(wsUrl, headers, handlers) {
+  // The native WebSocket API cannot set handshake headers, so only
+  // Sec-WebSocket-Protocol survives - it maps onto the subprotocol argument.
+  // The desktop transport below has no such limit.
+  const protocol = parseHeaders(headers)['Sec-WebSocket-Protocol']
+  const socket = new WebSocket(wsUrl, protocol ? [protocol] : undefined)
+
+  socket.onopen = () => handlers.onOpen()
+  socket.onmessage = (event) => handlers.onMessage(event.data)
+  socket.onerror = () => handlers.onError('WebSocket error occurred')
+  socket.onclose = (event) =>
+    handlers.onClose(`Connection closed (${event.code}${event.reason ? ': ' + event.reason : ''})`)
+
+  return {
+    send: (text) => socket.send(text),
+    close: () => socket.close(),
+  }
+}
 
 const ConnectionState = {
   DISCONNECTED: 'disconnected',
@@ -52,18 +106,18 @@ const StatusConfig = {
   [ConnectionState.CONNECTING]: {
     icon: Clock,
     label: 'Connecting...',
-    color: 'text-blue-400',
-    bg: 'bg-blue-500/10',
-    border: 'border-blue-500/20',
-    glow: 'shadow-lg shadow-blue-500/20'
+    color: 'text-info',
+    bg: 'bg-info/10',
+    border: 'border-info/20',
+    glow: 'shadow-lg shadow-info/20'
   },
   [ConnectionState.CONNECTED]: {
     icon: Radio,
     label: 'Connected',
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-500/10',
-    border: 'border-emerald-500/20',
-    glow: 'shadow-lg shadow-emerald-500/20'
+    color: 'text-success',
+    bg: 'bg-success/10',
+    border: 'border-success/20',
+    glow: 'shadow-lg shadow-success/20'
   },
   [ConnectionState.ERROR]: {
     icon: XCircle,
@@ -75,6 +129,10 @@ const StatusConfig = {
   }
 }
 
+/**
+ * WebSocket Testing Panel with Enhanced Visuals
+ * Allows testing WebSocket connections with real-time messaging and animations
+ */
 export function WebSocketPanel({
   url,
   onUrlChange,
@@ -89,6 +147,10 @@ export function WebSocketPanel({
   const reconnectTimeoutRef = useRef(null)
   const messagesEndRef = useRef(null)
 
+  // Read from the close handler, which captures the value at connect time.
+  const autoReconnectRef = useRef(autoReconnect)
+  autoReconnectRef.current = autoReconnect
+
   // Scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -101,7 +163,7 @@ export function WebSocketPanel({
     }
   }, [])
 
-  const connect = () => {
+  const connect = async () => {
     if (!url || !url.trim()) {
       addMessage('system', 'error', 'Please enter a WebSocket URL')
       return
@@ -118,60 +180,36 @@ export function WebSocketPanel({
     setState(ConnectionState.CONNECTING)
     addMessage('system', 'info', `Connecting to ${wsUrl}...`)
 
-    try {
-      // Parse headers if provided
-      let headersObj = {}
-      try {
-        headersObj = JSON.parse(headers || '{}')
-      } catch {}
-
-      // Note: Native WebSocket API doesn't support custom headers in the constructor
-      // Headers would need to be negotiated via the URL or subprotocol
-      const protocols = []
-      if (headersObj['Sec-WebSocket-Protocol']) {
-        protocols.push(headersObj['Sec-WebSocket-Protocol'])
-      }
-
-      wsRef.current = new WebSocket(wsUrl, protocols.length > 0 ? protocols : undefined)
-
-      wsRef.current.onopen = () => {
+    const handlers = {
+      onOpen: () => {
         setState(ConnectionState.CONNECTED)
         addMessage('system', 'success', `Connected to ${wsUrl}`)
-      }
-
-      wsRef.current.onmessage = (event) => {
-        let data = event.data
-        let type = 'message'
-
-        // Try to parse as JSON for pretty display
-        try {
-          const parsed = JSON.parse(data)
-          data = JSON.stringify(parsed, null, 2)
-          type = 'json'
-        } catch {}
-
-        addMessage('received', type, data)
-      }
-
-      wsRef.current.onerror = (error) => {
+      },
+      onMessage: (data) => {
+        const [content, type] = formatPayload(data)
+        addMessage('received', type, content)
+      },
+      onError: (detail) => {
         setState(ConnectionState.ERROR)
-        addMessage('system', 'error', 'WebSocket error occurred')
-      }
-
-      wsRef.current.onclose = (event) => {
+        addMessage('system', 'error', detail)
+      },
+      onClose: (detail) => {
+        wsRef.current = null
         setState(ConnectionState.DISCONNECTED)
-        addMessage('system', 'info', `Connection closed (${event.code}${event.reason ? ': ' + event.reason : ''})`)
+        addMessage('system', 'info', detail)
 
-        // Auto-reconnect if enabled
-        if (autoReconnect) {
-          reconnectTimeoutRef.current = setTimeout(() => {
-            connect()
-          }, 3000)
+        if (autoReconnectRef.current) {
+          reconnectTimeoutRef.current = setTimeout(connect, RECONNECT_DELAY_MS)
         }
-      }
+      },
+    }
+
+    try {
+      const open = await resolveTransport()
+      wsRef.current = await open(wsUrl, headers, handlers)
     } catch (error) {
       setState(ConnectionState.ERROR)
-      addMessage('system', 'error', `Failed to connect: ${error.message}`)
+      addMessage('system', 'error', `Failed to connect: ${error.message || error}`)
     }
   }
 
@@ -181,15 +219,13 @@ export function WebSocketPanel({
       reconnectTimeoutRef.current = null
     }
 
-    if (wsRef.current) {
-      wsRef.current.close()
-      wsRef.current = null
-    }
+    wsRef.current?.close()
+    wsRef.current = null
 
     setState(ConnectionState.DISCONNECTED)
   }
 
-  const send = () => {
+  const send = async () => {
     if (!wsRef.current || state !== ConnectionState.CONNECTED) {
       addMessage('system', 'error', 'Not connected')
       return
@@ -198,23 +234,13 @@ export function WebSocketPanel({
     if (!message.trim()) return
 
     try {
-      // Send the message
-      wsRef.current.send(message)
+      await wsRef.current.send(message)
 
-      // Add to messages as sent
-      let displayMessage = message
-      let messageType = 'message'
-
-      try {
-        const parsed = JSON.parse(message)
-        displayMessage = JSON.stringify(parsed, null, 2)
-        messageType = 'json'
-      } catch {}
-
+      const [displayMessage, messageType] = formatPayload(message)
       addMessage('sent', messageType, displayMessage)
       setMessage('')
     } catch (error) {
-      addMessage('system', 'error', `Failed to send: ${error.message}`)
+      addMessage('system', 'error', `Failed to send: ${error.message || error}`)
     }
   }
 
@@ -258,10 +284,10 @@ export function WebSocketPanel({
         {...slideDown}
         transition={spring}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10" />
+        
         {state === ConnectionState.CONNECTED && (
           <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-cyan-500/5"
+            className="absolute inset-0 bg-gradient-to-r from-success/5 to-primary/5"
             animate={pulseOpacity}
           />
         )}
@@ -276,18 +302,18 @@ export function WebSocketPanel({
                 {state === ConnectionState.CONNECTED ? (
                   <>
                     <motion.div
-                      className="absolute inset-0 rounded-full bg-emerald-500/30 blur-md"
+                      className="absolute inset-0 rounded-full bg-success/30 blur-md"
                       animate={pulseRing(CONNECTED_RING_RGB)}
                     />
-                    <Radio className="h-5 w-5 text-emerald-400 relative z-10" />
+                    <Radio className="h-5 w-5 text-success relative z-10" />
                   </>
                 ) : (
-                  <Plug className="h-5 w-5 text-cyan-500" />
+                  <Plug className="h-5 w-5 text-primary" />
                 )}
               </motion.div>
 
               <div>
-                <span className="text-sm font-semibold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                <span className="text-sm font-semibold text-foreground">
                   WebSocket
                 </span>
                 <motion.div
@@ -299,7 +325,7 @@ export function WebSocketPanel({
                   {state === ConnectionState.CONNECTED && (
                     <motion.div
                       animate={heartbeat}
-                      className="w-1.5 h-1.5 rounded-full bg-emerald-400"
+                      className="w-1.5 h-1.5 rounded-full bg-success/40"
                     />
                   )}
                   {state === ConnectionState.CONNECTING && (
@@ -348,7 +374,7 @@ export function WebSocketPanel({
       <motion.div
         className="px-4 py-3 border-b border-border/50"
         {...slideUp}
-        transition={{ delay: 0.1 }}
+        {...enterDelay(0.1)}
       >
         <div className="flex items-center gap-2">
           <div className="flex-1 relative">
@@ -359,7 +385,7 @@ export function WebSocketPanel({
               value={url}
               onChange={(e) => onUrlChange(e.target.value)}
               placeholder="echo.websocket.org"
-              className="pl-10 font-mono text-sm bg-background/50 backdrop-blur-sm border-border/50 focus:border-cyan-500/50"
+              className="pl-10 font-mono text-sm bg-background/50 backdrop-blur-sm border-border/50 focus:border-primary/50"
               disabled={state === ConnectionState.CONNECTED || state === ConnectionState.CONNECTING}
             />
           </div>
@@ -401,7 +427,7 @@ export function WebSocketPanel({
       <motion.div
         className="flex-1 overflow-y-auto p-4 space-y-2 bg-background"
         {...fadeIn}
-        transition={{ delay: 0.2 }}
+        {...enterDelay(0.2)}
       >
         <AnimatePresence mode="popLayout">
           {messages.length === 0 ? (
@@ -420,7 +446,7 @@ export function WebSocketPanel({
                 <p className="text-xs mt-1 text-muted-foreground">Enter a WebSocket URL to begin messaging</p>
                 <div className="mt-4 inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 border border-border/30 text-xs font-mono">
                   <span className="text-muted-foreground">Try:</span>
-                  <span className="text-cyan-400">wss://echo.websocket.org</span>
+                  <span className="text-primary">wss://echo.websocket.org</span>
                 </div>
               </div>
             </motion.div>
@@ -439,7 +465,7 @@ export function WebSocketPanel({
                     ${msg.direction === 'sent'
                       ? 'bg-gradient-to-r from-primary/10 to-primary/5 ml-8 border-primary/10'
                       : msg.direction === 'received'
-                        ? 'bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 mr-8 border-emerald-500/10'
+                        ? 'bg-gradient-to-r from-success/10 to-success/5 mr-8 border-success/10'
                         : 'bg-muted/20 border-border/50'
                     }
                   `}
@@ -458,19 +484,19 @@ export function WebSocketPanel({
                       <motion.div
                         initial={{ rotate: 45 }}
                         animate={{ rotate: 0 }}
-                        className="bg-emerald-500/20 rounded p-1.5"
+                        className="bg-success/20 rounded p-1.5"
                       >
-                        <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
+                        <CheckCircle className="h-3.5 w-3.5 text-success" />
                       </motion.div>
                     )}
                     {msg.direction === 'system' && (
                       <div className={`rounded p-1.5 ${
                         msg.type === 'error' ? 'bg-destructive/20' :
-                          msg.type === 'success' ? 'bg-emerald-500/20' :
+                          msg.type === 'success' ? 'bg-success/20' :
                             'bg-muted/30'
                       }`}>
                         {msg.type === 'error' ? <XCircle className="h-3.5 w-3.5 text-destructive" /> :
-                          msg.type === 'success' ? <CheckCircle className="h-3.5 w-3.5 text-emerald-500" /> :
+                          msg.type === 'success' ? <CheckCircle className="h-3.5 w-3.5 text-success" /> :
                             <AlertCircle className="h-3.5 w-3.5 text-muted-foreground" />
                         }
                       </div>
@@ -482,7 +508,7 @@ export function WebSocketPanel({
                       <span className={`
                         text-[10px] font-bold uppercase tracking-wider
                         ${msg.direction === 'sent' ? 'text-primary' : ''}
-                        ${msg.direction === 'received' ? 'text-emerald-400' : ''}
+                        ${msg.direction === 'received' ? 'text-success' : ''}
                         ${msg.direction === 'system' ? 'text-muted-foreground' : ''}
                       `}>
                         {msg.direction === 'sent' ? 'SENT' : msg.direction === 'received' ? 'RECEIVED' : 'SYSTEM'}
@@ -497,7 +523,7 @@ export function WebSocketPanel({
                           className="opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           {copiedMessage === msg.id ? (
-                            <CheckCircle className="h-3 w-3 text-emerald-400" />
+                            <CheckCircle className="h-3 w-3 text-success" />
                           ) : (
                             <Copy className="h-3 w-3 text-muted-foreground hover:text-foreground" />
                           )}
@@ -513,7 +539,7 @@ export function WebSocketPanel({
                     <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity -z-10 blur-sm" />
                   )}
                   {msg.direction === 'received' && (
-                    <div className="absolute -inset-0.5 bg-gradient-to-l from-emerald-500/20 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity -z-10 blur-sm" />
+                    <div className="absolute -inset-0.5 bg-gradient-to-l from-success/20 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity -z-10 blur-sm" />
                   )}
                 </motion.div>
               ))}
@@ -526,7 +552,7 @@ export function WebSocketPanel({
       <motion.div
         className="border-t border-border/50 p-4 bg-gradient-to-t from-muted/30 to-transparent"
         {...slideUp}
-        transition={{ delay: 0.3 }}
+        {...enterDelay(0.3)}
       >
         <div className="relative">
           <Textarea
@@ -535,7 +561,7 @@ export function WebSocketPanel({
             placeholder='{{"action": "ping"}'
             className={`flex-1 h-20 font-mono text-sm resize-none bg-background/50 backdrop-blur-sm border-border/50 transition-all ${
               state === ConnectionState.CONNECTED
-                ? 'focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/10'
+                ? 'focus:border-primary/50 focus:ring-2 focus:ring-primary/10'
                 : 'opacity-50 cursor-not-allowed'
             }`}
             disabled={state !== ConnectionState.CONNECTED}
