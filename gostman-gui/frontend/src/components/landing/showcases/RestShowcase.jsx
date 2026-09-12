@@ -1,15 +1,11 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Send, Copy, Check } from "lucide-react"
+import { collapse, fadeIn, pressableStrong, scaleInOut } from "../../../lib/motion"
+import { EmptyState, METHOD_STYLES, ShowcasePanel, Spinner } from "../ShowcaseParts"
+import { useDemoSequence } from "../useDemoSequence"
 
-const METHODS = {
-  GET: { color: "text-blue-400", bg: "bg-blue-400/10" },
-  POST: { color: "text-emerald-400", bg: "bg-emerald-400/10" },
-  PUT: { color: "text-amber-400", bg: "bg-amber-400/10" },
-  DELETE: { color: "text-red-400", bg: "bg-red-400/10" },
-}
-
-const INITIAL_REQUEST = {
+const REQUEST = {
   method: "GET",
   url: "https://api.gostman.io/v1/users",
   headers: { "Content-Type": "application/json" },
@@ -36,73 +32,48 @@ const RESPONSE_DATA = {
   },
 }
 
+const DEMO_SEQUENCE = [
+  { delay: 2500, action: "send" },
+  { delay: 3300, action: "receive" },
+]
+
 export const RestShowcase = () => {
-  const [step, setStep] = useState(0)
-  const [request, setRequest] = useState(INITIAL_REQUEST)
   const [response, setResponse] = useState(null)
   const [isSending, setIsSending] = useState(false)
   const [copied, setCopied] = useState(false)
 
-
-  useEffect(() => {
-    let mounted = true
-    let timeoutId = null
-
-    const interval = setInterval(() => {
-      setStep((prev) => {
-        const next = (prev + 1) % 5
-        if (next === 1 && mounted) {
-          setIsSending(true)
-          timeoutId = setTimeout(() => {
-            if (mounted) {
-              setResponse(RESPONSE_DATA)
-              setIsSending(false)
-            }
-          }, 800)
-        }
-        if (next === 0 && mounted) {
-          if (timeoutId) clearTimeout(timeoutId)
-          setResponse(null)
-          setIsSending(false)
-        }
-        return next
-      })
-    }, 2500)
-
-    return () => {
-      mounted = false
-      clearInterval(interval)
-      if (timeoutId) clearTimeout(timeoutId)
-    }
-  }, [])
+  useDemoSequence({
+    steps: DEMO_SEQUENCE,
+    loopAfter: 12500,
+    reset: () => {
+      setResponse(null)
+      setIsSending(false)
+    },
+    onStep: ({ action }) => {
+      if (action === "send") {
+        setIsSending(true)
+      } else if (action === "receive") {
+        setResponse(RESPONSE_DATA)
+        setIsSending(false)
+      }
+    },
+  })
 
   const copyCode = () => {
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const methodStyle = METHODS[request.method]
-
   return (
     <div className="w-full h-full flex flex-col">
-      {/* Step indicator */}
-
-
-      {/* Request Section */}
-      <motion.div
-        className="flex-1 bg-background/60 backdrop-blur-sm rounded-lg border border-border/60 overflow-hidden flex flex-col"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        {/* Request Bar */}
+      <ShowcasePanel className="flex-1">
         <div className="flex items-center gap-3 p-4 border-b border-border/40 bg-muted/20">
           <motion.div
-            className={`px-3 py-1.5 rounded-md font-bold text-sm ${methodStyle.color} ${methodStyle.bg}`}
-            key={request.method}
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
+            className={`px-3 py-1.5 rounded-md font-bold text-sm ${METHOD_STYLES[REQUEST.method]}`}
+            key={REQUEST.method}
+            {...scaleInOut}
           >
-            {request.method}
+            {REQUEST.method}
           </motion.div>
           <motion.div
             className="flex-1 bg-background rounded-md px-4 py-2 font-mono text-sm text-muted-foreground flex items-center"
@@ -110,7 +81,7 @@ export const RestShowcase = () => {
             animate={{ width: "auto" }}
             transition={{ delay: 0.5 }}
           >
-            <span className="truncate">{request.url}</span>
+            <span className="truncate">{REQUEST.url}</span>
           </motion.div>
           <motion.button
             className={`px-6 py-2 rounded-md font-semibold text-sm flex items-center gap-2 ${isSending
@@ -122,11 +93,7 @@ export const RestShowcase = () => {
           >
             {isSending ? (
               <>
-                <motion.span
-                  className="w-4 h-4 border-2 border-current border-t-transparent rounded-full"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                />
+                <Spinner className="w-4 h-4" />
                 Sending...
               </>
             ) : (
@@ -138,18 +105,14 @@ export const RestShowcase = () => {
           </motion.button>
         </div>
 
-        {/* Response Section */}
         <AnimatePresence mode="wait">
           {response ? (
             <motion.div
               key="response"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
+              {...collapse}
               transition={{ duration: 0.4 }}
               className="flex-1 flex flex-col min-h-0"
             >
-              {/* Response Headers */}
               <div className="flex items-center justify-between px-4 py-2 border-b border-border/40 bg-emerald-500/5">
                 <div className="flex items-center gap-4 text-sm">
                   <span className="text-emerald-400 font-bold">{response.status}</span>
@@ -161,8 +124,7 @@ export const RestShowcase = () => {
                 <motion.button
                   className="p-2 hover:bg-muted/30 rounded-md transition-colors"
                   onClick={copyCode}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  {...pressableStrong}
                 >
                   {copied ? (
                     <Check className="w-4 h-4 text-emerald-400" />
@@ -172,14 +134,8 @@ export const RestShowcase = () => {
                 </motion.button>
               </div>
 
-              {/* Response Body */}
               <div className="flex-1 p-4 font-mono text-sm overflow-auto">
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                  className="space-y-1"
-                >
+                <motion.div {...fadeIn} transition={{ delay: 0.2 }} className="space-y-1">
                   <div>
                     <span className="text-amber-300">{"{"}</span>
                   </div>
@@ -225,21 +181,16 @@ export const RestShowcase = () => {
               </div>
             </motion.div>
           ) : (
-            <motion.div
-              key="empty"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex-1 flex items-center justify-center text-muted-foreground/50"
-            >
-              <div className="text-center space-y-2">
-                <Send className="w-12 h-12 mx-auto opacity-30" />
-                <p className="text-sm">Send a request to see the response</p>
-              </div>
-            </motion.div>
+            <EmptyState
+              icon={Send}
+              iconClassName="w-12 h-12"
+              message="Send a request to see the response"
+              messageClassName="text-sm"
+              className="flex-1"
+            />
           )}
         </AnimatePresence>
-      </motion.div>
+      </ShowcasePanel>
     </div>
   )
 }

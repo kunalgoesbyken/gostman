@@ -4,6 +4,7 @@ import { Button, buttonVariants } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { Card, CardContent } from "./ui/card"
 import { cn } from "../lib/utils"
+import { easeSmooth, fadeIn, popIn, pressable, slideInLeft, springLayout } from "../lib/motion"
 import {
   Zap,
   Globe,
@@ -23,22 +24,16 @@ import {
 
 import logo from "../assets/logo.jpg"
 
-// Animation components
 import {
   AnimatedSection,
   StaggerContainer,
   ScaleIn,
   SlideInFromRight,
 } from "./landing/AnimatedSection"
-
-// Lazy load showcase components for better performance
 import { RestShowcase, GraphQLShowcase, ChainingShowcase, WebSocketShowcase } from "./landing/showcases"
-
-// Existing components
 import { FloatingCode } from "./landing/FloatingCode"
 import { DownloadDropdown } from "./landing/DownloadDropdown"
 
-// Loading skeleton for showcase components
 function ShowcaseSkeleton() {
   return (
     <div className="w-full h-full flex items-center justify-center">
@@ -119,7 +114,6 @@ const useGitHubStars = () => {
   const controllerRef = useRef(null)
 
   useEffect(() => {
-    // Cancel previous request if component remounts quickly
     if (controllerRef.current) {
       controllerRef.current.abort()
     }
@@ -156,7 +150,7 @@ const useGitHubStars = () => {
       }
     }
 
-    const timeoutId = setTimeout(fetchStars, 100) // Small debounce
+    const timeoutId = setTimeout(fetchStars, 100)
     return () => {
       clearTimeout(timeoutId)
       controller.abort()
@@ -165,6 +159,15 @@ const useGitHubStars = () => {
 
   return { stars, isLoading }
 }
+
+const VIEWPORT_ONCE = { once: true }
+
+const revealUp = (delay) => ({
+  initial: { opacity: 0, y: 20 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: VIEWPORT_ONCE,
+  ...(delay ? { transition: { delay } } : {}),
+})
 
 const TabButton = ({ tab, isActive, onClick }) => {
   const Icon = tab.icon
@@ -181,8 +184,7 @@ const TabButton = ({ tab, isActive, onClick }) => {
           ? "text-foreground bg-background/80 shadow-lg border border-border/60"
           : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
       )}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      {...pressable}
     >
       <Icon className={cn("w-4 h-4", isActive ? "text-primary" : "")} aria-hidden="true" />
       <span>{tab.label}</span>
@@ -190,7 +192,7 @@ const TabButton = ({ tab, isActive, onClick }) => {
         <motion.div
           layoutId="activeTab"
           className="absolute inset-0 bg-background/80 rounded-lg border border-border/60 -z-10"
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          transition={springLayout}
         />
       )}
     </motion.button>
@@ -270,8 +272,7 @@ export function LandingPage({ onGetStarted }) {
                   {stars !== null ? (
                     <motion.span
                       className="font-mono text-xs text-muted-foreground"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
+                      {...popIn}
                       key={stars}
                       aria-live="polite"
                     >
@@ -293,7 +294,7 @@ export function LandingPage({ onGetStarted }) {
               className="text-center space-y-6"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.25, 0.4, 0.25, 1] }}
+              transition={{ duration: 0.8, ease: easeSmooth }}
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -377,8 +378,7 @@ export function LandingPage({ onGetStarted }) {
 
               <motion.div
                 className="flex items-center justify-center gap-6 pt-6 text-sm text-muted-foreground/80"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                {...fadeIn}
                 transition={{ delay: 0.8 }}
               >
                 {["Free forever", "No account needed", "Open source"].map((text, i) => (
@@ -397,8 +397,7 @@ export function LandingPage({ onGetStarted }) {
 
               <motion.div
                 className="pt-6 flex justify-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                {...fadeIn}
                 transition={{ delay: 1 }}
               >
                 <Badge variant="outline" className="gap-2 px-3 py-1 text-xs bg-muted/20 border-border/40">
@@ -546,18 +545,18 @@ export function LandingPage({ onGetStarted }) {
                       <motion.div
                         key={item.feature}
                         className="grid grid-cols-3 gap-4 py-4 px-6 items-center hover:bg-muted/20 transition-colors"
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
+                        initial={slideInLeft.initial}
+                        whileInView={slideInLeft.animate}
+                        viewport={VIEWPORT_ONCE}
                         transition={{ delay: index * 0.05 }}
                       >
                         <div className="text-sm flex items-center">{item.feature}</div>
                         <div className="flex items-center justify-center">
                           {item.gostman ? (
                             <motion.div
-                              initial={{ scale: 0 }}
-                              whileInView={{ scale: 1 }}
-                              viewport={{ once: true }}
+                              initial={popIn.initial}
+                              whileInView={popIn.animate}
+                              viewport={VIEWPORT_ONCE}
                               transition={{ delay: index * 0.05 + 0.1, type: "spring", stiffness: 200 }}
                             >
                               <Check className="h-5 w-5 text-emerald-400/70" strokeWidth={2.5} />
@@ -598,30 +597,16 @@ export function LandingPage({ onGetStarted }) {
                 </div>
 
                 <div className="relative">
-                  <motion.h2
-                    className="text-3xl md:text-4xl font-semibold mb-4"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                  >
+                  <motion.h2 className="text-3xl md:text-4xl font-semibold mb-4" {...revealUp()}>
                     Ready to Go Native?
                   </motion.h2>
-                  <motion.p
-                    className="text-muted-foreground mb-8 max-w-lg mx-auto"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.1 }}
-                  >
+                  <motion.p className="text-muted-foreground mb-8 max-w-lg mx-auto" {...revealUp(0.1)}>
                     Join thousands who switched to a lighter, faster HTTP client.
                     Download now.
                   </motion.p>
                   <motion.div
                     className="flex flex-col sm:flex-row items-center justify-center gap-4"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.2 }}
+                    {...revealUp(0.2)}
                   >
                     <DownloadDropdown />
                     <Button
@@ -645,9 +630,7 @@ export function LandingPage({ onGetStarted }) {
           <div className="max-w-6xl mx-auto">
             <motion.div
               className="flex flex-col md:flex-row items-center justify-between gap-8"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              {...revealUp()}
             >
               <div className="flex items-center gap-3">
                 <motion.img
@@ -688,9 +671,9 @@ export function LandingPage({ onGetStarted }) {
 
             <motion.div
               className="mt-12 pt-8 border-t border-border/40 text-center"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
+              initial={fadeIn.initial}
+              whileInView={fadeIn.animate}
+              viewport={VIEWPORT_ONCE}
               transition={{ delay: 0.2 }}
             >
               <p className="text-sm text-muted-foreground/60">

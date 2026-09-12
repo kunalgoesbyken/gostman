@@ -1,6 +1,9 @@
-import { useState, useEffect, useRef } from "react"
+import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Braces, Play } from "lucide-react"
+import { fadeIn, popIn } from "../../../lib/motion"
+import { EmptyState, PanelLabel, ShowcaseFooter, ShowcaseHeader, ShowcasePanel, Spinner } from "../ShowcaseParts"
+import { useDemoSequence } from "../useDemoSequence"
 
 const GRAPHQL_RESPONSE = {
   data: {
@@ -33,96 +36,86 @@ const DEMO_SEQUENCE = [
   { delay: 2500, action: "showResponse" },
 ]
 
-export const GraphQLShowcase = () => {
-  const [isExecuting, setIsExecuting] = useState(false)
-  const [showResponse, setShowResponse] = useState(false)
-  const timeoutsRef = useRef([])
-
-  useEffect(() => {
-    const runSequence = () => {
-      // Clear previous timeouts
-      timeoutsRef.current.forEach(clearTimeout)
-      timeoutsRef.current = []
-
-      // Reset state
-      setIsExecuting(false)
-      setShowResponse(false)
-
-      // Schedule actions
-      DEMO_SEQUENCE.forEach(({ delay, action }) => {
-        const timeout = setTimeout(() => {
-          if (action === "reset") {
-            setIsExecuting(false)
-            setShowResponse(false)
-          } else if (action === "execute") {
-            setIsExecuting(true)
-          } else if (action === "showResponse") {
-            setIsExecuting(false)
-            setShowResponse(true)
-          }
-        }, delay)
-        timeoutsRef.current.push(timeout)
-      })
-
-      // Loop the sequence
-      const loopTimeout = setTimeout(runSequence, 5000)
-      timeoutsRef.current.push(loopTimeout)
-    }
-
-    runSequence()
-
-    return () => {
-      timeoutsRef.current.forEach(clearTimeout)
-    }
-  }, [])
-
-  const renderJSON = (obj, depth = 0) => {
-    if (typeof obj !== "object" || obj === null) {
-      return <span className="text-emerald-300">"{obj}"</span>
-    }
-
+const QueryValue = ({ value }) => {
+  if (typeof value === "string") {
     return (
-      <div className="space-y-0.5">
-        <span className="text-amber-300">{"{"}</span>
-        {Object.entries(obj).slice(0, depth === 0 ? 3 : 2).map(([key, value], i, arr) => (
-          <div key={key} className="pl-4">
-            <span className="text-blue-300">"{key}"</span>:{" "}
-            {typeof value === "string" ? (
-              <span className="text-emerald-300">"{value.slice(0, 40)}{value.length > 40 ? "..." : ""}"</span>
-            ) : Array.isArray(value) ? (
-              <>
-                <span className="text-amber-300">[</span>
-                <span className="text-muted-foreground/50">...{value.length} items</span>
-                <span className="text-amber-300">]</span>
-              </>
-            ) : typeof value === "object" ? (
-              <span className="text-amber-300">{"{...}"}</span>
-            ) : (
-              <span className="text-purple-300">{value}</span>
-            )}
-            {i < arr.length - 1 && ","}
-          </div>
-        ))}
-        <span className="text-amber-300">{"}"}</span>
-      </div>
+      <span className="text-emerald-300">"{value.slice(0, 40)}{value.length > 40 ? "..." : ""}"</span>
     )
+  }
+  if (Array.isArray(value)) {
+    return (
+      <>
+        <span className="text-amber-300">[</span>
+        <span className="text-muted-foreground/50">...{value.length} items</span>
+        <span className="text-amber-300">]</span>
+      </>
+    )
+  }
+  if (typeof value === "object") return <span className="text-amber-300">{"{...}"}</span>
+  return <span className="text-purple-300">{value}</span>
+}
+
+const renderJSON = (obj, depth = 0) => {
+  if (typeof obj !== "object" || obj === null) {
+    return <span className="text-emerald-300">"{obj}"</span>
   }
 
   return (
+    <div className="space-y-0.5">
+      <span className="text-amber-300">{"{"}</span>
+      {Object.entries(obj).slice(0, depth === 0 ? 3 : 2).map(([key, value], i, arr) => (
+        <div key={key} className="pl-4">
+          <span className="text-blue-300">"{key}"</span>:{" "}
+          <QueryValue value={value} />
+          {i < arr.length - 1 && ","}
+        </div>
+      ))}
+      <span className="text-amber-300">{"}"}</span>
+    </div>
+  )
+}
+
+const QueryField = ({ name }) => <div className="text-blue-300">{name}</div>
+
+export const GraphQLShowcase = () => {
+  const [isExecuting, setIsExecuting] = useState(false)
+  const [showResponse, setShowResponse] = useState(false)
+
+  useDemoSequence({
+    steps: DEMO_SEQUENCE,
+    loopAfter: 5000,
+    reset: () => {
+      setIsExecuting(false)
+      setShowResponse(false)
+    },
+    onStep: ({ action }) => {
+      if (action === "reset") {
+        setIsExecuting(false)
+        setShowResponse(false)
+      } else if (action === "execute") {
+        setIsExecuting(true)
+      } else if (action === "showResponse") {
+        setIsExecuting(false)
+        setShowResponse(true)
+      }
+    },
+  })
+
+  const status = isExecuting
+    ? "Executing..."
+    : showResponse
+      ? "View structured response"
+      : "Write your query"
+
+  return (
     <div className="w-full h-full flex flex-col">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 rounded-lg bg-pink-500/10">
-          <Braces className="w-5 h-5 text-pink-400" />
-        </div>
-        <div className="flex-1">
-          <h3 className="font-semibold text-sm">GraphQL Request</h3>
-          <p className="text-xs text-muted-foreground">
-            {!showResponse && !isExecuting && "Write your query"}
-            {isExecuting && "Executing..."}
-            {showResponse && !isExecuting && "View structured response"}
-          </p>
-        </div>
+      <ShowcaseHeader
+        icon={Braces}
+        iconClassName="text-pink-400"
+        tint="bg-pink-500/10"
+        title="GraphQL Request"
+        subtitle={status}
+      >
         <motion.button
           className={`px-4 py-2 rounded-md font-semibold text-sm flex items-center gap-2 ${isExecuting
               ? "bg-muted text-muted-foreground"
@@ -133,11 +126,7 @@ export const GraphQLShowcase = () => {
         >
           {isExecuting ? (
             <>
-              <motion.span
-                className="w-4 h-4 border-2 border-current border-t-transparent rounded-full"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              />
+              <Spinner className="w-4 h-4" />
               Running
             </>
           ) : (
@@ -147,19 +136,12 @@ export const GraphQLShowcase = () => {
             </>
           )}
         </motion.button>
-      </div>
+      </ShowcaseHeader>
 
       <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 min-h-0">
-        {/* Query Panel */}
-        <motion.div
-          className="bg-background/60 backdrop-blur-sm rounded-lg border border-border/60 overflow-hidden flex flex-col"
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-        >
+        <ShowcasePanel from="left">
           <div className="px-4 py-2 border-b border-border/40 bg-muted/20">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Query
-            </span>
+            <PanelLabel>Query</PanelLabel>
           </div>
 
           <div className="flex-1 overflow-auto p-4 font-mono text-xs leading-relaxed">
@@ -175,13 +157,13 @@ export const GraphQLShowcase = () => {
               </div>
               <div className="pl-8 space-y-0.5">
                 {["id", "username", "email"].map((field) => (
-                  <div key={field} className="text-blue-300">{field}</div>
+                  <QueryField key={field} name={field} />
                 ))}
                 <div className="text-blue-300 space-y-0.5">
                   <div>profile {"{"}</div>
                   <div className="pl-4 space-y-0.5">
                     {["avatar", "bio", "location"].map((field) => (
-                      <div key={field} className="text-blue-300">{field}</div>
+                      <QueryField key={field} name={field} />
                     ))}
                   </div>
                   <div>{"}"}</div>
@@ -191,24 +173,15 @@ export const GraphQLShowcase = () => {
               <div>{"}"}</div>
             </div>
           </div>
-        </motion.div>
+        </ShowcasePanel>
 
-        {/* Response Panel */}
-        <motion.div
-          className="bg-background/60 backdrop-blur-sm rounded-lg border border-border/60 overflow-hidden flex flex-col"
-          initial={{ opacity: 0, x: 10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1 }}
-        >
+        <ShowcasePanel from="right" delay={0.1}>
           <div className="flex items-center justify-between px-4 py-2 border-b border-border/40 bg-muted/20">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Response
-            </span>
+            <PanelLabel>Response</PanelLabel>
             <AnimatePresence>
               {showResponse && (
                 <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
+                  {...popIn}
                   exit={{ scale: 0 }}
                   className="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/10 text-emerald-400"
                 >
@@ -221,45 +194,25 @@ export const GraphQLShowcase = () => {
           <div className="flex-1 overflow-auto p-4 font-mono text-xs">
             <AnimatePresence mode="wait">
               {!showResponse ? (
-                <motion.div
-                  key="empty"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="h-full flex items-center justify-center text-muted-foreground/50"
-                >
-                  <div className="text-center space-y-2">
-                    <Braces className="w-10 h-10 mx-auto opacity-30" />
-                    <p className="text-xs">Run a query to see the response</p>
-                  </div>
-                </motion.div>
+                <EmptyState
+                  icon={Braces}
+                  iconClassName="w-10 h-10"
+                  message="Run a query to see the response"
+                  className="h-full"
+                />
               ) : (
-                <motion.div
-                  key="response"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3 }}
-                >
+                <motion.div key="response" {...fadeIn} transition={{ duration: 0.3 }}>
                   {renderJSON(GRAPHQL_RESPONSE)}
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
-        </motion.div>
+        </ShowcasePanel>
       </div>
 
-      {/* Feature highlight */}
-      <motion.div
-        className="mt-4 flex items-center gap-2 text-xs text-muted-foreground"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        <span className="px-2 py-1 rounded bg-blue-500/10 text-blue-400 font-mono">
-          No over-fetching
-        </span>
+      <ShowcaseFooter tag="No over-fetching" tagClassName="bg-blue-500/10 text-blue-400">
         <span>Get exactly the data you need, nothing more.</span>
-      </motion.div>
+      </ShowcaseFooter>
     </div>
   )
 }

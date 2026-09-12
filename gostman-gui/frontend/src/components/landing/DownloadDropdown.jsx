@@ -4,7 +4,6 @@ import { Button } from "../ui/button"
 import { Download, ChevronDown } from "lucide-react"
 import { AppleIcon, WindowsIcon, LinuxIcon } from "../Icons"
 
-// Moved constant here as it's strongly cohesive with this component (SRP/Cohesion)
 const DOWNLOAD_OPTIONS = [
     {
         os: "macOS",

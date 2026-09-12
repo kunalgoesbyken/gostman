@@ -1,6 +1,9 @@
-import { useState, useEffect, useRef } from "react"
+import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Link2, CheckCircle, Circle } from "lucide-react"
+import { collapse, slideUp, spin } from "../../../lib/motion"
+import { ShowcaseFooter, ShowcaseHeader, methodStyle } from "../ShowcaseParts"
+import { useDemoSequence } from "../useDemoSequence"
 
 const CHAIN_STEPS = [
   {
@@ -52,72 +55,42 @@ const DEMO_SEQUENCE = [
   { delay: 5500, action: "complete", stepIndex: 2 },
 ]
 
+const previewValue = (value) => {
+  if (typeof value === "string") return `"${value.slice(0, 30)}${value.length > 30 ? "..." : ""}"`
+  return typeof value === "object" ? "{...}" : value
+}
+
 export const ChainingShowcase = () => {
   const [activeStep, setActiveStep] = useState(null)
   const [completedSteps, setCompletedSteps] = useState([])
-  const timeoutsRef = useRef([])
 
-  useEffect(() => {
-    const runSequence = () => {
-      // Clear previous timeouts
-      timeoutsRef.current.forEach(clearTimeout)
-      timeoutsRef.current = []
-
-      // Reset state
+  useDemoSequence({
+    steps: DEMO_SEQUENCE,
+    loopAfter: 7000,
+    reset: () => {
       setActiveStep(null)
       setCompletedSteps([])
-
-      // Schedule actions
-      DEMO_SEQUENCE.forEach(({ delay, action, stepIndex }) => {
-        const timeout = setTimeout(() => {
-          if (action === "setActive") {
-            setActiveStep(stepIndex)
-          } else if (action === "complete") {
-            setCompletedSteps(prev => [...prev, stepIndex])
-            setActiveStep(null)
-          }
-        }, delay)
-        timeoutsRef.current.push(timeout)
-      })
-
-      // Loop the sequence
-      const loopTimeout = setTimeout(runSequence, 7000)
-      timeoutsRef.current.push(loopTimeout)
-    }
-
-    runSequence()
-
-    return () => {
-      timeoutsRef.current.forEach(clearTimeout)
-    }
-  }, [])
-
-  const getMethodColor = (method) => {
-    const colors = {
-      GET: "text-blue-400 bg-blue-400/10",
-      POST: "text-emerald-400 bg-emerald-400/10",
-      PUT: "text-amber-400 bg-amber-400/10",
-      DELETE: "text-red-400 bg-red-400/10",
-    }
-    return colors[method] || "text-gray-400 bg-gray-400/10"
-  }
+    },
+    onStep: ({ action, stepIndex }) => {
+      if (action === "setActive") {
+        setActiveStep(stepIndex)
+      } else if (action === "complete") {
+        setCompletedSteps((prev) => [...prev, stepIndex])
+        setActiveStep(null)
+      }
+    },
+  })
 
   return (
     <div className="w-full h-full flex flex-col">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 rounded-lg bg-violet-500/10">
-          <Link2 className="w-5 h-5 text-violet-400" />
-        </div>
-        <div>
-          <h3 className="font-semibold text-sm">Request Chaining</h3>
-          <p className="text-xs text-muted-foreground">
-            Chain requests together with extracted data
-          </p>
-        </div>
-      </div>
+      <ShowcaseHeader
+        icon={Link2}
+        iconClassName="text-violet-400"
+        tint="bg-violet-500/10"
+        title="Request Chaining"
+        subtitle="Chain requests together with extracted data"
+      />
 
-      {/* Chain Visualization */}
       <div className="flex-1 flex flex-col space-y-3 overflow-auto">
         {CHAIN_STEPS.map((step, index) => {
           const isCompleted = completedSteps.includes(index)
@@ -127,11 +100,9 @@ export const ChainingShowcase = () => {
             <motion.div
               key={step.id}
               className="relative"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              {...slideUp}
               transition={{ delay: index * 0.1 }}
             >
-              {/* Connector Line */}
               {index < CHAIN_STEPS.length - 1 && (
                 <motion.div
                   className="absolute left-[27px] top-14 h-3 w-0.5 bg-border/40"
@@ -143,7 +114,6 @@ export const ChainingShowcase = () => {
               )}
 
               <div className="flex gap-4">
-                {/* Step Indicator */}
                 <div className="relative z-10">
                   <motion.div
                     className={`w-14 h-14 rounded-xl flex items-center justify-center border-2 transition-colors ${isCompleted
@@ -160,8 +130,7 @@ export const ChainingShowcase = () => {
                     ) : isCurrent ? (
                       <motion.div
                         className="w-6 h-6 border-2 border-violet-400 border-t-transparent rounded-full"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        animate={spin}
                       />
                     ) : (
                       <Circle className="w-6 h-6 text-muted-foreground/40" />
@@ -169,10 +138,9 @@ export const ChainingShowcase = () => {
                   </motion.div>
                 </div>
 
-                {/* Step Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${getMethodColor(step.method)}`}>
+                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${methodStyle(step.method)}`}>
                       {step.method}
                     </span>
                     <code className="text-sm font-mono text-muted-foreground truncate">
@@ -184,13 +152,10 @@ export const ChainingShowcase = () => {
 
                   <p className="text-xs text-muted-foreground mb-2">{step.description}</p>
 
-                  {/* Response Preview */}
                   <AnimatePresence>
                     {(isCompleted || isCurrent) && (
                       <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
+                        {...collapse}
                         transition={{ duration: 0.2 }}
                         className="p-3 rounded-lg bg-background/60 border border-border/40"
                       >
@@ -218,10 +183,7 @@ export const ChainingShowcase = () => {
                               {Object.entries(step.response).slice(0, 2).map(([key, value]) => (
                                 <div key={key} className="pl-3">
                                   <span className="text-blue-300">"{key}"</span>:{" "}
-                                  <span className="text-emerald-300">
-                                    {typeof value === "string" ? `"${value.slice(0, 30)}${value.length > 30 ? "..." : ""}"` :
-                                      typeof value === "object" ? "{...}" : value}
-                                  </span>
+                                  <span className="text-emerald-300">{previewValue(value)}</span>
                                 </div>
                               ))}
                               <span className="text-amber-300">{"}"}</span>
@@ -237,7 +199,6 @@ export const ChainingShowcase = () => {
           )
         })}
 
-        {/* Chain Complete Indicator */}
         <AnimatePresence>
           {completedSteps.length === CHAIN_STEPS.length && (
             <motion.div
@@ -261,22 +222,13 @@ export const ChainingShowcase = () => {
         </AnimatePresence>
       </div>
 
-      {/* Info Footer */}
-      <motion.div
-        className="mt-4 flex items-center gap-2 text-xs text-muted-foreground"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        <span className="px-2 py-1 rounded bg-violet-500/10 text-violet-400 font-mono">
-          JSONPath
-        </span>
+      <ShowcaseFooter tag="JSONPath" tagClassName="bg-violet-500/10 text-violet-400">
         <span>Use</span>
         <code className="px-1.5 py-0.5 rounded bg-muted/50 font-mono text-violet-300 text-[10px]">
           $.data[0].id
         </code>
         <span>to extract values</span>
-      </motion.div>
+      </ShowcaseFooter>
     </div>
   )
 }
