@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, lazy, Suspense } from "react"
-import { motion, AnimatePresence, MotionConfig } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button, buttonVariants } from "./ui/button"
 import { cn } from "../lib/utils"
-import { fadeIn, heroContainer, heroItem, popIn, pressable, slideInLeft, springLayout } from "../lib/motion"
+import { easeSmooth, fadeIn, popIn, pressable, slideInLeft, springLayout } from "../lib/motion"
 import {
   Zap,
   Globe,
@@ -197,12 +197,12 @@ export function LandingPage({ onGetStarted }) {
   const { stars, isLoading } = useGitHubStars()
 
   return (
-    <MotionConfig reducedMotion="user">
+    <>
       {/* Skip link for accessibility */}
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
-      <div className="min-h-[100dvh] bg-background text-foreground overflow-hidden" id="main-content">
+      <div className="min-h-screen bg-background text-foreground overflow-hidden" id="main-content">
         <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
           <div className="absolute inset-0 bg-[radial-gradient(circle_1px_at_1px_1px,hsl(var(--foreground)/0.05)_1px,transparent_0)] [background-size:40px_40px]" />
           <div className="absolute inset-x-0 top-0 h-[60vh] bg-[linear-gradient(to_bottom,hsl(var(--primary)/0.06),transparent)]" />
@@ -269,20 +269,23 @@ export function LandingPage({ onGetStarted }) {
           <div className="max-w-5xl mx-auto">
             <motion.div
               className="max-w-3xl"
-              variants={heroContainer}
-              initial="hidden"
-              animate="visible"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: easeSmooth }}
             >
               <motion.p
                 className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground"
-                variants={heroItem}
+                {...fadeIn}
+                transition={{ delay: 0.15 }}
               >
                 Go + Wails desktop app
               </motion.p>
 
               <motion.h1
                 className="mt-5 text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.05]"
-                variants={heroItem}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25, duration: 0.7 }}
               >
                 Send the request.
                 <span className="block text-muted-foreground">Keep the data.</span>
@@ -290,7 +293,9 @@ export function LandingPage({ onGetStarted }) {
 
               <motion.p
                 className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-xl"
-                variants={heroItem}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.6 }}
               >
                 An HTTP client for REST, GraphQL and WebSocket that opens in a native
                 window and writes everything to local disk. No account, no sync, no
@@ -299,7 +304,9 @@ export function LandingPage({ onGetStarted }) {
 
               <motion.div
                 className="mt-9 flex flex-col sm:flex-row items-start gap-3"
-                variants={heroItem}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
               >
                 <DownloadDropdown />
                 <Button
@@ -316,7 +323,8 @@ export function LandingPage({ onGetStarted }) {
 
               <motion.dl
                 className="mt-12 grid grid-cols-2 sm:flex sm:flex-wrap gap-x-8 sm:gap-x-12 gap-y-5 border-t border-border/40 pt-6"
-                variants={heroItem}
+                {...fadeIn}
+                transition={{ delay: 0.65 }}
               >
                 {HERO_FACTS.map(({ label, value }) => (
                   <div key={label}>
@@ -392,31 +400,29 @@ export function LandingPage({ onGetStarted }) {
               <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
                 What it does
               </h2>
-            </AnimatedSection>
-
-            <StaggerContainer className="grid gap-x-16 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-              <p className="hidden md:block self-start md:sticky md:top-28 text-sm text-muted-foreground leading-relaxed">
+              <p className="mt-3 text-muted-foreground max-w-xl">
                 No plugins to install and no paid tier holding anything back.
               </p>
-              <div className="border-t border-border/40">
-                {FEATURES.map((feature) => (
-                  <div
-                    key={feature.title}
-                    className="group grid grid-cols-[auto_minmax(0,1fr)] gap-4 py-6 border-b border-border/40"
-                  >
-                    <feature.icon
-                      className="mt-0.5 h-[18px] w-[18px] text-muted-foreground/50 transition-colors group-hover:text-primary"
-                      strokeWidth={1.5}
-                    />
-                    <div className="min-w-0">
-                      <h3 className="text-[15px] font-medium tracking-tight">{feature.title}</h3>
-                      <p className="mt-1.5 text-sm text-muted-foreground/70 leading-relaxed max-w-[65ch]">
-                        {feature.description}
-                      </p>
-                    </div>
+            </AnimatedSection>
+
+            <StaggerContainer className="grid sm:grid-cols-2 gap-x-14 border-t border-border/40">
+              {FEATURES.map((feature) => (
+                <div
+                  key={feature.title}
+                  className="group flex items-start gap-4 py-7 border-b border-border/40"
+                >
+                  <feature.icon
+                    className="mt-0.5 h-[18px] w-[18px] shrink-0 text-muted-foreground/50 transition-colors group-hover:text-primary"
+                    strokeWidth={1.5}
+                  />
+                  <div className="min-w-0">
+                    <h3 className="text-[15px] font-medium tracking-tight">{feature.title}</h3>
+                    <p className="mt-1.5 text-sm text-muted-foreground/70 leading-relaxed">
+                      {feature.description}
+                    </p>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </StaggerContainer>
           </div>
         </section>
@@ -463,7 +469,7 @@ export function LandingPage({ onGetStarted }) {
                               viewport={VIEWPORT_ONCE}
                               transition={{ delay: index * 0.05 + 0.1, type: "spring", stiffness: 200 }}
                             >
-                              <Check className="h-5 w-5 text-success/70" strokeWidth={1.5} />
+                              <Check className="h-5 w-5 text-success/70" strokeWidth={2.5} />
                             </motion.div>
                           ) : (
                             <span className="text-muted-foreground/60">-</span>
@@ -471,9 +477,9 @@ export function LandingPage({ onGetStarted }) {
                         </div>
                         <div className="w-16 sm:w-20 flex items-center justify-center">
                           {item.others ? (
-                            <Check className="h-5 w-5 text-success/70" strokeWidth={1.5} />
+                            <Check className="h-5 w-5 text-success/70" strokeWidth={2.5} />
                           ) : (
-                            <X className="h-5 w-5 text-muted-foreground/30" strokeWidth={1.5} />
+                            <X className="h-5 w-5 text-muted-foreground/30" strokeWidth={2} />
                           )}
                         </div>
                       </motion.div>
@@ -573,6 +579,6 @@ export function LandingPage({ onGetStarted }) {
           </div>
         </footer>
       </div>
-    </MotionConfig>
+    </>
   )
 }

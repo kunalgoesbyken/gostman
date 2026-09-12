@@ -1,7 +1,7 @@
-import { memo, useState } from "react"
+import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Send, Copy, Check } from "lucide-react"
-import { collapse, fadeIn, pressableStrong, scaleInOut, springSoft } from "../../../lib/motion"
+import { collapse, fadeIn, pressableStrong, scaleInOut } from "../../../lib/motion"
 import { EmptyState, ShowcasePanel, Spinner, methodStyle } from "../ShowcaseParts"
 import { useDemoSequence } from "../useDemoSequence"
 
@@ -37,7 +37,7 @@ const DEMO_SEQUENCE = [
   { delay: 2000, action: "receive" },
 ]
 
-export const RestShowcase = memo(function RestShowcase() {
+export const RestShowcase = () => {
   const [response, setResponse] = useState(null)
   const [isSending, setIsSending] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -76,17 +76,17 @@ export const RestShowcase = memo(function RestShowcase() {
             {REQUEST.method}
           </motion.div>
           <motion.div
-            className="flex-1 origin-left bg-background rounded-md px-4 py-2 font-mono text-sm text-muted-foreground flex items-center overflow-hidden"
-            initial={{ scaleX: 0, opacity: 0 }}
-            animate={{ scaleX: 1, opacity: 1 }}
-            transition={{ delay: 0.15, ...springSoft }}
+            className="flex-1 bg-background rounded-md px-4 py-2 font-mono text-sm text-muted-foreground flex items-center"
+            initial={{ width: 0 }}
+            animate={{ width: "auto" }}
+            transition={{ delay: 0.15 }}
           >
             <span className="truncate">{REQUEST.url}</span>
           </motion.div>
           <motion.button
             className={`px-6 py-2 rounded-md font-semibold text-sm flex items-center gap-2 ${isSending
               ? "bg-muted text-muted-foreground"
-              : "bg-primary text-primary-foreground"
+              : "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
               }`}
             animate={isSending ? { scale: [1, 0.95, 1] } : { scale: 1 }}
             transition={{ duration: 0.3 }}
@@ -193,4 +193,4 @@ export const RestShowcase = memo(function RestShowcase() {
       </ShowcasePanel>
     </div>
   )
-})
+}
