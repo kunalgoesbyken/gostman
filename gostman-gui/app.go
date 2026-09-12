@@ -224,7 +224,14 @@ func replacePlaceholders(input string, variables map[string]string) string {
 // graphqlQuery/graphqlVariables come from the dedicated GraphQL tab fields and
 // take precedence when non-empty; otherwise we fall back to bodyStr/paramsJSON
 // so previously saved requests and Postman imports keep working.
-func (a *App) SendRequest(method, urlStr, headersJSON, bodyStr, paramsJSON, graphqlQuery, graphqlVariables string) ResponseMsg {
+//
+// variablesJSON carries the {{placeholder}} values straight from the Env Vars
+// editor, so unsaved edits apply to the very next Send. It is deliberately NOT
+// backfilled from the on-disk copy (GetVariables): reading disk when the
+// frontend sends "" or "{}" would silently resurrect stale values and recreate
+// the desktop/web mismatch this parameter exists to remove. An empty string
+// means "no variables", exactly as it does on the web target.
+func (a *App) SendRequest(method, urlStr, headersJSON, bodyStr, paramsJSON, graphqlQuery, graphqlVariables, variablesJSON string) ResponseMsg {
 	// Handle GraphQL requests - convert to POST with JSON body
 	if method == "GRAPHQL" {
 		method = "POST"
@@ -279,11 +286,12 @@ func (a *App) SendRequest(method, urlStr, headersJSON, bodyStr, paramsJSON, grap
 		}
 	}
 
-	// 1. Load and Parse Variables (coerce non-string values to string)
-	variablesJSON := a.GetVariables()
+	// 1. Parse the caller-supplied variables (coerce non-string values to string)
 	var rawVars map[string]any
-	if err := json.Unmarshal([]byte(variablesJSON), &rawVars); err != nil {
-		return ResponseMsg{Body: "Error parsing Env Variables", Status: "Configuration Error", Headers: nil, Cookies: nil, Size: 0}
+	if strings.TrimSpace(variablesJSON) != "" {
+		if err := json.Unmarshal([]byte(variablesJSON), &rawVars); err != nil {
+			return ResponseMsg{Body: "Error parsing Env Variables", Status: "Configuration Error", Headers: nil, Cookies: nil, Size: 0}
+		}
 	}
 	variables := coerceVariables(rawVars)
 

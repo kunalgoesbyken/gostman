@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { devtools, persist } from 'zustand/middleware'
+import { createJSONStorage, devtools, persist } from 'zustand/middleware'
 import { parseRequest } from '../lib/dataUtils'
 
 const DEFAULT_REQUEST = {
@@ -7,6 +7,67 @@ const DEFAULT_REQUEST = {
   headers: '{}', body: '', queryParams: '{}',
   graphqlQuery: '', graphqlVariables: '{}', response: ''
 }
+
+const createTab = (id, request = DEFAULT_REQUEST) => ({
+  id,
+  request: { ...request },
+  status: '',
+  loading: false,
+  responseTime: null,
+  responseHeaders: null,
+  responseCookies: null,
+  responseSize: null
+})
+
+const FIRST_TAB = createTab('tab-1')
+
+// Tabs are persisted so unsent drafts survive a reload, but response payloads
+// are not: a handful of large bodies would exhaust the ~5MB localStorage quota
+// and cost every later write.
+const persistableTab = (tab) => ({
+  ...createTab(tab.id, tab.request),
+  request: { ...tab.request, response: '' }
+})
+
+const restoreTabs = (tabs) => (
+  Array.isArray(tabs) && tabs.length > 0 && tabs.every(t => t?.id && t.request)
+    ? tabs.map(persistableTab)
+    : [FIRST_TAB]
+)
+
+// zustand writes on every set() and does not guard the call, so an exhausted
+// quota (or a browser with storage disabled) would otherwise throw out of a
+// store action mid-render. Losing persistence beats losing the session.
+const resilientStorage = createJSONStorage(() => ({
+  getItem: (name) => {
+    try {
+      return localStorage.getItem(name)
+    } catch (e) {
+      console.warn('Could not read persisted state:', e)
+      return null
+    }
+  },
+  setItem: (name, value) => {
+    try {
+      localStorage.setItem(name, value)
+    } catch (e) {
+      console.warn('Could not persist state:', e)
+    }
+  },
+  removeItem: (name) => {
+    try {
+      localStorage.removeItem(name)
+    } catch (e) {
+      console.warn('Could not clear persisted state:', e)
+    }
+  }
+}))
+
+// Keeps generated ids unique even if the stored counter is stale or missing.
+const nextIdAfter = (tabs) => 1 + tabs.reduce((max, t) => {
+  const n = Number(String(t.id).replace('tab-', ''))
+  return Number.isInteger(n) && n > max ? n : max
+}, 0)
 
 export const useAppStore = create(
   devtools(
@@ -17,15 +78,10 @@ export const useAppStore = create(
         folders: [],
         variables: '{}',
         requestHistory: [],
-        tabs: [{ id: 'tab-1', request: { ...DEFAULT_REQUEST }, status: '', loading: false, responseTime: null, responseHeaders: null, responseCookies: null, responseSize: null }],
-        activeTabId: 'tab-1',
+        tabs: [FIRST_TAB],
+        activeTabId: FIRST_TAB.id,
         nextTabId: 2,
-        activeRequest: { ...DEFAULT_REQUEST },
         activeRequestTab: 'body', // Active tab in RequestTabs ('body', 'graphql', 'websocket', etc.)
-        showLanding: true,
-        webStatus: '',
-        webLoading: false,
-        webResponseTime: null,
         codeDialogOpen: false,
         codeSnippets: null,
         importDialogOpen: false,
@@ -74,9 +130,12 @@ export const useAppStore = create(
 
         // Tabs
         setActiveTab: (tabId) => set({ activeTabId: tabId }),
+        // Doubles as a click handler, so anything that is not a folder id
+        // (a DOM event, say) is treated as "no folder".
         newTab: (folderId = null) => set((state) => {
-          const id = `tab-${state.nextTabId}`
-          return { tabs: [...state.tabs, { id, request: { ...DEFAULT_REQUEST, folderId }, status: '', loading: false, responseTime: null, responseHeaders: null, responseCookies: null, responseSize: null }], activeTabId: id, nextTabId: state.nextTabId + 1 }
+          const folder = typeof folderId === 'string' ? folderId : null
+          const tab = createTab(`tab-${state.nextTabId}`, { ...DEFAULT_REQUEST, folderId: folder })
+          return { tabs: [...state.tabs, tab], activeTabId: tab.id, nextTabId: state.nextTabId + 1 }
         }),
         closeTab: (tabId) => set((state) => {
           if (state.tabs.length === 1) return state
@@ -138,34 +197,36 @@ export const useAppStore = create(
         openCommandPalette: () => set({ commandPaletteOpen: true }),
         closeCommandPalette: () => set({ commandPaletteOpen: false }),
 
-        // Web version
-        setActiveRequest: (requestOrUpdater) => set((state) => ({
-          activeRequest: typeof requestOrUpdater === 'function'
-            ? requestOrUpdater(state.activeRequest)
-            : requestOrUpdater
-        })),
         setActiveRequestTab: (tab) => set({ activeRequestTab: tab }),
-        setShowLanding: (show) => set({ showLanding: show }),
-        setWebStatus: (status) => set({ webStatus: status }),
-        setWebLoading: (loading) => set({ webLoading: loading }),
-        setWebResponseTime: (time) => set({ webResponseTime: time }),
       }),
       {
         name: 'gostman-storage',
+        storage: resilientStorage,
         partialize: (state) => ({
           requests: state.requests,
           folders: state.folders,
           variables: state.variables,
           requestHistory: state.requestHistory,
+          tabs: state.tabs.map(persistableTab),
+          activeTabId: state.activeTabId,
+          nextTabId: state.nextTabId,
         }),
-        merge: (persistedState, currentState) => ({
-          ...currentState,
-          ...persistedState,
-          // Ensure array fields are always arrays even if localStorage is corrupted
-          requests: Array.isArray(persistedState?.requests) ? persistedState.requests : [],
-          folders: Array.isArray(persistedState?.folders) ? persistedState.folders : [],
-          requestHistory: Array.isArray(persistedState?.requestHistory) ? persistedState.requestHistory : [],
-        }),
+        merge: (persistedState, currentState) => {
+          // Guards against corrupted or partial localStorage content.
+          const tabs = restoreTabs(persistedState?.tabs)
+          return {
+            ...currentState,
+            ...persistedState,
+            requests: Array.isArray(persistedState?.requests) ? persistedState.requests : [],
+            folders: Array.isArray(persistedState?.folders) ? persistedState.folders : [],
+            requestHistory: Array.isArray(persistedState?.requestHistory) ? persistedState.requestHistory : [],
+            tabs,
+            activeTabId: tabs.some(t => t.id === persistedState?.activeTabId)
+              ? persistedState.activeTabId
+              : tabs[0].id,
+            nextTabId: Math.max(persistedState?.nextTabId || 0, nextIdAfter(tabs)),
+          }
+        },
       }
     ),
     { name: 'gostman-store', enabled: import.meta.env.DEV }
@@ -173,9 +234,7 @@ export const useAppStore = create(
 )
 
 export const useActiveTab = () => useAppStore((s) => {
-  if (!s.tabs || s.tabs.length === 0) {
-    return { id: 'tab-1', request: { ...DEFAULT_REQUEST }, status: '', loading: false, responseTime: null, responseHeaders: null, responseCookies: null, responseSize: null }
-  }
+  if (!s.tabs || s.tabs.length === 0) return FIRST_TAB
   return s.tabs.find(t => t.id === s.activeTabId) || s.tabs[0]
 })
 export const useActiveRequest = () => useAppStore((s) => {
