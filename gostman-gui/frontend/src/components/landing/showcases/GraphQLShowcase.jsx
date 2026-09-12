@@ -32,8 +32,8 @@ const GRAPHQL_RESPONSE = {
 
 const DEMO_SEQUENCE = [
   { delay: 0, action: "reset" },
-  { delay: 1500, action: "execute" },
-  { delay: 2500, action: "showResponse" },
+  { delay: 600, action: "execute" },
+  { delay: 1500, action: "showResponse" },
 ]
 
 const QueryValue = ({ value }) => {
@@ -83,7 +83,7 @@ export const GraphQLShowcase = () => {
 
   useDemoSequence({
     steps: DEMO_SEQUENCE,
-    loopAfter: 5000,
+    loopAfter: 6000,
     reset: () => {
       setIsExecuting(false)
       setShowResponse(false)

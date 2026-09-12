@@ -33,8 +33,8 @@ const RESPONSE_DATA = {
 }
 
 const DEMO_SEQUENCE = [
-  { delay: 2500, action: "send" },
-  { delay: 3300, action: "receive" },
+  { delay: 1100, action: "send" },
+  { delay: 2000, action: "receive" },
 ]
 
 export const RestShowcase = () => {
@@ -44,7 +44,7 @@ export const RestShowcase = () => {
 
   useDemoSequence({
     steps: DEMO_SEQUENCE,
-    loopAfter: 12500,
+    loopAfter: 6000,
     reset: () => {
       setResponse(null)
       setIsSending(false)
@@ -79,7 +79,7 @@ export const RestShowcase = () => {
             className="flex-1 bg-background rounded-md px-4 py-2 font-mono text-sm text-muted-foreground flex items-center"
             initial={{ width: 0 }}
             animate={{ width: "auto" }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.15 }}
           >
             <span className="truncate">{REQUEST.url}</span>
           </motion.div>
@@ -152,7 +152,7 @@ export const RestShowcase = () => {
                       key={user.id}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 + i * 0.15 }}
+                      transition={{ delay: 0.15 + i * 0.07 }}
                       className="pl-8"
                     >
                       <span className="text-amber-300">{"{"}</span>

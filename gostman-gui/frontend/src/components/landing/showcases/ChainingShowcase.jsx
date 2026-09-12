@@ -47,12 +47,12 @@ const CHAIN_STEPS = [
 ]
 
 const DEMO_SEQUENCE = [
-  { delay: 0, action: "setActive", stepIndex: 0 },
-  { delay: 1500, action: "complete", stepIndex: 0 },
-  { delay: 2000, action: "setActive", stepIndex: 1 },
-  { delay: 3500, action: "complete", stepIndex: 1 },
-  { delay: 4000, action: "setActive", stepIndex: 2 },
-  { delay: 5500, action: "complete", stepIndex: 2 },
+  { delay: 300, action: "setActive", stepIndex: 0 },
+  { delay: 1300, action: "complete", stepIndex: 0 },
+  { delay: 1700, action: "setActive", stepIndex: 1 },
+  { delay: 2700, action: "complete", stepIndex: 1 },
+  { delay: 3100, action: "setActive", stepIndex: 2 },
+  { delay: 4100, action: "complete", stepIndex: 2 },
 ]
 
 const previewValue = (value) => {
@@ -66,7 +66,7 @@ export const ChainingShowcase = () => {
 
   useDemoSequence({
     steps: DEMO_SEQUENCE,
-    loopAfter: 7000,
+    loopAfter: 6000,
     reset: () => {
       setActiveStep(null)
       setCompletedSteps([])

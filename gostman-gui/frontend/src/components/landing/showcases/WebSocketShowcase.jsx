@@ -11,13 +11,13 @@ const message = (type, text, event) => ({ action: "addMessage", data: { type, te
 
 const DEMO_SEQUENCE = [
   { delay: 0, action: "connect" },
-  { delay: 800, ...message("server", "Connected to server", "open") },
-  { delay: 1200, ...message("client", '{"action":"subscribe","channel":"prices"}', "message") },
+  { delay: 500, ...message("server", "Connected to server", "open") },
+  { delay: 1000, ...message("client", '{"action":"subscribe","channel":"prices"}', "message") },
   { delay: 1600, ...message("server", '{"channel":"prices","data":{"symbol":"BTC","price":67234.50}}', "data") },
-  { delay: 2000, ...message("server", '{"channel":"prices","data":{"symbol":"ETH","price":3456.78}}', "data") },
-  { delay: 2400, ...message("client", '{"action":"unsubscribe","channel":"prices"}', "message") },
-  { delay: 2800, ...message("server", "Unsubscribed from prices", "close") },
-  { delay: 3200, action: "disconnect" },
+  { delay: 2200, ...message("server", '{"channel":"prices","data":{"symbol":"ETH","price":3456.78}}', "data") },
+  { delay: 2900, ...message("client", '{"action":"unsubscribe","channel":"prices"}', "message") },
+  { delay: 3500, ...message("server", "Unsubscribed from prices", "close") },
+  { delay: 4100, action: "disconnect" },
 ]
 
 const formatTime = (date) =>
@@ -37,7 +37,7 @@ export const WebSocketShowcase = () => {
 
   useDemoSequence({
     steps: DEMO_SEQUENCE,
-    loopAfter: 5000,
+    loopAfter: 6000,
     reset: () => {
       setMessages([])
       setConnected(false)
