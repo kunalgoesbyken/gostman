@@ -12,15 +12,12 @@
 import { dereference, validate } from '@scalar/openapi-parser'
 import YAML from 'js-yaml'
 
-// Constants for magic numbers
 const MAX_RECURSION_DEPTH = 10
 const MAX_TRUNCATION_LENGTH = 50
-const DEBOUNCE_MS = 300
 const MAX_FOLDER_DEPTH = 100
 const MAX_VALIDATION_ERRORS = 10
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB in bytes
 
-// Valid HTTP methods for Postman request validation
 const VALID_HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'TRACE']
 
 /**
@@ -35,32 +32,26 @@ function safeStringify(value, placeholder = null) {
   if (value === null) return 'null'
 
   try {
-    // For primitives, return directly
     if (typeof value !== 'object') {
       return JSON.stringify(value)
     }
 
-    // Handle circular references
     const seen = new WeakSet()
     const circularPlaceholder = placeholder || '[Circular Reference]'
 
     const result = JSON.stringify(value, (key, val) => {
-      // Handle circular references
       if (typeof val === 'object' && val !== null) {
         if (seen.has(val)) {
           return circularPlaceholder
         }
         seen.add(val)
       }
-      // Handle functions
       if (typeof val === 'function') {
         return '[Function]'
       }
-      // Handle undefined
       if (val === undefined) {
         return null
       }
-      // Handle symbols
       if (typeof val === 'symbol') {
         return val.toString()
       }
@@ -92,7 +83,6 @@ function safeStringify(value, placeholder = null) {
   }
 }
 
-// Export the constants for use in other modules
 export { MAX_FILE_SIZE, MAX_VALIDATION_ERRORS }
 
 /**
@@ -123,8 +113,6 @@ function encodeUTF8(str) {
 
 /**
  * Extract query parameters from a URL string or object
- * FIX #6: Query parameter key validation - check param.key is non-empty string
- * FIX: Handle duplicate query param keys by using arrays
  * @param {string|Object} url - URL string or Postman URL object
  * @returns {Object} Query parameters as key-value pairs (arrays for duplicates)
  */
@@ -132,7 +120,6 @@ function extractQueryParams(url) {
   const queryParams = {}
 
   if (typeof url === 'string') {
-    // Parse query params from URL string
     try {
       const urlObj = new URL(url)
       urlObj.searchParams.forEach((value, key) => {
@@ -154,11 +141,9 @@ function extractQueryParams(url) {
     return queryParams
   }
 
-  // Handle Postman URL object format
   if (url && url.query) {
     const queryList = Array.isArray(url.query) ? url.query : []
     queryList.forEach(param => {
-      // FIX #6: Validate param.key is a non-empty string
       if (!param.disabled && param.key && typeof param.key === 'string' && param.key.trim()) {
         const value = param.value !== undefined ? String(param.value) : ''
         // Handle duplicates: if key exists, convert to array or append to array
@@ -189,7 +174,6 @@ function extractHeaders(headers) {
   if (!Array.isArray(headers)) return result
 
   headers.forEach(header => {
-    // Validate key is non-empty string and trim whitespace
     if (!header.disabled && header.key && typeof header.key === 'string' && header.key.trim()) {
       result[header.key] = header.value || ''
     }
@@ -200,7 +184,6 @@ function extractHeaders(headers) {
 
 /**
  * Extract body from a Postman RequestBody
- * FIX #7: GraphQL body extraction - validate query is string before using
  * @param {Object} requestBody - Postman RequestBody
  * @returns {string} Body as string
  */
@@ -235,7 +218,6 @@ function extractBody(requestBody) {
 
     case 'graphql':
       if (requestBody.graphql) {
-        // FIX #7: Validate query is string before using
         if (typeof requestBody.graphql === 'string') {
           return requestBody.graphql
         }
@@ -252,24 +234,20 @@ function extractBody(requestBody) {
 
 /**
  * Get URL from Postman request URL object
- * FIX #2: URL building from parts - handle path as either array or string
  * @param {string|Object} url - URL string or Postman URL object
  * @returns {string} Full URL string
  */
 function getUrlString(url) {
   if (typeof url === 'string') return url
 
-  // Handle Postman URL object format
   if (url && url.raw) return url.raw
 
-  // Build URL from parts
   if (url && url.protocol && url.host) {
     // Ensure protocol doesn't already contain ://
     const protocol = url.protocol.endsWith('://') ? url.protocol : url.protocol + '://'
     let urlString = protocol + (Array.isArray(url.host) ? url.host.join('.') : url.host)
     if (url.port) urlString += ':' + url.port
 
-    // FIX #2: Handle path as either array or string using Array.isArray()
     if (url.path) {
       const pathStr = Array.isArray(url.path) ? url.path.join('/') : url.path
       urlString += '/' + pathStr
@@ -298,7 +276,7 @@ function getUrlString(url) {
  * @param {number} depth - Current depth for recursion protection
  */
 function processPostmanItems(items, parentFolderId, requests, folders, usedIds = new Set(), unsupportedAuthWarnings = [], depth = 0) {
-  // FIX #5: Max depth check to prevent stack overflow
+  // Max depth check to prevent stack overflow
   if (depth > MAX_FOLDER_DEPTH) {
     console.warn(`Postman import: maximum folder depth (${MAX_FOLDER_DEPTH}) exceeded, skipping deeper folders`)
     return
@@ -307,10 +285,8 @@ function processPostmanItems(items, parentFolderId, requests, folders, usedIds =
   if (!Array.isArray(items)) return
 
   items.forEach(item => {
-    // Check if it's a folder (has items array)
     if (item.item && Array.isArray(item.item)) {
       let folderId = item.id || generateId()
-      // Ensure unique ID
       while (usedIds.has(folderId)) {
         folderId = generateId()
       }
@@ -323,26 +299,20 @@ function processPostmanItems(items, parentFolderId, requests, folders, usedIds =
         parentId: parentFolderId,
         description: item.description || ''
       })
-      // FIX #5: Pass depth + 1 to track recursion depth
       processPostmanItems(item.item, folderId, requests, folders, usedIds, unsupportedAuthWarnings, depth + 1)
     }
-    // Check if it's a request (has request object)
     else if (item.request) {
       const request = item.request
 
-      // Get URL
       const url = getUrlString(request.url)
 
-      // FIX #1: Missing URL validation - check if URL is empty and skip request
       if (!url || !url.trim()) {
         console.warn(`Postman import: skipping request "${item.name || 'Untitled'}" with empty URL`)
         return
       }
 
-      // Extract query parameters
       const queryParams = extractQueryParams(request.url)
 
-      // Extract headers
       const headers = extractHeaders(request.header || [])
 
       // Add auth headers if present and not disabled
@@ -358,17 +328,14 @@ function processPostmanItems(items, parentFolderId, requests, folders, usedIds =
           }
           headers['Authorization'] = `Bearer ${token}`
         } else if (request.auth.type === 'basic' && request.auth.basic) {
-          // Handle both array and single object formats
           const basicAuth = Array.isArray(request.auth.basic) ? request.auth.basic[0] : request.auth.basic
           const username = basicAuth?.username || basicAuth?.value?.username || '{{username}}'
           const password = basicAuth?.password || basicAuth?.value?.password || '{{password}}'
           // Handle Unicode in credentials
           headers['Authorization'] = `Basic ${btoa(encodeUTF8(username + ':' + password))}`
         } else if (request.auth.type === 'apikey' && request.auth.apikey) {
-          // FIX #4: Improved apikey auth handling for different formats
           const apikeyAuth = Array.isArray(request.auth.apikey) ? request.auth.apikey[0] : request.auth.apikey
           if (apikeyAuth) {
-            // Handle different Postman apikey formats
             const key = apikeyAuth.key || apikeyAuth.value?.key
             const value = apikeyAuth.value || apikeyAuth.value?.value || '{{apiKey}}'
             if (key && typeof key === 'string') {
@@ -378,7 +345,6 @@ function processPostmanItems(items, parentFolderId, requests, folders, usedIds =
         } else if (request.auth.type === 'awsv4' || request.auth.type === 'ntlm' ||
                    request.auth.type === 'digest' || request.auth.type === 'edgegrid' ||
                    request.auth.type === 'oauth1' || request.auth.type === 'oauth2') {
-          // Track unsupported auth types
           const warning = `Auth type '${request.auth.type}' is not fully supported. Request: ${item.name || 'Untitled'}`
           if (!unsupportedAuthWarnings.includes(warning)) {
             unsupportedAuthWarnings.push(warning)
@@ -388,23 +354,19 @@ function processPostmanItems(items, parentFolderId, requests, folders, usedIds =
         }
       }
 
-      // Extract body
       const body = extractBody(request.body)
 
-      // Ensure unique request ID
       let requestId = item.id || generateId()
       while (usedIds.has(requestId)) {
         requestId = generateId()
       }
       usedIds.add(requestId)
 
-      // FIX #9: Trim request name and check for empty
       let requestName = (item.name || request.name || 'Untitled Request').trim()
       if (!requestName) {
         requestName = 'Untitled Request'
       }
 
-      // FIX #3: Missing HTTP method validation - validate and default to GET if invalid
       let method = 'GET'
       if (request.method) {
         const normalizedMethod = request.method.toString().trim().toUpperCase()
@@ -433,7 +395,7 @@ function processPostmanItems(items, parentFolderId, requests, folders, usedIds =
  * @param {Object|string} postmanCollection - Parsed Postman collection JSON
  * @returns {Object} Object with requests array, folders array, collection name, and warnings
  */
-export function importPostmanCollection(postmanCollection) {
+function importPostmanCollection(postmanCollection) {
   const data = typeof postmanCollection === 'string' ? JSON.parse(postmanCollection) : postmanCollection
 
   const requests = []
@@ -443,7 +405,6 @@ export function importPostmanCollection(postmanCollection) {
 
   const collectionName = data?.info?.name || 'Imported Collection'
 
-  // Initialize external refs and circular refs tracking on the spec object
   if (!data._externalRefs) {
     data._externalRefs = []
   }
@@ -451,7 +412,6 @@ export function importPostmanCollection(postmanCollection) {
     data._circularRefs = []
   }
 
-  // Process items (can be at root or nested)
   processPostmanItems(data.item || [], null, requests, folders, usedIds, unsupportedAuthWarnings)
 
   return {
@@ -464,7 +424,6 @@ export function importPostmanCollection(postmanCollection) {
 
 /**
  * Parses a Postman collection JSON string (native parser, no SDK dependency)
- * FIX #8: Collection schema validation - check schema contains 'postman.com/json/collection'
  * @param {string} jsonString - JSON string of Postman collection
  * @returns {Object} Parsed result with requests and folders
  */
@@ -472,8 +431,6 @@ export function parsePostmanCollection(jsonString) {
   try {
     const data = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString
 
-    // FIX #8: Basic validation - check if it looks like a Postman collection
-    // Validate schema contains 'postman.com/json/collection'
     if (!data || !data.info || !data.info.schema) {
       return {
         success: false,
@@ -489,7 +446,6 @@ export function parsePostmanCollection(jsonString) {
       }
     }
 
-    // Import the collection
     const result = importPostmanCollection(data)
 
     return {
@@ -510,7 +466,6 @@ export function parsePostmanCollection(jsonString) {
  * @returns {Object} Validation result with { valid: boolean, error?: string, isRelative?: boolean }
  */
 function validateUrl(url) {
-  // Check if URL is provided
   if (!url || typeof url !== 'string') {
     return {
       valid: false,
@@ -521,7 +476,6 @@ function validateUrl(url) {
 
   const trimmedUrl = url.trim()
 
-  // Check if URL is empty after trimming
   if (!trimmedUrl) {
     return {
       valid: false,
@@ -530,7 +484,6 @@ function validateUrl(url) {
     }
   }
 
-  // Check for valid protocol (http://, https://, ws://, wss://)
   const validProtocols = ['http://', 'https://', 'ws://', 'wss://']
   const hasValidProtocol = validProtocols.some(protocol =>
     trimmedUrl.toLowerCase().startsWith(protocol)
@@ -545,7 +498,6 @@ function validateUrl(url) {
     }
   }
 
-  // Try to parse the URL to validate format
   try {
     new URL(trimmedUrl)
   } catch (err) {
@@ -556,7 +508,6 @@ function validateUrl(url) {
     }
   }
 
-  // URL is valid
   return { valid: true, isRelative: false }
 }
 
@@ -575,13 +526,10 @@ function joinUrlParts(baseUrl, path) {
   if (!baseUrl) return path || ''
   if (!path) return baseUrl
 
-  // Remove trailing slash from baseUrl if present
   const normalizedBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
 
-  // Remove leading slash from path if present
   const normalizedPath = path.startsWith('/') ? path.slice(1) : path
 
-  // Join with single slash
   return normalizedBase + '/' + normalizedPath
 }
 
@@ -595,7 +543,6 @@ function getServerUrl(server) {
 
   let url = server.url || ''
 
-  // Substitute server variables with their default values
   if (server.variables) {
     Object.entries(server.variables || {}).forEach(([name, config]) => {
       const defaultValue = config.default ?? config.enum?.[0]
@@ -608,7 +555,6 @@ function getServerUrl(server) {
     })
   }
 
-  // Check if URL is relative (doesn't start with http:// or https://)
   const isRelative = !url.match(/^https?:\/\//i)
 
   return { url, isRelative }
@@ -655,17 +601,14 @@ function extractOpenAPIQueryParams(operation = {}, pathParameters = []) {
   // Merge path-level and operation-level parameters (operation overrides path)
   const paramMap = new Map()
 
-  // Add path-level parameters first
   ;(pathParameters || [])
     .filter(p => p && p.in === 'query')
     .forEach(param => paramMap.set(param.name, param))
 
-  // Override with operation-level parameters
   ;(operation.parameters || [])
     .filter(p => p && p.in === 'query')
     .forEach(param => paramMap.set(param.name, param))
 
-  // Convert to query params object
   paramMap.forEach(param => {
     const value = param.example ||
                   param.schema?.example ||
@@ -673,7 +616,6 @@ function extractOpenAPIQueryParams(operation = {}, pathParameters = []) {
     queryParams[param.name] = value !== undefined ? String(value) : ''
   })
 
-  // Return null if no params, otherwise return the object
   return Object.keys(queryParams).length > 0 ? queryParams : null
 }
 
@@ -687,24 +629,19 @@ function extractOpenAPIQueryParams(operation = {}, pathParameters = []) {
 function extractOpenAPIPathParams(path, operation = {}, pathParameters = []) {
   const pathParams = {}
 
-  // Find all {param} placeholders in the path
   const pathParamMatches = path.match(/\{([^}]+)\}/g) || []
   const pathParamNames = pathParamMatches.map(match => match.slice(1, -1))
 
-  // Build a map of all path parameters
   const paramMap = new Map()
 
-  // Add path-level parameters first
   ;(pathParameters || [])
     .filter(p => p && p.in === 'path')
     .forEach(param => paramMap.set(param.name, param))
 
-  // Override with operation-level parameters
   ;(operation.parameters || [])
     .filter(p => p && p.in === 'path')
     .forEach(param => paramMap.set(param.name, param))
 
-  // Extract values for each path parameter found in the URL
   pathParamNames.forEach(paramName => {
     const param = paramMap.get(paramName)
 
@@ -739,17 +676,14 @@ function extractOpenAPIHeaders(operation = {}, pathParameters = []) {
   // Merge path-level and operation-level parameters (operation overrides path)
   const paramMap = new Map()
 
-  // Add path-level parameters first
   ;(pathParameters || [])
     .filter(p => p && p.in === 'header')
     .forEach(param => paramMap.set(param.name, param))
 
-  // Override with operation-level parameters
   ;(operation.parameters || [])
     .filter(p => p && p.in === 'header')
     .forEach(param => paramMap.set(param.name, param))
 
-  // Convert to headers object
   paramMap.forEach(param => {
     const value = param.example ||
                   param.schema?.example ||
@@ -779,7 +713,6 @@ function buildOpenAPIBody(requestBody) {
     return ''
   }
 
-  // Priority order for content types
   const typePriority = [
     'application/json',
     'application/ld+json',
@@ -790,27 +723,22 @@ function buildOpenAPIBody(requestBody) {
     'text/xml'
   ]
 
-  // Find the first matching content type
   let selectedType = contentTypes.find(ct => typePriority.includes(ct)) || contentTypes[0]
   const content = requestBody.content[selectedType]
 
   if (!content) return ''
 
-  // Use example if available
   if (content.example !== undefined) {
     const example = content.example
     if (selectedType.includes('json') || selectedType.includes('ld+json')) {
       return typeof example === 'string' ? example : safeStringify(example)
     }
-    // For text types, return as-is if string
     if (selectedType.startsWith('text/') && typeof example === 'string') {
       return example
     }
-    // For other types, stringify objects
     return typeof example === 'object' ? safeStringify(example) : String(example)
   }
 
-  // Try examples (OpenAPI 3.1)
   if (content.examples) {
     const firstExample = Object.values(content.examples || {})[0]
     if (firstExample?.value !== undefined) {
@@ -825,7 +753,6 @@ function buildOpenAPIBody(requestBody) {
     }
   }
 
-  // Generate from schema
   if (content.schema) {
     if (selectedType.includes('json') || selectedType.includes('ld+json')) {
       return generateExampleFromSchema(content.schema)
@@ -848,7 +775,6 @@ function getExampleValueFromSchema(schema) {
   if (schema.example !== undefined) return schema.example
   if (schema.default !== undefined) return schema.default
 
-  // Simple type inference
   switch (schema.type) {
     case 'string':
       return schema.enum?.[0] ||
@@ -868,12 +794,9 @@ function getExampleValueFromSchema(schema) {
     case 'array':
       return []
     case 'object':
-      // Handle objects with properties but no explicit type
       return schema.properties ? {} : undefined
     default:
-      // If no type specified but has properties, treat as object
       if (schema.properties) return {}
-      // If has const, return const value
       if (schema.const !== undefined) return schema.const
       return undefined
   }
@@ -900,7 +823,6 @@ function resolveRef(ref, spec) {
     return null // External references not supported
   }
 
-  // Navigate the reference path
   const path = ref.substring(2).split('/')
   let current = spec
 
@@ -930,7 +852,6 @@ function generateExampleFromSchema(schema, depth = 0, seenSchemas = null, spec =
 
   if (!schema) return '{}'
 
-  // Initialize circular refs tracking on spec
   if (spec && !spec._circularRefs) {
     spec._circularRefs = []
   }
@@ -943,7 +864,6 @@ function generateExampleFromSchema(schema, depth = 0, seenSchemas = null, spec =
       return null
     }
 
-    // Handle $ref by resolving it
     if (schema.$ref) {
       const resolved = resolveRef(schema.$ref, spec)
 
@@ -952,7 +872,6 @@ function generateExampleFromSchema(schema, depth = 0, seenSchemas = null, spec =
         return {}
       }
 
-      // Track actual schema objects, not ref strings
       if (seen.has(resolved)) {
         // Circular reference detected - track and skip
         if (spec && !spec._circularRefs.includes(schema.$ref)) {
@@ -961,12 +880,10 @@ function generateExampleFromSchema(schema, depth = 0, seenSchemas = null, spec =
         return null // Skip circular refs instead of including placeholder
       }
 
-      // Reuse the same WeakSet for tracking
       seen.add(resolved)
       return generate(resolved, currentDepth + 1, seen)
     }
 
-    // Handle allOf - merge all schemas
     if (schema.allOf && Array.isArray(schema.allOf)) {
       const result = {}
       let hasRequired = []
@@ -979,14 +896,12 @@ function generateExampleFromSchema(schema, depth = 0, seenSchemas = null, spec =
           }
         }
       })
-      // Store required fields metadata
       if (hasRequired.length > 0) {
         result._required = hasRequired
       }
       return result
     }
 
-    // Handle anyOf - use first valid schema
     if (schema.anyOf && Array.isArray(schema.anyOf)) {
       for (const sub of schema.anyOf) {
         const generated = generate(sub, currentDepth + 1, seen)
@@ -997,7 +912,6 @@ function generateExampleFromSchema(schema, depth = 0, seenSchemas = null, spec =
       return {}
     }
 
-    // Handle oneOf - use first schema
     if (schema.oneOf && Array.isArray(schema.oneOf)) {
       const schemas = schema.oneOf
       if (schemas.length > 0) {
@@ -1060,7 +974,6 @@ function generateExampleFromSchema(schema, depth = 0, seenSchemas = null, spec =
         if (schema.const !== undefined) {
           return schema.const
         }
-        // Handle enum
         if (schema.enum && schema.enum.length > 0) {
           return schema.enum[0]
         }
@@ -1077,11 +990,10 @@ function generateExampleFromSchema(schema, depth = 0, seenSchemas = null, spec =
  * @param {Object} openapiSpec - Validated OpenAPI spec object
  * @returns {Object} Object with requests array, folders array, and collection name
  */
-export function importOpenAPISpec(openapiSpec) {
+function importOpenAPISpec(openapiSpec) {
   const requests = []
   const folders = []
 
-  // Initialize tracking arrays
   if (!openapiSpec._externalRefs) {
     openapiSpec._externalRefs = []
   }
@@ -1093,12 +1005,10 @@ export function importOpenAPISpec(openapiSpec) {
     throw new Error('Invalid OpenAPI spec: paths must be an object')
   }
 
-  // Reject Swagger 2.0
   if (openapiSpec.swagger && !openapiSpec.openapi) {
     throw new Error('Swagger 2.0 is not supported. Please use OpenAPI 3.x.')
   }
 
-  // Extract collection info
   const collectionName = openapiSpec.info?.title || 'Imported OpenAPI Spec'
 
   // Get base URL from first server, handling variables
@@ -1122,7 +1032,6 @@ export function importOpenAPISpec(openapiSpec) {
     )
   }
 
-  // Validate paths exist
   const paths = openapiSpec.paths || {}
   if (Object.keys(paths).length === 0) {
     throw new Error(
@@ -1147,7 +1056,6 @@ export function importOpenAPISpec(openapiSpec) {
     })
   }
 
-  // Create folders only for used tags
   const tagFolderMap = new Map()
   const tags = Array.isArray(openapiSpec.tags) ? openapiSpec.tags : []
 
@@ -1165,10 +1073,8 @@ export function importOpenAPISpec(openapiSpec) {
     }
   })
 
-  // Build security scheme headers
   const securityHeaders = buildSecurityHeaders(openapiSpec.components?.securitySchemes || {})
 
-  // Process paths
   const pathsEntries = Object.entries(openapiSpec.paths || {})
   pathsEntries.forEach(([path, pathItem]) => {
     // Keep path as-is with {param} format
@@ -1207,7 +1113,6 @@ export function importOpenAPISpec(openapiSpec) {
         }
       })
 
-      // Build body
       const body = buildOpenAPIBody(operation.requestBody)
 
       // Store schema metadata for future use
@@ -1278,7 +1183,6 @@ export async function parseOpenAPISpec(specString) {
   let yamlError = null
 
   try {
-    // Validate input is not empty
     if (!specString || typeof specString !== 'string' || !specString.trim()) {
       return {
         success: false,
@@ -1306,7 +1210,6 @@ export async function parseOpenAPISpec(specString) {
       }
     }
 
-    // Validate we got a proper object
     if (!spec || typeof spec !== 'object') {
       return {
         success: false,
@@ -1364,7 +1267,6 @@ export async function parseOpenAPISpec(specString) {
     const serverInfo = getServerUrl(validatedSpec.servers?.[0]) || { url: '', isRelative: false }
     const { url: serverUrl, isRelative } = serverInfo
 
-    // Import the validated spec
     const result = importOpenAPISpec(validatedSpec)
 
     // Add warnings about relative URLs, external refs, and circular refs
@@ -1403,8 +1305,7 @@ export async function parseOpenAPISpec(specString) {
  * @param {Object} options - Export options
  * @returns {Object} OpenAPI 3.0 specification
  */
-export function exportToOpenAPI(requests, options = {}) {
-  // Validate requests is an array
+function exportToOpenAPI(requests, options = {}) {
   if (!Array.isArray(requests)) {
     requests = []
   }
@@ -1432,7 +1333,6 @@ export function exportToOpenAPI(requests, options = {}) {
     }
   }
 
-  // Helper to infer type from value
   const inferType = (val) => {
     if (Array.isArray(val)) return 'array'
     if (typeof val === 'boolean') return 'boolean'
@@ -1449,7 +1349,6 @@ export function exportToOpenAPI(requests, options = {}) {
     return normalized
   }
 
-  // Group requests by path and method
   const pathsMap = new Map()
 
   requests.forEach(request => {
@@ -1463,7 +1362,6 @@ export function exportToOpenAPI(requests, options = {}) {
       return
     }
 
-    // Parse URL to extract path
     let path = request.url
     try {
       const urlObj = new URL(request.url)
@@ -1495,7 +1393,6 @@ export function exportToOpenAPI(requests, options = {}) {
 
     const pathObj = pathsMap.get(path)
 
-    // Parse headers with case-insensitive access
     let headers = {}
     try {
       headers = JSON.parse(request.headers || '{}')
@@ -1529,7 +1426,6 @@ export function exportToOpenAPI(requests, options = {}) {
       }
     }
 
-    // Parse query params
     let queryParams = []
     try {
       const params = JSON.parse(request.queryParams || '{}')
@@ -1545,7 +1441,6 @@ export function exportToOpenAPI(requests, options = {}) {
       console.warn('Failed to parse query params for request:', request.name, err.message)
     }
 
-    // Extract path params from URL
     const pathParams = []
     const pathParamMatches = path.match(/\{([^}]+)\}/g)
     if (pathParamMatches) {
@@ -1562,7 +1457,6 @@ export function exportToOpenAPI(requests, options = {}) {
       })
     }
 
-    // Build request body
     let requestBody = undefined
     if (request.body && request.body.trim()) {
       let contentType = 'application/json'
@@ -1594,7 +1488,6 @@ export function exportToOpenAPI(requests, options = {}) {
       }
     }
 
-    // Build the operation object
     const operation = {
       summary: request.name || `${method.toUpperCase()} ${path}`,
       description: request.description || `Request to ${path}`,
@@ -1648,7 +1541,6 @@ function inferSchemaFromObject(obj, seen = new WeakSet()) {
   }
 
   if (typeof obj === 'object') {
-    // Check for circular reference
     if (seen.has(obj)) {
       return { type: 'object', description: '[Circular reference]' }
     }
@@ -1680,7 +1572,7 @@ function inferSchemaFromObject(obj, seen = new WeakSet()) {
  * @param {Object} options - Validation options
  * @returns {Promise<Object>} Validation result with valid flag and errors
  */
-export async function validateOpenAPI(spec, options = {}) {
+async function validateOpenAPI(spec, options = {}) {
   const { dereference: shouldDereference = false } = options
 
   try {
@@ -1694,7 +1586,6 @@ export async function validateOpenAPI(spec, options = {}) {
     delete specCopy._externalRefs
     delete specCopy._circularRefs
 
-    // Basic structure validation
     if (!spec || typeof spec !== 'object') {
       return {
         valid: false,
@@ -1702,7 +1593,6 @@ export async function validateOpenAPI(spec, options = {}) {
       }
     }
 
-    // Check for OpenAPI version
     if (!specCopy.openapi && !specCopy.swagger) {
       return {
         valid: false,
@@ -1813,7 +1703,6 @@ export function exportToOpenAPIYAML(requests, options = {}) {
  * @returns {Object} Postman collection v2.1
  */
 export function exportToPostman(requests, folders = [], options = {}) {
-  // Validate inputs
   if (!Array.isArray(requests)) {
     requests = []
   }
@@ -1826,13 +1715,11 @@ export function exportToPostman(requests, folders = [], options = {}) {
     description = 'Collection exported from Gostman'
   } = options
 
-  // Build folder map for quick lookup
   const folderMap = new Map()
   folders.forEach(folder => {
     folderMap.set(folder.id, { ...folder, items: [] })
   })
 
-  // Group requests by folder
   const rootItems = []
   const folderRequests = new Map()
 
@@ -1855,7 +1742,6 @@ export function exportToPostman(requests, folders = [], options = {}) {
       response: []
     }
 
-    // Parse and add headers
     try {
       const headers = JSON.parse(request.headers || '{}')
       item.request.header = Object.entries(headers).map(([key, value]) => ({
@@ -1867,7 +1753,6 @@ export function exportToPostman(requests, folders = [], options = {}) {
       console.warn('Failed to parse headers for Postman export:', err.message)
     }
 
-    // Parse and add query parameters
     try {
       const params = JSON.parse(request.queryParams || '{}')
       if (params && typeof params === 'object') {
@@ -1888,7 +1773,6 @@ export function exportToPostman(requests, folders = [], options = {}) {
       }
     }
 
-    // Add to appropriate folder or root
     if (request.folderId && folderMap.has(request.folderId)) {
       if (!folderRequests.has(request.folderId)) {
         folderRequests.set(request.folderId, [])
@@ -1899,18 +1783,15 @@ export function exportToPostman(requests, folders = [], options = {}) {
     }
   })
 
-  // Build the item hierarchy recursively
   const buildItemHierarchy = (folderId) => {
     const folder = folderMap.get(folderId)
     if (!folder) return []
 
     const items = []
 
-    // Add requests in this folder
     const requestsInFolder = folderRequests.get(folderId) || []
     items.push(...requestsInFolder)
 
-    // Find child folders and add them
     const childFolders = folders.filter(f => f.parentId === folderId)
     childFolders.forEach(childFolder => {
       items.push({
@@ -1923,10 +1804,8 @@ export function exportToPostman(requests, folders = [], options = {}) {
     return items
   }
 
-  // Start with root items
   const collectionItems = [...rootItems]
 
-  // Add top-level folders (no parent)
   folders.filter(f => !f.parentId).forEach(folder => {
     const folderItems = folderRequests.get(folder.id) || []
     const hasChildFolders = folders.some(f => f.parentId === folder.id)
@@ -1949,7 +1828,6 @@ export function exportToPostman(requests, folders = [], options = {}) {
   }
 }
 
-// Format version constant for Gostman exports
 const GOSTMAN_FORMAT_VERSION = '1.0.0'
 
 /**
@@ -1960,7 +1838,6 @@ const GOSTMAN_FORMAT_VERSION = '1.0.0'
  * @returns {Object} Gostman export data
  */
 export function exportToGostman(requests, folders = [], variables = {}) {
-  // Validate inputs
   if (!Array.isArray(requests)) {
     requests = []
   }
@@ -1991,7 +1868,6 @@ export function exportToGostman(requests, folders = [], variables = {}) {
  * @returns {Object} Parsed result with success flag, requests, folders, and variables
  */
 export function importGostman(data) {
-  // Validate structure
   if (!data || typeof data !== 'object') {
     return {
       success: false,
@@ -2006,7 +1882,6 @@ export function importGostman(data) {
     }
   }
 
-  // Validate arrays
   if (!Array.isArray(data.gostman.requests)) {
     return {
       success: false,
@@ -2021,7 +1896,6 @@ export function importGostman(data) {
     }
   }
 
-  // Validate variables is an object
   if (data.gostman.variables !== undefined && typeof data.gostman.variables !== 'object') {
     return {
       success: false,
@@ -2042,28 +1916,12 @@ export function importGostman(data) {
  * @param {string} yamlString - YAML string
  * @returns {Object} Parsed object
  */
-export function parseYAML(yamlString) {
+function parseYAML(yamlString) {
   try {
     return YAML.load(yamlString)
   } catch (error) {
     throw new Error(`Invalid YAML: ${error.message}`)
   }
-}
-
-/**
- * Converts object to YAML string using js-yaml
- * @param {Object} obj - Object to convert
- * @param {Object} options - YAML dump options
- * @returns {string} YAML string
- */
-export function toYAML(obj, options = {}) {
-  const defaultOptions = {
-    indent: 2,
-    lineWidth: -1,
-    noRefs: true,
-    sortKeys: false
-  }
-  return YAML.dump(obj, { ...defaultOptions, ...options })
 }
 
 /**
@@ -2073,7 +1931,6 @@ export function toYAML(obj, options = {}) {
  * @returns {string} Markdown documentation
  */
 export function exportToMarkdown(requests, options = {}) {
-  // Validate requests is an array
   if (!Array.isArray(requests)) {
     requests = []
   }
@@ -2096,7 +1953,6 @@ export function exportToMarkdown(requests, options = {}) {
 
   md += '---\n\n'
 
-  // Group requests by folder/path
   const grouped = new Map()
   requests.forEach(request => {
     const group = request.folderId || 'root'
@@ -2106,7 +1962,6 @@ export function exportToMarkdown(requests, options = {}) {
     grouped.get(group).push(request)
   })
 
-  // Add Table of Contents
   md += '## Table of Contents\n\n'
   grouped.forEach((_, groupId) => {
     if (groupId !== 'root') {
@@ -2116,7 +1971,6 @@ export function exportToMarkdown(requests, options = {}) {
   })
   md += '\n---\n\n'
 
-  // Generate documentation for each group
   grouped.forEach((groupRequests, groupId) => {
     if (groupId !== 'root') {
       const anchor = groupId.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
@@ -2127,7 +1981,6 @@ export function exportToMarkdown(requests, options = {}) {
     groupRequests.forEach(request => {
       const method = (request.method || 'GET').toUpperCase()
 
-      // Method badge color
       const methodColors = {
         GET: '🟢',
         POST: '🔵',
@@ -2146,7 +1999,6 @@ export function exportToMarkdown(requests, options = {}) {
         md += `${request.description}\n\n`
       }
 
-      // Headers
       try {
         const headers = JSON.parse(request.headers || '{}')
         if (Object.keys(headers).length > 0) {
@@ -2164,7 +2016,6 @@ export function exportToMarkdown(requests, options = {}) {
         console.warn('Failed to parse headers for markdown export:', err.message)
       }
 
-      // Query params
       try {
         const params = JSON.parse(request.queryParams || '{}')
         if (params && typeof params === 'object' && Object.keys(params).length > 0) {
@@ -2180,7 +2031,6 @@ export function exportToMarkdown(requests, options = {}) {
         console.warn('Failed to parse query params for markdown export:', err.message)
       }
 
-      // Body
       if (request.body && request.body.trim()) {
         md += '**Request Body:**\n\n'
         md += '```json\n'
@@ -2195,7 +2045,6 @@ export function exportToMarkdown(requests, options = {}) {
   return md
 }
 
-// Helper function to infer type (moved here for reuse)
 function inferType(val) {
   if (Array.isArray(val)) return 'array'
   if (typeof val === 'boolean') return 'boolean'
@@ -2211,11 +2060,9 @@ function inferType(val) {
 export function detectImportFormat(jsonString) {
   let data
 
-  // Try JSON first
   try {
     data = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString
   } catch {
-    // Try YAML if JSON fails
     try {
       data = parseYAML(jsonString)
     } catch {
@@ -2223,42 +2070,17 @@ export function detectImportFormat(jsonString) {
     }
   }
 
-  // Postman collection
   if (data.info?.schema?.includes('postman.com/json/collection') || data.info?._postman_id) {
     return 'postman'
   }
 
-  // OpenAPI/Swagger
   if (data.openapi || (data.swagger && data.info)) {
     return 'openapi'
   }
 
-  // Gostman
   if (data.gostman || (data.version && data.gostman)) {
     return 'gostman'
   }
 
   return 'unknown'
-}
-
-/**
- * Bundles an OpenAPI spec (resolves all $refs)
- * Note: @scalar/openapi-parser doesn't have a separate bundle function,
- * so we use dereference which has the same effect
- * @param {Object|string} spec - OpenAPI spec or file path
- * @returns {Promise<Object>} Bundled spec
- */
-export async function bundleOpenAPI(spec) {
-  const result = await dereference(spec)
-  return result.schema || spec
-}
-
-/**
- * Dereferences an OpenAPI spec (inlines all $refs)
- * @param {Object|string} spec - OpenAPI spec or file path
- * @returns {Promise<Object>} Dereferenced spec
- */
-export async function dereferenceOpenAPI(spec) {
-  const result = await dereference(spec)
-  return result.schema || spec
 }

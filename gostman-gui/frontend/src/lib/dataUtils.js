@@ -1,7 +1,3 @@
-/**
- * Utility functions for data parsing
- */
-
 /** Parse JSON safely, return default value if invalid */
 export function parseJSON(jsonString, defaultValue = {}) {
   if (!jsonString || jsonString.trim() === '') return defaultValue
@@ -119,11 +115,4 @@ export function normalizeHeaders(headers) {
     }
   }
   return entries
-}
-
-/** Get status code from status string */
-export function getStatusCode(status) {
-  if (!status) return null
-  const code = parseInt(status.split(" ")[0], 10)
-  return isNaN(code) ? null : code
 }

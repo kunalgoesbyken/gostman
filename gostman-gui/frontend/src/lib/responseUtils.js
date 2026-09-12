@@ -11,7 +11,6 @@ export function getStatusVariant(status) {
 
 /** Detect response content type from headers */
 export function detectContentType(response, responseHeaders) {
-  // Check data URL first
   if (response && typeof response === 'string' && response.startsWith('data:')) {
     if (response.startsWith('data:image/')) return 'image'
     if (response.startsWith('data:text/html')) return 'html'

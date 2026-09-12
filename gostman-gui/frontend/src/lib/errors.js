@@ -1,12 +1,4 @@
-/**
- * Error handling utilities
- * Provides structured error types and parsing
- */
-
-/**
- * Error types for categorization
- */
-export const ErrorType = {
+const ErrorType = {
   NETWORK: 'network',
   VALIDATION: 'validation',
   TIMEOUT: 'timeout',
@@ -14,14 +6,7 @@ export const ErrorType = {
   UNKNOWN: 'unknown'
 }
 
-/**
- * Creates a structured error object
- * @param {string} type - Error type from ErrorType
- * @param {string} message - Human-readable message
- * @param {any} details - Additional error details
- * @returns {Object} Structured error
- */
-export function createError(type, message, details = null) {
+function createError(type, message, details = null) {
   return {
     type,
     message,
@@ -30,22 +15,15 @@ export function createError(type, message, details = null) {
   }
 }
 
-/**
- * Checks if an error is a structured error object
- */
-export function isStructuredError(error) {
+function isStructuredError(error) {
   return error && typeof error === 'object' && 'type' in error && 'message' in error
 }
 
-/**
- * Parses a plain error string into a structured error
- */
 export function parseError(error) {
   if (isStructuredError(error)) return error
 
   const message = typeof error === 'string' ? error : error?.message || 'Unknown error'
 
-  // Detect error type from message
   if (message.includes('Network Error') || message.includes('fetch') || message.includes('ECONNREFUSED')) {
     return createError(ErrorType.NETWORK, message)
   }
@@ -62,9 +40,7 @@ export function parseError(error) {
   return createError(ErrorType.UNKNOWN, message, error)
 }
 
-/**
- * Gets error display configuration
- */
+/** Returns the icon/color/title presentation for an error, keyed by its parsed type. */
 export function getErrorConfig(error) {
   const parsed = parseError(error)
 
@@ -107,12 +83,4 @@ export function getErrorConfig(error) {
   }
 
   return configs[parsed.type] || configs[ErrorType.UNKNOWN]
-}
-
-/**
- * Formats an error for display in the response panel
- */
-export function formatErrorResponse(error) {
-  const parsed = parseError(error)
-  return JSON.stringify(parsed, null, 2)
 }

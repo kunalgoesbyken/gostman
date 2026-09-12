@@ -1,8 +1,5 @@
 import parseCurl from 'parse-curl'
 
-/**
- * Format body data as pretty-printed JSON if possible
- */
 function formatBody(body) {
   if (!body) return ''
   if (typeof body === 'object') return JSON.stringify(body, null, 2)
@@ -14,9 +11,6 @@ function formatBody(body) {
   }
 }
 
-/**
- * Extract query parameters from URL
- */
 function extractQueryParams(url) {
   try {
     const params = {}

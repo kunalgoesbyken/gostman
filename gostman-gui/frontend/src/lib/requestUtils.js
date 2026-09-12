@@ -73,7 +73,6 @@ export function prepareRequest(activeRequest, variablesMap) {
         urlStr = "https://" + urlStr
     }
 
-    // Parse headers
     let headersObj = {}
     try {
         headersObj = JSON.parse(headersStr || "{}")

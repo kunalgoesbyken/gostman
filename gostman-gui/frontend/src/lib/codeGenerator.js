@@ -14,9 +14,6 @@ function buildUrl(url, params) {
   return `${url}${url.includes('?') ? '&' : '?'}${qs}`
 }
 
-/**
- * Build a curl command from request components
- */
 function buildCurlCommand(method, url, headers, body, queryParams) {
   const headersObj = parseJSON(headers)
   const bodyObj = parseJSON(body)
@@ -25,12 +22,10 @@ function buildCurlCommand(method, url, headers, body, queryParams) {
   const fullUrl = buildUrl(url, paramsObj)
   let curl = `curl -X ${method} "${fullUrl}"`
 
-  // Add headers
   Object.entries(headersObj).forEach(([key, value]) => {
     curl += ` \\\n  -H "${key}: ${value}"`
   })
 
-  // Add body for methods that support it
   if (['POST', 'PUT', 'PATCH'].includes(method.toUpperCase()) && Object.keys(bodyObj).length > 0) {
     const bodyString = JSON.stringify(bodyObj, null, 2)
     curl += ` \\\n  -d '${bodyString}'`
@@ -39,21 +34,7 @@ function buildCurlCommand(method, url, headers, body, queryParams) {
   return curl
 }
 
-/**
- * Generate cURL command
- */
-export function generateCurl(method, url, headers, body, queryParams) {
-  return buildCurlCommand(method, url, headers, body, queryParams)
-}
-
-export function generateJavaScript(method, url, headers, body, queryParams) {
-  return generateJavaScriptFallback(method, url, headers, body, queryParams)
-}
-
-/**
- * Fallback JavaScript fetch generator
- */
-function generateJavaScriptFallback(method, url, headers, body, queryParams) {
+function generateJavaScript(method, url, headers, body, queryParams) {
   const headersObj = parseJSON(headers)
   const bodyObj = parseJSON(body)
   const paramsObj = parseJSON(queryParams)
@@ -85,23 +66,13 @@ function generateJavaScriptFallback(method, url, headers, body, queryParams) {
   return code
 }
 
-/**
- * Format headers for code output
- */
 function formatHeaders(headersObj) {
   return Object.entries(headersObj)
     .map(([key, value]) => `    "${key}": "${value}"`)
     .join(',\n')
 }
 
-export function generatePython(method, url, headers, body, queryParams) {
-  return generatePythonFallback(method, url, headers, body, queryParams)
-}
-
-/**
- * Fallback Python generator
- */
-function generatePythonFallback(method, url, headers, body, queryParams) {
+function generatePython(method, url, headers, body, queryParams) {
   const headersObj = parseJSON(headers)
   const bodyObj = parseJSON(body)
   const paramsObj = parseJSON(queryParams)
@@ -146,14 +117,7 @@ function generatePythonFallback(method, url, headers, body, queryParams) {
   return code
 }
 
-export function generateGo(method, url, headers, body, queryParams) {
-  return generateGoFallback(method, url, headers, body, queryParams)
-}
-
-/**
- * Fallback Go generator
- */
-function generateGoFallback(method, url, headers, body, queryParams) {
+function generateGo(method, url, headers, body, queryParams) {
   const headersObj = parseJSON(headers)
   const bodyObj = parseJSON(body)
   const paramsObj = parseJSON(queryParams)
@@ -202,22 +166,19 @@ function generateGoFallback(method, url, headers, body, queryParams) {
   return code
 }
 
-export function generatePhp(method, url, headers, body, queryParams) {
+function generatePhp(method, url, headers, body, queryParams) {
   const curl = buildCurlCommand(method, url, headers, body, queryParams)
   return `// PHP code generation not available\n// Curl command:\n${curl}`
 }
 
-export function generateJava(method, url, headers, body, queryParams) {
+function generateJava(method, url, headers, body, queryParams) {
   const curl = buildCurlCommand(method, url, headers, body, queryParams)
   return `// Java code generation not available\n// Curl command:\n${curl}`
 }
 
-/**
- * Get all code snippets
- */
 export function generateAllSnippets(method, url, headers, body, queryParams) {
   return {
-    curl: generateCurl(method, url, headers, body, queryParams),
+    curl: buildCurlCommand(method, url, headers, body, queryParams),
     javascript: generateJavaScript(method, url, headers, body, queryParams),
     python: generatePython(method, url, headers, body, queryParams),
     go: generateGo(method, url, headers, body, queryParams),
