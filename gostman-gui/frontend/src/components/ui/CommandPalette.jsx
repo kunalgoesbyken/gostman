@@ -118,7 +118,7 @@ export function CommandPalette({ isOpen, onClose, onCommand }) {
           </kbd>
         </div>
 
-        <div ref={listRef} className="max-h-[300px] overflow-y-auto scrollbar-thin p-2">
+        <div ref={listRef} className="max-h-[300px] overflow-y-auto scrollbar-compact p-2">
           {filteredCommands.length === 0 ? (
             <div className="py-8 text-center text-sm text-muted-foreground">
               No commands found

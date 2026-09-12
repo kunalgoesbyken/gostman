@@ -354,7 +354,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, status, res
         {!isCollapsed && (
           <div className="flex-1 overflow-hidden relative">
             {isError && errorObj ? (
-              <div className={`h-full overflow-auto custom-scrollbar ${errorConfig.bg}`}>
+              <div className={`h-full overflow-auto scrollbar-primary ${errorConfig.bg}`}>
                 <div className="flex items-start gap-4 p-6">
                   <div className={`p-3 rounded-xl ${errorConfig.bg} flex-shrink-0 ring-1 ${errorConfig.border}`}>
                     <AlertTriangle className={`h-5 w-5 ${errorConfig.color}`} strokeWidth={2} />
@@ -374,7 +374,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, status, res
                 </div>
               </div>
             ) : mainTab === 'body' ? (
-              <div className="h-full overflow-auto custom-scrollbar">
+              <div className="h-full overflow-auto scrollbar-primary">
                 <ResponseContent
                   response={response}
                   bodyMode={bodyMode}

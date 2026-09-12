@@ -159,7 +159,7 @@ export const Sidebar = memo(function Sidebar({
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto scrollbar-thin">
+          <div className="flex-1 overflow-y-auto scrollbar-compact">
             {filteredRequests.length === 0 && folders.length === 0 ? (
               <EmptyState
                 icon={searchQuery ? Search : FileJson}
@@ -243,7 +243,7 @@ export const Sidebar = memo(function Sidebar({
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto scrollbar-thin">
+            <div className="flex-1 overflow-y-auto scrollbar-compact">
               {filteredHistory.length === 0 ? (
                 <EmptyState
                   icon={historySearchQuery ? Search : Zap}

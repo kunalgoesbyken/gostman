@@ -15,7 +15,7 @@ export function DataTable({ columns, rows, emptyIcon: EmptyIcon, emptyTitle, emp
   }
 
   return (
-    <div className="h-full overflow-auto pb-4 custom-scrollbar">
+    <div className="h-full overflow-auto pb-4 scrollbar-primary">
       <table className="w-full text-xs border-collapse">
         <thead className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border/50 z-10">
           <tr>

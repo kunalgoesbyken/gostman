@@ -18,7 +18,7 @@ export const TabBar = memo(function TabBar({ tabs, activeTabId, onTabSelect, onT
     }
 
     return (
-        <div className="flex items-center gap-1 border-b bg-muted/5 px-2 py-1 overflow-x-auto scrollbar-thin">
+        <div className="flex items-center gap-1 border-b bg-muted/5 px-2 py-1 overflow-x-auto scrollbar-compact">
             {tabs.map((tab) => (
                 <motion.div
                     key={tab.id}
