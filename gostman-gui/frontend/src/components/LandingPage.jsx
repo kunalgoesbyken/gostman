@@ -69,12 +69,12 @@ const FEATURES = [
   {
     icon: TestTube,
     title: "Response Extraction",
-    description: "Capture any field into an environment variable the moment a response lands.",
+    description: "Capture any field into a variable the moment a response lands.",
   },
   {
     icon: Import,
     title: "Postman Import",
-    description: "Bring collections and environments across as they are. Export whenever you want out.",
+    description: "Bring Postman v2.1 collections and OpenAPI specs across as they are. Export whenever you want out.",
   },
   {
     icon: Zap,
@@ -84,7 +84,7 @@ const FEATURES = [
   {
     icon: Shield,
     title: "Stays On Your Machine",
-    description: "Requests, history and secrets are written to local disk. Nothing leaves the device.",
+    description: "Requests and history are written to local disk. Nothing leaves the device.",
   },
 ]
 
@@ -100,7 +100,7 @@ const COMPARISONS = [
 
 const SHOWCASE_TABS = [
   { id: "rest", label: "REST API", icon: Network, description: "HTTP requests with full control" },
-  { id: "graphql", label: "GraphQL", icon: Braces, description: "Queries, mutations & subscriptions" },
+  { id: "graphql", label: "GraphQL", icon: Braces, description: "Queries and mutations with variables" },
   { id: "chaining", label: "Chaining", icon: Link2, description: "Chain requests with data extraction" },
   { id: "websocket", label: "WebSocket", icon: Radio, description: "Real-time bidirectional messaging" },
 ]

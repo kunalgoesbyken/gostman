@@ -26,12 +26,12 @@ Gostman is a modern, cross-platform API client built with **Wails** (Go + React)
 
 - 🚀 **Multi-Protocol Support**: Native support for **REST**, **GraphQL**, and **WebSockets**.
 - ⛓️ **Request Chaining**: Use response data as variables in subsequent requests for complex workflows.
-- 📤 **Response Extraction**: Pull values out of a response with JSONPath (or dot notation) straight into environment variables.
+- 📤 **Response Extraction**: Pull values out of a response with JSONPath (or dot notation) straight into your variables.
 - ⚡ **Lightning Fast**: Built with Go for instant startup and blazing-fast response times.
 - 🎨 **Beautiful UI**: Modern glassmorphic design with smooth animations and dark mode.
 - 🔄 **Import/Export**: Effortlessly migrate with support for **Postman collections** and OpenAPI specs.
 - 🔒 **Local & Private**: All data stays on your machine. No cloud sync, no tracking, no accounts.
-- 📂 **Collections & Environments**: Organize requests and manage Dev/Staging/Prod variables with ease.
+- 📂 **Collections & Variables**: Organize requests in folders and define one set of `{{variables}}` shared across them.
 - ⌨️ **Power User UX**: Native keyboard shortcuts and intuitive workflow.
 
 ## Installation
@@ -107,7 +107,7 @@ Postman. Note that Gostman does not execute those scripts — there is no assert
 scripted assertions are not available.
 
 ### Zero-Friction Migration
-Don't get stuck. Import your existing **Postman Collections** (v2.1) and Environment files instantly. Export your Gostman collections anytime in standard formats.
+Don't get stuck. Import your existing **Postman Collections** (v2.1) and OpenAPI specs instantly. Export your Gostman collections anytime as OpenAPI (JSON or YAML), Postman v2.1, Markdown, or a Gostman backup.
 
 ## Development
 
