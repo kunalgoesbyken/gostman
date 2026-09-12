@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { memo, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Braces, Play } from "lucide-react"
 import { fadeIn, popIn } from "../../../lib/motion"
@@ -77,7 +77,7 @@ const renderJSON = (obj, depth = 0) => {
 
 const QueryField = ({ name }) => <div className="text-syntax-key">{name}</div>
 
-export const GraphQLShowcase = () => {
+export const GraphQLShowcase = memo(function GraphQLShowcase() {
   const [isExecuting, setIsExecuting] = useState(false)
   const [showResponse, setShowResponse] = useState(false)
 
@@ -215,4 +215,4 @@ export const GraphQLShowcase = () => {
       </ShowcaseFooter>
     </div>
   )
-}
+})

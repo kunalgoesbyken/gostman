@@ -202,3 +202,17 @@ export const rotateTo = (deg) => ({ animate: { rotate: deg }, transition: spring
 
 /** Offsets a section's entrance so stacked panels cascade instead of popping together. */
 export const enterDelay = (seconds) => ({ transition: { ...durationBase, delay: seconds } })
+
+/**
+ * Hero entrance. The container drives its children, so the sequence is one
+ * orchestrated reveal rather than a set of hand-tuned delays that drift apart.
+ */
+export const heroContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
+}
+
+export const heroItem = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: easeSmooth } },
+}

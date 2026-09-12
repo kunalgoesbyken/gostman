@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+import { memo, useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Radio, Send, MessageSquare, Activity, Wifi, WifiOff } from "lucide-react"
 import { collapse, fadeIn, slideDown, slideUp } from "../../../lib/motion"
@@ -30,7 +30,7 @@ const bubbleStyle = (msg) => {
   return "bg-success/10 text-success-foreground border border-success/20"
 }
 
-export const WebSocketShowcase = () => {
+export const WebSocketShowcase = memo(function WebSocketShowcase() {
   const [connected, setConnected] = useState(false)
   const [messages, setMessages] = useState([])
   const scrollRef = useRef(null)
@@ -169,4 +169,4 @@ export const WebSocketShowcase = () => {
       </ShowcaseFooter>
     </div>
   )
-}
+})

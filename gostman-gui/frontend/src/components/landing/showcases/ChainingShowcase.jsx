@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { memo, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Link2, CheckCircle, Circle } from "lucide-react"
 import { collapse, slideUp, spin } from "../../../lib/motion"
@@ -60,7 +60,7 @@ const previewValue = (value) => {
   return typeof value === "object" ? "{...}" : value
 }
 
-export const ChainingShowcase = () => {
+export const ChainingShowcase = memo(function ChainingShowcase() {
   const [activeStep, setActiveStep] = useState(null)
   const [completedSteps, setCompletedSteps] = useState([])
 
@@ -231,4 +231,4 @@ export const ChainingShowcase = () => {
       </ShowcaseFooter>
     </div>
   )
-}
+})
