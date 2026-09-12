@@ -7,36 +7,18 @@ import { Textarea } from "./ui/textarea"
 import { parse, visit, Kind } from 'graphql'
 import { request } from 'graphql-request'
 import { GRAPHQL_EXAMPLES } from "../lib/graphqlConstants"
-
-// Animation variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05
-    }
-  }
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
-  }
-}
-
-const pulseGlow = {
-  scale: [1, 1.02, 1],
-  opacity: [0.5, 0.8, 0.5],
-  transition: {
-    duration: 2,
-    repeat: Infinity,
-    ease: "easeInOut"
-  }
-}
+import {
+  staggerContainer,
+  listItem,
+  popIn,
+  collapse,
+  slideDown,
+  pressableStrong,
+  liftOnHover,
+  pulseGlow,
+  spin,
+  rotateTo,
+} from "../lib/motion"
 
 /**
  * GraphQL Query/Mutation Builder
@@ -205,14 +187,13 @@ export function GraphQLPanel({
   return (
     <motion.div
       className="flex flex-col h-full"
-      variants={containerVariants}
+      variants={staggerContainer}
       initial="hidden"
       animate="visible"
     >
-      {/* Header with gradient and glow */}
       <motion.div
         className="relative overflow-hidden"
-        variants={itemVariants}
+        variants={listItem}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-cyan-500/10" />
         <div className="relative px-4 py-3 border-b border-border/50 bg-muted/20">
@@ -237,11 +218,7 @@ export function GraphQLPanel({
                 </span>
                 <div className="flex items-center gap-2 mt-0.5">
                   {validation.valid ? (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="flex items-center gap-1"
-                    >
+                    <motion.div {...popIn} className="flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3 text-emerald-500" />
                       <span className="text-[10px] text-emerald-500">Valid</span>
                     </motion.div>
@@ -261,18 +238,12 @@ export function GraphQLPanel({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
+              <motion.div {...pressableStrong}>
                 <Badge variant="secondary" className="text-xs bg-purple-500/10 text-purple-400 border-purple-500/20 font-mono">
                   POST
                 </Badge>
               </motion.div>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
+              <motion.div {...pressableStrong}>
                 <Badge variant="secondary" className="text-xs bg-cyan-500/10 text-cyan-400 border-cyan-500/20">
                   {extractOperationName(query)}
                 </Badge>
@@ -291,13 +262,10 @@ export function GraphQLPanel({
         </div>
       </motion.div>
 
-      {/* Validation Errors */}
       <AnimatePresence mode="wait">
         {!validation.valid && validation.errors.length > 0 && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            {...collapse}
             className="px-4 py-2 bg-destructive/10 border-b border-destructive/20"
           >
             <motion.p
@@ -312,13 +280,10 @@ export function GraphQLPanel({
         )}
       </AnimatePresence>
 
-      {/* Templates Dropdown with stagger animation */}
       <AnimatePresence>
         {showExamples && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            {...collapse}
             className="px-4 py-3 border-b border-border/50 bg-gradient-to-r from-purple-500/5 to-pink-500/5"
           >
             <p className="text-xs text-muted-foreground mb-3 flex items-center gap-2">
@@ -326,7 +291,7 @@ export function GraphQLPanel({
               Insert a template:
             </p>
             <motion.div
-              variants={containerVariants}
+              variants={staggerContainer}
               initial="hidden"
               animate="visible"
               className="grid grid-cols-2 sm:grid-cols-4 gap-2"
@@ -337,10 +302,9 @@ export function GraphQLPanel({
                 { type: 'subscription', label: 'Subscription', icon: '🔄', color: 'from-green-500/10 to-emerald-500/10', border: 'border-emerald-500/20' },
                 { type: 'variables', label: 'Variables', icon: '{ }', color: 'from-orange-500/10 to-yellow-500/10', border: 'border-orange-500/20' },
               ].map((template) => (
-                <motion.div key={template.type} variants={itemVariants}>
+                <motion.div key={template.type} variants={listItem}>
                   <motion.button
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
+                    {...liftOnHover}
                     onClick={() => insertExample(template.type)}
                     className={`p-3 rounded-lg border ${template.border} bg-gradient-to-br ${template.color} hover:shadow-lg hover:shadow-${template.color.split('-')[1]}-500/10 transition-all`}
                   >
@@ -354,13 +318,10 @@ export function GraphQLPanel({
         )}
       </AnimatePresence>
 
-      {/* Detected Variables with pills */}
       <AnimatePresence>
         {detectedVars.length > 0 && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            {...collapse}
             className="px-4 py-2 border-b border-border/50 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 flex items-center gap-2 flex-wrap"
           >
             <span className="text-xs text-muted-foreground flex items-center gap-1.5">
@@ -368,13 +329,13 @@ export function GraphQLPanel({
               Variables detected:
             </span>
             <motion.div
-              variants={containerVariants}
+              variants={staggerContainer}
               initial="hidden"
               animate="visible"
               className="flex gap-1.5 flex-wrap"
             >
               {detectedVars.map((v, i) => (
-                <motion.div key={v.name} variants={itemVariants}>
+                <motion.div key={v.name} variants={listItem}>
                   <Badge
                     variant="outline"
                     className="text-xs bg-cyan-500/10 text-cyan-400 border-cyan-500/30 font-mono"
@@ -390,17 +351,16 @@ export function GraphQLPanel({
         )}
       </AnimatePresence>
 
-      {/* Main Editor Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <motion.div
-          variants={itemVariants}
+          variants={listItem}
           className="px-4 py-2 border-b border-border/50 bg-muted/10 flex items-center justify-between"
         >
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             Query Editor
           </span>
           <div className="flex items-center gap-1">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <motion.div {...pressableStrong}>
               <Button
                 size="sm"
                 variant="ghost"
@@ -420,7 +380,7 @@ export function GraphQLPanel({
                 )}
               </Button>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <motion.div {...pressableStrong}>
               <Button
                 size="sm"
                 variant="ghost"
@@ -430,10 +390,7 @@ export function GraphQLPanel({
               >
                 {isPrettifying ? (
                   <>
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    >
+                    <motion.div animate={spin}>
                       <Sparkles className="h-3 w-3" />
                     </motion.div>
                     Prettifying...
@@ -449,10 +406,9 @@ export function GraphQLPanel({
           </div>
         </motion.div>
         <motion.div
-          variants={itemVariants}
+          variants={listItem}
           className="flex-1 p-4 relative"
         >
-          {/* Animated border glow on focus */}
           <div className="absolute inset-4 rounded-lg opacity-0 focus-within:opacity-100 transition-opacity pointer-events-none">
             <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-cyan-500/20 blur-xl" />
           </div>
@@ -468,13 +424,12 @@ export function GraphQLPanel({
         </motion.div>
       </div>
 
-      {/* Variables Editor with collapsible animation */}
       <div className="border-t border-border/50">
         <AnimatePresence>
           <motion.details
             className="group"
             open={activeSection === 'variables'}
-            variants={itemVariants}
+            variants={listItem}
           >
             <motion.summary
               onClick={(e) => {
@@ -484,20 +439,14 @@ export function GraphQLPanel({
               className="px-4 py-2 cursor-pointer hover:bg-muted/10 flex items-center justify-between list-none"
             >
               <div className="flex items-center gap-2">
-                <motion.div
-                  animate={{ rotate: activeSection === 'variables' ? 90 : 0 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 24 }}
-                >
+                <motion.div {...rotateTo(activeSection === 'variables' ? 90 : 0)}>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </motion.div>
                 <span className="text-xs font-medium text-muted-foreground">
                   Query Variables (JSON)
                 </span>
                 {!varValidation.valid && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                  >
+                  <motion.div {...popIn}>
                     <AlertCircle className="h-3.5 w-3.5 text-destructive" />
                   </motion.div>
                 )}
@@ -509,9 +458,7 @@ export function GraphQLPanel({
             <AnimatePresence>
               {activeSection === 'variables' && (
                 <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
+                  {...collapse}
                   className="overflow-hidden"
                 >
                   <div className="p-4 border-t border-border/50 bg-muted/5">
@@ -525,8 +472,7 @@ export function GraphQLPanel({
                     />
                     {!varValidation.valid && (
                       <motion.p
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        {...slideDown}
                         className="text-xs text-destructive mt-2 flex items-center gap-1.5"
                       >
                         <AlertCircle className="h-3 w-3" />
@@ -541,11 +487,10 @@ export function GraphQLPanel({
         </AnimatePresence>
       </div>
 
-      {/* Request Preview with syntax highlight */}
       <div className="border-t border-border/50">
         <motion.details
           className="group"
-          variants={itemVariants}
+          variants={listItem}
         >
           <summary className="px-4 py-2 cursor-pointer hover:bg-muted/10 flex items-center justify-between list-none">
             <div className="flex items-center gap-2">
@@ -575,7 +520,7 @@ export function GraphQLPanel({
 
       {/* Footer Info with gradient text */}
       <motion.div
-        variants={itemVariants}
+        variants={listItem}
         className="px-4 py-2 border-t border-border/50 bg-muted/20 flex items-center justify-between"
       >
         <p className="text-xs text-muted-foreground">

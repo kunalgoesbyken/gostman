@@ -3,28 +3,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Plus, Trash2, Hash, CheckCircle2, AlertCircle } from "lucide-react"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
+import { staggerContainerFast, listItem, fadeIn, cardEnter, pressableSubtle, wiggle } from "../lib/motion"
 
-// Animation variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.03
-    }
-  }
-}
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
-  }
-}
-
-// Generate unique ID for params
 let paramIdCounter = 0
 const generateParamId = () => `param-${Date.now()}-${paramIdCounter++}`
 
@@ -363,22 +344,20 @@ export function ParamsPanel({
   return (
     <motion.div
       className="flex flex-col h-full"
-      variants={containerVariants}
+      variants={staggerContainerFast}
       initial="hidden"
       animate="visible"
     >
-      {/* Header */}
       <motion.div
         className="relative overflow-hidden"
-        variants={itemVariants}
+        variants={listItem}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10" />
         <div className="relative px-4 py-3 border-b border-border/50 bg-muted/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <motion.div
-                animate={{ rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                animate={wiggle}
               >
                 <Hash className="h-5 w-5 text-cyan-500" />
               </motion.div>
@@ -397,27 +376,23 @@ export function ParamsPanel({
         </div>
       </motion.div>
 
-      {/* Instructions */}
       <motion.div
         className="px-4 py-3 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 border-b border-cyan-500/10"
-        variants={itemVariants}
+        variants={listItem}
       >
         <p className="text-xs text-muted-foreground">
           Add query parameters to your URL. Parameters from the URL are automatically loaded here.
         </p>
       </motion.div>
 
-      {/* Key-Value List or Empty State */}
       <motion.div
         className="flex-1 overflow-y-auto"
-        variants={itemVariants}
+        variants={listItem}
       >
         <div className="p-2">
           {params.length === 0 ? (
-            /* Empty State */
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              {...fadeIn}
               className="flex flex-col items-center justify-center py-16 text-center"
             >
               <Hash className="h-12 w-12 text-muted-foreground/20 mb-4" />
@@ -428,7 +403,6 @@ export function ParamsPanel({
             </motion.div>
           ) : (
             <>
-              {/* Header row */}
               <div className="grid grid-cols-[40px_1fr_1fr_40px] gap-2 px-3 py-2 text-xs font-medium text-muted-foreground">
                 <div className="flex items-center justify-center">
                   <input
@@ -443,21 +417,15 @@ export function ParamsPanel({
                 <div />
               </div>
 
-              {/* Params list */}
-              <AnimatePresence mode="popLayout">
+              <AnimatePresence>
                 {params.map((param) => (
                   <motion.div
                     key={param.id}
-                    layout
-                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9, height: 0 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                    {...cardEnter}
                     className={`grid grid-cols-[40px_1fr_1fr_40px] gap-2 p-2 rounded-lg transition-colors ${
                       !param.enabled ? 'opacity-50 bg-muted/20' : ''
                     }`}
                   >
-                    {/* Enabled checkbox */}
                     <div className="flex items-center justify-center">
                       <input
                         type="checkbox"
@@ -467,7 +435,6 @@ export function ParamsPanel({
                       />
                     </div>
 
-                    {/* Key input */}
                     <Input
                       data-param-id={param.id}
                       placeholder="Parameter name"
@@ -477,7 +444,6 @@ export function ParamsPanel({
                       disabled={!param.enabled}
                     />
 
-                    {/* Value input */}
                     <Input
                       placeholder="Value"
                       value={param.value}
@@ -486,8 +452,7 @@ export function ParamsPanel({
                       disabled={!param.enabled}
                     />
 
-                    {/* Delete button */}
-                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                    <div>
                       <Button
                         size="icon"
                         variant="ghost"
@@ -496,15 +461,14 @@ export function ParamsPanel({
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
-                    </motion.div>
+                    </div>
                   </motion.div>
                 ))}
               </AnimatePresence>
             </>
           )}
 
-          {/* Add button */}
-          <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} className="mt-2">
+          <motion.div {...pressableSubtle} className="mt-2">
             <Button
               variant="outline"
               size="sm"
@@ -518,10 +482,9 @@ export function ParamsPanel({
         </div>
       </motion.div>
 
-      {/* Footer */}
       <motion.div
         className="px-4 py-3 border-t border-border/50 bg-muted/20 flex items-center justify-between"
-        variants={itemVariants}
+        variants={listItem}
       >
         <p className="text-xs text-muted-foreground">
           {enabledCount > 0 ? (

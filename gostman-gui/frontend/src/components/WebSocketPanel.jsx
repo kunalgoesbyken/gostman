@@ -5,40 +5,27 @@ import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { Textarea } from "./ui/textarea"
 import { Input } from "./ui/input"
+import {
+  fadeIn,
+  slideUp,
+  slideDown,
+  scaleInOut,
+  scaleInOutSubtle,
+  streamItem,
+  pressable,
+  pressableIcon,
+  pulseRing,
+  pulseScale,
+  pulseOpacity,
+  heartbeat,
+  spin,
+  float,
+  spring,
+  springSnappy,
+  durationBase,
+} from "../lib/motion"
 
-// Animation variants
-const messageVariants = {
-  hidden: { opacity: 0, x: -20, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    scale: 1,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
-  },
-  exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } }
-}
-
-const pulseGlow = {
-  boxShadow: [
-    '0 0 0 0px rgba(34, 211, 238, 0.4)',
-    '0 0 0 10px rgba(34, 211, 238, 0)',
-    '0 0 0 0px rgba(34, 211, 238, 0.4)',
-  ],
-  transition: {
-    duration: 2,
-    repeat: Infinity,
-  }
-}
-
-const waveAnimation = {
-  scale: [1, 1.1, 1],
-  opacity: [0.5, 1, 0.5],
-  transition: {
-    duration: 1.5,
-    repeat: Infinity,
-    ease: "easeInOut"
-  }
-}
+const CONNECTED_RING_RGB = '34, 211, 238'
 
 /**
  * WebSocket Testing Panel with Enhanced Visuals
@@ -263,40 +250,34 @@ export function WebSocketPanel({
   return (
     <motion.div
       className="flex flex-col h-full"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      {...fadeIn}
+      transition={durationBase}
     >
-      {/* Enhanced Header with gradient and glow */}
       <motion.div
         className="relative overflow-hidden"
-        initial={{ y: -10, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 300, damping: 24 }}
+        {...slideDown}
+        transition={spring}
       >
-        {/* Animated gradient background */}
         <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10" />
         {state === ConnectionState.CONNECTED && (
           <motion.div
             className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-cyan-500/5"
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 2, repeat: Infinity }}
+            animate={pulseOpacity}
           />
         )}
 
         <div className="relative px-4 py-3 border-b border-border/50 bg-muted/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {/* Animated icon */}
               <motion.div
                 className="relative"
-                animate={state === ConnectionState.CONNECTED ? waveAnimation : {}}
+                animate={state === ConnectionState.CONNECTED ? pulseScale : {}}
               >
                 {state === ConnectionState.CONNECTED ? (
                   <>
                     <motion.div
                       className="absolute inset-0 rounded-full bg-emerald-500/30 blur-md"
-                      animate={pulseGlow}
+                      animate={pulseRing(CONNECTED_RING_RGB)}
                     />
                     <Radio className="h-5 w-5 text-emerald-400 relative z-10" />
                   </>
@@ -309,25 +290,20 @@ export function WebSocketPanel({
                 <span className="text-sm font-semibold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
                   WebSocket
                 </span>
-                {/* Animated connection status */}
                 <motion.div
                   key={state}
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
+                  initial={scaleInOut.initial}
+                  animate={scaleInOut.animate}
                   className={`flex items-center gap-1.5 mt-0.5 ${statusConfig.color}`}
                 >
                   {state === ConnectionState.CONNECTED && (
                     <motion.div
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 1, repeat: Infinity }}
+                      animate={heartbeat}
                       className="w-1.5 h-1.5 rounded-full bg-emerald-400"
                     />
                   )}
                   {state === ConnectionState.CONNECTING && (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    >
+                    <motion.div animate={spin}>
                       <Clock className="h-3 w-3" />
                     </motion.div>
                   )}
@@ -340,11 +316,9 @@ export function WebSocketPanel({
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Auto-reconnect toggle with animation */}
               <motion.label
                 className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer px-2 py-1 rounded-md hover:bg-muted/30 transition-colors"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                {...pressable}
               >
                 <motion.div
                   className="relative"
@@ -360,7 +334,7 @@ export function WebSocketPanel({
                     <motion.div
                       className="w-3 h-3 rounded-full bg-white shadow-sm mt-0.5"
                       animate={{ x: autoReconnect ? 16 : 2 }}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      transition={springSnappy}
                     />
                   </div>
                 </motion.div>
@@ -371,11 +345,9 @@ export function WebSocketPanel({
         </div>
       </motion.div>
 
-      {/* URL Input with enhanced styling */}
       <motion.div
         className="px-4 py-3 border-b border-border/50"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
+        {...slideUp}
         transition={{ delay: 0.1 }}
       >
         <div className="flex items-center gap-2">
@@ -395,9 +367,7 @@ export function WebSocketPanel({
             {state === ConnectionState.CONNECTED || state === ConnectionState.CONNECTING ? (
               <motion.div
                 key="disconnect"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
+                {...scaleInOut}
               >
                 <Button
                   size="sm"
@@ -412,9 +382,7 @@ export function WebSocketPanel({
             ) : (
               <motion.div
                 key="connect"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
+                {...scaleInOut}
               >
                 <Button
                   size="sm"
@@ -430,26 +398,21 @@ export function WebSocketPanel({
         </div>
       </motion.div>
 
-      {/* Messages with enhanced animations */}
       <motion.div
         className="flex-1 overflow-y-auto p-4 space-y-2 bg-background"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        {...fadeIn}
         transition={{ delay: 0.2 }}
       >
         <AnimatePresence mode="popLayout">
           {messages.length === 0 ? (
             <motion.div
               key="empty"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              {...scaleInOutSubtle}
               className="flex items-center justify-center h-full text-muted-foreground text-sm"
             >
               <div className="text-center">
                 <motion.div
-                  animate={{ y: [0, -10, 0] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  animate={float}
                 >
                   <Waves className="h-12 w-12 mx-auto mb-3 opacity-30" />
                 </motion.div>
@@ -463,15 +426,14 @@ export function WebSocketPanel({
             </motion.div>
           ) : (
             <>
-              {messages.map((msg, idx) => (
+              {messages.map((msg) => (
                 <motion.div
                   key={msg.id}
                   layout
-                  variants={messageVariants}
+                  variants={streamItem}
                   initial="hidden"
                   animate="visible"
                   exit="exit"
-                  transition={{ delay: idx * 0.03 }}
                   className={`
                     relative group flex gap-3 p-3 rounded-lg text-sm border
                     ${msg.direction === 'sent'
@@ -482,7 +444,6 @@ export function WebSocketPanel({
                     }
                   `}
                 >
-                  {/* Direction indicator */}
                   <div className="shrink-0 pt-0.5">
                     {msg.direction === 'sent' && (
                       <motion.div
@@ -531,8 +492,7 @@ export function WebSocketPanel({
                           {formatTime(msg.timestamp)}
                         </span>
                         <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
+                          {...pressableIcon}
                           onClick={() => copyMessage(msg.content, msg.id)}
                           className="opacity-0 group-hover:opacity-100 transition-opacity"
                         >
@@ -549,7 +509,6 @@ export function WebSocketPanel({
                     </pre>
                   </div>
 
-                  {/* Gradient glow on hover */}
                   {msg.direction === 'sent' && (
                     <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity -z-10 blur-sm" />
                   )}
@@ -564,11 +523,9 @@ export function WebSocketPanel({
         </AnimatePresence>
       </motion.div>
 
-      {/* Message Input with enhanced styling */}
       <motion.div
         className="border-t border-border/50 p-4 bg-gradient-to-t from-muted/30 to-transparent"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
+        {...slideUp}
         transition={{ delay: 0.3 }}
       >
         <div className="relative">
@@ -588,7 +545,6 @@ export function WebSocketPanel({
               }
             }}
           />
-          {/* Character count */}
           <motion.div
             className="absolute bottom-2 right-2 text-[10px] text-muted-foreground"
             animate={{ opacity: message.length > 0 ? 1 : 0 }}
@@ -605,7 +561,7 @@ export function WebSocketPanel({
             <span className="ml-1">to send</span>
           </div>
           <div className="flex items-center gap-2">
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.div {...pressable}>
               <Button
                 size="sm"
                 variant="ghost"
@@ -617,7 +573,7 @@ export function WebSocketPanel({
                 Clear
               </Button>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.div {...pressable}>
               <Button
                 size="sm"
                 onClick={send}

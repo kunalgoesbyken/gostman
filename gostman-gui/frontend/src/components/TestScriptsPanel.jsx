@@ -10,26 +10,20 @@ import {
   VARIABLE_TEMPLATES,
   createTestScript
 } from "../lib/chaining"
-
-// Animation variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05
-    }
-  }
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
-  }
-}
+import {
+  staggerContainer,
+  listItem,
+  popIn,
+  popInOut,
+  cardEnter,
+  collapse,
+  slideDown,
+  pressable,
+  pressableSubtle,
+  liftOnHover,
+  wiggle,
+  springSoft,
+} from "../lib/motion"
 
 const scopeConfig = {
   environment: { label: 'Environment', color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
@@ -138,22 +132,20 @@ export function TestScriptsPanel({
   return (
     <motion.div
       className="flex flex-col h-full"
-      variants={containerVariants}
+      variants={staggerContainer}
       initial="hidden"
       animate="visible"
     >
-      {/* Header with gradient */}
       <motion.div
         className="relative overflow-hidden"
-        variants={itemVariants}
+        variants={listItem}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-orange-500/10" />
         <div className="relative px-4 py-3 border-b border-border/50 bg-muted/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <motion.div
-                animate={{ rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                animate={wiggle}
               >
                 <Link2 className="h-5 w-5 text-purple-500" />
               </motion.div>
@@ -165,8 +157,7 @@ export function TestScriptsPanel({
                   {extractedCount > 0 ? (
                     <motion.div
                       key={extractedCount}
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
+                      {...popIn}
                       className="flex items-center gap-1 text-[10px] text-emerald-400"
                     >
                       <CheckCircle2 className="h-3 w-3" />
@@ -182,11 +173,7 @@ export function TestScriptsPanel({
             </div>
             <AnimatePresence>
               {hasResponse && (
-                <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0, opacity: 0 }}
-                >
+                <motion.div {...popInOut}>
                   <Badge className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/20 gap-1">
                     <Target className="h-3 w-3" />
                     Ready
@@ -198,10 +185,9 @@ export function TestScriptsPanel({
         </div>
       </motion.div>
 
-      {/* Instructions with enhanced styling */}
       <motion.div
         className="px-4 py-3 bg-gradient-to-r from-purple-500/5 to-pink-500/5 border-b border-purple-500/10"
-        variants={itemVariants}
+        variants={listItem}
       >
         <div className="flex items-start gap-3">
           <div className="p-2 rounded-lg bg-purple-500/10">
@@ -218,23 +204,17 @@ export function TestScriptsPanel({
         </div>
       </motion.div>
 
-      {/* Extractors List with enhanced animations */}
       <motion.div
         className="flex-1 overflow-y-auto p-4 space-y-3"
-        variants={itemVariants}
+        variants={listItem}
       >
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence>
           {extractors.map((extractor, idx) => (
             <motion.div
               key={idx}
-              layout
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9, height: 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 24 }}
+              {...cardEnter}
               className="relative group"
             >
-              {/* Scope indicator border */}
               <div className={`absolute left-0 top-2 bottom-2 w-1 rounded-full ${scopeConfig[extractor.scope]?.bg || scopeConfig.environment.bg}`} />
 
               <div className="flex items-center gap-2 p-3 rounded-lg border border-border/50 bg-muted/10 ml-3 hover:border-border/80 transition-colors">
@@ -254,8 +234,7 @@ export function TestScriptsPanel({
                   />
                 </div>
 
-                {/* Animated scope selector */}
-                <motion.select
+                <select
                   value={extractor.scope}
                   onChange={(e) => updateExtractor(idx, 'scope', e.target.value)}
                   className={`h-9 px-3 text-sm rounded-md border cursor-pointer transition-colors ${
@@ -263,22 +242,15 @@ export function TestScriptsPanel({
                   } ${scopeConfig[extractor.scope]?.border || scopeConfig.environment.border} ${
                     scopeConfig[extractor.scope]?.color || scopeConfig.environment.color
                   }`}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                 >
                   <option value="environment">Environment</option>
                   <option value="local">Local</option>
                   <option value="global">Global</option>
-                </motion.select>
+                </select>
 
-                {/* Live preview with animation */}
                 <AnimatePresence>
                   {previewResult && previewResult[idx] && extractor.name && extractor.path && (
-                    <motion.div
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0, opacity: 0 }}
-                    >
+                    <motion.div {...popInOut}>
                       <Badge
                         variant={previewResult[idx].found ? "default" : "secondary"}
                         className={`gap-1 ${
@@ -301,7 +273,7 @@ export function TestScriptsPanel({
                   )}
                 </AnimatePresence>
 
-                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                <div>
                   <Button
                     size="icon"
                     variant="ghost"
@@ -310,14 +282,13 @@ export function TestScriptsPanel({
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
-                </motion.div>
+                </div>
               </div>
             </motion.div>
           ))}
         </AnimatePresence>
 
-        {/* Add button with animation */}
-        <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+        <motion.div {...pressableSubtle}>
           <Button
             variant="outline"
             size="sm"
@@ -330,20 +301,18 @@ export function TestScriptsPanel({
         </motion.div>
       </motion.div>
 
-      {/* Templates section */}
       <motion.div
         className="px-4 py-2 border-t border-border/50"
-        variants={itemVariants}
+        variants={listItem}
       >
         <motion.button
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.99 }}
+          {...pressableSubtle}
           onClick={() => setShowTemplates(!showTemplates)}
           className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-foreground py-2"
         >
           <motion.div
             animate={{ rotate: showTemplates ? 180 : 0 }}
-            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            transition={springSoft}
           >
             <ChevronDown className="h-4 w-4" />
           </motion.div>
@@ -353,17 +322,14 @@ export function TestScriptsPanel({
         <AnimatePresence>
           {showTemplates && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              {...collapse}
               className="overflow-hidden"
             >
               <div className="pt-2 grid grid-cols-2 gap-2">
                 {VARIABLE_TEMPLATES.map((template, idx) => (
                   <motion.div
                     key={idx}
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
+                    {...liftOnHover}
                     onClick={() => useTemplate(template)}
                     className="text-left p-3 text-xs rounded-lg border border-border/30 hover:border-purple-500/30 hover:bg-purple-500/5 cursor-pointer transition-all"
                   >
@@ -382,10 +348,9 @@ export function TestScriptsPanel({
         </AnimatePresence>
       </motion.div>
 
-      {/* Generated Script Preview */}
       <motion.div
         className="px-4 py-2 border-t border-border/50 bg-muted/20"
-        variants={itemVariants}
+        variants={listItem}
       >
         <details
           open={showScript}
@@ -397,8 +362,7 @@ export function TestScriptsPanel({
             Generated Postman-compatible script
           </summary>
           <motion.div
-            initial={{ opacity: 0, y: -5 }}
-            animate={{ opacity: 1, y: 0 }}
+            {...slideDown}
             className="mt-2"
           >
             <pre className="p-3 bg-background rounded-lg border border-border/30 overflow-x-auto text-xs">
@@ -408,10 +372,9 @@ export function TestScriptsPanel({
         </details>
       </motion.div>
 
-      {/* Footer Actions */}
       <motion.div
         className="px-4 py-3 border-t border-border/50 bg-muted/20 flex items-center justify-between"
-        variants={itemVariants}
+        variants={listItem}
       >
         <p className="text-xs text-muted-foreground">
           {hasResponse ? (
@@ -427,7 +390,7 @@ export function TestScriptsPanel({
           )}
         </p>
         <div className="flex items-center gap-2">
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <motion.div {...pressable}>
             <Button
               size="sm"
               variant="outline"
@@ -436,7 +399,7 @@ export function TestScriptsPanel({
               Clear All
             </Button>
           </motion.div>
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <motion.div {...pressable}>
             <Button
               size="sm"
               onClick={applyExtractions}

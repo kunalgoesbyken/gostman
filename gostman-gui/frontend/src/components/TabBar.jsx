@@ -2,6 +2,7 @@ import { memo } from 'react'
 import { X, Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '../lib/utils'
+import { springLayout } from '../lib/motion'
 
 export const TabBar = memo(function TabBar({ tabs, activeTabId, onTabSelect, onTabClose, onNewTab }) {
     const getMethodColor = (method) => {
@@ -29,7 +30,7 @@ export const TabBar = memo(function TabBar({ tabs, activeTabId, onTabSelect, onT
                             : 'hover:bg-muted/50 text-muted-foreground'
                     )}
                     onClick={() => onTabSelect(tab.id)}
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    transition={springLayout}
                 >
                     <span className={cn('text-xs font-mono font-semibold', getMethodColor(tab.request.method))}>
                         {tab.request.method}

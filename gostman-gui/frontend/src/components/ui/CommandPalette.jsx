@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, Plus, Save, FileText, FolderPlus, RotateCcw, Download, Upload, Command } from "lucide-react"
 import { cn } from "../../lib/utils"
+import { overlayFade, dialogPop, tapScale } from "../../lib/motion"
 
 const COMMANDS = [
   { id: "new-request", label: "New Request", description: "Create a new request", icon: Plus, shortcut: "Ctrl+N", action: "newRequest" },
@@ -23,19 +24,16 @@ export function CommandPalette({ isOpen, onClose, onCommand }) {
     return cmd.label.toLowerCase().includes(search) || cmd.description.toLowerCase().includes(search)
   })
 
-  // Focus input on open
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus()
     }
   }, [isOpen])
 
-  // Reset selection when query changes
   useEffect(() => {
     setSelectedIndex(0)
   }, [query])
 
-  // Keyboard navigation
   useEffect(() => {
     if (!isOpen) return
 
@@ -95,25 +93,16 @@ export function CommandPalette({ isOpen, onClose, onCommand }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh] px-4">
-      {/* Backdrop */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.15 }}
+        {...overlayFade}
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={handleClose}
       />
 
-      {/* Palette */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.96, y: -10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.96, y: -10 }}
-        transition={{ duration: 0.15, ease: "easeOut" }}
+        {...dialogPop}
         className="relative w-full max-w-xl bg-background border border-border/60 rounded-xl shadow-2xl overflow-hidden"
       >
-        {/* Input */}
         <div className="flex items-center gap-3 border-b border-border/40 px-4 py-3.5">
           <Search className="h-5 w-5 text-muted-foreground shrink-0" />
           <input
@@ -129,7 +118,6 @@ export function CommandPalette({ isOpen, onClose, onCommand }) {
           </kbd>
         </div>
 
-        {/* Commands List */}
         <div ref={listRef} className="max-h-[300px] overflow-y-auto scrollbar-thin p-2">
           {filteredCommands.length === 0 ? (
             <div className="py-8 text-center text-sm text-muted-foreground">
@@ -152,8 +140,7 @@ export function CommandPalette({ isOpen, onClose, onCommand }) {
                           ? "text-destructive hover:bg-destructive/10"
                           : "hover:bg-muted/50"
                     )}
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
+                    {...tapScale}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
                     <div className="flex-1 min-w-0">
@@ -182,7 +169,6 @@ export function CommandPalette({ isOpen, onClose, onCommand }) {
           )}
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-between px-4 py-2 border-t border-border/40 bg-muted/20 text-xs text-muted-foreground">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
