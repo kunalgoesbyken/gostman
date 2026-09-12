@@ -1,3 +1,4 @@
+import { EmptyState } from "./ui/emptyState"
 import React, { memo, useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { JsonView } from 'react-json-view-lite'
 import 'react-json-view-lite/dist/index.css'
@@ -119,22 +120,11 @@ function ResizableDivider({ onDrag, isDragging, onDoubleClick }) {
 }
 
 // Empty State
-function EmptyState({ icon: Icon, title, subtitle }) {
-  return (
-    <div className="flex h-full flex-col items-center justify-center p-8 text-center animate-in fade-in-50 duration-300">
-      <div className="mb-4 rounded-2xl bg-gradient-to-br from-muted/20 to-muted/5 p-5 ring-1 ring-border/50">
-        <Icon className="h-8 w-8 text-muted-foreground/40" />
-      </div>
-      <p className="text-sm font-medium text-muted-foreground">{title}</p>
-      <p className="mt-1.5 text-xs text-muted-foreground/50 max-w-xs">{subtitle}</p>
-    </div>
-  )
-}
 
 // Response Content Renderer
 function ResponseContent({ response, bodyMode, detectedType, jsonData, isValidJSON, rawResponse }) {
   if (!response) {
-    return <EmptyState icon={FileText} title="No response data" subtitle="Send a request to see the response here" />
+    return <EmptyState icon={FileText} title="No response data" description="Send a request to see the response here" />
   }
 
   if (bodyMode === 'pretty') {

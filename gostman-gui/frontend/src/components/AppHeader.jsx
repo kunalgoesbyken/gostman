@@ -4,37 +4,41 @@ import logo from "../assets/logo.jpg"
 
 export function AppHeader({ className, onImport, onReset, onBack }) {
   return (
-    <header className={`flex items-center gap-6 bg-muted/10 backdrop-blur-md px-6 ${className}`}>
-      <div className="flex items-center gap-3">
-        <img src={logo} alt="Gostman Logo" className="h-9 w-9 rounded-lg" />
-        <div>
-          <h1 className="text-base font-brand font-bold tracking-tight">Gostman</h1>
-          <p className="text-[10px] text-muted-foreground/70 uppercase tracking-wider">HTTP Client</p>
+    <header className={`flex items-center gap-4 bg-muted/10 px-4 backdrop-blur-md ${className}`}>
+      {onBack && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onBack}
+          aria-label="Back to landing page"
+          className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+      )}
+
+      <div className="flex min-w-0 items-center gap-2.5">
+        <img src={logo} alt="" className="h-7 w-7 rounded-md" />
+        <div className="min-w-0 leading-tight">
+          <h1 className="font-brand text-[15px] font-bold tracking-tight">Gostman</h1>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70">HTTP Client</p>
         </div>
       </div>
 
-      <div className="flex items-center gap-1">
-        <Button variant="outline" size="sm" onClick={onImport} className="gap-2">
+      <div className="ml-auto flex items-center gap-2">
+        <Button variant="outline" size="sm" onClick={onImport} className="h-8 gap-2">
           <Import className="h-4 w-4" />
           Import
         </Button>
-        {onBack && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onBack}
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
-            title="Back to landing page"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        )}
+
+        <div className="h-5 w-px bg-border" />
+
         <Button
           variant="ghost"
           size="icon"
           onClick={onReset}
-          className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors"
-          title="Reset to default (Clear data)"
+          aria-label="Reset and clear all local data"
+          className="h-8 w-8 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
         >
           <RotateCcw className="h-4 w-4" />
         </Button>

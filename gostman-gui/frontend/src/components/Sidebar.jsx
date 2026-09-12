@@ -4,6 +4,7 @@ import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { Input } from "./ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
+import { EmptyState } from "./ui/emptyState"
 import { cn } from "../lib/utils"
 import { METHOD_VARIANTS } from "../lib/constants"
 
@@ -22,40 +23,6 @@ function formatRelativeTime(isoString) {
   return date.toLocaleDateString()
 }
 
-const EmptyState = memo(({ icon: Icon, title, description, variant = "default" }) => {
-  const colorVariants = {
-    default: {
-      bg: "bg-primary/10",
-      gradient: "from-primary/20 to-primary/5",
-      border: "border-primary/10",
-      shadow: "shadow-primary/5",
-      text: "text-primary",
-      animate: false
-    },
-    blue: {
-      bg: "bg-info/10",
-      gradient: "from-info/20 to-info/5",
-      border: "border-info/10",
-      shadow: "shadow-info/5",
-      text: "text-info",
-      animate: true
-    }
-  }
-  const colors = colorVariants[variant] || colorVariants.default
-
-  return (
-    <div className="flex h-full flex-col items-center justify-center p-8 text-center">
-      <div className="mb-4 relative">
-        <div className={`absolute inset-0 ${colors.bg} rounded-full blur-xl scale-150 ${colors.animate ? 'animate-pulse' : ''}`} />
-        <div className={`relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${colors.gradient} border ${colors.border} shadow-lg ${colors.shadow}`}>
-          <Icon className={`h-7 w-7 ${colors.text}`} />
-        </div>
-      </div>
-      <p className="text-sm font-medium text-foreground mb-1">{title}</p>
-      <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>
-    </div>
-  )
-})
 
 export const Sidebar = memo(function Sidebar({
   requests = [],
@@ -165,7 +132,6 @@ export const Sidebar = memo(function Sidebar({
                 icon={searchQuery ? Search : FileJson}
                 title={searchQuery ? "No results" : "No requests yet"}
                 description={searchQuery ? "Try different terms" : "Press Ctrl+N to start"}
-                variant="default"
               />
             ) : (
               <div className="p-2 space-y-0.5">

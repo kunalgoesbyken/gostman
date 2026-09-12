@@ -69,7 +69,18 @@ export const RequestBar = memo(function RequestBar({ activeRequest, onMethodChan
 
   return (
     <div className="border-b border-border/60 bg-muted/20 backdrop-blur-md">
-      <div className="flex items-center gap-3 px-4 py-3">
+      <div className="px-4 pt-2.5">
+        <Input
+          type="text"
+          placeholder="Untitled request"
+          value={activeRequest.name}
+          onChange={(e) => onNameChange(e.target.value)}
+          aria-label="Request name"
+          className="h-auto border-none bg-transparent px-0 py-0 text-sm font-medium text-foreground/90 shadow-none placeholder:text-muted-foreground/60 focus-visible:ring-0"
+        />
+      </div>
+
+      <div className="flex items-center gap-2 px-4 pb-3 pt-2">
         {/* Method Selector */}
         <div className="relative">
           <Select
@@ -115,14 +126,14 @@ export const RequestBar = memo(function RequestBar({ activeRequest, onMethodChan
           onClick={onSend}
           disabled={loading}
           size="sm"
-          className={cn(
-            "gap-2 font-medium",
-            loading && "animate-pulse-glow"
-          )}
-          title="Send request (Ctrl+Enter)"
+          aria-label="Send request (Ctrl+Enter)"
+          className={cn("gap-2 font-medium", loading && "animate-pulse-glow")}
         >
           <Send className="h-4 w-4" />
           {loading ? "Sending..." : "Send"}
+          <span className="ml-1 hidden font-mono text-[10px] text-primary-foreground/60 xl:inline">
+            Ctrl+Enter
+          </span>
         </Button>
 
         {/* Save Button */}
@@ -131,7 +142,7 @@ export const RequestBar = memo(function RequestBar({ activeRequest, onMethodChan
           variant="secondary"
           size="sm"
           className="gap-2"
-          title="Save request (Ctrl+S)"
+          aria-label="Save request (Ctrl+S)"
         >
           <Save className="h-4 w-4" />
           Save
@@ -144,40 +155,12 @@ export const RequestBar = memo(function RequestBar({ activeRequest, onMethodChan
             variant="outline"
             size="sm"
             className="gap-2"
-            title="Generate code snippet"
+            aria-label="Generate code snippet"
           >
             <Code className="h-4 w-4" />
             Code
           </Button>
         )}
-
-        {/* Request Name Input */}
-        <div className="relative w-40">
-          <Input
-            type="text"
-            placeholder="Request name"
-            value={activeRequest.name}
-            onChange={(e) => onNameChange(e.target.value)}
-            className="text-sm"
-          />
-        </div>
-      </div>
-
-      {/* Keyboard shortcuts bar */}
-      <div className="flex items-center justify-between border-t border-border/60 px-4 py-1.5 text-xs text-muted-foreground/70">
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1">
-            <kbd>Ctrl</kbd>+<kbd>Enter</kbd> Send
-          </span>
-          <span className="flex items-center gap-1">
-            <kbd>Ctrl</kbd>+<kbd>S</kbd> Save
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1">
-            <kbd>Ctrl</kbd>+<kbd>N</kbd> New
-          </span>
-        </div>
       </div>
     </div>
   )
