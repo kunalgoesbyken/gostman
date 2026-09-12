@@ -1,4 +1,4 @@
-import { useEffect, useCallback, lazy, Suspense } from "react"
+import { useEffect, useCallback, useMemo, lazy, Suspense } from "react"
 import { LandingPage } from "./components/LandingPage"
 import { Sidebar } from "./components/Sidebar"
 import { RequestBar } from "./components/RequestBar"
@@ -33,6 +33,7 @@ function WebApp() {
   const folders = useAppStore((s) => s.folders)
   const requestHistory = useAppStore((s) => s.requestHistory)
   const variables = useAppStore((s) => s.variables)
+  const variablesMap = useMemo(() => parseJSON(variables, {}), [variables])
   const tabs = useAppStore((s) => s.tabs)
   const activeTabId = useAppStore((s) => s.activeTabId)
   const codeDialogOpen = useAppStore((s) => s.codeDialogOpen)
@@ -87,7 +88,7 @@ function WebApp() {
 
   const handleCreateFolder = useCreateFolderHandler()
   const handleClearHistory = useClearHistoryHandler()
-  const handleGenerateCode = useGenerateCodeHandler(activeRequest)
+  const handleGenerateCode = useGenerateCodeHandler(activeRequest, variablesMap)
   const handleSaveVars = useSaveVarsHandler(variables, persistVariables)
 
   const handleDeleteFolder = useCallback((folderId) => {
@@ -350,7 +351,7 @@ function WebApp() {
             <ImportExportDialog
               requests={requests}
               folders={folders}
-              variables={parseJSON(variables, {})}
+              variables={variablesMap}
               onImport={handleImport}
               onClose={closeImportDialog}
             />

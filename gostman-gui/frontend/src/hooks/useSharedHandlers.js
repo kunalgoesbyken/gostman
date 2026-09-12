@@ -1,5 +1,6 @@
 import { useCallback } from "react"
 import { generateAllSnippets } from "../lib/codeGenerator"
+import { prepareRequest } from "../lib/requestUtils"
 import { validateEnvVariables } from "../lib/validation"
 import { useAppStore } from "../store/appStore"
 
@@ -37,19 +38,31 @@ export function useClearHistoryHandler() {
   }, [])
 }
 
-export function useGenerateCodeHandler(activeRequest) {
+export function useGenerateCodeHandler(activeRequest, variablesMap) {
   const openCodeDialog = useAppStore((s) => s.openCodeDialog)
+  const showAlert = useAppStore((s) => s.showAlert)
 
   return useCallback(() => {
-    const snippets = generateAllSnippets(
-      activeRequest.method,
-      activeRequest.url,
-      activeRequest.headers,
-      activeRequest.body,
-      activeRequest.queryParams
+    let prepared
+    try {
+      prepared = prepareRequest(activeRequest, variablesMap || {})
+    } catch (e) {
+      showAlert('Cannot Generate Code', e.message, 'OK', 'warning')
+      return
+    }
+
+    // prepareRequest folds GraphQL into a JSON body, substitutes variables and
+    // merges query params into the URL, so snippets match what the app sends.
+    openCodeDialog(
+      generateAllSnippets(
+        prepared.method,
+        prepared.url,
+        JSON.stringify(prepared.headers),
+        prepared.body || '',
+        '{}'
+      )
     )
-    openCodeDialog(snippets)
-  }, [activeRequest])
+  }, [activeRequest, variablesMap])
 }
 
 // `persist` runs after validation so callers that already auto-save can pass a

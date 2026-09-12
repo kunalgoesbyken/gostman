@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, lazy, Suspense } from 'react'
+import { useEffect, useState, useCallback, useMemo, lazy, Suspense } from 'react'
 import { Loader2 } from "lucide-react"
 import { SendRequest, GetRequests, SaveRequest, DeleteRequest, GetVariables, SaveVariables, ResetData, GetFolders, SaveFolders, GetHistory, SaveHistory } from "../wailsjs/go/main/App"
 import { Sidebar } from "./components/Sidebar"
@@ -28,6 +28,7 @@ function App() {
   const tabs = useAppStore((s) => s.tabs)
   const activeTabId = useAppStore((s) => s.activeTabId)
   const variables = useAppStore((s) => s.variables)
+  const variablesMap = useMemo(() => parseJSON(variables, {}), [variables])
   const codeDialogOpen = useAppStore((s) => s.codeDialogOpen)
   const codeSnippets = useAppStore((s) => s.codeSnippets)
   const importDialogOpen = useAppStore((s) => s.importDialogOpen)
@@ -119,7 +120,7 @@ function App() {
 
   const handleCreateFolder = useCreateFolderHandler()
   const handleClearHistory = useClearHistoryHandler()
-  const handleGenerateCode = useGenerateCodeHandler(activeRequest)
+  const handleGenerateCode = useGenerateCodeHandler(activeRequest, variablesMap)
   const handleSaveVars = useSaveVarsHandler(variables, SaveVariables)
 
   const handleDeleteFolder = useCallback((folderId) => {
@@ -366,7 +367,7 @@ function App() {
           <ImportExportDialog
             requests={requests}
             folders={folders}
-            variables={parseJSON(variables, {})}
+            variables={variablesMap}
             onImport={handleImport}
             onClose={closeImportDialog}
           />
