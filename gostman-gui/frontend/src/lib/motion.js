@@ -121,32 +121,6 @@ export const dialogPop = {
 
 export const tapScale = { whileTap: { scale: 0.98 } }
 
-export const pressable = {
-  whileHover: { scale: 1.02 },
-  whileTap: { scale: 0.98 },
-}
-
-export const pressableSubtle = {
-  whileHover: { scale: 1.01 },
-  whileTap: { scale: 0.99 },
-}
-
-export const pressableStrong = {
-  whileHover: { scale: 1.05 },
-  whileTap: { scale: 0.95 },
-}
-
-/** Icon-sized buttons need a larger delta to read at that scale. */
-export const pressableIcon = {
-  whileHover: { scale: 1.1 },
-  whileTap: { scale: 0.9 },
-}
-
-export const liftOnHover = {
-  whileHover: { scale: 1.02, y: -2 },
-  whileTap: { scale: 0.98 },
-}
-
 const loop = (duration, extra = {}) => ({ duration, repeat: Infinity, ...extra })
 
 /** Breathing highlight for a valid/active state. */
@@ -172,11 +146,6 @@ export const pulseScale = {
   transition: loop(1.5, { ease: "easeInOut" }),
 }
 
-export const pulseOpacity = {
-  opacity: [0.5, 1, 0.5],
-  transition: loop(2),
-}
-
 export const heartbeat = {
   scale: [1, 1.2, 1],
   transition: loop(1),
@@ -185,11 +154,6 @@ export const heartbeat = {
 export const spin = {
   rotate: 360,
   transition: loop(1, { ease: "linear" }),
-}
-
-export const float = {
-  y: [0, -10, 0],
-  transition: loop(3, { ease: "easeInOut" }),
 }
 
 /** Occasional attention nudge on an idle icon. */

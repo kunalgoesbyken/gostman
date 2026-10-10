@@ -13,11 +13,9 @@ import {
   scaleInOut,
   scaleInOutSubtle,
   streamItem,
-  pressable,
-  pressableIcon,
+  tapScale,
   pulseRing,
   pulseScale,
-  pulseOpacity,
   heartbeat,
   spin,
   spring,
@@ -100,32 +98,28 @@ const StatusConfig = {
     label: 'Disconnected',
     color: 'text-muted-foreground',
     bg: 'bg-muted',
-    border: 'border-border/50',
-    glow: null
+    border: 'border-border/50'
   },
   [ConnectionState.CONNECTING]: {
     icon: Clock,
     label: 'Connecting...',
     color: 'text-info',
     bg: 'bg-info/10',
-    border: 'border-info/20',
-    glow: 'shadow-lg shadow-info/20'
+    border: 'border-info/20'
   },
   [ConnectionState.CONNECTED]: {
     icon: Radio,
     label: 'Connected',
     color: 'text-success',
     bg: 'bg-success/10',
-    border: 'border-success/20',
-    glow: 'shadow-lg shadow-success/20'
+    border: 'border-success/20'
   },
   [ConnectionState.ERROR]: {
     icon: XCircle,
     label: 'Error',
     color: 'text-destructive',
     bg: 'bg-destructive/10',
-    border: 'border-destructive/20',
-    glow: 'shadow-lg shadow-destructive/20'
+    border: 'border-destructive/20'
   }
 }
 
@@ -284,13 +278,6 @@ export function WebSocketPanel({
         {...slideDown}
         transition={spring}
       >
-        
-        {state === ConnectionState.CONNECTED && (
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-success/5 to-primary/5"
-            animate={pulseOpacity}
-          />
-        )}
 
         <div className="relative px-4 py-3 border-b border-border/50 bg-muted/20">
           <div className="flex items-center justify-between">
@@ -344,7 +331,7 @@ export function WebSocketPanel({
             <div className="flex items-center gap-2">
               <motion.label
                 className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer px-2 py-1 rounded-md hover:bg-muted/30 transition-colors"
-                {...pressable}
+                {...tapScale}
               >
                 <motion.div
                   className="relative"
@@ -385,7 +372,7 @@ export function WebSocketPanel({
               value={url}
               onChange={(e) => onUrlChange(e.target.value)}
               placeholder="echo.websocket.org"
-              className="pl-10 font-mono text-sm bg-background/50 backdrop-blur-sm border-border/50 focus:border-primary/50"
+              className="pl-10 font-mono text-sm bg-background/50 border-border/50 focus:border-primary/50"
               disabled={state === ConnectionState.CONNECTED || state === ConnectionState.CONNECTING}
             />
           </div>
@@ -457,9 +444,9 @@ export function WebSocketPanel({
                   className={`
                     relative group flex gap-3 p-3 rounded-lg text-sm border
                     ${msg.direction === 'sent'
-                      ? 'bg-gradient-to-r from-primary/10 to-primary/5 ml-8 border-primary/10'
+                      ? 'bg-primary/5 ml-8 border-primary/10'
                       : msg.direction === 'received'
-                        ? 'bg-gradient-to-r from-success/10 to-success/5 mr-8 border-success/10'
+                        ? 'bg-success/5 mr-8 border-success/10'
                         : 'bg-muted/20 border-border/50'
                     }
                   `}
@@ -512,7 +499,7 @@ export function WebSocketPanel({
                           {formatTime(msg.timestamp)}
                         </span>
                         <motion.button
-                          {...pressableIcon}
+                          {...tapScale}
                           onClick={() => copyMessage(msg.content, msg.id)}
                           className="opacity-0 group-hover:opacity-100 transition-opacity"
                         >
@@ -528,13 +515,6 @@ export function WebSocketPanel({
                       {msg.content}
                     </pre>
                   </div>
-
-                  {msg.direction === 'sent' && (
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity -z-10 blur-sm" />
-                  )}
-                  {msg.direction === 'received' && (
-                    <div className="absolute -inset-0.5 bg-gradient-to-l from-success/20 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity -z-10 blur-sm" />
-                  )}
                 </motion.div>
               ))}
               <div ref={messagesEndRef} />
@@ -544,7 +524,7 @@ export function WebSocketPanel({
       </motion.div>
 
       <motion.div
-        className="border-t border-border/50 p-4 bg-gradient-to-t from-muted/30 to-transparent"
+        className="border-t border-border/50 p-4"
         {...slideUp}
         {...enterDelay(0.3)}
       >
@@ -553,7 +533,7 @@ export function WebSocketPanel({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder='{{"action": "ping"}'
-            className={`flex-1 h-20 font-mono text-sm resize-none bg-background/50 backdrop-blur-sm border-border/50 transition-all ${
+            className={`flex-1 h-20 font-mono text-sm resize-none bg-background/50 border-border/50 transition-all ${
               state === ConnectionState.CONNECTED
                 ? 'focus:border-primary/50 focus:ring-2 focus:ring-primary/10'
                 : 'opacity-50 cursor-not-allowed'
@@ -581,7 +561,7 @@ export function WebSocketPanel({
             <span className="ml-1">to send</span>
           </div>
           <div className="flex items-center gap-2">
-            <motion.div {...pressable}>
+            <motion.div {...tapScale}>
               <Button
                 size="sm"
                 variant="ghost"
@@ -593,7 +573,7 @@ export function WebSocketPanel({
                 Clear
               </Button>
             </motion.div>
-            <motion.div {...pressable}>
+            <motion.div {...tapScale}>
               <Button
                 size="sm"
                 onClick={send}

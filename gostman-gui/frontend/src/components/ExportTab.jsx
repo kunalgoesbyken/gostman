@@ -150,8 +150,7 @@ export function ExportTab({ requests, folders, variables }) {
 
             {/* Preview */}
             <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background rounded-xl" />
-                <pre className="relative overflow-x-auto rounded-xl p-4 text-sm leading-relaxed border border-white/5 shadow-xl max-h-80">
+                <pre className="relative overflow-x-auto rounded-md p-4 text-sm leading-relaxed border border-border/60 bg-muted/20 max-h-80">
                     <code className="font-mono text-foreground whitespace-pre-wrap">{exportPreview || '// Export preview will appear here'}</code>
                 </pre>
 
@@ -161,7 +160,7 @@ export function ExportTab({ requests, folders, variables }) {
                         size="sm"
                         onClick={handleCopy}
                         variant="secondary"
-                        className="gap-1.5 shadow-lg bg-muted/80 backdrop-blur-sm"
+                        className="gap-1.5"
                     >
                         {copied ? (
                             <>
@@ -178,7 +177,7 @@ export function ExportTab({ requests, folders, variables }) {
                     <Button
                         size="sm"
                         onClick={handleDownload}
-                        className="gap-1.5 shadow-lg bg-primary hover:bg-primary/90"
+                        className="gap-1.5"
                     >
                         <Download className="h-3.5 w-3.5" />
                         <span className="text-xs">Download</span>

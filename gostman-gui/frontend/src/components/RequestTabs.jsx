@@ -53,7 +53,7 @@ export const RequestTabs = memo(function RequestTabs({
 
     return (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-1 flex-col min-h-0">
-            <div className="border-b border-border/60 bg-muted/10 px-4 backdrop-blur-md">
+            <div className="border-b border-border/60 bg-muted/10 px-4">
                 <TabsList>
                     <TabsTrigger value="body" icon={Braces}>Body</TabsTrigger>
                     <TabsTrigger value="graphql" icon={Zap}>GraphQL</TabsTrigger>

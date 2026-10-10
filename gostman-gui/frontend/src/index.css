@@ -93,58 +93,10 @@
   }
 }
 
-/* Grid pattern overlay for that IDE aesthetic */
 @layer components {
-  .grid-pattern {
-    background-image:
-      linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
-      linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px);
-    background-size: 40px 40px;
-    background-position: -1px -1px;
-    opacity: 0.3;
-  }
-
-  /* Glass morphism effect */
-  .glass {
-    @apply bg-background/80 backdrop-blur-md;
-  }
-
-  /* Subtle glow for active elements */
-  .glow {
-    box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.3);
-  }
-
-  .glow-subtle {
-    box-shadow: 0 0 12px -3px hsl(var(--primary) / 0.2);
-  }
-
-  /* Animated pulse for loading states */
-  @keyframes pulse-glow {
-
-    0%,
-    100% {
-      box-shadow: 0 0 12px -3px hsl(var(--primary) / 0.2);
-    }
-
-    50% {
-      box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.4);
-    }
-  }
-
-  .animate-pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite;
-  }
-
   kbd {
     @apply inline-flex items-center gap-0.5 rounded border border-border bg-muted px-1.5 py-0.5;
     @apply font-mono text-[10px] font-medium text-muted-foreground;
-  }
-
-  /* Keyboard shortcut badge style */
-  .kbd {
-    @apply inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium;
-    @apply bg-muted border border-border rounded;
-    @apply font-mono text-muted-foreground;
   }
 }
 
@@ -239,101 +191,6 @@
   }
 }
 
-/* Scroll-triggered animations */
-@layer utilities {
-  .reveal-on-scroll {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-  }
-
-  .reveal-on-scroll.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Landing page specific animations */
-@keyframes float {
-
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-@keyframes float-delayed {
-
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-30px);
-  }
-}
-
-@keyframes float-slow {
-
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-15px);
-  }
-}
-
-@keyframes pulse-slow {
-
-  0%,
-  100% {
-    opacity: 0.5;
-  }
-
-  50% {
-    opacity: 0.8;
-  }
-}
-
-@keyframes pulse-slow-delayed {
-
-  0%,
-  100% {
-    opacity: 0.3;
-  }
-
-  50% {
-    opacity: 0.6;
-  }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-float-delayed {
-  animation: float-delayed 8s ease-in-out infinite;
-}
-
-.animate-float-slow {
-  animation: float-slow 10s ease-in-out infinite;
-}
-
-.animate-pulse-slow {
-  animation: pulse-slow 4s ease-in-out infinite;
-}
-
-.animate-pulse-slow-delayed {
-  animation: pulse-slow-delayed 5s ease-in-out infinite;
-}
-
 /**
  * Skeleton shimmer. A light band travels across the placeholder instead of the
  * whole block blinking, which reads as "loading" rather than "broken".
@@ -359,28 +216,12 @@
   animation: shimmer 1.8s ease-in-out infinite;
 }
 
-
-/* Performance optimizations for background animations */
-.bg-orb {
-  contain: layout style paint;
-  will-change: transform;
-}
-
 /* Reduced motion support for accessibility */
 @media (prefers-reduced-motion: reduce) {
-  .animate-float,
-  .animate-float-delayed,
-  .animate-float-slow,
-  .animate-pulse-slow,
-  .animate-pulse-slow-delayed,
-  .animate-pulse-glow,
-  .animate-shimmer {
-    animation: none !important;
-  }
-
   /* Without the travelling band, fall back to a flat fill rather than
      freezing the gradient at an arbitrary position. */
   .animate-shimmer {
+    animation: none !important;
     background-image: none;
     background-color: hsl(var(--muted-foreground) / 0.12);
   }
@@ -482,7 +323,6 @@
   .json-tree-wrapper .json-view__expand-icon:hover,
   .json-tree-wrapper .json-view__collapse-icon:hover {
     color: hsl(var(--primary) / 0.8) !important;
-    transform: scale(1.1) !important;
   }
 
   /* Collapsed preview */

@@ -18,9 +18,7 @@ import {
   cardEnter,
   collapse,
   slideDown,
-  pressable,
-  pressableSubtle,
-  liftOnHover,
+  tapScale,
   wiggle,
   springSoft,
 } from "../lib/motion"
@@ -288,7 +286,7 @@ export function TestScriptsPanel({
           ))}
         </AnimatePresence>
 
-        <motion.div {...pressableSubtle}>
+        <motion.div {...tapScale}>
           <Button
             variant="outline"
             size="sm"
@@ -306,7 +304,7 @@ export function TestScriptsPanel({
         variants={listItem}
       >
         <motion.button
-          {...pressableSubtle}
+          {...tapScale}
           onClick={() => setShowTemplates(!showTemplates)}
           className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-foreground py-2"
         >
@@ -329,7 +327,7 @@ export function TestScriptsPanel({
                 {VARIABLE_TEMPLATES.map((template, idx) => (
                   <motion.div
                     key={idx}
-                    {...liftOnHover}
+                    {...tapScale}
                     onClick={() => useTemplate(template)}
                     className="text-left p-3 text-xs rounded-lg border border-border/30 hover:border-primary/30 hover:bg-primary/5 cursor-pointer transition-all"
                   >
@@ -390,7 +388,7 @@ export function TestScriptsPanel({
           )}
         </p>
         <div className="flex items-center gap-2">
-          <motion.div {...pressable}>
+          <motion.div {...tapScale}>
             <Button
               size="sm"
               variant="outline"
@@ -399,7 +397,7 @@ export function TestScriptsPanel({
               Clear All
             </Button>
           </motion.div>
-          <motion.div {...pressable}>
+          <motion.div {...tapScale}>
             <Button
               size="sm"
               onClick={applyExtractions}

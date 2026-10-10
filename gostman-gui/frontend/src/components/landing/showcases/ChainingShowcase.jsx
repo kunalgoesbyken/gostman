@@ -116,7 +116,7 @@ export const ChainingShowcase = () => {
               <div className="flex gap-4">
                 <div className="relative z-10">
                   <motion.div
-                    className={`w-14 h-14 rounded-xl flex items-center justify-center border-2 transition-colors ${isCompleted
+                    className={`w-14 h-14 rounded-lg flex items-center justify-center border-2 transition-colors ${isCompleted
                         ? "bg-success/10 border-success/30"
                         : isCurrent
                           ? "bg-primary/10 border-primary/30"
@@ -206,7 +206,7 @@ export const ChainingShowcase = () => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.3 }}
-              className="p-4 rounded-xl bg-success/10 border border-success/20"
+              className="p-4 rounded-lg bg-success/10 border border-success/20"
             >
               <div className="flex items-center gap-3">
                 <CheckCircle className="w-5 h-5 text-success" />

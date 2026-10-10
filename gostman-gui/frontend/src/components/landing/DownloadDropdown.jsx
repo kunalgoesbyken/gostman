@@ -35,7 +35,7 @@ export const DownloadDropdown = () => {
         <div className="relative">
             <Button
                 size="lg"
-                className="gap-3 text-lg px-8 py-6 glow shadow-xl shadow-primary/20"
+                className="gap-3 text-lg px-8 py-6"
                 onClick={() => setIsOpen(!isOpen)}
             >
                 <Download className="h-5 w-5" />
@@ -46,12 +46,12 @@ export const DownloadDropdown = () => {
             {isOpen && (
                 <>
                     <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-                    <div className="absolute top-full left-0 mt-2 z-20 min-w-[280px] rounded-xl border border-border/50 bg-background/95 backdrop-blur-xl shadow-2xl shadow-primary/20 overflow-hidden">
+                    <div className="absolute top-full left-0 mt-2 z-20 min-w-[280px] rounded-lg border border-border bg-background shadow-xl overflow-hidden">
                         {DOWNLOAD_OPTIONS.map((option) => (
                             <a
                                 key={option.os}
                                 href={option.href}
-                                className="flex items-center gap-3 px-4 py-3 hover:bg-primary/10 transition-colors border-b border-border/30 last:border-0"
+                                className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40 transition-colors border-b border-border/30 last:border-0"
                                 onClick={() => setIsOpen(false)}
                             >
                                 <option.icon className={`h-5 w-5 ${option.iconColor}`} />

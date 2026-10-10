@@ -28,12 +28,12 @@ export function ImportExportDialog({
   }, [onClose])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={onClose}>
-      <div className="relative w-full max-w-4xl max-h-[90vh] bg-gradient-to-b from-background to-muted/20 border border-border/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200" onClick={onClose}>
+      <div className="relative w-full max-w-4xl max-h-[90vh] bg-background border border-border rounded-lg shadow-xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-border/50 px-6 py-4 bg-gradient-to-r from-primary/5 via-transparent to-transparent">
+        <div className="flex items-center justify-between border-b border-border/50 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/20">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">
               {activeTab === 'import' ? <Upload className="h-4.5 w-4.5" /> : <Download className="h-4.5 w-4.5" />}
             </div>
             <div>
@@ -58,12 +58,12 @@ export function ImportExportDialog({
         {/* Content */}
         <div className="p-6 overflow-y-auto flex-1 min-h-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/50 p-1 rounded-xl">
-              <TabsTrigger value="import" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="import" className="gap-2">
                 <Upload className="h-3.5 w-3.5" />
                 Import
               </TabsTrigger>
-              <TabsTrigger value="export" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <TabsTrigger value="export" className="gap-2">
                 <Download className="h-3.5 w-3.5" />
                 Export
               </TabsTrigger>

@@ -13,8 +13,7 @@ import {
   popIn,
   collapse,
   slideDown,
-  pressableStrong,
-  liftOnHover,
+  tapScale,
   pulseGlow,
   spin,
   rotateTo,
@@ -238,12 +237,12 @@ export function GraphQLPanel({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <motion.div {...pressableStrong}>
+              <motion.div {...tapScale}>
                 <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20 font-mono">
                   POST
                 </Badge>
               </motion.div>
-              <motion.div {...pressableStrong}>
+              <motion.div {...tapScale}>
                 <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20">
                   {extractOperationName(query)}
                 </Badge>
@@ -304,7 +303,7 @@ export function GraphQLPanel({
               ].map((template) => (
                 <motion.div key={template.type} variants={listItem}>
                   <motion.button
-                    {...liftOnHover}
+                    {...tapScale}
                     onClick={() => insertExample(template.type)}
                     className="w-full p-3 rounded-lg border border-border/60 bg-muted/10 hover:border-primary/40 hover:bg-muted/30 transition-colors"
                   >
@@ -322,7 +321,7 @@ export function GraphQLPanel({
         {detectedVars.length > 0 && (
           <motion.div
             {...collapse}
-            className="px-4 py-2 border-b border-border/50 bg-gradient-to-r from-primary/5 to-info/5 flex items-center gap-2 flex-wrap"
+            className="px-4 py-2 border-b border-border/50 bg-muted/20 flex items-center gap-2 flex-wrap"
           >
             <span className="text-xs text-muted-foreground flex items-center gap-1.5">
               <Code className="h-3 w-3" />
@@ -360,7 +359,7 @@ export function GraphQLPanel({
             Query Editor
           </span>
           <div className="flex items-center gap-1">
-            <motion.div {...pressableStrong}>
+            <motion.div {...tapScale}>
               <Button
                 size="sm"
                 variant="ghost"
@@ -380,7 +379,7 @@ export function GraphQLPanel({
                 )}
               </Button>
             </motion.div>
-            <motion.div {...pressableStrong}>
+            <motion.div {...tapScale}>
               <Button
                 size="sm"
                 variant="ghost"
@@ -418,7 +417,7 @@ export function GraphQLPanel({
             onChange={(e) => onQueryChange(e.target.value)}
             placeholder={GRAPHQL_EXAMPLES.query}
             className={`w-full h-full font-mono text-sm resize-none relative z-10 ${!validation.valid ? 'border-destructive/50' : ''
-              } bg-background/80 backdrop-blur-sm border-border/50 focus:border-primary/50 transition-colors`}
+              } bg-background/80 border-border/50 focus:border-primary/50 transition-colors`}
             spellCheck={false}
           />
         </motion.div>
@@ -467,7 +466,7 @@ export function GraphQLPanel({
                       onChange={(e) => onVariablesChange(e.target.value)}
                       placeholder={GRAPHQL_EXAMPLES.variables}
                       className={`w-full h-24 font-mono text-sm resize-none ${!varValidation.valid ? 'border-destructive/50' : ''
-                        } bg-background/80 backdrop-blur-sm border-border/50`}
+                        } bg-background/80 border-border/50`}
                       spellCheck={false}
                     />
                     {!varValidation.valid && (

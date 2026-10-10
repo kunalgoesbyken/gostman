@@ -95,13 +95,13 @@ export function CommandPalette({ isOpen, onClose, onCommand }) {
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh] px-4">
       <motion.div
         {...overlayFade}
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/50"
         onClick={handleClose}
       />
 
       <motion.div
         {...dialogPop}
-        className="relative w-full max-w-xl bg-background border border-border/60 rounded-xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-xl bg-background border border-border/60 rounded-lg shadow-xl overflow-hidden"
       >
         <div className="flex items-center gap-3 border-b border-border/40 px-4 py-3.5">
           <Search className="h-5 w-5 text-muted-foreground shrink-0" />

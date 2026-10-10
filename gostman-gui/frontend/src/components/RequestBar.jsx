@@ -68,7 +68,7 @@ export const RequestBar = memo(function RequestBar({ activeRequest, onMethodChan
   }
 
   return (
-    <div className="border-b border-border/60 bg-muted/20 backdrop-blur-md">
+    <div className="border-b border-border/60 bg-muted/20">
       <div className="px-4 pt-2.5">
         <Input
           type="text"
@@ -127,7 +127,7 @@ export const RequestBar = memo(function RequestBar({ activeRequest, onMethodChan
           disabled={loading}
           size="sm"
           aria-label="Send request (Ctrl+Enter)"
-          className={cn("gap-2 font-medium", loading && "animate-pulse-glow")}
+          className="gap-2 font-medium"
         >
           <Send className="h-4 w-4" />
           {loading ? "Sending..." : "Send"}

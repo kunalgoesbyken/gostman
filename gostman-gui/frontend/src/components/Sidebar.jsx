@@ -65,7 +65,7 @@ export const Sidebar = memo(function Sidebar({
   const rootRequests = filteredRequests.filter(req => !req.folderId)
 
   return (
-    <div className="flex h-full w-64 flex-col border-r border-border/60 bg-gradient-to-b from-background via-background to-muted/20">
+    <div className="flex h-full w-64 flex-col border-r border-border/60 bg-background">
       {/* Toolbar */}
       <div className="border-b border-border/60 px-4 py-2 flex items-center justify-between bg-muted/20">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Explorer</span>
@@ -331,7 +331,7 @@ const RequestItem = memo(function RequestItem({ req, activeRequest, onSelectRequ
         <Trash2 className="h-3 w-3" />
       </Button>
       {activeRequest.id === req.id && (
-        <div className="absolute left-0 top-1/2 h-8 w-0.5 -translate-y-1/2 rounded-full bg-primary shadow-lg shadow-primary/50" />
+        <div className="absolute left-0 top-1/2 h-8 w-0.5 -translate-y-1/2 rounded-full bg-primary" />
       )}
     </div>
   )

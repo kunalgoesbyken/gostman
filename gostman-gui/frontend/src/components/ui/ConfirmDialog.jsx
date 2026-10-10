@@ -31,8 +31,8 @@ export function ConfirmDialog({
   const isDestructive = variant === 'destructive'
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-gradient-to-b from-background to-muted/20 border border-border/50 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200">
+      <div className="relative w-full max-w-md bg-background border border-border rounded-lg shadow-xl overflow-hidden animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between border-b border-border/50 px-6 py-4">
           <div className="flex items-center gap-3">
             <div className={`flex h-10 w-10 items-center justify-center rounded-full ${

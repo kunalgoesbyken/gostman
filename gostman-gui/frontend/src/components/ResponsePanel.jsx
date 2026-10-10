@@ -69,7 +69,7 @@ function TabButton({ id, label, icon: Icon, count, active, onClick }) {
       onClick={() => onClick(id)}
       className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all duration-200 relative ${
         active
-          ? 'bg-background shadow-lg text-foreground'
+          ? 'bg-background text-foreground'
           : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
       }`}
     >
@@ -153,7 +153,7 @@ function ResponseContent({ response, bodyMode, detectedType, jsonData, isValidJS
   if (detectedType === 'image') {
     return (
       <div className="flex items-center justify-center p-8 min-h-full">
-        <img src={response} alt="Response" className="max-w-full h-auto shadow-2xl rounded-lg border border-border/50" />
+        <img src={response} alt="Response" className="max-w-full h-auto rounded-md border border-border/50" />
       </div>
     )
   }
@@ -274,11 +274,11 @@ export const ResponsePanel = memo(function ResponsePanel({ response, status, res
 
       <div
         ref={containerRef}
-        className={`flex flex-col bg-background/95 backdrop-blur-xl border-t border-border/60 transition-all duration-300 ease-out ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}
+        className={`flex flex-col bg-background border-t border-border/60 transition-all duration-300 ease-out ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}
         style={panelStyle}
       >
         {/* Header Bar */}
-        <div className="flex items-center gap-3 border-b border-border/60 bg-gradient-to-r from-muted/10 to-transparent px-4 py-2.5">
+        <div className="flex items-center gap-3 border-b border-border/60 bg-muted/10 px-4 py-2.5">
           <div className="flex items-center gap-2.5 shrink-0">
             <button onClick={toggleCollapse} className="p-1 rounded-md hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors" title={isCollapsed ? "Expand" : "Collapse"}>
               {isCollapsed ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -306,7 +306,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, status, res
           </div>
 
           {!isCollapsed && (
-            <div className="flex items-center rounded-xl bg-muted/40 p-1 ring-1 ring-border/30">
+            <div className="flex items-center rounded-lg bg-muted/40 p-1 ring-1 ring-border/30">
               {TABS.map(tab => (
                 <TabButton
                   key={tab.id}
@@ -346,7 +346,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, status, res
             {isError && errorObj ? (
               <div className={`h-full overflow-auto scrollbar-primary ${errorConfig.bg}`}>
                 <div className="flex items-start gap-4 p-6">
-                  <div className={`p-3 rounded-xl ${errorConfig.bg} flex-shrink-0 ring-1 ${errorConfig.border}`}>
+                  <div className={`p-3 rounded-lg ${errorConfig.bg} flex-shrink-0 ring-1 ${errorConfig.border}`}>
                     <AlertTriangle className={`h-5 w-5 ${errorConfig.color}`} strokeWidth={2} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -383,7 +383,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, status, res
         )}
       </div>
 
-      {isFullscreen && <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40" onClick={toggleFullscreen} />}
+      {isFullscreen && <div className="fixed inset-0 bg-background/80 z-40" onClick={toggleFullscreen} />}
     </>
   )
 })

@@ -286,7 +286,7 @@ export function ImportTab({ onImport, onClose }) {
                 onFocus={() => setIsDropZoneFocused(true)}
                 onBlur={() => setIsDropZoneFocused(false)}
                 className={`
-                    border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer
+                    border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer
                     ${isDropZoneFocused
                         ? 'border-primary bg-primary/5 ring-2 ring-ring ring-offset-2'
                         : 'border-border/50 hover:border-primary/50'
@@ -301,7 +301,7 @@ export function ImportTab({ onImport, onClose }) {
                     className="hidden"
                 />
                 <div className="flex flex-col items-center gap-3 pointer-events-none">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
                         <Upload className="h-5 w-5 text-primary" />
                     </div>
                     <div>
@@ -332,7 +332,7 @@ export function ImportTab({ onImport, onClose }) {
             <div className="space-y-2">
                 <div className="relative">
                     <textarea
-                        className="flex min-h-[150px] w-full rounded-md border border-border bg-background/50 backdrop-blur-sm px-3 py-2 text-sm shadow-sm transition-all duration-200 placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono resize-none"
+                        className="flex min-h-[150px] w-full rounded-md border border-border bg-background/50 px-3 py-2 text-sm transition-all duration-200 placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono resize-none"
                         placeholder="Paste Postman collection, OpenAPI spec, or Gostman export JSON here..."
                         value={importJson}
                         disabled={isParsing}
@@ -372,7 +372,7 @@ export function ImportTab({ onImport, onClose }) {
             {importResult && (
                 <div
                     className={`
-                        rounded-xl p-4 border
+                        rounded-lg p-4 border
                         ${importResult.success
                             ? 'bg-success/10 border-success/20'
                             : 'bg-destructive/10 border-destructive/20'

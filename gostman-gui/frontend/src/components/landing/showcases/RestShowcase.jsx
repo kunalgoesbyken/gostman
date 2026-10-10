@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Send, Copy, Check } from "lucide-react"
-import { collapse, fadeIn, pressableStrong, scaleInOut } from "../../../lib/motion"
+import { collapse, fadeIn, tapScale, scaleInOut } from "../../../lib/motion"
 import { EmptyState, ShowcasePanel, Spinner, methodStyle } from "../ShowcaseParts"
 import { useDemoSequence } from "../useDemoSequence"
 
@@ -86,7 +86,7 @@ export const RestShowcase = () => {
           <motion.button
             className={`px-6 py-2 rounded-md font-semibold text-sm flex items-center gap-2 ${isSending
               ? "bg-muted text-muted-foreground"
-              : "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+              : "bg-primary text-primary-foreground"
               }`}
             animate={isSending ? { scale: [1, 0.95, 1] } : { scale: 1 }}
             transition={{ duration: 0.3 }}
@@ -124,7 +124,7 @@ export const RestShowcase = () => {
                 <motion.button
                   className="p-2 hover:bg-muted/30 rounded-md transition-colors"
                   onClick={copyCode}
-                  {...pressableStrong}
+                  {...tapScale}
                 >
                   {copied ? (
                     <Check className="w-4 h-4 text-success" />

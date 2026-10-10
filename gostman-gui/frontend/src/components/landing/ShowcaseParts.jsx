@@ -33,7 +33,7 @@ const ENTRANCE = {
 
 export const ShowcasePanel = ({ className = "", from = "up", delay, children, ...props }) => (
   <motion.div
-    className={`bg-background/60 backdrop-blur-sm rounded-lg border border-border/60 overflow-hidden flex flex-col ${className}`}
+    className={`bg-background/60 rounded-lg border border-border/60 overflow-hidden flex flex-col ${className}`}
     {...ENTRANCE[from]}
     {...(delay ? { transition: { delay } } : {})}
     {...props}

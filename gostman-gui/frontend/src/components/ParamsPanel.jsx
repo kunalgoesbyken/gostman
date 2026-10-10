@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Plus, Trash2, Hash, CheckCircle2, AlertCircle } from "lucide-react"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
-import { staggerContainerFast, listItem, fadeIn, cardEnter, pressableSubtle, wiggle } from "../lib/motion"
+import { staggerContainerFast, listItem, fadeIn, cardEnter, tapScale, wiggle } from "../lib/motion"
 
 
 let paramIdCounter = 0
@@ -377,7 +377,7 @@ export function ParamsPanel({
       </motion.div>
 
       <motion.div
-        className="px-4 py-3 bg-gradient-to-r from-primary/5 to-info/5 border-b border-primary/10"
+        className="px-4 py-3 bg-muted/20 border-b border-border/50"
         variants={listItem}
       >
         <p className="text-xs text-muted-foreground">
@@ -468,7 +468,7 @@ export function ParamsPanel({
             </>
           )}
 
-          <motion.div {...pressableSubtle} className="mt-2">
+          <motion.div {...tapScale} className="mt-2">
             <Button
               variant="outline"
               size="sm"

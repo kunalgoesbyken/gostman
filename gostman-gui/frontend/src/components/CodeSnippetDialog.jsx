@@ -32,12 +32,11 @@ export function CodeSnippetDialog({ snippets, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl bg-gradient-to-b from-background to-muted/20 border border-border/50 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-        {/* Header with gradient */}
-        <div className="flex items-center justify-between border-b border-border/50 px-6 py-4 bg-gradient-to-r from-primary/5 via-transparent to-transparent">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200">
+      <div className="relative w-full max-w-4xl bg-background border border-border rounded-lg shadow-xl overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between border-b border-border/50 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/20">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">
               <Code2 className="h-4.5 w-4.5" />
             </div>
             <div>
@@ -58,11 +57,11 @@ export function CodeSnippetDialog({ snippets, onClose }) {
         {/* Content */}
         <div className="p-6">
           <Tabs defaultValue="curl" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-5 bg-muted/50 p-1 rounded-xl">
+            <TabsList className="grid w-full grid-cols-4 mb-5">
               {LANGUAGES.map((lang) => {
                 const Icon = lang.icon
                 return (
-                  <TabsTrigger key={lang.id} value={lang.id} className="gap-2 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <TabsTrigger key={lang.id} value={lang.id} className="gap-2 text-xs">
                     <Icon className="h-3.5 w-3.5" />
                     {lang.label}
                   </TabsTrigger>
@@ -73,9 +72,7 @@ export function CodeSnippetDialog({ snippets, onClose }) {
             {LANGUAGES.map((lang) => (
               <TabsContent key={lang.id} value={lang.id} className="mt-0 animate-in fade-in-50 duration-200">
                 <div className="relative group">
-                  {/* Code block with enhanced styling */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background rounded-xl" />
-                  <pre className="relative overflow-x-auto rounded-xl p-5 text-sm leading-relaxed border border-white/5 shadow-xl">
+                  <pre className="relative overflow-x-auto rounded-md p-5 text-sm leading-relaxed border border-border/60 bg-muted/20">
                     <code className="font-mono text-foreground">{snippets[lang.id]}</code>
                   </pre>
 
@@ -85,10 +82,10 @@ export function CodeSnippetDialog({ snippets, onClose }) {
                       size="sm"
                       onClick={() => handleCopy(lang.id, snippets[lang.id])}
                       className={`
-                        gap-2 shadow-lg transition-all duration-200
+                        gap-2 transition-colors duration-200
                         ${copiedLang === lang.id
                           ? 'bg-success hover:bg-success text-white'
-                          : 'bg-muted/80 hover:bg-muted text-foreground backdrop-blur-sm'
+                          : 'bg-muted hover:bg-muted/80 text-foreground'
                         }
                       `}
                     >

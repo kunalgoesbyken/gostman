@@ -4,7 +4,7 @@ import logo from "../assets/logo.jpg"
 
 export function AppHeader({ className, onImport, onReset, onBack }) {
   return (
-    <header className={`flex items-center gap-4 bg-muted/10 px-4 backdrop-blur-md ${className}`}>
+    <header className={`flex items-center gap-4 bg-muted/10 px-4 ${className}`}>
       {onBack && (
         <Button
           variant="ghost"

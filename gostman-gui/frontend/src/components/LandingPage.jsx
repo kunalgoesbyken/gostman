@@ -2,9 +2,8 @@ import { useState, useEffect, useRef, lazy, Suspense } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button, buttonVariants } from "./ui/button"
 import { Badge } from "./ui/badge"
-import { Card, CardContent } from "./ui/card"
 import { cn } from "../lib/utils"
-import { easeSmooth, fadeIn, popIn, pressable, slideInLeft, springLayout } from "../lib/motion"
+import { easeSmooth, fadeIn, popIn, tapScale, slideInLeft, springLayout } from "../lib/motion"
 import {
   Zap,
   Globe,
@@ -31,7 +30,6 @@ import {
   SlideInFromRight,
 } from "./landing/AnimatedSection"
 import { RestShowcase, GraphQLShowcase, ChainingShowcase, WebSocketShowcase } from "./landing/showcases"
-import { FloatingCode } from "./landing/FloatingCode"
 import { DownloadDropdown } from "./landing/DownloadDropdown"
 
 function ShowcaseSkeleton() {
@@ -181,15 +179,12 @@ const TabButton = ({ tab, isActive, onClick }) => {
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
       )}
-      {...pressable}
+      {...tapScale}
     >
       {isActive && (
         <motion.span
           layoutId="activeShowcaseTab"
-          className={cn(
-            "absolute inset-0 -z-10 rounded-lg border border-border/60 bg-card",
-            "shadow-[inset_0_1px_0_hsl(var(--foreground)/0.06)]"
-          )}
+          className="absolute inset-0 -z-10 rounded-md bg-muted"
           transition={springLayout}
         />
       )}
@@ -232,48 +227,29 @@ export function LandingPage({ onGetStarted }) {
         Skip to main content
       </a>
       <div className="min-h-screen bg-background text-foreground overflow-hidden" id="main-content">
-        {/* Animated background */}
         <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
-          {/* Subtle dot grid pattern */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_1px_at_1px_1px,rgba(255,255,255,0.05)_1px,transparent_0)] [background-size:40px_40px]" />
-
-          {/* Animated gradient orbs */}
-          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] animate-pulse bg-orb" />
-          <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-success/5 rounded-full blur-[120px] animate-pulse bg-orb"
-            style={{ animationDuration: "4s", animationDelay: "1s" }}
-          />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] animate-pulse bg-orb"
-            style={{ animationDuration: "5s", animationDelay: "2s" }}
-          />
-
-          {/* Moving gradient mesh */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.06),rgba(255,255,255,0))]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_80%_50%,rgba(16,185,129,0.04),rgba(255,255,255,0))]" />
         </div>
-
-        <FloatingCode />
 
         {/* Navigation */}
         <motion.nav
-          className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-6 px-6"
+          className="fixed top-0 left-0 right-0 z-50 flex justify-center border-b border-border/40 bg-background px-6"
           initial={{ y: -100 }}
           animate={{ y: 0 }}
           transition={{ type: "spring", stiffness: 200, damping: 25 }}
         >
-          <div className="max-w-5xl w-full backdrop-blur-xl bg-background/75 border border-border/40 rounded-2xl shadow-md">
-            <div className="px-5 py-3 flex items-center justify-between">
+          <div className="max-w-5xl w-full">
+            <div className="py-3 flex items-center justify-between">
               <motion.div
                 className="flex items-center gap-2.5"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <motion.img
+                <img
                   src={logo}
                   alt="Gostman Logo"
                   className="h-8 w-8 rounded-md"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.2 }}
                 />
                 <span className="font-medium text-sm">Gostman</span>
               </motion.div>
@@ -324,11 +300,7 @@ export function LandingPage({ onGetStarted }) {
                 transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
               >
                 <Badge variant="outline" className="px-3 py-1 text-xs font-medium border-border/60 bg-muted/30">
-                  <motion.span
-                    className="inline-block w-1.5 h-1.5 rounded-full bg-success mr-2"
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-success mr-2" />
                   Open Source HTTP Client
                 </Badge>
               </motion.div>
@@ -449,7 +421,7 @@ export function LandingPage({ onGetStarted }) {
                 onKeyDown={handleTabKeyDown}
                 className="flex -mx-6 overflow-x-auto px-6 scrollbar-none"
               >
-                <div className="inline-flex shrink-0 items-center gap-1 rounded-xl border border-border/40 bg-muted/20 p-1">
+                <div className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-border/40 bg-muted/20 p-1">
                   {SHOWCASE_TABS.map((tab) => (
                     <TabButton
                       key={tab.id}
@@ -464,13 +436,7 @@ export function LandingPage({ onGetStarted }) {
 
             {/* Showcase Panel */}
             <ScaleIn delay={0.3}>
-              <motion.div
-                className={cn(
-                  "relative flex h-[600px] flex-col rounded-2xl p-4 sm:p-6",
-                  "border border-border/60 bg-card/40 backdrop-blur-sm",
-                  "shadow-[inset_0_1px_0_hsl(var(--foreground)/0.05),0_24px_48px_-24px_hsl(var(--background))]"
-                )}
-              >
+              <div className="relative flex h-[600px] flex-col rounded-lg border border-border/60 p-4 sm:p-6">
                 <AnimatePresence mode="wait">
                   <Suspense fallback={<ShowcaseSkeleton />}>
                     <motion.div
@@ -491,7 +457,7 @@ export function LandingPage({ onGetStarted }) {
                     </motion.div>
                   </Suspense>
                 </AnimatePresence>
-              </motion.div>
+              </div>
             </ScaleIn>
           </div>
         </section>
@@ -512,11 +478,9 @@ export function LandingPage({ onGetStarted }) {
               {FEATURES.map((feature) => (
                 <div
                   key={feature.title}
-                  className="group relative flex items-start gap-4 border-b border-border/40 py-8 sm:odd:pr-10 sm:even:pl-10 sm:even:border-l"
+                  className="flex items-start gap-4 border-b border-border/40 py-8 sm:odd:pr-10 sm:even:pl-10 sm:even:border-l"
                 >
-                  <span className="mt-px flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-muted/30 text-foreground/80 transition-colors duration-200 group-hover:border-primary/40 group-hover:bg-primary/10 group-hover:text-primary">
-                    <feature.icon className="h-[18px] w-[18px]" strokeWidth={2} />
-                  </span>
+                  <feature.icon className="mt-0.5 h-[18px] w-[18px] shrink-0 text-muted-foreground" strokeWidth={2} />
                   <div className="min-w-0">
                     <h3 className="text-[15px] font-medium tracking-tight">{feature.title}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
@@ -542,102 +506,83 @@ export function LandingPage({ onGetStarted }) {
             </AnimatedSection>
 
             <SlideInFromRight delay={0.2}>
-              <Card className="border border-border/60 bg-background/40 backdrop-blur-sm overflow-hidden">
-                <CardContent className="p-0">
-                  {/* Table Header */}
-                  <div className="grid grid-cols-3 gap-4 p-6 border-b border-border/40 bg-muted/10">
-                    <div className="font-medium text-sm">Feature</div>
-                    <div className="text-center">
-                      <span className="font-medium text-sm">Gostman</span>
-                      <Badge variant="outline" className="ml-2 text-xs bg-primary/10 text-primary border-primary/20">
-                        Go
-                      </Badge>
-                    </div>
-                    <div className="text-center font-medium text-sm text-muted-foreground">Others</div>
-                  </div>
+              <div className="border-t border-border/40">
+                {/* Table Header */}
+                <div className="grid grid-cols-3 gap-4 py-4 border-b border-border/40">
+                  <div className="font-medium text-sm">Feature</div>
+                  <div className="text-center font-medium text-sm">Gostman</div>
+                  <div className="text-center font-medium text-sm text-muted-foreground">Others</div>
+                </div>
 
-                  {/* Table Rows */}
-                  <div className="divide-y divide-border/30">
-                    {COMPARISONS.map((item, index) => (
-                      <motion.div
-                        key={item.feature}
-                        className="grid grid-cols-3 gap-4 py-4 px-6 items-center hover:bg-muted/20 transition-colors"
-                        initial={slideInLeft.initial}
-                        whileInView={slideInLeft.animate}
-                        viewport={VIEWPORT_ONCE}
-                        transition={{ delay: index * 0.05 }}
-                      >
-                        <div className="text-sm flex items-center">{item.feature}</div>
-                        <div className="flex items-center justify-center">
-                          {item.gostman ? (
-                            <motion.div
-                              initial={popIn.initial}
-                              whileInView={popIn.animate}
-                              viewport={VIEWPORT_ONCE}
-                              transition={{ delay: index * 0.05 + 0.1, type: "spring", stiffness: 200 }}
-                            >
-                              <Check className="h-5 w-5 text-success/70" strokeWidth={2.5} />
-                            </motion.div>
-                          ) : (
-                            <span className="text-muted-foreground/60">-</span>
-                          )}
-                        </div>
-                        <div className="flex items-center justify-center">
-                          {item.others ? (
+                {/* Table Rows */}
+                <div className="divide-y divide-border/30">
+                  {COMPARISONS.map((item, index) => (
+                    <motion.div
+                      key={item.feature}
+                      className="grid grid-cols-3 gap-4 py-4 items-center"
+                      initial={slideInLeft.initial}
+                      whileInView={slideInLeft.animate}
+                      viewport={VIEWPORT_ONCE}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <div className="text-sm flex items-center">{item.feature}</div>
+                      <div className="flex items-center justify-center">
+                        {item.gostman ? (
+                          <motion.div
+                            initial={popIn.initial}
+                            whileInView={popIn.animate}
+                            viewport={VIEWPORT_ONCE}
+                            transition={{ delay: index * 0.05 + 0.1, type: "spring", stiffness: 200 }}
+                          >
                             <Check className="h-5 w-5 text-success/70" strokeWidth={2.5} />
-                          ) : (
-                            <X className="h-5 w-5 text-muted-foreground/30" strokeWidth={2} />
-                          )}
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                          </motion.div>
+                        ) : (
+                          <span className="text-muted-foreground/60">-</span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-center">
+                        {item.others ? (
+                          <Check className="h-5 w-5 text-success/70" strokeWidth={2.5} />
+                        ) : (
+                          <X className="h-5 w-5 text-muted-foreground/30" strokeWidth={2} />
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
             </SlideInFromRight>
           </div>
         </section>
 
         {/* CTA Section */}
-        <section className="relative py-20 px-6">
+        <section className="relative pb-20 px-6">
           <div className="max-w-3xl mx-auto">
             <AnimatedSection delay={0.1}>
-              <motion.div
-                className="relative rounded-2xl border border-border/60 bg-gradient-to-br from-primary/10 via-primary/5 to-background p-12 text-center"
-                whileHover={{ scale: 1.01 }}
-                transition={{ type: "spring", stiffness: 200 }}
-              >
-                {/* Animated background elements - contained in overflow-hidden wrapper */}
-                <div className="absolute inset-0 overflow-hidden rounded-2xl">
-                  <div className="absolute top-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-[80px]" />
-                  <div className="absolute bottom-0 right-0 w-64 h-64 bg-success/5 rounded-full blur-[80px]" />
-                </div>
-
-                <div className="relative">
-                  <motion.h2 className="text-3xl md:text-4xl font-semibold mb-4" {...revealUp()}>
-                    Ready to Go Native?
-                  </motion.h2>
-                  <motion.p className="text-muted-foreground mb-8 max-w-lg mx-auto" {...revealUp(0.1)}>
-                    Join thousands who switched to a lighter, faster HTTP client.
-                    Download now.
-                  </motion.p>
-                  <motion.div
-                    className="flex flex-col sm:flex-row items-center justify-center gap-4"
-                    {...revealUp(0.2)}
+              <div className="border-t border-border/40 pt-20 text-center">
+                <motion.h2 className="text-3xl md:text-4xl font-semibold mb-4" {...revealUp()}>
+                  Ready to Go Native?
+                </motion.h2>
+                <motion.p className="text-muted-foreground mb-8 max-w-lg mx-auto" {...revealUp(0.1)}>
+                  Join thousands who switched to a lighter, faster HTTP client.
+                  Download now.
+                </motion.p>
+                <motion.div
+                  className="flex flex-col sm:flex-row items-center justify-center gap-4"
+                  {...revealUp(0.2)}
+                >
+                  <DownloadDropdown />
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="gap-2 border-border/60 hover:bg-muted/50"
+                    onClick={onGetStarted}
                   >
-                    <DownloadDropdown />
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="gap-2 border-border/60 hover:bg-muted/50"
-                      onClick={onGetStarted}
-                    >
-                      <Globe className="h-4 w-4" />
-                      Try Web Version
-                    </Button>
-                  </motion.div>
-                </div>
-              </motion.div>
+                    <Globe className="h-4 w-4" />
+                    Try Web Version
+                  </Button>
+                </motion.div>
+              </div>
             </AnimatedSection>
           </div>
         </section>
@@ -650,12 +595,10 @@ export function LandingPage({ onGetStarted }) {
               {...revealUp()}
             >
               <div className="flex items-center gap-3">
-                <motion.img
+                <img
                   src={logo}
                   alt="Gostman Logo"
                   className="h-8 w-8 rounded-md"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.2 }}
                 />
                 <div>
                   <span className="font-medium text-sm">Gostman</span>

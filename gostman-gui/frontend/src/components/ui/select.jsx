@@ -6,7 +6,7 @@ const Select = React.forwardRef(({ className, children, ...props }, ref) => {
     <div className="relative">
       <select
         className={cn(
-          "flex h-9 w-full appearance-none rounded-md border border-border bg-background/50 backdrop-blur-sm px-3 py-1 pr-8 text-sm shadow-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50 [&_option]:bg-background [&_option]:text-foreground",
+          "flex h-9 w-full appearance-none rounded-md border border-border bg-background/50 px-3 py-1 pr-8 text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50 [&_option]:bg-background [&_option]:text-foreground",
           className
         )}
         ref={ref}
