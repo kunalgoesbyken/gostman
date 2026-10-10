@@ -39,7 +39,6 @@ var curlValueFlags = map[string]string{
 var curlSwitches = map[string]string{
 	"-G": "get", "--get": "get",
 	"-I": "head", "--head": "head",
-	"-k": "insecure", "--insecure": "insecure",
 }
 
 type curlCommand struct {
@@ -140,8 +139,6 @@ func (c *curlCommand) applySwitch(kind string) {
 		c.asQuery = true
 	case "head":
 		c.request.Method = http.MethodHead
-	case "insecure":
-		c.request.Options.InsecureTLS = true
 	}
 }
 

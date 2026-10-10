@@ -21,6 +21,7 @@ const (
 	defaultMaxResponse = 50 << 20
 	maxRedirects       = 10
 	maxRequestBody     = 10 << 20
+	maxEncodedBody     = maxRequestBody * 3 / 2
 )
 
 type Policy struct {
@@ -72,6 +73,9 @@ func Send(ctx context.Context, r Request, policy Policy) Response {
 }
 
 func send(ctx context.Context, r Request, policy Policy) Response {
+	if len(r.Body) > maxEncodedBody {
+		return Failure(ErrorConfig, "request body is larger than 10 MB")
+	}
 	prepared, err := Prepare(r)
 	if err != nil {
 		return Failure(ErrorConfig, err.Error())

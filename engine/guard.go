@@ -10,18 +10,47 @@ import (
 
 var errBlockedAddress = errors.New("address is not reachable from the hosted proxy")
 
-var carrierGradeNAT = &net.IPNet{IP: net.IPv4(100, 64, 0, 0), Mask: net.CIDRMask(10, 32)}
+var blockedNetworks = mustParseCIDRs(
+	"0.0.0.0/8",
+	"100.64.0.0/10",
+	"192.0.0.0/24",
+	"192.0.2.0/24",
+	"192.88.99.0/24",
+	"198.18.0.0/15",
+	"198.51.100.0/24",
+	"203.0.113.0/24",
+	"240.0.0.0/4",
+	"64:ff9b::/96",
+	"64:ff9b:1::/48",
+	"2001::/32",
+	"2001:db8::/32",
+	"2002::/16",
+)
 
 var dialer = &net.Dialer{Timeout: 15 * time.Second, KeepAlive: 30 * time.Second}
 
+func mustParseCIDRs(cidrs ...string) []*net.IPNet {
+	networks := make([]*net.IPNet, 0, len(cidrs))
+	for _, cidr := range cidrs {
+		_, network, err := net.ParseCIDR(cidr)
+		if err != nil {
+			panic(err)
+		}
+		networks = append(networks, network)
+	}
+	return networks
+}
+
 func isBlockedIP(ip net.IP) bool {
-	return ip.IsLoopback() ||
-		ip.IsPrivate() ||
-		ip.IsUnspecified() ||
-		ip.IsLinkLocalUnicast() ||
-		ip.IsLinkLocalMulticast() ||
-		ip.IsMulticast() ||
-		carrierGradeNAT.Contains(ip)
+	if !ip.IsGlobalUnicast() || ip.IsPrivate() {
+		return true
+	}
+	for _, network := range blockedNetworks {
+		if network.Contains(ip) {
+			return true
+		}
+	}
+	return false
 }
 
 func guardedDial(ctx context.Context, network, address string) (net.Conn, error) {
