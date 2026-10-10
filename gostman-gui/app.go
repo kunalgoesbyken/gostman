@@ -179,19 +179,34 @@ func (a *App) LoadData() (SavedData, error) {
 }
 
 func (a *App) SaveRequest(request Request) (Request, error) {
-	if request.Id == "" {
-		request.Id = uuid.NewString()
+	saved, err := a.SaveRequests([]Request{request})
+	if err != nil {
+		return Request{}, err
+	}
+	return saved[0], nil
+}
+
+func (a *App) SaveRequests(requests []Request) ([]Request, error) {
+	for i := range requests {
+		if requests[i].Id == "" {
+			requests[i].Id = uuid.NewString()
+		}
 	}
 	err := mutateData(func(data *SavedData) {
+		positions := make(map[string]int, len(data.Requests))
 		for i, saved := range data.Requests {
-			if saved.Id == request.Id {
-				data.Requests[i] = request
-				return
-			}
+			positions[saved.Id] = i
 		}
-		data.Requests = append(data.Requests, request)
+		for _, request := range requests {
+			if position, exists := positions[request.Id]; exists {
+				data.Requests[position] = request
+				continue
+			}
+			positions[request.Id] = len(data.Requests)
+			data.Requests = append(data.Requests, request)
+		}
 	})
-	return request, err
+	return requests, err
 }
 
 func (a *App) DeleteRequest(id string) error {

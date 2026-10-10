@@ -1,189 +1,143 @@
-import React, { useState, useEffect, useCallback } from "react"
-import {
-    Download, FileJson, FileText, FolderOpen,
-    Check, Copy, FileCode
-} from "lucide-react"
+import { useMemo, useState } from "react"
+import { Check, Copy, Download } from "lucide-react"
 import { Button } from "./ui/button"
+import { pluralize } from "../lib/dataUtils"
 import {
-    exportToOpenAPIJSON,
-    exportToOpenAPIYAML,
-    exportToPostman,
-    exportToGostman,
-    exportToMarkdown
+  exportToGostman,
+  exportToMarkdown,
+  exportToOpenAPIJSON,
+  exportToOpenAPIYAML,
+  exportToPostman,
 } from "../lib/importExport"
+import { cn } from "../lib/utils"
+
+const PREVIEW_LIMIT = 20000
+const COPIED_NOTICE_MS = 2000
+const FILE_BASE_NAME = "gostman-export"
+const JSON_MIME = "application/json"
+
+const toJSON = (value) => JSON.stringify(value, null, 2)
 
 const EXPORT_FORMATS = [
-    { id: 'openapi-json', label: 'OpenAPI JSON', icon: FileCode, description: 'OpenAPI 3.0 spec (JSON)' },
-    { id: 'openapi-yaml', label: 'OpenAPI YAML', icon: FileCode, description: 'OpenAPI 3.0 spec (YAML)' },
-    { id: 'postman', label: 'Postman', icon: FileJson, description: 'Postman collection v2.1' },
-    { id: 'markdown', label: 'Markdown', icon: FileText, description: 'API documentation' },
-    { id: 'gostman', label: 'Gostman', icon: FolderOpen, description: 'Gostman backup (JSON)' }
+  {
+    id: "gostman",
+    label: "Gostman",
+    description: "Full backup: requests, folders and every environment",
+    extension: "json",
+    mime: JSON_MIME,
+    build: ({ requests, folders, environments }) => toJSON(exportToGostman(requests, folders, environments)),
+  },
+  {
+    id: "postman",
+    label: "Postman",
+    description: "Collection v2.1 with the active environment as collection variables",
+    extension: "postman_collection.json",
+    mime: JSON_MIME,
+    build: ({ requests, folders, variables }) => toJSON(exportToPostman(requests, folders, { variables })),
+  },
+  {
+    id: "openapi-json",
+    label: "OpenAPI JSON",
+    description: "OpenAPI 3.0 description of the HTTP requests",
+    extension: "openapi.json",
+    mime: JSON_MIME,
+    build: ({ requests }) => exportToOpenAPIJSON(requests),
+  },
+  {
+    id: "openapi-yaml",
+    label: "OpenAPI YAML",
+    description: "OpenAPI 3.0 description of the HTTP requests",
+    extension: "openapi.yaml",
+    mime: "text/yaml",
+    build: ({ requests }) => exportToOpenAPIYAML(requests),
+  },
+  {
+    id: "markdown",
+    label: "Markdown",
+    description: "Readable API documentation",
+    extension: "md",
+    mime: "text/markdown",
+    build: ({ requests, folders }) => exportToMarkdown(requests, folders),
+  },
 ]
 
-// MIME types for each export format
-const MIME_TYPES = {
-    'openapi-json': 'application/json',
-    'openapi-yaml': 'text/yaml',
-    'postman': 'application/json',
-    'markdown': 'text/markdown',
-    'gostman': 'application/json'
+function buildExport(format, data) {
+  try {
+    return { content: format.build(data), error: "" }
+  } catch (error) {
+    return { content: "", error: error?.message || String(error) }
+  }
 }
 
-export function ExportTab({ requests, folders, variables }) {
-    const [selectedExportFormat, setSelectedExportFormat] = useState('openapi-json')
-    const [exportPreview, setExportPreview] = useState('')
-    const [copied, setCopied] = useState(false)
+export function ExportTab({ requests, folders, environments, variables, onSaveFile }) {
+  const [formatId, setFormatId] = useState(EXPORT_FORMATS[0].id)
+  const [copied, setCopied] = useState(false)
 
-    // Memoize generateExport to avoid recreating on every render
-    const generateExport = useCallback(() => {
-        try {
-            switch (selectedExportFormat) {
-                case 'openapi-json':
-                    setExportPreview(exportToOpenAPIJSON(requests || [], {
-                        title: 'Gostman API Collection',
-                        version: '1.0.0'
-                    }))
-                    break
-                case 'openapi-yaml':
-                    setExportPreview(exportToOpenAPIYAML(requests || [], {
-                        title: 'Gostman API Collection',
-                        version: '1.0.0'
-                    }))
-                    break
-                case 'postman':
-                    setExportPreview(JSON.stringify(exportToPostman(requests || [], folders || [], {
-                        name: 'Gostman Collection'
-                    }), null, 2))
-                    break
-                case 'markdown':
-                    setExportPreview(exportToMarkdown(requests || [], {
-                        title: 'API Documentation'
-                    }))
-                    break
-                case 'gostman':
-                    setExportPreview(JSON.stringify(exportToGostman(requests || [], folders || [], variables || {}), null, 2))
-                    break
-                default:
-                    setExportPreview('')
-            }
-        } catch (err) {
-            setExportPreview(`Error generating export: ${err.message}`)
-        }
-    }, [selectedExportFormat, requests, folders, variables])
+  const format = EXPORT_FORMATS.find((candidate) => candidate.id === formatId)
+  const { content, error } = useMemo(
+    () => buildExport(format, { requests, folders, environments, variables }),
+    [format, requests, folders, environments, variables]
+  )
+  const preview = content.length > PREVIEW_LIMIT ? `${content.slice(0, PREVIEW_LIMIT)}\n…` : content
 
-    // Update export preview when format changes or data changes
-    useEffect(() => {
-        generateExport()
-    }, [generateExport])
+  const copy = async () => {
+    await navigator.clipboard.writeText(content)
+    setCopied(true)
+    setTimeout(() => setCopied(false), COPIED_NOTICE_MS)
+  }
 
-    const handleCopy = async () => {
-        try {
-            await navigator.clipboard.writeText(exportPreview)
-            setCopied(true)
-            setTimeout(() => setCopied(false), 2000)
-        } catch (err) {
-            console.error('Copy failed:', err)
-        }
-    }
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Export format">
+        {EXPORT_FORMATS.map((candidate) => (
+          <button
+            key={candidate.id}
+            type="button"
+            role="radio"
+            aria-checked={candidate.id === formatId}
+            onClick={() => setFormatId(candidate.id)}
+            className={cn(
+              "rounded-md border px-3 py-1.5 text-xs font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              candidate.id === formatId
+                ? "border-primary/50 bg-primary/10 text-foreground"
+                : "border-border text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {candidate.label}
+          </button>
+        ))}
+      </div>
 
-    const handleDownload = () => {
-        const mimeType = MIME_TYPES[selectedExportFormat] || 'text/plain'
-        const blob = new Blob([exportPreview], { type: mimeType })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-
-        const extensions = {
-            'openapi-json': 'json',
-            'openapi-yaml': 'yaml',
-            'postman': 'json',
-            'markdown': 'md',
-            'gostman': 'json'
-        }
-        a.download = `gostman-export.${extensions[selectedExportFormat] || 'txt'}`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        URL.revokeObjectURL(url)
-    }
-
-    return (
-        <div className="space-y-4">
-            {/* Stats */}
-            <div className="flex items-center gap-4 p-3 rounded-lg bg-muted/20 border border-border/50">
-                <div className="flex items-center gap-2">
-                    <FileJson className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{requests?.length || 0} requests</span>
-                </div>
-                <div className="w-px h-4 bg-border/50" />
-                <div className="flex items-center gap-2">
-                    <FolderOpen className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{folders?.length || 0} folders</span>
-                </div>
-            </div>
-
-            {/* Format Selection */}
-            <div className="grid grid-cols-5 gap-2">
-                {EXPORT_FORMATS.map((format) => {
-                    const Icon = format.icon
-                    const isActive = selectedExportFormat === format.id
-                    return (
-                        <button
-                            key={format.id}
-                            onClick={() => setSelectedExportFormat(format.id)}
-                            className={`
-                          flex flex-col items-center gap-2 p-3 rounded-lg border transition-all
-                          ${isActive
-                                    ? 'bg-primary/10 border-primary/30 shadow-sm'
-                                    : 'bg-muted/10 border-border/30 hover:border-border/50'
-                                }
-                        `}
-                        >
-                            <Icon className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
-                            <span className={`text-[10px] font-medium text-center ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
-                                {format.label}
-                            </span>
-                        </button>
-                    )
-                })}
-            </div>
-
-            {/* Preview */}
-            <div className="relative group">
-                <pre className="relative overflow-x-auto rounded-md p-4 text-sm leading-relaxed border border-border/60 bg-muted/20 max-h-80">
-                    <code className="font-mono text-foreground whitespace-pre-wrap">{exportPreview || '// Export preview will appear here'}</code>
-                </pre>
-
-                {/* Action buttons */}
-                <div className="absolute right-3 top-3 flex items-center gap-2">
-                    <Button
-                        size="sm"
-                        onClick={handleCopy}
-                        variant="secondary"
-                        className="gap-1.5"
-                    >
-                        {copied ? (
-                            <>
-                                <Check className="h-3.5 w-3.5" />
-                                <span className="text-xs">Copied</span>
-                            </>
-                        ) : (
-                            <>
-                                <Copy className="h-3.5 w-3.5" />
-                                <span className="text-xs">Copy</span>
-                            </>
-                        )}
-                    </Button>
-                    <Button
-                        size="sm"
-                        onClick={handleDownload}
-                        className="gap-1.5"
-                    >
-                        <Download className="h-3.5 w-3.5" />
-                        <span className="text-xs">Download</span>
-                    </Button>
-                </div>
-            </div>
+      <div className="flex items-center justify-between gap-3">
+        <p className="min-w-0 text-xs text-muted-foreground">
+          {format.description}. {pluralize(requests.length, "request")}, {pluralize(folders.length, "folder")}, {pluralize(environments.length, "environment")} in this workspace.
+        </p>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button size="sm" variant="outline" onClick={copy} disabled={!content} className="h-8 gap-1.5">
+            {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+            {copied ? "Copied" : "Copy"}
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => onSaveFile(`${FILE_BASE_NAME}.${format.extension}`, content, format.mime)}
+            disabled={!content}
+            className="h-8 gap-1.5"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Save file
+          </Button>
         </div>
-    )
+      </div>
+
+      {error ? (
+        <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+          Could not build the export: {error}
+        </p>
+      ) : (
+        <pre className="max-h-80 overflow-auto rounded-md border border-border/60 bg-muted/20 p-3 text-xs leading-relaxed scrollbar-compact">
+          <code className="whitespace-pre-wrap break-words font-mono text-foreground">{preview}</code>
+        </pre>
+      )}
+    </div>
+  )
 }

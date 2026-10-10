@@ -9,6 +9,8 @@ export function AppDialogs({ onCommand }) {
   const confirmDialog = useAppStore((s) => s.confirmDialog)
   const promptDialog = useAppStore((s) => s.promptDialog)
   const commandPaletteOpen = useAppStore((s) => s.commandPaletteOpen)
+  const environments = useAppStore((s) => s.environments)
+  const activeEnvironmentId = useAppStore((s) => s.activeEnvironmentId)
 
   const closeAlert = useAppStore((s) => s.closeAlert)
   const closeConfirm = useAppStore((s) => s.closeConfirm)
@@ -17,13 +19,12 @@ export function AppDialogs({ onCommand }) {
 
   return (
     <>
-      <AlertDialog
-        isOpen={alertDialog.isOpen}
-        title={alertDialog.title}
-        message={alertDialog.message}
-        confirmText={alertDialog.confirmText}
-        variant={alertDialog.variant}
-        onConfirm={closeAlert}
+      <CommandPalette
+        isOpen={commandPaletteOpen}
+        environments={environments}
+        activeEnvironmentId={activeEnvironmentId}
+        onClose={closeCommandPalette}
+        onCommand={onCommand}
       />
 
       <ConfirmDialog
@@ -33,8 +34,8 @@ export function AppDialogs({ onCommand }) {
         confirmText={confirmDialog.confirmText}
         variant={confirmDialog.variant}
         onConfirm={() => {
-          confirmDialog.onConfirm?.()
           closeConfirm()
+          confirmDialog.onConfirm?.()
         }}
         onCancel={closeConfirm}
       />
@@ -47,16 +48,19 @@ export function AppDialogs({ onCommand }) {
         defaultValue={promptDialog.defaultValue}
         confirmText={promptDialog.confirmText}
         onConfirm={(value) => {
-          promptDialog.onConfirm?.(value)
           closePrompt()
+          promptDialog.onConfirm?.(value)
         }}
         onCancel={closePrompt}
       />
 
-      <CommandPalette
-        isOpen={commandPaletteOpen}
-        onClose={closeCommandPalette}
-        onCommand={onCommand}
+      <AlertDialog
+        isOpen={alertDialog.isOpen}
+        title={alertDialog.title}
+        message={alertDialog.message}
+        confirmText={alertDialog.confirmText}
+        variant={alertDialog.variant}
+        onConfirm={closeAlert}
       />
     </>
   )

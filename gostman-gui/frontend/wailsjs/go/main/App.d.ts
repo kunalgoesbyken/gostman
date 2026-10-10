@@ -25,6 +25,8 @@ export function SaveHistory(arg1:Array<main.Request>):Promise<void>;
 
 export function SaveRequest(arg1:main.Request):Promise<main.Request>;
 
+export function SaveRequests(arg1:Array<main.Request>):Promise<Array<main.Request>>;
+
 export function SendRequest(arg1:string,arg2:engine.Request):Promise<engine.Response>;
 
 export function WSClose(arg1:string):Promise<void>;

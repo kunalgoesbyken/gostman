@@ -2,8 +2,12 @@ import { create } from 'zustand'
 import { createJSONStorage, devtools, persist } from 'zustand/middleware'
 import { isPlainObject, parseJSON } from '../lib/dataUtils'
 import { normalizeRequest } from '../lib/request'
+import { isBlankRequest } from '../lib/requestChanges'
 
 const HISTORY_LIMIT = 50
+const HISTORY_IDENTITY_FIELDS = ['method', 'url', 'body', 'bodyType', 'graphqlQuery', 'graphqlVariables']
+const IMPORT_TAB = 'import'
+const DEFAULT_REQUEST_PANEL = 'params'
 const EMPTY_VARIABLES = '{}'
 const DEFAULT_ENVIRONMENT_NAME = 'Default'
 const TAB_ID_PREFIX = 'tab-'
@@ -17,7 +21,7 @@ const createId = (prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random
 
 const asArray = (value) => (Array.isArray(value) ? value : [])
 
-const createTab = (id, request) => ({ id, request: normalizeRequest(request), pendingId: null, response: null })
+const createTab = (id, request) => ({ id, request: normalizeRequest(request), pendingId: null, response: null, bodyDrafts: {} })
 
 const FIRST_TAB = createTab(`${TAB_ID_PREFIX}1`)
 
@@ -39,6 +43,11 @@ const mapTab = (state, tabId, update) => ({
 
 const mapTabRequests = (tabs, update) => tabs.map((tab) => ({ ...tab, request: update(tab.request) }))
 
+const appendTab = (state, request) => {
+  const tab = createTab(`${TAB_ID_PREFIX}${state.nextTabId}`, request)
+  return { tabs: [...state.tabs, tab], activeTabId: tab.id, nextTabId: state.nextTabId + 1 }
+}
+
 const createEnvironment = (name, variables = EMPTY_VARIABLES) => ({ id: createId('env'), name, variables })
 
 const restoreEnvironments = (data) => {
@@ -56,13 +65,34 @@ const mapEnvironment = (state, id, update) => ({
   environments: state.environments.map((environment) => (environment.id === id ? update(environment) : environment)),
 })
 
-const withoutFolder = (folderId) => (request) => (
-  request.folderId === folderId ? { ...request, folderId: '' } : request
+const isEnvironment = (value) => (
+  isPlainObject(value) && Boolean(value.id) && typeof value.name === 'string' && typeof value.variables === 'string'
+)
+
+const parseVariables = (text) => (text.trim() === '' ? {} : parseJSON(text, null))
+
+const mergeVariables = (existing, incoming) => {
+  const current = parseVariables(existing)
+  if (!isPlainObject(current)) return null
+  if (Object.keys(current).length === 0) return incoming
+  const additions = parseVariables(incoming)
+  return isPlainObject(additions) ? JSON.stringify({ ...current, ...additions }, null, 2) : null
+}
+
+const findMatchingEnvironment = (environments, incoming) => {
+  const sameId = environments.findIndex((environment) => environment.id === incoming.id)
+  return sameId !== -1 ? sameId : environments.findIndex((environment) => environment.name === incoming.name)
+}
+
+const toFolder = ({ id, name, isOpen, parentId }) => ({ id, name, isOpen: Boolean(isOpen), parentId: parentId || '' })
+
+const movedOutOf = (folderId, parentId) => (request) => (
+  request.folderId === folderId ? { ...request, folderId: parentId } : request
 )
 
 const withoutRequestId = (id) => (request) => (request.id === id ? { ...request, id: '' } : request)
 
-const isSameCall = (first, second) => first.method === second.method && first.url === second.url
+const isSameCall = (first, second) => HISTORY_IDENTITY_FIELDS.every((field) => first[field] === second[field])
 
 let reportStorageFailure = () => {}
 
@@ -102,9 +132,11 @@ export const useAppStore = create(
         tabs: [FIRST_TAB],
         activeTabId: FIRST_TAB.id,
         nextTabId: 2,
+        requestPanel: DEFAULT_REQUEST_PANEL,
         codeDialogOpen: false,
         codeSnippets: null,
         importDialogOpen: false,
+        importDialogTab: IMPORT_TAB,
         commandPaletteOpen: false,
         persistenceFailureReported: false,
         alertDialog: CLOSED_ALERT,
@@ -123,33 +155,45 @@ export const useAppStore = create(
           }
         }),
 
-        upsertRequest: (request) => set((state) => {
-          const saved = normalizeRequest(request)
-          const exists = state.requests.some((existing) => existing.id === saved.id)
-          return {
-            requests: exists
-              ? state.requests.map((existing) => (existing.id === saved.id ? saved : existing))
-              : [...state.requests, saved],
-          }
+        upsertRequests: (requests) => set((state) => {
+          const byId = new Map(state.requests.map((request) => [request.id, request]))
+          requests.forEach((request) => byId.set(request.id, normalizeRequest(request)))
+          return { requests: Array.from(byId.values()) }
         }),
+        upsertRequest: (request) => get().upsertRequests([request]),
         removeRequest: (id) => set((state) => ({
           requests: state.requests.filter((request) => request.id !== id),
           tabs: mapTabRequests(state.tabs, withoutRequestId(id)),
         })),
+        patchOpenRequest: (id, changes) => set((state) => ({
+          tabs: mapTabRequests(state.tabs, (request) => (request.id === id ? { ...request, ...changes } : request)),
+        })),
 
-        addFolder: (name) => set((state) => ({
-          folders: [...state.folders, { id: createId('folder'), name, isOpen: true, parentId: '' }],
+        addFolder: (name, parentId = '') => set((state) => ({
+          folders: [
+            ...state.folders.map((folder) => (folder.id === parentId ? { ...folder, isOpen: true } : folder)),
+            { id: createId('folder'), name, isOpen: true, parentId },
+          ],
+        })),
+        renameFolder: (folderId, name) => set((state) => ({
+          folders: state.folders.map((folder) => (folder.id === folderId ? { ...folder, name } : folder)),
         })),
         mergeFolders: (folders) => set((state) => {
           const byId = new Map(state.folders.map((folder) => [folder.id, folder]))
-          folders.forEach((folder) => byId.set(folder.id, folder))
+          folders.forEach((folder) => byId.set(folder.id, toFolder(folder)))
           return { folders: Array.from(byId.values()) }
         }),
-        deleteFolder: (folderId) => set((state) => ({
-          folders: state.folders.filter((folder) => folder.id !== folderId),
-          requests: state.requests.map(withoutFolder(folderId)),
-          tabs: mapTabRequests(state.tabs, withoutFolder(folderId)),
-        })),
+        deleteFolder: (folderId) => set((state) => {
+          const parentId = state.folders.find((folder) => folder.id === folderId)?.parentId || ''
+          const moveToParent = movedOutOf(folderId, parentId)
+          return {
+            folders: state.folders
+              .filter((folder) => folder.id !== folderId)
+              .map((folder) => (folder.parentId === folderId ? { ...folder, parentId } : folder)),
+            requests: state.requests.map(moveToParent),
+            tabs: mapTabRequests(state.tabs, moveToParent),
+          }
+        }),
         toggleFolder: (folderId) => set((state) => ({
           folders: state.folders.map((folder) => (folder.id === folderId ? { ...folder, isOpen: !folder.isOpen } : folder)),
         })),
@@ -165,13 +209,17 @@ export const useAppStore = create(
         clearHistory: () => set({ requestHistory: [] }),
 
         setActiveTab: (tabId) => set({ activeTabId: tabId }),
-        newTab: (folderId = '') => set((state) => {
-          const tab = createTab(`${TAB_ID_PREFIX}${state.nextTabId}`, { folderId })
-          return { tabs: [...state.tabs, tab], activeTabId: tab.id, nextTabId: state.nextTabId + 1 }
+        newTab: (folderId = '') => set((state) => appendTab(state, { folderId })),
+        openRequestTab: (request) => set((state) => {
+          const holder = request.id ? state.tabs.find((tab) => tab.request.id === request.id) : null
+          if (holder) return { activeTabId: holder.id }
+          const active = selectActiveTab(state)
+          const isReusable = isBlankRequest(active.request) && active.pendingId === null
+          return isReusable ? mapTab(state, active.id, (tab) => createTab(tab.id, request)) : appendTab(state, request)
         }),
         closeTab: (tabId) => set((state) => {
-          if (state.tabs.length === 1) return state
           const remaining = state.tabs.filter((tab) => tab.id !== tabId)
+          if (remaining.length === 0) return appendTab({ ...state, tabs: remaining })
           if (state.activeTabId !== tabId) return { tabs: remaining }
           const closedIndex = state.tabs.findIndex((tab) => tab.id === tabId)
           return { tabs: remaining, activeTabId: remaining[Math.max(0, closedIndex - 1)].id }
@@ -180,8 +228,8 @@ export const useAppStore = create(
           mapTab(state, tabId, (tab) => ({ ...tab, request: { ...tab.request, ...updates } }))
         )),
         updateActiveRequest: (updates) => get().updateTabRequest(get().activeTabId, updates),
-        openInActiveTab: (request) => set((state) => (
-          mapTab(state, state.activeTabId, (tab) => createTab(tab.id, request))
+        setActiveBodyDrafts: (bodyDrafts) => set((state) => (
+          mapTab(state, state.activeTabId, (tab) => ({ ...tab, bodyDrafts }))
         )),
         startTabRequest: (tabId, pendingId) => set((state) => (
           mapTab(state, tabId, (tab) => ({ ...tab, pendingId }))
@@ -189,6 +237,8 @@ export const useAppStore = create(
         finishTabRequest: (tabId, pendingId, response) => set((state) => (
           mapTab(state, tabId, (tab) => (tab.pendingId === pendingId ? { ...tab, pendingId: null, response } : tab))
         )),
+        patchTab: (tabId, patch) => set((state) => mapTab(state, tabId, (tab) => ({ ...tab, ...patch }))),
+        setRequestPanel: (requestPanel) => set({ requestPanel }),
 
         setActiveEnvironment: (id) => set({ activeEnvironmentId: id }),
         addEnvironment: (name) => set((state) => {
@@ -209,15 +259,28 @@ export const useAppStore = create(
         )),
         mergeActiveVariables: (additions) => {
           if (!isPlainObject(additions) || Object.keys(additions).length === 0) return true
-          const existing = parseJSON(selectActiveVariables(get()), {})
+          const existing = parseVariables(selectActiveVariables(get()))
           if (!isPlainObject(existing)) return false
           get().setActiveVariables(JSON.stringify({ ...existing, ...additions }, null, 2))
           return true
         },
+        mergeEnvironments: (incoming) => {
+          const environments = [...get().environments]
+          const skippedNames = []
+          for (const { id, name, variables } of asArray(incoming).filter(isEnvironment)) {
+            const index = findMatchingEnvironment(environments, { id, name })
+            const merged = index === -1 ? variables : mergeVariables(environments[index].variables, variables)
+            if (merged === null) skippedNames.push(name)
+            else if (index === -1) environments.push({ id, name, variables })
+            else environments[index] = { ...environments[index], variables: merged }
+          }
+          set({ environments })
+          return skippedNames
+        },
 
         openCodeDialog: (snippets) => set({ codeDialogOpen: true, codeSnippets: snippets }),
         closeCodeDialog: () => set({ codeDialogOpen: false, codeSnippets: null }),
-        openImportDialog: () => set({ importDialogOpen: true }),
+        openImportDialog: (tab = IMPORT_TAB) => set({ importDialogOpen: true, importDialogTab: tab }),
         closeImportDialog: () => set({ importDialogOpen: false }),
         openCommandPalette: () => set({ commandPaletteOpen: true }),
         closeCommandPalette: () => set({ commandPaletteOpen: false }),
@@ -226,12 +289,12 @@ export const useAppStore = create(
           alertDialog: { isOpen: true, title, message, confirmText, variant },
         }),
         closeAlert: () => set({ alertDialog: CLOSED_ALERT }),
-        showConfirm: (title, message, onConfirm, onCancel = null, variant = 'default') => set({
+        showConfirm: (title, message, onConfirm, onCancel = null, variant = 'default', confirmText = '') => set({
           confirmDialog: {
             isOpen: true,
             title,
             message,
-            confirmText: variant === 'destructive' ? 'Delete' : 'Confirm',
+            confirmText: confirmText || (variant === 'destructive' ? 'Delete' : 'Confirm'),
             variant,
             onConfirm,
             onCancel,
@@ -283,5 +346,14 @@ reportStorageFailure = (reason) => useAppStore.getState().reportPersistenceFailu
 export const selectActiveTab = (state) => state.tabs.find((tab) => tab.id === state.activeTabId) || state.tabs[0]
 
 export const selectActiveVariables = (state) => findActiveEnvironment(state)?.variables ?? EMPTY_VARIABLES
+
+export const selectIsDialogOpen = (state) => (
+  state.codeDialogOpen
+  || state.importDialogOpen
+  || state.commandPaletteOpen
+  || state.alertDialog.isOpen
+  || state.confirmDialog.isOpen
+  || state.promptDialog.isOpen
+)
 
 export const useActiveTab = () => useAppStore(selectActiveTab)

@@ -5,7 +5,7 @@ import { Badge } from "./ui/badge"
 import { Select } from "./ui/select"
 import { Input } from "./ui/input"
 import { cn } from "../lib/utils"
-import { isWebSocketURL } from "./WebSocketPanel"
+import { isWebSocketURL } from "../lib/socketUrl"
 import { HTTP_METHODS, METHOD_COLORS } from "../lib/constants"
 
 const CURL_COMMAND = /^\s*curl\s/i

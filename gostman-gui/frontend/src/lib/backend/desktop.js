@@ -12,6 +12,7 @@ import {
   SaveRequest,
   SendRequest,
 } from '../../../wailsjs/go/main/App'
+import { openDesktopSocket } from './desktopSocket'
 import { toEngineRequest } from '../request'
 import { failureResponse } from '../response'
 
@@ -36,4 +37,6 @@ export const desktopBackend = {
   saveEnvironments: (environments, activeId) => SaveEnvironments(environments, activeId),
   reset: () => ResetData(),
   saveFile: (name, base64) => SaveFile(name, base64),
+  openSocket: openDesktopSocket,
+  unsentSocketHeaders: () => [],
 }

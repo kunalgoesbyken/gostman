@@ -1,161 +1,205 @@
-import React, { memo, lazy, Suspense, useState, useEffect, useCallback } from "react"
+import { memo, lazy, Suspense, useEffect, useMemo } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
-import { Braces, Hash, Heading1, FolderOpen, FlaskConical, Zap, Radio, AlertCircle, CheckCircle2 } from "lucide-react"
-import { TestScriptsPanel } from "./TestScriptsPanel"
+import { Braces, Hash, Heading1, FolderOpen, FlaskConical, KeyRound, SlidersHorizontal, Zap, Radio, AlertCircle, CheckCircle2 } from "lucide-react"
+import { AuthPanel } from "./AuthPanel"
+import { BodyPanel } from "./BodyPanel"
+import { KeyValueEditor } from "./KeyValueEditor"
 import { ParamsPanel } from "./ParamsPanel"
+import { SettingsPanel } from "./SettingsPanel"
+import { ExtractPanel } from "./ExtractPanel"
+import { BODY_FORM, BODY_MULTIPART, BODY_NONE } from "../lib/body"
+import { parseExtractors } from "../lib/chaining"
+import { GRAPHQL_METHOD } from "../lib/graphqlSchema"
+import { readParamRows } from "../lib/queryString"
+import { countSentRows, parseRows, serializeRows } from "../lib/rows"
+import { SOCKET_OPEN, SOCKET_PANEL, isSocketAddress, selectSession, useSocketStore } from "../lib/socketSessions"
 import { validateEnvVariables, formatJSONError } from "../lib/validation"
-import { isWebSocketURL } from "./WebSocketPanel"
-const GraphQLPanel = lazy(() => import("./GraphQLPanel").then(module => ({ default: module.GraphQLPanel })))
-const WebSocketPanel = lazy(() => import("./WebSocketPanel").then(module => ({ default: module.WebSocketPanel })))
+import { cn } from "../lib/utils"
+import { useAppStore } from "../store/appStore"
+
+const GraphQLPanel = lazy(() => import("./GraphQLPanel").then((module) => ({ default: module.GraphQLPanel })))
+const WebSocketPanel = lazy(() => import("./WebSocketPanel").then((module) => ({ default: module.WebSocketPanel })))
+
+const ROW_BODY_TYPES = [BODY_FORM, BODY_MULTIPART]
+
+function PanelFallback() {
+  return <p className="p-4 text-sm text-muted-foreground">Loading...</p>
+}
+
+function TabBadge({ value }) {
+  if (!value) return null
+  if (value === true) return <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-primary" />
+  return (
+    <span className="rounded bg-muted px-1 font-mono text-[10px] leading-4 text-muted-foreground">{value}</span>
+  )
+}
+
+function bodyBadge(body, bodyType) {
+  if (bodyType === BODY_NONE) return false
+  if (ROW_BODY_TYPES.includes(bodyType)) return countSentRows(parseRows(body))
+  return body.trim() !== ""
+}
+
+function EnvVarsStatus({ variables }) {
+  const validation = useMemo(() => validateEnvVariables(variables), [variables])
+  const Icon = validation.error ? AlertCircle : CheckCircle2
+
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-2 border-t px-4 py-2 text-xs",
+        validation.error ? "border-destructive/20 bg-destructive/10 text-destructive" : "border-success/20 bg-success/10 text-success"
+      )}
+    >
+      <Icon className="h-3.5 w-3.5 shrink-0" />
+      <span className="truncate">{formatJSONError(validation)}</span>
+    </div>
+  )
+}
 
 export const RequestTabs = memo(function RequestTabs({
-    activeRequest,
-    onUpdateField,
-    variables,
-    onUpdateVariables,
-    response,
-    EditorComponent,
-    defaultTab = 'body'
+  tabId,
+  activeRequest,
+  bodyDrafts,
+  onUpdateRequest,
+  onBodyDraftsChange,
+  variables,
+  onUpdateVariables,
+  response,
+  extraction,
+  schema,
+  actions,
+  EditorComponent,
 }) {
-    const [envVarValidation, setEnvVarValidation] = useState({ valid: true, error: null })
+  const activePanel = useAppStore((state) => state.requestPanel)
+  const setActivePanel = useAppStore((state) => state.setRequestPanel)
+  const isSocketOpen = useSocketStore((state) => selectSession(tabId)(state).status === SOCKET_OPEN)
+  const { url, queryParams, headers, body, bodyType, auth, options, method, extractors } = activeRequest
+  const isWebSocket = useMemo(() => isSocketAddress(url, variables), [url, variables])
+  const isGraphQL = method === GRAPHQL_METHOD
 
-    const [activeTab, setActiveTab] = useState(defaultTab)
+  useEffect(() => {
+    if (isWebSocket) setActivePanel(SOCKET_PANEL)
+  }, [isWebSocket, setActivePanel])
 
-    useEffect(() => {
-        setActiveTab(defaultTab)
-    }, [defaultTab])
+  const headerRows = useMemo(() => parseRows(headers), [headers])
+  const paramCount = useMemo(() => countSentRows(readParamRows(url, queryParams)), [url, queryParams])
+  const bodyContent = useMemo(() => bodyBadge(body, bodyType), [body, bodyType])
+  const extractorCount = useMemo(() => parseExtractors(extractors).filter((extractor) => extractor.enabled).length, [extractors])
+  const hasCustomOptions = options.timeoutMs > 0 || options.noFollowRedirects || options.insecureTLS
 
-    useEffect(() => {
-        const url = activeRequest?.url || ''
-        if (isWebSocketURL(url) && activeTab !== 'websocket') {
-            setActiveTab('websocket')
-        }
-    }, [activeRequest?.url])
+  const handleGraphQLQueryChange = (graphqlQuery) => {
+    onUpdateRequest(graphqlQuery.trim() === "" ? { graphqlQuery } : { graphqlQuery, method: GRAPHQL_METHOD })
+  }
 
-    useEffect(() => {
-        const result = validateEnvVariables(variables)
-        setEnvVarValidation(result)
-    }, [variables])
+  return (
+    <Tabs value={activePanel} onValueChange={setActivePanel} className="flex min-h-0 flex-1 flex-col">
+      <div className="overflow-x-auto border-b border-border/60 bg-muted/10 px-4">
+        <TabsList>
+          <TabsTrigger value="params" icon={Hash}>Params<TabBadge value={paramCount} /></TabsTrigger>
+          <TabsTrigger value="headers" icon={Heading1}>Headers<TabBadge value={countSentRows(headerRows)} /></TabsTrigger>
+          <TabsTrigger value="body" icon={Braces}>Body<TabBadge value={!isGraphQL && bodyContent} /></TabsTrigger>
+          <TabsTrigger value="auth" icon={KeyRound}>Auth<TabBadge value={auth.type !== ""} /></TabsTrigger>
+          <TabsTrigger value="graphql" icon={Zap}>GraphQL<TabBadge value={isGraphQL} /></TabsTrigger>
+          <TabsTrigger value={SOCKET_PANEL} icon={Radio}>WebSocket<TabBadge value={isSocketOpen} /></TabsTrigger>
+          <TabsTrigger value="vars" icon={FolderOpen}>Env Vars</TabsTrigger>
+          <TabsTrigger value="extract" icon={FlaskConical}>Extract<TabBadge value={extractorCount} /></TabsTrigger>
+          <TabsTrigger value="settings" icon={SlidersHorizontal}>Settings<TabBadge value={hasCustomOptions} /></TabsTrigger>
+        </TabsList>
+      </div>
 
-    const handleUrlChange = useCallback((newUrl) => onUpdateField('url', newUrl), [onUpdateField])
-    const handleQueryParamsChange = useCallback((newParams) => onUpdateField('queryParams', newParams), [onUpdateField])
+      <div className="flex-1 overflow-hidden">
+        <TabsContent value="params" className="h-full p-0" noMargin>
+          <ParamsPanel key={tabId} url={url} queryParams={queryParams} onChange={onUpdateRequest} />
+        </TabsContent>
 
-    return (
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-1 flex-col min-h-0">
-            <div className="border-b border-border/60 bg-muted/10 px-4">
-                <TabsList>
-                    <TabsTrigger value="body" icon={Braces}>Body</TabsTrigger>
-                    <TabsTrigger value="graphql" icon={Zap}>GraphQL</TabsTrigger>
-                    <TabsTrigger value="websocket" icon={Radio}>WebSocket</TabsTrigger>
-                    <TabsTrigger value="params" icon={Hash}>Params</TabsTrigger>
-                    <TabsTrigger value="headers" icon={Heading1}>Headers</TabsTrigger>
-                    <TabsTrigger value="vars" icon={FolderOpen}>Env Vars</TabsTrigger>
-                    <TabsTrigger value="test" icon={FlaskConical}>Extract</TabsTrigger>
-                </TabsList>
+        <TabsContent value="headers" className="h-full p-0" noMargin>
+          <KeyValueEditor
+            key={tabId}
+            rows={headerRows}
+            onChange={(rows) => onUpdateRequest({ headers: serializeRows(rows) })}
+            keyLabel="Header"
+          />
+        </TabsContent>
+
+        <TabsContent value="body" className="h-full p-0" noMargin>
+          <BodyPanel
+            key={tabId}
+            request={activeRequest}
+            drafts={bodyDrafts}
+            editorPath={`${tabId}/body`}
+            replacedByGraphQL={isGraphQL}
+            onUpdateRequest={onUpdateRequest}
+            onDraftsChange={onBodyDraftsChange}
+            EditorComponent={EditorComponent}
+          />
+        </TabsContent>
+
+        <TabsContent value="auth" className="h-full p-0" noMargin>
+          <AuthPanel key={tabId} auth={auth} onChange={(next) => onUpdateRequest({ auth: next })} />
+        </TabsContent>
+
+        <TabsContent value="graphql" className="h-full p-0" noMargin>
+          <Suspense fallback={<PanelFallback />}>
+            <GraphQLPanel
+              key={tabId}
+              query={activeRequest.graphqlQuery}
+              variables={activeRequest.graphqlVariables}
+              environment={variables}
+              schema={schema}
+              method={method}
+              onQueryChange={handleGraphQLQueryChange}
+              onVariablesChange={(graphqlVariables) => onUpdateRequest({ graphqlVariables })}
+              onUseGraphQL={() => onUpdateRequest({ method: GRAPHQL_METHOD })}
+              onLoadSchema={actions.loadSchema}
+            />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value={SOCKET_PANEL} className="h-full p-0" noMargin>
+          <Suspense fallback={<PanelFallback />}>
+            <WebSocketPanel
+              key={tabId}
+              tabId={tabId}
+              request={activeRequest}
+              variables={variables}
+              sockets={actions.sockets}
+            />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="vars" className="h-full p-0" noMargin>
+          <div className="flex h-full flex-col">
+            <div className="min-h-0 flex-1">
+              <Suspense fallback={<PanelFallback />}>
+                <EditorComponent
+                  value={variables}
+                  onChange={(event) => onUpdateVariables(event.target.value)}
+                  language="json"
+                  path="environment/variables"
+                  height="100%"
+                />
+              </Suspense>
             </div>
+            <EnvVarsStatus variables={variables} />
+          </div>
+        </TabsContent>
 
-            <div className="flex-1 overflow-hidden">
-                <TabsContent value="body" className="h-full p-0" noMargin>
-                    <div className="h-full">
-                        <Suspense fallback={<div className="h-64 flex items-center justify-center text-muted-foreground text-sm">Loading editor...</div>}>
-                            <EditorComponent
-                                value={activeRequest.body}
-                                onChange={(e) => onUpdateField('body', e.target.value)}
-                                language="json"
-                                placeholder='{\n  "key": "value"\n}'
-                                className="min-h-[300px] font-mono text-sm"
-                                height="100%"
-                            />
-                        </Suspense>
-                    </div>
-                </TabsContent>
+        <TabsContent value="extract" className="h-full p-0" noMargin>
+          <ExtractPanel
+            key={tabId}
+            extractors={extractors}
+            response={response}
+            extraction={extraction}
+            onChange={(next) => onUpdateRequest({ extractors: next })}
+            onRun={() => actions.runExtractors(tabId)}
+          />
+        </TabsContent>
 
-                <TabsContent value="graphql" className="h-full p-0" noMargin>
-                    <Suspense fallback={<div className="p-8 text-center text-sm text-muted-foreground">Loading GraphQL Module...</div>}>
-                        <GraphQLPanel
-                            query={activeRequest.graphqlQuery || ''}
-                            variables={activeRequest.graphqlVariables || '{}'}
-                            onQueryChange={(val) => onUpdateField('graphqlQuery', val)}
-                            onVariablesChange={(val) => onUpdateField('graphqlVariables', val)}
-                        />
-                    </Suspense>
-                </TabsContent>
-
-                <TabsContent value="websocket" className="h-full p-0" noMargin>
-                    <Suspense fallback={<div className="p-8 text-center text-sm text-muted-foreground">Loading WebSocket Module...</div>}>
-                        <WebSocketPanel
-                            url={activeRequest.wsUrl || activeRequest.url || ''}
-                            onUrlChange={(val) => onUpdateField('wsUrl', val)}
-                            headers={activeRequest.headers || '{}'}
-                        />
-                    </Suspense>
-                </TabsContent>
-
-                <TabsContent value="params" className="h-full p-0" noMargin>
-                    <ParamsPanel
-                        url={activeRequest?.url || ''}
-                        queryParams={activeRequest?.queryParams || '{}'}
-                        onUrlChange={handleUrlChange}
-                        onQueryParamsChange={handleQueryParamsChange}
-                    />
-                </TabsContent>
-
-                <TabsContent value="headers" className="h-full p-0" noMargin>
-                    <div className="h-full">
-                        <Suspense fallback={<div className="h-64 flex items-center justify-center text-muted-foreground text-sm">Loading editor...</div>}>
-                            <EditorComponent
-                                value={activeRequest.headers}
-                                onChange={(e) => onUpdateField('headers', e.target.value)}
-                                language="json"
-                                placeholder='{\n  "Content-Type": "application/json",\n  "Authorization": "Bearer token"\n}'
-                                className="min-h-[300px] font-mono text-sm"
-                                height="100%"
-                            />
-                        </Suspense>
-                    </div>
-                </TabsContent>
-
-                <TabsContent value="vars" className="h-full p-0" noMargin>
-                    <div className="flex h-full flex-col">
-                        <div className="flex-1 overflow-hidden relative">
-                            <Suspense fallback={<div className="h-64 flex items-center justify-center text-muted-foreground text-sm">Loading editor...</div>}>
-                                <EditorComponent
-                                    value={variables}
-                                    onChange={(e) => onUpdateVariables(e.target.value)}
-                                    language="json"
-                                    placeholder='{\n  "base_url": "https://api.example.com"\n}'
-                                    className="min-h-[200px] font-mono text-sm h-full resize-none p-4 bg-transparent border-0 focus-visible:ring-0"
-                                    height="100%"
-                                />
-                            </Suspense>
-                        </div>
-
-                        <div className={`px-4 py-2 flex items-center gap-2 text-xs border-t ${envVarValidation.error ? 'bg-destructive/10 border-destructive/20' : 'bg-success/10 border-success/20'
-                            }`}>
-                            {envVarValidation.error ? (
-                                <>
-                                    <AlertCircle className="h-3.5 w-3.5 text-destructive flex-shrink-0" />
-                                    <span className="text-destructive truncate">{formatJSONError(envVarValidation)}</span>
-                                </>
-                            ) : (
-                                <>
-                                    <CheckCircle2 className="h-3.5 w-3.5 text-success flex-shrink-0" />
-                                    <span className="text-success dark:text-success">Valid JSON</span>
-                                </>
-                            )}
-                        </div>
-
-                    </div>
-                </TabsContent>
-
-                <TabsContent value="test" className="h-full p-0" noMargin>
-                    <TestScriptsPanel
-                        response={response}
-                        variables={variables}
-                        onVariablesChange={onUpdateVariables}
-                    />
-                </TabsContent>
-            </div>
-        </Tabs>
-    )
+        <TabsContent value="settings" className="h-full p-0" noMargin>
+          <SettingsPanel options={options} onChange={(next) => onUpdateRequest({ options: next })} />
+        </TabsContent>
+      </div>
+    </Tabs>
+  )
 })

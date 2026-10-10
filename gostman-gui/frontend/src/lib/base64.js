@@ -1,6 +1,6 @@
 const CHUNK_SIZE = 0x8000
 
-function bytesToBase64(bytes) {
+export function bytesToBase64(bytes) {
   let binary = ''
   for (let offset = 0; offset < bytes.length; offset += CHUNK_SIZE) {
     binary += String.fromCharCode(...bytes.subarray(offset, offset + CHUNK_SIZE))
@@ -10,6 +10,11 @@ function bytesToBase64(bytes) {
 
 export function textToBase64(text) {
   return bytesToBase64(new TextEncoder().encode(text))
+}
+
+export function base64ByteLength(base64) {
+  const padding = base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0
+  return Math.max(0, Math.floor((base64.length * 3) / 4) - padding)
 }
 
 export function base64ToBytes(base64) {

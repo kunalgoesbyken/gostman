@@ -225,7 +225,7 @@ export function ImportTab({ onImport, onClose }) {
                                 format: 'gostman',
                                 requestsCount: result.requests.length,
                                 foldersCount: result.folders.length,
-                                warnings: [],
+                                warnings: result.warnings,
                                 data: result
                             })
                         }

@@ -1,601 +1,193 @@
-import React, { useState, useEffect, useRef } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Plug, Unplug, Send, Trash2, Clock, CheckCircle, XCircle, AlertCircle, Radio, Waves, Copy } from "lucide-react"
-import { EmptyState } from "./ui/emptyState"
+import { memo, useLayoutEffect, useMemo, useRef } from "react"
+import { ArrowDown, ArrowUp, Copy, Info, TriangleAlert } from "lucide-react"
 import { Button } from "./ui/button"
-import { Badge } from "./ui/badge"
 import { Textarea } from "./ui/textarea"
-import { Input } from "./ui/input"
+import { pluralize } from "../lib/dataUtils"
 import {
-  fadeIn,
-  slideUp,
-  slideDown,
-  scaleInOut,
-  scaleInOutSubtle,
-  streamItem,
-  tapScale,
-  pulseRing,
-  pulseScale,
-  heartbeat,
-  spin,
-  spring,
-  springSnappy,
-  durationBase,
-  enterDelay,
-} from "../lib/motion"
+  ENTRY_ERROR,
+  ENTRY_INFO,
+  ENTRY_RECEIVED,
+  ENTRY_SENT,
+  LOG_LIMIT,
+  SOCKET_CONNECTING,
+  SOCKET_IDLE,
+  SOCKET_OPEN,
+  SOCKET_WAITING,
+  resolveSocketTarget,
+  selectSession,
+  useSocketStore,
+} from "../lib/socketSessions"
+import { cn } from "../lib/utils"
 
-const CONNECTED_RING_RGB = '34, 211, 238'
-const RECONNECT_DELAY_MS = 3000
+const PINNED_DISTANCE_PX = 24
+const TIME_FORMAT = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })
 
-/**
- * Picks the transport for the current target.
- *
- * The desktop build routes through Go, which can set arbitrary handshake
- * headers; the web build is stuck with the browser API. The `go` global only
- * exists under Wails, and the desktop module is loaded lazily behind that
- * check, so the web app never evaluates desktop code - this module is part of
- * the web bundle too, because RequestBar and RequestTabs import
- * `isWebSocketURL` from it.
- */
-async function resolveTransport() {
-  if (!globalThis.go) return openBrowserSocket
-  const { openDesktopSocket } = await import("./websocketDesktop")
-  return openDesktopSocket
+const STATUS_VIEWS = {
+  [SOCKET_IDLE]: { label: "Disconnected", dot: "bg-muted-foreground/50" },
+  [SOCKET_CONNECTING]: { label: "Connecting", dot: "bg-warning" },
+  [SOCKET_OPEN]: { label: "Connected", dot: "bg-success" },
+  [SOCKET_WAITING]: { label: "Waiting to reconnect", dot: "bg-warning" },
 }
 
-const parseHeaders = (headers) => {
-  try {
-    return JSON.parse(headers || '{}')
-  } catch {
-    return {}
-  }
+const ENTRY_VIEWS = {
+  [ENTRY_SENT]: { icon: ArrowUp, label: "Sent", tone: "text-primary" },
+  [ENTRY_RECEIVED]: { icon: ArrowDown, label: "Received", tone: "text-success" },
+  [ENTRY_INFO]: { icon: Info, label: "Info", tone: "text-muted-foreground" },
+  [ENTRY_ERROR]: { icon: TriangleAlert, label: "Error", tone: "text-destructive" },
 }
 
-// Pretty-prints JSON payloads, returning the text to show and its message type.
-const formatPayload = (payload) => {
-  try {
-    return [JSON.stringify(JSON.parse(payload), null, 2), 'json']
-  } catch {
-    return [payload, 'message']
-  }
+const NOTICE = "shrink-0 border-b border-border/50 px-4 py-2 text-xs text-muted-foreground"
+
+function entryNote(entry) {
+  if (entry.byteCount !== undefined) return `Binary, ${pluralize(entry.byteCount, "byte")}`
+  if (entry.fullLength !== undefined) return `Showing the first ${entry.text.length} of ${entry.fullLength} characters`
+  return ""
 }
 
-/**
- * Both transports resolve to the same shape - `{ send(text), close() }` - and
- * report activity through a handlers object of
- * `{ onOpen, onMessage, onError, onClose }`.
- */
-function openBrowserSocket(wsUrl, headers, handlers) {
-  // The native WebSocket API cannot set handshake headers, so only
-  // Sec-WebSocket-Protocol survives - it maps onto the subprotocol argument.
-  // The desktop transport below has no such limit.
-  const protocol = parseHeaders(headers)['Sec-WebSocket-Protocol']
-  const socket = new WebSocket(wsUrl, protocol ? [protocol] : undefined)
-
-  socket.onopen = () => handlers.onOpen()
-  socket.onmessage = (event) => handlers.onMessage(event.data)
-  socket.onerror = () => handlers.onError('WebSocket error occurred')
-  socket.onclose = (event) =>
-    handlers.onClose(`Connection closed (${event.code}${event.reason ? ': ' + event.reason : ''})`)
-
-  return {
-    send: (text) => socket.send(text),
-    close: () => socket.close(),
-  }
-}
-
-const ConnectionState = {
-  DISCONNECTED: 'disconnected',
-  CONNECTING: 'connecting',
-  CONNECTED: 'connected',
-  ERROR: 'error'
-}
-
-// Status configurations with enhanced visuals
-const StatusConfig = {
-  [ConnectionState.DISCONNECTED]: {
-    icon: Unplug,
-    label: 'Disconnected',
-    color: 'text-muted-foreground',
-    bg: 'bg-muted',
-    border: 'border-border/50'
-  },
-  [ConnectionState.CONNECTING]: {
-    icon: Clock,
-    label: 'Connecting...',
-    color: 'text-info',
-    bg: 'bg-info/10',
-    border: 'border-info/20'
-  },
-  [ConnectionState.CONNECTED]: {
-    icon: Radio,
-    label: 'Connected',
-    color: 'text-success',
-    bg: 'bg-success/10',
-    border: 'border-success/20'
-  },
-  [ConnectionState.ERROR]: {
-    icon: XCircle,
-    label: 'Error',
-    color: 'text-destructive',
-    bg: 'bg-destructive/10',
-    border: 'border-destructive/20'
-  }
-}
-
-/**
- * WebSocket Testing Panel with Enhanced Visuals
- * Allows testing WebSocket connections with real-time messaging and animations
- */
-export function WebSocketPanel({
-  url,
-  onUrlChange,
-  headers
-}) {
-  const [state, setState] = useState(ConnectionState.DISCONNECTED)
-  const [message, setMessage] = useState('')
-  const [messages, setMessages] = useState([])
-  const [autoReconnect, setAutoReconnect] = useState(false)
-  const [copiedMessage, setCopiedMessage] = useState(null)
-  const wsRef = useRef(null)
-  const reconnectTimeoutRef = useRef(null)
-  const messagesEndRef = useRef(null)
-
-  // Read from the close handler, which captures the value at connect time.
-  const autoReconnectRef = useRef(autoReconnect)
-  autoReconnectRef.current = autoReconnect
-
-  // Scroll to bottom when new messages arrive
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-
-  // Clean up on unmount
-  useEffect(() => {
-    return () => {
-      disconnect()
-    }
-  }, [])
-
-  const connect = async () => {
-    if (!url || !url.trim()) {
-      addMessage('system', 'error', 'Please enter a WebSocket URL')
-      return
-    }
-
-    // Convert ws:// to wss:// if needed for secure connections
-    let wsUrl = url.trim()
-    if (wsUrl.startsWith('https://')) {
-      wsUrl = wsUrl.replace('https://', 'wss://')
-    } else if (wsUrl.startsWith('http://')) {
-      wsUrl = wsUrl.replace('http://', 'ws://')
-    }
-
-    setState(ConnectionState.CONNECTING)
-    addMessage('system', 'info', `Connecting to ${wsUrl}...`)
-
-    const handlers = {
-      onOpen: () => {
-        setState(ConnectionState.CONNECTED)
-        addMessage('system', 'success', `Connected to ${wsUrl}`)
-      },
-      onMessage: (data) => {
-        const [content, type] = formatPayload(data)
-        addMessage('received', type, content)
-      },
-      onError: (detail) => {
-        setState(ConnectionState.ERROR)
-        addMessage('system', 'error', detail)
-      },
-      onClose: (detail) => {
-        wsRef.current = null
-        setState(ConnectionState.DISCONNECTED)
-        addMessage('system', 'info', detail)
-
-        if (autoReconnectRef.current) {
-          reconnectTimeoutRef.current = setTimeout(connect, RECONNECT_DELAY_MS)
-        }
-      },
-    }
-
-    try {
-      const open = await resolveTransport()
-      wsRef.current = await open(wsUrl, headers, handlers)
-    } catch (error) {
-      setState(ConnectionState.ERROR)
-      addMessage('system', 'error', `Failed to connect: ${error.message || error}`)
-    }
-  }
-
-  const disconnect = () => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current)
-      reconnectTimeoutRef.current = null
-    }
-
-    wsRef.current?.close()
-    wsRef.current = null
-
-    setState(ConnectionState.DISCONNECTED)
-  }
-
-  const send = async () => {
-    if (!wsRef.current || state !== ConnectionState.CONNECTED) {
-      addMessage('system', 'error', 'Not connected')
-      return
-    }
-
-    if (!message.trim()) return
-
-    try {
-      await wsRef.current.send(message)
-
-      const [displayMessage, messageType] = formatPayload(message)
-      addMessage('sent', messageType, displayMessage)
-      setMessage('')
-    } catch (error) {
-      addMessage('system', 'error', `Failed to send: ${error.message || error}`)
-    }
-  }
-
-  const addMessage = (direction, type, content) => {
-    const newMessage = {
-      id: Date.now() + Math.random(),
-      direction,
-      type,
-      content,
-      timestamp: new Date()
-    }
-
-    setMessages(prev => [...prev, newMessage])
-  }
-
-  const clearMessages = () => {
-    setMessages([])
-  }
-
-  const copyMessage = (content, id) => {
-    navigator.clipboard.writeText(content)
-    setCopiedMessage(id)
-    setTimeout(() => setCopiedMessage(null), 2000)
-  }
-
-  const formatTime = (date) => {
-    return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
-  }
-
-  const statusConfig = StatusConfig[state]
-  const StatusIcon = statusConfig.icon
+const LogEntry = memo(function LogEntry({ entry }) {
+  const { icon: Icon, label, tone } = ENTRY_VIEWS[entry.kind]
+  const note = entryNote(entry)
+  const isMessage = entry.kind === ENTRY_SENT || entry.kind === ENTRY_RECEIVED
+  const copy = () => navigator.clipboard.writeText(entry.text).catch(() => {})
 
   return (
-    <motion.div
-      className="flex flex-col h-full"
-      {...fadeIn}
-      transition={durationBase}
-    >
-      <motion.div
-        className="relative overflow-hidden"
-        {...slideDown}
-        transition={spring}
-      >
+    <li className="group grid grid-cols-[4rem_1rem_minmax(0,1fr)_1.5rem] items-start gap-2 border-b border-border/30 px-4 py-1.5">
+      <time className="font-mono text-[11px] leading-5 text-muted-foreground">{TIME_FORMAT.format(entry.time)}</time>
+      <Icon aria-label={label} className={cn("mt-1 h-3.5 w-3.5", tone)} />
+      <div className="min-w-0">
+        {note && <p className="text-[11px] leading-5 text-muted-foreground">{note}</p>}
+        <pre className={cn("whitespace-pre-wrap break-all font-mono text-xs leading-5", isMessage ? "text-foreground" : tone)}>{entry.text}</pre>
+      </div>
+      {isMessage && (
+        <button
+          type="button"
+          onClick={copy}
+          aria-label="Copy message"
+          title="Copy message"
+          className="mt-0.5 rounded p-0.5 text-muted-foreground opacity-0 hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100"
+        >
+          <Copy className="h-3.5 w-3.5" />
+        </button>
+      )}
+    </li>
+  )
+})
 
-        <div className="relative px-4 py-3 border-b border-border/50 bg-muted/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <motion.div
-                className="relative"
-                animate={state === ConnectionState.CONNECTED ? pulseScale : {}}
-              >
-                {state === ConnectionState.CONNECTED ? (
-                  <>
-                    <motion.div
-                      className="absolute inset-0 rounded-full bg-success/30 blur-md"
-                      animate={pulseRing(CONNECTED_RING_RGB)}
-                    />
-                    <Radio className="h-5 w-5 text-success relative z-10" />
-                  </>
-                ) : (
-                  <Plug className="h-5 w-5 text-primary" />
-                )}
-              </motion.div>
+function MessageLog({ entries, dropped }) {
+  const logRef = useRef(null)
+  const isPinned = useRef(true)
 
-              <div>
-                <span className="text-sm font-semibold text-foreground">
-                  WebSocket
-                </span>
-                <motion.div
-                  key={state}
-                  initial={scaleInOut.initial}
-                  animate={scaleInOut.animate}
-                  className={`flex items-center gap-1.5 mt-0.5 ${statusConfig.color}`}
-                >
-                  {state === ConnectionState.CONNECTED && (
-                    <motion.div
-                      animate={heartbeat}
-                      className="w-1.5 h-1.5 rounded-full bg-success/40"
-                    />
-                  )}
-                  {state === ConnectionState.CONNECTING && (
-                    <motion.div animate={spin}>
-                      <Clock className="h-3 w-3" />
-                    </motion.div>
-                  )}
-                  {state !== ConnectionState.CONNECTED && state !== ConnectionState.CONNECTING && (
-                    <StatusIcon className="h-3 w-3" />
-                  )}
-                  <span className="text-[10px] font-medium">{statusConfig.label}</span>
-                </motion.div>
-              </div>
-            </div>
+  useLayoutEffect(() => {
+    const log = logRef.current
+    if (isPinned.current) log.scrollTop = log.scrollHeight
+  }, [entries])
 
-            <div className="flex items-center gap-2">
-              <motion.label
-                className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer px-2 py-1 rounded-md hover:bg-muted/30 transition-colors"
-                {...tapScale}
-              >
-                <motion.div
-                  className="relative"
-                  animate={autoReconnect ? { backgroundColor: ['hsl(var(--primary))'] } : {}}
-                >
-                  <input
-                    type="checkbox"
-                    checked={autoReconnect}
-                    onChange={(e) => setAutoReconnect(e.target.checked)}
-                    className="sr-only"
-                  />
-                  <div className={`w-8 h-4 rounded-full transition-colors ${autoReconnect ? 'bg-primary' : 'bg-muted'}`}>
-                    <motion.div
-                      className="w-3 h-3 rounded-full bg-white shadow-sm mt-0.5"
-                      animate={{ x: autoReconnect ? 16 : 2 }}
-                      transition={springSnappy}
-                    />
-                  </div>
-                </motion.div>
-                <span className="text-[10px] uppercase tracking-wide">Auto-reconnect</span>
-              </motion.label>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+  const trackPosition = (event) => {
+    const log = event.currentTarget
+    isPinned.current = log.scrollHeight - log.scrollTop - log.clientHeight <= PINNED_DISTANCE_PX
+  }
 
-      <motion.div
-        className="px-4 py-3 border-b border-border/50"
-        {...slideUp}
-        {...enterDelay(0.1)}
-      >
-        <div className="flex items-center gap-2">
-          <div className="flex-1 relative">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-mono">
-              ws://
-            </div>
-            <Input
-              value={url}
-              onChange={(e) => onUrlChange(e.target.value)}
-              placeholder="echo.websocket.org"
-              className="pl-10 font-mono text-sm bg-background/50 border-border/50 focus:border-primary/50"
-              disabled={state === ConnectionState.CONNECTED || state === ConnectionState.CONNECTING}
-            />
-          </div>
-          <AnimatePresence mode="wait">
-            {state === ConnectionState.CONNECTED || state === ConnectionState.CONNECTING ? (
-              <motion.div
-                key="disconnect"
-                {...scaleInOut}
-              >
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={disconnect}
-                  className="gap-2"
-                >
-                  <Unplug className="h-4 w-4" />
-                  Disconnect
-                </Button>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="connect"
-                {...scaleInOut}
-              >
-                <Button
-                  size="sm"
-                  onClick={connect}
-                  className="gap-2"
-                >
-                  <Plug className="h-4 w-4" />
-                  Connect
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </motion.div>
-
-      <motion.div
-        className="min-h-0 flex-1 overflow-y-auto bg-background p-4 space-y-2"
-        {...fadeIn}
-        {...enterDelay(0.2)}
-      >
-        <AnimatePresence mode="popLayout">
-          {messages.length === 0 ? (
-            <motion.div key="empty" {...scaleInOutSubtle}>
-              <EmptyState
-                icon={Waves}
-                title="Ready to connect"
-                description="Enter a WebSocket URL to begin messaging"
-                action={
-                  <div className="inline-flex items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 font-mono text-xs">
-                    <span className="text-muted-foreground">Try</span>
-                    <span className="text-primary">wss://echo.websocket.org</span>
-                  </div>
-                }
-              />
-            </motion.div>
-          ) : (
-            <>
-              {messages.map((msg) => (
-                <motion.div
-                  key={msg.id}
-                  layout
-                  variants={streamItem}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className={`
-                    relative group flex gap-3 p-3 rounded-lg text-sm border
-                    ${msg.direction === 'sent'
-                      ? 'bg-primary/5 ml-8 border-primary/10'
-                      : msg.direction === 'received'
-                        ? 'bg-success/5 mr-8 border-success/10'
-                        : 'bg-muted/20 border-border/50'
-                    }
-                  `}
-                >
-                  <div className="shrink-0 pt-0.5">
-                    {msg.direction === 'sent' && (
-                      <motion.div
-                        initial={{ rotate: -45 }}
-                        animate={{ rotate: 0 }}
-                        className="bg-primary/20 rounded p-1.5"
-                      >
-                        <Send className="h-3.5 w-3.5 text-primary" />
-                      </motion.div>
-                    )}
-                    {msg.direction === 'received' && (
-                      <motion.div
-                        initial={{ rotate: 45 }}
-                        animate={{ rotate: 0 }}
-                        className="bg-success/20 rounded p-1.5"
-                      >
-                        <CheckCircle className="h-3.5 w-3.5 text-success" />
-                      </motion.div>
-                    )}
-                    {msg.direction === 'system' && (
-                      <div className={`rounded p-1.5 ${
-                        msg.type === 'error' ? 'bg-destructive/20' :
-                          msg.type === 'success' ? 'bg-success/20' :
-                            'bg-muted/30'
-                      }`}>
-                        {msg.type === 'error' ? <XCircle className="h-3.5 w-3.5 text-destructive" /> :
-                          msg.type === 'success' ? <CheckCircle className="h-3.5 w-3.5 text-success" /> :
-                            <AlertCircle className="h-3.5 w-3.5 text-muted-foreground" />
-                        }
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className={`
-                        text-[10px] font-bold uppercase tracking-wider
-                        ${msg.direction === 'sent' ? 'text-primary' : ''}
-                        ${msg.direction === 'received' ? 'text-success' : ''}
-                        ${msg.direction === 'system' ? 'text-muted-foreground' : ''}
-                      `}>
-                        {msg.direction === 'sent' ? 'SENT' : msg.direction === 'received' ? 'RECEIVED' : 'SYSTEM'}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-muted-foreground font-mono">
-                          {formatTime(msg.timestamp)}
-                        </span>
-                        <motion.button
-                          {...tapScale}
-                          onClick={() => copyMessage(msg.content, msg.id)}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          {copiedMessage === msg.id ? (
-                            <CheckCircle className="h-3 w-3 text-success" />
-                          ) : (
-                            <Copy className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                          )}
-                        </motion.button>
-                      </div>
-                    </div>
-                    <pre className="text-xs font-mono whitespace-pre-wrap break-words overflow-x-auto bg-background/30 rounded p-2 border border-border/20">
-                      {msg.content}
-                    </pre>
-                  </div>
-                </motion.div>
-              ))}
-              <div ref={messagesEndRef} />
-            </>
-          )}
-        </AnimatePresence>
-      </motion.div>
-
-      <motion.div
-        className="border-t border-border/50 p-4"
-        {...slideUp}
-        {...enterDelay(0.3)}
-      >
-        <div className="relative">
-          <Textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder='{{"action": "ping"}'
-            className={`flex-1 h-20 font-mono text-sm resize-none bg-background/50 border-border/50 transition-all ${
-              state === ConnectionState.CONNECTED
-                ? 'focus:border-primary/50 focus:ring-2 focus:ring-primary/10'
-                : 'opacity-50 cursor-not-allowed'
-            }`}
-            disabled={state !== ConnectionState.CONNECTED}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-                send()
-              }
-            }}
-          />
-          <motion.div
-            className="absolute bottom-2 right-2 text-[10px] text-muted-foreground"
-            animate={{ opacity: message.length > 0 ? 1 : 0 }}
-          >
-            {message.length} chars
-          </motion.div>
-        </div>
-
-        <div className="flex items-center justify-between mt-3">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <kbd className="px-1.5 py-0.5 rounded bg-muted border border-border/30 font-mono text-[10px]">Ctrl</kbd>
-            <span>+</span>
-            <kbd className="px-1.5 py-0.5 rounded bg-muted border border-border/30 font-mono text-[10px]">Enter</kbd>
-            <span className="ml-1">to send</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <motion.div {...tapScale}>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={clearMessages}
-                disabled={messages.length === 0}
-                className="gap-1.5"
-              >
-                <Trash2 className="h-3 w-3" />
-                Clear
-              </Button>
-            </motion.div>
-            <motion.div {...tapScale}>
-              <Button
-                size="sm"
-                onClick={send}
-                disabled={state !== ConnectionState.CONNECTED || !message.trim()}
-                className="gap-2"
-              >
-                <Send className="h-3 w-3" />
-                Send
-              </Button>
-            </motion.div>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
+  return (
+    <div ref={logRef} onScroll={trackPosition} className="min-h-0 flex-1 overflow-y-auto scrollbar-primary">
+      {dropped > 0 && (
+        <p className="border-b border-border/30 px-4 py-1.5 text-xs text-muted-foreground">
+          Older entries dropped: {dropped}. The log keeps the latest {LOG_LIMIT}.
+        </p>
+      )}
+      {entries.length === 0 && (
+        <p className="px-4 py-3 text-xs text-muted-foreground">
+          No messages yet. Connect, then send a message or wait for the server to speak.
+        </p>
+      )}
+      <ul>
+        {entries.map((entry) => <LogEntry key={entry.id} entry={entry} />)}
+      </ul>
+    </div>
   )
 }
 
-/**
- * Detects if a URL is a WebSocket URL
- */
-export function isWebSocketURL(url) {
-  if (!url || typeof url !== 'string') return false
-  const trimmed = url.trim().toLowerCase()
-  return trimmed.startsWith('ws://') || trimmed.startsWith('wss://')
+export function WebSocketPanel({ tabId, request, variables, sockets }) {
+  const session = useSocketStore(selectSession(tabId))
+  const { url, headers } = request
+  const target = useMemo(() => resolveSocketTarget({ url, headers }, variables), [url, headers, variables])
+  const unsentHeaders = target.error ? [] : sockets.unsentHeaders(target.headers)
+  const status = STATUS_VIEWS[session.status]
+  const isIdle = session.status === SOCKET_IDLE
+  const isOpen = session.status === SOCKET_OPEN
+  const canSend = isOpen && session.draft !== ""
+
+  const handleComposerKey = (event) => {
+    if (event.key !== "Enter" || (!event.ctrlKey && !event.metaKey)) return
+    event.preventDefault()
+    event.stopPropagation()
+    sockets.sendMessage(tabId)
+  }
+
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex h-10 shrink-0 items-center gap-3 border-b border-border/50 px-4">
+        <span className="flex shrink-0 items-center gap-2 text-xs text-foreground">
+          <span aria-hidden="true" className={cn("h-2 w-2 rounded-full", status.dot)} />
+          {status.label}
+        </span>
+        <span className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground" title={target.url || target.error}>
+          {target.url || target.error}
+        </span>
+        <label className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={session.autoReconnect}
+            onChange={(event) => sockets.setAutoReconnect(tabId, event.target.checked)}
+            className="h-3.5 w-3.5 accent-primary"
+          />
+          Auto-reconnect
+        </label>
+        {isIdle ? (
+          <Button type="button" size="sm" className="h-7 shrink-0 px-3" disabled={Boolean(target.error)} onClick={() => sockets.connect(tabId)}>
+            Connect
+          </Button>
+        ) : (
+          <Button type="button" variant="outline" size="sm" className="h-7 shrink-0 px-3" onClick={() => sockets.disconnect(tabId)}>
+            Disconnect
+          </Button>
+        )}
+      </div>
+
+      {unsentHeaders.length > 0 && (
+        <p className={NOTICE}>
+          A browser can only set Sec-WebSocket-Protocol on a WebSocket. Not sent from here: {unsentHeaders.join(", ")}. The desktop app sends every header.
+        </p>
+      )}
+
+      <MessageLog entries={session.entries} dropped={session.dropped} />
+
+      <div className="flex shrink-0 items-stretch gap-2 border-t border-border/50 px-4 py-3">
+        <Textarea
+          value={session.draft}
+          onChange={(event) => sockets.setDraft(tabId, event.target.value)}
+          onKeyDown={handleComposerKey}
+          placeholder={isOpen ? "Message (Ctrl+Enter to send)" : "Connect to send messages"}
+          aria-label="Message"
+          disabled={!isOpen}
+          spellCheck={false}
+          className="h-16 min-h-0 flex-1 resize-none font-mono text-xs"
+        />
+        <div className="flex shrink-0 flex-col justify-between">
+          <Button type="button" size="sm" className="h-7 px-3" disabled={!canSend} onClick={() => sockets.sendMessage(tabId)}>
+            Send
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-7 px-3"
+            disabled={session.entries.length === 0}
+            onClick={() => sockets.clearLog(tabId)}
+          >
+            Clear
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
 }

@@ -1,4 +1,5 @@
 import { base64ToBytes } from '../base64'
+import { openBrowserSocket, unsentBrowserHeaders } from './browserSocket'
 import { mockFolders, mockRequests } from '../mockData'
 import { toEngineRequest } from '../request'
 import { failureResponse } from '../response'
@@ -145,4 +146,6 @@ export const webBackend = {
   saveEnvironments,
   reset,
   saveFile,
+  openSocket: openBrowserSocket,
+  unsentSocketHeaders: unsentBrowserHeaders,
 }

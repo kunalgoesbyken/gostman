@@ -1,3 +1,7 @@
+const VARIABLE_NAME = /^[a-zA-Z_][a-zA-Z0-9_-]*$/
+
+export const isVariableName = (name) => VARIABLE_NAME.test(name)
+
 /**
  * Validates a JSON string, reporting the failure position as line/column.
  * @returns {Object} { valid, error, parsed?, position?: { line, column, position } }
@@ -54,7 +58,7 @@ export function validateEnvVariables(jsonString) {
 
   if (result.parsed && typeof result.parsed === 'object') {
     for (const [key, value] of Object.entries(result.parsed)) {
-      if (!/^[a-zA-Z_][a-zA-Z0-9_-]*$/.test(key)) {
+      if (!isVariableName(key)) {
         return {
           valid: false,
           error: `Invalid variable name "${key}". Use alphanumeric characters, underscores, and hyphens.`

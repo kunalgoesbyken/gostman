@@ -1,24 +1,59 @@
-/**
- * Import/Export utilities for Gostman
- * Supports Postman collections, OpenAPI specs, and Gostman's native format
- *
- * Uses modern libraries for robust parsing:
- * - @scalar/openapi-parser: OpenAPI 3.x/3.1 validation and parsing
- * - js-yaml: YAML conversion
- *
- * Postman collections are parsed natively (no SDK dependency - avoids lodash issues)
- */
-
 import { dereference, validate } from '@scalar/openapi-parser'
 import YAML from 'js-yaml'
+import { BODY_BINARY, BODY_FORM, BODY_JSON, BODY_MULTIPART, BODY_NONE, BODY_TEXT, BODY_XML } from './body'
+import { buildCollectionTree, foldersIn, listFolders, requestsIn, ROOT_ID } from './collectionTree'
+import { isPlainObject, parseJSON, pluralize } from './dataUtils'
+import { readParamRows } from './queryString'
+import { isFileRow, isSentRow, parseRows, ROW_FILE, ROW_TEXT, serializeRows } from './rows'
+
+export const MAX_FILE_SIZE = 10 * 1024 * 1024
 
 const MAX_RECURSION_DEPTH = 10
-const MAX_TRUNCATION_LENGTH = 50
 const MAX_FOLDER_DEPTH = 100
 const MAX_VALIDATION_ERRORS = 10
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB in bytes
+const MAX_NAMES_IN_WARNING = 5
 
-const VALID_HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'TRACE']
+const POSTMAN_SCHEMA_MARKER = 'postman.com/json/collection'
+const POSTMAN_SCHEMA = 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json'
+const GOSTMAN_FORMAT_VERSION = '2.0.0'
+const GRAPHQL_METHOD = 'GRAPHQL'
+const OPENAPI_METHODS = ['get', 'post', 'put', 'delete', 'patch', 'options', 'head', 'trace']
+const UNTITLED_REQUEST = 'Untitled Request'
+
+const AUTH_BASIC = 'basic'
+const AUTH_BEARER = 'bearer'
+const AUTH_API_KEY = 'apikey'
+const AUTH_IN_HEADER = 'header'
+const AUTH_IN_QUERY = 'query'
+const NO_AUTH = { type: '' }
+
+const BODY_CONTENT_TYPES = {
+  [BODY_JSON]: 'application/json',
+  [BODY_TEXT]: 'text/plain',
+  [BODY_XML]: 'application/xml',
+  [BODY_FORM]: 'application/x-www-form-urlencoded',
+  [BODY_MULTIPART]: 'multipart/form-data',
+  [BODY_BINARY]: 'application/octet-stream',
+}
+
+const asArray = (value) => (Array.isArray(value) ? value : [])
+
+const asText = (value) => (value === undefined || value === null ? '' : String(value))
+
+const createRow = (key, value, enabled = true) => ({ key, value, enabled })
+
+const rowsField = (rows) => (rows.length > 0 ? serializeRows(rows) : '')
+
+const sentRows = (json) => parseRows(json).filter(isSentRow)
+
+const apiKeyLocation = (location) => (location === AUTH_IN_QUERY ? AUTH_IN_QUERY : AUTH_IN_HEADER)
+
+const withLeadingSlash = (path) => (path.startsWith('/') ? path : `/${path}`)
+
+function withoutQuery(url) {
+  const queryStart = url.indexOf('?')
+  return queryStart === -1 ? url : url.slice(0, queryStart)
+}
 
 /**
  * Safely stringifies a value, handling circular references and other edge cases.
@@ -83,8 +118,6 @@ function safeStringify(value, placeholder = null) {
   }
 }
 
-export { MAX_FILE_SIZE, MAX_VALIDATION_ERRORS }
-
 /**
  * Simple UUID generator (using crypto.randomUUID if available, else fallback)
  * @returns {string} A unique ID string
@@ -100,415 +133,219 @@ function generateId() {
   })
 }
 
-/**
- * Encodes a string to UTF-8 for use with btoa (handles Unicode characters)
- * @param {string} str - String to encode
- * @returns {string} UTF-8 encoded string safe for btoa
- */
-function encodeUTF8(str) {
-  return encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) =>
-    String.fromCharCode('0x' + p1)
-  )
+function uniqueId(candidate, usedIds) {
+  const id = candidate && !usedIds.has(candidate) ? candidate : generateId()
+  usedIds.add(id)
+  return id
 }
 
-/**
- * Extract query parameters from a URL string or object
- * @param {string|Object} url - URL string or Postman URL object
- * @returns {Object} Query parameters as key-value pairs (arrays for duplicates)
- */
-function extractQueryParams(url) {
-  const queryParams = {}
+const hasKey = (entry) => asText(entry?.key).trim() !== ''
 
-  if (typeof url === 'string') {
-    try {
-      const urlObj = new URL(url)
-      urlObj.searchParams.forEach((value, key) => {
-        // Handle duplicates: if key exists, convert to array or append to array
-        if (key in queryParams) {
-          if (Array.isArray(queryParams[key])) {
-            queryParams[key].push(value)
-          } else {
-            queryParams[key] = [queryParams[key], value]
-          }
-        } else {
-          queryParams[key] = value
-        }
-      })
-    } catch (err) {
-      // Invalid URL, return empty
-      console.warn('Failed to parse URL for query params:', err.message)
-    }
-    return queryParams
-  }
-
-  if (url && url.query) {
-    const queryList = Array.isArray(url.query) ? url.query : []
-    queryList.forEach(param => {
-      if (!param.disabled && param.key && typeof param.key === 'string' && param.key.trim()) {
-        const value = param.value !== undefined ? String(param.value) : ''
-        // Handle duplicates: if key exists, convert to array or append to array
-        if (param.key in queryParams) {
-          if (Array.isArray(queryParams[param.key])) {
-            queryParams[param.key].push(value)
-          } else {
-            queryParams[param.key] = [queryParams[param.key], value]
-          }
-        } else {
-          queryParams[param.key] = value
-        }
-      }
-    })
-  }
-
-  return queryParams
+function postmanRows(entries) {
+  return asArray(entries)
+    .filter(hasKey)
+    .map((entry) => createRow(asText(entry.key), asText(entry.value), !entry.disabled))
 }
 
-/**
- * Extract headers from a headers array
- * @param {Array} headers - Array of header objects
- * @returns {Object} Headers as key-value pairs
- */
-function extractHeaders(headers) {
-  const result = {}
+const postmanUrlPart = (part) => (isPlainObject(part) ? asText(part.value) : asText(part))
 
-  if (!Array.isArray(headers)) return result
+const joinPostmanUrlParts = (parts, separator) => (
+  Array.isArray(parts) ? parts.map(postmanUrlPart).join(separator) : asText(parts)
+)
 
-  headers.forEach(header => {
-    if (!header.disabled && header.key && typeof header.key === 'string' && header.key.trim()) {
-      result[header.key] = header.value || ''
-    }
-  })
-
-  return result
+function composePostmanUrl({ protocol, host, port, path }) {
+  const hostName = joinPostmanUrlParts(host, '.')
+  if (!hostName) return ''
+  const scheme = protocol ? `${asText(protocol).replace('://', '')}://` : ''
+  const portSuffix = port ? `:${port}` : ''
+  const pathText = joinPostmanUrlParts(path, '/')
+  return `${scheme}${hostName}${portSuffix}${pathText ? withLeadingSlash(pathText) : ''}`
 }
 
-/**
- * Extract body from a Postman RequestBody
- * @param {Object} requestBody - Postman RequestBody
- * @returns {string} Body as string
- */
-function extractBody(requestBody) {
-  if (!requestBody) return ''
-
-  switch (requestBody.mode) {
-    case 'raw':
-      return requestBody.raw || ''
-
-    case 'urlencoded':
-      const formData = {}
-      if (Array.isArray(requestBody.urlencoded)) {
-        requestBody.urlencoded.forEach(param => {
-          if (!param.disabled && param.key) {
-            formData[param.key] = param.value || ''
-          }
-        })
-      }
-      return safeStringify(formData)
-
-    case 'formdata':
-      const form = {}
-      if (Array.isArray(requestBody.formdata)) {
-        requestBody.formdata.forEach(param => {
-          if (!param.disabled && param.key) {
-            form[param.key] = param.value || ''
-          }
-        })
-      }
-      return safeStringify(form)
-
-    case 'graphql':
-      if (requestBody.graphql) {
-        if (typeof requestBody.graphql === 'string') {
-          return requestBody.graphql
-        }
-        if (requestBody.graphql.query && typeof requestBody.graphql.query === 'string') {
-          return safeStringify({ query: requestBody.graphql.query })
-        }
-      }
-      return ''
-
-    default:
-      return ''
-  }
-}
-
-/**
- * Get URL from Postman request URL object
- * @param {string|Object} url - URL string or Postman URL object
- * @returns {string} Full URL string
- */
-function getUrlString(url) {
+function postmanUrl(url) {
   if (typeof url === 'string') return url
-
-  if (url && url.raw) return url.raw
-
-  if (url && url.protocol && url.host) {
-    // Ensure protocol doesn't already contain ://
-    const protocol = url.protocol.endsWith('://') ? url.protocol : url.protocol + '://'
-    let urlString = protocol + (Array.isArray(url.host) ? url.host.join('.') : url.host)
-    if (url.port) urlString += ':' + url.port
-
-    if (url.path) {
-      const pathStr = Array.isArray(url.path) ? url.path.join('/') : url.path
-      urlString += '/' + pathStr
-    }
-
-    if (url.query && url.query.length > 0) {
-      const params = url.query.filter(p => !p.disabled).map(p =>
-        `${encodeURIComponent(p.key)}=${encodeURIComponent(p.value || '')}`
-      )
-      urlString += '?' + params.join('&')
-    }
-    return urlString
-  }
-
-  return ''
+  if (!isPlainObject(url)) return ''
+  const raw = asText(url.raw) || composePostmanUrl(url)
+  return Array.isArray(url.query) ? withoutQuery(raw) : raw
 }
 
-/**
- * Recursively processes Postman collection items
- * @param {Array} items - Array of Postman items
- * @param {string|null} parentFolderId - Parent folder ID
- * @param {Array} requests - Accumulator for requests
- * @param {Array} folders - Accumulator for folders
- * @param {Set} usedIds - Set of already used IDs to prevent duplicates
- * @param {Array} unsupportedAuthWarnings - Accumulator for unsupported auth warnings
- * @param {number} depth - Current depth for recursion protection
- */
-function processPostmanItems(items, parentFolderId, requests, folders, usedIds = new Set(), unsupportedAuthWarnings = [], depth = 0) {
-  // Max depth check to prevent stack overflow
+const POSTMAN_AUTH_READERS = {
+  noauth: () => NO_AUTH,
+  [AUTH_BASIC]: (fields) => ({ type: AUTH_BASIC, username: asText(fields.username), password: asText(fields.password) }),
+  [AUTH_BEARER]: (fields) => ({ type: AUTH_BEARER, token: asText(fields.token) }),
+  [AUTH_API_KEY]: (fields) => ({
+    type: AUTH_API_KEY,
+    key: asText(fields.key),
+    value: asText(fields.value),
+    in: apiKeyLocation(fields.in),
+  }),
+}
+
+function postmanAuthFields(auth) {
+  const fields = auth[auth.type]
+  if (isPlainObject(fields)) return fields
+  return Object.fromEntries(asArray(fields).filter(hasKey).map((field) => [field.key, field.value]))
+}
+
+function resolvePostmanAuth(auth, inherited, context) {
+  if (!isPlainObject(auth) || !auth.type || auth.type === 'inherit') return inherited
+  const read = POSTMAN_AUTH_READERS[auth.type]
+  if (read) return read(postmanAuthFields(auth))
+  context.unsupportedAuth.set(auth.type, (context.unsupportedAuth.get(auth.type) || 0) + 1)
+  return NO_AUTH
+}
+
+const POSTMAN_RAW_BODY_TYPES = { json: BODY_JSON, xml: BODY_XML, text: BODY_TEXT, html: BODY_TEXT, javascript: BODY_TEXT }
+
+function postmanFileName(source) {
+  const path = asText(Array.isArray(source) ? source[0] : source)
+  return path.split(/[\\/]/).pop()
+}
+
+function postmanFormDataRow(entry) {
+  const row = createRow(asText(entry.key), '', !entry.disabled)
+  if (entry.type !== ROW_FILE) return { ...row, value: asText(entry.value), type: ROW_TEXT }
+  return {
+    ...row,
+    type: ROW_FILE,
+    fileName: postmanFileName(entry.src),
+    contentType: asText(entry.contentType),
+    data: '',
+  }
+}
+
+function postmanFormDataBody(body) {
+  const rows = asArray(body.formdata).filter(hasKey).map(postmanFormDataRow)
+  return { body: rowsField(rows), bodyType: BODY_MULTIPART, needsFiles: rows.some(isFileRow) }
+}
+
+function postmanGraphQLVariables(variables) {
+  if (typeof variables === 'string') return variables
+  return isPlainObject(variables) ? JSON.stringify(variables, null, 2) : ''
+}
+
+const POSTMAN_BODY_READERS = {
+  raw: (body) => ({ body: asText(body.raw), bodyType: POSTMAN_RAW_BODY_TYPES[body.options?.raw?.language] || '' }),
+  urlencoded: (body) => ({ body: rowsField(postmanRows(body.urlencoded)), bodyType: BODY_FORM }),
+  formdata: postmanFormDataBody,
+  file: () => ({ body: '', bodyType: BODY_BINARY, needsFiles: true }),
+  graphql: (body) => ({
+    method: GRAPHQL_METHOD,
+    graphqlQuery: asText(body.graphql?.query),
+    graphqlVariables: postmanGraphQLVariables(body.graphql?.variables),
+  }),
+}
+
+function readPostmanBody(body) {
+  if (!isPlainObject(body) || body.disabled) return {}
+  const read = POSTMAN_BODY_READERS[body.mode]
+  return read ? read(body) : {}
+}
+
+const tlsWarning = (requestNames) => (
+  `TLS verification was disabled in the collection for ${listNames(requestNames)}; it was kept enabled. Turn it off in the request's Settings tab if you trust these hosts.`
+)
+
+function readPostmanRequest(item, folderId, inheritedAuth, context) {
+  const source = isPlainObject(item.request) ? item.request : { url: item.request }
+  const { needsFiles, ...body } = readPostmanBody(source.body)
+  const name = asText(item.name).trim() || UNTITLED_REQUEST
+  if (needsFiles) context.requestsNeedingFiles.push(name)
+  if (item.protocolProfileBehavior?.strictSSL === false) context.requestsWithoutTls.push(name)
+  return {
+    id: uniqueId(item.id, context.usedIds),
+    name,
+    method: asText(source.method).trim().toUpperCase() || 'GET',
+    url: postmanUrl(source.url),
+    headers: rowsField(postmanRows(source.header)),
+    queryParams: rowsField(postmanRows(source.url?.query).map((row, position) => ({ ...row, position }))),
+    folderId,
+    auth: resolvePostmanAuth(source.auth, inheritedAuth, context),
+    options: { noFollowRedirects: item.protocolProfileBehavior?.followRedirects === false, insecureTLS: false },
+    ...body,
+  }
+}
+
+function readPostmanFolder(item, parentId, inheritedAuth, context, depth) {
+  const folder = {
+    id: uniqueId(item.id, context.usedIds),
+    name: asText(item.name).trim() || 'Folder',
+    isOpen: false,
+    parentId,
+  }
+  context.folders.push(folder)
+  const auth = resolvePostmanAuth(item.auth, inheritedAuth, context)
+  readPostmanItems(item.item, folder.id, auth, context, depth + 1)
+}
+
+function readPostmanItems(items, parentId, inheritedAuth, context, depth = 0) {
   if (depth > MAX_FOLDER_DEPTH) {
-    console.warn(`Postman import: maximum folder depth (${MAX_FOLDER_DEPTH}) exceeded, skipping deeper folders`)
+    context.depthExceeded = true
     return
   }
-
-  if (!Array.isArray(items)) return
-
-  items.forEach(item => {
-    if (item.item && Array.isArray(item.item)) {
-      let folderId = item.id || generateId()
-      while (usedIds.has(folderId)) {
-        folderId = generateId()
-      }
-      usedIds.add(folderId)
-
-      folders.push({
-        id: folderId,
-        name: (item.name || 'Folder').trim().substring(0, 100), // Max 100 chars
-        isOpen: false,
-        parentId: parentFolderId,
-        description: item.description || ''
-      })
-      processPostmanItems(item.item, folderId, requests, folders, usedIds, unsupportedAuthWarnings, depth + 1)
+  for (const item of asArray(items).filter(isPlainObject)) {
+    if (Array.isArray(item.item)) {
+      readPostmanFolder(item, parentId, inheritedAuth, context, depth)
+    } else if (item.request) {
+      context.requests.push(readPostmanRequest(item, parentId, inheritedAuth, context))
     }
-    else if (item.request) {
-      const request = item.request
-
-      const url = getUrlString(request.url)
-
-      if (!url || !url.trim()) {
-        console.warn(`Postman import: skipping request "${item.name || 'Untitled'}" with empty URL`)
-        return
-      }
-
-      const queryParams = extractQueryParams(request.url)
-
-      const headers = extractHeaders(request.header || [])
-
-      // Add auth headers if present and not disabled
-      if (request.auth && !request.auth.disabled && request.auth.type) {
-        if (request.auth.type === 'bearer' && request.auth.bearer) {
-          let token = '{{token}}'
-          if (Array.isArray(request.auth.bearer) && request.auth.bearer[0]) {
-            token = request.auth.bearer[0].value || token
-          } else if (typeof request.auth.bearer === 'string') {
-            token = request.auth.bearer
-          } else if (request.auth.bearer?.value) {
-            token = request.auth.bearer.value
-          }
-          headers['Authorization'] = `Bearer ${token}`
-        } else if (request.auth.type === 'basic' && request.auth.basic) {
-          const basicAuth = Array.isArray(request.auth.basic) ? request.auth.basic[0] : request.auth.basic
-          const username = basicAuth?.username || basicAuth?.value?.username || '{{username}}'
-          const password = basicAuth?.password || basicAuth?.value?.password || '{{password}}'
-          // Handle Unicode in credentials
-          headers['Authorization'] = `Basic ${btoa(encodeUTF8(username + ':' + password))}`
-        } else if (request.auth.type === 'apikey' && request.auth.apikey) {
-          const apikeyAuth = Array.isArray(request.auth.apikey) ? request.auth.apikey[0] : request.auth.apikey
-          if (apikeyAuth) {
-            const key = apikeyAuth.key || apikeyAuth.value?.key
-            const value = apikeyAuth.value || apikeyAuth.value?.value || '{{apiKey}}'
-            if (key && typeof key === 'string') {
-              headers[key] = value
-            }
-          }
-        } else if (request.auth.type === 'awsv4' || request.auth.type === 'ntlm' ||
-                   request.auth.type === 'digest' || request.auth.type === 'edgegrid' ||
-                   request.auth.type === 'oauth1' || request.auth.type === 'oauth2') {
-          const warning = `Auth type '${request.auth.type}' is not fully supported. Request: ${item.name || 'Untitled'}`
-          if (!unsupportedAuthWarnings.includes(warning)) {
-            unsupportedAuthWarnings.push(warning)
-          }
-          // Add warning header so user knows about the limitation
-          headers['X-Gostman-Auth-Warning'] = `Unsupported auth type: ${request.auth.type}. Please configure manually.`
-        }
-      }
-
-      const body = extractBody(request.body)
-
-      let requestId = item.id || generateId()
-      while (usedIds.has(requestId)) {
-        requestId = generateId()
-      }
-      usedIds.add(requestId)
-
-      let requestName = (item.name || request.name || 'Untitled Request').trim()
-      if (!requestName) {
-        requestName = 'Untitled Request'
-      }
-
-      let method = 'GET'
-      if (request.method) {
-        const normalizedMethod = request.method.toString().trim().toUpperCase()
-        method = VALID_HTTP_METHODS.includes(normalizedMethod) ? normalizedMethod : 'GET'
-      }
-
-      requests.push({
-        id: requestId,
-        name: requestName,
-        url,
-        method,
-        headers: safeStringify(headers),
-        body,
-        queryParams: safeStringify(queryParams),
-        response: '',
-        folderId: parentFolderId,
-        description: item.description || request.description || '',
-        createdAt: new Date().toISOString()
-      })
-    }
-  })
-}
-
-/**
- * Converts a Postman collection to Gostman requests (native parser, no SDK dependency)
- * @param {Object|string} postmanCollection - Parsed Postman collection JSON
- * @returns {Object} Object with requests array, folders array, collection name, and warnings
- */
-function importPostmanCollection(postmanCollection) {
-  const data = typeof postmanCollection === 'string' ? JSON.parse(postmanCollection) : postmanCollection
-
-  const requests = []
-  const folders = []
-  const usedIds = new Set()
-  const unsupportedAuthWarnings = []
-
-  const collectionName = data?.info?.name || 'Imported Collection'
-
-  if (!data._externalRefs) {
-    data._externalRefs = []
-  }
-  if (!data._circularRefs) {
-    data._circularRefs = []
-  }
-
-  processPostmanItems(data.item || [], null, requests, folders, usedIds, unsupportedAuthWarnings)
-
-  return {
-    requests,
-    folders,
-    collectionName,
-    warnings: unsupportedAuthWarnings
   }
 }
 
-/**
- * Parses a Postman collection JSON string (native parser, no SDK dependency)
- * @param {string} jsonString - JSON string of Postman collection
- * @returns {Object} Parsed result with requests and folders
- */
-export function parsePostmanCollection(jsonString) {
+function postmanVariables(entries) {
+  return Object.fromEntries(
+    asArray(entries)
+      .filter((entry) => hasKey(entry) && !entry.disabled)
+      .map((entry) => [entry.key, asText(entry.value)])
+  )
+}
+
+function listNames(names) {
+  const shown = names.slice(0, MAX_NAMES_IN_WARNING).map((name) => `"${name}"`).join(', ')
+  const hidden = names.length - MAX_NAMES_IN_WARNING
+  return hidden > 0 ? `${shown} and ${hidden} more` : shown
+}
+
+function postmanWarnings(context) {
+  const warnings = Array.from(context.unsupportedAuth, ([type, count]) => (
+    `"${type}" auth is not supported and was left out (${pluralize(count, 'place')}).`
+  ))
+  if (context.requestsNeedingFiles.length > 0) {
+    warnings.push(`Files are not part of a Postman export. Attach them again in ${listNames(context.requestsNeedingFiles)}.`)
+  }
+  if (context.requestsWithoutTls.length > 0) warnings.push(tlsWarning(context.requestsWithoutTls))
+  if (context.depthExceeded) {
+    warnings.push(`Folders nested deeper than ${MAX_FOLDER_DEPTH} levels were skipped.`)
+  }
+  return warnings
+}
+
+export function parsePostmanCollection(source) {
   try {
-    const data = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString
-
-    if (!data || !data.info || !data.info.schema) {
-      return {
-        success: false,
-        error: 'Invalid Postman collection format: missing info.schema'
-      }
+    const data = typeof source === 'string' ? JSON.parse(source) : source
+    if (!asText(data?.info?.schema).includes(POSTMAN_SCHEMA_MARKER)) {
+      return { success: false, error: 'Invalid Postman collection: info.schema is missing or is not a Postman collection schema' }
     }
-
-    const schema = data.info.schema
-    if (typeof schema === 'string' && !schema.includes('postman.com/json/collection')) {
-      return {
-        success: false,
-        error: 'Invalid Postman collection format: schema does not match Postman collection format'
-      }
+    const context = {
+      requests: [],
+      folders: [],
+      usedIds: new Set(),
+      unsupportedAuth: new Map(),
+      requestsNeedingFiles: [],
+      requestsWithoutTls: [],
+      depthExceeded: false,
     }
-
-    const result = importPostmanCollection(data)
-
+    readPostmanItems(data.item, ROOT_ID, resolvePostmanAuth(data.auth, NO_AUTH, context), context)
     return {
       success: true,
-      ...result
+      requests: context.requests,
+      folders: context.folders,
+      variables: postmanVariables(data.variable),
+      warnings: postmanWarnings(context),
     }
   } catch (error) {
-    return {
-      success: false,
-      error: error.message || 'Invalid Postman collection format'
-    }
+    return { success: false, error: error.message || 'Invalid Postman collection format' }
   }
-}
-
-/**
- * Validates a URL string for proper protocol and format
- * @param {string} url - URL string to validate
- * @returns {Object} Validation result with { valid: boolean, error?: string, isRelative?: boolean }
- */
-function validateUrl(url) {
-  if (!url || typeof url !== 'string') {
-    return {
-      valid: false,
-      error: 'URL must be a non-empty string',
-      isRelative: false
-    }
-  }
-
-  const trimmedUrl = url.trim()
-
-  if (!trimmedUrl) {
-    return {
-      valid: false,
-      error: 'URL cannot be empty',
-      isRelative: false
-    }
-  }
-
-  const validProtocols = ['http://', 'https://', 'ws://', 'wss://']
-  const hasValidProtocol = validProtocols.some(protocol =>
-    trimmedUrl.toLowerCase().startsWith(protocol)
-  )
-
-  if (!hasValidProtocol) {
-    // This is a relative URL (no protocol scheme)
-    return {
-      valid: false,
-      error: 'URL must have a valid protocol scheme (http://, https://, ws://, wss://)',
-      isRelative: true
-    }
-  }
-
-  try {
-    new URL(trimmedUrl)
-  } catch (err) {
-    return {
-      valid: false,
-      error: `Invalid URL format: ${err.message}`,
-      isRelative: false
-    }
-  }
-
-  return { valid: true, isRelative: false }
 }
 
 /**
@@ -560,33 +397,30 @@ function getServerUrl(server) {
   return { url, isRelative }
 }
 
-/**
- * Builds security header templates from OpenAPI security schemes
- * @param {Object} securitySchemes - OpenAPI components.securitySchemes
- * @returns {Object} Headers object with authorization templates
- */
-function buildSecurityHeaders(securitySchemes = {}) {
-  const headers = {}
+const OPENAPI_HTTP_AUTH = {
+  [AUTH_BEARER]: { type: AUTH_BEARER, token: '{{token}}' },
+  [AUTH_BASIC]: { type: AUTH_BASIC, username: '{{username}}', password: '{{password}}' },
+}
 
-  Object.entries(securitySchemes || {}).forEach(([, scheme]) => {
-    if (scheme.type === 'http') {
-      if (scheme.scheme === 'bearer') {
-        headers['Authorization'] = 'Bearer {{token}}'
-      } else if (scheme.scheme === 'basic') {
-        headers['Authorization'] = 'Basic {{credentials}}'
-      }
-    } else if (scheme.type === 'apiKey') {
-      if (scheme.in === 'header') {
-        headers[scheme.name] = '{{apiKey}}'
-      }
-    } else if (scheme.type === 'oauth2') {
-      headers['Authorization'] = 'Bearer {{accessToken}}'
-    } else if (scheme.type === 'openIdConnect') {
-      headers['Authorization'] = 'Bearer {{idToken}}'
-    }
-  })
+const OPENAPI_TOKEN_SCHEMES = ['oauth2', 'openIdConnect']
+const OPENAPI_API_KEY_LOCATIONS = [AUTH_IN_HEADER, AUTH_IN_QUERY]
 
-  return headers
+function authFromSecurityScheme(scheme) {
+  if (!isPlainObject(scheme)) return NO_AUTH
+  if (scheme.type === 'http') return OPENAPI_HTTP_AUTH[asText(scheme.scheme).toLowerCase()] || NO_AUTH
+  if (OPENAPI_TOKEN_SCHEMES.includes(scheme.type)) return { type: AUTH_BEARER, token: '{{accessToken}}' }
+  if (scheme.type === 'apiKey' && OPENAPI_API_KEY_LOCATIONS.includes(scheme.in)) {
+    return { type: AUTH_API_KEY, key: asText(scheme.name), value: '{{apiKey}}', in: scheme.in }
+  }
+  return NO_AUTH
+}
+
+function openAPIAuth(spec, operation) {
+  const alternatives = asArray(operation.security ?? spec.security)
+  if (alternatives.length !== 1 || !isPlainObject(alternatives[0])) return NO_AUTH
+  const schemeNames = Object.keys(alternatives[0])
+  if (schemeNames.length !== 1) return NO_AUTH
+  return authFromSecurityScheme(spec.components?.securitySchemes?.[schemeNames[0]])
 }
 
 /**
@@ -696,72 +530,60 @@ function extractOpenAPIHeaders(operation = {}, pathParameters = []) {
   return headers
 }
 
-/**
- * Builds request body from OpenAPI requestBody
- * @param {Object} requestBody - OpenAPI request body
- * @returns {string} Body as string
- */
-function buildOpenAPIBody(requestBody) {
-  if (!requestBody) return ''
+const PREFERRED_CONTENT_TYPES = [
+  'application/json',
+  'application/ld+json',
+  'application/x-www-form-urlencoded',
+  'multipart/form-data',
+  'text/plain',
+  'application/xml',
+  'text/xml',
+]
 
-  const contentTypes = Object.keys(requestBody.content || {})
-  if (contentTypes.length === 0) {
-    console.warn(
-      'Request body defined but has no content types. ' +
-      'Add at least one content type (e.g., application/json) to the requestBody.content object.'
-    )
-    return ''
-  }
-
-  const typePriority = [
-    'application/json',
-    'application/ld+json',
-    'application/x-www-form-urlencoded',
-    'multipart/form-data',
-    'text/plain',
-    'application/xml',
-    'text/xml'
-  ]
-
-  let selectedType = contentTypes.find(ct => typePriority.includes(ct)) || contentTypes[0]
-  const content = requestBody.content[selectedType]
-
-  if (!content) return ''
-
-  if (content.example !== undefined) {
-    const example = content.example
-    if (selectedType.includes('json') || selectedType.includes('ld+json')) {
-      return typeof example === 'string' ? example : safeStringify(example)
-    }
-    if (selectedType.startsWith('text/') && typeof example === 'string') {
-      return example
-    }
-    return typeof example === 'object' ? safeStringify(example) : String(example)
-  }
-
-  if (content.examples) {
-    const firstExample = Object.values(content.examples || {})[0]
-    if (firstExample?.value !== undefined) {
-      const value = firstExample.value
-      if (selectedType.includes('json') || selectedType.includes('ld+json')) {
-        return typeof value === 'string' ? value : safeStringify(value)
-      }
-      if (selectedType.startsWith('text/') && typeof value === 'string') {
-        return value
-      }
-      return typeof value === 'object' ? safeStringify(value) : String(value)
-    }
-  }
-
-  if (content.schema) {
-    if (selectedType.includes('json') || selectedType.includes('ld+json')) {
-      return generateExampleFromSchema(content.schema)
-    }
-    // For non-JSON types, still try to generate JSON (not ideal but functional)
-    return generateExampleFromSchema(content.schema)
-  }
-
+function bodyTypeForContentType(contentType) {
+  if (contentType.includes('json')) return BODY_JSON
+  if (contentType === BODY_CONTENT_TYPES[BODY_FORM]) return BODY_FORM
+  if (contentType === BODY_CONTENT_TYPES[BODY_MULTIPART]) return BODY_MULTIPART
+  if (contentType.includes('xml')) return BODY_XML
+  if (contentType.startsWith('text/')) return BODY_TEXT
   return ''
+}
+
+function openAPIExample(mediaType) {
+  if (mediaType.example !== undefined) return mediaType.example
+  const namedExample = Object.values(mediaType.examples || {})[0]
+  if (namedExample?.value !== undefined) return namedExample.value
+  return mediaType.schema ? JSON.parse(generateExampleFromSchema(mediaType.schema)) : undefined
+}
+
+function exampleFields(example) {
+  if (typeof example === 'string') return Array.from(new URLSearchParams(example))
+  return isPlainObject(example) ? Object.entries(example) : []
+}
+
+const fieldText = (value) => (value !== null && typeof value === 'object' ? JSON.stringify(value) : asText(value))
+
+const exampleRows = (example) => exampleFields(example).map(([key, value]) => createRow(key, fieldText(value)))
+
+function serializeExample(example, bodyType) {
+  if (example === undefined || example === null) return ''
+  if (bodyType === BODY_FORM) return rowsField(exampleRows(example))
+  if (bodyType === BODY_MULTIPART) return rowsField(exampleRows(example).map((row) => ({ ...row, type: ROW_TEXT })))
+  return typeof example === 'string' ? example : safeStringify(example)
+}
+
+function openAPIBody(requestBody) {
+  const available = Object.keys(requestBody?.content || {})
+  const contentType = PREFERRED_CONTENT_TYPES.find((type) => available.includes(type)) || available[0]
+  if (!contentType) return { body: '', bodyType: '', contentType: '' }
+
+  const bodyType = bodyTypeForContentType(contentType)
+  const isEngineDefault = bodyType === BODY_MULTIPART || BODY_CONTENT_TYPES[bodyType] === contentType
+  return {
+    body: serializeExample(openAPIExample(requestBody.content[contentType] || {}), bodyType),
+    bodyType,
+    contentType: isEngineDefault ? '' : contentType,
+  }
 }
 
 /**
@@ -985,192 +807,72 @@ function generateExampleFromSchema(schema, depth = 0, seenSchemas = null, spec =
   return JSON.stringify(result, null, 2)
 }
 
-/**
- * Converts an OpenAPI 3.x spec to Gostman requests
- * @param {Object} openapiSpec - Validated OpenAPI spec object
- * @returns {Object} Object with requests array, folders array, and collection name
- */
-function importOpenAPISpec(openapiSpec) {
-  const requests = []
-  const folders = []
+function openAPIOperations(paths) {
+  return Object.entries(paths)
+    .filter(([, pathItem]) => isPlainObject(pathItem))
+    .flatMap(([path, pathItem]) => OPENAPI_METHODS
+      .filter((method) => isPlainObject(pathItem[method]))
+      .map((method) => ({
+        path,
+        method,
+        operation: pathItem[method],
+        pathParameters: asArray(pathItem.parameters),
+      })))
+}
 
-  if (!openapiSpec._externalRefs) {
-    openapiSpec._externalRefs = []
-  }
-  if (!openapiSpec._circularRefs) {
-    openapiSpec._circularRefs = []
-  }
+const objectRows = (object) => Object.entries(object || {}).map(([key, value]) => createRow(key, asText(value)))
 
-  if (!openapiSpec.paths || typeof openapiSpec.paths !== 'object') {
-    throw new Error('Invalid OpenAPI spec: paths must be an object')
-  }
+function fillPathParams(url, pathParams) {
+  return Object.entries(pathParams).reduce(
+    (filled, [name, value]) => filled.replace(`{${name}}`, () => value),
+    url
+  )
+}
 
-  if (openapiSpec.swagger && !openapiSpec.openapi) {
+function readOpenAPIOperation({ path, method, operation, pathParameters }, spec, baseUrl, folderId) {
+  const { body, bodyType, contentType } = openAPIBody(operation.requestBody)
+  const headers = objectRows(extractOpenAPIHeaders(operation, pathParameters))
+  if (contentType) headers.push(createRow('Content-Type', contentType))
+  return {
+    id: generateId(),
+    name: operation.summary || operation.operationId || `${method.toUpperCase()} ${path}`,
+    method: method.toUpperCase(),
+    url: fillPathParams(joinUrlParts(baseUrl, path), extractOpenAPIPathParams(path, operation, pathParameters)),
+    headers: rowsField(headers),
+    queryParams: rowsField(objectRows(extractOpenAPIQueryParams(operation, pathParameters))),
+    body,
+    bodyType,
+    folderId,
+    auth: openAPIAuth(spec, operation),
+  }
+}
+
+function importOpenAPISpec(spec) {
+  if (spec.swagger && !spec.openapi) {
     throw new Error('Swagger 2.0 is not supported. Please use OpenAPI 3.x.')
   }
-
-  const collectionName = openapiSpec.info?.title || 'Imported OpenAPI Spec'
-
-  // Get base URL from first server, handling variables
-  const { url: baseUrl, isRelative } = getServerUrl(openapiSpec.servers?.[0])
-
-  // Check for missing or empty servers array
-  const servers = openapiSpec.servers
-  if (!servers || servers.length === 0 || !baseUrl) {
-    throw new Error(
-      'This OpenAPI spec has no servers defined or the server URL is empty. ' +
-      'Add a "servers" array with at least one server object containing a valid URL. ' +
-      'Example: servers: [{ url: "https://api.example.com" }]'
-    )
+  if (!isPlainObject(spec.paths) || Object.keys(spec.paths).length === 0) {
+    throw new Error('This OpenAPI spec defines no paths, so there is nothing to import.')
   }
-
-  // Check for relative server URLs and provide a clear error
+  const { url: baseUrl, isRelative } = getServerUrl(spec.servers?.[0])
+  if (!baseUrl) {
+    throw new Error('This OpenAPI spec has no server URL. Add a "servers" entry such as { url: "https://api.example.com" }.')
+  }
   if (isRelative) {
-    throw new Error(
-      'This OpenAPI spec uses a relative server URL. ' +
-      'Please provide the full base URL (e.g., https://api.example.com)'
-    )
+    throw new Error('This OpenAPI spec uses a relative server URL. Provide the full base URL, for example https://api.example.com.')
   }
 
-  const paths = openapiSpec.paths || {}
-  if (Object.keys(paths).length === 0) {
-    throw new Error(
-      'This OpenAPI spec has no paths defined. ' +
-      'A valid OpenAPI spec must define at least one path with an operation.'
-    )
+  const tagFolders = new Map()
+  const folderIdFor = (tag) => {
+    if (tag === undefined) return ROOT_ID
+    const name = asText(tag)
+    if (!tagFolders.has(name)) tagFolders.set(name, { id: generateId(), name, isOpen: false, parentId: ROOT_ID })
+    return tagFolders.get(name).id
   }
-
-  // First pass: collect all used tags
-  const usedTags = new Set()
-  const pathValues = Object.values(paths)
-  if (Array.isArray(pathValues)) {
-    pathValues.forEach(pathItem => {
-      if (!pathItem || typeof pathItem !== 'object') return
-      const httpMethods = ['get', 'post', 'put', 'delete', 'patch', 'options', 'head', 'trace']
-      httpMethods.forEach(method => {
-        const operation = pathItem[method]
-        if (operation?.tags && Array.isArray(operation.tags)) {
-          operation.tags.forEach(tag => usedTags.add(tag))
-        }
-      })
-    })
-  }
-
-  const tagFolderMap = new Map()
-  const tags = Array.isArray(openapiSpec.tags) ? openapiSpec.tags : []
-
-  tags.forEach(tag => {
-    if (usedTags.has(tag.name)) {
-      const folderId = generateId()
-      tagFolderMap.set(tag.name, folderId)
-      folders.push({
-        id: folderId,
-        name: tag.name,
-        isOpen: false,
-        parentId: null,
-        description: tag.description || ''
-      })
-    }
-  })
-
-  const securityHeaders = buildSecurityHeaders(openapiSpec.components?.securitySchemes || {})
-
-  const pathsEntries = Object.entries(openapiSpec.paths || {})
-  pathsEntries.forEach(([path, pathItem]) => {
-    // Keep path as-is with {param} format
-    const fullPath = joinUrlParts(baseUrl, path)
-
-    // Get path-level parameters (shared across all methods in this path)
-    const pathParameters = Array.isArray(pathItem.parameters) ? pathItem.parameters : []
-
-    // Process each HTTP method
-    const httpMethods = ['get', 'post', 'put', 'delete', 'patch', 'options', 'head', 'trace']
-
-    httpMethods.forEach(method => {
-      const operation = pathItem[method]
-      if (!operation) return
-
-      // Determine folder from tags (use first tag)
-      const operationTags = Array.isArray(operation.tags) ? operation.tags : []
-      const folderId = operationTags[0]
-        ? tagFolderMap.get(operationTags[0]) || null
-        : null
-
-      // Build query parameters (merge path-level and operation-level)
-      const queryParams = extractOpenAPIQueryParams(operation, pathParameters)
-
-      // Extract path parameters from the URL
-      const pathParams = extractOpenAPIPathParams(path, operation, pathParameters)
-
-      // Build headers (security headers first, operation headers can override)
-      const operationHeaders = extractOpenAPIHeaders(operation, pathParameters)
-      const headers = { ...(securityHeaders || {}) }
-
-      // Only add operation headers that don't conflict with security headers
-      Object.entries(operationHeaders || {}).forEach(([key, value]) => {
-        if (!(key in securityHeaders)) {
-          headers[key] = value
-        }
-      })
-
-      const body = buildOpenAPIBody(operation.requestBody)
-
-      // Store schema metadata for future use
-      const metadata = {
-        openapi: {
-          operationId: operation.operationId,
-          schema: operation.requestBody?.content?.['application/json']?.schema,
-          parameters: operation.parameters,
-          pathParams,
-          responses: operation.responses?.[200]?.content?.['application/json']?.schema
-        }
-      }
-
-      // Build the full URL with path params substituted for display
-      let displayUrl = fullPath
-      if (Object.keys(pathParams || {}).length > 0) {
-        // Substitute path params for display URL
-        Object.entries(pathParams || {}).forEach(([paramName, paramValue]) => {
-          displayUrl = displayUrl.replace(`{${paramName}}`, paramValue)
-        })
-        // Store original path params in metadata for reference
-        metadata.openapi.pathParamsRaw = pathParams
-      }
-
-      // Generate unique operation name with counter for duplicates
-      const operationNameBase = operation.summary || operation.operationId || `${method.toUpperCase()} ${path}`
-      let operationName = operationNameBase
-      let nameCounter = 1
-
-      // Ensure uniqueness by adding counter if name already exists
-      while (requests.some(r => r.name === operationName)) {
-        operationName = `${operationNameBase} (${nameCounter})`
-        nameCounter++
-      }
-
-      requests.push({
-        id: generateId(),
-        name: operationName,
-        url: displayUrl,
-        method: method.toUpperCase(),
-        headers: safeStringify(headers),
-        body,
-        queryParams: queryParams !== null ? safeStringify(queryParams) : '',
-        response: '',
-        folderId,
-        description: operation.description || operation.summary || '',
-        createdAt: new Date().toISOString(),
-        metadata: safeStringify(metadata)
-      })
-    })
-  })
-
-  return {
-    requests,
-    folders,
-    collectionName,
-    warnings: []
-  }
+  const requests = openAPIOperations(spec.paths).map((entry) => (
+    readOpenAPIOperation(entry, spec, baseUrl, folderIdFor(asArray(entry.operation.tags)[0]))
+  ))
+  return { requests, folders: Array.from(tagFolders.values()), warnings: [] }
 }
 
 /**
@@ -1299,223 +1001,134 @@ export async function parseOpenAPISpec(specString) {
   }
 }
 
-/**
- * Converts Gostman requests to OpenAPI 3.0/3.1 specification
- * @param {Array} requests - Gostman request objects
- * @param {Object} options - Export options
- * @returns {Object} OpenAPI 3.0 specification
- */
-function exportToOpenAPI(requests, options = {}) {
-  if (!Array.isArray(requests)) {
-    requests = []
-  }
+const BINARY_SCHEMA = { type: 'string', format: 'binary' }
+const OPENAPI_RESERVED_HEADERS = ['accept', 'content-type', 'authorization']
+const LEADING_PLACEHOLDER = /^\{\{[^{}]+\}\}/
+const PATH_PLACEHOLDER = /\{([^{}]+)\}/g
 
+function splitUrl(url) {
+  const address = url.split(/[?#]/)[0]
+  const placeholder = address.match(LEADING_PLACEHOLDER)
+  if (placeholder) return { origin: '', path: withLeadingSlash(address.slice(placeholder[0].length)) }
+  const schemeEnd = address.indexOf('://')
+  if (schemeEnd === -1) return { origin: '', path: withLeadingSlash(address) }
+  const pathStart = address.indexOf('/', schemeEnd + 3)
+  if (pathStart === -1) return { origin: address, path: '/' }
+  return { origin: address.slice(0, pathStart), path: address.slice(pathStart) }
+}
+
+function openAPIPath(path) {
+  return path
+    .replace(/\/{2,}/g, '/')
+    .replace(/\/:([^/]+)/g, '/{$1}')
+    .replace(/\{\{([^{}]+)\}\}/g, '{$1}')
+}
+
+const toParameter = (location) => (row) => ({
+  name: row.key,
+  in: location,
+  schema: { type: 'string' },
+  example: row.value,
+})
+
+const uniqueRows = (rows, identify) => Array.from(new Map(rows.map((row) => [identify(row.key), row])).values())
+
+function openAPIParameters(request, path) {
+  const pathNames = new Set(Array.from(path.matchAll(PATH_PLACEHOLDER), (match) => match[1]))
+  const query = readParamRows(request.url, request.queryParams).filter(isSentRow)
+  const headers = sentRows(request.headers).filter((row) => !OPENAPI_RESERVED_HEADERS.includes(row.key.toLowerCase()))
+  return [
+    ...Array.from(pathNames, (name) => ({ name, in: 'path', required: true, schema: { type: 'string' } })),
+    ...uniqueRows(query, (key) => key).map(toParameter('query')),
+    ...uniqueRows(headers, (key) => key.toLowerCase()).map(toParameter('header')),
+  ]
+}
+
+function securitySchemeFor(auth) {
+  if (auth?.type === AUTH_BASIC || auth?.type === AUTH_BEARER) return { type: 'http', scheme: auth.type }
+  if (auth?.type === AUTH_API_KEY && auth.key) return { type: 'apiKey', in: apiKeyLocation(auth.in), name: auth.key }
+  return null
+}
+
+function registerSecurityScheme(scheme, registered) {
+  const signature = JSON.stringify(scheme)
+  const existing = Object.keys(registered).find((name) => JSON.stringify(registered[name]) === signature)
+  if (existing) return existing
+  const name = scheme.type === 'http' ? `${scheme.scheme}Auth` : `apiKeyAuth${Object.keys(registered).length + 1}`
+  registered[name] = scheme
+  return name
+}
+
+const mediaContent = (contentType, mediaType) => ({ content: { [contentType]: mediaType } })
+
+function formMediaType(body) {
+  const rows = sentRows(body)
+  const properties = rows.map((row) => [row.key, isFileRow(row) ? BINARY_SCHEMA : { type: 'string' }])
+  const example = rows.filter((row) => !isFileRow(row)).map((row) => [row.key, row.value])
+  return {
+    schema: { type: 'object', properties: Object.fromEntries(properties) },
+    example: Object.fromEntries(example),
+  }
+}
+
+function rawMediaType(body, contentType) {
+  const parsed = contentType.includes('json') ? parseJSON(body, null) : null
+  if (parsed === null) return { schema: { type: 'string' }, example: body }
+  return { schema: inferSchemaFromObject(parsed), example: parsed }
+}
+
+function openAPIRequestBody(request) {
+  const { body, bodyType } = request
+  if (bodyType === BODY_NONE || body.trim() === '') return null
+  if (bodyType === BODY_BINARY) return mediaContent(BODY_CONTENT_TYPES[BODY_BINARY], { schema: BINARY_SCHEMA })
+  if (bodyType === BODY_FORM || bodyType === BODY_MULTIPART) {
+    return mediaContent(BODY_CONTENT_TYPES[bodyType], formMediaType(body))
+  }
+  const declared = sentRows(request.headers).find((row) => row.key.toLowerCase() === 'content-type')
+  const contentType = declared
+    ? declared.value.split(';')[0].trim()
+    : BODY_CONTENT_TYPES[bodyType] || BODY_CONTENT_TYPES[BODY_TEXT]
+  return mediaContent(contentType, rawMediaType(body, contentType))
+}
+
+function openAPIOperation(request, path, securitySchemes) {
+  const requestBody = openAPIRequestBody(request)
+  const scheme = securitySchemeFor(request.auth)
+  return {
+    summary: request.name || `${request.method} ${path}`,
+    parameters: openAPIParameters(request, path),
+    ...(requestBody && { requestBody }),
+    ...(scheme && { security: [{ [registerSecurityScheme(scheme, securitySchemes)]: [] }] }),
+    responses: { 200: { description: 'Successful response' } },
+  }
+}
+
+function exportToOpenAPI(requests, options = {}) {
   const {
     title = 'Gostman API Collection',
     version = '1.0.0',
     description = 'API collection exported from Gostman',
-    baseUrl = '',
-    openApiVersion = '3.0.3'
   } = options
+  const origins = new Set()
+  const securitySchemes = {}
+  const paths = {}
 
-  const spec = {
-    openapi: openApiVersion,
-    info: {
-      title,
-      version,
-      description
-    },
-    servers: baseUrl ? [{ url: baseUrl }] : [],
-    paths: {},
-    components: {
-      schemas: {},
-      securitySchemes: {}
-    }
+  for (const request of asArray(requests)) {
+    const method = asText(request.method).toLowerCase()
+    if (!request.url || !OPENAPI_METHODS.includes(method)) continue
+    const { origin, path: rawPath } = splitUrl(request.url)
+    const path = openAPIPath(rawPath)
+    if (origin) origins.add(origin)
+    paths[path] = { ...paths[path], [method]: openAPIOperation(request, path, securitySchemes) }
   }
 
-  const inferType = (val) => {
-    if (Array.isArray(val)) return 'array'
-    if (typeof val === 'boolean') return 'boolean'
-    if (typeof val === 'number') return 'number'
-    return 'string'
+  return {
+    openapi: '3.0.3',
+    info: { title, version, description },
+    servers: Array.from(origins, (url) => ({ url })),
+    paths,
+    components: { schemas: {}, securitySchemes },
   }
-
-  // Helper to convert headers to lowercase for case-insensitive comparison
-  const normalizeHeaders = (headers) => {
-    const normalized = {}
-    Object.entries(headers).forEach(([key, value]) => {
-      normalized[key.toLowerCase()] = { key, value }
-    })
-    return normalized
-  }
-
-  const pathsMap = new Map()
-
-  requests.forEach(request => {
-    if (!request.url) return
-
-    // Validate method early - also handle GRAPHQL
-    const method = (request.method || 'GET').toLowerCase()
-    const validMethods = ['get', 'post', 'put', 'delete', 'patch', 'options', 'head', 'trace']
-    if (!validMethods.includes(method)) {
-      // Skip unknown methods (like GRAPHQL) but could log a warning
-      return
-    }
-
-    let path = request.url
-    try {
-      const urlObj = new URL(request.url)
-      path = urlObj.pathname
-
-      // Always check for duplicate server URLs
-      if (urlObj.origin) {
-        const existingServer = spec.servers.find(s => s.url === urlObj.origin)
-        if (!existingServer) {
-          spec.servers.push({ url: urlObj.origin })
-        }
-      }
-    } catch {
-      // If URL is not absolute, use as-is
-      path = path.startsWith('/') ? path : '/' + path
-    }
-
-    // Ensure path starts with / and normalize duplicate slashes
-    path = path.startsWith('/') ? path : '/' + path
-    path = path.replace(/\/+/g, '/')
-
-    // Normalize path parameters (e.g., :id to {id}, {{id}} to {id})
-    path = path.replace(/:([a-zA-Z0-9_]+)/g, '{$1}')
-    path = path.replace(/\{\{([a-zA-Z0-9_]+)\}\}/g, '{$1}')
-
-    if (!pathsMap.has(path)) {
-      pathsMap.set(path, {})
-    }
-
-    const pathObj = pathsMap.get(path)
-
-    let headers = {}
-    try {
-      headers = JSON.parse(request.headers || '{}')
-    } catch (err) {
-      console.warn('Failed to parse headers for request:', request.name, err.message)
-    }
-
-    const normalizedHeaders = normalizeHeaders(headers)
-
-    // Detect authentication from headers (case-insensitive)
-    const authHeader = normalizedHeaders['authorization']
-    if (authHeader) {
-      const authValue = authHeader.value
-      if (authValue.startsWith('Bearer ')) {
-        spec.components.securitySchemes.bearerAuth = {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT'
-        }
-      } else if (authValue.startsWith('Basic ')) {
-        spec.components.securitySchemes.basicAuth = {
-          type: 'http',
-          scheme: 'basic'
-        }
-      } else if (authValue.startsWith('ApiKey ')) {
-        spec.components.securitySchemes.apiKeyAuth = {
-          type: 'apiKey',
-          in: 'header',
-          name: authHeader.key
-        }
-      }
-    }
-
-    let queryParams = []
-    try {
-      const params = JSON.parse(request.queryParams || '{}')
-      if (params && typeof params === 'object' && Object.keys(params).length > 0) {
-        queryParams = Object.entries(params).map(([key, value]) => ({
-          name: key,
-          in: 'query',
-          schema: { type: inferType(value), example: value },
-          required: false
-        }))
-      }
-    } catch (err) {
-      console.warn('Failed to parse query params for request:', request.name, err.message)
-    }
-
-    const pathParams = []
-    const pathParamMatches = path.match(/\{([^}]+)\}/g)
-    if (pathParamMatches) {
-      pathParamMatches.forEach(match => {
-        const paramName = match.slice(1, -1)
-        if (!queryParams.find(p => p.name === paramName)) {
-          pathParams.push({
-            name: paramName,
-            in: 'path',
-            required: true,
-            schema: { type: 'string' }
-          })
-        }
-      })
-    }
-
-    let requestBody = undefined
-    if (request.body && request.body.trim()) {
-      let contentType = 'application/json'
-      const contentTypeHeader = normalizedHeaders['content-type']
-      if (contentTypeHeader) {
-        contentType = contentTypeHeader.value.split(';')[0].trim()
-      }
-
-      let bodySchema = { type: 'string' }
-      let bodyExample = request.body
-
-      if (contentType === 'application/json' || contentType === 'application/ld+json') {
-        try {
-          const parsed = JSON.parse(request.body)
-          bodySchema = inferSchemaFromObject(parsed)
-          bodyExample = parsed
-        } catch (err) {
-          console.warn('Failed to parse request body as JSON:', err.message)
-        }
-      }
-
-      requestBody = {
-        content: {
-          [contentType]: {
-            schema: bodySchema,
-            example: bodyExample
-          }
-        }
-      }
-    }
-
-    const operation = {
-      summary: request.name || `${method.toUpperCase()} ${path}`,
-      description: request.description || `Request to ${path}`,
-      parameters: [...queryParams, ...pathParams],
-      ...(requestBody && { requestBody })
-    }
-
-    // Add responses based on common status codes
-    operation.responses = {
-      '200': {
-        description: 'Successful response'
-      },
-      '400': {
-        description: 'Bad request'
-      },
-      '500': {
-        description: 'Server error'
-      }
-    }
-
-    pathObj[method] = operation
-  })
-
-  spec.paths = Object.fromEntries(
-    Array.from(pathsMap.entries()).map(([path, methods]) => [path, methods])
-  )
-
-  return spec
 }
 
 /**
@@ -1695,219 +1308,137 @@ export function exportToOpenAPIYAML(requests, options = {}) {
   })
 }
 
-/**
- * Converts Gostman requests to Postman collection format (native, no SDK dependency)
- * @param {Array} requests - Gostman request objects
- * @param {Array} folders - Gostman folder objects
- * @param {Object} options - Export options
- * @returns {Object} Postman collection v2.1
- */
-export function exportToPostman(requests, folders = [], options = {}) {
-  if (!Array.isArray(requests)) {
-    requests = []
-  }
-  if (!Array.isArray(folders)) {
-    folders = []
-  }
+const POSTMAN_AUTH_WRITERS = {
+  [AUTH_BASIC]: ({ username, password }) => ({ username, password }),
+  [AUTH_BEARER]: ({ token }) => ({ token }),
+  [AUTH_API_KEY]: (auth) => ({ key: auth.key, value: auth.value, in: apiKeyLocation(auth.in) }),
+}
 
-  const {
-    name = 'Gostman Collection',
-    description = 'Collection exported from Gostman'
-  } = options
+function toPostmanAuth(auth) {
+  const fieldsOf = POSTMAN_AUTH_WRITERS[auth?.type]
+  if (!fieldsOf) return { type: 'noauth' }
+  const fields = Object.entries(fieldsOf(auth)).map(([key, value]) => ({ key, value: asText(value), type: 'string' }))
+  return { type: auth.type, [auth.type]: fields }
+}
 
-  const folderMap = new Map()
-  folders.forEach(folder => {
-    folderMap.set(folder.id, { ...folder, items: [] })
-  })
+const disabledFlag = (row) => (row.enabled ? {} : { disabled: true })
 
-  const rootItems = []
-  const folderRequests = new Map()
+const toPostmanEntry = (row) => ({ key: row.key, value: row.value, ...disabledFlag(row) })
 
-  requests.forEach(request => {
-    const item = {
-      name: request.name || 'Untitled Request',
-      request: {
-        method: request.method || 'GET',
-        header: [],
-        url: {
-          raw: request.url || '',
-          query: []
-        },
-        body: {
-          mode: 'raw',
-          raw: request.body || ''
-        }
-      },
-      description: request.description || '',
-      response: []
-    }
+const toPostmanEntries = (rows) => rows.filter(hasKey).map(toPostmanEntry)
 
-    try {
-      const headers = JSON.parse(request.headers || '{}')
-      item.request.header = Object.entries(headers).map(([key, value]) => ({
-        key,
-        value: String(value),
-        type: 'text'
-      }))
-    } catch (err) {
-      console.warn('Failed to parse headers for Postman export:', err.message)
-    }
-
-    try {
-      const params = JSON.parse(request.queryParams || '{}')
-      if (params && typeof params === 'object') {
-        item.request.url.query = Object.entries(params).map(([key, value]) => ({
-          key,
-          value: String(value)
-        }))
-      }
-    } catch (err) {
-      console.warn('Failed to parse query params for Postman export:', err.message)
-    }
-
-    // Set body mode based on content
-    if (request.body && request.body.trim()) {
-      const trimmed = request.body.trim()
-      if (trimmed.startsWith('{')) {
-        item.request.body.options = { raw: { language: 'json' } }
-      }
-    }
-
-    if (request.folderId && folderMap.has(request.folderId)) {
-      if (!folderRequests.has(request.folderId)) {
-        folderRequests.set(request.folderId, [])
-      }
-      folderRequests.get(request.folderId).push(item)
-    } else {
-      rootItems.push(item)
-    }
-  })
-
-  const buildItemHierarchy = (folderId) => {
-    const folder = folderMap.get(folderId)
-    if (!folder) return []
-
-    const items = []
-
-    const requestsInFolder = folderRequests.get(folderId) || []
-    items.push(...requestsInFolder)
-
-    const childFolders = folders.filter(f => f.parentId === folderId)
-    childFolders.forEach(childFolder => {
-      items.push({
-        name: childFolder.name,
-        description: childFolder.description || '',
-        item: buildItemHierarchy(childFolder.id)
-      })
-    })
-
-    return items
-  }
-
-  const collectionItems = [...rootItems]
-
-  folders.filter(f => !f.parentId).forEach(folder => {
-    const folderItems = folderRequests.get(folder.id) || []
-    const hasChildFolders = folders.some(f => f.parentId === folder.id)
-    if (folderItems.length > 0 || hasChildFolders) {
-      collectionItems.push({
-        name: folder.name,
-        description: folder.description || '',
-        item: buildItemHierarchy(folder.id)
-      })
-    }
-  })
-
+function toPostmanFormData(row) {
+  if (!isFileRow(row)) return { ...toPostmanEntry(row), type: ROW_TEXT }
   return {
-    info: {
-      name,
-      description,
-      schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json'
-    },
-    item: collectionItems
+    key: row.key,
+    type: ROW_FILE,
+    src: asText(row.fileName),
+    ...(row.contentType && { contentType: row.contentType }),
+    ...disabledFlag(row),
   }
 }
 
-const GOSTMAN_FORMAT_VERSION = '1.0.0'
+const POSTMAN_BODY_WRITERS = {
+  [BODY_NONE]: () => null,
+  [BODY_FORM]: (body) => ({ mode: 'urlencoded', urlencoded: toPostmanEntries(parseRows(body)) }),
+  [BODY_MULTIPART]: (body) => ({ mode: 'formdata', formdata: parseRows(body).filter(hasKey).map(toPostmanFormData) }),
+  [BODY_BINARY]: (body) => ({ mode: 'file', file: { src: asText(parseJSON(body, {})?.fileName) } }),
+}
 
-/**
- * Exports Gostman data to native JSON format for Git sync
- * @param {Array} requests - Gostman request objects
- * @param {Array} folders - Gostman folder objects
- * @param {Object} variables - Environment variables
- * @returns {Object} Gostman export data
- */
-export function exportToGostman(requests, folders = [], variables = {}) {
-  if (!Array.isArray(requests)) {
-    requests = []
+function toPostmanBody(request) {
+  if (request.method === GRAPHQL_METHOD) {
+    return {
+      mode: 'graphql',
+      graphql: { query: request.graphqlQuery || request.body, variables: request.graphqlVariables },
+    }
   }
-  if (!Array.isArray(folders)) {
-    folders = []
-  }
-  if (typeof variables !== 'object' || variables === null) {
-    variables = {}
-  }
+  const write = POSTMAN_BODY_WRITERS[request.bodyType]
+  if (write) return write(request.body)
+  return { mode: 'raw', raw: request.body, options: { raw: { language: request.bodyType } } }
+}
 
+function toPostmanUrl(request) {
+  const address = request.url.split(/[?#]/)[0]
+  const schemeEnd = address.indexOf('://')
+  const [host, ...path] = (schemeEnd === -1 ? address : address.slice(schemeEnd + 3)).split('/')
+  return {
+    raw: request.url,
+    ...(schemeEnd !== -1 && { protocol: address.slice(0, schemeEnd) }),
+    host: host.split('.'),
+    path,
+    query: toPostmanEntries(readParamRows(request.url, request.queryParams)),
+  }
+}
+
+function toPostmanBehavior(options) {
+  const behavior = {
+    ...(options?.noFollowRedirects && { followRedirects: false }),
+    ...(options?.insecureTLS && { strictSSL: false }),
+  }
+  return Object.keys(behavior).length > 0 ? behavior : null
+}
+
+function toPostmanItem(request) {
+  const body = toPostmanBody(request)
+  const behavior = toPostmanBehavior(request.options)
+  return {
+    id: request.id,
+    name: request.name || UNTITLED_REQUEST,
+    ...(behavior && { protocolProfileBehavior: behavior }),
+    request: {
+      method: request.method === GRAPHQL_METHOD ? 'POST' : request.method,
+      header: toPostmanEntries(parseRows(request.headers)),
+      url: toPostmanUrl(request),
+      auth: toPostmanAuth(request.auth),
+      ...(body && { body }),
+    },
+    response: [],
+  }
+}
+
+export function exportToPostman(requests, folders = [], options = {}) {
+  const { name = 'Gostman Collection', variables = {} } = options
+  const tree = buildCollectionTree(folders, requests)
+  const itemsIn = (folderId) => [
+    ...foldersIn(tree, folderId).map((folder) => ({ id: folder.id, name: folder.name, item: itemsIn(folder.id) })),
+    ...requestsIn(tree, folderId).map(toPostmanItem),
+  ]
+  return {
+    info: { name, schema: POSTMAN_SCHEMA },
+    item: itemsIn(ROOT_ID),
+    variable: Object.entries(variables).map(([key, value]) => ({ key, value: asText(value) })),
+  }
+}
+
+export function exportToGostman(requests, folders, environments) {
   return {
     version: GOSTMAN_FORMAT_VERSION,
     exportedAt: new Date().toISOString(),
-    gostman: {
-      requests: requests.map(r => ({
-        ...r,
-        response: '' // Don't include responses in export
-      })),
-      folders,
-      variables
-    }
+    gostman: { requests, folders, environments },
   }
 }
 
-/**
- * Imports Gostman native JSON format
- * @param {Object} data - Gostman export data
- * @returns {Object} Parsed result with success flag, requests, folders, and variables
- */
+const invalidGostmanBackup = (reason) => ({ success: false, error: `Invalid Gostman export format: ${reason}` })
+
+const withTlsVerification = (request) => (
+  request?.options?.insecureTLS ? { ...request, options: { ...request.options, insecureTLS: false } } : request
+)
+
 export function importGostman(data) {
-  if (!data || typeof data !== 'object') {
-    return {
-      success: false,
-      error: 'Invalid Gostman export format: not an object'
-    }
-  }
-
-  if (!data.gostman) {
-    return {
-      success: false,
-      error: 'Invalid Gostman export format: missing gostman object'
-    }
-  }
-
-  if (!Array.isArray(data.gostman.requests)) {
-    return {
-      success: false,
-      error: 'Invalid Gostman export format: requests must be an array'
-    }
-  }
-
-  if (!Array.isArray(data.gostman.folders)) {
-    return {
-      success: false,
-      error: 'Invalid Gostman export format: folders must be an array'
-    }
-  }
-
-  if (data.gostman.variables !== undefined && typeof data.gostman.variables !== 'object') {
-    return {
-      success: false,
-      error: 'Invalid Gostman export format: variables must be an object'
-    }
-  }
-
+  const backup = data?.gostman
+  if (!isPlainObject(backup)) return invalidGostmanBackup('missing gostman object')
+  if (!Array.isArray(backup.requests)) return invalidGostmanBackup('requests must be an array')
+  if (!Array.isArray(backup.folders)) return invalidGostmanBackup('folders must be an array')
+  const requestsWithoutTls = backup.requests
+    .filter((request) => request?.options?.insecureTLS)
+    .map((request) => asText(request.name) || UNTITLED_REQUEST)
   return {
     success: true,
-    requests: data.gostman.requests || [],
-    folders: data.gostman.folders || [],
-    variables: data.gostman.variables || {}
+    warnings: requestsWithoutTls.length > 0 ? [tlsWarning(requestsWithoutTls)] : [],
+    requests: backup.requests.map(withTlsVerification),
+    folders: backup.folders,
+    environments: asArray(backup.environments),
+    variables: isPlainObject(backup.variables) ? backup.variables : {},
   }
 }
 
@@ -1924,153 +1455,109 @@ function parseYAML(yamlString) {
   }
 }
 
-/**
- * Generates Markdown documentation from requests
- * @param {Array} requests - Gostman request objects
- * @param {Object} options - Export options
- * @returns {string} Markdown documentation
- */
-export function exportToMarkdown(requests, options = {}) {
-  if (!Array.isArray(requests)) {
-    requests = []
-  }
+const MIN_FENCE_LENGTH = 3
 
-  const {
-    title = 'API Documentation',
-    description = 'Auto-generated documentation from Gostman',
-    baseUrl = ''
-  } = options
+const markdownCell = (text) => asText(text).replaceAll('|', '\\|').replaceAll('\n', ' ')
 
-  let md = `# ${title}\n\n`
+const markdownCode = (text) => (text ? `\`${markdownCell(text)}\`` : '')
 
-  if (description) {
-    md += `${description}\n\n`
-  }
-
-  if (baseUrl) {
-    md += `**Base URL:** \`${baseUrl}\`\n\n`
-  }
-
-  md += '---\n\n'
-
-  const grouped = new Map()
-  requests.forEach(request => {
-    const group = request.folderId || 'root'
-    if (!grouped.has(group)) {
-      grouped.set(group, [])
-    }
-    grouped.get(group).push(request)
-  })
-
-  md += '## Table of Contents\n\n'
-  grouped.forEach((_, groupId) => {
-    if (groupId !== 'root') {
-      const anchor = groupId.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
-      md += `- [${groupId}](#${anchor})\n`
-    }
-  })
-  md += '\n---\n\n'
-
-  grouped.forEach((groupRequests, groupId) => {
-    if (groupId !== 'root') {
-      const anchor = groupId.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
-      md += `<a id="${anchor}"></a>\n`
-      md += `## ${groupId}\n\n`
-    }
-
-    groupRequests.forEach(request => {
-      const method = (request.method || 'GET').toUpperCase()
-
-
-      md += `### ${request.name || 'Untitled Request'}\n\n`
-      md += `**${method}** \`${request.url || ''}\`\n\n`
-
-      if (request.description) {
-        md += `${request.description}\n\n`
-      }
-
-      try {
-        const headers = JSON.parse(request.headers || '{}')
-        if (Object.keys(headers).length > 0) {
-          md += '**Headers:**\n\n'
-          md += '| Key | Value |\n|-----|-------|\n'
-          Object.entries(headers).forEach(([key, value]) => {
-            const displayValue = String(value).length > MAX_TRUNCATION_LENGTH
-              ? String(value).substring(0, MAX_TRUNCATION_LENGTH - 3) + '...'
-              : String(value)
-            md += `| \`${key}\` | \`${displayValue}\` |\n`
-          })
-          md += '\n'
-        }
-      } catch (err) {
-        console.warn('Failed to parse headers for markdown export:', err.message)
-      }
-
-      try {
-        const params = JSON.parse(request.queryParams || '{}')
-        if (params && typeof params === 'object' && Object.keys(params).length > 0) {
-          md += '**Query Parameters:**\n\n'
-          md += '| Parameter | Type | Example |\n|-----------|------|---------|\n'
-          Object.entries(params).forEach(([key, value]) => {
-            const type = inferType(value)
-            md += `| \`${key}\` | ${type} | \`${value}\` |\n`
-          })
-          md += '\n'
-        }
-      } catch (err) {
-        console.warn('Failed to parse query params for markdown export:', err.message)
-      }
-
-      if (request.body && request.body.trim()) {
-        md += '**Request Body:**\n\n'
-        md += '```json\n'
-        md += request.body
-        md += '\n```\n\n'
-      }
-
-      md += '---\n\n'
-    })
-  })
-
-  return md
+function markdownTable(title, rows) {
+  if (rows.length === 0) return []
+  return [
+    `**${title}:**`,
+    '',
+    '| Key | Value |',
+    '|-----|-------|',
+    ...rows.map((row) => `| ${markdownCode(row.key)} | ${markdownCode(isFileRow(row) ? row.fileName : row.value)} |`),
+    '',
+  ]
 }
 
-function inferType(val) {
-  if (Array.isArray(val)) return 'array'
-  if (typeof val === 'boolean') return 'boolean'
-  if (typeof val === 'number') return 'number'
-  return 'string'
+function markdownCodeBlock(title, language, text) {
+  if (text.trim() === '') return []
+  const longestRun = Math.max(0, ...Array.from(text.matchAll(/`+/g), (match) => match[0].length))
+  const fence = '`'.repeat(Math.max(MIN_FENCE_LENGTH, longestRun + 1))
+  return [`**${title}:**`, '', `${fence}${language}`, text, fence, '']
 }
 
-/**
- * Detects the format of imported data (JSON or YAML)
- * @param {string} jsonString - JSON or YAML string to detect
- * @returns {string} Format type: 'postman', 'openapi', 'gostman', or 'unknown'
- */
-export function detectImportFormat(jsonString) {
-  let data
+const MARKDOWN_AUTH_LABELS = {
+  [AUTH_BASIC]: () => 'Basic',
+  [AUTH_BEARER]: () => 'Bearer token',
+  [AUTH_API_KEY]: (auth) => `API key ${markdownCode(auth.key)} in ${apiKeyLocation(auth.in)}`,
+}
 
+function markdownAuth(auth) {
+  const label = MARKDOWN_AUTH_LABELS[auth?.type]
+  return label ? [`**Auth:** ${label(auth)}`, ''] : []
+}
+
+function markdownBody(request) {
+  const { body, bodyType } = request
+  if (request.method === GRAPHQL_METHOD) {
+    return [
+      ...markdownCodeBlock('Query', 'graphql', request.graphqlQuery || body),
+      ...markdownCodeBlock('Variables', BODY_JSON, request.graphqlVariables),
+    ]
+  }
+  if (bodyType === BODY_NONE) return []
+  if (bodyType === BODY_FORM || bodyType === BODY_MULTIPART) return markdownTable('Body', sentRows(body))
+  if (bodyType === BODY_BINARY) {
+    const fileName = asText(parseJSON(body, {})?.fileName)
+    return fileName ? [`**Body:** file ${markdownCode(fileName)}`, ''] : []
+  }
+  return markdownCodeBlock('Body', bodyType, body)
+}
+
+function markdownRequest(request) {
+  const method = request.method === GRAPHQL_METHOD ? 'POST' : request.method
+  return [
+    `### ${request.name || UNTITLED_REQUEST}`,
+    '',
+    `**${method}** ${markdownCode(request.url)}`,
+    '',
+    ...markdownAuth(request.auth),
+    ...markdownTable('Headers', sentRows(request.headers)),
+    ...markdownTable('Query Parameters', readParamRows(request.url, request.queryParams).filter(isSentRow)),
+    ...markdownBody(request),
+    '---',
+    '',
+  ]
+}
+
+export function exportToMarkdown(requests, folders = [], options = {}) {
+  const { title = 'API Documentation' } = options
+  const tree = buildCollectionTree(folders, requests)
+  const sections = [
+    { heading: '', requests: requestsIn(tree, ROOT_ID) },
+    ...listFolders(tree).map(({ folder, path }) => ({ heading: path.join(' / '), requests: requestsIn(tree, folder.id) })),
+  ]
+  const lines = sections
+    .filter((section) => section.requests.length > 0)
+    .flatMap((section) => [
+      ...(section.heading ? [`## ${section.heading}`, ''] : []),
+      ...section.requests.flatMap(markdownRequest),
+    ])
+  return [`# ${title}`, '', ...lines].join('\n')
+}
+
+function parseStructuredText(text) {
   try {
-    data = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString
+    return JSON.parse(text)
   } catch {
-    try {
-      data = parseYAML(jsonString)
-    } catch {
-      return 'unknown'
-    }
+    return parseYAML(text)
   }
+}
 
-  if (data.info?.schema?.includes('postman.com/json/collection') || data.info?._postman_id) {
-    return 'postman'
+export function detectImportFormat(text) {
+  let data
+  try {
+    data = parseStructuredText(text)
+  } catch {
+    return 'unknown'
   }
-
-  if (data.openapi || (data.swagger && data.info)) {
-    return 'openapi'
-  }
-
-  if (data.gostman || (data.version && data.gostman)) {
-    return 'gostman'
-  }
-
+  if (!isPlainObject(data)) return 'unknown'
+  if (asText(data.info?.schema).includes(POSTMAN_SCHEMA_MARKER) || data.info?._postman_id) return 'postman'
+  if (data.openapi || (data.swagger && data.info)) return 'openapi'
+  if (data.gostman) return 'gostman'
   return 'unknown'
 }

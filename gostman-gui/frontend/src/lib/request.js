@@ -1,3 +1,6 @@
+import { resolveBodyType } from './body'
+import { foldQueryParams } from './queryString'
+
 const DEFAULT_AUTH = { type: '', username: '', password: '', token: '', key: '', value: '', in: '' }
 
 const DEFAULT_OPTIONS = { timeoutMs: 0, noFollowRedirects: false, insecureTLS: false }
@@ -28,7 +31,8 @@ export function normalizeRequest(raw) {
   }
   request.auth = { ...DEFAULT_AUTH, ...source.auth }
   request.options = { ...DEFAULT_OPTIONS, ...source.options }
-  return request
+  request.bodyType = resolveBodyType(request.bodyType, request.body)
+  return { ...request, ...foldQueryParams(request.url, request.queryParams) }
 }
 
 export function toEngineRequest(request, variables) {

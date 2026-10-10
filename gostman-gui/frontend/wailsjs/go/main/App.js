@@ -46,6 +46,10 @@ export function SaveRequest(arg1) {
   return window['go']['main']['App']['SaveRequest'](arg1);
 }
 
+export function SaveRequests(arg1) {
+  return window['go']['main']['App']['SaveRequests'](arg1);
+}
+
 export function SendRequest(arg1, arg2) {
   return window['go']['main']['App']['SendRequest'](arg1, arg2);
 }

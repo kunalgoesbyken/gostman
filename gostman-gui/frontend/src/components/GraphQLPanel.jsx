@@ -1,688 +1,270 @@
-import React, { useState, useEffect, useRef, useMemo } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { ChevronRight, FileJson, Check, AlertCircle, Loader2, Code, Wand2, Copy, CheckCircle2, Search, PencilLine, RefreshCw, Braces } from "lucide-react"
+import { useMemo, useState } from "react"
+import { ChevronDown, ChevronRight } from "lucide-react"
+import { parse, print } from "graphql"
 import { Button } from "./ui/button"
-import { Badge } from "./ui/badge"
+import { Input } from "./ui/input"
 import { Textarea } from "./ui/textarea"
-import { parse, visit, Kind } from 'graphql'
-import { request } from 'graphql-request'
-import { GRAPHQL_EXAMPLES } from "../lib/graphqlConstants"
-import {
-  staggerContainer,
-  listItem,
-  popIn,
-  collapse,
-  slideDown,
-  tapScale,
-  pulseGlow,
-  spin,
-  rotateTo,
-} from "../lib/motion"
+import { isPlainObject } from "../lib/dataUtils"
+import { GRAPHQL_METHOD } from "../lib/graphqlSchema"
+import { parseVariableMap, substitutePlaceholders } from "../lib/placeholders"
+import { cn } from "../lib/utils"
 
-/**
- * GraphQL Query/Mutation Builder
- * Provides syntax highlighting, validation, and helpers for GraphQL requests
- *
- * Uses graphql and graphql-request libraries for robust handling
- */
+const QUERY_PLACEHOLDER = "query {\n  viewer {\n    id\n  }\n}"
+const VARIABLES_PLACEHOLDER = '{\n  "id": "1"\n}'
+const EMPTY_VARIABLES = ["", "{}"]
+const SHOWN_TYPE_LIMIT = 100
+const NO_VARIABLES = new Map()
 
-/**
- * Validates a GraphQL query string
- * @param {string} query - GraphQL query to validate
- * @returns {Object} { valid, errors }
- */
-export function validateGraphQLQuery(query) {
-  if (!query || !query.trim()) {
-    return { valid: false, errors: ['Query is empty'] }
-  }
+const TOOLBAR = "flex h-10 shrink-0 items-center justify-between gap-3 border-b border-border/50 px-4"
+const TOOLBAR_LABEL = "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+const TOOLBAR_BUTTON = "h-7 px-2"
+const EDITOR = "h-full min-h-0 resize-none font-mono text-xs leading-relaxed"
 
+function describeSyntaxError(error) {
+  const location = error.locations?.[0]
+  return location ? `${error.message} (line ${location.line}, column ${location.column})` : error.message
+}
+
+function querySyntaxError(query) {
+  if (query.trim() === "") return ""
   try {
     parse(query)
-    return { valid: true, errors: [] }
+    return ""
   } catch (error) {
-    return { valid: false, errors: [error.message] }
+    return describeSyntaxError(error)
   }
 }
 
-/**
- * Formats/Prettifies a GraphQL query string
- * @param {string} query - GraphQL query to format
- * @returns {string} Formatted query
- */
-export function formatGraphQLQuery(query) {
+function variablesProblem(variables) {
+  if (variables.trim() === "") return ""
   try {
-    const ast = parse(query)
-    // The ast contains the structured query
-    // For now, return the original formatted by the parser
-    return query
-  } catch {
-    // If parsing fails, do basic cleanup
-    return query
-      .replace(/\s+/g, ' ')
-      .replace(/\{/g, '\n{\n  ')
-      .replace(/\}/g, '\n}\n')
-      .trim()
+    return isPlainObject(JSON.parse(variables)) ? "" : "Variables must be a JSON object."
+  } catch (error) {
+    return `Not valid JSON: ${error.message}`
   }
 }
 
-/**
- * Extracts operation name from a GraphQL query
- * @param {string} query - GraphQL query
- * @returns {string} Operation name or 'UnnamedQuery'
- */
-export function extractOperationName(query) {
-  try {
-    const ast = parse(query)
-    for (const definition of ast.definitions) {
-      if (definition.kind === Kind.OPERATION_DEFINITION) {
-        return definition.name?.value || 'UnnamedQuery'
-      }
-    }
-    return 'UnnamedQuery'
-  } catch {
-    return 'UnnamedQuery'
-  }
+function matchTypes(types, search) {
+  const needle = search.trim().toLowerCase()
+  if (needle === "") return types.map((type) => ({ type, hits: [] }))
+  return types.flatMap((type) => {
+    if (type.name.toLowerCase().includes(needle)) return [{ type, hits: [] }]
+    const hits = type.members.filter((member) => member.name.toLowerCase().includes(needle))
+    return hits.length > 0 ? [{ type, hits }] : []
+  })
 }
 
-/**
- * Extracts variables used in a GraphQL query
- * @param {string} query - GraphQL query
- * @returns {Array} Array of variable names
- */
-export function extractVariables(query) {
-  try {
-    const ast = parse(query)
-    const variables = []
-
-    visit(ast, {
-      VariableDefinition(node) {
-        variables.push({
-          name: node.variable.name.value,
-          type: node.type.name?.value || 'Unknown'
-        })
-      }
-    })
-
-    return variables
-  } catch {
-    return []
-  }
+function ErrorLine({ children }) {
+  return <p className="shrink-0 break-words text-xs text-destructive">{children}</p>
 }
 
-export function GraphQLPanel({
-  query = '',
-  variables = '',
-  onQueryChange,
-  onVariablesChange,
-  onExecute
-}) {
-  const [activeExample, setActiveExample] = useState('query')
-  const [showExamples, setShowExamples] = useState(false)
-  const [validation, setValidation] = useState({ valid: true, errors: [] })
-  const [detectedVars, setDetectedVars] = useState([])
-  const [copied, setCopied] = useState(false)
-  const [isPrettifying, setIsPrettifying] = useState(false)
-  const [activeSection, setActiveSection] = useState('query')
-  const queryRef = useRef(null)
-
-  // Validate query when it changes
-  useEffect(() => {
-    if (query && query.trim()) {
-      const result = validateGraphQLQuery(query)
-      setValidation(result)
-
-      // Extract variables from query
-      const vars = extractVariables(query)
-      setDetectedVars(vars)
-    } else {
-      setValidation({ valid: true, errors: [] })
-      setDetectedVars([])
-    }
-  }, [query])
-
-  const insertExample = (type) => {
-    setActiveExample(type)
-    if (type === 'query' || type === 'mutation' || type === 'subscription') {
-      onQueryChange(GRAPHQL_EXAMPLES[type])
-    } else if (type === 'variables') {
-      onVariablesChange(GRAPHQL_EXAMPLES.variables)
-    }
-    setShowExamples(false)
-  }
-
-  const prettifyQuery = async () => {
-    setIsPrettifying(true)
-    // Simulate async for animation
-    await new Promise(r => setTimeout(r, 300))
-    try {
-      const formatted = formatGraphQLQuery(query)
-      onQueryChange(formatted)
-    } catch (e) {
-      console.error('Error prettifying:', e)
-    }
-    setIsPrettifying(false)
-  }
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(query).catch(err => console.warn('Copy failed:', err))
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  const validateVariables = () => {
-    try {
-      if (variables && variables.trim()) {
-        JSON.parse(variables)
-        return { valid: true }
-      }
-      return { valid: true }
-    } catch (error) {
-      return { valid: false, error: error.message }
-    }
-  }
-
-  const varValidation = useMemo(() => validateVariables(), [variables])
-
+function SchemaMembers({ members }) {
+  if (members.length === 0) return <p className="pb-2 pl-5 text-xs text-muted-foreground">No fields.</p>
   return (
-    <motion.div
-      className="flex flex-col h-full"
-      variants={staggerContainer}
-      initial="hidden"
-      animate="visible"
-    >
-      <motion.div
-        className="relative overflow-hidden"
-        variants={listItem}
-      >
-        
-        <div className="relative px-4 py-3 border-b border-border/50 bg-muted/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <motion.div
-                className="relative"
-                animate={validation.valid && query ? pulseGlow : {}}
-              >
-                <Braces className="h-5 w-5 text-primary" />
-                {!validation.valid && query && (
-                  <motion.div
-                    className="absolute -top-1 -right-1 h-2 w-2 bg-destructive rounded-full"
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 0.5, repeat: Infinity }}
-                  />
-                )}
-              </motion.div>
-              <div>
-                <span className="text-sm font-semibold text-foreground">
-                  GraphQL
-                </span>
-                <div className="flex items-center gap-2 mt-0.5">
-                  {validation.valid ? (
-                    <motion.div {...popIn} className="flex items-center gap-1">
-                      <CheckCircle2 className="h-3 w-3 text-success" />
-                      <span className="text-[10px] text-success">Valid</span>
-                    </motion.div>
-                  ) : query ? (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1, rotate: [0, -10, 10, -10, 0] }}
-                      className="flex items-center gap-1"
-                    >
-                      <AlertCircle className="h-3 w-3 text-destructive" />
-                      <span className="text-[10px] text-destructive">Invalid</span>
-                    </motion.div>
-                  ) : (
-                    <span className="text-[10px] text-muted-foreground">Enter query</span>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <motion.div {...tapScale}>
-                <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20 font-mono">
-                  POST
-                </Badge>
-              </motion.div>
-              <motion.div {...tapScale}>
-                <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20">
-                  {extractOperationName(query)}
-                </Badge>
-              </motion.div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setShowExamples(!showExamples)}
-                className="text-xs gap-1.5"
-              >
-                <Wand2 className="h-3 w-3" />
-                Templates
-              </Button>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      <AnimatePresence mode="wait">
-        {!validation.valid && validation.errors.length > 0 && (
-          <motion.div
-            {...collapse}
-            className="px-4 py-2 bg-destructive/10 border-b border-destructive/20"
-          >
-            <motion.p
-              initial={{ x: -10 }}
-              animate={{ x: 0 }}
-              className="text-xs text-destructive flex items-center gap-2"
-            >
-              <AlertCircle className="h-3.5 w-3.5" />
-              {validation.errors[0]}
-            </motion.p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showExamples && (
-          <motion.div
-            {...collapse}
-            className="px-4 py-3 border-b border-border/50 bg-muted/10"
-          >
-            <p className="text-xs text-muted-foreground mb-3 flex items-center gap-2">
-              <Wand2 className="h-3 w-3" />
-              Insert a template:
-            </p>
-            <motion.div
-              variants={staggerContainer}
-              initial="hidden"
-              animate="visible"
-              className="grid grid-cols-2 sm:grid-cols-4 gap-2"
-            >
-              {[
-                { type: 'query', label: 'Query', icon: Search },
-                { type: 'mutation', label: 'Mutation', icon: PencilLine },
-                { type: 'subscription', label: 'Subscription', icon: RefreshCw },
-                { type: 'variables', label: 'Variables', icon: Braces },
-              ].map((template) => (
-                <motion.div key={template.type} variants={listItem}>
-                  <motion.button
-                    {...tapScale}
-                    onClick={() => insertExample(template.type)}
-                    className="w-full p-3 rounded-lg border border-border/60 bg-muted/10 hover:border-primary/40 hover:bg-muted/30 transition-colors"
-                  >
-                    <template.icon className="h-4 w-4 mb-1.5 mx-auto text-muted-foreground/60" strokeWidth={1.5} />
-                    <div className="text-xs font-medium">{template.label}</div>
-                  </motion.button>
-                </motion.div>
-              ))}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {detectedVars.length > 0 && (
-          <motion.div
-            {...collapse}
-            className="px-4 py-2 border-b border-border/50 bg-muted/20 flex items-center gap-2 flex-wrap"
-          >
-            <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-              <Code className="h-3 w-3" />
-              Variables detected:
-            </span>
-            <motion.div
-              variants={staggerContainer}
-              initial="hidden"
-              animate="visible"
-              className="flex gap-1.5 flex-wrap"
-            >
-              {detectedVars.map((v, i) => (
-                <motion.div key={v.name} variants={listItem}>
-                  <Badge
-                    variant="outline"
-                    className="text-xs bg-primary/10 text-primary border-primary/30 font-mono"
-                  >
-                    ${v.name}
-                    <span className="text-primary/50 mx-1">:</span>
-                    <span className="text-primary">{v.type}</span>
-                  </Badge>
-                </motion.div>
-              ))}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <motion.div
-          variants={listItem}
-          className="px-4 py-2 border-b border-border/50 bg-muted/10 flex items-center justify-between"
-        >
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-            Query Editor
-          </span>
-          <div className="flex items-center gap-1">
-            <motion.div {...tapScale}>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={copyToClipboard}
-                className="text-xs text-muted-foreground hover:text-foreground h-7 gap-1.5"
-              >
-                {copied ? (
-                  <>
-                    <Check className="h-3 w-3 text-success" />
-                    Copied!
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-3 w-3" />
-                    Copy
-                  </>
-                )}
-              </Button>
-            </motion.div>
-            <motion.div {...tapScale}>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={prettifyQuery}
-                className="text-xs text-muted-foreground hover:text-foreground h-7 gap-1.5"
-                disabled={!query || !validation.valid}
-              >
-                {isPrettifying ? (
-                  <>
-                    <motion.div animate={spin}>
-                      <Loader2 className="h-3 w-3" />
-                    </motion.div>
-                    Prettifying...
-                  </>
-                ) : (
-                  <>
-                    <Wand2 className="h-3 w-3" />
-                    Prettify
-                  </>
-                )}
-              </Button>
-            </motion.div>
-          </div>
-        </motion.div>
-        <motion.div
-          variants={listItem}
-          className="flex-1 p-4 relative"
-        >
-          <div className="absolute inset-4 rounded-lg opacity-0 focus-within:opacity-100 transition-opacity pointer-events-none">
-            
-          </div>
-          <Textarea
-            ref={queryRef}
-            value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
-            placeholder={GRAPHQL_EXAMPLES.query}
-            className={`w-full h-full font-mono text-sm resize-none relative z-10 ${!validation.valid ? 'border-destructive/50' : ''
-              } bg-background/80 border-border/50 focus:border-primary/50 transition-colors`}
-            spellCheck={false}
-          />
-        </motion.div>
-      </div>
-
-      <div className="border-t border-border/50">
-        <AnimatePresence>
-          <motion.details
-            className="group"
-            open={activeSection === 'variables'}
-            variants={listItem}
-          >
-            <motion.summary
-              onClick={(e) => {
-                e.preventDefault()
-                setActiveSection(activeSection === 'variables' ? 'query' : 'variables')
-              }}
-              className="px-4 py-2 cursor-pointer hover:bg-muted/10 flex items-center justify-between list-none"
-            >
-              <div className="flex items-center gap-2">
-                <motion.div {...rotateTo(activeSection === 'variables' ? 90 : 0)}>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </motion.div>
-                <span className="text-xs font-medium text-muted-foreground">
-                  Query Variables (JSON)
-                </span>
-                {!varValidation.valid && (
-                  <motion.div {...popIn}>
-                    <AlertCircle className="h-3.5 w-3.5 text-destructive" />
-                  </motion.div>
-                )}
-              </div>
-              <Badge variant="outline" className="text-xs text-muted-foreground">
-                {detectedVars.length} expected
-              </Badge>
-            </motion.summary>
-            <AnimatePresence>
-              {activeSection === 'variables' && (
-                <motion.div
-                  {...collapse}
-                  className="overflow-hidden"
-                >
-                  <div className="p-4 border-t border-border/50 bg-muted/5">
-                    <Textarea
-                      value={variables}
-                      onChange={(e) => onVariablesChange(e.target.value)}
-                      placeholder={GRAPHQL_EXAMPLES.variables}
-                      className={`w-full h-24 font-mono text-sm resize-none ${!varValidation.valid ? 'border-destructive/50' : ''
-                        } bg-background/80 border-border/50`}
-                      spellCheck={false}
-                    />
-                    {!varValidation.valid && (
-                      <motion.p
-                        {...slideDown}
-                        className="text-xs text-destructive mt-2 flex items-center gap-1.5"
-                      >
-                        <AlertCircle className="h-3 w-3" />
-                        {varValidation.error}
-                      </motion.p>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.details>
-        </AnimatePresence>
-      </div>
-
-      <div className="border-t border-border/50">
-        <motion.details
-          className="group"
-          variants={listItem}
-        >
-          <summary className="px-4 py-2 cursor-pointer hover:bg-muted/10 flex items-center justify-between list-none">
-            <div className="flex items-center gap-2">
-              <ChevronRight className="h-4 w-4 text-muted-foreground group-open:rotate-90 transition-transform" />
-              <span className="text-xs font-medium text-muted-foreground">
-                Request Preview
-              </span>
-            </div>
-            <FileJson className="h-3.5 w-3.5 text-muted-foreground" />
-          </summary>
-          <div className="p-4 border-t border-border/50 bg-muted/20">
-            <pre className="text-xs font-mono text-muted-foreground overflow-x-auto bg-background/50 rounded p-3 border border-border/30">
-              <code>{JSON.stringify({
-                query: query?.trim(),
-                variables: (() => {
-                  try {
-                    return variables ? JSON.parse(variables) : undefined
-                  } catch {
-                    return undefined
-                  }
-                })()
-              }, null, 2) || '{}'}</code>
-            </pre>
-          </div>
-        </motion.details>
-      </div>
-
-      {/* Footer Info with gradient text */}
-      <motion.div
-        variants={listItem}
-        className="px-4 py-2 border-t border-border/50 bg-muted/20 flex items-center justify-between"
-      >
-        <p className="text-xs text-muted-foreground">
-          GraphQL requests sent as <span className="font-mono text-primary">POST</span> with <span className="font-mono text-primary">application/json</span>
-        </p>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            Powered by
-            <span className="font-mono text-foreground/70">graphql</span>
-            <span>+</span>
-            <span className="font-mono text-foreground/70">graphql-request</span>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
+    <ul className="flex flex-col gap-1.5 pb-2 pl-5">
+      {members.map((member) => (
+        <li key={member.name}>
+          <code className="break-words font-mono text-xs text-foreground/90">{member.signature}</code>
+          {member.description && <p className="text-xs text-muted-foreground">{member.description}</p>}
+        </li>
+      ))}
+    </ul>
   )
 }
 
-/**
- * Executes a GraphQL request using graphql-request
- * @param {string} url - GraphQL endpoint URL
- * @param {string} query - GraphQL query
- * @param {Object} variables - Query variables
- * @param {Object} headers - Additional headers
- * @returns {Promise<Object>} Response data
- */
-export async function executeGraphQLRequest(url, query, variables = {}, headers = {}) {
-  try {
-    // Clean up the query
-    const cleanedQuery = query.replace(/^\s*(query|mutation|subscription)\s+/i, '')
-    const operationName = extractOperationName(query)
-
-    // Execute using graphql-request
-    const data = await request(
-      url,
-      query,
-      variables,
-      {
-        ...headers,
-        'Content-Type': 'application/json'
-      }
-    )
-
-    return {
-      success: true,
-      data,
-      operation: operationName
-    }
-  } catch (error) {
-    // Handle GraphQL errors
-    if (error.response?.errors) {
-      return {
-        success: false,
-        errors: error.response.errors,
-        message: 'GraphQL errors occurred'
-      }
-    }
-
-    return {
-      success: false,
-      error: error.message || 'Unknown error'
-    }
-  }
+function SchemaType({ type, hits, isOpen, onToggle }) {
+  const Chevron = isOpen ? ChevronDown : ChevronRight
+  const members = isOpen ? type.members : hits
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        title={type.description}
+        className="flex w-full items-center gap-1.5 rounded py-1 text-left text-xs hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        <span className="min-w-0 truncate font-mono text-foreground">{type.name}</span>
+        <span className="ml-auto shrink-0 pr-1 text-[10px] text-muted-foreground">{type.label}</span>
+      </button>
+      {(isOpen || hits.length > 0) && <SchemaMembers members={members} />}
+    </li>
+  )
 }
 
-/**
- * Validates if a string appears to be a GraphQL request
- */
-export function isGraphQLRequest(text) {
-  if (!text || typeof text !== 'string') return false
-  const trimmed = text.trim()
+function SchemaTypes({ types }) {
+  const [search, setSearch] = useState("")
+  const [openName, setOpenName] = useState("")
+  const matches = useMemo(() => matchTypes(types, search), [types, search])
+  const shown = matches.slice(0, SHOWN_TYPE_LIMIT)
 
-  // Check for GraphQL keywords at the start
-  const graphqlKeywords = ['query', 'mutation', 'subscription', 'fragment', '{']
-  const lowerTrimmed = trimmed.toLowerCase()
-
-  // Check if it starts with a keyword or just a brace (shorthand query)
-  if (lowerTrimmed.startsWith('{')) return true
-
-  for (const keyword of graphqlKeywords) {
-    if (lowerTrimmed.startsWith(keyword)) {
-      return true
-    }
-  }
-
-  return false
+  return (
+    <>
+      <Input
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+        placeholder={`Search ${types.length} types and their fields`}
+        aria-label="Search the schema"
+        spellCheck={false}
+        className="h-8 shrink-0 px-2 text-xs"
+      />
+      <ul className="min-h-0 flex-1 overflow-y-auto scrollbar-primary">
+        {shown.map(({ type, hits }) => (
+          <SchemaType
+            key={type.name}
+            type={type}
+            hits={hits}
+            isOpen={openName === type.name}
+            onToggle={() => setOpenName(openName === type.name ? "" : type.name)}
+          />
+        ))}
+        {matches.length === 0 && <li className="py-1 text-xs text-muted-foreground">Nothing matches.</li>}
+        {matches.length > shown.length && (
+          <li className="py-1 text-xs text-muted-foreground">
+            {matches.length - shown.length} more types match. Narrow the search to see them.
+          </li>
+        )}
+      </ul>
+    </>
+  )
 }
 
-/**
- * Formats a GraphQL request for sending as HTTP
- * @param {string} query - GraphQL query/mutation
- * @param {string} variables - JSON variables
- * @returns {Object} { body, headers } - Formatted request
- */
-export function formatGraphQLRequest(query, variables = '{}') {
-  // Validate variables JSON
-  let parsedVariables = {}
-  try {
-    if (variables && variables.trim()) {
-      parsedVariables = JSON.parse(variables)
-    }
-  } catch (e) {
-    console.warn('Invalid GraphQL variables JSON:', e)
-  }
-
-  const body = JSON.stringify({
-    query: query,
-    variables: parsedVariables
-  }, null, 2)
-
-  return {
-    body,
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }
+function SchemaPane({ schema, onLoad }) {
+  const isLoading = Boolean(schema?.loading)
+  return (
+    <aside className="flex w-80 shrink-0 flex-col border-l border-border/50">
+      <div className={TOOLBAR}>
+        <span className={TOOLBAR_LABEL}>Schema</span>
+        <Button type="button" variant="outline" size="sm" className={TOOLBAR_BUTTON} disabled={isLoading} onClick={onLoad}>
+          {schema?.types ? "Refresh" : "Fetch"}
+        </Button>
+      </div>
+      <div className="flex min-h-0 flex-1 flex-col gap-2 px-4 py-3">
+        {!schema && (
+          <p className="text-xs text-muted-foreground">
+            Fetch the schema to browse this endpoint's types and fields. The introspection query is sent with this request's URL, headers and auth.
+          </p>
+        )}
+        {isLoading && <p className="text-xs text-muted-foreground">Fetching the schema...</p>}
+        {schema?.error && <ErrorLine>{schema.error}</ErrorLine>}
+        {schema?.types && <SchemaTypes types={schema.types} />}
+      </div>
+    </aside>
+  )
 }
 
-/**
- * Introspects a GraphQL schema to get available queries and mutations
- * @param {string} url - GraphQL endpoint URL
- * @param {Object} headers - Request headers
- * @returns {Promise<Object>} Schema information
- */
-export async function introspectGraphQLSchema(url, headers = {}) {
-  const introspectionQuery = `
-    query IntrospectionQuery {
-      __schema {
-        queryType { name }
-        mutationType { name }
-        subscriptionType { name }
-        types {
-          name
-          kind
-          description
-          fields {
-            name
-            type {
-              name
-              kind
-            }
-          }
-        }
-      }
-    }
-  `
+function VariablesSection({ variables, problem, onChange }) {
+  const [isOpen, setIsOpen] = useState(!EMPTY_VARIABLES.includes(variables.trim()))
+  const Chevron = isOpen ? ChevronDown : ChevronRight
 
-  try {
-    const result = await executeGraphQLRequest(url, introspectionQuery, {}, headers)
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        className="flex h-8 shrink-0 items-center gap-1.5 border-t border-border/50 px-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+      >
+        <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        <span className={TOOLBAR_LABEL}>Variables (JSON)</span>
+        {problem && <span className="min-w-0 truncate pl-2 text-xs text-destructive" title={problem}>{problem}</span>}
+      </button>
+      {isOpen && (
+        <div className="h-24 min-h-[3rem] px-4 pb-3">
+          <Textarea
+            value={variables}
+            onChange={(event) => onChange(event.target.value)}
+            placeholder={VARIABLES_PLACEHOLDER}
+            aria-label="GraphQL variables"
+            aria-invalid={problem !== ""}
+            spellCheck={false}
+            className={cn(EDITOR, problem && "border-destructive/60")}
+          />
+        </div>
+      )}
+    </>
+  )
+}
 
-    if (result.success && result.data.__schema) {
-      const schema = result.data.__schema
-      return {
-        success: true,
-        queries: schema.queryType?.name || 'Query',
-        mutations: schema.mutationType?.name || 'Mutation',
-        subscriptions: schema.subscriptionType?.name || 'Subscription',
-        types: schema.types
-      }
-    }
+export function GraphQLPanel({ query, variables, environment, schema, method, onQueryChange, onVariablesChange, onUseGraphQL, onLoadSchema }) {
+  const [isSchemaOpen, setIsSchemaOpen] = useState(false)
+  const [prettifyError, setPrettifyError] = useState("")
 
-    return { success: false, error: 'Introspection failed' }
-  } catch (error) {
-    return { success: false, error: error.message }
+  const values = useMemo(() => parseVariableMap(environment) || NO_VARIABLES, [environment])
+  const syntaxError = useMemo(() => querySyntaxError(substitutePlaceholders(query, values)), [query, values])
+  const variablesError = useMemo(() => variablesProblem(substitutePlaceholders(variables, values)), [variables, values])
+  const queryError = syntaxError || prettifyError
+
+  const handleQueryChange = (next) => {
+    setPrettifyError("")
+    onQueryChange(next)
   }
+
+  const prettify = () => {
+    try {
+      handleQueryChange(print(parse(query)))
+    } catch (error) {
+      setPrettifyError(`Cannot prettify: ${describeSyntaxError(error)}`)
+    }
+  }
+
+  return (
+    <div className="flex h-full min-h-0">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className={TOOLBAR}>
+          <span className={TOOLBAR_LABEL}>Query</span>
+          {method !== GRAPHQL_METHOD && (
+            <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
+              Not sent while the method is {method}. Editing the query switches it to GRAPHQL.
+            </span>
+          )}
+          <div className="flex shrink-0 items-center gap-1">
+            {method !== GRAPHQL_METHOD && (
+              <Button type="button" variant="outline" size="sm" className={TOOLBAR_BUTTON} onClick={onUseGraphQL}>
+                Send as GraphQL
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className={TOOLBAR_BUTTON}
+              disabled={query.trim() === ""}
+              title="Reformat the query. Comments are removed."
+              onClick={prettify}
+            >
+              Prettify
+            </Button>
+            <Button
+              type="button"
+              variant={isSchemaOpen ? "secondary" : "ghost"}
+              size="sm"
+              className={TOOLBAR_BUTTON}
+              aria-pressed={isSchemaOpen}
+              onClick={() => setIsSchemaOpen(!isSchemaOpen)}
+            >
+              Schema
+            </Button>
+          </div>
+        </div>
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto scrollbar-primary">
+          <div className="flex min-h-[7rem] flex-1 flex-col gap-2 px-4 py-3">
+            <Textarea
+              value={query}
+              onChange={(event) => handleQueryChange(event.target.value)}
+              placeholder={QUERY_PLACEHOLDER}
+              aria-label="GraphQL query"
+              aria-invalid={queryError !== ""}
+              spellCheck={false}
+              className={cn(EDITOR, "flex-1", queryError && "border-destructive/60")}
+            />
+            {queryError && <ErrorLine>{queryError}</ErrorLine>}
+          </div>
+          <VariablesSection variables={variables} problem={variablesError} onChange={onVariablesChange} />
+        </div>
+      </div>
+      {isSchemaOpen && <SchemaPane schema={schema} onLoad={onLoadSchema} />}
+    </div>
+  )
 }

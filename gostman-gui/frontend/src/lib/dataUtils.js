@@ -14,6 +14,8 @@ export function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
 }
 
+export const pluralize = (count, noun) => `${count} ${noun}${count === 1 ? '' : 's'}`
+
 export function formatSize(bytes) {
   if (bytes < KILOBYTE) return `${bytes} B`
   if (bytes < MEGABYTE) return `${(bytes / KILOBYTE).toFixed(1)} KB`

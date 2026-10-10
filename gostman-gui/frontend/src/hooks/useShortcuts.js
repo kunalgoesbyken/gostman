@@ -1,7 +1,9 @@
 import { useEffect } from "react"
 
-export function useShortcuts(shortcuts) {
+export function useShortcuts(shortcuts, isEnabled) {
   useEffect(() => {
+    if (!isEnabled) return undefined
+
     const handleKeyDown = (event) => {
       if (!event.ctrlKey && !event.metaKey) return
       const run = shortcuts.get(event.key.toLowerCase())
@@ -12,5 +14,5 @@ export function useShortcuts(shortcuts) {
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [shortcuts])
+  }, [shortcuts, isEnabled])
 }

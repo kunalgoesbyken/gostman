@@ -1,69 +1,112 @@
 import { JSONPath } from 'jsonpath-plus'
-import { findHeader } from './response'
+import { isPlainObject, parseJSON } from './dataUtils'
+import { findHeader, textBody } from './response'
+import { isVariableName } from './validation'
 
-const HEADER_PREFIX = 'header.'
-const STATUS_PATHS = ['statusCode', 'status']
-const ROOT_PATHS = ['$', '$.']
+export const SOURCE_BODY = 'body'
+export const SOURCE_HEADER = 'header'
+export const SOURCE_COOKIE = 'cookie'
+export const SOURCE_STATUS = 'status'
 
-export const isHeaderPath = (path) => path.startsWith(HEADER_PREFIX)
-
-export const isStatusPath = (path) => STATUS_PATHS.includes(path)
-
-const toJSONPath = (path) => (path.startsWith('$') ? path : `$.${path}`)
-
-const stringify = (value) => (typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value))
-
-export function extractFromResponse(body, path) {
-  if (!path || isStatusPath(path) || isHeaderPath(path)) return null
-
-  const jsonPath = toJSONPath(path)
-  const isRoot = ROOT_PATHS.includes(jsonPath) || path === 'body'
-
-  let data
-  try {
-    data = JSON.parse(body)
-  } catch {
-    return isRoot ? body : null
-  }
-  if (isRoot) return stringify(data)
-
-  try {
-    const result = JSONPath({ path: jsonPath, json: data, wrap: false })
-    return result === undefined || result === null ? null : stringify(result)
-  } catch {
-    return null
-  }
-}
-
-export function extractFromHeaders(headers, path) {
-  if (!path || !isHeaderPath(path)) return null
-  return findHeader(headers, path.slice(HEADER_PREFIX.length))
-}
-
-export function createTestScript(variableName, path, scope = 'environment') {
-  const pmScope = scope === 'global' ? 'pm.globals' : scope === 'environment' ? 'pm.environment' : 'pm.variables'
-
-  if (isHeaderPath(path)) {
-    return `${pmScope}.set("${variableName}", pm.response.headers.get("${path.slice(HEADER_PREFIX.length)}"));`
-  }
-
-  if (isStatusPath(path)) {
-    return `${pmScope}.set("${variableName}", pm.response.code);`
-  }
-
-  return `${pmScope}.set("${variableName}", pm.response.json().${toJSONPath(path).substring(2)});`
-}
-
-export const VARIABLE_TEMPLATES = [
-  { name: 'User ID', path: '$.data.user.id', description: 'Extract user ID from response' },
-  { name: 'All User IDs', path: '$.data.users[*].id', description: 'Extract all user IDs (array)' },
-  { name: 'Auth Token', path: '$.data.token', description: 'Extract authentication token' },
-  { name: 'Session ID', path: '$.sessionId', description: 'Extract session identifier' },
-  { name: 'Resource ID', path: '$.data.id', description: 'Extract resource identifier' },
-  { name: 'First Item Name', path: '$.items[0].name', description: 'First item in array' },
-  { name: 'All Names', path: '$..name', description: 'All name properties (recursive)' },
-  { name: 'Filter Active', path: '$.items[?(@.active)].id', description: 'IDs of active items' },
-  { name: 'Response Status', path: 'statusCode', description: 'HTTP status code' },
-  { name: 'Location Header', path: 'header.Location', description: 'Location redirect header' },
-  { name: 'Authorization Header', path: 'header.Authorization', description: 'Auth header from response' },
+export const EXTRACTOR_SOURCES = [
+  { value: SOURCE_BODY, label: 'JSON body', hint: '$.data.token' },
+  { value: SOURCE_HEADER, label: 'Header', hint: 'Location' },
+  { value: SOURCE_COOKIE, label: 'Cookie', hint: 'session' },
+  { value: SOURCE_STATUS, label: 'Status code', hint: '' },
 ]
+
+export const BLANK_EXTRACTOR = { name: '', source: SOURCE_BODY, expression: '', enabled: true }
+
+const SOURCE_VALUES = EXTRACTOR_SOURCES.map((source) => source.value)
+
+const parsedBodies = new WeakMap()
+
+const found = (value) => ({ value })
+const missing = (reason) => ({ reason })
+
+const asText = (value) => (typeof value === 'string' ? value : '')
+
+const toExtractor = (raw) => ({
+  name: asText(raw.name),
+  source: SOURCE_VALUES.includes(raw.source) ? raw.source : SOURCE_BODY,
+  expression: asText(raw.expression),
+  enabled: raw.enabled !== false,
+})
+
+export function parseExtractors(json) {
+  const parsed = parseJSON(json, [])
+  return Array.isArray(parsed) ? parsed.filter(isPlainObject).map(toExtractor) : []
+}
+
+export const serializeExtractors = (extractors) => (extractors.length > 0 ? JSON.stringify(extractors) : '')
+
+export const isBlankExtractor = (extractor) => (
+  extractor.name === '' && extractor.expression === '' && extractor.source === SOURCE_BODY
+)
+
+function parseBody(response) {
+  const text = textBody(response)
+  if (text.trim() === '') return missing(response.body ? 'The response body is binary, not JSON' : 'The response body is empty')
+  try {
+    return { json: JSON.parse(text) }
+  } catch {
+    return missing(response.truncated ? 'The response was cut off, so its body is not complete JSON' : 'The response body is not JSON')
+  }
+}
+
+function jsonBody(response) {
+  if (!parsedBodies.has(response)) parsedBodies.set(response, parseBody(response))
+  return parsedBodies.get(response)
+}
+
+function fromBody(response, path) {
+  if (path === '') return missing('Enter a JSONPath such as $.data.id')
+  const body = jsonBody(response)
+  if (body.reason) return body
+  let match
+  try {
+    match = JSONPath({ path, json: body.json, wrap: false })
+  } catch (error) {
+    return missing(`Invalid JSONPath: ${error.message}`)
+  }
+  if (match === undefined) return missing('Nothing in the body matches this path')
+  if (match === null) return missing('The matched value is null')
+  return found(typeof match === 'object' ? JSON.stringify(match) : match)
+}
+
+function fromHeader(response, name) {
+  if (name === '') return missing('Enter a header name')
+  const value = findHeader(response.headers, name)
+  return value === null ? missing(`The response has no ${name} header`) : found(value)
+}
+
+function fromCookie(response, name) {
+  if (name === '') return missing('Enter a cookie name')
+  const cookie = (response.cookies || []).find((candidate) => candidate.name === name)
+  return cookie ? found(cookie.value) : missing(`The response has no ${name} cookie`)
+}
+
+const READERS = {
+  [SOURCE_BODY]: fromBody,
+  [SOURCE_HEADER]: fromHeader,
+  [SOURCE_COOKIE]: fromCookie,
+  [SOURCE_STATUS]: (response) => found(response.statusCode),
+}
+
+export const isUsableResponse = (response) => Boolean(response && !response.error)
+
+export function evaluateExtractor(extractor, response) {
+  if (!isVariableName(extractor.name)) {
+    return missing(extractor.name === '' ? 'Name the variable' : 'Use letters, digits, _ and - in the name')
+  }
+  return READERS[extractor.source](response, extractor.expression.trim())
+}
+
+export function extractVariables(extractors, response) {
+  const variables = {}
+  for (const extractor of extractors.filter((candidate) => candidate.enabled)) {
+    const result = evaluateExtractor(extractor, response)
+    if (!result.reason) variables[extractor.name] = result.value
+  }
+  return variables
+}

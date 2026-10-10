@@ -21,6 +21,7 @@ const badgeVariants = cva(
         delete: "border-transparent bg-destructive/10 text-destructive border-destructive/20",
         patch: "border-transparent bg-warning/10 text-warning border-warning/20",
         head: "border-transparent bg-success/10 text-success border-success/20",
+        options: "border-transparent bg-success/10 text-success border-success/20",
         graphql: "border-transparent bg-primary/10 text-primary border-primary/20",
         // Status badges
         success: "border-transparent bg-success/10 text-success border-success/20",

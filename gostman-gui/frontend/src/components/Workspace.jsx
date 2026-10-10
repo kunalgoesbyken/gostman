@@ -7,7 +7,7 @@ import { AppDialogs } from "./AppDialogs"
 import { AppHeader } from "./AppHeader"
 import { TabBar } from "./TabBar"
 import { RequestTabs } from "./RequestTabs"
-import { selectActiveVariables, useActiveTab, useAppStore } from "../store/appStore"
+import { selectActiveVariables, selectIsDialogOpen, useActiveTab, useAppStore } from "../store/appStore"
 import { useAutoSave } from "../hooks/useAutoSave"
 import { useRequestFieldHandlers } from "../hooks/useRequestFieldHandlers"
 import { useShortcuts } from "../hooks/useShortcuts"
@@ -92,21 +92,22 @@ function LoadedWorkspace({ backend, onBack }) {
   const requests = useAppStore((s) => s.requests)
   const folders = useAppStore((s) => s.folders)
   const requestHistory = useAppStore((s) => s.requestHistory)
+  const environments = useAppStore((s) => s.environments)
   const tabs = useAppStore((s) => s.tabs)
   const activeTabId = useAppStore((s) => s.activeTabId)
   const variables = useAppStore(selectActiveVariables)
   const codeDialogOpen = useAppStore((s) => s.codeDialogOpen)
   const codeSnippets = useAppStore((s) => s.codeSnippets)
   const importDialogOpen = useAppStore((s) => s.importDialogOpen)
+  const importDialogTab = useAppStore((s) => s.importDialogTab)
+  const isDialogOpen = useAppStore(selectIsDialogOpen)
 
   const setActiveTab = useAppStore((s) => s.setActiveTab)
   const newTab = useAppStore((s) => s.newTab)
   const updateActiveRequest = useAppStore((s) => s.updateActiveRequest)
+  const setActiveBodyDrafts = useAppStore((s) => s.setActiveBodyDrafts)
   const setActiveVariables = useAppStore((s) => s.setActiveVariables)
-  const deleteHistoryItem = useAppStore((s) => s.deleteHistoryItem)
-  const toggleFolder = useAppStore((s) => s.toggleFolder)
   const closeCodeDialog = useAppStore((s) => s.closeCodeDialog)
-  const openImportDialog = useAppStore((s) => s.openImportDialog)
   const closeImportDialog = useAppStore((s) => s.closeImportDialog)
   const openCommandPalette = useAppStore((s) => s.openCommandPalette)
 
@@ -128,35 +129,27 @@ function LoadedWorkspace({ backend, onBack }) {
     ["enter", actions.send],
   ]), [openCommandPalette, openNewTab, actions])
 
-  useShortcuts(shortcuts)
+  useShortcuts(shortcuts, !isDialogOpen)
   usePersistence(backend)
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
-      <AppHeader onImport={openImportDialog} onReset={actions.reset} onBack={onBack} />
+      <AppHeader onImport={actions.openImport} onReset={actions.reset} onBack={onBack} />
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
           folders={folders}
           requests={requests}
           requestHistory={requestHistory}
-          activeRequest={activeRequest}
-          onSelectRequest={actions.openRequest}
-          onSelectHistoryItem={actions.openHistoryEntry}
-          onDeleteHistoryItem={deleteHistoryItem}
-          onClearHistory={actions.clearHistory}
-          onNewRequest={openNewTab}
-          onDeleteRequest={actions.deleteRequest}
-          onCreateFolder={actions.createFolder}
-          onDeleteFolder={actions.deleteFolder}
-          onToggleFolder={toggleFolder}
-          onNewRequestInFolder={newTab}
+          activeRequestId={activeRequest.id}
+          actions={actions}
         />
 
-        <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <TabBar
             tabs={tabs}
             activeTabId={activeTabId}
+            requests={requests}
             onTabSelect={setActiveTab}
             onTabClose={actions.closeTab}
             onNewTab={openNewTab}
@@ -175,11 +168,17 @@ function LoadedWorkspace({ backend, onBack }) {
 
           <div className="flex flex-1 flex-col overflow-hidden">
             <RequestTabs
+              tabId={activeTab.id}
               activeRequest={activeRequest}
-              onUpdateField={updateField}
+              bodyDrafts={activeTab.bodyDrafts}
+              onUpdateRequest={updateActiveRequest}
+              onBodyDraftsChange={setActiveBodyDrafts}
               variables={variables}
               onUpdateVariables={setActiveVariables}
               response={activeTab.response}
+              extraction={activeTab.extraction}
+              schema={activeTab.schema}
+              actions={actions}
               EditorComponent={MonacoEditor}
             />
 
@@ -198,10 +197,13 @@ function LoadedWorkspace({ backend, onBack }) {
         )}
         {importDialogOpen && (
           <ImportExportDialog
+            initialTab={importDialogTab}
             requests={requests}
             folders={folders}
+            environments={environments}
             variables={variablesMap}
             onImport={actions.importData}
+            onSaveFile={actions.saveTextFile}
             onClose={closeImportDialog}
           />
         )}
