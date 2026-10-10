@@ -241,13 +241,13 @@ export function LandingPage({ onGetStarted }) {
 
         {/* Navigation */}
         <motion.nav
-          className="fixed top-0 left-0 right-0 z-50 flex justify-center border-b border-border/40 bg-background px-6"
+          className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-6 px-6"
           initial={{ y: -100 }}
           animate={{ y: 0 }}
           transition={{ type: "spring", stiffness: 200, damping: 25 }}
         >
-          <div className="max-w-5xl w-full">
-            <div className="py-3 flex items-center justify-between">
+          <div className="max-w-5xl w-full backdrop-blur-xl bg-background/75 border border-border/40 rounded-2xl shadow-md">
+            <div className="px-5 py-3 flex items-center justify-between">
               <motion.div
                 className="flex items-center gap-2.5"
                 initial={{ opacity: 0, x: -20 }}
