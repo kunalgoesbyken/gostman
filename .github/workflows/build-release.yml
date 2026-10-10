@@ -85,7 +85,7 @@ jobs:
           mkdir -p package/usr/share/icons/hicolor/256x256/apps
 
           # Copy binary
-          cp build/bin/gostman-gui package/usr/bin/
+          cp build/bin/Gostman package/usr/bin/gostman
 
           # Copy icon
           cp build/appicon.png package/usr/share/icons/hicolor/256x256/apps/gostman.png
@@ -94,7 +94,7 @@ jobs:
           cat > package/usr/share/applications/gostman.desktop << EOF
           [Desktop Entry]
           Name=Gostman
-          Exec=gostman-gui
+          Exec=gostman
           Icon=gostman
           Type=Application
           Categories=Development;Utility;
@@ -110,13 +110,13 @@ jobs:
         working-directory: ./gostman-gui/build/bin
         shell: bash
         run: |
-          mv gostman-gui.exe Gostman-windows-amd64.exe
+          mv Gostman.exe Gostman-windows-amd64.exe
 
       - name: Rename macOS binary
         if: matrix.os == 'macos-latest'
         working-directory: ./gostman-gui/build/bin
         run: |
-          mv gostman-gui.app Gostman-darwin-universal.app
+          mv Gostman.app Gostman-darwin-universal.app
           # Create a zip for easier distribution
           zip -r Gostman-darwin-universal.zip Gostman-darwin-universal.app
 

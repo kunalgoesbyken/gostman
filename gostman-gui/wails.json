@@ -1,8 +1,8 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
   "name": "Gostman",
-  "outputfilename": "gostman-gui",
-  "frontend:install": "npm install",
+  "outputfilename": "Gostman",
+  "frontend:install": "npm ci",
   "frontend:build": "npm run build",
   "frontend:dev:watcher": "npm run dev",
   "frontend:dev:serverUrl": "auto",
@@ -10,5 +10,12 @@
   "author": {
     "name": "kunal",
     "email": "kunt.rc7@gmail.com"
+  },
+  "info": {
+    "companyName": "Gostman",
+    "productName": "Gostman",
+    "productVersion": "1.1.0",
+    "copyright": "Gostman contributors",
+    "comments": "A lightweight API client"
   }
 }
