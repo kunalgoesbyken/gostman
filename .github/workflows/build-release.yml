@@ -8,6 +8,8 @@ on:
 
 env:
   WAILS_VERSION: 'v2.11.0'
+  GO_VERSION: '1.24.5'
+  NODE_VERSION: '20'
 
 permissions:
   contents: write
@@ -18,23 +20,19 @@ jobs:
       fail-fast: false
       matrix:
         include:
-
-          - name: Linux
+          - name: linux
             os: ubuntu-latest
-            build-name: Gostman-linux-amd64
-            build-path: gostman-gui/build/bin
-
-          - name: Windows
+          - name: windows
             os: windows-latest
-            build-name: Gostman-windows-amd64
-            build-path: gostman-gui/build/bin
-
-          - name: macOS
+          - name: macos
             os: macos-latest
-            build-name: Gostman-darwin-universal
-            build-path: gostman-gui/build/bin
 
     runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: gostman-gui
 
     steps:
       - name: Checkout code
@@ -43,104 +41,87 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24.5'
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: gostman-gui/go.sum
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: gostman-gui/frontend/package-lock.json
 
-      # Linux specific dependencies
       - name: Install Linux dependencies
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.name == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libfuse2 squashfs-tools
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev
 
-      # Install Wails
+      - name: Install NSIS
+        if: matrix.name == 'windows'
+        run: command -v makensis || choco install nsis -y --no-progress
+
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@${{ env.WAILS_VERSION }}
 
-      # Build the application
-      - name: Build application
-        working-directory: ./gostman-gui
+      # A tag build takes its version from the tag; a manual run keeps the
+      # version committed in wails.json.
+      - name: Resolve version
         run: |
-          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-            wails build -clean -platform linux/amd64 -tags webkit2_41
-          elif [ "${{ matrix.os }}" = "windows-latest" ]; then
-            wails build -clean -platform windows/amd64
-          else
-            wails build -clean -platform darwin/universal
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            version="${GITHUB_REF_NAME#v}"
+            jq --arg version "$version" '.info.productVersion = $version' wails.json > wails.tmp.json
+            mv wails.tmp.json wails.json
           fi
-        shell: bash
+          echo "VERSION=$(jq -r '.info.productVersion' wails.json)" >> "$GITHUB_ENV"
 
-      # Package for Linux (Zip)
-      - name: Package Linux
-        if: matrix.os == 'ubuntu-latest'
-        working-directory: ./gostman-gui
+      - name: Build and package (Linux)
+        if: matrix.name == 'linux'
         run: |
-          # Create a directory for the package
-          mkdir -p package/usr/bin
-          mkdir -p package/usr/share/applications
-          mkdir -p package/usr/share/icons/hicolor/256x256/apps
+          wails build -clean -platform linux/amd64 -tags webkit2_41
 
-          # Copy binary
-          cp build/bin/Gostman package/usr/bin/gostman
+          root=package
+          install -Dm755 build/bin/Gostman "$root/usr/bin/gostman"
+          install -Dm644 build/linux/gostman.desktop "$root/usr/share/applications/gostman.desktop"
+          install -Dm644 build/appicon.png "$root/usr/share/pixmaps/gostman.png"
+          tar -czf build/bin/Gostman-linux-amd64.tar.gz -C "$root" usr
 
-          # Copy icon
-          cp build/appicon.png package/usr/share/icons/hicolor/256x256/apps/gostman.png
+          mkdir -p "$root/DEBIAN"
+          sed "s/@VERSION@/$VERSION/" build/linux/control > "$root/DEBIAN/control"
+          dpkg-deb --build --root-owner-group "$root" build/bin/Gostman-linux-amd64.deb
 
-          # Create desktop file
-          cat > package/usr/share/applications/gostman.desktop << EOF
-          [Desktop Entry]
-          Name=Gostman
-          Exec=gostman
-          Icon=gostman
-          Type=Application
-          Categories=Development;Utility;
-          EOF
-
-          # Zip the package
-          cd package
-          zip -r ../build/bin/Gostman-linux-amd64.zip .
-
-      # Rename binaries for consistency
-      - name: Rename Windows binary
-        if: matrix.os == 'windows-latest'
-        working-directory: ./gostman-gui/build/bin
-        shell: bash
+      # The installer adds Start menu and desktop shortcuts, an uninstaller and
+      # the WebView2 runtime when it is missing. The bare executable is shipped
+      # alongside it as a portable build.
+      - name: Build and package (Windows)
+        if: matrix.name == 'windows'
         run: |
-          mv Gostman.exe Gostman-windows-amd64.exe
+          export PATH="$PATH:/c/Program Files (x86)/NSIS"
+          wails build -clean -platform windows/amd64 -nsis
+          mv build/bin/Gostman.exe build/bin/Gostman-windows-amd64-portable.exe
+          mv build/bin/Gostman-amd64-installer.exe build/bin/Gostman-windows-amd64.exe
 
-      - name: Rename macOS binary
-        if: matrix.os == 'macos-latest'
-        working-directory: ./gostman-gui/build/bin
+      # The bundle is ad-hoc signed so it launches on Apple Silicon. It is not
+      # notarized, so the first launch still needs right-click > Open.
+      - name: Build and package (macOS)
+        if: matrix.name == 'macos'
         run: |
-          mv Gostman.app Gostman-darwin-universal.app
-          # Create a zip for easier distribution
-          zip -r Gostman-darwin-universal.zip Gostman-darwin-universal.app
+          wails build -clean -platform darwin/universal
+          codesign --force --deep --sign - build/bin/Gostman.app
 
-      # Upload artifacts
-      - name: Upload Linux artifact
-        if: matrix.os == 'ubuntu-latest'
+          staging=dmg
+          mkdir "$staging"
+          cp -R build/bin/Gostman.app "$staging/"
+          ln -s /Applications "$staging/Applications"
+          hdiutil create -volname Gostman -srcfolder "$staging" -ov -format UDZO build/bin/Gostman-darwin-universal.dmg
+          ditto -c -k --keepParent build/bin/Gostman.app build/bin/Gostman-darwin-universal.zip
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.build-name }}
-          path: ${{ matrix.build-path }}/Gostman-linux-amd64.zip
-
-      - name: Upload Windows artifact
-        if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.build-name }}
-          path: ${{ matrix.build-path }}/Gostman-windows-amd64.exe
-
-      - name: Upload macOS artifact
-        if: matrix.os == 'macos-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.build-name }}
-          path: ${{ matrix.build-path }}/Gostman-darwin-universal.zip
+          name: gostman-${{ matrix.name }}
+          path: gostman-gui/build/bin/Gostman-*
+          if-no-files-found: error
 
   release:
     needs: build
@@ -151,20 +132,11 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          path: ./artifacts
-
-      - name: Display structure of downloaded files
-        run: ls -R ./artifacts
+          path: artifacts
+          merge-multiple: true
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            ./artifacts/Gostman-linux-amd64/Gostman-linux-amd64.zip
-            ./artifacts/Gostman-windows-amd64/Gostman-windows-amd64.exe
-            ./artifacts/Gostman-darwin-universal/Gostman-darwin-universal.zip
-          draft: false
-          prerelease: false
+          files: artifacts/Gostman-*
           generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
