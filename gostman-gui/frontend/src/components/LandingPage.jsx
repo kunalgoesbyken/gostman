@@ -30,6 +30,7 @@ import {
   SlideInFromRight,
 } from "./landing/AnimatedSection"
 import { RestShowcase, GraphQLShowcase, ChainingShowcase, WebSocketShowcase } from "./landing/showcases"
+import { BackgroundCode } from "./landing/BackgroundCode"
 import { DownloadDropdown } from "./landing/DownloadDropdown"
 
 function ShowcaseSkeleton() {
@@ -230,6 +231,8 @@ export function LandingPage({ onGetStarted }) {
         <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
           <div className="absolute inset-0 bg-[radial-gradient(circle_1px_at_1px_1px,rgba(255,255,255,0.05)_1px,transparent_0)] [background-size:40px_40px]" />
         </div>
+
+        <BackgroundCode />
 
         {/* Navigation */}
         <motion.nav
