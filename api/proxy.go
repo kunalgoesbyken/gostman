@@ -3,7 +3,9 @@ package handler
 import (
 	"encoding/json"
 	"log"
+	"mime"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/krockxz/gostman/engine"
@@ -36,6 +38,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+	if !isSameOriginJSON(r) {
+		http.Error(w, "cross-site requests are not allowed", http.StatusForbidden)
+		return
+	}
 	r.Body = http.MaxBytesReader(w, r.Body, maxRequestBytes)
 
 	query := r.URL.Query()
@@ -47,6 +53,29 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	default:
 		writeJSON(w, send(r))
 	}
+}
+
+func isSameOriginJSON(r *http.Request) bool {
+	mediaType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+	if err != nil || mediaType != "application/json" {
+		return false
+	}
+	if site := r.Header.Get("Sec-Fetch-Site"); site != "" && site != "same-origin" && site != "none" {
+		return false
+	}
+	origin := r.Header.Get("Origin")
+	if origin == "" {
+		return true
+	}
+	parsed, err := url.Parse(origin)
+	return err == nil && parsed.Host == publicHost(r)
+}
+
+func publicHost(r *http.Request) string {
+	if forwarded := r.Header.Get("X-Forwarded-Host"); forwarded != "" {
+		return forwarded
+	}
+	return r.Host
 }
 
 func send(r *http.Request) engine.Response {

@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 
 	"github.com/google/uuid"
@@ -271,7 +272,7 @@ func (a *App) SaveFile(suggestedName, base64Data string) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("file content is not valid base64: %w", err)
 	}
-	path, err := wailsruntime.SaveFileDialog(a.ctx, wailsruntime.SaveDialogOptions{DefaultFilename: suggestedName})
+	path, err := wailsruntime.SaveFileDialog(a.ctx, wailsruntime.SaveDialogOptions{DefaultFilename: safeFileName(suggestedName)})
 	if err != nil || path == "" {
 		return false, err
 	}
@@ -280,4 +281,12 @@ func (a *App) SaveFile(suggestedName, base64Data string) (bool, error) {
 
 func (a *App) ParseCurl(command string) (engine.Request, error) {
 	return engine.ParseCurl(command)
+}
+
+func safeFileName(name string) string {
+	base := filepath.Base(filepath.FromSlash(strings.ReplaceAll(name, `\`, "/")))
+	if strings.Trim(base, ". ") == "" || base == string(filepath.Separator) {
+		return "download"
+	}
+	return base
 }

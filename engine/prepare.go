@@ -27,7 +27,8 @@ func Prepare(r Request) (Prepared, error) {
 	if err != nil {
 		return Prepared{}, fmt.Errorf("environment variables are not valid JSON: %w", err)
 	}
-	substitute := substituter(variables)
+	expansion := &substitution{variables: variables, budget: maxEncodedBody}
+	substitute := expansion.apply
 
 	method := strings.ToUpper(strings.TrimSpace(r.Method))
 	isGraphQL := method == methodGraphQL
@@ -57,6 +58,9 @@ func Prepare(r Request) (Prepared, error) {
 		headers = append(headers, pair{headerContentType, contentType})
 	}
 	headers = applyAuth(r.Auth, substitute, headers, target)
+	if expansion.exceeded {
+		return Prepared{}, fmt.Errorf("the request is larger than 10 MB once variables are filled in")
+	}
 
 	prepared := Prepared{Method: method, URL: target.String(), body: body}
 	for _, header := range headers {

@@ -237,7 +237,7 @@ function ResponseBody({ response, kind, view, json }) {
   }
   if (view === 'raw') return <TextBody text={response.body} />
   if (kind === BODY_KINDS.HTML) {
-    return <iframe srcDoc={response.body} title="Response preview" className="h-full w-full border-none bg-white" sandbox="allow-scripts" />
+    return <iframe srcDoc={response.body} title="Response preview" className="h-full w-full border-none bg-white" sandbox="" />
   }
   return <MediaPreview response={response} kind={kind} />
 }

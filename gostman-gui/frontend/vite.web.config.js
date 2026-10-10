@@ -100,7 +100,7 @@ export default defineConfig({
       // During local dev, forward /api/proxy to the local Go server.
       // In production, Vercel handles this route via api/proxy.go.
       // Run the local server with: go run ./cmd/local (from the repo root)
-      '/api/proxy': 'http://localhost:8787'
+      '/api/proxy': { target: 'http://localhost:8787', xfwd: true }
     }
   }
 })

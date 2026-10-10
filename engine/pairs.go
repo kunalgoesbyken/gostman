@@ -61,16 +61,42 @@ func parseVariables(raw string) (map[string]string, error) {
 	return variables, nil
 }
 
-func substituter(variables map[string]string) func(string) string {
-	return func(input string) string {
-		return placeholderRe.ReplaceAllStringFunc(input, func(match string) string {
-			key := strings.TrimSpace(match[2 : len(match)-2])
-			if value, ok := variables[key]; ok {
-				return value
-			}
-			return match
-		})
+type substitution struct {
+	variables map[string]string
+	budget    int
+	exceeded  bool
+}
+
+func (s *substitution) lookup(match string) (string, bool) {
+	value, ok := s.variables[strings.TrimSpace(match[2:len(match)-2])]
+	return value, ok
+}
+
+func (s *substitution) expandedSize(input string) int {
+	size := len(input)
+	for _, match := range placeholderRe.FindAllString(input, -1) {
+		if value, ok := s.lookup(match); ok {
+			size += len(value) - len(match)
+		}
 	}
+	return size
+}
+
+func (s *substitution) apply(input string) string {
+	if s.exceeded || len(s.variables) == 0 {
+		return input
+	}
+	s.budget -= s.expandedSize(input)
+	if s.budget < 0 {
+		s.exceeded = true
+		return input
+	}
+	return placeholderRe.ReplaceAllStringFunc(input, func(match string) string {
+		if value, ok := s.lookup(match); ok {
+			return value
+		}
+		return match
+	})
 }
 
 func parsePairs(raw string) ([]pair, error) {
