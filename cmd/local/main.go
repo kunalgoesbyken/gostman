@@ -1,8 +1,9 @@
 // Command local runs the /api/proxy endpoint on a local HTTP server so the web
 // frontend (`npm run dev:web`) has something to proxy to during development.
 //
-// It reuses the exact same handler.Handler that Vercel deploys as a serverless
-// function, so local behaviour matches production, SSRF guards included.
+// It reuses the handler.Handler that Vercel deploys as a serverless function,
+// but swaps in an unrestricted policy so requests to localhost and private
+// networks work during development.
 //
 // This file deliberately lives OUTSIDE api/: Vercel's zero-config Go builder
 // discovers serverless functions with the glob "api/**/!(*_test).go", which is
@@ -17,7 +18,8 @@ import (
 	"os"
 	"time"
 
-	"handler"
+	handler "github.com/krockxz/gostman/api"
+	"github.com/krockxz/gostman/engine"
 )
 
 func main() {
@@ -25,6 +27,8 @@ func main() {
 	if port == "" {
 		port = "8787"
 	}
+
+	handler.Policy = engine.Policy{}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/proxy", handler.Handler)

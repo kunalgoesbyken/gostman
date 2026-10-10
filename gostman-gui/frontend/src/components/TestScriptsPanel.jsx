@@ -7,9 +7,13 @@ import { Input } from "./ui/input"
 import {
   extractFromResponse,
   extractFromHeaders,
+  isHeaderPath,
+  isStatusPath,
   VARIABLE_TEMPLATES,
   createTestScript
 } from "../lib/chaining"
+import { isPlainObject, parseJSON } from "../lib/dataUtils"
+import { textBody } from "../lib/response"
 import {
   staggerContainer,
   listItem,
@@ -23,48 +27,46 @@ import {
   springSoft,
 } from "../lib/motion"
 
+const EXTRACTION_NOTICE_MS = 3000
+const INVALID_VARIABLES_MESSAGE = 'Env Vars is not valid JSON'
+
 const scopeConfig = {
   environment: { label: 'Environment', color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/20' },
   local: { label: 'Local', color: 'text-info', bg: 'bg-info/10', border: 'border-info/20' },
   global: { label: 'Global', color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20' }
 }
 
-export function TestScriptsPanel({
-  response,
-  responseStatus,
-  responseHeaders,
-  variables,
-  onVariablesChange,
-  onSaveVariables
-}) {
+const isComplete = (extractor) => Boolean(extractor.name && extractor.path)
+
+function extractValue(response, path) {
+  if (isHeaderPath(path)) return extractFromHeaders(response.headers, path)
+  if (isStatusPath(path)) return String(response.statusCode)
+  return extractFromResponse(textBody(response), path)
+}
+
+export function TestScriptsPanel({ response, variables, onVariablesChange }) {
   const [extractors, setExtractors] = useState([{ name: '', path: '', scope: 'environment' }])
   const [previewResult, setPreviewResult] = useState(null)
   const [showTemplates, setShowTemplates] = useState(false)
   const [extractedCount, setExtractedCount] = useState(0)
+  const [extractionError, setExtractionError] = useState('')
   const [showScript, setShowScript] = useState(false)
 
-  // Update preview when response or extractors change
+  const hasResponse = Boolean(response && !response.error)
+
   useEffect(() => {
-    if (response && response.trim()) {
-      const results = {}
-      extractors.forEach((ext, idx) => {
-        if (ext.name && ext.path) {
-          let value
-          if (ext.path.startsWith('header.')) {
-            value = extractFromHeaders(responseHeaders, ext.path)
-          } else if (ext.path === 'statusCode' || ext.path === 'status') {
-            value = responseStatus || ''
-          } else {
-            value = extractFromResponse(response, ext.path)
-          }
-          results[idx] = { name: ext.name, value, found: value !== null }
-        }
-      })
-      setPreviewResult(results)
-    } else {
+    if (!hasResponse) {
       setPreviewResult(null)
+      return
     }
-  }, [response, responseStatus, responseHeaders, extractors])
+    const results = {}
+    extractors.forEach((extractor, index) => {
+      if (!isComplete(extractor)) return
+      const value = extractValue(response, extractor.path)
+      results[index] = { name: extractor.name, value, found: value !== null }
+    })
+    setPreviewResult(results)
+  }, [response, hasResponse, extractors])
 
   const addExtractor = () => {
     setExtractors([...extractors, { name: '', path: '', scope: 'environment' }])
@@ -75,40 +77,26 @@ export function TestScriptsPanel({
   }
 
   const updateExtractor = (index, field, value) => {
-    const updated = [...extractors]
-    updated[index][field] = value
-    setExtractors(updated)
+    setExtractors(extractors.map((extractor, i) => (i === index ? { ...extractor, [field]: value } : extractor)))
   }
 
   const applyExtractions = () => {
+    const existing = parseJSON(variables, null)
+    if (!isPlainObject(existing)) {
+      setExtractionError(INVALID_VARIABLES_MESSAGE)
+      return
+    }
+
     const extracted = {}
-
-    extractors.forEach((ext) => {
-      if (ext.name && ext.path) {
-        let value
-        if (ext.path.startsWith('header.')) {
-          value = extractFromHeaders(responseHeaders, ext.path)
-        } else if (ext.path === 'statusCode' || ext.path === 'status') {
-          value = responseStatus || ''
-        } else {
-          value = extractFromResponse(response, ext.path)
-        }
-
-        if (value !== null) {
-          extracted[ext.name] = value
-        }
-      }
+    extractors.filter(isComplete).forEach((extractor) => {
+      const value = extractValue(response, extractor.path)
+      if (value !== null) extracted[extractor.name] = value
     })
 
-    // Merge with existing variables
-    const existing = typeof variables === 'string' ? JSON.parse(variables || '{}') : variables
-    const merged = { ...existing, ...extracted }
-    onVariablesChange(JSON.stringify(merged, null, 2))
-
-    // Show extracted count
-    const count = Object.keys(extracted).length
-    setExtractedCount(count)
-    setTimeout(() => setExtractedCount(0), 3000)
+    onVariablesChange(JSON.stringify({ ...existing, ...extracted }, null, 2))
+    setExtractionError('')
+    setExtractedCount(Object.keys(extracted).length)
+    setTimeout(() => setExtractedCount(0), EXTRACTION_NOTICE_MS)
   }
 
   const useTemplate = (template) => {
@@ -117,15 +105,13 @@ export function TestScriptsPanel({
   }
 
   const generateTestScript = () => {
-    const validExtractors = extractors.filter(e => e.name && e.path)
+    const validExtractors = extractors.filter(isComplete)
     if (validExtractors.length === 0) return ''
 
     return validExtractors
       .map(ext => createTestScript(ext.name, ext.path, ext.scope))
       .join('\n')
   }
-
-  const hasResponse = response && response.trim()
 
   return (
     <motion.div
@@ -152,7 +138,9 @@ export function TestScriptsPanel({
                   Request Chaining
                 </span>
                 <div className="flex items-center gap-2 mt-0.5">
-                  {extractedCount > 0 ? (
+                  {extractionError ? (
+                    <span className="text-[10px] text-destructive">{extractionError}</span>
+                  ) : extractedCount > 0 ? (
                     <motion.div
                       key={extractedCount}
                       {...popIn}
@@ -401,7 +389,7 @@ export function TestScriptsPanel({
             <Button
               size="sm"
               onClick={applyExtractions}
-              disabled={!hasResponse || !extractors.some(e => e.name && e.path)}
+              disabled={!hasResponse || !extractors.some(isComplete)}
               className="gap-2"
             >
               <Play className="h-3.5 w-3.5" />

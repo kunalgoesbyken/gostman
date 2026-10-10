@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
+    "@scalar/openapi-parser": "^0.24.16",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.26",
@@ -20,11 +21,9 @@
     "js-yaml": "^4.1.1",
     "jsonpath-plus": "^10.3.0",
     "lucide-react": "^0.562.0",
-    "parse-curl": "^0.2.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-json-view-lite": "^2.5.0",
-    "@scalar/openapi-parser": "^0.24.16",
     "tailwind-merge": "^3.4.0",
     "zustand": "^5.0.9"
   },

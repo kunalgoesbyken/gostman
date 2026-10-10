@@ -1,120 +1,57 @@
 import { JSONPath } from 'jsonpath-plus'
+import { findHeader } from './response'
 
-/**
- * Extracts a value from a response body using a JSONPath expression.
- *
- * Status codes and headers are deliberately not resolvable here: they are not
- * part of the body, so those paths return null and the caller must supply them
- * (see extractFromHeaders).
- *
- * @param {Object|string} response - Response data, parsed or raw JSON text
- * @param {string} path - JSONPath expression, e.g. "$.data.user.id"
- * @param {Object} options - Extra JSONPath options
- * @returns {string|null} The extracted value, or null if not found
- */
-export function extractFromResponse(response, path, options = {}) {
-  if (!path) return null
+const HEADER_PREFIX = 'header.'
+const STATUS_PATHS = ['statusCode', 'status']
+const ROOT_PATHS = ['$', '$.']
 
-  const jsonPath = path.startsWith('$') ? path : `$.${path}`
+export const isHeaderPath = (path) => path.startsWith(HEADER_PREFIX)
 
-  let data = response
+export const isStatusPath = (path) => STATUS_PATHS.includes(path)
 
-  if (typeof data === 'string') {
-    try {
-      data = JSON.parse(data)
-    } catch {
-      return jsonPath === '$' || jsonPath === '$.' ? data : null
-    }
+const toJSONPath = (path) => (path.startsWith('$') ? path : `$.${path}`)
+
+const stringify = (value) => (typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value))
+
+export function extractFromResponse(body, path) {
+  if (!path || isStatusPath(path) || isHeaderPath(path)) return null
+
+  const jsonPath = toJSONPath(path)
+  const isRoot = ROOT_PATHS.includes(jsonPath) || path === 'body'
+
+  let data
+  try {
+    data = JSON.parse(body)
+  } catch {
+    return isRoot ? body : null
   }
-
-  if (jsonPath === '$' || jsonPath === '$.' || path === 'body') {
-    return typeof data === 'object' ? JSON.stringify(data, null, 2) : String(data)
-  }
-
-  if (path === 'statusCode' || path === 'status') {
-    return null
-  }
-
-  if (path.startsWith('header.')) {
-    return null
-  }
+  if (isRoot) return stringify(data)
 
   try {
-    const result = JSONPath({
-      path: jsonPath,
-      json: data,
-      wrap: false,
-      ...options
-    })
-
-    if (result === undefined || result === null) {
-      return null
-    }
-
-    if (typeof result === 'object') {
-      return JSON.stringify(result, null, 2)
-    }
-    return String(result)
-  } catch (error) {
-    console.warn(`JSONPath extraction failed: ${error.message}`)
+    const result = JSONPath({ path: jsonPath, json: data, wrap: false })
+    return result === undefined || result === null ? null : stringify(result)
+  } catch {
     return null
   }
 }
 
-/**
- * Extracts a value from response headers.
- * @param {Object} headers - Response headers
- * @param {string} path - Path expression, e.g. "header.Content-Type"
- * @returns {string|null} The header value, or null
- */
 export function extractFromHeaders(headers, path) {
-  if (!path || !path.startsWith('header.')) return null
-
-  const headerName = path.substring(7)
-
-  if (headers && typeof headers === 'object') {
-    if (headerName in headers) {
-      return String(headers[headerName])
-    }
-
-    // Header names can themselves contain dots, so fall back to JSONPath for
-    // anything a direct lookup misses.
-    try {
-      const result = JSONPath({
-        path: `$.${headerName}`,
-        json: headers,
-        wrap: false
-      })
-      if (result !== undefined) {
-        return String(result)
-      }
-    } catch {}
-  }
-
-  return null
+  if (!path || !isHeaderPath(path)) return null
+  return findHeader(headers, path.slice(HEADER_PREFIX.length))
 }
 
-/**
- * Builds a Postman-compatible test script that stores an extracted value.
- * @param {string} variableName - The variable to set
- * @param {string} path - The path to extract
- * @param {string} scope - 'local', 'environment', or 'global'
- * @returns {string} The test script
- */
 export function createTestScript(variableName, path, scope = 'environment') {
   const pmScope = scope === 'global' ? 'pm.globals' : scope === 'environment' ? 'pm.environment' : 'pm.variables'
 
-  if (path.startsWith('header.')) {
-    return `${pmScope}.set("${variableName}", pm.response.headers.get("${path.substring(7)}"));`
+  if (isHeaderPath(path)) {
+    return `${pmScope}.set("${variableName}", pm.response.headers.get("${path.slice(HEADER_PREFIX.length)}"));`
   }
 
-  if (path === 'statusCode' || path === 'status') {
+  if (isStatusPath(path)) {
     return `${pmScope}.set("${variableName}", pm.response.code);`
   }
 
-  const jsonPath = path.startsWith('$') ? path : `$.${path}`
-
-  return `${pmScope}.set("${variableName}", pm.response.json().${jsonPath.substring(2)});`
+  return `${pmScope}.set("${variableName}", pm.response.json().${toJSONPath(path).substring(2)});`
 }
 
 export const VARIABLE_TEMPLATES = [

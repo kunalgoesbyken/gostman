@@ -1,10 +1,11 @@
 import { ArrowLeft, RotateCcw, Import } from "lucide-react"
 import { Button } from "./ui/button"
+import { EnvironmentSwitcher } from "./EnvironmentSwitcher"
 import logo from "../assets/logo.jpg"
 
-export function AppHeader({ className, onImport, onReset, onBack }) {
+export function AppHeader({ onImport, onReset, onBack }) {
   return (
-    <header className={`flex items-center gap-4 bg-muted/10 px-4 ${className}`}>
+    <header className="flex items-center gap-4 border-b border-border/60 bg-muted/10 px-4 py-2.5">
       {onBack && (
         <Button
           variant="ghost"
@@ -26,6 +27,10 @@ export function AppHeader({ className, onImport, onReset, onBack }) {
       </div>
 
       <div className="ml-auto flex items-center gap-2">
+        <EnvironmentSwitcher />
+
+        <div className="h-5 w-px bg-border" />
+
         <Button variant="outline" size="sm" onClick={onImport} className="h-8 gap-2">
           <Import className="h-4 w-4" />
           Import

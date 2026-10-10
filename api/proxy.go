@@ -1,235 +1,89 @@
 package handler
 
 import (
-	"context"
-	"encoding/base64"
 	"encoding/json"
-	"fmt"
-	"io"
 	"log"
-	"net"
 	"net/http"
-	"net/url"
-	"strings"
 	"time"
+
+	"github.com/krockxz/gostman/engine"
 )
 
-// ProxyRequest defines the structure of the incoming JSON body
-type ProxyRequest struct {
-	Method  string            `json:"method"`
-	URL     string            `json:"url"`
-	Headers map[string]string `json:"headers"`
-	Body    string            `json:"body"`
+const maxRequestBytes = 14 << 20
+
+var Policy = engine.Policy{
+	BlockPrivate:     true,
+	MaxResponseBytes: 3 << 20,
+	MaxTimeout:       30 * time.Second,
 }
 
-// ProxyResponse defines the structure of the response we send back to the frontend
-type ProxyResponse struct {
-	Status  string        `json:"status"`
-	Headers []HeaderEntry `json:"headers"`
-	Body    string        `json:"body"`
-	Cookies []CookieInfo  `json:"cookies"`
-	Size    int64         `json:"size"`
+type prepareResult struct {
+	Prepared *engine.Prepared `json:"prepared,omitempty"`
+	Error    string           `json:"error,omitempty"`
 }
 
-// HeaderEntry represents a single header key-value pair
-type HeaderEntry struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
+type curlPayload struct {
+	Command string `json:"command"`
 }
 
-// CookieInfo represents a single response cookie, matching the desktop
-// ResponseMsg.CookieInfo shape (app.go:72-80)
-type CookieInfo struct {
-	Name     string `json:"name"`
-	Value    string `json:"value"`
-	Domain   string `json:"domain"`
-	Path     string `json:"path"`
-	Expires  string `json:"expires"`
-	Secure   bool   `json:"secure"`
-	HttpOnly bool   `json:"httpOnly"`
+type curlResult struct {
+	Request *engine.Request `json:"request,omitempty"`
+	Error   string          `json:"error,omitempty"`
 }
 
-func isPrivateIP(ip net.IP) bool {
-	return ip.IsLoopback() || ip.IsPrivate() || ip.IsLinkLocalUnicast()
-}
-
-func isPrivateHost(ctx context.Context, host string) bool {
-	if ip := net.ParseIP(host); ip != nil {
-		return isPrivateIP(ip)
-	}
-	ips, err := net.DefaultResolver.LookupIPAddr(ctx, host)
-	if err != nil {
-		return false
-	}
-	for _, ip := range ips {
-		if isPrivateIP(ip.IP) {
-			return true
-		}
-	}
-	return false
-}
-
-// writeProxyError writes a JSON-encoded ProxyResponse describing an error.
-// The HTTP status is always 200 so the frontend's response.json() succeeds
-// and the real error surfaces in the Status/Body fields. CORS headers are
-// expected to already be set on the response writer.
-func writeProxyError(w http.ResponseWriter, status, body string) {
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(ProxyResponse{
-		Status: status,
-		Body:   body,
-	}); err != nil {
-		log.Printf("Error writing proxy error response: %v", err)
-	}
-}
-
-// Handler is the Vercel Serverless Function entrypoint
 func Handler(w http.ResponseWriter, r *http.Request) {
-	// CORS Headers
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
-	if r.Method == "OPTIONS" {
-		w.WriteHeader(http.StatusOK)
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+	r.Body = http.MaxBytesReader(w, r.Body, maxRequestBytes)
 
-	if r.Method != "POST" {
-		writeProxyError(w, "Method Not Allowed", "Method not allowed")
-		return
+	query := r.URL.Query()
+	switch {
+	case query.Has("curl"):
+		writeJSON(w, parseCurl(r))
+	case query.Has("prepare"):
+		writeJSON(w, prepare(r))
+	default:
+		writeJSON(w, send(r))
 	}
+}
 
-	var proxyReq ProxyRequest
-	if err := json.NewDecoder(r.Body).Decode(&proxyReq); err != nil {
-		writeProxyError(w, "Invalid Request Body", "Invalid request body: "+err.Error())
-		return
+func send(r *http.Request) engine.Response {
+	var request engine.Request
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return engine.Failure(engine.ErrorConfig, "the request could not be read: "+err.Error())
 	}
+	return engine.Send(r.Context(), request, Policy)
+}
 
-	// Validate URL scheme (SSRF prevention)
-	parsedURL, err := url.Parse(proxyReq.URL)
-	if err != nil || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") {
-		writeProxyError(w, "Error", "Invalid or unsupported URL scheme")
-		return
+func prepare(r *http.Request) prepareResult {
+	var request engine.Request
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return prepareResult{Error: err.Error()}
 	}
-
-	if len(proxyReq.Body) > 10*1024*1024 {
-		writeProxyError(w, "Error", "Request body too large")
-		return
-	}
-
-	// Create the outgoing request with SSRF-safe redirect handling
-	transport := &http.Transport{
-		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-			host, _, err := net.SplitHostPort(addr)
-			if err != nil {
-				return nil, err
-			}
-			ips, err := net.DefaultResolver.LookupIPAddr(ctx, host)
-			if err != nil {
-				return nil, err
-			}
-			for _, ip := range ips {
-				if isPrivateIP(ip.IP) {
-					return nil, fmt.Errorf("request to private IP blocked: %s", ip.IP)
-				}
-			}
-			return (&net.Dialer{}).DialContext(ctx, network, addr)
-		},
-	}
-	client := &http.Client{
-		Timeout:   30 * time.Second,
-		Transport: transport,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			if len(via) >= 10 {
-				return http.ErrUseLastResponse
-			}
-			if isPrivateHost(req.Context(), req.URL.Hostname()) {
-				return http.ErrUseLastResponse
-			}
-			return nil
-		},
-	}
-
-	reqBody := strings.NewReader(proxyReq.Body)
-	outReq, err := http.NewRequest(proxyReq.Method, proxyReq.URL, reqBody)
+	prepared, err := engine.Prepare(request)
 	if err != nil {
-		writeProxyError(w, "Failed To Create Request", "Failed to create request: "+err.Error())
-		return
+		return prepareResult{Error: err.Error()}
 	}
+	return prepareResult{Prepared: &prepared}
+}
 
-	// Copy headers
-	for k, v := range proxyReq.Headers {
-		outReq.Header.Set(k, v)
+func parseCurl(r *http.Request) curlResult {
+	var payload curlPayload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		return curlResult{Error: err.Error()}
 	}
-
-	// Perform the request
-	resp, err := client.Do(outReq)
+	request, err := engine.ParseCurl(payload.Command)
 	if err != nil {
-		writeProxyError(w, "Network Error", "Network Error: "+err.Error())
-		return
+		return curlResult{Error: err.Error()}
 	}
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			log.Printf("Error closing response body: %v", err)
-		}
-	}()
+	return curlResult{Request: &request}
+}
 
-	// Read response body (limit to 50MB)
-	bodyBytes, err := io.ReadAll(io.LimitReader(resp.Body, 50*1024*1024))
-	if err != nil {
-		writeProxyError(w, "Read Error", "Failed to read response: "+err.Error())
-		return
-	}
-
-	// Collect ALL headers individually (no combining)
-	var respHeaders []HeaderEntry
-	for k, values := range resp.Header {
-		for _, v := range values {
-			respHeaders = append(respHeaders, HeaderEntry{Key: k, Value: v})
-		}
-	}
-
-	// Collect cookies from response — matches app.go:289-304
-	var respCookies []CookieInfo
-	for _, cookie := range resp.Cookies() {
-		expiresStr := ""
-		if !cookie.Expires.IsZero() {
-			expiresStr = cookie.Expires.UTC().Format(time.RFC1123)
-		}
-		respCookies = append(respCookies, CookieInfo{
-			Name:     cookie.Name,
-			Value:    cookie.Value,
-			Domain:   cookie.Domain,
-			Path:     cookie.Path,
-			Expires:  expiresStr,
-			Secure:   cookie.Secure,
-			HttpOnly: cookie.HttpOnly,
-		})
-	}
-
-	// Convert images to base64 data URL
-	contentType := resp.Header.Get("Content-Type")
-	var responseBody string
-	if contentType != "" && strings.HasPrefix(strings.ToLower(contentType), "image/") {
-		mimeType := strings.Split(contentType, ";")[0]
-		base64Data := base64.StdEncoding.EncodeToString(bodyBytes)
-		responseBody = "data:" + mimeType + ";base64," + base64Data
-	} else {
-		responseBody = string(bodyBytes)
-	}
-
-	response := ProxyResponse{
-		Status:  resp.Status,
-		Headers: respHeaders,
-		Body:    responseBody,
-		Cookies: respCookies,
-		Size:    int64(len(bodyBytes)),
-	}
-
+func writeJSON(w http.ResponseWriter, payload any) {
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		log.Printf("Error encoding proxy response: %v", err)
-		http.Error(w, "Internal error", http.StatusInternalServerError)
+	if err := json.NewEncoder(w).Encode(payload); err != nil {
+		log.Printf("proxy: failed to write response: %v", err)
 	}
 }

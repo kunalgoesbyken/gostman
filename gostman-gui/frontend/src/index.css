@@ -337,22 +337,4 @@
     font-size: 0.85em !important;
     margin-left: 6px !important;
   }
-
-  /* Syntax highlighter classes for Raw mode (non-tree view) */
-  .json-key {
-    color: hsl(var(--syntax-key)) !important;
-    font-weight: 500 !important;
-  }
-  .json-string {
-    color: hsl(var(--syntax-string)) !important;
-  }
-  .json-number {
-    color: hsl(var(--syntax-number)) !important;
-  }
-  .json-boolean {
-    color: hsl(var(--syntax-boolean)) !important;
-  }
-  .json-null {
-    color: hsl(var(--syntax-null)) !important;
-  }
 }

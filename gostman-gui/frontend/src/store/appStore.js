@@ -1,180 +1,231 @@
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist } from 'zustand/middleware'
-import { parseRequest } from '../lib/dataUtils'
+import { isPlainObject, parseJSON } from '../lib/dataUtils'
+import { normalizeRequest } from '../lib/request'
 
-const DEFAULT_REQUEST = {
-  id: '', name: 'New Request', method: 'GET', url: '',
-  headers: '{}', body: '', queryParams: '{}',
-  graphqlQuery: '', graphqlVariables: '{}', response: ''
+const HISTORY_LIMIT = 50
+const EMPTY_VARIABLES = '{}'
+const DEFAULT_ENVIRONMENT_NAME = 'Default'
+const TAB_ID_PREFIX = 'tab-'
+const STORAGE_FAILURE_TITLE = 'Storage is full'
+
+const CLOSED_ALERT = { isOpen: false, title: '', message: '', confirmText: 'OK', variant: 'default' }
+const CLOSED_CONFIRM = { isOpen: false, title: '', message: '', confirmText: 'Confirm', variant: 'default', onConfirm: null, onCancel: null }
+const CLOSED_PROMPT = { isOpen: false, title: '', message: '', placeholder: '', defaultValue: '', confirmText: 'OK', onConfirm: null, onCancel: null }
+
+const createId = (prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+
+const asArray = (value) => (Array.isArray(value) ? value : [])
+
+const createTab = (id, request) => ({ id, request: normalizeRequest(request), pendingId: null, response: null })
+
+const FIRST_TAB = createTab(`${TAB_ID_PREFIX}1`)
+
+const persistableTab = ({ id, request }) => ({ id, request })
+
+const restoreTabs = (tabs) => {
+  const restorable = asArray(tabs).filter((tab) => tab?.id && tab.request)
+  return restorable.length > 0 ? restorable.map((tab) => createTab(tab.id, tab.request)) : [FIRST_TAB]
 }
 
-const createTab = (id, request = DEFAULT_REQUEST) => ({
-  id,
-  request: { ...request },
-  status: '',
-  loading: false,
-  responseTime: null,
-  responseHeaders: null,
-  responseCookies: null,
-  responseSize: null
+const nextIdAfter = (tabs) => 1 + tabs.reduce((highest, tab) => {
+  const number = Number(String(tab.id).replace(TAB_ID_PREFIX, ''))
+  return Number.isInteger(number) && number > highest ? number : highest
+}, 0)
+
+const mapTab = (state, tabId, update) => ({
+  tabs: state.tabs.map((tab) => (tab.id === tabId ? update(tab) : tab)),
 })
 
-const FIRST_TAB = createTab('tab-1')
+const mapTabRequests = (tabs, update) => tabs.map((tab) => ({ ...tab, request: update(tab.request) }))
 
-// Tabs are persisted so unsent drafts survive a reload, but response payloads
-// are not: a handful of large bodies would exhaust the ~5MB localStorage quota
-// and cost every later write.
-const persistableTab = (tab) => ({
-  ...createTab(tab.id, tab.request),
-  request: { ...tab.request, response: '' }
-})
+const createEnvironment = (name, variables = EMPTY_VARIABLES) => ({ id: createId('env'), name, variables })
 
-const restoreTabs = (tabs) => (
-  Array.isArray(tabs) && tabs.length > 0 && tabs.every(t => t?.id && t.request)
-    ? tabs.map(persistableTab)
-    : [FIRST_TAB]
+const restoreEnvironments = (data) => {
+  const environments = asArray(data.environments).filter((environment) => environment?.id)
+  return environments.length > 0
+    ? environments
+    : [createEnvironment(DEFAULT_ENVIRONMENT_NAME, data.variables || EMPTY_VARIABLES)]
+}
+
+const findActiveEnvironment = (state) => (
+  state.environments.find((environment) => environment.id === state.activeEnvironmentId) || state.environments[0]
 )
 
-// zustand writes on every set() and does not guard the call, so an exhausted
-// quota (or a browser with storage disabled) would otherwise throw out of a
-// store action mid-render. Losing persistence beats losing the session.
-const resilientStorage = createJSONStorage(() => ({
+const mapEnvironment = (state, id, update) => ({
+  environments: state.environments.map((environment) => (environment.id === id ? update(environment) : environment)),
+})
+
+const withoutFolder = (folderId) => (request) => (
+  request.folderId === folderId ? { ...request, folderId: '' } : request
+)
+
+const withoutRequestId = (id) => (request) => (request.id === id ? { ...request, id: '' } : request)
+
+const isSameCall = (first, second) => first.method === second.method && first.url === second.url
+
+let reportStorageFailure = () => {}
+
+const guardedStorage = createJSONStorage(() => ({
   getItem: (name) => {
     try {
       return localStorage.getItem(name)
-    } catch (e) {
-      console.warn('Could not read persisted state:', e)
+    } catch {
       return null
     }
   },
   setItem: (name, value) => {
     try {
       localStorage.setItem(name, value)
-    } catch (e) {
-      console.warn('Could not persist state:', e)
+    } catch (error) {
+      reportStorageFailure(error.message)
     }
   },
   removeItem: (name) => {
     try {
       localStorage.removeItem(name)
-    } catch (e) {
-      console.warn('Could not clear persisted state:', e)
+    } catch (error) {
+      reportStorageFailure(error.message)
     }
-  }
+  },
 }))
-
-// Keeps generated ids unique even if the stored counter is stale or missing.
-const nextIdAfter = (tabs) => 1 + tabs.reduce((max, t) => {
-  const n = Number(String(t.id).replace('tab-', ''))
-  return Number.isInteger(n) && n > max ? n : max
-}, 0)
 
 export const useAppStore = create(
   devtools(
     persist(
-      (set) => ({
-        // State
+      (set, get) => ({
         requests: [],
         folders: [],
-        variables: '{}',
         requestHistory: [],
+        environments: [],
+        activeEnvironmentId: '',
         tabs: [FIRST_TAB],
         activeTabId: FIRST_TAB.id,
         nextTabId: 2,
-        activeRequestTab: 'body', // Active tab in RequestTabs ('body', 'graphql', 'websocket', etc.)
         codeDialogOpen: false,
         codeSnippets: null,
         importDialogOpen: false,
         commandPaletteOpen: false,
+        persistenceFailureReported: false,
+        alertDialog: CLOSED_ALERT,
+        confirmDialog: CLOSED_CONFIRM,
+        promptDialog: CLOSED_PROMPT,
 
-        // Dialog states (not persisted)
-        alertDialog: { isOpen: false, title: '', message: '', confirmText: 'OK', variant: 'default', onConfirm: null },
-        confirmDialog: { isOpen: false, title: '', message: '', confirmText: 'Confirm', variant: 'default', onConfirm: null, onCancel: null },
-        promptDialog: { isOpen: false, title: '', message: '', placeholder: '', defaultValue: '', confirmText: 'OK', onConfirm: null, onCancel: null },
-
-        // Requests
-        setRequests: (requests) => set({ requests: Array.isArray(requests) ? requests : [] }),
-        addRequest: (request) => set((state) => ({ requests: [...state.requests, request] })),
-        updateRequest: (id, updates) => set((state) => ({
-          requests: state.requests.map(r => r.id === id ? { ...r, ...updates } : r)
-        })),
-        deleteRequest: (id) => set((state) => ({ requests: state.requests.filter(r => r.id !== id) })),
-
-        // Folders
-        // Accepts either an array or an updater fn (prev) => next, like React setState.
-        setFolders: (foldersOrUpdater) => set((state) => {
-          const next = typeof foldersOrUpdater === 'function'
-            ? foldersOrUpdater(state.folders)
-            : foldersOrUpdater
-          return { folders: Array.isArray(next) ? next : [] }
+        hydrate: (data) => set(() => {
+          const environments = restoreEnvironments(data)
+          const hasActive = environments.some((environment) => environment.id === data.activeEnvironmentId)
+          return {
+            requests: asArray(data.requests).map(normalizeRequest),
+            folders: asArray(data.folders),
+            requestHistory: asArray(data.history).map(normalizeRequest),
+            environments,
+            activeEnvironmentId: hasActive ? data.activeEnvironmentId : environments[0].id,
+          }
         }),
-        addFolder: (name) => {
-          const id = `folder-${Date.now()}`
-          set((state) => ({ folders: [...state.folders, { id, name, isOpen: true }] }))
-          return id
-        },
-        deleteFolder: (folderId) => set((state) => ({ folders: state.folders.filter(f => f.id !== folderId) })),
+
+        upsertRequest: (request) => set((state) => {
+          const saved = normalizeRequest(request)
+          const exists = state.requests.some((existing) => existing.id === saved.id)
+          return {
+            requests: exists
+              ? state.requests.map((existing) => (existing.id === saved.id ? saved : existing))
+              : [...state.requests, saved],
+          }
+        }),
+        removeRequest: (id) => set((state) => ({
+          requests: state.requests.filter((request) => request.id !== id),
+          tabs: mapTabRequests(state.tabs, withoutRequestId(id)),
+        })),
+
+        addFolder: (name) => set((state) => ({
+          folders: [...state.folders, { id: createId('folder'), name, isOpen: true, parentId: '' }],
+        })),
+        mergeFolders: (folders) => set((state) => {
+          const byId = new Map(state.folders.map((folder) => [folder.id, folder]))
+          folders.forEach((folder) => byId.set(folder.id, folder))
+          return { folders: Array.from(byId.values()) }
+        }),
+        deleteFolder: (folderId) => set((state) => ({
+          folders: state.folders.filter((folder) => folder.id !== folderId),
+          requests: state.requests.map(withoutFolder(folderId)),
+          tabs: mapTabRequests(state.tabs, withoutFolder(folderId)),
+        })),
         toggleFolder: (folderId) => set((state) => ({
-          folders: state.folders.map(f => f.id === folderId ? { ...f, isOpen: !f.isOpen } : f)
+          folders: state.folders.map((folder) => (folder.id === folderId ? { ...folder, isOpen: !folder.isOpen } : folder)),
         })),
 
-        // History
         addToHistory: (request) => set((state) => {
-          const item = { ...request, id: `hist-${Date.now()}`, timestamp: new Date().toISOString() }
-          const filtered = state.requestHistory.filter(h => !(h.method === request.method && h.url === request.url))
-          return { requestHistory: [item, ...filtered].slice(0, 50) }
+          const entry = { ...normalizeRequest(request), id: createId('hist'), timestamp: new Date().toISOString() }
+          const others = state.requestHistory.filter((existing) => !isSameCall(existing, entry))
+          return { requestHistory: [entry, ...others].slice(0, HISTORY_LIMIT) }
         }),
-        deleteHistoryItem: (id) => set((state) => ({ requestHistory: state.requestHistory.filter(h => h.id !== id) })),
+        deleteHistoryItem: (id) => set((state) => ({
+          requestHistory: state.requestHistory.filter((entry) => entry.id !== id),
+        })),
         clearHistory: () => set({ requestHistory: [] }),
-        setRequestHistory: (history) => set({ requestHistory: Array.isArray(history) ? history : [] }),
 
-        // Tabs
         setActiveTab: (tabId) => set({ activeTabId: tabId }),
-        // Doubles as a click handler, so anything that is not a folder id
-        // (a DOM event, say) is treated as "no folder".
-        newTab: (folderId = null) => set((state) => {
-          const folder = typeof folderId === 'string' ? folderId : null
-          const tab = createTab(`tab-${state.nextTabId}`, { ...DEFAULT_REQUEST, folderId: folder })
+        newTab: (folderId = '') => set((state) => {
+          const tab = createTab(`${TAB_ID_PREFIX}${state.nextTabId}`, { folderId })
           return { tabs: [...state.tabs, tab], activeTabId: tab.id, nextTabId: state.nextTabId + 1 }
         }),
         closeTab: (tabId) => set((state) => {
           if (state.tabs.length === 1) return state
-          const newTabs = state.tabs.filter(t => t.id !== tabId)
-          let newActiveTabId = state.activeTabId
-          if (state.activeTabId === tabId) {
-            const idx = state.tabs.findIndex(t => t.id === tabId)
-            newActiveTabId = newTabs[Math.max(0, idx - 1)]?.id || newTabs[0]?.id
-          }
-          return { tabs: newTabs, activeTabId: newActiveTabId }
+          const remaining = state.tabs.filter((tab) => tab.id !== tabId)
+          if (state.activeTabId !== tabId) return { tabs: remaining }
+          const closedIndex = state.tabs.findIndex((tab) => tab.id === tabId)
+          return { tabs: remaining, activeTabId: remaining[Math.max(0, closedIndex - 1)].id }
         }),
-        updateActiveTab: (updates) => set((state) => ({
-          tabs: state.tabs.map(t => t.id === state.activeTabId ? { ...t, ...updates } : t)
-        })),
-        updateActiveRequest: (updates) => set((state) => ({
-          tabs: state.tabs.map(t => t.id === state.activeTabId ? { ...t, request: { ...t.request, ...updates } } : t)
-        })),
-        loadRequestIntoTab: (request) => set((state) => ({
-          tabs: state.tabs.map(t => t.id === state.activeTabId ? { ...t, request: parseRequest(request), status: '', responseTime: null, responseHeaders: null, responseCookies: null, responseSize: null } : t)
-        })),
-        loadHistoryIntoTab: (item) => set((state) => ({
-          tabs: state.tabs.map(t => t.id === state.activeTabId ? { ...t, request: { ...parseRequest(item), response: '' }, status: '', responseTime: null, responseHeaders: null, responseCookies: null, responseSize: null } : t)
-        })),
+        updateTabRequest: (tabId, updates) => set((state) => (
+          mapTab(state, tabId, (tab) => ({ ...tab, request: { ...tab.request, ...updates } }))
+        )),
+        updateActiveRequest: (updates) => get().updateTabRequest(get().activeTabId, updates),
+        openInActiveTab: (request) => set((state) => (
+          mapTab(state, state.activeTabId, (tab) => createTab(tab.id, request))
+        )),
+        startTabRequest: (tabId, pendingId) => set((state) => (
+          mapTab(state, tabId, (tab) => ({ ...tab, pendingId }))
+        )),
+        finishTabRequest: (tabId, pendingId, response) => set((state) => (
+          mapTab(state, tabId, (tab) => (tab.pendingId === pendingId ? { ...tab, pendingId: null, response } : tab))
+        )),
 
-        // Variables
-        setVariables: (variables) => set({ variables }),
+        setActiveEnvironment: (id) => set({ activeEnvironmentId: id }),
+        addEnvironment: (name) => set((state) => {
+          const environment = createEnvironment(name)
+          return { environments: [...state.environments, environment], activeEnvironmentId: environment.id }
+        }),
+        renameEnvironment: (id, name) => set((state) => (
+          mapEnvironment(state, id, (environment) => ({ ...environment, name }))
+        )),
+        deleteEnvironment: (id) => set((state) => {
+          if (state.environments.length === 1) return state
+          const environments = state.environments.filter((environment) => environment.id !== id)
+          const activeEnvironmentId = state.activeEnvironmentId === id ? environments[0].id : state.activeEnvironmentId
+          return { environments, activeEnvironmentId }
+        }),
+        setActiveVariables: (variables) => set((state) => (
+          mapEnvironment(state, findActiveEnvironment(state)?.id, (environment) => ({ ...environment, variables }))
+        )),
+        mergeActiveVariables: (additions) => {
+          if (!isPlainObject(additions) || Object.keys(additions).length === 0) return true
+          const existing = parseJSON(selectActiveVariables(get()), {})
+          if (!isPlainObject(existing)) return false
+          get().setActiveVariables(JSON.stringify({ ...existing, ...additions }, null, 2))
+          return true
+        },
 
-        // UI State
         openCodeDialog: (snippets) => set({ codeDialogOpen: true, codeSnippets: snippets }),
         closeCodeDialog: () => set({ codeDialogOpen: false, codeSnippets: null }),
         openImportDialog: () => set({ importDialogOpen: true }),
         closeImportDialog: () => set({ importDialogOpen: false }),
+        openCommandPalette: () => set({ commandPaletteOpen: true }),
+        closeCommandPalette: () => set({ commandPaletteOpen: false }),
 
-        // Dialog actions (non-blocking alternatives to alert/confirm/prompt)
         showAlert: (title, message, confirmText = 'OK', variant = 'default') => set({
-          alertDialog: { isOpen: true, title, message, confirmText, variant }
+          alertDialog: { isOpen: true, title, message, confirmText, variant },
         }),
-        closeAlert: () => set({ alertDialog: { isOpen: false, title: '', message: '', confirmText: 'OK', variant: 'default' } }),
-
+        closeAlert: () => set({ alertDialog: CLOSED_ALERT }),
         showConfirm: (title, message, onConfirm, onCancel = null, variant = 'default') => set({
           confirmDialog: {
             isOpen: true,
@@ -183,48 +234,42 @@ export const useAppStore = create(
             confirmText: variant === 'destructive' ? 'Delete' : 'Confirm',
             variant,
             onConfirm,
-            onCancel
-          }
+            onCancel,
+          },
         }),
-        closeConfirm: () => set({ confirmDialog: { isOpen: false } }),
-
+        closeConfirm: () => set({ confirmDialog: CLOSED_CONFIRM }),
         showPrompt: (title, message, defaultValue = '', placeholder = '', onConfirm, onCancel = null) => set({
-          promptDialog: { isOpen: true, title, message, placeholder, defaultValue, onConfirm, onCancel }
+          promptDialog: { ...CLOSED_PROMPT, isOpen: true, title, message, placeholder, defaultValue, onConfirm, onCancel },
         }),
-        closePrompt: () => set({ promptDialog: { isOpen: false } }),
+        closePrompt: () => set({ promptDialog: CLOSED_PROMPT }),
 
-        // Command palette
-        openCommandPalette: () => set({ commandPaletteOpen: true }),
-        closeCommandPalette: () => set({ commandPaletteOpen: false }),
-
-        setActiveRequestTab: (tab) => set({ activeRequestTab: tab }),
+        reportPersistenceFailure: (reason) => {
+          if (get().persistenceFailureReported) return
+          set({ persistenceFailureReported: true })
+          get().showAlert(
+            STORAGE_FAILURE_TITLE,
+            `Your latest changes could not be saved and will be lost when the app closes. Export your data or remove old requests to free space. (${reason})`,
+            'OK',
+            'warning',
+          )
+        },
       }),
       {
         name: 'gostman-storage',
-        storage: resilientStorage,
+        storage: guardedStorage,
         partialize: (state) => ({
-          requests: state.requests,
-          folders: state.folders,
-          variables: state.variables,
-          requestHistory: state.requestHistory,
           tabs: state.tabs.map(persistableTab),
           activeTabId: state.activeTabId,
           nextTabId: state.nextTabId,
         }),
-        merge: (persistedState, currentState) => {
-          // Guards against corrupted or partial localStorage content.
-          const tabs = restoreTabs(persistedState?.tabs)
+        merge: (persisted, current) => {
+          const tabs = restoreTabs(persisted?.tabs)
+          const hasActive = tabs.some((tab) => tab.id === persisted?.activeTabId)
           return {
-            ...currentState,
-            ...persistedState,
-            requests: Array.isArray(persistedState?.requests) ? persistedState.requests : [],
-            folders: Array.isArray(persistedState?.folders) ? persistedState.folders : [],
-            requestHistory: Array.isArray(persistedState?.requestHistory) ? persistedState.requestHistory : [],
+            ...current,
             tabs,
-            activeTabId: tabs.some(t => t.id === persistedState?.activeTabId)
-              ? persistedState.activeTabId
-              : tabs[0].id,
-            nextTabId: Math.max(persistedState?.nextTabId || 0, nextIdAfter(tabs)),
+            activeTabId: hasActive ? persisted.activeTabId : tabs[0].id,
+            nextTabId: Math.max(persisted?.nextTabId || 0, nextIdAfter(tabs)),
           }
         },
       }
@@ -233,13 +278,10 @@ export const useAppStore = create(
   )
 )
 
-export const useActiveTab = () => useAppStore((s) => {
-  if (!s.tabs || s.tabs.length === 0) return FIRST_TAB
-  return s.tabs.find(t => t.id === s.activeTabId) || s.tabs[0]
-})
-export const useActiveRequest = () => useAppStore((s) => {
-  const activeTab = s.tabs && s.tabs.length > 0
-    ? (s.tabs.find(t => t.id === s.activeTabId) || s.tabs[0])
-    : null
-  return activeTab?.request || { ...DEFAULT_REQUEST }
-})
+reportStorageFailure = (reason) => useAppStore.getState().reportPersistenceFailure(reason)
+
+export const selectActiveTab = (state) => state.tabs.find((tab) => tab.id === state.activeTabId) || state.tabs[0]
+
+export const selectActiveVariables = (state) => findActiveEnvironment(state)?.variables ?? EMPTY_VARIABLES
+
+export const useActiveTab = () => useAppStore(selectActiveTab)

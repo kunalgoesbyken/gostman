@@ -12,7 +12,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    target: 'es2022', // Support top-level await (required by curlconverter)
+    target: 'es2022', // Top-level await
     rollupOptions: {
       input: resolve(__dirname, 'index.html'),
     },
