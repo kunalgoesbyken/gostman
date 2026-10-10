@@ -5,7 +5,7 @@ Priority: optional
 Architecture: amd64
 Depends: libgtk-3-0, libwebkit2gtk-4.1-0
 Maintainer: Gostman <kunt.rc7@gmail.com>
-Homepage: https://github.com/krockxz/gostman
+Homepage: https://github.com/kunalgoesbyken/gostman
 Description: A lightweight API client
  Gostman sends REST, GraphQL and WebSocket requests from a small native
  window. Requests, collections and environments stay on your machine.

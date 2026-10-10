@@ -8,7 +8,7 @@ async function fetchStars(token) {
         headers["Authorization"] = `token ${token}`;
     }
 
-    const res = await fetch("https://api.github.com/repos/krockxz/gostman", { headers });
+    const res = await fetch("https://api.github.com/repos/kunalgoesbyken/gostman", { headers });
 
     if (res.status === 401 && token) {
         console.warn("GITHUB_TOKEN rejected, falling back to unauthenticated request");

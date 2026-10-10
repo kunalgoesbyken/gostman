@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,7 +12,6 @@ import (
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-// Frontend event names. Payloads are WSStateEvent and WSMessageEvent.
 const (
 	wsStateEventName   = "ws:state"
 	wsMessageEventName = "ws:message"
@@ -26,11 +26,9 @@ type WSStateEvent struct {
 type WSMessageEvent struct {
 	ConnectionId string `json:"connectionId"`
 	Data         string `json:"data"`
+	Binary       bool   `json:"binary"`
 }
 
-// wsConn owns one live socket. writeMutex serialises writes because a
-// gorilla connection supports only one concurrent writer, and Send may be
-// called from the frontend while the read loop is closing the socket.
 type wsConn struct {
 	conn       *websocket.Conn
 	writeMutex sync.Mutex
@@ -42,9 +40,6 @@ var (
 	wsConnections = map[string]*wsConn{}
 )
 
-// WSConnect dials urlStr with the headers in headersJSON (a JSON object of
-// string values) and returns a connection id used by WSSend and WSClose.
-// Incoming frames and state changes are emitted to the frontend as events.
 func (a *App) WSConnect(urlStr, headersJSON string) (string, error) {
 	header, err := parseWSHeaders(headersJSON)
 	if err != nil {
@@ -76,7 +71,6 @@ func (a *App) WSConnect(urlStr, headersJSON string) (string, error) {
 	return id, nil
 }
 
-// WSSend writes a text frame to the connection.
 func (a *App) WSSend(id, message string) error {
 	c := lookupWSConn(id)
 	if c == nil {
@@ -88,8 +82,6 @@ func (a *App) WSSend(id, message string) error {
 	return c.conn.WriteMessage(websocket.TextMessage, []byte(message))
 }
 
-// WSClose sends a close frame and tears the connection down. It is safe to
-// call on an already-closed or unknown connection.
 func (a *App) WSClose(id string) error {
 	c := takeWSConn(id)
 	if c == nil {
@@ -99,12 +91,9 @@ func (a *App) WSClose(id string) error {
 	return nil
 }
 
-// readLoop pumps frames to the frontend until the peer or WSClose ends the
-// connection. Every exit path unregisters the connection and closes the
-// socket, so the goroutine cannot outlive it.
 func (a *App) readLoop(id string, c *wsConn) {
 	for {
-		_, data, err := c.conn.ReadMessage()
+		kind, data, err := c.conn.ReadMessage()
 		if err != nil {
 			takeWSConn(id)
 			if !websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
@@ -113,11 +102,17 @@ func (a *App) readLoop(id string, c *wsConn) {
 			a.shutdown(id, c, "connection closed by peer")
 			return
 		}
-		wailsruntime.EventsEmit(a.ctx, wsMessageEventName, WSMessageEvent{ConnectionId: id, Data: string(data)})
+		wailsruntime.EventsEmit(a.ctx, wsMessageEventName, frameEvent(id, kind, data))
 	}
 }
 
-// shutdown closes the socket once and announces the final state.
+func frameEvent(id string, kind int, data []byte) WSMessageEvent {
+	if kind == websocket.BinaryMessage {
+		return WSMessageEvent{ConnectionId: id, Data: base64.StdEncoding.EncodeToString(data), Binary: true}
+	}
+	return WSMessageEvent{ConnectionId: id, Data: string(data)}
+}
+
 func (a *App) shutdown(id string, c *wsConn, detail string) {
 	c.closeOnce.Do(func() {
 		c.writeMutex.Lock()
@@ -138,7 +133,6 @@ func lookupWSConn(id string) *wsConn {
 	return wsConnections[id]
 }
 
-// takeWSConn removes and returns a connection, or nil if it was already gone.
 func takeWSConn(id string) *wsConn {
 	wsMutex.Lock()
 	defer wsMutex.Unlock()
