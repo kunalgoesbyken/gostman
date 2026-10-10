@@ -1,10 +1,10 @@
 import { memo, useMemo, useState } from "react"
 import { Clock, Search, X } from "lucide-react"
+import { Button, IconButton } from "./ui/button"
 import { EmptyState } from "./ui/emptyState"
+import { MethodTag } from "./MethodTag"
 import { SearchField } from "./SearchField"
 import { useAppStore } from "../store/appStore"
-import { METHOD_COLORS } from "../lib/constants"
-import { cn } from "../lib/utils"
 
 const MINUTE_MS = 60 * 1000
 const HOUR_MS = 60 * MINUTE_MS
@@ -23,31 +23,27 @@ function formatRelativeTime(isoString) {
 
 function HistoryRow({ entry, onOpen, onDelete }) {
   return (
-    <div className="group flex h-7 items-center pr-1 text-xs text-foreground/80 hover:bg-accent/50">
+    <li className="group flex h-7 items-center pr-1.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground">
       <button
         type="button"
         onClick={() => onOpen(entry)}
         title={entry.url}
-        className="flex h-full min-w-0 flex-1 items-center gap-1.5 pl-2 text-left outline-none focus-visible:bg-accent/50"
+        className="flex h-full min-w-0 flex-1 items-center gap-1.5 pl-3 text-left"
       >
-        <span className={cn("w-11 shrink-0 truncate font-mono text-[10px] font-semibold", METHOD_COLORS[entry.method] || "text-muted-foreground")}>
-          {entry.method}
-        </span>
+        <MethodTag method={entry.method} className="w-10" />
         <span className="min-w-0 flex-1 truncate">{entry.url}</span>
-        <span className="shrink-0 pl-1 text-[10px] text-muted-foreground group-focus-within:hidden group-hover:hidden">
+        <span className="shrink-0 pr-1 text-[11px] group-focus-within:hidden group-hover:hidden">
           {formatRelativeTime(entry.timestamp)}
         </span>
       </button>
-      <button
-        type="button"
+      <IconButton
+        label="Remove from history"
+        icon={X}
+        size="icon-xs"
         onClick={() => onDelete(entry.id)}
-        aria-label="Remove from history"
-        title="Remove from history"
-        className="hidden h-5 w-5 shrink-0 items-center justify-center rounded text-muted-foreground outline-none hover:bg-muted-foreground/20 hover:text-foreground focus-visible:bg-muted-foreground/20 group-focus-within:flex group-hover:flex"
-      >
-        <X className="h-3.5 w-3.5" />
-      </button>
-    </div>
+        className="hidden group-focus-within:inline-flex group-hover:inline-flex"
+      />
+    </li>
   )
 }
 
@@ -64,32 +60,30 @@ export const HistoryList = memo(function HistoryList({ entries, actions }) {
   const isSearching = query.trim() !== ""
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <>
       <SearchField value={query} onChange={setQuery} placeholder="Search history" />
 
-      {shown.length === 0 ? (
-        <EmptyState
-          icon={isSearching ? Search : Clock}
-          title={isSearching ? "No results" : "No history yet"}
-          description={isSearching ? "No sent request matches" : "Sent requests appear here"}
-        />
-      ) : (
-        <div className="min-h-0 flex-1 overflow-y-auto scrollbar-compact">
-          {shown.map((entry) => (
-            <HistoryRow key={entry.id} entry={entry} onOpen={actions.openHistoryEntry} onDelete={deleteHistoryItem} />
-          ))}
-        </div>
-      )}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {shown.length === 0 ? (
+          <EmptyState
+            icon={isSearching ? Search : Clock}
+            title={isSearching ? "No results" : "No history yet"}
+            description={isSearching ? "No sent request matches." : "Sent requests appear here."}
+          />
+        ) : (
+          <ul aria-label="History" className="py-1">
+            {shown.map((entry) => (
+              <HistoryRow key={entry.id} entry={entry} onOpen={actions.openHistoryEntry} onDelete={deleteHistoryItem} />
+            ))}
+          </ul>
+        )}
+      </div>
 
       {entries.length > 0 && (
-        <button
-          type="button"
-          onClick={actions.clearHistory}
-          className="border-t border-border/60 px-3 py-2 text-left text-xs text-muted-foreground outline-none hover:text-destructive focus-visible:text-destructive"
-        >
-          Clear history
-        </button>
+        <div className="flex h-10 shrink-0 items-center border-t border-border px-3">
+          <Button variant="ghost" size="sm" onClick={actions.clearHistory}>Clear history</Button>
+        </div>
       )}
-    </div>
+    </>
   )
 })

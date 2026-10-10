@@ -14,6 +14,8 @@ export function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
 }
 
+export const lookup = (table, key) => (Object.hasOwn(table, key) ? table[key] : undefined)
+
 export const pluralize = (count, noun) => `${count} ${noun}${count === 1 ? '' : 's'}`
 
 export function formatSize(bytes) {

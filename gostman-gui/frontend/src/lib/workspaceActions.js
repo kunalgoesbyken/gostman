@@ -1,6 +1,7 @@
 import { textToBase64 } from './base64'
 import { extractVariables, isUsableResponse, parseExtractors } from './chaining'
 import { generateAllSnippets } from './codeGenerator'
+import { sanitizeImport } from './importExport'
 import { pluralize } from './dataUtils'
 import { introspectionRequest, readSchema } from './graphqlSchema'
 import { normalizeRequest } from './request'
@@ -10,10 +11,7 @@ import { createSocketActions, isSocketAddress } from './socketSessions'
 import { selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
 
 const UNRECORDED_ERRORS = ['config', 'cancelled']
-const RESET_PROMPTS = {
-  header: 'Clear all data?',
-  command: 'Clear all data? This cannot be undone.',
-}
+const RESET_PROMPT = "Delete every request, folder, environment and history entry? This can't be undone."
 const EXPORT_TAB = 'export'
 const DESTRUCTIVE = 'destructive'
 
@@ -23,6 +21,7 @@ const activeVariables = () => selectActiveVariables(store())
 const messageOf = (error) => error?.message || String(error)
 const warn = (title, error) => store().showAlert(title, messageOf(error), 'OK', 'warning')
 const quoted = (name) => `"${name}"`
+const idsOf = (items) => items.map((item) => item.id)
 
 const attempt = (failureTitle, run) => async (...args) => {
   try {
@@ -120,10 +119,10 @@ export function createWorkspaceActions(backend) {
   })
 
   const removeFolder = attempt('Could not delete the folder', async (folder) => {
-    const contained = store().requests.filter((request) => request.folderId === folder.id)
-    for (const request of contained) {
-      await backend.saveRequest({ ...request, folderId: folder.parentId || '' })
-    }
+    const moved = store().requests
+      .filter((request) => request.folderId === folder.id)
+      .map((request) => ({ ...request, folderId: folder.parentId || '' }))
+    if (moved.length > 0) await backend.saveRequests(moved)
     store().deleteFolder(folder.id)
   })
 
@@ -139,28 +138,18 @@ export function createWorkspaceActions(backend) {
     store().updateTabRequest(tab.id, { ...normalizeRequest(parsed), id, name, folderId, extractors })
   })
 
-  async function saveImportedRequests(requests) {
-    const saved = []
-    try {
-      for (const request of requests) {
-        saved.push(await backend.saveRequest(normalizeRequest(request)))
-      }
-    } finally {
-      store().upsertRequests(saved)
-    }
-  }
-
-  const importData = attempt('Import failed', async (data) => {
-    const requests = data.requests || []
-    const folders = data.folders || []
-    await saveImportedRequests(requests)
+  const importData = attempt('Import failed', async (imported) => {
+    const existing = { requestIds: idsOf(store().requests), folderIds: idsOf(store().folders) }
+    const data = sanitizeImport(imported, existing)
+    const { requests, folders } = data
+    if (requests.length > 0) store().upsertRequests(await backend.saveRequests(requests))
     store().mergeFolders(folders)
     const skippedEnvironments = store().mergeEnvironments(data.environments)
     const variablesMerged = store().mergeActiveVariables(data.variables)
     const notes = [
       ...(variablesMerged ? [] : ['Variables were skipped because the active environment is not valid JSON.']),
       ...skippedEnvironments.map((name) => `Environment ${quoted(name)} was skipped because its variables are not valid JSON.`),
-      ...(data.warnings || []),
+      ...data.warnings,
     ]
     const summary = `Imported ${pluralize(requests.length, 'request')} and ${pluralize(folders.length, 'folder')}.`
     store().showAlert('Import complete', [summary, ...notes].join('\n'), 'OK', notes.length > 0 ? 'warning' : 'success')
@@ -176,30 +165,31 @@ export function createWorkspaceActions(backend) {
   ))
 
   const resetAll = attempt('Reset failed', async () => {
+    store().suspendPersistence()
     await backend.reset()
     useAppStore.persist.clearStorage()
     window.location.reload()
   })
 
-  const confirmReset = (message) => store().showConfirm('Reset App', message, resetAll, null, DESTRUCTIVE, 'Reset')
+  const confirmReset = () => store().showConfirm('Reset app', RESET_PROMPT, resetAll, null, DESTRUCTIVE, 'Reset')
 
   function createFolder(parentId = '') {
-    const title = parentId ? 'New Subfolder' : 'New Folder'
-    promptForName(title, 'Folder name:', '', (name) => store().addFolder(name, parentId))
+    const title = parentId ? 'New subfolder' : 'New folder'
+    promptForName(title, 'Folder name', '', (name) => store().addFolder(name, parentId))
   }
 
   function renameFolder(folder) {
-    promptForName('Rename Folder', 'Folder name:', folder.name, (name) => store().renameFolder(folder.id, name))
+    promptForName('Rename folder', 'Folder name', folder.name, (name) => store().renameFolder(folder.id, name))
   }
 
   function renameRequest(request) {
     const rename = attempt('Could not rename the request', (name) => updateSavedRequest(request, { name }))
-    promptForName('Rename Request', 'Request name:', request.name, rename)
+    promptForName('Rename request', 'Request name', request.name, rename)
   }
 
   function deleteRequest(request) {
     store().showConfirm(
-      'Delete Request',
+      'Delete request',
       `Delete ${quoted(request.name)}? This can't be undone.`,
       () => removeRequest(request.id),
       null,
@@ -209,7 +199,7 @@ export function createWorkspaceActions(backend) {
 
   function deleteFolder(folder) {
     store().showConfirm(
-      'Delete Folder',
+      'Delete folder',
       `Delete folder ${quoted(folder.name)}? ${describeFolderContents(folder)}`,
       () => removeFolder(folder),
       null,
@@ -222,7 +212,7 @@ export function createWorkspaceActions(backend) {
     if (entryCount === 0) return
     const subject = entryCount === 1 ? 'the only history entry' : `all ${entryCount} history entries`
     store().showConfirm(
-      'Clear History',
+      'Clear history',
       `Delete ${subject}? This can't be undone.`,
       () => store().clearHistory(),
       null,
@@ -245,7 +235,7 @@ export function createWorkspaceActions(backend) {
       return
     }
     store().showConfirm(
-      'Close Tab',
+      'Close tab',
       `${quoted(tab.request.name)} has unsaved changes. Close it and discard them?`,
       close,
       null,
@@ -266,7 +256,7 @@ export function createWorkspaceActions(backend) {
     switchEnvironment: (environmentId) => store().setActiveEnvironment(environmentId),
     export: () => store().openImportDialog(EXPORT_TAB),
     import: () => store().openImportDialog(),
-    reset: () => confirmReset(RESET_PROMPTS.command),
+    reset: confirmReset,
   }
 
   return {
@@ -290,7 +280,7 @@ export function createWorkspaceActions(backend) {
     clearHistory,
     closeTab,
     cancel: () => cancelTab(activeTab()),
-    reset: () => confirmReset(RESET_PROMPTS.header),
+    reset: confirmReset,
     openImport: () => store().openImportDialog(),
     runCommand: (action, payload) => commands[action]?.(payload),
     newRequest: (folderId) => store().newTab(folderId),

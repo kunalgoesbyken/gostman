@@ -1,161 +1,142 @@
-# Gostman
-
 <div align="center">
-  <img src="gostman-gui/frontend/src/assets/logo.jpg" alt="Gostman Logo" width="120" height="120" style="border-radius: 20px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);">
-  
-  <h1 style="margin-top: 20px;">Modern API Client for GraphQL, REST & WebSocket</h1>
-  
-  <p style="font-size: 1.2em; color: #666;">
-    Native, Privacy-First, and 10x Lighter than Postman.
-  </p>
+  <img src="gostman-gui/build/appicon.png" alt="Gostman" width="96" height="96">
+  <h1>Gostman</h1>
+  <p>An API client for REST, GraphQL and WebSocket. Desktop app and web app, no account.</p>
 
-  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-  ![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?logo=go&logoColor=white)
-  ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
+  [![CI](https://github.com/kunalgoesbyken/gostman/actions/workflows/ci.yml/badge.svg)](https://github.com/kunalgoesbyken/gostman/actions/workflows/ci.yml)
+  [![Release](https://img.shields.io/github/v/release/kunalgoesbyken/gostman)](https://github.com/kunalgoesbyken/gostman/releases/latest)
+  [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 </div>
 
-<br>
+![Gostman sending a request](screenshots/app.png)
 
-![Gostman Landing Page](screenshots/landing_page.png)
+| | |
+| --- | --- |
+| ![Multipart body with auth](screenshots/request-body.png) | ![GraphQL query with the schema browser](screenshots/graphql.png) |
+| ![Image response preview](screenshots/response-image.png) | ![Generated code](screenshots/code.png) |
 
-## Overview
-
-Gostman is a modern, cross-platform API client built with **Wails** (Go + React). It combines the performance of a native Go backend with the beautiful, reactive UI of modern web technologies. Designed for developers who value speed, privacy, and simplicity without compromising on power.
+Gostman is a native desktop application built with Go and [Wails](https://wails.io), with the same interface available in the browser at [gostman.vercel.app](https://gostman.vercel.app). Requests, collections and environments are stored on your machine. There is nothing to sign in to.
 
 ## Features
 
-- 🚀 **Multi-Protocol Support**: Native support for **REST**, **GraphQL**, and **WebSockets**.
-- ⛓️ **Request Chaining**: Use response data as variables in subsequent requests for complex workflows.
-- 📤 **Response Extraction**: Pull values out of a response with JSONPath (or dot notation) straight into your variables.
-- ⚡ **Lightning Fast**: Built with Go for instant startup and blazing-fast response times.
-- 🎨 **Beautiful UI**: Modern glassmorphic design with smooth animations and dark mode.
-- 🔄 **Import/Export**: Effortlessly migrate with support for **Postman collections** and OpenAPI specs.
-- 🔒 **Local & Private**: All data stays on your machine. No cloud sync, no tracking, no accounts.
-- 📂 **Collections & Variables**: Organize requests in folders and define one set of `{{variables}}` shared across them.
-- ⌨️ **Power User UX**: Native keyboard shortcuts and intuitive workflow.
+**Requests**
 
-## Installation
+- REST with any method, GraphQL, and WebSocket
+- Query parameters and headers as rows you can switch on and off
+- Bodies: JSON, text, XML, form URL-encoded, multipart with file uploads, or a single file
+- Auth helpers: Basic, Bearer token, API key (header or query)
+- Per-request timeout, redirect and TLS verification settings
+- Paste a `curl` command into the URL bar to turn it into a request
 
-### Download Pre-built Binaries
+**Responses**
 
-Visit the [Releases](https://github.com/krockxz/gostman/releases) page to download the latest version:
+- JSON tree and raw views, HTML preview, inline images and PDFs
+- Headers, cookies, status, size and timing
+- Download any response body, including binary ones
+- Cancel a request in flight
 
-| OS | Format | Download |
-|----|--------|----------|
-| **macOS** | `.zip` | [Universal Binary (Intel + Apple Silicon)](https://github.com/krockxz/gostman/releases/latest/download/Gostman-darwin-universal.zip) |
-| **Windows**| `.exe` | [64-bit Installer](https://github.com/krockxz/gostman/releases/latest/download/Gostman-windows-amd64.exe) |
+**Workflow**
 
+- Collections with nested folders, tabs, history and search
+- Environments with `{{variable}}` substitution in URLs, headers, bodies and auth
+- Extraction rules that copy values from a response (JSON path, header, cookie or status code) into variables after every send, for chaining requests
+- GraphQL schema introspection, query formatting and validation
+- Code generation for curl, JavaScript, Python, Go, PHP and Java
+- Import from Postman v2.1 and OpenAPI; export to Postman, OpenAPI, Markdown or a Gostman backup
 
-### Build from Source
+## Install
 
-**Prerequisites:**
-- Go 1.23+ for the desktop app (`gostman-gui/go.mod`); Go 1.24.5+ if you also build the web proxy, which the root and `api/` modules require
-- Node.js 20+
-- [Wails CLI](https://wails.io/docs/gettingstarted/installation)
+Download the latest build from the [releases page](https://github.com/kunalgoesbyken/gostman/releases/latest).
 
-```bash
-# 1. Install Wails
-go install github.com/wailsapp/wails/v2/cmd/wails@latest
+| Platform | File | Notes |
+| --- | --- | --- |
+| Windows | [`Gostman-windows-amd64.exe`](https://github.com/kunalgoesbyken/gostman/releases/latest/download/Gostman-windows-amd64.exe) | Installer. Adds Start menu and desktop shortcuts and an uninstaller. |
+| Windows | [`Gostman-windows-amd64-portable.exe`](https://github.com/kunalgoesbyken/gostman/releases/latest/download/Gostman-windows-amd64-portable.exe) | Single executable, no installation. |
+| macOS | [`Gostman-darwin-universal.dmg`](https://github.com/kunalgoesbyken/gostman/releases/latest/download/Gostman-darwin-universal.dmg) | Intel and Apple Silicon. Drag Gostman to Applications. |
+| Linux | [`Gostman-linux-amd64.deb`](https://github.com/kunalgoesbyken/gostman/releases/latest/download/Gostman-linux-amd64.deb) | Debian and Ubuntu. `sudo apt install ./Gostman-linux-amd64.deb` |
+| Linux | [`Gostman-linux-amd64.tar.gz`](https://github.com/kunalgoesbyken/gostman/releases/latest/download/Gostman-linux-amd64.tar.gz) | Other distributions. `sudo tar -xzf Gostman-linux-amd64.tar.gz -C /` Requires GTK 3 and WebKitGTK 4.1. |
 
-# 2. Clone the repository
-git clone https://github.com/krockxz/gostman.git
-cd gostman/gostman-gui
+The builds are not code-signed yet, so the operating system asks for confirmation the first time:
 
-# 3. Build the application
-wails build
-```
+- **Windows**: SmartScreen shows "Windows protected your PC". Choose **More info**, then **Run anyway**.
+- **macOS**: right-click Gostman in Applications and choose **Open**, then confirm.
 
-Run the binary from `build/bin/`.
+Windows needs the WebView2 runtime, which ships with Windows 10 and 11; the installer fetches it when it is missing.
 
-## Why Gostman?
+## Web version
 
-| Feature | Gostman | Postman | Insomnia |
-|---------|---------|---------|----------|
-| **Launch Speed** | < 1s | 10-20s | 5-10s |
-| **Privacy** | 🔒 100% Local | ☁️ Cloud Sync | ☁️ Cloud Sync |
-| **Memory Usage**| ~100MB | ~1GB+ | ~500MB+ |
-| **GraphQL/WS** | ✅ Built in | ✅ Native | ✅ Native |
-| **Data Ownership**| You own it | Vendor lock-in | Vendor lock-in |
+[gostman.vercel.app](https://gostman.vercel.app) runs the same interface in the browser. Browsers cannot call arbitrary APIs directly, so requests are relayed through a small proxy. Two consequences:
 
-## Technical Details
+- The hosted proxy cannot reach `localhost` or private network addresses. Use the desktop app for local APIs.
+- Responses larger than 3 MB are truncated. The desktop app reads up to 50 MB.
 
-### Multi-Protocol Power
-Gostman isn't just for REST. **GraphQL** requests get query validation, formatting, and automatic
-operation-name/variable detection (via the `graphql` + `graphql-request` libraries), and **WebSocket** URLs
-open a live connection panel with message history, JSON pretty-printing, and optional auto-reconnect — all
-within the same interface.
+Data in the web version is kept in the browser's local storage.
 
-> WebSocket connections use the browser's native `WebSocket` API, which cannot send custom request headers.
-> Only `Sec-WebSocket-Protocol` is honoured, and it is passed as a subprotocol. Schema introspection is not
-> yet surfaced in the GraphQL editor, so there is no schema-driven autocomplete.
+## Variables
 
-### Response Extraction & Chaining
-The **Extract** tab turns a response into variables. Add extraction rules that name a variable and point at a
-value using a JSONPath expression (`$.data.token`), plain dot notation (`data.user.id`), a response header
-(`header.Location`), or `statusCode`. Matches are previewed live against the last response; hitting
-**Extract Variables** merges them into your variables, where `{{placeholders}}` in later requests pick them up.
-
-| Variable | Path | Result |
-|----------|------|--------|
-| `auth_token` | `$.data.token` | the token from the login response |
-| `user_id` | `data.user.id` | nested id via dot notation |
-| `created_at` | `header.Location` | a response header |
-
-The panel also renders a read-only, Postman-compatible script preview of your rules
-(`pm.environment.set("auth_token", pm.response.json().data.token);`) so the same chaining can be pasted into
-Postman. Note that Gostman does not execute those scripts — there is no assertion/test runtime yet, so
-scripted assertions are not available.
-
-### Zero-Friction Migration
-Don't get stuck. Import your existing **Postman Collections** (v2.1) and OpenAPI specs instantly. Export your Gostman collections anytime as OpenAPI (JSON or YAML), Postman v2.1, Markdown, or a Gostman backup.
+Define variables per environment as a JSON object and reference them anywhere with `{{name}}`. See [docs/variables.md](docs/variables.md).
 
 ## Development
 
-### Live Development (Hot Reload)
+Requirements: Go 1.24.5 or newer, Node.js 20 or newer, and the [Wails CLI](https://wails.io/docs/gettingstarted/installation) v2.11.
 
-Run the application in development mode. This starts both the Go backend and the Vite frontend server.
+```bash
+git clone https://github.com/kunalgoesbyken/gostman.git
+cd gostman
+```
+
+Desktop app with hot reload:
 
 ```bash
 cd gostman-gui
 wails dev
 ```
 
-### Web Version
+Web app (two terminals):
 
-Gostman also runs as a pure web application (with some limitations like CORS, handled via proxy in production).
+```bash
+go run ./cmd/local            # request proxy on :8787, from the repository root
+```
 
 ```bash
 cd gostman-gui/frontend
-npm run dev:web
+npm install
+npm run dev:web               # http://localhost:3000
 ```
 
-## Project Structure
+Production builds:
 
 ```bash
-gostman/
-├── gostman-gui/     # Desktop application (Wails v2)
-│   ├── main.go      # Application entry point
-│   ├── app.go       # Wails app context and backend methods
-│   ├── wails.json   # Wails project configuration
-│   ├── frontend/    # React frontend (Vite), shared by desktop and web
-│   │   ├── src/
-│   │   │   ├── App.jsx       # Desktop app component
-│   │   │   ├── WebApp.jsx    # Web app component (with landing page)
-│   │   │   ├── components/   # UI Components
-│   │   │   ├── store/        # Zustand state
-│   │   │   └── lib/          # Utilities (API, Storage, etc.)
-│   └── build/       # Build output
-├── api/             # Vercel Go serverless functions (proxy.go = CORS proxy)
-├── cmd/local/       # Local HTTP server exposing /api/proxy for `npm run dev:web`
-├── docs/            # Additional documentation
-├── vercel.json      # Vercel deployment config
-└── README.md        # Project Documentation
+cd gostman-gui && wails build                 # desktop binary in build/bin
+cd gostman-gui/frontend && npm run build:web  # static site in dist-web
 ```
+
+Checks run by CI:
+
+```bash
+go build ./... && go vet ./...                           # repository root
+cd gostman-gui && go build ./... && go vet ./...
+cd gostman-gui/frontend && npm run build && npm run build:web
+```
+
+### Layout
+
+| Path | Contents |
+| --- | --- |
+| `engine/` | Go package that prepares and sends requests. Shared by the desktop app and the web proxy, so both behave the same. |
+| `gostman-gui/` | Wails desktop application: `app.go` (bindings and storage), `websocket.go`, packaging assets in `build/`. |
+| `gostman-gui/frontend/` | React interface used by both targets. `src/App.jsx` is the desktop entry, `src/WebApp.jsx` the web entry. |
+| `api/` | Vercel serverless functions. `proxy.go` exposes the engine to the web app. |
+| `cmd/local/` | The same proxy as a local server for development. |
+
+### Releasing
+
+Releases are automatic. Change `info.productVersion` in `gostman-gui/wails.json` and push to `main`. If no release exists for that version, the workflow builds the installers on Windows, macOS and Linux and publishes them as `v<version>`.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit issues or pull requests.
+Issues and pull requests are welcome. For anything larger than a small fix, please open an issue first to agree on the approach.
 
 ## License
 
-This project is licensed under the MIT License.
+[MIT](LICENSE)

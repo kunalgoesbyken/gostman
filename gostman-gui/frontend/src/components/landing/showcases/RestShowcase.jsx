@@ -76,7 +76,7 @@ export const RestShowcase = () => {
             {REQUEST.method}
           </motion.div>
           <motion.div
-            className="flex-1 bg-background rounded-md px-4 py-2 font-mono text-sm text-muted-foreground flex items-center"
+            className="min-w-0 flex-1 bg-background rounded-md px-4 py-2 font-mono text-sm text-muted-foreground flex items-center"
             initial={{ width: 0 }}
             animate={{ width: "auto" }}
             transition={{ delay: 0.15 }}
@@ -84,7 +84,7 @@ export const RestShowcase = () => {
             <span className="truncate">{REQUEST.url}</span>
           </motion.div>
           <motion.button
-            className={`px-6 py-2 rounded-md font-semibold text-sm flex items-center gap-2 ${isSending
+            className={`shrink-0 px-3 sm:px-6 py-2 rounded-md font-semibold text-sm flex items-center gap-2 ${isSending
               ? "bg-muted text-muted-foreground"
               : "bg-primary text-primary-foreground"
               }`}
@@ -94,7 +94,7 @@ export const RestShowcase = () => {
             {isSending ? (
               <>
                 <Spinner className="w-4 h-4" />
-                Sending...
+                Sending
               </>
             ) : (
               <>

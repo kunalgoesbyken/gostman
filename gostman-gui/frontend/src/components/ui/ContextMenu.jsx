@@ -1,10 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
+import { SectionLabel } from "./panel"
 import { cn } from "../../lib/utils"
 
 const VIEWPORT_MARGIN = 8
 const INDENT_STEP_PX = 12
-const BASE_PADDING_PX = 10
+const BASE_PADDING_PX = 12
 const MAX_INDENT_LEVELS = 8
 
 const FOCUS_STEPS = { ArrowDown: 1, ArrowUp: -1 }
@@ -25,10 +26,10 @@ function MenuItem({ item, onClose }) {
       role="menuitem"
       disabled={item.disabled}
       onClick={handleClick}
+      title={item.label}
       style={{ paddingLeft: BASE_PADDING_PX + Math.min(item.indent || 0, MAX_INDENT_LEVELS) * INDENT_STEP_PX }}
       className={cn(
-        "flex w-full items-center gap-2 py-1.5 pr-3 text-left text-xs outline-none",
-        "hover:bg-accent/60 focus-visible:bg-accent/60 disabled:pointer-events-none disabled:opacity-40",
+        "flex h-7 w-full items-center gap-2 pr-3 text-left text-xs hover:bg-accent disabled:pointer-events-none disabled:opacity-40",
         item.destructive && "text-destructive"
       )}
     >
@@ -82,13 +83,9 @@ export function ContextMenu({ position, title, items, onClose }) {
       role="menu"
       onKeyDown={handleKeyDown}
       style={placement || { left: 0, top: 0, visibility: "hidden" }}
-      className="fixed z-50 max-h-72 w-52 overflow-y-auto rounded-md border border-border bg-background py-1 shadow-md scrollbar-compact"
+      className="fixed z-50 max-h-72 w-56 overflow-y-auto rounded-md border border-border bg-background py-1 shadow-lg"
     >
-      {title && (
-        <div className="truncate px-2.5 pb-1 pt-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          {title}
-        </div>
-      )}
+      {title && <SectionLabel className="block truncate px-3 py-1" title={title}>{title}</SectionLabel>}
       {items.map((item) => <MenuItem key={item.id} item={item} onClose={onClose} />)}
     </div>,
     document.body

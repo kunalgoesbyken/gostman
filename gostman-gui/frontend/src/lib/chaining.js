@@ -3,9 +3,9 @@ import { isPlainObject, parseJSON } from './dataUtils'
 import { findHeader, textBody } from './response'
 import { isVariableName } from './validation'
 
-export const SOURCE_BODY = 'body'
-export const SOURCE_HEADER = 'header'
-export const SOURCE_COOKIE = 'cookie'
+const SOURCE_BODY = 'body'
+const SOURCE_HEADER = 'header'
+const SOURCE_COOKIE = 'cookie'
 export const SOURCE_STATUS = 'status'
 
 export const EXTRACTOR_SOURCES = [

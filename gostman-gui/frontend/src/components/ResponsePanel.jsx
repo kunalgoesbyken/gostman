@@ -1,63 +1,65 @@
 import { memo, useState, useMemo, useEffect, useRef, useCallback } from 'react'
-import { JsonView } from 'react-json-view-lite'
+import { JsonView, darkStyles } from 'react-json-view-lite'
 import 'react-json-view-lite/dist/index.css'
 import {
-  AlertTriangle, Braces, Check, ChevronDown, ChevronUp, Code, Cookie, Copy, Download, Eye,
-  FileDigit, FileText, FileX, List, Loader2, Maximize2, Minimize2, Minus, Scissors,
+  AlertTriangle, Check, ChevronDown, ChevronUp, Cookie, Copy, Download, FileDigit, FileText, FileX, List, Loader2,
+  Maximize2, Minimize2, Scissors,
 } from "lucide-react"
 import { Badge } from "./ui/badge"
+import { IconButton } from "./ui/button"
 import { DataTable } from "./ui/dataTable"
 import { EmptyState } from "./ui/emptyState"
-import { formatSize } from "../lib/dataUtils"
+import { Notice, SectionLabel, Toolbar } from "./ui/panel"
+import { SegmentedControl } from "./ui/segmented"
+import { TabCount, Tabs, TabsList, TabsTrigger } from "./ui/tabs"
+import { useClipboardCopy } from "../hooks/useClipboardCopy"
+import { formatSize, lookup } from "../lib/dataUtils"
+import { MIN_REQUEST_HEIGHT_PX, MIN_RESPONSE_HEIGHT_PX, TOOLBAR_HEIGHT_PX } from "../lib/layout"
 import {
   BODY_KINDS, ERROR_TITLES, bodyBytes, bodyKind, mimeType, parseJsonBody, statusVariant, textBody,
 } from "../lib/response"
 
-const DEFAULT_PANEL_HEIGHT = 40
-const MIN_PANEL_HEIGHT = 15
-const MAX_PANEL_HEIGHT = 85
-const COLLAPSED_HEIGHT = 48
-const COPIED_NOTICE_MS = 2000
+const DEFAULT_PANEL_SHARE = 40
 const TEXT_DISPLAY_LIMIT = 500_000
 const JSON_EXPANDED_DEPTH = 2
+const TAB_BODY = 'body'
+const TAB_HEADERS = 'headers'
+const TAB_COOKIES = 'cookies'
+const NO_VALUE = '—'
 
-const TABS = [
-  { id: 'body', label: 'Body', icon: Code },
-  { id: 'headers', label: 'Headers', icon: List },
-  { id: 'cookies', label: 'Cookies', icon: Cookie },
-]
-
-const VIEWS = {
-  pretty: { label: 'Pretty', icon: Braces },
-  raw: { label: 'Raw', icon: FileText },
-  preview: { label: 'Preview', icon: Eye },
-}
+const VIEW_LABELS = { pretty: 'Pretty', raw: 'Raw', preview: 'Preview' }
 
 const MEDIA_KINDS = [BODY_KINDS.IMAGE, BODY_KINDS.PDF, BODY_KINDS.AUDIO, BODY_KINDS.VIDEO]
 
-const ICON_BUTTON_CLASS = "rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+const JSON_STYLE = {
+  ...darkStyles,
+  container: 'font-mono text-xs leading-relaxed whitespace-pre-wrap',
+  label: 'mr-1.5 text-syntax-key',
+  clickableLabel: 'mr-1.5 cursor-pointer text-syntax-key',
+  stringValue: 'text-syntax-string',
+  numberValue: 'text-syntax-number',
+  booleanValue: 'text-syntax-boolean',
+  nullValue: 'text-syntax-null',
+  undefinedValue: 'text-syntax-null',
+  otherValue: 'text-foreground',
+  punctuation: 'mr-1.5 text-muted-foreground',
+}
+
+const flagText = (isSet) => (isSet ? 'Yes' : NO_VALUE)
 
 const HEADER_COLUMNS = [
-  { header: 'Name', key: 'key', width: 'w-2/5', cellClassName: 'font-medium text-primary/80 align-top whitespace-nowrap' },
-  { header: 'Value', key: 'value', cellClassName: 'break-all' },
+  { header: 'Name', key: 'key', width: 'w-1/3', cellClassName: 'text-foreground' },
+  { header: 'Value', key: 'value' },
 ]
 
-const flagCell = (isSet) => (
-  <div className="flex justify-center">
-    {isSet
-      ? <Check className="h-3.5 w-3.5 text-success" strokeWidth={2.5} />
-      : <Minus className="h-3.5 w-3.5 text-muted-foreground/30" strokeWidth={2} />}
-  </div>
-)
-
 const COOKIE_COLUMNS = [
-  { header: 'Name', key: 'name', cellClassName: 'font-medium text-primary/80 whitespace-nowrap', nowrap: true },
-  { header: 'Value', render: (cookie) => <span className="max-w-[180px] truncate" title={cookie.value}>{cookie.value || '—'}</span> },
-  { header: 'Domain', cellClassName: 'whitespace-nowrap', render: (cookie) => cookie.domain || '—' },
-  { header: 'Path', cellClassName: 'whitespace-nowrap', render: (cookie) => cookie.path || '/' },
-  { header: 'Expires', cellClassName: 'whitespace-nowrap', render: (cookie) => cookie.expires || 'Session' },
-  { header: 'Secure', render: (cookie) => flagCell(cookie.secure) },
-  { header: 'HttpOnly', render: (cookie) => flagCell(cookie.httpOnly) },
+  { header: 'Name', key: 'name', cellClassName: 'text-foreground' },
+  { header: 'Value', text: (cookie) => cookie.value || NO_VALUE },
+  { header: 'Domain', text: (cookie) => cookie.domain || NO_VALUE },
+  { header: 'Path', width: 'w-16', text: (cookie) => cookie.path || '/' },
+  { header: 'Expires', text: (cookie) => cookie.expires || 'Session' },
+  { header: 'Secure', width: 'w-20', text: (cookie) => flagText(cookie.secure) },
+  { header: 'HttpOnly', width: 'w-24', text: (cookie) => flagText(cookie.httpOnly) },
 ]
 
 function viewsFor(kind, isText, isJson) {
@@ -88,80 +90,8 @@ function useObjectUrl(response) {
 }
 
 function CopyButton({ text }) {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(text)
-    } catch {
-      return
-    }
-    setCopied(true)
-    setTimeout(() => setCopied(false), COPIED_NOTICE_MS)
-  }, [text])
-
-  return (
-    <button onClick={handleCopy} className={ICON_BUTTON_CLASS} title={copied ? "Copied" : "Copy body"}>
-      {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
-    </button>
-  )
-}
-
-function TabButton({ id, label, icon: Icon, count, active, onClick }) {
-  return (
-    <button
-      onClick={() => onClick(id)}
-      className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
-        active ? 'bg-background text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
-      }`}
-    >
-      <Icon className="h-3.5 w-3.5" />
-      {label}
-      {count > 0 && (
-        <span className={`rounded-full px-1.5 text-[10px] font-semibold ${active ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'}`}>
-          {count}
-        </span>
-      )}
-    </button>
-  )
-}
-
-function ViewButton({ view, active, onClick }) {
-  const { label, icon: Icon } = VIEWS[view]
-  return (
-    <button
-      onClick={() => onClick(view)}
-      className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-        active ? 'bg-background text-foreground' : 'text-muted-foreground hover:text-foreground'
-      }`}
-    >
-      <Icon className="h-3.5 w-3.5" />
-      {label}
-    </button>
-  )
-}
-
-function ResizableDivider({ onDrag, isDragging, onDoubleClick }) {
-  return (
-    <div
-      className={`group relative h-1.5 cursor-row-resize transition-colors hover:bg-primary/20 ${isDragging ? 'bg-primary/30' : 'bg-transparent'}`}
-      onMouseDown={onDrag}
-      onDoubleClick={onDoubleClick}
-    >
-      <div className={`absolute inset-0 flex items-center justify-center transition-opacity ${isDragging ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-        <div className={`h-1 w-16 rounded-full ${isDragging ? 'bg-primary' : 'bg-border'}`} />
-      </div>
-    </div>
-  )
-}
-
-function Notice({ icon: Icon, children }) {
-  return (
-    <div className="flex items-center gap-2 border-b border-warning/20 bg-warning/10 px-4 py-2 text-xs text-warning">
-      <Icon className="h-3.5 w-3.5 shrink-0" />
-      <span>{children}</span>
-    </div>
-  )
+  const { copied, copy } = useClipboardCopy(text)
+  return <IconButton label={copied ? "Copied" : "Copy body"} icon={copied ? Check : Copy} onClick={copy} />
 }
 
 function TextBody({ text }) {
@@ -169,11 +99,11 @@ function TextBody({ text }) {
   return (
     <>
       {shown.length < text.length && (
-        <Notice icon={Scissors}>
+        <Notice tone="warning" icon={Scissors}>
           Showing the first {formatSize(TEXT_DISPLAY_LIMIT)} of this body. Download it to see everything.
         </Notice>
       )}
-      <pre className="whitespace-pre-wrap break-words p-5 font-mono text-xs leading-relaxed text-foreground/90">{shown}</pre>
+      <pre className="whitespace-pre-wrap p-3 font-mono text-xs leading-relaxed text-foreground">{shown}</pre>
     </>
   )
 }
@@ -190,13 +120,13 @@ function BinaryBody({ response }) {
 
 function MediaElement({ kind, url, onError }) {
   if (kind === BODY_KINDS.IMAGE) {
-    return <img src={url} alt="Response body" onError={onError} className="h-auto max-w-full rounded-md border border-border/50" />
+    return <img src={url} alt="Response body" onError={onError} className="max-h-full max-w-full rounded border border-border object-contain" />
   }
   if (kind === BODY_KINDS.AUDIO) {
     return <audio src={url} controls onError={onError} className="w-full max-w-xl" />
   }
   if (kind === BODY_KINDS.VIDEO) {
-    return <video src={url} controls onError={onError} className="max-h-full max-w-full rounded-md" />
+    return <video src={url} controls onError={onError} className="max-h-full max-w-full rounded" />
   }
   return <embed src={url} type="application/pdf" className="h-full w-full" />
 }
@@ -209,9 +139,8 @@ function MediaPreview({ response, kind }) {
   if (failed) return <BinaryBody response={response} />
   if (!url) return null
 
-  const isDocument = kind === BODY_KINDS.PDF
   return (
-    <div className={isDocument ? "h-full" : "flex min-h-full items-center justify-center p-8"}>
+    <div className={kind === BODY_KINDS.PDF ? "h-full" : "flex h-full items-center justify-center p-3"}>
       <MediaElement kind={kind} url={url} onError={handleError} />
     </div>
   )
@@ -230,59 +159,56 @@ function ResponseBody({ response, kind, view, json }) {
   if (kind === BODY_KINDS.BINARY) return <BinaryBody response={response} />
   if (view === 'pretty') {
     return (
-      <div className="json-tree-wrapper p-5 font-mono text-sm">
-        <JsonView data={json} shouldExpandNode={(level) => level < JSON_EXPANDED_DEPTH} />
+      <div className="p-3">
+        <JsonView data={json} shouldExpandNode={(level) => level < JSON_EXPANDED_DEPTH} style={JSON_STYLE} />
       </div>
     )
   }
   if (view === 'raw') return <TextBody text={response.body} />
   if (kind === BODY_KINDS.HTML) {
-    return <iframe srcDoc={response.body} title="Response preview" className="h-full w-full border-none bg-white" sandbox="" />
+    return <iframe srcDoc={response.body} title="Response preview" className="block h-full w-full border-none bg-white" sandbox="" />
   }
   return <MediaPreview response={response} kind={kind} />
 }
 
 function ErrorBody({ response }) {
-  const tone = response.error === 'cancelled' ? 'text-muted-foreground' : 'text-destructive'
-  return (
-    <div className="flex items-start gap-3 p-6">
-      <AlertTriangle className={`mt-0.5 h-5 w-5 shrink-0 ${tone}`} strokeWidth={2} />
-      <div className="min-w-0 flex-1">
-        <h3 className="text-sm font-semibold text-foreground">{ERROR_TITLES[response.error] || 'Request failed'}</h3>
-        <p className="mt-1 whitespace-pre-wrap break-words text-sm text-muted-foreground">{response.body}</p>
-      </div>
-    </div>
-  )
+  const title = lookup(ERROR_TITLES, response.error) || 'Request failed'
+  return <EmptyState icon={AlertTriangle} title={title} description={response.body} />
 }
 
 function StatusSummary({ response }) {
   if (response.error) {
-    return <Badge variant="outline" className="px-2 text-[11px] font-semibold">{ERROR_TITLES[response.error] || 'Error'}</Badge>
+    return <Badge variant="outline">{lookup(ERROR_TITLES, response.error) || 'Error'}</Badge>
   }
+  const timing = `${response.durationMs} ms · ${formatSize(response.size)}`
   return (
     <>
-      <Badge variant={statusVariant(response.statusCode)} className="px-2 font-mono text-[11px] font-semibold">{response.status}</Badge>
-      <span className="font-mono text-[11px] text-muted-foreground/70">{formatSize(response.size)}</span>
-      <span className="font-mono text-[11px] text-muted-foreground/70">{response.durationMs} ms</span>
+      <Badge variant={statusVariant(response.statusCode)} title={response.status} className="max-w-[9rem] font-mono">
+        <span className="truncate">{response.status}</span>
+      </Badge>
+      <span title={timing} className="min-w-0 truncate font-mono text-[11px] text-muted-foreground">{timing}</span>
     </>
   )
 }
 
+const clamp = (value, lowest, highest) => Math.max(lowest, Math.min(highest, value))
+
 function usePanelResize() {
-  const [panelHeight, setPanelHeight] = useState(DEFAULT_PANEL_HEIGHT)
+  const [panelShare, setPanelShare] = useState(DEFAULT_PANEL_SHARE)
   const [isDragging, setIsDragging] = useState(false)
   const containerRef = useRef(null)
 
   const startDrag = useCallback((event) => {
+    event.preventDefault()
+    const available = containerRef.current.parentElement.getBoundingClientRect().height
     const startY = event.clientY
-    const startHeight = panelHeight
+    const startHeight = containerRef.current.getBoundingClientRect().height
+    const highest = Math.max(MIN_RESPONSE_HEIGHT_PX, available - MIN_REQUEST_HEIGHT_PX)
     setIsDragging(true)
 
     const handleMouseMove = (moveEvent) => {
-      if (!containerRef.current) return
-      const available = containerRef.current.parentElement.getBoundingClientRect().height
-      const deltaPercent = ((startY - moveEvent.clientY) / available) * 100
-      setPanelHeight(Math.max(MIN_PANEL_HEIGHT, Math.min(MAX_PANEL_HEIGHT, startHeight + deltaPercent)))
+      const height = clamp(startHeight + startY - moveEvent.clientY, MIN_RESPONSE_HEIGHT_PX, highest)
+      setPanelShare((height / available) * 100)
     }
 
     const handleMouseUp = () => {
@@ -293,25 +219,25 @@ function usePanelResize() {
 
     document.addEventListener('mousemove', handleMouseMove)
     document.addEventListener('mouseup', handleMouseUp)
-  }, [panelHeight])
+  }, [])
 
-  const resetHeight = useCallback(() => setPanelHeight(DEFAULT_PANEL_HEIGHT), [])
+  const resetHeight = useCallback(() => setPanelShare(DEFAULT_PANEL_SHARE), [])
 
-  return { containerRef, panelHeight, isDragging, startDrag, resetHeight }
+  return { containerRef, panelShare, isDragging, startDrag, resetHeight }
 }
 
-function panelStyleFor(isFullscreen, isCollapsed, panelHeight) {
-  if (isFullscreen) return { position: 'fixed', inset: 0, zIndex: 50 }
-  if (isCollapsed) return { flex: `0 0 ${COLLAPSED_HEIGHT}px`, minHeight: `${COLLAPSED_HEIGHT}px` }
-  return { flex: `0 0 ${panelHeight}%`, minHeight: `${COLLAPSED_HEIGHT}px` }
+function panelStyleFor(isFullscreen, isCollapsed, panelShare) {
+  if (isFullscreen) return { position: 'fixed', inset: 0, zIndex: 40 }
+  if (isCollapsed) return { flex: `0 0 ${TOOLBAR_HEIGHT_PX}px` }
+  return { flex: `0 1 ${panelShare}%`, minHeight: MIN_RESPONSE_HEIGHT_PX }
 }
 
 export const ResponsePanel = memo(function ResponsePanel({ response, loading, onDownload }) {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const [activeTab, setActiveTab] = useState('body')
+  const [activeTab, setActiveTab] = useState(TAB_BODY)
   const [selectedView, setSelectedView] = useState(null)
-  const { containerRef, panelHeight, isDragging, startDrag, resetHeight } = usePanelResize()
+  const { containerRef, panelShare, isDragging, startDrag, resetHeight } = usePanelResize()
 
   const shown = loading ? null : response
   const hasResult = Boolean(shown && !shown.error)
@@ -322,12 +248,13 @@ export const ResponsePanel = memo(function ResponsePanel({ response, loading, on
   const view = views.includes(selectedView) ? selectedView : views[0]
   const headers = shown?.headers || []
   const cookies = shown?.cookies || []
-  const tabCounts = { headers: headers.length, cookies: cookies.length }
   const hasBody = hasResult && kind !== BODY_KINDS.EMPTY
-  const showsBody = !isCollapsed && activeTab === 'body'
+  const isOpen = isFullscreen || !isCollapsed
+  const showsBody = isOpen && activeTab === TAB_BODY
+  const showsTabs = isOpen && hasResult
 
   useEffect(() => {
-    setActiveTab('body')
+    setActiveTab(TAB_BODY)
     setSelectedView(null)
   }, [response])
 
@@ -335,91 +262,98 @@ export const ResponsePanel = memo(function ResponsePanel({ response, loading, on
   const toggleCollapse = useCallback(() => setIsCollapsed((current) => !current), [])
 
   const renderContent = () => {
-    if (loading) return <EmptyState icon={Loader2} title="Sending request" description="Waiting for the server to answer" />
-    if (!shown) return <EmptyState icon={FileText} title="No response yet" description="Send a request to see the response here" />
+    if (loading) return <EmptyState icon={Loader2} title="Sending request" description="Waiting for the server to answer." />
+    if (!shown) return <EmptyState icon={FileText} title="No response yet" description="Send a request to see the response here." />
     if (shown.error) return <ErrorBody response={shown} />
-    if (activeTab === 'headers') {
-      return <DataTable columns={HEADER_COLUMNS} rows={headers} emptyIcon={List} emptyTitle="No headers" emptySubtitle="The server didn't send any headers" />
+    if (activeTab === TAB_HEADERS) {
+      if (headers.length === 0) return <EmptyState icon={List} title="No headers" description="The server sent no headers." />
+      return <DataTable columns={HEADER_COLUMNS} rows={headers} />
     }
-    if (activeTab === 'cookies') {
-      return <DataTable columns={COOKIE_COLUMNS} rows={cookies} emptyIcon={Cookie} emptyTitle="No cookies" emptySubtitle="The server didn't send any cookies" />
+    if (activeTab === TAB_COOKIES) {
+      if (cookies.length === 0) return <EmptyState icon={Cookie} title="No cookies" description="The server sent no cookies." />
+      return <DataTable columns={COOKIE_COLUMNS} rows={cookies} />
     }
     return <ResponseBody response={shown} kind={kind} view={view} json={json} />
   }
 
   return (
     <>
-      {!isFullscreen && !isCollapsed && (
-        <ResizableDivider onDrag={startDrag} isDragging={isDragging} onDoubleClick={resetHeight} />
+      {isOpen && !isFullscreen && (
+        <div
+          role="separator"
+          aria-orientation="horizontal"
+          aria-label="Resize the response panel"
+          title="Drag to resize. Double-click to reset."
+          onMouseDown={startDrag}
+          onDoubleClick={resetHeight}
+          className={`h-1 shrink-0 cursor-row-resize border-t border-border ${isDragging ? 'bg-border' : 'hover:bg-border'}`}
+        />
       )}
 
-      <div
+      <section
         ref={containerRef}
-        className="flex flex-col border-t border-border/60 bg-background"
-        style={panelStyleFor(isFullscreen, isCollapsed, panelHeight)}
+        aria-label="Response"
+        className={`flex min-h-0 flex-col bg-background ${isOpen && !isFullscreen ? '' : 'border-t border-border'}`}
+        style={panelStyleFor(isFullscreen, isCollapsed, panelShare)}
       >
-        <div className="flex items-center gap-3 border-b border-border/60 bg-muted/10 px-4 py-2.5">
-          <div className="flex shrink-0 items-center gap-2.5">
-            <button onClick={toggleCollapse} className={ICON_BUTTON_CLASS} title={isCollapsed ? "Expand" : "Collapse"}>
-              {isCollapsed ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </button>
-            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Response</span>
-            {shown && <StatusSummary response={shown} />}
-          </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
+          <Toolbar className={isOpen ? "pl-1.5 pr-1.5" : "border-b-0 pl-1.5 pr-1.5"}>
+            {!isFullscreen && (
+              <IconButton
+                label={isCollapsed ? "Expand response" : "Collapse response"}
+                icon={isCollapsed ? ChevronUp : ChevronDown}
+                onClick={toggleCollapse}
+              />
+            )}
+            {showsTabs ? (
+              <TabsList label="Response sections" className="shrink-0 pl-1.5">
+                <TabsTrigger value={TAB_BODY}>Body</TabsTrigger>
+                <TabsTrigger value={TAB_HEADERS}>Headers<TabCount>{headers.length}</TabCount></TabsTrigger>
+                <TabsTrigger value={TAB_COOKIES}>Cookies<TabCount>{cookies.length}</TabCount></TabsTrigger>
+              </TabsList>
+            ) : (
+              <SectionLabel className="pl-1.5">Response</SectionLabel>
+            )}
 
-          {!isCollapsed && hasResult && (
-            <div className="flex items-center rounded-lg bg-muted/40 p-1 ring-1 ring-border/30">
-              {TABS.map((tab) => (
-                <TabButton
-                  key={tab.id}
-                  id={tab.id}
-                  label={tab.label}
-                  icon={tab.icon}
-                  count={tabCounts[tab.id]}
-                  active={activeTab === tab.id}
-                  onClick={setActiveTab}
-                />
-              ))}
+            <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+              {shown && <StatusSummary response={shown} />}
             </div>
+
+            <div className="flex shrink-0 items-center gap-1">
+              {showsBody && text && <CopyButton text={text} />}
+              {hasBody && <IconButton label="Download body" icon={Download} onClick={onDownload} />}
+              <IconButton
+                label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+                icon={isFullscreen ? Minimize2 : Maximize2}
+                onClick={toggleFullscreen}
+              />
+            </div>
+          </Toolbar>
+
+          {isOpen && hasResult && shown.truncated && (
+            <Notice tone="warning" icon={Scissors}>
+              This response was cut off at {formatSize(shown.size)} because it exceeded the size limit.
+            </Notice>
           )}
 
-          <div className="ml-auto flex items-center gap-1.5">
-            {showsBody && text && <CopyButton text={text} />}
-            {hasBody && (
-              <button onClick={onDownload} className={ICON_BUTTON_CLASS} title="Download body">
-                <Download className="h-3.5 w-3.5" />
-              </button>
-            )}
-            <button onClick={toggleFullscreen} className={ICON_BUTTON_CLASS} title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}>
-              {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-            </button>
-          </div>
-        </div>
+          {showsBody && views.length > 1 && (
+            <Toolbar>
+              <SegmentedControl
+                label="Body view"
+                options={views.map((option) => ({ value: option, label: VIEW_LABELS[option] }))}
+                value={view}
+                onChange={setSelectedView}
+              />
+            </Toolbar>
+          )}
 
-        {!isCollapsed && hasResult && shown.truncated && (
-          <Notice icon={Scissors}>
-            This response was cut off at {formatSize(shown.size)} because it exceeded the size limit.
-          </Notice>
-        )}
-
-        {showsBody && views.length > 1 && (
-          <div className="flex items-center border-b border-border/40 bg-muted/5 px-4 py-2">
-            <div className="flex items-center rounded-lg bg-muted/30 p-0.5">
-              {views.map((option) => (
-                <ViewButton key={option} view={option} active={option === view} onClick={setSelectedView} />
-              ))}
+          {isOpen && (
+            <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden [overflow-wrap:anywhere]">
+              {renderContent()}
             </div>
-          </div>
-        )}
-
-        {!isCollapsed && (
-          <div className="relative flex-1 overflow-auto scrollbar-primary">
-            {renderContent()}
-          </div>
-        )}
-      </div>
-
-      {isFullscreen && <div className="fixed inset-0 z-40 bg-background/80" onClick={toggleFullscreen} />}
+          )}
+        </Tabs>
+      </section>
     </>
   )
 })

@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react"
-import { ChevronDown, ChevronRight } from "lucide-react"
+import { ChevronDown, ChevronRight, Network } from "lucide-react"
 import { parse, print } from "graphql"
 import { Button } from "./ui/button"
+import { EmptyState } from "./ui/emptyState"
 import { Input } from "./ui/input"
+import { Notice, Panel, PanelBody, SectionLabel, Toolbar } from "./ui/panel"
 import { Textarea } from "./ui/textarea"
 import { isPlainObject } from "../lib/dataUtils"
 import { GRAPHQL_METHOD } from "../lib/graphqlSchema"
@@ -14,11 +16,7 @@ const VARIABLES_PLACEHOLDER = '{\n  "id": "1"\n}'
 const EMPTY_VARIABLES = ["", "{}"]
 const SHOWN_TYPE_LIMIT = 100
 const NO_VARIABLES = new Map()
-
-const TOOLBAR = "flex h-10 shrink-0 items-center justify-between gap-3 border-b border-border/50 px-4"
-const TOOLBAR_LABEL = "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
-const TOOLBAR_BUTTON = "h-7 px-2"
-const EDITOR = "h-full min-h-0 resize-none font-mono text-xs leading-relaxed"
+const INVALID_FIELD = "border-destructive"
 
 function describeSyntaxError(error) {
   const location = error.locations?.[0]
@@ -55,7 +53,7 @@ function matchTypes(types, search) {
 }
 
 function ErrorLine({ children }) {
-  return <p className="shrink-0 break-words text-xs text-destructive">{children}</p>
+  return <p role="alert" title={children} className="shrink-0 truncate text-xs text-destructive">{children}</p>
 }
 
 function SchemaMembers({ members }) {
@@ -64,7 +62,7 @@ function SchemaMembers({ members }) {
     <ul className="flex flex-col gap-1.5 pb-2 pl-5">
       {members.map((member) => (
         <li key={member.name}>
-          <code className="break-words font-mono text-xs text-foreground/90">{member.signature}</code>
+          <code className="font-mono text-xs text-foreground">{member.signature}</code>
           {member.description && <p className="text-xs text-muted-foreground">{member.description}</p>}
         </li>
       ))}
@@ -81,12 +79,12 @@ function SchemaType({ type, hits, isOpen, onToggle }) {
         type="button"
         onClick={onToggle}
         aria-expanded={isOpen}
-        title={type.description}
-        className="flex w-full items-center gap-1.5 rounded py-1 text-left text-xs hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        title={type.description ? `${type.name}\n${type.description}` : type.name}
+        className="flex h-7 w-full items-center gap-1.5 rounded px-1 text-left text-xs hover:bg-accent"
       >
         <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-        <span className="min-w-0 truncate font-mono text-foreground">{type.name}</span>
-        <span className="ml-auto shrink-0 pr-1 text-[10px] text-muted-foreground">{type.label}</span>
+        <span className="min-w-0 flex-1 truncate font-mono text-foreground">{type.name}</span>
+        <span className="shrink-0 text-[11px] text-muted-foreground">{type.label}</span>
       </button>
       {(isOpen || hits.length > 0) && <SchemaMembers members={members} />}
     </li>
@@ -101,15 +99,17 @@ function SchemaTypes({ types }) {
 
   return (
     <>
-      <Input
-        value={search}
-        onChange={(event) => setSearch(event.target.value)}
-        placeholder={`Search ${types.length} types and their fields`}
-        aria-label="Search the schema"
-        spellCheck={false}
-        className="h-8 shrink-0 px-2 text-xs"
-      />
-      <ul className="min-h-0 flex-1 overflow-y-auto scrollbar-primary">
+      <Toolbar>
+        <Input
+          type="search"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder={`Search ${types.length} types and fields`}
+          aria-label="Search the schema"
+          spellCheck={false}
+        />
+      </Toolbar>
+      <ul className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-2 [overflow-wrap:anywhere]">
         {shown.map(({ type, hits }) => (
           <SchemaType
             key={type.name}
@@ -119,9 +119,9 @@ function SchemaTypes({ types }) {
             onToggle={() => setOpenName(openName === type.name ? "" : type.name)}
           />
         ))}
-        {matches.length === 0 && <li className="py-1 text-xs text-muted-foreground">Nothing matches.</li>}
+        {matches.length === 0 && <li className="p-1 text-xs text-muted-foreground">Nothing matches.</li>}
         {matches.length > shown.length && (
-          <li className="py-1 text-xs text-muted-foreground">
+          <li className="p-1 text-xs text-muted-foreground">
             {matches.length - shown.length} more types match. Narrow the search to see them.
           </li>
         )}
@@ -130,26 +130,31 @@ function SchemaTypes({ types }) {
   )
 }
 
-function SchemaPane({ schema, onLoad }) {
-  const isLoading = Boolean(schema?.loading)
+function SchemaContent({ schema }) {
+  if (schema?.types) return <SchemaTypes types={schema.types} />
+  if (schema?.loading) return <p className="p-3 text-xs text-muted-foreground">Fetching the schema</p>
+  if (schema?.error) return <Notice tone="destructive">{schema.error}</Notice>
   return (
-    <aside className="flex w-80 shrink-0 flex-col border-l border-border/50">
-      <div className={TOOLBAR}>
-        <span className={TOOLBAR_LABEL}>Schema</span>
-        <Button type="button" variant="outline" size="sm" className={TOOLBAR_BUTTON} disabled={isLoading} onClick={onLoad}>
+    <PanelBody>
+      <EmptyState
+        icon={Network}
+        title="No schema loaded"
+        description="Fetch it to browse this endpoint's types and fields. The introspection query uses this request's URL, headers and auth."
+      />
+    </PanelBody>
+  )
+}
+
+function SchemaPane({ schema, onLoad }) {
+  return (
+    <aside aria-label="Schema" className="flex w-2/5 min-w-52 max-w-80 shrink-0 flex-col border-l border-border">
+      <Toolbar>
+        <SectionLabel className="flex-1">Schema</SectionLabel>
+        <Button variant="outline" size="sm" disabled={Boolean(schema?.loading)} onClick={onLoad}>
           {schema?.types ? "Refresh" : "Fetch"}
         </Button>
-      </div>
-      <div className="flex min-h-0 flex-1 flex-col gap-2 px-4 py-3">
-        {!schema && (
-          <p className="text-xs text-muted-foreground">
-            Fetch the schema to browse this endpoint's types and fields. The introspection query is sent with this request's URL, headers and auth.
-          </p>
-        )}
-        {isLoading && <p className="text-xs text-muted-foreground">Fetching the schema...</p>}
-        {schema?.error && <ErrorLine>{schema.error}</ErrorLine>}
-        {schema?.types && <SchemaTypes types={schema.types} />}
-      </div>
+      </Toolbar>
+      <SchemaContent schema={schema} />
     </aside>
   )
 }
@@ -164,22 +169,21 @@ function VariablesSection({ variables, problem, onChange }) {
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
-        className="flex h-8 shrink-0 items-center gap-1.5 border-t border-border/50 px-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+        className="flex h-10 shrink-0 items-center gap-1.5 border-t border-border px-3 text-left"
       >
         <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-        <span className={TOOLBAR_LABEL}>Variables (JSON)</span>
+        <SectionLabel>Variables (JSON)</SectionLabel>
         {problem && <span className="min-w-0 truncate pl-2 text-xs text-destructive" title={problem}>{problem}</span>}
       </button>
       {isOpen && (
-        <div className="h-24 min-h-[3rem] px-4 pb-3">
+        <div className="min-h-11 flex-1 px-3 pb-3 pt-1">
           <Textarea
             value={variables}
             onChange={(event) => onChange(event.target.value)}
             placeholder={VARIABLES_PLACEHOLDER}
             aria-label="GraphQL variables"
             aria-invalid={problem !== ""}
-            spellCheck={false}
-            className={cn(EDITOR, problem && "border-destructive/60")}
+            className={cn("h-full", problem && INVALID_FIELD)}
           />
         </div>
       )}
@@ -195,6 +199,7 @@ export function GraphQLPanel({ query, variables, environment, schema, method, on
   const syntaxError = useMemo(() => querySyntaxError(substitutePlaceholders(query, values)), [query, values])
   const variablesError = useMemo(() => variablesProblem(substitutePlaceholders(variables, values)), [variables, values])
   const queryError = syntaxError || prettifyError
+  const isGraphQL = method === GRAPHQL_METHOD
 
   const handleQueryChange = (next) => {
     setPrettifyError("")
@@ -211,59 +216,46 @@ export function GraphQLPanel({ query, variables, environment, schema, method, on
 
   return (
     <div className="flex h-full min-h-0">
-      <div className="flex min-w-0 flex-1 flex-col">
-        <div className={TOOLBAR}>
-          <span className={TOOLBAR_LABEL}>Query</span>
-          {method !== GRAPHQL_METHOD && (
-            <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
-              Not sent while the method is {method}. Editing the query switches it to GRAPHQL.
-            </span>
+      <Panel className="flex-1">
+        <Toolbar>
+          <SectionLabel className="flex-1">Query</SectionLabel>
+          {!isGraphQL && <Button variant="outline" size="sm" onClick={onUseGraphQL}>Send as GraphQL</Button>}
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={query.trim() === ""}
+            title="Reformat the query. Comments are removed."
+            onClick={prettify}
+          >
+            Prettify
+          </Button>
+          <Button
+            variant={isSchemaOpen ? "secondary" : "ghost"}
+            size="sm"
+            aria-pressed={isSchemaOpen}
+            onClick={() => setIsSchemaOpen(!isSchemaOpen)}
+          >
+            Schema
+          </Button>
+        </Toolbar>
+        <div className="flex min-h-[4.25rem] flex-[2] flex-col gap-1 p-3">
+          <Textarea
+            value={query}
+            onChange={(event) => handleQueryChange(event.target.value)}
+            placeholder={QUERY_PLACEHOLDER}
+            aria-label="GraphQL query"
+            aria-invalid={queryError !== ""}
+            className={cn("min-h-0 flex-1", queryError && INVALID_FIELD)}
+          />
+          {queryError && <ErrorLine>{queryError}</ErrorLine>}
+          {!isGraphQL && !queryError && (
+            <p className="shrink-0 truncate text-xs text-muted-foreground" title={`Not sent while the method is ${method}.`}>
+              Not sent while the method is {method}.
+            </p>
           )}
-          <div className="flex shrink-0 items-center gap-1">
-            {method !== GRAPHQL_METHOD && (
-              <Button type="button" variant="outline" size="sm" className={TOOLBAR_BUTTON} onClick={onUseGraphQL}>
-                Send as GraphQL
-              </Button>
-            )}
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className={TOOLBAR_BUTTON}
-              disabled={query.trim() === ""}
-              title="Reformat the query. Comments are removed."
-              onClick={prettify}
-            >
-              Prettify
-            </Button>
-            <Button
-              type="button"
-              variant={isSchemaOpen ? "secondary" : "ghost"}
-              size="sm"
-              className={TOOLBAR_BUTTON}
-              aria-pressed={isSchemaOpen}
-              onClick={() => setIsSchemaOpen(!isSchemaOpen)}
-            >
-              Schema
-            </Button>
-          </div>
         </div>
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto scrollbar-primary">
-          <div className="flex min-h-[7rem] flex-1 flex-col gap-2 px-4 py-3">
-            <Textarea
-              value={query}
-              onChange={(event) => handleQueryChange(event.target.value)}
-              placeholder={QUERY_PLACEHOLDER}
-              aria-label="GraphQL query"
-              aria-invalid={queryError !== ""}
-              spellCheck={false}
-              className={cn(EDITOR, "flex-1", queryError && "border-destructive/60")}
-            />
-            {queryError && <ErrorLine>{queryError}</ErrorLine>}
-          </div>
-          <VariablesSection variables={variables} problem={variablesError} onChange={onVariablesChange} />
-        </div>
-      </div>
+        <VariablesSection variables={variables} problem={variablesError} onChange={onVariablesChange} />
+      </Panel>
       {isSchemaOpen && <SchemaPane schema={schema} onLoad={onLoadSchema} />}
     </div>
   )

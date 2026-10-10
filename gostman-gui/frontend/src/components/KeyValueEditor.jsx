@@ -1,15 +1,19 @@
 import { X } from "lucide-react"
-import { Button } from "./ui/button"
+import { IconButton } from "./ui/button"
+import { Checkbox } from "./ui/checkbox"
 import { Input } from "./ui/input"
+import { PanelBody, SectionLabel } from "./ui/panel"
 import { Select } from "./ui/select"
 import { FileField } from "./FileField"
 import { EMPTY_ATTACHMENT } from "../lib/attachments"
 import { ROW_FILE, ROW_TEXT, isBlankRow, isFileRow } from "../lib/rows"
 import { cn } from "../lib/utils"
 
-const PLAIN_COLUMNS = "grid-cols-[1rem_minmax(0,1fr)_minmax(0,1fr)_1.75rem]"
-const TYPED_COLUMNS = "grid-cols-[1rem_minmax(0,1fr)_5.5rem_minmax(0,1.5fr)_1.75rem]"
-const CELL_INPUT = "h-8 px-2 font-mono text-xs"
+const PLAIN_COLUMNS = "grid-cols-[1.5rem_minmax(0,1fr)_minmax(0,1fr)_1.75rem]"
+const TYPED_COLUMNS = "grid-cols-[1.5rem_minmax(0,1fr)_5rem_minmax(0,1.5fr)_1.75rem]"
+
+export const ROW_GRID = "grid items-center gap-x-2"
+export const ROW_STACK = "flex flex-col gap-1"
 
 const draftRow = (typed) => ({ key: "", value: "", enabled: true, ...(typed && { type: ROW_TEXT }) })
 
@@ -18,72 +22,63 @@ const asFileRow = ({ key, enabled }) => ({ key, value: "", enabled, type: ROW_FI
 
 function ColumnLabels({ columns, typed, keyLabel, valueLabel }) {
   return (
-    <div className={cn("grid items-center gap-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground", columns)}>
+    <div className={cn(ROW_GRID, "h-6", columns)}>
       <span />
-      <span>{keyLabel}</span>
-      {typed && <span>Type</span>}
-      <span>{valueLabel}</span>
+      <SectionLabel>{keyLabel}</SectionLabel>
+      {typed && <SectionLabel>Type</SectionLabel>}
+      <SectionLabel>{valueLabel}</SectionLabel>
       <span />
     </div>
   )
 }
 
-function ValueCell({ row, placeholder, onChange }) {
+function ValueCell({ row, label, onChange }) {
   if (isFileRow(row)) {
     return <FileField fileName={row.fileName} data={row.data} onChange={onChange} />
   }
   return (
     <Input
       value={row.value}
-      placeholder={placeholder}
-      aria-label={placeholder}
+      title={row.value}
+      placeholder={label}
+      aria-label={label}
       spellCheck={false}
       onChange={(event) => onChange({ value: event.target.value })}
-      className={CELL_INPUT}
+      className="font-mono"
     />
   )
 }
 
 function Row({ row, columns, typed, isDraft, keyLabel, valueLabel, onChange, onReplace, onRemove }) {
   return (
-    <div className={cn("grid items-center gap-2", columns, !row.enabled && "opacity-50")}>
-      <input
-        type="checkbox"
+    <div className={cn(ROW_GRID, columns, !row.enabled && "opacity-50")}>
+      <Checkbox
+        label="Send this row"
         checked={row.enabled}
         onChange={(event) => onChange({ enabled: event.target.checked })}
-        aria-label="Send this row"
-        className={cn("h-3.5 w-3.5 accent-primary", isDraft && "invisible")}
+        className={cn(isDraft && "invisible")}
       />
       <Input
         value={row.key}
+        title={row.key}
         placeholder={keyLabel}
         aria-label={keyLabel}
         spellCheck={false}
         onChange={(event) => onChange({ key: event.target.value })}
-        className={CELL_INPUT}
+        className="font-mono"
       />
       {typed && (
         <Select
           value={row.type || ROW_TEXT}
           onChange={(event) => onReplace(event.target.value === ROW_FILE ? asFileRow(row) : asTextRow(row))}
           aria-label="Field type"
-          className="h-8 px-2 text-xs"
         >
           <option value={ROW_TEXT}>Text</option>
           <option value={ROW_FILE}>File</option>
         </Select>
       )}
-      <ValueCell row={row} placeholder={valueLabel} onChange={onChange} />
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        onClick={onRemove}
-        aria-label="Remove row"
-        className={cn("h-7 w-7 text-muted-foreground hover:text-destructive", isDraft && "invisible")}
-      >
-        <X />
-      </Button>
+      <ValueCell row={row} label={valueLabel} onChange={onChange} />
+      <IconButton label="Remove row" icon={X} onClick={onRemove} className={cn(isDraft && "invisible")} />
     </div>
   )
 }
@@ -97,9 +92,9 @@ export function KeyValueEditor({ rows, onChange, keyLabel = "Key", valueLabel = 
   const removeRow = (index) => commit(shown.filter((_, at) => at !== index))
 
   return (
-    <div className="h-full overflow-auto px-4 py-3 scrollbar-primary">
+    <PanelBody>
       <ColumnLabels columns={columns} typed={typed} keyLabel={keyLabel} valueLabel={valueLabel} />
-      <div className="flex flex-col gap-1">
+      <div className={ROW_STACK}>
         {shown.map((row, index) => (
           <Row
             key={index}
@@ -115,6 +110,6 @@ export function KeyValueEditor({ rows, onChange, keyLabel = "Key", valueLabel = 
           />
         ))}
       </div>
-    </div>
+    </PanelBody>
   )
 }

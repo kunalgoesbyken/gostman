@@ -21,14 +21,3 @@ export const METHOD_CHIPS = {
     DELETE: "text-destructive bg-destructive/10",
     GRAPHQL: "text-primary bg-primary/10",
 }
-
-export const METHOD_VARIANTS = {
-    GET: "get",
-    POST: "post",
-    PUT: "put",
-    DELETE: "delete",
-    PATCH: "patch",
-    HEAD: "head",
-    OPTIONS: "options",
-    GRAPHQL: "graphql",
-}

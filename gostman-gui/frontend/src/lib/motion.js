@@ -17,11 +17,6 @@ export const slideDown = {
   animate: { opacity: 1, y: 0 },
 }
 
-export const slideInLeft = {
-  initial: { opacity: 0, x: -20 },
-  animate: { opacity: 1, x: 0 },
-}
-
 export const popIn = {
   initial: { scale: 0 },
   animate: { scale: 1 },

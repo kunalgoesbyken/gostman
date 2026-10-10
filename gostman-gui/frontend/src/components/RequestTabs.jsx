@@ -1,6 +1,7 @@
 import { memo, lazy, Suspense, useEffect, useMemo } from "react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
-import { Braces, Hash, Heading1, FolderOpen, FlaskConical, KeyRound, SlidersHorizontal, Zap, Radio, AlertCircle, CheckCircle2 } from "lucide-react"
+import { AlertCircle, CheckCircle2 } from "lucide-react"
+import { Notice, Panel, Toolbar } from "./ui/panel"
+import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { AuthPanel } from "./AuthPanel"
 import { BodyPanel } from "./BodyPanel"
 import { KeyValueEditor } from "./KeyValueEditor"
@@ -14,24 +15,22 @@ import { readParamRows } from "../lib/queryString"
 import { countSentRows, parseRows, serializeRows } from "../lib/rows"
 import { SOCKET_OPEN, SOCKET_PANEL, isSocketAddress, selectSession, useSocketStore } from "../lib/socketSessions"
 import { validateEnvVariables, formatJSONError } from "../lib/validation"
-import { cn } from "../lib/utils"
 import { useAppStore } from "../store/appStore"
 
 const GraphQLPanel = lazy(() => import("./GraphQLPanel").then((module) => ({ default: module.GraphQLPanel })))
 const WebSocketPanel = lazy(() => import("./WebSocketPanel").then((module) => ({ default: module.WebSocketPanel })))
 
 const ROW_BODY_TYPES = [BODY_FORM, BODY_MULTIPART]
+const PANEL_CLASS = "h-full min-h-0"
 
 function PanelFallback() {
-  return <p className="p-4 text-sm text-muted-foreground">Loading...</p>
+  return <p className="p-3 text-xs text-muted-foreground">Loading</p>
 }
 
 function TabBadge({ value }) {
   if (!value) return null
   if (value === true) return <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-primary" />
-  return (
-    <span className="rounded bg-muted px-1 font-mono text-[10px] leading-4 text-muted-foreground">{value}</span>
-  )
+  return <TabCount>{value}</TabCount>
 }
 
 function bodyBadge(body, bodyType) {
@@ -42,18 +41,14 @@ function bodyBadge(body, bodyType) {
 
 function EnvVarsStatus({ variables }) {
   const validation = useMemo(() => validateEnvVariables(variables), [variables])
-  const Icon = validation.error ? AlertCircle : CheckCircle2
-
   return (
-    <div
-      className={cn(
-        "flex items-center gap-2 border-t px-4 py-2 text-xs",
-        validation.error ? "border-destructive/20 bg-destructive/10 text-destructive" : "border-success/20 bg-success/10 text-success"
-      )}
+    <Notice
+      edge="border-t"
+      tone={validation.error ? "destructive" : "success"}
+      icon={validation.error ? AlertCircle : CheckCircle2}
     >
-      <Icon className="h-3.5 w-3.5 shrink-0" />
-      <span className="truncate">{formatJSONError(validation)}</span>
-    </div>
+      {formatJSONError(validation)}
+    </Notice>
   )
 }
 
@@ -94,35 +89,37 @@ export const RequestTabs = memo(function RequestTabs({
 
   return (
     <Tabs value={activePanel} onValueChange={setActivePanel} className="flex min-h-0 flex-1 flex-col">
-      <div className="overflow-x-auto border-b border-border/60 bg-muted/10 px-4">
-        <TabsList>
-          <TabsTrigger value="params" icon={Hash}>Params<TabBadge value={paramCount} /></TabsTrigger>
-          <TabsTrigger value="headers" icon={Heading1}>Headers<TabBadge value={countSentRows(headerRows)} /></TabsTrigger>
-          <TabsTrigger value="body" icon={Braces}>Body<TabBadge value={!isGraphQL && bodyContent} /></TabsTrigger>
-          <TabsTrigger value="auth" icon={KeyRound}>Auth<TabBadge value={auth.type !== ""} /></TabsTrigger>
-          <TabsTrigger value="graphql" icon={Zap}>GraphQL<TabBadge value={isGraphQL} /></TabsTrigger>
-          <TabsTrigger value={SOCKET_PANEL} icon={Radio}>WebSocket<TabBadge value={isSocketOpen} /></TabsTrigger>
-          <TabsTrigger value="vars" icon={FolderOpen}>Env Vars</TabsTrigger>
-          <TabsTrigger value="extract" icon={FlaskConical}>Extract<TabBadge value={extractorCount} /></TabsTrigger>
-          <TabsTrigger value="settings" icon={SlidersHorizontal}>Settings<TabBadge value={hasCustomOptions} /></TabsTrigger>
+      <Toolbar>
+        <TabsList label="Request sections">
+          <TabsTrigger value="params">Params<TabBadge value={paramCount} /></TabsTrigger>
+          <TabsTrigger value="headers">Headers<TabBadge value={countSentRows(headerRows)} /></TabsTrigger>
+          <TabsTrigger value="body">Body<TabBadge value={!isGraphQL && bodyContent} /></TabsTrigger>
+          <TabsTrigger value="auth">Auth<TabBadge value={auth.type !== ""} /></TabsTrigger>
+          <TabsTrigger value="graphql">GraphQL<TabBadge value={isGraphQL} /></TabsTrigger>
+          <TabsTrigger value={SOCKET_PANEL}>WebSocket<TabBadge value={isSocketOpen} /></TabsTrigger>
+          <TabsTrigger value="vars">Env vars</TabsTrigger>
+          <TabsTrigger value="extract">Extract<TabBadge value={extractorCount} /></TabsTrigger>
+          <TabsTrigger value="settings">Settings<TabBadge value={hasCustomOptions} /></TabsTrigger>
         </TabsList>
-      </div>
+      </Toolbar>
 
-      <div className="flex-1 overflow-hidden">
-        <TabsContent value="params" className="h-full p-0" noMargin>
+      <div className="min-h-0 flex-1 overflow-hidden">
+        <TabsContent value="params" className={PANEL_CLASS}>
           <ParamsPanel key={tabId} url={url} queryParams={queryParams} onChange={onUpdateRequest} />
         </TabsContent>
 
-        <TabsContent value="headers" className="h-full p-0" noMargin>
-          <KeyValueEditor
-            key={tabId}
-            rows={headerRows}
-            onChange={(rows) => onUpdateRequest({ headers: serializeRows(rows) })}
-            keyLabel="Header"
-          />
+        <TabsContent value="headers" className={PANEL_CLASS}>
+          <Panel>
+            <KeyValueEditor
+              key={tabId}
+              rows={headerRows}
+              onChange={(rows) => onUpdateRequest({ headers: serializeRows(rows) })}
+              keyLabel="Header"
+            />
+          </Panel>
         </TabsContent>
 
-        <TabsContent value="body" className="h-full p-0" noMargin>
+        <TabsContent value="body" className={PANEL_CLASS}>
           <BodyPanel
             key={tabId}
             request={activeRequest}
@@ -135,11 +132,11 @@ export const RequestTabs = memo(function RequestTabs({
           />
         </TabsContent>
 
-        <TabsContent value="auth" className="h-full p-0" noMargin>
+        <TabsContent value="auth" className={PANEL_CLASS}>
           <AuthPanel key={tabId} auth={auth} onChange={(next) => onUpdateRequest({ auth: next })} />
         </TabsContent>
 
-        <TabsContent value="graphql" className="h-full p-0" noMargin>
+        <TabsContent value="graphql" className={PANEL_CLASS}>
           <Suspense fallback={<PanelFallback />}>
             <GraphQLPanel
               key={tabId}
@@ -156,7 +153,7 @@ export const RequestTabs = memo(function RequestTabs({
           </Suspense>
         </TabsContent>
 
-        <TabsContent value={SOCKET_PANEL} className="h-full p-0" noMargin>
+        <TabsContent value={SOCKET_PANEL} className={PANEL_CLASS}>
           <Suspense fallback={<PanelFallback />}>
             <WebSocketPanel
               key={tabId}
@@ -168,8 +165,8 @@ export const RequestTabs = memo(function RequestTabs({
           </Suspense>
         </TabsContent>
 
-        <TabsContent value="vars" className="h-full p-0" noMargin>
-          <div className="flex h-full flex-col">
+        <TabsContent value="vars" className={PANEL_CLASS}>
+          <Panel>
             <div className="min-h-0 flex-1">
               <Suspense fallback={<PanelFallback />}>
                 <EditorComponent
@@ -182,10 +179,10 @@ export const RequestTabs = memo(function RequestTabs({
               </Suspense>
             </div>
             <EnvVarsStatus variables={variables} />
-          </div>
+          </Panel>
         </TabsContent>
 
-        <TabsContent value="extract" className="h-full p-0" noMargin>
+        <TabsContent value="extract" className={PANEL_CLASS}>
           <ExtractPanel
             key={tabId}
             extractors={extractors}
@@ -196,7 +193,7 @@ export const RequestTabs = memo(function RequestTabs({
           />
         </TabsContent>
 
-        <TabsContent value="settings" className="h-full p-0" noMargin>
+        <TabsContent value="settings" className={PANEL_CLASS}>
           <SettingsPanel options={options} onChange={(next) => onUpdateRequest({ options: next })} />
         </TabsContent>
       </div>

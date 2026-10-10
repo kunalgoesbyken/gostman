@@ -65,21 +65,15 @@ export const WebSocketShowcase = () => {
         title="WebSocket Connection"
         subtitle="Real-time bidirectional messaging"
       >
-        <motion.div
+        <div
           className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium ${connected
               ? "text-success bg-success/10 border-success/20"
               : "text-muted-foreground bg-muted/10 border-border/20"
             }`}
-          animate={connected ? { opacity: [0.9, 1, 0.9] } : {}}
-          transition={{ duration: 2, repeat: connected ? Infinity : 0, ease: "easeInOut" }}
         >
           {connected ? (
             <>
-              <motion.span
-                className="w-2 h-2 rounded-full bg-success"
-                animate={{ opacity: [1, 0.5, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              />
+              <span className="w-2 h-2 rounded-full bg-success" />
               Connected
             </>
           ) : (
@@ -88,7 +82,7 @@ export const WebSocketShowcase = () => {
               Disconnected
             </>
           )}
-        </motion.div>
+        </div>
       </ShowcaseHeader>
 
       <motion.div

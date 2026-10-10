@@ -1,6 +1,8 @@
 import { memo, useEffect, useMemo, useRef } from "react"
 import { Plus, X } from "lucide-react"
-import { METHOD_COLORS } from "../lib/constants"
+import { IconButton } from "./ui/button"
+import { MethodTag } from "./MethodTag"
+import { shortcutLabel } from "../lib/platform"
 import { isRequestDirty } from "../lib/requestChanges"
 import { cn } from "../lib/utils"
 
@@ -26,37 +28,26 @@ const Tab = memo(function Tab({ tab, saved, isActive, onSelect, onClose }) {
   return (
     <div
       ref={tabRef}
-      role="tab"
-      aria-selected={isActive}
       title={request.url ? `${title}\n${request.url}` : title}
       onMouseDown={preventAutoscroll}
       onAuxClick={closeOnMiddleClick}
       className={cn(
-        "group flex h-8 min-w-[7rem] max-w-[13rem] shrink-0 items-center border-r border-border/60 text-xs",
-        isActive ? "bg-background text-foreground" : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+        "group flex w-44 shrink-0 items-center border-b-2 border-r border-r-border pr-1.5 text-xs",
+        isActive ? "border-b-primary text-foreground" : "border-b-transparent text-muted-foreground hover:bg-accent hover:text-foreground"
       )}
     >
       <button
         type="button"
+        role="tab"
+        aria-selected={isActive}
         onClick={() => onSelect(tab.id)}
-        className="flex h-full min-w-0 flex-1 items-center gap-1.5 pl-3 text-left outline-none focus-visible:bg-muted/40"
+        className="flex h-full min-w-0 flex-1 items-center gap-1.5 pl-3 text-left"
       >
-        <span className={cn("shrink-0 font-mono text-[10px] font-semibold", METHOD_COLORS[request.method] || "text-muted-foreground")}>
-          {request.method}
-        </span>
+        <MethodTag method={request.method} />
         <span className="truncate">{title}</span>
+        {isDirty && <span aria-label="Unsaved changes" className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground" />}
       </button>
-      <button
-        type="button"
-        onClick={() => onClose(tab.id)}
-        aria-label={isDirty ? `Close ${title} (unsaved changes)` : `Close ${title}`}
-        className="relative mx-1 flex h-5 w-5 shrink-0 items-center justify-center rounded outline-none hover:bg-muted-foreground/20 focus-visible:bg-muted-foreground/20"
-      >
-        {isDirty && (
-          <span className="absolute h-1.5 w-1.5 rounded-full bg-foreground/70 group-hover:hidden group-focus-within:hidden" />
-        )}
-        <X className={cn("h-3 w-3", isDirty && "hidden group-hover:block group-focus-within:block")} />
-      </button>
+      <IconButton label={`Close ${title}`} icon={X} size="icon-xs" onClick={() => onClose(tab.id)} className="hover:bg-muted" />
     </div>
   )
 })
@@ -65,8 +56,8 @@ export const TabBar = memo(function TabBar({ tabs, activeTabId, requests, onTabS
   const savedById = useMemo(() => new Map(requests.map((request) => [request.id, request])), [requests])
 
   return (
-    <div className="flex items-stretch border-b border-border/60 bg-muted/20">
-      <div role="tablist" className="flex min-w-0 overflow-x-auto scrollbar-none">
+    <div className="flex h-10 shrink-0 items-stretch border-b border-border">
+      <div role="tablist" aria-label="Open requests" className="flex min-w-0 items-stretch overflow-x-auto scrollbar-none">
         {tabs.map((tab) => (
           <Tab
             key={tab.id}
@@ -78,15 +69,9 @@ export const TabBar = memo(function TabBar({ tabs, activeTabId, requests, onTabS
           />
         ))}
       </div>
-      <button
-        type="button"
-        onClick={onNewTab}
-        aria-label="New tab"
-        title="New request (Ctrl+N)"
-        className="flex h-8 w-8 shrink-0 items-center justify-center text-muted-foreground outline-none hover:bg-muted/40 hover:text-foreground focus-visible:bg-muted/40"
-      >
-        <Plus className="h-3.5 w-3.5" />
-      </button>
+      <div className="flex shrink-0 items-center px-1.5">
+        <IconButton label={`New request (${shortcutLabel("N")})`} icon={Plus} onClick={onNewTab} />
+      </div>
     </div>
   )
 })

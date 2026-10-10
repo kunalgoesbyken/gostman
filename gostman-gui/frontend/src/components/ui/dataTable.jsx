@@ -1,52 +1,36 @@
-import React from 'react'
+import { cn } from "../../lib/utils"
 
-/** Reusable table component for headers/cookies display */
-export function DataTable({ columns, rows, emptyIcon: EmptyIcon, emptyTitle, emptySubtitle }) {
-  if (rows.length === 0) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center p-8 text-center">
-        <div className="mb-3 rounded-full bg-muted/30 p-4">
-          <EmptyIcon className="h-7 w-7 text-muted-foreground/40" />
-        </div>
-        <p className="text-sm text-muted-foreground">{emptyTitle}</p>
-        <p className="mt-1 text-xs text-muted-foreground/50">{emptySubtitle}</p>
-      </div>
-    )
-  }
+const CELL = "truncate px-3 py-1.5 text-left"
 
+const textOf = (column, row) => (column.text ? column.text(row) : row[column.key])
+
+export function DataTable({ columns, rows }) {
   return (
-    <div className="h-full overflow-auto pb-4 scrollbar-primary">
-      <table className="w-full text-xs border-collapse">
-        <thead className="sticky top-0 bg-background border-b border-border/50 z-10">
-          <tr>
-            {columns.map((col, i) => (
-              <th
-                key={i}
-                className={`text-left px-4 py-3 font-semibold text-muted-foreground uppercase tracking-wider text-[10px] ${col.width || ''} ${col.nowrap ? 'whitespace-nowrap' : ''}`}
-              >
-                {col.header}
-              </th>
+    <table className="w-full table-fixed border-collapse text-xs">
+      <thead className="sticky top-0 bg-background">
+        <tr className="border-b border-border">
+          {columns.map((column) => (
+            <th
+              key={column.header}
+              title={column.header}
+              className={cn(CELL, "text-[11px] font-medium uppercase tracking-wide text-muted-foreground", column.width)}
+            >
+              {column.header}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row, index) => (
+          <tr key={index} className="border-b border-border hover:bg-accent">
+            {columns.map((column) => (
+              <td key={column.header} title={textOf(column, row)} className={cn(CELL, "font-mono text-muted-foreground", column.cellClassName)}>
+                {textOf(column, row)}
+              </td>
             ))}
           </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr
-              key={i}
-              className={`border-b border-border/20 hover:bg-primary/5 transition-colors ${i % 2 === 0 ? '' : 'bg-muted/5'}`}
-            >
-              {columns.map((col, j) => (
-                <td
-                  key={j}
-                  className={`px-4 py-2.5 font-mono text-muted-foreground ${col.cellClassName || ''}`}
-                >
-                  {col.render ? col.render(row, i) : row[col.key]}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+        ))}
+      </tbody>
+    </table>
   )
 }

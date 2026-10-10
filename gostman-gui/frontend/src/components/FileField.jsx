@@ -5,19 +5,17 @@ import { MAX_ATTACHMENT_BYTES, readAttachment } from "../lib/attachments"
 import { base64ByteLength } from "../lib/base64"
 import { formatSize } from "../lib/dataUtils"
 
+const SUMMARY = "min-w-0 flex-1 truncate text-xs"
+
 const tooLargeMessage = (file) => (
   `${file.name} is ${formatSize(file.size)}. Files are limited to ${formatSize(MAX_ATTACHMENT_BYTES)}.`
 )
 
 function FileSummary({ fileName, data, error }) {
-  if (error) return <span role="alert" className="truncate text-xs text-destructive">{error}</span>
-  if (!fileName) return <span className="truncate text-xs text-muted-foreground">No file selected</span>
-  return (
-    <span className="truncate font-mono text-xs text-foreground/90">
-      {fileName}
-      <span className="ml-2 text-muted-foreground">{formatSize(base64ByteLength(data))}</span>
-    </span>
-  )
+  if (error) return <span role="alert" title={error} className={`${SUMMARY} text-destructive`}>{error}</span>
+  if (!fileName) return <span className={`${SUMMARY} text-muted-foreground`}>No file selected</span>
+  const summary = `${fileName} (${formatSize(base64ByteLength(data))})`
+  return <span title={summary} className={`${SUMMARY} font-mono text-foreground`}>{summary}</span>
 }
 
 export function FileField({ fileName, data, onChange }) {
@@ -39,13 +37,7 @@ export function FileField({ fileName, data, onChange }) {
   return (
     <div className="flex min-w-0 items-center gap-2">
       <input ref={inputRef} type="file" className="hidden" onChange={handlePick} />
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="h-8 shrink-0 gap-1.5 px-2"
-        onClick={() => inputRef.current.click()}
-      >
+      <Button variant="outline" size="sm" onClick={() => inputRef.current.click()}>
         <Paperclip />
         {fileName ? "Replace" : "Choose file"}
       </Button>

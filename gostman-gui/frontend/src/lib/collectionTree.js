@@ -1,4 +1,5 @@
 export const ROOT_ID = ''
+export const MAX_FOLDER_DEPTH = 32
 
 export const ROW_FOLDER = 'folder'
 const ROW_REQUEST = 'request'
@@ -16,11 +17,24 @@ function groupBy(items, keyOf) {
   return groups
 }
 
+export function folderDepth(folderId, parentOf) {
+  let depth = 0
+  let ancestorId = parentOf.get(folderId)
+  while (parentOf.has(ancestorId) && depth <= MAX_FOLDER_DEPTH) {
+    depth += 1
+    ancestorId = parentOf.get(ancestorId)
+  }
+  return depth
+}
+
 export function buildCollectionTree(folders, requests) {
-  const folderIds = new Set(folders.map((folder) => folder.id))
-  const containerOf = (id) => (folderIds.has(id) ? id : ROOT_ID)
+  const parentOf = new Map(folders.map((folder) => [folder.id, folder.parentId]))
+  const containerOf = (id) => (parentOf.has(id) ? id : ROOT_ID)
+  const parentFolderOf = (folder) => (
+    folderDepth(folder.id, parentOf) > MAX_FOLDER_DEPTH ? ROOT_ID : containerOf(folder.parentId)
+  )
   return {
-    childFolders: groupBy(folders, (folder) => containerOf(folder.parentId)),
+    childFolders: groupBy(folders, parentFolderOf),
     folderRequests: groupBy(requests, (request) => containerOf(request.folderId)),
   }
 }

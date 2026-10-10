@@ -14,12 +14,12 @@ const THEME = {
         { token: 'variable', foreground: 'f0f9ff' },
     ],
     colors: {
-        'editor.background': '#0c1222',
+        'editor.background': '#030711',
         'editor.foreground': '#f0f9ff',
         'editorLineNumber.foreground': '#475569',
         'editorLineNumber.activeForeground': '#22d3ee',
         'editor.selectionBackground': '#22d3ee40',
-        'editor.lineHighlightBackground': '#1e293b',
+        'editor.lineHighlightBackground': '#0f1629',
         'editorCursor.foreground': '#22d3ee',
         'editorWhitespace.foreground': '#334155',
         'editorIndentGuide.background': '#1e293b',
@@ -44,7 +44,8 @@ export function MonacoEditor({ value, onChange, language = "json", path, height 
             theme={THEME_NAME}
             options={{
                 minimap: { enabled: false },
-                fontSize: 13,
+                fontSize: 12,
+                fontFamily: "'JetBrains Mono', 'Courier New', monospace",
                 lineNumbers: "on",
                 roundedSelection: false,
                 scrollBeyondLastLine: false,

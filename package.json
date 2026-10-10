@@ -1,8 +1,4 @@
 {
-  "dependencies": {
-    "parse-curl": "^0.2.6"
-  },
-  "devDependencies": {
-    "shadcn": "^3.6.2"
-  }
+  "name": "gostman",
+  "private": true
 }

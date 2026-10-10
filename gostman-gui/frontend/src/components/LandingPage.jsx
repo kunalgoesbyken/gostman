@@ -1,24 +1,26 @@
-import { useState, useEffect, useRef, lazy, Suspense } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button, buttonVariants } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { cn } from "../lib/utils"
-import { easeSmooth, fadeIn, popIn, tapScale, slideInLeft, springLayout } from "../lib/motion"
+import { easeSmooth, fadeIn, popIn, tapScale, springLayout } from "../lib/motion"
 import {
-  Zap,
-  Globe,
-  Github,
   ArrowRight,
-  Check,
-  X,
   Braces,
-  Shield,
-  Network,
-  Workflow,
-  TestTube,
+  Check,
+  Code,
+  Eye,
+  FolderTree,
+  Github,
+  Globe,
   Import,
-  Radio,
+  KeyRound,
+  Layers,
   Link2,
+  Network,
+  Radio,
+  Search,
+  Workflow,
 } from "lucide-react"
 
 import logo from "../assets/logo.jpg"
@@ -33,75 +35,79 @@ import { RestShowcase, GraphQLShowcase, ChainingShowcase, WebSocketShowcase } fr
 import { BackgroundCode } from "./landing/BackgroundCode"
 import { DownloadDropdown } from "./landing/DownloadDropdown"
 
-function ShowcaseSkeleton() {
-  return (
-    <div className="flex h-full w-full flex-col gap-3" aria-hidden="true">
-      <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-background/40 p-4">
-        <div className="h-7 w-16 shrink-0 rounded-md bg-muted/30 animate-shimmer" />
-        <div className="h-8 flex-1 rounded-md bg-muted/20 animate-shimmer" />
-        <div className="h-8 w-24 shrink-0 rounded-md bg-muted/30 animate-shimmer" />
-      </div>
-      <div className="flex-1 space-y-2.5 rounded-lg border border-border/60 bg-background/40 p-4">
-        {[80, 55, 65, 40, 70, 50].map((width, i) => (
-          <div
-            key={i}
-            className="h-3 rounded bg-muted/20 animate-shimmer"
-            style={{ width: `${width}%`, animationDelay: `${i * 90}ms` }}
-          />
-        ))}
-      </div>
-    </div>
-  )
-}
+const REPOSITORY = "kunalgoesbyken/gostman"
+const REPOSITORY_URL = `https://github.com/${REPOSITORY}`
+const ISSUES_URL = `${REPOSITORY_URL}/issues`
+const REPOSITORY_API_URL = `https://api.github.com/repos/${REPOSITORY}`
+
+const HIGHLIGHTS = ["No account", "Data stored locally", "Open source"]
 
 const FEATURES = [
   {
     icon: Network,
-    title: "Multi-Protocol",
-    description: "REST, GraphQL and WebSocket requests in one window, with no mode switching.",
+    title: "REST, GraphQL and WebSocket",
+    description: "Send HTTP requests, GraphQL queries and WebSocket messages from the same window.",
+  },
+  {
+    icon: Layers,
+    title: "Environments and variables",
+    description: "Keep a set of variables per environment and use them as {{name}} in URLs, headers and bodies.",
+  },
+  {
+    icon: KeyRound,
+    title: "Auth helpers",
+    description: "Basic, bearer token and API key auth, added to the request for you.",
+  },
+  {
+    icon: Braces,
+    title: "Request bodies",
+    description: "JSON, text, XML, URL-encoded forms, multipart forms with files, and single-file uploads.",
+  },
+  {
+    icon: FolderTree,
+    title: "Nested collections",
+    description: "Organise saved requests in folders inside folders, with search and a history of what you sent.",
   },
   {
     icon: Workflow,
-    title: "Request Chaining",
-    description: "Pull a token or id out of one response with JSONPath and feed it to the next request.",
+    title: "Response extraction",
+    description: "Read a value from a JSON body, header, cookie or status code and save it to a variable for the next request.",
   },
   {
-    icon: TestTube,
-    title: "Response Extraction",
-    description: "Capture any field into a variable the moment a response lands.",
+    icon: Search,
+    title: "GraphQL schema browser",
+    description: "Fetch a schema by introspection and search its types and fields.",
+  },
+  {
+    icon: Eye,
+    title: "Response preview and download",
+    description: "View JSON, HTML, images and PDFs in the app, or save any response body to a file.",
+  },
+  {
+    icon: Code,
+    title: "Code generation",
+    description: "Turn a request into cURL, JavaScript, Python, Go, PHP or Java.",
   },
   {
     icon: Import,
-    title: "Postman Import",
-    description: "Bring Postman v2.1 collections and OpenAPI specs across as they are. Export whenever you want out.",
-  },
-  {
-    icon: Zap,
-    title: "Opens Instantly",
-    description: "A Go backend and a native window. No splash screen, no sign-in, no workspace sync.",
-  },
-  {
-    icon: Shield,
-    title: "Stays On Your Machine",
-    description: "Requests and history are written to local disk. Nothing leaves the device.",
+    title: "Import and export",
+    description: "Import Postman v2.1 collections and OpenAPI 3 specs. Export to Postman, OpenAPI, Markdown or a Gostman backup.",
   },
 ]
 
-const COMPARISONS = [
-  { feature: "Built with Go", gostman: true, others: false },
-  { feature: "GraphQL & WebSocket", gostman: true, others: true },
-  { feature: "Request Chaining", gostman: true, others: true },
-  { feature: "Offline First", gostman: true, others: false },
-  { feature: "No Account Required", gostman: true, others: false },
-  { feature: "Lightweight (<50MB)", gostman: true, others: false },
-  { feature: "Local Data Only", gostman: true, others: false },
+const FACTS = [
+  { label: "Desktop app", detail: "A native app built with Go and Wails, for Windows, macOS and Linux." },
+  { label: "Web version", detail: "Runs in the browser. Requests are sent through a proxy because browsers block cross-origin calls." },
+  { label: "Account", detail: "None. There is no sign-in." },
+  { label: "Your data", detail: "The desktop app saves to a file on your disk. The web version saves to this browser's local storage." },
+  { label: "Source", detail: "Open source under the MIT license." },
 ]
 
 const SHOWCASE_TABS = [
-  { id: "rest", label: "REST API", icon: Network, description: "HTTP requests with full control" },
-  { id: "graphql", label: "GraphQL", icon: Braces, description: "Queries and mutations with variables" },
-  { id: "chaining", label: "Chaining", icon: Link2, description: "Chain requests with data extraction" },
-  { id: "websocket", label: "WebSocket", icon: Radio, description: "Real-time bidirectional messaging" },
+  { id: "rest", label: "REST", icon: Network, description: "Send an HTTP request and read the response." },
+  { id: "graphql", label: "GraphQL", icon: Braces, description: "Run queries and mutations with variables." },
+  { id: "chaining", label: "Chaining", icon: Link2, description: "Save a value from one response and use it in the next request." },
+  { id: "websocket", label: "WebSocket", icon: Radio, description: "Connect, send messages and read the replies." },
 ]
 
 const useGitHubStars = () => {
@@ -130,16 +136,12 @@ const useGitHubStars = () => {
       } catch (err) {
         if (err.name === "AbortError") return
         try {
-          const ghResponse = await fetch("https://api.github.com/repos/krockxz/gostman", {
-            signal: controller.signal,
-          })
-          if (!ghResponse.ok) throw new Error("GitHub API failed")
+          const ghResponse = await fetch(REPOSITORY_API_URL, { signal: controller.signal })
+          if (!ghResponse.ok) return
           const ghData = await ghResponse.json()
           setStars(ghData.stargazers_count)
-        } catch (ghErr) {
-          if (ghErr.name !== "AbortError") {
-            console.error("Failed to fetch stars:", ghErr)
-          }
+        } catch {
+          setStars(null)
         }
       } finally {
         setIsLoading(false)
@@ -177,7 +179,6 @@ const TabButton = ({ tab, isActive, onClick }) => {
       tabIndex={isActive ? 0 : -1}
       className={cn(
         "relative flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors duration-200",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
       )}
       {...tapScale}
@@ -223,7 +224,6 @@ export function LandingPage({ onGetStarted }) {
 
   return (
     <>
-      {/* Skip link for accessibility */}
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
@@ -239,7 +239,6 @@ export function LandingPage({ onGetStarted }) {
 
         <BackgroundCode />
 
-        {/* Navigation */}
         <motion.nav
           className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-6 px-6"
           initial={{ y: -100 }}
@@ -268,7 +267,7 @@ export function LandingPage({ onGetStarted }) {
                 transition={{ delay: 0.3 }}
               >
                 <a
-                  href="https://github.com/krockxz/gostman"
+                  href={REPOSITORY_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-2 text-sm hover:bg-muted/50")}
@@ -293,7 +292,6 @@ export function LandingPage({ onGetStarted }) {
           </div>
         </motion.nav>
 
-        {/* Hero Section */}
         <section className="relative pt-36 pb-16 px-6">
           <div className="max-w-4xl mx-auto">
             <motion.div
@@ -309,7 +307,7 @@ export function LandingPage({ onGetStarted }) {
               >
                 <Badge variant="outline" className="px-3 py-1 text-xs font-medium border-border/60 bg-muted/30">
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-success mr-2" />
-                  Open Source HTTP Client
+                  Open source API client
                 </Badge>
               </motion.div>
 
@@ -334,9 +332,9 @@ export function LandingPage({ onGetStarted }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.8 }}
               >
-                <span className="block">The HTTP Client</span>
+                <span className="block">An API client</span>
                 <span className="block mt-2 text-muted-foreground">
-                  For the Go Era
+                  for REST, GraphQL and WebSocket
                 </span>
               </motion.h1>
 
@@ -347,16 +345,7 @@ export function LandingPage({ onGetStarted }) {
                 style={{ willChange: "transform, opacity" }}
                 transition={{ delay: 0.5, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               >
-                The Native HTTP Client.{" "}
-                <motion.span
-                  className="text-primary font-medium"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  style={{ willChange: "transform, opacity" }}
-                  transition={{ delay: 0.8, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                >
-                  10x lighter than Postman.
-                </motion.span>
+                A native desktop app built with Go and Wails, with a web version for the browser. No account, and your data stays on your machine.
               </motion.p>
 
               <motion.div
@@ -373,7 +362,7 @@ export function LandingPage({ onGetStarted }) {
                   onClick={onGetStarted}
                 >
                   <Globe className="h-4 w-4" />
-                  Try Web Version
+                  Try the web version
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </motion.div>
@@ -383,7 +372,7 @@ export function LandingPage({ onGetStarted }) {
                 {...fadeIn}
                 transition={{ delay: 0.8 }}
               >
-                {["Free forever", "No account needed", "Open source"].map((text, i) => (
+                {HIGHLIGHTS.map((text, i) => (
                   <motion.div
                     key={text}
                     className="flex items-center gap-2"
@@ -403,14 +392,13 @@ export function LandingPage({ onGetStarted }) {
                 transition={{ delay: 1 }}
               >
                 <Badge variant="outline" className="gap-2 px-3 py-1 text-xs bg-muted/20 border-border/40">
-                  Powered by Wails (Go + React)
+                  Built with Wails (Go and React)
                 </Badge>
               </motion.div>
             </motion.div>
           </div>
         </section>
 
-        {/* Features in Action Section */}
         <section className="relative py-16 px-6">
           <div className="max-w-5xl mx-auto">
             <AnimatedSection className="mb-6" delay={0.1}>
@@ -442,43 +430,39 @@ export function LandingPage({ onGetStarted }) {
               </div>
             </AnimatedSection>
 
-            {/* Showcase Panel */}
             <ScaleIn delay={0.3}>
               <div className="relative flex h-[600px] flex-col rounded-lg border border-border/60 p-4 sm:p-6">
                 <AnimatePresence mode="wait">
-                  <Suspense fallback={<ShowcaseSkeleton />}>
-                    <motion.div
-                      key={activeTab}
-                      role="tabpanel"
-                      id={`showcase-panel-${activeTab}`}
-                      aria-labelledby={`showcase-tab-${activeTab}`}
-                      className="flex-1 min-h-0"
-                      initial={{ opacity: 0, x: 16 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -16 }}
-                      transition={{ duration: 0.28, ease: easeSmooth }}
-                    >
-                      {activeTab === "rest" && <RestShowcase />}
-                      {activeTab === "graphql" && <GraphQLShowcase />}
-                      {activeTab === "chaining" && <ChainingShowcase />}
-                      {activeTab === "websocket" && <WebSocketShowcase />}
-                    </motion.div>
-                  </Suspense>
+                  <motion.div
+                    key={activeTab}
+                    role="tabpanel"
+                    id={`showcase-panel-${activeTab}`}
+                    aria-labelledby={`showcase-tab-${activeTab}`}
+                    className="flex-1 min-h-0"
+                    initial={{ opacity: 0, x: 16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -16 }}
+                    transition={{ duration: 0.28, ease: easeSmooth }}
+                  >
+                    {activeTab === "rest" && <RestShowcase />}
+                    {activeTab === "graphql" && <GraphQLShowcase />}
+                    {activeTab === "chaining" && <ChainingShowcase />}
+                    {activeTab === "websocket" && <WebSocketShowcase />}
+                  </motion.div>
                 </AnimatePresence>
               </div>
             </ScaleIn>
           </div>
         </section>
 
-        {/* Features Section */}
         <section className="relative py-20 px-6">
           <div className="max-w-6xl mx-auto">
             <AnimatedSection className="mb-12 max-w-lg" delay={0.1}>
               <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
-                Six things it does without asking you to sign in
+                What it does
               </h2>
               <p className="mt-3 text-muted-foreground leading-relaxed">
-                No plugins, no paid tier, and no workspace to join before the first request.
+                No account, no plugins and no workspace to join before the first request.
               </p>
             </AnimatedSection>
 
@@ -501,79 +485,39 @@ export function LandingPage({ onGetStarted }) {
           </div>
         </section>
 
-        {/* Comparison Section */}
         <section className="relative py-20 px-6">
           <div className="max-w-3xl mx-auto">
             <AnimatedSection className="text-center mb-12" delay={0.1}>
               <h2 className="text-3xl md:text-4xl font-semibold mb-3">
-                Why Choose Gostman?
+                How it is built
               </h2>
               <p className="text-muted-foreground">
-                Fast, lightweight, private
+                What you get when you install it or open it in a browser.
               </p>
             </AnimatedSection>
 
             <SlideInFromRight delay={0.2}>
-              <div className="border-t border-border/40">
-                {/* Table Header */}
-                <div className="grid grid-cols-3 gap-4 py-4 border-b border-border/40">
-                  <div className="font-medium text-sm">Feature</div>
-                  <div className="text-center font-medium text-sm">Gostman</div>
-                  <div className="text-center font-medium text-sm text-muted-foreground">Others</div>
-                </div>
-
-                {/* Table Rows */}
-                <div className="divide-y divide-border/30">
-                  {COMPARISONS.map((item, index) => (
-                    <motion.div
-                      key={item.feature}
-                      className="grid grid-cols-3 gap-4 py-4 items-center"
-                      initial={slideInLeft.initial}
-                      whileInView={slideInLeft.animate}
-                      viewport={VIEWPORT_ONCE}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <div className="text-sm flex items-center">{item.feature}</div>
-                      <div className="flex items-center justify-center">
-                        {item.gostman ? (
-                          <motion.div
-                            initial={popIn.initial}
-                            whileInView={popIn.animate}
-                            viewport={VIEWPORT_ONCE}
-                            transition={{ delay: index * 0.05 + 0.1, type: "spring", stiffness: 200 }}
-                          >
-                            <Check className="h-5 w-5 text-success/70" strokeWidth={2.5} />
-                          </motion.div>
-                        ) : (
-                          <span className="text-muted-foreground/60">-</span>
-                        )}
-                      </div>
-                      <div className="flex items-center justify-center">
-                        {item.others ? (
-                          <Check className="h-5 w-5 text-success/70" strokeWidth={2.5} />
-                        ) : (
-                          <X className="h-5 w-5 text-muted-foreground/30" strokeWidth={2} />
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
+              <dl className="divide-y divide-border/30 border-y border-border/40">
+                {FACTS.map((fact) => (
+                  <div key={fact.label} className="grid gap-1 py-4 sm:grid-cols-3 sm:gap-4">
+                    <dt className="text-sm font-medium">{fact.label}</dt>
+                    <dd className="text-sm leading-relaxed text-muted-foreground sm:col-span-2">{fact.detail}</dd>
+                  </div>
+                ))}
+              </dl>
             </SlideInFromRight>
           </div>
         </section>
 
-        {/* CTA Section */}
         <section className="relative pb-20 px-6">
           <div className="max-w-3xl mx-auto">
             <AnimatedSection delay={0.1}>
               <div className="border-t border-border/40 pt-20 text-center">
                 <motion.h2 className="text-3xl md:text-4xl font-semibold mb-4" {...revealUp()}>
-                  Ready to Go Native?
+                  Get Gostman
                 </motion.h2>
                 <motion.p className="text-muted-foreground mb-8 max-w-lg mx-auto" {...revealUp(0.1)}>
-                  Join thousands who switched to a lighter, faster HTTP client.
-                  Download now.
+                  Download the desktop app, or open the web version in your browser.
                 </motion.p>
                 <motion.div
                   className="flex flex-col sm:flex-row items-center justify-center gap-4"
@@ -587,7 +531,7 @@ export function LandingPage({ onGetStarted }) {
                     onClick={onGetStarted}
                   >
                     <Globe className="h-4 w-4" />
-                    Try Web Version
+                    Try the web version
                   </Button>
                 </motion.div>
               </div>
@@ -595,7 +539,6 @@ export function LandingPage({ onGetStarted }) {
           </div>
         </section>
 
-        {/* Footer */}
         <footer className="border-t border-border/40 bg-muted/10 py-16 px-6">
           <div className="max-w-6xl mx-auto">
             <motion.div
@@ -611,28 +554,28 @@ export function LandingPage({ onGetStarted }) {
                 <div>
                   <span className="font-medium text-sm">Gostman</span>
                   <p className="text-xs text-muted-foreground/70 mt-0.5">
-                    A lightweight HTTP client for developers
+                    API client for REST, GraphQL and WebSocket
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-8">
                 <a
-                  href="https://github.com/krockxz/gostman"
+                  href={REPOSITORY_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors flex items-center gap-2"
+                  className="flex min-h-6 items-center gap-2 text-sm text-muted-foreground/70 transition-colors hover:text-foreground"
                 >
                   <Github className="h-4 w-4" />
                   GitHub
                 </a>
                 <a
-                  href="https://github.com/krockxz/gostman/issues"
+                  href={ISSUES_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors"
+                  className="flex min-h-6 items-center text-sm text-muted-foreground/70 transition-colors hover:text-foreground"
                 >
-                  Report Issue
+                  Report an issue
                 </a>
               </div>
             </motion.div>
@@ -645,7 +588,7 @@ export function LandingPage({ onGetStarted }) {
               transition={{ delay: 0.2 }}
             >
               <p className="text-sm text-muted-foreground/60">
-                © 2025 Gostman. Open source, always free.
+                Gostman is open source under the MIT license.
               </p>
             </motion.div>
           </div>

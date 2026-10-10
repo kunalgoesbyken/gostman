@@ -2,10 +2,6 @@ const VARIABLE_NAME = /^[a-zA-Z_][a-zA-Z0-9_-]*$/
 
 export const isVariableName = (name) => VARIABLE_NAME.test(name)
 
-/**
- * Validates a JSON string, reporting the failure position as line/column.
- * @returns {Object} { valid, error, parsed?, position?: { line, column, position } }
- */
 function validateJSON(jsonString) {
   if (!jsonString || jsonString.trim() === '') {
     return { valid: true, error: null, parsed: {} }
@@ -15,8 +11,6 @@ function validateJSON(jsonString) {
     const parsed = JSON.parse(jsonString)
     return { valid: true, error: null, parsed }
   } catch (error) {
-    // Engine-specific prefixes vary between V8 and SpiderMonkey; normalize them
-    // so the surfaced message reads the same everywhere.
     let message = error.message
     message = message.replace(/JSON\.parse: /, '')
     message = message.replace(/Unexpected token/, 'Unexpected token')
@@ -47,11 +41,6 @@ function validateJSON(jsonString) {
   }
 }
 
-/**
- * Validates an environment-variable map: valid identifier keys mapped to
- * scalar values only, since values are substituted into requests as strings.
- * @returns {Object} { valid, error?, parsed? }
- */
 export function validateEnvVariables(jsonString) {
   const result = validateJSON(jsonString)
   if (!result.valid) return result
@@ -78,7 +67,6 @@ export function validateEnvVariables(jsonString) {
   return result
 }
 
-/** Formats a validation result from validateEnvVariables for display. */
 export function formatJSONError(validationResult) {
   if (!validationResult.error) {
     return 'Valid JSON'

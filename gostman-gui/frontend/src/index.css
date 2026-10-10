@@ -1,4 +1,3 @@
-/* Import JetBrains Mono for that terminal/IDE feel and Outfit for the UI */
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
@@ -7,37 +6,29 @@
 
 @layer base {
   :root {
-    /* Deep terminal dark with slight blue tint */
+    color-scheme: dark;
+
     --background: 224 71% 4%;
     --foreground: 210 40% 98%;
 
-    /* Card surfaces with subtle elevation */
     --card: 224 71% 6%;
     --card-foreground: 210 40% 98%;
 
-    /* Electric cyan primary - unmistakable developer aesthetic */
     --primary: 191 96% 54%;
     --primary-foreground: 224 71% 4%;
 
-    /* Muted surfaces */
     --secondary: 224 40% 12%;
     --secondary-foreground: 210 40% 98%;
 
-    /* Subtle text */
     --muted: 224 40% 15%;
     --muted-foreground: 215 20% 65%;
 
-    /* Accent surfaces */
     --accent: 224 40% 12%;
     --accent-foreground: 210 40% 98%;
 
-    /* Error states */
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    /* Feedback states. These carry meaning that --primary cannot: valid vs
-       needs-attention vs informational. Components reference these rather than
-       reaching for raw palette values like emerald-400. */
     --success: 158 64% 52%;
     --success-foreground: 224 71% 4%;
     --warning: 38 92% 50%;
@@ -45,39 +36,25 @@
     --info: 217 91% 60%;
     --info-foreground: 224 71% 4%;
 
-    /* Borders - subtle like terminal dividers */
     --border: 224 40% 15%;
     --input: 224 40% 15%;
     --ring: 191 96% 54%;
 
-    /* Spacing radius */
     --radius: 0.375rem;
-
-    /* Scrollbar track width. The thumb is inset 3px inside this by a
-       transparent border, so it reads as ~4px while keeping a 10px target. */
     --scrollbar-size: 10px;
 
-    /* Code syntax palette. Deliberately separate from the feedback tokens: a
-       JSON string is not "successful", it is a string. Shared by the response
-       highlighter and the landing showcases so both speak one language. */
     --syntax-key: 191 96% 54%;
     --syntax-string: 142 76% 56%;
     --syntax-number: 25 95% 53%;
     --syntax-boolean: 280 74% 64%;
     --syntax-null: 0 84% 60%;
     --syntax-punctuation: 38 92% 60%;
-
-    /* Status code colors */
-    --status-2xx: 142 76% 36%;
-    --status-3xx: 199 89% 48%;
-    --status-4xx: 25 95% 53%;
-    --status-5xx: 0 84% 60%;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.25) transparent;
   }
 
   body {
@@ -87,35 +64,21 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Monospace for code-like elements */
   .font-mono {
     font-family: 'JetBrains Mono', 'Courier New', monospace;
   }
-}
 
-@layer components {
-  kbd {
-    @apply inline-flex items-center gap-0.5 rounded border border-border bg-muted px-1.5 py-0.5;
-    @apply font-mono text-[10px] font-medium text-muted-foreground;
+  :focus {
+    outline: none;
   }
-}
 
-/**
- * Scrollbars.
- *
- * Themed globally rather than behind an opt-in utility. The previous
- * `.scrollbar-thin` / `.custom-scrollbar` pair had to be remembered at every
- * scroll container, and the ones that forgot rendered the platform scrollbar --
- * an opaque light-grey bar with stepper arrows, straight through a dark UI.
- * Styling `*` makes theme-correct the default and leaves nothing to remember.
- *
- * Firefox gets `scrollbar-width`/`scrollbar-color`; Chromium and WebKit get the
- * `::-webkit-scrollbar` pseudo-elements, which also drop the stepper buttons.
- */
-@layer base {
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: hsl(var(--muted-foreground) / 0.25) transparent;
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: -2px;
+  }
+
+  option {
+    @apply bg-background text-foreground;
   }
 
   *::-webkit-scrollbar {
@@ -123,7 +86,6 @@
     height: var(--scrollbar-size);
   }
 
-  /* Transparent track: the bar reads as an overlay on whatever it scrolls. */
   *::-webkit-scrollbar-track,
   *::-webkit-scrollbar-corner {
     background: transparent;
@@ -132,11 +94,8 @@
   *::-webkit-scrollbar-thumb {
     background: hsl(var(--muted-foreground) / 0.25);
     border-radius: 9999px;
-    /* Inset via a transparent border so the thumb is slimmer than the
-       hit target, which stays a comfortable full width. */
     border: 3px solid transparent;
     background-clip: content-box;
-    transition: background-color 0.2s ease;
   }
 
   *::-webkit-scrollbar-thumb:hover {
@@ -144,44 +103,19 @@
     background-clip: content-box;
   }
 
-  *::-webkit-scrollbar-thumb:active {
-    background: hsl(var(--muted-foreground) / 0.6);
-    background-clip: content-box;
-  }
-
-  /* Steppers are a platform affordance this UI does not use anywhere. */
   *::-webkit-scrollbar-button {
     display: none;
   }
 }
 
+@layer components {
+  kbd {
+    @apply inline-flex shrink-0 items-center rounded border border-border px-1.5 py-0.5;
+    @apply font-mono text-[10px] font-medium text-muted-foreground;
+  }
+}
+
 @layer utilities {
-  /* Opt-in accent, for surfaces where the scrollbar is part of the content
-     rather than chrome -- the response body and data tables. */
-  .scrollbar-primary {
-    scrollbar-color: hsl(var(--primary) / 0.35) transparent;
-  }
-
-  .scrollbar-primary::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary) / 0.3);
-    background-clip: content-box;
-  }
-
-  .scrollbar-primary::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--primary) / 0.5);
-    background-clip: content-box;
-  }
-
-  /* For dense chrome (tab strips, palettes) where 10px is too much. */
-  .scrollbar-compact::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  .scrollbar-compact::-webkit-scrollbar-thumb {
-    border-width: 2px;
-  }
-
   .scrollbar-none {
     scrollbar-width: none;
   }
@@ -191,150 +125,24 @@
   }
 }
 
-/**
- * Skeleton shimmer. A light band travels across the placeholder instead of the
- * whole block blinking, which reads as "loading" rather than "broken".
- * Animates background-position only -- no layout, no repaint of siblings.
- */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.animate-shimmer {
-  background-image: linear-gradient(90deg,
-      transparent 0%,
-      hsl(var(--muted-foreground) / 0.12) 50%,
-      transparent 100%);
-  background-size: 200% 100%;
-  background-repeat: no-repeat;
-  animation: shimmer 1.8s ease-in-out infinite;
-}
-
-/* Reduced motion support for accessibility */
-@media (prefers-reduced-motion: reduce) {
-  /* Without the travelling band, fall back to a flat fill rather than
-     freezing the gradient at an arbitrary position. */
-  .animate-shimmer {
-    animation: none !important;
-    background-image: none;
-    background-color: hsl(var(--muted-foreground) / 0.12);
-  }
-
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Skip link for accessibility */
 .skip-link {
   position: absolute;
   top: -40px;
   left: 0;
+  z-index: 100;
+  padding: 8px 16px;
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
-  padding: 8px 16px;
-  z-index: 100;
-  transition: top 0.3s;
 }
 
 .skip-link:focus {
   top: 0;
 }
 
-/* Custom styling for react-json-view-lite */
-@layer components {
-  .json-tree-wrapper {
-    @apply text-sm;
-    background: transparent !important;
-  }
-
-  /* Force dark theme for all react-json-view-lite elements */
-  .json-tree-wrapper *,
-  .json-tree-wrapper *::before,
-  .json-tree-wrapper *::after {
-    background-color: transparent !important;
-    background: transparent !important;
-    color: hsl(var(--foreground)) !important;
-  }
-
-  /* Restore specific colors for JSON syntax */
-  .json-tree-wrapper .json-view__key {
-    color: hsl(var(--syntax-key)) !important;
-    font-weight: 500 !important;
-  }
-
-  .json-tree-wrapper .json-view__string {
-    color: hsl(var(--syntax-string)) !important;
-  }
-
-  .json-tree-wrapper .json-view__number {
-    color: hsl(var(--syntax-number)) !important;
-  }
-
-  .json-tree-wrapper .json-view__boolean {
-    color: hsl(var(--syntax-boolean)) !important;
-  }
-
-  .json-tree-wrapper .json-view__null {
-    color: hsl(var(--syntax-null)) !important;
-    font-style: italic !important;
-  }
-
-  .json-tree-wrapper .json-view__punctuation {
-    color: hsl(var(--muted-foreground)) !important;
-  }
-
-  /* Override react-json-view-lite default styles */
-  .json-tree-wrapper .json-view {
-    background: transparent !important;
-    padding: 0 !important;
-    line-height: 1.6 !important;
-  }
-
-  .json-tree-wrapper .json-view__row {
-    padding: 2px 0 !important;
-    transition: background-color 0.15s ease;
-    background: transparent !important;
-  }
-
-  .json-tree-wrapper .json-view__row:hover {
-    background-color: hsl(var(--muted) / 0.3) !important;
-    border-radius: 4px;
-  }
-
-  /* Expand/collapse icons */
-  .json-tree-wrapper .json-view__expand-icon,
-  .json-tree-wrapper .json-view__collapse-icon {
-    color: hsl(var(--primary)) !important;
-    cursor: pointer !important;
-    margin-right: 6px !important;
-    transition: transform 0.2s ease, color 0.15s ease !important;
-    background: transparent !important;
-  }
-
-  .json-tree-wrapper .json-view__expand-icon:hover,
-  .json-tree-wrapper .json-view__collapse-icon:hover {
-    color: hsl(var(--primary) / 0.8) !important;
-  }
-
-  /* Collapsed preview */
-  .json-tree-wrapper .json-view__ellipsis {
-    color: hsl(var(--muted-foreground) / 0.6) !important;
-    margin-left: 4px !important;
-  }
-
-  /* Size badges (e.g., "3 items") */
-  .json-tree-wrapper .json-view__item-count {
-    color: hsl(var(--muted-foreground) / 0.7) !important;
-    font-size: 0.85em !important;
-    margin-left: 6px !important;
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

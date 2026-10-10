@@ -9,12 +9,17 @@ import {
   SaveFile,
   SaveFolders,
   SaveHistory,
-  SaveRequest,
+  SaveRequests,
   SendRequest,
 } from '../../../wailsjs/go/main/App'
 import { openDesktopSocket } from './desktopSocket'
 import { toEngineRequest } from '../request'
 import { failureResponse } from '../response'
+
+async function saveRequest(request) {
+  const [saved] = await SaveRequests([request])
+  return saved
+}
 
 async function send(id, request, variables) {
   try {
@@ -30,7 +35,8 @@ export const desktopBackend = {
   prepare: (request, variables) => PrepareRequest(toEngineRequest(request, variables)),
   parseCurl: (command) => ParseCurl(command),
   load: () => LoadData(),
-  saveRequest: (request) => SaveRequest(request),
+  saveRequest,
+  saveRequests: (requests) => SaveRequests(requests),
   deleteRequest: (id) => DeleteRequest(id),
   saveFolders: (folders) => SaveFolders(folders),
   saveHistory: (history) => SaveHistory(history),

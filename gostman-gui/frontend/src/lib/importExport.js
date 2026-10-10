@@ -1,24 +1,30 @@
 import { dereference, validate } from '@scalar/openapi-parser'
 import YAML from 'js-yaml'
-import { BODY_BINARY, BODY_FORM, BODY_JSON, BODY_MULTIPART, BODY_NONE, BODY_TEXT, BODY_XML } from './body'
-import { buildCollectionTree, foldersIn, listFolders, requestsIn, ROOT_ID } from './collectionTree'
-import { isPlainObject, parseJSON, pluralize } from './dataUtils'
+import { BODY_BINARY, BODY_FORM, BODY_JSON, BODY_MULTIPART, BODY_NONE, BODY_TEXT, BODY_TYPES, BODY_XML } from './body'
+import { buildCollectionTree, folderDepth, foldersIn, listFolders, MAX_FOLDER_DEPTH, requestsIn, ROOT_ID } from './collectionTree'
+import { isPlainObject, lookup, parseJSON, pluralize } from './dataUtils'
 import { readParamRows } from './queryString'
+import { normalizeRequest } from './request'
 import { isFileRow, isSentRow, parseRows, ROW_FILE, ROW_TEXT, serializeRows } from './rows'
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024
 
 const MAX_RECURSION_DEPTH = 10
-const MAX_FOLDER_DEPTH = 100
 const MAX_VALIDATION_ERRORS = 10
 const MAX_NAMES_IN_WARNING = 5
+const MAX_NAME_LENGTH = 200
+const MAX_METHOD_LENGTH = 16
 
 const POSTMAN_SCHEMA_MARKER = 'postman.com/json/collection'
 const POSTMAN_SCHEMA = 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json'
 const GOSTMAN_FORMAT_VERSION = '2.0.0'
 const GRAPHQL_METHOD = 'GRAPHQL'
 const OPENAPI_METHODS = ['get', 'post', 'put', 'delete', 'patch', 'options', 'head', 'trace']
-const UNTITLED_REQUEST = 'Untitled Request'
+const UNTITLED_REQUEST = 'Untitled request'
+const UNTITLED_FOLDER = 'Folder'
+const UNTITLED_ENVIRONMENT = 'Environment'
+const DEFAULT_METHOD = 'GET'
+const METHOD_TOKEN = /^[A-Z]+$/
 
 const AUTH_BASIC = 'basic'
 const AUTH_BEARER = 'bearer'
@@ -55,86 +61,22 @@ function withoutQuery(url) {
   return queryStart === -1 ? url : url.slice(0, queryStart)
 }
 
-/**
- * Safely stringifies a value, handling circular references and other edge cases.
- * Uses a WeakSet to track circular references and replaces them with a placeholder.
- * @param {any} value - The value to stringify
- * @param {string|null} [placeholder=null] - Placeholder for circular refs (defaults to "[Circular]")
- * @returns {string} JSON string or empty string on error
- */
-function safeStringify(value, placeholder = null) {
+function safeStringify(value) {
   if (value === undefined) return ''
-  if (value === null) return 'null'
-
-  try {
-    if (typeof value !== 'object') {
-      return JSON.stringify(value)
-    }
-
-    const seen = new WeakSet()
-    const circularPlaceholder = placeholder || '[Circular Reference]'
-
-    const result = JSON.stringify(value, (key, val) => {
-      if (typeof val === 'object' && val !== null) {
-        if (seen.has(val)) {
-          return circularPlaceholder
-        }
-        seen.add(val)
-      }
-      if (typeof val === 'function') {
-        return '[Function]'
-      }
-      if (val === undefined) {
-        return null
-      }
-      if (typeof val === 'symbol') {
-        return val.toString()
-      }
-      return val
-    }, 2)
-
-    return result
-  } catch (error) {
-    // Fallback for very complex objects or edge cases
-    console.warn('safeStringify failed:', error.message)
-    try {
-      return JSON.stringify(
-        Object.keys(value || {}).reduce((acc, key) => {
-          try {
-            acc[key] = typeof value[key] === 'object'
-              ? (Array.isArray(value[key]) ? [] : {})
-              : value[key]
-          } catch {
-            acc[key] = '[Error accessing value]'
-          }
-          return acc
-        }, {}),
-        null,
-        2
-      )
-    } catch {
-      return '{}'
-    }
-  }
+  const seen = new WeakSet()
+  return JSON.stringify(value, (key, nested) => {
+    if (typeof nested !== 'object' || nested === null) return nested
+    if (seen.has(nested)) return '[Circular Reference]'
+    seen.add(nested)
+    return nested
+  }, 2)
 }
 
-/**
- * Simple UUID generator (using crypto.randomUUID if available, else fallback)
- * @returns {string} A unique ID string
- */
-function generateId() {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID()
-  }
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = Math.random() * 16 | 0
-    const v = c === 'x' ? r : (r & 0x3 | 0x8)
-    return v.toString(16)
-  })
-}
+const generateId = () => crypto.randomUUID()
 
 function uniqueId(candidate, usedIds) {
-  const id = candidate && !usedIds.has(candidate) ? candidate : generateId()
+  const isFree = typeof candidate === 'string' && candidate !== '' && !usedIds.has(candidate)
+  const id = isFree ? candidate : generateId()
   usedIds.add(id)
   return id
 }
@@ -182,14 +124,14 @@ const POSTMAN_AUTH_READERS = {
 }
 
 function postmanAuthFields(auth) {
-  const fields = auth[auth.type]
+  const fields = lookup(auth, auth.type)
   if (isPlainObject(fields)) return fields
   return Object.fromEntries(asArray(fields).filter(hasKey).map((field) => [field.key, field.value]))
 }
 
 function resolvePostmanAuth(auth, inherited, context) {
   if (!isPlainObject(auth) || !auth.type || auth.type === 'inherit') return inherited
-  const read = POSTMAN_AUTH_READERS[auth.type]
+  const read = lookup(POSTMAN_AUTH_READERS, auth.type)
   if (read) return read(postmanAuthFields(auth))
   context.unsupportedAuth.set(auth.type, (context.unsupportedAuth.get(auth.type) || 0) + 1)
   return NO_AUTH
@@ -225,7 +167,7 @@ function postmanGraphQLVariables(variables) {
 }
 
 const POSTMAN_BODY_READERS = {
-  raw: (body) => ({ body: asText(body.raw), bodyType: POSTMAN_RAW_BODY_TYPES[body.options?.raw?.language] || '' }),
+  raw: (body) => ({ body: asText(body.raw), bodyType: lookup(POSTMAN_RAW_BODY_TYPES, body.options?.raw?.language) || '' }),
   urlencoded: (body) => ({ body: rowsField(postmanRows(body.urlencoded)), bodyType: BODY_FORM }),
   formdata: postmanFormDataBody,
   file: () => ({ body: '', bodyType: BODY_BINARY, needsFiles: true }),
@@ -238,7 +180,7 @@ const POSTMAN_BODY_READERS = {
 
 function readPostmanBody(body) {
   if (!isPlainObject(body) || body.disabled) return {}
-  const read = POSTMAN_BODY_READERS[body.mode]
+  const read = lookup(POSTMAN_BODY_READERS, body.mode)
   return read ? read(body) : {}
 }
 
@@ -251,17 +193,19 @@ function readPostmanRequest(item, folderId, inheritedAuth, context) {
   const { needsFiles, ...body } = readPostmanBody(source.body)
   const name = asText(item.name).trim() || UNTITLED_REQUEST
   if (needsFiles) context.requestsNeedingFiles.push(name)
-  if (item.protocolProfileBehavior?.strictSSL === false) context.requestsWithoutTls.push(name)
   return {
     id: uniqueId(item.id, context.usedIds),
     name,
-    method: asText(source.method).trim().toUpperCase() || 'GET',
+    method: asText(source.method),
     url: postmanUrl(source.url),
     headers: rowsField(postmanRows(source.header)),
     queryParams: rowsField(postmanRows(source.url?.query).map((row, position) => ({ ...row, position }))),
     folderId,
     auth: resolvePostmanAuth(source.auth, inheritedAuth, context),
-    options: { noFollowRedirects: item.protocolProfileBehavior?.followRedirects === false, insecureTLS: false },
+    options: {
+      noFollowRedirects: item.protocolProfileBehavior?.followRedirects === false,
+      insecureTLS: item.protocolProfileBehavior?.strictSSL === false,
+    },
     ...body,
   }
 }
@@ -269,7 +213,7 @@ function readPostmanRequest(item, folderId, inheritedAuth, context) {
 function readPostmanFolder(item, parentId, inheritedAuth, context, depth) {
   const folder = {
     id: uniqueId(item.id, context.usedIds),
-    name: asText(item.name).trim() || 'Folder',
+    name: asText(item.name).trim() || UNTITLED_FOLDER,
     isOpen: false,
     parentId,
   }
@@ -313,14 +257,13 @@ function postmanWarnings(context) {
   if (context.requestsNeedingFiles.length > 0) {
     warnings.push(`Files are not part of a Postman export. Attach them again in ${listNames(context.requestsNeedingFiles)}.`)
   }
-  if (context.requestsWithoutTls.length > 0) warnings.push(tlsWarning(context.requestsWithoutTls))
   if (context.depthExceeded) {
     warnings.push(`Folders nested deeper than ${MAX_FOLDER_DEPTH} levels were skipped.`)
   }
   return warnings
 }
 
-export function parsePostmanCollection(source) {
+function parsePostmanCollection(source) {
   try {
     const data = typeof source === 'string' ? JSON.parse(source) : source
     if (!asText(data?.info?.schema).includes(POSTMAN_SCHEMA_MARKER)) {
@@ -332,7 +275,6 @@ export function parsePostmanCollection(source) {
       usedIds: new Set(),
       unsupportedAuth: new Map(),
       requestsNeedingFiles: [],
-      requestsWithoutTls: [],
       depthExceeded: false,
     }
     readPostmanItems(data.item, ROOT_ID, resolvePostmanAuth(data.auth, NO_AUTH, context), context)
@@ -348,17 +290,6 @@ export function parsePostmanCollection(source) {
   }
 }
 
-/**
- * Joins URL parts, handling trailing/leading slashes correctly
- * @param {string} baseUrl - Base URL
- * @param {string} path - Path to append
- * @returns {string} Properly joined URL
- *
- * @example
- * joinUrlParts("https://api.example.com", "/users") → "https://api.example.com/users"
- * joinUrlParts("https://api.example.com/", "users") → "https://api.example.com/users"
- * joinUrlParts("https://api.example.com/", "/users") → "https://api.example.com/users"
- */
 function joinUrlParts(baseUrl, path) {
   if (!baseUrl) return path || ''
   if (!path) return baseUrl
@@ -370,11 +301,6 @@ function joinUrlParts(baseUrl, path) {
   return normalizedBase + '/' + normalizedPath
 }
 
-/**
- * Gets base URL from server configuration, handling variables
- * @param {Object} server - OpenAPI server object
- * @returns {{url: string, isRelative: boolean}} Object with URL and relative flag
- */
 function getServerUrl(server) {
   if (!server) return { url: '', isRelative: false }
 
@@ -383,11 +309,7 @@ function getServerUrl(server) {
   if (server.variables) {
     Object.entries(server.variables || {}).forEach(([name, config]) => {
       const defaultValue = config.default ?? config.enum?.[0]
-      if (defaultValue === undefined) {
-        // Variable has no default value - keep placeholder and warn
-        console.warn(`Server variable {${name}} has no default value`)
-        return // Don't substitute - leave placeholder intact
-      }
+      if (defaultValue === undefined) return
       url = url.replace(`{${name}}`, defaultValue)
     })
   }
@@ -407,7 +329,7 @@ const OPENAPI_API_KEY_LOCATIONS = [AUTH_IN_HEADER, AUTH_IN_QUERY]
 
 function authFromSecurityScheme(scheme) {
   if (!isPlainObject(scheme)) return NO_AUTH
-  if (scheme.type === 'http') return OPENAPI_HTTP_AUTH[asText(scheme.scheme).toLowerCase()] || NO_AUTH
+  if (scheme.type === 'http') return lookup(OPENAPI_HTTP_AUTH, asText(scheme.scheme).toLowerCase()) || NO_AUTH
   if (OPENAPI_TOKEN_SCHEMES.includes(scheme.type)) return { type: AUTH_BEARER, token: '{{accessToken}}' }
   if (scheme.type === 'apiKey' && OPENAPI_API_KEY_LOCATIONS.includes(scheme.in)) {
     return { type: AUTH_API_KEY, key: asText(scheme.name), value: '{{apiKey}}', in: scheme.in }
@@ -420,19 +342,12 @@ function openAPIAuth(spec, operation) {
   if (alternatives.length !== 1 || !isPlainObject(alternatives[0])) return NO_AUTH
   const schemeNames = Object.keys(alternatives[0])
   if (schemeNames.length !== 1) return NO_AUTH
-  return authFromSecurityScheme(spec.components?.securitySchemes?.[schemeNames[0]])
+  return authFromSecurityScheme(lookup(spec.components?.securitySchemes || {}, schemeNames[0]))
 }
 
-/**
- * Extracts query parameters from an OpenAPI operation
- * @param {Object} operation - OpenAPI operation object
- * @param {Array} pathParameters - Path-level parameters to merge
- * @returns {Object|null} Query parameters as key-value pairs, or null if empty
- */
 function extractOpenAPIQueryParams(operation = {}, pathParameters = []) {
   const queryParams = {}
 
-  // Merge path-level and operation-level parameters (operation overrides path)
   const paramMap = new Map()
 
   ;(pathParameters || [])
@@ -453,13 +368,6 @@ function extractOpenAPIQueryParams(operation = {}, pathParameters = []) {
   return Object.keys(queryParams).length > 0 ? queryParams : null
 }
 
-/**
- * Extracts path parameters from URL and OpenAPI operation
- * @param {string} path - URL path with {param} placeholders
- * @param {Object} operation - OpenAPI operation object
- * @param {Array} pathParameters - Path-level parameters
- * @returns {Object} Path parameters as key-value pairs
- */
 function extractOpenAPIPathParams(path, operation = {}, pathParameters = []) {
   const pathParams = {}
 
@@ -479,15 +387,6 @@ function extractOpenAPIPathParams(path, operation = {}, pathParameters = []) {
   pathParamNames.forEach(paramName => {
     const param = paramMap.get(paramName)
 
-    // Warn if path parameter is not defined in OpenAPI parameters
-    if (!param) {
-      console.warn(
-        `Path parameter "{${paramName}}" is used in the URL path ` +
-        `but is not defined in the OpenAPI parameters. ` +
-        `Add a parameter definition with 'in: path' and 'required: true'.`
-      )
-    }
-
     const value = param?.example ||
                   param?.schema?.example ||
                   getExampleValueFromSchema(param?.schema) ||
@@ -498,16 +397,9 @@ function extractOpenAPIPathParams(path, operation = {}, pathParameters = []) {
   return pathParams
 }
 
-/**
- * Extracts headers from an OpenAPI operation
- * @param {Object} operation - OpenAPI operation object
- * @param {Array} pathParameters - Path-level parameters to merge
- * @returns {Object} Headers as key-value pairs
- */
 function extractOpenAPIHeaders(operation = {}, pathParameters = []) {
   const headers = {}
 
-  // Merge path-level and operation-level parameters (operation overrides path)
   const paramMap = new Map()
 
   ;(pathParameters || [])
@@ -578,7 +470,7 @@ function openAPIBody(requestBody) {
   if (!contentType) return { body: '', bodyType: '', contentType: '' }
 
   const bodyType = bodyTypeForContentType(contentType)
-  const isEngineDefault = bodyType === BODY_MULTIPART || BODY_CONTENT_TYPES[bodyType] === contentType
+  const isEngineDefault = bodyType === BODY_MULTIPART || lookup(BODY_CONTENT_TYPES, bodyType) === contentType
   return {
     body: serializeExample(openAPIExample(requestBody.content[contentType] || {}), bodyType),
     bodyType,
@@ -586,11 +478,6 @@ function openAPIBody(requestBody) {
   }
 }
 
-/**
- * Gets an example value from an OpenAPI schema
- * @param {Object} schema - OpenAPI schema object
- * @returns {any} Example value
- */
 function getExampleValueFromSchema(schema) {
   if (!schema) return undefined
 
@@ -624,32 +511,24 @@ function getExampleValueFromSchema(schema) {
   }
 }
 
-/**
- * Resolves a $ref reference in the spec
- * @param {string} ref - The $ref string
- * @param {Object} spec - The full OpenAPI spec
- * @returns {Object|null} The resolved schema or null if not found
- */
 function resolveRef(ref, spec) {
   if (!ref || !spec) return null
 
-  // Handle external references - track them but don't resolve
   if (!ref.startsWith('#/')) {
-    // Track external refs in the spec
     if (!spec._externalRefs) {
       spec._externalRefs = []
     }
     if (!spec._externalRefs.includes(ref)) {
       spec._externalRefs.push(ref)
     }
-    return null // External references not supported
+    return null
   }
 
   const path = ref.substring(2).split('/')
   let current = spec
 
   for (const key of path) {
-    if (current && typeof current === 'object' && key in current) {
+    if (current && typeof current === 'object' && Object.hasOwn(current, key)) {
       current = current[key]
     } else {
       return null
@@ -659,14 +538,6 @@ function resolveRef(ref, spec) {
   return current
 }
 
-/**
- * Generates a JSON example from an OpenAPI schema
- * @param {Object} schema - OpenAPI schema object
- * @param {number} depth - Current recursion depth
- * @param {WeakSet} seenSchemas - WeakSet of seen schema objects to detect circular references
- * @param {Object} spec - Full OpenAPI spec for $ref resolution
- * @returns {string} JSON string of generated example
- */
 function generateExampleFromSchema(schema, depth = 0, seenSchemas = null, spec = null) {
   if (depth > MAX_RECURSION_DEPTH) {
     return '{}'
@@ -678,7 +549,6 @@ function generateExampleFromSchema(schema, depth = 0, seenSchemas = null, spec =
     spec._circularRefs = []
   }
 
-  // Use a single WeakSet per top-level call to track seen schemas
   const freshSeenSchemas = seenSchemas || new WeakSet()
 
   function generate(schema, currentDepth, seen) {
@@ -689,17 +559,15 @@ function generateExampleFromSchema(schema, depth = 0, seenSchemas = null, spec =
     if (schema.$ref) {
       const resolved = resolveRef(schema.$ref, spec)
 
-      // Check for circular reference using WeakSet for object identity tracking
       if (!resolved) {
         return {}
       }
 
       if (seen.has(resolved)) {
-        // Circular reference detected - track and skip
         if (spec && !spec._circularRefs.includes(schema.$ref)) {
           spec._circularRefs.push(schema.$ref)
         }
-        return null // Skip circular refs instead of including placeholder
+        return null
       }
 
       seen.add(resolved)
@@ -744,14 +612,6 @@ function generateExampleFromSchema(schema, depth = 0, seenSchemas = null, spec =
 
     const schemaType = schema.type || (schema.properties ? 'object' : schema.enum ? 'string' : undefined)
 
-    // Warn about invalid schema without type, enum, or const
-    if (!schemaType && !schema.enum && schema.const === undefined) {
-      console.warn(
-        'Schema is missing "type" property and has no "enum" or "const" values. ' +
-        'This may result in invalid example generation.'
-      )
-    }
-
     switch (schemaType) {
       case 'string': {
         const example = getExampleValueFromSchema(schema)
@@ -774,7 +634,6 @@ function generateExampleFromSchema(schema, depth = 0, seenSchemas = null, spec =
         if (!schema.properties) return {}
         const obj = {}
         Object.entries(schema.properties).forEach(([key, propSchema]) => {
-          // Include required properties or those with defaults/examples
           if (schema.required?.includes(key) ||
               propSchema.default !== undefined ||
               propSchema.example !== undefined ||
@@ -782,7 +641,6 @@ function generateExampleFromSchema(schema, depth = 0, seenSchemas = null, spec =
             obj[key] = generate(propSchema, currentDepth + 1, seen)
           }
         })
-        // If object is empty, add at least one property for reference
         if (Object.keys(obj).length === 0) {
           const firstKey = Object.keys(schema.properties)[0]
           if (firstKey) {
@@ -792,7 +650,6 @@ function generateExampleFromSchema(schema, depth = 0, seenSchemas = null, spec =
         return obj
       }
       default:
-        // Handle schemas without explicit type but with const
         if (schema.const !== undefined) {
           return schema.const
         }
@@ -875,12 +732,7 @@ function importOpenAPISpec(spec) {
   return { requests, folders: Array.from(tagFolders.values()), warnings: [] }
 }
 
-/**
- * Parses an OpenAPI spec string (JSON or YAML) and converts to Gostman format
- * @param {string} specString - OpenAPI spec as JSON or YAML string
- * @returns {Promise<Object>} Parsed result with success flag, requests, folders, and error if failed
- */
-export async function parseOpenAPISpec(specString) {
+async function parseOpenAPISpec(specString) {
   let jsonError = null
   let yamlError = null
 
@@ -894,17 +746,14 @@ export async function parseOpenAPISpec(specString) {
 
     let spec
 
-    // Try JSON first, capture error for better reporting
     try {
       spec = JSON.parse(specString)
     } catch (jsonErr) {
       jsonError = jsonErr
-      // Try YAML, capture error for better reporting
       try {
         spec = parseYAML(specString)
       } catch (yamlErr) {
         yamlError = yamlErr
-        // Both parsers failed - provide combined error message
         return {
           success: false,
           error: `Could not parse the file as valid JSON or YAML.\n\nJSON error: ${jsonError.message || 'Invalid JSON syntax'}\nYAML error: ${yamlError.message || 'Invalid YAML syntax'}\n\nPlease check that your file is properly formatted.`
@@ -919,7 +768,6 @@ export async function parseOpenAPISpec(specString) {
       }
     }
 
-    // Initialize external refs and circular refs tracking
     if (!spec._externalRefs) {
       spec._externalRefs = []
     }
@@ -927,7 +775,6 @@ export async function parseOpenAPISpec(specString) {
       spec._circularRefs = []
     }
 
-    // Validate and ensure it's OpenAPI 3.x or 3.1
     if (spec.openapi) {
       if (!spec.openapi.startsWith('3')) {
         return {
@@ -944,10 +791,8 @@ export async function parseOpenAPISpec(specString) {
       }
     }
 
-    // Validate using @scalar/openapi-parser
     const validation = await validateOpenAPI(spec)
     if (!validation.valid) {
-      // Limit errors to first MAX_VALIDATION_ERRORS and show count
       const allErrors = Array.isArray(validation.errors) ? validation.errors : []
       const displayErrors = allErrors.slice(0, MAX_VALIDATION_ERRORS)
       const errorMessages = displayErrors.map(e => `- ${e.message || e}`).join('\n')
@@ -962,16 +807,13 @@ export async function parseOpenAPISpec(specString) {
       }
     }
 
-    // Ensure validation.spec exists and is an object
     const validatedSpec = validation.spec && typeof validation.spec === 'object' ? validation.spec : spec
 
-    // Check for relative server URLs - add warning but allow import
     const serverInfo = getServerUrl(validatedSpec.servers?.[0]) || { url: '', isRelative: false }
     const { url: serverUrl, isRelative } = serverInfo
 
     const result = importOpenAPISpec(validatedSpec)
 
-    // Add warnings about relative URLs, external refs, and circular refs
     const warnings = []
     if (isRelative || !serverUrl) {
       warnings.push(`Server URL is relative (${serverUrl || '/path'}). You may need to update the base URL in requests to match your API server.`)
@@ -985,7 +827,6 @@ export async function parseOpenAPISpec(specString) {
       warnings.push(`Skipped ${circularRefs.length} circular reference(s) during example generation.`)
     }
 
-    // Ensure result is a plain object before spreading
     const resultObj = result && typeof result === 'object' ? result : { requests: [], folders: [], collectionName: 'Import' }
 
     return {
@@ -1087,7 +928,7 @@ function openAPIRequestBody(request) {
   const declared = sentRows(request.headers).find((row) => row.key.toLowerCase() === 'content-type')
   const contentType = declared
     ? declared.value.split(';')[0].trim()
-    : BODY_CONTENT_TYPES[bodyType] || BODY_CONTENT_TYPES[BODY_TEXT]
+    : lookup(BODY_CONTENT_TYPES, bodyType) || BODY_CONTENT_TYPES[BODY_TEXT]
   return mediaContent(contentType, rawMediaType(body, contentType))
 }
 
@@ -1131,12 +972,6 @@ function exportToOpenAPI(requests, options = {}) {
   }
 }
 
-/**
- * Infers JSON Schema from a JavaScript object
- * @param {any} obj - Object to infer schema from
- * @param {WeakSet} seen - Set of already seen objects for circular reference detection
- * @returns {Object} JSON Schema
- */
 function inferSchemaFromObject(obj, seen = new WeakSet()) {
   if (obj === null) return { type: 'null' }
   if (typeof obj === 'string') return { type: 'string' }
@@ -1179,12 +1014,6 @@ function inferSchemaFromObject(obj, seen = new WeakSet()) {
   return {}
 }
 
-/**
- * Validates and optionally dereferences an OpenAPI spec using @scalar/openapi-parser
- * @param {Object|string} spec - OpenAPI spec object or JSON string
- * @param {Object} options - Validation options
- * @returns {Promise<Object>} Validation result with valid flag and errors
- */
 async function validateOpenAPI(spec, options = {}) {
   const { dereference: shouldDereference = false } = options
 
@@ -1193,8 +1022,6 @@ async function validateOpenAPI(spec, options = {}) {
       spec = JSON.parse(spec)
     }
 
-    // Remove custom tracking properties that would cause validation errors
-    // These are added by our import processing but shouldn't be in the spec
     const specCopy = { ...spec }
     delete specCopy._externalRefs
     delete specCopy._circularRefs
@@ -1215,7 +1042,6 @@ async function validateOpenAPI(spec, options = {}) {
 
     if (shouldDereference) {
       const result = await dereference(specCopy)
-      // @scalar/openapi-parser dereference returns { schema, errors }
       if (result.schema) {
         return {
           valid: true,
@@ -1231,19 +1057,16 @@ async function validateOpenAPI(spec, options = {}) {
       }
     }
 
-    // Use validate for validation without dereferencing
     try {
       const result = await validate(specCopy)
-      // @scalar/openapi-parser validate returns { valid, errors }
       if (result.valid) {
         return {
           valid: true,
-          spec: spec  // Return original spec with tracking properties intact
+          spec
         }
       }
       const errors = Array.isArray(result.errors) ? result.errors : []
       if (errors.length > 0) {
-        // Limit errors to MAX_VALIDATION_ERRORS
         const limitedErrors = errors.slice(0, MAX_VALIDATION_ERRORS)
         return {
           valid: false,
@@ -1251,11 +1074,10 @@ async function validateOpenAPI(spec, options = {}) {
         }
       }
     } catch (validateError) {
-      // If validate throws but basic structure is valid, accept it
       if (specCopy.openapi && specCopy.info && specCopy.paths) {
         return {
           valid: true,
-          spec: spec  // Return original spec with tracking properties intact
+          spec
         }
       }
       return {
@@ -1264,10 +1086,9 @@ async function validateOpenAPI(spec, options = {}) {
       }
     }
 
-    // Fallback - valid if basic structure is correct
     return {
       valid: true,
-      spec: spec
+      spec,
     }
   } catch (error) {
     return {
@@ -1277,27 +1098,10 @@ async function validateOpenAPI(spec, options = {}) {
   }
 }
 
-/**
- * Converts Gostman requests to OpenAPI JSON string
- * @param {Array} requests - Gostman request objects
- * @param {Object} options - Export options
- * @returns {string} OpenAPI JSON string
- */
 export function exportToOpenAPIJSON(requests, options = {}) {
-  try {
-    return safeStringify(exportToOpenAPI(requests, options))
-  } catch (error) {
-    console.warn('exportToOpenAPIJSON failed, falling back to standard stringify:', error.message)
-    return JSON.stringify(exportToOpenAPI(requests, options), null, 2)
-  }
+  return safeStringify(exportToOpenAPI(requests, options))
 }
 
-/**
- * Converts Gostman requests to OpenAPI YAML string using js-yaml
- * @param {Array} requests - Gostman request objects
- * @param {Object} options - Export options
- * @returns {string} OpenAPI YAML string
- */
 export function exportToOpenAPIYAML(requests, options = {}) {
   const spec = exportToOpenAPI(requests, options)
   return YAML.dump(spec, {
@@ -1315,7 +1119,7 @@ const POSTMAN_AUTH_WRITERS = {
 }
 
 function toPostmanAuth(auth) {
-  const fieldsOf = POSTMAN_AUTH_WRITERS[auth?.type]
+  const fieldsOf = lookup(POSTMAN_AUTH_WRITERS, auth?.type)
   if (!fieldsOf) return { type: 'noauth' }
   const fields = Object.entries(fieldsOf(auth)).map(([key, value]) => ({ key, value: asText(value), type: 'string' }))
   return { type: auth.type, [auth.type]: fields }
@@ -1352,7 +1156,7 @@ function toPostmanBody(request) {
       graphql: { query: request.graphqlQuery || request.body, variables: request.graphqlVariables },
     }
   }
-  const write = POSTMAN_BODY_WRITERS[request.bodyType]
+  const write = lookup(POSTMAN_BODY_WRITERS, request.bodyType)
   if (write) return write(request.body)
   return { mode: 'raw', raw: request.body, options: { raw: { language: request.bodyType } } }
 }
@@ -1420,33 +1224,21 @@ export function exportToGostman(requests, folders, environments) {
 
 const invalidGostmanBackup = (reason) => ({ success: false, error: `Invalid Gostman export format: ${reason}` })
 
-const withTlsVerification = (request) => (
-  request?.options?.insecureTLS ? { ...request, options: { ...request.options, insecureTLS: false } } : request
-)
-
-export function importGostman(data) {
+function importGostman(data) {
   const backup = data?.gostman
   if (!isPlainObject(backup)) return invalidGostmanBackup('missing gostman object')
   if (!Array.isArray(backup.requests)) return invalidGostmanBackup('requests must be an array')
   if (!Array.isArray(backup.folders)) return invalidGostmanBackup('folders must be an array')
-  const requestsWithoutTls = backup.requests
-    .filter((request) => request?.options?.insecureTLS)
-    .map((request) => asText(request.name) || UNTITLED_REQUEST)
   return {
     success: true,
-    warnings: requestsWithoutTls.length > 0 ? [tlsWarning(requestsWithoutTls)] : [],
-    requests: backup.requests.map(withTlsVerification),
+    warnings: [],
+    requests: backup.requests,
     folders: backup.folders,
     environments: asArray(backup.environments),
     variables: isPlainObject(backup.variables) ? backup.variables : {},
   }
 }
 
-/**
- * Parses YAML string to object using js-yaml
- * @param {string} yamlString - YAML string
- * @returns {Object} Parsed object
- */
 function parseYAML(yamlString) {
   try {
     return YAML.load(yamlString)
@@ -1487,7 +1279,7 @@ const MARKDOWN_AUTH_LABELS = {
 }
 
 function markdownAuth(auth) {
-  const label = MARKDOWN_AUTH_LABELS[auth?.type]
+  const label = lookup(MARKDOWN_AUTH_LABELS, auth?.type)
   return label ? [`**Auth:** ${label(auth)}`, ''] : []
 }
 
@@ -1548,7 +1340,7 @@ function parseStructuredText(text) {
   }
 }
 
-export function detectImportFormat(text) {
+function detectImportFormat(text) {
   let data
   try {
     data = parseStructuredText(text)
@@ -1560,4 +1352,128 @@ export function detectImportFormat(text) {
   if (data.openapi || (data.swagger && data.info)) return 'openapi'
   if (data.gostman) return 'gostman'
   return 'unknown'
+}
+
+const IMPORT_READERS = new Map([
+  ['postman', { label: 'Postman collection', read: parsePostmanCollection }],
+  ['openapi', { label: 'OpenAPI spec', read: parseOpenAPISpec }],
+  ['gostman', { label: 'Gostman export', read: (text) => importGostman(JSON.parse(text)) }],
+])
+
+const importFailure = (error) => ({ success: false, error })
+
+export async function parseImport(text) {
+  const reader = IMPORT_READERS.get(detectImportFormat(text))
+  if (!reader) return importFailure('Could not detect the format. Use a Postman collection, an OpenAPI 3 spec or a Gostman export.')
+  try {
+    const result = await reader.read(text)
+    if (!result.success) return result
+    if (result.requests.length === 0 && result.folders.length === 0) {
+      return importFailure(`This ${reader.label} contains no requests or folders.`)
+    }
+    return { ...result, label: reader.label }
+  } catch (error) {
+    return importFailure(error?.message || `This ${reader.label} could not be read.`)
+  }
+}
+
+const AUTH_TYPES = [AUTH_BASIC, AUTH_BEARER, AUTH_API_KEY]
+const AUTH_TEXT_FIELDS = ['username', 'password', 'token', 'key', 'value']
+const REQUEST_TEXT_FIELDS = ['id', 'url', 'headers', 'body', 'queryParams', 'folderId', 'graphqlQuery', 'graphqlVariables', 'extractors']
+const BODY_TYPE_VALUES = BODY_TYPES.map((type) => type.value)
+
+const stringOf = (value) => (typeof value === 'string' ? value : '')
+
+const cleanName = (value, fallback) => stringOf(value).trim().slice(0, MAX_NAME_LENGTH) || fallback
+
+const pickStrings = (source, fields) => Object.fromEntries(fields.map((field) => [field, stringOf(source[field])]))
+
+function cleanMethod(value) {
+  const method = stringOf(value).trim().toUpperCase()
+  return method.length <= MAX_METHOD_LENGTH && METHOD_TOKEN.test(method) ? method : DEFAULT_METHOD
+}
+
+function sanitizeAuth(raw) {
+  if (!isPlainObject(raw) || !AUTH_TYPES.includes(raw.type)) return NO_AUTH
+  return { ...pickStrings(raw, AUTH_TEXT_FIELDS), type: raw.type, in: apiKeyLocation(raw.in) }
+}
+
+function sanitizeOptions(raw) {
+  const timeoutMs = Math.trunc(Number(raw?.timeoutMs))
+  return {
+    timeoutMs: Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 0,
+    noFollowRedirects: raw?.noFollowRedirects === true,
+    insecureTLS: false,
+  }
+}
+
+function sanitizeRequest(raw) {
+  return normalizeRequest({
+    ...pickStrings(raw, REQUEST_TEXT_FIELDS),
+    name: cleanName(raw.name, UNTITLED_REQUEST),
+    method: cleanMethod(raw.method),
+    bodyType: BODY_TYPE_VALUES.includes(raw.bodyType) ? raw.bodyType : '',
+    auth: sanitizeAuth(raw.auth),
+    options: sanitizeOptions(raw.options),
+  })
+}
+
+const sanitizeFolder = (raw) => ({
+  id: stringOf(raw.id),
+  name: cleanName(raw.name, UNTITLED_FOLDER),
+  isOpen: raw.isOpen === true,
+  parentId: stringOf(raw.parentId),
+})
+
+const sanitizeEnvironment = (raw) => ({
+  id: stringOf(raw.id),
+  name: cleanName(raw.name, UNTITLED_ENVIRONMENT),
+  variables: stringOf(raw.variables),
+})
+
+function assignFreshIds(items, takenIds) {
+  const usedIds = new Set(takenIds)
+  const renamed = new Map()
+  const assigned = items.map((item) => {
+    const keepsId = item.id !== '' && !usedIds.has(item.id)
+    const id = keepsId ? item.id : generateId()
+    usedIds.add(id)
+    if (item.id !== '' && !renamed.has(item.id)) renamed.set(item.id, id)
+    return { ...item, id }
+  })
+  return { assigned, renamed }
+}
+
+function flattenDeepFolders(folders) {
+  const parentOf = new Map(folders.map((folder) => [folder.id, folder.parentId]))
+  const isTooDeep = (folder) => folderDepth(folder.id, parentOf) > MAX_FOLDER_DEPTH
+  return folders.map((folder) => (isTooDeep(folder) ? { ...folder, parentId: ROOT_ID } : folder))
+}
+
+export function sanitizeImport(data, existing) {
+  const rawRequests = asArray(data?.requests).filter(isPlainObject)
+  const requestsWithoutTls = rawRequests
+    .filter((request) => request.options?.insecureTLS)
+    .map((request) => cleanName(request.name, UNTITLED_REQUEST))
+
+  const folderIds = assignFreshIds(asArray(data?.folders).filter(isPlainObject).map(sanitizeFolder), existing.folderIds)
+  const inImport = (id) => folderIds.renamed.get(id) || ROOT_ID
+  const linkedFolders = folderIds.assigned.map((folder) => ({ ...folder, parentId: inImport(folder.parentId) }))
+  const folders = flattenDeepFolders(linkedFolders)
+  const flattenedCount = folders.filter((folder, index) => folder.parentId !== linkedFolders[index].parentId).length
+
+  const requestIds = assignFreshIds(rawRequests.map(sanitizeRequest), existing.requestIds)
+  const requests = requestIds.assigned.map((request) => ({ ...request, folderId: inImport(request.folderId), timestamp: '' }))
+
+  return {
+    requests,
+    folders,
+    environments: asArray(data?.environments).filter(isPlainObject).map(sanitizeEnvironment),
+    variables: isPlainObject(data?.variables) ? data.variables : {},
+    warnings: [
+      ...asArray(data?.warnings).filter((warning) => typeof warning === 'string'),
+      ...(requestsWithoutTls.length > 0 ? [tlsWarning(requestsWithoutTls)] : []),
+      ...(flattenedCount > 0 ? [`${pluralize(flattenedCount, 'folder')} nested in a loop or deeper than ${MAX_FOLDER_DEPTH} levels moved to the top level.`] : []),
+    ],
+  }
 }

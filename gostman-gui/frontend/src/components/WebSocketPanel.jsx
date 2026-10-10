@@ -1,8 +1,12 @@
 import { memo, useLayoutEffect, useMemo, useRef } from "react"
-import { ArrowDown, ArrowUp, Copy, Info, TriangleAlert } from "lucide-react"
-import { Button } from "./ui/button"
+import { ArrowDown, ArrowUp, Copy, Info, Radio, TriangleAlert } from "lucide-react"
+import { Button, IconButton } from "./ui/button"
+import { Checkbox } from "./ui/checkbox"
+import { EmptyState } from "./ui/emptyState"
+import { Notice, Panel, Toolbar } from "./ui/panel"
 import { Textarea } from "./ui/textarea"
 import { pluralize } from "../lib/dataUtils"
+import { shortcutLabel } from "../lib/platform"
 import {
   ENTRY_ERROR,
   ENTRY_INFO,
@@ -23,20 +27,18 @@ const PINNED_DISTANCE_PX = 24
 const TIME_FORMAT = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })
 
 const STATUS_VIEWS = {
-  [SOCKET_IDLE]: { label: "Disconnected", dot: "bg-muted-foreground/50" },
+  [SOCKET_IDLE]: { label: "Disconnected", dot: "bg-muted-foreground" },
   [SOCKET_CONNECTING]: { label: "Connecting", dot: "bg-warning" },
   [SOCKET_OPEN]: { label: "Connected", dot: "bg-success" },
   [SOCKET_WAITING]: { label: "Waiting to reconnect", dot: "bg-warning" },
 }
 
 const ENTRY_VIEWS = {
-  [ENTRY_SENT]: { icon: ArrowUp, label: "Sent", tone: "text-primary" },
+  [ENTRY_SENT]: { icon: ArrowUp, label: "Sent", tone: "text-info" },
   [ENTRY_RECEIVED]: { icon: ArrowDown, label: "Received", tone: "text-success" },
   [ENTRY_INFO]: { icon: Info, label: "Info", tone: "text-muted-foreground" },
   [ENTRY_ERROR]: { icon: TriangleAlert, label: "Error", tone: "text-destructive" },
 }
-
-const NOTICE = "shrink-0 border-b border-border/50 px-4 py-2 text-xs text-muted-foreground"
 
 function entryNote(entry) {
   if (entry.byteCount !== undefined) return `Binary, ${pluralize(entry.byteCount, "byte")}`
@@ -51,23 +53,21 @@ const LogEntry = memo(function LogEntry({ entry }) {
   const copy = () => navigator.clipboard.writeText(entry.text).catch(() => {})
 
   return (
-    <li className="group grid grid-cols-[4rem_1rem_minmax(0,1fr)_1.5rem] items-start gap-2 border-b border-border/30 px-4 py-1.5">
-      <time className="font-mono text-[11px] leading-5 text-muted-foreground">{TIME_FORMAT.format(entry.time)}</time>
-      <Icon aria-label={label} className={cn("mt-1 h-3.5 w-3.5", tone)} />
-      <div className="min-w-0">
+    <li className="group grid grid-cols-[3.75rem_1rem_minmax(0,1fr)_1.5rem] items-start gap-2 border-b border-border px-3 py-1">
+      <time className="font-mono text-[11px] leading-6 text-muted-foreground">{TIME_FORMAT.format(entry.time)}</time>
+      <Icon aria-label={label} className={cn("mt-[5px] h-3.5 w-3.5", tone)} />
+      <div className="min-w-0 py-0.5">
         {note && <p className="text-[11px] leading-5 text-muted-foreground">{note}</p>}
         <pre className={cn("whitespace-pre-wrap break-all font-mono text-xs leading-5", isMessage ? "text-foreground" : tone)}>{entry.text}</pre>
       </div>
       {isMessage && (
-        <button
-          type="button"
+        <IconButton
+          label="Copy message"
+          icon={Copy}
+          size="icon-xs"
           onClick={copy}
-          aria-label="Copy message"
-          title="Copy message"
-          className="mt-0.5 rounded p-0.5 text-muted-foreground opacity-0 hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100"
-        >
-          <Copy className="h-3.5 w-3.5" />
-        </button>
+          className="opacity-0 focus-visible:opacity-100 group-hover:opacity-100"
+        />
       )}
     </li>
   )
@@ -88,18 +88,12 @@ function MessageLog({ entries, dropped }) {
   }
 
   return (
-    <div ref={logRef} onScroll={trackPosition} className="min-h-0 flex-1 overflow-y-auto scrollbar-primary">
-      {dropped > 0 && (
-        <p className="border-b border-border/30 px-4 py-1.5 text-xs text-muted-foreground">
-          Older entries dropped: {dropped}. The log keeps the latest {LOG_LIMIT}.
-        </p>
-      )}
+    <div ref={logRef} onScroll={trackPosition} className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+      {dropped > 0 && <Notice>Older entries dropped: {dropped}. The log keeps the latest {LOG_LIMIT}.</Notice>}
       {entries.length === 0 && (
-        <p className="px-4 py-3 text-xs text-muted-foreground">
-          No messages yet. Connect, then send a message or wait for the server to speak.
-        </p>
+        <EmptyState icon={Radio} title="No messages yet" description="Connect, then send a message or wait for the server." />
       )}
-      <ul>
+      <ul aria-label="Messages">
         {entries.map((entry) => <LogEntry key={entry.id} entry={entry} />)}
       </ul>
     </div>
@@ -124,8 +118,8 @@ export function WebSocketPanel({ tabId, request, variables, sockets }) {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="flex h-10 shrink-0 items-center gap-3 border-b border-border/50 px-4">
+    <Panel>
+      <Toolbar>
         <span className="flex shrink-0 items-center gap-2 text-xs text-foreground">
           <span aria-hidden="true" className={cn("h-2 w-2 rounded-full", status.dot)} />
           {status.label}
@@ -133,61 +127,44 @@ export function WebSocketPanel({ tabId, request, variables, sockets }) {
         <span className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground" title={target.url || target.error}>
           {target.url || target.error}
         </span>
-        <label className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
-          <input
-            type="checkbox"
-            checked={session.autoReconnect}
-            onChange={(event) => sockets.setAutoReconnect(tabId, event.target.checked)}
-            className="h-3.5 w-3.5 accent-primary"
-          />
+        <Checkbox
+          checked={session.autoReconnect}
+          onChange={(event) => sockets.setAutoReconnect(tabId, event.target.checked)}
+        >
           Auto-reconnect
-        </label>
+        </Checkbox>
         {isIdle ? (
-          <Button type="button" size="sm" className="h-7 shrink-0 px-3" disabled={Boolean(target.error)} onClick={() => sockets.connect(tabId)}>
-            Connect
-          </Button>
+          <Button size="sm" disabled={Boolean(target.error)} onClick={() => sockets.connect(tabId)}>Connect</Button>
         ) : (
-          <Button type="button" variant="outline" size="sm" className="h-7 shrink-0 px-3" onClick={() => sockets.disconnect(tabId)}>
-            Disconnect
-          </Button>
+          <Button variant="outline" size="sm" onClick={() => sockets.disconnect(tabId)}>Disconnect</Button>
         )}
-      </div>
+      </Toolbar>
 
       {unsentHeaders.length > 0 && (
-        <p className={NOTICE}>
+        <Notice>
           A browser can only set Sec-WebSocket-Protocol on a WebSocket. Not sent from here: {unsentHeaders.join(", ")}. The desktop app sends every header.
-        </p>
+        </Notice>
       )}
 
       <MessageLog entries={session.entries} dropped={session.dropped} />
 
-      <div className="flex shrink-0 items-stretch gap-2 border-t border-border/50 px-4 py-3">
+      <div className="flex shrink-0 items-stretch gap-2 border-t border-border p-3">
         <Textarea
           value={session.draft}
           onChange={(event) => sockets.setDraft(tabId, event.target.value)}
           onKeyDown={handleComposerKey}
-          placeholder={isOpen ? "Message (Ctrl+Enter to send)" : "Connect to send messages"}
+          placeholder={isOpen ? `Message (${shortcutLabel("Enter")} to send)` : "Connect to send messages"}
           aria-label="Message"
           disabled={!isOpen}
-          spellCheck={false}
-          className="h-16 min-h-0 flex-1 resize-none font-mono text-xs"
+          className="h-16 flex-1"
         />
         <div className="flex shrink-0 flex-col justify-between">
-          <Button type="button" size="sm" className="h-7 px-3" disabled={!canSend} onClick={() => sockets.sendMessage(tabId)}>
-            Send
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-7 px-3"
-            disabled={session.entries.length === 0}
-            onClick={() => sockets.clearLog(tabId)}
-          >
+          <Button size="sm" disabled={!canSend} onClick={() => sockets.sendMessage(tabId)}>Send</Button>
+          <Button variant="ghost" size="sm" disabled={session.entries.length === 0} onClick={() => sockets.clearLog(tabId)}>
             Clear
           </Button>
         </div>
       </div>
-    </div>
+    </Panel>
   )
 }

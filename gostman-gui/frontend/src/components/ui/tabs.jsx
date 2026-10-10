@@ -1,82 +1,64 @@
 import * as React from "react"
 import { cn } from "../../lib/utils"
 
-const TabsContext = React.createContext({
-  value: "",
-  setValue: () => {},
-})
+const TabsContext = React.createContext({ value: "", setValue: () => {} })
 
-const Tabs = ({ defaultValue, value, onValueChange, children, className }) => {
-  const [internalValue, setInternalValue] = React.useState(defaultValue || "")
-
-  const currentValue = value !== undefined ? value : internalValue
-  const setValue = onValueChange || setInternalValue
-
+function Tabs({ value, onValueChange, children, className }) {
+  const context = React.useMemo(() => ({ value, setValue: onValueChange }), [value, onValueChange])
   return (
-    <TabsContext.Provider value={{ value: currentValue, setValue }}>
-      <div className={cn("w-full", className)}>{children}</div>
+    <TabsContext.Provider value={context}>
+      <div className={className}>{children}</div>
     </TabsContext.Provider>
   )
 }
 
-const TabsList = React.forwardRef(({ className, children }, ref) => {
-  const { value } = React.useContext(TabsContext)
-
+function TabsList({ className, label, children }) {
   return (
     <div
-      ref={ref}
-      className={cn(
-        "inline-flex h-9 items-center justify-center rounded-lg bg-muted/50 p-1 text-muted-foreground border border-border/50",
-        className
-      )}
+      role="tablist"
+      aria-label={label}
+      className={cn("flex h-full min-w-0 items-stretch gap-4 overflow-x-auto scrollbar-none", className)}
     >
       {children}
     </div>
   )
-})
-TabsList.displayName = "TabsList"
+}
 
-const TabsTrigger = React.forwardRef(({ className, value, children, icon: Icon }, ref) => {
+function TabsTrigger({ className, value, children }) {
   const { value: currentValue, setValue } = React.useContext(TabsContext)
+  const triggerRef = React.useRef(null)
   const isActive = currentValue === value
+
+  React.useEffect(() => {
+    if (isActive) triggerRef.current.scrollIntoView({ block: "nearest", inline: "nearest" })
+  }, [isActive])
 
   return (
     <button
-      ref={ref}
+      ref={triggerRef}
+      type="button"
+      role="tab"
+      aria-selected={isActive}
       onClick={() => setValue(value)}
       className={cn(
-        "inline-flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50",
-        isActive
-          ? "bg-background text-foreground"
-          : "text-muted-foreground hover:bg-background/50 hover:text-foreground",
+        "inline-flex min-w-6 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap border-b-2 px-0.5 pt-0.5 text-xs font-medium",
+        isActive ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground",
         className
       )}
     >
-      {Icon && <Icon className="h-4 w-4" />}
       {children}
     </button>
   )
-})
-TabsTrigger.displayName = "TabsTrigger"
+}
 
-const TabsContent = React.forwardRef(({ className, value, children, noMargin }, ref) => {
+function TabsContent({ className, value, children }) {
   const { value: currentValue } = React.useContext(TabsContext)
-
   if (currentValue !== value) return null
+  return <div role="tabpanel" className={className}>{children}</div>
+}
 
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-        !noMargin && "mt-2",
-        className
-      )}
-    >
-      {children}
-    </div>
-  )
-})
-TabsContent.displayName = "TabsContent"
+function TabCount({ children }) {
+  return <span className="rounded bg-muted px-1 font-mono text-[10px] leading-4 text-muted-foreground">{children}</span>
+}
 
-export { Tabs, TabsList, TabsTrigger, TabsContent }
+export { Tabs, TabsList, TabsTrigger, TabsContent, TabCount }

@@ -1,8 +1,11 @@
 import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
+import { IconButton } from "./ui/button"
 import { Field } from "./ui/field"
 import { Input } from "./ui/input"
+import { PanelBody } from "./ui/panel"
 import { Select } from "./ui/select"
+import { lookup } from "../lib/dataUtils"
 
 const AUTH_BASIC = "basic"
 const AUTH_BEARER = "bearer"
@@ -17,8 +20,6 @@ const AUTH_TYPES = [
   { value: AUTH_API_KEY, label: "API key" },
 ]
 
-const TEXT_INPUT = "font-mono text-xs"
-
 function TextInput({ value, onChange, ...props }) {
   return (
     <Input
@@ -26,7 +27,7 @@ function TextInput({ value, onChange, ...props }) {
       onChange={(event) => onChange(event.target.value)}
       spellCheck={false}
       autoComplete="off"
-      className={TEXT_INPUT}
+      className="font-mono"
       {...props}
     />
   )
@@ -34,26 +35,17 @@ function TextInput({ value, onChange, ...props }) {
 
 function SecretInput({ value, onChange }) {
   const [revealed, setRevealed] = useState(false)
-  const Icon = revealed ? EyeOff : Eye
 
   return (
-    <div className="relative">
-      <Input
-        type={revealed ? "text" : "password"}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        spellCheck={false}
-        autoComplete="off"
-        className={`${TEXT_INPUT} pr-9`}
-      />
-      <button
-        type="button"
+    <div className="relative min-w-0">
+      <TextInput type={revealed ? "text" : "password"} value={value} onChange={onChange} className="pr-8 font-mono" />
+      <IconButton
+        label={revealed ? "Hide value" : "Show value"}
+        icon={revealed ? EyeOff : Eye}
+        size="icon-xs"
         onClick={() => setRevealed(!revealed)}
-        aria-label={revealed ? "Hide value" : "Show value"}
-        className="absolute right-2 top-1/2 -translate-y-1/2 rounded text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <Icon className="h-4 w-4" />
-      </button>
+        className="absolute right-0.5 top-0.5"
+      />
     </div>
   )
 }
@@ -89,7 +81,7 @@ function ApiKeyFields({ auth, onFieldChange }) {
         <SecretInput value={auth.value} onChange={onFieldChange("value")} />
       </Field>
       <Field label="Add to">
-        <Select value={auth.in || IN_HEADER} onChange={(event) => onFieldChange("in")(event.target.value)} className="text-xs">
+        <Select value={auth.in || IN_HEADER} onChange={(event) => onFieldChange("in")(event.target.value)}>
           <option value={IN_HEADER}>Header</option>
           <option value={IN_QUERY}>Query params</option>
         </Select>
@@ -106,25 +98,25 @@ const FIELDS_BY_TYPE = {
 
 export function AuthPanel({ auth, onChange }) {
   const onFieldChange = (field) => (value) => onChange({ ...auth, [field]: value })
-  const TypeFields = FIELDS_BY_TYPE[auth.type]
+  const TypeFields = lookup(FIELDS_BY_TYPE, auth.type)
 
   return (
-    <div className="h-full overflow-auto px-4 py-3 scrollbar-primary">
+    <PanelBody className="h-full">
       <div className="flex max-w-xl flex-col gap-2">
         <Field label="Type">
-          <Select value={auth.type} onChange={(event) => onFieldChange("type")(event.target.value)} className="text-xs">
+          <Select value={auth.type} onChange={(event) => onFieldChange("type")(event.target.value)}>
             {AUTH_TYPES.map((type) => (
               <option key={type.value} value={type.value}>{type.label}</option>
             ))}
           </Select>
         </Field>
         {TypeFields && <TypeFields auth={auth} onFieldChange={onFieldChange} />}
-        {TypeFields && (
-          <p className="pt-1 text-xs text-muted-foreground">
-            Values can use {"{{variables}}"}. This overrides a header or parameter of the same name.
-          </p>
-        )}
+        <p className="pt-1 text-xs text-muted-foreground">
+          {TypeFields
+            ? "Values can use {{variables}}. This overrides a header or parameter of the same name."
+            : "This request is sent without authentication."}
+        </p>
       </div>
-    </div>
+    </PanelBody>
   )
 }

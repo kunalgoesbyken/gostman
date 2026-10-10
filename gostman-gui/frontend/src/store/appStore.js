@@ -11,10 +11,10 @@ const DEFAULT_REQUEST_PANEL = 'params'
 const EMPTY_VARIABLES = '{}'
 const DEFAULT_ENVIRONMENT_NAME = 'Default'
 const TAB_ID_PREFIX = 'tab-'
-const STORAGE_FAILURE_TITLE = 'Storage is full'
+const SAVE_FAILURE_TITLE = 'Changes could not be saved'
 
 const CLOSED_ALERT = { isOpen: false, title: '', message: '', confirmText: 'OK', variant: 'default' }
-const CLOSED_CONFIRM = { isOpen: false, title: '', message: '', confirmText: 'Confirm', variant: 'default', onConfirm: null, onCancel: null }
+const CLOSED_CONFIRM = { isOpen: false, title: '', message: '', confirmText: 'OK', variant: 'default', onConfirm: null, onCancel: null }
 const CLOSED_PROMPT = { isOpen: false, title: '', message: '', placeholder: '', defaultValue: '', confirmText: 'OK', onConfirm: null, onCancel: null }
 
 const createId = (prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
@@ -66,7 +66,7 @@ const mapEnvironment = (state, id, update) => ({
 })
 
 const isEnvironment = (value) => (
-  isPlainObject(value) && Boolean(value.id) && typeof value.name === 'string' && typeof value.variables === 'string'
+  isPlainObject(value) && typeof value.id === 'string' && typeof value.name === 'string' && typeof value.variables === 'string'
 )
 
 const parseVariables = (text) => (text.trim() === '' ? {} : parseJSON(text, null))
@@ -79,9 +79,9 @@ const mergeVariables = (existing, incoming) => {
   return isPlainObject(additions) ? JSON.stringify({ ...current, ...additions }, null, 2) : null
 }
 
-const findMatchingEnvironment = (environments, incoming) => {
-  const sameId = environments.findIndex((environment) => environment.id === incoming.id)
-  return sameId !== -1 ? sameId : environments.findIndex((environment) => environment.name === incoming.name)
+const withUnusedId = (environment, environments) => {
+  const isUnused = environment.id !== '' && environments.every((existing) => existing.id !== environment.id)
+  return isUnused ? environment : { ...environment, id: createId('env') }
 }
 
 const toFolder = ({ id, name, isOpen, parentId }) => ({ id, name, isOpen: Boolean(isOpen), parentId: parentId || '' })
@@ -124,6 +124,7 @@ export const useAppStore = create(
   devtools(
     persist(
       (set, get) => ({
+        hydrated: false,
         requests: [],
         folders: [],
         requestHistory: [],
@@ -147,6 +148,7 @@ export const useAppStore = create(
           const environments = restoreEnvironments(data)
           const hasActive = environments.some((environment) => environment.id === data.activeEnvironmentId)
           return {
+            hydrated: true,
             requests: asArray(data.requests).map(normalizeRequest),
             folders: asArray(data.folders),
             requestHistory: asArray(data.history).map(normalizeRequest),
@@ -154,6 +156,8 @@ export const useAppStore = create(
             activeEnvironmentId: hasActive ? data.activeEnvironmentId : environments[0].id,
           }
         }),
+
+        suspendPersistence: () => set({ hydrated: false }),
 
         upsertRequests: (requests) => set((state) => {
           const byId = new Map(state.requests.map((request) => [request.id, request]))
@@ -268,10 +272,10 @@ export const useAppStore = create(
           const environments = [...get().environments]
           const skippedNames = []
           for (const { id, name, variables } of asArray(incoming).filter(isEnvironment)) {
-            const index = findMatchingEnvironment(environments, { id, name })
+            const index = environments.findIndex((environment) => environment.name === name)
             const merged = index === -1 ? variables : mergeVariables(environments[index].variables, variables)
             if (merged === null) skippedNames.push(name)
-            else if (index === -1) environments.push({ id, name, variables })
+            else if (index === -1) environments.push(withUnusedId({ id, name, variables }, environments))
             else environments[index] = { ...environments[index], variables: merged }
           }
           set({ environments })
@@ -294,7 +298,7 @@ export const useAppStore = create(
             isOpen: true,
             title,
             message,
-            confirmText: confirmText || (variant === 'destructive' ? 'Delete' : 'Confirm'),
+            confirmText: confirmText || (variant === 'destructive' ? 'Delete' : 'OK'),
             variant,
             onConfirm,
             onCancel,
@@ -310,8 +314,8 @@ export const useAppStore = create(
           if (get().persistenceFailureReported) return
           set({ persistenceFailureReported: true })
           get().showAlert(
-            STORAGE_FAILURE_TITLE,
-            `Your latest changes could not be saved and will be lost when the app closes. Export your data or remove old requests to free space. (${reason})`,
+            SAVE_FAILURE_TITLE,
+            `Your latest changes were not saved and will be lost when the app closes. Export your data to keep a copy. (${reason})`,
             'OK',
             'warning',
           )

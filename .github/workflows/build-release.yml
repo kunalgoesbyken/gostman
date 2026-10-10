@@ -1,9 +1,12 @@
 name: Build and Release
 
+# Releases are driven by the version in gostman-gui/wails.json. Every push to
+# main checks whether that version already has a release; when it does not,
+# the installers are built on all three platforms and published as v<version>.
+# To ship a release: bump info.productVersion and push.
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
   workflow_dispatch:
 
 env:
@@ -15,7 +18,31 @@ permissions:
   contents: write
 
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      publish: ${{ steps.version.outputs.publish }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Decide whether this version still needs a release
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="$(jq -r '.info.productVersion' gostman-gui/wails.json)"
+          publish=true
+          if gh release view "v$version" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            publish=false
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "publish=$publish" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: plan
+    if: needs.plan.outputs.publish == 'true' || github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
       matrix:
@@ -28,6 +55,9 @@ jobs:
             os: macos-latest
 
     runs-on: ${{ matrix.os }}
+
+    env:
+      VERSION: ${{ needs.plan.outputs.version }}
 
     defaults:
       run:
@@ -64,17 +94,6 @@ jobs:
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@${{ env.WAILS_VERSION }}
 
-      # A tag build takes its version from the tag; a manual run keeps the
-      # version committed in wails.json.
-      - name: Resolve version
-        run: |
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
-            version="${GITHUB_REF_NAME#v}"
-            jq --arg version "$version" '.info.productVersion = $version' wails.json > wails.tmp.json
-            mv wails.tmp.json wails.json
-          fi
-          echo "VERSION=$(jq -r '.info.productVersion' wails.json)" >> "$GITHUB_ENV"
-
       - name: Build and package (Linux)
         if: matrix.name == 'linux'
         run: |
@@ -88,7 +107,7 @@ jobs:
 
           mkdir -p "$root/DEBIAN"
           sed "s/@VERSION@/$VERSION/" build/linux/control > "$root/DEBIAN/control"
-          dpkg-deb --build --root-owner-group "$root" build/bin/Gostman-linux-amd64.deb
+          dpkg-deb -Zxz --build --root-owner-group "$root" build/bin/Gostman-linux-amd64.deb
 
       # The installer adds Start menu and desktop shortcuts, an uninstaller and
       # the WebView2 runtime when it is missing. The bare executable is shipped
@@ -124,9 +143,9 @@ jobs:
           if-no-files-found: error
 
   release:
-    needs: build
+    needs: [plan, build]
+    if: needs.plan.outputs.publish == 'true'
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
 
     steps:
       - name: Download all artifacts
@@ -135,8 +154,10 @@ jobs:
           path: artifacts
           merge-multiple: true
 
-      - name: Create Release
+      - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ needs.plan.outputs.version }}
+          target_commitish: ${{ github.sha }}
           files: artifacts/Gostman-*
           generate_release_notes: true

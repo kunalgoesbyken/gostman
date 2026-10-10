@@ -2,20 +2,21 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import {
   Code, Copy, Download, FolderPlus, Globe, History, Plus, RotateCcw, Save, Search, Send, Upload, X,
 } from "lucide-react"
+import { shortcutLabel } from "../../lib/platform"
 import { cn } from "../../lib/utils"
 
 const COMMANDS = [
-  { id: "send-request", label: "Send Request", description: "Send the request in the current tab", icon: Send, shortcut: "Ctrl+Enter", action: "sendRequest" },
-  { id: "new-request", label: "New Request", description: "Open a new empty tab", icon: Plus, shortcut: "Ctrl+N", action: "newRequest" },
-  { id: "save-request", label: "Save Request", description: "Save the request in the current tab", icon: Save, shortcut: "Ctrl+S", action: "saveRequest" },
-  { id: "duplicate-request", label: "Duplicate Request", description: "Save a copy of the current request", icon: Copy, action: "duplicateRequest" },
-  { id: "generate-code", label: "Generate Code", description: "Show the current request as code", icon: Code, action: "generateCode" },
-  { id: "close-tab", label: "Close Tab", description: "Close the current tab", icon: X, action: "closeTab" },
-  { id: "new-folder", label: "New Folder", description: "Create a folder at the top level", icon: FolderPlus, action: "newFolder" },
-  { id: "import", label: "Import Data", description: "Import Postman, OpenAPI or Gostman files", icon: Upload, action: "import" },
-  { id: "export", label: "Export Data", description: "Export collections and environments", icon: Download, action: "export" },
-  { id: "clear-history", label: "Clear History", description: "Delete every history entry", icon: History, action: "clearHistory" },
-  { id: "reset", label: "Reset App", description: "Clear all data and reload", icon: RotateCcw, action: "reset", destructive: true },
+  { id: "send-request", label: "Send request", description: "Send the request in the current tab", icon: Send, shortcut: "Enter", action: "sendRequest" },
+  { id: "new-request", label: "New request", description: "Open a new empty tab", icon: Plus, shortcut: "N", action: "newRequest" },
+  { id: "save-request", label: "Save request", description: "Save the request in the current tab", icon: Save, shortcut: "S", action: "saveRequest" },
+  { id: "duplicate-request", label: "Duplicate request", description: "Save a copy of the current request", icon: Copy, action: "duplicateRequest" },
+  { id: "generate-code", label: "Generate code", description: "Show the current request as code", icon: Code, action: "generateCode" },
+  { id: "close-tab", label: "Close tab", description: "Close the current tab", icon: X, action: "closeTab" },
+  { id: "new-folder", label: "New folder", description: "Create a folder at the top level", icon: FolderPlus, action: "newFolder" },
+  { id: "import", label: "Import data", description: "Import Postman, OpenAPI or Gostman files", icon: Upload, action: "import" },
+  { id: "export", label: "Export data", description: "Export collections and environments", icon: Download, action: "export" },
+  { id: "clear-history", label: "Clear history", description: "Delete every history entry", icon: History, action: "clearHistory" },
+  { id: "reset", label: "Reset app", description: "Delete all data and reload", icon: RotateCcw, action: "reset", destructive: true },
 ]
 
 const SELECTION_STEPS = { ArrowDown: 1, ArrowUp: -1 }
@@ -24,7 +25,7 @@ const environmentCommands = (environments, activeEnvironmentId) => environments
   .filter((environment) => environment.id !== activeEnvironmentId)
   .map((environment) => ({
     id: `environment-${environment.id}`,
-    label: `Switch Environment: ${environment.name}`,
+    label: `Switch environment: ${environment.name}`,
     description: "Use this environment's variables",
     icon: Globe,
     action: "switchEnvironment",
@@ -42,27 +43,24 @@ function CommandRow({ command, isSelected, onSelect, onHover }) {
       type="button"
       role="option"
       aria-selected={isSelected}
+      title={command.label}
       ref={(element) => {
         if (isSelected) element?.scrollIntoView({ block: "nearest" })
       }}
       onClick={() => onSelect(command)}
       onMouseMove={onHover}
       className={cn(
-        "flex w-full items-center gap-3 rounded px-3 py-2 text-left outline-none",
+        "flex h-10 w-full items-center gap-3 rounded-md px-3 text-left",
         command.destructive && "text-destructive",
         isSelected && "bg-accent"
       )}
     >
       <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm">{command.label}</span>
-        <span className="block truncate text-xs text-muted-foreground">{command.description}</span>
+        <span className="block truncate text-xs font-medium">{command.label}</span>
+        <span className="block truncate text-[11px] text-muted-foreground">{command.description}</span>
       </span>
-      {command.shortcut && (
-        <kbd className="shrink-0 rounded border border-border/60 px-1.5 py-0.5 text-[10px] text-muted-foreground">
-          {command.shortcut}
-        </kbd>
-      )}
+      {command.shortcut && <kbd>{shortcutLabel(command.shortcut)}</kbd>}
     </button>
   )
 }
@@ -113,15 +111,16 @@ function OpenCommandPalette({ environments, activeEnvironmentId, onClose, onComm
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 px-4 pt-[20vh]" onMouseDown={onClose}>
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 px-4 pb-4 pt-[15vh]" onMouseDown={onClose}>
       <div
         role="dialog"
+        aria-modal="true"
         aria-label="Command palette"
         onMouseDown={(event) => event.stopPropagation()}
         onKeyDown={handleKeyDown}
-        className="w-full max-w-xl overflow-hidden rounded-lg border border-border bg-background shadow-xl"
+        className="flex max-h-full w-full max-w-xl flex-col overflow-hidden rounded-lg border border-border bg-background shadow-lg"
       >
-        <div className="flex items-center gap-3 border-b border-border/60 px-4 py-3">
+        <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border px-3">
           <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
           <input
             ref={inputRef}
@@ -131,15 +130,13 @@ function OpenCommandPalette({ environments, activeEnvironmentId, onClose, onComm
             placeholder="Type a command"
             aria-label="Search commands"
             spellCheck={false}
-            className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+            className="h-7 min-w-0 flex-1 rounded-md bg-transparent px-1 text-xs text-foreground placeholder:text-muted-foreground"
           />
-          <kbd className="rounded border border-border/60 px-1.5 py-0.5 text-[10px] text-muted-foreground">Esc</kbd>
+          <kbd>Esc</kbd>
         </div>
 
-        <div role="listbox" className="max-h-80 overflow-y-auto p-1.5 scrollbar-compact">
-          {shown.length === 0 && (
-            <p className="py-8 text-center text-sm text-muted-foreground">No commands found</p>
-          )}
+        <div role="listbox" aria-label="Commands" className="min-h-0 flex-1 overflow-y-auto p-1.5">
+          {shown.length === 0 && <p className="py-6 text-center text-xs text-muted-foreground">No commands found</p>}
           {shown.map((command, index) => (
             <CommandRow
               key={command.id}

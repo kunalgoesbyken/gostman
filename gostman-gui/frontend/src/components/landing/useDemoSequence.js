@@ -1,17 +1,5 @@
 import { useEffect, useRef } from "react"
 
-/**
- * Drives a showcase's scripted demo: runs each step at its offset, then restarts
- * after `loopAfter`. `reset` runs before every pass so a restart replays cleanly.
- *
- * `steps` and the callbacks are read from refs, so a showcase can define them
- * inline without re-arming the timers on every render.
- *
- * Each cycle is scheduled against a fixed start time rather than from whenever
- * the previous timer happened to fire, so throttled or coalesced timers cannot
- * accumulate drift. The demo restarts when the tab regains focus, where the
- * browser clamps timers hard enough to strand a replay mid-cycle.
- */
 export const useDemoSequence = ({ steps, loopAfter, onStep, reset }) => {
   const latest = useRef({ steps, loopAfter, onStep, reset })
   latest.current = { steps, loopAfter, onStep, reset }

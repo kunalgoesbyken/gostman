@@ -1,11 +1,14 @@
 import { base64ToBytes } from '../base64'
 import { openBrowserSocket, unsentBrowserHeaders } from './browserSocket'
+import { isPlainObject } from '../dataUtils'
 import { mockFolders, mockRequests } from '../mockData'
 import { toEngineRequest } from '../request'
 import { failureResponse } from '../response'
 
 const PROXY_URL = '/api/proxy'
 const DATA_KEY = 'gostman-data'
+const DAMAGED_DATA_PREFIX = 'gostman-data-damaged-'
+const UNREADABLE_DATA = 'The saved data in this browser cannot be read, so nothing was changed.'
 const LEGACY_KEYS = {
   requests: 'gostman_requests',
   folders: 'gostman_folders',
@@ -14,20 +17,28 @@ const LEGACY_KEYS = {
 }
 
 const inFlight = new Map()
+let damageNotice = ''
 
 const sampleData = () => ({ requests: [...mockRequests], folders: [...mockFolders], history: [] })
 
-function readStored(key) {
+const emptyData = () => ({ requests: [], folders: [], history: [] })
+
+function parseStored(raw) {
   try {
-    return JSON.parse(localStorage.getItem(key))
+    return JSON.parse(raw)
   } catch {
     return null
   }
 }
 
+function parseDocument(raw) {
+  const parsed = parseStored(raw)
+  return isPlainObject(parsed) ? parsed : null
+}
+
 function readLegacyData() {
   const stored = Object.entries(LEGACY_KEYS)
-    .map(([field, key]) => [field, readStored(key)])
+    .map(([field, key]) => [field, parseStored(localStorage.getItem(key))])
     .filter(([, value]) => value !== null)
   return stored.length > 0 ? Object.fromEntries(stored) : null
 }
@@ -38,12 +49,29 @@ function writeData(data) {
 
 function migrateLegacyData(legacy) {
   writeData(legacy)
-  Object.values(LEGACY_KEYS).forEach((key) => localStorage.removeItem(key))
+  Object.keys(legacy).forEach((field) => localStorage.removeItem(LEGACY_KEYS[field]))
   return legacy
 }
 
+function setAsideDamagedData(raw) {
+  const backupKey = `${DAMAGED_DATA_PREFIX}${Date.now()}`
+  localStorage.setItem(backupKey, raw)
+  const fresh = emptyData()
+  writeData(fresh)
+  damageNotice = `The saved data in this browser could not be read, so the app started empty. The unreadable copy was kept in this browser's local storage under "${backupKey}".`
+  return fresh
+}
+
+function readDocument() {
+  const raw = localStorage.getItem(DATA_KEY)
+  if (raw === null) return sampleData()
+  const stored = parseDocument(raw)
+  if (!stored) throw new Error(UNREADABLE_DATA)
+  return stored
+}
+
 function mutateData(mutate) {
-  const data = readStored(DATA_KEY) || sampleData()
+  const data = readDocument()
   mutate(data)
   writeData(data)
 }
@@ -81,19 +109,30 @@ async function send(id, request, variables) {
   }
 }
 
-async function load() {
-  const stored = readStored(DATA_KEY)
-  if (stored) return stored
+function readStoredData() {
+  const raw = localStorage.getItem(DATA_KEY)
+  if (raw !== null) return parseDocument(raw) || setAsideDamagedData(raw)
   const legacy = readLegacyData()
   return legacy ? migrateLegacyData(legacy) : sampleData()
 }
 
-async function saveRequest(request) {
-  const saved = { ...request, id: request.id || crypto.randomUUID() }
+async function load() {
+  const data = readStoredData()
+  return { ...data, notice: damageNotice }
+}
+
+async function saveRequests(requests) {
+  const saved = requests.map((request) => ({ ...request, id: request.id || crypto.randomUUID() }))
+  const savedIds = new Set(saved.map((request) => request.id))
   mutateData((data) => {
-    const others = (data.requests || []).filter((existing) => existing.id !== saved.id)
-    data.requests = [...others, saved]
+    const others = (data.requests || []).filter((existing) => !savedIds.has(existing.id))
+    data.requests = [...others, ...saved]
   })
+  return saved
+}
+
+async function saveRequest(request) {
+  const [saved] = await saveRequests([request])
   return saved
 }
 
@@ -140,6 +179,7 @@ export const webBackend = {
   parseCurl: (command) => postForResult('curl=1', { command }, 'request'),
   load,
   saveRequest,
+  saveRequests,
   deleteRequest,
   saveFolders,
   saveHistory,

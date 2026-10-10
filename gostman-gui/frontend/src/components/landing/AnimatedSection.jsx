@@ -10,10 +10,6 @@ const OFFSETS = {
   right: { x: -40 },
 }
 
-/**
- * Scroll-reveal wrapper. Every landing section that fades in on scroll should
- * use this (or a sibling below) rather than hand-rolling whileInView/viewport.
- */
 export const AnimatedSection = ({ children, className = "", delay = 0, direction = "up" }) => {
   const variants = {
     hidden: { opacity: 0, y: 0, x: 0, ...OFFSETS[direction] },
@@ -90,5 +86,4 @@ const revealOnScroll = (hidden, duration) => {
 }
 
 export const ScaleIn = revealOnScroll({ opacity: 0, scale: 0.9 }, 0.5)
-export const SlideInFromLeft = revealOnScroll({ opacity: 0, x: -60 }, 0.6)
 export const SlideInFromRight = revealOnScroll({ opacity: 0, x: 60 }, 0.6)

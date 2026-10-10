@@ -1,5 +1,6 @@
 import { WSClose, WSConnect, WSSend } from '../../../wailsjs/go/main/App'
 import { EventsOn } from '../../../wailsjs/runtime/runtime'
+import { base64ToBytes } from '../base64'
 
 const MESSAGE_EVENT = 'ws:message'
 const STATE_EVENT = 'ws:state'
@@ -9,6 +10,8 @@ const STATE_CLOSED = 'closed'
 const receivers = new Map()
 const dialBuffers = new Set()
 let isSubscribed = false
+
+const toFrame = (event) => (event.binary ? { bytes: base64ToBytes(event.data) } : { text: event.data })
 
 function route(eventName, event) {
   const receive = receivers.get(event?.connectionId)
@@ -43,7 +46,7 @@ export async function openDesktopSocket(url, headers, handlers) {
 
   const receive = (eventName, event) => {
     if (eventName === MESSAGE_EVENT) {
-      handlers.onMessage({ text: event.data })
+      handlers.onMessage(toFrame(event))
       return
     }
     if (event.state === STATE_ERROR) handlers.onError(event.detail)

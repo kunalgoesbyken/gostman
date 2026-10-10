@@ -7,15 +7,6 @@ const normalize = (pathname) => {
   return ROUTES.includes(path) ? path : "/"
 }
 
-/**
- * Two-route history binding for the web build: "/" is the landing page and
- * "/web" is the HTTP client.
- *
- * The URL is the single source of truth rather than a boolean in the store, so
- * the browser's back/forward buttons work, /web can be linked to directly, and
- * a refresh keeps you where you were. An unknown path resolves to "/" and is
- * replaced in history so it does not become a dead back-stack entry.
- */
 export function useRoute() {
   const [route, setRoute] = useState(() => normalize(window.location.pathname))
 

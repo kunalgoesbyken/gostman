@@ -1,8 +1,11 @@
 import { useMemo } from "react"
 import { Play, X } from "lucide-react"
-import { Button } from "./ui/button"
+import { Button, IconButton } from "./ui/button"
+import { Checkbox } from "./ui/checkbox"
 import { Input } from "./ui/input"
+import { Panel, PanelBody, SectionLabel, Toolbar } from "./ui/panel"
 import { Select } from "./ui/select"
+import { ROW_GRID, ROW_STACK } from "./KeyValueEditor"
 import {
   BLANK_EXTRACTOR,
   EXTRACTOR_SOURCES,
@@ -15,8 +18,7 @@ import {
 } from "../lib/chaining"
 import { cn } from "../lib/utils"
 
-const COLUMNS = "grid-cols-[1rem_minmax(0,1fr)_7.5rem_minmax(0,1fr)_minmax(0,1.25fr)_1.75rem]"
-const CELL_INPUT = "h-8 px-2 font-mono text-xs"
+const COLUMNS = "grid-cols-[1.5rem_minmax(0,1fr)_6.5rem_minmax(0,1fr)_minmax(0,1.25fr)_1.75rem]"
 const NO_RESPONSE = "Send the request to see a value"
 const FAILED_RESPONSE = "The last request failed"
 const SUMMARY = "Checked rows run after every response and save their value to the active environment, ready to use as {{variable_name}}."
@@ -39,10 +41,7 @@ function outcomeFor(extractor, response) {
 function Outcome({ outcome }) {
   const text = outcome.reason || String(outcome.value)
   return (
-    <span
-      title={text}
-      className={cn("truncate text-xs", outcome.reason ? "text-muted-foreground" : "font-mono text-foreground")}
-    >
+    <span title={text} className={cn("truncate text-xs", outcome.reason ? "text-muted-foreground" : "font-mono text-foreground")}>
       {text}
     </span>
   )
@@ -50,12 +49,12 @@ function Outcome({ outcome }) {
 
 function ColumnLabels() {
   return (
-    <div className={cn("grid items-center gap-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground", COLUMNS)}>
+    <div className={cn(ROW_GRID, "h-6", COLUMNS)}>
       <span />
-      <span>Variable</span>
-      <span>From</span>
-      <span>Path or name</span>
-      <span>Value in last response</span>
+      <SectionLabel className="truncate" title="Variable">Variable</SectionLabel>
+      <SectionLabel className="truncate" title="From">From</SectionLabel>
+      <SectionLabel className="truncate" title="Path or name">Path or name</SectionLabel>
+      <SectionLabel className="truncate" title="Value in last response">Value in last response</SectionLabel>
       <span />
     </div>
   )
@@ -64,52 +63,39 @@ function ColumnLabels() {
 function ExtractorRow({ extractor, isDraft, response, onChange, onRemove }) {
   const readsStatus = extractor.source === SOURCE_STATUS
   return (
-    <div className={cn("grid items-center gap-2", COLUMNS, !extractor.enabled && "opacity-50")}>
-      <input
-        type="checkbox"
+    <div className={cn(ROW_GRID, COLUMNS, !extractor.enabled && "opacity-50")}>
+      <Checkbox
+        label="Run this extractor"
         checked={extractor.enabled}
         onChange={(event) => onChange({ enabled: event.target.checked })}
-        aria-label="Run this extractor"
-        className={cn("h-3.5 w-3.5 accent-primary", isDraft && "invisible")}
+        className={cn(isDraft && "invisible")}
       />
       <Input
         value={extractor.name}
+        title={extractor.name}
         placeholder="variable_name"
         aria-label="Variable name"
         spellCheck={false}
         onChange={(event) => onChange({ name: event.target.value })}
-        className={CELL_INPUT}
+        className="font-mono"
       />
-      <Select
-        value={extractor.source}
-        onChange={(event) => onChange({ source: event.target.value })}
-        aria-label="Value source"
-        className="h-8 px-2 text-xs"
-      >
+      <Select value={extractor.source} onChange={(event) => onChange({ source: event.target.value })} aria-label="Value source">
         {EXTRACTOR_SOURCES.map((source) => (
           <option key={source.value} value={source.value}>{source.label}</option>
         ))}
       </Select>
       <Input
         value={readsStatus ? "" : extractor.expression}
+        title={extractor.expression}
         placeholder={hintFor(extractor.source)}
         aria-label="Path or name"
         spellCheck={false}
         disabled={readsStatus}
         onChange={(event) => onChange({ expression: event.target.value })}
-        className={CELL_INPUT}
+        className="font-mono"
       />
       {isDraft ? <span /> : <Outcome outcome={outcomeFor(extractor, response)} />}
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        onClick={onRemove}
-        aria-label="Remove extractor"
-        className={cn("h-7 w-7 text-muted-foreground hover:text-destructive", isDraft && "invisible")}
-      >
-        <X />
-      </Button>
+      <IconButton label="Remove extractor" icon={X} onClick={onRemove} className={cn(isDraft && "invisible")} />
     </div>
   )
 }
@@ -117,30 +103,24 @@ function ExtractorRow({ extractor, isDraft, response, onChange, onRemove }) {
 export function ExtractPanel({ extractors, response, extraction, onChange, onRun }) {
   const rows = useMemo(() => parseExtractors(extractors), [extractors])
   const shown = [...rows, BLANK_EXTRACTOR]
+  const runSummary = describeRun(extraction)
 
   const commit = (next) => onChange(serializeExtractors(next.filter((row) => !isBlankExtractor(row))))
   const patchRow = (index, patch) => commit(shown.map((row, at) => (at === index ? { ...row, ...patch } : row)))
   const removeRow = (index) => commit(shown.filter((_, at) => at !== index))
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-3 border-b border-border/50 px-4">
-        <p className="min-w-0 truncate text-xs text-muted-foreground" title={SUMMARY}>{SUMMARY}</p>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-7 shrink-0 px-2"
-          disabled={rows.length === 0 || !isUsableResponse(response)}
-          onClick={onRun}
-        >
+    <Panel>
+      <Toolbar>
+        <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground" title={SUMMARY}>{SUMMARY}</p>
+        <Button variant="outline" size="sm" disabled={rows.length === 0 || !isUsableResponse(response)} onClick={onRun}>
           <Play />
           Run now
         </Button>
-      </div>
-      <div className="min-h-0 flex-1 overflow-auto px-4 py-3 scrollbar-primary">
+      </Toolbar>
+      <PanelBody>
         <ColumnLabels />
-        <div className="flex flex-col gap-1">
+        <div className={ROW_STACK}>
           {shown.map((row, index) => (
             <ExtractorRow
               key={index}
@@ -152,8 +132,8 @@ export function ExtractPanel({ extractors, response, extraction, onChange, onRun
             />
           ))}
         </div>
-        <p className="pt-3 text-xs text-muted-foreground">{describeRun(extraction)}</p>
-      </div>
-    </div>
+        {runSummary && <p className="pt-3 text-xs text-muted-foreground">{runSummary}</p>}
+      </PanelBody>
+    </Panel>
   )
 }

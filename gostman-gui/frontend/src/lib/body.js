@@ -30,8 +30,6 @@ const isJSON = (text) => {
 
 const kindOf = (bodyType) => (STRUCTURED_TYPES.includes(bodyType) ? bodyType : RAW_KIND)
 
-export const isRawBody = (bodyType) => kindOf(bodyType) === RAW_KIND
-
 export function resolveBodyType(bodyType, body) {
   if (bodyType) return bodyType
   return body.trim() === '' || isJSON(body) ? BODY_JSON : BODY_TEXT

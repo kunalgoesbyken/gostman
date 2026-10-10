@@ -4,28 +4,13 @@ import { Button } from "../ui/button"
 import { Download, ChevronDown } from "lucide-react"
 import { AppleIcon, WindowsIcon, LinuxIcon } from "../Icons"
 
+const RELEASE_URL = "https://github.com/kunalgoesbyken/gostman/releases/latest/download"
+
 const DOWNLOAD_OPTIONS = [
-    {
-        os: "macOS",
-        desc: "Universal Binary (Intel + Apple Silicon)",
-        icon: AppleIcon,
-        href: "https://github.com/krockxz/gostman/releases/latest/download/Gostman-darwin-universal.zip",
-        iconColor: "text-foreground/90"
-    },
-    {
-        os: "Windows",
-        desc: "64-bit Installer",
-        icon: WindowsIcon,
-        href: "https://github.com/krockxz/gostman/releases/latest/download/Gostman-windows-amd64.exe",
-        iconColor: "text-foreground/90"
-    },
-    {
-        os: "Linux",
-        desc: "Linux Binary (64-bit)",
-        icon: LinuxIcon,
-        href: "https://github.com/krockxz/gostman/releases/latest/download/Gostman-linux-amd64.zip",
-        iconColor: "text-foreground/90"
-    },
+    { os: "macOS", desc: "Disk image for Intel and Apple Silicon", icon: AppleIcon, file: "Gostman-darwin-universal.dmg" },
+    { os: "Windows", desc: "64-bit installer", icon: WindowsIcon, file: "Gostman-windows-amd64.exe" },
+    { os: "Linux", desc: "Debian and Ubuntu package (.deb)", icon: LinuxIcon, file: "Gostman-linux-amd64.deb" },
+    { os: "Linux", desc: "Other distributions (.tar.gz)", icon: LinuxIcon, file: "Gostman-linux-amd64.tar.gz" },
 ]
 
 export const DownloadDropdown = () => {
@@ -49,12 +34,12 @@ export const DownloadDropdown = () => {
                     <div className="absolute top-full left-0 mt-2 z-20 min-w-[280px] rounded-lg border border-border bg-background shadow-xl overflow-hidden">
                         {DOWNLOAD_OPTIONS.map((option) => (
                             <a
-                                key={option.os}
-                                href={option.href}
+                                key={option.file}
+                                href={`${RELEASE_URL}/${option.file}`}
                                 className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40 transition-colors border-b border-border/30 last:border-0"
                                 onClick={() => setIsOpen(false)}
                             >
-                                <option.icon className={`h-5 w-5 ${option.iconColor}`} />
+                                <option.icon className="h-5 w-5 text-foreground/90" />
                                 <div className="flex-1">
                                     <div className="font-semibold">{option.os}</div>
                                     <div className="text-xs text-muted-foreground">{option.desc}</div>

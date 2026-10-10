@@ -2,21 +2,24 @@ import { memo, useCallback, useMemo, useState } from "react"
 import {
   ChevronDown, ChevronRight, Copy, FileJson, Folder, FolderInput, FolderPlus, MoreHorizontal, Pencil, Plus, Search, Trash2,
 } from "lucide-react"
+import { IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
 import { EmptyState } from "./ui/emptyState"
 import { VirtualList } from "./ui/VirtualList"
+import { MethodTag } from "./MethodTag"
 import { SearchField } from "./SearchField"
 import { useAppStore } from "../store/appStore"
 import { buildCollectionTree, findMatches, flattenCollection, listFolders, ROOT_ID, ROW_FOLDER } from "../lib/collectionTree"
-import { METHOD_COLORS } from "../lib/constants"
+import { shortcutLabel } from "../lib/platform"
 import { cn } from "../lib/utils"
 
 const ROW_HEIGHT_PX = 28
 const INDENT_STEP_PX = 12
-const BASE_PADDING_PX = 8
+const BASE_PADDING_PX = 12
 const MAX_INDENT_LEVELS = 10
 const MENU_ACTIONS = "actions"
 const MENU_MOVE = "move"
+const UNTITLED = "Untitled"
 
 const indentOf = (depth) => BASE_PADDING_PX + Math.min(depth, MAX_INDENT_LEVELS) * INDENT_STEP_PX
 
@@ -33,7 +36,7 @@ function requestMenuItems(request, actions, showMoveTargets) {
   return [
     { id: "rename", label: "Rename", icon: Pencil, onSelect: () => actions.renameRequest(request) },
     { id: "duplicate", label: "Duplicate", icon: Copy, onSelect: () => actions.duplicateRequest(request) },
-    { id: "move", label: "Move to…", icon: FolderInput, keepOpen: true, onSelect: showMoveTargets },
+    { id: "move", label: "Move to folder", icon: FolderInput, keepOpen: true, onSelect: showMoveTargets },
     { id: "delete", label: "Delete", icon: Trash2, destructive: true, onSelect: () => actions.deleteRequest(request) },
   ]
 }
@@ -67,6 +70,7 @@ function menuItemsFor(menu, tree, actions, showMoveTargets) {
 const TreeRow = memo(function TreeRow({ row, isActive, isMenuOpen, onActivate, onOpenMenu }) {
   const isFolder = row.kind === ROW_FOLDER
   const item = isFolder ? row.folder : row.request
+  const name = item.name || UNTITLED
   const Chevron = row.isOpen ? ChevronDown : ChevronRight
 
   const openMenuAtPointer = (event) => {
@@ -86,43 +90,35 @@ const TreeRow = memo(function TreeRow({ row, isActive, isMenuOpen, onActivate, o
       onContextMenu={openMenuAtPointer}
       style={{ height: ROW_HEIGHT_PX }}
       className={cn(
-        "group flex items-center pr-1 text-xs",
-        isActive ? "bg-accent text-foreground" : "text-foreground/80 hover:bg-accent/50",
-        isMenuOpen && "bg-accent/50"
+        "group flex items-center pr-1.5 text-xs",
+        isActive || isMenuOpen ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"
       )}
     >
       <button
         type="button"
         onClick={() => onActivate(row)}
-        title={isFolder ? item.name : `${item.name}\n${item.url}`}
+        title={isFolder ? name : `${name}\n${item.url}`}
         style={{ paddingLeft: indentOf(row.depth) }}
-        className="flex h-full min-w-0 flex-1 items-center gap-1.5 text-left outline-none focus-visible:bg-accent/50"
+        className="flex h-full min-w-0 flex-1 items-center gap-1.5 text-left"
       >
         {isFolder ? (
           <>
-            <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <Folder className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            <Chevron className="h-3.5 w-3.5 shrink-0" />
+            <Folder className="h-3.5 w-3.5 shrink-0" />
           </>
         ) : (
-          <span className={cn("w-11 shrink-0 truncate font-mono text-[10px] font-semibold", METHOD_COLORS[item.method] || "text-muted-foreground")}>
-            {item.method}
-          </span>
+          <MethodTag method={item.method} className="w-10" />
         )}
-        <span className={cn("truncate", isFolder && "font-medium")}>{item.name || "Untitled"}</span>
+        <span className={cn("truncate", isFolder && "font-medium text-foreground")}>{name}</span>
       </button>
-      <button
-        type="button"
-        onClick={openMenuBelowButton}
-        aria-label={`Actions for ${item.name}`}
+      <IconButton
+        label={`Actions for ${name}`}
+        icon={MoreHorizontal}
+        size="icon-xs"
         aria-haspopup="menu"
-        className={cn(
-          "flex h-5 w-5 shrink-0 items-center justify-center rounded text-muted-foreground outline-none",
-          "hover:bg-muted-foreground/20 hover:text-foreground focus-visible:bg-muted-foreground/20",
-          isMenuOpen ? "opacity-100" : "opacity-0 focus-visible:opacity-100 group-hover:opacity-100"
-        )}
-      >
-        <MoreHorizontal className="h-3.5 w-3.5" />
-      </button>
+        onClick={openMenuBelowButton}
+        className={cn("hover:bg-muted", !isMenuOpen && "opacity-0 focus-visible:opacity-100 group-hover:opacity-100")}
+      />
     </div>
   )
 })
@@ -164,27 +160,22 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
   )
 
   const isSearching = query.trim() !== ""
-  const isEmpty = rows.length === 0
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <>
       <SearchField value={query} onChange={setQuery} placeholder="Search name or URL" />
 
-      {isEmpty ? (
-        <EmptyState
-          icon={isSearching ? Search : FileJson}
-          title={isSearching ? "No results" : "No requests yet"}
-          description={isSearching ? "No request name or URL matches" : "Press Ctrl+N to start"}
-        />
-      ) : (
-        <VirtualList
-          role="tree"
-          items={rows}
-          rowHeight={ROW_HEIGHT_PX}
-          renderRow={renderRow}
-          className="min-h-0 flex-1 scrollbar-compact"
-        />
-      )}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {rows.length === 0 ? (
+          <EmptyState
+            icon={isSearching ? Search : FileJson}
+            title={isSearching ? "No results" : "No requests yet"}
+            description={isSearching ? "No request name or URL matches." : `Press ${shortcutLabel("N")} to create one.`}
+          />
+        ) : (
+          <VirtualList role="tree" aria-label="Collections" items={rows} rowHeight={ROW_HEIGHT_PX} renderRow={renderRow} className="h-full py-1" />
+        )}
+      </div>
 
       {menu && (
         <ContextMenu
@@ -194,6 +185,6 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
           onClose={closeMenu}
         />
       )}
-    </div>
+    </>
   )
 })
