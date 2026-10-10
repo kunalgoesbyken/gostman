@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Gostman
+GenericName=API Client
+Comment=A lightweight API client for REST, GraphQL and WebSocket
+Exec=gostman
+Icon=gostman
+Terminal=false
+Categories=Development;Network;
+StartupWMClass=Gostman
