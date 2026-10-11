@@ -55,6 +55,7 @@ const USERINFO_END = '@'
 const QUERY_START = '?'
 const FRAGMENT_START = '#'
 const PAIR_SEPARATOR = '&'
+const ALTERNATE_SEPARATOR = ';'
 const PAIR_ASSIGNMENT = '='
 
 const cutAt = (text, mark) => {
@@ -62,14 +63,24 @@ const cutAt = (text, mark) => {
   return at === -1 ? [text, ''] : [text.slice(0, at), text.slice(at)]
 }
 
+function decoded(text) {
+  try {
+    return decodeURIComponent(text.replaceAll('+', ' '))
+  } catch {
+    return text
+  }
+}
+
 function maskQueryPair(pair) {
   const at = pair.indexOf(PAIR_ASSIGNMENT)
-  if (at === -1 || !isSensitiveName(pair.slice(0, at))) return pair
+  if (at === -1 || !isSensitiveName(decoded(pair.slice(0, at)))) return pair
   return `${pair.slice(0, at)}${PAIR_ASSIGNMENT}${maskSecret(pair.slice(at + 1))}`
 }
 
+const maskPairs = (text, separator) => text.split(separator).map(maskQueryPair).join(separator)
+
 const maskQuery = (query) => (
-  query === '' ? '' : `${QUERY_START}${query.slice(1).split(PAIR_SEPARATOR).map(maskQueryPair).join(PAIR_SEPARATOR)}`
+  query === '' ? '' : `${QUERY_START}${maskPairs(maskPairs(query.slice(1), ALTERNATE_SEPARATOR), PAIR_SEPARATOR)}`
 )
 
 function maskUserinfo(base) {

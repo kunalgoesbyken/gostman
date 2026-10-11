@@ -123,6 +123,8 @@ func (s *Server) Stop() error {
 	return nil
 }
 
+const crossSite = "cross-site"
+
 const refusedOrigin = "The capture only forwards requests from pages served on localhost."
 
 func isLocalOrigin(origin string) bool {
@@ -138,7 +140,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, refusedHost, http.StatusForbidden)
 		return
 	}
-	if !isLocalOrigin(r.Header.Get("Origin")) {
+	if !isLocalOrigin(r.Header.Get("Origin")) || r.Header.Get("Sec-Fetch-Site") == crossSite {
 		http.Error(w, refusedOrigin, http.StatusForbidden)
 		return
 	}

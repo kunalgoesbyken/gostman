@@ -19,7 +19,12 @@ const shellWord = (text) => (BARE_WORD.test(text) ? text : shellQuote(text))
 
 const methodFlag = (method) => (method === HEAD ? '--head' : `-X ${shellWord(method)}`)
 
-const headerLine = ({ key, value }) => (value === '' ? `${key};` : `${key}: ${value}`)
+const LINE_BREAKS = /[
+]+/g
+
+const singleLine = (text) => text.replace(LINE_BREAKS, ' ')
+
+const headerLine = ({ key, value }) => (value === '' ? `${key};` : `${key}: ${singleLine(value)}`)
 
 const assignment = ({ key, value }) => `${key}=${value}`
 
