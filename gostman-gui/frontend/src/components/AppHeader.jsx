@@ -1,13 +1,15 @@
-import { ArrowLeft, Cookie, Import, RotateCcw, Search, Server, Settings } from "lucide-react"
+import { ArrowLeft, Cookie, Import, Radio, RotateCcw, Search, Server, Settings } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { EnvironmentSwitcher } from "./EnvironmentSwitcher"
 import { StorageMenu } from "./StorageMenu"
+import { useCaptureStore } from "../lib/captureSession"
 import { useMockStore } from "../lib/mockServer"
 import { shortcutLabel } from "../lib/platform"
 import logo from "../assets/logo.jpg"
 
-export function AppHeader({ storage, onImport, onReset, onOpenCommands, onOpenCookies, onOpenSettings, onOpenMock, onBack }) {
+export function AppHeader({ storage, onImport, onReset, onOpenCommands, onOpenCookies, onOpenSettings, onOpenMock, onOpenCapture, onBack }) {
   const isMockRunning = useMockStore((state) => state.isRunning)
+  const isCapturing = useCaptureStore((state) => state.isRunning)
 
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b border-border px-3">
@@ -38,6 +40,13 @@ export function AppHeader({ storage, onImport, onReset, onOpenCommands, onOpenCo
             size="icon"
             onClick={onOpenMock}
             className={isMockRunning ? "text-success" : undefined}
+          />
+          <IconButton
+            label={isCapturing ? "Capture traffic (running)" : "Capture traffic"}
+            icon={Radio}
+            size="icon"
+            onClick={onOpenCapture}
+            className={isCapturing ? "text-success" : undefined}
           />
           <IconButton label="Cookies" icon={Cookie} size="icon" onClick={onOpenCookies} />
           <IconButton label="Network settings" icon={Settings} size="icon" onClick={onOpenSettings} />

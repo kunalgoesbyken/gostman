@@ -1,3 +1,116 @@
+export namespace capture {
+	
+	export class Message {
+	    headers: engine.HeaderEntry[];
+	    body: string;
+	    bodyEncoding: string;
+	    contentType: string;
+	    size: number;
+	    truncated: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Message(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.headers = this.convertValues(source["headers"], engine.HeaderEntry);
+	        this.body = source["body"];
+	        this.bodyEncoding = source["bodyEncoding"];
+	        this.contentType = source["contentType"];
+	        this.size = source["size"];
+	        this.truncated = source["truncated"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Exchange {
+	    id: number;
+	    // Go type: time
+	    time: any;
+	    method: string;
+	    path: string;
+	    url: string;
+	    request: Message;
+	    status: number;
+	    response: Message;
+	    durationMs: number;
+	    upgraded: boolean;
+	    interrupted: boolean;
+	    error: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Exchange(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.time = this.convertValues(source["time"], null);
+	        this.method = source["method"];
+	        this.path = source["path"];
+	        this.url = source["url"];
+	        this.request = this.convertValues(source["request"], Message);
+	        this.status = source["status"];
+	        this.response = this.convertValues(source["response"], Message);
+	        this.durationMs = source["durationMs"];
+	        this.upgraded = source["upgraded"];
+	        this.interrupted = source["interrupted"];
+	        this.error = source["error"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class Settings {
+	    upstream: string;
+	    port: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Settings(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.upstream = source["upstream"];
+	        this.port = source["port"];
+	    }
+	}
+
+}
+
 export namespace engine {
 	
 	export class OAuth2 {
@@ -364,6 +477,22 @@ export namespace main {
 	        this.code = source["code"];
 	        this.codeVerifier = source["codeVerifier"];
 	        this.redirectUri = source["redirectUri"];
+	    }
+	}
+	export class CaptureState {
+	    running: boolean;
+	    address: string;
+	    upstream: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CaptureState(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.running = source["running"];
+	        this.address = source["address"];
+	        this.upstream = source["upstream"];
 	    }
 	}
 	export class CertificateFiles {

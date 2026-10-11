@@ -13,6 +13,7 @@ import { selectActiveVariables, selectIsDialogOpen, useActiveTab, useAppStore } 
 import { useAutoSave } from "../hooks/useAutoSave"
 import { useRequestFieldHandlers } from "../hooks/useRequestFieldHandlers"
 import { useShortcuts } from "../hooks/useShortcuts"
+import { useCaptureStore } from "../lib/captureSession"
 import { parseJSON } from "../lib/dataUtils"
 import { MIN_REQUEST_HEIGHT_PX } from "../lib/layout"
 import { forgetSharedLink, pendingSharedLink, subscribeToSharedLink } from "../lib/sharedLink"
@@ -25,6 +26,7 @@ const CookiesDialog = lazy(() => import("./CookiesDialog").then((module) => ({ d
 const NetworkDialog = lazy(() => import("./NetworkDialog").then((module) => ({ default: module.NetworkDialog })))
 const ExamplesDialog = lazy(() => import("./ExamplesDialog").then((module) => ({ default: module.ExamplesDialog })))
 const MockServerDialog = lazy(() => import("./MockServerDialog").then((module) => ({ default: module.MockServerDialog })))
+const CaptureDialog = lazy(() => import("./CaptureDialog").then((module) => ({ default: module.CaptureDialog })))
 const RunnerDialog = lazy(() => import("./RunnerDialog").then((module) => ({ default: module.RunnerDialog })))
 const MonacoEditor = lazy(() => import("./MonacoEditor").then((module) => ({ default: module.MonacoEditor })))
 
@@ -133,7 +135,8 @@ function LoadedWorkspace({ backend, onBack }) {
   const mockDialogOpen = useAppStore((s) => s.mockDialogOpen)
   const settings = useAppStore((s) => s.settings)
   const runner = useAppStore((s) => s.runner)
-  const isDialogOpen = useAppStore(selectIsDialogOpen)
+  const captureDialogOpen = useCaptureStore((s) => s.isOpen)
+  const isDialogOpen = useAppStore(selectIsDialogOpen) || captureDialogOpen
   const sharedLink = useSyncExternalStore(subscribeToSharedLink, pendingSharedLink)
 
   const setActiveTab = useAppStore((s) => s.setActiveTab)
@@ -180,6 +183,7 @@ function LoadedWorkspace({ backend, onBack }) {
         onOpenCookies={openCookiesDialog}
         onOpenSettings={openSettingsDialog}
         onOpenMock={actions.mock.open}
+        onOpenCapture={actions.capture.open}
         onBack={onBack}
       />
 
@@ -269,6 +273,7 @@ function LoadedWorkspace({ backend, onBack }) {
         {settingsDialogOpen && <NetworkDialog settings={settings} actions={actions} onClose={closeSettingsDialog} />}
         {examplesDialogOpen && <ExamplesDialog request={activeRequest} actions={actions.examples} EditorComponent={MonacoEditor} />}
         {mockDialogOpen && <MockServerDialog folders={folders} requests={requests} actions={actions.mock} />}
+        {captureDialogOpen && <CaptureDialog folders={folders} requests={requests} actions={actions.capture} />}
         {runner.isOpen && <RunnerDialog runner={runner} folders={folders} requests={requests} actions={actions} />}
       </Suspense>
 

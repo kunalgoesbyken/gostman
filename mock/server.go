@@ -10,11 +10,11 @@ import (
 	"strconv"
 	"sync/atomic"
 	"time"
+
+	"github.com/krockxz/gostman/loopback"
 )
 
 const (
-	loopbackHost      = "127.0.0.1"
-	highestPort       = 65535
 	highestDelayMs    = 60_000
 	maxRequestBody    = 10 << 20
 	readHeaderTimeout = 10 * time.Second
@@ -50,9 +50,9 @@ func Start(sources []Source, variables string, settings Settings, onRequest func
 	if err != nil {
 		return nil, err
 	}
-	listener, err := net.Listen("tcp4", net.JoinHostPort(loopbackHost, strconv.Itoa(settings.Port)))
+	listener, err := loopback.Listen(settings.Port)
 	if err != nil {
-		return nil, fmt.Errorf("port %d on %s could not be opened, another program may be using it: %w", settings.Port, loopbackHost, err)
+		return nil, err
 	}
 
 	lifetime, cancel := context.WithCancel(context.Background())
@@ -71,8 +71,8 @@ func Start(sources []Source, variables string, settings Settings, onRequest func
 }
 
 func (s Settings) validate() error {
-	if s.Port < 0 || s.Port > highestPort {
-		return fmt.Errorf("port %d is not valid, choose one between 1 and %d", s.Port, highestPort)
+	if err := loopback.CheckPort(s.Port); err != nil {
+		return err
 	}
 	if s.DelayMs < 0 || s.DelayMs > highestDelayMs {
 		return fmt.Errorf("the delay must be between 0 and %d ms", highestDelayMs)
@@ -128,20 +128,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func isLoopbackHost(hostport string) bool {
-	host := hostport
-	if name, _, err := net.SplitHostPort(hostport); err == nil {
-		host = name
-	}
-	if host == "localhost" {
-		return true
-	}
-	address := net.ParseIP(host)
-	return address != nil && address.IsLoopback()
-}
-
 func (s *Server) respond(w http.ResponseWriter, r *http.Request) string {
-	if !isLoopbackHost(r.Host) {
+	if !loopback.IsHost(r.Host) {
 		s.send(w, r, problem(http.StatusForbidden, "The mock server only answers requests addressed to localhost."))
 		return ""
 	}

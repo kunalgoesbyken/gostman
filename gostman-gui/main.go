@@ -50,7 +50,7 @@ func main() {
 		AssetServer:      &assetserver.Options{Assets: assets, Middleware: isolateSandbox},
 		BackgroundColour: &options.RGBA{R: 3, G: 7, B: 18, A: 1},
 		OnStartup:        app.startup,
-		OnShutdown:       app.stopMockOnQuit,
+		OnShutdown:       app.stopServersOnQuit,
 		Menu:             applicationMenu(),
 		Windows:          &windows.Options{Theme: windows.Dark},
 		Bind:             []interface{}{app},

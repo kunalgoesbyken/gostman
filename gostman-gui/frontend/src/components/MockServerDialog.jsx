@@ -1,7 +1,7 @@
 import { useMemo } from "react"
-import { AlertTriangle, Check, Copy, MonitorDown, Play, Server, Square } from "lucide-react"
+import { AlertTriangle, MonitorDown, Play, Server, Square } from "lucide-react"
 import { Badge } from "./ui/badge"
-import { Button, IconButton } from "./ui/button"
+import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
@@ -9,8 +9,8 @@ import { Input } from "./ui/input"
 import { Notice, SectionLabel, Toolbar } from "./ui/panel"
 import { Select } from "./ui/select"
 import { TabCount } from "./ui/tabs"
+import { LocalAddress } from "./LocalAddress"
 import { MethodTag } from "./MethodTag"
-import { useClipboardCopy } from "../hooks/useClipboardCopy"
 import { ROOT_ID, buildCollectionTree, listFolders } from "../lib/collectionTree"
 import { pluralize } from "../lib/dataUtils"
 import { parseExamples } from "../lib/examples"
@@ -39,16 +39,6 @@ function describeRoutes(routes) {
     conflicts > 0 && pluralize(conflicts, "conflict"),
     skipped > 0 && `${skipped} not served`,
   ].filter(Boolean).join(" · ")
-}
-
-function BaseUrl({ address }) {
-  const { copied, copy } = useClipboardCopy(address)
-  return (
-    <div className="ml-auto flex min-w-0 items-center gap-1">
-      <span title={address} className="min-w-0 truncate font-mono text-xs text-foreground">{address}</span>
-      <IconButton label={copied ? "Copied" : "Copy base URL"} icon={copied ? Check : Copy} onClick={copy} />
-    </div>
-  )
 }
 
 function ExampleChoice({ route, examples, onSelect }) {
@@ -221,7 +211,7 @@ export function MockServerDialog({ folders, requests, actions }) {
       <DialogHeader onClose={actions.close}>
         <DialogTitle>Mock server</DialogTitle>
         {isRunning && <Badge variant="success">Running</Badge>}
-        {isRunning && <BaseUrl address={address} />}
+        {isRunning && <LocalAddress address={address} />}
       </DialogHeader>
       {actions.isAvailable ? (
         <ServerPanel folders={folders} requests={requests} actions={actions} />

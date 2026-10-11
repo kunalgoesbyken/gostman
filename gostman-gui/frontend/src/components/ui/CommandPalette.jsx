@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
-  Bookmark, Code, Cookie, Copy, Download, FolderPlus, Globe, History, ListChecks, Plus, RotateCcw, Save, Search, Send, Server, Settings,
+  Bookmark, Code, Cookie, Copy, Download, FolderPlus, Globe, History, ListChecks, Plus, Radio, RotateCcw, Save, Search, Send, Server, Settings,
   Share2, Upload, X,
 } from "lucide-react"
 import { shortcutLabel } from "../../lib/platform"
@@ -17,6 +17,7 @@ const COMMANDS = [
   { id: "run-collection", label: "Run requests", description: "Run every request in a folder with its tests", icon: ListChecks, action: "runCollection" },
   { id: "examples", label: "Request examples", description: "See the saved responses of the current request", icon: Bookmark, action: "examples" },
   { id: "mock-server", label: "Mock server", description: "Serve saved examples on a local port", icon: Server, action: "mockServer" },
+  { id: "capture", label: "Capture traffic", description: "Forward an app's calls to its API and save them as requests", icon: Radio, action: "captureTraffic" },
   { id: "cookies", label: "Manage cookies", description: "See and delete stored cookies", icon: Cookie, action: "cookies" },
   { id: "network", label: "Network settings", description: "Proxy and certificates", icon: Settings, action: "settings" },
   { id: "import", label: "Import data", description: "Import Postman, OpenAPI or Gostman files", icon: Upload, action: "import" },

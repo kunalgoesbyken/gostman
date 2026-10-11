@@ -105,14 +105,14 @@ func send(ctx context.Context, r Request, policy Policy) Response {
 	response := Response{
 		Status:     incoming.Status,
 		StatusCode: incoming.StatusCode,
-		Headers:    flattenHeaders(incoming.Header),
+		Headers:    FlattenHeaders(incoming.Header),
 		Cookies:    cookies.entries,
 		Size:       int64(len(body)),
 		URL:        incoming.Request.URL.String(),
 		Truncated:  truncated,
 	}
-	response.ContentType = mediaType(incoming.Header.Get(headerContentType), body)
-	response.Body, response.BodyEncoding = encodeBody(body, truncated)
+	response.ContentType = MediaType(incoming.Header.Get(headerContentType), body)
+	response.Body, response.BodyEncoding = EncodeBody(body, truncated)
 	return response
 }
 
@@ -151,7 +151,7 @@ func classify(ctx context.Context, err error) Response {
 	}
 }
 
-func flattenHeaders(header http.Header) []HeaderEntry {
+func FlattenHeaders(header http.Header) []HeaderEntry {
 	var entries []HeaderEntry
 	for key, values := range header {
 		for _, value := range values {
@@ -161,7 +161,7 @@ func flattenHeaders(header http.Header) []HeaderEntry {
 	return entries
 }
 
-func mediaType(contentType string, body []byte) string {
+func MediaType(contentType string, body []byte) string {
 	if parsed, _, err := mime.ParseMediaType(contentType); err == nil {
 		return parsed
 	}
@@ -172,7 +172,7 @@ func mediaType(contentType string, body []byte) string {
 	return parsed
 }
 
-func encodeBody(body []byte, truncated bool) (string, string) {
+func EncodeBody(body []byte, truncated bool) (string, string) {
 	if truncated {
 		body = trimPartialRune(body)
 	}

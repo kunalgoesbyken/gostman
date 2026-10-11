@@ -20,6 +20,7 @@ const (
   gostman mcp [flags]
   gostman mock [workspace folder] [flags]
   gostman docs <workspace folder | export.json> [flags]
+  gostman capture --upstream <url> [flags]
   gostman init [folder]
   gostman version
 
@@ -86,6 +87,19 @@ docs
   --title <text>        page title (default: API documentation)
   --no-examples         leave out the saved example responses
 
+capture
+  Forward every request sent to 127.0.0.1 on to one API and print each
+  exchange. Point the app at the local address instead of the API; nothing is
+  intercepted, so an app whose base URL cannot be changed is not captured.
+
+  --upstream <url>      API to forward to, for example https://api.example.com
+  --port <number>       port to listen on (default 4020)
+  --workspace <folder>  save each new method and path as a request, with its
+                        response as an example, in this workspace
+  --folder <name>       top-level workspace folder to save into
+                        Authorization, Cookie and Proxy-Authorization request
+                        headers are never saved
+
 init
   Create an empty workspace in the folder (default: the current folder) and
   print how to register the MCP server with a coding agent.
@@ -123,6 +137,8 @@ func dispatch(arguments []string, stdout, stderr *os.File) int {
 		return mockCommand(arguments[1:], stdout, stderr)
 	case "docs":
 		return docsCommand(arguments[1:], stdout, stderr)
+	case "capture":
+		return captureCommand(arguments[1:], stdout, stderr)
 	case "init":
 		return initCommand(arguments[1:], stdout, stderr)
 	case "version", "--version":
