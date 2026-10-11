@@ -3,7 +3,7 @@ import { isRequestDirty } from './requestChanges'
 
 const byId = (items) => new Map(items.map((item) => [item.id, item]))
 
-export function reconcileTabs(tabs, previousRequests, requests, folders, leavesRestriction) {
+export function reconcileTabs(tabs, previousRequests, requests, folders, wasRestricted) {
   const previous = byId(previousRequests)
   const saved = byId(requests)
   const folderIds = new Set(folders.map((folder) => folder.id))
@@ -12,7 +12,7 @@ export function reconcileTabs(tabs, previousRequests, requests, folders, leavesR
     !request.folderId || folderIds.has(request.folderId) ? request : { ...request, folderId: '' }
   )
 
-  const carried = (request) => (leavesRestriction ? withoutActiveContent(request) : request)
+  const carried = (request) => (wasRestricted ? withoutActiveContent(request) : request)
 
   const refresh = (request) => {
     if (!request.id) return carried(request)
