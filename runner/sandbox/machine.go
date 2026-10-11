@@ -49,6 +49,9 @@ func boot() (*machine, error) {
 	vm := goja.New()
 	pending := &timers{}
 	pending.install(vm)
+	if err := installGlobals(vm); err != nil {
+		return nil, fmt.Errorf("the script runtime does not start: %w", err)
+	}
 	if _, err := vm.RunProgram(program); err != nil {
 		return nil, fmt.Errorf("the script runtime does not start: %w", err)
 	}
