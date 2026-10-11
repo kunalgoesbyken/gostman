@@ -1,11 +1,12 @@
 import { ArrowLeft, Cookie, Import, RotateCcw, Search, Server, Settings } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { EnvironmentSwitcher } from "./EnvironmentSwitcher"
+import { StorageMenu } from "./StorageMenu"
 import { useMockStore } from "../lib/mockServer"
 import { shortcutLabel } from "../lib/platform"
 import logo from "../assets/logo.jpg"
 
-export function AppHeader({ onImport, onReset, onOpenCommands, onOpenCookies, onOpenSettings, onOpenMock, onBack }) {
+export function AppHeader({ storage, onImport, onReset, onOpenCommands, onOpenCookies, onOpenSettings, onOpenMock, onBack }) {
   const isMockRunning = useMockStore((state) => state.isRunning)
 
   return (
@@ -16,6 +17,8 @@ export function AppHeader({ onImport, onReset, onOpenCommands, onOpenCookies, on
         <img src={logo} alt="" className="h-6 w-6 rounded" />
         <h1 className="font-brand text-sm font-semibold">Gostman</h1>
       </div>
+
+      <StorageMenu storage={storage} />
 
       <div className="ml-auto flex min-w-0 items-center gap-3">
         <Button variant="ghost" onClick={onOpenCommands} className="hidden lg:inline-flex">

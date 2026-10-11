@@ -450,6 +450,20 @@ export namespace main {
 		    return a;
 		}
 	}
+	export class RecentWorkspace {
+	    path: string;
+	    name: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RecentWorkspace(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.name = source["name"];
+	    }
+	}
 	export class Request {
 	    id: string;
 	    name: string;
@@ -584,6 +598,45 @@ export namespace main {
 	        this.history = this.convertValues(source["history"], Request);
 	        this.cookies = this.convertValues(source["cookies"], engine.CookieInfo);
 	        this.settings = this.convertValues(source["settings"], Settings);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class WorkspaceStatus {
+	    path: string;
+	    name: string;
+	    recent: RecentWorkspace[];
+	    problems: workspace.Problem[];
+	    notice: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new WorkspaceStatus(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.name = source["name"];
+	        this.recent = this.convertValues(source["recent"], RecentWorkspace);
+	        this.problems = this.convertValues(source["problems"], workspace.Problem);
+	        this.notice = source["notice"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -856,6 +909,27 @@ export namespace rpc {
 		}
 	}
 	
+
+}
+
+export namespace workspace {
+	
+	export class Problem {
+	    path: string;
+	    line: number;
+	    message: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Problem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.line = source["line"];
+	        this.message = source["message"];
+	    }
+	}
 
 }
 

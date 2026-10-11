@@ -2,15 +2,20 @@ import {
   Authorize,
   CancelAuthorization,
   CancelRequest,
+  CloseWorkspace,
   DeleteRequest,
   FetchToken,
   DescribeGrpc,
   InvokeGrpc,
   LoadData,
+  OpenWorkspace,
   ParseCurl,
   PickFile,
+  PickWorkspaceFolder,
   PrepareRequest,
+  ReloadWorkspace,
   ResetData,
+  SaveCollectionToFolder,
   SaveCookies,
   SaveEnvironments,
   SaveFile,
@@ -19,6 +24,7 @@ import {
   SaveRequests,
   SaveSettings,
   SendRequest,
+  WorkspaceStatus,
 } from '../../../wailsjs/go/main/App'
 import { desktopMock } from './desktopMock'
 import { openDesktopSocket } from './desktopSocket'
@@ -45,6 +51,19 @@ const send = answering((id, request, variables, cookies) => SendRequest(id, toEn
 
 const invokeGrpc = answering((id, request, variables) => InvokeGrpc(id, toGrpcCall(request, variables)))
 
+let storageChange = Promise.resolve()
+
+function duringStorageChange(change) {
+  const result = change()
+  storageChange = result.then(() => {}, () => {})
+  return result
+}
+
+async function load() {
+  await storageChange
+  return LoadData()
+}
+
 export const desktopBackend = {
   send,
   cancel: (id) => CancelRequest(id),
@@ -52,7 +71,7 @@ export const desktopBackend = {
   parseCurl: (command) => ParseCurl(command),
   describeGrpc: (request, variables) => DescribeGrpc(toGrpcTarget(request, variables)),
   invokeGrpc,
-  load: () => LoadData(),
+  load,
   saveRequest,
   saveRequests: (requests) => SaveRequests(requests),
   deleteRequest: (id) => DeleteRequest(id),
@@ -65,6 +84,15 @@ export const desktopBackend = {
     pickFile: (title) => PickFile(title),
   },
   mock: desktopMock,
+  storage: {
+    status: () => WorkspaceStatus(),
+    pickFolder: () => PickWorkspaceFolder(),
+    openFolder: (path) => OpenWorkspace(path),
+    saveToFolder: (path) => SaveCollectionToFolder(path),
+    reload: () => ReloadWorkspace(),
+    close: () => CloseWorkspace(),
+    change: duringStorageChange,
+  },
   oauthCallback: OAUTH_CALLBACK,
   authorize: (config, variables) => Authorize(config, variables),
   cancelAuthorization: () => CancelAuthorization(),

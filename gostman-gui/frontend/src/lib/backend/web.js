@@ -206,6 +206,7 @@ export const webBackend = {
   saveCookies,
   network: null,
   mock: null,
+  storage: null,
   oauthCallback: { url: `${window.location.origin}${OAUTH_CALLBACK_PATH}`, isFixed: true },
   authorize,
   cancelAuthorization: cancelOAuthPopup,

@@ -11,6 +11,8 @@ export function CancelAuthorization():Promise<void>;
 
 export function CancelRequest(arg1:string):Promise<void>;
 
+export function CloseWorkspace():Promise<main.WorkspaceStatus>;
+
 export function DeleteRequest(arg1:string):Promise<void>;
 
 export function DescribeGrpc(arg1:rpc.Target):Promise<rpc.Schema>;
@@ -25,13 +27,21 @@ export function MockRoutes(arg1:Array<mock.Source>,arg2:string):Promise<Array<mo
 
 export function MockStatus():Promise<main.MockState>;
 
+export function OpenWorkspace(arg1:string):Promise<main.WorkspaceStatus>;
+
 export function ParseCurl(arg1:string):Promise<engine.Request>;
 
 export function PickFile(arg1:string):Promise<string>;
 
+export function PickWorkspaceFolder():Promise<string>;
+
 export function PrepareRequest(arg1:engine.Request):Promise<engine.Prepared>;
 
+export function ReloadWorkspace():Promise<main.WorkspaceStatus>;
+
 export function ResetData():Promise<void>;
+
+export function SaveCollectionToFolder(arg1:string):Promise<main.WorkspaceStatus>;
 
 export function SaveCookies(arg1:Array<engine.CookieInfo>):Promise<void>;
 
@@ -62,3 +72,5 @@ export function WSClose(arg1:string):Promise<void>;
 export function WSConnect(arg1:string,arg2:string):Promise<string>;
 
 export function WSSend(arg1:string,arg2:string):Promise<void>;
+
+export function WorkspaceStatus():Promise<main.WorkspaceStatus>;
