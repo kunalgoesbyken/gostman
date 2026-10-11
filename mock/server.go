@@ -128,7 +128,23 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func isLoopbackHost(hostport string) bool {
+	host := hostport
+	if name, _, err := net.SplitHostPort(hostport); err == nil {
+		host = name
+	}
+	if host == "localhost" {
+		return true
+	}
+	address := net.ParseIP(host)
+	return address != nil && address.IsLoopback()
+}
+
 func (s *Server) respond(w http.ResponseWriter, r *http.Request) string {
+	if !isLoopbackHost(r.Host) {
+		s.send(w, r, problem(http.StatusForbidden, "The mock server only answers requests addressed to localhost."))
+		return ""
+	}
 	if s.settings.CORS && isPreflight(r) {
 		s.send(w, r, preflightAnswer(r))
 		return ""
@@ -155,6 +171,8 @@ func (s *Server) send(w http.ResponseWriter, r *http.Request, reply answer) {
 	for _, stored := range reply.headers {
 		header.Add(stored.Key, stored.Value)
 	}
+	header.Set("X-Content-Type-Options", "nosniff")
+	header.Set("Content-Security-Policy", "sandbox")
 	if s.settings.CORS {
 		allowOrigin(header, r)
 	}

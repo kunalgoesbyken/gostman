@@ -8,6 +8,7 @@ const ENCODING_BASE64 = 'base64'
 const ENCODING_UTF8 = 'utf8'
 const GRPC_PROTOCOL = 'grpc'
 const DEFAULT_STATUS = 200
+const UNSAVED_HEADERS = ['set-cookie', 'authorization', 'proxy-authenticate', 'www-authenticate']
 
 const asText = (value) => (typeof value === 'string' ? value : '')
 
@@ -53,12 +54,14 @@ function withinBodyLimit(example) {
 
 export const cleanExampleName = (name, fallback) => asText(name).trim().slice(0, MAX_NAME_LENGTH) || fallback
 
+const isShareableHeader = (header) => !UNSAVED_HEADERS.includes(header.key.toLowerCase())
+
 export function exampleFromResponse(response, name) {
   return withinBodyLimit({
     id: crypto.randomUUID(),
     name: cleanExampleName(name, response.status),
     status: response.statusCode,
-    headers: response.headers.map(toHeader),
+    headers: response.headers.filter(isShareableHeader).map(toHeader),
     body: response.body,
     bodyEncoding: response.bodyEncoding === ENCODING_BASE64 ? ENCODING_BASE64 : ENCODING_UTF8,
     contentType: response.contentType,
