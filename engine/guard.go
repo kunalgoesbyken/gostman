@@ -61,6 +61,17 @@ func isBlockedIP(ip net.IP) bool {
 	return false
 }
 
+func DialContext(policy Policy) func(ctx context.Context, network, address string) (net.Conn, error) {
+	if policy.BlockPrivate {
+		return guardedDial
+	}
+	return dialer.DialContext
+}
+
+func IsBlockedAddress(err error) bool {
+	return errors.Is(err, errBlockedAddress)
+}
+
 func guardedDial(ctx context.Context, network, address string) (net.Conn, error) {
 	host, port, err := net.SplitHostPort(address)
 	if err != nil {

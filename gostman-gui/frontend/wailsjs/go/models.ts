@@ -244,6 +244,7 @@ export namespace engine {
 	    url: string;
 	    truncated: boolean;
 	    error: string;
+	    protocol?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Response(source);
@@ -263,6 +264,7 @@ export namespace engine {
 	        this.url = source["url"];
 	        this.truncated = source["truncated"];
 	        this.error = source["error"];
+	        this.protocol = source["protocol"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -432,6 +434,9 @@ export namespace main {
 	    assertions: string;
 	    preScript: string;
 	    postScript: string;
+	    grpcMethod: string;
+	    grpcMessage: string;
+	    grpcProtos: string;
 	    timestamp: string;
 	
 	    static createFrom(source: any = {}) {
@@ -457,6 +462,9 @@ export namespace main {
 	        this.assertions = source["assertions"];
 	        this.preScript = source["preScript"];
 	        this.postScript = source["postScript"];
+	        this.grpcMethod = source["grpcMethod"];
+	        this.grpcMessage = source["grpcMessage"];
+	        this.grpcProtos = source["grpcProtos"];
 	        this.timestamp = source["timestamp"];
 	    }
 	
@@ -560,6 +568,189 @@ export namespace main {
 		    return a;
 		}
 	}
+
+}
+
+export namespace rpc {
+	
+	export class ProtoFile {
+	    name: string;
+	    content: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ProtoFile(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.content = source["content"];
+	    }
+	}
+	export class Target {
+	    address: string;
+	    headers: string;
+	    auth: engine.Auth;
+	    variables: string;
+	    options: engine.Options;
+	    protos: ProtoFile[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Target(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.address = source["address"];
+	        this.headers = source["headers"];
+	        this.auth = this.convertValues(source["auth"], engine.Auth);
+	        this.variables = source["variables"];
+	        this.options = this.convertValues(source["options"], engine.Options);
+	        this.protos = this.convertValues(source["protos"], ProtoFile);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Call {
+	    target: Target;
+	    method: string;
+	    message: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Call(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.target = this.convertValues(source["target"], Target);
+	        this.method = source["method"];
+	        this.message = source["message"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Method {
+	    name: string;
+	    fullName: string;
+	    inputType: string;
+	    outputType: string;
+	    clientStreaming: boolean;
+	    serverStreaming: boolean;
+	    skeleton: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Method(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.fullName = source["fullName"];
+	        this.inputType = source["inputType"];
+	        this.outputType = source["outputType"];
+	        this.clientStreaming = source["clientStreaming"];
+	        this.serverStreaming = source["serverStreaming"];
+	        this.skeleton = source["skeleton"];
+	    }
+	}
+	
+	export class Service {
+	    name: string;
+	    methods: Method[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Service(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.methods = this.convertValues(source["methods"], Method);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Schema {
+	    source: string;
+	    services: Service[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Schema(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.source = source["source"];
+	        this.services = this.convertValues(source["services"], Service);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
 
 }
 

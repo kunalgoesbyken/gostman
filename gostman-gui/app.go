@@ -81,6 +81,9 @@ type Request struct {
 	Assertions       string         `json:"assertions"`
 	PreScript        string         `json:"preScript"`
 	PostScript       string         `json:"postScript"`
+	GrpcMethod       string         `json:"grpcMethod"`
+	GrpcMessage      string         `json:"grpcMessage"`
+	GrpcProtos       string         `json:"grpcProtos"`
 	Timestamp        string         `json:"timestamp"`
 }
 

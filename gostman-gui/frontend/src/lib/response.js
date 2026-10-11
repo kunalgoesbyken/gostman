@@ -5,6 +5,8 @@ const FALLBACK_MIME = 'application/octet-stream'
 const FALLBACK_FILE_NAME = 'response'
 const UNSAFE_FILE_NAME_CHARACTERS = /[\/:*?"<>|]/g
 const JSON_START = /^\s*[[{]/
+const GRPC_PROTOCOL = 'grpc'
+const GRPC_OK = 0
 
 const HTML_TYPES = ['text/html', 'application/xhtml+xml']
 
@@ -124,7 +126,10 @@ export function downloadName(response) {
   return `${name}.${extension}`
 }
 
-export function statusVariant(statusCode) {
+const grpcVariant = (statusCode) => (statusCode === GRPC_OK ? 'success' : 'clientError')
+
+export function statusVariant({ statusCode, protocol }) {
+  if (protocol === GRPC_PROTOCOL) return grpcVariant(statusCode)
   if (statusCode >= 500) return 'serverError'
   if (statusCode >= 400) return 'clientError'
   if (statusCode >= 300) return 'redirect'

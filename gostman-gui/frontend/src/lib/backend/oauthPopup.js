@@ -6,7 +6,6 @@ const SIGN_IN_TIMEOUT_MS = 5 * 60 * 1000
 const BLOCKED = 'The sign-in window was blocked. Allow pop-ups for this site and try again.'
 const TIMED_OUT = 'No sign-in arrived within five minutes.'
 const CANCELLED = 'The sign-in was cancelled.'
-const MISMATCH = 'The sign-in answer did not match this request, so it was ignored.'
 const NO_CODE = 'The provider did not return an authorization code.'
 
 let cancelPending = () => {}
@@ -20,9 +19,8 @@ export function relayOAuthCallback() {
   window.close()
 }
 
-function readAnswer(answer, state) {
+function readAnswer(answer) {
   if (answer.error) throw new Error(`The provider refused the sign-in: ${answer.error_description || answer.error}`)
-  if (answer.state !== state) throw new Error(MISMATCH)
   if (!answer.code) throw new Error(NO_CODE)
   return answer.code
 }
@@ -50,8 +48,9 @@ export function signInWithPopup(url, state) {
       fail(new Error(CANCELLED))
     }
     channel.onmessage = (event) => {
+      if (event.data?.state !== state) return
       try {
-        succeed(readAnswer(event.data, state))
+        succeed(readAnswer(event.data))
       } catch (error) {
         fail(error)
       }

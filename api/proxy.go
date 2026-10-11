@@ -9,9 +9,15 @@ import (
 	"time"
 
 	"github.com/krockxz/gostman/engine"
+	"github.com/krockxz/gostman/rpc"
 )
 
-const maxRequestBytes = 14 << 20
+const (
+	maxRequestBytes = 14 << 20
+
+	grpcDescribe = "describe"
+	grpcInvoke   = "invoke"
+)
 
 var Policy = engine.Policy{
 	BlockPrivate:     true,
@@ -43,6 +49,11 @@ type curlResult struct {
 	Error   string          `json:"error,omitempty"`
 }
 
+type describeResult struct {
+	Schema *rpc.Schema `json:"schema,omitempty"`
+	Error  string      `json:"error,omitempty"`
+}
+
 func Handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -56,6 +67,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	query := r.URL.Query()
 	switch {
+	case query.Get("grpc") == grpcDescribe:
+		writeJSON(w, describeGrpc(r))
+	case query.Get("grpc") == grpcInvoke:
+		writeJSON(w, invokeGrpc(r))
 	case query.Has("curl"):
 		writeJSON(w, parseCurl(r))
 	case query.Has("prepare"):
@@ -142,6 +157,26 @@ func fetchToken(r *http.Request) engine.Token {
 		return engine.Token{Error: "the token request could not be read: " + err.Error()}
 	}
 	return engine.FetchToken(r.Context(), exchange, Policy)
+}
+
+func describeGrpc(r *http.Request) describeResult {
+	var target rpc.Target
+	if err := json.NewDecoder(r.Body).Decode(&target); err != nil {
+		return describeResult{Error: err.Error()}
+	}
+	schema, err := rpc.Describe(r.Context(), target, Policy)
+	if err != nil {
+		return describeResult{Error: err.Error()}
+	}
+	return describeResult{Schema: &schema}
+}
+
+func invokeGrpc(r *http.Request) engine.Response {
+	var call rpc.Call
+	if err := json.NewDecoder(r.Body).Decode(&call); err != nil {
+		return engine.Failure(engine.ErrorConfig, "the request could not be read: "+err.Error())
+	}
+	return rpc.Invoke(r.Context(), call, Policy)
 }
 
 func writeJSON(w http.ResponseWriter, payload any) {

@@ -17,11 +17,12 @@ permissions:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Root module: the shared request engine, the Vercel proxy function and the
-  # local dev server. Standard library only, so there is no go.sum to cache.
+  # Root module: the shared request engine, the gRPC client, the Vercel proxy
+  # function and the local dev server. `engine/` is standard library only;
+  # `rpc/` brings in gRPC and protobuf, which are pinned by the root go.sum.
   # ---------------------------------------------------------------------------
   go-api:
-    name: Go checks (engine, api, cmd)
+    name: Go checks (engine, rpc, api, cmd)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -31,7 +32,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
-          cache: false
+          cache-dependency-path: go.sum
 
       - name: go build ./...
         run: go build ./...

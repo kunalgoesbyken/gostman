@@ -5,6 +5,7 @@ import { pluralize } from './dataUtils'
 import { applyExtractors, createExecutor } from './execution'
 import { introspectionRequest, readSchema } from './graphqlSchema'
 import { clearToken, obtainToken } from './oauth'
+import { isGrpcRequest, serializeProtoFiles } from './grpc'
 import { normalizeRequest } from './request'
 import { isRequestDirty } from './requestChanges'
 import { bodyBase64, downloadName, mimeType } from './response'
@@ -16,6 +17,7 @@ const UNRECORDED_ERRORS = ['config', 'cancelled']
 const RESET_PROMPT = "Delete every request, folder, environment and history entry? This can't be undone."
 const EXPORT_TAB = 'export'
 const DESTRUCTIVE = 'destructive'
+const NO_GRPC_CODE = 'Code generation covers HTTP requests. A gRPC call has no equivalent snippet yet.'
 
 const store = () => useAppStore.getState()
 const activeTab = () => selectActiveTab(store())
@@ -98,6 +100,26 @@ export function createWorkspaceActions(backend) {
     store().patchTab(tab.id, { schema: readSchema(response) })
   }
 
+  async function loadGrpcSchema() {
+    const tab = activeTab()
+    store().patchTab(tab.id, { grpcSchema: { loading: true } })
+    try {
+      store().patchTab(tab.id, { grpcSchema: await backend.describeGrpc(tab.request, activeVariables()) })
+    } catch (error) {
+      store().patchTab(tab.id, { grpcSchema: { error: messageOf(error) } })
+    }
+  }
+
+  async function setGrpcProtos(files) {
+    const tab = activeTab()
+    store().updateTabRequest(tab.id, { grpcProtos: serializeProtoFiles(files) })
+    if (files.length > 0) {
+      await loadGrpcSchema()
+      return
+    }
+    store().patchTab(tab.id, { grpcSchema: null })
+  }
+
   async function send() {
     const tab = activeTab()
     if (isSocketAddress(tab.request.url, activeVariables())) {
@@ -161,6 +183,7 @@ export function createWorkspaceActions(backend) {
   })
 
   const generateCode = attempt('Cannot generate code', async () => {
+    if (isGrpcRequest(activeTab().request)) throw new Error(NO_GRPC_CODE)
     const prepared = await backend.prepare(activeTab().request, activeVariables())
     store().openCodeDialog(generateAllSnippets(prepared))
   })
@@ -312,6 +335,8 @@ export function createWorkspaceActions(backend) {
     startRun: runner.start,
     stopRun: runner.stop,
     loadSchema,
+    loadGrpcSchema,
+    setGrpcProtos,
     save,
     generateCode,
     pasteCurl,

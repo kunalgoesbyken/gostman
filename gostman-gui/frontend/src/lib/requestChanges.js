@@ -3,7 +3,7 @@ import { normalizeRequest } from './request'
 
 const TEXT_FIELDS = [
   'name', 'method', 'url', 'body', 'bodyType', 'folderId', 'graphqlQuery', 'graphqlVariables',
-  'extractors', 'assertions', 'preScript', 'postScript',
+  'extractors', 'assertions', 'preScript', 'postScript', 'grpcMethod', 'grpcMessage', 'grpcProtos',
 ]
 const PAIR_FIELDS = ['headers', 'queryParams']
 const EMPTY_PAIRS = ['', '{}', '[]']

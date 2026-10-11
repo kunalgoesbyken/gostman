@@ -1,5 +1,6 @@
 import { extractVariables, isUsableResponse, parseExtractors } from './chaining'
 import { isPlainObject, parseJSON } from './dataUtils'
+import { isGrpcRequest } from './grpc'
 import { withFreshToken } from './oauth'
 import { failureResponse } from './response'
 import { countActiveAssertions } from './scripting/assertions'
@@ -70,7 +71,8 @@ export function createExecutor(backend) {
       return stop(request, error.message)
     }
 
-    const response = await backend.send(sendId, request, variablesText(), store().cookies)
+    const transmit = isGrpcRequest(request) ? backend.invokeGrpc : backend.send
+    const response = await transmit(sendId, request, variablesText(), store().cookies)
     store().storeCookies(response.cookies || [])
     const extraction = applyExtractors(request, response)
 

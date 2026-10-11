@@ -7,7 +7,7 @@ import { normalizeRequest } from '../lib/request'
 import { isBlankRequest } from '../lib/requestChanges'
 
 const HISTORY_LIMIT = 50
-const HISTORY_IDENTITY_FIELDS = ['method', 'url', 'body', 'bodyType', 'graphqlQuery', 'graphqlVariables']
+const HISTORY_IDENTITY_FIELDS = ['method', 'url', 'body', 'bodyType', 'graphqlQuery', 'graphqlVariables', 'grpcMethod', 'grpcMessage']
 const IMPORT_TAB = 'import'
 const DEFAULT_REQUEST_PANEL = 'params'
 const EMPTY_VARIABLES = '{}'

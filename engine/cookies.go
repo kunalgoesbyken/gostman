@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"golang.org/x/net/publicsuffix"
 )
 
 const cookieTimeLayout = time.RFC1123
@@ -47,7 +49,7 @@ func describeCookie(cookie *http.Cookie, host string, now time.Time) CookieInfo 
 }
 
 func newJar(stored []CookieInfo, now time.Time) http.CookieJar {
-	jar, _ := cookiejar.New(nil)
+	jar, _ := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 	for _, info := range stored {
 		if origin, cookie, ok := restoreCookie(info, now); ok {
 			jar.SetCookies(origin, []*http.Cookie{cookie})

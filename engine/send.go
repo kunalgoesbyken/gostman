@@ -47,7 +47,7 @@ func send(ctx context.Context, r Request, policy Policy) Response {
 		return Failure(ErrorConfig, "request body is larger than 10 MB")
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, timeoutFor(r.Options, policy))
+	ctx, cancel := context.WithTimeout(ctx, policy.Timeout(r.Options))
 	defer cancel()
 
 	outgoing, err := http.NewRequestWithContext(ctx, prepared.Method, prepared.URL, bytes.NewReader(prepared.body))
@@ -83,10 +83,7 @@ func send(ctx context.Context, r Request, policy Policy) Response {
 	}
 	defer incoming.Body.Close()
 
-	limit := policy.MaxResponseBytes
-	if limit <= 0 {
-		limit = defaultMaxResponse
-	}
+	limit := policy.ResponseLimit()
 	body, err := io.ReadAll(io.LimitReader(incoming.Body, limit+1))
 	if err != nil {
 		return classify(ctx, err)
@@ -111,15 +108,22 @@ func send(ctx context.Context, r Request, policy Policy) Response {
 	return response
 }
 
-func timeoutFor(options Options, policy Policy) time.Duration {
+func (p Policy) Timeout(options Options) time.Duration {
 	timeout := defaultTimeout
 	if options.TimeoutMs > 0 {
 		timeout = time.Duration(options.TimeoutMs) * time.Millisecond
 	}
-	if policy.MaxTimeout > 0 && timeout > policy.MaxTimeout {
-		return policy.MaxTimeout
+	if p.MaxTimeout > 0 && timeout > p.MaxTimeout {
+		return p.MaxTimeout
 	}
 	return timeout
+}
+
+func (p Policy) ResponseLimit() int64 {
+	if p.MaxResponseBytes > 0 {
+		return p.MaxResponseBytes
+	}
+	return defaultMaxResponse
 }
 
 func Failure(kind, message string) Response {

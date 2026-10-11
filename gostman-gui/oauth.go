@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/subtle"
 	"errors"
 	"fmt"
 	"html"
@@ -51,7 +52,7 @@ func loopbackListener(redirectURI string) (net.Listener, string, error) {
 	return listener, path, nil
 }
 
-func readCallback(query url.Values, state string) callbackOutcome {
+func readCallback(query url.Values) callbackOutcome {
 	switch {
 	case query.Get("error") != "":
 		reason := query.Get("error_description")
@@ -59,8 +60,6 @@ func readCallback(query url.Values, state string) callbackOutcome {
 			reason = query.Get("error")
 		}
 		return callbackOutcome{err: fmt.Errorf("the provider refused the sign-in: %s", reason)}
-	case query.Get("state") != state:
-		return callbackOutcome{err: errors.New("the sign-in answer did not match this request, so it was ignored")}
 	case query.Get("code") == "":
 		return callbackOutcome{err: errors.New("the provider did not return an authorization code")}
 	default:
@@ -72,7 +71,11 @@ func awaitCallback(ctx context.Context, listener net.Listener, path, state strin
 	outcomes := make(chan callbackOutcome, 1)
 	mux := http.NewServeMux()
 	mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-		outcome := readCallback(r.URL.Query(), state)
+		if subtle.ConstantTimeCompare([]byte(r.URL.Query().Get("state")), []byte(state)) != 1 {
+			http.Error(w, "this sign-in answer does not belong to a pending request", http.StatusBadRequest)
+			return
+		}
+		outcome := readCallback(r.URL.Query())
 		message := "Signed in."
 		if outcome.err != nil {
 			message = "Sign-in failed: " + outcome.err.Error() + "."

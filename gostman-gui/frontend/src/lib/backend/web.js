@@ -2,11 +2,13 @@ import { base64ToBytes } from '../base64'
 import { openBrowserSocket, unsentBrowserHeaders } from './browserSocket'
 import { isPlainObject } from '../dataUtils'
 import { OAUTH_CALLBACK_PATH, cancelOAuthPopup, signInWithPopup } from './oauthPopup'
+import { toGrpcCall, toGrpcTarget } from '../grpc'
 import { mockFolders, mockRequests } from '../mockData'
 import { toEngineRequest } from '../request'
 import { failureResponse } from '../response'
 
 const PROXY_URL = '/api/proxy'
+const GRPC_INVOKE_URL = `${PROXY_URL}?grpc=invoke`
 const DATA_KEY = 'gostman-data'
 const DAMAGED_DATA_PREFIX = 'gostman-data-damaged-'
 const UNREADABLE_DATA = 'The saved data in this browser cannot be read, so nothing was changed.'
@@ -97,11 +99,11 @@ async function postForResult(query, payload, field) {
   return result[field]
 }
 
-async function send(id, request, variables, cookies) {
+async function exchange(url, id, payload) {
   const controller = new AbortController()
   inFlight.set(id, controller)
   try {
-    return await postJSON(PROXY_URL, toEngineRequest(request, variables, cookies), controller.signal)
+    return await postJSON(url, payload, controller.signal)
   } catch (error) {
     if (controller.signal.aborted) return failureResponse('cancelled', 'the request was cancelled')
     return failureResponse('network', error.message)
@@ -109,6 +111,10 @@ async function send(id, request, variables, cookies) {
     inFlight.delete(id)
   }
 }
+
+const send = (id, request, variables, cookies) => exchange(PROXY_URL, id, toEngineRequest(request, variables, cookies))
+
+const invokeGrpc = (id, request, variables) => exchange(GRPC_INVOKE_URL, id, toGrpcCall(request, variables))
 
 function readStoredData() {
   const raw = localStorage.getItem(DATA_KEY)
@@ -188,6 +194,8 @@ export const webBackend = {
   cancel: (id) => inFlight.get(id)?.abort(),
   prepare: (request, variables) => postForResult('prepare=1', toEngineRequest(request, variables), 'prepared'),
   parseCurl: (command) => postForResult('curl=1', { command }, 'request'),
+  describeGrpc: (request, variables) => postForResult('grpc=describe', toGrpcTarget(request, variables), 'schema'),
+  invokeGrpc,
   load,
   saveRequest,
   saveRequests,

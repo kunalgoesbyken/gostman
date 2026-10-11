@@ -1379,7 +1379,7 @@ export async function parseImport(text) {
 
 const AUTH_TYPES = [AUTH_BASIC, AUTH_BEARER, AUTH_API_KEY]
 const AUTH_TEXT_FIELDS = ['username', 'password', 'token', 'key', 'value']
-const REQUEST_TEXT_FIELDS = ['id', 'url', 'headers', 'body', 'queryParams', 'folderId', 'graphqlQuery', 'graphqlVariables', 'extractors']
+const REQUEST_TEXT_FIELDS = ['id', 'url', 'headers', 'body', 'queryParams', 'folderId', 'graphqlQuery', 'graphqlVariables', 'extractors', 'grpcMethod', 'grpcMessage', 'grpcProtos']
 const BODY_TYPE_VALUES = BODY_TYPES.map((type) => type.value)
 
 const stringOf = (value) => (typeof value === 'string' ? value : '')

@@ -44,6 +44,9 @@ const DEFAULT_REQUEST = {
   assertions: '',
   preScript: '',
   postScript: '',
+  grpcMethod: '',
+  grpcMessage: '',
+  grpcProtos: '',
   timestamp: '',
 }
 
