@@ -15,7 +15,7 @@ const (
 	highestStatus     = 599
 )
 
-var recomputedHeaders = map[string]bool{
+var unservedHeaders = map[string]bool{
 	"Connection":          true,
 	"Content-Length":      true,
 	"Date":                true,
@@ -102,7 +102,7 @@ func servedHeaders(stored []Header) []Header {
 	kept := make([]Header, 0, len(stored))
 	for _, header := range stored {
 		name := http.CanonicalHeaderKey(strings.TrimSpace(header.Key))
-		if name == "" || recomputedHeaders[name] {
+		if name == "" || unservedHeaders[name] {
 			continue
 		}
 		kept = append(kept, Header{Key: name, Value: header.Value})
