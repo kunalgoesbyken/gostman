@@ -1,6 +1,9 @@
 package mock
 
-import "net/http"
+import (
+	"net/http"
+	"net/url"
+)
 
 const (
 	headerOrigin           = "Origin"
@@ -31,9 +34,14 @@ func preflightAnswer(r *http.Request) answer {
 	return answer{status: http.StatusNoContent, headers: headers}
 }
 
+func isLoopbackOrigin(origin string) bool {
+	parsed, err := url.Parse(origin)
+	return err == nil && parsed.Host != "" && isLoopbackHost(parsed.Host)
+}
+
 func allowOrigin(header http.Header, r *http.Request) {
 	origin := r.Header.Get(headerOrigin)
-	if origin == "" {
+	if !isLoopbackOrigin(origin) {
 		header.Set(headerAllowOrigin, anyOrigin)
 		header.Del(headerAllowCredentials)
 		return
