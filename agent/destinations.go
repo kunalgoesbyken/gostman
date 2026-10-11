@@ -54,6 +54,10 @@ func addressesOf(request workspace.Request) []string {
 	return []string{request.URL, request.Auth.OAuth2.TokenURL, request.Auth.OAuth2.AuthURL}
 }
 
+func (d *destinations) forget() {
+	d.known = map[string]bool{}
+}
+
 func (d *destinations) learn(files workspace.Collection, authored map[string]bool, startup map[string]string) {
 	known := map[string]bool{}
 	environments := files.Environments

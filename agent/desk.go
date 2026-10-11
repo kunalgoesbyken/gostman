@@ -54,7 +54,7 @@ func Open(settings Settings) (*Desk, error) {
 		return nil, err
 	}
 	reach := newDestinations(settings.AllowedHosts)
-	reach.learn(files.Collection(), files.AgentAuthored(), settings.Variables)
+	study(reach, files, settings.Variables)
 	policy := settings.Policy
 	policy.Permit = reach.permit
 	client, err := NewClient(policy)
@@ -69,6 +69,15 @@ func Open(settings Settings) (*Desk, error) {
 	return desk, client.Enter(stored, settings.Environment, settings.Variables)
 }
 
+func study(reach *destinations, files *workspace.Workspace, startup map[string]string) {
+	authored, err := files.AgentAuthored()
+	if err != nil {
+		reach.forget()
+		return
+	}
+	reach.learn(files.Collection(), authored, startup)
+}
+
 func (d *Desk) Close() error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
@@ -80,7 +89,7 @@ func (d *Desk) refresh() (scene, error) {
 		return scene{}, err
 	}
 	files := d.files.Collection()
-	d.reach.learn(files, d.files.AgentAuthored(), d.startup)
+	study(d.reach, d.files, d.startup)
 	stored, err := runner.FromWorkspace(files)
 	if err != nil {
 		return scene{}, err

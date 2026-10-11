@@ -2,6 +2,7 @@ package workspace
 
 import (
 	"encoding/json"
+	"fmt"
 	"sort"
 )
 
@@ -10,20 +11,23 @@ const (
 	agentLedger    = agentDirectory + "/agent-requests.json"
 )
 
-func (w *Workspace) readAgentLedger() map[string]bool {
+func (w *Workspace) readAgentLedger() (map[string]bool, error) {
 	authored := map[string]bool{}
+	if !w.disk.exists(agentLedger) {
+		return authored, nil
+	}
 	content, err := w.disk.read(agentLedger)
 	if err != nil {
-		return authored
+		return nil, err
 	}
 	var ids []string
-	if json.Unmarshal(content, &ids) != nil {
-		return authored
+	if err := json.Unmarshal(content, &ids); err != nil {
+		return nil, fmt.Errorf("%s cannot be read: %w", agentLedger, err)
 	}
 	for _, id := range ids {
 		authored[id] = true
 	}
-	return authored
+	return authored, nil
 }
 
 func (w *Workspace) writeAgentLedger(authored map[string]bool) error {
@@ -42,7 +46,7 @@ func (w *Workspace) writeAgentLedger(authored map[string]bool) error {
 	return w.disk.write(agentLedger, append(content, '\n'))
 }
 
-func (w *Workspace) AgentAuthored() map[string]bool {
+func (w *Workspace) AgentAuthored() (map[string]bool, error) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	return w.readAgentLedger()
@@ -51,25 +55,13 @@ func (w *Workspace) AgentAuthored() map[string]bool {
 func (w *Workspace) MarkAgentAuthored(id string) error {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	authored := w.readAgentLedger()
+	authored, err := w.readAgentLedger()
+	if err != nil {
+		return err
+	}
 	if authored[id] {
 		return nil
 	}
 	authored[id] = true
-	return w.writeAgentLedger(authored)
-}
-
-func (w *Workspace) MarkReviewed(ids []string) error {
-	w.mu.Lock()
-	defer w.mu.Unlock()
-	authored := w.readAgentLedger()
-	changed := false
-	for _, id := range ids {
-		changed = changed || authored[id]
-		delete(authored, id)
-	}
-	if !changed {
-		return nil
-	}
 	return w.writeAgentLedger(authored)
 }
