@@ -23,6 +23,7 @@ type session struct {
 	variables variables
 	cookies   []engine.CookieInfo
 	tokens    tokenCache
+	witness   func(engine.Request)
 }
 
 type job struct {
@@ -116,7 +117,14 @@ func (s *session) transmit(ctx context.Context, request Request) (engine.Respons
 	if err := s.scripts.Call("toEngineRequest", &prepared, request, s.variables.text(), s.cookies); err != nil {
 		return engine.Response{}, err
 	}
+	s.announce(prepared)
 	return engine.Send(ctx, prepared, s.policy), nil
+}
+
+func (s *session) announce(prepared engine.Request) {
+	if s.witness != nil {
+		s.witness(prepared)
+	}
 }
 
 func (s *session) storeCookies(received []engine.CookieInfo) error {

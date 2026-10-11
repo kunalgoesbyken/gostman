@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/krockxz/gostman/engine"
-	"github.com/krockxz/gostman/runner/sandbox"
 )
 
 type Options struct {
@@ -97,32 +96,12 @@ func (s *session) runAll(ctx context.Context, planned plan, options Options, obs
 }
 
 func Run(ctx context.Context, stored Collection, options Options, observe func(Result)) (Report, error) {
-	scripts, err := sandbox.New()
+	session, err := NewSession(engine.Policy{})
 	if err != nil {
 		return Report{}, err
 	}
-	environment, err := selectEnvironment(stored.Environments, options.Environment)
-	if err != nil {
+	if err := session.Enter(stored.Environments, options.Environment, options.Variables); err != nil {
 		return Report{}, err
 	}
-	starting, err := startingVariables(environment, options.Variables)
-	if err != nil {
-		return Report{}, err
-	}
-	planned, err := prepare(scripts, stored, options)
-	if err != nil {
-		return Report{}, err
-	}
-
-	run := &session{scripts: scripts, variables: starting, cookies: []engine.CookieInfo{}, tokens: tokenCache{}}
-	started := time.Now()
-	results := run.runAll(ctx, planned, options, observe)
-	return Report{
-		Version:     ReportVersion,
-		Environment: environment.Name,
-		StartedAt:   started.UTC(),
-		DurationMs:  time.Since(started).Milliseconds(),
-		Summary:     summarize(results, len(planned.requests)),
-		Results:     results,
-	}, nil
+	return session.Run(ctx, stored, options, observe)
 }
