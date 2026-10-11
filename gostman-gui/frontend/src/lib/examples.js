@@ -14,13 +14,17 @@ const asText = (value) => (typeof value === 'string' ? value : '')
 
 const toHeader = (raw) => ({ key: asText(raw?.key), value: asText(raw?.value) })
 
+const isShareableHeader = (header) => !UNSAVED_HEADERS.includes(header.key.trim().toLowerCase())
+
+const toHeaders = (raw) => (Array.isArray(raw) ? raw.map(toHeader).filter(isShareableHeader) : [])
+
 const isStored = (raw) => isPlainObject(raw) && typeof raw.id === 'string' && raw.id !== ''
 
 const toExample = (raw) => ({
   id: raw.id,
   name: asText(raw.name),
   status: Number.isInteger(raw.status) ? raw.status : DEFAULT_STATUS,
-  headers: Array.isArray(raw.headers) ? raw.headers.map(toHeader) : [],
+  headers: toHeaders(raw.headers),
   body: asText(raw.body),
   bodyEncoding: raw.bodyEncoding === ENCODING_BASE64 ? ENCODING_BASE64 : ENCODING_UTF8,
   contentType: asText(raw.contentType),
@@ -54,14 +58,12 @@ function withinBodyLimit(example) {
 
 export const cleanExampleName = (name, fallback) => asText(name).trim().slice(0, MAX_NAME_LENGTH) || fallback
 
-const isShareableHeader = (header) => !UNSAVED_HEADERS.includes(header.key.toLowerCase())
-
 export function exampleFromResponse(response, name) {
   return withinBodyLimit({
     id: crypto.randomUUID(),
     name: cleanExampleName(name, response.status),
     status: response.statusCode,
-    headers: response.headers.filter(isShareableHeader).map(toHeader),
+    headers: toHeaders(response.headers),
     body: response.body,
     bodyEncoding: response.bodyEncoding === ENCODING_BASE64 ? ENCODING_BASE64 : ENCODING_UTF8,
     contentType: response.contentType,

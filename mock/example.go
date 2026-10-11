@@ -20,13 +20,16 @@ var recomputedHeaders = map[string]bool{
 	"Content-Length":      true,
 	"Date":                true,
 	"Keep-Alive":          true,
+	"Authorization":       true,
 	"Proxy-Authenticate":  true,
+	"Set-Cookie":          true,
 	"Proxy-Authorization": true,
 	"Proxy-Connection":    true,
 	"Te":                  true,
 	"Trailer":             true,
 	"Transfer-Encoding":   true,
 	"Upgrade":             true,
+	"Www-Authenticate":    true,
 }
 
 type answer struct {
