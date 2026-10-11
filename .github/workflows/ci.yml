@@ -76,6 +76,16 @@ jobs:
             npm install
           fi
 
+      - name: Verify the committed CLI script bundle is current
+        working-directory: ./gostman-gui/frontend
+        shell: bash
+        run: |
+          npm run build:cli
+          if ! git diff --exit-code --stat -- ../../runner/sandbox/bundle.js; then
+            echo "runner/sandbox/bundle.js is stale: run 'npm run build:cli' in gostman-gui/frontend and commit the result."
+            exit 1
+          fi
+
       # Desktop target: index.html -> src/main.jsx -> App.jsx (Wails bindings).
       - name: Build desktop frontend (dist/)
         working-directory: ./gostman-gui/frontend
