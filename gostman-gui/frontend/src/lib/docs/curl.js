@@ -9,6 +9,12 @@ const LINE_BREAK = ' \\\n  '
 
 const shellQuote = (text) => `'${text.replaceAll("'", `'\\''`)}'`
 
+const HEADER_NAME = /^[A-Za-z0-9!#$%&'*+.^_`|~-]+$/
+
+const isHeaderName = (name) => HEADER_NAME.test(name)
+
+const baseName = (fileName) => fileName.split('/').pop().split('\\').pop()
+
 const shellWord = (text) => (BARE_WORD.test(text) ? text : shellQuote(text))
 
 const methodFlag = (method) => (method === HEAD ? '--head' : `-X ${shellWord(method)}`)
@@ -17,18 +23,24 @@ const headerLine = ({ key, value }) => (value === '' ? `${key};` : `${key}: ${va
 
 const assignment = ({ key, value }) => `${key}=${value}`
 
+const multipartFlag = (field) => (
+  field.fileName === undefined
+    ? `--form-string ${shellQuote(assignment(field))}`
+    : `-F ${shellQuote(`${field.key}=@${baseName(field.fileName)}`)}`
+)
+
 const BODY_FLAGS = {
   [CURL_RAW]: (body) => [`--data-raw ${shellQuote(body.text)}`],
   [CURL_FORM]: (body) => body.fields.map((field) => `--data-urlencode ${shellQuote(assignment(field))}`),
-  [CURL_MULTIPART]: (body) => body.fields.map((field) => `-F ${shellQuote(assignment(field))}`),
-  [CURL_FILE]: (body) => [`--data-binary ${shellQuote(`@${body.fileName}`)}`],
+  [CURL_MULTIPART]: (body) => body.fields.map(multipartFlag),
+  [CURL_FILE]: (body) => [`--data-binary ${shellQuote(`@${baseName(body.fileName)}`)}`],
 }
 
 export function curlCommand({ method, url, user, headers, body }) {
   return [
-    `curl ${methodFlag(method)} ${shellQuote(url)}`,
+    `curl ${methodFlag(method)} --url ${shellQuote(url)}`,
     ...(user ? [`-u ${shellQuote(user)}`] : []),
-    ...headers.map((header) => `-H ${shellQuote(headerLine(header))}`),
+    ...headers.filter((header) => isHeaderName(header.key)).map((header) => `-H ${shellQuote(headerLine(header))}`),
     ...(body ? BODY_FLAGS[body.kind](body) : []),
   ].join(LINE_BREAK)
 }

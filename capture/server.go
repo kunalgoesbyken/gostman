@@ -123,9 +123,23 @@ func (s *Server) Stop() error {
 	return nil
 }
 
+const refusedOrigin = "The capture only forwards requests from pages served on localhost."
+
+func isLocalOrigin(origin string) bool {
+	if origin == "" {
+		return true
+	}
+	parsed, err := url.Parse(origin)
+	return err == nil && parsed.Host != "" && loopback.IsHost(parsed.Host)
+}
+
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !loopback.IsHost(r.Host) {
 		http.Error(w, refusedHost, http.StatusForbidden)
+		return
+	}
+	if !isLocalOrigin(r.Header.Get("Origin")) {
+		http.Error(w, refusedOrigin, http.StatusForbidden)
 		return
 	}
 	control := http.NewResponseController(w)

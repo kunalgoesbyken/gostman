@@ -5,12 +5,31 @@ import (
 	"sync"
 )
 
-const journalLimit = 500
+const (
+	journalLimit = 500
+	journalBytes = 128 << 20
+)
 
 type Journal struct {
 	mu        sync.Mutex
 	exchanges []Exchange
+	held      int
 	lastID    int64
+}
+
+func weightOf(exchange Exchange) int {
+	return len(exchange.Request.Body) + len(exchange.Response.Body)
+}
+
+func (j *Journal) trim() {
+	excess := 0
+	for len(j.exchanges)-excess > journalLimit || (j.held > journalBytes && len(j.exchanges)-excess > 1) {
+		j.held -= weightOf(j.exchanges[excess])
+		excess++
+	}
+	if excess > 0 {
+		j.exchanges = slices.Clone(j.exchanges[excess:])
+	}
 }
 
 func (j *Journal) Add(exchange Exchange) Exchange {
@@ -19,9 +38,8 @@ func (j *Journal) Add(exchange Exchange) Exchange {
 	j.lastID++
 	exchange.ID = j.lastID
 	j.exchanges = append(j.exchanges, exchange)
-	if excess := len(j.exchanges) - journalLimit; excess > 0 {
-		j.exchanges = slices.Clone(j.exchanges[excess:])
-	}
+	j.held += weightOf(exchange)
+	j.trim()
 	return exchange
 }
 
@@ -51,4 +69,5 @@ func (j *Journal) Clear() {
 	j.mu.Lock()
 	defer j.mu.Unlock()
 	j.exchanges = nil
+	j.held = 0
 }

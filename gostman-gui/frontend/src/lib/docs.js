@@ -13,7 +13,7 @@ import {
 import { formatJSON } from './docs/json'
 import { createAnchors, html, shorten, toSource, trusted } from './docs/markup'
 import { CONTENT_POLICY, SCRIPT, STYLE } from './docs/page'
-import { REDACTED } from './docs/redaction'
+import { REDACTED, maskUrl } from './docs/redaction'
 
 const DEFAULT_TITLE = 'API documentation'
 const ROOT_HEADING = 'General'
@@ -77,7 +77,7 @@ function describeEntry(request, anchorFor) {
     protocol,
     badge,
     anchor: anchorFor(request.name, 'request'),
-    search: `${badge.label} ${request.name} ${request.url}`.toLowerCase(),
+    search: `${badge.label} ${request.name} ${maskUrl(request.url)}`.toLowerCase(),
   }
 }
 
@@ -240,7 +240,7 @@ function requestArticle(entry, settings) {
   const { request } = entry
   return html`<article id="${entry.anchor}" data-search="${entry.search}">
 <h3><span dir="auto">${request.name}</span>${anchorLink(entry.anchor, request.name)}</h3>
-<p class="endpoint">${badge(entry.badge, 'method')}<code dir="ltr">${request.url}</code></p>
+<p class="endpoint">${badge(entry.badge, 'method')}<code dir="ltr">${maskUrl(request.url)}</code></p>
 ${descriptionOf(request)}${PROTOCOL_SECTIONS[entry.protocol].map((section) => section(request))}${settings.includeExamples ? examplesSection(request) : ''}
 </article>
 `

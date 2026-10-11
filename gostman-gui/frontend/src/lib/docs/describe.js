@@ -7,7 +7,7 @@ import { AUTH_OAUTH2, normalizeRequest } from '../request'
 import { isFileRow, isSentRow, parseRows } from '../rows'
 import { isWebSocketURL } from '../socketUrl'
 import { CURL_FILE, CURL_FORM, CURL_MULTIPART, CURL_RAW, curlCommand } from './curl'
-import { REDACTED, maskHeader, maskSecret } from './redaction'
+import { REDACTED, maskHeader, maskParameter, maskSecret, maskUrl } from './redaction'
 
 export const PROTOCOL_HTTP = 'http'
 export const PROTOCOL_GRAPHQL = 'graphql'
@@ -82,10 +82,10 @@ export const sentHeaders = (request) => parseRows(request.headers).filter(isSent
 
 export function sentParams(request) {
   const rows = readParamRows(request.url, request.queryParams).filter(isSentRow)
-  return [...rows, ...authParts(request.auth).query]
+  return [...rows.map(maskParameter), ...authParts(request.auth).query]
 }
 
-export const sentFields = (request) => parseRows(request.body).filter(isSentRow)
+export const sentFields = (request) => parseRows(request.body).filter(isSentRow).map((row) => (isFileRow(row) ? row : maskParameter(row)))
 
 export const fileNameOf = (request) => textOf(parseJSON(request.body, {})?.fileName)
 
@@ -98,7 +98,7 @@ const withMissing = (headers, additions) => [
   ...additions.filter((addition) => !hasHeader(headers, addition.key)),
 ]
 
-const curlField = (row) => ({ key: row.key, value: isFileRow(row) ? `@${textOf(row.fileName)}` : row.value })
+const curlField = (row) => (isFileRow(row) ? { key: row.key, fileName: textOf(row.fileName) } : { key: row.key, value: row.value })
 
 const CURL_BODIES = {
   [BODY_NONE]: () => null,
@@ -133,7 +133,7 @@ function curlParts(request, method, body, contentType) {
   const auth = authParts(request.auth)
   return {
     method,
-    url: withQuery(request.url, auth.query),
+    url: withQuery(maskUrl(request.url), auth.query),
     user: auth.user,
     headers: withMissing(sentHeaders(request), [...auth.headers, ...contentHeader(body ? contentType : '')]),
     body,
