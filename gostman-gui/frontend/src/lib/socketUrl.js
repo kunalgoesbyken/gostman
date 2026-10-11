@@ -1,8 +1,15 @@
+import { parseVariableMap, substitutePlaceholders } from './placeholders'
+
 const SOCKET_SCHEME = /^wss?:\/\//i
 const SOCKET_PROTOCOLS = ['ws:', 'wss:']
 const UPGRADED_PROTOCOLS = { 'http:': 'ws:', 'https:': 'wss:' }
 
 export const isWebSocketURL = (address) => SOCKET_SCHEME.test(address.trim())
+
+export function isSocketAddress(address, variablesJSON) {
+  const variables = parseVariableMap(variablesJSON)
+  return isWebSocketURL(variables ? substitutePlaceholders(address, variables) : address)
+}
 
 export function toSocketURL(address) {
   let url

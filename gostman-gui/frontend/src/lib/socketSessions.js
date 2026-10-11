@@ -1,8 +1,10 @@
 import { create } from 'zustand'
 import { parseVariableMap, placeholderNames, substitutePlaceholders } from './placeholders'
 import { isSentRow, parseRows } from './rows'
-import { isWebSocketURL, toSocketURL } from './socketUrl'
+import { toSocketURL } from './socketUrl'
 import { selectActiveVariables, useAppStore } from '../store/appStore'
+
+export { isSocketAddress } from './socketUrl'
 
 export const SOCKET_IDLE = 'idle'
 export const SOCKET_CONNECTING = 'connecting'
@@ -104,11 +106,6 @@ export function resolveSocketTarget(request, variablesJSON) {
     .filter(isSentRow)
     .map(({ key, value }) => [substitute(key), substitute(value)])
   return { url, headers }
-}
-
-export function isSocketAddress(address, variablesJSON) {
-  const variables = parseVariableMap(variablesJSON)
-  return isWebSocketURL(variables ? substitutePlaceholders(address, variables) : address)
 }
 
 function release(tabId) {

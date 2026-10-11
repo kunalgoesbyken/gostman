@@ -1,0 +1,129 @@
+package report
+
+import (
+	"fmt"
+	"io"
+	"strings"
+	"time"
+
+	"github.com/krockxz/gostman/runner"
+)
+
+const (
+	markPass = "PASS"
+	markFail = "FAIL"
+	markSkip = "SKIP"
+
+	styleReset  = "\x1b[0m"
+	styleRed    = "\x1b[31m"
+	styleGreen  = "\x1b[32m"
+	styleYellow = "\x1b[33m"
+	styleDim    = "\x1b[2m"
+
+	methodWidth  = 7
+	detailIndent = "      "
+	nestedIndent = "            "
+)
+
+type Text struct {
+	output  io.Writer
+	colored bool
+}
+
+func NewText(output io.Writer, colored bool) *Text {
+	return &Text{output: output, colored: colored}
+}
+
+func (t *Text) paint(style, text string) string {
+	if !t.colored || text == "" {
+		return text
+	}
+	return style + text + styleReset
+}
+
+func (t *Text) mark(result runner.Result) string {
+	switch {
+	case result.IsSkipped():
+		return t.paint(styleYellow, markSkip)
+	case result.Failed:
+		return t.paint(styleRed, markFail)
+	default:
+		return t.paint(styleGreen, markPass)
+	}
+}
+
+func outcomeOf(result runner.Result) string {
+	if result.IsSkipped() {
+		return result.Skipped
+	}
+	parts := []string{result.Status, fmt.Sprintf("%d ms", result.DurationMs)}
+	if total := len(result.Tests); total > 0 {
+		parts = append(parts, fmt.Sprintf("%d/%d tests", result.PassedTests(), total))
+	}
+	return strings.Join(parts, "  ")
+}
+
+func indented(text, indent string) string {
+	return indent + strings.ReplaceAll(text, "\n", "\n"+indent)
+}
+
+func (t *Text) printFailures(result runner.Result) {
+	if result.Error != "" {
+		fmt.Fprintln(t.output, t.paint(styleRed, indented(result.Error, detailIndent)))
+	}
+	for _, check := range result.Tests {
+		if check.Passed {
+			continue
+		}
+		fmt.Fprintf(t.output, "%s%s  %s\n", detailIndent, t.paint(styleRed, markFail), check.Name)
+		if check.Message != "" {
+			fmt.Fprintln(t.output, t.paint(styleDim, indented(check.Message, nestedIndent)))
+		}
+	}
+}
+
+func (t *Text) printLogs(result runner.Result) {
+	for _, line := range result.Logs {
+		fmt.Fprintln(t.output, t.paint(styleDim, indented(line.Level+": "+line.Text, detailIndent)))
+	}
+}
+
+func (t *Text) Request(result runner.Result) {
+	fmt.Fprintf(t.output, "%s  %-*s  %s  %s\n", t.mark(result), methodWidth, result.Method, qualifiedName(result), t.paint(styleDim, outcomeOf(result)))
+	t.printLogs(result)
+	t.printFailures(result)
+}
+
+func counts(entries ...string) string {
+	var kept []string
+	for _, entry := range entries {
+		if entry != "" {
+			kept = append(kept, entry)
+		}
+	}
+	return strings.Join(kept, ", ")
+}
+
+func counted(count int, label string) string {
+	if count == 0 {
+		return ""
+	}
+	return fmt.Sprintf("%d %s", count, label)
+}
+
+func (t *Text) Finish(report runner.Report) error {
+	summary := report.Summary
+	requests := counts(
+		fmt.Sprintf("%d passed", summary.Passed),
+		t.paint(styleRed, counted(summary.Failed, "failed")),
+		counted(summary.Skipped, "skipped"),
+		counted(summary.NotRun, "not run"),
+	)
+	tests := counts(
+		fmt.Sprintf("%d passed", summary.Tests-summary.FailedTests),
+		t.paint(styleRed, counted(summary.FailedTests, "failed")),
+	)
+	duration := (time.Duration(report.DurationMs) * time.Millisecond).String()
+	_, err := fmt.Fprintf(t.output, "\nRequests  %s\nTests     %s\nDuration  %s\n", requests, tests, duration)
+	return err
+}
