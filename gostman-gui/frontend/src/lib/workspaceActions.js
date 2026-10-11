@@ -1,4 +1,5 @@
 import { textToBase64 } from './base64'
+import { createCaptureActions } from './captureSession'
 import { generateAllSnippets } from './codeGenerator'
 import { countActiveRequests, sanitizeImport, withoutActiveRequests } from './importExport'
 import { pluralize } from './dataUtils'
@@ -69,6 +70,7 @@ export function createWorkspaceActions(backend) {
   const runner = createRunner(backend, execute)
   const examples = createExampleActions(backend)
   const mock = createMockActions(backend)
+  const capture = createCaptureActions(backend)
 
   function runExtractors(tabId) {
     const tab = tabById(tabId)
@@ -339,6 +341,7 @@ export function createWorkspaceActions(backend) {
     cookies: () => store().openCookiesDialog(),
     examples: examples.open,
     mockServer: mock.open,
+    captureTraffic: capture.open,
     settings: () => store().openSettingsDialog(),
     import: () => store().openImportDialog(),
     reset: confirmReset,
@@ -349,6 +352,7 @@ export function createWorkspaceActions(backend) {
     sockets,
     examples,
     mock,
+    capture,
     storage: createStorageActions(backend),
     runExtractors,
     getToken,

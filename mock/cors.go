@@ -3,6 +3,8 @@ package mock
 import (
 	"net/http"
 	"net/url"
+
+	"github.com/krockxz/gostman/loopback"
 )
 
 const (
@@ -36,7 +38,7 @@ func preflightAnswer(r *http.Request) answer {
 
 func isLoopbackOrigin(origin string) bool {
 	parsed, err := url.Parse(origin)
-	return err == nil && parsed.Host != "" && isLoopbackHost(parsed.Host)
+	return err == nil && parsed.Host != "" && loopback.IsHost(parsed.Host)
 }
 
 func allowOrigin(header http.Header, r *http.Request) {

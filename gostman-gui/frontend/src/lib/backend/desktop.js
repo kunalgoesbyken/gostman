@@ -27,6 +27,7 @@ import {
   TrustWorkspace,
   WorkspaceStatus,
 } from '../../../wailsjs/go/main/App'
+import { desktopCapture } from './desktopCapture'
 import { desktopMock } from './desktopMock'
 import { openDesktopSocket } from './desktopSocket'
 import { toGrpcCall, toGrpcTarget } from '../grpc'
@@ -85,6 +86,7 @@ export const desktopBackend = {
     pickFile: (title) => PickFile(title),
   },
   mock: desktopMock,
+  capture: desktopCapture,
   storage: {
     status: () => WorkspaceStatus(),
     pickFolder: () => PickWorkspaceFolder(),

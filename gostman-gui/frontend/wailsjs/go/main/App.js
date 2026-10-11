@@ -14,6 +14,22 @@ export function CancelRequest(arg1) {
   return window['go']['main']['App']['CancelRequest'](arg1);
 }
 
+export function CaptureStatus() {
+  return window['go']['main']['App']['CaptureStatus']();
+}
+
+export function CapturedDetails(arg1) {
+  return window['go']['main']['App']['CapturedDetails'](arg1);
+}
+
+export function CapturedExchanges() {
+  return window['go']['main']['App']['CapturedExchanges']();
+}
+
+export function ClearCaptured() {
+  return window['go']['main']['App']['ClearCaptured']();
+}
+
 export function CloseWorkspace() {
   return window['go']['main']['App']['CloseWorkspace']();
 }
@@ -114,8 +130,16 @@ export function SendRequest(arg1, arg2) {
   return window['go']['main']['App']['SendRequest'](arg1, arg2);
 }
 
+export function StartCapture(arg1) {
+  return window['go']['main']['App']['StartCapture'](arg1);
+}
+
 export function StartMock(arg1, arg2, arg3) {
   return window['go']['main']['App']['StartMock'](arg1, arg2, arg3);
+}
+
+export function StopCapture() {
+  return window['go']['main']['App']['StopCapture']();
 }
 
 export function StopMock() {

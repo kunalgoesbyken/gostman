@@ -15,7 +15,7 @@ const tabById = (tabId) => store().tabs.find((candidate) => candidate.id === tab
 const messageOf = (error) => error?.message || String(error)
 const quoted = (name) => `"${name}"`
 
-const isAsking = () => store().promptDialog.isOpen || store().confirmDialog.isOpen || store().alertDialog.isOpen
+export const isAsking = () => store().promptDialog.isOpen || store().confirmDialog.isOpen || store().alertDialog.isOpen
 
 const attempt = (failureTitle, run) => async (...args) => {
   try {

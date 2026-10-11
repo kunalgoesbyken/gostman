@@ -207,3 +207,7 @@ func (p Policy) route(insecureTLS bool) route {
 	}
 	return route{network, p.BlockPrivate, insecureTLS, p.refusal}
 }
+
+func (p Policy) Transport(insecureTLS bool) http.RoundTripper {
+	return p.route(insecureTLS)
+}
