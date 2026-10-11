@@ -3,12 +3,14 @@ import { openBrowserSocket, unsentBrowserHeaders } from './browserSocket'
 import { isPlainObject } from '../dataUtils'
 import { OAUTH_CALLBACK_PATH, cancelOAuthPopup, signInWithPopup } from './oauthPopup'
 import { toGrpcCall, toGrpcTarget } from '../grpc'
+import { toMcpCall, toMcpTarget } from '../mcp'
 import { mockFolders, mockRequests } from '../mockData'
 import { toEngineRequest } from '../request'
 import { failureResponse } from '../response'
 
 const PROXY_URL = '/api/proxy'
 const GRPC_INVOKE_URL = `${PROXY_URL}?grpc=invoke`
+const MCP_INVOKE_URL = `${PROXY_URL}?mcp=invoke`
 const DATA_KEY = 'gostman-data'
 const DAMAGED_DATA_PREFIX = 'gostman-data-damaged-'
 const UNREADABLE_DATA = 'The saved data in this browser cannot be read, so nothing was changed.'
@@ -116,6 +118,8 @@ const send = (id, request, variables, cookies) => exchange(PROXY_URL, id, toEngi
 
 const invokeGrpc = (id, request, variables) => exchange(GRPC_INVOKE_URL, id, toGrpcCall(request, variables))
 
+const invokeMcp = (id, request, variables) => exchange(MCP_INVOKE_URL, id, toMcpCall(request, variables))
+
 function readStoredData() {
   const raw = localStorage.getItem(DATA_KEY)
   if (raw !== null) return parseDocument(raw) || setAsideDamagedData(raw)
@@ -196,6 +200,8 @@ export const webBackend = {
   parseCurl: (command) => postForResult('curl=1', { command }, 'request'),
   describeGrpc: (request, variables) => postForResult('grpc=describe', toGrpcTarget(request, variables), 'schema'),
   invokeGrpc,
+  describeMcp: (request, variables) => postForResult('mcp=describe', toMcpTarget(request, variables), 'catalog'),
+  invokeMcp,
   load,
   saveRequest,
   saveRequests,

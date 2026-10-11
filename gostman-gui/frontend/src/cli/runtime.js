@@ -3,6 +3,7 @@ import { buildCollectionTree, collectRequests, listFolders } from '../lib/collec
 
 export { mergeCookies } from '../lib/cookies'
 export { toGrpcCall } from '../lib/grpc'
+export { toMcpCall } from '../lib/mcp'
 export { normalizeRequest, toEngineRequest } from '../lib/request'
 export { countActiveAssertions } from '../lib/scripting/assertions'
 export { runJob } from '../lib/scripting/job'

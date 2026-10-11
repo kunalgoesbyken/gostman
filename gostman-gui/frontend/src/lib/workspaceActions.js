@@ -7,6 +7,7 @@ import { RESTRICTED, applyExtractors, createExecutor } from './execution'
 import { introspectionRequest, readSchema } from './graphqlSchema'
 import { clearToken, obtainToken } from './oauth'
 import { isGrpcRequest, serializeProtoFiles } from './grpc'
+import { isMcpRequest } from './mcp'
 import { createMockActions } from './mockServer'
 import { normalizeRequest } from './request'
 import { isRequestDirty } from './requestChanges'
@@ -22,6 +23,7 @@ const EXPORT_TAB = 'export'
 const ACTIVE_CONTENT_PROMPT = 'in this file include scripts or OAuth 2.0 settings. These run when a request is sent and can read your variables, so only import them from a source you trust. Cancel imports everything else without them.'
 const DESTRUCTIVE = 'destructive'
 const NO_GRPC_CODE = 'Code generation covers HTTP requests. A gRPC call has no equivalent snippet yet.'
+const NO_MCP_CODE = 'Code generation covers HTTP requests. An MCP tool call has no equivalent snippet yet.'
 
 const store = () => useAppStore.getState()
 const activeTab = () => selectActiveTab(store())
@@ -120,6 +122,16 @@ export function createWorkspaceActions(backend) {
     }
   }
 
+  async function loadMcpCatalog() {
+    const tab = activeTab()
+    store().patchTab(tab.id, { mcpCatalog: { loading: true } })
+    try {
+      store().patchTab(tab.id, { mcpCatalog: await backend.describeMcp(tab.request, activeVariables()) })
+    } catch (error) {
+      store().patchTab(tab.id, { mcpCatalog: { error: messageOf(error) } })
+    }
+  }
+
   async function setGrpcProtos(files) {
     const tab = activeTab()
     store().updateTabRequest(tab.id, { grpcProtos: serializeProtoFiles(files) })
@@ -194,6 +206,7 @@ export function createWorkspaceActions(backend) {
 
   const generateCode = attempt('Cannot generate code', async () => {
     if (isGrpcRequest(activeTab().request)) throw new Error(NO_GRPC_CODE)
+    if (isMcpRequest(activeTab().request)) throw new Error(NO_MCP_CODE)
     const prepared = await backend.prepare(activeTab().request, activeVariables())
     store().openCodeDialog(generateAllSnippets(prepared))
   })
@@ -364,6 +377,7 @@ export function createWorkspaceActions(backend) {
     stopRun: runner.stop,
     loadSchema,
     loadGrpcSchema,
+    loadMcpCatalog,
     setGrpcProtos,
     save,
     generateCode,

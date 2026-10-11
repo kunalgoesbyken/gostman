@@ -2,6 +2,7 @@ import { hasActiveContent } from './activeContent'
 import { extractVariables, isUsableResponse, parseExtractors } from './chaining'
 import { isPlainObject, parseJSON } from './dataUtils'
 import { isGrpcRequest } from './grpc'
+import { isMcpRequest } from './mcp'
 import { withFreshToken } from './oauth'
 import { failureResponse } from './response'
 import { countActiveAssertions } from './scripting/assertions'
@@ -47,6 +48,12 @@ export function applyExtractors(request, response) {
 
 const needsPostStage = (request) => hasText(request.postScript) || countActiveAssertions(request.assertions) > 0
 
+function transportFor(backend, request) {
+  if (isGrpcRequest(request)) return backend.invokeGrpc
+  if (isMcpRequest(request)) return backend.invokeMcp
+  return backend.send
+}
+
 export function createExecutor(backend) {
   return async function execute(original, sendId) {
     const runs = []
@@ -72,7 +79,7 @@ export function createExecutor(backend) {
       return stop(request, error.message)
     }
 
-    const transmit = isGrpcRequest(request) ? backend.invokeGrpc : backend.send
+    const transmit = transportFor(backend, request)
     const response = await transmit(sendId, request, variablesText(), store().cookies)
     store().storeCookies(response.cookies || [])
     const extraction = applyExtractors(request, response)

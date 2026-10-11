@@ -3,6 +3,7 @@
 import {engine} from '../models';
 import {main} from '../models';
 import {rpc} from '../models';
+import {mcpclient} from '../models';
 import {mock} from '../models';
 
 export function Authorize(arg1:engine.OAuth2,arg2:string):Promise<main.AuthorizationResult>;
@@ -17,9 +18,13 @@ export function DeleteRequest(arg1:string):Promise<void>;
 
 export function DescribeGrpc(arg1:rpc.Target):Promise<rpc.Schema>;
 
+export function DescribeMcp(arg1:mcpclient.Target):Promise<mcpclient.Catalog>;
+
 export function FetchToken(arg1:engine.TokenExchange):Promise<engine.Token>;
 
 export function InvokeGrpc(arg1:string,arg2:rpc.Call):Promise<engine.Response>;
+
+export function InvokeMcp(arg1:string,arg2:mcpclient.Call):Promise<engine.Response>;
 
 export function LoadData():Promise<main.SavedData>;
 

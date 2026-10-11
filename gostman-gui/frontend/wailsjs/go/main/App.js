@@ -26,12 +26,20 @@ export function DescribeGrpc(arg1) {
   return window['go']['main']['App']['DescribeGrpc'](arg1);
 }
 
+export function DescribeMcp(arg1) {
+  return window['go']['main']['App']['DescribeMcp'](arg1);
+}
+
 export function FetchToken(arg1) {
   return window['go']['main']['App']['FetchToken'](arg1);
 }
 
 export function InvokeGrpc(arg1, arg2) {
   return window['go']['main']['App']['InvokeGrpc'](arg1, arg2);
+}
+
+export function InvokeMcp(arg1, arg2) {
+  return window['go']['main']['App']['InvokeMcp'](arg1, arg2);
 }
 
 export function LoadData() {

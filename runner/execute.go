@@ -6,12 +6,14 @@ import (
 	"strings"
 
 	"github.com/krockxz/gostman/engine"
+	"github.com/krockxz/gostman/mcpclient"
 	"github.com/krockxz/gostman/rpc"
 	"github.com/krockxz/gostman/runner/sandbox"
 )
 
 const (
 	grpcMethod    = "GRPC"
+	mcpMethod     = "MCP"
 	preRequest    = "Pre-request script"
 	postResponse  = "Post-response script"
 	skippedSocket = "WebSocket requests are not part of a run."
@@ -112,6 +114,14 @@ func (s *session) transmit(ctx context.Context, request Request) (engine.Respons
 			return engine.Response{}, err
 		}
 		return rpc.Invoke(ctx, call, s.policy), nil
+	}
+	if request.Method == mcpMethod {
+		var call mcpclient.Call
+		if err := s.scripts.Call("toMcpCall", &call, request, s.variables.text()); err != nil {
+			return engine.Response{}, err
+		}
+		s.announce(engine.Request{Headers: call.Target.Headers, Auth: call.Target.Auth, Variables: call.Target.Variables})
+		return mcpclient.Invoke(ctx, call, s.policy), nil
 	}
 	var prepared engine.Request
 	if err := s.scripts.Call("toEngineRequest", &prepared, request, s.variables.text(), s.cookies); err != nil {

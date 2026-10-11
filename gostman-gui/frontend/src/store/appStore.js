@@ -8,9 +8,9 @@ import { isBlankRequest } from '../lib/requestChanges'
 import { reconcileTabs } from '../lib/tabReconcile'
 
 const HISTORY_LIMIT = 50
-const HISTORY_IDENTITY_FIELDS = ['method', 'url', 'body', 'bodyType', 'graphqlQuery', 'graphqlVariables', 'grpcMethod', 'grpcMessage']
+const HISTORY_IDENTITY_FIELDS = ['method', 'url', 'body', 'bodyType', 'graphqlQuery', 'graphqlVariables', 'grpcMethod', 'grpcMessage', 'mcpTool', 'mcpArguments']
 const IMPORT_TAB = 'import'
-const DEFAULT_REQUEST_PANEL = 'params'
+export const DEFAULT_REQUEST_PANEL = 'params'
 const EMPTY_VARIABLES = '{}'
 const DEFAULT_ENVIRONMENT_NAME = 'Default'
 const TAB_ID_PREFIX = 'tab-'

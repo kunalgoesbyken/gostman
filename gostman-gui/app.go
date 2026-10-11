@@ -87,6 +87,8 @@ type Request struct {
 	GrpcMethod       string         `json:"grpcMethod"`
 	GrpcMessage      string         `json:"grpcMessage"`
 	GrpcProtos       string         `json:"grpcProtos"`
+	McpTool          string         `json:"mcpTool"`
+	McpArguments     string         `json:"mcpArguments"`
 	Timestamp        string         `json:"timestamp"`
 }
 

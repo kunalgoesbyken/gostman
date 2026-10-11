@@ -48,6 +48,8 @@ const DEFAULT_REQUEST = {
   grpcMethod: '',
   grpcMessage: '',
   grpcProtos: '',
+  mcpTool: '',
+  mcpArguments: '',
   timestamp: '',
 }
 

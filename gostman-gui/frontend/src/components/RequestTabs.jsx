@@ -15,15 +15,17 @@ import { parseExtractors } from "../lib/chaining"
 import { parseExamples } from "../lib/examples"
 import { GRAPHQL_METHOD } from "../lib/graphqlSchema"
 import { GRPC_METHOD, GRPC_PANEL } from "../lib/grpc"
+import { MCP_METHOD, MCP_PANEL } from "../lib/mcp"
 import { readParamRows } from "../lib/queryString"
 import { countActiveAssertions } from "../lib/scripting/assertions"
 import { countSentRows, parseRows, serializeRows } from "../lib/rows"
 import { SOCKET_OPEN, SOCKET_PANEL, isSocketAddress, selectSession, useSocketStore } from "../lib/socketSessions"
 import { validateEnvVariables, formatJSONError } from "../lib/validation"
-import { useAppStore } from "../store/appStore"
+import { DEFAULT_REQUEST_PANEL, useAppStore } from "../store/appStore"
 
 const GraphQLPanel = lazy(() => import("./GraphQLPanel").then((module) => ({ default: module.GraphQLPanel })))
 const GrpcPanel = lazy(() => import("./GrpcPanel").then((module) => ({ default: module.GrpcPanel })))
+const McpPanel = lazy(() => import("./McpPanel").then((module) => ({ default: module.McpPanel })))
 const WebSocketPanel = lazy(() => import("./WebSocketPanel").then((module) => ({ default: module.WebSocketPanel })))
 
 const ROW_BODY_TYPES = [BODY_FORM, BODY_MULTIPART]
@@ -71,6 +73,7 @@ export const RequestTabs = memo(function RequestTabs({
   tokenRequest,
   schema,
   grpcSchema,
+  mcpCatalog,
   actions,
   EditorComponent,
 }) {
@@ -81,6 +84,8 @@ export const RequestTabs = memo(function RequestTabs({
   const isWebSocket = useMemo(() => isSocketAddress(url, variables), [url, variables])
   const isGraphQL = method === GRAPHQL_METHOD
   const isGrpc = method === GRPC_METHOD
+  const isMcp = method === MCP_METHOD
+  const shownPanel = activePanel === MCP_PANEL && !isMcp ? DEFAULT_REQUEST_PANEL : activePanel
 
   useEffect(() => {
     if (isWebSocket) setActivePanel(SOCKET_PANEL)
@@ -89,6 +94,10 @@ export const RequestTabs = memo(function RequestTabs({
   useEffect(() => {
     if (isGrpc) setActivePanel(GRPC_PANEL)
   }, [isGrpc, setActivePanel])
+
+  useEffect(() => {
+    if (isMcp) setActivePanel(MCP_PANEL)
+  }, [isMcp, setActivePanel])
 
   const headerRows = useMemo(() => parseRows(headers), [headers])
   const paramCount = useMemo(() => countSentRows(readParamRows(url, queryParams)), [url, queryParams])
@@ -104,7 +113,7 @@ export const RequestTabs = memo(function RequestTabs({
   }
 
   return (
-    <Tabs value={activePanel} onValueChange={setActivePanel} className="flex min-h-0 flex-1 flex-col">
+    <Tabs value={shownPanel} onValueChange={setActivePanel} className="flex min-h-0 flex-1 flex-col">
       <Toolbar>
         <TabsList label="Request sections">
           <TabsTrigger value="params">Params<TabBadge value={paramCount} /></TabsTrigger>
@@ -113,6 +122,7 @@ export const RequestTabs = memo(function RequestTabs({
           <TabsTrigger value="auth">Auth<TabBadge value={auth.type !== ""} /></TabsTrigger>
           <TabsTrigger value="graphql">GraphQL<TabBadge value={isGraphQL} /></TabsTrigger>
           <TabsTrigger value={GRPC_PANEL}>gRPC<TabBadge value={isGrpc} /></TabsTrigger>
+          {isMcp && <TabsTrigger value={MCP_PANEL}>MCP</TabsTrigger>}
           <TabsTrigger value={SOCKET_PANEL}>WebSocket<TabBadge value={isSocketOpen} /></TabsTrigger>
           <TabsTrigger value="vars">Env vars</TabsTrigger>
           <TabsTrigger value="extract">Extract<TabBadge value={extractorCount} /></TabsTrigger>
@@ -198,6 +208,20 @@ export const RequestTabs = memo(function RequestTabs({
               onUpdateRequest={onUpdateRequest}
               onProtosChange={actions.setGrpcProtos}
               onLoadSchema={actions.loadGrpcSchema}
+              EditorComponent={EditorComponent}
+            />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value={MCP_PANEL} className={PANEL_CLASS}>
+          <Suspense fallback={<PanelFallback />}>
+            <McpPanel
+              key={tabId}
+              request={activeRequest}
+              catalog={mcpCatalog}
+              editorPath={`${tabId}/mcp`}
+              onUpdateRequest={onUpdateRequest}
+              onLoadCatalog={actions.loadMcpCatalog}
               EditorComponent={EditorComponent}
             />
           </Suspense>
