@@ -67,6 +67,21 @@ type substitution struct {
 	exceeded  bool
 }
 
+func newSubstitution(variables string) (*substitution, error) {
+	parsed, err := parseVariables(variables)
+	if err != nil {
+		return nil, fmt.Errorf("environment variables are not valid JSON: %w", err)
+	}
+	return &substitution{variables: parsed, budget: maxEncodedBody}, nil
+}
+
+func (s *substitution) overflow() error {
+	if s.exceeded {
+		return fmt.Errorf("the request is larger than 10 MB once variables are filled in")
+	}
+	return nil
+}
+
 func (s *substitution) lookup(match string) (string, bool) {
 	value, ok := s.variables[strings.TrimSpace(match[2:len(match)-2])]
 	return value, ok

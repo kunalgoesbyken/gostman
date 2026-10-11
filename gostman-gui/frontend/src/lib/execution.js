@@ -11,8 +11,6 @@ const CONFIG_ERROR = 'config'
 const PRE_REQUEST = 'Pre-request script'
 const POST_RESPONSE = 'Post-response script'
 
-export const NO_TESTS = { results: [], logs: [], error: '' }
-
 const store = () => useAppStore.getState()
 const variablesText = () => selectActiveVariables(store())
 const hasText = (text) => text.trim() !== ''

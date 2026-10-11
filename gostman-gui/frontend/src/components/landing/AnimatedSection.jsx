@@ -34,40 +34,7 @@ export const AnimatedSection = ({ children, className = "", delay = 0, direction
   )
 }
 
-export const StaggerContainer = ({ children, className = "", staggerDelay = 0.1 }) => {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: staggerDelay, delayChildren: 0.2 },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: easeSmooth } },
-  }
-
-  return (
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.1 }}
-      variants={containerVariants}
-      className={className}
-    >
-      {Array.isArray(children)
-        ? children.map((child, i) => (
-            <motion.div key={i} variants={itemVariants}>
-              {child}
-            </motion.div>
-          ))
-        : children}
-    </motion.div>
-  )
-}
-
-const RESTING = { opacity: 1, scale: 1, x: 0 }
+const RESTING = { opacity: 1, scale: 1 }
 
 const revealOnScroll = (hidden, duration) => {
   const visible = Object.fromEntries(Object.keys(hidden).map((key) => [key, RESTING[key]]))
@@ -86,4 +53,3 @@ const revealOnScroll = (hidden, duration) => {
 }
 
 export const ScaleIn = revealOnScroll({ opacity: 0, scale: 0.9 }, 0.5)
-export const SlideInFromRight = revealOnScroll({ opacity: 0, x: 60 }, 0.6)

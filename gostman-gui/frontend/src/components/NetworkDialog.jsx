@@ -128,6 +128,11 @@ export function NetworkDialog({ settings, actions, onClose }) {
   const [draft, setDraft] = useState(settings)
   const [failure, setFailure] = useState("")
 
+  const edit = (next) => {
+    setDraft(next)
+    setFailure("")
+  }
+
   const save = async () => {
     try {
       await actions.saveSettings(draft)
@@ -144,7 +149,7 @@ export function NetworkDialog({ settings, actions, onClose }) {
       </DialogHeader>
       <DialogBody>
         {actions.canConfigureNetwork ? (
-          <SettingsForm draft={draft} onChange={setDraft} onPick={actions.pickFile} />
+          <SettingsForm draft={draft} onChange={edit} onPick={actions.pickFile} />
         ) : (
           <EmptyState icon={MonitorDown} title="Available in the desktop app" description={WEB_NOTICE} />
         )}

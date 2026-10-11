@@ -68,11 +68,11 @@ func randomToken() (string, error) {
 }
 
 func StartAuthorization(config OAuth2, variables string) (Authorization, error) {
-	values, err := parseVariables(variables)
+	expansion, err := newSubstitution(variables)
 	if err != nil {
-		return Authorization{}, fmt.Errorf("environment variables are not valid JSON: %w", err)
+		return Authorization{}, err
 	}
-	substitute := (&substitution{variables: values, budget: maxEncodedBody}).apply
+	substitute := expansion.apply
 
 	target, err := url.Parse(strings.TrimSpace(substitute(config.AuthURL)))
 	if err != nil || target.Host == "" || (target.Scheme != "http" && target.Scheme != "https") {

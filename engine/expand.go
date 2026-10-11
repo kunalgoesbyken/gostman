@@ -10,11 +10,11 @@ type Expansion struct {
 }
 
 func NewExpansion(variables string) (*Expansion, error) {
-	parsed, err := parseVariables(variables)
+	substitution, err := newSubstitution(variables)
 	if err != nil {
-		return nil, fmt.Errorf("environment variables are not valid JSON: %w", err)
+		return nil, err
 	}
-	return &Expansion{&substitution{variables: parsed, budget: maxEncodedBody}}, nil
+	return &Expansion{substitution}, nil
 }
 
 func (e *Expansion) Text(input string) string {
@@ -36,8 +36,5 @@ func (e *Expansion) Headers(raw string, auth Auth) ([]HeaderEntry, error) {
 }
 
 func (e *Expansion) Err() error {
-	if e.substitution.exceeded {
-		return fmt.Errorf("the request is larger than 10 MB once variables are filled in")
-	}
-	return nil
+	return e.substitution.overflow()
 }

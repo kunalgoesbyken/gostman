@@ -17,6 +17,8 @@ function summarize(request, { response, tests }) {
     ...identify(request),
     status: response.status,
     statusCode: response.statusCode,
+    protocol: response.protocol,
+    isAnswered: !response.error,
     error: response.error ? response.body : tests.error,
     durationMs: response.durationMs,
     tests: tests.results,
@@ -24,7 +26,7 @@ function summarize(request, { response, tests }) {
   }
 }
 
-export function requestsInScope(folderId) {
+function requestsInScope(folderId) {
   const { folders, requests } = store()
   return collectRequests(buildCollectionTree(folders, requests), folderId)
 }

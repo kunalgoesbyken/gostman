@@ -1,5 +1,5 @@
-export const PROXY_SYSTEM = 'system'
-export const PROXY_NONE = 'none'
+const PROXY_SYSTEM = 'system'
+const PROXY_NONE = 'none'
 export const PROXY_CUSTOM = 'custom'
 
 export const PROXY_MODES = [

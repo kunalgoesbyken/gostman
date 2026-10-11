@@ -23,11 +23,10 @@ const (
 )
 
 func Prepare(r Request) (Prepared, error) {
-	variables, err := parseVariables(r.Variables)
+	expansion, err := newSubstitution(r.Variables)
 	if err != nil {
-		return Prepared{}, fmt.Errorf("environment variables are not valid JSON: %w", err)
+		return Prepared{}, err
 	}
-	expansion := &substitution{variables: variables, budget: maxEncodedBody}
 	substitute := expansion.apply
 
 	method := strings.ToUpper(strings.TrimSpace(r.Method))
@@ -58,8 +57,8 @@ func Prepare(r Request) (Prepared, error) {
 		headers = append(headers, pair{headerContentType, contentType})
 	}
 	headers = applyAuth(r.Auth, substitute, headers, target)
-	if expansion.exceeded {
-		return Prepared{}, fmt.Errorf("the request is larger than 10 MB once variables are filled in")
+	if err := expansion.overflow(); err != nil {
+		return Prepared{}, err
 	}
 
 	prepared := Prepared{Method: method, URL: target.String(), body: body}

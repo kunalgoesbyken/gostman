@@ -4,7 +4,8 @@ import { BODY_BINARY, BODY_FORM, BODY_JSON, BODY_MULTIPART, BODY_NONE, BODY_TEXT
 import { buildCollectionTree, folderDepth, foldersIn, listFolders, MAX_FOLDER_DEPTH, requestsIn, ROOT_ID } from './collectionTree'
 import { isPlainObject, lookup, parseJSON, pluralize } from './dataUtils'
 import { readParamRows } from './queryString'
-import { normalizeRequest } from './request'
+import { clearToken } from './oauth'
+import { AUTH_OAUTH2, normalizeRequest } from './request'
 import { isFileRow, isSentRow, parseRows, ROW_FILE, ROW_TEXT, serializeRows } from './rows'
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024
@@ -183,6 +184,12 @@ function readPostmanBody(body) {
   const read = lookup(POSTMAN_BODY_READERS, body.mode)
   return read ? read(body) : {}
 }
+
+const scriptWarning = (requestNames) => (
+  `Scripts were imported with ${listNames(requestNames)}. They run when the request is sent, so read them first if the file came from someone else.`
+)
+
+const hasScript = (request) => SCRIPT_FIELDS.some((field) => typeof request[field] === 'string' && request[field].trim() !== '')
 
 const tlsWarning = (requestNames) => (
   `TLS verification was disabled in the collection for ${listNames(requestNames)}; it was kept enabled. Turn it off in the request's Settings tab if you trust these hosts.`
@@ -1214,11 +1221,13 @@ export function exportToPostman(requests, folders = [], options = {}) {
   }
 }
 
+const withoutToken = (request) => ({ ...request, auth: { ...request.auth, oauth2: clearToken(request.auth.oauth2) } })
+
 export function exportToGostman(requests, folders, environments) {
   return {
     version: GOSTMAN_FORMAT_VERSION,
     exportedAt: new Date().toISOString(),
-    gostman: { requests, folders, environments },
+    gostman: { requests: requests.map(withoutToken), folders, environments },
   }
 }
 
@@ -1377,9 +1386,11 @@ export async function parseImport(text) {
   }
 }
 
-const AUTH_TYPES = [AUTH_BASIC, AUTH_BEARER, AUTH_API_KEY]
+const AUTH_TYPES = [AUTH_BASIC, AUTH_BEARER, AUTH_API_KEY, AUTH_OAUTH2]
+const OAUTH_TEXT_FIELDS = ['grant', 'authUrl', 'tokenUrl', 'clientId', 'clientSecret', 'scope', 'username', 'password', 'callbackUrl', 'credentialsIn', 'headerPrefix']
+const SCRIPT_FIELDS = ['preScript', 'postScript']
 const AUTH_TEXT_FIELDS = ['username', 'password', 'token', 'key', 'value']
-const REQUEST_TEXT_FIELDS = ['id', 'url', 'headers', 'body', 'queryParams', 'folderId', 'graphqlQuery', 'graphqlVariables', 'extractors', 'grpcMethod', 'grpcMessage', 'grpcProtos']
+const REQUEST_TEXT_FIELDS = ['id', 'url', 'headers', 'body', 'queryParams', 'folderId', 'graphqlQuery', 'graphqlVariables', 'extractors', 'assertions', ...SCRIPT_FIELDS, 'grpcMethod', 'grpcMessage', 'grpcProtos']
 const BODY_TYPE_VALUES = BODY_TYPES.map((type) => type.value)
 
 const stringOf = (value) => (typeof value === 'string' ? value : '')
@@ -1393,9 +1404,14 @@ function cleanMethod(value) {
   return method.length <= MAX_METHOD_LENGTH && METHOD_TOKEN.test(method) ? method : DEFAULT_METHOD
 }
 
+function sanitizeOAuth(raw) {
+  if (!isPlainObject(raw)) return {}
+  return { ...pickStrings(raw, OAUTH_TEXT_FIELDS), pkce: raw.pkce !== false }
+}
+
 function sanitizeAuth(raw) {
   if (!isPlainObject(raw) || !AUTH_TYPES.includes(raw.type)) return NO_AUTH
-  return { ...pickStrings(raw, AUTH_TEXT_FIELDS), type: raw.type, in: apiKeyLocation(raw.in) }
+  return { ...pickStrings(raw, AUTH_TEXT_FIELDS), type: raw.type, in: apiKeyLocation(raw.in), oauth2: sanitizeOAuth(raw.oauth2) }
 }
 
 function sanitizeOptions(raw) {
@@ -1456,6 +1472,8 @@ export function sanitizeImport(data, existing) {
     .filter((request) => request.options?.insecureTLS)
     .map((request) => cleanName(request.name, UNTITLED_REQUEST))
 
+  const requestsWithScripts = rawRequests.filter(hasScript).map((request) => cleanName(request.name, UNTITLED_REQUEST))
+
   const folderIds = assignFreshIds(asArray(data?.folders).filter(isPlainObject).map(sanitizeFolder), existing.folderIds)
   const inImport = (id) => folderIds.renamed.get(id) || ROOT_ID
   const linkedFolders = folderIds.assigned.map((folder) => ({ ...folder, parentId: inImport(folder.parentId) }))
@@ -1473,6 +1491,7 @@ export function sanitizeImport(data, existing) {
     warnings: [
       ...asArray(data?.warnings).filter((warning) => typeof warning === 'string'),
       ...(requestsWithoutTls.length > 0 ? [tlsWarning(requestsWithoutTls)] : []),
+      ...(requestsWithScripts.length > 0 ? [scriptWarning(requestsWithScripts)] : []),
       ...(flattenedCount > 0 ? [`${pluralize(flattenedCount, 'folder')} nested in a loop or deeper than ${MAX_FOLDER_DEPTH} levels moved to the top level.`] : []),
     ],
   }

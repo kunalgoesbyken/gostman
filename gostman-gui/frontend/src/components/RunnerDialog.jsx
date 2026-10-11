@@ -34,7 +34,7 @@ function ResultSummary({ result }) {
         </span>
       )}
       <span className="shrink-0 font-mono text-[11px] text-muted-foreground">{result.durationMs} ms</span>
-      <Badge variant={result.statusCode ? statusVariant(result.statusCode) : "serverError"} className="max-w-[9rem] font-mono">
+      <Badge variant={result.isAnswered ? statusVariant(result) : "serverError"} className="max-w-[9rem] font-mono">
         <span className="truncate">{result.status}</span>
       </Badge>
     </>

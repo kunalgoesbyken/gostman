@@ -4,33 +4,14 @@ import { Button, buttonVariants } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { cn } from "../lib/utils"
 import { easeSmooth, fadeIn, popIn, tapScale, springLayout } from "../lib/motion"
-import {
-  ArrowRight,
-  Braces,
-  Check,
-  Code,
-  Eye,
-  FolderTree,
-  Github,
-  Globe,
-  Import,
-  KeyRound,
-  Layers,
-  Link2,
-  Network,
-  Radio,
-  Search,
-  Workflow,
-} from "lucide-react"
+import { ArrowRight, Braces, Check, Github, Globe, Link2, Network, Radio } from "lucide-react"
 
 import logo from "../assets/logo.jpg"
+import oauthShot from "../assets/landing/oauth.png"
+import runnerShot from "../assets/landing/runner.png"
+import testsShot from "../assets/landing/tests.png"
 
-import {
-  AnimatedSection,
-  StaggerContainer,
-  ScaleIn,
-  SlideInFromRight,
-} from "./landing/AnimatedSection"
+import { AnimatedSection, ScaleIn } from "./landing/AnimatedSection"
 import { RestShowcase, GraphQLShowcase, ChainingShowcase, WebSocketShowcase } from "./landing/showcases"
 import { BackgroundCode } from "./landing/BackgroundCode"
 import { DownloadDropdown } from "./landing/DownloadDropdown"
@@ -40,67 +21,61 @@ const REPOSITORY_URL = `https://github.com/${REPOSITORY}`
 const ISSUES_URL = `${REPOSITORY_URL}/issues`
 const REPOSITORY_API_URL = `https://api.github.com/repos/${REPOSITORY}`
 
-const HIGHLIGHTS = ["No account", "Data stored locally", "Open source"]
+const HIGHLIGHTS = ["No account", "Data stays on your machine", "Open source"]
 
-const FEATURES = [
+const SPOTLIGHTS = [
   {
-    icon: Network,
-    title: "REST, GraphQL and WebSocket",
-    description: "Send HTTP requests, GraphQL queries and WebSocket messages from the same window.",
+    title: "Tests that run every time you press Send",
+    description: "Add checks as plain rows, or write a script with test() and expect(). The results sit beside the response, so a broken contract shows up on the request that broke it.",
+    points: [
+      "Checks on status, headers, body and response time",
+      "Pre-request and post-response scripts, run in a sandbox",
+      "Values pulled from a response into variables for the next request",
+    ],
+    image: testsShot,
+    alt: "A request with four assertion rows and a passing test list under the response",
   },
   {
-    icon: Layers,
-    title: "Environments and variables",
-    description: "Keep a set of variables per environment and use them as {{name}} in URLs, headers and bodies.",
+    title: "Run a whole folder and see exactly what failed",
+    description: "The runner sends every request in order with its scripts, variables and cookies, then lists each failure with the value that caused it.",
+    points: [
+      "Pick any folder or run everything",
+      "Stop on the first failure, or add a delay between requests",
+      "The same checks you use while editing a single request",
+    ],
+    image: runnerShot,
+    alt: "The runner showing four passing requests and one failed check with its actual value",
   },
   {
-    icon: KeyRound,
-    title: "Auth helpers",
-    description: "Basic, bearer token and API key auth, added to the request for you.",
-  },
-  {
-    icon: Braces,
-    title: "Request bodies",
-    description: "JSON, text, XML, URL-encoded forms, multipart forms with files, and single-file uploads.",
-  },
-  {
-    icon: FolderTree,
-    title: "Nested collections",
-    description: "Organise saved requests in folders inside folders, with search and a history of what you sent.",
-  },
-  {
-    icon: Workflow,
-    title: "Response extraction",
-    description: "Read a value from a JSON body, header, cookie or status code and save it to a variable for the next request.",
-  },
-  {
-    icon: Search,
-    title: "GraphQL schema browser",
-    description: "Fetch a schema by introspection and search its types and fields.",
-  },
-  {
-    icon: Eye,
-    title: "Response preview and download",
-    description: "View JSON, HTML, images and PDFs in the app, or save any response body to a file.",
-  },
-  {
-    icon: Code,
-    title: "Code generation",
-    description: "Turn a request into cURL, JavaScript, Python, Go, PHP or Java.",
-  },
-  {
-    icon: Import,
-    title: "Import and export",
-    description: "Import Postman v2.1 collections and OpenAPI 3 specs. Export to Postman, OpenAPI, Markdown or a Gostman backup.",
+    title: "Sign-in flows without the copy and paste",
+    description: "OAuth 2.0 with client credentials, password or authorization code with PKCE. Tokens are requested and renewed when a request needs them, and cookies carry over between requests the way they do in a browser.",
+    points: [
+      "Basic, bearer, API key and OAuth 2.0",
+      "A cookie jar you can inspect and clear",
+      "Proxy, CA and client certificates in the desktop app",
+    ],
+    image: oauthShot,
+    alt: "The Auth tab set to OAuth 2.0 with the token applied to the response below",
   },
 ]
 
-const FACTS = [
-  { label: "Desktop app", detail: "A native app built with Go and Wails, for Windows, macOS and Linux." },
-  { label: "Web version", detail: "Runs in the browser. Requests are sent through a proxy because browsers block cross-origin calls." },
-  { label: "Account", detail: "None. There is no sign-in." },
-  { label: "Your data", detail: "The desktop app saves to a file on your disk. The web version saves to this browser's local storage." },
-  { label: "Source", detail: "Open source under the MIT license." },
+const CAPABILITIES = [
+  {
+    title: "Protocols",
+    items: ["REST with any method", "GraphQL with a schema browser", "gRPC through reflection or .proto files", "WebSocket with a live message log"],
+  },
+  {
+    title: "Requests",
+    items: ["JSON, XML, form, multipart and file bodies", "Environments and {{variables}} everywhere", "Paste a curl command to turn it into a request", "Timeouts, redirects and TLS settings per request"],
+  },
+  {
+    title: "Responses",
+    items: ["JSON tree, HTML, image and PDF previews", "Headers, cookies, size and timing", "Download any body, including binary", "Code in cURL, JavaScript, Python, Go, PHP and Java"],
+  },
+  {
+    title: "Your data",
+    items: ["Nested collections, tabs and history", "Saved to a file on disk, or to this browser", "Import from Postman and OpenAPI", "Export to Postman, OpenAPI, Markdown or a backup"],
+  },
 ]
 
 const SHOWCASE_TABS = [
@@ -197,6 +172,35 @@ const TabButton = ({ tab, isActive, onClick }) => {
       />
       <span className="whitespace-nowrap">{tab.label}</span>
     </motion.button>
+  )
+}
+
+function Spotlight({ spotlight, isReversed }) {
+  return (
+    <AnimatedSection delay={0.1}>
+      <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-12">
+        <div className={cn("lg:col-span-5", isReversed && "lg:order-2")}>
+          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight [text-wrap:balance]">{spotlight.title}</h2>
+          <p className="mt-4 leading-relaxed text-muted-foreground">{spotlight.description}</p>
+          <ul className="mt-6 space-y-3">
+            {spotlight.points.map((point) => (
+              <li key={point} className="flex items-start gap-3 text-sm text-foreground/90">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-success/80" aria-hidden="true" />
+                <span>{point}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className={cn("lg:col-span-7", isReversed && "lg:order-1")}>
+          <img
+            src={spotlight.image}
+            alt={spotlight.alt}
+            loading="lazy"
+            className="w-full rounded-lg border border-border/60"
+          />
+        </div>
+      </div>
+    </AnimatedSection>
   )
 }
 
@@ -332,9 +336,9 @@ export function LandingPage({ onGetStarted }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.8 }}
               >
-                <span className="block">An API client</span>
+                <span className="block">Test any API.</span>
                 <span className="block mt-2 text-muted-foreground">
-                  for REST, GraphQL and WebSocket
+                  No account. No cloud.
                 </span>
               </motion.h1>
 
@@ -345,7 +349,7 @@ export function LandingPage({ onGetStarted }) {
                 style={{ willChange: "transform, opacity" }}
                 transition={{ delay: 0.5, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               >
-                A native desktop app built with Go and Wails, with a web version for the browser. No account, and your data stays on your machine.
+                Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. Send requests, write tests and run whole collections, on your desktop or in the browser.
               </motion.p>
 
               <motion.div
@@ -386,15 +390,6 @@ export function LandingPage({ onGetStarted }) {
                 ))}
               </motion.div>
 
-              <motion.div
-                className="pt-6 flex justify-center"
-                {...fadeIn}
-                transition={{ delay: 1 }}
-              >
-                <Badge variant="outline" className="gap-2 px-3 py-1 text-xs bg-muted/20 border-border/40">
-                  Built with Wails (Go and React)
-                </Badge>
-              </motion.div>
             </motion.div>
           </div>
         </section>
@@ -456,56 +451,35 @@ export function LandingPage({ onGetStarted }) {
         </section>
 
         <section className="relative py-20 px-6">
-          <div className="max-w-6xl mx-auto">
-            <AnimatedSection className="mb-12 max-w-lg" delay={0.1}>
-              <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
-                What it does
-              </h2>
-              <p className="mt-3 text-muted-foreground leading-relaxed">
-                No account, no plugins and no workspace to join before the first request.
-              </p>
-            </AnimatedSection>
-
-            <StaggerContainer className="grid border-t border-border/40 sm:grid-cols-2">
-              {FEATURES.map((feature) => (
-                <div
-                  key={feature.title}
-                  className="flex items-start gap-4 border-b border-border/40 py-8 sm:odd:pr-10 sm:even:pl-10 sm:even:border-l"
-                >
-                  <feature.icon className="mt-0.5 h-[18px] w-[18px] shrink-0 text-muted-foreground" strokeWidth={2} />
-                  <div className="min-w-0">
-                    <h3 className="text-[15px] font-medium tracking-tight">{feature.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                      {feature.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </StaggerContainer>
+          <div className="mx-auto flex max-w-6xl flex-col gap-24">
+            {SPOTLIGHTS.map((spotlight, index) => (
+              <Spotlight key={spotlight.title} spotlight={spotlight} isReversed={index % 2 === 1} />
+            ))}
           </div>
         </section>
 
         <section className="relative py-20 px-6">
-          <div className="max-w-3xl mx-auto">
-            <AnimatedSection className="text-center mb-12" delay={0.1}>
-              <h2 className="text-3xl md:text-4xl font-semibold mb-3">
-                How it is built
+          <div className="max-w-6xl mx-auto">
+            <AnimatedSection className="mb-10 max-w-xl" delay={0.1}>
+              <h2 className="text-3xl md:text-4xl font-semibold tracking-tight [text-wrap:balance]">
+                And the rest of what an API client should do
               </h2>
-              <p className="text-muted-foreground">
-                What you get when you install it or open it in a browser.
-              </p>
             </AnimatedSection>
 
-            <SlideInFromRight delay={0.2}>
-              <dl className="divide-y divide-border/30 border-y border-border/40">
-                {FACTS.map((fact) => (
-                  <div key={fact.label} className="grid gap-1 py-4 sm:grid-cols-3 sm:gap-4">
-                    <dt className="text-sm font-medium">{fact.label}</dt>
-                    <dd className="text-sm leading-relaxed text-muted-foreground sm:col-span-2">{fact.detail}</dd>
+            <AnimatedSection delay={0.2}>
+              <div className="grid gap-x-10 gap-y-10 border-t border-border/40 pt-10 sm:grid-cols-2 lg:grid-cols-4">
+                {CAPABILITIES.map((group) => (
+                  <div key={group.title}>
+                    <h3 className="text-sm font-medium">{group.title}</h3>
+                    <ul className="mt-4 space-y-2.5">
+                      {group.items.map((item) => (
+                        <li key={item} className="text-sm leading-relaxed text-muted-foreground">{item}</li>
+                      ))}
+                    </ul>
                   </div>
                 ))}
-              </dl>
-            </SlideInFromRight>
+              </div>
+            </AnimatedSection>
           </div>
         </section>
 
@@ -514,10 +488,10 @@ export function LandingPage({ onGetStarted }) {
             <AnimatedSection delay={0.1}>
               <div className="border-t border-border/40 pt-20 text-center">
                 <motion.h2 className="text-3xl md:text-4xl font-semibold mb-4" {...revealUp()}>
-                  Get Gostman
+                  Send your first request in a minute
                 </motion.h2>
                 <motion.p className="text-muted-foreground mb-8 max-w-lg mx-auto" {...revealUp(0.1)}>
-                  Download the desktop app, or open the web version in your browser.
+                  Download the desktop app for Windows, macOS or Linux, or open the web version now. There is nothing to sign up for.
                 </motion.p>
                 <motion.div
                   className="flex flex-col sm:flex-row items-center justify-center gap-4"
@@ -554,7 +528,7 @@ export function LandingPage({ onGetStarted }) {
                 <div>
                   <span className="font-medium text-sm">Gostman</span>
                   <p className="text-xs text-muted-foreground/70 mt-0.5">
-                    API client for REST, GraphQL and WebSocket
+                    API client for REST, GraphQL, gRPC and WebSocket
                   </p>
                 </div>
               </div>
