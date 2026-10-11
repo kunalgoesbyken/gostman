@@ -33,23 +33,3 @@ export const AnimatedSection = ({ children, className = "", delay = 0, direction
     </motion.div>
   )
 }
-
-const RESTING = { opacity: 1, scale: 1 }
-
-const revealOnScroll = (hidden, duration) => {
-  const visible = Object.fromEntries(Object.keys(hidden).map((key) => [key, RESTING[key]]))
-
-  return ({ children, className = "", delay = 0 }) => (
-    <motion.div
-      initial={hidden}
-      whileInView={visible}
-      viewport={{ once: true }}
-      transition={{ duration, delay, ease: easeSmooth }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  )
-}
-
-export const ScaleIn = revealOnScroll({ opacity: 0, scale: 0.9 }, 0.5)

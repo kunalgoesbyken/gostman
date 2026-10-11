@@ -1,20 +1,20 @@
 import { useState, useEffect, useRef } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { Button, buttonVariants } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { cn } from "../lib/utils"
-import { easeSmooth, fadeIn, popIn, tapScale, springLayout } from "../lib/motion"
-import { ArrowRight, Braces, Check, Github, Globe, Link2, Network, Radio } from "lucide-react"
+import { easeSmooth, fadeIn, popIn } from "../lib/motion"
+import { ArrowRight, Check, Github, Globe } from "lucide-react"
 
 import logo from "../assets/logo.jpg"
 import oauthShot from "../assets/landing/oauth.png"
 import mockShot from "../assets/landing/mock.png"
 import testsShot from "../assets/landing/tests.png"
 
-import { AnimatedSection, ScaleIn } from "./landing/AnimatedSection"
+import { AnimatedSection } from "./landing/AnimatedSection"
 import { AGENT_SESSION, CLI_RUN, REQUEST_FILE } from "./landing/captures"
 import { TerminalBlock } from "./landing/TerminalBlock"
-import { RestShowcase, GraphQLShowcase, ChainingShowcase, WebSocketShowcase } from "./landing/showcases"
+import { ProductShowcase } from "./landing/ProductShowcase"
 import { BackgroundCode } from "./landing/BackgroundCode"
 import { DownloadDropdown } from "./landing/DownloadDropdown"
 
@@ -26,16 +26,6 @@ const REPOSITORY_API_URL = `https://api.github.com/repos/${REPOSITORY}`
 const HIGHLIGHTS = ["No account", "Data stays on your machine", "Open source"]
 
 const SPOTLIGHTS = [
-  {
-    title: "Built for your coding agent, not just for you",
-    description: "Claude Code, Codex and Cursor can call Gostman through MCP in place of curl. They use the collection you already have, and variable values and credentials are filled in inside Gostman and replaced with their names in everything the agent reads.",
-    points: [
-      "Cookies, tokens and variables carry across calls in a session",
-      "Responses are capped and can be narrowed to the fields that matter",
-      "Agents reach only the hosts your collection already uses, unless you allow more",
-    ],
-    capture: AGENT_SESSION,
-  },
   {
     title: "Tests that run every time you press Send",
     description: "Add checks as plain rows, or write a script with test() and expect(). The results sit beside the response, so a broken contract shows up on the request that broke it.",
@@ -89,6 +79,16 @@ const SPOTLIGHTS = [
     image: oauthShot,
     alt: "The Auth tab set to OAuth 2.0 with the token applied to the response below",
   },
+  {
+    title: "Hand the same collection to your coding agent",
+    description: "Claude Code, Codex and Cursor can call Gostman through MCP in place of curl. They use the collection you already have, and variable values and credentials are filled in inside Gostman and replaced with their names in everything the agent reads.",
+    points: [
+      "Cookies, tokens and variables carry across calls in a session",
+      "Responses are capped and can be narrowed to the fields that matter",
+      "Agents reach only the hosts your collection already uses, unless you allow more",
+    ],
+    capture: AGENT_SESSION,
+  },
 ]
 
 const CAPABILITIES = [
@@ -108,13 +108,6 @@ const CAPABILITIES = [
     title: "Your data",
     items: ["Nested collections, tabs and history", "Plain YAML files in a folder, or app storage", "Import from Postman and OpenAPI", "Export to Postman, OpenAPI, Markdown or a backup"],
   },
-]
-
-const SHOWCASE_TABS = [
-  { id: "rest", label: "REST", icon: Network, description: "Send an HTTP request and read the response." },
-  { id: "graphql", label: "GraphQL", icon: Braces, description: "Run queries and mutations with variables." },
-  { id: "chaining", label: "Chaining", icon: Link2, description: "Save a value from one response and use it in the next request." },
-  { id: "websocket", label: "WebSocket", icon: Radio, description: "Connect, send messages and read the replies." },
 ]
 
 const useGitHubStars = () => {
@@ -174,39 +167,6 @@ const revealUp = (delay) => ({
   ...(delay ? { transition: { delay } } : {}),
 })
 
-const TabButton = ({ tab, isActive, onClick }) => {
-  const Icon = tab.icon
-  return (
-    <motion.button
-      onClick={onClick}
-      role="tab"
-      aria-selected={isActive}
-      aria-controls={`showcase-panel-${tab.id}`}
-      id={`showcase-tab-${tab.id}`}
-      tabIndex={isActive ? 0 : -1}
-      className={cn(
-        "relative flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors duration-200",
-        isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-      )}
-      {...tapScale}
-    >
-      {isActive && (
-        <motion.span
-          layoutId="activeShowcaseTab"
-          className="absolute inset-0 -z-10 rounded-md bg-muted"
-          transition={springLayout}
-        />
-      )}
-      <Icon
-        className={cn("h-4 w-4 transition-colors", isActive && "text-primary")}
-        strokeWidth={2}
-        aria-hidden="true"
-      />
-      <span className="whitespace-nowrap">{tab.label}</span>
-    </motion.button>
-  )
-}
-
 function Spotlight({ spotlight, isReversed }) {
   return (
     <AnimatedSection delay={0.1}>
@@ -241,26 +201,7 @@ function Spotlight({ spotlight, isReversed }) {
 }
 
 export function LandingPage({ onGetStarted }) {
-  const [activeTab, setActiveTab] = useState("rest")
   const { stars, isLoading } = useGitHubStars()
-
-  const activeDescription =
-    SHOWCASE_TABS.find((tab) => tab.id === activeTab)?.description ?? ""
-
-  const handleTabKeyDown = (event) => {
-    const keyOffset = { ArrowRight: 1, ArrowLeft: -1 }[event.key]
-    const isEdge = event.key === "Home" || event.key === "End"
-    if (keyOffset === undefined && !isEdge) return
-
-    event.preventDefault()
-    const current = SHOWCASE_TABS.findIndex((tab) => tab.id === activeTab)
-    const next = isEdge
-      ? (event.key === "Home" ? 0 : SHOWCASE_TABS.length - 1)
-      : (current + keyOffset + SHOWCASE_TABS.length) % SHOWCASE_TABS.length
-
-    setActiveTab(SHOWCASE_TABS[next].id)
-    document.getElementById(`showcase-tab-${SHOWCASE_TABS[next].id}`)?.focus()
-  }
 
   return (
     <>
@@ -432,57 +373,9 @@ Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. One coll
 
         <section className="relative py-16 px-6">
           <div className="max-w-5xl mx-auto">
-            <AnimatedSection className="mb-6" delay={0.1}>
-              <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
-                Watch a request go out and come back
-              </h2>
-              <p className="mt-3 max-w-xl text-muted-foreground leading-relaxed">
-                {activeDescription}
-              </p>
+            <AnimatedSection delay={0.1}>
+              <ProductShowcase />
             </AnimatedSection>
-
-            <AnimatedSection className="mb-5" delay={0.2}>
-              <div
-                role="tablist"
-                aria-label="Protocol demos"
-                onKeyDown={handleTabKeyDown}
-                className="flex -mx-6 overflow-x-auto px-6 scrollbar-none"
-              >
-                <div className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-border/40 bg-muted/20 p-1">
-                  {SHOWCASE_TABS.map((tab) => (
-                    <TabButton
-                      key={tab.id}
-                      tab={tab}
-                      isActive={activeTab === tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                    />
-                  ))}
-                </div>
-              </div>
-            </AnimatedSection>
-
-            <ScaleIn delay={0.3}>
-              <div className="relative flex h-[600px] flex-col rounded-lg border border-border/60 p-4 sm:p-6">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={activeTab}
-                    role="tabpanel"
-                    id={`showcase-panel-${activeTab}`}
-                    aria-labelledby={`showcase-tab-${activeTab}`}
-                    className="flex-1 min-h-0"
-                    initial={{ opacity: 0, x: 16 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -16 }}
-                    transition={{ duration: 0.28, ease: easeSmooth }}
-                  >
-                    {activeTab === "rest" && <RestShowcase />}
-                    {activeTab === "graphql" && <GraphQLShowcase />}
-                    {activeTab === "chaining" && <ChainingShowcase />}
-                    {activeTab === "websocket" && <WebSocketShowcase />}
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            </ScaleIn>
           </div>
         </section>
 

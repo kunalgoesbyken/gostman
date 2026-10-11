@@ -11,15 +11,3 @@ export const METHOD_COLORS = {
     GRAPHQL: "text-primary",
     GRPC: "text-info",
 }
-
-export const METHOD_CHIPS = {
-    GET: "text-success bg-success/10",
-    HEAD: "text-success bg-success/10",
-    OPTIONS: "text-success bg-success/10",
-    POST: "text-warning bg-warning/10",
-    PUT: "text-warning bg-warning/10",
-    PATCH: "text-warning bg-warning/10",
-    DELETE: "text-destructive bg-destructive/10",
-    GRAPHQL: "text-primary bg-primary/10",
-    GRPC: "text-info bg-info/10",
-}

@@ -1,4 +1,5 @@
-const command = (text) => ({ text, tone: "command" })
+const command = (copy) => ({ copy })
+const prompt = (text) => ({ text, tone: "command" })
 const muted = (text) => ({ text, tone: "muted" })
 const pass = (text) => ({ text, tone: "pass" })
 const fail = (text) => ({ text, tone: "fail" })
@@ -6,15 +7,36 @@ const key = (text) => ({ text, tone: "key" })
 const plain = (text) => ({ text })
 const BLANK = plain("")
 
+const REQUEST_FILE_LINES = [
+  key("id: r-current-user"),
+  key("name: Current user"),
+  key("method: GET"),
+  key("url: '{{base_url}}/me'"),
+  key("assertions:"),
+  plain("  - expression: res.status"),
+  plain("    operator: eq"),
+  plain('    value: "200"'),
+  plain("  - expression: res.body.session"),
+  plain("    operator: isString"),
+  key("postScript: |-"),
+  plain("  test('the session cookie was sent', () => {"),
+  plain("    expect(res.body.cookieHeader).to.contain('session=')"),
+  plain("  })"),
+]
+
 export const AGENT_SESSION = {
-  title: "Claude Code",
-  label: "A Claude Code session calling Gostman through MCP",
+  title: "Set up once, then ask in plain words",
+  label: "Registering Gostman with Claude Code and a session that uses it",
   lines: [
-    command("$ claude mcp add gostman -- gostman mcp --workspace orders-api --var-from-env PASSWORD"),
+    muted("Create a workspace and register it with your agent"),
+    command("gostman init orders-api"),
+    command("claude mcp add gostman -- gostman mcp --workspace orders-api --var-from-env PASSWORD"),
     BLANK,
-    command("> Sign in, then send Current user, then run the Items folder."),
-    command("  Quote the exact password value if you can see it anywhere."),
+    muted("You"),
+    prompt("Sign in, then send Current user, then run the Items folder."),
+    prompt("Quote the exact password value if you can see it anywhere."),
     BLANK,
+    muted("Claude Code"),
     plain("Sign in returned 200 and set the session and theme cookies plus user_id."),
     plain("Current user returned Ada (id 42, roles admin and dev). The Items folder"),
     plain("ran 2 requests: List items passed, and Export items failed with a 500."),
@@ -28,7 +50,7 @@ export const CLI_RUN = {
   title: "Terminal",
   label: "Output of gostman run on a workspace folder",
   lines: [
-    command("$ gostman run orders-api --var-from-env PASSWORD"),
+    command("gostman run orders-api --var-from-env PASSWORD"),
     pass("PASS  POST     Auth/Sign in  200 OK  88 ms  2/2 tests"),
     pass("PASS  GET      Account/Current user  200 OK  46 ms  3/3 tests"),
     pass("PASS  GET      Items/List items  200 OK  46 ms  1/1 tests"),
@@ -46,20 +68,6 @@ export const CLI_RUN = {
 export const REQUEST_FILE = {
   title: "orders-api/account/current-user.yaml",
   label: "A saved request as a YAML file",
-  lines: [
-    key("id: r-current-user"),
-    key("name: Current user"),
-    key("method: GET"),
-    key("url: '{{base_url}}/me'"),
-    key("assertions:"),
-    plain("  - expression: res.status"),
-    plain("    operator: eq"),
-    plain('    value: "200"'),
-    plain("  - expression: res.body.session"),
-    plain("    operator: isString"),
-    key("postScript: |-"),
-    plain("  test('the session cookie was sent', () => {"),
-    plain("    expect(res.body.cookieHeader).to.contain('session=')"),
-    plain("  })"),
-  ],
+  lines: REQUEST_FILE_LINES,
+  copyText: REQUEST_FILE_LINES.map((line) => line.text).join("\n"),
 }
