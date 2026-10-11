@@ -19,8 +19,7 @@ const shellWord = (text) => (BARE_WORD.test(text) ? text : shellQuote(text))
 
 const methodFlag = (method) => (method === HEAD ? '--head' : `-X ${shellWord(method)}`)
 
-const LINE_BREAKS = /[
-]+/g
+const LINE_BREAKS = /[\r\n]+/g
 
 const singleLine = (text) => text.replace(LINE_BREAKS, ' ')
 
