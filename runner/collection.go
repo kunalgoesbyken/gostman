@@ -57,6 +57,9 @@ type exportFile struct {
 }
 
 func Load(path string) (Collection, error) {
+	if isDirectory(path) {
+		return loadWorkspace(path)
+	}
 	content, err := os.ReadFile(path)
 	if err != nil {
 		return Collection{}, fmt.Errorf("cannot read the collection: %w", err)

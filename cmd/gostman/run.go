@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/krockxz/gostman/agent"
 	"github.com/krockxz/gostman/runner"
 	"github.com/krockxz/gostman/runner/report"
 )
@@ -35,6 +36,7 @@ type invocation struct {
 	options  runner.Options
 	reporter string
 	output   string
+	redact   bool
 }
 
 func parseInterspersed(flags *flag.FlagSet, arguments []string) ([]string, error) {
@@ -59,20 +61,21 @@ func parseInvocation(arguments []string) (invocation, error) {
 	flags.SetOutput(io.Discard)
 	flags.StringVar(&parsed.options.Environment, "env", "", "")
 	flags.StringVar(&parsed.options.Folder, "folder", "", "")
-	flags.Var(overrides(parsed.options.Variables), "var", "")
+	variableFlags(flags, parsed.options.Variables)
 	flags.BoolVar(&parsed.options.Bail, "bail", false, "")
 	flags.IntVar(&delayMs, "delay", 0, "")
 	flags.IntVar(&timeoutMs, "timeout", 0, "")
 	flags.BoolVar(&parsed.options.Insecure, "insecure", false, "")
 	flags.StringVar(&parsed.reporter, "reporter", report.FormatText, "")
 	flags.StringVar(&parsed.output, "output", "", "")
+	flags.BoolVar(&parsed.redact, "redact", false, "")
 
 	positional, err := parseInterspersed(flags, arguments)
 	switch {
 	case err != nil:
 		return parsed, err
 	case len(positional) != 1:
-		return parsed, errors.New("name exactly one export file to run")
+		return parsed, errors.New("name exactly one export file or workspace folder to run")
 	case !report.Supports(parsed.reporter):
 		return parsed, fmt.Errorf("unknown reporter %q; choose %s", parsed.reporter, strings.Join(report.Formats, ", "))
 	case delayMs < 0 || timeoutMs < 0:
@@ -125,6 +128,13 @@ func runCommand(arguments []string, stdout, stderr *os.File) int {
 	return parsed.execute(stored, stdout, stderr)
 }
 
+func (i invocation) pipeline() func(context.Context, runner.Collection, runner.Options, func(runner.Result)) (runner.Report, error) {
+	if i.redact {
+		return agent.RunRedacted
+	}
+	return runner.Run
+}
+
 func (i invocation) execute(stored runner.Collection, stdout, stderr *os.File) int {
 	file, err := i.openOutput()
 	if err != nil {
@@ -144,7 +154,7 @@ func (i invocation) execute(stored runner.Collection, stdout, stderr *os.File) i
 	defer release()
 	context.AfterFunc(ctx, release)
 
-	outcome, err := runner.Run(ctx, stored, i.options, func(result runner.Result) {
+	outcome, err := i.pipeline()(ctx, stored, i.options, func(result runner.Result) {
 		for _, reporter := range reporters {
 			reporter.Request(result)
 		}
