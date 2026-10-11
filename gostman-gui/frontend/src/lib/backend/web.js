@@ -1,6 +1,7 @@
 import { base64ToBytes } from '../base64'
 import { openBrowserSocket, unsentBrowserHeaders } from './browserSocket'
 import { isPlainObject } from '../dataUtils'
+import { OAUTH_CALLBACK_PATH, cancelOAuthPopup, signInWithPopup } from './oauthPopup'
 import { mockFolders, mockRequests } from '../mockData'
 import { toEngineRequest } from '../request'
 import { failureResponse } from '../response'
@@ -96,11 +97,11 @@ async function postForResult(query, payload, field) {
   return result[field]
 }
 
-async function send(id, request, variables) {
+async function send(id, request, variables, cookies) {
   const controller = new AbortController()
   inFlight.set(id, controller)
   try {
-    return await postJSON(PROXY_URL, toEngineRequest(request, variables), controller.signal)
+    return await postJSON(PROXY_URL, toEngineRequest(request, variables, cookies), controller.signal)
   } catch (error) {
     if (controller.signal.aborted) return failureResponse('cancelled', 'the request was cancelled')
     return failureResponse('network', error.message)
@@ -158,6 +159,16 @@ async function saveEnvironments(environments, activeEnvironmentId) {
   })
 }
 
+async function saveCookies(cookies) {
+  mutateData((data) => { data.cookies = cookies })
+}
+
+async function authorize(config, variables) {
+  const started = await postForResult('oauth=start', { config, variables }, 'authorization')
+  const code = await signInWithPopup(started.url, started.state)
+  return { code, codeVerifier: started.codeVerifier, redirectUri: started.redirectUri }
+}
+
 async function reset() {
   localStorage.removeItem(DATA_KEY)
 }
@@ -184,6 +195,12 @@ export const webBackend = {
   saveFolders,
   saveHistory,
   saveEnvironments,
+  saveCookies,
+  network: null,
+  oauthCallback: { url: `${window.location.origin}${OAUTH_CALLBACK_PATH}`, isFixed: true },
+  authorize,
+  cancelAuthorization: cancelOAuthPopup,
+  fetchToken: (exchange) => postJSON(`${PROXY_URL}?oauth=token`, exchange),
   reset,
   saveFile,
   openSocket: openBrowserSocket,

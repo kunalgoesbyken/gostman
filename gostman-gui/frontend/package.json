@@ -13,6 +13,7 @@
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
     "@scalar/openapi-parser": "^0.24.16",
+    "chai": "^5.3.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.26",

@@ -8,10 +8,12 @@ import { KeyValueEditor } from "./KeyValueEditor"
 import { ParamsPanel } from "./ParamsPanel"
 import { SettingsPanel } from "./SettingsPanel"
 import { ExtractPanel } from "./ExtractPanel"
+import { TestsPanel } from "./TestsPanel"
 import { BODY_FORM, BODY_MULTIPART, BODY_NONE } from "../lib/body"
 import { parseExtractors } from "../lib/chaining"
 import { GRAPHQL_METHOD } from "../lib/graphqlSchema"
 import { readParamRows } from "../lib/queryString"
+import { countActiveAssertions } from "../lib/scripting/assertions"
 import { countSentRows, parseRows, serializeRows } from "../lib/rows"
 import { SOCKET_OPEN, SOCKET_PANEL, isSocketAddress, selectSession, useSocketStore } from "../lib/socketSessions"
 import { validateEnvVariables, formatJSONError } from "../lib/validation"
@@ -62,6 +64,7 @@ export const RequestTabs = memo(function RequestTabs({
   onUpdateVariables,
   response,
   extraction,
+  tokenRequest,
   schema,
   actions,
   EditorComponent,
@@ -69,7 +72,7 @@ export const RequestTabs = memo(function RequestTabs({
   const activePanel = useAppStore((state) => state.requestPanel)
   const setActivePanel = useAppStore((state) => state.setRequestPanel)
   const isSocketOpen = useSocketStore((state) => selectSession(tabId)(state).status === SOCKET_OPEN)
-  const { url, queryParams, headers, body, bodyType, auth, options, method, extractors } = activeRequest
+  const { url, queryParams, headers, body, bodyType, auth, options, method, extractors, assertions, preScript, postScript } = activeRequest
   const isWebSocket = useMemo(() => isSocketAddress(url, variables), [url, variables])
   const isGraphQL = method === GRAPHQL_METHOD
 
@@ -81,6 +84,8 @@ export const RequestTabs = memo(function RequestTabs({
   const paramCount = useMemo(() => countSentRows(readParamRows(url, queryParams)), [url, queryParams])
   const bodyContent = useMemo(() => bodyBadge(body, bodyType), [body, bodyType])
   const extractorCount = useMemo(() => parseExtractors(extractors).filter((extractor) => extractor.enabled).length, [extractors])
+  const assertionCount = useMemo(() => countActiveAssertions(assertions), [assertions])
+  const hasScripts = preScript.trim() !== "" || postScript.trim() !== ""
   const hasCustomOptions = options.timeoutMs > 0 || options.noFollowRedirects || options.insecureTLS
 
   const handleGraphQLQueryChange = (graphqlQuery) => {
@@ -99,6 +104,7 @@ export const RequestTabs = memo(function RequestTabs({
           <TabsTrigger value={SOCKET_PANEL}>WebSocket<TabBadge value={isSocketOpen} /></TabsTrigger>
           <TabsTrigger value="vars">Env vars</TabsTrigger>
           <TabsTrigger value="extract">Extract<TabBadge value={extractorCount} /></TabsTrigger>
+          <TabsTrigger value="tests">Tests<TabBadge value={assertionCount || hasScripts} /></TabsTrigger>
           <TabsTrigger value="settings">Settings<TabBadge value={hasCustomOptions} /></TabsTrigger>
         </TabsList>
       </Toolbar>
@@ -133,7 +139,13 @@ export const RequestTabs = memo(function RequestTabs({
         </TabsContent>
 
         <TabsContent value="auth" className={PANEL_CLASS}>
-          <AuthPanel key={tabId} auth={auth} onChange={(next) => onUpdateRequest({ auth: next })} />
+          <AuthPanel
+            key={tabId}
+            auth={auth}
+            tokenRequest={tokenRequest}
+            actions={actions}
+            onChange={(next) => onUpdateRequest({ auth: next })}
+          />
         </TabsContent>
 
         <TabsContent value="graphql" className={PANEL_CLASS}>
@@ -190,6 +202,16 @@ export const RequestTabs = memo(function RequestTabs({
             extraction={extraction}
             onChange={(next) => onUpdateRequest({ extractors: next })}
             onRun={() => actions.runExtractors(tabId)}
+          />
+        </TabsContent>
+
+        <TabsContent value="tests" className={PANEL_CLASS}>
+          <TestsPanel
+            key={tabId}
+            request={activeRequest}
+            editorPath={tabId}
+            onUpdateRequest={onUpdateRequest}
+            EditorComponent={EditorComponent}
           />
         </TabsContent>
 

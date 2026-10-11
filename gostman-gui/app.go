@@ -25,6 +25,9 @@ type App struct {
 
 	inFlightMu sync.Mutex
 	inFlight   map[string]context.CancelFunc
+
+	networkMu sync.RWMutex
+	network   *engine.Network
 }
 
 func NewApp() *App {
@@ -33,15 +36,18 @@ func NewApp() *App {
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	a.loadNetwork()
 }
 
 type SavedData struct {
-	Variables           string        `json:"variables,omitempty"`
-	Environments        []Environment `json:"environments"`
-	ActiveEnvironmentId string        `json:"activeEnvironmentId"`
-	Requests            []Request     `json:"requests"`
-	Folders             []Folder      `json:"folders"`
-	History             []Request     `json:"history"`
+	Variables           string              `json:"variables,omitempty"`
+	Environments        []Environment       `json:"environments"`
+	ActiveEnvironmentId string              `json:"activeEnvironmentId"`
+	Requests            []Request           `json:"requests"`
+	Folders             []Folder            `json:"folders"`
+	History             []Request           `json:"history"`
+	Cookies             []engine.CookieInfo `json:"cookies"`
+	Settings            Settings            `json:"settings"`
 }
 
 type Environment struct {
@@ -72,6 +78,9 @@ type Request struct {
 	Auth             engine.Auth    `json:"auth"`
 	Options          engine.Options `json:"options"`
 	Extractors       string         `json:"extractors"`
+	Assertions       string         `json:"assertions"`
+	PreScript        string         `json:"preScript"`
+	PostScript       string         `json:"postScript"`
 	Timestamp        string         `json:"timestamp"`
 }
 
@@ -175,6 +184,12 @@ func (a *App) LoadData() (SavedData, error) {
 	if data.History == nil {
 		data.History = []Request{}
 	}
+	if data.Cookies == nil {
+		data.Cookies = []engine.CookieInfo{}
+	}
+	if data.Settings.Certificates == nil {
+		data.Settings.Certificates = []CertificateFiles{}
+	}
 	return data, nil
 }
 
@@ -252,7 +267,7 @@ func (a *App) SendRequest(id string, request engine.Request) engine.Response {
 	a.track(id, cancel)
 	defer a.release(id)
 
-	return engine.Send(ctx, request, engine.Policy{})
+	return engine.Send(ctx, request, a.policy())
 }
 
 func (a *App) CancelRequest(id string) {

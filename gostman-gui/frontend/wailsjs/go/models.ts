@@ -1,5 +1,45 @@
 export namespace engine {
 	
+	export class OAuth2 {
+	    grant: string;
+	    authUrl: string;
+	    tokenUrl: string;
+	    clientId: string;
+	    clientSecret: string;
+	    scope: string;
+	    username: string;
+	    password: string;
+	    callbackUrl: string;
+	    credentialsIn: string;
+	    pkce: boolean;
+	    headerPrefix: string;
+	    accessToken: string;
+	    refreshToken: string;
+	    expiresAt: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new OAuth2(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.grant = source["grant"];
+	        this.authUrl = source["authUrl"];
+	        this.tokenUrl = source["tokenUrl"];
+	        this.clientId = source["clientId"];
+	        this.clientSecret = source["clientSecret"];
+	        this.scope = source["scope"];
+	        this.username = source["username"];
+	        this.password = source["password"];
+	        this.callbackUrl = source["callbackUrl"];
+	        this.credentialsIn = source["credentialsIn"];
+	        this.pkce = source["pkce"];
+	        this.headerPrefix = source["headerPrefix"];
+	        this.accessToken = source["accessToken"];
+	        this.refreshToken = source["refreshToken"];
+	        this.expiresAt = source["expiresAt"];
+	    }
+	}
 	export class Auth {
 	    type: string;
 	    username: string;
@@ -8,6 +48,7 @@ export namespace engine {
 	    key: string;
 	    value: string;
 	    in: string;
+	    oauth2: OAuth2;
 	
 	    static createFrom(source: any = {}) {
 	        return new Auth(source);
@@ -22,7 +63,26 @@ export namespace engine {
 	        this.key = source["key"];
 	        this.value = source["value"];
 	        this.in = source["in"];
+	        this.oauth2 = this.convertValues(source["oauth2"], OAuth2);
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class CookieInfo {
 	    name: string;
@@ -32,6 +92,8 @@ export namespace engine {
 	    expires: string;
 	    secure: boolean;
 	    httpOnly: boolean;
+	    hostOnly: boolean;
+	    expired: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new CookieInfo(source);
@@ -46,6 +108,8 @@ export namespace engine {
 	        this.expires = source["expires"];
 	        this.secure = source["secure"];
 	        this.httpOnly = source["httpOnly"];
+	        this.hostOnly = source["hostOnly"];
+	        this.expired = source["expired"];
 	    }
 	}
 	export class HeaderEntry {
@@ -62,6 +126,7 @@ export namespace engine {
 	        this.value = source["value"];
 	    }
 	}
+	
 	export class Options {
 	    timeoutMs: number;
 	    noFollowRedirects: boolean;
@@ -126,6 +191,7 @@ export namespace engine {
 	    auth: Auth;
 	    variables: string;
 	    options: Options;
+	    cookies: CookieInfo[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Request(source);
@@ -144,6 +210,7 @@ export namespace engine {
 	        this.auth = this.convertValues(source["auth"], Auth);
 	        this.variables = source["variables"];
 	        this.options = this.convertValues(source["options"], Options);
+	        this.cookies = this.convertValues(source["cookies"], CookieInfo);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -216,11 +283,103 @@ export namespace engine {
 		    return a;
 		}
 	}
+	export class Token {
+	    accessToken: string;
+	    refreshToken: string;
+	    expiresAt: number;
+	    error: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Token(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.accessToken = source["accessToken"];
+	        this.refreshToken = source["refreshToken"];
+	        this.expiresAt = source["expiresAt"];
+	        this.error = source["error"];
+	    }
+	}
+	export class TokenExchange {
+	    config: OAuth2;
+	    variables: string;
+	    options: Options;
+	    code: string;
+	    codeVerifier: string;
+	    redirectUri: string;
+	    refresh: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new TokenExchange(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.config = this.convertValues(source["config"], OAuth2);
+	        this.variables = source["variables"];
+	        this.options = this.convertValues(source["options"], Options);
+	        this.code = source["code"];
+	        this.codeVerifier = source["codeVerifier"];
+	        this.redirectUri = source["redirectUri"];
+	        this.refresh = source["refresh"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 
 }
 
 export namespace main {
 	
+	export class AuthorizationResult {
+	    code: string;
+	    codeVerifier: string;
+	    redirectUri: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new AuthorizationResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.code = source["code"];
+	        this.codeVerifier = source["codeVerifier"];
+	        this.redirectUri = source["redirectUri"];
+	    }
+	}
+	export class CertificateFiles {
+	    host: string;
+	    certFile: string;
+	    keyFile: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CertificateFiles(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.host = source["host"];
+	        this.certFile = source["certFile"];
+	        this.keyFile = source["keyFile"];
+	    }
+	}
 	export class Environment {
 	    id: string;
 	    name: string;
@@ -270,6 +429,9 @@ export namespace main {
 	    auth: engine.Auth;
 	    options: engine.Options;
 	    extractors: string;
+	    assertions: string;
+	    preScript: string;
+	    postScript: string;
 	    timestamp: string;
 	
 	    static createFrom(source: any = {}) {
@@ -292,7 +454,48 @@ export namespace main {
 	        this.auth = this.convertValues(source["auth"], engine.Auth);
 	        this.options = this.convertValues(source["options"], engine.Options);
 	        this.extractors = source["extractors"];
+	        this.assertions = source["assertions"];
+	        this.preScript = source["preScript"];
+	        this.postScript = source["postScript"];
 	        this.timestamp = source["timestamp"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Settings {
+	    proxyMode: string;
+	    proxyUrl: string;
+	    proxyBypass: string;
+	    certificates: CertificateFiles[];
+	    caFile: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Settings(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.proxyMode = source["proxyMode"];
+	        this.proxyUrl = source["proxyUrl"];
+	        this.proxyBypass = source["proxyBypass"];
+	        this.certificates = this.convertValues(source["certificates"], CertificateFiles);
+	        this.caFile = source["caFile"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -320,6 +523,8 @@ export namespace main {
 	    requests: Request[];
 	    folders: Folder[];
 	    history: Request[];
+	    cookies: engine.CookieInfo[];
+	    settings: Settings;
 	
 	    static createFrom(source: any = {}) {
 	        return new SavedData(source);
@@ -333,6 +538,8 @@ export namespace main {
 	        this.requests = this.convertValues(source["requests"], Request);
 	        this.folders = this.convertValues(source["folders"], Folder);
 	        this.history = this.convertValues(source["history"], Request);
+	        this.cookies = this.convertValues(source["cookies"], engine.CookieInfo);
+	        this.settings = this.convertValues(source["settings"], Settings);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

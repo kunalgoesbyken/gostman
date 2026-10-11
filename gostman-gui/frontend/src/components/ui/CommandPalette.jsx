@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
-  Code, Copy, Download, FolderPlus, Globe, History, Plus, RotateCcw, Save, Search, Send, Upload, X,
+  Code, Cookie, Copy, Download, FolderPlus, Globe, History, ListChecks, Plus, RotateCcw, Save, Search, Send, Settings, Upload, X,
 } from "lucide-react"
 import { shortcutLabel } from "../../lib/platform"
 import { cn } from "../../lib/utils"
@@ -13,6 +13,9 @@ const COMMANDS = [
   { id: "generate-code", label: "Generate code", description: "Show the current request as code", icon: Code, action: "generateCode" },
   { id: "close-tab", label: "Close tab", description: "Close the current tab", icon: X, action: "closeTab" },
   { id: "new-folder", label: "New folder", description: "Create a folder at the top level", icon: FolderPlus, action: "newFolder" },
+  { id: "run-collection", label: "Run requests", description: "Run every request in a folder with its tests", icon: ListChecks, action: "runCollection" },
+  { id: "cookies", label: "Manage cookies", description: "See and delete stored cookies", icon: Cookie, action: "cookies" },
+  { id: "network", label: "Network settings", description: "Proxy and certificates", icon: Settings, action: "settings" },
   { id: "import", label: "Import data", description: "Import Postman, OpenAPI or Gostman files", icon: Upload, action: "import" },
   { id: "export", label: "Export data", description: "Export collections and environments", icon: Download, action: "export" },
   { id: "clear-history", label: "Clear history", description: "Delete every history entry", icon: History, action: "clearHistory" },

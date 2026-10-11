@@ -24,6 +24,16 @@ type prepareResult struct {
 	Error    string           `json:"error,omitempty"`
 }
 
+type authorizationPayload struct {
+	Config    engine.OAuth2 `json:"config"`
+	Variables string        `json:"variables"`
+}
+
+type authorizationResult struct {
+	Authorization *engine.Authorization `json:"authorization,omitempty"`
+	Error         string                `json:"error,omitempty"`
+}
+
 type curlPayload struct {
 	Command string `json:"command"`
 }
@@ -50,6 +60,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, parseCurl(r))
 	case query.Has("prepare"):
 		writeJSON(w, prepare(r))
+	case query.Get("oauth") == "start":
+		writeJSON(w, startAuthorization(r))
+	case query.Get("oauth") == "token":
+		writeJSON(w, fetchToken(r))
 	default:
 		writeJSON(w, send(r))
 	}
@@ -108,6 +122,26 @@ func parseCurl(r *http.Request) curlResult {
 		return curlResult{Error: err.Error()}
 	}
 	return curlResult{Request: &request}
+}
+
+func startAuthorization(r *http.Request) authorizationResult {
+	var payload authorizationPayload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		return authorizationResult{Error: err.Error()}
+	}
+	started, err := engine.StartAuthorization(payload.Config, payload.Variables)
+	if err != nil {
+		return authorizationResult{Error: err.Error()}
+	}
+	return authorizationResult{Authorization: &started}
+}
+
+func fetchToken(r *http.Request) engine.Token {
+	var exchange engine.TokenExchange
+	if err := json.NewDecoder(r.Body).Decode(&exchange); err != nil {
+		return engine.Token{Error: "the token request could not be read: " + err.Error()}
+	}
+	return engine.FetchToken(r.Context(), exchange, Policy)
 }
 
 func writeJSON(w http.ResponseWriter, payload any) {

@@ -8,6 +8,25 @@ type Auth struct {
 	Key      string `json:"key"`
 	Value    string `json:"value"`
 	In       string `json:"in"`
+	OAuth2   OAuth2 `json:"oauth2"`
+}
+
+type OAuth2 struct {
+	Grant         string `json:"grant"`
+	AuthURL       string `json:"authUrl"`
+	TokenURL      string `json:"tokenUrl"`
+	ClientID      string `json:"clientId"`
+	ClientSecret  string `json:"clientSecret"`
+	Scope         string `json:"scope"`
+	Username      string `json:"username"`
+	Password      string `json:"password"`
+	CallbackURL   string `json:"callbackUrl"`
+	CredentialsIn string `json:"credentialsIn"`
+	PKCE          bool   `json:"pkce"`
+	HeaderPrefix  string `json:"headerPrefix"`
+	AccessToken   string `json:"accessToken"`
+	RefreshToken  string `json:"refreshToken"`
+	ExpiresAt     int64  `json:"expiresAt"`
 }
 
 type Options struct {
@@ -17,17 +36,18 @@ type Options struct {
 }
 
 type Request struct {
-	Method           string  `json:"method"`
-	URL              string  `json:"url"`
-	Headers          string  `json:"headers"`
-	QueryParams      string  `json:"queryParams"`
-	Body             string  `json:"body"`
-	BodyType         string  `json:"bodyType"`
-	GraphqlQuery     string  `json:"graphqlQuery"`
-	GraphqlVariables string  `json:"graphqlVariables"`
-	Auth             Auth    `json:"auth"`
-	Variables        string  `json:"variables"`
-	Options          Options `json:"options"`
+	Method           string       `json:"method"`
+	URL              string       `json:"url"`
+	Headers          string       `json:"headers"`
+	QueryParams      string       `json:"queryParams"`
+	Body             string       `json:"body"`
+	BodyType         string       `json:"bodyType"`
+	GraphqlQuery     string       `json:"graphqlQuery"`
+	GraphqlVariables string       `json:"graphqlVariables"`
+	Auth             Auth         `json:"auth"`
+	Variables        string       `json:"variables"`
+	Options          Options      `json:"options"`
+	Cookies          []CookieInfo `json:"cookies"`
 }
 
 type HeaderEntry struct {
@@ -43,6 +63,8 @@ type CookieInfo struct {
 	Expires  string `json:"expires"`
 	Secure   bool   `json:"secure"`
 	HttpOnly bool   `json:"httpOnly"`
+	HostOnly bool   `json:"hostOnly"`
+	Expired  bool   `json:"expired"`
 }
 
 type Prepared struct {

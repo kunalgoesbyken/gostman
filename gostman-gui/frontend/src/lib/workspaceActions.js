@@ -1,12 +1,14 @@
 import { textToBase64 } from './base64'
-import { extractVariables, isUsableResponse, parseExtractors } from './chaining'
 import { generateAllSnippets } from './codeGenerator'
 import { sanitizeImport } from './importExport'
 import { pluralize } from './dataUtils'
+import { applyExtractors, createExecutor } from './execution'
 import { introspectionRequest, readSchema } from './graphqlSchema'
+import { clearToken, obtainToken } from './oauth'
 import { normalizeRequest } from './request'
 import { isRequestDirty } from './requestChanges'
 import { bodyBase64, downloadName, mimeType } from './response'
+import { createRunner } from './runner'
 import { createSocketActions, isSocketAddress } from './socketSessions'
 import { selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
 
@@ -17,6 +19,7 @@ const DESTRUCTIVE = 'destructive'
 
 const store = () => useAppStore.getState()
 const activeTab = () => selectActiveTab(store())
+const tabById = (tabId) => store().tabs.find((candidate) => candidate.id === tabId)
 const activeVariables = () => selectActiveVariables(store())
 const messageOf = (error) => error?.message || String(error)
 const warn = (title, error) => store().showAlert(title, messageOf(error), 'OK', 'warning')
@@ -56,14 +59,35 @@ export function createWorkspaceActions(backend) {
   }
 
   const sockets = createSocketActions(backend)
+  const execute = createExecutor(backend)
+  const runner = createRunner(backend, execute)
 
   function runExtractors(tabId) {
-    const tab = store().tabs.find((candidate) => candidate.id === tabId)
-    const extractors = parseExtractors(tab?.request.extractors || '')
-    if (extractors.length === 0 || !isUsableResponse(tab.response)) return
-    const variables = extractVariables(extractors, tab.response)
-    const saved = store().mergeActiveVariables(variables)
-    store().patchTab(tabId, { extraction: { saved, names: Object.keys(variables) } })
+    const tab = tabById(tabId)
+    const extraction = tab && applyExtractors(tab.request, tab.response)
+    if (extraction) store().patchTab(tabId, { extraction })
+  }
+
+  function setToken(tabId, oauth2) {
+    const tab = tabById(tabId)
+    if (tab) store().updateTabRequest(tabId, { auth: { ...tab.request.auth, oauth2 } })
+  }
+
+  async function getToken() {
+    const tab = activeTab()
+    const { auth, options } = tab.request
+    store().patchTab(tab.id, { tokenRequest: { isPending: true, error: '' } })
+    try {
+      setToken(tab.id, await obtainToken(backend, auth.oauth2, activeVariables(), options))
+      store().patchTab(tab.id, { tokenRequest: null })
+    } catch (error) {
+      store().patchTab(tab.id, { tokenRequest: { isPending: false, error: messageOf(error) } })
+    }
+  }
+
+  function forgetToken() {
+    const tab = activeTab()
+    setToken(tab.id, clearToken(tab.request.auth.oauth2))
   }
 
   async function loadSchema() {
@@ -84,10 +108,20 @@ export function createWorkspaceActions(backend) {
     sendSequence += 1
     const pendingId = `${tab.id}-${sendSequence}`
     store().startTabRequest(tab.id, pendingId)
-    const response = await backend.send(pendingId, tab.request, activeVariables())
-    store().finishTabRequest(tab.id, pendingId, response)
-    runExtractors(tab.id)
+    const { auth, response, tests, extraction } = await execute(tab.request, pendingId)
+    store().finishTabRequest(tab.id, pendingId, response, { tests, extraction })
+    if (auth.oauth2 !== tab.request.auth.oauth2) setToken(tab.id, auth.oauth2)
     if (!UNRECORDED_ERRORS.includes(response.error)) store().addToHistory(tab.request)
+  }
+
+  const saveSettings = async (settings) => {
+    await backend.network.saveSettings(settings)
+    store().setSettings(settings)
+  }
+
+  function closeRunner() {
+    runner.stop()
+    store().closeRunner()
   }
 
   const save = attempt('Could not save the request', async () => {
@@ -255,6 +289,9 @@ export function createWorkspaceActions(backend) {
     clearHistory,
     switchEnvironment: (environmentId) => store().setActiveEnvironment(environmentId),
     export: () => store().openImportDialog(EXPORT_TAB),
+    runCollection: () => store().openRunner(),
+    cookies: () => store().openCookiesDialog(),
+    settings: () => store().openSettingsDialog(),
     import: () => store().openImportDialog(),
     reset: confirmReset,
   }
@@ -263,6 +300,17 @@ export function createWorkspaceActions(backend) {
     send,
     sockets,
     runExtractors,
+    getToken,
+    forgetToken,
+    cancelToken: () => backend.cancelAuthorization(),
+    oauthCallback: backend.oauthCallback,
+    canConfigureNetwork: Boolean(backend.network),
+    saveSettings,
+    pickFile: (title) => backend.network.pickFile(title),
+    openRunner: (folderId) => store().openRunner(folderId),
+    closeRunner,
+    startRun: runner.start,
+    stopRun: runner.stop,
     loadSchema,
     save,
     generateCode,

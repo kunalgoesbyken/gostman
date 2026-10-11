@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist } from 'zustand/middleware'
+import { mergeCookies, withoutCookie } from '../lib/cookies'
 import { isPlainObject, parseJSON } from '../lib/dataUtils'
+import { DEFAULT_SETTINGS, normalizeSettings } from '../lib/network'
 import { normalizeRequest } from '../lib/request'
 import { isBlankRequest } from '../lib/requestChanges'
 
@@ -15,6 +17,7 @@ const SAVE_FAILURE_TITLE = 'Changes could not be saved'
 
 const CLOSED_ALERT = { isOpen: false, title: '', message: '', confirmText: 'OK', variant: 'default' }
 const CLOSED_CONFIRM = { isOpen: false, title: '', message: '', confirmText: 'OK', variant: 'default', onConfirm: null, onCancel: null }
+const CLOSED_RUNNER = { isOpen: false, folderId: '', isRunning: false, results: [] }
 const CLOSED_PROMPT = { isOpen: false, title: '', message: '', placeholder: '', defaultValue: '', confirmText: 'OK', onConfirm: null, onCancel: null }
 
 const createId = (prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
@@ -128,6 +131,8 @@ export const useAppStore = create(
         requests: [],
         folders: [],
         requestHistory: [],
+        cookies: [],
+        settings: DEFAULT_SETTINGS,
         environments: [],
         activeEnvironmentId: '',
         tabs: [FIRST_TAB],
@@ -139,6 +144,9 @@ export const useAppStore = create(
         importDialogOpen: false,
         importDialogTab: IMPORT_TAB,
         commandPaletteOpen: false,
+        cookiesDialogOpen: false,
+        settingsDialogOpen: false,
+        runner: CLOSED_RUNNER,
         persistenceFailureReported: false,
         alertDialog: CLOSED_ALERT,
         confirmDialog: CLOSED_CONFIRM,
@@ -152,6 +160,8 @@ export const useAppStore = create(
             requests: asArray(data.requests).map(normalizeRequest),
             folders: asArray(data.folders),
             requestHistory: asArray(data.history).map(normalizeRequest),
+            cookies: mergeCookies(asArray(data.cookies), []),
+            settings: normalizeSettings(data.settings),
             environments,
             activeEnvironmentId: hasActive ? data.activeEnvironmentId : environments[0].id,
           }
@@ -212,6 +222,13 @@ export const useAppStore = create(
         })),
         clearHistory: () => set({ requestHistory: [] }),
 
+        storeCookies: (received) => set((state) => (
+          received.length > 0 ? { cookies: mergeCookies(state.cookies, received) } : state
+        )),
+        removeCookie: (cookie) => set((state) => ({ cookies: withoutCookie(state.cookies, cookie) })),
+        clearCookies: () => set({ cookies: [] }),
+        setSettings: (settings) => set({ settings }),
+
         setActiveTab: (tabId) => set({ activeTabId: tabId }),
         newTab: (folderId = '') => set((state) => appendTab(state, { folderId })),
         openRequestTab: (request) => set((state) => {
@@ -238,8 +255,8 @@ export const useAppStore = create(
         startTabRequest: (tabId, pendingId) => set((state) => (
           mapTab(state, tabId, (tab) => ({ ...tab, pendingId }))
         )),
-        finishTabRequest: (tabId, pendingId, response) => set((state) => (
-          mapTab(state, tabId, (tab) => (tab.pendingId === pendingId ? { ...tab, pendingId: null, response } : tab))
+        finishTabRequest: (tabId, pendingId, response, outcome = {}) => set((state) => (
+          mapTab(state, tabId, (tab) => (tab.pendingId === pendingId ? { ...tab, ...outcome, pendingId: null, response } : tab))
         )),
         patchTab: (tabId, patch) => set((state) => mapTab(state, tabId, (tab) => ({ ...tab, ...patch }))),
         setRequestPanel: (requestPanel) => set({ requestPanel }),
@@ -288,6 +305,18 @@ export const useAppStore = create(
         closeImportDialog: () => set({ importDialogOpen: false }),
         openCommandPalette: () => set({ commandPaletteOpen: true }),
         closeCommandPalette: () => set({ commandPaletteOpen: false }),
+        openCookiesDialog: () => set({ cookiesDialogOpen: true }),
+        closeCookiesDialog: () => set({ cookiesDialogOpen: false }),
+        openSettingsDialog: () => set({ settingsDialogOpen: true }),
+        closeSettingsDialog: () => set({ settingsDialogOpen: false }),
+
+        openRunner: (folderId = '') => set({ runner: { ...CLOSED_RUNNER, isOpen: true, folderId } }),
+        closeRunner: () => set({ runner: CLOSED_RUNNER }),
+        startRun: () => set((state) => ({ runner: { ...state.runner, isRunning: true, results: [] } })),
+        addRunResult: (result) => set((state) => ({
+          runner: { ...state.runner, results: [...state.runner.results, result] },
+        })),
+        finishRun: () => set((state) => ({ runner: { ...state.runner, isRunning: false } })),
 
         showAlert: (title, message, confirmText = 'OK', variant = 'default') => set({
           alertDialog: { isOpen: true, title, message, confirmText, variant },
@@ -355,6 +384,9 @@ export const selectIsDialogOpen = (state) => (
   state.codeDialogOpen
   || state.importDialogOpen
   || state.commandPaletteOpen
+  || state.cookiesDialogOpen
+  || state.settingsDialogOpen
+  || state.runner.isOpen
   || state.alertDialog.isOpen
   || state.confirmDialog.isOpen
   || state.promptDialog.isOpen

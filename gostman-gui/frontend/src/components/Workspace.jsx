@@ -19,6 +19,9 @@ import { createWorkspaceActions } from "../lib/workspaceActions"
 
 const CodeSnippetDialog = lazy(() => import("./CodeSnippetDialog").then((module) => ({ default: module.CodeSnippetDialog })))
 const ImportExportDialog = lazy(() => import("./ImportExportDialog").then((module) => ({ default: module.ImportExportDialog })))
+const CookiesDialog = lazy(() => import("./CookiesDialog").then((module) => ({ default: module.CookiesDialog })))
+const NetworkDialog = lazy(() => import("./NetworkDialog").then((module) => ({ default: module.NetworkDialog })))
+const RunnerDialog = lazy(() => import("./RunnerDialog").then((module) => ({ default: module.RunnerDialog })))
 const MonacoEditor = lazy(() => import("./MonacoEditor").then((module) => ({ default: module.MonacoEditor })))
 
 const ENVIRONMENT_SAVE_DELAY_MS = 400
@@ -78,6 +81,7 @@ function useStoredData(backend) {
 function usePersistence(backend) {
   const folders = useAppStore((s) => s.folders)
   const requestHistory = useAppStore((s) => s.requestHistory)
+  const cookies = useAppStore((s) => s.cookies)
   const environments = useAppStore((s) => s.environments)
   const activeEnvironmentId = useAppStore((s) => s.activeEnvironmentId)
   const reportPersistenceFailure = useAppStore((s) => s.reportPersistenceFailure)
@@ -94,6 +98,7 @@ function usePersistence(backend) {
 
   const saveFolders = useCallback((value) => persist(() => backend.saveFolders(value)), [backend, persist])
   const saveHistory = useCallback((value) => persist(() => backend.saveHistory(value)), [backend, persist])
+  const saveCookies = useCallback((value) => persist(() => backend.saveCookies(value)), [backend, persist])
   const saveEnvironments = useCallback(
     (value) => persist(() => backend.saveEnvironments(value.environments, value.activeEnvironmentId)),
     [backend, persist]
@@ -101,6 +106,7 @@ function usePersistence(backend) {
 
   useAutoSave(folders, saveFolders)
   useAutoSave(requestHistory, saveHistory)
+  useAutoSave(cookies, saveCookies)
   useAutoSave(environmentState, saveEnvironments, ENVIRONMENT_SAVE_DELAY_MS)
 }
 
@@ -116,6 +122,10 @@ function LoadedWorkspace({ backend, onBack }) {
   const codeSnippets = useAppStore((s) => s.codeSnippets)
   const importDialogOpen = useAppStore((s) => s.importDialogOpen)
   const importDialogTab = useAppStore((s) => s.importDialogTab)
+  const cookiesDialogOpen = useAppStore((s) => s.cookiesDialogOpen)
+  const settingsDialogOpen = useAppStore((s) => s.settingsDialogOpen)
+  const settings = useAppStore((s) => s.settings)
+  const runner = useAppStore((s) => s.runner)
   const isDialogOpen = useAppStore(selectIsDialogOpen)
 
   const setActiveTab = useAppStore((s) => s.setActiveTab)
@@ -125,6 +135,10 @@ function LoadedWorkspace({ backend, onBack }) {
   const setActiveVariables = useAppStore((s) => s.setActiveVariables)
   const closeCodeDialog = useAppStore((s) => s.closeCodeDialog)
   const closeImportDialog = useAppStore((s) => s.closeImportDialog)
+  const openCookiesDialog = useAppStore((s) => s.openCookiesDialog)
+  const closeCookiesDialog = useAppStore((s) => s.closeCookiesDialog)
+  const openSettingsDialog = useAppStore((s) => s.openSettingsDialog)
+  const closeSettingsDialog = useAppStore((s) => s.closeSettingsDialog)
   const openCommandPalette = useAppStore((s) => s.openCommandPalette)
 
   const activeTab = useActiveTab()
@@ -150,7 +164,14 @@ function LoadedWorkspace({ backend, onBack }) {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
-      <AppHeader onImport={actions.openImport} onReset={actions.reset} onOpenCommands={openCommandPalette} onBack={onBack} />
+      <AppHeader
+        onImport={actions.openImport}
+        onReset={actions.reset}
+        onOpenCommands={openCommandPalette}
+        onOpenCookies={openCookiesDialog}
+        onOpenSettings={openSettingsDialog}
+        onBack={onBack}
+      />
 
       <div className="flex min-h-0 flex-1">
         <Sidebar
@@ -194,6 +215,7 @@ function LoadedWorkspace({ backend, onBack }) {
                 onUpdateVariables={setActiveVariables}
                 response={activeTab.response}
                 extraction={activeTab.extraction}
+                tokenRequest={activeTab.tokenRequest}
                 schema={activeTab.schema}
                 actions={actions}
                 EditorComponent={MonacoEditor}
@@ -202,6 +224,7 @@ function LoadedWorkspace({ backend, onBack }) {
 
             <ResponsePanel
               response={activeTab.response}
+              tests={activeTab.tests}
               loading={isLoading}
               onDownload={actions.download}
             />
@@ -225,6 +248,9 @@ function LoadedWorkspace({ backend, onBack }) {
             onClose={closeImportDialog}
           />
         )}
+        {cookiesDialogOpen && <CookiesDialog onClose={closeCookiesDialog} />}
+        {settingsDialogOpen && <NetworkDialog settings={settings} actions={actions} onClose={closeSettingsDialog} />}
+        {runner.isOpen && <RunnerDialog runner={runner} folders={folders} requests={requests} actions={actions} />}
       </Suspense>
 
       <AppDialogs onCommand={actions.runCommand} />

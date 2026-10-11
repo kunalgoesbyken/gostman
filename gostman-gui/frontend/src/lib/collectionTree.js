@@ -56,6 +56,11 @@ export function listFolders(tree) {
   return entries
 }
 
+export function collectRequests(tree, folderId) {
+  const nested = foldersIn(tree, folderId).flatMap((folder) => collectRequests(tree, folder.id))
+  return [...nested, ...requestsIn(tree, folderId)]
+}
+
 export function findMatches(folders, requests, query) {
   const needle = query.trim().toLowerCase()
   if (!needle) return null

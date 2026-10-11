@@ -1,10 +1,10 @@
-import { ArrowLeft, Import, RotateCcw, Search } from "lucide-react"
+import { ArrowLeft, Cookie, Import, RotateCcw, Search, Settings } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { EnvironmentSwitcher } from "./EnvironmentSwitcher"
 import { shortcutLabel } from "../lib/platform"
 import logo from "../assets/logo.jpg"
 
-export function AppHeader({ onImport, onReset, onOpenCommands, onBack }) {
+export function AppHeader({ onImport, onReset, onOpenCommands, onOpenCookies, onOpenSettings, onBack }) {
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b border-border px-3">
       {onBack && <IconButton label="Back to the landing page" icon={ArrowLeft} size="icon" onClick={onBack} />}
@@ -25,7 +25,11 @@ export function AppHeader({ onImport, onReset, onOpenCommands, onBack }) {
           <Import />
           Import
         </Button>
-        <IconButton label="Reset app and delete all data" icon={RotateCcw} size="icon" onClick={onReset} />
+        <div className="flex shrink-0 items-center gap-1">
+          <IconButton label="Cookies" icon={Cookie} size="icon" onClick={onOpenCookies} />
+          <IconButton label="Network settings" icon={Settings} size="icon" onClick={onOpenSettings} />
+          <IconButton label="Reset app and delete all data" icon={RotateCcw} size="icon" onClick={onReset} />
+        </div>
       </div>
     </header>
   )

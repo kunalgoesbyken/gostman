@@ -143,6 +143,11 @@ func applyAuth(auth Auth, substitute func(string) string, headers []pair, target
 			return headers
 		}
 		return setHeader(headers, key, value)
+	case authOAuth2:
+		if value, ok := oauthHeader(auth.OAuth2); ok {
+			return setHeader(headers, headerAuthorization, value)
+		}
+		return headers
 	default:
 		return headers
 	}

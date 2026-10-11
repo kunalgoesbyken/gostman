@@ -3,15 +3,12 @@ package engine
 import (
 	"bytes"
 	"context"
-	"crypto/tls"
 	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
 	"mime"
 	"net/http"
-	"net/http/cookiejar"
-	"sync"
 	"time"
 	"unicode/utf8"
 )
@@ -28,41 +25,7 @@ type Policy struct {
 	BlockPrivate     bool
 	MaxResponseBytes int64
 	MaxTimeout       time.Duration
-}
-
-type transportKey struct {
-	blockPrivate bool
-	insecureTLS  bool
-}
-
-var (
-	transportsMu sync.Mutex
-	transports   = map[transportKey]*http.Transport{}
-)
-
-func transportFor(key transportKey) *http.Transport {
-	transportsMu.Lock()
-	defer transportsMu.Unlock()
-
-	if transport, ok := transports[key]; ok {
-		return transport
-	}
-	transport := &http.Transport{
-		Proxy:                 http.ProxyFromEnvironment,
-		DialContext:           dialer.DialContext,
-		ForceAttemptHTTP2:     true,
-		MaxIdleConns:          100,
-		IdleConnTimeout:       90 * time.Second,
-		TLSHandshakeTimeout:   15 * time.Second,
-		ExpectContinueTimeout: time.Second,
-		TLSClientConfig:       &tls.Config{InsecureSkipVerify: key.insecureTLS},
-	}
-	if key.blockPrivate {
-		transport.Proxy = nil
-		transport.DialContext = guardedDial
-	}
-	transports[key] = transport
-	return transport
+	Network          *Network
 }
 
 func Send(ctx context.Context, r Request, policy Policy) Response {
@@ -98,11 +61,10 @@ func send(ctx context.Context, r Request, policy Policy) Response {
 		outgoing.Host = host
 	}
 
-	var cookies []*http.Cookie
-	jar, _ := cookiejar.New(nil)
+	cookies := &cookieLog{now: time.Now()}
 	client := &http.Client{
-		Jar:       jar,
-		Transport: transportFor(transportKey{policy.BlockPrivate, r.Options.InsecureTLS}),
+		Jar:       newJar(r.Cookies, cookies.now),
+		Transport: policy.route(r.Options.InsecureTLS),
 		CheckRedirect: func(next *http.Request, via []*http.Request) error {
 			if r.Options.NoFollowRedirects {
 				return http.ErrUseLastResponse
@@ -110,7 +72,7 @@ func send(ctx context.Context, r Request, policy Policy) Response {
 			if len(via) >= maxRedirects {
 				return fmt.Errorf("stopped after %d redirects", maxRedirects)
 			}
-			cookies = append(cookies, next.Response.Cookies()...)
+			cookies.record(next.Response)
 			return nil
 		},
 	}
@@ -129,6 +91,7 @@ func send(ctx context.Context, r Request, policy Policy) Response {
 	if err != nil {
 		return classify(ctx, err)
 	}
+	cookies.record(incoming)
 	truncated := int64(len(body)) > limit
 	if truncated {
 		body = body[:limit]
@@ -138,7 +101,7 @@ func send(ctx context.Context, r Request, policy Policy) Response {
 		Status:     incoming.Status,
 		StatusCode: incoming.StatusCode,
 		Headers:    flattenHeaders(incoming.Header),
-		Cookies:    describeCookies(append(cookies, incoming.Cookies()...)),
+		Cookies:    cookies.entries,
 		Size:       int64(len(body)),
 		URL:        incoming.Request.URL.String(),
 		Truncated:  truncated,
@@ -184,26 +147,6 @@ func flattenHeaders(header http.Header) []HeaderEntry {
 		}
 	}
 	return entries
-}
-
-func describeCookies(cookies []*http.Cookie) []CookieInfo {
-	var described []CookieInfo
-	for _, cookie := range cookies {
-		expires := ""
-		if !cookie.Expires.IsZero() {
-			expires = cookie.Expires.UTC().Format(time.RFC1123)
-		}
-		described = append(described, CookieInfo{
-			Name:     cookie.Name,
-			Value:    cookie.Value,
-			Domain:   cookie.Domain,
-			Path:     cookie.Path,
-			Expires:  expires,
-			Secure:   cookie.Secure,
-			HttpOnly: cookie.HttpOnly,
-		})
-	}
-	return described
 }
 
 func mediaType(contentType string, body []byte) string {

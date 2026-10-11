@@ -12,6 +12,7 @@ import { EmptyState } from "./ui/emptyState"
 import { Notice, SectionLabel, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { TabCount, Tabs, TabsList, TabsTrigger } from "./ui/tabs"
+import { TestResults, countPassed, hasTestOutput } from "./TestResults"
 import { useClipboardCopy } from "../hooks/useClipboardCopy"
 import { formatSize, lookup } from "../lib/dataUtils"
 import { MIN_REQUEST_HEIGHT_PX, MIN_RESPONSE_HEIGHT_PX, TOOLBAR_HEIGHT_PX } from "../lib/layout"
@@ -25,6 +26,7 @@ const JSON_EXPANDED_DEPTH = 2
 const TAB_BODY = 'body'
 const TAB_HEADERS = 'headers'
 const TAB_COOKIES = 'cookies'
+const TAB_TESTS = 'tests'
 const NO_VALUE = '—'
 
 const VIEW_LABELS = { pretty: 'Pretty', raw: 'Raw', preview: 'Preview' }
@@ -232,7 +234,7 @@ function panelStyleFor(isFullscreen, isCollapsed, panelShare) {
   return { flex: `0 1 ${panelShare}%`, minHeight: MIN_RESPONSE_HEIGHT_PX }
 }
 
-export const ResponsePanel = memo(function ResponsePanel({ response, loading, onDownload }) {
+export const ResponsePanel = memo(function ResponsePanel({ response, tests, loading, onDownload }) {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [activeTab, setActiveTab] = useState(TAB_BODY)
@@ -248,6 +250,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, loading, on
   const view = views.includes(selectedView) ? selectedView : views[0]
   const headers = shown?.headers || []
   const cookies = shown?.cookies || []
+  const showsTests = hasTestOutput(tests)
   const hasBody = hasResult && kind !== BODY_KINDS.EMPTY
   const isOpen = isFullscreen || !isCollapsed
   const showsBody = isOpen && activeTab === TAB_BODY
@@ -265,6 +268,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, loading, on
     if (loading) return <EmptyState icon={Loader2} title="Sending request" description="Waiting for the server to answer." />
     if (!shown) return <EmptyState icon={FileText} title="No response yet" description="Send a request to see the response here." />
     if (shown.error) return <ErrorBody response={shown} />
+    if (activeTab === TAB_TESTS && showsTests) return <TestResults tests={tests} />
     if (activeTab === TAB_HEADERS) {
       if (headers.length === 0) return <EmptyState icon={List} title="No headers" description="The server sent no headers." />
       return <DataTable columns={HEADER_COLUMNS} rows={headers} />
@@ -310,6 +314,11 @@ export const ResponsePanel = memo(function ResponsePanel({ response, loading, on
                 <TabsTrigger value={TAB_BODY}>Body</TabsTrigger>
                 <TabsTrigger value={TAB_HEADERS}>Headers<TabCount>{headers.length}</TabCount></TabsTrigger>
                 <TabsTrigger value={TAB_COOKIES}>Cookies<TabCount>{cookies.length}</TabCount></TabsTrigger>
+                {showsTests && (
+                  <TabsTrigger value={TAB_TESTS}>
+                    Tests<TabCount>{countPassed(tests.results)}/{tests.results.length}</TabCount>
+                  </TabsTrigger>
+                )}
               </TabsList>
             ) : (
               <SectionLabel className="pl-1.5">Response</SectionLabel>
