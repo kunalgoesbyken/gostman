@@ -12,9 +12,11 @@ import (
 const (
 	methodGraphQL = "GRAPHQL"
 	methodGRPC    = "GRPC"
+	methodMCP     = "MCP"
 
 	reasonGraphQL   = "GraphQL requests are not served."
 	reasonGRPC      = "gRPC requests are not served."
+	reasonMCP       = "MCP requests are not served."
 	reasonWebSocket = "WebSocket requests are not served."
 	reasonNoExample = "Save a response as an example to serve this route."
 )
@@ -115,6 +117,9 @@ func unservedReason(method, address string) string {
 	}
 	if method == methodGRPC {
 		return reasonGRPC
+	}
+	if method == methodMCP {
+		return reasonMCP
 	}
 	if isSocketAddress(address) {
 		return reasonWebSocket

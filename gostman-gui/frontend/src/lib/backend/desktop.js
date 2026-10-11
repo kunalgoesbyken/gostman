@@ -6,7 +6,9 @@ import {
   DeleteRequest,
   FetchToken,
   DescribeGrpc,
+  DescribeMcp,
   InvokeGrpc,
+  InvokeMcp,
   LoadData,
   OpenWorkspace,
   ParseCurl,
@@ -30,6 +32,7 @@ import {
 import { desktopMock } from './desktopMock'
 import { openDesktopSocket } from './desktopSocket'
 import { toGrpcCall, toGrpcTarget } from '../grpc'
+import { toMcpCall, toMcpTarget } from '../mcp'
 import { toEngineRequest } from '../request'
 import { failureResponse } from '../response'
 
@@ -52,6 +55,8 @@ const send = answering((id, request, variables, cookies) => SendRequest(id, toEn
 
 const invokeGrpc = answering((id, request, variables) => InvokeGrpc(id, toGrpcCall(request, variables)))
 
+const invokeMcp = answering((id, request, variables) => InvokeMcp(id, toMcpCall(request, variables)))
+
 let storageChange = Promise.resolve()
 
 function duringStorageChange(change) {
@@ -72,6 +77,8 @@ export const desktopBackend = {
   parseCurl: (command) => ParseCurl(command),
   describeGrpc: (request, variables) => DescribeGrpc(toGrpcTarget(request, variables)),
   invokeGrpc,
+  describeMcp: (request, variables) => DescribeMcp(toMcpTarget(request, variables)),
+  invokeMcp,
   load,
   saveRequest,
   saveRequests: (requests) => SaveRequests(requests),

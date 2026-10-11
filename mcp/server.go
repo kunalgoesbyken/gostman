@@ -82,8 +82,8 @@ func (s *Server) read(ctx context.Context, input *bufio.Reader, queue chan<- cal
 	}
 }
 
-func (s *Server) send(answer reply) {
-	answer.Version = jsonrpcVersion
+func (s *Server) send(answer Reply) {
+	answer.Version = JSONRPCVersion
 	encoded, err := encode(answer)
 	if err != nil {
 		fmt.Fprintf(s.Log, "a reply could not be encoded: %s\n", err)
@@ -97,15 +97,15 @@ func (s *Server) send(answer reply) {
 }
 
 func (s *Server) respond(id json.RawMessage, result any) {
-	s.send(reply{ID: id, Result: result})
+	s.send(Reply{ID: id, Result: result})
 }
 
 func (s *Server) fail(id json.RawMessage, code int, text string) {
-	s.send(reply{ID: id, Error: &failure{Code: code, Message: text}})
+	s.send(Reply{ID: id, Error: &Failure{Code: code, Message: text}})
 }
 
-func parse(line []byte) (message, int, string) {
-	var incoming message
+func parse(line []byte) (Message, int, string) {
+	var incoming Message
 	err := json.Unmarshal(line, &incoming)
 	var mistyped *json.UnmarshalTypeError
 	switch {
@@ -113,7 +113,7 @@ func parse(line []byte) (message, int, string) {
 		return incoming, codeInvalidRequest, invalidRequest
 	case err != nil:
 		return incoming, codeParseError, "Parse error: " + err.Error()
-	case incoming.Version != jsonrpcVersion || incoming.Method == "":
+	case incoming.Version != JSONRPCVersion || incoming.Method == "":
 		return incoming, codeInvalidRequest, invalidRequest
 	default:
 		return incoming, 0, ""
@@ -135,20 +135,20 @@ func (s *Server) receive(ctx context.Context, line []byte, queue chan<- call) {
 		return
 	}
 	switch incoming.Method {
-	case methodInitialize:
+	case MethodInitialize:
 		s.initialize(incoming)
-	case methodPing:
-		s.respond(incoming.ID, empty{})
-	case methodListTools:
+	case MethodPing:
+		s.respond(incoming.ID, Empty{})
+	case MethodListTools:
 		s.respond(incoming.ID, s.listing())
-	case methodCallTool:
+	case MethodCallTool:
 		s.enqueue(ctx, incoming, queue)
 	default:
-		s.fail(incoming.ID, codeMethodNotFound, "Method not found: "+incoming.Method)
+		s.fail(incoming.ID, CodeMethodNotFound, "Method not found: "+incoming.Method)
 	}
 }
 
-func (s *Server) notice(incoming message) {
+func (s *Server) notice(incoming Message) {
 	if incoming.Method != methodCancelled {
 		return
 	}
@@ -163,15 +163,15 @@ func (s *Server) notice(incoming message) {
 	}
 }
 
-func (s *Server) initialize(incoming message) {
-	var params initializeParams
+func (s *Server) initialize(incoming Message) {
+	var params InitializeParams
 	if err := json.Unmarshal(incoming.Params, &params); err != nil {
 		s.fail(incoming.ID, codeInvalidParams, "Invalid params: "+err.Error())
 		return
 	}
-	s.respond(incoming.ID, initializeResult{
+	s.respond(incoming.ID, InitializeResult{
 		ProtocolVersion: negotiate(params.ProtocolVersion),
-		ServerInfo:      implementation{Name: s.Name, Version: s.Version},
+		ServerInfo:      Implementation{Name: s.Name, Version: s.Version},
 		Instructions:    s.Instructions,
 	})
 }
@@ -198,8 +198,8 @@ func (s *Server) find(name string) (Tool, bool) {
 	return Tool{}, false
 }
 
-func (s *Server) enqueue(ctx context.Context, incoming message, queue chan<- call) {
-	var params callParams
+func (s *Server) enqueue(ctx context.Context, incoming Message, queue chan<- call) {
+	var params CallParams
 	if err := json.Unmarshal(incoming.Params, &params); err != nil {
 		s.fail(incoming.ID, codeInvalidParams, "Invalid params: "+err.Error())
 		return

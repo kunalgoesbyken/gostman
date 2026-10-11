@@ -9,14 +9,15 @@ import (
 	"time"
 
 	"github.com/krockxz/gostman/engine"
+	"github.com/krockxz/gostman/mcpclient"
 	"github.com/krockxz/gostman/rpc"
 )
 
 const (
 	maxRequestBytes = 14 << 20
 
-	grpcDescribe = "describe"
-	grpcInvoke   = "invoke"
+	actionDescribe = "describe"
+	actionInvoke   = "invoke"
 )
 
 var Policy = engine.Policy{
@@ -54,6 +55,11 @@ type describeResult struct {
 	Error  string      `json:"error,omitempty"`
 }
 
+type catalogResult struct {
+	Catalog *mcpclient.Catalog `json:"catalog,omitempty"`
+	Error   string             `json:"error,omitempty"`
+}
+
 func Handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -67,10 +73,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	query := r.URL.Query()
 	switch {
-	case query.Get("grpc") == grpcDescribe:
+	case query.Get("grpc") == actionDescribe:
 		writeJSON(w, describeGrpc(r))
-	case query.Get("grpc") == grpcInvoke:
+	case query.Get("grpc") == actionInvoke:
 		writeJSON(w, invokeGrpc(r))
+	case query.Get("mcp") == actionDescribe:
+		writeJSON(w, describeMcp(r))
+	case query.Get("mcp") == actionInvoke:
+		writeJSON(w, invokeMcp(r))
 	case query.Has("curl"):
 		writeJSON(w, parseCurl(r))
 	case query.Has("prepare"):
@@ -177,6 +187,26 @@ func invokeGrpc(r *http.Request) engine.Response {
 		return engine.Failure(engine.ErrorConfig, "the request could not be read: "+err.Error())
 	}
 	return rpc.Invoke(r.Context(), call, Policy)
+}
+
+func describeMcp(r *http.Request) catalogResult {
+	var target mcpclient.Target
+	if err := json.NewDecoder(r.Body).Decode(&target); err != nil {
+		return catalogResult{Error: err.Error()}
+	}
+	catalog, err := mcpclient.Describe(r.Context(), target, Policy)
+	if err != nil {
+		return catalogResult{Error: err.Error()}
+	}
+	return catalogResult{Catalog: &catalog}
+}
+
+func invokeMcp(r *http.Request) engine.Response {
+	var call mcpclient.Call
+	if err := json.NewDecoder(r.Body).Decode(&call); err != nil {
+		return engine.Failure(engine.ErrorConfig, "the request could not be read: "+err.Error())
+	}
+	return mcpclient.Invoke(r.Context(), call, Policy)
 }
 
 func writeJSON(w http.ResponseWriter, payload any) {

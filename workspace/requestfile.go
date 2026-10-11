@@ -14,7 +14,7 @@ const (
 var (
 	requestKeys = []string{
 		"id", "name", "order", "method", "url", "queryParams", "headers", "auth", "bodyType", "body",
-		"graphqlQuery", "graphqlVariables", "grpcMethod", "grpcMessage", "grpcProtos", "options",
+		"graphqlQuery", "graphqlVariables", "grpcMethod", "grpcMessage", "grpcProtos", "mcpTool", "mcpArguments", "options",
 		"extractors", "assertions", "preScript", "postScript", "examples", "timestamp",
 	}
 	authKeys   = []string{"type", "username", "password", "token", "key", "value", "in", "oauth2"}
@@ -138,6 +138,8 @@ func (b nodeBuilder) request(document requestDocument) *yaml.Node {
 	setField(root, "grpcMethod", b.text(request.GrpcMethod))
 	setField(root, "grpcMessage", b.text(request.GrpcMessage))
 	setField(root, "grpcProtos", b.jsonText(request.GrpcProtos))
+	setField(root, "mcpTool", b.text(request.McpTool))
+	setField(root, "mcpArguments", b.text(request.McpArguments))
 	setField(root, "options", b.options(request.Options, document.extras.options))
 	setField(root, "extractors", b.rows(request.Extractors))
 	setField(root, "assertions", b.rows(request.Assertions))
@@ -244,6 +246,8 @@ func readRequest(root *yaml.Node) (requestDocument, error) {
 		GrpcMethod:       fields.text("grpcMethod"),
 		GrpcMessage:      fields.text("grpcMessage"),
 		GrpcProtos:       fields.jsonText("grpcProtos", false, unchanged),
+		McpTool:          fields.text("mcpTool"),
+		McpArguments:     fields.text("mcpArguments"),
 		Examples:         fields.jsonText("examples", false, unchanged),
 		Timestamp:        fields.text("timestamp"),
 	}

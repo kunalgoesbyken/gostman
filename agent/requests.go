@@ -54,6 +54,8 @@ type definition struct {
 	GraphqlVariables any                  `json:"graphqlVariables,omitempty"`
 	GrpcMethod       string               `json:"grpcMethod,omitempty"`
 	GrpcMessage      any                  `json:"grpcMessage,omitempty"`
+	McpTool          string               `json:"mcpTool,omitempty"`
+	McpArguments     any                  `json:"mcpArguments,omitempty"`
 	Auth             *engine.Auth         `json:"auth,omitempty"`
 	Options          engine.Options       `json:"options"`
 	Assertions       any                  `json:"assertions,omitempty"`
@@ -179,6 +181,8 @@ func (d *Desk) getRequest(_ context.Context, current scene, arguments getArgumen
 		GraphqlVariables: graphqlVariables(request),
 		GrpcMethod:       request.GrpcMethod,
 		GrpcMessage:      structured(request.GrpcMessage),
+		McpTool:          request.McpTool,
+		McpArguments:     structured(request.McpArguments),
 		Auth:             shownAuth(request.Auth),
 		Options:          request.Options,
 		Assertions:       structured(request.Assertions),

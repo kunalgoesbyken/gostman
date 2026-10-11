@@ -6,7 +6,6 @@ const MAX_BODY_BYTES = 2 * 1024 * 1024
 const MAX_NAME_LENGTH = 120
 const ENCODING_BASE64 = 'base64'
 const ENCODING_UTF8 = 'utf8'
-const GRPC_PROTOCOL = 'grpc'
 const DEFAULT_STATUS = 200
 const UNSAVED_HEADERS = ['set-cookie', 'authorization', 'proxy-authenticate', 'www-authenticate']
 
@@ -40,7 +39,7 @@ export const serializeExamples = (examples) => (examples.length > 0 ? JSON.strin
 
 export const sanitizeExamples = (json) => serializeExamples(parseExamples(json).slice(0, MAX_EXAMPLES))
 
-export const canSaveAsExample = (response) => Boolean(response) && !response.error && response.protocol !== GRPC_PROTOCOL
+export const canSaveAsExample = (response) => Boolean(response) && !response.error && !response.protocol
 
 export const isBinaryExample = (example) => example.bodyEncoding === ENCODING_BASE64
 

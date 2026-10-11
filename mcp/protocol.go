@@ -6,50 +6,52 @@ import (
 )
 
 const (
-	jsonrpcVersion = "2.0"
+	JSONRPCVersion = "2.0"
 
-	methodInitialize = "initialize"
-	methodPing       = "ping"
-	methodListTools  = "tools/list"
-	methodCallTool   = "tools/call"
-	methodCancelled  = "notifications/cancelled"
+	MethodInitialize  = "initialize"
+	MethodInitialized = "notifications/initialized"
+	MethodPing        = "ping"
+	MethodListTools   = "tools/list"
+	MethodCallTool    = "tools/call"
+	methodCancelled   = "notifications/cancelled"
 
 	codeParseError     = -32700
 	codeInvalidRequest = -32600
-	codeMethodNotFound = -32601
+	CodeMethodNotFound = -32601
 	codeInvalidParams  = -32602
 
 	contentText = "text"
 )
 
-var protocolVersions = []string{"2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"}
+var ProtocolVersions = []string{"2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"}
 
 var absentID = json.RawMessage("null")
 
-type message struct {
+type Message struct {
 	Version string          `json:"jsonrpc"`
-	ID      json.RawMessage `json:"id"`
+	ID      json.RawMessage `json:"id,omitempty"`
 	Method  string          `json:"method"`
-	Params  json.RawMessage `json:"params"`
+	Params  json.RawMessage `json:"params,omitempty"`
 }
 
-type failure struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type Failure struct {
+	Code    int             `json:"code"`
+	Message string          `json:"message"`
+	Data    json.RawMessage `json:"data,omitempty"`
 }
 
-type reply struct {
+type Reply struct {
 	Version string          `json:"jsonrpc"`
 	ID      json.RawMessage `json:"id"`
 	Result  any             `json:"result,omitempty"`
-	Error   *failure        `json:"error,omitempty"`
+	Error   *Failure        `json:"error,omitempty"`
 }
 
-type initializeParams struct {
+type InitializeParams struct {
 	ProtocolVersion string `json:"protocolVersion"`
 }
 
-type implementation struct {
+type Implementation struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
 }
@@ -60,10 +62,10 @@ type capabilities struct {
 	Tools toolCapability `json:"tools"`
 }
 
-type initializeResult struct {
+type InitializeResult struct {
 	ProtocolVersion string         `json:"protocolVersion"`
 	Capabilities    capabilities   `json:"capabilities"`
-	ServerInfo      implementation `json:"serverInfo"`
+	ServerInfo      Implementation `json:"serverInfo"`
 	Instructions    string         `json:"instructions,omitempty"`
 }
 
@@ -82,7 +84,7 @@ type listResult struct {
 	Tools []toolListing `json:"tools"`
 }
 
-type callParams struct {
+type CallParams struct {
 	Name      string          `json:"name"`
 	Arguments json.RawMessage `json:"arguments"`
 }
@@ -101,19 +103,19 @@ type cancelParams struct {
 	RequestID json.RawMessage `json:"requestId"`
 }
 
-type empty struct{}
+type Empty struct{}
 
-func (m message) isNotification() bool {
+func (m Message) isNotification() bool {
 	return len(m.ID) == 0 || bytes.Equal(m.ID, absentID)
 }
 
 func negotiate(requested string) string {
-	for _, supported := range protocolVersions {
+	for _, supported := range ProtocolVersions {
 		if supported == requested {
 			return requested
 		}
 	}
-	return protocolVersions[0]
+	return ProtocolVersions[0]
 }
 
 func textContent(text string) content {

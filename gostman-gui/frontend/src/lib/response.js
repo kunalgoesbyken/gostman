@@ -1,4 +1,5 @@
 import { base64ToBytes, textToBase64 } from './base64'
+import { MCP_OK, MCP_PROTOCOL } from './mcp'
 
 const ENCODING_BASE64 = 'base64'
 const FALLBACK_MIME = 'application/octet-stream'
@@ -127,9 +128,11 @@ export function downloadName(response) {
 }
 
 const grpcVariant = (statusCode) => (statusCode === GRPC_OK ? 'success' : 'clientError')
+const mcpVariant = (status) => (status === MCP_OK ? 'success' : 'clientError')
 
-export function statusVariant({ statusCode, protocol }) {
+export function statusVariant({ statusCode, status, protocol }) {
   if (protocol === GRPC_PROTOCOL) return grpcVariant(statusCode)
+  if (protocol === MCP_PROTOCOL) return mcpVariant(status)
   if (statusCode >= 500) return 'serverError'
   if (statusCode >= 400) return 'clientError'
   if (statusCode >= 300) return 'redirect'
