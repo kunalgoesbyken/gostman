@@ -165,6 +165,7 @@ function LoadedWorkspace({ backend, onBack }) {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
       <AppHeader
+        storage={actions.storage}
         onImport={actions.openImport}
         onReset={actions.reset}
         onOpenCommands={openCommandPalette}

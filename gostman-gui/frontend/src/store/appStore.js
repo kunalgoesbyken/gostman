@@ -5,6 +5,7 @@ import { isPlainObject, parseJSON } from '../lib/dataUtils'
 import { DEFAULT_SETTINGS, normalizeSettings } from '../lib/network'
 import { normalizeRequest } from '../lib/request'
 import { isBlankRequest } from '../lib/requestChanges'
+import { reconcileTabs } from '../lib/tabReconcile'
 
 const HISTORY_LIMIT = 50
 const HISTORY_IDENTITY_FIELDS = ['method', 'url', 'body', 'bodyType', 'graphqlQuery', 'graphqlVariables', 'grpcMethod', 'grpcMessage']
@@ -152,13 +153,16 @@ export const useAppStore = create(
         confirmDialog: CLOSED_CONFIRM,
         promptDialog: CLOSED_PROMPT,
 
-        hydrate: (data) => set(() => {
+        hydrate: (data) => set((state) => {
           const environments = restoreEnvironments(data)
           const hasActive = environments.some((environment) => environment.id === data.activeEnvironmentId)
+          const requests = asArray(data.requests).map(normalizeRequest)
+          const folders = asArray(data.folders)
           return {
             hydrated: true,
-            requests: asArray(data.requests).map(normalizeRequest),
-            folders: asArray(data.folders),
+            requests,
+            folders,
+            tabs: reconcileTabs(state.tabs, state.requests, requests, folders),
             requestHistory: asArray(data.history).map(normalizeRequest),
             cookies: mergeCookies(asArray(data.cookies), []),
             settings: normalizeSettings(data.settings),

@@ -1,0 +1,163 @@
+package main
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
+	"sync"
+)
+
+const (
+	workspaceStateFile = "workspaces.json"
+	maxRecentFolders   = 8
+)
+
+type oauthTokens struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+	ExpiresAt    int64  `json:"expiresAt"`
+}
+
+type workspaceMemory struct {
+	ActiveEnvironmentId string                 `json:"activeEnvironmentId"`
+	Collapsed           []string               `json:"collapsed"`
+	Tokens              map[string]oauthTokens `json:"tokens"`
+}
+
+type workspaceState struct {
+	Current string                     `json:"current"`
+	Recent  []string                   `json:"recent"`
+	Folders map[string]workspaceMemory `json:"folders"`
+}
+
+var workspaceStateMutex sync.Mutex
+
+func workspaceStatePath() string {
+	return filepath.Join(appFolder, workspaceStateFile)
+}
+
+func (m workspaceMemory) withTokens(request Request) Request {
+	tokens := m.Tokens[request.Id]
+	request.Auth.OAuth2.AccessToken = tokens.AccessToken
+	request.Auth.OAuth2.RefreshToken = tokens.RefreshToken
+	request.Auth.OAuth2.ExpiresAt = tokens.ExpiresAt
+	return request
+}
+
+func (m workspaceMemory) isCollapsed(folderId string) bool {
+	for _, id := range m.Collapsed {
+		if id == folderId {
+			return true
+		}
+	}
+	return false
+}
+
+func (m *workspaceMemory) keepTokens(requests []Request) {
+	if m.Tokens == nil {
+		m.Tokens = map[string]oauthTokens{}
+	}
+	for _, request := range requests {
+		config := request.Auth.OAuth2
+		tokens := oauthTokens{AccessToken: config.AccessToken, RefreshToken: config.RefreshToken, ExpiresAt: config.ExpiresAt}
+		if tokens == (oauthTokens{}) {
+			delete(m.Tokens, request.Id)
+			continue
+		}
+		m.Tokens[request.Id] = tokens
+	}
+}
+
+func (m *workspaceMemory) keepCollapsed(folders []Folder) {
+	m.Collapsed = []string{}
+	for _, folder := range folders {
+		if !folder.IsOpen {
+			m.Collapsed = append(m.Collapsed, folder.Id)
+		}
+	}
+}
+
+func (s *workspaceState) memoryOf(path string) workspaceMemory {
+	if s.Folders == nil {
+		s.Folders = map[string]workspaceMemory{}
+	}
+	return s.Folders[path]
+}
+
+func (s *workspaceState) open(path string) {
+	recent := []string{path}
+	for _, known := range s.Recent {
+		if known != path && len(recent) < maxRecentFolders {
+			recent = append(recent, known)
+		}
+	}
+	s.Current, s.Recent = path, recent
+}
+
+func readWorkspaceStateFile() (workspaceState, error) {
+	var state workspaceState
+	content, err := os.ReadFile(workspaceStatePath())
+	if errors.Is(err, fs.ErrNotExist) || (err == nil && len(content) == 0) {
+		return state, nil
+	}
+	if err != nil {
+		return state, fmt.Errorf("failed to read the list of folders: %w", err)
+	}
+	if err := json.Unmarshal(content, &state); err != nil {
+		return state, fmt.Errorf("the list of folders is corrupted: %w", err)
+	}
+	return state, nil
+}
+
+func writeWorkspaceStateFile(state workspaceState) error {
+	if err := os.MkdirAll(appFolder, 0755); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+	encoded, err := json.MarshalIndent(state, "", " ")
+	if err != nil {
+		return fmt.Errorf("failed to encode the list of folders: %w", err)
+	}
+	temporary := workspaceStatePath() + ".tmp"
+	if err := os.WriteFile(temporary, encoded, 0600); err != nil {
+		return fmt.Errorf("failed to write the list of folders: %w", err)
+	}
+	if err := os.Rename(temporary, workspaceStatePath()); err != nil {
+		return fmt.Errorf("failed to replace the list of folders: %w", err)
+	}
+	return nil
+}
+
+func readWorkspaceState() (workspaceState, error) {
+	workspaceStateMutex.Lock()
+	defer workspaceStateMutex.Unlock()
+	return readWorkspaceStateFile()
+}
+
+func recallWorkspace(path string) (workspaceMemory, error) {
+	state, err := readWorkspaceState()
+	return state.memoryOf(path), err
+}
+
+func mutateWorkspaceState(mutate func(state *workspaceState)) error {
+	workspaceStateMutex.Lock()
+	defer workspaceStateMutex.Unlock()
+	state, err := readWorkspaceStateFile()
+	if err != nil {
+		return err
+	}
+	mutate(&state)
+	return writeWorkspaceStateFile(state)
+}
+
+func clearWorkspaceState() error {
+	workspaceStateMutex.Lock()
+	defer workspaceStateMutex.Unlock()
+	err := os.Remove(workspaceStatePath())
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil
+	}
+	return err
+}

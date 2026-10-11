@@ -37,6 +37,7 @@ func NewApp() *App {
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	a.loadNetwork()
+	restoreWorkspace()
 }
 
 type SavedData struct {
@@ -177,6 +178,10 @@ func (a *App) LoadData() (SavedData, error) {
 	if err != nil {
 		return SavedData{}, err
 	}
+	data, err = storage.current().collection(data)
+	if err != nil {
+		return SavedData{}, err
+	}
 	data = withDefaultEnvironment(data)
 	if data.Requests == nil {
 		data.Requests = []Request{}
@@ -210,39 +215,15 @@ func (a *App) SaveRequests(requests []Request) ([]Request, error) {
 			requests[i].Id = uuid.NewString()
 		}
 	}
-	err := mutateData(func(data *SavedData) {
-		positions := make(map[string]int, len(data.Requests))
-		for i, saved := range data.Requests {
-			positions[saved.Id] = i
-		}
-		for _, request := range requests {
-			if position, exists := positions[request.Id]; exists {
-				data.Requests[position] = request
-				continue
-			}
-			positions[request.Id] = len(data.Requests)
-			data.Requests = append(data.Requests, request)
-		}
-	})
-	return requests, err
+	return requests, storage.current().saveRequests(requests)
 }
 
 func (a *App) DeleteRequest(id string) error {
-	return mutateData(func(data *SavedData) {
-		kept := data.Requests[:0]
-		for _, request := range data.Requests {
-			if request.Id != id {
-				kept = append(kept, request)
-			}
-		}
-		data.Requests = kept
-	})
+	return storage.current().deleteRequest(id)
 }
 
 func (a *App) SaveFolders(folders []Folder) error {
-	return mutateData(func(data *SavedData) {
-		data.Folders = folders
-	})
+	return storage.current().saveFolders(folders)
 }
 
 func (a *App) SaveHistory(history []Request) error {
@@ -252,16 +233,15 @@ func (a *App) SaveHistory(history []Request) error {
 }
 
 func (a *App) SaveEnvironments(environments []Environment, activeId string) error {
-	return mutateData(func(data *SavedData) {
-		data.Variables = ""
-		data.Environments = environments
-		data.ActiveEnvironmentId = activeId
-	})
+	return storage.current().saveEnvironments(environments, activeId)
 }
 
 func (a *App) ResetData() error {
 	dataMutex.Lock()
 	defer dataMutex.Unlock()
+	if err := forgetWorkspaces(); err != nil {
+		return err
+	}
 	return writeData(SavedData{})
 }
 

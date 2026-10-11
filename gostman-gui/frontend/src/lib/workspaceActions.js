@@ -11,6 +11,7 @@ import { isRequestDirty } from './requestChanges'
 import { bodyBase64, downloadName, mimeType } from './response'
 import { createRunner } from './runner'
 import { createSocketActions, isSocketAddress } from './socketSessions'
+import { createStorageActions } from './storageActions'
 import { selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
 
 const UNRECORDED_ERRORS = ['config', 'cancelled']
@@ -336,6 +337,7 @@ export function createWorkspaceActions(backend) {
   return {
     send,
     sockets,
+    storage: createStorageActions(backend),
     runExtractors,
     getToken,
     forgetToken,

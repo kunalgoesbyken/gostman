@@ -14,6 +14,10 @@ export function CancelRequest(arg1) {
   return window['go']['main']['App']['CancelRequest'](arg1);
 }
 
+export function CloseWorkspace() {
+  return window['go']['main']['App']['CloseWorkspace']();
+}
+
 export function DeleteRequest(arg1) {
   return window['go']['main']['App']['DeleteRequest'](arg1);
 }
@@ -34,6 +38,10 @@ export function LoadData() {
   return window['go']['main']['App']['LoadData']();
 }
 
+export function OpenWorkspace(arg1) {
+  return window['go']['main']['App']['OpenWorkspace'](arg1);
+}
+
 export function ParseCurl(arg1) {
   return window['go']['main']['App']['ParseCurl'](arg1);
 }
@@ -42,12 +50,24 @@ export function PickFile(arg1) {
   return window['go']['main']['App']['PickFile'](arg1);
 }
 
+export function PickWorkspaceFolder() {
+  return window['go']['main']['App']['PickWorkspaceFolder']();
+}
+
 export function PrepareRequest(arg1) {
   return window['go']['main']['App']['PrepareRequest'](arg1);
 }
 
+export function ReloadWorkspace() {
+  return window['go']['main']['App']['ReloadWorkspace']();
+}
+
 export function ResetData() {
   return window['go']['main']['App']['ResetData']();
+}
+
+export function SaveCollectionToFolder(arg1) {
+  return window['go']['main']['App']['SaveCollectionToFolder'](arg1);
 }
 
 export function SaveCookies(arg1) {
@@ -96,4 +116,8 @@ export function WSConnect(arg1, arg2) {
 
 export function WSSend(arg1, arg2) {
   return window['go']['main']['App']['WSSend'](arg1, arg2);
+}
+
+export function WorkspaceStatus() {
+  return window['go']['main']['App']['WorkspaceStatus']();
 }
