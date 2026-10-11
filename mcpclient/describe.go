@@ -57,25 +57,33 @@ func describe(ctx context.Context, target Target, policy engine.Policy) (Catalog
 	}, nil
 }
 
+const (
+	maxToolPages = 100
+	maxTools     = 2000
+)
+
 func (s *session) tools(ctx context.Context) ([]Tool, error) {
 	tools := []Tool{}
 	cursor := ""
-	for {
+	for page := 0; ; page++ {
+		if page == maxToolPages || len(tools) > maxTools {
+			return nil, protocolError("the server lists more tools than can be loaded (%d)", maxTools)
+		}
 		received, err := s.request(ctx, mcp.MethodListTools, listParams{Cursor: cursor})
 		if err != nil {
 			return nil, err
 		}
-		var page listPage
-		if err := json.Unmarshal(received.result, &page); err != nil {
+		var listing listPage
+		if err := json.Unmarshal(received.result, &listing); err != nil {
 			return nil, protocolError("the tool list cannot be read: %v", err)
 		}
-		for _, listed := range page.Tools {
+		for _, listed := range listing.Tools {
 			tools = append(tools, describeTool(listed))
 		}
-		if page.NextCursor == "" {
+		if listing.NextCursor == "" {
 			return tools, nil
 		}
-		cursor = page.NextCursor
+		cursor = listing.NextCursor
 	}
 }
 

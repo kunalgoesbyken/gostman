@@ -3,10 +3,12 @@ package mcpclient
 import (
 	"bytes"
 	"encoding/json"
+	"strings"
 )
 
 const (
 	noArguments      = "{}"
+	placeholderOpen  = "{{"
 	maxSkeletonDepth = 6
 
 	kindObject  = "object"
@@ -76,7 +78,7 @@ func (n schemaNode) kind() string {
 	return kindNull
 }
 
-func (n schemaNode) preset() json.RawMessage {
+func (n schemaNode) suggestion() json.RawMessage {
 	switch {
 	case len(n.Default) > 0:
 		return n.Default
@@ -87,6 +89,14 @@ func (n schemaNode) preset() json.RawMessage {
 	default:
 		return nil
 	}
+}
+
+func (n schemaNode) preset() json.RawMessage {
+	suggested := n.suggestion()
+	if bytes.Contains(suggested, []byte(placeholderOpen)) {
+		return nil
+	}
+	return suggested
 }
 
 func example(schema json.RawMessage, depth int) []byte {
@@ -144,6 +154,9 @@ func members(object json.RawMessage) []member {
 		var value json.RawMessage
 		if err != nil || !isName || decoder.Decode(&value) != nil {
 			return listed
+		}
+		if strings.Contains(name, placeholderOpen) {
+			continue
 		}
 		listed = append(listed, member{name, value})
 	}
