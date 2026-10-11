@@ -4,6 +4,7 @@ import { generateAllSnippets } from './codeGenerator'
 import { sanitizeImport } from './importExport'
 import { pluralize } from './dataUtils'
 import { introspectionRequest, readSchema } from './graphqlSchema'
+import { GRPC_METHOD, serializeProtoFiles } from './grpc'
 import { normalizeRequest } from './request'
 import { isRequestDirty } from './requestChanges'
 import { bodyBase64, downloadName, mimeType } from './response'
@@ -14,6 +15,7 @@ const UNRECORDED_ERRORS = ['config', 'cancelled']
 const RESET_PROMPT = "Delete every request, folder, environment and history entry? This can't be undone."
 const EXPORT_TAB = 'export'
 const DESTRUCTIVE = 'destructive'
+const NO_GRPC_CODE = 'Code generation covers HTTP requests. A gRPC call has no equivalent snippet yet.'
 
 const store = () => useAppStore.getState()
 const activeTab = () => selectActiveTab(store())
@@ -22,6 +24,7 @@ const messageOf = (error) => error?.message || String(error)
 const warn = (title, error) => store().showAlert(title, messageOf(error), 'OK', 'warning')
 const quoted = (name) => `"${name}"`
 const idsOf = (items) => items.map((item) => item.id)
+const isGrpc = (request) => request.method === GRPC_METHOD
 
 const attempt = (failureTitle, run) => async (...args) => {
   try {
@@ -74,6 +77,26 @@ export function createWorkspaceActions(backend) {
     store().patchTab(tab.id, { schema: readSchema(response) })
   }
 
+  async function loadGrpcSchema() {
+    const tab = activeTab()
+    store().patchTab(tab.id, { grpcSchema: { loading: true } })
+    try {
+      store().patchTab(tab.id, { grpcSchema: await backend.describeGrpc(tab.request, activeVariables()) })
+    } catch (error) {
+      store().patchTab(tab.id, { grpcSchema: { error: messageOf(error) } })
+    }
+  }
+
+  async function setGrpcProtos(files) {
+    const tab = activeTab()
+    store().updateTabRequest(tab.id, { grpcProtos: serializeProtoFiles(files) })
+    if (files.length > 0) {
+      await loadGrpcSchema()
+      return
+    }
+    store().patchTab(tab.id, { grpcSchema: null })
+  }
+
   async function send() {
     const tab = activeTab()
     if (isSocketAddress(tab.request.url, activeVariables())) {
@@ -84,7 +107,8 @@ export function createWorkspaceActions(backend) {
     sendSequence += 1
     const pendingId = `${tab.id}-${sendSequence}`
     store().startTabRequest(tab.id, pendingId)
-    const response = await backend.send(pendingId, tab.request, activeVariables())
+    const dispatch = isGrpc(tab.request) ? backend.invokeGrpc : backend.send
+    const response = await dispatch(pendingId, tab.request, activeVariables())
     store().finishTabRequest(tab.id, pendingId, response)
     runExtractors(tab.id)
     if (!UNRECORDED_ERRORS.includes(response.error)) store().addToHistory(tab.request)
@@ -127,6 +151,7 @@ export function createWorkspaceActions(backend) {
   })
 
   const generateCode = attempt('Cannot generate code', async () => {
+    if (isGrpc(activeTab().request)) throw new Error(NO_GRPC_CODE)
     const prepared = await backend.prepare(activeTab().request, activeVariables())
     store().openCodeDialog(generateAllSnippets(prepared))
   })
@@ -264,6 +289,8 @@ export function createWorkspaceActions(backend) {
     sockets,
     runExtractors,
     loadSchema,
+    loadGrpcSchema,
+    setGrpcProtos,
     save,
     generateCode,
     pasteCurl,

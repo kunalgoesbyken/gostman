@@ -72,6 +72,9 @@ type Request struct {
 	Auth             engine.Auth    `json:"auth"`
 	Options          engine.Options `json:"options"`
 	Extractors       string         `json:"extractors"`
+	GrpcMethod       string         `json:"grpcMethod"`
+	GrpcMessage      string         `json:"grpcMessage"`
+	GrpcProtos       string         `json:"grpcProtos"`
 	Timestamp        string         `json:"timestamp"`
 }
 

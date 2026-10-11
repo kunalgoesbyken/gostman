@@ -11,6 +11,7 @@ import { ExtractPanel } from "./ExtractPanel"
 import { BODY_FORM, BODY_MULTIPART, BODY_NONE } from "../lib/body"
 import { parseExtractors } from "../lib/chaining"
 import { GRAPHQL_METHOD } from "../lib/graphqlSchema"
+import { GRPC_METHOD, GRPC_PANEL } from "../lib/grpc"
 import { readParamRows } from "../lib/queryString"
 import { countSentRows, parseRows, serializeRows } from "../lib/rows"
 import { SOCKET_OPEN, SOCKET_PANEL, isSocketAddress, selectSession, useSocketStore } from "../lib/socketSessions"
@@ -18,6 +19,7 @@ import { validateEnvVariables, formatJSONError } from "../lib/validation"
 import { useAppStore } from "../store/appStore"
 
 const GraphQLPanel = lazy(() => import("./GraphQLPanel").then((module) => ({ default: module.GraphQLPanel })))
+const GrpcPanel = lazy(() => import("./GrpcPanel").then((module) => ({ default: module.GrpcPanel })))
 const WebSocketPanel = lazy(() => import("./WebSocketPanel").then((module) => ({ default: module.WebSocketPanel })))
 
 const ROW_BODY_TYPES = [BODY_FORM, BODY_MULTIPART]
@@ -63,6 +65,7 @@ export const RequestTabs = memo(function RequestTabs({
   response,
   extraction,
   schema,
+  grpcSchema,
   actions,
   EditorComponent,
 }) {
@@ -72,10 +75,15 @@ export const RequestTabs = memo(function RequestTabs({
   const { url, queryParams, headers, body, bodyType, auth, options, method, extractors } = activeRequest
   const isWebSocket = useMemo(() => isSocketAddress(url, variables), [url, variables])
   const isGraphQL = method === GRAPHQL_METHOD
+  const isGrpc = method === GRPC_METHOD
 
   useEffect(() => {
     if (isWebSocket) setActivePanel(SOCKET_PANEL)
   }, [isWebSocket, setActivePanel])
+
+  useEffect(() => {
+    if (isGrpc) setActivePanel(GRPC_PANEL)
+  }, [isGrpc, setActivePanel])
 
   const headerRows = useMemo(() => parseRows(headers), [headers])
   const paramCount = useMemo(() => countSentRows(readParamRows(url, queryParams)), [url, queryParams])
@@ -96,6 +104,7 @@ export const RequestTabs = memo(function RequestTabs({
           <TabsTrigger value="body">Body<TabBadge value={!isGraphQL && bodyContent} /></TabsTrigger>
           <TabsTrigger value="auth">Auth<TabBadge value={auth.type !== ""} /></TabsTrigger>
           <TabsTrigger value="graphql">GraphQL<TabBadge value={isGraphQL} /></TabsTrigger>
+          <TabsTrigger value={GRPC_PANEL}>gRPC<TabBadge value={isGrpc} /></TabsTrigger>
           <TabsTrigger value={SOCKET_PANEL}>WebSocket<TabBadge value={isSocketOpen} /></TabsTrigger>
           <TabsTrigger value="vars">Env vars</TabsTrigger>
           <TabsTrigger value="extract">Extract<TabBadge value={extractorCount} /></TabsTrigger>
@@ -149,6 +158,21 @@ export const RequestTabs = memo(function RequestTabs({
               onVariablesChange={(graphqlVariables) => onUpdateRequest({ graphqlVariables })}
               onUseGraphQL={() => onUpdateRequest({ method: GRAPHQL_METHOD })}
               onLoadSchema={actions.loadSchema}
+            />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value={GRPC_PANEL} className={PANEL_CLASS}>
+          <Suspense fallback={<PanelFallback />}>
+            <GrpcPanel
+              key={tabId}
+              request={activeRequest}
+              schema={grpcSchema}
+              editorPath={`${tabId}/grpc`}
+              onUpdateRequest={onUpdateRequest}
+              onProtosChange={actions.setGrpcProtos}
+              onLoadSchema={actions.loadGrpcSchema}
+              EditorComponent={EditorComponent}
             />
           </Suspense>
         </TabsContent>

@@ -10,6 +10,14 @@ export function DeleteRequest(arg1) {
   return window['go']['main']['App']['DeleteRequest'](arg1);
 }
 
+export function DescribeGrpc(arg1) {
+  return window['go']['main']['App']['DescribeGrpc'](arg1);
+}
+
+export function InvokeGrpc(arg1, arg2) {
+  return window['go']['main']['App']['InvokeGrpc'](arg1, arg2);
+}
+
 export function LoadData() {
   return window['go']['main']['App']['LoadData']();
 }

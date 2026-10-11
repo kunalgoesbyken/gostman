@@ -183,7 +183,7 @@ function StatusSummary({ response }) {
   const timing = `${response.durationMs} ms · ${formatSize(response.size)}`
   return (
     <>
-      <Badge variant={statusVariant(response.statusCode)} title={response.status} className="max-w-[9rem] font-mono">
+      <Badge variant={statusVariant(response)} title={response.status} className="max-w-[9rem] font-mono">
         <span className="truncate">{response.status}</span>
       </Badge>
       <span title={timing} className="min-w-0 truncate font-mono text-[11px] text-muted-foreground">{timing}</span>

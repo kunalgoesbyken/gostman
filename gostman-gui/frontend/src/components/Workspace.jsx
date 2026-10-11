@@ -195,6 +195,7 @@ function LoadedWorkspace({ backend, onBack }) {
                 response={activeTab.response}
                 extraction={activeTab.extraction}
                 schema={activeTab.schema}
+                grpcSchema={activeTab.grpcSchema}
                 actions={actions}
                 EditorComponent={MonacoEditor}
               />

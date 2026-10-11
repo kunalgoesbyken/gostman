@@ -1,6 +1,6 @@
 import { normalizeRequest } from './request'
 
-const TEXT_FIELDS = ['name', 'method', 'url', 'body', 'bodyType', 'folderId', 'graphqlQuery', 'graphqlVariables', 'extractors']
+const TEXT_FIELDS = ['name', 'method', 'url', 'body', 'bodyType', 'folderId', 'graphqlQuery', 'graphqlVariables', 'extractors', 'grpcMethod', 'grpcMessage', 'grpcProtos']
 const PAIR_FIELDS = ['headers', 'queryParams']
 const EMPTY_PAIRS = ['', '{}', '[]']
 

@@ -1,4 +1,4 @@
-export const HTTP_METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "GRAPHQL"]
+export const HTTP_METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "GRAPHQL", "GRPC"]
 
 export const METHOD_COLORS = {
     GET: "text-success",
@@ -9,6 +9,7 @@ export const METHOD_COLORS = {
     PATCH: "text-warning",
     DELETE: "text-destructive",
     GRAPHQL: "text-primary",
+    GRPC: "text-info",
 }
 
 export const METHOD_CHIPS = {
@@ -20,4 +21,5 @@ export const METHOD_CHIPS = {
     PATCH: "text-warning bg-warning/10",
     DELETE: "text-destructive bg-destructive/10",
     GRAPHQL: "text-primary bg-primary/10",
+    GRPC: "text-info bg-info/10",
 }

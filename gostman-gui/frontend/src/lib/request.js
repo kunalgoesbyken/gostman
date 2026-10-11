@@ -20,6 +20,9 @@ const DEFAULT_REQUEST = {
   auth: DEFAULT_AUTH,
   options: DEFAULT_OPTIONS,
   extractors: '',
+  grpcMethod: '',
+  grpcMessage: '',
+  grpcProtos: '',
   timestamp: '',
 }
 
