@@ -20,6 +20,10 @@ func parseServing(arguments []string) (agent.Settings, error) {
 	flags.StringVar(&settings.Environment, "env", "", "")
 	variableFlags(flags, settings.Variables)
 	flags.BoolVar(&settings.Policy.BlockPrivate, "block-private", false, "")
+	flags.Func("allow-host", "", func(host string) error {
+		settings.AllowedHosts = append(settings.AllowedHosts, host)
+		return nil
+	})
 	if err := flags.Parse(arguments); err != nil {
 		return settings, err
 	}

@@ -8,7 +8,10 @@ import (
 	"time"
 )
 
-var errBlockedAddress = errors.New("address is not reachable from the hosted proxy")
+var (
+	errBlockedAddress   = errors.New("address is not reachable from the hosted proxy")
+	errHostNotPermitted = errors.New("this host is not on the list of hosts that may be called")
+)
 
 var blockedNetworks = mustParseCIDRs(
 	"0.0.0.0/8",
@@ -62,14 +65,24 @@ func isBlockedIP(ip net.IP) bool {
 }
 
 func DialContext(policy Policy) func(ctx context.Context, network, address string) (net.Conn, error) {
+	dial := dialer.DialContext
 	if policy.BlockPrivate {
-		return guardedDial
+		dial = guardedDial
 	}
-	return dialer.DialContext
+	return func(ctx context.Context, network, address string) (net.Conn, error) {
+		host, _, err := net.SplitHostPort(address)
+		if err != nil {
+			return nil, err
+		}
+		if err := policy.refusal(host); err != nil {
+			return nil, err
+		}
+		return dial(ctx, network, address)
+	}
 }
 
 func IsBlockedAddress(err error) bool {
-	return errors.Is(err, errBlockedAddress)
+	return errors.Is(err, errBlockedAddress) || errors.Is(err, errHostNotPermitted)
 }
 
 func guardedDial(ctx context.Context, network, address string) (net.Conn, error) {

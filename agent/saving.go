@@ -258,6 +258,7 @@ func (d *Desk) saveRequest(_ context.Context, current scene, arguments saveArgum
 	if err := d.place(current, &change, arguments.Folder); err != nil {
 		return saved{}, err
 	}
+	d.reach.remember(change.request.Id)
 	if err := d.files.SaveRequests([]workspace.Request{change.request}); err != nil {
 		return saved{}, err
 	}

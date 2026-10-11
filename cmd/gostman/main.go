@@ -18,6 +18,7 @@ const (
   gostman send [flags] <request>
   gostman send [flags] <METHOD> <url>
   gostman mcp [flags]
+  gostman mock [workspace folder] [flags]
   gostman init [folder]
   gostman version
 
@@ -61,7 +62,19 @@ mcp
 
   --workspace <folder>  workspace folder (default: the current folder)
   --env, --var, --var-from-env   as for run
+  --allow-host <host>   let the agent call this host as well (repeatable; * for
+                        any). Without it the agent reaches only localhost and
+                        the hosts the workspace's own requests already use
   --block-private       refuse requests to private and loopback addresses
+
+mock
+  Serve the saved examples of a workspace on 127.0.0.1, one route per request,
+  and print each request as it arrives.
+
+  --env <name>          environment used to resolve {{variables}} in URLs
+  --port <number>       port to listen on (default 4010)
+  --delay <ms>          wait before every answer
+  --cors                allow browser requests from localhost origins
 
 init
   Create an empty workspace in the folder (default: the current folder) and
@@ -96,6 +109,8 @@ func dispatch(arguments []string, stdout, stderr *os.File) int {
 		return sendCommand(arguments[1:], stdout, stderr)
 	case "mcp":
 		return mcpCommand(arguments[1:], stdout, stderr)
+	case "mock":
+		return mockCommand(arguments[1:], stdout, stderr)
 	case "init":
 		return initCommand(arguments[1:], stdout, stderr)
 	case "version", "--version":

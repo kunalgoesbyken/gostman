@@ -16,10 +16,11 @@ import (
 )
 
 type Settings struct {
-	Root        string
-	Environment string
-	Variables   map[string]string
-	Policy      engine.Policy
+	Root         string
+	Environment  string
+	Variables    map[string]string
+	Policy       engine.Policy
+	AllowedHosts []string
 }
 
 type Desk struct {
@@ -28,6 +29,7 @@ type Desk struct {
 	client  *Client
 	startup map[string]string
 	mocking mocking
+	reach   *destinations
 }
 
 type scene struct {
@@ -51,11 +53,15 @@ func Open(settings Settings) (*Desk, error) {
 	if err != nil {
 		return nil, err
 	}
-	client, err := NewClient(settings.Policy)
+	reach := newDestinations(settings.AllowedHosts)
+	reach.learn(files.Collection(), settings.Variables)
+	policy := settings.Policy
+	policy.Permit = reach.permit
+	client, err := NewClient(policy)
 	if err != nil {
 		return nil, err
 	}
-	desk := &Desk{files: files, client: client, startup: settings.Variables}
+	desk := &Desk{files: files, client: client, startup: settings.Variables, reach: reach}
 	stored, err := runner.FromWorkspace(files.Collection())
 	if err != nil {
 		return nil, err
@@ -74,6 +80,7 @@ func (d *Desk) refresh() (scene, error) {
 		return scene{}, err
 	}
 	files := d.files.Collection()
+	d.reach.learn(files, d.startup)
 	stored, err := runner.FromWorkspace(files)
 	if err != nil {
 		return scene{}, err

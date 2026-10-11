@@ -189,9 +189,13 @@ type route struct {
 	network      *Network
 	blockPrivate bool
 	insecureTLS  bool
+	refusal      func(host string) error
 }
 
 func (r route) RoundTrip(request *http.Request) (*http.Response, error) {
+	if err := r.refusal(request.URL.Hostname()); err != nil {
+		return nil, err
+	}
 	key := transportKey{r.blockPrivate, r.insecureTLS, r.network.certificateFor(request.URL.Hostname())}
 	return r.network.transport(key).RoundTrip(request)
 }
@@ -201,5 +205,5 @@ func (p Policy) route(insecureTLS bool) route {
 	if network == nil {
 		network = defaultNetwork
 	}
-	return route{network, p.BlockPrivate, insecureTLS}
+	return route{network, p.BlockPrivate, insecureTLS, p.refusal}
 }

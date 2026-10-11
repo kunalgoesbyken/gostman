@@ -61,7 +61,7 @@ func (m *mocking) report() mockReport {
 	return mockReport{Running: true, Address: m.server.Address(), Routes: m.server.Routes(), RecentRequests: m.served()}
 }
 
-func mockSources(files workspace.Collection) []mock.Source {
+func MockSources(files workspace.Collection) []mock.Source {
 	sources := make([]mock.Source, 0, len(files.Requests))
 	for _, request := range files.Requests {
 		sources = append(sources, mock.Source{
@@ -93,7 +93,7 @@ func (d *Desk) startMock(_ context.Context, current scene, arguments mockArgumen
 		settings.Port = mock.DefaultPort
 	}
 	d.mocking.recent = nil
-	server, err := mock.Start(mockSources(current.files), variables, settings, d.mocking.record)
+	server, err := mock.Start(MockSources(current.files), variables, settings, d.mocking.record)
 	if err != nil {
 		return mockReport{}, err
 	}
@@ -116,7 +116,7 @@ func (d *Desk) mockStatus(_ context.Context, current scene, _ noArguments) (mock
 	if err != nil {
 		return mockReport{}, err
 	}
-	if _, err := d.mocking.server.Update(mockSources(current.files), variables); err != nil {
+	if _, err := d.mocking.server.Update(MockSources(current.files), variables); err != nil {
 		return mockReport{}, err
 	}
 	return d.mocking.report(), nil

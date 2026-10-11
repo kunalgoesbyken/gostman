@@ -26,6 +26,14 @@ type Policy struct {
 	MaxResponseBytes int64
 	MaxTimeout       time.Duration
 	Network          *Network
+	Permit           func(host string) bool
+}
+
+func (p Policy) refusal(host string) error {
+	if p.Permit == nil || p.Permit(host) {
+		return nil
+	}
+	return fmt.Errorf("%w: %s", errHostNotPermitted, host)
 }
 
 func Send(ctx context.Context, r Request, policy Policy) Response {
@@ -132,7 +140,7 @@ func Failure(kind, message string) Response {
 
 func classify(ctx context.Context, err error) Response {
 	switch {
-	case errors.Is(err, errBlockedAddress):
+	case errors.Is(err, errBlockedAddress), errors.Is(err, errHostNotPermitted):
 		return Failure(ErrorBlocked, err.Error())
 	case errors.Is(ctx.Err(), context.DeadlineExceeded):
 		return Failure(ErrorTimeout, "the request timed out")
