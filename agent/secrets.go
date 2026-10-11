@@ -84,7 +84,7 @@ func (c *Client) learnResolved(label, value string) {
 	if hasPlaceholder(value) {
 		return
 	}
-	c.guard.Learn(label, value)
+	c.guard.LearnSecret(label, value)
 }
 
 func (c *Client) learnEnvironment(environment runner.Environment) {

@@ -43,17 +43,25 @@ func Marker(label string) string {
 }
 
 func (r *Redactor) Learn(label, value string) {
-	value = strings.TrimSpace(value)
-	if !IsMeaningful(value) {
-		return
+	if IsMeaningful(value) {
+		r.remember(label, strings.TrimSpace(value), minimumLength)
 	}
+}
+
+func (r *Redactor) LearnSecret(label, value string) {
+	if isSecret(value) {
+		r.remember(label, strings.TrimSpace(value), secretLength)
+	}
+}
+
+func (r *Redactor) remember(label, value string, shortest int) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if r.known[value] {
 		return
 	}
 	r.known[value] = true
-	for _, variant := range variants(value) {
+	for _, variant := range variants(value, shortest) {
 		r.forms = append(r.forms, form{text: variant, label: label})
 		r.margin = max(r.margin, len(variant))
 	}

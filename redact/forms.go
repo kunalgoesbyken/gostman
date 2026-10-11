@@ -11,6 +11,7 @@ import (
 const (
 	minimumLength   = 6
 	minimumDistinct = 4
+	secretLength    = 3
 	bitsPerByte     = 8
 	bitsPerSymbol   = 6
 	alignments      = 3
@@ -91,7 +92,12 @@ func base64Encoded(value string) []string {
 	return forms
 }
 
-func variants(value string) []string {
+func isSecret(value string) bool {
+	trimmed := strings.TrimSpace(value)
+	return len(trimmed) >= secretLength && !literals[strings.ToLower(trimmed)]
+}
+
+func variants(value string, shortest int) []string {
 	candidates := []string{value}
 	candidates = append(candidates, percentEncoded(value)...)
 	candidates = append(candidates, jsonEscaped(value)...)
@@ -99,7 +105,7 @@ func variants(value string) []string {
 	seen := map[string]bool{}
 	var kept []string
 	for _, candidate := range candidates {
-		if len(candidate) < minimumLength || seen[candidate] {
+		if len(candidate) < shortest || seen[candidate] {
 			continue
 		}
 		seen[candidate] = true

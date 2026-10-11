@@ -116,7 +116,7 @@ The agent gets these tools: `list_requests`, `get_request`, `send_request`, `run
 
 What this gives you over a shell command:
 
-- **Secrets stay out of the conversation.** Requests reference `{{name}}`; values are filled in inside Gostman and replaced with their names in everything returned, including URL-encoded, base64 and JSON-escaped echoes. Values shorter than six characters are not treated as secrets. This guards against accidental exposure; it is not a barrier against a value the server returns in a transformed form.
+- **Secrets stay out of the conversation.** Requests reference `{{name}}`; values are filled in inside Gostman and replaced with their names in everything returned, including URL-encoded, base64 and JSON-escaped echoes. Variable values shorter than six characters are not treated as secrets; passwords, tokens and keys in a request's auth settings are, from three characters. This guards against accidental exposure; it is not a barrier against a value the server returns in a transformed form.
 - **The agent can only call hosts your collection already uses**, plus localhost. Add more with `--allow-host api.example.com`, or `--allow-host '*'` for any. Requests an agent saves never widen this list.
 - **State carries across calls.** Cookies, OAuth 2.0 tokens and variables last for the session.
 - **Small answers.** Bodies are capped at 8 KB by default and can be narrowed with a JSONPath.
