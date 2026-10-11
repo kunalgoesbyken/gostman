@@ -58,24 +58,37 @@ func describe(ctx context.Context, target Target, policy engine.Policy) (Catalog
 }
 
 const (
-	maxToolPages = 100
-	maxTools     = 2000
+	maxToolPages    = 100
+	maxTools        = 2000
+	maxCatalogBytes = 8 << 20
 )
+
+func tooManyTools() error {
+	return protocolError("the server lists more tools than can be loaded (at most %d, %d MB in total)", maxTools, maxCatalogBytes>>20)
+}
 
 func (s *session) tools(ctx context.Context) ([]Tool, error) {
 	tools := []Tool{}
 	cursor := ""
+	loaded := 0
 	for page := 0; ; page++ {
-		if page == maxToolPages || len(tools) > maxTools {
-			return nil, protocolError("the server lists more tools than can be loaded (%d)", maxTools)
+		if page == maxToolPages {
+			return nil, tooManyTools()
 		}
 		received, err := s.request(ctx, mcp.MethodListTools, listParams{Cursor: cursor})
 		if err != nil {
 			return nil, err
 		}
+		loaded += len(received.result)
+		if loaded > maxCatalogBytes {
+			return nil, tooManyTools()
+		}
 		var listing listPage
 		if err := json.Unmarshal(received.result, &listing); err != nil {
 			return nil, protocolError("the tool list cannot be read: %v", err)
+		}
+		if len(tools)+len(listing.Tools) > maxTools {
+			return nil, tooManyTools()
 		}
 		for _, listed := range listing.Tools {
 			tools = append(tools, describeTool(listed))
