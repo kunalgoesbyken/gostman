@@ -15,10 +15,14 @@ export function AppHeader({ storage, onImport, onReset, onOpenCommands, onOpenCo
     <header className="flex h-12 shrink-0 items-center gap-3 border-b border-border px-3">
       {onBack && <IconButton label="Back to the landing page" icon={ArrowLeft} size="icon" onClick={onBack} />}
 
-      <div className="flex shrink-0 items-center gap-2">
-        <img src={logo} alt="" className="h-6 w-6 rounded" />
-        <h1 className="font-brand text-sm font-semibold">Gostman</h1>
-      </div>
+      {onBack ? (
+        <div className="flex shrink-0 items-center gap-2">
+          <img src={logo} alt="" className="h-6 w-6 rounded" />
+          <h1 className="font-brand text-sm font-semibold">Gostman</h1>
+        </div>
+      ) : (
+        <h1 className="sr-only">Gostman</h1>
+      )}
 
       <StorageMenu storage={storage} />
 

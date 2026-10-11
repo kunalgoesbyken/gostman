@@ -14,7 +14,7 @@ const serverLabel = ({ server, protocolVersion }) => (
   [server.name, server.version, protocolVersion && `MCP ${protocolVersion}`].filter(Boolean).join(" ")
 )
 
-function ToolOptions({ tools, tool, isListed }) {
+function toolOptions({ tools, tool, isListed }) {
   return (
     <>
       <option value="">Choose a tool</option>
@@ -41,7 +41,7 @@ function ToolField({ tools, tool, isListed, onChange }) {
   }
   return (
     <Select value={tool} onChange={(event) => onChange(event.target.value)} aria-label="MCP tool" className="font-mono">
-      <ToolOptions tools={tools} tool={tool} isListed={isListed} />
+      {toolOptions({ tools, tool, isListed })}
     </Select>
   )
 }

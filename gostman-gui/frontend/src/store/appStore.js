@@ -107,6 +107,24 @@ const isSameCall = (first, second) => HISTORY_IDENTITY_FIELDS.every((field) => f
 
 let reportStorageFailure = () => {}
 
+const WRITE_DELAY_MS = 400
+const pendingWrites = new Map()
+let writeTimer = 0
+
+function flushWrites() {
+  clearTimeout(writeTimer)
+  for (const [name, value] of pendingWrites) {
+    try {
+      localStorage.setItem(name, value)
+    } catch (error) {
+      reportStorageFailure(error.message)
+    }
+  }
+  pendingWrites.clear()
+}
+
+window.addEventListener('pagehide', flushWrites)
+
 const guardedStorage = createJSONStorage(() => ({
   getItem: (name) => {
     try {
@@ -116,13 +134,12 @@ const guardedStorage = createJSONStorage(() => ({
     }
   },
   setItem: (name, value) => {
-    try {
-      localStorage.setItem(name, value)
-    } catch (error) {
-      reportStorageFailure(error.message)
-    }
+    pendingWrites.set(name, value)
+    clearTimeout(writeTimer)
+    writeTimer = setTimeout(flushWrites, WRITE_DELAY_MS)
   },
   removeItem: (name) => {
+    pendingWrites.delete(name)
     try {
       localStorage.removeItem(name)
     } catch (error) {

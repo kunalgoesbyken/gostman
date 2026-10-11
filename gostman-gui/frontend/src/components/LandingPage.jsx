@@ -7,7 +7,8 @@ import { easeSmooth, fadeIn, popIn } from "../lib/motion"
 import { ArrowRight, Check, Github, Globe } from "lucide-react"
 
 import logo from "../assets/logo.jpg"
-import oauthShot from "../assets/landing/oauth.png"
+import captureShot from "../assets/landing/capture.png"
+import docsShot from "../assets/landing/docs.png"
 import mockShot from "../assets/landing/mock.png"
 import testsShot from "../assets/landing/tests.png"
 
@@ -69,15 +70,26 @@ const SPOTLIGHTS = [
     alt: "The mock server dialog with a served route and a live request log",
   },
   {
-    title: "Sign-in flows without the copy and paste",
-    description: "OAuth 2.0 with client credentials, password or authorization code with PKCE. Tokens are requested and renewed when a request needs them, and cookies carry over between requests the way they do in a browser.",
+    title: "Turn real traffic into a collection",
+    description: "Point your app at a local address and Gostman forwards every call to your API while listing each one live. Save any of them as a request, with its response kept as an example. There is no certificate to install.",
     points: [
-      "Basic, bearer, API key and OAuth 2.0",
-      "A cookie jar you can inspect and clear",
-      "Proxy, CA and client certificates in the desktop app",
+      "Works for any app whose API base URL you can change",
+      "Authorization and cookie headers are never saved",
+      "In the desktop app and as gostman capture",
     ],
-    image: oauthShot,
-    alt: "The Auth tab set to OAuth 2.0 with the token applied to the response below",
+    image: captureShot,
+    alt: "The capture dialog listing five forwarded calls with the response of one shown below",
+  },
+  {
+    title: "Share it or publish it without an account",
+    description: "Send a folder as an encrypted link or file that is built in your own window and never uploaded, or turn the collection into a single documentation page you can host anywhere.",
+    points: [
+      "Variable values and saved responses stay out unless you include them",
+      "The recipient sees what is inside before importing",
+      "One self-contained HTML file, from the app or gostman docs",
+    ],
+    image: docsShot,
+    alt: "A generated documentation page with a sidebar of requests and the details of one",
   },
   {
     title: "Hand the same collection to your coding agent",
@@ -94,11 +106,11 @@ const SPOTLIGHTS = [
 const CAPABILITIES = [
   {
     title: "Protocols",
-    items: ["REST with any method", "GraphQL with a schema browser", "gRPC through reflection or .proto files", "WebSocket with a live message log"],
+    items: ["REST with any method", "GraphQL with a schema browser", "gRPC through reflection or .proto files", "WebSocket with a live message log", "MCP servers over Streamable HTTP"],
   },
   {
     title: "Requests",
-    items: ["JSON, XML, form, multipart and file bodies", "Environments and {{variables}} everywhere", "Paste a curl command to turn it into a request", "Timeouts, redirects and TLS settings per request"],
+    items: ["JSON, XML, form, multipart and file bodies", "Basic, bearer, API key and OAuth 2.0 with renewal", "Environments and {{variables}} everywhere", "A cookie jar, proxy and client certificates", "Paste a curl command to turn it into a request"],
   },
   {
     title: "Responses",

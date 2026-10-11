@@ -4,6 +4,7 @@ import { easeSmooth, springLayout } from "../../lib/motion"
 import { cn } from "../../lib/utils"
 import graphqlShot from "../../assets/landing/graphql.png"
 import grpcShot from "../../assets/landing/grpc.png"
+import mcpShot from "../../assets/landing/mcp.png"
 import restShot from "../../assets/landing/rest.png"
 import websocketShot from "../../assets/landing/websocket.png"
 
@@ -28,6 +29,13 @@ const VIEWS = [
     description: "Load services through reflection or .proto files, pick a method and send the message as JSON.",
     image: grpcShot,
     alt: "A gRPC method call with a JSON message and the reply",
+  },
+  {
+    id: "mcp",
+    label: "MCP",
+    description: "Point a request at an MCP server, load its tools, call one with JSON arguments and check the result.",
+    image: mcpShot,
+    alt: "An MCP tool call with JSON arguments and the tool result",
   },
   {
     id: "websocket",

@@ -22,7 +22,8 @@ Gostman is a native desktop application built with Go and [Wails](https://wails.
 
 **Requests**
 
-- REST with any method, GraphQL, gRPC and WebSocket
+- REST with any method, GraphQL, gRPC, WebSocket and MCP servers
+- MCP servers over Streamable HTTP: load the tools, call one with JSON arguments, assert on the result
 - gRPC services loaded through server reflection or from `.proto` files, for unary and streaming methods
 - Query parameters and headers as rows you can switch on and off
 - Bodies: JSON, text, XML, form URL-encoded, multipart with file uploads, or a single file
@@ -48,6 +49,8 @@ Gostman is a native desktop application built with Go and [Wails](https://wails.
 - Collections as plain YAML files in a folder, ready for Git (desktop)
 - Saved response examples and a local mock server that serves them (desktop)
 - A `gostman` command line for CI, and an MCP server so coding agents can use the same collection
+- Traffic capture through a local forwarding address, saved as requests and examples (desktop and CLI)
+- Encrypted share links and files that are never uploaded, and a generated HTML documentation page
 - GraphQL schema introspection, query formatting and validation
 - Code generation for curl, JavaScript, Python, Go, PHP and Java
 - Import from Postman v2.1 and OpenAPI; export to Postman, OpenAPI, Markdown or a Gostman backup
@@ -90,11 +93,15 @@ Each release includes `gostman-cli-<os>-<arch>` archives with a single `gostman`
 gostman run orders-api --env CI --var-from-env API_TOKEN --reporter junit --output report.xml
 gostman send --workspace orders-api "Create user" --select '$.id'
 gostman mock orders-api --port 4010
+gostman capture --upstream https://api.example.com --workspace orders-api
+gostman docs orders-api --output docs.html
 ```
 
 - `run` takes a workspace folder or a Gostman export and sends every request in order with its scripts, extraction rules, cookies, OAuth 2.0 tokens and checks. It exits 0 when everything passed, 1 when a request or a check failed and 2 when the command or input is wrong. A 4xx or 5xx status alone is not a failure; add a check such as `res.status equals 200`.
 - `send` sends one saved request, or an ad hoc one (`gostman send GET https://example.com -H 'Accept: application/json'`), and prints a short JSON summary followed by the body.
 - `mock` serves the saved examples of a workspace on `127.0.0.1`.
+- `capture` forwards everything sent to `127.0.0.1:4020` on to one API, prints each call, and with `--workspace` saves each new method and path as a request with its response as an example.
+- `docs` writes the collection as one self-contained HTML page.
 - `--var name=value` sets a variable and `--var-from-env NAME` reads it from the environment, so secrets stay out of the files. `--redact` replaces variable values and credentials in a report with `{{name}}`.
 - Reports: `--reporter text|json|junit`. Colour is off when `NO_COLOR` is set or the output is not a terminal.
 - On macOS the binary is not notarized: run `xattr -d com.apple.quarantine gostman` once.
@@ -140,6 +147,25 @@ Save any response as a named example from the response panel (up to 20 per reque
 - `{{base_url}}/users/42` is served at `/users/42`; a literal base path such as `/v1` is kept. Segments written `:id`, or holding an unresolved variable, match anything.
 - GraphQL, gRPC and WebSocket requests, and requests without an example, are not served.
 - Examples travel with exports and workspace folders, so they can contain whatever the response body held.
+
+## Capture (desktop and CLI)
+
+Start a capture with the address of your API, then point your app at `http://127.0.0.1:4020`. Gostman forwards each call, lists it, and lets you save any of them as a request with its response as an example.
+
+- It is a forwarding address for one API, not an intercepting proxy: there is no certificate to install, and an app whose base URL cannot be changed is not captured.
+- `Authorization`, `Cookie` and `Proxy-Authorization` request headers are never saved. Bodies are saved as captured, so check them for tokens before sharing.
+- Only requests from localhost pages are forwarded. On an Android emulator use `adb reverse tcp:4020 tcp:4020`.
+
+## Sharing and documentation
+
+The **Share** tab of the import dialog encrypts a folder or the whole collection in your window (AES-256-GCM) and gives you a link, or an encrypted file plus a key. Nothing is uploaded: the key sits after the `#` in the link, which browsers do not send to servers.
+
+- Anyone holding the whole link can open it. Use a passphrase, or the file with the key sent separately, for anything sensitive.
+- Variable values and saved responses are left out unless you tick them. OAuth tokens, cookies and history are never included.
+- The recipient sees what is inside before importing, and their own variable values are kept.
+- A link carries up to 32 KB; larger selections go as a file.
+
+**Export → HTML docs** (or `gostman docs`) writes one self-contained documentation page: every request with its description, parameters, headers, body, a curl example and saved examples. Values in auth settings, credential headers and parameters with names such as `token` or `key` are shown as `<redacted>`; other literal secrets in bodies are not detected, so review the page before publishing.
 
 ## Variables
 
@@ -210,6 +236,8 @@ cd gostman-gui/frontend && npm run build && npm run build:web
 | `runner/` | The send pipeline in Go for the command line, running the app's script code in an embedded JavaScript engine. |
 | `mock/` | The mock server. |
 | `agent/`, `mcp/`, `redact/` | The MCP server, its tools and the redaction of secrets. |
+| `mcpclient/` | The MCP client used to test MCP servers. |
+| `capture/`, `loopback/` | The forwarding capture and the localhost-only listener it shares with the mock server. |
 | `cmd/gostman/` | The `gostman` command line. |
 | `gostman-gui/` | Wails desktop application: `app.go` (bindings and storage), `websocket.go`, packaging assets in `build/`. |
 | `gostman-gui/frontend/` | React interface used by both targets. `src/App.jsx` is the desktop entry, `src/WebApp.jsx` the web entry. |

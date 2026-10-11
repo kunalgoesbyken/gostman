@@ -15,6 +15,8 @@ const BUTTON_CLASS = "min-w-0 max-w-[14rem] shrink"
 
 const messageOf = (error) => error?.message || String(error)
 
+const keepMenuOpenState = (event) => event.stopPropagation()
+
 function menuItems(status, storage, isRestricted) {
   const hasFolder = status.path !== ""
   const recent = status.recent.map(({ path, name }) => ({
@@ -74,9 +76,9 @@ function FolderStorage({ storage }) {
   const items = useMemo(() => menuItems(status, storage, isRestricted), [status, storage, isRestricted])
   const closeMenu = useCallback(() => setMenuPosition(null), [])
 
-  const openMenuBelowButton = (event) => {
+  const toggleMenuBelowButton = (event) => {
     const { left, bottom } = event.currentTarget.getBoundingClientRect()
-    setMenuPosition({ x: left, y: bottom })
+    setMenuPosition(menuPosition ? null : { x: left, y: bottom })
   }
 
   const hasFolder = status.path !== ""
@@ -89,7 +91,8 @@ function FolderStorage({ storage }) {
         aria-haspopup="menu"
         aria-expanded={menuPosition !== null}
         title={isRestricted ? RESTRICTED_HINT : status.path || LOCAL_HINT}
-        onClick={openMenuBelowButton}
+        onMouseDown={keepMenuOpenState}
+        onClick={toggleMenuBelowButton}
         className={BUTTON_CLASS}
       >
         <Icon />

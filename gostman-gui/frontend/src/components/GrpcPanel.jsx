@@ -46,7 +46,7 @@ function ProtoFilePicker({ files, onChange, onError }) {
   )
 }
 
-function MethodOptions({ services, method, isListed }) {
+function methodOptions({ services, method, isListed }) {
   return (
     <>
       <option value="">Choose a method</option>
@@ -77,7 +77,7 @@ function MethodField({ services, method, isListed, onChange }) {
   }
   return (
     <Select value={method} onChange={(event) => onChange(event.target.value)} aria-label="gRPC method" className="font-mono">
-      <MethodOptions services={services} method={method} isListed={isListed} />
+      {methodOptions({ services, method, isListed })}
     </Select>
   )
 }

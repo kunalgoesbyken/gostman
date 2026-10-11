@@ -36,7 +36,7 @@ const HEADER_MASKS = {
 
 const SENSITIVE_WORDS = ['auth', 'cookie', 'credential', 'key', 'passw', 'secret', 'session', 'signature', 'token']
 
-export const isSensitiveName = (name) => {
+const isSensitiveName = (name) => {
   const lowered = name.toLowerCase()
   return SENSITIVE_WORDS.some((word) => lowered.includes(word))
 }

@@ -1,10 +1,10 @@
 import { base64ToBytes, bytesToBase64 } from './base64'
 
 export const MAX_LINK_FRAGMENT_LENGTH = 32 * 1024
-export const MAX_SHARED_BYTES = 10 * 1024 * 1024
+const MAX_SHARED_BYTES = 10 * 1024 * 1024
 export const MIN_PASSPHRASE_LENGTH = 8
 export const SHARE_FILE_EXTENSION = 'gostman-share'
-export const CREDENTIAL_KEY = 'key'
+const CREDENTIAL_KEY = 'key'
 export const CREDENTIAL_PASSPHRASE = 'passphrase'
 
 const VERSION_KEY = '1'

@@ -118,7 +118,7 @@ func (c *collector) summary() string {
 	if c.files == nil {
 		return fmt.Sprintf("Captured %d exchanges.", c.captured)
 	}
-	return fmt.Sprintf("Captured %d exchanges, saved %d new requests to %s.", c.captured, c.saved, c.files.Root())
+	return fmt.Sprintf("Captured %d exchanges, saved %d new requests to %s. Bodies are saved as captured: check them for tokens before sharing.", c.captured, c.saved, c.files.Root())
 }
 
 func serveCapture(settings capture.Settings, collecting *collector, stdout io.Writer) error {

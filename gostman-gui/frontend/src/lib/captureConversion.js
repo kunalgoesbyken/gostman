@@ -110,6 +110,8 @@ function withoutRepeats(exchanges) {
   })
 }
 
+const BODY_NOTE = 'Bodies are saved as they were captured. Check them for tokens or personal data before sharing the collection.'
+
 function describe({ unsavable, duplicates, drafts }) {
   const withheld = unique(drafts.flatMap((draft) => draft.withheld))
   const incomplete = drafts.filter((draft) => draft.isIncomplete).length
@@ -120,6 +122,7 @@ function describe({ unsavable, duplicates, drafts }) {
     unsavable > 0 && `Skipped ${pluralize(unsavable, 'exchange')} that failed or switched to a WebSocket.`,
     withoutExample > 0 && `Kept no example for ${pluralize(withoutExample, 'response')} that arrived incomplete.`,
     incomplete > 0 && `${pluralize(incomplete, 'request')} had a body larger than 2 MB, which is saved incomplete.`,
+    drafts.length > 0 && BODY_NOTE,
   ].filter(Boolean)
 }
 
