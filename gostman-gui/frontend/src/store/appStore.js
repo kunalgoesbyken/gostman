@@ -173,7 +173,7 @@ export const useAppStore = create(
             isRestricted: Boolean(data.restricted),
             requests,
             folders,
-            tabs: withSavedExamples(reconcileTabs(state.tabs, state.requests, requests, folders), requests),
+            tabs: withSavedExamples(reconcileTabs(state.tabs, state.requests, requests, folders, state.isRestricted), requests),
             requestHistory: asArray(data.history).map(normalizeRequest),
             cookies: mergeCookies(asArray(data.cookies), []),
             settings: normalizeSettings(data.settings),

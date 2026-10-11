@@ -2,6 +2,7 @@ import { dereference, validate } from '@scalar/openapi-parser'
 import YAML from 'js-yaml'
 import { BODY_BINARY, BODY_FORM, BODY_JSON, BODY_MULTIPART, BODY_NONE, BODY_TEXT, BODY_TYPES, BODY_XML } from './body'
 import { buildCollectionTree, folderDepth, foldersIn, listFolders, MAX_FOLDER_DEPTH, requestsIn, ROOT_ID } from './collectionTree'
+import { SCRIPT_FIELDS, hasActiveContent, withoutActiveContent } from './activeContent'
 import { isPlainObject, lookup, parseJSON, pluralize } from './dataUtils'
 import { sanitizeExamples } from './examples'
 import { readParamRows } from './queryString'
@@ -186,20 +187,9 @@ function readPostmanBody(body) {
   return read ? read(body) : {}
 }
 
-const hasScript = (request) => SCRIPT_FIELDS.some((field) => request[field].trim() !== '')
+export const countActiveRequests = (data) => data.requests.filter(hasActiveContent).length
 
-const isActive = (request) => hasScript(request) || request.auth.type === AUTH_OAUTH2
-
-const withoutScripts = (request) => ({ ...request, ...Object.fromEntries(SCRIPT_FIELDS.map((field) => [field, ''])) })
-
-const passive = (request) => normalizeRequest({
-  ...withoutScripts(request),
-  auth: request.auth.type === AUTH_OAUTH2 ? NO_AUTH : request.auth,
-})
-
-export const countActiveRequests = (data) => data.requests.filter(isActive).length
-
-export const withoutActiveContent = (data) => ({ ...data, requests: data.requests.map(passive) })
+export const withoutActiveRequests = (data) => ({ ...data, requests: data.requests.map(withoutActiveContent) })
 
 const tlsWarning = (requestNames) => (
   `TLS verification was disabled in the collection for ${listNames(requestNames)}; it was kept enabled. Turn it off in the request's Settings tab if you trust these hosts.`
@@ -1398,7 +1388,6 @@ export async function parseImport(text) {
 
 const AUTH_TYPES = [AUTH_BASIC, AUTH_BEARER, AUTH_API_KEY, AUTH_OAUTH2]
 const OAUTH_TEXT_FIELDS = ['grant', 'authUrl', 'tokenUrl', 'clientId', 'clientSecret', 'scope', 'username', 'password', 'callbackUrl', 'credentialsIn', 'headerPrefix']
-const SCRIPT_FIELDS = ['preScript', 'postScript']
 const AUTH_TEXT_FIELDS = ['username', 'password', 'token', 'key', 'value']
 const REQUEST_TEXT_FIELDS = ['id', 'url', 'headers', 'body', 'queryParams', 'folderId', 'graphqlQuery', 'graphqlVariables', 'extractors', 'assertions', ...SCRIPT_FIELDS, 'grpcMethod', 'grpcMessage', 'grpcProtos']
 const BODY_TYPE_VALUES = BODY_TYPES.map((type) => type.value)

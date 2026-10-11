@@ -1,6 +1,6 @@
 import { textToBase64 } from './base64'
 import { generateAllSnippets } from './codeGenerator'
-import { countActiveRequests, sanitizeImport, withoutActiveContent } from './importExport'
+import { countActiveRequests, sanitizeImport, withoutActiveRequests } from './importExport'
 import { pluralize } from './dataUtils'
 import { createExampleActions } from './exampleActions'
 import { RESTRICTED, applyExtractors, createExecutor } from './execution'
@@ -229,7 +229,7 @@ export function createWorkspaceActions(backend) {
       'Import scripts and sign-in settings?',
       `${pluralize(activeCount, 'request')} ${ACTIVE_CONTENT_PROMPT}`,
       () => addImported(data),
-      () => addImported(withoutActiveContent(data)),
+      () => addImported(withoutActiveRequests(data)),
       'default',
       'Import them',
     )
