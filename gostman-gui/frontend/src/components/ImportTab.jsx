@@ -1,13 +1,15 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Upload } from "lucide-react"
 import { Button } from "./ui/button"
 import { Textarea } from "./ui/textarea"
+import { ShareOpener } from "./ShareOpener"
 import { formatSize, pluralize } from "../lib/dataUtils"
 import { MAX_FILE_SIZE, parseImport } from "../lib/importExport"
+import { SHARE_FILE_EXTENSION, findShareReference } from "../lib/share"
 import { cn } from "../lib/utils"
 
 const PARSE_DELAY_MS = 300
-const ACCEPTED_FILES = ".json,.yaml,.yml"
+const ACCEPTED_FILES = `.json,.yaml,.yml,.${SHARE_FILE_EXTENSION}`
 const READ_FAILURE = { success: false, error: "The file could not be read as text." }
 
 const tooLarge = (file) => ({
@@ -63,12 +65,13 @@ function ImportFailure({ error }) {
   )
 }
 
-export function ImportTab({ onImport, onClose }) {
+export function ImportTab({ onImport, onImportShared, onClose }) {
   const [text, setText] = useState("")
   const [fileFailure, setFileFailure] = useState(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const fileInputRef = useRef(null)
-  const { result, isParsing } = useParsedImport(text)
+  const sharedReference = useMemo(() => findShareReference(text), [text])
+  const { result, isParsing } = useParsedImport(sharedReference === null ? text : "")
   const shown = fileFailure || result
 
   const updateText = (next) => {
@@ -127,18 +130,29 @@ export function ImportTab({ onImport, onClose }) {
           Choose file
         </Button>
         <p className="min-w-0 flex-1 text-xs text-muted-foreground">
-          Drop a file here, or paste its contents below. Postman v2.1 collections, OpenAPI 3 specs (JSON or YAML) and Gostman exports up to {formatSize(MAX_FILE_SIZE)}.
+          Drop a file here, or paste its contents below. Postman v2.1 collections, OpenAPI 3 specs (JSON or YAML), Gostman exports and Gostman share links or files, up to {formatSize(MAX_FILE_SIZE)}.
         </p>
       </div>
 
       <Textarea
         value={text}
         onChange={(event) => updateText(event.target.value)}
-        placeholder="Paste a Postman collection, an OpenAPI spec or a Gostman export"
+        placeholder="Paste a Postman collection, an OpenAPI spec, a Gostman export or a share link"
         aria-label="Content to import"
         className="min-h-24 flex-1"
       />
 
+      {sharedReference !== null && (
+        <div className="shrink-0 rounded-md border border-border p-3">
+          <ShareOpener
+            key={sharedReference}
+            reference={sharedReference}
+            onImport={onImportShared}
+            onCancel={() => updateText("")}
+            onDone={onClose}
+          />
+        </div>
+      )}
       {isParsing && <p role="status" className="shrink-0 text-xs text-muted-foreground">Reading the content</p>}
       {!isParsing && shown && !shown.success && <ImportFailure error={shown.error} />}
       {!isParsing && shown?.success && <ImportSummary result={shown} onImport={confirmImport} />}

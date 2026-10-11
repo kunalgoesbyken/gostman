@@ -1,6 +1,6 @@
 import { memo, useCallback, useMemo, useState } from "react"
 import {
-  ChevronDown, ChevronRight, Copy, FileJson, Folder, FolderInput, FolderPlus, ListChecks, MoreHorizontal, Pencil, Plus, Search, Trash2,
+  ChevronDown, ChevronRight, Copy, FileJson, Folder, FolderInput, FolderPlus, ListChecks, MoreHorizontal, Pencil, Plus, Search, Share2, Trash2,
 } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
@@ -28,6 +28,7 @@ function folderMenuItems(folder, actions) {
     { id: "new-request", label: "New request", icon: Plus, onSelect: () => actions.newRequest(folder.id) },
     { id: "new-subfolder", label: "New subfolder", icon: FolderPlus, onSelect: () => actions.createFolder(folder.id) },
     { id: "run", label: "Run folder", icon: ListChecks, onSelect: () => actions.openRunner(folder.id) },
+    { id: "share", label: "Share folder", icon: Share2, onSelect: () => actions.shareFolder(folder.id) },
     { id: "rename", label: "Rename", icon: Pencil, onSelect: () => actions.renameFolder(folder) },
     { id: "delete", label: "Delete", icon: Trash2, destructive: true, onSelect: () => actions.deleteFolder(folder) },
   ]

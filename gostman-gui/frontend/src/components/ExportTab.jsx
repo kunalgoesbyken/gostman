@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react"
 import { Download } from "lucide-react"
 import { CopyTextButton } from "./CopyTextButton"
+import { DEFAULT_DOCS_OPTIONS, DocsOptions } from "./DocsOptions"
 import { Button } from "./ui/button"
 import { SegmentedControl } from "./ui/segmented"
 import { pluralize } from "../lib/dataUtils"
+import { buildDocs } from "../lib/docs"
 import {
   exportToGostman,
   exportToMarkdown,
@@ -59,6 +61,15 @@ const EXPORT_FORMATS = [
     mime: "text/markdown",
     build: ({ requests, folders }) => exportToMarkdown(requests, folders),
   },
+  {
+    value: "html",
+    label: "HTML docs",
+    description: "One self-contained page to publish or print. Credentials are left out and variables stay as {{name}}",
+    fileName: "api-docs.html",
+    mime: "text/html",
+    hasDocsOptions: true,
+    build: ({ requests, folders, docsOptions }) => buildDocs({ requests, folders }, docsOptions),
+  },
 ]
 
 function buildExport(format, data) {
@@ -71,11 +82,12 @@ function buildExport(format, data) {
 
 export function ExportTab({ requests, folders, environments, variables, onSaveFile }) {
   const [formatId, setFormatId] = useState(EXPORT_FORMATS[0].value)
+  const [docsOptions, setDocsOptions] = useState(DEFAULT_DOCS_OPTIONS)
 
   const format = EXPORT_FORMATS.find((candidate) => candidate.value === formatId)
   const { content, error } = useMemo(
-    () => buildExport(format, { requests, folders, environments, variables }),
-    [format, requests, folders, environments, variables]
+    () => buildExport(format, { requests, folders, environments, variables, docsOptions }),
+    [format, requests, folders, environments, variables, docsOptions]
   )
   const preview = content.length > PREVIEW_LIMIT ? `${content.slice(0, PREVIEW_LIMIT)}\n…` : content
 
@@ -87,7 +99,7 @@ export function ExportTab({ requests, folders, environments, variables, onSaveFi
           <CopyTextButton text={content} />
           <Button
             size="sm"
-            onClick={() => onSaveFile(`${FILE_BASE_NAME}.${format.extension}`, content, format.mime)}
+            onClick={() => onSaveFile(format.fileName || `${FILE_BASE_NAME}.${format.extension}`, content, format.mime)}
             disabled={!content}
           >
             <Download />
@@ -95,6 +107,8 @@ export function ExportTab({ requests, folders, environments, variables, onSaveFi
           </Button>
         </div>
       </div>
+
+      {format.hasDocsOptions && <DocsOptions options={docsOptions} onChange={setDocsOptions} />}
 
       <p className="shrink-0 text-xs text-muted-foreground">
         {format.description}. This workspace has {pluralize(requests.length, "request")}, {pluralize(folders.length, "folder")} and {pluralize(environments.length, "environment")}.

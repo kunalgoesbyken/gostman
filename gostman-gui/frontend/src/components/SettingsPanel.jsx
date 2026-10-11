@@ -2,13 +2,14 @@ import { Checkbox } from "./ui/checkbox"
 import { Field } from "./ui/field"
 import { Input } from "./ui/input"
 import { PanelBody } from "./ui/panel"
+import { Textarea } from "./ui/textarea"
 
 const DEFAULT_TIMEOUT_MS = 30000
 const CHECKBOX_CLASS = "h-7 justify-start self-start"
 
 const toTimeoutMs = (text) => Math.max(0, Math.trunc(Number(text)) || 0)
 
-export function SettingsPanel({ options, onChange }) {
+export function SettingsPanel({ options, description, onChange, onDescriptionChange }) {
   const update = (patch) => onChange({ ...options, ...patch })
 
   return (
@@ -39,6 +40,15 @@ export function SettingsPanel({ options, onChange }) {
         >
           Verify TLS certificates
         </Checkbox>
+        <Field label="Description">
+          <Textarea
+            value={description}
+            onChange={(event) => onDescriptionChange(event.target.value)}
+            placeholder="What this request does, shown in generated documentation"
+            rows={3}
+            className="font-sans"
+          />
+        </Field>
       </div>
     </PanelBody>
   )

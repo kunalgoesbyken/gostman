@@ -19,6 +19,7 @@ const (
   gostman send [flags] <METHOD> <url>
   gostman mcp [flags]
   gostman mock [workspace folder] [flags]
+  gostman docs <workspace folder | export.json> [flags]
   gostman init [folder]
   gostman version
 
@@ -76,6 +77,15 @@ mock
   --delay <ms>          wait before every answer
   --cors                allow browser requests from localhost origins
 
+docs
+  Write the collection as one self-contained HTML page: every request with its
+  parameters, headers, body, a curl example and its saved examples. Variables
+  stay as {{name}} and literal credentials are replaced with <redacted>.
+
+  --output <file>       write the page to this file (default: stdout)
+  --title <text>        page title (default: API documentation)
+  --no-examples         leave out the saved example responses
+
 init
   Create an empty workspace in the folder (default: the current folder) and
   print how to register the MCP server with a coding agent.
@@ -111,6 +121,8 @@ func dispatch(arguments []string, stdout, stderr *os.File) int {
 		return mcpCommand(arguments[1:], stdout, stderr)
 	case "mock":
 		return mockCommand(arguments[1:], stdout, stderr)
+	case "docs":
+		return docsCommand(arguments[1:], stdout, stderr)
 	case "init":
 		return initCommand(arguments[1:], stdout, stderr)
 	case "version", "--version":

@@ -27,6 +27,7 @@ import {
   TrustWorkspace,
   WorkspaceStatus,
 } from '../../../wailsjs/go/main/App'
+import { WEB_APP_URL } from '../constants'
 import { desktopMock } from './desktopMock'
 import { openDesktopSocket } from './desktopSocket'
 import { toGrpcCall, toGrpcTarget } from '../grpc'
@@ -101,6 +102,7 @@ export const desktopBackend = {
   fetchToken: (exchange) => FetchToken(exchange),
   reset: () => ResetData(),
   saveFile: (name, base64) => SaveFile(name, base64),
+  webAppUrl: WEB_APP_URL,
   openSocket: openDesktopSocket,
   unsentSocketHeaders: () => [],
 }

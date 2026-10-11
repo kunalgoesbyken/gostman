@@ -2,6 +2,7 @@ import { extractVariables, parseExtractors } from '../lib/chaining'
 import { buildCollectionTree, collectRequests, listFolders } from '../lib/collectionTree'
 
 export { mergeCookies } from '../lib/cookies'
+export { buildDocs } from '../lib/docs'
 export { toGrpcCall } from '../lib/grpc'
 export { normalizeRequest, toEngineRequest } from '../lib/request'
 export { countActiveAssertions } from '../lib/scripting/assertions'

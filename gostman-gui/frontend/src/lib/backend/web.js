@@ -213,6 +213,7 @@ export const webBackend = {
   fetchToken: (exchange) => postJSON(`${PROXY_URL}?oauth=token`, exchange),
   reset,
   saveFile,
+  webAppUrl: window.location.origin,
   openSocket: openBrowserSocket,
   unsentSocketHeaders: unsentBrowserHeaders,
 }
