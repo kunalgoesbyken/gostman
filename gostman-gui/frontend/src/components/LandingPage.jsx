@@ -8,10 +8,12 @@ import { ArrowRight, Braces, Check, Github, Globe, Link2, Network, Radio } from 
 
 import logo from "../assets/logo.jpg"
 import oauthShot from "../assets/landing/oauth.png"
-import runnerShot from "../assets/landing/runner.png"
+import mockShot from "../assets/landing/mock.png"
 import testsShot from "../assets/landing/tests.png"
 
 import { AnimatedSection, ScaleIn } from "./landing/AnimatedSection"
+import { AGENT_SESSION, CLI_RUN, REQUEST_FILE } from "./landing/captures"
+import { TerminalBlock } from "./landing/TerminalBlock"
 import { RestShowcase, GraphQLShowcase, ChainingShowcase, WebSocketShowcase } from "./landing/showcases"
 import { BackgroundCode } from "./landing/BackgroundCode"
 import { DownloadDropdown } from "./landing/DownloadDropdown"
@@ -25,26 +27,56 @@ const HIGHLIGHTS = ["No account", "Data stays on your machine", "Open source"]
 
 const SPOTLIGHTS = [
   {
+    title: "Built for your coding agent, not just for you",
+    description: "Claude Code, Codex and Cursor can call Gostman through MCP in place of curl. They use the collection you already have, and variable values and credentials are filled in inside Gostman and replaced with their names in everything the agent reads.",
+    points: [
+      "Cookies, tokens and variables carry across calls in a session",
+      "Responses are capped and can be narrowed to the fields that matter",
+      "Agents reach only the hosts your collection already uses, unless you allow more",
+    ],
+    capture: AGENT_SESSION,
+  },
+  {
     title: "Tests that run every time you press Send",
     description: "Add checks as plain rows, or write a script with test() and expect(). The results sit beside the response, so a broken contract shows up on the request that broke it.",
     points: [
       "Checks on status, headers, body and response time",
       "Pre-request and post-response scripts, run in a sandbox",
-      "Values pulled from a response into variables for the next request",
+      "A runner in the app for a whole folder at once",
     ],
     image: testsShot,
     alt: "A request with four assertion rows and a passing test list under the response",
   },
   {
-    title: "Run a whole folder and see exactly what failed",
-    description: "The runner sends every request in order with its scripts, variables and cookies, then lists each failure with the value that caused it.",
+    title: "The same checks in CI, from one binary",
+    description: "gostman run sends every request in a folder with its scripts, variables and cookies, prints what failed and why, and exits non-zero so the pipeline stops. There is no runtime to install.",
     points: [
-      "Pick any folder or run everything",
-      "Stop on the first failure, or add a delay between requests",
-      "The same checks you use while editing a single request",
+      "Text, JSON and JUnit reports",
+      "Secrets passed from the environment, never stored in the collection",
+      "Linux, macOS and Windows builds on every release",
     ],
-    image: runnerShot,
-    alt: "The runner showing four passing requests and one failed check with its actual value",
+    capture: CLI_RUN,
+  },
+  {
+    title: "A collection you can read in a pull request",
+    description: "Open a folder and every request becomes a small YAML file: one file per request, one directory per folder. Commit it next to the code it tests and review changes line by line.",
+    points: [
+      "Tokens, cookies and history never reach the folder",
+      "A cloned folder runs no scripts until you trust it",
+      "The app, the command line and your agent all read the same files",
+    ],
+    capture: REQUEST_FILE,
+  },
+  {
+    title: "A mock server from the responses you saved",
+    description: "Save any response as an example, then start a local server that answers each route with it. Build the frontend before the API exists, and watch every request it makes arrive in the log.",
+    points: [
+      "Pick which example each route returns while the server runs",
+      "Optional delay and CORS for browser clients",
+      "Also available as gostman mock and to agents over MCP",
+    ],
+    image: mockShot,
+    alt: "The mock server dialog with a served route and a live request log",
   },
   {
     title: "Sign-in flows without the copy and paste",
@@ -74,7 +106,7 @@ const CAPABILITIES = [
   },
   {
     title: "Your data",
-    items: ["Nested collections, tabs and history", "Saved to a file on disk, or to this browser", "Import from Postman and OpenAPI", "Export to Postman, OpenAPI, Markdown or a backup"],
+    items: ["Nested collections, tabs and history", "Plain YAML files in a folder, or app storage", "Import from Postman and OpenAPI", "Export to Postman, OpenAPI, Markdown or a backup"],
   },
 ]
 
@@ -192,12 +224,16 @@ function Spotlight({ spotlight, isReversed }) {
           </ul>
         </div>
         <div className={cn("lg:col-span-7", isReversed && "lg:order-1")}>
-          <img
-            src={spotlight.image}
-            alt={spotlight.alt}
-            loading="lazy"
-            className="w-full rounded-lg border border-border/60"
-          />
+          {spotlight.capture ? (
+            <TerminalBlock {...spotlight.capture} />
+          ) : (
+            <img
+              src={spotlight.image}
+              alt={spotlight.alt}
+              loading="lazy"
+              className="w-full rounded-lg border border-border/60"
+            />
+          )}
         </div>
       </div>
     </AnimatedSection>
@@ -349,7 +385,7 @@ export function LandingPage({ onGetStarted }) {
                 style={{ willChange: "transform, opacity" }}
                 transition={{ delay: 0.5, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               >
-                Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. Send requests, write tests and run whole collections, on your desktop or in the browser.
+Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. One collection for you, your CI pipeline and your coding agent, kept as files on your machine.
               </motion.p>
 
               <motion.div

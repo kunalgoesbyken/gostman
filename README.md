@@ -1,7 +1,7 @@
 <div align="center">
   <img src="gostman-gui/build/appicon.png" alt="Gostman" width="96" height="96">
   <h1>Gostman</h1>
-  <p>An API client for REST, GraphQL, gRPC and WebSocket, with tests and a collection runner. Desktop app and web app, no account.</p>
+  <p>An API client for REST, GraphQL, gRPC and WebSocket that you, your CI pipeline and your coding agent share. Desktop app, web app and command line, no account.</p>
 
   [![CI](https://github.com/kunalgoesbyken/gostman/actions/workflows/ci.yml/badge.svg)](https://github.com/kunalgoesbyken/gostman/actions/workflows/ci.yml)
   [![Release](https://img.shields.io/github/v/release/kunalgoesbyken/gostman)](https://github.com/kunalgoesbyken/gostman/releases/latest)
@@ -45,6 +45,9 @@ Gostman is a native desktop application built with Go and [Wails](https://wails.
 - Extraction rules that copy values from a response (JSON path, header, cookie or status code) into variables after every send, for chaining requests
 - Assertions, and pre-request and post-response scripts with `test()` and `expect()`, run in a sandbox
 - A runner that sends every request in a folder in order and reports each failed check
+- Collections as plain YAML files in a folder, ready for Git (desktop)
+- Saved response examples and a local mock server that serves them (desktop)
+- A `gostman` command line for CI, and an MCP server so coding agents can use the same collection
 - GraphQL schema introspection, query formatting and validation
 - Code generation for curl, JavaScript, Python, Go, PHP and Java
 - Import from Postman v2.1 and OpenAPI; export to Postman, OpenAPI, Markdown or a Gostman backup
@@ -78,6 +81,65 @@ Windows needs the WebView2 runtime, which ships with Windows 10 and 11; the inst
 - Responses larger than 3 MB are truncated. The desktop app reads up to 50 MB.
 
 Data in the web version is kept in the browser's local storage.
+
+## Command line
+
+Each release includes `gostman-cli-<os>-<arch>` archives with a single `gostman` binary. It can also be built with `go build ./cmd/gostman`.
+
+```bash
+gostman run orders-api --env CI --var-from-env API_TOKEN --reporter junit --output report.xml
+gostman send --workspace orders-api "Create user" --select '$.id'
+gostman mock orders-api --port 4010
+```
+
+- `run` takes a workspace folder or a Gostman export and sends every request in order with its scripts, extraction rules, cookies, OAuth 2.0 tokens and checks. It exits 0 when everything passed, 1 when a request or a check failed and 2 when the command or input is wrong. A 4xx or 5xx status alone is not a failure; add a check such as `res.status equals 200`.
+- `send` sends one saved request, or an ad hoc one (`gostman send GET https://example.com -H 'Accept: application/json'`), and prints a short JSON summary followed by the body.
+- `mock` serves the saved examples of a workspace on `127.0.0.1`.
+- `--var name=value` sets a variable and `--var-from-env NAME` reads it from the environment, so secrets stay out of the files. `--redact` replaces variable values and credentials in a report with `{{name}}`.
+- Reports: `--reporter text|json|junit`. Colour is off when `NO_COLOR` is set or the output is not a terminal.
+- On macOS the binary is not notarized: run `xattr -d com.apple.quarantine gostman` once.
+
+`gostman help` lists every flag.
+
+## Use from a coding agent
+
+`gostman mcp` serves a workspace over the Model Context Protocol, so Claude Code, Codex, Cursor and other MCP clients can call your APIs through Gostman in place of `curl`.
+
+```bash
+gostman init api
+claude mcp add gostman -- gostman mcp --workspace api --var-from-env API_TOKEN
+```
+
+For other clients, register the command `gostman` with the arguments `mcp --workspace api`.
+
+The agent gets these tools: `list_requests`, `get_request`, `send_request`, `run_folder`, `save_request`, `list_environments`, `set_environment`, `start_mock`, `stop_mock` and `mock_status`.
+
+What this gives you over a shell command:
+
+- **Secrets stay out of the conversation.** Requests reference `{{name}}`; values are filled in inside Gostman and replaced with their names in everything returned, including URL-encoded, base64 and JSON-escaped echoes. Values shorter than six characters are not treated as secrets. This guards against accidental exposure; it is not a barrier against a value the server returns in a transformed form.
+- **The agent can only call hosts your collection already uses**, plus localhost. Add more with `--allow-host api.example.com`, or `--allow-host '*'` for any. Requests an agent saves do not widen this until you open and save them in the app.
+- **State carries across calls.** Cookies, OAuth 2.0 tokens and variables last for the session.
+- **Small answers.** Bodies are capped at 8 KB by default and can be narrowed with a JSONPath.
+- **Shared work.** Requests the agent saves are YAML files in the workspace, visible in the app and in Git. An agent cannot save a literal credential.
+
+The OAuth 2.0 authorization code grant and WebSocket requests are not available to agents.
+
+## Folders and Git (desktop)
+
+The control next to the logo shows where the collection lives. **Open folder** keeps it as files: `gostman.yaml`, one YAML file per request, one directory per folder and `environments/<name>.yaml`.
+
+- OAuth tokens, cookies, history, network settings and open tabs are never written to the folder.
+- Values typed into environments and auth fields are written as typed. Keep secrets in an environment file that Git ignores, or pass them at run time.
+- After a `git pull`, choose **Reload from disk**. Files that cannot be read are listed and left untouched.
+- A folder you did not create opens with its scripts and OAuth 2.0 settings switched off until you choose **Trust this folder**.
+
+## Examples and the mock server (desktop)
+
+Save any response as a named example from the response panel (up to 20 per request, 2 MB each; cookie and authorization headers are not kept). The mock server, opened from the header, serves each request's method and path with one of its examples on `127.0.0.1`.
+
+- `{{base_url}}/users/42` is served at `/users/42`; a literal base path such as `/v1` is kept. Segments written `:id`, or holding an unresolved variable, match anything.
+- GraphQL, gRPC and WebSocket requests, and requests without an example, are not served.
+- Examples travel with exports and workspace folders, so they can contain whatever the response body held.
 
 ## Variables
 
@@ -144,6 +206,11 @@ cd gostman-gui/frontend && npm run build && npm run build:web
 | --- | --- |
 | `engine/` | Go package that prepares and sends requests. Shared by the desktop app and the web proxy, so both behave the same. |
 | `rpc/` | Go package for gRPC: reflection, `.proto` compilation and calls. |
+| `workspace/` | A collection as YAML files in a folder. |
+| `runner/` | The send pipeline in Go for the command line, running the app's script code in an embedded JavaScript engine. |
+| `mock/` | The mock server. |
+| `agent/`, `mcp/`, `redact/` | The MCP server, its tools and the redaction of secrets. |
+| `cmd/gostman/` | The `gostman` command line. |
 | `gostman-gui/` | Wails desktop application: `app.go` (bindings and storage), `websocket.go`, packaging assets in `build/`. |
 | `gostman-gui/frontend/` | React interface used by both targets. `src/App.jsx` is the desktop entry, `src/WebApp.jsx` the web entry. |
 | `api/` | Vercel serverless functions. `proxy.go` exposes the engine to the web app. |

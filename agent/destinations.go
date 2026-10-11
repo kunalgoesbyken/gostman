@@ -13,9 +13,8 @@ import (
 const AnyHost = "*"
 
 type destinations struct {
-	allowed  map[string]bool
-	authored map[string]bool
-	known    map[string]bool
+	allowed map[string]bool
+	known   map[string]bool
 }
 
 func newDestinations(allowed []string) *destinations {
@@ -23,7 +22,7 @@ func newDestinations(allowed []string) *destinations {
 	for _, host := range allowed {
 		hosts[strings.ToLower(strings.TrimSpace(host))] = true
 	}
-	return &destinations{allowed: hosts, authored: map[string]bool{}, known: map[string]bool{}}
+	return &destinations{allowed: hosts, known: map[string]bool{}}
 }
 
 func hostOf(address string) string {
@@ -55,7 +54,7 @@ func addressesOf(request workspace.Request) []string {
 	return []string{request.URL, request.Auth.OAuth2.TokenURL, request.Auth.OAuth2.AuthURL}
 }
 
-func (d *destinations) learn(files workspace.Collection, startup map[string]string) {
+func (d *destinations) learn(files workspace.Collection, authored map[string]bool, startup map[string]string) {
 	known := map[string]bool{}
 	environments := files.Environments
 	if len(environments) == 0 {
@@ -67,7 +66,7 @@ func (d *destinations) learn(files workspace.Collection, startup map[string]stri
 			continue
 		}
 		for _, request := range files.Requests {
-			if d.authored[request.Id] {
+			if authored[request.Id] {
 				continue
 			}
 			for _, address := range addressesOf(request) {
@@ -91,8 +90,4 @@ func isLoopback(host string) bool {
 func (d *destinations) permit(host string) bool {
 	name := strings.ToLower(host)
 	return d.allowed[AnyHost] || d.allowed[name] || d.known[name] || isLoopback(name)
-}
-
-func (d *destinations) remember(id string) {
-	d.authored[id] = true
 }

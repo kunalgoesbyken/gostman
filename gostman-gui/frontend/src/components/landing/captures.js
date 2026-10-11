@@ -1,0 +1,65 @@
+const command = (text) => ({ text, tone: "command" })
+const muted = (text) => ({ text, tone: "muted" })
+const pass = (text) => ({ text, tone: "pass" })
+const fail = (text) => ({ text, tone: "fail" })
+const key = (text) => ({ text, tone: "key" })
+const plain = (text) => ({ text })
+const BLANK = plain("")
+
+export const AGENT_SESSION = {
+  title: "Claude Code",
+  label: "A Claude Code session calling Gostman through MCP",
+  lines: [
+    command("$ claude mcp add gostman -- gostman mcp --workspace orders-api --var-from-env PASSWORD"),
+    BLANK,
+    command("> Sign in, then send Current user, then run the Items folder."),
+    command("  Quote the exact password value if you can see it anywhere."),
+    BLANK,
+    plain("Sign in returned 200 and set the session and theme cookies plus user_id."),
+    plain("Current user returned Ada (id 42, roles admin and dev). The Items folder"),
+    plain("ran 2 requests: List items passed, and Export items failed with a 500."),
+    BLANK,
+    plain("I can't quote a password because none of these results contain one."),
+    plain("Sign in's body wasn't returned, and the cookie values are redacted."),
+  ],
+}
+
+export const CLI_RUN = {
+  title: "Terminal",
+  label: "Output of gostman run on a workspace folder",
+  lines: [
+    command("$ gostman run orders-api --var-from-env PASSWORD"),
+    pass("PASS  POST     Auth/Sign in  200 OK  88 ms  2/2 tests"),
+    pass("PASS  GET      Account/Current user  200 OK  46 ms  3/3 tests"),
+    pass("PASS  GET      Items/List items  200 OK  46 ms  1/1 tests"),
+    fail("FAIL  GET      Items/Export items  500 Internal Server Error  91 ms  0/1 tests"),
+    fail("      FAIL  res.status equals 200"),
+    muted("            The value was 500"),
+    BLANK,
+    plain("Requests  3 passed, 1 failed"),
+    plain("Tests     6 passed, 1 failed"),
+    plain("Duration  290ms"),
+    muted("exit 1"),
+  ],
+}
+
+export const REQUEST_FILE = {
+  title: "orders-api/account/current-user.yaml",
+  label: "A saved request as a YAML file",
+  lines: [
+    key("id: r-current-user"),
+    key("name: Current user"),
+    key("method: GET"),
+    key("url: '{{base_url}}/me'"),
+    key("assertions:"),
+    plain("  - expression: res.status"),
+    plain("    operator: eq"),
+    plain('    value: "200"'),
+    plain("  - expression: res.body.session"),
+    plain("    operator: isString"),
+    key("postScript: |-"),
+    plain("  test('the session cookie was sent', () => {"),
+    plain("    expect(res.body.cookieHeader).to.contain('session=')"),
+    plain("  })"),
+  ],
+}

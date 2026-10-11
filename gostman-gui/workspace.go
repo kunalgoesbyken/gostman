@@ -124,7 +124,18 @@ func (s folderStore) saveRequests(requests []Request) error {
 	if err := s.remember(func(memory *workspaceMemory) { memory.keepTokens(requests) }); err != nil {
 		return err
 	}
-	return s.folder.SaveRequests(toFileRequests(requests))
+	if err := s.folder.SaveRequests(toFileRequests(requests)); err != nil {
+		return err
+	}
+	return s.folder.MarkReviewed(requestIds(requests))
+}
+
+func requestIds(requests []Request) []string {
+	ids := make([]string, len(requests))
+	for i, request := range requests {
+		ids[i] = request.Id
+	}
+	return ids
 }
 
 func (s folderStore) deleteRequest(id string) error {
