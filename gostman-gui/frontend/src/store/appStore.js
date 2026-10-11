@@ -152,6 +152,7 @@ export const useAppStore = create(
         codeSnippets: null,
         importDialogOpen: false,
         importDialogTab: IMPORT_TAB,
+        importDialogFolderId: '',
         commandPaletteOpen: false,
         cookiesDialogOpen: false,
         settingsDialogOpen: false,
@@ -317,7 +318,7 @@ export const useAppStore = create(
 
         openCodeDialog: (snippets) => set({ codeDialogOpen: true, codeSnippets: snippets }),
         closeCodeDialog: () => set({ codeDialogOpen: false, codeSnippets: null }),
-        openImportDialog: (tab = IMPORT_TAB) => set({ importDialogOpen: true, importDialogTab: tab }),
+        openImportDialog: (tab = IMPORT_TAB, folderId = '') => set({ importDialogOpen: true, importDialogTab: tab, importDialogFolderId: folderId }),
         closeImportDialog: () => set({ importDialogOpen: false }),
         openCommandPalette: () => set({ commandPaletteOpen: true }),
         closeCommandPalette: () => set({ commandPaletteOpen: false }),

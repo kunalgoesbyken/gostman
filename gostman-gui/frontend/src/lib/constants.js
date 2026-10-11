@@ -1,3 +1,5 @@
+export const WEB_APP_URL = "https://gostman.vercel.app"
+
 export const HTTP_METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "GRAPHQL", "GRPC", "MCP"]
 
 export const METHOD_COLORS = {

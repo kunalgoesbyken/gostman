@@ -5,6 +5,7 @@ import "github.com/krockxz/gostman/engine"
 type Request struct {
 	Id               string         `json:"id"`
 	Name             string         `json:"name"`
+	Description      string         `json:"description"`
 	URL              string         `json:"url"`
 	Method           string         `json:"method"`
 	Headers          string         `json:"headers"`

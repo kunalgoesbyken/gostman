@@ -12,6 +12,8 @@ import { createMockActions } from './mockServer'
 import { normalizeRequest } from './request'
 import { isRequestDirty } from './requestChanges'
 import { bodyBase64, downloadName, mimeType } from './response'
+import { keepingOwnVariables } from './shareContent'
+import { clientUrl } from './sharedLink'
 import { createRunner } from './runner'
 import { createSocketActions, isSocketAddress } from './socketSessions'
 import { createStorageActions } from './storageActions'
@@ -20,6 +22,7 @@ import { selectActiveTab, selectActiveVariables, useAppStore } from '../store/ap
 const UNRECORDED_ERRORS = ['config', 'cancelled']
 const RESET_PROMPT = "Delete every request, folder, environment and history entry? This can't be undone."
 const EXPORT_TAB = 'export'
+const SHARE_TAB = 'share'
 const ACTIVE_CONTENT_PROMPT = 'in this file include scripts or OAuth 2.0 settings. These run when a request is sent and can read your variables, so only import them from a source you trust. Cancel imports everything else without them.'
 const DESTRUCTIVE = 'destructive'
 const NO_GRPC_CODE = 'Code generation covers HTTP requests. A gRPC call has no equivalent snippet yet.'
@@ -248,6 +251,8 @@ export function createWorkspaceActions(backend) {
     )
   })
 
+  const importShared = (imported) => importData(keepingOwnVariables(imported, store().environments))
+
   const download = attempt('Could not save the file', async () => {
     const { response } = activeTab()
     await backend.saveFile(downloadName(response), bodyBase64(response), mimeType(response))
@@ -348,6 +353,7 @@ export function createWorkspaceActions(backend) {
     clearHistory,
     switchEnvironment: (environmentId) => store().setActiveEnvironment(environmentId),
     export: () => store().openImportDialog(EXPORT_TAB),
+    share: () => store().openImportDialog(SHARE_TAB),
     runCollection: () => store().openRunner(),
     cookies: () => store().openCookiesDialog(),
     examples: examples.open,
@@ -383,6 +389,9 @@ export function createWorkspaceActions(backend) {
     generateCode,
     pasteCurl,
     importData,
+    importShared,
+    shareFolder: (folderId) => store().openImportDialog(SHARE_TAB, folderId),
+    shareLinkBase: clientUrl(backend.webAppUrl),
     download,
     saveTextFile,
     createFolder,

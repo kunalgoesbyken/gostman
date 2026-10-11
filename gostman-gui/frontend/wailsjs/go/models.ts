@@ -467,6 +467,7 @@ export namespace main {
 	export class Request {
 	    id: string;
 	    name: string;
+	    description: string;
 	    url: string;
 	    method: string;
 	    headers: string;
@@ -498,6 +499,7 @@ export namespace main {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
 	        this.name = source["name"];
+	        this.description = source["description"];
 	        this.url = source["url"];
 	        this.method = source["method"];
 	        this.headers = source["headers"];

@@ -2,7 +2,7 @@ import { isPlainObject } from './dataUtils'
 import { normalizeRequest } from './request'
 
 const TEXT_FIELDS = [
-  'name', 'method', 'url', 'body', 'bodyType', 'folderId', 'graphqlQuery', 'graphqlVariables',
+  'name', 'description', 'method', 'url', 'body', 'bodyType', 'folderId', 'graphqlQuery', 'graphqlVariables',
   'extractors', 'assertions', 'examples', 'preScript', 'postScript', 'grpcMethod', 'grpcMessage', 'grpcProtos',
   'mcpTool', 'mcpArguments',
 ]

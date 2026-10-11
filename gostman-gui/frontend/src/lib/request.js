@@ -29,6 +29,7 @@ const DEFAULT_OPTIONS = { timeoutMs: 0, noFollowRedirects: false, insecureTLS: f
 const DEFAULT_REQUEST = {
   id: '',
   name: 'New Request',
+  description: '',
   method: 'GET',
   url: '',
   headers: '{}',

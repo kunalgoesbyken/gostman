@@ -278,7 +278,12 @@ export const RequestTabs = memo(function RequestTabs({
         </TabsContent>
 
         <TabsContent value="settings" className={PANEL_CLASS}>
-          <SettingsPanel options={options} onChange={(next) => onUpdateRequest({ options: next })} />
+          <SettingsPanel
+            options={options}
+            description={activeRequest.description}
+            onChange={(next) => onUpdateRequest({ options: next })}
+            onDescriptionChange={(description) => onUpdateRequest({ description })}
+          />
         </TabsContent>
       </div>
     </Tabs>

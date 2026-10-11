@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from "react"
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, lazy, Suspense } from "react"
 import { AlertTriangle, Loader2 } from "lucide-react"
 import { Sidebar } from "./Sidebar"
 import { RequestBar } from "./RequestBar"
@@ -15,10 +15,12 @@ import { useRequestFieldHandlers } from "../hooks/useRequestFieldHandlers"
 import { useShortcuts } from "../hooks/useShortcuts"
 import { parseJSON } from "../lib/dataUtils"
 import { MIN_REQUEST_HEIGHT_PX } from "../lib/layout"
+import { forgetSharedLink, pendingSharedLink, subscribeToSharedLink } from "../lib/sharedLink"
 import { createWorkspaceActions } from "../lib/workspaceActions"
 
 const CodeSnippetDialog = lazy(() => import("./CodeSnippetDialog").then((module) => ({ default: module.CodeSnippetDialog })))
 const ImportExportDialog = lazy(() => import("./ImportExportDialog").then((module) => ({ default: module.ImportExportDialog })))
+const IncomingShareDialog = lazy(() => import("./IncomingShareDialog").then((module) => ({ default: module.IncomingShareDialog })))
 const CookiesDialog = lazy(() => import("./CookiesDialog").then((module) => ({ default: module.CookiesDialog })))
 const NetworkDialog = lazy(() => import("./NetworkDialog").then((module) => ({ default: module.NetworkDialog })))
 const ExamplesDialog = lazy(() => import("./ExamplesDialog").then((module) => ({ default: module.ExamplesDialog })))
@@ -124,6 +126,7 @@ function LoadedWorkspace({ backend, onBack }) {
   const codeSnippets = useAppStore((s) => s.codeSnippets)
   const importDialogOpen = useAppStore((s) => s.importDialogOpen)
   const importDialogTab = useAppStore((s) => s.importDialogTab)
+  const importDialogFolderId = useAppStore((s) => s.importDialogFolderId)
   const cookiesDialogOpen = useAppStore((s) => s.cookiesDialogOpen)
   const settingsDialogOpen = useAppStore((s) => s.settingsDialogOpen)
   const examplesDialogOpen = useAppStore((s) => s.examplesDialogOpen)
@@ -131,6 +134,7 @@ function LoadedWorkspace({ backend, onBack }) {
   const settings = useAppStore((s) => s.settings)
   const runner = useAppStore((s) => s.runner)
   const isDialogOpen = useAppStore(selectIsDialogOpen)
+  const sharedLink = useSyncExternalStore(subscribeToSharedLink, pendingSharedLink)
 
   const setActiveTab = useAppStore((s) => s.setActiveTab)
   const newTab = useAppStore((s) => s.newTab)
@@ -163,7 +167,7 @@ function LoadedWorkspace({ backend, onBack }) {
     ["enter", actions.send],
   ]), [openCommandPalette, openNewTab, actions])
 
-  useShortcuts(shortcuts, !isDialogOpen)
+  useShortcuts(shortcuts, !isDialogOpen && !sharedLink)
   usePersistence(backend)
 
   return (
@@ -248,15 +252,19 @@ function LoadedWorkspace({ backend, onBack }) {
         {importDialogOpen && (
           <ImportExportDialog
             initialTab={importDialogTab}
+            shareFolderId={importDialogFolderId}
+            shareLinkBase={actions.shareLinkBase}
             requests={requests}
             folders={folders}
             environments={environments}
             variables={variablesMap}
             onImport={actions.importData}
+            onImportShared={actions.importShared}
             onSaveFile={actions.saveTextFile}
             onClose={closeImportDialog}
           />
         )}
+        {sharedLink && <IncomingShareDialog reference={sharedLink} onImport={actions.importShared} onClose={forgetSharedLink} />}
         {cookiesDialogOpen && <CookiesDialog onClose={closeCookiesDialog} />}
         {settingsDialogOpen && <NetworkDialog settings={settings} actions={actions} onClose={closeSettingsDialog} />}
         {examplesDialogOpen && <ExamplesDialog request={activeRequest} actions={actions.examples} EditorComponent={MonacoEditor} />}
