@@ -173,7 +173,7 @@ export const useAppStore = create(
             isRestricted: Boolean(data.restricted),
             requests,
             folders,
-            tabs: withSavedExamples(reconcileTabs(state.tabs, state.requests, requests, folders, state.isRestricted), requests),
+            tabs: withSavedExamples(reconcileTabs(state.tabs, state.requests, requests, folders, state.isRestricted && !data.restricted), requests),
             requestHistory: asArray(data.history).map(normalizeRequest),
             cookies: mergeCookies(asArray(data.cookies), []),
             settings: normalizeSettings(data.settings),
@@ -375,6 +375,7 @@ export const useAppStore = create(
         storage: guardedStorage,
         partialize: (state) => ({
           tabs: state.tabs.map(persistableTab),
+          isRestricted: state.isRestricted,
           activeTabId: state.activeTabId,
           nextTabId: state.nextTabId,
         }),
@@ -384,6 +385,7 @@ export const useAppStore = create(
           return {
             ...current,
             tabs,
+            isRestricted: Boolean(persisted?.isRestricted),
             activeTabId: hasActive ? persisted.activeTabId : tabs[0].id,
             nextTabId: Math.max(persisted?.nextTabId || 0, nextIdAfter(tabs)),
           }
