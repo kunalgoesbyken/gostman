@@ -185,11 +185,20 @@ function readPostmanBody(body) {
   return read ? read(body) : {}
 }
 
-const scriptWarning = (requestNames) => (
-  `Scripts were imported with ${listNames(requestNames)}. They run when the request is sent, so read them first if the file came from someone else.`
-)
+const hasScript = (request) => SCRIPT_FIELDS.some((field) => request[field].trim() !== '')
 
-const hasScript = (request) => SCRIPT_FIELDS.some((field) => typeof request[field] === 'string' && request[field].trim() !== '')
+const isActive = (request) => hasScript(request) || request.auth.type === AUTH_OAUTH2
+
+const withoutScripts = (request) => ({ ...request, ...Object.fromEntries(SCRIPT_FIELDS.map((field) => [field, ''])) })
+
+const passive = (request) => normalizeRequest({
+  ...withoutScripts(request),
+  auth: request.auth.type === AUTH_OAUTH2 ? NO_AUTH : request.auth,
+})
+
+export const namesOfActiveRequests = (data) => data.requests.filter(isActive).map((request) => request.name)
+
+export const withoutActiveContent = (data) => ({ ...data, requests: data.requests.map(passive) })
 
 const tlsWarning = (requestNames) => (
   `TLS verification was disabled in the collection for ${listNames(requestNames)}; it was kept enabled. Turn it off in the request's Settings tab if you trust these hosts.`
@@ -251,7 +260,7 @@ function postmanVariables(entries) {
   )
 }
 
-function listNames(names) {
+export function listNames(names) {
   const shown = names.slice(0, MAX_NAMES_IN_WARNING).map((name) => `"${name}"`).join(', ')
   const hidden = names.length - MAX_NAMES_IN_WARNING
   return hidden > 0 ? `${shown} and ${hidden} more` : shown
@@ -1472,8 +1481,6 @@ export function sanitizeImport(data, existing) {
     .filter((request) => request.options?.insecureTLS)
     .map((request) => cleanName(request.name, UNTITLED_REQUEST))
 
-  const requestsWithScripts = rawRequests.filter(hasScript).map((request) => cleanName(request.name, UNTITLED_REQUEST))
-
   const folderIds = assignFreshIds(asArray(data?.folders).filter(isPlainObject).map(sanitizeFolder), existing.folderIds)
   const inImport = (id) => folderIds.renamed.get(id) || ROOT_ID
   const linkedFolders = folderIds.assigned.map((folder) => ({ ...folder, parentId: inImport(folder.parentId) }))
@@ -1491,7 +1498,6 @@ export function sanitizeImport(data, existing) {
     warnings: [
       ...asArray(data?.warnings).filter((warning) => typeof warning === 'string'),
       ...(requestsWithoutTls.length > 0 ? [tlsWarning(requestsWithoutTls)] : []),
-      ...(requestsWithScripts.length > 0 ? [scriptWarning(requestsWithScripts)] : []),
       ...(flattenedCount > 0 ? [`${pluralize(flattenedCount, 'folder')} nested in a loop or deeper than ${MAX_FOLDER_DEPTH} levels moved to the top level.`] : []),
     ],
   }

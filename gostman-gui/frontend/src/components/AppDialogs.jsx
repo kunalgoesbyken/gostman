@@ -37,7 +37,10 @@ export function AppDialogs({ onCommand }) {
           closeConfirm()
           confirmDialog.onConfirm?.()
         }}
-        onCancel={closeConfirm}
+        onCancel={() => {
+          closeConfirm()
+          confirmDialog.onCancel?.()
+        }}
       />
 
       <PromptDialog

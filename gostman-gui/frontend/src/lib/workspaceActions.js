@@ -1,6 +1,6 @@
 import { textToBase64 } from './base64'
 import { generateAllSnippets } from './codeGenerator'
-import { sanitizeImport } from './importExport'
+import { listNames, namesOfActiveRequests, sanitizeImport, withoutActiveContent } from './importExport'
 import { pluralize } from './dataUtils'
 import { applyExtractors, createExecutor } from './execution'
 import { introspectionRequest, readSchema } from './graphqlSchema'
@@ -16,6 +16,7 @@ import { selectActiveTab, selectActiveVariables, useAppStore } from '../store/ap
 const UNRECORDED_ERRORS = ['config', 'cancelled']
 const RESET_PROMPT = "Delete every request, folder, environment and history entry? This can't be undone."
 const EXPORT_TAB = 'export'
+const ACTIVE_CONTENT_PROMPT = 'in this file carry scripts or OAuth 2.0 settings. These run when a request is sent and can read your variables, so only import them from a source you trust. Cancel imports everything else without them.'
 const DESTRUCTIVE = 'destructive'
 const NO_GRPC_CODE = 'Code generation covers HTTP requests. A gRPC call has no equivalent snippet yet.'
 
@@ -195,9 +196,7 @@ export function createWorkspaceActions(backend) {
     store().updateTabRequest(tab.id, { ...normalizeRequest(parsed), id, name, folderId, extractors })
   })
 
-  const importData = attempt('Import failed', async (imported) => {
-    const existing = { requestIds: idsOf(store().requests), folderIds: idsOf(store().folders) }
-    const data = sanitizeImport(imported, existing)
+  const addImported = attempt('Import failed', async (data) => {
     const { requests, folders } = data
     if (requests.length > 0) store().upsertRequests(await backend.saveRequests(requests))
     store().mergeFolders(folders)
@@ -210,6 +209,21 @@ export function createWorkspaceActions(backend) {
     ]
     const summary = `Imported ${pluralize(requests.length, 'request')} and ${pluralize(folders.length, 'folder')}.`
     store().showAlert('Import complete', [summary, ...notes].join('\n'), 'OK', notes.length > 0 ? 'warning' : 'success')
+  })
+
+  const importData = attempt('Import failed', (imported) => {
+    const existing = { requestIds: idsOf(store().requests), folderIds: idsOf(store().folders) }
+    const data = sanitizeImport(imported, existing)
+    const activeNames = namesOfActiveRequests(data)
+    if (activeNames.length === 0) return addImported(data)
+    return store().showConfirm(
+      'Import scripts and sign-in settings?',
+      `${listNames(activeNames)} ${ACTIVE_CONTENT_PROMPT}`,
+      () => addImported(data),
+      () => addImported(withoutActiveContent(data)),
+      'default',
+      'Import them',
+    )
   })
 
   const download = attempt('Could not save the file', async () => {
