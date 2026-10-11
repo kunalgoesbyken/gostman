@@ -583,6 +583,7 @@ export namespace main {
 	    history: Request[];
 	    cookies: engine.CookieInfo[];
 	    settings: Settings;
+	    restricted?: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new SavedData(source);
@@ -598,6 +599,7 @@ export namespace main {
 	        this.history = this.convertValues(source["history"], Request);
 	        this.cookies = this.convertValues(source["cookies"], engine.CookieInfo);
 	        this.settings = this.convertValues(source["settings"], Settings);
+	        this.restricted = source["restricted"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

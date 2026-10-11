@@ -136,6 +136,7 @@ export const useAppStore = create(
     persist(
       (set, get) => ({
         hydrated: false,
+        isRestricted: false,
         requests: [],
         folders: [],
         requestHistory: [],
@@ -169,6 +170,7 @@ export const useAppStore = create(
           const folders = asArray(data.folders)
           return {
             hydrated: true,
+            isRestricted: Boolean(data.restricted),
             requests,
             folders,
             tabs: withSavedExamples(reconcileTabs(state.tabs, state.requests, requests, folders), requests),
@@ -181,6 +183,7 @@ export const useAppStore = create(
         }),
 
         suspendPersistence: () => set({ hydrated: false }),
+        liftRestriction: () => set({ isRestricted: false }),
 
         upsertRequests: (requests) => set((state) => {
           const byId = new Map(state.requests.map((request) => [request.id, request]))

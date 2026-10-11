@@ -33,6 +33,10 @@ type WorkspaceStatus struct {
 	Notice   string              `json:"notice"`
 }
 
+func trust(memory *workspaceMemory) {
+	memory.Trusted = true
+}
+
 type folderStore struct {
 	folder *workspace.Workspace
 }
@@ -104,6 +108,7 @@ func (s folderStore) collection(data SavedData) (SavedData, error) {
 	data.Folders = fromFileFolders(loaded.Folders, memory)
 	data.Environments = fromFileEnvironments(loaded.Environments)
 	data.ActiveEnvironmentId = memory.ActiveEnvironmentId
+	data.Restricted = !memory.Trusted
 	return data, nil
 }
 
@@ -194,6 +199,14 @@ func chosenFolder(path string) (string, error) {
 	return filepath.Abs(path)
 }
 
+func createTrusted(path string) (*workspace.Workspace, error) {
+	folder, err := workspace.Create(path, workspace.Collection{})
+	if err != nil {
+		return nil, err
+	}
+	return folder, folderStore{folder: folder}.remember(trust)
+}
+
 func openOrCreate(path string) (*workspace.Workspace, error) {
 	state, err := workspace.Inspect(path)
 	if err != nil {
@@ -203,7 +216,7 @@ func openOrCreate(path string) (*workspace.Workspace, error) {
 	case workspace.Existing:
 		return workspace.Open(path)
 	case workspace.Empty:
-		return workspace.Create(path, workspace.Collection{})
+		return createTrusted(path)
 	case workspace.Missing:
 		return nil, errors.New(missingFolder)
 	}
@@ -275,6 +288,7 @@ func (a *App) SaveCollectionToFolder(path string) (WorkspaceStatus, error) {
 	}
 	store := folderStore{folder: folder}
 	err = store.remember(func(memory *workspaceMemory) {
+		trust(memory)
 		memory.ActiveEnvironmentId = data.ActiveEnvironmentId
 		memory.keepTokens(data.Requests)
 		memory.keepCollapsed(data.Folders)
@@ -283,6 +297,14 @@ func (a *App) SaveCollectionToFolder(path string) (WorkspaceStatus, error) {
 		return WorkspaceStatus{}, err
 	}
 	return activate(folder)
+}
+
+func (a *App) TrustWorkspace() error {
+	store, isFolder := storage.current().(folderStore)
+	if !isFolder {
+		return nil
+	}
+	return store.remember(trust)
 }
 
 func (a *App) CloseWorkspace() (WorkspaceStatus, error) {

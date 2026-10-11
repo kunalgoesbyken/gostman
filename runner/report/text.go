@@ -5,6 +5,7 @@ import (
 	"io"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/krockxz/gostman/runner"
 )
@@ -88,7 +89,34 @@ func (t *Text) printLogs(result runner.Result) {
 	}
 }
 
-func (t *Text) Request(result runner.Result) {
+func printable(text string) string {
+	return strings.Map(func(character rune) rune {
+		if character == '\n' || character == '\t' || !unicode.IsControl(character) {
+			return character
+		}
+		return -1
+	}, text)
+}
+
+func printableResult(result runner.Result) runner.Result {
+	result.Method, result.Name, result.Folder = printable(result.Method), printable(result.Name), printable(result.Folder)
+	result.Status, result.Skipped, result.Error = printable(result.Status), printable(result.Skipped), printable(result.Error)
+	tests := make([]runner.Check, len(result.Tests))
+	for i, check := range result.Tests {
+		check.Name, check.Message = printable(check.Name), printable(check.Message)
+		tests[i] = check
+	}
+	logs := make([]runner.LogLine, len(result.Logs))
+	for i, line := range result.Logs {
+		line.Level, line.Text = printable(line.Level), printable(line.Text)
+		logs[i] = line
+	}
+	result.Tests, result.Logs = tests, logs
+	return result
+}
+
+func (t *Text) Request(received runner.Result) {
+	result := printableResult(received)
 	fmt.Fprintf(t.output, "%s  %-*s  %s  %s\n", t.mark(result), methodWidth, result.Method, qualifiedName(result), t.paint(styleDim, outcomeOf(result)))
 	t.printLogs(result)
 	t.printFailures(result)

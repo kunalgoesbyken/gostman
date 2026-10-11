@@ -122,6 +122,10 @@ export function StopMock() {
   return window['go']['main']['App']['StopMock']();
 }
 
+export function TrustWorkspace() {
+  return window['go']['main']['App']['TrustWorkspace']();
+}
+
 export function UpdateMock(arg1, arg2) {
   return window['go']['main']['App']['UpdateMock'](arg1, arg2);
 }

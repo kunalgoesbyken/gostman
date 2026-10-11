@@ -24,6 +24,7 @@ import {
   SaveRequests,
   SaveSettings,
   SendRequest,
+  TrustWorkspace,
   WorkspaceStatus,
 } from '../../../wailsjs/go/main/App'
 import { desktopMock } from './desktopMock'
@@ -91,6 +92,7 @@ export const desktopBackend = {
     saveToFolder: (path) => SaveCollectionToFolder(path),
     reload: () => ReloadWorkspace(),
     close: () => CloseWorkspace(),
+    trust: () => TrustWorkspace(),
     change: duringStorageChange,
   },
   oauthCallback: OAUTH_CALLBACK,

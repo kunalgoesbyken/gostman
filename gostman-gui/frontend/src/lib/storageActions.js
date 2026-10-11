@@ -5,6 +5,8 @@ const OPEN_FAILED = 'Could not open the folder'
 const SAVE_FAILED = 'Could not save the collection to the folder'
 const RELOAD_FAILED = 'Could not reload the folder'
 const CLOSE_FAILED = 'Could not close the folder'
+const TRUST_FAILED = 'Could not trust the folder'
+const TRUST_PROMPT = 'Requests in this folder can carry scripts and OAuth 2.0 settings. They run when a request is sent and can read your variables, so trust the folder only if you know where its files came from.'
 const SKIPPED_NOTE = 'These files were skipped and left unchanged. Fix them, then choose Reload from disk.'
 
 const store = () => useAppStore.getState()
@@ -48,8 +50,16 @@ export function createStorageActions(backend) {
     if (path) await switchAndReport(() => use(path))
   }
 
+  const trust = attempt(TRUST_FAILED, async () => {
+    await storage.trust()
+    store().liftRestriction()
+  })
+
+  const confirmTrust = () => store().showConfirm('Trust this folder?', TRUST_PROMPT, trust, null, 'default', 'Trust')
+
   return {
     status: storage.status,
+    confirmTrust,
     showProblems,
     openFolder: attempt(OPEN_FAILED, pickThen(storage.openFolder)),
     saveToFolder: attempt(SAVE_FAILED, pickThen(storage.saveToFolder)),

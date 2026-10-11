@@ -1,12 +1,15 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -19,9 +22,18 @@ type oauthTokens struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
 	ExpiresAt    int64  `json:"expiresAt"`
+	Issuer       string `json:"issuer"`
+}
+
+func issuerOf(request Request) string {
+	config := request.Auth.OAuth2
+	identity := strings.Join([]string{request.URL, config.TokenURL, config.AuthURL, config.ClientID}, "\n")
+	digest := sha256.Sum256([]byte(identity))
+	return hex.EncodeToString(digest[:])
 }
 
 type workspaceMemory struct {
+	Trusted             bool                   `json:"trusted"`
 	ActiveEnvironmentId string                 `json:"activeEnvironmentId"`
 	Collapsed           []string               `json:"collapsed"`
 	Tokens              map[string]oauthTokens `json:"tokens"`
@@ -41,6 +53,9 @@ func workspaceStatePath() string {
 
 func (m workspaceMemory) withTokens(request Request) Request {
 	tokens := m.Tokens[request.Id]
+	if tokens.Issuer != issuerOf(request) {
+		return request
+	}
 	request.Auth.OAuth2.AccessToken = tokens.AccessToken
 	request.Auth.OAuth2.RefreshToken = tokens.RefreshToken
 	request.Auth.OAuth2.ExpiresAt = tokens.ExpiresAt
@@ -62,12 +77,16 @@ func (m *workspaceMemory) keepTokens(requests []Request) {
 	}
 	for _, request := range requests {
 		config := request.Auth.OAuth2
-		tokens := oauthTokens{AccessToken: config.AccessToken, RefreshToken: config.RefreshToken, ExpiresAt: config.ExpiresAt}
-		if tokens == (oauthTokens{}) {
+		if config.AccessToken == "" && config.RefreshToken == "" {
 			delete(m.Tokens, request.Id)
 			continue
 		}
-		m.Tokens[request.Id] = tokens
+		m.Tokens[request.Id] = oauthTokens{
+			AccessToken:  config.AccessToken,
+			RefreshToken: config.RefreshToken,
+			ExpiresAt:    config.ExpiresAt,
+			Issuer:       issuerOf(request),
+		}
 	}
 }
 

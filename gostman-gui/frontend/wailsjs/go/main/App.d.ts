@@ -65,6 +65,8 @@ export function StartMock(arg1:Array<mock.Source>,arg2:string,arg3:mock.Settings
 
 export function StopMock():Promise<void>;
 
+export function TrustWorkspace():Promise<void>;
+
 export function UpdateMock(arg1:Array<mock.Source>,arg2:string):Promise<main.MockState>;
 
 export function WSClose(arg1:string):Promise<void>;

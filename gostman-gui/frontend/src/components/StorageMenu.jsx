@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { AlertTriangle, ChevronDown, Folder, FolderOpen, HardDrive, History, RefreshCw, Save, X } from "lucide-react"
+import { AlertTriangle, ChevronDown, Folder, FolderOpen, HardDrive, History, RefreshCw, Save, ShieldAlert, ShieldCheck, X } from "lucide-react"
 import { Button } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
 import { pluralize } from "../lib/dataUtils"
@@ -9,12 +9,13 @@ const LOCAL_LABEL = "This computer"
 const LOCAL_HINT = "The collection is saved in the app's data on this computer"
 const BROWSER_LABEL = "This browser"
 const BROWSER_HINT = "The collection is saved in this browser. Keeping it as files in a folder needs the desktop app."
+const RESTRICTED_HINT = "Scripts and OAuth 2.0 settings in this folder are off until you trust it"
 const NO_FOLDER = { path: "", name: "", recent: [], problems: [] }
 const BUTTON_CLASS = "min-w-0 max-w-[14rem] shrink"
 
 const messageOf = (error) => error?.message || String(error)
 
-function menuItems(status, storage) {
+function menuItems(status, storage, isRestricted) {
   const hasFolder = status.path !== ""
   const recent = status.recent.map(({ path, name }) => ({
     id: `recent:${path}`,
@@ -28,7 +29,9 @@ function menuItems(status, storage) {
     icon: AlertTriangle,
     onSelect: () => storage.showProblems(status.problems),
   }]
+  const trust = isRestricted ? [{ id: "trust", label: "Trust this folder", icon: ShieldCheck, onSelect: storage.confirmTrust }] : []
   return [
+    ...trust,
     { id: "open", label: "Open folder", icon: FolderOpen, onSelect: storage.openFolder },
     { id: "save", label: "Save collection to folder", icon: Save, onSelect: storage.saveToFolder },
     { id: "reload", label: "Reload from disk", icon: RefreshCw, disabled: !hasFolder, onSelect: storage.reload },
@@ -67,7 +70,8 @@ function BrowserStorage() {
 function FolderStorage({ storage }) {
   const status = useStorageStatus(storage)
   const [menuPosition, setMenuPosition] = useState(null)
-  const items = useMemo(() => menuItems(status, storage), [status, storage])
+  const isRestricted = useAppStore((s) => s.isRestricted)
+  const items = useMemo(() => menuItems(status, storage, isRestricted), [status, storage, isRestricted])
   const closeMenu = useCallback(() => setMenuPosition(null), [])
 
   const openMenuBelowButton = (event) => {
@@ -84,12 +88,13 @@ function FolderStorage({ storage }) {
         variant="ghost"
         aria-haspopup="menu"
         aria-expanded={menuPosition !== null}
-        title={status.path || LOCAL_HINT}
+        title={isRestricted ? RESTRICTED_HINT : status.path || LOCAL_HINT}
         onClick={openMenuBelowButton}
         className={BUTTON_CLASS}
       >
         <Icon />
         <span className="truncate">{hasFolder ? status.name : LOCAL_LABEL}</span>
+        {isRestricted && <ShieldAlert className="text-warning" />}
         {status.problems.length > 0 && <AlertTriangle className="text-warning" />}
         <ChevronDown />
       </Button>

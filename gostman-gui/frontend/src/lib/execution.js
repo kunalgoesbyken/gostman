@@ -2,6 +2,7 @@ import { extractVariables, isUsableResponse, parseExtractors } from './chaining'
 import { isPlainObject, parseJSON } from './dataUtils'
 import { isGrpcRequest } from './grpc'
 import { withFreshToken } from './oauth'
+import { AUTH_OAUTH2 } from './request'
 import { failureResponse } from './response'
 import { countActiveAssertions } from './scripting/assertions'
 import { applyRequestEdits, requestSubject, responseSubject, runInSandbox } from './scripting/sandbox'
@@ -10,6 +11,7 @@ import { selectActiveVariables, useAppStore } from '../store/appStore'
 const CONFIG_ERROR = 'config'
 const PRE_REQUEST = 'Pre-request script'
 const POST_RESPONSE = 'Post-response script'
+const RESTRICTED = 'This folder is not trusted yet, so its scripts and OAuth 2.0 settings are switched off. Open the folder menu in the header and choose Trust this folder.'
 
 const store = () => useAppStore.getState()
 const variablesText = () => selectActiveVariables(store())
@@ -43,6 +45,10 @@ export function applyExtractors(request, response) {
   return { saved: store().mergeActiveVariables(variables), names: Object.keys(variables) }
 }
 
+const usesActiveContent = (request) => (
+  hasText(request.preScript) || hasText(request.postScript) || request.auth.type === AUTH_OAUTH2
+)
+
 const needsPostStage = (request) => hasText(request.postScript) || countActiveAssertions(request.assertions) > 0
 
 export function createExecutor(backend) {
@@ -56,6 +62,7 @@ export function createExecutor(backend) {
     })
 
     let request = original
+    if (store().isRestricted && usesActiveContent(request)) return stop(request, RESTRICTED)
     if (hasText(request.preScript)) {
       const pre = await runStage(PRE_REQUEST, { script: request.preScript, request: requestSubject(request) })
       runs.push(pre)

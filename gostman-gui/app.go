@@ -49,6 +49,7 @@ type SavedData struct {
 	History             []Request           `json:"history"`
 	Cookies             []engine.CookieInfo `json:"cookies"`
 	Settings            Settings            `json:"settings"`
+	Restricted          bool                `json:"restricted,omitempty"`
 }
 
 type Environment struct {
