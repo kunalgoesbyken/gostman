@@ -22,8 +22,8 @@ const PATH_SEPARATOR = " / "
 const WEB_NOTICE = "The mock server needs the desktop app. Examples you save here are kept with your requests and included in exports."
 const NO_ROUTES_HINT = "Save a request, then save one of its responses as an example to serve it."
 const NO_MATCH = "No route"
-const ROUTE_COLUMNS = "grid grid-cols-[3rem_minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,12rem)] items-center gap-2 px-3"
-const LOG_COLUMNS = "grid grid-cols-[4.5rem_3rem_minmax(0,1.5fr)_minmax(0,1fr)_2.5rem_3.5rem] items-center gap-2 px-3"
+const ROUTE_COLUMNS = "grid grid-cols-[4rem_minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,12rem)] items-center gap-2 px-3"
+const LOG_COLUMNS = "grid grid-cols-[4.5rem_4rem_minmax(0,1.5fr)_minmax(0,1fr)_2.5rem_3.5rem] items-center gap-2 px-3"
 const CELL = "truncate font-mono text-xs"
 
 const countIn = (routes, state) => routes.filter((route) => route.state === state).length

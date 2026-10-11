@@ -3,7 +3,7 @@ import { generateAllSnippets } from './codeGenerator'
 import { countActiveRequests, sanitizeImport, withoutActiveContent } from './importExport'
 import { pluralize } from './dataUtils'
 import { createExampleActions } from './exampleActions'
-import { applyExtractors, createExecutor } from './execution'
+import { RESTRICTED, applyExtractors, createExecutor } from './execution'
 import { introspectionRequest, readSchema } from './graphqlSchema'
 import { clearToken, obtainToken } from './oauth'
 import { isGrpcRequest, serializeProtoFiles } from './grpc'
@@ -84,6 +84,10 @@ export function createWorkspaceActions(backend) {
   async function getToken() {
     const tab = activeTab()
     const { auth, options } = tab.request
+    if (store().isRestricted) {
+      store().patchTab(tab.id, { tokenRequest: { isPending: false, error: RESTRICTED } })
+      return
+    }
     store().patchTab(tab.id, { tokenRequest: { isPending: true, error: '' } })
     try {
       setToken(tab.id, await obtainToken(backend, auth.oauth2, activeVariables(), options))

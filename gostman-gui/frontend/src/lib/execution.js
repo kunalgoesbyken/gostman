@@ -11,7 +11,7 @@ import { selectActiveVariables, useAppStore } from '../store/appStore'
 const CONFIG_ERROR = 'config'
 const PRE_REQUEST = 'Pre-request script'
 const POST_RESPONSE = 'Post-response script'
-const RESTRICTED = 'This folder is not trusted yet, so its scripts and OAuth 2.0 settings are switched off. Open the folder menu in the header and choose Trust this folder.'
+export const RESTRICTED = 'This folder is not trusted yet, so its scripts and OAuth 2.0 settings are switched off. Open the folder menu in the header and choose Trust this folder.'
 
 const store = () => useAppStore.getState()
 const variablesText = () => selectActiveVariables(store())
