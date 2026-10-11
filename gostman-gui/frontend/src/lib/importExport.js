@@ -196,7 +196,7 @@ const passive = (request) => normalizeRequest({
   auth: request.auth.type === AUTH_OAUTH2 ? NO_AUTH : request.auth,
 })
 
-export const namesOfActiveRequests = (data) => data.requests.filter(isActive).map((request) => request.name)
+export const countActiveRequests = (data) => data.requests.filter(isActive).length
 
 export const withoutActiveContent = (data) => ({ ...data, requests: data.requests.map(passive) })
 
@@ -260,7 +260,7 @@ function postmanVariables(entries) {
   )
 }
 
-export function listNames(names) {
+function listNames(names) {
   const shown = names.slice(0, MAX_NAMES_IN_WARNING).map((name) => `"${name}"`).join(', ')
   const hidden = names.length - MAX_NAMES_IN_WARNING
   return hidden > 0 ? `${shown} and ${hidden} more` : shown
