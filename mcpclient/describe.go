@@ -70,19 +70,18 @@ func tooManyTools() error {
 func (s *session) tools(ctx context.Context) ([]Tool, error) {
 	tools := []Tool{}
 	cursor := ""
-	loaded := 0
+	perAnswer := s.limit
+	remaining := int64(maxCatalogBytes)
 	for page := 0; ; page++ {
-		if page == maxToolPages {
+		if page == maxToolPages || remaining <= 0 {
 			return nil, tooManyTools()
 		}
+		s.limit = min(perAnswer, remaining)
 		received, err := s.request(ctx, mcp.MethodListTools, listParams{Cursor: cursor})
 		if err != nil {
 			return nil, err
 		}
-		loaded += len(received.result)
-		if loaded > maxCatalogBytes {
-			return nil, tooManyTools()
-		}
+		remaining -= int64(len(received.result))
 		var listing listPage
 		if err := json.Unmarshal(received.result, &listing); err != nil {
 			return nil, protocolError("the tool list cannot be read: %v", err)
