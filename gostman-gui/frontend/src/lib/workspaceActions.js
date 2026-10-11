@@ -2,10 +2,12 @@ import { textToBase64 } from './base64'
 import { generateAllSnippets } from './codeGenerator'
 import { countActiveRequests, sanitizeImport, withoutActiveContent } from './importExport'
 import { pluralize } from './dataUtils'
+import { createExampleActions } from './exampleActions'
 import { applyExtractors, createExecutor } from './execution'
 import { introspectionRequest, readSchema } from './graphqlSchema'
 import { clearToken, obtainToken } from './oauth'
 import { isGrpcRequest, serializeProtoFiles } from './grpc'
+import { createMockActions } from './mockServer'
 import { normalizeRequest } from './request'
 import { isRequestDirty } from './requestChanges'
 import { bodyBase64, downloadName, mimeType } from './response'
@@ -64,6 +66,8 @@ export function createWorkspaceActions(backend) {
   const sockets = createSocketActions(backend)
   const execute = createExecutor(backend)
   const runner = createRunner(backend, execute)
+  const examples = createExampleActions(backend)
+  const mock = createMockActions(backend)
 
   function runExtractors(tabId) {
     const tab = tabById(tabId)
@@ -192,8 +196,8 @@ export function createWorkspaceActions(backend) {
   const pasteCurl = attempt('Could not read the curl command', async (command) => {
     const tab = activeTab()
     const parsed = await backend.parseCurl(command)
-    const { id, name, folderId, extractors } = tab.request
-    store().updateTabRequest(tab.id, { ...normalizeRequest(parsed), id, name, folderId, extractors })
+    const { id, name, folderId, extractors, examples: kept } = tab.request
+    store().updateTabRequest(tab.id, { ...normalizeRequest(parsed), id, name, folderId, extractors, examples: kept })
   })
 
   const addImported = attempt('Import failed', async (data) => {
@@ -328,6 +332,8 @@ export function createWorkspaceActions(backend) {
     export: () => store().openImportDialog(EXPORT_TAB),
     runCollection: () => store().openRunner(),
     cookies: () => store().openCookiesDialog(),
+    examples: examples.open,
+    mockServer: mock.open,
     settings: () => store().openSettingsDialog(),
     import: () => store().openImportDialog(),
     reset: confirmReset,
@@ -336,6 +342,8 @@ export function createWorkspaceActions(backend) {
   return {
     send,
     sockets,
+    examples,
+    mock,
     runExtractors,
     getToken,
     forgetToken,

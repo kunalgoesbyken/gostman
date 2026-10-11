@@ -34,6 +34,14 @@ export function LoadData() {
   return window['go']['main']['App']['LoadData']();
 }
 
+export function MockRoutes(arg1, arg2) {
+  return window['go']['main']['App']['MockRoutes'](arg1, arg2);
+}
+
+export function MockStatus() {
+  return window['go']['main']['App']['MockStatus']();
+}
+
 export function ParseCurl(arg1) {
   return window['go']['main']['App']['ParseCurl'](arg1);
 }
@@ -84,6 +92,18 @@ export function SaveSettings(arg1) {
 
 export function SendRequest(arg1, arg2) {
   return window['go']['main']['App']['SendRequest'](arg1, arg2);
+}
+
+export function StartMock(arg1, arg2, arg3) {
+  return window['go']['main']['App']['StartMock'](arg1, arg2, arg3);
+}
+
+export function StopMock() {
+  return window['go']['main']['App']['StopMock']();
+}
+
+export function UpdateMock(arg1, arg2) {
+  return window['go']['main']['App']['UpdateMock'](arg1, arg2);
 }
 
 export function WSClose(arg1) {

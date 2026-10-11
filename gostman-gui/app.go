@@ -79,6 +79,7 @@ type Request struct {
 	Options          engine.Options `json:"options"`
 	Extractors       string         `json:"extractors"`
 	Assertions       string         `json:"assertions"`
+	Examples         string         `json:"examples"`
 	PreScript        string         `json:"preScript"`
 	PostScript       string         `json:"postScript"`
 	GrpcMethod       string         `json:"grpcMethod"`

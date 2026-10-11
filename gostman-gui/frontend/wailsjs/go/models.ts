@@ -416,6 +416,40 @@ export namespace main {
 	        this.parentId = source["parentId"];
 	    }
 	}
+	export class MockState {
+	    running: boolean;
+	    address: string;
+	    routes: mock.Route[];
+	
+	    static createFrom(source: any = {}) {
+	        return new MockState(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.running = source["running"];
+	        this.address = source["address"];
+	        this.routes = this.convertValues(source["routes"], mock.Route);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class Request {
 	    id: string;
 	    name: string;
@@ -432,6 +466,7 @@ export namespace main {
 	    options: engine.Options;
 	    extractors: string;
 	    assertions: string;
+	    examples: string;
 	    preScript: string;
 	    postScript: string;
 	    grpcMethod: string;
@@ -460,6 +495,7 @@ export namespace main {
 	        this.options = this.convertValues(source["options"], engine.Options);
 	        this.extractors = source["extractors"];
 	        this.assertions = source["assertions"];
+	        this.examples = source["examples"];
 	        this.preScript = source["preScript"];
 	        this.postScript = source["postScript"];
 	        this.grpcMethod = source["grpcMethod"];
@@ -567,6 +603,75 @@ export namespace main {
 		    }
 		    return a;
 		}
+	}
+
+}
+
+export namespace mock {
+	
+	export class Route {
+	    requestId: string;
+	    name: string;
+	    method: string;
+	    path: string;
+	    state: string;
+	    reason: string;
+	    exampleId: string;
+	    exampleName: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Route(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.requestId = source["requestId"];
+	        this.name = source["name"];
+	        this.method = source["method"];
+	        this.path = source["path"];
+	        this.state = source["state"];
+	        this.reason = source["reason"];
+	        this.exampleId = source["exampleId"];
+	        this.exampleName = source["exampleName"];
+	    }
+	}
+	export class Settings {
+	    port: number;
+	    delayMs: number;
+	    cors: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Settings(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.port = source["port"];
+	        this.delayMs = source["delayMs"];
+	        this.cors = source["cors"];
+	    }
+	}
+	export class Source {
+	    id: string;
+	    name: string;
+	    method: string;
+	    url: string;
+	    examples: string;
+	    exampleId: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Source(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.method = source["method"];
+	        this.url = source["url"];
+	        this.examples = source["examples"];
+	        this.exampleId = source["exampleId"];
+	    }
 	}
 
 }

@@ -2,7 +2,7 @@ import { memo, useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { JsonView, darkStyles } from 'react-json-view-lite'
 import 'react-json-view-lite/dist/index.css'
 import {
-  AlertTriangle, Check, ChevronDown, ChevronUp, Cookie, Copy, Download, FileDigit, FileText, FileX, List, Loader2,
+  AlertTriangle, BookmarkPlus, Check, ChevronDown, ChevronUp, Cookie, Copy, Download, FileDigit, FileText, FileX, List, Loader2,
   Maximize2, Minimize2, Scissors,
 } from "lucide-react"
 import { Badge } from "./ui/badge"
@@ -15,6 +15,7 @@ import { TabCount, Tabs, TabsList, TabsTrigger } from "./ui/tabs"
 import { TestResults, countPassed, hasTestOutput } from "./TestResults"
 import { useClipboardCopy } from "../hooks/useClipboardCopy"
 import { formatSize, lookup } from "../lib/dataUtils"
+import { canSaveAsExample } from "../lib/examples"
 import { MIN_REQUEST_HEIGHT_PX, MIN_RESPONSE_HEIGHT_PX, TOOLBAR_HEIGHT_PX } from "../lib/layout"
 import {
   BODY_KINDS, ERROR_TITLES, bodyBytes, bodyKind, mimeType, parseJsonBody, statusVariant, textBody,
@@ -234,7 +235,7 @@ function panelStyleFor(isFullscreen, isCollapsed, panelShare) {
   return { flex: `0 1 ${panelShare}%`, minHeight: MIN_RESPONSE_HEIGHT_PX }
 }
 
-export const ResponsePanel = memo(function ResponsePanel({ response, tests, loading, onDownload }) {
+export const ResponsePanel = memo(function ResponsePanel({ response, tests, loading, onDownload, onSaveExample }) {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [activeTab, setActiveTab] = useState(TAB_BODY)
@@ -331,6 +332,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
             <div className="flex shrink-0 items-center gap-1">
               {showsBody && text && <CopyButton text={text} />}
               {hasBody && <IconButton label="Download body" icon={Download} onClick={onDownload} />}
+              {canSaveAsExample(shown) && <IconButton label="Save as example" icon={BookmarkPlus} onClick={onSaveExample} />}
               <IconButton
                 label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
                 icon={isFullscreen ? Minimize2 : Maximize2}

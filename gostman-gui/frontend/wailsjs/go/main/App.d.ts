@@ -3,6 +3,7 @@
 import {engine} from '../models';
 import {main} from '../models';
 import {rpc} from '../models';
+import {mock} from '../models';
 
 export function Authorize(arg1:engine.OAuth2,arg2:string):Promise<main.AuthorizationResult>;
 
@@ -19,6 +20,10 @@ export function FetchToken(arg1:engine.TokenExchange):Promise<engine.Token>;
 export function InvokeGrpc(arg1:string,arg2:rpc.Call):Promise<engine.Response>;
 
 export function LoadData():Promise<main.SavedData>;
+
+export function MockRoutes(arg1:Array<mock.Source>,arg2:string):Promise<Array<mock.Route>>;
+
+export function MockStatus():Promise<main.MockState>;
 
 export function ParseCurl(arg1:string):Promise<engine.Request>;
 
@@ -45,6 +50,12 @@ export function SaveRequests(arg1:Array<main.Request>):Promise<Array<main.Reques
 export function SaveSettings(arg1:main.Settings):Promise<void>;
 
 export function SendRequest(arg1:string,arg2:engine.Request):Promise<engine.Response>;
+
+export function StartMock(arg1:Array<mock.Source>,arg2:string,arg3:mock.Settings):Promise<main.MockState>;
+
+export function StopMock():Promise<void>;
+
+export function UpdateMock(arg1:Array<mock.Source>,arg2:string):Promise<main.MockState>;
 
 export function WSClose(arg1:string):Promise<void>;
 

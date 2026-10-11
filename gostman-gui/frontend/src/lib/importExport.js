@@ -3,6 +3,7 @@ import YAML from 'js-yaml'
 import { BODY_BINARY, BODY_FORM, BODY_JSON, BODY_MULTIPART, BODY_NONE, BODY_TEXT, BODY_TYPES, BODY_XML } from './body'
 import { buildCollectionTree, folderDepth, foldersIn, listFolders, MAX_FOLDER_DEPTH, requestsIn, ROOT_ID } from './collectionTree'
 import { isPlainObject, lookup, parseJSON, pluralize } from './dataUtils'
+import { sanitizeExamples } from './examples'
 import { readParamRows } from './queryString'
 import { clearToken } from './oauth'
 import { AUTH_OAUTH2, normalizeRequest } from './request'
@@ -1438,6 +1439,7 @@ function sanitizeRequest(raw) {
     name: cleanName(raw.name, UNTITLED_REQUEST),
     method: cleanMethod(raw.method),
     bodyType: BODY_TYPE_VALUES.includes(raw.bodyType) ? raw.bodyType : '',
+    examples: sanitizeExamples(stringOf(raw.examples)),
     auth: sanitizeAuth(raw.auth),
     options: sanitizeOptions(raw.options),
   })

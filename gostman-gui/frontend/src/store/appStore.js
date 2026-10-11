@@ -28,7 +28,7 @@ const createTab = (id, request) => ({ id, request: normalizeRequest(request), pe
 
 const FIRST_TAB = createTab(`${TAB_ID_PREFIX}1`)
 
-const persistableTab = ({ id, request }) => ({ id, request })
+const persistableTab = ({ id, request }) => ({ id, request: { ...request, examples: '' } })
 
 const restoreTabs = (tabs) => {
   const restorable = asArray(tabs).filter((tab) => tab?.id && tab.request)
@@ -45,6 +45,13 @@ const mapTab = (state, tabId, update) => ({
 })
 
 const mapTabRequests = (tabs, update) => tabs.map((tab) => ({ ...tab, request: update(tab.request) }))
+
+const withSavedExamples = (tabs, requests) => {
+  const examplesOf = new Map(requests.map((request) => [request.id, request.examples]))
+  return mapTabRequests(tabs, (request) => (
+    request.id && examplesOf.has(request.id) ? { ...request, examples: examplesOf.get(request.id) } : request
+  ))
+}
 
 const appendTab = (state, request) => {
   const tab = createTab(`${TAB_ID_PREFIX}${state.nextTabId}`, request)
@@ -146,18 +153,22 @@ export const useAppStore = create(
         commandPaletteOpen: false,
         cookiesDialogOpen: false,
         settingsDialogOpen: false,
+        examplesDialogOpen: false,
+        mockDialogOpen: false,
         runner: CLOSED_RUNNER,
         persistenceFailureReported: false,
         alertDialog: CLOSED_ALERT,
         confirmDialog: CLOSED_CONFIRM,
         promptDialog: CLOSED_PROMPT,
 
-        hydrate: (data) => set(() => {
+        hydrate: (data) => set((state) => {
           const environments = restoreEnvironments(data)
+          const requests = asArray(data.requests).map(normalizeRequest)
           const hasActive = environments.some((environment) => environment.id === data.activeEnvironmentId)
           return {
             hydrated: true,
-            requests: asArray(data.requests).map(normalizeRequest),
+            requests,
+            tabs: withSavedExamples(state.tabs, requests),
             folders: asArray(data.folders),
             requestHistory: asArray(data.history).map(normalizeRequest),
             cookies: mergeCookies(asArray(data.cookies), []),
@@ -213,7 +224,7 @@ export const useAppStore = create(
         })),
 
         addToHistory: (request) => set((state) => {
-          const entry = { ...normalizeRequest(request), id: createId('hist'), timestamp: new Date().toISOString() }
+          const entry = { ...normalizeRequest(request), examples: '', id: createId('hist'), timestamp: new Date().toISOString() }
           const others = state.requestHistory.filter((existing) => !isSameCall(existing, entry))
           return { requestHistory: [entry, ...others].slice(0, HISTORY_LIMIT) }
         }),
@@ -309,6 +320,10 @@ export const useAppStore = create(
         closeCookiesDialog: () => set({ cookiesDialogOpen: false }),
         openSettingsDialog: () => set({ settingsDialogOpen: true }),
         closeSettingsDialog: () => set({ settingsDialogOpen: false }),
+        openExamplesDialog: () => set({ examplesDialogOpen: true }),
+        closeExamplesDialog: () => set({ examplesDialogOpen: false }),
+        openMockDialog: () => set({ mockDialogOpen: true }),
+        closeMockDialog: () => set({ mockDialogOpen: false }),
 
         openRunner: (folderId = '') => set({ runner: { ...CLOSED_RUNNER, isOpen: true, folderId } }),
         closeRunner: () => set({ runner: CLOSED_RUNNER }),
@@ -386,6 +401,8 @@ export const selectIsDialogOpen = (state) => (
   || state.commandPaletteOpen
   || state.cookiesDialogOpen
   || state.settingsDialogOpen
+  || state.examplesDialogOpen
+  || state.mockDialogOpen
   || state.runner.isOpen
   || state.alertDialog.isOpen
   || state.confirmDialog.isOpen

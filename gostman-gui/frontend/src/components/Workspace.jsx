@@ -21,6 +21,8 @@ const CodeSnippetDialog = lazy(() => import("./CodeSnippetDialog").then((module)
 const ImportExportDialog = lazy(() => import("./ImportExportDialog").then((module) => ({ default: module.ImportExportDialog })))
 const CookiesDialog = lazy(() => import("./CookiesDialog").then((module) => ({ default: module.CookiesDialog })))
 const NetworkDialog = lazy(() => import("./NetworkDialog").then((module) => ({ default: module.NetworkDialog })))
+const ExamplesDialog = lazy(() => import("./ExamplesDialog").then((module) => ({ default: module.ExamplesDialog })))
+const MockServerDialog = lazy(() => import("./MockServerDialog").then((module) => ({ default: module.MockServerDialog })))
 const RunnerDialog = lazy(() => import("./RunnerDialog").then((module) => ({ default: module.RunnerDialog })))
 const MonacoEditor = lazy(() => import("./MonacoEditor").then((module) => ({ default: module.MonacoEditor })))
 
@@ -124,6 +126,8 @@ function LoadedWorkspace({ backend, onBack }) {
   const importDialogTab = useAppStore((s) => s.importDialogTab)
   const cookiesDialogOpen = useAppStore((s) => s.cookiesDialogOpen)
   const settingsDialogOpen = useAppStore((s) => s.settingsDialogOpen)
+  const examplesDialogOpen = useAppStore((s) => s.examplesDialogOpen)
+  const mockDialogOpen = useAppStore((s) => s.mockDialogOpen)
   const settings = useAppStore((s) => s.settings)
   const runner = useAppStore((s) => s.runner)
   const isDialogOpen = useAppStore(selectIsDialogOpen)
@@ -170,6 +174,7 @@ function LoadedWorkspace({ backend, onBack }) {
         onOpenCommands={openCommandPalette}
         onOpenCookies={openCookiesDialog}
         onOpenSettings={openSettingsDialog}
+        onOpenMock={actions.mock.open}
         onBack={onBack}
       />
 
@@ -228,6 +233,7 @@ function LoadedWorkspace({ backend, onBack }) {
               tests={activeTab.tests}
               loading={isLoading}
               onDownload={actions.download}
+              onSaveExample={actions.examples.saveResponse}
             />
           </div>
         </main>
@@ -251,6 +257,8 @@ function LoadedWorkspace({ backend, onBack }) {
         )}
         {cookiesDialogOpen && <CookiesDialog onClose={closeCookiesDialog} />}
         {settingsDialogOpen && <NetworkDialog settings={settings} actions={actions} onClose={closeSettingsDialog} />}
+        {examplesDialogOpen && <ExamplesDialog request={activeRequest} actions={actions.examples} EditorComponent={MonacoEditor} />}
+        {mockDialogOpen && <MockServerDialog folders={folders} requests={requests} actions={actions.mock} />}
         {runner.isOpen && <RunnerDialog runner={runner} folders={folders} requests={requests} actions={actions} />}
       </Suspense>
 

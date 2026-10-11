@@ -38,3 +38,7 @@ func (e *Expansion) Headers(raw string, auth Auth) ([]HeaderEntry, error) {
 func (e *Expansion) Err() error {
 	return e.substitution.overflow()
 }
+
+func PlaceholderSpans(text string) [][]int {
+	return placeholderRe.FindAllStringIndex(text, -1)
+}

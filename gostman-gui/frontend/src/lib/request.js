@@ -42,6 +42,7 @@ const DEFAULT_REQUEST = {
   options: DEFAULT_OPTIONS,
   extractors: '',
   assertions: '',
+  examples: '',
   preScript: '',
   postScript: '',
   grpcMethod: '',

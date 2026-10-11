@@ -20,6 +20,7 @@ import {
   SaveSettings,
   SendRequest,
 } from '../../../wailsjs/go/main/App'
+import { desktopMock } from './desktopMock'
 import { openDesktopSocket } from './desktopSocket'
 import { toGrpcCall, toGrpcTarget } from '../grpc'
 import { toEngineRequest } from '../request'
@@ -63,6 +64,7 @@ export const desktopBackend = {
     saveSettings: (settings) => SaveSettings(settings),
     pickFile: (title) => PickFile(title),
   },
+  mock: desktopMock,
   oauthCallback: OAUTH_CALLBACK,
   authorize: (config, variables) => Authorize(config, variables),
   cancelAuthorization: () => CancelAuthorization(),

@@ -1,5 +1,6 @@
 import { memo, lazy, Suspense, useEffect, useMemo } from "react"
-import { AlertCircle, CheckCircle2 } from "lucide-react"
+import { AlertCircle, Bookmark, CheckCircle2 } from "lucide-react"
+import { Button } from "./ui/button"
 import { Notice, Panel, Toolbar } from "./ui/panel"
 import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { AuthPanel } from "./AuthPanel"
@@ -11,6 +12,7 @@ import { ExtractPanel } from "./ExtractPanel"
 import { TestsPanel } from "./TestsPanel"
 import { BODY_FORM, BODY_MULTIPART, BODY_NONE } from "../lib/body"
 import { parseExtractors } from "../lib/chaining"
+import { parseExamples } from "../lib/examples"
 import { GRAPHQL_METHOD } from "../lib/graphqlSchema"
 import { GRPC_METHOD, GRPC_PANEL } from "../lib/grpc"
 import { readParamRows } from "../lib/queryString"
@@ -75,7 +77,7 @@ export const RequestTabs = memo(function RequestTabs({
   const activePanel = useAppStore((state) => state.requestPanel)
   const setActivePanel = useAppStore((state) => state.setRequestPanel)
   const isSocketOpen = useSocketStore((state) => selectSession(tabId)(state).status === SOCKET_OPEN)
-  const { url, queryParams, headers, body, bodyType, auth, options, method, extractors, assertions, preScript, postScript } = activeRequest
+  const { url, queryParams, headers, body, bodyType, auth, options, method, extractors, assertions, examples, preScript, postScript } = activeRequest
   const isWebSocket = useMemo(() => isSocketAddress(url, variables), [url, variables])
   const isGraphQL = method === GRAPHQL_METHOD
   const isGrpc = method === GRPC_METHOD
@@ -93,6 +95,7 @@ export const RequestTabs = memo(function RequestTabs({
   const bodyContent = useMemo(() => bodyBadge(body, bodyType), [body, bodyType])
   const extractorCount = useMemo(() => parseExtractors(extractors).filter((extractor) => extractor.enabled).length, [extractors])
   const assertionCount = useMemo(() => countActiveAssertions(assertions), [assertions])
+  const exampleCount = useMemo(() => parseExamples(examples).length, [examples])
   const hasScripts = preScript.trim() !== "" || postScript.trim() !== ""
   const hasCustomOptions = options.timeoutMs > 0 || options.noFollowRedirects || options.insecureTLS
 
@@ -116,6 +119,17 @@ export const RequestTabs = memo(function RequestTabs({
           <TabsTrigger value="tests">Tests<TabBadge value={assertionCount || hasScripts} /></TabsTrigger>
           <TabsTrigger value="settings">Settings<TabBadge value={hasCustomOptions} /></TabsTrigger>
         </TabsList>
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-label="Examples"
+          title="Saved response examples"
+          onClick={actions.examples.open}
+          className="ml-auto px-1.5"
+        >
+          <Bookmark />
+          <TabBadge value={exampleCount} />
+        </Button>
       </Toolbar>
 
       <div className="min-h-0 flex-1 overflow-hidden">
