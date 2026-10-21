@@ -1,6 +1,6 @@
 import {
   KIND_CANCELED, KIND_CONFIG, KIND_NETWORK, KIND_REPLY, KIND_TIMEOUT, KIND_TOO_LARGE,
-  aiError, cleanDetail, statusError,
+  aiError, cleanDetail, statusError, unreachableMessage,
 } from './errors'
 import {
   PROVIDER_ANTHROPIC, PROVIDER_GEMINI, PROVIDER_OPENAI, providerById,
@@ -130,11 +130,11 @@ async function readReply(response, wire, key) {
   }
 }
 
-function failureOf(error, controller, key, timedOut) {
+function failureOf(error, controller, key, timedOut, config, base) {
   if (timedOut()) return aiError(KIND_TIMEOUT, 'The provider did not answer in time')
   if (controller.signal.aborted) return aiError(KIND_CANCELED, 'Cancelled')
   const reason = scrubText(cleanDetail(error?.message || ''), [key])
-  return aiError(KIND_NETWORK, `Could not reach the provider${reason ? `: ${reason}` : ''}. In a browser the provider must allow cross-origin calls; a local Ollama also needs OLLAMA_ORIGINS set to this site.`)
+  return aiError(KIND_NETWORK, unreachableMessage({ provider: config.provider, host: new URL(base).host, origin: window.location.origin, reason }))
 }
 
 async function exchange(id, config, prompt, maxTokens) {
@@ -162,7 +162,7 @@ async function exchange(id, config, prompt, maxTokens) {
     })
     return await readReply(response, wire, key)
   } catch (error) {
-    return { error: failureOf(error, controller, key, () => didTimeOut) }
+    return { error: failureOf(error, controller, key, () => didTimeOut, config, base) }
   } finally {
     clearTimeout(timer)
     pending.delete(id)
