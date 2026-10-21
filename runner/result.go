@@ -13,6 +13,7 @@ type Check struct {
 type LogLine struct {
 	Level string `json:"level"`
 	Text  string `json:"text"`
+	At    int64  `json:"at"`
 }
 
 type Result struct {
@@ -30,8 +31,10 @@ type Result struct {
 	Failed     bool      `json:"failed"`
 	Tests      []Check   `json:"tests"`
 	Logs       []LogLine `json:"logs"`
+	Visual     string    `json:"visualization,omitempty"`
 	Iteration  int       `json:"iteration,omitempty"`
 	Exchange   *Capture  `json:"exchange,omitempty"`
+	flow       flow
 }
 
 type Summary struct {
@@ -71,7 +74,7 @@ func (r Result) PassedTests() int {
 }
 
 func summarize(results []Result, planned int) Summary {
-	summary := Summary{Requests: planned, NotRun: planned - len(results)}
+	summary := Summary{Requests: planned, NotRun: max(planned-len(results), 0)}
 	for _, result := range results {
 		summary.Tests += len(result.Tests)
 		summary.FailedTests += len(result.Tests) - result.PassedTests()

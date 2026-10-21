@@ -1,23 +1,10 @@
 import { expect } from 'chai'
 import { evaluateAssertions } from './assertions'
-
-const LOG_LEVELS = ['log', 'info', 'warn', 'error', 'debug']
-const AsyncFunction = (async () => {}).constructor
-
-const printable = (value) => {
-  if (typeof value === 'string') return value
-  if (value instanceof Error) return value.message
-  try {
-    return JSON.stringify(value) ?? String(value)
-  } catch {
-    return String(value)
-  }
-}
-
-function createConsole(logs) {
-  const write = (level) => (...values) => logs.push({ level, text: values.map(printable).join(' ') })
-  return Object.fromEntries(LOG_LEVELS.map((level) => [level, write(level)]))
-}
+import { createConsole, errorLine, printable } from './console'
+import { createFlow } from './flow'
+import { compileScript, describeFailure } from './scriptRuntime'
+import { createUtils } from './utils'
+import { createVisualizer } from './visualize'
 
 const storable = (value) => (value !== null && typeof value === 'object' ? JSON.stringify(value) : value)
 
@@ -70,7 +57,7 @@ function createTestRunner(results) {
       await check()
       results.push({ name, passed: true, message: '' })
     } catch (error) {
-      results.push({ name, passed: false, message: printable(error) })
+      results.push({ name, passed: false, message: error instanceof Error ? error.message : printable(error) })
     }
   }
   const test = (name, check) => {
@@ -81,29 +68,61 @@ function createTestRunner(results) {
 
 const editedRequest = ({ url, method, headers, body }) => ({ url, method, headers, body })
 
+async function sendRequest(target) {
+  const send = globalThis.hostSend
+  if (typeof send !== 'function') throw new Error('sendRequest is not available here.')
+  return createResponse(JSON.parse(await send(JSON.stringify(target))))
+}
+
 export async function runJob({ script, assertions, request, response, variables }) {
   const logs = []
   const tests = []
   const runner = createTestRunner(tests)
   const scriptRequest = createRequest(request)
   const environment = createEnvironment(variables)
+  const flow = createFlow()
+  let visualization = ''
   const legacy = {
     getVar: environment.get,
     setVar: environment.set,
     getEnvVar: environment.get,
     setEnvVar: environment.set,
     sleep: (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)),
+    sendRequest,
+    runner: flow.api,
+  }
+  const api = {
+    req: scriptRequest,
+    res: createResponse(response),
+    env: environment,
+    bru: legacy,
+    test: runner.test,
+    expect,
+    console: createConsole(logs),
+    sendRequest,
+    visualize: createVisualizer((html) => { visualization = html }),
+    utils: createUtils(),
+    ...flow.api,
   }
 
   let error = ''
   try {
-    const run = new AsyncFunction('req', 'res', 'env', 'bru', 'test', 'expect', 'console', script || '')
-    await run(scriptRequest, createResponse(response), environment, legacy, runner.test, expect, createConsole(logs))
+    const run = compileScript(Object.keys(api), script || '')
+    await run(...Object.values(api))
     await runner.settled()
   } catch (failure) {
-    error = printable(failure)
+    error = await describeFailure(failure)
+    logs.push(errorLine(error))
   }
 
   const assertionResults = response ? evaluateAssertions(assertions || '', response) : []
-  return { tests: [...assertionResults, ...tests], logs, error, variables, request: editedRequest(scriptRequest) }
+  return {
+    tests: [...assertionResults, ...tests],
+    logs,
+    error,
+    variables,
+    request: editedRequest(scriptRequest),
+    flow: flow.state,
+    visualization,
+  }
 }

@@ -10,7 +10,7 @@ import (
 const renderLimit = 5 * time.Minute
 
 func Render(function string, result any, arguments ...any) error {
-	renderer, err := boot()
+	renderer, err := boot(nil)
 	if err != nil {
 		return err
 	}

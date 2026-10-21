@@ -8,8 +8,9 @@ export { toMcpCall } from '../lib/mcp'
 export { normalizeRequest, toEngineRequest } from '../lib/request'
 export { countActiveAssertions } from '../lib/scripting/assertions'
 export { runJob } from '../lib/scripting/job'
-export { TIMED_OUT, TIMEOUT_MS } from '../lib/scripting/limits'
-export { applyRequestEdits, requestSubject, responseSubject } from '../lib/scripting/subjects'
+export { collectionHosts } from '../lib/scripting/destinations'
+export { MAX_FLOW_STEPS, MAX_SENDS, SEND_TIMEOUT_MS, TIMED_OUT, TIMEOUT_MS } from '../lib/scripting/limits'
+export { applyRequestEdits, requestSubject, responseSubject, scriptedRequest } from '../lib/scripting/subjects'
 export { isSocketAddress } from '../lib/socketUrl'
 
 export const requestsInFolder = (folders, requests, folderId) => (

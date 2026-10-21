@@ -24,6 +24,8 @@ type session struct {
 	policy    engine.Policy
 	variables variables
 	common    *shared
+	library   []Request
+	hosts     []string
 }
 
 type job struct {
@@ -40,6 +42,8 @@ type stageRun struct {
 	Error     string          `json:"error"`
 	Variables variables       `json:"variables"`
 	Request   json.RawMessage `json:"request"`
+	Flow      flow            `json:"flow"`
+	Visual    string          `json:"visualization"`
 }
 
 type exchange struct {
@@ -48,6 +52,8 @@ type exchange struct {
 	tests    []Check
 	logs     []LogLine
 	errors   []string
+	flow     flow
+	visual   string
 }
 
 func hasText(text string) bool {
@@ -60,16 +66,22 @@ func (x *exchange) record(run stageRun) {
 	if run.Error != "" {
 		x.errors = append(x.errors, run.Error)
 	}
+	if run.Flow.Action != "" {
+		x.flow = run.Flow
+	}
+	if run.Visual != "" {
+		x.visual = run.Visual
+	}
 }
 
 func (x *exchange) stop(message string) {
 	x.response = engine.Failure(engine.ErrorConfig, message)
 }
 
-func (s *session) runStage(stage string, work job) stageRun {
+func (s *session) runStage(ctx context.Context, stage string, work job) stageRun {
 	work.Variables = s.variables
 	var run stageRun
-	if err := s.scripts.Isolated("runJob", &run, work); err != nil {
+	if err := s.scripts.IsolatedWith(s.bridge(ctx), "runJob", &run, work); err != nil {
 		return stageRun{Error: stage + ": " + err.Error()}
 	}
 	if run.Variables != nil {
@@ -87,12 +99,12 @@ func (s *session) subject(function string, source any) (json.RawMessage, error) 
 	return described, err
 }
 
-func (s *session) runPreRequest(request Request, outcome *exchange) (Request, bool, error) {
+func (s *session) runPreRequest(ctx context.Context, request Request, outcome *exchange) (Request, bool, error) {
 	described, err := s.subject("requestSubject", request)
 	if err != nil {
 		return request, false, err
 	}
-	run := s.runStage(preRequest, job{Script: request.PreScript, Request: described})
+	run := s.runStage(ctx, preRequest, job{Script: request.PreScript, Request: described})
 	outcome.record(run)
 	if run.Error != "" {
 		outcome.stop(run.Error)
@@ -168,7 +180,7 @@ func (s *session) needsPostStage(request Request) (bool, error) {
 	return active > 0, err
 }
 
-func (s *session) runPostResponse(request Request, outcome *exchange) error {
+func (s *session) runPostResponse(ctx context.Context, request Request, outcome *exchange) error {
 	needed, err := s.needsPostStage(request)
 	if err != nil || !needed {
 		return err
@@ -181,7 +193,7 @@ func (s *session) runPostResponse(request Request, outcome *exchange) error {
 	if err != nil {
 		return err
 	}
-	outcome.record(s.runStage(postResponse, job{
+	outcome.record(s.runStage(ctx, postResponse, job{
 		Script:     request.PostScript,
 		Assertions: request.Assertions,
 		Request:    sent,
@@ -208,11 +220,15 @@ func (s *session) execute(ctx context.Context, request Request) (exchange, error
 	}
 
 	if hasText(request.PreScript) {
-		edited, proceed, err := s.runPreRequest(request, &outcome)
+		edited, proceed, err := s.runPreRequest(ctx, request, &outcome)
 		if err != nil || !proceed {
 			return outcome, err
 		}
 		request = edited
+		if outcome.flow.holdsBack() {
+			outcome.skipped = outcome.flow.reason()
+			return outcome, nil
+		}
 	}
 
 	request, err = s.withFreshToken(ctx, request)
@@ -234,5 +250,5 @@ func (s *session) execute(ctx context.Context, request Request) (exchange, error
 	if err := s.extract(request, outcome.response); err != nil {
 		return outcome, err
 	}
-	return outcome, s.runPostResponse(request, &outcome)
+	return outcome, s.runPostResponse(ctx, request, &outcome)
 }

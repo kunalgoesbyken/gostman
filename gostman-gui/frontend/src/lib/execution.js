@@ -6,12 +6,19 @@ import { isMcpRequest } from './mcp'
 import { withFreshToken } from './oauth'
 import { failureResponse } from './response'
 import { countActiveAssertions } from './scripting/assertions'
+import { consoleGroup } from './consoleLog'
+import { addressHost, collectionHosts, isPermittedHost } from './scripting/destinations'
+import { holdsBack, reasonFor } from './scripting/flow'
+import { MAX_SENDS, SEND_TIMEOUT_MS } from './scripting/limits'
 import { applyRequestEdits, requestSubject, responseSubject, runInSandbox } from './scripting/sandbox'
+import { scriptedRequest } from './scripting/subjects'
 import { promptNames } from './variableScopes'
-import { useAppStore, variableTextFor } from '../store/appStore'
+import { selectActiveVariables, useAppStore, variableTextFor } from '../store/appStore'
 
 const CONFIG_ERROR = 'config'
 const PROMPT_DECLINED = 'The request was not sent because the values it asks for were not provided.'
+const UNUSABLE_ADDRESS = 'The address cannot be used by a script.'
+const SEND_LIMIT = `A script may call sendRequest ${MAX_SENDS} times.`
 const PRE_REQUEST = 'Pre-request script'
 const POST_RESPONSE = 'Post-response script'
 export const RESTRICTED = 'This folder is not trusted yet, so its scripts and OAuth 2.0 settings are switched off. Open the folder menu in the header and choose Trust this folder.'
@@ -32,9 +39,9 @@ function scriptChanges(before, after) {
   return Object.fromEntries([...changed, ...removed])
 }
 
-async function runStage(stage, job, request) {
+async function runStage(stage, job, request, send) {
   const variables = readVariables(request)
-  const run = await runInSandbox({ ...job, variables })
+  const run = await runInSandbox({ ...job, variables }, send)
   if (isPlainObject(run.variables) && !isSame(variables, run.variables)) {
     store().mergeActiveVariables(scriptChanges(variables, run.variables))
   }
@@ -48,7 +55,13 @@ async function askForValues(request) {
   return store().askVariables(names, Object.fromEntries(names.map((name) => [name, known[name] ?? ''])))
 }
 
+const NO_FLOW = { action: '', target: '' }
+
+const lastFlow = (runs) => runs.map((run) => run.flow).filter((flow) => flow?.action).pop() ?? NO_FLOW
+
 const report = (runs) => ({
+  flow: lastFlow(runs),
+  visualization: runs.map((run) => run.visualization).filter(Boolean).pop() ?? '',
   results: runs.flatMap((run) => run.tests),
   logs: runs.flatMap((run) => run.logs),
   error: runs.map((run) => run.error).filter(Boolean).join('\n'),
@@ -69,9 +82,33 @@ function transportFor(backend, request) {
   return backend.send
 }
 
+let scriptSends = 0
+let consoleSequence = 0
+
+function createScriptSender(backend) {
+  let sent = 0
+  return async (target) => {
+    if (sent >= MAX_SENDS) throw new Error(SEND_LIMIT)
+    sent += 1
+    const { requests } = store()
+    const variables = selectActiveVariables(store())
+    const request = scriptedRequest(target, requests)
+    const host = addressHost(request.url, variables)
+    if (host === '') throw new Error(UNUSABLE_ADDRESS)
+    if (!isPermittedHost(host, collectionHosts(requests, variables))) {
+      throw new Error(`The host "${host}" is not used by this collection, so scripts may not call it.`)
+    }
+    scriptSends += 1
+    const timed = { ...request, options: { ...request.options, timeoutMs: request.options.timeoutMs || SEND_TIMEOUT_MS } }
+    const response = await transportFor(backend, timed)(`script-${scriptSends}`, timed, variablesText(timed, {}), store().cookies)
+    if (response.error) throw new Error(response.body)
+    return JSON.stringify(responseSubject(response))
+  }
+}
+
 export function createExecutor(backend) {
-  return async function execute(original, sendId) {
-    const runs = []
+  const perform = async (original, sendId, runs) => {
+    const send = createScriptSender(backend)
     const stop = (request, message) => ({
       auth: request.auth,
       response: failureResponse(CONFIG_ERROR, message),
@@ -82,9 +119,10 @@ export function createExecutor(backend) {
     let request = original
     if (store().isRestricted && hasActiveContent(request)) return stop(request, RESTRICTED)
     if (hasText(request.preScript)) {
-      const pre = await runStage(PRE_REQUEST, { script: request.preScript, request: requestSubject(request) }, request)
+      const pre = await runStage(PRE_REQUEST, { script: request.preScript, request: requestSubject(request) }, request, send)
       runs.push(pre)
       if (pre.error) return stop(request, pre.error)
+      if (holdsBack(pre.flow)) return { ...stop(request, reasonFor(pre.flow)), skipped: reasonFor(pre.flow) }
       request = applyRequestEdits(request, pre.request)
     }
 
@@ -108,8 +146,16 @@ export function createExecutor(backend) {
         assertions: request.assertions,
         request: requestSubject(request),
         response: responseSubject(response),
-      }, request))
+      }, request, send))
     }
     return { auth: request.auth, response, tests: report(runs), extraction }
+  }
+
+  return async function execute(original, sendId) {
+    const runs = []
+    const outcome = await perform(original, sendId, runs)
+    const logs = runs.flatMap((run) => run.logs)
+    if (logs.length > 0) store().appendConsole(consoleGroup(original, logs, ++consoleSequence))
+    return outcome
   }
 }

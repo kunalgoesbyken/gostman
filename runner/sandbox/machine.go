@@ -24,6 +24,7 @@ const (
 
 var (
 	errExpired = errors.New("the script ran out of time")
+	errMemory  = errors.New("the script used too much memory")
 	errStalled = errors.New("The script is waiting for something that never happens.")
 )
 
@@ -41,7 +42,7 @@ type machine struct {
 	stringify goja.Callable
 }
 
-func boot() (*machine, error) {
+func boot(bridge Bridge) (*machine, error) {
 	program, err := compiled()
 	if err != nil {
 		return nil, fmt.Errorf("the script runtime does not compile: %w", err)
@@ -49,7 +50,7 @@ func boot() (*machine, error) {
 	vm := goja.New()
 	pending := &timers{}
 	pending.install(vm)
-	if err := installGlobals(vm); err != nil {
+	if err := installGlobals(vm, bridge); err != nil {
 		return nil, fmt.Errorf("the script runtime does not start: %w", err)
 	}
 	if _, err := vm.RunProgram(program); err != nil {
@@ -151,6 +152,9 @@ func (m *machine) settle(value goja.Value, deadline time.Time) (goja.Value, erro
 func (m *machine) failure(err error) error {
 	var interrupted *goja.InterruptedError
 	if errors.As(err, &interrupted) {
+		if reason, ok := interrupted.Value().(error); ok {
+			return reason
+		}
 		return errExpired
 	}
 	var thrown *goja.Exception

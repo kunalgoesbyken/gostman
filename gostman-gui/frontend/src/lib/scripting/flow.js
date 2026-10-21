@@ -1,0 +1,24 @@
+export const FLOW_NEXT = 'next'
+export const FLOW_SKIP = 'skip'
+export const FLOW_STOP = 'stop'
+
+export const SKIPPED_BY_SCRIPT = 'Skipped by a script.'
+export const STOPPED_BY_SCRIPT = 'Not sent because a script stopped the run.'
+
+export const holdsBack = (flow) => flow.action === FLOW_SKIP || flow.action === FLOW_STOP
+
+export const reasonFor = (flow) => (flow.action === FLOW_STOP ? STOPPED_BY_SCRIPT : SKIPPED_BY_SCRIPT)
+
+export function createFlow() {
+  const state = { action: '', target: '' }
+  const set = (action, target = '') => {
+    state.action = action
+    state.target = target
+  }
+  const api = {
+    setNextRequest: (name) => (name === null || name === undefined ? set(FLOW_STOP) : set(FLOW_NEXT, String(name))),
+    skipRequest: () => set(FLOW_SKIP),
+    stopExecution: () => set(FLOW_STOP),
+  }
+  return { api, state }
+}
