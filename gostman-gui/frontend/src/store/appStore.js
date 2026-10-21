@@ -207,6 +207,8 @@ export const useAppStore = create(
         settingsDialogOpen: false,
         examplesDialogOpen: false,
         mockDialogOpen: false,
+        specLinks: {},
+        specDialog: null,
         runner: CLOSED_RUNNER,
         persistenceFailureReported: false,
         alertDialog: CLOSED_ALERT,
@@ -419,6 +421,9 @@ export const useAppStore = create(
         closeExamplesDialog: () => set({ examplesDialogOpen: false }),
         openMockDialog: () => set({ mockDialogOpen: true }),
         closeMockDialog: () => set({ mockDialogOpen: false }),
+        setSpecLink: (folderId, link) => set((state) => ({ specLinks: { ...state.specLinks, [folderId]: link } })),
+        openSpecDialog: (specDialog) => set({ specDialog }),
+        closeSpecDialog: () => set({ specDialog: null }),
 
         openRunner: (folderId = '') => set({ runner: { ...CLOSED_RUNNER, isOpen: true, folderId } }),
         closeRunner: () => set({ runner: CLOSED_RUNNER }),
@@ -466,6 +471,7 @@ export const useAppStore = create(
         partialize: (state) => ({
           tabs: state.tabs.map(persistableTab),
           isRestricted: state.isRestricted,
+          specLinks: state.specLinks,
           activeTabId: state.activeTabId,
           nextTabId: state.nextTabId,
         }),
@@ -476,6 +482,7 @@ export const useAppStore = create(
             ...current,
             tabs,
             isRestricted: Boolean(persisted?.isRestricted),
+            specLinks: isPlainObject(persisted?.specLinks) ? persisted.specLinks : {},
             activeTabId: hasActive ? persisted.activeTabId : tabs[0].id,
             nextTabId: Math.max(persisted?.nextTabId || 0, nextIdAfter(tabs)),
           }
@@ -524,6 +531,7 @@ export const selectIsDialogOpen = (state) => (
   || state.mockDialogOpen
   || state.environmentDialogOpen
   || state.variablePrompt.isOpen
+  || state.specDialog !== null
   || state.runner.isOpen
   || state.alertDialog.isOpen
   || state.confirmDialog.isOpen

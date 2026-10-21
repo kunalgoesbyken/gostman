@@ -28,6 +28,8 @@ const NetworkDialog = lazy(() => import("./NetworkDialog").then((module) => ({ d
 const ExamplesDialog = lazy(() => import("./ExamplesDialog").then((module) => ({ default: module.ExamplesDialog })))
 const MockServerDialog = lazy(() => import("./MockServerDialog").then((module) => ({ default: module.MockServerDialog })))
 const CaptureDialog = lazy(() => import("./CaptureDialog").then((module) => ({ default: module.CaptureDialog })))
+const SpecViewer = lazy(() => import("./SpecViewer").then((module) => ({ default: module.SpecViewer })))
+const SpecSyncDialog = lazy(() => import("./SpecSyncDialog").then((module) => ({ default: module.SpecSyncDialog })))
 const RunnerDialog = lazy(() => import("./RunnerDialog").then((module) => ({ default: module.RunnerDialog })))
 const MonacoEditor = lazy(() => import("./MonacoEditor").then((module) => ({ default: module.MonacoEditor })))
 
@@ -175,6 +177,9 @@ function LoadedWorkspace({ backend, onBack }) {
   const settingsDialogOpen = useAppStore((s) => s.settingsDialogOpen)
   const examplesDialogOpen = useAppStore((s) => s.examplesDialogOpen)
   const mockDialogOpen = useAppStore((s) => s.mockDialogOpen)
+  const specDialog = useAppStore((s) => s.specDialog)
+  const specLinks = useAppStore((s) => s.specLinks)
+  const closeSpecDialog = useAppStore((s) => s.closeSpecDialog)
   const settings = useAppStore((s) => s.settings)
   const runner = useAppStore((s) => s.runner)
   const captureDialogOpen = useCaptureStore((s) => s.isOpen)
@@ -304,6 +309,8 @@ function LoadedWorkspace({ backend, onBack }) {
             variables={variablesMap}
             onImport={actions.importData}
             onImportShared={actions.importShared}
+            openapi={actions.openapi}
+            onPickSpecFile={actions.canConfigureNetwork ? actions.pickFile : null}
             onSaveFile={actions.saveTextFile}
             onClose={closeImportDialog}
           />
@@ -314,6 +321,8 @@ function LoadedWorkspace({ backend, onBack }) {
         {examplesDialogOpen && <ExamplesDialog request={activeRequest} actions={actions.examples} EditorComponent={MonacoEditor} />}
         {mockDialogOpen && <MockServerDialog folders={folders} requests={requests} actions={actions.mock} />}
         {captureDialogOpen && <CaptureDialog folders={folders} requests={requests} actions={actions.capture} />}
+        {specDialog?.mode === "view" && <SpecViewer dialog={specDialog} actions={actions.openapi} onClose={closeSpecDialog} />}
+        {specDialog?.mode === "sync" && <SpecSyncDialog dialog={specDialog} link={specLinks[specDialog.folderId]} actions={actions.openapi} onClose={closeSpecDialog} />}
         {runner.isOpen && <RunnerDialog runner={runner} folders={folders} requests={requests} actions={actions} />}
       </Suspense>
 

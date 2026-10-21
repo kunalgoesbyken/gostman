@@ -10,11 +10,15 @@ import (
 
 	"github.com/krockxz/gostman/engine"
 	"github.com/krockxz/gostman/mcpclient"
+	"github.com/krockxz/gostman/openapi"
 	"github.com/krockxz/gostman/rpc"
 )
 
 const (
-	maxRequestBytes = 14 << 20
+	maxRequestBytes      = 14 << 20
+	maxOpenAPIReplyBytes = 4 << 20
+	maxOpenAPIRefs       = 10
+	maxOpenAPIBytes      = openapi.DefaultMaxBytes
 
 	actionDescribe = "describe"
 	actionInvoke   = "invoke"
@@ -81,6 +85,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, describeMcp(r))
 	case query.Get("mcp") == actionInvoke:
 		writeJSON(w, invokeMcp(r))
+	case query.Has("openapi"):
+		writeJSON(w, readOpenAPI(r))
 	case query.Has("curl"):
 		writeJSON(w, parseCurl(r))
 	case query.Has("prepare"):
@@ -147,6 +153,19 @@ func parseCurl(r *http.Request) curlResult {
 		return curlResult{Error: err.Error()}
 	}
 	return curlResult{Request: &request}
+}
+
+func readOpenAPI(r *http.Request) openapi.Reply {
+	var query openapi.Query
+	if err := json.NewDecoder(r.Body).Decode(&query); err != nil {
+		return openapi.Reply{Error: err.Error()}
+	}
+	query.Source.Path = ""
+	reply := openapi.Handle(r.Context(), query, openapi.Options{Policy: Policy, MaxBytes: maxOpenAPIBytes, MaxRefs: maxOpenAPIRefs})
+	if encoded, err := json.Marshal(reply); err == nil && len(encoded) > maxOpenAPIReplyBytes {
+		return openapi.Reply{Error: "the answer is too large for the web app, so it is read in smaller parts"}
+	}
+	return reply
 }
 
 func startAuthorization(r *http.Request) authorizationResult {

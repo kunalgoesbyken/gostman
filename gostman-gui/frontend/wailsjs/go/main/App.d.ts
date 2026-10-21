@@ -41,6 +41,8 @@ export function MockRoutes(arg1:Array<mock.Source>,arg2:string):Promise<Array<mo
 
 export function MockStatus():Promise<main.MockState>;
 
+export function OpenAPI(arg1:any):Promise<any>;
+
 export function OpenWorkspace(arg1:string):Promise<main.WorkspaceStatus>;
 
 export function ParseCurl(arg1:string):Promise<engine.Request>;

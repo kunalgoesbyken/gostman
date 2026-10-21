@@ -11,6 +11,7 @@ import { failureResponse } from '../response'
 const PROXY_URL = '/api/proxy'
 const GRPC_INVOKE_URL = `${PROXY_URL}?grpc=invoke`
 const MCP_INVOKE_URL = `${PROXY_URL}?mcp=invoke`
+const OPENAPI_PAGE_SIZE = 200
 const DATA_KEY = 'gostman-data'
 const DAMAGED_DATA_PREFIX = 'gostman-data-damaged-'
 const UNREADABLE_DATA = 'The saved data in this browser cannot be read, so nothing was changed.'
@@ -206,6 +207,8 @@ export const webBackend = {
   cancel: (id) => inFlight.get(id)?.abort(),
   prepare: (request, variables) => postForResult('prepare=1', toEngineRequest(request, variables), 'prepared'),
   parseCurl: (command) => postForResult('curl=1', { command }, 'request'),
+  openapi: (query) => postJSON(`${PROXY_URL}?openapi=1`, query),
+  openapiPageSize: OPENAPI_PAGE_SIZE,
   describeGrpc: (request, variables) => postForResult('grpc=describe', toGrpcTarget(request, variables), 'schema'),
   invokeGrpc,
   describeMcp: (request, variables) => postForResult('mcp=describe', toMcpTarget(request, variables), 'catalog'),

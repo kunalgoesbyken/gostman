@@ -18,6 +18,7 @@ import { clientUrl } from './sharedLink'
 import { createRunner } from './runner'
 import { buildReportPage } from './runReport'
 import { createSocketActions, isSocketAddress } from './socketSessions'
+import { createSpecActions } from './specActions'
 import { createStorageActions } from './storageActions'
 import { selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
 
@@ -259,6 +260,8 @@ export function createWorkspaceActions(backend) {
 
   const importShared = (imported) => importData(keepingOwnVariables(imported, store().environments))
 
+  const openapi = createSpecActions({ backend, attempt, addImported })
+
   const download = attempt('Could not save the file', async () => {
     const { response } = activeTab()
     await backend.saveFile(downloadName(response), bodyBase64(response), mimeType(response))
@@ -413,6 +416,7 @@ export function createWorkspaceActions(backend) {
     pasteCurl,
     importData,
     importShared,
+    openapi,
     shareFolder: (folderId) => store().openImportDialog(SHARE_TAB, folderId),
     shareLinkBase: clientUrl(backend.webAppUrl),
     download,

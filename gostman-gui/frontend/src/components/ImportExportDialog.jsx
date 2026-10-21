@@ -17,6 +17,8 @@ export function ImportExportDialog({
   variables,
   onImport,
   onImportShared,
+  openapi,
+  onPickSpecFile,
   onSaveFile,
   onClose,
 }) {
@@ -34,7 +36,7 @@ export function ImportExportDialog({
         </DialogHeader>
 
         <TabsContent value="import" className={TAB_CLASS}>
-          <ImportTab onImport={onImport} onImportShared={onImportShared} onClose={onClose} />
+          <ImportTab openapi={openapi} onPickSpecFile={onPickSpecFile} onImport={onImport} onImportShared={onImportShared} onClose={onClose} />
         </TabsContent>
         <TabsContent value="export" className={TAB_CLASS}>
           <ExportTab
