@@ -1,23 +1,9 @@
 import { cn } from "../../lib/utils"
-import { COMPARISON_DATE, COMPARISON_ROWS, COMPARISON_SOURCES, PRODUCTS } from "./comparisonData"
+import { COMPARISON_ROWS, PRODUCTS } from "./comparisonData"
 import { StatusGlyph } from "./StatusGlyph"
 
-const SOURCE_NUMBER = Object.fromEntries(COMPARISON_SOURCES.map((source, index) => [source.id, index + 1]))
 const BAND = "bg-[linear-gradient(hsl(var(--primary)/0.08),hsl(var(--primary)/0.08))]"
 const HEAD_CELL = "bg-background px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground md:sticky md:top-20 md:z-10 md:border-b md:border-border/60"
-
-function Citations({ ids = [] }) {
-  return ids.map((id) => (
-    <a
-      key={id}
-      href={`#comparison-source-${id}`}
-      aria-label={`Source ${SOURCE_NUMBER[id]}`}
-      className="relative -top-1 ml-1 inline-block text-[0.7rem] leading-none text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-    >
-      [{SOURCE_NUMBER[id]}]
-    </a>
-  ))
-}
 
 function Cell({ product, claim }) {
   return (
@@ -27,7 +13,6 @@ function Cell({ product, claim }) {
         <StatusGlyph state={claim.state} />
         <span className={product.id === "gostman" ? "text-foreground" : "text-foreground/80"}>
           {claim.text}
-          <Citations ids={claim.cite} />
         </span>
       </span>
     </td>
@@ -51,7 +36,7 @@ export function ComparisonTable() {
   return (
     <table className="block w-full border-separate border-spacing-0 md:table md:table-fixed">
       <caption className="mb-4 block text-left md:table-caption text-sm text-muted-foreground">
-        Gostman, Postman and Bruno compared feature by feature. Claims about Postman and Bruno link to their public pages, checked {COMPARISON_DATE}.
+        Gostman, Postman and Bruno compared feature by feature.
       </caption>
       <thead className="sr-only md:table-header-group md:not-sr-only">
         <tr>
