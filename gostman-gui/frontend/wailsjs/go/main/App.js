@@ -70,6 +70,10 @@ export function MockStatus() {
   return window['go']['main']['App']['MockStatus']();
 }
 
+export function OpenAPI(arg1) {
+  return window['go']['main']['App']['OpenAPI'](arg1);
+}
+
 export function OpenWorkspace(arg1) {
   return window['go']['main']['App']['OpenWorkspace'](arg1);
 }

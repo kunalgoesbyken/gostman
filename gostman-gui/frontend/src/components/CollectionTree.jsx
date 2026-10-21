@@ -1,6 +1,6 @@
 import { memo, useCallback, useMemo, useState } from "react"
 import {
-  ChevronDown, ChevronRight, Copy, FileJson, Folder, FolderInput, FolderPlus, ListChecks, MoreHorizontal, Pencil, Plus, Search, Share2, Trash2,
+  ChevronDown, ChevronRight, Copy, FileJson, FileSearch, RefreshCw, Folder, FolderInput, FolderPlus, ListChecks, MoreHorizontal, Pencil, Plus, Search, Share2, Trash2,
 } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
@@ -11,6 +11,7 @@ import { SearchField } from "./SearchField"
 import { useAppStore } from "../store/appStore"
 import { buildCollectionTree, findMatches, flattenCollection, listFolders, ROOT_ID, ROW_FOLDER } from "../lib/collectionTree"
 import { shortcutLabel } from "../lib/platform"
+import { SPEC_TEXT } from "../lib/specText"
 import { cn } from "../lib/utils"
 
 const ROW_HEIGHT_PX = 28
@@ -23,12 +24,20 @@ const UNTITLED = "Untitled"
 
 const indentOf = (depth) => BASE_PADDING_PX + Math.min(depth, MAX_INDENT_LEVELS) * INDENT_STEP_PX
 
-function folderMenuItems(folder, actions) {
+function specMenuItems(folder, actions) {
+  return [
+    { id: "spec-sync", label: SPEC_TEXT.checkForUpdates, icon: RefreshCw, onSelect: () => actions.openapi.check(folder.id) },
+    { id: "spec-browse", label: SPEC_TEXT.browseSpec, icon: FileSearch, onSelect: () => actions.openapi.browseFolder(folder.id) },
+  ]
+}
+
+function folderMenuItems(folder, actions, isLinked) {
   return [
     { id: "new-request", label: "New request", icon: Plus, onSelect: () => actions.newRequest(folder.id) },
     { id: "new-subfolder", label: "New subfolder", icon: FolderPlus, onSelect: () => actions.createFolder(folder.id) },
     { id: "run", label: "Run folder", icon: ListChecks, onSelect: () => actions.openRunner(folder.id) },
     { id: "share", label: "Share folder", icon: Share2, onSelect: () => actions.shareFolder(folder.id) },
+    ...(isLinked ? specMenuItems(folder, actions) : []),
     { id: "rename", label: "Rename", icon: Pencil, onSelect: () => actions.renameFolder(folder) },
     { id: "delete", label: "Delete", icon: Trash2, destructive: true, onSelect: () => actions.deleteFolder(folder) },
   ]
@@ -63,8 +72,8 @@ function moveTargetItems(request, tree, actions) {
   return [topLevel, ...folders]
 }
 
-function menuItemsFor(menu, tree, actions, showMoveTargets) {
-  if (menu.row.kind === ROW_FOLDER) return folderMenuItems(menu.row.folder, actions)
+function menuItemsFor(menu, tree, actions, showMoveTargets, specLinks) {
+  if (menu.row.kind === ROW_FOLDER) return folderMenuItems(menu.row.folder, actions, Boolean(specLinks[menu.row.folder.id]))
   if (menu.view === MENU_MOVE) return moveTargetItems(menu.row.request, tree, actions)
   return requestMenuItems(menu.row.request, actions, showMoveTargets)
 }
@@ -129,6 +138,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
   const [query, setQuery] = useState("")
   const [menu, setMenu] = useState(null)
   const toggleFolder = useAppStore((s) => s.toggleFolder)
+  const specLinks = useAppStore((s) => s.specLinks)
 
   const tree = useMemo(() => buildCollectionTree(folders, requests), [folders, requests])
   const rows = useMemo(
@@ -147,8 +157,8 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
   const menuItems = useMemo(() => {
     if (!menu) return []
     const showMoveTargets = () => setMenu((current) => current && { ...current, view: MENU_MOVE })
-    return menuItemsFor(menu, tree, actions, showMoveTargets)
-  }, [menu, tree, actions])
+    return menuItemsFor(menu, tree, actions, showMoveTargets, specLinks)
+  }, [menu, tree, actions, specLinks])
 
   const renderRow = (row) => (
     <TreeRow
