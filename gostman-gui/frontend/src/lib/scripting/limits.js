@@ -6,3 +6,6 @@ export const MAX_FLOW_STEPS = 1_000
 export const MAX_LOG_ENTRIES = 500
 export const MAX_LOG_CHARS = 10_000
 export const MAX_VISUAL_CHARS = 1_000_000
+export const MAX_MODULE_FILES = 200
+export const MAX_MODULE_BYTES = 1_000_000
+export const MAX_MODULE_DEPTH = 32

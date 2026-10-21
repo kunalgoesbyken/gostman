@@ -27,6 +27,7 @@ func loadWorkspace(root string) (Collection, error) {
 	}
 	collection, err := FromWorkspace(files.Collection())
 	collection.DotEnv = files.DotEnv()
+	collection.Modules = scriptModules(root)
 	return collection, err
 }
 
@@ -37,4 +38,12 @@ func FromWorkspace(stored workspace.Collection) (Collection, error) {
 	}
 	var collection Collection
 	return collection, json.Unmarshal(encoded, &collection)
+}
+
+func scriptModules(root string) map[string]string {
+	modules, err := workspace.ReadScriptModules(root)
+	if err != nil {
+		return nil
+	}
+	return modules
 }

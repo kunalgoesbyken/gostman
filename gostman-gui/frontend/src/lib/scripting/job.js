@@ -3,6 +3,7 @@ import { evaluateAssertions } from './assertions'
 import { createConsole, errorLine, printable } from './console'
 import { createFlow } from './flow'
 import { compileScript, describeFailure } from './scriptRuntime'
+import { createRequire } from './modules/require'
 import { createUtils } from './utils'
 import { createVisualizer } from './visualize'
 
@@ -74,7 +75,7 @@ async function sendRequest(target) {
   return createResponse(JSON.parse(await send(JSON.stringify(target))))
 }
 
-export async function runJob({ script, assertions, request, response, variables }) {
+export async function runJob({ script, assertions, request, response, variables, modules }) {
   const logs = []
   const tests = []
   const runner = createTestRunner(tests)
@@ -102,6 +103,7 @@ export async function runJob({ script, assertions, request, response, variables 
     sendRequest,
     visualize: createVisualizer((html) => { visualization = html }),
     utils: createUtils(),
+    require: createRequire(modules),
     ...flow.api,
   }
 

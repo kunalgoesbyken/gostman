@@ -338,6 +338,10 @@ export function SaveWindowTheme(arg1) {
   return window['go']['main']['App']['SaveWindowTheme'](arg1);
 }
 
+export function ScriptModules() {
+  return window['go']['main']['App']['ScriptModules']();
+}
+
 export function SecretConnections() {
   return window['go']['main']['App']['SecretConnections']();
 }

@@ -18,13 +18,22 @@ const PARSE_DELAY_MS = 300
 const AUTO_FORMAT = "auto"
 const SPEC_FORMAT = "openapi"
 const HAR_FORMAT = "har"
-const ACCEPTED_FILES = `.json,.yaml,.yml,.xml,.wsdl,.xsd,.har,.bru,.${SHARE_FILE_EXTENSION}`
+const ACCEPTED_FILES = `.zip,.json,.yaml,.yml,.xml,.wsdl,.xsd,.har,.bru,.${SHARE_FILE_EXTENSION}`
 
 const countsText = (counts) => [
   pluralize(counts.requests, "request"),
   pluralize(counts.folders, "folder"),
   ...(counts.environments > 0 ? [pluralize(counts.environments, "environment")] : []),
 ].join(", ")
+
+const totalsOf = (sources) => sources.reduce(
+  (total, source) => ({
+    requests: total.requests + source.requests,
+    folders: total.folders + source.folders,
+    environments: total.environments + source.environments,
+  }),
+  { requests: 0, folders: 0, environments: 0 },
+)
 
 function useParsedImport(source, readSource, options) {
   const [state, setState] = useState({ result: null, isParsing: false })
@@ -50,11 +59,16 @@ function useParsedImport(source, readSource, options) {
 }
 
 function SourceLines({ sources }) {
-  return sources.map((source, index) => (
-    <p key={`${source.name}-${index}`} className="pt-1 text-foreground">
-      {IMPORT_TEXT.sourceLine(source.name, FORMAT_LABELS[source.format] || source.format, countsText(source))}
-    </p>
-  ))
+  return (
+    <>
+      {sources.length > 1 && <p className="font-medium text-foreground">{IMPORT_TEXT.totalLine(sources.length, countsText(totalsOf(sources)))}</p>}
+      {sources.map((source, index) => (
+        <p key={`${source.name}-${index}`} className="pt-1 text-foreground">
+          {IMPORT_TEXT.sourceLine(source.name, FORMAT_LABELS[source.format] || source.format, countsText(source))}
+        </p>
+      ))}
+    </>
+  )
 }
 
 function ImportSummary({ result, onImport, onBrowse }) {

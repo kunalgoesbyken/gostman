@@ -17,6 +17,7 @@ type Collection struct {
 	Variables    string             `json:"variables"`
 	Settings     workspace.Settings `json:"settings"`
 	DotEnv       map[string]string  `json:"-"`
+	Modules      map[string]string  `json:"-"`
 }
 
 type Folder struct {
