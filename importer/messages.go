@@ -2,7 +2,7 @@ package importer
 
 const (
 	messageScripts       = "Scripts were kept in %s. Read them before you run them."
-	messageForeignCalls  = "Scripts in %s call pm.* or bru.* functions, which Gostman does not translate. Rewrite them before running."
+	messageForeignCalls  = "Scripts in %s still call pm.*, bru.* or insomnia.* functions that Gostman cannot translate. Rewrite them before running."
 	messageOAuth         = "OAuth 2 settings were imported for %s without tokens. Authorize again before sending."
 	messageAuthDropped   = "The authentication type of %s is not supported and was left out."
 	messageAuthType      = "The authentication type %s is not supported and was left out."
@@ -20,4 +20,21 @@ const (
 	messageUnsafePath    = "%q is not a safe path inside the collection"
 	messageDepth         = "Folders nested deeper than %d levels were skipped."
 	messageDocumentRead  = "could not read the document: %v"
+
+	messageScriptSyntax        = "The script could not be parsed, so it was kept unchanged."
+	messageScriptValue         = "%s is used as a value and was left as is."
+	messageScriptRetired       = "%s is not available in Gostman scripts and was left as is."
+	messageScriptUnsupported   = "%s has no Gostman equivalent and was left as is."
+	messageScriptScope         = "%s was mapped to the active environment, the only variable scope a Gostman script can set."
+	messageScriptSendScope     = "sendRequest only reaches hosts used by requests in this collection."
+	messageScriptSendAsync     = "sendRequest is used in a function that is not async, so its result is not awaited."
+	messageScriptSendTarget    = "The request given to sendRequest is not a literal, so its url, method, headers and body were not converted."
+	messageScriptSendCallback  = "The callback given to sendRequest is not a function literal, so its use of the response was not converted."
+	messageScriptOption        = "The sendRequest option %q is not supported and was left out."
+	messageScriptModule        = "require(%q) is not available in Gostman scripts and was left as is."
+	messageScriptModuleDynamic = "require with a computed name cannot be checked and was left as is."
+	messageScriptLine          = "Postman %s, %s, line %d: %s"
+	messageScriptMore          = "Postman %s, %s: %d more lines need attention."
+	messageScriptTotals        = "Postman scripts in %q: %d pm.* uses translated, %d need rewriting."
+	messageSecretVariables     = "Environment %q has secret variables (%s). They are marked secret; check their values before sharing."
 )

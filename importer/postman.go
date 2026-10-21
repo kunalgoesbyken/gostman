@@ -27,18 +27,19 @@ func (c *collector) readPostmanCollection(doc document) {
 				c.Variables[key] = value
 			}
 		}
-		base := c.postmanScope(root)
+		base := c.postmanScope(root, fmt.Sprintf(labelCollection, name))
 		c.postmanItems(list(root["item"]), rootID, base, 0)
+		c.summarizeScripts(name)
 	})
 }
 
-func (c *collector) postmanScope(node map[string]any) scope {
+func (c *collector) postmanScope(node map[string]any, label string) scope {
 	var inherited scope
 	if auth, set := c.postmanAuth(object(node["auth"])); set {
 		inherited.auth = &auth
 	}
-	inherited.pre = nonEmpty(postmanScript(node, listenPreRequest))
-	inherited.post = nonEmpty(postmanScript(node, listenTest))
+	inherited.pre = nonEmpty(c.postmanScript(label, node, listenPreRequest))
+	inherited.post = nonEmpty(c.postmanScript(label, node, listenTest))
 	for _, entry := range objects(node["variable"]) {
 		if key := text(entry["key"]); key != "" && !flag(entry["disabled"]) {
 			inherited.vars = append(inherited.vars, row{Key: key, Value: text(entry["value"]), Enabled: true})
@@ -65,7 +66,7 @@ func (c *collector) postmanItems(items []any, folderID string, inherited scope, 
 		case item == nil:
 		case item["item"] != nil:
 			id := c.addFolder(text(item["name"]), folderID)
-			c.postmanItems(list(item["item"]), id, inherited.within(c.postmanScope(item)), depth+1)
+			c.postmanItems(list(item["item"]), id, inherited.within(c.postmanScope(item, fmt.Sprintf(labelFolder, text(item["name"])))), depth+1)
 		case item["request"] != nil:
 			c.postmanRequest(item, folderID, inherited)
 		}
@@ -73,6 +74,7 @@ func (c *collector) postmanItems(items []any, folderID string, inherited scope, 
 }
 
 func (c *collector) postmanRequest(item map[string]any, folderID string, inherited scope) {
+	label := fmt.Sprintf(labelRequest, text(item["name"]))
 	source := object(item["request"])
 	if source == nil {
 		source = map[string]any{"url": item["request"], "method": "GET"}
@@ -83,8 +85,8 @@ func (c *collector) postmanRequest(item map[string]any, folderID string, inherit
 		method:      text(source["method"]),
 		description: postmanDescription(source["description"]),
 		headers:     headers,
-		preScript:   postmanScript(item, listenPreRequest),
-		postScript:  postmanScript(item, listenTest),
+		preScript:   c.postmanScript(label, item, listenPreRequest),
+		postScript:  c.postmanScript(label, item, listenTest),
 		options:     postmanOptions(object(item["protocolProfileBehavior"])),
 	}
 	request.url, request.params = postmanURL(source["url"])
@@ -186,7 +188,7 @@ func joinParts(value any, separator string) string {
 	return strings.Join(parts, separator)
 }
 
-func postmanScript(node map[string]any, listen string) string {
+func (c *collector) postmanScript(label string, node map[string]any, listen string) string {
 	var scripts []string
 	for _, event := range objects(node["event"]) {
 		if text(event["listen"]) != listen {
@@ -194,9 +196,9 @@ func postmanScript(node map[string]any, listen string) string {
 		}
 		script := object(event["script"])
 		if lines := list(script["exec"]); lines != nil {
-			scripts = append(scripts, joinLines(lines))
+			scripts = append(scripts, c.translateScript(label, listen, joinLines(lines)))
 		} else if code := text(script["exec"]); code != "" {
-			scripts = append(scripts, code)
+			scripts = append(scripts, c.translateScript(label, listen, code))
 		}
 	}
 	return joinScripts(scripts)
@@ -386,11 +388,36 @@ func (c *collector) readPostmanEnvironment(doc document) {
 	}
 	c.read(name, FormatPostman, func() {
 		values := map[string]string{}
+		secrets := map[string]map[string]bool{}
+		var secretNames []string
 		for _, entry := range objects(root["values"]) {
-			if key := text(entry["key"]); key != "" && entry["enabled"] != false {
-				values[key] = text(entry["value"])
+			key := text(entry["key"])
+			if key == "" || entry["enabled"] == false {
+				continue
+			}
+			values[key] = text(entry["value"])
+			if text(entry["type"]) == postmanSecretType {
+				secrets[key] = map[string]bool{"secret": true}
+				secretNames = append(secretNames, key)
 			}
 		}
-		c.addEnvironment(name, values)
+		id := c.addEnvironment(name, values)
+		c.markSecrets(id, name, secrets, secretNames)
 	})
+}
+
+func (c *collector) markSecrets(id, name string, secrets map[string]map[string]bool, names []string) {
+	if len(names) == 0 {
+		return
+	}
+	encoded, err := json.Marshal(secrets)
+	if err != nil {
+		return
+	}
+	for index := range c.Environments {
+		if c.Environments[index].Id == id {
+			c.Environments[index].Meta = string(encoded)
+		}
+	}
+	c.Warnings = append(c.Warnings, fmt.Sprintf(messageSecretVariables, name, listNames(names)))
 }
