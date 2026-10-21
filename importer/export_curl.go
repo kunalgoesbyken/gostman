@@ -1,0 +1,222 @@
+package importer
+
+import (
+	"encoding/json"
+	"fmt"
+	"strings"
+
+	"github.com/krockxz/gostman/workspace"
+)
+
+var sensitiveHeaders = map[string]bool{"authorization": true, "proxy-authorization": true, "x-api-key": true, "cookie": true}
+
+const (
+	curlHeaderLine = "#!/bin/sh\n"
+	curlJoin       = " \\\n  "
+	secretPrefix   = "GOSTMAN"
+)
+
+type curlScript struct {
+	out      strings.Builder
+	secrets  []string
+	position int
+}
+
+func exportCurl(collection workspace.Collection) []File {
+	script := &curlScript{}
+	var commands strings.Builder
+	for _, request := range orderedRequests(collection) {
+		script.position++
+		commands.WriteString(script.command(request))
+	}
+	header := curlHeaderLine
+	if len(script.secrets) > 0 {
+		header += "# Set these environment variables before running:\n# " + strings.Join(script.secrets, "\n# ") + "\n"
+	}
+	return []File{{Name: "requests.sh", Text: header + "\n" + commands.String()}}
+}
+
+func orderedRequests(collection workspace.Collection) []workspace.Request {
+	tree := buildTree(collection)
+	return collectRequests(tree, "", 0)
+}
+
+func collectRequests(tree exportTree, id string, depth int) []workspace.Request {
+	requests := append([]workspace.Request{}, tree.requests[id]...)
+	if depth >= maxFolderDepth {
+		return requests
+	}
+	for _, folder := range tree.folders[id] {
+		requests = append(requests, collectRequests(tree, folder.Id, depth+1)...)
+	}
+	return requests
+}
+
+func shellName(name string) string {
+	var out strings.Builder
+	for _, r := range name {
+		if r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '_' {
+			out.WriteRune(r)
+		} else {
+			out.WriteRune('_')
+		}
+	}
+	if resolved := out.String(); resolved != "" && (resolved[0] < '0' || resolved[0] > '9') {
+		return resolved
+	}
+	return "_" + out.String()
+}
+
+func shellQuote(value string) string {
+	var out strings.Builder
+	remaining := value
+	for remaining != "" {
+		start := strings.Index(remaining, variableOpen)
+		end := -1
+		if start >= 0 {
+			end = strings.Index(remaining[start:], variableClose)
+		}
+		if start < 0 || end < 0 {
+			out.WriteString(singleQuoted(remaining))
+			break
+		}
+		end += start
+		out.WriteString(singleQuoted(remaining[:start]))
+		out.WriteString(`"${` + shellName(strings.TrimSpace(remaining[start+len(variableOpen):end])) + `}"`)
+		remaining = remaining[end+len(variableClose):]
+	}
+	if out.Len() == 0 {
+		return "''"
+	}
+	return out.String()
+}
+
+func singleQuoted(value string) string {
+	if value == "" {
+		return ""
+	}
+	return "'" + strings.ReplaceAll(value, "'", `'\''`) + "'"
+}
+
+func (s *curlScript) secret(field, value string) string {
+	if value == "" {
+		return ""
+	}
+	trimmed := strings.TrimSpace(value)
+	if strings.HasPrefix(trimmed, variableOpen) && strings.HasSuffix(trimmed, variableClose) && strings.Count(trimmed, variableOpen) == 1 {
+		return trimmed
+	}
+	name := fmt.Sprintf("%s_R%d_%s", secretPrefix, s.position, field)
+	s.secrets = append(s.secrets, name)
+	return variableOpen + name + variableClose
+}
+
+func (s *curlScript) command(request workspace.Request) string {
+	arguments := []string{"curl"}
+	method := request.Method
+	hasBody := request.BodyType != "" || request.Method == methodGraphQL
+	if method == methodGraphQL {
+		method = "POST"
+	}
+	if method != "GET" || hasBody {
+		arguments = append(arguments, "-X "+method)
+	}
+	if !request.Options.NoFollowRedirects {
+		arguments = append(arguments, "-L")
+	}
+	if request.Options.TimeoutMs > 0 {
+		arguments = append(arguments, fmt.Sprintf("--max-time %d", (request.Options.TimeoutMs+999)/1000))
+	}
+	address, authArguments, headers := s.authorization(request)
+	arguments = append(arguments, authArguments...)
+	for _, header := range enabledRows(readRows(request.Headers)) {
+		arguments = append(arguments, headerArgument(header.Key, s.headerValue(header)))
+	}
+	for _, header := range headers {
+		arguments = append(arguments, headerArgument(header.Key, header.Value))
+	}
+	arguments = append(arguments, curlBody(request)...)
+	arguments = append(arguments, shellQuote(address))
+	return "# " + oneLine(request.Name) + "\n" + strings.Join(arguments, curlJoin) + "\n\n"
+}
+
+func (s *curlScript) authorization(request workspace.Request) (string, []string, []row) {
+	auth := request.Auth
+	address := request.URL
+	switch auth.Type {
+	case authBasic, authDigest, authNTLM:
+		flagName := map[string]string{authBasic: "-u", authDigest: "--digest -u", authNTLM: "--ntlm -u"}[auth.Type]
+		credentials := auth.Username + ":" + s.secret("PASSWORD", auth.Password)
+		return address, []string{flagName + " " + shellQuote(credentials)}, nil
+	case authBearer:
+		return address, nil, []row{{Key: "Authorization", Value: "Bearer " + s.secret("TOKEN", auth.Token), Enabled: true}}
+	case authAPIKey:
+		value := s.secret("API_KEY", auth.Value)
+		if auth.In == inQuery {
+			return appendQuery(address, []row{{Key: auth.Key, Value: value, Enabled: true}}), nil, nil
+		}
+		return address, nil, []row{{Key: auth.Key, Value: value, Enabled: true}}
+	case authAWS:
+		argument := fmt.Sprintf("--aws-sigv4 %s --user %s", shellQuote("aws:amz:"+auth.AWS.Region+":"+auth.AWS.Service), shellQuote(auth.AWS.AccessKey+":"+s.secret("SECRET_KEY", auth.AWS.SecretKey)))
+		return address, []string{argument}, nil
+	}
+	return address, nil, nil
+}
+
+func headerArgument(key, value string) string {
+	return "-H " + shellQuote(key+": "+value)
+}
+
+func (s *curlScript) headerValue(header row) string {
+	if !sensitiveHeaders[strings.ToLower(header.Key)] {
+		return header.Value
+	}
+	return s.secret(strings.ToUpper(shellName(header.Key)), header.Value)
+}
+
+func curlBody(request workspace.Request) []string {
+	if request.Method == methodGraphQL {
+		payload := `{"query":` + quoteJSON(request.GraphqlQuery)
+		if strings.TrimSpace(request.GraphqlVariables) != "" {
+			payload += `,"variables":` + request.GraphqlVariables
+		}
+		return []string{"-H 'Content-Type: application/json'", "--data-raw " + shellQuote(payload+"}")}
+	}
+	switch request.BodyType {
+	case bodyJSON, bodyText, bodyXML:
+		return []string{"--data-raw " + shellQuote(request.Body)}
+	case bodyForm:
+		return formArguments("--data-urlencode", readRows(request.Body))
+	case bodyMultipart:
+		return multipartArguments(readRows(request.Body))
+	}
+	return nil
+}
+
+func formArguments(option string, rows []row) []string {
+	var arguments []string
+	for _, candidate := range enabledRows(rows) {
+		arguments = append(arguments, option+" "+shellQuote(candidate.Key+"="+candidate.Value))
+	}
+	return arguments
+}
+
+func multipartArguments(rows []row) []string {
+	var arguments []string
+	for _, candidate := range enabledRows(rows) {
+		value := candidate.Value
+		if candidate.Type == rowTypeFile {
+			value = "@" + candidate.FileName
+		}
+		arguments = append(arguments, "-F "+shellQuote(candidate.Key+"="+value))
+	}
+	return arguments
+}
+
+func quoteJSON(value string) string {
+	encoded, err := json.Marshal(value)
+	if err != nil {
+		return `""`
+	}
+	return string(encoded)
+}
