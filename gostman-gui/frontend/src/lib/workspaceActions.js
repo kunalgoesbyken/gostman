@@ -16,6 +16,7 @@ import { bodyBase64, downloadName, mimeType } from './response'
 import { keepingOwnVariables } from './shareContent'
 import { clientUrl } from './sharedLink'
 import { createRunner } from './runner'
+import { buildReportPage } from './runReport'
 import { createSocketActions, isSocketAddress } from './socketSessions'
 import { createStorageActions } from './storageActions'
 import { selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
@@ -62,6 +63,9 @@ function describeFolderContents(folder) {
   const destination = parent ? quoted(parent.name) : 'the top level'
   return `Its ${pluralize(requestCount, 'request')} and ${pluralize(subfolderCount, 'subfolder')} move to ${destination}.`
 }
+
+const RUN_REPORT_FILE = 'gostman-report.html'
+const RUN_REPORT_TYPE = 'text/html'
 
 let sendSequence = 0
 
@@ -264,6 +268,14 @@ export function createWorkspaceActions(backend) {
     backend.saveFile(name, textToBase64(text), mime)
   ))
 
+  const downloadRunReport = () => {
+    const run = runner.describeRun()
+    if (!run) return undefined
+    const { environments, activeEnvironmentId, runner: state } = store()
+    const environment = (environments.find((candidate) => candidate.id === activeEnvironmentId) || environments[0])?.name || ''
+    return saveTextFile(RUN_REPORT_FILE, buildReportPage(state.results, run, environment), RUN_REPORT_TYPE)
+  }
+
   const resetAll = attempt('Reset failed', async () => {
     store().suspendPersistence()
     await backend.reset()
@@ -391,6 +403,7 @@ export function createWorkspaceActions(backend) {
     closeRunner,
     startRun: runner.start,
     stopRun: runner.stop,
+    downloadRunReport,
     loadSchema,
     loadGrpcSchema,
     loadMcpCatalog,

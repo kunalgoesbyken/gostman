@@ -37,7 +37,18 @@ run
   --delay <ms>          wait between requests
   --timeout <ms>        timeout for requests that do not set their own
   --insecure            skip TLS certificate verification
-  --reporter <format>   text, json or junit (default text)
+  --data <file>         run once per row of a CSV (header row) or JSON (array of
+                        objects) file; a row's values override the environment,
+                        and the variables iteration and iterationCount are set
+  --iterations <n>      repeat the run n times, or use only the first n data rows
+  --parallel <n>        run up to n at once: iterations when there are several
+                        (each keeps its order and extraction chaining),
+                        otherwise single requests, which do not see each
+                        other's extracted variables
+  --only <name>         run only requests with this name, id or Folder/Name
+                        (repeatable)
+  --env-file <file>     read KEY=value lines as variables (--var wins)
+  --reporter <format>   text, json, junit or html (default text)
   --output <file>       write the report to this file and print text to stdout
   --redact              replace variable values and credentials in the report
                         with {{name}}

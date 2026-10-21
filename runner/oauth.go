@@ -84,14 +84,16 @@ func (s *session) withFreshToken(ctx context.Context, request Request) (Request,
 	if request.Auth.Type != authOAuth2 {
 		return request, nil
 	}
-	config := s.tokens.recall(request.Auth.OAuth2)
+	s.common.signInMu.Lock()
+	defer s.common.signInMu.Unlock()
+	config := s.common.recall(request.Auth.OAuth2)
 	if !isTokenFresh(config, time.Now()) {
 		renewed, err := s.renewToken(ctx, config, request.Options)
 		if err != nil {
 			return request, err
 		}
 		config = renewed
-		s.tokens.remember(config)
+		s.common.remember(config)
 	}
 	request.Auth.OAuth2 = config
 	return request, nil

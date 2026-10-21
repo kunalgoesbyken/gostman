@@ -111,7 +111,28 @@ func prepare(scripts *sandbox.Sandbox, stored Collection, options Options) (plan
 		planned.folderNames[candidate.ID] = candidate.joined()
 	}
 	for _, request := range ordered {
-		planned.requests = append(planned.requests, options.applyTo(request))
+		if options.selects(request, planned.folderNames[request.FolderID]) {
+			planned.requests = append(planned.requests, options.applyTo(request))
+		}
+	}
+	if len(options.Only) > 0 && len(planned.requests) == 0 {
+		return plan{}, fmt.Errorf("no request matches %s", strings.Join(options.Only, ", "))
 	}
 	return planned, nil
+}
+
+func (o Options) selects(request Request, folder string) bool {
+	if len(o.Only) == 0 {
+		return true
+	}
+	qualified := request.Name
+	if folder != "" {
+		qualified = folder + pathSeparator + request.Name
+	}
+	for _, wanted := range o.Only {
+		if wanted == request.ID || wanted == request.Name || wanted == qualified {
+			return true
+		}
+	}
+	return false
 }
