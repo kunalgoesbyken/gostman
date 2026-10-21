@@ -326,6 +326,126 @@ export namespace engine {
 	        this.value = source["value"];
 	    }
 	}
+	export class Phases {
+	    dnsMs: number;
+	    connectMs: number;
+	    tlsMs: number;
+	    firstByteMs: number;
+	    downloadMs: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Phases(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.dnsMs = source["dnsMs"];
+	        this.connectMs = source["connectMs"];
+	        this.tlsMs = source["tlsMs"];
+	        this.firstByteMs = source["firstByteMs"];
+	        this.downloadMs = source["downloadMs"];
+	    }
+	}
+	export class TLSInfo {
+	    version: string;
+	    cipher: string;
+	    protocol?: string;
+	    subject?: string;
+	    issuer?: string;
+	    notAfter?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TLSInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.cipher = source["cipher"];
+	        this.protocol = source["protocol"];
+	        this.subject = source["subject"];
+	        this.issuer = source["issuer"];
+	        this.notAfter = source["notAfter"];
+	    }
+	}
+	export class TimelineHeader {
+	    key: string;
+	    value: string;
+	    masked?: boolean;
+	    secret?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TimelineHeader(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.key = source["key"];
+	        this.value = source["value"];
+	        this.masked = source["masked"];
+	        this.secret = source["secret"];
+	    }
+	}
+	export class Hop {
+	    method: string;
+	    url: string;
+	    status?: number;
+	    proto?: string;
+	    location?: string;
+	    remote?: string;
+	    reused: boolean;
+	    requestBytes: number;
+	    sent: TimelineHeader[];
+	    received: TimelineHeader[];
+	    cookiesSet?: string[];
+	    tls?: TLSInfo;
+	    startMs: number;
+	    totalMs: number;
+	    phases: Phases;
+	    failedPhase?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Hop(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.method = source["method"];
+	        this.url = source["url"];
+	        this.status = source["status"];
+	        this.proto = source["proto"];
+	        this.location = source["location"];
+	        this.remote = source["remote"];
+	        this.reused = source["reused"];
+	        this.requestBytes = source["requestBytes"];
+	        this.sent = this.convertValues(source["sent"], TimelineHeader);
+	        this.received = this.convertValues(source["received"], TimelineHeader);
+	        this.cookiesSet = source["cookiesSet"];
+	        this.tls = this.convertValues(source["tls"], TLSInfo);
+	        this.startMs = source["startMs"];
+	        this.totalMs = source["totalMs"];
+	        this.phases = this.convertValues(source["phases"], Phases);
+	        this.failedPhase = source["failedPhase"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	
 	
 	export class Options {
@@ -344,6 +464,7 @@ export namespace engine {
 	        this.insecureTLS = source["insecureTLS"];
 	    }
 	}
+	
 	export class Prepared {
 	    method: string;
 	    url: string;
@@ -432,40 +553,22 @@ export namespace engine {
 		    return a;
 		}
 	}
-	export class Response {
-	    status: string;
-	    statusCode: number;
-	    headers: HeaderEntry[];
-	    cookies: CookieInfo[];
-	    body: string;
-	    bodyEncoding: string;
-	    contentType: string;
-	    size: number;
-	    durationMs: number;
-	    url: string;
-	    truncated: boolean;
-	    error: string;
-	    protocol?: string;
+	export class Timeline {
+	    hops: Hop[];
+	    omitted?: number;
+	    totalMs: number;
+	    proxied?: boolean;
 	
 	    static createFrom(source: any = {}) {
-	        return new Response(source);
+	        return new Timeline(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.status = source["status"];
-	        this.statusCode = source["statusCode"];
-	        this.headers = this.convertValues(source["headers"], HeaderEntry);
-	        this.cookies = this.convertValues(source["cookies"], CookieInfo);
-	        this.body = source["body"];
-	        this.bodyEncoding = source["bodyEncoding"];
-	        this.contentType = source["contentType"];
-	        this.size = source["size"];
-	        this.durationMs = source["durationMs"];
-	        this.url = source["url"];
-	        this.truncated = source["truncated"];
-	        this.error = source["error"];
-	        this.protocol = source["protocol"];
+	        this.hops = this.convertValues(source["hops"], Hop);
+	        this.omitted = source["omitted"];
+	        this.totalMs = source["totalMs"];
+	        this.proxied = source["proxied"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -486,6 +589,65 @@ export namespace engine {
 		    return a;
 		}
 	}
+	export class Response {
+	    status: string;
+	    statusCode: number;
+	    headers: HeaderEntry[];
+	    cookies: CookieInfo[];
+	    body: string;
+	    bodyEncoding: string;
+	    contentType: string;
+	    size: number;
+	    durationMs: number;
+	    url: string;
+	    truncated: boolean;
+	    error: string;
+	    protocol?: string;
+	    timeline?: Timeline;
+	
+	    static createFrom(source: any = {}) {
+	        return new Response(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.status = source["status"];
+	        this.statusCode = source["statusCode"];
+	        this.headers = this.convertValues(source["headers"], HeaderEntry);
+	        this.cookies = this.convertValues(source["cookies"], CookieInfo);
+	        this.body = source["body"];
+	        this.bodyEncoding = source["bodyEncoding"];
+	        this.contentType = source["contentType"];
+	        this.size = source["size"];
+	        this.durationMs = source["durationMs"];
+	        this.url = source["url"];
+	        this.truncated = source["truncated"];
+	        this.error = source["error"];
+	        this.protocol = source["protocol"];
+	        this.timeline = this.convertValues(source["timeline"], Timeline);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	
 	export class Token {
 	    accessToken: string;
 	    refreshToken: string;
