@@ -41,7 +41,8 @@ func Scan(collection workspace.Collection, options Options) Report {
 			Folders:      len(collection.Folders),
 			Environments: len(collection.Environments),
 		},
-		Findings: s.sorted(),
+		Findings:  s.sorted(),
+		Truncated: s.truncated,
 	}
 }
 

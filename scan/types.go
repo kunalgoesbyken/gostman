@@ -41,6 +41,8 @@ type Counts struct {
 type Report struct {
 	Scanned  Counts    `json:"scanned"`
 	Findings []Finding `json:"findings"`
+
+	Truncated int `json:"truncated"`
 }
 
 type Options struct {

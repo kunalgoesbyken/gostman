@@ -3176,6 +3176,7 @@ export namespace scan {
 	    // Go type: Counts
 	    scanned: any;
 	    findings: Finding[];
+	    truncated: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Reply(source);
@@ -3186,6 +3187,7 @@ export namespace scan {
 	        this.error = source["error"];
 	        this.scanned = this.convertValues(source["scanned"], null);
 	        this.findings = this.convertValues(source["findings"], Finding);
+	        this.truncated = source["truncated"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

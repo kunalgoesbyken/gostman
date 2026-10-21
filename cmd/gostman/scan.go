@@ -42,6 +42,8 @@ type scanDocument struct {
 	FailOn   string         `json:"failOn"`
 	Passed   bool           `json:"passed"`
 	Findings []scan.Finding `json:"findings"`
+
+	Truncated int `json:"truncated"`
 }
 
 func parseScanning(arguments []string) (scanning, error) {
@@ -111,7 +113,8 @@ func writeScanJSON(out io.Writer, report scan.Report, parsed scanning) error {
 		Summary:  summarize(report),
 		FailOn:   parsed.failOn,
 		Passed:   !report.Reaches(parsed.threshold),
-		Findings: report.Findings,
+		Findings:  report.Findings,
+		Truncated: report.Truncated,
 	})
 }
 
@@ -129,6 +132,10 @@ func writeScanText(out io.Writer, report scan.Report, parsed scanning) error {
 		plural(report.Scanned.Requests, "request"), plural(report.Scanned.Folders, "folder"),
 		plural(report.Scanned.Environments, "environment"), plural(len(report.Findings), "finding"),
 		summary.High, summary.Medium, parsed.failOn)
+	if err != nil || report.Truncated == 0 {
+		return err
+	}
+	_, err = fmt.Fprintf(out, "%s too long to scan in full: only the first 1 MiB of each was checked.\n", plural(report.Truncated, "field"))
 	return err
 }
 
