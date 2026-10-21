@@ -10,6 +10,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/kunalgoesbyken/gostman/importer"
 	"github.com/kunalgoesbyken/gostman/openapi"
@@ -102,8 +103,30 @@ func importedCollection(result importer.Result) (workspace.Collection, error) {
 	return collection, err
 }
 
+func plural(count int, noun string) string {
+	if count == 1 {
+		return "1 " + noun
+	}
+	return fmt.Sprintf("%d %ss", count, noun)
+}
+
+func importSummary(counts importer.Counts) string {
+	parts := []string{plural(counts.Requests, "request"), plural(counts.Folders, "folder")}
+	optional := []struct {
+		count int
+		noun  string
+	}{{counts.Environments, "environment"}, {counts.Variables, "variable"}, {counts.FolderSettings, "folder setting"}}
+	for _, item := range optional {
+		if item.count > 0 {
+			parts = append(parts, plural(item.count, item.noun))
+		}
+	}
+	last := parts[len(parts)-1]
+	return strings.Join(parts[:len(parts)-1], ", ") + " and " + last
+}
+
 func reportImport(stdout, stderr io.Writer, result importer.Result, out string) {
-	fmt.Fprintf(stdout, "Imported %d requests, %d folders and %d environments into %s.\n", len(result.Requests), len(result.Folders), len(result.Environments), out)
+	fmt.Fprintf(stdout, "Imported %s into %s.\n", importSummary(result.Counts()), out)
 	for _, warning := range result.Warnings {
 		fmt.Fprintf(stderr, "warning: %s\n", warning)
 	}

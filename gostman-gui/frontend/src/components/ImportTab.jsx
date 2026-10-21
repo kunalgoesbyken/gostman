@@ -5,7 +5,6 @@ import { Input } from "./ui/input"
 import { Select } from "./ui/select"
 import { Textarea } from "./ui/textarea"
 import { ShareOpener } from "./ShareOpener"
-import { pluralize } from "../lib/dataUtils"
 import { parseImport } from "../lib/importExport"
 import { droppedEntries, pickedEntries, readImportFiles } from "../lib/importerClient"
 import { FORMAT_LABELS, IMPORT_FORMATS, IMPORT_TEXT } from "../lib/importText"
@@ -13,18 +12,14 @@ import { mayBeSpec } from "../lib/openapiSpec"
 import { SHARE_FILE_EXTENSION, findShareReference } from "../lib/share"
 import { SPEC_TEXT } from "../lib/specText"
 import { cn } from "../lib/utils"
+import { describeCounts } from "../lib/importCounts"
+import { countImported } from "../lib/importSummary"
 
 const PARSE_DELAY_MS = 300
 const AUTO_FORMAT = "auto"
 const SPEC_FORMAT = "openapi"
 const HAR_FORMAT = "har"
 const ACCEPTED_FILES = `.zip,.json,.yaml,.yml,.xml,.wsdl,.xsd,.har,.bru,.${SHARE_FILE_EXTENSION}`
-
-const countsText = (counts) => [
-  pluralize(counts.requests, "request"),
-  pluralize(counts.folders, "folder"),
-  ...(counts.environments > 0 ? [pluralize(counts.environments, "environment")] : []),
-].join(", ")
 
 const totalsOf = (sources) => sources.reduce(
   (total, source) => ({
@@ -61,10 +56,10 @@ function useParsedImport(source, readSource, options) {
 function SourceLines({ sources }) {
   return (
     <>
-      {sources.length > 1 && <p className="font-medium text-foreground">{IMPORT_TEXT.totalLine(sources.length, countsText(totalsOf(sources)))}</p>}
+      {sources.length > 1 && <p className="font-medium text-foreground">{IMPORT_TEXT.totalLine(sources.length, describeCounts(totalsOf(sources)))}</p>}
       {sources.map((source, index) => (
         <p key={`${source.name}-${index}`} className="pt-1 text-foreground">
-          {IMPORT_TEXT.sourceLine(source.name, FORMAT_LABELS[source.format] || source.format, countsText(source))}
+          {IMPORT_TEXT.sourceLine(source.name, FORMAT_LABELS[source.format] || source.format, describeCounts(source))}
         </p>
       ))}
     </>
@@ -80,7 +75,7 @@ function ImportSummary({ result, onImport, onBrowse }) {
       <div className="max-h-40 min-w-0 flex-1 overflow-y-auto text-xs [overflow-wrap:anywhere]">
         {result.sources ? <SourceLines sources={result.sources} /> : (
           <p className="font-medium text-foreground">
-            {result.label}: {countsText({ requests: result.requests.length, folders: result.folders.length, environments: 0 })}
+            {result.label}: {describeCounts(countImported(result))}
           </p>
         )}
         {isUnlinked && <p className="pt-1 text-muted-foreground">{SPEC_TEXT.syncNote}</p>}

@@ -32,6 +32,8 @@ import { createStorageActions } from './storageActions'
 import { createTabActions } from './tabActions'
 import { createTreeActions } from './treeActions'
 import { ROW_REQUEST } from './collectionTree'
+import { describeCounts } from './importCounts'
+import { countImported } from './importSummary'
 import { selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
 
 const UNRECORDED_ERRORS = ['config', 'cancelled']
@@ -248,7 +250,9 @@ export function createWorkspaceActions(backend) {
       ...skippedEnvironments.map((name) => `Environment ${quoted(name)} was skipped because its variables are not valid JSON.`),
       ...data.warnings,
     ]
-    const summary = `Imported ${pluralize(requests.length, 'request')} and ${pluralize(folders.length, 'folder')}.`
+    const counts = countImported(data)
+    const merged = { ...counts, environments: counts.environments - skippedEnvironments.length, variables: variablesMerged ? counts.variables : 0 }
+    const summary = `Imported ${describeCounts(merged)}.`
     store().showAlert('Import complete', [summary, ...notes].join('\n'), 'OK', notes.length > 0 ? 'warning' : 'success')
   })
 
