@@ -1,4 +1,8 @@
 import { textToBase64 } from './base64'
+import { createAiActions } from './ai/session'
+import {
+  TASK_DOCS, TASK_EXPLAIN, TASK_REQUEST, TASK_SCHEMA, TASK_SCRIPT, TASK_SEARCH, TASK_TESTS,
+} from './ai/tasks'
 import { createCaptureActions } from './captureSession'
 import { generateAllSnippets } from './codeGenerator'
 import { countActiveRequests, sanitizeImport, withoutActiveRequests } from './importExport'
@@ -359,6 +363,9 @@ export function createWorkspaceActions(backend) {
     )
   }
 
+  const ai = createAiActions(backend, { importData })
+  ai.load()
+
   const commands = {
     newRequest: () => store().newTab(),
     saveRequest: save,
@@ -385,9 +392,18 @@ export function createWorkspaceActions(backend) {
     settings: () => store().openSettingsDialog(),
     import: () => store().openImportDialog(),
     reset: confirmReset,
+    aiRequest: () => ai.start(TASK_REQUEST),
+    aiTests: () => ai.start(TASK_TESTS),
+    aiScript: () => ai.start(TASK_SCRIPT),
+    aiExplain: () => ai.start(TASK_EXPLAIN),
+    aiDocs: () => ai.start(TASK_DOCS),
+    aiSearch: () => ai.start(TASK_SEARCH),
+    aiSchema: () => ai.start(TASK_SCHEMA),
+    aiSettings: ai.openSettings,
   }
 
   return {
+    ai,
     send,
     sockets,
     examples,

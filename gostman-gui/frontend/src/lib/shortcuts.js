@@ -30,6 +30,8 @@ export const SHORTCUTS = [
     position,
     listed: position === 1,
   })),
+  { id: 'aiGenerate', group: 'General', label: 'AI: new request from a description', mod: true, shift: true, key: 'u', web: { alt: true, shift: true, key: 'u' } },
+  { id: 'aiExplain', group: 'General', label: 'AI: explain the response', mod: true, shift: true, key: 'x', web: { alt: true, shift: true, key: 'x' } },
   { id: 'toggleSidebar', group: 'Navigation', label: 'Toggle sidebar', mod: true, key: 'b' },
   { id: 'focusSidebarSearch', group: 'Navigation', label: 'Search the sidebar', mod: true, shift: true, key: 'f' },
 ]
