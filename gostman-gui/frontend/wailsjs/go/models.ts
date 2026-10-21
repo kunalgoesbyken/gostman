@@ -326,6 +326,38 @@ export namespace engine {
 	        this.value = source["value"];
 	    }
 	}
+	export class Layer {
+	    headers: string;
+	    auth: Auth;
+	
+	    static createFrom(source: any = {}) {
+	        return new Layer(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.headers = source["headers"];
+	        this.auth = this.convertValues(source["auth"], Auth);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	
 	
 	export class Options {
@@ -393,6 +425,7 @@ export namespace engine {
 	    variables: string;
 	    options: Options;
 	    cookies: CookieInfo[];
+	    inherited?: Layer[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Request(source);
@@ -412,6 +445,7 @@ export namespace engine {
 	        this.variables = source["variables"];
 	        this.options = this.convertValues(source["options"], Options);
 	        this.cookies = this.convertValues(source["cookies"], CookieInfo);
+	        this.inherited = this.convertValues(source["inherited"], Layer);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -781,6 +815,13 @@ export namespace main {
 	    name: string;
 	    isOpen: boolean;
 	    parentId: string;
+	    variables: string;
+	    description: string;
+	    headers: string;
+	    auth: engine.Auth;
+	    preScript: string;
+	    postScript: string;
+	    assertions: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Folder(source);
@@ -792,7 +833,32 @@ export namespace main {
 	        this.name = source["name"];
 	        this.isOpen = source["isOpen"];
 	        this.parentId = source["parentId"];
+	        this.variables = source["variables"];
+	        this.description = source["description"];
+	        this.headers = source["headers"];
+	        this.auth = this.convertValues(source["auth"], engine.Auth);
+	        this.preScript = source["preScript"];
+	        this.postScript = source["postScript"];
+	        this.assertions = source["assertions"];
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class GitState {
 	    installed: boolean;
@@ -1034,6 +1100,7 @@ export namespace main {
 	    activeGlobalId?: string;
 	    collectionVariables?: string;
 	    dotEnv?: Record<string, string>;
+	    collectionSettings: workspace.Settings;
 	
 	    static createFrom(source: any = {}) {
 	        return new SavedData(source);
@@ -1054,6 +1121,7 @@ export namespace main {
 	        this.activeGlobalId = source["activeGlobalId"];
 	        this.collectionVariables = source["collectionVariables"];
 	        this.dotEnv = source["dotEnv"];
+	        this.collectionSettings = this.convertValues(source["collectionSettings"], workspace.Settings);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -1140,6 +1208,7 @@ export namespace mcpclient {
 	export class Target {
 	    url: string;
 	    headers: string;
+	    inherited?: engine.Layer[];
 	    auth: engine.Auth;
 	    variables: string;
 	    options: engine.Options;
@@ -1152,6 +1221,7 @@ export namespace mcpclient {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.url = source["url"];
 	        this.headers = source["headers"];
+	        this.inherited = this.convertValues(source["inherited"], engine.Layer);
 	        this.auth = this.convertValues(source["auth"], engine.Auth);
 	        this.variables = source["variables"];
 	        this.options = this.convertValues(source["options"], engine.Options);
@@ -1944,6 +2014,7 @@ export namespace rpc {
 	export class Target {
 	    address: string;
 	    headers: string;
+	    inherited?: engine.Layer[];
 	    auth: engine.Auth;
 	    variables: string;
 	    options: engine.Options;
@@ -1957,6 +2028,7 @@ export namespace rpc {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.address = source["address"];
 	        this.headers = source["headers"];
+	        this.inherited = this.convertValues(source["inherited"], engine.Layer);
 	        this.auth = this.convertValues(source["auth"], engine.Auth);
 	        this.variables = source["variables"];
 	        this.options = this.convertValues(source["options"], engine.Options);
@@ -2125,6 +2197,46 @@ export namespace workspace {
 	        this.line = source["line"];
 	        this.message = source["message"];
 	    }
+	}
+	export class Settings {
+	    description: string;
+	    headers: string;
+	    auth: engine.Auth;
+	    preScript: string;
+	    postScript: string;
+	    assertions: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Settings(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.description = source["description"];
+	        this.headers = source["headers"];
+	        this.auth = this.convertValues(source["auth"], engine.Auth);
+	        this.preScript = source["preScript"];
+	        this.postScript = source["postScript"];
+	        this.assertions = source["assertions"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 
 }

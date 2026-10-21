@@ -52,7 +52,7 @@ func toFileRequests(requests []Request) []workspace.Request {
 func toFileFolders(folders []Folder) []workspace.Folder {
 	converted := make([]workspace.Folder, len(folders))
 	for i, folder := range folders {
-		converted[i] = workspace.Folder{Id: folder.Id, Name: folder.Name, ParentId: folder.ParentId}
+		converted[i] = workspace.Folder{Id: folder.Id, Name: folder.Name, ParentId: folder.ParentId, Variables: folder.Variables, Settings: folder.Settings}
 	}
 	return converted
 }
@@ -71,6 +71,7 @@ func toFileCollection(data SavedData) workspace.Collection {
 		Folders:      toFileFolders(data.Folders),
 		Environments: toFileEnvironments(data.Environments),
 		Variables:    data.CollectionVariables,
+		Settings:     data.CollectionSettings,
 	}
 }
 
@@ -85,7 +86,7 @@ func fromFileRequests(loaded []workspace.Request, memory workspaceMemory) []Requ
 func fromFileFolders(loaded []workspace.Folder, memory workspaceMemory) []Folder {
 	folders := make([]Folder, len(loaded))
 	for i, folder := range loaded {
-		folders[i] = Folder{Id: folder.Id, Name: folder.Name, ParentId: folder.ParentId, IsOpen: !memory.isCollapsed(folder.Id)}
+		folders[i] = Folder{Id: folder.Id, Name: folder.Name, ParentId: folder.ParentId, Variables: folder.Variables, Settings: folder.Settings, IsOpen: !memory.isCollapsed(folder.Id)}
 	}
 	return folders
 }
@@ -110,6 +111,7 @@ func (s folderStore) collection(data SavedData) (SavedData, error) {
 	data.Environments = fromFileEnvironments(loaded.Environments)
 	data.ActiveEnvironmentId = memory.ActiveEnvironmentId
 	data.CollectionVariables = loaded.Variables
+	data.CollectionSettings = loaded.Settings
 	data.DotEnv = s.folder.DotEnv()
 	data.Restricted = !memory.Trusted
 	return data, nil
@@ -160,6 +162,10 @@ func (s folderStore) saveEnvironments(environments []Environment, activeId strin
 
 func (s folderStore) saveVariables(text string) error {
 	return s.folder.SaveVariables(text)
+}
+
+func (s folderStore) saveSettings(settings workspace.Settings) error {
+	return s.folder.SaveSettings(settings)
 }
 
 func openFolder() *workspace.Workspace {

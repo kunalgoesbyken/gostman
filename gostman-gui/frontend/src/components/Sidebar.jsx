@@ -1,10 +1,11 @@
 import { memo, useState } from "react"
-import { FolderPlus, ListChecks, Plus } from "lucide-react"
+import { FolderPlus, ListChecks, Plus, Settings2 } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { Toolbar } from "./ui/panel"
 import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { CollectionTree } from "./CollectionTree"
 import { HistoryList } from "./HistoryList"
+import { FOLDER_SETTINGS_TEXT } from "../lib/folderSettingsText"
 import { shortcutLabel } from "../lib/platform"
 
 const VIEW_COLLECTIONS = "collections"
@@ -27,6 +28,7 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
           </TabsList>
           <div className="flex shrink-0 items-center gap-1">
             <IconButton label="Run requests" icon={ListChecks} onClick={() => actions.openRunner()} />
+            <IconButton label={FOLDER_SETTINGS_TEXT.collectionMenu} icon={Settings2} onClick={() => actions.openFolderSettings()} />
             <IconButton label="New folder" icon={FolderPlus} onClick={() => actions.createFolder()} />
             <IconButton label={`New request (${shortcutLabel("N")})`} icon={Plus} onClick={() => actions.newRequest()} />
           </div>

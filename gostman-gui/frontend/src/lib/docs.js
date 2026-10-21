@@ -63,7 +63,12 @@ const asArray = (value) => (Array.isArray(value) ? value : [])
 
 const isFolder = (value) => isPlainObject(value) && typeof value.id === 'string' && value.id !== ''
 
-const readFolder = (raw) => ({ id: raw.id, name: textOf(raw.name).trim() || UNTITLED_FOLDER, parentId: textOf(raw.parentId) })
+const readFolder = (raw) => ({
+  id: raw.id,
+  name: textOf(raw.name).trim() || UNTITLED_FOLDER,
+  parentId: textOf(raw.parentId),
+  description: textOf(raw.description).trim(),
+})
 
 function badgeOf(request, protocol) {
   return lookup(PROTOCOL_BADGES, protocol) || { label: request.method, className: lookup(METHOD_CLASSES, request.method) || PLAIN_CLASS }
@@ -88,7 +93,7 @@ function describeGroup(tree, folder, ancestors, anchorFor) {
   const anchor = anchorFor(path.join(' '), 'folder')
   const entries = requestsIn(tree, folder.id).map((request) => describeEntry(request, anchorFor))
   const groups = describeGroups(tree, folder.id, path, anchorFor)
-  return { anchor, name: folder.name, heading: path.join(PATH_SEPARATOR), entries, groups }
+  return { anchor, name: folder.name, heading: path.join(PATH_SEPARATOR), description: folder.description, entries, groups }
 }
 
 function describeGroups(tree, parentId, ancestors, anchorFor) {
@@ -107,7 +112,8 @@ function describeCollection(collection) {
     heading: ROOT_HEADING,
     entries: requestsIn(tree, ROOT_ID).map((request) => describeEntry(request, anchorFor)),
   }
-  return { requests, root, groups: describeGroups(tree, ROOT_ID, [], anchorFor) }
+  const description = textOf(collection?.settings?.description).trim()
+  return { requests, description, root, groups: describeGroups(tree, ROOT_ID, [], anchorFor) }
 }
 
 const flattenGroups = (groups) => groups.flatMap((group) => [group, ...flattenGroups(group.groups)])
@@ -231,10 +237,9 @@ function examplesSection(request) {
   return examples.length === 0 ? '' : html`<h4>Example responses</h4>${examples.map(exampleBlock)}`
 }
 
-function descriptionOf(request) {
-  const description = textOf(request.description).trim()
-  return description ? html`<p class="description" dir="auto">${description}</p>` : ''
-}
+const descriptionBlock = (text) => (text === '' ? '' : html`<p class="description" dir="auto">${text}</p>`)
+
+const descriptionOf = (request) => descriptionBlock(textOf(request.description).trim())
 
 function requestArticle(entry, settings) {
   const { request } = entry
@@ -249,7 +254,7 @@ ${descriptionOf(request)}${PROTOCOL_SECTIONS[entry.protocol].map((section) => se
 function groupSection(group, settings) {
   return html`<section id="${group.anchor}" data-group>
 <h2><span dir="auto">${group.heading}</span>${anchorLink(group.anchor, group.heading)}</h2>
-${group.entries.map((entry) => requestArticle(entry, settings))}</section>
+${descriptionBlock(group.description || '')}${group.entries.map((entry) => requestArticle(entry, settings))}</section>
 `
 }
 
@@ -289,7 +294,7 @@ function readSettings(options) {
 
 export function buildDocs(collection, options) {
   const settings = readSettings(options)
-  const { requests, root, groups } = describeCollection(collection)
+  const { requests, description, root, groups } = describeCollection(collection)
   const sections = flattenGroups(groups)
   return toSource(html`<!doctype html>
 <html lang="en">
@@ -313,7 +318,7 @@ ${root.entries.map(contentsEntry)}${groups.map(contentsGroup)}</ul>
 <main id="${CONTENT_ID}">
 <h1 dir="auto">${settings.title}</h1>
 <p class="intro">${summaryOf(requests.length, sections.length)}</p>
-${variablesSection(variablesUsed(requests))}${root.entries.length > 0 ? groupSection(root, settings) : ''}${sections.map((group) => groupSection(group, settings))}<footer>Generated with Gostman.</footer>
+${descriptionBlock(description)}${variablesSection(variablesUsed(requests))}${root.entries.length > 0 ? groupSection(root, settings) : ''}${sections.map((group) => groupSection(group, settings))}<footer>Generated with Gostman.</footer>
 </main>
 </div>
 <script>${trusted(SCRIPT)}</script>

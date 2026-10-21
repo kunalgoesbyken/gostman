@@ -15,6 +15,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/krockxz/gostman/engine"
+	"github.com/krockxz/gostman/workspace"
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -51,10 +52,11 @@ type SavedData struct {
 	Settings            Settings            `json:"settings"`
 	Restricted          bool                `json:"restricted,omitempty"`
 
-	Globals             []Environment     `json:"globals,omitempty"`
-	ActiveGlobalId      string            `json:"activeGlobalId,omitempty"`
-	CollectionVariables string            `json:"collectionVariables,omitempty"`
-	DotEnv              map[string]string `json:"dotEnv,omitempty"`
+	Globals             []Environment      `json:"globals,omitempty"`
+	ActiveGlobalId      string             `json:"activeGlobalId,omitempty"`
+	CollectionVariables string             `json:"collectionVariables,omitempty"`
+	DotEnv              map[string]string  `json:"dotEnv,omitempty"`
+	CollectionSettings  workspace.Settings `json:"collectionSettings"`
 }
 
 type Environment struct {
@@ -67,10 +69,12 @@ type Environment struct {
 }
 
 type Folder struct {
-	Id       string `json:"id"`
-	Name     string `json:"name"`
-	IsOpen   bool   `json:"isOpen"`
-	ParentId string `json:"parentId"`
+	Id        string `json:"id"`
+	Name      string `json:"name"`
+	IsOpen    bool   `json:"isOpen"`
+	ParentId  string `json:"parentId"`
+	Variables string `json:"variables"`
+	workspace.Settings
 }
 
 type Request struct {
@@ -99,7 +103,7 @@ type Request struct {
 	McpTool          string         `json:"mcpTool"`
 	McpArguments     string         `json:"mcpArguments"`
 	Vars             string         `json:"vars"`
-	Timestamp       string         `json:"timestamp"`
+	Timestamp        string         `json:"timestamp"`
 }
 
 var (

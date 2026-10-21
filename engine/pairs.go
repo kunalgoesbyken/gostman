@@ -136,7 +136,12 @@ func (s *substitution) apply(input string) string {
 	})
 }
 
-func parsePairs(raw string) ([]pair, error) {
+type pairRow struct {
+	pair
+	enabled bool
+}
+
+func parseRows(raw string) ([]pairRow, error) {
 	if strings.TrimSpace(raw) == "" {
 		return nil, nil
 	}
@@ -146,12 +151,38 @@ func parsePairs(raw string) ([]pair, error) {
 	}
 	switch value := decoded.(type) {
 	case map[string]any:
-		return pairsFromObject(value), nil
+		return rowsFromPairs(pairsFromObject(value)), nil
 	case []any:
-		return pairsFromRows(value), nil
+		return rowsFromList(value), nil
 	default:
 		return nil, fmt.Errorf("expected a JSON object or a list of rows")
 	}
+}
+
+func parsePairs(raw string) ([]pair, error) {
+	rows, err := parseRows(raw)
+	if err != nil {
+		return nil, err
+	}
+	return enabledPairs(rows), nil
+}
+
+func rowsFromPairs(pairs []pair) []pairRow {
+	rows := make([]pairRow, len(pairs))
+	for i, entry := range pairs {
+		rows[i] = pairRow{pair: entry, enabled: true}
+	}
+	return rows
+}
+
+func enabledPairs(rows []pairRow) []pair {
+	var pairs []pair
+	for _, entry := range rows {
+		if entry.enabled {
+			pairs = append(pairs, entry.pair)
+		}
+	}
+	return pairs
 }
 
 func pairsFromObject(object map[string]any) []pair {
@@ -174,20 +205,20 @@ func pairsFromObject(object map[string]any) []pair {
 	return pairs
 }
 
-func pairsFromRows(rows []any) []pair {
-	var pairs []pair
-	for _, row := range rows {
-		fields, ok := row.(map[string]any)
-		if !ok || fields["enabled"] == false {
+func rowsFromList(items []any) []pairRow {
+	var rows []pairRow
+	for _, item := range items {
+		fields, ok := item.(map[string]any)
+		if !ok {
 			continue
 		}
 		key := scalarString(fields["key"])
 		if strings.TrimSpace(key) == "" {
 			continue
 		}
-		pairs = append(pairs, pair{key, scalarString(fields["value"])})
+		rows = append(rows, pairRow{pair: pair{key, scalarString(fields["value"])}, enabled: fields["enabled"] != false})
 	}
-	return pairs
+	return rows
 }
 
 func substitutePairs(pairs []pair, substitute func(string) string) []pair {

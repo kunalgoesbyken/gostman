@@ -6,6 +6,7 @@ import { isPlainObject, lookup, parseJSON, pluralize } from './dataUtils'
 import { sanitizeExamples } from './examples'
 import { readParamRows } from './queryString'
 import { SCHEMES } from './authSchemes'
+import { AUTH_INHERIT, hasActiveSettings, normalizeScopeSettings, withoutActiveSettings } from './inheritance'
 import { clearToken } from './oauth'
 import { AUTH_OAUTH2, normalizeRequest } from './request'
 import { isFileRow, isSentRow, parseRows, ROW_FILE, ROW_TEXT, serializeRows } from './rows'
@@ -185,9 +186,16 @@ function readPostmanBody(body) {
   return read ? read(body) : {}
 }
 
-export const countActiveRequests = (data) => data.requests.filter(hasActiveContent).length
+export const countActiveRequests = (data) => (
+  data.requests.filter(hasActiveContent).length + [...data.folders, data.settings].filter(hasActiveSettings).length
+)
 
-export const withoutActiveRequests = (data) => ({ ...data, requests: data.requests.map(withoutActiveContent) })
+export const withoutActiveRequests = (data) => ({
+  ...data,
+  requests: data.requests.map(withoutActiveContent),
+  folders: data.folders.map(withoutActiveSettings),
+  settings: withoutActiveSettings(data.settings),
+})
 
 const tlsWarning = (requestNames) => (
   `TLS verification was disabled in the collection for ${listNames(requestNames)}; it was kept enabled. Turn it off in the request's Settings tab if you trust these hosts.`
@@ -585,11 +593,11 @@ export function exportToPostman(requests, folders = [], options = {}) {
 
 const withoutToken = (request) => ({ ...request, auth: { ...request.auth, oauth2: clearToken(request.auth.oauth2) } })
 
-export function exportToGostman(requests, folders, environments) {
+export function exportToGostman(requests, folders, environments, settings) {
   return {
     version: GOSTMAN_FORMAT_VERSION,
     exportedAt: new Date().toISOString(),
-    gostman: { requests: requests.map(withoutToken), folders, environments },
+    gostman: { requests: requests.map(withoutToken), folders, environments, settings },
   }
 }
 
@@ -607,6 +615,7 @@ function importGostman(data) {
     folders: backup.folders,
     environments: asArray(backup.environments),
     variables: isPlainObject(backup.variables) ? backup.variables : {},
+    settings: backup.settings,
   }
 }
 
@@ -746,11 +755,12 @@ export async function parseImport(text) {
   }
 }
 
-const AUTH_TYPES = [AUTH_BASIC, AUTH_BEARER, AUTH_API_KEY, AUTH_OAUTH2, ...Object.keys(SCHEMES)]
+const AUTH_TYPES = [AUTH_INHERIT, AUTH_BASIC, AUTH_BEARER, AUTH_API_KEY, AUTH_OAUTH2, ...Object.keys(SCHEMES)]
 const OAUTH_TEXT_FIELDS = ['grant', 'authUrl', 'tokenUrl', 'clientId', 'clientSecret', 'scope', 'username', 'password', 'callbackUrl', 'credentialsIn', 'headerPrefix']
 const AUTH_TEXT_FIELDS = ['username', 'password', 'token', 'key', 'value', 'domain']
 const SCHEME_SECTIONS = Object.values(SCHEMES).filter((scheme) => scheme.section)
 const REQUEST_TEXT_FIELDS = ['id', 'description', 'url', 'headers', 'body', 'queryParams', 'folderId', 'graphqlQuery', 'graphqlVariables', 'extractors', 'assertions', ...SCRIPT_FIELDS, 'grpcMethod', 'grpcMessage', 'grpcProtos', 'mcpTool', 'mcpArguments', 'vars']
+const SCOPE_TEXT_FIELDS = ['description', 'headers', 'assertions', ...SCRIPT_FIELDS]
 const BODY_TYPE_VALUES = BODY_TYPES.map((type) => type.value)
 
 const stringOf = (value) => (typeof value === 'string' ? value : '')
@@ -802,11 +812,18 @@ function sanitizeRequest(raw) {
   })
 }
 
+const sanitizeScope = (raw) => normalizeScopeSettings({
+  ...pickStrings(isPlainObject(raw) ? raw : {}, SCOPE_TEXT_FIELDS),
+  auth: sanitizeAuth(raw?.auth),
+})
+
 const sanitizeFolder = (raw) => ({
   id: stringOf(raw.id),
   name: cleanName(raw.name, UNTITLED_FOLDER),
   isOpen: raw.isOpen === true,
   parentId: stringOf(raw.parentId),
+  variables: stringOf(raw.variables) || '{}',
+  ...sanitizeScope(raw),
 })
 
 const sanitizeEnvironment = (raw) => ({
@@ -854,6 +871,7 @@ export function sanitizeImport(data, existing) {
     folders,
     environments: asArray(data?.environments).filter(isPlainObject).map(sanitizeEnvironment),
     variables: isPlainObject(data?.variables) ? data.variables : {},
+    settings: sanitizeScope(data?.settings),
     warnings: [
       ...asArray(data?.warnings).filter((warning) => typeof warning === 'string'),
       ...(requestsWithoutTls.length > 0 ? [tlsWarning(requestsWithoutTls)] : []),

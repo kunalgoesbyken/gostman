@@ -47,6 +47,10 @@ func send(ctx context.Context, r Request, policy Policy) Response {
 	if len(r.Body) > maxEncodedBody {
 		return Failure(ErrorConfig, "request body is larger than 10 MB")
 	}
+	r, err := Resolve(r)
+	if err != nil {
+		return Failure(ErrorConfig, err.Error())
+	}
 	prepared, err := Prepare(r)
 	if err != nil {
 		return Failure(ErrorConfig, err.Error())

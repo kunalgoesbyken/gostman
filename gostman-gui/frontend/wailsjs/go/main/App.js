@@ -214,6 +214,10 @@ export function ResetData() {
   return window['go']['main']['App']['ResetData']();
 }
 
+export function SaveCollectionSettings(arg1) {
+  return window['go']['main']['App']['SaveCollectionSettings'](arg1);
+}
+
 export function SaveCollectionToFolder(arg1) {
   return window['go']['main']['App']['SaveCollectionToFolder'](arg1);
 }

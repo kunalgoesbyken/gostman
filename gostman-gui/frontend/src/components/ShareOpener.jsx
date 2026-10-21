@@ -103,7 +103,7 @@ function SharePreview({ summary }) {
       {exampleCount > 0 && <p className="text-muted-foreground">{pluralize(exampleCount, "saved example response")}</p>}
       {activeCount > 0 && (
         <p className="text-warning">
-          {pluralize(activeCount, "request")} carry scripts or OAuth 2.0 settings. You are asked before those are imported.
+          {pluralize(activeCount, "item")} carry scripts or OAuth 2.0 settings. You are asked before those are imported.
         </p>
       )}
       {warnings.map((warning) => <p key={warning} className="text-warning">{warning}</p>)}

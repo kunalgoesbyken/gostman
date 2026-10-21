@@ -81,9 +81,11 @@ func (s *session) renewToken(ctx context.Context, config engine.OAuth2, options 
 }
 
 func (s *session) withFreshToken(ctx context.Context, request Request) (Request, error) {
-	if request.Auth.Type != authOAuth2 {
+	effective := engine.InheritedAuth(request.Auth, request.layers())
+	if effective.Type != authOAuth2 {
 		return request, nil
 	}
+	request.Auth = effective
 	s.common.signInMu.Lock()
 	defer s.common.signInMu.Unlock()
 	config := s.common.recall(request.Auth.OAuth2)

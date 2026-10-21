@@ -2,6 +2,7 @@ import { hasActiveContent } from './activeContent'
 import { extractVariables, isUsableResponse, parseExtractors } from './chaining'
 import { isPlainObject, parseJSON } from './dataUtils'
 import { isGrpcRequest } from './grpc'
+import { inheritedAuthSource, lineageOf, withInheritance } from './inheritance'
 import { isMcpRequest } from './mcp'
 import { withFreshToken } from './oauth'
 import { failureResponse } from './response'
@@ -61,12 +62,39 @@ export function applyExtractors(request, response) {
   return { saved: store().mergeActiveVariables(variables), names: Object.keys(variables) }
 }
 
-const needsPostStage = (request) => hasText(request.postScript) || countActiveAssertions(request.assertions) > 0
+const scopeLabel = (stage, name) => `${stage} (${name})`
+
+const preSteps = (lineage, request) => [
+  ...lineage.map(({ name, settings }) => ({ label: scopeLabel(PRE_REQUEST, name), script: settings.preScript })),
+  { label: PRE_REQUEST, script: request.preScript },
+].filter((step) => hasText(step.script))
+
+const postSteps = (lineage, request) => [
+  { label: POST_RESPONSE, script: request.postScript, assertions: request.assertions },
+  ...[...lineage].reverse().map(({ name, settings }) => ({
+    label: scopeLabel(POST_RESPONSE, name),
+    script: settings.postScript,
+    assertions: settings.assertions,
+  })),
+].filter((step) => hasText(step.script) || countActiveAssertions(step.assertions) > 0)
+
+const hasActiveInheritance = (lineage) => lineage.some(({ settings }) => hasActiveContent(settings))
 
 function transportFor(backend, request) {
   if (isGrpcRequest(request)) return backend.invokeGrpc
   if (isMcpRequest(request)) return backend.invokeMcp
   return backend.send
+}
+
+async function renewAuth(backend, request, lineage, variables) {
+  const source = inheritedAuthSource(request.auth, lineage)
+  if (!source) {
+    const renewed = await withFreshToken(backend, request, variables)
+    return { request: renewed, outgoing: renewed }
+  }
+  const outgoing = await withFreshToken(backend, { ...request, auth: source.settings.auth }, variables)
+  if (outgoing.auth !== source.settings.auth) store().updateScopeSettings(source.id, { auth: outgoing.auth })
+  return { request, outgoing }
 }
 
 export function createExecutor(backend) {
@@ -79,10 +107,11 @@ export function createExecutor(backend) {
       extraction: null,
     })
 
+    const lineage = lineageOf(store(), original.folderId)
     let request = original
-    if (store().isRestricted && hasActiveContent(request)) return stop(request, RESTRICTED)
-    if (hasText(request.preScript)) {
-      const pre = await runStage(PRE_REQUEST, { script: request.preScript, request: requestSubject(request) }, request)
+    if (store().isRestricted && (hasActiveContent(request) || hasActiveInheritance(lineage))) return stop(request, RESTRICTED)
+    for (const step of preSteps(lineage, request)) {
+      const pre = await runStage(step.label, { script: step.script, request: requestSubject(request) }, request)
       runs.push(pre)
       if (pre.error) return stop(request, pre.error)
       request = applyRequestEdits(request, pre.request)
@@ -91,24 +120,29 @@ export function createExecutor(backend) {
     const answers = await askForValues(request)
     if (answers === null) return stop(request, PROMPT_DECLINED)
 
+    let renewal
     try {
-      request = await withFreshToken(backend, request, variablesText(request, answers))
+      renewal = await renewAuth(backend, request, lineage, variablesText(request, answers))
     } catch (error) {
       return stop(request, error.message)
     }
+    request = renewal.request
+    const { outgoing } = renewal
 
-    const transmit = transportFor(backend, request)
-    const response = await transmit(sendId, request, variablesText(request, answers), store().cookies)
+    const transmit = transportFor(backend, outgoing)
+    const response = await transmit(sendId, withInheritance(store(), outgoing), variablesText(request, answers), store().cookies)
     store().storeCookies(response.cookies || [])
     const extraction = applyExtractors(request, response)
 
-    if (isUsableResponse(response) && needsPostStage(request)) {
-      runs.push(await runStage(POST_RESPONSE, {
-        script: request.postScript,
-        assertions: request.assertions,
-        request: requestSubject(request),
-        response: responseSubject(response),
-      }, request))
+    if (isUsableResponse(response)) {
+      for (const step of postSteps(lineage, request)) {
+        runs.push(await runStage(step.label, {
+          script: step.script,
+          assertions: step.assertions,
+          request: requestSubject(request),
+          response: responseSubject(response),
+        }, request))
+      }
     }
     return { auth: request.auth, response, tests: report(runs), extraction }
   }

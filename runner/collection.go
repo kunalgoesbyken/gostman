@@ -7,22 +7,26 @@ import (
 	"os"
 
 	"github.com/krockxz/gostman/engine"
+	"github.com/krockxz/gostman/workspace"
 )
 
 const byteOrderMark = "\xef\xbb\xbf"
 
 type Collection struct {
-	Requests     []json.RawMessage `json:"requests"`
-	Folders      []Folder          `json:"folders"`
-	Environments []Environment     `json:"environments"`
-	Variables    string            `json:"variables"`
-	DotEnv       map[string]string `json:"-"`
+	Requests     []json.RawMessage  `json:"requests"`
+	Folders      []Folder           `json:"folders"`
+	Environments []Environment      `json:"environments"`
+	Variables    string             `json:"variables"`
+	Settings     workspace.Settings `json:"settings"`
+	DotEnv       map[string]string  `json:"-"`
 }
 
 type Folder struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	ParentID string `json:"parentId"`
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	ParentID  string `json:"parentId"`
+	Variables string `json:"variables"`
+	workspace.Settings
 }
 
 type Environment struct {
@@ -57,6 +61,7 @@ type Request struct {
 	McpTool          string         `json:"mcpTool"`
 	McpArguments     string         `json:"mcpArguments"`
 	Vars             string         `json:"vars"`
+	Lineage          []Folder       `json:"-"`
 }
 
 type exportFile struct {

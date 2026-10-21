@@ -26,8 +26,8 @@ export function mergeProtoFiles(existing, added) {
 }
 
 export function toGrpcTarget(request, variables) {
-  const { url, headers, auth, options, grpcProtos } = request
-  return { address: url, headers, auth, options, variables, protos: parseProtoFiles(grpcProtos) }
+  const { url, headers, auth, options, grpcProtos, inherited = [] } = request
+  return { address: url, headers, auth, options, variables, protos: parseProtoFiles(grpcProtos), inherited }
 }
 
 export function toGrpcCall(request, variables) {

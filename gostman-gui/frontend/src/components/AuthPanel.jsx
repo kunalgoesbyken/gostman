@@ -5,6 +5,8 @@ import { Textarea } from "./ui/textarea"
 import { SecretInput, TextInput } from "./AuthInputs"
 import { OAuthFields } from "./OAuthFields"
 import { lookup } from "../lib/dataUtils"
+import { FOLDER_SETTINGS_TEXT as TEXT } from "../lib/folderSettingsText"
+import { AUTH_INHERIT } from "../lib/inheritance"
 import { AUTH_OAUTH2 } from "../lib/request"
 import { FIELD_AREA, FIELD_SECRET, FIELD_SELECT, SCHEMES } from "../lib/authSchemes"
 
@@ -14,8 +16,11 @@ const AUTH_API_KEY = "apikey"
 const IN_HEADER = "header"
 const IN_QUERY = "query"
 
+const NO_AUTH_NOTE = "This request is sent without authentication."
+const INHERIT_TYPE = { value: AUTH_INHERIT, label: TEXT.inherit }
+
 const AUTH_TYPES = [
-  { value: "", label: "No auth" },
+  { value: "", label: TEXT.noAuth },
   { value: AUTH_BASIC, label: "Basic" },
   { value: AUTH_BEARER, label: "Bearer token" },
   { value: AUTH_API_KEY, label: "API key" },
@@ -98,7 +103,19 @@ const FIELDS_BY_TYPE = {
   [AUTH_OAUTH2]: OAuthFields,
 }
 
-export function AuthPanel({ auth, tokenRequest, actions, onChange }) {
+function typeOptions(inheritance) {
+  if (!inheritance) return AUTH_TYPES
+  const [noAuth, ...others] = AUTH_TYPES
+  return [INHERIT_TYPE, { ...noAuth, value: inheritance.noAuthValue }, ...others]
+}
+
+function authNote(auth, inheritance, hasFields) {
+  if (inheritance && auth.type === AUTH_INHERIT) return inheritance.source ? TEXT.inheritsFrom(inheritance.source) : TEXT.inheritsNothing
+  if (hasFields) return "Values can use {{variables}}. This overrides a header or parameter of the same name."
+  return inheritance?.noAuthNote || NO_AUTH_NOTE
+}
+
+export function AuthPanel({ auth, tokenRequest, actions, inheritance, onChange }) {
   const onFieldChange = (field) => (value) => onChange({ ...auth, [field]: value })
   const scheme = lookup(SCHEMES, auth.type)
   const TypeFields = lookup(FIELDS_BY_TYPE, auth.type)
@@ -108,7 +125,7 @@ export function AuthPanel({ auth, tokenRequest, actions, onChange }) {
       <div className="flex max-w-xl flex-col gap-2">
         <Field label="Type">
           <Select value={auth.type} onChange={(event) => onFieldChange("type")(event.target.value)}>
-            {AUTH_TYPES.map((type) => (
+            {typeOptions(inheritance).map((type) => (
               <option key={type.value} value={type.value}>{type.label}</option>
             ))}
           </Select>
@@ -116,9 +133,7 @@ export function AuthPanel({ auth, tokenRequest, actions, onChange }) {
         {TypeFields && <TypeFields auth={auth} onFieldChange={onFieldChange} tokenRequest={tokenRequest} actions={actions} />}
         {scheme && <SchemeFields scheme={scheme} auth={auth} onFieldChange={onFieldChange} />}
         <p className="pt-1 text-xs text-muted-foreground">
-          {TypeFields || scheme
-            ? "Values can use {{variables}}. This overrides a header or parameter of the same name."
-            : "This request is sent without authentication."}
+          {authNote(auth, inheritance, Boolean(TypeFields || scheme))}
         </p>
         {scheme?.note && <p className="text-xs text-muted-foreground">{scheme.note}</p>}
       </div>

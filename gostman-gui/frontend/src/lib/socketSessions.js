@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 import { parseVariableMap, placeholderNames, substitutePlaceholders } from './placeholders'
 import { isSentRow, parseRows } from './rows'
-import { toSocketURL } from './socketUrl'
+import { withInheritance } from './inheritance'
+import { toHttpURL, toSocketURL } from './socketUrl'
 import { selectActiveVariables, useAppStore } from '../store/appStore'
 
 export { isSocketAddress } from './socketUrl'
@@ -146,7 +147,13 @@ export function createSocketActions(backend) {
     retryTimers.set(tabId, setTimeout(() => connect(tabId), RECONNECT_DELAY_MS))
   }
 
-  async function dial(tabId, target) {
+  async function inheritedHeaders(request, target) {
+    const state = useAppStore.getState()
+    const prepared = await backend.prepare(withInheritance(state, { ...request, url: toHttpURL(target.url) }), selectActiveVariables(state))
+    return prepared.headers.map(({ key, value }) => [key, value])
+  }
+
+  async function dial(tabId, target, request) {
     const link = {}
     const isCurrent = () => links.get(tabId) === link
     const whileCurrent = (handle) => (...args) => {
@@ -163,7 +170,7 @@ export function createSocketActions(backend) {
     }
     links.set(tabId, link)
     try {
-      const transport = await backend.openSocket(target.url, target.headers, handlers)
+      const transport = await backend.openSocket(target.url, await inheritedHeaders(request, target), handlers)
       if (isCurrent()) link.transport = transport
       else transport.close()
     } catch (error) {
@@ -184,7 +191,7 @@ export function createSocketActions(backend) {
     }
     setStatus(tabId, SOCKET_CONNECTING)
     log(tabId, { kind: ENTRY_INFO, text: `Connecting to ${target.url}` })
-    await dial(tabId, target)
+    await dial(tabId, target, tab.request)
   }
 
   function disconnect(tabId) {

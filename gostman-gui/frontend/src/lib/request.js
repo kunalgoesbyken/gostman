@@ -55,19 +55,22 @@ const DEFAULT_REQUEST = {
   timestamp: '',
 }
 
+export const normalizeAuth = (raw) => ({ ...DEFAULT_AUTH, ...raw, oauth2: { ...DEFAULT_OAUTH2, ...raw?.oauth2 } })
+
 export function normalizeRequest(raw) {
   const source = raw || {}
   const request = {}
   for (const [field, fallback] of Object.entries(DEFAULT_REQUEST)) {
     request[field] = source[field] || fallback
   }
-  request.auth = { ...DEFAULT_AUTH, ...source.auth, oauth2: { ...DEFAULT_OAUTH2, ...source.auth?.oauth2 } }
+  request.auth = normalizeAuth(source.auth)
   request.options = { ...DEFAULT_OPTIONS, ...source.options }
   request.bodyType = resolveBodyType(request.bodyType, request.body)
   return { ...request, ...foldQueryParams(request.url, request.queryParams) }
 }
 
 export function toEngineRequest(request, variables, cookies = []) {
+  const { inherited = [] } = request
   const { method, url, headers, queryParams, body, bodyType, graphqlQuery, graphqlVariables, auth, options } = normalizeRequest(request)
-  return { method, url, headers, queryParams, body, bodyType, graphqlQuery, graphqlVariables, auth, options, variables, cookies }
+  return { method, url, headers, queryParams, body, bodyType, graphqlQuery, graphqlVariables, auth, options, variables, cookies, inherited }
 }

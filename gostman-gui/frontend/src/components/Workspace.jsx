@@ -30,6 +30,7 @@ const MockServerDialog = lazy(() => import("./MockServerDialog").then((module) =
 const CaptureDialog = lazy(() => import("./CaptureDialog").then((module) => ({ default: module.CaptureDialog })))
 const SpecViewer = lazy(() => import("./SpecViewer").then((module) => ({ default: module.SpecViewer })))
 const SpecSyncDialog = lazy(() => import("./SpecSyncDialog").then((module) => ({ default: module.SpecSyncDialog })))
+const FolderSettings = lazy(() => import("./FolderSettings").then((module) => ({ default: module.FolderSettings })))
 const RunnerDialog = lazy(() => import("./RunnerDialog").then((module) => ({ default: module.RunnerDialog })))
 const MonacoEditor = lazy(() => import("./MonacoEditor").then((module) => ({ default: module.MonacoEditor })))
 
@@ -122,6 +123,7 @@ function usePersistence(backend) {
   const globalEnvironments = useAppStore((s) => s.globalEnvironments)
   const activeGlobalEnvironmentId = useAppStore((s) => s.activeGlobalEnvironmentId)
   const collectionVariables = useAppStore((s) => s.collectionVariables)
+  const collectionSettings = useAppStore((s) => s.collectionSettings)
   const reportPersistenceFailure = useAppStore((s) => s.reportPersistenceFailure)
 
   const environmentState = useMemo(
@@ -152,11 +154,14 @@ function usePersistence(backend) {
     [backend, persist]
   )
 
+  const saveCollectionSettings = useCallback((value) => persist(() => backend.saveCollectionSettings(value)), [backend, persist])
+
   useAutoSave(folders, saveFolders)
   useAutoSave(requestHistory, saveHistory)
   useAutoSave(cookies, saveCookies)
   useAutoSave(environmentState, saveEnvironments, ENVIRONMENT_SAVE_DELAY_MS)
   useAutoSave(scopeState, saveScopes, ENVIRONMENT_SAVE_DELAY_MS)
+  useAutoSave(collectionSettings, saveCollectionSettings, ENVIRONMENT_SAVE_DELAY_MS)
 }
 
 function LoadedWorkspace({ backend, onBack }) {
@@ -181,6 +186,9 @@ function LoadedWorkspace({ backend, onBack }) {
   const closeSpecDialog = useAppStore((s) => s.closeSpecDialog)
   const settings = useAppStore((s) => s.settings)
   const runner = useAppStore((s) => s.runner)
+  const folderSettings = useAppStore((s) => s.folderSettings)
+  const collectionSettings = useAppStore((s) => s.collectionSettings)
+  const closeFolderSettings = useAppStore((s) => s.closeFolderSettings)
   const captureDialogOpen = useCaptureStore((s) => s.isOpen)
   const isDialogOpen = useAppStore(selectIsDialogOpen) || captureDialogOpen
   const sharedLink = useSyncExternalStore(subscribeToSharedLink, pendingSharedLink)
@@ -306,6 +314,7 @@ function LoadedWorkspace({ backend, onBack }) {
             folders={folders}
             environments={shareableEnvironments}
             variables={variablesMap}
+            settings={collectionSettings}
             onImport={actions.importData}
             onImportShared={actions.importShared}
             openapi={actions.openapi}
@@ -322,6 +331,7 @@ function LoadedWorkspace({ backend, onBack }) {
         {captureDialogOpen && <CaptureDialog folders={folders} requests={requests} actions={actions.capture} />}
         {specDialog?.mode === "view" && <SpecViewer dialog={specDialog} actions={actions.openapi} onClose={closeSpecDialog} />}
         {specDialog?.mode === "sync" && <SpecSyncDialog dialog={specDialog} link={specLinks[specDialog.folderId]} actions={actions.openapi} onClose={closeSpecDialog} />}
+        {folderSettings && <FolderSettings backend={backend} scope={folderSettings} EditorComponent={MonacoEditor} onClose={closeFolderSettings} />}
         {runner.isOpen && <RunnerDialog runner={runner} folders={folders} requests={requests} actions={actions} />}
       </Suspense>
 

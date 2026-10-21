@@ -23,6 +23,10 @@ const (
 )
 
 func Prepare(r Request) (Prepared, error) {
+	r, err := Resolve(r)
+	if err != nil {
+		return Prepared{}, err
+	}
 	expansion, err := newSubstitution(r.Variables)
 	if err != nil {
 		return Prepared{}, err

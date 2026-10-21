@@ -17,6 +17,7 @@ type ProtoFile struct {
 type Target struct {
 	Address   string         `json:"address"`
 	Headers   string         `json:"headers"`
+	Inherited []engine.Layer `json:"inherited,omitempty"`
 	Auth      engine.Auth    `json:"auth"`
 	Variables string         `json:"variables"`
 	Options   engine.Options `json:"options"`

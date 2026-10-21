@@ -53,6 +53,7 @@ type Request struct {
 	Variables        string       `json:"variables"`
 	Options          Options      `json:"options"`
 	Cookies          []CookieInfo `json:"cookies"`
+	Inherited        []Layer      `json:"inherited,omitempty"`
 }
 
 type HeaderEntry struct {

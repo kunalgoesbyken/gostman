@@ -1,5 +1,7 @@
 package main
 
+import "github.com/krockxz/gostman/workspace"
+
 const (
 	appSecretScope    = "app"
 	globalSecretScope = "global"
@@ -24,4 +26,8 @@ func (a *App) SaveScopes(globals []Environment, activeGlobalId string, collectio
 		return err
 	}
 	return storage.current().saveVariables(collectionVariables)
+}
+
+func (a *App) SaveCollectionSettings(settings workspace.Settings) error {
+	return storage.current().saveSettings(settings)
 }

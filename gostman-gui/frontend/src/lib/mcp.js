@@ -6,8 +6,8 @@ export const MCP_OK = 'OK'
 export const isMcpRequest = (request) => request.method === MCP_METHOD
 
 export function toMcpTarget(request, variables) {
-  const { url, headers, auth, options } = request
-  return { url, headers, auth, options, variables }
+  const { url, headers, auth, options, inherited = [] } = request
+  return { url, headers, auth, options, variables, inherited }
 }
 
 export function toMcpCall(request, variables) {

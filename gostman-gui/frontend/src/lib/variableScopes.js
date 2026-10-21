@@ -79,12 +79,16 @@ export const dotEnvEntries = (dotEnv) => (
 
 const dotEnvLayer = (dotEnv) => ({ source: 'process', entries: dotEnvEntries(dotEnv || {}) })
 
-function folderLayers(folders, folderId) {
+export function folderChain(folders, folderId) {
   const chain = []
   for (let current = findById(folders, folderId); current && !chain.includes(current); current = findById(folders, current.parentId)) {
     chain.unshift(current)
   }
-  return chain.map((folder) => objectLayer('folder', folder.variables))
+  return chain
+}
+
+function folderLayers(folders, folderId) {
+  return folderChain(folders, folderId).map((folder) => objectLayer('folder', folder.variables))
 }
 
 export function scopeLayers(state, request) {

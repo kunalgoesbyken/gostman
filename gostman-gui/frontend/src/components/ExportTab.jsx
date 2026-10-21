@@ -27,7 +27,7 @@ const EXPORT_FORMATS = [
     description: "Full backup: requests, folders and every environment",
     extension: "json",
     mime: JSON_MIME,
-    build: ({ requests, folders, environments }) => toJSON(exportToGostman(requests, folders, environments)),
+    build: ({ requests, folders, environments, settings }) => toJSON(exportToGostman(requests, folders, environments, settings)),
   },
   {
     value: "postman",
@@ -68,7 +68,7 @@ const EXPORT_FORMATS = [
     fileName: "api-docs.html",
     mime: "text/html",
     hasDocsOptions: true,
-    build: ({ requests, folders, docsOptions }) => buildDocs({ requests, folders }, docsOptions),
+    build: ({ requests, folders, settings, docsOptions }) => buildDocs({ requests, folders, settings }, docsOptions),
   },
 ]
 
@@ -80,14 +80,14 @@ function buildExport(format, data) {
   }
 }
 
-export function ExportTab({ requests, folders, environments, variables, onSaveFile }) {
+export function ExportTab({ requests, folders, environments, variables, settings, onSaveFile }) {
   const [formatId, setFormatId] = useState(EXPORT_FORMATS[0].value)
   const [docsOptions, setDocsOptions] = useState(DEFAULT_DOCS_OPTIONS)
 
   const format = EXPORT_FORMATS.find((candidate) => candidate.value === formatId)
   const { content, error } = useMemo(
-    () => buildExport(format, { requests, folders, environments, variables, docsOptions }),
-    [format, requests, folders, environments, variables, docsOptions]
+    () => buildExport(format, { requests, folders, environments, variables, settings, docsOptions }),
+    [format, requests, folders, environments, variables, settings, docsOptions]
   )
   const preview = content.length > PREVIEW_LIMIT ? `${content.slice(0, PREVIEW_LIMIT)}\n…` : content
 

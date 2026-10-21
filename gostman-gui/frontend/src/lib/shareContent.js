@@ -1,9 +1,8 @@
-import { hasActiveContent } from './activeContent'
 import { buildCollectionTree, collectRequests, foldersIn, ROOT_ID } from './collectionTree'
 import { isSecretField, SCHEMES } from './authSchemes'
 import { isPlainObject, parseJSON } from './dataUtils'
 import { parseExamples } from './examples'
-import { exportToGostman, parseImport, sanitizeImport } from './importExport'
+import { countActiveRequests, exportToGostman, parseImport, sanitizeImport } from './importExport'
 import { ShareError } from './share'
 
 const PLACEHOLDER_START = '{{'
@@ -40,12 +39,13 @@ const withoutValues = (environment) => ({
 
 const withoutExamples = (request) => ({ ...request, examples: '' })
 
-export function buildSharedExport({ requests, folders, environments }, { folderId, includeVariables, includeExamples }) {
+export function buildSharedExport({ requests, folders, environments, settings }, { folderId, includeVariables, includeExamples }) {
   const selected = selectionOf(requests, folders, folderId)
   return exportToGostman(
     includeExamples ? selected.requests : selected.requests.map(withoutExamples),
     selected.folders,
-    includeVariables ? environments : environments.map(withoutValues)
+    includeVariables ? environments : environments.map(withoutValues),
+    folderId ? undefined : settings
   )
 }
 
@@ -77,7 +77,7 @@ export function describeShared(imported) {
     requests: data.requests.map(({ id, name, method, url }) => ({ id, name, method, url })),
     folders: data.folders.map(({ id, name }) => ({ id, name })),
     environments: data.environments.map(describeEnvironment),
-    activeCount: data.requests.filter(hasActiveContent).length,
+    activeCount: countActiveRequests(data),
     exampleCount: exampleCount(data.requests),
     warnings: data.warnings,
   }

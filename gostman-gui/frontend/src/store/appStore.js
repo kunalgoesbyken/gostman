@@ -3,6 +3,7 @@ import { createJSONStorage, devtools, persist } from 'zustand/middleware'
 import { mergeCookies, withoutCookie } from '../lib/cookies'
 import { isPlainObject, parseJSON } from '../lib/dataUtils'
 import { DEFAULT_SETTINGS, normalizeSettings } from '../lib/network'
+import { ROOT_SETTINGS_ID, isBlankScope, normalizeFolder, normalizeScopeSettings, updatedScope } from '../lib/inheritance'
 import { normalizeRequest } from '../lib/request'
 import { isBlankRequest } from '../lib/requestChanges'
 import { reconcileTabs } from '../lib/tabReconcile'
@@ -117,8 +118,6 @@ const withUnusedId = (environment, environments) => {
   return isUnused ? environment : { ...environment, id: createId('env') }
 }
 
-const toFolder = ({ id, name, isOpen, parentId }) => ({ id, name, isOpen: Boolean(isOpen), parentId: parentId || '' })
-
 const movedOutOf = (folderId, parentId) => (request) => (
   request.folderId === folderId ? { ...request, folderId: parentId } : request
 )
@@ -186,6 +185,8 @@ export const useAppStore = create(
         globalEnvironments: [],
         activeGlobalEnvironmentId: '',
         collectionVariables: EMPTY_VARIABLES,
+        collectionSettings: normalizeScopeSettings(),
+        folderSettings: null,
         dotEnv: {},
         environmentDialogOpen: false,
         variablePrompt: CLOSED_VARIABLE_PROMPT,
@@ -219,7 +220,7 @@ export const useAppStore = create(
           const environments = restoreEnvironments(data)
           const requests = asArray(data.requests).map(normalizeRequest)
           const hasActive = environments.some((environment) => environment.id === data.activeEnvironmentId)
-          const folders = asArray(data.folders)
+          const folders = asArray(data.folders).map(normalizeFolder)
           return {
             hydrated: true,
             isRestricted: Boolean(data.restricted),
@@ -234,6 +235,7 @@ export const useAppStore = create(
             globalEnvironments: asArray(data.globals).filter(isUsableEnvironment),
             activeGlobalEnvironmentId: data.activeGlobalId || '',
             collectionVariables: data.collectionVariables || EMPTY_VARIABLES,
+            collectionSettings: normalizeScopeSettings(data.collectionSettings),
             dotEnv: isPlainObject(data.dotEnv) ? data.dotEnv : {},
           }
         }),
@@ -258,7 +260,7 @@ export const useAppStore = create(
         addFolder: (name, parentId = '') => set((state) => ({
           folders: [
             ...state.folders.map((folder) => (folder.id === parentId ? { ...folder, isOpen: true } : folder)),
-            { id: createId('folder'), name, isOpen: true, parentId },
+            normalizeFolder({ id: createId('folder'), name, isOpen: true, parentId }),
           ],
         })),
         renameFolder: (folderId, name) => set((state) => ({
@@ -266,7 +268,7 @@ export const useAppStore = create(
         })),
         mergeFolders: (folders) => set((state) => {
           const byId = new Map(state.folders.map((folder) => [folder.id, folder]))
-          folders.forEach((folder) => byId.set(folder.id, toFolder(folder)))
+          folders.forEach((folder) => byId.set(folder.id, normalizeFolder(folder)))
           return { folders: Array.from(byId.values()) }
         }),
         deleteFolder: (folderId) => set((state) => {
@@ -370,6 +372,10 @@ export const useAppStore = create(
         }),
         setActiveEnvironmentIn: (scope, id) => set({ [ENVIRONMENT_LISTS[scope].active]: id }),
         setCollectionVariables: (collectionVariables) => set({ collectionVariables }),
+        updateScopeSettings: (folderId, patch) => set((state) => updatedScope(state, folderId, patch)),
+        openFolderSettings: (folderId = ROOT_SETTINGS_ID) => set({ folderSettings: { folderId } }),
+        closeFolderSettings: () => set({ folderSettings: null }),
+        adoptCollectionSettings: (incoming) => set((state) => (isBlankScope(state.collectionSettings) ? { collectionSettings: normalizeScopeSettings(incoming) } : state)),
         openEnvironmentDialog: () => set({ environmentDialogOpen: true }),
         closeEnvironmentDialog: () => set({ environmentDialogOpen: false }),
         askVariables: (names, defaults) => new Promise((resolve) => set({
@@ -530,6 +536,7 @@ export const selectIsDialogOpen = (state) => (
   || state.examplesDialogOpen
   || state.mockDialogOpen
   || state.environmentDialogOpen
+  || state.folderSettings !== null
   || state.variablePrompt.isOpen
   || state.specDialog !== null
   || state.runner.isOpen

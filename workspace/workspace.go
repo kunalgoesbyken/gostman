@@ -50,7 +50,7 @@ type folderEntry struct {
 	order  int64
 	stored folderContent
 	broken bool
-	extras []*yaml.Node
+	extras requestExtras
 }
 
 type environmentEntry struct {
@@ -178,7 +178,10 @@ func (w *Workspace) fill(collection Collection) error {
 	if err := w.SaveEnvironments(collection.Environments); err != nil {
 		return err
 	}
-	return w.SaveVariables(collection.Variables)
+	if err := w.SaveVariables(collection.Variables); err != nil {
+		return err
+	}
+	return w.SaveSettings(collection.Settings)
 }
 
 func (w *Workspace) Root() string {
@@ -275,7 +278,7 @@ func (w *Workspace) orderedEnvironments() []*environmentEntry {
 func (w *Workspace) Collection() Collection {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	collection := Collection{Requests: []Request{}, Folders: []Folder{}, Environments: []Environment{}, Variables: w.manifestVariables()}
+	collection := Collection{Requests: []Request{}, Folders: []Folder{}, Environments: []Environment{}, Variables: w.manifestVariables(), Settings: w.manifestSettings()}
 	for _, entry := range w.orderedFolders() {
 		collection.Folders = append(collection.Folders, entry.folder)
 	}
