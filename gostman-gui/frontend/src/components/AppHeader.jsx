@@ -3,19 +3,23 @@ import { Button, IconButton } from "./ui/button"
 import { EnvironmentSwitcher } from "./EnvironmentSwitcher"
 import { StorageMenu } from "./StorageMenu"
 import { WindowControls } from "./WindowControls"
-import { isDesktopShell } from "../lib/windowControls"
+import { isDesktopShell, isDragRegion, windowControls } from "../lib/windowControls"
 import { useShortcutLabel } from "../hooks/useShortcuts"
 import logo from "../assets/logo.jpg"
 
 const DRAG = { "--wails-draggable": "drag" }
 const NO_DRAG = { "--wails-draggable": "no-drag" }
 
+const toggleMaximiseOnDragRegion = (event) => {
+  if (isDragRegion(event.target)) windowControls.toggleMaximise()
+}
+
 export function AppHeader({ storage, onImport, onReset, onOpenCommands, onToggleSidebar, onBack }) {
   const isDesktop = isDesktopShell()
   const paletteShortcut = useShortcutLabel("commandPalette")
 
   return (
-    <header className="relative flex h-12 shrink-0 items-center gap-3 border-b border-border bg-background px-3 max-sm:gap-2" style={isDesktop ? DRAG : undefined}>
+    <header className="relative flex h-12 shrink-0 items-center gap-3 border-b border-border bg-background px-3 max-sm:gap-2" style={isDesktop ? DRAG : undefined} onDoubleClick={isDesktop ? toggleMaximiseOnDragRegion : undefined}>
       <IconButton label="Toggle sidebar" icon={PanelLeft} size="icon" onClick={onToggleSidebar} className="md:hidden" />
       {onBack && <IconButton label="Back to the landing page" icon={ArrowLeft} size="icon" onClick={onBack} />}
 

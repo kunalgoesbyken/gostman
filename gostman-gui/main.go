@@ -12,6 +12,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
+	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 //go:embed all:frontend/dist
@@ -20,6 +21,7 @@ var assets embed.FS
 const (
 	sandboxWorkerPrefix = "/assets/sandbox.worker."
 	sandboxPolicy       = "default-src 'none'; script-src 'unsafe-eval'"
+	singleInstanceID    = "app.gostman.desktop"
 )
 
 func isolateSandbox(next http.Handler) http.Handler {
@@ -36,6 +38,11 @@ func applicationMenu() *menu.Menu {
 		return nil
 	}
 	return menu.NewMenuFromItems(menu.AppMenu(), menu.EditMenu(), menu.WindowMenu())
+}
+
+func (a *App) showExistingWindow(options.SecondInstanceData) {
+	wailsruntime.WindowUnminimise(a.ctx)
+	wailsruntime.Show(a.ctx)
 }
 
 func main() {
@@ -56,6 +63,10 @@ func main() {
 		Menu:             applicationMenu(),
 		Windows:          &windows.Options{Theme: theme.frame},
 		Bind:             []interface{}{app},
+		SingleInstanceLock: &options.SingleInstanceLock{
+			UniqueId:               singleInstanceID,
+			OnSecondInstanceLaunch: app.showExistingWindow,
+		},
 	})
 	if err != nil {
 		log.Fatal(err)

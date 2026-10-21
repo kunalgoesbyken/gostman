@@ -8,3 +8,5 @@ export const windowControls = {
   isMaximised: WindowIsMaximised,
   close: Quit,
 }
+
+export const isDragRegion = (element) => getComputedStyle(element).getPropertyValue("--wails-draggable").trim() === "drag"
