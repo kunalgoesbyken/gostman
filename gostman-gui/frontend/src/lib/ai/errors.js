@@ -10,6 +10,7 @@ export const KIND_TOO_LARGE = 'too_large'
 export const KIND_REPLY = 'reply'
 
 const DETAIL_LIMIT = 300
+const MAX_RETRY_SECONDS = 3600
 const STATUS_UNAUTHORIZED = 401
 const STATUS_FORBIDDEN = 403
 const STATUS_TIMEOUT = 408
@@ -32,7 +33,13 @@ function classify(status) {
 
 export const cleanDetail = (text) => String(text).split(/\s+/).filter(Boolean).join(' ').slice(0, DETAIL_LIMIT)
 
-export function statusError(status, detail) {
+function retryNote(retryAfter) {
+  const seconds = Number(retryAfter)
+  return retryAfter && Number.isInteger(seconds) && seconds > 0 && seconds <= MAX_RETRY_SECONDS ? ` (retry in ${seconds}s)` : ''
+}
+
+export function statusError(status, detail, retryAfter = '') {
   const [kind, summary] = classify(status)
-  return aiError(kind, detail ? `${summary}: ${detail}` : summary, status)
+  const hinted = summary + retryNote(retryAfter)
+  return aiError(kind, detail ? `${hinted}: ${detail}` : hinted, status)
 }

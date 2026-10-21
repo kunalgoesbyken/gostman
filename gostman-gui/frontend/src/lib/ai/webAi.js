@@ -119,7 +119,7 @@ async function readReply(response, wire, key) {
     } catch {
       detail = ''
     }
-    return { error: statusError(response.status, scrubText(detail, [key])) }
+    return { error: statusError(response.status, scrubText(detail, [key]), response.headers.get('retry-after') || '') }
   }
   try {
     const text = wire.read(JSON.parse(raw)).trim()

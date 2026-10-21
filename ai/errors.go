@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/redact"
@@ -25,7 +26,10 @@ const (
 	KindReply     Kind = "reply"
 )
 
-const detailLimit = 300
+const (
+	detailLimit     = 300
+	maxRetrySeconds = 3600
+)
 
 type Error struct {
 	Kind    Kind   `json:"kind"`
@@ -47,11 +51,19 @@ func KindOf(err error) Kind {
 	return KindNetwork
 }
 
-func statusError(status int, detail string) *Error {
+func retryNote(retryAfter string) string {
+	seconds, err := strconv.Atoi(strings.TrimSpace(retryAfter))
+	if err != nil || seconds <= 0 || seconds > maxRetrySeconds {
+		return ""
+	}
+	return fmt.Sprintf(" (retry in %ds)", seconds)
+}
+
+func statusError(status int, detail string, retryAfter string) *Error {
 	kind, summary := classify(status)
-	message := summary
+	message := summary + retryNote(retryAfter)
 	if detail != "" {
-		message = summary + ": " + detail
+		message += ": " + detail
 	}
 	return &Error{Kind: kind, Status: status, Message: message}
 }
