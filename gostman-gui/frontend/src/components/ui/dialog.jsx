@@ -1,6 +1,7 @@
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { X } from "lucide-react"
 import { IconButton } from "./button"
+import { useFocusTrap } from "../../hooks/useFocusTrap"
 import { cn } from "../../lib/utils"
 
 const DIALOG_SIZES = {
@@ -9,6 +10,9 @@ const DIALOG_SIZES = {
 }
 
 export function Dialog({ label, size = "sm", onClose, className, children }) {
+  const dialogRef = useRef(null)
+  useFocusTrap(dialogRef)
+
   useEffect(() => {
     const closeOnEscape = (event) => {
       if (event.key === "Escape") onClose()
@@ -20,12 +24,14 @@ export function Dialog({ label, size = "sm", onClose, className, children }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onMouseDown={onClose}>
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label={label}
         onMouseDown={(event) => event.stopPropagation()}
         className={cn(
-          "flex max-h-full w-full flex-col overflow-hidden rounded-lg border border-border bg-background shadow-lg",
+          "flex max-h-full w-full flex-col overflow-hidden rounded-lg border border-border bg-background shadow-lg focus:outline-none",
           DIALOG_SIZES[size],
           className
         )}

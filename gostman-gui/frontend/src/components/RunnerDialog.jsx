@@ -129,7 +129,7 @@ export function RunnerDialog({ runner, folders, requests, actions }) {
       <DialogHeader onClose={actions.closeRunner}>
         <DialogTitle>Run requests</DialogTitle>
       </DialogHeader>
-      <Toolbar>
+      <Toolbar className="h-auto flex-wrap py-1.5">
         <div className="w-48 shrink-0">
           <Select value={folderId} disabled={isRunning} onChange={(event) => setFolderId(event.target.value)} aria-label="Requests to run">
             <option value={ROOT_ID}>All requests</option>
@@ -166,7 +166,7 @@ export function RunnerDialog({ runner, folders, requests, actions }) {
           )}
         </div>
       </Toolbar>
-      <Toolbar>
+      <Toolbar className="h-auto flex-wrap py-1.5">
         <input ref={fileInput} type="file" accept={DATA_ACCEPT} hidden onChange={chooseData} />
         <Button variant="ghost" size="sm" disabled={isRunning} onClick={() => fileInput.current.click()}>
           <Upload />

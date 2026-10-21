@@ -8,6 +8,7 @@ import { ROOT_SETTINGS_ID, isBlankScope, normalizeFolder, normalizeScopeSettings
 import { normalizeRequest } from '../lib/request'
 import { isBlankRequest } from '../lib/requestChanges'
 import { reconcileTabs } from '../lib/tabReconcile'
+import { isNarrowViewport } from '../lib/layout'
 import { promptLayer, resolveLayers, scopeLayers, variableText } from '../lib/variableScopes'
 
 const HISTORY_LIMIT = 50
@@ -127,6 +128,14 @@ const withoutRequestId = (id) => (request) => (request.id === id ? { ...request,
 
 const isSameCall = (first, second) => HISTORY_IDENTITY_FIELDS.every((field) => first[field] === second[field])
 
+function tabsWithRequest(state, request) {
+  const holder = request.id ? state.tabs.find((tab) => tab.request.id === request.id) : null
+  if (holder) return { activeTabId: holder.id }
+  const active = selectActiveTab(state)
+  const isReusable = isBlankRequest(active.request) && active.pendingId === null
+  return isReusable ? mapTab(state, active.id, (tab) => createTab(tab.id, request)) : appendTab(state, request)
+}
+
 let reportStorageFailure = () => {}
 
 const WRITE_DELAY_MS = 400
@@ -204,7 +213,7 @@ export const useAppStore = create(
         commandPaletteMode: 'commands',
         shortcutsDialogOpen: false,
         preferencesDialogOpen: false,
-        isSidebarOpen: true,
+        isSidebarOpen: !isNarrowViewport(),
         closedTabs: [],
         cookiesDialogOpen: false,
         settingsDialogOpen: false,
@@ -308,13 +317,10 @@ export const useAppStore = create(
 
         setActiveTab: (tabId) => set({ activeTabId: tabId }),
         newTab: (folderId = '') => set((state) => appendTab(state, { folderId })),
-        openRequestTab: (request) => set((state) => {
-          const holder = request.id ? state.tabs.find((tab) => tab.request.id === request.id) : null
-          if (holder) return { activeTabId: holder.id }
-          const active = selectActiveTab(state)
-          const isReusable = isBlankRequest(active.request) && active.pendingId === null
-          return isReusable ? mapTab(state, active.id, (tab) => createTab(tab.id, request)) : appendTab(state, request)
-        }),
+        openRequestTab: (request) => set((state) => ({
+          ...tabsWithRequest(state, request),
+          isSidebarOpen: state.isSidebarOpen && !isNarrowViewport(),
+        })),
         closeTab: (tabId) => set((state) => {
           const closed = state.tabs.find((tab) => tab.id === tabId)
           const closedTabs = closed && !isBlankRequest(closed.request)

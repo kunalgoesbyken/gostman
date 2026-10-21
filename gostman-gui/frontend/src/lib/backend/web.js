@@ -26,6 +26,25 @@ const LEGACY_KEYS = {
 }
 
 const inFlight = new Map()
+
+function memoryStorage() {
+  const items = new Map()
+  return {
+    getItem: (key) => (items.has(key) ? items.get(key) : null),
+    setItem: (key, value) => items.set(key, String(value)),
+    removeItem: (key) => items.delete(key),
+  }
+}
+
+function openStorage() {
+  try {
+    return window.localStorage
+  } catch {
+    return memoryStorage()
+  }
+}
+
+const storage = openStorage()
 let damageNotice = ''
 
 const sampleData = () => ({ requests: [...mockRequests], folders: [...mockFolders], history: [] })
@@ -47,24 +66,24 @@ function parseDocument(raw) {
 
 function readLegacyData() {
   const stored = Object.entries(LEGACY_KEYS)
-    .map(([field, key]) => [field, parseStored(localStorage.getItem(key))])
+    .map(([field, key]) => [field, parseStored(storage.getItem(key))])
     .filter(([, value]) => value !== null)
   return stored.length > 0 ? Object.fromEntries(stored) : null
 }
 
 function writeData(data) {
-  localStorage.setItem(DATA_KEY, JSON.stringify(data))
+  storage.setItem(DATA_KEY, JSON.stringify(data))
 }
 
 function migrateLegacyData(legacy) {
   writeData(legacy)
-  Object.keys(legacy).forEach((field) => localStorage.removeItem(LEGACY_KEYS[field]))
+  Object.keys(legacy).forEach((field) => storage.removeItem(LEGACY_KEYS[field]))
   return legacy
 }
 
 function setAsideDamagedData(raw) {
   const backupKey = `${DAMAGED_DATA_PREFIX}${Date.now()}`
-  localStorage.setItem(backupKey, raw)
+  storage.setItem(backupKey, raw)
   const fresh = emptyData()
   writeData(fresh)
   damageNotice = `The saved data in this browser could not be read, so the app started empty. The unreadable copy was kept in this browser's local storage under "${backupKey}".`
@@ -72,7 +91,7 @@ function setAsideDamagedData(raw) {
 }
 
 function readDocument() {
-  const raw = localStorage.getItem(DATA_KEY)
+  const raw = storage.getItem(DATA_KEY)
   if (raw === null) return sampleData()
   const stored = parseDocument(raw)
   if (!stored) throw new Error(UNREADABLE_DATA)
@@ -131,7 +150,7 @@ function openStream(id, request, onMessages) {
 }
 
 function readStoredData() {
-  const raw = localStorage.getItem(DATA_KEY)
+  const raw = storage.getItem(DATA_KEY)
   if (raw !== null) return parseDocument(raw) || setAsideDamagedData(raw)
   const legacy = readLegacyData()
   return legacy ? migrateLegacyData(legacy) : sampleData()
@@ -202,7 +221,7 @@ async function authorize(config, variables) {
 }
 
 async function reset() {
-  localStorage.removeItem(DATA_KEY)
+  storage.removeItem(DATA_KEY)
 }
 
 async function saveFile(name, base64, mime) {

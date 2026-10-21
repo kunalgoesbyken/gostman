@@ -12,7 +12,7 @@ function StatusItem({ icon: Icon, label, active, onClick }) {
   return (
     <button type="button" onClick={onClick} className={cn(ITEM_CLASS, active && "text-success")}>
       <Icon aria-hidden="true" />
-      {label}
+      <span className="max-sm:sr-only">{label}</span>
     </button>
   )
 }
@@ -28,7 +28,7 @@ export function StatusBar({ onOpenMock, onOpenCapture }) {
   const git = useGitStore((s) => s.state)
 
   return (
-    <footer className="flex h-6 shrink-0 items-center justify-between border-t border-border bg-background px-1 text-[11px] text-muted-foreground">
+    <footer className="flex h-6 shrink-0 items-center justify-between overflow-hidden border-t border-border bg-background px-1 text-[11px] text-muted-foreground">
       <div className="flex h-full items-center">
         <StatusItem icon={Settings} label="Network" onClick={openSettings} />
         <StatusItem icon={Server} label={isMockRunning ? "Mock server (running)" : "Mock server"} active={isMockRunning} onClick={onOpenMock} />
@@ -38,7 +38,7 @@ export function StatusBar({ onOpenMock, onOpenCapture }) {
       <div className="flex h-full items-center">
         <StatusItem icon={Cookie} label="Cookies" onClick={openCookies} />
         <StatusItem icon={SlidersHorizontal} label={PREFERENCES_TEXT.statusLabel} onClick={openPreferences} />
-        <span className="px-2 font-mono text-[10px]">v{__APP_VERSION__}</span>
+        <span className="px-2 font-mono text-[10px] max-sm:hidden">v{__APP_VERSION__}</span>
       </div>
     </footer>
   )

@@ -96,12 +96,26 @@ func buildURL(r Request, substitute func(string) string) (*url.URL, error) {
 		return nil, fmt.Errorf("unsupported URL scheme %q, use http or https", target.Scheme)
 	}
 
+	target.RawQuery = escapeNonASCII(target.RawQuery)
+
 	params, err := parsePairs(r.QueryParams)
 	if err != nil {
 		return nil, fmt.Errorf("query params are not valid: %w", err)
 	}
 	overrideQuery(target, substitutePairs(params, substitute))
 	return target, nil
+}
+
+func escapeNonASCII(raw string) string {
+	var escaped strings.Builder
+	for i := 0; i < len(raw); i++ {
+		if raw[i] < utf8.RuneSelf {
+			escaped.WriteByte(raw[i])
+			continue
+		}
+		fmt.Fprintf(&escaped, "%%%02X", raw[i])
+	}
+	return escaped.String()
 }
 
 func defaultScheme(raw string) string {

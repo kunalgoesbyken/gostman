@@ -231,6 +231,7 @@ function LoadedWorkspace({ backend, onBack }) {
         onImport={actions.openImport}
         onReset={actions.reset}
         onOpenCommands={openCommandPalette}
+        onToggleSidebar={() => actions.runCommand("toggleSidebar")}
         onOpenCookies={openCookiesDialog}
         onOpenSettings={openSettingsDialog}
         onOpenMock={actions.mock.open}
@@ -238,7 +239,7 @@ function LoadedWorkspace({ backend, onBack }) {
         onBack={onBack}
       />
 
-      <div className="flex min-h-0 flex-1">
+      <div className="relative flex min-h-0 flex-1">
         {isSidebarOpen && (
           <Sidebar
             folders={folders}
