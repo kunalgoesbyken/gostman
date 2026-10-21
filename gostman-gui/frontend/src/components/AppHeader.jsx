@@ -1,4 +1,4 @@
-import { ArrowLeft, Import, RotateCcw, Search } from "lucide-react"
+import { ArrowLeft, Import, PanelLeft, RotateCcw, Search } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { EnvironmentSwitcher } from "./EnvironmentSwitcher"
 import { StorageMenu } from "./StorageMenu"
@@ -10,18 +10,19 @@ import logo from "../assets/logo.jpg"
 const DRAG = { "--wails-draggable": "drag" }
 const NO_DRAG = { "--wails-draggable": "no-drag" }
 
-export function AppHeader({ storage, onImport, onReset, onOpenCommands, onBack }) {
+export function AppHeader({ storage, onImport, onReset, onOpenCommands, onToggleSidebar, onBack }) {
   const isDesktop = isDesktopShell()
   const paletteShortcut = useShortcutLabel("commandPalette")
 
   return (
     <header className="relative flex h-12 shrink-0 items-center gap-3 border-b border-border bg-background px-3" style={isDesktop ? DRAG : undefined}>
+      <IconButton label="Toggle sidebar" icon={PanelLeft} size="icon" onClick={onToggleSidebar} className="md:hidden" />
       {onBack && <IconButton label="Back to the landing page" icon={ArrowLeft} size="icon" onClick={onBack} />}
 
       {onBack || isDesktop ? (
         <div className="flex shrink-0 items-center gap-2">
-          <img src={logo} alt="" className="h-6 w-6 rounded" />
-          <h1 className="font-brand text-sm font-semibold">Gostman</h1>
+          <img src={logo} alt="" className="h-6 w-6 rounded max-sm:hidden" />
+          <h1 className="font-brand text-sm font-semibold max-sm:sr-only">Gostman</h1>
         </div>
       ) : (
         <h1 className="sr-only">Gostman</h1>
@@ -40,7 +41,7 @@ export function AppHeader({ storage, onImport, onReset, onOpenCommands, onBack }
         <EnvironmentSwitcher />
         <Button variant="outline" onClick={onImport}>
           <Import />
-          Import
+          <span className="max-sm:sr-only">Import</span>
         </Button>
         <div className="flex shrink-0 items-center gap-1">
           <IconButton label="Reset app and delete all data" icon={RotateCcw} size="icon" onClick={onReset} />

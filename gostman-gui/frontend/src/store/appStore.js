@@ -8,6 +8,7 @@ import { ROOT_SETTINGS_ID, isBlankScope, normalizeFolder, normalizeScopeSettings
 import { normalizeRequest } from '../lib/request'
 import { isBlankRequest } from '../lib/requestChanges'
 import { reconcileTabs } from '../lib/tabReconcile'
+import { isNarrowViewport } from '../lib/layout'
 import { promptLayer, resolveLayers, scopeLayers, variableText } from '../lib/variableScopes'
 
 const HISTORY_LIMIT = 50
@@ -204,7 +205,7 @@ export const useAppStore = create(
         commandPaletteMode: 'commands',
         shortcutsDialogOpen: false,
         preferencesDialogOpen: false,
-        isSidebarOpen: true,
+        isSidebarOpen: !isNarrowViewport(),
         closedTabs: [],
         cookiesDialogOpen: false,
         settingsDialogOpen: false,

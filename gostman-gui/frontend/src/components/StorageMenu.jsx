@@ -77,7 +77,7 @@ function BrowserStorage() {
   return (
     <Button variant="ghost" title={BROWSER_HINT} onClick={() => showAlert(BROWSER_LABEL, BROWSER_HINT)} className={BUTTON_CLASS}>
       <HardDrive />
-      <span className="truncate">{BROWSER_LABEL}</span>
+      <span className="truncate max-sm:sr-only">{BROWSER_LABEL}</span>
     </Button>
   )
 }
@@ -110,7 +110,7 @@ function FolderStorage({ storage }) {
         className={BUTTON_CLASS}
       >
         <Icon />
-        <span className="truncate">{hasFolder ? status.name : LOCAL_LABEL}</span>
+        <span className="truncate max-sm:sr-only">{hasFolder ? status.name : LOCAL_LABEL}</span>
         {isRestricted && <ShieldAlert className="text-warning" />}
         {status.problems.length > 0 && <AlertTriangle className="text-warning" />}
         <ChevronDown />

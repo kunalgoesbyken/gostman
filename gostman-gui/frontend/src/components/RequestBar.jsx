@@ -60,7 +60,7 @@ export const RequestBar = memo(function RequestBar({
         className="border-transparent text-sm font-medium hover:border-border focus:border-border"
       />
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Select
           value={activeRequest.method}
           onChange={(event) => onMethodChange(event.target.value)}
@@ -73,7 +73,7 @@ export const RequestBar = memo(function RequestBar({
           ))}
         </Select>
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-48 flex-1">
           <VariableInput
             placeholder="Enter a URL or paste a curl command"
             value={activeRequest.url}
