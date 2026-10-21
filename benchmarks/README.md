@@ -14,7 +14,7 @@
 ## Run
 
 ```powershell
-# from docs\benchmarks
+# from the benchmarks folder
 .\bench.ps1                                   # Gostman, Postman, Bruno; 5 runs; 20 s settle
 .\bench.ps1 -Apps Gostman,Postman,Bruno,Insomnia,Hoppscotch
 .\bench.ps1 -Runs 3 -SettleSeconds 10         # quick smoke test
