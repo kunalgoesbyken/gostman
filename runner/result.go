@@ -30,6 +30,8 @@ type Result struct {
 	Failed     bool      `json:"failed"`
 	Tests      []Check   `json:"tests"`
 	Logs       []LogLine `json:"logs"`
+	Iteration  int       `json:"iteration,omitempty"`
+	Exchange   *Capture  `json:"exchange,omitempty"`
 }
 
 type Summary struct {
@@ -48,6 +50,8 @@ type Report struct {
 	Environment string    `json:"environment"`
 	StartedAt   time.Time `json:"startedAt"`
 	DurationMs  int64     `json:"durationMs"`
+	Iterations  int       `json:"iterations,omitempty"`
+	Parallel    int       `json:"parallel,omitempty"`
 	Summary     Summary   `json:"summary"`
 	Results     []Result  `json:"results"`
 }

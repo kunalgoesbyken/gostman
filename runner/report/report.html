@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gostman run report</title>
+<style>
+:root {
+  --bg: #ffffff; --panel: #f6f7f8; --line: #dfe2e6; --text: #1b1f24; --muted: #66707b;
+  --pass: #1a7f37; --fail: #cf222e; --skip: #9a6700; --code: #f0f2f4;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14171a; --panel: #1b1f23; --line: #2d333a; --text: #e6e9ec; --muted: #8b949e;
+    --pass: #3fb950; --fail: #f85149; --skip: #d29922; --code: #101316;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 64px; }
+h1 { font-size: 18px; margin: 0 0 4px; }
+.meta { color: var(--muted); font-size: 12px; margin-bottom: 16px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 16px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; }
+.card b { display: block; font-size: 22px; font-weight: 600; }
+.card span { color: var(--muted); font-size: 12px; }
+.card.fail b { color: var(--fail); }
+.card.pass b { color: var(--pass); }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.bar button, .bar input { font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; }
+.bar button { cursor: pointer; }
+.bar button[aria-pressed="true"] { border-color: var(--text); }
+.bar input { flex: 1; min-width: 160px; }
+.row { border: 1px solid var(--line); border-radius: 6px; margin-bottom: 6px; background: var(--bg); }
+.row summary { display: flex; gap: 10px; align-items: center; padding: 6px 10px; cursor: pointer; list-style: none; }
+.row summary::-webkit-details-marker { display: none; }
+.mark { font: 600 11px ui-monospace, Consolas, monospace; width: 34px; flex: none; }
+.pass .mark { color: var(--pass); } .fail .mark { color: var(--fail); } .skip .mark { color: var(--skip); }
+.method { font: 600 11px ui-monospace, Consolas, monospace; width: 56px; flex: none; color: var(--muted); }
+.name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.name small { color: var(--muted); }
+.stat { font: 12px ui-monospace, Consolas, monospace; color: var(--muted); flex: none; }
+.body { border-top: 1px solid var(--line); padding: 10px 12px; display: grid; gap: 10px; }
+.body h3 { margin: 0 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+pre { margin: 0; padding: 8px 10px; background: var(--code); border-radius: 4px; overflow: auto; max-height: 320px; font: 12px/1.45 ui-monospace, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+ul { margin: 0; padding: 0; list-style: none; }
+li { font-size: 13px; padding: 1px 0; }
+li.ok::before { content: "PASS  "; color: var(--pass); font: 600 11px ui-monospace, Consolas, monospace; }
+li.bad::before { content: "FAIL  "; color: var(--fail); font: 600 11px ui-monospace, Consolas, monospace; }
+li small { display: block; color: var(--muted); margin-left: 42px; white-space: pre-wrap; }
+.error { color: var(--fail); white-space: pre-wrap; }
+.empty { color: var(--muted); padding: 24px 0; text-align: center; }
+</style>
+</head>
+<body>
+<main>
+<h1>Gostman run report</h1>
+<div class="meta" id="meta"></div>
+<div class="cards" id="cards"></div>
+<div class="bar">
+  <button type="button" id="all" aria-pressed="true">All</button>
+  <button type="button" id="failed" aria-pressed="false">Failed</button>
+  <input type="search" id="search" placeholder="Filter by name or URL" aria-label="Filter by name or URL">
+</div>
+<div id="rows"></div>
+</main>
+<script type="application/json" id="report-data">__GOSTMAN_REPORT__</script>
+<script>
+(function () {
+  var report = JSON.parse(document.getElementById('report-data').textContent) || {};
+  var results = report.results || [];
+  var summary = report.summary || {};
+  var onlyFailed = false;
+  var query = '';
+
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    node.dir = 'auto';
+    if (className) node.className = className;
+    if (text !== undefined && text !== null) node.textContent = text;
+    return node;
+  }
+
+  function section(title, content) {
+    var wrap = el('div');
+    wrap.appendChild(el('h3', '', title));
+    wrap.appendChild(content);
+    return wrap;
+  }
+
+  function parseHeaders(text) {
+    try {
+      var rows = JSON.parse(text || '[]');
+      if (Array.isArray(rows)) {
+        return rows.filter(function (row) { return row.enabled !== false && row.key; })
+          .map(function (row) { return row.key + ': ' + row.value; }).join('\n');
+      }
+      return Object.keys(rows).map(function (key) { return key + ': ' + rows[key]; }).join('\n');
+    } catch (error) {
+      return text || '';
+    }
+  }
+
+  function pretty(text, type) {
+    if (!text) return '';
+    if (/json/i.test(type || '') || /^\s*[\[{]/.test(text)) {
+      try { return JSON.stringify(JSON.parse(text), null, 2); } catch (error) { return text; }
+    }
+    return text;
+  }
+
+  function markOf(result) {
+    if (result.skipped) return 'skip';
+    return result.failed ? 'fail' : 'pass';
+  }
+
+  function render(result) {
+    var kind = markOf(result);
+    var row = el('details', 'row ' + kind);
+    var head = el('summary');
+    head.appendChild(el('span', 'mark', kind === 'skip' ? 'SKIP' : kind === 'fail' ? 'FAIL' : 'PASS'));
+    head.appendChild(el('span', 'method', result.method || ''));
+    var name = el('span', 'name', result.name || '');
+    var where = [];
+    if (result.folder) where.push(result.folder);
+    if (result.iteration) where.push('iteration ' + result.iteration);
+    if (where.length) name.appendChild(el('small', '', '  ' + where.join(' / ')));
+    head.appendChild(name);
+    if (result.skipped) {
+      head.appendChild(el('span', 'stat', 'skipped'));
+    } else {
+      var tests = result.tests || [];
+      if (tests.length) {
+        var passed = tests.filter(function (test) { return test.passed; }).length;
+        head.appendChild(el('span', 'stat', passed + '/' + tests.length + ' tests'));
+      }
+      head.appendChild(el('span', 'stat', result.status || ''));
+      head.appendChild(el('span', 'stat', (result.durationMs || 0) + ' ms'));
+    }
+    row.appendChild(head);
+
+    var body = el('div', 'body');
+    if (result.skipped) body.appendChild(el('div', '', result.skipped));
+    if (result.url) body.appendChild(section('URL', el('pre', '', result.url)));
+    if (result.error) body.appendChild(el('div', 'error', result.error));
+    if ((result.tests || []).length) {
+      var list = el('ul');
+      result.tests.forEach(function (test) {
+        var item = el('li', test.passed ? 'ok' : 'bad', test.name);
+        if (test.message) item.appendChild(el('small', '', test.message));
+        list.appendChild(item);
+      });
+      body.appendChild(section('Assertions and tests', list));
+    }
+    if ((result.logs || []).length) {
+      body.appendChild(section('Console', el('pre', '', result.logs.map(function (line) { return line.level + ': ' + line.text; }).join('\n'))));
+    }
+    var exchange = result.exchange;
+    if (exchange) {
+      var sent = exchange.request || {};
+      var request = [sent.method + ' ' + sent.url, parseHeaders(sent.headers)].filter(Boolean).join('\n');
+      if (sent.body) request += '\n\n' + sent.body;
+      body.appendChild(section('Request (as written, variables not expanded)', el('pre', '', request)));
+      var received = exchange.response || {};
+      var headers = (received.headers || []).map(function (entry) { return entry.key + ': ' + entry.value; }).join('\n');
+      var text = (result.status || '') + (headers ? '\n' + headers : '');
+      var content = pretty(received.body, received.contentType);
+      if (content) text += '\n\n' + content;
+      if (received.truncated) text += '\n\n[body truncated]';
+      body.appendChild(section('Response', el('pre', '', text)));
+    }
+    row.appendChild(body);
+    return row;
+  }
+
+  function matches(result) {
+    if (onlyFailed && !result.failed) return false;
+    if (!query) return true;
+    var haystack = ((result.name || '') + ' ' + (result.url || '') + ' ' + (result.folder || '')).toLowerCase();
+    return haystack.indexOf(query) !== -1;
+  }
+
+  function draw() {
+    var host = document.getElementById('rows');
+    host.textContent = '';
+    var shown = results.filter(matches);
+    if (!shown.length) host.appendChild(el('div', 'empty', results.length ? 'No requests match.' : 'No requests ran.'));
+    shown.forEach(function (result) { host.appendChild(render(result)); });
+  }
+
+  function card(value, label, tone) {
+    var node = el('div', 'card' + (tone ? ' ' + tone : ''));
+    node.appendChild(el('b', '', String(value || 0)));
+    node.appendChild(el('span', '', label));
+    return node;
+  }
+
+  var meta = [];
+  if (report.collection) meta.push(report.collection);
+  if (report.environment) meta.push('environment ' + report.environment);
+  if (report.startedAt) meta.push(new Date(report.startedAt).toLocaleString());
+  meta.push((report.durationMs || 0) + ' ms');
+  if (report.iterations) meta.push(report.iterations + ' iterations');
+  if (report.parallel) meta.push('parallel ' + report.parallel);
+  document.getElementById('meta').textContent = meta.join('  |  ');
+
+  var cards = document.getElementById('cards');
+  cards.appendChild(card(summary.requests, 'requests'));
+  cards.appendChild(card(summary.passed, 'passed', 'pass'));
+  cards.appendChild(card(summary.failed, 'failed', summary.failed ? 'fail' : ''));
+  cards.appendChild(card(summary.skipped, 'skipped'));
+  cards.appendChild(card(summary.notRun, 'not run'));
+  cards.appendChild(card((summary.tests || 0) - (summary.failedTests || 0), 'tests passed', 'pass'));
+  cards.appendChild(card(summary.failedTests, 'tests failed', summary.failedTests ? 'fail' : ''));
+
+  function setFilter(failed) {
+    onlyFailed = failed;
+    document.getElementById('all').setAttribute('aria-pressed', String(!failed));
+    document.getElementById('failed').setAttribute('aria-pressed', String(failed));
+    draw();
+  }
+  document.getElementById('all').addEventListener('click', function () { setFilter(false); });
+  document.getElementById('failed').addEventListener('click', function () { setFilter(true); });
+  document.getElementById('search').addEventListener('input', function (event) {
+    query = event.target.value.trim().toLowerCase();
+    draw();
+  });
+  draw();
+})();
+</script>
+</body>
+</html>

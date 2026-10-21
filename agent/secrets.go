@@ -87,6 +87,12 @@ func (c *Client) learnResolved(label, value string) {
 	c.guard.LearnSecret(label, value)
 }
 
+func (c *Client) learnAll(values map[string]string) {
+	for name, value := range values {
+		c.guard.Learn(name, value)
+	}
+}
+
 func (c *Client) learnEnvironment(environment runner.Environment) {
 	values, _ := environment.Values()
 	for name, value := range values {
@@ -155,9 +161,8 @@ func (c *Client) Study(stored runner.Collection) error {
 }
 
 func (c *Client) absorb() {
-	for name, value := range c.session.Variables() {
-		c.guard.Learn(name, value)
-	}
+	c.learnAll(c.session.Variables())
+	c.learnAll(c.session.Observed())
 	for _, cookie := range c.session.Cookies() {
 		c.guard.Learn(cookiePrefix+cookie.Name, cookie.Value)
 	}

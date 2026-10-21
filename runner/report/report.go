@@ -12,9 +12,10 @@ const (
 	FormatText  = "text"
 	FormatJSON  = "json"
 	FormatJUnit = "junit"
+	FormatHTML  = "html"
 )
 
-var Formats = []string{FormatText, FormatJSON, FormatJUnit}
+var Formats = []string{FormatText, FormatJSON, FormatJUnit, FormatHTML}
 
 type Reporter interface {
 	Request(result runner.Result)
@@ -29,6 +30,8 @@ func New(format string, output io.Writer) (Reporter, error) {
 		return jsonReporter{output: output}, nil
 	case FormatJUnit:
 		return junitReporter{output: output}, nil
+	case FormatHTML:
+		return htmlReporter{output: output}, nil
 	default:
 		return nil, fmt.Errorf("unknown reporter %q", format)
 	}
@@ -39,8 +42,12 @@ func Supports(format string) bool {
 }
 
 func qualifiedName(result runner.Result) string {
-	if result.Folder == "" {
-		return result.Name
+	name := result.Name
+	if result.Folder != "" {
+		name = result.Folder + "/" + result.Name
 	}
-	return result.Folder + "/" + result.Name
+	if result.Iteration > 0 {
+		name = fmt.Sprintf("%s [iteration %d]", name, result.Iteration)
+	}
+	return name
 }

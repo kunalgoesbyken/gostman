@@ -37,6 +37,7 @@ type invocation struct {
 	reporter string
 	output   string
 	redact   bool
+	extras   runExtras
 }
 
 func parseInterspersed(flags *flag.FlagSet, arguments []string) ([]string, error) {
@@ -69,6 +70,7 @@ func parseInvocation(arguments []string) (invocation, error) {
 	flags.StringVar(&parsed.reporter, "reporter", report.FormatText, "")
 	flags.StringVar(&parsed.output, "output", "", "")
 	flags.BoolVar(&parsed.redact, "redact", false, "")
+	parsed.extras.register(flags, &parsed.options)
 
 	positional, err := parseInterspersed(flags, arguments)
 	switch {
@@ -80,6 +82,12 @@ func parseInvocation(arguments []string) (invocation, error) {
 		return parsed, fmt.Errorf("unknown reporter %q; choose %s", parsed.reporter, strings.Join(report.Formats, ", "))
 	case delayMs < 0 || timeoutMs < 0:
 		return parsed, errors.New("--delay and --timeout take a number of milliseconds, zero or more")
+	}
+	if err := parsed.extras.validate(parsed.options); err != nil {
+		return parsed, err
+	}
+	if err := parsed.extras.apply(&parsed.options, parsed.reporter); err != nil {
+		return parsed, err
 	}
 	parsed.path = positional[0]
 	parsed.options.Delay = time.Duration(delayMs) * time.Millisecond

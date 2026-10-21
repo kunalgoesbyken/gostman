@@ -23,9 +23,7 @@ type session struct {
 	scripts   *sandbox.Sandbox
 	policy    engine.Policy
 	variables variables
-	cookies   []engine.CookieInfo
-	tokens    tokenCache
-	witness   func(engine.Request)
+	common    *shared
 }
 
 type job struct {
@@ -124,7 +122,7 @@ func (s *session) transmit(ctx context.Context, request Request) (engine.Respons
 		return mcpclient.Invoke(ctx, call, s.policy), nil
 	}
 	var prepared engine.Request
-	if err := s.scripts.Call("toEngineRequest", &prepared, request, s.variables.withRequest(request.Vars).text(), s.cookies); err != nil {
+	if err := s.scripts.Call("toEngineRequest", &prepared, request, s.variables.withRequest(request.Vars).text(), s.common.cookieList()); err != nil {
 		return engine.Response{}, err
 	}
 	s.announce(prepared)
@@ -132,20 +130,20 @@ func (s *session) transmit(ctx context.Context, request Request) (engine.Respons
 }
 
 func (s *session) announce(prepared engine.Request) {
-	if s.witness != nil {
-		s.witness(prepared)
-	}
+	s.common.announce(prepared)
 }
 
 func (s *session) storeCookies(received []engine.CookieInfo) error {
 	if len(received) == 0 {
 		return nil
 	}
+	s.common.mu.Lock()
+	defer s.common.mu.Unlock()
 	var merged []engine.CookieInfo
-	if err := s.scripts.Call("mergeCookies", &merged, s.cookies, received); err != nil {
+	if err := s.scripts.Call("mergeCookies", &merged, s.common.cookies, received); err != nil {
 		return err
 	}
-	s.cookies = merged
+	s.common.cookies = merged
 	return nil
 }
 

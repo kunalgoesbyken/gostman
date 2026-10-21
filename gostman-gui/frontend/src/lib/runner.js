@@ -1,8 +1,12 @@
 import { buildCollectionTree, collectRequests } from './collectionTree'
+import { isPlainObject, parseJSON } from './dataUtils'
+import { iterationCount, iterationVariables } from './runData'
 import { isSocketAddress } from './socketSessions'
 import { selectActiveVariables, useAppStore } from '../store/appStore'
 
 const SKIPPED_SOCKET = 'WebSocket requests are not part of a run.'
+const BODY_LIMIT = 64 * 1024
+const BASE64 = 'base64'
 
 const store = () => useAppStore.getState()
 const pause = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds))
@@ -11,10 +15,26 @@ const identify = ({ id, name, method, url }) => ({ id, name, method, url })
 
 const skipped = (request, reason) => ({ ...identify(request), skipped: reason, tests: [], hasFailed: false })
 
-function summarize(request, { response, tests }) {
+function capture(request, response) {
+  const isBinary = response.bodyEncoding === BASE64
+  const body = isBinary ? `(binary body, ${response.size} bytes)` : response.body.slice(0, BODY_LIMIT)
+  return {
+    request: { method: request.method, url: request.url, headers: request.headers, body: request.body },
+    response: {
+      headers: response.headers || [],
+      body,
+      contentType: response.contentType,
+      size: response.size,
+      truncated: !isBinary && (response.truncated || response.body.length > BODY_LIMIT),
+    },
+  }
+}
+
+function summarize(request, { response, tests }, iteration) {
   const failures = tests.results.filter((result) => !result.passed)
   return {
     ...identify(request),
+    iteration,
     status: response.status,
     statusCode: response.statusCode,
     protocol: response.protocol,
@@ -23,6 +43,7 @@ function summarize(request, { response, tests }) {
     durationMs: response.durationMs,
     tests: tests.results,
     hasFailed: Boolean(response.error) || tests.error !== '' || failures.length > 0,
+    exchange: capture(request, response),
   }
 }
 
@@ -34,36 +55,65 @@ function requestsInScope(folderId) {
 export function createRunner(backend, execute) {
   let current = null
   let sequence = 0
+  let lastRun = null
 
-  async function runOne(run, request) {
+  async function runOne(run, request, iteration) {
     if (isSocketAddress(request.url, selectActiveVariables(store()))) return skipped(request, SKIPPED_SOCKET)
     sequence += 1
-    run.sendId = `run-${sequence}`
-    return summarize(request, await execute(request, run.sendId))
+    const sendId = `run-${sequence}`
+    run.sendIds.add(sendId)
+    const outcome = await execute(request, sendId)
+    run.sendIds.delete(sendId)
+    return summarize(request, outcome, iteration)
   }
 
-  async function start({ folderId, delayMs, stopOnFailure }) {
-    const run = { isStopped: false, sendId: '' }
+  async function runIteration(run, requests, iteration, options) {
+    const queue = [...requests]
+    const workers = Math.min(Math.max(options.parallel, 1), queue.length)
+    const lanes = Array.from({ length: workers }, async () => {
+      while (queue.length > 0 && !run.isStopped && !run.isHalted) {
+        const request = queue.shift()
+        const result = await runOne(run, request, iteration)
+        if (run.isStopped) return
+        store().addRunResult(result)
+        if (options.stopOnFailure && result.hasFailed) run.isHalted = true
+        if (options.delayMs > 0 && !run.isHalted) await pause(options.delayMs)
+      }
+    })
+    await Promise.all(lanes)
+  }
+
+  async function start({ folderId, delayMs, stopOnFailure, parallel = 1, rows = [], iterations = 0 }) {
+    const run = { isStopped: false, isHalted: false, sendIds: new Set() }
     current = run
+    const requests = requestsInScope(folderId)
+    const count = iterationCount(rows, iterations)
+    const isIterating = rows.length > 0 || count > 1
+    const base = selectActiveVariables(store())
+    const parsed = parseJSON(base, {})
+    lastRun = { startedAt: new Date(), planned: requests.length * count, iterations: isIterating ? count : 0, parallel, finishedAt: null }
     store().startRun()
-    for (const request of requestsInScope(folderId)) {
-      const result = await runOne(run, request)
-      if (run.isStopped) break
-      store().addRunResult(result)
-      if (stopOnFailure && result.hasFailed) break
-      if (delayMs > 0) await pause(delayMs)
-      if (run.isStopped) break
+    for (let iteration = 0; iteration < count && !run.isStopped && !run.isHalted; iteration += 1) {
+      if (isIterating && isPlainObject(parsed)) {
+        store().setActiveVariables(JSON.stringify(iterationVariables(parsed, rows, iteration, count), null, 2))
+      }
+      await runIteration(run, requests, isIterating ? iteration + 1 : 0, { delayMs, stopOnFailure, parallel })
     }
-    if (current === run) store().finishRun()
+    if (isIterating && isPlainObject(parsed)) store().setActiveVariables(base)
+    if (current !== run) return
+    lastRun.finishedAt = new Date()
+    store().finishRun()
   }
 
   function stop() {
     if (!current) return
     current.isStopped = true
-    backend.cancel(current.sendId)
+    current.sendIds.forEach((sendId) => backend.cancel(sendId))
     current = null
     store().finishRun()
   }
 
-  return { start, stop }
+  const describeRun = () => lastRun && { ...lastRun, finishedAt: lastRun.finishedAt || new Date() }
+
+  return { start, stop, describeRun }
 }

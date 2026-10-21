@@ -35,7 +35,7 @@ func NewSession(policy engine.Policy) (*Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	state := &session{scripts: scripts, policy: policy, variables: variables{}, cookies: []engine.CookieInfo{}, tokens: tokenCache{}}
+	state := &session{scripts: scripts, policy: policy, variables: variables{}, common: newShared()}
 	return &Session{state: state}, nil
 }
 
@@ -62,7 +62,7 @@ func (s *Session) Set(overrides map[string]string) {
 }
 
 func (s *Session) Watch(witness func(engine.Request)) {
-	s.state.witness = witness
+	s.state.common.watch(witness)
 }
 
 func (v variables) plain() map[string]string {
@@ -82,16 +82,16 @@ func (s *Session) Variables() map[string]string {
 	return s.state.variables.plain()
 }
 
+func (s *Session) Observed() map[string]string {
+	return s.state.common.observedList()
+}
+
 func (s *Session) Cookies() []engine.CookieInfo {
-	return append([]engine.CookieInfo{}, s.state.cookies...)
+	return s.state.common.cookieList()
 }
 
 func (s *Session) Tokens() []engine.OAuth2 {
-	tokens := make([]engine.OAuth2, 0, len(s.state.tokens))
-	for _, token := range s.state.tokens {
-		tokens = append(tokens, token)
-	}
-	return tokens
+	return s.state.common.tokenList()
 }
 
 func (s *Session) Send(ctx context.Context, request Request, folder string) Outcome {
@@ -114,14 +114,21 @@ func (s *Session) Run(ctx context.Context, stored Collection, options Options, o
 	s.state.variables = layered(append(base, s.state.variables)...)
 	started := time.Now()
 	results := s.state.runAll(ctx, planned, options, observe)
-	return Report{
+	report := Report{
 		Version:     ReportVersion,
 		Environment: s.environment,
 		StartedAt:   started.UTC(),
 		DurationMs:  time.Since(started).Milliseconds(),
-		Summary:     summarize(results, len(planned.requests)),
+		Summary:     summarize(results, len(planned.requests)*options.iterationCount()),
 		Results:     results,
-	}, nil
+	}
+	if options.isIterating() {
+		report.Iterations = options.iterationCount()
+	}
+	if options.Parallel > 1 {
+		report.Parallel = options.Parallel
+	}
+	return report, nil
 }
 
 func (s *Session) Normalize(draft any) (Request, error) {

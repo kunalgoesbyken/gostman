@@ -16,6 +16,11 @@ type Options struct {
 	Delay       time.Duration
 	Timeout     time.Duration
 	Insecure    bool
+	Data        []Row
+	Iterations  int
+	Parallel    int
+	Only        []string
+	Capture     bool
 }
 
 func identify(request Request, folder string) Result {
@@ -60,12 +65,16 @@ func describe(request Request, folder string, outcome exchange) Result {
 	return result
 }
 
-func (s *session) attempt(ctx context.Context, request Request, folder string) Result {
+func (s *session) attempt(ctx context.Context, request Request, folder string, captured bool) Result {
 	outcome, err := s.execute(ctx, request)
 	if err != nil {
 		outcome.stop(err.Error())
 	}
-	return describe(request, folder, outcome)
+	result := describe(request, folder, outcome)
+	if captured && !result.IsSkipped() {
+		result.Exchange = capture(request, outcome.response)
+	}
+	return result
 }
 
 func pause(ctx context.Context, delay time.Duration) {
@@ -75,24 +84,6 @@ func pause(ctx context.Context, delay time.Duration) {
 	case <-timer.C:
 	case <-ctx.Done():
 	}
-}
-
-func (s *session) runAll(ctx context.Context, planned plan, options Options, observe func(Result)) []Result {
-	results := make([]Result, 0, len(planned.requests))
-	for index, request := range planned.requests {
-		result := s.attempt(ctx, request, planned.folderNames[request.FolderID])
-		results = append(results, result)
-		observe(result)
-		isLast := index == len(planned.requests)-1
-		if ctx.Err() != nil || isLast || (options.Bail && result.Failed) {
-			break
-		}
-		pause(ctx, options.Delay)
-		if ctx.Err() != nil {
-			break
-		}
-	}
-	return results
 }
 
 func Run(ctx context.Context, stored Collection, options Options, observe func(Result)) (Report, error) {
