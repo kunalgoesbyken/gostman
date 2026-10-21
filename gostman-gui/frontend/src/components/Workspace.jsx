@@ -5,6 +5,7 @@ import { RequestBar } from "./RequestBar"
 import { ResponsePanel } from "./ResponsePanel"
 import { AppDialogs } from "./AppDialogs"
 import { AppHeader } from "./AppHeader"
+import { StatusBar } from "./StatusBar"
 import { TabBar } from "./TabBar"
 import { RequestTabs } from "./RequestTabs"
 import { Button } from "./ui/button"
@@ -301,6 +302,8 @@ function LoadedWorkspace({ backend, onBack }) {
         {captureDialogOpen && <CaptureDialog folders={folders} requests={requests} actions={actions.capture} />}
         {runner.isOpen && <RunnerDialog runner={runner} folders={folders} requests={requests} actions={actions} />}
       </Suspense>
+
+      <StatusBar onOpenMock={actions.mock.open} onOpenCapture={actions.capture.open} />
 
       <AppDialogs onCommand={actions.runCommand} />
     </div>

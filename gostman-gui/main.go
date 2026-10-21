@@ -47,6 +47,7 @@ func main() {
 		Height:           820,
 		MinWidth:         800,
 		MinHeight:        600,
+		Frameless:        runtime.GOOS != "darwin",
 		AssetServer:      &assetserver.Options{Assets: assets, Middleware: isolateSandbox},
 		BackgroundColour: &options.RGBA{R: 3, G: 7, B: 18, A: 1},
 		OnStartup:        app.startup,

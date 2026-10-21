@@ -1,21 +1,23 @@
-import { ArrowLeft, Cookie, Import, Radio, RotateCcw, Search, Server, Settings } from "lucide-react"
+import { ArrowLeft, Import, RotateCcw, Search } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { EnvironmentSwitcher } from "./EnvironmentSwitcher"
 import { StorageMenu } from "./StorageMenu"
-import { useCaptureStore } from "../lib/captureSession"
-import { useMockStore } from "../lib/mockServer"
+import { WindowControls } from "./WindowControls"
+import { isDesktopShell } from "../lib/windowControls"
 import { shortcutLabel } from "../lib/platform"
 import logo from "../assets/logo.jpg"
 
-export function AppHeader({ storage, onImport, onReset, onOpenCommands, onOpenCookies, onOpenSettings, onOpenMock, onOpenCapture, onBack }) {
-  const isMockRunning = useMockStore((state) => state.isRunning)
-  const isCapturing = useCaptureStore((state) => state.isRunning)
+const DRAG = { "--wails-draggable": "drag" }
+const NO_DRAG = { "--wails-draggable": "no-drag" }
+
+export function AppHeader({ storage, onImport, onReset, onOpenCommands, onBack }) {
+  const isDesktop = isDesktopShell()
 
   return (
-    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-border px-3">
+    <header className="relative flex h-12 shrink-0 items-center gap-3 border-b border-border bg-background px-3" style={isDesktop ? DRAG : undefined}>
       {onBack && <IconButton label="Back to the landing page" icon={ArrowLeft} size="icon" onClick={onBack} />}
 
-      {onBack ? (
+      {onBack || isDesktop ? (
         <div className="flex shrink-0 items-center gap-2">
           <img src={logo} alt="" className="h-6 w-6 rounded" />
           <h1 className="font-brand text-sm font-semibold">Gostman</h1>
@@ -24,9 +26,11 @@ export function AppHeader({ storage, onImport, onReset, onOpenCommands, onOpenCo
         <h1 className="sr-only">Gostman</h1>
       )}
 
-      <StorageMenu storage={storage} />
+      <div style={isDesktop ? NO_DRAG : undefined}>
+        <StorageMenu storage={storage} />
+      </div>
 
-      <div className="ml-auto flex min-w-0 items-center gap-3">
+      <div className="ml-auto flex min-w-0 items-center gap-3" style={isDesktop ? NO_DRAG : undefined}>
         <Button variant="ghost" onClick={onOpenCommands} className="hidden lg:inline-flex">
           <Search />
           Commands
@@ -38,25 +42,10 @@ export function AppHeader({ storage, onImport, onReset, onOpenCommands, onOpenCo
           Import
         </Button>
         <div className="flex shrink-0 items-center gap-1">
-          <IconButton
-            label={isMockRunning ? "Mock server (running)" : "Mock server"}
-            icon={Server}
-            size="icon"
-            onClick={onOpenMock}
-            className={isMockRunning ? "text-success" : undefined}
-          />
-          <IconButton
-            label={isCapturing ? "Capture traffic (running)" : "Capture traffic"}
-            icon={Radio}
-            size="icon"
-            onClick={onOpenCapture}
-            className={isCapturing ? "text-success" : undefined}
-          />
-          <IconButton label="Cookies" icon={Cookie} size="icon" onClick={onOpenCookies} />
-          <IconButton label="Network settings" icon={Settings} size="icon" onClick={onOpenSettings} />
           <IconButton label="Reset app and delete all data" icon={RotateCcw} size="icon" onClick={onReset} />
         </div>
       </div>
+      {isDesktop && <WindowControls />}
     </header>
   )
 }
