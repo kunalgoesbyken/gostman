@@ -1,6 +1,6 @@
 package rpc
 
-import "github.com/krockxz/gostman/engine"
+import "github.com/kunalgoesbyken/gostman/engine"
 
 const (
 	Protocol = "grpc"

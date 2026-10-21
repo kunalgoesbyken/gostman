@@ -3,7 +3,7 @@ package runner
 import (
 	"fmt"
 
-	"github.com/krockxz/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/engine"
 )
 
 const (

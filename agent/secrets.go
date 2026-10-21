@@ -5,9 +5,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/krockxz/gostman/engine"
-	"github.com/krockxz/gostman/redact"
-	"github.com/krockxz/gostman/runner"
+	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/redact"
+	"github.com/kunalgoesbyken/gostman/runner"
 )
 
 const (

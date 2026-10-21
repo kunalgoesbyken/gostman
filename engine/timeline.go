@@ -14,7 +14,7 @@ import (
 
 	"golang.org/x/net/idna"
 
-	"github.com/krockxz/gostman/redact"
+	"github.com/kunalgoesbyken/gostman/redact"
 )
 
 const (

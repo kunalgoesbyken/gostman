@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/krockxz/gostman/runner"
+	"github.com/kunalgoesbyken/gostman/runner"
 )
 
 type noArguments struct{}

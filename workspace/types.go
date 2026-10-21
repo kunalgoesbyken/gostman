@@ -1,6 +1,6 @@
 package workspace
 
-import "github.com/krockxz/gostman/engine"
+import "github.com/kunalgoesbyken/gostman/engine"
 
 type Request struct {
 	Id               string         `json:"id"`

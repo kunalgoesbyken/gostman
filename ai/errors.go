@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/krockxz/gostman/redact"
+	"github.com/kunalgoesbyken/gostman/redact"
 )
 
 type Kind string

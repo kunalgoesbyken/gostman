@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/krockxz/gostman/capture"
+	"github.com/kunalgoesbyken/gostman/capture"
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 

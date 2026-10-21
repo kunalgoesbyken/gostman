@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/krockxz/gostman/openapi"
+	"github.com/kunalgoesbyken/gostman/openapi"
 )
 
 const (

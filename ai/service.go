@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/krockxz/gostman/redact"
+	"github.com/kunalgoesbyken/gostman/redact"
 )
 
 const (

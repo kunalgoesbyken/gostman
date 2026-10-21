@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/krockxz/gostman/engine"
-	"github.com/krockxz/gostman/mcpclient"
-	"github.com/krockxz/gostman/rpc"
-	"github.com/krockxz/gostman/runner/sandbox"
+	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/mcpclient"
+	"github.com/kunalgoesbyken/gostman/rpc"
+	"github.com/kunalgoesbyken/gostman/runner/sandbox"
 )
 
 const (

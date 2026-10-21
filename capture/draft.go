@@ -7,8 +7,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/krockxz/gostman/engine"
-	"github.com/krockxz/gostman/mock"
+	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/mock"
 )
 
 const (

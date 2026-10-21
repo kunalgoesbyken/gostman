@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/krockxz/gostman/agent"
-	"github.com/krockxz/gostman/runner"
-	"github.com/krockxz/gostman/runner/report"
+	"github.com/kunalgoesbyken/gostman/agent"
+	"github.com/kunalgoesbyken/gostman/runner"
+	"github.com/kunalgoesbyken/gostman/runner/report"
 )
 
 type overrides map[string]string

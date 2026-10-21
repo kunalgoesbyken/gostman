@@ -8,8 +8,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/krockxz/gostman/agent"
-	"github.com/krockxz/gostman/mcp"
+	"github.com/kunalgoesbyken/gostman/agent"
+	"github.com/kunalgoesbyken/gostman/mcp"
 )
 
 func parseServing(arguments []string) (agent.Settings, error) {

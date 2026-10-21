@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/krockxz/gostman/openapi"
-	"github.com/krockxz/gostman/workspace"
+	"github.com/kunalgoesbyken/gostman/openapi"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 const (

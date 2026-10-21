@@ -3,7 +3,7 @@ package capture
 import (
 	"time"
 
-	"github.com/krockxz/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/engine"
 )
 
 const DefaultPort = 4020

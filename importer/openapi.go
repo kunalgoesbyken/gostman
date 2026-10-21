@@ -3,8 +3,8 @@ package importer
 import (
 	"context"
 
-	"github.com/krockxz/gostman/openapi"
-	"github.com/krockxz/gostman/workspace"
+	"github.com/kunalgoesbyken/gostman/openapi"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 func (c *collector) readOpenAPI(ctx context.Context, doc document, config Config) {

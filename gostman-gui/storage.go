@@ -3,7 +3,7 @@ package main
 import (
 	"sync"
 
-	"github.com/krockxz/gostman/workspace"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 type collectionStore interface {

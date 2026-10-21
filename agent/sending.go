@@ -7,8 +7,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/krockxz/gostman/engine"
-	"github.com/krockxz/gostman/runner"
+	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/runner"
 )
 
 var textBodyTypes = []string{engine.BodyNone, engine.BodyJSON, engine.BodyText, engine.BodyXML, engine.BodyForm}

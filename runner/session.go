@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/krockxz/gostman/engine"
-	"github.com/krockxz/gostman/runner/sandbox"
+	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/runner/sandbox"
 )
 
 const (

@@ -9,9 +9,9 @@ import (
 	"os/signal"
 	"path/filepath"
 
-	"github.com/krockxz/gostman/agent"
-	"github.com/krockxz/gostman/mock"
-	"github.com/krockxz/gostman/workspace"
+	"github.com/kunalgoesbyken/gostman/agent"
+	"github.com/kunalgoesbyken/gostman/mock"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 const emptyVariables = "{}"

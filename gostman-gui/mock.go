@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/krockxz/gostman/mock"
-	"github.com/krockxz/gostman/openapi"
+	"github.com/kunalgoesbyken/gostman/mock"
+	"github.com/kunalgoesbyken/gostman/openapi"
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 

@@ -6,7 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/krockxz/gostman/runner"
+	"github.com/kunalgoesbyken/gostman/runner"
 )
 
 const dataPlaceholder = "__GOSTMAN_REPORT__"

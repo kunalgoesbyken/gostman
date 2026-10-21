@@ -10,7 +10,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/krockxz/gostman/workspace"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 const (

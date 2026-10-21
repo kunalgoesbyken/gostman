@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	handler "github.com/krockxz/gostman/api"
-	"github.com/krockxz/gostman/engine"
+	handler "github.com/kunalgoesbyken/gostman/api"
+	"github.com/kunalgoesbyken/gostman/engine"
 )
 
 func main() {

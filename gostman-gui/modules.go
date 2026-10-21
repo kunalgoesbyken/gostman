@@ -1,6 +1,6 @@
 package main
 
-import "github.com/krockxz/gostman/workspace"
+import "github.com/kunalgoesbyken/gostman/workspace"
 
 func (a *App) ScriptModules() (map[string]string, error) {
 	store, isFolder := storage.current().(folderStore)

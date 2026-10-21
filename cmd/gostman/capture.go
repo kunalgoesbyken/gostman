@@ -11,9 +11,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/krockxz/gostman/capture"
-	"github.com/krockxz/gostman/engine"
-	"github.com/krockxz/gostman/workspace"
+	"github.com/kunalgoesbyken/gostman/capture"
+	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 type collector struct {

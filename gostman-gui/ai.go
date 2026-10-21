@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/krockxz/gostman/ai"
+	"github.com/kunalgoesbyken/gostman/ai"
 )
 
 const aiKeyPrefix = "ai:"

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/krockxz/gostman/engine"
-	"github.com/krockxz/gostman/mcp"
+	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/mcp"
 )
 
 func Invoke(ctx context.Context, call Call, policy engine.Policy) engine.Response {

@@ -11,9 +11,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/krockxz/gostman/importer"
-	"github.com/krockxz/gostman/openapi"
-	"github.com/krockxz/gostman/workspace"
+	"github.com/kunalgoesbyken/gostman/importer"
+	"github.com/kunalgoesbyken/gostman/openapi"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 const (

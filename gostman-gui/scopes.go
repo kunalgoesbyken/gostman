@@ -1,6 +1,6 @@
 package main
 
-import "github.com/krockxz/gostman/workspace"
+import "github.com/kunalgoesbyken/gostman/workspace"
 
 const (
 	appSecretScope    = "app"

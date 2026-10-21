@@ -27,7 +27,7 @@ require (
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/godbus/dbus/v5 v5.2.2 // indirect
 	github.com/jchv/go-winloader v0.0.0-20210711035445-715c2860da7e // indirect
-	github.com/krockxz/gostman v0.0.0
+	github.com/kunalgoesbyken/gostman v0.0.0
 	github.com/labstack/echo/v4 v4.13.3 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/leaanthony/go-ansi-parser v1.6.1 // indirect
@@ -51,4 +51,4 @@ require (
 	golang.org/x/text v0.33.0 // indirect
 )
 
-replace github.com/krockxz/gostman => ../
+replace github.com/kunalgoesbyken/gostman => ../

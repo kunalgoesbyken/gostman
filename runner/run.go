@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/krockxz/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/engine"
 )
 
 type Options struct {

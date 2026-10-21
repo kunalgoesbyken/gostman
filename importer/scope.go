@@ -3,7 +3,7 @@ package importer
 import (
 	"strings"
 
-	"github.com/krockxz/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/engine"
 )
 
 type scope struct {

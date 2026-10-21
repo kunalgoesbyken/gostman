@@ -6,7 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/krockxz/gostman/runner/sandbox"
+	"github.com/kunalgoesbyken/gostman/runner/sandbox"
 )
 
 type unit struct {

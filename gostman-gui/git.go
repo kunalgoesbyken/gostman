@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/krockxz/gostman/gitutil"
+	"github.com/kunalgoesbyken/gostman/gitutil"
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 

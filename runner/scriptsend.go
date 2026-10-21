@@ -8,8 +8,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/krockxz/gostman/loopback"
-	"github.com/krockxz/gostman/runner/sandbox"
+	"github.com/kunalgoesbyken/gostman/loopback"
+	"github.com/kunalgoesbyken/gostman/runner/sandbox"
 )
 
 func (s *session) learn(library []Request) error {

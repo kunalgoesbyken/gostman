@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/krockxz/gostman/runner"
+	"github.com/kunalgoesbyken/gostman/runner"
 )
 
 type jsonReporter struct {

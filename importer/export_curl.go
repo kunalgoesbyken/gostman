@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/krockxz/gostman/redact"
-	"github.com/krockxz/gostman/workspace"
+	"github.com/kunalgoesbyken/gostman/redact"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 const curlFormSyntax = `=@<;"`

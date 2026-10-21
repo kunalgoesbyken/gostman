@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 
-	"github.com/krockxz/gostman/engine"
-	"github.com/krockxz/gostman/mcpclient"
+	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/mcpclient"
 )
 
 func (a *App) DescribeMcp(target mcpclient.Target) (mcpclient.Catalog, error) {

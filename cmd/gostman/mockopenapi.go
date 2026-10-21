@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/krockxz/gostman/engine"
-	"github.com/krockxz/gostman/mock"
-	"github.com/krockxz/gostman/openapi"
+	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/mock"
+	"github.com/kunalgoesbyken/gostman/openapi"
 )
 
 func specSourceOf(location string) openapi.Source {

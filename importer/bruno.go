@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/krockxz/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/engine"
 )
 
 var brunoMethods = map[string]bool{

@@ -5,8 +5,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/krockxz/gostman/runner"
-	"github.com/krockxz/gostman/secrets"
+	"github.com/kunalgoesbyken/gostman/runner"
+	"github.com/kunalgoesbyken/gostman/secrets"
 )
 
 type secretsFile struct{}

@@ -12,7 +12,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/krockxz/gostman/redact"
+	"github.com/kunalgoesbyken/gostman/redact"
 )
 
 const (

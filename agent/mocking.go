@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/krockxz/gostman/mock"
-	"github.com/krockxz/gostman/workspace"
+	"github.com/kunalgoesbyken/gostman/mock"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 const recentRequests = 20

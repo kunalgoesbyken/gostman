@@ -3,7 +3,7 @@ package agent
 import (
 	"net/http"
 
-	"github.com/krockxz/gostman/mcp"
+	"github.com/kunalgoesbyken/gostman/mcp"
 )
 
 const (

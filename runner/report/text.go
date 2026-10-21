@@ -7,7 +7,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/krockxz/gostman/runner"
+	"github.com/kunalgoesbyken/gostman/runner"
 )
 
 const (

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/krockxz/gostman/runner"
-	"github.com/krockxz/gostman/runner/report"
+	"github.com/kunalgoesbyken/gostman/runner"
+	"github.com/kunalgoesbyken/gostman/runner/report"
 )
 
 type listFlag []string

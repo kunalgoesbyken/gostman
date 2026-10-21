@@ -1,4 +1,4 @@
-module github.com/krockxz/gostman
+module github.com/kunalgoesbyken/gostman
 
 go 1.24.5
 

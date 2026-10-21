@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 
-	"github.com/krockxz/gostman/engine"
-	"github.com/krockxz/gostman/rpc"
+	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/rpc"
 )
 
 func (a *App) DescribeGrpc(target rpc.Target) (rpc.Schema, error) {

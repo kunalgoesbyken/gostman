@@ -9,7 +9,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/krockxz/gostman/secrets"
+	"github.com/kunalgoesbyken/gostman/secrets"
 )
 
 type Resolver interface {

@@ -3,7 +3,7 @@ package runner
 import (
 	"slices"
 
-	"github.com/krockxz/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/engine"
 )
 
 const (

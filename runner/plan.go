@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/krockxz/gostman/runner/sandbox"
+	"github.com/kunalgoesbyken/gostman/runner/sandbox"
 )
 
 const pathSeparator = "/"

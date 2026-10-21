@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/krockxz/gostman/loopback"
+	"github.com/kunalgoesbyken/gostman/loopback"
 )
 
 const (

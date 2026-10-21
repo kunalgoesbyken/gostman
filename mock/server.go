@@ -11,7 +11,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/krockxz/gostman/loopback"
+	"github.com/kunalgoesbyken/gostman/loopback"
 )
 
 const (

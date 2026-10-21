@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/krockxz/gostman/engine"
-	"github.com/krockxz/gostman/runner"
+	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/runner"
 )
 
 type Draft struct {

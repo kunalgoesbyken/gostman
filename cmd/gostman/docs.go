@@ -7,8 +7,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/krockxz/gostman/runner"
-	"github.com/krockxz/gostman/runner/sandbox"
+	"github.com/kunalgoesbyken/gostman/runner"
+	"github.com/kunalgoesbyken/gostman/runner/sandbox"
 )
 
 const (

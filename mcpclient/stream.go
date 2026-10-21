@@ -9,7 +9,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/krockxz/gostman/mcp"
+	"github.com/kunalgoesbyken/gostman/mcp"
 )
 
 var (

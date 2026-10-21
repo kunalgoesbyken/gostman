@@ -1,8 +1,8 @@
 package mcpclient
 
 import (
-	"github.com/krockxz/gostman/engine"
-	"github.com/krockxz/gostman/mcp"
+	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/mcp"
 )
 
 const Protocol = "mcp"

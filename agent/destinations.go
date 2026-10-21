@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/krockxz/gostman/engine"
-	"github.com/krockxz/gostman/workspace"
+	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 const AnyHost = "*"

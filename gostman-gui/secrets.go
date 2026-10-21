@@ -13,7 +13,7 @@ import (
 	"sync"
 	"unicode/utf8"
 
-	"github.com/krockxz/gostman/secrets"
+	"github.com/kunalgoesbyken/gostman/secrets"
 )
 
 const (
