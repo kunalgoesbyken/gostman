@@ -162,6 +162,10 @@ func (s *session) transmit(ctx context.Context, request Request) (engine.Respons
 	}
 	prepared.Inherited = request.layers()
 	s.announce(prepared)
+	if prepared.Options.Stream {
+		prepared.Options = withStreamBudget(prepared.Options, defaultStreamSeconds)
+		return s.collectStream(ctx, prepared), nil
+	}
 	return engine.Send(ctx, prepared, s.policy), nil
 }
 

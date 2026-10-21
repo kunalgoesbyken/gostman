@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/kunalgoesbyken/gostman/runner"
 	"github.com/kunalgoesbyken/gostman/runner/report"
@@ -24,23 +25,39 @@ func (l *listFlag) Set(value string) error {
 	return nil
 }
 
+type originFlags []string
+
+func (o *originFlags) String() string {
+	return strings.Join(*o, ",")
+}
+
+func (o *originFlags) Set(value string) error {
+	if strings.TrimSpace(value) == "" {
+		return errors.New("name an origin such as https://app.example.com")
+	}
+	*o = append(*o, value)
+	return nil
+}
+
 type runExtras struct {
-	dataFile string
-	envFile  string
+	dataFile      string
+	envFile       string
+	streamSeconds int
 }
 
 func (e *runExtras) register(flags *flag.FlagSet, options *runner.Options) {
 	flags.StringVar(&e.dataFile, "data", "", "")
 	flags.IntVar(&options.Iterations, "iterations", 0, "")
 	flags.IntVar(&options.Parallel, "parallel", 0, "")
+	flags.IntVar(&e.streamSeconds, "stream-timeout", 0, "")
 	flags.StringVar(&e.envFile, "env-file", "", "")
 	only := (*listFlag)(&options.Only)
 	flags.Var(only, "only", "")
 }
 
-func (runExtras) validate(options runner.Options) error {
-	if options.Iterations < 0 || options.Parallel < 0 {
-		return errors.New("--iterations and --parallel take a number, zero or more")
+func (e runExtras) validate(options runner.Options) error {
+	if options.Iterations < 0 || options.Parallel < 0 || e.streamSeconds < 0 {
+		return errors.New("--iterations, --parallel and --stream-timeout take a number, zero or more")
 	}
 	return nil
 }
@@ -65,6 +82,7 @@ func (e runExtras) apply(options *runner.Options, reporter string) error {
 		}
 	}
 	options.Capture = reporter == report.FormatHTML
+	options.StreamTimeout = time.Duration(e.streamSeconds) * time.Second
 	return nil
 }
 

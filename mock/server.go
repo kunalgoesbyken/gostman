@@ -160,7 +160,7 @@ func (s *Server) respond(w http.ResponseWriter, r *http.Request, call *outcome) 
 		return
 	}
 	if current.settings.CORS && isPreflight(r) {
-		s.send(w, r, current, preflightAnswer(r), 0)
+		s.send(w, r, current, preflightAnswer(r, current.settings), 0)
 		return
 	}
 	body, err := readBody(w, r)
@@ -226,7 +226,7 @@ func (s *Server) send(w http.ResponseWriter, r *http.Request, current *table, re
 	header.Set("X-Content-Type-Options", "nosniff")
 	header.Set("Content-Security-Policy", "sandbox")
 	if current.settings.CORS {
-		allowOrigin(header, r)
+		allowOrigin(header, r, current.settings)
 	}
 	if !allowsBody(reply.status) {
 		w.WriteHeader(reply.status)

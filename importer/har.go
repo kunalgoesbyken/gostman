@@ -5,6 +5,11 @@ import (
 	"strings"
 )
 
+const (
+	templateOpen    = "{{"
+	schemeSeparator = "://"
+)
+
 var staticMimePrefixes = []string{"image/", "font/", "audio/", "video/", "text/css", "text/javascript", "application/javascript", "application/x-javascript", "application/font", "application/x-font", "application/vnd.ms-fontobject", "application/wasm", "application/x-shockwave-flash"}
 
 var ignoredHARHeaders = map[string]bool{
@@ -68,19 +73,19 @@ func entryIdentity(source map[string]any) string {
 
 func (c *collector) harRequest(source map[string]any, rootID string, hosts map[string]string) {
 	address := text(source["url"])
-	parsed, err := url.Parse(address)
-	if err != nil || parsed.Host == "" {
+	target, ok := parseHARAddress(address)
+	if !ok {
 		c.skip("%q is not an address that can be requested", address)
 		return
 	}
-	folderID, known := hosts[parsed.Host]
+	folderID, known := hosts[target.host]
 	if !known {
-		folderID = c.addFolder(parsed.Host, rootID)
-		hosts[parsed.Host] = folderID
+		folderID = c.addFolder(target.host, rootID)
+		hosts[target.host] = folderID
 	}
 	headers := harHeaders(source["headers"])
 	request := parts{
-		name:        text(source["method"]) + " " + requestTarget(parsed),
+		name:        text(source["method"]) + " " + target.path,
 		method:      text(source["method"]),
 		url:         address,
 		headers:     headers,
@@ -90,11 +95,44 @@ func (c *collector) harRequest(source map[string]any, rootID string, hosts map[s
 	c.build(request, scope{}, folderID)
 }
 
-func requestTarget(parsed *url.URL) string {
-	if parsed.Path == "" || parsed.Path == "/" {
-		return parsed.Host
+type harAddress struct {
+	host string
+	path string
+}
+
+func parseHARAddress(address string) (harAddress, bool) {
+	if parsed, err := url.Parse(address); err == nil && parsed.Host != "" {
+		return harAddress{host: parsed.Host, path: requestTarget(parsed.Host, parsed.Path)}, true
 	}
-	return parsed.Path
+	return parseTemplatedAddress(address)
+}
+
+func parseTemplatedAddress(address string) (harAddress, bool) {
+	if !strings.Contains(address, templateOpen) {
+		return harAddress{}, false
+	}
+	_, rest, hasScheme := strings.Cut(address, schemeSeparator)
+	if !hasScheme {
+		rest = address
+	}
+	end := strings.IndexAny(rest, "/?#")
+	if end < 0 {
+		end = len(rest)
+	}
+	host := rest[:end]
+	if !strings.Contains(host, templateOpen) {
+		return harAddress{}, false
+	}
+	path, _, _ := strings.Cut(rest[end:], "?")
+	path, _, _ = strings.Cut(path, "#")
+	return harAddress{host: host, path: requestTarget(host, path)}, true
+}
+
+func requestTarget(host, path string) string {
+	if path == "" || path == "/" {
+		return host
+	}
+	return path
 }
 
 func harHeaders(value any) []row {

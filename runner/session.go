@@ -110,6 +110,9 @@ func (s *Session) Send(ctx context.Context, request Request, folder string) Outc
 }
 
 func (s *Session) Run(ctx context.Context, stored Collection, options Options, observe func(Result)) (Report, error) {
+	if err := options.CheckIterations(); err != nil {
+		return Report{}, err
+	}
 	planned, err := prepare(s.state.scripts, stored, options)
 	if err != nil {
 		return Report{}, err

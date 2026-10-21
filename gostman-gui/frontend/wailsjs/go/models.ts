@@ -698,6 +698,7 @@ export namespace engine {
 	    truncated: boolean;
 	    error: string;
 	    protocol?: string;
+	    streamEnd?: string;
 	    timeline?: Timeline;
 	
 	    static createFrom(source: any = {}) {
@@ -719,6 +720,7 @@ export namespace engine {
 	        this.truncated = source["truncated"];
 	        this.error = source["error"];
 	        this.protocol = source["protocol"];
+	        this.streamEnd = source["streamEnd"];
 	        this.timeline = this.convertValues(source["timeline"], Timeline);
 	    }
 	
@@ -1992,6 +1994,7 @@ export namespace mock {
 	export class Settings {
 	    port: number;
 	    cors: boolean;
+	    corsOrigins: string[];
 	    behavior: Behavior;
 	
 	    static createFrom(source: any = {}) {
@@ -2002,6 +2005,7 @@ export namespace mock {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.port = source["port"];
 	        this.cors = source["cors"];
+	        this.corsOrigins = source["corsOrigins"];
 	        this.behavior = this.convertValues(source["behavior"], Behavior);
 	    }
 	

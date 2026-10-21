@@ -58,6 +58,9 @@ func outcomeOf(result runner.Result) string {
 		return result.Skipped
 	}
 	parts := []string{result.Status, fmt.Sprintf("%d ms", result.DurationMs)}
+	if result.StreamEnd != "" {
+		parts = append(parts, "stream "+result.StreamEnd)
+	}
 	if total := len(result.Tests); total > 0 {
 		parts = append(parts, fmt.Sprintf("%d/%d tests", result.PassedTests(), total))
 	}

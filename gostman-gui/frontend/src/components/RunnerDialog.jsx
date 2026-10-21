@@ -12,8 +12,9 @@ import { MethodTag } from "./MethodTag"
 import { TestRow, countPassed } from "./TestResults"
 import { ROOT_ID, buildCollectionTree, collectRequests, listFolders } from "../lib/collectionTree"
 import { pluralize } from "../lib/dataUtils"
-import { DATA_FILE_ERROR, iterationCount, parseDataFile } from "../lib/runData"
+import { DATA_FILE_ERROR, iterationCount, MAX_ITERATIONS, parseDataFile } from "../lib/runData"
 import { statusVariant } from "../lib/response"
+import { endSummary } from "../lib/sse"
 import { cn } from "../lib/utils"
 
 const PATH_SEPARATOR = " / "
@@ -57,6 +58,7 @@ function ResultRow({ result }) {
   const { Icon, tone } = outcomeIcon(result)
   const failures = result.tests.filter((test) => !test.passed)
   const detail = result.skipped || result.error
+  const streamNote = result.streamEnd ? endSummary({ endReason: result.streamEnd }) : ""
 
   return (
     <li className="border-b border-border px-3 py-1.5">
@@ -68,6 +70,7 @@ function ResultRow({ result }) {
         <ResultSummary result={result} />
       </div>
       {detail && <p className="pl-[1.375rem] text-xs text-muted-foreground">{detail}</p>}
+      {streamNote && <p className="pl-[1.375rem] text-xs text-muted-foreground">{streamNote}</p>}
       {failures.length > 0 && (
         <ul className="pl-[1.375rem]">
           {failures.map((test, index) => <TestRow key={index} result={test} />)}
@@ -181,11 +184,12 @@ export function RunnerDialog({ runner, folders, requests, actions }) {
         <Input
           type="number"
           min={0}
+          max={MAX_ITERATIONS}
           value={iterationLimit || ""}
           placeholder={LABELS.iterations}
           aria-label={LABELS.iterations}
           disabled={isRunning}
-          onChange={(event) => setIterationLimit(toCount(event.target.value))}
+          onChange={(event) => setIterationLimit(Math.min(MAX_ITERATIONS, toCount(event.target.value)))}
           className="w-28 shrink-0 font-mono"
         />
         <Input

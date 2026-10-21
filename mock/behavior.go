@@ -100,5 +100,8 @@ func (s Settings) validate() error {
 	if err := loopback.CheckPort(s.Port); err != nil {
 		return err
 	}
+	if err := s.validateOrigins(); err != nil {
+		return err
+	}
 	return s.Behavior.validate()
 }

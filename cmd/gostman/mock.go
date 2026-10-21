@@ -133,6 +133,8 @@ func mockCommand(arguments []string, stdout, stderr *os.File) int {
 	errorRate := flags.Int("error-rate", 0, "")
 	errorStatus := flags.Int("error-status", 0, "")
 	cors := flags.Bool("cors", false, "")
+	var corsOrigins originFlags
+	flags.Var(&corsOrigins, "cors-origin", "")
 	verbose := flags.Bool("log", false, "")
 	positional, err := parseInterspersed(flags, arguments)
 	if err != nil {
@@ -148,7 +150,7 @@ func mockCommand(arguments []string, stdout, stderr *os.File) int {
 	case *specLocation == "":
 		root = currentFolder
 	}
-	settings := mock.Settings{Port: *port, CORS: *cors, Behavior: mock.Behavior{
+	settings := mock.Settings{Port: *port, CORS: *cors || len(corsOrigins) > 0, CORSOrigins: corsOrigins, Behavior: mock.Behavior{
 		DelayMs:    *delay,
 		DelayMaxMs: *delayMax,
 		Fault:      mock.Fault{Percent: *errorRate, Kind: mock.FaultStatus, Status: *errorStatus},

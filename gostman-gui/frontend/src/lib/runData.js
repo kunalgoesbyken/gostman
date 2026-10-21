@@ -1,10 +1,13 @@
-import { isPlainObject } from './dataUtils'
+import { isPlainObject } from './dataUtils.js'
 
 const BYTE_ORDER_MARK = '﻿'
 const QUOTE = '"'
 const JSON_EXTENSION = /\.json$/i
 
+export const MAX_ITERATIONS = 10000
+
 export const DATA_FILE_ERROR = {
+  tooManyRows: `A data file can have at most ${MAX_ITERATIONS} rows.`,
   empty: 'The data file has no rows.',
   notArray: 'A JSON data file must be an array of objects, one object per iteration.',
   unreadable: 'The data file cannot be read.',
@@ -59,11 +62,12 @@ export function parseDataFile(name, content) {
   const text = content.startsWith(BYTE_ORDER_MARK) ? content.slice(1) : content
   const rows = JSON_EXTENSION.test(name) ? parseJsonRows(text) : parseCsv(text)
   if (rows.length === 0) throw new Error(DATA_FILE_ERROR.empty)
+  if (rows.length > MAX_ITERATIONS) throw new Error(DATA_FILE_ERROR.tooManyRows)
   return rows
 }
 
 export const iterationCount = (rows, iterations) => {
-  const requested = Math.max(0, Math.trunc(iterations) || 0)
+  const requested = Math.min(MAX_ITERATIONS, Math.max(0, Math.trunc(iterations) || 0))
   if (rows.length === 0) return Math.max(requested, 1)
   return requested > 0 ? Math.min(requested, rows.length) : rows.length
 }
