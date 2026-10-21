@@ -1,12 +1,10 @@
+import { chordLabel, chordModifiers, chordSignature, digitCode, isDigitChord, matchesChord, modifiersPrefix, reservedReason } from './chords.js'
+import { isApplePlatform, isDesktopApp } from './platform.js'
+import { getPreferences } from './preferences.js'
+import { SHORTCUT_TEXT } from './shortcutText.js'
 
-const APPLE_PLATFORMS = ['mac', 'iphone', 'ipad']
 const TAB_POSITIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-
-const platformName = () => (navigator.userAgentData?.platform || navigator.platform || '').toLowerCase()
-
-export const isApplePlatform = () => APPLE_PLATFORMS.some((name) => platformName().includes(name))
-
-export const isDesktopApp = () => typeof window !== 'undefined' && Boolean(window.go)
+const FIRST_TAB_ID = 'tab1'
 
 export const SHORTCUT_GROUPS = ['General', 'Request', 'Tabs', 'Navigation']
 
@@ -26,7 +24,7 @@ export const SHORTCUTS = [
     group: 'Tabs',
     label: position === 9 ? 'Go to last tab' : `Go to tab ${position}`,
     alt: true,
-    code: `Digit${position}`,
+    code: digitCode(position),
     position,
     listed: position === 1,
   })),
@@ -36,58 +34,80 @@ export const SHORTCUTS = [
 
 const byId = new Map(SHORTCUTS.map((shortcut) => [shortcut.id, shortcut]))
 
-export const bindingFor = (shortcut, isDesktop = isDesktopApp()) => {
+const ownerOf = (shortcut) => (shortcut.position ? byId.get(FIRST_TAB_ID) : shortcut)
+
+const isAvailable = (shortcut, isDesktop) => isDesktop || shortcut.web !== false
+
+const defaultBinding = (shortcut, isDesktop) => {
   if (isDesktop || shortcut.web === undefined) return shortcut
   if (!shortcut.web) return null
   return { id: shortcut.id, ...shortcut.web }
 }
 
-export const activeShortcuts = (isDesktop = isDesktopApp()) => (
-  SHORTCUTS.map((shortcut) => ({ shortcut, binding: bindingFor(shortcut, isDesktop) })).filter(({ binding }) => binding)
+export function bindingFor(shortcut, isDesktop = isDesktopApp(), overrides = getPreferences().shortcuts) {
+  const override = overrides[ownerOf(shortcut).id]
+  if (override === undefined) return defaultBinding(shortcut, isDesktop)
+  if (override === null) return null
+  if (!shortcut.position) return { id: shortcut.id, ...override }
+  return { id: shortcut.id, ...chordModifiers(override), code: digitCode(shortcut.position) }
+}
+
+export const activeShortcuts = (isDesktop = isDesktopApp(), overrides = getPreferences().shortcuts) => (
+  SHORTCUTS.map((shortcut) => ({ shortcut, binding: bindingFor(shortcut, isDesktop, overrides) })).filter(({ binding }) => binding)
 )
 
-export function matchesBinding(binding, event) {
-  const usesControl = Boolean(binding.mod || binding.ctrl)
-  if (binding.mod && !(event.ctrlKey || event.metaKey)) return false
-  if (binding.ctrl && !event.ctrlKey) return false
-  if (!usesControl && (event.ctrlKey || event.metaKey)) return false
-  if (Boolean(binding.alt) !== event.altKey) return false
-  if (Boolean(binding.shift) !== event.shiftKey) return false
-  if (binding.code) return event.code === binding.code
-  return event.key.toLowerCase() === binding.key
-}
+export const matchesBinding = (binding, event, isApple = isApplePlatform()) => matchesChord(binding, event, isApple)
 
-const KEY_NAMES = { enter: 'Enter', tab: 'Tab' }
-const CODE_NAMES = { BracketLeft: '[', BracketRight: ']' }
+export const bindingLabel = (binding, isApple = isApplePlatform()) => chordLabel(binding, isApple)
 
-const keyName = (binding) => {
-  if (binding.code) return CODE_NAMES[binding.code] || binding.code.replace(/^(Digit|Key)/, '')
-  return KEY_NAMES[binding.key] || binding.key.toUpperCase()
-}
-
-export function bindingLabel(binding, isApple = isApplePlatform()) {
-  const parts = []
-  if (binding.ctrl || (binding.mod && !isApple)) parts.push(isApple ? '⌃' : 'Ctrl')
-  if (binding.mod && isApple) parts.push('⌘')
-  if (binding.alt) parts.push(isApple ? '⌥' : 'Alt')
-  if (binding.shift) parts.push(isApple ? '⇧' : 'Shift')
-  parts.push(keyName(binding))
-  return isApple ? parts.join('') : parts.join('+')
-}
-
-export const shortcutLabelFor = (id) => {
+export const shortcutLabelFor = (id, overrides) => {
   const shortcut = byId.get(id)
-  const binding = shortcut && bindingFor(shortcut)
+  const binding = shortcut && bindingFor(shortcut, isDesktopApp(), overrides)
   return binding ? bindingLabel(binding) : ''
 }
 
-export function shortcutRows() {
-  return activeShortcuts()
-    .filter(({ shortcut }) => shortcut.listed !== false)
-    .map(({ shortcut, binding }) => ({
-      id: shortcut.id,
-      group: shortcut.group,
-      label: shortcut.position ? 'Go to tab 1 to 9 (9 is the last tab)' : shortcut.label,
-      keys: shortcut.position ? `${bindingLabel(binding).replace(/1$/, '')}1 to 9` : bindingLabel(binding),
-    }))
+export const hintWithShortcut = (text, label) => (label ? `${text} (${label})` : text)
+
+const candidateChords = (owner, chord) => (
+  owner.position ? TAB_POSITIONS.map((position) => ({ ...chordModifiers(chord), code: digitCode(position) })) : [chord]
+)
+
+export function checkChord(id, chord, { isDesktop, isApple, overrides }) {
+  const owner = ownerOf(byId.get(id))
+  if (owner.position && !isDigitChord(chord)) return { error: 'needsDigit' }
+  const candidates = candidateChords(owner, chord)
+  const error = candidates.map((candidate) => reservedReason(candidate, { isDesktop, isApple })).find(Boolean)
+  if (error) return { error }
+  const taken = new Set(candidates.map((candidate) => chordSignature(candidate, isApple)))
+  const conflict = activeShortcuts(isDesktop, overrides)
+    .find(({ shortcut, binding }) => ownerOf(shortcut) !== owner && taken.has(chordSignature(binding, isApple)))
+  return { conflict: conflict && ownerOf(conflict.shortcut) }
+}
+
+export const withChord = (overrides, id, chord) => ({ ...overrides, [ownerOf(byId.get(id)).id]: chord })
+
+export function withoutChord(overrides, id) {
+  const ownerId = ownerOf(byId.get(id)).id
+  return Object.fromEntries(Object.entries(overrides).filter(([key]) => key !== ownerId))
+}
+
+const keysLabel = (shortcut, binding, isApple) => {
+  if (!binding) return ''
+  return shortcut.position ? SHORTCUT_TEXT.tabRange(modifiersPrefix(binding, isApple)) : bindingLabel(binding, isApple)
+}
+
+export function shortcutRows(overrides = getPreferences().shortcuts, isDesktop = isDesktopApp(), isApple = isApplePlatform()) {
+  return SHORTCUTS
+    .filter((shortcut) => shortcut.listed !== false && isAvailable(shortcut, isDesktop))
+    .map((shortcut) => {
+      const binding = bindingFor(shortcut, isDesktop, overrides)
+      return {
+        id: shortcut.id,
+        group: shortcut.group,
+        label: shortcut.position ? SHORTCUT_TEXT.tabRangeLabel : shortcut.label,
+        binding,
+        keys: keysLabel(shortcut, binding, isApple),
+        isCustom: overrides[ownerOf(shortcut).id] !== undefined,
+      }
+    })
 }

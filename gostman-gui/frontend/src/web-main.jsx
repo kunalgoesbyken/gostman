@@ -5,8 +5,10 @@ import WebApp from './WebApp'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { isOAuthCallback, relayOAuthCallback } from './lib/backend/oauthPopup'
 import { watchSharedLinks } from './lib/sharedLink'
+import { watchPreferences } from './lib/preferences'
 
 function renderApp() {
+  watchPreferences()
   watchSharedLinks()
   createRoot(document.getElementById('root')).render(
     <React.StrictMode>

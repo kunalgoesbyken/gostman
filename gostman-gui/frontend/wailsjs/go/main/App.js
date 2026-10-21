@@ -254,6 +254,10 @@ export function SaveSettings(arg1) {
   return window['go']['main']['App']['SaveSettings'](arg1);
 }
 
+export function SaveWindowTheme(arg1) {
+  return window['go']['main']['App']['SaveWindowTheme'](arg1);
+}
+
 export function SendRequest(arg1, arg2) {
   return window['go']['main']['App']['SendRequest'](arg1, arg2);
 }

@@ -5,6 +5,7 @@ import { OAUTH_CALLBACK_PATH, cancelOAuthPopup, signInWithPopup } from './oauthP
 import { toGrpcCall, toGrpcTarget } from '../grpc'
 import { toMcpCall, toMcpTarget } from '../mcp'
 import { mockFolders, mockRequests } from '../mockData'
+import { withPreferredTimeout } from '../preferences'
 import { toEngineRequest } from '../request'
 import { failureResponse } from '../response'
 
@@ -115,7 +116,7 @@ async function exchange(url, id, payload) {
   }
 }
 
-const send = (id, request, variables, cookies) => exchange(PROXY_URL, id, toEngineRequest(request, variables, cookies))
+const send = (id, request, variables, cookies) => exchange(PROXY_URL, id, toEngineRequest(withPreferredTimeout(request), variables, cookies))
 
 const invokeGrpc = (id, request, variables) => exchange(GRPC_INVOKE_URL, id, toGrpcCall(request, variables))
 

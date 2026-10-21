@@ -1,36 +1,126 @@
-import { useMemo } from "react"
-import { Dialog, DialogBody, DialogHeader, DialogTitle } from "./ui/dialog"
-import { SHORTCUT_GROUPS, isDesktopApp, shortcutRows } from "../lib/shortcuts"
+import { useCallback, useMemo, useState } from "react"
+import { Pencil, RotateCcw, X } from "lucide-react"
+import { Badge } from "./ui/badge"
+import { Button, IconButton } from "./ui/button"
+import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { useChordCapture } from "../hooks/useChordCapture"
+import { chordLabel, modifiersPrefix } from "../lib/chords"
+import { isApplePlatform, isDesktopApp } from "../lib/platform"
+import { updatePreferences, usePreferences } from "../lib/preferences"
+import { SHORTCUT_GROUPS, checkChord, shortcutRows, withChord, withoutChord } from "../lib/shortcuts"
+import { SHORTCUT_TEXT } from "../lib/shortcutText"
+
+const CAPTURE_PLACEHOLDER = "…"
+
+function ConflictNotice({ chordLabel, owner, onReplace, onCancel }) {
+  return (
+    <div role="alert" className="mb-1 flex flex-wrap items-center gap-2 text-xs text-warning">
+      <p className="min-w-0 flex-1 basis-48">{SHORTCUT_TEXT.conflict(chordLabel, owner)}</p>
+      <Button size="sm" onClick={onReplace}>{SHORTCUT_TEXT.replace}</Button>
+      <Button size="sm" variant="outline" onClick={onCancel}>{SHORTCUT_TEXT.cancel}</Button>
+    </div>
+  )
+}
+
+function KeysDisplay({ keys, isCapturing, liveKeys }) {
+  if (isCapturing) return <kbd className="text-foreground">{liveKeys}</kbd>
+  if (keys) return <kbd>{keys}</kbd>
+  return <span className="text-[11px] text-muted-foreground">{SHORTCUT_TEXT.unassigned}</span>
+}
+
+function ShortcutRow({ row, isCapturing, liveKeys, error, conflict, actions }) {
+  return (
+    <li className="py-1">
+      <div className="flex min-h-8 flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+        <span className="min-w-0 flex-1 basis-40">
+          {row.label}
+          {row.isCustom && <Badge className="ml-2 align-middle">{SHORTCUT_TEXT.customised}</Badge>}
+        </span>
+        <span className="flex shrink-0 items-center gap-1">
+          <KeysDisplay keys={row.keys} isCapturing={isCapturing} liveKeys={liveKeys} />
+          <IconButton label={SHORTCUT_TEXT.changeFor(row.label)} icon={Pencil} size="icon-xs" onClick={actions.start} />
+          {row.binding && <IconButton label={SHORTCUT_TEXT.clearFor(row.label)} icon={X} size="icon-xs" onClick={actions.clear} />}
+          {row.isCustom && <IconButton label={SHORTCUT_TEXT.resetFor(row.label)} icon={RotateCcw} size="icon-xs" onClick={actions.reset} />}
+        </span>
+      </div>
+      {isCapturing && (
+        <p aria-live="polite" className="mb-1 text-[11px] text-muted-foreground">
+          {SHORTCUT_TEXT.capturing}. {SHORTCUT_TEXT.captureHint}
+        </p>
+      )}
+      {error && <p role="alert" className="mb-1 text-[11px] text-destructive">{SHORTCUT_TEXT.errors[error]}</p>}
+      {conflict && <ConflictNotice {...conflict} onReplace={actions.replace} onCancel={actions.cancel} />}
+    </li>
+  )
+}
 
 export function ShortcutsDialog({ onClose }) {
-  const rows = useMemo(shortcutRows, [])
+  const { shortcuts } = usePreferences()
+  const [session, setSession] = useState(null)
   const isDesktop = isDesktopApp()
+  const isApple = isApplePlatform()
+  const rows = useMemo(() => shortcutRows(shortcuts, isDesktop, isApple), [shortcuts, isDesktop, isApple])
+  const context = useMemo(() => ({ isDesktop, isApple, overrides: shortcuts }), [isDesktop, isApple, shortcuts])
+
+  const save = useCallback((overrides) => {
+    updatePreferences({ shortcuts: overrides })
+    setSession(null)
+  }, [])
+
+  const handleResult = useCallback(({ chord, error }) => {
+    const checked = chord ? checkChord(session.id, chord, context) : { error }
+    if (checked.error) setSession((current) => ({ ...current, error: checked.error }))
+    else if (checked.conflict) setSession({ id: session.id, chord, conflict: checked.conflict })
+    else save(withChord(shortcuts, session.id, chord))
+  }, [session, context, shortcuts, save])
+
+  const cancel = useCallback(() => setSession(null), [])
+  const isCapturing = Boolean(session) && !session.conflict
+  const modifiers = useChordCapture(isCapturing, isApple, { onResult: handleResult, onCancel: cancel })
+  const liveKeys = modifiersPrefix(modifiers, isApple) + CAPTURE_PLACEHOLDER
+
+  const actionsFor = (row) => ({
+    start: () => setSession({ id: row.id }),
+    clear: () => save(withChord(shortcuts, row.id, null)),
+    reset: () => save(withoutChord(shortcuts, row.id)),
+    cancel,
+    replace: () => save(withChord(withChord(shortcuts, session.conflict.id, null), session.id, session.chord)),
+  })
+
+  const conflictFor = (row) => {
+    if (session?.id !== row.id || !session.conflict) return null
+    return { chordLabel: chordLabel(session.chord, isApple), owner: session.conflict.label }
+  }
 
   return (
-    <Dialog label="Keyboard shortcuts" onClose={onClose}>
+    <Dialog label={SHORTCUT_TEXT.title} className="max-w-xl" onClose={onClose}>
       <DialogHeader onClose={onClose}>
-        <DialogTitle>Keyboard shortcuts</DialogTitle>
+        <DialogTitle>{SHORTCUT_TEXT.title}</DialogTitle>
       </DialogHeader>
-      <DialogBody className="space-y-4 overflow-y-auto">
+      <DialogBody className="space-y-4">
         {SHORTCUT_GROUPS.map((group) => (
-          <section key={group} aria-label={group}>
-            <h3 className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{group}</h3>
-            <ul>
+          <section key={group} aria-label={SHORTCUT_TEXT.groups[group]}>
+            <h3 className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{SHORTCUT_TEXT.groups[group]}</h3>
+            <ul className="divide-y divide-border">
               {rows.filter((row) => row.group === group).map((row) => (
-                <li key={row.id} className="flex h-8 items-center justify-between gap-3 text-xs">
-                  <span className="min-w-0 truncate">{row.label}</span>
-                  <kbd>{row.keys}</kbd>
-                </li>
+                <ShortcutRow
+                  key={row.id}
+                  row={row}
+                  isCapturing={isCapturing && session.id === row.id}
+                  liveKeys={liveKeys}
+                  error={session?.id === row.id ? session.error : null}
+                  conflict={conflictFor(row)}
+                  actions={actionsFor(row)}
+                />
               ))}
             </ul>
           </section>
         ))}
-        {!isDesktop && (
-          <p className="text-[11px] text-muted-foreground">
-            In the browser, Alt replaces the shortcuts that browsers keep for themselves: Ctrl+W, Ctrl+Shift+T and Ctrl+Tab.
-          </p>
-        )}
+        {!isDesktop && <p className="text-[11px] text-muted-foreground">{SHORTCUT_TEXT.webNotice}</p>}
       </DialogBody>
+      <DialogFooter>
+        <Button variant="outline" disabled={Object.keys(shortcuts).length === 0} onClick={() => save({})}>{SHORTCUT_TEXT.resetAll}</Button>
+      </DialogFooter>
     </Dialog>
   )
 }

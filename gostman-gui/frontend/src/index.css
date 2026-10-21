@@ -6,6 +6,52 @@
 
 @layer base {
   :root {
+    color-scheme: light;
+
+    --background: 0 0% 100%;
+    --foreground: 224 40% 8%;
+
+    --card: 220 20% 98%;
+    --card-foreground: 224 40% 8%;
+
+    --primary: 193 95% 24%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 16% 94%;
+    --secondary-foreground: 224 40% 8%;
+
+    --muted: 220 16% 94%;
+    --muted-foreground: 220 10% 34%;
+
+    --accent: 220 16% 92%;
+    --accent-foreground: 224 40% 8%;
+
+    --destructive: 0 72% 40%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 76% 24%;
+    --success-foreground: 0 0% 100%;
+    --warning: 28 95% 29%;
+    --warning-foreground: 0 0% 100%;
+    --info: 217 91% 40%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 220 13% 82%;
+    --input: 220 13% 82%;
+    --ring: 193 95% 28%;
+
+    --radius: 0.375rem;
+    --scrollbar-size: 10px;
+
+    --syntax-key: 193 90% 26%;
+    --syntax-string: 142 70% 26%;
+    --syntax-number: 24 90% 33%;
+    --syntax-boolean: 275 60% 42%;
+    --syntax-null: 0 72% 40%;
+    --syntax-punctuation: 36 85% 28%;
+  }
+
+  .dark {
     color-scheme: dark;
 
     --background: 224 71% 4%;
@@ -27,7 +73,7 @@
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 224 71% 4%;
 
     --success: 158 64% 52%;
     --success-foreground: 224 71% 4%;
@@ -40,15 +86,36 @@
     --input: 224 40% 15%;
     --ring: 191 96% 54%;
 
-    --radius: 0.375rem;
-    --scrollbar-size: 10px;
-
     --syntax-key: 191 96% 54%;
     --syntax-string: 142 76% 56%;
     --syntax-number: 25 95% 53%;
     --syntax-boolean: 280 74% 64%;
     --syntax-null: 0 84% 60%;
     --syntax-punctuation: 38 92% 60%;
+  }
+
+  @media (prefers-contrast: more) {
+    :root {
+      --muted-foreground: 220 12% 24%;
+      --border: 220 10% 42%;
+      --input: 220 10% 42%;
+      --ring: 193 95% 20%;
+    }
+
+    .dark {
+      --muted-foreground: 215 25% 82%;
+      --border: 224 20% 55%;
+      --input: 224 20% 55%;
+      --ring: 191 96% 70%;
+    }
+  }
+
+  html {
+    background-color: hsl(var(--background));
+  }
+
+  html[data-density="compact"] {
+    font-size: 90%;
   }
 
   * {
@@ -144,5 +211,35 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (min-width: 768px) {
+  html[data-response-layout="right"] .response-split {
+    flex-direction: row;
+  }
+
+  html[data-response-layout="right"] .response-split > :first-child {
+    min-width: 0;
+  }
+
+  html[data-response-layout="right"] .response-split > [role="separator"] {
+    display: none;
+  }
+
+  html[data-response-layout="right"] .response-split > :last-child {
+    min-width: 20rem;
+    border-left: 1px solid hsl(var(--border));
+  }
+}
+
+@media (forced-colors: active) {
+  [aria-checked="true"],
+  [aria-selected="true"],
+  [aria-current="true"] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
   }
 }

@@ -10,7 +10,7 @@ import { MethodTag } from "./MethodTag"
 import { SearchField } from "./SearchField"
 import { useAppStore } from "../store/appStore"
 import { buildCollectionTree, findMatches, flattenCollection, listFolders, ROOT_ID, ROW_FOLDER } from "../lib/collectionTree"
-import { shortcutLabel } from "../lib/platform"
+import { useShortcutLabel } from "../hooks/useShortcuts"
 import { SPEC_TEXT } from "../lib/specText"
 import { cn } from "../lib/utils"
 
@@ -137,6 +137,7 @@ const TreeRow = memo(function TreeRow({ row, isActive, isMenuOpen, onActivate, o
 export const CollectionTree = memo(function CollectionTree({ folders, requests, activeRequestId, actions }) {
   const [query, setQuery] = useState("")
   const [menu, setMenu] = useState(null)
+  const newRequestShortcut = useShortcutLabel("newRequest")
   const toggleFolder = useAppStore((s) => s.toggleFolder)
   const specLinks = useAppStore((s) => s.specLinks)
 
@@ -182,7 +183,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
           <EmptyState
             icon={isSearching ? Search : FileJson}
             title={isSearching ? "No results" : "No requests yet"}
-            description={isSearching ? "No request name or URL matches." : `Press ${shortcutLabel("N")} to create one.`}
+            description={isSearching ? "No request name or URL matches." : (newRequestShortcut ? `Press ${newRequestShortcut} to create one.` : "Use New request to create one.")}
           />
         ) : (
           <VirtualList role="tree" aria-label="Collections" items={rows} rowHeight={ROW_HEIGHT_PX} renderRow={renderRow} className="h-full py-1" />

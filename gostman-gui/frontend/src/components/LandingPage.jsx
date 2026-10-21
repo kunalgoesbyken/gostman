@@ -220,7 +220,7 @@ export function LandingPage({ onGetStarted }) {
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
-      <div className="min-h-screen bg-background text-foreground overflow-hidden" id="main-content">
+      <div className="dark min-h-screen bg-background text-foreground overflow-hidden" id="main-content">
         <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
           <div className="absolute inset-0 bg-[radial-gradient(circle_1px_at_1px_1px,rgba(255,255,255,0.05)_1px,transparent_0)] [background-size:40px_40px]" />
           <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />

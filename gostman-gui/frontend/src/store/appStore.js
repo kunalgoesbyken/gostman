@@ -201,6 +201,7 @@ export const useAppStore = create(
         commandPaletteOpen: false,
         commandPaletteMode: 'commands',
         shortcutsDialogOpen: false,
+        preferencesDialogOpen: false,
         isSidebarOpen: true,
         closedTabs: [],
         cookiesDialogOpen: false,
@@ -411,6 +412,8 @@ export const useAppStore = create(
         openCommandPalette: (mode) => set({ commandPaletteOpen: true, commandPaletteMode: mode === 'requests' ? 'requests' : 'commands' }),
         openShortcutsDialog: () => set({ shortcutsDialogOpen: true, commandPaletteOpen: false }),
         closeShortcutsDialog: () => set({ shortcutsDialogOpen: false }),
+        openPreferencesDialog: () => set({ preferencesDialogOpen: true, commandPaletteOpen: false }),
+        closePreferencesDialog: () => set({ preferencesDialogOpen: false }),
         toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
         closeCommandPalette: () => set({ commandPaletteOpen: false }),
         openCookiesDialog: () => set({ cookiesDialogOpen: true }),
@@ -525,6 +528,7 @@ export const selectIsDialogOpen = (state) => (
   || state.importDialogOpen
   || state.commandPaletteOpen
   || state.shortcutsDialogOpen
+  || state.preferencesDialogOpen
   || state.cookiesDialogOpen
   || state.settingsDialogOpen
   || state.examplesDialogOpen

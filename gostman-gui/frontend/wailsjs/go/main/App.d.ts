@@ -135,6 +135,8 @@ export function SaveScopes(arg1:Array<main.Environment>,arg2:string,arg3:string)
 
 export function SaveSettings(arg1:main.Settings):Promise<void>;
 
+export function SaveWindowTheme(arg1:string):Promise<void>;
+
 export function SendRequest(arg1:string,arg2:engine.Request):Promise<engine.Response>;
 
 export function StartCapture(arg1:capture.Settings):Promise<main.CaptureState>;

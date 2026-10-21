@@ -40,6 +40,7 @@ func applicationMenu() *menu.Menu {
 
 func main() {
 	app := NewApp()
+	theme := savedWindowTheme()
 
 	err := wails.Run(&options.App{
 		Title:            "Gostman",
@@ -49,11 +50,11 @@ func main() {
 		MinHeight:        600,
 		Frameless:        runtime.GOOS != "darwin",
 		AssetServer:      &assetserver.Options{Assets: assets, Middleware: isolateSandbox},
-		BackgroundColour: &options.RGBA{R: 3, G: 7, B: 18, A: 1},
+		BackgroundColour: &theme.background,
 		OnStartup:        app.startup,
 		OnShutdown:       app.stopServersOnQuit,
 		Menu:             applicationMenu(),
-		Windows:          &windows.Options{Theme: windows.Dark},
+		Windows:          &windows.Options{Theme: theme.frame},
 		Bind:             []interface{}{app},
 	})
 	if err != nil {

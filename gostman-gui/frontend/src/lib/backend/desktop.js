@@ -38,6 +38,7 @@ import { desktopMock } from './desktopMock'
 import { openDesktopSocket } from './desktopSocket'
 import { toGrpcCall, toGrpcTarget } from '../grpc'
 import { toMcpCall, toMcpTarget } from '../mcp'
+import { withPreferredTimeout } from '../preferences'
 import { toEngineRequest } from '../request'
 import { failureResponse } from '../response'
 
@@ -56,7 +57,7 @@ const answering = (run) => async (...args) => {
   }
 }
 
-const send = answering((id, request, variables, cookies) => SendRequest(id, toEngineRequest(request, variables, cookies)))
+const send = answering((id, request, variables, cookies) => SendRequest(id, toEngineRequest(withPreferredTimeout(request), variables, cookies)))
 
 const invokeGrpc = answering((id, request, variables) => InvokeGrpc(id, toGrpcCall(request, variables)))
 

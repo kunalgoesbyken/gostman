@@ -51,6 +51,9 @@ const JSON_STYLE = {
   nullValue: 'text-syntax-null',
   undefinedValue: 'text-syntax-null',
   otherValue: 'text-foreground',
+  collapseIcon: `${darkStyles.collapseIcon} !text-foreground`,
+  expandIcon: `${darkStyles.expandIcon} !text-foreground`,
+  collapsedContent: `${darkStyles.collapsedContent} !text-foreground`,
   punctuation: 'mr-1.5 text-muted-foreground',
 }
 

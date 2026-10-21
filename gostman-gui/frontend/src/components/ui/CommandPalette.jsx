@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
   Bookmark, Clock, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Plus, Radio, RotateCcw, Save, Search, Send,
-  Server, Settings, Share2, Undo2, Upload, X,
+  Server, Settings, Share2, SlidersHorizontal, Undo2, Upload, X,
 } from "lucide-react"
 import { MethodTag } from "../MethodTag"
 import { fuzzyScore } from "../../lib/fuzzy"
-import { shortcutLabelFor } from "../../lib/shortcuts"
+import { PREFERENCES_TEXT } from "../../lib/preferencesText"
+import { useShortcutLabel } from "../../hooks/useShortcuts"
 import { cn } from "../../lib/utils"
 
 const COMMANDS = [
@@ -24,6 +25,7 @@ const COMMANDS = [
   { id: "mock-server", label: "Mock server", description: "Serve saved examples on a local port", icon: Server, action: "mockServer" },
   { id: "capture", label: "Capture traffic", description: "Forward an app's calls to its API and save them as requests", icon: Radio, action: "captureTraffic" },
   { id: "cookies", label: "Manage cookies", description: "See and delete stored cookies", icon: Cookie, action: "cookies" },
+  { id: "preferences", label: PREFERENCES_TEXT.title, description: PREFERENCES_TEXT.commandDescription, icon: SlidersHorizontal, action: "preferences" },
   { id: "network", label: "Network settings", description: "Proxy and certificates", icon: Settings, action: "settings" },
   { id: "import", label: "Import data", description: "Import Postman, OpenAPI or Gostman files", icon: Upload, action: "import" },
   { id: "export", label: "Export data", description: "Export collections and environments", icon: Download, action: "export" },
@@ -139,7 +141,7 @@ const scrollWhenSelected = (isSelected) => (element) => {
 
 function CommandRow({ command, isSelected, onSelect, onHover }) {
   const Icon = command.icon
-  const shortcut = command.shortcutId ? shortcutLabelFor(command.shortcutId) : ""
+  const shortcut = useShortcutLabel(command.shortcutId)
   return (
     <button
       type="button"

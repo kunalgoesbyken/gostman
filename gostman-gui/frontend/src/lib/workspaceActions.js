@@ -10,6 +10,7 @@ import { clearToken, obtainToken } from './oauth'
 import { isGrpcRequest, serializeProtoFiles } from './grpc'
 import { isMcpRequest } from './mcp'
 import { createMockActions } from './mockServer'
+import { getPreferences } from './preferences'
 import { normalizeRequest } from './request'
 import { isRequestDirty } from './requestChanges'
 import { bodyBase64, downloadName, mimeType } from './response'
@@ -345,7 +346,7 @@ export function createWorkspaceActions(backend) {
       store().closeTab(tabId)
     }
     const saved = requests.find((request) => request.id === tab.request.id)
-    if (!isRequestDirty(tab.request, saved)) {
+    if (!getPreferences().confirmCloseTab || !isRequestDirty(tab.request, saved)) {
       close()
       return
     }
@@ -383,6 +384,7 @@ export function createWorkspaceActions(backend) {
     mockServer: mock.open,
     captureTraffic: capture.open,
     settings: () => store().openSettingsDialog(),
+    preferences: () => store().openPreferencesDialog(),
     import: () => store().openImportDialog(),
     reset: confirmReset,
   }
