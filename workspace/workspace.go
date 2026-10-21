@@ -280,10 +280,14 @@ func (w *Workspace) Collection() Collection {
 	defer w.mu.Unlock()
 	collection := Collection{Requests: []Request{}, Folders: []Folder{}, Environments: []Environment{}, Variables: w.manifestVariables(), Settings: w.manifestSettings()}
 	for _, entry := range w.orderedFolders() {
-		collection.Folders = append(collection.Folders, entry.folder)
+		folder := entry.folder
+		folder.SortOrder = entry.order
+		collection.Folders = append(collection.Folders, folder)
 	}
 	for _, entry := range w.orderedRequests() {
-		collection.Requests = append(collection.Requests, entry.request)
+		request := entry.request
+		request.SortOrder = entry.order
+		collection.Requests = append(collection.Requests, request)
 	}
 	for _, entry := range w.orderedEnvironments() {
 		collection.Environments = append(collection.Environments, entry.environment)

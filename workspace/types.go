@@ -29,6 +29,7 @@ type Request struct {
 	McpArguments     string         `json:"mcpArguments"`
 	Vars             string         `json:"vars"`
 	Timestamp        string         `json:"timestamp"`
+	SortOrder        int64          `json:"sortOrder"`
 }
 
 type Settings struct {
@@ -44,6 +45,7 @@ type Folder struct {
 	Id        string `json:"id"`
 	Name      string `json:"name"`
 	ParentId  string `json:"parentId"`
+	SortOrder int64  `json:"sortOrder"`
 	Variables string `json:"variables"`
 	Settings
 }

@@ -73,6 +73,7 @@ type Folder struct {
 	Name      string `json:"name"`
 	IsOpen    bool   `json:"isOpen"`
 	ParentId  string `json:"parentId"`
+	SortOrder int64  `json:"sortOrder"`
 	Variables string `json:"variables"`
 	workspace.Settings
 }
@@ -104,6 +105,7 @@ type Request struct {
 	McpArguments     string         `json:"mcpArguments"`
 	Vars             string         `json:"vars"`
 	Timestamp        string         `json:"timestamp"`
+	SortOrder        int64          `json:"sortOrder"`
 }
 
 var (

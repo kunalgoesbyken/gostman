@@ -89,6 +89,16 @@ func (w *Workspace) nextEnvironmentOrder() int64 {
 	return highest + 1
 }
 
+func (w *Workspace) requestOrder(entry *requestEntry, request Request, directory string) int64 {
+	if request.SortOrder > 0 {
+		return request.SortOrder
+	}
+	if entry.path == "" || parentOf(entry.path) != directory {
+		return w.nextRequestOrder(directory)
+	}
+	return entry.order
+}
+
 func (w *Workspace) relocate(from, to string) error {
 	if from == to {
 		return nil
@@ -125,10 +135,7 @@ func (w *Workspace) storeRequest(request Request) error {
 	if err != nil {
 		return err
 	}
-	order := entry.order
-	if entry.path == "" || parentOf(entry.path) != directory {
-		order = w.nextRequestOrder(directory)
-	}
+	order := w.requestOrder(entry, request, directory)
 	document := requestDocument{request: request, order: order, extras: entry.extras}
 	normalized, err := normalizeRequest(document)
 	if err != nil {
@@ -248,6 +255,9 @@ func (w *Workspace) storeFolder(folder Folder) error {
 		entry = created
 	} else if err := w.moveFolder(entry, folder, parent); err != nil {
 		return err
+	}
+	if folder.SortOrder > 0 {
+		entry.order = folder.SortOrder
 	}
 	document := folderDocument{folderContent: folderContent{folder: folder, order: entry.order}, extras: entry.extras}
 	content, err := normalizeFolder(document)
