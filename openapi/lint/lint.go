@@ -2,10 +2,16 @@ package lint
 
 import (
 	"context"
+	"errors"
 	"sort"
+	"time"
 
 	"github.com/kunalgoesbyken/gostman/openapi"
 )
+
+const timeLimit = 30 * time.Second
+
+var errTookTooLong = errors.New("linting took too long and was stopped")
 
 type Query struct {
 	Source openapi.Source `json:"source"`
@@ -21,11 +27,16 @@ func Run(ctx context.Context, source openapi.Source, opt openapi.Options, config
 	if err := config.validate(); err != nil {
 		return Report{}, err
 	}
+	ctx, cancel := context.WithTimeout(ctx, timeLimit)
+	defer cancel()
 	root, err := openapi.ReadRoot(ctx, source, opt)
+	if errors.Is(err, context.DeadlineExceeded) {
+		return Report{}, errTookTooLong
+	}
 	if err != nil {
 		return Report{}, err
 	}
-	return Analyze(root, config)
+	return Analyze(ctx, root, config)
 }
 
 func Handle(ctx context.Context, query Query, opt openapi.Options) Reply {
@@ -40,15 +51,15 @@ func Handle(ctx context.Context, query Query, opt openapi.Options) Reply {
 	return Reply{Report: &report}
 }
 
-func Analyze(root map[string]any, config Config) (Report, error) {
-	spec, err := newSpec(root)
+func Analyze(ctx context.Context, root map[string]any, config Config) (Report, error) {
+	spec, err := newSpec(ctx, root)
 	if err != nil {
 		return Report{}, err
 	}
-	return evaluate(spec, config), nil
+	return evaluate(ctx, spec, config)
 }
 
-func evaluate(spec *Spec, config Config) Report {
+func evaluate(ctx context.Context, spec *Spec, config Config) (Report, error) {
 	report := Report{Findings: []Finding{}}
 	order := map[string]int{}
 	for index, rule := range Rules() {
@@ -58,12 +69,15 @@ func evaluate(spec *Spec, config Config) Report {
 			continue
 		}
 		report.Findings = append(report.Findings, findingsOf(rule, severity, spec)...)
+		if ctx.Err() != nil {
+			return Report{}, errTookTooLong
+		}
 	}
 	sortFindings(report.Findings, order)
 	for _, finding := range report.Findings {
 		report.Counts.add(finding.Severity)
 	}
-	return report
+	return report, nil
 }
 
 func findingsOf(rule Rule, severity Severity, spec *Spec) []Finding {

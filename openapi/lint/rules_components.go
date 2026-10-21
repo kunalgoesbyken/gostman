@@ -94,7 +94,7 @@ func componentUnused(s *Spec) []Issue {
 func refValid(s *Spec) []Issue {
 	var issues []Issue
 	for _, use := range s.Refs {
-		_, err := followRef(s.Root, use.Ref)
+		_, err := s.follow(use.Ref)
 		if err == nil || errors.Is(err, errExternalRef) {
 			continue
 		}

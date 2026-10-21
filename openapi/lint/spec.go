@@ -1,6 +1,7 @@
 package lint
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"sort"
@@ -24,6 +25,10 @@ type Spec struct {
 	Paths      []string
 	Operations []Operation
 	Refs       []refUse
+	Tags       map[string]bool
+
+	ctx     context.Context
+	targets map[string]refTarget
 }
 
 type Parameter struct {
@@ -32,8 +37,8 @@ type Parameter struct {
 	Pointer string
 }
 
-func newSpec(root map[string]any) (*Spec, error) {
-	spec := &Spec{Root: root}
+func newSpec(ctx context.Context, root map[string]any) (*Spec, error) {
+	spec := &Spec{Root: root, ctx: ctx, targets: map[string]refTarget{}}
 	if err := spec.detectVersion(); err != nil {
 		return nil, err
 	}
@@ -41,6 +46,7 @@ func newSpec(root map[string]any) (*Spec, error) {
 		return nil, err
 	}
 	spec.Refs = collectRefs(root)
+	spec.Tags = declaredTags(root)
 	spec.readOperations()
 	return spec, nil
 }

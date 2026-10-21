@@ -44,19 +44,18 @@ func operationSummary(_ *Spec, op Operation) []Issue {
 	return []Issue{{Path: op.Pointer, Message: "the operation has neither a summary nor a description"}}
 }
 
-func declaredTags(s *Spec) map[string]bool {
+func declaredTags(root map[string]any) map[string]bool {
 	declared := map[string]bool{}
-	for _, raw := range asList(s.Root["tags"]) {
+	for _, raw := range asList(root["tags"]) {
 		declared[asString(asMap(raw)["name"])] = true
 	}
 	return declared
 }
 
 func operationTagsDeclared(s *Spec, op Operation) []Issue {
-	declared := declaredTags(s)
 	var issues []Issue
 	for index, raw := range asList(op.Data["tags"]) {
-		if tag := asString(raw); !declared[tag] {
+		if tag := asString(raw); !s.Tags[tag] {
 			issues = append(issues, Issue{Path: fmt.Sprintf("%s/tags/%d", op.Pointer, index), Message: fmt.Sprintf("tag %q is not declared in the top-level tags", tag)})
 		}
 	}

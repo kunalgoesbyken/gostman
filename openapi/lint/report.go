@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"unicode"
 )
 
 const (
@@ -34,9 +35,28 @@ func location(finding Finding) string {
 	return finding.Path
 }
 
+func unprintable(r rune) bool {
+	return unicode.IsControl(r) || unicode.In(r, unicode.Cf, unicode.Zl, unicode.Zp)
+}
+
+func visible(text string) string {
+	var out strings.Builder
+	for _, r := range text {
+		switch {
+		case !unprintable(r):
+			out.WriteRune(r)
+		case r > 0xFFFF:
+			fmt.Fprintf(&out, `\U%08x`, r)
+		default:
+			fmt.Fprintf(&out, `\u%04x`, r)
+		}
+	}
+	return out.String()
+}
+
 func writeText(w io.Writer, report Report) error {
 	for _, finding := range report.Findings {
-		if _, err := fmt.Fprintf(w, "%-7s %s  %s\n        %s\n", finding.Severity, finding.Rule, location(finding), finding.Message); err != nil {
+		if _, err := fmt.Fprintf(w, "%-7s %s  %s\n        %s\n", finding.Severity, visible(finding.Rule), visible(location(finding)), visible(finding.Message)); err != nil {
 			return err
 		}
 	}
@@ -107,8 +127,8 @@ func writeJUnit(w io.Writer, report Report, failOn Severity) error {
 }
 
 func (s *junitSuite) add(finding Finding, failOn Severity) {
-	message := &junitMessage{Type: string(finding.Severity), Text: strings.TrimSpace(finding.Message)}
-	entry := junitCase{Name: location(finding), Class: finding.Rule}
+	message := &junitMessage{Type: string(finding.Severity), Text: visible(strings.TrimSpace(finding.Message))}
+	entry := junitCase{Name: visible(location(finding)), Class: visible(finding.Rule)}
 	if failOn.rank() > 0 && finding.Severity.rank() >= failOn.rank() {
 		entry.Failure = message
 		s.Failures++

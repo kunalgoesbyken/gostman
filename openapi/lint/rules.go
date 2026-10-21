@@ -31,6 +31,9 @@ func eachOperation(check func(*Spec, Operation) []Issue) func(*Spec) []Issue {
 	return func(s *Spec) []Issue {
 		var issues []Issue
 		for _, op := range s.Operations {
+			if s.ctx.Err() != nil {
+				return issues
+			}
 			issues = append(issues, check(s, op)...)
 		}
 		return issues

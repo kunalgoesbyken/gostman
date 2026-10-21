@@ -8,7 +8,14 @@ import (
 	"strings"
 )
 
+const maxRefHops = 32
+
 var errExternalRef = errors.New("external reference")
+
+type refTarget struct {
+	value any
+	err   error
+}
 
 type refUse struct {
 	Pointer string
@@ -62,7 +69,7 @@ func step(current any, token string) (any, error) {
 
 func followRef(root map[string]any, ref string) (any, error) {
 	seen := map[string]bool{}
-	for {
+	for hop := 0; hop < maxRefHops; hop++ {
 		if seen[ref] {
 			return nil, fmt.Errorf("%s leads back to itself without reaching a definition", ref)
 		}
@@ -77,6 +84,16 @@ func followRef(root map[string]any, ref string) (any, error) {
 		}
 		ref = next
 	}
+	return nil, fmt.Errorf("%s is part of a chain of more than %d $ref values", ref, maxRefHops)
+}
+
+func (s *Spec) follow(ref string) (any, error) {
+	if cached, ok := s.targets[ref]; ok {
+		return cached.value, cached.err
+	}
+	value, err := followRef(s.Root, ref)
+	s.targets[ref] = refTarget{value: value, err: err}
+	return value, err
 }
 
 func (s *Spec) resolve(v any) map[string]any {
@@ -84,7 +101,7 @@ func (s *Spec) resolve(v any) map[string]any {
 	if !isRef {
 		return asMap(v)
 	}
-	target, err := followRef(s.Root, ref)
+	target, err := s.follow(ref)
 	if err != nil {
 		return nil
 	}
