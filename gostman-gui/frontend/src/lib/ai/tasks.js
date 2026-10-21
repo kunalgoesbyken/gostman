@@ -139,14 +139,14 @@ const testsTask = {
     const raw = parseModelObject(text)
     const proposed = validAssertions(raw.assertions)
     const script = source.isRestricted ? '' : textField(raw.script, SCRIPT_LIMIT)
-    requireContent(proposed, script)
     const existing = parseAssertions(source.request.assertions)
     const added = withoutDuplicates(existing, proposed)
+    requireContent(added, script)
     const merged = [...existing, ...added]
     const nextScript = joinScripts(source.request.postScript, script)
     return {
       sections: [
-        { label: 'Assertions', before: assertionText(existing), after: assertionText(merged) },
+        ...(added.length > 0 ? [{ label: 'Assertions', before: assertionText(existing), after: assertionText(merged) }] : []),
         ...(script ? [{ label: 'Post-response script (AI-generated, review before running)', before: source.request.postScript, after: nextScript }] : []),
       ],
       applyLabel: 'Add to request',
