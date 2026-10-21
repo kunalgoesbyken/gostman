@@ -24,6 +24,8 @@ export function CapturedExchanges():Promise<Array<capture.Exchange>>;
 
 export function ClearCaptured():Promise<void>;
 
+export function ClearMockLog():Promise<void>;
+
 export function CloseWorkspace():Promise<main.WorkspaceStatus>;
 
 export function DeleteRequest(arg1:string):Promise<void>;
@@ -96,7 +98,11 @@ export function InvokeMcp(arg1:string,arg2:mcpclient.Call):Promise<engine.Respon
 
 export function LoadData():Promise<main.SavedData>;
 
-export function MockRoutes(arg1:Array<mock.Source>,arg2:string):Promise<Array<mock.Route>>;
+export function MockConfig():Promise<mock.Config>;
+
+export function MockFromSpec(arg1:openapi.Source):Promise<mock.Spec>;
+
+export function MockRoutes(arg1:Array<mock.Source>,arg2:string,arg3:mock.Config):Promise<Array<mock.Route>>;
 
 export function MockStatus():Promise<main.MockState>;
 
@@ -130,6 +136,8 @@ export function SaveFolders(arg1:Array<main.Folder>):Promise<void>;
 
 export function SaveHistory(arg1:Array<main.Request>):Promise<void>;
 
+export function SaveMockConfig(arg1:mock.Config):Promise<void>;
+
 export function SaveRequest(arg1:main.Request):Promise<main.Request>;
 
 export function SaveRequests(arg1:Array<main.Request>):Promise<Array<main.Request>>;
@@ -142,7 +150,7 @@ export function SendRequest(arg1:string,arg2:engine.Request):Promise<engine.Resp
 
 export function StartCapture(arg1:capture.Settings):Promise<main.CaptureState>;
 
-export function StartMock(arg1:Array<mock.Source>,arg2:string,arg3:mock.Settings):Promise<main.MockState>;
+export function StartMock(arg1:Array<mock.Source>,arg2:string,arg3:mock.Config):Promise<main.MockState>;
 
 export function StopCapture():Promise<void>;
 
@@ -152,7 +160,7 @@ export function StreamRequest(arg1:string,arg2:engine.Request):Promise<engine.Re
 
 export function TrustWorkspace():Promise<void>;
 
-export function UpdateMock(arg1:Array<mock.Source>,arg2:string):Promise<main.MockState>;
+export function UpdateMock(arg1:Array<mock.Source>,arg2:string,arg3:mock.Config):Promise<main.MockState>;
 
 export function WSClose(arg1:string):Promise<void>;
 

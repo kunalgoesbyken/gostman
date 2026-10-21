@@ -1,8 +1,25 @@
 package redact
 
-import "strings"
+import (
+	_ "embed"
+	"encoding/json"
+	"strings"
+)
 
-var sensitiveWords = []string{"auth", "bearer", "cookie", "credential", "key", "passw", "pwd", "secret", "session", "signature", "token"}
+const Masked = "***"
+
+//go:embed sensitive_words.json
+var sensitiveWordsJSON []byte
+
+var sensitiveWords = loadSensitiveWords()
+
+func loadSensitiveWords() []string {
+	var words []string
+	if err := json.Unmarshal(sensitiveWordsJSON, &words); err != nil {
+		panic("redact: sensitive_words.json is invalid: " + err.Error())
+	}
+	return words
+}
 
 func IsSensitiveName(name string) bool {
 	lowered := strings.ToLower(name)

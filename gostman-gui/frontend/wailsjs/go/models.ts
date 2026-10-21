@@ -932,6 +932,7 @@ export namespace main {
 	    running: boolean;
 	    address: string;
 	    routes: mock.Route[];
+	    log: mock.Entry[];
 	
 	    static createFrom(source: any = {}) {
 	        return new MockState(source);
@@ -942,6 +943,7 @@ export namespace main {
 	        this.running = source["running"];
 	        this.address = source["address"];
 	        this.routes = this.convertValues(source["routes"], mock.Route);
+	        this.log = this.convertValues(source["log"], mock.Entry);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -1365,6 +1367,359 @@ export namespace mcpclient {
 
 export namespace mock {
 	
+	export class Fault {
+	    percent: number;
+	    kind: string;
+	    status: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Fault(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.percent = source["percent"];
+	        this.kind = source["kind"];
+	        this.status = source["status"];
+	    }
+	}
+	export class Behavior {
+	    delayMs: number;
+	    delayMaxMs: number;
+	    slowBodyMs: number;
+	    fault: Fault;
+	
+	    static createFrom(source: any = {}) {
+	        return new Behavior(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.delayMs = source["delayMs"];
+	        this.delayMaxMs = source["delayMaxMs"];
+	        this.slowBodyMs = source["slowBodyMs"];
+	        this.fault = this.convertValues(source["fault"], Fault);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Condition {
+	    field: string;
+	    name: string;
+	    op: string;
+	    value: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Condition(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.field = source["field"];
+	        this.name = source["name"];
+	        this.op = source["op"];
+	        this.value = source["value"];
+	    }
+	}
+	export class RouteOptions {
+	    disabled: boolean;
+	    behavior: Behavior;
+	
+	    static createFrom(source: any = {}) {
+	        return new RouteOptions(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.disabled = source["disabled"];
+	        this.behavior = this.convertValues(source["behavior"], Behavior);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Header {
+	    key: string;
+	    value: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Header(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.key = source["key"];
+	        this.value = source["value"];
+	    }
+	}
+	export class Rule {
+	    id: string;
+	    name: string;
+	    disabled: boolean;
+	    method: string;
+	    path: string;
+	    conditions: Condition[];
+	    nth: number;
+	    exampleId: string;
+	    status: number;
+	    headers: Header[];
+	    body: string;
+	    behavior: Behavior;
+	
+	    static createFrom(source: any = {}) {
+	        return new Rule(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.disabled = source["disabled"];
+	        this.method = source["method"];
+	        this.path = source["path"];
+	        this.conditions = this.convertValues(source["conditions"], Condition);
+	        this.nth = source["nth"];
+	        this.exampleId = source["exampleId"];
+	        this.status = source["status"];
+	        this.headers = this.convertValues(source["headers"], Header);
+	        this.body = source["body"];
+	        this.behavior = this.convertValues(source["behavior"], Behavior);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Source {
+	    id: string;
+	    name: string;
+	    method: string;
+	    url: string;
+	    examples: string;
+	    exampleId: string;
+	    path: string;
+	    types: Record<string, string>;
+	
+	    static createFrom(source: any = {}) {
+	        return new Source(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.method = source["method"];
+	        this.url = source["url"];
+	        this.examples = source["examples"];
+	        this.exampleId = source["exampleId"];
+	        this.path = source["path"];
+	        this.types = source["types"];
+	    }
+	}
+	export class Spec {
+	    title: string;
+	    sources: Source[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Spec(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.title = source["title"];
+	        this.sources = this.convertValues(source["sources"], Source);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Settings {
+	    port: number;
+	    cors: boolean;
+	    behavior: Behavior;
+	
+	    static createFrom(source: any = {}) {
+	        return new Settings(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.port = source["port"];
+	        this.cors = source["cors"];
+	        this.behavior = this.convertValues(source["behavior"], Behavior);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Config {
+	    settings: Settings;
+	    spec: Spec;
+	    rules: Rule[];
+	    routes: Record<string, RouteOptions>;
+	    selections: Record<string, string>;
+	
+	    static createFrom(source: any = {}) {
+	        return new Config(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.settings = this.convertValues(source["settings"], Settings);
+	        this.spec = this.convertValues(source["spec"], Spec);
+	        this.rules = this.convertValues(source["rules"], Rule);
+	        this.routes = this.convertValues(source["routes"], RouteOptions, true);
+	        this.selections = source["selections"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Entry {
+	    id: number;
+	    // Go type: time
+	    time: any;
+	    method: string;
+	    path: string;
+	    headers: Header[];
+	    body: string;
+	    bodyBytes: number;
+	    route: string;
+	    rule: string;
+	    fault: string;
+	    status: number;
+	    durationMs: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Entry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.time = this.convertValues(source["time"], null);
+	        this.method = source["method"];
+	        this.path = source["path"];
+	        this.headers = this.convertValues(source["headers"], Header);
+	        this.body = source["body"];
+	        this.bodyBytes = source["bodyBytes"];
+	        this.route = source["route"];
+	        this.rule = source["rule"];
+	        this.fault = source["fault"];
+	        this.status = source["status"];
+	        this.durationMs = source["durationMs"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
 	export class Route {
 	    requestId: string;
 	    name: string;
@@ -1391,44 +1746,10 @@ export namespace mock {
 	        this.exampleName = source["exampleName"];
 	    }
 	}
-	export class Settings {
-	    port: number;
-	    delayMs: number;
-	    cors: boolean;
 	
-	    static createFrom(source: any = {}) {
-	        return new Settings(source);
-	    }
 	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.port = source["port"];
-	        this.delayMs = source["delayMs"];
-	        this.cors = source["cors"];
-	    }
-	}
-	export class Source {
-	    id: string;
-	    name: string;
-	    method: string;
-	    url: string;
-	    examples: string;
-	    exampleId: string;
 	
-	    static createFrom(source: any = {}) {
-	        return new Source(source);
-	    }
 	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.name = source["name"];
-	        this.method = source["method"];
-	        this.url = source["url"];
-	        this.examples = source["examples"];
-	        this.exampleId = source["exampleId"];
-	    }
-	}
 
 }
 

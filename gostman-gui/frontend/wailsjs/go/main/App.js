@@ -30,6 +30,10 @@ export function ClearCaptured() {
   return window['go']['main']['App']['ClearCaptured']();
 }
 
+export function ClearMockLog() {
+  return window['go']['main']['App']['ClearMockLog']();
+}
+
 export function CloseWorkspace() {
   return window['go']['main']['App']['CloseWorkspace']();
 }
@@ -174,8 +178,16 @@ export function LoadData() {
   return window['go']['main']['App']['LoadData']();
 }
 
-export function MockRoutes(arg1, arg2) {
-  return window['go']['main']['App']['MockRoutes'](arg1, arg2);
+export function MockConfig() {
+  return window['go']['main']['App']['MockConfig']();
+}
+
+export function MockFromSpec(arg1) {
+  return window['go']['main']['App']['MockFromSpec'](arg1);
+}
+
+export function MockRoutes(arg1, arg2, arg3) {
+  return window['go']['main']['App']['MockRoutes'](arg1, arg2, arg3);
 }
 
 export function MockStatus() {
@@ -242,6 +254,10 @@ export function SaveHistory(arg1) {
   return window['go']['main']['App']['SaveHistory'](arg1);
 }
 
+export function SaveMockConfig(arg1) {
+  return window['go']['main']['App']['SaveMockConfig'](arg1);
+}
+
 export function SaveRequest(arg1) {
   return window['go']['main']['App']['SaveRequest'](arg1);
 }
@@ -286,8 +302,8 @@ export function TrustWorkspace() {
   return window['go']['main']['App']['TrustWorkspace']();
 }
 
-export function UpdateMock(arg1, arg2) {
-  return window['go']['main']['App']['UpdateMock'](arg1, arg2);
+export function UpdateMock(arg1, arg2, arg3) {
+  return window['go']['main']['App']['UpdateMock'](arg1, arg2, arg3);
 }
 
 export function WSClose(arg1) {

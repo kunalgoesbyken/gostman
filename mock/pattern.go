@@ -1,7 +1,9 @@
 package mock
 
 import (
+	"math"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/krockxz/gostman/engine"
@@ -12,13 +14,24 @@ const (
 	schemeSeparator = "://"
 	pathEnd         = "?#"
 	parameterPrefix = ":"
+	templateOpen    = "{"
+	templateClose   = "}"
+	placeholderOpen = "{{"
 	wildcardKey     = "\x00"
 	literalRank     = '0'
 	wildcardRank    = '1'
 )
 
+const (
+	kindInteger = "integer"
+	kindNumber  = "number"
+	kindBoolean = "boolean"
+)
+
 type segment struct {
 	text     string
+	name     string
+	kind     string
 	wildcard bool
 }
 
@@ -27,6 +40,14 @@ type pattern []segment
 func routePattern(rawURL string, expand func(string) string) pattern {
 	afterBase := withoutLeadingPlaceholder(strings.TrimSpace(rawURL))
 	return parsePattern(withoutOrigin(expand(afterBase)))
+}
+
+func templatePattern(path string, kinds map[string]string) pattern {
+	shape := parsePattern(path)
+	for i, part := range shape {
+		shape[i].kind = kinds[part.name]
+	}
+	return shape
 }
 
 func withoutLeadingPlaceholder(text string) string {
@@ -67,14 +88,35 @@ func parsePattern(path string) pattern {
 }
 
 func toSegment(part string) segment {
-	if isParameter(part) || len(engine.PlaceholderSpans(part)) > 0 {
+	if name, ok := parameterName(part); ok {
+		return segment{text: part, name: name, wildcard: true}
+	}
+	if isTemplated(part) {
 		return segment{text: part, wildcard: true}
 	}
 	return segment{text: unescaped(part)}
 }
 
-func isParameter(part string) bool {
-	return len(part) > len(parameterPrefix) && strings.HasPrefix(part, parameterPrefix)
+func parameterName(part string) (string, bool) {
+	if name, ok := strings.CutPrefix(part, parameterPrefix); ok && name != "" {
+		return name, true
+	}
+	if spans := engine.PlaceholderSpans(part); len(spans) == 1 && spans[0][0] == 0 && spans[0][1] == len(part) {
+		return strings.TrimSpace(part[len(placeholderOpen) : len(part)-len(placeholderOpen)]), true
+	}
+	if inner, ok := strings.CutPrefix(part, templateOpen); ok {
+		name, closed := strings.CutSuffix(inner, templateClose)
+		return name, closed && name != "" && !strings.ContainsAny(name, templateOpen+templateClose)
+	}
+	return "", false
+}
+
+func isTemplated(part string) bool {
+	if len(engine.PlaceholderSpans(part)) > 0 {
+		return true
+	}
+	open := strings.Index(part, templateOpen)
+	return open >= 0 && strings.Contains(part[open:], templateClose)
 }
 
 func unescaped(part string) string {
@@ -125,14 +167,39 @@ func (p pattern) rank() string {
 	return string(rank)
 }
 
-func (p pattern) matches(parts []string) bool {
+func (p pattern) match(parts []string) (map[string]string, bool) {
 	if len(p) != len(parts) {
-		return false
+		return nil, false
 	}
+	var params map[string]string
 	for i, part := range p {
-		if !part.wildcard && part.text != parts[i] {
-			return false
+		if !part.accepts(parts[i]) {
+			return nil, false
 		}
+		if part.name == "" {
+			continue
+		}
+		if params == nil {
+			params = map[string]string{}
+		}
+		params[part.name] = parts[i]
+	}
+	return params, true
+}
+
+func (s segment) accepts(text string) bool {
+	if !s.wildcard {
+		return s.text == text
+	}
+	switch s.kind {
+	case kindInteger:
+		_, err := strconv.ParseInt(text, 10, 64)
+		return err == nil
+	case kindNumber:
+		number, err := strconv.ParseFloat(text, 64)
+		return err == nil && !math.IsNaN(number) && !math.IsInf(number, 0)
+	case kindBoolean:
+		return text == "true" || text == "false"
 	}
 	return true
 }

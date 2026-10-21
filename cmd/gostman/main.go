@@ -93,9 +93,20 @@ mock
   and print each request as it arrives.
 
   --env <name>          environment used to resolve {{variables}} in URLs
+  --openapi <file|url>  also serve the operations of an OpenAPI or Swagger
+                        spec: paths, status codes, headers and example bodies
+                        (alone, it serves only the spec)
   --port <number>       port to listen on (default 4010)
   --delay <ms>          wait before every answer
+  --delay-max <ms>      with --delay, wait a random time between the two
+  --error-rate <pct>    answer this percentage of requests with an error
+  --error-status <code> status of those errors (default 500)
   --cors                allow browser requests from localhost origins
+  --log                 also print each request's headers and body;
+                        credential headers and query values show as ***
+
+  Rules, per-route options and an imported spec saved by the desktop app
+  are read from .gostman/mock.yaml in the workspace folder.
 
 docs
   Write the collection as one self-contained HTML page: every request with its
