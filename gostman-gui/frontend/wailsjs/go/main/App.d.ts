@@ -7,6 +7,7 @@ import {rpc} from '../models';
 import {mcpclient} from '../models';
 import {gitutil} from '../models';
 import {mock} from '../models';
+import {openapi} from '../models';
 
 export function Authorize(arg1:engine.OAuth2,arg2:string):Promise<main.AuthorizationResult>;
 
@@ -98,7 +99,7 @@ export function MockRoutes(arg1:Array<mock.Source>,arg2:string):Promise<Array<mo
 
 export function MockStatus():Promise<main.MockState>;
 
-export function OpenAPI(arg1:any):Promise<any>;
+export function OpenAPI(arg1:openapi.Query):Promise<openapi.Reply>;
 
 export function OpenWorkspace(arg1:string):Promise<main.WorkspaceStatus>;
 

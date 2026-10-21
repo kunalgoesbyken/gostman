@@ -88,7 +88,7 @@ function folderLayers(folders, folderId) {
 }
 
 export function scopeLayers(state, request) {
-  const activeGlobal = findById(state.globalEnvironments, state.activeGlobalEnvironmentId)
+  const activeGlobal = state.isRestricted ? undefined : findById(state.globalEnvironments, state.activeGlobalEnvironmentId)
   const activeEnvironment = findById(state.environments, state.activeEnvironmentId) || state.environments[0]
   return [
     dotEnvLayer(state.dotEnv),

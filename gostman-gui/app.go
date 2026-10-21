@@ -197,8 +197,10 @@ func (a *App) LoadData() (SavedData, error) {
 		return SavedData{}, err
 	}
 	data = withDefaultEnvironment(data)
-	data.Environments = vault.withSecrets(data.Environments)
-	data.Globals = vault.withSecrets(data.Globals)
+	if !data.Restricted {
+		data.Environments = vault.withSecrets(data.Environments, secretScope())
+		data.Globals = vault.withSecrets(data.Globals, globalSecretScope)
+	}
 	if data.Requests == nil {
 		data.Requests = []Request{}
 	}

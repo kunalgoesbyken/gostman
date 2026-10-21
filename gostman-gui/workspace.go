@@ -286,11 +286,16 @@ func (a *App) SaveCollectionToFolder(path string) (WorkspaceStatus, error) {
 	if err != nil {
 		return WorkspaceStatus{}, err
 	}
+	stripped, secrets := splitSecrets(data.Environments)
+	data.Environments = stripped
 	folder, err := workspace.Create(chosen, toFileCollection(data))
 	if errors.Is(err, workspace.ErrNotEmpty) {
 		return WorkspaceStatus{}, errors.New(occupiedFolder)
 	}
 	if err != nil {
+		return WorkspaceStatus{}, err
+	}
+	if err := vault.keep(folder.Root(), secrets); err != nil {
 		return WorkspaceStatus{}, err
 	}
 	store := folderStore{folder: folder}

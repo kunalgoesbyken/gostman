@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -213,8 +214,8 @@ func (v *secretVault) reconcile(scope string, wanted map[string]bool) error {
 	return v.writeIndex(index)
 }
 
-func secretKey(environmentId, name string) string {
-	return environmentId + "/" + name
+func secretKey(scope, environmentId, name string) string {
+	return url.PathEscape(scope) + "/" + url.PathEscape(environmentId) + "/" + url.PathEscape(name)
 }
 
 type secretFlags map[string]struct {
@@ -287,9 +288,16 @@ func plainString(raw json.RawMessage) string {
 	return string(raw)
 }
 
-func (v *secretVault) withoutSecrets(environments []Environment, scope string) ([]Environment, error) {
-	wanted := map[string]bool{}
+type secretEntry struct {
+	environmentId string
+	name          string
+	value         string
+	known         bool
+}
+
+func splitSecrets(environments []Environment) ([]Environment, []secretEntry) {
 	stripped := make([]Environment, len(environments))
+	var entries []secretEntry
 	for i, environment := range environments {
 		stripped[i] = environment
 		flags := parseMeta(environment.Meta)
@@ -303,28 +311,44 @@ func (v *secretVault) withoutSecrets(environments []Environment, scope string) (
 				kept = append(kept, pair)
 				continue
 			}
-			key := secretKey(environment.Id, pair.name)
-			wanted[key] = true
-			if err := v.set(key, plainString(pair.value)); err != nil {
-				return nil, fmt.Errorf("secret %q could not be stored: %w", pair.name, err)
-			}
+			entries = append(entries, secretEntry{environmentId: environment.Id, name: pair.name, value: plainString(pair.value), known: true})
 		}
 		if len(kept) != len(pairs) {
 			stripped[i].Variables = writePairs(kept)
 		}
 		for name, flag := range flags {
 			if flag.Secret {
-				wanted[secretKey(environment.Id, name)] = true
+				entries = append(entries, secretEntry{environmentId: environment.Id, name: name})
 			}
 		}
 	}
-	if err := v.reconcile(scope, wanted); err != nil {
+	return stripped, entries
+}
+
+func (v *secretVault) keep(scope string, entries []secretEntry) error {
+	wanted := map[string]bool{}
+	for _, entry := range entries {
+		key := secretKey(scope, entry.environmentId, entry.name)
+		wanted[key] = true
+		if !entry.known {
+			continue
+		}
+		if err := v.set(key, entry.value); err != nil {
+			return fmt.Errorf("secret %q could not be stored: %w", entry.name, err)
+		}
+	}
+	return v.reconcile(scope, wanted)
+}
+
+func (v *secretVault) withoutSecrets(environments []Environment, scope string) ([]Environment, error) {
+	stripped, entries := splitSecrets(environments)
+	if err := v.keep(scope, entries); err != nil {
 		return nil, err
 	}
 	return stripped, nil
 }
 
-func (v *secretVault) withSecrets(environments []Environment) []Environment {
+func (v *secretVault) withSecrets(environments []Environment, scope string) []Environment {
 	filled := make([]Environment, len(environments))
 	for i, environment := range environments {
 		filled[i] = environment
@@ -347,7 +371,7 @@ func (v *secretVault) withSecrets(environments []Environment) []Environment {
 			if !flags[name].Secret || present[name] {
 				continue
 			}
-			value, _ := v.get(secretKey(environment.Id, name))
+			value, _ := v.get(secretKey(scope, environment.Id, name))
 			encoded, _ := json.Marshal(value)
 			pairs = append(pairs, orderedPair{name, encoded})
 			added = true
