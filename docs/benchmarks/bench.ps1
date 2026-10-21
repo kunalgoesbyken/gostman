@@ -228,6 +228,7 @@ $meta = [ordered]@{
   Timestamp = (Get-Date).ToString('o'); CPU = $cpu; RAM_GB = $ram; WindowsBuild = $os.BuildNumber
   Disk = $disk; WebView2 = $wv2; Runs = $Runs; SettleSeconds = $SettleSeconds
 }
+if (-not (Test-Path $OutDir)) { New-Item -ItemType Directory -Force -Path $OutDir | Out-Null }
 $jsonPath = Join-Path $OutDir "results-$stamp.json"
 [pscustomobject]@{ Machine = $meta; Results = $results } | ConvertTo-Json -Depth 5 | Set-Content -Path $jsonPath -Encoding utf8
 
