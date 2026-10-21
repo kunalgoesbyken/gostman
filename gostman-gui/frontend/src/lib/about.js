@@ -1,7 +1,8 @@
 import { isDesktopApp } from './platform'
+import { WEB_APP_URL } from './constants'
 
 export const ABOUT_LINKS = [
-  { id: 'website', url: 'https://gostman.vercel.app' },
+  { id: 'website', url: WEB_APP_URL },
   { id: 'source', url: 'https://github.com/kunalgoesbyken/gostman' },
   { id: 'releases', url: 'https://github.com/kunalgoesbyken/gostman/releases' },
   { id: 'issues', url: 'https://github.com/kunalgoesbyken/gostman/issues' },

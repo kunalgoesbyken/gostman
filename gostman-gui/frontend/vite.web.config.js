@@ -5,6 +5,7 @@ import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { createHash } from 'crypto'
 import { readFileSync, writeFileSync } from 'fs'
+import { siteDefine, siteMeta } from './site.config.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -67,7 +68,7 @@ function stampServiceWorker() {
 const appVersion = JSON.parse(readFileSync(resolve(__dirname, '../wails.json'), 'utf8')).info.productVersion
 
 export default defineConfig({
-  define: { __APP_VERSION__: JSON.stringify(appVersion) },
+  define: { __APP_VERSION__: JSON.stringify(appVersion), ...siteDefine },
   plugins: [
     react(),
     nodePolyfills({
@@ -81,6 +82,7 @@ export default defineConfig({
     serveWebEntryInDev('index-web.html'),
     renameHtmlEntry('index-web.html', 'index.html'),
     stampServiceWorker(),
+    siteMeta(),
   ],
   build: {
     outDir: 'dist-web',

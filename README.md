@@ -36,6 +36,18 @@ Both are good tools. Gostman exists for people who want the paid-tier workflow w
 
 Prices and plans change, so check Bruno's and Postman's own pages before you decide. A side-by-side table is on [gostman.vercel.app](https://gostman.vercel.app).
 
+## Quick start
+
+- **Browser:** open [gostman.vercel.app/web](https://gostman.vercel.app/web), paste a URL and press Send.
+- **Desktop:** download the installer from the [Install](#install) table and open it.
+- **Command line:** send a request from a terminal, or run a collection you saved to a folder in the app.
+
+```bash
+go install github.com/kunalgoesbyken/gostman/cmd/gostman@latest
+gostman send GET https://example.com -H 'Accept: text/html'
+gostman run path/to/collection
+```
+
 ## Features
 
 **Requests**
