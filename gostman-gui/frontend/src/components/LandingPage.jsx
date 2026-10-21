@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState, useEffect, useRef } from "react"
-import { motion, useReducedMotion } from "framer-motion"
+import { LazyMotion, m, useReducedMotion } from "framer-motion"
 import { Button, buttonVariants } from "./ui/button"
 import { cn } from "../lib/utils"
 import { popIn } from "../lib/motion"
@@ -20,6 +20,8 @@ import { ProductShowcase } from "./landing/ProductShowcase"
 import { BackgroundCode } from "./landing/BackgroundCode"
 import { DownloadDropdown } from "./landing/DownloadDropdown"
 import { MountOnVisible } from "./landing/MountOnVisible"
+
+const loadMotionFeatures = () => import("../lib/motionFeatures").then((module) => module.default)
 
 const EverythingSection = lazy(() => import("./landing/EverythingSection"))
 
@@ -219,7 +221,7 @@ export function LandingPage({ onGetStarted }) {
   })
 
   return (
-    <>
+    <LazyMotion features={loadMotionFeatures} strict>
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
@@ -235,7 +237,7 @@ export function LandingPage({ onGetStarted }) {
 
         <BackgroundCode />
 
-        <motion.nav
+        <m.nav
           className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-6 px-6"
           initial={reduceMotion ? false : { y: -100 }}
           animate={{ y: 0 }}
@@ -243,7 +245,7 @@ export function LandingPage({ onGetStarted }) {
         >
           <div className="max-w-5xl w-full backdrop-blur-xl bg-background/75 border border-border/40 rounded-2xl shadow-md">
             <div className="px-5 py-3 flex items-center justify-between">
-              <motion.div
+              <m.div
                 className="flex items-center gap-2.5"
                 initial={reduceMotion ? false : { opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -255,8 +257,8 @@ export function LandingPage({ onGetStarted }) {
                   className="h-8 w-8 rounded-md"
                 />
                 <span className="font-medium text-sm">Gostman</span>
-              </motion.div>
-              <motion.div
+              </m.div>
+              <m.div
                 className="flex items-center gap-2"
                 initial={reduceMotion ? false : { opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -271,22 +273,22 @@ export function LandingPage({ onGetStarted }) {
                   <Github className="h-4 w-4" aria-hidden="true" />
                   <span className="font-medium">Star</span>
                   {stars !== null ? (
-                    <motion.span
+                    <m.span
                       className="font-mono text-xs text-muted-foreground"
                       {...(reduceMotion ? {} : popIn)}
                       key={stars}
                       aria-live="polite"
                     >
                       {stars.toLocaleString()}
-                    </motion.span>
+                    </m.span>
                   ) : isLoading ? (
                     <div className="h-4 w-8 bg-muted/20 animate-pulse rounded" />
                   ) : null}
                 </a>
-              </motion.div>
+              </m.div>
             </div>
           </div>
-        </motion.nav>
+        </m.nav>
 
         <section ref={heroRef} className="relative pt-36 pb-16 px-6">
           <div className="max-w-4xl mx-auto">
@@ -442,6 +444,6 @@ export function LandingPage({ onGetStarted }) {
           </div>
         </footer>
       </div>
-    </>
+    </LazyMotion>
   )
 }

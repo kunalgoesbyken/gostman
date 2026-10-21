@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence, m } from "framer-motion"
 import { easeSmooth, springLayout } from "../../lib/motion"
 import { cn } from "../../lib/utils"
 import graphqlShot from "../../assets/landing/graphql.png"
@@ -66,7 +66,7 @@ function ViewTab({ view, isActive, onSelect }) {
         isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
       )}
     >
-      {isActive && <motion.span layoutId="activeShowcaseTab" className="absolute inset-0 -z-10 rounded-md bg-muted" transition={springLayout} />}
+      {isActive && <m.span layoutId="activeShowcaseTab" className="absolute inset-0 -z-10 rounded-md bg-muted" transition={springLayout} />}
       {view.label}
     </button>
   )
@@ -113,7 +113,7 @@ export function ProductShowcase() {
         className="mt-6 aspect-[1240/760] overflow-hidden rounded-lg border border-border/60 bg-background"
       >
         <AnimatePresence mode="wait" initial={false}>
-          <motion.img
+          <m.img
             key={active.id}
             src={active.image}
             alt={active.alt}
