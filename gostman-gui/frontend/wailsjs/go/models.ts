@@ -168,6 +168,7 @@ export namespace deeplink {
 	
 	export class Reply {
 	    file: importer.File;
+	    host?: string;
 	    error?: string;
 	
 	    static createFrom(source: any = {}) {
@@ -177,6 +178,7 @@ export namespace deeplink {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.file = this.convertValues(source["file"], importer.File);
+	        this.host = source["host"];
 	        this.error = source["error"];
 	    }
 	
