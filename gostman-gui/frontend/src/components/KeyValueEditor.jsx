@@ -1,7 +1,7 @@
 import { X } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
-import { Input } from "./ui/input"
+import { VariableInput } from "./VariableInput"
 import { PanelBody, SectionLabel } from "./ui/panel"
 import { Select } from "./ui/select"
 import { FileField } from "./FileField"
@@ -37,7 +37,7 @@ function ValueCell({ row, label, onChange }) {
     return <FileField fileName={row.fileName} data={row.data} onChange={onChange} />
   }
   return (
-    <Input
+    <VariableInput
       value={row.value}
       title={row.value}
       placeholder={label}
@@ -58,7 +58,7 @@ function Row({ row, columns, typed, isDraft, keyLabel, valueLabel, onChange, onR
         onChange={(event) => onChange({ enabled: event.target.checked })}
         className={cn(isDraft && "invisible")}
       />
-      <Input
+      <VariableInput
         value={row.key}
         title={row.key}
         placeholder={keyLabel}

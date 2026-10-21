@@ -50,6 +50,7 @@ function RawBody({ body, bodyType, editorPath, onChange, EditorComponent }) {
           onChange={(event) => onChange(event.target.value)}
           language={lookup(EDITOR_LANGUAGES, bodyType) || PLAIN_TEXT_LANGUAGE}
           path={editorPath}
+          variables
           height="100%"
         />
       </Suspense>

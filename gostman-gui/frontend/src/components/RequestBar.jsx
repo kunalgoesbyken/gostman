@@ -3,6 +3,7 @@ import { Code, Save, Send, X } from "lucide-react"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Select } from "./ui/select"
+import { VariableInput } from "./VariableInput"
 import { HTTP_METHODS, METHOD_COLORS } from "../lib/constants"
 import { lookup } from "../lib/dataUtils"
 import { shortcutLabel } from "../lib/platform"
@@ -70,7 +71,7 @@ export const RequestBar = memo(function RequestBar({
         </Select>
 
         <div className="min-w-0 flex-1">
-          <Input
+          <VariableInput
             placeholder="Enter a URL or paste a curl command"
             value={activeRequest.url}
             title={activeRequest.url}
