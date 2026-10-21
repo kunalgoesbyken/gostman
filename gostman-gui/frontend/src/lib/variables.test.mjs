@@ -26,3 +26,10 @@ test("openReference and completion", () => {
   assert.deepEqual(applyCompletion(text, ref, 4, "base_url"), { text: "{{base_url}}/x", caret: 12 })
   assert.equal(openReference("{{a}} b", 7), null)
 })
+
+test("secret masking uses the shared sensitive-name list", () => {
+  for (const name of ["pwd", "bearer", "db_credential", "sessionId", "apiKey", "x-signature"]) {
+    assert.ok(looksSecret(name), name)
+  }
+  assert.ok(!looksSecret("base_url"))
+})

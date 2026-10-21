@@ -1,11 +1,12 @@
+import { isSensitiveName } from "./sensitiveNames.js"
+
 const TOKEN = /\{\{\s*([^{}]*?)\s*\}\}/g
 const OPEN_REFERENCE = /\{\{\s*([\w.-]*)$/
-const SECRET_NAME = /token|secret|key|password|auth/i
 
 export const MASKED_VALUE = "••••••••"
 export const MAX_SUGGESTIONS = 50
 
-export const looksSecret = (name) => SECRET_NAME.test(name)
+export const looksSecret = isSensitiveName
 
 export function findReferences(text) {
   return Array.from(text.matchAll(TOKEN), (match) => ({
