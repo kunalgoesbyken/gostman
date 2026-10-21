@@ -1,9 +1,9 @@
 import { AiButton } from "./AiButton"
+import { MarkdownField } from "./MarkdownField"
 import { Checkbox } from "./ui/checkbox"
 import { Field } from "./ui/field"
 import { Input } from "./ui/input"
 import { PanelBody } from "./ui/panel"
-import { Textarea } from "./ui/textarea"
 import { SSE_SETTINGS_TEXT } from "../lib/sse"
 
 const DEFAULT_TIMEOUT_MS = 30000
@@ -80,12 +80,13 @@ export function SettingsPanel({ options, description, onChange, onDescriptionCha
             </Field>
           </>
         )}
-        <Field label="Description">
-          <Textarea
+        <Field label="Description" grouped>
+          <MarkdownField
             value={description}
-            onChange={(event) => onDescriptionChange(event.target.value)}
-            placeholder="What this request does, shown in generated documentation"
-            rows={3}
+            onChange={onDescriptionChange}
+            placeholder="What this request does (Markdown), shown in generated documentation"
+            rows={4}
+            label="Description"
             className="font-sans"
           />
         </Field>

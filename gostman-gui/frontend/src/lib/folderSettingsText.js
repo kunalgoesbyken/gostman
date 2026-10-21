@@ -18,7 +18,7 @@ export const FOLDER_SETTINGS_TEXT = {
   postScript: "After the response",
   scriptNote: "Collection scripts run first and the request's own last before sending; after the response the order is reversed. Scripts run only in trusted folders.",
   testsNote: "Assertions here run after every response in this folder, in addition to the request's own.",
-  docsNote: "Markdown shown in generated documentation.",
+  docsNote: "Markdown shown in generated documentation. HTML is never rendered.",
   docsPlaceholder: "Describe what this folder is for.",
   inherit: "Inherit",
   noAuth: "No auth",

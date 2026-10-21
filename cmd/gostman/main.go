@@ -125,6 +125,8 @@ docs
   --output <file>       write the page to this file (default: stdout)
   --title <text>        page title (default: API documentation)
   --no-examples         leave out the saved example responses
+  --playground          add a "Try it" panel to each request that sends it from the
+                        reader's browser; secrets are left empty for the reader
 
 capture
   Forward every request sent to 127.0.0.1 on to one API and print each

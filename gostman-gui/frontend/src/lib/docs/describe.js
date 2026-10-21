@@ -24,7 +24,7 @@ const IN_QUERY = 'query'
 const AUTHORIZATION = 'Authorization'
 const CONTENT_TYPE = 'Content-Type'
 const BEARER_PREFIX = 'Bearer'
-const ACCESS_TOKEN = '<access token>'
+export const ACCESS_TOKEN = '<access token>'
 const JSON_CONTENT = 'application/json'
 const UNTITLED_REQUEST = 'Untitled request'
 const OBJECT_FIELDS = ['auth', 'options']
@@ -150,9 +150,14 @@ const CURL_BUILDERS = {
   ),
 }
 
-export function curlExample(request) {
+export function exchangeOf(request) {
   const build = lookup(CURL_BUILDERS, protocolOf(request))
-  return build ? curlCommand(build(request)) : ''
+  return build ? build(request) : null
+}
+
+export function curlExample(request) {
+  const exchange = exchangeOf(request)
+  return exchange ? curlCommand(exchange) : ''
 }
 
 function variableSources(request) {

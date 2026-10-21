@@ -44,7 +44,7 @@ export function maskHeader(row) {
 
 export const maskParameter = (row) => (isSensitiveName(row.key) ? { ...row, value: maskSecret(row.value) } : row)
 
-const UNPARSED_BODY = '<redacted: not valid JSON, so it cannot be checked for secrets>'
+export const UNPARSED_BODY = '<redacted: not valid JSON, so it cannot be checked for secrets>'
 
 const isSensitiveKey = (key) => key !== undefined && isSensitiveName(key)
 
