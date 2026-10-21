@@ -20,7 +20,7 @@ type span struct {
 
 func childNodes(parent ast.Node) []span {
 	var found []span
-	collectNodes(reflect.ValueOf(parent).Elem(), &found)
+	eachChild(parent, func(node ast.Node) { found = appendSpan(found, node) })
 	sort.SliceStable(found, func(a, b int) bool { return found[a].start < found[b].start })
 	return disjoint(found)
 }
@@ -36,7 +36,7 @@ func disjoint(sorted []span) []span {
 	return kept
 }
 
-func collectNodes(value reflect.Value, found *[]span) {
+func collectNodes(value reflect.Value, emit func(ast.Node)) {
 	if value.Kind() != reflect.Struct {
 		return
 	}
@@ -44,43 +44,62 @@ func collectNodes(value reflect.Value, found *[]span) {
 		if skippedChildren[value.Type().Field(index).Name] {
 			continue
 		}
-		collectField(value.Field(index), found)
+		collectField(value.Field(index), emit)
 	}
 }
 
-func collectField(field reflect.Value, found *[]span) {
+func collectField(field reflect.Value, emit func(ast.Node)) {
 	switch field.Kind() {
 	case reflect.Slice:
 		for index := 0; index < field.Len(); index++ {
-			collectField(field.Index(index), found)
+			collectField(field.Index(index), emit)
 		}
 	case reflect.Interface:
 		if !field.IsNil() {
-			collectField(field.Elem(), found)
+			collectField(field.Elem(), emit)
 		}
 	case reflect.Pointer:
-		collectPointer(field, found)
+		collectPointer(field, emit)
 	case reflect.Struct:
-		collectEmbedded(field, found)
+		collectEmbedded(field, emit)
 	}
 }
 
-func collectPointer(field reflect.Value, found *[]span) {
+func collectPointer(field reflect.Value, emit func(ast.Node)) {
 	if field.IsNil() || !field.Type().Implements(nodeType) {
 		return
 	}
-	node := field.Interface().(ast.Node)
-	if from, to := int(node.Idx0()), int(node.Idx1()); from > 0 && to >= from {
-		*found = append(*found, span{node: node, start: from - 1, end: to - 1})
-	}
+	emit(field.Interface().(ast.Node))
 }
 
-func collectEmbedded(field reflect.Value, found *[]span) {
+func appendSpan(found []span, node ast.Node) []span {
+	if from, to := int(node.Idx0()), int(node.Idx1()); from > 0 && to >= from {
+		return append(found, span{node: node, start: from - 1, end: to - 1})
+	}
+	return found
+}
+
+func eachChild(parent ast.Node, emit func(ast.Node)) {
+	collectNodes(reflect.ValueOf(parent).Elem(), emit)
+}
+
+func exceedsDepth(node ast.Node, limit int) bool {
+	if limit < 0 {
+		return true
+	}
+	deeper := false
+	eachChild(node, func(child ast.Node) {
+		deeper = deeper || exceedsDepth(child, limit-1)
+	})
+	return deeper
+}
+
+func collectEmbedded(field reflect.Value, emit func(ast.Node)) {
 	if field.CanAddr() && field.Addr().Type().Implements(nodeType) {
-		collectPointer(field.Addr(), found)
+		collectPointer(field.Addr(), emit)
 		return
 	}
-	collectNodes(field, found)
+	collectNodes(field, emit)
 }
 
 type chain struct {

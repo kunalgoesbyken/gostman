@@ -13,7 +13,11 @@ const (
 	scriptPrefix = "(async function(){\n"
 	scriptSuffix = "\n})"
 	postmanRoot  = "pm"
-	legacyRoot   = "postman"
+
+	maxScriptBytes = 1 << 20
+	maxNesting     = 200
+	maxTreeDepth   = 1500
+	legacyRoot     = "postman"
 )
 
 type scriptNote struct {
@@ -35,13 +39,26 @@ type translator struct {
 	translated int
 	failed     int
 	aliases    []string
+	depth      int
+	truncated  bool
 	async      []bool
 	declared   map[string]bool
 	needs      map[string]bool
 	noted      map[string]bool
 }
 
-func translatePostmanScript(source string) scriptTranslation {
+func translatePostmanScript(source string) (result scriptTranslation) {
+	defer func() {
+		if recover() != nil {
+			result = scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: messageScriptInternal}}, failed: 1}
+		}
+	}()
+	if len(source) > maxScriptBytes {
+		return scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: fmt.Sprintf(messageScriptTooLarge, maxScriptBytes>>10)}}, failed: 1}
+	}
+	if nestingDepth(source) > maxNesting {
+		return scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: messageScriptTooDeep}}, failed: 1}
+	}
 	program, err := parser.ParseFile(nil, "", scriptPrefix+source+scriptSuffix, 0)
 	if err != nil {
 		return scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: messageScriptSyntax}}, failed: 1}
@@ -50,9 +67,15 @@ func translatePostmanScript(source string) scriptTranslation {
 	if body == nil {
 		return scriptTranslation{text: source}
 	}
+	if exceedsDepth(body, maxTreeDepth) {
+		return scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: messageScriptTooDeep}}, failed: 1}
+	}
 	t := &translator{source: source, wrapped: scriptPrefix + source + scriptSuffix, async: []bool{true}, declared: map[string]bool{}, needs: map[string]bool{}, noted: map[string]bool{}}
 	t.collectDeclared(body)
 	text := t.splice(len(scriptPrefix), len(scriptPrefix)+len(source), childNodes(body))
+	if t.truncated {
+		return scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: messageScriptTooDeep}}, failed: 1}
+	}
 	return scriptTranslation{text: t.withRequires(text), notes: t.sortedNotes(), translated: t.translated, failed: t.failed}
 }
 
@@ -116,6 +139,8 @@ func (t *translator) splice(from, to int, children []span) string {
 }
 
 func (t *translator) raw(from, to int) string {
+	from = max(0, min(from, len(t.wrapped)))
+	to = max(from, min(to, len(t.wrapped)))
 	return t.wrapped[from:to]
 }
 
@@ -135,6 +160,12 @@ func (t *translator) renderChildren(node ast.Node, skip func(ast.Node) bool) str
 }
 
 func (t *translator) render(node ast.Node) string {
+	t.depth++
+	defer func() { t.depth-- }()
+	if t.depth > maxTreeDepth {
+		t.truncated = true
+		return t.text(node)
+	}
 	switch current := node.(type) {
 	case *ast.CallExpression:
 		return t.renderCall(current)
@@ -333,7 +364,7 @@ func (t *translator) collectDeclared(root ast.Node) {
 			t.declareTarget(current.Rest)
 		}
 	}
-	visit(root, declare)
+	visit(root, declare, 0)
 }
 
 func (t *translator) declareIdentifier(identifier *ast.Identifier) {
@@ -350,13 +381,16 @@ func (t *translator) declareTarget(target ast.Node) {
 		if identifier, ok := node.(*ast.Identifier); ok {
 			t.declared[string(identifier.Name)] = true
 		}
-	})
+	}, 0)
 }
 
-func visit(node ast.Node, run func(ast.Node)) {
+func visit(node ast.Node, run func(ast.Node), depth int) {
+	if depth > maxTreeDepth {
+		return
+	}
 	run(node)
 	for _, child := range childNodes(node) {
-		visit(child.node, run)
+		visit(child.node, run, depth+1)
 	}
 }
 

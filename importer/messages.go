@@ -37,4 +37,7 @@ const (
 	messageScriptMore          = "Postman %s, %s: %d more lines need attention."
 	messageScriptTotals        = "Postman scripts in %q: %d pm.* uses translated, %d need rewriting."
 	messageSecretVariables     = "Environment %q has secret variables (%s). They are marked secret; check their values before sharing."
+	messageScriptInternal      = "The script could not be translated and was kept unchanged."
+	messageScriptTooLarge      = "The script is larger than %d KB and was kept unchanged."
+	messageScriptTooDeep       = "The script nests too deeply to translate and was kept unchanged."
 )
