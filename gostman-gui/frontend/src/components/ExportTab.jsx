@@ -2,9 +2,12 @@ import { useEffect, useMemo, useState } from "react"
 import { Download } from "lucide-react"
 import { CopyTextButton } from "./CopyTextButton"
 import { DEFAULT_DOCS_OPTIONS, DocsOptions } from "./DocsOptions"
+import { ScanNotice } from "./ScanNotice"
 import { Button } from "./ui/button"
 import { SegmentedControl } from "./ui/segmented"
+import { useSecretScan } from "../hooks/useSecretScan"
 import { pluralize } from "../lib/dataUtils"
+import { SCAN_TEXT } from "../lib/scanText"
 import { buildDocs } from "../lib/docs"
 import { EXPORT_TEXT } from "../lib/importText"
 import {
@@ -115,8 +118,10 @@ function buildExport(format, data) {
   }
 }
 
-export function ExportTab({ requests, folders, environments, variables, settings, importer, onSaveFile, onSaveBase64 }) {
+export function ExportTab({ requests, folders, environments, variables, settings, importer, scan, onGoToRequest, onSaveFile, onSaveBase64 }) {
   const [formatId, setFormatId] = useState(EXPORT_FORMATS[0].value)
+  const scanned = useMemo(() => ({ requests, folders, environments, settings }), [requests, folders, environments, settings])
+  const scanState = useSecretScan(scan, scanned, false)
   const [docsOptions, setDocsOptions] = useState(DEFAULT_DOCS_OPTIONS)
   const [includeSecrets, setIncludeSecrets] = useState(false)
 
@@ -161,6 +166,8 @@ export function ExportTab({ requests, folders, environments, variables, settings
       <p className="shrink-0 text-xs text-muted-foreground">
         {format.description}. This workspace has {pluralize(requests.length, "request")}, {pluralize(folders.length, "folder")} and {pluralize(environments.length, "environment")}.
       </p>
+
+      <ScanNotice state={scanState} advice={SCAN_TEXT.foundExport} onGoToRequest={onGoToRequest} />
 
       {error ? (
         <p role="alert" className="text-xs text-destructive [overflow-wrap:anywhere]">Could not build the export: {error}</p>

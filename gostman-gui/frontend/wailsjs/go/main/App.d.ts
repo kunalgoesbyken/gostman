@@ -12,6 +12,7 @@ import {mock} from '../models';
 import {openapi} from '../models';
 import {secrets} from '../models';
 import {workspace} from '../models';
+import {scan} from '../models';
 
 export function AiCancel(arg1:string):Promise<void>;
 
@@ -180,6 +181,8 @@ export function SaveSecretConnection(arg1:main.SecretConnection):Promise<void>;
 export function SaveSettings(arg1:main.Settings):Promise<void>;
 
 export function SaveWindowTheme(arg1:string):Promise<void>;
+
+export function ScanSecrets(arg1:scan.Query):Promise<scan.Reply>;
 
 export function ScriptModules():Promise<Record<string, string>>;
 

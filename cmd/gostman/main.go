@@ -21,6 +21,7 @@ const (
   gostman mock [workspace folder] [flags]
   gostman docs <workspace folder | export.json> [flags]
   gostman capture --upstream <url> [flags]
+  gostman scan <workspace folder | export.json> [flags]
   gostman init [folder]
   gostman import <file | folder> --out <workspace folder> [flags]
   gostman export <workspace folder> --format <format> --out <path>
@@ -139,6 +140,19 @@ capture
                         Authorization, Cookie and Proxy-Authorization request
                         headers are never saved
 
+scan
+  Look for credentials typed into a Gostman workspace folder or a Gostman,
+  Postman or other supported export: well-known token formats, random-looking
+  values in fields named like a credential, and literal passwords or tokens in
+  auth settings. Values that are {{variables}} or placeholders are ignored.
+  Findings show at most the first 4 characters of a value, never the value.
+
+  --reporter <format>   text or json (default text)
+  --fail-on <level>     high, medium or none (default medium): the lowest
+                        severity that makes the command exit with status 1
+  --skip-examples       leave out saved example responses, which are scanned
+                        by default because they can hold real tokens
+
 init
   Create an empty workspace in the folder (default: the current folder) and
   print how to register the MCP server with a coding agent.
@@ -164,8 +178,8 @@ export
                         placeholders and re-import as empty variables
 
 Exit codes:
-  0  every request and test passed
-  1  a request or a test failed
+  0  every request and test passed (scan: nothing at or above --fail-on)
+  1  a request or a test failed (scan: a finding at or above --fail-on)
   2  the command or the input is wrong
 `
 )
@@ -198,6 +212,8 @@ func dispatch(arguments []string, stdout, stderr *os.File) int {
 		return docsCommand(arguments[1:], stdout, stderr)
 	case "capture":
 		return captureCommand(arguments[1:], stdout, stderr)
+	case "scan":
+		return scanCommand(arguments[1:], stdout, stderr)
 	case "import":
 		return importCommand(arguments[1:], stdout, stderr)
 	case "export":

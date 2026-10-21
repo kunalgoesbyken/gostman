@@ -9,6 +9,7 @@ import { countActiveRequests, sanitizeImport, withoutActiveRequests } from './im
 import { pluralize } from './dataUtils'
 import { createExampleActions } from './exampleActions'
 import { createImporterClient } from './importerClient'
+import { createScanClient } from './scanClient'
 import { RESTRICTED, applyExtractors, createExecutor } from './execution'
 import { introspectionRequest, readSchema } from './graphqlSchema'
 import { clearToken, obtainToken } from './oauth'
@@ -421,6 +422,7 @@ export function createWorkspaceActions(backend) {
     share: () => store().openImportDialog(SHARE_TAB),
     runCollection: () => store().openRunner(),
     cookies: () => store().openCookiesDialog(),
+    scanSecrets: () => store().openScanDialog(),
     examples: examples.open,
     mockServer: mock.open,
     captureTraffic: capture.open,
@@ -472,6 +474,11 @@ export function createWorkspaceActions(backend) {
     importShared,
     openapi,
     importer,
+    scan: createScanClient(backend),
+    goToRequest: (requestId) => {
+      const request = store().requests.find((candidate) => candidate.id === requestId)
+      if (request) store().openRequestTab(request)
+    },
     shareFolder: (folderId) => store().openImportDialog(SHARE_TAB, folderId),
     shareLinkBase: clientUrl(backend.webAppUrl),
     download,

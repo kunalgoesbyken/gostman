@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Download } from "lucide-react"
 import { CopyTextButton } from "./CopyTextButton"
+import { ScanNotice } from "./ScanNotice"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Field } from "./ui/field"
@@ -8,8 +9,10 @@ import { Input } from "./ui/input"
 import { SegmentedControl } from "./ui/segmented"
 import { Select } from "./ui/select"
 import { Textarea } from "./ui/textarea"
+import { useSecretScan } from "../hooks/useSecretScan"
 import { buildCollectionTree, listFolders, ROOT_ID } from "../lib/collectionTree"
 import { formatSize, pluralize } from "../lib/dataUtils"
+import { SCAN_TEXT } from "../lib/scanText"
 import {
   MAX_LINK_FRAGMENT_LENGTH, MIN_PASSPHRASE_LENGTH, SHARE_FILE_EXTENSION,
   createShare, fitsInLink, fragmentLength, shareFileText, shareKey, shareLink,
@@ -119,7 +122,7 @@ function FileOutput({ share, usesPassphrase, onSaveFile }) {
   )
 }
 
-export function ShareTab({ requests, folders, environments, settings, initialFolderId, linkBase, onSaveFile }) {
+export function ShareTab({ requests, folders, environments, settings, initialFolderId, linkBase, scan, onGoToRequest, onSaveFile }) {
   const [folderId, setFolderId] = useState(initialFolderId)
   const [includeVariables, setIncludeVariables] = useState(false)
   const [includeExamples, setIncludeExamples] = useState(false)
@@ -136,9 +139,14 @@ export function ShareTab({ requests, folders, environments, settings, initialFol
   const text = useMemo(() => JSON.stringify(exported), [exported])
   const literalCount = useMemo(() => countLiteralCredentials([...selection.requests, ...selection.folders]), [selection])
 
+  const scanState = useSecretScan(scan, selection, false)
+  const [reviewedReport, setReviewedReport] = useState(null)
+  const hasFindings = (scanState.report?.findings.length ?? 0) > 0
+  const isHeld = scanState.isScanning || (hasFindings && reviewedReport !== scanState.report)
+
   const usesPassphrase = protection === PROTECT_PASSPHRASE
   const isEmpty = selection.requests.length === 0 && selection.folders.length === 0
-  const isReady = !isEmpty && (!usesPassphrase || passphrase.length >= MIN_PASSPHRASE_LENGTH)
+  const isReady = !isEmpty && !isHeld && (!usesPassphrase || passphrase.length >= MIN_PASSPHRASE_LENGTH)
   const { share, error } = useCreatedShare(text, usesPassphrase ? passphrase : "", isReady)
 
   return (
@@ -183,6 +191,11 @@ export function ShareTab({ requests, folders, environments, settings, initialFol
         </p>
       )}
 
+      <ScanNotice state={scanState} advice={SCAN_TEXT.foundShare} onGoToRequest={onGoToRequest}>
+        {isHeld && !scanState.isScanning && (
+          <Button size="sm" onClick={() => setReviewedReport(scanState.report)}>{SCAN_TEXT.shareAnyway}</Button>
+        )}
+      </ScanNotice>
       {isEmpty && <p role="status" className={NOTE_CLASS}>There is nothing to share here yet.</p>}
       {error && <p role="alert" className="text-xs text-destructive [overflow-wrap:anywhere]">{error}</p>}
       {share && delivery === SEND_LINK && <LinkOutput share={share} linkBase={linkBase} usesPassphrase={usesPassphrase} />}
