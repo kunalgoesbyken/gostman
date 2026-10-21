@@ -10,12 +10,14 @@ import { TabBar } from "./TabBar"
 import { RequestTabs } from "./RequestTabs"
 import { Button } from "./ui/button"
 import { EmptyState } from "./ui/emptyState"
+import { WelcomePanel } from "./WelcomePanel"
 import { selectActiveVariables, selectIsDialogOpen, selectResolvedVariables, useActiveTab, useAppStore } from "../store/appStore"
 import { useAutoSave } from "../hooks/useAutoSave"
 import { useRequestFieldHandlers } from "../hooks/useRequestFieldHandlers"
 import { useShortcuts } from "../hooks/useShortcuts"
 import { useCaptureStore } from "../lib/captureSession"
 import { MIN_REQUEST_HEIGHT_PX } from "../lib/layout"
+import { isBlankRequest } from "../lib/requestChanges"
 import { forgetSharedLink, pendingSharedLink, subscribeToSharedLink } from "../lib/sharedLink"
 import { exportableVariables, withoutSecretValues } from "../lib/variableScopes"
 import { createWorkspaceActions } from "../lib/workspaceActions"
@@ -210,10 +212,17 @@ function LoadedWorkspace({ backend, onBack }) {
   const closeSettingsDialog = useAppStore((s) => s.closeSettingsDialog)
   const openCommandPalette = useAppStore((s) => s.openCommandPalette)
   const isSidebarOpen = useAppStore((s) => s.isSidebarOpen)
+  const welcomeVisible = useAppStore((s) => s.welcomeVisible)
+  const hideWelcome = useAppStore((s) => s.hideWelcome)
 
   const activeTab = useActiveTab()
   const activeRequest = activeTab.request
   const isLoading = activeTab.pendingId !== null
+  const showsWelcome = welcomeVisible && isBlankRequest(activeRequest) && activeTab.response === null && !isLoading
+
+  useEffect(() => {
+    if (welcomeVisible && !showsWelcome) hideWelcome()
+  }, [welcomeVisible, showsWelcome, hideWelcome])
 
   const actions = useMemo(() => createWorkspaceActions(backend), [backend])
   const resolvedVariables = useAppStore(selectResolvedVariables)
@@ -275,7 +284,7 @@ function LoadedWorkspace({ backend, onBack }) {
             loading={isLoading}
           />
 
-          <div className="response-split flex min-h-0 flex-1 flex-col overflow-hidden">
+          {showsWelcome ? <WelcomePanel actions={actions} onDismiss={hideWelcome} /> : <div className="response-split flex min-h-0 flex-1 flex-col overflow-hidden">
             <section aria-label="Request" className="flex min-h-0 flex-1 flex-col" style={REQUEST_AREA_STYLE}>
               <RequestTabs
                 tabId={activeTab.id}
@@ -302,7 +311,7 @@ function LoadedWorkspace({ backend, onBack }) {
               onDownload={actions.download}
               onSaveExample={actions.examples.saveResponse}
             />
-          </div>
+          </div>}
         </main>
       </div>
 

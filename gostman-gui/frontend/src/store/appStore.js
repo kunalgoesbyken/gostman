@@ -9,6 +9,7 @@ import { normalizeRequest } from '../lib/request'
 import { isBlankRequest } from '../lib/requestChanges'
 import { reconcileTabs } from '../lib/tabReconcile'
 import { promptLayer, resolveLayers, scopeLayers, variableText } from '../lib/variableScopes'
+import { isWelcomeDismissed, rememberWelcomeDismissed } from '../lib/welcome'
 import { NO_WORKSPACE, enterWorkspace, leaveWorkspace, persistableSessions, restoreSessions } from './workspaceSessions'
 
 const HISTORY_LIMIT = 50
@@ -198,6 +199,7 @@ export const useAppStore = create(
         workspaceStatus: NO_WORKSPACE,
         workspaceSessions: {},
         workspaceMenuOpen: false,
+        welcomeVisible: !isWelcomeDismissed(),
         requestPanel: DEFAULT_REQUEST_PANEL,
         codeDialogOpen: false,
         codeSnippets: null,
@@ -251,6 +253,11 @@ export const useAppStore = create(
         enterWorkspace: (status) => set((state) => enterWorkspace(state, status, () => ({
           tabs: [FIRST_TAB], activeTabId: FIRST_TAB.id, nextTabId: 2, requests: [],
         }))),
+        showWelcome: () => set((state) => ({ ...appendTab(state, {}), welcomeVisible: true, commandPaletteOpen: false })),
+        hideWelcome: () => {
+          rememberWelcomeDismissed()
+          set({ welcomeVisible: false })
+        },
         adoptWorkspaceStatus: (status) => set({ workspaceStatus: status }),
         leaveWorkspace: (path) => set((state) => leaveWorkspace(state, path)),
         setWorkspaceMenuOpen: (workspaceMenuOpen) => set({ workspaceMenuOpen, commandPaletteOpen: false }),

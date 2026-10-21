@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
-  Bookmark, Clock, Folder, FolderOpen, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Plus, Radio, RotateCcw, Save, Search, Send,
+  Bookmark, Clock, Hand, Folder, FolderOpen, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Plus, Radio, RotateCcw, Save, Search, Send,
   Server, Settings, Share2, SlidersHorizontal, Undo2, Upload, X,
 } from "lucide-react"
 import { MethodTag } from "../MethodTag"
 import { fuzzyScore } from "../../lib/fuzzy"
 import { PREFERENCES_TEXT } from "../../lib/preferencesText"
+import { WELCOME_TEXT } from "../../lib/welcomeText"
 import { WORKSPACE_TEXT } from "../../lib/workspaceText"
 import { useShortcutLabel } from "../../hooks/useShortcuts"
 import { cn } from "../../lib/utils"
@@ -32,6 +33,7 @@ const COMMANDS = [
   { id: "export", label: "Export data", description: "Export collections and environments", icon: Download, action: "export" },
   { id: "share", label: "Share collection", description: "Create an encrypted link or file, no account needed", icon: Share2, action: "share" },
   { id: "clear-history", label: "Clear history", description: "Delete every history entry", icon: History, action: "clearHistory" },
+  { id: "welcome", label: WELCOME_TEXT.commandTitle, description: WELCOME_TEXT.commandDescription, icon: Hand, action: "showWelcome" },
   { id: "reset", label: "Reset app", description: "Delete all data and reload", icon: RotateCcw, action: "reset", destructive: true },
 ]
 

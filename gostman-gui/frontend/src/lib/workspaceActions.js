@@ -14,6 +14,7 @@ import { isMcpRequest } from './mcp'
 import { createMockActions } from './mockServer'
 import { getPreferences } from './preferences'
 import { normalizeRequest } from './request'
+import { SAMPLE_REQUEST } from './welcome'
 import { isRequestDirty } from './requestChanges'
 import { bodyBase64, downloadName, mimeType } from './response'
 import { keepingOwnVariables } from './shareContent'
@@ -384,6 +385,7 @@ export function createWorkspaceActions(backend) {
     findRequest: () => store().openCommandPalette('requests'),
     newFolder: () => createFolder(),
     clearHistory,
+    showWelcome: () => store().showWelcome(),
     switchEnvironment: (environmentId) => store().setActiveEnvironment(environmentId),
     workspaceSwitcher: () => storageActions?.openSwitcher(),
     openFolder: () => storageActions?.openFolder(),
@@ -451,6 +453,10 @@ export function createWorkspaceActions(backend) {
     cancel: () => cancelTab(activeTab()),
     reset: confirmReset,
     openImport: () => store().openImportDialog(),
+    sendSample: () => {
+      store().openRequestTab(normalizeRequest(SAMPLE_REQUEST))
+      return send()
+    },
     runCommand: (action, payload) => commands[action]?.(payload),
     newRequest: (folderId) => store().newTab(folderId),
     openRequest: (request) => store().openRequestTab(request),
