@@ -1,3 +1,4 @@
+import { AiButton } from "./AiButton"
 import { Checkbox } from "./ui/checkbox"
 import { Field } from "./ui/field"
 import { Input } from "./ui/input"
@@ -10,7 +11,7 @@ const CHECKBOX_CLASS = "h-7 justify-start self-start"
 
 const toWholeNumber = (text) => Math.max(0, Math.trunc(Number(text)) || 0)
 
-export function SettingsPanel({ options, description, onChange, onDescriptionChange }) {
+export function SettingsPanel({ options, description, onChange, onDescriptionChange, onDocument }) {
   const update = (patch) => onChange({ ...options, ...patch })
 
   return (
@@ -88,6 +89,7 @@ export function SettingsPanel({ options, description, onChange, onDescriptionCha
             className="font-sans"
           />
         </Field>
+        <AiButton label="Write the description with AI" onClick={onDocument} className="self-start" />
       </div>
     </PanelBody>
   )

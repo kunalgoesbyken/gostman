@@ -34,6 +34,7 @@ import {
   WorkspaceStatus,
 } from '../../../wailsjs/go/main/App'
 import { WEB_APP_URL } from '../constants'
+import { desktopAi } from './desktopAi'
 import { desktopCapture } from './desktopCapture'
 import { desktopGit } from './desktopGit'
 import { desktopMock } from './desktopMock'
@@ -108,6 +109,7 @@ export const desktopBackend = {
     saveSettings: (settings) => SaveSettings(settings),
     pickFile: (title) => PickFile(title),
   },
+  ai: desktopAi,
   mock: desktopMock,
   secrets: desktopSecrets,
   capture: desktopCapture,

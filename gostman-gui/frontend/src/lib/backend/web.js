@@ -1,3 +1,4 @@
+import { webAi } from '../ai/webAi'
 import { base64ToBytes } from '../base64'
 import { openBrowserSocket, unsentBrowserHeaders } from './browserSocket'
 import { isPlainObject } from '../dataUtils'
@@ -259,6 +260,7 @@ export const webBackend = {
   saveCollectionSettings,
   saveCookies,
   network: null,
+  ai: webAi,
   mock: null,
   secrets: null,
   capture: null,

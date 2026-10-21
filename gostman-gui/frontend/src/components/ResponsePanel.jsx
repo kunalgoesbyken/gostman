@@ -3,9 +3,10 @@ import { JsonView, darkStyles } from 'react-json-view-lite'
 import 'react-json-view-lite/dist/index.css'
 import {
   AlertTriangle, BookmarkPlus, Check, ChevronDown, ChevronUp, Cookie, Copy, Download, FileDigit, FileText, FileX, List, Loader2,
-  Maximize2, Minimize2, Scissors, Search,
+  Maximize2, Minimize2, Scissors, Search, Sparkles,
 } from "lucide-react"
 import { ConsolePanel } from "./ConsolePanel"
+import { AiButton } from "./AiButton"
 import { FilterBar, SearchBar } from "./ResponseSearchBar"
 import { HighlightedText } from "./HighlightedText"
 import { useDebouncedValue } from "../hooks/useDebouncedValue"
@@ -23,6 +24,7 @@ import { VisualizeTab } from "./VisualizeTab"
 import { TimelineTab } from "./TimelineTab"
 import { useClipboardCopy } from "../hooks/useClipboardCopy"
 import { formatSize, lookup } from "../lib/dataUtils"
+import { isFailedResponse } from "../lib/ai/tasks"
 import { canSaveAsExample } from "../lib/examples"
 import { breakdownTitle } from "../lib/timeline"
 import { MIN_REQUEST_HEIGHT_PX, MIN_RESPONSE_HEIGHT_PX, TOOLBAR_HEIGHT_PX } from "../lib/layout"
@@ -200,9 +202,9 @@ function ResponseBody({ response, kind, view, json, filtered, highlight }) {
   return <MediaPreview response={response} kind={kind} />
 }
 
-function ErrorBody({ response }) {
+function ErrorBody({ response, onExplain }) {
   const title = lookup(ERROR_TITLES, response.error) || 'Request failed'
-  return <EmptyState icon={AlertTriangle} title={title} description={response.body} />
+  return <EmptyState icon={AlertTriangle} title={title} description={response.body} action={<AiButton label="Explain this error with AI" onClick={onExplain} />} />
 }
 
 function StatusSummary({ response }) {
@@ -262,7 +264,7 @@ function panelStyleFor(isFullscreen, isCollapsed, panelShare) {
   return { flex: `0 1 ${panelShare}%`, minHeight: MIN_RESPONSE_HEIGHT_PX }
 }
 
-export const ResponsePanel = memo(function ResponsePanel({ response, tests, loading, onDownload, onSaveExample }) {
+export const ResponsePanel = memo(function ResponsePanel({ response, tests, loading, onDownload, onSaveExample, onExplain }) {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [activeTab, setActiveTab] = useState(TAB_BODY)
@@ -335,7 +337,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
     if (loading) return <EmptyState icon={Loader2} title="Sending request" description="Waiting for the server to answer." />
     if (!shown) return <EmptyState icon={FileText} title="No response yet" description="Send a request to see the response here." />
     if (activeTab === TAB_TIMELINE && hasTimeline) return <TimelineTab timeline={shown.timeline} />
-    if (shown.error) return <ErrorBody response={shown} />
+    if (shown.error) return <ErrorBody response={shown} onExplain={onExplain} />
     if (activeTab === TAB_TESTS && showsTests) return <TestResults tests={tests} />
     if (activeTab === TAB_CONSOLE) return <ConsolePanel />
     if (activeTab === TAB_VISUALIZE && tests?.visualization) return <VisualizeTab html={tests.visualization} />
@@ -413,6 +415,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
               )}
               {showsBody && copyText && <CopyButton text={copyText} />}
               {hasBody && <IconButton label="Download body" icon={Download} onClick={onDownload} />}
+              {isFailedResponse(shown) && !shown.error && <IconButton label="Explain with AI" icon={Sparkles} onClick={onExplain} />}
               {canSaveAsExample(shown) && <IconButton label="Save as example" icon={BookmarkPlus} onClick={onSaveExample} />}
               <IconButton
                 label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}

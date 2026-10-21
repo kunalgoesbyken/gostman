@@ -15,6 +15,8 @@ import { useAutoSave } from "../hooks/useAutoSave"
 import { useRequestFieldHandlers } from "../hooks/useRequestFieldHandlers"
 import { useShortcuts } from "../hooks/useShortcuts"
 import { useCaptureStore } from "../lib/captureSession"
+import { useAiStore } from "../lib/ai/session"
+import { TASK_EXPLAIN, TASK_REQUEST } from "../lib/ai/tasks"
 import { MIN_REQUEST_HEIGHT_PX } from "../lib/layout"
 import { forgetSharedLink, pendingSharedLink, subscribeToSharedLink } from "../lib/sharedLink"
 import { exportableVariables, withoutSecretValues } from "../lib/variableScopes"
@@ -32,6 +34,8 @@ const SpecViewer = lazy(() => import("./SpecViewer").then((module) => ({ default
 const SpecSyncDialog = lazy(() => import("./SpecSyncDialog").then((module) => ({ default: module.SpecSyncDialog })))
 const FolderSettings = lazy(() => import("./FolderSettings").then((module) => ({ default: module.FolderSettings })))
 const RunnerDialog = lazy(() => import("./RunnerDialog").then((module) => ({ default: module.RunnerDialog })))
+const AiDialog = lazy(() => import("./AiDialog").then((module) => ({ default: module.AiDialog })))
+const AiSettingsDialog = lazy(() => import("./AiSettingsDialog").then((module) => ({ default: module.AiSettingsDialog })))
 const MonacoEditor = lazy(() => import("./MonacoEditor").then((module) => ({ default: module.MonacoEditor })))
 
 const ENVIRONMENT_SAVE_DELAY_MS = 400
@@ -58,6 +62,8 @@ const createShortcutHandlers = (actions) => {
     previousTab: () => store().cycleTab(-1),
     toggleSidebar: () => store().toggleSidebar(),
     focusSidebarSearch,
+    aiGenerate: () => actions.ai.start(TASK_REQUEST),
+    aiExplain: () => actions.ai.start(TASK_EXPLAIN),
   }
   for (let position = 1; position <= 9; position += 1) handlers[`tab${position}`] = () => store().activateTabAt(position)
   return handlers
@@ -190,7 +196,10 @@ function LoadedWorkspace({ backend, onBack }) {
   const collectionSettings = useAppStore((s) => s.collectionSettings)
   const closeFolderSettings = useAppStore((s) => s.closeFolderSettings)
   const captureDialogOpen = useCaptureStore((s) => s.isOpen)
-  const isDialogOpen = useAppStore(selectIsDialogOpen) || captureDialogOpen
+  const aiDialog = useAiStore((s) => s.dialog !== null)
+  const aiSettingsOpen = useAiStore((s) => s.settingsOpen)
+  const aiDialogOpen = aiDialog || aiSettingsOpen
+  const isDialogOpen = useAppStore(selectIsDialogOpen) || captureDialogOpen || aiDialogOpen
   const sharedLink = useSyncExternalStore(subscribeToSharedLink, pendingSharedLink)
 
   const setActiveTab = useAppStore((s) => s.setActiveTab)
@@ -297,6 +306,7 @@ function LoadedWorkspace({ backend, onBack }) {
               loading={isLoading}
               onDownload={actions.download}
               onSaveExample={actions.examples.saveResponse}
+              onExplain={() => actions.ai.start(TASK_EXPLAIN)}
             />
           </div>
         </main>
@@ -335,6 +345,8 @@ function LoadedWorkspace({ backend, onBack }) {
         {specDialog?.mode === "view" && <SpecViewer dialog={specDialog} actions={actions.openapi} onClose={closeSpecDialog} />}
         {specDialog?.mode === "sync" && <SpecSyncDialog dialog={specDialog} link={specLinks[specDialog.folderId]} actions={actions.openapi} onClose={closeSpecDialog} />}
         {folderSettings && <FolderSettings backend={backend} scope={folderSettings} EditorComponent={MonacoEditor} onClose={closeFolderSettings} />}
+        {aiDialog && <AiDialog actions={actions.ai} />}
+        {aiSettingsOpen && <AiSettingsDialog actions={actions.ai} />}
         {runner.isOpen && <RunnerDialog runner={runner} folders={folders} requests={requests} actions={actions} />}
       </Suspense>
 

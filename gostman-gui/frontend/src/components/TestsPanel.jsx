@@ -1,5 +1,6 @@
 import { Suspense, useMemo, useState } from "react"
 import { X } from "lucide-react"
+import { AiButton } from "./AiButton"
 import { IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Input } from "./ui/input"
@@ -10,6 +11,7 @@ import { ROW_GRID, ROW_STACK } from "./KeyValueEditor"
 import {
   BLANK_ASSERTION, OPERATORS, isBlankAssertion, operatorOf, parseAssertions, serializeAssertions,
 } from "../lib/scripting/assertions"
+import { TASK_SCRIPT, TASK_TESTS } from "../lib/ai/tasks"
 import { cn } from "../lib/utils"
 
 const VIEW_ASSERTIONS = "assertions"
@@ -123,14 +125,16 @@ export function ScriptEditor({ value, path, onChange, EditorComponent }) {
   )
 }
 
-export function TestsPanel({ request, editorPath, onUpdateRequest, EditorComponent }) {
+export function TestsPanel({ request, editorPath, onUpdateRequest, EditorComponent, ai }) {
   const [view, setView] = useState(VIEW_ASSERTIONS)
+  const askAi = () => (view === VIEW_ASSERTIONS ? ai.start(TASK_TESTS) : ai.start(TASK_SCRIPT, { scriptKind: view }))
 
   return (
     <Panel>
       <Toolbar>
         <SegmentedControl label="Tests section" options={VIEWS} value={view} onChange={setView} />
         <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground" title={HINTS[view]}>{HINTS[view]}</p>
+        <AiButton label={view === VIEW_ASSERTIONS ? "Generate assertions and tests with AI" : "Generate this script with AI"} onClick={askAi} />
       </Toolbar>
       {view === VIEW_ASSERTIONS ? (
         <AssertionEditor assertions={request.assertions} onChange={(assertions) => onUpdateRequest({ assertions })} />

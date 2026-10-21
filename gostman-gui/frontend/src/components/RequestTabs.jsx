@@ -10,6 +10,7 @@ import { ParamsPanel } from "./ParamsPanel"
 import { SettingsPanel } from "./SettingsPanel"
 import { ExtractPanel } from "./ExtractPanel"
 import { TestsPanel } from "./TestsPanel"
+import { TASK_DOCS } from "../lib/ai/tasks"
 import { BODY_FORM, BODY_MULTIPART, BODY_NONE } from "../lib/body"
 import { parseExtractors } from "../lib/chaining"
 import { parseExamples } from "../lib/examples"
@@ -276,6 +277,7 @@ export const RequestTabs = memo(function RequestTabs({
             editorPath={tabId}
             onUpdateRequest={onUpdateRequest}
             EditorComponent={EditorComponent}
+            ai={actions.ai}
           />
         </TabsContent>
 
@@ -285,6 +287,7 @@ export const RequestTabs = memo(function RequestTabs({
             description={activeRequest.description}
             onChange={(next) => onUpdateRequest({ options: next })}
             onDescriptionChange={(description) => onUpdateRequest({ description })}
+            onDocument={() => actions.ai.start(TASK_DOCS)}
           />
         </TabsContent>
       </div>
