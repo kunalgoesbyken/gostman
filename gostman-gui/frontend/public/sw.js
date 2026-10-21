@@ -2,7 +2,8 @@ const CACHE_PREFIX = 'gostman-shell-'
 const CACHE_NAME = CACHE_PREFIX + '__BUILD_ID__'
 const SHELL_URL = '/'
 const BUILD_ASSETS = __BUILD_ASSETS__
-const PRECACHE = [SHELL_URL, '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', ...BUILD_ASSETS]
+const STATIC_FILES = ['/manifest.webmanifest', '/theme-boot.js', '/favicon-32.png', '/icon-192.png', '/icon-512.png']
+const PRECACHE = [SHELL_URL, ...STATIC_FILES, ...BUILD_ASSETS]
 const API_PREFIX = '/api/'
 const ASSET_PREFIX = '/assets/'
 
@@ -29,6 +30,19 @@ async function cachedAsset(request) {
   return response
 }
 
+async function freshStatic(request) {
+  const cache = await caches.open(CACHE_NAME)
+  try {
+    const response = await fetch(request)
+    if (response.ok) await cache.put(request, response.clone())
+    return response
+  } catch (error) {
+    const cached = await cache.match(request)
+    if (cached) return cached
+    throw error
+  }
+}
+
 async function navigation(request) {
   try {
     const response = await fetch(request)
@@ -51,6 +65,10 @@ self.addEventListener('fetch', (event) => {
   if (!isCacheable(url)) return
   if (request.mode === 'navigate') {
     event.respondWith(navigation(request))
+    return
+  }
+  if (STATIC_FILES.includes(url.pathname)) {
+    event.respondWith(freshStatic(request))
     return
   }
   if (url.pathname.startsWith(ASSET_PREFIX) && !url.pathname.startsWith('/assets/sandbox.worker.')) {
