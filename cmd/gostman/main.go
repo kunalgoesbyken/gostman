@@ -21,6 +21,7 @@ const (
   gostman mock [workspace folder] [flags]
   gostman docs <workspace folder | export.json> [flags]
   gostman capture --upstream <url> [flags]
+  gostman lint <spec file | address> [flags]
   gostman init [folder]
   gostman import <file | folder> --out <workspace folder> [flags]
   gostman export <workspace folder> --format <format> --out <path>
@@ -139,6 +140,17 @@ capture
                         Authorization, Cookie and Proxy-Authorization request
                         headers are never saved
 
+lint
+  Check an OpenAPI 3.x or Swagger 2.0 document (JSON or YAML, a file or an
+  http(s) address) against the built-in rules and print the findings.
+
+  --reporter <format>   text, json or junit (default text)
+  --fail-on <level>     error, warning or none (default error): the lowest
+                        severity that makes the exit status 1
+  --config <file>       rule settings; without it .gostman/lint.yaml in the
+                        current folder is used when it exists. Under "rules:"
+                        give a rule id and error, warning, info or off
+
 init
   Create an empty workspace in the folder (default: the current folder) and
   print how to register the MCP server with a coding agent.
@@ -198,6 +210,8 @@ func dispatch(arguments []string, stdout, stderr *os.File) int {
 		return docsCommand(arguments[1:], stdout, stderr)
 	case "capture":
 		return captureCommand(arguments[1:], stdout, stderr)
+	case "lint":
+		return lintCommand(arguments[1:], stdout, stderr)
 	case "import":
 		return importCommand(arguments[1:], stdout, stderr)
 	case "export":

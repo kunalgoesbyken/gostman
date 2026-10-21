@@ -241,6 +241,7 @@ export const webBackend = {
   prepare: (request, variables) => postForResult('prepare=1', toEngineRequest(request, variables), 'prepared'),
   parseCurl: (command) => postForResult('curl=1', { command }, 'request'),
   openapi: (query) => postJSON(`${PROXY_URL}?openapi=1`, query),
+  lint: (query) => postJSON(`${PROXY_URL}?lint=1`, query),
   openapiPageSize: OPENAPI_PAGE_SIZE,
   importer: (query) => postJSON(`${PROXY_URL}?import=1`, query),
   describeGrpc: (request, variables) => postForResult('grpc=describe', toGrpcTarget(request, variables), 'schema'),

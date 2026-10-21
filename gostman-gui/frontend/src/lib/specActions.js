@@ -110,7 +110,17 @@ export function createSpecActions({ backend, attempt, addImported }) {
 
   const browseFolder = (folderId) => browse(store().specLinks[folderId].source)
 
-  const sendToTab = (detail, variables) => {
+  const lintLatest = () => {
+    const linked = Object.values(store().specLinks).filter((link) => link.source)
+    if (linked.length === 0) {
+      store().showAlert(SPEC_ALERTS.lintTitle, SPEC_TEXT.lintNoSpec)
+      return
+    }
+    const [newest] = linked.sort((a, b) => (b.syncedAt || '').localeCompare(a.syncedAt || ''))
+    store().openSpecDialog({ mode: 'view', source: newest.source, tab: 'lint' })
+  }
+
+  const sendToTab =(detail, variables) => {
     store().mergeActiveVariables(missingVariables(variables))
     store().openRequestTab({ ...detail.request, id: '', folderId: '' })
     store().closeSpecDialog()
@@ -121,6 +131,8 @@ export function createSpecActions({ backend, attempt, addImported }) {
     summary: client.summary,
     operation: client.operation,
     schema: client.schema,
+    lint: client.lint,
+    lintLatest,
     importSpec,
     check,
     apply,

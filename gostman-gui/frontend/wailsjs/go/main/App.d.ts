@@ -8,6 +8,7 @@ import {rpc} from '../models';
 import {mcpclient} from '../models';
 import {gitutil} from '../models';
 import {importer} from '../models';
+import {lint} from '../models';
 import {mock} from '../models';
 import {openapi} from '../models';
 import {secrets} from '../models';
@@ -118,6 +119,8 @@ export function Import(arg1:importer.Query):Promise<importer.Reply>;
 export function InvokeGrpc(arg1:string,arg2:rpc.Call):Promise<engine.Response>;
 
 export function InvokeMcp(arg1:string,arg2:mcpclient.Call):Promise<engine.Response>;
+
+export function LintSpec(arg1:lint.Query):Promise<lint.Reply>;
 
 export function LoadData():Promise<main.SavedData>;
 

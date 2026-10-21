@@ -12,6 +12,7 @@ import (
 	"github.com/kunalgoesbyken/gostman/importer"
 	"github.com/kunalgoesbyken/gostman/mcpclient"
 	"github.com/kunalgoesbyken/gostman/openapi"
+	"github.com/kunalgoesbyken/gostman/openapi/lint"
 	"github.com/kunalgoesbyken/gostman/rpc"
 )
 
@@ -94,6 +95,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, invokeMcp(r))
 	case query.Has("openapi"):
 		writeJSON(w, readOpenAPI(r))
+	case query.Has("lint"):
+		writeJSON(w, lintSpec(r))
 	case query.Has("import"):
 		writeJSON(w, runImport(r))
 	case query.Has("curl"):
@@ -197,6 +200,22 @@ func readOpenAPI(r *http.Request) openapi.Reply {
 	reply := openapi.Handle(r.Context(), query, openapi.Options{Policy: Policy, MaxBytes: maxOpenAPIBytes, MaxRefs: maxOpenAPIRefs})
 	if encoded, err := json.Marshal(reply); err == nil && len(encoded) > maxOpenAPIReplyBytes {
 		return openapi.Reply{Error: "the answer is too large for the web app, so it is read in smaller parts"}
+	}
+	return reply
+}
+
+func lintSpec(r *http.Request) lint.Reply {
+	var query lint.Query
+	if err := json.NewDecoder(r.Body).Decode(&query); err != nil {
+		return lint.Reply{Error: err.Error()}
+	}
+	if query.Source.Text == "" {
+		return lint.Reply{Error: "the web app lints the spec text it is given and does not fetch addresses"}
+	}
+	query.Source = openapi.Source{Text: query.Source.Text}
+	reply := lint.Handle(r.Context(), query, openapi.Options{Policy: Policy, MaxBytes: maxOpenAPIBytes})
+	if encoded, err := json.Marshal(reply); err == nil && len(encoded) > maxOpenAPIReplyBytes {
+		return lint.Reply{Error: "the findings are too many to show in the web app"}
 	}
 	return reply
 }
