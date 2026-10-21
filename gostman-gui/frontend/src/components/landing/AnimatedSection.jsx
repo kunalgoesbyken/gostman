@@ -1,7 +1,5 @@
-import { motion } from "framer-motion"
-import { easeSmooth } from "../../lib/motion"
-
-const ONCE = { once: true, amount: 0.2 }
+import { useRef } from "react"
+import { gsap, useReveal } from "../../lib/landingMotion"
 
 const OFFSETS = {
   up: { y: 40 },
@@ -11,25 +9,22 @@ const OFFSETS = {
 }
 
 export const AnimatedSection = ({ children, className = "", delay = 0, direction = "up" }) => {
-  const variants = {
-    hidden: { opacity: 0, y: 0, x: 0, ...OFFSETS[direction] },
-    visible: {
-      opacity: 1,
-      y: 0,
-      x: 0,
-      transition: { duration: 0.6, delay, ease: easeSmooth },
-    },
-  }
+  const ref = useRef(null)
+
+  useReveal(ref, (element) => {
+    gsap.from(element, {
+      opacity: 0,
+      ...OFFSETS[direction],
+      duration: 0.6,
+      delay,
+      ease: "power2.out",
+      scrollTrigger: { trigger: element, start: "top 85%", once: true },
+    })
+  })
 
   return (
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={ONCE}
-      variants={variants}
-      className={className}
-    >
+    <div ref={ref} className={className}>
       {children}
-    </motion.div>
+    </div>
   )
 }

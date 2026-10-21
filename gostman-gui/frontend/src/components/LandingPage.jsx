@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react"
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 import { Button, buttonVariants } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { cn } from "../lib/utils"
-import { easeSmooth, fadeIn, popIn } from "../lib/motion"
-import { ArrowRight, Check, Github, Globe } from "lucide-react"
+import { popIn } from "../lib/motion"
+import { gsap, useReveal, useSmoothScroll } from "../lib/landingMotion"
+import { ArrowRight, Check, Github, Globe } from "./landing/icons"
 
 import logo from "../assets/logo.jpg"
 import captureShot from "../assets/landing/capture.png"
@@ -13,6 +14,7 @@ import mockShot from "../assets/landing/mock.png"
 import testsShot from "../assets/landing/tests.png"
 
 import { AnimatedSection } from "./landing/AnimatedSection"
+import { SplitHeading, SplitWords } from "./landing/SplitHeading"
 import { AGENT_SESSION, CLI_RUN, REQUEST_FILE } from "./landing/captures"
 import { TerminalBlock } from "./landing/TerminalBlock"
 import { ProductShowcase } from "./landing/ProductShowcase"
@@ -36,6 +38,8 @@ const SPOTLIGHTS = [
       "A runner in the app for a whole folder at once",
     ],
     image: testsShot,
+    width: 864,
+    height: 672,
     alt: "A request with four assertion rows and a passing test list under the response",
   },
   {
@@ -67,6 +71,8 @@ const SPOTLIGHTS = [
       "Also available as gostman mock and to agents over MCP",
     ],
     image: mockShot,
+    width: 767,
+    height: 574,
     alt: "The mock server dialog with a served route and a live request log",
   },
   {
@@ -78,6 +84,8 @@ const SPOTLIGHTS = [
       "In the desktop app and as gostman capture",
     ],
     image: captureShot,
+    width: 896,
+    height: 640,
     alt: "The capture dialog listing five forwarded calls with the response of one shown below",
   },
   {
@@ -89,6 +97,8 @@ const SPOTLIGHTS = [
       "One self-contained HTML file, from the app or gostman docs",
     ],
     image: docsShot,
+    width: 1240,
+    height: 760,
     alt: "A generated documentation page with a sidebar of requests and the details of one",
   },
   {
@@ -170,21 +180,12 @@ const useGitHubStars = () => {
   return { stars, isLoading }
 }
 
-const VIEWPORT_ONCE = { once: true }
-
-const revealUp = (delay) => ({
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: VIEWPORT_ONCE,
-  ...(delay ? { transition: { delay } } : {}),
-})
-
 function Spotlight({ spotlight, isReversed }) {
   return (
     <AnimatedSection delay={0.1}>
       <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-12">
         <div className={cn("lg:col-span-5", isReversed && "lg:order-2")}>
-          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight [text-wrap:balance]">{spotlight.title}</h2>
+          <SplitHeading text={spotlight.title} className="text-2xl md:text-3xl font-semibold tracking-tight [text-wrap:balance]" />
           <p className="mt-4 leading-relaxed text-muted-foreground">{spotlight.description}</p>
           <ul className="mt-6 space-y-3">
             {spotlight.points.map((point) => (
@@ -202,8 +203,11 @@ function Spotlight({ spotlight, isReversed }) {
             <img
               src={spotlight.image}
               alt={spotlight.alt}
+              width={spotlight.width}
+              height={spotlight.height}
               loading="lazy"
-              className="w-full rounded-lg border border-border/60"
+              decoding="async"
+              className="h-auto w-full rounded-lg border border-border/60"
             />
           )}
         </div>
@@ -214,6 +218,21 @@ function Spotlight({ spotlight, isReversed }) {
 
 export function LandingPage({ onGetStarted }) {
   const { stars, isLoading } = useGitHubStars()
+  const reduceMotion = useReducedMotion()
+  const heroRef = useRef(null)
+
+  useSmoothScroll()
+
+  useReveal(heroRef, () => {
+    gsap
+      .timeline({ defaults: { ease: "power3.out" } })
+      .from("[data-intro=badge]", { opacity: 0, y: 12, duration: 0.5 })
+      .from("[data-intro=proof]", { opacity: 0, y: 12, duration: 0.5 }, "<0.05")
+      .from(".split-word", { opacity: 0, y: 28, duration: 0.7, stagger: 0.07 }, "<0.1")
+      .from("[data-intro=lede]", { opacity: 0, y: 16, duration: 0.6 }, "-=0.35")
+      .from("[data-intro=actions]", { opacity: 0, y: 16, duration: 0.5 }, "-=0.4")
+      .from("[data-intro=highlight]", { opacity: 0, y: 10, duration: 0.4, stagger: 0.08 }, "-=0.3")
+  })
 
   return (
     <>
@@ -234,7 +253,7 @@ export function LandingPage({ onGetStarted }) {
 
         <motion.nav
           className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-6 px-6"
-          initial={{ y: -100 }}
+          initial={reduceMotion ? false : { y: -100 }}
           animate={{ y: 0 }}
           transition={{ type: "spring", stiffness: 200, damping: 25 }}
         >
@@ -242,7 +261,7 @@ export function LandingPage({ onGetStarted }) {
             <div className="px-5 py-3 flex items-center justify-between">
               <motion.div
                 className="flex items-center gap-2.5"
-                initial={{ opacity: 0, x: -20 }}
+                initial={reduceMotion ? false : { opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
               >
@@ -255,7 +274,7 @@ export function LandingPage({ onGetStarted }) {
               </motion.div>
               <motion.div
                 className="flex items-center gap-2"
-                initial={{ opacity: 0, x: 20 }}
+                initial={reduceMotion ? false : { opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
               >
@@ -270,7 +289,7 @@ export function LandingPage({ onGetStarted }) {
                   {stars !== null ? (
                     <motion.span
                       className="font-mono text-xs text-muted-foreground"
-                      {...popIn}
+                      {...(reduceMotion ? {} : popIn)}
                       key={stars}
                       aria-live="polite"
                     >
@@ -285,31 +304,16 @@ export function LandingPage({ onGetStarted }) {
           </div>
         </motion.nav>
 
-        <section className="relative pt-36 pb-16 px-6">
+        <section ref={heroRef} className="relative pt-36 pb-16 px-6">
           <div className="max-w-4xl mx-auto">
-            <motion.div
-              className="text-center space-y-6"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: easeSmooth }}
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              >
+            <div className="text-center space-y-6">
+              <div data-intro="badge">
                 <Badge variant="outline" className="px-3 py-1 text-xs font-medium border-border/60 bg-muted/30">
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-success mr-2" />
                   Open source API client
                 </Badge>
-              </motion.div>
+              </div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25, duration: 0.8 }}
-                className="flex justify-center"
-              >
+              <div data-intro="proof" className="flex justify-center">
                 <a href="https://peerlist.io/kunalrc/project/gostman" target="_blank" rel="noreferrer">
                   <img
                     src="https://peerlist.io/api/v1/projects/embed/PRJHA9EGOA6EQB87M3JRKKDPEO8D8M?showUpvote=true&theme=dark"
@@ -317,35 +321,26 @@ export function LandingPage({ onGetStarted }) {
                     style={{ width: "auto", height: "72px" }}
                   />
                 </a>
-              </motion.div>
+              </div>
 
-              <motion.h1
+              <h1
+                aria-label="Test any API. No account. No cloud."
                 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.1]"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.8 }}
               >
-                <span className="block">Test any API.</span>
-                <span className="block mt-2 text-muted-foreground">
-                  No account. No cloud.
-                </span>
-              </motion.h1>
+                <SplitWords className="block" text="Test any API." />
+                <SplitWords className="block mt-2 text-muted-foreground" text="No account. No cloud." />
+              </h1>
 
-              <motion.p
+              <p
+                data-intro="lede"
                 className="text-lg md:text-xl text-muted-foreground/90 max-w-2xl mx-auto leading-relaxed"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                style={{ willChange: "transform, opacity" }}
-                transition={{ delay: 0.5, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               >
-Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. One collection for you, your CI pipeline and your coding agent, kept as files on your machine.
-              </motion.p>
+                Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. One collection for you, your CI pipeline and your coding agent, kept as files on your machine.
+              </p>
 
-              <motion.div
+              <div
+                data-intro="actions"
                 className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-6"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
               >
                 <DownloadDropdown />
                 <Button
@@ -358,28 +353,17 @@ Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. One coll
                   Try the web version
                   <ArrowRight className="h-4 w-4" />
                 </Button>
-              </motion.div>
+              </div>
 
-              <motion.div
-                className="flex items-center justify-center gap-6 pt-6 text-sm text-muted-foreground/80"
-                {...fadeIn}
-                transition={{ delay: 0.8 }}
-              >
-                {HIGHLIGHTS.map((text, i) => (
-                  <motion.div
-                    key={text}
-                    className="flex items-center gap-2"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.8 + i * 0.1 }}
-                  >
+              <div className="flex items-center justify-center gap-6 pt-6 text-sm text-muted-foreground/80">
+                {HIGHLIGHTS.map((text) => (
+                  <div key={text} data-intro="highlight" className="flex items-center gap-2">
                     <Check className="h-3.5 w-3.5 text-success/70" />
                     <span>{text}</span>
-                  </motion.div>
+                  </div>
                 ))}
-              </motion.div>
-
-            </motion.div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -402,9 +386,10 @@ Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. One coll
         <section className="relative py-20 px-6">
           <div className="max-w-6xl mx-auto">
             <AnimatedSection className="mb-10 max-w-xl" delay={0.1}>
-              <h2 className="text-3xl md:text-4xl font-semibold tracking-tight [text-wrap:balance]">
-                And the rest of what an API client should do
-              </h2>
+              <SplitHeading
+                text="And the rest of what an API client should do"
+                className="text-3xl md:text-4xl font-semibold tracking-tight [text-wrap:balance]"
+              />
             </AnimatedSection>
 
             <AnimatedSection delay={0.2}>
@@ -428,16 +413,14 @@ Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. One coll
           <div className="max-w-3xl mx-auto">
             <AnimatedSection delay={0.1}>
               <div className="border-t border-border/40 pt-20 text-center">
-                <motion.h2 className="text-3xl md:text-4xl font-semibold mb-4" {...revealUp()}>
-                  Send your first request in a minute
-                </motion.h2>
-                <motion.p className="text-muted-foreground mb-8 max-w-lg mx-auto" {...revealUp(0.1)}>
+                <SplitHeading
+                  text="Send your first request in a minute"
+                  className="text-3xl md:text-4xl font-semibold mb-4"
+                />
+                <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
                   Download the desktop app for Windows, macOS or Linux, or open the web version now. There is nothing to sign up for.
-                </motion.p>
-                <motion.div
-                  className="flex flex-col sm:flex-row items-center justify-center gap-4"
-                  {...revealUp(0.2)}
-                >
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <DownloadDropdown />
                   <Button
                     size="lg"
@@ -448,7 +431,7 @@ Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. One coll
                     <Globe className="h-4 w-4" />
                     Try the web version
                   </Button>
-                </motion.div>
+                </div>
               </div>
             </AnimatedSection>
           </div>
@@ -456,10 +439,7 @@ Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. One coll
 
         <footer className="border-t border-border/40 bg-muted/10 py-16 px-6">
           <div className="max-w-6xl mx-auto">
-            <motion.div
-              className="flex flex-col md:flex-row items-center justify-between gap-8"
-              {...revealUp()}
-            >
+            <AnimatedSection className="flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="flex items-center gap-3">
                 <img
                   src={logo}
@@ -493,19 +473,13 @@ Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. One coll
                   Report an issue
                 </a>
               </div>
-            </motion.div>
+            </AnimatedSection>
 
-            <motion.div
-              className="mt-12 pt-8 border-t border-border/40 text-center"
-              initial={fadeIn.initial}
-              whileInView={fadeIn.animate}
-              viewport={VIEWPORT_ONCE}
-              transition={{ delay: 0.2 }}
-            >
+            <AnimatedSection className="mt-12 pt-8 border-t border-border/40 text-center" delay={0.2}>
               <p className="text-sm text-muted-foreground/60">
                 Gostman is open source under the MIT license.
               </p>
-            </motion.div>
+            </AnimatedSection>
           </div>
         </footer>
       </div>

@@ -1,4 +1,4 @@
-import { Check, Copy } from "lucide-react"
+import { Check, Copy } from "./icons"
 import { useClipboardCopy } from "../../hooks/useClipboardCopy"
 import { cn } from "../../lib/utils"
 

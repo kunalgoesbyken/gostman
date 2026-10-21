@@ -1,7 +1,7 @@
 
 import React, { useState } from "react"
 import { Button } from "../ui/button"
-import { Download, ChevronDown } from "lucide-react"
+import { Download, ChevronDown } from "./icons"
 import { AppleIcon, WindowsIcon, LinuxIcon } from "../Icons"
 
 const RELEASE_URL = "https://github.com/kunalgoesbyken/gostman/releases/latest/download"
