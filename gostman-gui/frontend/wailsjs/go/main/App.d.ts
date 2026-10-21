@@ -8,6 +8,7 @@ import {mcpclient} from '../models';
 import {gitutil} from '../models';
 import {mock} from '../models';
 import {openapi} from '../models';
+import {secrets} from '../models';
 import {workspace} from '../models';
 
 export function Authorize(arg1:engine.OAuth2,arg2:string):Promise<main.AuthorizationResult>;
@@ -29,6 +30,8 @@ export function ClearMockLog():Promise<void>;
 export function CloseWorkspace():Promise<main.WorkspaceStatus>;
 
 export function DeleteRequest(arg1:string):Promise<void>;
+
+export function DeleteSecretConnection(arg1:string):Promise<void>;
 
 export function DescribeGrpc(arg1:rpc.Target):Promise<rpc.Schema>;
 
@@ -122,6 +125,8 @@ export function ReloadWorkspace():Promise<main.WorkspaceStatus>;
 
 export function ResetData():Promise<void>;
 
+export function ResolveSecretReferences(arg1:Record<string, secrets.Ref>):Promise<Record<string, string>>;
+
 export function SaveCollectionSettings(arg1:workspace.Settings):Promise<void>;
 
 export function SaveCollectionToFolder(arg1:string):Promise<main.WorkspaceStatus>;
@@ -144,7 +149,13 @@ export function SaveRequests(arg1:Array<main.Request>):Promise<Array<main.Reques
 
 export function SaveScopes(arg1:Array<main.Environment>,arg2:string,arg3:string):Promise<void>;
 
+export function SaveSecretConnection(arg1:main.SecretConnection):Promise<void>;
+
 export function SaveSettings(arg1:main.Settings):Promise<void>;
+
+export function SecretConnections():Promise<Array<main.SecretConnection>>;
+
+export function SecretKinds():Promise<Array<secrets.KindInfo>>;
 
 export function SendRequest(arg1:string,arg2:engine.Request):Promise<engine.Response>;
 
@@ -157,6 +168,8 @@ export function StopCapture():Promise<void>;
 export function StopMock():Promise<void>;
 
 export function StreamRequest(arg1:string,arg2:engine.Request):Promise<engine.Response>;
+
+export function TestSecretReference(arg1:secrets.Ref):Promise<number>;
 
 export function TrustWorkspace():Promise<void>;
 
