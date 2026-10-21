@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+import { lazy, Suspense, useState, useEffect, useRef } from "react"
 import { motion, useReducedMotion } from "framer-motion"
 import { Button, buttonVariants } from "./ui/button"
 import { cn } from "../lib/utils"
@@ -19,6 +19,10 @@ import { TerminalBlock } from "./landing/TerminalBlock"
 import { ProductShowcase } from "./landing/ProductShowcase"
 import { BackgroundCode } from "./landing/BackgroundCode"
 import { DownloadDropdown } from "./landing/DownloadDropdown"
+import { MountOnVisible } from "./landing/MountOnVisible"
+
+const PremiumFeatures = lazy(() => import("./landing/PremiumFeatures"))
+const ComparisonSection = lazy(() => import("./landing/ComparisonSection"))
 
 const REPOSITORY = "kunalgoesbyken/gostman"
 const REPOSITORY_URL = `https://github.com/${REPOSITORY}`
@@ -364,6 +368,12 @@ export function LandingPage({ onGetStarted }) {
           </div>
         </section>
 
+        <MountOnVisible>
+          <Suspense fallback={null}>
+            <PremiumFeatures />
+          </Suspense>
+        </MountOnVisible>
+
         <section className="relative py-20 px-6">
           <div className="max-w-6xl mx-auto">
             <AnimatedSection className="mb-10 max-w-xl" delay={0.1}>
@@ -389,6 +399,12 @@ export function LandingPage({ onGetStarted }) {
             </AnimatedSection>
           </div>
         </section>
+
+        <MountOnVisible>
+          <Suspense fallback={null}>
+            <ComparisonSection />
+          </Suspense>
+        </MountOnVisible>
 
         <section className="relative pb-20 px-6">
           <div className="max-w-3xl mx-auto">
