@@ -1,4 +1,5 @@
 import { lookup } from '../dataUtils'
+import { isSensitiveName } from '../sensitiveNames'
 
 export const REDACTED = '<redacted>'
 
@@ -34,12 +35,6 @@ const HEADER_MASKS = {
   cookie: maskCookies,
 }
 
-const SENSITIVE_WORDS = ['auth', 'cookie', 'credential', 'key', 'passw', 'secret', 'session', 'signature', 'token']
-
-const isSensitiveName = (name) => {
-  const lowered = name.toLowerCase()
-  return SENSITIVE_WORDS.some((word) => lowered.includes(word))
-}
 
 export function maskHeader(row) {
   const name = row.key.trim()

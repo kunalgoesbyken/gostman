@@ -1,0 +1,22 @@
+.gm-var-ok,
+.gm-var-missing {
+  border-radius: 2px;
+}
+
+.gm-var-ok {
+  background: hsl(var(--success) / 0.16);
+  box-shadow: 0 1px 0 hsl(var(--success) / 0.7);
+}
+
+.gm-var-missing {
+  background: hsl(var(--warning) / 0.16);
+  box-shadow: 0 1px 0 hsl(var(--warning) / 0.8);
+}
+
+.gm-var-ok.gm-var-monaco {
+  color: hsl(var(--success)) !important;
+}
+
+.gm-var-missing.gm-var-monaco {
+  color: hsl(var(--warning)) !important;
+}
