@@ -244,10 +244,19 @@ func ValidPath(path string) (string, error) {
 		return "", fmt.Errorf("%q is not a path inside the folder", path)
 	}
 	clean := filepath.ToSlash(filepath.Clean(filepath.FromSlash(slashed)))
-	if clean == ".git" || strings.HasPrefix(clean, ".git/") || strings.Contains(strings.ToLower(clean), "/.git/") {
-		return "", errors.New("files inside .git cannot be used")
+	for _, segment := range strings.Split(clean, "/") {
+		if isGitDirName(segment) {
+			return "", errors.New("files inside .git cannot be used")
+		}
 	}
 	return clean, nil
+}
+
+var shortGitName = regexp.MustCompile(`^git~[0-9]+$`)
+
+func isGitDirName(segment string) bool {
+	normalized := strings.ToLower(strings.TrimRight(segment, ". "))
+	return normalized == ".git" || shortGitName.MatchString(normalized) || strings.HasPrefix(normalized, ".git:")
 }
 
 var revisionPattern = regexp.MustCompile(`^[0-9a-f]{4,64}$`)
