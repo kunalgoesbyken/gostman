@@ -1,6 +1,7 @@
 import { buildCollectionTree, collectRequests } from './collectionTree'
 import { isPlainObject, parseJSON } from './dataUtils'
 import { iterationCount, iterationVariables } from './runData'
+import { createFlowFollower } from './runFlow'
 import { isSocketAddress } from './socketSessions'
 import { selectActiveVariables, useAppStore } from '../store/appStore'
 
@@ -13,7 +14,9 @@ const pause = (milliseconds) => new Promise((resolve) => setTimeout(resolve, mil
 
 const identify = ({ id, name, method, url }) => ({ id, name, method, url })
 
-const skipped = (request, reason) => ({ ...identify(request), skipped: reason, tests: [], hasFailed: false })
+const flagged = (result, problem) => ({ ...result, error: [result.error, problem].filter(Boolean).join('\n'), hasFailed: true })
+
+const skipped = (request, reason, flow = { action: '' }) => ({ ...identify(request), skipped: reason, tests: [], logs: [], flow, hasFailed: false })
 
 function capture(request, response) {
   const isBinary = response.bodyEncoding === BASE64
@@ -42,6 +45,9 @@ function summarize(request, { response, tests }, iteration) {
     error: response.error ? response.body : tests.error,
     durationMs: response.durationMs,
     tests: tests.results,
+    logs: tests.logs,
+    visualization: tests.visualization,
+    flow: tests.flow,
     hasFailed: Boolean(response.error) || tests.error !== '' || failures.length > 0,
     exchange: capture(request, response),
   }
@@ -64,17 +70,21 @@ export function createRunner(backend, execute) {
     run.sendIds.add(sendId)
     const outcome = await execute(request, sendId)
     run.sendIds.delete(sendId)
+    if (outcome.skipped) return skipped(request, outcome.skipped, outcome.tests.flow)
     return summarize(request, outcome, iteration)
   }
 
   async function runIteration(run, requests, iteration, options) {
     const queue = [...requests]
     const workers = Math.min(Math.max(options.parallel, 1), queue.length)
+    const follow = createFlowFollower(run, requests, queue, workers > 1)
     const lanes = Array.from({ length: workers }, async () => {
       while (queue.length > 0 && !run.isStopped && !run.isHalted) {
         const request = queue.shift()
-        const result = await runOne(run, request, iteration)
+        const outcome = await runOne(run, request, iteration)
         if (run.isStopped) return
+        const problem = follow(outcome.flow)
+        const result = problem ? flagged(outcome, problem) : outcome
         store().addRunResult(result)
         if (options.stopOnFailure && result.hasFailed) run.isHalted = true
         if (options.delayMs > 0 && !run.isHalted) await pause(options.delayMs)

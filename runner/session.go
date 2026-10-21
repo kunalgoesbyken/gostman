@@ -112,6 +112,9 @@ func (s *Session) Run(ctx context.Context, stored Collection, options Options, o
 		return Report{}, err
 	}
 	s.state.variables = layered(append(base, s.state.variables)...)
+	if err := s.state.learn(planned.library); err != nil {
+		return Report{}, err
+	}
 	started := time.Now()
 	results := s.state.runAll(ctx, planned, options, observe)
 	report := Report{

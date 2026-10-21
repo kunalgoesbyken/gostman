@@ -5,6 +5,7 @@ import {
   AlertTriangle, BookmarkPlus, Check, ChevronDown, ChevronUp, Cookie, Copy, Download, FileDigit, FileText, FileX, List, Loader2,
   Maximize2, Minimize2, Scissors, Search,
 } from "lucide-react"
+import { ConsolePanel } from "./ConsolePanel"
 import { FilterBar, SearchBar } from "./ResponseSearchBar"
 import { HighlightedText } from "./HighlightedText"
 import { useDebouncedValue } from "../hooks/useDebouncedValue"
@@ -17,6 +18,7 @@ import { Notice, SectionLabel, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { TabCount, Tabs, TabsList, TabsTrigger } from "./ui/tabs"
 import { TestResults, countPassed, hasTestOutput } from "./TestResults"
+import { VisualizeTab } from "./VisualizeTab"
 import { useClipboardCopy } from "../hooks/useClipboardCopy"
 import { formatSize, lookup } from "../lib/dataUtils"
 import { canSaveAsExample } from "../lib/examples"
@@ -32,6 +34,8 @@ const TAB_BODY = 'body'
 const TAB_HEADERS = 'headers'
 const TAB_COOKIES = 'cookies'
 const TAB_TESTS = 'tests'
+const TAB_CONSOLE = 'console'
+const TAB_VISUALIZE = 'visualize'
 const NO_VALUE = '—'
 const SEARCH_DEBOUNCE_MS = 200
 const NO_FILTER = { active: false }
@@ -323,6 +327,8 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
     if (!shown) return <EmptyState icon={FileText} title="No response yet" description="Send a request to see the response here." />
     if (shown.error) return <ErrorBody response={shown} />
     if (activeTab === TAB_TESTS && showsTests) return <TestResults tests={tests} />
+    if (activeTab === TAB_CONSOLE) return <ConsolePanel />
+    if (activeTab === TAB_VISUALIZE && tests?.visualization) return <VisualizeTab html={tests.visualization} />
     if (activeTab === TAB_HEADERS) {
       if (headers.length === 0) return <EmptyState icon={List} title="No headers" description="The server sent no headers." />
       return <DataTable columns={HEADER_COLUMNS} rows={headers} />
@@ -375,6 +381,8 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
                     Tests<TabCount>{countPassed(tests.results)}/{tests.results.length}</TabCount>
                   </TabsTrigger>
                 )}
+                <TabsTrigger value={TAB_CONSOLE}>Console</TabsTrigger>
+                {tests?.visualization && <TabsTrigger value={TAB_VISUALIZE}>Visualize</TabsTrigger>}
               </TabsList>
             ) : (
               <SectionLabel className="pl-1.5">Response</SectionLabel>

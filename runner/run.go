@@ -46,6 +46,7 @@ func hasFailedCheck(tests []Check) bool {
 
 func describe(request Request, folder string, outcome exchange) Result {
 	result := identify(request, folder)
+	result.flow = outcome.flow
 	if outcome.skipped != "" {
 		result.Skipped = outcome.skipped
 		return result
@@ -57,6 +58,7 @@ func describe(request Request, folder string, outcome exchange) Result {
 	result.DurationMs = response.DurationMs
 	result.Tests = append(result.Tests, outcome.tests...)
 	result.Logs = append(result.Logs, outcome.logs...)
+	result.Visual = outcome.visual
 	result.Error = strings.Join(outcome.errors, "\n")
 	if response.Error != "" {
 		result.Error = response.Body

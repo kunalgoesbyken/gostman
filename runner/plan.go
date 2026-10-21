@@ -23,6 +23,7 @@ func (f folderPath) name() string {
 }
 
 type plan struct {
+	library     []Request
 	requests    []Request
 	folderNames map[string]string
 }
@@ -106,7 +107,7 @@ func prepare(scripts *sandbox.Sandbox, stored Collection, options Options) (plan
 	if err := scripts.Call("requestsInFolder", &ordered, folders, requests, folderID); err != nil {
 		return plan{}, err
 	}
-	planned := plan{folderNames: map[string]string{}}
+	planned := plan{library: requests, folderNames: map[string]string{}}
 	for _, candidate := range paths {
 		planned.folderNames[candidate.ID] = candidate.joined()
 	}

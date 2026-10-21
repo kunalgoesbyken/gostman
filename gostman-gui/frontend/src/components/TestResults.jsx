@@ -1,12 +1,10 @@
 import { AlertTriangle, Check, X } from "lucide-react"
-import { Notice, SectionLabel } from "./ui/panel"
+import { Notice } from "./ui/panel"
 import { cn } from "../lib/utils"
-
-const LOG_TONES = { warn: "text-warning", error: "text-destructive" }
 
 export const countPassed = (results) => results.filter((result) => result.passed).length
 
-export const hasTestOutput = (tests) => Boolean(tests && (tests.results.length > 0 || tests.logs.length > 0 || tests.error))
+export const hasTestOutput = (tests) => Boolean(tests && (tests.results.length > 0 || tests.error))
 
 export function TestRow({ result }) {
   const Icon = result.passed ? Check : X
@@ -30,16 +28,6 @@ export function TestResults({ tests }) {
           <ul aria-label="Test results">
             {tests.results.map((result, index) => <TestRow key={index} result={result} />)}
           </ul>
-        )}
-        {tests.logs.length > 0 && (
-          <div>
-            <SectionLabel>Console</SectionLabel>
-            <pre className="whitespace-pre-wrap pt-1 font-mono text-xs leading-relaxed">
-              {tests.logs.map((entry, index) => (
-                <span key={index} className={cn("block", LOG_TONES[entry.level] || "text-foreground")}>{entry.text}</span>
-              ))}
-            </pre>
-          </div>
         )}
       </div>
     </>

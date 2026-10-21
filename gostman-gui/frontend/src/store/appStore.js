@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist } from 'zustand/middleware'
+import { addConsoleGroup } from '../lib/consoleLog'
 import { mergeCookies, withoutCookie } from '../lib/cookies'
 import { isPlainObject, parseJSON } from '../lib/dataUtils'
 import { DEFAULT_SETTINGS, normalizeSettings } from '../lib/network'
@@ -211,6 +212,7 @@ export const useAppStore = create(
         specLinks: {},
         specDialog: null,
         runner: CLOSED_RUNNER,
+        consoleGroups: [],
         persistenceFailureReported: false,
         alertDialog: CLOSED_ALERT,
         confirmDialog: CLOSED_CONFIRM,
@@ -438,6 +440,8 @@ export const useAppStore = create(
           runner: { ...state.runner, results: [...state.runner.results, result] },
         })),
         finishRun: () => set((state) => ({ runner: { ...state.runner, isRunning: false } })),
+        appendConsole: (group) => set((state) => ({ consoleGroups: addConsoleGroup(state.consoleGroups, group) })),
+        clearConsole: () => set({ consoleGroups: [] }),
 
         showAlert: (title, message, confirmText = 'OK', variant = 'default') => set({
           alertDialog: { isOpen: true, title, message, confirmText, variant },

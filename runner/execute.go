@@ -24,6 +24,8 @@ type session struct {
 	policy    engine.Policy
 	variables variables
 	common    *shared
+	library   []Request
+	hosts     []string
 }
 
 type job struct {
@@ -40,6 +42,8 @@ type stageRun struct {
 	Error     string          `json:"error"`
 	Variables variables       `json:"variables"`
 	Request   json.RawMessage `json:"request"`
+	Flow      flow            `json:"flow"`
+	Visual    string          `json:"visualization"`
 }
 
 type exchange struct {
@@ -48,6 +52,8 @@ type exchange struct {
 	tests    []Check
 	logs     []LogLine
 	errors   []string
+	flow     flow
+	visual   string
 }
 
 func hasText(text string) bool {
@@ -60,6 +66,12 @@ func (x *exchange) record(run stageRun) {
 	if run.Error != "" {
 		x.errors = append(x.errors, run.Error)
 	}
+	if run.Flow.Action != "" {
+		x.flow = run.Flow
+	}
+	if run.Visual != "" {
+		x.visual = run.Visual
+	}
 }
 
 func (x *exchange) stop(message string) {
@@ -71,11 +83,11 @@ func (s *session) scoped(request Request) variables {
 	return layered(append(scopes, requestScope(request.Vars))...)
 }
 
-func (s *session) runStage(stage string, work job, request Request) stageRun {
+func (s *session) runStage(ctx context.Context, stage string, work job, request Request) stageRun {
 	before := s.scoped(request)
 	work.Variables = before
 	var run stageRun
-	if err := s.scripts.Isolated("runJob", &run, work); err != nil {
+	if err := s.scripts.IsolatedWith(s.bridge(ctx), "runJob", &run, work); err != nil {
 		return stageRun{Error: stage + ": " + err.Error()}
 	}
 	if run.Variables != nil {
@@ -93,12 +105,12 @@ func (s *session) subject(function string, source any) (json.RawMessage, error) 
 	return described, err
 }
 
-func (s *session) runPreRequest(request Request, scripted step, outcome *exchange) (Request, bool, error) {
+func (s *session) runPreRequest(ctx context.Context, request Request, scripted step, outcome *exchange) (Request, bool, error) {
 	described, err := s.subject("requestSubject", request)
 	if err != nil {
 		return request, false, err
 	}
-	run := s.runStage(scripted.label, job{Script: scripted.script, Request: described}, request)
+	run := s.runStage(ctx, scripted.label, job{Script: scripted.script, Request: described}, request)
 	outcome.record(run)
 	if run.Error != "" {
 		outcome.stop(run.Error)
@@ -112,9 +124,9 @@ func (s *session) runPreRequest(request Request, scripted step, outcome *exchang
 	return edited, true, nil
 }
 
-func (s *session) runPreRequests(request Request, outcome *exchange) (Request, bool, error) {
+func (s *session) runPreRequests(ctx context.Context, request Request, outcome *exchange) (Request, bool, error) {
 	for _, scripted := range request.preSteps() {
-		edited, proceed, err := s.runPreRequest(request, scripted, outcome)
+		edited, proceed, err := s.runPreRequest(ctx, request, scripted, outcome)
 		if err != nil || !proceed {
 			return request, false, err
 		}
@@ -206,7 +218,7 @@ func (s *session) postSteps(request Request) ([]step, error) {
 	return steps, nil
 }
 
-func (s *session) runPostResponse(request Request, outcome *exchange) error {
+func (s *session) runPostResponse(ctx context.Context, request Request, outcome *exchange) error {
 	steps, err := s.postSteps(request)
 	if err != nil || len(steps) == 0 {
 		return err
@@ -220,7 +232,7 @@ func (s *session) runPostResponse(request Request, outcome *exchange) error {
 		return err
 	}
 	for _, scripted := range steps {
-		outcome.record(s.runStage(scripted.label, job{
+		outcome.record(s.runStage(ctx, scripted.label, job{
 			Script:     scripted.script,
 			Assertions: scripted.assertions,
 			Request:    sent,
@@ -247,9 +259,13 @@ func (s *session) execute(ctx context.Context, request Request) (exchange, error
 		return outcome, nil
 	}
 
-	request, proceed, err := s.runPreRequests(request, &outcome)
+	request, proceed, err := s.runPreRequests(ctx, request, &outcome)
 	if err != nil || !proceed {
 		return outcome, err
+	}
+	if outcome.flow.holdsBack() {
+		outcome.skipped = outcome.flow.reason()
+		return outcome, nil
 	}
 
 	request, err = s.withFreshToken(ctx, request)
@@ -271,5 +287,5 @@ func (s *session) execute(ctx context.Context, request Request) (exchange, error
 	if err := s.extract(request, outcome.response); err != nil {
 		return outcome, err
 	}
-	return outcome, s.runPostResponse(request, &outcome)
+	return outcome, s.runPostResponse(ctx, request, &outcome)
 }

@@ -19,7 +19,8 @@ const toResult = (result) => ({
   error: result.error || '',
   failed: Boolean(result.hasFailed),
   tests: result.tests,
-  logs: [],
+  logs: result.logs || [],
+  visualization: result.visualization || '',
   iteration: result.iteration,
   exchange: result.exchange,
 })
@@ -33,7 +34,7 @@ function summarize(results, planned) {
     passed: results.length - skipped - failed,
     failed,
     skipped,
-    notRun: planned - results.length,
+    notRun: Math.max(planned - results.length, 0),
     tests: tests.length,
     failedTests: tests.filter((test) => !test.passed).length,
   }

@@ -37,7 +37,7 @@ func (s *session) spawn() (*session, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &session{scripts: scripts, policy: s.policy, variables: variables{}, common: s.common}, nil
+	return &session{scripts: scripts, policy: s.policy, variables: variables{}, common: s.common, library: s.library, hosts: s.hosts}, nil
 }
 
 func (s *session) crew(wanted int) []*session {
@@ -58,37 +58,40 @@ type schedule struct {
 	units   []unit
 	base    variables
 	count   int
-	slots   []Result
-	filled  []bool
+	outputs [][]Result
 	halted  atomic.Bool
 	emit    sync.Mutex
 	observe func(Result)
 }
 
-func (c *schedule) record(slot int, result Result) {
-	c.slots[slot] = result
-	c.filled[slot] = true
+func (c *schedule) record(position int, result Result) {
+	c.outputs[position] = append(c.outputs[position], result)
 	c.emit.Lock()
 	defer c.emit.Unlock()
 	c.observe(result)
 }
 
 func (c *schedule) work(ctx context.Context, worker *session, queue <-chan int) {
-	total := len(c.planned.requests)
+	limit := worker.scripts.Limits().FlowSteps
 	for position := range queue {
 		if c.halted.Load() || ctx.Err() != nil {
 			continue
 		}
 		current := c.units[position]
 		worker.variables = startingFor(c.base, c.options, current.iteration, c.count)
-		for step, index := range current.indexes {
-			request := c.planned.requests[index]
+		jumps := 0
+		for cursor := 0; cursor < len(current.indexes); {
+			request := c.planned.requests[current.indexes[cursor]]
 			result := worker.attempt(ctx, request, c.planned.folderNames[request.FolderID], c.options.Capture)
 			worker.common.publish(worker.variables.plain())
 			if c.options.isIterating() {
 				result.Iteration = current.iteration + 1
 			}
-			c.record(current.iteration*total+index, result)
+			following, problem := c.follow(current, cursor, result.flow, &jumps, limit)
+			if problem != "" {
+				result.flag(problem)
+			}
+			c.record(position, result)
 			if ctx.Err() != nil {
 				return
 			}
@@ -96,7 +99,8 @@ func (c *schedule) work(ctx context.Context, worker *session, queue <-chan int) 
 				c.halted.Store(true)
 				break
 			}
-			isLast := step == len(current.indexes)-1 && position == len(c.units)-1
+			isLast := following >= len(current.indexes) && position == len(c.units)-1
+			cursor = following
 			if !isLast {
 				pause(ctx, c.options.Delay)
 			}
@@ -109,15 +113,14 @@ func (c *schedule) work(ctx context.Context, worker *session, queue <-chan int) 
 
 func (s *session) runAll(ctx context.Context, planned plan, options Options, observe func(Result)) []Result {
 	count := options.iterationCount()
-	total := len(planned.requests)
+	units := planUnits(count, len(planned.requests), options.Parallel)
 	run := &schedule{
 		planned: planned,
 		options: options,
-		units:   planUnits(count, total, options.Parallel),
+		units:   units,
 		base:    maps.Clone(s.variables),
 		count:   count,
-		slots:   make([]Result, count*total),
-		filled:  make([]bool, count*total),
+		outputs: make([][]Result, len(units)),
 		observe: observe,
 	}
 	queue := make(chan int, len(run.units))
@@ -137,11 +140,9 @@ func (s *session) runAll(ctx context.Context, planned plan, options Options, obs
 	}
 	group.Wait()
 
-	results := make([]Result, 0, len(run.slots))
-	for slot, result := range run.slots {
-		if run.filled[slot] {
-			results = append(results, result)
-		}
+	var results []Result
+	for _, output := range run.outputs {
+		results = append(results, output...)
 	}
 	return results
 }

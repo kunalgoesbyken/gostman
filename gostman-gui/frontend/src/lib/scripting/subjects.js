@@ -1,5 +1,6 @@
 import { BODY_JSON, BODY_NONE } from '../body'
 import { isPlainObject, parseJSON } from '../dataUtils'
+import { normalizeRequest } from '../request'
 import { parseJsonBody, textBody } from '../response'
 import { isSentRow, parseRows, serializeRows } from '../rows'
 
@@ -52,4 +53,21 @@ export function applyRequestEdits(request, edited) {
     ...(isSame(original.headers, edited.headers) ? {} : { headers: editedHeaders(request, edited.headers || {}) }),
     ...(isSame(original.body, edited.body) ? {} : editedBody(request, edited.body ?? '')),
   }
+}
+
+const findSaved = (library, name) => library.find((saved) => saved.name === name || saved.id === name)
+
+export function scriptedRequest(target, library) {
+  if (typeof target === 'string') {
+    const saved = findSaved(library, target)
+    if (!saved) throw new Error(`No saved request is named "${target}".`)
+    return normalizeRequest(saved)
+  }
+  if (!isPlainObject(target)) throw new Error('sendRequest needs a request object or the name of a saved request.')
+  return normalizeRequest({
+    method: String(target.method || 'GET').toUpperCase(),
+    url: String(target.url ?? ''),
+    headers: editedHeaders({ headers: '[]' }, target.headers || {}),
+    ...editedBody({ bodyType: BODY_NONE }, target.body ?? ''),
+  })
 }

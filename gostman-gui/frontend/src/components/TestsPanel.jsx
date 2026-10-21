@@ -24,8 +24,8 @@ const VIEWS = [
 
 const HINTS = {
   [VIEW_ASSERTIONS]: "Checked rows are verified after every response. Use res.status, res.headers.name, res.body.path or res.responseTime.",
-  [VIEW_PRE]: "Runs before sending. Available: req, env.get(), env.set(), console.log().",
-  [VIEW_POST]: "Runs after the response. Available: req, res, env, test(name, fn), expect(value).",
+  [VIEW_PRE]: "Runs before sending. Available: req, env, console, utils, sendRequest(), skipRequest(), stopExecution().",
+  [VIEW_POST]: "Runs after the response. Available: req, res, env, console, utils, test(name, fn), expect(value), sendRequest(), setNextRequest(name), visualize(template, data).",
 }
 
 const COLUMNS = "grid-cols-[1.5rem_minmax(0,1.25fr)_9rem_minmax(0,1fr)_1.75rem]"
