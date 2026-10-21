@@ -1,6 +1,6 @@
-import { SaveWindowTheme } from '../../wailsjs/go/main/App.js'
 import { isDesktopApp } from './platform.js'
 
 export function reportWindowTheme(theme) {
-  if (isDesktopApp()) SaveWindowTheme(theme).catch(() => {})
+  if (!isDesktopApp()) return
+  import('../../wailsjs/go/main/App.js').then(({ SaveWindowTheme }) => SaveWindowTheme(theme)).catch(() => {})
 }
