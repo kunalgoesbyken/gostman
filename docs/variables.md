@@ -11,7 +11,7 @@ When a name is defined in more than one place, the most specific scope wins. Fro
 | Global | Environments, **Global** tab | Shared by every collection. One global environment is in use at a time. |
 | Collection | Environments, **Collection variables** | Applies to every request in the collection. Stored in `gostman.yaml` for folder workspaces. |
 | Environment | Environments, **Collection** tab | The environment selected in the header. If it inherits from another environment, the parent's variables come first and the child overrides them. |
-| Folder | Folder settings, once available | Read from a `variables` object on a folder. Outer folders first, the request's own folder last. |
+| Folder | Folder settings, **Vars** tab | Outer folders first, the request's own folder last. See [Folder and collection settings](folder-settings.md). |
 | Request | **Vars** tab of a request | Rows can be switched off without deleting them. |
 
 Values written by Extract rules and scripts (`env.set`) are saved into the active environment, so they take part as environment variables.

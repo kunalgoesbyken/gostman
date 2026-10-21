@@ -2,6 +2,7 @@ package workspace
 
 import (
 	"fmt"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -13,19 +14,18 @@ const (
 
 var (
 	manifestKeys    = []string{"format", "version"}
-	folderKeys      = []string{"id", "name", "order"}
+	folderKeys      = append([]string{"id", "name", "order", "variables"}, settingsKeys...)
 	environmentKeys = []string{"id", "name", "order", "color", "extends", "variables", "meta"}
 )
 
 type folderContent struct {
-	id    string
-	name  string
-	order int64
+	folder Folder
+	order  int64
 }
 
 type folderDocument struct {
 	folderContent
-	extras []*yaml.Node
+	extras requestExtras
 }
 
 type environmentContent struct {
@@ -67,24 +67,45 @@ func checkManifest(content []byte) error {
 }
 
 func (b nodeBuilder) folder(document folderDocument) *yaml.Node {
+	folder := document.folder
 	root := mappingNode()
-	setField(root, "id", b.text(document.id))
-	setField(root, "name", b.text(document.name))
+	setField(root, "id", b.text(folder.Id))
+	setField(root, "name", b.text(folder.Name))
 	setField(root, "order", integerNode(document.order))
-	root.Content = append(root.Content, document.extras...)
+	setField(root, "variables", b.folderVariables(folder.Variables))
+	b.settings(root, folder.Settings, document.extras)
+	root.Content = append(root.Content, document.extras.request...)
 	return root
+}
+
+func (b nodeBuilder) folderVariables(text string) *yaml.Node {
+	if strings.TrimSpace(text) == "" {
+		return nil
+	}
+	return b.variables(text)
 }
 
 func readFolder(root *yaml.Node) (folderDocument, error) {
 	var failure error
 	fields := readFields(root, folderKeys, &failure)
-	content := folderContent{id: fields.text("id"), name: fields.text("name"), order: fields.integer("order")}
-	return folderDocument{folderContent: content, extras: fields.extras}, failure
+	document := folderDocument{extras: requestExtras{request: fields.extras}}
+	document.order = fields.integer("order")
+	document.folder = Folder{
+		Id:        fields.text("id"),
+		Name:      fields.text("name"),
+		Variables: fields.variables(),
+		Settings:  readSettings(fields, &document.extras, &failure),
+	}
+	return document, failure
 }
 
 func readFolderContent(root *yaml.Node) (folderContent, error) {
 	document, err := readFolder(root)
 	return document.folderContent, err
+}
+
+func normalizeFolder(document folderDocument) (folderContent, error) {
+	return readFolderContent(nodeBuilder{}.folder(document))
 }
 
 func encodeFolder(document folderDocument) ([]byte, error) {
@@ -137,7 +158,7 @@ func readEnvironment(root *yaml.Node) (environmentDocument, error) {
 			Id: fields.text("id"), Name: fields.text("name"), Variables: fields.variables(),
 			Color: fields.text("color"), Extends: fields.text("extends"), Meta: fields.metaVariables(),
 		},
-		order:       fields.integer("order"),
+		order: fields.integer("order"),
 	}
 	return environmentDocument{environmentContent: content, extras: fields.extras}, failure
 }

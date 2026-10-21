@@ -249,8 +249,13 @@ func (w *Workspace) storeFolder(folder Folder) error {
 	} else if err := w.moveFolder(entry, folder, parent); err != nil {
 		return err
 	}
+	document := folderDocument{folderContent: folderContent{folder: folder, order: entry.order}, extras: entry.extras}
+	content, err := normalizeFolder(document)
+	if err != nil {
+		return err
+	}
 	entry.folder = folder
-	content := folderContent{id: folder.Id, name: folder.Name, order: entry.order}
+	entry.folder.Variables, entry.folder.Settings = content.folder.Variables, content.folder.Settings
 	if entry.stored == content {
 		return nil
 	}
@@ -258,7 +263,7 @@ func (w *Workspace) storeFolder(folder Folder) error {
 	if entry.broken {
 		return fmt.Errorf("%s could not be read, so it was left unchanged; fix or delete it first", relative)
 	}
-	encoded, err := encodeFolder(folderDocument{folderContent: content, extras: entry.extras})
+	encoded, err := encodeFolder(document)
 	if err != nil {
 		return fmt.Errorf("%s: %w", folder.Name, err)
 	}

@@ -1,6 +1,10 @@
 package main
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/krockxz/gostman/workspace"
+)
 
 type collectionStore interface {
 	collection(data SavedData) (SavedData, error)
@@ -9,6 +13,7 @@ type collectionStore interface {
 	saveFolders(folders []Folder) error
 	saveEnvironments(environments []Environment, activeId string) error
 	saveVariables(text string) error
+	saveSettings(settings workspace.Settings) error
 }
 
 type appDataStore struct{}
@@ -63,6 +68,12 @@ func (appDataStore) saveEnvironments(environments []Environment, activeId string
 func (appDataStore) saveVariables(text string) error {
 	return mutateData(func(data *SavedData) {
 		data.CollectionVariables = text
+	})
+}
+
+func (appDataStore) saveSettings(settings workspace.Settings) error {
+	return mutateData(func(data *SavedData) {
+		data.CollectionSettings = settings
 	})
 }
 

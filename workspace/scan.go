@@ -123,9 +123,11 @@ func (s *scanner) readFolder(directory, parentId string) *folderEntry {
 		s.report(relative, err)
 		return entry
 	}
-	entry.folder.Id, entry.order, entry.extras = document.id, document.order, document.extras
-	if document.name != "" {
-		entry.folder.Name = document.name
+	name := entry.folder.Name
+	entry.folder, entry.order, entry.extras = document.folder, document.order, document.extras
+	entry.folder.ParentId = parentId
+	if entry.folder.Name == "" {
+		entry.folder.Name = name
 	}
 	return entry
 }
@@ -170,7 +172,8 @@ func (s *scanner) adoptFolders(folders []*folderEntry, depth int) {
 		entry.order = effectiveOrder(entry.order, previous)
 		previous = entry.order
 		entry.folder.Id = uniqueId(entry.folder.Id, folderIdPrefix, entry.dir, isTaken)
-		entry.stored = folderContent{id: entry.folder.Id, name: entry.folder.Name, order: entry.order}
+		entry.stored = folderContent{folder: entry.folder, order: entry.order}
+		entry.stored.folder.ParentId = ""
 		s.folders[entry.folder.Id] = entry
 	}
 	for _, entry := range folders {

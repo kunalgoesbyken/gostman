@@ -18,6 +18,7 @@ import {
   PrepareRequest,
   ReloadWorkspace,
   ResetData,
+  SaveCollectionSettings,
   SaveCollectionToFolder,
   SaveCookies,
   SaveEnvironments,
@@ -94,6 +95,7 @@ export const desktopBackend = {
   saveHistory: (history) => SaveHistory(history),
   saveEnvironments: (environments, activeId) => SaveEnvironments(environments, activeId),
   saveScopes: (globals, activeGlobalId, collectionVariables) => SaveScopes(globals, activeGlobalId, collectionVariables),
+  saveCollectionSettings: (settings) => SaveCollectionSettings(settings),
   saveCookies: (cookies) => SaveCookies(cookies),
   network: {
     saveSettings: (settings) => SaveSettings(settings),

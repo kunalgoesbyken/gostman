@@ -178,6 +178,10 @@ async function saveScopes(globals, activeGlobalId, collectionVariables) {
   })
 }
 
+async function saveCollectionSettings(settings) {
+  mutateData((data) => { data.collectionSettings = settings })
+}
+
 async function saveCookies(cookies) {
   mutateData((data) => { data.cookies = cookies })
 }
@@ -221,6 +225,7 @@ export const webBackend = {
   saveHistory,
   saveEnvironments,
   saveScopes,
+  saveCollectionSettings,
   saveCookies,
   network: null,
   mock: null,

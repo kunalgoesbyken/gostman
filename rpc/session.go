@@ -28,7 +28,11 @@ func open(target Target, policy engine.Policy) (*session, error) {
 	if err != nil {
 		return nil, err
 	}
-	headers, err := expansion.Headers(target.Headers, target.Auth)
+	rows, auth, err := engine.Inherit(target.Headers, target.Auth, target.Inherited)
+	if err != nil {
+		return nil, configError("%v", err)
+	}
+	headers, err := expansion.Headers(rows, auth)
 	if err != nil {
 		return nil, configError("%v", err)
 	}

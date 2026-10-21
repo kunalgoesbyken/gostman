@@ -1,6 +1,6 @@
 import { memo, useCallback, useMemo, useState } from "react"
 import {
-  ChevronDown, ChevronRight, Copy, FileJson, FileSearch, RefreshCw, Folder, FolderInput, FolderPlus, ListChecks, MoreHorizontal, Pencil, Plus, Search, Share2, Trash2,
+  ChevronDown, ChevronRight, Copy, FileJson, FileSearch, RefreshCw, Folder, FolderInput, FolderPlus, ListChecks, MoreHorizontal, Pencil, Plus, Search, Settings2, Share2, Trash2,
 } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
@@ -10,6 +10,7 @@ import { MethodTag } from "./MethodTag"
 import { SearchField } from "./SearchField"
 import { useAppStore } from "../store/appStore"
 import { buildCollectionTree, findMatches, flattenCollection, listFolders, ROOT_ID, ROW_FOLDER } from "../lib/collectionTree"
+import { FOLDER_SETTINGS_TEXT } from "../lib/folderSettingsText"
 import { shortcutLabel } from "../lib/platform"
 import { SPEC_TEXT } from "../lib/specText"
 import { cn } from "../lib/utils"
@@ -38,6 +39,7 @@ function folderMenuItems(folder, actions, isLinked) {
     { id: "run", label: "Run folder", icon: ListChecks, onSelect: () => actions.openRunner(folder.id) },
     { id: "share", label: "Share folder", icon: Share2, onSelect: () => actions.shareFolder(folder.id) },
     ...(isLinked ? specMenuItems(folder, actions) : []),
+    { id: "settings", label: FOLDER_SETTINGS_TEXT.menuSettings, icon: Settings2, onSelect: () => actions.openFolderSettings(folder.id) },
     { id: "rename", label: "Rename", icon: Pencil, onSelect: () => actions.renameFolder(folder) },
     { id: "delete", label: "Delete", icon: Trash2, destructive: true, onSelect: () => actions.deleteFolder(folder) },
   ]

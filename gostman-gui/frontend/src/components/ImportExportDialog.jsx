@@ -15,6 +15,7 @@ export function ImportExportDialog({
   folders,
   environments,
   variables,
+  settings,
   onImport,
   onImportShared,
   openapi,
@@ -44,6 +45,7 @@ export function ImportExportDialog({
             folders={folders}
             environments={environments}
             variables={variables}
+            settings={settings}
             onSaveFile={onSaveFile}
           />
         </TabsContent>
@@ -52,6 +54,7 @@ export function ImportExportDialog({
             requests={requests}
             folders={folders}
             environments={environments}
+            settings={settings}
             initialFolderId={shareFolderId}
             linkBase={shareLinkBase}
             onSaveFile={onSaveFile}

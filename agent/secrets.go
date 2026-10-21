@@ -158,6 +158,10 @@ func (c *Client) Study(stored runner.Collection) error {
 	for _, environment := range stored.Environments {
 		c.learnEnvironment(environment)
 	}
+	c.learnCredentials(stored.Settings.Headers, stored.Settings.Auth, "")
+	for _, folder := range stored.Folders {
+		c.learnCredentials(folder.Headers, folder.Auth, "")
+	}
 	listed, err := c.session.Catalog(stored, "")
 	if err != nil {
 		return err

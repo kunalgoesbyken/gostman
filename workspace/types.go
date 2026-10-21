@@ -31,10 +31,21 @@ type Request struct {
 	Timestamp        string         `json:"timestamp"`
 }
 
+type Settings struct {
+	Description string      `json:"description"`
+	Headers     string      `json:"headers"`
+	Auth        engine.Auth `json:"auth"`
+	PreScript   string      `json:"preScript"`
+	PostScript  string      `json:"postScript"`
+	Assertions  string      `json:"assertions"`
+}
+
 type Folder struct {
-	Id       string `json:"id"`
-	Name     string `json:"name"`
-	ParentId string `json:"parentId"`
+	Id        string `json:"id"`
+	Name      string `json:"name"`
+	ParentId  string `json:"parentId"`
+	Variables string `json:"variables"`
+	Settings
 }
 
 type Environment struct {
@@ -51,6 +62,7 @@ type Collection struct {
 	Folders      []Folder      `json:"folders"`
 	Environments []Environment `json:"environments"`
 	Variables    string        `json:"variables,omitempty"`
+	Settings     Settings      `json:"settings"`
 }
 
 type Problem struct {

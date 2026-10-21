@@ -119,7 +119,7 @@ function FileOutput({ share, usesPassphrase, onSaveFile }) {
   )
 }
 
-export function ShareTab({ requests, folders, environments, initialFolderId, linkBase, onSaveFile }) {
+export function ShareTab({ requests, folders, environments, settings, initialFolderId, linkBase, onSaveFile }) {
   const [folderId, setFolderId] = useState(initialFolderId)
   const [includeVariables, setIncludeVariables] = useState(false)
   const [includeExamples, setIncludeExamples] = useState(false)
@@ -129,12 +129,12 @@ export function ShareTab({ requests, folders, environments, initialFolderId, lin
 
   const scopes = useMemo(() => listFolders(buildCollectionTree(folders, [])), [folders])
   const exported = useMemo(
-    () => buildSharedExport({ requests, folders, environments }, { folderId, includeVariables, includeExamples }),
-    [requests, folders, environments, folderId, includeVariables, includeExamples]
+    () => buildSharedExport({ requests, folders, environments, settings }, { folderId, includeVariables, includeExamples }),
+    [requests, folders, environments, settings, folderId, includeVariables, includeExamples]
   )
   const selection = exported.gostman
   const text = useMemo(() => JSON.stringify(exported), [exported])
-  const literalCount = useMemo(() => countLiteralCredentials(selection.requests), [selection])
+  const literalCount = useMemo(() => countLiteralCredentials([...selection.requests, ...selection.folders]), [selection])
 
   const usesPassphrase = protection === PROTECT_PASSPHRASE
   const isEmpty = selection.requests.length === 0 && selection.folders.length === 0

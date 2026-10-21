@@ -81,7 +81,7 @@ function AssertionRow({ assertion, isDraft, onChange, onRemove }) {
   )
 }
 
-function AssertionEditor({ assertions, onChange }) {
+export function AssertionEditor({ assertions, onChange }) {
   const rows = useMemo(() => parseAssertions(assertions), [assertions])
   const shown = [...rows, BLANK_ASSERTION]
 
@@ -107,7 +107,7 @@ function AssertionEditor({ assertions, onChange }) {
   )
 }
 
-function ScriptEditor({ value, path, onChange, EditorComponent }) {
+export function ScriptEditor({ value, path, onChange, EditorComponent }) {
   return (
     <div className="min-h-0 flex-1">
       <Suspense fallback={<p className="p-3 text-xs text-muted-foreground">Loading editor</p>}>

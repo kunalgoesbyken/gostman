@@ -110,8 +110,10 @@ func prepare(scripts *sandbox.Sandbox, stored Collection, options Options) (plan
 	for _, candidate := range paths {
 		planned.folderNames[candidate.ID] = candidate.joined()
 	}
+	lineageOf := stored.lineages()
 	for _, request := range ordered {
 		if options.selects(request, planned.folderNames[request.FolderID]) {
+			request.Lineage = lineageOf(request.FolderID)
 			planned.requests = append(planned.requests, options.applyTo(request))
 		}
 	}

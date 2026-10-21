@@ -1,5 +1,5 @@
 import { memo, lazy, Suspense, useEffect, useMemo } from "react"
-import { Bookmark } from "lucide-react"
+import { Bookmark, CornerLeftUp } from "lucide-react"
 import { Button } from "./ui/button"
 import { Panel, Toolbar } from "./ui/panel"
 import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
@@ -13,8 +13,10 @@ import { TestsPanel } from "./TestsPanel"
 import { BODY_FORM, BODY_MULTIPART, BODY_NONE } from "../lib/body"
 import { parseExtractors } from "../lib/chaining"
 import { parseExamples } from "../lib/examples"
+import { FOLDER_SETTINGS_TEXT as INHERIT_TEXT } from "../lib/folderSettingsText"
 import { GRAPHQL_METHOD } from "../lib/graphqlSchema"
 import { GRPC_METHOD, GRPC_PANEL } from "../lib/grpc"
+import { AUTH_INHERIT, countInheritedHeaders, inheritedAuthSource, lineageOf } from "../lib/inheritance"
 import { MCP_METHOD, MCP_PANEL } from "../lib/mcp"
 import { readParamRows } from "../lib/queryString"
 import { countActiveAssertions } from "../lib/scripting/assertions"
@@ -38,6 +40,15 @@ function TabBadge({ value }) {
   if (!value) return null
   if (value === true) return <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-primary" />
   return <TabCount>{value}</TabCount>
+}
+
+function InheritedMark({ title, children }) {
+  return (
+    <span title={title} className="inline-flex items-center gap-0.5 font-mono text-[10px] text-muted-foreground">
+      <CornerLeftUp aria-hidden="true" className="h-3 w-3" />
+      {children}
+    </span>
+  )
 }
 
 function bodyBadge(body, bodyType) {
@@ -66,6 +77,8 @@ export const RequestTabs = memo(function RequestTabs({
   const setActivePanel = useAppStore((state) => state.setRequestPanel)
   const isSocketOpen = useSocketStore((state) => selectSession(tabId)(state).status === SOCKET_OPEN)
   const { url, queryParams, headers, body, bodyType, auth, options, method, extractors, assertions, examples, preScript, postScript, vars } = activeRequest
+  const authSource = useAppStore((state) => inheritedAuthSource({ type: AUTH_INHERIT }, lineageOf(state, activeRequest.folderId))?.name ?? null)
+  const inheritedHeaders = useAppStore((state) => countInheritedHeaders(state, activeRequest.folderId))
   const isWebSocket = useMemo(() => isSocketAddress(url, variables), [url, variables])
   const isGraphQL = method === GRAPHQL_METHOD
   const isGrpc = method === GRPC_METHOD
@@ -103,9 +116,17 @@ export const RequestTabs = memo(function RequestTabs({
       <Toolbar>
         <TabsList label="Request sections">
           <TabsTrigger value="params">Params<TabBadge value={paramCount} /></TabsTrigger>
-          <TabsTrigger value="headers">Headers<TabBadge value={countSentRows(headerRows)} /></TabsTrigger>
+          <TabsTrigger value="headers">
+            Headers
+            <TabBadge value={countSentRows(headerRows)} />
+            {inheritedHeaders > 0 && <InheritedMark title={INHERIT_TEXT.inheritedHeaders(inheritedHeaders)}>{inheritedHeaders}</InheritedMark>}
+          </TabsTrigger>
           <TabsTrigger value="body">Body<TabBadge value={!isGraphQL && bodyContent} /></TabsTrigger>
-          <TabsTrigger value="auth">Auth<TabBadge value={auth.type !== ""} /></TabsTrigger>
+          <TabsTrigger value="auth">
+            Auth
+            <TabBadge value={auth.type !== "" && auth.type !== AUTH_INHERIT} />
+            {auth.type === AUTH_INHERIT && authSource && <InheritedMark title={INHERIT_TEXT.inheritsFrom(authSource)} />}
+          </TabsTrigger>
           <TabsTrigger value="graphql">GraphQL<TabBadge value={isGraphQL} /></TabsTrigger>
           <TabsTrigger value={GRPC_PANEL}>gRPC<TabBadge value={isGrpc} /></TabsTrigger>
           {isMcp && <TabsTrigger value={MCP_PANEL}>MCP</TabsTrigger>}
@@ -163,6 +184,7 @@ export const RequestTabs = memo(function RequestTabs({
             auth={auth}
             tokenRequest={tokenRequest}
             actions={actions}
+            inheritance={{ source: authSource, noAuthValue: "" }}
             onChange={(next) => onUpdateRequest({ auth: next })}
           />
         </TabsContent>

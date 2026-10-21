@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -150,11 +151,17 @@ func requestScope(text string) variables {
 	return scope
 }
 
-func (v variables) withRequest(text string) variables {
-	if strings.TrimSpace(text) == "" {
-		return v
+func (v variables) update(before, after variables) {
+	for name, value := range after {
+		if !bytes.Equal(before[name], value) {
+			v[name] = value
+		}
 	}
-	return layered(v, requestScope(text))
+	for name := range before {
+		if _, kept := after[name]; !kept {
+			delete(v, name)
+		}
+	}
 }
 
 func baseScopes(stored Collection) ([]variables, error) {

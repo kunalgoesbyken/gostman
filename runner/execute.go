@@ -66,14 +66,20 @@ func (x *exchange) stop(message string) {
 	x.response = engine.Failure(engine.ErrorConfig, message)
 }
 
-func (s *session) runStage(stage string, work job) stageRun {
-	work.Variables = s.variables
+func (s *session) scoped(request Request) variables {
+	scopes := append([]variables{s.variables}, request.folderScopes()...)
+	return layered(append(scopes, requestScope(request.Vars))...)
+}
+
+func (s *session) runStage(stage string, work job, request Request) stageRun {
+	before := s.scoped(request)
+	work.Variables = before
 	var run stageRun
 	if err := s.scripts.Isolated("runJob", &run, work); err != nil {
 		return stageRun{Error: stage + ": " + err.Error()}
 	}
 	if run.Variables != nil {
-		s.variables = run.Variables
+		s.variables.update(before, run.Variables)
 	}
 	if run.Error != "" {
 		run.Error = stage + ": " + run.Error
@@ -87,12 +93,12 @@ func (s *session) subject(function string, source any) (json.RawMessage, error) 
 	return described, err
 }
 
-func (s *session) runPreRequest(request Request, outcome *exchange) (Request, bool, error) {
+func (s *session) runPreRequest(request Request, scripted step, outcome *exchange) (Request, bool, error) {
 	described, err := s.subject("requestSubject", request)
 	if err != nil {
 		return request, false, err
 	}
-	run := s.runStage(preRequest, job{Script: request.PreScript, Request: described})
+	run := s.runStage(scripted.label, job{Script: scripted.script, Request: described}, request)
 	outcome.record(run)
 	if run.Error != "" {
 		outcome.stop(run.Error)
@@ -102,34 +108,52 @@ func (s *session) runPreRequest(request Request, outcome *exchange) (Request, bo
 	if err := s.scripts.Call("applyRequestEdits", &edited, request, run.Request); err != nil {
 		return request, false, err
 	}
+	edited.Lineage = request.Lineage
 	return edited, true, nil
+}
+
+func (s *session) runPreRequests(request Request, outcome *exchange) (Request, bool, error) {
+	for _, scripted := range request.preSteps() {
+		edited, proceed, err := s.runPreRequest(request, scripted, outcome)
+		if err != nil || !proceed {
+			return request, false, err
+		}
+		request = edited
+	}
+	return request, true, nil
 }
 
 func (s *session) transmit(ctx context.Context, request Request) (engine.Response, error) {
 	if request.Method == grpcMethod {
 		var call rpc.Call
-		if err := s.scripts.Call("toGrpcCall", &call, request, s.variables.withRequest(request.Vars).text()); err != nil {
+		if err := s.scripts.Call("toGrpcCall", &call, request, s.scoped(request).text()); err != nil {
 			return engine.Response{}, err
 		}
+		call.Target.Inherited = request.layers()
 		return rpc.Invoke(ctx, call, s.policy), nil
 	}
 	if request.Method == mcpMethod {
 		var call mcpclient.Call
-		if err := s.scripts.Call("toMcpCall", &call, request, s.variables.withRequest(request.Vars).text()); err != nil {
+		if err := s.scripts.Call("toMcpCall", &call, request, s.scoped(request).text()); err != nil {
 			return engine.Response{}, err
 		}
-		s.announce(engine.Request{Headers: call.Target.Headers, Auth: call.Target.Auth, Variables: call.Target.Variables})
+		call.Target.Inherited = request.layers()
+		s.announce(engine.Request{Headers: call.Target.Headers, Auth: call.Target.Auth, Variables: call.Target.Variables, Inherited: call.Target.Inherited})
 		return mcpclient.Invoke(ctx, call, s.policy), nil
 	}
 	var prepared engine.Request
-	if err := s.scripts.Call("toEngineRequest", &prepared, request, s.variables.withRequest(request.Vars).text(), s.common.cookieList()); err != nil {
+	if err := s.scripts.Call("toEngineRequest", &prepared, request, s.scoped(request).text(), s.common.cookieList()); err != nil {
 		return engine.Response{}, err
 	}
+	prepared.Inherited = request.layers()
 	s.announce(prepared)
 	return engine.Send(ctx, prepared, s.policy), nil
 }
 
 func (s *session) announce(prepared engine.Request) {
+	if resolved, err := engine.Resolve(prepared); err == nil {
+		prepared = resolved
+	}
 	s.common.announce(prepared)
 }
 
@@ -159,18 +183,32 @@ func (s *session) extract(request Request, response engine.Response) error {
 	return nil
 }
 
-func (s *session) needsPostStage(request Request) (bool, error) {
-	if hasText(request.PostScript) {
+func (s *session) isWorthRunning(scripted step) (bool, error) {
+	if hasText(scripted.script) {
 		return true, nil
 	}
 	var active int
-	err := s.scripts.Call("countActiveAssertions", &active, request.Assertions)
+	err := s.scripts.Call("countActiveAssertions", &active, scripted.assertions)
 	return active > 0, err
 }
 
+func (s *session) postSteps(request Request) ([]step, error) {
+	var steps []step
+	for _, scripted := range request.postSteps() {
+		worthRunning, err := s.isWorthRunning(scripted)
+		if err != nil {
+			return nil, err
+		}
+		if worthRunning {
+			steps = append(steps, scripted)
+		}
+	}
+	return steps, nil
+}
+
 func (s *session) runPostResponse(request Request, outcome *exchange) error {
-	needed, err := s.needsPostStage(request)
-	if err != nil || !needed {
+	steps, err := s.postSteps(request)
+	if err != nil || len(steps) == 0 {
 		return err
 	}
 	sent, err := s.subject("requestSubject", request)
@@ -181,18 +219,20 @@ func (s *session) runPostResponse(request Request, outcome *exchange) error {
 	if err != nil {
 		return err
 	}
-	outcome.record(s.runStage(postResponse, job{
-		Script:     request.PostScript,
-		Assertions: request.Assertions,
-		Request:    sent,
-		Response:   received,
-	}))
+	for _, scripted := range steps {
+		outcome.record(s.runStage(scripted.label, job{
+			Script:     scripted.script,
+			Assertions: scripted.assertions,
+			Request:    sent,
+			Response:   received,
+		}, request))
+	}
 	return nil
 }
 
 func (s *session) isSocket(request Request) (bool, error) {
 	var socket bool
-	err := s.scripts.Call("isSocketAddress", &socket, request.URL, s.variables.withRequest(request.Vars).text())
+	err := s.scripts.Call("isSocketAddress", &socket, request.URL, s.scoped(request).text())
 	return socket, err
 }
 
@@ -207,12 +247,9 @@ func (s *session) execute(ctx context.Context, request Request) (exchange, error
 		return outcome, nil
 	}
 
-	if hasText(request.PreScript) {
-		edited, proceed, err := s.runPreRequest(request, &outcome)
-		if err != nil || !proceed {
-			return outcome, err
-		}
-		request = edited
+	request, proceed, err := s.runPreRequests(request, &outcome)
+	if err != nil || !proceed {
+		return outcome, err
 	}
 
 	request, err = s.withFreshToken(ctx, request)

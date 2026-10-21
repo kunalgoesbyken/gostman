@@ -8,6 +8,7 @@ import {mcpclient} from '../models';
 import {gitutil} from '../models';
 import {mock} from '../models';
 import {openapi} from '../models';
+import {workspace} from '../models';
 
 export function Authorize(arg1:engine.OAuth2,arg2:string):Promise<main.AuthorizationResult>;
 
@@ -114,6 +115,8 @@ export function PrepareRequest(arg1:engine.Request):Promise<engine.Prepared>;
 export function ReloadWorkspace():Promise<main.WorkspaceStatus>;
 
 export function ResetData():Promise<void>;
+
+export function SaveCollectionSettings(arg1:workspace.Settings):Promise<void>;
 
 export function SaveCollectionToFolder(arg1:string):Promise<main.WorkspaceStatus>;
 

@@ -58,6 +58,7 @@ func open(target Target, policy engine.Policy) (*session, error) {
 		URL:       target.URL,
 		Headers:   target.Headers,
 		Auth:      target.Auth,
+		Inherited: target.Inherited,
 		Variables: target.Variables,
 	})
 	if err != nil {

@@ -8,6 +8,7 @@ import { RESTRICTED, applyExtractors, createExecutor } from './execution'
 import { introspectionRequest, readSchema } from './graphqlSchema'
 import { clearToken, obtainToken } from './oauth'
 import { isGrpcRequest, serializeProtoFiles } from './grpc'
+import { withInheritance } from './inheritance'
 import { isMcpRequest } from './mcp'
 import { createMockActions } from './mockServer'
 import { normalizeRequest } from './request'
@@ -118,7 +119,7 @@ export function createWorkspaceActions(backend) {
     const tab = activeTab()
     sendSequence += 1
     store().patchTab(tab.id, { schema: { loading: true } })
-    const response = await backend.send(`${tab.id}-schema-${sendSequence}`, introspectionRequest(tab.request), activeVariables())
+    const response = await backend.send(`${tab.id}-schema-${sendSequence}`, introspectionRequest(withInheritance(store(), tab.request)), activeVariables())
     store().patchTab(tab.id, { schema: readSchema(response) })
   }
 
@@ -126,7 +127,7 @@ export function createWorkspaceActions(backend) {
     const tab = activeTab()
     store().patchTab(tab.id, { grpcSchema: { loading: true } })
     try {
-      store().patchTab(tab.id, { grpcSchema: await backend.describeGrpc(tab.request, activeVariables()) })
+      store().patchTab(tab.id, { grpcSchema: await backend.describeGrpc(withInheritance(store(), tab.request), activeVariables()) })
     } catch (error) {
       store().patchTab(tab.id, { grpcSchema: { error: messageOf(error) } })
     }
@@ -136,7 +137,7 @@ export function createWorkspaceActions(backend) {
     const tab = activeTab()
     store().patchTab(tab.id, { mcpCatalog: { loading: true } })
     try {
-      store().patchTab(tab.id, { mcpCatalog: await backend.describeMcp(tab.request, activeVariables()) })
+      store().patchTab(tab.id, { mcpCatalog: await backend.describeMcp(withInheritance(store(), tab.request), activeVariables()) })
     } catch (error) {
       store().patchTab(tab.id, { mcpCatalog: { error: messageOf(error) } })
     }
@@ -217,7 +218,7 @@ export function createWorkspaceActions(backend) {
   const generateCode = attempt('Cannot generate code', async () => {
     if (isGrpcRequest(activeTab().request)) throw new Error(NO_GRPC_CODE)
     if (isMcpRequest(activeTab().request)) throw new Error(NO_MCP_CODE)
-    const prepared = await backend.prepare(activeTab().request, activeVariables())
+    const prepared = await backend.prepare(withInheritance(store(), activeTab().request), activeVariables())
     store().openCodeDialog(generateAllSnippets(prepared))
   })
 
@@ -232,6 +233,7 @@ export function createWorkspaceActions(backend) {
     const { requests, folders } = data
     if (requests.length > 0) store().upsertRequests(await backend.saveRequests(requests))
     store().mergeFolders(folders)
+    store().adoptCollectionSettings(data.settings)
     const skippedEnvironments = store().mergeEnvironments(data.environments)
     const variablesMerged = store().mergeActiveVariables(data.variables)
     const notes = [
@@ -250,7 +252,7 @@ export function createWorkspaceActions(backend) {
     if (activeCount === 0) return addImported(data)
     return store().showConfirm(
       'Import scripts and sign-in settings?',
-      `${pluralize(activeCount, 'request')} ${ACTIVE_CONTENT_PROMPT}`,
+      `${pluralize(activeCount, 'item')} ${ACTIVE_CONTENT_PROMPT}`,
       () => addImported(data),
       () => addImported(withoutActiveRequests(data)),
       'default',
@@ -403,6 +405,7 @@ export function createWorkspaceActions(backend) {
     saveSettings,
     pickFile: (title) => backend.network.pickFile(title),
     openRunner: (folderId) => store().openRunner(folderId),
+    openFolderSettings: (folderId) => store().openFolderSettings(folderId),
     closeRunner,
     startRun: runner.start,
     stopRun: runner.stop,
