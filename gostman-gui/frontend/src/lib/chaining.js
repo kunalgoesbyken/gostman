@@ -59,16 +59,20 @@ function jsonBody(response) {
   return parsedBodies.get(response)
 }
 
+export function evaluateJsonPath(json, path) {
+  try {
+    return { value: JSONPath({ path, json, wrap: false }) }
+  } catch (error) {
+    return { error: error.message }
+  }
+}
+
 function fromBody(response, path) {
   if (path === '') return missing('Enter a JSONPath such as $.data.id')
   const body = jsonBody(response)
   if (body.reason) return body
-  let match
-  try {
-    match = JSONPath({ path, json: body.json, wrap: false })
-  } catch (error) {
-    return missing(`Invalid JSONPath: ${error.message}`)
-  }
+  const { value: match, error } = evaluateJsonPath(body.json, path)
+  if (error) return missing(`Invalid JSONPath: ${error}`)
   if (match === undefined) return missing('Nothing in the body matches this path')
   if (match === null) return missing('The matched value is null')
   return found(typeof match === 'object' ? JSON.stringify(match) : match)
