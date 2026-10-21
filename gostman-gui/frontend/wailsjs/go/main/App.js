@@ -278,6 +278,10 @@ export function StopMock() {
   return window['go']['main']['App']['StopMock']();
 }
 
+export function StreamRequest(arg1, arg2) {
+  return window['go']['main']['App']['StreamRequest'](arg1, arg2);
+}
+
 export function TrustWorkspace() {
   return window['go']['main']['App']['TrustWorkspace']();
 }

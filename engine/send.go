@@ -21,13 +21,17 @@ const (
 	maxEncodedBody     = maxRequestBody * 3 / 2
 )
 
+var errBodyTooLarge = errors.New("request body is larger than 10 MB")
+
 type Policy struct {
-	BlockPrivate     bool
-	MaxResponseBytes int64
-	MaxTimeout       time.Duration
-	Network          *Network
-	Permit           func(host string) bool
-	RevealSecrets    bool
+	BlockPrivate      bool
+	MaxResponseBytes  int64
+	MaxTimeout        time.Duration
+	Network           *Network
+	Permit            func(host string) bool
+	RevealSecrets     bool
+	MaxStreamDuration time.Duration
+	MinStreamRetry    time.Duration
 }
 
 func (p Policy) refusal(host string) error {
@@ -45,27 +49,67 @@ func Send(ctx context.Context, r Request, policy Policy) Response {
 }
 
 func send(ctx context.Context, r Request, policy Policy) Response {
-	if len(r.Body) > maxEncodedBody {
-		return Failure(ErrorConfig, "request body is larger than 10 MB")
-	}
-	r, err := Resolve(r)
-	if err != nil {
-		return Failure(ErrorConfig, err.Error())
-	}
-	prepared, err := Prepare(r)
-	if err != nil {
-		return Failure(ErrorConfig, err.Error())
-	}
-	if len(prepared.body) > maxRequestBody {
-		return Failure(ErrorConfig, "request body is larger than 10 MB")
-	}
+	timeline := newRecorder(policy.RevealSecrets)
+	response := exchange(ctx, r, policy, timeline)
+	response.Timeline = timeline.finish()
+	return response
+}
 
+func exchange(ctx context.Context, r Request, policy Policy, timeline *recorder) Response {
 	ctx, cancel := context.WithTimeout(ctx, policy.Timeout(r.Options))
 	defer cancel()
 
-	outgoing, err := http.NewRequestWithContext(ctx, prepared.Method, prepared.URL, bytes.NewReader(prepared.body))
+	outgoing, client, cookies, err := newExchange(ctx, r, policy, timeline)
 	if err != nil {
 		return Failure(ErrorConfig, err.Error())
+	}
+	incoming, err := client.Do(outgoing)
+	if err != nil {
+		return classify(ctx, err)
+	}
+	defer incoming.Body.Close()
+
+	return collect(ctx, incoming, cookies, policy.ResponseLimit())
+}
+
+func collect(ctx context.Context, incoming *http.Response, cookies *cookieLog, limit int64) Response {
+	body, err := io.ReadAll(io.LimitReader(incoming.Body, limit+1))
+	if err != nil {
+		return classify(ctx, err)
+	}
+	cookies.record(incoming)
+	truncated := int64(len(body)) > limit
+	if truncated {
+		body = body[:limit]
+	}
+
+	response := describe(incoming, cookies)
+	response.Size = int64(len(body))
+	response.Truncated = truncated
+	response.ContentType = MediaType(incoming.Header.Get(headerContentType), body)
+	response.Body, response.BodyEncoding = EncodeBody(body, truncated)
+	return response
+}
+
+func newExchange(ctx context.Context, r Request, policy Policy, timeline *recorder) (*http.Request, *http.Client, *cookieLog, error) {
+	if len(r.Body) > maxEncodedBody {
+		return nil, nil, nil, errBodyTooLarge
+	}
+	r, err := Resolve(r)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	prepared, err := Prepare(r)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if len(prepared.body) > maxRequestBody {
+		return nil, nil, nil, errBodyTooLarge
+	}
+
+	outgoing, err := http.NewRequestWithContext(ctx, prepared.Method, prepared.URL, bytes.NewReader(prepared.body))
+	if err != nil {
+		return nil, nil, nil, err
 	}
 	for _, header := range prepared.Headers {
 		outgoing.Header.Add(header.Key, header.Value)
@@ -74,13 +118,6 @@ func send(ctx context.Context, r Request, policy Policy) Response {
 		outgoing.Host = host
 	}
 
-	timeline := newRecorder(policy.RevealSecrets)
-	response := deliver(ctx, outgoing, r, policy, timeline)
-	response.Timeline = timeline.finish()
-	return response
-}
-
-func deliver(ctx context.Context, outgoing *http.Request, r Request, policy Policy, timeline *recorder) Response {
 	cookies := &cookieLog{now: time.Now()}
 	client := &http.Client{
 		Jar:       newJar(r.Cookies, cookies.now),
@@ -96,36 +133,17 @@ func deliver(ctx context.Context, outgoing *http.Request, r Request, policy Poli
 			return nil
 		},
 	}
+	return outgoing, client, cookies, nil
+}
 
-	incoming, err := client.Do(outgoing)
-	if err != nil {
-		return classify(ctx, err)
-	}
-	defer incoming.Body.Close()
-
-	limit := policy.ResponseLimit()
-	body, err := io.ReadAll(io.LimitReader(incoming.Body, limit+1))
-	if err != nil {
-		return classify(ctx, err)
-	}
-	cookies.record(incoming)
-	truncated := int64(len(body)) > limit
-	if truncated {
-		body = body[:limit]
-	}
-
-	response := Response{
+func describe(incoming *http.Response, cookies *cookieLog) Response {
+	return Response{
 		Status:     incoming.Status,
 		StatusCode: incoming.StatusCode,
 		Headers:    FlattenHeaders(incoming.Header),
 		Cookies:    cookies.entries,
-		Size:       int64(len(body)),
 		URL:        incoming.Request.URL.String(),
-		Truncated:  truncated,
 	}
-	response.ContentType = MediaType(incoming.Header.Get(headerContentType), body)
-	response.Body, response.BodyEncoding = EncodeBody(body, truncated)
-	return response
 }
 
 func (p Policy) Timeout(options Options) time.Duration {

@@ -25,9 +25,11 @@ const (
 )
 
 var Policy = engine.Policy{
-	BlockPrivate:     true,
-	MaxResponseBytes: 3 << 20,
-	MaxTimeout:       30 * time.Second,
+	BlockPrivate:      true,
+	MaxResponseBytes:  3 << 20,
+	MaxTimeout:        30 * time.Second,
+	MaxStreamDuration: 60 * time.Second,
+	MinStreamRetry:    time.Second,
 }
 
 type prepareResult struct {
@@ -77,6 +79,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	query := r.URL.Query()
 	switch {
+	case query.Has("sse"):
+		streamEvents(w, r)
 	case query.Get("grpc") == actionDescribe:
 		writeJSON(w, describeGrpc(r))
 	case query.Get("grpc") == actionInvoke:
@@ -129,6 +133,30 @@ func send(r *http.Request) engine.Response {
 		return engine.Failure(engine.ErrorConfig, "the request could not be read: "+err.Error())
 	}
 	return engine.MarkProxied(engine.Send(r.Context(), request, Policy))
+}
+
+func streamEvents(w http.ResponseWriter, r *http.Request) {
+	var request engine.Request
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		writeJSON(w, engine.Failure(engine.ErrorConfig, "the request could not be read: "+err.Error()))
+		return
+	}
+	w.Header().Set("Content-Type", "application/x-ndjson")
+	w.Header().Set("Cache-Control", "no-cache, no-transform")
+	w.Header().Set("X-Accel-Buffering", "no")
+
+	encoder := json.NewEncoder(w)
+	controller := http.NewResponseController(w)
+	write := func(batch []engine.StreamMessage) {
+		for _, message := range batch {
+			if err := encoder.Encode(message); err != nil {
+				return
+			}
+		}
+		controller.Flush()
+	}
+	response := engine.Stream(r.Context(), request, Policy, write)
+	write([]engine.StreamMessage{{Kind: engine.StreamResponse, Response: &response}})
 }
 
 func prepare(r *http.Request) prepareResult {

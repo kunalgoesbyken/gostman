@@ -6,6 +6,7 @@ import { EmptyState } from "./ui/emptyState"
 import { Input } from "./ui/input"
 import { Notice, Panel, PanelBody, SectionLabel, Toolbar } from "./ui/panel"
 import { Textarea } from "./ui/textarea"
+import { GraphQLBuilder } from "./GraphQLBuilder"
 import { isPlainObject } from "../lib/dataUtils"
 import { GRAPHQL_METHOD } from "../lib/graphqlSchema"
 import { parseVariableMap, substitutePlaceholders } from "../lib/placeholders"
@@ -17,6 +18,8 @@ const EMPTY_VARIABLES = ["", "{}"]
 const SHOWN_TYPE_LIMIT = 100
 const NO_VARIABLES = new Map()
 const INVALID_FIELD = "border-destructive"
+const PANE_SCHEMA = "schema"
+const PANE_BUILDER = "builder"
 
 function describeSyntaxError(error) {
   const location = error.locations?.[0]
@@ -192,7 +195,7 @@ function VariablesSection({ variables, problem, onChange }) {
 }
 
 export function GraphQLPanel({ query, variables, environment, schema, method, onQueryChange, onVariablesChange, onUseGraphQL, onLoadSchema }) {
-  const [isSchemaOpen, setIsSchemaOpen] = useState(false)
+  const [pane, setPane] = useState("")
   const [prettifyError, setPrettifyError] = useState("")
 
   const values = useMemo(() => parseVariableMap(environment) || NO_VARIABLES, [environment])
@@ -204,6 +207,13 @@ export function GraphQLPanel({ query, variables, environment, schema, method, on
   const handleQueryChange = (next) => {
     setPrettifyError("")
     onQueryChange(next)
+  }
+
+  const togglePane = (name) => setPane(pane === name ? "" : name)
+
+  const applyBuilderChange = (result) => {
+    handleQueryChange(result.query)
+    if (result.variables !== variables) onVariablesChange(result.variables)
   }
 
   const prettify = () => {
@@ -230,10 +240,18 @@ export function GraphQLPanel({ query, variables, environment, schema, method, on
             Prettify
           </Button>
           <Button
-            variant={isSchemaOpen ? "secondary" : "ghost"}
+            variant={pane === PANE_BUILDER ? "secondary" : "ghost"}
             size="sm"
-            aria-pressed={isSchemaOpen}
-            onClick={() => setIsSchemaOpen(!isSchemaOpen)}
+            aria-pressed={pane === PANE_BUILDER}
+            onClick={() => togglePane(PANE_BUILDER)}
+          >
+            Builder
+          </Button>
+          <Button
+            variant={pane === PANE_SCHEMA ? "secondary" : "ghost"}
+            size="sm"
+            aria-pressed={pane === PANE_SCHEMA}
+            onClick={() => togglePane(PANE_SCHEMA)}
           >
             Schema
           </Button>
@@ -256,7 +274,10 @@ export function GraphQLPanel({ query, variables, environment, schema, method, on
         </div>
         <VariablesSection variables={variables} problem={variablesError} onChange={onVariablesChange} />
       </Panel>
-      {isSchemaOpen && <SchemaPane schema={schema} onLoad={onLoadSchema} />}
+      {pane === PANE_SCHEMA && <SchemaPane schema={schema} onLoad={onLoadSchema} />}
+      {pane === PANE_BUILDER && (
+        <GraphQLBuilder schema={schema} query={query} variables={variables} onChange={applyBuilderChange} onLoadSchema={onLoadSchema} />
+      )}
     </div>
   )
 }

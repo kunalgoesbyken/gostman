@@ -24,7 +24,15 @@ const DEFAULT_OAUTH2 = {
 
 const DEFAULT_AUTH = { type: '', username: '', password: '', token: '', key: '', value: '', in: '', oauth2: DEFAULT_OAUTH2 }
 
-const DEFAULT_OPTIONS = { timeoutMs: 0, noFollowRedirects: false, insecureTLS: false }
+const DEFAULT_OPTIONS = {
+  timeoutMs: 0,
+  noFollowRedirects: false,
+  insecureTLS: false,
+  stream: false,
+  streamReconnect: false,
+  streamMaxEvents: 0,
+  streamMaxSeconds: 0,
+}
 
 const DEFAULT_REQUEST = {
   id: '',

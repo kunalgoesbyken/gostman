@@ -22,7 +22,7 @@ var (
 		"grant", "authUrl", "tokenUrl", "clientId", "clientSecret", "scope", "username", "password",
 		"callbackUrl", "credentialsIn", "pkce", "headerPrefix", "accessToken", "refreshToken", "expiresAt",
 	}
-	optionKeys = []string{"timeoutMs", "noFollowRedirects", "insecureTLS"}
+	optionKeys = []string{"timeoutMs", "noFollowRedirects", "insecureTLS", "stream", "streamReconnect", "streamMaxEvents", "streamMaxSeconds"}
 )
 
 type requestExtras struct {
@@ -120,6 +120,10 @@ func (b nodeBuilder) options(options engine.Options, extras []*yaml.Node) *yaml.
 	setField(node, "timeoutMs", integerNode(int64(options.TimeoutMs)))
 	setField(node, "noFollowRedirects", setFlagNode(options.NoFollowRedirects))
 	setField(node, "insecureTLS", setFlagNode(options.InsecureTLS))
+	setField(node, "stream", setFlagNode(options.Stream))
+	setField(node, "streamReconnect", setFlagNode(options.StreamReconnect))
+	setField(node, "streamMaxEvents", integerNode(int64(options.StreamMaxEvents)))
+	setField(node, "streamMaxSeconds", integerNode(int64(options.StreamMaxSeconds)))
 	node.Content = append(node.Content, extras...)
 	return filledMapping(node)
 }
@@ -227,6 +231,10 @@ func readOptions(node *yaml.Node, extras *requestExtras, failure *error) engine.
 		TimeoutMs:         int(fields.integer("timeoutMs")),
 		NoFollowRedirects: fields.flag("noFollowRedirects", false),
 		InsecureTLS:       fields.flag("insecureTLS", false),
+		Stream:            fields.flag("stream", false),
+		StreamReconnect:   fields.flag("streamReconnect", false),
+		StreamMaxEvents:   int(fields.integer("streamMaxEvents")),
+		StreamMaxSeconds:  int(fields.integer("streamMaxSeconds")),
 	}
 }
 

@@ -37,6 +37,7 @@ import { desktopCapture } from './desktopCapture'
 import { desktopGit } from './desktopGit'
 import { desktopMock } from './desktopMock'
 import { openDesktopSocket } from './desktopSocket'
+import { openDesktopStream } from './desktopStream'
 import { toGrpcCall, toGrpcTarget } from '../grpc'
 import { toMcpCall, toMcpTarget } from '../mcp'
 import { toEngineRequest } from '../request'
@@ -87,6 +88,8 @@ export const desktopBackend = {
   invokeGrpc,
   describeMcp: (request, variables) => DescribeMcp(toMcpTarget(request, variables)),
   invokeMcp,
+  openStream: openDesktopStream,
+  streamCapSeconds: 0,
   load,
   saveRequest,
   saveRequests: (requests) => SaveRequests(requests),

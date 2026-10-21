@@ -57,6 +57,9 @@ func Prepare(r Request) (Prepared, error) {
 	if err != nil {
 		return Prepared{}, err
 	}
+	if r.BodyType == BodySOAP && len(body) > 0 {
+		headers, contentType = soapHeaders(headers, body)
+	}
 	if contentType != "" && !hasHeader(headers, headerContentType) {
 		headers = append(headers, pair{headerContentType, contentType})
 	}

@@ -6,6 +6,8 @@ import { inheritedAuthSource, lineageOf, withInheritance } from './inheritance'
 import { isMcpRequest } from './mcp'
 import { withFreshToken } from './oauth'
 import { failureResponse } from './response'
+import { isStreamRequest } from './sse'
+import { transmitStream } from './sseTransport'
 import { countActiveAssertions } from './scripting/assertions'
 import { consoleGroup } from './consoleLog'
 import { addressHost, collectionHostsBy, isPermittedHost } from './scripting/destinations'
@@ -96,6 +98,7 @@ const hasActiveInheritance = (lineage) => lineage.some(({ settings }) => hasActi
 function transportFor(backend, request) {
   if (isGrpcRequest(request)) return backend.invokeGrpc
   if (isMcpRequest(request)) return backend.invokeMcp
+  if (isStreamRequest(request)) return transmitStream(backend)
   return backend.send
 }
 

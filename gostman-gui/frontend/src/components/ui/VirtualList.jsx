@@ -3,8 +3,9 @@ import { cn } from "../../lib/utils"
 
 const OVERSCAN_ROWS = 8
 
-export function VirtualList({ items, rowHeight, renderRow, className, ...props }) {
-  const containerRef = useRef(null)
+export function VirtualList({ items, rowHeight, renderRow, className, scrollRef, ...props }) {
+  const ownRef = useRef(null)
+  const containerRef = scrollRef || ownRef
   const [scrollTop, setScrollTop] = useState(0)
   const [viewportHeight, setViewportHeight] = useState(0)
 
