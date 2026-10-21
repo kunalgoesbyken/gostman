@@ -1,6 +1,7 @@
 package mock
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"sort"
@@ -92,7 +93,23 @@ func maskedTarget(target *url.URL) string {
 	return target.EscapedPath() + queryStart + strings.Join(pairs, queryJoin)
 }
 
+func maskedBody(body []byte) []byte {
+	var document any
+	if json.Unmarshal(body, &document) != nil {
+		return body
+	}
+	if !redact.MapSensitive(document, func(string, string) string { return redact.Masked }) {
+		return body
+	}
+	masked, err := json.Marshal(document)
+	if err != nil {
+		return body
+	}
+	return masked
+}
+
 func loggedBody(body []byte) string {
+	body = maskedBody(body)
 	end := min(len(body), maxLoggedBody)
 	for end > 0 && end < len(body) && !utf8.RuneStart(body[end]) {
 		end--

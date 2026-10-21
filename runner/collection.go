@@ -1,10 +1,8 @@
 package runner
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/krockxz/gostman/engine"
 	"github.com/krockxz/gostman/workspace"
@@ -72,12 +70,12 @@ func Load(path string) (Collection, error) {
 	if isDirectory(path) {
 		return loadWorkspace(path)
 	}
-	content, err := os.ReadFile(path)
+	content, err := ReadText(path)
 	if err != nil {
 		return Collection{}, fmt.Errorf("cannot read the collection: %w", err)
 	}
 	var file exportFile
-	if err := json.Unmarshal(bytes.TrimPrefix(content, []byte(byteOrderMark)), &file); err != nil {
+	if err := json.Unmarshal(content, &file); err != nil {
 		return Collection{}, fmt.Errorf("%s is not a Gostman export: %w", path, err)
 	}
 	if file.Gostman == nil {

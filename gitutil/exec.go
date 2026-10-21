@@ -237,7 +237,7 @@ func ValidPath(path string) (string, error) {
 		return "", errors.New("a file path is required")
 	}
 	slashed := filepath.ToSlash(path)
-	if strings.HasPrefix(slashed, "-") || strings.HasPrefix(slashed, ":") {
+	if strings.HasPrefix(slashed, ":") {
 		return "", fmt.Errorf("%q is not a valid file path", path)
 	}
 	if !filepath.IsLocal(filepath.FromSlash(slashed)) {

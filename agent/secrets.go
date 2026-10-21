@@ -1,6 +1,8 @@
 package agent
 
 import (
+	"encoding/json"
+	"net/url"
 	"strings"
 
 	"github.com/krockxz/gostman/engine"
@@ -12,9 +14,13 @@ const (
 	hiddenPrefix  = "redacted:"
 	headerPrefix  = hiddenPrefix + "header."
 	cookiePrefix  = hiddenPrefix + "cookie."
+	queryPrefix   = hiddenPrefix + "query."
+	bodyPrefix    = hiddenPrefix + "body."
 	schemeDivider = " "
 	cookieDivider = ";"
 	cookieHeader  = "cookie"
+	queryStart    = "?"
+	fragmentStart = "#"
 )
 
 var credentialHeaders = map[string]bool{
@@ -130,6 +136,44 @@ func (c *Client) learnHeader(header engine.HeaderEntry) {
 		c.learnCookiePairs(header.Value)
 	case credentialHeaders[name]:
 		c.learnResolved(headerLabel(name), credentialOf(header.Value))
+	case redact.IsSensitiveName(name):
+		c.learnResolved(headerLabel(name), header.Value)
+	}
+}
+
+func (c *Client) learnBody(body, variables string) {
+	expansion, err := engine.NewExpansion(variables)
+	if err != nil {
+		return
+	}
+	var document any
+	if json.Unmarshal([]byte(expansion.Text(body)), &document) != nil {
+		return
+	}
+	redact.MapSensitive(document, func(name, value string) string {
+		c.learnResolved(bodyPrefix+name, value)
+		return value
+	})
+}
+
+func (c *Client) learnQuery(address, variables string) {
+	expansion, err := engine.NewExpansion(variables)
+	if err != nil {
+		return
+	}
+	_, query, found := strings.Cut(expansion.Text(address), queryStart)
+	if !found {
+		return
+	}
+	query, _, _ = strings.Cut(query, fragmentStart)
+	parsed, _ := url.ParseQuery(query)
+	for name, values := range parsed {
+		if !redact.IsSensitiveName(name) {
+			continue
+		}
+		for _, value := range values {
+			c.learnResolved(queryPrefix+name, value)
+		}
 	}
 }
 
@@ -152,6 +196,8 @@ func (c *Client) learnCredentials(headers string, auth engine.Auth, variables st
 
 func (c *Client) witness(sent engine.Request) {
 	c.learnCredentials(sent.Headers, sent.Auth, sent.Variables)
+	c.learnQuery(sent.URL, sent.Variables)
+	c.learnBody(sent.Body, sent.Variables)
 }
 
 func (c *Client) Study(stored runner.Collection) error {
@@ -170,12 +216,18 @@ func (c *Client) Study(stored runner.Collection) error {
 	}
 	for _, entry := range listed {
 		c.learnCredentials(entry.Request.Headers, entry.Request.Auth, "")
+		c.learnQuery(entry.Request.URL, "")
+		c.learnBody(entry.Request.Body, "")
 	}
 	return nil
 }
 
 func (c *Client) absorb() {
 	c.learnAll(c.session.Variables())
+	c.absorbShared()
+}
+
+func (c *Client) absorbShared() {
 	c.learnAll(c.session.Observed())
 	for name, value := range c.session.Resolved() {
 		c.learnResolved(name, value)

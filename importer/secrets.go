@@ -26,10 +26,10 @@ type redactor struct {
 func (r *redactor) placeholder(field string) string {
 	base := variableName(r.owner + "_" + field)
 	name := base
-	for attempt := 2; r.used[name]; attempt++ {
+	for attempt := 2; r.used[strings.ToUpper(name)]; attempt++ {
 		name = fmt.Sprintf("%s_%d", base, attempt)
 	}
-	r.used[name] = true
+	r.used[strings.ToUpper(name)] = true
 	r.names = append(r.names, name)
 	return variableOpen + name + variableClose
 }
@@ -60,10 +60,31 @@ func (r *redactor) request(request workspace.Request) workspace.Request {
 	request.QueryParams = r.rows(request.QueryParams)
 	request.Vars = r.rows(request.Vars)
 	request.URL = r.query(request.URL)
-	if request.BodyType == bodyForm || request.BodyType == bodyMultipart {
+	switch request.BodyType {
+	case bodyForm, bodyMultipart:
 		request.Body = r.rows(request.Body)
+	case bodyJSON:
+		request.Body = r.json(request.Body)
 	}
+	request.GraphqlVariables = r.json(request.GraphqlVariables)
 	return request
+}
+
+func (r *redactor) json(source string) string {
+	var document any
+	decoder := json.NewDecoder(strings.NewReader(source))
+	decoder.UseNumber()
+	if decoder.Decode(&document) != nil {
+		return source
+	}
+	if !redact.MapSensitive(document, r.value) {
+		return source
+	}
+	encoded, err := json.Marshal(document)
+	if err != nil {
+		return source
+	}
+	return string(encoded)
 }
 
 func (r *redactor) auth(auth engine.Auth) engine.Auth {

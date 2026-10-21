@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"time"
 	"unicode/utf8"
+
+	"github.com/krockxz/gostman/redact"
 )
 
 const (
@@ -129,11 +131,22 @@ func newExchange(ctx context.Context, r Request, policy Policy, timeline *record
 			if len(via) >= maxRedirects {
 				return fmt.Errorf("stopped after %d redirects", maxRedirects)
 			}
+			if originOf(next.URL) != originOf(via[0].URL) {
+				dropCredentials(next.Header)
+			}
 			cookies.record(next.Response)
 			return nil
 		},
 	}
 	return outgoing, client, cookies, nil
+}
+
+func dropCredentials(header http.Header) {
+	for name := range header {
+		if redact.IsSensitiveName(name) {
+			header.Del(name)
+		}
+	}
 }
 
 func describe(incoming *http.Response, cookies *cookieLog) Response {

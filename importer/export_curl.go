@@ -115,6 +115,13 @@ func (s *curlScript) secret(field, value string) string {
 	return s.redactor.value(field, value)
 }
 
+func (s *curlScript) json(source string) string {
+	if s.includeSecrets {
+		return source
+	}
+	return s.redactor.json(source)
+}
+
 func (s *curlScript) command(request workspace.Request) string {
 	arguments := []string{"curl"}
 	method := request.Method
@@ -201,7 +208,7 @@ func (s *curlScript) body(request workspace.Request) []string {
 	if request.Method == methodGraphQL {
 		payload := `{"query":` + quoteJSON(request.GraphqlQuery)
 		if strings.TrimSpace(request.GraphqlVariables) != "" {
-			payload += `,"variables":` + request.GraphqlVariables
+			payload += `,"variables":` + s.json(request.GraphqlVariables)
 		}
 		return []string{"-H 'Content-Type: application/json'", "--data-raw " + shellQuote(payload+"}")}
 	}
@@ -210,7 +217,11 @@ func (s *curlScript) body(request workspace.Request) []string {
 		if strings.TrimSpace(request.Body) == "" {
 			return nil
 		}
-		return []string{"--data-raw " + shellQuote(request.Body)}
+		text := request.Body
+		if request.BodyType == bodyJSON {
+			text = s.json(text)
+		}
+		return []string{"--data-raw " + shellQuote(text)}
 	case bodyForm:
 		return formArguments("--data-urlencode", s.sensitiveRows(readRows(request.Body)))
 	case bodyMultipart:

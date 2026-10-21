@@ -53,7 +53,7 @@ func (c *Client) Text(text string) string {
 func (c *Client) Run(ctx context.Context, stored runner.Collection, options runner.Options, observe func(runner.Result)) (runner.Report, error) {
 	c.learnAll(options.DataValues())
 	report, err := c.session.Run(ctx, stored, options, func(result runner.Result) {
-		c.absorb()
+		c.absorbShared()
 		if cleaned, err := redact.Clean(c.guard, result); err == nil {
 			observe(cleaned)
 		}
