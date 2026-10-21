@@ -241,6 +241,7 @@ export const useAppStore = create(
         isSidebarOpen: !isNarrowViewport(),
         closedTabs: [],
         cookiesDialogOpen: false,
+        scanDialogOpen: false,
         settingsDialogOpen: false,
         examplesDialogOpen: false,
         mockDialogOpen: false,
@@ -503,6 +504,8 @@ export const useAppStore = create(
         closeCommandPalette: () => set({ commandPaletteOpen: false }),
         openCookiesDialog: () => set({ cookiesDialogOpen: true }),
         closeCookiesDialog: () => set({ cookiesDialogOpen: false }),
+        openScanDialog: () => set({ scanDialogOpen: true, commandPaletteOpen: false }),
+        closeScanDialog: () => set({ scanDialogOpen: false }),
         openSettingsDialog: () => set({ settingsDialogOpen: true }),
         closeSettingsDialog: () => set({ settingsDialogOpen: false }),
         openExamplesDialog: () => set({ examplesDialogOpen: true }),
@@ -621,6 +624,7 @@ export const selectIsDialogOpen = (state) => (
   || state.shortcutsDialogOpen
   || state.preferencesDialogOpen
   || state.cookiesDialogOpen
+  || state.scanDialogOpen
   || state.settingsDialogOpen
   || state.examplesDialogOpen
   || state.mockDialogOpen

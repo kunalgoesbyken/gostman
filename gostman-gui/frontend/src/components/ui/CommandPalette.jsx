@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
   Bookmark, ClipboardPaste, Gauge, Clock, MonitorDown, Info, Hand, Folder, FolderOpen, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Pin, Plus, Radio, RotateCcw, Save, Search, Send,
-  Server, Settings, Share2, SlidersHorizontal, Sparkles, Undo2, Upload, X,
+  Server, Settings, Share2, ShieldAlert, SlidersHorizontal, Sparkles, Undo2, Upload, X,
 } from "lucide-react"
 import { MethodTag } from "../MethodTag"
 import { fuzzyScore } from "../../lib/fuzzy"
 import { PREFERENCES_TEXT } from "../../lib/preferencesText"
 import { ABOUT_TEXT } from "../../lib/aboutText"
 import { INSTALL_TEXT } from "../../lib/installText"
+import { SCAN_TEXT } from "../../lib/scanText"
 import { useInstallable } from "../../lib/pwa"
 import { LOAD_TEST_TEXT } from "../../lib/loadTestText"
 import { WELCOME_TEXT } from "../../lib/welcomeText"
@@ -36,6 +37,7 @@ const COMMANDS = [
   { id: "mock-server", label: "Mock server", description: "Serve saved examples on a local port", icon: Server, action: "mockServer" },
   { id: "capture", label: "Capture traffic", description: "Forward an app's calls to its API and save them as requests", icon: Radio, action: "captureTraffic" },
   { id: "cookies", label: "Manage cookies", description: "See and delete stored cookies", icon: Cookie, action: "cookies" },
+  { id: "scan-secrets", label: SCAN_TEXT.title, description: SCAN_TEXT.commandDescription, icon: ShieldAlert, keywords: "credentials tokens passwords leak", action: "scanSecrets" },
   { id: "preferences", label: PREFERENCES_TEXT.title, description: PREFERENCES_TEXT.commandDescription, icon: SlidersHorizontal, action: "preferences" },
   { id: "network", label: "Network settings", description: "Proxy and certificates", icon: Settings, action: "settings" },
   { id: "import", label: "Import data", description: "Import Postman, OpenAPI or Gostman files", icon: Upload, action: "import" },

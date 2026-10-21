@@ -20,6 +20,8 @@ export function ImportExportDialog({
   onImportShared,
   openapi,
   importer,
+  scan,
+  onGoToRequest,
   onPickSpecFile,
   onSaveFile,
   onSaveBase64,
@@ -49,6 +51,8 @@ export function ImportExportDialog({
             variables={variables}
             settings={settings}
             importer={importer}
+            scan={scan}
+            onGoToRequest={onGoToRequest}
             onSaveFile={onSaveFile}
             onSaveBase64={onSaveBase64}
           />
@@ -61,6 +65,8 @@ export function ImportExportDialog({
             settings={settings}
             initialFolderId={shareFolderId}
             linkBase={shareLinkBase}
+            scan={scan}
+            onGoToRequest={onGoToRequest}
             onSaveFile={onSaveFile}
           />
         </TabsContent>

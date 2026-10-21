@@ -29,6 +29,7 @@ import { createWorkspaceActions } from "../lib/workspaceActions"
 const CodeSnippetDialog = lazy(() => import("./CodeSnippetDialog").then((module) => ({ default: module.CodeSnippetDialog })))
 const ImportExportDialog = lazy(() => import("./ImportExportDialog").then((module) => ({ default: module.ImportExportDialog })))
 const IncomingShareDialog = lazy(() => import("./IncomingShareDialog").then((module) => ({ default: module.IncomingShareDialog })))
+const ScanDialog = lazy(() => import("./ScanDialog").then((module) => ({ default: module.ScanDialog })))
 const CookiesDialog = lazy(() => import("./CookiesDialog").then((module) => ({ default: module.CookiesDialog })))
 const NetworkDialog = lazy(() => import("./NetworkDialog").then((module) => ({ default: module.NetworkDialog })))
 const ExamplesDialog = lazy(() => import("./ExamplesDialog").then((module) => ({ default: module.ExamplesDialog })))
@@ -197,6 +198,8 @@ function LoadedWorkspace({ backend, onBack }) {
   const importDialogTab = useAppStore((s) => s.importDialogTab)
   const importDialogFolderId = useAppStore((s) => s.importDialogFolderId)
   const cookiesDialogOpen = useAppStore((s) => s.cookiesDialogOpen)
+  const scanDialogOpen = useAppStore((s) => s.scanDialogOpen)
+  const closeScanDialog = useAppStore((s) => s.closeScanDialog)
   const settingsDialogOpen = useAppStore((s) => s.settingsDialogOpen)
   const examplesDialogOpen = useAppStore((s) => s.examplesDialogOpen)
   const mockDialogOpen = useAppStore((s) => s.mockDialogOpen)
@@ -245,6 +248,15 @@ function LoadedWorkspace({ backend, onBack }) {
   const variablesMap = useMemo(() => exportableVariables(resolvedVariables), [resolvedVariables])
   const shareableEnvironments = useMemo(() => withoutSecretValues(environments), [environments])
   const openNewTab = useCallback(() => newTab(), [newTab])
+  const scannedCollection = useMemo(
+    () => ({ requests, folders, environments: shareableEnvironments, settings: collectionSettings }),
+    [requests, folders, shareableEnvironments, collectionSettings]
+  )
+  const goToRequest = useCallback((requestId) => {
+    closeScanDialog()
+    closeImportDialog()
+    actions.goToRequest(requestId)
+  }, [actions, closeScanDialog, closeImportDialog])
 
   const updateField = useCallback((field, value) => updateActiveRequest({ [field]: value }), [updateActiveRequest])
   const fieldHandlers = useRequestFieldHandlers(updateField)
@@ -353,6 +365,8 @@ function LoadedWorkspace({ backend, onBack }) {
             onImportShared={actions.importShared}
             openapi={actions.openapi}
             importer={actions.importer}
+            scan={actions.scan}
+            onGoToRequest={goToRequest}
             onSaveBase64={actions.saveBase64File}
             onPickSpecFile={actions.canConfigureNetwork ? actions.pickFile : null}
             onSaveFile={actions.saveTextFile}
@@ -361,6 +375,7 @@ function LoadedWorkspace({ backend, onBack }) {
         )}
         {sharedLink && <IncomingShareDialog reference={sharedLink} onImport={actions.importShared} onClose={forgetSharedLink} />}
         {cookiesDialogOpen && <CookiesDialog onClose={closeCookiesDialog} />}
+        {scanDialogOpen && <ScanDialog scan={actions.scan} collection={scannedCollection} onGoToRequest={goToRequest} onClose={closeScanDialog} />}
         {settingsDialogOpen && <NetworkDialog settings={settings} actions={actions} onClose={closeSettingsDialog} />}
         {examplesDialogOpen && <ExamplesDialog request={activeRequest} actions={actions.examples} EditorComponent={MonacoEditor} />}
         {mockDialogOpen && <MockServerDialog folders={folders} requests={requests} actions={actions.mock} />}

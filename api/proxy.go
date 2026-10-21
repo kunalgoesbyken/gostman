@@ -13,6 +13,7 @@ import (
 	"github.com/kunalgoesbyken/gostman/mcpclient"
 	"github.com/kunalgoesbyken/gostman/openapi"
 	"github.com/kunalgoesbyken/gostman/rpc"
+	"github.com/kunalgoesbyken/gostman/scan"
 )
 
 const (
@@ -96,6 +97,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, readOpenAPI(r))
 	case query.Has("import"):
 		writeJSON(w, runImport(r))
+	case query.Has("scan"):
+		writeJSON(w, scanSecrets(r))
 	case query.Has("curl"):
 		writeJSON(w, parseCurl(r))
 	case query.Has("prepare"):
@@ -174,6 +177,14 @@ func prepare(r *http.Request) prepareResult {
 		return prepareResult{Error: err.Error()}
 	}
 	return prepareResult{Prepared: &prepared}
+}
+
+func scanSecrets(r *http.Request) scan.Reply {
+	var query scan.Query
+	if err := json.NewDecoder(r.Body).Decode(&query); err != nil {
+		return scan.Reply{Error: "the collection could not be read"}
+	}
+	return scan.Handle(query)
 }
 
 func parseCurl(r *http.Request) curlResult {
