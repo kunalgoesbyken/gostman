@@ -20,7 +20,7 @@ export const FORMAT_LABELS = {
 export const IMPORT_TEXT = {
   chooseFiles: 'Choose files',
   chooseFolder: 'Choose folder',
-  dropHint: 'Drop files or a folder here, or paste content below. Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI and Swagger, Gostman exports and share links.',
+  dropHint: 'Drop files, a folder or a .zip here, or paste content below. Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI and Swagger, Gostman exports and share links.',
   formatLabel: 'Format',
   pastePlaceholder: 'Paste a collection, a spec, a capture or a share link',
   pasteLabel: 'Content to import',
@@ -36,6 +36,7 @@ export const IMPORT_TEXT = {
   noFiles: 'No importable files were found.',
   filesSelected: (count) => `${count} files selected`,
   sourceLine: (source, label, counts) => `${source}: ${label}, ${counts}`,
+  totalLine: (sources, counts) => `${sources} files read: ${counts}`,
   summary: (counts) => `Found ${counts}`,
 }
 

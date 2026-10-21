@@ -1,6 +1,7 @@
 import { MAX_FILE_SIZE } from './importExport'
 import { formatSize } from './dataUtils'
 import { IMPORT_TEXT } from './importText'
+import { readZip } from './zipReader'
 
 const MAX_FILES = 5000
 const MAX_DEPTH = 32
@@ -64,8 +65,29 @@ export async function droppedEntries(dataTransfer) {
   return found
 }
 
-export async function readImportFiles(entries) {
-  const relevant = entries.length === 1 ? entries : entries.filter(({ name }) => IMPORTABLE.has(extensionOf(name)) && !isHiddenPath(name))
+const isArchive = ({ name }) => extensionOf(name) === 'zip'
+
+async function expandArchives(entries) {
+  const expanded = []
+  for (const entry of entries) {
+    if (!isArchive(entry)) {
+      expanded.push(entry)
+      continue
+    }
+    if (entry.file.size > MAX_FILE_SIZE) throw new Error(IMPORT_TEXT.tooLarge(entry.name, formatSize(entry.file.size), formatSize(MAX_FILE_SIZE)))
+    expanded.push(...await readZip(await entry.file.arrayBuffer(), { files: MAX_FILES, bytes: MAX_FILE_SIZE }))
+  }
+  return expanded
+}
+
+export async function readImportFiles(given) {
+  let entries
+  try {
+    entries = await expandArchives(given)
+  } catch (error) {
+    return { error: error.message }
+  }
+  const relevant = entries.length === 1 && !isArchive(given[0]) ? entries : entries.filter(({ name }) => IMPORTABLE.has(extensionOf(name)) && !isHiddenPath(name))
   if (relevant.length === 0) return { error: IMPORT_TEXT.noFiles }
   if (relevant.length > MAX_FILES) return { error: IMPORT_TEXT.tooMany(MAX_FILES) }
   const oversized = relevant.find(({ file }) => file.size > MAX_FILE_SIZE)
