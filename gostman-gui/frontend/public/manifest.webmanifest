@@ -1,0 +1,16 @@
+{
+  "name": "Gostman",
+  "short_name": "Gostman",
+  "description": "An open source API client for REST, GraphQL, gRPC and WebSocket. No account, and your data stays on your device.",
+  "id": "/web",
+  "start_url": "/web",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#050810",
+  "theme_color": "#050810",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

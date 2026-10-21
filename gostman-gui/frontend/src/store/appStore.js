@@ -200,6 +200,7 @@ export const useAppStore = create(
         workspaceSessions: {},
         workspaceMenuOpen: false,
         welcomeVisible: !isWelcomeDismissed(),
+        aboutOpen: false,
         requestPanel: DEFAULT_REQUEST_PANEL,
         codeDialogOpen: false,
         codeSnippets: null,
@@ -258,6 +259,8 @@ export const useAppStore = create(
           rememberWelcomeDismissed()
           set({ welcomeVisible: false })
         },
+        openAbout: () => set({ aboutOpen: true, commandPaletteOpen: false }),
+        closeAbout: () => set({ aboutOpen: false }),
         adoptWorkspaceStatus: (status) => set({ workspaceStatus: status }),
         leaveWorkspace: (path) => set((state) => leaveWorkspace(state, path)),
         setWorkspaceMenuOpen: (workspaceMenuOpen) => set({ workspaceMenuOpen, commandPaletteOpen: false }),
@@ -557,6 +560,7 @@ export const selectIsDialogOpen = (state) => (
   || state.importDialogOpen
   || state.commandPaletteOpen
   || state.workspaceMenuOpen
+  || state.aboutOpen
   || state.shortcutsDialogOpen
   || state.preferencesDialogOpen
   || state.cookiesDialogOpen

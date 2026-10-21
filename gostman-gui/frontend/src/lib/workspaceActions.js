@@ -14,6 +14,7 @@ import { isMcpRequest } from './mcp'
 import { createMockActions } from './mockServer'
 import { getPreferences } from './preferences'
 import { normalizeRequest } from './request'
+import { promptInstall } from './pwa'
 import { SAMPLE_REQUEST } from './welcome'
 import { isRequestDirty } from './requestChanges'
 import { bodyBase64, downloadName, mimeType } from './response'
@@ -386,6 +387,8 @@ export function createWorkspaceActions(backend) {
     newFolder: () => createFolder(),
     clearHistory,
     showWelcome: () => store().showWelcome(),
+    about: () => store().openAbout(),
+    installApp: promptInstall,
     switchEnvironment: (environmentId) => store().setActiveEnvironment(environmentId),
     workspaceSwitcher: () => storageActions?.openSwitcher(),
     openFolder: () => storageActions?.openFolder(),
