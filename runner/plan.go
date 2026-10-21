@@ -86,6 +86,7 @@ func (o Options) applyTo(request Request) Request {
 	if o.Insecure {
 		request.Options.InsecureTLS = true
 	}
+	request.Options = withStreamBudget(request.Options, o.streamSeconds())
 	return request
 }
 

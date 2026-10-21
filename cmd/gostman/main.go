@@ -52,6 +52,9 @@ run
                         and the variables iteration and iterationCount are set
   --iterations <n>      repeat the run n times, or use only the first n data rows
                         (at most 10000 iterations; more exits with status 2)
+  --stream-timeout <s>  time budget for each streaming (SSE) request in a run
+                        (default 10 seconds, at most 100 events unless the
+                        request sets its own); the report says how it ended
   --parallel <n>        run up to n at once: iterations when there are several
                         (each keeps its order and extraction chaining),
                         otherwise single requests, which do not see each

@@ -26,6 +26,7 @@ type Result struct {
 	Status     string    `json:"status"`
 	StatusCode int       `json:"statusCode"`
 	Protocol   string    `json:"protocol"`
+	StreamEnd  string    `json:"streamEnd,omitempty"`
 	DurationMs int64     `json:"durationMs"`
 	Error      string    `json:"error"`
 	Failed     bool      `json:"failed"`

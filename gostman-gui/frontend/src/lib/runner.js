@@ -2,6 +2,7 @@ import { buildCollectionTree, collectRequests } from './collectionTree'
 import { isPlainObject, parseJSON } from './dataUtils'
 import { iterationCount, iterationVariables } from './runData'
 import { createFlowFollower } from './runFlow'
+import { withRunStreamBudget } from './runStream'
 import { isSocketAddress } from './socketSessions'
 import { selectActiveVariables, useAppStore } from '../store/appStore'
 
@@ -41,6 +42,7 @@ function summarize(request, { response, tests }, iteration) {
     status: response.status,
     statusCode: response.statusCode,
     protocol: response.protocol,
+    streamEnd: response.streamEnd,
     isAnswered: !response.error,
     error: response.error ? response.body : tests.error,
     durationMs: response.durationMs,
@@ -68,7 +70,7 @@ export function createRunner(backend, execute) {
     sequence += 1
     const sendId = `run-${sequence}`
     run.sendIds.add(sendId)
-    const outcome = await execute(request, sendId)
+    const outcome = await execute(withRunStreamBudget(request), sendId)
     run.sendIds.delete(sendId)
     if (outcome.skipped) return skipped(request, outcome.skipped, outcome.tests.flow)
     return summarize(request, outcome, iteration)

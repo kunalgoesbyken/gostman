@@ -698,6 +698,7 @@ export namespace engine {
 	    truncated: boolean;
 	    error: string;
 	    protocol?: string;
+	    streamEnd?: string;
 	    timeline?: Timeline;
 	
 	    static createFrom(source: any = {}) {
@@ -719,6 +720,7 @@ export namespace engine {
 	        this.truncated = source["truncated"];
 	        this.error = source["error"];
 	        this.protocol = source["protocol"];
+	        this.streamEnd = source["streamEnd"];
 	        this.timeline = this.convertValues(source["timeline"], Timeline);
 	    }
 	

@@ -14,6 +14,7 @@ import { ROOT_ID, buildCollectionTree, collectRequests, listFolders } from "../l
 import { pluralize } from "../lib/dataUtils"
 import { DATA_FILE_ERROR, iterationCount, MAX_ITERATIONS, parseDataFile } from "../lib/runData"
 import { statusVariant } from "../lib/response"
+import { endSummary } from "../lib/sse"
 import { cn } from "../lib/utils"
 
 const PATH_SEPARATOR = " / "
@@ -57,6 +58,7 @@ function ResultRow({ result }) {
   const { Icon, tone } = outcomeIcon(result)
   const failures = result.tests.filter((test) => !test.passed)
   const detail = result.skipped || result.error
+  const streamNote = result.streamEnd ? endSummary({ endReason: result.streamEnd }) : ""
 
   return (
     <li className="border-b border-border px-3 py-1.5">
@@ -68,6 +70,7 @@ function ResultRow({ result }) {
         <ResultSummary result={result} />
       </div>
       {detail && <p className="pl-[1.375rem] text-xs text-muted-foreground">{detail}</p>}
+      {streamNote && <p className="pl-[1.375rem] text-xs text-muted-foreground">{streamNote}</p>}
       {failures.length > 0 && (
         <ul className="pl-[1.375rem]">
           {failures.map((test, index) => <TestRow key={index} result={test} />)}

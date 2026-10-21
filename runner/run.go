@@ -9,18 +9,19 @@ import (
 )
 
 type Options struct {
-	Environment string
-	Folder      string
-	Variables   map[string]string
-	Bail        bool
-	Delay       time.Duration
-	Timeout     time.Duration
-	Insecure    bool
-	Data        []Row
-	Iterations  int
-	Parallel    int
-	Only        []string
-	Capture     bool
+	Environment   string
+	Folder        string
+	Variables     map[string]string
+	Bail          bool
+	Delay         time.Duration
+	Timeout       time.Duration
+	Insecure      bool
+	Data          []Row
+	Iterations    int
+	Parallel      int
+	Only          []string
+	Capture       bool
+	StreamTimeout time.Duration
 }
 
 func identify(request Request, folder string) Result {
@@ -55,6 +56,7 @@ func describe(request Request, folder string, outcome exchange) Result {
 	result.Status = response.Status
 	result.StatusCode = response.StatusCode
 	result.Protocol = response.Protocol
+	result.StreamEnd = response.StreamEnd
 	result.DurationMs = response.DurationMs
 	result.Tests = append(result.Tests, outcome.tests...)
 	result.Logs = append(result.Logs, outcome.logs...)

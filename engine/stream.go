@@ -133,6 +133,7 @@ func (s *stream) run(ctx context.Context) Response {
 	}
 	s.out.add(StreamMessage{Kind: StreamEnd, Reason: reason, Detail: detail})
 	response.Size = s.bytes
+	response.StreamEnd = reason
 	return response
 }
 
