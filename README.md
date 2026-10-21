@@ -15,7 +15,7 @@
   <p>No account. Your requests stay on your device. The web app installs as an app and works offline.</p>
 </div>
 
-![Gostman sending a request](screenshots/app.png)
+![Gostman sending a request and generating code](screenshots/demo.gif)
 
 | | |
 | --- | --- |
@@ -24,6 +24,17 @@
 | ![Assertions and test results](gostman-gui/frontend/src/assets/landing/tests.png) | ![Collection runner](gostman-gui/frontend/src/assets/landing/runner.png) |
 
 Gostman is a native desktop application built with Go and [Wails](https://wails.io), with the same interface available in the browser at [gostman.vercel.app](https://gostman.vercel.app). Requests, collections and environments are stored on your machine. There is nothing to sign in to.
+
+## Why not Bruno or Postman?
+
+Both are good tools. Gostman exists for people who want the paid-tier workflow without a paid tier or an account.
+
+- **Nothing to sign in to.** Collections are plain YAML files in a folder you can commit. The desktop app and the browser version both work without an account.
+- **No tiers.** Data-driven runs, parallel runs, HTML reports, secret managers (Vault, AWS, Azure, Google Cloud) and the Git panel are all in the download. Bruno documents several of these under its [Pro and Ultimate plans](https://www.usebruno.com/pricing), and Postman lists custom data files in the Collection Runner on its [paid plans](https://www.postman.com/pricing/).
+- **Small and quick.** The Windows installer is about 10 MB, the app takes about 20 MB on disk and opens in well under a second on a modern laptop. The [benchmark script](benchmarks/README.md) is in the repository so you can measure it on your own machine.
+- **One collection for you, CI and your coding agent.** The same files run in the app, with `gostman run` in CI, and through the built-in MCP server.
+
+Prices and plans change, so check Bruno's and Postman's own pages before you decide. A side-by-side table is on [gostman.vercel.app](https://gostman.vercel.app).
 
 ## Features
 
