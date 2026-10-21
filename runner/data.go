@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
 	"strings"
 )
@@ -25,11 +24,10 @@ func (o Options) DataValues() map[string]string {
 }
 
 func LoadData(path string) ([]Row, error) {
-	content, err := os.ReadFile(path)
+	content, err := ReadText(path)
 	if err != nil {
 		return nil, fmt.Errorf("cannot read the data file: %w", err)
 	}
-	content = bytes.TrimPrefix(content, []byte(byteOrderMark))
 	var rows []Row
 	if strings.EqualFold(filepath.Ext(path), ".json") {
 		rows, err = parseJSONRows(content)

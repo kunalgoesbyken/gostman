@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bufio"
 	"errors"
 	"flag"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/krockxz/gostman/runner"
@@ -81,15 +79,13 @@ func unquote(value string) string {
 }
 
 func readEnvFile(path string) (map[string]string, error) {
-	file, err := os.Open(path)
+	content, err := runner.ReadText(path)
 	if err != nil {
 		return nil, fmt.Errorf("cannot read the env file: %w", err)
 	}
-	defer file.Close()
 	values := map[string]string{}
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(scanner.Text()), "\xef\xbb\xbf"))
+	for _, text := range strings.Split(string(content), "\n") {
+		line := strings.TrimSpace(text)
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
@@ -101,5 +97,5 @@ func readEnvFile(path string) (map[string]string, error) {
 		}
 		values[name] = unquote(strings.TrimSpace(value))
 	}
-	return values, scanner.Err()
+	return values, nil
 }
