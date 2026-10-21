@@ -286,6 +286,10 @@ export function SaveSettings(arg1) {
   return window['go']['main']['App']['SaveSettings'](arg1);
 }
 
+export function SaveWindowTheme(arg1) {
+  return window['go']['main']['App']['SaveWindowTheme'](arg1);
+}
+
 export function SecretConnections() {
   return window['go']['main']['App']['SecretConnections']();
 }

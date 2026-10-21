@@ -6,7 +6,8 @@ import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { CollectionTree } from "./CollectionTree"
 import { HistoryList } from "./HistoryList"
 import { FOLDER_SETTINGS_TEXT } from "../lib/folderSettingsText"
-import { shortcutLabel } from "../lib/platform"
+import { useShortcutLabel } from "../hooks/useShortcuts"
+import { hintWithShortcut } from "../lib/shortcuts"
 
 const VIEW_COLLECTIONS = "collections"
 const VIEW_HISTORY = "history"
@@ -14,6 +15,7 @@ const VIEW_CLASS = "flex min-h-0 flex-1 flex-col"
 
 export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory, activeRequestId, actions }) {
   const [view, setView] = useState(VIEW_COLLECTIONS)
+  const newRequestShortcut = useShortcutLabel("newRequest")
 
   return (
     <aside className="flex w-64 shrink-0 flex-col border-r border-border">
@@ -30,7 +32,7 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
             <IconButton label="Run requests" icon={ListChecks} onClick={() => actions.openRunner()} />
             <IconButton label={FOLDER_SETTINGS_TEXT.collectionMenu} icon={Settings2} onClick={() => actions.openFolderSettings()} />
             <IconButton label="New folder" icon={FolderPlus} onClick={() => actions.createFolder()} />
-            <IconButton label={`New request (${shortcutLabel("N")})`} icon={Plus} onClick={() => actions.newRequest()} />
+            <IconButton label={hintWithShortcut("New request", newRequestShortcut)} icon={Plus} onClick={() => actions.newRequest()} />
           </div>
         </Toolbar>
 

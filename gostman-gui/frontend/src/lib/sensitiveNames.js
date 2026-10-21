@@ -1,6 +1,4 @@
-import words from '../../../../redact/sensitive_words.json'
-
-export const SENSITIVE_WORDS = words
+export const SENSITIVE_WORDS = ['auth', 'bearer', 'cookie', 'credential', 'key', 'passw', 'pwd', 'secret', 'session', 'signature', 'token']
 
 export const isSensitiveName = (name) => {
   const lowered = String(name).toLowerCase()

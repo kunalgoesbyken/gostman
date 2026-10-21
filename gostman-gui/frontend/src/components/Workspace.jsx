@@ -270,7 +270,7 @@ function LoadedWorkspace({ backend, onBack }) {
             loading={isLoading}
           />
 
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div className="response-split flex min-h-0 flex-1 flex-col overflow-hidden">
             <section aria-label="Request" className="flex min-h-0 flex-1 flex-col" style={REQUEST_AREA_STYLE}>
               <RequestTabs
                 tabId={activeTab.id}

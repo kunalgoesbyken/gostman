@@ -76,6 +76,10 @@ jobs:
             npm install
           fi
 
+      - name: Run frontend library tests
+        working-directory: ./gostman-gui/frontend
+        run: node --test
+
       - name: Verify the committed CLI script bundle is current
         working-directory: ./gostman-gui/frontend
         shell: bash

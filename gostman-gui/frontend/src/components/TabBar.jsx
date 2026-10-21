@@ -2,7 +2,8 @@ import { memo, useEffect, useMemo, useRef } from "react"
 import { Plus, X } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { MethodTag } from "./MethodTag"
-import { shortcutLabel } from "../lib/platform"
+import { useShortcutLabel } from "../hooks/useShortcuts"
+import { hintWithShortcut } from "../lib/shortcuts"
 import { isRequestDirty } from "../lib/requestChanges"
 import { cn } from "../lib/utils"
 
@@ -53,6 +54,7 @@ const Tab = memo(function Tab({ tab, saved, isActive, onSelect, onClose }) {
 })
 
 export const TabBar = memo(function TabBar({ tabs, activeTabId, requests, onTabSelect, onTabClose, onNewTab }) {
+  const newRequestShortcut = useShortcutLabel("newRequest")
   const savedById = useMemo(() => new Map(requests.map((request) => [request.id, request])), [requests])
 
   return (
@@ -70,7 +72,7 @@ export const TabBar = memo(function TabBar({ tabs, activeTabId, requests, onTabS
         ))}
       </div>
       <div className="flex shrink-0 items-center px-1.5">
-        <IconButton label={`New request (${shortcutLabel("N")})`} icon={Plus} onClick={onNewTab} />
+        <IconButton label={hintWithShortcut("New request", newRequestShortcut)} icon={Plus} onClick={onNewTab} />
       </div>
     </div>
   )

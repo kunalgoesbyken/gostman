@@ -1,40 +1,62 @@
 import { useEffect, useState } from 'react'
 import Editor from '@monaco-editor/react'
 import { useVariableMap } from '../hooks/useVariableMap'
+import { tripletToHex } from '../lib/colour'
+import { useResolvedTheme, usePreferences } from '../lib/preferences'
 import { VARIABLE_TEXT, describeReference, findReferences, isDefined, openReference, suggestNames } from '../lib/variables'
 import './variables.css'
 
-const THEME_NAME = 'gostman-dark'
+const THEME_NAME = 'gostman'
 
-const THEME = {
-    base: 'vs-dark',
+const tokenValue = (name) => getComputedStyle(document.documentElement).getPropertyValue(`--${name}`)
+
+const hex = (name, alpha) => tripletToHex(tokenValue(name), alpha)
+
+const rule = (token, name, fontStyle) => ({ token, foreground: hex(name).slice(1), fontStyle })
+
+const buildTheme = (isDark) => ({
+    base: isDark ? 'vs-dark' : 'vs',
     inherit: true,
     rules: [
-        { token: 'string', foreground: '5eead4' },
-        { token: 'number', foreground: 'fb923c' },
-        { token: 'keyword', foreground: '22d3ee' },
-        { token: 'comment', foreground: '6b7280', fontStyle: 'italic' },
-        { token: 'type', foreground: 'a78bfa' },
-        { token: 'variable', foreground: 'f0f9ff' },
+        rule('string', 'syntax-string'),
+        rule('number', 'syntax-number'),
+        rule('keyword', 'syntax-key'),
+        rule('comment', 'muted-foreground', 'italic'),
+        rule('type', 'syntax-boolean'),
+        rule('variable', 'foreground'),
     ],
     colors: {
-        'editor.background': '#030711',
-        'editor.foreground': '#f0f9ff',
-        'editorLineNumber.foreground': '#475569',
-        'editorLineNumber.activeForeground': '#22d3ee',
-        'editor.selectionBackground': '#22d3ee40',
-        'editor.lineHighlightBackground': '#0f1629',
-        'editorCursor.foreground': '#22d3ee',
-        'editorWhitespace.foreground': '#334155',
-        'editorIndentGuide.background': '#1e293b',
-        'editorIndentGuide.activeBackground': '#334155',
-        'scrollbarSlider.background': '#334155',
-        'scrollbarSlider.hoverBackground': '#475569',
-        'scrollbarSlider.activeBackground': '#64748b',
+        'editor.background': hex('background'),
+        'editor.foreground': hex('foreground'),
+        'editorLineNumber.foreground': hex('muted-foreground'),
+        'editorLineNumber.activeForeground': hex('primary'),
+        'editor.selectionBackground': hex('primary', 0.25),
+        'editor.lineHighlightBackground': hex('card'),
+        'editorCursor.foreground': hex('primary'),
+        'editorWhitespace.foreground': hex('border'),
+        'editorIndentGuide.background1': hex('border'),
+        'editorIndentGuide.activeBackground1': hex('muted-foreground'),
+        'editorWidget.background': hex('card'),
+        'editorWidget.foreground': hex('card-foreground'),
+        'editorWidget.border': hex('border'),
+        'editorSuggestWidget.selectedBackground': hex('accent'),
+        'scrollbarSlider.background': hex('muted-foreground', 0.3),
+        'scrollbarSlider.hoverBackground': hex('muted-foreground', 0.5),
+        'scrollbarSlider.activeBackground': hex('muted-foreground', 0.7),
     },
-}
+})
 
-const defineTheme = (monaco) => monaco.editor.defineTheme(THEME_NAME, THEME)
+const defineTheme = (monaco, isDark) => monaco.editor.defineTheme(THEME_NAME, buildTheme(isDark))
+
+function useEditorTheme(instance) {
+  const resolvedTheme = useResolvedTheme()
+  useEffect(() => {
+    if (!instance) return
+    defineTheme(instance.monaco, resolvedTheme === 'dark')
+    instance.monaco.editor.setTheme(THEME_NAME)
+  }, [instance, resolvedTheme])
+  return resolvedTheme
+}
 
 const VARIABLE_LANGUAGES = ['json', 'xml', 'plaintext']
 const variablesByModel = new Map()
@@ -124,6 +146,8 @@ function useVariableSupport(instance, enabled) {
 
 export function MonacoEditor({ value, onChange, language = "json", path, height = "300px", variables = false }) {
     const [instance, setInstance] = useState(null)
+    const { editorFontSize, wrapLines } = usePreferences()
+    const resolvedTheme = useEditorTheme(instance)
     useVariableSupport(instance, variables)
     return (
         <Editor
@@ -133,7 +157,7 @@ export function MonacoEditor({ value, onChange, language = "json", path, height 
             value={value}
             onChange={(next) => onChange?.({ target: { value: next || "" } })}
             beforeMount={(monaco) => {
-                defineTheme(monaco)
+                defineTheme(monaco, resolvedTheme === 'dark')
                 registerVariableProviders(monaco)
             }}
             onMount={(editor, monaco) => {
@@ -142,7 +166,7 @@ export function MonacoEditor({ value, onChange, language = "json", path, height 
             theme={THEME_NAME}
             options={{
                 minimap: { enabled: false },
-                fontSize: 12,
+                fontSize: editorFontSize,
                 fontFamily: "'JetBrains Mono', 'Courier New', monospace",
                 lineNumbers: "on",
                 roundedSelection: false,
@@ -151,7 +175,7 @@ export function MonacoEditor({ value, onChange, language = "json", path, height 
                 formatOnPaste: true,
                 formatOnType: true,
                 tabSize: 2,
-                wordWrap: "on",
+                wordWrap: wrapLines ? "on" : "off",
                 suggest: {
                     showKeywords: true,
                 },

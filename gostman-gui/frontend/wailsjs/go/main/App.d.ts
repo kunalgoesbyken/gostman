@@ -153,6 +153,8 @@ export function SaveSecretConnection(arg1:main.SecretConnection):Promise<void>;
 
 export function SaveSettings(arg1:main.Settings):Promise<void>;
 
+export function SaveWindowTheme(arg1:string):Promise<void>;
+
 export function SecretConnections():Promise<Array<main.SecretConnection>>;
 
 export function SecretKinds():Promise<Array<secrets.KindInfo>>;

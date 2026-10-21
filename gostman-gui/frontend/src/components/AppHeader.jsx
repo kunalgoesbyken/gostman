@@ -4,7 +4,7 @@ import { EnvironmentSwitcher } from "./EnvironmentSwitcher"
 import { StorageMenu } from "./StorageMenu"
 import { WindowControls } from "./WindowControls"
 import { isDesktopShell } from "../lib/windowControls"
-import { shortcutLabel } from "../lib/platform"
+import { useShortcutLabel } from "../hooks/useShortcuts"
 import logo from "../assets/logo.jpg"
 
 const DRAG = { "--wails-draggable": "drag" }
@@ -12,6 +12,7 @@ const NO_DRAG = { "--wails-draggable": "no-drag" }
 
 export function AppHeader({ storage, onImport, onReset, onOpenCommands, onBack }) {
   const isDesktop = isDesktopShell()
+  const paletteShortcut = useShortcutLabel("commandPalette")
 
   return (
     <header className="relative flex h-12 shrink-0 items-center gap-3 border-b border-border bg-background px-3" style={isDesktop ? DRAG : undefined}>
@@ -34,7 +35,7 @@ export function AppHeader({ storage, onImport, onReset, onOpenCommands, onBack }
         <Button variant="ghost" onClick={onOpenCommands} className="hidden lg:inline-flex">
           <Search />
           Commands
-          <kbd>{shortcutLabel("K")}</kbd>
+          {paletteShortcut && <kbd>{paletteShortcut}</kbd>}
         </Button>
         <EnvironmentSwitcher />
         <Button variant="outline" onClick={onImport}>

@@ -1,8 +1,9 @@
-import { Cookie, GitBranch, Radio, Server, Settings } from "lucide-react"
+import { Cookie, GitBranch, Radio, Server, Settings, SlidersHorizontal } from "lucide-react"
 import { cn } from "../lib/utils"
 import { useCaptureStore } from "../lib/captureSession"
 import { openGit, useGitStore } from "../lib/gitSession"
 import { useMockStore } from "../lib/mockServer"
+import { PREFERENCES_TEXT } from "../lib/preferencesText"
 import { useAppStore } from "../store/appStore"
 
 const ITEM_CLASS = "inline-flex h-full items-center gap-1.5 px-2 transition-colors hover:bg-accent hover:text-foreground [&_svg]:size-3"
@@ -21,6 +22,7 @@ const gitLabel = (git) => (git.detached ? "Detached HEAD" : git.branch) + (git.c
 export function StatusBar({ onOpenMock, onOpenCapture }) {
   const openCookies = useAppStore((s) => s.openCookiesDialog)
   const openSettings = useAppStore((s) => s.openSettingsDialog)
+  const openPreferences = useAppStore((s) => s.openPreferencesDialog)
   const isMockRunning = useMockStore((s) => s.isRunning)
   const isCapturing = useCaptureStore((s) => s.isRunning)
   const git = useGitStore((s) => s.state)
@@ -35,6 +37,7 @@ export function StatusBar({ onOpenMock, onOpenCapture }) {
       </div>
       <div className="flex h-full items-center">
         <StatusItem icon={Cookie} label="Cookies" onClick={openCookies} />
+        <StatusItem icon={SlidersHorizontal} label={PREFERENCES_TEXT.statusLabel} onClick={openPreferences} />
         <span className="px-2 font-mono text-[10px]">v{__APP_VERSION__}</span>
       </div>
     </footer>

@@ -6,7 +6,8 @@ import { Select } from "./ui/select"
 import { VariableInput } from "./VariableInput"
 import { HTTP_METHODS, METHOD_COLORS } from "../lib/constants"
 import { lookup } from "../lib/dataUtils"
-import { shortcutLabel } from "../lib/platform"
+import { useShortcutLabel } from "../hooks/useShortcuts"
+import { hintWithShortcut } from "../lib/shortcuts"
 import { isWebSocketURL } from "../lib/socketUrl"
 import { cn } from "../lib/utils"
 
@@ -38,6 +39,8 @@ export const RequestBar = memo(function RequestBar({
   loading,
 }) {
   const sendLabel = isWebSocketURL(activeRequest.url) ? "Connect" : "Send"
+  const sendShortcut = useShortcutLabel("sendRequest")
+  const saveShortcut = useShortcutLabel("saveRequest")
 
   const handlePaste = (event) => {
     const pastedText = event.clipboardData.getData("text")
@@ -90,12 +93,12 @@ export const RequestBar = memo(function RequestBar({
             Cancel
           </Button>
         ) : (
-          <Button onClick={onSend} title={`${sendLabel} (${shortcutLabel("Enter")})`}>
+          <Button onClick={onSend} title={hintWithShortcut(sendLabel, sendShortcut)}>
             <Send />
             {sendLabel}
           </Button>
         )}
-        <ActionButton icon={Save} label="Save" hint={`Save (${shortcutLabel("S")})`} variant="secondary" onClick={onSave} />
+        <ActionButton icon={Save} label="Save" hint={hintWithShortcut("Save", saveShortcut)} variant="secondary" onClick={onSave} />
         <ActionButton icon={Code} label="Code" hint="Generate code" variant="outline" onClick={onGenerateCode} />
       </div>
     </div>
