@@ -3,6 +3,7 @@ import { cn } from "../lib/utils"
 import { useCaptureStore } from "../lib/captureSession"
 import { openGit, useGitStore } from "../lib/gitSession"
 import { useMockStore } from "../lib/mockServer"
+import { ABOUT_TEXT } from "../lib/aboutText"
 import { PREFERENCES_TEXT } from "../lib/preferencesText"
 import { useAppStore } from "../store/appStore"
 
@@ -23,6 +24,7 @@ export function StatusBar({ onOpenMock, onOpenCapture }) {
   const openCookies = useAppStore((s) => s.openCookiesDialog)
   const openSettings = useAppStore((s) => s.openSettingsDialog)
   const openPreferences = useAppStore((s) => s.openPreferencesDialog)
+  const openAbout = useAppStore((s) => s.openAbout)
   const isMockRunning = useMockStore((s) => s.isRunning)
   const isCapturing = useCaptureStore((s) => s.isRunning)
   const git = useGitStore((s) => s.state)
@@ -38,7 +40,7 @@ export function StatusBar({ onOpenMock, onOpenCapture }) {
       <div className="flex h-full items-center">
         <StatusItem icon={Cookie} label="Cookies" onClick={openCookies} />
         <StatusItem icon={SlidersHorizontal} label={PREFERENCES_TEXT.statusLabel} onClick={openPreferences} />
-        <span className="px-2 font-mono text-[10px]">v{__APP_VERSION__}</span>
+        <button type="button" title={ABOUT_TEXT.versionButton} aria-label={ABOUT_TEXT.versionButton} onClick={openAbout} className={cn(ITEM_CLASS, "font-mono text-[10px]")}>v{__APP_VERSION__}</button>
       </div>
     </footer>
   )

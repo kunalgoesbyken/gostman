@@ -2,6 +2,7 @@ import { AlertDialog } from "./ui/AlertDialog"
 import { ConfirmDialog } from "./ui/ConfirmDialog"
 import { PromptDialog } from "./ui/PromptDialog"
 import { CommandPalette } from "./ui/CommandPalette"
+import { AboutDialog } from "./AboutDialog"
 import { PreferencesDialog } from "./PreferencesDialog"
 import { ShortcutsDialog } from "./ShortcutsDialog"
 import { EnvironmentDialog } from "./EnvironmentDialog"
@@ -20,6 +21,8 @@ export function AppDialogs({ onCommand, secrets, hasWorkspaces }) {
   const workspaces = useAppStore((s) => s.workspaceStatus.workspaces)
   const folders = useAppStore((s) => s.folders)
   const requestHistory = useAppStore((s) => s.requestHistory)
+  const aboutOpen = useAppStore((s) => s.aboutOpen)
+  const closeAbout = useAppStore((s) => s.closeAbout)
   const shortcutsDialogOpen = useAppStore((s) => s.shortcutsDialogOpen)
   const preferencesDialogOpen = useAppStore((s) => s.preferencesDialogOpen)
   const environmentDialogOpen = useAppStore((s) => s.environmentDialogOpen)
@@ -49,6 +52,7 @@ export function AppDialogs({ onCommand, secrets, hasWorkspaces }) {
         onCommand={onCommand}
       />
 
+      {aboutOpen && <AboutDialog onClose={closeAbout} />}
       {shortcutsDialogOpen && <ShortcutsDialog onClose={closeShortcutsDialog} />}
       {preferencesDialogOpen && <PreferencesDialog onClose={closePreferencesDialog} />}
       {environmentDialogOpen && <EnvironmentDialog secrets={secrets} onClose={closeEnvironmentDialog} />}
