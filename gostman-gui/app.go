@@ -27,6 +27,8 @@ type App struct {
 	inFlightMu sync.Mutex
 	inFlight   map[string]context.CancelFunc
 
+	links linkInbox
+
 	networkMu sync.RWMutex
 	network   *engine.Network
 }
@@ -39,6 +41,7 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	a.loadNetwork()
 	restoreWorkspace()
+	a.receiveLaunchArguments()
 }
 
 type SavedData struct {

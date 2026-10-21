@@ -11,6 +11,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/menu"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -40,7 +41,7 @@ func applicationMenu() *menu.Menu {
 	return menu.NewMenuFromItems(menu.AppMenu(), menu.EditMenu(), menu.WindowMenu())
 }
 
-func (a *App) showExistingWindow(options.SecondInstanceData) {
+func (a *App) showExistingWindow() {
 	wailsruntime.WindowUnminimise(a.ctx)
 	wailsruntime.Show(a.ctx)
 }
@@ -62,10 +63,11 @@ func main() {
 		OnShutdown:       app.stopServersOnQuit,
 		Menu:             applicationMenu(),
 		Windows:          &windows.Options{Theme: theme.frame},
+		Mac:              &mac.Options{OnUrlOpen: app.receiveLink},
 		Bind:             []interface{}{app},
 		SingleInstanceLock: &options.SingleInstanceLock{
 			UniqueId:               singleInstanceID,
-			OnSecondInstanceLaunch: app.showExistingWindow,
+			OnSecondInstanceLaunch: app.handleSecondInstance,
 		},
 	})
 	if err != nil {

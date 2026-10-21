@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/kunalgoesbyken/gostman/deeplink"
 	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/importer"
 	"github.com/kunalgoesbyken/gostman/mcpclient"
@@ -22,6 +23,7 @@ const (
 	maxOpenAPIBytes      = openapi.DefaultMaxBytes
 	maxImportBytes       = 10 << 20
 	maxImportReplyBytes  = 12 << 20
+	maxLinkBytes         = 4 << 20
 
 	actionDescribe = "describe"
 	actionInvoke   = "invoke"
@@ -94,6 +96,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, invokeMcp(r))
 	case query.Has("openapi"):
 		writeJSON(w, readOpenAPI(r))
+	case query.Has("link"):
+		writeJSON(w, fetchLink(r))
 	case query.Has("import"):
 		writeJSON(w, runImport(r))
 	case query.Has("curl"):
@@ -215,6 +219,16 @@ func runImport(r *http.Request) importer.Reply {
 		return importer.Reply{Error: "the result is too large for the web app"}
 	}
 	return reply
+}
+
+func fetchLink(r *http.Request) deeplink.Reply {
+	var payload struct {
+		URL string `json:"url"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		return deeplink.Reply{Error: err.Error()}
+	}
+	return deeplink.Fetch(r.Context(), payload.URL, Policy, maxLinkBytes)
 }
 
 func startAuthorization(r *http.Request) authorizationResult {

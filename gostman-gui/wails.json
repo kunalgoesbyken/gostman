@@ -16,6 +16,13 @@
     "productName": "Gostman",
     "productVersion": "1.4.0",
     "copyright": "Gostman contributors",
-    "comments": "An API client for REST, GraphQL, gRPC and WebSocket"
+    "comments": "An API client for REST, GraphQL, gRPC and WebSocket",
+    "protocols": [
+      {
+        "scheme": "gostman",
+        "description": "Open in Gostman",
+        "role": "Viewer"
+      }
+    ]
   }
 }

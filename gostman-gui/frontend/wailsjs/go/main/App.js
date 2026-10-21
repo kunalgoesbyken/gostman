@@ -82,6 +82,10 @@ export function DescribeMcp(arg1) {
   return window['go']['main']['App']['DescribeMcp'](arg1);
 }
 
+export function FetchLink(arg1) {
+  return window['go']['main']['App']['FetchLink'](arg1);
+}
+
 export function FetchToken(arg1) {
   return window['go']['main']['App']['FetchToken'](arg1);
 }
@@ -372,6 +376,10 @@ export function StopMock() {
 
 export function StreamRequest(arg1, arg2) {
   return window['go']['main']['App']['StreamRequest'](arg1, arg2);
+}
+
+export function TakeOpenLinks() {
+  return window['go']['main']['App']['TakeOpenLinks']();
 }
 
 export function TestSecretReference(arg1) {
