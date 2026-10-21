@@ -71,6 +71,8 @@ export function SaveRequest(arg1:main.Request):Promise<main.Request>;
 
 export function SaveRequests(arg1:Array<main.Request>):Promise<Array<main.Request>>;
 
+export function SaveScopes(arg1:Array<main.Environment>,arg2:string,arg3:string):Promise<void>;
+
 export function SaveSettings(arg1:main.Settings):Promise<void>;
 
 export function SendRequest(arg1:string,arg2:engine.Request):Promise<engine.Response>;

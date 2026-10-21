@@ -50,12 +50,20 @@ type SavedData struct {
 	Cookies             []engine.CookieInfo `json:"cookies"`
 	Settings            Settings            `json:"settings"`
 	Restricted          bool                `json:"restricted,omitempty"`
+
+	Globals             []Environment     `json:"globals,omitempty"`
+	ActiveGlobalId      string            `json:"activeGlobalId,omitempty"`
+	CollectionVariables string            `json:"collectionVariables,omitempty"`
+	DotEnv              map[string]string `json:"dotEnv,omitempty"`
 }
 
 type Environment struct {
 	Id        string `json:"id"`
 	Name      string `json:"name"`
 	Variables string `json:"variables"`
+	Color     string `json:"color"`
+	Extends   string `json:"extends"`
+	Meta      string `json:"meta"`
 }
 
 type Folder struct {
@@ -90,7 +98,8 @@ type Request struct {
 	GrpcProtos       string         `json:"grpcProtos"`
 	McpTool          string         `json:"mcpTool"`
 	McpArguments     string         `json:"mcpArguments"`
-	Timestamp        string         `json:"timestamp"`
+	Vars             string         `json:"vars"`
+	Timestamp       string         `json:"timestamp"`
 }
 
 var (
@@ -188,6 +197,8 @@ func (a *App) LoadData() (SavedData, error) {
 		return SavedData{}, err
 	}
 	data = withDefaultEnvironment(data)
+	data.Environments = vault.withSecrets(data.Environments)
+	data.Globals = vault.withSecrets(data.Globals)
 	if data.Requests == nil {
 		data.Requests = []Request{}
 	}
@@ -238,7 +249,11 @@ func (a *App) SaveHistory(history []Request) error {
 }
 
 func (a *App) SaveEnvironments(environments []Environment, activeId string) error {
-	return storage.current().saveEnvironments(environments, activeId)
+	stripped, err := vault.withoutSecrets(environments, secretScope())
+	if err != nil {
+		return err
+	}
+	return storage.current().saveEnvironments(stripped, activeId)
 }
 
 func (a *App) ResetData() error {

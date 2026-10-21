@@ -7,30 +7,45 @@ import { withFreshToken } from './oauth'
 import { failureResponse } from './response'
 import { countActiveAssertions } from './scripting/assertions'
 import { applyRequestEdits, requestSubject, responseSubject, runInSandbox } from './scripting/sandbox'
-import { selectActiveVariables, useAppStore } from '../store/appStore'
+import { promptNames } from './variableScopes'
+import { useAppStore, variableTextFor } from '../store/appStore'
 
 const CONFIG_ERROR = 'config'
+const PROMPT_DECLINED = 'The request was not sent because the values it asks for were not provided.'
 const PRE_REQUEST = 'Pre-request script'
 const POST_RESPONSE = 'Post-response script'
 export const RESTRICTED = 'This folder is not trusted yet, so its scripts and OAuth 2.0 settings are switched off. Open the folder menu in the header and choose Trust this folder.'
 
 const store = () => useAppStore.getState()
-const variablesText = () => selectActiveVariables(store())
+const variablesText = (request, answers) => variableTextFor(store(), request, answers)
 const hasText = (text) => text.trim() !== ''
 const isSame = (first, second) => JSON.stringify(first) === JSON.stringify(second)
 
-function readVariables() {
-  const parsed = parseJSON(variablesText(), {})
-  return isPlainObject(parsed) ? parsed : null
+function readVariables(request) {
+  const parsed = parseJSON(variablesText(request), {})
+  return isPlainObject(parsed) ? parsed : {}
 }
 
-async function runStage(stage, job) {
-  const variables = readVariables()
-  const run = await runInSandbox({ ...job, variables: variables || {} })
-  if (variables && isPlainObject(run.variables) && !isSame(variables, run.variables)) {
-    store().setActiveVariables(JSON.stringify(run.variables, null, 2))
+function scriptChanges(before, after) {
+  const changed = Object.entries(after).filter(([name, value]) => before[name] !== value)
+  const removed = Object.keys(before).filter((name) => !(name in after)).map((name) => [name, null])
+  return Object.fromEntries([...changed, ...removed])
+}
+
+async function runStage(stage, job, request) {
+  const variables = readVariables(request)
+  const run = await runInSandbox({ ...job, variables })
+  if (isPlainObject(run.variables) && !isSame(variables, run.variables)) {
+    store().mergeActiveVariables(scriptChanges(variables, run.variables))
   }
   return { ...run, error: run.error ? `${stage}: ${run.error}` : '' }
+}
+
+async function askForValues(request) {
+  const names = promptNames(request)
+  if (names.length === 0) return {}
+  const known = readVariables(request)
+  return store().askVariables(names, Object.fromEntries(names.map((name) => [name, known[name] ?? ''])))
 }
 
 const report = (runs) => ({
@@ -67,20 +82,23 @@ export function createExecutor(backend) {
     let request = original
     if (store().isRestricted && hasActiveContent(request)) return stop(request, RESTRICTED)
     if (hasText(request.preScript)) {
-      const pre = await runStage(PRE_REQUEST, { script: request.preScript, request: requestSubject(request) })
+      const pre = await runStage(PRE_REQUEST, { script: request.preScript, request: requestSubject(request) }, request)
       runs.push(pre)
       if (pre.error) return stop(request, pre.error)
       request = applyRequestEdits(request, pre.request)
     }
 
+    const answers = await askForValues(request)
+    if (answers === null) return stop(request, PROMPT_DECLINED)
+
     try {
-      request = await withFreshToken(backend, request, variablesText())
+      request = await withFreshToken(backend, request, variablesText(request, answers))
     } catch (error) {
       return stop(request, error.message)
     }
 
     const transmit = transportFor(backend, request)
-    const response = await transmit(sendId, request, variablesText(), store().cookies)
+    const response = await transmit(sendId, request, variablesText(request, answers), store().cookies)
     store().storeCookies(response.cookies || [])
     const extraction = applyExtractors(request, response)
 
@@ -90,7 +108,7 @@ export function createExecutor(backend) {
         assertions: request.assertions,
         request: requestSubject(request),
         response: responseSubject(response),
-      }))
+      }, request))
     }
     return { auth: request.auth, response, tests: report(runs), extraction }
   }

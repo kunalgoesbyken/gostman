@@ -1,7 +1,7 @@
 import { memo, lazy, Suspense, useEffect, useMemo } from "react"
-import { AlertCircle, Bookmark, CheckCircle2 } from "lucide-react"
+import { Bookmark } from "lucide-react"
 import { Button } from "./ui/button"
-import { Notice, Panel, Toolbar } from "./ui/panel"
+import { Panel, Toolbar } from "./ui/panel"
 import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { AuthPanel } from "./AuthPanel"
 import { BodyPanel } from "./BodyPanel"
@@ -20,7 +20,6 @@ import { readParamRows } from "../lib/queryString"
 import { countActiveAssertions } from "../lib/scripting/assertions"
 import { countSentRows, parseRows, serializeRows } from "../lib/rows"
 import { SOCKET_OPEN, SOCKET_PANEL, isSocketAddress, selectSession, useSocketStore } from "../lib/socketSessions"
-import { validateEnvVariables, formatJSONError } from "../lib/validation"
 import { DEFAULT_REQUEST_PANEL, useAppStore } from "../store/appStore"
 
 const GraphQLPanel = lazy(() => import("./GraphQLPanel").then((module) => ({ default: module.GraphQLPanel })))
@@ -47,19 +46,6 @@ function bodyBadge(body, bodyType) {
   return body.trim() !== ""
 }
 
-function EnvVarsStatus({ variables }) {
-  const validation = useMemo(() => validateEnvVariables(variables), [variables])
-  return (
-    <Notice
-      edge="border-t"
-      tone={validation.error ? "destructive" : "success"}
-      icon={validation.error ? AlertCircle : CheckCircle2}
-    >
-      {formatJSONError(validation)}
-    </Notice>
-  )
-}
-
 export const RequestTabs = memo(function RequestTabs({
   tabId,
   activeRequest,
@@ -67,7 +53,6 @@ export const RequestTabs = memo(function RequestTabs({
   onUpdateRequest,
   onBodyDraftsChange,
   variables,
-  onUpdateVariables,
   response,
   extraction,
   tokenRequest,
@@ -80,7 +65,7 @@ export const RequestTabs = memo(function RequestTabs({
   const activePanel = useAppStore((state) => state.requestPanel)
   const setActivePanel = useAppStore((state) => state.setRequestPanel)
   const isSocketOpen = useSocketStore((state) => selectSession(tabId)(state).status === SOCKET_OPEN)
-  const { url, queryParams, headers, body, bodyType, auth, options, method, extractors, assertions, examples, preScript, postScript } = activeRequest
+  const { url, queryParams, headers, body, bodyType, auth, options, method, extractors, assertions, examples, preScript, postScript, vars } = activeRequest
   const isWebSocket = useMemo(() => isSocketAddress(url, variables), [url, variables])
   const isGraphQL = method === GRAPHQL_METHOD
   const isGrpc = method === GRPC_METHOD
@@ -100,6 +85,7 @@ export const RequestTabs = memo(function RequestTabs({
   }, [isMcp, setActivePanel])
 
   const headerRows = useMemo(() => parseRows(headers), [headers])
+  const variableRows = useMemo(() => parseRows(vars), [vars])
   const paramCount = useMemo(() => countSentRows(readParamRows(url, queryParams)), [url, queryParams])
   const bodyContent = useMemo(() => bodyBadge(body, bodyType), [body, bodyType])
   const extractorCount = useMemo(() => parseExtractors(extractors).filter((extractor) => extractor.enabled).length, [extractors])
@@ -124,7 +110,7 @@ export const RequestTabs = memo(function RequestTabs({
           <TabsTrigger value={GRPC_PANEL}>gRPC<TabBadge value={isGrpc} /></TabsTrigger>
           {isMcp && <TabsTrigger value={MCP_PANEL}>MCP</TabsTrigger>}
           <TabsTrigger value={SOCKET_PANEL}>WebSocket<TabBadge value={isSocketOpen} /></TabsTrigger>
-          <TabsTrigger value="vars">Env vars</TabsTrigger>
+          <TabsTrigger value="vars">Vars<TabBadge value={countSentRows(variableRows)} /></TabsTrigger>
           <TabsTrigger value="extract">Extract<TabBadge value={extractorCount} /></TabsTrigger>
           <TabsTrigger value="tests">Tests<TabBadge value={assertionCount || hasScripts} /></TabsTrigger>
           <TabsTrigger value="settings">Settings<TabBadge value={hasCustomOptions} /></TabsTrigger>
@@ -241,18 +227,12 @@ export const RequestTabs = memo(function RequestTabs({
 
         <TabsContent value="vars" className={PANEL_CLASS}>
           <Panel>
-            <div className="min-h-0 flex-1">
-              <Suspense fallback={<PanelFallback />}>
-                <EditorComponent
-                  value={variables}
-                  onChange={(event) => onUpdateVariables(event.target.value)}
-                  language="json"
-                  path="environment/variables"
-                  height="100%"
-                />
-              </Suspense>
-            </div>
-            <EnvVarsStatus variables={variables} />
+            <KeyValueEditor
+              key={tabId}
+              rows={variableRows}
+              onChange={(rows) => onUpdateRequest({ vars: serializeRows(rows) })}
+              keyLabel="Variable"
+            />
           </Panel>
         </TabsContent>
 

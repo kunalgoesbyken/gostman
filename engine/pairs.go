@@ -82,23 +82,45 @@ func (s *substitution) overflow() error {
 	return nil
 }
 
+func (s *substitution) resolve(name string) (string, bool) {
+	if value, ok := s.variables[name]; ok {
+		return value, true
+	}
+	if asked, isPrompt := PromptName(name); isPrompt {
+		value, ok := s.variables[asked]
+		return value, ok
+	}
+	return "", false
+}
+
 func (s *substitution) lookup(match string) (string, bool) {
-	value, ok := s.variables[strings.TrimSpace(match[2:len(match)-2])]
-	return value, ok
+	name := strings.TrimSpace(match[2 : len(match)-2])
+	if value, ok := s.resolve(name); ok {
+		return value, true
+	}
+	return dynamicValue(name)
+}
+
+func (s *substitution) sizeOf(match string) (int, bool) {
+	name := strings.TrimSpace(match[2 : len(match)-2])
+	if value, ok := s.resolve(name); ok {
+		return len(value), true
+	}
+	return dynamicSizeBound, isDynamicName(name)
 }
 
 func (s *substitution) expandedSize(input string) int {
 	size := len(input)
 	for _, match := range placeholderRe.FindAllString(input, -1) {
-		if value, ok := s.lookup(match); ok {
-			size += len(value) - len(match)
+		if length, ok := s.sizeOf(match); ok {
+			size += length - len(match)
 		}
 	}
 	return size
 }
 
 func (s *substitution) apply(input string) string {
-	if s.exceeded || len(s.variables) == 0 {
+	if s.exceeded {
 		return input
 	}
 	s.budget -= s.expandedSize(input)

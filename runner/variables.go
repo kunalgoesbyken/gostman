@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+const processEnvironmentPrefix = "process.env."
+
 type variables map[string]json.RawMessage
 
 func parseVariables(text string) (variables, error) {
@@ -57,11 +59,113 @@ func selectEnvironment(environments []Environment, name string) (Environment, er
 	return Environment{}, fmt.Errorf("there is no environment named %q; the collection has %s", name, strings.Join(names, ", "))
 }
 
-func startingVariables(environment Environment, overrides map[string]string) (variables, error) {
-	parsed, err := parseVariables(environment.Variables)
-	if err != nil {
-		return nil, fmt.Errorf("environment %q cannot be used: %w", environment.Name, err)
+func layered(scopes ...variables) variables {
+	merged := variables{}
+	for _, scope := range scopes {
+		merged.merge(scope)
 	}
-	parsed.override(overrides)
+	return merged
+}
+
+type variableFlags map[string]struct {
+	Enabled *bool `json:"enabled"`
+}
+
+func (e Environment) ownScope() (variables, error) {
+	parsed, err := parseVariables(e.Variables)
+	if err != nil {
+		return nil, fmt.Errorf("environment %q cannot be used: %w", e.Name, err)
+	}
+	var flags variableFlags
+	if strings.TrimSpace(e.Meta) != "" {
+		if err := json.Unmarshal([]byte(e.Meta), &flags); err != nil {
+			return nil, fmt.Errorf("environment %q has unreadable variable settings: %w", e.Name, err)
+		}
+	}
+	for name, flag := range flags {
+		if flag.Enabled != nil && !*flag.Enabled {
+			delete(parsed, name)
+		}
+	}
 	return parsed, nil
+}
+
+func environmentScopes(environments []Environment, environment Environment) ([]variables, error) {
+	visited := map[string]bool{}
+	var chain []Environment
+	for current, found := environment, true; found && !visited[current.ID]; {
+		visited[current.ID] = true
+		chain = append([]Environment{current}, chain...)
+		current, found = findEnvironment(environments, current.Extends)
+	}
+	scopes := make([]variables, 0, len(chain))
+	for _, link := range chain {
+		scope, err := link.ownScope()
+		if err != nil {
+			return nil, err
+		}
+		scopes = append(scopes, scope)
+	}
+	return scopes, nil
+}
+
+func findEnvironment(environments []Environment, id string) (Environment, bool) {
+	for _, candidate := range environments {
+		if id != "" && candidate.ID == id {
+			return candidate, true
+		}
+	}
+	return Environment{}, false
+}
+
+func startingVariables(environments []Environment, environment Environment, overrides map[string]string) (variables, error) {
+	scopes, err := environmentScopes(environments, environment)
+	if err != nil {
+		return nil, err
+	}
+	starting := layered(scopes...)
+	starting.override(overrides)
+	return starting, nil
+}
+
+type variableRow struct {
+	Key     string `json:"key"`
+	Value   any    `json:"value"`
+	Enabled *bool  `json:"enabled"`
+}
+
+func requestScope(text string) variables {
+	scope := variables{}
+	var rows []variableRow
+	if json.Unmarshal([]byte(text), &rows) != nil {
+		return scope
+	}
+	for _, row := range rows {
+		if strings.TrimSpace(row.Key) == "" || (row.Enabled != nil && !*row.Enabled) {
+			continue
+		}
+		encoded, _ := json.Marshal(row.Value)
+		scope[row.Key] = encoded
+	}
+	return scope
+}
+
+func (v variables) withRequest(text string) variables {
+	if strings.TrimSpace(text) == "" {
+		return v
+	}
+	return layered(v, requestScope(text))
+}
+
+func baseScopes(stored Collection) ([]variables, error) {
+	collection, err := parseVariables(stored.Variables)
+	if err != nil {
+		return nil, fmt.Errorf("the collection variables are not a JSON object")
+	}
+	processed := variables{}
+	for name, value := range stored.DotEnv {
+		encoded, _ := json.Marshal(value)
+		processed[processEnvironmentPrefix+name] = encoded
+	}
+	return []variables{processed, collection}, nil
 }

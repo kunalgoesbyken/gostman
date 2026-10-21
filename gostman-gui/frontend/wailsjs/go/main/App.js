@@ -130,6 +130,10 @@ export function SaveRequests(arg1) {
   return window['go']['main']['App']['SaveRequests'](arg1);
 }
 
+export function SaveScopes(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SaveScopes'](arg1, arg2, arg3);
+}
+
 export function SaveSettings(arg1) {
   return window['go']['main']['App']['SaveSettings'](arg1);
 }

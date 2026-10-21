@@ -6,6 +6,7 @@ import { DEFAULT_SETTINGS, normalizeSettings } from '../lib/network'
 import { normalizeRequest } from '../lib/request'
 import { isBlankRequest } from '../lib/requestChanges'
 import { reconcileTabs } from '../lib/tabReconcile'
+import { promptLayer, resolveLayers, scopeLayers, variableText } from '../lib/variableScopes'
 
 const HISTORY_LIMIT = 50
 const HISTORY_IDENTITY_FIELDS = ['method', 'url', 'body', 'bodyType', 'graphqlQuery', 'graphqlVariables', 'grpcMethod', 'grpcMessage', 'mcpTool', 'mcpArguments']
@@ -19,6 +20,7 @@ const SAVE_FAILURE_TITLE = 'Changes could not be saved'
 const CLOSED_ALERT = { isOpen: false, title: '', message: '', confirmText: 'OK', variant: 'default' }
 const CLOSED_CONFIRM = { isOpen: false, title: '', message: '', confirmText: 'OK', variant: 'default', onConfirm: null, onCancel: null }
 const CLOSED_RUNNER = { isOpen: false, folderId: '', isRunning: false, results: [] }
+const CLOSED_VARIABLE_PROMPT = { isOpen: false, names: [], defaults: {}, resolve: null }
 const CLOSED_PROMPT = { isOpen: false, title: '', message: '', placeholder: '', defaultValue: '', confirmText: 'OK', onConfirm: null, onCancel: null }
 
 const MAX_CLOSED_TABS = 10
@@ -61,7 +63,20 @@ const appendTab = (state, request) => {
   return { tabs: [...state.tabs, tab], activeTabId: tab.id, nextTabId: state.nextTabId + 1 }
 }
 
-const createEnvironment = (name, variables = EMPTY_VARIABLES) => ({ id: createId('env'), name, variables })
+export const createEnvironment = (name, variables = EMPTY_VARIABLES) => ({
+  id: createId('env'), name, variables, color: '', extends: '', meta: EMPTY_VARIABLES,
+})
+
+const ENVIRONMENT_LISTS = {
+  collection: { list: 'environments', active: 'activeEnvironmentId' },
+  global: { list: 'globalEnvironments', active: 'activeGlobalEnvironmentId' },
+}
+
+const isUsableEnvironment = (environment) => Boolean(environment?.id)
+
+const withoutExtending = (environments, id) => environments.map((environment) => (
+  environment.extends === id ? { ...environment, extends: '' } : environment
+))
 
 const restoreEnvironments = (data) => {
   const environments = asArray(data.environments).filter((environment) => environment?.id)
@@ -81,6 +96,11 @@ const mapEnvironment = (state, id, update) => ({
 const isEnvironment = (value) => (
   isPlainObject(value) && typeof value.id === 'string' && typeof value.name === 'string' && typeof value.variables === 'string'
 )
+
+const environmentExtras = ({ color, meta }) => ({
+  color: typeof color === 'string' ? color : '',
+  meta: typeof meta === 'string' ? meta : EMPTY_VARIABLES,
+})
 
 const parseVariables = (text) => (text.trim() === '' ? {} : parseJSON(text, null))
 
@@ -163,6 +183,12 @@ export const useAppStore = create(
         settings: DEFAULT_SETTINGS,
         environments: [],
         activeEnvironmentId: '',
+        globalEnvironments: [],
+        activeGlobalEnvironmentId: '',
+        collectionVariables: EMPTY_VARIABLES,
+        dotEnv: {},
+        environmentDialogOpen: false,
+        variablePrompt: CLOSED_VARIABLE_PROMPT,
         tabs: [FIRST_TAB],
         activeTabId: FIRST_TAB.id,
         nextTabId: 2,
@@ -203,6 +229,10 @@ export const useAppStore = create(
             settings: normalizeSettings(data.settings),
             environments,
             activeEnvironmentId: hasActive ? data.activeEnvironmentId : environments[0].id,
+            globalEnvironments: asArray(data.globals).filter(isUsableEnvironment),
+            activeGlobalEnvironmentId: data.activeGlobalId || '',
+            collectionVariables: data.collectionVariables || EMPTY_VARIABLES,
+            dotEnv: isPlainObject(data.dotEnv) ? data.dotEnv : {},
           }
         }),
 
@@ -323,37 +353,49 @@ export const useAppStore = create(
         setRequestPanel: (requestPanel) => set({ requestPanel }),
 
         setActiveEnvironment: (id) => set({ activeEnvironmentId: id }),
-        addEnvironment: (name) => set((state) => {
-          const environment = createEnvironment(name)
-          return { environments: [...state.environments, environment], activeEnvironmentId: environment.id }
+        updateEnvironment: (scope, id, patch) => set((state) => {
+          const { list } = ENVIRONMENT_LISTS[scope]
+          return { [list]: state[list].map((environment) => (environment.id === id ? { ...environment, ...patch } : environment)) }
         }),
-        renameEnvironment: (id, name) => set((state) => (
-          mapEnvironment(state, id, (environment) => ({ ...environment, name }))
-        )),
-        deleteEnvironment: (id) => set((state) => {
-          if (state.environments.length === 1) return state
-          const environments = state.environments.filter((environment) => environment.id !== id)
-          const activeEnvironmentId = state.activeEnvironmentId === id ? environments[0].id : state.activeEnvironmentId
-          return { environments, activeEnvironmentId }
+        addEnvironmentTo: (scope, environment) => set((state) => {
+          const { list, active } = ENVIRONMENT_LISTS[scope]
+          return { [list]: [...state[list], environment], [active]: environment.id }
         }),
+        removeEnvironmentFrom: (scope, id) => set((state) => {
+          const { list, active } = ENVIRONMENT_LISTS[scope]
+          const remaining = withoutExtending(state[list].filter((environment) => environment.id !== id), id)
+          return { [list]: remaining, [active]: state[active] === id ? remaining[0]?.id || '' : state[active] }
+        }),
+        setActiveEnvironmentIn: (scope, id) => set({ [ENVIRONMENT_LISTS[scope].active]: id }),
+        setCollectionVariables: (collectionVariables) => set({ collectionVariables }),
+        openEnvironmentDialog: () => set({ environmentDialogOpen: true }),
+        closeEnvironmentDialog: () => set({ environmentDialogOpen: false }),
+        askVariables: (names, defaults) => new Promise((resolve) => set({
+          variablePrompt: { isOpen: true, names, defaults, resolve },
+        })),
+        answerVariables: (answers) => {
+          get().variablePrompt.resolve?.(answers)
+          set({ variablePrompt: CLOSED_VARIABLE_PROMPT })
+        },
         setActiveVariables: (variables) => set((state) => (
           mapEnvironment(state, findActiveEnvironment(state)?.id, (environment) => ({ ...environment, variables }))
         )),
         mergeActiveVariables: (additions) => {
           if (!isPlainObject(additions) || Object.keys(additions).length === 0) return true
-          const existing = parseVariables(selectActiveVariables(get()))
+          const existing = parseVariables(findActiveEnvironment(get())?.variables ?? EMPTY_VARIABLES)
           if (!isPlainObject(existing)) return false
-          get().setActiveVariables(JSON.stringify({ ...existing, ...additions }, null, 2))
+          const merged = Object.entries({ ...existing, ...additions }).filter(([, value]) => value !== null)
+          get().setActiveVariables(JSON.stringify(Object.fromEntries(merged), null, 2))
           return true
         },
         mergeEnvironments: (incoming) => {
           const environments = [...get().environments]
           const skippedNames = []
-          for (const { id, name, variables } of asArray(incoming).filter(isEnvironment)) {
+          for (const { id, name, variables, color, meta } of asArray(incoming).filter(isEnvironment)) {
             const index = environments.findIndex((environment) => environment.name === name)
             const merged = index === -1 ? variables : mergeVariables(environments[index].variables, variables)
             if (merged === null) skippedNames.push(name)
-            else if (index === -1) environments.push(withUnusedId({ id, name, variables }, environments))
+            else if (index === -1) environments.push(withUnusedId({ ...createEnvironment(name, variables), id, ...environmentExtras({ color, meta }) }, environments))
             else environments[index] = { ...environments[index], variables: merged }
           }
           set({ environments })
@@ -448,7 +490,28 @@ reportStorageFailure = (reason) => useAppStore.getState().reportPersistenceFailu
 
 export const selectActiveTab = (state) => state.tabs.find((tab) => tab.id === state.activeTabId) || state.tabs[0]
 
-export const selectActiveVariables = (state) => findActiveEnvironment(state)?.variables ?? EMPTY_VARIABLES
+const sameInputs = (first, second) => first !== null && first.every((input, index) => Object.is(input, second[index]))
+
+let lastInputs = null
+let lastResolved = null
+
+export function selectResolvedVariables(state) {
+  const request = selectActiveTab(state)?.request
+  const inputs = [
+    state.globalEnvironments, state.activeGlobalEnvironmentId, state.collectionVariables, state.environments,
+    state.activeEnvironmentId, state.folders, state.dotEnv, request?.folderId, request?.vars,
+  ]
+  if (sameInputs(lastInputs, inputs)) return lastResolved
+  lastInputs = inputs
+  lastResolved = resolveLayers(scopeLayers(state, request))
+  return lastResolved
+}
+
+export const variableTextFor = (state, request, answers = {}) => (
+  variableText(resolveLayers([...scopeLayers(state, request), promptLayer(answers)]))
+)
+
+export const selectActiveVariables = (state) => variableText(selectResolvedVariables(state))
 
 export const selectIsDialogOpen = (state) => (
   state.codeDialogOpen
@@ -459,6 +522,8 @@ export const selectIsDialogOpen = (state) => (
   || state.settingsDialogOpen
   || state.examplesDialogOpen
   || state.mockDialogOpen
+  || state.environmentDialogOpen
+  || state.variablePrompt.isOpen
   || state.runner.isOpen
   || state.alertDialog.isOpen
   || state.confirmDialog.isOpen

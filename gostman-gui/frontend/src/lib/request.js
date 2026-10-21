@@ -51,6 +51,7 @@ const DEFAULT_REQUEST = {
   grpcProtos: '',
   mcpTool: '',
   mcpArguments: '',
+  vars: '{}',
   timestamp: '',
 }
 

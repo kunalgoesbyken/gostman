@@ -25,7 +25,9 @@ func loadWorkspace(root string) (Collection, error) {
 	if err != nil {
 		return Collection{}, fmt.Errorf("cannot read the workspace: %w", err)
 	}
-	return FromWorkspace(files.Collection())
+	collection, err := FromWorkspace(files.Collection())
+	collection.DotEnv = files.DotEnv()
+	return collection, err
 }
 
 func FromWorkspace(stored workspace.Collection) (Collection, error) {

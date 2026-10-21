@@ -15,6 +15,8 @@ type Collection struct {
 	Requests     []json.RawMessage `json:"requests"`
 	Folders      []Folder          `json:"folders"`
 	Environments []Environment     `json:"environments"`
+	Variables    string            `json:"variables"`
+	DotEnv       map[string]string `json:"-"`
 }
 
 type Folder struct {
@@ -27,6 +29,8 @@ type Environment struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`
 	Variables string `json:"variables"`
+	Extends   string `json:"extends"`
+	Meta      string `json:"meta"`
 }
 
 type Request struct {
@@ -52,6 +56,7 @@ type Request struct {
 	GrpcProtos       string         `json:"grpcProtos"`
 	McpTool          string         `json:"mcpTool"`
 	McpArguments     string         `json:"mcpArguments"`
+	Vars             string         `json:"vars"`
 }
 
 type exportFile struct {
