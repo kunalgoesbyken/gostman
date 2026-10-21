@@ -42,6 +42,7 @@ import { WEB_APP_URL } from '../constants'
 import { desktopAi } from './desktopAi'
 import { desktopCapture } from './desktopCapture'
 import { desktopGit } from './desktopGit'
+import { desktopLoadTest } from './desktopLoadTest'
 import { desktopMock } from './desktopMock'
 import { desktopSecrets } from './desktopSecrets'
 import { openDesktopSocket } from './desktopSocket'
@@ -118,6 +119,7 @@ export const desktopBackend = {
   mock: desktopMock,
   secrets: desktopSecrets,
   capture: desktopCapture,
+  loadTest: desktopLoadTest,
   storage: {
     status: () => WorkspaceStatus(),
     pickFolder: () => PickWorkspaceFolder(),

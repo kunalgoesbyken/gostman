@@ -17,6 +17,9 @@ const (
 	ProxyCustom = "custom"
 
 	noCertificate = -1
+
+	idleConnections        = 512
+	idleConnectionsPerHost = 512
 )
 
 var proxySchemes = map[string]bool{"http": true, "https": true, "socks5": true, "socks5h": true}
@@ -169,7 +172,8 @@ func (n *Network) transport(key transportKey) *http.Transport {
 		Proxy:                 n.proxy,
 		DialContext:           dialer.DialContext,
 		ForceAttemptHTTP2:     true,
-		MaxIdleConns:          100,
+		MaxIdleConns:          idleConnections,
+		MaxIdleConnsPerHost:   idleConnectionsPerHost,
 		IdleConnTimeout:       90 * time.Second,
 		TLSHandshakeTimeout:   15 * time.Second,
 		ExpectContinueTimeout: time.Second,

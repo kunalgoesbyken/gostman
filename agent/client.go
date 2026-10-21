@@ -12,6 +12,7 @@ import (
 type Client struct {
 	session *runner.Session
 	guard   *redact.Redactor
+	policy  engine.Policy
 }
 
 func NewClient(policy engine.Policy) (*Client, error) {
@@ -19,7 +20,7 @@ func NewClient(policy engine.Policy) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	client := &Client{session: session, guard: redact.New()}
+	client := &Client{session: session, guard: redact.New(), policy: policy}
 	session.Watch(client.witness)
 	return client, nil
 }

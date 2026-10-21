@@ -264,6 +264,7 @@ export const webBackend = {
   mock: null,
   secrets: null,
   capture: null,
+  loadTest: null,
   storage: null,
   oauthCallback: { url: `${window.location.origin}${OAUTH_CALLBACK_PATH}`, isFixed: true },
   authorize,

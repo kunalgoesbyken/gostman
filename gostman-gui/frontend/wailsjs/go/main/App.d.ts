@@ -11,6 +11,7 @@ import {importer} from '../models';
 import {mock} from '../models';
 import {openapi} from '../models';
 import {secrets} from '../models';
+import {loadtest} from '../models';
 import {workspace} from '../models';
 
 export function AiCancel(arg1:string):Promise<void>;
@@ -153,6 +154,8 @@ export function ResolveSecretReferences(arg1:Record<string, secrets.Ref>):Promis
 
 export function RevealWorkspace(arg1:string):Promise<void>;
 
+export function RunLoadTest(arg1:engine.Request,arg2:loadtest.Config):Promise<loadtest.Report>;
+
 export function SaveCollectionSettings(arg1:workspace.Settings):Promise<void>;
 
 export function SaveCollectionToFolder(arg1:string):Promise<main.WorkspaceStatus>;
@@ -194,6 +197,8 @@ export function StartCapture(arg1:capture.Settings):Promise<main.CaptureState>;
 export function StartMock(arg1:Array<mock.Source>,arg2:string,arg3:mock.Config):Promise<main.MockState>;
 
 export function StopCapture():Promise<void>;
+
+export function StopLoadTest():Promise<void>;
 
 export function StopMock():Promise<void>;
 
