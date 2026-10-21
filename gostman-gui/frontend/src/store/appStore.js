@@ -10,6 +10,8 @@ import { isBlankRequest } from '../lib/requestChanges'
 import { reconcileTabs } from '../lib/tabReconcile'
 import { isNarrowViewport } from '../lib/layout'
 import { promptLayer, resolveLayers, scopeLayers, variableText } from '../lib/variableScopes'
+import { isWelcomeDismissed, rememberWelcomeDismissed } from '../lib/welcome'
+import { NO_WORKSPACE, enterWorkspace, leaveWorkspace, persistableSessions, restoreSessions } from './workspaceSessions'
 
 const HISTORY_LIMIT = 50
 const HISTORY_IDENTITY_FIELDS = ['method', 'url', 'body', 'bodyType', 'graphqlQuery', 'graphqlVariables', 'grpcMethod', 'grpcMessage', 'mcpTool', 'mcpArguments']
@@ -203,6 +205,11 @@ export const useAppStore = create(
         tabs: [FIRST_TAB],
         activeTabId: FIRST_TAB.id,
         nextTabId: 2,
+        workspaceStatus: NO_WORKSPACE,
+        workspaceSessions: {},
+        workspaceMenuOpen: false,
+        welcomeVisible: !isWelcomeDismissed(),
+        aboutOpen: false,
         requestPanel: DEFAULT_REQUEST_PANEL,
         codeDialogOpen: false,
         codeSnippets: null,
@@ -253,6 +260,19 @@ export const useAppStore = create(
         }),
 
         suspendPersistence: () => set({ hydrated: false }),
+        enterWorkspace: (status) => set((state) => enterWorkspace(state, status, () => ({
+          tabs: [FIRST_TAB], activeTabId: FIRST_TAB.id, nextTabId: 2, requests: [],
+        }))),
+        showWelcome: () => set((state) => ({ ...appendTab(state, {}), welcomeVisible: true, commandPaletteOpen: false })),
+        hideWelcome: () => {
+          rememberWelcomeDismissed()
+          set({ welcomeVisible: false })
+        },
+        openAbout: () => set({ aboutOpen: true, commandPaletteOpen: false }),
+        closeAbout: () => set({ aboutOpen: false }),
+        adoptWorkspaceStatus: (status) => set({ workspaceStatus: status }),
+        leaveWorkspace: (path) => set((state) => leaveWorkspace(state, path)),
+        setWorkspaceMenuOpen: (workspaceMenuOpen) => set({ workspaceMenuOpen, commandPaletteOpen: false }),
         liftRestriction: () => set({ isRestricted: false }),
 
         upsertRequests: (requests) => set((state) => {
@@ -493,6 +513,7 @@ export const useAppStore = create(
           specLinks: state.specLinks,
           activeTabId: state.activeTabId,
           nextTabId: state.nextTabId,
+          workspaceSessions: persistableSessions(state.workspaceSessions, persistableTab),
         }),
         merge: (persisted, current) => {
           const tabs = restoreTabs(persisted?.tabs)
@@ -502,6 +523,7 @@ export const useAppStore = create(
             tabs,
             isRestricted: Boolean(persisted?.isRestricted),
             specLinks: isPlainObject(persisted?.specLinks) ? persisted.specLinks : {},
+            workspaceSessions: restoreSessions(persisted?.workspaceSessions, restoreTabs, nextIdAfter),
             activeTabId: hasActive ? persisted.activeTabId : tabs[0].id,
             nextTabId: Math.max(persisted?.nextTabId || 0, nextIdAfter(tabs)),
           }
@@ -543,6 +565,8 @@ export const selectIsDialogOpen = (state) => (
   state.codeDialogOpen
   || state.importDialogOpen
   || state.commandPaletteOpen
+  || state.workspaceMenuOpen
+  || state.aboutOpen
   || state.shortcutsDialogOpen
   || state.preferencesDialogOpen
   || state.cookiesDialogOpen

@@ -18,6 +18,8 @@ import { isMcpRequest } from './mcp'
 import { createMockActions } from './mockServer'
 import { getPreferences } from './preferences'
 import { normalizeRequest } from './request'
+import { promptInstall } from './pwa'
+import { SAMPLE_REQUEST } from './welcome'
 import { isRequestDirty } from './requestChanges'
 import { bodyBase64, downloadName, mimeType } from './response'
 import { keepingOwnVariables } from './shareContent'
@@ -373,6 +375,7 @@ export function createWorkspaceActions(backend) {
 
   const ai = createAiActions(backend, { importData })
   ai.load()
+  const storageActions = createStorageActions(backend)
 
   const commands = {
     newRequest: () => store().newTab(),
@@ -389,7 +392,13 @@ export function createWorkspaceActions(backend) {
     findRequest: () => store().openCommandPalette('requests'),
     newFolder: () => createFolder(),
     clearHistory,
+    showWelcome: () => store().showWelcome(),
+    about: () => store().openAbout(),
+    installApp: promptInstall,
     switchEnvironment: (environmentId) => store().setActiveEnvironment(environmentId),
+    workspaceSwitcher: () => storageActions?.openSwitcher(),
+    openFolder: () => storageActions?.openFolder(),
+    switchWorkspace: (path) => storageActions?.reopen(path),
     export: () => store().openImportDialog(EXPORT_TAB),
     share: () => store().openImportDialog(SHARE_TAB),
     runCollection: () => store().openRunner(),
@@ -419,7 +428,7 @@ export function createWorkspaceActions(backend) {
     mock,
     capture,
     secrets: backend.secrets,
-    storage: createStorageActions(backend),
+    storage: storageActions,
     runExtractors,
     getToken,
     forgetToken,
@@ -462,6 +471,10 @@ export function createWorkspaceActions(backend) {
     cancel: () => cancelTab(activeTab()),
     reset: confirmReset,
     openImport: () => store().openImportDialog(),
+    sendSample: () => {
+      store().openRequestTab(normalizeRequest(SAMPLE_REQUEST))
+      return send()
+    },
     runCommand: (action, payload) => commands[action]?.(payload),
     newRequest: (folderId) => store().newTab(folderId),
     openRequest: (request) => store().openRequestTab(request),

@@ -2,9 +2,10 @@
 Type=Application
 Name=Gostman
 GenericName=API Client
-Comment=A lightweight API client for REST, GraphQL and WebSocket
+Comment=An API client for REST, GraphQL, gRPC and WebSocket
 Exec=gostman
 Icon=gostman
 Terminal=false
 Categories=Development;Network;
+Keywords=API;REST;GraphQL;gRPC;WebSocket;HTTP;
 StartupWMClass=Gostman

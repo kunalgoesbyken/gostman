@@ -3,7 +3,8 @@ import react from '@vitejs/plugin-react'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
-import { readFileSync } from 'fs'
+import { createHash } from 'crypto'
+import { readFileSync, writeFileSync } from 'fs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -41,6 +42,26 @@ function serveWebEntryInDev(entry) {
   }
 }
 
+function stampServiceWorker() {
+  let assets = []
+  return {
+    name: 'stamp-service-worker',
+    apply: 'build',
+    writeBundle(_options, bundle) {
+      assets = Object.values(bundle)
+        .filter((item) => (item.type === 'chunk' && item.isEntry) || item.fileName.endsWith('.css'))
+        .map((item) => `/${item.fileName}`)
+        .sort()
+    },
+    closeBundle() {
+      const file = resolve(__dirname, 'dist-web/sw.js')
+      const buildId = createHash('sha1').update(assets.join(',')).digest('hex').slice(0, 10)
+      const source = readFileSync(file, 'utf8').replace('__BUILD_ID__', buildId).replace('__BUILD_ASSETS__', JSON.stringify(assets))
+      writeFileSync(file, source)
+    },
+  }
+}
+
 const appVersion = JSON.parse(readFileSync(resolve(__dirname, '../wails.json'), 'utf8')).info.productVersion
 
 export default defineConfig({
@@ -57,6 +78,7 @@ export default defineConfig({
     }),
     serveWebEntryInDev('index-web.html'),
     renameHtmlEntry('index-web.html', 'index.html'),
+    stampServiceWorker(),
   ],
   build: {
     outDir: 'dist-web',

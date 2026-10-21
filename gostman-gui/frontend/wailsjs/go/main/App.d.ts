@@ -55,6 +55,8 @@ export function DescribeMcp(arg1:mcpclient.Target):Promise<mcpclient.Catalog>;
 
 export function FetchToken(arg1:engine.TokenExchange):Promise<engine.Token>;
 
+export function ForgetWorkspace(arg1:string):Promise<main.WorkspaceStatus>;
+
 export function GitAbortMerge():Promise<void>;
 
 export function GitAddRemote(arg1:string,arg2:string):Promise<void>;
@@ -137,13 +139,19 @@ export function PickFile(arg1:string):Promise<string>;
 
 export function PickWorkspaceFolder():Promise<string>;
 
+export function PinWorkspace(arg1:string,arg2:boolean):Promise<main.WorkspaceStatus>;
+
 export function PrepareRequest(arg1:engine.Request):Promise<engine.Prepared>;
 
 export function ReloadWorkspace():Promise<main.WorkspaceStatus>;
 
+export function RenameWorkspace(arg1:string,arg2:string):Promise<main.WorkspaceStatus>;
+
 export function ResetData():Promise<void>;
 
 export function ResolveSecretReferences(arg1:Record<string, secrets.Ref>):Promise<Record<string, string>>;
+
+export function RevealWorkspace(arg1:string):Promise<void>;
 
 export function SaveCollectionSettings(arg1:workspace.Settings):Promise<void>;
 

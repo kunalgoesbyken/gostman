@@ -1350,20 +1350,6 @@ export namespace main {
 		    return a;
 		}
 	}
-	export class RecentWorkspace {
-	    path: string;
-	    name: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new RecentWorkspace(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.path = source["path"];
-	        this.name = source["name"];
-	    }
-	}
 	export class Request {
 	    id: string;
 	    name: string;
@@ -1557,10 +1543,30 @@ export namespace main {
 	    }
 	}
 	
+	export class WorkspaceEntry {
+	    path: string;
+	    name: string;
+	    pinned: boolean;
+	    current: boolean;
+	    missing: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new WorkspaceEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.name = source["name"];
+	        this.pinned = source["pinned"];
+	        this.current = source["current"];
+	        this.missing = source["missing"];
+	    }
+	}
 	export class WorkspaceStatus {
 	    path: string;
 	    name: string;
-	    recent: RecentWorkspace[];
+	    workspaces: WorkspaceEntry[];
 	    problems: workspace.Problem[];
 	    notice: string;
 	
@@ -1572,7 +1578,7 @@ export namespace main {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.path = source["path"];
 	        this.name = source["name"];
-	        this.recent = this.convertValues(source["recent"], RecentWorkspace);
+	        this.workspaces = this.convertValues(source["workspaces"], WorkspaceEntry);
 	        this.problems = this.convertValues(source["problems"], workspace.Problem);
 	        this.notice = source["notice"];
 	    }

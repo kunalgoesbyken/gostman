@@ -6,6 +6,7 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { isOAuthCallback, relayOAuthCallback } from './lib/backend/oauthPopup'
 import { watchSharedLinks } from './lib/sharedLink'
 import { watchPreferences } from './lib/preferences'
+import { registerServiceWorker, watchInstallPrompt } from './lib/pwa'
 
 function renderApp() {
   watchPreferences()
@@ -18,6 +19,9 @@ function renderApp() {
     </React.StrictMode>
   )
 }
+
+watchInstallPrompt()
+registerServiceWorker()
 
 if (isOAuthCallback()) relayOAuthCallback()
 else renderApp()

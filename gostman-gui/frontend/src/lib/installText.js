@@ -1,0 +1,4 @@
+export const INSTALL_TEXT = {
+  label: 'Install app',
+  description: 'Add Gostman to this device and open it in its own window',
+}

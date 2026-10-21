@@ -42,6 +42,8 @@ type workspaceMemory struct {
 type workspaceState struct {
 	Current string                     `json:"current"`
 	Recent  []string                   `json:"recent"`
+	Pinned  []string                   `json:"pinned"`
+	Names   map[string]string          `json:"names"`
 	Folders map[string]workspaceMemory `json:"folders"`
 }
 
@@ -108,9 +110,21 @@ func (s *workspaceState) memoryOf(path string) workspaceMemory {
 
 func (s *workspaceState) open(path string) {
 	recent := []string{path}
+	unpinned := 0
+	if !s.isPinned(path) {
+		unpinned = 1
+	}
 	for _, known := range s.Recent {
-		if known != path && len(recent) < maxRecentFolders {
+		if known == path {
+			continue
+		}
+		if s.isPinned(known) {
 			recent = append(recent, known)
+			continue
+		}
+		if unpinned < maxRecentFolders {
+			recent = append(recent, known)
+			unpinned++
 		}
 	}
 	s.Current, s.Recent = path, recent
