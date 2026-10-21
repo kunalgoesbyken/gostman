@@ -25,16 +25,17 @@ export function environmentEntries(environment) {
       value,
       secret: meta[name]?.secret === true,
       enabled: meta[name]?.enabled !== false,
+      ref: meta[name]?.ref,
     }))
 }
 
 export function withEntries(environment, entries) {
   const variables = {}
   const meta = {}
-  for (const { name, value, secret, enabled } of entries) {
+  for (const { name, value, secret, enabled, ref } of entries) {
     if (name.trim() === '') continue
     variables[name] = value
-    if (secret || !enabled) meta[name] = { ...(secret && { secret: true }), ...(!enabled && { enabled: false }) }
+    if (secret || !enabled || ref) meta[name] = { ...(secret && { secret: true }), ...(!enabled && { enabled: false }), ...(ref && { ref }) }
   }
   return { ...environment, variables: JSON.stringify(variables, null, 2), meta: JSON.stringify(meta) }
 }
@@ -56,10 +57,14 @@ export function withoutSecretValues(environments) {
   })
 }
 
-const environmentLayers = (source, environments, environment) => (
+const referenceEntry = (entry, referenced) => (
+  entry.ref ? { ...entry, secret: true, value: referenced[entry.name] ?? '' } : entry
+)
+
+const environmentLayers = (source, environments, environment, referenced) => (
   environmentChain(environments, environment).map((link) => ({
     source,
-    entries: environmentEntries(link).filter((entry) => entry.enabled),
+    entries: environmentEntries(link).filter((entry) => entry.enabled).map((entry) => referenceEntry(entry, referenced)),
   }))
 )
 
@@ -91,14 +96,14 @@ function folderLayers(folders, folderId) {
   return folderChain(folders, folderId).map((folder) => objectLayer('folder', folder.variables))
 }
 
-export function scopeLayers(state, request) {
+export function scopeLayers(state, request, referenced = {}) {
   const activeGlobal = state.isRestricted ? undefined : findById(state.globalEnvironments, state.activeGlobalEnvironmentId)
   const activeEnvironment = findById(state.environments, state.activeEnvironmentId) || state.environments[0]
   return [
     dotEnvLayer(state.dotEnv),
-    ...(activeGlobal ? environmentLayers('global', state.globalEnvironments, activeGlobal) : []),
+    ...(activeGlobal ? environmentLayers('global', state.globalEnvironments, activeGlobal, referenced) : []),
     objectLayer('collection', state.collectionVariables),
-    ...(activeEnvironment ? environmentLayers('environment', state.environments, activeEnvironment) : []),
+    ...(activeEnvironment ? environmentLayers('environment', state.environments, activeEnvironment, referenced) : []),
     ...folderLayers(state.folders, request?.folderId),
     rowsLayer(request?.vars),
   ]
@@ -107,8 +112,8 @@ export function scopeLayers(state, request) {
 export function resolveLayers(layers) {
   const resolved = new Map()
   for (const layer of layers) {
-    for (const { name, value, secret } of layer.entries) {
-      resolved.set(name, { value: asText(value), secret: secret === true, source: layer.source })
+    for (const { name, value, secret, ref } of layer.entries) {
+      resolved.set(name, { value: asText(value), secret: secret === true, source: layer.source, ref })
     }
   }
   return resolved
@@ -146,3 +151,8 @@ export const promptLayer = (answers) => ({
   source: 'request',
   entries: Object.entries(answers).map(([name, value]) => ({ name: PROMPT_PREFIX + name, value })),
 })
+
+export function referenceTargets(state, request) {
+  const resolved = resolveLayers(scopeLayers(state, request))
+  return Object.fromEntries(Array.from(resolved).filter(([, { ref }]) => ref).map(([name, { ref }]) => [name, ref]))
+}

@@ -177,6 +177,9 @@ func (c *Client) Study(stored runner.Collection) error {
 func (c *Client) absorb() {
 	c.learnAll(c.session.Variables())
 	c.learnAll(c.session.Observed())
+	for name, value := range c.session.Resolved() {
+		c.learnResolved(name, value)
+	}
 	for _, cookie := range c.session.Cookies() {
 		c.guard.Learn(cookiePrefix+cookie.Name, cookie.Value)
 	}

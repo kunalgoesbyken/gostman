@@ -15,7 +15,8 @@ import { holdsBack, reasonFor } from './scripting/flow'
 import { MAX_SENDS, SEND_TIMEOUT_MS } from './scripting/limits'
 import { applyRequestEdits, requestSubject, responseSubject, runInSandbox } from './scripting/sandbox'
 import { scriptedRequest } from './scripting/subjects'
-import { promptNames } from './variableScopes'
+import { SECRETS_TEXT } from './secretsText'
+import { promptNames, referenceTargets } from './variableScopes'
 import { useAppStore, variableTextFor } from '../store/appStore'
 
 const CONFIG_ERROR = 'config'
@@ -27,12 +28,12 @@ const POST_RESPONSE = 'Post-response script'
 export const RESTRICTED = 'This folder is not trusted yet, so its scripts and OAuth 2.0 settings are switched off. Open the folder menu in the header and choose Trust this folder.'
 
 const store = () => useAppStore.getState()
-const variablesText = (request, answers) => variableTextFor(store(), request, answers)
+const variablesText = (request, answers, referenced) => variableTextFor(store(), request, answers, referenced)
 const hasText = (text) => text.trim() !== ''
 const isSame = (first, second) => JSON.stringify(first) === JSON.stringify(second)
 
-function readVariables(request) {
-  const parsed = parseJSON(variablesText(request), {})
+function readVariables(request, referenced) {
+  const parsed = parseJSON(variablesText(request, undefined, referenced), {})
   return isPlainObject(parsed) ? parsed : {}
 }
 
@@ -42,8 +43,8 @@ function scriptChanges(before, after) {
   return Object.fromEntries([...changed, ...removed])
 }
 
-async function runStage(stage, job, request, send) {
-  const variables = readVariables(request)
+async function runStage(stage, job, request, send, referenced) {
+  const variables = readVariables(request, referenced)
   const run = await runInSandbox({ ...job, variables }, send)
   if (isPlainObject(run.variables) && !isSame(variables, run.variables)) {
     store().mergeActiveVariables(scriptChanges(variables, run.variables))
@@ -51,10 +52,10 @@ async function runStage(stage, job, request, send) {
   return { ...run, error: run.error ? `${stage}: ${run.error}` : '' }
 }
 
-async function askForValues(request) {
+async function askForValues(request, referenced) {
   const names = promptNames(request)
   if (names.length === 0) return {}
-  const known = readVariables(request)
+  const known = readVariables(request, referenced)
   return store().askVariables(names, Object.fromEntries(names.map((name) => [name, known[name] ?? ''])))
 }
 
@@ -94,6 +95,13 @@ const postSteps = (lineage, request) => [
 ].filter((step) => hasText(step.script) || countActiveAssertions(step.assertions) > 0)
 
 const hasActiveInheritance = (lineage) => lineage.some(({ settings }) => hasActiveContent(settings))
+
+async function resolveReferences(backend, request) {
+  const targets = referenceTargets(store(), request)
+  if (Object.keys(targets).length === 0) return {}
+  if (!backend.secrets) throw new Error(SECRETS_TEXT.desktopOnly)
+  return backend.secrets.resolve(targets)
+}
 
 function transportFor(backend, request) {
   if (isGrpcRequest(request)) return backend.invokeGrpc
@@ -150,20 +158,29 @@ export function createExecutor(backend) {
     const lineage = lineageOf(store(), original.folderId)
     let request = original
     if (store().isRestricted && (hasActiveContent(request) || hasActiveInheritance(lineage))) return stop(request, RESTRICTED)
+
+    let referenced
+    try {
+      referenced = await resolveReferences(backend, request)
+    } catch (error) {
+      return stop(request, error.message)
+    }
+    const variablesOf = (candidate, answers) => variablesText(candidate, answers, referenced)
+
     for (const step of preSteps(lineage, request)) {
-      const pre = await runStage(step.label, { script: step.script, request: requestSubject(request) }, request, send)
+      const pre = await runStage(step.label, { script: step.script, request: requestSubject(request) }, request, send, referenced)
       runs.push(pre)
       if (pre.error) return stop(request, pre.error)
       if (holdsBack(pre.flow)) return { ...stop(request, reasonFor(pre.flow)), skipped: reasonFor(pre.flow) }
       request = applyRequestEdits(request, pre.request)
     }
 
-    const answers = await askForValues(request)
+    const answers = await askForValues(request, referenced)
     if (answers === null) return stop(request, PROMPT_DECLINED)
 
     let renewal
     try {
-      renewal = await renewAuth(backend, request, lineage, variablesText(request, answers))
+      renewal = await renewAuth(backend, request, lineage, variablesOf(request, answers))
     } catch (error) {
       return stop(request, error.message)
     }
@@ -171,7 +188,7 @@ export function createExecutor(backend) {
     const { outgoing } = renewal
 
     const transmit = transportFor(backend, outgoing)
-    const response = await transmit(sendId, withInheritance(store(), outgoing), variablesText(request, answers), store().cookies)
+    const response = await transmit(sendId, withInheritance(store(), outgoing), variablesOf(request, answers), store().cookies)
     store().storeCookies(response.cookies || [])
     const extraction = applyExtractors(request, response)
 
@@ -182,7 +199,7 @@ export function createExecutor(backend) {
           assertions: step.assertions,
           request: requestSubject(request),
           response: responseSubject(response),
-        }, request, send))
+        }, request, send, referenced))
       }
     }
     return { auth: request.auth, response, tests: report(runs), extraction }

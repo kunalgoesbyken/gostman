@@ -524,8 +524,8 @@ export function selectResolvedVariables(state) {
   return lastResolved
 }
 
-export const variableTextFor = (state, request, answers = {}) => (
-  variableText(resolveLayers([...scopeLayers(state, request), promptLayer(answers)]))
+export const variableTextFor = (state, request, answers = {}, referenced = {}) => (
+  variableText(resolveLayers([...scopeLayers(state, request, referenced), promptLayer(answers)]))
 )
 
 export const selectActiveVariables = (state) => variableText(selectResolvedVariables(state))

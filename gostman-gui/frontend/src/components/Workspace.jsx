@@ -337,7 +337,7 @@ function LoadedWorkspace({ backend, onBack }) {
 
       <StatusBar onOpenMock={actions.mock.open} onOpenCapture={actions.capture.open} />
 
-      <AppDialogs onCommand={actions.runCommand} />
+      <AppDialogs onCommand={actions.runCommand} secrets={actions.secrets} />
     </div>
   )
 }

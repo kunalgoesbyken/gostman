@@ -24,4 +24,5 @@ func (f fromEnvironment) Set(name string) error {
 func variableFlags(flags *flag.FlagSet, variables map[string]string) {
 	flags.Var(overrides(variables), "var", "")
 	flags.Var(fromEnvironment(variables), "var-from-env", "")
+	secretFlags(flags)
 }

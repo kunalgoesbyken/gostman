@@ -1,14 +1,18 @@
 import { useEffect, useMemo, useState } from "react"
-import { Eye, EyeOff, Lock, LockOpen, X } from "lucide-react"
+import { Eye, EyeOff, KeyRound, Lock, LockOpen, X } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Input } from "./ui/input"
 import { SectionLabel } from "./ui/panel"
+import { BLANK_REFERENCE, ReferenceFields } from "./SecretReferenceFields"
+import { useSecretConnections } from "../hooks/useSecretConnections"
 import { ENVIRONMENT_TEXT as TEXT } from "../lib/environmentText"
+import { REFERENCE_TEXT } from "../lib/secretsText"
 import { asText } from "../lib/variableScopes"
 import { cn } from "../lib/utils"
 
 const COLUMNS = "grid grid-cols-[1.5rem_minmax(0,1fr)_minmax(0,1.5fr)_1.5rem_1.5rem_1.5rem] items-center gap-x-2 px-3"
+const REFERENCE_COLUMNS = "grid grid-cols-[1.5rem_minmax(0,1fr)_minmax(0,1.5fr)_1.5rem_1.5rem_1.5rem_1.5rem] items-center gap-x-2 px-3"
 const BLANK_ROW = { name: "", value: "", secret: false, enabled: true }
 
 const matches = (row, needle) => (
@@ -33,10 +37,21 @@ function ValueField({ row, isRevealed, readOnly, autoFocus, onChange }) {
   )
 }
 
-function Row({ row, isDraft, isRevealed, focusField, features, onChange, onRemove, onToggleReveal }) {
-  const canReveal = row.secret
+function ReferenceSummary({ reference }) {
+  const target = reference.path ? `${reference.provider}: ${reference.path}` : REFERENCE_TEXT.manager
   return (
-    <div className={cn(COLUMNS, "h-9 border-b border-border", !row.enabled && "opacity-50")}>
+    <span title={target} className="flex h-7 min-w-0 items-center gap-1.5 rounded-md border border-dashed border-border px-2 text-xs text-muted-foreground">
+      <KeyRound className="h-3.5 w-3.5 shrink-0" />
+      <span className="truncate font-mono">{target}</span>
+    </span>
+  )
+}
+
+function RowCells({ row, isDraft, isRevealed, focusField, features, references, onChange, onRemove, onToggleReveal }) {
+  const canReveal = row.secret
+  const toggleReference = () => onChange(row.ref ? { ref: undefined } : { ref: { ...BLANK_REFERENCE, provider: references.connections[0]?.alias ?? "" }, value: "", secret: false })
+  return (
+    <div className={cn(references ? REFERENCE_COLUMNS : COLUMNS, "h-9")}>
       {features.enabled ? (
         <Checkbox
           label={TEXT.enabled}
@@ -55,7 +70,7 @@ function Row({ row, isDraft, isRevealed, focusField, features, onChange, onRemov
         onChange={(event) => onChange({ name: event.target.value })}
         className="font-mono"
       />
-      <ValueField row={row} isRevealed={isRevealed} readOnly={features.readOnly} autoFocus={focusField === "value"} onChange={onChange} />
+      {row.ref ? <ReferenceSummary reference={row.ref} /> : <ValueField row={row} isRevealed={isRevealed} readOnly={features.readOnly} autoFocus={focusField === "value"} onChange={onChange} />}
       {canReveal ? (
         <IconButton
           label={isRevealed ? TEXT.hide : TEXT.reveal}
@@ -64,7 +79,7 @@ function Row({ row, isDraft, isRevealed, focusField, features, onChange, onRemov
           onClick={onToggleReveal}
         />
       ) : <span />}
-      {features.secret && !isDraft ? (
+      {features.secret && !isDraft && !row.ref ? (
         <IconButton
           label={row.secret ? TEXT.notSecret : TEXT.secret}
           icon={row.secret ? Lock : LockOpen}
@@ -74,12 +89,34 @@ function Row({ row, isDraft, isRevealed, focusField, features, onChange, onRemov
           className={row.secret ? "text-primary" : undefined}
         />
       ) : <span />}
+      {references && (!isDraft ? (
+        <IconButton
+          label={row.ref ? REFERENCE_TEXT.usePlain : REFERENCE_TEXT.useManager}
+          icon={KeyRound}
+          size="icon-xs"
+          aria-pressed={Boolean(row.ref)}
+          onClick={toggleReference}
+          className={row.ref ? "text-primary" : undefined}
+        />
+      ) : <span />)}
       {!features.readOnly && !isDraft ? <IconButton label={TEXT.removeRow} icon={X} size="icon-xs" onClick={onRemove} /> : <span />}
     </div>
   )
 }
 
-export function EnvironmentTable({ rows, query, features, onChange }) {
+function Row(props) {
+  const { row, references, onChange } = props
+  return (
+    <div className={cn("border-b border-border", !row.enabled && "opacity-50")}>
+      <RowCells {...props} />
+      {row.ref && references && <ReferenceFields reference={row.ref} {...references} onChange={(ref) => onChange({ ref })} />}
+    </div>
+  )
+}
+
+export function EnvironmentTable({ rows, query, features, secrets, onChange }) {
+  const { connections, isLoaded } = useSecretConnections(secrets)
+  const references = secrets && features.references ? { secrets, connections, isLoaded } : null
   const [revealed, setRevealed] = useState(() => new Set())
   const [focus, setFocus] = useState(null)
   const needle = query.trim().toLowerCase()
@@ -106,13 +143,14 @@ export function EnvironmentTable({ rows, query, features, onChange }) {
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto">
-      <div className={cn(COLUMNS, "h-7 border-b border-border")}>
+      <div className={cn(references ? REFERENCE_COLUMNS : COLUMNS, "h-7 border-b border-border")}>
         <span />
         <SectionLabel>{TEXT.variable}</SectionLabel>
         <SectionLabel>{TEXT.value}</SectionLabel>
         <span />
         <span />
         <span />
+        {references && <span />}
       </div>
       {visible.map(({ row, index }) => (
         <Row
@@ -121,6 +159,7 @@ export function EnvironmentTable({ rows, query, features, onChange }) {
           isRevealed={revealed.has(index)}
           focusField={focus?.index === index ? focus.field : null}
           features={features}
+          references={references}
           onChange={(patch) => edit(index, patch)}
           onRemove={() => onChange(rows.filter((_, at) => at !== index))}
           onToggleReveal={() => toggleReveal(index)}
@@ -131,6 +170,7 @@ export function EnvironmentTable({ rows, query, features, onChange }) {
           isDraft
           row={BLANK_ROW}
           features={features}
+          references={references}
           onChange={addRow}
         />
       )}
