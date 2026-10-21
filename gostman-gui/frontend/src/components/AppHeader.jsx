@@ -3,18 +3,22 @@ import { Button, IconButton } from "./ui/button"
 import { EnvironmentSwitcher } from "./EnvironmentSwitcher"
 import { StorageMenu } from "./StorageMenu"
 import { WindowControls } from "./WindowControls"
-import { isDesktopShell } from "../lib/windowControls"
+import { isDesktopShell, isDragRegion, windowControls } from "../lib/windowControls"
 import { shortcutLabel } from "../lib/platform"
 import logo from "../assets/logo.jpg"
 
 const DRAG = { "--wails-draggable": "drag" }
 const NO_DRAG = { "--wails-draggable": "no-drag" }
 
+const toggleMaximiseOnDragRegion = (event) => {
+  if (isDragRegion(event.target)) windowControls.toggleMaximise()
+}
+
 export function AppHeader({ storage, onImport, onReset, onOpenCommands, onBack }) {
   const isDesktop = isDesktopShell()
 
   return (
-    <header className="relative flex h-12 shrink-0 items-center gap-3 border-b border-border bg-background px-3" style={isDesktop ? DRAG : undefined}>
+    <header className="relative flex h-12 shrink-0 items-center gap-3 border-b border-border bg-background px-3" style={isDesktop ? DRAG : undefined} onDoubleClick={isDesktop ? toggleMaximiseOnDragRegion : undefined}>
       {onBack && <IconButton label="Back to the landing page" icon={ArrowLeft} size="icon" onClick={onBack} />}
 
       {onBack || isDesktop ? (
