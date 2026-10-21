@@ -7,7 +7,7 @@ import { AUTH_OAUTH2, normalizeRequest } from '../request'
 import { isFileRow, isSentRow, parseRows } from '../rows'
 import { isWebSocketURL } from '../socketUrl'
 import { CURL_FILE, CURL_FORM, CURL_MULTIPART, CURL_RAW, curlCommand } from './curl'
-import { REDACTED, maskHeader, maskParameter, maskSecret, maskUrl } from './redaction'
+import { REDACTED, maskHeader, maskJsonText, maskParameter, maskSecret, maskUrl } from './redaction'
 
 export const PROTOCOL_HTTP = 'http'
 export const PROTOCOL_GRAPHQL = 'graphql'
@@ -108,7 +108,7 @@ const CURL_BODIES = {
 }
 
 function rawBody(request) {
-  return request.body.trim() === '' ? null : { kind: CURL_RAW, text: request.body }
+  return request.body.trim() === '' ? null : { kind: CURL_RAW, text: request.bodyType === BODY_JSON ? maskJsonText(request.body) : request.body }
 }
 
 function curlBody(request) {

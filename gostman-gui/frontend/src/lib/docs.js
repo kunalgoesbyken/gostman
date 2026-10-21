@@ -13,7 +13,7 @@ import {
 import { formatJSON } from './docs/json'
 import { createAnchors, html, shorten, toSource, trusted } from './docs/markup'
 import { CONTENT_POLICY, SCRIPT, STYLE } from './docs/page'
-import { REDACTED, maskUrl } from './docs/redaction'
+import { REDACTED, maskJsonText, maskUrl } from './docs/redaction'
 
 const DEFAULT_TITLE = 'API documentation'
 const ROOT_HEADING = 'General'
@@ -172,7 +172,7 @@ const BODY_SECTIONS = {
   [BODY_FORM]: (request) => pairSection('Form fields', sentFields(request).map(fieldRow)),
   [BODY_MULTIPART]: (request) => pairSection('Multipart fields', sentFields(request).map(fieldRow)),
   [BODY_BINARY]: (request) => (fileNameOf(request) ? html`<h4>Body</h4><p>File <code>${fileNameOf(request)}</code></p>` : ''),
-  [BODY_JSON]: (request) => codeSection('Body', formatted(request.body)),
+  [BODY_JSON]: (request) => codeSection('Body', formatted(maskJsonText(request.body))),
 }
 
 function bodySection(request) {
@@ -188,7 +188,7 @@ const curlSection = (request) => codeSection('Example request', curlExample(requ
 
 const graphqlSection = (request) => [
   codeSection('Query', request.graphqlQuery),
-  codeSection('Variables', formatted(request.graphqlVariables.trim() === '{}' ? '' : request.graphqlVariables)),
+  codeSection('Variables', formatted(request.graphqlVariables.trim() === '{}' ? '' : maskJsonText(request.graphqlVariables))),
 ]
 
 const protoNames = (request) => parseProtoFiles(request.grpcProtos).map((file) => file.name).join(', ')

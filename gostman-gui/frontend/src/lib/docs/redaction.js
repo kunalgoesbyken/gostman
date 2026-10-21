@@ -44,6 +44,23 @@ export function maskHeader(row) {
 
 export const maskParameter = (row) => (isSensitiveName(row.key) ? { ...row, value: maskSecret(row.value) } : row)
 
+function maskJsonNode(node, key) {
+  if (Array.isArray(node)) return node.map((item) => maskJsonNode(item, key))
+  if (node !== null && typeof node === 'object') {
+    return Object.fromEntries(Object.entries(node).map(([name, value]) => [name, maskJsonNode(value, name)]))
+  }
+  const isLeaf = typeof node === 'string' || typeof node === 'number'
+  return isLeaf && key !== undefined && isSensitiveName(key) ? maskSecret(String(node)) : node
+}
+
+export function maskJsonText(text) {
+  try {
+    return JSON.stringify(maskJsonNode(JSON.parse(text)), null, 2)
+  } catch {
+    return text
+  }
+}
+
 const SCHEME_END = '://'
 const PATH_START = '/'
 const USERINFO_END = '@'
