@@ -93,6 +93,15 @@ func parseJSONRows(content []byte) ([]Row, error) {
 	return rows, nil
 }
 
+const MaxIterations = 10000
+
+func (o Options) CheckIterations() error {
+	if requested := max(o.Iterations, o.iterationCount()); requested > MaxIterations {
+		return fmt.Errorf("a run is limited to %d iterations, this one asks for %d; lower the iteration count or use fewer data rows", MaxIterations, requested)
+	}
+	return nil
+}
+
 func (o Options) iterationCount() int {
 	count := len(o.Data)
 	if count == 0 {

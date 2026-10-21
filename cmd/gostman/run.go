@@ -89,6 +89,9 @@ func parseInvocation(arguments []string) (invocation, error) {
 	if err := parsed.extras.apply(&parsed.options, parsed.reporter); err != nil {
 		return parsed, err
 	}
+	if err := parsed.options.CheckIterations(); err != nil {
+		return parsed, err
+	}
 	parsed.path = positional[0]
 	parsed.options.Delay = time.Duration(delayMs) * time.Millisecond
 	parsed.options.Timeout = time.Duration(timeoutMs) * time.Millisecond

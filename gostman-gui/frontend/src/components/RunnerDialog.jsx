@@ -12,7 +12,7 @@ import { MethodTag } from "./MethodTag"
 import { TestRow, countPassed } from "./TestResults"
 import { ROOT_ID, buildCollectionTree, collectRequests, listFolders } from "../lib/collectionTree"
 import { pluralize } from "../lib/dataUtils"
-import { DATA_FILE_ERROR, iterationCount, parseDataFile } from "../lib/runData"
+import { DATA_FILE_ERROR, iterationCount, MAX_ITERATIONS, parseDataFile } from "../lib/runData"
 import { statusVariant } from "../lib/response"
 import { cn } from "../lib/utils"
 
@@ -181,11 +181,12 @@ export function RunnerDialog({ runner, folders, requests, actions }) {
         <Input
           type="number"
           min={0}
+          max={MAX_ITERATIONS}
           value={iterationLimit || ""}
           placeholder={LABELS.iterations}
           aria-label={LABELS.iterations}
           disabled={isRunning}
-          onChange={(event) => setIterationLimit(toCount(event.target.value))}
+          onChange={(event) => setIterationLimit(Math.min(MAX_ITERATIONS, toCount(event.target.value)))}
           className="w-28 shrink-0 font-mono"
         />
         <Input
