@@ -6,6 +6,13 @@
   [![CI](https://github.com/kunalgoesbyken/gostman/actions/workflows/ci.yml/badge.svg)](https://github.com/kunalgoesbyken/gostman/actions/workflows/ci.yml)
   [![Release](https://img.shields.io/github/v/release/kunalgoesbyken/gostman)](https://github.com/kunalgoesbyken/gostman/releases/latest)
   [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+  <p>
+    <a href="https://gostman.vercel.app/web"><strong>Open the web app</strong></a> ·
+    <a href="https://github.com/kunalgoesbyken/gostman/releases/latest">Download for Windows, macOS and Linux</a> ·
+    <a href="#features">Features</a>
+  </p>
+  <p>No account. Your requests stay on your device. The web app installs as an app and works offline.</p>
 </div>
 
 ![Gostman sending a request](screenshots/app.png)
