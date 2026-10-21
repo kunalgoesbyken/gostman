@@ -115,6 +115,8 @@ func (c *collector) importDocuments(ctx context.Context, docs []document, option
 	}
 	for _, doc := range docs {
 		switch doc.kind {
+		case kindGostman:
+			c.readGostman(doc)
 		case kindInsomnia:
 			c.readInsomnia(doc)
 		case kindHAR:

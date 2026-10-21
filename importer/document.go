@@ -21,6 +21,7 @@ const (
 	FormatBruno    = "bruno"
 	FormatPostman  = "postman"
 	FormatOpenAPI  = "openapi"
+	FormatGostman  = "gostman"
 
 	kindInsomnia            = "insomnia"
 	kindHAR                 = "har"
@@ -47,6 +48,8 @@ const (
 	brunoExtension          = ".bru"
 )
 
+var importableExtensions = map[string]bool{".json": true, ".yml": true, ".yaml": true, ".xml": true, ".wsdl": true, ".xsd": true, ".har": true, ".txt": true}
+
 var kindFormats = map[string]string{
 	kindInsomnia:           FormatInsomnia,
 	kindHAR:                FormatHAR,
@@ -58,6 +61,7 @@ var kindFormats = map[string]string{
 	kindBruno:              FormatBruno,
 	kindBrunoConfig:        FormatBruno,
 	kindOpenCollection:     FormatBruno,
+	kindGostman:            FormatGostman,
 }
 
 type document struct {
@@ -92,6 +96,8 @@ func classify(file File) document {
 	doc := document{file: file}
 	trimmed := strings.TrimSpace(file.Text)
 	switch {
+	case !importableName(file.Name):
+		doc.err = unsupportedType(file.Name)
 	case trimmed == "":
 		doc.err = errEmpty
 	case strings.HasPrefix(trimmed, "<"):
@@ -105,6 +111,15 @@ func classify(file File) document {
 		}
 	}
 	return doc
+}
+
+func importableName(name string) bool {
+	extension := path.Ext(strings.ToLower(name))
+	return extension == "" || extension == brunoExtension || importableExtensions[extension]
+}
+
+func unsupportedType(name string) error {
+	return fmt.Errorf(messageUnsupportedTypeDetail, path.Ext(strings.ToLower(name)))
 }
 
 func classifyXML(source string) string {

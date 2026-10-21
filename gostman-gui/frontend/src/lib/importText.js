@@ -6,6 +6,7 @@ export const IMPORT_FORMATS = [
   { value: 'bruno', label: 'Bruno' },
   { value: 'postman', label: 'Postman' },
   { value: 'openapi', label: 'OpenAPI' },
+  { value: 'gostman', label: 'Gostman' },
 ]
 
 export const FORMAT_LABELS = {
@@ -15,6 +16,7 @@ export const FORMAT_LABELS = {
   bruno: 'Bruno collection',
   postman: 'Postman file',
   openapi: 'OpenAPI spec',
+  gostman: 'Gostman export',
 }
 
 export const IMPORT_TEXT = {

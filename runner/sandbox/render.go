@@ -1,7 +1,6 @@
 package sandbox
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -16,13 +15,10 @@ func Render(function string, result any, arguments ...any) error {
 	}
 	encoded, err := renderer.invoke(function, renderLimit, arguments)
 	if errors.Is(err, errExpired) {
-		return fmt.Errorf("%s took more than %s and was stopped", function, renderLimit)
+		return fmt.Errorf("the operation took more than %s and was stopped", renderLimit)
 	}
 	if err != nil {
 		return err
 	}
-	if err := json.Unmarshal([]byte(encoded), result); err != nil {
-		return fmt.Errorf("%s returned an unexpected value: %w", function, err)
-	}
-	return nil
+	return decodeResult(encoded, result)
 }

@@ -1,7 +1,6 @@
 package sandbox
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -87,8 +86,5 @@ func (s *Sandbox) run(target *machine, function string, result any, arguments []
 	if err != nil {
 		return err
 	}
-	if err := json.Unmarshal([]byte(encoded), result); err != nil {
-		return fmt.Errorf("%s returned an unexpected value: %w", function, err)
-	}
-	return nil
+	return decodeResult(encoded, result)
 }
