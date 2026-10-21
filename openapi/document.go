@@ -62,6 +62,7 @@ type Document struct {
 }
 
 func Load(ctx context.Context, source Source, opt Options) (*Document, error) {
+	opt = opt.withAllowance()
 	data, base, err := opt.read(ctx, source)
 	if err != nil {
 		return nil, err

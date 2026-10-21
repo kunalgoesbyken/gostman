@@ -10,7 +10,10 @@ import (
 	"strings"
 )
 
-const maxExampleDepth = 8
+const (
+	maxExampleDepth = 8
+	maxExampleNodes = 2000
+)
 
 type ordered struct {
 	keys []string
@@ -80,6 +83,7 @@ type walker struct {
 	l     *loader
 	mode  exampleMode
 	stack map[uintptr]bool
+	nodes int
 }
 
 func (l *loader) exampleOf(schema node, mode exampleMode) (any, bool) {
@@ -88,7 +92,8 @@ func (l *loader) exampleOf(schema node, mode exampleMode) (any, bool) {
 }
 
 func (w *walker) value(n node, depth int) (any, bool) {
-	if depth > maxExampleDepth {
+	w.nodes++
+	if depth > maxExampleDepth || w.nodes > maxExampleNodes {
 		return nil, false
 	}
 	m, d, _ := w.l.resolved(n)

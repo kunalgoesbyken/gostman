@@ -17,6 +17,8 @@ import (
 const (
 	maxRequestBytes      = 14 << 20
 	maxOpenAPIReplyBytes = 4 << 20
+	maxOpenAPIRefs       = 10
+	maxOpenAPIBytes      = openapi.DefaultMaxBytes
 
 	actionDescribe = "describe"
 	actionInvoke   = "invoke"
@@ -159,7 +161,7 @@ func readOpenAPI(r *http.Request) openapi.Reply {
 		return openapi.Reply{Error: err.Error()}
 	}
 	query.Source.Path = ""
-	reply := openapi.Handle(r.Context(), query, openapi.Options{Policy: Policy})
+	reply := openapi.Handle(r.Context(), query, openapi.Options{Policy: Policy, MaxBytes: maxOpenAPIBytes, MaxRefs: maxOpenAPIRefs})
 	if encoded, err := json.Marshal(reply); err == nil && len(encoded) > maxOpenAPIReplyBytes {
 		return openapi.Reply{Error: "the answer is too large for the web app, so it is read in smaller parts"}
 	}

@@ -20,6 +20,7 @@ const (
 	DefaultMaxBytes = 10 << 20
 	defaultMaxRefs  = 50
 	fetchTimeout    = 25 * time.Second
+	totalFetchTime  = 60 * time.Second
 	maxRedirects    = 5
 
 	maxRefHops       = 32
@@ -37,6 +38,12 @@ type Options struct {
 	AllowFiles bool
 	MaxBytes   int64
 	MaxRefs    int
+	spent      *allowance
+}
+
+type allowance struct {
+	left     int64
+	deadline time.Time
 }
 
 func (o Options) limit() int64 {
@@ -44,6 +51,28 @@ func (o Options) limit() int64 {
 		return o.MaxBytes
 	}
 	return DefaultMaxBytes
+}
+
+func (o Options) allowed() int64 {
+	if o.spent == nil {
+		return o.limit()
+	}
+	return min(o.limit(), o.spent.left)
+}
+
+func (o Options) charge(data []byte) {
+	if o.spent != nil {
+		o.spent.left -= int64(len(data))
+	}
+}
+
+func (o Options) withAllowance() Options {
+	duration := totalFetchTime
+	if o.Policy.MaxTimeout > 0 {
+		duration = o.Policy.MaxTimeout
+	}
+	o.spent = &allowance{left: o.limit(), deadline: time.Now().Add(duration)}
+	return o
 }
 
 func (o Options) refLimit() int {
@@ -84,6 +113,11 @@ func (o Options) fetch(ctx context.Context, address string) ([]byte, error) {
 	if err := checkScheme(parsed); err != nil {
 		return nil, err
 	}
+	if o.spent != nil {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithDeadline(ctx, o.spent.deadline)
+		defer cancel()
+	}
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, parsed.String(), nil)
 	if err != nil {
 		return nil, err
@@ -97,7 +131,12 @@ func (o Options) fetch(ctx context.Context, address string) ([]byte, error) {
 	if response.StatusCode < 200 || response.StatusCode > 299 {
 		return nil, fmt.Errorf("%s answered %s", parsed.Host, response.Status)
 	}
-	return readLimited(response.Body, o.limit())
+	data, err := readLimited(response.Body, o.allowed())
+	if err != nil {
+		return nil, err
+	}
+	o.charge(data)
+	return data, nil
 }
 
 func readLimited(reader io.Reader, limit int64) ([]byte, error) {
@@ -120,16 +159,23 @@ func (o Options) readFile(path string) ([]byte, error) {
 		return nil, err
 	}
 	defer file.Close()
-	return readLimited(file, o.limit())
+	data, err := readLimited(file, o.allowed())
+	if err != nil {
+		return nil, err
+	}
+	o.charge(data)
+	return data, nil
 }
 
 func (o Options) read(ctx context.Context, source Source) ([]byte, string, error) {
 	switch {
 	case source.Text != "":
-		if int64(len(source.Text)) > o.limit() {
-			return nil, "", fmt.Errorf("the document is larger than %d MB", o.limit()>>20)
+		if int64(len(source.Text)) > o.allowed() {
+			return nil, "", fmt.Errorf("the document is larger than %d MB", o.allowed()>>20)
 		}
-		return []byte(source.Text), "", nil
+		data := []byte(source.Text)
+		o.charge(data)
+		return data, "", nil
 	case source.URL != "":
 		data, err := o.fetch(ctx, source.URL)
 		return data, source.URL, err
