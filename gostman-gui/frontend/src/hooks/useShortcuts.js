@@ -1,18 +1,22 @@
 import { useEffect } from "react"
+import { activeShortcuts, matchesBinding } from "../lib/shortcuts"
 
-export function useShortcuts(shortcuts, isEnabled) {
+// handlers maps a shortcut id from lib/shortcuts to the function it runs.
+export function useShortcuts(handlers, isEnabled) {
   useEffect(() => {
     if (!isEnabled) return undefined
 
+    const bindings = activeShortcuts().map(({ shortcut, binding }) => ({ shortcut, binding }))
+
     const handleKeyDown = (event) => {
-      if (!event.ctrlKey && !event.metaKey) return
-      const run = shortcuts.get(event.key.toLowerCase())
+      const match = bindings.find(({ binding }) => matchesBinding(binding, event))
+      const run = match && handlers[match.shortcut.id]
       if (!run) return
       event.preventDefault()
-      run()
+      run(match.shortcut.position)
     }
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [shortcuts, isEnabled])
+  }, [handlers, isEnabled])
 }

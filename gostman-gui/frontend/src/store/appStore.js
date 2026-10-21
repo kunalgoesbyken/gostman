@@ -21,6 +21,8 @@ const CLOSED_CONFIRM = { isOpen: false, title: '', message: '', confirmText: 'OK
 const CLOSED_RUNNER = { isOpen: false, folderId: '', isRunning: false, results: [] }
 const CLOSED_PROMPT = { isOpen: false, title: '', message: '', placeholder: '', defaultValue: '', confirmText: 'OK', onConfirm: null, onCancel: null }
 
+const MAX_CLOSED_TABS = 10
+
 const createId = (prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 
 const asArray = (value) => (Array.isArray(value) ? value : [])
@@ -171,6 +173,10 @@ export const useAppStore = create(
         importDialogTab: IMPORT_TAB,
         importDialogFolderId: '',
         commandPaletteOpen: false,
+        commandPaletteMode: 'commands',
+        shortcutsDialogOpen: false,
+        isSidebarOpen: true,
+        closedTabs: [],
         cookiesDialogOpen: false,
         settingsDialogOpen: false,
         examplesDialogOpen: false,
@@ -273,11 +279,32 @@ export const useAppStore = create(
           return isReusable ? mapTab(state, active.id, (tab) => createTab(tab.id, request)) : appendTab(state, request)
         }),
         closeTab: (tabId) => set((state) => {
+          const closed = state.tabs.find((tab) => tab.id === tabId)
+          const closedTabs = closed && !isBlankRequest(closed.request)
+            ? [closed.request, ...state.closedTabs].slice(0, MAX_CLOSED_TABS)
+            : state.closedTabs
           const remaining = state.tabs.filter((tab) => tab.id !== tabId)
-          if (remaining.length === 0) return appendTab({ ...state, tabs: remaining })
-          if (state.activeTabId !== tabId) return { tabs: remaining }
+          if (remaining.length === 0) return { ...appendTab({ ...state, tabs: remaining }), closedTabs }
+          if (state.activeTabId !== tabId) return { tabs: remaining, closedTabs }
           const closedIndex = state.tabs.findIndex((tab) => tab.id === tabId)
-          return { tabs: remaining, activeTabId: remaining[Math.max(0, closedIndex - 1)].id }
+          return { tabs: remaining, closedTabs, activeTabId: remaining[Math.max(0, closedIndex - 1)].id }
+        }),
+        reopenClosedTab: () => set((state) => {
+          if (state.closedTabs.length === 0) return state
+          const [request, ...closedTabs] = state.closedTabs
+          const active = selectActiveTab(state)
+          const isReusable = isBlankRequest(active.request) && active.pendingId === null
+          const opened = isReusable ? { ...mapTab(state, active.id, (tab) => createTab(tab.id, request)) } : appendTab(state, request)
+          return { ...opened, closedTabs }
+        }),
+        cycleTab: (step) => set((state) => {
+          const index = state.tabs.findIndex((tab) => tab.id === state.activeTabId)
+          const next = state.tabs[(index + step + state.tabs.length) % state.tabs.length]
+          return { activeTabId: next.id }
+        }),
+        activateTabAt: (position) => set((state) => {
+          const tab = position === 9 ? state.tabs[state.tabs.length - 1] : state.tabs[position - 1]
+          return tab ? { activeTabId: tab.id } : state
         }),
         updateTabRequest: (tabId, updates) => set((state) => (
           mapTab(state, tabId, (tab) => ({ ...tab, request: { ...tab.request, ...updates } }))
@@ -337,7 +364,10 @@ export const useAppStore = create(
         closeCodeDialog: () => set({ codeDialogOpen: false, codeSnippets: null }),
         openImportDialog: (tab = IMPORT_TAB, folderId = '') => set({ importDialogOpen: true, importDialogTab: tab, importDialogFolderId: folderId }),
         closeImportDialog: () => set({ importDialogOpen: false }),
-        openCommandPalette: () => set({ commandPaletteOpen: true }),
+        openCommandPalette: (mode) => set({ commandPaletteOpen: true, commandPaletteMode: mode === 'requests' ? 'requests' : 'commands' }),
+        openShortcutsDialog: () => set({ shortcutsDialogOpen: true, commandPaletteOpen: false }),
+        closeShortcutsDialog: () => set({ shortcutsDialogOpen: false }),
+        toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
         closeCommandPalette: () => set({ commandPaletteOpen: false }),
         openCookiesDialog: () => set({ cookiesDialogOpen: true }),
         closeCookiesDialog: () => set({ cookiesDialogOpen: false }),
@@ -424,6 +454,7 @@ export const selectIsDialogOpen = (state) => (
   state.codeDialogOpen
   || state.importDialogOpen
   || state.commandPaletteOpen
+  || state.shortcutsDialogOpen
   || state.cookiesDialogOpen
   || state.settingsDialogOpen
   || state.examplesDialogOpen

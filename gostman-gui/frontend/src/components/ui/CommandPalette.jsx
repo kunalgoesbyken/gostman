@@ -1,18 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
-  Bookmark, Code, Cookie, Copy, Download, FolderPlus, Globe, History, ListChecks, Plus, Radio, RotateCcw, Save, Search, Send, Server, Settings,
-  Share2, Upload, X,
+  Bookmark, Clock, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Plus, Radio, RotateCcw, Save, Search, Send,
+  Server, Settings, Share2, Undo2, Upload, X,
 } from "lucide-react"
-import { shortcutLabel } from "../../lib/platform"
+import { MethodTag } from "../MethodTag"
+import { fuzzyScore } from "../../lib/fuzzy"
+import { shortcutLabelFor } from "../../lib/shortcuts"
 import { cn } from "../../lib/utils"
 
 const COMMANDS = [
-  { id: "send-request", label: "Send request", description: "Send the request in the current tab", icon: Send, shortcut: "Enter", action: "sendRequest" },
-  { id: "new-request", label: "New request", description: "Open a new empty tab", icon: Plus, shortcut: "N", action: "newRequest" },
-  { id: "save-request", label: "Save request", description: "Save the request in the current tab", icon: Save, shortcut: "S", action: "saveRequest" },
+  { id: "send-request", label: "Send request", description: "Send the request in the current tab", icon: Send, shortcutId: "sendRequest", action: "sendRequest" },
+  { id: "new-request", label: "New request", description: "Open a new empty tab", icon: Plus, shortcutId: "newRequest", action: "newRequest" },
+  { id: "save-request", label: "Save request", description: "Save the request in the current tab", icon: Save, shortcutId: "saveRequest", action: "saveRequest" },
   { id: "duplicate-request", label: "Duplicate request", description: "Save a copy of the current request", icon: Copy, action: "duplicateRequest" },
   { id: "generate-code", label: "Generate code", description: "Show the current request as code", icon: Code, action: "generateCode" },
-  { id: "close-tab", label: "Close tab", description: "Close the current tab", icon: X, action: "closeTab" },
+  { id: "close-tab", label: "Close tab", description: "Close the current tab", icon: X, shortcutId: "closeTab", action: "closeTab" },
+  { id: "reopen-tab", label: "Reopen closed tab", description: "Bring back the tab you closed last", icon: Undo2, shortcutId: "reopenTab", action: "reopenTab" },
+  { id: "toggle-sidebar", label: "Toggle sidebar", description: "Show or hide collections and history", icon: PanelLeft, shortcutId: "toggleSidebar", action: "toggleSidebar" },
+  { id: "keyboard-shortcuts", label: "Keyboard shortcuts", description: "See every shortcut", icon: Keyboard, keywords: "?", shortcutId: "shortcutsHelp", action: "shortcuts" },
   { id: "new-folder", label: "New folder", description: "Create a folder at the top level", icon: FolderPlus, action: "newFolder" },
   { id: "run-collection", label: "Run requests", description: "Run every request in a folder with its tests", icon: ListChecks, action: "runCollection" },
   { id: "examples", label: "Request examples", description: "See the saved responses of the current request", icon: Bookmark, action: "examples" },
@@ -28,6 +33,17 @@ const COMMANDS = [
 ]
 
 const SELECTION_STEPS = { ArrowDown: 1, ArrowUp: -1 }
+const MAX_REQUEST_RESULTS = 12
+const MAX_HISTORY_RESULTS = 6
+const MAX_RECENT_REQUESTS = 30
+const PATH_SEPARATOR = " / "
+const UNTITLED = "Untitled request"
+const NAME_MATCH_BONUS = 20
+
+const KIND_COMMAND = "command"
+const KIND_REQUEST = "request"
+const KIND_HISTORY = "history"
+const SECTION_TITLES = { [KIND_COMMAND]: "Commands", [KIND_REQUEST]: "Requests", [KIND_HISTORY]: "History" }
 
 const environmentCommands = (environments, activeEnvironmentId) => environments
   .filter((environment) => environment.id !== activeEnvironmentId)
@@ -40,60 +56,166 @@ const environmentCommands = (environments, activeEnvironmentId) => environments
     payload: environment.id,
   }))
 
-const matches = (command, needle) => (
-  command.label.toLowerCase().includes(needle) || command.description.toLowerCase().includes(needle)
+const folderPathOf = (folders) => {
+  const byId = new Map(folders.map((folder) => [folder.id, folder]))
+  return (folderId) => {
+    const names = []
+    const seen = new Set()
+    for (let folder = byId.get(folderId); folder && !seen.has(folder.id); folder = byId.get(folder.parentId)) {
+      seen.add(folder.id)
+      names.unshift(folder.name)
+    }
+    return names.join(PATH_SEPARATOR)
+  }
+}
+
+const requestItems = (requests, folders) => {
+  const pathOf = folderPathOf(folders)
+  return requests.map((request) => ({
+    kind: KIND_REQUEST,
+    id: `request-${request.id}`,
+    request,
+    method: request.method,
+    title: request.name || UNTITLED,
+    path: pathOf(request.folderId),
+    url: request.url,
+  }))
+}
+
+const historyItems = (history) => history.map((entry) => ({
+  kind: KIND_HISTORY,
+  id: `history-${entry.id}`,
+  request: entry,
+  method: entry.method,
+  title: entry.url,
+  path: "",
+  url: "",
+}))
+
+const commandItems = (commands) => commands.map((command) => ({ ...command, kind: KIND_COMMAND }))
+
+// A match on the name outranks a match on the folder or address.
+const itemScore = (item, needle) => {
+  if (item.kind === KIND_COMMAND) {
+    const label = fuzzyScore(item.label, needle)
+    if (label !== null) return label
+    return `${item.description} ${item.keywords || ""}`.toLowerCase().includes(needle) ? 1 : null
+  }
+  const title = fuzzyScore(item.title, needle)
+  if (title !== null) return title + NAME_MATCH_BONUS
+  return fuzzyScore(`${item.path} ${item.method} ${item.url}`, needle)
+}
+
+const rank = (items, needle, limit) => items
+  .map((item) => ({ item, score: itemScore(item, needle) }))
+  .filter((entry) => entry.score !== null)
+  .sort((first, second) => second.score - first.score)
+  .slice(0, limit)
+  .map((entry) => entry.item)
+
+function paletteItems({ commands, requests, history, query, mode }) {
+  const needle = query.trim().toLowerCase()
+  const showCommands = mode !== "requests"
+  if (!needle) {
+    return showCommands
+      ? commands
+      : [...requests.slice(0, MAX_RECENT_REQUESTS), ...history.slice(0, MAX_HISTORY_RESULTS)]
+  }
+  return [
+    ...(showCommands ? rank(commands, needle, commands.length) : []),
+    ...rank(requests, needle, MAX_REQUEST_RESULTS),
+    ...rank(history, needle, MAX_HISTORY_RESULTS),
+  ]
+}
+
+const rowClass = (isSelected, extra) => cn(
+  "flex h-10 w-full items-center gap-3 rounded-md px-3 text-left",
+  extra,
+  isSelected && "bg-accent"
 )
+
+const scrollWhenSelected = (isSelected) => (element) => {
+  if (isSelected) element?.scrollIntoView({ block: "nearest" })
+}
 
 function CommandRow({ command, isSelected, onSelect, onHover }) {
   const Icon = command.icon
+  const shortcut = command.shortcutId ? shortcutLabelFor(command.shortcutId) : ""
   return (
     <button
       type="button"
       role="option"
       aria-selected={isSelected}
       title={command.label}
-      ref={(element) => {
-        if (isSelected) element?.scrollIntoView({ block: "nearest" })
-      }}
+      ref={scrollWhenSelected(isSelected)}
       onClick={() => onSelect(command)}
       onMouseMove={onHover}
-      className={cn(
-        "flex h-10 w-full items-center gap-3 rounded-md px-3 text-left",
-        command.destructive && "text-destructive",
-        isSelected && "bg-accent"
-      )}
+      className={rowClass(isSelected, command.destructive && "text-destructive")}
     >
       <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
       <span className="min-w-0 flex-1">
         <span className="block truncate text-xs font-medium">{command.label}</span>
         <span className="block truncate text-[11px] text-muted-foreground">{command.description}</span>
       </span>
-      {command.shortcut && <kbd>{shortcutLabel(command.shortcut)}</kbd>}
+      {shortcut && <kbd>{shortcut}</kbd>}
     </button>
   )
 }
 
-function OpenCommandPalette({ environments, activeEnvironmentId, onClose, onCommand }) {
+function RequestRow({ item, isSelected, onSelect, onHover }) {
+  const isHistory = item.kind === KIND_HISTORY
+  const detail = isHistory ? "Sent earlier" : [item.path, item.url].filter(Boolean).join("  ·  ")
+  const Icon = isHistory ? Clock : FileText
+  return (
+    <button
+      type="button"
+      role="option"
+      aria-selected={isSelected}
+      title={isHistory ? item.title : `${item.title}${item.path ? ` (${item.path})` : ""}`}
+      ref={scrollWhenSelected(isSelected)}
+      onClick={() => onSelect(item)}
+      onMouseMove={onHover}
+      className={rowClass(isSelected)}
+    >
+      <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+      <MethodTag method={item.method} className="w-12" />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-xs font-medium">{item.title}</span>
+        <span className="block truncate text-[11px] text-muted-foreground">{detail}</span>
+      </span>
+    </button>
+  )
+}
+
+function SectionTitle({ kind }) {
+  return <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{SECTION_TITLES[kind]}</p>
+}
+
+function OpenCommandPalette({ mode, environments, activeEnvironmentId, requests, folders, history, onClose, onCommand, onShowShortcuts }) {
   const [query, setQuery] = useState("")
   const [selectedIndex, setSelectedIndex] = useState(0)
   const inputRef = useRef(null)
 
   const commands = useMemo(
-    () => [...COMMANDS, ...environmentCommands(environments, activeEnvironmentId)],
+    () => commandItems([...COMMANDS, ...environmentCommands(environments, activeEnvironmentId)]),
     [environments, activeEnvironmentId]
   )
-  const shown = useMemo(() => {
-    const needle = query.trim().toLowerCase()
-    return needle ? commands.filter((command) => matches(command, needle)) : commands
-  }, [commands, query])
+  const requestRows = useMemo(() => requestItems(requests, folders), [requests, folders])
+  const historyRows = useMemo(() => historyItems(history), [history])
+  const shown = useMemo(
+    () => paletteItems({ commands, requests: requestRows, history: historyRows, query, mode }),
+    [commands, requestRows, historyRows, query, mode]
+  )
 
   useEffect(() => {
     inputRef.current.focus()
   }, [])
 
-  const select = (command) => {
+  const select = (item) => {
     onClose()
-    onCommand(command.action, command.payload)
+    if (item.kind === KIND_REQUEST) onCommand("openRequest", item.request)
+    else if (item.kind === KIND_HISTORY) onCommand("openHistory", item.request)
+    else onCommand(item.action, item.payload)
   }
 
   const updateQuery = (event) => {
@@ -118,6 +240,9 @@ function OpenCommandPalette({ environments, activeEnvironmentId, onClose, onComm
     setSelectedIndex((index) => (index + step + shown.length) % shown.length)
   }
 
+  const isRequestMode = mode === "requests"
+  const showsSections = isRequestMode || query.trim() !== ""
+
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 px-4 pb-4 pt-[15vh]" onMouseDown={onClose}>
       <div
@@ -135,25 +260,38 @@ function OpenCommandPalette({ environments, activeEnvironmentId, onClose, onComm
             type="text"
             value={query}
             onChange={updateQuery}
-            placeholder="Type a command"
-            aria-label="Search commands"
+            placeholder={isRequestMode ? "Go to a request or history entry" : "Type a command or a request name"}
+            aria-label={isRequestMode ? "Search requests" : "Search commands"}
             spellCheck={false}
             className="h-7 min-w-0 flex-1 rounded-md bg-transparent px-1 text-xs text-foreground placeholder:text-muted-foreground"
           />
+          <button
+            type="button"
+            title="Keyboard shortcuts"
+            aria-label="Keyboard shortcuts"
+            onClick={onShowShortcuts}
+            className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border font-mono text-[11px] text-muted-foreground hover:bg-accent hover:text-foreground"
+          >
+            ?
+          </button>
           <kbd>Esc</kbd>
         </div>
 
-        <div role="listbox" aria-label="Commands" className="min-h-0 flex-1 overflow-y-auto p-1.5">
-          {shown.length === 0 && <p className="py-6 text-center text-xs text-muted-foreground">No commands found</p>}
-          {shown.map((command, index) => (
-            <CommandRow
-              key={command.id}
-              command={command}
-              isSelected={index === selectedIndex}
-              onSelect={select}
-              onHover={() => setSelectedIndex(index)}
-            />
-          ))}
+        <div role="listbox" aria-label="Results" className="min-h-0 flex-1 overflow-y-auto p-1.5">
+          {shown.length === 0 && <p className="py-6 text-center text-xs text-muted-foreground">Nothing found</p>}
+          {shown.map((item, index) => {
+            const isSelected = index === selectedIndex
+            const onHover = () => setSelectedIndex(index)
+            const startsSection = showsSections && item.kind !== shown[index - 1]?.kind
+            return (
+              <div key={item.id} role="presentation">
+                {startsSection && <SectionTitle kind={item.kind} />}
+                {item.kind === KIND_COMMAND
+                  ? <CommandRow command={item} isSelected={isSelected} onSelect={select} onHover={onHover} />
+                  : <RequestRow item={item} isSelected={isSelected} onSelect={select} onHover={onHover} />}
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>

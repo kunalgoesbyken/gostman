@@ -33,6 +33,33 @@ const MonacoEditor = lazy(() => import("./MonacoEditor").then((module) => ({ def
 const ENVIRONMENT_SAVE_DELAY_MS = 400
 const REQUEST_AREA_STYLE = { minHeight: MIN_REQUEST_HEIGHT_PX }
 
+const store = () => useAppStore.getState()
+
+function focusSidebarSearch() {
+  if (!store().isSidebarOpen) store().toggleSidebar()
+  requestAnimationFrame(() => document.querySelector("aside input[type=search]")?.focus())
+}
+
+// Shortcut ids come from lib/shortcuts.
+const createShortcutHandlers = (actions) => {
+  const handlers = {
+    commandPalette: () => store().openCommandPalette(),
+    findRequest: () => store().openCommandPalette("requests"),
+    shortcutsHelp: () => store().openShortcutsDialog(),
+    newRequest: () => store().newTab(),
+    saveRequest: actions.save,
+    sendRequest: actions.send,
+    closeTab: () => actions.closeTab(store().activeTabId),
+    reopenTab: () => store().reopenClosedTab(),
+    nextTab: () => store().cycleTab(1),
+    previousTab: () => store().cycleTab(-1),
+    toggleSidebar: () => store().toggleSidebar(),
+    focusSidebarSearch,
+  }
+  for (let position = 1; position <= 9; position += 1) handlers[`tab${position}`] = () => store().activateTabAt(position)
+  return handlers
+}
+
 const messageOf = (error) => error?.message || String(error)
 
 function LoadingOverlay() {
@@ -151,6 +178,7 @@ function LoadedWorkspace({ backend, onBack }) {
   const openSettingsDialog = useAppStore((s) => s.openSettingsDialog)
   const closeSettingsDialog = useAppStore((s) => s.closeSettingsDialog)
   const openCommandPalette = useAppStore((s) => s.openCommandPalette)
+  const isSidebarOpen = useAppStore((s) => s.isSidebarOpen)
 
   const activeTab = useActiveTab()
   const activeRequest = activeTab.request
@@ -163,12 +191,7 @@ function LoadedWorkspace({ backend, onBack }) {
   const updateField = useCallback((field, value) => updateActiveRequest({ [field]: value }), [updateActiveRequest])
   const fieldHandlers = useRequestFieldHandlers(updateField)
 
-  const shortcuts = useMemo(() => new Map([
-    ["k", openCommandPalette],
-    ["n", openNewTab],
-    ["s", actions.save],
-    ["enter", actions.send],
-  ]), [openCommandPalette, openNewTab, actions])
+  const shortcuts = useMemo(() => createShortcutHandlers(actions), [actions])
 
   useShortcuts(shortcuts, !isDialogOpen && !sharedLink)
   usePersistence(backend)
@@ -188,13 +211,15 @@ function LoadedWorkspace({ backend, onBack }) {
       />
 
       <div className="flex min-h-0 flex-1">
-        <Sidebar
-          folders={folders}
-          requests={requests}
-          requestHistory={requestHistory}
-          activeRequestId={activeRequest.id}
-          actions={actions}
-        />
+        {isSidebarOpen && (
+          <Sidebar
+            folders={folders}
+            requests={requests}
+            requestHistory={requestHistory}
+            activeRequestId={activeRequest.id}
+            actions={actions}
+          />
+        )}
 
         <main className="flex min-w-0 flex-1 flex-col">
           <TabBar
