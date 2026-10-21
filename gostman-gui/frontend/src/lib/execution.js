@@ -7,13 +7,13 @@ import { withFreshToken } from './oauth'
 import { failureResponse } from './response'
 import { countActiveAssertions } from './scripting/assertions'
 import { consoleGroup } from './consoleLog'
-import { addressHost, collectionHosts, isPermittedHost } from './scripting/destinations'
+import { addressHost, collectionHostsBy, isPermittedHost } from './scripting/destinations'
 import { holdsBack, reasonFor } from './scripting/flow'
 import { MAX_SENDS, SEND_TIMEOUT_MS } from './scripting/limits'
 import { applyRequestEdits, requestSubject, responseSubject, runInSandbox } from './scripting/sandbox'
 import { scriptedRequest } from './scripting/subjects'
 import { promptNames } from './variableScopes'
-import { selectActiveVariables, useAppStore, variableTextFor } from '../store/appStore'
+import { useAppStore, variableTextFor } from '../store/appStore'
 
 const CONFIG_ERROR = 'config'
 const PROMPT_DECLINED = 'The request was not sent because the values it asks for were not provided.'
@@ -91,16 +91,16 @@ function createScriptSender(backend) {
     if (sent >= MAX_SENDS) throw new Error(SEND_LIMIT)
     sent += 1
     const { requests } = store()
-    const variables = selectActiveVariables(store())
     const request = scriptedRequest(target, requests)
-    const host = addressHost(request.url, variables)
+    const timed = { ...request, options: { ...request.options, timeoutMs: request.options.timeoutMs || SEND_TIMEOUT_MS, noFollowRedirects: true } }
+    const variables = variablesText(timed, {})
+    const host = addressHost(timed.url, variables)
     if (host === '') throw new Error(UNUSABLE_ADDRESS)
-    if (!isPermittedHost(host, collectionHosts(requests, variables))) {
+    if (!isPermittedHost(host, collectionHostsBy(requests, (candidate) => variablesText(candidate, {})))) {
       throw new Error(`The host "${host}" is not used by this collection, so scripts may not call it.`)
     }
     scriptSends += 1
-    const timed = { ...request, options: { ...request.options, timeoutMs: request.options.timeoutMs || SEND_TIMEOUT_MS } }
-    const response = await transportFor(backend, timed)(`script-${scriptSends}`, timed, variablesText(timed, {}), store().cookies)
+    const response = await transportFor(backend, timed)(`script-${scriptSends}`, timed, variables, store().cookies)
     if (response.error) throw new Error(response.body)
     return JSON.stringify(responseSubject(response))
   }
