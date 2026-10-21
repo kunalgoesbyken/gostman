@@ -15,7 +15,7 @@ A web page can only call a provider that allows cross-origin requests. From the 
 
 - Anthropic: allowed only when the request carries `anthropic-dangerous-direct-browser-access: true`, which Gostman sends.
 - OpenAI, OpenRouter and Google Gemini: answer the browser preflight and allow calls from any origin.
-- Ollama: allows only local origins by default. Start it with `OLLAMA_ORIGINS` set to the site, for example `OLLAMA_ORIGINS=https://gostman.vercel.app`, and restart it.
+- Ollama: allows only local origins by default. Start it with `OLLAMA_ORIGINS` set to the site, for example `OLLAMA_ORIGINS=https://gostman.com`, and restart it.
 - Other OpenAI-compatible servers: must answer the `OPTIONS` preflight and allow the `Authorization` and `Content-Type` headers from the site.
 
 A blocked call looks like a network failure, so the error names the likely cause and the fix for the chosen provider. The desktop app calls the provider from Go and has no such limit.

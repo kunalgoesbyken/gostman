@@ -8,7 +8,7 @@
   [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
   <p>
-    <a href="https://gostman.vercel.app/web"><strong>Open the web app</strong></a> ·
+    <a href="https://gostman.com/web"><strong>Open the web app</strong></a> ·
     <a href="https://github.com/kunalgoesbyken/gostman/releases/latest">Download for Windows, macOS and Linux</a> ·
     <a href="#features">Features</a>
   </p>
@@ -23,7 +23,7 @@
 | ![Image response preview](screenshots/response-image.png) | ![Generated code](screenshots/code.png) |
 | ![Assertions and test results](gostman-gui/frontend/src/assets/landing/tests.png) | ![Collection runner](gostman-gui/frontend/src/assets/landing/runner.png) |
 
-Gostman is a native desktop application built with Go and [Wails](https://wails.io), with the same interface available in the browser at [gostman.vercel.app](https://gostman.vercel.app). Requests, collections and environments are stored on your machine. There is nothing to sign in to.
+Gostman is a native desktop application built with Go and [Wails](https://wails.io), with the same interface available in the browser at [gostman.com](https://gostman.com). Requests, collections and environments are stored on your machine. There is nothing to sign in to.
 
 ## Why not Bruno or Postman?
 
@@ -34,11 +34,11 @@ Both are good tools. Gostman exists for people who want the paid-tier workflow w
 - **Small and quick.** The Windows installer is about 10 MB, the app takes about 20 MB on disk and opens in well under a second on a modern laptop. The [benchmark script](benchmarks/README.md) is in the repository so you can measure it on your own machine.
 - **One collection for you, CI and your coding agent.** The same files run in the app, with `gostman run` in CI, and through the built-in MCP server.
 
-Prices and plans change, so check Bruno's and Postman's own pages before you decide. A side-by-side table is on [gostman.vercel.app](https://gostman.vercel.app).
+Prices and plans change, so check Bruno's and Postman's own pages before you decide. A side-by-side table is on [gostman.com](https://gostman.com).
 
 ## Quick start
 
-- **Browser:** open [gostman.vercel.app/web](https://gostman.vercel.app/web), paste a URL and press Send.
+- **Browser:** open [gostman.com/web](https://gostman.com/web), paste a URL and press Send.
 - **Desktop:** download the installer from the [Install](#install) table and open it.
 - **Command line:** send a request from a terminal, or run a collection you saved to a folder in the app.
 
@@ -110,7 +110,7 @@ Windows needs the WebView2 runtime, which ships with Windows 10 and 11; the inst
 
 ## Web version
 
-[gostman.vercel.app](https://gostman.vercel.app) runs the same interface in the browser. Browsers cannot call arbitrary APIs directly, so requests are relayed through a small proxy. Two consequences:
+[gostman.com](https://gostman.com) runs the same interface in the browser. Browsers cannot call arbitrary APIs directly, so requests are relayed through a small proxy. Two consequences:
 
 - The hosted proxy cannot reach `localhost` or private network addresses. Use the desktop app for local APIs.
 - Proxy, CA certificate and client certificate settings exist only in the desktop app.
