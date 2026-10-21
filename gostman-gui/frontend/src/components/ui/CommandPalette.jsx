@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
-  Bookmark, ClipboardPaste, Clock, MonitorDown, Info, Hand, Folder, FolderOpen, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Pin, Plus, Radio, RotateCcw, Save, Search, Send,
+  Bookmark, ClipboardPaste, Gauge, Clock, MonitorDown, Info, Hand, Folder, FolderOpen, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Pin, Plus, Radio, RotateCcw, Save, Search, Send,
   Server, Settings, Share2, SlidersHorizontal, Sparkles, Undo2, Upload, X,
 } from "lucide-react"
 import { MethodTag } from "../MethodTag"
@@ -9,6 +9,7 @@ import { PREFERENCES_TEXT } from "../../lib/preferencesText"
 import { ABOUT_TEXT } from "../../lib/aboutText"
 import { INSTALL_TEXT } from "../../lib/installText"
 import { useInstallable } from "../../lib/pwa"
+import { LOAD_TEST_TEXT } from "../../lib/loadTestText"
 import { WELCOME_TEXT } from "../../lib/welcomeText"
 import { WORKSPACE_TEXT } from "../../lib/workspaceText"
 import { useShortcutLabel } from "../../hooks/useShortcuts"
@@ -53,6 +54,8 @@ const COMMANDS = [
   { id: "about", label: ABOUT_TEXT.commandTitle, description: ABOUT_TEXT.commandDescription, icon: Info, action: "about" },
   { id: "reset", label: "Reset app", description: "Delete all data and reload", icon: RotateCcw, action: "reset", destructive: true },
 ]
+
+const LOAD_TEST_COMMAND = { id: "load-test", label: LOAD_TEST_TEXT.commandTitle, description: LOAD_TEST_TEXT.commandDescription, icon: Gauge, keywords: "performance stress", action: "loadTest" }
 
 const workspaceCommands = (workspaces) => {
   if (!workspaces) return []
@@ -233,15 +236,15 @@ function SectionTitle({ kind }) {
 
 const INSTALL_COMMAND = { id: "install-app", label: INSTALL_TEXT.label, description: INSTALL_TEXT.description, icon: MonitorDown, action: "installApp" }
 
-function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspaces, requests, folders, history, onClose, onCommand, onShowShortcuts }) {
+function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspaces, hasLoadTest, requests, folders, history, onClose, onCommand, onShowShortcuts }) {
   const [query, setQuery] = useState("")
   const [selectedIndex, setSelectedIndex] = useState(0)
   const inputRef = useRef(null)
   const canInstall = useInstallable()
 
   const commands = useMemo(
-    () => commandItems([...COMMANDS, ...(canInstall ? [INSTALL_COMMAND] : []), ...workspaceCommands(workspaces), ...environmentCommands(environments, activeEnvironmentId)]),
-    [environments, activeEnvironmentId, workspaces, canInstall]
+    () => commandItems([...COMMANDS, ...(hasLoadTest ? [LOAD_TEST_COMMAND] : []), ...(canInstall ? [INSTALL_COMMAND] : []), ...workspaceCommands(workspaces), ...environmentCommands(environments, activeEnvironmentId)]),
+    [environments, activeEnvironmentId, workspaces, hasLoadTest, canInstall]
   )
   const requestRows = useMemo(() => requestItems(requests, folders), [requests, folders])
   const historyRows = useMemo(() => historyItems(history), [history])

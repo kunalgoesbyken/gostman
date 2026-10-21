@@ -1102,6 +1102,129 @@ export namespace importer {
 
 }
 
+export namespace loadtest {
+	
+	export class Bin {
+	    fromMs: number;
+	    toMs: number;
+	    count: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Bin(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.fromMs = source["fromMs"];
+	        this.toMs = source["toMs"];
+	        this.count = source["count"];
+	    }
+	}
+	export class Config {
+	    concurrency: number;
+	    durationMs: number;
+	    requests: number;
+	    ratePerSecond: number;
+	    rampMs: number;
+	    failureStatus: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Config(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.concurrency = source["concurrency"];
+	        this.durationMs = source["durationMs"];
+	        this.requests = source["requests"];
+	        this.ratePerSecond = source["ratePerSecond"];
+	        this.rampMs = source["rampMs"];
+	        this.failureStatus = source["failureStatus"];
+	    }
+	}
+	export class Latency {
+	    minMs: number;
+	    meanMs: number;
+	    p50Ms: number;
+	    p90Ms: number;
+	    p95Ms: number;
+	    p99Ms: number;
+	    maxMs: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Latency(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.minMs = source["minMs"];
+	        this.meanMs = source["meanMs"];
+	        this.p50Ms = source["p50Ms"];
+	        this.p90Ms = source["p90Ms"];
+	        this.p95Ms = source["p95Ms"];
+	        this.p99Ms = source["p99Ms"];
+	        this.maxMs = source["maxMs"];
+	    }
+	}
+	export class Report {
+	    config: Config;
+	    total: number;
+	    succeeded: number;
+	    failed: number;
+	    networkErrors: number;
+	    statusFailures: number;
+	    statusCodes: Record<number, number>;
+	    durationMs: number;
+	    requestsPerSecond: number;
+	    latency: Latency;
+	    bytesReceived: number;
+	    errorSamples: string[];
+	    distribution: Bin[];
+	    stopped: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Report(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.config = this.convertValues(source["config"], Config);
+	        this.total = source["total"];
+	        this.succeeded = source["succeeded"];
+	        this.failed = source["failed"];
+	        this.networkErrors = source["networkErrors"];
+	        this.statusFailures = source["statusFailures"];
+	        this.statusCodes = source["statusCodes"];
+	        this.durationMs = source["durationMs"];
+	        this.requestsPerSecond = source["requestsPerSecond"];
+	        this.latency = this.convertValues(source["latency"], Latency);
+	        this.bytesReceived = source["bytesReceived"];
+	        this.errorSamples = source["errorSamples"];
+	        this.distribution = this.convertValues(source["distribution"], Bin);
+	        this.stopped = source["stopped"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace main {
 	
 	export class AiReply {

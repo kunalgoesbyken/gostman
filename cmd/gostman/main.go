@@ -17,6 +17,8 @@ const (
   gostman run <export.json | workspace folder> [flags]
   gostman send [flags] <request>
   gostman send [flags] <METHOD> <url>
+  gostman load <export.json | workspace folder> --request <name> [flags]
+  gostman load [flags] <METHOD> <url>
   gostman mcp [flags]
   gostman mock [workspace folder] [flags]
   gostman docs <workspace folder | export.json> [flags]
@@ -82,6 +84,31 @@ send
   --select <jsonpath>   print only this part of a JSON response body
   --max-body <bytes>    print at most this much of the body (default 8192)
   --include-headers     include the response headers in the summary
+
+load
+  Send one request many times at once and report throughput, latency
+  percentiles, status codes and errors. Dynamic variables such as {{$guid}} are
+  generated again for every request. Only target systems you own or have
+  permission to test.
+
+  --request <name>      saved request (id, name or Folder/Name) of the workspace
+                        or export file given first
+  <METHOD> <url>        a request that is not saved; -H, --header and -d, --data
+                        describe it as for send
+  --concurrency <n>     simultaneous requests (default 10, at most 500)
+  --duration <time>     how long to keep sending, for example 30s (default 10s
+                        unless --requests is set; at most 10m)
+  --requests <n>        stop after n requests (at most 1000000)
+  --rps <n>             cap the total requests per second
+  --ramp <time>         start the workers one after another over this time
+  --fail-status <code>  count this status and above as failed (default 500)
+  --env, --var, --var-from-env, --timeout, --insecure   as for send
+  --reporter <format>   text or json (default text)
+  --max-p95 <time>      exit 1 when the 95th percentile latency is higher
+  --max-error-rate <p>  exit 1 when more than p percent fail, for example 1%
+                        Exit 1 also follows an interrupt and a run in which no
+                        request succeeded. Pre-request scripts and tests are
+                        not part of a load test; cookies are not shared.
 
 mcp
   Serve a workspace to a coding agent over the Model Context Protocol on
@@ -190,6 +217,8 @@ func dispatch(arguments []string, stdout, stderr *os.File) int {
 		return runCommand(arguments[1:], stdout, stderr)
 	case "send":
 		return sendCommand(arguments[1:], stdout, stderr)
+	case "load":
+		return loadCommand(arguments[1:], stdout, stderr)
 	case "mcp":
 		return mcpCommand(arguments[1:], stdout, stderr)
 	case "mock":

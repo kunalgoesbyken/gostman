@@ -17,6 +17,7 @@ import { useAutoSave } from "../hooks/useAutoSave"
 import { useRequestFieldHandlers } from "../hooks/useRequestFieldHandlers"
 import { useShortcuts } from "../hooks/useShortcuts"
 import { useCaptureStore } from "../lib/captureSession"
+import { useLoadTestStore } from "../lib/loadTestSession"
 import { useAiStore } from "../lib/ai/session"
 import { TASK_EXPLAIN, TASK_REQUEST } from "../lib/ai/tasks"
 import { MIN_REQUEST_HEIGHT_PX } from "../lib/layout"
@@ -33,6 +34,7 @@ const NetworkDialog = lazy(() => import("./NetworkDialog").then((module) => ({ d
 const ExamplesDialog = lazy(() => import("./ExamplesDialog").then((module) => ({ default: module.ExamplesDialog })))
 const MockServerDialog = lazy(() => import("./MockServerDialog").then((module) => ({ default: module.MockServerDialog })))
 const CaptureDialog = lazy(() => import("./CaptureDialog").then((module) => ({ default: module.CaptureDialog })))
+const LoadTestDialog = lazy(() => import("./LoadTestDialog").then((module) => ({ default: module.LoadTestDialog })))
 const SpecViewer = lazy(() => import("./SpecViewer").then((module) => ({ default: module.SpecViewer })))
 const SpecSyncDialog = lazy(() => import("./SpecSyncDialog").then((module) => ({ default: module.SpecSyncDialog })))
 const FolderSettings = lazy(() => import("./FolderSettings").then((module) => ({ default: module.FolderSettings })))
@@ -207,10 +209,11 @@ function LoadedWorkspace({ backend, onBack }) {
   const collectionSettings = useAppStore((s) => s.collectionSettings)
   const closeFolderSettings = useAppStore((s) => s.closeFolderSettings)
   const captureDialogOpen = useCaptureStore((s) => s.isOpen)
+  const loadTestDialogOpen = useLoadTestStore((s) => s.isOpen)
   const aiDialog = useAiStore((s) => s.dialog !== null)
   const aiSettingsOpen = useAiStore((s) => s.settingsOpen)
   const aiDialogOpen = aiDialog || aiSettingsOpen
-  const isDialogOpen = useAppStore(selectIsDialogOpen) || captureDialogOpen || aiDialogOpen
+  const isDialogOpen = useAppStore(selectIsDialogOpen) || captureDialogOpen || loadTestDialogOpen || aiDialogOpen
   const sharedLink = useSyncExternalStore(subscribeToSharedLink, pendingSharedLink)
 
   const setActiveTab = useAppStore((s) => s.setActiveTab)
@@ -295,6 +298,7 @@ function LoadedWorkspace({ backend, onBack }) {
             onCancel={actions.cancel}
             onSave={actions.save}
             onGenerateCode={actions.generateCode}
+            onLoadTest={actions.loadTest.isAvailable ? actions.loadTest.open : null}
             onPasteCurl={actions.pasteCurl}
             loading={isLoading}
           />
@@ -361,6 +365,7 @@ function LoadedWorkspace({ backend, onBack }) {
         {examplesDialogOpen && <ExamplesDialog request={activeRequest} actions={actions.examples} EditorComponent={MonacoEditor} />}
         {mockDialogOpen && <MockServerDialog folders={folders} requests={requests} actions={actions.mock} />}
         {captureDialogOpen && <CaptureDialog folders={folders} requests={requests} actions={actions.capture} />}
+        {loadTestDialogOpen && <LoadTestDialog actions={actions.loadTest} />}
         {specDialog?.mode === "view" && <SpecViewer dialog={specDialog} actions={actions.openapi} onClose={closeSpecDialog} />}
         {specDialog?.mode === "sync" && <SpecSyncDialog dialog={specDialog} link={specLinks[specDialog.folderId]} actions={actions.openapi} onClose={closeSpecDialog} />}
         {folderSettings && <FolderSettings backend={backend} scope={folderSettings} EditorComponent={MonacoEditor} onClose={closeFolderSettings} />}
@@ -373,7 +378,7 @@ function LoadedWorkspace({ backend, onBack }) {
 
       <NoticeToast />
 
-      <AppDialogs onCommand={actions.runCommand} secrets={actions.secrets} hasWorkspaces={Boolean(actions.storage)} />
+      <AppDialogs onCommand={actions.runCommand} secrets={actions.secrets} hasWorkspaces={Boolean(actions.storage)} hasLoadTest={actions.loadTest.isAvailable} />
     </div>
   )
 }

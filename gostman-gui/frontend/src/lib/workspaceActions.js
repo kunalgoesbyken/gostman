@@ -4,6 +4,7 @@ import {
   TASK_DOCS, TASK_EXPLAIN, TASK_REQUEST, TASK_SCHEMA, TASK_SCRIPT, TASK_SEARCH, TASK_TESTS,
 } from './ai/tasks'
 import { createCaptureActions } from './captureSession'
+import { createLoadTestActions } from './loadTestSession'
 import { generateAllSnippets } from './codeGenerator'
 import { countActiveRequests, sanitizeImport, withoutActiveRequests } from './importExport'
 import { pluralize } from './dataUtils'
@@ -95,6 +96,7 @@ export function createWorkspaceActions(backend) {
   const examples = createExampleActions(backend)
   const mock = createMockActions(backend)
   const capture = createCaptureActions(backend)
+  const loadTest = createLoadTestActions(backend)
 
   function runExtractors(tabId) {
     const tab = tabById(tabId)
@@ -424,6 +426,7 @@ export function createWorkspaceActions(backend) {
     examples: examples.open,
     mockServer: mock.open,
     captureTraffic: capture.open,
+    loadTest: loadTest.open,
     settings: () => store().openSettingsDialog(),
     preferences: () => store().openPreferencesDialog(),
     import: () => store().openImportDialog(),
@@ -445,6 +448,7 @@ export function createWorkspaceActions(backend) {
     examples,
     mock,
     capture,
+    loadTest,
     secrets: backend.secrets,
     storage: storageActions,
     runExtractors,

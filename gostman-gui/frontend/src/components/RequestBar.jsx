@@ -1,5 +1,5 @@
 import { memo } from "react"
-import { Code, Save, Send, X } from "lucide-react"
+import { Code, Gauge, Save, Send, X } from "lucide-react"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Select } from "./ui/select"
@@ -7,6 +7,7 @@ import { VariableInput } from "./VariableInput"
 import { HTTP_METHODS, METHOD_COLORS } from "../lib/constants"
 import { lookup } from "../lib/dataUtils"
 import { useShortcutLabel } from "../hooks/useShortcuts"
+import { LOAD_TEST_TEXT } from "../lib/loadTestText"
 import { hintWithShortcut } from "../lib/shortcuts"
 import { isWebSocketURL } from "../lib/socketUrl"
 import { cn } from "../lib/utils"
@@ -35,6 +36,7 @@ export const RequestBar = memo(function RequestBar({
   onCancel,
   onSave,
   onGenerateCode,
+  onLoadTest,
   onPasteCurl,
   loading,
 }) {
@@ -100,6 +102,7 @@ export const RequestBar = memo(function RequestBar({
         )}
         <ActionButton icon={Save} label="Save" hint={hintWithShortcut("Save", saveShortcut)} variant="secondary" onClick={onSave} />
         <ActionButton icon={Code} label="Code" hint="Generate code" variant="outline" onClick={onGenerateCode} />
+        {onLoadTest && <ActionButton icon={Gauge} label={LOAD_TEST_TEXT.barLabel} hint={LOAD_TEST_TEXT.barHint} variant="outline" onClick={onLoadTest} />}
       </div>
     </div>
   )

@@ -9,7 +9,7 @@ import { EnvironmentDialog } from "./EnvironmentDialog"
 import { VariablePromptDialog } from "./VariablePromptDialog"
 import { useAppStore } from "../store/appStore"
 
-export function AppDialogs({ onCommand, secrets, hasWorkspaces }) {
+export function AppDialogs({ onCommand, secrets, hasWorkspaces, hasLoadTest }) {
   const alertDialog = useAppStore((s) => s.alertDialog)
   const confirmDialog = useAppStore((s) => s.confirmDialog)
   const promptDialog = useAppStore((s) => s.promptDialog)
@@ -47,6 +47,7 @@ export function AppDialogs({ onCommand, secrets, hasWorkspaces }) {
         onShowShortcuts={openShortcutsDialog}
         environments={environments}
         workspaces={hasWorkspaces ? workspaces : null}
+        hasLoadTest={hasLoadTest}
         activeEnvironmentId={activeEnvironmentId}
         onClose={closeCommandPalette}
         onCommand={onCommand}

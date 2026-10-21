@@ -156,17 +156,25 @@ func (s *session) transmit(ctx context.Context, request Request) (engine.Respons
 		s.announce(engine.Request{Headers: call.Target.Headers, Auth: call.Target.Auth, Variables: call.Target.Variables, Inherited: call.Target.Inherited})
 		return mcpclient.Invoke(ctx, call, s.policy), nil
 	}
-	var prepared engine.Request
-	if err := s.scripts.Call("toEngineRequest", &prepared, request, s.scoped(request).text(), s.common.cookieList()); err != nil {
+	prepared, err := s.httpRequest(request)
+	if err != nil {
 		return engine.Response{}, err
 	}
-	prepared.Inherited = request.layers()
-	s.announce(prepared)
 	if prepared.Options.Stream {
 		prepared.Options = withStreamBudget(prepared.Options, defaultStreamSeconds)
 		return s.collectStream(ctx, prepared), nil
 	}
 	return engine.Send(ctx, prepared, s.policy), nil
+}
+
+func (s *session) httpRequest(request Request) (engine.Request, error) {
+	var prepared engine.Request
+	if err := s.scripts.Call("toEngineRequest", &prepared, request, s.scoped(request).text(), s.common.cookieList()); err != nil {
+		return prepared, err
+	}
+	prepared.Inherited = request.layers()
+	s.announce(prepared)
+	return prepared, nil
 }
 
 func (s *session) announce(prepared engine.Request) {

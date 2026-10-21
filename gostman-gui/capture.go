@@ -83,6 +83,7 @@ func (a *App) ClearCaptured() {
 func (a *App) stopServersOnQuit(ctx context.Context) {
 	a.stopMockOnQuit(ctx)
 	a.StopCapture()
+	a.StopLoadTest()
 }
 
 func (a *App) keepExchange(exchange capture.Exchange) {

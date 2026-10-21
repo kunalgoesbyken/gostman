@@ -282,6 +282,10 @@ export function RevealWorkspace(arg1) {
   return window['go']['main']['App']['RevealWorkspace'](arg1);
 }
 
+export function RunLoadTest(arg1, arg2) {
+  return window['go']['main']['App']['RunLoadTest'](arg1, arg2);
+}
+
 export function SaveCollectionSettings(arg1) {
   return window['go']['main']['App']['SaveCollectionSettings'](arg1);
 }
@@ -364,6 +368,10 @@ export function StartMock(arg1, arg2, arg3) {
 
 export function StopCapture() {
   return window['go']['main']['App']['StopCapture']();
+}
+
+export function StopLoadTest() {
+  return window['go']['main']['App']['StopLoadTest']();
 }
 
 export function StopMock() {
