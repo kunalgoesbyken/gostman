@@ -22,6 +22,7 @@ const (
 	checkSystem     = "You are a connection test."
 	localhostName   = "localhost"
 	secretLabel     = "secret"
+	noAnswer        = "The provider returned no answer"
 	insecureWarning = "Use https for this base URL, or allow plain http for it in the AI settings"
 )
 
@@ -129,6 +130,9 @@ func complete(ctx context.Context, config Config, key string, prompt Prompt, tok
 	text, err := provider.Complete(ctx, call)
 	if err != nil {
 		return "", masked(err, key)
+	}
+	if strings.TrimSpace(text) == "" {
+		return "", failure(KindReply, noAnswer)
 	}
 	return capOutput(text), nil
 }
