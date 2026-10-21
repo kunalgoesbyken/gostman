@@ -14,6 +14,7 @@ const (
 	insomniaWorkspace    = "workspace"
 	insomniaEnvironment  = "environment"
 	maxEnvironmentDepth  = 8
+	maxInsomniaNodes     = 20000
 	templateTagOpen      = "{%"
 	insomniaVariableRoot = "_."
 	baseEnvironmentName  = "Base Environment"
@@ -53,11 +54,18 @@ func (c *collector) insomniaV4(root map[string]any) []insomniaSpace {
 	children := map[string][]*insomniaNode{}
 	var workspaces []map[string]any
 	skipped := map[string]int{}
+	seenIDs := map[string]bool{}
+	duplicates := 0
 	for _, resource := range resources {
 		kind := text(resource["_type"])
 		switch kind {
 		case insomniaRequest, insomniaGroup:
-			parent := text(resource["parentId"])
+			id, parent := text(resource["_id"]), text(resource["parentId"])
+			if id == "" || id == parent || seenIDs[id] {
+				duplicates++
+				continue
+			}
+			seenIDs[id] = true
 			children[parent] = append(children[parent], &insomniaNode{fields: resource, isFolder: kind == insomniaGroup, sortKey: sortKeyOf(resource["metaSortKey"])})
 		case insomniaWorkspace:
 			workspaces = append(workspaces, resource)
@@ -70,6 +78,7 @@ func (c *collector) insomniaV4(root map[string]any) []insomniaSpace {
 		node.children = children[text(node.fields["_id"])]
 	}
 	c.reportSkippedKinds(skipped)
+	c.noteSkipped(duplicates, "items with a repeated or self-referencing id")
 	var spaces []insomniaSpace
 	for _, workspace := range workspaces {
 		id := text(workspace["_id"])
@@ -120,7 +129,8 @@ func insomniaEnvironments(resources []map[string]any, workspaceID string) (map[s
 }
 
 func insomniaV5(root map[string]any) insomniaSpace {
-	space := insomniaSpace{name: text(root["name"]), nodes: v5Nodes(list(root["collection"]), 0)}
+	budget := maxInsomniaNodes
+	space := insomniaSpace{name: text(root["name"]), nodes: v5Nodes(list(root["collection"]), 0, &budget)}
 	if environments := object(root["environments"]); environments != nil {
 		space.base = environments
 		space.subs = objects(environments["subEnvironments"])
@@ -128,7 +138,7 @@ func insomniaV5(root map[string]any) insomniaSpace {
 	return space
 }
 
-func v5Nodes(items []any, depth int) []*insomniaNode {
+func v5Nodes(items []any, depth int, budget *int) []*insomniaNode {
 	if depth > maxFolderDepth {
 		return nil
 	}
@@ -138,10 +148,14 @@ func v5Nodes(items []any, depth int) []*insomniaNode {
 		if fields == nil {
 			continue
 		}
+		if *budget <= 0 {
+			break
+		}
+		*budget--
 		node := &insomniaNode{fields: fields, sortKey: sortKeyOf(object(fields["meta"])["sortKey"])}
 		if fields["children"] != nil {
 			node.isFolder = true
-			node.children = v5Nodes(list(fields["children"]), depth+1)
+			node.children = v5Nodes(list(fields["children"]), depth+1, budget)
 		}
 		nodes = append(nodes, node)
 	}
@@ -167,6 +181,14 @@ func (c *collector) insomniaNodes(nodes []*insomniaNode, folderID string, inheri
 	}
 	sort.SliceStable(nodes, func(i, j int) bool { return nodes[i].sortKey < nodes[j].sortKey })
 	for _, node := range nodes {
+		if c.visitedNodes[node] {
+			continue
+		}
+		if len(c.visitedNodes) >= maxInsomniaNodes {
+			c.Warnings = appendUnique(c.Warnings, fmt.Sprintf(messageTooManyItems, maxInsomniaNodes))
+			return
+		}
+		c.visitedNodes[node] = true
 		if node.isFolder {
 			id := c.addFolder(text(node.fields["name"]), folderID)
 			c.insomniaNodes(node.children, id, inherited.within(c.insomniaScope(node.fields)), depth+1)

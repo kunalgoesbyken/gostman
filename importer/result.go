@@ -41,10 +41,12 @@ type collector struct {
 	flags     map[string][]string
 	flagOrder []string
 	full      bool
+
+	visitedNodes map[*insomniaNode]bool
 }
 
 func newCollector() *collector {
-	return &collector{Result: Result{Variables: map[string]string{}}, flags: map[string][]string{}}
+	return &collector{Result: Result{Variables: map[string]string{}}, flags: map[string][]string{}, visitedNodes: map[*insomniaNode]bool{}}
 }
 
 func newID() string {

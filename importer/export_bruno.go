@@ -10,66 +10,7 @@ import (
 	"github.com/krockxz/gostman/workspace"
 )
 
-const (
-	brunoVersion = "1"
-	bruIndent    = "  "
-)
-
-type bruWriter struct {
-	out strings.Builder
-}
-
-func (w *bruWriter) dict(name string, entries []bruEntry) {
-	if len(entries) == 0 {
-		return
-	}
-	w.out.WriteString(name + " {\n")
-	for _, entry := range entries {
-		key := entry.Key
-		if !entry.Enabled {
-			key = disabledMark + key
-		}
-		if strings.Contains(entry.Value, "\n") {
-			w.out.WriteString(bruIndent + key + ": " + multilineMark + "\n")
-			w.out.WriteString(indentLines(entry.Value, bruIndent+bruIndent) + "\n" + bruIndent + multilineMark + "\n")
-			continue
-		}
-		w.out.WriteString(bruIndent + key + ": " + entry.Value + "\n")
-	}
-	w.out.WriteString("}\n\n")
-}
-
-func (w *bruWriter) block(name, body string) {
-	if strings.TrimSpace(body) == "" {
-		return
-	}
-	w.out.WriteString(name + " {\n" + indentLines(body, bruIndent) + "\n}\n\n")
-}
-
-func (w *bruWriter) names(name string, items []string) {
-	if len(items) == 0 {
-		return
-	}
-	w.out.WriteString(name + " [\n" + bruIndent + strings.Join(items, ",\n"+bruIndent) + "\n]\n\n")
-}
-
-func (w *bruWriter) String() string {
-	return strings.TrimRight(w.out.String(), "\n") + "\n"
-}
-
-func indentLines(body, indent string) string {
-	lines := strings.Split(normalizeNewlines(body), "\n")
-	for index, line := range lines {
-		if line != "" {
-			lines[index] = indent + line
-		}
-	}
-	return strings.Join(lines, "\n")
-}
-
-func oneLine(name string) string {
-	return strings.Join(strings.Fields(name), " ")
-}
+const brunoVersion = "1"
 
 func rowsToEntries(rows []row) []bruEntry {
 	entries := make([]bruEntry, len(rows))

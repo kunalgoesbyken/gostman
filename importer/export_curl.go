@@ -10,6 +10,8 @@ import (
 
 var sensitiveHeaders = map[string]bool{"authorization": true, "proxy-authorization": true, "x-api-key": true, "cookie": true}
 
+const tokenCharacters = "!#$%&'*+-.^_`|~"
+
 const (
 	curlHeaderLine = "#!/bin/sh\n"
 	curlJoin       = " \\\n  "
@@ -92,6 +94,7 @@ func shellQuote(value string) string {
 }
 
 func singleQuoted(value string) string {
+	value = strings.ReplaceAll(value, string(rune(0)), "")
 	if value == "" {
 		return ""
 	}
@@ -118,8 +121,11 @@ func (s *curlScript) command(request workspace.Request) string {
 	if method == methodGraphQL {
 		method = "POST"
 	}
+	if !validMethod(method) {
+		method = defaultMethod
+	}
 	if method != "GET" || hasBody {
-		arguments = append(arguments, "-X "+method)
+		arguments = append(arguments, "-X "+shellQuote(method))
 	}
 	if !request.Options.NoFollowRedirects {
 		arguments = append(arguments, "-L")
@@ -136,7 +142,7 @@ func (s *curlScript) command(request workspace.Request) string {
 		arguments = append(arguments, headerArgument(header.Key, header.Value))
 	}
 	arguments = append(arguments, curlBody(request)...)
-	arguments = append(arguments, shellQuote(address))
+	arguments = append(arguments, "--url "+shellQuote(address))
 	return "# " + oneLine(request.Name) + "\n" + strings.Join(arguments, curlJoin) + "\n\n"
 }
 
@@ -164,7 +170,19 @@ func (s *curlScript) authorization(request workspace.Request) (string, []string,
 }
 
 func headerArgument(key, value string) string {
-	return "-H " + shellQuote(key+": "+value)
+	return "-H " + shellQuote(strings.TrimLeft(key, "@")+": "+value)
+}
+
+func validMethod(method string) bool {
+	if method == "" || method != strings.ToUpper(method) {
+		return false
+	}
+	for _, r := range method {
+		if !strings.ContainsRune(tokenCharacters, r) && (r < 'A' || r > 'Z') && (r < '0' || r > '9') {
+			return false
+		}
+	}
+	return true
 }
 
 func (s *curlScript) headerValue(header row) string {
@@ -204,11 +222,11 @@ func formArguments(option string, rows []row) []string {
 func multipartArguments(rows []row) []string {
 	var arguments []string
 	for _, candidate := range enabledRows(rows) {
-		value := candidate.Value
 		if candidate.Type == rowTypeFile {
-			value = "@" + candidate.FileName
+			arguments = append(arguments, "-F "+shellQuote(candidate.Key+"=@"+candidate.FileName))
+			continue
 		}
-		arguments = append(arguments, "-F "+shellQuote(candidate.Key+"="+value))
+		arguments = append(arguments, "--form-string "+shellQuote(candidate.Key+"="+candidate.Value))
 	}
 	return arguments
 }

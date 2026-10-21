@@ -9,6 +9,7 @@ const (
 	messageFiles         = "Files are not part of an export. Attach them again in %s."
 	messageTemplateTags  = "Template tags in %s were kept as text and are not evaluated."
 	messageTooMany       = "Only the first %d requests were imported."
+	messageTooManyItems  = "Only the first %d items were read; the rest were left out."
 	messageAndMore       = "%s and %d more"
 	messageEmpty         = "There is nothing to import: no requests, folders or environments were found."
 	messageUnknown       = "Could not detect the format. Use an Insomnia, HAR, WSDL, Bruno, Postman or OpenAPI file, or choose the format."
