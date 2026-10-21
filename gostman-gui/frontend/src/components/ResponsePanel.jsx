@@ -26,6 +26,7 @@ import { useClipboardCopy } from "../hooks/useClipboardCopy"
 import { formatSize, lookup } from "../lib/dataUtils"
 import { isFailedResponse } from "../lib/ai/tasks"
 import { canSaveAsExample } from "../lib/examples"
+import { trimTree } from "../lib/jsonTree"
 import { breakdownTitle } from "../lib/timeline"
 import { MIN_REQUEST_HEIGHT_PX, MIN_RESPONSE_HEIGHT_PX, TOOLBAR_HEIGHT_PX } from "../lib/layout"
 import {
@@ -176,10 +177,22 @@ function PrettyBody({ json, filtered, highlight }) {
   const data = filtered ? filtered.value : json
   if (highlight) return <TextBody text={JSON.stringify(data, null, 2)} highlight={highlight} />
   if (data === null || typeof data !== 'object') return <TextBody text={JSON.stringify(data, null, 2)} />
+  return <JsonTree data={data} />
+}
+
+function JsonTree({ data }) {
+  const { value, omitted } = useMemo(() => trimTree(data), [data])
   return (
-    <div className="p-3">
-      <JsonView data={data} shouldExpandNode={(level) => level < JSON_EXPANDED_DEPTH} style={JSON_STYLE} />
-    </div>
+    <>
+      {omitted > 0 && (
+        <Notice tone="warning" icon={Scissors}>
+          Showing the start of this tree. {omitted} more values are hidden. Use Raw or the filter to see the rest.
+        </Notice>
+      )}
+      <div className="p-3">
+        <JsonView data={value} shouldExpandNode={(level) => level < JSON_EXPANDED_DEPTH} style={JSON_STYLE} />
+      </div>
+    </>
   )
 }
 

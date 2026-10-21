@@ -1,4 +1,6 @@
-const identityOf = (cookie) => [cookie.domain, cookie.path, cookie.name].join('\n')
+export const MAX_STORED_COOKIES = 3000
+
+const identityOf =(cookie) => [cookie.domain, cookie.path, cookie.name].join('\n')
 
 const hasExpired = (cookie, now) => cookie.expires !== '' && Date.parse(cookie.expires) <= now
 
@@ -10,7 +12,7 @@ export function mergeCookies(stored, received, now = Date.now()) {
     jar.delete(identityOf(cookie))
     jar.set(identityOf(cookie), cookie)
   }
-  return Array.from(jar.values()).filter((cookie) => isLiveCookie(cookie, now))
+  return Array.from(jar.values()).filter((cookie) => isLiveCookie(cookie, now)).slice(-MAX_STORED_COOKIES)
 }
 
 export const withoutCookie = (cookies, removed) => cookies.filter((cookie) => identityOf(cookie) !== identityOf(removed))
