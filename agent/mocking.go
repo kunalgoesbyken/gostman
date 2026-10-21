@@ -14,6 +14,7 @@ const recentRequests = 20
 
 type mocking struct {
 	server *mock.Server
+	config mock.Config
 	log    sync.Mutex
 	recent []mock.Entry
 }
@@ -88,16 +89,17 @@ func (d *Desk) startMock(_ context.Context, current scene, arguments mockArgumen
 	if err != nil {
 		return mockReport{}, err
 	}
-	settings := mock.Settings{Port: arguments.Port, DelayMs: arguments.DelayMs}
-	if settings.Port == 0 {
-		settings.Port = mock.DefaultPort
+	config := mock.DefaultConfig()
+	config.Settings.Behavior.DelayMs = arguments.DelayMs
+	if arguments.Port != 0 {
+		config.Settings.Port = arguments.Port
 	}
 	d.mocking.recent = nil
-	server, err := mock.Start(MockSources(current.files), variables, settings, d.mocking.record)
+	server, err := mock.Start(MockSources(current.files), variables, config, d.mocking.record)
 	if err != nil {
 		return mockReport{}, err
 	}
-	d.mocking.server = server
+	d.mocking.server, d.mocking.config = server, config
 	return d.mocking.report(), nil
 }
 
@@ -116,7 +118,7 @@ func (d *Desk) mockStatus(_ context.Context, current scene, _ noArguments) (mock
 	if err != nil {
 		return mockReport{}, err
 	}
-	if _, err := d.mocking.server.Update(MockSources(current.files), variables); err != nil {
+	if _, err := d.mocking.server.Update(MockSources(current.files), variables, d.mocking.config); err != nil {
 		return mockReport{}, err
 	}
 	return d.mocking.report(), nil

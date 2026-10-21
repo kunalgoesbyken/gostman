@@ -36,6 +36,7 @@ type answer struct {
 	status  int
 	headers []Header
 	body    []byte
+	binary  bool
 }
 
 func parseExamples(raw string) []Example {
@@ -77,7 +78,7 @@ func answerFrom(example Example) (answer, error) {
 	if example.ContentType != "" && !hasHeader(headers, headerContentType) {
 		headers = append(headers, Header{Key: headerContentType, Value: example.ContentType})
 	}
-	return answer{status: servedStatus(example.Status), headers: headers, body: body}, nil
+	return answer{status: servedStatus(example.Status), headers: headers, body: body, binary: example.BodyEncoding == encodingBase64}, nil
 }
 
 func exampleBody(example Example) ([]byte, error) {
