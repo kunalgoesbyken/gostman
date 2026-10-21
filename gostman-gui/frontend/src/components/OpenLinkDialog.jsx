@@ -24,7 +24,7 @@ async function download(address, fetchLink, importer) {
   if (reply.error) return failure(reply.error)
   const result = await importer.read([reply.file], "auto", {})
   if (!result.success) return failure(result.error)
-  return { status: READY, result }
+  return { status: READY, result, host: reply.host }
 }
 
 function Field({ label, children }) {
@@ -49,12 +49,13 @@ function Source({ link }) {
   )
 }
 
-function Detected({ result }) {
+function Detected({ result, host }) {
   const [source] = result.sources
   const format = FORMAT_LABELS[source.format] || source.format
   const { activeCount } = describeShared(result)
   return (
     <div role="status" className="flex flex-col gap-1 text-xs [overflow-wrap:anywhere]">
+      <p className="text-foreground">{OPEN_LINK_TEXT.downloadedFrom(host)}</p>
       <p className="font-medium text-foreground">{OPEN_LINK_TEXT.detected(format)}</p>
       <p className="text-foreground">{describeCounts(source)}</p>
       {activeCount > 0 && <p className="text-warning">{OPEN_LINK_TEXT.activeNote(pluralize(activeCount, "item"))}</p>}
@@ -85,7 +86,7 @@ function Review({ link, fetchLink, importer, onImport, onClose }) {
         <p className="text-xs text-warning">{OPEN_LINK_TEXT.trustNote}</p>
         {state === FETCHING && <p role="status" className="text-xs text-muted-foreground">{OPEN_LINK_TEXT.downloading}</p>}
         {state.status === FAILED && <p role="alert" className="text-xs text-destructive">{state.error}</p>}
-        {state.status === READY && <Detected result={state.result} />}
+        {state.status === READY && <Detected result={state.result} host={state.host} />}
       </DialogBody>
       <DialogFooter>
         <Button variant="outline" size="sm" autoFocus onClick={onClose}>{OPEN_LINK_TEXT.cancel}</Button>

@@ -68,5 +68,5 @@ func (a *App) TakeOpenLinks() []OpenLink {
 }
 
 func (a *App) FetchLink(address string) deeplink.Reply {
-	return deeplink.Fetch(a.ctx, address, a.policy(), deeplink.MaxBytes)
+	return deeplink.Fetch(a.ctx, address, deeplink.MaxBytes)
 }

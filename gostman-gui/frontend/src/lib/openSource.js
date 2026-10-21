@@ -7,8 +7,6 @@ const OPEN_ACTION = 'open'
 const OPEN_QUERY = 'url'
 const OPEN_FRAGMENT = 'open'
 const SECURE = 'https:'
-const INSECURE = 'http:'
-const LOOPBACK_HOSTS = ['localhost', '127.0.0.1', '[::1]']
 const CONTROL_OR_SPACE = /[\p{Cc}\s]/u
 const MARKDOWN_RESERVED = /[!'()*]/g
 
@@ -35,10 +33,6 @@ function authorityOf(raw, parsed) {
   return authority
 }
 
-const isAllowedScheme = (parsed) => (
-  parsed.protocol === SECURE || (parsed.protocol === INSECURE && LOOPBACK_HOSTS.includes(parsed.hostname))
-)
-
 export function parseOpenSource(raw) {
   if (typeof raw !== 'string' || raw === '') throw refuse(OPEN_LINK_TEXT.notAddress)
   if (raw.length > MAX_URL_LENGTH) throw refuse(OPEN_LINK_TEXT.tooLong)
@@ -46,7 +40,7 @@ export function parseOpenSource(raw) {
   const parsed = parseAddress(raw)
   if (!hasAuthoritySlashes(raw, parsed)) throw refuse(OPEN_LINK_TEXT.notAddress)
   if (parsed.username || parsed.password || authorityOf(raw, parsed).includes('@')) throw refuse(OPEN_LINK_TEXT.credentials)
-  if (!isAllowedScheme(parsed)) throw refuse(OPEN_LINK_TEXT.scheme)
+  if (parsed.protocol !== SECURE) throw refuse(OPEN_LINK_TEXT.scheme)
   if (parsed.hostname === '') throw refuse(OPEN_LINK_TEXT.noHost)
   parsed.hash = ''
   return { url: parsed.href, host: parsed.host }

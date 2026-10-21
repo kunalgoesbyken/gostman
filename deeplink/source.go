@@ -14,9 +14,7 @@ import (
 const (
 	MaxURLLength = 2048
 
-	secureScheme   = "https"
-	insecureScheme = "http"
-	localhostName  = "localhost"
+	secureScheme = "https"
 )
 
 var (
@@ -72,21 +70,6 @@ func canonicalAddress(address netip.Addr) (string, error) {
 	return address.String(), nil
 }
 
-func isLoopback(host string) bool {
-	if host == localhostName {
-		return true
-	}
-	address, err := netip.ParseAddr(strings.Trim(host, "[]"))
-	return err == nil && address.IsLoopback()
-}
-
-func checkScheme(scheme, host string) error {
-	if scheme == secureScheme || scheme == insecureScheme && isLoopback(host) {
-		return nil
-	}
-	return errScheme
-}
-
 func joinPort(host, port string) string {
 	if port == "" {
 		return host
@@ -109,8 +92,8 @@ func ParseSource(raw string) (Source, error) {
 	if err != nil {
 		return Source{}, err
 	}
-	if err := checkScheme(parsed.Scheme, host); err != nil {
-		return Source{}, err
+	if parsed.Scheme != secureScheme {
+		return Source{}, errScheme
 	}
 	parsed.Host = joinPort(host, parsed.Port())
 	parsed.Fragment, parsed.RawFragment = "", ""

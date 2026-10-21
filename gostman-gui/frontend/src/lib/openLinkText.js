@@ -16,6 +16,7 @@ export const OPEN_LINK_TEXT = {
   downloading: 'Downloading',
   import: 'Import',
   detected: (format) => `Detected: ${format}`,
+  downloadedFrom: (host) => `Downloaded from ${host}`,
   unknownFormat: 'Gostman could not tell what kind of file this is.',
   activeNote: (count) => `${count} carry scripts or OAuth 2.0 settings. You are asked before those are imported, and imported folders stay restricted until you trust them.`,
   badgeAlt: 'Open in Gostman',

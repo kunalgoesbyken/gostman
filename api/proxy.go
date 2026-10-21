@@ -228,7 +228,7 @@ func fetchLink(r *http.Request) deeplink.Reply {
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		return deeplink.Reply{Error: err.Error()}
 	}
-	return deeplink.Fetch(r.Context(), payload.URL, Policy, maxLinkBytes)
+	return deeplink.Fetch(r.Context(), payload.URL, maxLinkBytes)
 }
 
 func startAuthorization(r *http.Request) authorizationResult {

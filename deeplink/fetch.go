@@ -26,29 +26,39 @@ const (
 
 type Reply struct {
 	File  importer.File `json:"file"`
+	Host  string        `json:"host,omitempty"`
 	Error string        `json:"error,omitempty"`
 }
 
-func Fetch(ctx context.Context, raw string, policy engine.Policy, limit int64) Reply {
+var strictPolicy = engine.Policy{BlockPrivate: true}
+
+func Fetch(ctx context.Context, raw string, limit int64) Reply {
 	source, err := ParseSource(raw)
 	if err != nil {
 		return Reply{Error: err.Error()}
 	}
-	data, err := download(ctx, source, policy, limit)
+	data, final, err := download(ctx, source, limit)
 	if err != nil {
-		return Reply{Error: explain(err, source.Host, limit)}
+		return Reply{Error: explain(err, firstNonEmpty(final.Host, source.Host), limit)}
 	}
 	text, err := importer.DecodeText(data)
 	if err != nil {
-		return Reply{Error: fmt.Sprintf("%s did not send a text file that Gostman can read", source.Host)}
+		return Reply{Error: fmt.Sprintf("%s did not send a text file that Gostman can read", final.Host)}
 	}
-	return Reply{File: importer.File{Name: fileName(source.URL), Text: text}}
+	return Reply{File: importer.File{Name: fileName(final.URL), Text: text}, Host: final.Host}
 }
 
-func client(policy engine.Policy) *http.Client {
+func firstNonEmpty(first, second string) string {
+	if first != "" {
+		return first
+	}
+	return second
+}
+
+func client() *http.Client {
 	return &http.Client{
 		Timeout:   fetchTimeout,
-		Transport: policy.Transport(false),
+		Transport: strictPolicy.Transport(false),
 		CheckRedirect: func(next *http.Request, via []*http.Request) error {
 			if len(via) >= maxRedirects {
 				return fmt.Errorf("stopped after %d redirects", maxRedirects)
@@ -67,28 +77,29 @@ type sizeError struct{ limit int64 }
 
 func (s sizeError) Error() string { return fmt.Sprintf("larger than %d MB", s.limit>>20) }
 
-func download(ctx context.Context, source Source, policy engine.Policy, limit int64) ([]byte, error) {
+func download(ctx context.Context, source Source, limit int64) ([]byte, Source, error) {
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, source.URL, nil)
 	if err != nil {
-		return nil, err
+		return nil, Source{}, err
 	}
 	request.Header.Set("Accept", "application/json, application/yaml, text/yaml, text/plain, */*;q=0.5")
-	response, err := client(policy).Do(request)
+	response, err := client().Do(request)
 	if err != nil {
-		return nil, err
+		return nil, Source{}, err
 	}
 	defer response.Body.Close()
+	final := Source{URL: response.Request.URL.String(), Host: response.Request.URL.Host}
 	if response.StatusCode < 200 || response.StatusCode > 299 {
-		return nil, statusError(response.StatusCode)
+		return nil, final, statusError(response.StatusCode)
 	}
 	data, err := io.ReadAll(io.LimitReader(response.Body, limit+1))
 	if err != nil {
-		return nil, err
+		return nil, final, err
 	}
 	if int64(len(data)) > limit {
-		return nil, sizeError{limit}
+		return nil, final, sizeError{limit}
 	}
-	return data, nil
+	return data, final, nil
 }
 
 func explain(err error, host string, limit int64) string {
