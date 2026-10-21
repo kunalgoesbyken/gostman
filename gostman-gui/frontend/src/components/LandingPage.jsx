@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { motion, useReducedMotion } from "framer-motion"
 import { Button, buttonVariants } from "./ui/button"
-import { Badge } from "./ui/badge"
 import { cn } from "../lib/utils"
 import { popIn } from "../lib/motion"
 import { gsap, useReveal, useSmoothScroll } from "../lib/landingMotion"
@@ -226,9 +225,7 @@ export function LandingPage({ onGetStarted }) {
   useReveal(heroRef, () => {
     gsap
       .timeline({ defaults: { ease: "power3.out" } })
-      .from("[data-intro=badge]", { opacity: 0, y: 12, duration: 0.5 })
-      .from("[data-intro=proof]", { opacity: 0, y: 12, duration: 0.5 }, "<0.05")
-      .from(".split-word", { opacity: 0, y: 28, duration: 0.7, stagger: 0.07 }, "<0.1")
+      .from(".split-word", { opacity: 0, y: 28, duration: 0.7, stagger: 0.07 })
       .from("[data-intro=lede]", { opacity: 0, y: 16, duration: 0.6 }, "-=0.35")
       .from("[data-intro=actions]", { opacity: 0, y: 16, duration: 0.5 }, "-=0.4")
       .from("[data-intro=highlight]", { opacity: 0, y: 10, duration: 0.4, stagger: 0.08 }, "-=0.3")
@@ -307,22 +304,6 @@ export function LandingPage({ onGetStarted }) {
         <section ref={heroRef} className="relative pt-36 pb-16 px-6">
           <div className="max-w-4xl mx-auto">
             <div className="text-center space-y-6">
-              <div data-intro="badge">
-                <Badge variant="outline" className="px-3 py-1 text-xs font-medium border-border/60 bg-muted/30">
-                  Open source API client
-                </Badge>
-              </div>
-
-              <div data-intro="proof" className="flex justify-center">
-                <a href="https://peerlist.io/kunalrc/project/gostman" target="_blank" rel="noreferrer">
-                  <img
-                    src="https://peerlist.io/api/v1/projects/embed/PRJHA9EGOA6EQB87M3JRKKDPEO8D8M?showUpvote=true&theme=dark"
-                    alt="Gostman"
-                    style={{ width: "auto", height: "72px" }}
-                  />
-                </a>
-              </div>
-
               <h1
                 aria-label="Test any API. No account. No cloud."
                 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.1]"
