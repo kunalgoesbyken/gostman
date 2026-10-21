@@ -8,6 +8,7 @@ import { ROOT_SETTINGS_ID, isBlankScope, normalizeFolder, normalizeScopeSettings
 import { normalizeRequest } from '../lib/request'
 import { isBlankRequest } from '../lib/requestChanges'
 import { reconcileTabs } from '../lib/tabReconcile'
+import { reorderTabs, stepTab } from '../lib/tabOrder'
 import { promptLayer, resolveLayers, scopeLayers, variableText } from '../lib/variableScopes'
 
 const HISTORY_LIMIT = 50
@@ -31,15 +32,15 @@ const createId = (prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random
 
 const asArray = (value) => (Array.isArray(value) ? value : [])
 
-const createTab = (id, request) => ({ id, request: normalizeRequest(request), pendingId: null, response: null, bodyDrafts: {} })
+const createTab = (id, request, isPreview = false) => ({ id, request: normalizeRequest(request), isPreview, pendingId: null, response: null, bodyDrafts: {} })
 
 const FIRST_TAB = createTab(`${TAB_ID_PREFIX}1`)
 
-const persistableTab = ({ id, request }) => ({ id, request: { ...request, examples: '' } })
+const persistableTab = ({ id, request, isPreview }) => ({ id, isPreview, request: { ...request, examples: '' } })
 
 const restoreTabs = (tabs) => {
   const restorable = asArray(tabs).filter((tab) => tab?.id && tab.request)
-  return restorable.length > 0 ? restorable.map((tab) => createTab(tab.id, tab.request)) : [FIRST_TAB]
+  return restorable.length > 0 ? restorable.map((tab) => createTab(tab.id, tab.request, tab.isPreview === true)) : [FIRST_TAB]
 }
 
 const nextIdAfter = (tabs) => 1 + tabs.reduce((highest, tab) => {
@@ -60,8 +61,8 @@ const withSavedExamples = (tabs, requests) => {
   ))
 }
 
-const appendTab = (state, request) => {
-  const tab = createTab(`${TAB_ID_PREFIX}${state.nextTabId}`, request)
+const appendTab = (state, request, isPreview = false) => {
+  const tab = createTab(`${TAB_ID_PREFIX}${state.nextTabId}`, request, isPreview)
   return { tabs: [...state.tabs, tab], activeTabId: tab.id, nextTabId: state.nextTabId + 1 }
 }
 
@@ -124,6 +125,20 @@ const movedOutOf = (folderId, parentId) => (request) => (
 )
 
 const withoutRequestId = (id) => (request) => (request.id === id ? { ...request, id: '' } : request)
+
+const isReplaceable = (tab) => tab.pendingId === null && tab.isPreview
+
+const withoutTabs = (state, closing) => {
+  const closingIds = new Set(closing.map((tab) => tab.id))
+  const remaining = state.tabs.filter((tab) => !closingIds.has(tab.id))
+  const remembered = closing.filter((tab) => !isBlankRequest(tab.request)).map((tab) => tab.request)
+  const closedTabs = [...remembered.reverse(), ...state.closedTabs].slice(0, MAX_CLOSED_TABS)
+  if (remaining.length === 0) return { ...appendTab({ ...state, tabs: remaining }, {}), closedTabs }
+  if (!closingIds.has(state.activeTabId)) return { tabs: remaining, closedTabs }
+  const survivors = state.tabs.slice(0, state.tabs.findIndex((tab) => tab.id === state.activeTabId)).filter((tab) => !closingIds.has(tab.id))
+  const next = survivors[survivors.length - 1] || remaining[0]
+  return { tabs: remaining, closedTabs, activeTabId: next.id }
+}
 
 const isSameCall = (first, second) => HISTORY_IDENTITY_FIELDS.every((field) => first[field] === second[field])
 
@@ -215,6 +230,9 @@ export const useAppStore = create(
         runner: CLOSED_RUNNER,
         consoleGroups: [],
         persistenceFailureReported: false,
+        treeClipboard: null,
+        notice: null,
+        revealTarget: null,
         alertDialog: CLOSED_ALERT,
         confirmDialog: CLOSED_CONFIRM,
         promptDialog: CLOSED_PROMPT,
@@ -285,6 +303,39 @@ export const useAppStore = create(
             tabs: mapTabRequests(state.tabs, moveToParent),
           }
         }),
+        patchFolders: (patches) => set((state) => {
+          const byId = new Map(patches.map((patch) => [patch.id, patch]))
+          return { folders: state.folders.map((folder) => (byId.has(folder.id) ? { ...folder, ...byId.get(folder.id) } : folder)) }
+        }),
+        addFolders: (folders) => set((state) => {
+          const taken = new Set(state.folders.map((folder) => folder.id))
+          const additions = folders.filter((folder) => !taken.has(folder.id)).map(normalizeFolder)
+          return { folders: [...state.folders, ...additions] }
+        }),
+        removeFolders: (folderIds) => set((state) => {
+          const removed = new Set(folderIds)
+          return { folders: state.folders.filter((folder) => !removed.has(folder.id)) }
+        }),
+        removeRequests: (ids) => set((state) => {
+          const removed = new Set(ids)
+          return {
+            requests: state.requests.filter((request) => !removed.has(request.id)),
+            tabs: mapTabRequests(state.tabs, (request) => (removed.has(request.id) ? { ...request, id: '' } : request)),
+          }
+        }),
+        setTreeClipboard: (treeClipboard) => set({ treeClipboard }),
+        showNotice: (message, undo = null) => set({ notice: { id: createId('notice'), message, undo } }),
+        dismissNotice: () => set({ notice: null }),
+        revealRequest: (requestId) => set((state) => {
+          const parents = new Map(state.folders.map((folder) => [folder.id, folder.parentId]))
+          const ancestors = new Set()
+          for (let id = state.requests.find((request) => request.id === requestId)?.folderId; parents.has(id) && !ancestors.has(id); id = parents.get(id)) ancestors.add(id)
+          return {
+            isSidebarOpen: true,
+            folders: state.folders.map((folder) => (ancestors.has(folder.id) && !folder.isOpen ? { ...folder, isOpen: true } : folder)),
+            revealTarget: { requestId, nonce: createId('reveal') },
+          }
+        }),
         toggleFolder: (folderId) => set((state) => ({
           folders: state.folders.map((folder) => (folder.id === folderId ? { ...folder, isOpen: !folder.isOpen } : folder)),
         })),
@@ -308,24 +359,24 @@ export const useAppStore = create(
 
         setActiveTab: (tabId) => set({ activeTabId: tabId }),
         newTab: (folderId = '') => set((state) => appendTab(state, { folderId })),
-        openRequestTab: (request) => set((state) => {
+        openRequestTab: (request, { preview = false } = {}) => set((state) => {
           const holder = request.id ? state.tabs.find((tab) => tab.request.id === request.id) : null
-          if (holder) return { activeTabId: holder.id }
+          if (holder) return { activeTabId: holder.id, ...(preview || !holder.isPreview ? {} : mapTab(state, holder.id, (tab) => ({ ...tab, isPreview: false }))) }
           const active = selectActiveTab(state)
           const isReusable = isBlankRequest(active.request) && active.pendingId === null
-          return isReusable ? mapTab(state, active.id, (tab) => createTab(tab.id, request)) : appendTab(state, request)
+          if (isReusable) return mapTab(state, active.id, (tab) => createTab(tab.id, request, preview))
+          const replaceable = preview && state.tabs.find(isReplaceable)
+          if (!replaceable) return appendTab(state, request, preview)
+          return { ...mapTab(state, replaceable.id, (tab) => createTab(tab.id, request, true)), activeTabId: replaceable.id }
         }),
-        closeTab: (tabId) => set((state) => {
-          const closed = state.tabs.find((tab) => tab.id === tabId)
-          const closedTabs = closed && !isBlankRequest(closed.request)
-            ? [closed.request, ...state.closedTabs].slice(0, MAX_CLOSED_TABS)
-            : state.closedTabs
-          const remaining = state.tabs.filter((tab) => tab.id !== tabId)
-          if (remaining.length === 0) return { ...appendTab({ ...state, tabs: remaining }), closedTabs }
-          if (state.activeTabId !== tabId) return { tabs: remaining, closedTabs }
-          const closedIndex = state.tabs.findIndex((tab) => tab.id === tabId)
-          return { tabs: remaining, closedTabs, activeTabId: remaining[Math.max(0, closedIndex - 1)].id }
+        pinTab: (tabId) => set((state) => mapTab(state, tabId, (tab) => (tab.isPreview ? { ...tab, isPreview: false } : tab))),
+        moveTab: (tabId, targetId, place) => set((state) => ({ tabs: reorderTabs(state.tabs, tabId, targetId, place) })),
+        stepTab: (tabId, step) => set((state) => ({ tabs: stepTab(state.tabs, tabId, step) })),
+        closeTabs: (tabIds) => set((state) => {
+          const closing = state.tabs.filter((tab) => tabIds.includes(tab.id))
+          return closing.length === 0 ? state : withoutTabs(state, closing)
         }),
+        closeTab: (tabId) => get().closeTabs([tabId]),
         reopenClosedTab: () => set((state) => {
           if (state.closedTabs.length === 0) return state
           const [request, ...closedTabs] = state.closedTabs
@@ -344,7 +395,7 @@ export const useAppStore = create(
           return tab ? { activeTabId: tab.id } : state
         }),
         updateTabRequest: (tabId, updates) => set((state) => (
-          mapTab(state, tabId, (tab) => ({ ...tab, request: { ...tab.request, ...updates } }))
+          mapTab(state, tabId, (tab) => ({ ...tab, isPreview: false, request: { ...tab.request, ...updates } }))
         )),
         updateActiveRequest: (updates) => get().updateTabRequest(get().activeTabId, updates),
         setActiveBodyDrafts: (bodyDrafts) => set((state) => (

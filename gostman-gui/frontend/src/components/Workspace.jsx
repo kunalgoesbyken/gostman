@@ -5,6 +5,7 @@ import { RequestBar } from "./RequestBar"
 import { ResponsePanel } from "./ResponsePanel"
 import { AppDialogs } from "./AppDialogs"
 import { AppHeader } from "./AppHeader"
+import { NoticeToast } from "./NoticeToast"
 import { StatusBar } from "./StatusBar"
 import { TabBar } from "./TabBar"
 import { RequestTabs } from "./RequestTabs"
@@ -54,6 +55,9 @@ const createShortcutHandlers = (actions) => {
     sendRequest: actions.send,
     closeTab: () => actions.closeTab(store().activeTabId),
     reopenTab: () => store().reopenClosedTab(),
+    closeOtherTabs: () => actions.tabs.closeOthers(store().activeTabId),
+    closeSavedTabs: () => actions.tabs.closeSaved(),
+    keepTab: () => actions.tabs.pinActive(),
     nextTab: () => store().cycleTab(1),
     previousTab: () => store().cycleTab(-1),
     toggleSidebar: () => store().toggleSidebar(),
@@ -254,6 +258,7 @@ function LoadedWorkspace({ backend, onBack }) {
             tabs={tabs}
             activeTabId={activeTabId}
             requests={requests}
+            actions={actions}
             onTabSelect={setActiveTab}
             onTabClose={actions.closeTab}
             onNewTab={openNewTab}
@@ -338,6 +343,8 @@ function LoadedWorkspace({ backend, onBack }) {
       </Suspense>
 
       <StatusBar onOpenMock={actions.mock.open} onOpenCapture={actions.capture.open} />
+
+      <NoticeToast />
 
       <AppDialogs onCommand={actions.runCommand} secrets={actions.secrets} />
     </div>

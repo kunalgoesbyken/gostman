@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
-  Bookmark, Clock, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Plus, Radio, RotateCcw, Save, Search, Send,
+  Bookmark, ClipboardPaste, Clock, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Pin, Plus, Radio, RotateCcw, Save, Search, Send,
   Server, Settings, Share2, SlidersHorizontal, Undo2, Upload, X,
 } from "lucide-react"
 import { MethodTag } from "../MethodTag"
@@ -14,8 +14,13 @@ const COMMANDS = [
   { id: "new-request", label: "New request", description: "Open a new empty tab", icon: Plus, shortcutId: "newRequest", action: "newRequest" },
   { id: "save-request", label: "Save request", description: "Save the request in the current tab", icon: Save, shortcutId: "saveRequest", action: "saveRequest" },
   { id: "duplicate-request", label: "Duplicate request", description: "Save a copy of the current request", icon: Copy, action: "duplicateRequest" },
+  { id: "copy-request", label: "Copy request", description: "Copy the saved request to paste it into a folder", icon: Copy, action: "copyRequest" },
+  { id: "paste-request", label: "Paste request", description: "Paste the copied request or folder next to the current request", icon: ClipboardPaste, action: "pasteRequest" },
   { id: "generate-code", label: "Generate code", description: "Show the current request as code", icon: Code, action: "generateCode" },
   { id: "close-tab", label: "Close tab", description: "Close the current tab", icon: X, shortcutId: "closeTab", action: "closeTab" },
+  { id: "close-other-tabs", label: "Close other tabs", description: "Keep only the current tab", icon: X, shortcutId: "closeOtherTabs", action: "closeOtherTabs" },
+  { id: "close-saved-tabs", label: "Close saved tabs", description: "Close every tab without unsaved changes", icon: X, shortcutId: "closeSavedTabs", action: "closeSavedTabs" },
+  { id: "keep-tab", label: "Keep preview tab open", description: "Turn the preview tab into a regular tab", icon: Pin, shortcutId: "keepTab", action: "keepTab" },
   { id: "reopen-tab", label: "Reopen closed tab", description: "Bring back the tab you closed last", icon: Undo2, shortcutId: "reopenTab", action: "reopenTab" },
   { id: "toggle-sidebar", label: "Toggle sidebar", description: "Show or hide collections and history", icon: PanelLeft, shortcutId: "toggleSidebar", action: "toggleSidebar" },
   { id: "keyboard-shortcuts", label: "Keyboard shortcuts", description: "See every shortcut", icon: Keyboard, keywords: "?", shortcutId: "shortcutsHelp", action: "shortcuts" },

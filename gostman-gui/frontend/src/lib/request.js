@@ -61,6 +61,7 @@ const DEFAULT_REQUEST = {
   mcpArguments: '',
   vars: '{}',
   timestamp: '',
+  sortOrder: 0,
 }
 
 export const normalizeAuth = (raw) => ({ ...DEFAULT_AUTH, ...raw, oauth2: { ...DEFAULT_OAUTH2, ...raw?.oauth2 } })
