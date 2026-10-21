@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"os"
+	"strconv"
 
 	"github.com/krockxz/gostman/runner"
 	"github.com/krockxz/gostman/secrets"
@@ -34,8 +35,14 @@ func useSecretEnvironment(lookup secrets.Environment) {
 }
 
 func secretFlags(flags *flag.FlagSet) {
-	flags.BoolFunc("secrets", "", func(string) error {
-		useSecretEnvironment(os.LookupEnv)
+	flags.BoolFunc("secrets", "", func(value string) error {
+		enabled, err := strconv.ParseBool(value)
+		if err != nil {
+			return err
+		}
+		if enabled {
+			useSecretEnvironment(os.LookupEnv)
+		}
 		return nil
 	})
 	flags.Var(secretsFile{}, "secrets-env-file", "")
