@@ -58,6 +58,10 @@ export function FetchToken(arg1) {
   return window['go']['main']['App']['FetchToken'](arg1);
 }
 
+export function ForgetWorkspace(arg1) {
+  return window['go']['main']['App']['ForgetWorkspace'](arg1);
+}
+
 export function GitAbortMerge() {
   return window['go']['main']['App']['GitAbortMerge']();
 }
@@ -222,6 +226,10 @@ export function PickWorkspaceFolder() {
   return window['go']['main']['App']['PickWorkspaceFolder']();
 }
 
+export function PinWorkspace(arg1, arg2) {
+  return window['go']['main']['App']['PinWorkspace'](arg1, arg2);
+}
+
 export function PrepareRequest(arg1) {
   return window['go']['main']['App']['PrepareRequest'](arg1);
 }
@@ -230,12 +238,20 @@ export function ReloadWorkspace() {
   return window['go']['main']['App']['ReloadWorkspace']();
 }
 
+export function RenameWorkspace(arg1, arg2) {
+  return window['go']['main']['App']['RenameWorkspace'](arg1, arg2);
+}
+
 export function ResetData() {
   return window['go']['main']['App']['ResetData']();
 }
 
 export function ResolveSecretReferences(arg1) {
   return window['go']['main']['App']['ResolveSecretReferences'](arg1);
+}
+
+export function RevealWorkspace(arg1) {
+  return window['go']['main']['App']['RevealWorkspace'](arg1);
 }
 
 export function SaveCollectionSettings(arg1) {

@@ -20,17 +20,12 @@ const (
 	fallbackNotice  = "The folder %s could not be opened: %v. The collection saved on this computer is shown instead."
 )
 
-type RecentWorkspace struct {
-	Path string `json:"path"`
-	Name string `json:"name"`
-}
-
 type WorkspaceStatus struct {
-	Path     string              `json:"path"`
-	Name     string              `json:"name"`
-	Recent   []RecentWorkspace   `json:"recent"`
-	Problems []workspace.Problem `json:"problems"`
-	Notice   string              `json:"notice"`
+	Path       string              `json:"path"`
+	Name       string              `json:"name"`
+	Workspaces []WorkspaceEntry    `json:"workspaces"`
+	Problems   []workspace.Problem `json:"problems"`
+	Notice     string              `json:"notice"`
 }
 
 func trust(memory *workspaceMemory) {
@@ -175,24 +170,14 @@ func openFolder() *workspace.Workspace {
 	return nil
 }
 
-func recentWorkspaces(state workspaceState) []RecentWorkspace {
-	recent := []RecentWorkspace{}
-	for _, path := range state.Recent {
-		if path != state.Current {
-			recent = append(recent, RecentWorkspace{Path: path, Name: filepath.Base(path)})
-		}
-	}
-	return recent
-}
-
 func currentStatus() (WorkspaceStatus, error) {
 	state, err := readWorkspaceState()
 	if err != nil {
 		return WorkspaceStatus{}, err
 	}
-	status := WorkspaceStatus{Recent: recentWorkspaces(state), Problems: []workspace.Problem{}, Notice: storage.takeNotice()}
+	status := WorkspaceStatus{Workspaces: workspaceEntries(state), Problems: []workspace.Problem{}, Notice: storage.takeNotice()}
 	if folder := openFolder(); folder != nil {
-		status.Path, status.Name, status.Problems = folder.Root(), filepath.Base(folder.Root()), folder.Problems()
+		status.Path, status.Name, status.Problems = folder.Root(), state.displayName(folder.Root()), folder.Problems()
 	}
 	return status, nil
 }
