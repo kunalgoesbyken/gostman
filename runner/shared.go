@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"maps"
 	"sync"
 
 	"github.com/krockxz/gostman/engine"
@@ -10,6 +11,7 @@ type shared struct {
 	mu      sync.Mutex
 	cookies []engine.CookieInfo
 	tokens  tokenCache
+	seen    map[string]string
 	witness func(engine.Request)
 
 	witnessMu sync.Mutex
@@ -17,7 +19,7 @@ type shared struct {
 }
 
 func newShared() *shared {
-	return &shared{cookies: []engine.CookieInfo{}, tokens: tokenCache{}}
+	return &shared{cookies: []engine.CookieInfo{}, tokens: tokenCache{}, seen: map[string]string{}}
 }
 
 func (c *shared) cookieList() []engine.CookieInfo {
@@ -34,6 +36,18 @@ func (c *shared) tokenList() []engine.OAuth2 {
 		tokens = append(tokens, token)
 	}
 	return tokens
+}
+
+func (c *shared) publish(values map[string]string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	maps.Copy(c.seen, values)
+}
+
+func (c *shared) observedList() map[string]string {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return maps.Clone(c.seen)
 }
 
 func (c *shared) recall(config engine.OAuth2) engine.OAuth2 {

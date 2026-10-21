@@ -14,6 +14,16 @@ import (
 
 type Row map[string]json.RawMessage
 
+func (o Options) DataValues() map[string]string {
+	values := map[string]string{}
+	for _, row := range o.Data {
+		for name, raw := range row {
+			values[name] = plainText(raw)
+		}
+	}
+	return values
+}
+
 func LoadData(path string) ([]Row, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {

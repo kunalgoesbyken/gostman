@@ -84,6 +84,7 @@ func (c *schedule) work(ctx context.Context, worker *session, queue <-chan int) 
 		for step, index := range current.indexes {
 			request := c.planned.requests[index]
 			result := worker.attempt(ctx, request, c.planned.folderNames[request.FolderID], c.options.Capture)
+			worker.common.publish(worker.variables.plain())
 			if c.options.isIterating() {
 				result.Iteration = current.iteration + 1
 			}

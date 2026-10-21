@@ -82,6 +82,10 @@ func (s *Session) Variables() map[string]string {
 	return s.state.variables.plain()
 }
 
+func (s *Session) Observed() map[string]string {
+	return s.state.common.observedList()
+}
+
 func (s *Session) Cookies() []engine.CookieInfo {
 	return s.state.common.cookieList()
 }
