@@ -69,7 +69,14 @@ h4 { margin-top: 1.5rem; font-size: 0.8125rem; font-weight: 650; letter-spacing:
 h5 { margin-top: 1.25rem; font-size: 0.9375rem; font-weight: 650; }
 p { margin: 0.75rem 0 0; }
 .intro, .description { max-width: 42rem; overflow-wrap: anywhere; }
-.description { white-space: pre-line; }
+.md > :first-child { margin-top: 0; }
+.md h1, .md h2, .md h3, .md h4, .md h5, .md h6 { margin: 1.25rem 0 0; padding: 0; border: 0; color: var(--ink); font-size: 1rem; letter-spacing: 0; text-transform: none; }
+.md ul, .md ol { margin: 0.75rem 0 0; padding-inline-start: 1.5rem; }
+.md li { margin-top: 0.25rem; }
+.md blockquote { margin: 0.75rem 0 0; padding: 0 0.875rem; border-inline-start: 3px solid var(--line); color: var(--soft); }
+.md hr { margin: 1.25rem 0; border: 0; border-top: 1px solid var(--line); }
+.md pre { margin-top: 0.75rem; }
+.md pre code { padding: 0; border: 0; background: none; }
 .note { color: var(--soft); font-size: 0.875rem; }
 .anchor { margin-left: 0.4rem; color: var(--soft); font-weight: 400; opacity: 0; }
 h2:hover .anchor, h3:hover .anchor, .anchor:focus-visible { opacity: 1; }

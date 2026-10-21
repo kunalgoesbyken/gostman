@@ -3,10 +3,10 @@ import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Notice, Panel, PanelBody, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
-import { Textarea } from "./ui/textarea"
 import { AuthPanel } from "./AuthPanel"
 import { EnvironmentTable } from "./EnvironmentTable"
 import { KeyValueEditor } from "./KeyValueEditor"
+import { MarkdownField } from "./MarkdownField"
 import { AssertionEditor, ScriptEditor } from "./TestsPanel"
 import { isPlainObject, parseJSON } from "../lib/dataUtils"
 import { FOLDER_SETTINGS_TEXT as TEXT } from "../lib/folderSettingsText"
@@ -74,12 +74,12 @@ function DocsTab({ description, onChange }) {
     <Panel>
       <Notice>{TEXT.docsNote}</Notice>
       <PanelBody>
-        <Textarea
+        <MarkdownField
           value={description}
-          onChange={(event) => onChange({ description: event.target.value })}
+          onChange={(next) => onChange({ description: next })}
           placeholder={TEXT.docsPlaceholder}
           rows={14}
-          aria-label={TEXT.tabs.docs}
+          label={TEXT.tabs.docs}
           className="font-sans"
         />
       </PanelBody>

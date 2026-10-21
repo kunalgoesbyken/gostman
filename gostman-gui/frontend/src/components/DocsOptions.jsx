@@ -1,7 +1,7 @@
 import { Checkbox } from "./ui/checkbox"
 import { Input } from "./ui/input"
 
-export const DEFAULT_DOCS_OPTIONS = { title: "", includeExamples: true }
+export const DEFAULT_DOCS_OPTIONS = { title: "", includeExamples: true, playground: false }
 
 export function DocsOptions({ options, onChange }) {
   const update = (patch) => onChange({ ...options, ...patch })
@@ -17,6 +17,9 @@ export function DocsOptions({ options, onChange }) {
       />
       <Checkbox checked={options.includeExamples} onChange={(event) => update({ includeExamples: event.target.checked })}>
         Include example responses
+      </Checkbox>
+      <Checkbox checked={options.playground} onChange={(event) => update({ playground: event.target.checked })}>
+        Include a Try it panel
       </Checkbox>
     </div>
   )

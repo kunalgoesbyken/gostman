@@ -13,7 +13,10 @@ import {
 import { formatJSON } from './docs/json'
 import { createAnchors, html, shorten, toSource, trusted } from './docs/markup'
 import { CONTENT_POLICY, SCRIPT, STYLE } from './docs/page'
+import { playgroundPanel } from './docs/playground'
+import { PLAYGROUND_POLICY, PLAYGROUND_SCRIPT, PLAYGROUND_STYLE } from './docs/playgroundPage'
 import { REDACTED, maskJsonText, maskUrl } from './docs/redaction'
+import { markdownToHtml } from './markdown'
 
 const DEFAULT_TITLE = 'API documentation'
 const ROOT_HEADING = 'General'
@@ -29,6 +32,9 @@ const SUCCESS_CLASS = 'is-success'
 const REDIRECT_CLASS = 'is-redirect'
 const FAILURE_CLASS = 'is-failure'
 const PLAIN_CLASS = 'is-plain'
+const COLLECTION_HEADING_OFFSET = 1
+const FOLDER_HEADING_OFFSET = 2
+const REQUEST_HEADING_OFFSET = 3
 
 const METHOD_CLASSES = {
   GET: 'is-get',
@@ -237,16 +243,18 @@ function examplesSection(request) {
   return examples.length === 0 ? '' : html`<h4>Example responses</h4>${examples.map(exampleBlock)}`
 }
 
-const descriptionBlock = (text) => (text === '' ? '' : html`<p class="description" dir="auto">${text}</p>`)
+const descriptionBlock = (text, headingOffset) => (
+  text === '' ? '' : html`<div class="description md">${trusted(markdownToHtml(text, { headingOffset }))}</div>`
+)
 
-const descriptionOf = (request) => descriptionBlock(textOf(request.description).trim())
+const descriptionOf = (request) => descriptionBlock(textOf(request.description).trim(), REQUEST_HEADING_OFFSET)
 
 function requestArticle(entry, settings) {
   const { request } = entry
   return html`<article id="${entry.anchor}" data-search="${entry.search}">
 <h3><span dir="auto">${request.name}</span>${anchorLink(entry.anchor, request.name)}</h3>
 <p class="endpoint">${badge(entry.badge, 'method')}<code dir="ltr">${maskUrl(request.url)}</code></p>
-${descriptionOf(request)}${PROTOCOL_SECTIONS[entry.protocol].map((section) => section(request))}${settings.includeExamples ? examplesSection(request) : ''}
+${descriptionOf(request)}${PROTOCOL_SECTIONS[entry.protocol].map((section) => section(request))}${settings.includeExamples ? examplesSection(request) : ''}${settings.playground ? playgroundPanel(request) : ''}
 </article>
 `
 }
@@ -254,7 +262,7 @@ ${descriptionOf(request)}${PROTOCOL_SECTIONS[entry.protocol].map((section) => se
 function groupSection(group, settings) {
   return html`<section id="${group.anchor}" data-group>
 <h2><span dir="auto">${group.heading}</span>${anchorLink(group.anchor, group.heading)}</h2>
-${descriptionBlock(group.description || '')}${group.entries.map((entry) => requestArticle(entry, settings))}</section>
+${descriptionBlock(group.description || '', FOLDER_HEADING_OFFSET)}${group.entries.map((entry) => requestArticle(entry, settings))}</section>
 `
 }
 
@@ -289,6 +297,7 @@ function readSettings(options) {
   return {
     title: textOf(options?.title).trim() || DEFAULT_TITLE,
     includeExamples: options?.includeExamples !== false,
+    playground: options?.playground === true,
   }
 }
 
@@ -301,10 +310,10 @@ export function buildDocs(collection, options) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="${CONTENT_POLICY}">
+<meta http-equiv="Content-Security-Policy" content="${settings.playground ? PLAYGROUND_POLICY : CONTENT_POLICY}">
 <meta name="generator" content="Gostman">
 <title>${settings.title}</title>
-<style>${trusted(STYLE)}</style>
+<style>${trusted(STYLE)}${settings.playground ? trusted(PLAYGROUND_STYLE) : ''}</style>
 </head>
 <body>
 <a class="skip" href="#${CONTENT_ID}">Skip to content</a>
@@ -318,10 +327,12 @@ ${root.entries.map(contentsEntry)}${groups.map(contentsGroup)}</ul>
 <main id="${CONTENT_ID}">
 <h1 dir="auto">${settings.title}</h1>
 <p class="intro">${summaryOf(requests.length, sections.length)}</p>
-${descriptionBlock(description)}${variablesSection(variablesUsed(requests))}${root.entries.length > 0 ? groupSection(root, settings) : ''}${sections.map((group) => groupSection(group, settings))}<footer>Generated with Gostman.</footer>
+${descriptionBlock(description, COLLECTION_HEADING_OFFSET)}${variablesSection(variablesUsed(requests))}${root.entries.length > 0 ? groupSection(root, settings) : ''}${sections.map((group) => groupSection(group, settings))}<footer>Generated with Gostman.</footer>
 </main>
 </div>
 <script>${trusted(SCRIPT)}</script>
+${settings.playground ? html`<script>${trusted(PLAYGROUND_SCRIPT)}</script>
+` : ''}
 </body>
 </html>
 `)

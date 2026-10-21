@@ -19,6 +19,7 @@ const (
 type docsOptions struct {
 	Title           string `json:"title,omitempty"`
 	IncludeExamples bool   `json:"includeExamples"`
+	Playground      bool   `json:"playground"`
 }
 
 type documenting struct {
@@ -34,6 +35,7 @@ func parseDocumenting(arguments []string) (documenting, error) {
 	flags.StringVar(&parsed.output, "output", "", "")
 	flags.StringVar(&parsed.options.Title, "title", "", "")
 	withoutExamples := flags.Bool("no-examples", false, "")
+	flags.BoolVar(&parsed.options.Playground, "playground", false, "")
 	positional, err := parseInterspersed(flags, arguments)
 	if err != nil {
 		return parsed, err
