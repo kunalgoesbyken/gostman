@@ -77,39 +77,14 @@ func (r *redactor) json(source string) string {
 	if decoder.Decode(&document) != nil {
 		return source
 	}
-	masked, changed := r.node(document)
-	if !changed {
+	if !redact.MapSensitive(document, r.value) {
 		return source
 	}
-	encoded, err := json.Marshal(masked)
+	encoded, err := json.Marshal(document)
 	if err != nil {
 		return source
 	}
 	return string(encoded)
-}
-
-func (r *redactor) node(node any) (any, bool) {
-	changed := false
-	switch value := node.(type) {
-	case map[string]any:
-		for name, member := range value {
-			text, isText := member.(string)
-			if isText && text != "" && redact.IsSensitiveName(name) {
-				value[name], changed = r.value(name, text), true
-				continue
-			}
-			var nested bool
-			value[name], nested = r.node(member)
-			changed = changed || nested
-		}
-	case []any:
-		for index, member := range value {
-			var nested bool
-			value[index], nested = r.node(member)
-			changed = changed || nested
-		}
-	}
-	return node, changed
 }
 
 func (r *redactor) auth(auth engine.Auth) engine.Auth {
