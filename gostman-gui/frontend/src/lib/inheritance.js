@@ -2,6 +2,7 @@ import { NO_AUTH, NO_SCRIPTS, hasActiveContent } from './activeContent'
 import { FOLDER_SETTINGS_TEXT as TEXT } from './folderSettingsText'
 import { AUTH_OAUTH2, normalizeAuth } from './request'
 import { parseRows, countSentRows } from './rows'
+import { cleanOrder } from './sortOrder.js'
 import { folderChain } from './variableScopes'
 
 export const AUTH_INHERIT = 'inherit'
@@ -24,6 +25,7 @@ export const normalizeFolder = (raw) => ({
   name: raw.name,
   isOpen: Boolean(raw.isOpen),
   parentId: raw.parentId || '',
+  sortOrder: cleanOrder(raw.sortOrder),
   variables: textOf(raw.variables) || EMPTY_ROWS,
   ...normalizeScopeSettings(raw),
 })

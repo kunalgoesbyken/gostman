@@ -1209,6 +1209,7 @@ export namespace main {
 	    name: string;
 	    isOpen: boolean;
 	    parentId: string;
+	    sortOrder: number;
 	    variables: string;
 	    description: string;
 	    headers: string;
@@ -1227,6 +1228,7 @@ export namespace main {
 	        this.name = source["name"];
 	        this.isOpen = source["isOpen"];
 	        this.parentId = source["parentId"];
+	        this.sortOrder = source["sortOrder"];
 	        this.variables = source["variables"];
 	        this.description = source["description"];
 	        this.headers = source["headers"];
@@ -1377,6 +1379,7 @@ export namespace main {
 	    mcpArguments: string;
 	    vars: string;
 	    timestamp: string;
+	    sortOrder: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Request(source);
@@ -1410,6 +1413,7 @@ export namespace main {
 	        this.mcpArguments = source["mcpArguments"];
 	        this.vars = source["vars"];
 	        this.timestamp = source["timestamp"];
+	        this.sortOrder = source["sortOrder"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -3058,6 +3062,7 @@ export namespace workspace {
 	    id: string;
 	    name: string;
 	    parentId: string;
+	    sortOrder: number;
 	    variables: string;
 	    description: string;
 	    headers: string;
@@ -3075,6 +3080,7 @@ export namespace workspace {
 	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.parentId = source["parentId"];
+	        this.sortOrder = source["sortOrder"];
 	        this.variables = source["variables"];
 	        this.description = source["description"];
 	        this.headers = source["headers"];
@@ -3129,6 +3135,7 @@ export namespace workspace {
 	    mcpArguments: string;
 	    vars: string;
 	    timestamp: string;
+	    sortOrder: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Request(source);
@@ -3162,6 +3169,7 @@ export namespace workspace {
 	        this.mcpArguments = source["mcpArguments"];
 	        this.vars = source["vars"];
 	        this.timestamp = source["timestamp"];
+	        this.sortOrder = source["sortOrder"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

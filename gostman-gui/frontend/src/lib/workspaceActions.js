@@ -29,6 +29,9 @@ import { buildReportPage } from './runReport'
 import { createSocketActions, isSocketAddress } from './socketSessions'
 import { createSpecActions } from './specActions'
 import { createStorageActions } from './storageActions'
+import { createTabActions } from './tabActions'
+import { createTreeActions } from './treeActions'
+import { ROW_REQUEST } from './collectionTree'
 import { selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
 
 const UNRECORDED_ERRORS = ['config', 'cancelled']
@@ -201,12 +204,8 @@ export function createWorkspaceActions(backend) {
     store().patchOpenRequest(saved.id, changes)
   }
 
-  const moveRequest = attempt('Could not move the request', (request, folderId) => (
-    updateSavedRequest(request, { folderId })
-  ))
-
   const duplicateRequest = attempt('Could not duplicate the request', async (request) => {
-    const copy = { ...request, id: '', timestamp: '', name: `${request.name} copy` }
+    const copy = { ...request, id: '', timestamp: '', sortOrder: 0, name: `${request.name} copy` }
     store().upsertRequest(await backend.saveRequest(normalizeRequest(copy)))
   })
 
@@ -376,6 +375,13 @@ export function createWorkspaceActions(backend) {
   const ai = createAiActions(backend, { importData })
   ai.load()
   const storageActions = createStorageActions(backend)
+  const tree = createTreeActions(backend, attempt)
+  const tabActions = createTabActions(backend, attempt, cancelTab)
+
+  const activeSavedSource = () => {
+    const { id } = activeTab().request
+    return id && store().requests.some((request) => request.id === id) ? { kind: ROW_REQUEST, id } : null
+  }
 
   const commands = {
     newRequest: () => store().newTab(),
@@ -385,6 +391,14 @@ export function createWorkspaceActions(backend) {
     duplicateRequest: () => duplicateRequest(activeTab().request),
     closeTab: () => closeTab(store().activeTabId),
     openRequest: (request) => store().openRequestTab(request),
+    closeOtherTabs: () => tabActions.closeOthers(store().activeTabId),
+    closeSavedTabs: tabActions.closeSaved,
+    keepTab: tabActions.pinActive,
+    copyRequest: () => {
+      const source = activeSavedSource()
+      if (source) tree.copyItem(source)
+    },
+    pasteRequest: () => tree.pasteItem(activeSavedSource()),
     openHistory: (entry) => store().openRequestTab({ ...entry, id: '', timestamp: '' }),
     reopenTab: () => store().reopenClosedTab(),
     toggleSidebar: () => store().toggleSidebar(),
@@ -464,10 +478,12 @@ export function createWorkspaceActions(backend) {
     deleteFolder,
     renameRequest,
     duplicateRequest,
-    moveRequest,
+    moveRequest: (request, folderId) => tree.moveToFolder({ kind: ROW_REQUEST, id: request.id }, folderId),
     deleteRequest,
     clearHistory,
     closeTab,
+    tree,
+    tabs: tabActions,
     cancel: () => cancelTab(activeTab()),
     reset: confirmReset,
     openImport: () => store().openImportDialog(),
@@ -478,6 +494,7 @@ export function createWorkspaceActions(backend) {
     runCommand: (action, payload) => commands[action]?.(payload),
     newRequest: (folderId) => store().newTab(folderId),
     openRequest: (request) => store().openRequestTab(request),
+    previewRequest: (request) => store().openRequestTab(request, { preview: true }),
     openHistoryEntry: (entry) => store().openRequestTab({ ...entry, id: '', timestamp: '' }),
   }
 }

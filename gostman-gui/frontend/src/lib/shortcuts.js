@@ -17,6 +17,9 @@ export const SHORTCUTS = [
   { id: 'sendRequest', group: 'Request', label: 'Send request', mod: true, key: 'enter' },
   { id: 'closeTab', group: 'Tabs', label: 'Close tab', mod: true, key: 'w', web: { alt: true, key: 'w' } },
   { id: 'reopenTab', group: 'Tabs', label: 'Reopen closed tab', mod: true, shift: true, key: 't', web: { alt: true, shift: true, key: 't' } },
+  { id: 'closeOtherTabs', group: 'Tabs', label: 'Close other tabs', alt: true, shift: true, key: 'w' },
+  { id: 'closeSavedTabs', group: 'Tabs', label: 'Close saved tabs', alt: true, shift: true, key: 's' },
+  { id: 'keepTab', group: 'Tabs', label: 'Keep preview tab open', alt: true, shift: true, key: 'k' },
   { id: 'nextTab', group: 'Tabs', label: 'Next tab', ctrl: true, key: 'tab', web: { alt: true, code: 'BracketRight' } },
   { id: 'previousTab', group: 'Tabs', label: 'Previous tab', ctrl: true, shift: true, key: 'tab', web: { alt: true, code: 'BracketLeft' } },
   ...TAB_POSITIONS.map((position) => ({

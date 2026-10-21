@@ -1,8 +1,11 @@
+import { compareOrder } from './sortOrder.js'
+
 export const ROOT_ID = ''
 export const MAX_FOLDER_DEPTH = 32
 
 export const ROW_FOLDER = 'folder'
-const ROW_REQUEST = 'request'
+export const ROW_REQUEST = 'request'
+export const ROW_EMPTY = 'empty'
 
 const NO_ITEMS = []
 
@@ -27,6 +30,11 @@ export function folderDepth(folderId, parentOf) {
   return depth
 }
 
+function sortedGroups(groups) {
+  for (const group of groups.values()) group.sort(compareOrder)
+  return groups
+}
+
 export function buildCollectionTree(folders, requests) {
   const parentOf = new Map(folders.map((folder) => [folder.id, folder.parentId]))
   const containerOf = (id) => (parentOf.has(id) ? id : ROOT_ID)
@@ -34,8 +42,8 @@ export function buildCollectionTree(folders, requests) {
     folderDepth(folder.id, parentOf) > MAX_FOLDER_DEPTH ? ROOT_ID : containerOf(folder.parentId)
   )
   return {
-    childFolders: groupBy(folders, parentFolderOf),
-    folderRequests: groupBy(requests, (request) => containerOf(request.folderId)),
+    childFolders: sortedGroups(groupBy(folders, parentFolderOf)),
+    folderRequests: sortedGroups(groupBy(requests, (request) => containerOf(request.folderId))),
   }
 }
 
@@ -82,12 +90,17 @@ export function findMatches(folders, requests, query) {
 
 export function flattenCollection(tree, matches) {
   const rows = []
+  const visitFolder = (folder, depth) => {
+    const first = rows.length
+    visit(folder.id, depth + 1)
+    if (!matches && rows.length === first) rows.push({ kind: ROW_EMPTY, key: `${ROW_EMPTY}:${folder.id}`, depth: depth + 1, parentId: folder.id })
+  }
   const visit = (containerId, depth) => {
     for (const folder of foldersIn(tree, containerId)) {
       if (matches && !matches.folderIds.has(folder.id)) continue
       const isOpen = Boolean(matches) || folder.isOpen
       rows.push({ kind: ROW_FOLDER, key: `${ROW_FOLDER}:${folder.id}`, depth, folder, isOpen })
-      if (isOpen) visit(folder.id, depth + 1)
+      if (isOpen) visitFolder(folder, depth)
     }
     for (const request of requestsIn(tree, containerId)) {
       if (matches && !matches.requestIds.has(request.id)) continue
