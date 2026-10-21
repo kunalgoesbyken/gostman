@@ -30,6 +30,7 @@ type Policy struct {
 	Network           *Network
 	Permit            func(host string) bool
 	MaxStreamDuration time.Duration
+	MinStreamRetry    time.Duration
 }
 
 func (p Policy) refusal(host string) error {

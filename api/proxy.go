@@ -29,6 +29,7 @@ var Policy = engine.Policy{
 	MaxResponseBytes:  3 << 20,
 	MaxTimeout:        30 * time.Second,
 	MaxStreamDuration: 60 * time.Second,
+	MinStreamRetry:    time.Second,
 }
 
 type prepareResult struct {

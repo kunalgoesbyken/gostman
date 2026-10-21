@@ -32,6 +32,9 @@ const (
 	defaultStreamDuration = 5 * time.Minute
 	defaultRetry          = 3 * time.Second
 	minRetry              = 100 * time.Millisecond
+	maxReconnects         = 25
+	eventOverheadBytes    = 96
+	tooManyReconnects     = "the server closed the stream too many times"
 	readBufferBytes       = 32 << 10
 )
 
@@ -54,6 +57,7 @@ type stream struct {
 	maxBytes  int64
 	events    int
 	bytes     int64
+	emitted   int64
 	attempt   int
 }
 
@@ -107,6 +111,10 @@ func (s *stream) run(ctx context.Context) Response {
 	response := streamResponse(incoming, cookies)
 	reason, detail := s.read(ctx, incoming, response)
 	for s.shouldReconnect(ctx, reason) {
+		if s.attempt >= maxReconnects {
+			reason, detail = EndFailed, tooManyReconnects
+			break
+		}
 		if !s.pause(ctx) {
 			reason, detail = endReason(ctx, ctx.Err())
 			break
@@ -184,8 +192,12 @@ func (s *stream) accept(chunk []byte) (string, bool) {
 		s.events++
 		event.Index = s.events
 		s.out.add(StreamMessage{Kind: StreamEvent, Event: &event})
+		s.emitted += int64(len(event.Type) + len(event.ID) + len(event.Data) + eventOverheadBytes)
 		if s.events >= s.maxEvents {
 			return EndMaxEvents, true
+		}
+		if s.emitted > s.maxBytes {
+			return EndMaxBytes, true
 		}
 	}
 	if capped {
@@ -216,7 +228,7 @@ func (s *stream) pause(ctx context.Context) bool {
 	if s.parser.retryMs > 0 {
 		delay = time.Duration(s.parser.retryMs) * time.Millisecond
 	}
-	delay = max(delay, minRetry)
+	delay = max(delay, minRetry, s.policy.MinStreamRetry)
 	s.attempt++
 	s.out.add(StreamMessage{Kind: StreamWait, RetryMs: delay.Milliseconds(), Attempt: s.attempt})
 
