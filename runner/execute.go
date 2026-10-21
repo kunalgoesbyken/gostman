@@ -26,14 +26,16 @@ type session struct {
 	common    *shared
 	library   []Request
 	hosts     []string
+	modules   map[string]string
 }
 
 type job struct {
-	Script     string          `json:"script"`
-	Assertions string          `json:"assertions"`
-	Request    json.RawMessage `json:"request"`
-	Response   json.RawMessage `json:"response,omitempty"`
-	Variables  variables       `json:"variables"`
+	Script     string            `json:"script"`
+	Assertions string            `json:"assertions"`
+	Request    json.RawMessage   `json:"request"`
+	Response   json.RawMessage   `json:"response,omitempty"`
+	Variables  variables         `json:"variables"`
+	Modules    map[string]string `json:"modules,omitempty"`
 }
 
 type stageRun struct {
@@ -86,6 +88,7 @@ func (s *session) scoped(request Request) variables {
 func (s *session) runStage(ctx context.Context, stage string, work job, request Request) stageRun {
 	before := s.scoped(request)
 	work.Variables = before
+	work.Modules = s.modules
 	var run stageRun
 	if err := s.scripts.IsolatedWith(s.bridge(ctx), "runJob", &run, work); err != nil {
 		return stageRun{Error: stage + ": " + err.Error()}

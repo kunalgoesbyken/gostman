@@ -118,6 +118,7 @@ func (s *Session) Run(ctx context.Context, stored Collection, options Options, o
 	if err != nil {
 		return Report{}, err
 	}
+	s.state.modules = stored.Modules
 	s.state.variables = layered(append(base, s.state.variables)...)
 	if err := s.state.learn(planned.library); err != nil {
 		return Report{}, err

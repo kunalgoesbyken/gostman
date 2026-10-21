@@ -103,6 +103,17 @@ async function resolveReferences(backend, request) {
   return backend.secrets.resolve(targets)
 }
 
+const REQUIRE_CALL = 'require('
+
+async function loadModules(backend, steps) {
+  if (!backend.storage?.scriptModules || !steps.some((step) => step.script?.includes(REQUIRE_CALL))) return {}
+  try {
+    return await backend.storage.scriptModules()
+  } catch {
+    return {}
+  }
+}
+
 function transportFor(backend, request) {
   if (isGrpcRequest(request)) return backend.invokeGrpc
   if (isMcpRequest(request)) return backend.invokeMcp
@@ -167,8 +178,10 @@ export function createExecutor(backend) {
     }
     const variablesOf = (candidate, answers) => variablesText(candidate, answers, referenced)
 
+    const modules = await loadModules(backend, [...preSteps(lineage, request), ...postSteps(lineage, request)])
+
     for (const step of preSteps(lineage, request)) {
-      const pre = await runStage(step.label, { script: step.script, request: requestSubject(request) }, request, send, referenced)
+      const pre = await runStage(step.label, { script: step.script, request: requestSubject(request), modules }, request, send, referenced)
       runs.push(pre)
       if (pre.error) return stop(request, pre.error)
       if (holdsBack(pre.flow)) return { ...stop(request, reasonFor(pre.flow)), skipped: reasonFor(pre.flow) }
@@ -199,6 +212,7 @@ export function createExecutor(backend) {
           assertions: step.assertions,
           request: requestSubject(request),
           response: responseSubject(response),
+          modules,
         }, request, send, referenced))
       }
     }
