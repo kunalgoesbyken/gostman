@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/dop251/goja/ast"
 	"github.com/dop251/goja/parser"
@@ -14,10 +15,10 @@ const (
 	scriptSuffix = "\n})"
 	postmanRoot  = "pm"
 
-	maxScriptBytes = 1 << 20
-	maxNesting     = 200
-	maxTreeDepth   = 1500
-	legacyRoot     = "postman"
+	maxScriptBytes  = 64 << 10
+	translateBudget = 3 * time.Second
+	maxTreeDepth    = 1500
+	legacyRoot      = "postman"
 )
 
 type scriptNote struct {
@@ -47,18 +48,32 @@ type translator struct {
 	noted      map[string]bool
 }
 
-func translatePostmanScript(source string) (result scriptTranslation) {
-	defer func() {
-		if recover() != nil {
-			result = scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: messageScriptInternal}}, failed: 1}
-		}
-	}()
+func keptAsWritten(source, reason string) scriptTranslation {
+	return scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: reason}}, failed: 1}
+}
+
+func translatePostmanScript(source string) scriptTranslation {
 	if len(source) > maxScriptBytes {
-		return scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: fmt.Sprintf(messageScriptTooLarge, maxScriptBytes>>10)}}, failed: 1}
+		return keptAsWritten(source, fmt.Sprintf(messageScriptTooLarge, maxScriptBytes>>10))
 	}
-	if nestingDepth(source) > maxNesting {
-		return scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: messageScriptTooDeep}}, failed: 1}
+	done := make(chan scriptTranslation, 1)
+	go func() {
+		defer func() {
+			if recover() != nil {
+				done <- keptAsWritten(source, messageScriptInternal)
+			}
+		}()
+		done <- translateParsed(source)
+	}()
+	select {
+	case result := <-done:
+		return result
+	case <-time.After(translateBudget):
+		return keptAsWritten(source, messageScriptTooSlow)
 	}
+}
+
+func translateParsed(source string) scriptTranslation {
 	program, err := parser.ParseFile(nil, "", scriptPrefix+source+scriptSuffix, 0)
 	if err != nil {
 		return scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: messageScriptSyntax}}, failed: 1}

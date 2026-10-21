@@ -40,4 +40,5 @@ const (
 	messageScriptInternal      = "The script could not be translated and was kept unchanged."
 	messageScriptTooLarge      = "The script is larger than %d KB and was kept unchanged."
 	messageScriptTooDeep       = "The script nests too deeply to translate and was kept unchanged."
+	messageScriptTooSlow       = "The script took too long to translate and was kept unchanged."
 )
