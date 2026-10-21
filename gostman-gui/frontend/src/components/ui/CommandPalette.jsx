@@ -94,7 +94,6 @@ const historyItems = (history) => history.map((entry) => ({
 
 const commandItems = (commands) => commands.map((command) => ({ ...command, kind: KIND_COMMAND }))
 
-// A match on the name outranks a match on the folder or address.
 const itemScore = (item, needle) => {
   if (item.kind === KIND_COMMAND) {
     const label = fuzzyScore(item.label, needle)

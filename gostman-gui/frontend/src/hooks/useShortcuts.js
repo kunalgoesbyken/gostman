@@ -1,7 +1,6 @@
 import { useEffect } from "react"
 import { activeShortcuts, matchesBinding } from "../lib/shortcuts"
 
-// handlers maps a shortcut id from lib/shortcuts to the function it runs.
 export function useShortcuts(handlers, isEnabled) {
   useEffect(() => {
     if (!isEnabled) return undefined

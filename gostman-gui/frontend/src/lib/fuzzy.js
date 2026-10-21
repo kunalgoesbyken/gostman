@@ -1,5 +1,3 @@
-// Subsequence match: every character of the query appears in order. Higher scores
-// are better; null means no match. Runs of characters and word starts score more.
 const WORD_START = /[\s/\-_.:?&=]/
 
 function wordScore(haystack, needle) {
@@ -17,7 +15,6 @@ function wordScore(haystack, needle) {
   return haystack.includes(needle) ? score + 10 : score
 }
 
-// Each space-separated word of the query must match, in any order.
 export function fuzzyScore(text, query) {
   const haystack = text.toLowerCase()
   let total = 0

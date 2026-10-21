@@ -43,7 +43,6 @@ function focusSidebarSearch() {
   requestAnimationFrame(() => document.querySelector("aside input[type=search]")?.focus())
 }
 
-// Shortcut ids come from lib/shortcuts.
 const createShortcutHandlers = (actions) => {
   const handlers = {
     commandPalette: () => store().openCommandPalette(),

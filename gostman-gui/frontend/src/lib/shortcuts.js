@@ -1,11 +1,3 @@
-// The single table of keyboard bindings. useShortcuts matches events against it
-// and the palette and the shortcuts dialog render labels from it.
-//
-// A binding names its key as `key` (event.key, lower-case) or `code` (event.code,
-// for Alt+digit, where the key changes with the keyboard layout and on macOS).
-// `mod` is Ctrl or Cmd. `ctrl` is the Control key itself on every platform.
-// `web` replaces the binding in the browser build, or is null to skip it there:
-// browsers keep Ctrl+W, Ctrl+T and Ctrl+Tab for themselves and page scripts cannot override them.
 
 const APPLE_PLATFORMS = ['mac', 'iphone', 'ipad']
 const TAB_POSITIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -14,7 +6,6 @@ const platformName = () => (navigator.userAgentData?.platform || navigator.platf
 
 export const isApplePlatform = () => APPLE_PLATFORMS.some((name) => platformName().includes(name))
 
-// The Wails shell injects window.go; the web build never has it.
 export const isDesktopApp = () => typeof window !== 'undefined' && Boolean(window.go)
 
 export const SHORTCUT_GROUPS = ['General', 'Request', 'Tabs', 'Navigation']
@@ -45,7 +36,6 @@ export const SHORTCUTS = [
 
 const byId = new Map(SHORTCUTS.map((shortcut) => [shortcut.id, shortcut]))
 
-// The binding that applies in this build, or null when the build has none.
 export const bindingFor = (shortcut, isDesktop = isDesktopApp()) => {
   if (isDesktop || shortcut.web === undefined) return shortcut
   if (!shortcut.web) return null
@@ -85,14 +75,12 @@ export function bindingLabel(binding, isApple = isApplePlatform()) {
   return isApple ? parts.join('') : parts.join('+')
 }
 
-// Label for a shortcut in this build, or '' when it has none here.
 export const shortcutLabelFor = (id) => {
   const shortcut = byId.get(id)
   const binding = shortcut && bindingFor(shortcut)
   return binding ? bindingLabel(binding) : ''
 }
 
-// Rows for the shortcuts dialog. Alt+1 to 9 collapse into one row.
 export function shortcutRows() {
   return activeShortcuts()
     .filter(({ shortcut }) => shortcut.listed !== false)
