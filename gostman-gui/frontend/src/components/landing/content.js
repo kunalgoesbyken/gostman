@@ -1,7 +1,7 @@
-export const AI_AVAILABLE = false
+export const AI_AVAILABLE = true
 
 export const AI_FEATURE = {
   icon: "Sparkles",
   title: "AI features, bring your own key",
-  description: "Off by default. Your key stays in your OS keychain and secrets are redacted before anything is sent.",
+  description: "Off by default. Bring your own key for Anthropic, OpenAI, Gemini, OpenRouter, Ollama or any compatible URL. Keys stay on your device, in the OS keychain on desktop, and each request is previewed with secrets masked.",
 }

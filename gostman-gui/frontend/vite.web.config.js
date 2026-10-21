@@ -42,6 +42,8 @@ function serveWebEntryInDev(entry) {
   }
 }
 
+const SANDBOX_WORKER_PREFIX = 'assets/sandbox.worker.'
+
 function stampServiceWorker() {
   let assets = []
   return {
@@ -49,7 +51,7 @@ function stampServiceWorker() {
     apply: 'build',
     writeBundle(_options, bundle) {
       assets = Object.values(bundle)
-        .filter((item) => (item.type === 'chunk' && item.isEntry) || item.fileName.endsWith('.css'))
+        .filter((item) => (item.type === 'chunk' || item.fileName.endsWith('.css')) && !item.fileName.startsWith(SANDBOX_WORKER_PREFIX))
         .map((item) => `/${item.fileName}`)
         .sort()
     },

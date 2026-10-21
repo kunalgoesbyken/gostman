@@ -40,7 +40,7 @@ func post(ctx context.Context, client *http.Client, endpoint string, headers map
 		return transportError(ctx, err)
 	}
 	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices {
-		return statusError(response.StatusCode, providerMessage(raw))
+		return statusError(response.StatusCode, providerMessage(raw), response.Header.Get("Retry-After"))
 	}
 	if err := json.Unmarshal(raw, reply); err != nil {
 		return failure(KindReply, "The provider answered with something that is not JSON. Check the base URL")

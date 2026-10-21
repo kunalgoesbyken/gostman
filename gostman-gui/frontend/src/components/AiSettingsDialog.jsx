@@ -130,7 +130,7 @@ export function AiSettingsDialog({ actions }) {
             className="font-mono"
           />
         </Field>
-        <Field label="API key">
+        <Field label="API key" grouped>
           <KeyField key={settings.provider} actions={actions} keyStored={keyStored} provider={provider} />
         </Field>
         <ConnectionTest test={test} onRun={actions.testConnection} disabled={needsKey || !settings.model.trim()} />

@@ -1,3 +1,5 @@
+import { PROVIDER_ANTHROPIC, PROVIDER_CUSTOM, PROVIDER_OLLAMA } from './providers'
+
 export const KIND_AUTH = 'auth'
 export const KIND_RATE_LIMIT = 'rate_limit'
 export const KIND_REQUEST = 'request'
@@ -10,6 +12,7 @@ export const KIND_TOO_LARGE = 'too_large'
 export const KIND_REPLY = 'reply'
 
 const DETAIL_LIMIT = 300
+const MAX_RETRY_SECONDS = 3600
 const STATUS_UNAUTHORIZED = 401
 const STATUS_FORBIDDEN = 403
 const STATUS_TIMEOUT = 408
@@ -32,7 +35,27 @@ function classify(status) {
 
 export const cleanDetail = (text) => String(text).split(/\s+/).filter(Boolean).join(' ').slice(0, DETAIL_LIMIT)
 
-export function statusError(status, detail) {
-  const [kind, summary] = classify(status)
-  return aiError(kind, detail ? `${summary}: ${detail}` : summary, status)
+function retryNote(retryAfter) {
+  const seconds = Number(retryAfter)
+  return retryAfter && Number.isInteger(seconds) && seconds > 0 && seconds <= MAX_RETRY_SECONDS ? ` (retry in ${seconds}s)` : ''
 }
+
+export function statusError(status, detail, retryAfter = '') {
+  const [kind, summary] = classify(status)
+  const hinted = summary + retryNote(retryAfter)
+  return aiError(kind, detail ? `${hinted}: ${detail}` : hinted, status)
+}
+
+const BLOCKED_BY_PAGE = 'the provider does not allow calls from a web page (CORS)'
+const DESKTOP_ADVICE = 'The desktop app is not subject to this limit.'
+
+const browserAdvice = (provider, origin) => {
+  if (provider === PROVIDER_OLLAMA) return `Start Ollama with OLLAMA_ORIGINS=${origin} and restart it, or use the desktop app.`
+  if (provider === PROVIDER_CUSTOM) return `The server must answer the OPTIONS preflight and allow ${origin} with the Authorization and Content-Type headers. ${DESKTOP_ADVICE}`
+  if (provider === PROVIDER_ANTHROPIC) return `Anthropic only allows browser calls that carry its direct-access header, which Gostman sends, so also check the key and your connection. ${DESKTOP_ADVICE}`
+  return `Check the base URL and your connection. ${DESKTOP_ADVICE}`
+}
+
+export const unreachableMessage = ({ provider, host, origin, reason }) => (
+  `Could not reach ${host}${reason ? ` (${reason})` : ''}. The address may be wrong, or ${BLOCKED_BY_PAGE}. ${browserAdvice(provider, origin)}`
+)

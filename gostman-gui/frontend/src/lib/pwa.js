@@ -38,7 +38,7 @@ export function watchInstallPrompt() {
 
 export function registerServiceWorker() {
   if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register(WORKER_URL).catch(() => {})
-  })
+  const register = () => navigator.serviceWorker.register(WORKER_URL).catch(() => {})
+  if (document.readyState === 'complete') register()
+  else window.addEventListener('load', register, { once: true })
 }
