@@ -5,6 +5,7 @@ import {main} from '../models';
 import {capture} from '../models';
 import {rpc} from '../models';
 import {mcpclient} from '../models';
+import {gitutil} from '../models';
 import {mock} from '../models';
 
 export function Authorize(arg1:engine.OAuth2,arg2:string):Promise<main.AuthorizationResult>;
@@ -30,6 +31,62 @@ export function DescribeGrpc(arg1:rpc.Target):Promise<rpc.Schema>;
 export function DescribeMcp(arg1:mcpclient.Target):Promise<mcpclient.Catalog>;
 
 export function FetchToken(arg1:engine.TokenExchange):Promise<engine.Token>;
+
+export function GitAbortMerge():Promise<void>;
+
+export function GitAddRemote(arg1:string,arg2:string):Promise<void>;
+
+export function GitBranches():Promise<Array<gitutil.Branch>>;
+
+export function GitClone(arg1:string,arg2:string):Promise<main.WorkspaceStatus>;
+
+export function GitCommit(arg1:string,arg2:boolean):Promise<void>;
+
+export function GitConflict(arg1:string):Promise<gitutil.Conflict>;
+
+export function GitCreateBranch(arg1:string):Promise<void>;
+
+export function GitDeleteBranch(arg1:string,arg2:boolean):Promise<void>;
+
+export function GitDiff(arg1:string,arg2:boolean,arg3:boolean):Promise<gitutil.Diff>;
+
+export function GitDiscard(arg1:string,arg2:boolean):Promise<void>;
+
+export function GitFetch():Promise<string>;
+
+export function GitInit():Promise<void>;
+
+export function GitLog(arg1:string):Promise<Array<gitutil.Commit>>;
+
+export function GitOpenPullRequest():Promise<void>;
+
+export function GitPull():Promise<string>;
+
+export function GitPush():Promise<string>;
+
+export function GitResolve(arg1:string,arg2:string):Promise<void>;
+
+export function GitRestoreVersion(arg1:string,arg2:string):Promise<void>;
+
+export function GitSetRemoteURL(arg1:string,arg2:string):Promise<void>;
+
+export function GitStage(arg1:Array<string>):Promise<void>;
+
+export function GitStageAll():Promise<void>;
+
+export function GitStashAction(arg1:string,arg2:number):Promise<void>;
+
+export function GitStashSave(arg1:string):Promise<void>;
+
+export function GitStashes():Promise<Array<gitutil.Stash>>;
+
+export function GitState():Promise<main.GitState>;
+
+export function GitSwitchBranch(arg1:string,arg2:boolean):Promise<void>;
+
+export function GitUnstage(arg1:Array<string>):Promise<void>;
+
+export function GitVersion(arg1:string,arg2:string):Promise<gitutil.Version>;
 
 export function InvokeGrpc(arg1:string,arg2:rpc.Call):Promise<engine.Response>;
 

@@ -461,6 +461,161 @@ export namespace engine {
 
 }
 
+export namespace gitutil {
+	
+	export class Branch {
+	    name: string;
+	    current: boolean;
+	    remote: boolean;
+	    upstream: string;
+	    short: string;
+	    subject: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Branch(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.current = source["current"];
+	        this.remote = source["remote"];
+	        this.upstream = source["upstream"];
+	        this.short = source["short"];
+	        this.subject = source["subject"];
+	    }
+	}
+	export class Change {
+	    path: string;
+	    origPath: string;
+	    index: string;
+	    worktree: string;
+	    conflict: boolean;
+	    untracked: boolean;
+	    kind: string;
+	    summary: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Change(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.origPath = source["origPath"];
+	        this.index = source["index"];
+	        this.worktree = source["worktree"];
+	        this.conflict = source["conflict"];
+	        this.untracked = source["untracked"];
+	        this.kind = source["kind"];
+	        this.summary = source["summary"];
+	    }
+	}
+	export class Commit {
+	    hash: string;
+	    short: string;
+	    author: string;
+	    date: string;
+	    subject: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Commit(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.hash = source["hash"];
+	        this.short = source["short"];
+	        this.author = source["author"];
+	        this.date = source["date"];
+	        this.subject = source["subject"];
+	    }
+	}
+	export class Conflict {
+	    path: string;
+	    ours: string;
+	    theirs: string;
+	    base: string;
+	    working: string;
+	    oursGone: boolean;
+	    theirsGone: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Conflict(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.ours = source["ours"];
+	        this.theirs = source["theirs"];
+	        this.base = source["base"];
+	        this.working = source["working"];
+	        this.oursGone = source["oursGone"];
+	        this.theirsGone = source["theirsGone"];
+	    }
+	}
+	export class Diff {
+	    text: string;
+	    binary: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Diff(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.text = source["text"];
+	        this.binary = source["binary"];
+	    }
+	}
+	export class Remote {
+	    name: string;
+	    url: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Remote(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.url = source["url"];
+	    }
+	}
+	export class Stash {
+	    index: number;
+	    message: string;
+	    date: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Stash(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.index = source["index"];
+	        this.message = source["message"];
+	        this.date = source["date"];
+	    }
+	}
+	export class Version {
+	    content: string;
+	    diff: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Version(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.content = source["content"];
+	        this.diff = source["diff"];
+	    }
+	}
+
+}
+
 export namespace main {
 	
 	export class AuthorizationResult {
@@ -544,6 +699,66 @@ export namespace main {
 	        this.isOpen = source["isOpen"];
 	        this.parentId = source["parentId"];
 	    }
+	}
+	export class GitState {
+	    installed: boolean;
+	    installHint: string;
+	    hasFolder: boolean;
+	    isRepo: boolean;
+	    problem: string;
+	    restricted: boolean;
+	    root: string;
+	    branch: string;
+	    detached: boolean;
+	    upstream: string;
+	    ahead: number;
+	    behind: number;
+	    merging: boolean;
+	    hasCommits: boolean;
+	    changes: gitutil.Change[];
+	    remotes: gitutil.Remote[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GitState(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.installed = source["installed"];
+	        this.installHint = source["installHint"];
+	        this.hasFolder = source["hasFolder"];
+	        this.isRepo = source["isRepo"];
+	        this.problem = source["problem"];
+	        this.restricted = source["restricted"];
+	        this.root = source["root"];
+	        this.branch = source["branch"];
+	        this.detached = source["detached"];
+	        this.upstream = source["upstream"];
+	        this.ahead = source["ahead"];
+	        this.behind = source["behind"];
+	        this.merging = source["merging"];
+	        this.hasCommits = source["hasCommits"];
+	        this.changes = this.convertValues(source["changes"], gitutil.Change);
+	        this.remotes = this.convertValues(source["remotes"], gitutil.Remote);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class MockState {
 	    running: boolean;
