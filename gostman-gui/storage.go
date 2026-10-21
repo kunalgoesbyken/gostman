@@ -8,6 +8,7 @@ type collectionStore interface {
 	deleteRequest(id string) error
 	saveFolders(folders []Folder) error
 	saveEnvironments(environments []Environment, activeId string) error
+	saveVariables(text string) error
 }
 
 type appDataStore struct{}
@@ -56,6 +57,12 @@ func (appDataStore) saveEnvironments(environments []Environment, activeId string
 		data.Variables = ""
 		data.Environments = environments
 		data.ActiveEnvironmentId = activeId
+	})
+}
+
+func (appDataStore) saveVariables(text string) error {
+	return mutateData(func(data *SavedData) {
+		data.CollectionVariables = text
 	})
 }
 

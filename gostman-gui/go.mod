@@ -6,10 +6,12 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/wailsapp/wails/v2 v2.11.0
+	github.com/zalando/go-keyring v0.2.8
 )
 
 require (
 	github.com/bufbuild/protocompile v0.14.1 // indirect
+	github.com/danieljoos/wincred v1.2.3 // indirect
 	golang.org/x/sync v0.19.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260120221211-b8f7ae30c516 // indirect
 	google.golang.org/grpc v1.80.0 // indirect
@@ -20,7 +22,7 @@ require (
 require (
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
-	github.com/godbus/dbus/v5 v5.1.0 // indirect
+	github.com/godbus/dbus/v5 v5.2.2 // indirect
 	github.com/jchv/go-winloader v0.0.0-20210711035445-715c2860da7e // indirect
 	github.com/krockxz/gostman v0.0.0
 	github.com/labstack/echo/v4 v4.13.3 // indirect

@@ -175,7 +175,10 @@ func (w *Workspace) fill(collection Collection) error {
 	if err := w.SaveRequests(collection.Requests); err != nil {
 		return err
 	}
-	return w.SaveEnvironments(collection.Environments)
+	if err := w.SaveEnvironments(collection.Environments); err != nil {
+		return err
+	}
+	return w.SaveVariables(collection.Variables)
 }
 
 func (w *Workspace) Root() string {
@@ -272,7 +275,7 @@ func (w *Workspace) orderedEnvironments() []*environmentEntry {
 func (w *Workspace) Collection() Collection {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	collection := Collection{Requests: []Request{}, Folders: []Folder{}, Environments: []Environment{}}
+	collection := Collection{Requests: []Request{}, Folders: []Folder{}, Environments: []Environment{}, Variables: w.manifestVariables()}
 	for _, entry := range w.orderedFolders() {
 		collection.Folders = append(collection.Folders, entry.folder)
 	}

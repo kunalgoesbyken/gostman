@@ -10,14 +10,14 @@ import { TabBar } from "./TabBar"
 import { RequestTabs } from "./RequestTabs"
 import { Button } from "./ui/button"
 import { EmptyState } from "./ui/emptyState"
-import { selectActiveVariables, selectIsDialogOpen, useActiveTab, useAppStore } from "../store/appStore"
+import { selectActiveVariables, selectIsDialogOpen, selectResolvedVariables, useActiveTab, useAppStore } from "../store/appStore"
 import { useAutoSave } from "../hooks/useAutoSave"
 import { useRequestFieldHandlers } from "../hooks/useRequestFieldHandlers"
 import { useShortcuts } from "../hooks/useShortcuts"
 import { useCaptureStore } from "../lib/captureSession"
-import { parseJSON } from "../lib/dataUtils"
 import { MIN_REQUEST_HEIGHT_PX } from "../lib/layout"
 import { forgetSharedLink, pendingSharedLink, subscribeToSharedLink } from "../lib/sharedLink"
+import { exportableVariables, withoutSecretValues } from "../lib/variableScopes"
 import { createWorkspaceActions } from "../lib/workspaceActions"
 
 const CodeSnippetDialog = lazy(() => import("./CodeSnippetDialog").then((module) => ({ default: module.CodeSnippetDialog })))
@@ -118,11 +118,19 @@ function usePersistence(backend) {
   const cookies = useAppStore((s) => s.cookies)
   const environments = useAppStore((s) => s.environments)
   const activeEnvironmentId = useAppStore((s) => s.activeEnvironmentId)
+  const globalEnvironments = useAppStore((s) => s.globalEnvironments)
+  const activeGlobalEnvironmentId = useAppStore((s) => s.activeGlobalEnvironmentId)
+  const collectionVariables = useAppStore((s) => s.collectionVariables)
   const reportPersistenceFailure = useAppStore((s) => s.reportPersistenceFailure)
 
   const environmentState = useMemo(
     () => ({ environments, activeEnvironmentId }),
     [environments, activeEnvironmentId]
+  )
+
+  const scopeState = useMemo(
+    () => ({ globalEnvironments, activeGlobalEnvironmentId, collectionVariables }),
+    [globalEnvironments, activeGlobalEnvironmentId, collectionVariables]
   )
 
   const persist = useCallback((write) => {
@@ -138,10 +146,16 @@ function usePersistence(backend) {
     [backend, persist]
   )
 
+  const saveScopes = useCallback(
+    (value) => persist(() => backend.saveScopes(value.globalEnvironments, value.activeGlobalEnvironmentId, value.collectionVariables)),
+    [backend, persist]
+  )
+
   useAutoSave(folders, saveFolders)
   useAutoSave(requestHistory, saveHistory)
   useAutoSave(cookies, saveCookies)
   useAutoSave(environmentState, saveEnvironments, ENVIRONMENT_SAVE_DELAY_MS)
+  useAutoSave(scopeState, saveScopes, ENVIRONMENT_SAVE_DELAY_MS)
 }
 
 function LoadedWorkspace({ backend, onBack }) {
@@ -171,7 +185,6 @@ function LoadedWorkspace({ backend, onBack }) {
   const newTab = useAppStore((s) => s.newTab)
   const updateActiveRequest = useAppStore((s) => s.updateActiveRequest)
   const setActiveBodyDrafts = useAppStore((s) => s.setActiveBodyDrafts)
-  const setActiveVariables = useAppStore((s) => s.setActiveVariables)
   const closeCodeDialog = useAppStore((s) => s.closeCodeDialog)
   const closeImportDialog = useAppStore((s) => s.closeImportDialog)
   const openCookiesDialog = useAppStore((s) => s.openCookiesDialog)
@@ -186,7 +199,9 @@ function LoadedWorkspace({ backend, onBack }) {
   const isLoading = activeTab.pendingId !== null
 
   const actions = useMemo(() => createWorkspaceActions(backend), [backend])
-  const variablesMap = useMemo(() => parseJSON(variables, {}), [variables])
+  const resolvedVariables = useAppStore(selectResolvedVariables)
+  const variablesMap = useMemo(() => exportableVariables(resolvedVariables), [resolvedVariables])
+  const shareableEnvironments = useMemo(() => withoutSecretValues(environments), [environments])
   const openNewTab = useCallback(() => newTab(), [newTab])
 
   const updateField = useCallback((field, value) => updateActiveRequest({ [field]: value }), [updateActiveRequest])
@@ -252,7 +267,6 @@ function LoadedWorkspace({ backend, onBack }) {
                 onUpdateRequest={updateActiveRequest}
                 onBodyDraftsChange={setActiveBodyDrafts}
                 variables={variables}
-                onUpdateVariables={setActiveVariables}
                 response={activeTab.response}
                 extraction={activeTab.extraction}
                 tokenRequest={activeTab.tokenRequest}
@@ -286,7 +300,7 @@ function LoadedWorkspace({ backend, onBack }) {
             shareLinkBase={actions.shareLinkBase}
             requests={requests}
             folders={folders}
-            environments={environments}
+            environments={shareableEnvironments}
             variables={variablesMap}
             onImport={actions.importData}
             onImportShared={actions.importShared}

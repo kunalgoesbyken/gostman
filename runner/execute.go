@@ -110,21 +110,21 @@ func (s *session) runPreRequest(request Request, outcome *exchange) (Request, bo
 func (s *session) transmit(ctx context.Context, request Request) (engine.Response, error) {
 	if request.Method == grpcMethod {
 		var call rpc.Call
-		if err := s.scripts.Call("toGrpcCall", &call, request, s.variables.text()); err != nil {
+		if err := s.scripts.Call("toGrpcCall", &call, request, s.variables.withRequest(request.Vars).text()); err != nil {
 			return engine.Response{}, err
 		}
 		return rpc.Invoke(ctx, call, s.policy), nil
 	}
 	if request.Method == mcpMethod {
 		var call mcpclient.Call
-		if err := s.scripts.Call("toMcpCall", &call, request, s.variables.text()); err != nil {
+		if err := s.scripts.Call("toMcpCall", &call, request, s.variables.withRequest(request.Vars).text()); err != nil {
 			return engine.Response{}, err
 		}
 		s.announce(engine.Request{Headers: call.Target.Headers, Auth: call.Target.Auth, Variables: call.Target.Variables})
 		return mcpclient.Invoke(ctx, call, s.policy), nil
 	}
 	var prepared engine.Request
-	if err := s.scripts.Call("toEngineRequest", &prepared, request, s.variables.text(), s.cookies); err != nil {
+	if err := s.scripts.Call("toEngineRequest", &prepared, request, s.variables.withRequest(request.Vars).text(), s.cookies); err != nil {
 		return engine.Response{}, err
 	}
 	s.announce(prepared)
@@ -194,7 +194,7 @@ func (s *session) runPostResponse(request Request, outcome *exchange) error {
 
 func (s *session) isSocket(request Request) (bool, error) {
 	var socket bool
-	err := s.scripts.Call("isSocketAddress", &socket, request.URL, s.variables.text())
+	err := s.scripts.Call("isSocketAddress", &socket, request.URL, s.variables.withRequest(request.Vars).text())
 	return socket, err
 }
 

@@ -169,6 +169,14 @@ async function saveEnvironments(environments, activeEnvironmentId) {
   })
 }
 
+async function saveScopes(globals, activeGlobalId, collectionVariables) {
+  mutateData((data) => {
+    data.globals = globals
+    data.activeGlobalId = activeGlobalId
+    data.collectionVariables = collectionVariables
+  })
+}
+
 async function saveCookies(cookies) {
   mutateData((data) => { data.cookies = cookies })
 }
@@ -209,6 +217,7 @@ export const webBackend = {
   saveFolders,
   saveHistory,
   saveEnvironments,
+  saveScopes,
   saveCookies,
   network: null,
   mock: null,

@@ -44,7 +44,7 @@ func (s *Session) Enter(environments []Environment, name string, overrides map[s
 	if err != nil {
 		return err
 	}
-	starting, err := startingVariables(environment, overrides)
+	starting, err := startingVariables(environments, environment, overrides)
 	if err != nil {
 		return err
 	}
@@ -107,6 +107,11 @@ func (s *Session) Run(ctx context.Context, stored Collection, options Options, o
 	if err != nil {
 		return Report{}, err
 	}
+	base, err := baseScopes(stored)
+	if err != nil {
+		return Report{}, err
+	}
+	s.state.variables = layered(append(base, s.state.variables)...)
 	started := time.Now()
 	results := s.state.runAll(ctx, planned, options, observe)
 	return Report{

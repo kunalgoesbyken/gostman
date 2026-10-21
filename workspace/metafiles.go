@@ -14,7 +14,7 @@ const (
 var (
 	manifestKeys    = []string{"format", "version"}
 	folderKeys      = []string{"id", "name", "order"}
-	environmentKeys = []string{"id", "name", "order", "variables"}
+	environmentKeys = []string{"id", "name", "order", "color", "extends", "variables", "meta"}
 )
 
 type folderContent struct {
@@ -107,9 +107,19 @@ func (b nodeBuilder) environment(document environmentDocument) *yaml.Node {
 	setField(root, "id", b.text(document.environment.Id))
 	setField(root, "name", b.text(document.environment.Name))
 	setField(root, "order", integerNode(document.order))
+	setField(root, "color", b.text(document.environment.Color))
+	setField(root, "extends", b.text(document.environment.Extends))
 	setField(root, "variables", b.variables(document.environment.Variables))
+	setField(root, "meta", b.variables(document.environment.Meta))
 	root.Content = append(root.Content, document.extras...)
 	return root
+}
+
+func (r *fieldReader) metaVariables() string {
+	if !r.has("meta") {
+		return emptyObject
+	}
+	return r.jsonText("meta", true, unchanged)
 }
 
 func (r *fieldReader) variables() string {
@@ -123,7 +133,10 @@ func readEnvironment(root *yaml.Node) (environmentDocument, error) {
 	var failure error
 	fields := readFields(root, environmentKeys, &failure)
 	content := environmentContent{
-		environment: Environment{Id: fields.text("id"), Name: fields.text("name"), Variables: fields.variables()},
+		environment: Environment{
+			Id: fields.text("id"), Name: fields.text("name"), Variables: fields.variables(),
+			Color: fields.text("color"), Extends: fields.text("extends"), Meta: fields.metaVariables(),
+		},
 		order:       fields.integer("order"),
 	}
 	return environmentDocument{environmentContent: content, extras: fields.extras}, failure

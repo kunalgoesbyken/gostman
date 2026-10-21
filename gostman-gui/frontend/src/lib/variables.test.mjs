@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
-import { applyCompletion, describeReference, findReferences, looksSecret, openReference, suggestNames } from "./variables.js"
+import { applyCompletion, describeReference, findReferences, isDefined, looksSecret, openReference, suggestNames } from "./variables.js"
 
 const vars = new Map([["base_url", "https://x"], ["apiToken", "abc"], ["user", "1"]])
 
@@ -32,4 +32,25 @@ test("secret masking uses the shared sensitive-name list", () => {
     assert.ok(looksSecret(name), name)
   }
   assert.ok(!looksSecret("base_url"))
+})
+
+test("references accept names in any script", () => {
+  assert.deepEqual(openReference("{{名前", 4), { start: 0, query: "名前" })
+  assert.deepEqual(openReference("{{ имя", 6), { start: 0, query: "имя" })
+})
+
+test("dynamic and prompt names count as defined and complete after their prefix", () => {
+  assert.ok(isDefined("$guid", vars) && isDefined("$randomInt(1,9)", vars) && isDefined("?who", vars))
+  assert.ok(!isDefined("$nope", vars))
+  assert.equal(describeReference("$guid", vars).kind, "dynamic")
+  assert.ok(suggestNames(vars, "$ran").includes("$randomEmail"))
+  assert.ok(!suggestNames(vars, "ba").some((name) => name.startsWith("$")))
+})
+
+test("secret rows are masked using scope details", () => {
+  const scoped = new Map([["db", "pw"]])
+  scoped.details = new Map([["db", { secret: true, source: "environment" }]])
+  const info = describeReference("db", scoped)
+  assert.equal(info.shown, "•".repeat(8))
+  assert.equal(info.source, "Environment")
 })

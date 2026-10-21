@@ -1,10 +1,8 @@
 import { useMemo } from "react"
-import { parseVariableMap } from "../lib/placeholders"
-import { selectActiveVariables, useAppStore } from "../store/appStore"
-
-const NO_VARIABLES = new Map()
+import { variableMap } from "../lib/variableScopes"
+import { selectResolvedVariables, useAppStore } from "../store/appStore"
 
 export function useVariableMap() {
-  const text = useAppStore(selectActiveVariables)
-  return useMemo(() => parseVariableMap(text) || NO_VARIABLES, [text])
+  const resolved = useAppStore(selectResolvedVariables)
+  return useMemo(() => variableMap(resolved), [resolved])
 }

@@ -1,7 +1,7 @@
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { CONTROL_BASE, CONTROL_SIZES } from "./ui/input"
 import { useVariableMap } from "../hooks/useVariableMap"
-import { applyCompletion, describeReference, findReferences, openReference, suggestNames } from "../lib/variables"
+import { VARIABLE_TEXT, applyCompletion, describeReference, findReferences, isDefined, openReference, suggestNames } from "../lib/variables"
 import { cn } from "../lib/utils"
 import "./variables.css"
 
@@ -11,7 +11,7 @@ function Mirror({ text, variables, innerRef, className }) {
     let at = 0
     for (const ref of findReferences(text)) {
       if (ref.start > at) out.push(<span key={`t${at}`}>{text.slice(at, ref.start)}</span>)
-      const defined = variables.has(ref.name)
+      const defined = isDefined(ref.name, variables)
       out.push(
         <span key={`v${ref.start}`} data-var={ref.name} className={defined ? "gm-var-ok" : "gm-var-missing"}>
           {text.slice(ref.start, ref.end)}
@@ -42,7 +42,8 @@ function Tooltip({ info, anchor }) {
     >
       <span className="text-muted-foreground">{info.name}</span>
       <span className="text-muted-foreground"> = </span>
-      {info.defined ? info.shown : <span className="text-warning">not defined in the active environment</span>}
+      {info.defined ? info.shown : <span className="text-warning">{VARIABLE_TEXT.undefinedName}</span>}
+      {info.source && <span className="text-muted-foreground"> ({info.source})</span>}
     </div>
   )
 }

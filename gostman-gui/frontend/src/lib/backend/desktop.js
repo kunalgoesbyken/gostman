@@ -24,6 +24,7 @@ import {
   SaveFolders,
   SaveHistory,
   SaveRequests,
+  SaveScopes,
   SaveSettings,
   SendRequest,
   TrustWorkspace,
@@ -88,6 +89,7 @@ export const desktopBackend = {
   saveFolders: (folders) => SaveFolders(folders),
   saveHistory: (history) => SaveHistory(history),
   saveEnvironments: (environments, activeId) => SaveEnvironments(environments, activeId),
+  saveScopes: (globals, activeGlobalId, collectionVariables) => SaveScopes(globals, activeGlobalId, collectionVariables),
   saveCookies: (cookies) => SaveCookies(cookies),
   network: {
     saveSettings: (settings) => SaveSettings(settings),

@@ -25,11 +25,17 @@ const encodePart = attempt(encodeURIComponent)
 const decode = (text) => mapOutsidePlaceholders(text, decodePart)
 const encode = (text) => mapOutsidePlaceholders(text, encodePart)
 
+const MASKED_PLACEHOLDER = /\{\{[^}]+\}\}/g
+
+const indexOutsidePlaceholders = (text, mark) => (
+  text.replace(MASKED_PLACEHOLDER, (placeholder) => ' '.repeat(placeholder.length)).indexOf(mark)
+)
+
 function splitUrl(url) {
-  const fragmentStart = url.indexOf(FRAGMENT_MARK)
+  const fragmentStart = indexOutsidePlaceholders(url, FRAGMENT_MARK)
   const beforeFragment = fragmentStart === -1 ? url : url.slice(0, fragmentStart)
   const fragment = fragmentStart === -1 ? '' : url.slice(fragmentStart)
-  const queryStart = beforeFragment.indexOf(QUERY_MARK)
+  const queryStart = indexOutsidePlaceholders(beforeFragment, QUERY_MARK)
   if (queryStart === -1) return { base: beforeFragment, query: '', fragment }
   return { base: beforeFragment.slice(0, queryStart), query: beforeFragment.slice(queryStart + 1), fragment }
 }

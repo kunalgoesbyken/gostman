@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import Editor from '@monaco-editor/react'
 import { useVariableMap } from '../hooks/useVariableMap'
-import { describeReference, findReferences, MAX_SUGGESTIONS, openReference } from '../lib/variables'
+import { VARIABLE_TEXT, describeReference, findReferences, isDefined, openReference, suggestNames } from '../lib/variables'
 import './variables.css'
 
 const THEME_NAME = 'gostman-dark'
@@ -54,7 +54,7 @@ function registerVariableProviders(monaco) {
       if (!found) return null
       const info = describeReference(found.name, variables)
       const range = monaco.Range.fromPositions(model.getPositionAt(found.start), model.getPositionAt(found.end))
-      const text = info.defined ? '`' + info.name + '` = `' + info.shown + '`' : '`' + info.name + '` is not defined in the active environment'
+      const text = info.defined ? '`' + info.name + '` = `' + info.shown + '`' + (info.source ? ' (' + info.source + ')' : '') : '`' + info.name + '` ' + VARIABLE_TEXT.undefinedName
       return { range, contents: [{ value: text }] }
     },
   })
@@ -74,7 +74,7 @@ function registerVariableProviders(monaco) {
         endLineNumber: position.lineNumber,
         endColumn: position.column + (closing ? closing[0].length : 0),
       }
-      const suggestions = Array.from(variables.keys()).slice(0, MAX_SUGGESTIONS * 4).map((name) => ({
+      const suggestions = suggestNames(variables, open.query).map((name) => ({
         label: name,
         kind: monaco.languages.CompletionItemKind.Variable,
         detail: describeReference(name, variables).shown,
@@ -108,7 +108,7 @@ function useVariableSupport(instance, enabled) {
     const paint = () => {
       const next = findReferences(model.getValue()).map((ref) => ({
         range: monaco.Range.fromPositions(model.getPositionAt(ref.start), model.getPositionAt(ref.end)),
-        options: { inlineClassName: (variables.has(ref.name) ? 'gm-var-ok' : 'gm-var-missing') + ' gm-var-monaco' },
+        options: { inlineClassName: (isDefined(ref.name, variables) ? 'gm-var-ok' : 'gm-var-missing') + ' gm-var-monaco' },
       }))
       decorations = model.deltaDecorations(decorations, next)
     }

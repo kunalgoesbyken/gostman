@@ -515,6 +515,9 @@ export namespace main {
 	    id: string;
 	    name: string;
 	    variables: string;
+	    color: string;
+	    extends: string;
+	    meta: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Environment(source);
@@ -525,6 +528,9 @@ export namespace main {
 	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.variables = source["variables"];
+	        this.color = source["color"];
+	        this.extends = source["extends"];
+	        this.meta = source["meta"];
 	    }
 	}
 	export class Folder {
@@ -618,6 +624,7 @@ export namespace main {
 	    grpcProtos: string;
 	    mcpTool: string;
 	    mcpArguments: string;
+	    vars: string;
 	    timestamp: string;
 	
 	    static createFrom(source: any = {}) {
@@ -650,6 +657,7 @@ export namespace main {
 	        this.grpcProtos = source["grpcProtos"];
 	        this.mcpTool = source["mcpTool"];
 	        this.mcpArguments = source["mcpArguments"];
+	        this.vars = source["vars"];
 	        this.timestamp = source["timestamp"];
 	    }
 	
@@ -719,6 +727,10 @@ export namespace main {
 	    cookies: engine.CookieInfo[];
 	    settings: Settings;
 	    restricted?: boolean;
+	    globals?: Environment[];
+	    activeGlobalId?: string;
+	    collectionVariables?: string;
+	    dotEnv?: Record<string, string>;
 	
 	    static createFrom(source: any = {}) {
 	        return new SavedData(source);
@@ -735,6 +747,10 @@ export namespace main {
 	        this.cookies = this.convertValues(source["cookies"], engine.CookieInfo);
 	        this.settings = this.convertValues(source["settings"], Settings);
 	        this.restricted = source["restricted"];
+	        this.globals = this.convertValues(source["globals"], Environment);
+	        this.activeGlobalId = source["activeGlobalId"];
+	        this.collectionVariables = source["collectionVariables"];
+	        this.dotEnv = source["dotEnv"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

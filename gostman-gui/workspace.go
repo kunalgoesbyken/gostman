@@ -70,6 +70,7 @@ func toFileCollection(data SavedData) workspace.Collection {
 		Requests:     toFileRequests(data.Requests),
 		Folders:      toFileFolders(data.Folders),
 		Environments: toFileEnvironments(data.Environments),
+		Variables:    data.CollectionVariables,
 	}
 }
 
@@ -108,6 +109,8 @@ func (s folderStore) collection(data SavedData) (SavedData, error) {
 	data.Folders = fromFileFolders(loaded.Folders, memory)
 	data.Environments = fromFileEnvironments(loaded.Environments)
 	data.ActiveEnvironmentId = memory.ActiveEnvironmentId
+	data.CollectionVariables = loaded.Variables
+	data.DotEnv = s.folder.DotEnv()
 	data.Restricted = !memory.Trusted
 	return data, nil
 }
@@ -153,6 +156,10 @@ func (s folderStore) saveEnvironments(environments []Environment, activeId strin
 		return nil
 	}
 	return s.folder.SaveEnvironments(toFileEnvironments(environments))
+}
+
+func (s folderStore) saveVariables(text string) error {
+	return s.folder.SaveVariables(text)
 }
 
 func openFolder() *workspace.Workspace {

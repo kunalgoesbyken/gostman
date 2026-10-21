@@ -6,7 +6,7 @@ const TEXT_FIELDS = [
   'extractors', 'assertions', 'examples', 'preScript', 'postScript', 'grpcMethod', 'grpcMessage', 'grpcProtos',
   'mcpTool', 'mcpArguments',
 ]
-const PAIR_FIELDS = ['headers', 'queryParams']
+const PAIR_FIELDS = ['headers', 'queryParams', 'vars']
 const EMPTY_PAIRS = ['', '{}', '[]']
 
 const BLANK_REQUEST = normalizeRequest()

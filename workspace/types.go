@@ -27,6 +27,7 @@ type Request struct {
 	GrpcProtos       string         `json:"grpcProtos"`
 	McpTool          string         `json:"mcpTool"`
 	McpArguments     string         `json:"mcpArguments"`
+	Vars             string         `json:"vars"`
 	Timestamp        string         `json:"timestamp"`
 }
 
@@ -40,12 +41,16 @@ type Environment struct {
 	Id        string `json:"id"`
 	Name      string `json:"name"`
 	Variables string `json:"variables"`
+	Color     string `json:"color"`
+	Extends   string `json:"extends"`
+	Meta      string `json:"meta"`
 }
 
 type Collection struct {
 	Requests     []Request     `json:"requests"`
 	Folders      []Folder      `json:"folders"`
 	Environments []Environment `json:"environments"`
+	Variables    string        `json:"variables,omitempty"`
 }
 
 type Problem struct {
