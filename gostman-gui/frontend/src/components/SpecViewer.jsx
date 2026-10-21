@@ -9,12 +9,14 @@ import { VirtualList } from "./ui/VirtualList"
 import { MethodTag } from "./MethodTag"
 import { SchemaTree } from "./SchemaTree"
 import { SearchField } from "./SearchField"
+import { SpecLint } from "./SpecLint"
 import { SPEC_TEXT } from "../lib/specText"
 import { cn } from "../lib/utils"
 
 const ROW_HEIGHT_PX = 28
 const TAB_OPERATIONS = "operations"
 const TAB_MODELS = "models"
+const TAB_LINT = "lint"
 const UNTAGGED = ""
 
 const matches = (query) => (...fields) => fields.some((field) => field?.toLocaleLowerCase().includes(query))
@@ -175,12 +177,25 @@ function ModelList({ names, query, selected, onSelect }) {
 
 export function SpecViewer({ dialog, actions, onClose }) {
   const { source } = dialog
-  const [tab, setTab] = useState(TAB_OPERATIONS)
+  const [tab, setTab] = useState(dialog.tab || TAB_OPERATIONS)
+  const [hasOpenedLint, setHasOpenedLint] = useState(tab === TAB_LINT)
   const [query, setQuery] = useState("")
   const [operationKey, setOperationKey] = useState(null)
   const [modelName, setModelName] = useState(null)
 
+  const changeTab = (value) => {
+    setTab(value)
+    if (value === TAB_LINT) setHasOpenedLint(true)
+  }
+
+  const openOperation = (key) => {
+    setQuery("")
+    setOperationKey(key)
+    setTab(TAB_OPERATIONS)
+  }
+
   const summary = useLoaded(() => actions.summary(source), [source])
+  const lint = useLoaded(hasOpenedLint ? () => actions.lint(source) : null, [source, hasOpenedLint])
   const detail = useLoaded(operationKey === null ? null : () => actions.operation(source, operationKey), [source, operationKey])
   const model = useLoaded(modelName === null ? null : () => actions.schema(source, modelName), [source, modelName])
 
@@ -193,15 +208,21 @@ export function SpecViewer({ dialog, actions, onClose }) {
     <Dialog label={SPEC_TEXT.viewerTitle} size="lg" className="max-w-5xl" onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <DialogTitle>{summary.value?.info.title || SPEC_TEXT.viewerTitle}</DialogTitle>
-        <Tabs value={tab} onValueChange={setTab} className="ml-4 h-full">
+        <Tabs value={tab} onValueChange={changeTab} className="ml-4 h-full">
           <TabsList label={SPEC_TEXT.viewerTitle}>
             <TabsTrigger value={TAB_OPERATIONS}>{SPEC_TEXT.operations}</TabsTrigger>
             <TabsTrigger value={TAB_MODELS}>{SPEC_TEXT.models}</TabsTrigger>
+            <TabsTrigger value={TAB_LINT}>{SPEC_TEXT.lint}</TabsTrigger>
           </TabsList>
         </Tabs>
       </DialogHeader>
       <Status state={summary}>
-        {summary.value && (
+        {summary.value && tab === TAB_LINT && (
+          <Status state={lint}>
+            {lint.value && <SpecLint report={lint.value} onOpenOperation={openOperation} />}
+          </Status>
+        )}
+        {summary.value && tab !== TAB_LINT && (
           <div className="flex min-h-0 flex-1">
             <div className="flex w-72 shrink-0 flex-col border-r border-border">
               <SearchField value={query} onChange={setQuery} placeholder={isOperations ? SPEC_TEXT.searchOperations : SPEC_TEXT.searchModels} />

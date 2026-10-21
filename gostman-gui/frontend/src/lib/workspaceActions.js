@@ -432,6 +432,7 @@ export function createWorkspaceActions(backend) {
     settings: () => store().openSettingsDialog(),
     preferences: () => store().openPreferencesDialog(),
     import: () => store().openImportDialog(),
+    lintSpec: openapi.lintLatest,
     reset: confirmReset,
     aiRequest: () => ai.start(TASK_REQUEST),
     aiTests: () => ai.start(TASK_TESTS),

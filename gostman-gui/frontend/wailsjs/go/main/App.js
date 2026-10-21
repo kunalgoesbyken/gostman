@@ -218,6 +218,10 @@ export function InvokeMcp(arg1, arg2) {
   return window['go']['main']['App']['InvokeMcp'](arg1, arg2);
 }
 
+export function LintSpec(arg1) {
+  return window['go']['main']['App']['LintSpec'](arg1);
+}
+
 export function LoadData() {
   return window['go']['main']['App']['LoadData']();
 }

@@ -35,6 +35,19 @@ export const SPEC_TEXT = {
   locallyEdited: 'edited here',
   apply: 'Apply selected',
   close: 'Close',
+  lint: 'Lint',
+  lintClean: 'No problems found.',
+  lintNoSpec: 'Import an OpenAPI spec from an address or a file first, then open it with Browse.',
+  lintCount: {
+    error: (count) => `${count} ${count === 1 ? 'error' : 'errors'}`,
+    warning: (count) => `${count} ${count === 1 ? 'warning' : 'warnings'}`,
+    info: (count) => `${count} info`,
+  },
+  lintHeading: {
+    error: (count) => `Errors (${count})`,
+    warning: (count) => `Warnings (${count})`,
+    info: (count) => `Info (${count})`,
+  },
   untagged: 'No tag',
   syncedAt: 'Last synced',
   unchanged: (count) => `${count} unchanged`,
@@ -46,4 +59,5 @@ export const SPEC_ALERTS = {
   syncTitle: 'Spec sync failed',
   applied: (counts) => `Added ${counts.added}, updated ${counts.changed} and removed ${counts.removed} requests.`,
   appliedTitle: 'Spec synced',
+  lintTitle: 'Lint API spec',
 }

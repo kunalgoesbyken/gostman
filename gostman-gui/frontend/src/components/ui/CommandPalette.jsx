@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
   Bookmark, ClipboardPaste, Gauge, Clock, MonitorDown, Info, Hand, Folder, FolderOpen, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Pin, Plus, Radio, RotateCcw, Save, Search, Send,
-  Server, Settings, Share2, ShieldAlert, SlidersHorizontal, Sparkles, Undo2, Upload, X,
+  Server, Settings, Share2, ShieldAlert, ShieldCheck, SlidersHorizontal, Sparkles, Undo2, Upload, X,
 } from "lucide-react"
 import { MethodTag } from "../MethodTag"
 import { fuzzyScore } from "../../lib/fuzzy"
@@ -41,6 +41,7 @@ const COMMANDS = [
   { id: "preferences", label: PREFERENCES_TEXT.title, description: PREFERENCES_TEXT.commandDescription, icon: SlidersHorizontal, action: "preferences" },
   { id: "network", label: "Network settings", description: "Proxy and certificates", icon: Settings, action: "settings" },
   { id: "import", label: "Import data", description: "Import Postman, OpenAPI or Gostman files", icon: Upload, action: "import" },
+  { id: "lint-spec", label: "Lint API spec", description: "Check the imported OpenAPI spec for problems", icon: ShieldCheck, keywords: "openapi swagger validate governance", action: "lintSpec" },
   { id: "export", label: "Export data", description: "Export collections and environments", icon: Download, action: "export" },
   { id: "share", label: "Share collection", description: "Create an encrypted link or file, no account needed", icon: Share2, action: "share" },
   { id: "ai-request", label: "AI: new request from a description", description: "Draft a request, shown as a preview you accept", icon: Sparkles, shortcutId: "aiGenerate", action: "aiRequest", keywords: "generate" },
