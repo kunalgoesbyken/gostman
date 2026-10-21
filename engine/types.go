@@ -9,6 +9,11 @@ type Auth struct {
 	Value    string `json:"value"`
 	In       string `json:"in"`
 	OAuth2   OAuth2 `json:"oauth2"`
+
+	Domain   string       `json:"domain"`
+	AWS      AWSAuth      `json:"aws"`
+	OAuth1   OAuth1Auth   `json:"oauth1"`
+	EdgeGrid EdgeGridAuth `json:"edgegrid"`
 }
 
 type OAuth2 struct {

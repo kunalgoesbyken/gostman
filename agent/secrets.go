@@ -46,6 +46,14 @@ func authFields(auth *engine.Auth) []secretField {
 		{hiddenPrefix + "auth.password", &auth.Password},
 		{hiddenPrefix + "auth.token", &auth.Token},
 		{hiddenPrefix + "auth.apiKey", &auth.Value},
+		{hiddenPrefix + "aws.secretKey", &auth.AWS.SecretKey},
+		{hiddenPrefix + "aws.sessionToken", &auth.AWS.SessionToken},
+		{hiddenPrefix + "oauth1.consumerSecret", &auth.OAuth1.ConsumerSecret},
+		{hiddenPrefix + "oauth1.tokenSecret", &auth.OAuth1.TokenSecret},
+		{hiddenPrefix + "oauth1.token", &auth.OAuth1.Token},
+		{hiddenPrefix + "oauth1.privateKey", &auth.OAuth1.PrivateKey},
+		{hiddenPrefix + "edgegrid.clientSecret", &auth.EdgeGrid.ClientSecret},
+		{hiddenPrefix + "edgegrid.accessToken", &auth.EdgeGrid.AccessToken},
 	}, tokenFields(&auth.OAuth2)...)
 }
 

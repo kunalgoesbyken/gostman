@@ -6,6 +6,7 @@ import { SCRIPT_FIELDS, hasActiveContent, withoutActiveContent } from './activeC
 import { isPlainObject, lookup, parseJSON, pluralize } from './dataUtils'
 import { sanitizeExamples } from './examples'
 import { readParamRows } from './queryString'
+import { SCHEMES } from './authSchemes'
 import { clearToken } from './oauth'
 import { AUTH_OAUTH2, normalizeRequest } from './request'
 import { isFileRow, isSentRow, parseRows, ROW_FILE, ROW_TEXT, serializeRows } from './rows'
@@ -1386,9 +1387,10 @@ export async function parseImport(text) {
   }
 }
 
-const AUTH_TYPES = [AUTH_BASIC, AUTH_BEARER, AUTH_API_KEY, AUTH_OAUTH2]
+const AUTH_TYPES = [AUTH_BASIC, AUTH_BEARER, AUTH_API_KEY, AUTH_OAUTH2, ...Object.keys(SCHEMES)]
 const OAUTH_TEXT_FIELDS = ['grant', 'authUrl', 'tokenUrl', 'clientId', 'clientSecret', 'scope', 'username', 'password', 'callbackUrl', 'credentialsIn', 'headerPrefix']
-const AUTH_TEXT_FIELDS = ['username', 'password', 'token', 'key', 'value']
+const AUTH_TEXT_FIELDS = ['username', 'password', 'token', 'key', 'value', 'domain']
+const SCHEME_SECTIONS = Object.values(SCHEMES).filter((scheme) => scheme.section)
 const REQUEST_TEXT_FIELDS = ['id', 'description', 'url', 'headers', 'body', 'queryParams', 'folderId', 'graphqlQuery', 'graphqlVariables', 'extractors', 'assertions', ...SCRIPT_FIELDS, 'grpcMethod', 'grpcMessage', 'grpcProtos', 'mcpTool', 'mcpArguments']
 const BODY_TYPE_VALUES = BODY_TYPES.map((type) => type.value)
 
@@ -1408,9 +1410,16 @@ function sanitizeOAuth(raw) {
   return { ...pickStrings(raw, OAUTH_TEXT_FIELDS), pkce: raw.pkce !== false }
 }
 
+function sanitizeSections(raw) {
+  return Object.fromEntries(SCHEME_SECTIONS.map(({ section, fields }) => [
+    section,
+    isPlainObject(raw[section]) ? pickStrings(raw[section], fields.map((field) => field.key)) : {},
+  ]))
+}
+
 function sanitizeAuth(raw) {
   if (!isPlainObject(raw) || !AUTH_TYPES.includes(raw.type)) return NO_AUTH
-  return { ...pickStrings(raw, AUTH_TEXT_FIELDS), type: raw.type, in: apiKeyLocation(raw.in), oauth2: sanitizeOAuth(raw.oauth2) }
+  return { ...pickStrings(raw, AUTH_TEXT_FIELDS), type: raw.type, in: apiKeyLocation(raw.in), oauth2: sanitizeOAuth(raw.oauth2), ...sanitizeSections(raw) }
 }
 
 function sanitizeOptions(raw) {
