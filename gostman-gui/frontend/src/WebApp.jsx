@@ -1,8 +1,9 @@
-import { useCallback } from "react"
+import { lazy, Suspense, useCallback } from "react"
 import { LandingPage } from "./components/LandingPage"
-import { Workspace } from "./components/Workspace"
 import { useRoute } from "./hooks/useRoute"
 import { webBackend } from "./lib/backend/web"
+
+const Workspace = lazy(() => import("./components/Workspace").then((module) => ({ default: module.Workspace })))
 
 function WebApp() {
   const { route, navigate } = useRoute()
@@ -13,7 +14,11 @@ function WebApp() {
     return <LandingPage onGetStarted={openClient} />
   }
 
-  return <Workspace backend={webBackend} onBack={openLanding} />
+  return (
+    <Suspense fallback={null}>
+      <Workspace backend={webBackend} onBack={openLanding} />
+    </Suspense>
+  )
 }
 
 export default WebApp
