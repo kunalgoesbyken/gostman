@@ -83,7 +83,7 @@ func (a *App) setNetwork(network *engine.Network) {
 func (a *App) policy() engine.Policy {
 	a.networkMu.RLock()
 	defer a.networkMu.RUnlock()
-	return engine.Policy{Network: a.network}
+	return engine.Policy{Network: a.network, RevealSecrets: true}
 }
 
 func (a *App) SaveSettings(settings Settings) error {

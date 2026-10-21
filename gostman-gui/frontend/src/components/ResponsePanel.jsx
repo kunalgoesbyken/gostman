@@ -19,9 +19,11 @@ import { SegmentedControl } from "./ui/segmented"
 import { TabCount, Tabs, TabsList, TabsTrigger } from "./ui/tabs"
 import { TestResults, countPassed, hasTestOutput } from "./TestResults"
 import { VisualizeTab } from "./VisualizeTab"
+import { TimelineTab } from "./TimelineTab"
 import { useClipboardCopy } from "../hooks/useClipboardCopy"
 import { formatSize, lookup } from "../lib/dataUtils"
 import { canSaveAsExample } from "../lib/examples"
+import { breakdownTitle } from "../lib/timeline"
 import { MIN_REQUEST_HEIGHT_PX, MIN_RESPONSE_HEIGHT_PX, TOOLBAR_HEIGHT_PX } from "../lib/layout"
 import {
   BODY_KINDS, ERROR_TITLES, bodyBytes, bodyKind, mimeType, parseJsonBody, statusVariant, textBody,
@@ -36,6 +38,7 @@ const TAB_COOKIES = 'cookies'
 const TAB_TESTS = 'tests'
 const TAB_CONSOLE = 'console'
 const TAB_VISUALIZE = 'visualize'
+const TAB_TIMELINE = 'timeline'
 const NO_VALUE = '—'
 const SEARCH_DEBOUNCE_MS = 200
 const NO_FILTER = { active: false }
@@ -203,12 +206,13 @@ function StatusSummary({ response }) {
     return <Badge variant="outline">{lookup(ERROR_TITLES, response.error) || 'Error'}</Badge>
   }
   const timing = `${response.durationMs} ms · ${formatSize(response.size)}`
+  const detail = [timing, breakdownTitle(response.timeline)].filter(Boolean).join('\n\n')
   return (
     <>
       <Badge variant={statusVariant(response)} title={response.status} className="max-w-[9rem] font-mono">
         <span className="truncate">{response.status}</span>
       </Badge>
-      <span title={timing} className="min-w-0 truncate font-mono text-[11px] text-muted-foreground">{timing}</span>
+      <span title={detail} className="min-w-0 truncate font-mono text-[11px] text-muted-foreground">{timing}</span>
     </>
   )
 }
@@ -274,7 +278,8 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
   const hasBody = hasResult && kind !== BODY_KINDS.EMPTY
   const isOpen = isFullscreen || !isCollapsed
   const showsBody = isOpen && activeTab === TAB_BODY
-  const showsTabs = isOpen && hasResult
+  const hasTimeline = Boolean(shown?.timeline)
+  const showsTabs = isOpen && (hasResult || hasTimeline)
 
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -325,6 +330,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
   const renderContent = () => {
     if (loading) return <EmptyState icon={Loader2} title="Sending request" description="Waiting for the server to answer." />
     if (!shown) return <EmptyState icon={FileText} title="No response yet" description="Send a request to see the response here." />
+    if (activeTab === TAB_TIMELINE && hasTimeline) return <TimelineTab timeline={shown.timeline} />
     if (shown.error) return <ErrorBody response={shown} />
     if (activeTab === TAB_TESTS && showsTests) return <TestResults tests={tests} />
     if (activeTab === TAB_CONSOLE) return <ConsolePanel />
@@ -374,8 +380,9 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
             {showsTabs ? (
               <TabsList label="Response sections" className="shrink-0 pl-1.5">
                 <TabsTrigger value={TAB_BODY}>Body</TabsTrigger>
-                <TabsTrigger value={TAB_HEADERS}>Headers<TabCount>{headers.length}</TabCount></TabsTrigger>
-                <TabsTrigger value={TAB_COOKIES}>Cookies<TabCount>{cookies.length}</TabCount></TabsTrigger>
+                {hasResult && <TabsTrigger value={TAB_HEADERS}>Headers<TabCount>{headers.length}</TabCount></TabsTrigger>}
+                {hasResult && <TabsTrigger value={TAB_COOKIES}>Cookies<TabCount>{cookies.length}</TabCount></TabsTrigger>}
+                {hasTimeline && <TabsTrigger value={TAB_TIMELINE}>Timeline</TabsTrigger>}
                 {showsTests && (
                   <TabsTrigger value={TAB_TESTS}>
                     Tests<TabCount>{countPassed(tests.results)}/{tests.results.length}</TabCount>

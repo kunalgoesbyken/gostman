@@ -27,6 +27,7 @@ type Policy struct {
 	MaxTimeout       time.Duration
 	Network          *Network
 	Permit           func(host string) bool
+	RevealSecrets    bool
 }
 
 func (p Policy) refusal(host string) error {
@@ -73,10 +74,17 @@ func send(ctx context.Context, r Request, policy Policy) Response {
 		outgoing.Host = host
 	}
 
+	timeline := newRecorder(policy.RevealSecrets)
+	response := deliver(ctx, outgoing, r, policy, timeline)
+	response.Timeline = timeline.finish()
+	return response
+}
+
+func deliver(ctx context.Context, outgoing *http.Request, r Request, policy Policy, timeline *recorder) Response {
 	cookies := &cookieLog{now: time.Now()}
 	client := &http.Client{
 		Jar:       newJar(r.Cookies, cookies.now),
-		Transport: authRoute(r, outgoing.URL, policy.route(r.Options.InsecureTLS)),
+		Transport: authRoute(r, outgoing.URL, timeline.wrap(policy.route(r.Options.InsecureTLS))),
 		CheckRedirect: func(next *http.Request, via []*http.Request) error {
 			if r.Options.NoFollowRedirects {
 				return http.ErrUseLastResponse

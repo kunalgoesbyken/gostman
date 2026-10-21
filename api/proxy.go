@@ -128,7 +128,7 @@ func send(r *http.Request) engine.Response {
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return engine.Failure(engine.ErrorConfig, "the request could not be read: "+err.Error())
 	}
-	return engine.Send(r.Context(), request, Policy)
+	return engine.MarkProxied(engine.Send(r.Context(), request, Policy))
 }
 
 func prepare(r *http.Request) prepareResult {

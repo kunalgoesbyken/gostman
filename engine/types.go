@@ -109,4 +109,5 @@ type Response struct {
 	Truncated    bool          `json:"truncated"`
 	Error        string        `json:"error"`
 	Protocol     string        `json:"protocol,omitempty"`
+	Timeline     *Timeline     `json:"timeline,omitempty"`
 }
