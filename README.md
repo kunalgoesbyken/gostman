@@ -179,7 +179,7 @@ The **Share** tab of the import dialog encrypts a folder or the whole collection
 
 ## Variables
 
-Define variables per environment as a JSON object and reference them anywhere with `{{name}}`. See [docs/variables.md](docs/variables.md).
+Define variables per environment as a JSON object and reference them anywhere with `{{name}}`.
 
 ## Tests and scripts
 
