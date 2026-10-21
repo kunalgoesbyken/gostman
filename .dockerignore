@@ -1,0 +1,14 @@
+.git
+.github
+.claude
+.vercel
+.env
+.env.*
+**/node_modules
+gostman-gui
+vscode
+screenshots
+packaging
+docs
+*.md
+!README.md

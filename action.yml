@@ -1,0 +1,124 @@
+name: Gostman run
+description: Install the Gostman CLI and run an API collection, failing the job when a request or a check fails.
+author: kunalgoesbyken
+
+branding:
+  icon: check-circle
+  color: green
+
+inputs:
+  collection:
+    description: Workspace folder or Gostman export file to run.
+    required: true
+  version:
+    description: Release to install, for example 1.4.0. Defaults to the latest release.
+    required: false
+    default: latest
+  environment:
+    description: Environment name to use. Defaults to the first one in the collection.
+    required: false
+    default: ''
+  folder:
+    description: Run only this folder of the collection.
+    required: false
+    default: ''
+  data:
+    description: CSV or JSON file with one row per iteration.
+    required: false
+    default: ''
+  reporter:
+    description: One of text, json, junit or html.
+    required: false
+    default: text
+  output:
+    description: File to write the report to. The text summary is still printed.
+    required: false
+    default: ''
+  redact:
+    description: Replace variable values and credentials in the report with their names.
+    required: false
+    default: 'true'
+  bail:
+    description: Stop at the first failure.
+    required: false
+    default: 'false'
+  extra-args:
+    description: Further flags for gostman run, separated by spaces. Pass secrets with --var-from-env and the env block of the step.
+    required: false
+    default: ''
+
+outputs:
+  exit-code:
+    description: Exit code of gostman run. 0 passed, 1 a request or check failed, 2 wrong input.
+    value: ${{ steps.run.outputs.exit-code }}
+  report:
+    description: Path of the report file, empty when no output was requested.
+    value: ${{ steps.run.outputs.report }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install gostman
+      shell: bash
+      env:
+        GOSTMAN_VERSION: ${{ inputs.version }}
+        RUNNER_OS_NAME: ${{ runner.os }}
+        RUNNER_ARCH_NAME: ${{ runner.arch }}
+      run: |
+        set -euo pipefail
+        case "$RUNNER_OS_NAME" in
+          Linux) os=linux ;;
+          macOS) os=darwin ;;
+          Windows) os=windows ;;
+          *) echo "unsupported runner OS: $RUNNER_OS_NAME" >&2; exit 2 ;;
+        esac
+        case "$RUNNER_ARCH_NAME" in
+          X64) arch=amd64 ;;
+          ARM64) arch=arm64 ;;
+          *) echo "unsupported runner architecture: $RUNNER_ARCH_NAME" >&2; exit 2 ;;
+        esac
+        if [ "$os" = windows ]; then ext=zip; else ext=tar.gz; fi
+        asset="gostman-cli-$os-$arch.$ext"
+        base="https://github.com/kunalgoesbyken/gostman/releases"
+        if [ "$GOSTMAN_VERSION" = latest ]; then
+          url="$base/latest/download/$asset"
+        else
+          url="$base/download/v${GOSTMAN_VERSION#v}/$asset"
+        fi
+        dest="$RUNNER_TEMP/gostman-bin"
+        mkdir -p "$dest"
+        curl --fail --silent --show-error --location --output "$dest/$asset" "$url"
+        tar -xf "$dest/$asset" -C "$dest"
+        echo "$dest" >> "$GITHUB_PATH"
+
+    - name: Run collection
+      id: run
+      shell: bash
+      env:
+        GOSTMAN_COLLECTION: ${{ inputs.collection }}
+        GOSTMAN_ENVIRONMENT: ${{ inputs.environment }}
+        GOSTMAN_FOLDER: ${{ inputs.folder }}
+        GOSTMAN_DATA: ${{ inputs.data }}
+        GOSTMAN_REPORTER: ${{ inputs.reporter }}
+        GOSTMAN_OUTPUT: ${{ inputs.output }}
+        GOSTMAN_REDACT: ${{ inputs.redact }}
+        GOSTMAN_BAIL: ${{ inputs.bail }}
+        GOSTMAN_EXTRA_ARGS: ${{ inputs.extra-args }}
+      run: |
+        set -uo pipefail
+        args=(run "$GOSTMAN_COLLECTION" --reporter "$GOSTMAN_REPORTER")
+        [ -n "$GOSTMAN_ENVIRONMENT" ] && args+=(--env "$GOSTMAN_ENVIRONMENT")
+        [ -n "$GOSTMAN_FOLDER" ] && args+=(--folder "$GOSTMAN_FOLDER")
+        [ -n "$GOSTMAN_DATA" ] && args+=(--data "$GOSTMAN_DATA")
+        [ -n "$GOSTMAN_OUTPUT" ] && args+=(--output "$GOSTMAN_OUTPUT")
+        [ "$GOSTMAN_REDACT" = true ] && args+=(--redact)
+        [ "$GOSTMAN_BAIL" = true ] && args+=(--bail)
+        if [ -n "$GOSTMAN_EXTRA_ARGS" ]; then
+          read -r -a extra <<< "$GOSTMAN_EXTRA_ARGS"
+          args+=("${extra[@]}")
+        fi
+        gostman "${args[@]}"
+        code=$?
+        echo "exit-code=$code" >> "$GITHUB_OUTPUT"
+        echo "report=$GOSTMAN_OUTPUT" >> "$GITHUB_OUTPUT"
+        exit "$code"

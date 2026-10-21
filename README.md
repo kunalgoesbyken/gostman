@@ -60,7 +60,11 @@ Gostman is a native desktop application built with Go and [Wails](https://wails.
 - Encrypted share links and files that are never uploaded, and a generated HTML documentation page
 - GraphQL schema introspection, query formatting and validation
 - Code generation for curl, JavaScript, Python, Go, PHP and Java
-- Import from Postman v2.1 and OpenAPI; export to Postman, OpenAPI, Markdown or a Gostman backup
+- Server-Sent Events and SOAP requests, with WSDL import
+- Auth also covers OAuth 1, Digest, AWS SigV4, NTLM and Akamai EdgeGrid
+- A Git panel (desktop): diff, commit, push, branches, stash and conflict resolution
+- Secret managers: HashiCorp Vault, AWS, Azure and Google Cloud
+- Import from Postman, OpenAPI, Insomnia, HAR, WSDL, Bruno and curl; export to Postman, OpenAPI, HAR, Bruno, Markdown or a Gostman backup
 
 ## Install
 
@@ -118,6 +122,27 @@ gostman docs orders-api --output docs.html
 - On macOS the binary is not notarized: run `xattr -d com.apple.quarantine gostman` once.
 
 `gostman help` lists every flag.
+
+With Go installed: `go install github.com/kunalgoesbyken/gostman/cmd/gostman@latest`.
+
+### Docker and CI
+
+```bash
+docker build -t gostman .
+docker run --rm -v "$PWD:/workspace" -e API_TOKEN gostman run api --var-from-env API_TOKEN
+```
+
+The image is distroless, static and runs as a non-root user. In GitHub Actions:
+
+```yaml
+- uses: kunalgoesbyken/gostman@main
+  with:
+    collection: api
+    reporter: junit
+    output: report.xml
+```
+
+[docs/ci.md](docs/ci.md) has exit codes, reports, secrets, and GitLab CI, Jenkins and plain GitHub Actions recipes.
 
 ## Use from a coding agent
 
