@@ -17,7 +17,7 @@ var (
 		"graphqlQuery", "graphqlVariables", "grpcMethod", "grpcMessage", "grpcProtos", "mcpTool", "mcpArguments", "vars", "options",
 		"extractors", "assertions", "preScript", "postScript", "examples", "timestamp",
 	}
-	authKeys   = []string{"type", "username", "password", "token", "key", "value", "in", "oauth2"}
+	authKeys   = []string{"type", "username", "password", "token", "key", "value", "in", "oauth2", "domain", "aws", "oauth1", "edgegrid"}
 	oauth2Keys = []string{
 		"grant", "authUrl", "tokenUrl", "clientId", "clientSecret", "scope", "username", "password",
 		"callbackUrl", "credentialsIn", "pkce", "headerPrefix", "accessToken", "refreshToken", "expiresAt",
@@ -107,6 +107,10 @@ func (b nodeBuilder) auth(auth engine.Auth, extras requestExtras) *yaml.Node {
 	setField(node, "value", b.text(auth.Value))
 	setField(node, "in", b.text(auth.In))
 	setField(node, "oauth2", b.oauth2(auth.OAuth2, extras.oauth2))
+	setField(node, "domain", b.text(auth.Domain))
+	setField(node, "aws", b.section(awsFields(&auth.AWS)))
+	setField(node, "oauth1", b.section(oauth1Fields(&auth.OAuth1)))
+	setField(node, "edgegrid", b.section(edgeGridFields(&auth.EdgeGrid)))
 	node.Content = append(node.Content, extras.auth...)
 	return filledMapping(node)
 }
@@ -207,7 +211,11 @@ func readAuth(node *yaml.Node, extras *requestExtras, failure *error) engine.Aut
 		Key:      fields.text("key"),
 		Value:    fields.text("value"),
 		In:       fields.text("in"),
+		Domain:   fields.text("domain"),
 	}
+	readSection(fields.fields["aws"], awsFields(&auth.AWS), failure)
+	readSection(fields.fields["oauth1"], oauth1Fields(&auth.OAuth1), failure)
+	readSection(fields.fields["edgegrid"], edgeGridFields(&auth.EdgeGrid), failure)
 	auth.OAuth2, extras.oauth2 = readOAuth2(fields.fields["oauth2"], failure)
 	return auth
 }

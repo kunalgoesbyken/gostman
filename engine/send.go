@@ -72,7 +72,7 @@ func send(ctx context.Context, r Request, policy Policy) Response {
 	cookies := &cookieLog{now: time.Now()}
 	client := &http.Client{
 		Jar:       newJar(r.Cookies, cookies.now),
-		Transport: policy.route(r.Options.InsecureTLS),
+		Transport: authRoute(r, outgoing.URL, policy.route(r.Options.InsecureTLS)),
 		CheckRedirect: func(next *http.Request, via []*http.Request) error {
 			if r.Options.NoFollowRedirects {
 				return http.ErrUseLastResponse

@@ -1,5 +1,6 @@
 import { hasActiveContent } from './activeContent'
 import { buildCollectionTree, collectRequests, foldersIn, ROOT_ID } from './collectionTree'
+import { isSecretField, SCHEMES } from './authSchemes'
 import { isPlainObject, parseJSON } from './dataUtils'
 import { parseExamples } from './examples'
 import { exportToGostman, parseImport, sanitizeImport } from './importExport'
@@ -50,9 +51,14 @@ export function buildSharedExport({ requests, folders, environments }, { folderI
 
 const isLiteralSecret = (value) => typeof value === 'string' && value !== '' && !value.includes(PLACEHOLDER_START)
 
+const hasLiteralSchemeSecret = (auth) => Object.values(SCHEMES).some(({ section, fields }) => (
+  fields.some((field) => isSecretField(field) && isLiteralSecret((section ? auth[section] : auth)?.[field.key]))
+))
+
 const hasLiteralCredentials = ({ auth }) => (
   AUTH_SECRET_FIELDS.some((field) => isLiteralSecret(auth[field]))
   || OAUTH_SECRET_FIELDS.some((field) => isLiteralSecret(auth.oauth2[field]))
+  || hasLiteralSchemeSecret(auth)
 )
 
 export const countLiteralCredentials = (requests) => requests.filter(hasLiteralCredentials).length

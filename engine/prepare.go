@@ -57,6 +57,7 @@ func Prepare(r Request) (Prepared, error) {
 		headers = append(headers, pair{headerContentType, contentType})
 	}
 	headers = applyAuth(r.Auth, substitute, headers, target)
+	headers, body = signRequest(r.Auth, substitute, method, target, headers, body)
 	if err := expansion.overflow(); err != nil {
 		return Prepared{}, err
 	}
