@@ -103,7 +103,10 @@ mock
   --delay-max <ms>      with --delay, wait a random time between the two
   --error-rate <pct>    answer this percentage of requests with an error
   --error-status <code> status of those errors (default 500)
-  --cors                allow browser requests from localhost origins
+  --cors                answer browsers only for localhost origins (any port,
+                        127.0.0.1 and [::1] too); other origins get no CORS headers
+  --cors-origin <url>   also allow this exact origin, e.g. https://app.example.com
+                        (repeatable; implies --cors)
   --log                 also print each request's headers and body;
                         credential headers and query values show as ***
 

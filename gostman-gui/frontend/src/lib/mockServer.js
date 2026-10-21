@@ -77,6 +77,7 @@ export const normalizeConfig = (raw) => ({
   settings: {
     port: raw?.settings?.port || DEFAULT_PORT,
     cors: Boolean(raw?.settings?.cors),
+    corsOrigins: Array.isArray(raw?.settings?.corsOrigins) ? raw.settings.corsOrigins : [],
     behavior: normalizeBehavior(raw?.settings?.behavior),
   },
   spec: { title: raw?.spec?.title || '', sources: raw?.spec?.sources || [] },

@@ -57,7 +57,7 @@ export const MOCK_TEXT = {
   behaviorTitle: 'Behavior',
   inherit: 'Uses the server behavior',
   cors: 'Allow CORS',
-  corsHint: 'Answers browser preflight requests and adds CORS headers for localhost pages.',
+  corsHint: 'Answers browser preflight requests and adds CORS headers for pages on localhost only. Other origins are allowed with --cors-origin in the CLI.',
   delay: 'Delay (ms)',
   delayMax: 'Up to (ms)',
   slowBody: 'Slow body (ms)',

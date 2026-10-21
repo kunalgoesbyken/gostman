@@ -24,6 +24,20 @@ func (l *listFlag) Set(value string) error {
 	return nil
 }
 
+type originFlags []string
+
+func (o *originFlags) String() string {
+	return strings.Join(*o, ",")
+}
+
+func (o *originFlags) Set(value string) error {
+	if strings.TrimSpace(value) == "" {
+		return errors.New("name an origin such as https://app.example.com")
+	}
+	*o = append(*o, value)
+	return nil
+}
+
 type runExtras struct {
 	dataFile string
 	envFile  string

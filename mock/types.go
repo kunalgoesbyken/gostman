@@ -84,9 +84,10 @@ type Behavior struct {
 }
 
 type Settings struct {
-	Port     int      `json:"port"`
-	CORS     bool     `json:"cors"`
-	Behavior Behavior `json:"behavior"`
+	Port        int      `json:"port"`
+	CORS        bool     `json:"cors"`
+	CORSOrigins []string `json:"corsOrigins"`
+	Behavior    Behavior `json:"behavior"`
 }
 
 type Condition struct {

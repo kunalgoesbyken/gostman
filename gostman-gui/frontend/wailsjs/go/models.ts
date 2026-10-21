@@ -1992,6 +1992,7 @@ export namespace mock {
 	export class Settings {
 	    port: number;
 	    cors: boolean;
+	    corsOrigins: string[];
 	    behavior: Behavior;
 	
 	    static createFrom(source: any = {}) {
@@ -2002,6 +2003,7 @@ export namespace mock {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.port = source["port"];
 	        this.cors = source["cors"];
+	        this.corsOrigins = source["corsOrigins"];
 	        this.behavior = this.convertValues(source["behavior"], Behavior);
 	    }
 	
