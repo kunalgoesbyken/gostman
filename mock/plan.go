@@ -40,7 +40,6 @@ type table struct {
 	served    []servedRoute
 	rules     []*compiledRule
 	owners    map[string]string
-	variables string
 	settings  Settings
 }
 
@@ -72,7 +71,6 @@ func buildTable(sources []Source, variables string, config Config) (*table, erro
 		routes:    make([]Route, 0, len(composed)),
 		owners:    map[string]string{},
 		rules:     rules,
-		variables: variables,
 		settings:  config.Settings,
 	}
 	for _, source := range composed {

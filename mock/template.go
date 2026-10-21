@@ -12,19 +12,19 @@ const (
 	maxResponseBody = 10 << 20
 	requestScope    = "request."
 	jsonMarker      = "json"
+	noVariables     = "{}"
 )
 
 var errResponseTooLarge = fmt.Errorf("the response is larger than %d MB once the request values are filled in", maxResponseBody>>20)
 
 type renderer struct {
 	exchange  *exchange
-	variables string
 	expansion *engine.Expansion
 	written   int
 }
 
-func (a answer) render(e *exchange, variables string) (answer, error) {
-	filler := &renderer{exchange: e, variables: variables}
+func (a answer) render(e *exchange) (answer, error) {
+	filler := &renderer{exchange: e}
 	headers := make([]Header, len(a.headers))
 	for i, header := range a.headers {
 		value, err := filler.fill(header.Value, nil)
@@ -82,7 +82,7 @@ func (r *renderer) resolve(placeholder string, escape func(string) string) (stri
 		return value, nil
 	}
 	if r.expansion == nil {
-		expansion, err := engine.NewExpansion(r.variables)
+		expansion, err := engine.NewExpansion(noVariables)
 		if err != nil {
 			return "", err
 		}
