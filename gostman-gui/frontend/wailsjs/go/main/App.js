@@ -50,6 +50,118 @@ export function FetchToken(arg1) {
   return window['go']['main']['App']['FetchToken'](arg1);
 }
 
+export function GitAbortMerge() {
+  return window['go']['main']['App']['GitAbortMerge']();
+}
+
+export function GitAddRemote(arg1, arg2) {
+  return window['go']['main']['App']['GitAddRemote'](arg1, arg2);
+}
+
+export function GitBranches() {
+  return window['go']['main']['App']['GitBranches']();
+}
+
+export function GitClone(arg1, arg2) {
+  return window['go']['main']['App']['GitClone'](arg1, arg2);
+}
+
+export function GitCommit(arg1, arg2) {
+  return window['go']['main']['App']['GitCommit'](arg1, arg2);
+}
+
+export function GitConflict(arg1) {
+  return window['go']['main']['App']['GitConflict'](arg1);
+}
+
+export function GitCreateBranch(arg1) {
+  return window['go']['main']['App']['GitCreateBranch'](arg1);
+}
+
+export function GitDeleteBranch(arg1, arg2) {
+  return window['go']['main']['App']['GitDeleteBranch'](arg1, arg2);
+}
+
+export function GitDiff(arg1, arg2, arg3) {
+  return window['go']['main']['App']['GitDiff'](arg1, arg2, arg3);
+}
+
+export function GitDiscard(arg1, arg2) {
+  return window['go']['main']['App']['GitDiscard'](arg1, arg2);
+}
+
+export function GitFetch() {
+  return window['go']['main']['App']['GitFetch']();
+}
+
+export function GitInit() {
+  return window['go']['main']['App']['GitInit']();
+}
+
+export function GitLog(arg1) {
+  return window['go']['main']['App']['GitLog'](arg1);
+}
+
+export function GitOpenPullRequest() {
+  return window['go']['main']['App']['GitOpenPullRequest']();
+}
+
+export function GitPull() {
+  return window['go']['main']['App']['GitPull']();
+}
+
+export function GitPush() {
+  return window['go']['main']['App']['GitPush']();
+}
+
+export function GitResolve(arg1, arg2) {
+  return window['go']['main']['App']['GitResolve'](arg1, arg2);
+}
+
+export function GitRestoreVersion(arg1, arg2) {
+  return window['go']['main']['App']['GitRestoreVersion'](arg1, arg2);
+}
+
+export function GitSetRemoteURL(arg1, arg2) {
+  return window['go']['main']['App']['GitSetRemoteURL'](arg1, arg2);
+}
+
+export function GitStage(arg1) {
+  return window['go']['main']['App']['GitStage'](arg1);
+}
+
+export function GitStageAll() {
+  return window['go']['main']['App']['GitStageAll']();
+}
+
+export function GitStashAction(arg1, arg2) {
+  return window['go']['main']['App']['GitStashAction'](arg1, arg2);
+}
+
+export function GitStashSave(arg1) {
+  return window['go']['main']['App']['GitStashSave'](arg1);
+}
+
+export function GitStashes() {
+  return window['go']['main']['App']['GitStashes']();
+}
+
+export function GitState() {
+  return window['go']['main']['App']['GitState']();
+}
+
+export function GitSwitchBranch(arg1, arg2) {
+  return window['go']['main']['App']['GitSwitchBranch'](arg1, arg2);
+}
+
+export function GitUnstage(arg1) {
+  return window['go']['main']['App']['GitUnstage'](arg1);
+}
+
+export function GitVersion(arg1, arg2) {
+  return window['go']['main']['App']['GitVersion'](arg1, arg2);
+}
+
 export function InvokeGrpc(arg1, arg2) {
   return window['go']['main']['App']['InvokeGrpc'](arg1, arg2);
 }

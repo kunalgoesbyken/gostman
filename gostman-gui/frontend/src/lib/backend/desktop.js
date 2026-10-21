@@ -33,6 +33,7 @@ import {
 } from '../../../wailsjs/go/main/App'
 import { WEB_APP_URL } from '../constants'
 import { desktopCapture } from './desktopCapture'
+import { desktopGit } from './desktopGit'
 import { desktopMock } from './desktopMock'
 import { openDesktopSocket } from './desktopSocket'
 import { toGrpcCall, toGrpcTarget } from '../grpc'
@@ -109,6 +110,7 @@ export const desktopBackend = {
     close: () => CloseWorkspace(),
     trust: () => TrustWorkspace(),
     change: duringStorageChange,
+    git: desktopGit,
   },
   oauthCallback: OAUTH_CALLBACK,
   authorize: (config, variables) => Authorize(config, variables),

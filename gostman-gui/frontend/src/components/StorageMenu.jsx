@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { AlertTriangle, ChevronDown, Folder, FolderOpen, HardDrive, History, RefreshCw, Save, ShieldAlert, ShieldCheck, X } from "lucide-react"
+import { AlertTriangle, ChevronDown, Download, Folder, FolderOpen, GitBranch, HardDrive, History, RefreshCw, Save, ShieldAlert, ShieldCheck, X } from "lucide-react"
 import { Button } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
+import { GitPanel } from "./GitPanel"
 import { pluralize } from "../lib/dataUtils"
+import { openGit } from "../lib/gitSession"
 import { useAppStore } from "../store/appStore"
 
 const LOCAL_LABEL = "This computer"
@@ -36,6 +38,8 @@ function menuItems(status, storage, isRestricted) {
     ...trust,
     { id: "open", label: "Open folder", icon: FolderOpen, onSelect: storage.openFolder },
     { id: "save", label: "Save collection to folder", icon: Save, onSelect: storage.saveToFolder },
+    { id: "clone", label: "Clone repository", icon: Download, onSelect: storage.promptClone },
+    { id: "git", label: "Git", icon: GitBranch, disabled: !hasFolder, onSelect: openGit },
     { id: "reload", label: "Reload from disk", icon: RefreshCw, disabled: !hasFolder, onSelect: storage.reload },
     ...problems,
     ...recent,
@@ -59,6 +63,15 @@ function useStorageStatus(storage) {
   return status
 }
 
+function useGitState(git, path) {
+  useEffect(() => {
+    const refresh = () => git.refreshState().catch(() => {})
+    refresh()
+    window.addEventListener("focus", refresh)
+    return () => window.removeEventListener("focus", refresh)
+  }, [git, path])
+}
+
 function BrowserStorage() {
   const showAlert = useAppStore((s) => s.showAlert)
   return (
@@ -71,6 +84,7 @@ function BrowserStorage() {
 
 function FolderStorage({ storage }) {
   const status = useStorageStatus(storage)
+  useGitState(storage.git, status.path)
   const [menuPosition, setMenuPosition] = useState(null)
   const isRestricted = useAppStore((s) => s.isRestricted)
   const items = useMemo(() => menuItems(status, storage, isRestricted), [status, storage, isRestricted])
@@ -102,6 +116,7 @@ function FolderStorage({ storage }) {
         <ChevronDown />
       </Button>
       {menuPosition && <ContextMenu position={menuPosition} title="" items={items} onClose={closeMenu} />}
+      <GitPanel actions={storage.git} onTrust={storage.confirmTrust} />
     </>
   )
 }
