@@ -2,6 +2,7 @@ import { AlertDialog } from "./ui/AlertDialog"
 import { ConfirmDialog } from "./ui/ConfirmDialog"
 import { PromptDialog } from "./ui/PromptDialog"
 import { CommandPalette } from "./ui/CommandPalette"
+import { ShortcutsDialog } from "./ShortcutsDialog"
 import { useAppStore } from "../store/appStore"
 
 export function AppDialogs({ onCommand }) {
@@ -11,6 +12,13 @@ export function AppDialogs({ onCommand }) {
   const commandPaletteOpen = useAppStore((s) => s.commandPaletteOpen)
   const environments = useAppStore((s) => s.environments)
   const activeEnvironmentId = useAppStore((s) => s.activeEnvironmentId)
+  const commandPaletteMode = useAppStore((s) => s.commandPaletteMode)
+  const requests = useAppStore((s) => s.requests)
+  const folders = useAppStore((s) => s.folders)
+  const requestHistory = useAppStore((s) => s.requestHistory)
+  const shortcutsDialogOpen = useAppStore((s) => s.shortcutsDialogOpen)
+  const closeShortcutsDialog = useAppStore((s) => s.closeShortcutsDialog)
+  const openShortcutsDialog = useAppStore((s) => s.openShortcutsDialog)
 
   const closeAlert = useAppStore((s) => s.closeAlert)
   const closeConfirm = useAppStore((s) => s.closeConfirm)
@@ -21,11 +29,18 @@ export function AppDialogs({ onCommand }) {
     <>
       <CommandPalette
         isOpen={commandPaletteOpen}
+        mode={commandPaletteMode}
+        requests={requests}
+        folders={folders}
+        history={requestHistory}
+        onShowShortcuts={openShortcutsDialog}
         environments={environments}
         activeEnvironmentId={activeEnvironmentId}
         onClose={closeCommandPalette}
         onCommand={onCommand}
       />
+
+      {shortcutsDialogOpen && <ShortcutsDialog onClose={closeShortcutsDialog} />}
 
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}
