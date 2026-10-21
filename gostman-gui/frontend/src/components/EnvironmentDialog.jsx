@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { Check, Copy, Plus, Trash2 } from "lucide-react"
+import { Check, Copy, KeyRound, Plus, Trash2 } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
@@ -8,7 +8,9 @@ import { SegmentedControl } from "./ui/segmented"
 import { Select } from "./ui/select"
 import { EnvironmentTable } from "./EnvironmentTable"
 import { SearchField } from "./SearchField"
+import { SecretsDialog } from "./SecretsDialog"
 import { ENVIRONMENT_COLORS, ENVIRONMENT_TEXT as TEXT } from "../lib/environmentText"
+import { SECRETS_TEXT } from "../lib/secretsText"
 import { isDesktopShell } from "../lib/windowControls"
 import { SCOPE_COLLECTION, SCOPE_GLOBAL, dotEnvEntries, environmentChain, environmentEntries, withEntries } from "../lib/variableScopes"
 import { cn } from "../lib/utils"
@@ -20,7 +22,7 @@ const SCOPE_OPTIONS = [
   { value: SCOPE_COLLECTION, label: TEXT.collectionTab },
   { value: SCOPE_GLOBAL, label: TEXT.globalTab },
 ]
-const ENVIRONMENT_FEATURES = { enabled: true, secret: true, readOnly: false }
+const ENVIRONMENT_FEATURES = { enabled: true, secret: true, references: true, readOnly: false }
 const COLLECTION_FEATURES = { enabled: false, secret: false, readOnly: false }
 const DOT_ENV_FEATURES = { enabled: false, secret: false, readOnly: true }
 
@@ -79,7 +81,7 @@ function ExtendsSelect({ environment, environments, onChange }) {
   )
 }
 
-function EnvironmentEditor({ scope, environment, environments, isActive, canDelete }) {
+function EnvironmentEditor({ scope, environment, environments, isActive, canDelete, secrets }) {
   const updateEnvironment = useAppStore((s) => s.updateEnvironment)
   const addEnvironmentTo = useAppStore((s) => s.addEnvironmentTo)
   const removeEnvironmentFrom = useAppStore((s) => s.removeEnvironmentFrom)
@@ -134,7 +136,8 @@ function EnvironmentEditor({ scope, environment, environments, isActive, canDele
         </div>
       </div>
       <SearchField value={query} onChange={setQuery} placeholder={TEXT.search} />
-      <EnvironmentTable rows={rows} query={query} features={ENVIRONMENT_FEATURES} onChange={editRows} />
+      {!secrets && rows.some((row) => row.ref) && <Notice edge="border-b" tone="warning">{SECRETS_TEXT.webReferences}</Notice>}
+      <EnvironmentTable rows={rows} query={query} features={ENVIRONMENT_FEATURES} secrets={secrets} onChange={editRows} />
     </>
   )
 }
@@ -172,7 +175,7 @@ function DotEnvViewer() {
   )
 }
 
-function Editor({ scope, selectedId, environments, activeId }) {
+function Editor({ scope, selectedId, environments, activeId, secrets }) {
   const environment = environments.find((candidate) => candidate.id === selectedId)
   if (selectedId === COLLECTION_VARIABLES_ID) return <CollectionVariablesEditor key={selectedId} />
   if (selectedId === DOT_ENV_ID) return <DotEnvViewer key={selectedId} />
@@ -185,11 +188,12 @@ function Editor({ scope, selectedId, environments, activeId }) {
       environments={environments}
       isActive={environment.id === activeId}
       canDelete={scope === SCOPE_GLOBAL || environments.length > 1}
+      secrets={secrets}
     />
   )
 }
 
-export function EnvironmentDialog({ onClose }) {
+export function EnvironmentDialog({ secrets, onClose }) {
   const environments = useAppStore((s) => s.environments)
   const activeEnvironmentId = useAppStore((s) => s.activeEnvironmentId)
   const globalEnvironments = useAppStore((s) => s.globalEnvironments)
@@ -198,6 +202,7 @@ export function EnvironmentDialog({ onClose }) {
   const addEnvironmentTo = useAppStore((s) => s.addEnvironmentTo)
   const [scope, setScope] = useState(SCOPE_COLLECTION)
   const [selectedId, setSelectedId] = useState(activeEnvironmentId)
+  const [isManagingSecrets, setIsManagingSecrets] = useState(false)
 
   const isGlobal = scope === SCOPE_GLOBAL
   const list = isGlobal ? globalEnvironments : environments
@@ -215,52 +220,63 @@ export function EnvironmentDialog({ onClose }) {
     setSelectedId(environment.id)
   }
 
+  const closeUnlessCovered = () => {
+    if (!isManagingSecrets) onClose()
+  }
+
   const resolvedSelection = list.some((candidate) => candidate.id === selectedId) || [COLLECTION_VARIABLES_ID, DOT_ENV_ID].includes(selectedId)
     ? selectedId
     : list[0]?.id || ""
 
   return (
-    <Dialog label={TEXT.title} size="lg" onClose={onClose} className="max-w-5xl">
-      <DialogHeader onClose={onClose}>
-        <DialogTitle>{TEXT.title}</DialogTitle>
-        <SegmentedControl label={TEXT.scope} options={SCOPE_OPTIONS} value={scope} onChange={changeScope} className="ml-2" />
-      </DialogHeader>
-      <div className="flex min-h-0 flex-1">
-        <nav aria-label={TEXT.title} className="flex w-56 shrink-0 flex-col border-r border-border">
-          <div className="min-h-0 flex-1 overflow-y-auto py-1">
-            {list.map((environment) => (
-              <ListItem
-                key={environment.id}
-                label={environment.name}
-                color={environment.color}
-                isSelected={environment.id === resolvedSelection}
-                isActive={environment.id === activeId}
-                onSelect={() => setSelectedId(environment.id)}
-              />
-            ))}
-            {!isGlobal && (
-              <ListItem
-                label={TEXT.collectionVariables}
-                isSelected={resolvedSelection === COLLECTION_VARIABLES_ID}
-                onSelect={() => setSelectedId(COLLECTION_VARIABLES_ID)}
-              />
-            )}
-            {hasDotEnv && (
-              <ListItem label={TEXT.dotEnv} isSelected={resolvedSelection === DOT_ENV_ID} onSelect={() => setSelectedId(DOT_ENV_ID)} />
-            )}
-          </div>
-          <div className="border-t border-border p-2">
-            <Button variant="outline" size="sm" className="w-full" onClick={create}>
-              <Plus />
-              {isGlobal ? TEXT.newGlobal : TEXT.newEnvironment}
-            </Button>
-          </div>
-        </nav>
-        <section className="flex min-w-0 flex-1 flex-col">
-          <Editor scope={scope} selectedId={resolvedSelection} environments={list} activeId={activeId} />
-        </section>
-      </div>
-      <Notice edge="border-t">{TEXT.precedence} {isDesktopShell() ? TEXT.secretNote : TEXT.secretNoteWeb}</Notice>
-    </Dialog>
+    <>
+      <Dialog label={TEXT.title} size="lg" onClose={closeUnlessCovered} className="max-w-5xl">
+        <DialogHeader onClose={onClose}>
+          <DialogTitle>{TEXT.title}</DialogTitle>
+          <SegmentedControl label={TEXT.scope} options={SCOPE_OPTIONS} value={scope} onChange={changeScope} className="ml-2" />
+          <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setIsManagingSecrets(true)}>
+            <KeyRound />
+            {SECRETS_TEXT.title}
+          </Button>
+        </DialogHeader>
+        <div className="flex min-h-0 flex-1">
+          <nav aria-label={TEXT.title} className="flex w-56 shrink-0 flex-col border-r border-border">
+            <div className="min-h-0 flex-1 overflow-y-auto py-1">
+              {list.map((environment) => (
+                <ListItem
+                  key={environment.id}
+                  label={environment.name}
+                  color={environment.color}
+                  isSelected={environment.id === resolvedSelection}
+                  isActive={environment.id === activeId}
+                  onSelect={() => setSelectedId(environment.id)}
+                />
+              ))}
+              {!isGlobal && (
+                <ListItem
+                  label={TEXT.collectionVariables}
+                  isSelected={resolvedSelection === COLLECTION_VARIABLES_ID}
+                  onSelect={() => setSelectedId(COLLECTION_VARIABLES_ID)}
+                />
+              )}
+              {hasDotEnv && (
+                <ListItem label={TEXT.dotEnv} isSelected={resolvedSelection === DOT_ENV_ID} onSelect={() => setSelectedId(DOT_ENV_ID)} />
+              )}
+            </div>
+            <div className="border-t border-border p-2">
+              <Button variant="outline" size="sm" className="w-full" onClick={create}>
+                <Plus />
+                {isGlobal ? TEXT.newGlobal : TEXT.newEnvironment}
+              </Button>
+            </div>
+          </nav>
+          <section className="flex min-w-0 flex-1 flex-col">
+            <Editor scope={scope} selectedId={resolvedSelection} environments={list} activeId={activeId} secrets={secrets} />
+          </section>
+        </div>
+        <Notice edge="border-t">{TEXT.precedence} {isDesktopShell() ? TEXT.secretNote : TEXT.secretNoteWeb}</Notice>
+      </Dialog>
+      {isManagingSecrets && <SecretsDialog secrets={secrets} onClose={() => setIsManagingSecrets(false)} />}
+    </>
   )
 }

@@ -17,6 +17,7 @@ const (
 type Session struct {
 	state       *session
 	environment string
+	resolved    map[string]string
 }
 
 type Outcome struct {
@@ -48,7 +49,13 @@ func (s *Session) Enter(environments []Environment, name string, overrides map[s
 	if err != nil {
 		return err
 	}
+	resolved, err := resolveReferences(context.Background(), environments, environment, overrides)
+	if err != nil {
+		return err
+	}
+	starting.override(resolved)
 	s.state.variables = starting
+	s.resolved = resolved
 	s.environment = environment.Name
 	return nil
 }

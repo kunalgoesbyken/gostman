@@ -4,6 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"net/http"
 	"net/url"
 	"sort"
 	"strings"
@@ -35,6 +36,19 @@ type AWSAuth struct {
 	SessionToken string `json:"sessionToken"`
 	Region       string `json:"region"`
 	Service      string `json:"service"`
+}
+
+func SignAWS(config AWSAuth, request *http.Request, body []byte) {
+	var headers []pair
+	for name, values := range request.Header {
+		for _, value := range values {
+			headers = append(headers, pair{name, value})
+		}
+	}
+	keep := func(value string) string { return value }
+	for _, header := range signSigV4(config, keep, request.Method, request.URL, headers, body) {
+		request.Header.Set(header.key, header.value)
+	}
 }
 
 func signSigV4(config AWSAuth, substitute func(string) string, method string, target *url.URL, headers []pair, body []byte) []pair {

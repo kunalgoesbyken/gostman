@@ -35,6 +35,7 @@ import { WEB_APP_URL } from '../constants'
 import { desktopCapture } from './desktopCapture'
 import { desktopGit } from './desktopGit'
 import { desktopMock } from './desktopMock'
+import { desktopSecrets } from './desktopSecrets'
 import { openDesktopSocket } from './desktopSocket'
 import { toGrpcCall, toGrpcTarget } from '../grpc'
 import { toMcpCall, toMcpTarget } from '../mcp'
@@ -100,6 +101,7 @@ export const desktopBackend = {
     pickFile: (title) => PickFile(title),
   },
   mock: desktopMock,
+  secrets: desktopSecrets,
   capture: desktopCapture,
   storage: {
     status: () => WorkspaceStatus(),

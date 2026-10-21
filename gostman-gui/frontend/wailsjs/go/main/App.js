@@ -38,6 +38,10 @@ export function DeleteRequest(arg1) {
   return window['go']['main']['App']['DeleteRequest'](arg1);
 }
 
+export function DeleteSecretConnection(arg1) {
+  return window['go']['main']['App']['DeleteSecretConnection'](arg1);
+}
+
 export function DescribeGrpc(arg1) {
   return window['go']['main']['App']['DescribeGrpc'](arg1);
 }
@@ -214,6 +218,10 @@ export function ResetData() {
   return window['go']['main']['App']['ResetData']();
 }
 
+export function ResolveSecretReferences(arg1) {
+  return window['go']['main']['App']['ResolveSecretReferences'](arg1);
+}
+
 export function SaveCollectionToFolder(arg1) {
   return window['go']['main']['App']['SaveCollectionToFolder'](arg1);
 }
@@ -250,8 +258,20 @@ export function SaveScopes(arg1, arg2, arg3) {
   return window['go']['main']['App']['SaveScopes'](arg1, arg2, arg3);
 }
 
+export function SaveSecretConnection(arg1) {
+  return window['go']['main']['App']['SaveSecretConnection'](arg1);
+}
+
 export function SaveSettings(arg1) {
   return window['go']['main']['App']['SaveSettings'](arg1);
+}
+
+export function SecretConnections() {
+  return window['go']['main']['App']['SecretConnections']();
+}
+
+export function SecretKinds() {
+  return window['go']['main']['App']['SecretKinds']();
 }
 
 export function SendRequest(arg1, arg2) {
@@ -272,6 +292,10 @@ export function StopCapture() {
 
 export function StopMock() {
   return window['go']['main']['App']['StopMock']();
+}
+
+export function TestSecretReference(arg1) {
+  return window['go']['main']['App']['TestSecretReference'](arg1);
 }
 
 export function TrustWorkspace() {

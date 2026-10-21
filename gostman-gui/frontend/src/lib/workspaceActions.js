@@ -393,6 +393,7 @@ export function createWorkspaceActions(backend) {
     examples,
     mock,
     capture,
+    secrets: backend.secrets,
     storage: createStorageActions(backend),
     runExtractors,
     getToken,
