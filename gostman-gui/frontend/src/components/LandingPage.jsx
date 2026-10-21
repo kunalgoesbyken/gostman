@@ -21,6 +21,8 @@ import { BackgroundCode } from "./landing/BackgroundCode"
 import { DownloadDropdown } from "./landing/DownloadDropdown"
 import { MountOnVisible } from "./landing/MountOnVisible"
 
+const starCount = (value) => (Number.isFinite(value) ? value : null)
+
 const PremiumFeatures = lazy(() => import("./landing/PremiumFeatures"))
 const ComparisonSection = lazy(() => import("./landing/ComparisonSection"))
 
@@ -157,14 +159,14 @@ const useGitHubStars = () => {
           throw new Error("Local/API endpoint unavailable")
         }
         const data = await response.json()
-        setStars(data.stars)
+        setStars(starCount(data.stars))
       } catch (err) {
         if (err.name === "AbortError") return
         try {
           const ghResponse = await fetch(REPOSITORY_API_URL, { signal: controller.signal })
           if (!ghResponse.ok) return
           const ghData = await ghResponse.json()
-          setStars(ghData.stargazers_count)
+          setStars(starCount(ghData.stargazers_count))
         } catch {
           setStars(null)
         }
