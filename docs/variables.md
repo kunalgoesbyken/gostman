@@ -55,7 +55,7 @@ A variable can read its value from HashiCorp Vault, AWS Secrets Manager, Azure K
 - The collection stores only the reference. Connections (address, namespace, sign-in) are settings of this computer under **Secret managers**, with credentials in the keychain, so a cloned collection cannot point your credentials at its own server. An unknown connection name fails with a message.
 - References are resolved when a request is sent and cached in memory for five minutes. Values are never saved, exported or shared. If a reference cannot be read the request is not sent.
 - Folders that are not trusted yet never resolve references.
-- Desktop app and CLI only. See the README for the CLI variables and `--secrets-env-file`.
+- Desktop app and CLI only. See the README for the CLI variables, `--secrets` and `--secrets-env-file`.
 
 ## Dynamic variables
 

@@ -33,11 +33,14 @@ run
   --var <key=value>     set a variable, overriding the environment (repeatable)
   --var-from-env <NAME> set the variable NAME from the environment variable
                         NAME, so the value is not typed or stored (repeatable)
-  --secrets-env-file <file>
-                        read KEY=value lines that configure the secret manager
-                        connections named by variables that reference a secret
-                        (Vault, AWS, Azure, GCP); the process environment wins
+  --secrets             allow variables that reference a secret manager
+                        (Vault, AWS, Azure, GCP) to be read with the credentials
+                        in the process environment; off by default so that a
+                        collection you did not write cannot use them
                         (also for send and mcp)
+  --secrets-env-file <file>
+                        like --secrets, with the connection settings read from
+                        KEY=value lines; the process environment wins
   --bail                stop at the first failure
   --delay <ms>          wait between requests
   --timeout <ms>        timeout for requests that do not set their own

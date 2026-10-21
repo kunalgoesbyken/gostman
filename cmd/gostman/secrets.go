@@ -34,6 +34,9 @@ func useSecretEnvironment(lookup secrets.Environment) {
 }
 
 func secretFlags(flags *flag.FlagSet) {
-	useSecretEnvironment(os.LookupEnv)
+	flags.BoolFunc("secrets", "", func(string) error {
+		useSecretEnvironment(os.LookupEnv)
+		return nil
+	})
 	flags.Var(secretsFile{}, "secrets-env-file", "")
 }

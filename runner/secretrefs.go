@@ -82,7 +82,7 @@ func resolveReferences(ctx context.Context, environments []Environment, environm
 		return nil, err
 	}
 	if secretResolver == nil {
-		return nil, errors.New("the environment has secret manager references, but no secret manager connection is configured")
+		return nil, errors.New("the environment has secret manager references, which this run is not allowed to read: pass --secrets or --secrets-env-file to allow it")
 	}
 	resolved := make(map[string]string, len(wanted))
 	for _, name := range slices.Sorted(maps.Keys(wanted)) {
