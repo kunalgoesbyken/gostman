@@ -10,6 +10,9 @@ const REQUEST_BODY_BYTES = 6144
 const SHAPE_DEPTH = 6
 const SHAPE_KEYS = 40
 const TEMPLATE_OPEN = '{{'
+const SCHEME_SEPARATOR = '://'
+const AUTHORITY_END = ['/', '?', '#']
+const USERINFO_END = '@'
 
 const isTemplate = (value) => String(value).includes(TEMPLATE_OPEN)
 
@@ -28,7 +31,19 @@ function maskedPairs(text) {
   return [...params].map(([name, value]) => [name, maskedValue(name, value)])
 }
 
-export function maskedUrl(url) {
+function maskedUserinfo(url) {
+  const schemeAt = url.indexOf(SCHEME_SEPARATOR)
+  if (schemeAt === -1) return url
+  const start = schemeAt + SCHEME_SEPARATOR.length
+  const ends = AUTHORITY_END.map((mark) => url.indexOf(mark, start)).filter((index) => index !== -1)
+  const end = ends.length > 0 ? Math.min(...ends) : url.length
+  const separatorAt = url.slice(start, end).lastIndexOf(USERINFO_END)
+  if (separatorAt <= 0 || isTemplate(url.slice(start, start + separatorAt))) return url
+  return url.slice(0, start) + MASK + url.slice(start + separatorAt)
+}
+
+export function maskedUrl(rawUrl) {
+  const url = maskedUserinfo(rawUrl)
   const hashAt = url.indexOf('#')
   const withoutHash = hashAt === -1 ? url : url.slice(0, hashAt)
   const queryAt = withoutHash.indexOf('?')
