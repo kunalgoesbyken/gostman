@@ -6,6 +6,7 @@ import {engine} from '../models';
 import {capture} from '../models';
 import {rpc} from '../models';
 import {mcpclient} from '../models';
+import {deeplink} from '../models';
 import {gitutil} from '../models';
 import {importer} from '../models';
 import {mock} from '../models';
@@ -54,6 +55,8 @@ export function DeleteSecretConnection(arg1:string):Promise<void>;
 export function DescribeGrpc(arg1:rpc.Target):Promise<rpc.Schema>;
 
 export function DescribeMcp(arg1:mcpclient.Target):Promise<mcpclient.Catalog>;
+
+export function FetchLink(arg1:string):Promise<deeplink.Reply>;
 
 export function FetchToken(arg1:engine.TokenExchange):Promise<engine.Token>;
 
@@ -206,6 +209,8 @@ export function StopLoadTest():Promise<void>;
 export function StopMock():Promise<void>;
 
 export function StreamRequest(arg1:string,arg2:engine.Request):Promise<engine.Response>;
+
+export function TakeOpenLinks():Promise<Array<main.OpenLink>>;
 
 export function TestSecretReference(arg1:secrets.Ref):Promise<number>;
 

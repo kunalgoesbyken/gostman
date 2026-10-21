@@ -23,6 +23,7 @@ import { TASK_EXPLAIN, TASK_REQUEST } from "../lib/ai/tasks"
 import { MIN_REQUEST_HEIGHT_PX } from "../lib/layout"
 import { isBlankRequest } from "../lib/requestChanges"
 import { forgetSharedLink, pendingSharedLink, subscribeToSharedLink } from "../lib/sharedLink"
+import { currentOpenLink, dismissOpenLink, subscribeToOpenLink } from "../lib/openLink"
 import { exportableVariables, withoutSecretValues } from "../lib/variableScopes"
 import { createWorkspaceActions } from "../lib/workspaceActions"
 
@@ -30,6 +31,7 @@ const CodeSnippetDialog = lazy(() => import("./CodeSnippetDialog").then((module)
 const ImportExportDialog = lazy(() => import("./ImportExportDialog").then((module) => ({ default: module.ImportExportDialog })))
 const IncomingShareDialog = lazy(() => import("./IncomingShareDialog").then((module) => ({ default: module.IncomingShareDialog })))
 const ScanDialog = lazy(() => import("./ScanDialog").then((module) => ({ default: module.ScanDialog })))
+const OpenLinkDialog = lazy(() => import("./OpenLinkDialog").then((module) => ({ default: module.OpenLinkDialog })))
 const CookiesDialog = lazy(() => import("./CookiesDialog").then((module) => ({ default: module.CookiesDialog })))
 const NetworkDialog = lazy(() => import("./NetworkDialog").then((module) => ({ default: module.NetworkDialog })))
 const ExamplesDialog = lazy(() => import("./ExamplesDialog").then((module) => ({ default: module.ExamplesDialog })))
@@ -218,6 +220,7 @@ function LoadedWorkspace({ backend, onBack }) {
   const aiDialogOpen = aiDialog || aiSettingsOpen
   const isDialogOpen = useAppStore(selectIsDialogOpen) || captureDialogOpen || loadTestDialogOpen || aiDialogOpen
   const sharedLink = useSyncExternalStore(subscribeToSharedLink, pendingSharedLink)
+  const openLink = useSyncExternalStore(subscribeToOpenLink, currentOpenLink)
 
   const setActiveTab = useAppStore((s) => s.setActiveTab)
   const newTab = useAppStore((s) => s.newTab)
@@ -263,7 +266,7 @@ function LoadedWorkspace({ backend, onBack }) {
 
   const shortcuts = useMemo(() => createShortcutHandlers(actions), [actions])
 
-  useShortcuts(shortcuts, !isDialogOpen && !sharedLink)
+  useShortcuts(shortcuts, !isDialogOpen && !sharedLink && !openLink)
   usePersistence(backend)
 
   return (
@@ -374,6 +377,9 @@ function LoadedWorkspace({ backend, onBack }) {
           />
         )}
         {sharedLink && <IncomingShareDialog reference={sharedLink} onImport={actions.importShared} onClose={forgetSharedLink} />}
+        {openLink && (
+          <OpenLinkDialog link={openLink} fetchLink={backend.fetchLink} importer={actions.importer} onImport={actions.importShared} onClose={dismissOpenLink} />
+        )}
         {cookiesDialogOpen && <CookiesDialog onClose={closeCookiesDialog} />}
         {scanDialogOpen && <ScanDialog scan={actions.scan} collection={scannedCollection} onGoToRequest={goToRequest} onClose={closeScanDialog} />}
         {settingsDialogOpen && <NetworkDialog settings={settings} actions={actions} onClose={closeSettingsDialog} />}

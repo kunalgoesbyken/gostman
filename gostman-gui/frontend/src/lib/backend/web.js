@@ -244,6 +244,7 @@ export const webBackend = {
   openapiPageSize: OPENAPI_PAGE_SIZE,
   importer: (query) => postJSON(`${PROXY_URL}?import=1`, query),
   scan: (query) => postJSON(`${PROXY_URL}?scan=1`, query),
+  fetchLink: (address) => postJSON(`${PROXY_URL}?link=1`, { url: address }),
   describeGrpc: (request, variables) => postForResult('grpc=describe', toGrpcTarget(request, variables), 'schema'),
   invokeGrpc,
   describeMcp: (request, variables) => postForResult('mcp=describe', toMcpTarget(request, variables), 'catalog'),

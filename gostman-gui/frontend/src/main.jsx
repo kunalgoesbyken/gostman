@@ -4,8 +4,10 @@ import './index.css'
 import App from './App'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { watchPreferences } from './lib/preferences'
+import { watchDesktopLinks } from './lib/backend/desktopLinks'
 
 watchPreferences()
+watchDesktopLinks()
 
 const container = document.getElementById('root')
 

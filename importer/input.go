@@ -36,7 +36,7 @@ type File struct {
 	Text string `json:"text"`
 }
 
-func decodeText(data []byte) (string, error) {
+func DecodeText(data []byte) (string, error) {
 	if len(data) >= 2 && (data[0] == 0xff && data[1] == 0xfe || data[0] == 0xfe && data[1] == 0xff) {
 		decoded, err := unicode.UTF16(unicode.LittleEndian, unicode.UseBOM).NewDecoder().Bytes(data)
 		if err != nil {
@@ -71,7 +71,7 @@ func readFile(path string, limit int64) (File, error) {
 	if err != nil {
 		return File{}, fmt.Errorf("%s: %w", path, err)
 	}
-	text, err := decodeText(data)
+	text, err := DecodeText(data)
 	if err != nil {
 		return File{}, fmt.Errorf("%s: %w", path, err)
 	}

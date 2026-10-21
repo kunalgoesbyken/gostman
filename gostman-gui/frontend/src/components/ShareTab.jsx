@@ -6,6 +6,7 @@ import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Field } from "./ui/field"
 import { Input } from "./ui/input"
+import { OpenLinkBuilder } from "./OpenLinkBuilder"
 import { SegmentedControl } from "./ui/segmented"
 import { Select } from "./ui/select"
 import { Textarea } from "./ui/textarea"
@@ -200,6 +201,7 @@ export function ShareTab({ requests, folders, environments, settings, initialFol
       {error && <p role="alert" className="text-xs text-destructive [overflow-wrap:anywhere]">{error}</p>}
       {share && delivery === SEND_LINK && <LinkOutput share={share} linkBase={linkBase} usesPassphrase={usesPassphrase} />}
       {share && delivery === SEND_FILE && <FileOutput share={share} usesPassphrase={usesPassphrase} onSaveFile={onSaveFile} />}
+      <OpenLinkBuilder linkBase={linkBase} />
     </>
   )
 }
