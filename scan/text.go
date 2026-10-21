@@ -5,6 +5,8 @@ import (
 	"unicode/utf8"
 )
 
+const maxLabelLength = 32
+
 type match struct {
 	rule
 	value string
@@ -104,6 +106,7 @@ func blockMatches(text string) []match {
 
 func (b block) find(text string) []match {
 	var found []match
+	trailing := true
 	for rest := text; ; {
 		start := strings.Index(rest, b.Opening)
 		if start < 0 {
@@ -115,30 +118,36 @@ func (b block) find(text string) []match {
 			rest = rest[len(b.Opening):]
 			continue
 		}
-		whole := b.extent(rest, header)
+		whole := rest[:header]
+		if trailing {
+			whole, trailing = b.extent(rest, header)
+		}
 		if !isPlaceholder(whole) {
 			found = append(found, match{b.rule, whole})
 		}
-		rest = rest[header:]
+		rest = rest[len(whole):]
 	}
 }
 
 func (b block) header(text string) (int, bool) {
-	end := strings.Index(text, b.Closing)
-	if end < len(b.Opening) {
+	window := text[len(b.Opening):]
+	if limit := maxLabelLength + len(b.Closing); len(window) > limit {
+		window = window[:limit]
+	}
+	end := strings.Index(window, b.Closing)
+	if end < 0 {
 		return 0, false
 	}
-	label := text[len(b.Opening):end]
-	if strings.IndexFunc(label, func(r rune) bool { return r != ' ' && !upper.has(r) }) >= 0 {
+	if strings.IndexFunc(window[:end], func(r rune) bool { return r != ' ' && !upper.has(r) }) >= 0 {
 		return 0, false
 	}
-	return end + len(b.Closing), true
+	return len(b.Opening) + end + len(b.Closing), true
 }
 
-func (b block) extent(text string, header int) string {
+func (b block) extent(text string, header int) (string, bool) {
 	trailer := strings.Index(text[header:], b.Trailer)
 	if trailer < 0 {
-		return text[:header]
+		return text[:header], false
 	}
-	return text[:header+trailer+len(b.Trailer)]
+	return text[:header+trailer+len(b.Trailer)], true
 }

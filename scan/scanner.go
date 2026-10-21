@@ -14,6 +14,7 @@ const (
 	schemeMarker   = "://"
 	userSeparator  = "@"
 	passwordMarker = ":"
+	maxFieldBytes  = 1 << 20
 )
 
 type site struct {
@@ -23,9 +24,10 @@ type site struct {
 }
 
 type scanner struct {
-	options  Options
-	findings []Finding
-	seen     map[string]bool
+	options   Options
+	findings  []Finding
+	seen      map[string]bool
+	truncated int
 }
 
 type exampleHeader struct {
@@ -41,6 +43,10 @@ type exampleRecord struct {
 }
 
 func (s *scanner) examine(at site, field, value string, check judge) {
+	if len(value) > maxFieldBytes {
+		value = value[:maxFieldBytes]
+		s.truncated++
+	}
 	found := detect(value)
 	if len(found) == 0 && check != nil {
 		found = check(value)
