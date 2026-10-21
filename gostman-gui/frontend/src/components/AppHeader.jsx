@@ -15,7 +15,7 @@ export function AppHeader({ storage, onImport, onReset, onOpenCommands, onToggle
   const paletteShortcut = useShortcutLabel("commandPalette")
 
   return (
-    <header className="relative flex h-12 shrink-0 items-center gap-3 border-b border-border bg-background px-3" style={isDesktop ? DRAG : undefined}>
+    <header className="relative flex h-12 shrink-0 items-center gap-3 border-b border-border bg-background px-3 max-sm:gap-2" style={isDesktop ? DRAG : undefined}>
       <IconButton label="Toggle sidebar" icon={PanelLeft} size="icon" onClick={onToggleSidebar} className="md:hidden" />
       {onBack && <IconButton label="Back to the landing page" icon={ArrowLeft} size="icon" onClick={onBack} />}
 
@@ -32,7 +32,7 @@ export function AppHeader({ storage, onImport, onReset, onOpenCommands, onToggle
         <StorageMenu storage={storage} />
       </div>
 
-      <div className="ml-auto flex min-w-0 items-center gap-3" style={isDesktop ? NO_DRAG : undefined}>
+      <div className="ml-auto flex min-w-0 items-center gap-3 max-sm:gap-2" style={isDesktop ? NO_DRAG : undefined}>
         <Button variant="ghost" onClick={onOpenCommands} className="hidden lg:inline-flex">
           <Search />
           Commands
