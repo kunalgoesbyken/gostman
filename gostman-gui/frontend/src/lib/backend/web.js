@@ -222,6 +222,7 @@ export const webBackend = {
   parseCurl: (command) => postForResult('curl=1', { command }, 'request'),
   openapi: (query) => postJSON(`${PROXY_URL}?openapi=1`, query),
   openapiPageSize: OPENAPI_PAGE_SIZE,
+  importer: (query) => postJSON(`${PROXY_URL}?import=1`, query),
   describeGrpc: (request, variables) => postForResult('grpc=describe', toGrpcTarget(request, variables), 'schema'),
   invokeGrpc,
   describeMcp: (request, variables) => postForResult('mcp=describe', toMcpTarget(request, variables), 'catalog'),

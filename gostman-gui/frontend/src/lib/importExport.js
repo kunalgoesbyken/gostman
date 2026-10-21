@@ -9,7 +9,7 @@ import { SCHEMES } from './authSchemes'
 import { AUTH_INHERIT, hasActiveSettings, normalizeScopeSettings, withoutActiveSettings } from './inheritance'
 import { clearToken } from './oauth'
 import { AUTH_OAUTH2, normalizeRequest } from './request'
-import { isFileRow, isSentRow, parseRows, ROW_FILE, ROW_TEXT, serializeRows } from './rows'
+import { isFileRow, isSentRow, parseRows, ROW_FILE, ROW_TEXT } from './rows'
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024
 
@@ -17,7 +17,6 @@ const MAX_NAMES_IN_WARNING = 5
 const MAX_NAME_LENGTH = 200
 const MAX_METHOD_LENGTH = 16
 
-const POSTMAN_SCHEMA_MARKER = 'postman.com/json/collection'
 const POSTMAN_SCHEMA = 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json'
 const GOSTMAN_FORMAT_VERSION = '2.0.0'
 const GRAPHQL_METHOD = 'GRAPHQL'
@@ -48,20 +47,11 @@ const asArray = (value) => (Array.isArray(value) ? value : [])
 
 const asText = (value) => (value === undefined || value === null ? '' : String(value))
 
-const createRow = (key, value, enabled = true) => ({ key, value, enabled })
-
-const rowsField = (rows) => (rows.length > 0 ? serializeRows(rows) : '')
-
 const sentRows = (json) => parseRows(json).filter(isSentRow)
 
 const apiKeyLocation = (location) => (location === AUTH_IN_QUERY ? AUTH_IN_QUERY : AUTH_IN_HEADER)
 
 const withLeadingSlash = (path) => (path.startsWith('/') ? path : `/${path}`)
-
-function withoutQuery(url) {
-  const queryStart = url.indexOf('?')
-  return queryStart === -1 ? url : url.slice(0, queryStart)
-}
 
 function safeStringify(value) {
   if (value === undefined) return ''
@@ -76,115 +66,7 @@ function safeStringify(value) {
 
 const generateId = () => crypto.randomUUID()
 
-function uniqueId(candidate, usedIds) {
-  const isFree = typeof candidate === 'string' && candidate !== '' && !usedIds.has(candidate)
-  const id = isFree ? candidate : generateId()
-  usedIds.add(id)
-  return id
-}
-
 const hasKey = (entry) => asText(entry?.key).trim() !== ''
-
-function postmanRows(entries) {
-  return asArray(entries)
-    .filter(hasKey)
-    .map((entry) => createRow(asText(entry.key), asText(entry.value), !entry.disabled))
-}
-
-const postmanUrlPart = (part) => (isPlainObject(part) ? asText(part.value) : asText(part))
-
-const joinPostmanUrlParts = (parts, separator) => (
-  Array.isArray(parts) ? parts.map(postmanUrlPart).join(separator) : asText(parts)
-)
-
-function composePostmanUrl({ protocol, host, port, path }) {
-  const hostName = joinPostmanUrlParts(host, '.')
-  if (!hostName) return ''
-  const scheme = protocol ? `${asText(protocol).replace('://', '')}://` : ''
-  const portSuffix = port ? `:${port}` : ''
-  const pathText = joinPostmanUrlParts(path, '/')
-  return `${scheme}${hostName}${portSuffix}${pathText ? withLeadingSlash(pathText) : ''}`
-}
-
-function postmanUrl(url) {
-  if (typeof url === 'string') return url
-  if (!isPlainObject(url)) return ''
-  const raw = asText(url.raw) || composePostmanUrl(url)
-  return Array.isArray(url.query) ? withoutQuery(raw) : raw
-}
-
-const POSTMAN_AUTH_READERS = {
-  noauth: () => NO_AUTH,
-  [AUTH_BASIC]: (fields) => ({ type: AUTH_BASIC, username: asText(fields.username), password: asText(fields.password) }),
-  [AUTH_BEARER]: (fields) => ({ type: AUTH_BEARER, token: asText(fields.token) }),
-  [AUTH_API_KEY]: (fields) => ({
-    type: AUTH_API_KEY,
-    key: asText(fields.key),
-    value: asText(fields.value),
-    in: apiKeyLocation(fields.in),
-  }),
-}
-
-function postmanAuthFields(auth) {
-  const fields = lookup(auth, auth.type)
-  if (isPlainObject(fields)) return fields
-  return Object.fromEntries(asArray(fields).filter(hasKey).map((field) => [field.key, field.value]))
-}
-
-function resolvePostmanAuth(auth, inherited, context) {
-  if (!isPlainObject(auth) || !auth.type || auth.type === 'inherit') return inherited
-  const read = lookup(POSTMAN_AUTH_READERS, auth.type)
-  if (read) return read(postmanAuthFields(auth))
-  context.unsupportedAuth.set(auth.type, (context.unsupportedAuth.get(auth.type) || 0) + 1)
-  return NO_AUTH
-}
-
-const POSTMAN_RAW_BODY_TYPES = { json: BODY_JSON, xml: BODY_XML, text: BODY_TEXT, html: BODY_TEXT, javascript: BODY_TEXT }
-
-function postmanFileName(source) {
-  const path = asText(Array.isArray(source) ? source[0] : source)
-  return path.split(/[\\/]/).pop()
-}
-
-function postmanFormDataRow(entry) {
-  const row = createRow(asText(entry.key), '', !entry.disabled)
-  if (entry.type !== ROW_FILE) return { ...row, value: asText(entry.value), type: ROW_TEXT }
-  return {
-    ...row,
-    type: ROW_FILE,
-    fileName: postmanFileName(entry.src),
-    contentType: asText(entry.contentType),
-    data: '',
-  }
-}
-
-function postmanFormDataBody(body) {
-  const rows = asArray(body.formdata).filter(hasKey).map(postmanFormDataRow)
-  return { body: rowsField(rows), bodyType: BODY_MULTIPART, needsFiles: rows.some(isFileRow) }
-}
-
-function postmanGraphQLVariables(variables) {
-  if (typeof variables === 'string') return variables
-  return isPlainObject(variables) ? JSON.stringify(variables, null, 2) : ''
-}
-
-const POSTMAN_BODY_READERS = {
-  raw: (body) => ({ body: asText(body.raw), bodyType: lookup(POSTMAN_RAW_BODY_TYPES, body.options?.raw?.language) || '' }),
-  urlencoded: (body) => ({ body: rowsField(postmanRows(body.urlencoded)), bodyType: BODY_FORM }),
-  formdata: postmanFormDataBody,
-  file: () => ({ body: '', bodyType: BODY_BINARY, needsFiles: true }),
-  graphql: (body) => ({
-    method: GRAPHQL_METHOD,
-    graphqlQuery: asText(body.graphql?.query),
-    graphqlVariables: postmanGraphQLVariables(body.graphql?.variables),
-  }),
-}
-
-function readPostmanBody(body) {
-  if (!isPlainObject(body) || body.disabled) return {}
-  const read = lookup(POSTMAN_BODY_READERS, body.mode)
-  return read ? read(body) : {}
-}
 
 export const countActiveRequests = (data) => (
   data.requests.filter(hasActiveContent).length + [...data.folders, data.settings].filter(hasActiveSettings).length
@@ -197,111 +79,15 @@ export const withoutActiveRequests = (data) => ({
   settings: withoutActiveSettings(data.settings),
 })
 
-const tlsWarning = (requestNames) => (
-  `TLS verification was disabled in the collection for ${listNames(requestNames)}; it was kept enabled. Turn it off in the request's Settings tab if you trust these hosts.`
-)
-
-function readPostmanRequest(item, folderId, inheritedAuth, context) {
-  const source = isPlainObject(item.request) ? item.request : { url: item.request }
-  const { needsFiles, ...body } = readPostmanBody(source.body)
-  const name = asText(item.name).trim() || UNTITLED_REQUEST
-  if (needsFiles) context.requestsNeedingFiles.push(name)
-  return {
-    id: uniqueId(item.id, context.usedIds),
-    name,
-    method: asText(source.method),
-    url: postmanUrl(source.url),
-    headers: rowsField(postmanRows(source.header)),
-    queryParams: rowsField(postmanRows(source.url?.query).map((row, position) => ({ ...row, position }))),
-    folderId,
-    auth: resolvePostmanAuth(source.auth, inheritedAuth, context),
-    options: {
-      noFollowRedirects: item.protocolProfileBehavior?.followRedirects === false,
-      insecureTLS: item.protocolProfileBehavior?.strictSSL === false,
-    },
-    ...body,
-  }
-}
-
-function readPostmanFolder(item, parentId, inheritedAuth, context, depth) {
-  const folder = {
-    id: uniqueId(item.id, context.usedIds),
-    name: asText(item.name).trim() || UNTITLED_FOLDER,
-    isOpen: false,
-    parentId,
-  }
-  context.folders.push(folder)
-  const auth = resolvePostmanAuth(item.auth, inheritedAuth, context)
-  readPostmanItems(item.item, folder.id, auth, context, depth + 1)
-}
-
-function readPostmanItems(items, parentId, inheritedAuth, context, depth = 0) {
-  if (depth > MAX_FOLDER_DEPTH) {
-    context.depthExceeded = true
-    return
-  }
-  for (const item of asArray(items).filter(isPlainObject)) {
-    if (Array.isArray(item.item)) {
-      readPostmanFolder(item, parentId, inheritedAuth, context, depth)
-    } else if (item.request) {
-      context.requests.push(readPostmanRequest(item, parentId, inheritedAuth, context))
-    }
-  }
-}
-
-function postmanVariables(entries) {
-  return Object.fromEntries(
-    asArray(entries)
-      .filter((entry) => hasKey(entry) && !entry.disabled)
-      .map((entry) => [entry.key, asText(entry.value)])
-  )
-}
-
 function listNames(names) {
   const shown = names.slice(0, MAX_NAMES_IN_WARNING).map((name) => `"${name}"`).join(', ')
   const hidden = names.length - MAX_NAMES_IN_WARNING
   return hidden > 0 ? `${shown} and ${hidden} more` : shown
 }
 
-function postmanWarnings(context) {
-  const warnings = Array.from(context.unsupportedAuth, ([type, count]) => (
-    `"${type}" auth is not supported and was left out (${pluralize(count, 'place')}).`
-  ))
-  if (context.requestsNeedingFiles.length > 0) {
-    warnings.push(`Files are not part of a Postman export. Attach them again in ${listNames(context.requestsNeedingFiles)}.`)
-  }
-  if (context.depthExceeded) {
-    warnings.push(`Folders nested deeper than ${MAX_FOLDER_DEPTH} levels were skipped.`)
-  }
-  return warnings
-}
-
-function parsePostmanCollection(source) {
-  try {
-    const data = typeof source === 'string' ? JSON.parse(source) : source
-    if (!asText(data?.info?.schema).includes(POSTMAN_SCHEMA_MARKER)) {
-      return { success: false, error: 'Invalid Postman collection: info.schema is missing or is not a Postman collection schema' }
-    }
-    const context = {
-      requests: [],
-      folders: [],
-      usedIds: new Set(),
-      unsupportedAuth: new Map(),
-      requestsNeedingFiles: [],
-      depthExceeded: false,
-    }
-    readPostmanItems(data.item, ROOT_ID, resolvePostmanAuth(data.auth, NO_AUTH, context), context)
-    return {
-      success: true,
-      requests: context.requests,
-      folders: context.folders,
-      variables: postmanVariables(data.variable),
-      warnings: postmanWarnings(context),
-    }
-  } catch (error) {
-    return { success: false, error: error.message || 'Invalid Postman collection format' }
-  }
-}
+const tlsWarning = (requestNames) => (
+  `TLS verification was disabled in the collection for ${listNames(requestNames)}; it was kept enabled. Turn it off in the request's Settings tab if you trust these hosts.`
+)
 
 const BINARY_SCHEMA = { type: 'string', format: 'binary' }
 const OPENAPI_RESERVED_HEADERS = ['accept', 'content-type', 'authorization']
@@ -730,13 +516,11 @@ function detectImportFormat(text) {
     return 'unknown'
   }
   if (!isPlainObject(data)) return 'unknown'
-  if (asText(data.info?.schema).includes(POSTMAN_SCHEMA_MARKER) || data.info?._postman_id) return 'postman'
   if (data.gostman) return 'gostman'
   return 'unknown'
 }
 
 const IMPORT_READERS = new Map([
-  ['postman', { label: 'Postman collection', read: parsePostmanCollection }],
   ['gostman', { label: 'Gostman export', read: (text) => importGostman(JSON.parse(text)) }],
 ])
 

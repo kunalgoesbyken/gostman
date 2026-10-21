@@ -170,6 +170,10 @@ export function GitVersion(arg1, arg2) {
   return window['go']['main']['App']['GitVersion'](arg1, arg2);
 }
 
+export function Import(arg1) {
+  return window['go']['main']['App']['Import'](arg1);
+}
+
 export function InvokeGrpc(arg1, arg2) {
   return window['go']['main']['App']['InvokeGrpc'](arg1, arg2);
 }

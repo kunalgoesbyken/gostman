@@ -19,8 +19,10 @@ export function ImportExportDialog({
   onImport,
   onImportShared,
   openapi,
+  importer,
   onPickSpecFile,
   onSaveFile,
+  onSaveBase64,
   onClose,
 }) {
   const [activeTab, setActiveTab] = useState(initialTab)
@@ -37,7 +39,7 @@ export function ImportExportDialog({
         </DialogHeader>
 
         <TabsContent value="import" className={TAB_CLASS}>
-          <ImportTab openapi={openapi} onPickSpecFile={onPickSpecFile} onImport={onImport} onImportShared={onImportShared} onClose={onClose} />
+          <ImportTab openapi={openapi} importer={importer} onPickSpecFile={onPickSpecFile} onImport={onImport} onImportShared={onImportShared} onClose={onClose} />
         </TabsContent>
         <TabsContent value="export" className={TAB_CLASS}>
           <ExportTab
@@ -46,7 +48,9 @@ export function ImportExportDialog({
             environments={environments}
             variables={variables}
             settings={settings}
+            importer={importer}
             onSaveFile={onSaveFile}
+            onSaveBase64={onSaveBase64}
           />
         </TabsContent>
         <TabsContent value="share" className={TAB_CLASS}>

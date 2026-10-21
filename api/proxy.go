@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/krockxz/gostman/engine"
+	"github.com/krockxz/gostman/importer"
 	"github.com/krockxz/gostman/mcpclient"
 	"github.com/krockxz/gostman/openapi"
 	"github.com/krockxz/gostman/rpc"
@@ -19,6 +20,8 @@ const (
 	maxOpenAPIReplyBytes = 4 << 20
 	maxOpenAPIRefs       = 10
 	maxOpenAPIBytes      = openapi.DefaultMaxBytes
+	maxImportBytes       = 10 << 20
+	maxImportReplyBytes  = 12 << 20
 
 	actionDescribe = "describe"
 	actionInvoke   = "invoke"
@@ -91,6 +94,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, invokeMcp(r))
 	case query.Has("openapi"):
 		writeJSON(w, readOpenAPI(r))
+	case query.Has("import"):
+		writeJSON(w, runImport(r))
 	case query.Has("curl"):
 		writeJSON(w, parseCurl(r))
 	case query.Has("prepare"):
@@ -192,6 +197,22 @@ func readOpenAPI(r *http.Request) openapi.Reply {
 	reply := openapi.Handle(r.Context(), query, openapi.Options{Policy: Policy, MaxBytes: maxOpenAPIBytes, MaxRefs: maxOpenAPIRefs})
 	if encoded, err := json.Marshal(reply); err == nil && len(encoded) > maxOpenAPIReplyBytes {
 		return openapi.Reply{Error: "the answer is too large for the web app, so it is read in smaller parts"}
+	}
+	return reply
+}
+
+func runImport(r *http.Request) importer.Reply {
+	var query importer.Query
+	if err := json.NewDecoder(r.Body).Decode(&query); err != nil {
+		return importer.Reply{Error: err.Error()}
+	}
+	config := importer.Config{
+		OpenAPI:  openapi.Options{Policy: Policy, MaxBytes: maxImportBytes, MaxRefs: maxOpenAPIRefs},
+		MaxBytes: maxImportBytes,
+	}
+	reply := importer.Handle(r.Context(), query, config)
+	if encoded, err := json.Marshal(reply); err == nil && len(encoded) > maxImportReplyBytes {
+		return importer.Reply{Error: "the result is too large for the web app"}
 	}
 	return reply
 }

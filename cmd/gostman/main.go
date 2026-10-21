@@ -22,6 +22,8 @@ const (
   gostman docs <workspace folder | export.json> [flags]
   gostman capture --upstream <url> [flags]
   gostman init [folder]
+  gostman import <file | folder> --out <workspace folder> [flags]
+  gostman export <workspace folder> --format <format> --out <path>
   gostman version
 
 run
@@ -134,6 +136,26 @@ init
   Create an empty workspace in the folder (default: the current folder) and
   print how to register the MCP server with a coding agent.
 
+import
+  Create a workspace from an Insomnia, HAR, WSDL, Bruno, Postman or OpenAPI
+  file or folder. Imports add data only; scripts and OAuth settings are kept
+  and reported, tokens and cookie values are never carried over.
+
+  --format <name>       auto, insomnia, har, wsdl, bruno, postman or openapi
+                        (default auto: detected from the content)
+  --out <folder>        workspace folder to create (required)
+  --skip-static         HAR: leave out images, fonts, styles and scripts
+
+export
+  Write a workspace as bruno (a folder of .bru files), openapi, curl (a shell
+  script; credentials become environment variable placeholders) or har.
+
+  --format <name>       bruno, openapi, curl or har
+  --out <path>          file, or folder for bruno (required)
+  --include-secrets     write literal credentials; by default passwords, tokens
+                        and secret-named headers or variables become {{NAME}}
+                        placeholders and re-import as empty variables
+
 Exit codes:
   0  every request and test passed
   1  a request or a test failed
@@ -169,6 +191,10 @@ func dispatch(arguments []string, stdout, stderr *os.File) int {
 		return docsCommand(arguments[1:], stdout, stderr)
 	case "capture":
 		return captureCommand(arguments[1:], stdout, stderr)
+	case "import":
+		return importCommand(arguments[1:], stdout, stderr)
+	case "export":
+		return exportCommand(arguments[1:], stdout, stderr)
 	case "init":
 		return initCommand(arguments[1:], stdout, stderr)
 	case "version", "--version":
