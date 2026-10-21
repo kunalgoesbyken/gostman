@@ -3,8 +3,12 @@ import { JsonView, darkStyles } from 'react-json-view-lite'
 import 'react-json-view-lite/dist/index.css'
 import {
   AlertTriangle, BookmarkPlus, Check, ChevronDown, ChevronUp, Cookie, Copy, Download, FileDigit, FileText, FileX, List, Loader2,
-  Maximize2, Minimize2, Scissors,
+  Maximize2, Minimize2, Scissors, Search,
 } from "lucide-react"
+import { FilterBar, SearchBar } from "./ResponseSearchBar"
+import { HighlightedText } from "./HighlightedText"
+import { useDebouncedValue } from "../hooks/useDebouncedValue"
+import { MAX_MATCHES, filterJson, findMatches, stepIndex } from "../lib/responseSearch"
 import { Badge } from "./ui/badge"
 import { IconButton } from "./ui/button"
 import { DataTable } from "./ui/dataTable"
@@ -29,6 +33,8 @@ const TAB_HEADERS = 'headers'
 const TAB_COOKIES = 'cookies'
 const TAB_TESTS = 'tests'
 const NO_VALUE = '—'
+const SEARCH_DEBOUNCE_MS = 200
+const NO_FILTER = { active: false }
 
 const VIEW_LABELS = { pretty: 'Pretty', raw: 'Raw', preview: 'Preview' }
 
@@ -97,7 +103,7 @@ function CopyButton({ text }) {
   return <IconButton label={copied ? "Copied" : "Copy body"} icon={copied ? Check : Copy} onClick={copy} />
 }
 
-function TextBody({ text }) {
+function TextBody({ text, highlight }) {
   const shown = displayableText(text)
   return (
     <>
@@ -106,7 +112,11 @@ function TextBody({ text }) {
           Showing the first {formatSize(TEXT_DISPLAY_LIMIT)} of this body. Download it to see everything.
         </Notice>
       )}
-      <pre className="whitespace-pre-wrap p-3 font-mono text-xs leading-relaxed text-foreground">{shown}</pre>
+      <pre className="whitespace-pre-wrap p-3 font-mono text-xs leading-relaxed text-foreground">
+        {highlight
+          ? <HighlightedText text={shown} matches={highlight.matches} length={highlight.length} activeIndex={highlight.index} />
+          : shown}
+      </pre>
     </>
   )
 }
@@ -149,7 +159,18 @@ function MediaPreview({ response, kind }) {
   )
 }
 
-function ResponseBody({ response, kind, view, json }) {
+function PrettyBody({ json, filtered, highlight }) {
+  const data = filtered ? filtered.value : json
+  if (highlight) return <TextBody text={JSON.stringify(data, null, 2)} highlight={highlight} />
+  if (data === null || typeof data !== 'object') return <TextBody text={JSON.stringify(data, null, 2)} />
+  return (
+    <div className="p-3">
+      <JsonView data={data} shouldExpandNode={(level) => level < JSON_EXPANDED_DEPTH} style={JSON_STYLE} />
+    </div>
+  )
+}
+
+function ResponseBody({ response, kind, view, json, filtered, highlight }) {
   if (kind === BODY_KINDS.EMPTY) {
     return (
       <EmptyState
@@ -160,14 +181,8 @@ function ResponseBody({ response, kind, view, json }) {
     )
   }
   if (kind === BODY_KINDS.BINARY) return <BinaryBody response={response} />
-  if (view === 'pretty') {
-    return (
-      <div className="p-3">
-        <JsonView data={json} shouldExpandNode={(level) => level < JSON_EXPANDED_DEPTH} style={JSON_STYLE} />
-      </div>
-    )
-  }
-  if (view === 'raw') return <TextBody text={response.body} />
+  if (view === 'pretty') return <PrettyBody json={json} filtered={filtered} highlight={highlight} />
+  if (view === 'raw') return <TextBody text={filtered ? filtered.text : response.body} highlight={highlight} />
   if (kind === BODY_KINDS.HTML) {
     return <iframe srcDoc={response.body} title="Response preview" className="block h-full w-full border-none bg-white" sandbox="" />
   }
@@ -257,10 +272,48 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
   const showsBody = isOpen && activeTab === TAB_BODY
   const showsTabs = isOpen && hasResult
 
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [matchIndex, setMatchIndex] = useState(0)
+  const [filterPath, setFilterPath] = useState('')
+  const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS)
+  const debouncedPath = useDebouncedValue(filterPath, SEARCH_DEBOUNCE_MS)
+
+  const filter = useMemo(() => (json === null ? NO_FILTER : filterJson(json, debouncedPath)), [json, debouncedPath])
+  const filtered = filter.active && !filter.error ? filter : null
+  const canSearch = showsBody && hasBody && (view === 'pretty' || view === 'raw')
+  const searching = searchOpen && canSearch && debouncedQuery !== ''
+  const searchText = useMemo(() => {
+    if (!searching) return ''
+    const base = view === 'pretty' ? JSON.stringify(filtered ? filtered.value : json, null, 2) : (filtered ? filtered.text : text)
+    return displayableText(base)
+  }, [searching, view, filtered, json, text])
+  const matches = useMemo(() => findMatches(searchText, debouncedQuery), [searchText, debouncedQuery])
+  const activeMatch = Math.min(matchIndex, Math.max(matches.length - 1, 0))
+  const highlight = searching ? { matches, length: debouncedQuery.length, index: activeMatch } : null
+  const copyText = filtered ? filtered.text : text
+
   useEffect(() => {
     setActiveTab(TAB_BODY)
     setSelectedView(null)
+    setSearchOpen(false)
+    setQuery('')
+    setFilterPath('')
   }, [response])
+
+  useEffect(() => setMatchIndex(0), [debouncedQuery, view, filtered])
+
+  const stepMatch = useCallback((direction) => setMatchIndex(stepIndex(activeMatch, matches.length, direction)), [activeMatch, matches.length])
+  const closeSearch = useCallback(() => {
+    setSearchOpen(false)
+    setQuery('')
+    containerRef.current?.focus()
+  }, [containerRef])
+  const handleKeyDown = (event) => {
+    if (!canSearch || !(event.ctrlKey || event.metaKey) || event.altKey || event.key.toLowerCase() !== 'f') return
+    event.preventDefault()
+    setSearchOpen(true)
+  }
 
   const toggleFullscreen = useCallback(() => setIsFullscreen((current) => !current), [])
   const toggleCollapse = useCallback(() => setIsCollapsed((current) => !current), [])
@@ -278,7 +331,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
       if (cookies.length === 0) return <EmptyState icon={Cookie} title="No cookies" description="The server sent no cookies." />
       return <DataTable columns={COOKIE_COLUMNS} rows={cookies} />
     }
-    return <ResponseBody response={shown} kind={kind} view={view} json={json} />
+    return <ResponseBody response={shown} kind={kind} view={view} json={json} filtered={filtered} highlight={highlight} />
   }
 
   return (
@@ -298,7 +351,9 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
       <section
         ref={containerRef}
         aria-label="Response"
-        className={`flex min-h-0 flex-col bg-background ${isOpen && !isFullscreen ? '' : 'border-t border-border'}`}
+        tabIndex={-1}
+        onKeyDown={handleKeyDown}
+        className={`flex min-h-0 flex-col bg-background outline-none ${isOpen && !isFullscreen ? '' : 'border-t border-border'}`}
         style={panelStyleFor(isFullscreen, isCollapsed, panelShare)}
       >
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
@@ -330,7 +385,14 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
             </div>
 
             <div className="flex shrink-0 items-center gap-1">
-              {showsBody && text && <CopyButton text={text} />}
+              {canSearch && (
+                <IconButton
+                  label={searchOpen ? "Close search" : "Search body (Ctrl+F)"}
+                  icon={Search}
+                  onClick={() => (searchOpen ? closeSearch() : setSearchOpen(true))}
+                />
+              )}
+              {showsBody && copyText && <CopyButton text={copyText} />}
               {hasBody && <IconButton label="Download body" icon={Download} onClick={onDownload} />}
               {canSaveAsExample(shown) && <IconButton label="Save as example" icon={BookmarkPlus} onClick={onSaveExample} />}
               <IconButton
@@ -356,6 +418,22 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
                 onChange={setSelectedView}
               />
             </Toolbar>
+          )}
+
+          {showsBody && hasBody && json !== null && (
+            <FilterBar path={filterPath} onPathChange={setFilterPath} error={filter.error} />
+          )}
+
+          {searchOpen && canSearch && (
+            <SearchBar
+              query={query}
+              onQueryChange={setQuery}
+              index={activeMatch}
+              count={matches.length}
+              capped={matches.length >= MAX_MATCHES}
+              onStep={stepMatch}
+              onClose={closeSearch}
+            />
           )}
 
           {isOpen && (

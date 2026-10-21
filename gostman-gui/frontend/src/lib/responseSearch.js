@@ -1,0 +1,31 @@
+import { evaluateJsonPath } from './chaining'
+
+export const MAX_MATCHES = 2000
+
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+export function findMatches(text, query) {
+  if (query === '' || text === '') return []
+  const pattern = new RegExp(escapeRegExp(query), 'gi')
+  const matches = []
+  let match = pattern.exec(text)
+  while (match && matches.length < MAX_MATCHES) {
+    matches.push(match.index)
+    match = pattern.exec(text)
+  }
+  return matches
+}
+
+export function stepIndex(current, count, direction) {
+  if (count === 0) return 0
+  return (current + direction + count) % count
+}
+
+export function filterJson(json, path) {
+  const trimmed = path.trim()
+  if (trimmed === '') return { active: false }
+  const { value, error } = evaluateJsonPath(json, trimmed)
+  if (error) return { active: true, error: `Invalid JSONPath: ${error}` }
+  if (value === undefined) return { active: true, error: 'Nothing in the body matches this path' }
+  return { active: true, value, text: JSON.stringify(value, null, 2) }
+}
