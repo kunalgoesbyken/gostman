@@ -7,7 +7,7 @@ import { AUTH_OAUTH2, normalizeRequest } from '../request'
 import { isFileRow, isSentRow, parseRows } from '../rows'
 import { isWebSocketURL } from '../socketUrl'
 import { CURL_FILE, CURL_FORM, CURL_MULTIPART, CURL_RAW, curlCommand } from './curl'
-import { REDACTED, maskHeader, maskJsonText, maskParameter, maskSecret, maskUrl } from './redaction'
+import { REDACTED, maskHeader, maskJsonNode, maskJsonText, maskParameter, maskSecret, maskUrl } from './redaction'
 
 export const PROTOCOL_HTTP = 'http'
 export const PROTOCOL_GRAPHQL = 'graphql'
@@ -118,7 +118,7 @@ function curlBody(request) {
 
 export function graphqlPayload(request) {
   const variables = parseJSON(request.graphqlVariables, {})
-  return JSON.stringify({ query: request.graphqlQuery, variables: isPlainObject(variables) ? variables : {} }, null, 2)
+  return JSON.stringify({ query: request.graphqlQuery, variables: isPlainObject(variables) ? maskJsonNode(variables) : {} }, null, 2)
 }
 
 function withQuery(url, entries) {
