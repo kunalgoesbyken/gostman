@@ -59,6 +59,11 @@ const createShortcutHandlers = (actions) => {
     toggleSidebar: () => store().toggleSidebar(),
     focusSidebarSearch,
   }
+  if (actions.storage) {
+    handlers.workspaceSwitcher = actions.storage.openSwitcher
+    handlers.nextWorkspace = () => actions.storage.cycle(1)
+    handlers.previousWorkspace = () => actions.storage.cycle(-1)
+  }
   for (let position = 1; position <= 9; position += 1) handlers[`tab${position}`] = () => store().activateTabAt(position)
   return handlers
 }
@@ -339,7 +344,7 @@ function LoadedWorkspace({ backend, onBack }) {
 
       <StatusBar onOpenMock={actions.mock.open} onOpenCapture={actions.capture.open} />
 
-      <AppDialogs onCommand={actions.runCommand} secrets={actions.secrets} />
+      <AppDialogs onCommand={actions.runCommand} secrets={actions.secrets} hasWorkspaces={Boolean(actions.storage)} />
     </div>
   )
 }

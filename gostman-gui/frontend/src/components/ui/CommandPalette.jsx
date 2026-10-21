@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
-  Bookmark, Clock, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Plus, Radio, RotateCcw, Save, Search, Send,
+  Bookmark, Clock, Folder, FolderOpen, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Plus, Radio, RotateCcw, Save, Search, Send,
   Server, Settings, Share2, SlidersHorizontal, Undo2, Upload, X,
 } from "lucide-react"
 import { MethodTag } from "../MethodTag"
 import { fuzzyScore } from "../../lib/fuzzy"
 import { PREFERENCES_TEXT } from "../../lib/preferencesText"
+import { WORKSPACE_TEXT } from "../../lib/workspaceText"
 import { useShortcutLabel } from "../../hooks/useShortcuts"
 import { cn } from "../../lib/utils"
 
@@ -33,6 +34,25 @@ const COMMANDS = [
   { id: "clear-history", label: "Clear history", description: "Delete every history entry", icon: History, action: "clearHistory" },
   { id: "reset", label: "Reset app", description: "Delete all data and reload", icon: RotateCcw, action: "reset", destructive: true },
 ]
+
+const workspaceCommands = (workspaces) => {
+  if (!workspaces) return []
+  const switcher = [
+    { id: "workspace-switcher", label: WORKSPACE_TEXT.switcherCommand, description: WORKSPACE_TEXT.switcherDescription, icon: FolderOpen, shortcutId: "workspaceSwitcher", action: "workspaceSwitcher" },
+    { id: "workspace-open", label: WORKSPACE_TEXT.openFolder, description: WORKSPACE_TEXT.switcherDescription, icon: FolderOpen, action: "openFolder" },
+  ]
+  const others = workspaces
+    .filter((workspace) => !workspace.current && !workspace.missing)
+    .map((workspace) => ({
+      id: `workspace-${workspace.path}`,
+      label: WORKSPACE_TEXT.switchTo(workspace.name),
+      description: WORKSPACE_TEXT.switchDescription,
+      icon: Folder,
+      action: "switchWorkspace",
+      payload: workspace.path,
+    }))
+  return [...switcher, ...others]
+}
 
 const SELECTION_STEPS = { ArrowDown: 1, ArrowUp: -1 }
 const MAX_REQUEST_RESULTS = 12
@@ -192,14 +212,14 @@ function SectionTitle({ kind }) {
   return <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{SECTION_TITLES[kind]}</p>
 }
 
-function OpenCommandPalette({ mode, environments, activeEnvironmentId, requests, folders, history, onClose, onCommand, onShowShortcuts }) {
+function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspaces, requests, folders, history, onClose, onCommand, onShowShortcuts }) {
   const [query, setQuery] = useState("")
   const [selectedIndex, setSelectedIndex] = useState(0)
   const inputRef = useRef(null)
 
   const commands = useMemo(
-    () => commandItems([...COMMANDS, ...environmentCommands(environments, activeEnvironmentId)]),
-    [environments, activeEnvironmentId]
+    () => commandItems([...COMMANDS, ...workspaceCommands(workspaces), ...environmentCommands(environments, activeEnvironmentId)]),
+    [environments, activeEnvironmentId, workspaces]
   )
   const requestRows = useMemo(() => requestItems(requests, folders), [requests, folders])
   const historyRows = useMemo(() => historyItems(history), [history])

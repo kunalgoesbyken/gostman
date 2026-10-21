@@ -1,16 +1,11 @@
 import { pluralize } from './dataUtils'
 import { createGitActions } from './gitSession'
+import { WORKSPACE_TEXT as TEXT } from './workspaceText'
 import { useAppStore } from '../store/appStore'
 
-const OPEN_FAILED = 'Could not open the folder'
-const SAVE_FAILED = 'Could not save the collection to the folder'
-const RELOAD_FAILED = 'Could not reload the folder'
-const CLONE_FAILED = 'Could not clone the repository'
 const CLONE_TITLE = 'Clone repository'
 const CLONE_MESSAGE = 'Address of the repository to clone. Sign-in uses your git credential helper or SSH agent. Next, choose the folder to clone into.'
 const CLONE_PLACEHOLDER = 'https://github.com/owner/repository.git'
-const CLOSE_FAILED = 'Could not close the folder'
-const TRUST_FAILED = 'Could not trust the folder'
 const TRUST_PROMPT = 'Requests in this folder can carry scripts and OAuth 2.0 settings. They run when a request is sent and can read your variables, so trust the folder only if you know where its files came from.'
 const SKIPPED_NOTE = 'These files were skipped and left unchanged. Fix them, then choose Reload from disk.'
 
@@ -42,7 +37,9 @@ export function createStorageActions(backend) {
     const switched = storage.change(async () => {
       await backend.saveFolders(folders)
       await backend.saveEnvironments(environments, activeEnvironmentId)
-      return change()
+      const status = await change()
+      store().enterWorkspace(status)
+      return status
     })
     store().suspendPersistence()
     return switched
@@ -55,7 +52,7 @@ export function createStorageActions(backend) {
     if (path) await switchAndReport(() => use(path))
   }
 
-  const clone = attempt(CLONE_FAILED, async (address) => {
+  const clone = attempt(TEXT.cloneFailed, async (address) => {
     const parent = await storage.pickFolder()
     if (parent) await switchAndReport(() => storage.git.clone(address.trim(), parent))
   })
@@ -64,23 +61,75 @@ export function createStorageActions(backend) {
     if (address?.trim()) clone(address)
   })
 
-  const trust = attempt(TRUST_FAILED, async () => {
+  const trust = attempt(TEXT.trustFailed, async () => {
     await storage.trust()
     store().liftRestriction()
   })
 
   const confirmTrust = () => store().showConfirm('Trust this folder?', TRUST_PROMPT, trust, null, 'default', 'Trust')
 
+  const adopt = (status) => store().adoptWorkspaceStatus(status)
+
+  const pin = attempt(TEXT.pinFailed, async (path, pinned) => adopt(await storage.pin(path, pinned)))
+
+  const rename = attempt(TEXT.renameFailed, async (path, name) => adopt(await storage.rename(path, name)))
+
+  const forget = attempt(TEXT.forgetFailed, async (path) => {
+    adopt(await storage.forget(path))
+    store().leaveWorkspace(path)
+  })
+
+  const reveal = attempt(TEXT.revealFailed, (path) => storage.reveal(path))
+
+  const promptRename = (entry) => store().showPrompt(
+    TEXT.renameTitle,
+    TEXT.renameMessage,
+    entry.name,
+    '',
+    (name) => rename(entry.path, name ?? ''),
+  )
+
+  const confirmForget = (entry) => store().showConfirm(
+    TEXT.forgetTitle,
+    TEXT.forgetMessage(entry.name),
+    () => forget(entry.path),
+    null,
+    'destructive',
+    TEXT.forgetConfirm,
+  )
+
+  const refresh = attempt(TEXT.listFailed, async () => {
+    const status = await storage.status()
+    adopt(status)
+    if (status.notice) store().showAlert(TEXT.alertTitle, status.notice, 'OK', 'warning')
+  })
+
+  const reopen = attempt(TEXT.openFailed, (path) => switchAndReport(() => storage.openFolder(path)))
+
+  const cycle = (step) => {
+    const reachable = store().workspaceStatus.workspaces.filter((entry) => !entry.missing)
+    if (reachable.length < 2) return
+    const index = reachable.findIndex((entry) => entry.current)
+    const from = index < 0 && step < 0 ? 0 : index
+    reopen(reachable[(from + step + reachable.length) % reachable.length].path)
+  }
+
   return {
-    status: storage.status,
+    refresh,
+    cycle,
+    openSwitcher: () => store().setWorkspaceMenuOpen(true),
     confirmTrust,
     git: createGitActions(storage.git),
     promptClone,
     showProblems,
-    openFolder: attempt(OPEN_FAILED, pickThen(storage.openFolder)),
-    saveToFolder: attempt(SAVE_FAILED, pickThen(storage.saveToFolder)),
-    reopen: attempt(OPEN_FAILED, (path) => switchAndReport(() => storage.openFolder(path))),
-    reload: attempt(RELOAD_FAILED, () => switchAndReport(storage.reload)),
-    close: attempt(CLOSE_FAILED, () => switchAndReport(storage.close)),
+    pin,
+    promptRename,
+    confirmForget,
+    reveal,
+    openFolder: attempt(TEXT.openFailed, pickThen(storage.openFolder)),
+    saveToFolder: attempt(TEXT.saveFailed, pickThen(storage.saveToFolder)),
+    reopen,
+    reload: attempt(TEXT.reloadFailed, () => switchAndReport(storage.reload)),
+    close: attempt(TEXT.closeFailed, () => switchAndReport(storage.close)),
   }
 }

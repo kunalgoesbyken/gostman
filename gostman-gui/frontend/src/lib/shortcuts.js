@@ -30,6 +30,9 @@ export const SHORTCUTS = [
   })),
   { id: 'toggleSidebar', group: 'Navigation', label: 'Toggle sidebar', mod: true, key: 'b' },
   { id: 'focusSidebarSearch', group: 'Navigation', label: 'Search the sidebar', mod: true, shift: true, key: 'f' },
+  { id: 'workspaceSwitcher', group: 'Navigation', label: 'Switch workspace', mod: true, shift: true, key: 'o', web: false },
+  { id: 'nextWorkspace', group: 'Navigation', label: 'Next workspace', mod: true, shift: true, code: 'BracketRight', web: false },
+  { id: 'previousWorkspace', group: 'Navigation', label: 'Previous workspace', mod: true, shift: true, code: 'BracketLeft', web: false },
 ]
 
 const byId = new Map(SHORTCUTS.map((shortcut) => [shortcut.id, shortcut]))

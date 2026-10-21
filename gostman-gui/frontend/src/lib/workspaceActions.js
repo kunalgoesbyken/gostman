@@ -367,6 +367,8 @@ export function createWorkspaceActions(backend) {
     )
   }
 
+  const storageActions = createStorageActions(backend)
+
   const commands = {
     newRequest: () => store().newTab(),
     saveRequest: save,
@@ -383,6 +385,9 @@ export function createWorkspaceActions(backend) {
     newFolder: () => createFolder(),
     clearHistory,
     switchEnvironment: (environmentId) => store().setActiveEnvironment(environmentId),
+    workspaceSwitcher: () => storageActions?.openSwitcher(),
+    openFolder: () => storageActions?.openFolder(),
+    switchWorkspace: (path) => storageActions?.reopen(path),
     export: () => store().openImportDialog(EXPORT_TAB),
     share: () => store().openImportDialog(SHARE_TAB),
     runCollection: () => store().openRunner(),
@@ -403,7 +408,7 @@ export function createWorkspaceActions(backend) {
     mock,
     capture,
     secrets: backend.secrets,
-    storage: createStorageActions(backend),
+    storage: storageActions,
     runExtractors,
     getToken,
     forgetToken,

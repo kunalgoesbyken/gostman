@@ -1,67 +1,16 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { AlertTriangle, ChevronDown, Download, Folder, FolderOpen, GitBranch, HardDrive, History, RefreshCw, Save, ShieldAlert, ShieldCheck, X } from "lucide-react"
+import { useCallback, useEffect, useRef } from "react"
+import { AlertTriangle, ChevronDown, Folder, HardDrive, ShieldAlert } from "lucide-react"
 import { Button } from "./ui/button"
-import { ContextMenu } from "./ui/ContextMenu"
 import { GitPanel } from "./GitPanel"
-import { pluralize } from "../lib/dataUtils"
-import { openGit } from "../lib/gitSession"
+import { WorkspaceMenu } from "./WorkspaceMenu"
+import { useShortcutLabel } from "../hooks/useShortcuts"
+import { hintWithShortcut } from "../lib/shortcuts"
+import { WORKSPACE_TEXT as TEXT } from "../lib/workspaceText"
 import { useAppStore } from "../store/appStore"
 
-const LOCAL_LABEL = "This computer"
-const LOCAL_HINT = "The collection is saved in the app's data on this computer"
-const BROWSER_LABEL = "This browser"
-const BROWSER_HINT = "The collection is saved in this browser. Keeping it as files in a folder needs the desktop app."
-const RESTRICTED_HINT = "Scripts and OAuth 2.0 settings in this folder are off until you trust it"
-const NO_FOLDER = { path: "", name: "", recent: [], problems: [] }
 const BUTTON_CLASS = "min-w-0 max-w-[14rem] shrink"
 
-const messageOf = (error) => error?.message || String(error)
-
 const keepMenuOpenState = (event) => event.stopPropagation()
-
-function menuItems(status, storage, isRestricted) {
-  const hasFolder = status.path !== ""
-  const recent = status.recent.map(({ path, name }) => ({
-    id: `recent:${path}`,
-    label: `Reopen ${name}`,
-    icon: History,
-    onSelect: () => storage.reopen(path),
-  }))
-  const problems = status.problems.length === 0 ? [] : [{
-    id: "problems",
-    label: `Show ${pluralize(status.problems.length, "unreadable file")}`,
-    icon: AlertTriangle,
-    onSelect: () => storage.showProblems(status.problems),
-  }]
-  const trust = isRestricted ? [{ id: "trust", label: "Trust this folder", icon: ShieldCheck, onSelect: storage.confirmTrust }] : []
-  return [
-    ...trust,
-    { id: "open", label: "Open folder", icon: FolderOpen, onSelect: storage.openFolder },
-    { id: "save", label: "Save collection to folder", icon: Save, onSelect: storage.saveToFolder },
-    { id: "clone", label: "Clone repository", icon: Download, onSelect: storage.promptClone },
-    { id: "git", label: "Git", icon: GitBranch, disabled: !hasFolder, onSelect: openGit },
-    { id: "reload", label: "Reload from disk", icon: RefreshCw, disabled: !hasFolder, onSelect: storage.reload },
-    ...problems,
-    ...recent,
-    { id: "close", label: "Close folder", icon: X, disabled: !hasFolder, onSelect: storage.close },
-  ]
-}
-
-function useStorageStatus(storage) {
-  const [status, setStatus] = useState(NO_FOLDER)
-  const showAlert = useAppStore((s) => s.showAlert)
-
-  useEffect(() => {
-    const adopt = (current) => {
-      setStatus(current)
-      if (current.notice) showAlert("Folder not available", current.notice, "OK", "warning")
-    }
-    const fail = (error) => showAlert("Could not read the list of folders", messageOf(error), "OK", "warning")
-    storage.status().then(adopt).catch(fail)
-  }, [storage, showAlert])
-
-  return status
-}
 
 function useGitState(git, path) {
   useEffect(() => {
@@ -75,47 +24,54 @@ function useGitState(git, path) {
 function BrowserStorage() {
   const showAlert = useAppStore((s) => s.showAlert)
   return (
-    <Button variant="ghost" title={BROWSER_HINT} onClick={() => showAlert(BROWSER_LABEL, BROWSER_HINT)} className={BUTTON_CLASS}>
+    <Button variant="ghost" title={TEXT.browserHint} onClick={() => showAlert(TEXT.browserLabel, TEXT.browserHint)} className={BUTTON_CLASS}>
       <HardDrive />
-      <span className="truncate">{BROWSER_LABEL}</span>
+      <span className="truncate">{TEXT.browserLabel}</span>
     </Button>
   )
 }
 
 function FolderStorage({ storage }) {
-  const status = useStorageStatus(storage)
-  useGitState(storage.git, status.path)
-  const [menuPosition, setMenuPosition] = useState(null)
+  const status = useAppStore((s) => s.workspaceStatus)
+  const isOpen = useAppStore((s) => s.workspaceMenuOpen)
+  const setOpen = useAppStore((s) => s.setWorkspaceMenuOpen)
   const isRestricted = useAppStore((s) => s.isRestricted)
-  const items = useMemo(() => menuItems(status, storage, isRestricted), [status, storage, isRestricted])
-  const closeMenu = useCallback(() => setMenuPosition(null), [])
+  const buttonRef = useRef(null)
+  const shortcut = useShortcutLabel("workspaceSwitcher")
+  const { refresh } = storage
+  useGitState(storage.git, status.path)
 
-  const toggleMenuBelowButton = (event) => {
-    const { left, bottom } = event.currentTarget.getBoundingClientRect()
-    setMenuPosition(menuPosition ? null : { x: left, y: bottom })
-  }
+  useEffect(() => {
+    refresh()
+  }, [refresh])
+
+  const closeMenu = useCallback(() => setOpen(false), [setOpen])
 
   const hasFolder = status.path !== ""
   const Icon = hasFolder ? Folder : HardDrive
+  const rect = isOpen ? buttonRef.current?.getBoundingClientRect() : null
+  const title = isRestricted ? TEXT.restrictedHint : hintWithShortcut(status.path || TEXT.localHint, shortcut)
 
   return (
     <>
       <Button
+        ref={buttonRef}
         variant="ghost"
         aria-haspopup="menu"
-        aria-expanded={menuPosition !== null}
-        title={isRestricted ? RESTRICTED_HINT : status.path || LOCAL_HINT}
+        aria-expanded={isOpen}
+        aria-label={`${TEXT.switcherLabel}: ${hasFolder ? status.name : TEXT.localLabel}`}
+        title={title}
         onMouseDown={keepMenuOpenState}
-        onClick={toggleMenuBelowButton}
+        onClick={() => setOpen(!isOpen)}
         className={BUTTON_CLASS}
       >
         <Icon />
-        <span className="truncate">{hasFolder ? status.name : LOCAL_LABEL}</span>
+        <span className="truncate">{hasFolder ? status.name : TEXT.localLabel}</span>
         {isRestricted && <ShieldAlert className="text-warning" />}
         {status.problems.length > 0 && <AlertTriangle className="text-warning" />}
         <ChevronDown />
       </Button>
-      {menuPosition && <ContextMenu position={menuPosition} title="" items={items} onClose={closeMenu} />}
+      {rect && <WorkspaceMenu anchor={{ x: rect.left, y: rect.bottom }} status={status} storage={storage} isRestricted={isRestricted} onClose={closeMenu} />}
       <GitPanel actions={storage.git} onTrust={storage.confirmTrust} />
     </>
   )
