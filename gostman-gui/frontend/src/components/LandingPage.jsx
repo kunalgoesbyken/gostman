@@ -4,7 +4,7 @@ import { Button, buttonVariants } from "./ui/button"
 import { cn } from "../lib/utils"
 import { popIn } from "../lib/motion"
 import { gsap, useReveal, useSmoothScroll } from "../lib/landingMotion"
-import { ArrowRight, Check, Github, Globe } from "./landing/icons"
+import { ArrowRight, Check, Download, Github, Globe } from "./landing/icons"
 
 import logo from "../assets/logo.jpg"
 import captureShot from "../assets/landing/capture.png"
@@ -21,7 +21,7 @@ import { BackgroundCode } from "./landing/BackgroundCode"
 import { DownloadDropdown } from "./landing/DownloadDropdown"
 import { MountOnVisible } from "./landing/MountOnVisible"
 
-const PremiumFeatures = lazy(() => import("./landing/PremiumFeatures"))
+const EverythingSection = lazy(() => import("./landing/EverythingSection"))
 const ComparisonSection = lazy(() => import("./landing/ComparisonSection"))
 
 const REPOSITORY = "kunalgoesbyken/gostman"
@@ -113,25 +113,6 @@ const SPOTLIGHTS = [
       "Agents reach only the hosts your collection already uses, unless you allow more",
     ],
     capture: AGENT_SESSION,
-  },
-]
-
-const CAPABILITIES = [
-  {
-    title: "Protocols",
-    items: ["REST with any method", "GraphQL with a schema browser", "gRPC through reflection or .proto files", "WebSocket with a live message log", "MCP servers over Streamable HTTP"],
-  },
-  {
-    title: "Requests",
-    items: ["JSON, XML, form, multipart and file bodies", "Basic, bearer, API key and OAuth 2.0 with renewal", "Environments and {{variables}} everywhere", "A cookie jar, proxy and client certificates", "Paste a curl command to turn it into a request"],
-  },
-  {
-    title: "Responses",
-    items: ["JSON tree, HTML, image and PDF previews", "Headers, cookies, size and timing", "Download any body, including binary", "Code in cURL, JavaScript, Python, Go, PHP and Java"],
-  },
-  {
-    title: "Your data",
-    items: ["Nested collections, tabs and history", "Plain YAML files in a folder, or app storage", "Import from Postman and OpenAPI", "Export to Postman, OpenAPI, Markdown or a backup"],
   },
 ]
 
@@ -240,7 +221,7 @@ export function LandingPage({ onGetStarted }) {
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
-      <div className="dark min-h-screen bg-background text-foreground overflow-hidden" id="main-content">
+      <div className="dark min-h-screen bg-background text-foreground overflow-x-clip" id="main-content">
         <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
           <div className="absolute inset-0 bg-[radial-gradient(circle_1px_at_1px_1px,rgba(255,255,255,0.05)_1px,transparent_0)] [background-size:40px_40px]" />
           <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
@@ -368,37 +349,13 @@ export function LandingPage({ onGetStarted }) {
           </div>
         </section>
 
-        <MountOnVisible>
-          <Suspense fallback={null}>
-            <PremiumFeatures />
-          </Suspense>
-        </MountOnVisible>
-
-        <section className="relative py-20 px-6">
-          <div className="max-w-6xl mx-auto">
-            <AnimatedSection className="mb-10 max-w-xl" delay={0.1}>
-              <SplitHeading
-                text="And the rest of what an API client should do"
-                className="text-3xl md:text-4xl font-semibold tracking-tight [text-wrap:balance]"
-              />
-            </AnimatedSection>
-
-            <AnimatedSection delay={0.2}>
-              <div className="grid gap-x-10 gap-y-10 border-t border-border/40 pt-10 sm:grid-cols-2 lg:grid-cols-4">
-                {CAPABILITIES.map((group) => (
-                  <div key={group.title}>
-                    <h3 className="text-sm font-medium">{group.title}</h3>
-                    <ul className="mt-4 space-y-2.5">
-                      {group.items.map((item) => (
-                        <li key={item} className="text-sm leading-relaxed text-muted-foreground">{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </AnimatedSection>
-          </div>
-        </section>
+        <div id="download" className="scroll-mt-24">
+          <MountOnVisible minHeight={720}>
+            <Suspense fallback={null}>
+              <EverythingSection onGetStarted={onGetStarted} />
+            </Suspense>
+          </MountOnVisible>
+        </div>
 
         <MountOnVisible>
           <Suspense fallback={null}>
@@ -418,7 +375,10 @@ export function LandingPage({ onGetStarted }) {
                   Download the desktop app for Windows, macOS or Linux, or open the web version now. There is nothing to sign up for.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <DownloadDropdown />
+                  <a href="#download" className={buttonVariants({ size: "lg", className: "gap-2" })}>
+                    <Download className="h-4 w-4" />
+                    Choose a download
+                  </a>
                   <Button
                     size="lg"
                     variant="outline"

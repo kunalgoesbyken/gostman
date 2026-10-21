@@ -4,14 +4,15 @@ import { Button } from "../ui/button"
 import { Download, ChevronDown } from "./icons"
 import { AppleIcon, WindowsIcon, LinuxIcon } from "../Icons"
 
-const RELEASE_URL = "https://github.com/kunalgoesbyken/gostman/releases/latest/download"
+import { DOWNLOADS, downloadUrl } from "./downloads"
 
-const DOWNLOAD_OPTIONS = [
-    { os: "macOS", desc: "Disk image for Intel and Apple Silicon", icon: AppleIcon, file: "Gostman-darwin-universal.dmg" },
-    { os: "Windows", desc: "64-bit installer", icon: WindowsIcon, file: "Gostman-windows-amd64.exe" },
-    { os: "Linux", desc: "Debian and Ubuntu package (.deb)", icon: LinuxIcon, file: "Gostman-linux-amd64.deb" },
-    { os: "Linux", desc: "Other distributions (.tar.gz)", icon: LinuxIcon, file: "Gostman-linux-amd64.tar.gz" },
-]
+const ICONS = { macos: AppleIcon, windows: WindowsIcon, linux: LinuxIcon }
+
+const DOWNLOAD_OPTIONS = DOWNLOADS.map((download) => ({
+    ...download,
+    icon: ICONS[download.os],
+    desc: `${download.note} (${download.kind})`,
+}))
 
 export const DownloadDropdown = () => {
     const [isOpen, setIsOpen] = useState(false)
@@ -35,13 +36,13 @@ export const DownloadDropdown = () => {
                         {DOWNLOAD_OPTIONS.map((option) => (
                             <a
                                 key={option.file}
-                                href={`${RELEASE_URL}/${option.file}`}
+                                href={downloadUrl(option)}
                                 className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40 transition-colors border-b border-border/30 last:border-0"
                                 onClick={() => setIsOpen(false)}
                             >
                                 <option.icon className="h-5 w-5 text-foreground/90" />
                                 <div className="flex-1">
-                                    <div className="font-semibold">{option.os}</div>
+                                    <div className="font-semibold">{option.name}</div>
                                     <div className="text-xs text-muted-foreground">{option.desc}</div>
                                 </div>
                                 <Download className="h-4 w-4 text-muted-foreground" />

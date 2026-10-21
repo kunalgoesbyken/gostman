@@ -16,7 +16,7 @@ export function SplitWords({ text, className }) {
   )
 }
 
-export function SplitHeading({ as: Tag = "h2", text, className }) {
+export function SplitHeading({ as: Tag = "h2", id, text, className }) {
   const ref = useRef(null)
 
   useReveal(ref, (element) => {
@@ -31,7 +31,7 @@ export function SplitHeading({ as: Tag = "h2", text, className }) {
   })
 
   return (
-    <Tag ref={ref} aria-label={text} className={className}>
+    <Tag ref={ref} id={id} aria-label={text} className={className}>
       <SplitWords text={text} />
     </Tag>
   )
