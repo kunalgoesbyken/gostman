@@ -224,6 +224,10 @@ func (c *Client) Study(stored runner.Collection) error {
 
 func (c *Client) absorb() {
 	c.learnAll(c.session.Variables())
+	c.absorbShared()
+}
+
+func (c *Client) absorbShared() {
 	c.learnAll(c.session.Observed())
 	for name, value := range c.session.Resolved() {
 		c.learnResolved(name, value)
