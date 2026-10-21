@@ -4,6 +4,7 @@ import { EmptyState } from "./ui/emptyState"
 import { Notice, Panel, PanelBody, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { FileField } from "./FileField"
+import { SoapBar } from "./SoapBar"
 import { KeyValueEditor } from "./KeyValueEditor"
 import {
   BODY_BINARY,
@@ -11,6 +12,7 @@ import {
   BODY_JSON,
   BODY_MULTIPART,
   BODY_NONE,
+  BODY_SOAP,
   BODY_TYPES,
   BODY_XML,
   switchBodyType,
@@ -18,9 +20,10 @@ import {
 import { EMPTY_ATTACHMENT } from "../lib/attachments"
 import { isPlainObject, lookup, parseJSON } from "../lib/dataUtils"
 import { parseRows, serializeRows } from "../lib/rows"
+import { SOAP_11, soapTemplate } from "../lib/soap"
 
 const PLAIN_TEXT_LANGUAGE = "plaintext"
-const EDITOR_LANGUAGES = { [BODY_JSON]: "json", [BODY_XML]: "xml" }
+const EDITOR_LANGUAGES = { [BODY_JSON]: "json", [BODY_XML]: "xml", [BODY_SOAP]: "xml" }
 
 function RowsBody({ body, typed, onChange }) {
   const rows = useMemo(() => parseRows(body), [body])
@@ -76,8 +79,9 @@ function BodyEditor({ request, editorPath, onChange, EditorComponent }) {
 export function BodyPanel({ request, drafts, editorPath, replacedByGraphQL, onUpdateRequest, onDraftsChange, EditorComponent }) {
   const handleTypeChange = (bodyType) => {
     const next = switchBodyType(request, drafts, bodyType)
+    const body = next.updates.body ?? request.body
     onDraftsChange(next.drafts)
-    onUpdateRequest(next.updates)
+    onUpdateRequest(bodyType === BODY_SOAP && body.trim() === "" ? { ...next.updates, body: soapTemplate(SOAP_11) } : next.updates)
   }
 
   return (
@@ -85,6 +89,7 @@ export function BodyPanel({ request, drafts, editorPath, replacedByGraphQL, onUp
       <Toolbar>
         <SegmentedControl label="Body type" options={BODY_TYPES} value={request.bodyType} onChange={handleTypeChange} />
       </Toolbar>
+      {request.bodyType === BODY_SOAP && <SoapBar request={request} onUpdateRequest={onUpdateRequest} />}
       {replacedByGraphQL && (
         <Notice>The method is GRAPHQL, so the body is built from the GraphQL tab and this one is not sent.</Notice>
       )}

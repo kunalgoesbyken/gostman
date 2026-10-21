@@ -5,12 +5,14 @@ export const BODY_XML = 'xml'
 export const BODY_FORM = 'form'
 export const BODY_MULTIPART = 'multipart'
 export const BODY_BINARY = 'binary'
+export const BODY_SOAP = 'soap'
 
 export const BODY_TYPES = [
   { value: BODY_NONE, label: 'None' },
   { value: BODY_JSON, label: 'JSON' },
   { value: BODY_TEXT, label: 'Text' },
   { value: BODY_XML, label: 'XML' },
+  { value: BODY_SOAP, label: 'SOAP' },
   { value: BODY_FORM, label: 'Form URL-encoded' },
   { value: BODY_MULTIPART, label: 'Multipart' },
   { value: BODY_BINARY, label: 'File' },

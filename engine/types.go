@@ -38,6 +38,11 @@ type Options struct {
 	TimeoutMs         int  `json:"timeoutMs"`
 	NoFollowRedirects bool `json:"noFollowRedirects"`
 	InsecureTLS       bool `json:"insecureTLS"`
+
+	Stream           bool `json:"stream"`
+	StreamReconnect  bool `json:"streamReconnect"`
+	StreamMaxEvents  int  `json:"streamMaxEvents"`
+	StreamMaxSeconds int  `json:"streamMaxSeconds"`
 }
 
 type Request struct {

@@ -14,6 +14,7 @@ import { IconButton } from "./ui/button"
 import { DataTable } from "./ui/dataTable"
 import { EmptyState } from "./ui/emptyState"
 import { Notice, SectionLabel, Toolbar } from "./ui/panel"
+import { ProtocolBody } from "./ProtocolBody"
 import { SegmentedControl } from "./ui/segmented"
 import { TabCount, Tabs, TabsList, TabsTrigger } from "./ui/tabs"
 import { TestResults, countPassed, hasTestOutput } from "./TestResults"
@@ -438,7 +439,9 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
 
           {isOpen && (
             <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden [overflow-wrap:anywhere]">
-              {renderContent()}
+              <ProtocolBody response={shown} isLoading={loading} isBodyShown={activeTab === TAB_BODY}>
+                {renderContent()}
+              </ProtocolBody>
             </div>
           )}
         </Tabs>

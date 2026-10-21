@@ -3,11 +3,12 @@ import { Field } from "./ui/field"
 import { Input } from "./ui/input"
 import { PanelBody } from "./ui/panel"
 import { Textarea } from "./ui/textarea"
+import { SSE_SETTINGS_TEXT } from "../lib/sse"
 
 const DEFAULT_TIMEOUT_MS = 30000
 const CHECKBOX_CLASS = "h-7 justify-start self-start"
 
-const toTimeoutMs = (text) => Math.max(0, Math.trunc(Number(text)) || 0)
+const toWholeNumber = (text) => Math.max(0, Math.trunc(Number(text)) || 0)
 
 export function SettingsPanel({ options, description, onChange, onDescriptionChange }) {
   const update = (patch) => onChange({ ...options, ...patch })
@@ -22,7 +23,7 @@ export function SettingsPanel({ options, description, onChange, onDescriptionCha
             step={1000}
             value={options.timeoutMs || ""}
             placeholder={`${DEFAULT_TIMEOUT_MS} (default)`}
-            onChange={(event) => update({ timeoutMs: toTimeoutMs(event.target.value) })}
+            onChange={(event) => update({ timeoutMs: toWholeNumber(event.target.value) })}
             className="max-w-48 font-mono"
           />
         </Field>
@@ -40,6 +41,44 @@ export function SettingsPanel({ options, description, onChange, onDescriptionCha
         >
           Verify TLS certificates
         </Checkbox>
+        <Checkbox
+          checked={options.stream}
+          onChange={(event) => update({ stream: event.target.checked })}
+          className={CHECKBOX_CLASS}
+        >
+          {SSE_SETTINGS_TEXT.stream}
+        </Checkbox>
+        {options.stream && (
+          <>
+            <Checkbox
+              checked={options.streamReconnect}
+              onChange={(event) => update({ streamReconnect: event.target.checked })}
+              className={CHECKBOX_CLASS}
+            >
+              {SSE_SETTINGS_TEXT.reconnect}
+            </Checkbox>
+            <Field label={SSE_SETTINGS_TEXT.maxEvents}>
+              <Input
+                type="number"
+                min={0}
+                value={options.streamMaxEvents || ""}
+                placeholder={SSE_SETTINGS_TEXT.maxEventsPlaceholder}
+                onChange={(event) => update({ streamMaxEvents: toWholeNumber(event.target.value) })}
+                className="max-w-48 font-mono"
+              />
+            </Field>
+            <Field label={SSE_SETTINGS_TEXT.maxSeconds}>
+              <Input
+                type="number"
+                min={0}
+                value={options.streamMaxSeconds || ""}
+                placeholder={SSE_SETTINGS_TEXT.maxSecondsPlaceholder}
+                onChange={(event) => update({ streamMaxSeconds: toWholeNumber(event.target.value) })}
+                className="max-w-48 font-mono"
+              />
+            </Field>
+          </>
+        )}
         <Field label="Description">
           <Textarea
             value={description}

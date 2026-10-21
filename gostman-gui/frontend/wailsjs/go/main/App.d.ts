@@ -145,6 +145,8 @@ export function StopCapture():Promise<void>;
 
 export function StopMock():Promise<void>;
 
+export function StreamRequest(arg1:string,arg2:engine.Request):Promise<engine.Response>;
+
 export function TrustWorkspace():Promise<void>;
 
 export function UpdateMock(arg1:Array<mock.Source>,arg2:string):Promise<main.MockState>;

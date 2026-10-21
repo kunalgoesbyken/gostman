@@ -332,6 +332,10 @@ export namespace engine {
 	    timeoutMs: number;
 	    noFollowRedirects: boolean;
 	    insecureTLS: boolean;
+	    stream: boolean;
+	    streamReconnect: boolean;
+	    streamMaxEvents: number;
+	    streamMaxSeconds: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Options(source);
@@ -342,6 +346,10 @@ export namespace engine {
 	        this.timeoutMs = source["timeoutMs"];
 	        this.noFollowRedirects = source["noFollowRedirects"];
 	        this.insecureTLS = source["insecureTLS"];
+	        this.stream = source["stream"];
+	        this.streamReconnect = source["streamReconnect"];
+	        this.streamMaxEvents = source["streamMaxEvents"];
+	        this.streamMaxSeconds = source["streamMaxSeconds"];
 	    }
 	}
 	export class Prepared {

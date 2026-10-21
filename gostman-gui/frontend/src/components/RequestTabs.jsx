@@ -92,7 +92,7 @@ export const RequestTabs = memo(function RequestTabs({
   const assertionCount = useMemo(() => countActiveAssertions(assertions), [assertions])
   const exampleCount = useMemo(() => parseExamples(examples).length, [examples])
   const hasScripts = preScript.trim() !== "" || postScript.trim() !== ""
-  const hasCustomOptions = options.timeoutMs > 0 || options.noFollowRedirects || options.insecureTLS
+  const hasCustomOptions = options.timeoutMs > 0 || options.noFollowRedirects || options.insecureTLS || options.stream
 
   const handleGraphQLQueryChange = (graphqlQuery) => {
     onUpdateRequest(graphqlQuery.trim() === "" ? { graphqlQuery } : { graphqlQuery, method: GRAPHQL_METHOD })

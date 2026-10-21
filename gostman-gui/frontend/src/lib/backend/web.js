@@ -2,6 +2,7 @@ import { base64ToBytes } from '../base64'
 import { openBrowserSocket, unsentBrowserHeaders } from './browserSocket'
 import { isPlainObject } from '../dataUtils'
 import { OAUTH_CALLBACK_PATH, cancelOAuthPopup, signInWithPopup } from './oauthPopup'
+import { STREAM_CAP_SECONDS, readStream } from './webStream'
 import { toGrpcCall, toGrpcTarget } from '../grpc'
 import { toMcpCall, toMcpTarget } from '../mcp'
 import { mockFolders, mockRequests } from '../mockData'
@@ -11,6 +12,7 @@ import { failureResponse } from '../response'
 const PROXY_URL = '/api/proxy'
 const GRPC_INVOKE_URL = `${PROXY_URL}?grpc=invoke`
 const MCP_INVOKE_URL = `${PROXY_URL}?mcp=invoke`
+const STREAM_URL = `${PROXY_URL}?sse=1`
 const OPENAPI_PAGE_SIZE = 200
 const DATA_KEY = 'gostman-data'
 const DAMAGED_DATA_PREFIX = 'gostman-data-damaged-'
@@ -121,6 +123,12 @@ const invokeGrpc = (id, request, variables) => exchange(GRPC_INVOKE_URL, id, toG
 
 const invokeMcp = (id, request, variables) => exchange(MCP_INVOKE_URL, id, toMcpCall(request, variables))
 
+function openStream(id, request, onMessages) {
+  const controller = new AbortController()
+  inFlight.set(id, controller)
+  return readStream(STREAM_URL, request, onMessages, controller.signal).finally(() => inFlight.delete(id))
+}
+
 function readStoredData() {
   const raw = localStorage.getItem(DATA_KEY)
   if (raw !== null) return parseDocument(raw) || setAsideDamagedData(raw)
@@ -213,6 +221,8 @@ export const webBackend = {
   invokeGrpc,
   describeMcp: (request, variables) => postForResult('mcp=describe', toMcpTarget(request, variables), 'catalog'),
   invokeMcp,
+  openStream,
+  streamCapSeconds: STREAM_CAP_SECONDS,
   load,
   saveRequest,
   saveRequests,

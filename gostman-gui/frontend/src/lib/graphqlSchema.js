@@ -4,11 +4,11 @@ import { parseJsonBody, textBody } from './response'
 
 export const GRAPHQL_METHOD = 'GRAPHQL'
 
-const KIND_NON_NULL = 'NON_NULL'
-const KIND_LIST = 'LIST'
+export const KIND_NON_NULL = 'NON_NULL'
+export const KIND_LIST = 'LIST'
 const RESERVED_PREFIX = '__'
 const UNKNOWN_TYPE = '?'
-const ROOT_FIELDS = [
+export const ROOT_FIELDS = [
   ['queryType', 'query'],
   ['mutationType', 'mutation'],
   ['subscriptionType', 'subscription'],
@@ -21,7 +21,7 @@ export const introspectionRequest = (request) => ({
   graphqlVariables: '',
 })
 
-function typeText(reference) {
+export function typeText(reference) {
   if (!reference) return UNKNOWN_TYPE
   if (reference.kind === KIND_NON_NULL) return `${typeText(reference.ofType)}!`
   if (reference.kind === KIND_LIST) return `[${typeText(reference.ofType)}]`
@@ -82,5 +82,5 @@ export function readSchema(response) {
   if (!isPlainObject(schema)) {
     return { error: payload.errors?.[0]?.message || `The endpoint answered ${response.status} without a schema.` }
   }
-  return { types: summarize(schema) }
+  return { types: summarize(schema), introspection: schema }
 }
