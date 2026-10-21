@@ -174,7 +174,7 @@ const withSecrets = (prompt, secrets, provider) => scrubPrompt(prompt, [...secre
 export const webAi = {
   holdsKeyOnDevice: true,
   keyStored: async (provider) => readKey(provider) !== '',
-  saveKey: async (provider, key, remember) => writeKey(provider, key.trim(), remember),
+  saveKey: async ({ provider }, key, remember) => writeKey(provider, key.trim(), remember),
   removeKey: async (provider) => dropKey(provider),
   preview: async (provider, prompt, secrets) => withSecrets(prompt, secrets, provider),
   complete: (id, config, prompt, secrets, maxTokens) => (

@@ -166,9 +166,9 @@ export function createAiActions(backend, { importData }) {
   }
 
   const saveKey = async (key, remember) => {
-    const { provider } = state().settings
-    await ai.saveKey(provider, key, remember)
-    await refreshKey(provider)
+    const { settings } = state()
+    await ai.saveKey(providerConfig(settings), key, remember)
+    await refreshKey(settings.provider)
   }
 
   const removeKey = async () => {

@@ -60,6 +60,14 @@ func resolveBase(config Config, preset Preset) (string, *Error) {
 	return "", failure(KindConfig, "The base URL must start with https://")
 }
 
+func ResolveBase(config Config) (string, *Error) {
+	preset, known := presets()[config.Provider]
+	if !known {
+		return "", failure(KindConfig, "Choose a provider")
+	}
+	return resolveBase(config, preset)
+}
+
 func resolve(config Config, key string) (Provider, string, *Error) {
 	preset, known := presets()[config.Provider]
 	if !known {

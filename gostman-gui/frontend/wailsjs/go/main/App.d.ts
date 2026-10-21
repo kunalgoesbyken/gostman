@@ -25,7 +25,7 @@ export function AiPreview(arg1:string,arg2:ai.Prompt,arg3:Array<string>):Promise
 
 export function AiRemoveKey(arg1:string):Promise<void>;
 
-export function AiSaveKey(arg1:string,arg2:string):Promise<void>;
+export function AiSaveKey(arg1:ai.Config,arg2:string):Promise<void>;
 
 export function Authorize(arg1:engine.OAuth2,arg2:string):Promise<main.AuthorizationResult>;
 

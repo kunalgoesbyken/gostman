@@ -14,7 +14,7 @@ const answering = (run) => async (...args) => {
 export const desktopAi = {
   holdsKeyOnDevice: false,
   keyStored: (provider) => AiKeyStored(provider),
-  saveKey: (provider, key) => AiSaveKey(provider, key),
+  saveKey: (config, key) => AiSaveKey(config, key),
   removeKey: (provider) => AiRemoveKey(provider),
   preview: (provider, prompt, secrets) => AiPreview(provider, prompt, secrets),
   complete: answering((id, config, prompt, secrets, maxTokens) => AiComplete(id, config, prompt, secrets, maxTokens)),

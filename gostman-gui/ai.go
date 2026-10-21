@@ -15,22 +15,53 @@ type AiReply struct {
 	Error *ai.Error `json:"error"`
 }
 
+const aiKeyBindingSuffix = ":base"
+
+const aiKeyMoved = "This key was saved for a different address. Save it again for this base URL."
+
 func aiKeyName(provider string) string { return aiKeyPrefix + provider }
+
+func aiKeyBindingName(provider string) string { return aiKeyName(provider) + aiKeyBindingSuffix }
+
+func boundAiKey(config ai.Config) (string, *ai.Error) {
+	base, problem := ai.ResolveBase(config)
+	if problem != nil {
+		return "", problem
+	}
+	key, stored := vault.get(aiKeyName(config.Provider))
+	if !stored {
+		return "", nil
+	}
+	if bound, _ := vault.get(aiKeyBindingName(config.Provider)); bound != base {
+		return "", &ai.Error{Kind: ai.KindConfig, Message: aiKeyMoved}
+	}
+	return key, nil
+}
 
 func (a *App) AiKeyStored(provider string) bool {
 	_, stored := vault.get(aiKeyName(provider))
 	return stored
 }
 
-func (a *App) AiSaveKey(provider, key string) error {
+func (a *App) AiSaveKey(config ai.Config, key string) error {
 	trimmed := strings.TrimSpace(key)
 	if trimmed == "" {
 		return errors.New("paste a key first")
 	}
-	return vault.set(aiKeyName(provider), trimmed)
+	base, problem := ai.ResolveBase(config)
+	if problem != nil {
+		return errors.New(problem.Message)
+	}
+	if err := vault.set(aiKeyName(config.Provider), trimmed); err != nil {
+		return err
+	}
+	return vault.set(aiKeyBindingName(config.Provider), base)
 }
 
 func (a *App) AiRemoveKey(provider string) error {
+	if err := vault.remove(aiKeyBindingName(provider)); err != nil {
+		return err
+	}
 	return vault.remove(aiKeyName(provider))
 }
 
@@ -43,7 +74,10 @@ func (a *App) AiComplete(id string, config ai.Config, prompt ai.Prompt, secrets 
 	ctx, cancel := context.WithCancel(a.ctx)
 	a.track(id, cancel)
 	defer a.release(id)
-	key, _ := vault.get(aiKeyName(config.Provider))
+	key, problem := boundAiKey(config)
+	if problem != nil {
+		return AiReply{Error: problem}
+	}
 	text, err := ai.Run(ctx, config, key, prompt, secrets, maxTokens)
 	return replyOf(text, err)
 }
@@ -52,7 +86,10 @@ func (a *App) AiCheck(id string, config ai.Config) AiReply {
 	ctx, cancel := context.WithCancel(a.ctx)
 	a.track(id, cancel)
 	defer a.release(id)
-	key, _ := vault.get(aiKeyName(config.Provider))
+	key, problem := boundAiKey(config)
+	if problem != nil {
+		return AiReply{Error: problem}
+	}
 	return replyOf("", ai.Check(ctx, config, key))
 }
 

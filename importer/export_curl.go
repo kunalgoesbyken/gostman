@@ -262,9 +262,13 @@ func multipartArguments(rows []row) []string {
 	return arguments
 }
 
+func carriesFormSyntax(value string) bool {
+	return strings.ContainsAny(value, curlFormSyntax) || strings.Contains(value, variableOpen) || strings.Contains(value, variableClose)
+}
+
 func fileField(candidate row) (string, bool) {
 	name := baseName(candidate.FileName)
-	if name == "" || strings.ContainsAny(candidate.Key, curlFormSyntax) || strings.ContainsAny(name, curlFormSyntax) {
+	if name == "" || carriesFormSyntax(candidate.Key) || carriesFormSyntax(name) {
 		return "", false
 	}
 	return candidate.Key + "=@" + name, true
