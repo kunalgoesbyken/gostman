@@ -9,6 +9,8 @@ import (
 	"github.com/krockxz/gostman/workspace"
 )
 
+const curlFormSyntax = `=@<;"`
+
 const tokenCharacters = "!#$%&'*+-.^_`|~"
 
 const (
@@ -239,12 +241,22 @@ func multipartArguments(rows []row) []string {
 	var arguments []string
 	for _, candidate := range enabledRows(rows) {
 		if candidate.Type == rowTypeFile {
-			arguments = append(arguments, "-F "+shellQuote(candidate.Key+"=@"+candidate.FileName))
+			if field, ok := fileField(candidate); ok {
+				arguments = append(arguments, "-F "+shellQuote(field))
+			}
 			continue
 		}
 		arguments = append(arguments, "--form-string "+shellQuote(candidate.Key+"="+candidate.Value))
 	}
 	return arguments
+}
+
+func fileField(candidate row) (string, bool) {
+	name := baseName(candidate.FileName)
+	if name == "" || strings.ContainsAny(candidate.Key, curlFormSyntax) || strings.ContainsAny(name, curlFormSyntax) {
+		return "", false
+	}
+	return candidate.Key + "=@" + name, true
 }
 
 func quoteJSON(value string) string {
