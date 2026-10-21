@@ -8,7 +8,9 @@ import (
 	"encoding/hex"
 	"hash"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"golang.org/x/text/unicode/norm"
@@ -36,7 +38,7 @@ var (
 	digestQopPreference = []string{"auth", "auth-int"}
 )
 
-func authRoute(r Request, base http.RoundTripper) http.RoundTripper {
+func authRoute(r Request, origin *url.URL, base http.RoundTripper) http.RoundTripper {
 	if r.Auth.Type != authDigest && r.Auth.Type != authNTLM {
 		return base
 	}
@@ -45,10 +47,35 @@ func authRoute(r Request, base http.RoundTripper) http.RoundTripper {
 		return base
 	}
 	username, password := expansion.apply(r.Auth.Username), expansion.apply(r.Auth.Password)
+	authenticated := http.RoundTripper(digestRoundTripper{base: base, username: username, password: password})
 	if r.Auth.Type == authNTLM {
-		return ntlmRoute(base, username, password, expansion.apply(r.Auth.Domain))
+		authenticated = ntlmRoute(base, username, password, expansion.apply(r.Auth.Domain))
 	}
-	return digestRoundTripper{base: base, username: username, password: password}
+	return originBound{origin: originOf(origin), authenticated: authenticated, plain: base}
+}
+
+type originBound struct {
+	origin        string
+	authenticated http.RoundTripper
+	plain         http.RoundTripper
+}
+
+func (t originBound) RoundTrip(req *http.Request) (*http.Response, error) {
+	if originOf(req.URL) == t.origin {
+		return t.authenticated.RoundTrip(req)
+	}
+	return t.plain.RoundTrip(req)
+}
+
+var defaultPorts = map[string]string{"http": "80", "https": "443"}
+
+func originOf(u *url.URL) string {
+	scheme := strings.ToLower(u.Scheme)
+	port := u.Port()
+	if port == "" {
+		port = defaultPorts[scheme]
+	}
+	return scheme + "://" + net.JoinHostPort(strings.ToLower(u.Hostname()), port)
 }
 
 type digestRoundTripper struct {

@@ -9,6 +9,8 @@ export const FIELD_SECRET = 'secret'
 export const FIELD_AREA = 'area'
 export const FIELD_SELECT = 'select'
 
+export const isSecretField = (field) => field.kind === FIELD_SECRET || field.secret === true
+
 const SIGNATURE_METHODS = ['HMAC-SHA1', 'HMAC-SHA256', 'RSA-SHA1', 'RSA-SHA256', 'PLAINTEXT']
 const SIGNATURE_RSA_PREFIX = 'RSA-'
 const PLACEMENTS = [
@@ -64,6 +66,7 @@ export const SCHEMES = {
         key: 'privateKey',
         label: 'Private key (PEM)',
         kind: FIELD_AREA,
+        secret: true,
         when: (config) => (config.signatureMethod || '').startsWith(SIGNATURE_RSA_PREFIX),
       },
       { key: 'realm', label: 'Realm', kind: FIELD_TEXT },
