@@ -166,6 +166,12 @@ func (r Repo) Stage(files []string) error {
 }
 
 func (r Repo) StageAll() error {
+	if r.Restricted {
+		return ErrRestricted
+	}
+	if err := r.refuseUnresolved(); err != nil {
+		return err
+	}
 	_, err := r.runWrite("add", "-A")
 	return err
 }
@@ -281,7 +287,7 @@ func (r Repo) Branches() ([]Branch, error) {
 }
 
 func (r Repo) CreateBranch(name string) error {
-	if err := ValidRef(name); err != nil {
+	if err := validNewBranch(name); err != nil {
 		return err
 	}
 	_, err := r.runWrite("switch", "-c", name)
