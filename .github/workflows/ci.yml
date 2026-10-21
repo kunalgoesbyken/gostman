@@ -138,7 +138,7 @@ jobs:
           # fragile. The script tag is authoritative: it is what the app loads.
           entry_bundle() {
             local dir="$1" html="$1/index.html" src
-            src="$(grep -o '<script[^>]*src="[^"]*"' "$html" \
+            src="$(grep -o '<script[^>]*type="module"[^>]*src="[^"]*"' "$html" \
                    | grep -o 'src="[^"]*"' \
                    | head -n1 \
                    | sed 's/^src="//; s/"$//')"
