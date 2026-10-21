@@ -1,64 +1,81 @@
-import { useEffect, useMemo, useRef, useState } from "react"
-import { FileText, Upload } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { FileText, FolderOpen, Upload } from "lucide-react"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
+import { Select } from "./ui/select"
 import { Textarea } from "./ui/textarea"
 import { ShareOpener } from "./ShareOpener"
-import { formatSize, pluralize } from "../lib/dataUtils"
-import { MAX_FILE_SIZE, parseImport } from "../lib/importExport"
+import { pluralize } from "../lib/dataUtils"
+import { parseImport } from "../lib/importExport"
+import { droppedEntries, pickedEntries, readImportFiles } from "../lib/importerClient"
+import { FORMAT_LABELS, IMPORT_FORMATS, IMPORT_TEXT } from "../lib/importText"
 import { mayBeSpec } from "../lib/openapiSpec"
 import { SHARE_FILE_EXTENSION, findShareReference } from "../lib/share"
 import { SPEC_TEXT } from "../lib/specText"
 import { cn } from "../lib/utils"
 
 const PARSE_DELAY_MS = 300
-const ACCEPTED_FILES = `.json,.yaml,.yml,.${SHARE_FILE_EXTENSION}`
-const READ_FAILURE = { success: false, error: "The file could not be read as text." }
+const AUTO_FORMAT = "auto"
+const SPEC_FORMAT = "openapi"
+const HAR_FORMAT = "har"
+const ACCEPTED_FILES = `.json,.yaml,.yml,.xml,.wsdl,.xsd,.har,.bru,.${SHARE_FILE_EXTENSION}`
 
-const tooLarge = (file) => ({
-  success: false,
-  error: `${file.name} is ${formatSize(file.size)}. Files are limited to ${formatSize(MAX_FILE_SIZE)}.`,
-})
+const countsText = (counts) => [
+  pluralize(counts.requests, "request"),
+  pluralize(counts.folders, "folder"),
+  ...(counts.environments > 0 ? [pluralize(counts.environments, "environment")] : []),
+].join(", ")
 
-function useParsedImport(text, remote, readSpec) {
+function useParsedImport(source, readSource, options) {
   const [state, setState] = useState({ result: null, isParsing: false })
 
   useEffect(() => {
-    if (!remote && text.trim() === "") {
+    if (!source) {
       setState({ result: null, isParsing: false })
       return undefined
     }
     let isCurrent = true
     setState((current) => ({ ...current, isParsing: true }))
-    const read = () => {
-      if (remote) return readSpec(remote)
-      return mayBeSpec(text) ? readSpec({ text }) : parseImport(text)
-    }
     const timer = setTimeout(async () => {
-      const result = await read()
+      const result = await readSource(source, options)
       if (isCurrent) setState({ result, isParsing: false })
     }, PARSE_DELAY_MS)
     return () => {
       isCurrent = false
       clearTimeout(timer)
     }
-  }, [text, remote, readSpec])
+  }, [source, readSource, options])
 
   return state
 }
 
+function SourceLines({ sources }) {
+  return sources.map((source, index) => (
+    <p key={`${source.name}-${index}`} className="pt-1 text-foreground">
+      {IMPORT_TEXT.sourceLine(source.name, FORMAT_LABELS[source.format] || source.format, countsText(source))}
+    </p>
+  ))
+}
+
 function ImportSummary({ result, onImport, onBrowse }) {
   const warnings = result.warnings || []
+  const skipped = result.skipped || []
   const isUnlinked = result.spec && !result.spec.source
   return (
     <div role="status" className="flex shrink-0 items-start gap-3 rounded-md border border-border p-3">
-      <div className="max-h-32 min-w-0 flex-1 overflow-y-auto text-xs [overflow-wrap:anywhere]">
-        <p className="font-medium text-foreground">
-          {result.label}: {pluralize(result.requests.length, "request")} and {pluralize(result.folders.length, "folder")}
-        </p>
+      <div className="max-h-40 min-w-0 flex-1 overflow-y-auto text-xs [overflow-wrap:anywhere]">
+        {result.sources ? <SourceLines sources={result.sources} /> : (
+          <p className="font-medium text-foreground">
+            {result.label}: {countsText({ requests: result.requests.length, folders: result.folders.length, environments: 0 })}
+          </p>
+        )}
         {isUnlinked && <p className="pt-1 text-muted-foreground">{SPEC_TEXT.syncNote}</p>}
         {warnings.map((warning) => (
           <p key={warning} className="pt-1 text-warning">{warning}</p>
+        ))}
+        {skipped.length > 0 && <p className="pt-1 font-medium text-muted-foreground">{IMPORT_TEXT.skippedHeading}</p>}
+        {skipped.map((note) => (
+          <p key={note} className="text-muted-foreground">{note}</p>
         ))}
       </div>
       {result.spec && <Button size="sm" variant="outline" onClick={onBrowse}>{SPEC_TEXT.browse}</Button>}
@@ -101,20 +118,72 @@ function AddressRow({ address, onChange, onLoad, onPickFile }) {
   )
 }
 
-export function ImportTab({ openapi, onPickSpecFile, onImport, onImportShared, onClose }) {
+function FormatRow({ format, onFormat, showStatic, skipStatic, onSkipStatic }) {
+  return (
+    <div className="flex shrink-0 flex-wrap items-center gap-3 text-xs">
+      <label className="flex items-center gap-2 text-muted-foreground">
+        {IMPORT_TEXT.formatLabel}
+        <Select value={format} onChange={(event) => onFormat(event.target.value)} aria-label={IMPORT_TEXT.formatLabel} className="w-48">
+          {IMPORT_FORMATS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+        </Select>
+      </label>
+      {showStatic && (
+        <label className="flex items-center gap-2 text-muted-foreground">
+          <input type="checkbox" checked={skipStatic} onChange={(event) => onSkipStatic(event.target.checked)} />
+          {IMPORT_TEXT.skipStatic}
+        </label>
+      )}
+    </div>
+  )
+}
+
+export function ImportTab({ openapi, importer, onPickSpecFile, onImport, onImportShared, onClose }) {
   const [text, setText] = useState("")
+  const [fileName, setFileName] = useState("")
+  const [files, setFiles] = useState([])
   const [address, setAddress] = useState("")
   const [remote, setRemote] = useState(null)
   const [fileFailure, setFileFailure] = useState(null)
+  const [format, setFormat] = useState(AUTO_FORMAT)
+  const [skipStatic, setSkipStatic] = useState(false)
   const [isDragOver, setIsDragOver] = useState(false)
   const fileInputRef = useRef(null)
+  const folderInputRef = useRef(null)
   const sharedReference = useMemo(() => findShareReference(text), [text])
-  const { result, isParsing } = useParsedImport(sharedReference === null ? text : "", remote, openapi.read)
-  const shown = fileFailure || result
 
-  const updateText = (next) => {
+  const source = useMemo(() => {
+    if (remote) return { remote }
+    if (files.length > 0) return { files }
+    if (sharedReference === null && text.trim() !== "") return { text, name: fileName || IMPORT_TEXT.pastedName }
+    return null
+  }, [remote, files, sharedReference, text, fileName])
+
+  const options = useMemo(() => ({ format, skipStatic }), [format, skipStatic])
+
+  const readSource = useCallback(async (input, chosen) => {
+    const importOptions = { skipStatic: chosen.skipStatic }
+    if (input.remote) return openapi.read(input.remote)
+    if (input.files) return importer.read(input.files, chosen.format, importOptions)
+    const mayUseSpec = chosen.format === AUTO_FORMAT || chosen.format === SPEC_FORMAT
+    if (mayUseSpec && mayBeSpec(input.text)) return openapi.read({ text: input.text })
+    const local = chosen.format === AUTO_FORMAT ? await parseImport(input.text) : { success: false }
+    if (local.success) return local
+    return importer.read([{ name: input.name, text: input.text }], chosen.format, importOptions)
+  }, [openapi, importer])
+
+  const { result, isParsing } = useParsedImport(source, readSource, options)
+  const shown = fileFailure || result
+  const showStatic = format === HAR_FORMAT || result?.sources?.some((entry) => entry.format === HAR_FORMAT)
+
+  const reset = () => {
     setFileFailure(null)
     setRemote(null)
+    setFiles([])
+    setFileName("")
+  }
+
+  const updateText = (next) => {
+    reset()
     setText(next)
   }
 
@@ -130,28 +199,32 @@ export function ImportTab({ openapi, onPickSpecFile, onImport, onImportShared, o
     setRemote({ path })
   }
 
-  const readFile = async (file) => {
-    if (!file) return
-    if (file.size > MAX_FILE_SIZE) {
-      setFileFailure(tooLarge(file))
+  const readEntries = async (entries) => {
+    if (entries.length === 0) return
+    reset()
+    const read = await readImportFiles(entries)
+    if (read.error) {
+      setFileFailure({ success: false, error: read.error })
       return
     }
-    try {
-      updateText(await file.text())
-    } catch {
-      setFileFailure(READ_FAILURE)
+    if (read.files.length === 1) {
+      setText(read.files[0].text)
+      setFileName(read.files[0].name)
+      return
     }
+    setText("")
+    setFiles(read.files)
   }
 
   const handlePick = (event) => {
-    readFile(event.target.files[0])
+    readEntries(pickedEntries(event.target.files))
     event.target.value = ""
   }
 
-  const handleDrop = (event) => {
+  const handleDrop = async (event) => {
     event.preventDefault()
     setIsDragOver(false)
-    readFile(event.dataTransfer.files[0])
+    readEntries(await droppedEntries(event.dataTransfer))
   }
 
   const handleDragOver = (event) => {
@@ -176,23 +249,32 @@ export function ImportTab({ openapi, onPickSpecFile, onImport, onImportShared, o
           isDragOver && "border-primary"
         )}
       >
-        <input ref={fileInputRef} type="file" accept={ACCEPTED_FILES} onChange={handlePick} className="hidden" />
-        <Button variant="outline" size="sm" onClick={() => fileInputRef.current.click()}>
-          <Upload />
-          Choose file
-        </Button>
+        <input ref={fileInputRef} type="file" multiple accept={ACCEPTED_FILES} onChange={handlePick} className="hidden" />
+        <input ref={folderInputRef} type="file" webkitdirectory="" onChange={handlePick} className="hidden" />
+        <div className="flex shrink-0 flex-col gap-2">
+          <Button variant="outline" size="sm" onClick={() => fileInputRef.current.click()}>
+            <Upload />
+            {IMPORT_TEXT.chooseFiles}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => folderInputRef.current.click()}>
+            <FolderOpen />
+            {IMPORT_TEXT.chooseFolder}
+          </Button>
+        </div>
         <p className="min-w-0 flex-1 text-xs text-muted-foreground">
-          Drop a file here, or paste its contents below. Postman v2.1 collections, OpenAPI and Swagger specs (JSON or YAML), Gostman exports and Gostman share links or files, up to {formatSize(MAX_FILE_SIZE)}.
+          {files.length > 0 ? IMPORT_TEXT.filesSelected(files.length) : IMPORT_TEXT.dropHint}
         </p>
       </div>
+
+      <FormatRow format={format} onFormat={setFormat} showStatic={showStatic} skipStatic={skipStatic} onSkipStatic={setSkipStatic} />
 
       <AddressRow address={address} onChange={setAddress} onLoad={loadAddress} onPickFile={onPickSpecFile ? pickSpecFile : null} />
 
       <Textarea
         value={text}
         onChange={(event) => updateText(event.target.value)}
-        placeholder="Paste a Postman collection, an OpenAPI spec, a Gostman export or a share link"
-        aria-label="Content to import"
+        placeholder={IMPORT_TEXT.pastePlaceholder}
+        aria-label={IMPORT_TEXT.pasteLabel}
         className="min-h-24 flex-1"
       />
 
@@ -207,7 +289,7 @@ export function ImportTab({ openapi, onPickSpecFile, onImport, onImportShared, o
           />
         </div>
       )}
-      {isParsing && <p role="status" className="shrink-0 text-xs text-muted-foreground">Reading the content</p>}
+      {isParsing && <p role="status" className="shrink-0 text-xs text-muted-foreground">{IMPORT_TEXT.reading}</p>}
       {!isParsing && shown && !shown.success && <ImportFailure error={shown.error} />}
       {!isParsing && shown?.success && (
         <ImportSummary result={shown} onImport={confirmImport} onBrowse={() => openapi.browse(remote || { text })} />

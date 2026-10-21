@@ -4,6 +4,7 @@ import { generateAllSnippets } from './codeGenerator'
 import { countActiveRequests, sanitizeImport, withoutActiveRequests } from './importExport'
 import { pluralize } from './dataUtils'
 import { createExampleActions } from './exampleActions'
+import { createImporterClient } from './importerClient'
 import { RESTRICTED, applyExtractors, createExecutor } from './execution'
 import { introspectionRequest, readSchema } from './graphqlSchema'
 import { clearToken, obtainToken } from './oauth'
@@ -262,10 +263,14 @@ export function createWorkspaceActions(backend) {
 
   const openapi = createSpecActions({ backend, attempt, addImported })
 
+  const importer = createImporterClient(backend)
+
   const download = attempt('Could not save the file', async () => {
     const { response } = activeTab()
     await backend.saveFile(downloadName(response), bodyBase64(response), mimeType(response))
   })
+
+  const saveBase64File = attempt('Could not save the file', (name, base64, mime) => backend.saveFile(name, base64, mime))
 
   const saveTextFile = attempt('Could not save the file', (name, text, mime) => (
     backend.saveFile(name, textToBase64(text), mime)
@@ -417,10 +422,12 @@ export function createWorkspaceActions(backend) {
     importData,
     importShared,
     openapi,
+    importer,
     shareFolder: (folderId) => store().openImportDialog(SHARE_TAB, folderId),
     shareLinkBase: clientUrl(backend.webAppUrl),
     download,
     saveTextFile,
+    saveBase64File,
     createFolder,
     renameFolder,
     deleteFolder,

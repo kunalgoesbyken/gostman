@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Download } from "lucide-react"
 import { CopyTextButton } from "./CopyTextButton"
 import { DEFAULT_DOCS_OPTIONS, DocsOptions } from "./DocsOptions"
@@ -6,6 +6,7 @@ import { Button } from "./ui/button"
 import { SegmentedControl } from "./ui/segmented"
 import { pluralize } from "../lib/dataUtils"
 import { buildDocs } from "../lib/docs"
+import { EXPORT_TEXT } from "../lib/importText"
 import {
   exportToGostman,
   exportToMarkdown,
@@ -72,6 +73,40 @@ const EXPORT_FORMATS = [
   },
 ]
 
+const BACKEND_FORMATS = [
+  { value: "bruno", label: "Bruno", description: "A folder of .bru files with environments, saved as a .zip", mime: "application/zip", backend: "bruno" },
+  { value: "curl", label: "curl script", description: "One curl command per request. Credentials become environment variable placeholders", fileName: "requests.sh", mime: "text/x-shellscript", backend: "curl" },
+  { value: "har", label: "HAR", description: "HTTP Archive 1.2 with the requests and no responses", fileName: "requests.har", mime: JSON_MIME, backend: "har" },
+]
+
+const NEWLINE = String.fromCharCode(10)
+
+const previewOf = (files) => (
+  files.length === 1 ? files[0].text : files.map((file) => [EXPORT_TEXT.fileHeading(file.name), file.text].join(NEWLINE)).join(NEWLINE + NEWLINE)
+)
+
+function useBackendExport(format, data, importer, includeSecrets) {
+  const [state, setState] = useState({ reply: null, error: "", isBuilding: false })
+  const { requests, folders, environments, variables } = data
+
+  useEffect(() => {
+    if (!format.backend) return undefined
+    let isCurrent = true
+    setState((current) => ({ ...current, isBuilding: true }))
+    const collection = { requests, folders, environments, variables: JSON.stringify(variables || {}) }
+    importer.build(format.backend, collection, { includeSecrets })
+      .then((reply) => isCurrent && setState({ reply, error: "", isBuilding: false }))
+      .catch((error) => isCurrent && setState({ reply: null, error: error.message, isBuilding: false }))
+    return () => {
+      isCurrent = false
+    }
+  }, [format, requests, folders, environments, variables, importer, includeSecrets])
+
+  return state
+}
+
+const ALL_FORMATS = [...EXPORT_FORMATS, ...BACKEND_FORMATS]
+
 function buildExport(format, data) {
   try {
     return { content: format.build(data), error: "" }
@@ -80,33 +115,46 @@ function buildExport(format, data) {
   }
 }
 
-export function ExportTab({ requests, folders, environments, variables, onSaveFile }) {
+export function ExportTab({ requests, folders, environments, variables, importer, onSaveFile, onSaveBase64 }) {
   const [formatId, setFormatId] = useState(EXPORT_FORMATS[0].value)
   const [docsOptions, setDocsOptions] = useState(DEFAULT_DOCS_OPTIONS)
+  const [includeSecrets, setIncludeSecrets] = useState(false)
 
-  const format = EXPORT_FORMATS.find((candidate) => candidate.value === formatId)
-  const { content, error } = useMemo(
-    () => buildExport(format, { requests, folders, environments, variables, docsOptions }),
+  const format = ALL_FORMATS.find((candidate) => candidate.value === formatId)
+  const local = useMemo(
+    () => (format.backend ? { content: "", error: "" } : buildExport(format, { requests, folders, environments, variables, docsOptions })),
     [format, requests, folders, environments, variables, docsOptions]
   )
+  const remote = useBackendExport(format, { requests, folders, environments, variables }, importer, includeSecrets)
+  const content = format.backend ? (remote.reply ? previewOf(remote.reply.files) : "") : local.content
+  const error = format.backend ? remote.error : local.error
+  const save = () => {
+    if (remote.reply?.archive) onSaveBase64("gostman-export.zip", remote.reply.archive, format.mime)
+    else if (format.backend) onSaveFile(format.fileName, remote.reply.files[0].text, format.mime)
+    else onSaveFile(format.fileName || `${FILE_BASE_NAME}.${format.extension}`, content, format.mime)
+  }
   const preview = content.length > PREVIEW_LIMIT ? `${content.slice(0, PREVIEW_LIMIT)}\n…` : content
 
   return (
     <>
       <div className="flex shrink-0 flex-wrap items-center gap-2">
-        <SegmentedControl label="Export format" options={EXPORT_FORMATS} value={formatId} onChange={setFormatId} className="shrink" />
+        <SegmentedControl label="Export format" options={ALL_FORMATS} value={formatId} onChange={setFormatId} className="shrink" />
         <div className="ml-auto flex shrink-0 items-center gap-2">
           <CopyTextButton text={content} />
-          <Button
-            size="sm"
-            onClick={() => onSaveFile(format.fileName || `${FILE_BASE_NAME}.${format.extension}`, content, format.mime)}
-            disabled={!content}
-          >
+          <Button size="sm" onClick={save} disabled={!content || remote.isBuilding}>
             <Download />
             Save file
           </Button>
         </div>
       </div>
+
+      {format.backend && (
+        <label className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+          <input type="checkbox" checked={includeSecrets} onChange={(event) => setIncludeSecrets(event.target.checked)} />
+          {EXPORT_TEXT.includeSecrets}
+          <span>{includeSecrets ? EXPORT_TEXT.secretsWarning : EXPORT_TEXT.secretsNote}</span>
+        </label>
+      )}
 
       {format.hasDocsOptions && <DocsOptions options={docsOptions} onChange={setDocsOptions} />}
 

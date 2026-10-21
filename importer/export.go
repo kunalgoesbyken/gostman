@@ -32,7 +32,10 @@ type exportTree struct {
 	requests map[string][]workspace.Request
 }
 
-func Export(format string, collection workspace.Collection) ([]File, string, error) {
+func Export(format string, collection workspace.Collection, options Options) ([]File, string, error) {
+	if format != ExportCurl && !options.IncludeSecrets {
+		collection = redactSecrets(collection)
+	}
 	var files []File
 	var err error
 	switch format {
@@ -41,7 +44,7 @@ func Export(format string, collection workspace.Collection) ([]File, string, err
 	case ExportOpenAPI:
 		files, err = exportOpenAPI(collection)
 	case ExportCurl:
-		files = exportCurl(collection)
+		files = exportCurl(collection, options)
 	case ExportHAR:
 		files, err = exportHAR(collection)
 	default:

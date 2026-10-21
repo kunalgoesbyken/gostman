@@ -12,7 +12,8 @@ var ignoredHARHeaders = map[string]bool{
 }
 
 type Options struct {
-	SkipStatic bool `json:"skipStatic"`
+	SkipStatic     bool `json:"skipStatic"`
+	IncludeSecrets bool `json:"includeSecrets"`
 }
 
 func (c *collector) readHAR(doc document, options Options) {

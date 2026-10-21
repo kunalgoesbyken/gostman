@@ -8,32 +8,28 @@ import (
 	"github.com/krockxz/gostman/workspace"
 )
 
-var sensitiveHeaders = map[string]bool{"authorization": true, "proxy-authorization": true, "x-api-key": true, "cookie": true}
-
 const tokenCharacters = "!#$%&'*+-.^_`|~"
 
 const (
 	curlHeaderLine = "#!/bin/sh\n"
 	curlJoin       = " \\\n  "
-	secretPrefix   = "GOSTMAN"
 )
 
 type curlScript struct {
-	out      strings.Builder
-	secrets  []string
-	position int
+	redactor       redactor
+	includeSecrets bool
 }
 
-func exportCurl(collection workspace.Collection) []File {
-	script := &curlScript{}
+func exportCurl(collection workspace.Collection, options Options) []File {
+	script := &curlScript{redactor: redactor{used: map[string]bool{}}, includeSecrets: options.IncludeSecrets}
 	var commands strings.Builder
-	for _, request := range orderedRequests(collection) {
-		script.position++
+	for index, request := range orderedRequests(collection) {
+		script.redactor.owner = fmt.Sprintf("R%d", index+1)
 		commands.WriteString(script.command(request))
 	}
 	header := curlHeaderLine
-	if len(script.secrets) > 0 {
-		header += "# Set these environment variables before running:\n# " + strings.Join(script.secrets, "\n# ") + "\n"
+	if names := script.redactor.names; len(names) > 0 {
+		header += "# Set these environment variables before running:\n# " + strings.Join(shellNames(names), "\n# ") + "\n"
 	}
 	return []File{{Name: "requests.sh", Text: header + "\n" + commands.String()}}
 }
@@ -101,23 +97,26 @@ func singleQuoted(value string) string {
 	return "'" + strings.ReplaceAll(value, "'", `'\''`) + "'"
 }
 
+func shellNames(names []string) []string {
+	converted := make([]string, len(names))
+	for index, name := range names {
+		converted[index] = shellName(name)
+	}
+	return converted
+}
+
 func (s *curlScript) secret(field, value string) string {
-	if value == "" {
-		return ""
+	if s.includeSecrets {
+		return value
 	}
-	trimmed := strings.TrimSpace(value)
-	if strings.HasPrefix(trimmed, variableOpen) && strings.HasSuffix(trimmed, variableClose) && strings.Count(trimmed, variableOpen) == 1 {
-		return trimmed
-	}
-	name := fmt.Sprintf("%s_R%d_%s", secretPrefix, s.position, field)
-	s.secrets = append(s.secrets, name)
-	return variableOpen + name + variableClose
+	return s.redactor.value(field, value)
 }
 
 func (s *curlScript) command(request workspace.Request) string {
 	arguments := []string{"curl"}
 	method := request.Method
-	hasBody := request.BodyType != "" || request.Method == methodGraphQL
+	body := curlBody(request)
+	hasBody := len(body) > 0
 	if method == methodGraphQL {
 		method = "POST"
 	}
@@ -141,7 +140,7 @@ func (s *curlScript) command(request workspace.Request) string {
 	for _, header := range headers {
 		arguments = append(arguments, headerArgument(header.Key, header.Value))
 	}
-	arguments = append(arguments, curlBody(request)...)
+	arguments = append(arguments, body...)
 	arguments = append(arguments, "--url "+shellQuote(address))
 	return "# " + oneLine(request.Name) + "\n" + strings.Join(arguments, curlJoin) + "\n\n"
 }
@@ -149,6 +148,9 @@ func (s *curlScript) command(request workspace.Request) string {
 func (s *curlScript) authorization(request workspace.Request) (string, []string, []row) {
 	auth := request.Auth
 	address := request.URL
+	if !s.includeSecrets {
+		address = s.redactor.query(address)
+	}
 	switch auth.Type {
 	case authBasic, authDigest, authNTLM:
 		flagName := map[string]string{authBasic: "-u", authDigest: "--digest -u", authNTLM: "--ntlm -u"}[auth.Type]
@@ -186,10 +188,10 @@ func validMethod(method string) bool {
 }
 
 func (s *curlScript) headerValue(header row) string {
-	if !sensitiveHeaders[strings.ToLower(header.Key)] {
+	if !isSensitiveName(header.Key) {
 		return header.Value
 	}
-	return s.secret(strings.ToUpper(shellName(header.Key)), header.Value)
+	return s.secret(header.Key, header.Value)
 }
 
 func curlBody(request workspace.Request) []string {
@@ -202,6 +204,9 @@ func curlBody(request workspace.Request) []string {
 	}
 	switch request.BodyType {
 	case bodyJSON, bodyText, bodyXML:
+		if strings.TrimSpace(request.Body) == "" {
+			return nil
+		}
 		return []string{"--data-raw " + shellQuote(request.Body)}
 	case bodyForm:
 		return formArguments("--data-urlencode", readRows(request.Body))

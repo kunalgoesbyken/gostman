@@ -133,6 +133,9 @@ export
 
   --format <name>       bruno, openapi, curl or har
   --out <path>          file, or folder for bruno (required)
+  --include-secrets     write literal credentials; by default passwords, tokens
+                        and secret-named headers or variables become {{NAME}}
+                        placeholders and re-import as empty variables
 
 Exit codes:
   0  every request and test passed

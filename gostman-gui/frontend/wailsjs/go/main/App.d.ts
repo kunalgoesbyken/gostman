@@ -6,6 +6,7 @@ import {capture} from '../models';
 import {rpc} from '../models';
 import {mcpclient} from '../models';
 import {gitutil} from '../models';
+import {importer} from '../models';
 import {mock} from '../models';
 import {openapi} from '../models';
 
@@ -88,6 +89,8 @@ export function GitSwitchBranch(arg1:string,arg2:boolean):Promise<void>;
 export function GitUnstage(arg1:Array<string>):Promise<void>;
 
 export function GitVersion(arg1:string,arg2:string):Promise<gitutil.Version>;
+
+export function Import(arg1:importer.Query):Promise<importer.Reply>;
 
 export function InvokeGrpc(arg1:string,arg2:rpc.Call):Promise<engine.Response>;
 

@@ -53,7 +53,7 @@ func Handle(ctx context.Context, query Query, config Config) Reply {
 		if query.Collection == nil {
 			return Reply{Error: "give a collection to export"}
 		}
-		files, archive, err := Export(query.Format, *query.Collection)
+		files, archive, err := Export(query.Format, *query.Collection, query.Options)
 		if err != nil {
 			return Reply{Error: err.Error()}
 		}

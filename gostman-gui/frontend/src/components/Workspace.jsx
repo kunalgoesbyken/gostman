@@ -309,6 +309,8 @@ function LoadedWorkspace({ backend, onBack }) {
             onImport={actions.importData}
             onImportShared={actions.importShared}
             openapi={actions.openapi}
+            importer={actions.importer}
+            onSaveBase64={actions.saveBase64File}
             onPickSpecFile={actions.canConfigureNetwork ? actions.pickFile : null}
             onSaveFile={actions.saveTextFile}
             onClose={closeImportDialog}

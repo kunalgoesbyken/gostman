@@ -161,6 +161,9 @@ func harPostOf(request workspace.Request) *harPost {
 	}
 	switch request.BodyType {
 	case bodyJSON, bodyText, bodyXML:
+		if strings.TrimSpace(request.Body) == "" {
+			return nil
+		}
 		return &harPost{MimeType: bodyMime(request.BodyType), Text: request.Body}
 	case bodyForm:
 		return &harPost{MimeType: "application/x-www-form-urlencoded", Params: harParamsOf(readRows(request.Body))}

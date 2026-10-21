@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 
@@ -17,8 +18,8 @@ import (
 
 const (
 	importMaxBytes   = 64 << 20
-	exportFilePerm   = 0o644
-	exportFolderPerm = 0o755
+	exportFilePerm   = 0o600
+	exportFolderPerm = 0o700
 )
 
 type transfer struct {
@@ -26,6 +27,7 @@ type transfer struct {
 	format string
 	out    string
 	skip   bool
+	secret bool
 }
 
 func parseTransfer(name string, arguments []string, defaultFormat string) (transfer, error) {
@@ -35,6 +37,7 @@ func parseTransfer(name string, arguments []string, defaultFormat string) (trans
 	flags.StringVar(&parsed.format, "format", defaultFormat, "")
 	flags.StringVar(&parsed.out, "out", "", "")
 	flags.BoolVar(&parsed.skip, "skip-static", false, "")
+	flags.BoolVar(&parsed.secret, "include-secrets", false, "")
 	positional, err := parseInterspersed(flags, arguments)
 	if err != nil {
 		return parsed, err
@@ -70,8 +73,23 @@ func importCommand(arguments []string, stdout, stderr *os.File) int {
 	if _, err := workspace.Create(parsed.out, collection); err != nil {
 		return complain(stderr, err)
 	}
+	if err := restrictPermissions(parsed.out); err != nil {
+		return complain(stderr, err)
+	}
 	reportImport(stdout, stderr, result, parsed.out)
 	return exitPassed
+}
+
+func restrictPermissions(root string) error {
+	return filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			return os.Chmod(path, exportFolderPerm)
+		}
+		return os.Chmod(path, exportFilePerm)
+	})
 }
 
 func importedCollection(result importer.Result) (workspace.Collection, error) {
@@ -103,7 +121,10 @@ func exportCommand(arguments []string, stdout, stderr *os.File) int {
 	if err != nil {
 		return complain(stderr, err)
 	}
-	files, _, err := importer.Export(parsed.format, opened.Collection())
+	if parsed.secret {
+		fmt.Fprintln(stderr, "warning: --include-secrets writes credentials into the exported files")
+	}
+	files, _, err := importer.Export(parsed.format, opened.Collection(), importer.Options{IncludeSecrets: parsed.secret})
 	if err != nil {
 		return complain(stderr, err)
 	}
