@@ -593,11 +593,13 @@ export function exportToPostman(requests, folders = [], options = {}) {
 
 const withoutToken = (request) => ({ ...request, auth: { ...request.auth, oauth2: clearToken(request.auth.oauth2) } })
 
+const withoutScopeToken = (scope) => (scope?.auth?.oauth2 ? { ...scope, auth: { ...scope.auth, oauth2: clearToken(scope.auth.oauth2) } } : scope)
+
 export function exportToGostman(requests, folders, environments, settings) {
   return {
     version: GOSTMAN_FORMAT_VERSION,
     exportedAt: new Date().toISOString(),
-    gostman: { requests: requests.map(withoutToken), folders, environments, settings },
+    gostman: { requests: requests.map(withoutToken), folders: folders.map(withoutScopeToken), environments, settings: withoutScopeToken(settings) },
   }
 }
 
