@@ -12,7 +12,9 @@ const shellWord = (text) => (BARE_SHELL_WORD.test(text) ? text : shellQuote(text
 
 const singleQuote = (text) => `'${text.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`
 
-const powershellQuote = (text) => `'${text.replaceAll("'", "''")}'`
+const POWERSHELL_QUOTES = new Set(["'", '‘', '’', '‚', '‛'])
+
+const powershellQuote = (text) => `'${Array.from(text, (character) => (POWERSHELL_QUOTES.has(character) ? character + character : character)).join('')}'`
 
 const fourDigitEscape = (code) => `\\u${code.toString(16).padStart(4, '0')}`
 
