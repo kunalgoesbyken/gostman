@@ -1,16 +1,22 @@
-import { lazy, Suspense, useCallback } from "react"
+import { lazy, Suspense, useCallback, useEffect } from "react"
 import { LandingPage } from "./components/LandingPage"
 import { useRoute } from "./hooks/useRoute"
 import { webBackend } from "./lib/backend/web"
+import { whenIdle } from "./lib/idle"
 
-const Workspace = lazy(() => import("./components/Workspace").then((module) => ({ default: module.Workspace })))
+const loadWorkspace = () => import("./components/Workspace")
+
+const Workspace = lazy(() => loadWorkspace().then((module) => ({ default: module.Workspace })))
 
 function WebApp() {
   const { route, navigate } = useRoute()
   const openClient = useCallback(() => navigate("/web"), [navigate])
   const openLanding = useCallback(() => navigate("/"), [navigate])
+  const isLanding = route === "/"
 
-  if (route === "/") {
+  useEffect(() => (isLanding ? whenIdle(loadWorkspace) : undefined), [isLanding])
+
+  if (isLanding) {
     return <LandingPage onGetStarted={openClient} />
   }
 

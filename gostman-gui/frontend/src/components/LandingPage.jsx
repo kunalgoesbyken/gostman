@@ -262,44 +262,45 @@ export function LandingPage({ onGetStarted }) {
           </div>
         </NavBar>
 
-        <section className="relative pt-36 pb-16 px-6">
-          <div
-            className="pointer-events-none absolute inset-x-0 -top-14 h-[640px] bg-[radial-gradient(ellipse_55%_60%_at_50%_0%,hsl(var(--primary)/0.10),transparent)]"
-            aria-hidden="true"
-          />
-          <div className="relative max-w-4xl mx-auto">
-            <div className="text-center space-y-6">
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.1] [text-wrap:balance]">
-                <span className="intro block">Test any API.</span>
-                <span className="intro block mt-2 text-muted-foreground" style={introStep(1)}>No account. No cloud.</span>
-              </h1>
+        <div className="relative overflow-hidden">
+          <div className="landing-stripes pointer-events-none absolute inset-x-0 top-0 h-[760px]" aria-hidden="true" />
+          <section className="relative pt-36 pb-16 px-6">
+            <div className="relative max-w-4xl mx-auto">
+              <div className="text-center space-y-6">
+                <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.1] [text-wrap:balance]">
+                  <span className="intro block">Test any API.</span>
+                  <span className="intro block mt-2 text-muted-foreground" style={introStep(1)}>No account. No cloud.</span>
+                </h1>
 
-              <p className="intro text-lg md:text-xl text-muted-foreground/90 max-w-2xl mx-auto leading-relaxed" style={introStep(2)}>
-                Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. One collection for you, your CI pipeline and your coding agent, kept as files on your machine.
-              </p>
+                <p className="intro text-lg md:text-xl text-muted-foreground/90 max-w-2xl mx-auto leading-relaxed" style={introStep(2)}>
+                  Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. One collection for you, your CI pipeline and your coding agent, kept as files on your machine.
+                </p>
 
-              <div className="intro relative z-20 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-6" style={introStep(3)}>
-                <DownloadDropdown />
-                <TryWebButton onClick={onGetStarted} className="px-6 py-5.5" />
-              </div>
+                <div className="intro relative z-20 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-6" style={introStep(3)}>
+                  <DownloadDropdown />
+                  <TryWebButton onClick={onGetStarted} className="px-6 py-5.5" />
+                </div>
 
-              <div className="intro flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-6 text-sm text-muted-foreground/80" style={introStep(4)}>
-                {HIGHLIGHTS.map((text) => (
-                  <div key={text} className="flex items-center gap-2">
-                    <Check className="h-3.5 w-3.5 text-success/70" />
-                    <span>{text}</span>
-                  </div>
-                ))}
+                <div className="intro flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-6 text-sm text-muted-foreground/80" style={introStep(4)}>
+                  {HIGHLIGHTS.map((text) => (
+                    <div key={text} className="flex items-center gap-2">
+                      <Check className="h-3.5 w-3.5 text-success/70" />
+                      <span>{text}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <section className="relative py-16 px-6">
-          <div className="max-w-5xl mx-auto">
-            <ProductShowcase />
-          </div>
-        </section>
+          <section className="relative py-16 px-6">
+            <div className="landing-glow pointer-events-none absolute inset-x-0 -top-[15%] hidden h-[75%] md:block" aria-hidden="true" />
+            <div className="landing-horizon pointer-events-none absolute left-1/2 top-[30%] hidden h-[160%] w-[150%] -translate-x-1/2 md:block" aria-hidden="true" />
+            <div className="relative max-w-5xl mx-auto">
+              <ProductShowcase />
+            </div>
+          </section>
+        </div>
 
         <section className="relative py-20 px-6" aria-labelledby="workflow-heading">
           <div className="mx-auto max-w-6xl">
@@ -337,6 +338,9 @@ export function LandingPage({ onGetStarted }) {
 
         <section className="relative px-6 pb-24">
           <div className="relative mx-auto max-w-6xl rounded-2xl border border-border/60 bg-card px-6 py-16 text-center md:py-20">
+            <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl" aria-hidden="true">
+              <div className="landing-glow absolute inset-x-0 top-1/3 h-full opacity-70" />
+            </div>
             <SplitHeading
               text="Send your first request in a minute"
               className="text-3xl md:text-5xl font-semibold tracking-tight [text-wrap:balance]"

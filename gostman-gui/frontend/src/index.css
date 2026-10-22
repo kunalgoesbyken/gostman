@@ -174,6 +174,27 @@
 }
 
 @layer components {
+  .landing-stripes {
+    background-image: repeating-linear-gradient(90deg, hsl(var(--foreground) / 0.045) 0 1px, transparent 1px 7px);
+    mask-image: linear-gradient(to bottom, black, transparent 80%);
+  }
+
+  .landing-glow {
+    background:
+      radial-gradient(40% 45% at 50% 60%, hsl(var(--primary) / 0.55), transparent),
+      radial-gradient(28% 38% at 22% 62%, hsl(var(--success) / 0.4), transparent),
+      radial-gradient(28% 38% at 78% 62%, hsl(var(--info) / 0.45), transparent);
+  }
+
+  .landing-horizon {
+    border-radius: 50%;
+    background: hsl(var(--background));
+    border-top: 1px solid hsl(var(--primary) / 0.8);
+    box-shadow:
+      0 -1px 12px hsl(var(--primary) / 0.6),
+      0 -24px 80px -16px hsl(var(--primary) / 0.45);
+  }
+
   kbd {
     @apply inline-flex shrink-0 items-center rounded border border-border px-1.5 py-0.5;
     @apply font-mono text-[10px] font-medium text-muted-foreground;
