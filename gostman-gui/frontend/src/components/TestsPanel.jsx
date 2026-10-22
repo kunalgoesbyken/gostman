@@ -92,18 +92,20 @@ export function AssertionEditor({ assertions, onChange }) {
   const removeRow = (index) => commit(shown.filter((_, at) => at !== index))
 
   return (
-    <PanelBody>
-      <ColumnLabels />
-      <div className={ROW_STACK}>
-        {shown.map((row, index) => (
-          <AssertionRow
-            key={index}
-            assertion={row}
-            isDraft={index === rows.length}
-            onChange={(patch) => patchRow(index, patch)}
-            onRemove={() => removeRow(index)}
-          />
-        ))}
+    <PanelBody className="overflow-x-auto">
+      <div className="min-w-[30rem]">
+        <ColumnLabels />
+        <div className={ROW_STACK}>
+          {shown.map((row, index) => (
+            <AssertionRow
+              key={index}
+              assertion={row}
+              isDraft={index === rows.length}
+              onChange={(patch) => patchRow(index, patch)}
+              onRemove={() => removeRow(index)}
+            />
+          ))}
+        </div>
       </div>
     </PanelBody>
   )

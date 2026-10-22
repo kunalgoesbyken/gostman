@@ -45,6 +45,7 @@ export function AppHeader({ storage, onImport, onReset, onOpenCommands, onToggle
           Commands
           {paletteShortcut && <kbd>{paletteShortcut}</kbd>}
         </Button>
+        <IconButton label="Commands" icon={Search} size="icon" onClick={onOpenCommands} className="lg:hidden" />
         {gettingStarted}
         <EnvironmentSwitcher />
         {canInstall && (
@@ -53,13 +54,11 @@ export function AppHeader({ storage, onImport, onReset, onOpenCommands, onToggle
             <span className="hidden sm:inline">{INSTALL_TEXT.label}</span>
           </Button>
         )}
-        <Button variant="outline" onClick={onImport}>
+        <Button variant="outline" onClick={onImport} className="max-sm:hidden">
           <Import />
-          <span className="max-sm:sr-only">Import</span>
+          Import
         </Button>
-        <div className="flex shrink-0 items-center gap-1">
-          <IconButton label="Reset app and delete all data" icon={RotateCcw} size="icon" onClick={onReset} />
-        </div>
+        <IconButton label="Reset app and delete all data" icon={RotateCcw} size="icon" onClick={onReset} className="max-sm:hidden" />
       </div>
       {isDesktop && <WindowControls />}
     </header>

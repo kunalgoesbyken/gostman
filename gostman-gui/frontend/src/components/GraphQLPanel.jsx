@@ -4,7 +4,7 @@ import { parse, print } from "graphql"
 import { Button } from "./ui/button"
 import { EmptyState } from "./ui/emptyState"
 import { Input } from "./ui/input"
-import { Notice, Panel, PanelBody, SectionLabel, Toolbar } from "./ui/panel"
+import { Notice, Panel, PanelBody, SIDE_PANE, SectionLabel, Toolbar } from "./ui/panel"
 import { Textarea } from "./ui/textarea"
 import { GraphQLBuilder } from "./GraphQLBuilder"
 import { isPlainObject } from "../lib/dataUtils"
@@ -150,7 +150,7 @@ function SchemaContent({ schema }) {
 
 function SchemaPane({ schema, onLoad }) {
   return (
-    <aside aria-label="Schema" className="flex w-2/5 min-w-52 max-w-80 shrink-0 flex-col border-l border-border">
+    <aside aria-label="Schema" className={cn(SIDE_PANE, "w-2/5 min-w-52 max-w-80")}>
       <Toolbar>
         <SectionLabel className="flex-1">Schema</SectionLabel>
         <Button variant="outline" size="sm" disabled={Boolean(schema?.loading)} onClick={onLoad}>
@@ -225,7 +225,7 @@ export function GraphQLPanel({ query, variables, environment, schema, method, on
   }
 
   return (
-    <div className="flex h-full min-h-0">
+    <div className="relative flex h-full min-h-0">
       <Panel className="flex-1">
         <Toolbar>
           <SectionLabel className="flex-1">Query</SectionLabel>

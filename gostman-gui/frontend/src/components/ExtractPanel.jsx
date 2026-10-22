@@ -118,19 +118,21 @@ export function ExtractPanel({ extractors, response, extraction, onChange, onRun
           Run now
         </Button>
       </Toolbar>
-      <PanelBody>
-        <ColumnLabels />
-        <div className={ROW_STACK}>
-          {shown.map((row, index) => (
-            <ExtractorRow
-              key={index}
-              extractor={row}
-              isDraft={index === rows.length}
-              response={response}
-              onChange={(patch) => patchRow(index, patch)}
-              onRemove={() => removeRow(index)}
-            />
-          ))}
+      <PanelBody className="overflow-x-auto">
+        <div className="min-w-[36rem]">
+          <ColumnLabels />
+          <div className={ROW_STACK}>
+            {shown.map((row, index) => (
+              <ExtractorRow
+                key={index}
+                extractor={row}
+                isDraft={index === rows.length}
+                response={response}
+                onChange={(patch) => patchRow(index, patch)}
+                onRemove={() => removeRow(index)}
+              />
+            ))}
+          </div>
         </div>
         {runSummary && <p className="pt-3 text-xs text-muted-foreground">{runSummary}</p>}
       </PanelBody>

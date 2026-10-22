@@ -1,7 +1,7 @@
 import { KeyRound, X } from "lucide-react"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
-import { Field } from "./ui/field"
+import { FIELD_COLUMNS, Field } from "./ui/field"
 import { Select } from "./ui/select"
 import { SecretInput, TextInput } from "./AuthInputs"
 import { GRANTS, GRANT_AUTHORIZATION_CODE, GRANT_PASSWORD, callbackUrlFor, hasToken, isTokenFresh } from "../lib/oauth"
@@ -25,8 +25,8 @@ function TokenControls({ config, tokenRequest, actions, onClear }) {
   const error = tokenRequest?.error || ""
 
   return (
-    <div className="grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)] items-start gap-3">
-      <span />
+    <div className={cn(FIELD_COLUMNS, "items-start")}>
+      <span className="max-sm:hidden" />
       <div className="flex min-w-0 flex-col gap-2">
         <div className="flex items-center gap-2">
           {isPending ? (

@@ -17,7 +17,7 @@ export class ErrorBoundary extends React.Component {
     if (!this.state.error) return this.props.children
 
     return (
-      <div className="h-screen overflow-y-auto bg-background">
+      <div className="h-dvh overflow-y-auto bg-background">
         <EmptyState
           icon={AlertTriangle}
           title="Something went wrong"

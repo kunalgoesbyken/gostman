@@ -34,3 +34,9 @@ export function Notice({ tone = "muted", icon: Icon, edge = "border-b", classNam
     </div>
   )
 }
+
+export const SPLIT_PANES = "flex min-h-0 flex-1 max-sm:flex-col"
+
+export const SPLIT_LIST = "flex shrink-0 flex-col border-border max-sm:max-h-[40%] max-sm:w-full max-sm:border-b sm:border-r"
+
+export const SIDE_PANE = "flex shrink-0 flex-col border-l border-border bg-background max-sm:absolute max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-10 max-sm:z-10 max-sm:w-full max-sm:max-w-none max-sm:border-l-0 max-sm:border-t"

@@ -3,7 +3,7 @@ import { ChevronDown, ChevronRight, Network } from "lucide-react"
 import { Button } from "./ui/button"
 import { EmptyState } from "./ui/emptyState"
 import { Input } from "./ui/input"
-import { Notice, PanelBody, SectionLabel, Toolbar } from "./ui/panel"
+import { Notice, PanelBody, SIDE_PANE, SectionLabel, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { VirtualList } from "./ui/VirtualList"
 import { useDebouncedValue } from "../hooks/useDebouncedValue"
@@ -158,7 +158,7 @@ function BuilderContent({ schema, query, variables, onChange }) {
 
 export function GraphQLBuilder({ schema, query, variables, onChange, onLoadSchema }) {
   return (
-    <aside aria-label={BUILDER_TEXT.paneLabel} className="flex w-1/2 min-w-64 max-w-md shrink-0 flex-col border-l border-border">
+    <aside aria-label={BUILDER_TEXT.paneLabel} className={cn(SIDE_PANE, "w-1/2 min-w-64 max-w-md")}>
       <Toolbar>
         <SectionLabel className="flex-1">{BUILDER_TEXT.title}</SectionLabel>
         <Button variant="outline" size="sm" disabled={Boolean(schema?.loading)} onClick={onLoadSchema}>

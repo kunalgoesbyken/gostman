@@ -26,7 +26,7 @@ export function EnvironmentSwitcher() {
         aria-label="Active environment"
         title={active.name}
         controlSize="md"
-        className="w-16 sm:w-28 md:w-44"
+        className="w-20 sm:w-28 md:w-44"
       >
         {environments.map((environment) => (
           <option key={environment.id} value={environment.id}>

@@ -5,7 +5,7 @@ import { Button, IconButton } from "./ui/button"
 import { DataTable } from "./ui/dataTable"
 import { Dialog, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
-import { Toolbar } from "./ui/panel"
+import { SPLIT_LIST, SPLIT_PANES, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { TabCount } from "./ui/tabs"
 import { formatSize } from "../lib/dataUtils"
@@ -138,8 +138,8 @@ export function ExamplesDialog({ request, actions, EditorComponent }) {
         <span title={request.name} className="min-w-0 truncate text-xs text-muted-foreground">{request.name}</span>
       </DialogHeader>
       {selected ? (
-        <div className="flex min-h-0 flex-1">
-          <ul aria-label="Saved examples" className="w-56 shrink-0 overflow-y-auto border-r border-border py-1">
+        <div className={SPLIT_PANES}>
+          <ul aria-label="Saved examples" className={cn(SPLIT_LIST, "w-56 overflow-y-auto py-1")}>
             {examples.map((example) => (
               <ExampleRow
                 key={example.id}

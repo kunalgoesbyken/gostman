@@ -249,7 +249,7 @@ function StatusSummary({ response }) {
       <Badge variant={statusVariant(response)} title={response.status} className="max-w-[9rem] font-mono">
         <span className="truncate">{response.status}</span>
       </Badge>
-      <span title={detail} className="min-w-0 truncate font-mono text-[11px] text-muted-foreground">{timing}</span>
+      <span title={detail} className="min-w-0 truncate font-mono text-[11px] text-muted-foreground max-md:hidden">{timing}</span>
     </>
   )
 }
@@ -453,7 +453,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
               />
             )}
             {showsTabs ? (
-              <TabsList label="Response sections" className="shrink-0 pl-1.5">
+              <TabsList label="Response sections" className="pl-1.5">
                 <TabsTrigger value={TAB_BODY}>Body</TabsTrigger>
                 {hasResult && <TabsTrigger value={TAB_HEADERS}>Headers<TabCount>{headers.length}</TabCount></TabsTrigger>}
                 {hasResult && <TabsTrigger value={TAB_COOKIES}>Cookies<TabCount>{cookies.length}</TabCount></TabsTrigger>}
@@ -470,7 +470,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
               <SectionLabel className="pl-1.5">Response</SectionLabel>
             )}
 
-            <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+            <div className="ml-auto flex shrink-0 items-center gap-2">
               {shown && <StatusSummary response={shown} />}
             </div>
 

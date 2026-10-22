@@ -100,7 +100,7 @@ function LoadingOverlay() {
 
 function LoadFailure({ reason, onRetry }) {
   return (
-    <div className="h-screen overflow-y-auto bg-background">
+    <div className="h-dvh overflow-y-auto bg-background">
       <EmptyState
         icon={AlertTriangle}
         title="Saved data could not be loaded"
@@ -276,7 +276,7 @@ function LoadedWorkspace({ backend, onBack }) {
   usePersistence(backend)
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
+    <div className="flex h-dvh flex-col overflow-hidden bg-background text-foreground">
       <AppHeader
         storage={actions.storage}
         onImport={actions.openImport}
@@ -293,13 +293,22 @@ function LoadedWorkspace({ backend, onBack }) {
 
       <div className="relative flex min-h-0 flex-1">
         {isSidebarOpen && (
-          <Sidebar
-            folders={folders}
-            requests={requests}
-            requestHistory={requestHistory}
-            activeRequestId={activeRequest.id}
-            actions={actions}
-          />
+          <>
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label="Close sidebar"
+              onClick={() => actions.runCommand("toggleSidebar")}
+              className="absolute inset-0 z-20 bg-black/40 md:hidden"
+            />
+            <Sidebar
+              folders={folders}
+              requests={requests}
+              requestHistory={requestHistory}
+              activeRequestId={activeRequest.id}
+              actions={actions}
+            />
+          </>
         )}
 
         <main className="flex min-w-0 flex-1 flex-col">

@@ -189,7 +189,7 @@ export function GitPanel({ actions, onTrust }) {
   if (!isOpen) return null
 
   return (
-    <Dialog label="Git" onClose={actions.close} className="h-[42rem] max-w-5xl">
+    <Dialog label="Git" size="lg" onClose={actions.close} className="h-[42rem] max-w-5xl">
       <DialogHeader onClose={actions.close}>
         <DialogTitle>Git</DialogTitle>
         {state.isRepo && (

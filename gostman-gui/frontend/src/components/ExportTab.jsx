@@ -143,7 +143,7 @@ export function ExportTab({ requests, folders, environments, variables, settings
   return (
     <>
       <div className="flex shrink-0 flex-wrap items-center gap-2">
-        <SegmentedControl label="Export format" options={ALL_FORMATS} value={formatId} onChange={setFormatId} className="shrink" />
+        <SegmentedControl label="Export format" options={ALL_FORMATS} value={formatId} onChange={setFormatId} />
         <div className="ml-auto flex shrink-0 items-center gap-2">
           <CopyTextButton text={content} />
           <Button size="sm" onClick={save} disabled={!content || remote.isBuilding}>

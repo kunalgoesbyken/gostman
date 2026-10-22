@@ -82,7 +82,7 @@ export const RequestBar = memo(function RequestBar({
           ))}
         </Select>
 
-        <div className="min-w-48 flex-1">
+        <div className="min-w-40 flex-1">
           <VariableInput
             placeholder="Enter a URL or paste a curl command"
             value={activeRequest.url}

@@ -182,7 +182,7 @@ function Popover({ anchor, buttonRef, onClose, children }) {
       role="dialog"
       aria-label={TEXT.title}
       style={style}
-      className="fixed z-50 max-h-[calc(100vh-4rem)] overflow-y-auto rounded-md border border-border bg-background p-3 shadow-lg"
+      className="fixed z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto rounded-md border border-border bg-background p-3 shadow-lg"
     >
       {children}
     </div>,
@@ -221,7 +221,7 @@ export function GettingStartedButton({ onBegin }) {
       >
         <ListChecks />
         <span className="hidden truncate xl:inline">{TEXT.next}: {nextTitle}</span>
-        <span className="sr-only sm:not-sr-only xl:hidden">{TEXT.title}</span>
+        <span className="max-sm:sr-only xl:hidden">{TEXT.title}</span>
         <span className="text-muted-foreground">{progress.doneCount}/{progress.steps.length}</span>
       </Button>
       {anchor && (

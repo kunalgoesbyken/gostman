@@ -161,7 +161,7 @@ export function WorkspaceMenu({ anchor, status, storage, isRestricted, onClose }
       aria-label={TEXT.switcherLabel}
       onKeyDown={handleKeyDown}
       style={placement || { left: 0, top: 0, visibility: "hidden" }}
-      className="fixed z-50 flex max-h-[min(32rem,calc(100vh-4rem))] w-[min(23rem,calc(100vw-1rem))] flex-col overflow-y-auto rounded-md border border-border bg-background py-1 shadow-lg"
+      className="fixed z-50 flex max-h-[min(32rem,calc(100dvh-4rem))] w-[min(23rem,calc(100vw-1rem))] flex-col overflow-y-auto rounded-md border border-border bg-background py-1 shadow-lg"
     >
       <ComputerRow isCurrent={status.path === ""} storage={storage} onClose={onClose} />
       {groups.length === 0 && <p className="px-3 py-2 text-xs text-muted-foreground">{TEXT.noWorkspaces}</p>}

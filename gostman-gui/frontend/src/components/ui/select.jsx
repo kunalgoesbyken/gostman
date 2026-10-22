@@ -156,7 +156,7 @@ const Select = React.forwardRef(function Select(
         title={title || selected?.label}
         onClick={() => (isOpen ? close() : open())}
         onKeyDown={handleKeyDown}
-        className={cn(CONTROL_BASE, CONTROL_SIZES[controlSize], "flex items-center pr-7 text-left", className)}
+        className={cn(CONTROL_BASE, CONTROL_SIZES[controlSize], "flex max-w-full items-center pr-7 text-left", className)}
         {...props}
       >
         <span className="truncate">{selected ? selected.label : String(value ?? "")}</span>

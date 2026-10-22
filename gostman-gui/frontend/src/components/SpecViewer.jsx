@@ -4,6 +4,7 @@ import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
+import { SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs"
 import { VirtualList } from "./ui/VirtualList"
 import { MethodTag } from "./MethodTag"
@@ -223,8 +224,8 @@ export function SpecViewer({ dialog, actions, onClose }) {
           </Status>
         )}
         {summary.value && tab !== TAB_LINT && (
-          <div className="flex min-h-0 flex-1">
-            <div className="flex w-72 shrink-0 flex-col border-r border-border">
+          <div className={SPLIT_PANES}>
+            <div className={cn(SPLIT_LIST, "w-72 max-sm:h-2/5")}>
               <SearchField value={query} onChange={setQuery} placeholder={isOperations ? SPEC_TEXT.searchOperations : SPEC_TEXT.searchModels} />
               <div className="min-h-0 flex-1">
                 {isOperations ? (

@@ -3,7 +3,7 @@ import { Check, Copy, KeyRound, Plus, Trash2 } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
-import { Notice } from "./ui/panel"
+import { Notice, SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { Select } from "./ui/select"
 import { EnvironmentTable } from "./EnvironmentTable"
@@ -236,11 +236,11 @@ export function EnvironmentDialog({ secrets, onClose }) {
           <SegmentedControl label={TEXT.scope} options={SCOPE_OPTIONS} value={scope} onChange={changeScope} className="ml-2" />
           <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setIsManagingSecrets(true)}>
             <KeyRound />
-            {SECRETS_TEXT.title}
+            <span className="max-sm:sr-only">{SECRETS_TEXT.title}</span>
           </Button>
         </DialogHeader>
-        <div className="flex min-h-0 flex-1">
-          <nav aria-label={TEXT.title} className="flex w-56 shrink-0 flex-col border-r border-border">
+        <div className={SPLIT_PANES}>
+          <nav aria-label={TEXT.title} className={cn(SPLIT_LIST, "w-56")}>
             <div className="min-h-0 flex-1 overflow-y-auto py-1">
               {list.map((environment) => (
                 <ListItem

@@ -1,10 +1,9 @@
 import { useState } from "react"
 import { Button, buttonVariants } from "../ui/button"
 import { cn } from "../../lib/utils"
-import { detectBrowserOs } from "../../lib/detectOs"
 import { Download, ChevronDown } from "./icons"
 import { AppleIcon, WindowsIcon, LinuxIcon } from "../Icons"
-import { DOWNLOADS, downloadFor, downloadUrl } from "./downloads"
+import { DOWNLOADS, downloadUrl } from "./downloads"
 
 const ICONS = { macos: AppleIcon, windows: WindowsIcon, linux: LinuxIcon }
 
@@ -20,7 +19,7 @@ function DownloadMenu({ onClose }) {
   return (
     <>
       <div className="fixed inset-0 z-10" onClick={onClose} />
-      <div className="absolute top-full left-0 mt-2 z-20 min-w-[280px] text-left rounded-lg border border-border bg-background shadow-xl overflow-hidden">
+      <div className="absolute top-full left-0 right-0 mt-2 z-20 min-w-[280px] sm:right-auto text-left rounded-lg border border-border bg-background shadow-xl overflow-hidden">
         {DOWNLOAD_OPTIONS.map((option) => (
           <a
             key={option.file}
@@ -41,21 +40,21 @@ function DownloadMenu({ onClose }) {
   )
 }
 
-export const DownloadDropdown = () => {
+export const DownloadDropdown = ({ primary, variant }) => {
   const [isOpen, setIsOpen] = useState(false)
-  const [primary] = useState(() => downloadFor(detectBrowserOs()))
   const toggle = () => setIsOpen((open) => !open)
 
   return (
     <div className="relative z-30 flex">
       {primary ? (
         <>
-          <a href={downloadUrl(primary)} className={cn(buttonVariants({ size: "lg" }), LARGE, "flex-1 px-8 rounded-r-none")}>
+          <a href={downloadUrl(primary)} className={cn(buttonVariants({ size: "lg", variant }), LARGE, "min-w-0 flex-1 rounded-r-none px-5 sm:px-8")}>
             <Download className="h-5 w-5" />
             Download for {primary.name}
           </a>
           <Button
             size="lg"
+            variant={variant}
             className={cn(LARGE, "px-3 rounded-l-none border-l border-primary-foreground/20")}
             aria-label="Other downloads"
             aria-expanded={isOpen}
@@ -65,7 +64,7 @@ export const DownloadDropdown = () => {
           </Button>
         </>
       ) : (
-        <Button size="lg" className={cn(LARGE, "flex-1 px-8")} aria-expanded={isOpen} onClick={toggle}>
+        <Button size="lg" variant={variant} className={cn(LARGE, "flex-1 px-5 sm:px-8")} aria-expanded={isOpen} onClick={toggle}>
           <Download className="h-5 w-5" />
           Download for Desktop
           <ChevronDown className="h-5 w-5" />

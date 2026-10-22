@@ -37,7 +37,7 @@ export function DocsNav({ nav, currentHref }) {
           <NavList nav={nav} currentHref={currentHref} />
         </div>
       </details>
-      <div className="hidden lg:sticky lg:top-28 lg:block lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
+      <div className="hidden lg:sticky lg:top-28 lg:block lg:max-h-[calc(100dvh-8rem)] lg:overflow-y-auto">
         <NavList nav={nav} currentHref={currentHref} />
       </div>
     </>

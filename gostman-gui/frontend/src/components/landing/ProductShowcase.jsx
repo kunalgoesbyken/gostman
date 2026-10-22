@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, m } from "framer-motion"
 import { easeSmooth, springLayout } from "../../lib/motion"
 import { cn } from "../../lib/utils"
@@ -55,9 +55,22 @@ const KEY_STEPS = { ArrowRight: 1, ArrowLeft: -1 }
 const tabId = (id) => `showcase-tab-${id}`
 const panelId = (id) => `showcase-panel-${id}`
 
+function useCenteredInList(ref, isActive) {
+  useEffect(() => {
+    const tab = ref.current
+    const list = tab.parentElement
+    if (!isActive || list.scrollWidth <= list.clientWidth) return
+    const offset = tab.getBoundingClientRect().left - list.getBoundingClientRect().left + list.scrollLeft
+    list.scrollTo({ left: offset - (list.clientWidth - tab.offsetWidth) / 2, behavior: "smooth" })
+  }, [ref, isActive])
+}
+
 function ViewTab({ view, isActive, onSelect }) {
+  const ref = useRef(null)
+  useCenteredInList(ref, isActive)
   return (
     <button
+      ref={ref}
       type="button"
       role="tab"
       id={tabId(view.id)}
@@ -66,7 +79,7 @@ function ViewTab({ view, isActive, onSelect }) {
       tabIndex={isActive ? 0 : -1}
       onClick={onSelect}
       className={cn(
-        "relative whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium transition-colors",
+        "relative shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors sm:px-4",
         isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
       )}
     >
@@ -126,7 +139,7 @@ export function ProductShowcase() {
           role="tablist"
           aria-label="Protocols"
           onKeyDown={handleKeyDown}
-          className="isolate inline-flex shrink-0 items-center gap-1 self-start overflow-x-auto rounded-lg border border-border/40 bg-muted/20 p-1 scrollbar-none sm:self-auto"
+          className="isolate inline-flex max-w-full shrink-0 items-center gap-1 self-start overflow-x-auto rounded-lg border border-border/40 bg-muted/20 p-1 scrollbar-none sm:self-auto"
         >
           {VIEWS.map((view) => (
             <ViewTab key={view.id} view={view} isActive={view.id === activeId} onSelect={() => select(view.id)} />

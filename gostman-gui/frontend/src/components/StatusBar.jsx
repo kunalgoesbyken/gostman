@@ -7,7 +7,7 @@ import { ABOUT_TEXT } from "../lib/aboutText"
 import { PREFERENCES_TEXT } from "../lib/preferencesText"
 import { useAppStore } from "../store/appStore"
 
-const ITEM_CLASS = "inline-flex h-full items-center gap-1.5 px-2 transition-colors hover:bg-accent hover:text-foreground [&_svg]:size-3"
+const ITEM_CLASS = "inline-flex h-full items-center gap-1.5 px-2 transition-colors hover:bg-accent hover:text-foreground max-sm:px-3 [&_svg]:size-3 max-sm:[&_svg]:size-4"
 
 function StatusItem({ icon: Icon, label, active, onClick }) {
   return (
@@ -30,7 +30,7 @@ export function StatusBar({ onOpenMock, onOpenCapture }) {
   const git = useGitStore((s) => s.state)
 
   return (
-    <footer className="flex h-6 shrink-0 items-center justify-between overflow-hidden border-t border-border bg-background px-1 text-[11px] text-muted-foreground">
+    <footer className="flex h-6 max-sm:h-10 shrink-0 items-center justify-between overflow-hidden border-t border-border bg-background px-1 text-[11px] text-muted-foreground">
       <div className="flex h-full items-center">
         <StatusItem icon={Settings} label="Network" onClick={openSettings} />
         <StatusItem icon={Server} label={isMockRunning ? "Mock server (running)" : "Mock server"} active={isMockRunning} onClick={onOpenMock} />

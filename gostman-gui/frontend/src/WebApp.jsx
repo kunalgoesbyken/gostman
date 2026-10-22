@@ -4,6 +4,7 @@ import { useRoute } from "./hooks/useRoute"
 import { webBackend } from "./lib/backend/web"
 import { whenIdle } from "./lib/idle"
 import { registerServiceWorker } from "./lib/pwa"
+import { preventInputZoom } from "./lib/viewport"
 
 const loadWorkspace = () => import("./components/Workspace")
 
@@ -18,7 +19,7 @@ function WebApp() {
   useEffect(() => {
     if (isLanding) return whenIdle(loadWorkspace)
     registerServiceWorker()
-    return undefined
+    return preventInputZoom()
   }, [isLanding])
 
   if (isLanding) {

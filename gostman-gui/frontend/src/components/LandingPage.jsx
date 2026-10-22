@@ -17,6 +17,8 @@ import { AGENT_SESSION, CLI_RUN, REQUEST_FILE } from "./landing/captures"
 import { TerminalBlock } from "./landing/TerminalBlock"
 import { ProductShowcase } from "./landing/ProductShowcase"
 import { DownloadDropdown } from "./landing/DownloadDropdown"
+import { downloadFor } from "./landing/downloads"
+import { detectBrowserOs } from "../lib/detectOs"
 import { Brand } from "./landing/Brand"
 import { NavBar } from "./landing/NavBar"
 import { PointList } from "./landing/PointList"
@@ -173,13 +175,37 @@ const useGitHubStars = () => {
   return { stars, isLoading }
 }
 
-function TryWebButton({ onClick, className }) {
+function TryWebButton({ onClick, isPrimary }) {
   return (
-    <Button size="lg" variant="outline" className={cn("gap-2 text-base border-border/60 hover:bg-muted/50", className)} onClick={onClick}>
+    <Button
+      size="lg"
+      variant={isPrimary ? "default" : "outline"}
+      className={cn("gap-2 px-6 py-5.5 text-base", !isPrimary && "border-border/60 hover:bg-muted/50")}
+      onClick={onClick}
+    >
       <Globe className="h-4 w-4" />
       Try the web version
       <ArrowRight className="h-4 w-4" />
     </Button>
+  )
+}
+
+function CallToActions({ onGetStarted, className, style }) {
+  const [download] = useState(() => downloadFor(detectBrowserOs()))
+  return (
+    <div className={cn("relative z-20 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center", className)} style={style}>
+      {download ? (
+        <>
+          <DownloadDropdown primary={download} />
+          <TryWebButton onClick={onGetStarted} />
+        </>
+      ) : (
+        <>
+          <TryWebButton onClick={onGetStarted} isPrimary />
+          <DownloadDropdown variant="outline" />
+        </>
+      )}
+    </div>
   )
 }
 
@@ -194,12 +220,12 @@ function LazySection({ children, minHeight }) {
 function Spotlight({ spotlight, isReversed }) {
   return (
     <div className="grid items-center gap-8 p-6 md:p-10 lg:grid-cols-12 lg:gap-12 lg:p-12">
-      <div className={cn("lg:col-span-5", isReversed && "lg:order-2")}>
+      <div className={cn("min-w-0 lg:col-span-5", isReversed && "lg:order-2")}>
         <SplitHeading as="h3" text={spotlight.title} className="text-2xl md:text-3xl font-semibold tracking-tight [text-wrap:balance]" />
         <p className="mt-4 leading-relaxed text-muted-foreground">{spotlight.description}</p>
         <PointList points={spotlight.points} className="mt-6 space-y-3" />
       </div>
-      <div className={cn("reveal-on-scroll lg:col-span-7", isReversed && "lg:order-1")}>
+      <div className={cn("reveal-on-scroll min-w-0 lg:col-span-7", isReversed && "lg:order-1")}>
         {spotlight.capture ? (
           <TerminalBlock {...spotlight.capture} />
         ) : (
@@ -232,8 +258,8 @@ export function LandingPage({ onGetStarted }) {
       <div className="dark min-h-screen bg-background text-foreground overflow-x-clip" id="main-content">
         <NavBar>
           <Brand />
-          <div className="flex items-center gap-2">
-            <a href={docPath("")} className={cn(NAV_LINK, "hidden sm:inline-flex")}>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <a href={docPath("")} className={NAV_LINK}>
               Docs
             </a>
             <button type="button" onClick={onGetStarted} className={cn(NAV_LINK, "hidden sm:inline-flex")}>
@@ -276,10 +302,7 @@ export function LandingPage({ onGetStarted }) {
                   Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. One collection for you, your CI pipeline and your coding agent, kept as files on your machine.
                 </p>
 
-                <div className="intro relative z-20 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-6" style={introStep(3)}>
-                  <DownloadDropdown />
-                  <TryWebButton onClick={onGetStarted} className="px-6 py-5.5" />
-                </div>
+                <CallToActions onGetStarted={onGetStarted} className="intro pt-6" style={introStep(3)} />
 
                 <div className="intro flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-6 text-sm text-muted-foreground/80" style={introStep(4)}>
                   {HIGHLIGHTS.map((text) => (
@@ -348,10 +371,7 @@ export function LandingPage({ onGetStarted }) {
             <p className="mx-auto mt-5 max-w-lg leading-relaxed text-muted-foreground">
               Download the desktop app for Windows, macOS or Linux, or open the web version now. There is nothing to sign up for.
             </p>
-            <div className="relative z-20 mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
-              <DownloadDropdown />
-              <TryWebButton onClick={onGetStarted} className="px-6 py-5.5" />
-            </div>
+            <CallToActions onGetStarted={onGetStarted} className="mt-8" />
           </div>
         </section>
 

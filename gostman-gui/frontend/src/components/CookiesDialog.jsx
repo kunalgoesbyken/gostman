@@ -8,6 +8,7 @@ import { TabCount } from "./ui/tabs"
 import { SearchField } from "./SearchField"
 import { useAppStore } from "../store/appStore"
 
+const TABLE_WIDTH = "min-w-[40rem]"
 const COLUMNS = "grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)_4rem_minmax(0,1fr)_1.75rem] items-center gap-2 px-3"
 const CELL = "truncate font-mono text-xs"
 const EMPTY_HINT = "Cookies set by responses are kept here and sent back to the same site on later requests."
@@ -56,8 +57,8 @@ export function CookiesDialog({ onClose }) {
             : <EmptyState icon={Search} title="No results" description="No cookie name or domain matches." />}
         </div>
       ) : (
-        <>
-          <div className={`${COLUMNS} h-8 shrink-0 border-b border-border`}>
+        <div className="flex min-h-0 flex-1 flex-col overflow-x-auto">
+          <div className={`${COLUMNS} ${TABLE_WIDTH} h-8 shrink-0 border-b border-border`}>
             <SectionLabel className="truncate">Name</SectionLabel>
             <SectionLabel className="truncate">Value</SectionLabel>
             <SectionLabel className="truncate">Domain</SectionLabel>
@@ -65,7 +66,7 @@ export function CookiesDialog({ onClose }) {
             <SectionLabel className="truncate">Expires</SectionLabel>
             <span />
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className={`${TABLE_WIDTH} min-h-0 flex-1 overflow-y-auto`}>
             {shown.map((cookie) => (
               <CookieRow
                 key={`${cookie.domain}\n${cookie.path}\n${cookie.name}`}
@@ -74,7 +75,7 @@ export function CookiesDialog({ onClose }) {
               />
             ))}
           </div>
-        </>
+        </div>
       )}
     </Dialog>
   )

@@ -5,7 +5,7 @@ export function SegmentedControl({ label, options, value, onChange, className })
     <div
       role="radiogroup"
       aria-label={label}
-      className={cn("flex h-7 min-w-0 shrink-0 items-stretch divide-x divide-border overflow-x-auto rounded-md border border-border scrollbar-none", className)}
+      className={cn("flex h-7 min-w-0 items-stretch divide-x divide-border overflow-x-auto rounded-md border border-border scrollbar-none", className)}
     >
       {options.map((option) => (
         <button
