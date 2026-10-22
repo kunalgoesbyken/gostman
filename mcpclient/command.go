@@ -27,6 +27,7 @@ const (
 	environmentJoin   = "="
 	quoteDouble       = '"'
 	quoteSingle       = '\''
+	asciiSpace        = " \t\r\n\v\f"
 )
 
 const (
@@ -64,11 +65,7 @@ func (t *tail) String() string {
 }
 
 func commandLine(address string) (string, bool) {
-	trimmed := strings.TrimSpace(address)
-	if len(trimmed) < len(CommandPrefix) || !strings.EqualFold(trimmed[:len(CommandPrefix)], CommandPrefix) {
-		return "", false
-	}
-	return trimmed[len(CommandPrefix):], true
+	return strings.CutPrefix(strings.Trim(address, asciiSpace), CommandPrefix)
 }
 
 func IsCommand(address string) bool {
@@ -116,7 +113,9 @@ func commandEnvironment(expansion *engine.Expansion, rows string) ([]string, err
 	}
 	environment := os.Environ()
 	for _, variable := range variables {
-		environment = append(environment, variable.Key+environmentJoin+variable.Value)
+		if strings.TrimSpace(variable.Key) != "" {
+			environment = append(environment, variable.Key+environmentJoin+variable.Value)
+		}
 	}
 	return environment, nil
 }
