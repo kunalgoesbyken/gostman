@@ -29,24 +29,30 @@ function ConnectionRow({ connection, onEdit, onRemove }) {
 }
 
 function ConnectionList({ connections, onAdd, onEdit, onRemove }) {
+  const addButton = (
+    <Button variant="outline" size="sm" onClick={onAdd}>
+      <Plus />
+      {TEXT.add}
+    </Button>
+  )
   return (
     <>
       <Notice edge="border-b">{TEXT.intro}</Notice>
-      {connections.length === 0 && <EmptyState icon={KeyRound} title={TEXT.empty} className="min-h-40" />}
-      {connections.map((connection) => (
-        <ConnectionRow
-          key={connection.alias}
-          connection={connection}
-          onEdit={() => onEdit(connection)}
-          onRemove={() => onRemove(connection)}
-        />
-      ))}
-      <div className="p-4">
-        <Button variant="outline" size="sm" onClick={onAdd}>
-          <Plus />
-          {TEXT.add}
-        </Button>
-      </div>
+      {connections.length === 0 ? (
+        <EmptyState icon={KeyRound} title={TEXT.empty} action={addButton} className="min-h-60" />
+      ) : (
+        <>
+          {connections.map((connection) => (
+            <ConnectionRow
+              key={connection.alias}
+              connection={connection}
+              onEdit={() => onEdit(connection)}
+              onRemove={() => onRemove(connection)}
+            />
+          ))}
+          <div className="p-4">{addButton}</div>
+        </>
+      )}
     </>
   )
 }
