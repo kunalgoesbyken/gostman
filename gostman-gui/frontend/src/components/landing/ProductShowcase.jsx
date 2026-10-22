@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { AnimatePresence, m } from "framer-motion"
 import { easeSmooth, springLayout } from "../../lib/motion"
 import { cn } from "../../lib/utils"
+import { whenIdle } from "../../lib/idle"
 import graphqlShot from "../../assets/landing/graphql.png"
 import grpcShot from "../../assets/landing/grpc.png"
 import mcpShot from "../../assets/landing/mcp.png"
@@ -75,6 +76,10 @@ function ViewTab({ view, isActive, onSelect }) {
   )
 }
 
+const preloadViews = () => VIEWS.forEach(({ image }) => {
+  new Image().src = image
+})
+
 function useRotation(activeId, setActiveId, isPaused) {
   useEffect(() => {
     if (isPaused || !window.matchMedia(MOTION_OK).matches) return undefined
@@ -92,6 +97,7 @@ export function ProductShowcase() {
   const [hasInteracted, setHasInteracted] = useState(false)
   const active = VIEWS.find((view) => view.id === activeId)
   useRotation(activeId, setActiveId, isHovered || hasInteracted)
+  useEffect(() => whenIdle(preloadViews), [])
 
   const select = (id) => {
     setHasInteracted(true)

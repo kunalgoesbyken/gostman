@@ -7,7 +7,7 @@ import { isOAuthCallback, relayOAuthCallback } from './lib/backend/oauthPopup'
 import { watchSharedLinks } from './lib/sharedLink'
 import { watchOpenLinks } from './lib/openLink'
 import { watchPreferences } from './lib/preferences'
-import { registerServiceWorker, watchInstallPrompt } from './lib/pwa'
+import { watchInstallPrompt } from './lib/pwa'
 
 function renderApp() {
   watchPreferences()
@@ -23,7 +23,6 @@ function renderApp() {
 }
 
 watchInstallPrompt()
-registerServiceWorker()
 
 if (isOAuthCallback()) relayOAuthCallback()
 else renderApp()

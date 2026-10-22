@@ -65,8 +65,9 @@ async function buildGuideRenderer() {
 
 const stylesheetsOf = (bundle) =>
   Object.values(bundle)
-    .filter((item) => item.type === 'asset' && item.fileName.endsWith('.css'))
-    .map((item) => `/${item.fileName}`)
+    .filter((item) => item.type === 'chunk' && item.isEntry)
+    .flatMap((chunk) => [...(chunk.viteMetadata?.importedCss ?? [])])
+    .map((fileName) => `/${fileName}`)
 
 export function siteMeta() {
   return {

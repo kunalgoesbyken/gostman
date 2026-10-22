@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import Editor, { DiffEditor } from '@monaco-editor/react'
+import Editor, { DiffEditor, loader } from '@monaco-editor/react'
 import { useVariableMap } from '../hooks/useVariableMap'
 import { tripletToHex } from '../lib/colour'
 import { useResolvedTheme, usePreferences } from '../lib/preferences'
@@ -7,6 +7,8 @@ import { VARIABLE_TEXT, describeReference, findReferences, isDefined, openRefere
 import './variables.css'
 
 const THEME_NAME = 'gostman'
+
+export const preloadMonaco = () => loader.init().catch(() => {})
 const FONT_FAMILY = "'JetBrains Mono', 'Courier New', monospace"
 
 const tokenValue = (name) => getComputedStyle(document.documentElement).getPropertyValue(`--${name}`)

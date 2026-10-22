@@ -27,6 +27,7 @@ import { forgetSharedLink, pendingSharedLink, subscribeToSharedLink } from "../l
 import { currentOpenLink, dismissOpenLink, subscribeToOpenLink } from "../lib/openLink"
 import { exportableVariables, withoutSecretValues } from "../lib/variableScopes"
 import { createWorkspaceActions } from "../lib/workspaceActions"
+import { whenIdle } from "../lib/idle"
 
 const CodeSnippetDialog = lazy(() => import("./CodeSnippetDialog").then((module) => ({ default: module.CodeSnippetDialog })))
 const ImportExportDialog = lazy(() => import("./ImportExportDialog").then((module) => ({ default: module.ImportExportDialog })))
@@ -45,7 +46,9 @@ const FolderSettings = lazy(() => import("./FolderSettings").then((module) => ({
 const RunnerDialog = lazy(() => import("./RunnerDialog").then((module) => ({ default: module.RunnerDialog })))
 const AiDialog = lazy(() => import("./AiDialog").then((module) => ({ default: module.AiDialog })))
 const AiSettingsDialog = lazy(() => import("./AiSettingsDialog").then((module) => ({ default: module.AiSettingsDialog })))
-const MonacoEditor = lazy(() => import("./MonacoEditor").then((module) => ({ default: module.MonacoEditor })))
+const loadMonacoEditor = () => import("./MonacoEditor")
+const MonacoEditor = lazy(() => loadMonacoEditor().then((module) => ({ default: module.MonacoEditor })))
+const preloadEditor = () => loadMonacoEditor().then((module) => module.preloadMonaco())
 
 const ENVIRONMENT_SAVE_DELAY_MS = 400
 const REQUEST_AREA_STYLE = { minHeight: MIN_REQUEST_HEIGHT_PX }
@@ -412,6 +415,7 @@ function LoadedWorkspace({ backend, onBack }) {
 
 export function Workspace({ backend, onBack }) {
   const { isHydrated, failure, retry } = useStoredData(backend)
+  useEffect(() => whenIdle(preloadEditor), [])
   if (failure) return <LoadFailure reason={failure} onRetry={retry} />
   if (!isHydrated) return <LoadingOverlay />
   return <LoadedWorkspace backend={backend} onBack={onBack} />

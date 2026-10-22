@@ -3,6 +3,7 @@ import { LandingPage } from "./components/LandingPage"
 import { useRoute } from "./hooks/useRoute"
 import { webBackend } from "./lib/backend/web"
 import { whenIdle } from "./lib/idle"
+import { registerServiceWorker } from "./lib/pwa"
 
 const loadWorkspace = () => import("./components/Workspace")
 
@@ -14,7 +15,11 @@ function WebApp() {
   const openLanding = useCallback(() => navigate("/"), [navigate])
   const isLanding = route === "/"
 
-  useEffect(() => (isLanding ? whenIdle(loadWorkspace) : undefined), [isLanding])
+  useEffect(() => {
+    if (isLanding) return whenIdle(loadWorkspace)
+    registerServiceWorker()
+    return undefined
+  }, [isLanding])
 
   if (isLanding) {
     return <LandingPage onGetStarted={openClient} />
