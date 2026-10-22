@@ -16,7 +16,7 @@ const toggleMaximiseOnDragRegion = (event) => {
   if (isDragRegion(event.target)) windowControls.toggleMaximise()
 }
 
-export function AppHeader({ storage, onImport, onReset, onOpenCommands, onToggleSidebar, onBack }) {
+export function AppHeader({ storage, onImport, onReset, onOpenCommands, onToggleSidebar, onBack, gettingStarted }) {
   const isDesktop = isDesktopShell()
   const paletteShortcut = useShortcutLabel("commandPalette")
   const canInstall = useInstallable()
@@ -45,6 +45,7 @@ export function AppHeader({ storage, onImport, onReset, onOpenCommands, onToggle
           Commands
           {paletteShortcut && <kbd>{paletteShortcut}</kbd>}
         </Button>
+        {gettingStarted}
         <EnvironmentSwitcher />
         {canInstall && (
           <Button variant="ghost" onClick={promptInstall} title={INSTALL_TEXT.description}>

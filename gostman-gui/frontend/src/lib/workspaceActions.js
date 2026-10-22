@@ -18,6 +18,7 @@ import { isGrpcRequest, serializeProtoFiles } from './grpc'
 import { withInheritance } from './inheritance'
 import { isMcpRequest } from './mcp'
 import { createMockActions } from './mockServer'
+import { STEP_CHECK, STEP_RUN, STEP_SAVE, STEP_SEND, STEP_VARIABLE } from './onboarding'
 import { getPreferences } from './preferences'
 import { normalizeRequest } from './request'
 import { promptInstall } from './pwa'
@@ -49,6 +50,7 @@ const NO_MCP_CODE = 'Code generation covers HTTP requests. An MCP tool call has 
 
 const store = () => useAppStore.getState()
 const activeTab = () => selectActiveTab(store())
+const TESTS_PANEL = 'tests'
 const tabById = (tabId) => store().tabs.find((candidate) => candidate.id === tabId)
 const activeVariables = () => selectActiveVariables(store())
 const messageOf = (error) => error?.message || String(error)
@@ -390,6 +392,34 @@ export function createWorkspaceActions(backend) {
     return id && store().requests.some((request) => request.id === id) ? { kind: ROW_REQUEST, id } : null
   }
 
+  const sendSample = () => {
+    store().openRequestTab(normalizeRequest(SAMPLE_REQUEST))
+    return send()
+  }
+
+  const openHistoryEntry = (entry) => store().openRequestTab({ ...entry, id: '', timestamp: '' })
+
+  function saveLatestRequest() {
+    const [latest] = store().requestHistory
+    if (!activeTab().request.url && latest) openHistoryEntry(latest)
+    return save()
+  }
+
+  function openTests() {
+    const { requests } = store()
+    const isSaved = requests.some((request) => request.id === activeTab().request.id)
+    if (!isSaved && requests.length > 0) store().openRequestTab(requests[requests.length - 1])
+    store().setRequestPanel(TESTS_PANEL)
+  }
+
+  const onboardingSteps = {
+    [STEP_SEND]: sendSample,
+    [STEP_SAVE]: saveLatestRequest,
+    [STEP_VARIABLE]: () => store().openEnvironmentDialog(),
+    [STEP_CHECK]: openTests,
+    [STEP_RUN]: () => store().openRunner(),
+  }
+
   const commands = {
     newRequest: () => store().newTab(),
     saveRequest: save,
@@ -406,7 +436,7 @@ export function createWorkspaceActions(backend) {
       if (source) tree.copyItem(source)
     },
     pasteRequest: () => tree.pasteItem(activeSavedSource()),
-    openHistory: (entry) => store().openRequestTab({ ...entry, id: '', timestamp: '' }),
+    openHistory: openHistoryEntry,
     reopenTab: () => store().reopenClosedTab(),
     toggleSidebar: () => store().toggleSidebar(),
     shortcuts: () => store().openShortcutsDialog(),
@@ -503,14 +533,11 @@ export function createWorkspaceActions(backend) {
     cancel: () => cancelTab(activeTab()),
     reset: confirmReset,
     openImport: () => store().openImportDialog(),
-    sendSample: () => {
-      store().openRequestTab(normalizeRequest(SAMPLE_REQUEST))
-      return send()
-    },
+    beginOnboardingStep: (id) => onboardingSteps[id](),
     runCommand: (action, payload) => commands[action]?.(payload),
     newRequest: (folderId) => store().newTab(folderId),
     openRequest: (request) => store().openRequestTab(request),
     previewRequest: (request) => store().openRequestTab(request, { preview: true }),
-    openHistoryEntry: (entry) => store().openRequestTab({ ...entry, id: '', timestamp: '' }),
+    openHistoryEntry,
   }
 }

@@ -53,7 +53,7 @@ Open it with Ctrl+K, or with the **Commands** button in the header (shown on wid
 | **AI: requests from an API schema** | Turn an OpenAPI or GraphQL schema into requests | |
 | **AI settings** | Provider, model, key and consent | |
 | **Clear history** | Delete every history entry | |
-| **Show welcome** | Sample request, imports and shortcuts | |
+| **Show welcome** | Getting started steps, imports and shortcuts | |
 | **About Gostman** | Version, links and diagnostics | |
 | **Reset app** | Delete all data and reload | |
 

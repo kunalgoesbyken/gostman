@@ -1,9 +1,10 @@
-import { FolderOpen, FolderPlus, Import, Send, Terminal, X } from "lucide-react"
+import { FolderOpen, FolderPlus, Import, Terminal, X } from "lucide-react"
+import { GettingStartedChecklist, useOnboardingProgress } from "./GettingStarted"
 import { Button, IconButton } from "./ui/button"
 import { SectionLabel } from "./ui/panel"
 import { usePreferences } from "../lib/preferences"
 import { shortcutRows } from "../lib/shortcuts"
-import { SAMPLE_REQUEST, SHORTCUT_IDS } from "../lib/welcome"
+import { SHORTCUT_IDS } from "../lib/welcome"
 import { WELCOME_TEXT as TEXT } from "../lib/welcomeText"
 
 function Card({ icon: Icon, title, hint, action }) {
@@ -52,6 +53,7 @@ function VariableHint() {
 
 export function WelcomePanel({ actions, onDismiss }) {
   const canOpenFolder = Boolean(actions.storage)
+  const progress = useOnboardingProgress()
 
   return (
     <section aria-label={TEXT.title} className="min-h-0 flex-1 overflow-y-auto border-t border-border">
@@ -65,21 +67,10 @@ export function WelcomePanel({ actions, onDismiss }) {
         </div>
 
         <div className="rounded-md border border-border p-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="min-w-0 flex-1">
-              <h3 className="text-xs font-semibold">{TEXT.sampleTitle}</h3>
-              <p className="mt-1 truncate font-mono text-xs text-muted-foreground" title={SAMPLE_REQUEST.url}>
-                {SAMPLE_REQUEST.method} {SAMPLE_REQUEST.url}
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">{TEXT.sampleHint}</p>
-            </div>
-            <Button onClick={actions.sendSample}>
-              <Send />
-              {TEXT.sampleAction}
-            </Button>
-          </div>
+          <GettingStartedChecklist progress={progress} onBegin={actions.beginOnboardingStep} />
         </div>
 
+        <SectionLabel className="-mb-2 block">{TEXT.existingTitle}</SectionLabel>
         <div className="grid gap-3 sm:grid-cols-2">
           <Card
             icon={Import}

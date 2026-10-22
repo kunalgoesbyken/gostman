@@ -12,6 +12,7 @@ import { isNarrowViewport } from '../lib/layout'
 import { reorderTabs, stepTab } from '../lib/tabOrder'
 import { promptLayer, resolveLayers, scopeLayers, variableText } from '../lib/variableScopes'
 import { isWelcomeDismissed, rememberWelcomeDismissed } from '../lib/welcome'
+import { rememberSteps, rememberedSteps } from '../lib/onboarding'
 import { NO_WORKSPACE, enterWorkspace, leaveWorkspace, persistableSessions, restoreSessions } from './workspaceSessions'
 
 const HISTORY_LIMIT = 50
@@ -227,6 +228,8 @@ export const useAppStore = create(
         workspaceSessions: {},
         workspaceMenuOpen: false,
         welcomeVisible: !isWelcomeDismissed(),
+        welcomeDismissed: isWelcomeDismissed(),
+        onboardingSteps: rememberedSteps(),
         aboutOpen: false,
         requestPanel: DEFAULT_REQUEST_PANEL,
         codeDialogOpen: false,
@@ -288,7 +291,15 @@ export const useAppStore = create(
         showWelcome: () => set((state) => ({ ...appendTab(state, {}), welcomeVisible: true, commandPaletteOpen: false })),
         hideWelcome: () => {
           rememberWelcomeDismissed()
-          set({ welcomeVisible: false })
+          set({ welcomeVisible: false, welcomeDismissed: true })
+        },
+        closeWelcome: () => set({ welcomeVisible: false }),
+        completeOnboardingStep: (id) => {
+          const steps = get().onboardingSteps
+          if (steps.includes(id)) return
+          const updated = [...steps, id]
+          rememberSteps(updated)
+          set({ onboardingSteps: updated })
         },
         openAbout: () => set({ aboutOpen: true, commandPaletteOpen: false }),
         closeAbout: () => set({ aboutOpen: false }),

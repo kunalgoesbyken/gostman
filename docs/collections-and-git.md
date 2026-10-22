@@ -87,18 +87,28 @@ The tab context menu contains:
 
 When tabs with unsaved changes are about to close, a **Close tabs** prompt asks you to confirm with **Discard**. This prompt depends on a preference in the app settings.
 
-## Welcome panel
+## Welcome panel and getting started
 
-A new, blank tab with no response shows the **Welcome to Gostman** panel. It is not shown again once you dismiss it, and you can bring it back with the **Show welcome** command in the command palette.
+A new, blank tab with no response shows the **Welcome to Gostman** panel. Its **Get started** list walks through five steps, each with a button that does it for you:
 
-The panel offers:
+| Step | Button | Done when |
+| --- | --- | --- |
+| Send a request | **Send sample request**, a `GET` to `https://httpbin.org/anything?hello=world` | History has an entry |
+| Save it to your collection | **Save request** saves the open request, or the last one you sent | The collection has a request you saved |
+| Add a variable | **Open environments** | An environment, a global environment or the collection defines a variable |
+| Add a check | **Open the Tests tab** of the open or last saved request | A saved request has an assertion or a post-response script |
+| Run your requests together | **Open the runner** | You have started a run |
 
-- **Send sample request**, a `GET` to `https://httpbin.org/anything?hello=world`.
+Steps are worked out from your data, so after an import the steps it covers are already ticked. While steps remain, a button in the header names the next one and shows your progress, for example **Next: Add a variable 2/5**; it opens the same list. **Hide** in that list, or the close button on the panel, puts both away. When every step is done the button disappears and the panel no longer opens by itself. The **Show welcome** command in the command palette brings the panel back at any time.
+
+Below the list, the panel offers:
+
 - **Import** for Postman, Bruno, Insomnia, OpenAPI, HAR or a curl command.
 - **Open folder**, only where folder storage is available (see below).
 - **New collection**, which creates a folder in the sidebar.
 - A hint to paste a curl command into the address bar to fill the request.
 - A list of keyboard shortcuts and a note on variables: a name in double braces is green when the active environment defines it and orange when it is missing.
+- A link to the [tutorial](tutorial-first-collection.md), which goes through the same steps in more depth.
 
 ## Storage menu
 

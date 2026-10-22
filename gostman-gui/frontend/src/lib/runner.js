@@ -1,5 +1,6 @@
 import { buildCollectionTree, collectRequests } from './collectionTree'
 import { isPlainObject, parseJSON } from './dataUtils'
+import { STEP_RUN } from './onboarding'
 import { iterationCount, iterationVariables } from './runData'
 import { createFlowFollower } from './runFlow'
 import { withRunStreamBudget } from './runStream'
@@ -105,6 +106,7 @@ export function createRunner(backend, execute) {
     const parsed = parseJSON(base, {})
     lastRun = { startedAt: new Date(), planned: requests.length * count, iterations: isIterating ? count : 0, parallel, finishedAt: null }
     store().startRun()
+    store().completeOnboardingStep(STEP_RUN)
     for (let iteration = 0; iteration < count && !run.isStopped && !run.isHalted; iteration += 1) {
       if (isIterating && isPlainObject(parsed)) {
         store().setActiveVariables(JSON.stringify(iterationVariables(parsed, rows, iteration, count), null, 2))
