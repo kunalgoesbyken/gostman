@@ -9,7 +9,8 @@
   <p>
     <a href="https://gostman.com/web"><strong>Open the web app</strong></a> ·
     <a href="https://github.com/kunalgoesbyken/gostman/releases/latest">Download for Windows, macOS and Linux</a> ·
-    <a href="#features">Features</a>
+    <a href="https://gostman.com/docs">Documentation</a> ·
+    <a href="docs/tutorial-first-collection.md">Tutorial: test an API</a>
   </p>
   <p>No account. Your requests stay on your device. The web app installs as an app and works offline.</p>
 </div>
@@ -21,7 +22,9 @@
 | ![Multipart body with auth](screenshots/request-body.png) | ![GraphQL query with the schema browser](screenshots/graphql.png) |
 | ![Assertions and test results](gostman-gui/frontend/src/assets/landing/tests.png) | ![Collection runner](gostman-gui/frontend/src/assets/landing/runner.png) |
 
-Gostman is a native desktop application built with Go and [Wails](https://wails.io), with the same interface available in the browser at [gostman.com](https://gostman.com). Requests, collections and environments are stored on your machine. There is nothing to sign in to.
+Save a request once and use it three ways: send it from the app, check it on every pull request with `gostman run`, and let a coding agent call it through `gostman mcp` without seeing your secrets. Requests, collections and environments are plain files on your machine, and there is nothing to sign in to. New here? The [tutorial](docs/tutorial-first-collection.md) builds a tested collection step by step, and the [documentation](https://gostman.com/docs) covers every feature.
+
+Gostman is a native desktop application built with Go and [Wails](https://wails.io), with the same interface in the browser at [gostman.com](https://gostman.com).
 
 ## Why not Bruno or Postman?
 
