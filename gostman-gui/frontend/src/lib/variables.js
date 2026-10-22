@@ -3,6 +3,7 @@ import { DYNAMIC_PREFIX, DYNAMIC_VARIABLES, SOURCE_LABELS, isDynamicName, isProm
 
 const TOKEN = /\{\{\s*([^{}]*?)\s*\}\}/gu
 const OPEN_REFERENCE = /\{\{\s*([\p{L}\p{N}_.$?-]*)$/u
+export const CLOSING_REFERENCE = /^\s*\}\}/
 
 export const MASKED_VALUE = "••••••••"
 export const MAX_SUGGESTIONS = 50
@@ -58,7 +59,7 @@ export function suggestNames(variables, query) {
 }
 
 export function applyCompletion(text, reference, caret, name) {
-  const closing = /^\s*\}\}/.exec(text.slice(caret))
+  const closing = CLOSING_REFERENCE.exec(text.slice(caret))
   const end = caret + (closing ? closing[0].length : 0)
   const insertion = `{{${name}}}`
   return { text: text.slice(0, reference.start) + insertion + text.slice(end), caret: reference.start + insertion.length }

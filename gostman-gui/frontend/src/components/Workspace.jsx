@@ -46,9 +46,8 @@ const FolderSettings = lazy(() => import("./FolderSettings").then((module) => ({
 const RunnerDialog = lazy(() => import("./RunnerDialog").then((module) => ({ default: module.RunnerDialog })))
 const AiDialog = lazy(() => import("./AiDialog").then((module) => ({ default: module.AiDialog })))
 const AiSettingsDialog = lazy(() => import("./AiSettingsDialog").then((module) => ({ default: module.AiSettingsDialog })))
-const loadMonacoEditor = () => import("./MonacoEditor")
-const MonacoEditor = lazy(() => loadMonacoEditor().then((module) => ({ default: module.MonacoEditor })))
-const preloadEditor = () => loadMonacoEditor().then((module) => module.preloadMonaco())
+const loadCodeEditor = () => import("./CodeEditor")
+const CodeEditor = lazy(() => loadCodeEditor().then((module) => ({ default: module.CodeEditor })))
 
 const ENVIRONMENT_SAVE_DELAY_MS = 400
 const REQUEST_AREA_STYLE = { minHeight: MIN_REQUEST_HEIGHT_PX }
@@ -342,7 +341,7 @@ function LoadedWorkspace({ backend, onBack }) {
                 grpcSchema={activeTab.grpcSchema}
                 mcpCatalog={activeTab.mcpCatalog}
                 actions={actions}
-                EditorComponent={MonacoEditor}
+                EditorComponent={CodeEditor}
               />
             </section>
 
@@ -392,13 +391,13 @@ function LoadedWorkspace({ backend, onBack }) {
         {cookiesDialogOpen && <CookiesDialog onClose={closeCookiesDialog} />}
         {scanDialogOpen && <ScanDialog scan={actions.scan} collection={scannedCollection} onGoToRequest={goToRequest} onClose={closeScanDialog} />}
         {settingsDialogOpen && <NetworkDialog settings={settings} actions={actions} onClose={closeSettingsDialog} />}
-        {examplesDialogOpen && <ExamplesDialog request={activeRequest} actions={actions.examples} EditorComponent={MonacoEditor} />}
+        {examplesDialogOpen && <ExamplesDialog request={activeRequest} actions={actions.examples} EditorComponent={CodeEditor} />}
         {mockDialogOpen && <MockServerDialog folders={folders} requests={requests} actions={actions.mock} />}
         {captureDialogOpen && <CaptureDialog folders={folders} requests={requests} actions={actions.capture} />}
         {loadTestDialogOpen && <LoadTestDialog actions={actions.loadTest} />}
         {specDialog?.mode === "view" && <SpecViewer dialog={specDialog} actions={actions.openapi} onClose={closeSpecDialog} />}
         {specDialog?.mode === "sync" && <SpecSyncDialog dialog={specDialog} link={specLinks[specDialog.folderId]} actions={actions.openapi} onClose={closeSpecDialog} />}
-        {folderSettings && <FolderSettings backend={backend} scope={folderSettings} EditorComponent={MonacoEditor} onClose={closeFolderSettings} />}
+        {folderSettings && <FolderSettings backend={backend} scope={folderSettings} EditorComponent={CodeEditor} onClose={closeFolderSettings} />}
         {aiDialog && <AiDialog actions={actions.ai} />}
         {aiSettingsOpen && <AiSettingsDialog actions={actions.ai} />}
         {runner.isOpen && <RunnerDialog runner={runner} folders={folders} requests={requests} actions={actions} />}
@@ -415,7 +414,7 @@ function LoadedWorkspace({ backend, onBack }) {
 
 export function Workspace({ backend, onBack }) {
   const { isHydrated, failure, retry } = useStoredData(backend)
-  useEffect(() => whenIdle(preloadEditor), [])
+  useEffect(() => whenIdle(loadCodeEditor), [])
   if (failure) return <LoadFailure reason={failure} onRetry={retry} />
   if (!isHydrated) return <LoadingOverlay />
   return <LoadedWorkspace backend={backend} onBack={onBack} />

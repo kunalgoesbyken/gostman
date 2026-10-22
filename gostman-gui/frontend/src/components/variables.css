@@ -13,10 +13,12 @@
   box-shadow: 0 1px 0 hsl(var(--warning) / 0.8);
 }
 
-.gm-var-ok.gm-var-monaco {
-  color: hsl(var(--success)) !important;
+.gm-var-ok.gm-var-code,
+.gm-var-ok.gm-var-code * {
+  color: hsl(var(--success));
 }
 
-.gm-var-missing.gm-var-monaco {
-  color: hsl(var(--warning)) !important;
+.gm-var-missing.gm-var-code,
+.gm-var-missing.gm-var-code * {
+  color: hsl(var(--warning));
 }

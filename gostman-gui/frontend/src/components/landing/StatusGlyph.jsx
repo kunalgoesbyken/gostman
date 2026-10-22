@@ -23,7 +23,7 @@ const SHAPES = {
 
 const TONES = {
   included: "text-success",
-  partial: "text-amber-400",
+  partial: "text-warning",
   excluded: "text-muted-foreground",
 }
 

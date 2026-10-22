@@ -2,7 +2,7 @@ import { useState } from "react"
 import { ArrowRight } from "lucide-react"
 import { Dialog, DialogBody, DialogHeader } from "./ui/dialog"
 import { SegmentedControl } from "./ui/segmented"
-import { MonacoDiff } from "./MonacoEditor"
+import { CodeDiff } from "./CodeEditor"
 import { COMPARE_PARTS, describeResponse } from "../lib/responseHistory"
 
 const PART_OPTIONS = Object.entries(COMPARE_PARTS).map(([value, part]) => ({ value, label: part.label }))
@@ -22,7 +22,7 @@ export function ResponseCompareDialog({ earlier, latest, onClose }) {
         </span>
       </DialogHeader>
       <DialogBody className="min-h-0 flex-1 p-0">
-        <MonacoDiff
+        <CodeDiff
           original={part.text(earlier.response)}
           modified={part.text(latest.response)}
           language={part.language(latest.response)}
