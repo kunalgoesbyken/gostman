@@ -100,6 +100,8 @@ Data in the web version is kept in the browser's local storage.
 
 The same pages are published at [gostman.com/docs](https://gostman.com/docs).
 
+- [Getting started](docs/getting-started.md) and [what is free in Gostman](docs/free-features.md)
+- [Requests and responses](docs/requests-and-responses.md) and [protocols](docs/protocols.md)
 - [Command line](docs/cli.md): `run`, `send`, `load`, `scan`, `lint`, `docs`, `mock`, `capture`, secret managers, data files, reports
 - [CI recipes](docs/ci.md): GitHub Actions, GitLab CI, Jenkins, Docker
 - [Use from a coding agent](docs/agents.md)
@@ -107,11 +109,10 @@ The same pages are published at [gostman.com/docs](https://gostman.com/docs).
 - [Sharing, generated docs and Open in Gostman links](docs/sharing-and-docs.md)
 - [Variables, scripts and settings](docs/scripting-and-settings.md)
 - [AI assistant](docs/ai.md)
-- [Development and releasing](docs/development.md)
 
 ## Contributing
 
-Issues and pull requests are welcome. For anything larger than a small fix, please open an issue first to agree on the approach. See [docs/development.md](docs/development.md) for how to build and test.
+Issues and pull requests are welcome. For anything larger than a small fix, please open an issue first to agree on the approach. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to build, test and release.
 
 ## License
 
