@@ -28,7 +28,7 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
               {requestHistory.length > 0 && <TabCount>{requestHistory.length}</TabCount>}
             </TabsTrigger>
           </TabsList>
-          <div className="flex shrink-0 items-center gap-1">
+          <div className="flex shrink-0 items-center gap-0">
             <IconButton label="Run requests" icon={ListChecks} onClick={() => actions.openRunner()} />
             <IconButton label={FOLDER_SETTINGS_TEXT.collectionMenu} icon={Settings2} onClick={() => actions.openFolderSettings()} />
             <IconButton label="New folder" icon={FolderPlus} onClick={() => actions.createFolder()} />

@@ -41,7 +41,7 @@ On macOS the binary is not notarized. Run `xattr -d com.apple.quarantine gostman
 
 1. Choose a method, type a URL and press **Send**.
 2. Read the response below the request: **Body** in Pretty or Raw, **Headers** and **Cookies**, with the status, time and size beside them.
-3. Press **Save** to keep the request in your collection, or **Code** to copy it as cURL, JavaScript, Python, Go, PHP or Java.
+3. Press **Save** to keep the request in your collection, or **Code** to copy it as code in one of 13 languages, from cURL and Python to C#, Swift and PowerShell.
 
 ![Gostman sending a POST request with a JSON body and showing the pretty-printed response](../gostman-gui/frontend/src/assets/landing/rest.png)
 

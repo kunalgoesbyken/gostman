@@ -280,15 +280,23 @@ A request keeps up to 20 examples, and an example body is limited to 2 MB. Heade
 
 ## Code generation
 
-Code opens the Generate code dialog. It has one tab per language:
+Code opens the Generate code dialog. Pick a language from the list at the top:
 
-- cURL
-- JavaScript
-- Python
-- Go
-- PHP
-- Java
+| Language | What the snippet uses |
+| --- | --- |
+| cURL | `curl` |
+| JavaScript | `fetch` |
+| Python | `requests` |
+| Go | `net/http` |
+| Java and Kotlin | `java.net.http.HttpClient` |
+| C# | `HttpClient` |
+| PHP | the cURL extension |
+| Ruby | `Net::HTTP` |
+| Swift | `URLSession` with `async`/`await` |
+| Rust | `reqwest` with the `blocking` feature |
+| Dart | the `http` package |
+| PowerShell | `Invoke-WebRequest`, for Windows PowerShell 5.1 and PowerShell 7 |
 
-Copy copies the snippet for the selected language. The snippets are built from the request as the engine prepares it, so variables, inherited headers and auth appear as they are sent.
+Copy copies the snippet for the selected language. Text is escaped for each language, so quotes, `$`, backslashes, line breaks and non-ASCII characters arrive as typed. The snippets are built from the request as the engine prepares it, so variables, inherited headers and auth appear as they are sent.
 
-![The Generate code dialog showing a JavaScript fetch call for a POST request](../screenshots/code.png)
+![The Generate code dialog with C# selected, showing an HttpClient call with a JSON body and a signed Hawk Authorization header](../screenshots/code.png)
