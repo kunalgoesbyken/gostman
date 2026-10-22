@@ -18,7 +18,7 @@ export const DownloadDropdown = () => {
     const [isOpen, setIsOpen] = useState(false)
 
     return (
-        <div className="relative">
+        <div className="relative z-30">
             <Button
                 size="lg"
                 className="gap-3 text-lg px-8 py-6"
@@ -32,7 +32,7 @@ export const DownloadDropdown = () => {
             {isOpen && (
                 <>
                     <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-                    <div className="absolute top-full left-0 mt-2 z-20 min-w-[280px] rounded-lg border border-border bg-background shadow-xl overflow-hidden">
+                    <div className="absolute top-full left-0 mt-2 z-20 min-w-[280px] text-left rounded-lg border border-border bg-background shadow-xl overflow-hidden">
                         {DOWNLOAD_OPTIONS.map((option) => (
                             <a
                                 key={option.file}

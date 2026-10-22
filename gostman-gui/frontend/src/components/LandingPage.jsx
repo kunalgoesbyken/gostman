@@ -297,7 +297,7 @@ export function LandingPage({ onGetStarted }) {
 
               <div
                 data-intro="actions"
-                className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-6"
+                className="relative z-20 flex flex-col sm:flex-row items-center justify-center gap-3 pt-6"
               >
                 <DownloadDropdown />
                 <Button
