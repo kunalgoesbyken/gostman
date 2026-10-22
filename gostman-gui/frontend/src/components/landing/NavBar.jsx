@@ -1,7 +1,7 @@
 export function NavBar({ children }) {
   return (
-    <div className="max-w-5xl w-full backdrop-blur-xl bg-background/75 border border-border/40 rounded-2xl shadow-md">
-      <div className="px-5 py-3 flex items-center justify-between">{children}</div>
-    </div>
+    <nav aria-label="Gostman" className="fixed inset-x-0 top-0 z-50 border-b border-border/40 bg-background/90 px-6 backdrop-blur">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between">{children}</div>
+    </nav>
   )
 }

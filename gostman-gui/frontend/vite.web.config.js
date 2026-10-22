@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url'
 import { createHash } from 'crypto'
 import { readFileSync, writeFileSync } from 'fs'
 import { siteDefine, siteMeta } from './site.config.js'
+import { fontLinks } from './fonts.config.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -83,6 +84,7 @@ export default defineConfig({
     renameHtmlEntry('index-web.html', 'index.html'),
     stampServiceWorker(),
     siteMeta(),
+    fontLinks(),
   ],
   build: {
     outDir: 'dist-web',

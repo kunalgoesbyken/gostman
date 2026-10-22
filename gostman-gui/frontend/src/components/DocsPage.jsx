@@ -1,9 +1,7 @@
 import { cn } from "../lib/utils"
 import { DocsNav } from "./DocsNav"
-import { DotGrid } from "./landing/DotGrid"
 import { ComparisonTable } from "./landing/ComparisonTable"
-import { FeatureGroup, groupNumber } from "./landing/FeatureGroup"
-import { FEATURE_GROUPS } from "./landing/featureGroups"
+import { FeatureIndex } from "./landing/FeatureIndex"
 import { SiteFooter } from "./landing/SiteFooter"
 import { SiteHeader } from "./landing/SiteHeader"
 import { docPath } from "../docs/manifest"
@@ -75,10 +73,8 @@ function Home() {
       <p className="mt-4 leading-relaxed text-muted-foreground">
         Each feature links to the page that explains it.
       </p>
-      <div className="mt-8 flex flex-col gap-12">
-        {FEATURE_GROUPS.map((group, index) => (
-          <FeatureGroup key={group.id} group={group} number={groupNumber(index)} />
-        ))}
+      <div className="mt-8">
+        <FeatureIndex />
       </div>
     </section>
   )
@@ -89,9 +85,6 @@ export function DocsPage({ page, nav }) {
 
   return (
     <div className="dark min-h-screen bg-background text-foreground overflow-x-clip">
-      <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
-        <DotGrid />
-      </div>
       <SiteHeader />
 
       <div className="relative mx-auto grid max-w-6xl gap-10 px-6 pt-32 pb-20 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-14">

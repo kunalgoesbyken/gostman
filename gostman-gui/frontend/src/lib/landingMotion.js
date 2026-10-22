@@ -1,24 +1,33 @@
-import { useEffect, useLayoutEffect } from "react"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-import Lenis from "lenis"
-
-gsap.registerPlugin(ScrollTrigger)
+import { useEffect } from "react"
 
 const MOTION_OK = "(prefers-reduced-motion: no-preference)"
 
-export { gsap }
+const loadEngine = () => import("./landingMotionEngine")
 
-export function useReveal(scopeRef, build) {
-  useLayoutEffect(() => {
-    const mm = gsap.matchMedia(scopeRef.current)
-    mm.add(MOTION_OK, () => build(scopeRef.current))
-    return () => mm.revert()
+function useMotionEngine(start) {
+  useEffect(() => {
+    let active = true
+    let stop = null
+    loadEngine().then((engine) => {
+      if (active) stop = start(engine)
+    })
+    return () => {
+      active = false
+      stop?.()
+    }
   }, [])
 }
 
+export function useReveal(scopeRef, build) {
+  useMotionEngine(({ gsap }) => {
+    const mm = gsap.matchMedia(scopeRef.current)
+    mm.add(MOTION_OK, () => build(gsap, scopeRef.current))
+    return () => mm.revert()
+  })
+}
+
 export function useSmoothScroll() {
-  useEffect(() => {
+  useMotionEngine(({ gsap, ScrollTrigger, Lenis }) => {
     const mm = gsap.matchMedia()
     mm.add(MOTION_OK, () => {
       const lenis = new Lenis({ lerp: 0.1 })
@@ -41,5 +50,5 @@ export function useSmoothScroll() {
       window.removeEventListener("load", refresh)
       mm.revert()
     }
-  }, [])
+  })
 }

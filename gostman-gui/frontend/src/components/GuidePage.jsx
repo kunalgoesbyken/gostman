@@ -1,6 +1,5 @@
 import { buttonVariants } from "./ui/button"
 import { cn } from "../lib/utils"
-import { DotGrid } from "./landing/DotGrid"
 import { PointList } from "./landing/PointList"
 import { SiteFooter } from "./landing/SiteFooter"
 import { SiteHeader } from "./landing/SiteHeader"
@@ -36,10 +35,6 @@ function Section({ block }) {
 export function GuidePage({ page }) {
   return (
     <div className="dark min-h-screen bg-background text-foreground overflow-x-clip">
-      <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
-        <DotGrid />
-      </div>
-
       <SiteHeader />
 
       <main className="relative mx-auto max-w-3xl px-6 pt-36 pb-20">

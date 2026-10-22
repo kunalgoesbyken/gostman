@@ -3,9 +3,7 @@ import { Button, buttonVariants } from "../ui/button"
 import { cn } from "../../lib/utils"
 import { detectBrowserOs } from "../../lib/detectOs"
 import { Download, Globe } from "./icons"
-import { DOWNLOADS, downloadUrl } from "./downloads"
-
-const primaryDownload = (os) => DOWNLOADS.find((download) => download.os === os)
+import { DOWNLOADS, downloadFor, downloadUrl } from "./downloads"
 
 function DownloadRow({ download }) {
   return (
@@ -26,7 +24,7 @@ function DownloadRow({ download }) {
 
 export function DownloadPanel({ onGetStarted }) {
   const [os] = useState(detectBrowserOs)
-  const primary = primaryDownload(os)
+  const primary = downloadFor(os)
   const others = DOWNLOADS.filter((download) => download !== primary)
 
   return (

@@ -8,3 +8,5 @@ export const DOWNLOADS = [
 ]
 
 export const downloadUrl = (download) => `${RELEASE_URL}/${download.file}`
+
+export const downloadFor = (os) => DOWNLOADS.find((download) => download.os === os)

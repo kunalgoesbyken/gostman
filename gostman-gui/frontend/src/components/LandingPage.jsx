@@ -4,7 +4,8 @@ import { Button, buttonVariants } from "./ui/button"
 import { cn } from "../lib/utils"
 import { popIn } from "../lib/motion"
 import { REPOSITORY, REPOSITORY_URL } from "../lib/siteLinks"
-import { gsap, useReveal, useSmoothScroll } from "../lib/landingMotion"
+import { docPath } from "../docs/manifest"
+import { useSmoothScroll } from "../lib/landingMotion"
 import { ArrowRight, Check, Download, Github, Globe } from "./landing/icons"
 
 import captureShot from "../assets/landing/capture.png"
@@ -12,19 +13,16 @@ import docsShot from "../assets/landing/docs.png"
 import mockShot from "../assets/landing/mock.png"
 import testsShot from "../assets/landing/tests.png"
 
-import { AnimatedSection } from "./landing/AnimatedSection"
-import { SplitHeading, SplitWords } from "./landing/SplitHeading"
 import { AGENT_SESSION, CLI_RUN, REQUEST_FILE } from "./landing/captures"
 import { TerminalBlock } from "./landing/TerminalBlock"
 import { ProductShowcase } from "./landing/ProductShowcase"
-import { BackgroundCode } from "./landing/BackgroundCode"
 import { DownloadDropdown } from "./landing/DownloadDropdown"
 import { Brand } from "./landing/Brand"
-import { DotGrid } from "./landing/DotGrid"
 import { NavBar } from "./landing/NavBar"
 import { PointList } from "./landing/PointList"
 import { SiteFooter } from "./landing/SiteFooter"
 import { MountOnVisible } from "./landing/MountOnVisible"
+import { SplitHeading } from "./landing/SplitHeading"
 
 const loadMotionFeatures = () => import("../lib/motionFeatures").then((module) => module.default)
 
@@ -32,10 +30,15 @@ const EverythingSection = lazy(() => import("./landing/EverythingSection"))
 
 const starCount = (value) => (Number.isFinite(value) ? value : null)
 const ComparisonSection = lazy(() => import("./landing/ComparisonSection"))
+const FaqSection = lazy(() => import("./landing/FaqSection"))
 
 const REPOSITORY_API_URL = `https://api.github.com/repos/${REPOSITORY}`
 
-const HIGHLIGHTS = ["No account", "Data stays on your machine", "Open source"]
+const HIGHLIGHTS = ["No account", "Collections stay on your machine", "Open source"]
+
+const introStep = (step) => ({ "--intro-step": step })
+
+const NAV_LINK = cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-2 text-sm hover:bg-muted/50")
 
 const SPOTLIGHTS = [
   {
@@ -170,50 +173,56 @@ const useGitHubStars = () => {
   return { stars, isLoading }
 }
 
+function TryWebButton({ onClick, className }) {
+  return (
+    <Button size="lg" variant="outline" className={cn("gap-2 text-base border-border/60 hover:bg-muted/50", className)} onClick={onClick}>
+      <Globe className="h-4 w-4" />
+      Try the web version
+      <ArrowRight className="h-4 w-4" />
+    </Button>
+  )
+}
+
+function LazySection({ children, minHeight }) {
+  return (
+    <MountOnVisible minHeight={minHeight}>
+      <Suspense fallback={null}>{children}</Suspense>
+    </MountOnVisible>
+  )
+}
+
 function Spotlight({ spotlight, isReversed }) {
   return (
-    <AnimatedSection delay={0.1}>
-      <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-12">
-        <div className={cn("lg:col-span-5", isReversed && "lg:order-2")}>
-          <SplitHeading text={spotlight.title} className="text-2xl md:text-3xl font-semibold tracking-tight [text-wrap:balance]" />
-          <p className="mt-4 leading-relaxed text-muted-foreground">{spotlight.description}</p>
-          <PointList points={spotlight.points} className="mt-6 space-y-3" />
-        </div>
-        <div className={cn("lg:col-span-7", isReversed && "lg:order-1")}>
-          {spotlight.capture ? (
-            <TerminalBlock {...spotlight.capture} />
-          ) : (
-            <img
-              src={spotlight.image}
-              alt={spotlight.alt}
-              width={spotlight.width}
-              height={spotlight.height}
-              loading="lazy"
-              decoding="async"
-              className="h-auto w-full rounded-lg border border-border/60"
-            />
-          )}
-        </div>
+    <div className="grid items-center gap-8 p-6 md:p-10 lg:grid-cols-12 lg:gap-12 lg:p-12">
+      <div className={cn("lg:col-span-5", isReversed && "lg:order-2")}>
+        <SplitHeading as="h3" text={spotlight.title} className="text-2xl md:text-3xl font-semibold tracking-tight [text-wrap:balance]" />
+        <p className="mt-4 leading-relaxed text-muted-foreground">{spotlight.description}</p>
+        <PointList points={spotlight.points} className="mt-6 space-y-3" />
       </div>
-    </AnimatedSection>
+      <div className={cn("reveal-on-scroll lg:col-span-7", isReversed && "lg:order-1")}>
+        {spotlight.capture ? (
+          <TerminalBlock {...spotlight.capture} />
+        ) : (
+          <img
+            src={spotlight.image}
+            alt={spotlight.alt}
+            width={spotlight.width}
+            height={spotlight.height}
+            loading="lazy"
+            decoding="async"
+            className="h-auto w-full rounded-lg border border-border/60"
+          />
+        )}
+      </div>
+    </div>
   )
 }
 
 export function LandingPage({ onGetStarted }) {
   const { stars, isLoading } = useGitHubStars()
   const reduceMotion = useReducedMotion()
-  const heroRef = useRef(null)
 
   useSmoothScroll()
-
-  useReveal(heroRef, () => {
-    gsap
-      .timeline({ defaults: { ease: "power3.out" } })
-      .from(".split-word", { opacity: 0, y: 28, duration: 0.7, stagger: 0.07 })
-      .from("[data-intro=lede]", { opacity: 0, y: 16, duration: 0.6 }, "-=0.35")
-      .from("[data-intro=actions]", { opacity: 0, y: 16, duration: 0.5 }, "-=0.4")
-      .from("[data-intro=highlight]", { opacity: 0, y: 10, duration: 0.4, stagger: 0.08 }, "-=0.3")
-  })
 
   return (
     <LazyMotion features={loadMotionFeatures} strict>
@@ -221,100 +230,62 @@ export function LandingPage({ onGetStarted }) {
         Skip to main content
       </a>
       <div className="dark min-h-screen bg-background text-foreground overflow-x-clip" id="main-content">
-        <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
-          <DotGrid />
-          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
-          <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-success/5 rounded-full blur-[120px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.06),rgba(255,255,255,0))]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_80%_50%,rgba(16,185,129,0.04),rgba(255,255,255,0))]" />
-        </div>
+        <NavBar>
+          <Brand />
+          <div className="flex items-center gap-2">
+            <a href={docPath("")} className={cn(NAV_LINK, "hidden sm:inline-flex")}>
+              Docs
+            </a>
+            <button type="button" onClick={onGetStarted} className={cn(NAV_LINK, "hidden sm:inline-flex")}>
+              Web app
+            </button>
+            <a href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer" className={NAV_LINK}>
+              <Github className="h-4 w-4" aria-hidden="true" />
+              <span className="hidden font-medium sm:inline">Star</span>
+              {stars !== null ? (
+                <m.span
+                  className="font-mono text-xs text-muted-foreground"
+                  {...(reduceMotion ? {} : popIn)}
+                  key={stars}
+                  aria-live="polite"
+                >
+                  {stars.toLocaleString()}
+                </m.span>
+              ) : isLoading ? (
+                <div className="h-4 w-8 bg-muted/20 animate-pulse rounded" />
+              ) : null}
+            </a>
+            <a href="#download" className={buttonVariants({ size: "sm", className: "gap-2" })}>
+              <Download className="h-4 w-4" />
+              Download
+            </a>
+          </div>
+        </NavBar>
 
-        <BackgroundCode />
-
-        <m.nav
-          className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-6 px-6"
-          initial={reduceMotion ? false : { y: -100 }}
-          animate={{ y: 0 }}
-          transition={{ type: "spring", stiffness: 200, damping: 25 }}
-        >
-          <NavBar>
-            <m.div
-              initial={reduceMotion ? false : { opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Brand />
-            </m.div>
-            <m.div
-              className="flex items-center gap-2"
-              initial={reduceMotion ? false : { opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <a
-                href={REPOSITORY_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-2 text-sm hover:bg-muted/50")}
-              >
-                <Github className="h-4 w-4" aria-hidden="true" />
-                <span className="font-medium">Star</span>
-                {stars !== null ? (
-                  <m.span
-                    className="font-mono text-xs text-muted-foreground"
-                    {...(reduceMotion ? {} : popIn)}
-                    key={stars}
-                    aria-live="polite"
-                  >
-                    {stars.toLocaleString()}
-                  </m.span>
-                ) : isLoading ? (
-                  <div className="h-4 w-8 bg-muted/20 animate-pulse rounded" />
-                ) : null}
-              </a>
-            </m.div>
-          </NavBar>
-        </m.nav>
-
-        <section ref={heroRef} className="relative pt-36 pb-16 px-6">
-          <div className="max-w-4xl mx-auto">
+        <section className="relative pt-36 pb-16 px-6">
+          <div
+            className="pointer-events-none absolute inset-x-0 -top-14 h-[640px] bg-[radial-gradient(ellipse_55%_60%_at_50%_0%,hsl(var(--primary)/0.10),transparent)]"
+            aria-hidden="true"
+          />
+          <div className="relative max-w-4xl mx-auto">
             <div className="text-center space-y-6">
-              <h1
-                aria-label="Test any API. No account. No cloud."
-                className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.1]"
-              >
-                <SplitWords className="block" text="Test any API." />
-                <SplitWords className="block mt-2 text-muted-foreground" text="No account. No cloud." />
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.1] [text-wrap:balance]">
+                <span className="intro block">Test any API.</span>
+                <span className="intro block mt-2 text-muted-foreground" style={introStep(1)}>No account. No cloud.</span>
               </h1>
 
-              <p
-                data-intro="lede"
-                className="text-lg md:text-xl text-muted-foreground/90 max-w-2xl mx-auto leading-relaxed"
-              >
+              <p className="intro text-lg md:text-xl text-muted-foreground/90 max-w-2xl mx-auto leading-relaxed" style={introStep(2)}>
                 Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. One collection for you, your CI pipeline and your coding agent, kept as files on your machine.
               </p>
 
-              <div
-                data-intro="actions"
-                className="relative z-20 flex flex-col sm:flex-row items-center justify-center gap-3 pt-6"
-              >
+              <div className="intro relative z-20 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-6" style={introStep(3)}>
                 <DownloadDropdown />
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="gap-2 text-base px-6 py-5.5 border-border/60 hover:bg-muted/50"
-                  onClick={onGetStarted}
-                >
-                  <Globe className="h-4 w-4" />
-                  Try the web version
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
+                <TryWebButton onClick={onGetStarted} className="px-6 py-5.5" />
               </div>
 
-              <div className="flex items-center justify-center gap-6 pt-6 text-sm text-muted-foreground/80">
+              <div className="intro flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-6 text-sm text-muted-foreground/80" style={introStep(4)}>
                 {HIGHLIGHTS.map((text) => (
-                  <div key={text} data-intro="highlight" className="flex items-center gap-2">
+                  <div key={text} className="flex items-center gap-2">
                     <Check className="h-3.5 w-3.5 text-success/70" />
                     <span>{text}</span>
                   </div>
@@ -326,68 +297,61 @@ export function LandingPage({ onGetStarted }) {
 
         <section className="relative py-16 px-6">
           <div className="max-w-5xl mx-auto">
-            <AnimatedSection delay={0.1}>
-              <ProductShowcase />
-            </AnimatedSection>
+            <ProductShowcase />
           </div>
         </section>
 
-        <section className="relative py-20 px-6">
-          <div className="mx-auto flex max-w-6xl flex-col gap-24">
-            {SPOTLIGHTS.map((spotlight, index) => (
-              <Spotlight key={spotlight.title} spotlight={spotlight} isReversed={index % 2 === 1} />
-            ))}
+        <section className="relative py-20 px-6" aria-labelledby="workflow-heading">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-12 max-w-2xl">
+              <SplitHeading
+                id="workflow-heading"
+                text="One collection, from the first request to CI"
+                className="text-3xl font-semibold tracking-tight md:text-5xl [text-wrap:balance]"
+              />
+              <p className="mt-5 leading-relaxed text-muted-foreground">
+                Tests, the command line, Git, mocks, captured traffic, sharing and your coding agent all work from the same files.
+              </p>
+            </div>
+            <div className="divide-y divide-border/60 rounded-2xl border border-border/60 bg-card/40">
+              {SPOTLIGHTS.map((spotlight, index) => (
+                <Spotlight key={spotlight.title} spotlight={spotlight} isReversed={index % 2 === 1} />
+              ))}
+            </div>
           </div>
         </section>
 
         <div id="download" className="scroll-mt-24">
-          <MountOnVisible minHeight={720}>
-            <Suspense fallback={null}>
-              <EverythingSection onGetStarted={onGetStarted} />
-            </Suspense>
-          </MountOnVisible>
+          <LazySection minHeight={720}>
+            <EverythingSection onGetStarted={onGetStarted} />
+          </LazySection>
         </div>
 
-        <MountOnVisible>
-          <Suspense fallback={null}>
-            <ComparisonSection />
-          </Suspense>
-        </MountOnVisible>
+        <LazySection>
+          <ComparisonSection />
+        </LazySection>
 
-        <section className="relative pb-20 px-6">
-          <div className="max-w-3xl mx-auto">
-            <AnimatedSection delay={0.1}>
-              <div className="border-t border-border/40 pt-20 text-center">
-                <SplitHeading
-                  text="Send your first request in a minute"
-                  className="text-3xl md:text-4xl font-semibold mb-4"
-                />
-                <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-                  Download the desktop app for Windows, macOS or Linux, or open the web version now. There is nothing to sign up for.
-                </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <a href="#download" className={buttonVariants({ size: "lg", className: "gap-2" })}>
-                    <Download className="h-4 w-4" />
-                    Choose a download
-                  </a>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="gap-2 border-border/60 hover:bg-muted/50"
-                    onClick={onGetStarted}
-                  >
-                    <Globe className="h-4 w-4" />
-                    Try the web version
-                  </Button>
-                </div>
-              </div>
-            </AnimatedSection>
+        <LazySection>
+          <FaqSection />
+        </LazySection>
+
+        <section className="relative px-6 pb-24">
+          <div className="relative mx-auto max-w-6xl rounded-2xl border border-border/60 bg-card px-6 py-16 text-center md:py-20">
+            <SplitHeading
+              text="Send your first request in a minute"
+              className="text-3xl md:text-5xl font-semibold tracking-tight [text-wrap:balance]"
+            />
+            <p className="mx-auto mt-5 max-w-lg leading-relaxed text-muted-foreground">
+              Download the desktop app for Windows, macOS or Linux, or open the web version now. There is nothing to sign up for.
+            </p>
+            <div className="relative z-20 mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
+              <DownloadDropdown />
+              <TryWebButton onClick={onGetStarted} className="px-6 py-5.5" />
+            </div>
           </div>
         </section>
 
-        <AnimatedSection>
-          <SiteFooter />
-        </AnimatedSection>
+        <SiteFooter />
       </div>
     </LazyMotion>
   )

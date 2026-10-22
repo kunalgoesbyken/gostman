@@ -1,5 +1,5 @@
 import { Fragment, useRef } from "react"
-import { gsap, useReveal } from "../../lib/landingMotion"
+import { useReveal } from "../../lib/landingMotion"
 
 export function SplitWords({ text, className }) {
   const words = text.split(" ")
@@ -19,7 +19,7 @@ export function SplitWords({ text, className }) {
 export function SplitHeading({ as: Tag = "h2", id, text, className }) {
   const ref = useRef(null)
 
-  useReveal(ref, (element) => {
+  useReveal(ref, (gsap, element) => {
     gsap.from(element.querySelectorAll(".split-word"), {
       opacity: 0,
       y: 18,

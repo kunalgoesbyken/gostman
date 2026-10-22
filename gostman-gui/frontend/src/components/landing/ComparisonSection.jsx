@@ -1,4 +1,3 @@
-import { AnimatedSection } from "./AnimatedSection"
 import { STATES } from "./comparisonData"
 import { ComparisonTable } from "./ComparisonTable"
 import { SplitHeading } from "./SplitHeading"
@@ -21,7 +20,7 @@ export default function ComparisonSection() {
   return (
     <section className="relative px-6 py-24" aria-labelledby="comparison-heading">
       <div className="mx-auto max-w-6xl">
-        <AnimatedSection className="mb-12 max-w-2xl">
+        <div className="mb-12 max-w-2xl">
           <SplitHeading
             id="comparison-heading"
             text="How Gostman compares"
@@ -30,7 +29,7 @@ export default function ComparisonSection() {
           <p className="mt-5 leading-relaxed text-muted-foreground">
             Short answers about Postman and Bruno. Plans change, so confirm on their pages before you decide.
           </p>
-        </AnimatedSection>
+        </div>
 
         <Legend />
         <ComparisonTable />

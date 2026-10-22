@@ -6,6 +6,7 @@ import { join, relative, resolve, sep } from 'path'
 import { guidePages } from './src/guides/pages.js'
 import { docFiles, docOutputFile, docPath, docSlug } from './src/docs/manifest.js'
 import { loadDocs } from './site-docs.js'
+import { FONT_STYLESHEET } from './fonts.config.js'
 
 const DEFAULT_SITE_URL = 'https://gostman.com'
 const SITE_URL_TOKEN = '__SITE_URL__'
@@ -78,7 +79,7 @@ export function siteMeta() {
 
       const { renderGuidePage, renderDocsPage, assets } = await buildGuideRenderer()
       const docs = loadDocs(DOCS_DIR)
-      const stylesheets = stylesheetsOf(bundle)
+      const stylesheets = [FONT_STYLESHEET, ...stylesheetsOf(bundle)]
       const emit = (fileName, source) => this.emitFile({ type: 'asset', fileName, source })
       assets.forEach((asset) => emit(asset.fileName, asset.source))
       docs.images.forEach((image) => emit(image.fileName, image.source))
