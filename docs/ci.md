@@ -128,7 +128,7 @@ A non-zero exit code fails the stage, and `post { always }` still publishes the 
 The repository has a `Dockerfile` that builds a static `gostman` into a distroless image that runs as a non-root user. No secrets are baked in.
 
 ```bash
-docker build -t gostman --build-arg VERSION=1.4.0 .
+docker build -t gostman --build-arg VERSION=1.5.0 .
 docker run --rm -v "$PWD:/workspace" -e API_TOKEN gostman run api --env CI --var-from-env API_TOKEN
 ```
 
@@ -139,7 +139,7 @@ Use it in a pipeline as the job image:
 ```yaml
 api-tests:
   image:
-    name: registry.example.com/tools/gostman:1.4.0
+    name: registry.example.com/tools/gostman:1.5.0
     entrypoint: [""]
   script:
     - gostman run api --env CI --var-from-env API_TOKEN
