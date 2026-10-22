@@ -1,14 +1,11 @@
 import { buttonVariants } from "./ui/button"
 import { cn } from "../lib/utils"
-import { Brand } from "./landing/Brand"
 import { DotGrid } from "./landing/DotGrid"
-import { NavBar } from "./landing/NavBar"
 import { PointList } from "./landing/PointList"
 import { SiteFooter } from "./landing/SiteFooter"
-import { Github } from "./landing/icons"
-import { REPOSITORY_URL, RELEASES_URL } from "../lib/siteLinks"
+import { SiteHeader } from "./landing/SiteHeader"
+import { RELEASES_URL } from "../lib/siteLinks"
 
-const NAV_LINK = cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-2 text-sm hover:bg-muted/50")
 const BODY_TEXT = "mt-4 leading-relaxed text-muted-foreground"
 
 function LinkRow({ links }) {
@@ -43,21 +40,7 @@ export function GuidePage({ page }) {
         <DotGrid />
       </div>
 
-      <nav aria-label="Gostman" className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-6 px-6">
-        <NavBar>
-          <a href="/" aria-label="Gostman home">
-            <Brand />
-          </a>
-          <div className="flex items-center gap-2">
-            <a href="/web" className={NAV_LINK}>Web app</a>
-            <a href={RELEASES_URL} rel="noopener" className={NAV_LINK}>Download</a>
-            <a href={REPOSITORY_URL} rel="noopener" className={NAV_LINK}>
-              <Github className="h-4 w-4" />
-              GitHub
-            </a>
-          </div>
-        </NavBar>
-      </nav>
+      <SiteHeader />
 
       <main className="relative mx-auto max-w-3xl px-6 pt-36 pb-20">
         <h1 className="text-4xl md:text-5xl font-semibold tracking-tight leading-[1.1] [text-wrap:balance]">{page.heading}</h1>

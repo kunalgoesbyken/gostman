@@ -9,6 +9,8 @@ The **Share** tab of the import dialog encrypts a folder or the whole collection
 
 **Export → HTML docs** (or `gostman docs`) writes one self-contained documentation page: every request with its description, parameters, headers, body, a curl example and saved examples. Values in auth settings, credential headers and parameters with names such as `token` or `key` are shown as `<redacted>`; other literal secrets in bodies are not detected, so review the page before publishing.
 
+![A generated documentation page with a sidebar of requests and the details of one](../gostman-gui/frontend/src/assets/landing/docs.png)
+
 ## Open in Gostman links
 
 A link can ask Gostman to download a Postman, OpenAPI, Insomnia, HAR, Bruno or Gostman file and import it, for example from a README button:

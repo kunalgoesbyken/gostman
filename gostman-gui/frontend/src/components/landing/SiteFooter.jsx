@@ -1,8 +1,10 @@
 import { Brand } from "./Brand"
 import { Github } from "./icons"
 import { guidePages } from "../../guides/pages"
+import { docPath } from "../../docs/manifest"
 import { ISSUES_URL, REPOSITORY_URL } from "../../lib/siteLinks"
 
+const DOCS_LINK = { path: docPath("").slice(1), heading: "Documentation" }
 const FOOTER_LINK = "text-sm text-muted-foreground/70 transition-colors hover:text-foreground"
 
 export function SiteFooter() {
@@ -23,7 +25,7 @@ export function SiteFooter() {
         </div>
 
         <nav aria-label="Guides" className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
-          {guidePages.map((page) => (
+          {[DOCS_LINK, ...guidePages].map((page) => (
             <a key={page.path} href={`/${page.path}`} className={FOOTER_LINK}>
               {page.heading}
             </a>

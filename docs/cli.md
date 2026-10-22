@@ -89,4 +89,4 @@ The image is distroless, static and runs as a non-root user. In GitHub Actions:
     output: report.xml
 ```
 
-[docs/ci.md](docs/ci.md) has exit codes, reports, secrets, and GitLab CI, Jenkins and plain GitHub Actions recipes.
+[CI recipes](ci.md) has exit codes, reports, secrets, and GitLab CI, Jenkins and plain GitHub Actions recipes.

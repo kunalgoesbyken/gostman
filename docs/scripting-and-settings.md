@@ -1,5 +1,7 @@
 # Variables, scripts and settings
 
+This page covers variables, tests and scripts, the desktop network settings and the OAuth 2.0 callback.
+
 ## Variables
 
 Define variables per environment as a JSON object and reference them anywhere with `{{name}}`.
@@ -7,6 +9,8 @@ Define variables per environment as a JSON object and reference them anywhere wi
 ## Tests and scripts
 
 The Tests tab of a request holds assertions (`res.status equals 200`, `res.body.user.id is a number`) and pre-request and post-response scripts. Scripts are JavaScript with `req`, `res`, `env.get()` / `env.set()`, `test(name, fn)` and Chai's `expect()`. They run in an isolated worker with no network access and are stopped after 10 seconds. Results appear in the Tests tab of the response, and the runner applies the same checks to every request in a folder.
+
+![A request with four assertion rows and a passing test list under the response](../gostman-gui/frontend/src/assets/landing/tests.png)
 
 ## Network settings (desktop)
 

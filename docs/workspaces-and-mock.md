@@ -13,6 +13,8 @@ The control next to the logo shows where the collection lives. **Open folder** k
 
 Save any response as a named example from the response panel (up to 20 per request, 2 MB each; cookie and authorization headers are not kept). The mock server, opened from the header, serves each request's method and path with one of its examples on `127.0.0.1`.
 
+![The mock server dialog with a served route and a live request log](../gostman-gui/frontend/src/assets/landing/mock.png)
+
 - `{{base_url}}/users/42` is served at `/users/42`; a literal base path such as `/v1` is kept. Segments written `:id`, or holding an unresolved variable, match anything.
 - GraphQL, gRPC and WebSocket requests, and requests without an example, are not served.
 - Examples travel with exports and workspace folders, so they can contain whatever the response body held.
@@ -26,6 +28,8 @@ Save any response as a named example from the response panel (up to 20 per reque
 ## Capture (desktop and CLI)
 
 Start a capture with the address of your API, then point your app at `http://127.0.0.1:4020`. Gostman forwards each call, lists it, and lets you save any of them as a request with its response as an example.
+
+![The capture dialog listing five forwarded calls with the response of one shown below](../gostman-gui/frontend/src/assets/landing/capture.png)
 
 - It is a forwarding address for one API, not an intercepting proxy: there is no certificate to install, and an app whose base URL cannot be changed is not captured.
 - `Authorization`, `Cookie` and `Proxy-Authorization` request headers are never saved. Bodies are saved as captured, so check them for tokens before sharing.

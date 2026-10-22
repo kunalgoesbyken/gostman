@@ -98,6 +98,8 @@ Data in the web version is kept in the browser's local storage.
 
 ## Documentation
 
+The same pages are published at [gostman.com/docs](https://gostman.com/docs).
+
 - [Command line](docs/cli.md): `run`, `send`, `load`, `scan`, `lint`, `docs`, `mock`, `capture`, secret managers, data files, reports
 - [CI recipes](docs/ci.md): GitHub Actions, GitLab CI, Jenkins, Docker
 - [Use from a coding agent](docs/agents.md)

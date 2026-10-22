@@ -4,14 +4,17 @@ import { mkdtempSync, rmSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { join, relative, resolve, sep } from 'path'
 import { guidePages } from './src/guides/pages.js'
+import { docFiles, docOutputFile, docPath, docSlug } from './src/docs/manifest.js'
+import { loadDocs } from './site-docs.js'
 
 const DEFAULT_SITE_URL = 'https://gostman.com'
 const SITE_URL_TOKEN = '__SITE_URL__'
 const GUIDE_ENTRY = resolve('src/guides/render.jsx')
+const DOCS_DIR = resolve('../../docs')
 
 export const siteUrl = (process.env.SITE_URL || DEFAULT_SITE_URL).replace(/\/+$/, '')
 
-const sitemapPaths = ['', ...guidePages.map((page) => page.path)]
+const sitemapPaths = ['', ...guidePages.map((page) => page.path), ...docFiles.map((file) => docPath(docSlug(file)).slice(1))]
 
 const sitemapEntry = (url, path) => `  <url>
     <loc>${url}/${path}</loc>
@@ -50,13 +53,13 @@ async function buildGuideRenderer() {
   const script = outputFiles.find((file) => file.path.endsWith('.js'))
   const scriptPath = join(outdir, 'render.cjs')
   writeFileSync(scriptPath, script.text)
-  const { renderGuidePage } = createRequire(scriptPath)(scriptPath)
+  const { renderGuidePage, renderDocsPage } = createRequire(scriptPath)(scriptPath)
   rmSync(outdir, { recursive: true, force: true })
 
   const assets = outputFiles
     .filter((file) => file !== script)
     .map((file) => ({ fileName: relative(outdir, file.path).split(sep).join('/'), source: file.contents }))
-  return { renderGuidePage, assets }
+  return { renderGuidePage, renderDocsPage, assets }
 }
 
 const stylesheetsOf = (bundle) =>
@@ -73,16 +76,16 @@ export function siteMeta() {
       this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: sitemapXml(siteUrl) })
       this.emitFile({ type: 'asset', fileName: 'robots.txt', source: robotsTxt(siteUrl) })
 
-      const { renderGuidePage, assets } = await buildGuideRenderer()
+      const { renderGuidePage, renderDocsPage, assets } = await buildGuideRenderer()
+      const docs = loadDocs(DOCS_DIR)
       const stylesheets = stylesheetsOf(bundle)
-      assets.forEach((asset) => this.emitFile({ type: 'asset', ...asset }))
-      guidePages.forEach((page) => {
-        this.emitFile({
-          type: 'asset',
-          fileName: `${page.path}/index.html`,
-          source: renderGuidePage(page, { siteUrl, stylesheets }),
-        })
-      })
+      const emit = (fileName, source) => this.emitFile({ type: 'asset', fileName, source })
+      assets.forEach((asset) => emit(asset.fileName, asset.source))
+      docs.images.forEach((image) => emit(image.fileName, image.source))
+      guidePages.forEach((page) => emit(`${page.path}/index.html`, renderGuidePage(page, { siteUrl, stylesheets })))
+      docs.pages.forEach((page) =>
+        emit(docOutputFile(page.slug), renderDocsPage(page, { siteUrl, stylesheets, nav: docs.nav })),
+      )
     },
   }
 }
