@@ -12,7 +12,7 @@ import { RequestTabs } from "./RequestTabs"
 import { Button } from "./ui/button"
 import { EmptyState } from "./ui/emptyState"
 import { WelcomePanel } from "./WelcomePanel"
-import { GettingStartedButton, useOnboardingProgress } from "./GettingStarted"
+import { GettingStartedButton, useOnboardingCompletion } from "./GettingStarted"
 import { selectActiveVariables, selectIsDialogOpen, selectResolvedVariables, useActiveTab, useAppStore } from "../store/appStore"
 import { useAutoSave } from "../hooks/useAutoSave"
 import { useRequestFieldHandlers } from "../hooks/useRequestFieldHandlers"
@@ -27,7 +27,6 @@ import { forgetSharedLink, pendingSharedLink, subscribeToSharedLink } from "../l
 import { currentOpenLink, dismissOpenLink, subscribeToOpenLink } from "../lib/openLink"
 import { exportableVariables, withoutSecretValues } from "../lib/variableScopes"
 import { createWorkspaceActions } from "../lib/workspaceActions"
-import { rememberWelcomeDismissed } from "../lib/welcome"
 
 const CodeSnippetDialog = lazy(() => import("./CodeSnippetDialog").then((module) => ({ default: module.CodeSnippetDialog })))
 const ImportExportDialog = lazy(() => import("./ImportExportDialog").then((module) => ({ default: module.ImportExportDialog })))
@@ -239,7 +238,6 @@ function LoadedWorkspace({ backend, onBack }) {
   const welcomeVisible = useAppStore((s) => s.welcomeVisible)
   const hideWelcome = useAppStore((s) => s.hideWelcome)
   const closeWelcome = useAppStore((s) => s.closeWelcome)
-  const { isComplete: isOnboarded } = useOnboardingProgress()
 
   const activeTab = useActiveTab()
   const activeRequest = activeTab.request
@@ -250,9 +248,7 @@ function LoadedWorkspace({ backend, onBack }) {
     if (welcomeVisible && !showsWelcome) closeWelcome()
   }, [welcomeVisible, showsWelcome, closeWelcome])
 
-  useEffect(() => {
-    if (isOnboarded) rememberWelcomeDismissed()
-  }, [isOnboarded])
+  useOnboardingCompletion()
 
   const actions = useMemo(() => createWorkspaceActions(backend), [backend])
   const resolvedVariables = useAppStore(selectResolvedVariables)

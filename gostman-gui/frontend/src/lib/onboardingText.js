@@ -5,6 +5,7 @@ export const ONBOARDING_TEXT = {
   progress: (done, total) => `${done} of ${total} done`,
   next: 'Next',
   completeTitle: 'You are set up',
+  completeNotice: 'You finished getting started.',
   completeHint: 'You have tried the main parts of Gostman. The tutorial goes further with chaining requests, scripts and running your tests in CI.',
   tutorial: 'Read the tutorial',
   hide: 'Hide',

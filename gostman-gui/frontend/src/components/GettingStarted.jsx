@@ -4,6 +4,7 @@ import { Check, ExternalLink, ListChecks } from "lucide-react"
 import { Button } from "./ui/button"
 import { openExternal } from "../lib/about"
 import { WEB_APP_URL } from "../lib/constants"
+import { rememberWelcomeDismissed } from "../lib/welcome"
 import { onboardingProgress } from "../lib/onboarding"
 import { ONBOARDING_TEXT as TEXT } from "../lib/onboardingText"
 import { cn } from "../lib/utils"
@@ -25,6 +26,24 @@ export function useOnboardingProgress() {
     () => onboardingProgress({ requestHistory, requests, collectionVariables, environments, globalEnvironments, onboardingSteps }),
     [requestHistory, requests, collectionVariables, environments, globalEnvironments, onboardingSteps]
   )
+}
+
+export function useOnboardingCompletion() {
+  const hydrated = useAppStore((s) => s.hydrated)
+  const isDismissed = useAppStore((s) => s.welcomeDismissed)
+  const showNotice = useAppStore((s) => s.showNotice)
+  const { isComplete } = useOnboardingProgress()
+  const wasComplete = useRef(null)
+
+  useEffect(() => {
+    if (!hydrated) {
+      wasComplete.current = null
+      return
+    }
+    if (wasComplete.current === false && isComplete && !isDismissed) showNotice(TEXT.completeNotice)
+    wasComplete.current = isComplete
+    if (isComplete) rememberWelcomeDismissed()
+  }, [hydrated, isComplete, isDismissed, showNotice])
 }
 
 function ProgressBar({ done, total }) {
