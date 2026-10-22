@@ -8,15 +8,11 @@ assertions:
   - expression: res.status
     operator: eq
     value: "200"
+  - expression: res.body.id
+    operator: eq
+    value: "{{todo_id}}"
   - expression: res.body.completed
     operator: isBoolean
-  - expression: res.responseTime
-    operator: lt
-    value: "2000"
-postScript: |
-  test("returns the todo that was asked for", () => {
-    expect(String(res.body.id)).to.equal(String(env.get("todo_id")))
-  })
 examples: |
   [
     {

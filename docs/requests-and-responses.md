@@ -126,7 +126,7 @@ Rules run after every response. Run now applies them to the last response, and a
 
 The Tests tab has three views: Assertions, Pre-request script and Post-response script. The response panel shows the results in its Tests tab. For the script API and sandbox, see [Variables, scripts and settings](scripting-and-settings.md).
 
-Each assertion row has an Expression, a Check and an Expected value. Expressions use `res.status`, `res.headers.name`, `res.body.path` or `res.responseTime`. The Check list includes:
+Each assertion row has an Expression, a Check and an Expected value. Expressions use `res.status`, `res.headers.name`, `res.body.path` or `res.responseTime`. The expected value can use `{{variables}}`, including values extracted from an earlier response and columns of a data file; a name that is not defined is compared as written. The Check list includes:
 
 - Comparisons: equals, does not equal, is greater than, is at least, is less than, is at most.
 - Text and list checks: contains, does not contain, starts with, ends with, matches regex, is one of, has length.

@@ -4,8 +4,8 @@ Each folder here is a Gostman workspace: plain YAML files you can open in the de
 
 | Folder | What it shows |
 | --- | --- |
-| [`todo-api`](todo-api) | Folder headers, an environment, chaining one response into the next request, assertions, a post-response script, a saved example for the mock server, and a data file. Calls [JSONPlaceholder](https://jsonplaceholder.typicode.com). |
-| [`auth-and-secrets`](auth-and-secrets) | Auth set once on a folder and inherited by its requests, a request with its own auth, a request that expects a 401, and secrets passed at run time instead of stored in the files. Calls [httpbin](https://httpbin.org). |
+| [`todo-api`](todo-api) | Folder headers, an environment, chaining one response into the next request, assertions that compare against variables, a saved example for the mock server, and a data file. Calls [JSONPlaceholder](https://jsonplaceholder.typicode.com). |
+| [`auth-and-secrets`](auth-and-secrets) | Auth set once on a folder and inherited by its requests, a request with its own auth, a request that expects a 401, secrets passed at run time instead of stored in the files, and a post-response script that fails the run when a secret is missing. Calls [httpbin](https://httpbin.org). |
 
 ## Run them
 

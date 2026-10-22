@@ -117,7 +117,7 @@ export async function runJob({ script, assertions, request, response, variables,
     logs.push(errorLine(error))
   }
 
-  const assertionResults = response ? evaluateAssertions(assertions || '', response) : []
+  const assertionResults = response ? evaluateAssertions(assertions || '', response, variables) : []
   return {
     tests: [...assertionResults, ...tests],
     logs,

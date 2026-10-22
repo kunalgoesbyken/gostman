@@ -4,11 +4,15 @@ const PLACEHOLDER = /\{\{([^}]+)\}\}/g
 
 const asText = (value) => (typeof value === 'object' ? JSON.stringify(value) : String(value))
 
+const isDefined = (value) => value !== null && value !== undefined
+
+export const variableMap = (variables) => new Map(
+  Object.entries(variables).filter(([, value]) => isDefined(value)).map(([name, value]) => [name, asText(value)])
+)
+
 export function parseVariableMap(json) {
   const parsed = json.trim() === '' ? {} : parseJSON(json, null)
-  if (!isPlainObject(parsed)) return null
-  const defined = Object.entries(parsed).filter(([, value]) => value !== null)
-  return new Map(defined.map(([name, value]) => [name, asText(value)]))
+  return isPlainObject(parsed) ? variableMap(parsed) : null
 }
 
 export function substitutePlaceholders(text, variables) {

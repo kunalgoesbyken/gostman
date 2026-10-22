@@ -1,5 +1,6 @@
 import { JSONPath } from 'jsonpath-plus'
 import { isPlainObject, parseJSON } from '../dataUtils'
+import { substitutePlaceholders, variableMap } from '../placeholders'
 
 const isPrimitive = (value) => value === null || typeof value !== 'object'
 
@@ -94,20 +95,22 @@ function resolve(expression, response) {
   return JSONPath({ path, json: { res: response }, wrap: false })
 }
 
-function evaluate(assertion, response) {
+function evaluate(assertion, response, variables) {
   const operator = operatorOf(assertion)
   const name = titleOf(assertion, operator)
   try {
     const actual = resolve(assertion.expression.trim(), response)
-    const passed = Boolean(operator.test(actual, parseJSON(assertion.value, assertion.value)))
+    const expected = substitutePlaceholders(assertion.value, variables)
+    const passed = Boolean(operator.test(actual, parseJSON(expected, expected)))
     return { name, passed, message: passed ? '' : `The value was ${describe(actual)}` }
   } catch (error) {
     return { name, passed: false, message: error.message }
   }
 }
 
-export function evaluateAssertions(json, response) {
+export function evaluateAssertions(json, response, variables = {}) {
+  const values = variableMap(variables)
   return parseAssertions(json)
     .filter((assertion) => assertion.enabled && assertion.expression.trim() !== '')
-    .map((assertion) => evaluate(assertion, response))
+    .map((assertion) => evaluate(assertion, response, values))
 }

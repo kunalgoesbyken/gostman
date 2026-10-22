@@ -25,7 +25,7 @@ const VIEWS = [
 ]
 
 const HINTS = {
-  [VIEW_ASSERTIONS]: "Checked rows are verified after every response. Use res.status, res.headers.name, res.body.path or res.responseTime.",
+  [VIEW_ASSERTIONS]: "Use res.status, res.headers.name, res.body.path or res.responseTime; expected values can use {{variables}}. Checked rows are verified after every response.",
   [VIEW_PRE]: "Runs before sending. Available: req, env, console, utils, sendRequest(), skipRequest(), stopExecution().",
   [VIEW_POST]: "Runs after the response. Available: req, res, env, console, utils, test(name, fn), expect(value), sendRequest(), setNextRequest(name), visualize(template, data).",
 }

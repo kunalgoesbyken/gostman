@@ -57,11 +57,11 @@ gostman run examples/todo-api --env Public
 
 ```
 PASS  GET      Todos/List todos  200 OK  99 ms  3/3 tests
-PASS  GET      Todos/Get one todo  200 OK  13 ms  4/4 tests
+PASS  GET      Todos/Get one todo  200 OK  13 ms  3/3 tests
 PASS  POST     Todos/Create a todo  201 Created  286 ms  3/3 tests
 
 Requests  3 passed
-Tests     10 passed
+Tests     9 passed
 ```
 
 Open the same folder in the desktop app with **Open folder** to see the requests, the checks and the variable passed from one request to the next.

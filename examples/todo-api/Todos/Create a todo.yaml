@@ -17,7 +17,6 @@ assertions:
     value: "201"
   - expression: res.body.id
     operator: isNumber
-postScript: |
-  test("echoes the title that was sent", () => {
-    expect(res.body.title).to.equal(env.get("title"))
-  })
+  - expression: res.body.title
+    operator: eq
+    value: "{{title}}"
