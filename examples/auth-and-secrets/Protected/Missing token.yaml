@@ -1,0 +1,12 @@
+id: req-missing-token
+name: Missing token
+description: Sends no auth on purpose and checks that the API refuses it.
+order: 3
+method: GET
+url: "{{base_url}}/bearer"
+auth:
+  type: none
+assertions:
+  - expression: res.status
+    operator: eq
+    value: "401"

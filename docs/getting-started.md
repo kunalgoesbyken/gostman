@@ -71,6 +71,8 @@ Browsers cannot call arbitrary APIs directly, so the web version relays requests
 
 ## Next steps
 
+- [Tutorial: test an API](tutorial-first-collection.md), about fifteen minutes from an empty collection to a tested one
+- [Example collections](../examples/README.md) you can open or run right away
 - [What is free in Gostman](free-features.md)
 - [Variables](variables.md) and [folder settings](folder-settings.md) to organise a collection
 - [Gostman in CI](ci.md) to run it in a pipeline

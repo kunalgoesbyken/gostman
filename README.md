@@ -46,6 +46,34 @@ gostman send GET https://example.com -H 'Accept: text/html'
 gostman run path/to/collection
 ```
 
+### Try a working collection
+
+The [`examples`](examples) folder holds collections that call public test APIs, so they run as soon as you clone the repository:
+
+```bash
+git clone https://github.com/kunalgoesbyken/gostman && cd gostman
+gostman run examples/todo-api --env Public
+```
+
+```
+PASS  GET      Todos/List todos  200 OK  99 ms  3/3 tests
+PASS  GET      Todos/Get one todo  200 OK  13 ms  4/4 tests
+PASS  POST     Todos/Create a todo  201 Created  286 ms  3/3 tests
+
+Requests  3 passed
+Tests     10 passed
+```
+
+Open the same folder in the desktop app with **Open folder** to see the requests, the checks and the variable passed from one request to the next.
+
+## Learn
+
+- [Tutorial: test an API](docs/tutorial-first-collection.md) builds that collection step by step: variables, folders, assertions, chaining, scripts and a data-driven run.
+- [Tutorial: run your API tests in CI](docs/tutorial-ci.md) runs it on every pull request with secrets kept out of the files.
+- [Guides by task](docs/guides.md): migrate from Postman, mock a backend before it exists, record real traffic, load test, publish docs, let a coding agent call your API.
+- [Script reference and examples](docs/scripting-and-settings.md#tests-and-scripts): JSON Schema checks, request signing, fetching a token, polling.
+- [Troubleshooting](docs/troubleshooting.md)
+
 ## Features
 
 - **Protocols:** REST, GraphQL (schema browser), gRPC (reflection or `.proto`), WebSocket, Server-Sent Events, SOAP and MCP servers.
@@ -97,7 +125,7 @@ Data in the web version is kept in the browser's local storage.
 
 ## Documentation
 
-The same pages are published at [gostman.com/docs](https://gostman.com/docs).
+The same pages are published at [gostman.com/docs](https://gostman.com/docs). The tutorials and guides are listed under [Learn](#learn); the reference pages are:
 
 - [Getting started](docs/getting-started.md) and [what is free in Gostman](docs/free-features.md)
 - [Requests and responses](docs/requests-and-responses.md) and [protocols](docs/protocols.md)

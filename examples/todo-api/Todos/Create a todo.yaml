@@ -1,0 +1,23 @@
+id: req-create-todo
+name: Create a todo
+description: Sends a JSON body built from the title and completed variables. Run it with --data todos.csv to send one todo per row.
+order: 3
+method: POST
+url: "{{base_url}}/todos"
+bodyType: json
+body: |
+  {
+    "userId": 1,
+    "title": "{{title}}",
+    "completed": {{completed}}
+  }
+assertions:
+  - expression: res.status
+    operator: eq
+    value: "201"
+  - expression: res.body.id
+    operator: isNumber
+postScript: |
+  test("echoes the title that was sent", () => {
+    expect(res.body.title).to.equal(env.get("title"))
+  })

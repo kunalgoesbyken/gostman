@@ -1,0 +1,5 @@
+id: env-public
+name: Public
+variables:
+  base_url: https://httpbin.org
+  username: demo

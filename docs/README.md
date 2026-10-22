@@ -9,6 +9,14 @@ Gostman is an API client for REST, GraphQL, gRPC and WebSocket that you, your CI
 - [Getting started](getting-started.md): open Gostman in the browser, install the desktop app or the command line, and send a first request.
 - [What is free in Gostman](free-features.md): the features Postman and Bruno list under paid plans, and where Gostman covers each one.
 
+## Learn
+
+- [Tutorial: test an API](tutorial-first-collection.md): build a collection with variables, chained requests and checks, then run it from the app and the command line.
+- [Tutorial: run your API tests in CI](tutorial-ci.md): run the collection on every pull request with secrets kept out of the files.
+- [Guides by task](guides.md): migrate from Postman, mock a backend, record traffic, load test, publish docs and more.
+- [Troubleshooting](troubleshooting.md): common problems and their fixes.
+- [Example collections](../examples/README.md): ready-to-run workspaces you can open or run.
+
 ## Send requests
 
 - [Requests and responses](requests-and-responses.md): the request editor, every body and auth type, and the response viewer.

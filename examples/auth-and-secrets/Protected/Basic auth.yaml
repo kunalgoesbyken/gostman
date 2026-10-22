@@ -1,0 +1,21 @@
+id: req-basic-auth
+name: Basic auth
+description: Sets its own auth, so it does not inherit the folder's token. The password comes from the PASSWORD environment variable.
+order: 2
+method: GET
+url: "{{base_url}}/basic-auth/{{username}}/{{PASSWORD}}"
+auth:
+  type: basic
+  username: "{{username}}"
+  password: "{{PASSWORD}}"
+assertions:
+  - expression: res.status
+    operator: eq
+    value: "200"
+  - expression: res.body.user
+    operator: eq
+    value: demo
+postScript: |
+  test("PASSWORD was supplied at run time", () => {
+    expect(env.get("PASSWORD")).to.be.a("string").and.not.be.empty
+  })

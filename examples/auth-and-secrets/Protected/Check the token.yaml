@@ -1,0 +1,18 @@
+id: req-check-token
+name: Check the token
+description: Inherits the bearer token from the Protected folder.
+order: 1
+method: GET
+url: "{{base_url}}/bearer"
+auth:
+  type: inherit
+assertions:
+  - expression: res.status
+    operator: eq
+    value: "200"
+  - expression: res.body.authenticated
+    operator: isTrue
+postScript: |
+  test("API_TOKEN was supplied at run time", () => {
+    expect(env.get("API_TOKEN")).to.be.a("string").and.not.be.empty
+  })

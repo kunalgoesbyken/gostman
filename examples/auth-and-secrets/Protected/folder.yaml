@@ -1,0 +1,7 @@
+id: folder-protected
+name: Protected
+description: Every request in this folder inherits the bearer token set here. The token itself is never stored in the folder; it comes from the API_TOKEN environment variable at run time.
+order: 1
+auth:
+  type: bearer
+  token: "{{API_TOKEN}}"

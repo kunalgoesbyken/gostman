@@ -1,0 +1,6 @@
+id: folder-todos
+name: Todos
+order: 1
+headers:
+  - key: Accept
+    value: application/json

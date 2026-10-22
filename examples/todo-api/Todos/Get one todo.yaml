@@ -1,0 +1,32 @@
+id: req-get-todo
+name: Get one todo
+description: Uses the todo_id variable that List todos extracted from its response.
+order: 2
+method: GET
+url: "{{base_url}}/todos/{{todo_id}}"
+assertions:
+  - expression: res.status
+    operator: eq
+    value: "200"
+  - expression: res.body.completed
+    operator: isBoolean
+  - expression: res.responseTime
+    operator: lt
+    value: "2000"
+postScript: |
+  test("returns the todo that was asked for", () => {
+    expect(String(res.body.id)).to.equal(String(env.get("todo_id")))
+  })
+examples: |
+  [
+    {
+      "id": "example-todo",
+      "name": "A todo",
+      "status": 200,
+      "headers": [{ "key": "Content-Type", "value": "application/json" }],
+      "body": "{\n  \"userId\": 1,\n  \"id\": 1,\n  \"title\": \"Write the first test\",\n  \"completed\": false\n}",
+      "bodyEncoding": "utf8",
+      "contentType": "application/json",
+      "isDefault": true
+    }
+  ]

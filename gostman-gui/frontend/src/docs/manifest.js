@@ -4,6 +4,15 @@ export const docSections = [
     docs: [{ file: "README.md" }, { file: "getting-started.md" }, { file: "free-features.md", comparison: true }],
   },
   {
+    title: "Learn",
+    docs: [
+      { file: "tutorial-first-collection.md" },
+      { file: "tutorial-ci.md" },
+      { file: "guides.md" },
+      { file: "troubleshooting.md" },
+    ],
+  },
+  {
     title: "Send requests",
     docs: [
       { file: "requests-and-responses.md" },

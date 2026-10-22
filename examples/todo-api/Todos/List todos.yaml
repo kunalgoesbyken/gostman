@@ -1,0 +1,19 @@
+id: req-list-todos
+name: List todos
+description: Lists todos for one user and keeps the id of the first one for the next request.
+order: 1
+method: GET
+url: "{{base_url}}/todos?userId=1"
+extractors:
+  - name: todo_id
+    source: body
+    expression: $[0].id
+assertions:
+  - expression: res.status
+    operator: eq
+    value: "200"
+  - expression: res.body
+    operator: isArray
+  - expression: res.body[0].userId
+    operator: eq
+    value: "1"
