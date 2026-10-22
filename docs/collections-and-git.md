@@ -151,6 +151,8 @@ A folder you did not create opens as restricted. In a restricted folder, scripts
 
 The **Git** panel is a desktop feature. It works on the open folder, so open or save the collection to a folder first, or clone a repository from the workspace menu. The panel refreshes when the app window regains focus.
 
+![The Git panel with one changed request file, its diff showing the URL change, and a commit message ready to commit](../screenshots/git-panel.png)
+
 If the panel cannot work, it says why:
 
 - **Git is not installed**, with an install hint.

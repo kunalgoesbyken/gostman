@@ -66,6 +66,8 @@ The report is not redacted for you. Review it before you share it.
 
 The Load test dialog sends the current request many times at once and measures how the server responds. Open it with the **Load test this request** command while the request you want to test is the active tab.
 
+![A finished load test: 1001 requests at 200 per second with no failures, and a latency table from min to max](../screenshots/load-test.png)
+
 The command appears only in the desktop app. In the web version the palette does not offer it.
 
 Only test systems you own or have permission to test.
@@ -106,6 +108,8 @@ For thresholds that fail a pipeline, a fixed request count or a ramp-up, use `go
 ## Scan for secrets
 
 The Scan for secrets dialog looks through your collection for credentials that were typed into it, before you share or commit it. Open it with the **Scan for secrets** command.
+
+![The Scan for secrets dialog with one high finding: a Stripe live key in the X-Api-Key header of Auth/Partner callback, shown only as sk_l****](../screenshots/scan.png)
 
 It looks for well-known token formats, random-looking values in credential fields and passwords typed into auth settings. Values written as `{{variables}}` are not reported. Nothing leaves the window except the check itself, and only a few characters of a value are ever shown.
 

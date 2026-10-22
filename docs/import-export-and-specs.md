@@ -6,6 +6,8 @@ This page covers the Import and Export dialog, what an import does and does not 
 
 Open the dialog with the **Import** button in the header or the **Import data** and **Export data** commands in the command palette. It has three tabs: **Import**, **Export** and **Share**. The Share tab is covered in [Sharing and documentation](sharing-and-docs.md).
 
+![The Import tab with Choose files and Choose folder, the format list, an OpenAPI address field and a box to paste content](../screenshots/import.png)
+
 ## Importing
 
 You can bring data in four ways:
@@ -77,6 +79,8 @@ Pasting a share link, or choosing a share file, shows a preview with the request
 ## Exporting
 
 The **Export** tab previews the content, shows how many requests, folders and environments the workspace has, and offers a copy button and **Save file**. A secret scan runs on the workspace and warns before you save when it finds credentials, see [Command line](cli.md#secret-scanner). The preview shows the first 20,000 characters; the saved file is complete.
+
+![The Export tab with the Gostman format selected, a warning that one possible secret is written into the export, and the export preview](../screenshots/export.png)
 
 | Format | What you get |
 | --- | --- |

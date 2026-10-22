@@ -2,6 +2,8 @@
 
 Every folder and the collection itself can carry settings that the requests below it share. Open them from a folder's menu (**Settings**) or with the settings button above the collection tree (**Collection settings**).
 
+![Folder settings for the Auth folder on the Headers tab, with X-Client and X-User-Id headers sent with every request in the folder](../screenshots/folder-settings.png)
+
 | Tab | What it holds |
 | --- | --- |
 | Headers | Rows sent with every request below |

@@ -18,6 +18,8 @@ The lock is available on environment variables. It is not offered for collection
 
 A variable can read its value from a secret manager instead of holding it. You set this up in two steps: add a connection once, then point variables at it.
 
+![The Secret managers dialog adding a HashiCorp Vault connection named team-vault with its address, mount and KV version](../screenshots/secret-managers.png)
+
 The collection stores only the reference: the connection name, the path, an optional JSON field and an optional version. The connection itself, with its address and sign-in details, is kept on this computer with credentials in the system keychain, and is never part of a collection. A collection you clone cannot point your credentials at its own server.
 
 Secret managers work in the desktop app and in the command line. In the web version the Secret managers dialog shows `Available in the desktop app and the CLI`, because the web version never sends credentials to its relay. Variables that use a reference only resolve in the desktop app and the command line. For the command line, see [Secret managers](cli.md) in the command line page.
@@ -80,6 +82,8 @@ If the connection name on a variable does not exist on this computer, the row sh
 
 Gostman keeps the cookies that responses set and sends them back to the same site on later requests. Open the **Manage cookies** command to see them in the **Cookies** dialog.
 
+![The Cookies dialog listing session_id, theme and locale cookies for httpbin.org with their path and expiry](../screenshots/cookies.png)
+
 - The table lists **Name**, **Value**, **Domain**, **Path** and **Expires** for each cookie, and the title shows the count.
 - **Filter by name or domain** narrows the list.
 - The delete button on a row removes one cookie. **Clear all** removes every cookie.
@@ -89,6 +93,8 @@ Share links never include cookies.
 ## Network settings
 
 Network settings sets the proxy and certificates used when the desktop app sends requests. Open the **Network settings** command from the command palette.
+
+![The Network settings dialog with a custom proxy, hosts that bypass it, a CA certificate picker and a client certificate row for api.example.com](../screenshots/network.png)
 
 Network settings are desktop only. In the web version the dialog shows `Available in the desktop app`: requests from the web version go through the hosted relay, which cannot use a proxy or certificates from your machine.
 

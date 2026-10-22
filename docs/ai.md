@@ -2,6 +2,8 @@
 
 AI is off by default. Open the command palette, choose "AI settings", tick the consent line, turn AI on, pick a provider, type a model id and paste a key. Use "Test connection" to check it.
 
+![The AI settings dialog: the consent line, the switch to turn AI on, provider, base URL, model id and API key fields](../screenshots/ai-settings.png)
+
 Providers: Anthropic, OpenAI, Google Gemini, OpenRouter, Ollama and any OpenAI-compatible base URL. Model ids are typed by you; the placeholders are only hints. Plain `http` base URLs are refused unless the host is loopback or you allow it for that address.
 
 ## Where the key lives

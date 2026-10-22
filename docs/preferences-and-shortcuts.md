@@ -6,6 +6,8 @@ This page covers the command palette and its commands, the Preferences dialog, t
 
 The command palette runs most actions in Gostman from the keyboard.
 
+![The command palette filtered by tab, listing tab commands with their shortcuts and a matching saved request](../screenshots/command-palette.png)
+
 Open it with Ctrl+K, or with the **Commands** button in the header (shown on wide windows). Type to filter, use the up and down arrows to move, press Enter to run the highlighted row and Esc to close it. The **?** button in the palette opens the Keyboard shortcuts dialog.
 
 - Typing searches command names first, then their descriptions and keywords. It also finds saved requests by name, folder, method or URL, and history entries.
@@ -70,6 +72,8 @@ Some commands appear only when they apply:
 
 Open **Preferences** from the command palette. Changes apply as soon as you make them. They are saved on this device, in local storage under `gostman.preferences`.
 
+![The Preferences dialog with theme, density, response panel position, editor font size, line wrapping, default timeout and language](../screenshots/preferences.png)
+
 | Section | Setting | Options | Default |
 | --- | --- | --- | --- |
 | Appearance | **Theme** | **System**, **Light**, **Dark** | **System** |
@@ -103,6 +107,8 @@ The About dialog's diagnostics report the theme setting.
 ## Keyboard shortcuts
 
 Open the Keyboard shortcuts dialog with Ctrl+/, with the **Keyboard shortcuts** command, with the **?** button of the palette or with the **Keyboard shortcuts** button in Preferences. It lists every shortcut in four groups: **General**, **Request**, **Tabs** and **Navigation**.
+
+![The Keyboard shortcuts dialog listing general, request and tab shortcuts, each with buttons to change or remove it](../screenshots/shortcuts.png)
 
 ### Default shortcuts
 

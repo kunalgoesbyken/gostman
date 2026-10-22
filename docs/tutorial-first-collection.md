@@ -50,6 +50,8 @@ Change the expected `userId` to `2` and send again to see a failure, then change
 
 Real flows chain requests: log in, then use the token; create a record, then fetch it by its id.
 
+![The Extract tab of List todos: a rule that saves $[0].id as todo_id, its value 1 from the last response, and the confirmation that it was saved](../screenshots/extract.png)
+
 1. On **List todos**, open the **Extract** tab and add a rule: name `todo_id`, source **JSON body**, expression `$[0].id`.
 2. Send **List todos**. The rule copies the first todo's id into `todo_id` in the active environment.
 3. Create a second request in **Todos** named **Get one todo** with the URL `{{base_url}}/todos/{{todo_id}}` and send it. Hovering `todo_id` shows the value it will use.
