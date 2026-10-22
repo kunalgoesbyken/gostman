@@ -1,22 +1,22 @@
 class GostmanCli < Formula
   desc "Gostman command line: run API collections in CI, mock, capture, and MCP for agents"
   homepage "https://github.com/kunalgoesbyken/gostman"
-  version "1.4.0"
+  version "1.5.0"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/kunalgoesbyken/gostman/releases/download/v1.4.0/gostman-cli-darwin-arm64.tar.gz"
-      sha256 "5abf06b27a90a6dcbbd2dfbc89007e79835d92cbae94a03579ff253e2c6ddef7"
+      url "https://github.com/kunalgoesbyken/gostman/releases/download/v1.5.0/gostman-cli-darwin-arm64.tar.gz"
+      sha256 "c50d3dba042b5119612bbe7f99fd42acfcdbc8748eac47377ffc32204855e792"
     else
-      url "https://github.com/kunalgoesbyken/gostman/releases/download/v1.4.0/gostman-cli-darwin-amd64.tar.gz"
-      sha256 "ad122aa59c348a623d800144f6018f230c48358959aaf7dc5cb194cc4165e822"
+      url "https://github.com/kunalgoesbyken/gostman/releases/download/v1.5.0/gostman-cli-darwin-amd64.tar.gz"
+      sha256 "1a4893e701284e48efca49ff0afbeaf0e3adeb552c8807458a498ca23053e835"
     end
   end
 
   on_linux do
-    url "https://github.com/kunalgoesbyken/gostman/releases/download/v1.4.0/gostman-cli-linux-amd64.tar.gz"
-    sha256 "3012ec5aa62c611186305b907ba5808cab3ec8528bf813b61e8a5d7f0fd3172f"
+    url "https://github.com/kunalgoesbyken/gostman/releases/download/v1.5.0/gostman-cli-linux-amd64.tar.gz"
+    sha256 "5f60b876406a89d8b8fd48261f0d9f29aa1542759da3f0966222becca9298bc9"
   end
 
   def install
