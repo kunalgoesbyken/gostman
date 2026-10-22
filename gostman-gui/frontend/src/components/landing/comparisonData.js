@@ -49,7 +49,7 @@ export const COMPARISON_ROWS = [
   },
   {
     feature: "Every feature free",
-    gostman: { state: "included", text: "No paid tier. Open source, MIT license." },
+    gostman: { state: "included", text: "No paid tier. Open source." },
     postman: { state: "partial", text: "Free plan; Solo $9 per month; Team $19 per user per month; both billed annually." },
     bruno: { state: "partial", text: "Open Source $0; Pro $6 and Ultimate $11 per user per month, billed annually." },
   },
