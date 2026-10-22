@@ -90,7 +90,7 @@ export function SettingsPanel({ options, description, onChange, onDescriptionCha
             className="font-sans"
           />
         </Field>
-        <AiButton label="Write the description with AI" onClick={onDocument} className="self-start" />
+        <AiButton label="Write the description with AI" onClick={onDocument} className="self-start">Write with AI</AiButton>
       </div>
     </PanelBody>
   )

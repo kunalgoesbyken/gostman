@@ -173,9 +173,9 @@ func applyAuth(auth Auth, substitute func(string) string, headers []pair, target
 		}
 		return headers, nil
 	case authJWT:
-		return applyJWT(auth.JWT, substitute, headers, target)
+		return labelled(jwtLabel)(applyJWT(auth.JWT, substitute, headers, target))
 	case authASAP:
-		return applyASAP(auth.ASAP, substitute, headers)
+		return labelled(asapLabel)(applyASAP(auth.ASAP, substitute, headers))
 	default:
 		return headers, nil
 	}

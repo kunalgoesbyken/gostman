@@ -32,6 +32,9 @@ const (
 	jwtDefaultHMAC     = "HS256"
 	jwtDefaultSigned   = "RS256"
 	asapDefaultExpiry  = time.Hour
+
+	jwtLabel  = "JWT Bearer"
+	asapLabel = "ASAP"
 )
 
 type JWTAuth struct {
@@ -88,11 +91,11 @@ var jwtAlgorithms = map[string]jwtAlgorithm{
 
 func applyJWT(config JWTAuth, substitute func(string) string, headers []pair, target *url.URL) ([]pair, error) {
 	name := algorithmName(substitute(config.Algorithm), jwtDefaultHMAC)
-	claims, err := jsonObjectText(substitute(config.Payload), "The JWT payload")
+	claims, err := jsonObjectText(substitute(config.Payload), "the payload")
 	if err != nil {
 		return headers, err
 	}
-	extra, err := jsonObject(substitute(config.Header), "The JWT header")
+	extra, err := jsonObject(substitute(config.Header), "the extra header fields")
 	if err != nil {
 		return headers, err
 	}
@@ -122,17 +125,17 @@ func applyJWT(config JWTAuth, substitute func(string) string, headers []pair, ta
 func applyASAP(config ASAPAuth, substitute func(string) string, headers []pair) ([]pair, error) {
 	name := algorithmName(substitute(config.Algorithm), jwtDefaultSigned)
 	if jwtAlgorithms[name].family == familyHMAC {
-		return headers, fmt.Errorf("ASAP tokens are signed with a private key; choose an RS, PS or ES algorithm")
+		return headers, fmt.Errorf("tokens are signed with a private key, so choose an RS, PS or ES algorithm")
 	}
 	issuer, audience, keyID := strings.TrimSpace(substitute(config.Issuer)), strings.TrimSpace(substitute(config.Audience)), strings.TrimSpace(substitute(config.KeyID))
 	if issuer == "" || audience == "" || keyID == "" {
-		return headers, fmt.Errorf("ASAP needs an issuer, an audience and a key ID")
+		return headers, fmt.Errorf("an issuer, an audience and a key ID are required")
 	}
 	lifetime, err := asapLifetime(substitute(config.Expiry))
 	if err != nil {
 		return headers, err
 	}
-	claims, err := jsonObject(substitute(config.Claims), "The additional ASAP claims")
+	claims, err := jsonObject(substitute(config.Claims), "the additional claims")
 	if err != nil {
 		return headers, err
 	}
@@ -151,6 +154,15 @@ func applyASAP(config ASAPAuth, substitute func(string) string, headers []pair) 
 		return headers, err
 	}
 	return setHeader(headers, headerAuthorization, jwtDefaultPrefix+" "+token), nil
+}
+
+func labelled(label string) func([]pair, error) ([]pair, error) {
+	return func(headers []pair, err error) ([]pair, error) {
+		if err != nil {
+			return headers, fmt.Errorf("%s: %w", label, err)
+		}
+		return headers, nil
+	}
 }
 
 func algorithmName(value, fallback string) string {
@@ -172,7 +184,7 @@ func asapLifetime(value string) (time.Duration, error) {
 	if lifetime, err := time.ParseDuration(value); err == nil && lifetime > 0 {
 		return lifetime, nil
 	}
-	return 0, fmt.Errorf("the ASAP expiry %q is not a number of seconds or a duration such as 1h", value)
+	return 0, fmt.Errorf("the expiry %q is not a number of seconds or a duration such as 1h", value)
 }
 
 func jwtSecret(secret, encoding string) ([]byte, error) {
@@ -184,7 +196,7 @@ func jwtSecret(secret, encoding string) ([]byte, error) {
 		decoded, err = base64.RawURLEncoding.DecodeString(strings.TrimRight(strings.TrimSpace(secret), "="))
 	}
 	if err != nil {
-		return nil, fmt.Errorf("the JWT secret is not valid base64")
+		return nil, fmt.Errorf("the secret is not valid base64")
 	}
 	return decoded, nil
 }
@@ -223,7 +235,7 @@ func jsonObject(text, label string) (map[string]any, error) {
 func signJWT(name string, header map[string]any, payload []byte, secret []byte, privateKey string) (string, error) {
 	algorithm, ok := jwtAlgorithms[name]
 	if !ok {
-		return "", fmt.Errorf("unsupported JWT algorithm %q", name)
+		return "", fmt.Errorf("unsupported algorithm %q", name)
 	}
 	header["alg"] = name
 	if _, set := header["typ"]; !set {

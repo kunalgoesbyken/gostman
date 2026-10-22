@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
   Bookmark, ClipboardPaste, Gauge, Clock, MonitorDown, Info, Hand, Folder, FolderOpen, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Pin, Plus, Radio, RotateCcw, Save, Search, Send,
-  Server, Settings, Share2, ShieldAlert, ShieldCheck, SlidersHorizontal, Sparkles, Undo2, Upload, X,
+  Bot, Server, Settings, Share2, ShieldAlert, ShieldCheck, SlidersHorizontal, Undo2, Upload, X,
 } from "lucide-react"
 import { MethodTag } from "../MethodTag"
 import { fuzzyScore } from "../../lib/fuzzy"
@@ -44,13 +44,13 @@ const COMMANDS = [
   { id: "lint-spec", label: "Lint API spec", description: "Check the imported OpenAPI spec for problems", icon: ShieldCheck, keywords: "openapi swagger validate governance", action: "lintSpec" },
   { id: "export", label: "Export data", description: "Export collections and environments", icon: Download, action: "export" },
   { id: "share", label: "Share collection", description: "Create an encrypted link or file, no account needed", icon: Share2, action: "share" },
-  { id: "ai-request", label: "AI: new request from a description", description: "Draft a request, shown as a preview you accept", icon: Sparkles, shortcutId: "aiGenerate", action: "aiRequest", keywords: "generate" },
-  { id: "ai-tests", label: "AI: generate assertions and tests", description: "Propose checks for the last response", icon: Sparkles, action: "aiTests" },
-  { id: "ai-script", label: "AI: write a script", description: "Propose a pre-request or post-response script", icon: Sparkles, action: "aiScript" },
-  { id: "ai-explain", label: "AI: explain the response", description: "Explain a failure and suggest a fix", icon: Sparkles, shortcutId: "aiExplain", action: "aiExplain" },
-  { id: "ai-docs", label: "AI: document this request", description: "Propose a description for the request", icon: Sparkles, action: "aiDocs" },
-  { id: "ai-search", label: "AI: ask about the collection", description: "Find requests by describing them", icon: Sparkles, action: "aiSearch", keywords: "search find" },
-  { id: "ai-schema", label: "AI: requests from an API schema", description: "Turn an OpenAPI or GraphQL schema into requests", icon: Sparkles, action: "aiSchema" },
+  { id: "ai-request", label: "AI: new request from a description", description: "Draft a request, shown as a preview you accept", icon: Bot, shortcutId: "aiGenerate", action: "aiRequest", keywords: "generate" },
+  { id: "ai-tests", label: "AI: generate assertions and tests", description: "Propose checks for the last response", icon: Bot, action: "aiTests" },
+  { id: "ai-script", label: "AI: write a script", description: "Propose a pre-request or post-response script", icon: Bot, action: "aiScript" },
+  { id: "ai-explain", label: "AI: explain the response", description: "Explain a failure and suggest a fix", icon: Bot, shortcutId: "aiExplain", action: "aiExplain" },
+  { id: "ai-docs", label: "AI: document this request", description: "Propose a description for the request", icon: Bot, action: "aiDocs" },
+  { id: "ai-search", label: "AI: ask about the collection", description: "Find requests by describing them", icon: Bot, action: "aiSearch", keywords: "search find" },
+  { id: "ai-schema", label: "AI: requests from an API schema", description: "Turn an OpenAPI or GraphQL schema into requests", icon: Bot, action: "aiSchema" },
   { id: "ai-settings", label: "AI settings", description: "Provider, model, key and consent", icon: Settings, action: "aiSettings" },
   { id: "clear-history", label: "Clear history", description: "Delete every history entry", icon: History, action: "clearHistory" },
   { id: "welcome", label: WELCOME_TEXT.commandTitle, description: WELCOME_TEXT.commandDescription, icon: Hand, action: "showWelcome" },

@@ -169,7 +169,7 @@ Before the first send the panel reads "No response yet". While a request runs it
 
 ### Summary and toolbar
 
-The toolbar shows the status and, for a completed request, the duration in milliseconds and the size. Hover the timing for a breakdown. A request that failed shows an error title instead: Invalid request, Network error, Request timed out, Request cancelled or Address blocked, with a message and an Explain this error with AI button.
+The toolbar shows the status and, for a completed request, the duration in milliseconds and the size. Hover the timing for a breakdown. A request that failed shows an error title instead: Invalid request, Network error, Request timed out, Request cancelled or Address blocked, with a message and an **Explain with AI** button.
 
 The toolbar buttons are:
 

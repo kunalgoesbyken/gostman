@@ -3,7 +3,7 @@ import { JsonView, darkStyles } from 'react-json-view-lite'
 import 'react-json-view-lite/dist/index.css'
 import {
   AlertTriangle, BookmarkPlus, Check, ChevronDown, ChevronUp, Cookie, Copy, Download, FileDigit, FileText, FileX, History, List, Loader2,
-  Maximize2, Minimize2, Scissors, Search, Sparkles,
+  Maximize2, MessageCircleQuestion, Minimize2, Scissors, Search,
 } from "lucide-react"
 import { ConsolePanel } from "./ConsolePanel"
 import { AiButton } from "./AiButton"
@@ -235,7 +235,7 @@ function ResponseBody({ response, kind, view, json, filtered, highlight }) {
 
 function ErrorBody({ response, onExplain }) {
   const title = lookup(ERROR_TITLES, response.error) || 'Request failed'
-  return <EmptyState icon={AlertTriangle} title={title} description={response.body} className="whitespace-pre-line" action={<AiButton label="Explain this error with AI" onClick={onExplain} />} />
+  return <EmptyState icon={AlertTriangle} title={title} description={response.body} className="whitespace-pre-line" action={<AiButton label="Explain this error with AI" onClick={onExplain}>Explain with AI</AiButton>} />
 }
 
 function StatusSummary({ response }) {
@@ -485,7 +485,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
               )}
               {showsBody && copyText && <CopyButton text={copyText} />}
               {hasBody && !past && <IconButton label="Download body" icon={Download} onClick={onDownload} />}
-              {isFailedResponse(shown) && !shown.error && <IconButton label="Explain with AI" icon={Sparkles} onClick={onExplain} />}
+              {isFailedResponse(shown) && !shown.error && <IconButton label="Explain with AI" icon={MessageCircleQuestion} onClick={onExplain} />}
               {canSaveAsExample(shown) && !past && <IconButton label="Save as example" icon={BookmarkPlus} onClick={onSaveExample} />}
               <IconButton
                 label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}

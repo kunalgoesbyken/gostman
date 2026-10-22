@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Loader2, ShieldCheck, Sparkles } from "lucide-react"
+import { Loader2, ShieldCheck } from "lucide-react"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
@@ -154,7 +154,7 @@ function Footer({ dialog, task, actions, skipNextTime }) {
     return (
       <>
         <Button variant="outline" onClick={actions.backToInput}>Back</Button>
-        <Button onClick={() => actions.confirmPreview(skipNextTime)}><Sparkles />Send to AI</Button>
+        <Button onClick={() => actions.confirmPreview(skipNextTime)}>Send to AI</Button>
       </>
     )
   }

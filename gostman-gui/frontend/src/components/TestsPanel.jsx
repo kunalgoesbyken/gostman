@@ -133,9 +133,11 @@ export function TestsPanel({ request, editorPath, onUpdateRequest, EditorCompone
     <Panel>
       <Toolbar>
         <SegmentedControl label="Tests section" options={VIEWS} value={view} onChange={setView} />
-        <p className="line-clamp-2 min-w-0 flex-1 text-xs leading-4 text-muted-foreground" title={HINTS[view]}>{HINTS[view]}</p>
-        <AiButton label={view === VIEW_ASSERTIONS ? "Generate assertions and tests with AI" : "Generate this script with AI"} onClick={askAi} />
+        <AiButton label={view === VIEW_ASSERTIONS ? "Generate assertions and tests with AI" : "Generate this script with AI"} onClick={askAi} className="ml-auto">
+          Generate with AI
+        </AiButton>
       </Toolbar>
+      <p className="shrink-0 border-b border-border px-3 py-2 text-xs text-muted-foreground">{HINTS[view]}</p>
       {view === VIEW_ASSERTIONS ? (
         <AssertionEditor assertions={request.assertions} onChange={(assertions) => onUpdateRequest({ assertions })} />
       ) : (
