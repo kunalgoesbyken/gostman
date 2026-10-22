@@ -1,6 +1,5 @@
 .git
 .github
-.claude
 .vercel
 .env
 .env.*

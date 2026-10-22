@@ -44,11 +44,5 @@ Thumbs.db
 # Logs
 *.log
 
-# Claude/Agents
-.claude/
-.gemini/
-.mcp.json
-mcp.json
 .vercel
-AGENTS.md
 
