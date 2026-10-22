@@ -1,6 +1,10 @@
 package workspace
 
-import "github.com/kunalgoesbyken/gostman/engine"
+import (
+	"fmt"
+
+	"github.com/kunalgoesbyken/gostman/engine"
+)
 
 type Request struct {
 	Id               string         `json:"id"`
@@ -71,4 +75,11 @@ type Problem struct {
 	Path    string `json:"path"`
 	Line    int    `json:"line"`
 	Message string `json:"message"`
+}
+
+func (p Problem) String() string {
+	if p.Line > 0 {
+		return fmt.Sprintf("%s (line %d): %s", p.Path, p.Line, p.Message)
+	}
+	return p.Path + ": " + p.Message
 }

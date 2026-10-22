@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
@@ -25,10 +26,21 @@ func loadWorkspace(root string) (Collection, error) {
 	if err != nil {
 		return Collection{}, fmt.Errorf("cannot read the workspace: %w", err)
 	}
+	if problems := files.Problems(); len(problems) > 0 {
+		return Collection{}, unreadableFiles(problems)
+	}
 	collection, err := FromWorkspace(files.Collection())
 	collection.DotEnv = files.DotEnv()
 	collection.Modules = scriptModules(root)
 	return collection, err
+}
+
+func unreadableFiles(problems []workspace.Problem) error {
+	lines := make([]string, len(problems))
+	for i, problem := range problems {
+		lines[i] = "  " + problem.String()
+	}
+	return fmt.Errorf("these workspace files could not be read, so their requests would be skipped. Fix them and try again:\n%s", strings.Join(lines, "\n"))
 }
 
 func FromWorkspace(stored workspace.Collection) (Collection, error) {
