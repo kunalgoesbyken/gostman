@@ -3,10 +3,10 @@ import { LazyMotion, m, useReducedMotion } from "framer-motion"
 import { Button, buttonVariants } from "./ui/button"
 import { cn } from "../lib/utils"
 import { popIn } from "../lib/motion"
+import { REPOSITORY, REPOSITORY_URL } from "../lib/siteLinks"
 import { gsap, useReveal, useSmoothScroll } from "../lib/landingMotion"
 import { ArrowRight, Check, Download, Github, Globe } from "./landing/icons"
 
-import logo from "../assets/logo.jpg"
 import captureShot from "../assets/landing/capture.png"
 import docsShot from "../assets/landing/docs.png"
 import mockShot from "../assets/landing/mock.png"
@@ -19,6 +19,11 @@ import { TerminalBlock } from "./landing/TerminalBlock"
 import { ProductShowcase } from "./landing/ProductShowcase"
 import { BackgroundCode } from "./landing/BackgroundCode"
 import { DownloadDropdown } from "./landing/DownloadDropdown"
+import { Brand } from "./landing/Brand"
+import { DotGrid } from "./landing/DotGrid"
+import { NavBar } from "./landing/NavBar"
+import { PointList } from "./landing/PointList"
+import { SiteFooter } from "./landing/SiteFooter"
 import { MountOnVisible } from "./landing/MountOnVisible"
 
 const loadMotionFeatures = () => import("../lib/motionFeatures").then((module) => module.default)
@@ -28,9 +33,6 @@ const EverythingSection = lazy(() => import("./landing/EverythingSection"))
 const starCount = (value) => (Number.isFinite(value) ? value : null)
 const ComparisonSection = lazy(() => import("./landing/ComparisonSection"))
 
-const REPOSITORY = "kunalgoesbyken/gostman"
-const REPOSITORY_URL = `https://github.com/${REPOSITORY}`
-const ISSUES_URL = `${REPOSITORY_URL}/issues`
 const REPOSITORY_API_URL = `https://api.github.com/repos/${REPOSITORY}`
 
 const HIGHLIGHTS = ["No account", "Data stays on your machine", "Open source"]
@@ -175,14 +177,7 @@ function Spotlight({ spotlight, isReversed }) {
         <div className={cn("lg:col-span-5", isReversed && "lg:order-2")}>
           <SplitHeading text={spotlight.title} className="text-2xl md:text-3xl font-semibold tracking-tight [text-wrap:balance]" />
           <p className="mt-4 leading-relaxed text-muted-foreground">{spotlight.description}</p>
-          <ul className="mt-6 space-y-3">
-            {spotlight.points.map((point) => (
-              <li key={point} className="flex items-start gap-3 text-sm text-foreground/90">
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-success/80" aria-hidden="true" />
-                <span>{point}</span>
-              </li>
-            ))}
-          </ul>
+          <PointList points={spotlight.points} className="mt-6 space-y-3" />
         </div>
         <div className={cn("lg:col-span-7", isReversed && "lg:order-1")}>
           {spotlight.capture ? (
@@ -227,7 +222,7 @@ export function LandingPage({ onGetStarted }) {
       </a>
       <div className="dark min-h-screen bg-background text-foreground overflow-x-clip" id="main-content">
         <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_1px_at_1px_1px,rgba(255,255,255,0.05)_1px,transparent_0)] [background-size:40px_40px]" />
+          <DotGrid />
           <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
           <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-success/5 rounded-full blur-[120px]" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px]" />
@@ -243,51 +238,43 @@ export function LandingPage({ onGetStarted }) {
           animate={{ y: 0 }}
           transition={{ type: "spring", stiffness: 200, damping: 25 }}
         >
-          <div className="max-w-5xl w-full backdrop-blur-xl bg-background/75 border border-border/40 rounded-2xl shadow-md">
-            <div className="px-5 py-3 flex items-center justify-between">
-              <m.div
-                className="flex items-center gap-2.5"
-                initial={reduceMotion ? false : { opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
+          <NavBar>
+            <m.div
+              initial={reduceMotion ? false : { opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Brand />
+            </m.div>
+            <m.div
+              className="flex items-center gap-2"
+              initial={reduceMotion ? false : { opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <a
+                href={REPOSITORY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-2 text-sm hover:bg-muted/50")}
               >
-                <img
-                  src={logo}
-                  alt="Gostman Logo"
-                  className="h-8 w-8 rounded-md"
-                />
-                <span className="font-medium text-sm">Gostman</span>
-              </m.div>
-              <m.div
-                className="flex items-center gap-2"
-                initial={reduceMotion ? false : { opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <a
-                  href={REPOSITORY_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-2 text-sm hover:bg-muted/50")}
-                >
-                  <Github className="h-4 w-4" aria-hidden="true" />
-                  <span className="font-medium">Star</span>
-                  {stars !== null ? (
-                    <m.span
-                      className="font-mono text-xs text-muted-foreground"
-                      {...(reduceMotion ? {} : popIn)}
-                      key={stars}
-                      aria-live="polite"
-                    >
-                      {stars.toLocaleString()}
-                    </m.span>
-                  ) : isLoading ? (
-                    <div className="h-4 w-8 bg-muted/20 animate-pulse rounded" />
-                  ) : null}
-                </a>
-              </m.div>
-            </div>
-          </div>
+                <Github className="h-4 w-4" aria-hidden="true" />
+                <span className="font-medium">Star</span>
+                {stars !== null ? (
+                  <m.span
+                    className="font-mono text-xs text-muted-foreground"
+                    {...(reduceMotion ? {} : popIn)}
+                    key={stars}
+                    aria-live="polite"
+                  >
+                    {stars.toLocaleString()}
+                  </m.span>
+                ) : isLoading ? (
+                  <div className="h-4 w-8 bg-muted/20 animate-pulse rounded" />
+                ) : null}
+              </a>
+            </m.div>
+          </NavBar>
         </m.nav>
 
         <section ref={heroRef} className="relative pt-36 pb-16 px-6">
@@ -398,51 +385,9 @@ export function LandingPage({ onGetStarted }) {
           </div>
         </section>
 
-        <footer className="border-t border-border/40 bg-muted/10 py-16 px-6">
-          <div className="max-w-6xl mx-auto">
-            <AnimatedSection className="flex flex-col md:flex-row items-center justify-between gap-8">
-              <div className="flex items-center gap-3">
-                <img
-                  src={logo}
-                  alt="Gostman Logo"
-                  className="h-8 w-8 rounded-md"
-                />
-                <div>
-                  <span className="font-medium text-sm">Gostman</span>
-                  <p className="text-xs text-muted-foreground/70 mt-0.5">
-                    API client for REST, GraphQL, gRPC and WebSocket
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-8">
-                <a
-                  href={REPOSITORY_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex min-h-6 items-center gap-2 text-sm text-muted-foreground/70 transition-colors hover:text-foreground"
-                >
-                  <Github className="h-4 w-4" />
-                  GitHub
-                </a>
-                <a
-                  href={ISSUES_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex min-h-6 items-center text-sm text-muted-foreground/70 transition-colors hover:text-foreground"
-                >
-                  Report an issue
-                </a>
-              </div>
-            </AnimatedSection>
-
-            <AnimatedSection className="mt-12 pt-8 border-t border-border/40 text-center" delay={0.2}>
-              <p className="text-sm text-muted-foreground/60">
-                Gostman is open source under the MIT license.
-              </p>
-            </AnimatedSection>
-          </div>
-        </footer>
+        <AnimatedSection>
+          <SiteFooter />
+        </AnimatedSection>
       </div>
     </LazyMotion>
   )

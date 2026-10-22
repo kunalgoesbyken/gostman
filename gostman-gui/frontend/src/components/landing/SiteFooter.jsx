@@ -1,0 +1,39 @@
+import { Brand } from "./Brand"
+import { Github } from "./icons"
+import { guidePages } from "../../guides/pages"
+import { ISSUES_URL, REPOSITORY_URL } from "../../lib/siteLinks"
+
+const FOOTER_LINK = "text-sm text-muted-foreground/70 transition-colors hover:text-foreground"
+
+export function SiteFooter() {
+  return (
+    <footer className="border-t border-border/40 bg-muted/10 py-16 px-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+          <Brand tagline="API client for REST, GraphQL, gRPC and WebSocket" />
+          <div className="flex items-center gap-8">
+            <a href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer" className={`flex min-h-6 items-center gap-2 ${FOOTER_LINK}`}>
+              <Github className="h-4 w-4" />
+              GitHub
+            </a>
+            <a href={ISSUES_URL} target="_blank" rel="noopener noreferrer" className={`flex min-h-6 items-center ${FOOTER_LINK}`}>
+              Report an issue
+            </a>
+          </div>
+        </div>
+
+        <nav aria-label="Guides" className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+          {guidePages.map((page) => (
+            <a key={page.path} href={`/${page.path}`} className={FOOTER_LINK}>
+              {page.heading}
+            </a>
+          ))}
+        </nav>
+
+        <div className="mt-8 pt-8 border-t border-border/40 text-center">
+          <p className="text-sm text-muted-foreground/60">Gostman is open source under the MIT license.</p>
+        </div>
+      </div>
+    </footer>
+  )
+}

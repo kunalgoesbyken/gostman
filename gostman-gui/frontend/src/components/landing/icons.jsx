@@ -1,4 +1,4 @@
-import { Icon } from "@iconify/react"
+import { Icon } from "@iconify/react/offline"
 import arrowRight from "@iconify-icons/solar/arrow-right-linear"
 import check from "@iconify-icons/solar/check-read-linear"
 import copy from "@iconify-icons/solar/copy-linear"
