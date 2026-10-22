@@ -94,7 +94,7 @@ func (t *table) admit(source Source, expand func(string) string) (Route, error) 
 	if reason := unservedReason(route.Method, expand(source.URL)); reason != "" {
 		return route.withState(StateSkipped, reason), nil
 	}
-	shape := shapeOf(source, expand)
+	shape := shapeOf(source)
 	route.Path = shape.String()
 	if source.Disabled {
 		return route.withState(StateDisabled, reasonDisabled), nil
@@ -130,11 +130,11 @@ func (t *table) admit(source Source, expand func(string) string) (Route, error) 
 	return route.withState(StateServed, ""), nil
 }
 
-func shapeOf(source Source, expand func(string) string) pattern {
+func shapeOf(source Source) pattern {
 	if source.Path != "" {
 		return templatePattern(source.Path, source.Types)
 	}
-	return routePattern(source.URL, expand)
+	return routePattern(source.URL)
 }
 
 func alternativesOf(examples []Example) map[string]answer {

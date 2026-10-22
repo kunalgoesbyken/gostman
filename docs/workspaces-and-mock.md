@@ -11,11 +11,11 @@ The control next to the logo shows where the collection lives. **Open folder** k
 
 ## Examples and the mock server (desktop)
 
-Save any response as a named example from the response panel (up to 20 per request, 2 MB each; cookie and authorization headers are not kept). The mock server, opened from the header, serves each request's method and path with one of its examples on `127.0.0.1`.
+Save any response as a named example from the response panel (up to 20 per request, 2 MB each; cookie and authorization headers are not kept). The mock server, opened with **Mock server** at the bottom of the window, serves each request's method and path with one of its examples on `127.0.0.1`.
 
 ![The mock server dialog with a served route and a live request log](../gostman-gui/frontend/src/assets/landing/mock.png)
 
-- `{{base_url}}/users/42` is served at `/users/42`; a literal base path such as `/v1` is kept. Segments written `:id`, or holding an unresolved variable, match anything.
+- `{{base_url}}/users/42` is served at `/users/42`; a literal base path such as `/v1` is kept. A path segment written `:id` or holding a variable, such as `/users/{{user_id}}`, matches any value, whatever the variable holds, and its value is available as `{{request.params.user_id}}`. A variable that holds several path segments, such as `api/v1`, is treated as one segment, so write those segments out in the URL instead.
 - GraphQL, gRPC and WebSocket requests, and requests without an example, are not served.
 - Examples travel with exports and workspace folders, so they can contain whatever the response body held.
 - **From OpenAPI spec**: load a spec from an address or a file and every operation becomes a route (base path from `servers`, `{id}` segments typed by the spec, status codes, headers and example bodies from the spec). Operations without an example answer with an empty body.

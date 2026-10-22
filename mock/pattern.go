@@ -37,9 +37,9 @@ type segment struct {
 
 type pattern []segment
 
-func routePattern(rawURL string, expand func(string) string) pattern {
+func routePattern(rawURL string) pattern {
 	afterBase := withoutLeadingPlaceholder(strings.TrimSpace(rawURL))
-	return parsePattern(withoutOrigin(expand(afterBase)))
+	return parsePattern(withoutOrigin(afterBase))
 }
 
 func templatePattern(path string, kinds map[string]string) pattern {

@@ -127,7 +127,8 @@ mock
   Serve the saved examples of a workspace on 127.0.0.1, one route per request,
   and print each request as it arrives.
 
-  --env <name>          environment used to resolve {{variables}} in URLs
+  --env <name>          environment for {{variables}} in URLs; a variable in
+                        the path matches any value
   --openapi <file|url>  also serve the operations of an OpenAPI or Swagger
                         spec: paths, status codes, headers and example bodies
                         (alone, it serves only the spec)
