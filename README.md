@@ -5,7 +5,6 @@
 
   [![CI](https://github.com/kunalgoesbyken/gostman/actions/workflows/ci.yml/badge.svg)](https://github.com/kunalgoesbyken/gostman/actions/workflows/ci.yml)
   [![Release](https://img.shields.io/github/v/release/kunalgoesbyken/gostman)](https://github.com/kunalgoesbyken/gostman/releases/latest)
-  [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
   <p>
     <a href="https://gostman.com/web"><strong>Open the web app</strong></a> ·
@@ -113,7 +112,3 @@ The same pages are published at [gostman.com/docs](https://gostman.com/docs).
 ## Contributing
 
 Issues and pull requests are welcome. For anything larger than a small fix, please open an issue first to agree on the approach. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to build, test and release.
-
-## License
-
-[MIT](LICENSE)

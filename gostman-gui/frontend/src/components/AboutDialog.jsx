@@ -2,7 +2,7 @@ import { Check, Copy } from "lucide-react"
 import { Button } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { useClipboardCopy } from "../hooks/useClipboardCopy"
-import { ABOUT_LINKS, LICENCE_NAME, buildDiagnostics, openExternal } from "../lib/about"
+import { ABOUT_LINKS, buildDiagnostics, openExternal } from "../lib/about"
 import { ABOUT_TEXT as TEXT } from "../lib/aboutText"
 import { usePreferences } from "../lib/preferences"
 import { useAppStore } from "../store/appStore"
@@ -30,7 +30,6 @@ export function AboutDialog({ onClose }) {
           </div>
         </div>
         <p className="text-xs text-muted-foreground">{TEXT.tagline}</p>
-        <p className="text-xs text-muted-foreground">{TEXT.licence(LICENCE_NAME)}</p>
         <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
           {ABOUT_LINKS.map((link) => (
             <li key={link.id}>

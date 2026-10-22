@@ -54,7 +54,7 @@ Open it with Ctrl+K, or with the **Commands** button in the header (shown on wid
 | **AI settings** | Provider, model, key and consent | |
 | **Clear history** | Delete every history entry | |
 | **Show welcome** | Sample request, imports and shortcuts | |
-| **About Gostman** | Version, licence, links and diagnostics | |
+| **About Gostman** | Version, links and diagnostics | |
 | **Reset app** | Delete all data and reload | |
 
 The shortcuts above are the defaults on the desktop app. The web version uses different keys for some of them; see [Default shortcuts](#default-shortcuts). The AI commands are described in [AI features](ai.md). **Run requests**, **Load test this request** and **Scan for secrets** are described in [Running, load testing and scanning](runner-load-and-scan.md). **Manage cookies** and **Network settings** are described in [Secrets and network settings](secrets-and-network.md).
@@ -163,7 +163,6 @@ Open **About Gostman** from the command palette. The dialog shows:
 
 - the version number;
 - a short description: an open source API client for REST, GraphQL, gRPC and WebSocket, with no account and your data on your device;
-- the licence, MIT;
-- links to the **Website**, **Source code**, **Releases**, **Report an issue** and **Licence**.
+- links to the **Website**, **Source code**, **Releases** and **Report an issue**.
 
 **Copy diagnostics** copies a short JSON text to the clipboard, and the button then reads **Copied**. It holds the app version, whether you run the desktop or web app, the platform, the language, the theme, whether you are online, and the number of requests, folders and environments. It never includes requests, URLs, variables, tokens or secrets, so you can attach it to a bug report.

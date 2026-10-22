@@ -3,7 +3,7 @@ import { COMPARISON_ROWS, PRODUCTS } from "./comparisonData"
 import { StatusGlyph } from "./StatusGlyph"
 
 const BAND = "bg-[linear-gradient(hsl(var(--primary)/0.08),hsl(var(--primary)/0.08))]"
-const HEAD_CELL = "bg-background px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground md:sticky md:top-20 md:z-10 md:border-b md:border-border/60"
+const HEAD_CELL = "px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground md:border-b md:border-border/60"
 
 function Cell({ product, claim }) {
   return (

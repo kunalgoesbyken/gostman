@@ -31,10 +31,6 @@ export function SiteFooter() {
             </a>
           ))}
         </nav>
-
-        <div className="mt-8 pt-8 border-t border-border/40 text-center">
-          <p className="text-sm text-muted-foreground/60">Gostman is open source under the MIT license.</p>
-        </div>
       </div>
     </footer>
   )

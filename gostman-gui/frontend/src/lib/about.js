@@ -6,10 +6,7 @@ export const ABOUT_LINKS = [
   { id: 'source', url: 'https://github.com/kunalgoesbyken/gostman' },
   { id: 'releases', url: 'https://github.com/kunalgoesbyken/gostman/releases' },
   { id: 'issues', url: 'https://github.com/kunalgoesbyken/gostman/issues' },
-  { id: 'licence', url: 'https://github.com/kunalgoesbyken/gostman/blob/main/LICENSE' },
 ]
-
-export const LICENCE_NAME = 'MIT'
 
 const platformOf = () => navigator.userAgentData?.platform || navigator.platform || ''
 
