@@ -28,12 +28,13 @@ import { isFailedResponse } from "../lib/ai/tasks"
 import { canSaveAsExample } from "../lib/examples"
 import { trimTree } from "../lib/jsonTree"
 import { breakdownTitle } from "../lib/timeline"
-import { MIN_REQUEST_HEIGHT_PX, MIN_RESPONSE_HEIGHT_PX, TOOLBAR_HEIGHT_PX } from "../lib/layout"
+import {
+  DEFAULT_RESPONSE_SHARE, MIN_REQUEST_HEIGHT_PX, MIN_RESPONSE_HEIGHT_PX, TOOLBAR_HEIGHT_PX, rememberResponseShare, rememberedResponseShare,
+} from "../lib/layout"
 import {
   BODY_KINDS, ERROR_TITLES, bodyBytes, bodyKind, mimeType, parseJsonBody, statusVariant, textBody,
 } from "../lib/response"
 
-const DEFAULT_PANEL_SHARE = 40
 const TEXT_DISPLAY_LIMIT = 500_000
 const JSON_EXPANDED_DEPTH = 2
 const TAB_BODY = 'body'
@@ -65,10 +66,12 @@ const JSON_STYLE = {
   collapseIcon: `${darkStyles.collapseIcon} !text-foreground`,
   expandIcon: `${darkStyles.expandIcon} !text-foreground`,
   collapsedContent: `${darkStyles.collapsedContent} !text-foreground`,
-  punctuation: 'mr-1.5 text-muted-foreground',
+  punctuation: `${darkStyles.punctuation} !font-normal !text-muted-foreground`,
 }
 
 const flagText = (isSet) => (isSet ? 'Yes' : NO_VALUE)
+
+const testTone = (tests) => (tests.error || countPassed(tests.results) < tests.results.length ? 'destructive' : 'success')
 
 const HEADER_COLUMNS = [
   { header: 'Name', key: 'key', width: 'w-1/3', cellClassName: 'text-foreground' },
@@ -217,7 +220,7 @@ function ResponseBody({ response, kind, view, json, filtered, highlight }) {
 
 function ErrorBody({ response, onExplain }) {
   const title = lookup(ERROR_TITLES, response.error) || 'Request failed'
-  return <EmptyState icon={AlertTriangle} title={title} description={response.body} action={<AiButton label="Explain this error with AI" onClick={onExplain} />} />
+  return <EmptyState icon={AlertTriangle} title={title} description={response.body} className="whitespace-pre-line" action={<AiButton label="Explain this error with AI" onClick={onExplain} />} />
 }
 
 function StatusSummary({ response }) {
@@ -239,7 +242,7 @@ function StatusSummary({ response }) {
 const clamp = (value, lowest, highest) => Math.max(lowest, Math.min(highest, value))
 
 function usePanelResize() {
-  const [panelShare, setPanelShare] = useState(DEFAULT_PANEL_SHARE)
+  const [panelShare, setPanelShare] = useState(rememberedResponseShare)
   const [isDragging, setIsDragging] = useState(false)
   const containerRef = useRef(null)
 
@@ -249,15 +252,18 @@ function usePanelResize() {
     const startY = event.clientY
     const startHeight = containerRef.current.getBoundingClientRect().height
     const highest = Math.max(MIN_RESPONSE_HEIGHT_PX, available - MIN_REQUEST_HEIGHT_PX)
+    let share = (startHeight / available) * 100
     setIsDragging(true)
 
     const handleMouseMove = (moveEvent) => {
       const height = clamp(startHeight + startY - moveEvent.clientY, MIN_RESPONSE_HEIGHT_PX, highest)
-      setPanelShare((height / available) * 100)
+      share = (height / available) * 100
+      setPanelShare(share)
     }
 
     const handleMouseUp = () => {
       setIsDragging(false)
+      rememberResponseShare(share)
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
     }
@@ -266,7 +272,10 @@ function usePanelResize() {
     document.addEventListener('mouseup', handleMouseUp)
   }, [])
 
-  const resetHeight = useCallback(() => setPanelShare(DEFAULT_PANEL_SHARE), [])
+  const resetHeight = useCallback(() => {
+    setPanelShare(DEFAULT_RESPONSE_SHARE)
+    rememberResponseShare(DEFAULT_RESPONSE_SHARE)
+  }, [])
 
   return { containerRef, panelShare, isDragging, startDrag, resetHeight }
 }
@@ -404,7 +413,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
                 {hasTimeline && <TabsTrigger value={TAB_TIMELINE}>Timeline</TabsTrigger>}
                 {showsTests && (
                   <TabsTrigger value={TAB_TESTS}>
-                    Tests<TabCount>{countPassed(tests.results)}/{tests.results.length}</TabCount>
+                    Tests<TabCount tone={testTone(tests)}>{countPassed(tests.results)}/{tests.results.length}</TabCount>
                   </TabsTrigger>
                 )}
                 <TabsTrigger value={TAB_CONSOLE}>Console</TabsTrigger>

@@ -85,7 +85,7 @@ The tab context menu contains:
 | Reveal in collection | Scrolls the tree to the saved request; disabled for a request that is not saved |
 | Copy as cURL | Copies the prepared request as a curl command; only HTTP requests can be copied |
 
-When tabs with unsaved changes are about to close, a **Close tabs** prompt asks you to confirm with **Discard**. This prompt depends on a preference in the app settings.
+Closing one tab with unsaved changes asks whether to **Save** them first, close with **Don't save**, or **Cancel**. When several tabs with unsaved changes are about to close, a **Close tabs** prompt asks you to confirm with **Discard**. Both prompts depend on a preference in the app settings.
 
 ## Welcome panel and getting started
 

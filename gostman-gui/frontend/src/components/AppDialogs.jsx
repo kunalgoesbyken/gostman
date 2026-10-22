@@ -73,6 +73,11 @@ export function AppDialogs({ onCommand, secrets, hasWorkspaces, hasLoadTest }) {
           closeConfirm()
           confirmDialog.onCancel?.()
         }}
+        alternativeText={confirmDialog.alternative?.text}
+        onAlternative={() => {
+          closeConfirm()
+          confirmDialog.alternative.run()
+        }}
       />
 
       <PromptDialog

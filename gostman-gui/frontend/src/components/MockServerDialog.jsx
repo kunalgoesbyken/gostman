@@ -62,17 +62,17 @@ function ServerControls({ mock, scopes, actions }) {
           ))}
         </Select>
       </div>
-      <Input
-        type="number"
-        min={1}
-        value={config.settings.port || ""}
-        placeholder={MOCK_TEXT.port}
-        aria-label={MOCK_TEXT.port}
-        title={MOCK_TEXT.portTitle}
-        disabled={isRunning}
-        onChange={(event) => actions.setSettings({ port: toPort(event.target.value) })}
-        className="w-20 shrink-0 font-mono"
-      />
+      <label className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground" title={MOCK_TEXT.portTitle}>
+        {MOCK_TEXT.port}
+        <Input
+          type="number"
+          min={1}
+          value={config.settings.port || ""}
+          disabled={isRunning}
+          onChange={(event) => actions.setSettings({ port: toPort(event.target.value) })}
+          className="w-20 font-mono"
+        />
+      </label>
       <div className="ml-auto">
         {isRunning ? (
           <Button variant="destructive" size="sm" onClick={actions.stop}>

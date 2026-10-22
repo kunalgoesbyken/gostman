@@ -51,6 +51,13 @@ export const RequestBar = memo(function RequestBar({
     onPasteCurl(pastedText)
   }
 
+  const handleUrlKeyDown = (event) => {
+    if (event.key !== "Enter" || event.nativeEvent.isComposing) return
+    if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return
+    event.preventDefault()
+    if (!loading) onSend()
+  }
+
   return (
     <div className="flex shrink-0 flex-col gap-2 border-b border-border px-3 py-2">
       <Input
@@ -82,6 +89,7 @@ export const RequestBar = memo(function RequestBar({
             title={activeRequest.url}
             onChange={(event) => onUrlChange(event.target.value)}
             onPaste={handlePaste}
+            onKeyDown={handleUrlKeyDown}
             aria-label="Request URL"
             spellCheck={false}
             controlSize="md"

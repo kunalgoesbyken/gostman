@@ -132,6 +132,8 @@ Open the Keyboard shortcuts dialog with Ctrl+/, with the **Keyboard shortcuts** 
 
 On macOS the dialog shows the same shortcuts with the symbols for Control, Command, Option and Shift. In the browser, Alt replaces the shortcuts that browsers keep for themselves: Ctrl+W, Ctrl+Shift+T and Ctrl+Tab.
 
+Enter in the address bar also sends the request, unless a variable suggestion is open or an input method is composing text.
+
 ### Change a shortcut
 
 1. Open the Keyboard shortcuts dialog.

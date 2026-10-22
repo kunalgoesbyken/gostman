@@ -50,7 +50,7 @@ export function createExampleActions(backend) {
   const add = attempt(SAVE_FAILURE, async (tabId, response, name) => {
     const example = exampleFromResponse(response, name)
     const request = await change(tabId, (examples) => withExample(examples, example))
-    if (request) store().showAlert('Saved', `Example ${quoted(example.name)} was saved with ${quoted(request.name)}.`, 'OK', 'success')
+    if (request) store().showNotice(`Example ${quoted(example.name)} was saved with ${quoted(request.name)}.`)
   })
 
   function saveResponse() {

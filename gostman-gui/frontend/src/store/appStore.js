@@ -25,7 +25,7 @@ const TAB_ID_PREFIX = 'tab-'
 const SAVE_FAILURE_TITLE = 'Changes could not be saved'
 
 const CLOSED_ALERT = { isOpen: false, title: '', message: '', confirmText: 'OK', variant: 'default' }
-const CLOSED_CONFIRM = { isOpen: false, title: '', message: '', confirmText: 'OK', variant: 'default', onConfirm: null, onCancel: null }
+const CLOSED_CONFIRM = { isOpen: false, title: '', message: '', confirmText: 'OK', variant: 'default', onConfirm: null, onCancel: null, alternative: null }
 const CLOSED_RUNNER = { isOpen: false, folderId: '', isRunning: false, results: [] }
 const CLOSED_VARIABLE_PROMPT = { isOpen: false, names: [], defaults: {}, resolve: null }
 const CLOSED_PROMPT = { isOpen: false, title: '', message: '', placeholder: '', defaultValue: '', confirmText: 'OK', onConfirm: null, onCancel: null }
@@ -541,7 +541,7 @@ export const useAppStore = create(
           alertDialog: { isOpen: true, title, message, confirmText, variant },
         }),
         closeAlert: () => set({ alertDialog: CLOSED_ALERT }),
-        showConfirm: (title, message, onConfirm, onCancel = null, variant = 'default', confirmText = '') => set({
+        showConfirm: (title, message, onConfirm, onCancel = null, variant = 'default', confirmText = '', alternative = null) => set({
           confirmDialog: {
             isOpen: true,
             title,
@@ -550,6 +550,7 @@ export const useAppStore = create(
             variant,
             onConfirm,
             onCancel,
+            alternative,
           },
         }),
         closeConfirm: () => set({ confirmDialog: CLOSED_CONFIRM }),

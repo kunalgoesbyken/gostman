@@ -57,8 +57,14 @@ function TabsContent({ className, value, children }) {
   return <div role="tabpanel" className={className}>{children}</div>
 }
 
-function TabCount({ children }) {
-  return <span className="rounded bg-muted px-1 font-mono text-[10px] leading-4 text-muted-foreground">{children}</span>
+const COUNT_TONES = {
+  neutral: "bg-muted text-muted-foreground",
+  success: "bg-success/10 text-success",
+  destructive: "bg-destructive/10 text-destructive",
+}
+
+function TabCount({ tone = "neutral", children }) {
+  return <span className={cn("rounded px-1 font-mono text-[10px] leading-4", COUNT_TONES[tone])}>{children}</span>
 }
 
 export { Tabs, TabsList, TabsTrigger, TabsContent, TabCount }

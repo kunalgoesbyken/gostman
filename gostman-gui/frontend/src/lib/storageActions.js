@@ -61,9 +61,12 @@ export function createStorageActions(backend) {
     if (address?.trim()) clone(address)
   })
 
+  const git = createGitActions(storage.git)
+
   const trust = attempt(TEXT.trustFailed, async () => {
     await storage.trust()
     store().liftRestriction()
+    await git.refreshState()
   })
 
   const confirmTrust = () => store().showConfirm('Trust this folder?', TRUST_PROMPT, trust, null, 'default', 'Trust')
@@ -119,7 +122,7 @@ export function createStorageActions(backend) {
     cycle,
     openSwitcher: () => store().setWorkspaceMenuOpen(true),
     confirmTrust,
-    git: createGitActions(storage.git),
+    git,
     promptClone,
     showProblems,
     pin,

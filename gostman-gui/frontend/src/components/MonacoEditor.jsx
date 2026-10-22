@@ -64,6 +64,31 @@ let providersRegistered = false
 
 const modelVariables = (model) => variablesByModel.get(model.uri.toString())
 
+const JSON_LANGUAGE = 'json'
+const PLACEHOLDER_VALUE = '0'
+
+const maskReferences = (text, references) => references.reduceRight(
+  (masked, ref) => masked.slice(0, ref.start) + PLACEHOLDER_VALUE.padEnd(ref.end - ref.start) + masked.slice(ref.end),
+  text,
+)
+
+function isJsonWithReferences(text) {
+  const references = findReferences(text)
+  if (references.length === 0) return false
+  try {
+    JSON.parse(maskReferences(text, references))
+    return true
+  } catch {
+    return false
+  }
+}
+
+function clearReferenceErrors(monaco, model) {
+  if (model.getLanguageId() !== JSON_LANGUAGE) return
+  const markers = monaco.editor.getModelMarkers({ owner: JSON_LANGUAGE, resource: model.uri })
+  if (markers.length > 0 && isJsonWithReferences(model.getValue())) monaco.editor.setModelMarkers(model, JSON_LANGUAGE, [])
+}
+
 function registerVariableProviders(monaco) {
   if (providersRegistered) return
   providersRegistered = true
@@ -136,8 +161,12 @@ function useVariableSupport(instance, enabled) {
     }
     paint()
     const subscription = model.onDidChangeContent(paint)
+    const markerSubscription = monaco.editor.onDidChangeMarkers((uris) => {
+      if (!model.isDisposed() && uris.some((uri) => uri.toString() === key)) clearReferenceErrors(monaco, model)
+    })
     return () => {
       subscription.dispose()
+      markerSubscription.dispose()
       variablesByModel.delete(key)
       if (!model.isDisposed()) model.deltaDecorations(decorations, [])
     }

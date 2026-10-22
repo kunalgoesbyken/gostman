@@ -37,7 +37,9 @@ export const TAB_TEXT = {
   moveRight: 'Move right',
   previewHint: 'Preview tab. Edit or double-click to keep it open.',
   closeTabsTitle: 'Close tabs',
-  closeTabsMessage: (count) => `${count} of these tabs have unsaved changes. Close them and discard the changes?`,
+  closeTabsMessage: (count) => (count === 1
+    ? 'One of these tabs has unsaved changes. Close it and discard the changes?'
+    : `${count} of these tabs have unsaved changes. Close them and discard the changes?`),
   discard: 'Discard',
   curlCopied: 'cURL command copied to the clipboard.',
   curlFailed: 'Could not copy as cURL',

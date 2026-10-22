@@ -26,6 +26,7 @@ function capture(request, response) {
   return {
     request: { method: request.method, url: request.url, headers: request.headers, body: request.body },
     response: {
+      url: response.url || '',
       headers: response.headers || [],
       body,
       contentType: response.contentType,

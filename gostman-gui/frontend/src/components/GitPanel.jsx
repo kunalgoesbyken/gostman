@@ -20,7 +20,7 @@ const TABS = [
   { value: TAB_HISTORY, label: "History" },
   { value: TAB_REMOTES, label: "Remotes" },
 ]
-const RESTRICTED_NOTICE = "This folder is not trusted yet, so Git is read-only: you can look at changes but not stage, commit or sync."
+const RESTRICTED_NOTICE = "This folder is not trusted yet, so Git is read-only: you can look at changes but not initialize, stage, commit or sync."
 const MERGE_NOTICE = "A merge is in progress. Resolve each conflicted file, then commit to finish it."
 const NO_REPOSITORY = "This folder is not a Git repository"
 const NO_REPOSITORY_HINT = "Initialize one to track changes, commit and sync your collection."
@@ -200,7 +200,7 @@ export function GitPanel({ actions, onTrust }) {
         )}
         {state.isRepo && <div className="ml-auto"><SyncButtons state={state} isDisabled={isBusy} actions={actions} /></div>}
       </DialogHeader>
-      {state.restricted && state.isRepo && (
+      {state.restricted && (
         <Notice tone="warning" icon={ShieldAlert}>
           {RESTRICTED_NOTICE}{" "}
           <button type="button" className="underline" onClick={onTrust}>Trust this folder</button>

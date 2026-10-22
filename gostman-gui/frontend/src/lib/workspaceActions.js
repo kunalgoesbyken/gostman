@@ -45,6 +45,7 @@ const EXPORT_TAB = 'export'
 const SHARE_TAB = 'share'
 const ACTIVE_CONTENT_PROMPT = 'in this file include scripts or OAuth 2.0 settings. These run when a request is sent and can read your variables, so only import them from a source you trust. Cancel imports everything else without them.'
 const DESTRUCTIVE = 'destructive'
+const SAVE_FAILURE = 'Could not save the request'
 const NO_GRPC_CODE = 'Code generation covers HTTP requests. A gRPC call has no equivalent snippet yet.'
 const NO_MCP_CODE = 'Code generation covers HTTP requests. An MCP tool call has no equivalent snippet yet.'
 
@@ -197,13 +198,14 @@ export function createWorkspaceActions(backend) {
     store().closeRunner()
   }
 
-  const save = attempt('Could not save the request', async () => {
-    const tab = activeTab()
-    const saved = await backend.saveRequest(normalizeRequest(tab.request))
+  async function saveTab(tabId) {
+    const saved = await backend.saveRequest(normalizeRequest(tabById(tabId).request))
     store().upsertRequest(saved)
-    store().updateTabRequest(tab.id, { id: saved.id })
-    store().showAlert('Saved', `${quoted(saved.name)} was saved.`, 'OK', 'success')
-  })
+    store().updateTabRequest(tabId, { id: saved.id })
+    store().showNotice(`${quoted(saved.name)} was saved.`)
+  }
+
+  const save = attempt(SAVE_FAILURE, () => saveTab(activeTab().id))
 
   async function updateSavedRequest(request, changes) {
     const saved = await backend.saveRequest(normalizeRequest({ ...request, ...changes }))
@@ -371,13 +373,18 @@ export function createWorkspaceActions(backend) {
       close()
       return
     }
+    const saveAndClose = attempt(SAVE_FAILURE, async () => {
+      await saveTab(tabId)
+      close()
+    })
     store().showConfirm(
       'Close tab',
-      `${quoted(tab.request.name)} has unsaved changes. Close it and discard them?`,
+      `${quoted(tab.request.name)} has unsaved changes. Save them before closing?`,
       close,
       null,
       DESTRUCTIVE,
-      'Discard',
+      "Don't save",
+      { text: 'Save', run: saveAndClose },
     )
   }
 

@@ -1,7 +1,7 @@
 import { Button } from "./button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./dialog"
 
-export function ConfirmDialog({ isOpen, title, message, confirmText, variant, onConfirm, onCancel }) {
+export function ConfirmDialog({ isOpen, title, message, confirmText, variant, onConfirm, onCancel, alternativeText, onAlternative }) {
   if (!isOpen) return null
 
   return (
@@ -15,6 +15,7 @@ export function ConfirmDialog({ isOpen, title, message, confirmText, variant, on
       <DialogFooter>
         <Button variant="outline" autoFocus onClick={onCancel}>Cancel</Button>
         <Button variant={variant === "destructive" ? "destructive" : "default"} onClick={onConfirm}>{confirmText}</Button>
+        {alternativeText && <Button onClick={onAlternative}>{alternativeText}</Button>}
       </DialogFooter>
     </Dialog>
   )

@@ -124,7 +124,7 @@ Rules run after every response. Run now applies them to the last response, and a
 
 ### Tests
 
-The Tests tab has three views: Assertions, Pre-request script and Post-response script. The response panel shows the results in its Tests tab. For the script API and sandbox, see [Variables, scripts and settings](scripting-and-settings.md).
+The Tests tab has three views: Assertions, Pre-request script and Post-response script. The response panel shows the results in its Tests tab, whose count turns red when a check fails and green when all pass. For the script API and sandbox, see [Variables, scripts and settings](scripting-and-settings.md).
 
 Each assertion row has an Expression, a Check and an Expected value. Expressions use `res.status`, `res.headers.name`, `res.body.path` or `res.responseTime`. The expected value can use `{{variables}}`, including values extracted from an earlier response and columns of a data file; a name that is not defined is compared as written. The Check list includes:
 
@@ -154,7 +154,7 @@ A name written as `{{?name}}` is asked for when you send the request. A dialog t
 
 ## The response viewer
 
-The response panel sits below the request. Drag its top edge to resize it and double-click the edge to reset the height. The chevron button collapses it, and the fullscreen button expands it.
+The response panel sits below the request. Drag its top edge to resize it and double-click the edge to reset the height; the height you choose is kept for the next time you open the app. The chevron button collapses it, and the fullscreen button expands it.
 
 ![A JPEG response shown in the Body tab of the response panel](../screenshots/response-image.png)
 

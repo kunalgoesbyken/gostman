@@ -18,7 +18,7 @@ Requests run in sidebar order, with their scripts, extraction rules and assertio
 | **Delay (ms)** | Waits this many milliseconds after each request before the next one. Empty means no delay. |
 | **Stop on failure** | Stops the run after the first request that fails. |
 | **Data file (CSV or JSON)** | Loads a file with one row per iteration. See [Data files](#data-files). |
-| **Iterations** | Limits the number of iterations. The highest value is 10000. |
+| **Iterations** | Limits the number of iterations. Empty shows the number that will run: the row count of the data file, or 1. The highest value is 10000. |
 | **Parallel** | Sends up to this many requests at once. Empty means 1. |
 | **Run** and **Stop** | Starts the run. While a run is going, **Stop** cancels the requests in flight and ends it. |
 
@@ -50,13 +50,15 @@ Each row of the results list shows:
 - the number of passed assertions out of the total, the duration in milliseconds and the status;
 - the message of any error, and each failed assertion with its detail.
 
+Select a row to expand it. It then shows the address that was called, the assertions that passed and the response body, with JSON formatted. A run keeps the first 64 KB of each body; send the request on its own to see a longer one.
+
 The footer reads, for example, `Ran 5 of 5 · 4 passed · 1 failed`. Before a run it shows how many requests are in scope, and how many iterations when there is more than one.
 
 A 4xx or 5xx status does not fail a request by itself. Add an assertion such as `res.status equals 200`, as in the screenshot above. A request also counts as failed when it gets no response or when its script raises an error.
 
 ### Download HTML report
 
-**Download HTML report** saves the results of the last run as `gostman-report.html`. It is disabled while a run is going and when there are no results. The command line produces the same report with `--reporter html`; see [Command line](cli.md) and [Gostman in CI](ci.md).
+**Download HTML report**, at the bottom of the dialog, saves the results of the last run as `gostman-report.html`. It is disabled while a run is going and when there are no results. The command line produces the same report with `--reporter html`; see [Command line](cli.md) and [Gostman in CI](ci.md).
 
 The report is not redacted for you. Review it before you share it.
 
