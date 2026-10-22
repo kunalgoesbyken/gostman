@@ -79,7 +79,7 @@ Open the same folder in the desktop app with **Open folder** to see the requests
 
 ## Features
 
-- **Protocols:** REST, GraphQL (schema browser), gRPC (reflection or `.proto`), WebSocket, Socket.IO, MQTT over WebSocket, GraphQL subscriptions, Server-Sent Events, SOAP and MCP servers.
+- **Protocols:** REST, GraphQL (schema browser), gRPC (reflection or `.proto`), WebSocket, Socket.IO, MQTT over WebSocket, GraphQL subscriptions, Server-Sent Events, SOAP and MCP servers, over HTTP or, on the desktop, as a local command (stdio).
 - **Auth:** Basic, Bearer, API key, OAuth 2.0 (with PKCE and automatic renewal), OAuth 1, Digest, AWS SigV4, NTLM, Akamai EdgeGrid, JWT Bearer, Atlassian ASAP and Hawk.
 - **Workflow:** collections with nested folders, environments and variables, extraction rules to chain requests, a cookie jar, history, earlier responses with a side-by-side compare, and a command palette.
 - **Tests:** assertions plus pre-request and post-response scripts with `test()` and `expect()` in a sandbox, and a collection runner with CSV or JSON data files, parallel runs and HTML, JUnit and JSON reports.

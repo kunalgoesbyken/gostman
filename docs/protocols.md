@@ -242,7 +242,22 @@ Use Import and choose WSDL as the format, or leave Detect automatically on. The 
 
 This section is about testing an MCP server from Gostman. To expose Gostman to an agent, see [Use from a coding agent](agents.md).
 
-Choose MCP in the method list and enter the server's URL. An MCP tab appears. Gostman reaches servers over Streamable HTTP. It does not support stdio servers yet. The headers and auth of the request are sent with every call, and placeholders work in the URL, the tool name and the arguments.
+Choose MCP in the method list and enter the server's URL. An MCP tab appears. Gostman reaches remote servers over Streamable HTTP, and in the desktop app it can also start a local server that talks over stdio. The headers and auth of the request are sent with every call to a remote server, and placeholders work in the URL, the tool name and the arguments.
+
+### Local servers (stdio)
+
+In the desktop app, write `stdio:` followed by the command that starts the server, for example `stdio:npx -y @modelcontextprotocol/server-everything` or `stdio:python server.py`.
+
+![The Run a program on this computer? confirmation showing the command stdio:npx -y @modelcontextprotocol/server-everything](../screenshots/mcp-stdio-confirm.png)
+
+- The first time a command runs, Gostman shows it and asks **Run a program on this computer?**. Cancel is the default. You are asked again when the command changes or the app restarts.
+- The command is split into a program and its arguments; it is not passed to a shell, so pipes, `&&` and `$VAR` have no special meaning. Put an argument with spaces in double or single quotes.
+- The enabled rows on the Headers tab become environment variables of the program, for example `API_KEY`, and `{{variables}}` work in both.
+- Each Load and each call start the program again and stop it when the answer arrives. When it stops early, its error output is shown.
+- In a folder you have not trusted, local commands are switched off like scripts. The collection runner runs a local command only after you have confirmed it from its tab.
+- The web app, `gostman run` and the MCP server for coding agents never start local commands.
+
+![An MCP request to a local server started with npx: the server line, the echo tool, its JSON arguments and the response](../screenshots/mcp-stdio.png)
 
 ![An MCP request with the server line gostman-mcp-test-server 1.0.0 MCP 2025-06-18, the echo tool, JSON arguments and an OK response](../gostman-gui/frontend/src/assets/landing/mcp.png)
 

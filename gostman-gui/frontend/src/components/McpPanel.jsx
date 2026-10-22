@@ -4,11 +4,14 @@ import { Input } from "./ui/input"
 import { Notice, Panel, SectionLabel, Toolbar } from "./ui/panel"
 import { Select } from "./ui/select"
 import { isBlankMessage } from "../lib/grpc"
-import { findTool } from "../lib/mcp"
+import { findTool, isLocalCommand } from "../lib/mcp"
 
 const TOOL_PLACEHOLDER = "tool_name"
 const NOT_LOADED = "Tools not loaded"
-const CATALOG_HINT = "Load the tools from the MCP server at this URL. The headers and auth of this request are sent with every call. Servers are reached over Streamable HTTP; stdio servers are not supported yet."
+const CATALOG_HINTS = {
+  remote: "Load the tools from the MCP server at this URL. The headers and auth of this request are sent with every call. In the desktop app, write stdio: and a command in the address bar to start a local server instead, for example stdio:npx -y @modelcontextprotocol/server-everything.",
+  local: "Load starts this command on this computer and reads its tools; every call starts it again. The rows on the Headers tab are passed to it as environment variables.",
+}
 
 const serverLabel = ({ server, protocolVersion }) => (
   [server.name, server.version, protocolVersion && `MCP ${protocolVersion}`].filter(Boolean).join(" ")
@@ -46,10 +49,10 @@ function ToolField({ tools, tool, isListed, onChange }) {
   )
 }
 
-function CatalogNotice({ catalog }) {
+function CatalogNotice({ catalog, isLocal }) {
   if (catalog?.error) return <Notice tone="destructive" role="alert">{catalog.error}</Notice>
   if (catalog?.tools?.length === 0) return <Notice tone="warning">This server lists no tools.</Notice>
-  if (!catalog?.tools) return <Notice>{CATALOG_HINT}</Notice>
+  if (!catalog?.tools) return <Notice>{isLocal ? CATALOG_HINTS.local : CATALOG_HINTS.remote}</Notice>
   return null
 }
 
@@ -89,7 +92,7 @@ export function McpPanel({ request, catalog, editorPath, onUpdateRequest, onLoad
           {tools ? "Reload" : "Load"}
         </Button>
       </Toolbar>
-      <CatalogNotice catalog={catalog} />
+      <CatalogNotice catalog={catalog} isLocal={isLocalCommand(request)} />
       <Toolbar>
         <SectionLabel>Tool</SectionLabel>
         <div className="min-w-0 flex-1">

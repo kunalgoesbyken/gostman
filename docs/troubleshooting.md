@@ -40,7 +40,7 @@ Problems people run into most often, with the reason and the fix. If yours is no
 
 **A missing secret does not fail the run.** An undefined variable is left as `{{name}}` and the request is still sent. Add a script check such as `expect(env.get("API_TOKEN")).to.be.a("string")`; the [CI tutorial](tutorial-ci.md#3-make-a-missing-secret-fail-the-run) shows it.
 
-**Scripts or OAuth 2.0 do nothing in a folder I opened.** A folder you did not create opens restricted, and its scripts and OAuth 2.0 settings are switched off until you trust it. Open the storage menu in the header and choose **Trust this folder**. Read the scripts first: they run when a request is sent and can read your variables.
+**Scripts, OAuth 2.0 or a local MCP server do nothing in a folder I opened.** A folder you did not create opens restricted, and its scripts, OAuth 2.0 settings and local MCP commands are switched off until you trust it. Open the storage menu in the header and choose **Trust this folder**. Read the scripts first: they run when a request is sent and can read your variables.
 
 **An imported Postman script fails.** Common `pm.*` calls are rewritten on import, but not every Postman API exists in Gostman. The import summary lists what was left out. See [Variables, scripts and settings](scripting-and-settings.md) for the script API.
 

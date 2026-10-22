@@ -22,7 +22,7 @@ func invoke(ctx context.Context, call Call, policy engine.Policy) engine.Respons
 	ctx, cancel := context.WithTimeout(ctx, policy.Timeout(call.Target.Options))
 	defer cancel()
 
-	session, err := open(call.Target, policy)
+	session, err := open(ctx, call.Target, policy)
 	if err != nil {
 		return classify(ctx, err).response()
 	}

@@ -35,7 +35,7 @@ func Describe(ctx context.Context, target Target, policy engine.Policy) (Catalog
 }
 
 func describe(ctx context.Context, target Target, policy engine.Policy) (Catalog, error) {
-	session, err := open(target, policy)
+	session, err := open(ctx, target, policy)
 	if err != nil {
 		return Catalog{}, err
 	}

@@ -16,7 +16,8 @@ import { introspectionRequest, readSchema } from './graphqlSchema'
 import { clearToken, obtainToken } from './oauth'
 import { isGrpcRequest, serializeProtoFiles } from './grpc'
 import { withInheritance } from './inheritance'
-import { isMcpRequest } from './mcp'
+import { askToRun, needsApproval } from './localCommands'
+import { isLocalCommand, isMcpRequest } from './mcp'
 import { createMockActions } from './mockServer'
 import { STEP_CHECK, STEP_RUN, STEP_SAVE, STEP_SEND, STEP_VARIABLE } from './onboarding'
 import { getPreferences } from './preferences'
@@ -43,7 +44,7 @@ const UNRECORDED_ERRORS = ['config', 'cancelled']
 const RESET_PROMPT = "Delete every request, folder, environment and history entry? This can't be undone."
 const EXPORT_TAB = 'export'
 const SHARE_TAB = 'share'
-const ACTIVE_CONTENT_PROMPT = 'in this file include scripts or OAuth 2.0 settings. These run when a request is sent and can read your variables, so only import them from a source you trust. Cancel imports everything else without them.'
+const ACTIVE_CONTENT_PROMPT = 'in this file include scripts, OAuth 2.0 settings or local MCP commands. These run when a request is sent and can read your variables, so only import them from a source you trust. Cancel imports everything else without them.'
 const DESTRUCTIVE = 'destructive'
 const SAVE_FAILURE = 'Could not save the request'
 const NO_GRPC_CODE = 'Code generation covers HTTP requests. A gRPC call has no equivalent snippet yet.'
@@ -152,8 +153,18 @@ export function createWorkspaceActions(backend) {
     }
   }
 
+  async function mayRunCommand(request) {
+    if (!needsApproval(backend, request, activeVariables())) return true
+    return askToRun(store().showConfirm, request, activeVariables())
+  }
+
   async function loadMcpCatalog() {
     const tab = activeTab()
+    if (store().isRestricted && isLocalCommand(tab.request)) {
+      store().patchTab(tab.id, { mcpCatalog: { error: RESTRICTED } })
+      return
+    }
+    if (!(await mayRunCommand(tab.request))) return
     store().patchTab(tab.id, { mcpCatalog: { loading: true } })
     try {
       store().patchTab(tab.id, { mcpCatalog: await backend.describeMcp(withInheritance(store(), tab.request), activeVariables()) })
@@ -179,6 +190,7 @@ export function createWorkspaceActions(backend) {
       return
     }
     if (tab.pendingId) return
+    if (!store().isRestricted && !(await mayRunCommand(tab.request))) return
     sendSequence += 1
     const pendingId = `${tab.id}-${sendSequence}`
     store().startTabRequest(tab.id, pendingId)

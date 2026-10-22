@@ -104,6 +104,7 @@ export const desktopBackend = {
   describeGrpc: (request, variables) => DescribeGrpc(toGrpcTarget(request, variables)),
   invokeGrpc,
   describeMcp: (request, variables) => DescribeMcp(toMcpTarget(request, variables)),
+  runsLocalCommands: true,
   invokeMcp,
   openStream: openDesktopStream,
   streamCapSeconds: 0,

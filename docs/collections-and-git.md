@@ -145,7 +145,7 @@ Files that cannot be read are skipped and left unchanged. Fix them, then choose 
 
 ### Trust
 
-A folder you did not create opens as restricted. In a restricted folder, scripts and OAuth 2.0 settings are switched off and the Git panel is read-only. **Trust this folder** asks for confirmation, explains that requests can carry scripts and OAuth 2.0 settings that run when a request is sent and can read your variables, and then lifts the restriction.
+A folder you did not create opens as restricted. In a restricted folder, scripts, OAuth 2.0 settings and local MCP commands are switched off and the Git panel is read-only. **Trust this folder** asks for confirmation, explains that requests can carry scripts, OAuth 2.0 settings and local MCP commands that run when a request is sent and can read your variables, and then lifts the restriction.
 
 ## Git panel
 

@@ -28,5 +28,5 @@ export const FOLDER_SETTINGS_TEXT = {
   inheritedHeaders: (count) => `${count} from folders or the collection`,
   menuSettings: "Settings",
   collectionMenu: "Collection settings",
-  restrictedNote: "This folder is not trusted, so its scripts and OAuth 2.0 settings are switched off.",
+  restrictedNote: "This folder is not trusted, so its scripts, OAuth 2.0 settings and local MCP commands are switched off.",
 }

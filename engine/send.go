@@ -34,6 +34,7 @@ type Policy struct {
 	RevealSecrets     bool
 	MaxStreamDuration time.Duration
 	MinStreamRetry    time.Duration
+	RunCommands       bool
 }
 
 func (p Policy) refusal(host string) error {

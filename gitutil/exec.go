@@ -11,6 +11,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/kunalgoesbyken/gostman/childproc"
 )
 
 const (
@@ -135,6 +137,7 @@ func (r Repo) exec(ctx context.Context, timeout time.Duration, stdin []byte, arg
 	defer cancel()
 	command := exec.CommandContext(ctx, "git", args...)
 	command.Dir = r.Dir
+	childproc.NoWindow(command)
 	command.Env = environment()
 	if stdin != nil {
 		command.Stdin = bytes.NewReader(stdin)

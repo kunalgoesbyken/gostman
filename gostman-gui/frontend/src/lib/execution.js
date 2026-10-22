@@ -3,7 +3,8 @@ import { extractVariables, isUsableResponse, parseExtractors } from './chaining'
 import { isPlainObject, parseJSON } from './dataUtils'
 import { isGrpcRequest } from './grpc'
 import { inheritedAuthSource, lineageOf, withInheritance } from './inheritance'
-import { isMcpRequest } from './mcp'
+import { LOCAL_COMMAND_TEXT, needsApproval } from './localCommands'
+import { isLocalCommand, isMcpRequest } from './mcp'
 import { withFreshToken } from './oauth'
 import { failureResponse } from './response'
 import { isStreamRequest } from './sse'
@@ -25,7 +26,7 @@ const UNUSABLE_ADDRESS = 'The address cannot be used by a script.'
 const SEND_LIMIT = `A script may call sendRequest ${MAX_SENDS} times.`
 const PRE_REQUEST = 'Pre-request script'
 const POST_RESPONSE = 'Post-response script'
-export const RESTRICTED = 'This folder is not trusted yet, so its scripts and OAuth 2.0 settings are switched off. Open the folder menu in the header and choose Trust this folder.'
+export const RESTRICTED = 'This folder is not trusted yet, so its scripts, OAuth 2.0 settings and local MCP commands are switched off. Open the folder menu in the header and choose Trust this folder.'
 
 const store = () => useAppStore.getState()
 const variablesText = (request, answers, referenced) => variableTextFor(store(), request, answers, referenced)
@@ -199,6 +200,8 @@ export function createExecutor(backend) {
     }
     request = renewal.request
     const { outgoing } = renewal
+
+    if (isLocalCommand(outgoing) && needsApproval(backend, outgoing, variablesOf(request, answers))) return stop(request, LOCAL_COMMAND_TEXT.notApproved)
 
     const transmit = transportFor(backend, outgoing)
     const response = await transmit(sendId, withInheritance(store(), outgoing), variablesOf(request, answers), store().cookies)

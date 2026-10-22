@@ -249,6 +249,7 @@ export const webBackend = {
   describeGrpc: (request, variables) => postForResult('grpc=describe', toGrpcTarget(request, variables), 'schema'),
   invokeGrpc,
   describeMcp: (request, variables) => postForResult('mcp=describe', toMcpTarget(request, variables), 'catalog'),
+  runsLocalCommands: false,
   invokeMcp,
   openStream,
   streamCapSeconds: STREAM_CAP_SECONDS,
