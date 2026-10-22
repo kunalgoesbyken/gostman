@@ -190,7 +190,7 @@ func classify(ctx context.Context, err error) Response {
 	case errors.Is(ctx.Err(), context.Canceled):
 		return Failure(ErrorCancelled, "the request was cancelled")
 	default:
-		return Failure(ErrorNetwork, err.Error())
+		return networkFailure(err)
 	}
 }
 

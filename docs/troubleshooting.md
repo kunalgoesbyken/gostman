@@ -16,7 +16,9 @@ Problems people run into most often, with the reason and the fix. If yours is no
 
 **A `{{name}}` is sent as written.** No variable with that name is defined in a scope the request sees. In the editor the name is orange when it is missing and green when it is defined. Check that the right environment is picked in the header and that the name matches exactly; names are case-sensitive. See [Variables](variables.md).
 
-**A certificate error on an internal API.** Add your company's CA certificate in the desktop network settings (gear icon in the header). Switching off verification per request is possible under **Settings** but sends the request without checking who answers. See [Secrets and network settings](secrets-and-network.md).
+**Could not connect, or the host could not be found.** The response panel says which: nothing answered at that host and port, or the name did not resolve. Check that the server is running, the port is right and the address has no typo. On the desktop app a `localhost` address reaches your own machine; a request that goes through a proxy needs the proxy address under **Network**.
+
+**A certificate error on an internal API.** Add your company's CA certificate in the desktop network settings (**Network**, at the bottom left of the window). Switching off verification per request is possible under **Settings** but sends the request without checking who answers. See [Secrets and network settings](secrets-and-network.md).
 
 **The response is cut off in the web app.** The web version reads up to 3 MB of a response. The desktop app reads up to 50 MB.
 

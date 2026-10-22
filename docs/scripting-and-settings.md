@@ -90,7 +90,7 @@ Scripts imported from Postman keep working for the common `pm.*` calls, which th
 
 ## Network settings (desktop)
 
-The gear icon in the header opens the proxy and certificate settings: use the system proxy, none, or a custom HTTP, HTTPS or SOCKS5 proxy with a bypass list; add a CA certificate; and attach client certificates to hosts. Certificates and keys are PEM files, and keys must not be passphrase-protected.
+**Network**, at the bottom left of the window, opens the proxy and certificate settings: use the system proxy, none, or a custom HTTP, HTTPS or SOCKS5 proxy with a bypass list; add a CA certificate; and attach client certificates to hosts. Certificates and keys are PEM files, and keys must not be passphrase-protected.
 
 ## OAuth 2.0 callback
 
