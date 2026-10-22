@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, normalizePath } from 'vite'
 import react from '@vitejs/plugin-react'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import { resolve, dirname } from 'path'
@@ -44,6 +44,37 @@ function serveWebEntryInDev(entry) {
   }
 }
 
+const chunkClosure = (bundle, fileName, seen = new Set()) => {
+  if (seen.has(fileName)) return seen
+  seen.add(fileName)
+  bundle[fileName].imports.forEach((imported) => chunkClosure(bundle, imported, seen))
+  return seen
+}
+
+function preloadedRoutePage(route, module) {
+  const moduleId = normalizePath(resolve(__dirname, module))
+  return {
+    name: 'preloaded-route-page',
+    apply: 'build',
+    enforce: 'post',
+    generateBundle(_options, bundle) {
+      const chunks = Object.values(bundle).filter((item) => item.type === 'chunk')
+      const target = chunks.find((chunk) => chunk.isDynamicEntry && moduleId in chunk.modules)
+      const page = bundle['index.html']
+      if (!target || !page) return
+      const loaded = new Set(chunks.filter((chunk) => chunk.isEntry).flatMap((chunk) => [...chunkClosure(bundle, chunk.fileName)]))
+      const files = [...chunkClosure(bundle, target.fileName)].filter((fileName) => !loaded.has(fileName))
+      const styles = files.flatMap((fileName) => [...(bundle[fileName].viteMetadata?.importedCss ?? [])])
+      const links = [
+        ...styles.map((fileName) => `<link rel="stylesheet" href="/${fileName}">`),
+        ...files.map((fileName) => `<link rel="modulepreload" crossorigin href="/${fileName}">`),
+      ]
+      const source = String(page.source).replace('</head>', `${links.join('\n')}\n</head>`)
+      this.emitFile({ type: 'asset', fileName: `${route}/index.html`, source })
+    },
+  }
+}
+
 const SANDBOX_WORKER_PREFIX = 'assets/sandbox.worker.'
 
 function stampServiceWorker() {
@@ -82,6 +113,7 @@ export default defineConfig({
     }),
     serveWebEntryInDev('index-web.html'),
     renameHtmlEntry('index-web.html', 'index.html'),
+    preloadedRoutePage('web', 'src/components/Workspace.jsx'),
     stampServiceWorker(),
     siteMeta(),
     fontLinks(),
