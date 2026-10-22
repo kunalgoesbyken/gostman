@@ -97,6 +97,8 @@ The Type list in the Auth tab holds these choices:
 
 JWT Bearer and ASAP also apply to WebSocket and gRPC connections, because they do not depend on the body.
 
+![The Auth tab set to JWT Bearer with HS256, a masked secret, a JSON payload that uses {{user_id}} and {{$timestamp}}, a kid header field and the Authorization header placement](../screenshots/auth-jwt.png)
+
 Secret fields are masked. The eye button shows or hides the value. Values can use `{{variables}}`, and auth overrides a header or parameter of the same name.
 
 OAuth 2.0 has these fields:

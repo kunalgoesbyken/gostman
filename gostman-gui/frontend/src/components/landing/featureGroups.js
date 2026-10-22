@@ -6,7 +6,7 @@ export const FEATURE_INDEX = [
     id: "send",
     title: "Send and inspect",
     rows: [
-      { term: "Every protocol", href: docPath("protocols"), text: "REST, GraphQL with a schema browser, gRPC through reflection or .proto files, WebSocket, Server-Sent Events, SOAP and MCP in one window." },
+      { term: "Every protocol", href: docPath("protocols"), text: "REST, GraphQL with a schema browser, gRPC through reflection or .proto files, WebSocket, Socket.IO, MQTT, Server-Sent Events, SOAP and MCP in one window." },
       { term: "Auth for real APIs", href: docPath("requests-and-responses"), text: "Basic, bearer, API key, OAuth 1 and 2 with renewal, Digest, AWS SigV4, NTLM, Akamai EdgeGrid, JWT, ASAP and Hawk." },
       { term: "Bodies and transport", href: docPath("requests-and-responses"), text: "JSON, XML, form, multipart and file bodies, a cookie jar, proxy and client certificates, and curl commands pasted straight into a request." },
       { term: "Responses", href: docPath("requests-and-responses"), text: "JSON tree, HTML, image and PDF previews, headers, cookies, size and timing. Download any body, including binary, or copy it as code in cURL, JavaScript, Python, Go, PHP or Java." },

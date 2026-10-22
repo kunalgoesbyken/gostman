@@ -1,6 +1,6 @@
-import { WSClose, WSConnect, WSSend } from '../../../wailsjs/go/main/App'
+import { WSClose, WSConnect, WSSend, WSSendBinary } from '../../../wailsjs/go/main/App'
 import { EventsOn } from '../../../wailsjs/runtime/runtime'
-import { base64ToBytes } from '../base64'
+import { base64ToBytes, bytesToBase64 } from '../base64'
 
 const MESSAGE_EVENT = 'ws:message'
 const STATE_EVENT = 'ws:state'
@@ -63,6 +63,7 @@ export async function openDesktopSocket(url, headers, handlers) {
 
   return {
     send: (text) => WSSend(connectionId, text),
+    sendBytes: (bytes) => WSSendBinary(connectionId, bytesToBase64(bytes)),
     close: () => WSClose(connectionId),
   }
 }

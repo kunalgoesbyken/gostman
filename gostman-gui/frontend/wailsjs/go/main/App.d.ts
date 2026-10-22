@@ -227,4 +227,6 @@ export function WSConnect(arg1:string,arg2:string):Promise<string>;
 
 export function WSSend(arg1:string,arg2:string):Promise<void>;
 
+export function WSSendBinary(arg1:string,arg2:string):Promise<void>;
+
 export function WorkspaceStatus():Promise<main.WorkspaceStatus>;

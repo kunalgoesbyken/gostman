@@ -18,6 +18,7 @@ const (
 	graphqlVariables = "graphql variables"
 	grpcMessage      = "grpc message"
 	mcpArguments     = "mcp arguments"
+	socketMessages   = "saved messages"
 )
 
 func Scan(collection workspace.Collection, options Options) Report {
@@ -114,6 +115,7 @@ func (s *scanner) request(at site, request workspace.Request) {
 	s.structured(at, graphqlVariables, request.GraphqlVariables)
 	s.structured(at, grpcMessage, request.GrpcMessage)
 	s.structured(at, mcpArguments, request.McpArguments)
+	s.structured(at, socketMessages, request.SocketMessages)
 	s.variables(at, "request variable", request.Vars)
 	s.scripts(at, request.PreScript, request.PostScript)
 	s.auth(at, request.Auth)

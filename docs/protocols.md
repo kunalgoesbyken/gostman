@@ -1,6 +1,6 @@
 # Protocols
 
-This page covers every protocol you can test from Gostman: REST and other HTTP requests, GraphQL, gRPC, WebSocket, Server-Sent Events, SOAP and MCP servers. It describes what each protocol's panel does and where the desktop app and the web app differ. To let a coding agent call your APIs through Gostman instead, see [Use from a coding agent](agents.md).
+This page covers every protocol you can test from Gostman: REST and other HTTP requests, GraphQL, gRPC, WebSocket, Socket.IO, MQTT, Server-Sent Events, SOAP and MCP servers. It describes what each protocol's panel does and where the desktop app and the web app differ. To let a coding agent call your APIs through Gostman instead, see [Use from a coding agent](agents.md).
 
 Every protocol uses the same request bar, variables, environments, auth and saved collections. Requests are prepared and sent by the Go engine in both the desktop app and the web app, so a request behaves the same in both unless this page says otherwise.
 
@@ -53,7 +53,7 @@ Select Builder to open the query builder. It uses the same introspection result,
 
 ### Subscriptions
 
-Gostman sends GraphQL as a normal HTTP request. To read subscriptions from a server that delivers them as server-sent events, turn on Stream as server-sent events in the Settings tab. See [Server-Sent Events](#server-sent-events).
+With an `http` or `https` URL, Gostman sends GraphQL as a normal HTTP request. To read subscriptions from a server that delivers them as server-sent events, turn on Stream as server-sent events in the Settings tab. See [Server-Sent Events](#server-sent-events). For subscriptions over WebSocket, use a `ws://` or `wss://` URL; see [GraphQL subscriptions](#graphql-subscriptions).
 
 ## gRPC
 
@@ -121,6 +121,44 @@ Enter a `ws://` or `wss://` URL. The Send button becomes Connect, and the WebSoc
 - The log keeps the latest 1000 entries. A notice shows how many older entries were dropped.
 - A text message longer than 10,000 characters is shortened, and the entry says Showing the first N of M characters.
 - A binary message appears as hexadecimal bytes. The entry says Binary and the byte count, and shows the first 64 bytes.
+
+### Saved messages
+
+Save keeps the message box, and the event or topic, under a name. The saved messages are part of the request, so they are written with it and travel with exports and workspace folders. Pick one from Load a saved message to put it back in the message box. While the message box matches a saved message, a delete button removes it.
+
+### Socket.IO
+
+Choose Socket.IO in the Protocol list next to the status. Gostman speaks Socket.IO 3 and 4 (Engine.IO 4) over WebSocket.
+
+![A Socket.IO session that joined the / namespace, received a welcome event, emitted echo with a JSON argument and received echoed back](../screenshots/socketio.png)
+
+- The URL path is the namespace: `ws://localhost:3000/admin` joins `/admin`, and `ws://localhost:3000` joins `/`. Gostman connects to `/socket.io/` on that host. A URL that already starts with `/socket.io/` is used as written and joins `/`.
+- Type an event name in Event and its argument in the message box. JSON is sent as JSON, other text as a string, and an empty box emits the event without arguments.
+- Received events show the event name above the arguments. Acknowledgements show as `ack` with their id, and a refused connection shows the server's message.
+- Gostman answers the server's pings. Binary Socket.IO packets are listed but not decoded.
+
+### MQTT
+
+Choose MQTT in the Protocol list to talk to a broker over MQTT 3.1.1 on WebSocket, for example `ws://localhost:8080/mqtt`. The `mqtt` subprotocol is sent for you.
+
+![An MQTT session subscribed to sensors/#, publishing to sensors/kitchen and receiving messages on sensors/kitchen and sensors/temp](../screenshots/mqtt.png)
+
+- Set Auth to Basic to send a user name and password; other auth types send none. Each connection uses a new client ID that starts with `gostman-` and a clean session.
+- Type a topic filter such as `sensors/#` and select Subscribe. The broker's answer is shown in the log.
+- Type a topic in Topic and the payload in the message box to publish at QoS 0. Received messages show their topic above the payload; a payload that is not UTF-8 is shown as hexadecimal bytes.
+- Brokers that only listen on TCP port 1883, without WebSocket, cannot be reached.
+
+### GraphQL subscriptions
+
+A GRAPHQL request with a `ws://` or `wss://` URL connects with the `graphql-transport-ws` protocol, which the `graphql-ws` library, Apollo Server and most current servers use.
+
+![A GraphQL subscription over WebSocket: the connection is acknowledged, then each result arrives as next](../screenshots/graphql-subscription.png)
+
+1. Write the subscription in the GraphQL tab, with its variables.
+2. Select Connect. Gostman sends `connection_init` with the request's headers and auth as its payload, which is where most servers read credentials, then subscribes once the server acknowledges.
+3. Each result appears as `next`, followed by a notice when the subscription completes.
+
+The older `subscriptions-transport-ws` protocol is not supported. For servers that send subscriptions as server-sent events instead, see [Subscriptions](#subscriptions).
 
 ### Auto-reconnect
 

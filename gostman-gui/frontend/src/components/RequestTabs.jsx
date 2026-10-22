@@ -244,6 +244,7 @@ export const RequestTabs = memo(function RequestTabs({
               request={activeRequest}
               variables={variables}
               sockets={actions.sockets}
+              onUpdateRequest={onUpdateRequest}
             />
           </Suspense>
         </TabsContent>

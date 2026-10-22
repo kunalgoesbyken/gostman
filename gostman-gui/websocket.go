@@ -72,6 +72,18 @@ func (a *App) WSConnect(urlStr, headersJSON string) (string, error) {
 }
 
 func (a *App) WSSend(id, message string) error {
+	return writeWS(id, websocket.TextMessage, []byte(message))
+}
+
+func (a *App) WSSendBinary(id, encoded string) error {
+	data, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil {
+		return fmt.Errorf("the binary message is not valid base64: %w", err)
+	}
+	return writeWS(id, websocket.BinaryMessage, data)
+}
+
+func writeWS(id string, kind int, data []byte) error {
 	c := lookupWSConn(id)
 	if c == nil {
 		return fmt.Errorf("websocket %s is not connected", id)
@@ -79,7 +91,7 @@ func (a *App) WSSend(id, message string) error {
 
 	c.writeMutex.Lock()
 	defer c.writeMutex.Unlock()
-	return c.conn.WriteMessage(websocket.TextMessage, []byte(message))
+	return c.conn.WriteMessage(kind, data)
 }
 
 func (a *App) WSClose(id string) error {

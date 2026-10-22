@@ -59,6 +59,8 @@ const DEFAULT_REQUEST = {
   grpcProtos: '',
   mcpTool: '',
   mcpArguments: '',
+  socketProtocol: '',
+  socketMessages: '',
   vars: '{}',
   timestamp: '',
   sortOrder: 0,

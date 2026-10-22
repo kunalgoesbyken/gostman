@@ -3,6 +3,7 @@ import { parseVariableMap, placeholderNames, substitutePlaceholders } from './pl
 import { isSentRow, parseRows } from './rows'
 import { withInheritance } from './inheritance'
 import { toHttpURL, toSocketURL } from './socketUrl'
+import { protocolOf } from './realtime/protocols'
 import { selectActiveVariables, useAppStore } from '../store/appStore'
 
 export { isSocketAddress } from './socketUrl'
@@ -28,8 +29,9 @@ const HIGH_SURROGATE_START = 0xd800
 const HIGH_SURROGATE_END = 0xdbff
 const INVALID_VARIABLES = "The active environment's variables are not valid JSON."
 const INVALID_ADDRESS = 'Enter a ws:// or wss:// URL in the address bar.'
+const SUBPROTOCOL_HEADER = 'Sec-WebSocket-Protocol'
 
-const IDLE_SESSION = { status: SOCKET_IDLE, entries: [], dropped: 0, autoReconnect: false, draft: '' }
+const IDLE_SESSION = { status: SOCKET_IDLE, entries: [], dropped: 0, autoReconnect: false, draft: '', draftTarget: '', filter: '' }
 
 export const useSocketStore = create(() => ({ sessions: {} }))
 
@@ -106,7 +108,7 @@ export function resolveSocketTarget(request, variablesJSON) {
   const headers = parseRows(request.headers)
     .filter(isSentRow)
     .map(({ key, value }) => [substitute(key), substitute(value)])
-  return { url, headers }
+  return { url, headers, substitute }
 }
 
 function release(tabId) {
@@ -114,6 +116,7 @@ function release(tabId) {
   retryTimers.delete(tabId)
   const link = links.get(tabId)
   links.delete(tabId)
+  link?.session?.stop?.()
   link?.transport?.close()
 }
 
@@ -147,14 +150,44 @@ export function createSocketActions(backend) {
     retryTimers.set(tabId, setTimeout(() => connect(tabId), RECONNECT_DELAY_MS))
   }
 
-  async function inheritedHeaders(request, target) {
+  function createChannel(tabId, link, isCurrent) {
+    const failed = (error) => {
+      if (isCurrent()) log(tabId, { kind: ENTRY_ERROR, text: `Could not send: ${messageOf(error)}` })
+    }
+    const deliver = (write) => {
+      link.ready.then(write).catch(failed)
+    }
+    return {
+      sendText: (text) => deliver(() => link.transport.send(text)),
+      sendBytes: (bytes) => deliver(() => link.transport.sendBytes(bytes)),
+      frame: (frame) => log(tabId, frameEntry(frame)),
+      received: (text, label) => log(tabId, { ...textEntry(ENTRY_RECEIVED, text), label }),
+      info: (text) => log(tabId, { kind: ENTRY_INFO, text }),
+      error: (text) => log(tabId, { kind: ENTRY_ERROR, text }),
+    }
+  }
+
+  async function prepareSession(request, target) {
     const state = useAppStore.getState()
-    const prepared = await backend.prepare(withInheritance(state, { ...request, url: toHttpURL(target.url) }), selectActiveVariables(state))
-    return prepared.headers.map(({ key, value }) => [key, value])
+    const effective = withInheritance(state, { ...request, url: toHttpURL(target.url) })
+    const prepared = await backend.prepare(effective, selectActiveVariables(state))
+    const preparedHeaders = prepared.headers || []
+    const protocol = protocolOf(request)
+    const headers = preparedHeaders.map(({ key, value }) => [key, value])
+    return {
+      protocol,
+      url: protocol.address ? protocol.address(target.url) : target.url,
+      headers: protocol.subprotocol ? [...headers, [SUBPROTOCOL_HEADER, protocol.subprotocol]] : headers,
+      context: { url: target.url, request: effective, prepared: { ...prepared, headers: preparedHeaders }, substitute: target.substitute },
+    }
   }
 
   async function dial(tabId, target, request) {
     const link = {}
+    let markReady
+    link.ready = new Promise((resolve) => {
+      markReady = resolve
+    })
     const isCurrent = () => links.get(tabId) === link
     const whileCurrent = (handle) => (...args) => {
       if (isCurrent()) handle(...args)
@@ -163,16 +196,26 @@ export function createSocketActions(backend) {
       onOpen: whileCurrent(() => {
         setStatus(tabId, SOCKET_OPEN)
         log(tabId, { kind: ENTRY_INFO, text: 'Connected' })
+        link.session.onOpen?.()
       }),
-      onMessage: whileCurrent((frame) => log(tabId, frameEntry(frame))),
+      onMessage: whileCurrent((frame) => link.session.onFrame(frame)),
       onError: whileCurrent((detail) => log(tabId, { kind: ENTRY_ERROR, text: detail })),
-      onClose: whileCurrent((detail) => handleLoss(tabId, { kind: ENTRY_INFO, text: detail })),
+      onClose: whileCurrent((detail) => {
+        link.session.stop?.()
+        handleLoss(tabId, { kind: ENTRY_INFO, text: detail })
+      }),
     }
     links.set(tabId, link)
     try {
-      const transport = await backend.openSocket(target.url, await inheritedHeaders(request, target), handlers)
-      if (isCurrent()) link.transport = transport
-      else transport.close()
+      const setup = await prepareSession(request, target)
+      link.session = setup.protocol.createSession(createChannel(tabId, link, isCurrent), setup.context)
+      const transport = await backend.openSocket(setup.url, setup.headers, handlers)
+      if (!isCurrent()) {
+        transport.close()
+        return
+      }
+      link.transport = transport
+      markReady()
     } catch (error) {
       if (isCurrent()) handleLoss(tabId, { kind: ENTRY_ERROR, text: `Could not connect: ${messageOf(error)}` })
     }
@@ -201,19 +244,27 @@ export function createSocketActions(backend) {
     if (wasActive) log(tabId, { kind: ENTRY_INFO, text: 'Disconnected' })
   }
 
-  async function sendMessage(tabId) {
-    const { draft, status } = sessionOf(tabId)
-    const transport = links.get(tabId)?.transport
-    if (!transport || status !== SOCKET_OPEN || draft === '') return
+  function withOpenSession(tabId, use) {
+    const session = links.get(tabId)?.session
+    if (!session || sessionOf(tabId).status !== SOCKET_OPEN) return
     try {
-      await transport.send(draft)
+      use(session)
     } catch (error) {
-      log(tabId, { kind: ENTRY_ERROR, text: `Could not send: ${messageOf(error)}` })
-      return
+      log(tabId, { kind: ENTRY_ERROR, text: messageOf(error) })
     }
-    log(tabId, textEntry(ENTRY_SENT, draft))
-    patchSession(tabId, () => ({ draft: '' }))
   }
+
+  function sendMessage(tabId) {
+    const { draft, draftTarget } = sessionOf(tabId)
+    if (draft === '' && draftTarget.trim() === '') return
+    withOpenSession(tabId, (session) => {
+      const sent = session.compose({ body: draft, target: draftTarget })
+      log(tabId, { ...textEntry(ENTRY_SENT, sent.text), label: sent.label })
+      patchSession(tabId, () => ({ draft: '' }))
+    })
+  }
+
+  const subscribe = (tabId) => withOpenSession(tabId, (session) => session.subscribe(sessionOf(tabId).filter))
 
   function clearLog(tabId) {
     queuedEntries.delete(tabId)
@@ -236,7 +287,11 @@ export function createSocketActions(backend) {
     sendMessage,
     clearLog,
     openFromAddressBar,
+    subscribe,
     setDraft: (tabId, draft) => patchSession(tabId, () => ({ draft })),
+    setDraftTarget: (tabId, draftTarget) => patchSession(tabId, () => ({ draftTarget })),
+    setFilter: (tabId, filter) => patchSession(tabId, () => ({ filter })),
+    loadMessage: (tabId, message) => patchSession(tabId, () => ({ draft: message.body, draftTarget: message.target })),
     setAutoReconnect,
     unsentHeaders: backend.unsentSocketHeaders,
   }

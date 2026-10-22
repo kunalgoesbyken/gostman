@@ -1,12 +1,17 @@
 import { memo, useLayoutEffect, useMemo, useRef } from "react"
-import { ArrowDown, ArrowUp, Copy, Info, Radio, TriangleAlert } from "lucide-react"
+import { ArrowDown, ArrowUp, Copy, Info, Radio, Trash2, TriangleAlert } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { EmptyState } from "./ui/emptyState"
+import { Input } from "./ui/input"
 import { Notice, Panel, Toolbar } from "./ui/panel"
+import { Select } from "./ui/select"
 import { Textarea } from "./ui/textarea"
 import { pluralize } from "../lib/dataUtils"
 import { shortcutLabel } from "../lib/platform"
+import { PROTOCOL_OPTIONS, protocolOf, usesGraphQL } from "../lib/realtime/protocols"
+import { readSavedMessages, removeMessage, saveMessage } from "../lib/realtime/savedMessages"
+import { useAppStore } from "../store/appStore"
 import {
   ENTRY_ERROR,
   ENTRY_INFO,
@@ -40,11 +45,27 @@ const ENTRY_VIEWS = {
   [ENTRY_ERROR]: { icon: TriangleAlert, label: "Error", tone: "text-destructive" },
 }
 
-function entryNote(entry) {
+const TEXT = {
+  protocol: "Protocol",
+  graphql: "GraphQL subscription",
+  filter: "Topic filter, for example sensors/#",
+  subscribe: "Subscribe",
+  saved: "Saved messages",
+  savedPlaceholder: "Load a saved message",
+  noSaved: "No saved messages yet",
+  save: "Save",
+  saveTitle: "Save message",
+  saveMessage: "Name for this message. It is saved with the request.",
+  remove: "Delete saved message",
+}
+
+function sizeNote(entry) {
   if (entry.byteCount !== undefined) return `Binary, ${pluralize(entry.byteCount, "byte")}`
   if (entry.fullLength !== undefined) return `Showing the first ${entry.text.length} of ${entry.fullLength} characters`
   return ""
 }
+
+const entryNote = (entry) => [entry.label, sizeNote(entry)].filter(Boolean).join(" · ")
 
 const LogEntry = memo(function LogEntry({ entry }) {
   const { icon: Icon, label, tone } = ENTRY_VIEWS[entry.kind]
@@ -100,15 +121,85 @@ function MessageLog({ entries, dropped }) {
   )
 }
 
-export function WebSocketPanel({ tabId, request, variables, sockets }) {
+function ProtocolPicker({ request, disabled, onUpdateRequest }) {
+  if (usesGraphQL(request)) return <span className="shrink-0 text-xs text-muted-foreground">{TEXT.graphql}</span>
+  return (
+    <Select
+      aria-label={TEXT.protocol}
+      className="w-28 shrink-0"
+      value={request.socketProtocol || ""}
+      disabled={disabled}
+      onChange={(event) => onUpdateRequest({ socketProtocol: event.target.value })}
+    >
+      {PROTOCOL_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+    </Select>
+  )
+}
+
+function SubscribeBar({ tabId, session, isOpen, sockets }) {
+  const submit = (event) => {
+    event.preventDefault()
+    sockets.subscribe(tabId)
+  }
+  return (
+    <form onSubmit={submit} className="flex shrink-0 items-center gap-2 border-b border-border px-3 py-2">
+      <Input
+        aria-label={TEXT.filter}
+        placeholder={TEXT.filter}
+        value={session.filter}
+        onChange={(event) => sockets.setFilter(tabId, event.target.value)}
+      />
+      <Button type="submit" size="sm" variant="outline" disabled={!isOpen || session.filter.trim() === ""}>{TEXT.subscribe}</Button>
+    </form>
+  )
+}
+
+function SavedMessages({ tabId, request, session, sockets, onUpdateRequest }) {
+  const showPrompt = useAppStore((state) => state.showPrompt)
+  const messages = useMemo(() => readSavedMessages(request.socketMessages), [request.socketMessages])
+  const current = messages.find((message) => message.body === session.draft && message.target === session.draftTarget)
+  const hasDraft = session.draft !== "" || session.draftTarget.trim() !== ""
+
+  const choose = (name) => {
+    const message = messages.find((entry) => entry.name === name)
+    if (message) sockets.loadMessage(tabId, message)
+  }
+
+  const save = () => showPrompt(TEXT.saveTitle, TEXT.saveMessage, current?.name || "", "", (name) => {
+    const trimmed = name?.trim()
+    if (trimmed) onUpdateRequest({ socketMessages: saveMessage(request.socketMessages, { name: trimmed, body: session.draft, target: session.draftTarget }) })
+  })
+
+  const remove = () => onUpdateRequest({ socketMessages: removeMessage(request.socketMessages, current.name) })
+
+  return (
+    <>
+      <Select
+        aria-label={TEXT.saved}
+        className="w-48 shrink-0"
+        value={current?.name || ""}
+        disabled={messages.length === 0}
+        onChange={(event) => choose(event.target.value)}
+      >
+        <option value="">{messages.length === 0 ? TEXT.noSaved : TEXT.savedPlaceholder}</option>
+        {messages.map((message) => <option key={message.name} value={message.name}>{message.name}</option>)}
+      </Select>
+      {current && <IconButton label={TEXT.remove} icon={Trash2} onClick={remove} />}
+      <Button size="sm" variant="outline" disabled={!hasDraft} onClick={save}>{TEXT.save}</Button>
+    </>
+  )
+}
+
+export function WebSocketPanel({ tabId, request, variables, sockets, onUpdateRequest }) {
   const session = useSocketStore(selectSession(tabId))
   const { url, headers } = request
   const target = useMemo(() => resolveSocketTarget({ url, headers }, variables), [url, headers, variables])
   const unsentHeaders = target.error ? [] : sockets.unsentHeaders(target.headers)
+  const protocol = protocolOf(request)
   const status = STATUS_VIEWS[session.status]
   const isIdle = session.status === SOCKET_IDLE
   const isOpen = session.status === SOCKET_OPEN
-  const canSend = isOpen && session.draft !== ""
+  const canSend = isOpen && (session.draft !== "" || (Boolean(protocol.targetLabel) && session.draftTarget.trim() !== ""))
 
   const handleComposerKey = (event) => {
     if (event.key !== "Enter" || (!event.ctrlKey && !event.metaKey)) return
@@ -124,6 +215,7 @@ export function WebSocketPanel({ tabId, request, variables, sockets }) {
           <span aria-hidden="true" className={cn("h-2 w-2 rounded-full", status.dot)} />
           {status.label}
         </span>
+        <ProtocolPicker request={request} disabled={!isIdle} onUpdateRequest={onUpdateRequest} />
         <span className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground" title={target.url || target.error}>
           {target.url || target.error}
         </span>
@@ -146,9 +238,30 @@ export function WebSocketPanel({ tabId, request, variables, sockets }) {
         </Notice>
       )}
 
+      {protocol.canSubscribe && <SubscribeBar tabId={tabId} session={session} isOpen={isOpen} sockets={sockets} />}
+
       <MessageLog entries={session.entries} dropped={session.dropped} />
 
-      <div className="flex shrink-0 items-stretch gap-2 border-t border-border p-3">
+      <div className="flex shrink-0 items-center gap-2 border-t border-border px-3 pt-3">
+        {protocol.targetLabel && (
+          <Input
+            aria-label={protocol.targetLabel}
+            placeholder={protocol.targetLabel}
+            value={session.draftTarget}
+            onChange={(event) => sockets.setDraftTarget(tabId, event.target.value)}
+            className="flex-1"
+          />
+        )}
+        <SavedMessages
+          tabId={tabId}
+          request={request}
+          session={session}
+          sockets={sockets}
+          onUpdateRequest={onUpdateRequest}
+        />
+      </div>
+
+      <div className="flex shrink-0 items-stretch gap-2 p-3">
         <Textarea
           value={session.draft}
           onChange={(event) => sockets.setDraft(tabId, event.target.value)}

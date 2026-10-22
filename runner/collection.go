@@ -59,6 +59,8 @@ type Request struct {
 	GrpcProtos       string         `json:"grpcProtos"`
 	McpTool          string         `json:"mcpTool"`
 	McpArguments     string         `json:"mcpArguments"`
+	SocketProtocol   string         `json:"socketProtocol"`
+	SocketMessages   string         `json:"socketMessages"`
 	Vars             string         `json:"vars"`
 	Lineage          []Folder       `json:"-"`
 }

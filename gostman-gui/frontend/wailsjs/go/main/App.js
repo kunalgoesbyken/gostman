@@ -422,6 +422,10 @@ export function WSSend(arg1, arg2) {
   return window['go']['main']['App']['WSSend'](arg1, arg2);
 }
 
+export function WSSendBinary(arg1, arg2) {
+  return window['go']['main']['App']['WSSendBinary'](arg1, arg2);
+}
+
 export function WorkspaceStatus() {
   return window['go']['main']['App']['WorkspaceStatus']();
 }

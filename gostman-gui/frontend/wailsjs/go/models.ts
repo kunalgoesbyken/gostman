@@ -1784,6 +1784,8 @@ export namespace main {
 	    grpcProtos: string;
 	    mcpTool: string;
 	    mcpArguments: string;
+	    socketProtocol: string;
+	    socketMessages: string;
 	    vars: string;
 	    timestamp: string;
 	    sortOrder: number;
@@ -1818,6 +1820,8 @@ export namespace main {
 	        this.grpcProtos = source["grpcProtos"];
 	        this.mcpTool = source["mcpTool"];
 	        this.mcpArguments = source["mcpArguments"];
+	        this.socketProtocol = source["socketProtocol"];
+	        this.socketMessages = source["socketMessages"];
 	        this.vars = source["vars"];
 	        this.timestamp = source["timestamp"];
 	        this.sortOrder = source["sortOrder"];
@@ -3703,6 +3707,8 @@ export namespace workspace {
 	    grpcProtos: string;
 	    mcpTool: string;
 	    mcpArguments: string;
+	    socketProtocol: string;
+	    socketMessages: string;
 	    vars: string;
 	    timestamp: string;
 	    sortOrder: number;
@@ -3737,6 +3743,8 @@ export namespace workspace {
 	        this.grpcProtos = source["grpcProtos"];
 	        this.mcpTool = source["mcpTool"];
 	        this.mcpArguments = source["mcpArguments"];
+	        this.socketProtocol = source["socketProtocol"];
+	        this.socketMessages = source["socketMessages"];
 	        this.vars = source["vars"];
 	        this.timestamp = source["timestamp"];
 	        this.sortOrder = source["sortOrder"];

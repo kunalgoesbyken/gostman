@@ -33,6 +33,7 @@ export async function openBrowserSocket(url, headers, handlers) {
   socket.onclose = (event) => handlers.onClose(describeClose(event, wasOpen))
   return {
     send: (text) => socket.send(text),
+    sendBytes: (bytes) => socket.send(bytes),
     close: () => socket.close(),
   }
 }
