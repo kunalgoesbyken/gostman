@@ -63,7 +63,10 @@ func Prepare(r Request) (Prepared, error) {
 	if contentType != "" && !hasHeader(headers, headerContentType) {
 		headers = append(headers, pair{headerContentType, contentType})
 	}
-	headers = applyAuth(r.Auth, substitute, headers, target)
+	headers, err = applyAuth(r.Auth, substitute, headers, target)
+	if err != nil {
+		return Prepared{}, err
+	}
 	headers, body = signRequest(r.Auth, substitute, method, target, headers, body)
 	if err := expansion.overflow(); err != nil {
 		return Prepared{}, err
@@ -146,31 +149,35 @@ func overrideQuery(target *url.URL, params []pair) {
 	target.RawQuery = query.Encode()
 }
 
-func applyAuth(auth Auth, substitute func(string) string, headers []pair, target *url.URL) []pair {
+func applyAuth(auth Auth, substitute func(string) string, headers []pair, target *url.URL) ([]pair, error) {
 	switch auth.Type {
 	case authBasic:
 		credentials := substitute(auth.Username) + ":" + substitute(auth.Password)
 		encoded := base64.StdEncoding.EncodeToString([]byte(credentials))
-		return setHeader(headers, headerAuthorization, "Basic "+encoded)
+		return setHeader(headers, headerAuthorization, "Basic "+encoded), nil
 	case authBearer:
-		return setHeader(headers, headerAuthorization, "Bearer "+substitute(auth.Token))
+		return setHeader(headers, headerAuthorization, "Bearer "+substitute(auth.Token)), nil
 	case authAPIKey:
 		key, value := substitute(auth.Key), substitute(auth.Value)
 		if strings.TrimSpace(key) == "" {
-			return headers
+			return headers, nil
 		}
 		if auth.In == authQuery {
 			overrideQuery(target, []pair{{key, value}})
-			return headers
+			return headers, nil
 		}
-		return setHeader(headers, key, value)
+		return setHeader(headers, key, value), nil
 	case authOAuth2:
 		if value, ok := oauthHeader(auth.OAuth2); ok {
-			return setHeader(headers, headerAuthorization, value)
+			return setHeader(headers, headerAuthorization, value), nil
 		}
-		return headers
+		return headers, nil
+	case authJWT:
+		return applyJWT(auth.JWT, substitute, headers, target)
+	case authASAP:
+		return applyASAP(auth.ASAP, substitute, headers)
 	default:
-		return headers
+		return headers, nil
 	}
 }
 

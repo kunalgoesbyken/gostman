@@ -60,6 +60,10 @@ func authFields(auth *engine.Auth) []secretField {
 		{hiddenPrefix + "oauth1.privateKey", &auth.OAuth1.PrivateKey},
 		{hiddenPrefix + "edgegrid.clientSecret", &auth.EdgeGrid.ClientSecret},
 		{hiddenPrefix + "edgegrid.accessToken", &auth.EdgeGrid.AccessToken},
+		{hiddenPrefix + "jwt.secret", &auth.JWT.Secret},
+		{hiddenPrefix + "jwt.privateKey", &auth.JWT.PrivateKey},
+		{hiddenPrefix + "asap.privateKey", &auth.ASAP.PrivateKey},
+		{hiddenPrefix + "hawk.key", &auth.Hawk.Key},
 	}, tokenFields(&auth.OAuth2)...)
 }
 

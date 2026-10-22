@@ -70,7 +70,7 @@ function ApiKeyFields({ auth, onFieldChange }) {
 
 function SchemeInput({ field, value, onChange }) {
   if (field.kind === FIELD_SECRET) return <SecretInput value={value} onChange={onChange} />
-  if (field.kind === FIELD_AREA) return <Textarea rows={5} value={value} onChange={(event) => onChange(event.target.value)} />
+  if (field.kind === FIELD_AREA) return <Textarea rows={5} value={value} onChange={(event) => onChange(event.target.value)} placeholder={field.placeholder} />
   if (field.kind === FIELD_SELECT) {
     return (
       <Select value={value || field.fallback} onChange={(event) => onChange(event.target.value)}>

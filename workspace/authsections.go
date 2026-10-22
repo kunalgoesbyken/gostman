@@ -49,6 +49,47 @@ func edgeGridFields(config *engine.EdgeGridAuth) []textField {
 	}
 }
 
+func jwtFields(config *engine.JWTAuth) []textField {
+	return []textField{
+		{"algorithm", &config.Algorithm},
+		{"secret", &config.Secret},
+		{"secretEncoding", &config.SecretEncoding},
+		{"privateKey", &config.PrivateKey},
+		{"payload", &config.Payload},
+		{"header", &config.Header},
+		{"in", &config.In},
+		{"prefix", &config.Prefix},
+		{"queryKey", &config.QueryKey},
+	}
+}
+
+func asapFields(config *engine.ASAPAuth) []textField {
+	return []textField{
+		{"algorithm", &config.Algorithm},
+		{"issuer", &config.Issuer},
+		{"subject", &config.Subject},
+		{"audience", &config.Audience},
+		{"keyId", &config.KeyID},
+		{"privateKey", &config.PrivateKey},
+		{"claims", &config.Claims},
+		{"expiry", &config.Expiry},
+	}
+}
+
+func hawkFields(config *engine.HawkAuth) []textField {
+	return []textField{
+		{"id", &config.ID},
+		{"key", &config.Key},
+		{"algorithm", &config.Algorithm},
+		{"ext", &config.Ext},
+		{"app", &config.App},
+		{"dlg", &config.Dlg},
+		{"nonce", &config.Nonce},
+		{"timestamp", &config.Timestamp},
+		{"payloadHash", &config.PayloadHash},
+	}
+}
+
 func (b nodeBuilder) section(fields []textField) *yaml.Node {
 	node := mappingNode()
 	for _, field := range fields {

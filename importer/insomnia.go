@@ -378,6 +378,13 @@ func (c *collector) insomniaAuth(auth map[string]any) (engine.Auth, bool) {
 		return awsAuth(value("accessKeyId"), value("secretAccessKey"), value("sessionToken"), value("region"), value("service")), true
 	case authOAuth1:
 		return insomniaOAuth1(value), true
+	case authHawk:
+		return hawkAuth(engine.HawkAuth{ID: value("id"), Key: value("key"), Algorithm: value("algorithm"), Ext: value("ext")}, flag(auth["validatePayload"])), true
+	case authASAP:
+		return asapAuth(engine.ASAPAuth{
+			Issuer: value("issuer"), Subject: value("subject"), Audience: value("audience"),
+			KeyID: value("keyId"), PrivateKey: value("privateKey"), Claims: value("additionalClaims"),
+		}), true
 	case authOAuth2:
 		return oauth2Auth(oauth2Fields{
 			Grant: value("grantType"), AuthURL: value("authorizationUrl"), TokenURL: value("accessTokenUrl"),

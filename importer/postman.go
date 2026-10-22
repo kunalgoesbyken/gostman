@@ -334,9 +334,35 @@ func (c *collector) postmanAuth(auth map[string]any) (engine.Auth, bool) {
 		return postmanOAuth1(fields), true
 	case authOAuth2:
 		return c.postmanOAuth2(fields), true
+	case authJWT:
+		return postmanJWT(fields), true
+	case authASAP:
+		return asapAuth(engine.ASAPAuth{
+			Algorithm: fields["alg"], Issuer: fields["iss"], Subject: fields["sub"], Audience: fields["aud"],
+			KeyID: fields["kid"], PrivateKey: fields["privateKey"], Claims: fields["claims"], Expiry: fields["exp"],
+		}), true
+	case authHawk:
+		return hawkAuth(engine.HawkAuth{
+			ID: fields["authId"], Key: fields["authKey"], Algorithm: fields["algorithm"], Ext: fields["extraData"],
+			App: fields["app"], Dlg: fields["delegation"], Nonce: fields["nonce"], Timestamp: fields["timestamp"],
+		}, fields["includePayloadHash"] == "true"), true
 	}
 	c.Warnings = appendUnique(c.Warnings, fmt.Sprintf(messageAuthType, kind))
 	return engine.Auth{}, true
+}
+
+func postmanJWT(fields map[string]string) engine.Auth {
+	config := engine.JWTAuth{
+		Algorithm: fields["algorithm"], Secret: fields["secret"], PrivateKey: fields["privateKey"], Payload: fields["payload"],
+		Header: fields["header"], Prefix: fields["headerPrefix"], QueryKey: fields["queryParamKey"],
+	}
+	if fields["isSecretBase64Encoded"] == "true" {
+		config.SecretEncoding = jwtSecretBase64
+	}
+	if fields["addTokenTo"] == "queryParam" {
+		config.In = inQuery
+	}
+	return engine.Auth{Type: authJWT, JWT: config}
 }
 
 func postmanOAuth1(fields map[string]string) engine.Auth {

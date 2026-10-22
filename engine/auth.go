@@ -10,6 +10,8 @@ func signRequest(auth Auth, substitute func(string) string, method string, targe
 		return signOAuth1(auth.OAuth1, substitute, method, target, headers, body)
 	case authEdgeGrid:
 		return signEdgeGrid(auth.EdgeGrid, substitute, method, target, headers, body), body
+	case authHawk:
+		return signHawk(auth.Hawk, substitute, method, target, headers, body), body
 	default:
 		return headers, body
 	}

@@ -104,6 +104,10 @@ func (r *redactor) auth(auth engine.Auth) engine.Auth {
 	auth.EdgeGrid.ClientToken = r.value("EDGEGRID_CLIENT_TOKEN", auth.EdgeGrid.ClientToken)
 	auth.EdgeGrid.ClientSecret = r.value("EDGEGRID_SECRET", auth.EdgeGrid.ClientSecret)
 	auth.EdgeGrid.AccessToken = r.value("EDGEGRID_TOKEN", auth.EdgeGrid.AccessToken)
+	auth.JWT.Secret = r.value("JWT_SECRET", auth.JWT.Secret)
+	auth.JWT.PrivateKey = r.value("JWT_PRIVATE_KEY", auth.JWT.PrivateKey)
+	auth.ASAP.PrivateKey = r.value("ASAP_PRIVATE_KEY", auth.ASAP.PrivateKey)
+	auth.Hawk.Key = r.value("HAWK_KEY", auth.Hawk.Key)
 	return auth
 }
 

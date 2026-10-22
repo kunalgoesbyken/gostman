@@ -72,7 +72,10 @@ func (e *Expansion) Headers(raw string, auth Auth) ([]HeaderEntry, error) {
 	if err != nil {
 		return nil, fmt.Errorf("headers are not valid: %w", err)
 	}
-	pairs = applyAuth(auth, e.Text, substitutePairs(pairs, e.Text), &url.URL{})
+	pairs, err = applyAuth(auth, e.Text, substitutePairs(pairs, e.Text), &url.URL{})
+	if err != nil {
+		return nil, err
+	}
 
 	entries := make([]HeaderEntry, 0, len(pairs))
 	for _, header := range pairs {

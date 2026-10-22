@@ -16,8 +16,14 @@ const (
 	authOAuth1   = "oauth1"
 	authOAuth2   = "oauth2"
 	authEdgeGrid = "edgegrid"
+	authJWT      = "jwt"
+	authASAP     = "asap"
+	authHawk     = "hawk"
 	inHeader     = "header"
 	inQuery      = "query"
+
+	jwtSecretBase64 = "base64"
+	hawkIncludeHash = "include"
 
 	grantClientCredentials = "client_credentials"
 	grantPassword          = "password"
@@ -65,6 +71,17 @@ func awsAuth(accessKey, secretKey, sessionToken, region, service string) engine.
 	return engine.Auth{Type: authAWS, AWS: engine.AWSAuth{
 		AccessKey: accessKey, SecretKey: secretKey, SessionToken: sessionToken, Region: region, Service: service,
 	}}
+}
+
+func asapAuth(config engine.ASAPAuth) engine.Auth {
+	return engine.Auth{Type: authASAP, ASAP: config}
+}
+
+func hawkAuth(config engine.HawkAuth, includeHash bool) engine.Auth {
+	if includeHash {
+		config.PayloadHash = hawkIncludeHash
+	}
+	return engine.Auth{Type: authHawk, Hawk: config}
 }
 
 func oauth2Auth(fields oauth2Fields) (engine.Auth, bool) {

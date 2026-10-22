@@ -205,6 +205,32 @@ export namespace deeplink {
 
 export namespace engine {
 	
+	export class ASAPAuth {
+	    algorithm: string;
+	    issuer: string;
+	    subject: string;
+	    audience: string;
+	    keyId: string;
+	    privateKey: string;
+	    claims: string;
+	    expiry: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ASAPAuth(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.algorithm = source["algorithm"];
+	        this.issuer = source["issuer"];
+	        this.subject = source["subject"];
+	        this.audience = source["audience"];
+	        this.keyId = source["keyId"];
+	        this.privateKey = source["privateKey"];
+	        this.claims = source["claims"];
+	        this.expiry = source["expiry"];
+	    }
+	}
 	export class AWSAuth {
 	    accessKey: string;
 	    secretKey: string;
@@ -223,6 +249,62 @@ export namespace engine {
 	        this.sessionToken = source["sessionToken"];
 	        this.region = source["region"];
 	        this.service = source["service"];
+	    }
+	}
+	export class HawkAuth {
+	    id: string;
+	    key: string;
+	    algorithm: string;
+	    ext: string;
+	    app: string;
+	    dlg: string;
+	    nonce: string;
+	    timestamp: string;
+	    payloadHash: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new HawkAuth(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.key = source["key"];
+	        this.algorithm = source["algorithm"];
+	        this.ext = source["ext"];
+	        this.app = source["app"];
+	        this.dlg = source["dlg"];
+	        this.nonce = source["nonce"];
+	        this.timestamp = source["timestamp"];
+	        this.payloadHash = source["payloadHash"];
+	    }
+	}
+	export class JWTAuth {
+	    algorithm: string;
+	    secret: string;
+	    secretEncoding: string;
+	    privateKey: string;
+	    payload: string;
+	    header: string;
+	    in: string;
+	    prefix: string;
+	    queryKey: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new JWTAuth(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.algorithm = source["algorithm"];
+	        this.secret = source["secret"];
+	        this.secretEncoding = source["secretEncoding"];
+	        this.privateKey = source["privateKey"];
+	        this.payload = source["payload"];
+	        this.header = source["header"];
+	        this.in = source["in"];
+	        this.prefix = source["prefix"];
+	        this.queryKey = source["queryKey"];
 	    }
 	}
 	export class EdgeGridAuth {
@@ -336,6 +418,9 @@ export namespace engine {
 	    aws: AWSAuth;
 	    oauth1: OAuth1Auth;
 	    edgegrid: EdgeGridAuth;
+	    jwt: JWTAuth;
+	    asap: ASAPAuth;
+	    hawk: HawkAuth;
 	
 	    static createFrom(source: any = {}) {
 	        return new Auth(source);
@@ -355,6 +440,9 @@ export namespace engine {
 	        this.aws = this.convertValues(source["aws"], AWSAuth);
 	        this.oauth1 = this.convertValues(source["oauth1"], OAuth1Auth);
 	        this.edgegrid = this.convertValues(source["edgegrid"], EdgeGridAuth);
+	        this.jwt = this.convertValues(source["jwt"], JWTAuth);
+	        this.asap = this.convertValues(source["asap"], ASAPAuth);
+	        this.hawk = this.convertValues(source["hawk"], HawkAuth);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -403,6 +491,7 @@ export namespace engine {
 	        this.expired = source["expired"];
 	    }
 	}
+	
 	
 	export class HeaderEntry {
 	    key: string;
@@ -538,6 +627,7 @@ export namespace engine {
 		    return a;
 		}
 	}
+	
 	export class Layer {
 	    headers: string;
 	    auth: Auth;

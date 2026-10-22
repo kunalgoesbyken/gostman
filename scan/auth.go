@@ -23,6 +23,10 @@ var authFields = []authField{
 	{"auth.oauth1.privateKey", func(a engine.Auth) string { return a.OAuth1.PrivateKey }},
 	{"auth.edgegrid.clientSecret", func(a engine.Auth) string { return a.EdgeGrid.ClientSecret }},
 	{"auth.edgegrid.accessToken", func(a engine.Auth) string { return a.EdgeGrid.AccessToken }},
+	{"auth.jwt.secret", func(a engine.Auth) string { return a.JWT.Secret }},
+	{"auth.jwt.privateKey", func(a engine.Auth) string { return a.JWT.PrivateKey }},
+	{"auth.asap.privateKey", func(a engine.Auth) string { return a.ASAP.PrivateKey }},
+	{"auth.hawk.key", func(a engine.Auth) string { return a.Hawk.Key }},
 }
 
 func (s *scanner) auth(at site, auth engine.Auth) {

@@ -91,6 +91,11 @@ The Type list in the Auth tab holds these choices:
 - AWS Signature V4: Access key ID, Secret access key, Session token, Region and Service.
 - OAuth 1.0: consumer key and secret, access token and token secret, signature method (HMAC-SHA1, HMAC-SHA256, RSA-SHA1, RSA-SHA256 or PLAINTEXT), and optional realm, callback URL, verifier, nonce and timestamp. Send in chooses Authorization header, Query params or Form body.
 - Akamai EdgeGrid: Client token, Client secret and Access token are required. Headers to sign, Max body size, Nonce and Timestamp are optional.
+- JWT Bearer: Gostman signs a token from Payload (JSON) for every request. HS256, HS384 and HS512 use a Secret, plain or Base64; the RS, PS and ES algorithms use a Private key (PEM). Extra header fields such as `kid` are optional. Add to puts the token in the Authorization header after Header prefix (default `Bearer`) or in a query parameter (default `token`). A payload that is not a JSON object stops the send with a message.
+- ASAP (Atlassian): Issuer, Audience, Key ID and Private key are required; Subject, Additional claims and Expires after (default `1h`) are optional. Each request gets a new token with `iat`, `exp` and `jti`, sent as a Bearer token.
+- Hawk: Hawk Auth ID and Hawk Auth Key, with SHA-256 or SHA-1. Payload hash adds a hash of the body. Extra data, App ID and Delegation are optional; Nonce and Timestamp are generated when empty.
+
+JWT Bearer and ASAP also apply to WebSocket and gRPC connections, because they do not depend on the body.
 
 Secret fields are masked. The eye button shows or hides the value. Values can use `{{variables}}`, and auth overrides a header or parameter of the same name.
 

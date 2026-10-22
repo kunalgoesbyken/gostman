@@ -7,9 +7,7 @@ import (
 	"crypto/rsa"
 	"crypto/sha1"
 	"crypto/sha256"
-	"crypto/x509"
 	"encoding/base64"
-	"encoding/pem"
 	"fmt"
 	"net/url"
 	"sort"
@@ -31,8 +29,6 @@ const (
 	contentTypeForm  = "application/x-www-form-urlencoded"
 	oauth1Version    = "1.0"
 )
-
-var oauth1DefaultPorts = map[string]string{"http": "80", "https": "443"}
 
 type OAuth1Auth struct {
 	ConsumerKey     string `json:"consumerKey"`
@@ -175,7 +171,7 @@ func encodeOAuth1Pairs(params []pair, separator string, quoted bool) string {
 
 func oauth1BaseURI(target *url.URL) string {
 	scheme := strings.ToLower(target.Scheme)
-	host := strings.TrimSuffix(strings.ToLower(target.Host), ":"+oauth1DefaultPorts[scheme])
+	host := strings.TrimSuffix(strings.ToLower(target.Host), ":"+defaultPorts[scheme])
 	path := target.EscapedPath()
 	if path == "" {
 		path = "/"
@@ -235,16 +231,9 @@ func oauth1Signature(method, base, consumerSecret, tokenSecret, privateKey strin
 }
 
 func parseRSAKey(text string) (*rsa.PrivateKey, error) {
-	block, _ := pem.Decode([]byte(strings.TrimSpace(text)))
-	if block == nil {
-		return nil, fmt.Errorf("the private key is not PEM encoded")
-	}
-	if key, err := x509.ParsePKCS1PrivateKey(block.Bytes); err == nil {
-		return key, nil
-	}
-	parsed, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	parsed, err := parsePrivateKey(text)
 	if err != nil {
-		return nil, fmt.Errorf("the private key is not a valid RSA key")
+		return nil, err
 	}
 	key, ok := parsed.(*rsa.PrivateKey)
 	if !ok {

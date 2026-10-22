@@ -14,6 +14,9 @@ type Auth struct {
 	AWS      AWSAuth      `json:"aws"`
 	OAuth1   OAuth1Auth   `json:"oauth1"`
 	EdgeGrid EdgeGridAuth `json:"edgegrid"`
+	JWT      JWTAuth      `json:"jwt"`
+	ASAP     ASAPAuth     `json:"asap"`
+	Hawk     HawkAuth     `json:"hawk"`
 }
 
 type OAuth2 struct {
