@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import Editor from '@monaco-editor/react'
+import Editor, { DiffEditor } from '@monaco-editor/react'
 import { useVariableMap } from '../hooks/useVariableMap'
 import { tripletToHex } from '../lib/colour'
 import { useResolvedTheme, usePreferences } from '../lib/preferences'
@@ -7,6 +7,7 @@ import { VARIABLE_TEXT, describeReference, findReferences, isDefined, openRefere
 import './variables.css'
 
 const THEME_NAME = 'gostman'
+const FONT_FAMILY = "'JetBrains Mono', 'Courier New', monospace"
 
 const tokenValue = (name) => getComputedStyle(document.documentElement).getPropertyValue(`--${name}`)
 
@@ -196,7 +197,7 @@ export function MonacoEditor({ value, onChange, language = "json", path, height 
             options={{
                 minimap: { enabled: false },
                 fontSize: editorFontSize,
-                fontFamily: "'JetBrains Mono', 'Courier New', monospace",
+                fontFamily: FONT_FAMILY,
                 lineNumbers: "on",
                 roundedSelection: false,
                 scrollBeyondLastLine: false,
@@ -215,4 +216,41 @@ export function MonacoEditor({ value, onChange, language = "json", path, height 
             }}
         />
     )
+}
+
+export function MonacoDiff({ original, modified, language }) {
+  const [instance, setInstance] = useState(null)
+  const { editorFontSize, wrapLines } = usePreferences()
+  const resolvedTheme = useEditorTheme(instance)
+  useEffect(() => () => {
+    if (!instance) return
+    const models = instance.editor.getModel()
+    instance.editor.setModel(null)
+    models?.original.dispose()
+    models?.modified.dispose()
+  }, [instance])
+  return (
+    <DiffEditor
+      height="100%"
+      language={language}
+      original={original}
+      modified={modified}
+      keepCurrentOriginalModel
+      keepCurrentModifiedModel
+      beforeMount={(monaco) => defineTheme(monaco, resolvedTheme === 'dark')}
+      onMount={(editor, monaco) => setInstance({ editor, monaco })}
+      theme={THEME_NAME}
+      options={{
+        readOnly: true,
+        minimap: { enabled: false },
+        fontSize: editorFontSize,
+        fontFamily: FONT_FAMILY,
+        scrollBeyondLastLine: false,
+        automaticLayout: true,
+        wordWrap: wrapLines ? "on" : "off",
+        diffWordWrap: wrapLines ? "on" : "off",
+        renderOverviewRuler: false,
+      }}
+    />
+  )
 }

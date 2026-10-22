@@ -345,6 +345,7 @@ function LoadedWorkspace({ backend, onBack }) {
 
             <ResponsePanel
               response={activeTab.response}
+              history={activeTab.responses}
               tests={activeTab.tests}
               loading={isLoading}
               onDownload={actions.download}

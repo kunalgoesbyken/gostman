@@ -1,8 +1,8 @@
-import { memo, useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { Suspense, lazy, memo, useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { JsonView, darkStyles } from 'react-json-view-lite'
 import 'react-json-view-lite/dist/index.css'
 import {
-  AlertTriangle, BookmarkPlus, Check, ChevronDown, ChevronUp, Cookie, Copy, Download, FileDigit, FileText, FileX, List, Loader2,
+  AlertTriangle, BookmarkPlus, Check, ChevronDown, ChevronUp, Cookie, Copy, Download, FileDigit, FileText, FileX, History, List, Loader2,
   Maximize2, Minimize2, Scissors, Search, Sparkles,
 } from "lucide-react"
 import { ConsolePanel } from "./ConsolePanel"
@@ -12,6 +12,7 @@ import { HighlightedText } from "./HighlightedText"
 import { useDebouncedValue } from "../hooks/useDebouncedValue"
 import { MAX_MATCHES, filterJson, findMatches, stepIndex } from "../lib/responseSearch"
 import { Badge } from "./ui/badge"
+import { ContextMenu } from "./ui/ContextMenu"
 import { IconButton } from "./ui/button"
 import { DataTable } from "./ui/dataTable"
 import { EmptyState } from "./ui/emptyState"
@@ -28,6 +29,7 @@ import { isFailedResponse } from "../lib/ai/tasks"
 import { canSaveAsExample } from "../lib/examples"
 import { trimTree } from "../lib/jsonTree"
 import { breakdownTitle } from "../lib/timeline"
+import { describeResponse, formatTime } from "../lib/responseHistory"
 import {
   DEFAULT_RESPONSE_SHARE, MIN_REQUEST_HEIGHT_PX, MIN_RESPONSE_HEIGHT_PX, TOOLBAR_HEIGHT_PX, rememberResponseShare, rememberedResponseShare,
 } from "../lib/layout"
@@ -49,6 +51,19 @@ const SEARCH_DEBOUNCE_MS = 200
 const NO_FILTER = { active: false }
 
 const VIEW_LABELS = { pretty: 'Pretty', raw: 'Raw', preview: 'Preview' }
+const NO_HISTORY = []
+const MENU_GAP_PX = 4
+const LINK_BUTTON = 'font-medium text-primary underline-offset-2 hover:underline'
+
+const ResponseCompareDialog = lazy(() => import("./ResponseCompareDialog").then((module) => ({ default: module.ResponseCompareDialog })))
+
+const HISTORY_TEXT = {
+  menu: 'Earlier responses',
+  latest: 'Latest response',
+  showing: (at) => `Showing the response from ${formatTime(at)}.`,
+  compare: 'Compare with the latest',
+  back: 'Back to the latest',
+}
 
 const MEDIA_KINDS = [BODY_KINDS.IMAGE, BODY_KINDS.PDF, BODY_KINDS.AUDIO, BODY_KINDS.VIDEO]
 
@@ -286,14 +301,40 @@ function panelStyleFor(isFullscreen, isCollapsed, panelShare) {
   return { flex: `0 1 ${panelShare}%`, minHeight: MIN_RESPONSE_HEIGHT_PX }
 }
 
-export const ResponsePanel = memo(function ResponsePanel({ response, tests, loading, onDownload, onSaveExample, onExplain }) {
+function historyMenuItems(earlier, past, select) {
+  const latest = past ? [{ id: 'latest', label: HISTORY_TEXT.latest, onSelect: () => select(null) }] : []
+  return [...latest, ...earlier.map((entry) => ({ id: String(entry.at), label: describeResponse(entry), onSelect: () => select(entry.at) }))]
+}
+
+function PastResponseNotice({ past, canCompare, onCompare, onBack }) {
+  return (
+    <Notice icon={History}>
+      {HISTORY_TEXT.showing(past.at)}{' '}
+      {canCompare && (
+        <>
+          <button type="button" className={LINK_BUTTON} onClick={onCompare}>{HISTORY_TEXT.compare}</button>
+          {' · '}
+        </>
+      )}
+      <button type="button" className={LINK_BUTTON} onClick={onBack}>{HISTORY_TEXT.back}</button>
+    </Notice>
+  )
+}
+
+export const ResponsePanel = memo(function ResponsePanel({ response, history = NO_HISTORY, tests, loading, onDownload, onSaveExample, onExplain }) {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [activeTab, setActiveTab] = useState(TAB_BODY)
   const [selectedView, setSelectedView] = useState(null)
+  const [pastAt, setPastAt] = useState(null)
+  const [historyMenu, setHistoryMenu] = useState(null)
+  const [isComparing, setIsComparing] = useState(false)
   const { containerRef, panelShare, isDragging, startDrag, resetHeight } = usePanelResize()
 
-  const shown = loading ? null : response
+  const earlier = useMemo(() => history.filter((entry) => entry.response !== response), [history, response])
+  const latestEntry = history.find((entry) => entry.response === response)
+  const past = earlier.find((entry) => entry.at === pastAt)
+  const shown = loading ? null : past?.response ?? response
   const hasResult = Boolean(shown && !shown.error)
   const text = textBody(shown)
   const kind = hasResult ? bodyKind(shown) : BODY_KINDS.EMPTY
@@ -336,6 +377,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
     setSearchOpen(false)
     setQuery('')
     setFilterPath('')
+    setPastAt(null)
   }, [response])
 
   useEffect(() => setMatchIndex(0), [debouncedQuery, view, filtered])
@@ -350,6 +392,11 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
     if (!canSearch || !(event.ctrlKey || event.metaKey) || event.altKey || event.key.toLowerCase() !== 'f') return
     event.preventDefault()
     setSearchOpen(true)
+  }
+
+  const openHistory = (event) => {
+    const { left, bottom } = event.currentTarget.getBoundingClientRect()
+    setHistoryMenu({ x: left, y: bottom + MENU_GAP_PX })
   }
 
   const toggleFullscreen = useCallback(() => setIsFullscreen((current) => !current), [])
@@ -428,6 +475,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
             </div>
 
             <div className="flex shrink-0 items-center gap-1">
+              {earlier.length > 0 && <IconButton label={HISTORY_TEXT.menu} icon={History} onClick={openHistory} />}
               {canSearch && (
                 <IconButton
                   label={searchOpen ? "Close search" : "Search body (Ctrl+F)"}
@@ -436,9 +484,9 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
                 />
               )}
               {showsBody && copyText && <CopyButton text={copyText} />}
-              {hasBody && <IconButton label="Download body" icon={Download} onClick={onDownload} />}
+              {hasBody && !past && <IconButton label="Download body" icon={Download} onClick={onDownload} />}
               {isFailedResponse(shown) && !shown.error && <IconButton label="Explain with AI" icon={Sparkles} onClick={onExplain} />}
-              {canSaveAsExample(shown) && <IconButton label="Save as example" icon={BookmarkPlus} onClick={onSaveExample} />}
+              {canSaveAsExample(shown) && !past && <IconButton label="Save as example" icon={BookmarkPlus} onClick={onSaveExample} />}
               <IconButton
                 label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
                 icon={isFullscreen ? Minimize2 : Maximize2}
@@ -446,6 +494,10 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
               />
             </div>
           </Toolbar>
+
+          {isOpen && past && (
+            <PastResponseNotice past={past} canCompare={Boolean(latestEntry)} onCompare={() => setIsComparing(true)} onBack={() => setPastAt(null)} />
+          )}
 
           {isOpen && hasResult && shown.truncated && (
             <Notice tone="warning" icon={Scissors}>
@@ -489,6 +541,14 @@ export const ResponsePanel = memo(function ResponsePanel({ response, tests, load
           )}
         </Tabs>
       </section>
+      {historyMenu && (
+        <ContextMenu position={historyMenu} title={HISTORY_TEXT.menu} items={historyMenuItems(earlier, past, setPastAt)} onClose={() => setHistoryMenu(null)} />
+      )}
+      {isComparing && past && latestEntry && (
+        <Suspense fallback={null}>
+          <ResponseCompareDialog earlier={past} latest={latestEntry} onClose={() => setIsComparing(false)} />
+        </Suspense>
+      )}
     </>
   )
 })

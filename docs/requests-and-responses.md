@@ -173,6 +173,7 @@ The toolbar shows the status and, for a completed request, the duration in milli
 
 The toolbar buttons are:
 
+- Earlier responses, once the request has been sent more than once
 - Search body (Ctrl+F)
 - Copy body
 - Download body
@@ -181,6 +182,19 @@ The toolbar buttons are:
 - Fullscreen
 
 The panel shows a notice when the response was cut off because it exceeded the size limit. The README gives the limits: 3 MB on the web app and 50 MB on the desktop app.
+
+### Earlier responses and comparing
+
+Each tab keeps its last 10 responses while the app is open. They are kept in memory only, like the current response, and responses with a body over 2 MB are not kept.
+
+1. Select **Earlier responses** in the toolbar and pick one. The list shows the time, the status, the duration and the size of each.
+2. The panel shows that response with its headers, cookies and timeline, under the notice "Showing the response from" and its time. Download body and Save as example are hidden while it is shown.
+3. Select **Compare with the latest** to open the two side by side. **Body** compares the bodies, with JSON formatted first so that only real changes stand out; **Headers** compares the headers sorted by name.
+4. Select **Back to the latest**, or send the request again, to return to the newest response.
+
+![The response panel showing an earlier response under the notice Showing the response from, with Compare with the latest and Back to the latest](../screenshots/response-history.png)
+
+![The Compare responses dialog: the earlier body on the left, the latest on the right, with the changed Authorization token highlighted](../screenshots/response-compare.png)
 
 ### Tabs
 

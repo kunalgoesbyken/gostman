@@ -7,6 +7,7 @@ import { DEFAULT_SETTINGS, normalizeSettings } from '../lib/network'
 import { ROOT_SETTINGS_ID, isBlankScope, normalizeFolder, normalizeScopeSettings, updatedScope } from '../lib/inheritance'
 import { normalizeRequest } from '../lib/request'
 import { isBlankRequest } from '../lib/requestChanges'
+import { rememberResponse } from '../lib/responseHistory'
 import { reconcileTabs } from '../lib/tabReconcile'
 import { isNarrowViewport } from '../lib/layout'
 import { reorderTabs, stepTab } from '../lib/tabOrder'
@@ -36,7 +37,7 @@ const createId = (prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random
 
 const asArray = (value) => (Array.isArray(value) ? value : [])
 
-const createTab = (id, request, isPreview = false) => ({ id, request: normalizeRequest(request), isPreview, pendingId: null, response: null, bodyDrafts: {} })
+const createTab = (id, request, isPreview = false) => ({ id, request: normalizeRequest(request), isPreview, pendingId: null, response: null, responses: [], bodyDrafts: {} })
 
 const FIRST_TAB = createTab(`${TAB_ID_PREFIX}1`)
 
@@ -443,7 +444,9 @@ export const useAppStore = create(
           mapTab(state, tabId, (tab) => ({ ...tab, pendingId }))
         )),
         finishTabRequest: (tabId, pendingId, response, outcome = {}) => set((state) => (
-          mapTab(state, tabId, (tab) => (tab.pendingId === pendingId ? { ...tab, ...outcome, pendingId: null, response } : tab))
+          mapTab(state, tabId, (tab) => (tab.pendingId === pendingId
+            ? { ...tab, ...outcome, pendingId: null, response, responses: rememberResponse(tab.responses, response, Date.now()) }
+            : tab))
         )),
         patchTab: (tabId, patch) => set((state) => mapTab(state, tabId, (tab) => ({ ...tab, ...patch }))),
         setRequestPanel: (requestPanel) => set({ requestPanel }),
