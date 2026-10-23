@@ -1,5 +1,5 @@
 import { mergeCookies } from '../cookies'
-import { addressParts } from './destinations'
+import { addressParts, isLoopbackHost, isPermittedHost } from './destinations'
 import { createPropertyList } from './propertyList'
 
 const ROOT_PATH = '/'
@@ -60,6 +60,16 @@ function cookieFor(address, item) {
 }
 
 const retired = (cookie) => ({ ...cookie, expired: true })
+
+const visibleTo = (hosts) => (cookie) => isLoopbackHost(cookie.domain) || hosts.some((host) => domainMatches(cookie, host))
+
+const writableBy = (hosts) => (cookie) => (cookie.expired ? visibleTo(hosts)(cookie) : isPermittedHost(cookie.domain, hosts))
+
+const listed = (items) => (Array.isArray(items) ? items : [])
+
+export const scriptCookies = (cookies, hosts) => listed(cookies).filter(visibleTo(listed(hosts)))
+
+export const acceptedCookies = (changes, hosts) => listed(changes).filter(writableBy(listed(hosts)))
 
 export function createCookies(stored, currentAddress) {
   let jar = Array.isArray(stored) ? stored : []

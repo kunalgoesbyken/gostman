@@ -15,6 +15,7 @@ import { addressHost, collectionHostsBy, isPermittedHost } from './scripting/des
 import { holdsBack, reasonFor } from './scripting/flow'
 import { MAX_SENDS, SEND_TIMEOUT_MS } from './scripting/limits'
 import { applyRequestEdits, requestSubject, responseSubject, runInSandbox } from './scripting/sandbox'
+import { acceptedCookies, scriptCookies } from './scripting/scriptCookies'
 import { scriptedRequest } from './scripting/subjects'
 import { SECRETS_TEXT } from './secretsText'
 import { ENTRY_KINDS, exchangeEntry, scriptEntry, withActivity } from './timeline'
@@ -58,15 +59,19 @@ function createTrace() {
   return { entries, timed }
 }
 
+const scriptHosts = () => collectionHostsBy(store().requests, (candidate) => variablesText(candidate, {}))
+
 async function runStage(stage, job, request, { send, trace, referenced }) {
   const variables = readVariables(request, referenced)
-  const { cookies } = store()
+  const hosts = scriptHosts()
+  const cookies = scriptCookies(store().cookies, hosts)
   const environment = findActiveEnvironment(store())?.name ?? ''
   const run = await trace.timed(scriptEntry(stage), () => runInSandbox({ ...job, variables, cookies, environment }, send))
   if (isPlainObject(run.variables) && !isSame(variables, run.variables)) {
     store().mergeActiveVariables(scriptChanges(variables, run.variables))
   }
-  if (Array.isArray(run.cookies)) store().storeCookies(run.cookies)
+  const changed = acceptedCookies(run.cookies, hosts)
+  if (changed.length > 0) store().storeCookies(changed)
   return { ...run, error: run.error ? `${stage}: ${run.error}` : '' }
 }
 
@@ -164,7 +169,7 @@ function createScriptSender(backend, trace) {
     const variables = variablesText(timed, {})
     const host = addressHost(timed.url, variables)
     if (host === '') throw new Error(UNUSABLE_ADDRESS)
-    if (!isPermittedHost(host, collectionHostsBy(requests, (candidate) => variablesText(candidate, {})))) {
+    if (!isPermittedHost(host, scriptHosts())) {
       throw new Error(`The host "${host}" is not used by this collection, so scripts may not call it.`)
     }
     scriptSends += 1

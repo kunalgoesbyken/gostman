@@ -29,7 +29,7 @@ Scripts are JavaScript. They run in an isolated worker with no network access of
 | `utils` | `uuid()`, `md5`, `sha1`, `sha256`, `sha512` (`hex` or `base64` output), `hmac(algorithm, key, text)`, `base64`, `hex` and `url` with `encode` and `decode`, `date` (`now`, `timestamp`, `unix`, `format`, `add`) and `random` (`int`, `string`, `pick`). |
 | `visualize(template, data)`, `visualize.table(rows)` | Renders an HTML view of the response in its **Visualize** tab. Templates use `{{field}}`, `{{#each list}}` and `{{#if value}}`; values are escaped. |
 | `require(name)` | The bundled modules `lodash`, `crypto-js`, `uuid`, `moment`, `dayjs`, `ajv` and `chai`. In a trusted folder on the desktop, also `./` and `../` files inside the folder. |
-| `bru` | Bruno's script API, so scripts pasted from Bruno run as they are; see [Scripts from Postman and Bruno](#scripts-from-postman-and-bruno). `bru.cookies` reads and changes the cookies sent to this request's URL. |
+| `bru` | Bruno's script API, so scripts pasted from Bruno run as they are; see [Scripts from Postman and Bruno](#scripts-from-postman-and-bruno). `bru.cookies` reads and changes the cookies sent to this request's URL; `bru.cookies.jar()` reaches only the cookies of localhost and of hosts the collection's requests use, the same hosts `sendRequest` may call. |
 
 ### Response queries
 

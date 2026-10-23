@@ -93,13 +93,15 @@ func (s *session) runStage(ctx context.Context, stage string, work job, request 
 	before := s.scoped(request)
 	work.Variables = before
 	work.Modules = s.modules
-	work.Cookies = s.common.cookieList()
 	work.Environment = s.environment
+	if err := s.scripts.Call("scriptCookies", &work.Cookies, s.common.cookieList(), s.hosts); err != nil {
+		return stageRun{Error: stage + ": " + err.Error()}
+	}
 	var run stageRun
 	if err := s.scripts.IsolatedWith(s.bridge(ctx), "runJob", &run, work); err != nil {
 		return stageRun{Error: stage + ": " + err.Error()}
 	}
-	if err := s.storeCookies(run.Cookies); err != nil {
+	if err := s.storeScriptCookies(run.Cookies); err != nil {
 		return stageRun{Error: stage + ": " + err.Error()}
 	}
 	if run.Variables != nil {
@@ -205,6 +207,17 @@ func (s *session) storeCookies(received []engine.CookieInfo) error {
 	}
 	s.common.cookies = merged
 	return nil
+}
+
+func (s *session) storeScriptCookies(changes []engine.CookieInfo) error {
+	if len(changes) == 0 {
+		return nil
+	}
+	var accepted []engine.CookieInfo
+	if err := s.scripts.Call("acceptedCookies", &accepted, changes, s.hosts); err != nil {
+		return err
+	}
+	return s.storeCookies(accepted)
 }
 
 func (s *session) extract(request Request, response engine.Response) error {
