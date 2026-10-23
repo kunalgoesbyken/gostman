@@ -33,7 +33,7 @@ function authorityOf(address) {
 const BACKSLASH = '\\'
 const FIRST_PRINTABLE = 0x21
 const hasAmbiguousCharacters = (address) => (
-  Array.from(address.trim()).some((character) => character === BACKSLASH || character.charCodeAt(0) < FIRST_PRINTABLE)
+  address.trim().split('').some((character) => character === BACKSLASH || character.charCodeAt(0) < FIRST_PRINTABLE)
 )
 
 export function hostOf(address) {

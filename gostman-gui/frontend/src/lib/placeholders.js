@@ -10,9 +10,16 @@ export const variableMap = (variables) => new Map(
   Object.entries(variables).filter(([, value]) => isDefined(value)).map(([name, value]) => [name, asText(value)])
 )
 
-export function parseVariableMap(json) {
+function readVariableMap(json) {
   const parsed = json.trim() === '' ? {} : parseJSON(json, null)
   return isPlainObject(parsed) ? variableMap(parsed) : null
+}
+
+let lastParsed = { json: null, variables: null }
+
+export function parseVariableMap(json) {
+  if (json !== lastParsed.json) lastParsed = { json, variables: readVariableMap(json) }
+  return lastParsed.variables
 }
 
 export function substitutePlaceholders(text, variables) {
