@@ -1,5 +1,10 @@
-export const REPOSITORY = "kunalgoesbyken/gostman"
+export const OWNER = "kunalgoesbyken"
+export const REPOSITORY = `${OWNER}/gostman`
 export const REPOSITORY_URL = `https://github.com/${REPOSITORY}`
 export const ISSUES_URL = `${REPOSITORY_URL}/issues`
 export const RELEASES_URL = `${REPOSITORY_URL}/releases/latest`
 export const DOCS_URL = `${REPOSITORY_URL}/blob/main/docs`
+export const HOMEBREW_TAP = `${OWNER}/tap`
+export const SCOOP_BUCKET_URL = `https://github.com/${OWNER}/scoop-gostman`
+export const GO_MODULE = `github.com/${REPOSITORY}`
+export const LICENSE_URL = `${REPOSITORY_URL}/blob/main/LICENSE`

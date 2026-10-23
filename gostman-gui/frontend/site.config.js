@@ -1,6 +1,7 @@
 import { build } from 'esbuild'
 import { createRequire } from 'module'
-import { mkdtempSync, rmSync, writeFileSync } from 'fs'
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs'
+import { createHash } from 'crypto'
 import { tmpdir } from 'os'
 import { join, relative, resolve, sep } from 'path'
 import { guidePages } from './src/guides/pages.js'
@@ -11,6 +12,8 @@ const DEFAULT_SITE_URL = 'https://gostman.com'
 const SITE_URL_TOKEN = '__SITE_URL__'
 const GUIDE_ENTRY = resolve('src/guides/render.jsx')
 const DOCS_DIR = resolve('../../docs')
+const EMPTY_ROOT = '<div id="root"></div>'
+const IMAGE_FILES = /\.(png|jpe?g|webp)$/
 
 export const siteUrl = (process.env.SITE_URL || DEFAULT_SITE_URL).replace(/\/+$/, '')
 
@@ -33,7 +36,26 @@ Disallow: /api/
 Sitemap: ${url}/sitemap.xml
 `
 
-async function buildGuideRenderer() {
+const contentHash = (source) => createHash('sha256').update(source).digest('hex')
+
+function bundledImageUrls(bundle) {
+  const urls = new Map(
+    Object.values(bundle)
+      .filter((item) => item.type === 'asset' && IMAGE_FILES.test(item.fileName))
+      .map((asset) => [contentHash(asset.source), `/${asset.fileName}`]),
+  )
+  return {
+    name: 'bundled-image-urls',
+    setup(build) {
+      build.onLoad({ filter: IMAGE_FILES }, (args) => {
+        const url = urls.get(contentHash(readFileSync(args.path)))
+        return url ? { contents: `export default ${JSON.stringify(url)}`, loader: 'js' } : undefined
+      })
+    },
+  }
+}
+
+async function buildGuideRenderer(bundle) {
   const outdir = mkdtempSync(join(tmpdir(), 'gostman-guides-'))
   const { outputFiles } = await build({
     entryPoints: [GUIDE_ENTRY],
@@ -45,7 +67,8 @@ async function buildGuideRenderer() {
     jsx: 'automatic',
     publicPath: '/',
     assetNames: 'assets/[name]-[hash]',
-    loader: { '.jpg': 'file', '.png': 'file' },
+    loader: { '.jpg': 'file', '.png': 'file', '.webp': 'file' },
+    plugins: [bundledImageUrls(bundle)],
     define: { 'process.env.NODE_ENV': '"production"' },
     logLevel: 'silent',
   })
@@ -53,13 +76,13 @@ async function buildGuideRenderer() {
   const script = outputFiles.find((file) => file.path.endsWith('.js'))
   const scriptPath = join(outdir, 'render.cjs')
   writeFileSync(scriptPath, script.text)
-  const { renderGuidePage, renderDocsPage } = createRequire(scriptPath)(scriptPath)
+  const { renderGuidePage, renderDocsPage, renderLandingMarkup } = createRequire(scriptPath)(scriptPath)
   rmSync(outdir, { recursive: true, force: true })
 
   const assets = outputFiles
     .filter((file) => file !== script)
     .map((file) => ({ fileName: relative(outdir, file.path).split(sep).join('/'), source: file.contents }))
-  return { renderGuidePage, renderDocsPage, assets }
+  return { renderGuidePage, renderDocsPage, renderLandingMarkup, assets }
 }
 
 const stylesheetsOf = (bundle) =>
@@ -77,7 +100,7 @@ export function siteMeta() {
       this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: sitemapXml(siteUrl) })
       this.emitFile({ type: 'asset', fileName: 'robots.txt', source: robotsTxt(siteUrl) })
 
-      const { renderGuidePage, renderDocsPage, assets } = await buildGuideRenderer()
+      const { renderGuidePage, renderDocsPage, renderLandingMarkup, assets } = await buildGuideRenderer(bundle)
       const docs = loadDocs(DOCS_DIR)
       const stylesheets = stylesheetsOf(bundle)
       const emit = (fileName, source) => this.emitFile({ type: 'asset', fileName, source })
@@ -87,6 +110,9 @@ export function siteMeta() {
       docs.pages.forEach((page) =>
         emit(docOutputFile(page.slug), renderDocsPage(page, { siteUrl, stylesheets, nav: docs.nav })),
       )
+      const landing = bundle['index.html']
+      if (!String(landing.source).includes(EMPTY_ROOT)) this.error('index.html has no empty root element to prerender into')
+      landing.source = String(landing.source).replace(EMPTY_ROOT, `<div id="root">${renderLandingMarkup()}</div>`)
     },
   }
 }

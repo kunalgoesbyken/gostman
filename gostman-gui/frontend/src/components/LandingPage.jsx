@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef } from "react"
 import { LazyMotion, m, useReducedMotion } from "framer-motion"
 import { Button, buttonVariants } from "./ui/button"
 import { cn } from "../lib/utils"
@@ -8,35 +8,44 @@ import { docPath } from "../docs/manifest"
 import { useSmoothScroll } from "../lib/landingMotion"
 import { ArrowRight, Check, Download, Github, Globe } from "./landing/icons"
 
-import captureShot from "../assets/landing/capture.png"
-import docsShot from "../assets/landing/docs.png"
-import mockShot from "../assets/landing/mock.png"
-import testsShot from "../assets/landing/tests.png"
+import captureShot from "../assets/landing/capture.webp"
+import docsShot from "../assets/landing/docs.webp"
+import mockShot from "../assets/landing/mock.webp"
+import testsShot from "../assets/landing/tests.webp"
 
 import { AGENT_SESSION, CLI_RUN, REQUEST_FILE } from "./landing/captures"
 import { TerminalBlock } from "./landing/TerminalBlock"
 import { ProductShowcase } from "./landing/ProductShowcase"
 import { DownloadDropdown } from "./landing/DownloadDropdown"
-import { downloadFor } from "./landing/downloads"
-import { detectBrowserOs } from "../lib/detectOs"
+import { DOWNLOADS, downloadFor, groupByOs } from "./landing/downloads"
+import { useBrowserOs } from "../hooks/useBrowserOs"
+import { InstallCommands } from "./landing/InstallCommands"
+import { formatList } from "./landing/content"
 import { Brand } from "./landing/Brand"
 import { NavBar } from "./landing/NavBar"
 import { PointList } from "./landing/PointList"
 import { SiteFooter } from "./landing/SiteFooter"
-import { MountOnVisible } from "./landing/MountOnVisible"
 import { SplitHeading } from "./landing/SplitHeading"
+import { CountsSection } from "./landing/CountsSection"
+import { EverythingSection } from "./landing/EverythingSection"
+import { ComparisonSection } from "./landing/ComparisonSection"
+import { FaqSection } from "./landing/FaqSection"
 
 const loadMotionFeatures = () => import("../lib/motionFeatures").then((module) => module.default)
 
-const EverythingSection = lazy(() => import("./landing/EverythingSection"))
-
 const starCount = (value) => (Number.isFinite(value) ? value : null)
-const ComparisonSection = lazy(() => import("./landing/ComparisonSection"))
-const FaqSection = lazy(() => import("./landing/FaqSection"))
 
 const REPOSITORY_API_URL = `https://api.github.com/repos/${REPOSITORY}`
 
 const HIGHLIGHTS = ["No account", "Collections stay on your machine", "Open source"]
+
+const SECTION_LINKS = [
+  { href: "#features", label: "Features" },
+  { href: "#compare", label: "Compare" },
+  { href: "#faq", label: "FAQ" },
+]
+
+const PLATFORMS = formatList(groupByOs(DOWNLOADS).map((group) => group.name))
 
 const introStep = (step) => ({ "--intro-step": step })
 
@@ -191,29 +200,14 @@ function TryWebButton({ onClick, isPrimary }) {
 }
 
 function CallToActions({ onGetStarted, className, style }) {
-  const [download] = useState(() => downloadFor(detectBrowserOs()))
+  const os = useBrowserOs()
+  const download = downloadFor(os)
+  const isWebFirst = os !== null && !download
   return (
     <div className={cn("relative z-20 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center", className)} style={style}>
-      {download ? (
-        <>
-          <DownloadDropdown primary={download} />
-          <TryWebButton onClick={onGetStarted} />
-        </>
-      ) : (
-        <>
-          <TryWebButton onClick={onGetStarted} isPrimary />
-          <DownloadDropdown variant="outline" />
-        </>
-      )}
+      <DownloadDropdown primary={download} variant={isWebFirst ? "outline" : undefined} />
+      <TryWebButton onClick={onGetStarted} isPrimary={isWebFirst} />
     </div>
-  )
-}
-
-function LazySection({ children, minHeight }) {
-  return (
-    <MountOnVisible minHeight={minHeight}>
-      <Suspense fallback={null}>{children}</Suspense>
-    </MountOnVisible>
   )
 }
 
@@ -259,6 +253,11 @@ export function LandingPage({ onGetStarted }) {
         <NavBar>
           <Brand />
           <div className="flex items-center gap-1 sm:gap-2">
+            {SECTION_LINKS.map((link) => (
+              <a key={link.href} href={link.href} className={cn(NAV_LINK, "max-md:hidden")}>
+                {link.label}
+              </a>
+            ))}
             <a href={docPath("")} className={NAV_LINK}>
               Docs
             </a>
@@ -304,7 +303,7 @@ export function LandingPage({ onGetStarted }) {
 
                 <CallToActions onGetStarted={onGetStarted} className="intro pt-6" style={introStep(3)} />
 
-                <div className="intro flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-6 text-sm text-muted-foreground/80" style={introStep(4)}>
+                <div className="intro flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-6 text-sm text-muted-foreground" style={introStep(4)}>
                   {HIGHLIGHTS.map((text) => (
                     <div key={text} className="flex items-center gap-2">
                       <Check className="h-3.5 w-3.5 text-success/70" />
@@ -325,7 +324,9 @@ export function LandingPage({ onGetStarted }) {
           </section>
         </div>
 
-        <section className="relative py-20 px-6" aria-labelledby="workflow-heading">
+        <CountsSection />
+
+        <section id="features" className="render-when-visible relative py-20 px-6" aria-labelledby="workflow-heading">
           <div className="mx-auto max-w-6xl">
             <div className="mb-12 max-w-2xl">
               <SplitHeading
@@ -345,21 +346,11 @@ export function LandingPage({ onGetStarted }) {
           </div>
         </section>
 
-        <div id="download" className="scroll-mt-24">
-          <LazySection minHeight={720}>
-            <EverythingSection onGetStarted={onGetStarted} />
-          </LazySection>
-        </div>
+        <EverythingSection onGetStarted={onGetStarted} />
+        <ComparisonSection />
+        <FaqSection />
 
-        <LazySection>
-          <ComparisonSection />
-        </LazySection>
-
-        <LazySection>
-          <FaqSection />
-        </LazySection>
-
-        <section className="relative px-6 pb-24">
+        <section className="render-when-visible relative px-6 pb-24">
           <div className="relative mx-auto max-w-6xl rounded-2xl border border-border/60 bg-card px-6 py-16 text-center md:py-20">
             <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl" aria-hidden="true">
               <div className="landing-glow absolute inset-x-0 top-1/3 h-full opacity-70" />
@@ -372,6 +363,8 @@ export function LandingPage({ onGetStarted }) {
               Download the desktop app for Windows, macOS or Linux, or open the web version now. There is nothing to sign up for.
             </p>
             <CallToActions onGetStarted={onGetStarted} className="mt-8" />
+            <p className="mt-6 text-sm text-muted-foreground">Free and open source · {PLATFORMS} · No account</p>
+            <InstallCommands className="relative mx-auto mt-10 max-w-2xl text-left" />
           </div>
         </section>
 

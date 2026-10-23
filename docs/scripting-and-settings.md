@@ -10,7 +10,7 @@ Define variables in an environment, a folder, the collection or a request, and r
 
 The Tests tab of a request holds assertions (`res.status equals 200`, `res.body.user.id is a number`) and pre-request and post-response scripts. Use assertions for checks that fit in one row and a script for anything else. Results appear in the Tests tab of the response, and the runner and `gostman run` apply the same checks.
 
-![A request with four assertion rows and a passing test list under the response](../gostman-gui/frontend/src/assets/landing/tests.png)
+![A request with four assertion rows and a passing test list under the response](../gostman-gui/frontend/src/assets/landing/tests.webp)
 
 Scripts are JavaScript. They run in an isolated worker with no network access of their own and are stopped after 10 seconds. Folder and collection scripts run around the request's own, outermost first; see [Folder and collection settings](folder-settings.md).
 

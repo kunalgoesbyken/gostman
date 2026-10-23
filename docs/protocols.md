@@ -24,7 +24,7 @@ Limits that apply to every protocol on this page:
 
 Choose GRAPHQL in the method list, or open the GraphQL tab and select Send as GraphQL. The engine sends a POST request with a JSON body that holds `query` and, when you provide them, `variables`. If the query editor is empty, the engine falls back to the request body.
 
-![A GraphQL request named Countries with a query, a Variables (JSON) section and a 200 OK response that shows data and countries](../gostman-gui/frontend/src/assets/landing/graphql.png)
+![A GraphQL request named Countries with a query, a Variables (JSON) section and a 200 OK response that shows data and countries](../gostman-gui/frontend/src/assets/landing/graphql.webp)
 
 ### Query and variables
 
@@ -59,7 +59,7 @@ With an `http` or `https` URL, Gostman sends GraphQL as a normal HTTP request. T
 
 Choose GRPC in the method list. The address is a `grpc://host:port` URL for plaintext or `grpcs://host:port` for TLS. The default port is 80 for `grpc://` and 443 for `grpcs://`. TLS certificates are verified unless you turn off Verify TLS certificates in Settings.
 
-![A gRPC request with the source set to Server reflection, a method picker showing Echo as Unary, a JSON message and a JSON response](../gostman-gui/frontend/src/assets/landing/grpc.png)
+![A gRPC request with the source set to Server reflection, a method picker showing Echo as Unary, a JSON message and a JSON response](../gostman-gui/frontend/src/assets/landing/grpc.webp)
 
 ### Load the services
 
@@ -106,7 +106,7 @@ gRPC works in both apps. In the web app the call goes through the proxy, so it c
 
 Enter a `ws://` or `wss://` URL. The Send button becomes Connect, and the WebSocket tab opens. Placeholders in the URL and in the headers are replaced with environment values. If the URL uses a variable the active environment does not define, the panel shows which ones are missing.
 
-![A WebSocket session that is Connected to wss://echo.websocket.org with sent and received messages in the log and an empty message box](../gostman-gui/frontend/src/assets/landing/websocket.png)
+![A WebSocket session that is Connected to wss://echo.websocket.org with sent and received messages in the log and an empty message box](../gostman-gui/frontend/src/assets/landing/websocket.webp)
 
 ### Connect and send
 
@@ -259,7 +259,7 @@ In the desktop app, write `stdio:` followed by the command that starts the serve
 
 ![An MCP request to a local server started with npx: the server line, the echo tool, its JSON arguments and the response](../screenshots/mcp-stdio.png)
 
-![An MCP request with the server line gostman-mcp-test-server 1.0.0 MCP 2025-06-18, the echo tool, JSON arguments and an OK response](../gostman-gui/frontend/src/assets/landing/mcp.png)
+![An MCP request with the server line gostman-mcp-test-server 1.0.0 MCP 2025-06-18, the echo tool, JSON arguments and an OK response](../gostman-gui/frontend/src/assets/landing/mcp.webp)
 
 ### Load the tools
 

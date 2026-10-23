@@ -6,7 +6,7 @@ import { ABOUT_LINKS, buildDiagnostics, openExternal } from "../lib/about"
 import { ABOUT_TEXT as TEXT } from "../lib/aboutText"
 import { usePreferences } from "../lib/preferences"
 import { useAppStore } from "../store/appStore"
-import logo from "../assets/logo.jpg"
+import logo from "../assets/logo.webp"
 
 export function AboutDialog({ onClose }) {
   const requests = useAppStore((s) => s.requests)

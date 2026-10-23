@@ -168,6 +168,7 @@
   html {
     background-color: hsl(var(--background));
     font-size: calc(var(--text-scale) * 1%);
+    scroll-padding-top: 4.5rem;
   }
 
   html[data-density="compact"] {
@@ -248,6 +249,11 @@
       0 -24px 80px -16px hsl(var(--primary) / 0.45);
   }
 
+  .render-when-visible {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 60rem;
+  }
+
   kbd {
     @apply inline-flex shrink-0 items-center rounded border border-border px-1.5 py-0.5;
     @apply font-mono text-3xs font-medium text-muted-foreground;
@@ -298,6 +304,17 @@
       animation: reveal linear both;
       animation-timeline: view();
       animation-range: entry 0% entry 60%;
+    }
+
+    .split-heading {
+      view-timeline: --split-heading block;
+    }
+
+    .split-word {
+      --word-delay: calc(min(var(--word-step, 0), 8) * 5%);
+      animation: reveal linear both;
+      animation-timeline: --split-heading;
+      animation-range: entry var(--word-delay) entry calc(50% + var(--word-delay));
     }
   }
 }

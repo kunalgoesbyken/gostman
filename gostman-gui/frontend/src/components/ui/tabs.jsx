@@ -1,5 +1,6 @@
 import * as React from "react"
 import { ORIENTATION, moveFocus } from "../../lib/rovingFocus"
+import { scrollIntoStrip } from "../../lib/scrollIntoStrip"
 import { cn } from "../../lib/utils"
 
 export const TAB_KEYS = { selector: "[role=tab]", orientation: ORIENTATION.horizontal, activate: true }
@@ -34,7 +35,7 @@ function TabsTrigger({ className, value, children }) {
   const isActive = currentValue === value
 
   React.useEffect(() => {
-    if (isActive) triggerRef.current.scrollIntoView({ block: "nearest", inline: "nearest" })
+    if (isActive) scrollIntoStrip(triggerRef.current)
   }, [isActive])
 
   return (

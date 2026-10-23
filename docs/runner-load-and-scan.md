@@ -8,7 +8,7 @@ The Run requests dialog sends the requests of your collection one after another 
 
 Requests run in sidebar order, with their scripts, extraction rules and assertions, using the active environment. WebSocket requests are skipped.
 
-![The Run requests dialog after a run: Sign in, Current user, List items and Reports passed with a 200 OK status, and Export failed with a 500 status because the check res.status equals 200 did not hold. The footer reads Ran 5 of 5, 4 passed, 1 failed.](../gostman-gui/frontend/src/assets/landing/runner.png)
+![The Run requests dialog after a run: Sign in, Current user, List items and Reports passed with a 200 OK status, and Export failed with a 500 status because the check res.status equals 200 did not hold. The footer reads Ran 5 of 5, 4 passed, 1 failed.](../gostman-gui/frontend/src/assets/landing/runner.webp)
 
 ### Options
 

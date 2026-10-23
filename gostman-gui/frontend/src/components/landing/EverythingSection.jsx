@@ -2,9 +2,9 @@ import { DownloadPanel } from "./DownloadPanel"
 import { FeatureIndex } from "./FeatureIndex"
 import { SplitHeading } from "./SplitHeading"
 
-export default function EverythingSection({ onGetStarted }) {
+export function EverythingSection({ onGetStarted }) {
   return (
-    <section className="relative px-6 py-24" aria-labelledby="included-heading">
+    <section id="download" className="render-when-visible relative px-6 py-24" aria-labelledby="included-heading">
       <div className="mx-auto max-w-6xl">
         <div className="mb-14 max-w-2xl">
           <SplitHeading

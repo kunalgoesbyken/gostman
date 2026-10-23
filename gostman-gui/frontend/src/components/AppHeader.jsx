@@ -7,7 +7,7 @@ import { isDesktopShell, isDragRegion, windowControls } from "../lib/windowContr
 import { promptInstall, useInstallable } from "../lib/pwa"
 import { INSTALL_TEXT } from "../lib/installText"
 import { useShortcutLabel } from "../hooks/useShortcuts"
-import logo from "../assets/logo.jpg"
+import logo from "../assets/logo.webp"
 
 const DRAG = { "--wails-draggable": "drag" }
 const NO_DRAG = { "--wails-draggable": "no-drag" }

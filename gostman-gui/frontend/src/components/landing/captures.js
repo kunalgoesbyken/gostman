@@ -1,11 +1,4 @@
-const command = (copy) => ({ copy })
-const prompt = (text) => ({ text, tone: "command" })
-const muted = (text) => ({ text, tone: "muted" })
-const pass = (text) => ({ text, tone: "pass" })
-const fail = (text) => ({ text, tone: "fail" })
-const key = (text) => ({ text, tone: "key" })
-const plain = (text) => ({ text })
-const BLANK = plain("")
+import { BLANK, command, fail, key, muted, pass, plain, prompt } from "./terminalLines"
 
 const REQUEST_FILE_LINES = [
   key("id: r-current-user"),

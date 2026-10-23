@@ -50,6 +50,8 @@ const chunkClosure = (bundle, fileName, seen = new Set()) => {
   return seen
 }
 
+const withLinks = (html, links) => String(html).replace('</head>', `${links.join('\n')}\n</head>`)
+
 function preloadedRoutePage(route, module) {
   const moduleId = normalizePath(resolve(__dirname, module))
   return {
@@ -64,12 +66,16 @@ function preloadedRoutePage(route, module) {
       const loaded = new Set(chunks.filter((chunk) => chunk.isEntry).flatMap((chunk) => [...chunkClosure(bundle, chunk.fileName)]))
       const files = [...chunkClosure(bundle, target.fileName)].filter((fileName) => !loaded.has(fileName))
       const styles = files.flatMap((fileName) => [...(bundle[fileName].viteMetadata?.importedCss ?? [])])
-      const links = [
+      const preloads = [
         ...styles.map((fileName) => `<link rel="stylesheet" href="/${fileName}">`),
         ...files.map((fileName) => `<link rel="modulepreload" crossorigin href="/${fileName}">`),
       ]
-      const source = String(page.source).replace('</head>', `${links.join('\n')}\n</head>`)
-      this.emitFile({ type: 'asset', fileName: `${route}/index.html`, source })
+      const prefetches = [
+        ...styles.map((fileName) => `<link rel="prefetch" as="style" href="/${fileName}">`),
+        ...files.map((fileName) => `<link rel="prefetch" as="script" crossorigin href="/${fileName}">`),
+      ]
+      this.emitFile({ type: 'asset', fileName: `${route}/index.html`, source: withLinks(page.source, preloads) })
+      page.source = withLinks(page.source, prefetches)
     },
   }
 }

@@ -2,7 +2,7 @@
 
 This page covers the request editor and the response viewer in Gostman: the request bar, the request tabs, variables in inputs, the response tabs, history, the cookie jar, saved examples and code generation. It describes the desktop app and the web app, which share one interface, and marks the places where they differ.
 
-![A POST request to a login URL with a JSON body, and the pretty-printed JSON response below it](../gostman-gui/frontend/src/assets/landing/rest.png)
+![A POST request to a login URL with a JSON body, and the pretty-printed JSON response below it](../gostman-gui/frontend/src/assets/landing/rest.webp)
 
 ## Open requests
 
@@ -139,7 +139,7 @@ Each assertion row has an Expression, a Check and an Expected value. Expressions
 - Text and list checks: contains, does not contain, starts with, ends with, matches regex, is one of, has length.
 - Checks without an expected value: is defined, is undefined, is null, is empty, is not empty, is true, is false, is a number, is a string, is a boolean, is an array, is an object.
 
-![Assertions and test results](../gostman-gui/frontend/src/assets/landing/tests.png)
+![Assertions and test results](../gostman-gui/frontend/src/assets/landing/tests.webp)
 
 ### Settings
 
