@@ -20,6 +20,7 @@ type dialect struct {
 	roots      map[string]bool
 	response   string
 	properties map[string]string
+	objects    map[string]string
 	calls      map[string]callRule
 	specials   map[string]special
 	scoped     map[string]bool
@@ -27,6 +28,16 @@ type dialect struct {
 	implicit   map[string]string
 	receivers  map[string]receiver
 	native     map[string]map[string]bool
+}
+
+func (d *dialect) rebased(path chain) (string, int, bool) {
+	for kept := len(path.segments); kept > 0; kept-- {
+		prefix := chain{root: path.root, segments: path.segments[:kept]}
+		if replacement, found := d.objects[prefix.text()]; found {
+			return replacement, len(path.segments) - kept, true
+		}
+	}
+	return "", 0, false
 }
 
 func (d *dialect) responsePath(path chain) (string, bool) {

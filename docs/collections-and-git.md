@@ -105,7 +105,7 @@ Steps are worked out from your data, so after an import the steps it covers are 
 
 Below the list, the panel offers:
 
-- **Import** for Postman, Bruno, Insomnia, OpenAPI, HAR or a curl command.
+- **Import** for Postman, Bruno, Insomnia, OpenAPI, HAR, .http files or a curl command.
 - **Open folder**, only where folder storage is available (see below).
 - **New collection**, which creates a folder in the sidebar.
 - A hint to paste a curl command into the address bar to fill the request.

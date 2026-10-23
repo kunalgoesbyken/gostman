@@ -21,7 +21,7 @@ export const guidePages = [
       {
         heading: "Moving over from Postman",
         paragraphs: [
-          "Import a Postman collection, or OpenAPI, Insomnia, HAR, WSDL, Bruno and curl. Collections export back to Postman, OpenAPI, HAR, Bruno and Markdown.",
+          "Import a Postman collection, or OpenAPI, Insomnia, HAR, WSDL, Bruno, .http files and curl. Collections export back to Postman, OpenAPI, HAR, Bruno, .http files and Markdown.",
           "Imported scripts are kept and listed in the import summary. Gostman scripts use test() and expect() rather than the Postman pm API, so review them after importing.",
         ],
       },

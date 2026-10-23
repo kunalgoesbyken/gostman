@@ -34,7 +34,7 @@ export const FEATURE_INDEX = [
     rows: [
       { term: "A real Git panel", href: docPath("collections-and-git"), text: "Diff, commit, push, branches, stash and conflict resolution, in the desktop app." },
       { term: "Plain files", href: docPath("collections-and-git"), text: "Nested collections, tabs and history, kept as plain YAML files in a folder or in app storage." },
-      { term: "Import and export", href: docPath("import-export-and-specs"), text: "Import Postman, OpenAPI, Insomnia, HAR, WSDL, Bruno collections and curl commands. Export to Postman, OpenAPI, Markdown or a backup." },
+      { term: "Import and export", href: docPath("import-export-and-specs"), text: "Import Postman, OpenAPI, Insomnia, HAR, WSDL, Bruno collections, .http files and curl commands. Export to Postman, OpenAPI, Markdown, .http files or a backup." },
       { term: "Agent-ready, and in the browser", href: docPath("agents"), text: "An MCP server with secret redaction and a host allowlist, and a web version with nothing to install." },
     ],
   },

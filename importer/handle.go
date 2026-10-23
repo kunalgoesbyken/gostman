@@ -104,11 +104,13 @@ func (c *collector) accept(files []File, format string) []document {
 }
 
 func (c *collector) importDocuments(ctx context.Context, docs []document, options Options, config Config) {
-	var bruno, open, supporting []document
+	var bruno, open, supporting, httpDocs []document
 	for _, doc := range docs {
 		switch {
 		case doc.kind == kindBruno || doc.kind == kindBrunoConfig:
 			bruno = append(bruno, doc)
+		case doc.kind == kindHTTP || doc.kind == kindHTTPEnvironment:
+			httpDocs = append(httpDocs, doc)
 		case doc.kind == kindOpenItem || doc.kind == kindOpenEnvironment || doc.kind == kindOpenCollection && !bundled(doc):
 			open = append(open, doc)
 		case doc.kind == kindSchema:
@@ -142,5 +144,8 @@ func (c *collector) importDocuments(ctx context.Context, docs []document, option
 	}
 	if len(open) > 0 {
 		c.readOpenFolders(open)
+	}
+	if len(httpDocs) > 0 {
+		c.readHTTP(httpDocs)
 	}
 }

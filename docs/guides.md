@@ -2,7 +2,7 @@
 
 Short recipes for common jobs. Each one lists the steps and links to the reference page with every option. New to Gostman? Start with the [tutorial](tutorial-first-collection.md).
 
-## Move a collection from Postman, Insomnia or Bruno
+## Move a collection from Postman, Insomnia, Bruno or .http files
 
 In the app, choose **Import** in the sidebar (or on the welcome panel) and drop the export file or folder. From the command line:
 
@@ -12,8 +12,9 @@ gostman run api
 ```
 
 - Requests, folders, environments, auth, examples and scripts come across. Common Postman script calls such as `pm.test`, `pm.expect`, `pm.environment.set` and `pm.response.json()` are rewritten to Gostman's script API, and so are Bruno calls such as `bru.setEnvVar`, `bru.getVar`, `bru.interpolate`, `bru.runRequest`, `bru.sendRequest` and `bru.sleep`. Bruno's `res("path")` queries and `bru.cookies` work as written. The import summary lists anything that was left out or needs a look.
+- `.http` and `.rest` files from VS Code REST Client or JetBrains HTTP Client import as one folder per file, with file variables, `http-client.env.json` environments, request variables and the common JetBrains `client.*` and `response.*` script calls. Import a project folder with `gostman import requests/ --out api`.
 - Tokens and cookie values are never imported, and imports never switch off TLS verification. Sign in again where a request needs a token.
-- Export back with `gostman export api --format bruno --out bruno-api`, or `openapi`, `curl` and `har`.
+- Export back with `gostman export api --format bruno --out bruno-api`, or `openapi`, `curl`, `har` and `http`.
 
 Reference: [Import, export and OpenAPI specs](import-export-and-specs.md). Moving from Bruno: [Coming from Bruno](coming-from-bruno.md).
 

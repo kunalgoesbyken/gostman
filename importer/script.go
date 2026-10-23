@@ -299,8 +299,33 @@ func (t *translator) property(node ast.Expression, path chain) (string, bool) {
 	if response, isResponse := t.dialect.responsePath(path); isResponse {
 		return responseProperty(responseRoot, response)
 	}
+	if replacement, ok := t.rebased(node, path); ok {
+		return replacement, true
+	}
 	rule, found := t.dialect.properties[path.text()]
 	return rule, found
+}
+
+func (t *translator) rebased(node ast.Expression, path chain) (string, bool) {
+	replacement, outer, found := t.dialect.rebased(path)
+	if !found {
+		return "", false
+	}
+	inner := node
+	for ; outer > 0; outer-- {
+		inner = memberObject(inner)
+	}
+	return replacement + t.raw(int(inner.Idx1())-1, int(node.Idx1())-1), true
+}
+
+func memberObject(node ast.Expression) ast.Expression {
+	switch member := node.(type) {
+	case *ast.DotExpression:
+		return member.Left
+	case *ast.BracketExpression:
+		return member.Left
+	}
+	return node
 }
 
 func (t *translator) noteScope(node ast.Node, path chain) {
@@ -372,10 +397,13 @@ func (t *translator) callRule(call *ast.CallExpression, path chain, args []strin
 		return responseCall(responseRoot, response, args)
 	}
 	rule, found := t.dialect.calls[path.text()]
-	if !found {
-		return "", false
+	if found {
+		return rule(args)
 	}
-	return rule(args)
+	if callee, ok := t.rebased(call.Callee, path); ok {
+		return callee + "(" + strings.Join(args, ", ") + ")", true
+	}
+	return "", false
 }
 
 func (t *translator) renderArguments(call *ast.CallExpression) []string {

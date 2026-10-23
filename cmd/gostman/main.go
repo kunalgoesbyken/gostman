@@ -226,21 +226,23 @@ init
   print how to register the MCP server with a coding agent.
 
 import
-  Create a workspace from an Insomnia, HAR, WSDL, Bruno, Postman or OpenAPI
-  file or folder. Imports add data only; scripts and OAuth settings are kept
-  and reported, tokens and cookie values are never carried over.
+  Create a workspace from an Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI or
+  .http file or folder. Imports add data only; scripts and OAuth settings are
+  kept and reported, tokens and cookie values are never carried over.
 
-  --format <name>       auto, insomnia, har, wsdl, bruno, postman or openapi
-                        (default auto: detected from the content)
+  --format <name>       auto, insomnia, har, wsdl, bruno, postman, openapi or
+                        http (default auto: detected from the content)
   --out <folder>        workspace folder to create (required)
   --skip-static         HAR: leave out images, fonts, styles and scripts
 
 export
   Write a workspace as bruno (a folder of .bru files), openapi, curl (a shell
-  script; credentials become environment variable placeholders) or har.
+  script; credentials become environment variable placeholders), har or http
+  (.http files for VS Code REST Client and JetBrains HTTP Client).
 
-  --format <name>       bruno, openapi, curl or har
-  --out <path>          file, or folder for bruno (required)
+  --format <name>       bruno, openapi, curl, har or http
+  --out <path>          file, or folder when the export has several files
+                        (required)
   --include-secrets     write literal credentials; by default passwords, tokens
                         and secret-named headers or variables become {{NAME}}
                         placeholders and re-import as empty variables

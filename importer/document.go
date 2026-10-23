@@ -22,6 +22,7 @@ const (
 	FormatPostman  = "postman"
 	FormatOpenAPI  = "openapi"
 	FormatGostman  = "gostman"
+	FormatHTTP     = "http"
 
 	kindInsomnia            = "insomnia"
 	kindHAR                 = "har"
@@ -36,6 +37,8 @@ const (
 	kindOpenItem            = "opencollection-item"
 	kindOpenEnvironment     = "opencollection-environment"
 	kindGostman             = "gostman"
+	kindHTTP                = "http"
+	kindHTTPEnvironment     = "http-environment"
 	kindUnknown             = ""
 	postmanSchemaMarker     = "getpostman.com/json/collection"
 	insomniaV5Prefix        = "collection.insomnia.rest/5"
@@ -50,7 +53,7 @@ const (
 	brunoExtension          = ".bru"
 )
 
-var importableExtensions = map[string]bool{".json": true, ".yml": true, ".yaml": true, ".xml": true, ".wsdl": true, ".xsd": true, ".har": true, ".txt": true}
+var importableExtensions = map[string]bool{".json": true, ".yml": true, ".yaml": true, ".xml": true, ".wsdl": true, ".xsd": true, ".har": true, ".txt": true, httpExtension: true, restExtension: true}
 
 var kindFormats = map[string]string{
 	kindInsomnia:           FormatInsomnia,
@@ -66,6 +69,8 @@ var kindFormats = map[string]string{
 	kindOpenItem:           FormatBruno,
 	kindOpenEnvironment:    FormatBruno,
 	kindGostman:            FormatGostman,
+	kindHTTP:               FormatHTTP,
+	kindHTTPEnvironment:    FormatHTTP,
 }
 
 type document struct {
@@ -104,14 +109,18 @@ func classify(file File) document {
 		doc.err = unsupportedType(file.Name)
 	case trimmed == "":
 		doc.err = errEmpty
+	case isHTTPFileName(file.Name):
+		doc.kind = kindHTTP
 	case strings.HasPrefix(trimmed, "<"):
 		doc.kind = classifyXML(trimmed)
 	case path.Ext(strings.ToLower(file.Name)) == brunoExtension || looksLikeBru(trimmed):
 		doc.kind = kindBruno
+	case looksLikeHTTP(trimmed):
+		doc.kind = kindHTTP
 	default:
-		doc.data, doc.err = decodeStructured(trimmed)
+		doc.data, doc.err = decodeNamed(file.Name, trimmed)
 		if doc.err == nil {
-			doc.kind = classifyStructured(doc.data)
+			doc.kind = classifyNamed(file.Name, doc.data)
 		}
 	}
 	return doc
@@ -176,6 +185,8 @@ func classifyStructured(data any) string {
 		return kindOpenCollection
 	case root["gostman"] != nil:
 		return kindGostman
+	case object(root[restClientEnvironments]) != nil:
+		return kindHTTPEnvironment
 	case text(root["type"]) == "collection" && text(root["name"]) != "":
 		return kindBrunoConfig
 	case text(info["type"]) != "" && text(info["name"]) != "":

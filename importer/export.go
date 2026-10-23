@@ -18,6 +18,7 @@ const (
 	ExportOpenAPI = "openapi"
 	ExportCurl    = "curl"
 	ExportHAR     = "har"
+	ExportHTTP    = "http"
 
 	exportName     = "Gostman"
 	maxStemRunes   = 100
@@ -47,6 +48,8 @@ func Export(format string, collection workspace.Collection, options Options) ([]
 		files = exportCurl(collection, options)
 	case ExportHAR:
 		files, err = exportHAR(collection)
+	case ExportHTTP:
+		files = exportHTTP(collection, options)
 	default:
 		return nil, "", fmt.Errorf("unknown export format %q", format)
 	}

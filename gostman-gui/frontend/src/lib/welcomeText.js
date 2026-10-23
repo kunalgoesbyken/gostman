@@ -6,7 +6,7 @@ export const WELCOME_TEXT = {
   commandDescription: 'Getting started steps, imports and shortcuts',
   existingTitle: 'Already have requests?',
   importTitle: 'Import',
-  importHint: 'Postman, Bruno, Insomnia, OpenAPI, HAR or a curl command.',
+  importHint: 'Postman, Bruno, Insomnia, OpenAPI, HAR, .http files or a curl command.',
   importAction: 'Import',
   folderTitle: 'Open a folder',
   folderHint: 'Keep requests as files next to your code and share them through git.',

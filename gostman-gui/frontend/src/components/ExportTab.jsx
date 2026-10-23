@@ -21,6 +21,7 @@ import {
 const PREVIEW_LIMIT = 20000
 const FILE_BASE_NAME = "gostman-export"
 const JSON_MIME = "application/json"
+const ZIP_MIME = "application/zip"
 
 const toJSON = (value) => JSON.stringify(value, null, 2)
 
@@ -77,9 +78,10 @@ const EXPORT_FORMATS = [
 ]
 
 const BACKEND_FORMATS = [
-  { value: "bruno", label: "Bruno", description: "A folder of .bru files with environments, saved as a .zip", mime: "application/zip", backend: "bruno" },
+  { value: "bruno", label: "Bruno", description: "A folder of .bru files with environments, saved as a .zip", mime: ZIP_MIME, backend: "bruno" },
   { value: "curl", label: "curl script", description: "One curl command per request. Credentials become environment variable placeholders", fileName: "requests.sh", mime: "text/x-shellscript", backend: "curl" },
   { value: "har", label: "HAR", description: "HTTP Archive 1.2 with the requests and no responses", fileName: "requests.har", mime: JSON_MIME, backend: "har" },
+  { value: "http", label: ".http files", description: "Requests for VS Code REST Client and JetBrains HTTP Client, one file per folder, with http-client.env.json environments", fileName: "requests.http", mime: "text/plain", backend: "http" },
 ]
 
 const NEWLINE = String.fromCharCode(10)
@@ -134,7 +136,7 @@ export function ExportTab({ requests, folders, environments, variables, settings
   const content = format.backend ? (remote.reply ? previewOf(remote.reply.files) : "") : local.content
   const error = format.backend ? remote.error : local.error
   const save = () => {
-    if (remote.reply?.archive) onSaveBase64("gostman-export.zip", remote.reply.archive, format.mime)
+    if (remote.reply?.archive) onSaveBase64("gostman-export.zip", remote.reply.archive, ZIP_MIME)
     else if (format.backend) onSaveFile(format.fileName, remote.reply.files[0].text, format.mime)
     else onSaveFile(format.fileName || `${FILE_BASE_NAME}.${format.extension}`, content, format.mime)
   }

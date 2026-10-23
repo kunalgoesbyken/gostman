@@ -29,6 +29,7 @@ Gostman reads the content after a short pause and shows a summary before anythin
 | HAR | HAR captures |
 | WSDL | WSDL services |
 | Bruno | Bruno collections in `.bru` or YAML (OpenCollection), as a folder, a `.zip` or one exported file |
+| .http files | VS Code REST Client and JetBrains HTTP Client `.http` and `.rest` files, with their environments. See [.http files](#http-files) |
 | Gostman | Gostman exports and share links |
 
 Request tags are carried over from Bruno (`tags` in a `.bru` file's `meta` block, or `info.tags` in OpenCollection YAML) and from the `tags` of an OpenAPI operation, which also still pick the folder. Postman, Insomnia, HAR and WSDL files have no request tags.
@@ -39,11 +40,47 @@ When you pick HAR, or the files you read include a HAR capture, a **Leave out im
 
 ### Files and folders
 
-- The file picker accepts `.zip`, `.json`, `.yaml`, `.yml`, `.xml`, `.wsdl`, `.xsd`, `.har`, `.bru` and Gostman share files.
+- The file picker accepts `.zip`, `.json`, `.yaml`, `.yml`, `.xml`, `.wsdl`, `.xsd`, `.har`, `.bru`, `.http`, `.rest` and Gostman share files.
 - A folder or archive is searched for importable files with those extensions. Hidden paths (any segment starting with a dot) and `node_modules` are ignored.
 - Up to 5,000 files are read. Each file and the files together are limited to 10 MB, and the dialog reports the limit when you go over it.
 - Files must be text. A binary file is refused with a message naming it.
 - With several files, the summary lists each file with its detected format and a total line.
+
+### .http files
+
+Files ending in `.http` or `.rest` are always read as request files. Pasted text, or a file with another extension, is read as one only when its first request starts with a method and an address, such as `GET https://api.example.com/users`.
+
+- Each file becomes a folder named after the file. Files in subfolders keep that layout, so `users/admin.http` becomes the folder `admin` inside `users`.
+- Requests are separated by `###`. The name is the text after `###` or a `# @name` (or `// @name`) line; a request without one is named after its method and address. Other `#` and `//` lines before the request line become its description.
+- A line with only an address is a `GET`. `HTTP/1.1` at the end of the request line is ignored, and the lines after it that start with `?` or `&`, or are indented and start with `/`, continue the address.
+- Headers run until the first blank line and the body runs to the next `###`. The body type comes from `Content-Type`: JSON, XML, text, form fields and multipart parts are read into their own body types. A `Content-Type` that matches what Gostman sends for that body type is dropped.
+- `Authorization: Basic user password` (or `user:password`), `Digest user password` and `Bearer token` become the request's authentication.
+- `X-Request-Type: GraphQL`, or the JetBrains `GRAPHQL` method, makes a GraphQL request: the query, then a blank line and the variables as JSON.
+- `# @no-redirect` and `# @timeout` (seconds, or with `ms`, `s` or `m`) set the request options. `# @prompt name` turns `{{name}}` in that request into the prompt `{{?name}}`.
+- File variables (`@name = value`) become variables of the file's folder.
+- A REST Client request variable such as `{{login.response.body.$.token}}` or `{{login.response.headers.Location}}` adds an extract rule to the `login` request and is replaced with the variable it fills, here `{{login_token}}`. References to `.request.` values or XPath queries are kept as written and listed in the summary.
+
+System variables are rewritten to Gostman's dynamic variables where one exists:
+
+| In the file | In Gostman |
+| --- | --- |
+| `{{$guid}}`, `{{$uuid}}`, `{{$random.uuid}}` | `{{$guid}}`, `{{$uuid}}` |
+| `{{$timestamp}}`, `{{$isoTimestamp}}`, `{{$datetime iso8601}}` | `{{$timestamp}}`, `{{$isoTimestamp}}` |
+| `{{$randomInt}}`, `{{$random.integer}}` | `{{$randomInt}}` |
+| `{{$randomInt 1 10}}`, `{{$random.integer(1, 10)}}` (upper bound not included) | `{{$randomInt(1,9)}}` |
+| `{{$random.email}}` | `{{$randomEmail}}` |
+| `{{$processEnv NAME}}`, `{{$dotenv NAME}}`, `{{$env.NAME}}` | `{{process.env.NAME}}`, read from the workspace's `.env` file |
+
+Others, such as `{{$datetime rfc1123}}`, offsets like `{{$timestamp -1 d}}`, `{{$aadToken}}` and the JetBrains `{{$random.*}}` generators, are kept as written and listed in the summary.
+
+Environments come from:
+
+- `http-client.env.json` and `http-client.private.env.json` (JetBrains). Each top-level name becomes an environment, and values from the private file are added to it and marked secret. Values that are objects, such as JetBrains auth settings, are left out with a note.
+- A `settings.json` with `rest-client.environmentVariables` (REST Client). Each environment gets the `$shared` values, and `{{$shared name}}` is replaced with the shared value. Comments and trailing commas are allowed. Folders that start with a dot are not searched, so add `.vscode/settings.json` to the import yourself.
+
+JetBrains response handlers (`> {% ... %}`) become post-response scripts and pre-request handlers (`< {% ... %}`) become pre-request scripts. Common calls are rewritten: `client.test` to `test`, `client.assert(value, message)` to `expect(value, message).to.be.ok`, `client.global.set` and `get` and `request.variables.set` and `get` to `env.set` and `env.get`, `client.log` to `console.log`, `response.body` and `response.status` to `res.body` and `res.status`, and `response.headers.valueOf(name)` to `res.getHeader(name)`. Anything else is kept as written and listed in the summary.
+
+Not imported, and listed in the summary: bodies read from files with `< path` (the request keeps the file name, attach the file again), response handlers in separate `.js` files, `>>` response redirects and `WEBSOCKET` and `GRPC` requests.
 
 ### The import summary
 
@@ -95,10 +132,25 @@ The **Export** tab previews the content, shows how many requests, folders and en
 | Bruno | A folder of `.bru` files with environments, saved as a `.zip` |
 | curl script | One curl command per request. Credentials become environment variable placeholders |
 | HAR | HTTP Archive 1.2 with the requests and no responses |
+| .http files | Requests for VS Code REST Client and JetBrains HTTP Client, one file per folder, with environments in `http-client.env.json` |
 
 Gostman, OpenAPI and Bruno exports keep request tags. Bruno only reads tags made of letters, digits, `_` and `-`, so other tags, such as ones with spaces, are left out of a Bruno export.
 
-For Bruno, curl script and HAR exports, an **Include credentials** checkbox is off by default. Off, passwords, tokens and secret-named headers or variables are replaced with `{{NAME}}` placeholders. On, credentials are written into the file in plain text.
+For Bruno, curl script, HAR and .http exports, an **Include credentials** checkbox is off by default. Off, passwords, tokens and secret-named headers or variables are replaced with `{{NAME}}` placeholders. On, credentials are written into the file in plain text.
+
+### .http export
+
+Each folder with requests becomes a `.http` file named after it, inside a folder for each parent folder; requests outside any folder go to `requests.http`. One file is saved as it is, several as a `.zip`.
+
+- Each file starts with `@name = value` lines for the collection and folder variables that apply to it. Variables with secret-looking names or several lines are left out.
+- Each request has a `###` line with its name, its description as `#` lines, `# @name` when the name has no spaces, and `# @no-redirect`, `# @timeout` and `# @prompt` when they apply.
+- Basic, Digest and Bearer authentication and API keys are written as headers or query parameters. Other authentication types are noted in a comment.
+- Bodies are written with a matching `Content-Type`. Form fields are URL-encoded and multipart file fields read their file with `< ./name`. GraphQL requests are `POST` requests with `X-Request-Type: GraphQL`.
+- Dynamic variables are written in REST Client form, for example `{{$randomInt 1 10}}` and `{{$dotenv NAME}}`. A variable filled by an extract rule of a named request in the same file is written as a request variable such as `{{login.response.body.$.token}}`.
+- Environments are written to `http-client.env.json`, and secret or secret-named values to `http-client.private.env.json`, empty unless you include credentials.
+- Scripts, assertions, the Vars tab of a request, examples, folder settings, gRPC, MCP and WebSocket requests are not written.
+
+Importing the export again gives the same requests, folders, variables and environments, apart from what is listed above. Requests outside any folder come back in a `requests` folder.
 
 ### HTML docs options
 

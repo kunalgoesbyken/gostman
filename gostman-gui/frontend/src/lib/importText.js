@@ -5,6 +5,7 @@ export const IMPORT_FORMATS = [
   { value: 'insomnia', label: 'Insomnia' },
   { value: 'bruno', label: 'Bruno' },
   { value: 'har', label: 'HAR' },
+  { value: 'http', label: '.http files' },
   { value: 'wsdl', label: 'WSDL' },
   { value: 'gostman', label: 'Gostman' },
 ]
@@ -17,12 +18,13 @@ export const FORMAT_LABELS = {
   postman: 'Postman file',
   openapi: 'OpenAPI spec',
   gostman: 'Gostman export',
+  http: '.http file',
 }
 
 export const IMPORT_TEXT = {
   chooseFiles: 'Choose files',
   chooseFolder: 'Choose folder',
-  dropHint: 'Drop files, a folder or a .zip here, or paste content below. Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI and Swagger, Gostman exports and share links.',
+  dropHint: 'Drop files, a folder or a .zip here, or paste content below. Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI and Swagger, .http files (REST Client, JetBrains HTTP Client), Gostman exports and share links.',
   formatLabel: 'Format',
   pastePlaceholder: 'Paste a collection, a spec, a capture or a share link',
   pasteLabel: 'Content to import',

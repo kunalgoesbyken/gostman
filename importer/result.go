@@ -135,6 +135,15 @@ func (c *collector) flag(kind, name string) {
 	c.flags[kind] = append(c.flags[kind], name)
 }
 
+func (c *collector) flagUnique(kind, name string) {
+	for _, existing := range c.flags[kind] {
+		if existing == name {
+			return
+		}
+	}
+	c.flag(kind, name)
+}
+
 func (c *collector) read(name, format string, run func()) {
 	requests, folders, environments := len(c.Requests), len(c.Folders), len(c.Environments)
 	run()

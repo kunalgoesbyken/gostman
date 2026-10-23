@@ -17,7 +17,7 @@ export const FAQ = [
   },
   {
     question: "Can I bring my Postman or Bruno collections?",
-    answer: "Yes. Import Postman, Bruno (.bru files or the YAML format), Insomnia, OpenAPI, HAR and curl. Common pm.* and bru.* script calls are rewritten to Gostman's script API. An import only adds data, and it lists any scripts it carries before you accept them.",
+    answer: "Yes. Import Postman, Bruno (.bru files or the YAML format), Insomnia, OpenAPI, HAR, .http files and curl. Common pm.* and bru.* script calls are rewritten to Gostman's script API. An import only adds data, and it lists any scripts it carries before you accept them.",
   },
   {
     question: "How does a team share a collection?",
