@@ -10,6 +10,7 @@ import { ONBOARDING_TEXT as TEXT } from "../lib/onboardingText"
 import { cn } from "../lib/utils"
 import { docPath, docSlug } from "../docs/manifest"
 import { useAppStore } from "../store/appStore"
+import { usePopoverDismiss } from "../hooks/usePopoverDismiss"
 
 const TUTORIAL_URL = `${WEB_APP_URL}${docPath(docSlug("tutorial-first-collection.md"))}`
 const VIEWPORT_MARGIN = 8
@@ -141,28 +142,6 @@ export function GettingStartedChecklist({ progress, onBegin, onHide }) {
       <TutorialLink />
     </section>
   )
-}
-
-function usePopoverDismiss(popoverRef, buttonRef, onClose) {
-  useEffect(() => {
-    const closeWhenOutside = (event) => {
-      if (popoverRef.current?.contains(event.target) || buttonRef.current?.contains(event.target)) return
-      onClose()
-    }
-    const closeOnEscape = (event) => {
-      if (event.key !== "Escape") return
-      onClose()
-      buttonRef.current?.focus()
-    }
-    window.addEventListener("mousedown", closeWhenOutside)
-    window.addEventListener("keydown", closeOnEscape)
-    window.addEventListener("resize", onClose)
-    return () => {
-      window.removeEventListener("mousedown", closeWhenOutside)
-      window.removeEventListener("keydown", closeOnEscape)
-      window.removeEventListener("resize", onClose)
-    }
-  }, [popoverRef, buttonRef, onClose])
 }
 
 function Popover({ anchor, buttonRef, onClose, children }) {

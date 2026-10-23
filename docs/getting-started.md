@@ -19,6 +19,7 @@ Download the latest build from the [releases page](https://github.com/kunalgoesb
 | macOS | `Gostman-darwin-universal.dmg` | Intel and Apple Silicon. Drag Gostman to Applications. |
 | Linux | `Gostman-linux-amd64.deb` | Debian and Ubuntu. Run `sudo apt install ./Gostman-linux-amd64.deb`. |
 | Linux | `Gostman-linux-amd64.tar.gz` | Other distributions. Requires GTK 3 and WebKitGTK 4.1. |
+| Arch Linux | [`gostman-bin`](https://aur.archlinux.org/packages/gostman-bin) | Community package in the AUR. Install it with an AUR helper, for example `yay -S gostman-bin`. |
 
 The builds are not code-signed yet, so the operating system asks for confirmation the first time:
 

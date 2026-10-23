@@ -3,21 +3,36 @@ import { Button, buttonVariants } from "../ui/button"
 import { cn } from "../../lib/utils"
 import { detectBrowserOs } from "../../lib/detectOs"
 import { Download, Globe } from "./icons"
-import { DOWNLOADS, downloadFor, downloadUrl } from "./downloads"
+import { DOWNLOADS, downloadFor, downloadUrl, groupByOs, isExternal } from "./downloads"
+
+const NAME_COLUMN = "w-20 shrink-0 font-medium"
 
 function DownloadRow({ download }) {
+  const external = isExternal(download)
   return (
     <li>
       <a
         href={downloadUrl(download)}
-        className="group flex min-h-11 items-center justify-between gap-4 border-t border-border/30 py-3 text-sm transition-colors hover:text-foreground"
+        target={external ? "_blank" : undefined}
+        rel={external ? "noreferrer" : undefined}
+        className="group flex min-h-10 items-center justify-between gap-4 py-2 text-muted-foreground transition-colors hover:text-foreground"
       >
-        <span>
-          <span className="font-medium">{download.name}</span>
-          <span className="ml-2 text-muted-foreground">{download.note}</span>
-        </span>
-        <span className="font-mono text-xs text-muted-foreground group-hover:text-foreground">{download.kind}</span>
+        {download.note}
+        <span className="font-mono text-xs group-hover:text-foreground">{download.kind}</span>
       </a>
+    </li>
+  )
+}
+
+function DownloadGroup({ group }) {
+  return (
+    <li className="flex gap-4 border-t border-border/30 py-0.5 text-sm">
+      <span className={cn(NAME_COLUMN, "py-2.5")}>{group.name}</span>
+      <ul className="min-w-0 flex-1">
+        {group.downloads.map((download) => (
+          <DownloadRow key={download.kind} download={download} />
+        ))}
+      </ul>
     </li>
   )
 }
@@ -51,8 +66,8 @@ export function DownloadPanel({ onGetStarted }) {
 
       <p className="mb-1 mt-6 text-xs uppercase tracking-wide text-muted-foreground">{primary ? "Other downloads" : "Desktop downloads"}</p>
       <ul>
-        {others.map((download) => (
-          <DownloadRow key={download.file} download={download} />
+        {groupByOs(others).map((group) => (
+          <DownloadGroup key={group.os} group={group} />
         ))}
       </ul>
 
@@ -60,12 +75,10 @@ export function DownloadPanel({ onGetStarted }) {
         <button
           type="button"
           onClick={onGetStarted}
-          className="group flex min-h-11 w-full items-center justify-between gap-4 border-t border-border/30 py-3 text-left text-sm transition-colors hover:text-foreground"
+          className="group flex min-h-11 w-full items-center gap-4 border-t border-border/30 py-3 text-left text-sm transition-colors hover:text-foreground"
         >
-          <span>
-            <span className="font-medium">Web version</span>
-            <span className="ml-2 text-muted-foreground">Runs in this browser</span>
-          </span>
+          <span className={NAME_COLUMN}>Web</span>
+          <span className="flex-1 text-muted-foreground group-hover:text-foreground">Runs in this browser</span>
           <Globe className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
         </button>
       ) : null}

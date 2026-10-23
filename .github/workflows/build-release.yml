@@ -106,6 +106,7 @@ jobs:
           install -Dm755 build/bin/Gostman "$root/usr/bin/gostman"
           install -Dm644 build/linux/gostman.desktop "$root/usr/share/applications/gostman.desktop"
           install -Dm644 build/appicon.png "$root/usr/share/pixmaps/gostman.png"
+          install -Dm644 ../LICENSE "$root/usr/share/doc/gostman/copyright"
           tar -czf build/bin/Gostman-linux-amd64.tar.gz -C "$root" usr
 
           mkdir -p "$root/DEBIAN"
