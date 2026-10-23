@@ -28,14 +28,11 @@ export function ComparisonSection() {
             className="text-3xl font-semibold tracking-tight md:text-5xl [text-wrap:balance]"
           />
           <p className="mt-5 leading-relaxed text-muted-foreground">
-            Short answers about Postman and Bruno, taken from their public pricing and documentation in October 2026. Plans change, so confirm on their pages before you decide.
-          </p>
-          <p className="mt-3 leading-relaxed text-muted-foreground">
-            Moving from Bruno?{" "}
+            From their public pricing and docs, October 2026. Moving from Bruno? Read{" "}
             <a href={docPath("coming-from-bruno")} className="text-foreground underline underline-offset-4 hover:text-primary">
               Coming from Bruno
-            </a>{" "}
-            covers importing collections, what happens to scripts and the CLI flags.
+            </a>
+            .
           </p>
         </div>
 
