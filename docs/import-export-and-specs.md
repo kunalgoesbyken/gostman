@@ -149,6 +149,7 @@ Each folder with requests becomes a `.http` file named after it, inside a folder
 - Dynamic variables are written in REST Client form, for example `{{$randomInt 1 10}}` and `{{$dotenv NAME}}`. A variable filled by an extract rule of a named request in the same file is written as a request variable such as `{{login.response.body.$.token}}`.
 - Environments are written to `http-client.env.json`, and secret or secret-named values to `http-client.private.env.json`, empty unless you include credentials.
 - Scripts, assertions, the Vars tab of a request, examples, folder settings, gRPC, MCP and WebSocket requests are not written.
+- A request whose body has a line that .http files read as an instruction, such as `< ./file`, `>> output.txt`, `> {% ... %}` or `###`, is left out with a note, so opening the file in an editor never reads, writes or runs anything the request did not. Attached file names keep only their last part.
 
 Importing the export again gives the same requests, folders, variables and environments, apart from what is listed above. Requests outside any folder come back in a `requests` folder.
 

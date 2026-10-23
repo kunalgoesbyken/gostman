@@ -23,6 +23,8 @@ const (
 	webSocketLabel     = "WebSocket"
 	noteLeftOut        = "This %s request has no .http form and was left out."
 	noteAuth           = "The %s authentication of this request is not written to .http files."
+	noteInstructions   = "The body of this request has lines that .http files read as file, script or output instructions, so it was left out."
+	httpResponseLink   = "<>"
 	dotenvReader       = "$dotenv"
 	restClientRange    = "$randomInt %d %d"
 )
@@ -33,8 +35,9 @@ var (
 )
 
 type exportedBody struct {
-	text        string
-	contentType string
+	text         string
+	contentType  string
+	instructions bool
 }
 
 func exportHTTP(collection workspace.Collection, options Options) []File {
@@ -204,12 +207,16 @@ func (w *sectionWriter) text(request workspace.Request) string {
 		return strings.Join(lines, "\n") + "\n"
 	}
 	method, address, headers, body, note := httpRequestText(request)
+	if body.instructions {
+		lines = append(lines, "# "+noteInstructions)
+		return strings.Join(lines, "\n") + "\n"
+	}
 	message := []string{method + " " + w.placeholders(singleLine(address))}
 	for _, header := range headers {
 		message = append(message, w.placeholders(singleLine(header.Key))+": "+w.placeholders(singleLine(header.Value)))
 	}
-	if body != "" {
-		message = append(message, "", w.placeholders(body))
+	if body.text != "" {
+		message = append(message, "", w.placeholders(body.text))
 	}
 	for _, name := range w.prompts {
 		lines = append(lines, "# @prompt "+name)
@@ -237,11 +244,12 @@ func unwrittenProtocol(request workspace.Request) string {
 	return ""
 }
 
-func httpRequestText(request workspace.Request) (string, string, []row, string, string) {
+func httpRequestText(request workspace.Request) (string, string, []row, exportedBody, string) {
 	headers, address, note := httpAuthorization(request.Auth, enabledRows(readRows(request.Headers)), request.URL)
 	if request.Method == methodGraphQL {
 		headers = append(headers, row{Key: requestTypeHeader, Value: graphQLHeaderValue, Enabled: true})
-		return "POST", address, withContentType(headers, defaultContentTypes[bodyJSON], false), graphQLText(request), note
+		query := graphQLText(request)
+		return "POST", address, withContentType(headers, defaultContentTypes[bodyJSON], false), exportedBody{text: query, instructions: readsAsInstructions(query)}, note
 	}
 	method := request.Method
 	if !validMethod(method) {
@@ -251,7 +259,35 @@ func httpRequestText(request workspace.Request) (string, string, []row, string, 
 	if body.contentType != "" {
 		headers = withContentType(headers, body.contentType, request.BodyType == bodyMultipart)
 	}
-	return method, address, headers, body.text, note
+	return method, address, headers, body, note
+}
+
+func readsAsInstructions(text string) bool {
+	for _, line := range strings.Split(normalizeNewlines(text), "\n") {
+		if isInstructionLine(strings.TrimLeftFunc(line, unicode.IsSpace)) {
+			return true
+		}
+	}
+	return false
+}
+
+func isInstructionLine(line string) bool {
+	_, isFile := fileReferencePath(line)
+	return isFile ||
+		strings.HasPrefix(line, httpSeparator) ||
+		strings.HasPrefix(line, httpRedirect) ||
+		strings.HasPrefix(line, httpResponseLink) ||
+		isScriptLine(line, httpPreScript) ||
+		isScriptLine(line, httpPostScript) ||
+		isHandlerFile(line)
+}
+
+func attachedName(location string) string {
+	name := strings.TrimSpace(singleLine(baseName(location)))
+	if name == "" || strings.HasPrefix(name, ".") {
+		return httpBinaryFallback
+	}
+	return name
 }
 
 func graphQLText(request workspace.Request) string {
@@ -312,7 +348,7 @@ func httpBodyText(request workspace.Request) exportedBody {
 		if text == "" {
 			return exportedBody{}
 		}
-		return exportedBody{text: text, contentType: defaultContentTypes[request.BodyType]}
+		return exportedBody{text: text, contentType: defaultContentTypes[request.BodyType], instructions: readsAsInstructions(text)}
 	case bodyForm:
 		return formText(enabledRows(readRows(request.Body)))
 	case bodyMultipart:
@@ -340,14 +376,16 @@ func multipartText(rows []row) exportedBody {
 	}
 	delimiter := "--" + httpBoundary
 	var lines []string
+	instructions := false
 	for _, candidate := range rows {
 		lines = append(lines, delimiter)
 		disposition := "Content-Disposition: form-data; name=" + quotedParameter(candidate.Key)
 		if candidate.Type != rowTypeFile {
 			lines = append(lines, disposition, "", candidate.Value)
+			instructions = instructions || readsAsInstructions(candidate.Value)
 			continue
 		}
-		name := baseName(candidate.FileName)
+		name := attachedName(candidate.FileName)
 		lines = append(lines, disposition+"; filename="+quotedParameter(name))
 		if candidate.ContentType != "" {
 			lines = append(lines, contentTypeHeader+": "+singleLine(candidate.ContentType))
@@ -355,7 +393,7 @@ func multipartText(rows []row) exportedBody {
 		lines = append(lines, "", "< ./"+name)
 	}
 	lines = append(lines, delimiter+"--")
-	return exportedBody{text: strings.Join(lines, "\n"), contentType: "multipart/form-data; boundary=" + httpBoundary}
+	return exportedBody{text: strings.Join(lines, "\n"), contentType: "multipart/form-data; boundary=" + httpBoundary, instructions: instructions}
 }
 
 func quotedParameter(value string) string {
@@ -370,10 +408,7 @@ func binaryText(source string) exportedBody {
 	if json.Unmarshal([]byte(source), &file) != nil {
 		return exportedBody{}
 	}
-	name := baseName(file.FileName)
-	if name == "" {
-		name = httpBinaryFallback
-	}
+	name := attachedName(file.FileName)
 	contentType := file.ContentType
 	if contentType == "" {
 		contentType = "application/octet-stream"
