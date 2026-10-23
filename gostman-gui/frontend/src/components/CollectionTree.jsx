@@ -306,7 +306,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
 
   return (
     <>
-      <SearchField value={query} onChange={setQuery} onKeyDown={enterResultsOnArrow} placeholder="Search name or URL">
+      <SearchField value={query} onChange={setQuery} onKeyDown={enterResultsOnArrow} placeholder="Search name or URL" className="pr-1.5">
         <IconButton label={TREE_TEXT.collapseAll} icon={ChevronsDownUp} className="shrink-0" disabled={isSearching || folders.length === 0} onClick={collapseFolders} />
       </SearchField>
 
