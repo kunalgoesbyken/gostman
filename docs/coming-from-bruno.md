@@ -34,6 +34,7 @@ Hidden paths, `node_modules` and the folders listed under `ignore` in `bruno.jso
 | `vars:post-response` that read `res.body` | Extraction rules with a JSONPath, for example `res.body[0].id` becomes `$[0].id` (`.bru` files only) |
 | `script:pre-request`, `script:post-response` and `tests` | Pre-request and post-response scripts, translated as described below |
 | `docs` | The request description |
+| `tags` in `meta`, or `info.tags` in YAML | Request tags, for `gostman run --tags` and the tag filter of **Run requests** |
 | Path parameters such as `:id` | Filled into the URL |
 | JSON, text, XML, form and multipart bodies | The same body types. File bodies and file fields need the file picked again |
 | Basic, Digest, Bearer, API key and NTLM auth | The same auth types |
@@ -44,11 +45,10 @@ Not imported, and listed in the summary where it applies:
 - gRPC and WebSocket requests. Create them again in Gostman, see [Protocols](protocols.md).
 - Assertions with an operator Gostman does not have, and `vars:post-response` rows that read anything other than `res.body`.
 - Auth types not in the table above.
-- Tags. Select requests by name or path with `--only` instead.
 
 ## Scripts
 
-`test()`, `expect()` (Chai), `req` and `res` have the same names in Gostman, so most test code needs no change. The `req` getters and setters (`getUrl`, `setUrl`, `getMethod`, `setMethod`, `getHeader`, `setHeader`, `getHeaders`, `setHeaders`, `getBody`, `setBody`) and the `res` getters (`getStatus`, `getHeader`, `getHeaders`, `getBody`, `getResponseTime`) work as they are. The importer rewrites the rest:
+`test()`, `expect()` (Chai), `req`, `res` and `bru` work in Gostman, so most scripts need no change, whether you import them or paste them into a request. `res("path")` queries (dotted paths, `[0]`, `..` deep search and `[?]` filters), `bru.cookies` and `bru.cookies.jar()`, and Bruno's `req` and `res` methods such as `req.setTimeout`, `req.getName`, `req.headerList` and `res.getSize` run as written. On import, the calls with a Gostman name are rewritten to it:
 
 | Bruno | Gostman |
 | --- | --- |
@@ -62,14 +62,16 @@ Not imported, and listed in the summary where it applies:
 | `bru.sendRequest(options, callback)` | `sendRequest`, with Bruno's `data` option sent as the body and `data` kept on the response next to `body` |
 | `bru.runRequest("Folder/Name")` | `sendRequest("Name")`, the saved request with that name |
 | `res.getStatusText()`, `res.getUrl()` | `res.statusText`, `res.url` |
+| `bru.interpolate(text)` | `env.interpolate(text)` |
+| `bru.getProcessEnv("NAME")` | `env.get("NAME")`. Pass the value with `--var-from-env NAME` |
 
-`sendRequest` reaches only the hosts that requests in the collection already use.
+`sendRequest` and `bru.cookies.jar()` reach only localhost and the hosts that requests in the collection already use.
 
 Calls with no equivalent are kept as written and listed in the summary with their line, so you can rewrite them before running:
 
-- `res("path")` queries. Read the value from `res.body` instead, for example `res.body.order.total`.
-- `bru.getProcessEnv("NAME")`. Pass the value with `--var-from-env NAME` and read it with `env.get("NAME")`.
-- `bru.interpolate`, `bru.cookies` and any other `bru.*` call not in the table.
+- `bru.cwd`, `bru.getCollectionName`, `bru.getSecretVar`, the OAuth 2.0 credential calls, `bru.getTestResults` and `bru.getAssertionResults`.
+- `bru.runner.iterationIndex` and `totalIterations`. Read `env.get("iteration")` and `env.get("iterationCount")` instead.
+- `req.setMaxRedirects`, `req.onFail`, `req.getAuthMode`, `req.getTags`, `req.getPathParams`, `req.getExecutionMode` and `req.disableParsingResponseJson`.
 - `require` of anything other than the bundled `lodash`, `crypto-js`, `uuid`, `moment`, `dayjs`, `ajv` and `chai`. In a trusted folder on the desktop, `./` and `../` files inside the folder also load.
 
 Scripts run in an isolated worker with no network access of their own and stop after 10 seconds. There is no equivalent of Bruno's developer mode. The full script API is in [Variables, scripts and settings](scripting-and-settings.md#script-api).
@@ -90,14 +92,17 @@ Scripts run in an isolated worker with no network access of their own and stop a
 | `--bail` | `--bail` |
 | `--insecure` | `--insecure` |
 | `--secrets-env-file secrets.env` | `--secrets-env-file secrets.env`, or `--secrets` to use the process environment |
-| `--reporter-junit report.xml` | `--reporter junit --output report.xml`, also `json` and `html`. One report file per run |
-| `--tags smoke` | `--only "List orders"` or `--only "Shop/Orders/List orders"`, by name, id or path, repeatable |
+| `--reporter-junit report.xml --reporter-html report.html` | `--reporter junit:report.xml --reporter html:report.html`, also `json` and `text`, repeatable |
+| `--tags smoke --exclude-tags slow` | `--tags smoke --exclude-tags slow` |
+| `--cacert ca.pem` | `--cacert ca.pem`, added to the system certificates |
+| `--client-cert-config certs.json` | `--client-cert cert.pem --client-key key.pem`, or `--client-cert api.example.com=cert.pem,key.pem` for one host |
+| `--noproxy` | `--noproxy host,list` next to `--proxy url`; without `--proxy`, set `NO_PROXY` |
 
 `--env-file` differs: in Bruno it names an environment file, and in Gostman it reads `KEY=value` lines as variables. Import the environment instead.
 
-`--tests-only`, `--sandbox`, `--cacert`, `--client-cert-config`, `--ignore-truststore`, `--noproxy` and `--disable-cookies` have no `gostman run` flag. Every other flag is in [Command line](cli.md).
+`--tests-only`, `--sandbox`, `--ignore-truststore` and `--disable-cookies` have no `gostman run` flag. Requests can also be picked by name, id or path with `--only "Shop/Orders/List orders"`. Every other flag is in [Command line](cli.md).
 
-The `gostman` binary has nothing else to install, so CI needs no Node.js. The GitHub Action and the Dockerfile are described in [Gostman in CI](ci.md).
+The `gostman` binary has nothing else to install, so CI needs no Node.js. The GitHub Action and the `ghcr.io/kunalgoesbyken/gostman` image are described in [Gostman in CI](ci.md).
 
 ## Working with the collection afterwards
 
@@ -108,5 +113,4 @@ The `gostman` binary has nothing else to install, so CI needs no Node.js. The Gi
 ## What Bruno has that Gostman does not
 
 - A VS Code extension. Gostman has the desktop app, the web app and the command line.
-- Tags on requests.
 - A larger community and a longer history. Gostman is a smaller project; report problems on [GitHub](https://github.com/kunalgoesbyken/gostman/issues).
