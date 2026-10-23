@@ -83,6 +83,20 @@ export function normalizeRequest(raw) {
   return { ...request, ...foldQueryParams(request.url, request.queryParams) }
 }
 
+const withoutDefaultValues = (values, defaults) => Object.fromEntries(
+  Object.entries(values || {}).filter(([field, value]) => value !== defaults[field])
+)
+
+export function compactRequest(request) {
+  const { auth, options, ...fields } = request
+  const { oauth2, ...credentials } = auth || {}
+  return {
+    ...withoutDefaultValues(fields, DEFAULT_REQUEST),
+    auth: { ...withoutDefaultValues(credentials, DEFAULT_AUTH), oauth2: withoutDefaultValues(oauth2, DEFAULT_OAUTH2) },
+    options: withoutDefaultValues(options, DEFAULT_OPTIONS),
+  }
+}
+
 export function toEngineRequest(request, variables, cookies = []) {
   const { inherited = [] } = request
   const { method, url, headers, queryParams, body, bodyType, graphqlQuery, graphqlVariables, auth, options } = normalizeRequest(request)

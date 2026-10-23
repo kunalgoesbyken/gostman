@@ -50,4 +50,6 @@ Problems people run into most often, with the reason and the fix. If yours is no
 
 **Where is my data?** On the desktop, in the app data folder, or as YAML files in the folder you opened. On the web, in the browser's local storage, so clearing site data deletes it. Export a **Gostman** backup first; see [Import, export and OpenAPI specs](import-export-and-specs.md).
 
+**"Changes could not be saved" on the web.** Browsers give each site about 5 MB of local storage. A collection of several thousand requests with large bodies or saved examples can fill it. Export a **Gostman** backup, then remove what you no longer need, or use the desktop app, which has no such limit.
+
 **Two people changed the same request in Git.** Each request is its own file, so conflicts are rare and limited to that request. The Git panel lists conflicts first; resolve them, then choose **Reload from disk**. See [Collections and Git](collections-and-git.md).

@@ -9,7 +9,7 @@ import { toGrpcCall, toGrpcTarget } from '../grpc'
 import { toMcpCall, toMcpTarget } from '../mcp'
 import { mockFolders, mockRequests } from '../mockData'
 import { withPreferredTimeout } from '../preferences'
-import { toEngineRequest } from '../request'
+import { compactRequest, toEngineRequest } from '../request'
 import { failureResponse } from '../response'
 
 const PROXY_URL = '/api/proxy'
@@ -48,6 +48,11 @@ function openStorage() {
 
 const storage = openStorage()
 let damageNotice = ''
+let cachedDocument = null
+
+window.addEventListener('storage', (event) => {
+  if (event.key === DATA_KEY || event.key === null) cachedDocument = null
+})
 
 const sampleData = () => ({ requests: [...mockRequests], folders: [...mockFolders], history: [] })
 
@@ -101,9 +106,15 @@ function readDocument() {
 }
 
 function mutateData(mutate) {
-  const data = readDocument()
+  const data = cachedDocument || readDocument()
   mutate(data)
-  writeData(data)
+  try {
+    writeData(data)
+    cachedDocument = data
+  } catch (error) {
+    cachedDocument = null
+    throw error
+  }
 }
 
 async function postJSON(url, payload, signal) {
@@ -168,7 +179,7 @@ async function saveRequests(requests) {
   const savedIds = new Set(saved.map((request) => request.id))
   mutateData((data) => {
     const others = (data.requests || []).filter((existing) => !savedIds.has(existing.id))
-    data.requests = [...others, ...saved]
+    data.requests = [...others, ...saved].map(compactRequest)
   })
   return saved
 }
@@ -189,7 +200,7 @@ async function saveFolders(folders) {
 }
 
 async function saveHistory(history) {
-  mutateData((data) => { data.history = history })
+  mutateData((data) => { data.history = history.map(compactRequest) })
 }
 
 async function saveEnvironments(environments, activeEnvironmentId) {
@@ -223,6 +234,7 @@ async function authorize(config, variables) {
 }
 
 async function reset() {
+  cachedDocument = null
   storage.removeItem(DATA_KEY)
 }
 
