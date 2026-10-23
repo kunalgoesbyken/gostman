@@ -2,12 +2,14 @@ import { useEffect, useId, useState } from "react"
 import { Keyboard } from "lucide-react"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
+import { Combobox } from "./ui/combobox"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
 import { SectionLabel } from "./ui/panel"
 import { RADIO_KEYS, SegmentedControl } from "./ui/segmented"
 import { Select } from "./ui/select"
 import { useAppStore } from "../store/appStore"
+import { awaitsRestart, useWindowFrame } from "../hooks/useWindowFrame"
 import { isFontInstalled, sortedFamilies } from "../lib/fonts"
 import { moveFocus, tabStopOf } from "../lib/rovingFocus"
 import {
@@ -99,13 +101,12 @@ function FontRow({ label, hint, name, isCode, suggestions, preferences }) {
 
   return (
     <PreferenceRow label={label} hint={isMissing ? PREFERENCES_TEXT.fontMissing : hint}>
-      <Input
+      <Combobox
         aria-label={label}
         aria-invalid={isMissing}
-        list={suggestions}
+        suggestions={suggestions}
         maxLength={FONT_NAME_LENGTH}
         spellCheck={false}
-        autoComplete="off"
         placeholder={PREFERENCES_TEXT.defaultFont}
         value={draft}
         onChange={change}
@@ -132,20 +133,13 @@ function useInstalledFonts(listFonts) {
 }
 
 function FontsSection({ preferences, listFonts }) {
-  const listId = useId()
   const installed = useInstalledFonts(listFonts)
-  const suggestions = installed.fonts.length > 0 ? listId : undefined
 
   return (
     <Section title={sections.fonts}>
-      <FontRow label={fields.interfaceFont} hint={PREFERENCES_TEXT.interfaceFontHint} name="interfaceFont" suggestions={suggestions} preferences={preferences} />
-      <FontRow label={fields.codeFont} hint={PREFERENCES_TEXT.codeFontHint} name="codeFont" isCode suggestions={suggestions} preferences={preferences} />
-      {suggestions && (
-        <datalist id={listId}>
-          {installed.fonts.map((family) => <option key={family} value={family} />)}
-        </datalist>
-      )}
-      {listFonts && !suggestions && (
+      <FontRow label={fields.interfaceFont} hint={PREFERENCES_TEXT.interfaceFontHint} name="interfaceFont" suggestions={installed.fonts} preferences={preferences} />
+      <FontRow label={fields.codeFont} hint={PREFERENCES_TEXT.codeFontHint} name="codeFont" isCode suggestions={installed.fonts} preferences={preferences} />
+      {listFonts && installed.fonts.length === 0 && (
         <Button variant="outline" size="sm" onClick={installed.load}>{PREFERENCES_TEXT.suggestFonts}</Button>
       )}
       {installed.status && <p role="status" className="text-2xs text-muted-foreground">{installed.status}</p>}
@@ -188,15 +182,40 @@ function NumberRow({ label, hint, suffix, range, value, onCommit }) {
   )
 }
 
+const FLAG_CLASS = "h-auto min-h-6 justify-start py-0.5 text-left text-xs text-foreground"
+
 function FlagRow({ label, name, preferences }) {
   return (
-    <Checkbox
-      checked={preferences[name]}
-      onChange={(event) => updatePreferences({ [name]: event.target.checked })}
-      className="h-auto min-h-6 justify-start py-0.5 text-left text-xs text-foreground"
-    >
+    <Checkbox checked={preferences[name]} onChange={(event) => updatePreferences({ [name]: event.target.checked })} className={FLAG_CLASS}>
       {label}
     </Checkbox>
+  )
+}
+
+const titleBarHint = (frame, failed) => {
+  if (failed) return PREFERENCES_TEXT.systemTitleBarFailed
+  if (awaitsRestart(frame)) return PREFERENCES_TEXT.systemTitleBarRestart
+  return PREFERENCES_TEXT.systemTitleBarHint
+}
+
+function SystemTitleBarRow({ windowFrame }) {
+  const frame = useWindowFrame(windowFrame)
+  const [failed, setFailed] = useState(false)
+  const hintId = useId()
+  if (!frame?.adjustable) return null
+
+  const change = (event) => {
+    setFailed(false)
+    windowFrame.setSystemTitleBar(event.target.checked).catch(() => setFailed(true))
+  }
+
+  return (
+    <div>
+      <Checkbox checked={frame.systemTitleBar} onChange={change} aria-describedby={hintId} className={FLAG_CLASS}>
+        {fields.systemTitleBar}
+      </Checkbox>
+      <p id={hintId} role="status" className="pl-[1.375rem] text-2xs text-muted-foreground">{titleBarHint(frame, failed)}</p>
+    </div>
   )
 }
 
@@ -205,7 +224,7 @@ const percentLabels = (language) => {
   return TEXT_SCALES.map((scale) => ({ value: scale, label: format.format(scale / 100) }))
 }
 
-export function PreferencesDialog({ listFonts, onClose }) {
+export function PreferencesDialog({ listFonts, windowFrame, onClose }) {
   const preferences = usePreferences()
   const openShortcuts = useAppStore((state) => state.openShortcutsDialog)
 
@@ -233,6 +252,7 @@ export function PreferencesDialog({ listFonts, onClose }) {
           <ChoiceRow label={fields.textScale} name="textScale" options={percentLabels(preferences.language)} preferences={preferences} />
           <ChoiceRow label={fields.density} name="density" options={optionsOf(DENSITIES, PREFERENCES_TEXT.densities)} preferences={preferences} />
           <ChoiceRow label={fields.responseLayout} name="responseLayout" options={optionsOf(RESPONSE_LAYOUTS, PREFERENCES_TEXT.layouts)} preferences={preferences} />
+          <SystemTitleBarRow windowFrame={windowFrame} />
         </Section>
         <FontsSection preferences={preferences} listFonts={listFonts} />
         <Section title={sections.editor}>

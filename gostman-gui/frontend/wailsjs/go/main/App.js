@@ -350,6 +350,10 @@ export function SaveSettings(arg1) {
   return window['go']['main']['App']['SaveSettings'](arg1);
 }
 
+export function SaveSystemTitleBar(arg1) {
+  return window['go']['main']['App']['SaveSystemTitleBar'](arg1);
+}
+
 export function SaveWindowTheme(arg1) {
   return window['go']['main']['App']['SaveWindowTheme'](arg1);
 }
@@ -428,6 +432,10 @@ export function WSSend(arg1, arg2) {
 
 export function WSSendBinary(arg1, arg2) {
   return window['go']['main']['App']['WSSendBinary'](arg1, arg2);
+}
+
+export function WindowFrame() {
+  return window['go']['main']['App']['WindowFrame']();
 }
 
 export function WorkspaceStatus() {

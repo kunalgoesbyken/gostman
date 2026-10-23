@@ -31,10 +31,12 @@ type App struct {
 
 	networkMu sync.RWMutex
 	network   *engine.Network
+
+	frameless bool
 }
 
-func NewApp() *App {
-	return &App{inFlight: map[string]context.CancelFunc{}}
+func NewApp(frameless bool) *App {
+	return &App{inFlight: map[string]context.CancelFunc{}, frameless: frameless}
 }
 
 func (a *App) startup(ctx context.Context) {

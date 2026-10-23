@@ -1958,6 +1958,22 @@ export namespace main {
 	    }
 	}
 	
+	export class WindowFrame {
+	    adjustable: boolean;
+	    frameless: boolean;
+	    systemTitleBar: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new WindowFrame(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.adjustable = source["adjustable"];
+	        this.frameless = source["frameless"];
+	        this.systemTitleBar = source["systemTitleBar"];
+	    }
+	}
 	export class WorkspaceEntry {
 	    path: string;
 	    name: string;

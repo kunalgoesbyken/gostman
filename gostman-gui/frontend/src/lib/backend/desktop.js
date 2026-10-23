@@ -51,6 +51,7 @@ import { desktopMock } from './desktopMock'
 import { desktopSecrets } from './desktopSecrets'
 import { openDesktopSocket } from './desktopSocket'
 import { openDesktopStream } from './desktopStream'
+import { desktopWindowFrame } from './desktopWindowFrame'
 import { toGrpcCall, toGrpcTarget } from '../grpc'
 import { toMcpCall, toMcpTarget } from '../mcp'
 import { withPreferredTimeout } from '../preferences'
@@ -151,6 +152,7 @@ export const desktopBackend = {
   reset: () => ResetData(),
   saveFile: (name, base64) => SaveFile(name, base64),
   listInstalledFonts: () => InstalledFonts(),
+  windowFrame: desktopWindowFrame,
   webAppUrl: WEB_APP_URL,
   openSocket: openDesktopSocket,
   unsentSocketHeaders: () => [],

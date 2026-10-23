@@ -24,7 +24,9 @@ function readEntries(children, group = "") {
   })
 }
 
-function placeBelow(anchor) {
+export const LIST_CLASS = "fixed z-50 overflow-y-auto rounded-md border border-border bg-background py-1 shadow-lg"
+
+export function placeBelow(anchor) {
   const { left, top, bottom, width } = anchor.getBoundingClientRect()
   const below = window.innerHeight - bottom - VIEWPORT_MARGIN
   const above = top - VIEWPORT_MARGIN
@@ -38,30 +40,28 @@ function placeBelow(anchor) {
   }
 }
 
-function useDismiss(isOpen, close, anchorRef, listRef) {
+export function useDismiss(isOpen, close, anchorRef, listRef) {
   React.useEffect(() => {
     if (!isOpen) return undefined
+    const isInside = (target) => anchorRef.current?.contains(target) || listRef.current?.contains(target)
     const closeWhenOutside = (event) => {
-      const isInside = anchorRef.current?.contains(event.target) || listRef.current?.contains(event.target)
-      if (!isInside) close()
-    }
-    const closeWhenPageScrolls = (event) => {
-      if (!listRef.current?.contains(event.target)) close()
+      if (!isInside(event.target)) close()
     }
     window.addEventListener("mousedown", closeWhenOutside)
     window.addEventListener("resize", close)
-    window.addEventListener("scroll", closeWhenPageScrolls, true)
+    window.addEventListener("scroll", closeWhenOutside, true)
     return () => {
       window.removeEventListener("mousedown", closeWhenOutside)
       window.removeEventListener("resize", close)
-      window.removeEventListener("scroll", closeWhenPageScrolls, true)
+      window.removeEventListener("scroll", closeWhenOutside, true)
     }
   }, [isOpen, close, anchorRef, listRef])
 }
 
-function OptionRow({ entry, isSelected, isActive, onChoose, onPoint }) {
+export function OptionRow({ id, entry, isSelected, isActive, onChoose, onPoint }) {
   return (
     <div
+      id={id}
       role="option"
       aria-selected={isSelected}
       aria-disabled={entry.disabled}
@@ -168,7 +168,7 @@ const Select = React.forwardRef(function Select(
           id={listId}
           role="listbox"
           style={placement}
-          className="fixed z-50 overflow-y-auto rounded-md border border-border bg-background py-1 shadow-lg"
+          className={LIST_CLASS}
         >
           {entries.map((entry, index) => (
             <React.Fragment key={`${entry.group}\n${entry.value}`}>

@@ -191,6 +191,8 @@ export function SaveSecretConnection(arg1:main.SecretConnection):Promise<void>;
 
 export function SaveSettings(arg1:main.Settings):Promise<void>;
 
+export function SaveSystemTitleBar(arg1:boolean):Promise<main.WindowFrame>;
+
 export function SaveWindowTheme(arg1:string):Promise<void>;
 
 export function ScanSecrets(arg1:scan.Query):Promise<scan.Reply>;
@@ -230,5 +232,7 @@ export function WSConnect(arg1:string,arg2:string):Promise<string>;
 export function WSSend(arg1:string,arg2:string):Promise<void>;
 
 export function WSSendBinary(arg1:string,arg2:string):Promise<void>;
+
+export function WindowFrame():Promise<main.WindowFrame>;
 
 export function WorkspaceStatus():Promise<main.WorkspaceStatus>;

@@ -278,6 +278,7 @@ export const webBackend = {
   reset,
   saveFile,
   listInstalledFonts: browserFontLister(),
+  windowFrame: null,
   webAppUrl: window.location.origin,
   openSocket: openBrowserSocket,
   unsentSocketHeaders: unsentBrowserHeaders,

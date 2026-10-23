@@ -278,6 +278,7 @@ function LoadedWorkspace({ backend, onBack }) {
     <div className="flex h-dvh flex-col overflow-hidden bg-background text-foreground">
       <AppHeader
         storage={actions.storage}
+        windowFrame={backend.windowFrame}
         onImport={actions.openImport}
         onReset={actions.reset}
         onOpenCommands={openCommandPalette}
@@ -415,7 +416,7 @@ function LoadedWorkspace({ backend, onBack }) {
 
       <NoticeToast />
 
-      <AppDialogs onCommand={actions.runCommand} secrets={actions.secrets} listFonts={backend.listInstalledFonts} hasWorkspaces={Boolean(actions.storage)} hasLoadTest={actions.loadTest.isAvailable} />
+      <AppDialogs onCommand={actions.runCommand} secrets={actions.secrets} listFonts={backend.listInstalledFonts} windowFrame={backend.windowFrame} hasWorkspaces={Boolean(actions.storage)} hasLoadTest={actions.loadTest.isAvailable} />
     </div>
   )
 }

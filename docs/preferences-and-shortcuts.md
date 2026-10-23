@@ -93,6 +93,7 @@ Open **Preferences** from the command palette. Changes apply as soon as you make
 - **Default timeout** applies to requests that set no timeout of their own. 0 uses the built-in limit. See [Variables, scripts and settings](scripting-and-settings.md) for request settings.
 - A number field only takes effect while the value is a whole number inside the range. Otherwise the field is marked invalid, and it goes back to the saved value when you leave it.
 - **Language** lists English only. The dialog says more languages will appear when translations are available.
+- **Use the system title bar** appears in the desktop app on Windows and Linux, under Appearance. It replaces Gostman's own title bar and window buttons with your desktop's, and takes effect the next time Gostman starts. It is saved with the app's data rather than these preferences, so **Reset to defaults** leaves it unchanged. On macOS the system title bar is always used.
 
 At the bottom of the dialog:
 
@@ -123,7 +124,7 @@ The About dialog's diagnostics report the theme setting.
 
 - Type the name of a font installed on your device, for example `Segoe UI`, `Noto Sans JP` or `Fira Code`. The app changes as you type.
 - If no installed font has that name, the field is marked and says `Not found on this device, so the default font is used.`
-- Select **Suggest installed fonts**, and the font fields then suggest the names of the fonts installed on your device as you type. The desktop app reads them on Windows, macOS and Linux. In the browser the button appears in Chrome and Edge, which ask for permission first; in other browsers, type the name.
+- Select **Suggest installed fonts**, and the font fields then suggest the names of the fonts installed on your device as you type. The up and down arrows move through the list, Enter picks a name and Esc closes the list. The desktop app reads them on Windows, macOS and Linux. In the browser the button appears in Chrome and Edge, which ask for permission first; in other browsers, type the name.
 
 These settings are saved on this device, so the desktop app and each browser keep their own.
 

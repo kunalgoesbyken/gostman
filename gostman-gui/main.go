@@ -48,7 +48,8 @@ func (a *App) showExistingWindow() {
 }
 
 func main() {
-	app := NewApp()
+	frameless := opensFrameless()
+	app := NewApp(frameless)
 	theme := savedWindowTheme()
 
 	err := wails.Run(&options.App{
@@ -59,7 +60,7 @@ func main() {
 		MinHeight:        600,
 		MaxWidth:         maxWindowSide,
 		MaxHeight:        maxWindowSide,
-		Frameless:        runtime.GOOS != "darwin",
+		Frameless:        frameless,
 		AssetServer:      &assetserver.Options{Assets: assets, Middleware: isolateSandbox},
 		BackgroundColour: &theme.background,
 		OnStartup:        app.startup,
