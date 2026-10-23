@@ -6,14 +6,17 @@
     stored = {}
   }
   var root = document.documentElement
-  var follows = function (name) {
-    return typeof stored[name] !== 'string' || stored[name] === 'system'
+  var chosen = function (name, explicit) {
+    return explicit.indexOf(stored[name]) === -1 ? 'system' : stored[name]
   }
-  var isDark = follows('theme') ? matchMedia('(prefers-color-scheme: dark)').matches : stored.theme === 'dark'
-  var wantsMoreContrast = follows('contrast') ? matchMedia('(prefers-contrast: more)').matches : stored.contrast === 'more'
-  root.classList.toggle('dark', isDark)
-  root.dataset.contrast = wantsMoreContrast ? 'more' : 'standard'
+  var resolve = function (name, explicit, query) {
+    var value = chosen(name, explicit)
+    if (value !== 'system') return value
+    return matchMedia(query).matches ? explicit[1] : explicit[0]
+  }
+  root.classList.toggle('dark', resolve('theme', ['light', 'dark'], '(prefers-color-scheme: dark)') === 'dark')
+  root.dataset.contrast = resolve('contrast', ['standard', 'more'], '(prefers-contrast: more)')
   if (typeof stored.accent === 'string') root.dataset.accent = stored.accent
   if (typeof stored.density === 'string') root.dataset.density = stored.density
-  if (typeof stored.textScale === 'number') root.style.setProperty('--text-scale', stored.textScale)
+  if ([90, 100, 110, 125].indexOf(stored.textScale) !== -1) root.style.setProperty('--text-scale', stored.textScale)
 })()

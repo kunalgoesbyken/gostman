@@ -16,8 +16,11 @@ function textWidth(fontFamily) {
   return probe.measureText(PROBE_TEXT).width
 }
 
-export const isFontInstalled = (name) =>
-  GENERIC_FAMILIES.some((generic) => textWidth(fontStack(name, generic)) !== textWidth(generic))
+const isBundledFont = (name) => [...document.fonts].some((face) => face.family.replaceAll('"', '') === name)
+
+const isSystemFont = (name) => GENERIC_FAMILIES.some((generic) => textWidth(fontStack(name, generic)) !== textWidth(generic))
+
+export const isFontInstalled = (name) => isBundledFont(name) || isSystemFont(name)
 
 export function applyFont(root, slot, name) {
   const property = `--font-${slot}`
