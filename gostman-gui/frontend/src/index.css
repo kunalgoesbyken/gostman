@@ -254,6 +254,10 @@
     contain-intrinsic-size: auto 60rem;
   }
 
+  :root[data-anchor-jumped] .render-when-visible {
+    content-visibility: visible;
+  }
+
   kbd {
     @apply inline-flex shrink-0 items-center rounded border border-border px-1.5 py-0.5;
     @apply font-mono text-3xs font-medium text-muted-foreground;
