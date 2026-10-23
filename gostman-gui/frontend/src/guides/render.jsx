@@ -30,7 +30,7 @@ function PageDocument({ title, description, url, siteUrl, stylesheets, structure
         <meta property="og:description" content={description} />
         <meta property="og:url" content={url} />
         <meta property="og:type" content="article" />
-        <meta property="og:image" content={`${siteUrl}/og.png`} />
+        <meta property="og:image" content={`${siteUrl}/social.png`} />
         <meta name="twitter:card" content="summary_large_image" />
         {stylesheets.map((href) => (
           <link key={href} rel="stylesheet" href={href} />
