@@ -188,7 +188,7 @@ func (w *sectionWriter) placeholders(text string) string {
 
 func (w *sectionWriter) text(request workspace.Request) string {
 	lines := []string{strings.TrimSpace(httpSeparator + " " + oneLine(request.Name))}
-	for _, line := range strings.Split(normalizeNewlines(request.Description), "\n") {
+	for _, line := range physicalLines(request.Description) {
 		if trimmed := strings.TrimSpace(line); trimmed != "" {
 			lines = append(lines, "# "+trimmed)
 		}
@@ -262,8 +262,16 @@ func httpRequestText(request workspace.Request) (string, string, []row, exported
 	return method, address, headers, body, note
 }
 
+func isLineBreak(r rune) bool {
+	return r == '\n' || r == '\r' || r == '\v' || r == '\f' || r == '\u0085' || r == lineSeparator || r == paragraphSep
+}
+
+func physicalLines(text string) []string {
+	return strings.FieldsFunc(text, isLineBreak)
+}
+
 func readsAsInstructions(text string) bool {
-	for _, line := range strings.Split(normalizeNewlines(text), "\n") {
+	for _, line := range physicalLines(text) {
 		if isInstructionLine(strings.TrimLeftFunc(line, unicode.IsSpace)) {
 			return true
 		}
@@ -284,7 +292,7 @@ func isInstructionLine(line string) bool {
 
 func attachedName(location string) string {
 	name := strings.TrimSpace(singleLine(baseName(location)))
-	if name == "" || strings.HasPrefix(name, ".") {
+	if name == "" || strings.HasPrefix(name, ".") || strings.Contains(name, variableOpen) || strings.Contains(name, variableClose) {
 		return httpBinaryFallback
 	}
 	return name
