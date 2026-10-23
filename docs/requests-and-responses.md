@@ -221,7 +221,7 @@ Each tab keeps its last 10 responses while the app is open. They are kept in mem
 | Body | Always | The response body. |
 | Headers | The request completed | Name and Value table, with a count. |
 | Cookies | The request completed | Name, Value, Domain, Path, Expires, Secure and HttpOnly. |
-| Timeline | The response has timing data | See [Timeline](#timeline). |
+| Timeline | The response has timing data, or scripts ran | See [Timeline](#timeline). |
 | Tests | There are test results or a script error | Each result with a pass or fail mark. The count shows passed over total. |
 | Console | The request completed | Output of `console.log()` in scripts. |
 | Visualize | A script called `visualize()` | See [Visualize](#visualize). |
@@ -260,6 +260,8 @@ The Timeline tab shows the total time and the number of requests, then a legend 
 - Remote address, Protocol and whether the connection was new or reused.
 - TLS version and cipher, and the certificate subject and issuer.
 - Request headers and Response headers. A masked header has a button to reveal its value.
+
+When the request has scripts, the timeline lists everything the send did, in order: the pre-request script, each request a script sent with `sendRequest` (indented below its script, with the same bar and details), the request itself, and the post-response script. A script row shows how long it ran, its number of console lines, and how many tests and assertions passed or failed; open it to read its console lines and test results. The total then covers the scripts and the requests. The Console tab keeps showing the same lines.
 
 On the web app, the timings were measured by the Gostman proxy, from the proxy to the target, and a notice in the tab says so.
 

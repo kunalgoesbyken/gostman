@@ -19,7 +19,7 @@ const TEXT = {
   nothingMatchesDescription: "Choose another level to see the rest of the output.",
 }
 
-function ConsoleLine({ line }) {
+export function ConsoleLine({ line }) {
   return (
     <li className="flex gap-2 py-0.5 font-mono text-xs leading-relaxed">
       <time className="shrink-0 text-muted-foreground">{formatTime(line.at)}</time>

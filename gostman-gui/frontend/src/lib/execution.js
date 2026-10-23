@@ -17,6 +17,7 @@ import { MAX_SENDS, SEND_TIMEOUT_MS } from './scripting/limits'
 import { applyRequestEdits, requestSubject, responseSubject, runInSandbox } from './scripting/sandbox'
 import { scriptedRequest } from './scripting/subjects'
 import { SECRETS_TEXT } from './secretsText'
+import { ENTRY_KINDS, exchangeEntry, scriptEntry, withActivity } from './timeline'
 import { promptNames, referenceTargets } from './variableScopes'
 import { useAppStore, variableTextFor } from '../store/appStore'
 
@@ -44,9 +45,22 @@ function scriptChanges(before, after) {
   return Object.fromEntries([...changed, ...removed])
 }
 
-async function runStage(stage, job, request, send, referenced) {
+function createTrace() {
+  const origin = performance.now()
+  const entries = []
+  const now = () => performance.now() - origin
+  const timed = async (record, work) => {
+    const startMs = now()
+    const result = await work()
+    entries.push(record(result, startMs, now()))
+    return result
+  }
+  return { entries, timed }
+}
+
+async function runStage(stage, job, request, { send, trace, referenced }) {
   const variables = readVariables(request, referenced)
-  const run = await runInSandbox({ ...job, variables }, send)
+  const run = await trace.timed(scriptEntry(stage), () => runInSandbox({ ...job, variables }, send))
   if (isPlainObject(run.variables) && !isSame(variables, run.variables)) {
     store().mergeActiveVariables(scriptChanges(variables, run.variables))
   }
@@ -136,7 +150,7 @@ async function renewAuth(backend, request, lineage, variables) {
 let scriptSends = 0
 let consoleSequence = 0
 
-function createScriptSender(backend) {
+function createScriptSender(backend, trace) {
   let sent = 0
   return async (target) => {
     if (sent >= MAX_SENDS) throw new Error(SEND_LIMIT)
@@ -151,15 +165,16 @@ function createScriptSender(backend) {
       throw new Error(`The host "${host}" is not used by this collection, so scripts may not call it.`)
     }
     scriptSends += 1
-    const response = await transportFor(backend, timed)(`script-${scriptSends}`, timed, variables, store().cookies)
+    const sendId = `script-${scriptSends}`
+    const transmit = () => transportFor(backend, timed)(sendId, timed, variables, store().cookies)
+    const response = await trace.timed(exchangeEntry(ENTRY_KINDS.SEND, timed), transmit)
     if (response.error) throw new Error(response.body)
     return JSON.stringify(responseSubject(response))
   }
 }
 
 export function createExecutor(backend) {
-  const perform = async (original, sendId, runs) => {
-    const send = createScriptSender(backend)
+  const perform = async (original, sendId, runs, trace) => {
     const stop = (request, message) => ({
       auth: request.auth,
       response: failureResponse(CONFIG_ERROR, message),
@@ -178,11 +193,12 @@ export function createExecutor(backend) {
       return stop(request, error.message)
     }
     const variablesOf = (candidate, answers) => variablesText(candidate, answers, referenced)
+    const context = { send: createScriptSender(backend, trace), trace, referenced }
 
     const modules = await loadModules(backend, [...preSteps(lineage, request), ...postSteps(lineage, request)])
 
     for (const step of preSteps(lineage, request)) {
-      const pre = await runStage(step.label, { script: step.script, request: requestSubject(request), modules }, request, send, referenced)
+      const pre = await runStage(step.label, { script: step.script, request: requestSubject(request), modules }, request, context)
       runs.push(pre)
       if (pre.error) return stop(request, pre.error)
       if (holdsBack(pre.flow)) return { ...stop(request, reasonFor(pre.flow)), skipped: reasonFor(pre.flow) }
@@ -203,8 +219,8 @@ export function createExecutor(backend) {
 
     if (isLocalCommand(outgoing) && needsApproval(backend, outgoing, variablesOf(request, answers))) return stop(request, LOCAL_COMMAND_TEXT.notApproved)
 
-    const transmit = transportFor(backend, outgoing)
-    const response = await transmit(sendId, withInheritance(store(), outgoing), variablesOf(request, answers), store().cookies)
+    const transmit = () => transportFor(backend, outgoing)(sendId, withInheritance(store(), outgoing), variablesOf(request, answers), store().cookies)
+    const response = await trace.timed(exchangeEntry(ENTRY_KINDS.REQUEST, outgoing), transmit)
     store().storeCookies(response.cookies || [])
     const extraction = applyExtractors(request, response)
 
@@ -216,7 +232,7 @@ export function createExecutor(backend) {
           request: requestSubject(request),
           response: responseSubject(response),
           modules,
-        }, request, send, referenced))
+        }, request, context))
       }
     }
     return { auth: request.auth, response, tests: report(runs), extraction }
@@ -224,9 +240,10 @@ export function createExecutor(backend) {
 
   return async function execute(original, sendId) {
     const runs = []
-    const outcome = await perform(original, sendId, runs)
+    const trace = createTrace()
+    const outcome = await perform(original, sendId, runs, trace)
     const logs = runs.flatMap((run) => run.logs)
     if (logs.length > 0) store().appendConsole(consoleGroup(original, logs, ++consoleSequence))
-    return outcome
+    return { ...outcome, response: withActivity(outcome.response, trace.entries) }
   }
 }

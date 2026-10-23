@@ -1,4 +1,5 @@
-import { formatSize, pluralize } from './dataUtils'
+import { formatSize, lookup, pluralize } from './dataUtils'
+import { ERROR_TITLES } from './response'
 
 const MS_PER_SECOND = 1000
 const FINE_MS = 10
@@ -29,7 +30,18 @@ export const TIMELINE_TEXT = {
   total: 'Total',
   breakdown: 'Time breakdown',
   expired: 'expired',
+  requests: (count) => pluralize(count, 'request'),
+  scripts: (count) => pluralize(count, 'script'),
+  consoleLines: (count) => pluralize(count, 'console line'),
+  passed: (count) => `${count} passed`,
+  failed: (count) => `${count} failed`,
+  scriptFailed: 'Failed',
+  noOutput: 'No console output or test results.',
 }
+
+export const ENTRY_KINDS = { SCRIPT: 'script', SEND: 'send', REQUEST: 'request' }
+
+const EMPTY_TIMELINE = { hops: [], totalMs: 0 }
 
 const failureLabels = Object.fromEntries(PHASES.flatMap((phase) => phase.failures.map((failure) => [failure, phase.label])))
 
@@ -42,9 +54,72 @@ export function formatMs(ms) {
   return `${ms.toFixed(1)} ms`
 }
 
+const timelineEntries = (timeline) => timeline.activity ?? [{ kind: ENTRY_KINDS.REQUEST, hops: timeline.hops }]
+
+const isScript = (entry) => entry.kind === ENTRY_KINDS.SCRIPT
+
+export const timelineHops = (timeline) => timelineEntries(timeline).flatMap((entry) => entry.hops ?? [])
+
+const isSend = (entry) => entry.kind === ENTRY_KINDS.SEND
+
+export function timelineTotalMs(timeline) {
+  if (!timeline.activity) return timeline.totalMs
+  return timeline.activity.filter((entry) => !isSend(entry)).reduce((sum, entry) => sum + entry.totalMs, 0)
+}
+
 export function timelineScale(timeline) {
-  const lastEnd = Math.max(...timeline.hops.map((hop) => hop.startMs + hop.totalMs))
+  const lastEnd = Math.max(0, ...timelineHops(timeline).map((hop) => hop.startMs + hop.totalMs))
   return Math.max(timeline.totalMs, lastEnd, 1)
+}
+
+function entryRows(entry, position) {
+  if (isScript(entry) || entry.hops.length === 0) return [{ key: `${position}`, entry }]
+  return entry.hops.map((hop, index) => ({ key: `${position}-${index}`, entry, hop }))
+}
+
+export function timelineRows(timeline) {
+  let number = 0
+  return timelineEntries(timeline).flatMap(entryRows).map((row) => {
+    if (isScript(row.entry)) return row
+    number += 1
+    return { ...row, number }
+  })
+}
+
+export const scriptEntry = (label) => (run, startMs, endMs) => ({
+  kind: ENTRY_KINDS.SCRIPT,
+  label,
+  startMs,
+  totalMs: endMs - startMs,
+  logs: run.logs,
+  tests: run.tests,
+  failed: Boolean(run.error),
+})
+
+const exchangeSummary = (request, response) => ({
+  method: request.method,
+  url: response.url || request.url,
+  status: response.error ? lookup(ERROR_TITLES, response.error) || response.status : response.status,
+  statusCode: response.statusCode,
+  protocol: response.protocol,
+  failed: Boolean(response.error),
+  detail: response.error ? response.body : '',
+})
+
+export const exchangeEntry = (kind, request) => (response, startMs, endMs) => ({
+  kind,
+  startMs,
+  totalMs: endMs - startMs,
+  hops: response.timeline?.hops ?? [],
+  summary: exchangeSummary(request, response),
+})
+
+const byStart = (first, second) => first.startMs - second.startMs
+
+export function withActivity(response, entries) {
+  if (!entries.some((entry) => entry.kind !== ENTRY_KINDS.REQUEST)) return response
+  const timeline = response.timeline ?? EMPTY_TIMELINE
+  return { ...response, timeline: { ...timeline, activity: [...entries].sort(byStart) } }
 }
 
 export function hopSegments(hop, scale) {
@@ -57,16 +132,16 @@ export function hopSegments(hop, scale) {
   })
 }
 
-export function phaseTotals(timeline) {
+export function phaseTotals(hops) {
   return PHASES.map((phase) => ({
     phase,
-    ms: timeline.hops.reduce((sum, hop) => sum + hop.phases[phase.key], 0),
+    ms: hops.reduce((sum, hop) => sum + hop.phases[phase.key], 0),
   }))
 }
 
 export function breakdownTitle(timeline) {
-  if (!timeline) return ''
-  const lines = phaseTotals(timeline).map(({ phase, ms }) => `${phase.short} ${formatMs(ms)}`)
+  if (!timeline?.hops.length) return ''
+  const lines = phaseTotals(timeline.hops).map(({ phase, ms }) => `${phase.short} ${formatMs(ms)}`)
   const heading = timeline.proxied ? `${TIMELINE_TEXT.breakdown} (measured by the Gostman proxy)` : TIMELINE_TEXT.breakdown
   return [heading, ...lines].join('\n')
 }

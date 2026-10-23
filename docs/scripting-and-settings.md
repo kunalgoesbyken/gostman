@@ -24,7 +24,7 @@ Scripts are JavaScript. They run in an isolated worker with no network access of
 | `test(name, fn)` | Records a passing test, or a failing one when `fn` throws. `fn` may be `async`. |
 | `expect` | [Chai](https://www.chaijs.com/api/bdd/)'s `expect`. |
 | `console` | `log`, `info`, `warn` and `error`, shown in the console panel and in run output. |
-| `sendRequest(request)` | Sends another request and returns its response, up to 5 times per script. Pass the name of a saved request, or `{ method, url, headers, body }`. |
+| `sendRequest(request)` | Sends another request and returns its response, up to 50 times per script. Pass the name of a saved request, or `{ method, url, headers, body }`. |
 | `setNextRequest(name)`, `skipRequest()`, `stopExecution()` | Change the order of a run: jump to a request by name or `Folder/Name` path, skip this one, or stop. `setNextRequest(null)` also stops. |
 | `utils` | `uuid()`, `md5`, `sha1`, `sha256`, `sha512` (`hex` or `base64` output), `hmac(algorithm, key, text)`, `base64`, `hex` and `url` with `encode` and `decode`, `date` (`now`, `timestamp`, `unix`, `format`, `add`) and `random` (`int`, `string`, `pick`). |
 | `visualize(template, data)`, `visualize.table(rows)` | Renders an HTML view of the response in its **Visualize** tab. Templates use `{{field}}`, `{{#each list}}` and `{{#if value}}`; values are escaped. |

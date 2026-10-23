@@ -1,6 +1,6 @@
 export const TIMEOUT_MS = 10_000
 export const TIMED_OUT = `The script ran for more than ${TIMEOUT_MS / 1000} seconds and was stopped.`
-export const MAX_SENDS = 5
+export const MAX_SENDS = 50
 export const SEND_TIMEOUT_MS = 5_000
 export const MAX_FLOW_STEPS = 1_000
 export const MAX_LOG_ENTRIES = 500
