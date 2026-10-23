@@ -22,7 +22,7 @@ export const TREE_TEXT = {
   emptyAction: 'New request',
   emptyImport: 'Import',
   noResultsTitle: 'No results',
-  noResultsDescription: 'No request name or URL matches.',
+  noResultsDescription: 'No request name, URL or tag matches.',
   emptyFolder: 'This folder is empty',
   dropHere: 'Drop here to move to the top level',
 }

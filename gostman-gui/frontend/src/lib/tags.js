@@ -1,13 +1,13 @@
 const TAG_SEPARATOR = ','
 
-const foldTag = (tag) => tag.toUpperCase().toLowerCase()
+export const foldCase = (text) => text.toUpperCase().toLowerCase()
 
 export function normalizeTags(raw) {
   const seen = new Set()
   const tags = []
   for (const value of Array.isArray(raw) ? raw : []) {
     const tag = typeof value === 'string' ? value.trim() : ''
-    const key = foldTag(tag)
+    const key = foldCase(tag)
     if (tag === '' || seen.has(key)) continue
     seen.add(key)
     tags.push(tag)
@@ -24,8 +24,8 @@ export const sameTags = (first, second) => {
 }
 
 const sharesTag = (tags, wanted) => {
-  const held = new Set(normalizeTags(tags).map(foldTag))
-  return wanted.some((tag) => held.has(foldTag(tag)))
+  const held = new Set(normalizeTags(tags).map(foldCase))
+  return wanted.some((tag) => held.has(foldCase(tag)))
 }
 
 export const matchesTags = (tags, { include = [], exclude = [] }) => (
