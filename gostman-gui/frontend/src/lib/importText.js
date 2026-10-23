@@ -1,18 +1,13 @@
-const FORMAT_AUTO = 'auto'
-const FORMAT_GOSTMAN = 'gostman'
-
 export const IMPORT_FORMATS = [
-  { value: FORMAT_AUTO, label: 'Detect automatically' },
+  { value: 'auto', label: 'Detect automatically' },
   { value: 'postman', label: 'Postman' },
   { value: 'openapi', label: 'OpenAPI' },
   { value: 'insomnia', label: 'Insomnia' },
   { value: 'bruno', label: 'Bruno' },
   { value: 'har', label: 'HAR' },
   { value: 'wsdl', label: 'WSDL' },
-  { value: FORMAT_GOSTMAN, label: 'Gostman' },
+  { value: 'gostman', label: 'Gostman' },
 ]
-
-export const OTHER_TOOL_FORMATS = IMPORT_FORMATS.filter(({ value }) => value !== FORMAT_AUTO && value !== FORMAT_GOSTMAN)
 
 export const FORMAT_LABELS = {
   insomnia: 'Insomnia export',

@@ -26,7 +26,6 @@ import { NavBar } from "./landing/NavBar"
 import { PointList } from "./landing/PointList"
 import { SiteFooter } from "./landing/SiteFooter"
 import { SplitHeading } from "./landing/SplitHeading"
-import { CountsSection } from "./landing/CountsSection"
 import { EverythingSection } from "./landing/EverythingSection"
 import { ComparisonSection } from "./landing/ComparisonSection"
 import { FaqSection } from "./landing/FaqSection"
@@ -323,8 +322,6 @@ export function LandingPage({ onGetStarted }) {
             </div>
           </section>
         </div>
-
-        <CountsSection />
 
         <section id="features" className="render-when-visible relative py-20 px-6" aria-labelledby="workflow-heading">
           <div className="mx-auto max-w-6xl">
