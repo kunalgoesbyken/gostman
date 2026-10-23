@@ -53,11 +53,11 @@ function ResultSummary({ result }) {
   return (
     <>
       {result.tests.length > 0 && (
-        <span className="shrink-0 font-mono text-[11px] text-muted-foreground">
+        <span className="shrink-0 font-mono text-2xs text-muted-foreground">
           {countPassed(result.tests)}/{result.tests.length} tests
         </span>
       )}
-      <span className="shrink-0 font-mono text-[11px] text-muted-foreground">{result.durationMs} ms</span>
+      <span className="shrink-0 font-mono text-2xs text-muted-foreground">{result.durationMs} ms</span>
       <Badge variant={result.isAnswered ? statusVariant(result) : "serverError"} className="max-w-[9rem] font-mono">
         <span className="truncate">{result.status}</span>
       </Badge>
@@ -76,14 +76,14 @@ function ExchangeDetail({ result }) {
   const url = response.url || request.url
   return (
     <div className="flex flex-col gap-2 pb-1.5 pl-[1.375rem]">
-      <p className="truncate font-mono text-[11px] text-muted-foreground" title={url}>{url}</p>
+      <p className="truncate font-mono text-2xs text-muted-foreground" title={url}>{url}</p>
       {passed.length > 0 && (
         <ul>
           {passed.map((test, index) => <TestRow key={index} result={test} />)}
         </ul>
       )}
       {response.body ? (
-        <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-md border border-border bg-muted/40 p-2 font-mono text-[11px] text-foreground">{readableBody(response)}</pre>
+        <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-md border border-border bg-muted/40 p-2 font-mono text-2xs text-foreground">{readableBody(response)}</pre>
       ) : (
         <p className="text-xs text-muted-foreground">{LABELS.emptyBody}</p>
       )}
@@ -112,7 +112,7 @@ function ResultRow({ result }) {
       >
         <Icon className={cn("h-3.5 w-3.5 shrink-0", tone)} />
         <MethodTag method={result.method} className="w-12" />
-        {result.iteration > 0 && <span className="shrink-0 font-mono text-[11px] text-muted-foreground">#{result.iteration}</span>}
+        {result.iteration > 0 && <span className="shrink-0 font-mono text-2xs text-muted-foreground">#{result.iteration}</span>}
         <span title={`${result.name}\n${result.url}`} className="min-w-0 flex-1 truncate text-xs text-foreground">{result.name}</span>
         <ResultSummary result={result} />
         {canExpand && <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}

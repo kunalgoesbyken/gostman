@@ -75,10 +75,10 @@ const LogEntry = memo(function LogEntry({ entry }) {
 
   return (
     <li className="group grid grid-cols-[3.75rem_1rem_minmax(0,1fr)_1.5rem] items-start gap-2 border-b border-border px-3 py-1">
-      <time className="font-mono text-[11px] leading-6 text-muted-foreground">{TIME_FORMAT.format(entry.time)}</time>
+      <time className="font-mono text-2xs leading-6 text-muted-foreground">{TIME_FORMAT.format(entry.time)}</time>
       <Icon aria-label={label} className={cn("mt-[5px] h-3.5 w-3.5", tone)} />
       <div className="min-w-0 py-0.5">
-        {note && <p className="text-[11px] leading-5 text-muted-foreground">{note}</p>}
+        {note && <p className="text-2xs leading-5 text-muted-foreground">{note}</p>}
         <pre className={cn("whitespace-pre-wrap break-all font-mono text-xs leading-5", isMessage ? "text-foreground" : tone)}>{entry.text}</pre>
       </div>
       {isMessage && (

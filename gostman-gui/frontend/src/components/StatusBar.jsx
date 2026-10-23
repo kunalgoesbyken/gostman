@@ -30,7 +30,7 @@ export function StatusBar({ onOpenMock, onOpenCapture }) {
   const git = useGitStore((s) => s.state)
 
   return (
-    <footer className="flex h-6 max-sm:h-10 shrink-0 items-center justify-between overflow-hidden border-t border-border bg-background px-1 text-[11px] text-muted-foreground">
+    <footer className="flex h-6 max-sm:h-10 shrink-0 items-center justify-between overflow-hidden border-t border-border bg-background px-1 text-2xs text-muted-foreground">
       <div className="flex h-full items-center">
         <StatusItem icon={Settings} label="Network" onClick={openSettings} />
         <StatusItem icon={Server} label={isMockRunning ? "Mock server (running)" : "Mock server"} active={isMockRunning} onClick={onOpenMock} />
@@ -40,7 +40,7 @@ export function StatusBar({ onOpenMock, onOpenCapture }) {
       <div className="flex h-full items-center">
         <StatusItem icon={Cookie} label="Cookies" onClick={openCookies} />
         <StatusItem icon={SlidersHorizontal} label={PREFERENCES_TEXT.statusLabel} onClick={openPreferences} />
-        <button type="button" title={ABOUT_TEXT.versionButton} aria-label={ABOUT_TEXT.versionButton} onClick={openAbout} className={cn(ITEM_CLASS, "font-mono text-[10px]")}>v{__APP_VERSION__}</button>
+        <button type="button" title={ABOUT_TEXT.versionButton} aria-label={ABOUT_TEXT.versionButton} onClick={openAbout} className={cn(ITEM_CLASS, "font-mono text-3xs")}>v{__APP_VERSION__}</button>
       </div>
     </footer>
   )

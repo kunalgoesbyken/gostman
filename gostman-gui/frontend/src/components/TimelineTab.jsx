@@ -12,7 +12,7 @@ import {
 
 function Legend({ timeline }) {
   return (
-    <ul className="flex flex-wrap gap-x-4 gap-y-1 border-b border-border px-3 py-2 text-[11px] text-muted-foreground">
+    <ul className="flex flex-wrap gap-x-4 gap-y-1 border-b border-border px-3 py-2 text-2xs text-muted-foreground">
       {phaseTotals(timeline).map(({ phase, ms }) => (
         <li key={phase.key} className="flex items-center gap-1.5">
           <span className={cn('h-2 w-2 rounded-sm', phase.color)} aria-hidden="true" />
@@ -48,7 +48,7 @@ function HeaderValue({ header }) {
   const [shown, setShown] = useState(false)
   const canReveal = header.masked && header.secret !== undefined
   return (
-    <div className="flex min-w-0 items-start gap-1 py-0.5 font-mono text-[11px]">
+    <div className="flex min-w-0 items-start gap-1 py-0.5 font-mono text-2xs">
       <span className="shrink-0 text-foreground">{header.key}:</span>
       <span dir="auto" className="min-w-0 flex-1 break-all text-muted-foreground">{shown ? header.secret : header.value}</span>
       {canReveal && (
@@ -75,7 +75,7 @@ function HeaderList({ title, headers }) {
 function HopDetails({ hop }) {
   return (
     <div className="flex flex-col gap-3 pt-2">
-      <dl className="grid grid-cols-[max-content_minmax(0,1fr)] gap-x-4 gap-y-0.5 text-[11px]">
+      <dl className="grid grid-cols-[max-content_minmax(0,1fr)] gap-x-4 gap-y-0.5 text-2xs">
         {hopFacts(hop).map(([label, value]) => (
           <div key={label} className="contents">
             <dt className="text-muted-foreground">{label}</dt>
@@ -92,7 +92,7 @@ function HopDetails({ hop }) {
 function HopCaption({ hop }) {
   const parts = hopSegments(hop, 1).filter(({ ms }) => ms > 0).map(({ phase, ms }) => `${phase.short} ${formatMs(ms)}`)
   if (hop.reused) parts.unshift(TIMELINE_TEXT.reused)
-  return <p className="font-mono text-[11px] text-muted-foreground">{parts.join(' · ')}</p>
+  return <p className="font-mono text-2xs text-muted-foreground">{parts.join(' · ')}</p>
 }
 
 function HopRow({ hop, index, scale }) {
@@ -112,7 +112,7 @@ function HopRow({ hop, index, scale }) {
         <span className="shrink-0 font-mono font-medium text-foreground">{hop.method}</span>
         <span dir="auto" title={hop.url} className="min-w-0 flex-1 truncate font-mono text-muted-foreground">{hop.url}</span>
         <HopStatus hop={hop} />
-        <span className="shrink-0 font-mono text-[11px] text-foreground">{formatMs(hop.totalMs)}</span>
+        <span className="shrink-0 font-mono text-2xs text-foreground">{formatMs(hop.totalMs)}</span>
       </button>
       <div className="mt-1.5 flex flex-col gap-1 pl-5">
         <Waterfall hop={hop} scale={scale} />

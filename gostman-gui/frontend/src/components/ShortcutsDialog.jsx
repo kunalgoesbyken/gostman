@@ -25,7 +25,7 @@ function ConflictNotice({ chordLabel, owner, onReplace, onCancel }) {
 function KeysDisplay({ keys, isCapturing, liveKeys }) {
   if (isCapturing) return <kbd className="text-foreground">{liveKeys}</kbd>
   if (keys) return <kbd>{keys}</kbd>
-  return <span className="text-[11px] text-muted-foreground">{SHORTCUT_TEXT.unassigned}</span>
+  return <span className="text-2xs text-muted-foreground">{SHORTCUT_TEXT.unassigned}</span>
 }
 
 function ShortcutRow({ row, isCapturing, liveKeys, error, conflict, actions }) {
@@ -44,11 +44,11 @@ function ShortcutRow({ row, isCapturing, liveKeys, error, conflict, actions }) {
         </span>
       </div>
       {isCapturing && (
-        <p aria-live="polite" className="mb-1 text-[11px] text-muted-foreground">
+        <p aria-live="polite" className="mb-1 text-2xs text-muted-foreground">
           {SHORTCUT_TEXT.capturing}. {SHORTCUT_TEXT.captureHint}
         </p>
       )}
-      {error && <p role="alert" className="mb-1 text-[11px] text-destructive">{SHORTCUT_TEXT.errors[error]}</p>}
+      {error && <p role="alert" className="mb-1 text-2xs text-destructive">{SHORTCUT_TEXT.errors[error]}</p>}
       {conflict && <ConflictNotice {...conflict} onReplace={actions.replace} onCancel={actions.cancel} />}
     </li>
   )
@@ -100,7 +100,7 @@ export function ShortcutsDialog({ onClose }) {
       <DialogBody className="space-y-4">
         {SHORTCUT_GROUPS.map((group) => (
           <section key={group} aria-label={SHORTCUT_TEXT.groups[group]}>
-            <h3 className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{SHORTCUT_TEXT.groups[group]}</h3>
+            <h3 className="mb-1 text-2xs font-semibold uppercase tracking-wide text-muted-foreground">{SHORTCUT_TEXT.groups[group]}</h3>
             <ul className="divide-y divide-border">
               {rows.filter((row) => row.group === group).map((row) => (
                 <ShortcutRow
@@ -116,7 +116,7 @@ export function ShortcutsDialog({ onClose }) {
             </ul>
           </section>
         ))}
-        {!isDesktop && <p className="text-[11px] text-muted-foreground">{SHORTCUT_TEXT.webNotice}</p>}
+        {!isDesktop && <p className="text-2xs text-muted-foreground">{SHORTCUT_TEXT.webNotice}</p>}
       </DialogBody>
       <DialogFooter>
         <Button variant="outline" disabled={Object.keys(shortcuts).length === 0} onClick={() => save({})}>{SHORTCUT_TEXT.resetAll}</Button>

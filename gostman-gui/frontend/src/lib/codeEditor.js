@@ -15,7 +15,7 @@ const EDITOR_TEXT = {
   syntaxError: 'Syntax error',
 }
 
-const FONT_FAMILY = "'JetBrains Mono', 'Courier New', monospace"
+const FONT_FAMILY = 'var(--font-mono)'
 const INDENT = '  '
 const PLACEHOLDER_VALUE = '0'
 
@@ -45,7 +45,7 @@ const theme = EditorView.theme({
     border: `1px solid ${token('border')}`,
     borderRadius: 'var(--radius)',
     fontFamily: FONT_FAMILY,
-    fontSize: '12px',
+    fontSize: '0.75rem',
     overflow: 'hidden',
   },
   '.cm-tooltip-hover': { padding: '4px 8px', maxWidth: '20rem', overflowWrap: 'anywhere' },
@@ -57,13 +57,13 @@ const theme = EditorView.theme({
   '.cm-panels': { backgroundColor: token('card'), color: token('foreground') },
   '.cm-panels.cm-panels-top': { borderBottom: `1px solid ${token('border')}` },
   '.cm-panels.cm-panels-bottom': { borderTop: `1px solid ${token('border')}` },
-  '.cm-panel.cm-search': { fontSize: '12px' },
+  '.cm-panel.cm-search': { fontSize: '0.75rem' },
   '.cm-textfield': {
     backgroundColor: token('background'),
     color: token('foreground'),
     border: `1px solid ${token('border')}`,
     borderRadius: 'var(--radius)',
-    fontSize: '12px',
+    fontSize: '0.75rem',
   },
   '.cm-button': {
     backgroundColor: token('accent'),
@@ -71,7 +71,7 @@ const theme = EditorView.theme({
     color: token('accent-foreground'),
     border: `1px solid ${token('border')}`,
     borderRadius: 'var(--radius)',
-    fontSize: '12px',
+    fontSize: '0.75rem',
   },
   '.cm-specialChar': { color: token('destructive') },
   '.cm-snippetField': { backgroundColor: token('accent') },

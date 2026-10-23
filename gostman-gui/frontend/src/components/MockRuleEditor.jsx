@@ -127,7 +127,7 @@ export function MockRuleEditor({ rule, position, isLast, actions }) {
     <li className="border-b border-border">
       <div className="flex h-9 items-center gap-2 px-3">
         <Checkbox label={MOCK_TEXT.ruleSwitch(label)} checked={!rule.disabled} onChange={(event) => onChange({ disabled: !event.target.checked })} />
-        <span className="w-4 shrink-0 text-right font-mono text-[10px] text-muted-foreground">{position}</span>
+        <span className="w-4 shrink-0 text-right font-mono text-3xs text-muted-foreground">{position}</span>
         <button type="button" aria-expanded={isOpen} onClick={() => setIsOpen(!isOpen)} className="flex min-w-0 flex-1 items-center gap-2 text-left text-xs">
           {isOpen ? <ChevronDown className="h-3.5 w-3.5 shrink-0" /> : <ChevronRight className="h-3.5 w-3.5 shrink-0" />}
           <span className="min-w-0 truncate text-foreground">{label}</span>

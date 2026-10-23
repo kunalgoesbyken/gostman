@@ -67,7 +67,13 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
+        sans: ["var(--font-ui)"],
+        mono: ["var(--font-mono)"],
         brand: ["Outfit", "sans-serif"],
+      },
+      fontSize: {
+        "3xs": "0.625rem",
+        "2xs": "0.6875rem",
       },
     },
   },

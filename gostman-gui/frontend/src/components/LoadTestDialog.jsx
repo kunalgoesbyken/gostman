@@ -114,7 +114,7 @@ function Histogram({ bins }) {
           />
         ))}
       </div>
-      <div className="flex justify-between font-mono text-[11px] text-muted-foreground">
+      <div className="flex justify-between font-mono text-2xs text-muted-foreground">
         <span>{fixed(bins[0].fromMs)} ms</span>
         <span>{fixed(bins[bins.length - 1].toMs)} ms</span>
       </div>
@@ -168,7 +168,7 @@ function Results({ report }) {
           <div className="flex flex-col gap-1">
             <SectionLabel>{LOAD_TEST_TEXT.percentilesLabel}</SectionLabel>
             <DataTable columns={PERCENTILE_COLUMNS} rows={percentileRows(report.latency)} />
-            <p className="text-[11px] text-muted-foreground">{LOAD_TEST_TEXT.accuracy(LATENCY_ACCURACY_PERCENT)}</p>
+            <p className="text-2xs text-muted-foreground">{LOAD_TEST_TEXT.accuracy(LATENCY_ACCURACY_PERCENT)}</p>
           </div>
           <Histogram bins={report.distribution} />
         </>

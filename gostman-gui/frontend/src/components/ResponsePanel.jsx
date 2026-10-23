@@ -249,7 +249,7 @@ function StatusSummary({ response }) {
       <Badge variant={statusVariant(response)} title={response.status} className="max-w-[9rem] font-mono">
         <span className="truncate">{response.status}</span>
       </Badge>
-      <span title={detail} className="min-w-0 truncate font-mono text-[11px] text-muted-foreground max-md:hidden">{timing}</span>
+      <span title={detail} className="min-w-0 truncate font-mono text-2xs text-muted-foreground max-md:hidden">{timing}</span>
     </>
   )
 }

@@ -50,7 +50,7 @@ export function TerminalBlock({ title, lines, label, copyText }) {
         <span className="truncate">{title}</span>
         {copyText && <CopyControl text={copyText} label="Copy file" />}
       </figcaption>
-      <pre className="overflow-x-auto p-4 font-mono text-[13px] leading-relaxed text-muted-foreground">
+      <pre className="overflow-x-auto p-4 font-mono text-[0.8125rem] leading-relaxed text-muted-foreground">
         {lines.map((line, index) => (
           line.copy ? <CommandLine key={index} line={line} /> : <OutputLine key={index} line={line} />
         ))}

@@ -62,7 +62,7 @@ function BuilderRow({ row, disabled, onToggleOpen, onToggleSelected }) {
       >
         {rowText(row)}
       </span>
-      <span className="ml-auto max-w-[45%] shrink-0 truncate font-mono text-[11px] text-muted-foreground" title={row.label}>{row.label}</span>
+      <span className="ml-auto max-w-[45%] shrink-0 truncate font-mono text-2xs text-muted-foreground" title={row.label}>{row.label}</span>
     </div>
   )
 }

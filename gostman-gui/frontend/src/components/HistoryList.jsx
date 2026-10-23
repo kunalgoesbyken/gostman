@@ -32,7 +32,7 @@ function HistoryRow({ entry, onOpen, onDelete }) {
       >
         <MethodTag method={entry.method} className="w-10" />
         <span className="min-w-0 flex-1 truncate">{entry.url}</span>
-        <span className="shrink-0 pr-1 text-[11px] group-focus-within:hidden group-hover:hidden">
+        <span className="shrink-0 pr-1 text-2xs group-focus-within:hidden group-hover:hidden">
           {formatRelativeTime(entry.timestamp)}
         </span>
       </button>

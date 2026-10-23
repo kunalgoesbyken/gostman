@@ -45,7 +45,7 @@ function TabBadge({ value }) {
 
 function InheritedMark({ title, children }) {
   return (
-    <span title={title} className="inline-flex items-center gap-0.5 font-mono text-[10px] text-muted-foreground">
+    <span title={title} className="inline-flex items-center gap-0.5 font-mono text-3xs text-muted-foreground">
       <CornerLeftUp aria-hidden="true" className="h-3 w-3" />
       {children}
     </span>

@@ -20,7 +20,7 @@ export function PanelBody({ className, ...props }) {
 }
 
 export function SectionLabel({ className, ...props }) {
-  return <span className={cn("shrink-0 text-[11px] font-medium uppercase tracking-wide text-muted-foreground", className)} {...props} />
+  return <span className={cn("shrink-0 text-2xs font-medium uppercase tracking-wide text-muted-foreground", className)} {...props} />
 }
 
 export function Notice({ tone = "muted", icon: Icon, edge = "border-b", className, children, ...props }) {

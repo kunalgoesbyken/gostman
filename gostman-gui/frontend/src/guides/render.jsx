@@ -15,6 +15,7 @@ function PageDocument({ title, description, url, siteUrl, stylesheets, structure
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="/theme-boot.js" />
         <title>{title}</title>
         <meta name="description" content={description} />
         <link rel="canonical" href={url} />

@@ -23,6 +23,8 @@
     "@codemirror/merge": "^6.12.3",
     "@codemirror/state": "^6.7.6",
     "@codemirror/view": "^6.43.15",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource/outfit": "^5.3.0",
     "@iconify-icons/logos": "^1.2.36",
     "@iconify-icons/solar": "^1.2.3",
     "@iconify/react": "^5.2.1",

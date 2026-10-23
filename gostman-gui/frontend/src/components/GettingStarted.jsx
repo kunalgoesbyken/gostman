@@ -60,7 +60,7 @@ function StepMarker({ number, isDone, isNext }) {
     <span
       aria-hidden="true"
       className={cn(
-        "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-semibold",
+        "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-3xs font-semibold",
         isDone && "border-success bg-success text-success-foreground",
         isNext && "border-primary text-primary",
         !isDone && !isNext && "border-border text-muted-foreground"

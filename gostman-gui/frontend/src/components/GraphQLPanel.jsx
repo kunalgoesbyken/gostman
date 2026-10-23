@@ -87,7 +87,7 @@ function SchemaType({ type, hits, isOpen, onToggle }) {
       >
         <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
         <span className="min-w-0 flex-1 truncate font-mono text-foreground">{type.name}</span>
-        <span className="shrink-0 text-[11px] text-muted-foreground">{type.label}</span>
+        <span className="shrink-0 text-2xs text-muted-foreground">{type.label}</span>
       </button>
       {(isOpen || hits.length > 0) && <SchemaMembers members={members} />}
     </li>

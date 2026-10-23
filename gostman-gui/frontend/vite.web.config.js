@@ -6,7 +6,6 @@ import { fileURLToPath } from 'url'
 import { createHash } from 'crypto'
 import { readFileSync, writeFileSync } from 'fs'
 import { siteDefine, siteMeta } from './site.config.js'
-import { fontLinks } from './fonts.config.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -116,12 +115,12 @@ export default defineConfig({
     preloadedRoutePage('web', 'src/components/Workspace.jsx'),
     stampServiceWorker(),
     siteMeta(),
-    fontLinks(),
   ],
   build: {
     outDir: 'dist-web',
     emptyOutDir: true,
     target: 'es2022',
+    assetsInlineLimit: 0,
     rollupOptions: {
       input: resolve(__dirname, 'index-web.html'),
       output: {

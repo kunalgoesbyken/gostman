@@ -1,12 +1,19 @@
 (function () {
-  var theme = 'system'
+  var stored = {}
   try {
-    var stored = JSON.parse(localStorage.getItem('gostman.preferences'))
-    if (stored && typeof stored.theme === 'string') theme = stored.theme
+    stored = JSON.parse(localStorage.getItem('gostman.preferences')) || {}
   } catch (error) {
-    theme = 'system'
+    stored = {}
   }
-  var prefersDark = matchMedia('(prefers-color-scheme: dark)').matches
-  var isDark = theme === 'dark' || (theme !== 'light' && prefersDark)
-  document.documentElement.classList.toggle('dark', isDark)
+  var root = document.documentElement
+  var follows = function (name) {
+    return typeof stored[name] !== 'string' || stored[name] === 'system'
+  }
+  var isDark = follows('theme') ? matchMedia('(prefers-color-scheme: dark)').matches : stored.theme === 'dark'
+  var wantsMoreContrast = follows('contrast') ? matchMedia('(prefers-contrast: more)').matches : stored.contrast === 'more'
+  root.classList.toggle('dark', isDark)
+  root.dataset.contrast = wantsMoreContrast ? 'more' : 'standard'
+  if (typeof stored.accent === 'string') root.dataset.accent = stored.accent
+  if (typeof stored.density === 'string') root.dataset.density = stored.density
+  if (typeof stored.textScale === 'number') root.style.setProperty('--text-scale', stored.textScale)
 })()

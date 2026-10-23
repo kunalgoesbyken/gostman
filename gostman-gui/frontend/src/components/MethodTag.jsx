@@ -4,7 +4,7 @@ import { cn } from "../lib/utils"
 
 export function MethodTag({ method, className }) {
   return (
-    <span className={cn("shrink-0 truncate font-mono text-[10px] font-semibold", lookup(METHOD_COLORS, method) || "text-muted-foreground", className)}>
+    <span className={cn("shrink-0 truncate font-mono text-3xs font-semibold", lookup(METHOD_COLORS, method) || "text-muted-foreground", className)}>
       {method}
     </span>
   )

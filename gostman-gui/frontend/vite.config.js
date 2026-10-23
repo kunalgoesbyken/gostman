@@ -4,7 +4,6 @@ import {resolve, dirname} from 'path'
 import {fileURLToPath} from 'url'
 import {readFileSync} from 'fs'
 import {siteDefine} from './site.config.js'
-import {fontLinks} from './fonts.config.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -12,7 +11,7 @@ const appVersion = JSON.parse(readFileSync(resolve(__dirname, '../wails.json'), 
 
 export default defineConfig({
   define: {__APP_VERSION__: JSON.stringify(appVersion), ...siteDefine},
-  plugins: [react(), fontLinks()],
+  plugins: [react()],
   build: {
     outDir: 'dist',
     emptyOutDir: true,

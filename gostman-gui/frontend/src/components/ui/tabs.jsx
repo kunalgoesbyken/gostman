@@ -64,7 +64,7 @@ const COUNT_TONES = {
 }
 
 function TabCount({ tone = "neutral", children }) {
-  return <span className={cn("rounded px-1 font-mono text-[10px] leading-4", COUNT_TONES[tone])}>{children}</span>
+  return <span className={cn("rounded px-1 font-mono text-3xs leading-4", COUNT_TONES[tone])}>{children}</span>
 }
 
 export { Tabs, TabsList, TabsTrigger, TabsContent, TabCount }
