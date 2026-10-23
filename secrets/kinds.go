@@ -1,32 +1,42 @@
 package secrets
 
 import (
+	"context"
 	"fmt"
 	"strings"
 )
 
 const (
-	KindVault = "vault"
-	KindAWS   = "aws"
-	KindAzure = "azure"
-	KindGCP   = "gcp"
+	KindVault            = "vault"
+	KindAWS              = "aws"
+	KindAzure            = "azure"
+	KindGCP              = "gcp"
+	KindKeePassXC        = "keepassxc"
+	KindOnePassword      = "onepassword"
+	KindBitwarden        = "bitwarden"
+	KindBitwardenSecrets = "bitwarden-secrets"
 
-	fieldAddress      = "address"
-	fieldNamespace    = "namespace"
-	fieldMount        = "mount"
-	fieldKVVersion    = "kv_version"
-	fieldRoleID       = "role_id"
-	fieldSecretID     = "secret_id"
-	fieldToken        = "token"
-	fieldRegion       = "region"
-	fieldAccessKey    = "access_key"
-	fieldSecretKey    = "secret_key"
-	fieldSessionToken = "session_token"
-	fieldTenantID     = "tenant_id"
-	fieldClientID     = "client_id"
-	fieldClientSecret = "client_secret"
-	fieldAuthority    = "authority"
-	fieldProject      = "project"
+	fieldAddress        = "address"
+	fieldNamespace      = "namespace"
+	fieldMount          = "mount"
+	fieldKVVersion      = "kv_version"
+	fieldRoleID         = "role_id"
+	fieldSecretID       = "secret_id"
+	fieldToken          = "token"
+	fieldRegion         = "region"
+	fieldAccessKey      = "access_key"
+	fieldSecretKey      = "secret_key"
+	fieldSessionToken   = "session_token"
+	fieldTenantID       = "tenant_id"
+	fieldClientID       = "client_id"
+	fieldClientSecret   = "client_secret"
+	fieldAuthority      = "authority"
+	fieldProject        = "project"
+	fieldAssociation    = "association"
+	fieldAssociationKey = "association_key"
+	fieldAccount        = "account"
+	fieldSession        = "session_key"
+	fieldCommand        = "command"
 )
 
 type Field struct {
@@ -37,13 +47,16 @@ type Field struct {
 }
 
 type KindInfo struct {
-	Name   string  `json:"name"`
-	Fields []Field `json:"fields"`
+	Name     string  `json:"name"`
+	Fields   []Field `json:"fields"`
+	Versions bool    `json:"versions"`
+	Pairing  bool    `json:"pairing"`
 }
 
 type kind struct {
 	info  KindInfo
 	build func(Connection, *gateway) (Provider, error)
+	pair  func(context.Context) (map[string]string, error)
 }
 
 var catalog = []kind{
@@ -56,7 +69,7 @@ var catalog = []kind{
 			{Name: fieldRoleID, Env: []string{"VAULT_ROLE_ID"}},
 			{Name: fieldToken, Secret: true, Env: []string{"VAULT_TOKEN"}},
 			{Name: fieldSecretID, Secret: true, Env: []string{"VAULT_SECRET_ID"}},
-		}},
+		}, Versions: true},
 		build: newVault,
 	},
 	{
@@ -66,7 +79,7 @@ var catalog = []kind{
 			{Name: fieldSecretKey, Secret: true, Required: true, Env: []string{"AWS_SECRET_ACCESS_KEY"}},
 			{Name: fieldSessionToken, Secret: true, Env: []string{"AWS_SESSION_TOKEN"}},
 			{Name: fieldAddress},
-		}},
+		}, Versions: true},
 		build: newAWS,
 	},
 	{
@@ -77,7 +90,7 @@ var catalog = []kind{
 			{Name: fieldClientSecret, Secret: true, Env: []string{"AZURE_CLIENT_SECRET"}},
 			{Name: fieldToken, Secret: true, Env: []string{"AZURE_ACCESS_TOKEN"}},
 			{Name: fieldAuthority, Env: []string{"AZURE_AUTHORITY_HOST"}},
-		}},
+		}, Versions: true},
 		build: newAzure,
 	},
 	{
@@ -85,8 +98,39 @@ var catalog = []kind{
 			{Name: fieldToken, Secret: true, Required: true, Env: []string{"GOOGLE_OAUTH_ACCESS_TOKEN", "GCP_ACCESS_TOKEN"}},
 			{Name: fieldProject, Env: []string{"GOOGLE_CLOUD_PROJECT", "GCLOUD_PROJECT"}},
 			{Name: fieldAddress},
-		}},
+		}, Versions: true},
 		build: newGCP,
+	},
+	{
+		info: KindInfo{Name: KindOnePassword, Fields: []Field{
+			{Name: fieldAccount, Env: []string{"OP_ACCOUNT"}},
+			{Name: fieldToken, Secret: true, Env: []string{onePasswordTokenEnv}},
+			{Name: fieldCommand},
+		}},
+		build: newOnePassword,
+	},
+	{
+		info: KindInfo{Name: KindBitwarden, Fields: []Field{
+			{Name: fieldSession, Secret: true, Required: true, Env: []string{bitwardenSessionEnv}},
+			{Name: fieldCommand},
+		}},
+		build: newBitwarden,
+	},
+	{
+		info: KindInfo{Name: KindBitwardenSecrets, Fields: []Field{
+			{Name: fieldToken, Secret: true, Required: true, Env: []string{bwsTokenEnv}},
+			{Name: fieldAddress, Env: []string{bwsServerEnv}},
+			{Name: fieldCommand},
+		}},
+		build: newBWS,
+	},
+	{
+		info: KindInfo{Name: KindKeePassXC, Fields: []Field{
+			{Name: fieldAssociation, Required: true},
+			{Name: fieldAssociationKey, Secret: true, Required: true},
+		}},
+		build: newKeePassXC,
+		pair:  pairKeePassXC,
 	},
 }
 
@@ -94,8 +138,17 @@ func Kinds() []KindInfo {
 	infos := make([]KindInfo, len(catalog))
 	for i, entry := range catalog {
 		infos[i] = entry.info
+		infos[i].Pairing = entry.pair != nil
 	}
 	return infos
+}
+
+func Pair(ctx context.Context, kindName string) (map[string]string, error) {
+	entry, found := kindNamed(kindName)
+	if !found || entry.pair == nil {
+		return nil, fmt.Errorf("%q connections are not set up by connecting to an app", kindName)
+	}
+	return entry.pair(ctx)
 }
 
 func kindNamed(name string) (kind, bool) {

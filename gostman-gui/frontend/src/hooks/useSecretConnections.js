@@ -17,7 +17,8 @@ export function useSecretConnections(secrets) {
 
   useEffect(() => {
     reload()
-  }, [reload])
+    return secrets?.subscribe(reload)
+  }, [secrets, reload])
 
-  return { ...state, reload }
+  return state
 }

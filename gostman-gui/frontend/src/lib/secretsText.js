@@ -1,7 +1,7 @@
 export const SECRETS_TEXT = {
   title: "Secret managers",
-  intro: "A connection says where a secret manager is and how to sign in. It is kept on this computer, with credentials in the system keychain, and is never part of a collection. Variables refer to a connection by its name.",
-  empty: "No connections yet. Add one to read secrets from Vault, AWS, Azure or Google Cloud.",
+  intro: "A connection says where a secret manager or password manager is and how to sign in. It is kept on this computer, with credentials in the system keychain, and is never part of a collection. Variables refer to a connection by its name.",
+  empty: "No connections yet. Add one to read secrets from Vault, AWS, Azure, Google Cloud, 1Password, Bitwarden or KeePassXC.",
   add: "Add connection",
   edit: "Edit connection",
   remove: "Delete connection",
@@ -23,6 +23,20 @@ export const SECRETS_TEXT = {
     aws: "AWS Secrets Manager",
     azure: "Azure Key Vault",
     gcp: "Google Cloud Secret Manager",
+    keepassxc: "KeePassXC",
+    onepassword: "1Password",
+    bitwarden: "Bitwarden",
+    "bitwarden-secrets": "Bitwarden Secrets Manager",
+  },
+  kindFields: {
+    onepassword: { token: "Service account token" },
+    "bitwarden-secrets": { token: "Access token", address: "Server address" },
+  },
+  kindHints: {
+    onepassword: "Reads items with the 1Password CLI (op). To approve access in the 1Password app, turn on Settings → Developer → Integrate with 1Password CLI and leave the token empty. For CI, use a service account token instead. Account is only needed when you are signed in to several accounts.",
+    bitwarden: "Reads items with the Bitwarden CLI (bw). In a terminal, run bw login, then bw unlock --raw, and paste the session key here. Run bw sync after you change an item in another app.",
+    "bitwarden-secrets": "Reads secrets with the Bitwarden Secrets Manager CLI (bws) and a machine account access token. Leave Server address empty for bitwarden.com; set it for the EU cloud or a self-hosted server.",
+    keepassxc: "Connects to KeePassXC the way its browser extension does, so your master password never reaches Gostman. In KeePassXC, turn on Enable browser integration under Settings → Browser Integration and unlock your database. KeePassXC 2.7 to 2.8 freezes when an app reads an entry without a URL, so give the entries you use a URL.",
   },
   fields: {
     address: "Address",
@@ -41,11 +55,27 @@ export const SECRETS_TEXT = {
     client_secret: "Client secret",
     authority: "Sign-in address",
     project: "Project",
+    account: "Account",
+    session_key: "Session key",
+    command: "Program",
   },
   placeholders: {
     address: "https://",
     mount: "secret",
     kv_version: "2",
+    account: "my.1password.com",
+    command: "Found automatically",
+  },
+  pairing: {
+    keepassxc: {
+      label: "Connection",
+      connect: "Connect to KeePassXC",
+      reconnect: "Connect again",
+      waiting: "Waiting for KeePassXC",
+      prompt: "Switch to KeePassXC. Unlock the database if it asks, then name this connection and choose Save and allow access.",
+      unpaired: "Not connected yet.",
+      paired: (name) => `Connected. KeePassXC knows this connection as "${name}".`,
+    },
   },
 }
 
@@ -58,6 +88,18 @@ export const REFERENCE_TEXT = {
   path: "Secret path",
   field: "JSON field",
   fieldPlaceholder: "optional",
+  fieldNames: {
+    keepassxc: "Field",
+    onepassword: "Field",
+    bitwarden: "Field",
+    "bitwarden-secrets": "Field",
+  },
+  fieldPlaceholders: {
+    keepassxc: "password",
+    onepassword: "password",
+    bitwarden: "password",
+    "bitwarden-secrets": "value",
+  },
   version: "Version",
   versionPlaceholder: "latest",
   test: "Test",
@@ -70,6 +112,10 @@ export const REFERENCE_TEXT = {
     aws: "prod/database",
     azure: "database-password",
     gcp: "database-password",
+    keepassxc: "Work/API keys/Stripe",
+    onepassword: "Private/Stripe",
+    bitwarden: "Stripe, or the item ID",
+    "bitwarden-secrets": "Secret ID",
   },
   versions: {
     vault: "Version number",

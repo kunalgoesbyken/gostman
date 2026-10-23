@@ -143,6 +143,8 @@ export function OpenAPI(arg1:openapi.Query):Promise<openapi.Reply>;
 
 export function OpenWorkspace(arg1:string):Promise<main.WorkspaceStatus>;
 
+export function PairSecretConnection(arg1:string):Promise<Record<string, string>>;
+
 export function ParseCurl(arg1:string):Promise<engine.Request>;
 
 export function PickFile(arg1:string):Promise<string>;

@@ -66,6 +66,9 @@ func (e Environment) Lookup() Lookup {
 		if !found {
 			return Connection{}, fmt.Errorf("there is no connection named %q: set %s%s to %s and add its settings, or name the connection after its kind to use the standard variables", alias, prefix, environmentKind, KindNames())
 		}
+		if entry.pair != nil {
+			return Connection{}, fmt.Errorf("connection %q is a %s connection, which only the desktop app can use", alias, entry.info.Name)
+		}
 		return e.connection(alias, entry, naming{prefix: prefix, isStandard: !declared})
 	}
 }

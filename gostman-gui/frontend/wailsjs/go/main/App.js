@@ -254,6 +254,10 @@ export function OpenWorkspace(arg1) {
   return window['go']['main']['App']['OpenWorkspace'](arg1);
 }
 
+export function PairSecretConnection(arg1) {
+  return window['go']['main']['App']['PairSecretConnection'](arg1);
+}
+
 export function ParseCurl(arg1) {
   return window['go']['main']['App']['ParseCurl'](arg1);
 }

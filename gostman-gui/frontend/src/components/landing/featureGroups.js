@@ -17,7 +17,7 @@ export const FEATURE_INDEX = [
     title: "Variables and secrets",
     rows: [
       { term: "Variables done properly", href: docPath("variables"), text: "Secret variables in your OS keychain, plus global, collection, folder and request scopes, dynamic variables and prompts." },
-      { term: "Secret managers", href: docPath("secrets-and-network"), text: "Pull values from HashiCorp Vault, AWS, Azure or Google Cloud at send time." },
+      { term: "Secret managers", href: docPath("secrets-and-network"), text: "Pull values from Vault, AWS, Azure, Google Cloud, 1Password, Bitwarden or KeePassXC at send time." },
     ],
   },
   {

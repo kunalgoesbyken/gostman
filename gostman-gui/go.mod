@@ -12,6 +12,7 @@ require (
 
 require (
 	github.com/Azure/go-ntlmssp v0.1.1 // indirect
+	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/bufbuild/protocompile v0.14.1 // indirect
 	github.com/danieljoos/wincred v1.2.3 // indirect
 	github.com/dop251/goja v0.0.0-20260603125802-cfe4039cb6d7 // indirect

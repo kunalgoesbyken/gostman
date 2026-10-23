@@ -14,6 +14,11 @@ type Provider interface {
 	Resolve(ctx context.Context, ref Ref) (string, error)
 }
 
+type entryProvider interface {
+	Provider
+	Volatile(ref Ref) bool
+}
+
 type Lookup func(alias string) (Connection, error)
 
 type Resolver struct {
@@ -34,34 +39,48 @@ func (r *Resolver) Resolve(ctx context.Context, ref Ref) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	provider, err := r.provider(connection)
+	if err != nil {
+		return "", err
+	}
+	entries, readsEntries := provider.(entryProvider)
+	isCached := !readsEntries || !entries.Volatile(ref)
 	key := strings.Join([]string{connection.fingerprint(), ref.Path, ref.Field, ref.Version}, "\x00")
-	if value, found := r.cache.get(key); found {
+	if value, found := r.cache.get(key); found && isCached {
 		return value, nil
 	}
-	value, err := r.fetch(ctx, connection, ref)
+	value, err := read(ctx, provider, ref, readsEntries)
 	if err != nil {
 		return "", fmt.Errorf("secret %s: %w", ref.Describe(), err)
 	}
-	r.cache.put(key, value)
+	if isCached {
+		r.cache.put(key, value)
+	}
 	return value, nil
 }
 
-func (r *Resolver) fetch(ctx context.Context, connection Connection, ref Ref) (string, error) {
+func (r *Resolver) provider(connection Connection) (Provider, error) {
 	entry, found := kindNamed(connection.Kind)
 	if !found {
-		return "", fmt.Errorf("the connection %q has the unknown kind %q", connection.Alias, connection.Kind)
+		return nil, fmt.Errorf("the connection %q has the unknown kind %q", connection.Alias, connection.Kind)
 	}
 	provider, err := entry.build(connection, r.gateway)
 	if err != nil {
-		return "", fmt.Errorf("connection %q is not usable: %w", connection.Alias, err)
+		return nil, fmt.Errorf("connection %q is not usable: %w", connection.Alias, err)
 	}
+	return provider, nil
+}
+
+func read(ctx context.Context, provider Provider, ref Ref, readsEntries bool) (string, error) {
 	payload, err := provider.Resolve(ctx, ref)
 	if err != nil {
 		return "", err
 	}
-	value, err := pick(payload, ref.Field)
-	if err != nil {
-		return "", err
+	value := payload
+	if !readsEntries {
+		if value, err = pick(payload, ref.Field); err != nil {
+			return "", err
+		}
 	}
 	return value, checkValue(value)
 }

@@ -3538,6 +3538,8 @@ export namespace secrets {
 	export class KindInfo {
 	    name: string;
 	    fields: Field[];
+	    versions: boolean;
+	    pairing: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new KindInfo(source);
@@ -3547,6 +3549,8 @@ export namespace secrets {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.name = source["name"];
 	        this.fields = this.convertValues(source["fields"], Field);
+	        this.versions = source["versions"];
+	        this.pairing = source["pairing"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

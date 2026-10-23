@@ -3,7 +3,7 @@ import { KeyRound, MonitorDown, Pencil, Plus, Trash2 } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
-import { Field } from "./ui/field"
+import { FIELD_COLUMNS, Field } from "./ui/field"
 import { Input } from "./ui/input"
 import { Notice, SectionLabel } from "./ui/panel"
 import { Select } from "./ui/select"
@@ -11,10 +11,16 @@ import { BLANK_REFERENCE, ReferenceTarget } from "./SecretReferenceFields"
 import { useSecretConnections } from "../hooks/useSecretConnections"
 import { SECRETS_TEXT as TEXT } from "../lib/secretsText"
 import { useAppStore } from "../store/appStore"
+import { cn } from "../lib/utils"
 
 const NEW_CONNECTION = { alias: "", kind: "", values: {}, stored: [], isSaved: false }
 
-const labelOf = (field) => TEXT.fields[field.name] || field.name
+const labelOf = (kind, field) => TEXT.kindFields[kind]?.[field.name] || TEXT.fields[field.name] || field.name
+
+function isComplete(draft, kinds) {
+  const kind = kinds.find((candidate) => candidate.name === draft.kind)
+  return draft.alias.trim() !== "" && (!kind?.pairing || Boolean(draft.values.association))
+}
 
 function ConnectionRow({ connection, onEdit, onRemove }) {
   return (
@@ -73,7 +79,51 @@ function CredentialInput({ field, draft, onChange }) {
   )
 }
 
-function ConnectionForm({ draft, isNew, kinds, secrets, onChange }) {
+function FieldNote({ role, className, children }) {
+  return (
+    <div className={FIELD_COLUMNS}>
+      <span className="max-sm:hidden" />
+      <p role={role} className={cn("text-xs [overflow-wrap:anywhere]", className)}>{children}</p>
+    </div>
+  )
+}
+
+function PairingField({ kind, draft, secrets, onPaired }) {
+  const text = TEXT.pairing[kind.name]
+  const [isWaiting, setIsWaiting] = useState(false)
+  const [problem, setProblem] = useState("")
+  const pairedAs = draft.values.association
+
+  const connect = async () => {
+    setIsWaiting(true)
+    setProblem("")
+    try {
+      onPaired(await secrets.pair(kind.name))
+    } catch (error) {
+      setProblem(error.message)
+    } finally {
+      setIsWaiting(false)
+    }
+  }
+
+  return (
+    <>
+      <Field label={text.label} grouped>
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
+          <Button variant="outline" size="sm" disabled={isWaiting} onClick={connect}>
+            {isWaiting ? text.waiting : pairedAs ? text.reconnect : text.connect}
+          </Button>
+          <p role="status" className={cn("min-w-0 text-xs [overflow-wrap:anywhere]", pairedAs ? "text-success" : "text-muted-foreground")}>
+            {isWaiting ? text.prompt : pairedAs ? text.paired(pairedAs) : text.unpaired}
+          </p>
+        </div>
+      </Field>
+      {problem && <FieldNote role="alert" className="text-destructive">{problem}</FieldNote>}
+    </>
+  )
+}
+
+function ConnectionForm({ draft, isNew, kinds, secrets, onChange, onPaired }) {
   const [reference, setReference] = useState(BLANK_REFERENCE)
   const kind = kinds.find((candidate) => candidate.name === draft.kind)
   const setValue = (name, value) => onChange({ ...draft, values: { ...draft.values, [name]: value } })
@@ -93,15 +143,18 @@ function ConnectionForm({ draft, isNew, kinds, secrets, onChange }) {
           {kinds.map((candidate) => <option key={candidate.name} value={candidate.name}>{TEXT.kinds[candidate.name] || candidate.name}</option>)}
         </Select>
       </Field>
-      {kind?.fields.map((field) => (
-        <Field key={field.name} label={field.required ? `${labelOf(field)} *` : labelOf(field)}>
+      {TEXT.kindHints[draft.kind] && <FieldNote className="text-muted-foreground">{TEXT.kindHints[draft.kind]}</FieldNote>}
+      {kind?.pairing ? (
+        <PairingField kind={kind} draft={draft} secrets={secrets} onPaired={(values) => onPaired(kind.name, values)} />
+      ) : kind?.fields.map((field) => (
+        <Field key={field.name} label={field.required ? `${labelOf(kind.name, field)} *` : labelOf(kind.name, field)}>
           <CredentialInput field={field} draft={draft} onChange={setValue} />
         </Field>
       ))}
       {!isNew && (
         <>
           <SectionLabel className="pt-3">{TEXT.testTitle}</SectionLabel>
-          <ReferenceTarget reference={{ ...reference, provider: draft.alias }} kind={draft.kind} secrets={secrets} onChange={setReference} />
+          <ReferenceTarget reference={{ ...reference, provider: draft.alias }} kind={kind} secrets={secrets} onChange={setReference} />
           <p className="text-xs text-muted-foreground">{TEXT.testHint}</p>
         </>
       )}
@@ -118,7 +171,7 @@ function DesktopOnly() {
 }
 
 function ConnectionManager({ secrets, onClose }) {
-  const { connections, kinds, failure, reload } = useSecretConnections(secrets)
+  const { connections, kinds, failure } = useSecretConnections(secrets)
   const [editing, setEditing] = useState(null)
   const [problem, setProblem] = useState("")
   const showConfirm = useAppStore((state) => state.showConfirm)
@@ -133,11 +186,14 @@ function ConnectionManager({ secrets, onClose }) {
     setEditing({ ...connection, values: connection.values || {}, stored: connection.stored || [], isSaved: true })
   }
 
+  const pair = (kindName, values) => setEditing((current) => (
+    current?.kind === kindName ? { ...current, values: { ...current.values, ...values } } : current
+  ))
+
   const save = async () => {
     try {
       await secrets.save({ alias: editing.alias, kind: editing.kind, values: editing.values })
       setEditing(null)
-      await reload()
     } catch (error) {
       setProblem(error.message)
     }
@@ -146,10 +202,7 @@ function ConnectionManager({ secrets, onClose }) {
   const remove = (connection) => showConfirm(
     TEXT.remove,
     TEXT.confirmRemove(connection.alias),
-    async () => {
-      await secrets.remove(connection.alias)
-      await reload()
-    },
+    () => secrets.remove(connection.alias),
     null,
     "destructive"
   )
@@ -159,7 +212,14 @@ function ConnectionManager({ secrets, onClose }) {
       <DialogBody className="p-0">
         {editing ? (
           <div className="p-4">
-            <ConnectionForm draft={editing} isNew={!editing.isSaved} kinds={kinds} secrets={secrets} onChange={(next) => { setProblem(""); setEditing(next) }} />
+            <ConnectionForm
+              draft={editing}
+              isNew={!editing.isSaved}
+              kinds={kinds}
+              secrets={secrets}
+              onChange={(next) => { setProblem(""); setEditing(next) }}
+              onPaired={pair}
+            />
           </div>
         ) : (
           <ConnectionList connections={connections} onAdd={startAdding} onEdit={startEditing} onRemove={remove} />
@@ -170,7 +230,7 @@ function ConnectionManager({ secrets, onClose }) {
         {editing ? (
           <>
             <Button variant="outline" onClick={() => setEditing(null)}>{TEXT.cancel}</Button>
-            <Button disabled={editing.alias.trim() === ""} onClick={save}>{TEXT.save}</Button>
+            <Button disabled={!isComplete(editing, kinds)} onClick={save}>{TEXT.save}</Button>
           </>
         ) : (
           <Button variant="outline" onClick={onClose}>{TEXT.close}</Button>

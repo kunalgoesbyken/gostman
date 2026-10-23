@@ -6,7 +6,7 @@ Gostman has no paid tier, no account and no licence key, so every feature in the
 
 - **Data-driven runs:** run a collection once per row of a CSV or JSON file, in the app or with `gostman run --data`. See [Command line](cli.md) and [Runner, load testing and secret scanning](runner-load-and-scan.md).
 - **Parallel runs and reports:** run requests side by side and write text, JSON, JUnit or HTML reports. See [Gostman in CI](ci.md).
-- **Secret managers:** read values from HashiCorp Vault, AWS Secrets Manager, Azure Key Vault or Google Cloud Secret Manager at send time. See [Secrets and network](secrets-and-network.md).
+- **Secret managers:** read values from HashiCorp Vault, AWS Secrets Manager, Azure Key Vault, Google Cloud Secret Manager, KeePassXC, 1Password, Bitwarden or Bitwarden Secrets Manager at send time. See [Secrets and network](secrets-and-network.md).
 - **Git in the app:** diff, commit, push, branches, stash and conflict resolution in the desktop app. See [Collections and Git](collections-and-git.md).
 - **Mock server:** serve saved examples or an OpenAPI spec locally, with rules, delays and a live request log. See [Folders, mock server and capture](workspaces-and-mock.md).
 - **Command line for CI:** `gostman run` exits non-zero when a request or a check fails, and a GitHub Action and a Docker image are available. See [Gostman in CI](ci.md).

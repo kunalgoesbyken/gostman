@@ -104,6 +104,10 @@ func (a *App) SecretKinds() []secrets.KindInfo {
 	return secrets.Kinds()
 }
 
+func (a *App) PairSecretConnection(kind string) (map[string]string, error) {
+	return secrets.Pair(a.ctx, kind)
+}
+
 func (a *App) SecretConnections() ([]SecretConnection, error) {
 	connections.mu.Lock()
 	records, err := connections.read()

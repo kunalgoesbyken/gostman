@@ -31,7 +31,7 @@ Gostman is a native desktop application built with Go and [Wails](https://wails.
 Both are good tools. Gostman is for people who want the paid-tier workflow without a paid tier or an account.
 
 - **Nothing to sign in to.** Collections are plain YAML files in a folder you can commit. The desktop app and the browser version both work without an account.
-- **No tiers.** Data-driven runs, parallel runs, HTML reports, secret managers (Vault, AWS, Azure, Google Cloud), the Git panel and any number of collections are all in the download. Bruno documents several of these under its [Pro and Ultimate plans](https://www.usebruno.com/pricing), and Postman lists custom data files in the Collection Runner on its [paid plans](https://www.postman.com/pricing/).
+- **No tiers.** Data-driven runs, parallel runs, HTML reports, secret managers (Vault, AWS, Azure, Google Cloud, 1Password, Bitwarden, KeePassXC), the Git panel and any number of collections are all in the download. Bruno documents several of these under its [Pro and Ultimate plans](https://www.usebruno.com/pricing), and Postman lists custom data files in the Collection Runner on its [paid plans](https://www.postman.com/pricing/).
 - **Sharing without Git.** Send a folder to a teammate as an encrypted link or file that is built on your machine and never uploaded.
 - **More in the same download.** Load testing, Socket.IO, MQTT, GraphQL subscriptions, MCP servers, HAR import, traffic capture, a secret scanner and a mock server, plus a command line that is one binary with no Node.js to install.
 
@@ -93,7 +93,7 @@ Open the same folder in the desktop app with **Open folder** to see the requests
 - **Mock server and capture:** serve saved examples or an OpenAPI spec locally, and record traffic from your own app.
 - **OpenAPI:** import, sync with a remote spec, and a spec viewer with a linter (`gostman lint`).
 - **Docs:** generate one HTML page with Markdown descriptions and an optional Try it panel.
-- **Secret managers:** HashiCorp Vault, AWS, Azure and Google Cloud, and your OS keychain for stored values.
+- **Secret managers:** HashiCorp Vault, AWS, Azure and Google Cloud; the password managers KeePassXC, 1Password and Bitwarden; and your OS keychain for stored values.
 - **Sharing:** encrypted share links that never upload anything, and Open in Gostman links.
 - **For coding agents:** `gostman mcp` lets Claude Code, Codex and Cursor call your API through the collection without seeing your secrets.
 - **AI assistant** (optional, bring your own key): generate requests, tests and scripts, and explain errors.

@@ -115,8 +115,8 @@ function Row(props) {
 }
 
 export function EnvironmentTable({ rows, query, features, secrets, onChange }) {
-  const { connections, isLoaded } = useSecretConnections(secrets)
-  const references = secrets && features.references ? { secrets, connections, isLoaded } : null
+  const { connections, kinds, isLoaded } = useSecretConnections(secrets)
+  const references = secrets && features.references ? { secrets, connections, kinds, isLoaded } : null
   const [revealed, setRevealed] = useState(() => new Set())
   const [focus, setFocus] = useState(null)
   const needle = query.trim().toLowerCase()

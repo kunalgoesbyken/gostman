@@ -7,7 +7,9 @@ import { cn } from "../lib/utils"
 
 export const BLANK_REFERENCE = { provider: "", path: "", field: "", version: "" }
 
-const TARGET_COLUMNS = "grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,0.75fr)_auto] items-center gap-2"
+const TARGET_COLUMNS = "grid items-center gap-2"
+const VERSIONED_COLUMNS = "grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,0.75fr)_auto]"
+const UNVERSIONED_COLUMNS = "grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_auto]"
 
 function TestResult({ outcome }) {
   if (!outcome) return null
@@ -20,6 +22,9 @@ function TestResult({ outcome }) {
 
 export function ReferenceTarget({ reference: stored, kind, secrets, onChange }) {
   const reference = { ...BLANK_REFERENCE, ...stored }
+  const kindName = kind?.name
+  const showsVersion = kind?.versions !== false || reference.version !== ""
+  const fieldName = TEXT.fieldNames[kindName] || TEXT.field
   const [outcome, setOutcome] = useState(null)
   const [isTesting, setIsTesting] = useState(false)
   const edit = (patch) => {
@@ -40,10 +45,10 @@ export function ReferenceTarget({ reference: stored, kind, secrets, onChange }) 
 
   return (
     <div className="flex flex-col gap-1">
-      <div className={TARGET_COLUMNS}>
+      <div className={cn(TARGET_COLUMNS, showsVersion ? VERSIONED_COLUMNS : UNVERSIONED_COLUMNS)}>
         <Input
           value={reference.path}
-          placeholder={TEXT.paths[kind] || TEXT.path}
+          placeholder={TEXT.paths[kindName] || TEXT.path}
           aria-label={TEXT.path}
           spellCheck={false}
           onChange={(event) => edit({ path: event.target.value })}
@@ -51,22 +56,24 @@ export function ReferenceTarget({ reference: stored, kind, secrets, onChange }) 
         />
         <Input
           value={reference.field}
-          placeholder={TEXT.fieldPlaceholder}
-          aria-label={TEXT.field}
-          title={TEXT.field}
+          placeholder={TEXT.fieldPlaceholders[kindName] || TEXT.fieldPlaceholder}
+          aria-label={fieldName}
+          title={fieldName}
           spellCheck={false}
           onChange={(event) => edit({ field: event.target.value })}
           className="font-mono"
         />
-        <Input
-          value={reference.version}
-          placeholder={TEXT.versions[kind] || TEXT.version}
-          aria-label={TEXT.version}
-          title={TEXT.versions[kind] || TEXT.version}
-          spellCheck={false}
-          onChange={(event) => edit({ version: event.target.value })}
-          className="font-mono"
-        />
+        {showsVersion && (
+          <Input
+            value={reference.version}
+            placeholder={TEXT.versions[kindName] || TEXT.version}
+            aria-label={TEXT.version}
+            title={TEXT.versions[kindName] || TEXT.version}
+            spellCheck={false}
+            onChange={(event) => edit({ version: event.target.value })}
+            className="font-mono"
+          />
+        )}
         <Button variant="outline" size="sm" disabled={isTesting || reference.provider === "" || reference.path.trim() === ""} onClick={test}>
           {isTesting ? TEXT.testing : TEXT.test}
         </Button>
@@ -76,9 +83,10 @@ export function ReferenceTarget({ reference: stored, kind, secrets, onChange }) 
   )
 }
 
-export function ReferenceFields({ reference: stored, connections, isLoaded, secrets, onChange }) {
+export function ReferenceFields({ reference: stored, connections, kinds, isLoaded, secrets, onChange }) {
   const reference = { ...BLANK_REFERENCE, ...stored }
   const connection = connections.find((candidate) => candidate.alias === reference.provider)
+  const kind = kinds.find((candidate) => candidate.name === connection?.kind)
   const isUnknown = isLoaded && reference.provider !== "" && !connection
   return (
     <div className="flex flex-col gap-1 pb-2 pl-10 pr-3">
@@ -92,7 +100,7 @@ export function ReferenceFields({ reference: stored, connections, isLoaded, secr
           {isUnknown && <option value={reference.provider}>{reference.provider}</option>}
           {connections.map((candidate) => <option key={candidate.alias} value={candidate.alias}>{candidate.alias}</option>)}
         </Select>
-        <ReferenceTarget reference={reference} kind={connection?.kind} secrets={secrets} onChange={onChange} />
+        <ReferenceTarget reference={reference} kind={kind} secrets={secrets} onChange={onChange} />
       </div>
       {isUnknown && <p role="alert" className="text-xs text-warning">{TEXT.unknownConnection(reference.provider)}</p>}
       {isLoaded && connections.length === 0 && !isUnknown && <p className="text-xs text-muted-foreground">{TEXT.noConnections}</p>}
