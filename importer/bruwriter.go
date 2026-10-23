@@ -17,6 +17,35 @@ type bruWriter struct {
 }
 
 func (w *bruWriter) dict(name string, entries []bruEntry) {
+	w.section(name, dictLines(entries))
+}
+
+func (w *bruWriter) section(name, lines string) {
+	if lines != "" {
+		w.out.WriteString(name + " {\n" + lines + "}\n\n")
+	}
+}
+
+func listLines(key string, items []string) string {
+	var lines strings.Builder
+	for _, item := range items {
+		if isBrunoListItem(item) {
+			lines.WriteString(bruIndent + bruIndent + item + "\n")
+		}
+	}
+	if lines.Len() == 0 {
+		return ""
+	}
+	return bruIndent + key + ": " + listOpen + "\n" + lines.String() + bruIndent + listClose + "\n"
+}
+
+func isBrunoListItem(item string) bool {
+	return item != "" && strings.IndexFunc(item, func(r rune) bool {
+		return !unicode.IsLetter(r) && (r < '0' || r > '9') && r != '_' && r != '-'
+	}) < 0
+}
+
+func dictLines(entries []bruEntry) string {
 	var lines strings.Builder
 	for _, entry := range entries {
 		key, ok := safeKey(entry.Key)
@@ -33,9 +62,7 @@ func (w *bruWriter) dict(name string, entries []bruEntry) {
 		}
 		lines.WriteString(bruIndent + key + ": " + singleLine(entry.Value) + "\n")
 	}
-	if lines.Len() > 0 {
-		w.out.WriteString(name + " {\n" + lines.String() + "}\n\n")
-	}
+	return lines.String()
 }
 
 func (w *bruWriter) block(name, body string) {

@@ -34,6 +34,7 @@ func (c *collector) readOpenAPI(ctx context.Context, doc document, config Config
 func openAPIRequest(source openapi.Request, folderID string) workspace.Request {
 	request := newRequest(source.Name, source.Method, source.URL)
 	request.Description = source.Description
+	request.Tags = workspace.NormalizeTags(source.Tags)
 	request.Headers = source.Headers
 	request.Body = source.Body
 	request.BodyType = source.BodyType

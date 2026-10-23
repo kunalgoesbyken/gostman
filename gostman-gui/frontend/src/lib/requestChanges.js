@@ -1,5 +1,6 @@
 import { isPlainObject } from './dataUtils'
 import { normalizeRequest } from './request'
+import { sameTags } from './tags'
 
 const TEXT_FIELDS = [
   'name', 'description', 'method', 'url', 'body', 'bodyType', 'folderId', 'graphqlQuery', 'graphqlVariables',
@@ -22,6 +23,7 @@ const sameSettings = (first, second) => Object.keys(first).every((key) => (
 function sameRequest(first, second) {
   return TEXT_FIELDS.every((field) => first[field] === second[field])
     && PAIR_FIELDS.every((field) => samePairs(first[field], second[field]))
+    && sameTags(first.tags, second.tags)
     && sameSettings(first.auth, second.auth)
     && sameSettings(first.options, second.options)
 }

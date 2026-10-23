@@ -1763,6 +1763,7 @@ export namespace main {
 	    id: string;
 	    name: string;
 	    description: string;
+	    tags?: string[];
 	    url: string;
 	    method: string;
 	    headers: string;
@@ -1799,6 +1800,7 @@ export namespace main {
 	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.description = source["description"];
+	        this.tags = source["tags"];
 	        this.url = source["url"];
 	        this.method = source["method"];
 	        this.headers = source["headers"];
@@ -2710,6 +2712,7 @@ export namespace openapi {
 	    id: string;
 	    name: string;
 	    description: string;
+	    tags?: string[];
 	    url: string;
 	    method: string;
 	    headers: string;
@@ -2729,6 +2732,7 @@ export namespace openapi {
 	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.description = source["description"];
+	        this.tags = source["tags"];
 	        this.url = source["url"];
 	        this.method = source["method"];
 	        this.headers = source["headers"];
@@ -3702,6 +3706,7 @@ export namespace workspace {
 	    id: string;
 	    name: string;
 	    description: string;
+	    tags?: string[];
 	    url: string;
 	    method: string;
 	    headers: string;
@@ -3738,6 +3743,7 @@ export namespace workspace {
 	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.description = source["description"];
+	        this.tags = source["tags"];
 	        this.url = source["url"];
 	        this.method = source["method"];
 	        this.headers = source["headers"];

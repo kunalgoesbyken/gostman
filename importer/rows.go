@@ -144,6 +144,16 @@ func objects(value any) []map[string]any {
 	return found
 }
 
+func texts(value any) []string {
+	var found []string
+	for _, item := range list(value) {
+		if object(item) == nil && list(item) == nil {
+			found = append(found, text(item))
+		}
+	}
+	return found
+}
+
 func flag(value any) bool {
 	set, _ := value.(bool)
 	return set

@@ -9,6 +9,7 @@ import (
 
 	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/runner"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 var textBodyTypes = []string{engine.BodyNone, engine.BodyJSON, engine.BodyText, engine.BodyXML, engine.BodyForm}
@@ -27,8 +28,10 @@ type sendArguments struct {
 }
 
 type runArguments struct {
-	Folder string `json:"folder"`
-	Bail   bool   `json:"bail"`
+	Folder      string   `json:"folder"`
+	Bail        bool     `json:"bail"`
+	Tags        []string `json:"tags"`
+	ExcludeTags []string `json:"exclude_tags"`
 }
 
 type failedRequest struct {
@@ -154,7 +157,12 @@ func digest(report runner.Report) runDigest {
 }
 
 func (d *Desk) runFolder(ctx context.Context, current scene, arguments runArguments) (runDigest, error) {
-	options := runner.Options{Folder: arguments.Folder, Bail: arguments.Bail}
+	options := runner.Options{
+		Folder:      arguments.Folder,
+		Bail:        arguments.Bail,
+		Tags:        workspace.NormalizeTags(arguments.Tags),
+		ExcludeTags: workspace.NormalizeTags(arguments.ExcludeTags),
+	}
 	report, err := d.client.Run(ctx, current.stored, options, func(runner.Result) {})
 	if err != nil {
 		return runDigest{}, err

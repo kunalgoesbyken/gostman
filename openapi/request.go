@@ -75,6 +75,7 @@ type Request struct {
 	ID          string      `json:"id"`
 	Name        string      `json:"name"`
 	Description string      `json:"description"`
+	Tags        []string    `json:"tags,omitempty"`
 	URL         string      `json:"url"`
 	Method      string      `json:"method"`
 	Headers     string      `json:"headers"`
@@ -173,7 +174,7 @@ func (d *Document) GenerateRequest(o *Operation) *Request {
 		return o.request
 	}
 	params := d.params(o)
-	request := &Request{Method: o.Method, Name: requestName(o)}
+	request := &Request{Method: o.Method, Name: requestName(o), Tags: o.Tags}
 
 	path := o.Path
 	var query []string

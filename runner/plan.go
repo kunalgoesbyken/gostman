@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/runner/sandbox"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 const pathSeparator = "/"
@@ -119,13 +120,38 @@ func prepare(scripts *sandbox.Sandbox, stored Collection, options Options) (plan
 			planned.requests = append(planned.requests, options.applyTo(request))
 		}
 	}
-	if len(options.Only) > 0 && len(planned.requests) == 0 {
-		return plan{}, fmt.Errorf("no request matches %s", strings.Join(options.Only, ", "))
+	if filters := options.filters(); len(filters) > 0 && len(planned.requests) == 0 {
+		return plan{}, fmt.Errorf("no request matches: %s", strings.Join(filters, "; "))
 	}
 	return planned, nil
 }
 
+func (o Options) filters() []string {
+	var described []string
+	if len(o.Only) > 0 {
+		described = append(described, strings.Join(o.Only, ", "))
+	}
+	if len(o.Tags) > 0 {
+		described = append(described, "tagged "+strings.Join(o.Tags, " or "))
+	}
+	if len(o.ExcludeTags) > 0 {
+		described = append(described, "not tagged "+strings.Join(o.ExcludeTags, " or "))
+	}
+	return described
+}
+
 func (o Options) selects(request Request, folder string) bool {
+	return o.selectsName(request, folder) && o.selectsTags(request.Tags)
+}
+
+func (o Options) selectsTags(tags []string) bool {
+	if len(o.Tags) > 0 && !workspace.SharesTag(tags, o.Tags) {
+		return false
+	}
+	return !workspace.SharesTag(tags, o.ExcludeTags)
+}
+
+func (o Options) selectsName(request Request, folder string) bool {
 	if len(o.Only) == 0 {
 		return true
 	}

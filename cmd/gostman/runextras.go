@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/kunalgoesbyken/gostman/runner"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 type listFlag []string
@@ -21,6 +22,21 @@ func (l *listFlag) Set(value string) error {
 		return errors.New("name a request")
 	}
 	*l = append(*l, value)
+	return nil
+}
+
+type tagFlag []string
+
+func (t *tagFlag) String() string {
+	return strings.Join(*t, ",")
+}
+
+func (t *tagFlag) Set(value string) error {
+	tags := workspace.NormalizeTags(strings.Split(value, ","))
+	if len(tags) == 0 {
+		return errors.New("name a tag")
+	}
+	*t = workspace.NormalizeTags(append(*t, tags...))
 	return nil
 }
 
@@ -52,6 +68,8 @@ func (e *runExtras) register(flags *flag.FlagSet, options *runner.Options) {
 	flags.StringVar(&e.envFile, "env-file", "", "")
 	only := (*listFlag)(&options.Only)
 	flags.Var(only, "only", "")
+	flags.Var((*tagFlag)(&options.Tags), "tags", "")
+	flags.Var((*tagFlag)(&options.ExcludeTags), "exclude-tags", "")
 }
 
 func (e runExtras) validate(options runner.Options) error {

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 const (
@@ -22,6 +23,7 @@ type parts struct {
 	method       string
 	url          string
 	description  string
+	tags         []string
 	headers      []row
 	params       []row
 	body         string
@@ -42,6 +44,7 @@ func (c *collector) build(p parts, inherited scope, folderID string) {
 	request := newRequest(p.name, p.method, "")
 	request.URL, request.QueryParams = withQuery(p.url, p.params)
 	request.Description = p.description
+	request.Tags = workspace.NormalizeTags(p.tags)
 	request.FolderId = folderID
 	request.Headers = rowsJSON(mergeRows(inherited.headers, p.headers))
 	request.Vars = rowsJSON(mergeRows(inherited.vars, p.vars))

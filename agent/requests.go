@@ -17,13 +17,14 @@ type listArguments struct {
 }
 
 type requestLine struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Folder      string `json:"folder"`
-	Method      string `json:"method"`
-	URL         string `json:"url"`
-	HasTests    bool   `json:"hasTests"`
-	HasExamples bool   `json:"hasExamples"`
+	ID          string   `json:"id"`
+	Name        string   `json:"name"`
+	Folder      string   `json:"folder"`
+	Method      string   `json:"method"`
+	URL         string   `json:"url"`
+	Tags        []string `json:"tags,omitempty"`
+	HasTests    bool     `json:"hasTests"`
+	HasExamples bool     `json:"hasExamples"`
 }
 
 type requestList struct {
@@ -104,6 +105,7 @@ func describeLine(entry runner.Listed, files workspace.Collection) requestLine {
 		Folder:      entry.Folder,
 		Method:      request.Method,
 		URL:         request.URL,
+		Tags:        request.Tags,
 		HasTests:    entry.Checks > 0 || hasText(request.PostScript),
 		HasExamples: len(examplesOf(storedRequest(files, request.ID))) > 0,
 	}

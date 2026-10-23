@@ -5,6 +5,7 @@ import { iterationCount, iterationVariables } from './runData'
 import { createFlowFollower } from './runFlow'
 import { withRunStreamBudget } from './runStream'
 import { isSocketAddress } from './socketSessions'
+import { matchesTags } from './tags'
 import { selectActiveVariables, useAppStore } from '../store/appStore'
 
 const SKIPPED_SOCKET = 'WebSocket requests are not part of a run.'
@@ -57,9 +58,10 @@ function summarize(request, { response, tests }, iteration) {
   }
 }
 
-function requestsInScope(folderId) {
-  const { folders, requests } = store()
-  return collectRequests(buildCollectionTree(folders, requests), folderId)
+const NO_TAG_FILTER = { include: [], exclude: [] }
+
+export function requestsInScope(folders, requests, folderId, tagFilter) {
+  return collectRequests(buildCollectionTree(folders, requests), folderId).filter((request) => matchesTags(request.tags, tagFilter))
 }
 
 export function createRunner(backend, execute) {
@@ -97,10 +99,11 @@ export function createRunner(backend, execute) {
     await Promise.all(lanes)
   }
 
-  async function start({ folderId, delayMs, stopOnFailure, parallel = 1, rows = [], iterations = 0 }) {
+  async function start({ folderId, delayMs, stopOnFailure, parallel = 1, rows = [], iterations = 0, tagFilter = NO_TAG_FILTER }) {
     const run = { isStopped: false, isHalted: false, sendIds: new Set() }
     current = run
-    const requests = requestsInScope(folderId)
+    const { folders, requests: saved } = store()
+    const requests = requestsInScope(folders, saved, folderId, tagFilter)
     const count = iterationCount(rows, iterations)
     const isIterating = rows.length > 0 || count > 1
     const base = selectActiveVariables(store())

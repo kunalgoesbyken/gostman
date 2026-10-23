@@ -31,6 +31,8 @@ Gostman reads the content after a short pause and shows a summary before anythin
 | Bruno | Bruno collections in `.bru` or YAML (OpenCollection), as a folder, a `.zip` or one exported file |
 | Gostman | Gostman exports and share links |
 
+Request tags are carried over from Bruno (`tags` in a `.bru` file's `meta` block, or `info.tags` in OpenCollection YAML) and from the `tags` of an OpenAPI operation, which also still pick the folder. Postman, Insomnia, HAR and WSDL files have no request tags.
+
 The **Format** list defaults to **Detect automatically**. Choose a format yourself when detection picks the wrong one. A curl command pasted into the address bar of a request fills that request, see [Collections, tabs and Git](collections-and-git.md).
 
 When you pick HAR, or the files you read include a HAR capture, a **Leave out images, fonts, styles and scripts** checkbox appears. Chosen entries are listed under **Left out** in the summary.
@@ -93,6 +95,8 @@ The **Export** tab previews the content, shows how many requests, folders and en
 | Bruno | A folder of `.bru` files with environments, saved as a `.zip` |
 | curl script | One curl command per request. Credentials become environment variable placeholders |
 | HAR | HTTP Archive 1.2 with the requests and no responses |
+
+Gostman, OpenAPI and Bruno exports keep request tags. Bruno only reads tags made of letters, digits, `_` and `-`, so other tags, such as ones with spaces, are left out of a Bruno export.
 
 For Bruno, curl script and HAR exports, an **Include credentials** checkbox is off by default. Off, passwords, tokens and secret-named headers or variables are replaced with `{{NAME}}` placeholders. On, credentials are written into the file in plain text.
 

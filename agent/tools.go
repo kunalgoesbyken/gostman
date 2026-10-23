@@ -47,8 +47,10 @@ var sendInput = object(map[string]schema{
 })
 
 var runInput = object(map[string]schema{
-	"folder": text("The folder to run, by name or path. Leave out to run every request in the workspace."),
-	"bail":   flag("Stop at the first failing request."),
+	"folder":       text("The folder to run, by name or path. Leave out to run every request in the workspace."),
+	"bail":         flag("Stop at the first failing request."),
+	"tags":         list("Run only requests with at least one of these tags, as list_requests shows them. Case does not matter.", text("A tag.")),
+	"exclude_tags": list("Skip requests with any of these tags.", text("A tag.")),
 })
 
 var assertionInput = object(map[string]schema{
@@ -82,7 +84,7 @@ func (d *Desk) Tools() []mcp.Tool {
 	return []mcp.Tool{
 		{
 			Name: "list_requests",
-			Description: "List the API requests saved in this Gostman workspace: id, name, method, URL template, folder, and whether each has tests and saved example responses. " +
+			Description: "List the API requests saved in this Gostman workspace: id, name, method, URL template, folder, tags, and whether each has tests and saved example responses. " +
 				"Call this first to find a request to send instead of writing a curl command.",
 			InputSchema: listInput,
 			ReadOnly:    true,
@@ -110,6 +112,7 @@ func (d *Desk) Tools() []mcp.Tool {
 		{
 			Name: "run_folder",
 			Description: "Send every request in a folder, or in the whole workspace, in order, with scripts and assertions, the way the collection runner does. " +
+				"tags and exclude_tags narrow the run to a subset such as smoke tests. " +
 				"Use it to check that an API still works after a change. Returns the counts and, for failed requests only, the error, the failed tests and the console output.",
 			InputSchema: runInput,
 			Handle:      bind(d, (*Desk).runFolder),

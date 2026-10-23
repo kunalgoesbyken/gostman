@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"reflect"
 	"sort"
 	"strings"
 )
@@ -142,7 +143,7 @@ func (w *Workspace) storeRequest(request Request) error {
 		return err
 	}
 	normalized.FolderId = request.FolderId
-	isStored := entry.path == target && entry.order == order && entry.request == normalized
+	isStored := entry.path == target && entry.order == order && reflect.DeepEqual(entry.request, normalized)
 	if entry.path != "" {
 		if err := w.relocate(entry.path, target); err != nil {
 			return err

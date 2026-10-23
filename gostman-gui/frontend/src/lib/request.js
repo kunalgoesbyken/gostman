@@ -1,5 +1,6 @@
 import { resolveBodyType } from './body'
 import { foldQueryParams } from './queryString'
+import { normalizeTags } from './tags'
 
 export const AUTH_OAUTH2 = 'oauth2'
 export const GRANT_CLIENT_CREDENTIALS = 'client_credentials'
@@ -38,6 +39,7 @@ const DEFAULT_REQUEST = {
   id: '',
   name: 'New Request',
   description: '',
+  tags: [],
   method: 'GET',
   url: '',
   headers: '{}',
@@ -74,6 +76,7 @@ export function normalizeRequest(raw) {
   for (const [field, fallback] of Object.entries(DEFAULT_REQUEST)) {
     request[field] = source[field] || fallback
   }
+  request.tags = normalizeTags(source.tags)
   request.auth = normalizeAuth(source.auth)
   request.options = { ...DEFAULT_OPTIONS, ...source.options }
   request.bodyType = resolveBodyType(request.bodyType, request.body)

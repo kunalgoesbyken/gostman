@@ -9,6 +9,8 @@ const (
 	multilineMark = "'''"
 	disabledMark  = "~"
 	blockIndent   = 2
+	listOpen      = "["
+	listClose     = "]"
 )
 
 var brunoBlocks = map[string]bool{
@@ -116,6 +118,31 @@ func (f bruFile) names(name string) []string {
 		}
 	}
 	return names
+}
+
+func (f bruFile) list(block, key string) []string {
+	lines := f.blocks[block]
+	for index, line := range lines {
+		name, value, found := strings.Cut(strings.TrimSpace(line), ":")
+		if found && strings.TrimSpace(name) == key && strings.TrimSpace(value) == listOpen {
+			return listItems(lines[index+1:])
+		}
+	}
+	return nil
+}
+
+func listItems(lines []string) []string {
+	var items []string
+	for _, line := range lines {
+		item := strings.TrimSpace(line)
+		if item == listClose {
+			break
+		}
+		if item != "" {
+			items = append(items, item)
+		}
+	}
+	return items
 }
 
 func (f bruFile) value(block, key string) string {

@@ -22,6 +22,7 @@ const (
 
 var requestLabels = map[string]string{
 	"description":      "description",
+	"tags":             "tags",
 	"method":           "method",
 	"url":              "URL",
 	"queryParams":      "query parameters",
@@ -47,7 +48,7 @@ var requestLabels = map[string]string{
 	"order":            "position",
 }
 
-var requestOrder = []string{"name", "method", "url", "queryParams", "headers", "auth", "bodyType", "body", "graphqlQuery", "graphqlVariables", "grpcMethod", "grpcMessage", "grpcProtos", "mcpTool", "mcpArguments", "socketProtocol", "socketMessages", "options", "extractors", "assertions", "preScript", "postScript", "examples", "description", "order"}
+var requestOrder = []string{"name", "method", "url", "queryParams", "headers", "auth", "bodyType", "body", "graphqlQuery", "graphqlVariables", "grpcMethod", "grpcMessage", "grpcProtos", "mcpTool", "mcpArguments", "socketProtocol", "socketMessages", "options", "extractors", "assertions", "preScript", "postScript", "examples", "description", "tags", "order"}
 
 var showsValues = map[string]bool{"url": true, "method": true}
 

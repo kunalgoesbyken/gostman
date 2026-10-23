@@ -41,7 +41,7 @@ The row below the request bar holds the tabs. A count or a dot on a tab shows th
 | Vars | Variables for this request |
 | Extract | Rules that copy response values into variables |
 | Tests | Assertions and scripts |
-| Settings | Timeout, redirects, TLS, streaming and description |
+| Settings | Timeout, redirects, TLS, streaming, tags and description |
 
 The bookmark button at the right end of the tab row opens the saved [examples](#examples) of the request.
 
@@ -167,6 +167,7 @@ Each assertion row has an Expression, a Check and an Expected value. Expressions
 | Follow redirects | On by default. |
 | Verify TLS certificates | On by default. Clear it to accept certificates that fail verification. |
 | Stream as server-sent events | Streams the response as events. Adds Reconnect when the server closes the stream, Max events (default 10000) and Max seconds (default 300). |
+| Tags | Labels such as `smoke` or `regression`. Type a tag and press Enter or a comma; Backspace in the empty field removes the last one. Tags already used in the collection are suggested. Case is ignored, so `Smoke` and `smoke` are one tag. The runner dialog and `gostman run --tags` use them to run a subset. |
 | Description | Markdown shown in generated documentation. |
 
 A dot on the Settings tab means a timeout, a disabled redirect or TLS check, or streaming is set.

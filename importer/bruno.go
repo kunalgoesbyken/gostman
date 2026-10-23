@@ -347,6 +347,7 @@ func (c *collector) importBrunoRequest(file brunoFile, inherited scope, folderID
 		method:      strings.ToUpper(method),
 		url:         bru.value(method, "url"),
 		description: bru.text("docs"),
+		tags:        bru.list("meta", "tags"),
 		headers:     bruRows(bru.entries("headers")),
 		params:      bruRows(bru.entries("params:query")),
 		vars:        bruRows(bru.entries("vars:pre-request")),

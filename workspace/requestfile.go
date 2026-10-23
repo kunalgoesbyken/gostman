@@ -13,7 +13,7 @@ const (
 
 var (
 	requestKeys = []string{
-		"id", "name", "description", "order", "method", "url", "queryParams", "headers", "auth", "bodyType", "body",
+		"id", "name", "description", "tags", "order", "method", "url", "queryParams", "headers", "auth", "bodyType", "body",
 		"graphqlQuery", "graphqlVariables", "grpcMethod", "grpcMessage", "grpcProtos", "mcpTool", "mcpArguments", "socketProtocol", "socketMessages", "vars", "options",
 		"extractors", "assertions", "preScript", "postScript", "examples", "timestamp",
 	}
@@ -138,6 +138,7 @@ func (b nodeBuilder) request(document requestDocument) *yaml.Node {
 	setField(root, "id", b.text(request.Id))
 	setField(root, "name", b.text(request.Name))
 	setField(root, "description", b.text(request.Description))
+	setField(root, "tags", b.textList(NormalizeTags(request.Tags)))
 	setField(root, "order", integerNode(document.order))
 	setField(root, "method", b.text(request.Method))
 	setField(root, "url", b.text(request.URL))
@@ -257,6 +258,7 @@ func readRequest(root *yaml.Node) (requestDocument, error) {
 		Id:               fields.text("id"),
 		Name:             fields.text("name"),
 		Description:      fields.text("description"),
+		Tags:             NormalizeTags(fields.textList("tags")),
 		URL:              fields.text("url"),
 		Method:           fields.text("method"),
 		Headers:          fields.pairs("headers"),

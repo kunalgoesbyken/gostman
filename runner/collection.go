@@ -39,6 +39,7 @@ type Environment struct {
 type Request struct {
 	ID               string         `json:"id"`
 	Name             string         `json:"name"`
+	Tags             []string       `json:"tags"`
 	URL              string         `json:"url"`
 	Method           string         `json:"method"`
 	Headers          string         `json:"headers"`

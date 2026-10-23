@@ -67,6 +67,10 @@ run
                         other's extracted variables
   --only <name>         run only requests with this name, id or Folder/Name
                         (repeatable)
+  --tags <a,b>          run only requests with at least one of these tags
+                        (comma list, repeatable)
+  --exclude-tags <a,b>  skip requests with any of these tags (comma list,
+                        repeatable); combines with --folder, --only and --tags
   --env-file <file>     read KEY=value lines as variables (--var wins)
   --reporter <format[:file]>
                         text, json, junit or html (default text); with :file

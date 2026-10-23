@@ -113,6 +113,7 @@ func (c *collector) openRequest(name string, item, described map[string]any, fol
 		method:      text(described["method"]),
 		url:         applyPathParams(text(described["url"]), pathParams),
 		description: text(item["docs"]),
+		tags:        texts(object(item["info"])["tags"]),
 		headers:     openRows(described["headers"]),
 		params:      params,
 	}

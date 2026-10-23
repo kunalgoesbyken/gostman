@@ -10,10 +10,13 @@ import { Toolbar } from "./ui/panel"
 import { Select } from "./ui/select"
 import { MethodTag } from "./MethodTag"
 import { TestRow, countPassed } from "./TestResults"
-import { ROOT_ID, buildCollectionTree, collectRequests, listFolders } from "../lib/collectionTree"
+import { TagsInput } from "./ui/tagsInput"
+import { ROOT_ID, buildCollectionTree, listFolders } from "../lib/collectionTree"
 import { pluralize } from "../lib/dataUtils"
 import { DATA_FILE_ERROR, iterationCount, MAX_ITERATIONS, parseDataFile } from "../lib/runData"
 import { parseJsonBody, statusVariant } from "../lib/response"
+import { requestsInScope } from "../lib/runner"
+import { collectTags } from "../lib/tags"
 import { endSummary } from "../lib/sse"
 import { cn } from "../lib/utils"
 
@@ -26,6 +29,10 @@ const LABELS = {
   dataFile: "Data file (CSV or JSON)",
   clearData: "Remove the data file",
   report: "Download HTML report",
+  includeTags: "Only tags",
+  excludeTags: "Skip tags",
+  anyTag: "Any",
+  noTag: "None",
   emptyBody: "The response had no body.",
   truncated: "Only the start of a long body is kept in a run. Send the request on its own to see all of it.",
   idle: "Requests run in sidebar order with their scripts, extraction rules and assertions, using the active environment. A data file runs everything once per row. With parallel above 1, requests are sent together and do not see each other's extracted variables.",
@@ -40,6 +47,15 @@ function NumberField({ label, className, ...props }) {
       {label}
       <Input type="number" className={cn("w-20 font-mono", className)} {...props} />
     </label>
+  )
+}
+
+function TagFilterField({ label, ...props }) {
+  return (
+    <div className="flex min-w-[14rem] flex-1 items-center gap-1.5 text-xs text-muted-foreground">
+      <span className="shrink-0">{label}</span>
+      <TagsInput label={label} {...props} />
+    </div>
   )
 }
 
@@ -151,10 +167,13 @@ export function RunnerDialog({ runner, folders, requests, actions }) {
   const [rows, setRows] = useState([])
   const [dataName, setDataName] = useState("")
   const [dataError, setDataError] = useState("")
+  const [includeTags, setIncludeTags] = useState([])
+  const [excludeTags, setExcludeTags] = useState([])
 
-  const tree = useMemo(() => buildCollectionTree(folders, requests), [folders, requests])
-  const scopes = useMemo(() => listFolders(tree), [tree])
-  const requestCount = useMemo(() => collectRequests(tree, folderId).length, [tree, folderId])
+  const scopes = useMemo(() => listFolders(buildCollectionTree(folders, [])), [folders])
+  const knownTags = useMemo(() => collectTags(requests), [requests])
+  const tagFilter = useMemo(() => ({ include: includeTags, exclude: excludeTags }), [includeTags, excludeTags])
+  const requestCount = useMemo(() => requestsInScope(folders, requests, folderId, tagFilter).length, [folders, requests, folderId, tagFilter])
   const { isRunning, results } = runner
   const iterations = iterationCount(rows, iterationLimit)
   const total = requestCount * iterations
@@ -211,7 +230,7 @@ export function RunnerDialog({ runner, folders, requests, actions }) {
               Stop
             </Button>
           ) : (
-            <Button size="sm" disabled={total === 0} onClick={() => actions.startRun({ folderId, delayMs, stopOnFailure, parallel, rows, iterations: iterationLimit })}>
+            <Button size="sm" disabled={total === 0} onClick={() => actions.startRun({ folderId, delayMs, stopOnFailure, parallel, rows, iterations: iterationLimit, tagFilter })}>
               <Play />
               Run
             </Button>
@@ -248,6 +267,12 @@ export function RunnerDialog({ runner, folders, requests, actions }) {
           onChange={(event) => setParallel(Math.max(1, toCount(event.target.value)))}
         />
       </Toolbar>
+      {knownTags.length > 0 && (
+        <Toolbar className="h-auto flex-wrap py-1.5">
+          <TagFilterField label={LABELS.includeTags} placeholder={LABELS.anyTag} value={includeTags} onChange={setIncludeTags} suggestions={knownTags} disabled={isRunning} />
+          <TagFilterField label={LABELS.excludeTags} placeholder={LABELS.noTag} value={excludeTags} onChange={setExcludeTags} suggestions={knownTags} disabled={isRunning} />
+        </Toolbar>
+      )}
       {dataError && <p role="alert" className="shrink-0 px-4 py-1 text-xs text-destructive">{dataError}</p>}
       <div className="min-h-0 flex-1 overflow-y-auto [overflow-wrap:anywhere]">
         {results.length === 0 ? (

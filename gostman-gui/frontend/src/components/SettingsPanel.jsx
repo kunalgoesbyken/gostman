@@ -1,18 +1,24 @@
+import { useMemo } from "react"
 import { AiButton } from "./AiButton"
 import { MarkdownField } from "./MarkdownField"
 import { Checkbox } from "./ui/checkbox"
 import { Field } from "./ui/field"
 import { Input } from "./ui/input"
 import { PanelBody } from "./ui/panel"
+import { TagsInput } from "./ui/tagsInput"
 import { SSE_SETTINGS_TEXT } from "../lib/sse"
+import { collectTags } from "../lib/tags"
+import { useAppStore } from "../store/appStore"
 
 const DEFAULT_TIMEOUT_MS = 30000
 const CHECKBOX_CLASS = "h-7 justify-start self-start"
 
 const toWholeNumber = (text) => Math.max(0, Math.trunc(Number(text)) || 0)
 
-export function SettingsPanel({ options, description, onChange, onDescriptionChange, onDocument }) {
+export function SettingsPanel({ options, description, tags, onChange, onDescriptionChange, onTagsChange, onDocument }) {
   const update = (patch) => onChange({ ...options, ...patch })
+  const requests = useAppStore((state) => state.requests)
+  const knownTags = useMemo(() => collectTags(requests), [requests])
 
   return (
     <PanelBody className="h-full">
@@ -80,6 +86,15 @@ export function SettingsPanel({ options, description, onChange, onDescriptionCha
             </Field>
           </>
         )}
+        <Field label="Tags" grouped>
+          <TagsInput
+            value={tags}
+            onChange={onTagsChange}
+            label="Tags"
+            placeholder="smoke, regression"
+            suggestions={knownTags}
+          />
+        </Field>
         <Field label="Description" grouped>
           <MarkdownField
             value={description}

@@ -4,6 +4,7 @@ import { IconButton } from "./ui/button"
 import { MethodTag } from "./MethodTag"
 import { ROW_FOLDER } from "../lib/collectionTree"
 import { PLACE_AFTER, PLACE_BEFORE, PLACE_INSIDE } from "../lib/dropPlace"
+import { normalizeTags } from "../lib/tags"
 import { TREE_TEXT } from "../lib/treeText"
 import { cn } from "../lib/utils"
 
@@ -81,7 +82,7 @@ export const TreeRow = memo(function TreeRow({ row, isActive, isTabStop, focusRe
         onClick={() => onActivate(row)}
         onDoubleClick={() => onPin(row)}
         onPointerDown={(event) => onPointerDown(event, row)}
-        title={isFolder ? name : `${name}\n${item.url}`}
+        title={isFolder ? name : [name, item.url, normalizeTags(item.tags).join(", ")].filter(Boolean).join("\n")}
         style={{ paddingLeft: indentOf(row.depth) }}
         className="flex h-full min-w-0 flex-1 items-center gap-1.5 text-left"
       >

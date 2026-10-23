@@ -97,6 +97,9 @@ func openAPIOperation(request workspace.Request, route string, schemes map[strin
 	if request.Description != "" {
 		operation["description"] = request.Description
 	}
+	if tags := workspace.NormalizeTags(request.Tags); len(tags) > 0 {
+		operation["tags"] = tags
+	}
 	if parameters := openAPIParameters(request, route); len(parameters) > 0 {
 		operation["parameters"] = parameters
 	}

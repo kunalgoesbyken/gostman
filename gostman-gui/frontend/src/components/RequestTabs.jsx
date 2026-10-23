@@ -287,8 +287,10 @@ export const RequestTabs = memo(function RequestTabs({
           <SettingsPanel
             options={options}
             description={activeRequest.description}
+            tags={activeRequest.tags}
             onChange={(next) => onUpdateRequest({ options: next })}
             onDescriptionChange={(description) => onUpdateRequest({ description })}
+            onTagsChange={(tags) => onUpdateRequest({ tags })}
             onDocument={() => actions.ai.start(TASK_DOCS)}
           />
         </TabsContent>

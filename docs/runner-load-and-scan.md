@@ -20,6 +20,7 @@ Requests run in sidebar order, with their scripts, extraction rules and assertio
 | **Data file (CSV or JSON)** | Loads a file with one row per iteration. See [Data files](#data-files). |
 | **Iterations** | Limits the number of iterations. Empty shows the number that will run: the row count of the data file, or 1. The highest value is 10000. |
 | **Parallel** | Sends up to this many requests at once. Empty means 1. |
+| **Only tags** and **Skip tags** | Shown when a request in the collection has tags. **Only tags** keeps the requests that have at least one of the tags you add; empty keeps every request. **Skip tags** leaves out requests that have any of them. Case is ignored. Both apply inside the chosen folder, and the footer counts what is left. Tags are set in a request's [Settings](requests-and-responses.md#settings) tab. |
 | **Run** and **Stop** | Starts the run. While a run is going, **Stop** cancels the requests in flight and ends it. |
 
 All controls except **Stop** are disabled while a run is going. **Run** is disabled when no request is in scope.

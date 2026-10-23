@@ -10,6 +10,7 @@ import { AUTH_INHERIT, hasActiveSettings, normalizeScopeSettings, withoutActiveS
 import { clearToken } from './oauth'
 import { AUTH_OAUTH2, normalizeRequest } from './request'
 import { isFileRow, isSentRow, parseRows, ROW_FILE, ROW_TEXT } from './rows'
+import { normalizeTags } from './tags'
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024
 
@@ -182,8 +183,10 @@ function openAPIRequestBody(request) {
 function openAPIOperation(request, path, securitySchemes) {
   const requestBody = openAPIRequestBody(request)
   const scheme = securitySchemeFor(request.auth)
+  const tags = normalizeTags(request.tags)
   return {
     summary: request.name || `${request.method} ${path}`,
+    ...(tags.length > 0 && { tags }),
     parameters: openAPIParameters(request, path),
     ...(requestBody && { requestBody }),
     ...(scheme && { security: [{ [registerSecurityScheme(scheme, securitySchemes)]: [] }] }),
@@ -590,6 +593,7 @@ function sanitizeRequest(raw) {
   return normalizeRequest({
     ...pickStrings(raw, REQUEST_TEXT_FIELDS),
     name: cleanName(raw.name, UNTITLED_REQUEST),
+    tags: normalizeTags(raw.tags),
     method: cleanMethod(raw.method),
     bodyType: BODY_TYPE_VALUES.includes(raw.bodyType) ? raw.bodyType : '',
     examples: sanitizeExamples(stringOf(raw.examples)),

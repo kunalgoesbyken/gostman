@@ -9,7 +9,7 @@ claude mcp add gostman -- gostman mcp --workspace api --var-from-env API_TOKEN
 
 For other clients, register the command `gostman` with the arguments `mcp --workspace api`.
 
-The agent gets these tools: `list_requests`, `get_request`, `send_request`, `run_folder`, `save_request`, `list_environments`, `set_environment`, `start_mock`, `stop_mock` and `mock_status`.
+The agent gets these tools: `list_requests`, `get_request`, `send_request`, `run_folder`, `save_request`, `list_environments`, `set_environment`, `start_mock`, `stop_mock` and `mock_status`. `list_requests` shows each request's tags, and `run_folder` takes `tags` and `exclude_tags` to run a subset, the same way as `gostman run --tags`.
 
 What this gives you over a shell command:
 

@@ -20,6 +20,8 @@ type Options struct {
 	Iterations    int
 	Parallel      int
 	Only          []string
+	Tags          []string
+	ExcludeTags   []string
 	Capture       bool
 	StreamTimeout time.Duration
 	Network       *engine.Network

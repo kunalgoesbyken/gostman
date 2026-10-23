@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -115,6 +116,18 @@ func (b nodeBuilder) text(value string) *yaml.Node {
 	return b.explicitText(value)
 }
 
+func (b nodeBuilder) textList(items []string) *yaml.Node {
+	if len(items) == 0 {
+		return nil
+	}
+	list := listNode()
+	list.Style = yaml.FlowStyle
+	for _, item := range items {
+		list.Content = append(list.Content, b.explicitText(item))
+	}
+	return list
+}
+
 func setField(mapping *yaml.Node, key string, value *yaml.Node) {
 	if value == nil {
 		return
@@ -171,7 +184,7 @@ func decodeFile[T any](content []byte, readErr error, read func(*yaml.Node) (T, 
 
 var errUnstable = errors.New("the content cannot be written as YAML without changing it")
 
-func encodeVerified[T comparable](build func(nodeBuilder) *yaml.Node, read func(*yaml.Node) (T, error)) ([]byte, error) {
+func encodeVerified[T any](build func(nodeBuilder) *yaml.Node, read func(*yaml.Node) (T, error)) ([]byte, error) {
 	for _, builder := range []nodeBuilder{{}, {quoteEverything: true}} {
 		root := build(builder)
 		content, err := encodeDocument(root)
@@ -185,7 +198,7 @@ func encodeVerified[T comparable](build func(nodeBuilder) *yaml.Node, read func(
 	return nil, errUnstable
 }
 
-func survivesParsing[T comparable](content []byte, root *yaml.Node, read func(*yaml.Node) (T, error)) bool {
+func survivesParsing[T any](content []byte, root *yaml.Node, read func(*yaml.Node) (T, error)) bool {
 	parsed, err := parseDocument(content)
 	if err != nil {
 		return false
@@ -195,7 +208,7 @@ func survivesParsing[T comparable](content []byte, root *yaml.Node, read func(*y
 		return false
 	}
 	reread, err := read(parsed)
-	return err == nil && written == reread
+	return err == nil && reflect.DeepEqual(written, reread)
 }
 
 type fieldReader struct {
@@ -265,6 +278,32 @@ func (r *fieldReader) text(key string) string {
 		return ""
 	}
 	return node.Value
+}
+
+func isNull(node *yaml.Node) bool {
+	return node.Kind == yaml.ScalarNode && node.ShortTag() == tagNull
+}
+
+func (r *fieldReader) textList(key string) []string {
+	node := r.fields[key]
+	if node == nil || isNull(node) {
+		return nil
+	}
+	if node.Kind != yaml.SequenceNode {
+		r.fail(failAt(node, key+" must be a list"))
+		return nil
+	}
+	items := make([]string, 0, len(node.Content))
+	for _, item := range node.Content {
+		if item.Kind != yaml.ScalarNode {
+			r.fail(failAt(item, key+" must list single values"))
+			continue
+		}
+		if !isNull(item) {
+			items = append(items, item.Value)
+		}
+	}
+	return items
 }
 
 func (r *fieldReader) flag(key string, fallback bool) bool {

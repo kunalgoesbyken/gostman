@@ -56,11 +56,11 @@ func brunoRequest(request workspace.Request, sequence int) string {
 	if request.Method == methodGraphQL {
 		kind = "graphql"
 	}
-	w.dict("meta", []bruEntry{
+	w.section("meta", dictLines([]bruEntry{
 		{Key: "name", Value: oneLine(request.Name), Enabled: true},
 		{Key: "type", Value: kind, Enabled: true},
 		{Key: "seq", Value: fmt.Sprint(sequence), Enabled: true},
-	})
+	})+listLines("tags", workspace.NormalizeTags(request.Tags)))
 	method := strings.ToLower(request.Method)
 	if request.Method == methodGraphQL || !brunoMethods[method] {
 		method = "post"

@@ -1,4 +1,5 @@
 import { compareOrder } from './sortOrder.js'
+import { normalizeTags } from './tags.js'
 
 export const ROOT_ID = ''
 export const MAX_FOLDER_DEPTH = 32
@@ -77,7 +78,7 @@ export function findMatches(folders, requests, query) {
   const requestIds = new Set()
   const folderIds = new Set()
   for (const request of requests) {
-    if (!`${request.name}\n${request.url}`.toLowerCase().includes(needle)) continue
+    if (![request.name, request.url, ...normalizeTags(request.tags)].join('\n').toLowerCase().includes(needle)) continue
     requestIds.add(request.id)
     let ancestorId = request.folderId
     while (parentOf.has(ancestorId) && !folderIds.has(ancestorId)) {

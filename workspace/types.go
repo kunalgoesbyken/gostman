@@ -10,6 +10,7 @@ type Request struct {
 	Id               string         `json:"id"`
 	Name             string         `json:"name"`
 	Description      string         `json:"description"`
+	Tags             []string       `json:"tags,omitempty"`
 	URL              string         `json:"url"`
 	Method           string         `json:"method"`
 	Headers          string         `json:"headers"`
