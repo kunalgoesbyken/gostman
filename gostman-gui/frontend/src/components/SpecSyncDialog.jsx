@@ -13,7 +13,7 @@ function Change({ id, label, method, detail, edited, checked, onToggle }) {
       <Checkbox label={label} checked={checked} onChange={() => onToggle(id)} />
       <MethodTag method={method} className="w-12" />
       <span className="min-w-0 flex-1 truncate text-xs" title={label}>{detail}</span>
-      {edited && <span className="shrink-0 text-[11px] text-warning">{SPEC_TEXT.locallyEdited}</span>}
+      {edited && <span className="shrink-0 text-2xs text-warning">{SPEC_TEXT.locallyEdited}</span>}
     </li>
   )
 }

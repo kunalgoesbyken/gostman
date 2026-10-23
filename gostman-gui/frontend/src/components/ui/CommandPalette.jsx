@@ -201,7 +201,7 @@ function CommandRow({ command, isSelected, onSelect, onHover }) {
       <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
       <span className="min-w-0 flex-1">
         <span className="block truncate text-xs font-medium">{command.label}</span>
-        <span className="block truncate text-[11px] text-muted-foreground">{command.description}</span>
+        <span className="block truncate text-2xs text-muted-foreground">{command.description}</span>
       </span>
       {shortcut && <kbd>{shortcut}</kbd>}
     </button>
@@ -227,14 +227,14 @@ function RequestRow({ item, isSelected, onSelect, onHover }) {
       <MethodTag method={item.method} className="w-12" />
       <span className="min-w-0 flex-1">
         <span className="block truncate text-xs font-medium">{item.title}</span>
-        <span className="block truncate text-[11px] text-muted-foreground">{detail}</span>
+        <span className="block truncate text-2xs text-muted-foreground">{detail}</span>
       </span>
     </button>
   )
 }
 
 function SectionTitle({ kind }) {
-  return <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{SECTION_TITLES[kind]}</p>
+  return <p className="px-3 pb-1 pt-2 text-3xs font-semibold uppercase tracking-wide text-muted-foreground">{SECTION_TITLES[kind]}</p>
 }
 
 const INSTALL_COMMAND = { id: "install-app", label: INSTALL_TEXT.label, description: INSTALL_TEXT.description, icon: MonitorDown, action: "installApp" }
@@ -319,7 +319,7 @@ function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspace
             title="Keyboard shortcuts"
             aria-label="Keyboard shortcuts"
             onClick={onShowShortcuts}
-            className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border font-mono text-[11px] text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border font-mono text-2xs text-muted-foreground hover:bg-accent hover:text-foreground"
           >
             ?
           </button>

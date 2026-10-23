@@ -36,7 +36,7 @@ function StatusBadge({ session }) {
 
 function Counters({ session, shown }) {
   const text = `${SSE_TEXT.shown(shown, session.events.length)} · ${SSE_TEXT.received(session.total)}`
-  return <span className="min-w-0 truncate font-mono text-[11px] text-muted-foreground" title={text}>{text}</span>
+  return <span className="min-w-0 truncate font-mono text-2xs text-muted-foreground" title={text}>{text}</span>
 }
 
 function CopyShown({ events }) {

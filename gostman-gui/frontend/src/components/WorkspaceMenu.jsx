@@ -36,7 +36,7 @@ function WorkspaceRow({ entry, storage, onClose }) {
         <Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
         <span className="min-w-0 flex-1">
           <span className="block truncate text-xs font-medium">{entry.name}</span>
-          <span className={cn("block truncate text-[11px]", entry.missing ? "text-warning" : "text-muted-foreground")}>
+          <span className={cn("block truncate text-2xs", entry.missing ? "text-warning" : "text-muted-foreground")}>
             {entry.missing ? TEXT.missing : entry.path}
           </span>
         </span>

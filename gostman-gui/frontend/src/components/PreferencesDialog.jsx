@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useId, useState } from "react"
 import { Keyboard } from "lucide-react"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
@@ -8,11 +8,13 @@ import { SectionLabel } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { Select } from "./ui/select"
 import { useAppStore } from "../store/appStore"
+import { canListInstalledFonts, isFontInstalled, listInstalledFonts } from "../lib/fonts"
 import {
-  DENSITIES, EDITOR_FONT_SIZES, LANGUAGES, REQUEST_TIMEOUT_SECONDS, RESPONSE_LAYOUTS, THEMES,
-  resetPreferences, updatePreferences, usePreferences,
+  ACCENTS, CONTRASTS, DENSITIES, EDITOR_FONT_SIZES, FONT_NAME_LENGTH, LANGUAGES, REQUEST_TIMEOUT_SECONDS, RESPONSE_LAYOUTS,
+  TEXT_SCALES, THEMES, resetPreferences, updatePreferences, usePreferences,
 } from "../lib/preferences"
 import { PREFERENCES_TEXT } from "../lib/preferencesText"
+import { cn } from "../lib/utils"
 
 const { fields, sections } = PREFERENCES_TEXT
 
@@ -23,7 +25,7 @@ function PreferenceRow({ label, hint, children }) {
     <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
       <span className="min-w-0 flex-1 basis-40 text-xs">
         {label}
-        {hint && <span className="mt-0.5 block text-[11px] text-muted-foreground">{hint}</span>}
+        {hint && <span className="mt-0.5 block text-2xs text-muted-foreground">{hint}</span>}
       </span>
       {children}
     </div>
@@ -39,16 +41,111 @@ function Section({ title, children }) {
   )
 }
 
-function ChoiceRow({ label, name, values, labels, preferences }) {
+function ChoiceRow({ label, hint, name, options, preferences }) {
   return (
-    <PreferenceRow label={label}>
+    <PreferenceRow label={label} hint={hint}>
       <SegmentedControl
         label={label}
-        options={optionsOf(values, labels)}
+        options={options}
         value={preferences[name]}
         onChange={(value) => updatePreferences({ [name]: value })}
       />
     </PreferenceRow>
+  )
+}
+
+function AccentRow({ preferences }) {
+  return (
+    <PreferenceRow label={fields.accent}>
+      <div role="radiogroup" aria-label={fields.accent} className="flex items-center gap-1.5">
+        {ACCENTS.map((accent) => (
+          <button
+            key={accent}
+            type="button"
+            role="radio"
+            aria-checked={preferences.accent === accent}
+            aria-label={PREFERENCES_TEXT.accents[accent]}
+            title={PREFERENCES_TEXT.accents[accent]}
+            data-accent={accent}
+            onClick={() => updatePreferences({ accent })}
+            className={cn(
+              "flex h-6 w-6 items-center justify-center rounded-full",
+              preferences.accent === accent && "ring-1 ring-foreground ring-offset-1 ring-offset-background"
+            )}
+          >
+            <span aria-hidden="true" className="h-4 w-4 rounded-full bg-primary" />
+          </button>
+        ))}
+      </div>
+    </PreferenceRow>
+  )
+}
+
+function FontRow({ label, hint, name, isCode, suggestions, preferences }) {
+  const saved = preferences[name]
+  const [draft, setDraft] = useState(saved)
+  const isMissing = saved !== "" && !isFontInstalled(saved)
+
+  useEffect(() => setDraft(saved), [saved])
+
+  const change = (event) => {
+    setDraft(event.target.value)
+    updatePreferences({ [name]: event.target.value.trim() })
+  }
+
+  return (
+    <PreferenceRow label={label} hint={isMissing ? PREFERENCES_TEXT.fontMissing : hint}>
+      <Input
+        aria-label={label}
+        aria-invalid={isMissing}
+        list={suggestions}
+        maxLength={FONT_NAME_LENGTH}
+        spellCheck={false}
+        autoComplete="off"
+        placeholder={PREFERENCES_TEXT.defaultFont}
+        value={draft}
+        onChange={change}
+        onBlur={() => setDraft(saved)}
+        className={cn("w-48", isCode && "font-mono")}
+      />
+    </PreferenceRow>
+  )
+}
+
+function useInstalledFonts() {
+  const [fonts, setFonts] = useState([])
+  const [status, setStatus] = useState("")
+
+  const load = () =>
+    listInstalledFonts()
+      .then((families) => {
+        setFonts(families)
+        setStatus(PREFERENCES_TEXT.fontsSuggested)
+      })
+      .catch(() => setStatus(PREFERENCES_TEXT.fontsDenied))
+
+  return { fonts, status, load }
+}
+
+function FontsSection({ preferences }) {
+  const listId = useId()
+  const installed = useInstalledFonts()
+  const suggestions = installed.fonts.length > 0 ? listId : undefined
+
+  return (
+    <Section title={sections.fonts}>
+      <FontRow label={fields.interfaceFont} hint={PREFERENCES_TEXT.interfaceFontHint} name="interfaceFont" suggestions={suggestions} preferences={preferences} />
+      <FontRow label={fields.codeFont} hint={PREFERENCES_TEXT.codeFontHint} name="codeFont" isCode suggestions={suggestions} preferences={preferences} />
+      {suggestions && (
+        <datalist id={listId}>
+          {installed.fonts.map((family) => <option key={family} value={family} />)}
+        </datalist>
+      )}
+      {canListInstalledFonts() && !suggestions && (
+        <Button variant="outline" size="sm" onClick={installed.load}>{PREFERENCES_TEXT.suggestFonts}</Button>
+      )}
+      {installed.status && <p role="status" className="text-2xs text-muted-foreground">{installed.status}</p>}
+    </Section>
   )
 }
 
@@ -99,6 +196,11 @@ function FlagRow({ label, name, preferences }) {
   )
 }
 
+const percentLabels = (language) => {
+  const format = new Intl.NumberFormat(language, { style: "percent" })
+  return TEXT_SCALES.map((scale) => ({ value: scale, label: format.format(scale / 100) }))
+}
+
 export function PreferencesDialog({ onClose }) {
   const preferences = usePreferences()
   const openShortcuts = useAppStore((state) => state.openShortcutsDialog)
@@ -115,10 +217,20 @@ export function PreferencesDialog({ onClose }) {
       </DialogHeader>
       <DialogBody className="space-y-6">
         <Section title={sections.appearance}>
-          <ChoiceRow label={fields.theme} name="theme" values={THEMES} labels={PREFERENCES_TEXT.themes} preferences={preferences} />
-          <ChoiceRow label={fields.density} name="density" values={DENSITIES} labels={PREFERENCES_TEXT.densities} preferences={preferences} />
-          <ChoiceRow label={fields.responseLayout} name="responseLayout" values={RESPONSE_LAYOUTS} labels={PREFERENCES_TEXT.layouts} preferences={preferences} />
+          <ChoiceRow label={fields.theme} name="theme" options={optionsOf(THEMES, PREFERENCES_TEXT.themes)} preferences={preferences} />
+          <ChoiceRow
+            label={fields.contrast}
+            hint={PREFERENCES_TEXT.contrastHint}
+            name="contrast"
+            options={optionsOf(CONTRASTS, PREFERENCES_TEXT.contrasts)}
+            preferences={preferences}
+          />
+          <AccentRow preferences={preferences} />
+          <ChoiceRow label={fields.textScale} name="textScale" options={percentLabels(preferences.language)} preferences={preferences} />
+          <ChoiceRow label={fields.density} name="density" options={optionsOf(DENSITIES, PREFERENCES_TEXT.densities)} preferences={preferences} />
+          <ChoiceRow label={fields.responseLayout} name="responseLayout" options={optionsOf(RESPONSE_LAYOUTS, PREFERENCES_TEXT.layouts)} preferences={preferences} />
         </Section>
+        <FontsSection preferences={preferences} />
         <Section title={sections.editor}>
           <NumberRow
             label={fields.editorFontSize}

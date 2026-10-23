@@ -71,7 +71,7 @@ function Section({ title, children }) {
 
 function Example({ text }) {
   if (!text) return null
-  return <pre className="max-h-48 overflow-auto rounded-md border border-border p-2 font-mono text-[11px]">{text}</pre>
+  return <pre className="max-h-48 overflow-auto rounded-md border border-border p-2 font-mono text-2xs">{text}</pre>
 }
 
 function Bodies({ bodies }) {

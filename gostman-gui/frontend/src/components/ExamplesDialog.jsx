@@ -89,7 +89,7 @@ function ExampleDetail({ example, isDefault, draft, onDraftChange, actions, Edit
         <SegmentedControl label="Example section" options={views} value={view} onChange={setView} />
         <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
           <StatusBadge status={example.status} />
-          <span title={summary} className="min-w-0 truncate font-mono text-[11px] text-muted-foreground">{summary}</span>
+          <span title={summary} className="min-w-0 truncate font-mono text-2xs text-muted-foreground">{summary}</span>
         </div>
         <div className="flex shrink-0 items-center gap-1">
           <IconButton

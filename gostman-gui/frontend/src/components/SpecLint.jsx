@@ -27,7 +27,7 @@ function FindingBody({ finding }) {
   return (
     <>
       <span className="block truncate text-xs text-foreground">{finding.message}</span>
-      <span className="block truncate font-mono text-[11px] text-muted-foreground">{finding.rule} · {finding.operation || finding.path}</span>
+      <span className="block truncate font-mono text-2xs text-muted-foreground">{finding.rule} · {finding.operation || finding.path}</span>
     </>
   )
 }

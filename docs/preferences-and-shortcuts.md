@@ -1,6 +1,6 @@
 # Preferences, shortcuts and the command palette
 
-This page covers the command palette and its commands, the Preferences dialog, the Keyboard shortcuts dialog and how to change a shortcut, the themes, and the About dialog. Throughout, Ctrl means Command on macOS.
+This page covers the command palette and its commands, the Preferences dialog, the Keyboard shortcuts dialog and how to change a shortcut, the themes, colours and fonts, and the About dialog. Throughout, Ctrl means Command on macOS.
 
 ## Command palette
 
@@ -40,7 +40,7 @@ Open it with Ctrl+K, or with the **Commands** button in the header (shown on wid
 | **Capture traffic** | Forward an app's calls to its API and save them as requests | |
 | **Manage cookies** | See and delete stored cookies | |
 | **Scan for secrets** | Find credentials typed into requests before you share or commit them | |
-| **Preferences** | Theme, density, editor, layout and defaults | |
+| **Preferences** | Theme, colours, fonts, text size, editor, layout and defaults | |
 | **Network settings** | Proxy and certificates | |
 | **Import data** | Import Postman, OpenAPI or Gostman files | |
 | **Lint API spec** | Check the imported OpenAPI spec for problems | |
@@ -72,13 +72,18 @@ Some commands appear only when they apply:
 
 Open **Preferences** from the command palette. Changes apply as soon as you make them. They are saved on this device, in local storage under `gostman.preferences`.
 
-![The Preferences dialog with theme, density, response panel position, editor font size, line wrapping, default timeout and language](../screenshots/preferences.png)
+![The Preferences dialog with theme, contrast, accent colour, text size, density, response panel position, interface and code fonts, editor font size and line wrapping](../screenshots/preferences.png)
 
 | Section | Setting | Options | Default |
 | --- | --- | --- | --- |
 | Appearance | **Theme** | **System**, **Light**, **Dark** | **System** |
+| Appearance | **Contrast** | **System**, **Standard**, **More** | **System** |
+| Appearance | **Accent colour** | **Cyan**, **Blue**, **Violet**, **Pink**, **Graphite** | **Cyan** |
+| Appearance | **Text size** | 90%, 100%, 110%, 125% | 100% |
 | Appearance | **Density** | **Comfortable**, **Compact** | **Comfortable** |
 | Appearance | **Response panel** | **Below**, **Right** | **Below** |
+| Fonts | **Interface font** | The name of a font installed on this device | Empty, which uses the default |
+| Fonts | **Code font** | The name of a font installed on this device | Empty, which uses the default |
 | Editor | **Editor font size** | A whole number from 10 to 24 | 12 |
 | Editor | **Wrap long lines** | On or off | On |
 | Requests | **Default timeout** | A whole number of seconds from 0 to 3600 | 0 |
@@ -95,14 +100,32 @@ At the bottom of the dialog:
 - **Reset to defaults** restores every setting in the table. It keeps the shortcuts you changed; reset those in the Keyboard shortcuts dialog.
 - **Done** closes the dialog.
 
-### Themes
+### Themes and colours
 
 **Theme** has three options:
 
 - **System** follows the light or dark setting of your operating system and changes with it.
 - **Light** and **Dark** always use that appearance.
 
+**Contrast** makes borders, field outlines and secondary text stronger. **System** turns it on when your operating system asks for more contrast, **More** always does, and **Standard** never does.
+
+**Accent colour** sets the colour of buttons, selected tabs, links and focus outlines. Each accent has its own shade for light and dark, chosen so that text in that colour and text on it stay easy to read. The landing page and the documentation keep the Gostman colours.
+
+![Gostman in the light theme with more contrast, the violet accent and 110% text size](../screenshots/appearance.png)
+
+**Text size** scales all text and the spacing around it. **Compact** density makes everything a little smaller again. **Editor font size** is separate and sets the size of the code editors.
+
 The About dialog's diagnostics report the theme setting.
+
+### Fonts
+
+**Interface font** is used for menus, labels and buttons. **Code font** is used for the editors, the address bar, key and value tables and other code. Leave a field empty to use the default fonts, Outfit and JetBrains Mono, which come with Gostman and need no internet connection.
+
+- Type the name of a font installed on your device, for example `Segoe UI`, `Noto Sans JP` or `Fira Code`. The app changes as you type.
+- If no installed font has that name, the field is marked and says `Not found on this device, so the default font is used.`
+- Where the browser can list installed fonts, a **Suggest installed fonts** button appears. Select it, allow access if asked, and the font fields then suggest names as you type. This works in Chrome, Edge and the Windows desktop app; elsewhere, type the name.
+
+These settings are saved on this device, so the desktop app and each browser keep their own.
 
 ## Keyboard shortcuts
 

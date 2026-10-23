@@ -41,7 +41,7 @@ export function SearchBar({ query, onQueryChange, index, count, capped, onStep, 
         spellCheck={false}
         className="pl-7"
       />
-      <span aria-live="polite" className="w-16 shrink-0 text-center font-mono text-[11px] text-muted-foreground">
+      <span aria-live="polite" className="w-16 shrink-0 text-center font-mono text-2xs text-muted-foreground">
         {statusText(query, index, count, capped)}
       </span>
       <IconButton label="Previous match" icon={ChevronUp} onClick={() => onStep(-1)} disabled={count === 0} />

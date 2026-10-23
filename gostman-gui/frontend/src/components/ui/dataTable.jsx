@@ -13,7 +13,7 @@ export function DataTable({ columns, rows }) {
             <th
               key={column.header}
               title={column.header}
-              className={cn(CELL, "text-[11px] font-medium uppercase tracking-wide text-muted-foreground", column.width)}
+              className={cn(CELL, "text-2xs font-medium uppercase tracking-wide text-muted-foreground", column.width)}
             >
               {column.header}
             </th>
