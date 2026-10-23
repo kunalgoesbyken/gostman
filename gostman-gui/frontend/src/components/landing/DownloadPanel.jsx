@@ -1,7 +1,6 @@
-import { useState } from "react"
 import { Button, buttonVariants } from "../ui/button"
 import { cn } from "../../lib/utils"
-import { detectBrowserOs } from "../../lib/detectOs"
+import { useBrowserOs } from "../../hooks/useBrowserOs"
 import { Download, Globe } from "./icons"
 import { DOWNLOADS, downloadFor, downloadUrl, groupByOs, isExternal } from "./downloads"
 
@@ -38,8 +37,7 @@ function DownloadGroup({ group }) {
 }
 
 export function DownloadPanel({ onGetStarted }) {
-  const [os] = useState(detectBrowserOs)
-  const primary = downloadFor(os)
+  const primary = downloadFor(useBrowserOs())
   const others = DOWNLOADS.filter((download) => download !== primary)
 
   return (

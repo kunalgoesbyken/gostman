@@ -3,9 +3,9 @@ import { ChevronDown } from "./icons"
 import { SplitHeading } from "./SplitHeading"
 import { ISSUES_URL } from "../../lib/siteLinks"
 
-export default function FaqSection() {
+export function FaqSection() {
   return (
-    <section className="relative px-6 py-24" aria-labelledby="faq-heading">
+    <section id="faq" className="render-when-visible relative px-6 py-24" aria-labelledby="faq-heading">
       <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-16">
         <div>
           <SplitHeading

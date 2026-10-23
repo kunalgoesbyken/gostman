@@ -106,7 +106,7 @@ Choosing **HTML docs** shows three options:
 
 What the page contains and how it redacts values is described in [Sharing and documentation](sharing-and-docs.md). From the command line, use `gostman docs`, see [Command line](cli.md).
 
-![A generated documentation page with a sidebar listing requests grouped by folder, a variables section and a sign-in request with its body](../gostman-gui/frontend/src/assets/landing/docs.png)
+![A generated documentation page with a sidebar listing requests grouped by folder, a variables section and a sign-in request with its body](../gostman-gui/frontend/src/assets/landing/docs.webp)
 
 ## OpenAPI specs
 

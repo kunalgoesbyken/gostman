@@ -9,24 +9,15 @@ import { FOLDER_SETTINGS_TEXT as TEXT } from "../lib/folderSettingsText"
 import { AUTH_INHERIT } from "../lib/inheritance"
 import { AUTH_OAUTH2 } from "../lib/request"
 import { FIELD_AREA, FIELD_SECRET, FIELD_SELECT, SCHEMES } from "../lib/authSchemes"
+import { AUTH_API_KEY, AUTH_BASIC, AUTH_BEARER, AUTH_METHODS, AUTH_NONE } from "../lib/authTypes"
 
-const AUTH_BASIC = "basic"
-const AUTH_BEARER = "bearer"
-const AUTH_API_KEY = "apikey"
 const IN_HEADER = "header"
 const IN_QUERY = "query"
 
 const NO_AUTH_NOTE = "This request is sent without authentication."
 const INHERIT_TYPE = { value: AUTH_INHERIT, label: TEXT.inherit }
 
-const AUTH_TYPES = [
-  { value: "", label: TEXT.noAuth },
-  { value: AUTH_BASIC, label: "Basic" },
-  { value: AUTH_BEARER, label: "Bearer token" },
-  { value: AUTH_API_KEY, label: "API key" },
-  { value: AUTH_OAUTH2, label: "OAuth 2.0" },
-  ...Object.entries(SCHEMES).map(([value, scheme]) => ({ value, label: scheme.label })),
-]
+const AUTH_TYPES = [{ value: AUTH_NONE, label: TEXT.noAuth }, ...AUTH_METHODS]
 
 function BasicFields({ auth, onFieldChange }) {
   return (

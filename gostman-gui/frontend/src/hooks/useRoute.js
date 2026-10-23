@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react"
 
-const ROUTES = ["/", "/web"]
+export const LANDING_ROUTE = "/"
+const ROUTES = [LANDING_ROUTE, "/web"]
 
-const normalize = (pathname) => {
-  const path = pathname.replace(/\/+$/, "") || "/"
-  return ROUTES.includes(path) ? path : "/"
+export const normalize = (pathname) => {
+  const path = pathname.replace(/\/+$/, "") || LANDING_ROUTE
+  return ROUTES.includes(path) ? path : LANDING_ROUTE
 }
 
 export function useRoute() {

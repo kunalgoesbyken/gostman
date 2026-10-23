@@ -16,9 +16,9 @@ function Legend() {
   )
 }
 
-export default function ComparisonSection() {
+export function ComparisonSection() {
   return (
-    <section className="relative border-y border-border/60 bg-card/40 px-6 py-24" aria-labelledby="comparison-heading">
+    <section id="compare" className="render-when-visible relative border-y border-border/60 bg-card/40 px-6 py-24" aria-labelledby="comparison-heading">
       <div className="mx-auto max-w-6xl">
         <div className="mb-12 max-w-2xl">
           <SplitHeading

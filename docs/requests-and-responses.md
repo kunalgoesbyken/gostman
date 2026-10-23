@@ -2,7 +2,7 @@
 
 This page covers the request editor and the response viewer in Gostman: the request bar, the request tabs, variables in inputs, the response tabs, history, the cookie jar, saved examples and code generation. It describes the desktop app and the web app, which share one interface, and marks the places where they differ.
 
-![A POST request to a login URL with a JSON body, and the pretty-printed JSON response below it](../gostman-gui/frontend/src/assets/landing/rest.png)
+![A POST request to a login URL with a JSON body, and the pretty-printed JSON response below it](../gostman-gui/frontend/src/assets/landing/rest.webp)
 
 ## Open requests
 
@@ -51,6 +51,24 @@ Params and Headers use a table with a checkbox, a name and a value for each row.
 
 - The Params rows mirror the query string in the URL. Unchecked rows are kept in the table but not sent.
 - The Headers tab shows a count of headers inherited from folders or the collection. See [Folder and collection settings](folder-settings.md).
+
+#### Bulk edit
+
+**Bulk edit**, under the table, turns the rows into text you can paste or edit in one go, one row per line:
+
+```text
+Accept: application/json
+Authorization: Bearer {{token}}
+// X-Debug: 1
+```
+
+![The Headers tab in bulk edit: four headers as name: value lines, the last one starting with // so it is not sent](../screenshots/bulk-edit.png)
+
+- The name ends at the first colon, and spaces around the name and the value are dropped.
+- A line that starts with `//` is kept without being sent, like an unchecked row.
+- Blank lines are ignored. **Edit as table** switches back.
+
+Bulk edit works the same way for Vars, Form URL-encoded bodies and folder headers. It is not offered for Multipart bodies, because a file row cannot be written as text, and rows with a colon in the name or spaces at the start or end of a name or value can only be edited in the table.
 
 ### Body
 
@@ -139,7 +157,7 @@ Each assertion row has an Expression, a Check and an Expected value. Expressions
 - Text and list checks: contains, does not contain, starts with, ends with, matches regex, is one of, has length.
 - Checks without an expected value: is defined, is undefined, is null, is empty, is not empty, is true, is false, is a number, is a string, is a boolean, is an array, is an object.
 
-![Assertions and test results](../gostman-gui/frontend/src/assets/landing/tests.png)
+![Assertions and test results](../gostman-gui/frontend/src/assets/landing/tests.webp)
 
 ### Settings
 

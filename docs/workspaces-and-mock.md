@@ -13,7 +13,7 @@ The control next to the logo shows where the collection lives. **Open folder** k
 
 Save any response as a named example from the response panel (up to 20 per request, 2 MB each; cookie and authorization headers are not kept). The mock server, opened with **Mock server** at the bottom of the window, serves each request's method and path with one of its examples on `127.0.0.1`.
 
-![The mock server dialog with a served route and a live request log](../gostman-gui/frontend/src/assets/landing/mock.png)
+![The mock server dialog with a served route and a live request log](../gostman-gui/frontend/src/assets/landing/mock.webp)
 
 - `{{base_url}}/users/42` is served at `/users/42`; a literal base path such as `/v1` is kept. A path segment written `:id` or holding a variable, such as `/users/{{user_id}}`, matches any value, whatever the variable holds, and its value is available as `{{request.params.user_id}}`. A variable that holds several path segments, such as `api/v1`, is treated as one segment, so write those segments out in the URL instead.
 - GraphQL, gRPC and WebSocket requests, and requests without an example, are not served.
@@ -29,7 +29,7 @@ Save any response as a named example from the response panel (up to 20 per reque
 
 Start a capture with the address of your API, then point your app at `http://127.0.0.1:4020`. Gostman forwards each call, lists it, and lets you save any of them as a request with its response as an example.
 
-![The capture dialog listing five forwarded calls with the response of one shown below](../gostman-gui/frontend/src/assets/landing/capture.png)
+![The capture dialog listing five forwarded calls with the response of one shown below](../gostman-gui/frontend/src/assets/landing/capture.webp)
 
 - It is a forwarding address for one API, not an intercepting proxy: there is no certificate to install, and an app whose base URL cannot be changed is not captured.
 - `Authorization`, `Cookie` and `Proxy-Authorization` request headers are never saved. Bodies are saved as captured, so check them for tokens before sharing.

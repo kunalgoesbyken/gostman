@@ -1,0 +1,8 @@
+export const command = (copy) => ({ copy })
+export const prompt = (text) => ({ text, tone: "command" })
+export const muted = (text) => ({ text, tone: "muted" })
+export const pass = (text) => ({ text, tone: "pass" })
+export const fail = (text) => ({ text, tone: "fail" })
+export const key = (text) => ({ text, tone: "key" })
+export const plain = (text) => ({ text })
+export const BLANK = plain("")

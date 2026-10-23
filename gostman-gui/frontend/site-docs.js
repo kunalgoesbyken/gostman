@@ -8,9 +8,19 @@ import { REPOSITORY_URL } from './src/lib/siteLinks.js'
 const IMAGE_DIR = 'docs-images'
 const DESCRIPTION_LIMIT = 155
 
+const WEBP_SIZES = {
+  'VP8 ': (bytes) => ({ width: bytes.readUInt16LE(26) & 0x3fff, height: bytes.readUInt16LE(28) & 0x3fff }),
+  VP8L: (bytes) => {
+    const bits = bytes.readUInt32LE(21)
+    return { width: (bits & 0x3fff) + 1, height: ((bits >>> 14) & 0x3fff) + 1 }
+  },
+  VP8X: (bytes) => ({ width: bytes.readUIntLE(24, 3) + 1, height: bytes.readUIntLE(27, 3) + 1 }),
+}
+
 const IMAGE_SIZES = {
   '.png': (bytes) => ({ width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) }),
   '.gif': (bytes) => ({ width: bytes.readUInt16LE(6), height: bytes.readUInt16LE(8) }),
+  '.webp': (bytes) => WEBP_SIZES[bytes.toString('ascii', 12, 16)](bytes),
 }
 
 const escapeAttribute = (text) =>

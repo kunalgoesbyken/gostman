@@ -1,6 +1,7 @@
-import { renderToStaticMarkup } from "react-dom/server"
+import { renderToStaticMarkup, renderToString } from "react-dom/server"
 import { DocsPage } from "../components/DocsPage"
 import { GuidePage } from "../components/GuidePage"
+import { LandingPage } from "../components/LandingPage"
 import { docPath } from "../docs/manifest"
 
 const THEME_COLOR = "#050810"
@@ -93,3 +94,7 @@ export function renderDocsPage(page, { siteUrl, stylesheets, nav }) {
     children: <DocsPage page={page} nav={nav} />,
   })
 }
+
+const stayOnPage = () => {}
+
+export const renderLandingMarkup = () => renderToString(<LandingPage onGetStarted={stayOnPage} />)

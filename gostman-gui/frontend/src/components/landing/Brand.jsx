@@ -1,4 +1,4 @@
-import logo from "../../assets/logo.jpg"
+import logo from "../../assets/logo.webp"
 
 export function Brand({ tagline }) {
   return (
@@ -7,7 +7,7 @@ export function Brand({ tagline }) {
       {tagline ? (
         <div>
           <span className="font-medium text-sm">Gostman</span>
-          <p className="text-xs text-muted-foreground/70 mt-0.5">{tagline}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">{tagline}</p>
         </div>
       ) : (
         <span className="font-medium text-sm">Gostman</span>

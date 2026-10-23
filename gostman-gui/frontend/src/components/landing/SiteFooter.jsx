@@ -1,36 +1,45 @@
 import { Brand } from "./Brand"
-import { Github } from "./icons"
-import { guidePages } from "../../guides/pages"
-import { docPath } from "../../docs/manifest"
-import { ISSUES_URL, REPOSITORY_URL } from "../../lib/siteLinks"
+import { FOOTER_COLUMNS } from "./footerLinks"
 
-const DOCS_LINK = { path: docPath("").slice(1), heading: "Documentation" }
-const FOOTER_LINK = "text-sm text-muted-foreground/70 transition-colors hover:text-foreground"
+const FOOTER_LINK = "text-sm text-muted-foreground transition-colors hover:text-foreground"
+
+function FooterLink({ link }) {
+  const target = link.external ? { target: "_blank", rel: "noopener noreferrer" } : {}
+  return (
+    <a href={link.href} className={FOOTER_LINK} {...target}>
+      {link.label}
+    </a>
+  )
+}
+
+function FooterColumn({ column }) {
+  return (
+    <nav aria-label={column.title}>
+      <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{column.title}</h2>
+      <ul className="mt-4 space-y-3">
+        {column.links.map((link) => (
+          <li key={link.href}>
+            <FooterLink link={link} />
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border/40 bg-muted/10 py-16 px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+    <footer className="render-when-visible border-t border-border/40 bg-muted/10 px-6 py-16">
+      <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
+        <div className="space-y-4">
           <Brand tagline="API client for REST, GraphQL, gRPC and WebSocket" />
-          <div className="flex items-center gap-8">
-            <a href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer" className={`flex min-h-6 items-center gap-2 ${FOOTER_LINK}`}>
-              <Github className="h-4 w-4" />
-              GitHub
-            </a>
-            <a href={ISSUES_URL} target="_blank" rel="noopener noreferrer" className={`flex min-h-6 items-center ${FOOTER_LINK}`}>
-              Report an issue
-            </a>
-          </div>
+          <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">Free and open source. No account, and your collections stay on your machine.</p>
         </div>
-
-        <nav aria-label="Guides" className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
-          {[DOCS_LINK, ...guidePages].map((page) => (
-            <a key={page.path} href={`/${page.path}`} className={FOOTER_LINK}>
-              {page.heading}
-            </a>
+        <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
+          {FOOTER_COLUMNS.map((column) => (
+            <FooterColumn key={column.title} column={column} />
           ))}
-        </nav>
+        </div>
       </div>
     </footer>
   )

@@ -3,11 +3,12 @@ import { AnimatePresence, m } from "framer-motion"
 import { easeSmooth, springLayout } from "../../lib/motion"
 import { cn } from "../../lib/utils"
 import { whenIdle } from "../../lib/idle"
-import graphqlShot from "../../assets/landing/graphql.png"
-import grpcShot from "../../assets/landing/grpc.png"
-import mcpShot from "../../assets/landing/mcp.png"
-import restShot from "../../assets/landing/rest.png"
-import websocketShot from "../../assets/landing/websocket.png"
+import { scrollIntoStrip } from "../../lib/scrollIntoStrip"
+import graphqlShot from "../../assets/landing/graphql.webp"
+import grpcShot from "../../assets/landing/grpc.webp"
+import mcpShot from "../../assets/landing/mcp.webp"
+import restShot from "../../assets/landing/rest.webp"
+import websocketShot from "../../assets/landing/websocket.webp"
 
 const VIEWS = [
   {
@@ -57,11 +58,7 @@ const panelId = (id) => `showcase-panel-${id}`
 
 function useCenteredInList(ref, isActive) {
   useEffect(() => {
-    const tab = ref.current
-    const list = tab.parentElement
-    if (!isActive || list.scrollWidth <= list.clientWidth) return
-    const offset = tab.getBoundingClientRect().left - list.getBoundingClientRect().left + list.scrollLeft
-    list.scrollTo({ left: offset - (list.clientWidth - tab.offsetWidth) / 2, behavior: "smooth" })
+    if (isActive) scrollIntoStrip(ref.current, { center: true, behavior: "smooth" })
   }, [ref, isActive])
 }
 

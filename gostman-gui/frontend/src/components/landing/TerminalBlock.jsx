@@ -4,7 +4,7 @@ import { cn } from "../../lib/utils"
 
 const LINE_TONES = {
   command: "text-foreground",
-  muted: "text-muted-foreground/70",
+  muted: "text-muted-foreground",
   pass: "text-success",
   fail: "text-destructive",
   key: "text-syntax-key",
@@ -43,11 +43,11 @@ function OutputLine({ line }) {
   return <span className={cn("block min-h-[1.25em] whitespace-pre-wrap", LINE_TONES[line.tone])}>{line.text}</span>
 }
 
-export function TerminalBlock({ title, lines, label, copyText }) {
+export function TerminalBlock({ title, header, lines, label, copyText }) {
   return (
     <figure aria-label={label} className="overflow-hidden rounded-lg border border-border/60 bg-background">
       <figcaption className="flex h-10 items-center justify-between border-b border-border/60 pl-4 pr-1.5 font-mono text-xs text-muted-foreground">
-        <span className="truncate">{title}</span>
+        {header ?? <span className="truncate">{title}</span>}
         {copyText && <CopyControl text={copyText} label="Copy file" />}
       </figcaption>
       <pre className="overflow-x-auto p-4 font-mono text-[0.8125rem] leading-relaxed text-muted-foreground">

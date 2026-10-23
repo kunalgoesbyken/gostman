@@ -2,7 +2,7 @@
 
 Gostman is an API client for REST, GraphQL, gRPC and WebSocket that you, your CI pipeline and your coding agent share. These pages cover the desktop app, the web app and the command line, and every feature in them is included in the free download.
 
-![Gostman sending a POST request with a JSON body and showing the pretty-printed response](../gostman-gui/frontend/src/assets/landing/rest.png)
+![Gostman sending a POST request with a JSON body and showing the pretty-printed response](../gostman-gui/frontend/src/assets/landing/rest.webp)
 
 ## Where to start
 
