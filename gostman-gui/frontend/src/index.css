@@ -167,6 +167,7 @@
 
   html {
     background-color: hsl(var(--background));
+    overscroll-behavior: none;
     font-size: calc(var(--text-scale) * 1%);
     scroll-padding-top: 4.5rem;
   }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
+	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 const (
@@ -18,11 +20,12 @@ const (
 type windowTheme struct {
 	background options.RGBA
 	frame      windows.Theme
+	applyFrame func(context.Context)
 }
 
 var windowThemes = map[string]windowTheme{
-	"dark":  {background: options.RGBA{R: 3, G: 7, B: 17, A: 1}, frame: windows.Dark},
-	"light": {background: options.RGBA{R: 255, G: 255, B: 255, A: 1}, frame: windows.Light},
+	"dark":  {background: options.RGBA{R: 3, G: 7, B: 17, A: 1}, frame: windows.Dark, applyFrame: wailsruntime.WindowSetDarkTheme},
+	"light": {background: options.RGBA{R: 255, G: 255, B: 255, A: 1}, frame: windows.Light, applyFrame: wailsruntime.WindowSetLightTheme},
 }
 
 func windowThemePath() string {
@@ -40,10 +43,17 @@ func savedWindowTheme() windowTheme {
 	return windowThemes[defaultWindowTheme]
 }
 
+func (a *App) applyWindowTheme(theme windowTheme) {
+	theme.applyFrame(a.ctx)
+	wailsruntime.WindowSetBackgroundColour(a.ctx, theme.background.R, theme.background.G, theme.background.B, theme.background.A)
+}
+
 func (a *App) SaveWindowTheme(name string) error {
-	if _, known := windowThemes[name]; !known {
+	theme, known := windowThemes[name]
+	if !known {
 		return fmt.Errorf("unknown window theme %q", name)
 	}
+	a.applyWindowTheme(theme)
 	if err := os.MkdirAll(appFolder, 0755); err != nil {
 		return err
 	}

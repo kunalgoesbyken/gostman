@@ -65,7 +65,7 @@ func main() {
 		OnStartup:        app.startup,
 		OnShutdown:       app.stopServersOnQuit,
 		Menu:             applicationMenu(),
-		Windows:          &windows.Options{Theme: theme.frame},
+		Windows:          &windows.Options{Theme: theme.frame, WindowIsTranslucent: true, BackdropType: windows.Mica},
 		Mac:              &mac.Options{OnUrlOpen: app.receiveLink},
 		Bind:             []interface{}{app},
 		SingleInstanceLock: &options.SingleInstanceLock{
