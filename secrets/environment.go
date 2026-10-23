@@ -75,12 +75,17 @@ func (e Environment) Lookup() Lookup {
 
 func (e Environment) connection(alias string, entry kind, names naming) (Connection, error) {
 	connection := Connection{Alias: alias, Kind: entry.info.Name, Values: map[string]string{}}
+	isConfigured := !names.isStandard
 	for _, field := range entry.info.Fields {
 		value := e.first(names.variables(field))
 		if value == "" && field.Required {
 			return Connection{}, fmt.Errorf("connection %q needs %s: set %s", alias, readable(field.Name), strings.Join(names.variables(field), " or "))
 		}
 		connection.Values[field.Name] = value
+		isConfigured = isConfigured || value != ""
+	}
+	if !isConfigured {
+		return Connection{}, fmt.Errorf("connection %q is not set up: set one of %s, or %s%s to %s", alias, names.all(entry.info), names.prefix, environmentKind, entry.info.Name)
 	}
 	if _, err := entry.build(connection, nil); err != nil {
 		return Connection{}, fmt.Errorf("connection %q is not usable: %w (variables: %s)", alias, err, names.all(entry.info))
