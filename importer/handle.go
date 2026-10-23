@@ -104,12 +104,14 @@ func (c *collector) accept(files []File, format string) []document {
 }
 
 func (c *collector) importDocuments(ctx context.Context, docs []document, options Options, config Config) {
-	var bruno, supporting []document
+	var bruno, open, supporting []document
 	for _, doc := range docs {
-		switch doc.kind {
-		case kindBruno, kindBrunoConfig:
+		switch {
+		case doc.kind == kindBruno || doc.kind == kindBrunoConfig:
 			bruno = append(bruno, doc)
-		case kindSchema:
+		case doc.kind == kindOpenItem || doc.kind == kindOpenEnvironment || doc.kind == kindOpenCollection && !bundled(doc):
+			open = append(open, doc)
+		case doc.kind == kindSchema:
 			supporting = append(supporting, doc)
 		}
 	}
@@ -128,12 +130,17 @@ func (c *collector) importDocuments(ctx context.Context, docs []document, option
 		case kindPostmanEnvironment:
 			c.readPostmanEnvironment(doc)
 		case kindOpenCollection:
-			c.readOpenCollection(doc)
+			if bundled(doc) {
+				c.readOpenCollection(doc)
+			}
 		case kindOpenAPI:
 			c.readOpenAPI(ctx, doc, config)
 		}
 	}
 	if len(bruno) > 0 {
 		c.readBruno(bruno)
+	}
+	if len(open) > 0 {
+		c.readOpenFolders(open)
 	}
 }

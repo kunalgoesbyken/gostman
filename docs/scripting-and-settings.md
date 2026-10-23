@@ -86,7 +86,7 @@ Show a list as a table:
 visualize.table(res.body.map(({ id, title, completed }) => ({ id, title, completed })))
 ```
 
-Scripts imported from Postman keep working for the common `pm.*` calls, which the importer rewrites to the names above.
+Scripts imported from Postman or Bruno keep working for the common `pm.*` and `bru.*` calls, which the importer rewrites to the names above. Bruno's variable scopes all map to `env`, `bru.runRequest("Folder/Name")` sends the saved request with that name, and responses from `bru.sendRequest` and `bru.runRequest` keep Bruno's `data` field next to `body`. Calls with no equivalent, such as `res("path")` queries, `bru.interpolate` and `bru.cookies`, are kept as written and listed in the import summary.
 
 ## Network settings (desktop)
 

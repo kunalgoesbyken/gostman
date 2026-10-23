@@ -3,6 +3,8 @@ package importer
 import "strings"
 
 const (
+	postmanRoot         = "pm"
+	legacyRoot          = "postman"
 	responseRoot        = "res"
 	jsonSchemaAssertion = "jsonSchema"
 	environmentAccess   = "env"
@@ -11,23 +13,26 @@ const (
 type callRule func(args []string) (string, bool)
 
 var (
-	scopeNotes = map[string]bool{"globals": true, "collectionVariables": true, "variables": true, "iterationData": true}
-
-	implicitModules = map[string]string{"_": "lodash", "CryptoJS": "crypto-js", "moment": "moment"}
-
 	supportedModules = map[string]bool{"lodash": true, "crypto-js": true, "moment": true, "dayjs": true, "uuid": true, "ajv": true, "chai": true}
 
-	retiredGlobals = map[string]bool{
-		"tests": true, "responseBody": true, "responseCode": true, "responseHeaders": true,
-		"tv4": true, "xml2Json": true, "cheerio": true,
+	postmanDialect = &dialect{
+		name:     "Postman",
+		api:      "pm.*",
+		roots:    map[string]bool{postmanRoot: true, legacyRoot: true},
+		response: postmanRoot + ".response",
+		properties: map[string]string{
+			"pm.request.method": "req.method",
+			"pm.request.url":    "req.url",
+		},
+		calls:    buildCallRules(),
+		specials: map[string]special{"pm.sendRequest": (*translator).renderSendRequest},
+		scoped:   map[string]bool{"pm.globals": true, "pm.collectionVariables": true, "pm.variables": true, "pm.iterationData": true},
+		retired: map[string]bool{
+			"tests": true, "responseBody": true, "responseCode": true, "responseHeaders": true,
+			"tv4": true, "xml2Json": true, "cheerio": true,
+		},
+		implicit: map[string]string{"_": "lodash", "CryptoJS": "crypto-js", "moment": "moment"},
 	}
-
-	propertyRules = map[string]string{
-		"pm.request.method": "req.method",
-		"pm.request.url":    "req.url",
-	}
-
-	callRules = buildCallRules()
 )
 
 func buildCallRules() map[string]callRule {
@@ -70,13 +75,6 @@ func withoutArguments(replacement string) callRule {
 	return func(args []string) (string, bool) {
 		return replacement, len(args) == 0
 	}
-}
-
-func responsePath(path chain) (string, bool) {
-	if path.root != postmanRoot || len(path.segments) == 0 || path.segments[0] != "response" {
-		return "", false
-	}
-	return strings.Join(path.segments[1:], "."), true
 }
 
 func responseCall(root, path string, args []string) (string, bool) {

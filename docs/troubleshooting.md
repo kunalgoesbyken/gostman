@@ -42,7 +42,7 @@ Problems people run into most often, with the reason and the fix. If yours is no
 
 **Scripts, OAuth 2.0 or a local MCP server do nothing in a folder I opened.** A folder you did not create opens restricted, and its scripts, OAuth 2.0 settings and local MCP commands are switched off until you trust it. Open the storage menu in the header and choose **Trust this folder**. Read the scripts first: they run when a request is sent and can read your variables.
 
-**An imported Postman script fails.** Common `pm.*` calls are rewritten on import, but not every Postman API exists in Gostman. The import summary lists what was left out. See [Variables, scripts and settings](scripting-and-settings.md) for the script API.
+**An imported Postman or Bruno script fails.** Common `pm.*` and `bru.*` calls are rewritten on import, but not every Postman or Bruno API exists in Gostman. The import summary lists what was left out. See [Variables, scripts and settings](scripting-and-settings.md) for the script API.
 
 **A secret manager reference fails on the command line.** References are read only when the run allows it with `--secrets` or `--secrets-env-file`. See [Command line](cli.md).
 

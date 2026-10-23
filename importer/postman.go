@@ -29,7 +29,7 @@ func (c *collector) readPostmanCollection(doc document) {
 		}
 		base := c.postmanScope(root, fmt.Sprintf(labelCollection, name))
 		c.postmanItems(list(root["item"]), rootID, base, 0)
-		c.summarizeScripts(name)
+		c.summarizeScripts(postmanDialect, name)
 	})
 }
 
@@ -196,9 +196,9 @@ func (c *collector) postmanScript(label string, node map[string]any, listen stri
 		}
 		script := object(event["script"])
 		if lines := list(script["exec"]); lines != nil {
-			scripts = append(scripts, c.translateScript(label, listen, joinLines(lines)))
+			scripts = append(scripts, c.translateScript(postmanDialect, label, stageName(listen), joinLines(lines)))
 		} else if code := text(script["exec"]); code != "" {
-			scripts = append(scripts, c.translateScript(label, listen, code))
+			scripts = append(scripts, c.translateScript(postmanDialect, label, stageName(listen), code))
 		}
 	}
 	return joinScripts(scripts)

@@ -28,7 +28,7 @@ Gostman reads the content after a short pause and shows a summary before anythin
 | Insomnia | Insomnia exports |
 | HAR | HAR captures |
 | WSDL | WSDL services |
-| Bruno | Bruno collections, as a folder or a `.zip` |
+| Bruno | Bruno collections in `.bru` or YAML (OpenCollection), as a folder, a `.zip` or one exported file |
 | Gostman | Gostman exports and share links |
 
 The **Format** list defaults to **Detect automatically**. Choose a format yourself when detection picks the wrong one. A curl command pasted into the address bar of a request fills that request, see [Collections, tabs and Git](collections-and-git.md).

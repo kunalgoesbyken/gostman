@@ -89,10 +89,16 @@ func (c *collector) brunoSets(docs []document) []*brunoSet {
 		loose = append(loose, doc)
 	}
 	sort.SliceStable(sets, func(i, j int) bool { return len(sets[i].root) > len(sets[j].root) })
+	roots := make([]string, len(sets))
+	for index, set := range sets {
+		roots[index] = set.root
+	}
 	var implicit *brunoSet
 	for _, doc := range loose {
-		set := owner(sets, doc.file.Name)
-		if set == nil {
+		var set *brunoSet
+		if index := owner(roots, doc.file.Name); index >= 0 {
+			set = sets[index]
+		} else {
 			implicit = c.implicitSet(implicit, loose)
 			set = implicit
 		}
@@ -104,13 +110,13 @@ func (c *collector) brunoSets(docs []document) []*brunoSet {
 	return sets
 }
 
-func owner(sets []*brunoSet, name string) *brunoSet {
-	for _, set := range sets {
-		if set.root == "." || strings.HasPrefix(name, set.root+"/") {
-			return set
+func owner(roots []string, name string) int {
+	for index, root := range roots {
+		if root == "." || strings.HasPrefix(name, root+"/") {
+			return index
 		}
 	}
-	return nil
+	return -1
 }
 
 func (c *collector) implicitSet(existing *brunoSet, docs []document) *brunoSet {
@@ -183,7 +189,7 @@ func (c *collector) importBrunoSet(set *brunoSet) {
 		switch path.Base(file.path) {
 		case brunoCollectionFile:
 			if file.dir == "." {
-				collectionScope = c.brunoScope(file.bru)
+				collectionScope = c.brunoScope(file.bru, fmt.Sprintf(labelCollection, set.name))
 			}
 		case brunoFolderFile:
 			meta[file.dir] = file.bru
@@ -208,7 +214,7 @@ func (c *collector) importBrunoSet(set *brunoSet) {
 		folder := meta[dir]
 		name := cleanName(folder.value("meta", "name"), path.Base(dir))
 		folders[dir] = c.addFolder(name, parentID)
-		scopes[dir] = scopes[path.Dir(dir)].within(c.brunoScope(folder))
+		scopes[dir] = scopes[path.Dir(dir)].within(c.brunoScope(folder, fmt.Sprintf(labelFolder, name)))
 		return folders[dir], true
 	}
 	for _, dir := range sortedFolderDirs(set, meta) {
@@ -229,6 +235,7 @@ func (c *collector) importBrunoSet(set *brunoSet) {
 	for _, environment := range set.environments {
 		c.importBrunoEnvironment(environment)
 	}
+	c.summarizeScripts(brunoDialect, set.name)
 }
 
 func sortedFolderDirs(set *brunoSet, meta map[string]bruFile) []string {
@@ -268,7 +275,7 @@ func brunoOrder(file brunoFile) string {
 	return fmt.Sprintf("%s/%09d/%s", file.dir, sequence(file.bru), file.path)
 }
 
-func (c *collector) brunoScope(file bruFile) scope {
+func (c *collector) brunoScope(file bruFile, label string) scope {
 	var inherited scope
 	for _, entry := range file.entries("headers") {
 		inherited.headers = append(inherited.headers, row{Key: entry.Key, Value: entry.Value, Enabled: entry.Enabled})
@@ -279,13 +286,18 @@ func (c *collector) brunoScope(file bruFile) scope {
 			inherited.auth = &auth
 		}
 	}
-	if script := file.text("script:pre-request"); script != "" {
-		inherited.pre = []string{script}
-	}
-	if script := file.text("script:post-response"); script != "" {
-		inherited.post = []string{script}
-	}
+	pre, post := c.brunoScripts(file, label)
+	inherited.pre, inherited.post = nonEmpty(pre), nonEmpty(post)
 	return inherited
+}
+
+func (c *collector) brunoScripts(file bruFile, label string) (string, string) {
+	pre := c.translateScript(brunoDialect, label, stagePre, file.text("script:pre-request"))
+	post := joinScripts([]string{
+		c.translateScript(brunoDialect, label, stageAfter, file.text("script:post-response")),
+		c.translateScript(brunoDialect, label, stagePost, file.text("tests")),
+	})
+	return pre, post
 }
 
 func bruRows(entries []bruEntry) []row {
@@ -338,9 +350,8 @@ func (c *collector) importBrunoRequest(file brunoFile, inherited scope, folderID
 		headers:     bruRows(bru.entries("headers")),
 		params:      bruRows(bru.entries("params:query")),
 		vars:        bruRows(bru.entries("vars:pre-request")),
-		preScript:   bru.text("script:pre-request"),
-		postScript:  joinScripts([]string{bru.text("script:post-response"), bru.text("tests")}),
 	}
+	request.preScript, request.postScript = c.brunoScripts(bru, fmt.Sprintf(labelRequest, name))
 	request.url = applyPathParams(request.url, bruRows(bru.entries("params:path")))
 	if strings.Contains(request.url, "?") {
 		request.params = disabledOnly(request.params)

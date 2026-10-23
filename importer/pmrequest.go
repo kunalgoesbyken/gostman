@@ -16,7 +16,7 @@ func (t *translator) renderSendRequest(call *ast.CallExpression) string {
 		return t.text(call)
 	}
 	t.translated++
-	target := t.requestTarget(call.ArgumentList[0])
+	target := t.requestTarget(call.ArgumentList[0], t.requestField)
 	if len(call.ArgumentList) == 1 {
 		return "sendRequest(" + target + ")"
 	}
@@ -65,22 +65,24 @@ func secondParameter(parameters *ast.ParameterList) string {
 	return ""
 }
 
-func (t *translator) requestTarget(argument ast.Expression) string {
+type requestField func(ast.Property) (string, bool)
+
+func (t *translator) requestTarget(argument ast.Expression, field requestField) string {
 	switch current := argument.(type) {
 	case *ast.StringLiteral, *ast.TemplateLiteral:
 		return "{ url: " + t.render(current) + " }"
 	case *ast.ObjectLiteral:
-		return t.requestObject(current)
+		return t.requestObject(current, field)
 	}
 	t.note(argument, "sendRequest-target", messageScriptSendTarget)
 	return t.render(argument)
 }
 
-func (t *translator) requestObject(object *ast.ObjectLiteral) string {
+func (t *translator) requestObject(object *ast.ObjectLiteral, field requestField) string {
 	var fields []string
 	for _, property := range object.Value {
-		if field, ok := t.requestField(property); ok {
-			fields = append(fields, field)
+		if rendered, ok := field(property); ok {
+			fields = append(fields, rendered)
 		}
 	}
 	return "{ " + strings.Join(fields, ", ") + " }"

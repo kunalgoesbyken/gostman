@@ -73,10 +73,17 @@ func collectPointer(field reflect.Value, emit func(ast.Node)) {
 }
 
 func appendSpan(found []span, node ast.Node) []span {
-	if from, to := int(node.Idx0()), int(node.Idx1()); from > 0 && to >= from {
-		return append(found, span{node: node, start: from - 1, end: to - 1})
+	if from, to := startOf(node), int(node.Idx1())-1; from >= 0 && to >= from {
+		return append(found, span{node: node, start: from, end: to})
 	}
 	return found
+}
+
+func startOf(node ast.Node) int {
+	if statement, ok := node.(*ast.IfStatement); ok && statement.If == 0 && statement.Test != nil {
+		return int(statement.Test.Idx0()) - 1
+	}
+	return int(node.Idx0()) - 1
 }
 
 func eachChild(parent ast.Node, emit func(ast.Node)) {

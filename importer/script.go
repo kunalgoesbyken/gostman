@@ -13,12 +13,10 @@ import (
 const (
 	scriptPrefix = "(async function(){\n"
 	scriptSuffix = "\n})"
-	postmanRoot  = "pm"
 
 	maxScriptBytes  = 64 << 10
 	translateBudget = 3 * time.Second
 	maxTreeDepth    = 1500
-	legacyRoot      = "postman"
 )
 
 type scriptNote struct {
@@ -34,25 +32,27 @@ type scriptTranslation struct {
 }
 
 type translator struct {
-	source     string
-	wrapped    string
-	notes      []scriptNote
-	translated int
-	failed     int
-	aliases    []string
-	depth      int
-	truncated  bool
-	async      []bool
-	declared   map[string]bool
-	needs      map[string]bool
-	noted      map[string]bool
+	dialect      *dialect
+	source       string
+	wrapped      string
+	notes        []scriptNote
+	translated   int
+	failed       int
+	aliases      []string
+	depth        int
+	truncated    bool
+	async        []bool
+	declared     map[string]bool
+	needs        map[string]bool
+	awaitedCalls map[ast.Expression]bool
+	noted        map[string]bool
 }
 
 func keptAsWritten(source, reason string) scriptTranslation {
 	return scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: reason}}, failed: 1}
 }
 
-func translatePostmanScript(source string) scriptTranslation {
+func translateSource(d *dialect, source string) scriptTranslation {
 	if len(source) > maxScriptBytes {
 		return keptAsWritten(source, fmt.Sprintf(messageScriptTooLarge, maxScriptBytes>>10))
 	}
@@ -63,7 +63,7 @@ func translatePostmanScript(source string) scriptTranslation {
 				done <- keptAsWritten(source, messageScriptInternal)
 			}
 		}()
-		done <- translateParsed(source)
+		done <- translateParsed(d, source)
 	}()
 	select {
 	case result := <-done:
@@ -73,7 +73,7 @@ func translatePostmanScript(source string) scriptTranslation {
 	}
 }
 
-func translateParsed(source string) scriptTranslation {
+func translateParsed(d *dialect, source string) scriptTranslation {
 	program, err := parser.ParseFile(nil, "", scriptPrefix+source+scriptSuffix, 0)
 	if err != nil {
 		return scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: messageScriptSyntax}}, failed: 1}
@@ -85,7 +85,7 @@ func translateParsed(source string) scriptTranslation {
 	if exceedsDepth(body, maxTreeDepth) {
 		return scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: messageScriptTooDeep}}, failed: 1}
 	}
-	t := &translator{source: source, wrapped: scriptPrefix + source + scriptSuffix, async: []bool{true}, declared: map[string]bool{}, needs: map[string]bool{}, noted: map[string]bool{}}
+	t := &translator{dialect: d, source: source, wrapped: scriptPrefix + source + scriptSuffix, async: []bool{true}, declared: map[string]bool{}, needs: map[string]bool{}, noted: map[string]bool{}, awaitedCalls: map[ast.Expression]bool{}}
 	t.collectDeclared(body)
 	text := t.splice(len(scriptPrefix), len(scriptPrefix)+len(source), childNodes(body))
 	if t.truncated {
@@ -160,11 +160,11 @@ func (t *translator) raw(from, to int) string {
 }
 
 func (t *translator) text(node ast.Node) string {
-	return t.raw(int(node.Idx0())-1, int(node.Idx1())-1)
+	return t.raw(startOf(node), int(node.Idx1())-1)
 }
 
 func (t *translator) renderChildren(node ast.Node, skip func(ast.Node) bool) string {
-	from, to := int(node.Idx0())-1, int(node.Idx1())-1
+	from, to := startOf(node), int(node.Idx1())-1
 	var kept []span
 	for _, child := range childNodes(node) {
 		if skip == nil || !skip(child.node) {
@@ -196,6 +196,8 @@ func (t *translator) render(node ast.Node) string {
 		return t.inFunction(current, current.Async)
 	case *ast.PropertyKeyed:
 		return t.renderProperty(current)
+	case *ast.AwaitExpression:
+		t.awaitedCalls[current.Argument] = true
 	}
 	return t.renderChildren(node, nil)
 }
@@ -231,21 +233,20 @@ func (t *translator) renderIdentifier(identifier *ast.Identifier) string {
 	if t.declared[name] {
 		return name
 	}
-	switch name {
-	case postmanRoot, legacyRoot:
+	if t.dialect.roots[name] {
 		t.fail(identifier, messageScriptValue, name)
-	default:
-		t.noteFreeIdentifier(identifier, name)
+		return name
 	}
+	t.noteFreeIdentifier(identifier, name)
 	return name
 }
 
 func (t *translator) noteFreeIdentifier(identifier *ast.Identifier, name string) {
-	if _, implicit := implicitModules[name]; implicit {
+	if _, implicit := t.dialect.implicit[name]; implicit {
 		t.needs[name] = true
 		return
 	}
-	if retiredGlobals[name] {
+	if t.dialect.retired[name] {
 		t.fail(identifier, messageScriptRetired, name)
 	}
 }
@@ -278,7 +279,7 @@ func (t *translator) rooted(root string) bool {
 	if t.declared[root] {
 		return false
 	}
-	return root == postmanRoot || root == legacyRoot
+	return t.dialect.roots[root]
 }
 
 func (t *translator) renderPath(node ast.Expression, path chain) string {
@@ -292,10 +293,10 @@ func (t *translator) renderPath(node ast.Expression, path chain) string {
 
 func (t *translator) property(node ast.Expression, path chain) (string, bool) {
 	t.noteScope(node, path)
-	if response, isResponse := responsePath(path); isResponse {
+	if response, isResponse := t.dialect.responsePath(path); isResponse {
 		return responseProperty(responseRoot, response)
 	}
-	rule, found := propertyRules[path.root+"."+path.path()]
+	rule, found := t.dialect.properties[path.text()]
 	return rule, found
 }
 
@@ -303,8 +304,13 @@ func (t *translator) noteScope(node ast.Node, path chain) {
 	if len(path.segments) == 0 {
 		return
 	}
-	if scopeNotes[path.segments[0]] {
-		t.note(node, path.segments[0], fmt.Sprintf(messageScriptScope, path.root+"."+path.segments[0]))
+	name := path.root
+	for _, segment := range path.segments {
+		name += "." + segment
+		if t.dialect.scoped[name] {
+			t.note(node, name, fmt.Sprintf(messageScriptScope, name))
+			return
+		}
 	}
 }
 
@@ -312,6 +318,9 @@ func (t *translator) renderCall(call *ast.CallExpression) string {
 	path, pure := chainOf(call.Callee)
 	if pure && (t.rooted(path.root) || t.aliased(path.root)) {
 		return t.renderRooted(call, path)
+	}
+	if kind, found := t.receiver(path.root); pure && found {
+		return t.renderReceiver(call, path, kind)
 	}
 	if pure && path.root == "require" && len(path.segments) == 0 && !t.declared["require"] {
 		t.checkRequire(call)
@@ -323,8 +332,8 @@ func (t *translator) renderRooted(call *ast.CallExpression, path chain) string {
 	if t.aliased(path.root) && !t.rooted(path.root) {
 		return t.renderAliasCall(call, path)
 	}
-	if path.root == postmanRoot && path.path() == "sendRequest" {
-		return t.renderSendRequest(call)
+	if render, found := t.dialect.specials[path.text()]; found {
+		return render(t, call)
 	}
 	args := t.renderArguments(call)
 	if replacement, ok := t.callRule(call, path, args); ok {
@@ -346,10 +355,10 @@ func (t *translator) renderAliasCall(call *ast.CallExpression, path chain) strin
 
 func (t *translator) callRule(call *ast.CallExpression, path chain, args []string) (string, bool) {
 	t.noteScope(call, path)
-	if response, isResponse := responsePath(path); isResponse {
+	if response, isResponse := t.dialect.responsePath(path); isResponse {
 		return responseCall(responseRoot, response, args)
 	}
-	rule, found := callRules[path.root+"."+path.path()]
+	rule, found := t.dialect.calls[path.text()]
 	if !found {
 		return "", false
 	}
@@ -417,7 +426,7 @@ func (t *translator) withRequires(text string) string {
 	sort.Strings(names)
 	var header strings.Builder
 	for _, name := range names {
-		header.WriteString(fmt.Sprintf("const %s = require(%q);\n", name, implicitModules[name]))
+		header.WriteString(fmt.Sprintf("const %s = require(%q);\n", name, t.dialect.implicit[name]))
 	}
 	return header.String() + text
 }

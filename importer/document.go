@@ -33,6 +33,8 @@ const (
 	kindBruno               = "bruno"
 	kindBrunoConfig         = "bruno-config"
 	kindOpenCollection      = "opencollection"
+	kindOpenItem            = "opencollection-item"
+	kindOpenEnvironment     = "opencollection-environment"
 	kindGostman             = "gostman"
 	kindUnknown             = ""
 	postmanSchemaMarker     = "getpostman.com/json/collection"
@@ -61,6 +63,8 @@ var kindFormats = map[string]string{
 	kindBruno:              FormatBruno,
 	kindBrunoConfig:        FormatBruno,
 	kindOpenCollection:     FormatBruno,
+	kindOpenItem:           FormatBruno,
+	kindOpenEnvironment:    FormatBruno,
 	kindGostman:            FormatGostman,
 }
 
@@ -174,8 +178,17 @@ func classifyStructured(data any) string {
 		return kindGostman
 	case text(root["type"]) == "collection" && text(root["name"]) != "":
 		return kindBrunoConfig
+	case text(info["type"]) != "" && text(info["name"]) != "":
+		return kindOpenItem
+	case isOpenEnvironment(root):
+		return kindOpenEnvironment
 	}
 	return kindUnknown
+}
+
+func isOpenEnvironment(root map[string]any) bool {
+	_, listed := root["variables"].([]any)
+	return listed && text(root["name"]) != ""
 }
 
 func isPostmanEnvironment(root map[string]any) bool {

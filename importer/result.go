@@ -41,7 +41,7 @@ type collector struct {
 	flags     map[string][]string
 	flagOrder []string
 	full      bool
-	postman   scriptTally
+	scripts   scriptTally
 
 	visitedNodes map[*insomniaNode]bool
 }

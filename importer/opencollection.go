@@ -22,10 +22,11 @@ func (c *collector) readOpenCollection(doc document) {
 	name := cleanName(text(info["name"]), collectionBundled)
 	c.read(name, FormatBruno, func() {
 		rootID := c.addFolder(name, "")
-		c.openItems(list(root["items"]), rootID, scope{}, 0)
+		c.openItems(list(root["items"]), rootID, c.openScope(root, fmt.Sprintf(labelCollection, name)), 0)
 		for _, environment := range objects(root["environments"]) {
 			c.openEnvironment(environment)
 		}
+		c.summarizeScripts(brunoDialect, name)
 	})
 }
 
@@ -42,7 +43,7 @@ func (c *collector) openItems(items []any, folderID string, inherited scope, dep
 		info := object(item["info"])
 		if text(info["type"]) == itemFolder {
 			id := c.addFolder(text(info["name"]), folderID)
-			c.openItems(list(item["items"]), id, inherited.within(c.openScope(item)), depth+1)
+			c.openItems(list(item["items"]), id, inherited.within(c.openScope(item, fmt.Sprintf(labelFolder, text(info["name"])))), depth+1)
 			continue
 		}
 		if described := object(item["http"]); described != nil {
@@ -53,17 +54,18 @@ func (c *collector) openItems(items []any, folderID string, inherited scope, dep
 	}
 }
 
-func (c *collector) openScope(item map[string]any) scope {
+func (c *collector) openScope(item map[string]any, label string) scope {
 	var inherited scope
 	described := object(item["request"])
 	inherited.headers = openRows(described["headers"])
+	inherited.vars = openRows(described["variables"])
 	if auth := object(described["auth"]); auth != nil {
 		converted, ok := c.openAuth(auth)
 		if ok {
 			inherited.auth = &converted
 		}
 	}
-	pre, post := openScripts(item)
+	pre, post := c.openScripts(append(objects(described["scripts"]), runtimeScripts(item)...), label)
 	inherited.pre, inherited.post = nonEmpty(pre), nonEmpty(post)
 	return inherited
 }
@@ -76,14 +78,21 @@ func openRows(value any) []row {
 	return keyedRows(rows)
 }
 
-func openScripts(item map[string]any) (string, string) {
+func runtimeScripts(item map[string]any) []map[string]any {
+	return objects(object(item["runtime"])["scripts"])
+}
+
+func (c *collector) openScripts(entries []map[string]any, label string) (string, string) {
 	var pre, post []string
-	for _, entry := range objects(object(item["runtime"])["scripts"]) {
+	for _, entry := range entries {
+		code := text(entry["code"])
 		switch text(entry["type"]) {
 		case scriptBefore:
-			pre = append(pre, text(entry["code"]))
-		case scriptAfter, scriptTests:
-			post = append(post, text(entry["code"]))
+			pre = append(pre, c.translateScript(brunoDialect, label, stagePre, code))
+		case scriptAfter:
+			post = append(post, c.translateScript(brunoDialect, label, stageAfter, code))
+		case scriptTests:
+			post = append(post, c.translateScript(brunoDialect, label, stagePost, code))
 		}
 	}
 	return joinScripts(pre), joinScripts(post)
@@ -107,7 +116,7 @@ func (c *collector) openRequest(name string, item, described map[string]any, fol
 		headers:     openRows(described["headers"]),
 		params:      params,
 	}
-	request.preScript, request.postScript = openScripts(item)
+	request.preScript, request.postScript = c.openScripts(runtimeScripts(item), fmt.Sprintf(labelRequest, cleanName(name, untitledRequest)))
 	if auth := object(described["auth"]); auth != nil {
 		converted, ok := c.openAuth(auth)
 		if ok {
