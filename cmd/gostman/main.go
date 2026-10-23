@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime/debug"
+	"strings"
 )
 
 const (
@@ -227,6 +229,14 @@ Exit codes:
 
 var version = "dev"
 
+func currentVersion() string {
+	info, ok := debug.ReadBuildInfo()
+	if version != "dev" || !ok || !strings.HasPrefix(info.Main.Version, "v") {
+		return version
+	}
+	return strings.TrimPrefix(info.Main.Version, "v")
+}
+
 func main() {
 	os.Exit(dispatch(os.Args[1:], os.Stdout, os.Stderr))
 }
@@ -266,7 +276,7 @@ func dispatch(arguments []string, stdout, stderr *os.File) int {
 	case "init":
 		return initCommand(arguments[1:], stdout, stderr)
 	case "version", "--version":
-		fmt.Fprintln(stdout, version)
+		fmt.Fprintln(stdout, currentVersion())
 		return exitPassed
 	case "help", "--help", "-h":
 		fmt.Fprint(stdout, usage)

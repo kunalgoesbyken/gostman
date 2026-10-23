@@ -50,7 +50,7 @@ func mcpCommand(arguments []string, stdout, stderr *os.File) int {
 
 	server := &mcp.Server{
 		Name:         programName,
-		Version:      version,
+		Version:      currentVersion(),
 		Instructions: agent.Instructions,
 		Tools:        desk.Tools(),
 		Log:          stderr,
