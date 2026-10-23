@@ -106,6 +106,7 @@ Download the latest build from the [releases page](https://github.com/kunalgoesb
 | Windows | [`Gostman-windows-amd64-portable.exe`](https://github.com/kunalgoesbyken/gostman/releases/latest/download/Gostman-windows-amd64-portable.exe) | Single executable, no installation. |
 | macOS | [`Gostman-darwin-universal.dmg`](https://github.com/kunalgoesbyken/gostman/releases/latest/download/Gostman-darwin-universal.dmg) | Intel and Apple Silicon. Drag Gostman to Applications. |
 | Linux | [`Gostman-linux-amd64.deb`](https://github.com/kunalgoesbyken/gostman/releases/latest/download/Gostman-linux-amd64.deb) | Debian and Ubuntu. `sudo apt install ./Gostman-linux-amd64.deb` |
+| Linux | [`Gostman-linux-x86_64.AppImage`](https://github.com/kunalgoesbyken/gostman/releases/latest/download/Gostman-linux-x86_64.AppImage) | Any distribution. `chmod +x Gostman-linux-x86_64.AppImage` and run it. AppImage managers keep it up to date. |
 | Linux | [`Gostman-linux-amd64.tar.gz`](https://github.com/kunalgoesbyken/gostman/releases/latest/download/Gostman-linux-amd64.tar.gz) | Other distributions. `sudo tar -xzf Gostman-linux-amd64.tar.gz -C /` Requires GTK 3 and WebKitGTK 4.1. |
 | Arch Linux | [`gostman-bin`](https://aur.archlinux.org/packages/gostman-bin) | Community package in the AUR, maintained by [@softexpert](https://github.com/softexpert). `yay -S gostman-bin` |
 

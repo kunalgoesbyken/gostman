@@ -48,7 +48,7 @@ jobs:
       matrix:
         include:
           - name: linux
-            os: ubuntu-latest
+            os: ubuntu-22.04
             cli_targets: linux/amd64
           - name: windows
             os: windows-latest
@@ -112,6 +112,45 @@ jobs:
           mkdir -p "$root/DEBIAN"
           sed "s/@VERSION@/$VERSION/" build/linux/control > "$root/DEBIAN/control"
           dpkg-deb -Zxz --build --root-owner-group "$root" build/bin/Gostman-linux-amd64.deb
+
+      - name: Build the AppImage (Linux)
+        if: matrix.name == 'linux'
+        env:
+          TOOLS_URL: https://github.com/tauri-apps/binary-releases/releases/download
+          GTK_PLUGIN_URL: https://raw.githubusercontent.com/tauri-apps/tauri/8e7028331ad37ac2db74d4ec20e66be5cacf2c40/crates/tauri-bundler/src/bundle/linux/appimage/linuxdeploy-plugin-gtk.sh
+          ARCH: x86_64
+          APPIMAGE_EXTRACT_AND_RUN: '1'
+          LDAI_OUTPUT: build/bin/Gostman-linux-x86_64.AppImage
+          LDAI_UPDATE_INFORMATION: gh-releases-zsync|${{ github.repository_owner }}|${{ github.event.repository.name }}|latest|Gostman-linux-x86_64.AppImage.zsync
+        run: |
+          tools="$PWD/appimage-tools"
+          mkdir -p "$tools"
+          curl -fsSL -o "$tools/linuxdeploy" "$TOOLS_URL/linuxdeploy-07333c6/linuxdeploy-x86_64.AppImage"
+          curl -fsSL -o "$tools/AppRun" "$TOOLS_URL/apprun-old/AppRun-x86_64"
+          curl -fsSL -o "$tools/linuxdeploy-plugin-gtk.sh" "$GTK_PLUGIN_URL"
+          (cd "$tools" && sha256sum -c) <<'SUMS'
+          36a2d7e274d12e1050d0e9ecfe11d339ed54720b2bec464c286d53f8b07f5c62  linuxdeploy
+          f30140a43a0a59e46db21bdefdf749b9e9f2c6946e92afabbacf98b8ae73fb4f  AppRun
+          ef6b9a980417243bc62e0241b51dc49876032afd1bab9b4762389f961b406d9b  linuxdeploy-plugin-gtk.sh
+          SUMS
+          chmod +x "$tools"/*
+          convert build/appicon.png -resize 256x256 "$tools/gostman.png"
+
+          appdir=AppDir
+          libdir="$(pkg-config --variable=libdir webkit2gtk-4.1)"
+          webkit="$libdir/webkit2gtk-4.1"
+          for helper in WebKitNetworkProcess WebKitWebProcess injected-bundle/libwebkit2gtkinjectedbundle.so; do
+            install -Dm755 "$webkit/$helper" "$appdir$webkit/$helper"
+          done
+          install -Dm755 build/bin/Gostman "$appdir/usr/bin/gostman"
+          install -Dm755 "$tools/AppRun" "$appdir/AppRun"
+
+          PATH="$tools:$PATH" linuxdeploy --appdir "$appdir" \
+            --executable "$appdir/usr/bin/gostman" \
+            --desktop-file build/linux/gostman.desktop \
+            --icon-file "$tools/gostman.png"             --library "$libdir/libGLESv2.so.2" \
+            --plugin gtk --output appimage
+          mv "${LDAI_OUTPUT##*/}.zsync" "$(dirname "$LDAI_OUTPUT")/"
 
       # The installer adds Start menu and desktop shortcuts, an uninstaller and
       # the WebView2 runtime when it is missing. The bare executable is shipped

@@ -18,6 +18,7 @@ Download the latest build from the [releases page](https://github.com/kunalgoesb
 | Windows | `Gostman-windows-amd64-portable.exe` | Single executable, no installation. |
 | macOS | `Gostman-darwin-universal.dmg` | Intel and Apple Silicon. Drag Gostman to Applications. |
 | Linux | `Gostman-linux-amd64.deb` | Debian and Ubuntu. Run `sudo apt install ./Gostman-linux-amd64.deb`. |
+| Linux | `Gostman-linux-x86_64.AppImage` | Any distribution. Run `chmod +x Gostman-linux-x86_64.AppImage`, then start it. AppImage managers keep it up to date. |
 | Linux | `Gostman-linux-amd64.tar.gz` | Other distributions. Requires GTK 3 and WebKitGTK 4.1. |
 | Arch Linux | [`gostman-bin`](https://aur.archlinux.org/packages/gostman-bin) | Community package in the AUR. Install it with an AUR helper, for example `yay -S gostman-bin`. |
 

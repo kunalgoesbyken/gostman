@@ -5,7 +5,8 @@ export const DOWNLOADS = [
   { os: "windows", name: "Windows", note: "64-bit installer", kind: ".exe", file: "Gostman-windows-amd64.exe" },
   { os: "linux", name: "Linux", note: "Debian, Ubuntu", kind: ".deb", file: "Gostman-linux-amd64.deb" },
   { os: "linux", name: "Linux", note: "Arch, community package", kind: "AUR", url: "https://aur.archlinux.org/packages/gostman-bin" },
-  { os: "linux", name: "Linux", note: "Other distributions", kind: ".tar.gz", file: "Gostman-linux-amd64.tar.gz" },
+  { os: "linux", name: "Linux", note: "Any distribution", kind: "AppImage", file: "Gostman-linux-x86_64.AppImage" },
+  { os: "linux", name: "Linux", note: "System libraries", kind: ".tar.gz", file: "Gostman-linux-amd64.tar.gz" },
 ]
 
 export const downloadUrl = (download) => download.url ?? `${RELEASE_URL}/${download.file}`

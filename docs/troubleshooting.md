@@ -8,7 +8,7 @@ Problems people run into most often, with the reason and the fix. If yours is no
 
 **macOS says the app cannot be opened.** Right-click Gostman in Applications, choose **Open**, then confirm. For the command line, run `xattr -d com.apple.quarantine gostman` once.
 
-**The Linux app does not start.** The `.tar.gz` build needs GTK 3 and WebKitGTK 4.1 from your distribution's packages. The `.deb` installs them for you.
+**The Linux app does not start.** The `.tar.gz` build needs GTK 3 and WebKitGTK 4.1 from your distribution's packages. The `.deb` installs them for you, and the AppImage carries its own.
 
 ## Sending requests
 
