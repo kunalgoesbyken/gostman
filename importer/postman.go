@@ -40,6 +40,11 @@ func (c *collector) postmanScope(node map[string]any, label string) scope {
 	}
 	inherited.pre = nonEmpty(c.postmanScript(label, node, listenPreRequest))
 	inherited.post = nonEmpty(c.postmanScript(label, node, listenTest))
+	return inherited
+}
+
+func (c *collector) postmanFolderScope(node map[string]any, label string) scope {
+	inherited := c.postmanScope(node, label)
 	for _, entry := range objects(node["variable"]) {
 		if key := text(entry["key"]); key != "" && !flag(entry["disabled"]) {
 			inherited.vars = append(inherited.vars, row{Key: key, Value: text(entry["value"]), Enabled: true})
@@ -66,7 +71,7 @@ func (c *collector) postmanItems(items []any, folderID string, inherited scope, 
 		case item == nil:
 		case item["item"] != nil:
 			id := c.addFolder(text(item["name"]), folderID)
-			c.postmanItems(list(item["item"]), id, inherited.within(c.postmanScope(item, fmt.Sprintf(labelFolder, text(item["name"])))), depth+1)
+			c.postmanItems(list(item["item"]), id, inherited.within(c.postmanFolderScope(item, fmt.Sprintf(labelFolder, text(item["name"])))), depth+1)
 		case item["request"] != nil:
 			c.postmanRequest(item, folderID, inherited)
 		}

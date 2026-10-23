@@ -23,7 +23,7 @@ Gostman reads the content after a short pause and shows a summary before anythin
 
 | Format | Notes |
 | --- | --- |
-| Postman | Postman files |
+| Postman | Postman files. Collection variables are imported once as variables, not copied into every request |
 | OpenAPI | OpenAPI and Swagger specs |
 | Insomnia | Insomnia exports |
 | HAR | HAR captures |
