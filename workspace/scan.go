@@ -23,6 +23,7 @@ type scanner struct {
 	requests     map[string]*requestEntry
 	folders      map[string]*folderEntry
 	environments map[string]*environmentEntry
+	implicit     []*folderEntry
 	problems     []Problem
 }
 
@@ -81,6 +82,7 @@ func (s *scanner) run() error {
 		return err
 	}
 	s.directory("", "", 0)
+	s.dropEmptyImplicitFolders()
 	s.environmentFiles()
 	return nil
 }
@@ -115,6 +117,7 @@ func (s *scanner) readFolder(directory, parentId string) *folderEntry {
 	relative := joinPath(directory, FolderFileName)
 	content, err := s.disk.read(relative)
 	if errors.Is(err, fs.ErrNotExist) {
+		s.implicit = append(s.implicit, entry)
 		return entry
 	}
 	document, err := decodeFile(content, err, readFolder)
@@ -187,6 +190,29 @@ func (s *scanner) descend(entry *folderEntry, depth int) {
 		return
 	}
 	s.directory(entry.dir, entry.folder.Id, depth+1)
+}
+
+func (s *scanner) childCounts() map[string]int {
+	counts := map[string]int{}
+	for _, entry := range s.requests {
+		counts[entry.request.FolderId]++
+	}
+	for _, entry := range s.folders {
+		counts[entry.folder.ParentId]++
+	}
+	return counts
+}
+
+func (s *scanner) dropEmptyImplicitFolders() {
+	counts := s.childCounts()
+	sort.Slice(s.implicit, func(first, second int) bool { return s.implicit[first].dir > s.implicit[second].dir })
+	for _, entry := range s.implicit {
+		if counts[entry.folder.Id] > 0 {
+			continue
+		}
+		delete(s.folders, entry.folder.Id)
+		counts[entry.folder.ParentId]--
+	}
 }
 
 func (s *scanner) environmentFiles() {
