@@ -2,7 +2,7 @@ import { Search } from "lucide-react"
 import { Input } from "./ui/input"
 import { Toolbar } from "./ui/panel"
 
-export function SearchField({ value, onChange, placeholder, onKeyDown }) {
+export function SearchField({ value, onChange, placeholder, onKeyDown, children }) {
   return (
     <Toolbar className="relative">
       <Search className="pointer-events-none absolute left-5 h-3.5 w-3.5 text-muted-foreground" />
@@ -16,6 +16,7 @@ export function SearchField({ value, onChange, placeholder, onKeyDown }) {
         spellCheck={false}
         className="pl-7"
       />
+      {children}
     </Toolbar>
   )
 }

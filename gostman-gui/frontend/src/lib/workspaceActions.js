@@ -461,6 +461,7 @@ export function createWorkspaceActions(backend) {
     shortcuts: () => store().openShortcutsDialog(),
     findRequest: () => store().openCommandPalette('requests'),
     newFolder: () => createFolder(),
+    collapseFolders: () => store().collapseFolders(),
     clearHistory,
     showWelcome: () => store().showWelcome(),
     about: () => store().openAbout(),

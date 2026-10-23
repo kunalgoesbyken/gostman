@@ -21,7 +21,7 @@ The buttons next to the view tabs are:
 
 The tree lists folders and requests. Each request row shows its method and name, and hovering a row shows its URL. Folders can hold other folders. An import moves folders nested deeper than 32 levels to the top level.
 
-- Click a folder to open or close it.
+- Click a folder to open or close it. **Collapse all folders**, next to the search field and in the command palette, closes every folder.
 - Click a request to open it in a preview tab. Double-click it to keep the tab open.
 - An empty folder shows **This folder is empty**.
 - An empty collection shows **No requests yet** with **New request** and **Import** buttons, and a **Paste** button when you have copied an item.

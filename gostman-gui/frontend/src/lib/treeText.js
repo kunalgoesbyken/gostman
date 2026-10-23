@@ -2,6 +2,8 @@ export const TREE_TEXT = {
   moveUp: 'Move up',
   moveDown: 'Move down',
   moveToFolder: 'Move to folder',
+  collapseAll: 'Collapse all folders',
+  collapseAllDescription: 'Close every folder in the sidebar',
   topLevel: 'Top level',
   copy: 'Copy',
   paste: 'Paste',

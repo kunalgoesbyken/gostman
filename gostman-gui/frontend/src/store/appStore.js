@@ -384,6 +384,9 @@ export const useAppStore = create(
         toggleFolder: (folderId) => set((state) => ({
           folders: state.folders.map((folder) => (folder.id === folderId ? { ...folder, isOpen: !folder.isOpen } : folder)),
         })),
+        collapseFolders: () => set((state) => (state.folders.some((folder) => folder.isOpen)
+          ? { folders: state.folders.map((folder) => (folder.isOpen ? { ...folder, isOpen: false } : folder)) }
+          : state)),
 
         addToHistory: (request) => set((state) => {
           const entry = { ...normalizeRequest(request), examples: '', id: createId('hist'), timestamp: new Date().toISOString() }

@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
-import { ClipboardPaste, FileJson, Plus, Search, Upload } from "lucide-react"
-import { Button } from "./ui/button"
+import { ChevronsDownUp, ClipboardPaste, FileJson, Plus, Search, Upload } from "lucide-react"
+import { Button, IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
 import { EmptyState } from "./ui/emptyState"
 import { VirtualList, scrollIndexIntoView } from "./ui/VirtualList"
@@ -134,6 +134,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
   const scrollRef = useRef(null)
   const typeahead = useTypeahead()
   const toggleFolder = useAppStore((s) => s.toggleFolder)
+  const collapseFolders = useAppStore((s) => s.collapseFolders)
   const specLinks = useAppStore((s) => s.specLinks)
   const treeClipboard = useAppStore((s) => s.treeClipboard)
 
@@ -305,7 +306,9 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
 
   return (
     <>
-      <SearchField value={query} onChange={setQuery} onKeyDown={enterResultsOnArrow} placeholder="Search name or URL" />
+      <SearchField value={query} onChange={setQuery} onKeyDown={enterResultsOnArrow} placeholder="Search name or URL">
+        <IconButton label={TREE_TEXT.collapseAll} icon={ChevronsDownUp} className="shrink-0" disabled={isSearching || folders.length === 0} onClick={collapseFolders} />
+      </SearchField>
 
       <div className={cn("min-h-0 flex-1", isDropAtRoot && "ring-1 ring-inset ring-primary")}>
         {rows.length === 0 ? (

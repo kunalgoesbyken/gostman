@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
-  Bookmark, ClipboardPaste, Gauge, Clock, MonitorDown, Info, Hand, Folder, FolderOpen, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Pin, Plus, Radio, RotateCcw, Save, Search, Send,
+  Bookmark, ChevronsDownUp, ClipboardPaste, Gauge, Clock, MonitorDown, Info, Hand, Folder, FolderOpen, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Pin, Plus, Radio, RotateCcw, Save, Search, Send,
   Bot, Server, Settings, Share2, ShieldAlert, ShieldCheck, SlidersHorizontal, Undo2, Upload, X,
 } from "lucide-react"
 import { MethodTag } from "../MethodTag"
@@ -13,6 +13,7 @@ import { useInstallable } from "../../lib/pwa"
 import { LOAD_TEST_TEXT } from "../../lib/loadTestText"
 import { WELCOME_TEXT } from "../../lib/welcomeText"
 import { WORKSPACE_TEXT } from "../../lib/workspaceText"
+import { TREE_TEXT } from "../../lib/treeText"
 import { useShortcutLabel } from "../../hooks/useShortcuts"
 import { cn } from "../../lib/utils"
 
@@ -32,6 +33,7 @@ const COMMANDS = [
   { id: "toggle-sidebar", label: "Toggle sidebar", description: "Show or hide collections and history", icon: PanelLeft, shortcutId: "toggleSidebar", action: "toggleSidebar" },
   { id: "keyboard-shortcuts", label: "Keyboard shortcuts", description: "See every shortcut", icon: Keyboard, keywords: "?", shortcutId: "shortcutsHelp", action: "shortcuts" },
   { id: "new-folder", label: "New folder", description: "Create a folder at the top level", icon: FolderPlus, action: "newFolder" },
+  { id: "collapse-folders", label: TREE_TEXT.collapseAll, description: TREE_TEXT.collapseAllDescription, icon: ChevronsDownUp, keywords: "close fold tree", action: "collapseFolders" },
   { id: "run-collection", label: "Run requests", description: "Run every request in a folder with its tests", icon: ListChecks, action: "runCollection" },
   { id: "examples", label: "Request examples", description: "See the saved responses of the current request", icon: Bookmark, action: "examples" },
   { id: "mock-server", label: "Mock server", description: "Serve saved examples on a local port", icon: Server, action: "mockServer" },
