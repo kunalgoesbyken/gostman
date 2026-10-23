@@ -137,7 +137,10 @@ func (s *scanner) readFolder(directory, parentId string) *folderEntry {
 
 func (s *scanner) appendRequest(requests []*requestEntry, relative, folderId string) []*requestEntry {
 	content, err := s.disk.read(relative)
-	document, err := decodeFile(content, err, readRequest)
+	document, err := decodeFile(content, err, readRequestFile)
+	if isForeign(err) {
+		return requests
+	}
 	if err != nil {
 		s.report(relative, err)
 		return requests

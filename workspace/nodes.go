@@ -25,6 +25,7 @@ const (
 type fileError struct {
 	line    int
 	message string
+	foreign bool
 }
 
 func (e *fileError) Error() string {
@@ -32,6 +33,11 @@ func (e *fileError) Error() string {
 		return e.message
 	}
 	return fmt.Sprintf("line %d: %s", e.line, e.message)
+}
+
+func isForeign(err error) bool {
+	var located *fileError
+	return errors.As(err, &located) && located.foreign
 }
 
 func failAt(node *yaml.Node, message string) error {
@@ -146,7 +152,7 @@ func parseDocument(content []byte) (*yaml.Node, error) {
 	}
 	root := document.Content[0]
 	if root.Kind != yaml.MappingNode {
-		return nil, failAt(root, "expected a list of fields")
+		return nil, &fileError{line: root.Line, message: "expected a list of fields", foreign: true}
 	}
 	return root, nil
 }

@@ -17,8 +17,9 @@ var (
 		"graphqlQuery", "graphqlVariables", "grpcMethod", "grpcMessage", "grpcProtos", "mcpTool", "mcpArguments", "socketProtocol", "socketMessages", "vars", "options",
 		"extractors", "assertions", "preScript", "postScript", "examples", "timestamp",
 	}
-	authKeys   = []string{"type", "username", "password", "token", "key", "value", "in", "oauth2", "domain", "aws", "oauth1", "edgegrid", "jwt", "asap", "hawk"}
-	oauth2Keys = []string{
+	requestMarkers = []string{"method", "url"}
+	authKeys       = []string{"type", "username", "password", "token", "key", "value", "in", "oauth2", "domain", "aws", "oauth1", "edgegrid", "jwt", "asap", "hawk"}
+	oauth2Keys     = []string{
 		"grant", "authUrl", "tokenUrl", "clientId", "clientSecret", "scope", "username", "password",
 		"callbackUrl", "credentialsIn", "pkce", "headerPrefix", "accessToken", "refreshToken", "expiresAt",
 	}
@@ -282,6 +283,22 @@ func readRequest(root *yaml.Node) (requestDocument, error) {
 		Timestamp:        fields.text("timestamp"),
 	}
 	return document, failure
+}
+
+func isRequestDocument(root *yaml.Node) bool {
+	for i := 0; i+1 < len(root.Content); i += 2 {
+		if isKnownKey(requestMarkers, root.Content[i].Value) {
+			return true
+		}
+	}
+	return false
+}
+
+func readRequestFile(root *yaml.Node) (requestDocument, error) {
+	if !isRequestDocument(root) {
+		return requestDocument{}, &fileError{message: "not a request", foreign: true}
+	}
+	return readRequest(root)
 }
 
 func readRequestContent(root *yaml.Node) (requestContent, error) {
