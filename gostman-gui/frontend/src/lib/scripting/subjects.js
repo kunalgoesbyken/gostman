@@ -3,6 +3,7 @@ import { isPlainObject, parseJSON } from '../dataUtils'
 import { normalizeRequest } from '../request'
 import { parseJsonBody, textBody } from '../response'
 import { isSentRow, parseRows, serializeRows } from '../rows'
+import { SEND_TIMEOUT_MS } from './limits'
 
 const sentHeaders = (request) => (
   Object.fromEntries(parseRows(request.headers).filter(isSentRow).map((row) => [row.key, row.value]))
@@ -11,8 +12,17 @@ const sentHeaders = (request) => (
 const scriptBody = (request) => (request.bodyType === BODY_JSON ? parseJSON(request.body, request.body) : request.body)
 
 export function requestSubject(request) {
-  return { method: request.method, url: request.url, headers: sentHeaders(request), body: scriptBody(request) }
+  return {
+    name: request.name,
+    method: request.method,
+    url: request.url,
+    headers: sentHeaders(request),
+    body: scriptBody(request),
+    timeout: request.options?.timeoutMs ?? 0,
+  }
 }
+
+const editable = ({ method, url, headers, body, timeout }) => ({ method, url, headers, body, timeout })
 
 const lowerCased = (headers) => Object.fromEntries((headers || []).map((header) => [header.key.toLowerCase(), header.value]))
 
@@ -43,15 +53,20 @@ function editedBody(request, body) {
   return { body: JSON.stringify(body, null, 2), bodyType }
 }
 
+const milliseconds = (value) => Math.max(0, Math.trunc(Number(value)) || 0)
+
+const editedOptions = (request, timeout) => ({ options: { ...request.options, timeoutMs: milliseconds(timeout) } })
+
 export function applyRequestEdits(request, edited) {
-  const original = requestSubject(request)
-  if (!isPlainObject(edited) || isSame(original, edited)) return request
+  const original = editable(requestSubject(request))
+  if (!isPlainObject(edited) || isSame(original, editable(edited))) return request
   return {
     ...request,
     method: String(edited.method),
     url: String(edited.url),
     ...(isSame(original.headers, edited.headers) ? {} : { headers: editedHeaders(request, edited.headers || {}) }),
     ...(isSame(original.body, edited.body) ? {} : editedBody(request, edited.body ?? '')),
+    ...(original.timeout === edited.timeout ? {} : editedOptions(request, edited.timeout)),
   }
 }
 
@@ -69,5 +84,6 @@ export function scriptedRequest(target, library) {
     url: String(target.url ?? ''),
     headers: editedHeaders({ headers: '[]' }, target.headers || {}),
     ...editedBody({ bodyType: BODY_NONE }, target.body ?? ''),
+    options: { timeoutMs: Math.min(milliseconds(target.timeout), SEND_TIMEOUT_MS) },
   })
 }

@@ -283,6 +283,9 @@ func (t *translator) rooted(root string) bool {
 }
 
 func (t *translator) renderPath(node ast.Expression, path chain) string {
+	if supported, native := t.dialect.nativePath(path); native {
+		return t.keepNative(node, path.text(), supported, t.text(node))
+	}
 	if replacement, ok := t.property(node, path); ok {
 		t.translated++
 		return replacement
@@ -336,12 +339,22 @@ func (t *translator) renderRooted(call *ast.CallExpression, path chain) string {
 		return render(t, call)
 	}
 	args := t.renderArguments(call)
+	if supported, native := t.dialect.nativePath(path); native {
+		return t.keepNative(call, path.text()+"()", supported, t.text(call.Callee)+"("+strings.Join(args, ", ")+")")
+	}
 	if replacement, ok := t.callRule(call, path, args); ok {
 		t.translated++
 		return replacement
 	}
 	t.fail(call, messageScriptUnsupported, path.text()+"()")
 	return t.text(call.Callee) + "(" + strings.Join(args, ", ") + ")"
+}
+
+func (t *translator) keepNative(node ast.Node, label string, supported bool, kept string) string {
+	if !supported {
+		t.fail(node, messageScriptUnsupported, label)
+	}
+	return kept
 }
 
 func (t *translator) renderAliasCall(call *ast.CallExpression, path chain) string {

@@ -22,15 +22,19 @@ var brunoDialect = &dialect{
 	calls:    buildBrunoRules(),
 	specials: map[string]special{"bru.sendRequest": (*translator).renderBrunoSend, "bru.runRequest": (*translator).renderRunRequest},
 	scoped:   brunoScopedNames(),
+	native: map[string]map[string]bool{
+		"bru.cookies": setOf("get", "has", "one", "all", "count", "idx", "indexOf", "toObject", "toString", "each", "find", "filter", "map", "reduce", "add", "upsert", "remove", "delete", "clear", "jar"),
+	},
 	receivers: map[string]receiver{
 		requestReceiver: {
-			fields:  setOf("method", "url", "headers", "body"),
-			methods: keptMethods("getUrl", "setUrl", "getMethod", "setMethod", "getHeaders", "setHeaders", "getHeader", "setHeader", "getBody", "setBody"),
+			fields: setOf("method", "url", "headers", "body", "name", "timeout", "headerList"),
+			methods: setOf("getName", "getUrl", "setUrl", "getHost", "getPath", "getQueryString", "getMethod", "setMethod",
+				"getHeaders", "setHeaders", "getHeader", "setHeader", "deleteHeader", "deleteHeaders", "getBody", "setBody", "getTimeout", "setTimeout"),
 		},
 		responseRoot: {
-			fields:  setOf("status", "statusText", "headers", "body", "responseTime", "size", "url"),
-			methods: withRenames(keptMethods("getStatus", "getHeaders", "getHeader", "getBody", "getResponseTime"), map[string]string{"getStatusText": "res.statusText", "getUrl": "res.url"}),
-			query:   true,
+			fields:   setOf("status", "statusText", "headers", "body", "responseTime", "size", "url", "headerList"),
+			methods:  setOf("getStatus", "getStatusText", "getHeaders", "getHeader", "getBody", "setBody", "getResponseTime", "getUrl", "getSize"),
+			callable: true,
 		},
 	},
 }
@@ -42,34 +46,42 @@ var (
 
 func buildBrunoRules() map[string]callRule {
 	rules := map[string]callRule{
-		"bru.getFolderVar":             rename("env.get"),
-		"bru.getRequestVar":            rename("env.get"),
-		"bru.getAllEnvVars":            withoutArguments("env.all()"),
-		"bru.getAllVars":               withoutArguments("env.all()"),
-		"bru.getAllGlobalEnvVars":      withoutArguments("env.all()"),
-		"bru.setNextRequest":           rename("setNextRequest"),
-		"bru.runner.setNextRequest":    rename("setNextRequest"),
-		"bru.runner.skipRequest":       rename("skipRequest"),
-		"bru.runner.stopExecution":     rename("stopExecution"),
-		"bru.runner.iterationData.has": rename("env.has"),
-		"bru.runner.iterationData.get": iterationValue,
-		"bru.sleep":                    pause,
+		"bru.getFolderVar":                   rename("env.get"),
+		"bru.getRequestVar":                  rename("env.get"),
+		"bru.getProcessEnv":                  rename("env.get"),
+		"bru.getEnvName":                     withoutArguments("env.name"),
+		"bru.getRequestName":                 withoutArguments("req.name"),
+		"bru.interpolate":                    rename("env.interpolate"),
+		"bru.isSafeMode":                     withoutArguments("true"),
+		"bru.setNextRequest":                 rename("setNextRequest"),
+		"bru.runner.setNextRequest":          rename("setNextRequest"),
+		"bru.runner.skipRequest":             rename("skipRequest"),
+		"bru.runner.stopExecution":           rename("stopExecution"),
+		"bru.runner.iterationData.has":       rename("env.has"),
+		"bru.runner.iterationData.get":       iterationValue,
+		"bru.runner.iterationData.unset":     rename("env.unset"),
+		"bru.runner.iterationData.stringify": withoutArguments("JSON.stringify(env.all())"),
+		"bru.sleep":                          pause,
 	}
 	for _, family := range brunoVariableFamilies {
 		rules["bru.get"+family] = rename("env.get")
 		rules["bru.set"+family] = rename("env.set")
 		rules["bru.has"+family] = rename("env.has")
 		rules["bru.delete"+family] = rename("env.unset")
+		rules["bru.getAll"+family+"s"] = withoutArguments("env.all()")
+		rules["bru.deleteAll"+family+"s"] = withoutArguments("env.clear()")
 	}
 	return rules
 }
 
 func brunoScopedNames() map[string]bool {
-	names := setOf("bru.getFolderVar", "bru.getRequestVar", "bru.getAllVars", "bru.getAllGlobalEnvVars", "bru.runner.iterationData")
+	names := setOf("bru.getFolderVar", "bru.getRequestVar", "bru.getProcessEnv", "bru.runner.iterationData")
 	for _, family := range brunoScopedFamilies {
 		for _, verb := range []string{"get", "set", "has", "delete"} {
 			names["bru."+verb+family] = true
 		}
+		names["bru.getAll"+family+"s"] = true
+		names["bru.deleteAll"+family+"s"] = true
 	}
 	return names
 }
@@ -96,49 +108,25 @@ func setOf(names ...string) map[string]bool {
 	return set
 }
 
-func keptMethods(names ...string) map[string]string {
-	methods := make(map[string]string, len(names))
-	for _, name := range names {
-		methods[name] = ""
-	}
-	return methods
-}
-
-func withRenames(methods, renames map[string]string) map[string]string {
-	for name, replacement := range renames {
-		methods[name] = replacement
-	}
-	return methods
-}
-
 func (t *translator) receiver(root string) (receiver, bool) {
 	kind, found := t.dialect.receivers[root]
 	return kind, found && !t.declared[root]
 }
 
 func (t *translator) renderReceiver(call *ast.CallExpression, path chain, kind receiver) string {
-	args := t.renderArguments(call)
-	kept := t.text(call.Callee) + "(" + strings.Join(args, ", ") + ")"
+	kept := t.text(call.Callee) + "(" + strings.Join(t.renderArguments(call), ", ") + ")"
+	if !kind.supports(path) {
+		t.fail(call, messageScriptUnsupported, path.text()+"()")
+	}
+	return kept
+}
+
+func (r receiver) supports(path chain) bool {
 	if len(path.segments) == 0 {
-		if kind.query {
-			t.fail(call, messageScriptQuery, path.root)
-		}
-		return kept
+		return r.callable
 	}
 	member := path.segments[0]
-	if kind.fields[member] {
-		return kept
-	}
-	replacement, known := kind.methods[member]
-	switch {
-	case known && replacement == "":
-		return kept
-	case known && len(path.segments) == 1 && len(args) == 0:
-		t.translated++
-		return replacement
-	}
-	t.fail(call, messageScriptUnsupported, path.text()+"()")
-	return kept
+	return r.fields[member] || (len(path.segments) == 1 && r.methods[member])
 }
 
 func (t *translator) renderBrunoSend(call *ast.CallExpression) string {
@@ -167,7 +155,7 @@ func (t *translator) brunoRequestField(property ast.Property) (string, bool) {
 		return "", false
 	}
 	switch name {
-	case "url", "method", "headers":
+	case "url", "method", "headers", "timeout":
 		return name + ": " + t.render(keyed.Value), true
 	case "data":
 		return "body: " + t.render(keyed.Value), true

@@ -19,7 +19,7 @@ import { scriptedRequest } from './scripting/subjects'
 import { SECRETS_TEXT } from './secretsText'
 import { ENTRY_KINDS, exchangeEntry, scriptEntry, withActivity } from './timeline'
 import { promptNames, referenceTargets } from './variableScopes'
-import { useAppStore, variableTextFor } from '../store/appStore'
+import { findActiveEnvironment, useAppStore, variableTextFor } from '../store/appStore'
 
 const CONFIG_ERROR = 'config'
 const PROMPT_DECLINED = 'The request was not sent because the values it asks for were not provided.'
@@ -60,10 +60,13 @@ function createTrace() {
 
 async function runStage(stage, job, request, { send, trace, referenced }) {
   const variables = readVariables(request, referenced)
-  const run = await trace.timed(scriptEntry(stage), () => runInSandbox({ ...job, variables }, send))
+  const { cookies } = store()
+  const environment = findActiveEnvironment(store())?.name ?? ''
+  const run = await trace.timed(scriptEntry(stage), () => runInSandbox({ ...job, variables, cookies, environment }, send))
   if (isPlainObject(run.variables) && !isSame(variables, run.variables)) {
     store().mergeActiveVariables(scriptChanges(variables, run.variables))
   }
+  if (Array.isArray(run.cookies)) store().storeCookies(run.cookies)
   return { ...run, error: run.error ? `${stage}: ${run.error}` : '' }
 }
 

@@ -1,53 +1,28 @@
 import { expect } from 'chai'
+import { substitutePlaceholders, variableMap } from '../placeholders'
 import { evaluateAssertions } from './assertions'
+import { createBruno } from './bruno'
 import { createConsole, errorLine, printable } from './console'
+import { createRequest, createResponse, editedRequest } from './exchange'
 import { createFlow } from './flow'
 import { compileScript, describeFailure } from './scriptRuntime'
 import { createRequire } from './modules/require'
+import { createCookies } from './scriptCookies'
 import { createUtils } from './utils'
 import { createVisualizer } from './visualize'
 
 const storable = (value) => (value !== null && typeof value === 'object' ? JSON.stringify(value) : value)
 
-function createEnvironment(variables) {
+function createEnvironment(variables, environmentName) {
   return {
+    name: environmentName,
     get: (name) => variables[name],
     has: (name) => Object.hasOwn(variables, name),
     set: (name, value) => { variables[name] = storable(value) },
     unset: (name) => { delete variables[name] },
     all: () => ({ ...variables }),
-  }
-}
-
-const findKey = (headers, name) => (
-  Object.keys(headers).find((key) => key.toLowerCase() === String(name).toLowerCase())
-)
-
-function createRequest(source) {
-  const request = { ...source, headers: { ...source.headers } }
-  return Object.assign(request, {
-    getUrl: () => request.url,
-    setUrl: (url) => { request.url = url },
-    getMethod: () => request.method,
-    setMethod: (method) => { request.method = method },
-    getHeaders: () => request.headers,
-    setHeaders: (headers) => { request.headers = { ...headers } },
-    getHeader: (name) => request.headers[findKey(request.headers, name)],
-    setHeader: (name, value) => { request.headers[findKey(request.headers, name) || name] = String(value) },
-    getBody: () => request.body,
-    setBody: (body) => { request.body = body },
-  })
-}
-
-function createResponse(source) {
-  if (!source) return undefined
-  return {
-    ...source,
-    getStatus: () => source.status,
-    getHeaders: () => source.headers,
-    getHeader: (name) => source.headers[findKey(source.headers, name)],
-    getBody: () => source.body,
-    getResponseTime: () => source.responseTime,
+    clear: () => Object.keys(variables).forEach((key) => { delete variables[key] }),
+    interpolate: (text) => substitutePlaceholders(String(text), variableMap(variables)),
   }
 }
 
@@ -67,36 +42,26 @@ function createTestRunner(results) {
   return { test, settled: () => queue }
 }
 
-const editedRequest = ({ url, method, headers, body }) => ({ url, method, headers, body })
-
 async function sendRequest(target) {
   const send = globalThis.hostSend
   if (typeof send !== 'function') throw new Error('sendRequest is not available here.')
   return createResponse(JSON.parse(await send(JSON.stringify(target))))
 }
 
-export async function runJob({ script, assertions, request, response, variables, modules }) {
+export async function runJob({ script, assertions, request, response, variables, modules, cookies, environment: environmentName }) {
   const logs = []
   const tests = []
   const runner = createTestRunner(tests)
-  const scriptRequest = createRequest(request)
-  const environment = createEnvironment(variables)
+  const environment = createEnvironment(variables, environmentName ?? '')
+  const scriptRequest = createRequest(request, environment.interpolate)
+  const jar = createCookies(cookies, () => environment.interpolate(scriptRequest.url ?? ''))
   const flow = createFlow()
   let visualization = ''
-  const legacy = {
-    getVar: environment.get,
-    setVar: environment.set,
-    getEnvVar: environment.get,
-    setEnvVar: environment.set,
-    sleep: (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)),
-    sendRequest,
-    runner: flow.api,
-  }
   const api = {
     req: scriptRequest,
     res: createResponse(response),
     env: environment,
-    bru: legacy,
+    bru: createBruno({ environment, flow: flow.api, request: scriptRequest, cookies: jar.api, sendRequest }),
     test: runner.test,
     expect,
     console: createConsole(logs),
@@ -126,5 +91,6 @@ export async function runJob({ script, assertions, request, response, variables,
     request: editedRequest(scriptRequest),
     flow: flow.state,
     visualization,
+    cookies: jar.changes,
   }
 }

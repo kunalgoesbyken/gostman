@@ -9,9 +9,9 @@ import (
 type special func(t *translator, call *ast.CallExpression) string
 
 type receiver struct {
-	fields  map[string]bool
-	methods map[string]string
-	query   bool
+	fields   map[string]bool
+	methods  map[string]bool
+	callable bool
 }
 
 type dialect struct {
@@ -26,6 +26,7 @@ type dialect struct {
 	retired    map[string]bool
 	implicit   map[string]string
 	receivers  map[string]receiver
+	native     map[string]map[string]bool
 }
 
 func (d *dialect) responsePath(path chain) (string, bool) {
@@ -33,4 +34,18 @@ func (d *dialect) responsePath(path chain) (string, bool) {
 		return "", false
 	}
 	return strings.Join(path.segments[1:], "."), true
+}
+
+func (d *dialect) nativePath(path chain) (supported, native bool) {
+	if len(path.segments) == 0 {
+		return false, false
+	}
+	members, native := d.native[path.root+"."+path.segments[0]]
+	switch {
+	case !native:
+		return false, false
+	case len(path.segments) == 1:
+		return true, true
+	}
+	return len(path.segments) == 2 && members[path.segments[1]], true
 }

@@ -21,8 +21,10 @@ var (
 		roots:    map[string]bool{postmanRoot: true, legacyRoot: true},
 		response: postmanRoot + ".response",
 		properties: map[string]string{
-			"pm.request.method": "req.method",
-			"pm.request.url":    "req.url",
+			"pm.request.method":   "req.method",
+			"pm.request.url":      "req.url",
+			"pm.environment.name": "env.name",
+			"pm.info.requestName": "req.name",
 		},
 		calls:    buildCallRules(),
 		specials: map[string]special{"pm.sendRequest": (*translator).renderSendRequest},
@@ -57,6 +59,8 @@ func buildCallRules() map[string]callRule {
 			rules["pm."+scope+"."+name] = rename(environmentAccess + "." + name)
 		}
 		rules["pm."+scope+".toObject"] = withoutArguments(environmentAccess + ".all()")
+		rules["pm."+scope+".clear"] = withoutArguments(environmentAccess + ".clear()")
+		rules["pm."+scope+".replaceIn"] = rename(environmentAccess + ".interpolate")
 	}
 	for _, name := range []string{"get", "has"} {
 		rules["pm.iterationData."+name] = rename(environmentAccess + "." + name)

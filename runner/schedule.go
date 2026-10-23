@@ -37,7 +37,7 @@ func (s *session) spawn() (*session, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &session{scripts: scripts, policy: s.policy, variables: variables{}, common: s.common, library: s.library, hosts: s.hosts, modules: s.modules}, nil
+	return &session{scripts: scripts, policy: s.policy, variables: variables{}, environment: s.environment, common: s.common, library: s.library, hosts: s.hosts, modules: s.modules}, nil
 }
 
 func (s *session) crew(wanted int) []*session {

@@ -11,7 +11,7 @@ gostman import postman_collection.json --out api
 gostman run api
 ```
 
-- Requests, folders, environments, auth, examples and scripts come across. Common Postman script calls such as `pm.test`, `pm.expect`, `pm.environment.set` and `pm.response.json()` are rewritten to Gostman's script API, and so are Bruno calls such as `bru.setEnvVar`, `bru.getVar`, `bru.runRequest`, `bru.sendRequest` and `bru.sleep`. The import summary lists anything that was left out or needs a look.
+- Requests, folders, environments, auth, examples and scripts come across. Common Postman script calls such as `pm.test`, `pm.expect`, `pm.environment.set` and `pm.response.json()` are rewritten to Gostman's script API, and so are Bruno calls such as `bru.setEnvVar`, `bru.getVar`, `bru.interpolate`, `bru.runRequest`, `bru.sendRequest` and `bru.sleep`. Bruno's `res("path")` queries and `bru.cookies` work as written. The import summary lists anything that was left out or needs a look.
 - Tokens and cookie values are never imported, and imports never switch off TLS verification. Sign in again where a request needs a token.
 - Export back with `gostman export api --format bruno --out bruno-api`, or `openapi`, `curl` and `har`.
 

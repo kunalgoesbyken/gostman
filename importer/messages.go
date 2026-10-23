@@ -36,7 +36,6 @@ const (
 	messageScriptOption        = "The sendRequest option %q is not supported and was left out."
 	messageScriptModule        = "require(%q) is not available in Gostman scripts and was left as is."
 	messageScriptModuleDynamic = "require with a computed name cannot be checked and was left as is."
-	messageScriptQuery         = "%s(...) response queries have no Gostman equivalent and were left as is. Read the value from res.body instead."
 	messageScriptRequestPath   = "The request path given to bru.runRequest is not a literal and was left as is."
 	messageScriptRunRequest    = "bru.runRequest(%q) now sends the saved request named %q."
 	messageScriptLine          = "%s %s, %s, line %d: %s"

@@ -98,10 +98,20 @@ func mentions(script, api string) bool {
 			return false
 		}
 		at := offset + index
-		if at == 0 || !isIdentifierByte(script[at-1]) {
+		if (at == 0 || !isIdentifierByte(script[at-1])) && !startsNative(script[at:]) {
 			return true
 		}
 		offset = at + len(api)
+	}
+	return false
+}
+
+func startsNative(text string) bool {
+	for prefix := range brunoDialect.native {
+		rest, found := strings.CutPrefix(text, prefix)
+		if found && (rest == "" || !isIdentifierByte(rest[0])) {
+			return true
+		}
 	}
 	return false
 }

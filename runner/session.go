@@ -15,9 +15,8 @@ const (
 )
 
 type Session struct {
-	state       *session
-	environment string
-	resolved    map[string]string
+	state    *session
+	resolved map[string]string
 }
 
 type Outcome struct {
@@ -56,12 +55,12 @@ func (s *Session) Enter(environments []Environment, name string, overrides map[s
 	starting.override(resolved)
 	s.state.variables = starting
 	s.resolved = resolved
-	s.environment = environment.Name
+	s.state.environment = environment.Name
 	return nil
 }
 
 func (s *Session) Environment() string {
-	return s.environment
+	return s.state.environment
 }
 
 func (s *Session) Set(overrides map[string]string) {
@@ -130,7 +129,7 @@ func (s *Session) Run(ctx context.Context, stored Collection, options Options, o
 	results := s.state.runAll(ctx, planned, options, observe)
 	report := Report{
 		Version:     ReportVersion,
-		Environment: s.environment,
+		Environment: s.state.environment,
 		StartedAt:   started.UTC(),
 		DurationMs:  time.Since(started).Milliseconds(),
 		Summary:     summarize(results, len(planned.requests)*options.iterationCount()),

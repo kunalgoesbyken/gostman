@@ -93,7 +93,7 @@ const restoreEnvironments = (data) => {
     : [createEnvironment(DEFAULT_ENVIRONMENT_NAME, data.variables || EMPTY_VARIABLES)]
 }
 
-const findActiveEnvironment = (state) => (
+export const findActiveEnvironment = (state) => (
   state.environments.find((environment) => environment.id === state.activeEnvironmentId) || state.environments[0]
 )
 

@@ -8,12 +8,25 @@ const IPV4_PARTS = 4
 const OCTET_MAX = 255
 const OCTET_DIGITS = /^\d{1,3}$/
 const UNRESOLVED = '{'
+const QUERY_START = '?'
+const FRAGMENT_START = '#'
+const PATH_END = [QUERY_START, FRAGMENT_START]
+const ROOT_PATH = '/'
+const SECURE_SCHEMES = ['https', 'wss']
+
+const firstIndexOf = (text, marks) => Math.min(text.length, ...marks.map((mark) => text.indexOf(mark)).filter((index) => index >= 0))
+
+function splitAddress(address) {
+  const text = address.trim()
+  const schemeEnd = text.indexOf(SCHEME_SEPARATOR)
+  const scheme = schemeEnd >= 0 ? text.slice(0, schemeEnd).toLowerCase() : ''
+  const rest = schemeEnd >= 0 ? text.slice(schemeEnd + SCHEME_SEPARATOR.length) : text
+  const authorityEnd = firstIndexOf(rest, AUTHORITY_END)
+  return { scheme, authority: rest.slice(0, authorityEnd), tail: rest.slice(authorityEnd) }
+}
 
 function authorityOf(address) {
-  const text = address.trim()
-  const rest = text.includes(SCHEME_SEPARATOR) ? text.slice(text.indexOf(SCHEME_SEPARATOR) + SCHEME_SEPARATOR.length) : text
-  const ends = AUTHORITY_END.map((mark) => rest.indexOf(mark)).filter((index) => index >= 0)
-  const authority = ends.length > 0 ? rest.slice(0, Math.min(...ends)) : rest
+  const { authority } = splitAddress(address)
   return authority.slice(authority.lastIndexOf('@') + 1)
 }
 
@@ -28,6 +41,14 @@ export function hostOf(address) {
   const authority = authorityOf(address)
   const host = authority.startsWith('[') ? authority.slice(1, authority.indexOf(']')) : authority.split(':')[0]
   return host.toLowerCase()
+}
+
+export function addressParts(address) {
+  const { scheme, tail } = splitAddress(address)
+  const pathEnd = firstIndexOf(tail, PATH_END)
+  const rest = tail.slice(pathEnd)
+  const query = rest.startsWith(QUERY_START) ? rest.slice(1, firstIndexOf(rest, [FRAGMENT_START])) : ''
+  return { secure: SECURE_SCHEMES.includes(scheme), host: hostOf(address), path: tail.slice(0, pathEnd) || ROOT_PATH, query }
 }
 
 const isOctet = (part) => OCTET_DIGITS.test(part) && Number(part) <= OCTET_MAX

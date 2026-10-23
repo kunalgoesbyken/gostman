@@ -20,32 +20,36 @@ const (
 )
 
 type session struct {
-	scripts   *sandbox.Sandbox
-	policy    engine.Policy
-	variables variables
-	common    *shared
-	library   []Request
-	hosts     []string
-	modules   map[string]string
+	scripts     *sandbox.Sandbox
+	policy      engine.Policy
+	variables   variables
+	environment string
+	common      *shared
+	library     []Request
+	hosts       []string
+	modules     map[string]string
 }
 
 type job struct {
-	Script     string            `json:"script"`
-	Assertions string            `json:"assertions"`
-	Request    json.RawMessage   `json:"request"`
-	Response   json.RawMessage   `json:"response,omitempty"`
-	Variables  variables         `json:"variables"`
-	Modules    map[string]string `json:"modules,omitempty"`
+	Script      string              `json:"script"`
+	Assertions  string              `json:"assertions"`
+	Request     json.RawMessage     `json:"request"`
+	Response    json.RawMessage     `json:"response,omitempty"`
+	Variables   variables           `json:"variables"`
+	Modules     map[string]string   `json:"modules,omitempty"`
+	Cookies     []engine.CookieInfo `json:"cookies"`
+	Environment string              `json:"environment"`
 }
 
 type stageRun struct {
-	Tests     []Check         `json:"tests"`
-	Logs      []LogLine       `json:"logs"`
-	Error     string          `json:"error"`
-	Variables variables       `json:"variables"`
-	Request   json.RawMessage `json:"request"`
-	Flow      flow            `json:"flow"`
-	Visual    string          `json:"visualization"`
+	Tests     []Check             `json:"tests"`
+	Logs      []LogLine           `json:"logs"`
+	Error     string              `json:"error"`
+	Variables variables           `json:"variables"`
+	Request   json.RawMessage     `json:"request"`
+	Flow      flow                `json:"flow"`
+	Visual    string              `json:"visualization"`
+	Cookies   []engine.CookieInfo `json:"cookies"`
 }
 
 type exchange struct {
@@ -89,8 +93,13 @@ func (s *session) runStage(ctx context.Context, stage string, work job, request 
 	before := s.scoped(request)
 	work.Variables = before
 	work.Modules = s.modules
+	work.Cookies = s.common.cookieList()
+	work.Environment = s.environment
 	var run stageRun
 	if err := s.scripts.IsolatedWith(s.bridge(ctx), "runJob", &run, work); err != nil {
+		return stageRun{Error: stage + ": " + err.Error()}
+	}
+	if err := s.storeCookies(run.Cookies); err != nil {
 		return stageRun{Error: stage + ": " + err.Error()}
 	}
 	if run.Variables != nil {
