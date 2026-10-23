@@ -1,3 +1,4 @@
+import { docPath } from "../../docs/manifest"
 import { STATES } from "./comparisonData"
 import { ComparisonTable } from "./ComparisonTable"
 import { SplitHeading } from "./SplitHeading"
@@ -6,7 +7,7 @@ import { StatusGlyph } from "./StatusGlyph"
 function Legend() {
   return (
     <ul className="mb-6 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground" aria-label="Legend">
-      {["included", "partial"].map((state) => (
+      {Object.keys(STATES).map((state) => (
         <li key={state} className="flex items-center gap-2">
           <StatusGlyph state={state} />
           {STATES[state]}
@@ -27,7 +28,14 @@ export function ComparisonSection() {
             className="text-3xl font-semibold tracking-tight md:text-5xl [text-wrap:balance]"
           />
           <p className="mt-5 leading-relaxed text-muted-foreground">
-            Short answers about Postman and Bruno. Plans change, so confirm on their pages before you decide.
+            Short answers about Postman and Bruno, taken from their public pricing and documentation in October 2026. Plans change, so confirm on their pages before you decide.
+          </p>
+          <p className="mt-3 leading-relaxed text-muted-foreground">
+            Moving from Bruno?{" "}
+            <a href={docPath("coming-from-bruno")} className="text-foreground underline underline-offset-4 hover:text-primary">
+              Coming from Bruno
+            </a>{" "}
+            covers importing collections, what happens to scripts and the CLI flags.
           </p>
         </div>
 

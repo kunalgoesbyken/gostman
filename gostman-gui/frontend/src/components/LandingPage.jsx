@@ -36,7 +36,7 @@ const starCount = (value) => (Number.isFinite(value) ? value : null)
 
 const REPOSITORY_API_URL = `https://api.github.com/repos/${REPOSITORY}`
 
-const HIGHLIGHTS = ["No account", "Collections stay on your machine", "Open source"]
+const HIGHLIGHTS = ["Open source, MIT licence", "Collections stay on your machine", "Share through Git or a link"]
 
 const SECTION_LINKS = [
   { href: "#features", label: "Features" },
@@ -293,11 +293,11 @@ export function LandingPage({ onGetStarted }) {
               <div className="text-center space-y-6">
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.1] [text-wrap:balance]">
                   <span className="intro block">Test any API.</span>
-                  <span className="intro block mt-2 text-muted-foreground" style={introStep(1)}>No account. No cloud.</span>
+                  <span className="intro block mt-2 text-muted-foreground" style={introStep(1)}>No account. No paid tier.</span>
                 </h1>
 
                 <p className="intro text-lg md:text-xl text-muted-foreground/90 max-w-2xl mx-auto leading-relaxed" style={introStep(2)}>
-                  Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. One collection for you, your CI pipeline and your coding agent, kept as files on your machine.
+                  Gostman is an open source client for REST, GraphQL, gRPC and WebSocket that keeps your collections as files on your machine. Tests, a command line for CI, a mock server and sharing with your team are all in the free download.
                 </p>
 
                 <CallToActions onGetStarted={onGetStarted} className="intro pt-6" style={introStep(3)} />

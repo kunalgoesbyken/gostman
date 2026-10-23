@@ -15,7 +15,7 @@ gostman run api
 - Tokens and cookie values are never imported, and imports never switch off TLS verification. Sign in again where a request needs a token.
 - Export back with `gostman export api --format bruno --out bruno-api`, or `openapi`, `curl` and `har`.
 
-Reference: [Import, export and OpenAPI specs](import-export-and-specs.md).
+Reference: [Import, export and OpenAPI specs](import-export-and-specs.md). Moving from Bruno: [Coming from Bruno](coming-from-bruno.md).
 
 ## Work on a frontend before the backend exists
 

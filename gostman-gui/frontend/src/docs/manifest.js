@@ -1,7 +1,12 @@
 export const docSections = [
   {
     title: "Start",
-    docs: [{ file: "README.md" }, { file: "getting-started.md" }, { file: "free-features.md", comparison: true }],
+    docs: [
+      { file: "README.md" },
+      { file: "getting-started.md" },
+      { file: "free-features.md", comparison: true },
+      { file: "coming-from-bruno.md" },
+    ],
   },
   {
     title: "Learn",

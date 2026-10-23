@@ -21,6 +21,6 @@ Gostman has no accounts, so it has no hosted collaboration, single sign-on or cl
 
 ## How the comparison was made
 
-The rows for Postman and Bruno come from their public pricing and documentation pages. Plans change, so check the current [Postman pricing](https://www.postman.com/pricing/) and [Bruno pricing](https://www.usebruno.com/pricing) before you decide.
+The rows for Postman and Bruno come from their public pricing and documentation pages. Plans change, so check the current [Postman pricing](https://www.postman.com/pricing/) and [Bruno pricing](https://www.usebruno.com/pricing) before you decide. Moving a collection over from Bruno is covered in [Coming from Bruno](coming-from-bruno.md).
 
 ## Compare feature by feature

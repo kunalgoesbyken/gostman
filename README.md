@@ -1,7 +1,7 @@
 <div align="center">
   <img src="gostman-gui/build/appicon.png" alt="Gostman" width="96" height="96">
   <h1>Gostman</h1>
-  <p>An API client for REST, GraphQL, gRPC and WebSocket that you, your CI pipeline and your coding agent share. Desktop app, web app and command line, no account.</p>
+  <p>An open source API client for REST, GraphQL, gRPC and WebSocket. Desktop app, web app and command line, with no account and no paid tier.</p>
 
   [![CI](https://github.com/kunalgoesbyken/gostman/actions/workflows/ci.yml/badge.svg)](https://github.com/kunalgoesbyken/gostman/actions/workflows/ci.yml)
   [![Release](https://img.shields.io/github/v/release/kunalgoesbyken/gostman)](https://github.com/kunalgoesbyken/gostman/releases/latest)
@@ -31,11 +31,15 @@ Gostman is a native desktop application built with Go and [Wails](https://wails.
 Both are good tools. Gostman is for people who want the paid-tier workflow without a paid tier or an account.
 
 - **Nothing to sign in to.** Collections are plain YAML files in a folder you can commit. The desktop app and the browser version both work without an account.
-- **No tiers.** Data-driven runs, parallel runs, HTML reports, secret managers (Vault, AWS, Azure, Google Cloud) and the Git panel are all in the download. Bruno documents several of these under its [Pro and Ultimate plans](https://www.usebruno.com/pricing), and Postman lists custom data files in the Collection Runner on its [paid plans](https://www.postman.com/pricing/).
-- **Small.** The Windows installer is about 10 MB and the app takes about 20 MB on disk. The [benchmark script](benchmarks/README.md) lets you measure it on your own machine.
-- **One collection for you, CI and your coding agent.** The same files run in the app, with `gostman run` in CI, and through the built-in MCP server.
+- **No tiers.** Data-driven runs, parallel runs, HTML reports, secret managers (Vault, AWS, Azure, Google Cloud), the Git panel and any number of collections are all in the download. Bruno documents several of these under its [Pro and Ultimate plans](https://www.usebruno.com/pricing), and Postman lists custom data files in the Collection Runner on its [paid plans](https://www.postman.com/pricing/).
+- **Sharing without Git.** Send a folder to a teammate as an encrypted link or file that is built on your machine and never uploaded.
+- **More in the same download.** Load testing, Socket.IO, MQTT, GraphQL subscriptions, MCP servers, HAR import, traffic capture, a secret scanner and a mock server, plus a command line that is one binary with no Node.js to install.
 
-Prices and plans change, so check their pages before you decide. Gostman has no accounts, so it has no hosted collaboration, SSO or cloud monitors. A side-by-side table is on [gostman.com](https://gostman.com).
+Prices and plans change, so check their pages before you decide. Gostman has no accounts, so it has no hosted collaboration, SSO or cloud monitors, and it has no VS Code extension. A side-by-side table is on [gostman.com](https://gostman.com). Moving from Bruno? [Coming from Bruno](docs/coming-from-bruno.md) covers importing a collection, its scripts and the `bru run` flags.
+
+### Will Gostman add a paid tier?
+
+Gostman has no paid tier, no account and no licence key, and every feature is in the free download. It is released under the [MIT licence](LICENSE), so the published code stays free to use, change and fork whatever happens to the project.
 
 ## Quick start
 
