@@ -11,7 +11,7 @@ inputs:
     description: Workspace folder or Gostman export file to run.
     required: true
   version:
-    description: Release to install, for example 1.5.0. Defaults to the latest release.
+    description: Release to install, for example 1.6.0. Defaults to the latest release.
     required: false
     default: latest
   environment:
