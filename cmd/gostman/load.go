@@ -42,6 +42,7 @@ type loading struct {
 	maxErrors   string
 	config      loadtest.Config
 	limits      loadtest.Thresholds
+	network     *engine.Network
 	positional  []string
 }
 
@@ -68,13 +69,18 @@ func parseLoading(arguments []string) (loading, error) {
 	flags.StringVar(&parsed.reporter, "reporter", report.FormatText, "")
 	flags.DurationVar(&parsed.limits.MaxP95, "max-p95", 0, "")
 	flags.StringVar(&parsed.maxErrors, "max-error-rate", "", "")
+	networking := networkFlags(flags)
 
 	positional, err := parseInterspersed(flags, arguments)
 	if err != nil {
 		return parsed, err
 	}
 	parsed.positional = positional
-	return parsed, parsed.finish()
+	if err := parsed.finish(); err != nil {
+		return parsed, err
+	}
+	parsed.network, err = networking.network()
+	return parsed, err
 }
 
 func (l *loading) finish() error {
@@ -191,7 +197,7 @@ func (l loading) execute(stdout, stderr io.Writer) int {
 	if err != nil {
 		return complain(stderr, err)
 	}
-	client, err := agent.NewClient(engine.Policy{})
+	client, err := agent.NewClient(engine.Policy{Network: l.network})
 	if err != nil {
 		return complain(stderr, err)
 	}

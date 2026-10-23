@@ -30,6 +30,7 @@ type sending struct {
 	view        agent.View
 	timeoutMs   int
 	insecure    bool
+	network     *engine.Network
 	positional  []string
 }
 
@@ -62,6 +63,7 @@ func parseSending(arguments []string) (sending, error) {
 	flags.BoolVar(&parsed.view.IncludeHeaders, "include-headers", false, "")
 	flags.IntVar(&parsed.timeoutMs, "timeout", 0, "")
 	flags.BoolVar(&parsed.insecure, "insecure", false, "")
+	networking := networkFlags(flags)
 
 	positional, err := parseInterspersed(flags, arguments)
 	switch {
@@ -77,7 +79,8 @@ func parseSending(arguments []string) (sending, error) {
 		return parsed, fmt.Errorf("--max-body takes a number of bytes between 1 and %d", agent.HighestBodyBytes)
 	}
 	parsed.positional = positional
-	return parsed, nil
+	parsed.network, err = networking.network()
+	return parsed, err
 }
 
 func namesSavedRequest(positional []string) bool {
@@ -119,7 +122,7 @@ func (s sending) prepare() (*agent.Client, runner.Listed, error) {
 	if err != nil {
 		return nil, runner.Listed{}, err
 	}
-	client, err := agent.NewClient(engine.Policy{})
+	client, err := agent.NewClient(engine.Policy{Network: s.network})
 	if err != nil {
 		return nil, runner.Listed{}, err
 	}

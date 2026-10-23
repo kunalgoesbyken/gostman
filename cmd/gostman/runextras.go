@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/kunalgoesbyken/gostman/runner"
-	"github.com/kunalgoesbyken/gostman/runner/report"
 )
 
 type listFlag []string
@@ -62,7 +61,7 @@ func (e runExtras) validate(options runner.Options) error {
 	return nil
 }
 
-func (e runExtras) apply(options *runner.Options, reporter string) error {
+func (e runExtras) apply(options *runner.Options, capture bool) error {
 	if e.dataFile != "" {
 		rows, err := runner.LoadData(e.dataFile)
 		if err != nil {
@@ -81,7 +80,7 @@ func (e runExtras) apply(options *runner.Options, reporter string) error {
 			}
 		}
 	}
-	options.Capture = reporter == report.FormatHTML
+	options.Capture = capture
 	options.StreamTimeout = time.Duration(e.streamSeconds) * time.Second
 	return nil
 }

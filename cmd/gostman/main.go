@@ -68,10 +68,29 @@ run
   --only <name>         run only requests with this name, id or Folder/Name
                         (repeatable)
   --env-file <file>     read KEY=value lines as variables (--var wins)
-  --reporter <format>   text, json, junit or html (default text)
-  --output <file>       write the report to this file and print text to stdout
+  --reporter <format[:file]>
+                        text, json, junit or html (default text); with :file
+                        the report goes to that file (repeatable, at most one
+                        without a file, which prints to stdout)
+  --output <file>       write the report given without a file to this file
+                        When every report goes to a file, the text summary is
+                        printed to stdout.
   --redact              replace variable values and credentials in the report
                         with {{name}}
+  --cacert <file>       trust the PEM certificates in this file as well as the
+                        system's (repeatable)
+  --client-cert <file> --client-key <file>
+                        present this PEM certificate and key to every host
+  --client-cert <host=cert,key>
+                        present this PEM certificate and key to this host only;
+                        *.example.com covers subdomains (repeatable)
+  --proxy <url>         send through this http, https or socks5 proxy instead
+                        of the one in HTTPS_PROXY, HTTP_PROXY and NO_PROXY,
+                        which are used otherwise
+  --noproxy <hosts>     comma-separated hosts that skip --proxy; *.example.com
+                        matches subdomains
+                        These also apply to OAuth 2 token requests and to
+                        sendRequest in scripts.
 
 send
   Send one request through the same pipeline and print a JSON summary followed
@@ -83,6 +102,7 @@ send
   --workspace <path>    workspace folder or export file (default: the current
                         folder when it is a workspace)
   --env, --var, --var-from-env, --timeout, --insecure   as for run
+  --cacert, --client-cert, --client-key, --proxy, --noproxy   as for run
   -H, --header <name: value>  add a header to an unsaved request (repeatable)
   -d, --data <body>     body of an unsaved request
   --select <jsonpath>   print only this part of a JSON response body
@@ -107,6 +127,7 @@ load
   --ramp <time>         start the workers one after another over this time
   --fail-status <code>  count this status and above as failed (default 500)
   --env, --var, --var-from-env, --timeout, --insecure   as for send
+  --cacert, --client-cert, --client-key, --proxy, --noproxy   as for run
   --reporter <format>   text or json (default text)
   --max-p95 <time>      exit 1 when the 95th percentile latency is higher
   --max-error-rate <p>  exit 1 when more than p percent fail, for example 1%

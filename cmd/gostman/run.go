@@ -13,7 +13,6 @@ import (
 
 	"github.com/kunalgoesbyken/gostman/agent"
 	"github.com/kunalgoesbyken/gostman/runner"
-	"github.com/kunalgoesbyken/gostman/runner/report"
 )
 
 type overrides map[string]string
@@ -32,12 +31,11 @@ func (o overrides) Set(pair string) error {
 }
 
 type invocation struct {
-	path     string
-	options  runner.Options
-	reporter string
-	output   string
-	redact   bool
-	extras   runExtras
+	path    string
+	options runner.Options
+	reports []reporterSpec
+	redact  bool
+	extras  runExtras
 }
 
 func parseInterspersed(flags *flag.FlagSet, arguments []string) ([]string, error) {
@@ -57,6 +55,8 @@ func parseInterspersed(flags *flag.FlagSet, arguments []string) ([]string, error
 func parseInvocation(arguments []string) (invocation, error) {
 	parsed := invocation{options: runner.Options{Variables: map[string]string{}}}
 	var delayMs, timeoutMs int
+	var reporters reporterFlags
+	var output string
 
 	flags := flag.NewFlagSet("run", flag.ContinueOnError)
 	flags.SetOutput(io.Discard)
@@ -67,10 +67,11 @@ func parseInvocation(arguments []string) (invocation, error) {
 	flags.IntVar(&delayMs, "delay", 0, "")
 	flags.IntVar(&timeoutMs, "timeout", 0, "")
 	flags.BoolVar(&parsed.options.Insecure, "insecure", false, "")
-	flags.StringVar(&parsed.reporter, "reporter", report.FormatText, "")
-	flags.StringVar(&parsed.output, "output", "", "")
+	flags.Var(&reporters, "reporter", "")
+	flags.StringVar(&output, "output", "", "")
 	flags.BoolVar(&parsed.redact, "redact", false, "")
 	parsed.extras.register(flags, &parsed.options)
+	networking := networkFlags(flags)
 
 	positional, err := parseInterspersed(flags, arguments)
 	switch {
@@ -78,15 +79,20 @@ func parseInvocation(arguments []string) (invocation, error) {
 		return parsed, err
 	case len(positional) != 1:
 		return parsed, errors.New("name exactly one export file or workspace folder to run")
-	case !report.Supports(parsed.reporter):
-		return parsed, fmt.Errorf("unknown reporter %q; choose %s", parsed.reporter, strings.Join(report.Formats, ", "))
 	case delayMs < 0 || timeoutMs < 0:
 		return parsed, errors.New("--delay and --timeout take a number of milliseconds, zero or more")
+	}
+	parsed.reports, err = reporters.resolve(output)
+	if err != nil {
+		return parsed, err
 	}
 	if err := parsed.extras.validate(parsed.options); err != nil {
 		return parsed, err
 	}
-	if err := parsed.extras.apply(&parsed.options, parsed.reporter); err != nil {
+	if parsed.options.Network, err = networking.network(); err != nil {
+		return parsed, err
+	}
+	if err := parsed.extras.apply(&parsed.options, capturesExchanges(parsed.reports)); err != nil {
 		return parsed, err
 	}
 	if err := parsed.options.CheckIterations(); err != nil {
@@ -96,26 +102,6 @@ func parseInvocation(arguments []string) (invocation, error) {
 	parsed.options.Delay = time.Duration(delayMs) * time.Millisecond
 	parsed.options.Timeout = time.Duration(timeoutMs) * time.Millisecond
 	return parsed, nil
-}
-
-func (i invocation) reporters(stdout *os.File, file io.Writer) ([]report.Reporter, error) {
-	progress := report.NewText(stdout, report.SupportsColor(stdout))
-	if file == nil && i.reporter == report.FormatText {
-		return []report.Reporter{progress}, nil
-	}
-	if file == nil {
-		chosen, err := report.New(i.reporter, stdout)
-		return []report.Reporter{chosen}, err
-	}
-	chosen, err := report.New(i.reporter, file)
-	return []report.Reporter{progress, chosen}, err
-}
-
-func (i invocation) openOutput() (*os.File, error) {
-	if i.output == "" {
-		return nil, nil
-	}
-	return os.Create(i.output)
 }
 
 func complain(stderr io.Writer, err error) int {
@@ -147,19 +133,12 @@ func (i invocation) pipeline() func(context.Context, runner.Collection, runner.O
 }
 
 func (i invocation) execute(stored runner.Collection, stdout, stderr *os.File) int {
-	file, err := i.openOutput()
+	opened, err := openReports(i.reports, stdout)
 	if err != nil {
 		return complain(stderr, err)
 	}
-	var destination io.Writer
-	if file != nil {
-		defer file.Close()
-		destination = file
-	}
-	reporters, err := i.reporters(stdout, destination)
-	if err != nil {
-		return complain(stderr, err)
-	}
+	defer opened.close()
+	reporters := opened.reporters
 
 	ctx, release := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer release()

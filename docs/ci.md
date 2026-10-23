@@ -33,6 +33,33 @@ gostman run api --env CI --var-from-env API_TOKEN --redact
 
 With `--output`, the report goes to the file and the text summary is still printed.
 
+To write several reports in one run, repeat `--reporter` as `format:file`:
+
+```bash
+gostman run api --reporter text --reporter junit:report.xml --reporter html:report.html
+```
+
+At most one reporter can go without a file, and it prints to stdout. When every report goes to a file, the text summary is printed.
+
+## Proxies and certificates
+
+Behind a corporate proxy or in front of an API that needs a client certificate, pass the files to `run`, `send` or `load`:
+
+```bash
+gostman run api --cacert corp-ca.pem --client-cert client.pem --client-key client-key.pem \
+  --proxy http://proxy.corp.example:3128 --noproxy localhost,*.internal.example.com
+```
+
+| Flag | Effect |
+| --- | --- |
+| `--cacert <file>` | trusts the PEM certificates in the file as well as the system's (repeatable) |
+| `--client-cert <file> --client-key <file>` | presents this PEM certificate to every host |
+| `--client-cert <host>=<cert>,<key>` | presents it to that host only; `*.example.com` covers subdomains (repeatable) |
+| `--proxy <url>` | sends through this `http`, `https` or `socks5` proxy |
+| `--noproxy <hosts>` | comma-separated hosts that skip `--proxy` |
+
+Without `--proxy`, the `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY` variables of the job are used. OAuth 2 token requests and `sendRequest` in scripts go through the same proxy and certificates. Keys must be unencrypted PEM; convert a `.p12` or `.pfx` file with `openssl pkcs12 -in client.p12 -nodes -out client.pem`. Write certificates from CI secrets to files at the start of the job, not into the repository. A missing file or one without PEM data exits 2 before anything is sent.
+
 ## GitHub Actions
 
 The composite action at the root of this repository installs the CLI and runs a collection.
@@ -125,21 +152,22 @@ A non-zero exit code fails the stage, and `post { always }` still publishes the 
 
 ## Docker
 
-The repository has a `Dockerfile` that builds a static `gostman` into a distroless image that runs as a non-root user. No secrets are baked in.
+New releases publish `ghcr.io/kunalgoesbyken/gostman` for `linux/amd64` and `linux/arm64`, tagged with the version and `latest`; pin the version tag in pipelines. It holds a static `gostman` in a distroless image that runs as a non-root user. No secrets are baked in.
 
 ```bash
-docker build -t gostman --build-arg VERSION=1.6.0 .
-docker run --rm -v "$PWD:/workspace" -e API_TOKEN gostman run api --env CI --var-from-env API_TOKEN
+docker run --rm -v "$PWD:/workspace" -e API_TOKEN ghcr.io/kunalgoesbyken/gostman run api --env CI --var-from-env API_TOKEN
 ```
 
-The container works in `/workspace`. The mounted folder must be readable by the image user (uid 65532), and writable if you use `--output` there. The image has no shell, so pass the arguments to `gostman` directly.
+The `Dockerfile` at the root of the repository builds the same image: `docker build -t gostman --build-arg VERSION=1.7.1 .`
+
+The container works in `/workspace`. The mounted folder must be readable by the image user (uid 65532), and writable if reports are written there. The image has no shell, so pass the arguments to `gostman` directly.
 
 Use it in a pipeline as the job image:
 
 ```yaml
 api-tests:
   image:
-    name: registry.example.com/tools/gostman:1.6.0
+    name: ghcr.io/kunalgoesbyken/gostman:latest
     entrypoint: [""]
   script:
     - gostman run api --env CI --var-from-env API_TOKEN

@@ -67,7 +67,7 @@ func (c *Client) Run(ctx context.Context, stored runner.Collection, options runn
 }
 
 func RunRedacted(ctx context.Context, stored runner.Collection, options runner.Options, observe func(runner.Result)) (runner.Report, error) {
-	client, err := NewClient(engine.Policy{})
+	client, err := NewClient(engine.Policy{Network: options.Network})
 	if err != nil {
 		return runner.Report{}, err
 	}

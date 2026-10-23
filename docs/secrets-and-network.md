@@ -125,3 +125,7 @@ Under **Certificates**:
 Certificates and keys are PEM files. A client certificate is presented only to its host; use `*.example.com` to cover subdomains. Keys must not be passphrase-protected. A row without a host is rejected when you save.
 
 Use **Remove certificate** to delete a row.
+
+### In the command line
+
+The command line does not read these settings. `gostman run`, `send` and `load` take the same proxy and certificates as flags: `--cacert`, `--client-cert` with `--client-key` or as `host=cert,key`, `--proxy` and `--noproxy`. Without `--proxy` they use the `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY` environment variables. See [Proxies and certificates](ci.md#proxies-and-certificates).
