@@ -23,6 +23,7 @@ const (
 	sandboxWorkerPrefix = "/assets/sandbox.worker."
 	sandboxPolicy       = "default-src 'none'; script-src 'unsafe-eval'"
 	singleInstanceID    = "app.gostman.desktop"
+	maxWindowSide       = 16384
 )
 
 func isolateSandbox(next http.Handler) http.Handler {
@@ -56,6 +57,8 @@ func main() {
 		Height:           820,
 		MinWidth:         800,
 		MinHeight:        600,
+		MaxWidth:         maxWindowSide,
+		MaxHeight:        maxWindowSide,
 		Frameless:        runtime.GOOS != "darwin",
 		AssetServer:      &assetserver.Options{Assets: assets, Middleware: isolateSandbox},
 		BackgroundColour: &theme.background,
