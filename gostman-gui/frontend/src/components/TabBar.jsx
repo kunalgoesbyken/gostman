@@ -1,20 +1,23 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { Plus, X } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
+import { TAB_KEYS } from "./ui/tabs"
 import { MethodTag } from "./MethodTag"
 import { usePointerDrag } from "../hooks/usePointerDrag"
 import { useShortcutLabel } from "../hooks/useShortcuts"
 import { PLACE_AFTER, PLACE_BEFORE } from "../lib/dropPlace"
-import { hintWithShortcut } from "../lib/shortcuts"
+import { isFocusLost, moveFocus } from "../lib/rovingFocus"
+import { hintWithShortcut, isRemoveKey } from "../lib/shortcuts"
 import { isRequestDirty } from "../lib/requestChanges"
 import { tabMenuItems } from "../lib/tabMenu"
 import { cn } from "../lib/utils"
 
 const MIDDLE_MOUSE_BUTTON = 1
 const STEP_KEYS = { ArrowLeft: -1, ArrowRight: 1 }
+const ACTIVE_TAB = "[role=tab][tabindex=\"0\"]"
 
-const Tab = memo(function Tab({ tab, saved, isActive, dropPlace, isDragged, onSelect, onClose, onPin, onOpenMenu, onPointerDown, onStep }) {
+const Tab = memo(function Tab({ tab, saved, isActive, dropPlace, isDragged, onSelect, onClose, onCloseFromKeyboard, onPin, onOpenMenu, onPointerDown, onStep }) {
   const tabRef = useRef(null)
   const { request } = tab
   const isDirty = useMemo(() => isRequestDirty(request, saved), [request, saved])
@@ -34,7 +37,12 @@ const Tab = memo(function Tab({ tab, saved, isActive, dropPlace, isDragged, onSe
     event.preventDefault()
     onOpenMenu(tab.id, { x: event.clientX, y: event.clientY })
   }
-  const stepOnArrow = (event) => {
+  const handleKeyDown = (event) => {
+    if (isRemoveKey(event)) {
+      event.preventDefault()
+      onCloseFromKeyboard(tab.id)
+      return
+    }
     const step = event.altKey && event.shiftKey ? STEP_KEYS[event.key] : undefined
     if (!step) return
     event.preventDefault()
@@ -60,17 +68,18 @@ const Tab = memo(function Tab({ tab, saved, isActive, dropPlace, isDragged, onSe
         type="button"
         role="tab"
         aria-selected={isActive}
+        tabIndex={isActive ? 0 : -1}
         onClick={() => onSelect(tab.id)}
         onDoubleClick={() => onPin(tab.id)}
         onPointerDown={(event) => onPointerDown(event, tab.id)}
-        onKeyDown={stepOnArrow}
+        onKeyDown={handleKeyDown}
         className="flex h-full min-w-0 flex-1 items-center gap-1.5 pl-3 text-left"
       >
         <MethodTag method={request.method} />
         <span className={cn("truncate", tab.isPreview && "italic")}>{title}</span>
         {isDirty && <span aria-label="Unsaved changes" className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground" />}
       </button>
-      <IconButton label={`Close ${title}`} icon={X} size="icon-xs" onClick={() => onClose(tab.id)} className="hover:bg-muted" />
+      <IconButton label={`Close ${title}`} icon={X} size="icon-xs" tabIndex={-1} onClick={() => onClose(tab.id)} className="hover:bg-muted" />
     </div>
   )
 })
@@ -92,6 +101,17 @@ export const TabBar = memo(function TabBar({ tabs, activeTabId, requests, action
   const { drag, begin } = usePointerDrag({ resolveDrop: resolveTabDrop, onDrop: reorder, scrollRef: listRef, axis: "x" })
 
   const startDrag = useCallback((event, tabId) => begin(event, { id: tabId }), [begin])
+  const refocusAfterClose = useRef(false)
+  const closeFromKeyboard = useCallback((tabId) => {
+    refocusAfterClose.current = true
+    onTabClose(tabId)
+  }, [onTabClose])
+
+  useLayoutEffect(() => {
+    if (!refocusAfterClose.current) return
+    refocusAfterClose.current = false
+    if (isFocusLost()) listRef.current?.querySelector(ACTIVE_TAB)?.focus()
+  })
   const openMenu = useCallback((tabId, position) => setMenu({ tabId, position }), [])
   const closeMenu = useCallback(() => setMenu(null), [])
 
@@ -101,8 +121,8 @@ export const TabBar = memo(function TabBar({ tabs, activeTabId, requests, action
   }, [menu, tabs, actions, onTabClose])
 
   return (
-    <div className="flex h-10 shrink-0 items-stretch border-b border-border">
-      <div ref={listRef} role="tablist" aria-label="Open requests" className="flex min-w-0 items-stretch overflow-x-auto scrollbar-none">
+    <div data-pane="tabs" className="flex h-10 shrink-0 items-stretch border-b border-border">
+      <div ref={listRef} role="tablist" aria-label="Open requests" onKeyDown={(event) => moveFocus(event, TAB_KEYS)} className="flex min-w-0 items-stretch overflow-x-auto scrollbar-none">
         {tabs.map((tab) => (
           <Tab
             key={tab.id}
@@ -113,6 +133,7 @@ export const TabBar = memo(function TabBar({ tabs, activeTabId, requests, action
             isDragged={drag?.source.id === tab.id}
             onSelect={onTabSelect}
             onClose={onTabClose}
+            onCloseFromKeyboard={closeFromKeyboard}
             onPin={actions.tabs.pin}
             onOpenMenu={openMenu}
             onPointerDown={startDrag}

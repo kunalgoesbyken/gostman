@@ -36,7 +36,7 @@ export const PREFERENCES_TEXT = {
   fontMissing: 'Not found on this device, so the default font is used.',
   suggestFonts: 'Suggest installed fonts',
   fontsSuggested: 'Installed fonts are suggested as you type a font name.',
-  fontsDenied: 'Gostman was not allowed to read the installed fonts.',
+  fontsDenied: 'The installed fonts could not be read.',
   timeoutHint: 'Applies to requests that set no timeout of their own. 0 uses the built-in limit.',
   languageHint: 'More languages will appear here when translations are available.',
   shortcuts: 'Keyboard shortcuts',

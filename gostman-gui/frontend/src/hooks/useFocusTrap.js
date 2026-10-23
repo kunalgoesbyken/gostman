@@ -1,8 +1,6 @@
-import { useEffect } from "react"
-
-const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-
-const focusableWithin = (container) => [...container.querySelectorAll(FOCUSABLE)].filter((element) => element.offsetParent !== null)
+import { useEffect, useState } from "react"
+import { focusableWithin } from "../lib/focusable"
+import { focusOrigin, returnFocusTo } from "../lib/panes"
 
 function wrapTab(event, container) {
   const items = focusableWithin(container)
@@ -17,9 +15,10 @@ function wrapTab(event, container) {
 }
 
 export function useFocusTrap(ref) {
+  const [origin] = useState(focusOrigin)
+
   useEffect(() => {
     const container = ref.current
-    const previous = document.activeElement
     if (!container.contains(document.activeElement)) container.focus()
     const trap = (event) => {
       if (event.key === "Tab") wrapTab(event, container)
@@ -27,7 +26,7 @@ export function useFocusTrap(ref) {
     container.addEventListener("keydown", trap)
     return () => {
       container.removeEventListener("keydown", trap)
-      if (previous instanceof HTMLElement && previous.isConnected) previous.focus()
+      returnFocusTo(origin)
     }
-  }, [ref])
+  }, [ref, origin])
 }

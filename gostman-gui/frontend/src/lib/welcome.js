@@ -7,7 +7,7 @@ export const SAMPLE_REQUEST = {
   url: 'https://httpbin.org/anything?hello=world',
 }
 
-export const SHORTCUT_IDS = ['commandPalette', 'newRequest', 'sendRequest', 'saveRequest', 'findRequest', 'shortcutsHelp']
+export const SHORTCUT_IDS = ['commandPalette', 'newRequest', 'sendRequest', 'saveRequest', 'findRequest', 'nextPane', 'shortcutsHelp']
 
 export function isWelcomeDismissed() {
   try {

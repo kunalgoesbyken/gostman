@@ -5,10 +5,11 @@ import { Checkbox } from "./ui/checkbox"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
 import { SectionLabel } from "./ui/panel"
-import { SegmentedControl } from "./ui/segmented"
+import { RADIO_KEYS, SegmentedControl } from "./ui/segmented"
 import { Select } from "./ui/select"
 import { useAppStore } from "../store/appStore"
-import { canListInstalledFonts, isFontInstalled, listInstalledFonts } from "../lib/fonts"
+import { isFontInstalled, sortedFamilies } from "../lib/fonts"
+import { moveFocus, tabStopOf } from "../lib/rovingFocus"
 import {
   ACCENTS, CONTRASTS, DENSITIES, EDITOR_FONT_SIZES, FONT_NAME_LENGTH, LANGUAGES, REQUEST_TIMEOUT_SECONDS, RESPONSE_LAYOUTS,
   TEXT_SCALES, THEMES, resetPreferences, updatePreferences, usePreferences,
@@ -55,9 +56,11 @@ function ChoiceRow({ label, hint, name, options, preferences }) {
 }
 
 function AccentRow({ preferences }) {
+  const tabStop = tabStopOf(ACCENTS, preferences.accent)
+
   return (
     <PreferenceRow label={fields.accent}>
-      <div role="radiogroup" aria-label={fields.accent} className="flex items-center gap-1.5">
+      <div role="radiogroup" aria-label={fields.accent} onKeyDown={(event) => moveFocus(event, RADIO_KEYS)} className="flex items-center gap-1.5">
         {ACCENTS.map((accent) => (
           <button
             key={accent}
@@ -65,6 +68,7 @@ function AccentRow({ preferences }) {
             role="radio"
             aria-checked={preferences.accent === accent}
             aria-label={PREFERENCES_TEXT.accents[accent]}
+            tabIndex={accent === tabStop ? 0 : -1}
             title={PREFERENCES_TEXT.accents[accent]}
             data-accent={accent}
             onClick={() => updatePreferences({ accent })}
@@ -112,14 +116,14 @@ function FontRow({ label, hint, name, isCode, suggestions, preferences }) {
   )
 }
 
-function useInstalledFonts() {
+function useInstalledFonts(listFonts) {
   const [fonts, setFonts] = useState([])
   const [status, setStatus] = useState("")
 
   const load = () =>
-    listInstalledFonts()
+    listFonts()
       .then((families) => {
-        setFonts(families)
+        setFonts(sortedFamilies(families))
         setStatus(PREFERENCES_TEXT.fontsSuggested)
       })
       .catch(() => setStatus(PREFERENCES_TEXT.fontsDenied))
@@ -127,9 +131,9 @@ function useInstalledFonts() {
   return { fonts, status, load }
 }
 
-function FontsSection({ preferences }) {
+function FontsSection({ preferences, listFonts }) {
   const listId = useId()
-  const installed = useInstalledFonts()
+  const installed = useInstalledFonts(listFonts)
   const suggestions = installed.fonts.length > 0 ? listId : undefined
 
   return (
@@ -141,7 +145,7 @@ function FontsSection({ preferences }) {
           {installed.fonts.map((family) => <option key={family} value={family} />)}
         </datalist>
       )}
-      {canListInstalledFonts() && !suggestions && (
+      {listFonts && !suggestions && (
         <Button variant="outline" size="sm" onClick={installed.load}>{PREFERENCES_TEXT.suggestFonts}</Button>
       )}
       {installed.status && <p role="status" className="text-2xs text-muted-foreground">{installed.status}</p>}
@@ -201,7 +205,7 @@ const percentLabels = (language) => {
   return TEXT_SCALES.map((scale) => ({ value: scale, label: format.format(scale / 100) }))
 }
 
-export function PreferencesDialog({ onClose }) {
+export function PreferencesDialog({ listFonts, onClose }) {
   const preferences = usePreferences()
   const openShortcuts = useAppStore((state) => state.openShortcutsDialog)
 
@@ -230,7 +234,7 @@ export function PreferencesDialog({ onClose }) {
           <ChoiceRow label={fields.density} name="density" options={optionsOf(DENSITIES, PREFERENCES_TEXT.densities)} preferences={preferences} />
           <ChoiceRow label={fields.responseLayout} name="responseLayout" options={optionsOf(RESPONSE_LAYOUTS, PREFERENCES_TEXT.layouts)} preferences={preferences} />
         </Section>
-        <FontsSection preferences={preferences} />
+        <FontsSection preferences={preferences} listFonts={listFonts} />
         <Section title={sections.editor}>
           <NumberRow
             label={fields.editorFontSize}

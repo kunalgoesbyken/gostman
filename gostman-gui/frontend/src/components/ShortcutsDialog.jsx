@@ -7,10 +7,37 @@ import { useChordCapture } from "../hooks/useChordCapture"
 import { chordLabel, modifiersPrefix } from "../lib/chords"
 import { isApplePlatform, isDesktopApp } from "../lib/platform"
 import { updatePreferences, usePreferences } from "../lib/preferences"
-import { SHORTCUT_GROUPS, checkChord, shortcutRows, withChord, withoutChord } from "../lib/shortcuts"
+import { MOVING_KEYS, SHORTCUT_GROUPS, checkChord, shortcutRows, withChord, withoutChord } from "../lib/shortcuts"
 import { SHORTCUT_TEXT } from "../lib/shortcutText"
 
 const CAPTURE_PLACEHOLDER = "…"
+const { moving: MOVING_TEXT } = SHORTCUT_TEXT
+
+function GroupHeading({ children }) {
+  return <h3 className="mb-1 text-2xs font-semibold uppercase tracking-wide text-muted-foreground">{children}</h3>
+}
+
+function MovingKeys({ isApple }) {
+  return (
+    <section aria-label={MOVING_TEXT.title}>
+      <GroupHeading>{MOVING_TEXT.title}</GroupHeading>
+      <ul className="divide-y divide-border">
+        {MOVING_KEYS.map(({ id, chords }) => (
+          <li key={id} className="flex min-h-8 flex-wrap items-center gap-x-3 gap-y-1 py-1 text-xs">
+            <span className="min-w-0 flex-1 basis-40">{MOVING_TEXT.labels[id]}</span>
+            <span className="flex shrink-0 flex-wrap items-center gap-1">
+              {chords.length === 0 && <kbd>{MOVING_TEXT.typing}</kbd>}
+              {chords.map((chord) => {
+                const label = chordLabel(chord, isApple)
+                return <kbd key={label}>{label}</kbd>
+              })}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
 
 function ConflictNotice({ chordLabel, owner, onReplace, onCancel }) {
   return (
@@ -100,7 +127,7 @@ export function ShortcutsDialog({ onClose }) {
       <DialogBody className="space-y-4">
         {SHORTCUT_GROUPS.map((group) => (
           <section key={group} aria-label={SHORTCUT_TEXT.groups[group]}>
-            <h3 className="mb-1 text-2xs font-semibold uppercase tracking-wide text-muted-foreground">{SHORTCUT_TEXT.groups[group]}</h3>
+            <GroupHeading>{SHORTCUT_TEXT.groups[group]}</GroupHeading>
             <ul className="divide-y divide-border">
               {rows.filter((row) => row.group === group).map((row) => (
                 <ShortcutRow
@@ -116,6 +143,7 @@ export function ShortcutsDialog({ onClose }) {
             </ul>
           </section>
         ))}
+        <MovingKeys isApple={isApple} />
         {!isDesktop && <p className="text-2xs text-muted-foreground">{SHORTCUT_TEXT.webNotice}</p>}
       </DialogBody>
       <DialogFooter>

@@ -28,9 +28,8 @@ export function applyFont(root, slot, name) {
   root.style.setProperty(property, fontStack(name, `var(${property}-default)`))
 }
 
-export const canListInstalledFonts = () => typeof window.queryLocalFonts === 'function'
+const queryLocalFamilies = async () => (await window.queryLocalFonts()).map((font) => font.family)
 
-export async function listInstalledFonts() {
-  const fonts = await window.queryLocalFonts()
-  return [...new Set(fonts.map((font) => font.family))].sort((first, second) => first.localeCompare(second))
-}
+export const browserFontLister = () => (typeof window.queryLocalFonts === 'function' ? queryLocalFamilies : null)
+
+export const sortedFamilies = (families) => [...new Set(families)].sort((first, second) => first.localeCompare(second))

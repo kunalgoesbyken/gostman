@@ -438,6 +438,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
       <section
         ref={containerRef}
         aria-label="Response"
+        data-pane="response"
         tabIndex={-1}
         onKeyDown={handleKeyDown}
         className={`flex min-h-0 flex-col bg-background outline-none ${isOpen && !isFullscreen ? '' : 'border-t border-border'}`}

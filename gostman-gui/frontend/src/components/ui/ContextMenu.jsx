@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { SectionLabel } from "./panel"
+import { focusOrigin, returnFocusTo } from "../../lib/panes"
+import { isFocusLost } from "../../lib/rovingFocus"
 import { cn } from "../../lib/utils"
 
 const VIEWPORT_MARGIN = 8
@@ -42,6 +44,11 @@ function MenuItem({ item, onClose }) {
 export function ContextMenu({ position, title, items, onClose }) {
   const menuRef = useRef(null)
   const [placement, setPlacement] = useState(null)
+  const [origin] = useState(focusOrigin)
+
+  useEffect(() => () => {
+    if (isFocusLost()) returnFocusTo(origin)
+  }, [origin])
 
   useLayoutEffect(() => {
     const { width, height } = menuRef.current.getBoundingClientRect()
@@ -49,8 +56,12 @@ export function ContextMenu({ position, title, items, onClose }) {
       left: clampToViewport(position.x, width, window.innerWidth),
       top: clampToViewport(position.y, height, window.innerHeight),
     })
-    menuRef.current.querySelector("button:not(:disabled)")?.focus()
   }, [position, items])
+
+  useEffect(() => {
+    if (!placement || menuRef.current.contains(document.activeElement)) return
+    menuRef.current.querySelector("button:not(:disabled)")?.focus()
+  }, [placement])
 
   useEffect(() => {
     const closeWhenOutside = (event) => {

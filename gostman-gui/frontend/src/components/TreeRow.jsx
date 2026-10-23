@@ -1,4 +1,4 @@
-import { memo } from "react"
+import { memo, useLayoutEffect, useRef } from "react"
 import { ChevronDown, ChevronRight, Folder, MoreHorizontal } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { MethodTag } from "./MethodTag"
@@ -32,11 +32,16 @@ export const EmptyRow = memo(function EmptyRow({ row, dropPlace }) {
   )
 })
 
-export const TreeRow = memo(function TreeRow({ row, isActive, isMenuOpen, isDragged, dropPlace, onActivate, onPin, onOpenMenu, onPointerDown, onKeyDown }) {
+export const TreeRow = memo(function TreeRow({ row, isActive, isTabStop, focusRequest, isMenuOpen, isDragged, dropPlace, onActivate, onPin, onOpenMenu, onPointerDown, onKeyDown, onFocus }) {
   const isFolder = row.kind === ROW_FOLDER
   const item = isFolder ? row.folder : row.request
   const name = item.name || UNTITLED
   const Chevron = row.isOpen ? ChevronDown : ChevronRight
+  const mainRef = useRef(null)
+
+  useLayoutEffect(() => {
+    if (focusRequest) mainRef.current.focus()
+  }, [focusRequest])
 
   const openMenuAtPointer = (event) => {
     event.preventDefault()
@@ -53,9 +58,11 @@ export const TreeRow = memo(function TreeRow({ row, isActive, isMenuOpen, isDrag
       data-row-key={row.key}
       aria-expanded={isFolder ? row.isOpen : undefined}
       aria-selected={isActive}
-      aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown Control+C Control+V Control+D"
+      aria-level={row.depth + 1}
+      aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown Control+C Control+V Control+D F2 Delete Shift+F10"
       onContextMenu={openMenuAtPointer}
       onKeyDown={(event) => onKeyDown(event, row)}
+      onFocus={() => onFocus(row)}
       style={{ height: ROW_HEIGHT_PX }}
       className={cn(
         "group relative flex select-none items-center pr-1.5 text-xs [-webkit-touch-callout:none]",
@@ -66,8 +73,11 @@ export const TreeRow = memo(function TreeRow({ row, isActive, isMenuOpen, isDrag
     >
       <DropLine place={dropPlace} />
       <button
+        ref={mainRef}
         type="button"
         data-row-main
+        data-pane-entry
+        tabIndex={isTabStop ? 0 : -1}
         onClick={() => onActivate(row)}
         onDoubleClick={() => onPin(row)}
         onPointerDown={(event) => onPointerDown(event, row)}
@@ -90,6 +100,7 @@ export const TreeRow = memo(function TreeRow({ row, isActive, isMenuOpen, isDrag
         icon={MoreHorizontal}
         size="icon-xs"
         data-row-action
+        tabIndex={-1}
         aria-haspopup="menu"
         onClick={openMenuBelowButton}
         className={cn("hover:bg-muted", !isMenuOpen && "opacity-0 focus-visible:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100")}

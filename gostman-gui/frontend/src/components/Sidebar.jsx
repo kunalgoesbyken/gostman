@@ -18,7 +18,7 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
   const newRequestShortcut = useShortcutLabel("newRequest")
 
   return (
-    <aside className="flex w-72 max-w-full shrink-0 flex-col border-r border-border max-md:absolute max-md:inset-y-0 max-md:left-0 max-md:z-30 max-md:bg-background max-md:shadow-lg">
+    <aside data-pane="sidebar" className="flex w-72 max-w-full shrink-0 flex-col border-r border-border max-md:absolute max-md:inset-y-0 max-md:left-0 max-md:z-30 max-md:bg-background max-md:shadow-lg">
       <Tabs value={view} onValueChange={setView} className="flex min-h-0 flex-1 flex-col">
         <Toolbar className="pr-1.5">
           <TabsList label="Sidebar view" className="flex-1">

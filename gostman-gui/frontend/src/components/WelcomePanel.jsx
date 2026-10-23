@@ -56,7 +56,7 @@ export function WelcomePanel({ actions, onDismiss }) {
   const progress = useOnboardingProgress()
 
   return (
-    <section aria-label={TEXT.title} className="min-h-0 flex-1 overflow-y-auto border-t border-border">
+    <section aria-label={TEXT.title} data-pane="request" className="min-h-0 flex-1 overflow-y-auto border-t border-border">
       <div className="mx-auto flex max-w-3xl flex-col gap-5 p-4">
         <div className="flex items-start gap-2">
           <div className="min-w-0 flex-1">

@@ -28,7 +28,9 @@ The tree lists folders and requests. Each request row shows its method and name,
 
 ### Search
 
-The **Search name or URL** field filters the tree by request name or URL. When nothing matches, the tree shows **No results**. Drag and drop is switched off while a search is active.
+The **Search name or URL** field filters the tree by request name or URL. When nothing matches, the tree shows **No results**. Drag and drop is switched off while a search is active. Press the Down Arrow in the field to move into the results.
+
+The tree is one stop for the Tab key. Inside it, the arrow keys move between rows, Right Arrow and Left Arrow open and close folders, Enter opens a request in a tab and Space previews it. Typing the start of a name jumps to the next matching request or folder. F2 renames a row, Delete deletes it after you confirm, and Shift+F10 or the Menu key shows its actions. See [Move around with the keyboard](preferences-and-shortcuts.md#move-around-with-the-keyboard) for every key.
 
 ### Move, copy and duplicate
 

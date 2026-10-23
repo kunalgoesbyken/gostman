@@ -3,6 +3,12 @@ import { cn } from "../../lib/utils"
 
 const OVERSCAN_ROWS = 8
 
+export function scrollIndexIntoView(container, index, rowHeight) {
+  const top = index * rowHeight
+  if (top < container.scrollTop) container.scrollTop = top
+  else if (top + rowHeight > container.scrollTop + container.clientHeight) container.scrollTop = top + rowHeight - container.clientHeight
+}
+
 export function VirtualList({ items, rowHeight, renderRow, className, scrollRef, ...props }) {
   const ownRef = useRef(null)
   const containerRef = scrollRef || ownRef
@@ -19,7 +25,8 @@ export function VirtualList({ items, rowHeight, renderRow, className, scrollRef,
   }, [])
 
   const totalHeight = items.length * rowHeight
-  const visibleTop = Math.min(scrollTop, Math.max(0, totalHeight - viewportHeight))
+  const currentScrollTop = containerRef.current?.scrollTop ?? scrollTop
+  const visibleTop = Math.min(currentScrollTop, Math.max(0, totalHeight - viewportHeight))
   const first = Math.max(0, Math.floor(visibleTop / rowHeight) - OVERSCAN_ROWS)
   const last = Math.min(items.length, Math.ceil((visibleTop + viewportHeight) / rowHeight) + OVERSCAN_ROWS)
 

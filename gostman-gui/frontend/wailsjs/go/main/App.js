@@ -210,6 +210,10 @@ export function Import(arg1) {
   return window['go']['main']['App']['Import'](arg1);
 }
 
+export function InstalledFonts() {
+  return window['go']['main']['App']['InstalledFonts']();
+}
+
 export function InvokeGrpc(arg1, arg2) {
   return window['go']['main']['App']['InvokeGrpc'](arg1, arg2);
 }

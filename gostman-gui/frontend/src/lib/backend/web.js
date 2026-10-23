@@ -2,6 +2,7 @@ import { webAi } from '../ai/webAi'
 import { base64ToBytes } from '../base64'
 import { openBrowserSocket, unsentBrowserHeaders } from './browserSocket'
 import { isPlainObject } from '../dataUtils'
+import { browserFontLister } from '../fonts'
 import { OAUTH_CALLBACK_PATH, cancelOAuthPopup, signInWithPopup } from './oauthPopup'
 import { STREAM_CAP_SECONDS, readStream } from './webStream'
 import { toGrpcCall, toGrpcTarget } from '../grpc'
@@ -276,6 +277,7 @@ export const webBackend = {
   fetchToken: (exchange) => postJSON(`${PROXY_URL}?oauth=token`, exchange),
   reset,
   saveFile,
+  listInstalledFonts: browserFontLister(),
   webAppUrl: window.location.origin,
   openSocket: openBrowserSocket,
   unsentSocketHeaders: unsentBrowserHeaders,

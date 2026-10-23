@@ -4,7 +4,7 @@ import { Button, IconButton } from "./ui/button"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
 import { Notice, SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
-import { SegmentedControl } from "./ui/segmented"
+import { RADIO_KEYS, SegmentedControl } from "./ui/segmented"
 import { Select } from "./ui/select"
 import { EnvironmentTable } from "./EnvironmentTable"
 import { SearchField } from "./SearchField"
@@ -13,6 +13,7 @@ import { ENVIRONMENT_COLORS, ENVIRONMENT_TEXT as TEXT } from "../lib/environment
 import { SECRETS_TEXT } from "../lib/secretsText"
 import { isDesktopShell } from "../lib/windowControls"
 import { SCOPE_COLLECTION, SCOPE_GLOBAL, dotEnvEntries, environmentChain, environmentEntries, withEntries } from "../lib/variableScopes"
+import { moveFocus, tabStopOf } from "../lib/rovingFocus"
 import { cn } from "../lib/utils"
 import { createEnvironment, useAppStore } from "../store/appStore"
 
@@ -30,16 +31,21 @@ function ColorDot({ color, className }) {
   return <span aria-hidden="true" className={cn("h-2 w-2 shrink-0 rounded-full", ENVIRONMENT_COLORS[color] || "border border-border", className)} />
 }
 
+const COLOR_NAMES = Object.keys(ENVIRONMENT_COLORS)
+
 function ColorPicker({ value, onChange }) {
+  const tabStop = tabStopOf(COLOR_NAMES, value)
+
   return (
-    <div role="radiogroup" aria-label={TEXT.colour} className="flex items-center gap-1.5">
-      {Object.keys(ENVIRONMENT_COLORS).map((color) => (
+    <div role="radiogroup" aria-label={TEXT.colour} onKeyDown={(event) => moveFocus(event, RADIO_KEYS)} className="flex items-center gap-1.5">
+      {COLOR_NAMES.map((color) => (
         <button
           key={color}
           type="button"
           role="radio"
           aria-checked={value === color}
           aria-label={color}
+          tabIndex={color === tabStop ? 0 : -1}
           title={color}
           onClick={() => onChange(value === color ? "" : color)}
           className={cn("flex h-5 w-5 items-center justify-center rounded-full", value === color && "ring-1 ring-foreground ring-offset-1 ring-offset-background")}

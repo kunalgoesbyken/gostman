@@ -121,6 +121,8 @@ export function GitVersion(arg1:string,arg2:string):Promise<gitutil.Version>;
 
 export function Import(arg1:importer.Query):Promise<importer.Reply>;
 
+export function InstalledFonts():Promise<Array<string>>;
+
 export function InvokeGrpc(arg1:string,arg2:rpc.Call):Promise<engine.Response>;
 
 export function InvokeMcp(arg1:string,arg2:mcpclient.Call):Promise<engine.Response>;

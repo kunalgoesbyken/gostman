@@ -4,17 +4,21 @@ import { ClipboardPaste, FileJson, Plus, Search, Upload } from "lucide-react"
 import { Button } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
 import { EmptyState } from "./ui/emptyState"
-import { VirtualList } from "./ui/VirtualList"
+import { VirtualList, scrollIndexIntoView } from "./ui/VirtualList"
 import { EmptyRow, ROW_HEIGHT_PX, TreeRow } from "./TreeRow"
 import { SearchField } from "./SearchField"
 import { useAppStore } from "../store/appStore"
 import { usePointerDrag } from "../hooks/usePointerDrag"
+import { useTypeahead } from "../hooks/useTypeahead"
 import { buildCollectionTree, findMatches, flattenCollection, ROOT_ID, ROW_EMPTY, ROW_FOLDER } from "../lib/collectionTree"
 import { PLACE_AFTER, PLACE_BEFORE, PLACE_INSIDE } from "../lib/dropPlace"
-import { matchesBinding } from "../lib/shortcuts"
+import { hasModifier, isFocusLost } from "../lib/rovingFocus"
+import { isRemoveKey, matchesBinding } from "../lib/shortcuts"
 import { MENU_ACTIONS, MENU_MOVE, menuItemsFor } from "../lib/treeMenus"
 import { STEP_DOWN, STEP_UP, TARGET_ROOT, canDropFolder } from "../lib/treeMoves"
+import { firstChildRow, firstRow, lastRow, nearestRow, pageFrom, parentRow, rowLabel, stepFrom } from "../lib/treeNavigation"
 import { TREE_TEXT } from "../lib/treeText"
+import { findByPrefix, isTypedCharacter } from "../lib/typeahead"
 import { cn } from "../lib/utils"
 
 const FOLDER_EDGE_RATIO = 0.25
@@ -23,6 +27,8 @@ const ARROW_STEPS = { ArrowUp: STEP_UP, ArrowDown: STEP_DOWN }
 const COPY = { mod: true, key: "c" }
 const PASTE = { mod: true, key: "v" }
 const DUPLICATE = { mod: true, key: "d" }
+
+const isMenuKey = (event) => event.key === "ContextMenu" || (event.shiftKey && event.key === "F10")
 
 const sourceOf = (row) => (row.kind === ROW_FOLDER ? { kind: ROW_FOLDER, id: row.folder.id } : { kind: row.kind, id: row.request.id })
 
@@ -121,7 +127,12 @@ function useExpandOnHover(drag, toggleFolder, folders) {
 export const CollectionTree = memo(function CollectionTree({ folders, requests, activeRequestId, actions }) {
   const [query, setQuery] = useState("")
   const [menu, setMenu] = useState(null)
+  const [focusedKey, setFocusedKey] = useState(null)
+  const [focusRequest, setFocusRequest] = useState(null)
+  const focusedIndex = useRef(-1)
+  const focusCount = useRef(0)
   const scrollRef = useRef(null)
+  const typeahead = useTypeahead()
   const toggleFolder = useAppStore((s) => s.toggleFolder)
   const specLinks = useAppStore((s) => s.specLinks)
   const treeClipboard = useAppStore((s) => s.treeClipboard)
@@ -166,29 +177,92 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
 
   const openMenu = useCallback((row, position) => setMenu({ row, position, view: MENU_ACTIONS }), [])
   const closeMenu = useCallback(() => setMenu(null), [])
+  const openMenuBelow = useCallback((element, row) => {
+    const { left, bottom } = element.getBoundingClientRect()
+    openMenu(row, { x: left, y: bottom })
+  }, [openMenu])
 
   const startDrag = useCallback((event, row) => {
     if (!isSearching) begin(event, sourceOf(row))
   }, [begin, isSearching])
 
+  const tabStopKey = useMemo(() => {
+    if (rowsByKey.has(focusedKey)) return focusedKey
+    const active = rows.find((row) => row.request?.id === activeRequestId)
+    return active ? active.key : rows[firstRow(rows)]?.key
+  }, [rows, rowsByKey, focusedKey, activeRequestId])
+
+  const focusRowAt = useCallback((index) => {
+    const row = rows[index]
+    if (!row) return
+    focusedIndex.current = index
+    focusCount.current += 1
+    setFocusedKey(row.key)
+    setFocusRequest({ key: row.key, count: focusCount.current })
+    scrollIndexIntoView(scrollRef.current, index, ROW_HEIGHT_PX)
+  }, [rows])
+
+  const trackFocus = useCallback((row) => {
+    focusedIndex.current = rows.findIndex((candidate) => candidate.key === row.key)
+    setFocusedKey(row.key)
+    setFocusRequest((current) => (current?.key === row.key ? null : current))
+  }, [rows])
+
+  useEffect(() => {
+    if (focusedKey === null || rowsByKey.has(focusedKey)) return
+    if (isFocusLost()) focusRowAt(nearestRow(rows, focusedIndex.current))
+    else setFocusedKey(null)
+  }, [rows, rowsByKey, focusedKey, focusRowAt])
+
+  const enterResultsOnArrow = useCallback((event) => {
+    if (event.key !== "ArrowDown") return
+    event.preventDefault()
+    focusRowAt(rows.findIndex((row) => row.key === tabStopKey))
+  }, [rows, tabStopKey, focusRowAt])
+
+  const editItem = useCallback((event, source) => {
+    const step = event.altKey ? ARROW_STEPS[event.key] : undefined
+    if (step) return () => actions.tree.stepItem(source, step)
+    if (matchesBinding(COPY, event)) return () => actions.tree.copyItem(source)
+    if (matchesBinding(PASTE, event)) return () => actions.tree.pasteItem(source)
+    if (matchesBinding(DUPLICATE, event)) return () => actions.tree.duplicateItem(source)
+    return null
+  }, [actions])
+
+  const navigate = useCallback((event, row, index) => {
+    const isFolder = row.kind === ROW_FOLDER
+    if (isRemoveKey(event)) return () => (isFolder ? actions.deleteFolder(row.folder) : actions.deleteRequest(row.request))
+    if (isTypedCharacter(event, typeahead.isTyping())) return () => focusRowAt(findByPrefix(rows.map(rowLabel), index, typeahead.type(event.key)))
+    if (hasModifier(event)) return null
+    const canToggle = isFolder && !isSearching
+    const pageSize = Math.max(1, Math.floor(scrollRef.current.clientHeight / ROW_HEIGHT_PX) - 1)
+    const keys = {
+      ArrowDown: () => focusRowAt(stepFrom(rows, index, 1)),
+      ArrowUp: () => focusRowAt(stepFrom(rows, index, -1)),
+      Home: () => focusRowAt(firstRow(rows)),
+      End: () => focusRowAt(lastRow(rows)),
+      PageDown: () => focusRowAt(pageFrom(rows, index, 1, pageSize)),
+      PageUp: () => focusRowAt(pageFrom(rows, index, -1, pageSize)),
+      ArrowRight: () => (canToggle && !row.isOpen ? toggleFolder(row.folder.id) : focusRowAt(firstChildRow(rows, index))),
+      ArrowLeft: () => (canToggle && row.isOpen ? toggleFolder(row.folder.id) : focusRowAt(parentRow(rows, index))),
+      Enter: () => (isFolder ? toggleFolder(row.folder.id) : pinRow(row)),
+      " ": () => activateRow(row),
+      F2: () => (isFolder ? actions.renameFolder(row.folder) : actions.renameRequest(row.request)),
+    }
+    return keys[event.key] ?? null
+  }, [rows, isSearching, toggleFolder, focusRowAt, pinRow, activateRow, actions, typeahead])
+
   const handleKeyDown = useCallback((event, row) => {
     if (event.target.closest("[data-row-action]")) return
-    const source = sourceOf(row)
-    const step = event.altKey ? ARROW_STEPS[event.key] : undefined
-    if (step) {
-      event.preventDefault()
-      actions.tree.stepItem(source, step)
-    } else if (matchesBinding(COPY, event)) {
-      event.preventDefault()
-      actions.tree.copyItem(source)
-    } else if (matchesBinding(PASTE, event)) {
-      event.preventDefault()
-      actions.tree.pasteItem(source)
-    } else if (matchesBinding(DUPLICATE, event)) {
-      event.preventDefault()
-      actions.tree.duplicateItem(source)
-    }
-  }, [actions])
+    const index = rows.findIndex((candidate) => candidate.key === row.key)
+    const element = event.currentTarget
+    const run = isMenuKey(event)
+      ? () => openMenuBelow(element, row)
+      : editItem(event, sourceOf(row)) || navigate(event, row, index)
+    if (!run) return
+    event.preventDefault()
+    run()
+  }, [rows, openMenuBelow, editItem, navigate])
 
   const menuItems = useMemo(() => {
     if (!menu) return []
@@ -210,6 +284,8 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
         key={row.key}
         row={row}
         isActive={!isFolder && id === activeRequestId}
+        isTabStop={row.key === tabStopKey}
+        focusRequest={focusRequest?.key === row.key ? focusRequest.count : 0}
         isMenuOpen={menu?.row.key === row.key}
         isDragged={drag?.source.kind === row.kind && drag.source.id === id}
         dropPlace={dropPlace}
@@ -218,6 +294,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
         onOpenMenu={openMenu}
         onPointerDown={startDrag}
         onKeyDown={handleKeyDown}
+        onFocus={trackFocus}
       />
     )
   }
@@ -228,7 +305,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
 
   return (
     <>
-      <SearchField value={query} onChange={setQuery} placeholder="Search name or URL" />
+      <SearchField value={query} onChange={setQuery} onKeyDown={enterResultsOnArrow} placeholder="Search name or URL" />
 
       <div className={cn("min-h-0 flex-1", isDropAtRoot && "ring-1 ring-inset ring-primary")}>
         {rows.length === 0 ? (

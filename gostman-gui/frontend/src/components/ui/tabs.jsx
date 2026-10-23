@@ -1,5 +1,8 @@
 import * as React from "react"
+import { ORIENTATION, moveFocus } from "../../lib/rovingFocus"
 import { cn } from "../../lib/utils"
+
+export const TAB_KEYS = { selector: "[role=tab]", orientation: ORIENTATION.horizontal, activate: true }
 
 const TabsContext = React.createContext({ value: "", setValue: () => {} })
 
@@ -17,6 +20,7 @@ function TabsList({ className, label, children }) {
     <div
       role="tablist"
       aria-label={label}
+      onKeyDown={(event) => moveFocus(event, TAB_KEYS)}
       className={cn("flex h-full min-w-0 items-stretch gap-4 overflow-x-auto scrollbar-none", className)}
     >
       {children}
@@ -39,6 +43,7 @@ function TabsTrigger({ className, value, children }) {
       type="button"
       role="tab"
       aria-selected={isActive}
+      tabIndex={isActive ? 0 : -1}
       onClick={() => setValue(value)}
       className={cn(
         "inline-flex min-w-6 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap border-b-2 px-0.5 pt-0.5 text-xs font-medium",

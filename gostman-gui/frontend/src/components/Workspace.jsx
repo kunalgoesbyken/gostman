@@ -28,6 +28,7 @@ import { currentOpenLink, dismissOpenLink, subscribeToOpenLink } from "../lib/op
 import { exportableVariables, withoutSecretValues } from "../lib/variableScopes"
 import { createWorkspaceActions } from "../lib/workspaceActions"
 import { whenIdle } from "../lib/idle"
+import { PANE_ADDRESS, cyclePane, focusPane, watchPaneFocus } from "../lib/panes"
 
 const CodeSnippetDialog = lazy(() => import("./CodeSnippetDialog").then((module) => ({ default: module.CodeSnippetDialog })))
 const ImportExportDialog = lazy(() => import("./ImportExportDialog").then((module) => ({ default: module.ImportExportDialog })))
@@ -76,6 +77,9 @@ const createShortcutHandlers = (actions) => {
     previousTab: () => store().cycleTab(-1),
     toggleSidebar: () => store().toggleSidebar(),
     focusSidebarSearch,
+    nextPane: () => cyclePane(1),
+    previousPane: () => cyclePane(-1),
+    focusAddress: () => focusPane(PANE_ADDRESS),
     aiGenerate: () => actions.ai.start(TASK_REQUEST),
     aiExplain: () => actions.ai.start(TASK_EXPLAIN),
   }
@@ -273,6 +277,7 @@ function LoadedWorkspace({ backend, onBack }) {
   const shortcuts = useMemo(() => createShortcutHandlers(actions), [actions])
 
   useShortcuts(shortcuts, !isDialogOpen && !sharedLink && !openLink)
+  useEffect(watchPaneFocus, [])
   usePersistence(backend)
 
   return (
@@ -335,7 +340,7 @@ function LoadedWorkspace({ backend, onBack }) {
           />
 
           {showsWelcome ? <WelcomePanel actions={actions} onDismiss={hideWelcome} /> : <div className="response-split flex min-h-0 flex-1 flex-col overflow-hidden">
-            <section aria-label="Request" className="flex min-h-0 flex-1 flex-col" style={REQUEST_AREA_STYLE}>
+            <section aria-label="Request" data-pane="request" className="flex min-h-0 flex-1 flex-col" style={REQUEST_AREA_STYLE}>
               <RequestTabs
                 tabId={activeTab.id}
                 activeRequest={activeRequest}
@@ -416,7 +421,7 @@ function LoadedWorkspace({ backend, onBack }) {
 
       <NoticeToast />
 
-      <AppDialogs onCommand={actions.runCommand} secrets={actions.secrets} hasWorkspaces={Boolean(actions.storage)} hasLoadTest={actions.loadTest.isAvailable} />
+      <AppDialogs onCommand={actions.runCommand} secrets={actions.secrets} listFonts={backend.listInstalledFonts} hasWorkspaces={Boolean(actions.storage)} hasLoadTest={actions.loadTest.isAvailable} />
     </div>
   )
 }

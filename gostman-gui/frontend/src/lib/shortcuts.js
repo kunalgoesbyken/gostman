@@ -8,6 +8,23 @@ const FIRST_TAB_ID = 'tab1'
 
 export const SHORTCUT_GROUPS = ['General', 'Request', 'Tabs', 'Navigation']
 
+const REMOVE_CHORDS = [{ key: 'delete' }, { mod: true, key: 'backspace' }]
+
+export const MOVING_KEYS = [
+  { id: 'lists', chords: [{ key: 'arrowup' }, { key: 'arrowdown' }, { key: 'home' }, { key: 'end' }] },
+  { id: 'pages', chords: [{ key: 'pageup' }, { key: 'pagedown' }] },
+  { id: 'tabs', chords: [{ key: 'arrowleft' }, { key: 'arrowright' }] },
+  { id: 'folders', chords: [{ key: 'arrowleft' }, { key: 'arrowright' }] },
+  { id: 'open', chords: [{ key: 'enter' }] },
+  { id: 'preview', chords: [{ key: 'space' }] },
+  { id: 'jump', chords: [] },
+  { id: 'rename', chords: [{ key: 'f2' }] },
+  { id: 'remove', chords: REMOVE_CHORDS },
+  { id: 'menu', chords: [{ shift: true, key: 'f10' }] },
+  { id: 'results', chords: [{ key: 'arrowdown' }] },
+  { id: 'close', chords: [{ key: 'escape' }] },
+]
+
 export const SHORTCUTS = [
   { id: 'commandPalette', group: 'General', label: 'Command palette', mod: true, key: 'k' },
   { id: 'findRequest', group: 'General', label: 'Go to request or history', mod: true, key: 'p' },
@@ -35,6 +52,9 @@ export const SHORTCUTS = [
   { id: 'aiExplain', group: 'General', label: 'AI: explain the response', mod: true, shift: true, key: 'x', web: { alt: true, shift: true, key: 'x' } },
   { id: 'toggleSidebar', group: 'Navigation', label: 'Toggle sidebar', mod: true, key: 'b' },
   { id: 'focusSidebarSearch', group: 'Navigation', label: 'Search the sidebar', mod: true, shift: true, key: 'f' },
+  { id: 'nextPane', group: 'Navigation', label: 'Next pane', key: 'f6' },
+  { id: 'previousPane', group: 'Navigation', label: 'Previous pane', shift: true, key: 'f6' },
+  { id: 'focusAddress', group: 'Navigation', label: 'Go to the URL', mod: true, key: 'l' },
   { id: 'workspaceSwitcher', group: 'Navigation', label: 'Switch workspace', mod: true, shift: true, key: 'o', web: false },
   { id: 'nextWorkspace', group: 'Navigation', label: 'Next workspace', mod: true, shift: true, code: 'BracketRight', web: false },
   { id: 'previousWorkspace', group: 'Navigation', label: 'Previous workspace', mod: true, shift: true, code: 'BracketLeft', web: false },
@@ -65,6 +85,8 @@ export const activeShortcuts = (isDesktop = isDesktopApp(), overrides = getPrefe
 )
 
 export const matchesBinding = (binding, event, isApple = isApplePlatform()) => matchesChord(binding, event, isApple)
+
+export const isRemoveKey = (event) => REMOVE_CHORDS.some((chord) => matchesBinding(chord, event))
 
 export const bindingLabel = (binding, isApple = isApplePlatform()) => chordLabel(binding, isApple)
 

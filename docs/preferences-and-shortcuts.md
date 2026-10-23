@@ -1,6 +1,6 @@
 # Preferences, shortcuts and the command palette
 
-This page covers the command palette and its commands, the Preferences dialog, the Keyboard shortcuts dialog and how to change a shortcut, the themes, colours and fonts, and the About dialog. Throughout, Ctrl means Command on macOS.
+This page covers the command palette and its commands, the Preferences dialog, the Keyboard shortcuts dialog and how to change a shortcut, moving around the app with the keyboard alone, the themes, colours and fonts, and the About dialog. Throughout, Ctrl means Command on macOS.
 
 ## Command palette
 
@@ -123,13 +123,13 @@ The About dialog's diagnostics report the theme setting.
 
 - Type the name of a font installed on your device, for example `Segoe UI`, `Noto Sans JP` or `Fira Code`. The app changes as you type.
 - If no installed font has that name, the field is marked and says `Not found on this device, so the default font is used.`
-- Where the browser can list installed fonts, a **Suggest installed fonts** button appears. Select it, allow access if asked, and the font fields then suggest names as you type. This works in Chrome, Edge and the Windows desktop app; elsewhere, type the name.
+- Select **Suggest installed fonts**, and the font fields then suggest the names of the fonts installed on your device as you type. The desktop app reads them on Windows, macOS and Linux. In the browser the button appears in Chrome and Edge, which ask for permission first; in other browsers, type the name.
 
 These settings are saved on this device, so the desktop app and each browser keep their own.
 
 ## Keyboard shortcuts
 
-Open the Keyboard shortcuts dialog with Ctrl+/, with the **Keyboard shortcuts** command, with the **?** button of the palette or with the **Keyboard shortcuts** button in Preferences. It lists every shortcut in four groups: **General**, **Request**, **Tabs** and **Navigation**.
+Open the Keyboard shortcuts dialog with Ctrl+/, with the **Keyboard shortcuts** command, with the **?** button of the palette or with the **Keyboard shortcuts** button in Preferences. It lists every shortcut in four groups: **General**, **Request**, **Tabs** and **Navigation**. Below them, **Moving around** lists the keys that work inside lists, tabs and menus; those cannot be changed.
 
 ![The Keyboard shortcuts dialog listing general, request and tab shortcuts, each with buttons to change or remove it](../screenshots/shortcuts.png)
 
@@ -155,6 +155,9 @@ Open the Keyboard shortcuts dialog with Ctrl+/, with the **Keyboard shortcuts** 
 | Tabs | Go to tab 1 to 9 (9 is the last tab) | Alt+1 to 9 | Alt+1 to 9 |
 | Navigation | Toggle sidebar | Ctrl+B | Ctrl+B |
 | Navigation | Search the sidebar | Ctrl+Shift+F | Ctrl+Shift+F |
+| Navigation | Next pane | F6 | F6 |
+| Navigation | Previous pane | Shift+F6 | Shift+F6 |
+| Navigation | Go to the URL | Ctrl+L | Ctrl+L |
 | Navigation | Switch workspace | Ctrl+Shift+O | Not available |
 | Navigation | Next workspace | Ctrl+Shift+] | Not available |
 | Navigation | Previous workspace | Ctrl+Shift+[ | Not available |
@@ -187,6 +190,44 @@ A combination must include Ctrl, Alt or the command key. A function key can be u
 - For **Go to tab 1 to 9**, a combination without a number key. The other tabs use the same modifier.
 
 Your changes are saved with your preferences.
+
+## Move around with the keyboard
+
+Everything in the main window can be reached without a mouse.
+
+![The Keyboard shortcuts dialog showing the navigation shortcuts and the Moving around keys](../screenshots/keyboard-navigation.png)
+
+### Panes
+
+The window has five panes: the sidebar, the open tabs, the address bar, the request and the response. F6 moves to the next pane and Shift+F6 to the previous one; a pane that is hidden, such as a closed sidebar, is skipped. Each pane remembers where you were, so coming back puts you on the same field, row or tab. The first visit lands on the selected row, tab or the URL field.
+
+Ctrl+L goes straight to the URL field, and Ctrl+Shift+F to the sidebar search. These, too, can be changed in the Keyboard shortcuts dialog.
+
+### Lists, tabs and options
+
+Each list, row of tabs and set of options is one stop for the Tab key, so Tab moves from one group to the next instead of through every item. Inside a group:
+
+| Keys | Where | What they do |
+| --- | --- | --- |
+| Up Arrow, Down Arrow, Home, End | Collection tree, history, menus | Move to the previous, next, first or last item |
+| Page Up, Page Down | Collection tree | Move a screen up or down |
+| Left Arrow, Right Arrow, Home, End | Open tabs, the request and response sections, option buttons such as **Theme** | Move to and select the previous, next, first or last tab or option |
+| Right Arrow | Collection tree | Open a closed folder, or move to its first item |
+| Left Arrow | Collection tree | Close an open folder, or move to the folder that holds the row |
+| Enter | Collection tree | Open the request in a tab, or open or close the folder |
+| Space | Collection tree | Preview the request, or open or close the folder |
+| Start typing | Collection tree | Jump to the next request or folder whose name starts with what you type. Accents and letter case are ignored, and any script works |
+| F2 | Collection tree | Rename the request or folder |
+| Delete or Ctrl+Backspace | Collection tree | Delete the request or folder, after you confirm |
+| Delete or Ctrl+Backspace | Open tabs | Close the tab |
+| Delete or Ctrl+Backspace | History | Remove the entry |
+| Shift+F10 or the Menu key | Collection tree | Show the actions for the request or folder |
+| Down Arrow | Sidebar search fields | Move into the results |
+| Esc | Menus and dialogs | Close them and go back to where you were |
+
+Alt+Shift+Left Arrow and Alt+Shift+Right Arrow move the focused tab, and the tree keeps its keys for moving, copying and duplicating rows; see [Move, copy and duplicate](collections-and-git.md#move-copy-and-duplicate).
+
+Closing a dialog or a menu puts you back on the item that opened it. After you delete a row, close a tab or remove a history entry, the focus moves to the next one.
 
 ## About
 
