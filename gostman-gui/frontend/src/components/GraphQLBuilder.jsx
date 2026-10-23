@@ -6,6 +6,7 @@ import { Input } from "./ui/input"
 import { Notice, PanelBody, SIDE_PANE, SectionLabel, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { VirtualList } from "./ui/VirtualList"
+import { SkeletonLines } from "./ui/skeleton"
 import { useDebouncedValue } from "../hooks/useDebouncedValue"
 import { BUILDER_TEXT, ROW_ARGUMENT, ROW_FIELD, ROW_FRAGMENT, buildRows, filterRows } from "../lib/graphqlBuilder"
 import { firstOperation, parseQuery, setArgumentIncluded, setFieldSelected, setFragmentSelected } from "../lib/graphqlDocument"
@@ -147,7 +148,7 @@ const GraphQLBuilderTree = memo(function GraphQLBuilderTree({ index, query, vari
 function BuilderContent({ schema, query, variables, onChange }) {
   const index = useMemo(() => (schema?.introspection ? buildIndex(schema.introspection) : null), [schema])
   if (index) return <GraphQLBuilderTree index={index} query={query} variables={variables} onChange={onChange} />
-  if (schema?.loading) return <p className="p-3 text-xs text-muted-foreground">{BUILDER_TEXT.loading}</p>
+  if (schema?.loading) return <SkeletonLines label={BUILDER_TEXT.loading} lines={6} />
   if (schema?.error) return <Notice tone="destructive">{schema.error}</Notice>
   return (
     <PanelBody>

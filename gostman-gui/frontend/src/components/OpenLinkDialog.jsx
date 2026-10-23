@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Button } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { SkeletonLines } from "./ui/skeleton"
 import { describeCounts } from "../lib/importCounts"
 import { FORMAT_LABELS } from "../lib/importText"
 import { pluralize } from "../lib/dataUtils"
@@ -84,7 +85,7 @@ function Review({ link, fetchLink, importer, onImport, onClose }) {
         <p className="text-xs text-muted-foreground">{OPEN_LINK_TEXT.intro}</p>
         <Source link={link} />
         <p className="text-xs text-warning">{OPEN_LINK_TEXT.trustNote}</p>
-        {state === FETCHING && <p role="status" className="text-xs text-muted-foreground">{OPEN_LINK_TEXT.downloading}</p>}
+        {state === FETCHING && <SkeletonLines label={OPEN_LINK_TEXT.downloading} lines={3} className="p-0" />}
         {state.status === FAILED && <p role="alert" className="text-xs text-destructive">{state.error}</p>}
         {state.status === READY && <Detected result={state.result} host={state.host} />}
       </DialogBody>

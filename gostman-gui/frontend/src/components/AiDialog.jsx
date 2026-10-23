@@ -1,11 +1,12 @@
 import { useState } from "react"
-import { Loader2, ShieldCheck } from "lucide-react"
+import { ShieldCheck } from "lucide-react"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Notice, SectionLabel } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { Textarea } from "./ui/textarea"
+import { SkeletonLines } from "./ui/skeleton"
 import { formatSize } from "../lib/dataUtils"
 import { hostOf, providerById } from "../lib/ai/providers"
 import {
@@ -71,9 +72,9 @@ function PreviewStage({ dialog, host, skipNextTime, onSkipChange }) {
 
 function RunningStage({ provider }) {
   return (
-    <div role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
-      <Loader2 className="h-4 w-4 animate-spin" />
-      Waiting for {provider.label}
+    <div role="status" className="flex flex-col gap-3">
+      <p className="text-sm text-muted-foreground">Waiting for {provider.label}</p>
+      <SkeletonLines className="p-0" />
     </div>
   )
 }

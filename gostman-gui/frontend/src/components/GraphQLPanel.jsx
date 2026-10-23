@@ -6,6 +6,7 @@ import { EmptyState } from "./ui/emptyState"
 import { Input } from "./ui/input"
 import { Notice, Panel, PanelBody, SIDE_PANE, SectionLabel, Toolbar } from "./ui/panel"
 import { Textarea } from "./ui/textarea"
+import { SkeletonLines } from "./ui/skeleton"
 import { GraphQLBuilder } from "./GraphQLBuilder"
 import { isPlainObject } from "../lib/dataUtils"
 import { GRAPHQL_METHOD } from "../lib/graphqlSchema"
@@ -135,7 +136,7 @@ function SchemaTypes({ types }) {
 
 function SchemaContent({ schema }) {
   if (schema?.types) return <SchemaTypes types={schema.types} />
-  if (schema?.loading) return <p className="p-3 text-xs text-muted-foreground">Fetching the schema</p>
+  if (schema?.loading) return <SkeletonLines label="Fetching the schema" lines={6} />
   if (schema?.error) return <Notice tone="destructive">{schema.error}</Notice>
   return (
     <PanelBody>

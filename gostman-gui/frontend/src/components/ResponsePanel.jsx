@@ -2,7 +2,7 @@ import { Suspense, lazy, memo, useState, useMemo, useEffect, useRef, useCallback
 import { JsonView, darkStyles } from 'react-json-view-lite'
 import 'react-json-view-lite/dist/index.css'
 import {
-  AlertTriangle, BookmarkPlus, Check, ChevronDown, ChevronUp, Cookie, Copy, Download, FileDigit, FileText, FileX, History, List, Loader2,
+  AlertTriangle, BookmarkPlus, Check, ChevronDown, ChevronUp, Cookie, Copy, Download, FileDigit, FileText, FileX, History, List,
   Maximize2, MessageCircleQuestion, Minimize2, Scissors, Search,
 } from "lucide-react"
 import { ConsolePanel } from "./ConsolePanel"
@@ -20,6 +20,7 @@ import { Notice, SectionLabel, Toolbar } from "./ui/panel"
 import { ProtocolBody } from "./ProtocolBody"
 import { SegmentedControl } from "./ui/segmented"
 import { TabCount, Tabs, TabsList, TabsTrigger } from "./ui/tabs"
+import { SkeletonLines } from "./ui/skeleton"
 import { TestResults, countPassed, hasTestOutput } from "./TestResults"
 import { VisualizeTab } from "./VisualizeTab"
 import { TimelineTab } from "./TimelineTab"
@@ -403,7 +404,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
   const toggleCollapse = useCallback(() => setIsCollapsed((current) => !current), [])
 
   const renderContent = () => {
-    if (loading) return <EmptyState icon={Loader2} title="Sending request" description="Waiting for the server to answer." />
+    if (loading) return <SkeletonLines label="Sending request" lines={6} />
     if (!shown) return <EmptyState icon={FileText} title="No response yet" description="Send a request to see the response here." />
     if (activeTab === TAB_TIMELINE && hasTimeline) return <TimelineTab timeline={shown.timeline} />
     if (shown.error) return <ErrorBody response={shown} onExplain={onExplain} />

@@ -1,11 +1,12 @@
 import { useState } from "react"
-import { Check, Loader2 } from "lucide-react"
+import { Check } from "lucide-react"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Field } from "./ui/field"
 import { Input } from "./ui/input"
 import { Select } from "./ui/select"
+import { Skeleton } from "./ui/skeleton"
 import { PROVIDERS, hostOf, providerById } from "../lib/ai/providers"
 import { useAiStore } from "../lib/ai/session"
 
@@ -57,9 +58,9 @@ function ConnectionTest({ test, onRun, disabled }) {
   return (
     <div className="flex items-center gap-2">
       <Button size="sm" variant="outline" disabled={disabled || test.status === "running"} onClick={onRun}>
-        {test.status === "running" && <Loader2 className="animate-spin" />}
         Test connection
       </Button>
+      {test.status === "running" && <Skeleton className="h-3 w-24" />}
       {test.message && (
         <span role="status" className={`min-w-0 text-xs ${test.status === "error" ? "text-destructive" : "text-muted-foreground"}`}>{test.message}</span>
       )}

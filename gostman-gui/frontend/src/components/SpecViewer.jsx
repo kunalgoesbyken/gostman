@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { FileJson, Loader2, Search, Send } from "lucide-react"
+import { FileJson, Search, Send } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
@@ -7,6 +7,7 @@ import { EmptyState } from "./ui/emptyState"
 import { SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs"
 import { VirtualList } from "./ui/VirtualList"
+import { SkeletonLines } from "./ui/skeleton"
 import { MethodTag } from "./MethodTag"
 import { SchemaTree } from "./SchemaTree"
 import { SearchField } from "./SearchField"
@@ -152,7 +153,7 @@ function useLoaded(load, deps) {
 
 function Status({ state, children }) {
   if (state.isLoading) {
-    return <p role="status" className="flex items-center gap-2 p-4 text-xs text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" />{SPEC_TEXT.loading}</p>
+    return <SkeletonLines label={SPEC_TEXT.loading} lines={6} className="p-4" />
   }
   if (state.error) return <p role="alert" className="p-4 text-xs text-destructive [overflow-wrap:anywhere]">{state.error}</p>
   return children

@@ -8,6 +8,7 @@ import { EmptyState } from "./ui/emptyState"
 import { SPLIT_LIST, SPLIT_PANES, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { TabCount } from "./ui/tabs"
+import { EditorSkeleton } from "./ui/skeleton"
 import { formatSize } from "../lib/dataUtils"
 import { exampleSize, isBinaryExample, parseExamples, servedByDefault } from "../lib/examples"
 import { statusVariant } from "../lib/response"
@@ -62,7 +63,7 @@ function ExampleBody({ example, draft, onDraftChange, EditorComponent }) {
     )
   }
   return (
-    <Suspense fallback={<p className="p-3 text-xs text-muted-foreground">Loading editor</p>}>
+    <Suspense fallback={<EditorSkeleton />}>
       <EditorComponent
         value={draft}
         onChange={(event) => onDraftChange(event.target.value)}

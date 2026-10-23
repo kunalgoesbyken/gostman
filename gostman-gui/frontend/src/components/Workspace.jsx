@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, lazy, Suspense } from "react"
-import { AlertTriangle, Loader2 } from "lucide-react"
+import { AlertTriangle } from "lucide-react"
 import { Sidebar } from "./Sidebar"
 import { RequestBar } from "./RequestBar"
 import { ResponsePanel } from "./ResponsePanel"
@@ -9,7 +9,9 @@ import { NoticeToast } from "./NoticeToast"
 import { StatusBar } from "./StatusBar"
 import { TabBar } from "./TabBar"
 import { RequestTabs } from "./RequestTabs"
+import { AppSkeleton } from "./AppSkeleton"
 import { Button } from "./ui/button"
+import { DialogPending } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
 import { WelcomePanel } from "./WelcomePanel"
 import { GettingStartedButton, useOnboardingCompletion } from "./GettingStarted"
@@ -93,14 +95,6 @@ const createShortcutHandlers = (actions) => {
 }
 
 const messageOf = (error) => error?.message || String(error)
-
-function LoadingOverlay() {
-  return (
-    <div role="status" aria-label="Loading" className="fixed inset-0 z-50 flex items-center justify-center bg-background">
-      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-    </div>
-  )
-}
 
 function LoadFailure({ reason, onRetry }) {
   return (
@@ -372,7 +366,7 @@ function LoadedWorkspace({ backend, onBack }) {
         </main>
       </div>
 
-      <Suspense fallback={<LoadingOverlay />}>
+      <Suspense fallback={<DialogPending />}>
         {codeDialogOpen && codeSnippets && (
           <CodeSnippetDialog snippets={codeSnippets} onClose={closeCodeDialog} />
         )}
@@ -430,6 +424,6 @@ export function Workspace({ backend, onBack }) {
   const { isHydrated, failure, retry } = useStoredData(backend)
   useEffect(() => whenIdle(loadCodeEditor), [])
   if (failure) return <LoadFailure reason={failure} onRetry={retry} />
-  if (!isHydrated) return <LoadingOverlay />
+  if (!isHydrated) return <AppSkeleton />
   return <LoadedWorkspace backend={backend} onBack={onBack} />
 }

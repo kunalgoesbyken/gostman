@@ -3,6 +3,7 @@ import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Notice, Panel, SectionLabel, Toolbar } from "./ui/panel"
 import { Select } from "./ui/select"
+import { EditorSkeleton } from "./ui/skeleton"
 import { isBlankMessage } from "../lib/grpc"
 import { findTool, isLocalCommand } from "../lib/mcp"
 
@@ -120,7 +121,7 @@ export function McpPanel({ request, catalog, editorPath, onUpdateRequest, onLoad
       </Toolbar>
       {selected && <ToolDetails tool={selected} showsSchema={showsSchema} />}
       <div className="min-h-0 flex-1">
-        <Suspense fallback={<p className="p-3 text-xs text-muted-foreground">Loading editor</p>}>
+        <Suspense fallback={<EditorSkeleton />}>
           <EditorComponent
             value={mcpArguments}
             onChange={(event) => onUpdateRequest({ mcpArguments: event.target.value })}

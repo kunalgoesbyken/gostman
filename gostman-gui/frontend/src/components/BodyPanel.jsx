@@ -3,6 +3,7 @@ import { FileX } from "lucide-react"
 import { EmptyState } from "./ui/emptyState"
 import { Notice, Panel, PanelBody, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
+import { EditorSkeleton } from "./ui/skeleton"
 import { FileField } from "./FileField"
 import { SoapBar } from "./SoapBar"
 import { KeyValueEditor } from "./KeyValueEditor"
@@ -47,7 +48,7 @@ function BinaryBody({ body, onChange }) {
 function RawBody({ body, bodyType, editorPath, onChange, EditorComponent }) {
   return (
     <div className="min-h-0 flex-1">
-      <Suspense fallback={<p className="p-3 text-xs text-muted-foreground">Loading editor</p>}>
+      <Suspense fallback={<EditorSkeleton />}>
         <EditorComponent
           value={body}
           onChange={(event) => onChange(event.target.value)}

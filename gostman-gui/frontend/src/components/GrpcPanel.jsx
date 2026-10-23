@@ -4,6 +4,7 @@ import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Notice, Panel, SectionLabel, Toolbar } from "./ui/panel"
 import { Select } from "./ui/select"
+import { EditorSkeleton } from "./ui/skeleton"
 import { MAX_ATTACHMENT_BYTES } from "../lib/attachments"
 import { formatSize } from "../lib/dataUtils"
 import {
@@ -144,7 +145,7 @@ export function GrpcPanel({ request, schema, editorPath, onUpdateRequest, onProt
       </Toolbar>
       {selected?.clientStreaming && <Notice>{STREAM_HINT}</Notice>}
       <div className="min-h-0 flex-1">
-        <Suspense fallback={<p className="p-3 text-xs text-muted-foreground">Loading editor</p>}>
+        <Suspense fallback={<EditorSkeleton />}>
           <EditorComponent
             value={grpcMessage}
             onChange={(event) => onUpdateRequest({ grpcMessage: event.target.value })}

@@ -3,6 +3,7 @@ import { Bookmark, CornerLeftUp } from "lucide-react"
 import { Button } from "./ui/button"
 import { Panel, Toolbar } from "./ui/panel"
 import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
+import { SkeletonLines } from "./ui/skeleton"
 import { AuthPanel } from "./AuthPanel"
 import { BodyPanel } from "./BodyPanel"
 import { KeyValueEditor } from "./KeyValueEditor"
@@ -34,7 +35,7 @@ const ROW_BODY_TYPES = [BODY_FORM, BODY_MULTIPART]
 const PANEL_CLASS = "h-full min-h-0"
 
 function PanelFallback() {
-  return <p className="p-3 text-xs text-muted-foreground">Loading</p>
+  return <SkeletonLines label="Loading" />
 }
 
 function TabBadge({ value }) {

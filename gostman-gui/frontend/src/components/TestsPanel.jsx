@@ -7,6 +7,7 @@ import { Input } from "./ui/input"
 import { Panel, PanelBody, SectionLabel, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { Select } from "./ui/select"
+import { EditorSkeleton } from "./ui/skeleton"
 import { ROW_GRID, ROW_STACK } from "./KeyValueEditor"
 import {
   BLANK_ASSERTION, OPERATORS, isBlankAssertion, operatorOf, parseAssertions, serializeAssertions,
@@ -114,7 +115,7 @@ export function AssertionEditor({ assertions, onChange }) {
 export function ScriptEditor({ value, path, onChange, EditorComponent }) {
   return (
     <div className="min-h-0 flex-1">
-      <Suspense fallback={<p className="p-3 text-xs text-muted-foreground">Loading editor</p>}>
+      <Suspense fallback={<EditorSkeleton />}>
         <EditorComponent
           value={value}
           onChange={(event) => onChange(event.target.value)}

@@ -4,6 +4,8 @@ import { IconButton } from "./button"
 import { useFocusTrap } from "../../hooks/useFocusTrap"
 import { cn } from "../../lib/utils"
 
+const DIALOG_OVERLAY = "fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 max-sm:p-2"
+
 const DIALOG_SIZES = {
   sm: "max-w-md",
   lg: "h-[36rem] max-w-3xl max-sm:h-full",
@@ -22,7 +24,7 @@ export function Dialog({ label, size = "sm", onClose, className, children }) {
   }, [onClose])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 max-sm:p-2" onMouseDown={onClose}>
+    <div className={DIALOG_OVERLAY} onMouseDown={onClose}>
       <div
         ref={dialogRef}
         tabIndex={-1}
@@ -40,6 +42,10 @@ export function Dialog({ label, size = "sm", onClose, className, children }) {
       </div>
     </div>
   )
+}
+
+export function DialogPending() {
+  return <div role="status" aria-label="Loading" className={DIALOG_OVERLAY} />
 }
 
 export function DialogHeader({ onClose, children }) {
