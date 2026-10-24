@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
-  Bookmark, ChevronsDownUp, ClipboardPaste, Gauge, Clock, MonitorDown, Info, Hand, Folder, FolderOpen, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Pin, Plus, Radio, RotateCcw, Save, Search, Send,
-  Bot, Server, Settings, Share2, ShieldAlert, ShieldCheck, SlidersHorizontal, Undo2, Upload, X,
+  Bookmark, ChevronsDownUp, ClipboardPaste, Gauge, Clock, MonitorDown, Info, Hand, Folder, FolderOpen, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Pin, Plus, Radio, Save, Search, Send,
+  Bot, Server, Settings, Share2, ShieldAlert, ShieldCheck, SlidersHorizontal, Trash2, Undo2, Upload, X,
 } from "lucide-react"
 import { MethodTag } from "../MethodTag"
 import { fuzzyScore } from "../../lib/fuzzy"
 import { PREFERENCES_TEXT } from "../../lib/preferencesText"
 import { ABOUT_TEXT } from "../../lib/aboutText"
+import { DATA_TEXT } from "../../lib/dataText"
 import { INSTALL_TEXT } from "../../lib/installText"
 import { SCAN_TEXT } from "../../lib/scanText"
 import { useInstallable } from "../../lib/pwa"
@@ -57,7 +58,7 @@ const COMMANDS = [
   { id: "clear-history", label: "Clear history", description: "Delete every history entry", icon: History, action: "clearHistory" },
   { id: "welcome", label: WELCOME_TEXT.commandTitle, description: WELCOME_TEXT.commandDescription, icon: Hand, action: "showWelcome" },
   { id: "about", label: ABOUT_TEXT.commandTitle, description: ABOUT_TEXT.commandDescription, icon: Info, action: "about" },
-  { id: "reset", label: "Reset app", description: "Delete all data and reload", icon: RotateCcw, action: "reset", destructive: true },
+  { id: "reset", label: DATA_TEXT.commandTitle, description: DATA_TEXT.commandDescription, icon: Trash2, keywords: DATA_TEXT.commandKeywords, action: "reset", destructive: true },
 ]
 
 const LOAD_TEST_COMMAND = { id: "load-test", label: LOAD_TEST_TEXT.commandTitle, description: LOAD_TEST_TEXT.commandDescription, icon: Gauge, keywords: "performance stress", action: "loadTest" }
@@ -300,6 +301,7 @@ function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspace
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
+        data-surface="menu"
         onMouseDown={(event) => event.stopPropagation()}
         onKeyDown={handleKeyDown}
         className="flex max-h-full w-full max-w-xl flex-col overflow-hidden rounded-lg border border-border bg-background shadow-lg"

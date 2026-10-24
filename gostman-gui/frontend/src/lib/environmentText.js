@@ -40,6 +40,11 @@ export const ENVIRONMENT_TEXT = {
   promptCancel: "Cancel",
 }
 
+export const COLOR_TEXT = {
+  names: { red: "Red", orange: "Orange", green: "Green", blue: "Blue", purple: "Purple", gray: "Gray" },
+  automatic: (name) => `${name}, picked automatically`,
+}
+
 export const ENVIRONMENT_COLORS = {
   red: "bg-red-500",
   orange: "bg-orange-500",

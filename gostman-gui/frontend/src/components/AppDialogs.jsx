@@ -7,12 +7,15 @@ import { PreferencesDialog } from "./PreferencesDialog"
 import { ShortcutsDialog } from "./ShortcutsDialog"
 import { EnvironmentDialog } from "./EnvironmentDialog"
 import { VariablePromptDialog } from "./VariablePromptDialog"
+import { DeleteDataDialog } from "./DeleteDataDialog"
 import { useAppStore } from "../store/appStore"
 
 export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWorkspaces, hasLoadTest }) {
   const alertDialog = useAppStore((s) => s.alertDialog)
   const confirmDialog = useAppStore((s) => s.confirmDialog)
   const promptDialog = useAppStore((s) => s.promptDialog)
+  const deleteDataDialog = useAppStore((s) => s.deleteDataDialog)
+  const closeDeleteData = useAppStore((s) => s.closeDeleteData)
   const commandPaletteOpen = useAppStore((s) => s.commandPaletteOpen)
   const environments = useAppStore((s) => s.environments)
   const activeEnvironmentId = useAppStore((s) => s.activeEnvironmentId)
@@ -55,9 +58,22 @@ export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWork
 
       {aboutOpen && <AboutDialog onClose={closeAbout} />}
       {shortcutsDialogOpen && <ShortcutsDialog onClose={closeShortcutsDialog} />}
-      {preferencesDialogOpen && <PreferencesDialog listFonts={listFonts} windowFrame={windowFrame} onClose={closePreferencesDialog} />}
+      {preferencesDialogOpen && <PreferencesDialog listFonts={listFonts} windowFrame={windowFrame} onCommand={onCommand} onClose={closePreferencesDialog} />}
       {environmentDialogOpen && <EnvironmentDialog secrets={secrets} onClose={closeEnvironmentDialog} />}
       <VariablePromptDialog />
+      {deleteDataDialog.isOpen && (
+        <DeleteDataDialog
+          onDelete={() => {
+            closeDeleteData()
+            deleteDataDialog.onDelete()
+          }}
+          onExport={() => {
+            closeDeleteData()
+            onCommand("export")
+          }}
+          onClose={closeDeleteData}
+        />
+      )}
 
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}

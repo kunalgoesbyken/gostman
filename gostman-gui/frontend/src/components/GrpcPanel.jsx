@@ -154,6 +154,7 @@ export function GrpcPanel({ request, schema, editorPath, onUpdateRequest, onProt
             variables
             fileReads={false}
             height="100%"
+            surface="body"
           />
         </Suspense>
       </div>

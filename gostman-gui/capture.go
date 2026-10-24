@@ -80,7 +80,7 @@ func (a *App) ClearCaptured() {
 	captureJournal.Clear()
 }
 
-func (a *App) stopServersOnQuit(ctx context.Context) {
+func (a *App) stopServers(ctx context.Context) {
 	a.stopMockOnQuit(ctx)
 	a.StopCapture()
 	a.StopLoadTest()

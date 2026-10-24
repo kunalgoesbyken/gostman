@@ -2,6 +2,7 @@ import { useState } from "react"
 import { KeyRound, MonitorDown, Pencil, Plus, Trash2 } from "lucide-react"
 import { BrandIcon } from "./ui/brandIcon"
 import { Button, IconButton } from "./ui/button"
+import { ColorPicker } from "./ui/colorPicker"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
 import { FIELD_COLUMNS, Field } from "./ui/field"
@@ -9,13 +10,15 @@ import { Input } from "./ui/input"
 import { Notice, SectionLabel } from "./ui/panel"
 import { Select } from "./ui/select"
 import { Switch } from "./ui/switch"
+import { ConnectionMark } from "./ConnectionMark"
 import { BLANK_REFERENCE, ReferenceTarget } from "./SecretReferenceFields"
 import { useSecretConnections } from "../hooks/useSecretConnections"
+import { automaticColor, connectionColor } from "../lib/secretOrigins"
 import { SECRETS_TEXT as TEXT } from "../lib/secretsText"
 import { useAppStore } from "../store/appStore"
 import { cn } from "../lib/utils"
 
-const NEW_CONNECTION = { alias: "", kind: "", values: {}, stored: [], isSaved: false }
+const NEW_CONNECTION = { alias: "", kind: "", color: "", values: {}, stored: [], isSaved: false }
 
 const labelOf = (kind, field) => TEXT.kindFields[kind]?.[field.name] || TEXT.fields[field.name] || field.name
 
@@ -46,7 +49,7 @@ function useAttempt() {
 function ConnectionRow({ connection, onSwitch, onEdit, onRemove }) {
   return (
     <div className="flex h-9 items-center gap-3 border-b border-border px-4">
-      <BrandIcon brand={connection.kind} fallback={KeyRound} className="text-muted-foreground" />
+      <ConnectionMark kind={connection.kind} color={connectionColor(connection)} className="text-muted-foreground" />
       <span className={cn("min-w-0 flex-1 truncate text-xs font-medium", connection.disabled && "text-muted-foreground")}>{connection.alias}</span>
       <span className="truncate text-xs text-muted-foreground">{TEXT.kinds[connection.kind] || connection.kind}</span>
       <Switch label={TEXT.switchLabel(connection.alias)} checked={!connection.disabled} onCheckedChange={onSwitch} className="w-14">
@@ -202,6 +205,10 @@ function ConnectionForm({ draft, isNew, kinds, secrets, onChange, onFilled }) {
           onChange={(event) => onChange({ ...draft, alias: event.target.value })}
         />
       </Field>
+      <Field label={TEXT.colour} grouped>
+        <ColorPicker label={TEXT.colour} value={draft.color} automatic={draft.alias.trim() && automaticColor(draft.alias.trim())} onChange={(color) => onChange({ ...draft, color })} />
+      </Field>
+      <FieldNote className="text-muted-foreground">{TEXT.colourNote}</FieldNote>
       <Field label={TEXT.kind}>
         <Select value={draft.kind} disabled={!isNew} onChange={(event) => onChange({ ...draft, kind: event.target.value, values: {} })}>
           {kinds.map((candidate) => (
@@ -256,7 +263,7 @@ function ConnectionManager({ secrets, onClose }) {
 
   const startEditing = (connection) => {
     setProblem("")
-    setEditing({ ...connection, values: connection.values || {}, stored: connection.stored || [], isSaved: true })
+    setEditing({ ...connection, color: connection.color || "", values: connection.values || {}, stored: connection.stored || [], isSaved: true })
   }
 
   const fill = (kindName, values) => setEditing((current) => (
@@ -265,7 +272,7 @@ function ConnectionManager({ secrets, onClose }) {
 
   const save = async () => {
     try {
-      await secrets.save({ alias: editing.alias, kind: editing.kind, values: editing.values })
+      await secrets.save({ alias: editing.alias, kind: editing.kind, color: editing.color, values: editing.values })
       setEditing(null)
     } catch (error) {
       setProblem(error.message)

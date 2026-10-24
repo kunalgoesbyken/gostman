@@ -20,7 +20,7 @@ function useEditorConfig(language, variables, fileReads) {
   )
 }
 
-export function CodeEditor({ value = '', onChange, language = 'json', path, height = '300px', variables = false, fileReads = true }) {
+export function CodeEditor({ value = '', onChange, language = 'json', path, height = '300px', variables = false, fileReads = true, surface }) {
   const hostRef = useRef(null)
   const viewRef = useRef(null)
   const onChangeRef = useRef(onChange)
@@ -63,7 +63,7 @@ export function CodeEditor({ value = '', onChange, language = 'json', path, heig
     view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: value }, annotations: externalChange.of(true) })
   }, [value])
 
-  return <div ref={hostRef} className="overflow-hidden" style={{ height, fontSize: editorFontSize }} />
+  return <div ref={hostRef} data-surface={surface} className="overflow-hidden" style={{ height, fontSize: editorFontSize }} />
 }
 
 export function CodeDiff({ original, modified, language }) {

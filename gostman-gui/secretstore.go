@@ -80,6 +80,24 @@ func (v *secretVault) remove(key string) error {
 	return v.dropFromFile(key)
 }
 
+func (v *secretVault) wipe() error {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	if v.useKeyring {
+		_ = keyring.DeleteAll(keychainService)
+	}
+	return removeIfPresent(v.path(vaultFileName), v.path(vaultKeyName), v.path(vaultIndexName))
+}
+
+func forgetSecrets() error {
+	connections.mu.Lock()
+	defer connections.mu.Unlock()
+	if err := removeIfPresent(connections.path); err != nil {
+		return err
+	}
+	return vault.wipe()
+}
+
 func (v *secretVault) dropFromFile(key string) error {
 	values, err := v.readFile()
 	if err != nil {

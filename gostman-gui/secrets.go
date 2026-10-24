@@ -27,6 +27,7 @@ type SecretConnection struct {
 	Values   map[string]string `json:"values"`
 	Stored   []string          `json:"stored,omitempty"`
 	Disabled bool              `json:"disabled,omitempty"`
+	Color    string            `json:"color,omitempty"`
 }
 
 type connectionBook struct {
@@ -38,6 +39,7 @@ type connectionRecord struct {
 	Kind     string            `json:"kind"`
 	Values   map[string]string `json:"values"`
 	Disabled bool              `json:"disabled,omitempty"`
+	Color    string            `json:"color,omitempty"`
 }
 
 var (
@@ -137,14 +139,14 @@ func (a *App) SecretConnections() ([]SecretConnection, error) {
 	for _, alias := range slices.Sorted(maps.Keys(records)) {
 		record := records[alias]
 		stored := slices.Sorted(maps.Keys(storedCredentials(alias, record)))
-		listed = append(listed, SecretConnection{Alias: alias, Kind: record.Kind, Values: record.Values, Stored: stored, Disabled: record.Disabled})
+		listed = append(listed, SecretConnection{Alias: alias, Kind: record.Kind, Values: record.Values, Stored: stored, Disabled: record.Disabled, Color: record.Color})
 	}
 	return listed, nil
 }
 
 func splitConnection(connection SecretConnection) (connectionRecord, map[string]string) {
 	secretFields := secrets.SecretFields(connection.Kind)
-	record := connectionRecord{Kind: connection.Kind, Values: map[string]string{}}
+	record := connectionRecord{Kind: connection.Kind, Values: map[string]string{}, Color: strings.TrimSpace(connection.Color)}
 	entered := map[string]string{}
 	for field, value := range connection.Values {
 		switch {

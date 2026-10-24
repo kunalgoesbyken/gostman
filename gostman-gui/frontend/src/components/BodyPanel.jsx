@@ -56,6 +56,7 @@ function RawBody({ body, bodyType, editorPath, onChange, EditorComponent }) {
           path={editorPath}
           variables
           height="100%"
+          surface="body"
         />
       </Suspense>
     </div>

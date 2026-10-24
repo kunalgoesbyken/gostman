@@ -122,6 +122,7 @@ export function ScriptEditor({ value, path, onChange, EditorComponent }) {
           language="javascript"
           path={path}
           height="100%"
+          surface="script"
         />
       </Suspense>
     </div>

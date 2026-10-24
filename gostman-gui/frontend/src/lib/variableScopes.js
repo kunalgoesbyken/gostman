@@ -1,6 +1,7 @@
 import { isPlainObject, parseJSON } from './dataUtils'
 import { placeholderNames } from './placeholders'
 import { parseRows } from './rows'
+import { connectionDirectory } from './secretOrigins'
 import { PROCESS_PREFIX, PROMPT_PREFIX } from './variableNames'
 
 export const SCOPE_GLOBAL = 'global'
@@ -128,9 +129,10 @@ export const exportableVariables = (resolved) => (
   Object.fromEntries(Array.from(resolved).filter(([, { secret }]) => !secret).map(([name, { value }]) => [name, value]))
 )
 
-export function variableMap(resolved) {
+export function variableMap(resolved, connections = null) {
   const map = new Map(Array.from(resolved, ([name, { value }]) => [name, value]))
   map.details = resolved
+  map.connections = connections && connectionDirectory(connections)
   return map
 }
 

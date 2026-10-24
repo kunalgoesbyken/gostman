@@ -1,4 +1,4 @@
-import { ArrowLeft, Download, Import, PanelLeft, RotateCcw, Search } from "lucide-react"
+import { ArrowLeft, Download, Import, PanelLeft, Search } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { EnvironmentSwitcher } from "./EnvironmentSwitcher"
 import { StorageMenu } from "./StorageMenu"
@@ -6,6 +6,8 @@ import { WindowControls } from "./WindowControls"
 import { isDesktopShell, isDragRegion, windowControls } from "../lib/windowControls"
 import { promptInstall, useInstallable } from "../lib/pwa"
 import { INSTALL_TEXT } from "../lib/installText"
+import { SIDEBAR_TEXT } from "../lib/sidebarText"
+import { hintWithShortcut } from "../lib/shortcuts"
 import { useShortcutLabel } from "../hooks/useShortcuts"
 import { useWindowFrame } from "../hooks/useWindowFrame"
 import { Logo } from "./ui/logo"
@@ -17,15 +19,16 @@ const toggleMaximiseOnDragRegion = (event) => {
   if (isDragRegion(event.target)) windowControls.toggleMaximise()
 }
 
-export function AppHeader({ storage, windowFrame, onImport, onReset, onOpenCommands, onToggleSidebar, onBack, gettingStarted }) {
+export function AppHeader({ storage, windowFrame, onImport, onOpenCommands, onToggleSidebar, onBack, gettingStarted }) {
   const isDesktop = isDesktopShell()
   const drawsTitleBar = Boolean(useWindowFrame(windowFrame)?.frameless)
   const paletteShortcut = useShortcutLabel("commandPalette")
+  const sidebarShortcut = useShortcutLabel("toggleSidebar")
   const canInstall = useInstallable()
 
   return (
     <header className="relative flex h-12 shrink-0 items-center gap-3 border-b border-border bg-background px-3 max-sm:gap-2" style={drawsTitleBar ? DRAG : undefined} onDoubleClick={drawsTitleBar ? toggleMaximiseOnDragRegion : undefined}>
-      <IconButton label="Toggle sidebar" icon={PanelLeft} size="icon" onClick={onToggleSidebar} className="md:hidden" />
+      <IconButton label={hintWithShortcut(SIDEBAR_TEXT.toggle, sidebarShortcut)} icon={PanelLeft} size="icon" onClick={onToggleSidebar} style={drawsTitleBar ? NO_DRAG : undefined} />
       {onBack && <IconButton label="Back to the landing page" icon={ArrowLeft} size="icon" onClick={onBack} />}
 
       {onBack || isDesktop ? (
@@ -60,7 +63,6 @@ export function AppHeader({ storage, windowFrame, onImport, onReset, onOpenComma
           <Import />
           Import
         </Button>
-        <IconButton label="Reset app and delete all data" icon={RotateCcw} size="icon" onClick={onReset} className="max-sm:hidden" />
       </div>
       {drawsTitleBar && <WindowControls />}
     </header>

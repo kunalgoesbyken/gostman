@@ -3,8 +3,9 @@ import { createPortal } from "react-dom"
 import { CONTROL_BASE, CONTROL_SIZES } from "./ui/input"
 import { placeBelow, useDismiss } from "./ui/select"
 import { Textarea } from "./ui/textarea"
+import { VariableCard } from "./VariableCard"
 import { useVariableMap } from "../hooks/useVariableMap"
-import { VARIABLE_TEXT, applyCompletion, describeReference, findReferences, isDefined, openReference, suggestNames } from "../lib/variables"
+import { applyCompletion, describeReference, findReferences, openReference, referenceLook, suggestNames } from "../lib/variables"
 import { cn } from "../lib/utils"
 import "./variables.css"
 
@@ -19,9 +20,9 @@ function Mirror({ text, variables, innerRef, className }) {
     let at = 0
     for (const ref of findReferences(text)) {
       if (ref.start > at) out.push(<span key={`t${at}`}>{text.slice(at, ref.start)}</span>)
-      const defined = isDefined(ref.name, variables)
+      const look = referenceLook(ref.name, variables)
       out.push(
-        <span key={`v${ref.start}`} data-var={ref.name} className={defined ? "gm-var-ok" : "gm-var-missing"}>
+        <span key={`v${ref.start}`} data-var={ref.name} className={look.className} {...look.attributes}>
           {text.slice(ref.start, ref.end)}
         </span>,
       )
@@ -46,12 +47,9 @@ function Tooltip({ info, anchor }) {
     <div
       role="tooltip"
       style={{ position: "fixed", left: anchor.left, top: anchor.bottom + 4 }}
-      className="pointer-events-none z-50 max-w-xs break-all rounded-md border border-border bg-card px-2 py-1 font-mono text-xs text-foreground shadow-lg"
+      className="pointer-events-none z-50 max-w-xs break-all rounded-md border border-border bg-card px-2 py-1 text-xs text-foreground shadow-lg"
     >
-      <span className="text-muted-foreground">{info.name}</span>
-      <span className="text-muted-foreground"> = </span>
-      {info.defined ? info.shown : <span className="text-warning">{VARIABLE_TEXT.undefinedName}</span>}
-      {info.source && <span className="text-muted-foreground"> ({info.source})</span>}
+      <VariableCard info={info} />
     </div>
   )
 }

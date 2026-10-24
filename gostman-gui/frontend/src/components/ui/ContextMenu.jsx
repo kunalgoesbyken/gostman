@@ -92,6 +92,7 @@ export function ContextMenu({ position, title, items, onClose }) {
     <div
       ref={menuRef}
       role="menu"
+      data-surface="menu"
       onKeyDown={handleKeyDown}
       style={placement || { left: 0, top: 0, visibility: "hidden" }}
       className="fixed z-50 max-h-72 w-56 overflow-y-auto rounded-md border border-border bg-background py-1 shadow-lg"

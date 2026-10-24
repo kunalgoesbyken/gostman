@@ -273,12 +273,29 @@ func (a *App) SaveEnvironments(environments []Environment, activeId string) erro
 }
 
 func (a *App) ResetData() error {
+	a.stopServers(a.ctx)
+	captureJournal.Clear()
 	dataMutex.Lock()
 	defer dataMutex.Unlock()
 	if err := forgetWorkspaces(); err != nil {
 		return err
 	}
+	if err := forgetSecrets(); err != nil {
+		return err
+	}
+	if err := removeIfPresent(filepath.Join(appFolder, mockAppDataFile)); err != nil {
+		return err
+	}
 	return writeData(SavedData{})
+}
+
+func removeIfPresent(paths ...string) error {
+	for _, path := range paths {
+		if err := os.Remove(path); err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+	}
+	return nil
 }
 
 func (a *App) SendRequest(id string, request engine.Request) engine.Response {

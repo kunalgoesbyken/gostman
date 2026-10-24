@@ -1,4 +1,5 @@
 import { isSensitiveName } from "./sensitiveNames.js"
+import { ORIGIN_UNKNOWN, secretOrigin } from "./secretOrigins.js"
 import { mapText, someText } from "./textValues.js"
 import { DYNAMIC_PREFIX, DYNAMIC_VARIABLES, FAKER_VARIABLES, SOURCE_LABELS, callsFile, describeDynamic, isDynamicName, isFakerQuery, isFileName, isPromptName } from "./variableNames.js"
 
@@ -67,7 +68,15 @@ export function describeReference(name, variables) {
   const detail = variables.details?.get(name)
   const secret = defined && (detail?.secret === true || looksSecret(name))
   const source = detail ? SOURCE_LABELS[detail.source] : ""
-  return { name, defined, value, shown: secret ? MASKED_VALUE : value, secret, kind: null, source }
+  const origin = secretOrigin(detail?.ref, variables.connections)
+  return { name, defined, value, shown: secret ? MASKED_VALUE : value, secret, kind: null, source, origin }
+}
+
+export function referenceLook(name, variables) {
+  const origin = secretOrigin(variables.details?.get(name)?.ref, variables.connections)
+  if (origin?.state === ORIGIN_UNKNOWN) return { className: "gm-var-missing" }
+  if (origin) return { className: "gm-var-secret", attributes: { "data-secret-color": origin.color, "data-secret-state": origin.state } }
+  return { className: isDefined(name, variables) ? "gm-var-ok" : "gm-var-missing" }
 }
 
 export function openReference(text, caret) {

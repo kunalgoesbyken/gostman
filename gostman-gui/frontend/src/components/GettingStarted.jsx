@@ -160,6 +160,7 @@ function Popover({ anchor, buttonRef, onClose, children }) {
       ref={popoverRef}
       role="dialog"
       aria-label={TEXT.title}
+      data-surface="menu"
       style={style}
       className="fixed z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto rounded-md border border-border bg-background p-3 shadow-lg"
     >

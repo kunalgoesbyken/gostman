@@ -233,9 +233,12 @@ async function authorize(config, variables) {
   return { code, codeVerifier: started.codeVerifier, redirectUri: started.redirectUri }
 }
 
+const damagedCopies = () => Object.keys(storage).filter((key) => key.startsWith(DAMAGED_DATA_PREFIX))
+
 async function reset() {
   cachedDocument = null
   storage.removeItem(DATA_KEY)
+  damagedCopies().forEach((key) => storage.removeItem(key))
 }
 
 async function saveFile(name, base64, mime) {

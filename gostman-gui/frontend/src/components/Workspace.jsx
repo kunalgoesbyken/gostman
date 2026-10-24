@@ -19,18 +19,20 @@ import { selectActiveVariables, selectIsDialogOpen, selectResolvedVariables, use
 import { useAutoSave } from "../hooks/useAutoSave"
 import { useRequestFieldHandlers } from "../hooks/useRequestFieldHandlers"
 import { useShortcuts } from "../hooks/useShortcuts"
+import { useSharedSecretConnections } from "../hooks/useSecretConnections"
 import { useCaptureStore } from "../lib/captureSession"
 import { useLoadTestStore } from "../lib/loadTestSession"
 import { useAiStore } from "../lib/ai/session"
 import { TASK_EXPLAIN, TASK_REQUEST } from "../lib/ai/tasks"
-import { MIN_REQUEST_HEIGHT_PX } from "../lib/layout"
+import { MIN_REQUEST_HEIGHT_PX, isNarrowViewport } from "../lib/layout"
 import { isBlankRequest } from "../lib/requestChanges"
 import { forgetSharedLink, pendingSharedLink, subscribeToSharedLink } from "../lib/sharedLink"
 import { currentOpenLink, dismissOpenLink, subscribeToOpenLink } from "../lib/openLink"
 import { exportableVariables, withoutSecretValues } from "../lib/variableScopes"
 import { createWorkspaceActions } from "../lib/workspaceActions"
 import { whenIdle } from "../lib/idle"
-import { PANE_ADDRESS, cyclePane, focusPane, watchPaneFocus } from "../lib/panes"
+import { PANE_ADDRESS, PANE_SIDEBAR, cyclePane, focusPane, watchPaneFocus } from "../lib/panes"
+import { SIDEBAR_TEXT } from "../lib/sidebarText"
 
 const CodeSnippetDialog = lazy(() => import("./CodeSnippetDialog").then((module) => ({ default: module.CodeSnippetDialog })))
 const ImportExportDialog = lazy(() => import("./ImportExportDialog").then((module) => ({ default: module.ImportExportDialog })))
@@ -60,6 +62,15 @@ const store = () => useAppStore.getState()
 function focusSidebarSearch() {
   if (!store().isSidebarOpen) store().toggleSidebar()
   requestAnimationFrame(() => document.querySelector("aside input[type=search]")?.focus())
+}
+
+const hasFocusIn = (pane) => Boolean(document.activeElement?.closest(`[data-pane="${pane}"]`))
+
+function returnFocusFromClosedSidebar() {
+  return useAppStore.subscribe((state, previous) => {
+    const isClosing = previous.isSidebarOpen && !state.isSidebarOpen
+    if (isClosing && !isNarrowViewport() && hasFocusIn(PANE_SIDEBAR)) focusPane(PANE_ADDRESS)
+  })
 }
 
 const createShortcutHandlers = (actions) => {
@@ -251,6 +262,7 @@ function LoadedWorkspace({ backend, onBack }) {
   useOnboardingCompletion()
 
   const actions = useMemo(() => createWorkspaceActions(backend), [backend])
+  useSharedSecretConnections(actions.secrets)
   const resolvedVariables = useAppStore(selectResolvedVariables)
   const variablesMap = useMemo(() => exportableVariables(resolvedVariables), [resolvedVariables])
   const shareableEnvironments = useMemo(() => withoutSecretValues(environments), [environments])
@@ -272,6 +284,7 @@ function LoadedWorkspace({ backend, onBack }) {
 
   useShortcuts(shortcuts, !isDialogOpen && !sharedLink && !openLink)
   useEffect(watchPaneFocus, [])
+  useEffect(returnFocusFromClosedSidebar, [])
   usePersistence(backend)
 
   return (
@@ -280,7 +293,6 @@ function LoadedWorkspace({ backend, onBack }) {
         storage={actions.storage}
         windowFrame={backend.windowFrame}
         onImport={actions.openImport}
-        onReset={actions.reset}
         onOpenCommands={openCommandPalette}
         onToggleSidebar={() => actions.runCommand("toggleSidebar")}
         onOpenCookies={openCookiesDialog}
@@ -297,7 +309,7 @@ function LoadedWorkspace({ backend, onBack }) {
             <button
               type="button"
               tabIndex={-1}
-              aria-label="Close sidebar"
+              aria-label={SIDEBAR_TEXT.close}
               onClick={() => actions.runCommand("toggleSidebar")}
               className="absolute inset-0 z-20 bg-black/40 md:hidden"
             />

@@ -159,6 +159,7 @@ export function WorkspaceMenu({ anchor, status, storage, isRestricted, onClose }
       ref={menuRef}
       role="menu"
       aria-label={TEXT.switcherLabel}
+      data-surface="menu"
       onKeyDown={handleKeyDown}
       style={placement || { left: 0, top: 0, visibility: "hidden" }}
       className="fixed z-50 flex max-h-[min(32rem,calc(100dvh-4rem))] w-[min(23rem,calc(100vw-1rem))] flex-col overflow-y-auto rounded-md border border-border bg-background py-1 shadow-lg"

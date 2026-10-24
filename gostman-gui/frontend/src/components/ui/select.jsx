@@ -59,7 +59,7 @@ export function useDismiss(isOpen, close, anchorRef, listRef) {
 }
 
 function OptionIcon({ icon }) {
-  return <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center text-muted-foreground">{icon}</span>
+  return <span className="flex h-3.5 min-w-3.5 shrink-0 items-center justify-center text-muted-foreground">{icon}</span>
 }
 
 export function OptionRow({ id, entry, isSelected, isActive, hasIcons = false, onChoose, onPoint }) {
@@ -174,6 +174,7 @@ const Select = React.forwardRef(function Select(
           ref={listRef}
           id={listId}
           role="listbox"
+          data-surface="menu"
           style={placement}
           className={LIST_CLASS}
         >

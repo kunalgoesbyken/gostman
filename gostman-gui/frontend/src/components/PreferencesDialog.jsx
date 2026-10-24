@@ -1,91 +1,33 @@
-import { useEffect, useId, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { Keyboard } from "lucide-react"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Combobox } from "./ui/combobox"
-import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { Dialog, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
-import { SectionLabel } from "./ui/panel"
-import { RADIO_KEYS, SegmentedControl } from "./ui/segmented"
+import { SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
 import { Select } from "./ui/select"
+import { DataSection } from "./preferences/DataSection"
+import { ChoiceRow, PreferenceRow, optionsOf } from "./preferences/PreferenceRows"
+import { ThemeSection } from "./preferences/ThemeSection"
 import { useAppStore } from "../store/appStore"
 import { awaitsRestart, useWindowFrame } from "../hooks/useWindowFrame"
 import { isFontInstalled, sortedFamilies } from "../lib/fonts"
-import { moveFocus, tabStopOf } from "../lib/rovingFocus"
+import { ORIENTATION, moveFocus } from "../lib/rovingFocus"
+import { scrollIntoStrip } from "../lib/scrollIntoStrip"
+import { readStored, writeStored } from "../lib/storage"
 import {
-  ACCENTS, CONTRASTS, DENSITIES, EDITOR_FONT_SIZES, FONT_NAME_LENGTH, LANGUAGES, REQUEST_TIMEOUT_SECONDS, RESPONSE_LAYOUTS,
-  TEXT_SCALES, THEMES, resetPreferences, updatePreferences, usePreferences,
+  DENSITIES, EDITOR_FONT_SIZES, FONT_NAME_LENGTH, LANGUAGES, REQUEST_TIMEOUT_SECONDS, RESPONSE_LAYOUTS,
+  TEXT_SCALES, resetPreferences, updatePreferences, usePreferences,
 } from "../lib/preferences"
 import { PREFERENCES_TEXT } from "../lib/preferencesText"
 import { cn } from "../lib/utils"
 
 const { fields, sections } = PREFERENCES_TEXT
 
-const optionsOf = (values, labels) => values.map((value) => ({ value, label: labels[value] }))
-
-function PreferenceRow({ label, hint, children }) {
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
-      <span className="min-w-0 flex-1 basis-40 text-xs">
-        {label}
-        {hint && <span className="mt-0.5 block text-2xs text-muted-foreground">{hint}</span>}
-      </span>
-      {children}
-    </div>
-  )
-}
-
-function Section({ title, children }) {
-  return (
-    <section aria-label={title} className="space-y-3">
-      <SectionLabel className="block">{title}</SectionLabel>
-      {children}
-    </section>
-  )
-}
-
-function ChoiceRow({ label, hint, name, options, preferences }) {
-  return (
-    <PreferenceRow label={label} hint={hint}>
-      <SegmentedControl
-        label={label}
-        options={options}
-        value={preferences[name]}
-        onChange={(value) => updatePreferences({ [name]: value })}
-      />
-    </PreferenceRow>
-  )
-}
-
-function AccentRow({ preferences }) {
-  const tabStop = tabStopOf(ACCENTS, preferences.accent)
-
-  return (
-    <PreferenceRow label={fields.accent}>
-      <div role="radiogroup" aria-label={fields.accent} onKeyDown={(event) => moveFocus(event, RADIO_KEYS)} className="flex items-center gap-1.5">
-        {ACCENTS.map((accent) => (
-          <button
-            key={accent}
-            type="button"
-            role="radio"
-            aria-checked={preferences.accent === accent}
-            aria-label={PREFERENCES_TEXT.accents[accent]}
-            tabIndex={accent === tabStop ? 0 : -1}
-            title={PREFERENCES_TEXT.accents[accent]}
-            data-accent={accent}
-            onClick={() => updatePreferences({ accent })}
-            className={cn(
-              "flex h-6 w-6 items-center justify-center rounded-full",
-              preferences.accent === accent && "ring-1 ring-foreground ring-offset-1 ring-offset-background"
-            )}
-          >
-            <span aria-hidden="true" className="h-4 w-4 rounded-full bg-primary" />
-          </button>
-        ))}
-      </div>
-    </PreferenceRow>
-  )
-}
+const PREFERENCES_WINDOW = { id: "preferences", width: 760, height: 560, minWidth: 560, minHeight: 360 }
+const SECTION_STORAGE_KEY = "gostman.preferencesSection"
+const SECTION_KEYS = { selector: "[role=tab]", orientation: ORIENTATION.both, activate: true }
 
 function FontRow({ label, hint, name, isCode, suggestions, preferences }) {
   const saved = preferences[name]
@@ -129,22 +71,7 @@ function useInstalledFonts(listFonts) {
       })
       .catch(() => setStatus(PREFERENCES_TEXT.fontsDenied))
 
-  return { fonts, status, load }
-}
-
-function FontsSection({ preferences, listFonts }) {
-  const installed = useInstalledFonts(listFonts)
-
-  return (
-    <Section title={sections.fonts}>
-      <FontRow label={fields.interfaceFont} hint={PREFERENCES_TEXT.interfaceFontHint} name="interfaceFont" suggestions={installed.fonts} preferences={preferences} />
-      <FontRow label={fields.codeFont} hint={PREFERENCES_TEXT.codeFontHint} name="codeFont" isCode suggestions={installed.fonts} preferences={preferences} />
-      {listFonts && installed.fonts.length === 0 && (
-        <Button variant="outline" size="sm" onClick={installed.load}>{PREFERENCES_TEXT.suggestFonts}</Button>
-      )}
-      {installed.status && <p role="status" className="text-2xs text-muted-foreground">{installed.status}</p>}
-    </Section>
-  )
+  return { fonts, status, load: listFonts ? load : null }
 }
 
 const isWithin = ({ min, max }, number) => Number.isInteger(number) && number >= min && number <= max
@@ -224,9 +151,129 @@ const percentLabels = (language) => {
   return TEXT_SCALES.map((scale) => ({ value: scale, label: format.format(scale / 100) }))
 }
 
-export function PreferencesDialog({ listFonts, windowFrame, onClose }) {
+function AppearanceSection({ preferences, windowFrame }) {
+  return (
+    <>
+      <ChoiceRow label={fields.textScale} name="textScale" options={percentLabels(preferences.language)} preferences={preferences} />
+      <ChoiceRow label={fields.density} name="density" options={optionsOf(DENSITIES, PREFERENCES_TEXT.densities)} preferences={preferences} />
+      <ChoiceRow label={fields.responseLayout} name="responseLayout" options={optionsOf(RESPONSE_LAYOUTS, PREFERENCES_TEXT.layouts)} preferences={preferences} />
+      <SystemTitleBarRow windowFrame={windowFrame} />
+    </>
+  )
+}
+
+function FontsSection({ preferences, installedFonts }) {
+  return (
+    <>
+      <FontRow label={fields.interfaceFont} hint={PREFERENCES_TEXT.interfaceFontHint} name="interfaceFont" suggestions={installedFonts.fonts} preferences={preferences} />
+      <FontRow label={fields.codeFont} hint={PREFERENCES_TEXT.codeFontHint} name="codeFont" isCode suggestions={installedFonts.fonts} preferences={preferences} />
+      {installedFonts.load && installedFonts.fonts.length === 0 && (
+        <Button variant="outline" size="sm" onClick={installedFonts.load}>{PREFERENCES_TEXT.suggestFonts}</Button>
+      )}
+      {installedFonts.status && <p role="status" className="text-2xs text-muted-foreground">{installedFonts.status}</p>}
+    </>
+  )
+}
+
+function EditorSection({ preferences }) {
+  return (
+    <>
+      <NumberRow
+        label={fields.editorFontSize}
+        range={EDITOR_FONT_SIZES}
+        value={preferences.editorFontSize}
+        onCommit={(editorFontSize) => updatePreferences({ editorFontSize })}
+      />
+      <FlagRow label={fields.wrapLines} name="wrapLines" preferences={preferences} />
+    </>
+  )
+}
+
+function RequestsSection({ preferences }) {
+  return (
+    <>
+      <NumberRow
+        label={fields.requestTimeout}
+        hint={PREFERENCES_TEXT.timeoutHint}
+        suffix={PREFERENCES_TEXT.seconds}
+        range={REQUEST_TIMEOUT_SECONDS}
+        value={preferences.requestTimeoutSeconds}
+        onCommit={(requestTimeoutSeconds) => updatePreferences({ requestTimeoutSeconds })}
+      />
+      <FlagRow label={fields.confirmCloseTab} name="confirmCloseTab" preferences={preferences} />
+    </>
+  )
+}
+
+function LanguageSection({ preferences }) {
+  return (
+    <PreferenceRow label={fields.language} hint={PREFERENCES_TEXT.languageHint}>
+      <div className="w-40 max-w-full">
+        <Select aria-label={fields.language} value={preferences.language} onChange={(event) => updatePreferences({ language: event.target.value })}>
+          {LANGUAGES.map((language) => (
+            <option key={language.value} value={language.value}>{PREFERENCES_TEXT.languages[language.value]}</option>
+          ))}
+        </Select>
+      </div>
+    </PreferenceRow>
+  )
+}
+
+const SECTIONS = [
+  { id: "appearance", title: sections.appearance, render: (context) => <AppearanceSection {...context} /> },
+  { id: "theme", title: sections.theme, render: (context) => <ThemeSection {...context} /> },
+  { id: "fonts", title: sections.fonts, render: (context) => <FontsSection {...context} /> },
+  { id: "editor", title: sections.editor, render: (context) => <EditorSection {...context} /> },
+  { id: "requests", title: sections.requests, render: (context) => <RequestsSection {...context} /> },
+  { id: "language", title: sections.language, render: (context) => <LanguageSection {...context} /> },
+  { id: "data", title: sections.data, render: (context) => <DataSection {...context} /> },
+]
+
+const sectionById = (id) => SECTIONS.find((section) => section.id === id) ?? SECTIONS[0]
+
+const rememberedSectionId = () => sectionById(readStored(SECTION_STORAGE_KEY)).id
+
+function SectionTab({ section, isSelected, tabId, panelId, onSelect }) {
+  const tabRef = useRef(null)
+
+  useEffect(() => {
+    if (isSelected) scrollIntoStrip(tabRef.current)
+  }, [isSelected])
+
+  return (
+    <button
+      ref={tabRef}
+      type="button"
+      role="tab"
+      id={tabId}
+      aria-selected={isSelected}
+      aria-controls={isSelected ? panelId : undefined}
+      tabIndex={isSelected ? 0 : -1}
+      onClick={onSelect}
+      className={cn(
+        "flex h-8 shrink-0 items-center whitespace-nowrap rounded-md px-2.5 text-left text-xs",
+        isSelected ? "bg-muted font-medium text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+      )}
+    >
+      {section.title}
+    </button>
+  )
+}
+
+export function PreferencesDialog({ listFonts, windowFrame, onCommand, onClose }) {
   const preferences = usePreferences()
+  const installedFonts = useInstalledFonts(listFonts)
   const openShortcuts = useAppStore((state) => state.openShortcutsDialog)
+  const [selectedId, setSelectedId] = useState(rememberedSectionId)
+  const selected = sectionById(selectedId)
+  const baseId = useId()
+  const tabIdOf = (section) => `${baseId}-${section.id}-tab`
+  const panelId = `${baseId}-panel`
+
+  const select = (id) => {
+    setSelectedId(id)
+    writeStored(SECTION_STORAGE_KEY, id)
+  }
 
   const showShortcuts = () => {
     onClose()
@@ -234,64 +281,45 @@ export function PreferencesDialog({ listFonts, windowFrame, onClose }) {
   }
 
   return (
-    <Dialog label={PREFERENCES_TEXT.title} className="max-w-lg" onClose={onClose}>
+    <Dialog label={PREFERENCES_TEXT.title} size="lg" floating={PREFERENCES_WINDOW} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <DialogTitle>{PREFERENCES_TEXT.title}</DialogTitle>
       </DialogHeader>
-      <DialogBody className="space-y-6">
-        <Section title={sections.appearance}>
-          <ChoiceRow label={fields.theme} name="theme" options={optionsOf(THEMES, PREFERENCES_TEXT.themes)} preferences={preferences} />
-          <ChoiceRow
-            label={fields.contrast}
-            hint={PREFERENCES_TEXT.contrastHint}
-            name="contrast"
-            options={optionsOf(CONTRASTS, PREFERENCES_TEXT.contrasts)}
-            preferences={preferences}
-          />
-          <AccentRow preferences={preferences} />
-          <ChoiceRow label={fields.textScale} name="textScale" options={percentLabels(preferences.language)} preferences={preferences} />
-          <ChoiceRow label={fields.density} name="density" options={optionsOf(DENSITIES, PREFERENCES_TEXT.densities)} preferences={preferences} />
-          <ChoiceRow label={fields.responseLayout} name="responseLayout" options={optionsOf(RESPONSE_LAYOUTS, PREFERENCES_TEXT.layouts)} preferences={preferences} />
-          <SystemTitleBarRow windowFrame={windowFrame} />
-        </Section>
-        <FontsSection preferences={preferences} listFonts={listFonts} />
-        <Section title={sections.editor}>
-          <NumberRow
-            label={fields.editorFontSize}
-            range={EDITOR_FONT_SIZES}
-            value={preferences.editorFontSize}
-            onCommit={(editorFontSize) => updatePreferences({ editorFontSize })}
-          />
-          <FlagRow label={fields.wrapLines} name="wrapLines" preferences={preferences} />
-        </Section>
-        <Section title={sections.requests}>
-          <NumberRow
-            label={fields.requestTimeout}
-            hint={PREFERENCES_TEXT.timeoutHint}
-            suffix={PREFERENCES_TEXT.seconds}
-            range={REQUEST_TIMEOUT_SECONDS}
-            value={preferences.requestTimeoutSeconds}
-            onCommit={(requestTimeoutSeconds) => updatePreferences({ requestTimeoutSeconds })}
-          />
-          <FlagRow label={fields.confirmCloseTab} name="confirmCloseTab" preferences={preferences} />
-        </Section>
-        <Section title={sections.language}>
-          <PreferenceRow label={fields.language} hint={PREFERENCES_TEXT.languageHint}>
-            <div className="w-40 max-w-full">
-              <Select aria-label={fields.language} value={preferences.language} onChange={(event) => updatePreferences({ language: event.target.value })}>
-                {LANGUAGES.map((language) => (
-                  <option key={language.value} value={language.value}>{PREFERENCES_TEXT.languages[language.value]}</option>
-                ))}
-              </Select>
-            </div>
-          </PreferenceRow>
-        </Section>
-        <Button variant="outline" onClick={showShortcuts}>
-          <Keyboard />
-          {PREFERENCES_TEXT.shortcuts}
-        </Button>
-      </DialogBody>
+      <div className={SPLIT_PANES}>
+        <div
+          role="tablist"
+          aria-label={PREFERENCES_TEXT.sectionsLabel}
+          aria-orientation="vertical"
+          onKeyDown={(event) => moveFocus(event, SECTION_KEYS)}
+          className={cn(SPLIT_LIST, "w-44 gap-0.5 overflow-y-auto p-2 max-sm:flex-row max-sm:overflow-x-auto max-sm:scrollbar-none")}
+        >
+          {SECTIONS.map((section) => (
+            <SectionTab
+              key={section.id}
+              section={section}
+              isSelected={section.id === selected.id}
+              tabId={tabIdOf(section)}
+              panelId={panelId}
+              onSelect={() => select(section.id)}
+            />
+          ))}
+        </div>
+        <div
+          key={selected.id}
+          role="tabpanel"
+          id={panelId}
+          aria-labelledby={tabIdOf(selected)}
+          className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-6 py-5 [overflow-wrap:anywhere] max-sm:p-4"
+        >
+          <h3 className="mb-5 text-sm font-semibold">{selected.title}</h3>
+          <div className="space-y-4">{selected.render({ preferences, windowFrame, installedFonts, onCommand })}</div>
+        </div>
+      </div>
       <DialogFooter>
+        <Button variant="ghost" className="mr-auto" onClick={showShortcuts}>
+          <Keyboard />
+          <span className="max-sm:sr-only">{PREFERENCES_TEXT.shortcuts}</span>
+        </Button>
         <Button variant="outline" onClick={resetPreferences}>{PREFERENCES_TEXT.reset}</Button>
         <Button onClick={onClose}>{PREFERENCES_TEXT.close}</Button>
       </DialogFooter>

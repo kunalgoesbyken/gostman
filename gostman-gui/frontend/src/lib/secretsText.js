@@ -12,6 +12,8 @@ export const SECRETS_TEXT = {
   alias: "Name",
   aliasPlaceholder: "production",
   kind: "Service",
+  colour: "Colour",
+  colourNote: "Fields that read from this connection are tinted with its colour. Without a choice, one is picked from the name.",
   save: "Save",
   cancel: "Cancel",
   close: "Close",
@@ -94,6 +96,7 @@ export const SECRETS_TEXT = {
 
 export const REFERENCE_TEXT = {
   offOption: (alias) => `${alias} (off)`,
+  missingConnection: (alias) => `There is no connection named "${alias}" on this computer. Add it under Secret managers.`,
   connectionOff: (alias) => `The connection "${alias}" is off, so this variable is empty. Turn it on under Secret managers.`,
   manager: "Secret manager",
   useManager: "Read from a secret manager",

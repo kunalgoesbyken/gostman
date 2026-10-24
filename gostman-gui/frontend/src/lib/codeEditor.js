@@ -9,7 +9,8 @@ import { html } from '@codemirror/lang-html'
 import { javascript } from '@codemirror/lang-javascript'
 import { tags } from '@lezer/highlight'
 import { basicSetup } from 'codemirror'
-import { CLOSING_REFERENCE, VARIABLE_TEXT, describeReference, findReferences, isDefined, openReference, suggestNames } from './variables'
+import { CLOSING_REFERENCE, describeReference, findReferences, openReference, referenceLook, suggestNames } from './variables'
+import { mountVariableCard } from '../components/VariableCard'
 
 const EDITOR_TEXT = {
   syntaxError: 'Syntax error',
@@ -159,10 +160,13 @@ export const languageExtension = (language) => LANGUAGES[language]?.() ?? []
 
 export const wrapExtension = (wrapLines) => (wrapLines ? EditorView.lineWrapping : [])
 
+function variableMark(name, variables) {
+  const look = referenceLook(name, variables)
+  return Decoration.mark({ class: `${look.className} gm-var-code`, attributes: look.attributes })
+}
+
 const variableDecorations = (doc, variables) => Decoration.set(
-  findReferences(doc.toString()).map((ref) =>
-    Decoration.mark({ class: `${isDefined(ref.name, variables) ? 'gm-var-ok' : 'gm-var-missing'} gm-var-code` }).range(ref.start, ref.end),
-  ),
+  findReferences(doc.toString()).map((ref) => variableMark(ref.name, variables).range(ref.start, ref.end)),
 )
 
 const highlightVariables = (variables) => ViewPlugin.define(
@@ -175,21 +179,6 @@ const highlightVariables = (variables) => ViewPlugin.define(
   { decorations: (plugin) => plugin.decorations },
 )
 
-const span = (text, className) => {
-  const element = document.createElement('span')
-  element.textContent = text
-  if (className) element.className = className
-  return element
-}
-
-function variableTooltip(info) {
-  const dom = document.createElement('div')
-  dom.append(span(info.name, 'text-muted-foreground'), span(' = ', 'text-muted-foreground'))
-  dom.append(info.defined ? span(info.shown) : span(VARIABLE_TEXT.undefinedName, 'text-warning'))
-  if (info.source) dom.append(span(` (${info.source})`, 'text-muted-foreground'))
-  return { dom }
-}
-
 const describeVariables = (variables) => hoverTooltip((view, pos) => {
   const line = view.state.doc.lineAt(pos)
   const offset = pos - line.from
@@ -198,7 +187,7 @@ const describeVariables = (variables) => hoverTooltip((view, pos) => {
   return {
     pos: line.from + found.start,
     end: line.from + found.end,
-    create: () => variableTooltip(describeReference(found.name, variables)),
+    create: () => mountVariableCard(describeReference(found.name, variables)),
   }
 })
 

@@ -37,11 +37,11 @@ import { createTabActions } from './tabActions'
 import { createTreeActions } from './treeActions'
 import { ROW_REQUEST } from './collectionTree'
 import { describeCounts } from './importCounts'
+import { DATA_TEXT } from './dataText'
 import { countImported } from './importSummary'
 import { selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
 
 const UNRECORDED_ERRORS = ['config', 'cancelled']
-const RESET_PROMPT = "Delete every request, folder, environment and history entry? This can't be undone."
 const EXPORT_TAB = 'export'
 const SHARE_TAB = 'share'
 const ACTIVE_CONTENT_PROMPT = 'in this file include scripts, OAuth 2.0 settings, local MCP commands or {{$file(...)}} placeholders that send files from this computer. These run when a request is sent and can read your variables, so only import them from a source you trust. Cancel imports everything else without them.'
@@ -315,14 +315,20 @@ export function createWorkspaceActions(backend) {
     return saveTextFile(RUN_REPORT_FILE, buildReportPage(state.results, run, environment), RUN_REPORT_TYPE)
   }
 
-  const resetAll = attempt('Reset failed', async () => {
+  const deleteAllData = attempt(DATA_TEXT.failed, async () => {
     store().suspendPersistence()
+    await ai.forgetEverything()
     await backend.reset()
     useAppStore.persist.clearStorage()
     window.location.reload()
   })
 
-  const confirmReset = () => store().showConfirm('Reset app', RESET_PROMPT, resetAll, null, DESTRUCTIVE, 'Reset')
+  const confirmDeleteAllData = () => store().showDeleteData(deleteAllData)
+
+  const openExport = () => {
+    store().closePreferencesDialog()
+    store().openImportDialog(EXPORT_TAB)
+  }
 
   function createFolder(parentId = '') {
     const title = parentId ? 'New subfolder' : 'New folder'
@@ -470,7 +476,7 @@ export function createWorkspaceActions(backend) {
     workspaceSwitcher: () => storageActions?.openSwitcher(),
     openFolder: () => storageActions?.openFolder(),
     switchWorkspace: (path) => storageActions?.reopen(path),
-    export: () => store().openImportDialog(EXPORT_TAB),
+    export: openExport,
     share: () => store().openImportDialog(SHARE_TAB),
     runCollection: () => store().openRunner(),
     cookies: () => store().openCookiesDialog(),
@@ -483,7 +489,7 @@ export function createWorkspaceActions(backend) {
     preferences: () => store().openPreferencesDialog(),
     import: () => store().openImportDialog(),
     lintSpec: openapi.lintLatest,
-    reset: confirmReset,
+    reset: confirmDeleteAllData,
     aiRequest: () => ai.start(TASK_REQUEST),
     aiTests: () => ai.start(TASK_TESTS),
     aiScript: () => ai.start(TASK_SCRIPT),
@@ -551,7 +557,6 @@ export function createWorkspaceActions(backend) {
     tree,
     tabs: tabActions,
     cancel: () => cancelTab(activeTab()),
-    reset: confirmReset,
     openImport: () => store().openImportDialog(),
     beginOnboardingStep: (id) => onboardingSteps[id](),
     runCommand: (action, payload) => commands[action]?.(payload),

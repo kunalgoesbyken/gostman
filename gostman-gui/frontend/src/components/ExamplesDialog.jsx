@@ -70,6 +70,7 @@ function ExampleBody({ example, draft, onDraftChange, EditorComponent }) {
         language={languageOf(example.contentType)}
         path={`examples/${example.id}`}
         height="100%"
+        surface="body"
       />
     </Suspense>
   )

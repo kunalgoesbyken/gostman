@@ -1,9 +1,9 @@
 import { useState } from "react"
-import { KeyRound } from "lucide-react"
-import { BrandIcon } from "./ui/brandIcon"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Select } from "./ui/select"
+import { ConnectionMark } from "./ConnectionMark"
+import { connectionColor } from "../lib/secretOrigins"
 import { REFERENCE_TEXT as TEXT } from "../lib/secretsText"
 import { cn } from "../lib/utils"
 
@@ -101,7 +101,7 @@ export function ReferenceFields({ reference: stored, connections, kinds, isLoade
           <option value="" disabled>{TEXT.noConnection}</option>
           {isUnknown && <option value={reference.provider}>{reference.provider}</option>}
           {connections.map((candidate) => (
-            <option key={candidate.alias} value={candidate.alias} icon={<BrandIcon brand={candidate.kind} fallback={KeyRound} />}>
+            <option key={candidate.alias} value={candidate.alias} icon={<ConnectionMark kind={candidate.kind} color={connectionColor(candidate)} />}>
               {candidate.disabled ? TEXT.offOption(candidate.alias) : candidate.alias}
             </option>
           ))}

@@ -1,5 +1,6 @@
 .gm-var-ok,
-.gm-var-missing {
+.gm-var-missing,
+.gm-var-secret {
   border-radius: 2px;
 }
 
@@ -21,4 +22,56 @@
 .gm-var-missing.gm-var-code,
 .gm-var-missing.gm-var-code * {
   color: hsl(var(--warning));
+}
+
+.gm-var-secret {
+  background: hsl(var(--gm-secret) / 0.16);
+  text-decoration: underline dashed hsl(var(--gm-secret));
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.gm-var-secret[data-secret-color="red"] {
+  --gm-secret: 0 84% 60%;
+}
+
+.gm-var-secret[data-secret-color="orange"] {
+  --gm-secret: 25 95% 53%;
+}
+
+.gm-var-secret[data-secret-color="green"] {
+  --gm-secret: 142 71% 45%;
+}
+
+.gm-var-secret[data-secret-color="blue"] {
+  --gm-secret: 217 91% 60%;
+}
+
+.gm-var-secret[data-secret-color="purple"] {
+  --gm-secret: 271 91% 65%;
+}
+
+.gm-var-secret[data-secret-color="gray"] {
+  --gm-secret: 220 9% 46%;
+}
+
+[data-contrast="more"] .gm-var-secret {
+  background: hsl(var(--gm-secret) / 0.28);
+  text-decoration-thickness: 3px;
+}
+
+.gm-var-secret[data-secret-state="off"] {
+  background: hsl(var(--muted));
+  text-decoration-style: dotted;
+  text-decoration-color: hsl(var(--muted-foreground));
+}
+
+.gm-var-secret.gm-var-code,
+.gm-var-secret.gm-var-code * {
+  color: hsl(var(--foreground));
+}
+
+.gm-var-secret.gm-var-code[data-secret-state="off"],
+.gm-var-secret.gm-var-code[data-secret-state="off"] * {
+  color: hsl(var(--muted-foreground));
 }

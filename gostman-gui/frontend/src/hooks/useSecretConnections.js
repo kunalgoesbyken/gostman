@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
+import { useAppStore } from "../store/appStore"
 
 const NOTHING = { connections: [], kinds: [], failure: "", isLoaded: false }
 
@@ -21,4 +22,13 @@ export function useSecretConnections(secrets) {
   }, [secrets, reload])
 
   return state
+}
+
+export function useSharedSecretConnections(secrets) {
+  const { connections, failure, isLoaded } = useSecretConnections(secrets)
+  const setSecretConnections = useAppStore((state) => state.setSecretConnections)
+
+  useEffect(() => {
+    setSecretConnections(isLoaded && !failure ? connections : null)
+  }, [connections, failure, isLoaded, setSecretConnections])
 }

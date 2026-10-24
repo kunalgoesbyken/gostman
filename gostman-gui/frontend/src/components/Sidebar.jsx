@@ -6,33 +6,60 @@ import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { CollectionTree } from "./CollectionTree"
 import { HistoryList } from "./HistoryList"
 import { FOLDER_SETTINGS_TEXT } from "../lib/folderSettingsText"
+import { SIDEBAR_TEXT } from "../lib/sidebarText"
+import { cn } from "../lib/utils"
 import { useShortcutLabel } from "../hooks/useShortcuts"
+import { RESIZE_CLOSING, RESIZE_IDLE, useSidebarResize } from "../hooks/useSidebarResize"
 import { hintWithShortcut } from "../lib/shortcuts"
+import { useAppStore } from "../store/appStore"
 
 const VIEW_COLLECTIONS = "collections"
 const VIEW_HISTORY = "history"
 const VIEW_CLASS = "flex min-h-0 flex-1 flex-col"
 
+function SidebarResizer({ phase, separatorProps }) {
+  return (
+    <div
+      {...separatorProps}
+      aria-label={SIDEBAR_TEXT.resize}
+      data-active={phase !== RESIZE_IDLE || undefined}
+      className="group absolute inset-y-0 -right-1 z-10 flex w-2 cursor-col-resize touch-none justify-center outline-none max-md:hidden"
+    >
+      <span className="h-full w-0.5 transition-colors group-hover:bg-ring group-hover:delay-150 group-focus-visible:bg-ring group-data-[active]:bg-ring" />
+    </div>
+  )
+}
+
 export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory, activeRequestId, actions }) {
   const [view, setView] = useState(VIEW_COLLECTIONS)
   const newRequestShortcut = useShortcutLabel("newRequest")
+  const closeSidebar = useAppStore((s) => s.closeSidebar)
+  const { asideRef, style, phase, separatorProps } = useSidebarResize(closeSidebar)
 
   return (
-    <aside data-pane="sidebar" className="flex w-72 max-w-full shrink-0 flex-col border-r border-border max-md:absolute max-md:inset-y-0 max-md:left-0 max-md:z-30 max-md:bg-background max-md:shadow-lg">
+    <aside
+      ref={asideRef}
+      data-pane="sidebar"
+      style={style}
+      className={cn(
+        "flex w-72 max-w-full shrink-0 flex-col border-r border-border transition-opacity max-md:absolute max-md:inset-y-0 max-md:left-0 max-md:z-30 max-md:bg-background max-md:shadow-lg md:relative md:w-[var(--sidebar-width)]",
+        phase === RESIZE_CLOSING && "opacity-50"
+      )}
+    >
       <Tabs value={view} onValueChange={setView} className="flex min-h-0 flex-1 flex-col">
         <Toolbar className="pr-1.5">
-          <TabsList label="Sidebar view" className="flex-1">
-            <TabsTrigger value={VIEW_COLLECTIONS}>Collections</TabsTrigger>
+          <TabsList label={SIDEBAR_TEXT.views} className="flex-1">
+            <TabsTrigger value={VIEW_COLLECTIONS}>{SIDEBAR_TEXT.collections}</TabsTrigger>
             <TabsTrigger value={VIEW_HISTORY}>
-              History
+              {SIDEBAR_TEXT.history}
               {requestHistory.length > 0 && <TabCount>{requestHistory.length}</TabCount>}
             </TabsTrigger>
           </TabsList>
           <div className="flex shrink-0 items-center gap-0">
-            <IconButton label="Run requests" icon={ListChecks} onClick={() => actions.openRunner()} />
+            <IconButton label={SIDEBAR_TEXT.runRequests} icon={ListChecks} onClick={() => actions.openRunner()} />
             <IconButton label={FOLDER_SETTINGS_TEXT.collectionMenu} icon={Settings2} onClick={() => actions.openFolderSettings()} />
-            <IconButton label="New folder" icon={FolderPlus} onClick={() => actions.createFolder()} />
-            <IconButton label={hintWithShortcut("New request", newRequestShortcut)} icon={Plus} onClick={() => actions.newRequest()} />
+            <IconButton label={SIDEBAR_TEXT.newFolder} icon={FolderPlus} onClick={() => actions.createFolder()} />
+            <IconButton label={hintWithShortcut(SIDEBAR_TEXT.newRequest, newRequestShortcut)} icon={Plus} onClick={() => actions.newRequest()} />
           </div>
         </Toolbar>
 
@@ -43,6 +70,7 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
           <HistoryList entries={requestHistory} actions={actions} />
         </TabsContent>
       </Tabs>
+      <SidebarResizer phase={phase} separatorProps={separatorProps} />
     </aside>
   )
 })

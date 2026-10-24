@@ -2,9 +2,12 @@ import { create } from 'zustand'
 import { sanitizeOverrides } from './chords.js'
 import { isPlainObject, parseJSON } from './dataUtils.js'
 import { FONT_SLOTS, applyFont } from './fonts.js'
+import { readStored, writeStored } from './storage.js'
+import { DEFAULT_PALETTE, EMPTY_CUSTOM_COLORS, PALETTE_IDS, WINDOW_PROPERTIES, normalizeCustomColors, themeStyleSheet, windowProperties, windowTone } from './themes.js'
 import { reportWindowTheme } from './windowTheme.js'
 
 const STORAGE_KEY = 'gostman.preferences'
+const THEME_STYLE_ID = 'gostman-theme'
 const SCHEMA_VERSION = 1
 const SYSTEM_QUERIES = {
   systemIsDark: '(prefers-color-scheme: dark)',
@@ -26,6 +29,8 @@ export const DEFAULT_PREFERENCES = {
   theme: 'system',
   contrast: 'system',
   accent: 'cyan',
+  palette: DEFAULT_PALETTE,
+  customColors: EMPTY_CUSTOM_COLORS,
   textScale: 100,
   interfaceFont: '',
   codeFont: '',
@@ -49,6 +54,7 @@ const VALIDATORS = {
   theme: oneOf(THEMES),
   contrast: oneOf(CONTRASTS),
   accent: oneOf(ACCENTS),
+  palette: oneOf(PALETTE_IDS),
   textScale: oneOf(TEXT_SCALES),
   interfaceFont: isFontName,
   codeFont: isFontName,
@@ -64,7 +70,7 @@ const VALIDATORS = {
 export function normalizePreferences(raw) {
   const source = isPlainObject(raw) ? raw : {}
   const checked = Object.entries(VALIDATORS).map(([name, isValid]) => [name, isValid(source[name]) ? source[name] : DEFAULT_PREFERENCES[name]])
-  return { ...Object.fromEntries(checked), shortcuts: sanitizeOverrides(source.shortcuts) }
+  return { ...Object.fromEntries(checked), customColors: normalizeCustomColors(source.customColors), shortcuts: sanitizeOverrides(source.shortcuts) }
 }
 
 export const resolveTheme = (theme, systemIsDark) => {
@@ -77,24 +83,12 @@ const resolveContrast = (contrast, systemWantsMoreContrast) => {
   return contrast
 }
 
-function readStored() {
-  try {
-    return parseJSON(localStorage.getItem(STORAGE_KEY) ?? '', null)
-  } catch {
-    return null
-  }
-}
+const readPreferences = () => parseJSON(readStored(STORAGE_KEY) ?? '', null)
 
-function writeStored(preferences) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: SCHEMA_VERSION, ...preferences }))
-  } catch {
-    return
-  }
-}
+const writePreferences = (preferences) => writeStored(STORAGE_KEY, JSON.stringify({ version: SCHEMA_VERSION, ...preferences }))
 
 export const usePreferencesStore = create((set) => ({
-  preferences: normalizePreferences(readStored()),
+  preferences: normalizePreferences(readPreferences()),
   systemIsDark: false,
   systemWantsMoreContrast: false,
   update: (patch) => set((state) => ({ preferences: normalizePreferences({ ...state.preferences, ...patch }) })),
@@ -117,12 +111,31 @@ export const withPreferredTimeout = (request) => {
   return { ...request, options: { ...request.options, timeoutMs: requestTimeoutSeconds * 1000 } }
 }
 
+function themeStyleElement() {
+  const existing = document.getElementById(THEME_STYLE_ID)
+  if (existing) return existing
+  const style = document.createElement('style')
+  style.id = THEME_STYLE_ID
+  return document.head.appendChild(style)
+}
+
+function applyThemeColors(root, preferences, mode, contrast) {
+  const properties = windowProperties(preferences, mode, contrast)
+  WINDOW_PROPERTIES.forEach((name) => (properties[name] ? root.style.setProperty(name, properties[name]) : root.style.removeProperty(name)))
+  const sheet = themeStyleSheet(preferences, mode, contrast)
+  const style = themeStyleElement()
+  if (style.textContent !== sheet) style.textContent = sheet
+}
+
 function applyToDocument({ preferences, systemIsDark, systemWantsMoreContrast }) {
   const root = document.documentElement
   const language = LANGUAGES.find((candidate) => candidate.value === preferences.language)
-  root.classList.toggle('dark', resolveTheme(preferences.theme, systemIsDark) === 'dark')
-  root.dataset.contrast = resolveContrast(preferences.contrast, systemWantsMoreContrast)
+  const mode = resolveTheme(preferences.theme, systemIsDark)
+  const contrast = resolveContrast(preferences.contrast, systemWantsMoreContrast)
+  root.classList.toggle('dark', windowTone(preferences, mode) === 'dark')
+  root.dataset.contrast = contrast
   root.dataset.accent = preferences.accent
+  applyThemeColors(root, preferences, mode, contrast)
   root.style.setProperty('--text-scale', preferences.textScale)
   Object.entries(FONT_SLOTS).forEach(([name, slot]) => applyFont(root, slot, preferences[name]))
   root.dataset.density = preferences.density
@@ -143,7 +156,7 @@ export function watchPreferences() {
   let reportedTheme = ''
   const sync = (state) => {
     applyToDocument(state)
-    const theme = resolveTheme(state.preferences.theme, state.systemIsDark)
+    const theme = windowTone(state.preferences, resolveTheme(state.preferences.theme, state.systemIsDark))
     if (theme !== reportedTheme) reportWindowTheme(theme)
     reportedTheme = theme
   }
@@ -151,6 +164,6 @@ export function watchPreferences() {
   sync(usePreferencesStore.getState())
   usePreferencesStore.subscribe((state, previous) => {
     sync(state)
-    if (state.preferences !== previous.preferences) writeStored(state.preferences)
+    if (state.preferences !== previous.preferences) writePreferences(state.preferences)
   })
 }

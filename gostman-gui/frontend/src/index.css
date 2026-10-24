@@ -7,8 +7,73 @@
 @layer base {
   :root,
   [data-accent="cyan"] {
-    --primary: 193 95% 24%;
-    --ring: 193 95% 28%;
+    --light-primary: 193 95% 24%;
+    --light-ring: 193 95% 28%;
+    --dark-primary: 191 96% 54%;
+    --dark-ring: 191 96% 54%;
+  }
+
+  [data-accent="blue"] {
+    --light-primary: 224 76% 42%;
+    --light-ring: 224 76% 42%;
+    --dark-primary: 221 92% 70%;
+    --dark-ring: 221 92% 70%;
+  }
+
+  [data-accent="violet"] {
+    --light-primary: 262 60% 46%;
+    --light-ring: 262 60% 46%;
+    --dark-primary: 258 90% 76%;
+    --dark-ring: 258 90% 76%;
+  }
+
+  [data-accent="pink"] {
+    --light-primary: 330 72% 38%;
+    --light-ring: 330 72% 38%;
+    --dark-primary: 328 86% 72%;
+    --dark-ring: 328 86% 72%;
+  }
+
+  [data-accent="graphite"] {
+    --light-primary: 220 14% 24%;
+    --light-ring: 220 14% 24%;
+    --dark-primary: 216 18% 80%;
+    --dark-ring: 216 18% 80%;
+  }
+
+  :root {
+    --light-brand: 199 90% 36%;
+    --dark-brand: 197 86% 62%;
+    --light-primary-foreground: 0 0% 100%;
+    --dark-primary-foreground: 224 71% 4%;
+    --light-destructive: 0 72% 40%;
+    --dark-destructive: 0 84% 60%;
+    --light-destructive-foreground: 0 0% 100%;
+    --dark-destructive-foreground: 224 71% 4%;
+    --light-success: 142 76% 24%;
+    --dark-success: 158 64% 52%;
+    --light-success-foreground: 0 0% 100%;
+    --dark-success-foreground: 224 71% 4%;
+    --light-warning: 28 95% 29%;
+    --dark-warning: 38 92% 50%;
+    --light-warning-foreground: 0 0% 100%;
+    --dark-warning-foreground: 224 71% 4%;
+    --light-info: 217 91% 40%;
+    --dark-info: 217 91% 60%;
+    --light-info-foreground: 0 0% 100%;
+    --dark-info-foreground: 224 71% 4%;
+    --light-syntax-key: 193 90% 26%;
+    --dark-syntax-key: 191 96% 54%;
+    --light-syntax-string: 142 70% 26%;
+    --dark-syntax-string: 142 76% 56%;
+    --light-syntax-number: 24 90% 33%;
+    --dark-syntax-number: 25 95% 53%;
+    --light-syntax-boolean: 275 60% 42%;
+    --dark-syntax-boolean: 280 74% 64%;
+    --light-syntax-null: 0 72% 40%;
+    --dark-syntax-null: 0 84% 60%;
+    --light-syntax-punctuation: 36 85% 28%;
+    --dark-syntax-punctuation: 38 92% 60%;
   }
 
   :root {
@@ -22,12 +87,9 @@
 
     --background: 0 0% 100%;
     --foreground: 224 40% 8%;
-    --brand: 199 90% 36%;
 
     --card: 220 20% 98%;
     --card-foreground: 224 40% 8%;
-
-    --primary-foreground: 0 0% 100%;
 
     --secondary: 220 16% 94%;
     --secondary-foreground: 224 40% 8%;
@@ -38,28 +100,11 @@
     --accent: 220 16% 92%;
     --accent-foreground: 224 40% 8%;
 
-    --destructive: 0 72% 40%;
-    --destructive-foreground: 0 0% 100%;
-
-    --success: 142 76% 24%;
-    --success-foreground: 0 0% 100%;
-    --warning: 28 95% 29%;
-    --warning-foreground: 0 0% 100%;
-    --info: 217 91% 40%;
-    --info-foreground: 0 0% 100%;
-
     --border: 220 13% 82%;
     --input: 220 13% 82%;
 
     --radius: 0.375rem;
     --scrollbar-size: 10px;
-
-    --syntax-key: 193 90% 26%;
-    --syntax-string: 142 70% 26%;
-    --syntax-number: 24 90% 33%;
-    --syntax-boolean: 275 60% 42%;
-    --syntax-null: 0 72% 40%;
-    --syntax-punctuation: 36 85% 28%;
   }
 
   .dark {
@@ -67,12 +112,9 @@
 
     --background: 224 71% 4%;
     --foreground: 210 40% 98%;
-    --brand: 197 86% 62%;
 
     --card: 224 71% 6%;
     --card-foreground: 210 40% 98%;
-
-    --primary-foreground: 224 71% 4%;
 
     --secondary: 224 40% 12%;
     --secondary-foreground: 210 40% 98%;
@@ -83,75 +125,52 @@
     --accent: 224 40% 12%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 224 71% 4%;
-
-    --success: 158 64% 52%;
-    --success-foreground: 224 71% 4%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 224 71% 4%;
-    --info: 217 91% 60%;
-    --info-foreground: 224 71% 4%;
-
     --border: 224 40% 15%;
     --input: 224 40% 15%;
-
-    --syntax-key: 191 96% 54%;
-    --syntax-string: 142 76% 56%;
-    --syntax-number: 25 95% 53%;
-    --syntax-boolean: 280 74% 64%;
-    --syntax-null: 0 84% 60%;
-    --syntax-punctuation: 38 92% 60%;
   }
 
-  [data-accent="blue"] {
-    --primary: 224 76% 42%;
-    --ring: 224 76% 42%;
-  }
-
-  [data-accent="violet"] {
-    --primary: 262 60% 46%;
-    --ring: 262 60% 46%;
-  }
-
-  [data-accent="pink"] {
-    --primary: 330 72% 38%;
-    --ring: 330 72% 38%;
-  }
-
-  [data-accent="graphite"] {
-    --primary: 220 14% 24%;
-    --ring: 220 14% 24%;
+  :root,
+  [data-accent] {
+    --brand: var(--light-brand);
+    --primary-foreground: var(--light-primary-foreground);
+    --destructive: var(--light-destructive);
+    --destructive-foreground: var(--light-destructive-foreground);
+    --success: var(--light-success);
+    --success-foreground: var(--light-success-foreground);
+    --warning: var(--light-warning);
+    --warning-foreground: var(--light-warning-foreground);
+    --info: var(--light-info);
+    --info-foreground: var(--light-info-foreground);
+    --syntax-key: var(--light-syntax-key);
+    --syntax-string: var(--light-syntax-string);
+    --syntax-number: var(--light-syntax-number);
+    --syntax-boolean: var(--light-syntax-boolean);
+    --syntax-null: var(--light-syntax-null);
+    --syntax-punctuation: var(--light-syntax-punctuation);
+    --primary: var(--light-primary);
+    --ring: var(--light-ring);
   }
 
   .dark,
-  .dark [data-accent="cyan"] {
-    --primary: 191 96% 54%;
-    --ring: 191 96% 54%;
-  }
-
-  .dark [data-accent="blue"],
-  .dark[data-accent="blue"] {
-    --primary: 221 92% 70%;
-    --ring: 221 92% 70%;
-  }
-
-  .dark [data-accent="violet"],
-  .dark[data-accent="violet"] {
-    --primary: 258 90% 76%;
-    --ring: 258 90% 76%;
-  }
-
-  .dark [data-accent="pink"],
-  .dark[data-accent="pink"] {
-    --primary: 328 86% 72%;
-    --ring: 328 86% 72%;
-  }
-
-  .dark [data-accent="graphite"],
-  .dark[data-accent="graphite"] {
-    --primary: 216 18% 80%;
-    --ring: 216 18% 80%;
+  .dark [data-accent] {
+    --brand: var(--dark-brand);
+    --primary-foreground: var(--dark-primary-foreground);
+    --destructive: var(--dark-destructive);
+    --destructive-foreground: var(--dark-destructive-foreground);
+    --success: var(--dark-success);
+    --success-foreground: var(--dark-success-foreground);
+    --warning: var(--dark-warning);
+    --warning-foreground: var(--dark-warning-foreground);
+    --info: var(--dark-info);
+    --info-foreground: var(--dark-info-foreground);
+    --syntax-key: var(--dark-syntax-key);
+    --syntax-string: var(--dark-syntax-string);
+    --syntax-number: var(--dark-syntax-number);
+    --syntax-boolean: var(--dark-syntax-boolean);
+    --syntax-null: var(--dark-syntax-null);
+    --syntax-punctuation: var(--dark-syntax-punctuation);
+    --primary: var(--dark-primary);
+    --ring: var(--dark-ring);
   }
 
   [data-contrast="more"] {
@@ -259,6 +278,24 @@
 
   :root[data-anchor-jumped] .render-when-visible {
     content-visibility: visible;
+  }
+
+  .color-swatch {
+    @apply h-6 w-6 shrink-0 cursor-pointer rounded border border-border bg-transparent p-0;
+  }
+
+  .color-swatch::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+
+  .color-swatch::-webkit-color-swatch {
+    border: none;
+    border-radius: calc(var(--radius) - 3px);
+  }
+
+  .color-swatch::-moz-color-swatch {
+    border: none;
+    border-radius: calc(var(--radius) - 3px);
   }
 
   kbd {

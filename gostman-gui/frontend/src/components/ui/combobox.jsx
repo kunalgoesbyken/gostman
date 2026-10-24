@@ -88,7 +88,7 @@ export function Combobox({ value, suggestions, onChange, onKeyDown, onBlur, ...p
         onBlur={handleBlur}
       />
       {isOpen && createPortal(
-        <div ref={listRef} id={listId} role="listbox" style={placement} className={LIST_CLASS}>
+        <div ref={listRef} id={listId} role="listbox" data-surface="menu" style={placement} className={LIST_CLASS}>
           {shown.map((suggestion, index) => (
             <OptionRow
               key={suggestion}

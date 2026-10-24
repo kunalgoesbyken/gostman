@@ -130,6 +130,7 @@ export function McpPanel({ request, catalog, editorPath, onUpdateRequest, onLoad
             variables
             fileReads={false}
             height="100%"
+            surface="body"
           />
         </Suspense>
       </div>

@@ -64,7 +64,7 @@ func main() {
 		AssetServer:      &assetserver.Options{Assets: assets, Middleware: isolateSandbox},
 		BackgroundColour: &theme.background,
 		OnStartup:        app.startup,
-		OnShutdown:       app.stopServersOnQuit,
+		OnShutdown:       app.stopServers,
 		Menu:             applicationMenu(),
 		Windows:          &windows.Options{Theme: theme.frame, WindowIsTranslucent: true, BackdropType: windows.Mica},
 		Mac:              &mac.Options{OnUrlOpen: app.receiveLink},

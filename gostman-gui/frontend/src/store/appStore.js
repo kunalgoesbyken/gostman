@@ -9,7 +9,7 @@ import { normalizeRequest } from '../lib/request'
 import { isBlankRequest } from '../lib/requestChanges'
 import { rememberResponse } from '../lib/responseHistory'
 import { reconcileTabs } from '../lib/tabReconcile'
-import { isNarrowViewport } from '../lib/layout'
+import { isNarrowViewport, rememberSidebarOpen, rememberedSidebarOpen } from '../lib/layout'
 import { reorderTabs, stepTab } from '../lib/tabOrder'
 import { promptLayer, resolveLayers, scopeLayers, variableText } from '../lib/variableScopes'
 import { isWelcomeDismissed, rememberWelcomeDismissed } from '../lib/welcome'
@@ -30,6 +30,7 @@ const CLOSED_CONFIRM = { isOpen: false, title: '', message: '', confirmText: 'OK
 const CLOSED_RUNNER = { isOpen: false, folderId: '', isRunning: false, results: [] }
 const CLOSED_VARIABLE_PROMPT = { isOpen: false, names: [], defaults: {}, resolve: null }
 const CLOSED_PROMPT = { isOpen: false, title: '', message: '', placeholder: '', defaultValue: '', confirmText: 'OK', onConfirm: null, onCancel: null }
+const CLOSED_DELETE_DATA = { isOpen: false, onDelete: null }
 
 const MAX_CLOSED_TABS = 10
 
@@ -220,6 +221,7 @@ export const useAppStore = create(
         collectionSettings: normalizeScopeSettings(),
         folderSettings: null,
         dotEnv: {},
+        secretConnections: null,
         environmentDialogOpen: false,
         variablePrompt: CLOSED_VARIABLE_PROMPT,
         tabs: [FIRST_TAB],
@@ -242,7 +244,7 @@ export const useAppStore = create(
         commandPaletteMode: 'commands',
         shortcutsDialogOpen: false,
         preferencesDialogOpen: false,
-        isSidebarOpen: !isNarrowViewport(),
+        isSidebarOpen: rememberedSidebarOpen(),
         closedTabs: [],
         cookiesDialogOpen: false,
         scanDialogOpen: false,
@@ -260,6 +262,7 @@ export const useAppStore = create(
         alertDialog: CLOSED_ALERT,
         confirmDialog: CLOSED_CONFIRM,
         promptDialog: CLOSED_PROMPT,
+        deleteDataDialog: CLOSED_DELETE_DATA,
 
         hydrate: (data) => set((state) => {
           const environments = restoreEnvironments(data)
@@ -308,6 +311,7 @@ export const useAppStore = create(
         leaveWorkspace: (path) => set((state) => leaveWorkspace(state, path)),
         setWorkspaceMenuOpen: (workspaceMenuOpen) => set({ workspaceMenuOpen, commandPaletteOpen: false }),
         liftRestriction: () => set({ isRestricted: false }),
+        setSecretConnections: (secretConnections) => set({ secretConnections }),
 
         upsertRequests: (requests) => set((state) => {
           const byId = new Map(state.requests.map((request) => [request.id, request]))
@@ -518,6 +522,7 @@ export const useAppStore = create(
         openPreferencesDialog: () => set({ preferencesDialogOpen: true, commandPaletteOpen: false }),
         closePreferencesDialog: () => set({ preferencesDialogOpen: false }),
         toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
+        closeSidebar: () => set({ isSidebarOpen: false }),
         closeCommandPalette: () => set({ commandPaletteOpen: false }),
         openCookiesDialog: () => set({ cookiesDialogOpen: true }),
         closeCookiesDialog: () => set({ cookiesDialogOpen: false }),
@@ -564,6 +569,8 @@ export const useAppStore = create(
           promptDialog: { ...CLOSED_PROMPT, isOpen: true, title, message, placeholder, defaultValue, onConfirm, onCancel },
         }),
         closePrompt: () => set({ promptDialog: CLOSED_PROMPT }),
+        showDeleteData: (onDelete) => set({ deleteDataDialog: { isOpen: true, onDelete }, commandPaletteOpen: false }),
+        closeDeleteData: () => set({ deleteDataDialog: CLOSED_DELETE_DATA }),
 
         reportPersistenceFailure: (reason) => {
           if (get().persistenceFailureReported) return
@@ -607,6 +614,10 @@ export const useAppStore = create(
 )
 
 reportStorageFailure = (reason) => useAppStore.getState().reportPersistenceFailure(reason)
+
+useAppStore.subscribe((state, previous) => {
+  if (state.isSidebarOpen !== previous.isSidebarOpen) rememberSidebarOpen(state.isSidebarOpen)
+})
 
 export const selectActiveTab = (state) => state.tabs.find((tab) => tab.id === state.activeTabId) || state.tabs[0]
 
@@ -654,6 +665,7 @@ export const selectIsDialogOpen = (state) => (
   || state.alertDialog.isOpen
   || state.confirmDialog.isOpen
   || state.promptDialog.isOpen
+  || state.deleteDataDialog.isOpen
 )
 
 export const useActiveTab = () => useAppStore(selectActiveTab)

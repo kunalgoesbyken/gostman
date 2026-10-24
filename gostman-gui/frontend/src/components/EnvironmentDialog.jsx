@@ -1,19 +1,19 @@
 import { useMemo, useState } from "react"
 import { Check, Copy, KeyRound, Plus, Trash2 } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
+import { ColorDot, ColorPicker } from "./ui/colorPicker"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
 import { Notice, SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
-import { RADIO_KEYS, SegmentedControl } from "./ui/segmented"
+import { SegmentedControl } from "./ui/segmented"
 import { Select } from "./ui/select"
 import { EnvironmentTable } from "./EnvironmentTable"
 import { SearchField } from "./SearchField"
 import { SecretsDialog } from "./SecretsDialog"
-import { ENVIRONMENT_COLORS, ENVIRONMENT_TEXT as TEXT } from "../lib/environmentText"
+import { ENVIRONMENT_TEXT as TEXT } from "../lib/environmentText"
 import { SECRETS_TEXT } from "../lib/secretsText"
 import { isDesktopShell } from "../lib/windowControls"
 import { SCOPE_COLLECTION, SCOPE_GLOBAL, dotEnvEntries, environmentChain, environmentEntries, withEntries } from "../lib/variableScopes"
-import { moveFocus, tabStopOf } from "../lib/rovingFocus"
 import { cn } from "../lib/utils"
 import { createEnvironment, useAppStore } from "../store/appStore"
 
@@ -26,36 +26,6 @@ const SCOPE_OPTIONS = [
 const ENVIRONMENT_FEATURES = { enabled: true, secret: true, references: true, readOnly: false }
 const COLLECTION_FEATURES = { enabled: false, secret: false, readOnly: false }
 const DOT_ENV_FEATURES = { enabled: false, secret: false, readOnly: true }
-
-function ColorDot({ color, className }) {
-  return <span aria-hidden="true" className={cn("h-2 w-2 shrink-0 rounded-full", ENVIRONMENT_COLORS[color] || "border border-border", className)} />
-}
-
-const COLOR_NAMES = Object.keys(ENVIRONMENT_COLORS)
-
-function ColorPicker({ value, onChange }) {
-  const tabStop = tabStopOf(COLOR_NAMES, value)
-
-  return (
-    <div role="radiogroup" aria-label={TEXT.colour} onKeyDown={(event) => moveFocus(event, RADIO_KEYS)} className="flex items-center gap-1.5">
-      {COLOR_NAMES.map((color) => (
-        <button
-          key={color}
-          type="button"
-          role="radio"
-          aria-checked={value === color}
-          aria-label={color}
-          tabIndex={color === tabStop ? 0 : -1}
-          title={color}
-          onClick={() => onChange(value === color ? "" : color)}
-          className={cn("flex h-5 w-5 items-center justify-center rounded-full", value === color && "ring-1 ring-foreground ring-offset-1 ring-offset-background")}
-        >
-          <ColorDot color={color} className="h-3.5 w-3.5" />
-        </button>
-      ))}
-    </div>
-  )
-}
 
 function ListItem({ label, color, isSelected, isActive, onSelect }) {
   return (
@@ -126,7 +96,7 @@ function EnvironmentEditor({ scope, environment, environments, isActive, canDele
     <>
       <div className="flex flex-wrap items-center gap-3 border-b border-border px-3 py-2">
         <Input value={name} onChange={(event) => editName(event.target.value)} aria-label={TEXT.name} placeholder={TEXT.namePlaceholder} controlSize="md" className="w-48" />
-        <ColorPicker value={environment.color} onChange={(color) => patch({ color })} />
+        <ColorPicker label={TEXT.colour} value={environment.color} onChange={(color) => patch({ color })} />
         <ExtendsSelect environment={environment} environments={environments} onChange={(parent) => patch({ extends: parent })} />
         <div className="ml-auto flex items-center gap-1">
           <Button
