@@ -1,5 +1,6 @@
 import { isSensitiveName } from "./sensitiveNames.js"
 import { ORIGIN_UNKNOWN, secretOrigin } from "./secretOrigins.js"
+import { colorTriplet } from "./swatches.js"
 import { mapText, someText } from "./textValues.js"
 import { DYNAMIC_PREFIX, DYNAMIC_VARIABLES, FAKER_VARIABLES, SOURCE_LABELS, callsFile, describeDynamic, isDynamicName, isFakerQuery, isFileName, isPromptName } from "./variableNames.js"
 
@@ -8,6 +9,7 @@ const ENGINE_PLACEHOLDER = /\{\{([^}]+)\}\}/gu
 const OPEN_REFERENCE = /\{\{\s*([\p{L}\p{N}_.$?-]*)$/u
 const WORD_BEFORE_CARET = /[\p{L}\p{N}_.$]*$/u
 export const CLOSING_REFERENCE = /^\s*\}\}/
+export const SECRET_TINT = "--gm-secret"
 
 export const MASKED_VALUE = "••••••••"
 export const MAX_SUGGESTIONS = 50
@@ -75,31 +77,41 @@ export function describeReference(name, variables) {
 export function referenceLook(name, variables) {
   const origin = secretOrigin(variables.details?.get(name)?.ref, variables.connections)
   if (origin?.state === ORIGIN_UNKNOWN) return { className: "gm-var-missing" }
-  if (origin) return { className: "gm-var-secret", attributes: { "data-secret-color": origin.color, "data-secret-state": origin.state } }
+  if (origin) return { className: "gm-var-secret", attributes: { "data-secret-state": origin.state }, tint: colorTriplet(origin.color) }
   return { className: isDefined(name, variables) ? "gm-var-ok" : "gm-var-missing" }
 }
 
+const wordBefore = (text, caret) => WORD_BEFORE_CARET.exec(text.slice(0, caret))[0]
+
 export function openReference(text, caret) {
-  const before = text.slice(0, caret)
-  const match = OPEN_REFERENCE.exec(before)
+  const match = OPEN_REFERENCE.exec(text.slice(0, caret))
   if (match) return { start: caret - match[0].length, query: match[1] }
-  const word = WORD_BEFORE_CARET.exec(before)[0]
+  const word = wordBefore(text, caret)
   return isFakerQuery(word) ? { start: caret - word.length, query: word } : null
+}
+
+export function referenceAtCaret(text, caret, explicit) {
+  const open = openReference(text, caret)
+  if (open || !explicit) return open
+  const word = wordBefore(text, caret)
+  return { start: caret - word.length, query: word }
 }
 
 const GENERATED_VARIABLES = DYNAMIC_VARIABLES.filter((name) => !isFileName(name))
 
-function builtInNames(query, fileReads) {
+function builtInNames(query, fileReads, explicit) {
   if (isFakerQuery(query)) return FAKER_VARIABLES
-  if (!query.startsWith(DYNAMIC_PREFIX)) return []
+  if (!query.startsWith(DYNAMIC_PREFIX) && !(explicit && query === "")) return []
   return fileReads ? DYNAMIC_VARIABLES : GENERATED_VARIABLES
 }
 
-export function suggestNames(variables, query, { fileReads = true } = {}) {
+export function suggestNames(variables, query, { fileReads = true, explicit = false } = {}) {
   const needle = query.toLowerCase()
-  const names = [...Array.from(variables.keys()), ...builtInNames(query, fileReads)].filter((name) => name.toLowerCase().includes(needle))
+  const own = Array.from(variables.keys())
+  const builtIn = builtInNames(query, fileReads, explicit).filter((name) => !variables.has(name))
   const rank = (name) => (name.toLowerCase().startsWith(needle) ? 0 : 1)
-  return names.sort((a, b) => rank(a) - rank(b) || a.localeCompare(b)).slice(0, MAX_SUGGESTIONS)
+  const ranked = (names) => names.filter((name) => name.toLowerCase().includes(needle)).sort((a, b) => rank(a) - rank(b) || a.localeCompare(b))
+  return [...ranked(own), ...ranked(builtIn)].slice(0, MAX_SUGGESTIONS)
 }
 
 export function applyCompletion(text, reference, caret, name) {

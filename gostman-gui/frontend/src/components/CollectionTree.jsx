@@ -6,6 +6,7 @@ import { ContextMenu } from "./ui/ContextMenu"
 import { EmptyState } from "./ui/emptyState"
 import { VirtualList, scrollIndexIntoView } from "./ui/VirtualList"
 import { EmptyRow, ROW_HEIGHT_PX, TreeRow } from "./TreeRow"
+import { LabelDialog } from "./LabelDialog"
 import { SearchField } from "./SearchField"
 import { useAppStore } from "../store/appStore"
 import { usePointerDrag } from "../hooks/usePointerDrag"
@@ -127,6 +128,7 @@ function useExpandOnHover(drag, toggleFolder, folders) {
 export const CollectionTree = memo(function CollectionTree({ folders, requests, activeRequestId, actions }) {
   const [query, setQuery] = useState("")
   const [menu, setMenu] = useState(null)
+  const [labelTarget, setLabelTarget] = useState(null)
   const [focusedKey, setFocusedKey] = useState(null)
   const [focusRequest, setFocusRequest] = useState(null)
   const focusedIndex = useRef(-1)
@@ -178,6 +180,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
 
   const openMenu = useCallback((row, position) => setMenu({ row, position, view: MENU_ACTIONS }), [])
   const closeMenu = useCallback(() => setMenu(null), [])
+  const closeLabels = useCallback(() => setLabelTarget(null), [])
   const openMenuBelow = useCallback((element, row) => {
     const { left, bottom } = element.getBoundingClientRect()
     openMenu(row, { x: left, y: bottom })
@@ -269,7 +272,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
     if (!menu) return []
     const showMoveTargets = () => setMenu((current) => current && { ...current, view: MENU_MOVE })
     const context = {
-      actions, tree, state: { folders, requests }, showMoveTargets, hasClipboard,
+      actions, tree, state: { folders, requests }, showMoveTargets, hasClipboard, editLabels: setLabelTarget,
       isLinked: menu.row.kind === ROW_FOLDER && Boolean(specLinks[menu.row.folder.id]),
     }
     return menuItemsFor(menu, context)
@@ -319,6 +322,8 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
       </div>
 
       {drag && draggedName && <DragChip drag={drag} name={draggedName} />}
+
+      {labelTarget && <LabelDialog target={labelTarget} actions={actions} onClose={closeLabels} />}
 
       {menu && (
         <ContextMenu

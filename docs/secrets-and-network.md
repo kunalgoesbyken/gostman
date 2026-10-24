@@ -31,7 +31,7 @@ Open **Environments** from the header, then select **Secret managers**. Select *
 | Field | Meaning |
 | --- | --- |
 | **Name** | The name variables use to refer to the connection, such as `production`. It cannot be changed after the connection is saved. |
-| **Colour** | The colour of fields that read from this connection. Without a choice, one is picked from the name; the colour it will use has a dashed outline. |
+| **Colour** | The colour of fields that read from this connection: one of six colours, or any colour from the swatch with a plus. Without a choice, one is picked from the name; the colour it will use has a dashed outline. |
 | **Service** | HashiCorp Vault, AWS Secrets Manager, Azure Key Vault, Google Cloud Secret Manager, KeePassXC, 1Password, Bitwarden or Bitwarden Secrets Manager. It cannot be changed after the connection is saved. |
 
 The other fields depend on the service. A star marks a required field. Fields that hold credentials are masked.

@@ -267,7 +267,8 @@ func (w *Workspace) storeFolder(folder Folder) error {
 	}
 	entry.folder = folder
 	entry.folder.Variables, entry.folder.Settings = content.folder.Variables, content.folder.Settings
-	if entry.stored == content {
+	entry.folder.Color, entry.folder.Tags = content.folder.Color, content.folder.Tags
+	if reflect.DeepEqual(entry.stored, content) {
 		return nil
 	}
 	relative := joinPath(entry.dir, FolderFileName)

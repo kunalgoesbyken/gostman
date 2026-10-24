@@ -49,11 +49,13 @@ type Settings struct {
 }
 
 type Folder struct {
-	Id        string `json:"id"`
-	Name      string `json:"name"`
-	ParentId  string `json:"parentId"`
-	SortOrder int64  `json:"sortOrder"`
-	Variables string `json:"variables"`
+	Id        string   `json:"id"`
+	Name      string   `json:"name"`
+	ParentId  string   `json:"parentId"`
+	SortOrder int64    `json:"sortOrder"`
+	Variables string   `json:"variables"`
+	Color     string   `json:"color,omitempty"`
+	Tags      []string `json:"tags,omitempty"`
 	Settings
 }
 

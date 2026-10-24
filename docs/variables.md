@@ -25,7 +25,7 @@ Each environment is a table of rows: a name, a value, an on/off switch and a loc
 ![The Environments dialog with the Local environment selected: a green colour label, its variables, and the secret ones masked](../screenshots/environments.png)
 
 - **Secret** (lock): the value is masked in the table (the eye reveals it) and in hover previews and suggestions. It is never written to the workspace YAML, to exports or to share links. See [Secret variables](#secret-variables).
-- **Colour**: a label shown next to the environment picker, so production is hard to mistake for staging.
+- **Colour**: a label shown next to the environment picker, so production is hard to mistake for staging. Choose one of six colours, or the swatch with a plus for any colour from your system's colour picker.
 - **Inherits from**: the environment whose variables are used first. Cycles are not offered.
 - **Duplicate**, **Delete** and **Filter variables** (matches names and the values of non-secret rows).
 
@@ -39,7 +39,7 @@ Write `{{name}}` wherever the value should appear: URL, query parameters and hea
 - A placeholder with no matching variable is left as written, so the mistake is visible in the request that goes out.
 - Every occurrence is replaced. Values are inserted as they are; a value placed in a URL is not percent-encoded apart from spaces.
 - Placeholders are not expanded recursively.
-- In fields with variable support, defined names are underlined, hovering shows the value (masked for secrets) and the scope it came from, and typing `{{` offers completions.
+- In fields with variable support, defined names are underlined, hovering shows the value (masked for secrets) and the scope it came from, and typing `{{` or pressing Ctrl+Space offers completions.
 
 ## Secret variables
 

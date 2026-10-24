@@ -33,6 +33,8 @@ export function contrastRatio(first, second) {
 
 export const isDarkColor = (hex) => contrastRatio(hex, WHITE) > contrastRatio(hex, BLACK)
 
+export const textColorOn = (hex) => (isDarkColor(hex) ? WHITE : BLACK)
+
 function toOklab(hex) {
   const [red, green, blue] = channelsOf(hex).map(toLinear)
   const long = Math.cbrt(0.4122214708 * red + 0.5363325363 * green + 0.0514459929 * blue)
@@ -63,7 +65,33 @@ export function mixColors(from, to, amount) {
   return fromOklab(start.map((value, index) => value + (end[index] - value) * amount))
 }
 
+const SEARCH_STEPS = 16
+
+export function readableOn(color, background, minimum) {
+  if (contrastRatio(color, background) >= minimum) return color
+  const target = isDarkColor(background) ? WHITE : BLACK
+  let [low, high] = [0, 1]
+  for (let step = 0; step < SEARCH_STEPS; step += 1) {
+    const middle = (low + high) / 2
+    if (contrastRatio(mixColors(color, target, middle), background) >= minimum) high = middle
+    else low = middle
+  }
+  return mixColors(color, target, high)
+}
+
 const oneDecimal = (value) => Math.round(value * 10) / 10
+
+const hueChannel = (hue, saturation, lightness, offset) => {
+  const turn = (offset + hue / 30) % 12
+  const reach = saturation * Math.min(lightness, 1 - lightness)
+  return lightness - reach * Math.max(-1, Math.min(turn - 3, 9 - turn, 1))
+}
+
+export function tripletToHex(triplet) {
+  const [hue, saturation, lightness] = triplet.trim().split(/\s+/).map((part) => parseFloat(part))
+  if ([hue, saturation, lightness].some(Number.isNaN)) return null
+  return toHex([0, 8, 4].map((offset) => hueChannel(hue, saturation / 100, lightness / 100, offset)))
+}
 
 function hueOf([red, green, blue], max, delta) {
   if (delta === 0) return 0

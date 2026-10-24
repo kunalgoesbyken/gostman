@@ -89,9 +89,10 @@ Preferences is a window you can move and resize inside the app. Pick a section o
 | --- | --- | --- | --- |
 | Theme | **Theme** | **System**, **Light**, **Dark** | **System** |
 | Theme | **Contrast** | **System**, **Standard**, **More** | **System** |
-| Theme | **Accent colour** | **Cyan**, **Blue**, **Violet**, **Pink**, **Graphite** | **Cyan** |
+| Theme | **Accent colour** | **Cyan**, **Blue**, **Violet**, **Pink**, **Graphite** or a custom colour | **Cyan** |
 | Theme | **Palette** | **Default**, **Neutral**, **Slate**, **Paper**, **Moss**, **Dusk**, **Ocean**, **Ink** | **Default** |
 | Theme | **Custom colours** | A background and a text colour for each part of the window, for light and for dark | None |
+| Theme | **Method colours** | A text colour and an optional background for each request method, for light and for dark | None |
 | Appearance | **Text size** | 90%, 100%, 110%, 125% | 100% |
 | Appearance | **Density** | **Comfortable**, **Compact** | **Comfortable** |
 | Appearance | **Response panel** | **Below**, **Right** | **Below** |
@@ -111,7 +112,7 @@ Preferences is a window you can move and resize inside the app. Pick a section o
 At the bottom of the window:
 
 - **Keyboard shortcuts** closes Preferences and opens the Keyboard shortcuts dialog.
-- **Reset to defaults** restores every setting in the table, including the palette and custom colours. It keeps the shortcuts you changed; reset those in the Keyboard shortcuts dialog.
+- **Reset to defaults** restores every setting in the table, including the palette, custom colours and method colours. It keeps the shortcuts you changed (reset those in the Keyboard shortcuts dialog) and your tag colours.
 - **Done** closes the window.
 
 ### Themes and colours
@@ -124,6 +125,8 @@ At the bottom of the window:
 **Contrast** makes borders, field outlines and secondary text stronger. **System** turns it on when your operating system asks for more contrast, **More** always does, and **Standard** never does.
 
 **Accent colour** sets the colour of buttons, selected tabs, links and focus outlines. Each accent has its own shade for light and dark, chosen so that text in that colour and text on it stay easy to read.
+
+The last swatch, marked with a plus, picks a custom accent. Gostman keeps your colour where it is readable and darkens or lightens it where it is not, so text in the accent colour reaches 4.5:1 against the window. When it changes your colour, a note under **Accent colour** shows the shade used in each mode.
 
 **Palette** sets the background and text colours of the whole window. Each palette has a light and a dark version, shown side by side in its preview, and most give the sidebar a slightly different tone.
 
@@ -149,7 +152,9 @@ At the bottom of the window:
 - Borders, secondary text and highlights of each part are worked out from its two colours, so they stay readable. A dark part in the light theme, or a light part in the dark theme, uses the method, status and syntax colours made for its own background.
 - The reset button at the end of a row clears that part; **Reset light colours** or **Reset dark colours** clears them all for that version.
 
-**Share a theme**: **Copy theme** copies the palette and every custom colour, for both versions, as text. **Import theme** takes such text and applies it. A theme only holds colours; anything else, or a colour not written as `#rrggbb`, is refused.
+**Method colours** set the colour of each request method (GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, GRAPHQL, GRPC and MCP) in the sidebar, tabs, history, runner and the method menu of the address bar. Each method has a **Text** colour and a **Background**; with a background, the method is shown as a badge. They work like custom colours: **Light** and **Dark** choose the version you edit, **Contrast** warns below 4.5:1, and the reset buttons clear one method or all of them.
+
+**Share a theme**: **Copy theme** copies the palette, the accent colour, and every custom and method colour, for both versions, as text. **Import theme** takes such text and applies it. A theme only holds colours; anything else, or a colour not written as `#rrggbb`, is refused.
 
 Theme, contrast, accent and palette also apply to the landing page and the documentation in the same browser.
 
@@ -282,6 +287,8 @@ Each list, row of tabs and set of options is one stop for the Tab key, so Tab mo
 | Delete or Ctrl+Backspace | History | Remove the entry |
 | Shift+F10 or the Menu key | Collection tree | Show the actions for the request or folder |
 | Down Arrow | Sidebar search fields | Move into the results |
+| Ctrl+Space | Address bar, tables and code editors | Suggest variables without typing `{{` first; the word before the caret filters the list |
+| Shift+Alt+F | JSON and XML body editor | Format the body, the same as the **Format** button |
 | Esc | Menus and dialogs | Close them and go back to where you were |
 
 Alt+Shift+Left Arrow and Alt+Shift+Right Arrow move the focused tab, and the tree keeps its keys for moving, copying and duplicating rows; see [Move, copy and duplicate](collections-and-git.md#move-copy-and-duplicate).

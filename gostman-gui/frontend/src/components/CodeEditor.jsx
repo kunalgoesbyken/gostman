@@ -1,32 +1,60 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react'
 import { Annotation, Compartment, EditorState } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
 import { MergeView } from '@codemirror/merge'
 import { useVariableMap } from '../hooks/useVariableMap'
 import { usePreferences } from '../lib/preferences'
-import { baseExtensions, languageExtension, variableExtension, wrapExtension } from '../lib/codeEditor'
+import { baseExtensions, canFormat, formatDocument, formatKeymap, languageExtension, revealOffset, variableExtension, wrapExtension } from '../lib/codeEditor'
 import './variables.css'
 
 const externalChange = Annotation.define()
+const NO_EXTENSION = []
 
 const isUserChange = (update) => update.docChanged && !update.transactions.some((transaction) => transaction.annotation(externalChange))
 
-function useEditorConfig(language, variables, fileReads) {
+function useEditorConfig(language, variables, fileReads, formatting = NO_EXTENSION) {
   const { wrapLines } = usePreferences()
   const variableMap = useVariableMap()
   return useMemo(
-    () => [languageExtension(language), wrapExtension(wrapLines), variables ? variableExtension(variableMap, { fileReads }) : []],
-    [language, wrapLines, variables, fileReads, variableMap],
+    () => [languageExtension(language), wrapExtension(wrapLines), variables ? variableExtension(variableMap, { fileReads }) : [], formatting],
+    [language, wrapLines, variables, fileReads, variableMap, formatting],
   )
 }
 
-export function CodeEditor({ value = '', onChange, language = 'json', path, height = '300px', variables = false, fileReads = true, surface }) {
+function useFormatting(language, onFormat) {
+  const onFormatRef = useRef(onFormat)
+  const isFormattable = Boolean(onFormat) && canFormat(language)
+
+  useEffect(() => {
+    onFormatRef.current = onFormat
+  }, [onFormat])
+
+  return useMemo(() => {
+    const run = (view) => onFormatRef.current?.(formatDocument(view, language))
+    const runFromKeys = (view) => {
+      run(view)
+      return true
+    }
+    return { run, extension: isFormattable ? formatKeymap(runFromKeys) : NO_EXTENSION }
+  }, [language, isFormattable])
+}
+
+export const CodeEditor = forwardRef(function CodeEditor(
+  { value = '', onChange, onFormat, language = 'json', path, height = '300px', variables = false, fileReads = true, surface },
+  ref,
+) {
   const hostRef = useRef(null)
   const viewRef = useRef(null)
   const onChangeRef = useRef(onChange)
   const compartment = useMemo(() => new Compartment(), [])
   const { editorFontSize } = usePreferences()
-  const config = useEditorConfig(language, variables, fileReads)
+  const formatting = useFormatting(language, onFormat)
+  const config = useEditorConfig(language, variables, fileReads, formatting.extension)
+
+  useImperativeHandle(ref, () => ({
+    format: () => viewRef.current && formatting.run(viewRef.current),
+    reveal: (offset) => viewRef.current && revealOffset(viewRef.current, offset),
+  }), [formatting])
 
   useEffect(() => {
     onChangeRef.current = onChange
@@ -64,7 +92,7 @@ export function CodeEditor({ value = '', onChange, language = 'json', path, heig
   }, [value])
 
   return <div ref={hostRef} data-surface={surface} className="overflow-hidden" style={{ height, fontSize: editorFontSize }} />
-}
+})
 
 export function CodeDiff({ original, modified, language }) {
   const hostRef = useRef(null)

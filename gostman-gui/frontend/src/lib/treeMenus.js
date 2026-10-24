@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, ClipboardPaste, Copy, FileSearch, Folder, FolderInput, FolderPlus, ListChecks, Pencil, Plus, RefreshCw, Settings2, Share2, Trash2 } from "lucide-react"
+import { ArrowDown, ArrowUp, ClipboardPaste, Copy, FileSearch, Folder, FolderInput, FolderPlus, ListChecks, Palette, Pencil, Plus, RefreshCw, Settings2, Share2, Tag, Trash2 } from "lucide-react"
 import { ROOT_ID, ROW_FOLDER, ROW_REQUEST, listFolders } from "./collectionTree"
 import { FOLDER_SETTINGS_TEXT } from "./folderSettingsText"
 import { SPEC_TEXT } from "./specText"
@@ -28,7 +28,7 @@ function arrangeItems(source, context) {
 }
 
 function folderMenuItems(folder, context) {
-  const { actions, isLinked } = context
+  const { actions, isLinked, editLabels } = context
   const source = { kind: ROW_FOLDER, id: folder.id }
   return [
     { id: "new-request", label: "New request", icon: Plus, onSelect: () => actions.newRequest(folder.id) },
@@ -37,6 +37,7 @@ function folderMenuItems(folder, context) {
     { id: "share", label: "Share folder", icon: Share2, onSelect: () => actions.shareFolder(folder.id) },
     ...(isLinked ? specMenuItems(folder, actions) : []),
     { id: "settings", label: FOLDER_SETTINGS_TEXT.menuSettings, icon: Settings2, onSelect: () => actions.openFolderSettings(folder.id) },
+    { id: "labels", label: TREE_TEXT.editLabels, icon: Palette, onSelect: () => editLabels(source) },
     ...arrangeItems(source, { ...context, pasteRow: source }),
     { id: "rename", label: "Rename", icon: Pencil, onSelect: () => actions.renameFolder(folder) },
     { id: "delete", label: "Delete", icon: Trash2, destructive: true, onSelect: () => actions.deleteFolder(folder) },
@@ -44,10 +45,11 @@ function folderMenuItems(folder, context) {
 }
 
 function requestMenuItems(request, context) {
-  const { actions } = context
+  const { actions, editLabels } = context
   const source = { kind: ROW_REQUEST, id: request.id }
   return [
     { id: "rename", label: "Rename", icon: Pencil, onSelect: () => actions.renameRequest(request) },
+    { id: "tags", label: TREE_TEXT.editTags, icon: Tag, onSelect: () => editLabels(source) },
     ...arrangeItems(source, { ...context, pasteRow: source }),
     { id: "delete", label: "Delete", icon: Trash2, destructive: true, onSelect: () => actions.deleteRequest(request) },
   ]

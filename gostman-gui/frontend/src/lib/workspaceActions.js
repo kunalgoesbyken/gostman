@@ -339,6 +339,8 @@ export function createWorkspaceActions(backend) {
     promptForName('Rename folder', 'Folder name', folder.name, (name) => store().renameFolder(folder.id, name))
   }
 
+  const setRequestTags = attempt('Could not save the tags', (request, tags) => updateSavedRequest(request, { tags }))
+
   function renameRequest(request) {
     const rename = attempt('Could not rename the request', (name) => updateSavedRequest(request, { name }))
     promptForName('Rename request', 'Request name', request.name, rename)
@@ -549,6 +551,7 @@ export function createWorkspaceActions(backend) {
     renameFolder,
     deleteFolder,
     renameRequest,
+    setRequestTags,
     duplicateRequest,
     moveRequest: (request, folderId) => tree.moveToFolder({ kind: ROW_REQUEST, id: request.id }, folderId),
     deleteRequest,

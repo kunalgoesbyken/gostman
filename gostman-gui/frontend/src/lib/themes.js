@@ -1,5 +1,6 @@
 import { hslTriplet, isDarkColor, isHexColor, mixColors } from './color.js'
 import { isPlainObject, parseJSON } from './dataUtils.js'
+import { STYLED_METHODS, methodBackgroundToken, methodToken } from './methodColors.js'
 
 export const MODES = ['light', 'dark']
 export const ROLES = ['background', 'foreground']
@@ -63,6 +64,7 @@ const PALETTES = {
 export const PALETTE_IDS = Object.keys(PALETTES)
 export const DEFAULT_PALETTE = 'default'
 export const EMPTY_CUSTOM_COLORS = { light: {}, dark: {} }
+export const EMPTY_METHOD_COLORS = { light: {}, dark: {} }
 
 const MIXES = {
   standard: { card: 0.025, muted: 0.06, accent: 0.085, border: 0.16, mutedForeground: 0.66 },
@@ -161,16 +163,20 @@ function normalizeSurfaceColors(raw) {
   return Object.fromEntries(ROLES.filter((role) => isHexColor(source[role])).map((role) => [role, source[role].toLowerCase()]))
 }
 
-function normalizeModeColors(raw) {
+function normalizeModeColors(raw, ids) {
   const source = entriesOf(raw)
-  const surfaces = SURFACE_IDS.map((id) => [id, normalizeSurfaceColors(source[id])])
-  return Object.fromEntries(surfaces.filter(([, colors]) => Object.keys(colors).length > 0))
+  const entries = ids.map((id) => [id, normalizeSurfaceColors(source[id])])
+  return Object.fromEntries(entries.filter(([, colors]) => Object.keys(colors).length > 0))
 }
 
-export function normalizeCustomColors(raw) {
+const normalizeColorSet = (raw, ids) => {
   const source = entriesOf(raw)
-  return Object.fromEntries(MODES.map((mode) => [mode, normalizeModeColors(source[mode])]))
+  return Object.fromEntries(MODES.map((mode) => [mode, normalizeModeColors(source[mode], ids)]))
 }
+
+export const normalizeCustomColors = (raw) => normalizeColorSet(raw, SURFACE_IDS)
+
+export const normalizeMethodColors = (raw) => normalizeColorSet(raw, STYLED_METHODS)
 
 export function withSurfaceColor(customColors, mode, id, role, value) {
   const surface = { ...customColors[mode][id], [role]: value }
@@ -184,22 +190,42 @@ export function withoutSurface(customColors, mode, id) {
 
 export const withoutMode = (customColors, mode) => ({ ...customColors, [mode]: {} })
 
+const methodProperties = (method, colors) => [
+  colors.foreground && [methodToken(method), hslTriplet(colors.foreground)],
+  colors.background && [methodBackgroundToken(method), colors.background],
+].filter(Boolean)
+
+export function methodStyleSheet(methodColors, mode) {
+  const properties = Object.entries(methodColors[mode]).flatMap(([method, colors]) => methodProperties(method, colors))
+  return properties.length > 0 ? `:root { ${declarations(Object.fromEntries(properties))} }` : ''
+}
+
 const THEME_FORMAT = 1
 const THEME_TEXT_LIMIT = 20000
-const DOCUMENT_KEYS = ['gostmanTheme', 'palette', 'colors']
+const DOCUMENT_KEYS = ['gostmanTheme', 'palette', 'accent', 'colors', 'methods']
 
 const hasOnly = (value, keys) => isPlainObject(value) && Object.keys(value).every((key) => keys.includes(key))
 const isSurfaceEntry = (value) => hasOnly(value, ROLES) && Object.values(value).every(isHexColor)
-const isModeEntry = (value) => hasOnly(value, SURFACE_IDS) && Object.values(value).every(isSurfaceEntry)
-const isColorSet = (value) => hasOnly(value, MODES) && Object.values(value).every(isModeEntry)
+const isModeEntry = (ids) => (value) => hasOnly(value, ids) && Object.values(value).every(isSurfaceEntry)
+const isColorSet = (value, ids) => hasOnly(value, MODES) && Object.values(value).every(isModeEntry(ids))
+const isOptional = (value, isValid) => value === undefined || isValid(value)
 
-const isThemeDocument = (value) =>
-  hasOnly(value, DOCUMENT_KEYS) && value.gostmanTheme === THEME_FORMAT && PALETTE_IDS.includes(value.palette) && isColorSet(value.colors)
+const isThemeDocument = (value, accents) =>
+  hasOnly(value, DOCUMENT_KEYS) && value.gostmanTheme === THEME_FORMAT && PALETTE_IDS.includes(value.palette) &&
+  isColorSet(value.colors, SURFACE_IDS) && isOptional(value.methods, (methods) => isColorSet(methods, STYLED_METHODS)) &&
+  isOptional(value.accent, (accent) => accents.includes(accent) || isHexColor(accent))
 
-export const serializeTheme = ({ palette, customColors }) => JSON.stringify({ gostmanTheme: THEME_FORMAT, palette, colors: customColors }, null, 2)
+export const serializeTheme = ({ palette, accent, customColors, methodColors }) => (
+  JSON.stringify({ gostmanTheme: THEME_FORMAT, palette, accent, colors: customColors, methods: methodColors }, null, 2)
+)
 
-export function parseTheme(text) {
+export function parseTheme(text, accents) {
   const value = text.length <= THEME_TEXT_LIMIT ? parseJSON(text, null) : null
-  if (!isThemeDocument(value)) return null
-  return { palette: value.palette, customColors: normalizeCustomColors(value.colors) }
+  if (!isThemeDocument(value, accents)) return null
+  return {
+    palette: value.palette,
+    ...(value.accent !== undefined && { accent: value.accent }),
+    customColors: normalizeCustomColors(value.colors),
+    methodColors: normalizeMethodColors(value.methods),
+  }
 }

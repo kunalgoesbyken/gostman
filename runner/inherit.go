@@ -43,6 +43,14 @@ func (c Collection) lineages() func(folderID string) []Folder {
 	}
 }
 
+func (r Request) allTags() []string {
+	tags := slices.Clone(r.Tags)
+	for _, folder := range r.Lineage {
+		tags = append(tags, folder.Tags...)
+	}
+	return tags
+}
+
 func (r Request) layers() []engine.Layer {
 	layers := make([]engine.Layer, len(r.Lineage))
 	for i, folder := range r.Lineage {

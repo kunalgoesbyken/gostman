@@ -70,15 +70,29 @@ export function collectRequests(tree, folderId) {
   return [...nested, ...requestsIn(tree, folderId)]
 }
 
+export function inheritedTags(folders) {
+  const byId = new Map(folders.map((folder) => [folder.id, folder]))
+  return (request) => {
+    const tags = [...normalizeTags(request.tags)]
+    const visited = new Set()
+    for (let id = request.folderId; byId.has(id) && !visited.has(id); id = byId.get(id).parentId) {
+      visited.add(id)
+      tags.push(...normalizeTags(byId.get(id).tags))
+    }
+    return normalizeTags(tags)
+  }
+}
+
 export function findMatches(folders, requests, query) {
   const needle = foldCase(query.trim())
   if (!needle) return null
 
   const parentOf = new Map(folders.map((folder) => [folder.id, folder.parentId]))
+  const tagsOf = inheritedTags(folders)
   const requestIds = new Set()
   const folderIds = new Set()
   for (const request of requests) {
-    if (!foldCase([request.name, request.url, ...normalizeTags(request.tags)].join('\n')).includes(needle)) continue
+    if (!foldCase([request.name, request.url, ...tagsOf(request)].join('\n')).includes(needle)) continue
     requestIds.add(request.id)
     let ancestorId = request.folderId
     while (parentOf.has(ancestorId) && !folderIds.has(ancestorId)) {

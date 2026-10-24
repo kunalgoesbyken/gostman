@@ -3,9 +3,8 @@ import { Copy, Import } from "lucide-react"
 import { PreferenceGroup } from "./PreferenceRows"
 import { Button } from "../ui/button"
 import { Textarea } from "../ui/textarea"
-import { updatePreferences } from "../../lib/preferences"
+import { themeFromText, themeText, updatePreferences } from "../../lib/preferences"
 import { PREFERENCES_TEXT } from "../../lib/preferencesText"
-import { parseTheme, serializeTheme } from "../../lib/themes"
 import { cn } from "../../lib/utils"
 
 const TEXT = PREFERENCES_TEXT.theme
@@ -17,7 +16,7 @@ function ImportForm({ onDone, onCancel }) {
 
   const apply = (event) => {
     event.preventDefault()
-    const theme = parseTheme(text)
+    const theme = themeFromText(text)
     if (!theme) {
       setIsInvalid(true)
       return
@@ -59,7 +58,7 @@ export function ThemeTransfer({ preferences }) {
 
   const copy = () =>
     Promise.resolve()
-      .then(() => navigator.clipboard.writeText(serializeTheme(preferences)))
+      .then(() => navigator.clipboard.writeText(themeText(preferences)))
       .then(() => setStatus({ text: TEXT.copied, failed: false }))
       .catch(() => setStatus({ text: TEXT.copyFailed, failed: true }))
 

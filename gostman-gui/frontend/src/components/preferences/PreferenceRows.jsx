@@ -1,8 +1,11 @@
 import { useId } from "react"
+import { CustomColorSwatch } from "../ui/colorPicker"
 import { RADIO_KEYS, SegmentedControl } from "../ui/segmented"
+import { CUSTOM_ACCENT, accentShade } from "../../lib/accent"
 import { ACCENTS, updatePreferences } from "../../lib/preferences"
 import { PREFERENCES_TEXT } from "../../lib/preferencesText"
 import { moveFocus, tabStopOf } from "../../lib/rovingFocus"
+import { MODES } from "../../lib/themes"
 import { cn } from "../../lib/utils"
 
 export const optionsOf = (values, labels) => values.map((value) => ({ value, label: labels[value] }))
@@ -49,11 +52,21 @@ export function ChoiceRow({ label, hint, name, options, preferences }) {
   )
 }
 
+const ACCENT_OPTIONS = [...ACCENTS, CUSTOM_ACCENT]
+
+function adjustedShades(preferences) {
+  if (preferences.accent !== CUSTOM_ACCENT) return null
+  const shades = Object.fromEntries(MODES.map((mode) => [mode, accentShade(preferences, mode, preferences.accentColor)]))
+  return Object.values(shades).some((shade) => shade !== preferences.accentColor) ? shades : null
+}
+
 export function AccentRow({ preferences }) {
-  const tabStop = tabStopOf(ACCENTS, preferences.accent)
+  const tabStop = tabStopOf(ACCENT_OPTIONS, preferences.accent)
+  const isCustom = preferences.accent === CUSTOM_ACCENT
+  const shades = adjustedShades(preferences)
 
   return (
-    <PreferenceRow label={PREFERENCES_TEXT.fields.accent}>
+    <PreferenceRow label={PREFERENCES_TEXT.fields.accent} hint={shades && PREFERENCES_TEXT.accentAdjusted(shades)}>
       <div role="radiogroup" aria-label={PREFERENCES_TEXT.fields.accent} onKeyDown={(event) => moveFocus(event, RADIO_KEYS)} className="flex items-center gap-1.5">
         {ACCENTS.map((accent) => (
           <button
@@ -74,6 +87,13 @@ export function AccentRow({ preferences }) {
             <span aria-hidden="true" className="h-4 w-4 rounded-full bg-primary" />
           </button>
         ))}
+        <CustomColorSwatch
+          value={isCustom ? preferences.accentColor : ""}
+          isSelected={isCustom}
+          isTabStop={tabStop === CUSTOM_ACCENT}
+          size="md"
+          onChange={(accentColor) => updatePreferences({ accent: CUSTOM_ACCENT, accentColor })}
+        />
       </div>
     </PreferenceRow>
   )

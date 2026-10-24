@@ -2,9 +2,11 @@ import { memo, useLayoutEffect, useRef } from "react"
 import { ChevronDown, ChevronRight, Folder, MoreHorizontal } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { MethodTag } from "./MethodTag"
+import { TagBadge } from "./TagBadge"
 import { ROW_FOLDER } from "../lib/collectionTree"
 import { PLACE_AFTER, PLACE_BEFORE, PLACE_INSIDE } from "../lib/dropPlace"
 import { normalizeTags } from "../lib/tags"
+import { colorHex } from "../lib/swatches"
 import { TREE_TEXT } from "../lib/treeText"
 import { cn } from "../lib/utils"
 
@@ -13,12 +15,37 @@ const INDENT_STEP_PX = 12
 const BASE_PADDING_PX = 12
 const MAX_INDENT_LEVELS = 10
 const UNTITLED = "Untitled"
+const SHOWN_TAGS = 2
+const FOLDER_FILL_OPACITY = 0.3
 
 const indentOf = (depth) => BASE_PADDING_PX + Math.min(depth, MAX_INDENT_LEVELS) * INDENT_STEP_PX
 
 function DropLine({ place }) {
   if (place !== PLACE_BEFORE && place !== PLACE_AFTER) return null
   return <span aria-hidden className={cn("pointer-events-none absolute inset-x-0 h-0.5 bg-primary", place === PLACE_BEFORE ? "top-0" : "bottom-0")} />
+}
+
+function RowTags({ tags }) {
+  if (tags.length === 0) return null
+  const hidden = tags.length - SHOWN_TAGS
+
+  return (
+    <span className="flex min-w-0 max-w-[50%] shrink items-center gap-1 pl-1">
+      {tags.slice(0, SHOWN_TAGS).map((tag) => <TagBadge key={tag} tag={tag} className="px-1 text-3xs leading-4" />)}
+      {hidden > 0 && (
+        <>
+          <span aria-hidden="true" className="shrink-0 text-3xs text-muted-foreground">{TREE_TEXT.moreTags(hidden)}</span>
+          <span className="sr-only">{tags.slice(SHOWN_TAGS).join(", ")}</span>
+        </>
+      )}
+    </span>
+  )
+}
+
+function FolderIcon({ color }) {
+  const hex = colorHex(color)
+  if (!hex) return <Folder className="h-3.5 w-3.5 shrink-0" />
+  return <Folder className="h-3.5 w-3.5 shrink-0" style={{ color: hex }} fill={hex} fillOpacity={FOLDER_FILL_OPACITY} />
 }
 
 export const EmptyRow = memo(function EmptyRow({ row, dropPlace }) {
@@ -37,6 +64,7 @@ export const TreeRow = memo(function TreeRow({ row, isActive, isTabStop, focusRe
   const isFolder = row.kind === ROW_FOLDER
   const item = isFolder ? row.folder : row.request
   const name = item.name || UNTITLED
+  const tags = normalizeTags(item.tags)
   const Chevron = row.isOpen ? ChevronDown : ChevronRight
   const mainRef = useRef(null)
 
@@ -82,19 +110,20 @@ export const TreeRow = memo(function TreeRow({ row, isActive, isTabStop, focusRe
         onClick={() => onActivate(row)}
         onDoubleClick={() => onPin(row)}
         onPointerDown={(event) => onPointerDown(event, row)}
-        title={isFolder ? name : [name, item.url, normalizeTags(item.tags).join(", ")].filter(Boolean).join("\n")}
+        title={[name, !isFolder && item.url, tags.join(", ")].filter(Boolean).join("\n")}
         style={{ paddingLeft: indentOf(row.depth) }}
         className="flex h-full min-w-0 flex-1 items-center gap-1.5 text-left"
       >
         {isFolder ? (
           <>
             <Chevron className="h-3.5 w-3.5 shrink-0" />
-            <Folder className="h-3.5 w-3.5 shrink-0" />
+            <FolderIcon color={item.color} />
           </>
         ) : (
           <MethodTag method={item.method} className="w-10" />
         )}
-        <span className={cn("truncate", isFolder && "font-medium text-foreground")}>{name}</span>
+        <span className={cn("min-w-0 flex-1 truncate", isFolder && "font-medium text-foreground")}>{name}</span>
+        <RowTags tags={tags} />
       </button>
       <IconButton
         label={`Actions for ${name}`}

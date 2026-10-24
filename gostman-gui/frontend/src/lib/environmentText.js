@@ -43,13 +43,6 @@ export const ENVIRONMENT_TEXT = {
 export const COLOR_TEXT = {
   names: { red: "Red", orange: "Orange", green: "Green", blue: "Blue", purple: "Purple", gray: "Gray" },
   automatic: (name) => `${name}, picked automatically`,
-}
-
-export const ENVIRONMENT_COLORS = {
-  red: "bg-red-500",
-  orange: "bg-orange-500",
-  green: "bg-green-500",
-  blue: "bg-blue-500",
-  purple: "bg-purple-500",
-  gray: "bg-gray-500",
+  custom: "Custom colour",
+  customValue: (hex) => `Custom colour ${hex}`,
 }

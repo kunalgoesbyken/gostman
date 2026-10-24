@@ -1,8 +1,8 @@
 import { Settings2 } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { Select } from "./ui/select"
-import { ENVIRONMENT_COLORS, ENVIRONMENT_TEXT as TEXT } from "../lib/environmentText"
-import { cn } from "../lib/utils"
+import { ColorDot } from "./ui/colorPicker"
+import { ENVIRONMENT_TEXT as TEXT } from "../lib/environmentText"
 import { useAppStore } from "../store/appStore"
 
 export function EnvironmentSwitcher() {
@@ -16,10 +16,7 @@ export function EnvironmentSwitcher() {
 
   return (
     <div className="flex min-w-0 items-center gap-1">
-      <span
-        aria-hidden="true"
-        className={cn("h-2 w-2 shrink-0 rounded-full", ENVIRONMENT_COLORS[active.color] || "border border-border")}
-      />
+      <ColorDot color={active.color} />
       <Select
         value={active.id}
         onChange={(event) => setActiveEnvironment(event.target.value)}

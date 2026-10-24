@@ -18,7 +18,8 @@ const toWholeNumber = (text) => Math.max(0, Math.trunc(Number(text)) || 0)
 export function SettingsPanel({ options, description, tags, onChange, onDescriptionChange, onTagsChange, onDocument }) {
   const update = (patch) => onChange({ ...options, ...patch })
   const requests = useAppStore((state) => state.requests)
-  const knownTags = useMemo(() => collectTags(requests), [requests])
+  const folders = useAppStore((state) => state.folders)
+  const knownTags = useMemo(() => collectTags([...requests, ...folders]), [requests, folders])
 
   return (
     <PanelBody className="h-full">

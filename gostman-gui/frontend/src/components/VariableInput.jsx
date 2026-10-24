@@ -5,7 +5,7 @@ import { placeBelow, useDismiss } from "./ui/select"
 import { Textarea } from "./ui/textarea"
 import { VariableCard } from "./VariableCard"
 import { useVariableMap } from "../hooks/useVariableMap"
-import { applyCompletion, describeReference, findReferences, openReference, referenceLook, suggestNames } from "../lib/variables"
+import { SECRET_TINT, applyCompletion, describeReference, findReferences, referenceAtCaret, referenceLook, suggestNames } from "../lib/variables"
 import { cn } from "../lib/utils"
 import "./variables.css"
 
@@ -13,6 +13,8 @@ const STEPS = { ArrowDown: 1, ArrowUp: -1 }
 const CARET_KEYS = new Set(["ArrowLeft", "ArrowRight", "Home", "End"])
 
 const picksSuggestion = (event) => event.key === "Tab" || (event.key === "Enter" && !event.ctrlKey && !event.metaKey)
+
+const asksForSuggestions = (event) => event.ctrlKey && event.code === "Space" && !event.altKey && !event.metaKey && !event.shiftKey
 
 function Mirror({ text, variables, innerRef, className }) {
   const parts = useMemo(() => {
@@ -22,7 +24,7 @@ function Mirror({ text, variables, innerRef, className }) {
       if (ref.start > at) out.push(<span key={`t${at}`}>{text.slice(at, ref.start)}</span>)
       const look = referenceLook(ref.name, variables)
       out.push(
-        <span key={`v${ref.start}`} data-var={ref.name} className={look.className} {...look.attributes}>
+        <span key={`v${ref.start}`} data-var={ref.name} className={look.className} style={look.tint ? { [SECRET_TINT]: look.tint } : undefined} {...look.attributes}>
           {text.slice(ref.start, ref.end)}
         </span>,
       )
@@ -90,13 +92,13 @@ function useCompletion(fieldRef, { fileReads, onChange, onKeyDown, onBlur, onCar
   const close = useCallback(() => setOpen(null), [])
   useDismiss(open !== null, close, fieldRef, listRef)
 
-  const names = open ? suggestNames(variables, open.query, { fileReads }) : []
+  const names = open ? suggestNames(variables, open.query, { fileReads, explicit: open.explicit }) : []
   const showing = open !== null && names.length > 0
 
-  const refresh = (field) => {
+  const refresh = (field, explicit = false) => {
     const caret = field.selectionStart ?? 0
-    const reference = field.selectionEnd === caret ? openReference(field.value, caret) : null
-    setOpen(reference && { ...reference, caret, placement: placeBelow(field) })
+    const reference = field.selectionEnd === caret ? referenceAtCaret(field.value, caret, explicit) : null
+    setOpen(reference && { ...reference, caret, explicit, placement: placeBelow(field) })
     setActive(0)
     if (onCaretMove) requestAnimationFrame(onCaretMove)
   }
@@ -113,6 +115,11 @@ function useCompletion(fieldRef, { fileReads, onChange, onKeyDown, onBlur, onCar
   }
 
   const handleKeyDown = (event) => {
+    if (asksForSuggestions(event)) {
+      event.preventDefault()
+      refresh(event.currentTarget, true)
+      return
+    }
     if (showing && STEPS[event.key]) {
       event.preventDefault()
       setActive((active + STEPS[event.key] + names.length) % names.length)
@@ -135,7 +142,7 @@ function useCompletion(fieldRef, { fileReads, onChange, onKeyDown, onBlur, onCar
   const fieldProps = {
     onChange: (event) => {
       onChange?.(event)
-      refresh(event.target)
+      refresh(event.target, Boolean(open?.explicit))
     },
     onKeyDown: handleKeyDown,
     onKeyUp: (event) => {

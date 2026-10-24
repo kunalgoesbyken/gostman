@@ -90,6 +90,7 @@ Details:
 
 - File attachments, in the File type and in Multipart file rows, are limited to 5 MB. A larger file is refused with a message.
 - Switching between raw types (JSON, Text, XML, SOAP) keeps the same text. Switching between the groups None, Form URL-encoded, Multipart, File and raw types keeps a separate draft for each group, so you can switch back without losing it.
+- For JSON and XML, **Format** at the right of the toolbar (or Shift+Alt+F in the editor) indents the body. `{{variables}}` are kept as written, also where JSON expects a value, and numbers, key order and duplicate keys are left exactly as they are. Undo (Ctrl+Z) restores the previous text. When the body is not valid, nothing is changed: a notice names the problem with its line and column, for example "Line 3, column 3: Expected ',' or '}' after the property value", the cursor moves to that place, and **Go to line** takes you back to it later. The same message appears when you hover the underlined spot while typing.
 - For SOAP, the toolbar offers SOAP 1.1 and SOAP 1.2, a SOAPAction field and a Format XML button. Choosing SOAP with an empty body inserts a SOAP 1.1 template.
 - When the method is GRAPHQL, the Body tab shows a notice: the body is built from the GraphQL tab and the Body tab is not sent.
 
@@ -175,7 +176,7 @@ A dot on the Settings tab means a timeout, a disabled redirect or TLS check, or 
 
 ## Variables in inputs
 
-URL, header, parameter and body fields recognise `{{name}}`. Defined names are underlined, and hovering one shows its value and where it comes from. Typing `{{` opens a list of names; use the arrow keys with Enter or Tab to pick one, and Escape to close the list. Secret values are masked in these hints.
+URL, header, parameter and body fields recognise `{{name}}`. Defined names are underlined, and hovering one shows its value and where it comes from. Typing `{{` opens a list of names; use the arrow keys with Enter or Tab to pick one, and Escape to close the list. Ctrl+Space opens the same list without typing `{{`: the word before the caret filters it, and the name you pick is written with its braces. With nothing before the caret, it lists your variables first and then the dynamic ones. Secret values are masked in these hints.
 
 A name written as `{{?name}}` is asked for when you send the request. A dialog titled "Values needed" lists each name with a field. Send continues with the values you entered and Cancel stops the send. See [Variables](variables.md#prompt-variables) for scopes, dynamic variables and secrets.
 

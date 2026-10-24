@@ -31,6 +31,8 @@ The width, from 224 to 480 pixels, and whether the sidebar is shown are remember
 
 The tree lists folders and requests. Each request row shows its method and name, and hovering a row shows its URL and tags. Folders can hold other folders. An import moves folders nested deeper than 32 levels to the top level.
 
+Tags show at the right of a row as coloured labels, the first two in full and the rest as **+N**. A folder with a colour shows it on its folder icon. See [Folder colours and tags](#folder-colours-and-tags).
+
 - Click a folder to open or close it. **Collapse all folders**, next to the search field and in the command palette, closes every folder.
 - Click a request to open it in a preview tab. Double-click it to keep the tab open.
 - An empty folder shows **This folder is empty**.
@@ -38,7 +40,7 @@ The tree lists folders and requests. Each request row shows its method and name,
 
 ### Search
 
-The **Search name, URL or tag** field filters the tree by request name, URL or tag. When nothing matches, the tree shows **No results**. Drag and drop is switched off while a search is active. Press the Down Arrow in the field to move into the results.
+The **Search name, URL or tag** field filters the tree by request name, URL or tag. A request also matches the tags of the folders it is in. When nothing matches, the tree shows **No results**. Drag and drop is switched off while a search is active. Press the Down Arrow in the field to move into the results.
 
 The tree is one stop for the Tab key. Inside it, the arrow keys move between rows, Right Arrow and Left Arrow open and close folders, Enter opens a request in a tab and Space previews it. Typing the start of a name jumps to the next matching request or folder. F2 renames a row, Delete deletes it after you confirm, and Shift+F10 or the Menu key shows its actions. See [Move around with the keyboard](preferences-and-shortcuts.md#move-around-with-the-keyboard) for every key.
 
@@ -59,6 +61,7 @@ Right-click a row, or use the actions button that appears when you hover it, to 
 For a request:
 
 - **Rename**
+- **Tags…**, see [Folder colours and tags](#folder-colours-and-tags)
 - **Move up**, **Move down**, **Move to folder**
 - **Copy**, **Paste**, **Duplicate**
 - **Delete**
@@ -71,9 +74,20 @@ For a folder, the menu adds these entries before the move and copy entries:
 - **Run folder**
 - **Share folder**, which opens the Share tab, see [Sharing and documentation](sharing-and-docs.md)
 - **Settings**, the folder settings described in [Folder and collection settings](folder-settings.md)
+- **Colour and tags…**, see [Folder colours and tags](#folder-colours-and-tags)
 - **Check for spec updates** and **Browse API spec**, only for a folder created from an OpenAPI spec that has a saved address or file, see [Import, export and OpenAPI specs](import-export-and-specs.md)
 
 A folder also has **Rename** and **Delete**.
+
+### Folder colours and tags
+
+**Colour and tags…** on a folder, or **Tags…** on a request, opens a small window:
+
+- **Folder colour** offers six colours and a custom one (the swatch with a plus), which opens your system's colour picker. Choose the selected colour again to remove it. The colour is saved with the folder, in `folder.yaml` for a folder workspace, so everyone who opens the collection sees it.
+- **Tags** adds and removes tags. Type a tag and press Enter, or pick one used elsewhere in the collection. A request's tags can also be edited in its **Settings** tab.
+- **Tag colours** sets the colour of each tag. Without a choice, a colour is picked from the tag's name, so a tag looks the same on every computer. A tag you colour keeps that colour everywhere it appears; these choices are kept on this device and survive **Reset to defaults**.
+
+Folder tags apply to every request inside the folder, including requests in its subfolders. The sidebar search, the runner's **Only tags** and **Skip tags** filters, and `gostman run --tags` and `--exclude-tags` all treat them as the request's own tags.
 
 ## Tabs
 

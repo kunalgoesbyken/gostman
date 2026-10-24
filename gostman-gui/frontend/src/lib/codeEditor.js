@@ -4,12 +4,14 @@ import { HighlightStyle, indentUnit, syntaxHighlighting, syntaxTree } from '@cod
 import { indentWithTab } from '@codemirror/commands'
 import { linter } from '@codemirror/lint'
 import { json } from '@codemirror/lang-json'
-import { xml } from '@codemirror/lang-xml'
+import { xml, xmlLanguage } from '@codemirror/lang-xml'
 import { html } from '@codemirror/lang-html'
 import { javascript } from '@codemirror/lang-javascript'
 import { tags } from '@lezer/highlight'
 import { basicSetup } from 'codemirror'
-import { CLOSING_REFERENCE, describeReference, findReferences, openReference, referenceLook, suggestNames } from './variables'
+import { findJsonProblem, formatJson, lineAndColumn } from './jsonFormat'
+import { formatXml } from './soap'
+import { CLOSING_REFERENCE, SECRET_TINT, describeReference, findReferences, referenceAtCaret, referenceLook, suggestNames } from './variables'
 import { mountVariableCard } from '../components/VariableCard'
 
 const EDITOR_TEXT = {
@@ -18,7 +20,6 @@ const EDITOR_TEXT = {
 
 const FONT_FAMILY = 'var(--font-mono)'
 const INDENT = '  '
-const PLACEHOLDER_VALUE = '0'
 
 const token = (name, alpha) => (alpha === undefined ? `hsl(var(--${name}))` : `hsl(var(--${name}) / ${alpha})`)
 
@@ -30,8 +31,9 @@ const theme = EditorView.theme({
   '.cm-scroller': { fontFamily: FONT_FAMILY, lineHeight: '1.6' },
   '.cm-content': { caretColor: token('primary') },
   '.cm-cursor, .cm-dropCursor': { borderLeftColor: token('primary') },
-  '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': { backgroundColor: token('primary', 0.25) },
-  '.cm-activeLine': { backgroundColor: token('card') },
+  '.cm-selectionBackground, .cm-content ::selection': { backgroundColor: token('primary', 0.22) },
+  '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground': { backgroundColor: token('primary', 0.3) },
+  '.cm-activeLine': { backgroundColor: token('foreground', 0.035) },
   '.cm-gutters': { backgroundColor: token('background'), color: token('muted-foreground'), border: 'none' },
   '.cm-activeLineGutter': { backgroundColor: 'transparent', color: token('primary') },
   '.cm-foldPlaceholder': { backgroundColor: token('accent'), color: token('muted-foreground'), border: 'none' },
@@ -117,22 +119,6 @@ export const baseExtensions = [
   tooltips({ parent: document.body }),
 ]
 
-const maskReferences = (text, references) => references.reduceRight(
-  (masked, ref) => masked.slice(0, ref.start) + PLACEHOLDER_VALUE.padEnd(ref.end - ref.start) + masked.slice(ref.end),
-  text,
-)
-
-function isJsonWithReferences(text) {
-  const references = findReferences(text)
-  if (references.length === 0) return false
-  try {
-    JSON.parse(maskReferences(text, references))
-    return true
-  } catch {
-    return false
-  }
-}
-
 function syntaxErrors(view) {
   const diagnostics = []
   syntaxTree(view.state).iterate({
@@ -145,8 +131,10 @@ function syntaxErrors(view) {
 
 function jsonErrors(view) {
   const text = view.state.doc.toString()
-  if (!text.trim() || isJsonWithReferences(text)) return []
-  return syntaxErrors(view)
+  const problem = text.trim() ? findJsonProblem(text) : null
+  if (!problem) return []
+  const to = Math.min(problem.offset + 1, text.length)
+  return [{ from: problem.offset, to, severity: 'error', message: problem.message }]
 }
 
 const LANGUAGES = {
@@ -158,11 +146,56 @@ const LANGUAGES = {
 
 export const languageExtension = (language) => LANGUAGES[language]?.() ?? []
 
+const XML_PROBLEM_NODES = new Set(['MismatchedCloseTag', 'MissingCloseTag'])
+
+function xmlProblemOffset(text) {
+  let offset = null
+  xmlLanguage.parser.parse(text).iterate({
+    enter: (node) => {
+      if (offset !== null) return false
+      if (node.type.isError || XML_PROBLEM_NODES.has(node.name)) offset = node.from
+      return undefined
+    },
+  })
+  return offset
+}
+
+function xmlResult(text) {
+  const result = formatXml(text)
+  if (!result.error) return result
+  const offset = xmlProblemOffset(text)
+  return { error: offset === null ? { message: result.error } : { message: result.error, offset, line: lineAndColumn(text, offset).line } }
+}
+
+const FORMATTERS = { json: formatJson, xml: xmlResult }
+
+export const canFormat = (language) => Object.hasOwn(FORMATTERS, language)
+
+export function revealOffset(view, offset) {
+  const position = Math.min(offset, view.state.doc.length)
+  view.dispatch({ selection: { anchor: position }, effects: EditorView.scrollIntoView(position, { y: 'center' }) })
+  view.focus()
+}
+
+export function formatDocument(view, language) {
+  const text = view.state.doc.toString()
+  if (!text.trim()) return { text }
+  const result = FORMATTERS[language](text)
+  if (result.error?.offset !== undefined) revealOffset(view, result.error.offset)
+  if (result.text !== undefined && result.text !== text) {
+    view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: result.text }, userEvent: 'input.format', scrollIntoView: true })
+  }
+  return result
+}
+
+export const formatKeymap = (run) => keymap.of([{ key: 'Shift-Alt-f', preventDefault: true, run }])
+
 export const wrapExtension = (wrapLines) => (wrapLines ? EditorView.lineWrapping : [])
 
 function variableMark(name, variables) {
   const look = referenceLook(name, variables)
-  return Decoration.mark({ class: `${look.className} gm-var-code`, attributes: look.attributes })
+  const tint = look.tint ? { style: `${SECRET_TINT}: ${look.tint}` } : {}
+  return Decoration.mark({ class: `${look.className} gm-var-code`, attributes: { ...look.attributes, ...tint } })
 }
 
 const variableDecorations = (doc, variables) => Decoration.set(
@@ -194,14 +227,14 @@ const describeVariables = (variables) => hoverTooltip((view, pos) => {
 const completeVariables = (variables, options) => (context) => {
   const line = context.state.doc.lineAt(context.pos)
   const caret = context.pos - line.from
-  const open = openReference(line.text, caret)
+  const open = referenceAtCaret(line.text, caret, context.explicit)
   if (!open) return null
   const closing = CLOSING_REFERENCE.exec(line.text.slice(caret))
   return {
     from: line.from + open.start,
     to: context.pos + (closing ? closing[0].length : 0),
     filter: false,
-    options: suggestNames(variables, open.query, options).map((name) => ({
+    options: suggestNames(variables, open.query, { ...options, explicit: context.explicit }).map((name) => ({
       label: name,
       apply: `{{${name}}}`,
       detail: describeReference(name, variables).shown,

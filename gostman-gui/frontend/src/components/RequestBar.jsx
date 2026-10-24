@@ -4,13 +4,12 @@ import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Select } from "./ui/select"
 import { VariableInput } from "./VariableInput"
-import { HTTP_METHODS, METHOD_COLORS } from "../lib/constants"
-import { lookup } from "../lib/dataUtils"
+import { HTTP_METHODS } from "../lib/constants"
+import { methodTextStyle } from "../lib/methodColors"
 import { useShortcutLabel } from "../hooks/useShortcuts"
 import { LOAD_TEST_TEXT } from "../lib/loadTestText"
 import { hintWithShortcut } from "../lib/shortcuts"
 import { isWebSocketURL } from "../lib/socketUrl"
-import { cn } from "../lib/utils"
 
 const CURL_PREFIX = "curl "
 
@@ -75,7 +74,8 @@ export const RequestBar = memo(function RequestBar({
           onChange={(event) => onMethodChange(event.target.value)}
           aria-label="HTTP method"
           controlSize="md"
-          className={cn("w-28 font-mono font-semibold", lookup(METHOD_COLORS, activeRequest.method))}
+          style={methodTextStyle(activeRequest.method)}
+          className="w-28 font-mono font-semibold"
         >
           {methodOptions(activeRequest.method).map((method) => (
             <option key={method} value={method}>{method}</option>

@@ -35,6 +35,7 @@ const INDENT = '  '
 const DECLARATION_START = '<?xml'
 const DECLARATION_END = '?>'
 const PARSER_ERROR = 'parsererror'
+const FAILURE_DETAIL = 'div'
 const XML_TYPE = 'application/xml'
 
 const ELEMENT = 1
@@ -74,10 +75,12 @@ export function writeSoapAction(headers, action) {
   return serializeRows([...others, { key: ACTION_HEADER, value: action, enabled: true }])
 }
 
+const failureText = (failure) => (failure.querySelector(FAILURE_DETAIL) ?? failure).textContent.trim().split('\n')[0]
+
 function parseXml(text) {
   const document = new DOMParser().parseFromString(text, XML_TYPE)
   const failure = document.getElementsByTagName(PARSER_ERROR)[0]
-  return failure ? { error: failure.textContent.trim().split('\n')[0] } : { document }
+  return failure ? { error: failureText(failure) } : { document }
 }
 
 const escapeText = (text) => text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')

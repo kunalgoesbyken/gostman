@@ -3,6 +3,8 @@ import { FOLDER_SETTINGS_TEXT as TEXT } from './folderSettingsText'
 import { AUTH_OAUTH2, normalizeAuth } from './request'
 import { parseRows, countSentRows } from './rows'
 import { cleanOrder } from './sortOrder.js'
+import { cleanColorChoice } from './swatches.js'
+import { normalizeTags } from './tags.js'
 import { folderChain } from './variableScopes'
 
 export const AUTH_INHERIT = 'inherit'
@@ -27,6 +29,8 @@ export const normalizeFolder = (raw) => ({
   parentId: raw.parentId || '',
   sortOrder: cleanOrder(raw.sortOrder),
   variables: textOf(raw.variables) || EMPTY_ROWS,
+  color: cleanColorChoice(raw.color),
+  tags: normalizeTags(raw.tags),
   ...normalizeScopeSettings(raw),
 })
 

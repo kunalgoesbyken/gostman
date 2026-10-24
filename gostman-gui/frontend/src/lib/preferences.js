@@ -1,9 +1,15 @@
 import { create } from 'zustand'
+import { ACCENT_PROPERTIES, CUSTOM_ACCENT, accentProperties } from './accent.js'
 import { sanitizeOverrides } from './chords.js'
+import { isHexColor } from './color.js'
 import { isPlainObject, parseJSON } from './dataUtils.js'
 import { FONT_SLOTS, applyFont } from './fonts.js'
 import { readStored, writeStored } from './storage.js'
-import { DEFAULT_PALETTE, EMPTY_CUSTOM_COLORS, PALETTE_IDS, WINDOW_PROPERTIES, normalizeCustomColors, themeStyleSheet, windowProperties, windowTone } from './themes.js'
+import { normalizeTagColors } from './tagColors.js'
+import {
+  DEFAULT_PALETTE, EMPTY_CUSTOM_COLORS, EMPTY_METHOD_COLORS, PALETTE_IDS, WINDOW_PROPERTIES, methodStyleSheet, normalizeCustomColors, normalizeMethodColors,
+  parseTheme, serializeTheme, themeStyleSheet, windowProperties, windowTone,
+} from './themes.js'
 import { reportWindowTheme } from './windowTheme.js'
 
 const STORAGE_KEY = 'gostman.preferences'
@@ -29,8 +35,11 @@ export const DEFAULT_PREFERENCES = {
   theme: 'system',
   contrast: 'system',
   accent: 'cyan',
+  accentColor: '',
   palette: DEFAULT_PALETTE,
   customColors: EMPTY_CUSTOM_COLORS,
+  methodColors: EMPTY_METHOD_COLORS,
+  tagColors: {},
   textScale: 100,
   interfaceFont: '',
   codeFont: '',
@@ -53,7 +62,7 @@ const isFontName = (value) => typeof value === 'string' && value === value.trim(
 const VALIDATORS = {
   theme: oneOf(THEMES),
   contrast: oneOf(CONTRASTS),
-  accent: oneOf(ACCENTS),
+  accent: oneOf([...ACCENTS, CUSTOM_ACCENT]),
   palette: oneOf(PALETTE_IDS),
   textScale: oneOf(TEXT_SCALES),
   interfaceFont: isFontName,
@@ -67,10 +76,34 @@ const VALIDATORS = {
   language: oneOf(LANGUAGES.map((language) => language.value)),
 }
 
+const withUsableAccent = (preferences) => (
+  preferences.accent === CUSTOM_ACCENT && preferences.accentColor === '' ? { ...preferences, accent: DEFAULT_PREFERENCES.accent } : preferences
+)
+
 export function normalizePreferences(raw) {
   const source = isPlainObject(raw) ? raw : {}
   const checked = Object.entries(VALIDATORS).map(([name, isValid]) => [name, isValid(source[name]) ? source[name] : DEFAULT_PREFERENCES[name]])
-  return { ...Object.fromEntries(checked), customColors: normalizeCustomColors(source.customColors), shortcuts: sanitizeOverrides(source.shortcuts) }
+  return withUsableAccent({
+    ...Object.fromEntries(checked),
+    accentColor: isHexColor(source.accentColor) ? source.accentColor.toLowerCase() : '',
+    customColors: normalizeCustomColors(source.customColors),
+    methodColors: normalizeMethodColors(source.methodColors),
+    tagColors: normalizeTagColors(source.tagColors),
+    shortcuts: sanitizeOverrides(source.shortcuts),
+  })
+}
+
+const themeAccent = ({ accent, accentColor }) => (accent === CUSTOM_ACCENT ? accentColor : accent)
+
+const preferredAccent = (accent) => (isHexColor(accent) ? { accent: CUSTOM_ACCENT, accentColor: accent.toLowerCase() } : { accent })
+
+export const themeText = (preferences) => serializeTheme({ ...preferences, accent: themeAccent(preferences) })
+
+export function themeFromText(text) {
+  const theme = parseTheme(text, ACCENTS)
+  if (!theme) return null
+  const { accent, ...colors } = theme
+  return accent === undefined ? colors : { ...colors, ...preferredAccent(accent) }
 }
 
 export const resolveTheme = (theme, systemIsDark) => {
@@ -92,7 +125,7 @@ export const usePreferencesStore = create((set) => ({
   systemIsDark: false,
   systemWantsMoreContrast: false,
   update: (patch) => set((state) => ({ preferences: normalizePreferences({ ...state.preferences, ...patch }) })),
-  reset: () => set((state) => ({ preferences: { ...DEFAULT_PREFERENCES, shortcuts: state.preferences.shortcuts } })),
+  reset: () => set((state) => ({ preferences: { ...DEFAULT_PREFERENCES, shortcuts: state.preferences.shortcuts, tagColors: state.preferences.tagColors } })),
 }))
 
 export const getPreferences = () => usePreferencesStore.getState().preferences
@@ -120,9 +153,10 @@ function themeStyleElement() {
 }
 
 function applyThemeColors(root, preferences, mode, contrast) {
-  const properties = windowProperties(preferences, mode, contrast)
-  WINDOW_PROPERTIES.forEach((name) => (properties[name] ? root.style.setProperty(name, properties[name]) : root.style.removeProperty(name)))
-  const sheet = themeStyleSheet(preferences, mode, contrast)
+  const properties = { ...windowProperties(preferences, mode, contrast), ...accentProperties(preferences) }
+  const names = [...WINDOW_PROPERTIES, ...ACCENT_PROPERTIES]
+  names.forEach((name) => (properties[name] ? root.style.setProperty(name, properties[name]) : root.style.removeProperty(name)))
+  const sheet = [themeStyleSheet(preferences, mode, contrast), methodStyleSheet(preferences.methodColors, mode)].filter(Boolean).join('\n')
   const style = themeStyleElement()
   if (style.textContent !== sheet) style.textContent = sheet
 }

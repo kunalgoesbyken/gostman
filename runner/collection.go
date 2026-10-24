@@ -21,10 +21,11 @@ type Collection struct {
 }
 
 type Folder struct {
-	ID        string `json:"id"`
-	Name      string `json:"name"`
-	ParentID  string `json:"parentId"`
-	Variables string `json:"variables"`
+	ID        string   `json:"id"`
+	Name      string   `json:"name"`
+	ParentID  string   `json:"parentId"`
+	Variables string   `json:"variables"`
+	Tags      []string `json:"tags"`
 	workspace.Settings
 }
 

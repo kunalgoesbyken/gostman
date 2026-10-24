@@ -1,19 +1,13 @@
-import { lookup } from "./dataUtils"
-import { ENVIRONMENT_COLORS } from "./environmentText"
+import { automaticSwatch, isColorChoice } from "./swatches.js"
 
 const ORIGIN_ON = "on"
 export const ORIGIN_OFF = "off"
 export const ORIGIN_UNKNOWN = "unknown"
 
-const NEUTRAL_COLOR = "gray"
-const AUTOMATIC_COLORS = Object.keys(ENVIRONMENT_COLORS).filter((color) => color !== NEUTRAL_COLOR)
-
-const textHash = (text) => Array.from(text).reduce((hash, char) => (hash * 31 + char.codePointAt(0)) >>> 0, 0)
-
-export const automaticColor = (alias) => AUTOMATIC_COLORS[textHash(alias) % AUTOMATIC_COLORS.length]
+export const automaticColor = automaticSwatch
 
 export const connectionColor = (connection) => (
-  lookup(ENVIRONMENT_COLORS, connection.color) ? connection.color : automaticColor(connection.alias)
+  isColorChoice(connection.color) ? connection.color : automaticColor(connection.alias)
 )
 
 export const connectionDirectory = (connections) => new Map(connections.map((connection) => [connection.alias, connection]))

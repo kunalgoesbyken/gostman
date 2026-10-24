@@ -25,6 +25,24 @@ export const TREE_TEXT = {
   noResultsDescription: 'No request name, URL or tag matches.',
   emptyFolder: 'This folder is empty',
   dropHere: 'Drop here to move to the top level',
+  editLabels: 'Colour and tags…',
+  editTags: 'Tags…',
+  moreTags: (count) => `+${count}`,
+}
+
+export const LABEL_TEXT = {
+  folderTitle: (name) => `Colour and tags: ${name}`,
+  requestTitle: (name) => `Tags: ${name}`,
+  colour: 'Folder colour',
+  colourNote: 'Shown on the folder icon in the sidebar and saved with the collection.',
+  tags: 'Tags',
+  tagsPlaceholder: 'Add a tag, then press Enter',
+  folderTagsNote: "Folder tags apply to every request inside it: the runner's tag filters and gostman run --tags treat them as the request's own.",
+  requestTagsNote: 'Tags group requests across folders. Filter by them in the sidebar search and the runner.',
+  tagColours: 'Tag colours',
+  tagColoursNote: 'A tag keeps its colour everywhere it is used. Without a choice, a colour is picked from the tag name. Tag colours are kept on this device.',
+  tagColour: (tag) => `Colour of the ${tag} tag`,
+  done: 'Done',
 }
 
 export const TAB_TEXT = {

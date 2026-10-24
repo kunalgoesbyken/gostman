@@ -49,7 +49,7 @@ func toFileRequests(requests []Request) []workspace.Request {
 func toFileFolders(folders []Folder) []workspace.Folder {
 	converted := make([]workspace.Folder, len(folders))
 	for i, folder := range folders {
-		converted[i] = workspace.Folder{Id: folder.Id, Name: folder.Name, ParentId: folder.ParentId, SortOrder: folder.SortOrder, Variables: folder.Variables, Settings: folder.Settings}
+		converted[i] = workspace.Folder{Id: folder.Id, Name: folder.Name, ParentId: folder.ParentId, SortOrder: folder.SortOrder, Variables: folder.Variables, Color: folder.Color, Tags: folder.Tags, Settings: folder.Settings}
 	}
 	return converted
 }
@@ -83,7 +83,7 @@ func fromFileRequests(loaded []workspace.Request, memory workspaceMemory) []Requ
 func fromFileFolders(loaded []workspace.Folder, memory workspaceMemory) []Folder {
 	folders := make([]Folder, len(loaded))
 	for i, folder := range loaded {
-		folders[i] = Folder{Id: folder.Id, Name: folder.Name, ParentId: folder.ParentId, SortOrder: folder.SortOrder, Variables: folder.Variables, Settings: folder.Settings, IsOpen: !memory.isCollapsed(folder.Id)}
+		folders[i] = Folder{Id: folder.Id, Name: folder.Name, ParentId: folder.ParentId, SortOrder: folder.SortOrder, Variables: folder.Variables, Color: folder.Color, Tags: folder.Tags, Settings: folder.Settings, IsOpen: !memory.isCollapsed(folder.Id)}
 	}
 	return folders
 }

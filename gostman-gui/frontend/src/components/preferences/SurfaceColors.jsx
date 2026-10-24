@@ -10,13 +10,15 @@ import { PREFERENCES_TEXT } from "../../lib/preferencesText"
 import { MODES, ROLES, SURFACES, effectiveColors, withSurfaceColor, withoutMode, withoutSurface } from "../../lib/themes"
 
 const TEXT = PREFERENCES_TEXT.theme
-const MODE_OPTIONS = optionsOf(MODES, PREFERENCES_TEXT.themes)
-const HEADER = "whitespace-nowrap pb-1.5 pr-3 text-left text-2xs font-medium uppercase tracking-wide text-muted-foreground"
-const CELL = "py-2 pr-3"
+export const MODE_OPTIONS = optionsOf(MODES, PREFERENCES_TEXT.themes)
+export const HEADER = "whitespace-nowrap pb-1.5 pr-3 text-left text-2xs font-medium uppercase tracking-wide text-muted-foreground"
+export const CELL = "py-2 pr-3"
 
 const roundedDown = (ratio) => Math.floor(ratio * 10) / 10
 
-function ContrastValue({ ratio, format }) {
+export const useRatioFormat = (language) => useMemo(() => new Intl.NumberFormat(language, { minimumFractionDigits: 1, maximumFractionDigits: 1 }), [language])
+
+export function ContrastValue({ ratio, format }) {
   const text = TEXT.ratio(format.format(roundedDown(ratio)))
   if (ratio >= MIN_TEXT_CONTRAST) return <span className="font-mono text-2xs text-muted-foreground">{text}</span>
   const warning = TEXT.lowContrast(format.format(MIN_TEXT_CONTRAST))
@@ -82,7 +84,7 @@ function SurfaceRow({ id, preferences, mode, format, onColor, onReset }) {
 export function SurfaceColors({ preferences }) {
   const resolvedMode = useResolvedTheme()
   const [mode, setMode] = useState(resolvedMode)
-  const format = useMemo(() => new Intl.NumberFormat(preferences.language, { minimumFractionDigits: 1, maximumFractionDigits: 1 }), [preferences.language])
+  const format = useRatioFormat(preferences.language)
   const { customColors } = preferences
   const hasCustom = Object.keys(customColors[mode]).length > 0
 

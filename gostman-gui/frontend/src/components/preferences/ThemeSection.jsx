@@ -1,3 +1,4 @@
+import { MethodColors } from "./MethodColors"
 import { PalettePicker } from "./PalettePicker"
 import { AccentRow, ChoiceRow, optionsOf } from "./PreferenceRows"
 import { SurfaceColors } from "./SurfaceColors"
@@ -23,6 +24,7 @@ export function ThemeSection({ preferences }) {
       </div>
       <PalettePicker preferences={preferences} />
       <SurfaceColors preferences={preferences} />
+      <MethodColors preferences={preferences} />
       <ThemeTransfer preferences={preferences} />
     </div>
   )

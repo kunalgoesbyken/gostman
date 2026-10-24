@@ -1,6 +1,7 @@
 import { useId, useState } from "react"
 import { X } from "lucide-react"
 import { CONTROL_BASE } from "./input"
+import { TagBadge } from "../TagBadge"
 import { normalizeTags, splitTags } from "../../lib/tags"
 import { cn } from "../../lib/utils"
 
@@ -9,8 +10,7 @@ const SEPARATOR = ","
 
 function TagChip({ tag, disabled, onRemove }) {
   return (
-    <span className="inline-flex max-w-full items-center gap-0.5 rounded bg-muted py-0.5 pl-1.5 pr-0.5 text-2xs text-foreground">
-      <span className="truncate">{tag}</span>
+    <TagBadge tag={tag} className="gap-0.5 py-0.5 pl-1.5 pr-0.5 text-2xs">
       <button
         type="button"
         disabled={disabled}
@@ -20,7 +20,7 @@ function TagChip({ tag, disabled, onRemove }) {
       >
         <X className="h-3 w-3" />
       </button>
-    </span>
+    </TagBadge>
   )
 }
 

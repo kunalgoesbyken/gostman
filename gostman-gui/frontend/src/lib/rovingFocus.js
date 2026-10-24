@@ -1,3 +1,5 @@
+export const OPENS_PICKER = 'data-opens-picker'
+
 const HORIZONTAL = 'horizontal'
 const VERTICAL = 'vertical'
 
@@ -39,7 +41,7 @@ export function moveFocus(event, { selector, orientation, activate = false }) {
   event.preventDefault()
   if (next === index) return
   items[next].focus()
-  if (activate) items[next].click()
+  if (activate && !items[next].hasAttribute(OPENS_PICKER)) items[next].click()
 }
 
 export const isFocusLost = () => !document.activeElement || document.activeElement === document.body

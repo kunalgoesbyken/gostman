@@ -1,4 +1,4 @@
-import { buildCollectionTree, collectRequests } from './collectionTree'
+import { buildCollectionTree, collectRequests, inheritedTags } from './collectionTree'
 import { isPlainObject, parseJSON } from './dataUtils'
 import { STEP_RUN } from './onboarding'
 import { iterationCount, iterationVariables } from './runData'
@@ -61,7 +61,8 @@ function summarize(request, { response, tests }, iteration) {
 const NO_TAG_FILTER = { include: [], exclude: [] }
 
 export function requestsInScope(folders, requests, folderId, tagFilter) {
-  return collectRequests(buildCollectionTree(folders, requests), folderId).filter((request) => matchesTags(request.tags, tagFilter))
+  const tagsOf = inheritedTags(folders)
+  return collectRequests(buildCollectionTree(folders, requests), folderId).filter((request) => matchesTags(tagsOf(request), tagFilter))
 }
 
 export function createRunner(backend, execute) {

@@ -171,7 +171,7 @@ export function RunnerDialog({ runner, folders, requests, actions }) {
   const [excludeTags, setExcludeTags] = useState([])
 
   const scopes = useMemo(() => listFolders(buildCollectionTree(folders, [])), [folders])
-  const knownTags = useMemo(() => collectTags(requests), [requests])
+  const knownTags = useMemo(() => collectTags([...requests, ...folders]), [requests, folders])
   const tagFilter = useMemo(() => ({ include: includeTags, exclude: excludeTags }), [includeTags, excludeTags])
   const requestCount = useMemo(() => requestsInScope(folders, requests, folderId, tagFilter).length, [folders, requests, folderId, tagFilter])
   const { isRunning, results } = runner

@@ -115,8 +115,8 @@ func prepare(scripts *sandbox.Sandbox, stored Collection, options Options) (plan
 	}
 	lineageOf := stored.lineages()
 	for _, request := range ordered {
+		request.Lineage = lineageOf(request.FolderID)
 		if options.selects(request, planned.folderNames[request.FolderID]) {
-			request.Lineage = lineageOf(request.FolderID)
 			planned.requests = append(planned.requests, options.applyTo(request))
 		}
 	}
@@ -141,7 +141,7 @@ func (o Options) filters() []string {
 }
 
 func (o Options) selects(request Request, folder string) bool {
-	return o.selectsName(request, folder) && o.selectsTags(request.Tags)
+	return o.selectsName(request, folder) && o.selectsTags(request.allTags())
 }
 
 func (o Options) selectsTags(tags []string) bool {
