@@ -19,6 +19,10 @@ func (a *App) InvokeMcp(id string, call mcpclient.Call) engine.Response {
 	return mcpclient.Invoke(ctx, call, a.mcpPolicy())
 }
 
+func (a *App) DiscoverMcpAuthorization(query mcpclient.AuthQuery) mcpclient.AuthPlan {
+	return mcpclient.DiscoverAuthorization(a.ctx, query, a.policy())
+}
+
 func (a *App) mcpPolicy() engine.Policy {
 	policy := a.policy()
 	policy.RunCommands = true

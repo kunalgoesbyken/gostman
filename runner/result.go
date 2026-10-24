@@ -1,6 +1,9 @@
 package runner
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 const ReportVersion = 1
 
@@ -8,6 +11,7 @@ type Check struct {
 	Name    string `json:"name"`
 	Passed  bool   `json:"passed"`
 	Message string `json:"message"`
+	Kind    string `json:"kind,omitempty"`
 }
 
 type LogLine struct {
@@ -29,6 +33,8 @@ type Result struct {
 	StreamEnd  string    `json:"streamEnd,omitempty"`
 	DurationMs int64     `json:"durationMs"`
 	Error      string    `json:"error"`
+	Failure    string    `json:"failure,omitempty"`
+	Unresolved []string  `json:"unresolved,omitempty"`
 	Failed     bool      `json:"failed"`
 	Tests      []Check   `json:"tests"`
 	Logs       []LogLine `json:"logs"`
@@ -58,6 +64,14 @@ type Report struct {
 	Parallel    int       `json:"parallel,omitempty"`
 	Summary     Summary   `json:"summary"`
 	Results     []Result  `json:"results"`
+}
+
+func (r Result) QualifiedName() string {
+	name := Listed{Folder: r.Folder, Request: Request{Name: r.Name}}.QualifiedName()
+	if r.Iteration > 0 {
+		return fmt.Sprintf("%s [iteration %d]", name, r.Iteration)
+	}
+	return name
 }
 
 func (r Result) IsSkipped() bool {

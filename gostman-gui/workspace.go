@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -14,8 +15,10 @@ import (
 const (
 	pickFolderTitle = "Choose a folder for the collection"
 	emptyVariables  = "{}"
-	foreignFolder   = "this folder already has files that are not a Gostman workspace; choose an empty folder or one that holds a workspace"
-	occupiedFolder  = "this folder already has files; choose an empty folder to save the collection to"
+	nestedWorkspace = "gostman"
+	foreignFolder   = "this folder and its gostman folder already have files that are not a Gostman workspace; choose an empty folder or one that holds a workspace"
+	occupiedFolder  = "this folder and its gostman folder already have files; choose an empty folder to save the collection to"
+	nestedNotice    = "%s already holds other files, so the collection is kept in its %s folder."
 	missingFolder   = "this folder no longer exists"
 	noFolderChosen  = "choose a folder first"
 	fallbackNotice  = "The folder %s could not be opened: %v. The collection saved on this computer is shown instead."
@@ -126,21 +129,21 @@ func (s folderStore) saveRequests(requests []Request) error {
 	if err := s.remember(func(memory *workspaceMemory) { memory.keepTokens(requests) }); err != nil {
 		return err
 	}
-	return s.folder.SaveRequests(toFileRequests(requests))
+	return s.write(func() error { return s.folder.SaveRequests(toFileRequests(requests)) })
 }
 
 func (s folderStore) deleteRequest(id string) error {
 	if err := s.remember(func(memory *workspaceMemory) { delete(memory.Tokens, id) }); err != nil {
 		return err
 	}
-	return s.folder.DeleteRequest(id)
+	return s.write(func() error { return s.folder.DeleteRequest(id) })
 }
 
 func (s folderStore) saveFolders(folders []Folder) error {
 	if err := s.remember(func(memory *workspaceMemory) { memory.keepCollapsed(folders) }); err != nil {
 		return err
 	}
-	return s.folder.SaveFolders(toFileFolders(folders))
+	return s.write(func() error { return s.folder.SaveFolders(toFileFolders(folders)) })
 }
 
 func isUntouchedDefault(environments []Environment) bool {
@@ -154,15 +157,15 @@ func (s folderStore) saveEnvironments(environments []Environment, activeId strin
 	if isUntouchedDefault(environments) && len(s.folder.Collection().Environments) == 0 {
 		return nil
 	}
-	return s.folder.SaveEnvironments(toFileEnvironments(environments))
+	return s.write(func() error { return s.folder.SaveEnvironments(toFileEnvironments(environments)) })
 }
 
 func (s folderStore) saveVariables(text string) error {
-	return s.folder.SaveVariables(text)
+	return s.write(func() error { return s.folder.SaveVariables(text) })
 }
 
 func (s folderStore) saveSettings(settings workspace.Settings) error {
-	return s.folder.SaveSettings(settings)
+	return s.write(func() error { return s.folder.SaveSettings(settings) })
 }
 
 func openFolder() *workspace.Workspace {
@@ -207,20 +210,44 @@ func createTrusted(path string) (*workspace.Workspace, error) {
 	return folder, folderStore{folder: folder}.remember(trust)
 }
 
-func openOrCreate(path string) (*workspace.Workspace, error) {
+func placement(path string) (string, workspace.State, error) {
 	state, err := workspace.Inspect(path)
-	if err != nil {
-		return nil, err
+	if err != nil || state != workspace.Foreign {
+		return path, state, err
 	}
-	switch state {
-	case workspace.Existing:
-		return workspace.Open(path)
-	case workspace.Empty:
-		return createTrusted(path)
-	case workspace.Missing:
+	nested := filepath.Join(path, nestedWorkspace)
+	state, err = workspace.Inspect(nested)
+	return nested, state, err
+}
+
+func announcePlacement(path, target string) {
+	if target != path {
+		storage.announce(fmt.Sprintf(nestedNotice, filepath.Base(path), nestedWorkspace))
+	}
+}
+
+func openOrCreateAt(path, target string, state workspace.State) (*workspace.Workspace, error) {
+	switch {
+	case state == workspace.Existing:
+		return workspace.Open(target)
+	case state == workspace.Empty, state == workspace.Missing && target != path:
+		return createTrusted(target)
+	case state == workspace.Missing:
 		return nil, errors.New(missingFolder)
 	}
 	return nil, errors.New(foreignFolder)
+}
+
+func openOrCreate(path string) (*workspace.Workspace, error) {
+	target, state, err := placement(path)
+	if err != nil {
+		return nil, err
+	}
+	folder, err := openOrCreateAt(path, target, state)
+	if err == nil {
+		announcePlacement(path, target)
+	}
+	return folder, err
 }
 
 func reopen(path string) (*workspace.Workspace, error) {
@@ -279,9 +306,13 @@ func (a *App) SaveCollectionToFolder(path string) (WorkspaceStatus, error) {
 	if err != nil {
 		return WorkspaceStatus{}, err
 	}
+	target, _, err := placement(chosen)
+	if err != nil {
+		return WorkspaceStatus{}, err
+	}
 	stripped, secrets := splitSecrets(data.Environments)
 	data.Environments = stripped
-	folder, err := workspace.Create(chosen, toFileCollection(data))
+	folder, err := workspace.Create(target, toFileCollection(data))
 	if errors.Is(err, workspace.ErrNotEmpty) {
 		return WorkspaceStatus{}, errors.New(occupiedFolder)
 	}
@@ -301,6 +332,7 @@ func (a *App) SaveCollectionToFolder(path string) (WorkspaceStatus, error) {
 	if err != nil {
 		return WorkspaceStatus{}, err
 	}
+	announcePlacement(chosen, target)
 	return activate(folder)
 }
 
@@ -312,11 +344,33 @@ func workspaceFiles() engine.FileReader {
 	root := store.folder.Root()
 	read := engine.FolderFiles(root)
 	return func(path string) ([]byte, error) {
-		if memory, err := recallWorkspace(root); err != nil || !memory.Trusted {
-			return nil, errors.New(untrustedFiles)
+		if err := requireTrust(root); err != nil {
+			return nil, err
 		}
 		return read(path)
 	}
+}
+
+func workspaceAttachments() engine.FileOpener {
+	open := engine.LocalOpener()
+	store, isFolder := storage.current().(folderStore)
+	if !isFolder {
+		return open
+	}
+	root := store.folder.Root()
+	return func(path string) (*os.File, error) {
+		if err := requireTrust(root); err != nil {
+			return nil, err
+		}
+		return open(path)
+	}
+}
+
+func requireTrust(root string) error {
+	if memory, err := recallWorkspace(root); err != nil || !memory.Trusted {
+		return errors.New(untrustedFiles)
+	}
+	return nil
 }
 
 func (a *App) TrustWorkspace() error {

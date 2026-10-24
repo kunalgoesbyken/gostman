@@ -5,10 +5,13 @@ import { MergeView } from '@codemirror/merge'
 import { useVariableMap } from '../hooks/useVariableMap'
 import { usePreferences } from '../lib/preferences'
 import { baseExtensions, canFormat, formatDocument, formatKeymap, languageExtension, revealOffset, variableExtension, wrapExtension } from '../lib/codeEditor'
+import { LARGE_BODY_CHARS } from '../lib/largeText'
 import './variables.css'
 
 const externalChange = Annotation.define()
 const NO_EXTENSION = []
+
+const highlightedLanguage = (language, text) => (text.length > LARGE_BODY_CHARS ? null : language)
 
 const isUserChange = (update) => update.docChanged && !update.transactions.some((transaction) => transaction.annotation(externalChange))
 
@@ -46,10 +49,11 @@ export const CodeEditor = forwardRef(function CodeEditor(
   const hostRef = useRef(null)
   const viewRef = useRef(null)
   const onChangeRef = useRef(onChange)
+  const emittedRef = useRef(value)
   const compartment = useMemo(() => new Compartment(), [])
   const { editorFontSize } = usePreferences()
   const formatting = useFormatting(language, onFormat)
-  const config = useEditorConfig(language, variables, fileReads, formatting.extension)
+  const config = useEditorConfig(highlightedLanguage(language, value), variables, fileReads, formatting.extension)
 
   useImperativeHandle(ref, () => ({
     format: () => viewRef.current && formatting.run(viewRef.current),
@@ -69,7 +73,9 @@ export const CodeEditor = forwardRef(function CodeEditor(
           baseExtensions,
           compartment.of(config),
           EditorView.updateListener.of((update) => {
-            if (isUserChange(update)) onChangeRef.current?.({ target: { value: update.state.doc.toString() } })
+            if (!isUserChange(update)) return
+            emittedRef.current = update.state.doc.toString()
+            onChangeRef.current?.({ target: { value: emittedRef.current } })
           }),
         ],
       }),
@@ -87,7 +93,9 @@ export const CodeEditor = forwardRef(function CodeEditor(
 
   useEffect(() => {
     const view = viewRef.current
-    if (!view || view.state.doc.toString() === value) return
+    if (!view || value === emittedRef.current) return
+    emittedRef.current = value
+    if (view.state.doc.toString() === value) return
     view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: value }, annotations: externalChange.of(true) })
   }, [value])
 

@@ -18,6 +18,7 @@ export function enterWorkspace(state, status, freshSession) {
     activeTabId: next.activeTabId,
     nextTabId: next.nextTabId,
     requests: next.requests,
+    sessionVariables: {},
   }
 }
 

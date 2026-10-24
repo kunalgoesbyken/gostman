@@ -14,16 +14,16 @@ const (
 var (
 	requestKeys = []string{
 		"id", "name", "description", "tags", "order", "method", "url", "queryParams", "headers", "auth", "bodyType", "body",
-		"graphqlQuery", "graphqlVariables", "grpcMethod", "grpcMessage", "grpcProtos", "mcpTool", "mcpArguments", "socketProtocol", "socketMessages", "vars", "options",
+		"graphqlQuery", "graphqlVariables", "grpcMethod", "grpcMessage", "grpcProtos", "mcpMethod", "mcpTool", "mcpArguments", "socketProtocol", "socketMessages", "vars", "options",
 		"extractors", "assertions", "preScript", "postScript", "examples", "timestamp",
 	}
 	requestMarkers = []string{"method", "url"}
 	authKeys       = []string{"type", "username", "password", "token", "key", "value", "in", "oauth2", "domain", "aws", "oauth1", "edgegrid", "jwt", "asap", "hawk"}
 	oauth2Keys     = []string{
 		"grant", "authUrl", "tokenUrl", "clientId", "clientSecret", "scope", "username", "password",
-		"callbackUrl", "credentialsIn", "pkce", "headerPrefix", "accessToken", "refreshToken", "expiresAt",
+		"callbackUrl", "credentialsIn", "pkce", "headerPrefix", "accessToken", "refreshToken", "expiresAt", "resource", "issuer", "deviceUrl", "sendIdToken",
 	}
-	optionKeys = []string{"timeoutMs", "noFollowRedirects", "insecureTLS", "stream", "streamReconnect", "streamMaxEvents", "streamMaxSeconds"}
+	optionKeys = []string{"timeoutMs", "noFollowRedirects", "insecureTLS", "stream", "streamReconnect", "streamMaxEvents", "streamMaxSeconds", "skipCookies", "discardCookies", "socketIoPath", "socketIoAuth"}
 )
 
 type requestExtras struct {
@@ -76,7 +76,15 @@ func (b nodeBuilder) graphqlVariables(text string) *yaml.Node {
 	return b.text(text)
 }
 
+func withOAuth2Defaults(config engine.OAuth2) engine.OAuth2 {
+	if config.WithoutTokens() == (engine.OAuth2{}) {
+		return engine.OAuth2{Grant: defaultGrant, PKCE: true}
+	}
+	return config
+}
+
 func (b nodeBuilder) oauth2(config engine.OAuth2, extras []*yaml.Node) *yaml.Node {
+	config = withOAuth2Defaults(config)
 	node := mappingNode()
 	if config.Grant != defaultGrant {
 		setField(node, "grant", b.explicitText(config.Grant))
@@ -94,6 +102,10 @@ func (b nodeBuilder) oauth2(config engine.OAuth2, extras []*yaml.Node) *yaml.Nod
 		setField(node, "pkce", flagNode(false))
 	}
 	setField(node, "headerPrefix", b.text(config.HeaderPrefix))
+	setField(node, "resource", b.text(config.Resource))
+	setField(node, "issuer", b.text(config.Issuer))
+	setField(node, "deviceUrl", b.text(config.DeviceURL))
+	setField(node, "sendIdToken", setFlagNode(config.SendIDToken))
 	node.Content = append(node.Content, extras...)
 	return filledMapping(node)
 }
@@ -128,6 +140,10 @@ func (b nodeBuilder) options(options engine.Options, extras []*yaml.Node) *yaml.
 	setField(node, "streamReconnect", setFlagNode(options.StreamReconnect))
 	setField(node, "streamMaxEvents", integerNode(int64(options.StreamMaxEvents)))
 	setField(node, "streamMaxSeconds", integerNode(int64(options.StreamMaxSeconds)))
+	setField(node, "skipCookies", setFlagNode(options.SkipCookies))
+	setField(node, "discardCookies", setFlagNode(options.DiscardCookies))
+	setField(node, "socketIoPath", b.text(options.SocketIOPath))
+	setField(node, "socketIoAuth", b.text(options.SocketIOAuth))
 	node.Content = append(node.Content, extras...)
 	return filledMapping(node)
 }
@@ -152,6 +168,7 @@ func (b nodeBuilder) request(document requestDocument) *yaml.Node {
 	setField(root, "grpcMethod", b.text(request.GrpcMethod))
 	setField(root, "grpcMessage", b.text(request.GrpcMessage))
 	setField(root, "grpcProtos", b.jsonText(request.GrpcProtos))
+	setField(root, "mcpMethod", b.text(request.McpMethod))
 	setField(root, "mcpTool", b.text(request.McpTool))
 	setField(root, "mcpArguments", b.text(request.McpArguments))
 	setField(root, "socketProtocol", b.text(request.SocketProtocol))
@@ -204,6 +221,10 @@ func readOAuth2(node *yaml.Node, failure *error) (engine.OAuth2, []*yaml.Node) {
 		CredentialsIn: fields.text("credentialsIn"),
 		PKCE:          fields.flag("pkce", true),
 		HeaderPrefix:  fields.text("headerPrefix"),
+		Resource:      fields.text("resource"),
+		Issuer:        fields.text("issuer"),
+		DeviceURL:     fields.text("deviceUrl"),
+		SendIDToken:   fields.flag("sendIdToken", false),
 	}
 	if fields.has("grant") {
 		config.Grant = fields.text("grant")
@@ -245,6 +266,10 @@ func readOptions(node *yaml.Node, extras *requestExtras, failure *error) engine.
 		StreamReconnect:   fields.flag("streamReconnect", false),
 		StreamMaxEvents:   int(fields.integer("streamMaxEvents")),
 		StreamMaxSeconds:  int(fields.integer("streamMaxSeconds")),
+		SkipCookies:       fields.flag("skipCookies", false),
+		DiscardCookies:    fields.flag("discardCookies", false),
+		SocketIOPath:      fields.text("socketIoPath"),
+		SocketIOAuth:      fields.text("socketIoAuth"),
 	}
 }
 
@@ -276,6 +301,7 @@ func readRequest(root *yaml.Node) (requestDocument, error) {
 		GrpcMethod:       fields.text("grpcMethod"),
 		GrpcMessage:      fields.text("grpcMessage"),
 		GrpcProtos:       fields.jsonText("grpcProtos", false, unchanged),
+		McpMethod:        fields.text("mcpMethod"),
 		McpTool:          fields.text("mcpTool"),
 		McpArguments:     fields.text("mcpArguments"),
 		SocketProtocol:   fields.text("socketProtocol"),

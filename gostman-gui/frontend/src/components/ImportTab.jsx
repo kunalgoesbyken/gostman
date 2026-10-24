@@ -22,15 +22,6 @@ const SPEC_FORMAT = "openapi"
 const HAR_FORMAT = "har"
 const ACCEPTED_FILES = `.zip,.json,.yaml,.yml,.xml,.wsdl,.xsd,.har,.bru,.http,.rest,.${SHARE_FILE_EXTENSION}`
 
-const totalsOf = (sources) => sources.reduce(
-  (total, source) => ({
-    requests: total.requests + source.requests,
-    folders: total.folders + source.folders,
-    environments: total.environments + source.environments,
-  }),
-  { requests: 0, folders: 0, environments: 0 },
-)
-
 function useParsedImport(source, readSource, options) {
   const [state, setState] = useState({ result: null, isParsing: false })
 
@@ -54,14 +45,17 @@ function useParsedImport(source, readSource, options) {
   return state
 }
 
-function SourceLines({ sources }) {
+const sourceLine = (source, counts) => IMPORT_TEXT.sourceLine(source.name, FORMAT_LABELS[source.format] || source.format, describeCounts(counts))
+
+function SourceLines({ result }) {
+  const { sources } = result
+  const total = countImported(result)
+  if (sources.length === 1) return <p className="font-medium text-foreground">{sourceLine(sources[0], total)}</p>
   return (
     <>
-      {sources.length > 1 && <p className="font-medium text-foreground">{IMPORT_TEXT.totalLine(sources.length, describeCounts(totalsOf(sources)))}</p>}
+      <p className="font-medium text-foreground">{IMPORT_TEXT.totalLine(describeCounts(total))}</p>
       {sources.map((source, index) => (
-        <p key={`${source.name}-${index}`} className="pt-1 text-foreground">
-          {IMPORT_TEXT.sourceLine(source.name, FORMAT_LABELS[source.format] || source.format, describeCounts(source))}
-        </p>
+        <p key={`${source.name}-${index}`} className="pt-1 text-foreground">{sourceLine(source, source)}</p>
       ))}
     </>
   )
@@ -74,12 +68,15 @@ function ImportSummary({ result, onImport, onBrowse }) {
   return (
     <div role="status" className="flex shrink-0 items-start gap-3 rounded-md border border-border p-3">
       <div className="max-h-40 min-w-0 flex-1 overflow-y-auto text-xs [overflow-wrap:anywhere]">
-        {result.sources ? <SourceLines sources={result.sources} /> : (
+        {result.sources ? <SourceLines result={result} /> : (
           <p className="font-medium text-foreground">
             {result.label}: {describeCounts(countImported(result))}
           </p>
         )}
         {isUnlinked && <p className="pt-1 text-muted-foreground">{SPEC_TEXT.syncNote}</p>}
+        {(result.notes || []).map((note) => (
+          <p key={note} className="pt-1 text-muted-foreground">{note}</p>
+        ))}
         {warnings.map((warning) => (
           <p key={warning} className="pt-1 text-warning">{warning}</p>
         ))}
@@ -89,7 +86,7 @@ function ImportSummary({ result, onImport, onBrowse }) {
         ))}
       </div>
       {result.spec && <Button size="sm" variant="outline" onClick={onBrowse}>{SPEC_TEXT.browse}</Button>}
-      <Button size="sm" onClick={onImport}>Import</Button>
+      <Button size="sm" onClick={onImport}>{IMPORT_TEXT.importButton}</Button>
     </div>
   )
 }

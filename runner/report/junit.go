@@ -72,8 +72,17 @@ func requestCase(result runner.Result, suite string) junitCase {
 		described.Skipped = &junitProblem{Message: result.Skipped}
 	case result.Error != "":
 		described.Error = &junitProblem{Message: result.Error}
+	case result.Failed && result.PassedTests() == len(result.Tests):
+		described.Failure = &junitProblem{Message: failureMessage(result)}
 	}
 	return described
+}
+
+func failureMessage(result runner.Result) string {
+	if result.Failure == "" {
+		return result.Status
+	}
+	return result.Status + ": " + result.Failure
 }
 
 func checkCase(check runner.Check, suite string) junitCase {

@@ -1,4 +1,5 @@
 import { webAi } from '../ai/webAi'
+import { ATTACHMENT_TEXT } from '../attachmentText'
 import { base64ToBytes } from '../base64'
 import { openBrowserSocket, unsentBrowserHeaders } from './browserSocket'
 import { isPlainObject } from '../dataUtils'
@@ -7,16 +8,25 @@ import { OAUTH_CALLBACK_PATH, cancelOAuthPopup, signInWithPopup } from './oauthP
 import { STREAM_CAP_SECONDS, readStream } from './webStream'
 import { toGrpcCall, toGrpcTarget } from '../grpc'
 import { toMcpCall, toMcpTarget } from '../mcp'
-import { mockFolders, mockRequests } from '../mockData'
 import { withPreferredTimeout } from '../preferences'
 import { compactRequest, toEngineRequest } from '../request'
 import { failureResponse } from '../response'
+import { DATA_TEXT } from '../dataText'
+import { PRIVACY_TEXT } from '../privacyText'
+import { RelayUnreachableError, currentRelay } from '../relay'
+import { createStorageGate } from './storageGate'
+import { TAB_DRAFTS_KEY, isStorageFull } from '../storage'
+import { KIND_BEFORE_RESTORE } from '../backupKinds'
+import { clearSnapshots, listSnapshots, readSnapshot, saveSnapshot, snapshotIfDue } from './webBackups'
+import { webRecords } from './webRecords'
 
-const PROXY_URL = '/api/proxy'
-const GRPC_INVOKE_URL = `${PROXY_URL}?grpc=invoke`
-const MCP_INVOKE_URL = `${PROXY_URL}?mcp=invoke`
-const STREAM_URL = `${PROXY_URL}?sse=1`
+const PROXY_PATH = '/api/proxy'
+const GRPC_INVOKE = 'grpc=invoke'
+const MCP_INVOKE = 'mcp=invoke'
+const STREAM = 'sse=1'
+const EXPAND = 'expand=1'
 const OPENAPI_PAGE_SIZE = 200
+const HTTP_PAYLOAD_TOO_LARGE = 413
 const DATA_KEY = 'gostman-data'
 const DAMAGED_DATA_PREFIX = 'gostman-data-damaged-'
 const UNREADABLE_DATA = 'The saved data in this browser cannot be read, so nothing was changed.'
@@ -47,14 +57,27 @@ function openStorage() {
 }
 
 const storage = openStorage()
+const storageGate = createStorageGate()
+const records = webRecords(storage, [DATA_KEY, TAB_DRAFTS_KEY])
+const dataChannel = typeof BroadcastChannel === 'function' ? new BroadcastChannel(DATA_KEY) : null
 let damageNotice = ''
 let cachedDocument = null
+let pendingChange = Promise.resolve()
+
+const forgetDocument = () => {
+  cachedDocument = null
+}
 
 window.addEventListener('storage', (event) => {
-  if (event.key === DATA_KEY || event.key === null) cachedDocument = null
+  if (event.key === DATA_KEY || event.key === null) forgetDocument()
 })
+dataChannel?.addEventListener('message', forgetDocument)
 
-const sampleData = () => ({ requests: [...mockRequests], folders: [...mockFolders], history: [] })
+function serially(change) {
+  const result = pendingChange.then(change)
+  pendingChange = result.catch(() => {})
+  return result
+}
 
 const emptyData = () => ({ requests: [], folders: [], history: [] })
 
@@ -78,53 +101,83 @@ function readLegacyData() {
   return stored.length > 0 ? Object.fromEntries(stored) : null
 }
 
-function writeData(data) {
-  storage.setItem(DATA_KEY, JSON.stringify(data))
+const readText = async (key) => (await records()).read(key)
+
+async function writeText(key, text) {
+  try {
+    await (await records()).write(key, text)
+  } catch (error) {
+    throw isStorageFull(error) ? new Error(DATA_TEXT.browserStorageFull(error.room)) : error
+  }
 }
 
-function migrateLegacyData(legacy) {
-  writeData(legacy)
+async function writeDocumentText(text) {
+  await writeText(DATA_KEY, text)
+  dataChannel?.postMessage(DATA_KEY)
+}
+
+const writeData = (data) => writeDocumentText(JSON.stringify(data))
+
+async function migrateLegacyData(legacy) {
+  await writeData(legacy)
   Object.keys(legacy).forEach((field) => storage.removeItem(LEGACY_KEYS[field]))
   return legacy
 }
 
-function setAsideDamagedData(raw) {
+async function setAsideDamagedData(raw) {
   const backupKey = `${DAMAGED_DATA_PREFIX}${Date.now()}`
-  storage.setItem(backupKey, raw)
+  await writeText(backupKey, raw)
   const fresh = emptyData()
-  writeData(fresh)
-  damageNotice = `The saved data in this browser could not be read, so the app started empty. The unreadable copy was kept in this browser's local storage under "${backupKey}".`
+  await writeData(fresh)
+  damageNotice = DATA_TEXT.damagedDataKept(backupKey, (await records()).inDatabase)
   return fresh
 }
 
-function readDocument() {
-  const raw = storage.getItem(DATA_KEY)
-  if (raw === null) return sampleData()
+async function readDocument() {
+  const raw = await readText(DATA_KEY)
+  if (raw === null) return emptyData()
   const stored = parseDocument(raw)
   if (!stored) throw new Error(UNREADABLE_DATA)
   return stored
 }
 
-function mutateData(mutate) {
-  const data = cachedDocument || readDocument()
+const mutateData = (mutate) => serially(async () => {
+  const data = cachedDocument || await readDocument()
   mutate(data)
   try {
-    writeData(data)
+    await writeData(data)
     cachedDocument = data
   } catch (error) {
     cachedDocument = null
     throw error
   }
+})
+
+function proxyUrl(query) {
+  const relay = currentRelay()
+  if (relay.isLocal && !relay.origin) throw new Error(PRIVACY_TEXT.relayMissing)
+  return `${relay.origin}${PROXY_PATH}${query ? `?${query}` : ''}`
 }
 
-async function postJSON(url, payload, signal) {
-  const response = await fetch(url, {
+async function reach(url, init) {
+  try {
+    return await fetch(url, init)
+  } catch (error) {
+    const relay = currentRelay()
+    if (relay.isLocal && !init.signal?.aborted) throw new RelayUnreachableError(relay.origin, PRIVACY_TEXT.relayUnreachable(relay.origin))
+    throw error
+  }
+}
+
+async function postJSON(query, payload, signal) {
+  const response = await reach(proxyUrl(query), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
     signal,
   })
   const contentType = response.headers.get('content-type') || ''
+  if (response.status === HTTP_PAYLOAD_TOO_LARGE) throw new Error(ATTACHMENT_TEXT.proxyTooLarge)
   if (!response.ok || !contentType.includes('application/json')) {
     throw new Error(`The proxy answered with HTTP ${response.status} instead of a result`)
   }
@@ -132,16 +185,16 @@ async function postJSON(url, payload, signal) {
 }
 
 async function postForResult(query, payload, field) {
-  const result = await postJSON(`${PROXY_URL}?${query}`, payload)
+  const result = await postJSON(query, payload)
   if (result.error) throw new Error(result.error)
   return result[field]
 }
 
-async function exchange(url, id, payload) {
+async function exchange(query, id, payload) {
   const controller = new AbortController()
   inFlight.set(id, controller)
   try {
-    return await postJSON(url, payload, controller.signal)
+    return await postJSON(query, payload, controller.signal)
   } catch (error) {
     if (controller.signal.aborted) return failureResponse('cancelled', 'the request was cancelled')
     return failureResponse('network', error.message)
@@ -150,34 +203,67 @@ async function exchange(url, id, payload) {
   }
 }
 
-const send = (id, request, variables, cookies) => exchange(PROXY_URL, id, toEngineRequest(withPreferredTimeout(request), variables, cookies))
+const send = (id, request, variables, cookies) => exchange('', id, toEngineRequest(withPreferredTimeout(request), variables, cookies))
 
-const invokeGrpc = (id, request, variables) => exchange(GRPC_INVOKE_URL, id, toGrpcCall(request, variables))
+const invokeGrpc = (id, request, variables) => exchange(GRPC_INVOKE, id, toGrpcCall(request, variables))
 
-const invokeMcp = (id, request, variables) => exchange(MCP_INVOKE_URL, id, toMcpCall(request, variables))
+const invokeMcp = (id, request, variables) => exchange(MCP_INVOKE, id, toMcpCall(request, variables))
 
-function openStream(id, request, onMessages) {
+async function openStream(id, request, onMessages) {
   const controller = new AbortController()
   inFlight.set(id, controller)
-  return readStream(STREAM_URL, request, onMessages, controller.signal).finally(() => inFlight.delete(id))
+  try {
+    return await readStream(proxyUrl(STREAM), request, onMessages, controller.signal)
+  } catch (error) {
+    return failureResponse('network', error.message)
+  } finally {
+    inFlight.delete(id)
+  }
 }
 
-function readStoredData() {
-  const raw = storage.getItem(DATA_KEY)
-  if (raw !== null) return parseDocument(raw) || setAsideDamagedData(raw)
-  const legacy = readLegacyData()
-  return legacy ? migrateLegacyData(legacy) : sampleData()
+async function readStoredData() {
+  const raw = await readText(DATA_KEY)
+  if (raw === null) {
+    const legacy = readLegacyData()
+    return legacy ? migrateLegacyData(legacy) : emptyData()
+  }
+  const stored = parseDocument(raw)
+  if (!stored) return setAsideDamagedData(raw)
+  snapshotIfDue(raw).catch(() => {})
+  cachedDocument = stored
+  return stored
 }
 
 async function load() {
-  const data = readStoredData()
+  await storageGate.settled()
+  const data = await serially(readStoredData)
   return { ...data, notice: damageNotice }
+}
+
+async function replaceDocument(text) {
+  const current = await readText(DATA_KEY)
+  if (current !== null) await saveSnapshot(KIND_BEFORE_RESTORE, current)
+  cachedDocument = null
+  await writeDocumentText(text)
+}
+
+async function restoreSnapshot(id) {
+  const snapshot = await readSnapshot(id)
+  if (!snapshot || !parseDocument(snapshot.data)) throw new Error(DATA_TEXT.backupUnreadable)
+  await serially(() => replaceDocument(snapshot.data))
+}
+
+const backups = {
+  list: listSnapshots,
+  restore: (id) => storageGate.during(() => restoreSnapshot(id)),
+  openFolder: null,
+  remindsExport: true,
 }
 
 async function saveRequests(requests) {
   const saved = requests.map((request) => ({ ...request, id: request.id || crypto.randomUUID() }))
   const savedIds = new Set(saved.map((request) => request.id))
-  mutateData((data) => {
+  await mutateData((data) => {
     const others = (data.requests || []).filter((existing) => !savedIds.has(existing.id))
     data.requests = [...others, ...saved].map(compactRequest)
   })
@@ -190,21 +276,21 @@ async function saveRequest(request) {
 }
 
 async function deleteRequest(id) {
-  mutateData((data) => {
+  await mutateData((data) => {
     data.requests = (data.requests || []).filter((request) => request.id !== id)
   })
 }
 
 async function saveFolders(folders) {
-  mutateData((data) => { data.folders = folders })
+  await mutateData((data) => { data.folders = folders })
 }
 
 async function saveHistory(history) {
-  mutateData((data) => { data.history = history.map(compactRequest) })
+  await mutateData((data) => { data.history = history.map(compactRequest) })
 }
 
 async function saveEnvironments(environments, activeEnvironmentId) {
-  mutateData((data) => {
+  await mutateData((data) => {
     delete data.variables
     data.environments = environments
     data.activeEnvironmentId = activeEnvironmentId
@@ -212,7 +298,7 @@ async function saveEnvironments(environments, activeEnvironmentId) {
 }
 
 async function saveScopes(globals, activeGlobalId, collectionVariables) {
-  mutateData((data) => {
+  await mutateData((data) => {
     data.globals = globals
     data.activeGlobalId = activeGlobalId
     data.collectionVariables = collectionVariables
@@ -220,25 +306,41 @@ async function saveScopes(globals, activeGlobalId, collectionVariables) {
 }
 
 async function saveCollectionSettings(settings) {
-  mutateData((data) => { data.collectionSettings = settings })
+  await mutateData((data) => { data.collectionSettings = settings })
 }
 
 async function saveCookies(cookies) {
-  mutateData((data) => { data.cookies = cookies })
+  await mutateData((data) => { data.cookies = cookies })
 }
 
 async function authorize(config, variables) {
   const started = await postForResult('oauth=start', { config, variables }, 'authorization')
-  const code = await signInWithPopup(started.url, started.state)
-  return { code, codeVerifier: started.codeVerifier, redirectUri: started.redirectUri }
+  const { code, issuer } = await signInWithPopup(started.url, started.state, config.issuer)
+  return { code, issuer, codeVerifier: started.codeVerifier, redirectUri: started.redirectUri }
 }
 
-const damagedCopies = () => Object.keys(storage).filter((key) => key.startsWith(DAMAGED_DATA_PREFIX))
+const isStoredData = (key) => key === DATA_KEY || key === TAB_DRAFTS_KEY || key.startsWith(DAMAGED_DATA_PREFIX)
+
+async function clearStoredData() {
+  cachedDocument = null
+  const target = await records()
+  const keys = await target.keys()
+  await Promise.all(keys.filter(isStoredData).map((key) => target.remove(key)))
+  Object.keys(storage).filter(isStoredData).forEach((key) => storage.removeItem(key))
+  return target
+}
 
 async function reset() {
-  cachedDocument = null
-  storage.removeItem(DATA_KEY)
-  damagedCopies().forEach((key) => storage.removeItem(key))
+  const target = await serially(clearStoredData)
+  await clearSnapshots().catch((error) => {
+    if (target.inDatabase) throw error
+  })
+}
+
+const tabDrafts = {
+  read: readText,
+  write: (key, text) => records().then((target) => target.write(key, text)),
+  remove: (key) => records().then((target) => target.remove(key)),
 }
 
 async function saveFile(name, base64, mime) {
@@ -255,17 +357,18 @@ export const webBackend = {
   send,
   cancel: (id) => inFlight.get(id)?.abort(),
   prepare: (request, variables) => postForResult('prepare=1', toEngineRequest(request, variables), 'prepared'),
-  expand: (texts, variables) => postForResult('expand=1', { texts, variables }, 'texts'),
+  expand: (texts, variables) => postForResult(EXPAND, { texts, variables }, 'texts'),
   parseCurl: (command) => postForResult('curl=1', { command }, 'request'),
-  openapi: (query) => postJSON(`${PROXY_URL}?openapi=1`, query),
-  lint: (query) => postJSON(`${PROXY_URL}?lint=1`, query),
+  openapi: (query) => postJSON('openapi=1', query),
+  lint: (query) => postJSON('lint=1', query),
   openapiPageSize: OPENAPI_PAGE_SIZE,
-  importer: (query) => postJSON(`${PROXY_URL}?import=1`, query),
-  scan: (query) => postJSON(`${PROXY_URL}?scan=1`, query),
-  fetchLink: (address) => postJSON(`${PROXY_URL}?link=1`, { url: address }),
+  importer: (query) => postJSON('import=1', query),
+  scan: (query) => postJSON('scan=1', query),
+  fetchLink: (address) => postJSON('link=1', { url: address }),
   describeGrpc: (request, variables) => postForResult('grpc=describe', toGrpcTarget(request, variables), 'schema'),
   invokeGrpc,
   describeMcp: (request, variables) => postForResult('mcp=describe', toMcpTarget(request, variables), 'catalog'),
+  discoverMcpAuthorization: (query) => postJSON('mcp=auth', { ...query, native: false }),
   runsLocalCommands: false,
   invokeMcp,
   openStream,
@@ -280,6 +383,7 @@ export const webBackend = {
   saveScopes,
   saveCollectionSettings,
   saveCookies,
+  tabDrafts,
   network: null,
   ai: webAi,
   mock: null,
@@ -287,10 +391,15 @@ export const webBackend = {
   capture: null,
   loadTest: null,
   storage: null,
+  backups,
+  relay: { check: () => postForResult(EXPAND, { texts: [], variables: '{}' }, 'texts') },
+  updates: null,
   oauthCallback: { url: `${window.location.origin}${OAUTH_CALLBACK_PATH}`, isFixed: true },
   authorize,
   cancelAuthorization: cancelOAuthPopup,
-  fetchToken: (exchange) => postJSON(`${PROXY_URL}?oauth=token`, exchange),
+  fetchToken: (exchange) => postJSON('oauth=token', exchange),
+  startDeviceAuthorization: (exchange) => postJSON('oauth=device', exchange),
+  discoverIssuer: (query) => postJSON('oauth=discover', query),
   reset,
   saveFile,
   listInstalledFonts: browserFontLister(),

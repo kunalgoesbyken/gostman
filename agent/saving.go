@@ -19,7 +19,7 @@ const (
 )
 
 var assertionOperators = []string{
-	"eq", "neq", "gt", "gte", "lt", "lte", "contains", "notContains", "startsWith", "endsWith", "matches", "in", "length",
+	"eq", "neq", "gt", "gte", "lt", "lte", "contains", "notContains", "startsWith", "endsWith", "matches", "in", "length", "schema",
 	"isDefined", "isUndefined", "isNull", "isEmpty", "isNotEmpty", "isTrue", "isFalse",
 	"isNumber", "isString", "isBoolean", "isArray", "isObject",
 }
@@ -51,6 +51,7 @@ type saved struct {
 }
 
 type revision struct {
+	original workspace.Request
 	request  workspace.Request
 	supplied []string
 	created  bool
@@ -65,7 +66,7 @@ func (r *revision) text(target *string, value *string) {
 }
 
 func (d *Desk) blankRequest() (workspace.Request, error) {
-	defaults, err := d.client.session.Normalize(struct{}{})
+	defaults, err := d.client.catalog.Normalize(struct{}{})
 	return workspace.Request{Id: rand.Text(), Auth: defaults.Auth, Options: defaults.Options}, err
 }
 
@@ -75,7 +76,7 @@ func (d *Desk) startingPoint(a saveArguments, files workspace.Collection) (revis
 		if existing.Id == "" {
 			return revision{}, fmt.Errorf("There is no request with the id %q. Leave id out to create a request.", a.ID)
 		}
-		return revision{request: existing}, nil
+		return revision{original: existing, request: existing}, nil
 	}
 	if a.Name == nil || !hasText(*a.Name) || a.URL == nil || !hasText(*a.URL) {
 		return revision{}, errors.New("A new request needs a name and a url.")
@@ -101,10 +102,10 @@ func (r *revision) headers(headers *map[string]string) error {
 		return nil
 	}
 	entries := headerEntries(*headers)
+	if name, found := literalCredential(entries); found {
+		return fmt.Errorf("Not saved: the %s header holds a literal credential. Keep the credential in an environment variable and reference it, for example \"Bearer {{token}}\".", name)
+	}
 	for _, header := range entries {
-		if isCredentialHeader(header.Key) && isLiteral(header.Value) {
-			return fmt.Errorf("Not saved: the %s header holds a literal credential. Keep the credential in an environment variable and reference it, for example \"Bearer {{token}}\".", header.Key)
-		}
 		r.supplied = append(r.supplied, header.Key, header.Value)
 	}
 	rows, err := headerRows(entries)
@@ -159,16 +160,23 @@ func (r revision) check() error {
 	return nil
 }
 
+func labelled(label string) string {
+	if hidden, found := strings.CutPrefix(label, hiddenPrefix); found {
+		return fmt.Sprintf("a credential that Gostman keeps hidden (%s)", hidden)
+	}
+	return fmt.Sprintf("the value of the variable %q", label)
+}
+
 func leak(label string) error {
 	if strings.HasPrefix(label, hiddenPrefix) {
-		return fmt.Errorf("Not saved: the request contains a credential that Gostman keeps hidden (%s). Keep it in an environment variable and write {{name}} where it belongs.", strings.TrimPrefix(label, hiddenPrefix))
+		return fmt.Errorf("Not saved: it contains %s. Keep it in an environment variable and write {{name}} where it belongs.", labelled(label))
 	}
-	return fmt.Errorf("Not saved: the request contains the value of the variable %q. Write {{%s}} in its place so the value stays out of the workspace files.", label, label)
+	return fmt.Errorf("Not saved: it contains %s. Write {{%s}} in its place so the value stays out of the workspace files.", labelled(label), label)
 }
 
 func refuseFileReads(supplied []string) error {
 	if slices.ContainsFunc(supplied, engine.ReadsFiles) {
-		return errors.New("Not saved: {{$file(...)}} reads files on this computer, so only a person can add it to a request.")
+		return errors.New("Not saved: {{$file(...)}} reads files on this computer, so only a person can add it.")
 	}
 	return nil
 }
@@ -206,35 +214,52 @@ func childFolder(folders []workspace.Folder, parentID, name string) (workspace.F
 	return workspace.Folder{}, false
 }
 
-func (d *Desk) ensureFolder(folders []workspace.Folder, segments []string) (string, error) {
-	parentID, grown := "", false
+func growFolders(folders []workspace.Folder, segments []string) ([]workspace.Folder, string, bool) {
+	grown := append([]workspace.Folder{}, folders...)
+	parentID := ""
 	for _, name := range segments {
-		folder, found := childFolder(folders, parentID, name)
+		folder, found := childFolder(grown, parentID, name)
 		if !found {
 			folder = workspace.Folder{Id: rand.Text(), Name: name, ParentId: parentID}
-			folders, grown = append(folders, folder), true
+			grown = append(grown, folder)
 		}
 		parentID = folder.Id
 	}
-	if !grown {
-		return parentID, nil
+	return grown, parentID, len(grown) > len(folders)
+}
+
+type folderPlan struct {
+	segments []string
+	folders  []workspace.Folder
+	parentID string
+	grown    bool
+}
+
+func (d *Desk) planFolders(existing []workspace.Folder, path string) (folderPlan, error) {
+	segments, err := folderSegments(path)
+	if err != nil {
+		return folderPlan{}, err
 	}
-	return parentID, d.files.SaveFolders(folders)
+	if err := d.refuseSecrets(segments); err != nil {
+		return folderPlan{}, err
+	}
+	folders, parentID, grown := growFolders(existing, segments)
+	return folderPlan{segments: segments, folders: folders, parentID: parentID, grown: grown}, nil
 }
 
 func (d *Desk) place(current scene, change *revision, path *string) error {
 	if path == nil {
 		return nil
 	}
-	segments, err := folderSegments(*path)
+	plan, err := d.planFolders(current.files.Folders, *path)
 	if err != nil {
 		return err
 	}
-	if err := d.refuseSecrets(segments); err != nil {
-		return err
+	change.request.FolderId = plan.parentID
+	if !plan.grown {
+		return nil
 	}
-	change.request.FolderId, err = d.ensureFolder(current.files.Folders, segments)
-	return err
+	return d.files.SaveFolders(plan.folders)
 }
 
 func (d *Desk) folderPath(id string) string {
@@ -269,8 +294,10 @@ func (d *Desk) saveRequest(_ context.Context, current scene, arguments saveArgum
 	if err := d.place(current, &change, arguments.Folder); err != nil {
 		return saved{}, err
 	}
-	if err := d.files.MarkAgentAuthored(change.request.Id); err != nil {
-		return saved{}, err
+	if change.created || redirected(change.original, change.request) {
+		if err := d.files.MarkAgentAuthored(change.request.Id); err != nil {
+			return saved{}, err
+		}
 	}
 	if err := d.files.SaveRequests([]workspace.Request{change.request}); err != nil {
 		return saved{}, err

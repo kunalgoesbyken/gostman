@@ -55,9 +55,21 @@ func (c *collector) reportNotes(d *dialect, label, stage string, notes []scriptN
 }
 
 func (c *collector) summarizeScripts(d *dialect, name string) {
-	if c.scripts.translated+c.scripts.failed == 0 {
+	tally := c.scripts
+	c.scripts.translated, c.scripts.failed = 0, 0
+	if tally.translated+tally.failed == 0 || (c.inPlace && tally.failed == 0) {
 		return
 	}
-	c.Warnings = append(c.Warnings, fmt.Sprintf(messageScriptTotals, d.name, name, c.scripts.translated, d.api, c.scripts.failed))
-	c.scripts.translated, c.scripts.failed = 0, 0
+	if tally.failed == 0 {
+		c.Notes = append(c.Notes, fmt.Sprintf(messageScriptsRewritten, d.name, name, uses(tally.translated), d.api))
+		return
+	}
+	c.Warnings = append(c.Warnings, fmt.Sprintf(messageScriptTotals, d.name, name, uses(tally.translated), d.api, tally.failed))
+}
+
+func uses(count int) string {
+	if count == 1 {
+		return "1 use"
+	}
+	return fmt.Sprintf("%d uses", count)
 }

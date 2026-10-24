@@ -8,7 +8,7 @@ import (
 
 const (
 	limitExport       = "TIMEOUT_MS"
-	messageExport     = "TIMED_OUT"
+	allowanceExport   = "scriptAllowance"
 	sendTimeoutExport = "SEND_TIMEOUT_MS"
 	sendsExport       = "MAX_SENDS"
 	stepsExport       = "MAX_FLOW_STEPS"
@@ -20,10 +20,18 @@ type Limits struct {
 	FlowSteps   int
 }
 
+type Allowance struct {
+	Limit   int64  `json:"limit"`
+	Message string `json:"message"`
+}
+
+func (a Allowance) duration() time.Duration {
+	return time.Duration(a.Limit) * time.Millisecond
+}
+
 type Sandbox struct {
 	shared   *machine
-	limit    time.Duration
-	timedOut string
+	standard Allowance
 	limits   Limits
 }
 
@@ -32,16 +40,23 @@ func New() (*Sandbox, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Sandbox{
+	sandbox := &Sandbox{
 		shared:   shared,
-		limit:    time.Duration(shared.exports.Get(limitExport).ToInteger()) * time.Millisecond,
-		timedOut: shared.exports.Get(messageExport).String(),
+		standard: Allowance{Limit: shared.exports.Get(limitExport).ToInteger()},
 		limits: Limits{
 			SendTimeout: time.Duration(shared.exports.Get(sendTimeoutExport).ToInteger()) * time.Millisecond,
 			Sends:       int(shared.exports.Get(sendsExport).ToInteger()),
 			FlowSteps:   int(shared.exports.Get(stepsExport).ToInteger()),
 		},
-	}, nil
+	}
+	sandbox.standard, err = sandbox.Allowance(sandbox.standard.Limit)
+	return sandbox, err
+}
+
+func (s *Sandbox) Allowance(milliseconds int64) (Allowance, error) {
+	var allowance Allowance
+	err := s.Call(allowanceExport, &allowance, milliseconds)
+	return allowance, err
 }
 
 func (s *Sandbox) Limits() Limits {
@@ -56,29 +71,25 @@ func (s *Sandbox) Call(function string, result any, arguments ...any) error {
 		}
 		s.shared = shared
 	}
-	err := s.run(s.shared, function, result, arguments)
+	err := s.run(s.shared, s.standard, function, result, arguments)
 	if err != nil {
 		s.shared = nil
 	}
 	return err
 }
 
-func (s *Sandbox) Isolated(function string, result any, arguments ...any) error {
-	return s.IsolatedWith(nil, function, result, arguments...)
-}
-
-func (s *Sandbox) IsolatedWith(bridge Bridge, function string, result any, arguments ...any) error {
+func (s *Sandbox) Isolated(allowance Allowance, bridge Bridge, function string, result any, arguments ...any) error {
 	isolated, err := boot(bridge)
 	if err != nil {
 		return err
 	}
-	return s.run(isolated, function, result, arguments)
+	return s.run(isolated, allowance, function, result, arguments)
 }
 
-func (s *Sandbox) run(target *machine, function string, result any, arguments []any) error {
-	encoded, err := target.invoke(function, s.limit, arguments)
+func (s *Sandbox) run(target *machine, allowance Allowance, function string, result any, arguments []any) error {
+	encoded, err := target.invoke(function, allowance.duration(), arguments)
 	if errors.Is(err, errExpired) {
-		return errors.New(s.timedOut)
+		return errors.New(allowance.Message)
 	}
 	if errors.Is(err, errMemory) {
 		return fmt.Errorf("The script used more than %d MB of memory and was stopped.", memoryAllowance>>20)

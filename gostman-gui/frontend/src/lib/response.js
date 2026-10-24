@@ -31,10 +31,12 @@ const FILE_EXTENSIONS = {
 
 export const ERROR_TITLES = {
   config: 'Invalid request',
+  script: 'Script failed',
   network: 'Network error',
   timeout: 'Request timed out',
   cancelled: 'Request cancelled',
   blocked: 'Address blocked',
+  restricted: 'Folder not trusted',
 }
 
 export const BODY_KINDS = {
@@ -73,8 +75,10 @@ export function textBody(response) {
   return response.body
 }
 
+export const looksLikeJson = (text) => JSON_START.test(text)
+
 export function parseJsonBody(text) {
-  if (!JSON_START.test(text)) return null
+  if (!looksLikeJson(text)) return null
   try {
     return JSON.parse(text)
   } catch {

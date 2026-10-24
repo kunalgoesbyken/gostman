@@ -8,26 +8,40 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"slices"
 	"sync"
+	"time"
 )
 
 const (
-	queueDepth     = 64
-	noArguments    = "{}"
-	invalidRequest = "Invalid request: a message needs \"jsonrpc\": \"2.0\" and a method"
+	concurrentCalls  = 8
+	progressInterval = 250 * time.Millisecond
+	noArguments      = "{}"
+	invalidRequest   = "Invalid request: a message needs \"jsonrpc\": \"2.0\" and a method"
+	idInUse          = "Invalid request: a call with this id is still running"
 )
 
 type Result struct {
-	Value any
-	Text  string
+	Value      any
+	Text       string
+	Structured any
+}
+
+type Hints struct {
+	ReadOnly    bool
+	Destructive bool
+	Idempotent  bool
+	OpenWorld   bool
 }
 
 type Tool struct {
-	Name        string
-	Description string
-	InputSchema any
-	ReadOnly    bool
-	Handle      func(ctx context.Context, arguments json.RawMessage) (Result, error)
+	Name         string
+	Title        string
+	Description  string
+	InputSchema  any
+	OutputSchema any
+	Hints        Hints
+	Handle       func(ctx context.Context, arguments json.RawMessage) (Result, error)
 }
 
 type Server struct {
@@ -37,41 +51,57 @@ type Server struct {
 	Tools        []Tool
 	Log          io.Writer
 
-	writing sync.Mutex
-	output  io.Writer
+	setup   sync.Once
+	slots   chan struct{}
+	calls   sync.WaitGroup
 	pending sync.Mutex
 	cancels map[string]context.CancelFunc
 }
 
-type call struct {
-	ctx       context.Context
-	id        json.RawMessage
-	tool      Tool
-	arguments json.RawMessage
+type writer func(message any)
+
+type progressKey struct{}
+
+type reporter struct {
+	mu       sync.Mutex
+	token    json.RawMessage
+	write    writer
+	reported time.Time
+	progress float64
+}
+
+func (s *Server) ready() {
+	s.setup.Do(func() {
+		s.slots = make(chan struct{}, concurrentCalls)
+		s.cancels = map[string]context.CancelFunc{}
+	})
 }
 
 func (s *Server) Serve(ctx context.Context, input io.Reader, output io.Writer) error {
-	s.output = output
-	s.cancels = map[string]context.CancelFunc{}
-	queue := make(chan call, queueDepth)
-	finished := make(chan struct{})
-	go func() {
-		defer close(finished)
-		for queued := range queue {
-			s.perform(queued)
+	s.ready()
+	var lock sync.Mutex
+	write := func(message any) {
+		encoded, err := encode(message)
+		if err != nil {
+			fmt.Fprintf(s.Log, "a reply could not be encoded: %s\n", err)
+			return
 		}
-	}()
-	err := s.read(ctx, bufio.NewReader(input), queue)
-	close(queue)
-	<-finished
+		lock.Lock()
+		defer lock.Unlock()
+		if _, err := io.WriteString(output, encoded+"\n"); err != nil {
+			fmt.Fprintf(s.Log, "a reply could not be written: %s\n", err)
+		}
+	}
+	err := s.read(ctx, bufio.NewReader(input), write)
+	s.calls.Wait()
 	return err
 }
 
-func (s *Server) read(ctx context.Context, input *bufio.Reader, queue chan<- call) error {
+func (s *Server) read(ctx context.Context, input *bufio.Reader, write writer) error {
 	for {
 		line, err := input.ReadBytes('\n')
 		if len(bytes.TrimSpace(line)) > 0 {
-			s.receive(ctx, line, queue)
+			s.handle(ctx, line, write)
 		}
 		if errors.Is(err, io.EOF) {
 			return nil
@@ -82,26 +112,12 @@ func (s *Server) read(ctx context.Context, input *bufio.Reader, queue chan<- cal
 	}
 }
 
-func (s *Server) send(answer Reply) {
-	answer.Version = JSONRPCVersion
-	encoded, err := encode(answer)
-	if err != nil {
-		fmt.Fprintf(s.Log, "a reply could not be encoded: %s\n", err)
-		return
-	}
-	s.writing.Lock()
-	defer s.writing.Unlock()
-	if _, err := io.WriteString(s.output, encoded+"\n"); err != nil {
-		fmt.Fprintf(s.Log, "a reply could not be written: %s\n", err)
-	}
+func respond(write writer, id json.RawMessage, result any) {
+	write(Reply{Version: JSONRPCVersion, ID: id, Result: result})
 }
 
-func (s *Server) respond(id json.RawMessage, result any) {
-	s.send(Reply{ID: id, Result: result})
-}
-
-func (s *Server) fail(id json.RawMessage, code int, text string) {
-	s.send(Reply{ID: id, Error: &Failure{Code: code, Message: text}})
+func fail(write writer, id json.RawMessage, code int, text string) {
+	write(Reply{Version: JSONRPCVersion, ID: id, Error: &Failure{Code: code, Message: text}})
 }
 
 func parse(line []byte) (Message, int, string) {
@@ -120,31 +136,101 @@ func parse(line []byte) (Message, int, string) {
 	}
 }
 
-func (s *Server) receive(ctx context.Context, line []byte, queue chan<- call) {
+func (s *Server) handle(ctx context.Context, line []byte, write writer) <-chan struct{} {
+	s.ready()
+	done := make(chan struct{})
 	incoming, code, problem := parse(line)
-	if code != 0 {
-		id := absentID
-		if !incoming.isNotification() {
-			id = incoming.ID
-		}
-		s.fail(id, code, problem)
-		return
-	}
-	if incoming.isNotification() {
+	switch {
+	case code != 0 && incoming.isNotification():
+		fail(write, absentID, code, problem)
+	case code != 0:
+		fail(write, incoming.ID, code, problem)
+	case incoming.isNotification():
 		s.notice(incoming)
-		return
-	}
-	switch incoming.Method {
-	case MethodInitialize:
-		s.initialize(incoming)
-	case MethodPing:
-		s.respond(incoming.ID, Empty{})
-	case MethodListTools:
-		s.respond(incoming.ID, s.listing())
-	case MethodCallTool:
-		s.enqueue(ctx, incoming, queue)
 	default:
-		s.fail(incoming.ID, CodeMethodNotFound, "Method not found: "+incoming.Method)
+		if s.dispatch(ctx, incoming, write, done) {
+			return done
+		}
+	}
+	close(done)
+	return done
+}
+
+func (s *Server) dispatch(ctx context.Context, incoming Message, write writer, done chan struct{}) bool {
+	stateless, refusal := classify(incoming)
+	switch {
+	case refusal != nil:
+		write(Reply{Version: JSONRPCVersion, ID: incoming.ID, Error: refusal})
+	case incoming.Method == MethodCallTool:
+		return s.start(ctx, incoming, stateless, write, done)
+	default:
+		s.answer(incoming, stateless, write)
+	}
+	return false
+}
+
+func supportedVersions() []string {
+	return append(append([]string{}, statelessVersions...), ProtocolVersions...)
+}
+
+func declaredVersion(incoming Message) (string, map[string]json.RawMessage, bool) {
+	var params requestMeta
+	json.Unmarshal(incoming.Params, &params)
+	raw, declared := params.Meta[metaVersion]
+	var version string
+	json.Unmarshal(raw, &version)
+	return version, params.Meta, declared
+}
+
+func classify(incoming Message) (bool, *Failure) {
+	version, meta, declared := declaredVersion(incoming)
+	if !declared {
+		return false, nil
+	}
+	if !slices.Contains(statelessVersions, version) {
+		data, _ := json.Marshal(versionRefusal{Supported: supportedVersions(), Requested: version})
+		return true, &Failure{Code: codeUnsupportedVersion, Message: "Unsupported protocol version", Data: data}
+	}
+	if _, found := meta[metaCapabilities]; !found {
+		return true, &Failure{Code: codeInvalidParams, Message: "Invalid params: _meta needs " + metaCapabilities}
+	}
+	return true, nil
+}
+
+func (s *Server) implementation() Implementation {
+	return Implementation{Name: s.Name, Version: s.Version}
+}
+
+func (s *Server) stamp(result *completion) {
+	result.ResultType = resultComplete
+	result.Meta = &serverMeta{ServerInfo: s.implementation()}
+}
+
+func privateHints() cacheHints {
+	fresh := int64(0)
+	return cacheHints{TTLMs: &fresh, CacheScope: privateCache}
+}
+
+func (s *Server) discover() discoverResult {
+	found := discoverResult{cacheHints: privateHints(), SupportedVersions: supportedVersions(), Instructions: s.Instructions}
+	s.stamp(&found.completion)
+	return found
+}
+
+func (s *Server) answer(incoming Message, stateless bool, write writer) {
+	switch {
+	case incoming.Method == methodDiscover && stateless:
+		respond(write, incoming.ID, s.discover())
+	case incoming.Method == methodDiscover:
+		fail(write, incoming.ID, codeInvalidParams, "Invalid params: server/discover needs _meta with "+metaVersion+" and "+metaCapabilities)
+	case incoming.Method == MethodInitialize:
+		s.initialize(incoming, write)
+	case incoming.Method == MethodPing:
+		respond(write, incoming.ID, Empty{})
+	case incoming.Method == MethodListTools:
+		respond(write, incoming.ID, s.listing(stateless))
+	default:
+		fail(write, incoming.ID, CodeMethodNotFound, "Method not found: "+incoming.Method)
 	}
 }
 
@@ -163,27 +249,39 @@ func (s *Server) notice(incoming Message) {
 	}
 }
 
-func (s *Server) initialize(incoming Message) {
+func (s *Server) initialize(incoming Message, write writer) {
 	var params InitializeParams
 	if err := json.Unmarshal(incoming.Params, &params); err != nil {
-		s.fail(incoming.ID, codeInvalidParams, "Invalid params: "+err.Error())
+		fail(write, incoming.ID, codeInvalidParams, "Invalid params: "+err.Error())
 		return
 	}
-	s.respond(incoming.ID, InitializeResult{
+	respond(write, incoming.ID, InitializeResult{
 		ProtocolVersion: negotiate(params.ProtocolVersion),
-		ServerInfo:      Implementation{Name: s.Name, Version: s.Version},
+		ServerInfo:      s.implementation(),
 		Instructions:    s.Instructions,
 	})
 }
 
-func (s *Server) listing() listResult {
+func (s *Server) listing(stateless bool) listResult {
 	listed := listResult{Tools: make([]toolListing, 0, len(s.Tools))}
+	if stateless {
+		s.stamp(&listed.completion)
+		listed.cacheHints = privateHints()
+	}
 	for _, tool := range s.Tools {
 		listed.Tools = append(listed.Tools, toolListing{
-			Name:        tool.Name,
-			Description: tool.Description,
-			InputSchema: tool.InputSchema,
-			Annotations: annotations{ReadOnly: tool.ReadOnly},
+			Name:         tool.Name,
+			Title:        tool.Title,
+			Description:  tool.Description,
+			InputSchema:  tool.InputSchema,
+			OutputSchema: tool.OutputSchema,
+			Annotations: annotations{
+				Title:       tool.Title,
+				ReadOnly:    tool.Hints.ReadOnly,
+				Destructive: tool.Hints.Destructive,
+				Idempotent:  tool.Hints.Idempotent,
+				OpenWorld:   tool.Hints.OpenWorld,
+			},
 		})
 	}
 	return listed
@@ -198,49 +296,103 @@ func (s *Server) find(name string) (Tool, bool) {
 	return Tool{}, false
 }
 
-func (s *Server) enqueue(ctx context.Context, incoming Message, queue chan<- call) {
+func withProgress(ctx context.Context, params json.RawMessage, write writer) context.Context {
+	var meta callMeta
+	if json.Unmarshal(params, &meta) != nil {
+		return ctx
+	}
+	token := meta.Meta.ProgressToken
+	if isAbsent(token) {
+		return ctx
+	}
+	return context.WithValue(ctx, progressKey{}, &reporter{token: token, write: write})
+}
+
+func Progress(ctx context.Context, progress, total float64, message string) {
+	if tracker, ok := ctx.Value(progressKey{}).(*reporter); ok {
+		tracker.report(progress, total, message)
+	}
+}
+
+func (r *reporter) report(progress, total float64, message string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	finished := total > 0 && progress >= total
+	if progress <= r.progress || (!finished && time.Since(r.reported) < progressInterval) {
+		return
+	}
+	r.reported, r.progress = time.Now(), progress
+	r.write(notification{Version: JSONRPCVersion, Method: methodProgress, Params: progressParams{
+		ProgressToken: r.token,
+		Progress:      progress,
+		Total:         total,
+		Message:       message,
+	}})
+}
+
+func (s *Server) start(ctx context.Context, incoming Message, stateless bool, write writer, done chan struct{}) bool {
 	var params CallParams
 	if err := json.Unmarshal(incoming.Params, &params); err != nil {
-		s.fail(incoming.ID, codeInvalidParams, "Invalid params: "+err.Error())
-		return
+		fail(write, incoming.ID, codeInvalidParams, "Invalid params: "+err.Error())
+		return false
 	}
 	tool, found := s.find(params.Name)
 	if !found {
-		s.fail(incoming.ID, codeInvalidParams, "Unknown tool: "+params.Name)
-		return
+		fail(write, incoming.ID, codeInvalidParams, "Unknown tool: "+params.Name)
+		return false
 	}
-	if len(params.Arguments) == 0 || bytes.Equal(params.Arguments, absentID) {
+	if isAbsent(params.Arguments) {
 		params.Arguments = json.RawMessage(noArguments)
 	}
-	scoped, cancel := context.WithCancel(ctx)
+	key := string(incoming.ID)
+	scoped, cancel := context.WithCancel(withProgress(ctx, incoming.Params, write))
 	s.pending.Lock()
-	s.cancels[string(incoming.ID)] = cancel
+	if _, taken := s.cancels[key]; taken {
+		s.pending.Unlock()
+		cancel()
+		fail(write, incoming.ID, codeInvalidRequest, idInUse)
+		return false
+	}
+	s.cancels[key] = cancel
 	s.pending.Unlock()
-	queue <- call{ctx: scoped, id: incoming.ID, tool: tool, arguments: params.Arguments}
+	s.calls.Add(1)
+	go func() {
+		defer s.calls.Done()
+		defer close(done)
+		result := s.perform(scoped, tool, params.Arguments)
+		if stateless {
+			s.stamp(&result.completion)
+		}
+		if cancelled := s.release(key, scoped); !cancelled {
+			respond(write, incoming.ID, result)
+		}
+	}()
+	return true
 }
 
-func (s *Server) release(queued call) bool {
+func (s *Server) perform(ctx context.Context, tool Tool, arguments json.RawMessage) callResult {
+	s.slots <- struct{}{}
+	defer func() { <-s.slots }()
+	if ctx.Err() != nil {
+		return toolFailure("The call was cancelled.")
+	}
+	return s.execute(ctx, tool, arguments)
+}
+
+func (s *Server) release(key string, ctx context.Context) bool {
 	s.pending.Lock()
 	defer s.pending.Unlock()
-	cancelled := queued.ctx.Err() != nil
-	s.cancels[string(queued.id)]()
-	delete(s.cancels, string(queued.id))
+	cancelled := ctx.Err() != nil
+	s.cancels[key]()
+	delete(s.cancels, key)
 	return cancelled
-}
-
-func (s *Server) perform(queued call) {
-	result := s.execute(queued)
-	if cancelled := s.release(queued); cancelled {
-		return
-	}
-	s.respond(queued.id, result)
 }
 
 func toolFailure(text string) callResult {
 	return callResult{Content: []content{textContent(text)}, IsError: true}
 }
 
-func present(result Result) callResult {
+func present(tool Tool, result Result) callResult {
 	shown := callResult{Content: []content{}}
 	if result.Value != nil {
 		encoded, err := encode(result.Value)
@@ -252,19 +404,25 @@ func present(result Result) callResult {
 	if result.Text != "" {
 		shown.Content = append(shown.Content, textContent(result.Text))
 	}
+	if tool.OutputSchema != nil {
+		shown.StructuredContent = result.Value
+		if result.Structured != nil {
+			shown.StructuredContent = result.Structured
+		}
+	}
 	return shown
 }
 
-func (s *Server) execute(queued call) (shown callResult) {
+func (s *Server) execute(ctx context.Context, tool Tool, arguments json.RawMessage) (shown callResult) {
 	defer func() {
 		if crash := recover(); crash != nil {
-			fmt.Fprintf(s.Log, "%s stopped unexpectedly: %v\n", queued.tool.Name, crash)
-			shown = toolFailure(queued.tool.Name + " stopped unexpectedly; the server is still running.")
+			fmt.Fprintf(s.Log, "%s stopped unexpectedly: %v\n", tool.Name, crash)
+			shown = toolFailure(tool.Name + " stopped unexpectedly; the server is still running.")
 		}
 	}()
-	result, err := queued.tool.Handle(queued.ctx, queued.arguments)
+	result, err := tool.Handle(ctx, arguments)
 	if err != nil {
 		return toolFailure(err.Error())
 	}
-	return present(result)
+	return present(tool, result)
 }

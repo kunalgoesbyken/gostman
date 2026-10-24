@@ -111,16 +111,25 @@ export function flattenCollection(tree, matches) {
     if (!matches && rows.length === first) rows.push({ kind: ROW_EMPTY, key: `${ROW_EMPTY}:${folder.id}`, depth: depth + 1, parentId: folder.id })
   }
   const visit = (containerId, depth) => {
+    const siblings = []
     for (const folder of foldersIn(tree, containerId)) {
       if (matches && !matches.folderIds.has(folder.id)) continue
       const isOpen = Boolean(matches) || folder.isOpen
-      rows.push({ kind: ROW_FOLDER, key: `${ROW_FOLDER}:${folder.id}`, depth, folder, isOpen })
+      const row = { kind: ROW_FOLDER, key: `${ROW_FOLDER}:${folder.id}`, depth, folder, isOpen }
+      rows.push(row)
+      siblings.push(row)
       if (isOpen) visitFolder(folder, depth)
     }
     for (const request of requestsIn(tree, containerId)) {
       if (matches && !matches.requestIds.has(request.id)) continue
-      rows.push({ kind: ROW_REQUEST, key: `${ROW_REQUEST}:${request.id}`, depth, request })
+      const row = { kind: ROW_REQUEST, key: `${ROW_REQUEST}:${request.id}`, depth, request }
+      rows.push(row)
+      siblings.push(row)
     }
+    siblings.forEach((row, index) => {
+      row.position = index + 1
+      row.siblings = siblings.length
+    })
   }
   visit(ROOT_ID, 0)
   return rows

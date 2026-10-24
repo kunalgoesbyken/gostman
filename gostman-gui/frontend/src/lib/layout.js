@@ -2,7 +2,6 @@ import { readStored, writeStored } from "./storage"
 
 export const MIN_REQUEST_HEIGHT_PX = 232
 export const MIN_RESPONSE_HEIGHT_PX = 120
-export const TOOLBAR_HEIGHT_PX = 40
 export const DEFAULT_RESPONSE_SHARE = 55
 export const SIDEBAR_MIN_WIDTH_PX = 224
 export const SIDEBAR_MAX_WIDTH_PX = 480

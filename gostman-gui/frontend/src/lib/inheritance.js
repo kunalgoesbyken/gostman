@@ -1,4 +1,4 @@
-import { NO_AUTH, NO_SCRIPTS, hasActiveContent, withoutFileContent } from './activeContent'
+import { NO_AUTH, NO_SCRIPTS, activeKinds, hasActiveContent, withoutFileContent } from './activeContent'
 import { FOLDER_SETTINGS_TEXT as TEXT } from './folderSettingsText'
 import { AUTH_OAUTH2, normalizeAuth } from './request'
 import { parseRows, countSentRows } from './rows'
@@ -8,6 +8,7 @@ import { normalizeTags } from './tags.js'
 import { folderChain } from './variableScopes'
 
 export const AUTH_INHERIT = 'inherit'
+export const AUTH_NONE = 'none'
 export const ROOT_SETTINGS_ID = ''
 export const EMPTY_ROWS = '{}'
 
@@ -20,6 +21,7 @@ export const normalizeScopeSettings = (raw) => ({
   preScript: textOf(raw?.preScript),
   postScript: textOf(raw?.postScript),
   assertions: textOf(raw?.assertions),
+  scriptTimeoutMs: Math.max(0, Math.trunc(Number(raw?.scriptTimeoutMs)) || 0),
 })
 
 export const normalizeFolder = (raw) => ({
@@ -65,6 +67,8 @@ export function updatedScope(state, folderId, patch) {
 export const isBlankScope = (settings) => JSON.stringify(normalizeScopeSettings(settings)) === JSON.stringify(normalizeScopeSettings())
 
 export const hasActiveSettings =(raw) => hasActiveContent(normalizeScopeSettings(raw))
+
+export const activeSettingsKinds = (raw) => activeKinds(normalizeScopeSettings(raw))
 
 export function withoutActiveSettings(raw) {
   const settings = withoutFileContent(normalizeScopeSettings(raw))

@@ -413,6 +413,7 @@ func (w *Workspace) storeEnvironment(environment Environment) error {
 	if environment.Id == "" {
 		return errMissingId
 	}
+	environment, _ = WithoutSecretValues(environment)
 	entry := w.environments[environment.Id]
 	if entry == nil {
 		entry = &environmentEntry{order: w.nextEnvironmentOrder()}

@@ -13,12 +13,13 @@ import { SecretsDialog } from "./SecretsDialog"
 import { ENVIRONMENT_TEXT as TEXT } from "../lib/environmentText"
 import { SECRETS_TEXT } from "../lib/secretsText"
 import { isDesktopShell } from "../lib/windowControls"
-import { SCOPE_COLLECTION, SCOPE_GLOBAL, dotEnvEntries, environmentChain, environmentEntries, withEntries } from "../lib/variableScopes"
+import { SCOPE_COLLECTION, SCOPE_GLOBAL, dotEnvEntries, environmentChain, environmentEntries, sessionEntries, withEntries } from "../lib/variableScopes"
 import { cn } from "../lib/utils"
 import { createEnvironment, useAppStore } from "../store/appStore"
 
 const COLLECTION_VARIABLES_ID = "collection-variables"
 const DOT_ENV_ID = "dot-env"
+const SESSION_ID = "session-values"
 const SCOPE_OPTIONS = [
   { value: SCOPE_COLLECTION, label: TEXT.collectionTab },
   { value: SCOPE_GLOBAL, label: TEXT.globalTab },
@@ -151,10 +152,37 @@ function DotEnvViewer() {
   )
 }
 
+function SessionValuesViewer() {
+  const sessionVariables = useAppStore((s) => s.sessionVariables)
+  const clearSessionVariables = useAppStore((s) => s.clearSessionVariables)
+  const rows = useMemo(() => sessionEntries(sessionVariables), [sessionVariables])
+  const [query, setQuery] = useState("")
+  return (
+    <>
+      <Notice edge="border-b">{TEXT.sessionNote}</Notice>
+      <div className="flex items-center justify-end border-b border-border px-3 py-2">
+        <Button variant="outline" size="sm" disabled={rows.length === 0} onClick={clearSessionVariables}>
+          <Trash2 />
+          {TEXT.clearSession}
+        </Button>
+      </div>
+      {rows.length === 0 ? (
+        <p className="p-4 text-xs text-muted-foreground">{TEXT.sessionEmpty}</p>
+      ) : (
+        <>
+          <SearchField value={query} onChange={setQuery} placeholder={TEXT.search} />
+          <EnvironmentTable rows={rows} query={query} features={DOT_ENV_FEATURES} />
+        </>
+      )}
+    </>
+  )
+}
+
 function Editor({ scope, selectedId, environments, activeId, secrets }) {
   const environment = environments.find((candidate) => candidate.id === selectedId)
   if (selectedId === COLLECTION_VARIABLES_ID) return <CollectionVariablesEditor key={selectedId} />
   if (selectedId === DOT_ENV_ID) return <DotEnvViewer key={selectedId} />
+  if (selectedId === SESSION_ID) return <SessionValuesViewer key={selectedId} />
   if (!environment) return <p className="p-4 text-xs text-muted-foreground">{scope === SCOPE_GLOBAL ? TEXT.emptyGlobal : ""}</p>
   return (
     <EnvironmentEditor
@@ -200,7 +228,7 @@ export function EnvironmentDialog({ secrets, onClose }) {
     if (!isManagingSecrets) onClose()
   }
 
-  const resolvedSelection = list.some((candidate) => candidate.id === selectedId) || [COLLECTION_VARIABLES_ID, DOT_ENV_ID].includes(selectedId)
+  const resolvedSelection = list.some((candidate) => candidate.id === selectedId) || [COLLECTION_VARIABLES_ID, DOT_ENV_ID, SESSION_ID].includes(selectedId)
     ? selectedId
     : list[0]?.id || ""
 
@@ -237,6 +265,9 @@ export function EnvironmentDialog({ secrets, onClose }) {
               )}
               {hasDotEnv && (
                 <ListItem label={TEXT.dotEnv} isSelected={resolvedSelection === DOT_ENV_ID} onSelect={() => setSelectedId(DOT_ENV_ID)} />
+              )}
+              {!isGlobal && (
+                <ListItem label={TEXT.sessionValues} isSelected={resolvedSelection === SESSION_ID} onSelect={() => setSelectedId(SESSION_ID)} />
               )}
             </div>
             <div className="border-t border-border p-2">

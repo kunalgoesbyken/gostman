@@ -10,6 +10,7 @@ import { pluralize } from "../lib/dataUtils"
 import { SCAN_TEXT } from "../lib/scanText"
 import { buildDocs } from "../lib/docs"
 import { EXPORT_TEXT } from "../lib/importText"
+import { noteExport } from "../lib/exportReminder"
 import {
   exportToGostman,
   exportToMarkdown,
@@ -22,12 +23,13 @@ const PREVIEW_LIMIT = 20000
 const FILE_BASE_NAME = "gostman-export"
 const JSON_MIME = "application/json"
 const ZIP_MIME = "application/zip"
+const BACKUP_FORMAT = "gostman"
 
 const toJSON = (value) => JSON.stringify(value, null, 2)
 
 const EXPORT_FORMATS = [
   {
-    value: "gostman",
+    value: BACKUP_FORMAT,
     label: "Gostman",
     description: "Full backup: requests, folders and every environment",
     extension: "json",
@@ -37,10 +39,10 @@ const EXPORT_FORMATS = [
   {
     value: "postman",
     label: "Postman",
-    description: "Collection v2.1 with the active environment as collection variables",
+    description: "Collection v2.1. The variables in use, except secret ones, become collection variables",
     extension: "postman_collection.json",
     mime: JSON_MIME,
-    build: ({ requests, folders, variables }) => toJSON(exportToPostman(requests, folders, { variables })),
+    build: ({ requests, folders, variables, settings }) => toJSON(exportToPostman(requests, folders, { variables, settings })),
   },
   {
     value: "openapi-json",
@@ -139,6 +141,7 @@ export function ExportTab({ requests, folders, environments, variables, settings
     if (remote.reply?.archive) onSaveBase64("gostman-export.zip", remote.reply.archive, ZIP_MIME)
     else if (format.backend) onSaveFile(format.fileName, remote.reply.files[0].text, format.mime)
     else onSaveFile(format.fileName || `${FILE_BASE_NAME}.${format.extension}`, content, format.mime)
+    if (format.value === BACKUP_FORMAT) noteExport()
   }
   const preview = content.length > PREVIEW_LIMIT ? `${content.slice(0, PREVIEW_LIMIT)}\n…` : content
 

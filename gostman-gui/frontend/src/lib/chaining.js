@@ -1,6 +1,7 @@
 import { JSONPath } from 'jsonpath-plus'
 import { isPlainObject, parseJSON } from './dataUtils'
 import { findHeader, textBody } from './response'
+import { SCOPE_ENVIRONMENT, SCOPE_SESSION } from './scripting/scopes'
 import { isVariableName } from './validation'
 
 const SOURCE_BODY = 'body'
@@ -19,6 +20,10 @@ export const BLANK_EXTRACTOR = { name: '', source: SOURCE_BODY, expression: '', 
 
 const SOURCE_VALUES = EXTRACTOR_SOURCES.map((source) => source.value)
 
+export const EXTRACTOR_SCOPES = [SCOPE_SESSION, SCOPE_ENVIRONMENT]
+
+export const defaultExtractScope = (workspacePath) => (workspacePath ? SCOPE_SESSION : SCOPE_ENVIRONMENT)
+
 const parsedBodies = new WeakMap()
 
 const found = (value) => ({ value })
@@ -31,6 +36,7 @@ const toExtractor = (raw) => ({
   source: SOURCE_VALUES.includes(raw.source) ? raw.source : SOURCE_BODY,
   expression: asText(raw.expression),
   enabled: raw.enabled !== false,
+  ...(EXTRACTOR_SCOPES.includes(raw.scope) && { scope: raw.scope }),
 })
 
 export function parseExtractors(json) {
@@ -104,6 +110,15 @@ export function evaluateExtractor(extractor, response) {
     return missing(extractor.name === '' ? 'Name the variable' : 'Use letters, digits, _ and - in the name')
   }
   return READERS[extractor.source](response, extractor.expression.trim())
+}
+
+export function extractWrites(extractors, response, fallbackScope) {
+  const writes = Object.fromEntries(EXTRACTOR_SCOPES.map((scope) => [scope, {}]))
+  for (const extractor of extractors.filter((candidate) => candidate.enabled)) {
+    const result = evaluateExtractor(extractor, response)
+    if (!result.reason) writes[extractor.scope || fallbackScope][extractor.name] = result.value
+  }
+  return writes
 }
 
 export function extractVariables(extractors, response) {

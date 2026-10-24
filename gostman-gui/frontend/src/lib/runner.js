@@ -53,7 +53,7 @@ function summarize(request, { response, tests }, iteration) {
     logs: tests.logs,
     visualization: tests.visualization,
     flow: tests.flow,
-    hasFailed: Boolean(response.error) || tests.error !== '' || failures.length > 0,
+    hasFailed: Boolean(response.error) || Boolean(response.failed) || tests.error !== '' || failures.length > 0,
     exchange: capture(request, response),
   }
 }
@@ -84,13 +84,15 @@ export function createRunner(backend, execute) {
   async function runIteration(run, requests, iteration, options) {
     const queue = [...requests]
     const workers = Math.min(Math.max(options.parallel, 1), queue.length)
-    const follow = createFlowFollower(run, requests, queue, workers > 1)
+    const { follow, passedOver } = createFlowFollower(run, requests, queue, workers > 1)
+    const attempted = new Set()
     const lanes = Array.from({ length: workers }, async () => {
       while (queue.length > 0 && !run.isStopped && !run.isHalted) {
         const request = queue.shift()
+        attempted.add(request)
         const outcome = await runOne(run, request, iteration)
         if (run.isStopped) return
-        const problem = follow(outcome.flow)
+        const problem = follow(outcome.flow, request.name)
         const result = problem ? flagged(outcome, problem) : outcome
         store().addRunResult(result)
         if (options.stopOnFailure && result.hasFailed) run.isHalted = true
@@ -98,6 +100,10 @@ export function createRunner(backend, execute) {
       }
     })
     await Promise.all(lanes)
+    if (run.isStopped) return
+    passedOver.forEach((reason, request) => {
+      if (!attempted.has(request)) store().addRunResult({ ...skipped(request, reason), iteration })
+    })
   }
 
   async function start({ folderId, delayMs, stopOnFailure, parallel = 1, rows = [], iterations = 0, tagFilter = NO_TAG_FILTER }) {

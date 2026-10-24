@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
+import { Input } from "./ui/input"
 import { Notice, Panel, PanelBody, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
@@ -10,12 +11,14 @@ import { MarkdownField } from "./MarkdownField"
 import { AssertionEditor, ScriptEditor } from "./TestsPanel"
 import { isPlainObject, parseJSON } from "../lib/dataUtils"
 import { FOLDER_SETTINGS_TEXT as TEXT } from "../lib/folderSettingsText"
-import { AUTH_INHERIT, ROOT_SETTINGS_ID, hasActiveSettings, inheritedAuthSource, lineageOf, normalizeScopeSettings } from "../lib/inheritance"
-import { clearToken, obtainToken } from "../lib/oauth"
+import { AUTH_INHERIT, AUTH_NONE, ROOT_SETTINGS_ID, hasActiveSettings, inheritedAuthSource, lineageOf, normalizeScopeSettings } from "../lib/inheritance"
+import { cancelSignIn, clearToken, discoverIssuer, obtainToken } from "../lib/oauth"
+import { OAUTH_TEXT } from "../lib/oauthText"
 import { parseRows, serializeRows } from "../lib/rows"
 import { RESTRICTED } from "../lib/execution"
+import { MAX_TIMEOUT_MS, MIN_TIMEOUT_MS, TIMEOUT_MS } from "../lib/scripting/limits"
 import { environmentEntries, withEntries } from "../lib/variableScopes"
-import { useAppStore, variableTextFor } from "../store/appStore"
+import { findActiveEnvironment, useAppStore, variableTextFor } from "../store/appStore"
 
 const TAB_HEADERS = "headers"
 const TAB_AUTH = "auth"
@@ -25,7 +28,6 @@ const TAB_TESTS = "tests"
 const TAB_DOCS = "docs"
 const VIEW_PRE = "preScript"
 const VIEW_POST = "postScript"
-const NO_AUTH = "none"
 const VARIABLE_FEATURES = { enabled: false, secret: false, readOnly: false }
 const SCRIPT_VIEWS = [
   { value: VIEW_PRE, label: TEXT.preScript },
@@ -49,13 +51,36 @@ function VariablesTab({ variables, onChange }) {
   )
 }
 
-function ScriptTab({ settings, path, EditorComponent, onChange }) {
+const MS_PER_SECOND = 1000
+
+const timeLimitOf = (text) => Math.min(Math.round(Number(text) * MS_PER_SECOND) || 0, MAX_TIMEOUT_MS)
+
+function TimeLimitField({ value, onChange }) {
+  return (
+    <label className="ml-auto flex items-center gap-2 text-xs text-muted-foreground" title={TEXT.timeLimitNote}>
+      <span className="max-sm:sr-only">{TEXT.timeLimit}</span>
+      <Input
+        type="number"
+        min={MIN_TIMEOUT_MS / MS_PER_SECOND}
+        max={MAX_TIMEOUT_MS / MS_PER_SECOND}
+        value={value ? value / MS_PER_SECOND : ""}
+        placeholder={String(TIMEOUT_MS / MS_PER_SECOND)}
+        aria-label={TEXT.timeLimit}
+        onChange={(event) => onChange({ scriptTimeoutMs: timeLimitOf(event.target.value) })}
+        className="w-20"
+      />
+    </label>
+  )
+}
+
+function ScriptTab({ settings, path, isCollection, EditorComponent, onChange }) {
   const [view, setView] = useState(VIEW_PRE)
 
   return (
     <Panel>
       <Toolbar>
         <SegmentedControl label={TEXT.tabs.script} options={SCRIPT_VIEWS} value={view} onChange={setView} />
+        {isCollection && <TimeLimitField value={settings.scriptTimeoutMs} onChange={onChange} />}
       </Toolbar>
       <Notice>{TEXT.scriptNote}</Notice>
       <ScriptEditor
@@ -89,6 +114,7 @@ function DocsTab({ description, onChange }) {
 
 function useFolderAuthActions(backend, scopeId, auth, onChange) {
   const [tokenRequest, setTokenRequest] = useState(null)
+  const scopeVariables = () => variableTextFor(useAppStore.getState(), { folderId: scopeId, vars: "" })
 
   const getToken = async () => {
     if (useAppStore.getState().isRestricted) {
@@ -97,8 +123,9 @@ function useFolderAuthActions(backend, scopeId, auth, onChange) {
     }
     setTokenRequest({ isPending: true, error: "" })
     try {
-      const variables = variableTextFor(useAppStore.getState(), { folderId: scopeId, vars: "" })
-      const oauth2 = await obtainToken(backend, auth.oauth2, variables, {})
+      const environmentId = findActiveEnvironment(useAppStore.getState())?.id || ""
+      const onDevice = (device) => setTokenRequest({ isPending: true, error: "", device })
+      const oauth2 = await obtainToken(backend, auth.oauth2, scopeVariables(), {}, { environmentId, onDevice })
       onChange({ auth: { ...auth, oauth2 } })
       setTokenRequest(null)
     } catch (error) {
@@ -106,9 +133,21 @@ function useFolderAuthActions(backend, scopeId, auth, onChange) {
     }
   }
 
+  const discoverEndpoints = async () => {
+    setTokenRequest({ isPending: true, isDiscovering: true, error: "" })
+    try {
+      const oauth2 = await discoverIssuer(backend, auth.oauth2, scopeVariables(), {})
+      onChange({ auth: { ...auth, oauth2 } })
+      setTokenRequest({ isPending: false, error: "", notice: OAUTH_TEXT.discovered(oauth2.issuer) })
+    } catch (error) {
+      setTokenRequest({ isPending: false, error: error.message })
+    }
+  }
+
   const actions = {
     getToken,
-    cancelToken: () => backend.cancelAuthorization(),
+    discoverEndpoints,
+    cancelToken: () => cancelSignIn(backend),
     forgetToken: () => onChange({ auth: { ...auth, oauth2: clearToken(auth.oauth2) } }),
     oauthCallback: backend.oauthCallback,
   }
@@ -117,7 +156,7 @@ function useFolderAuthActions(backend, scopeId, auth, onChange) {
 
 function AuthTab({ backend, scopeId, auth, source, isCollection, onChange }) {
   const { tokenRequest, actions } = useFolderAuthActions(backend, scopeId, auth, onChange)
-  const inheritance = isCollection ? undefined : { source, noAuthValue: NO_AUTH, noAuthNote: TEXT.folderNoAuth }
+  const inheritance = isCollection ? undefined : { source, noAuthValue: AUTH_NONE, noAuthNote: TEXT.folderNoAuth }
   const shown = isCollection ? auth : { ...auth, type: auth.type || AUTH_INHERIT }
 
   return (
@@ -192,12 +231,12 @@ export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
             {isCollection ? <CollectionVariables /> : <VariablesTab variables={folder.variables} onChange={(variables) => patch({ variables })} />}
           </TabsContent>
           <TabsContent value={TAB_SCRIPT} className="h-full min-h-0">
-            <ScriptTab settings={settings} path={path} EditorComponent={EditorComponent} onChange={patch} />
+            <ScriptTab settings={settings} path={path} isCollection={isCollection} EditorComponent={EditorComponent} onChange={patch} />
           </TabsContent>
           <TabsContent value={TAB_TESTS} className="h-full min-h-0">
             <Panel>
               <Notice>{TEXT.testsNote}</Notice>
-              <AssertionEditor assertions={settings.assertions} onChange={(assertions) => patch({ assertions })} />
+              <AssertionEditor assertions={settings.assertions} onChange={(assertions) => patch({ assertions })} EditorComponent={EditorComponent} />
             </Panel>
           </TabsContent>
           <TabsContent value={TAB_DOCS} className="h-full min-h-0">

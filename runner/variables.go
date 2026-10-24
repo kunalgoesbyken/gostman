@@ -151,16 +151,27 @@ func requestScope(text string) variables {
 	return scope
 }
 
-func (v variables) update(before, after variables) {
-	for name, value := range after {
-		if !bytes.Equal(before[name], value) {
-			v[name] = value
-		}
-	}
-	for name := range before {
-		if _, kept := after[name]; !kept {
+const scopeSession = "session"
+
+type scopedWrites map[string]variables
+
+func isNull(value json.RawMessage) bool {
+	return bytes.Equal(bytes.TrimSpace(value), []byte("null"))
+}
+
+func (v variables) change(changes variables) {
+	for name, value := range changes {
+		if isNull(value) {
 			delete(v, name)
+			continue
 		}
+		v[name] = value
+	}
+}
+
+func (v variables) forget(changes variables) {
+	for name := range changes {
+		delete(v, name)
 	}
 }
 

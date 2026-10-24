@@ -1,3 +1,5 @@
+import { pluralize } from './dataUtils'
+
 export const WORKSPACE_TEXT = {
   localLabel: 'This computer',
   localHint: "The collection is saved in the app's data on this computer",
@@ -13,7 +15,6 @@ export const WORKSPACE_TEXT = {
   recent: 'Recent',
   current: 'Current',
   missing: 'Folder not found',
-  moreActions: (name) => `Actions for ${name}`,
   noWorkspaces: 'Folders you open are listed here, so you can switch between them.',
   thisComputer: 'This computer (no folder)',
   openFolder: 'Open folder',
@@ -46,4 +47,9 @@ export const WORKSPACE_TEXT = {
   renameFailed: 'Could not rename the workspace',
   forgetFailed: 'Could not remove the workspace',
   revealFailed: 'Could not open the folder in the file explorer',
+  diskReloaded: 'Files changed on disk were reloaded.',
+  diskReloadedWithProblems: (count) => `Files changed on disk were reloaded. ${pluralize(count, 'file')} could not be read; choose Reload from disk to see which.`,
+  diskChanged: 'This request changed on disk while you were editing it.',
+  keepMine: 'Keep my edits',
+  loadTheirs: 'Load from disk',
 }

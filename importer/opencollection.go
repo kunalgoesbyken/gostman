@@ -2,6 +2,7 @@ package importer
 
 import (
 	"fmt"
+	"path"
 	"sort"
 	"strings"
 
@@ -10,142 +11,328 @@ import (
 
 const (
 	itemFolder        = "folder"
+	itemGraphQL       = "graphql"
+	itemGrpc          = "grpc"
+	itemWebSocket     = "websocket"
+	itemWorkspace     = "workspace"
 	scriptBefore      = "before-request"
 	scriptAfter       = "after-response"
 	scriptTests       = "tests"
+	actionSetVariable = "set-variable"
 	collectionBundled = "OpenCollection"
+	flowPassword      = "resource_owner_password_credentials"
 )
 
 func (c *collector) readOpenCollection(doc document) {
-	root := object(doc.data)
-	info := object(root["info"])
-	name := cleanName(text(info["name"]), collectionBundled)
+	c.readOpenTree(doc, path.Dir(doc.file.Name))
+}
+
+func (c *collector) readOpenTree(doc document, root string) {
+	data := object(doc.data)
+	name := cleanName(text(object(data["info"])["name"]), collectionBundled)
 	c.read(name, FormatBruno, func() {
-		rootID := c.addFolder(name, "")
-		c.openItems(list(root["items"]), rootID, c.openScope(root, fmt.Sprintf(labelCollection, name)), 0)
-		for _, environment := range objects(root["environments"]) {
-			c.openEnvironment(environment)
+		paths := openPaths(list(data["items"]), "", 0)
+		ids, translation := runTargets(paths)
+		ctx := treeContext{root: root, dialect: translation, ids: ids}
+		since := c.mark()
+		rootID := c.addScopedFolder(name, "", c.collectionScope(c.openScope(ctx, data, fmt.Sprintf(labelCollection, name))))
+		c.openItems(ctx, list(data["items"]), rootID, "", 0)
+		var drafts []environmentDraft
+		for _, environment := range objects(data["environments"]) {
+			drafts = append(drafts, openEnvironment(environment, text(environment["name"])))
 		}
+		c.addBrunoEnvironments(drafts)
+		c.noteDotEnv(name, since)
 		c.summarizeScripts(brunoDialect, name)
 	})
 }
 
-func (c *collector) openItems(items []any, folderID string, inherited scope, depth int) {
-	if depth >= maxFolderDepth {
-		c.Warnings = appendUnique(c.Warnings, fmt.Sprintf(messageDepth, maxFolderDepth))
-		return
-	}
+func sortedItems(items []any) []map[string]any {
 	entries := objects(items)
 	sort.SliceStable(entries, func(i, j int) bool {
 		return sortKeyOf(object(entries[i]["info"])["seq"]) < sortKeyOf(object(entries[j]["info"])["seq"])
 	})
-	for _, item := range entries {
+	return entries
+}
+
+func openPaths(items []any, prefix string, depth int) []requestPath {
+	if depth >= maxFolderDepth {
+		return nil
+	}
+	var paths []requestPath
+	for _, item := range sortedItems(items) {
 		info := object(item["info"])
+		name := cleanName(text(info["name"]), untitledRequest)
 		if text(info["type"]) == itemFolder {
-			id := c.addFolder(text(info["name"]), folderID)
-			c.openItems(list(item["items"]), id, inherited.within(c.openScope(item, fmt.Sprintf(labelFolder, text(info["name"])))), depth+1)
+			paths = append(paths, openPaths(list(item["items"]), path.Join(prefix, name), depth+1)...)
 			continue
 		}
-		if described := object(item["http"]); described != nil {
-			c.openRequest(text(info["name"]), item, described, folderID, inherited)
+		paths = append(paths, requestPath{path: path.Join(prefix, name), name: name})
+	}
+	return paths
+}
+
+func (c *collector) openItems(ctx treeContext, items []any, folderID, prefix string, depth int) {
+	if depth >= maxFolderDepth {
+		c.warnDepth()
+		return
+	}
+	for _, item := range sortedItems(items) {
+		info := object(item["info"])
+		name := cleanName(text(info["name"]), untitledRequest)
+		if text(info["type"]) == itemFolder {
+			id := c.addScopedFolder(text(info["name"]), folderID, c.openScope(ctx, item, fmt.Sprintf(labelFolder, name)))
+			c.openItems(ctx, list(item["items"]), id, path.Join(prefix, name), depth+1)
 			continue
 		}
-		c.skip("%s: only HTTP requests are imported from OpenCollection", cleanName(text(info["name"]), untitledRequest))
+		c.openRequest(ctx, name, path.Join(prefix, name), item, folderID)
 	}
 }
 
-func (c *collector) openScope(item map[string]any, label string) scope {
-	var inherited scope
+func (c *collector) openScope(ctx treeContext, item map[string]any, label string) scope {
+	inherited := scope{description: describedText(item["docs"])}
 	described := object(item["request"])
 	inherited.headers = openRows(described["headers"])
 	inherited.vars = openRows(described["variables"])
-	if auth := object(described["auth"]); auth != nil {
-		converted, ok := c.openAuth(auth)
-		if ok {
+	if auth := described["auth"]; auth != nil {
+		if converted, ok := c.openAuth(auth); ok {
 			inherited.auth = &converted
 		}
 	}
-	pre, post := c.openScripts(append(objects(described["scripts"]), runtimeScripts(item)...), label)
-	inherited.pre, inherited.post = nonEmpty(pre), nonEmpty(post)
+	inherited.pre, inherited.post = c.openScripts(ctx.dialect, append(objects(described["scripts"]), runtimeScripts(item)...), label)
 	return inherited
 }
 
 func openRows(value any) []row {
 	var rows []row
 	for _, entry := range objects(value) {
-		rows = append(rows, row{Key: text(entry["name"]), Value: text(entry["value"]), Enabled: !flag(entry["disabled"])})
+		rows = append(rows, row{Key: text(entry["name"]), Value: openValue(entry["value"]), Enabled: !flag(entry["disabled"])})
 	}
 	return keyedRows(rows)
+}
+
+func openValue(value any) string {
+	if typed := object(value); typed != nil {
+		return text(typed["data"])
+	}
+	return text(value)
 }
 
 func runtimeScripts(item map[string]any) []map[string]any {
 	return objects(object(item["runtime"])["scripts"])
 }
 
-func (c *collector) openScripts(entries []map[string]any, label string) (string, string) {
-	var pre, post []string
+func (c *collector) openScripts(d *dialect, entries []map[string]any, label string) (string, string) {
+	var pre, post, hooks []string
 	for _, entry := range entries {
 		code := text(entry["code"])
-		switch text(entry["type"]) {
-		case scriptBefore:
-			pre = append(pre, c.translateScript(brunoDialect, label, stagePre, code))
-		case scriptAfter:
-			post = append(post, c.translateScript(brunoDialect, label, stageAfter, code))
-		case scriptTests:
-			post = append(post, c.translateScript(brunoDialect, label, stagePost, code))
+		switch kind := text(entry["type"]); {
+		case kind == scriptBefore:
+			pre = append(pre, c.translateScript(d, label, stagePre, code))
+		case kind == scriptAfter:
+			post = append(post, c.translateScript(d, label, stageAfter, code))
+		case kind == scriptTests:
+			post = append(post, c.translateScript(d, label, stagePost, code))
+		case strings.TrimSpace(code) != "":
+			hooks = append(hooks, kind)
 		}
+	}
+	if len(hooks) > 0 {
+		c.Warnings = append(c.Warnings, droppedScripts(label, hooks))
 	}
 	return joinScripts(pre), joinScripts(post)
 }
 
-func (c *collector) openRequest(name string, item, described map[string]any, folderID string, inherited scope) {
-	var params, pathParams []row
+func (c *collector) openRequest(ctx treeContext, name, location string, item map[string]any, folderID string) {
+	info := object(item["info"])
+	runtime := object(item["runtime"])
+	request := parts{
+		id:          ctx.ids[location],
+		name:        name,
+		description: describedText(item["docs"]),
+		tags:        texts(info["tags"]),
+		vars:        openRows(runtime["variables"]),
+	}
+	label := fmt.Sprintf(labelRequest, name)
+	request.preScript, request.postScript = c.openScripts(ctx.dialect, runtimeScripts(item), label)
+	request.assertions = c.openAssertions(name, runtime["assertions"])
+	var described map[string]any
+	switch kind := text(info["type"]); {
+	case object(item["http"]) != nil || kind == itemGraphQL && object(item["graphql"]) != nil:
+		described = object(item["http"])
+		if described == nil {
+			described = object(item["graphql"])
+		}
+		c.openHTTP(item, described, &request)
+	case kind == itemGrpc:
+		described = object(item["grpc"])
+		c.openGrpc(ctx, described, &request)
+	case kind == itemWebSocket:
+		described = object(item["websocket"])
+		socketParts(text(described["url"]), openSocketMessages(described["message"]), &request)
+		request.headers = openRows(described["headers"])
+	default:
+		c.skip(messageOpenItemType, name, kind)
+		return
+	}
+	if auth := described["auth"]; text(auth) != authInherit {
+		converted, supported := c.openAuth(auth)
+		request.auth = c.checkedAuth(name, converted, supported)
+	}
+	c.build(request, folderID)
+}
+
+func (c *collector) openHTTP(item, described map[string]any, request *parts) {
+	var pathParams []row
 	for _, entry := range objects(described["params"]) {
 		candidate := row{Key: text(entry["name"]), Value: text(entry["value"]), Enabled: !flag(entry["disabled"])}
 		if text(entry["type"]) == "path" {
 			pathParams = append(pathParams, candidate)
 		} else {
-			params = append(params, candidate)
+			request.params = append(request.params, candidate)
 		}
 	}
-	request := parts{
-		name:        name,
-		method:      text(described["method"]),
-		url:         applyPathParams(text(described["url"]), pathParams),
-		description: text(item["docs"]),
-		tags:        texts(object(item["info"])["tags"]),
-		headers:     openRows(described["headers"]),
-		params:      params,
+	address, pathVars := pathParamVariables(text(described["url"]), pathParams)
+	request.method = text(described["method"])
+	request.url = address
+	request.vars = append(request.vars, pathVars...)
+	request.headers = openRows(described["headers"])
+	if strings.Contains(request.url, "?") {
+		request.params = disabledOnly(request.params)
 	}
-	request.preScript, request.postScript = c.openScripts(runtimeScripts(item), fmt.Sprintf(labelRequest, cleanName(name, untitledRequest)))
-	if auth := object(described["auth"]); auth != nil {
-		converted, ok := c.openAuth(auth)
-		if ok {
-			request.auth = &converted
-		} else if text(auth["type"]) != "inherit" {
-			c.flag(messageAuthDropped, cleanName(name, untitledRequest))
-		}
-	}
-	c.openBody(object(described["body"]), &request)
-	request.assertions = openAssertions(object(item["runtime"])["assertions"])
-	c.build(request, inherited, folderID)
+	c.openBody(openBodyOf(described["body"]), request)
+	request.extractors = c.openExtractors(request.name, object(item["runtime"])["actions"])
+	settings := object(item["settings"])
+	request.options = c.settingsOptions(request.name, requestSettings{
+		timeout:         text(settings["timeout"]),
+		followRedirects: text(settings["followRedirects"]),
+		maxRedirects:    text(settings["maxRedirects"]),
+	})
+	request.examples = c.savedExamples(request.name, openExamples(item["examples"]))
 }
 
-func (c *collector) openAuth(auth map[string]any) (engine.Auth, bool) {
+func openBodyOf(value any) map[string]any {
+	variants := objects(value)
+	if variants == nil {
+		return object(value)
+	}
+	for _, variant := range variants {
+		if flag(variant["selected"]) {
+			return object(variant["body"])
+		}
+	}
+	if len(variants) > 0 {
+		return object(variants[0]["body"])
+	}
+	return nil
+}
+
+func (c *collector) openGrpc(ctx treeContext, described map[string]any, request *parts) {
+	call := grpcCall{
+		url:        text(described["url"]),
+		method:     text(described["method"]),
+		methodType: text(described["methodType"]),
+		protoPath:  text(described["protoFilePath"]),
+	}
+	if single, isText := described["message"].(string); isText {
+		call.messages = []string{single}
+	}
+	for _, message := range objects(described["message"]) {
+		call.messages = append(call.messages, text(message["message"]))
+	}
+	c.grpcParts(ctx.root, call, request)
+	request.headers = openRows(described["metadata"])
+}
+
+func openSocketMessages(value any) []socketMessage {
+	entries := objects(value)
+	if single := object(value); single != nil {
+		entries = []map[string]any{{"message": single}}
+	}
+	var messages []socketMessage
+	for index, entry := range entries {
+		name := cleanName(text(entry["title"]), fmt.Sprintf(untitledMessage, index+1))
+		messages = append(messages, socketMessage{Name: name, Body: openValue(entry["message"])})
+	}
+	return messages
+}
+
+func openExamples(value any) []exampleDraft {
+	var drafts []exampleDraft
+	for _, example := range objects(value) {
+		response := object(example["response"])
+		body := object(response["body"])
+		drafts = append(drafts, exampleDraft{
+			name:        text(example["name"]),
+			status:      text(response["status"]),
+			headers:     openRows(response["headers"]),
+			body:        text(body["data"]),
+			contentType: exampleContentType(text(body["type"])),
+		})
+	}
+	return drafts
+}
+
+func (c *collector) openExtractors(name string, actions any) string {
+	var extractors []extractor
+	for _, action := range objects(actions) {
+		if text(action["type"]) != actionSetVariable || text(action["phase"]) != scriptAfter {
+			continue
+		}
+		variable := text(object(action["variable"])["name"])
+		expression := text(object(action["selector"])["expression"])
+		rule, ok := responseExtractor(variable, expression, !flag(action["disabled"]))
+		if !ok {
+			c.skip(messagePostResponseVariable, name, variable, expression)
+			continue
+		}
+		extractors = append(extractors, rule)
+	}
+	return jsonList(extractors)
+}
+
+func (c *collector) openAuth(value any) (engine.Auth, bool) {
+	auth := object(value)
 	kind := text(auth["type"])
+	if auth == nil {
+		kind = text(value)
+	}
+	field := func(key string) string { return text(auth[key]) }
 	switch kind {
-	case "none":
+	case authNone, "":
 		return engine.Auth{}, true
 	case authBasic, authDigest:
-		return credentialsAuth(kind, text(auth["username"]), text(auth["password"])), true
+		return credentialsAuth(kind, field("username"), field("password")), true
 	case authBearer:
-		return bearerAuth(text(auth["token"])), true
+		return bearerAuth(field("token")), true
 	case authNTLM:
-		return ntlmAuth(text(auth["username"]), text(auth["password"]), text(auth["domain"])), true
+		return ntlmAuth(field("username"), field("password"), field("domain")), true
 	case authAPIKey:
-		return apiKeyAuth(text(auth["key"]), text(auth["value"]), text(auth["placement"]) == inQuery), true
+		return apiKeyAuth(field("key"), field("value"), field("placement") == inQuery), true
+	case authAWS:
+		return awsAuth(field("accessKeyId"), field("secretAccessKey"), field("sessionToken"), field("region"), field("service")), true
+	case authOAuth2:
+		return openOAuth2(auth)
 	}
 	return engine.Auth{}, false
+}
+
+func openOAuth2(auth map[string]any) (engine.Auth, bool) {
+	credentials := object(auth["credentials"])
+	owner := object(auth["resourceOwner"])
+	grant := text(auth["flow"])
+	if grant == flowPassword {
+		grant = grantPassword
+	}
+	pkce := object(auth["pkce"])
+	token := object(auth["tokenConfig"])
+	return oauth2Auth(oauth2Fields{
+		Grant: grant, AuthURL: text(auth["authorizationUrl"]), TokenURL: text(auth["accessTokenUrl"]),
+		ClientID: text(credentials["clientId"]), ClientSecret: text(credentials["clientSecret"]), Scope: text(auth["scope"]),
+		Username: text(owner["username"]), Password: text(owner["password"]), CallbackURL: text(auth["callbackUrl"]),
+		HeaderPrefix: text(object(token["placement"])["header"]), PKCE: pkce != nil && !flag(pkce["disabled"]),
+		SecretInBody: text(credentials["placement"]) != basicAuthHeader, SendIDToken: text(token["source"]) == idTokenSource,
+	})
 }
 
 func (c *collector) openBody(body map[string]any, request *parts) {
@@ -161,13 +348,10 @@ func (c *collector) openBody(body map[string]any, request *parts) {
 	case "xml":
 		request.body, request.bodyType = text(data), bodyXML
 	case "form-urlencoded":
-		request.body, request.bodyType = rowsJSON(openRows(data)), bodyForm
+		request.body, request.bodyType = jsonList(openRows(data)), bodyForm
 	case "multipart-form":
-		rows := openRows(data)
-		for index := range rows {
-			rows[index].Type = rowTypeText
-		}
-		request.body, request.bodyType = rowsJSON(rows), bodyMultipart
+		rows := openMultipart(data)
+		request.body, request.bodyType, request.needsFiles = jsonList(rows), bodyMultipart, anyFile(rows)
 	case "graphql":
 		graphql := object(data)
 		request.method = methodGraphQL
@@ -175,30 +359,91 @@ func (c *collector) openBody(body map[string]any, request *parts) {
 	case "file":
 		request.bodyType, request.needsFiles = bodyBinary, true
 	}
+	if query := text(body["query"]); query != "" {
+		request.method = methodGraphQL
+		request.graphqlQuery, request.graphqlVars = query, graphqlVariables(body["variables"])
+	}
 }
 
-func openAssertions(value any) string {
+func openMultipart(value any) []row {
+	var rows []row
+	for _, entry := range objects(value) {
+		candidate := row{Key: text(entry["name"]), Enabled: !flag(entry["disabled"]), Type: rowTypeText, ContentType: text(entry["contentType"])}
+		if text(entry["type"]) == rowTypeFile {
+			files := texts(entry["value"])
+			if len(files) == 0 {
+				files = []string{text(entry["value"])}
+			}
+			candidate.Type, candidate.FileName = rowTypeFile, baseName(files[0])
+		} else {
+			candidate.Value = text(entry["value"])
+		}
+		rows = append(rows, candidate)
+	}
+	return keyedRows(rows)
+}
+
+func (c *collector) openAssertions(name string, value any) string {
 	var assertions []assertion
 	for _, entry := range objects(value) {
 		operator, operand, _ := strings.Cut(strings.TrimSpace(text(entry["operator"])), " ")
-		mapped, known := brunoAssertOperators[operator]
-		if !known {
-			continue
-		}
 		if operand == "" {
 			operand = text(entry["value"])
 		}
-		assertions = append(assertions, assertion{Expression: text(entry["expression"]), Operator: mapped, Value: operand, Enabled: !flag(entry["disabled"])})
+		if rule, ok := c.assertionRule(name, text(entry["expression"]), operator, operand, !flag(entry["disabled"])); ok {
+			assertions = append(assertions, rule)
+		}
 	}
 	return jsonList(assertions)
 }
 
-func (c *collector) openEnvironment(environment map[string]any) {
-	variables := map[string]string{}
+func openEnvironment(environment map[string]any, name string) environmentDraft {
+	draft := environmentDraft{name: name, color: text(environment["color"]), extends: text(environment["extends"])}
+	if parents := texts(environment["extends"]); len(parents) > 0 {
+		draft.extends = parents[0]
+	}
 	for _, entry := range objects(environment["variables"]) {
-		if name := text(entry["name"]); name != "" && !flag(entry["disabled"]) {
-			variables[name] = text(entry["value"])
+		draft.variables = append(draft.variables, envVariable{
+			name:    text(entry["name"]),
+			value:   openValue(entry["value"]),
+			enabled: !flag(entry["disabled"]) && entry["enabled"] != false,
+			secret:  flag(entry["secret"]),
+		})
+	}
+	external := object(environment["externalSecrets"])
+	provider := text(external["type"])
+	for _, entry := range objects(external["variables"]) {
+		reference := firstText(entry, "path", "secretName", "vaultName", "projectId")
+		draft.variables = append(draft.variables, envVariable{
+			name:    text(entry["name"]),
+			enabled: !flag(entry["disabled"]),
+			ref:     &secretRef{Provider: provider, Path: reference},
+		})
+	}
+	return draft
+}
+
+func firstText(entry map[string]any, keys ...string) string {
+	for _, key := range keys {
+		if value := text(entry[key]); value != "" {
+			return value
 		}
 	}
-	c.addEnvironment(text(environment["name"]), variables)
+	return ""
+}
+
+func (c *collector) readBrunoEnvironments(doc document) {
+	root := object(doc.data)
+	entries := objects(root["environments"])
+	if entries == nil {
+		entries = []map[string]any{root}
+	}
+	name := fileStem(doc.file.Name)
+	c.read(name, FormatBruno, func() {
+		drafts := make([]environmentDraft, 0, len(entries))
+		for _, entry := range entries {
+			drafts = append(drafts, openEnvironment(entry, cleanName(text(entry["name"]), name)))
+		}
+		c.addDraftEnvironments(drafts)
+	})
 }

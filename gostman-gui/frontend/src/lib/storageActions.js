@@ -45,7 +45,11 @@ export function createStorageActions(backend) {
     return switched
   }
 
-  const switchAndReport = async (change) => showProblems((await switchStorage(change)).problems)
+  const switchAndReport = async (change) => {
+    const status = await switchStorage(change)
+    if (status.notice) store().showNotice(status.notice)
+    showProblems(status.problems)
+  }
 
   const pickThen = (use) => async () => {
     const path = await storage.pickFolder()
@@ -109,6 +113,14 @@ export function createStorageActions(backend) {
 
   const reopen = attempt(TEXT.openFailed, (path) => switchAndReport(() => storage.openFolder(path)))
 
+  const adoptDiskChange = attempt(TEXT.reloadFailed, async () => {
+    if (!store().hydrated) return
+    const [data, status] = await Promise.all([backend.load(), storage.status()])
+    store().hydrate(data)
+    adopt(status)
+    store().showNotice(status.problems.length > 0 ? TEXT.diskReloadedWithProblems(status.problems.length) : TEXT.diskReloaded)
+  })
+
   const cycle = (step) => {
     const reachable = store().workspaceStatus.workspaces.filter((entry) => !entry.missing)
     if (reachable.length < 2) return
@@ -119,6 +131,7 @@ export function createStorageActions(backend) {
 
   return {
     refresh,
+    followDisk: () => storage.onDiskChange(adoptDiskChange),
     cycle,
     openSwitcher: () => store().setWorkspaceMenuOpen(true),
     confirmTrust,

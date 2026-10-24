@@ -126,7 +126,7 @@ export function describeResponse(response, includeValues) {
 }
 
 const AUTH_SECRET_FIELDS = ['password', 'token', 'value']
-const OAUTH_SECRET_FIELDS = ['clientSecret', 'accessToken', 'refreshToken', 'password']
+const OAUTH_SECRET_FIELDS = ['clientSecret', 'accessToken', 'refreshToken', 'idToken', 'password']
 
 const fieldValues = (source, fields) => fields.map((field) => source?.[field]).filter(Boolean)
 

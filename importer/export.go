@@ -35,7 +35,7 @@ type exportTree struct {
 
 func Export(format string, collection workspace.Collection, options Options) ([]File, string, error) {
 	if format != ExportCurl && !options.IncludeSecrets {
-		collection = redactSecrets(collection)
+		collection, _ = RedactSecrets(collection)
 	}
 	var files []File
 	var err error

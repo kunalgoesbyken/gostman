@@ -19,6 +19,7 @@ var ignoredHARHeaders = map[string]bool{
 type Options struct {
 	SkipStatic     bool `json:"skipStatic"`
 	IncludeSecrets bool `json:"includeSecrets"`
+	InPlace        bool `json:"-"`
 }
 
 func (c *collector) readHAR(doc document, options Options) {
@@ -92,7 +93,7 @@ func (c *collector) harRequest(source map[string]any, rootID string, hosts map[s
 		description: cookieNote(source["cookies"]),
 	}
 	harBody(object(source["postData"]), &request)
-	c.build(request, scope{}, folderID)
+	c.build(request, folderID)
 }
 
 type harAddress struct {
@@ -167,7 +168,7 @@ func harBody(post map[string]any, request *parts) {
 	params := harParams(post["params"], bodyType)
 	switch {
 	case len(params) > 0 && (bodyType == bodyForm || bodyType == bodyMultipart):
-		request.body, request.bodyType = rowsJSON(params), bodyType
+		request.body, request.bodyType = jsonList(params), bodyType
 		request.needsFiles = anyFile(params)
 	case text(post["text"]) != "":
 		request.body, request.bodyType = text(post["text"]), bodyType

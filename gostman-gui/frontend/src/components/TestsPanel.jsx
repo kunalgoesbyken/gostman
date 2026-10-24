@@ -1,6 +1,8 @@
 import { Suspense, useMemo, useState } from "react"
-import { X } from "lucide-react"
+import { Braces, X } from "lucide-react"
+import { AddChecksAction } from "./AddChecksAction"
 import { AiButton } from "./AiButton"
+import { AI_TEXT } from "../lib/aiText"
 import { IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Input } from "./ui/input"
@@ -9,9 +11,11 @@ import { SegmentedControl } from "./ui/segmented"
 import { Select } from "./ui/select"
 import { EditorSkeleton } from "./ui/skeleton"
 import { ROW_GRID, ROW_STACK } from "./KeyValueEditor"
+import { SchemaDialog } from "./SchemaDialog"
 import {
-  BLANK_ASSERTION, OPERATORS, isBlankAssertion, operatorOf, parseAssertions, serializeAssertions,
+  BLANK_ASSERTION, OPERATORS, SCHEMA_OPERATOR, isBlankAssertion, operatorOf, parseAssertions, serializeAssertions,
 } from "../lib/scripting/assertions"
+import { SCHEMA_TEXT, TESTS_TEXT as TEXT } from "../lib/checksText"
 import { TASK_SCRIPT, TASK_TESTS } from "../lib/ai/tasks"
 import { cn } from "../lib/utils"
 
@@ -19,17 +23,7 @@ const VIEW_ASSERTIONS = "assertions"
 const VIEW_PRE = "preScript"
 const VIEW_POST = "postScript"
 
-const VIEWS = [
-  { value: VIEW_ASSERTIONS, label: "Assertions" },
-  { value: VIEW_PRE, label: "Pre-request script" },
-  { value: VIEW_POST, label: "Post-response script" },
-]
-
-const HINTS = {
-  [VIEW_ASSERTIONS]: "Use res.status, res.headers.name, res.body.path or res.responseTime; expected values can use {{variables}}. Checked rows are verified after every response.",
-  [VIEW_PRE]: "Runs before sending. Available: req, env, console, utils, sendRequest(), skipRequest(), stopExecution().",
-  [VIEW_POST]: "Runs after the response. Available: req, res, env, console, utils, test(name, fn), expect(value), sendRequest(), setNextRequest(name), visualize(template, data).",
-}
+const VIEWS = [VIEW_ASSERTIONS, VIEW_PRE, VIEW_POST].map((value) => ({ value, label: TEXT.views[value] }))
 
 const COLUMNS = "grid-cols-[1.5rem_minmax(0,1.25fr)_9rem_minmax(0,1fr)_1.75rem]"
 
@@ -37,20 +31,36 @@ function ColumnLabels() {
   return (
     <div className={cn(ROW_GRID, "h-6", COLUMNS)}>
       <span />
-      <SectionLabel className="truncate">Expression</SectionLabel>
-      <SectionLabel className="truncate">Check</SectionLabel>
-      <SectionLabel className="truncate">Expected</SectionLabel>
+      <SectionLabel className="truncate">{TEXT.expression}</SectionLabel>
+      <SectionLabel className="truncate">{TEXT.check}</SectionLabel>
+      <SectionLabel className="truncate">{TEXT.expected}</SectionLabel>
       <span />
     </div>
   )
 }
 
-function AssertionRow({ assertion, isDraft, onChange, onRemove }) {
+function ExpectedInput({ assertion, isUnary, placeholder = TEXT.expectedPlaceholder, onChange, className }) {
+  return (
+    <Input
+      value={isUnary ? "" : assertion.value}
+      title={assertion.value}
+      placeholder={isUnary ? "" : placeholder}
+      aria-label={TEXT.expectedValue}
+      spellCheck={false}
+      disabled={isUnary}
+      onChange={(event) => onChange({ value: event.target.value })}
+      className={cn("font-mono", className)}
+    />
+  )
+}
+
+function AssertionRow({ assertion, isDraft, onChange, onRemove, onEditSchema }) {
   const isUnary = Boolean(operatorOf(assertion).unary)
+  const isSchema = assertion.operator === SCHEMA_OPERATOR && onEditSchema
   return (
     <div className={cn(ROW_GRID, COLUMNS, !assertion.enabled && "opacity-50")}>
       <Checkbox
-        label="Verify this assertion"
+        label={TEXT.verify}
         checked={assertion.enabled}
         onChange={(event) => onChange({ enabled: event.target.checked })}
         className={cn(isDraft && "invisible")}
@@ -59,34 +69,33 @@ function AssertionRow({ assertion, isDraft, onChange, onRemove }) {
         value={assertion.expression}
         title={assertion.expression}
         placeholder="res.status"
-        aria-label="Expression"
+        aria-label={TEXT.expression}
         spellCheck={false}
         onChange={(event) => onChange({ expression: event.target.value })}
         className="font-mono"
       />
-      <Select value={assertion.operator} onChange={(event) => onChange({ operator: event.target.value })} aria-label="Check">
+      <Select value={assertion.operator} onChange={(event) => onChange({ operator: event.target.value })} aria-label={TEXT.check}>
         {OPERATORS.map((operator) => (
           <option key={operator.value} value={operator.value}>{operator.label}</option>
         ))}
       </Select>
-      <Input
-        value={isUnary ? "" : assertion.value}
-        title={assertion.value}
-        placeholder={isUnary ? "" : "200"}
-        aria-label="Expected value"
-        spellCheck={false}
-        disabled={isUnary}
-        onChange={(event) => onChange({ value: event.target.value })}
-        className="font-mono"
-      />
-      <IconButton label="Remove assertion" icon={X} onClick={onRemove} className={cn(isDraft && "invisible")} />
+      {isSchema ? (
+        <div className="flex min-w-0 items-center gap-1">
+          <ExpectedInput assertion={assertion} isUnary={false} placeholder={TEXT.schemaPlaceholder} onChange={onChange} className="min-w-0 flex-1" />
+          <IconButton label={SCHEMA_TEXT.edit} icon={Braces} onClick={onEditSchema} />
+        </div>
+      ) : (
+        <ExpectedInput assertion={assertion} isUnary={isUnary} onChange={onChange} />
+      )}
+      <IconButton label={TEXT.remove} icon={X} onClick={onRemove} className={cn(isDraft && "invisible")} />
     </div>
   )
 }
 
-export function AssertionEditor({ assertions, onChange }) {
+export function AssertionEditor({ assertions, onChange, EditorComponent }) {
   const rows = useMemo(() => parseAssertions(assertions), [assertions])
   const shown = [...rows, BLANK_ASSERTION]
+  const [editing, setEditing] = useState(null)
 
   const commit = (next) => onChange(serializeAssertions(next.filter((row) => !isBlankAssertion(row))))
   const patchRow = (index, patch) => commit(shown.map((row, at) => (at === index ? { ...row, ...patch } : row)))
@@ -104,10 +113,19 @@ export function AssertionEditor({ assertions, onChange }) {
               isDraft={index === rows.length}
               onChange={(patch) => patchRow(index, patch)}
               onRemove={() => removeRow(index)}
+              onEditSchema={EditorComponent && (() => setEditing(index))}
             />
           ))}
         </div>
       </div>
+      {editing !== null && (
+        <SchemaDialog
+          value={shown[editing].value}
+          EditorComponent={EditorComponent}
+          onSave={(value) => patchRow(editing, { value })}
+          onClose={() => setEditing(null)}
+        />
+      )}
     </PanelBody>
   )
 }
@@ -136,14 +154,19 @@ export function TestsPanel({ request, editorPath, onUpdateRequest, EditorCompone
   return (
     <Panel>
       <Toolbar>
-        <SegmentedControl label="Tests section" options={VIEWS} value={view} onChange={setView} />
-        <AiButton label={view === VIEW_ASSERTIONS ? "Generate assertions and tests with AI" : "Generate this script with AI"} onClick={askAi} className="ml-auto">
-          Generate with AI
-        </AiButton>
+        <SegmentedControl label={TEXT.sectionLabel} options={VIEWS} value={view} onChange={setView} />
+        <div className="ml-auto flex items-center gap-2">
+          {view === VIEW_ASSERTIONS && <AddChecksAction />}
+          {ai && (
+            <AiButton label={view === VIEW_ASSERTIONS ? AI_TEXT.buttons.generateTests : AI_TEXT.buttons.generateScript} onClick={askAi}>
+              {AI_TEXT.buttons.generate}
+            </AiButton>
+          )}
+        </div>
       </Toolbar>
-      <p className="shrink-0 border-b border-border px-3 py-2 text-xs text-muted-foreground">{HINTS[view]}</p>
+      <p className="shrink-0 border-b border-border px-3 py-2 text-xs text-muted-foreground">{TEXT.hints[view]}</p>
       {view === VIEW_ASSERTIONS ? (
-        <AssertionEditor assertions={request.assertions} onChange={(assertions) => onUpdateRequest({ assertions })} />
+        <AssertionEditor assertions={request.assertions} onChange={(assertions) => onUpdateRequest({ assertions })} EditorComponent={EditorComponent} />
       ) : (
         <ScriptEditor
           key={view}

@@ -29,6 +29,9 @@ const (
 
 	actionDescribe = "describe"
 	actionInvoke   = "invoke"
+	actionAuth     = "auth"
+
+	hostedBlockedHint = "The hosted web app cannot reach localhost or private network addresses. Use the desktop app, or run gostman relay and choose it under Preferences, Privacy."
 )
 
 var Policy = engine.Policy{
@@ -106,6 +109,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, describeMcp(r))
 	case query.Get("mcp") == actionInvoke:
 		writeJSON(w, invokeMcp(r))
+	case query.Get("mcp") == actionAuth:
+		writeJSON(w, discoverMcpAuthorization(r))
 	case query.Has("openapi"):
 		writeJSON(w, readOpenAPI(r))
 	case query.Has("link"):
@@ -126,6 +131,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, startAuthorization(r))
 	case query.Get("oauth") == "token":
 		writeJSON(w, fetchToken(r))
+	case query.Get("oauth") == "device":
+		writeJSON(w, startDeviceAuthorization(r))
+	case query.Get("oauth") == "discover":
+		writeJSON(w, discoverIssuer(r))
 	default:
 		writeJSON(w, send(r))
 	}
@@ -154,12 +163,19 @@ func publicHost(r *http.Request) string {
 	return r.Host
 }
 
+func explainBlocked(response engine.Response) engine.Response {
+	if response.Error == engine.ErrorBlocked {
+		response.Body = hostedBlockedHint + "\n\n" + response.Body
+	}
+	return response
+}
+
 func send(r *http.Request) engine.Response {
 	var request engine.Request
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return engine.Failure(engine.ErrorConfig, "the request could not be read: "+err.Error())
 	}
-	return engine.MarkProxied(engine.Send(r.Context(), request, Policy))
+	return explainBlocked(engine.MarkProxied(engine.Send(r.Context(), request, Policy)))
 }
 
 func streamEvents(w http.ResponseWriter, r *http.Request) {
@@ -182,7 +198,7 @@ func streamEvents(w http.ResponseWriter, r *http.Request) {
 		}
 		controller.Flush()
 	}
-	response := engine.Stream(r.Context(), request, Policy, write)
+	response := explainBlocked(engine.Stream(r.Context(), request, Policy, write))
 	write([]engine.StreamMessage{{Kind: engine.StreamResponse, Response: &response}})
 }
 
@@ -305,6 +321,22 @@ func fetchToken(r *http.Request) engine.Token {
 	return engine.FetchToken(r.Context(), exchange, Policy)
 }
 
+func startDeviceAuthorization(r *http.Request) engine.DeviceAuthorization {
+	var exchange engine.TokenExchange
+	if err := json.NewDecoder(r.Body).Decode(&exchange); err != nil {
+		return engine.DeviceAuthorization{Error: "the device sign-in request could not be read: " + err.Error()}
+	}
+	return engine.StartDeviceAuthorization(r.Context(), exchange, Policy)
+}
+
+func discoverIssuer(r *http.Request) engine.Discovery {
+	var query engine.DiscoveryQuery
+	if err := json.NewDecoder(r.Body).Decode(&query); err != nil {
+		return engine.Discovery{Error: "the discovery request could not be read: " + err.Error()}
+	}
+	return engine.Discover(r.Context(), query, Policy)
+}
+
 func describeGrpc(r *http.Request) describeResult {
 	var target rpc.Target
 	if err := json.NewDecoder(r.Body).Decode(&target); err != nil {
@@ -322,7 +354,7 @@ func invokeGrpc(r *http.Request) engine.Response {
 	if err := json.NewDecoder(r.Body).Decode(&call); err != nil {
 		return engine.Failure(engine.ErrorConfig, "the request could not be read: "+err.Error())
 	}
-	return rpc.Invoke(r.Context(), call, Policy)
+	return explainBlocked(rpc.Invoke(r.Context(), call, Policy))
 }
 
 func describeMcp(r *http.Request) catalogResult {
@@ -342,7 +374,15 @@ func invokeMcp(r *http.Request) engine.Response {
 	if err := json.NewDecoder(r.Body).Decode(&call); err != nil {
 		return engine.Failure(engine.ErrorConfig, "the request could not be read: "+err.Error())
 	}
-	return mcpclient.Invoke(r.Context(), call, Policy)
+	return explainBlocked(mcpclient.Invoke(r.Context(), call, Policy))
+}
+
+func discoverMcpAuthorization(r *http.Request) mcpclient.AuthPlan {
+	var query mcpclient.AuthQuery
+	if err := json.NewDecoder(r.Body).Decode(&query); err != nil {
+		return mcpclient.AuthPlan{Steps: []mcpclient.AuthStep{{Step: mcpclient.StepProbe, Outcome: mcpclient.OutcomeFailed, Detail: err.Error()}}}
+	}
+	return mcpclient.DiscoverAuthorization(r.Context(), query, Policy)
 }
 
 func writeJSON(w http.ResponseWriter, payload any) {

@@ -36,6 +36,14 @@ type Policy struct {
 	MinStreamRetry    time.Duration
 	RunCommands       bool
 	ReadFile          FileReader
+	OpenFile          FileOpener
+}
+
+func (p Policy) fileOpener() FileOpener {
+	if p.OpenFile == nil {
+		return refusingOpener(errAttachmentsUnavailable)
+	}
+	return p.OpenFile
 }
 
 func (p Policy) fileReader() FileReader {
@@ -70,17 +78,28 @@ func exchange(ctx context.Context, r Request, policy Policy, timeline *recorder)
 	ctx, cancel := context.WithTimeout(ctx, policy.Timeout(r.Options))
 	defer cancel()
 
-	outgoing, client, cookies, err := newExchange(ctx, r, policy, timeline)
+	setup, err := newExchange(ctx, r, policy, timeline)
 	if err != nil {
-		return Failure(ErrorConfig, err.Error())
+		return setupFailure(err)
 	}
-	incoming, err := client.Do(outgoing)
+	response := setup.perform(ctx, policy.ResponseLimit())
+	response.Unresolved = setup.unresolved
+	return response
+}
+
+func (s *exchangeSetup) perform(ctx context.Context, limit int64) Response {
+	incoming, err := s.client.Do(s.request)
 	if err != nil {
 		return classify(ctx, err)
 	}
 	defer incoming.Body.Close()
+	return collect(ctx, incoming, s.cookies, limit)
+}
 
-	return collect(ctx, incoming, cookies, policy.ResponseLimit())
+func setupFailure(err error) Response {
+	failure := Failure(ErrorConfig, err.Error())
+	failure.Unresolved = UnresolvedIn(err)
+	return failure
 }
 
 func collect(ctx context.Context, incoming *http.Response, cookies *cookieLog, limit int64) Response {
@@ -102,26 +121,35 @@ func collect(ctx context.Context, incoming *http.Response, cookies *cookieLog, l
 	return response
 }
 
-func newExchange(ctx context.Context, r Request, policy Policy, timeline *recorder) (*http.Request, *http.Client, *cookieLog, error) {
+type exchangeSetup struct {
+	request    *http.Request
+	client     *http.Client
+	cookies    *cookieLog
+	unresolved []string
+}
+
+func newExchange(ctx context.Context, r Request, policy Policy, timeline *recorder) (*exchangeSetup, error) {
 	if len(r.Body) > maxEncodedBody {
-		return nil, nil, nil, errBodyTooLarge
+		return nil, errBodyTooLarge
 	}
 	r, err := Resolve(r)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
-	prepared, err := prepare(r, policy.fileReader())
+	prepared, err := prepare(r, policy.fileReader(), policy.fileOpener())
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
+	prepared.releaseWith(ctx)
 	if len(prepared.body) > maxRequestBody {
-		return nil, nil, nil, errBodyTooLarge
+		return nil, errBodyTooLarge
 	}
 
 	outgoing, err := http.NewRequestWithContext(ctx, prepared.Method, prepared.URL, bytes.NewReader(prepared.body))
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
+	prepared.streamTo(outgoing)
 	for _, header := range prepared.Headers {
 		outgoing.Header.Add(header.Key, header.Value)
 	}
@@ -131,7 +159,7 @@ func newExchange(ctx context.Context, r Request, policy Policy, timeline *record
 
 	cookies := &cookieLog{now: time.Now()}
 	client := &http.Client{
-		Jar:       newJar(r.Cookies, cookies.now),
+		Jar:       newJar(sentCookies(r), cookies.now),
 		Transport: authRoute(r, outgoing.URL, timeline.wrap(policy.route(r.Options.InsecureTLS))),
 		CheckRedirect: func(next *http.Request, via []*http.Request) error {
 			if r.Options.NoFollowRedirects {
@@ -147,7 +175,7 @@ func newExchange(ctx context.Context, r Request, policy Policy, timeline *record
 			return nil
 		},
 	}
-	return outgoing, client, cookies, nil
+	return &exchangeSetup{outgoing, client, cookies, prepared.Unresolved}, nil
 }
 
 func dropCredentials(header http.Header) {
@@ -186,8 +214,10 @@ func (p Policy) ResponseLimit() int64 {
 	return defaultMaxResponse
 }
 
+const FailureStatus = "Error"
+
 func Failure(kind, message string) Response {
-	return Response{Status: "Error", Error: kind, Body: message, BodyEncoding: EncodingUTF8}
+	return Response{Status: FailureStatus, Error: kind, Body: message, BodyEncoding: EncodingUTF8}
 }
 
 func classify(ctx context.Context, err error) Response {

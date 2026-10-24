@@ -8,33 +8,34 @@ import { Select } from "./ui/select"
 import { ROW_GRID, ROW_STACK } from "./KeyValueEditor"
 import {
   BLANK_EXTRACTOR,
+  EXTRACTOR_SCOPES,
   EXTRACTOR_SOURCES,
   SOURCE_STATUS,
+  defaultExtractScope,
   evaluateExtractor,
   isBlankExtractor,
   isUsableResponse,
   parseExtractors,
   serializeExtractors,
 } from "../lib/chaining"
+import { EXTRACT_TEXT as TEXT } from "../lib/extractText"
 import { cn } from "../lib/utils"
+import { useAppStore } from "../store/appStore"
 
-const COLUMNS = "grid-cols-[1.5rem_minmax(0,1fr)_6.5rem_minmax(0,1fr)_minmax(0,1.25fr)_1.75rem]"
-const NO_RESPONSE = "Send the request to see a value"
-const FAILED_RESPONSE = "The last request failed"
-const SUMMARY = "Checked rows run after every response and save their value to the active environment, ready to use as {{variable_name}}."
+const COLUMNS = "grid-cols-[1.5rem_minmax(0,1fr)_6.5rem_minmax(0,1fr)_7rem_minmax(0,1.25fr)_1.75rem]"
 
 const hintFor = (source) => EXTRACTOR_SOURCES.find((candidate) => candidate.value === source).hint
 
 function describeRun(extraction) {
-  if (!extraction) return ""
-  if (!extraction.saved) return "Nothing was saved: the active environment's variables are not valid JSON."
-  if (extraction.names.length === 0) return "The last run produced no values."
-  return `Saved ${extraction.names.join(", ")} to the active environment.`
+  if (!extraction?.written) return ""
+  if (!extraction.saved) return TEXT.invalidEnvironment
+  const lines = EXTRACTOR_SCOPES.filter((scope) => extraction.written[scope]?.length > 0).map((scope) => TEXT.savedTo[scope](extraction.written[scope]))
+  return lines.length > 0 ? lines.join(" ") : TEXT.nothing
 }
 
 function outcomeFor(extractor, response) {
-  if (!response) return { reason: NO_RESPONSE }
-  if (!isUsableResponse(response)) return { reason: FAILED_RESPONSE }
+  if (!response) return { reason: TEXT.noResponse }
+  if (!isUsableResponse(response)) return { reason: TEXT.failedResponse }
   return evaluateExtractor(extractor, response)
 }
 
@@ -51,21 +52,20 @@ function ColumnLabels() {
   return (
     <div className={cn(ROW_GRID, "h-6", COLUMNS)}>
       <span />
-      <SectionLabel className="truncate" title="Variable">Variable</SectionLabel>
-      <SectionLabel className="truncate" title="From">From</SectionLabel>
-      <SectionLabel className="truncate" title="Path or name">Path or name</SectionLabel>
-      <SectionLabel className="truncate" title="Value in last response">Value in last response</SectionLabel>
+      {[TEXT.variable, TEXT.from, TEXT.path, TEXT.keepIn, TEXT.value].map((label) => (
+        <SectionLabel key={label} className="truncate" title={label}>{label}</SectionLabel>
+      ))}
       <span />
     </div>
   )
 }
 
-function ExtractorRow({ extractor, isDraft, response, onChange, onRemove }) {
+function ExtractorRow({ extractor, isDraft, response, fallbackScope, onChange, onRemove }) {
   const readsStatus = extractor.source === SOURCE_STATUS
   return (
     <div className={cn(ROW_GRID, COLUMNS, !extractor.enabled && "opacity-50")}>
       <Checkbox
-        label="Run this extractor"
+        label={TEXT.run}
         checked={extractor.enabled}
         onChange={(event) => onChange({ enabled: event.target.checked })}
         className={cn(isDraft && "invisible")}
@@ -73,13 +73,13 @@ function ExtractorRow({ extractor, isDraft, response, onChange, onRemove }) {
       <Input
         value={extractor.name}
         title={extractor.name}
-        placeholder="variable_name"
-        aria-label="Variable name"
+        placeholder={TEXT.namePlaceholder}
+        aria-label={TEXT.name}
         spellCheck={false}
         onChange={(event) => onChange({ name: event.target.value })}
         className="font-mono"
       />
-      <Select value={extractor.source} onChange={(event) => onChange({ source: event.target.value })} aria-label="Value source">
+      <Select value={extractor.source} onChange={(event) => onChange({ source: event.target.value })} aria-label={TEXT.source}>
         {EXTRACTOR_SOURCES.map((source) => (
           <option key={source.value} value={source.value}>{source.label}</option>
         ))}
@@ -88,22 +88,29 @@ function ExtractorRow({ extractor, isDraft, response, onChange, onRemove }) {
         value={readsStatus ? "" : extractor.expression}
         title={extractor.expression}
         placeholder={hintFor(extractor.source)}
-        aria-label="Path or name"
+        aria-label={TEXT.path}
         spellCheck={false}
         disabled={readsStatus}
         onChange={(event) => onChange({ expression: event.target.value })}
         className="font-mono"
       />
+      <Select value={extractor.scope || fallbackScope} onChange={(event) => onChange({ scope: event.target.value })} aria-label={TEXT.scope}>
+        {EXTRACTOR_SCOPES.map((scope) => (
+          <option key={scope} value={scope}>{TEXT.scopes[scope]}</option>
+        ))}
+      </Select>
       {isDraft ? <span /> : <Outcome outcome={outcomeFor(extractor, response)} />}
-      <IconButton label="Remove extractor" icon={X} onClick={onRemove} className={cn(isDraft && "invisible")} />
+      <IconButton label={TEXT.remove} icon={X} onClick={onRemove} className={cn(isDraft && "invisible")} />
     </div>
   )
 }
 
 export function ExtractPanel({ extractors, response, extraction, onChange, onRun }) {
+  const workspacePath = useAppStore((state) => state.workspaceStatus.path)
   const rows = useMemo(() => parseExtractors(extractors), [extractors])
   const shown = [...rows, BLANK_EXTRACTOR]
   const runSummary = describeRun(extraction)
+  const fallbackScope = defaultExtractScope(workspacePath)
 
   const commit = (next) => onChange(serializeExtractors(next.filter((row) => !isBlankExtractor(row))))
   const patchRow = (index, patch) => commit(shown.map((row, at) => (at === index ? { ...row, ...patch } : row)))
@@ -112,14 +119,14 @@ export function ExtractPanel({ extractors, response, extraction, onChange, onRun
   return (
     <Panel>
       <Toolbar>
-        <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground" title={SUMMARY}>{SUMMARY}</p>
+        <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground" title={TEXT.summary}>{TEXT.summary}</p>
         <Button variant="outline" size="sm" disabled={rows.length === 0 || !isUsableResponse(response)} onClick={onRun}>
           <Play />
-          Run now
+          {TEXT.runNow}
         </Button>
       </Toolbar>
       <PanelBody className="overflow-x-auto">
-        <div className="min-w-[36rem]">
+        <div className="min-w-[42rem]">
           <ColumnLabels />
           <div className={ROW_STACK}>
             {shown.map((row, index) => (
@@ -128,6 +135,7 @@ export function ExtractPanel({ extractors, response, extraction, onChange, onRun
                 extractor={row}
                 isDraft={index === rows.length}
                 response={response}
+                fallbackScope={fallbackScope}
                 onChange={(patch) => patchRow(index, patch)}
                 onRemove={() => removeRow(index)}
               />

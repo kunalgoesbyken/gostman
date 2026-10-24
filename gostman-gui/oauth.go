@@ -25,11 +25,13 @@ type AuthorizationResult struct {
 	Code         string `json:"code"`
 	CodeVerifier string `json:"codeVerifier"`
 	RedirectURI  string `json:"redirectUri"`
+	Issuer       string `json:"issuer"`
 }
 
 type callbackOutcome struct {
-	code string
-	err  error
+	code   string
+	issuer string
+	err    error
 }
 
 func loopbackListener(redirectURI string) (net.Listener, string, error) {
@@ -52,8 +54,11 @@ func loopbackListener(redirectURI string) (net.Listener, string, error) {
 	return listener, path, nil
 }
 
-func readCallback(query url.Values) callbackOutcome {
+func readCallback(query url.Values, issuer string) callbackOutcome {
+	received := query.Get("iss")
 	switch {
+	case issuer != "" && received != "" && received != issuer:
+		return callbackOutcome{err: fmt.Errorf("the sign-in answer names the issuer %q instead of %q, so it was discarded", received, issuer)}
 	case query.Get("error") != "":
 		reason := query.Get("error_description")
 		if reason == "" {
@@ -63,11 +68,11 @@ func readCallback(query url.Values) callbackOutcome {
 	case query.Get("code") == "":
 		return callbackOutcome{err: errors.New("the provider did not return an authorization code")}
 	default:
-		return callbackOutcome{code: query.Get("code")}
+		return callbackOutcome{code: query.Get("code"), issuer: received}
 	}
 }
 
-func awaitCallback(ctx context.Context, listener net.Listener, path, state string) (string, error) {
+func awaitCallback(ctx context.Context, listener net.Listener, path, state, issuer string) (callbackOutcome, error) {
 	outcomes := make(chan callbackOutcome, 1)
 	mux := http.NewServeMux()
 	mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +80,7 @@ func awaitCallback(ctx context.Context, listener net.Listener, path, state strin
 			http.Error(w, "this sign-in answer does not belong to a pending request", http.StatusBadRequest)
 			return
 		}
-		outcome := readCallback(r.URL.Query())
+		outcome := readCallback(r.URL.Query(), issuer)
 		message := "Signed in."
 		if outcome.err != nil {
 			message = "Sign-in failed: " + outcome.err.Error() + "."
@@ -93,12 +98,12 @@ func awaitCallback(ctx context.Context, listener net.Listener, path, state strin
 
 	select {
 	case outcome := <-outcomes:
-		return outcome.code, outcome.err
+		return outcome, outcome.err
 	case <-ctx.Done():
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-			return "", errors.New("no sign-in arrived within five minutes")
+			return callbackOutcome{}, errors.New("no sign-in arrived within five minutes")
 		}
-		return "", errors.New("the sign-in was cancelled")
+		return callbackOutcome{}, errors.New("the sign-in was cancelled")
 	}
 }
 
@@ -116,11 +121,11 @@ func (a *App) Authorize(config engine.OAuth2, variables string) (AuthorizationRe
 	defer a.release(authorizationKey)
 
 	wailsruntime.BrowserOpenURL(a.ctx, started.URL)
-	code, err := awaitCallback(ctx, listener, path, started.State)
+	outcome, err := awaitCallback(ctx, listener, path, started.State, config.Issuer)
 	if err != nil {
 		return AuthorizationResult{}, err
 	}
-	return AuthorizationResult{Code: code, CodeVerifier: started.CodeVerifier, RedirectURI: started.RedirectURI}, nil
+	return AuthorizationResult{Code: outcome.code, CodeVerifier: started.CodeVerifier, RedirectURI: started.RedirectURI, Issuer: outcome.issuer}, nil
 }
 
 func (a *App) CancelAuthorization() {
@@ -129,4 +134,12 @@ func (a *App) CancelAuthorization() {
 
 func (a *App) FetchToken(exchange engine.TokenExchange) engine.Token {
 	return engine.FetchToken(a.ctx, exchange, a.policy())
+}
+
+func (a *App) StartDeviceAuthorization(exchange engine.TokenExchange) engine.DeviceAuthorization {
+	return engine.StartDeviceAuthorization(a.ctx, exchange, a.policy())
+}
+
+func (a *App) DiscoverIssuer(query engine.DiscoveryQuery) engine.Discovery {
+	return engine.Discover(a.ctx, query, a.policy())
 }

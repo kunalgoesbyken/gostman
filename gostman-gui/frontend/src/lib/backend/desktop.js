@@ -3,6 +3,7 @@ import {
   CancelAuthorization,
   CancelRequest,
   CloseWorkspace,
+  CollectionNetwork,
   DeleteRequest,
   FetchLink,
   FetchToken,
@@ -10,6 +11,8 @@ import {
   InstalledFonts,
   DescribeGrpc,
   DescribeMcp,
+  DiscoverIssuer,
+  DiscoverMcpAuthorization,
   ExpandTexts,
   Import,
   InvokeGrpc,
@@ -27,6 +30,7 @@ import {
   RenameWorkspace,
   ResetData,
   RevealWorkspace,
+  SaveCollectionPassphrase,
   SaveCollectionSettings,
   SaveCollectionToFolder,
   SaveCookies,
@@ -40,11 +44,14 @@ import {
   ScanSecrets,
   ScriptModules,
   SendRequest,
+  StartDeviceAuthorization,
   TrustWorkspace,
   WorkspaceStatus,
 } from '../../../wailsjs/go/main/App'
+import { EventsOn } from '../../../wailsjs/runtime/runtime'
 import { WEB_APP_URL } from '../constants'
 import { desktopAi } from './desktopAi'
+import { createDesktopBackups, desktopUpdates } from './desktopBackups'
 import { desktopCapture } from './desktopCapture'
 import { desktopGit } from './desktopGit'
 import { desktopLoadTest } from './desktopLoadTest'
@@ -53,11 +60,16 @@ import { desktopSecrets } from './desktopSecrets'
 import { openDesktopSocket } from './desktopSocket'
 import { openDesktopStream } from './desktopStream'
 import { desktopWindowFrame } from './desktopWindowFrame'
+import { allowDiskAttachments } from '../attachments'
 import { toGrpcCall, toGrpcTarget } from '../grpc'
 import { toMcpCall, toMcpTarget } from '../mcp'
 import { withPreferredTimeout } from '../preferences'
 import { toEngineRequest } from '../request'
 import { failureResponse } from '../response'
+import { createStorageGate } from './storageGate'
+import { localRecords } from '../storage'
+
+const DISK_CHANGED_EVENT = 'workspace:changed'
 
 async function saveRequest(request) {
   const [saved] = await SaveRequests([request])
@@ -80,16 +92,12 @@ const invokeGrpc = answering((id, request, variables) => InvokeGrpc(id, toGrpcCa
 
 const invokeMcp = answering((id, request, variables) => InvokeMcp(id, toMcpCall(request, variables)))
 
-let storageChange = Promise.resolve()
+const storageGate = createStorageGate()
 
-function duringStorageChange(change) {
-  const result = change()
-  storageChange = result.then(() => {}, () => {})
-  return result
-}
+allowDiskAttachments((title) => PickFile(title))
 
 async function load() {
-  await storageChange
+  await storageGate.settled()
   return LoadData()
 }
 
@@ -108,6 +116,7 @@ export const desktopBackend = {
   describeGrpc: (request, variables) => DescribeGrpc(toGrpcTarget(request, variables)),
   invokeGrpc,
   describeMcp: (request, variables) => DescribeMcp(toMcpTarget(request, variables)),
+  discoverMcpAuthorization: (query) => DiscoverMcpAuthorization({ ...query, native: true }),
   runsLocalCommands: true,
   invokeMcp,
   openStream: openDesktopStream,
@@ -122,9 +131,12 @@ export const desktopBackend = {
   saveScopes: (globals, activeGlobalId, collectionVariables) => SaveScopes(globals, activeGlobalId, collectionVariables),
   saveCollectionSettings: (settings) => SaveCollectionSettings(settings),
   saveCookies: (cookies) => SaveCookies(cookies),
+  tabDrafts: localRecords(window.localStorage),
   network: {
     saveSettings: (settings) => SaveSettings(settings),
     pickFile: (title) => PickFile(title),
+    collection: () => CollectionNetwork(),
+    saveCollectionPassphrase: (host, certFile, passphrase) => SaveCollectionPassphrase(host, certFile, passphrase),
   },
   ai: desktopAi,
   mock: desktopMock,
@@ -144,13 +156,19 @@ export const desktopBackend = {
     reveal: (path) => RevealWorkspace(path),
     trust: () => TrustWorkspace(),
     scriptModules: () => ScriptModules(),
-    change: duringStorageChange,
+    change: storageGate.during,
+    onDiskChange: (listener) => EventsOn(DISK_CHANGED_EVENT, listener),
     git: desktopGit,
   },
+  backups: createDesktopBackups(storageGate),
+  relay: null,
+  updates: desktopUpdates,
   oauthCallback: OAUTH_CALLBACK,
   authorize: (config, variables) => Authorize(config, variables),
   cancelAuthorization: () => CancelAuthorization(),
   fetchToken: (exchange) => FetchToken(exchange),
+  startDeviceAuthorization: (exchange) => StartDeviceAuthorization(exchange),
+  discoverIssuer: (query) => DiscoverIssuer(query),
   reset: () => ResetData(),
   saveFile: (name, base64) => SaveFile(name, base64),
   listInstalledFonts: () => InstalledFonts(),

@@ -78,6 +78,10 @@ func (d disk) read(relative string) ([]byte, error) {
 	return os.ReadFile(target)
 }
 
+func (d disk) readListed(relative string) ([]byte, error) {
+	return os.ReadFile(filepath.Join(d.root, filepath.FromSlash(relative)))
+}
+
 func (d disk) exists(relative string) bool {
 	target, err := d.resolve(relative)
 	if err != nil {

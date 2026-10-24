@@ -36,10 +36,11 @@ export const guidePages = [
       },
       {
         heading: "Prices and plans",
-        paragraphs: ["Postman and Bruno change their plans, so check their own pricing pages before you decide."],
+        paragraphs: ["Postman, Bruno and Insomnia change their plans, so check their own pricing pages before you decide."],
         links: [
           { label: "Postman pricing", href: "https://www.postman.com/pricing/", brand: "postman" },
           { label: "Bruno pricing", href: "https://www.usebruno.com/pricing", brand: "bruno" },
+          { label: "Insomnia pricing", href: "https://insomnia.rest/pricing", brand: "insomnia" },
         ],
       },
     ],

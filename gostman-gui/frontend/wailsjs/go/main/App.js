@@ -18,6 +18,10 @@ export function AiKeyStored(arg1) {
   return window['go']['main']['App']['AiKeyStored'](arg1);
 }
 
+export function AiModels(arg1, arg2) {
+  return window['go']['main']['App']['AiModels'](arg1, arg2);
+}
+
 export function AiPreview(arg1, arg2, arg3) {
   return window['go']['main']['App']['AiPreview'](arg1, arg2, arg3);
 }
@@ -66,6 +70,10 @@ export function CloseWorkspace() {
   return window['go']['main']['App']['CloseWorkspace']();
 }
 
+export function CollectionNetwork() {
+  return window['go']['main']['App']['CollectionNetwork']();
+}
+
 export function DeleteRequest(arg1) {
   return window['go']['main']['App']['DeleteRequest'](arg1);
 }
@@ -80,6 +88,14 @@ export function DescribeGrpc(arg1) {
 
 export function DescribeMcp(arg1) {
   return window['go']['main']['App']['DescribeMcp'](arg1);
+}
+
+export function DiscoverIssuer(arg1) {
+  return window['go']['main']['App']['DiscoverIssuer'](arg1);
+}
+
+export function DiscoverMcpAuthorization(arg1) {
+  return window['go']['main']['App']['DiscoverMcpAuthorization'](arg1);
 }
 
 export function ExpandTexts(arg1, arg2) {
@@ -226,8 +242,16 @@ export function InvokeMcp(arg1, arg2) {
   return window['go']['main']['App']['InvokeMcp'](arg1, arg2);
 }
 
+export function LatestRelease() {
+  return window['go']['main']['App']['LatestRelease']();
+}
+
 export function LintSpec(arg1) {
   return window['go']['main']['App']['LintSpec'](arg1);
+}
+
+export function ListBackups() {
+  return window['go']['main']['App']['ListBackups']();
 }
 
 export function LoadData() {
@@ -252,6 +276,10 @@ export function MockStatus() {
 
 export function OpenAPI(arg1) {
   return window['go']['main']['App']['OpenAPI'](arg1);
+}
+
+export function OpenBackupsFolder() {
+  return window['go']['main']['App']['OpenBackupsFolder']();
 }
 
 export function OpenWorkspace(arg1) {
@@ -298,12 +326,20 @@ export function ResolveSecretReferences(arg1) {
   return window['go']['main']['App']['ResolveSecretReferences'](arg1);
 }
 
+export function RestoreBackup(arg1) {
+  return window['go']['main']['App']['RestoreBackup'](arg1);
+}
+
 export function RevealWorkspace(arg1) {
   return window['go']['main']['App']['RevealWorkspace'](arg1);
 }
 
 export function RunLoadTest(arg1, arg2) {
   return window['go']['main']['App']['RunLoadTest'](arg1, arg2);
+}
+
+export function SaveCollectionPassphrase(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SaveCollectionPassphrase'](arg1, arg2, arg3);
 }
 
 export function SaveCollectionSettings(arg1) {
@@ -392,6 +428,10 @@ export function SetSecretConnectionEnabled(arg1, arg2) {
 
 export function StartCapture(arg1) {
   return window['go']['main']['App']['StartCapture'](arg1);
+}
+
+export function StartDeviceAuthorization(arg1) {
+  return window['go']['main']['App']['StartDeviceAuthorization'](arg1);
 }
 
 export function StartMock(arg1, arg2, arg3) {

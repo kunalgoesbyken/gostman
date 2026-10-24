@@ -163,11 +163,11 @@ The footer of the menu has these actions:
 | Action | Effect |
 | --- | --- |
 | Trust this folder | Shown only for a restricted folder |
-| Open folder | Picks a folder to use as the collection |
-| Save collection to folder | Writes the current collection into a folder you pick |
+| Open folder | Picks a folder to use as the collection. An empty folder becomes a new collection; a folder that already holds other files, such as a repository root, gets the collection in a `gostman` folder inside it |
+| Save collection to folder | Writes the current collection into a folder you pick, or into a new `gostman` folder inside it when it already holds other files |
 | Clone repository | Asks for a repository address, then a folder to clone into |
 | Git | Opens the Git panel; needs an open folder |
-| Reload from disk | Rereads the folder; needs an open folder |
+| Reload from disk | Rereads the folder at once; changes made outside the app are also picked up by themselves within a few seconds. Needs an open folder |
 | Show N unreadable files | Lists files that could not be read; shown only when there are some |
 | Close folder | Returns to app storage; needs an open folder |
 

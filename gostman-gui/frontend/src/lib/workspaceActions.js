@@ -6,22 +6,26 @@ import {
 import { createCaptureActions } from './captureSession'
 import { createLoadTestActions } from './loadTestSession'
 import { generateAllSnippets } from './codeGenerator'
-import { countActiveRequests, sanitizeImport, withoutActiveRequests } from './importExport'
+import { activeKindsOf, countActiveRequests, sanitizeImport, withoutActiveRequests } from './importExport'
 import { pluralize } from './dataUtils'
 import { createExampleActions } from './exampleActions'
 import { createImporterClient } from './importerClient'
 import { createScanClient } from './scanClient'
 import { RESTRICTED, applyExtractors, createExecutor } from './execution'
 import { introspectionRequest, readSchema } from './graphqlSchema'
-import { clearToken, obtainToken } from './oauth'
+import { cancelSignIn, clearToken, discoverIssuer, obtainToken } from './oauth'
+import { OAUTH_TEXT } from './oauthText'
 import { isGrpcRequest, serializeProtoFiles } from './grpc'
 import { withInheritance } from './inheritance'
 import { askToRun, needsApproval } from './localCommands'
 import { isLocalCommand, isMcpRequest } from './mcp'
+import { retryStep, signInToMcp } from './mcpAuth'
+import { compareTools, rememberTools } from './mcpChecks'
 import { createMockActions } from './mockServer'
+import { withoutPassphrases } from './network'
 import { STEP_CHECK, STEP_RUN, STEP_SAVE, STEP_SEND, STEP_VARIABLE } from './onboarding'
 import { getPreferences } from './preferences'
-import { normalizeRequest } from './request'
+import { AUTH_OAUTH2, normalizeRequest } from './request'
 import { promptInstall } from './pwa'
 import { SAMPLE_REQUEST } from './welcome'
 import { isRequestDirty } from './requestChanges'
@@ -31,20 +35,24 @@ import { clientUrl } from './sharedLink'
 import { createRunner } from './runner'
 import { buildReportPage } from './runReport'
 import { createSocketActions, isSocketAddress } from './socketSessions'
+import { TESTS_PANEL } from './requestSections'
 import { createSpecActions } from './specActions'
 import { createStorageActions } from './storageActions'
+import { createBackupActions } from './backupActions'
 import { createTabActions } from './tabActions'
 import { createTreeActions } from './treeActions'
 import { ROW_REQUEST } from './collectionTree'
 import { describeCounts } from './importCounts'
 import { DATA_TEXT } from './dataText'
+import { markDataDeleted } from './storage'
+import { ACTIVE_IMPORT_TEXT } from './importText'
 import { countImported } from './importSummary'
-import { selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
+import { SCOPE_GLOBAL } from './variableScopes'
+import { findActiveEnvironment, selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
 
-const UNRECORDED_ERRORS = ['config', 'cancelled']
+const UNRECORDED_ERRORS = ['config', 'script', 'cancelled']
 const EXPORT_TAB = 'export'
 const SHARE_TAB = 'share'
-const ACTIVE_CONTENT_PROMPT = 'in this file include scripts, OAuth 2.0 settings, local MCP commands or {{$file(...)}} placeholders that send files from this computer. These run when a request is sent and can read your variables, so only import them from a source you trust. Cancel imports everything else without them.'
 const DESTRUCTIVE = 'destructive'
 const SAVE_FAILURE = 'Could not save the request'
 const NO_GRPC_CODE = 'Code generation covers HTTP requests. A gRPC call has no equivalent snippet yet.'
@@ -52,9 +60,9 @@ const NO_MCP_CODE = 'Code generation covers HTTP requests. An MCP tool call has 
 
 const store = () => useAppStore.getState()
 const activeTab = () => selectActiveTab(store())
-const TESTS_PANEL = 'tests'
 const tabById = (tabId) => store().tabs.find((candidate) => candidate.id === tabId)
 const activeVariables = () => selectActiveVariables(store())
+const activeEnvironmentId = () => findActiveEnvironment(store())?.id || ''
 const messageOf = (error) => error?.message || String(error)
 const warn = (title, error) => store().showAlert(title, messageOf(error), 'OK', 'warning')
 const quoted = (name) => `"${name}"`
@@ -122,9 +130,23 @@ export function createWorkspaceActions(backend) {
       return
     }
     store().patchTab(tab.id, { tokenRequest: { isPending: true, error: '' } })
+    const onDevice = (device) => store().patchTab(tab.id, { tokenRequest: { isPending: true, error: '', device } })
     try {
-      setToken(tab.id, await obtainToken(backend, auth.oauth2, activeVariables(), options))
+      setToken(tab.id, await obtainToken(backend, auth.oauth2, activeVariables(), options, { environmentId: activeEnvironmentId(), onDevice }))
       store().patchTab(tab.id, { tokenRequest: null })
+    } catch (error) {
+      store().patchTab(tab.id, { tokenRequest: { isPending: false, error: messageOf(error) } })
+    }
+  }
+
+  async function discoverEndpoints() {
+    const tab = activeTab()
+    const { auth, options } = tab.request
+    store().patchTab(tab.id, { tokenRequest: { isPending: true, isDiscovering: true, error: '' } })
+    try {
+      const oauth2 = await discoverIssuer(backend, auth.oauth2, activeVariables(), options)
+      setToken(tab.id, oauth2)
+      store().patchTab(tab.id, { tokenRequest: { isPending: false, error: '', notice: OAUTH_TEXT.discovered(oauth2.issuer) } })
     } catch (error) {
       store().patchTab(tab.id, { tokenRequest: { isPending: false, error: messageOf(error) } })
     }
@@ -158,6 +180,18 @@ export function createWorkspaceActions(backend) {
     return askToRun(store().showConfirm, request, activeVariables())
   }
 
+  async function describeMcpServer(tabId) {
+    const { request } = tabById(tabId)
+    try {
+      const catalog = await backend.describeMcp(withInheritance(store(), request), activeVariables())
+      const changes = compareTools(catalog)
+      if (!changes || changes.firstSeen) rememberTools(catalog)
+      return { ...catalog, changes }
+    } catch (error) {
+      return { error: messageOf(error) }
+    }
+  }
+
   async function loadMcpCatalog() {
     const tab = activeTab()
     if (store().isRestricted && isLocalCommand(tab.request)) {
@@ -166,12 +200,43 @@ export function createWorkspaceActions(backend) {
     }
     if (!(await mayRunCommand(tab.request))) return
     store().patchTab(tab.id, { mcpCatalog: { loading: true } })
+    store().patchTab(tab.id, { mcpCatalog: await describeMcpServer(tab.id) })
+  }
+
+  function acceptMcpTools() {
+    const tab = activeTab()
+    rememberTools(tab.mcpCatalog)
+    store().patchTab(tab.id, { mcpCatalog: { ...tab.mcpCatalog, changes: null } })
+  }
+
+  async function signInToMcpServer() {
+    const tabId = activeTab().id
+    const showSteps = (steps, running = true) => {
+      if (tabById(tabId)) store().patchTab(tabId, { mcpAuth: { steps, running } })
+    }
+    if (store().isRestricted) {
+      showSteps([{ step: 'probe', outcome: 'failed', detail: RESTRICTED }], false)
+      return
+    }
+    showSteps([])
     try {
-      store().patchTab(tab.id, { mcpCatalog: await backend.describeMcp(withInheritance(store(), tab.request), activeVariables()) })
+      const request = withInheritance(store(), tabById(tabId).request)
+      const oauth2 = await signInToMcp(backend, request, activeVariables(), showSteps)
+      const steps = tabById(tabId)?.mcpAuth?.steps ?? []
+      if (!oauth2 || !tabById(tabId)) {
+        showSteps(steps, false)
+        return
+      }
+      store().updateTabRequest(tabId, { auth: { ...tabById(tabId).request.auth, type: AUTH_OAUTH2, oauth2: { ...oauth2, tokenEnvironment: activeEnvironmentId() } } })
+      const catalog = await describeMcpServer(tabId)
+      store().patchTab(tabId, { mcpCatalog: catalog })
+      showSteps([...steps, retryStep(catalog)], false)
     } catch (error) {
-      store().patchTab(tab.id, { mcpCatalog: { error: messageOf(error) } })
+      showSteps([...(tabById(tabId)?.mcpAuth?.steps ?? []), { step: 'probe', outcome: 'failed', detail: messageOf(error) }], false)
     }
   }
+
+  const closeMcpSignIn = () => store().patchTab(activeTab().id, { mcpAuth: null })
 
   async function setGrpcProtos(files) {
     const tab = activeTab()
@@ -202,7 +267,7 @@ export function createWorkspaceActions(backend) {
 
   const saveSettings = async (settings) => {
     await backend.network.saveSettings(settings)
-    store().setSettings(settings)
+    store().setSettings(withoutPassphrases(settings))
   }
 
   function closeRunner() {
@@ -263,16 +328,22 @@ export function createWorkspaceActions(backend) {
     store().mergeFolders(folders)
     store().adoptCollectionSettings(data.settings)
     const skippedEnvironments = store().mergeEnvironments(data.environments)
-    const variablesMerged = store().mergeActiveVariables(data.variables)
-    const notes = [
-      ...(variablesMerged ? [] : ['Variables were skipped because the active environment is not valid JSON.']),
-      ...skippedEnvironments.map((name) => `Environment ${quoted(name)} was skipped because its variables are not valid JSON.`),
+    const skippedGlobals = store().mergeEnvironments(data.globals, SCOPE_GLOBAL)
+    const variablesMerged = store().mergeCollectionVariables(data.variables)
+    const warnings = [
+      ...(variablesMerged ? [] : ['Collection variables were skipped because the existing collection variables are not valid JSON.']),
+      ...[...skippedEnvironments, ...skippedGlobals].map((name) => `Environment ${quoted(name)} was skipped because its variables are not valid JSON.`),
       ...data.warnings,
     ]
     const counts = countImported(data)
-    const merged = { ...counts, environments: counts.environments - skippedEnvironments.length, variables: variablesMerged ? counts.variables : 0 }
+    const merged = {
+      ...counts,
+      environments: counts.environments - skippedEnvironments.length,
+      globals: counts.globals - skippedGlobals.length,
+      variables: variablesMerged ? counts.variables : 0,
+    }
     const summary = `Imported ${describeCounts(merged)}.`
-    store().showAlert('Import complete', [summary, ...notes].join('\n'), 'OK', notes.length > 0 ? 'warning' : 'success')
+    store().showAlert('Import complete', [summary, ...data.notes, ...warnings].join('\n'), 'OK', warnings.length > 0 ? 'warning' : 'success')
   })
 
   const importData = attempt('Import failed', (imported) => {
@@ -280,13 +351,14 @@ export function createWorkspaceActions(backend) {
     const data = sanitizeImport(imported, existing)
     const activeCount = countActiveRequests(data)
     if (activeCount === 0) return addImported(data)
+    const kinds = activeKindsOf(data)
     return store().showConfirm(
-      'Import scripts and sign-in settings?',
-      `${pluralize(activeCount, 'item')} ${ACTIVE_CONTENT_PROMPT}`,
+      ACTIVE_IMPORT_TEXT.title(kinds),
+      ACTIVE_IMPORT_TEXT.message(pluralize(activeCount, 'item'), kinds),
       () => addImported(data),
       () => addImported(withoutActiveRequests(data)),
       'default',
-      'Import them',
+      ACTIVE_IMPORT_TEXT.confirm,
     )
   })
 
@@ -320,6 +392,7 @@ export function createWorkspaceActions(backend) {
     await ai.forgetEverything()
     await backend.reset()
     useAppStore.persist.clearStorage()
+    markDataDeleted()
     window.location.reload()
   })
 
@@ -408,7 +481,7 @@ export function createWorkspaceActions(backend) {
     )
   }
 
-  const ai = createAiActions(backend, { importData })
+  const ai = createAiActions(backend, { importData, openapi })
   ai.load()
   const storageActions = createStorageActions(backend)
   const tree = createTreeActions(backend, attempt)
@@ -512,14 +585,18 @@ export function createWorkspaceActions(backend) {
     loadTest,
     secrets: backend.secrets,
     storage: storageActions,
+    backups: createBackupActions(backend),
     runExtractors,
     getToken,
     forgetToken,
-    cancelToken: () => backend.cancelAuthorization(),
+    discoverEndpoints,
+    cancelToken: () => cancelSignIn(backend),
     oauthCallback: backend.oauthCallback,
     canConfigureNetwork: Boolean(backend.network),
     saveSettings,
     pickFile: (title) => backend.network.pickFile(title),
+    collectionNetwork: () => backend.network.collection(),
+    saveCollectionPassphrase: (host, certFile, passphrase) => backend.network.saveCollectionPassphrase(host, certFile, passphrase),
     openRunner: (folderId) => store().openRunner(folderId),
     openFolderSettings: (folderId) => store().openFolderSettings(folderId),
     closeRunner,
@@ -529,6 +606,9 @@ export function createWorkspaceActions(backend) {
     loadSchema,
     loadGrpcSchema,
     loadMcpCatalog,
+    acceptMcpTools,
+    signInToMcpServer,
+    closeMcpSignIn,
     setGrpcProtos,
     save,
     generateCode,

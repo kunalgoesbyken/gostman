@@ -1,8 +1,8 @@
-import { memo, lazy, Suspense, useEffect, useMemo } from "react"
+import { memo, lazy, Suspense, useEffect, useMemo, useRef } from "react"
 import { Bookmark, CornerLeftUp } from "lucide-react"
 import { Button } from "./ui/button"
 import { Panel, Toolbar } from "./ui/panel"
-import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
+import { OverflowTabsList, TabCount, Tabs, TabsContent } from "./ui/tabs"
 import { SkeletonLines } from "./ui/skeleton"
 import { AuthPanel } from "./AuthPanel"
 import { BodyPanel } from "./BodyPanel"
@@ -11,20 +11,26 @@ import { ParamsPanel } from "./ParamsPanel"
 import { SettingsPanel } from "./SettingsPanel"
 import { ExtractPanel } from "./ExtractPanel"
 import { TestsPanel } from "./TestsPanel"
+import { useAiEnabled } from "../lib/ai/session"
 import { TASK_DOCS } from "../lib/ai/tasks"
 import { BODY_FORM, BODY_MULTIPART, BODY_NONE } from "../lib/body"
 import { parseExtractors } from "../lib/chaining"
 import { parseExamples } from "../lib/examples"
 import { FOLDER_SETTINGS_TEXT as INHERIT_TEXT } from "../lib/folderSettingsText"
 import { GRAPHQL_METHOD } from "../lib/graphqlSchema"
-import { GRPC_METHOD, GRPC_PANEL } from "../lib/grpc"
+import { GRPC_PANEL, isBlankMessage } from "../lib/grpc"
 import { AUTH_INHERIT, countInheritedHeaders, inheritedAuthSource, lineageOf } from "../lib/inheritance"
-import { MCP_METHOD, MCP_PANEL } from "../lib/mcp"
+import { MCP_PANEL } from "../lib/mcp"
 import { readParamRows } from "../lib/queryString"
+import {
+  AUTH_PANEL, BODY_PANEL, EXTRACT_PANEL, GRAPHQL_PANEL, HEADERS_PANEL, PARAMS_PANEL, SETTINGS_PANEL, TESTS_PANEL, VARS_PANEL,
+  hasProtocolPanel, leadSection, requestKind, requestSections,
+} from "../lib/requestSections"
+import { REQUEST_TABS_TEXT as TEXT } from "../lib/requestTabsText"
 import { countActiveAssertions } from "../lib/scripting/assertions"
 import { countSentRows, parseRows, serializeRows } from "../lib/rows"
-import { SOCKET_OPEN, SOCKET_PANEL, isSocketAddress, selectSession, useSocketStore } from "../lib/socketSessions"
-import { DEFAULT_REQUEST_PANEL, useAppStore } from "../store/appStore"
+import { SOCKET_IDLE, SOCKET_OPEN, SOCKET_PANEL, isSocketAddress, selectSession, useSocketStore } from "../lib/socketSessions"
+import { useAppStore } from "../store/appStore"
 
 const GraphQLPanel = lazy(() => import("./GraphQLPanel").then((module) => ({ default: module.GraphQLPanel })))
 const GrpcPanel = lazy(() => import("./GrpcPanel").then((module) => ({ default: module.GrpcPanel })))
@@ -35,7 +41,7 @@ const ROW_BODY_TYPES = [BODY_FORM, BODY_MULTIPART]
 const PANEL_CLASS = "h-full min-h-0"
 
 function PanelFallback() {
-  return <SkeletonLines label="Loading" />
+  return <SkeletonLines label={TEXT.loading} />
 }
 
 function TabBadge({ value }) {
@@ -59,6 +65,31 @@ function bodyBadge(body, bodyType) {
   return body.trim() !== ""
 }
 
+const holdsGrpcCall = (request) => request.grpcMethod.trim() !== "" || !isBlankMessage(request.grpcMessage)
+
+const filledSections = (flags) => new Set(Object.keys(flags).filter((section) => flags[section]))
+
+function sectionItem(value, badge, mark) {
+  const label = TEXT.labels[value]
+  return {
+    value,
+    label,
+    marked: Boolean(badge),
+    detail: badge ? <TabBadge value={badge} /> : null,
+    content: <>{label}<TabBadge value={badge} />{mark}</>,
+  }
+}
+
+function useLeadOnKindChange(kind, setActivePanel) {
+  const previousKind = useRef(null)
+  useEffect(() => {
+    const isMount = previousKind.current === null
+    if (previousKind.current === kind) return
+    previousKind.current = kind
+    if (!isMount || hasProtocolPanel(kind)) setActivePanel(leadSection(kind))
+  }, [kind, setActivePanel])
+}
+
 export const RequestTabs = memo(function RequestTabs({
   tabId,
   activeRequest,
@@ -77,27 +108,16 @@ export const RequestTabs = memo(function RequestTabs({
 }) {
   const activePanel = useAppStore((state) => state.requestPanel)
   const setActivePanel = useAppStore((state) => state.setRequestPanel)
-  const isSocketOpen = useSocketStore((state) => selectSession(tabId)(state).status === SOCKET_OPEN)
+  const isAiOn = useAiEnabled()
+  const socketStatus = useSocketStore((state) => selectSession(tabId)(state).status)
   const { url, queryParams, headers, body, bodyType, auth, options, method, extractors, assertions, examples, preScript, postScript, vars } = activeRequest
   const authSource = useAppStore((state) => inheritedAuthSource({ type: AUTH_INHERIT }, lineageOf(state, activeRequest.folderId))?.name ?? null)
   const inheritedHeaders = useAppStore((state) => countInheritedHeaders(state, activeRequest.folderId))
-  const isWebSocket = useMemo(() => isSocketAddress(url, variables), [url, variables])
+  const isSocket = useMemo(() => isSocketAddress(url, variables), [url, variables])
+  const kind = requestKind(activeRequest, isSocket)
   const isGraphQL = method === GRAPHQL_METHOD
-  const isGrpc = method === GRPC_METHOD
-  const isMcp = method === MCP_METHOD
-  const shownPanel = activePanel === MCP_PANEL && !isMcp ? DEFAULT_REQUEST_PANEL : activePanel
 
-  useEffect(() => {
-    if (isWebSocket) setActivePanel(SOCKET_PANEL)
-  }, [isWebSocket, setActivePanel])
-
-  useEffect(() => {
-    if (isGrpc) setActivePanel(GRPC_PANEL)
-  }, [isGrpc, setActivePanel])
-
-  useEffect(() => {
-    if (isMcp) setActivePanel(MCP_PANEL)
-  }, [isMcp, setActivePanel])
+  useLeadOnKindChange(kind, setActivePanel)
 
   const headerRows = useMemo(() => parseRows(headers), [headers])
   const variableRows = useMemo(() => parseRows(vars), [vars])
@@ -108,6 +128,36 @@ export const RequestTabs = memo(function RequestTabs({
   const exampleCount = useMemo(() => parseExamples(examples).length, [examples])
   const hasScripts = preScript.trim() !== "" || postScript.trim() !== ""
   const hasCustomOptions = options.timeoutMs > 0 || options.noFollowRedirects || options.insecureTLS || options.stream
+  const hasOwnAuth = auth.type !== "" && auth.type !== AUTH_INHERIT
+
+  const sections = requestSections(kind, filledSections({
+    [PARAMS_PANEL]: paramCount > 0,
+    [BODY_PANEL]: Boolean(bodyContent),
+    [AUTH_PANEL]: hasOwnAuth,
+    [GRAPHQL_PANEL]: activeRequest.graphqlQuery.trim() !== "",
+    [GRPC_PANEL]: holdsGrpcCall(activeRequest),
+    [SOCKET_PANEL]: socketStatus !== SOCKET_IDLE,
+    [EXTRACT_PANEL]: extractorCount > 0,
+    [TESTS_PANEL]: assertionCount > 0 || hasScripts,
+  }))
+  const shownPanel = sections.includes(activePanel) ? activePanel : leadSection(kind)
+
+  const badges = {
+    [PARAMS_PANEL]: paramCount,
+    [HEADERS_PANEL]: countSentRows(headerRows),
+    [BODY_PANEL]: !isGraphQL && bodyContent,
+    [AUTH_PANEL]: hasOwnAuth,
+    [SOCKET_PANEL]: socketStatus === SOCKET_OPEN,
+    [VARS_PANEL]: countSentRows(variableRows),
+    [EXTRACT_PANEL]: extractorCount,
+    [TESTS_PANEL]: assertionCount || hasScripts,
+    [SETTINGS_PANEL]: hasCustomOptions,
+  }
+  const marks = {
+    [HEADERS_PANEL]: inheritedHeaders > 0 && <InheritedMark title={INHERIT_TEXT.inheritedHeaders(inheritedHeaders)}>{inheritedHeaders}</InheritedMark>,
+    [AUTH_PANEL]: auth.type === AUTH_INHERIT && authSource && <InheritedMark title={INHERIT_TEXT.inheritsFrom(authSource)} />,
+  }
+  const items = sections.map((section) => sectionItem(section, badges[section], marks[section]))
 
   const handleGraphQLQueryChange = (graphqlQuery) => {
     onUpdateRequest(graphqlQuery.trim() === "" ? { graphqlQuery } : { graphqlQuery, method: GRAPHQL_METHOD })
@@ -116,35 +166,14 @@ export const RequestTabs = memo(function RequestTabs({
   return (
     <Tabs value={shownPanel} onValueChange={setActivePanel} className="flex min-h-0 flex-1 flex-col">
       <Toolbar>
-        <TabsList label="Request sections">
-          <TabsTrigger value="params">Params<TabBadge value={paramCount} /></TabsTrigger>
-          <TabsTrigger value="headers">
-            Headers
-            <TabBadge value={countSentRows(headerRows)} />
-            {inheritedHeaders > 0 && <InheritedMark title={INHERIT_TEXT.inheritedHeaders(inheritedHeaders)}>{inheritedHeaders}</InheritedMark>}
-          </TabsTrigger>
-          <TabsTrigger value="body">Body<TabBadge value={!isGraphQL && bodyContent} /></TabsTrigger>
-          <TabsTrigger value="auth">
-            Auth
-            <TabBadge value={auth.type !== "" && auth.type !== AUTH_INHERIT} />
-            {auth.type === AUTH_INHERIT && authSource && <InheritedMark title={INHERIT_TEXT.inheritsFrom(authSource)} />}
-          </TabsTrigger>
-          <TabsTrigger value="graphql">GraphQL<TabBadge value={isGraphQL} /></TabsTrigger>
-          <TabsTrigger value={GRPC_PANEL}>gRPC<TabBadge value={isGrpc} /></TabsTrigger>
-          {isMcp && <TabsTrigger value={MCP_PANEL}>MCP</TabsTrigger>}
-          <TabsTrigger value={SOCKET_PANEL}>WebSocket<TabBadge value={isSocketOpen} /></TabsTrigger>
-          <TabsTrigger value="vars">Vars<TabBadge value={countSentRows(variableRows)} /></TabsTrigger>
-          <TabsTrigger value="extract">Extract<TabBadge value={extractorCount} /></TabsTrigger>
-          <TabsTrigger value="tests">Tests<TabBadge value={assertionCount || hasScripts} /></TabsTrigger>
-          <TabsTrigger value="settings">Settings<TabBadge value={hasCustomOptions} /></TabsTrigger>
-        </TabsList>
+        <OverflowTabsList label={TEXT.sections} items={items} moreLabel={TEXT.more} moreHint={TEXT.moreHint} />
         <Button
           variant="ghost"
           size="sm"
-          aria-label="Examples"
-          title="Saved response examples"
+          aria-label={TEXT.examples}
+          title={TEXT.examplesHint}
           onClick={actions.examples.open}
-          className="ml-auto px-1.5"
+          className="ml-auto shrink-0 px-1.5"
         >
           <Bookmark />
           <TabBadge value={exampleCount} />
@@ -152,22 +181,22 @@ export const RequestTabs = memo(function RequestTabs({
       </Toolbar>
 
       <div className="min-h-0 flex-1 overflow-hidden">
-        <TabsContent value="params" className={PANEL_CLASS}>
+        <TabsContent value={PARAMS_PANEL} className={PANEL_CLASS}>
           <ParamsPanel key={tabId} url={url} queryParams={queryParams} onChange={onUpdateRequest} />
         </TabsContent>
 
-        <TabsContent value="headers" className={PANEL_CLASS}>
+        <TabsContent value={HEADERS_PANEL} className={PANEL_CLASS}>
           <Panel>
             <KeyValueEditor
               key={tabId}
               rows={headerRows}
               onChange={(rows) => onUpdateRequest({ headers: serializeRows(rows) })}
-              keyLabel="Header"
+              keyLabel={TEXT.headerLabel}
             />
           </Panel>
         </TabsContent>
 
-        <TabsContent value="body" className={PANEL_CLASS}>
+        <TabsContent value={BODY_PANEL} className={PANEL_CLASS}>
           <BodyPanel
             key={tabId}
             request={activeRequest}
@@ -180,7 +209,7 @@ export const RequestTabs = memo(function RequestTabs({
           />
         </TabsContent>
 
-        <TabsContent value="auth" className={PANEL_CLASS}>
+        <TabsContent value={AUTH_PANEL} className={PANEL_CLASS}>
           <AuthPanel
             key={tabId}
             auth={auth}
@@ -191,7 +220,7 @@ export const RequestTabs = memo(function RequestTabs({
           />
         </TabsContent>
 
-        <TabsContent value="graphql" className={PANEL_CLASS}>
+        <TabsContent value={GRAPHQL_PANEL} className={PANEL_CLASS}>
           <Suspense fallback={<PanelFallback />}>
             <GraphQLPanel
               key={tabId}
@@ -227,11 +256,15 @@ export const RequestTabs = memo(function RequestTabs({
           <Suspense fallback={<PanelFallback />}>
             <McpPanel
               key={tabId}
+              tabId={tabId}
               request={activeRequest}
               catalog={mcpCatalog}
               editorPath={`${tabId}/mcp`}
               onUpdateRequest={onUpdateRequest}
               onLoadCatalog={actions.loadMcpCatalog}
+              onAcceptTools={actions.acceptMcpTools}
+              onSignIn={actions.signInToMcpServer}
+              onCloseSignIn={actions.closeMcpSignIn}
               EditorComponent={EditorComponent}
             />
           </Suspense>
@@ -250,18 +283,18 @@ export const RequestTabs = memo(function RequestTabs({
           </Suspense>
         </TabsContent>
 
-        <TabsContent value="vars" className={PANEL_CLASS}>
+        <TabsContent value={VARS_PANEL} className={PANEL_CLASS}>
           <Panel>
             <KeyValueEditor
               key={tabId}
               rows={variableRows}
               onChange={(rows) => onUpdateRequest({ vars: serializeRows(rows) })}
-              keyLabel="Variable"
+              keyLabel={TEXT.variableLabel}
             />
           </Panel>
         </TabsContent>
 
-        <TabsContent value="extract" className={PANEL_CLASS}>
+        <TabsContent value={EXTRACT_PANEL} className={PANEL_CLASS}>
           <ExtractPanel
             key={tabId}
             extractors={extractors}
@@ -272,18 +305,18 @@ export const RequestTabs = memo(function RequestTabs({
           />
         </TabsContent>
 
-        <TabsContent value="tests" className={PANEL_CLASS}>
+        <TabsContent value={TESTS_PANEL} className={PANEL_CLASS}>
           <TestsPanel
             key={tabId}
             request={activeRequest}
             editorPath={tabId}
             onUpdateRequest={onUpdateRequest}
             EditorComponent={EditorComponent}
-            ai={actions.ai}
+            ai={isAiOn ? actions.ai : null}
           />
         </TabsContent>
 
-        <TabsContent value="settings" className={PANEL_CLASS}>
+        <TabsContent value={SETTINGS_PANEL} className={PANEL_CLASS}>
           <SettingsPanel
             options={options}
             description={activeRequest.description}
@@ -291,7 +324,7 @@ export const RequestTabs = memo(function RequestTabs({
             onChange={(next) => onUpdateRequest({ options: next })}
             onDescriptionChange={(description) => onUpdateRequest({ description })}
             onTagsChange={(tags) => onUpdateRequest({ tags })}
-            onDocument={() => actions.ai.start(TASK_DOCS)}
+            onDocument={isAiOn ? () => actions.ai.start(TASK_DOCS) : null}
           />
         </TabsContent>
       </div>

@@ -49,16 +49,17 @@ type StreamMessage struct {
 }
 
 type stream struct {
-	request   Request
-	policy    Policy
-	out       *batcher
-	parser    eventParser
-	maxEvents int
-	maxBytes  int64
-	events    int
-	bytes     int64
-	emitted   int64
-	attempt   int
+	request    Request
+	policy     Policy
+	out        *batcher
+	parser     eventParser
+	maxEvents  int
+	maxBytes   int64
+	events     int
+	bytes      int64
+	emitted    int64
+	attempt    int
+	unresolved []string
 }
 
 func Stream(ctx context.Context, r Request, policy Policy, emit func([]StreamMessage)) Response {
@@ -77,6 +78,9 @@ func Stream(ctx context.Context, r Request, policy Policy, emit func([]StreamMes
 
 	response := s.run(ctx)
 	response.DurationMs = time.Since(started).Milliseconds()
+	if response.Unresolved == nil {
+		response.Unresolved = s.unresolved
+	}
 	return response
 }
 
@@ -138,20 +142,21 @@ func (s *stream) run(ctx context.Context) Response {
 }
 
 func (s *stream) dial(ctx context.Context) (*http.Response, *cookieLog, *Response) {
-	outgoing, client, cookies, err := newExchange(ctx, s.request, s.policy, newRecorder(s.policy.RevealSecrets))
+	setup, err := newExchange(ctx, s.request, s.policy, newRecorder(s.policy.RevealSecrets))
 	if err != nil {
-		failure := Failure(ErrorConfig, err.Error())
+		failure := setupFailure(err)
 		return nil, nil, &failure
 	}
+	s.unresolved = setup.unresolved
 	if s.parser.lastID != "" {
-		outgoing.Header.Set(headerLastEventID, s.parser.lastID)
+		setup.request.Header.Set(headerLastEventID, s.parser.lastID)
 	}
-	incoming, err := client.Do(outgoing)
+	incoming, err := setup.client.Do(setup.request)
 	if err != nil {
 		failure := classify(ctx, err)
 		return nil, nil, &failure
 	}
-	return incoming, cookies, nil
+	return incoming, setup.cookies, nil
 }
 
 func carriesEvents(incoming *http.Response) bool {

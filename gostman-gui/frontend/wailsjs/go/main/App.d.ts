@@ -25,6 +25,8 @@ export function AiComplete(arg1:string,arg2:ai.Config,arg3:ai.Prompt,arg4:Array<
 
 export function AiKeyStored(arg1:string):Promise<boolean>;
 
+export function AiModels(arg1:string,arg2:ai.Config):Promise<main.AiModelsReply>;
+
 export function AiPreview(arg1:string,arg2:ai.Prompt,arg3:Array<string>):Promise<ai.Prompt>;
 
 export function AiRemoveKey(arg1:string):Promise<void>;
@@ -49,6 +51,8 @@ export function ClearMockLog():Promise<void>;
 
 export function CloseWorkspace():Promise<main.WorkspaceStatus>;
 
+export function CollectionNetwork():Promise<main.CollectionNetwork>;
+
 export function DeleteRequest(arg1:string):Promise<void>;
 
 export function DeleteSecretConnection(arg1:string):Promise<void>;
@@ -56,6 +60,10 @@ export function DeleteSecretConnection(arg1:string):Promise<void>;
 export function DescribeGrpc(arg1:rpc.Target):Promise<rpc.Schema>;
 
 export function DescribeMcp(arg1:mcpclient.Target):Promise<mcpclient.Catalog>;
+
+export function DiscoverIssuer(arg1:engine.DiscoveryQuery):Promise<engine.Discovery>;
+
+export function DiscoverMcpAuthorization(arg1:mcpclient.AuthQuery):Promise<mcpclient.AuthPlan>;
 
 export function ExpandTexts(arg1:Array<string>,arg2:string):Promise<Array<string>>;
 
@@ -129,7 +137,11 @@ export function InvokeGrpc(arg1:string,arg2:rpc.Call):Promise<engine.Response>;
 
 export function InvokeMcp(arg1:string,arg2:mcpclient.Call):Promise<engine.Response>;
 
+export function LatestRelease():Promise<main.Release>;
+
 export function LintSpec(arg1:lint.Query):Promise<lint.Reply>;
+
+export function ListBackups():Promise<Array<main.Backup>>;
 
 export function LoadData():Promise<main.SavedData>;
 
@@ -142,6 +154,8 @@ export function MockRoutes(arg1:Array<mock.Source>,arg2:string,arg3:mock.Config)
 export function MockStatus():Promise<main.MockState>;
 
 export function OpenAPI(arg1:openapi.Query):Promise<openapi.Reply>;
+
+export function OpenBackupsFolder():Promise<void>;
 
 export function OpenWorkspace(arg1:string):Promise<main.WorkspaceStatus>;
 
@@ -165,9 +179,13 @@ export function ResetData():Promise<void>;
 
 export function ResolveSecretReferences(arg1:Record<string, secrets.Ref>):Promise<Record<string, string>>;
 
+export function RestoreBackup(arg1:string):Promise<void>;
+
 export function RevealWorkspace(arg1:string):Promise<void>;
 
 export function RunLoadTest(arg1:engine.Request,arg2:loadtest.Config):Promise<loadtest.Report>;
+
+export function SaveCollectionPassphrase(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function SaveCollectionSettings(arg1:workspace.Settings):Promise<void>;
 
@@ -212,6 +230,8 @@ export function SendRequest(arg1:string,arg2:engine.Request):Promise<engine.Resp
 export function SetSecretConnectionEnabled(arg1:string,arg2:boolean):Promise<void>;
 
 export function StartCapture(arg1:capture.Settings):Promise<main.CaptureState>;
+
+export function StartDeviceAuthorization(arg1:engine.TokenExchange):Promise<engine.DeviceAuthorization>;
 
 export function StartMock(arg1:Array<mock.Source>,arg2:string,arg3:mock.Config):Promise<main.MockState>;
 

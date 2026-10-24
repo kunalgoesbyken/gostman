@@ -18,13 +18,13 @@ var (
 	lineSeparator = []byte("\n")
 )
 
-func (l *httpLink) reply(ctx context.Context, incoming *http.Response, id json.RawMessage) (envelope, error) {
+func (l *httpLink) reply(ctx context.Context, incoming *http.Response, id json.RawMessage, received *answer) (envelope, error) {
 	body := l.bounded(incoming)
 	switch mediaType(incoming.Header) {
 	case typeJSON:
 		return l.readReply(body, id)
 	case typeStream:
-		return l.awaitReply(ctx, body, id)
+		return l.awaitReply(ctx, body, id, received)
 	default:
 		return envelope{}, protocolError(
 			"%s did not answer as an MCP server: it sent %q instead of JSON or an event stream",
@@ -71,25 +71,16 @@ func nextEvent(events *bufio.Reader) ([]byte, error) {
 	}
 }
 
-func (l *httpLink) awaitReply(ctx context.Context, body *io.LimitedReader, id json.RawMessage) (envelope, error) {
+func (l *httpLink) awaitReply(ctx context.Context, body *io.LimitedReader, id json.RawMessage, received *answer) (envelope, error) {
 	events := bufio.NewReader(body)
 	for {
 		data, err := nextEvent(events)
 		if err != nil {
 			return envelope{}, l.interrupted(body, err)
 		}
-		var incoming envelope
-		if json.Unmarshal(data, &incoming) != nil {
-			continue
-		}
-		if incoming.answers(id) {
-			return incoming, nil
-		}
-		if !incoming.isRequest() {
-			continue
-		}
-		if err := l.deliver(ctx, answerTo(incoming)); err != nil {
-			return envelope{}, err
+		reply, done, err := received.take(data, id, func(payload any) error { return l.deliver(ctx, payload) })
+		if err != nil || done {
+			return reply, err
 		}
 	}
 }

@@ -23,11 +23,13 @@ type session struct {
 	scripts     *sandbox.Sandbox
 	policy      engine.Policy
 	variables   variables
+	session     variables
 	environment string
 	common      *shared
 	library     []Request
 	hosts       []string
 	modules     map[string]string
+	contract    *contract
 }
 
 type job struct {
@@ -42,14 +44,14 @@ type job struct {
 }
 
 type stageRun struct {
-	Tests     []Check             `json:"tests"`
-	Logs      []LogLine           `json:"logs"`
-	Error     string              `json:"error"`
-	Variables variables           `json:"variables"`
-	Request   json.RawMessage     `json:"request"`
-	Flow      flow                `json:"flow"`
-	Visual    string              `json:"visualization"`
-	Cookies   []engine.CookieInfo `json:"cookies"`
+	Tests   []Check             `json:"tests"`
+	Logs    []LogLine           `json:"logs"`
+	Error   string              `json:"error"`
+	Writes  scopedWrites        `json:"writes"`
+	Request json.RawMessage     `json:"request"`
+	Flow    flow                `json:"flow"`
+	Visual  string              `json:"visualization"`
+	Cookies []engine.CookieInfo `json:"cookies"`
 }
 
 type exchange struct {
@@ -86,27 +88,42 @@ func (x *exchange) stop(message string) {
 
 func (s *session) scoped(request Request) variables {
 	scopes := append([]variables{s.variables}, request.folderScopes()...)
-	return layered(append(scopes, requestScope(request.Vars))...)
+	return layered(append(scopes, requestScope(request.Vars), s.session)...)
+}
+
+func (s *session) current() variables {
+	return layered(s.variables, s.session)
+}
+
+func (s *session) write(writes scopedWrites) {
+	for scope, changes := range writes {
+		if scope != scopeSession {
+			s.variables.change(changes)
+			s.session.forget(changes)
+		}
+	}
+	s.session.change(writes[scopeSession])
 }
 
 func (s *session) runStage(ctx context.Context, stage string, work job, request Request) stageRun {
-	before := s.scoped(request)
-	work.Variables = before
+	work.Variables = s.scoped(request)
 	work.Modules = s.modules
 	work.Environment = s.environment
 	if err := s.scripts.Call("scriptCookies", &work.Cookies, s.common.cookieList(), s.hosts); err != nil {
 		return stageRun{Error: stage + ": " + err.Error()}
 	}
+	allowance, err := s.scripts.Allowance(request.scriptTimeout())
+	if err != nil {
+		return stageRun{Error: stage + ": " + err.Error()}
+	}
 	var run stageRun
-	if err := s.scripts.IsolatedWith(s.bridge(ctx), "runJob", &run, work); err != nil {
+	if err := s.scripts.Isolated(allowance, s.bridge(ctx), "runJob", &run, work); err != nil {
 		return stageRun{Error: stage + ": " + err.Error()}
 	}
 	if err := s.storeScriptCookies(run.Cookies); err != nil {
 		return stageRun{Error: stage + ": " + err.Error()}
 	}
-	if run.Variables != nil {
-		s.variables.update(before, run.Variables)
-	}
+	s.write(run.Writes)
 	if run.Error != "" {
 		run.Error = stage + ": " + run.Error
 	}
@@ -209,6 +226,13 @@ func (s *session) storeCookies(received []engine.CookieInfo) error {
 	return nil
 }
 
+func (s *session) keepCookies(request Request, received []engine.CookieInfo) error {
+	if request.Options.DiscardCookies {
+		return nil
+	}
+	return s.storeCookies(received)
+}
+
 func (s *session) storeScriptCookies(changes []engine.CookieInfo) error {
 	if len(changes) == 0 {
 		return nil
@@ -224,11 +248,11 @@ func (s *session) extract(request Request, response engine.Response) error {
 	if !hasText(request.Extractors) {
 		return nil
 	}
-	var extracted variables
-	if err := s.scripts.Call("extract", &extracted, request, response); err != nil {
+	var extracted scopedWrites
+	if err := s.scripts.Call("extractWrites", &extracted, request, response); err != nil {
 		return err
 	}
-	s.variables.merge(extracted)
+	s.write(extracted)
 	return nil
 }
 
@@ -315,7 +339,7 @@ func (s *session) execute(ctx context.Context, request Request) (exchange, error
 	if err != nil {
 		return outcome, err
 	}
-	if err := s.storeCookies(outcome.response.Cookies); err != nil {
+	if err := s.keepCookies(request, outcome.response.Cookies); err != nil {
 		return outcome, err
 	}
 	if outcome.response.Error != "" {
@@ -324,5 +348,8 @@ func (s *session) execute(ctx context.Context, request Request) (exchange, error
 	if err := s.extract(request, outcome.response); err != nil {
 		return outcome, err
 	}
-	return outcome, s.runPostResponse(ctx, request, &outcome)
+	if err := s.runPostResponse(ctx, request, &outcome); err != nil {
+		return outcome, err
+	}
+	return outcome, s.checkContract(request, &outcome)
 }

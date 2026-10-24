@@ -12,6 +12,7 @@ import { useAppStore } from "../store/appStore"
 import { usePointerDrag } from "../hooks/usePointerDrag"
 import { useTypeahead } from "../hooks/useTypeahead"
 import { buildCollectionTree, findMatches, flattenCollection, ROOT_ID, ROW_EMPTY, ROW_FOLDER } from "../lib/collectionTree"
+import { checksContract } from "../lib/contractCheck"
 import { PLACE_AFTER, PLACE_BEFORE, PLACE_INSIDE } from "../lib/dropPlace"
 import { hasModifier, isFocusLost } from "../lib/rovingFocus"
 import { isRemoveKey, matchesBinding } from "../lib/shortcuts"
@@ -146,6 +147,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
     [tree, folders, requests, query]
   )
   const rowsByKey = useMemo(() => new Map(rows.map((row) => [row.key, row])), [rows])
+  const focusedRowIndex = useMemo(() => rows.findIndex((row) => row.key === focusedKey), [rows, focusedKey])
   const hasClipboard = treeClipboard !== null
 
   const clearQuery = useCallback(() => setQuery(""), [])
@@ -274,6 +276,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
     const context = {
       actions, tree, state: { folders, requests }, showMoveTargets, hasClipboard, editLabels: setLabelTarget,
       isLinked: menu.row.kind === ROW_FOLDER && Boolean(specLinks[menu.row.folder.id]),
+      checksContract: menu.row.kind === ROW_FOLDER && checksContract(specLinks[menu.row.folder.id]),
     }
     return menuItemsFor(menu, context)
   }, [menu, tree, folders, requests, actions, specLinks, hasClipboard])
@@ -287,6 +290,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
       <TreeRow
         key={row.key}
         row={row}
+        search={query}
         isActive={!isFolder && id === activeRequestId}
         isTabStop={row.key === tabStopKey}
         focusRequest={focusRequest?.key === row.key ? focusRequest.count : 0}
@@ -309,7 +313,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
 
   return (
     <>
-      <SearchField value={query} onChange={setQuery} onKeyDown={enterResultsOnArrow} placeholder="Search name, URL or tag" className="pr-1.5">
+      <SearchField value={query} onChange={setQuery} onKeyDown={enterResultsOnArrow} placeholder={TREE_TEXT.searchPlaceholder} className="pr-1.5">
         <IconButton label={TREE_TEXT.collapseAll} icon={ChevronsDownUp} className="shrink-0" disabled={isSearching || folders.length === 0} onClick={collapseFolders} />
       </SearchField>
 
@@ -317,7 +321,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
         {rows.length === 0 ? (
           <TreeEmptyState isSearching={isSearching} hasClipboard={hasClipboard} actions={actions} />
         ) : (
-          <VirtualList role="tree" aria-label="Collections" items={rows} rowHeight={ROW_HEIGHT_PX} renderRow={renderRow} scrollRef={scrollRef} className="h-full py-1" />
+          <VirtualList role="tree" aria-label={TREE_TEXT.treeLabel} items={rows} rowHeight={ROW_HEIGHT_PX} renderRow={renderRow} scrollRef={scrollRef} pinnedIndex={focusedRowIndex} className="h-full py-1" />
         )}
       </div>
 

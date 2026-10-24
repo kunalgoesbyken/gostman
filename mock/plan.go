@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
@@ -22,25 +23,36 @@ const (
 	reasonWebSocket = "WebSocket requests are not served."
 	reasonNoExample = "Save a response as an example to serve this route."
 	reasonDisabled  = "This route is switched off."
+
+	headerResponseName = "X-Mock-Response-Name"
+	headerResponseCode = "X-Mock-Response-Code"
+	reasonNoMatch      = "No saved example of %q matches the x-mock-response-name and x-mock-response-code headers."
 )
 
 var socketSchemes = []string{"ws://", "wss://"}
 
 type servedRoute struct {
-	name         string
-	method       string
-	shape        pattern
-	answer       answer
-	alternatives map[string]answer
-	behavior     Behavior
+	name     string
+	method   string
+	shape    pattern
+	answer   answer
+	examples []servedExample
+	behavior Behavior
+}
+
+type servedExample struct {
+	id     string
+	name   string
+	status int
+	answer answer
 }
 
 type table struct {
-	routes    []Route
-	served    []servedRoute
-	rules     []*compiledRule
-	owners    map[string]string
-	settings  Settings
+	routes   []Route
+	served   []servedRoute
+	rules    []*compiledRule
+	owners   map[string]string
+	settings Settings
 }
 
 func Plan(sources []Source, variables string, config Config) ([]Route, error) {
@@ -68,10 +80,10 @@ func buildTable(sources []Source, variables string, config Config) (*table, erro
 		return nil, err
 	}
 	planned := &table{
-		routes:    make([]Route, 0, len(composed)),
-		owners:    map[string]string{},
-		rules:     rules,
-		settings:  config.Settings,
+		routes:   make([]Route, 0, len(composed)),
+		owners:   map[string]string{},
+		rules:    rules,
+		settings: config.Settings,
 	}
 	for _, source := range composed {
 		route, err := planned.admit(source, expansion.Text)
@@ -120,12 +132,12 @@ func (t *table) admit(source Source, expand func(string) string) (Route, error) 
 	}
 	t.owners[key] = source.Name
 	t.served = append(t.served, servedRoute{
-		name:         source.Name,
-		method:       route.Method,
-		shape:        shape,
-		answer:       served,
-		alternatives: alternativesOf(examples),
-		behavior:     source.Behavior,
+		name:     source.Name,
+		method:   route.Method,
+		shape:    shape,
+		answer:   served,
+		examples: servedExamples(examples),
+		behavior: source.Behavior,
 	})
 	return route.withState(StateServed, ""), nil
 }
@@ -137,14 +149,14 @@ func shapeOf(source Source) pattern {
 	return routePattern(source.URL)
 }
 
-func alternativesOf(examples []Example) map[string]answer {
-	alternatives := make(map[string]answer, len(examples))
+func servedExamples(examples []Example) []servedExample {
+	served := make([]servedExample, 0, len(examples))
 	for _, example := range examples {
-		if served, err := answerFrom(example); err == nil {
-			alternatives[example.ID] = served
+		if reply, err := answerFrom(example); err == nil {
+			served = append(served, servedExample{id: example.ID, name: example.Name, status: example.Status, answer: reply})
 		}
 	}
-	return alternatives
+	return served
 }
 
 func (t *table) find(method string, parts []string) (servedRoute, map[string]string, bool) {
@@ -182,14 +194,30 @@ func (t *table) resolve(e *exchange) (decision, bool) {
 	if !routed {
 		return decision{}, false
 	}
-	return decision{route: route.name, answer: route.answer, params: params, behavior: route.behavior}, true
+	return decision{route: route.name, answer: route.requested(e.header), params: params, behavior: route.behavior}, true
 }
 
 func (r servedRoute) answerFor(exampleID string) answer {
-	if alternative, ok := r.alternatives[exampleID]; ok {
-		return alternative
+	for _, example := range r.examples {
+		if example.id == exampleID {
+			return example.answer
+		}
 	}
 	return r.answer
+}
+
+func (r servedRoute) requested(header http.Header) answer {
+	name := strings.TrimSpace(header.Get(headerResponseName))
+	code := strings.TrimSpace(header.Get(headerResponseCode))
+	if name == "" && code == "" {
+		return r.answer
+	}
+	for _, example := range r.examples {
+		if (name == "" || strings.EqualFold(example.name, name)) && (code == "" || strconv.Itoa(example.status) == code) {
+			return example.answer
+		}
+	}
+	return problem(http.StatusNotFound, fmt.Sprintf(reasonNoMatch, r.name))
 }
 
 func (r *compiledRule) decide(route servedRoute, routed bool, params map[string]string) decision {

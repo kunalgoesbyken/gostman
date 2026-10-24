@@ -8,9 +8,12 @@ import (
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/mcp"
 	"github.com/kunalgoesbyken/gostman/runner"
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
+
+const highestIterations = 100
 
 var textBodyTypes = []string{engine.BodyNone, engine.BodyJSON, engine.BodyText, engine.BodyXML, engine.BodyForm}
 
@@ -28,10 +31,12 @@ type sendArguments struct {
 }
 
 type runArguments struct {
-	Folder      string   `json:"folder"`
-	Bail        bool     `json:"bail"`
-	Tags        []string `json:"tags"`
-	ExcludeTags []string `json:"exclude_tags"`
+	Folder      string       `json:"folder"`
+	Bail        bool         `json:"bail"`
+	Tags        []string     `json:"tags"`
+	ExcludeTags []string     `json:"exclude_tags"`
+	Data        []runner.Row `json:"data"`
+	Iterations  int          `json:"iterations"`
 }
 
 type failedRequest struct {
@@ -41,7 +46,9 @@ type failedRequest struct {
 	Method      string           `json:"method"`
 	URL         string           `json:"url"`
 	Status      string           `json:"status"`
+	Iteration   int              `json:"iteration,omitempty"`
 	Error       string           `json:"error,omitempty"`
+	Unresolved  []string         `json:"unresolved,omitempty"`
 	FailedTests []runner.Check   `json:"failedTests"`
 	Logs        []runner.LogLine `json:"logs"`
 }
@@ -49,6 +56,7 @@ type failedRequest struct {
 type runDigest struct {
 	Environment string          `json:"environment"`
 	DurationMs  int64           `json:"durationMs"`
+	Iterations  int             `json:"iterations,omitempty"`
 	Summary     runner.Summary  `json:"summary"`
 	Failures    []failedRequest `json:"failures"`
 }
@@ -77,12 +85,8 @@ func (a sendArguments) check() error {
 }
 
 func headerEntries(headers map[string]string) []engine.HeaderEntry {
-	names := make([]string, 0, len(headers))
-	for name := range headers {
-		names = append(names, name)
-	}
 	entries := make([]engine.HeaderEntry, 0, len(headers))
-	for _, name := range sorted(names) {
+	for _, name := range sortedKeys(headers) {
 		entries = append(entries, engine.HeaderEntry{Key: name, Value: headers[name]})
 	}
 	return entries
@@ -90,7 +94,7 @@ func headerEntries(headers map[string]string) []engine.HeaderEntry {
 
 func (d *Desk) target(current scene, arguments sendArguments) (runner.Listed, error) {
 	if hasText(arguments.Request) {
-		return d.client.Find(current.stored, arguments.Request)
+		return d.find(current.stored, arguments.Request)
 	}
 	return d.client.Compose(Draft{
 		Method:   arguments.Method,
@@ -99,6 +103,26 @@ func (d *Desk) target(current scene, arguments sendArguments) (runner.Listed, er
 		Body:     arguments.Body,
 		BodyType: arguments.BodyType,
 	})
+}
+
+func (d *Desk) deliver(ctx context.Context, target runner.Listed, view View) (Outcome, error) {
+	target.Request = d.tune(target.Request)
+	var outcome Outcome
+	var response engine.Response
+	var err error
+	d.outside(func() {
+		outcome, response, err = d.client.Exchange(ctx, target, view)
+	})
+	if err == nil && target.Request.ID != "" {
+		d.responses.record(target.Request.ID, received(response))
+	}
+	switch {
+	case response.Error == engine.ErrorBlocked:
+		outcome.Hint = hintRefused
+	case len(outcome.Unresolved) > 0:
+		outcome.Hint = hintUndefined
+	}
+	return outcome, err
 }
 
 func (d *Desk) sendRequest(ctx context.Context, current scene, arguments sendArguments) (Outcome, error) {
@@ -110,7 +134,7 @@ func (d *Desk) sendRequest(ctx context.Context, current scene, arguments sendArg
 		return Outcome{}, err
 	}
 	d.client.SetVariables(arguments.Variables)
-	return d.client.Send(ctx, target, View{
+	return d.deliver(ctx, target, View{
 		Select:         arguments.Select,
 		MaxBodyBytes:   arguments.MaxBodyBytes,
 		IncludeHeaders: arguments.IncludeHeaders,
@@ -135,7 +159,9 @@ func describeFailure(result runner.Result) failedRequest {
 		Method:      result.Method,
 		URL:         result.URL,
 		Status:      result.Status,
+		Iteration:   result.Iteration,
 		Error:       result.Error,
+		Unresolved:  result.Unresolved,
 		FailedTests: failedChecks(result.Tests),
 		Logs:        result.Logs,
 	}
@@ -145,6 +171,7 @@ func digest(report runner.Report) runDigest {
 	summary := runDigest{
 		Environment: report.Environment,
 		DurationMs:  report.DurationMs,
+		Iterations:  report.Iterations,
 		Summary:     report.Summary,
 		Failures:    []failedRequest{},
 	}
@@ -156,14 +183,43 @@ func digest(report runner.Report) runDigest {
 	return summary
 }
 
+func (d *Desk) observeRun(ctx context.Context, options *runner.Options) func(runner.Result) {
+	var planned, finished, failed int
+	options.OnPlanned = func(requests int) { planned = requests }
+	return func(result runner.Result) {
+		finished++
+		if result.Failed {
+			failed++
+		}
+		if result.Exchange != nil {
+			d.responses.record(result.ID, captured(result))
+		}
+		total := max(planned, finished)
+		mcp.Progress(ctx, float64(finished), float64(total), fmt.Sprintf("%d of %d done, %d failed; last: %s", finished, total, failed, result.Name))
+	}
+}
+
 func (d *Desk) runFolder(ctx context.Context, current scene, arguments runArguments) (runDigest, error) {
+	if arguments.Iterations < 0 || arguments.Iterations > highestIterations || len(arguments.Data) > highestIterations {
+		return runDigest{}, fmt.Errorf("A run from here is limited to %d iterations and %d data rows.", highestIterations, highestIterations)
+	}
 	options := runner.Options{
 		Folder:      arguments.Folder,
 		Bail:        arguments.Bail,
 		Tags:        workspace.NormalizeTags(arguments.Tags),
 		ExcludeTags: workspace.NormalizeTags(arguments.ExcludeTags),
+		Data:        arguments.Data,
+		Iterations:  arguments.Iterations,
+		Timeout:     d.timeout,
+		Insecure:    d.insecure,
+		Capture:     true,
 	}
-	report, err := d.client.Run(ctx, current.stored, options, func(runner.Result) {})
+	observe := d.observeRun(ctx, &options)
+	var report runner.Report
+	var err error
+	d.outside(func() {
+		report, err = d.client.Run(ctx, current.stored, options, observe)
+	})
 	if err != nil {
 		return runDigest{}, err
 	}

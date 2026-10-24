@@ -1,3 +1,5 @@
+import { isPlainObject } from '../dataUtils'
+import { readStoredJSON, removeStored, writeStored } from '../storage'
 import { PROVIDER_ANTHROPIC } from './providers'
 
 const STORAGE_KEY = 'gostman-ai'
@@ -13,31 +15,17 @@ export const DEFAULT_AI_SETTINGS = {
 }
 
 export function loadAiSettings() {
-  try {
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY))
-    if (stored === null || typeof stored !== 'object' || Array.isArray(stored)) return DEFAULT_AI_SETTINGS
-    return { ...DEFAULT_AI_SETTINGS, ...stored, skipPreview: { ...stored.skipPreview } }
-  } catch {
-    return DEFAULT_AI_SETTINGS
-  }
+  const stored = readStoredJSON(STORAGE_KEY, null)
+  if (!isPlainObject(stored)) return DEFAULT_AI_SETTINGS
+  return { ...DEFAULT_AI_SETTINGS, ...stored, skipPreview: { ...stored.skipPreview } }
 }
 
-export function saveAiSettings(settings) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
-  } catch {
-    return
-  }
-}
+export const saveAiSettings = (settings) => writeStored(STORAGE_KEY, JSON.stringify(settings))
 
-export function forgetAiSettings() {
-  try {
-    localStorage.removeItem(STORAGE_KEY)
-  } catch {
-    return
-  }
-}
+export const forgetAiSettings = () => removeStored(STORAGE_KEY)
 
 export const providerConfig = ({ provider, baseUrl, model, allowInsecure }) => ({ provider, baseUrl, model, allowInsecure })
 
-export const isConfigured = (settings) => settings.enabled && settings.consented && settings.model.trim() !== ''
+export const isAiEnabled = (settings) => settings.enabled && settings.consented
+
+export const isConfigured = (settings) => isAiEnabled(settings) && settings.model.trim() !== ''

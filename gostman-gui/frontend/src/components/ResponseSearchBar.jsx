@@ -3,11 +3,12 @@ import { ChevronDown, ChevronUp, Filter, Search, X } from 'lucide-react'
 import { IconButton } from './ui/button'
 import { Input } from './ui/input'
 import { Toolbar } from './ui/panel'
+import { RESPONSE_TEXT as TEXT } from '../lib/responseText'
 
 function statusText(query, index, count, capped) {
   if (query === '') return ''
-  if (count === 0) return 'No results'
-  return `${index + 1} of ${count}${capped ? '+' : ''}`
+  if (count === 0) return TEXT.noMatches
+  return TEXT.matchPosition(index, count, capped)
 }
 
 export function SearchBar({ query, onQueryChange, index, count, capped, onStep, onClose }) {
@@ -36,17 +37,17 @@ export function SearchBar({ query, onQueryChange, index, count, capped, onStep, 
         value={query}
         onChange={(event) => onQueryChange(event.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Find in body"
-        aria-label="Find in body"
+        placeholder={TEXT.findInBody}
+        aria-label={TEXT.findInBody}
         spellCheck={false}
         className="pl-7"
       />
-      <span aria-live="polite" className="w-16 shrink-0 text-center font-mono text-2xs text-muted-foreground">
+      <span aria-live="polite" className="min-w-16 shrink-0 whitespace-nowrap px-1 text-center font-mono text-2xs text-muted-foreground">
         {statusText(query, index, count, capped)}
       </span>
-      <IconButton label="Previous match" icon={ChevronUp} onClick={() => onStep(-1)} disabled={count === 0} />
-      <IconButton label="Next match" icon={ChevronDown} onClick={() => onStep(1)} disabled={count === 0} />
-      <IconButton label="Close search" icon={X} onClick={onClose} />
+      <IconButton label={TEXT.previousMatch} icon={ChevronUp} onClick={() => onStep(-1)} disabled={count === 0} />
+      <IconButton label={TEXT.nextMatch} icon={ChevronDown} onClick={() => onStep(1)} disabled={count === 0} />
+      <IconButton label={TEXT.closeSearch} icon={X} onClick={onClose} />
     </Toolbar>
   )
 }
@@ -60,13 +61,13 @@ export function FilterBar({ path, onPathChange, error }) {
           value={path}
           onChange={(event) => onPathChange(event.target.value)}
           onKeyDown={(event) => event.key === 'Escape' && onPathChange('')}
-          placeholder="Filter with JSONPath, e.g. $.data[0].id"
-          aria-label="JSONPath filter"
+          placeholder={TEXT.filterPlaceholder}
+          aria-label={TEXT.filterLabel}
           aria-invalid={Boolean(error)}
           spellCheck={false}
           className={`pl-7 font-mono ${error ? 'border-destructive' : ''}`}
         />
-        {path !== '' && <IconButton label="Clear filter" icon={X} onClick={() => onPathChange('')} />}
+        {path !== '' && <IconButton label={TEXT.clearFilter} icon={X} onClick={() => onPathChange('')} />}
       </Toolbar>
       {error && <p role="alert" className="px-3 pb-2 text-xs text-destructive [overflow-wrap:anywhere]">{error}</p>}
     </div>

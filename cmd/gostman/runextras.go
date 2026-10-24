@@ -87,16 +87,8 @@ func (e runExtras) apply(options *runner.Options, capture bool) error {
 		}
 		options.Data = rows
 	}
-	if e.envFile != "" {
-		values, err := readEnvFile(e.envFile)
-		if err != nil {
-			return err
-		}
-		for name, value := range values {
-			if _, taken := options.Variables[name]; !taken {
-				options.Variables[name] = value
-			}
-		}
+	if err := mergeEnvFile(e.envFile, options.Variables); err != nil {
+		return err
 	}
 	options.Capture = capture
 	options.StreamTimeout = time.Duration(e.streamSeconds) * time.Second
@@ -111,6 +103,22 @@ func unquote(value string) string {
 		return strings.TrimSpace(value[:cut])
 	}
 	return value
+}
+
+func mergeEnvFile(path string, variables map[string]string) error {
+	if path == "" {
+		return nil
+	}
+	values, err := readEnvFile(path)
+	if err != nil {
+		return err
+	}
+	for name, value := range values {
+		if _, taken := variables[name]; !taken {
+			variables[name] = value
+		}
+	}
+	return nil
 }
 
 func readEnvFile(path string) (map[string]string, error) {

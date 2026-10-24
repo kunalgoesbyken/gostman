@@ -23,10 +23,11 @@ const (
 )
 
 func Prepare(r Request) (Prepared, error) {
-	return prepare(r, nil)
+	return prepare(r, nil, nil)
 }
 
-func prepare(r Request, files FileReader) (Prepared, error) {
+func prepare(r Request, files FileReader, open FileOpener) (Prepared, error) {
+	stream := &bodyStream{open: open}
 	r, err := Resolve(r)
 	if err != nil {
 		return Prepared{}, err
@@ -38,6 +39,16 @@ func prepare(r Request, files FileReader) (Prepared, error) {
 	if files != nil {
 		expansion.readingFiles(files)
 	}
+	prepared, err := prepareWith(r, expansion, stream)
+	if err != nil {
+		stream.close()
+		return Prepared{}, withUnresolved(err, expansion.missing)
+	}
+	prepared.Unresolved = expansion.missing
+	return prepared, nil
+}
+
+func prepareWith(r Request, expansion *substitution, stream *bodyStream) (Prepared, error) {
 	substitute := expansion.apply
 
 	method := strings.ToUpper(strings.TrimSpace(r.Method))
@@ -49,7 +60,7 @@ func prepare(r Request, files FileReader) (Prepared, error) {
 		method = http.MethodGet
 	}
 
-	target, err := buildURL(r, substitute)
+	target, err := buildURL(r, expansion)
 	if err != nil {
 		return Prepared{}, err
 	}
@@ -60,9 +71,17 @@ func prepare(r Request, files FileReader) (Prepared, error) {
 	}
 	headers = substitutePairs(headers, substitute)
 
-	body, contentType, err := buildBody(r, isGraphQL, substitute)
+	body, contentType, err := buildBody(r, isGraphQL, substitute, stream)
 	if err != nil {
 		return Prepared{}, err
+	}
+	streamed := stream.streamed()
+	if streamed && signsBody(r.Auth) {
+		streamed = false
+		if body, err = stream.load(); err != nil {
+			return Prepared{}, err
+		}
+		stream.close()
 	}
 	if r.BodyType == BodySOAP && len(body) > 0 {
 		headers, contentType = soapHeaders(headers, body)
@@ -80,6 +99,9 @@ func prepare(r Request, files FileReader) (Prepared, error) {
 	}
 
 	prepared := Prepared{Method: method, URL: target.String(), body: body}
+	if streamed {
+		prepared.stream = stream
+	}
 	for _, header := range headers {
 		prepared.Headers = append(prepared.Headers, HeaderEntry{Key: header.key, Value: header.value})
 	}
@@ -89,7 +111,8 @@ func prepare(r Request, files FileReader) (Prepared, error) {
 	return prepared, nil
 }
 
-func buildURL(r Request, substitute func(string) string) (*url.URL, error) {
+func buildURL(r Request, expansion *substitution) (*url.URL, error) {
+	substitute := expansion.apply
 	raw := strings.TrimSpace(substitute(r.URL))
 	if raw == "" {
 		return nil, fmt.Errorf("enter a URL to send the request to")
@@ -100,7 +123,7 @@ func buildURL(r Request, substitute func(string) string) (*url.URL, error) {
 
 	target, err := url.Parse(strings.ReplaceAll(raw, " ", "%20"))
 	if err != nil || target.Host == "" {
-		return nil, fmt.Errorf("%q is not a valid URL", raw)
+		return nil, invalidURL(raw, expansion.missing)
 	}
 	if target.Scheme != "http" && target.Scheme != "https" {
 		return nil, fmt.Errorf("unsupported URL scheme %q, use http or https", target.Scheme)
@@ -114,6 +137,13 @@ func buildURL(r Request, substitute func(string) string) (*url.URL, error) {
 	}
 	overrideQuery(target, substitutePairs(params, substitute))
 	return target, nil
+}
+
+func invalidURL(raw string, missing []string) error {
+	if len(missing) == 0 {
+		return fmt.Errorf("%q is not a valid URL", raw)
+	}
+	return fmt.Errorf("%q is not a valid URL because %s", raw, NotDefined(missing))
 }
 
 func escapeNonASCII(raw string) string {

@@ -67,10 +67,12 @@ func Import(ctx context.Context, files []File, format string, options Options, c
 		return Result{}, err
 	}
 	c := newCollector()
+	c.inPlace = options.InPlace
+	files, c.protos = splitProtoFiles(files)
 	docs := c.accept(files, format)
 	c.importDocuments(ctx, docs, options, config)
 	result := c.result()
-	if len(result.Requests) == 0 && len(result.Folders) == 0 && len(result.Environments) == 0 {
+	if len(result.Requests) == 0 && len(result.Folders) == 0 && len(result.Environments) == 0 && len(result.Globals) == 0 {
 		return Result{}, emptyError(files, result)
 	}
 	return result, nil
@@ -122,7 +124,9 @@ func (c *collector) importDocuments(ctx context.Context, docs []document, option
 		case kindGostman:
 			c.readGostman(doc)
 		case kindInsomnia:
-			c.readInsomnia(doc)
+			c.readInsomnia(ctx, doc, config)
+		case kindBrunoEnvironment:
+			c.readBrunoEnvironments(doc)
 		case kindHAR:
 			c.readHAR(doc, options)
 		case kindWSDL:
@@ -131,6 +135,8 @@ func (c *collector) importDocuments(ctx context.Context, docs []document, option
 			c.readPostmanCollection(doc)
 		case kindPostmanEnvironment:
 			c.readPostmanEnvironment(doc)
+		case kindPostmanDump:
+			c.readPostmanDump(doc)
 		case kindOpenCollection:
 			if bundled(doc) {
 				c.readOpenCollection(doc)

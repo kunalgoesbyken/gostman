@@ -5,9 +5,12 @@ import (
 	"strings"
 
 	"github.com/dop251/goja/ast"
+	"github.com/dop251/goja/token"
 )
 
 const sendRequestWrapper = "((callback, target) => sendRequest(target).then((response) => callback(null, response), callback))"
+
+const postmanTargetAdapter = `((target) => typeof target === "string" ? { url: target } : { ...target, url: target.url?.raw ?? target.url, headers: Array.isArray(target.header) ? Object.fromEntries(target.header.map((row) => [row.key, row.value])) : target.header ?? target.headers, body: target.body?.raw ?? target.body })`
 
 func (t *translator) renderSendRequest(call *ast.CallExpression) string {
 	t.note(call, "sendRequest-scope", messageScriptSendScope)
@@ -16,11 +19,23 @@ func (t *translator) renderSendRequest(call *ast.CallExpression) string {
 		return t.text(call)
 	}
 	t.translated++
-	target := t.requestTarget(call.ArgumentList[0], t.requestField)
+	target := t.postmanTarget(call.ArgumentList[0])
 	if len(call.ArgumentList) == 1 {
 		return "sendRequest(" + target + ")"
 	}
 	return t.awaited(call, sendRequestWrapper+"("+t.renderCallback(call.ArgumentList[1])+", "+target+")")
+}
+
+func (t *translator) renderLegacyTest(assign *ast.AssignExpression) (string, bool) {
+	target, isBracket := assign.Left.(*ast.BracketExpression)
+	if !t.dialect.retired[legacyTests] || !isBracket || assign.Operator != token.ASSIGN || t.declared[legacyTests] {
+		return "", false
+	}
+	if tests, isIdentifier := target.Left.(*ast.Identifier); !isIdentifier || string(tests.Name) != legacyTests {
+		return "", false
+	}
+	t.translated++
+	return "test(" + t.render(target.Member) + ", ((passed) => () => expect(passed).to.be.ok)(" + t.render(assign.Right) + "))", true
 }
 
 func (t *translator) awaited(at ast.Node, expression string) string {
@@ -66,6 +81,14 @@ func secondParameter(parameters *ast.ParameterList) string {
 }
 
 type requestField func(ast.Property) (string, bool)
+
+func (t *translator) postmanTarget(argument ast.Expression) string {
+	switch argument.(type) {
+	case *ast.StringLiteral, *ast.TemplateLiteral, *ast.ObjectLiteral:
+		return t.requestTarget(argument, t.requestField)
+	}
+	return postmanTargetAdapter + "(" + t.render(argument) + ")"
+}
 
 func (t *translator) requestTarget(argument ast.Expression, field requestField) string {
 	switch current := argument.(type) {

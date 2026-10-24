@@ -27,11 +27,19 @@ The request bar sits above the request tabs.
 | Code | Opens the code generator. See [Code generation](#code-generation). |
 | Load test | Desktop app only. Opens the Load test dialog for this request. See [Load test](runner-load-and-scan.md#load-test). |
 
-When the URL is a WebSocket address, the Send button is labelled Connect. Send and Save show their keyboard shortcuts in their tooltips; see [Preferences, shortcuts and the command palette](preferences-and-shortcuts.md).
+When the URL is a WebSocket address, the method list shows WS (or GRAPHQL for GraphQL subscriptions) and the Send button is labelled Connect; while the connection is open it becomes Disconnect. Send and Save show their keyboard shortcuts in their tooltips; see [Preferences, shortcuts and the command palette](preferences-and-shortcuts.md).
 
 ## Request tabs
 
-The row below the request bar holds the tabs. A count or a dot on a tab shows that it has content. The GraphQL, gRPC and WebSocket tabs belong to those protocols, and an MCP tab appears when the method is MCP.
+The row below the request bar holds the tabs. Only the tabs that apply to the kind of request are shown, and a protocol's own tab comes first:
+
+- HTTP: Params, Headers, Body, Auth, Vars, Extract, Tests, Settings.
+- GraphQL (method GRAPHQL): GraphQL, Params, Headers, Auth, Vars, Extract, Tests, Settings.
+- gRPC (method GRPC): gRPC, Headers, Auth, Vars, Extract, Tests, Settings.
+- WebSocket, Socket.IO and MQTT (a `ws://` or `wss://` URL): WebSocket, Params, Headers, Auth, Vars, Settings. With the method GRAPHQL the GraphQL tab follows WebSocket.
+- MCP: MCP, Params, Headers, Auth, Vars, Extract, Tests, Settings. A local `stdio:` server has no Params or Auth tab.
+
+A tab that does not apply stays visible while it still holds something, for example a GraphQL query on a request whose method is now POST, so nothing you entered is hidden. A count or a dot on a tab shows that it has content. When the row is too narrow, the tabs that do not fit move into a More menu; the selected tab always stays in the row.
 
 | Tab | Purpose |
 | --- | --- |
@@ -88,7 +96,9 @@ Choose a body type with the buttons at the top of the Body tab.
 
 Details:
 
-- File attachments, in the File type and in Multipart file rows, are limited to 5 MB. A larger file is refused with a message.
+- File attachments, in the File type and in Multipart file rows, work differently in the two apps:
+  - The desktop app keeps only the file's path and reads the file from disk while the request is sent, so the file is never loaded into memory or saved in the collection. The files of one request can be up to 1 GB together. A folder you have not trusted cannot send them, and the CLI does not send them. AWS Signature, Hawk, EdgeGrid and OAuth 1.0 sign the whole body, so with them the files are limited to 10 MB. A large upload can take longer than the default 30 second timeout; raise it under **Settings**.
+  - The web app keeps the file's content in the request, and a file is limited to 3 MB, because the hosted proxy accepts requests of at most 4.5 MB. A larger file is refused with a message that says so.
 - Switching between raw types (JSON, Text, XML, SOAP) keeps the same text. Switching between the groups None, Form URL-encoded, Multipart, File and raw types keeps a separate draft for each group, so you can switch back without losing it.
 - For JSON and XML, **Format** at the right of the toolbar (or Shift+Alt+F in the editor) indents the body. `{{variables}}` are kept as written, also where JSON expects a value, and numbers, key order and duplicate keys are left exactly as they are. Undo (Ctrl+Z) restores the previous text. When the body is not valid, nothing is changed: a notice names the problem with its line and column, for example "The JSON cannot be formatted at line 3, column 3: Expected ',' or '}' after the property value", the cursor moves to that place, and **Go to line** takes you back to it later. The same message appears when you hover the underlined spot while typing.
 
@@ -125,15 +135,21 @@ Secret fields are masked. The eye button shows or hides the value. Values can us
 
 OAuth 2.0 has these fields:
 
-- Grant type: Client credentials, Password or Authorization code.
+- Grant type: Client credentials, Password, Authorization code or Device code.
+- Issuer, with **Discover**: enter the provider's issuer, such as `https://login.example.com/realm`, and Discover reads its `/.well-known/openid-configuration` and fills in the authorization, token and device authorization URLs. The document must name the same issuer, or nothing is filled in. With an issuer set, a sign-in answer that names another issuer is discarded. An issuer written as a variable, such as `{{idp}}`, is kept as you wrote it, and the URLs it fills in start with the variable, such as `{{idp}}/token`, so each environment can point at its own provider.
 - Authorization URL and Callback URL, for Authorization code only.
+- Device authorization URL, for Device code only.
 - Token URL, Client ID, Client secret and Scope.
 - Username and Password, for the Password grant only.
 - Send credentials in: Basic auth header or Request body.
 - Use PKCE, for Authorization code only.
-- Header prefix and Access token.
+- Header prefix.
+- Send the ID token instead of the access token: sends the OpenID Connect ID token the provider returned, for APIs that expect it. The provider returns one when the scope includes `openid`.
+- Access token, or ID token when the option above is on.
 
-Get token requests a token and Clear token removes it. The panel shows whether a token exists and when it expires. For Authorization code, the panel waits for you to finish signing in in your browser, and Cancel stops the wait. For the callback address to register with your provider, see [Variables, scripts and settings](scripting-and-settings.md#oauth-20-callback).
+Get token requests a token and Clear token removes it. The panel shows whether a token exists and when it expires. For Authorization code, the panel waits for you to finish signing in in your browser, and Cancel stops the wait. In the web version the sign-in opens in a pop-up; closing the pop-up before you finish stops the wait with a message. For Device code, the panel shows a code and a link to the provider's sign-in page; open it on any device, enter the code, and the token arrives when you finish. Cancel stops the wait. For the callback address to register with your provider, see [Variables, scripts and settings](scripting-and-settings.md#oauth-20-callback).
+
+A token belongs to the environment that was active when it was fetched or typed in. After you switch environments it is not sent: the panel says so, a client credentials or password token is fetched again for the new environment, and the other grants ask you to choose Get token. Tokens saved by an earlier version of Gostman have no environment, so they are treated the same way once.
 
 ### Vars
 
@@ -141,7 +157,7 @@ The Vars tab holds variables that apply to this request only. They use the same 
 
 ### Extract
 
-Extract rules copy a value from each response into the active environment, so later requests can use it as `{{variable_name}}`. Each row has:
+Extract rules copy a value from each response into a variable, so later requests can use it as `{{variable_name}}`. The **Keep in** column chooses where: a session value that is never written to disk, or the active environment. See [Variables](variables.md#setting-variables-from-a-response) for the default in each kind of collection. Each row has:
 
 - A checkbox that turns the rule on or off.
 - Variable: the name to save.
@@ -160,6 +176,9 @@ Each assertion row has an Expression, a Check and an Expected value. Expressions
 - Comparisons: equals, does not equal, is greater than, is at least, is less than, is at most.
 - Text and list checks: contains, does not contain, starts with, ends with, matches regex, is one of, has length.
 - Checks without an expected value: is defined, is undefined, is null, is empty, is not empty, is true, is false, is a number, is a string, is a boolean, is an array, is an object.
+- matches schema: the expected value is a JSON Schema, such as `{"type": "object", "required": ["id"]}`, or a `{{variable}}` that holds one. The button next to the field opens the schema in an editor. A failure lists each place that does not match and why, for example `$.items[2].price should be a number, but it is the text "12.5".` See [JSON Schema checks](scripting-and-settings.md#json-schema-checks).
+
+**Add checks from this response**, in the response toolbar and at the top of the **Tests** tab once a response has arrived, builds assertions from the response you just received: the status code, the content type, a JSON Schema of the body, and a response time budget. A dialog lists them with checkboxes, and the **Add** button appends the checked ones to the request's assertions. Checks the request already has are not offered again. The schema records each field's type and which fields were present; extra fields are allowed, numbers are not required to be whole, a field seen as both null and a value accepts both, and a field that was only ever null accepts any value. The response time budget is twice the time the response took, rounded up to 100 ms and at least 200 ms, and starts unchecked.
 
 ![Assertions and test results](../gostman-gui/frontend/src/assets/landing/tests.webp)
 
@@ -170,6 +189,8 @@ Each assertion row has an Expression, a Check and an Expected value. Expressions
 | Timeout (ms) | Empty uses the default, shown as 30000. |
 | Follow redirects | On by default. |
 | Verify TLS certificates | On by default. Clear it to accept certificates that fail verification. |
+| Send cookies from the cookie jar | On by default. Clear it to send the request without stored cookies. |
+| Store cookies the response sets | On by default. Clear it to leave the cookie jar unchanged. |
 | Stream as server-sent events | Streams the response as events. Adds Reconnect when the server closes the stream, Max events (default 10000) and Max seconds (default 300). |
 | Tags | Labels such as `smoke` or `regression`. Type a tag and press Enter or a comma; Backspace in the empty field removes the last one. Tags already used in the collection are suggested. Case is ignored, so `Smoke` and `smoke` are one tag. The runner dialog and `gostman run --tags` use them to run a subset. |
 | Description | Markdown shown in generated documentation. |
@@ -203,10 +224,11 @@ The toolbar buttons are:
 - Copy body
 - Download body
 - Save as example
+- Add checks from this response, for an HTTP response
 - Explain with AI, for a failed status
 - Fullscreen
 
-The panel shows a notice when the response was cut off because it exceeded the size limit. The README gives the limits: 3 MB on the web app and 50 MB on the desktop app.
+Responses are limited to 50 MB in the desktop app and the CLI, and to 3 MB in the web app. A longer response is cut off at the limit, and the panel says so; the body shown, copied and saved is then only the first part.
 
 ### Earlier responses and comparing
 
@@ -243,18 +265,18 @@ The Body tab chooses a view from the response type.
 | HTML | Raw and Preview |
 | Other text | Raw |
 | Image, PDF, audio, video | Preview, plus Raw when the content is text such as SVG |
-| Binary | A notice with the type and size. Use Download body. |
+| Binary | A notice with the type and size, and **Save to file**. |
 | No body | "Empty response body" with the status. |
 
 - Pretty shows a collapsible tree. The first two levels are expanded. Very large trees are trimmed, and a notice tells you how many values are hidden.
 - The HTML preview runs in a sandboxed frame.
-- Text longer than 500,000 characters is cut in the view, with a notice. Download body saves the whole response.
+- A body over 500,000 characters is shown whole as plain text, without the tree or colours, so the window stays responsive. Only the lines on screen are drawn, and long lines are wrapped to the width of the panel. For JSON, **Format anyway** in the notice above the body pretty-prints it in the background and then offers Pretty and Raw; the rest of the app keeps working while it formats.
 
 ### Filter and search
 
 For a JSON body, the filter field accepts a JSONPath such as `$.data[0].id` and shows only the matching value. An invalid path shows an error under the field, and the clear button removes the filter. Copy body copies the filtered text while a filter is active.
 
-Search works in the Pretty and Raw views. Press Ctrl+F while the response panel has focus, or use the search button. Type in the "Find in body" field and the matches are highlighted.
+Search works in the Pretty and Raw views, across the whole body, also for large bodies. For a large JSON body the filter runs in the background. Press Ctrl+F while the response panel has focus, or use the search button. Type in the "Find in body" field and the matches are highlighted.
 
 - Enter goes to the next match and Shift+Enter to the previous one.
 - The counter reads "1 of 12". It shows a plus sign when the match limit of 2000 is reached.

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { ROOT_ID, buildCollectionTree, collectRequests } from './collectionTree'
 import { selectActiveVariables, useAppStore } from '../store/appStore'
+import { isWebAddress } from './webAddress'
 
 export const ROUTE_SERVED = 'served'
 export const ROUTE_NO_EXAMPLE = 'no-example'
@@ -140,16 +141,6 @@ const affectsRoutes = (state, previous) => (
   || state.folders !== previous.folders
   || selectActiveVariables(state) !== selectActiveVariables(previous)
 )
-
-const WEB_PROTOCOLS = ['http:', 'https:']
-
-function isWebAddress(text) {
-  try {
-    return WEB_PROTOCOLS.includes(new URL(text).protocol)
-  } catch {
-    return false
-  }
-}
 
 export function specSourceOf(text) {
   const address = text.trim()

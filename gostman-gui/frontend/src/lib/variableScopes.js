@@ -4,8 +4,7 @@ import { parseRows } from './rows'
 import { connectionDirectory } from './secretOrigins'
 import { PROCESS_PREFIX, PROMPT_PREFIX } from './variableNames'
 
-export const SCOPE_GLOBAL = 'global'
-export const SCOPE_COLLECTION = 'collection'
+export { SCOPE_COLLECTION, SCOPE_GLOBAL } from './scripting/scopes'
 
 const PROMPT_TOKEN = /\{\{\s*\?([^{}]*?)\s*\}\}/gu
 
@@ -84,6 +83,12 @@ export const dotEnvEntries = (dotEnv) => (
   Object.entries(dotEnv).map(([name, value]) => ({ name: PROCESS_PREFIX + name, value, secret: true, enabled: true }))
 )
 
+export const sessionEntries = (values) => (
+  Object.entries(values || {}).map(([name, value]) => ({ name, value, secret: true, enabled: true }))
+)
+
+const sessionLayer = (values) => ({ source: 'session', entries: sessionEntries(values) })
+
 const dotEnvLayer = (dotEnv) => ({ source: 'process', entries: dotEnvEntries(dotEnv || {}) })
 
 export function folderChain(folders, folderId) {
@@ -108,6 +113,7 @@ export function scopeLayers(state, request, referenced = {}) {
     ...(activeEnvironment ? environmentLayers('environment', state.environments, activeEnvironment, referenced) : []),
     ...folderLayers(state.folders, request?.folderId),
     rowsLayer(request?.vars),
+    sessionLayer(state.sessionVariables),
   ]
 }
 
@@ -115,11 +121,15 @@ export function resolveLayers(layers) {
   const resolved = new Map()
   for (const layer of layers) {
     for (const { name, value, secret, ref } of layer.entries) {
-      resolved.set(name, { value: asText(value), secret: secret === true, source: layer.source, ref })
+      resolved.set(name, { value: asText(value), typed: value, secret: secret === true, source: layer.source, ref })
     }
   }
   return resolved
 }
+
+export const scriptValues = (resolved) => (
+  Object.fromEntries(Array.from(resolved, ([name, { typed }]) => [name, typed]))
+)
 
 export const variableText = (resolved) => (
   JSON.stringify(Object.fromEntries(Array.from(resolved, ([name, { value }]) => [name, value])))

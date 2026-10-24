@@ -119,12 +119,11 @@ func (c *collector) readHTTPEnvironments(docs []document) {
 			c.collectEnvironments(set, doc)
 		}
 		for _, name := range set.order {
-			id := c.addEnvironment(name, set.values[name])
-			secrets := map[string]map[string]bool{}
-			for _, key := range sortedKeys(set.secrets[name]) {
-				secrets[key] = map[string]bool{"secret": true}
+			draft := environmentDraft{name: name}
+			for _, key := range sortedKeys(set.values[name]) {
+				draft.variables = append(draft.variables, envVariable{name: key, value: set.values[name][key], enabled: true, secret: set.secrets[name][key]})
 			}
-			c.markSecrets(id, name, secrets, sortedKeys(set.secrets[name]))
+			c.addDraftEnvironments([]environmentDraft{draft})
 		}
 	})
 }

@@ -5,22 +5,14 @@ import { openGit, useGitStore } from "../lib/gitSession"
 import { useMockStore } from "../lib/mockServer"
 import { ABOUT_TEXT } from "../lib/aboutText"
 import { PREFERENCES_TEXT } from "../lib/preferencesText"
+import { STATUS_BAR_TEXT as TEXT } from "../lib/statusBarText"
 import { useAppStore } from "../store/appStore"
+import { DataNotices } from "./DataNotices"
+import { STATUS_ITEM_CLASS, StatusItem } from "./StatusItem"
 
-const ITEM_CLASS = "inline-flex h-full items-center gap-1.5 px-2 transition-colors hover:bg-accent hover:text-foreground max-sm:px-3 [&_svg]:size-3 max-sm:[&_svg]:size-4"
+const gitLabel = (git) => (git.detached ? TEXT.detached : git.branch) + (git.changes.length > 0 ? ` (${git.changes.length})` : "")
 
-function StatusItem({ icon: Icon, label, active, onClick }) {
-  return (
-    <button type="button" onClick={onClick} className={cn(ITEM_CLASS, active && "text-success")}>
-      <Icon aria-hidden="true" />
-      <span className="max-sm:sr-only">{label}</span>
-    </button>
-  )
-}
-
-const gitLabel = (git) => (git.detached ? "Detached HEAD" : git.branch) + (git.changes.length > 0 ? ` (${git.changes.length})` : "")
-
-export function StatusBar({ onOpenMock, onOpenCapture }) {
+export function StatusBar({ onOpenMock, onOpenCapture, updates, remindsExport, onExport }) {
   const openCookies = useAppStore((s) => s.openCookiesDialog)
   const openSettings = useAppStore((s) => s.openSettingsDialog)
   const openPreferences = useAppStore((s) => s.openPreferencesDialog)
@@ -32,15 +24,16 @@ export function StatusBar({ onOpenMock, onOpenCapture }) {
   return (
     <footer className="flex h-6 max-sm:h-10 shrink-0 items-center justify-between overflow-hidden border-t border-border bg-background px-1 text-2xs text-muted-foreground">
       <div className="flex h-full items-center">
-        <StatusItem icon={Settings} label="Network" onClick={openSettings} />
-        <StatusItem icon={Server} label={isMockRunning ? "Mock server (running)" : "Mock server"} active={isMockRunning} onClick={onOpenMock} />
-        <StatusItem icon={Radio} label={isCapturing ? "Capture (running)" : "Capture"} active={isCapturing} onClick={onOpenCapture} />
-        {git.hasFolder && <StatusItem icon={GitBranch} label={git.isRepo ? gitLabel(git) : "Git"} onClick={openGit} />}
+        <StatusItem icon={Settings} label={TEXT.network} onClick={openSettings} />
+        <StatusItem icon={Server} label={TEXT.mock(isMockRunning)} active={isMockRunning} onClick={onOpenMock} />
+        <StatusItem icon={Radio} label={TEXT.capture(isCapturing)} active={isCapturing} onClick={onOpenCapture} />
+        {git.hasFolder && <StatusItem icon={GitBranch} label={git.isRepo ? gitLabel(git) : TEXT.git} onClick={openGit} />}
       </div>
       <div className="flex h-full items-center">
-        <StatusItem icon={Cookie} label="Cookies" onClick={openCookies} />
+        <DataNotices updates={updates} remindsExport={remindsExport} onExport={onExport} />
+        <StatusItem icon={Cookie} label={TEXT.cookies} onClick={openCookies} />
         <StatusItem icon={SlidersHorizontal} label={PREFERENCES_TEXT.statusLabel} onClick={openPreferences} />
-        <button type="button" title={ABOUT_TEXT.versionButton} aria-label={ABOUT_TEXT.versionButton} onClick={openAbout} className={cn(ITEM_CLASS, "font-mono text-3xs")}>v{__APP_VERSION__}</button>
+        <button type="button" title={ABOUT_TEXT.versionButton} aria-label={ABOUT_TEXT.versionButton} onClick={openAbout} className={cn(STATUS_ITEM_CLASS, "font-mono text-3xs")}>v{__APP_VERSION__}</button>
       </div>
     </footer>
   )

@@ -20,21 +20,27 @@ type Auth struct {
 }
 
 type OAuth2 struct {
-	Grant         string `json:"grant"`
-	AuthURL       string `json:"authUrl"`
-	TokenURL      string `json:"tokenUrl"`
-	ClientID      string `json:"clientId"`
-	ClientSecret  string `json:"clientSecret"`
-	Scope         string `json:"scope"`
-	Username      string `json:"username"`
-	Password      string `json:"password"`
-	CallbackURL   string `json:"callbackUrl"`
-	CredentialsIn string `json:"credentialsIn"`
-	PKCE          bool   `json:"pkce"`
-	HeaderPrefix  string `json:"headerPrefix"`
-	AccessToken   string `json:"accessToken"`
-	RefreshToken  string `json:"refreshToken"`
-	ExpiresAt     int64  `json:"expiresAt"`
+	Grant            string `json:"grant"`
+	AuthURL          string `json:"authUrl"`
+	TokenURL         string `json:"tokenUrl"`
+	ClientID         string `json:"clientId"`
+	ClientSecret     string `json:"clientSecret"`
+	Scope            string `json:"scope"`
+	Username         string `json:"username"`
+	Password         string `json:"password"`
+	CallbackURL      string `json:"callbackUrl"`
+	CredentialsIn    string `json:"credentialsIn"`
+	PKCE             bool   `json:"pkce"`
+	HeaderPrefix     string `json:"headerPrefix"`
+	AccessToken      string `json:"accessToken"`
+	RefreshToken     string `json:"refreshToken"`
+	ExpiresAt        int64  `json:"expiresAt"`
+	Resource         string `json:"resource"`
+	Issuer           string `json:"issuer"`
+	DeviceURL        string `json:"deviceUrl"`
+	SendIDToken      bool   `json:"sendIdToken"`
+	IDToken          string `json:"idToken"`
+	TokenEnvironment string `json:"tokenEnvironment"`
 }
 
 type Options struct {
@@ -46,6 +52,12 @@ type Options struct {
 	StreamReconnect  bool `json:"streamReconnect"`
 	StreamMaxEvents  int  `json:"streamMaxEvents"`
 	StreamMaxSeconds int  `json:"streamMaxSeconds"`
+
+	SkipCookies    bool `json:"skipCookies"`
+	DiscardCookies bool `json:"discardCookies"`
+
+	SocketIOPath string `json:"socketIoPath"`
+	SocketIOAuth string `json:"socketIoAuth"`
 }
 
 type Request struct {
@@ -82,12 +94,14 @@ type CookieInfo struct {
 }
 
 type Prepared struct {
-	Method  string        `json:"method"`
-	URL     string        `json:"url"`
-	Headers []HeaderEntry `json:"headers"`
-	Body    string        `json:"body"`
+	Method     string        `json:"method"`
+	URL        string        `json:"url"`
+	Headers    []HeaderEntry `json:"headers"`
+	Body       string        `json:"body"`
+	Unresolved []string      `json:"unresolved,omitempty"`
 
-	body []byte
+	body   []byte
+	stream *bodyStream
 }
 
 const (
@@ -119,4 +133,14 @@ type Response struct {
 	Protocol     string        `json:"protocol,omitempty"`
 	StreamEnd    string        `json:"streamEnd,omitempty"`
 	Timeline     *Timeline     `json:"timeline,omitempty"`
+
+	Failed        bool           `json:"failed,omitempty"`
+	Notifications []Notification `json:"notifications,omitempty"`
+	Unresolved    []string       `json:"unresolved,omitempty"`
+}
+
+type Notification struct {
+	Method string `json:"method"`
+	Params string `json:"params,omitempty"`
+	AtMs   int64  `json:"atMs"`
 }

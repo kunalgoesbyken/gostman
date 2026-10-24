@@ -13,8 +13,22 @@ When a name is defined in more than one place, the most specific scope wins. Fro
 | Environment | Environments, **Collection** tab | The environment selected in the header. If it inherits from another environment, the parent's variables come first and the child overrides them. |
 | Folder | Folder settings, **Vars** tab | Outer folders first, the request's own folder last. See [Folder and collection settings](folder-settings.md). |
 | Request | **Vars** tab of a request | Rows can be switched off without deleting them. |
+| Session | Environments, **Session values** | Set by scripts and Extract rules for this session only. Never written to disk. |
 
-Values written by Extract rules and scripts (`env.set`) are saved into the active environment, so they take part as environment variables.
+## Values set by scripts and Extract rules
+
+Scripts choose where a value goes:
+
+| Call | Where the value goes |
+| --- | --- |
+| `env.set`, `pm.environment.set`, `bru.setEnvVar`, `insomnia.environment.set` | The active environment. It is saved with the environment, in its YAML file in a folder workspace, unless the variable is marked secret, which keeps the value in the keychain. |
+| `env.session.set`, `pm.variables.set`, `bru.setVar`, `insomnia.variables.set` | Session values. |
+| `env.collection.set`, `pm.collectionVariables.set`, `insomnia.collectionVariables.set`, `insomnia.baseEnvironment.set` | Collection variables, saved in `gostman.yaml` in a folder workspace. |
+| `env.globals.set`, `pm.globals.set`, `bru.setGlobalEnvVar`, `insomnia.globals.set` | The global environment in use. When none is in use, a global environment named Globals is created and used. In the CLI there are no globals, so the value lasts for the run. |
+
+Session values sit above every other scope, the way Postman's local variables and Bruno's runtime variables do. They are kept in memory: closing the app, opening another collection or **Clear session values** in the Environments dialog removes them. They are treated as secret, so hover previews mask them, and they never go into exports, share links or AI prompts. Writing a name to the environment, the collection or the globals removes the session value with that name, so the newest value wins.
+
+Use session values for tokens and other values that come from a response, so they are not committed to Git with the environment. Reading works the same from every scope object: `pm.environment.get("token")` and `pm.variables.get("token")` both return the value the request would use. A number or `true`/`false` set by a script reads back as a number or a boolean, in the apps and the CLI alike; it becomes text only where it is filled into a request.
 
 The Go engine, the desktop and web apps and the CLI resolve a name the same way, apart from global environments, which exist in the apps only.
 
@@ -36,10 +50,10 @@ Names may contain letters of any script, digits, underscores, dots and hyphens. 
 Write `{{name}}` wherever the value should appear: URL, query parameters and headers (keys and values), body (including form and multipart text fields), auth fields, GraphQL query and variables, and WebSocket URL and headers.
 
 - Names are case-sensitive and whitespace inside the braces is ignored: `{{ name }}` is `{{name}}`.
-- A placeholder with no matching variable is left as written, so the mistake is visible in the request that goes out.
+- A placeholder with no matching variable is left as written, so the mistake is visible in the request that goes out. The response view names such placeholders in a notice with a link to the Environments dialog, and `gostman run` and `send` print a warning for them. Dynamic values (`{{$...}}`) and prompts (`{{?...}}`) are not listed.
 - Every occurrence is replaced. Values are inserted as they are; a value placed in a URL is not percent-encoded apart from spaces.
-- Placeholders are not expanded recursively.
-- In fields with variable support, defined names are underlined, hovering shows the value (masked for secrets) and the scope it came from, and typing `{{` or pressing Ctrl+Space offers completions.
+- A value can refer to other variables: with `host` set to `https://api.example.com` and `api` to `{{host}}/v1`, `{{api}}/users` becomes `https://api.example.com/v1/users`. Values are filled in up to 8 levels deep; a placeholder deeper than that, or one that refers back to a variable being filled in, is left as written. A dynamic value inside a variable, such as `{{$guid}}`, is generated once per request, so every use of that variable gets the same value. `{{$file(...)}}` inside a variable's value is never read; write it in the request itself.
+- In fields with variable support, defined names are underlined, hovering shows the value (masked for secrets) and the scope it came from, and typing `{{` or pressing Ctrl+Space offers completions. For a value that refers to other variables, the hover also shows what it resolves to and through which variables, with secret parts masked.
 
 ## Secret variables
 
@@ -47,7 +61,7 @@ Mark a row as secret with its lock.
 
 - **Desktop**: values live in the operating system keychain (Windows Credential Manager, macOS Keychain, the Secret Service on Linux). If no keychain is available they are kept in `secrets.enc` in the app data folder, encrypted with AES-256-GCM using a key file next to it. That fallback protects against casual reading and accidental sharing, not against someone who can read both files.
 - Only the name of a secret variable is written to the environment file (as `meta`), never its value. Copying a workspace folder to another computer therefore leaves the secret values behind.
-- **Web**: there is no keychain in a browser, so values stay in the browser's local storage and are still left out of exports and share links.
+- **Web**: there is no keychain in a browser, so values stay in the browser's storage (IndexedDB) and are still left out of exports and share links.
 - **CLI**: provide the value yourself, for example `gostman run <collection> --var-from-env API_TOKEN` (the environment variable name becomes the variable name) or `--var token=value`.
 
 ## Secret managers
@@ -125,7 +139,12 @@ In a folder workspace, a `.env` file next to `gostman.yaml` is read as process e
 
 ## Setting variables from a response
 
-The **Extract** tab stores rules on a request. After each response, every enabled rule copies a value into the active environment:
+The **Extract** tab stores rules on a request. After each response, every enabled rule copies a value into a variable. **Keep in** chooses where:
+
+- **Session**: a session value, never written to disk. This is the default in a folder workspace, where environment files are usually shared through Git and a token written there would be committed with them.
+- **Environment**: the active environment, saved with it. This is the default when the collection is kept in the app's own storage, which is never shared, so existing rules keep working as before.
+
+A rule saved with an explicit choice keeps it wherever the collection is opened. In the CLI a rule without a choice keeps its value as a session value; nothing is written to disk either way.
 
 | Source | Expression | Example |
 | --- | --- | --- |

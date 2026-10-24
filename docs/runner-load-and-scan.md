@@ -57,6 +57,8 @@ The footer reads, for example, `Ran 5 of 5 · 4 passed · 1 failed`. Before a ru
 
 A 4xx or 5xx status does not fail a request by itself. Add an assertion such as `res.status equals 200`, as in the screenshot above. A request also counts as failed when it gets no response or when its script raises an error.
 
+Requests in a folder linked to an OpenAPI spec also get the spec's contract checks, which count like assertions; see [Contract checks](import-export-and-specs.md#contract-checks).
+
 ### Download HTML report
 
 **Download HTML report**, at the bottom of the dialog, saves the results of the last run as `gostman-report.html`. It is disabled while a run is going and when there are no results. The command line produces the same report with `--reporter html`; see [Command line](cli.md) and [Gostman in CI](ci.md).

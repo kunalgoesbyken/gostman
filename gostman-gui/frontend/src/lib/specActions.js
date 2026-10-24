@@ -1,3 +1,4 @@
+import { checksContract } from './contractCheck'
 import { parseJSON } from './dataUtils'
 import { sanitizeImport } from './importExport'
 import { createSpecClient } from './openapiSpec'
@@ -106,6 +107,11 @@ export function createSpecActions({ backend, attempt, addImported }) {
     }), 'OK', 'success')
   })
 
+  const toggleContract = (folderId) => {
+    const link = store().specLinks[folderId]
+    store().setSpecLink(folderId, { ...link, contract: !checksContract(link) })
+  }
+
   const browse = (source) => store().openSpecDialog({ mode: 'view', source })
 
   const browseFolder = (folderId) => browse(store().specLinks[folderId].source)
@@ -136,6 +142,7 @@ export function createSpecActions({ backend, attempt, addImported }) {
     importSpec,
     check,
     apply,
+    toggleContract,
     browse,
     browseFolder,
     sendToTab,

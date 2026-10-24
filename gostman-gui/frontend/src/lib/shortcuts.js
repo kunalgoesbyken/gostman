@@ -29,7 +29,7 @@ export const SHORTCUTS = [
   { id: 'commandPalette', group: 'General', label: 'Command palette', mod: true, key: 'k' },
   { id: 'findRequest', group: 'General', label: 'Go to request or history', mod: true, key: 'p' },
   { id: 'shortcutsHelp', group: 'General', label: 'Keyboard shortcuts', mod: true, key: '/' },
-  { id: 'newRequest', group: 'Request', label: 'New request', mod: true, key: 'n' },
+  { id: 'newRequest', group: 'Request', label: 'New request', mod: true, key: 'n', web: { alt: true, key: 'n' } },
   { id: 'saveRequest', group: 'Request', label: 'Save request', mod: true, key: 's' },
   { id: 'sendRequest', group: 'Request', label: 'Send request', mod: true, key: 'enter' },
   { id: 'closeTab', group: 'Tabs', label: 'Close tab', mod: true, key: 'w', web: { alt: true, key: 'w' } },
@@ -48,8 +48,8 @@ export const SHORTCUTS = [
     position,
     listed: position === 1,
   })),
-  { id: 'aiGenerate', group: 'General', label: 'AI: new request from a description', mod: true, shift: true, key: 'u', web: { alt: true, shift: true, key: 'u' } },
-  { id: 'aiExplain', group: 'General', label: 'AI: explain the response', mod: true, shift: true, key: 'x', web: { alt: true, shift: true, key: 'x' } },
+  { id: 'aiGenerate', ai: true, group: 'General', label: 'AI: new request from a description', mod: true, shift: true, key: 'u', web: { alt: true, shift: true, key: 'u' } },
+  { id: 'aiExplain', ai: true, group: 'General', label: 'AI: explain the response', mod: true, shift: true, key: 'x', web: { alt: true, shift: true, key: 'x' } },
   { id: 'toggleSidebar', group: 'Navigation', label: 'Toggle sidebar', mod: true, key: 'b' },
   { id: 'focusSidebarSearch', group: 'Navigation', label: 'Search the sidebar', mod: true, shift: true, key: 'f' },
   { id: 'nextPane', group: 'Navigation', label: 'Next pane', key: 'f6' },
@@ -138,6 +138,7 @@ export function shortcutRows(overrides = getPreferences().shortcuts, isDesktop =
         binding,
         keys: keysLabel(shortcut, binding, isApple),
         isCustom: overrides[ownerOf(shortcut).id] !== undefined,
+        ai: Boolean(shortcut.ai),
       }
     })
 }

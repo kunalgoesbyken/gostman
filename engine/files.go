@@ -40,7 +40,19 @@ func ReadsFiles(text string) bool {
 		}
 	}
 	decoded, err := decodeJSON(text)
-	return err == nil && anyText(decoded, ReadsFiles)
+	return err == nil && (attachesFile(decoded) || anyText(decoded, ReadsFiles))
+}
+
+func attachesFile(value any) bool {
+	switch typed := value.(type) {
+	case []any:
+		return slices.ContainsFunc(typed, attachesFile)
+	case map[string]any:
+		path, isText := typed["path"].(string)
+		_, isFile := typed["fileName"]
+		return isFile && isText && path != ""
+	}
+	return false
 }
 
 func anyText(value any, test func(string) bool) bool {
@@ -104,17 +116,25 @@ func FolderFiles(root string) FileReader {
 
 func LocalFiles() FileReader {
 	return func(path string) ([]byte, error) {
-		resolved, err := localPath(path)
+		file, err := openLocal(path)
 		if err != nil {
 			return nil, err
-		}
-		file, err := os.Open(resolved)
-		if err != nil {
-			return nil, unreadable(path, resolved, err)
 		}
 		defer file.Close()
 		return readFile(path, file)
 	}
+}
+
+func openLocal(path string) (*os.File, error) {
+	resolved, err := localPath(path)
+	if err != nil {
+		return nil, err
+	}
+	file, err := os.Open(resolved)
+	if err != nil {
+		return nil, unreadable(path, resolved, err)
+	}
+	return file, nil
 }
 
 func readFile(path string, file *os.File) ([]byte, error) {

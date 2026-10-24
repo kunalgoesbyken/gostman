@@ -37,6 +37,7 @@ type schemaNode struct {
 	Default    json.RawMessage   `json:"default"`
 	Const      json.RawMessage   `json:"const"`
 	Enum       []json.RawMessage `json:"enum"`
+	Minimum    json.RawMessage   `json:"minimum"`
 }
 
 type member struct {
@@ -112,6 +113,11 @@ func example(schema json.RawMessage, depth int) []byte {
 		return exampleObject(node.Properties, depth)
 	case kindArray:
 		return exampleArray(node.Items, depth)
+	case kindNumber, kindInteger:
+		if len(node.Minimum) > 0 {
+			return node.Minimum
+		}
+		return examples[kind]
 	default:
 		if scalar, known := examples[kind]; known {
 			return scalar
@@ -161,4 +167,13 @@ func members(object json.RawMessage) []member {
 		listed = append(listed, member{name, value})
 	}
 	return listed
+}
+
+func promptSkeleton(arguments []PromptArgument) string {
+	fields := make([][]byte, 0, len(arguments))
+	for _, argument := range arguments {
+		name, _ := json.Marshal(argument.Name)
+		fields = append(fields, append(name, []byte(`:""`)...))
+	}
+	return indented(enclose('{', fields, '}'))
 }

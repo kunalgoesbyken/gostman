@@ -12,6 +12,7 @@ import { basicSetup } from 'codemirror'
 import { findJsonProblem, formatJson, lineAndColumn } from './jsonFormat'
 import { formatXml } from './soap'
 import { CLOSING_REFERENCE, SECRET_TINT, describeReference, findReferences, referenceAtCaret, referenceLook, suggestNames } from './variables'
+import { LARGE_BODY_CHARS } from './largeText'
 import { mountVariableCard } from '../components/VariableCard'
 
 const EDITOR_TEXT = {
@@ -19,6 +20,7 @@ const EDITOR_TEXT = {
 }
 
 const FONT_FAMILY = 'var(--font-mono)'
+const FONT_FEATURES = '"calt" 0, "liga" 0'
 const INDENT = '  '
 
 const token = (name, alpha) => (alpha === undefined ? `hsl(var(--${name}))` : `hsl(var(--${name}) / ${alpha})`)
@@ -28,7 +30,7 @@ const lintRange = (name) => ({ backgroundImage: 'none', textDecoration: `underli
 const theme = EditorView.theme({
   '&': { height: '100%', color: token('foreground'), backgroundColor: token('background') },
   '&.cm-focused': { outline: 'none' },
-  '.cm-scroller': { fontFamily: FONT_FAMILY, lineHeight: '1.6' },
+  '.cm-scroller': { fontFamily: FONT_FAMILY, fontFeatureSettings: FONT_FEATURES, lineHeight: '1.6' },
   '.cm-content': { caretColor: token('primary') },
   '.cm-cursor, .cm-dropCursor': { borderLeftColor: token('primary') },
   '.cm-selectionBackground, .cm-content ::selection': { backgroundColor: token('primary', 0.22) },
@@ -48,6 +50,7 @@ const theme = EditorView.theme({
     border: `1px solid ${token('border')}`,
     borderRadius: 'var(--radius)',
     fontFamily: FONT_FAMILY,
+    fontFeatureSettings: FONT_FEATURES,
     fontSize: '0.75rem',
     overflow: 'hidden',
   },
@@ -119,7 +122,10 @@ export const baseExtensions = [
   tooltips({ parent: document.body }),
 ]
 
+const isTooLargeToLint = (view) => view.state.doc.length > LARGE_BODY_CHARS
+
 function syntaxErrors(view) {
+  if (isTooLargeToLint(view)) return []
   const diagnostics = []
   syntaxTree(view.state).iterate({
     enter: (node) => {
@@ -130,6 +136,7 @@ function syntaxErrors(view) {
 }
 
 function jsonErrors(view) {
+  if (isTooLargeToLint(view)) return []
   const text = view.state.doc.toString()
   const problem = text.trim() ? findJsonProblem(text) : null
   if (!problem) return []
@@ -198,15 +205,16 @@ function variableMark(name, variables) {
   return Decoration.mark({ class: `${look.className} gm-var-code`, attributes: { ...look.attributes, ...tint } })
 }
 
-const variableDecorations = (doc, variables) => Decoration.set(
-  findReferences(doc.toString()).map((ref) => variableMark(ref.name, variables).range(ref.start, ref.end)),
+const variableDecorations = (view, variables) => Decoration.set(
+  view.visibleRanges.flatMap(({ from, to }) => findReferences(view.state.doc.sliceString(from, to))
+    .map((ref) => variableMark(ref.name, variables).range(from + ref.start, from + ref.end))),
 )
 
 const highlightVariables = (variables) => ViewPlugin.define(
   (view) => ({
-    decorations: variableDecorations(view.state.doc, variables),
+    decorations: variableDecorations(view, variables),
     update(update) {
-      if (update.docChanged) this.decorations = variableDecorations(update.state.doc, variables)
+      if (update.docChanged || update.viewportChanged) this.decorations = variableDecorations(update.view, variables)
     },
   }),
   { decorations: (plugin) => plugin.decorations },

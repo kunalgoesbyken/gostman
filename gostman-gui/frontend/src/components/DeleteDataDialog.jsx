@@ -1,8 +1,9 @@
 import { useState } from "react"
+import { AlertTriangle } from "lucide-react"
 import { Button } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
-import { SectionLabel } from "./ui/panel"
+import { Notice, SectionLabel } from "./ui/panel"
 import { DATA_TEXT as TEXT } from "../lib/dataText"
 import { isDesktopShell } from "../lib/windowControls"
 import { WORKSPACE_TEXT } from "../lib/workspaceText"
@@ -42,6 +43,7 @@ export function DeleteDataDialog({ onDelete, onExport, onClose }) {
       </DialogHeader>
       <form onSubmit={submit} className="flex min-h-0 flex-col">
         <DialogBody className="space-y-4">
+          <Notice role="note" tone="destructive" icon={AlertTriangle} edge="border" className="rounded-md border-destructive/40 font-medium leading-relaxed">{TEXT.backupsWarning}</Notice>
           <ItemList heading={TEXT.deletedHeading} items={deleted} />
           <ItemList heading={TEXT.keptHeading} items={kept} />
           <p className="text-xs leading-relaxed text-muted-foreground">{advice}</p>

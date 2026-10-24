@@ -7,7 +7,9 @@ import { Dialog, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
 import { SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
 import { Select } from "./ui/select"
+import { AiSection } from "./preferences/AiSection"
 import { DataSection } from "./preferences/DataSection"
+import { PrivacySection } from "./preferences/PrivacySection"
 import { ChoiceRow, PreferenceRow, optionsOf } from "./preferences/PreferenceRows"
 import { ThemeSection } from "./preferences/ThemeSection"
 import { useAppStore } from "../store/appStore"
@@ -15,18 +17,17 @@ import { awaitsRestart, useWindowFrame } from "../hooks/useWindowFrame"
 import { isFontInstalled, sortedFamilies } from "../lib/fonts"
 import { ORIENTATION, moveFocus } from "../lib/rovingFocus"
 import { scrollIntoStrip } from "../lib/scrollIntoStrip"
-import { readStored, writeStored } from "../lib/storage"
 import {
-  DENSITIES, EDITOR_FONT_SIZES, FONT_NAME_LENGTH, LANGUAGES, REQUEST_TIMEOUT_SECONDS, RESPONSE_LAYOUTS,
-  TEXT_SCALES, resetPreferences, updatePreferences, usePreferences,
+  BUILT_IN_TIMEOUT_SECONDS, DENSITIES, EDITOR_FONT_SIZES, FONT_NAME_LENGTH, LANGUAGES, REQUEST_TIMEOUT_SECONDS,
+  RESPONSE_LAYOUTS, TEXT_SCALES, resetPreferences, updatePreferences, usePreferences,
 } from "../lib/preferences"
+import { SECTION_AI, selectPreferencesSection, usePreferencesSection } from "../lib/preferencesSection"
 import { PREFERENCES_TEXT } from "../lib/preferencesText"
 import { cn } from "../lib/utils"
 
 const { fields, sections } = PREFERENCES_TEXT
 
 const PREFERENCES_WINDOW = { id: "preferences", width: 760, height: 560, minWidth: 560, minHeight: 360 }
-const SECTION_STORAGE_KEY = "gostman.preferencesSection"
 const SECTION_KEYS = { selector: "[role=tab]", orientation: ORIENTATION.both, activate: true }
 
 function FontRow({ label, hint, name, isCode, suggestions, preferences }) {
@@ -180,6 +181,7 @@ function EditorSection({ preferences }) {
     <>
       <NumberRow
         label={fields.editorFontSize}
+        suffix={PREFERENCES_TEXT.pixels}
         range={EDITOR_FONT_SIZES}
         value={preferences.editorFontSize}
         onCommit={(editorFontSize) => updatePreferences({ editorFontSize })}
@@ -194,7 +196,7 @@ function RequestsSection({ preferences }) {
     <>
       <NumberRow
         label={fields.requestTimeout}
-        hint={PREFERENCES_TEXT.timeoutHint}
+        hint={PREFERENCES_TEXT.timeoutHint(BUILT_IN_TIMEOUT_SECONDS)}
         suffix={PREFERENCES_TEXT.seconds}
         range={REQUEST_TIMEOUT_SECONDS}
         value={preferences.requestTimeoutSeconds}
@@ -226,12 +228,12 @@ const SECTIONS = [
   { id: "editor", title: sections.editor, render: (context) => <EditorSection {...context} /> },
   { id: "requests", title: sections.requests, render: (context) => <RequestsSection {...context} /> },
   { id: "language", title: sections.language, render: (context) => <LanguageSection {...context} /> },
+  { id: SECTION_AI, title: sections.ai, render: (context) => <AiSection actions={context.ai} /> },
+  { id: "privacy", title: sections.privacy, render: (context) => <PrivacySection {...context} /> },
   { id: "data", title: sections.data, render: (context) => <DataSection {...context} /> },
 ]
 
 const sectionById = (id) => SECTIONS.find((section) => section.id === id) ?? SECTIONS[0]
-
-const rememberedSectionId = () => sectionById(readStored(SECTION_STORAGE_KEY)).id
 
 function SectionTab({ section, isSelected, tabId, panelId, onSelect }) {
   const tabRef = useRef(null)
@@ -260,20 +262,14 @@ function SectionTab({ section, isSelected, tabId, panelId, onSelect }) {
   )
 }
 
-export function PreferencesDialog({ listFonts, windowFrame, onCommand, onClose }) {
+export function PreferencesDialog({ listFonts, windowFrame, onCommand, backups, relay, updates, ai, onClose }) {
   const preferences = usePreferences()
   const installedFonts = useInstalledFonts(listFonts)
   const openShortcuts = useAppStore((state) => state.openShortcutsDialog)
-  const [selectedId, setSelectedId] = useState(rememberedSectionId)
-  const selected = sectionById(selectedId)
+  const selected = sectionById(usePreferencesSection((state) => state.id))
   const baseId = useId()
   const tabIdOf = (section) => `${baseId}-${section.id}-tab`
   const panelId = `${baseId}-panel`
-
-  const select = (id) => {
-    setSelectedId(id)
-    writeStored(SECTION_STORAGE_KEY, id)
-  }
 
   const showShortcuts = () => {
     onClose()
@@ -300,7 +296,7 @@ export function PreferencesDialog({ listFonts, windowFrame, onCommand, onClose }
               isSelected={section.id === selected.id}
               tabId={tabIdOf(section)}
               panelId={panelId}
-              onSelect={() => select(section.id)}
+              onSelect={() => selectPreferencesSection(section.id)}
             />
           ))}
         </div>
@@ -312,7 +308,7 @@ export function PreferencesDialog({ listFonts, windowFrame, onCommand, onClose }
           className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-6 py-5 [overflow-wrap:anywhere] max-sm:p-4"
         >
           <h3 className="mb-5 text-sm font-semibold">{selected.title}</h3>
-          <div className="space-y-4">{selected.render({ preferences, windowFrame, installedFonts, onCommand })}</div>
+          <div className="space-y-4">{selected.render({ preferences, windowFrame, installedFonts, onCommand, backups, relay, updates, ai })}</div>
         </div>
       </div>
       <DialogFooter>

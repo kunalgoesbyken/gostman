@@ -15,6 +15,7 @@ var authFields = []authField{
 	{"auth.oauth2.password", func(a engine.Auth) string { return a.OAuth2.Password }},
 	{"auth.oauth2.accessToken", func(a engine.Auth) string { return a.OAuth2.AccessToken }},
 	{"auth.oauth2.refreshToken", func(a engine.Auth) string { return a.OAuth2.RefreshToken }},
+	{"auth.oauth2.idToken", func(a engine.Auth) string { return a.OAuth2.IDToken }},
 	{"auth.aws.secretKey", func(a engine.Auth) string { return a.AWS.SecretKey }},
 	{"auth.aws.sessionToken", func(a engine.Auth) string { return a.AWS.SessionToken }},
 	{"auth.oauth1.consumerSecret", func(a engine.Auth) string { return a.OAuth1.ConsumerSecret }},

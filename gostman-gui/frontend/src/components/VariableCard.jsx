@@ -17,6 +17,16 @@ function ValueLine({ info }) {
   )
 }
 
+function ResolvedLine({ info }) {
+  return (
+    <p className="font-mono">
+      <span className="text-muted-foreground">{VARIABLE_TEXT.resolvesTo} </span>
+      <span className="[overflow-wrap:anywhere]">{info.resolved}</span>
+      <span className="text-muted-foreground"> ({VARIABLE_TEXT.through(info.chain)})</span>
+    </p>
+  )
+}
+
 function OriginHeader({ origin }) {
   return (
     <p className="flex min-w-0 items-center gap-1.5">
@@ -66,6 +76,7 @@ export function VariableCard({ info }) {
   return (
     <div className="flex flex-col gap-1 font-sans">
       <ValueLine info={info} />
+      {info.chain?.length > 0 && <ResolvedLine info={info} />}
       {info.origin && <SecretOrigin origin={info.origin} />}
     </div>
   )

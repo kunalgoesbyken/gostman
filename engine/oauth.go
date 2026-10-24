@@ -19,7 +19,11 @@ const (
 	GrantClientCredentials = "client_credentials"
 	GrantPassword          = "password"
 	GrantAuthorizationCode = "authorization_code"
+	GrantDeviceCode        = "device_code"
 	grantRefreshToken      = "refresh_token"
+	deviceGrantType        = "urn:ietf:params:oauth:grant-type:device_code"
+	errorPending           = "authorization_pending"
+	errorSlowDown          = "slow_down"
 
 	credentialsInBody   = "body"
 	defaultTokenPrefix  = "Bearer"
@@ -42,18 +46,23 @@ type TokenExchange struct {
 	CodeVerifier string  `json:"codeVerifier"`
 	RedirectURI  string  `json:"redirectUri"`
 	Refresh      bool    `json:"refresh"`
+	DeviceCode   string  `json:"deviceCode"`
 }
 
 type Token struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
+	IDToken      string `json:"idToken"`
 	ExpiresAt    int64  `json:"expiresAt"`
 	Error        string `json:"error"`
+	Pending      bool   `json:"pending,omitempty"`
+	SlowDown     bool   `json:"slowDown,omitempty"`
 }
 
 type tokenPayload struct {
 	AccessToken      string      `json:"access_token"`
 	RefreshToken     string      `json:"refresh_token"`
+	IDToken          string      `json:"id_token"`
 	ExpiresIn        json.Number `json:"expires_in"`
 	Error            string      `json:"error"`
 	ErrorDescription string      `json:"error_description"`
@@ -92,6 +101,9 @@ func StartAuthorization(config OAuth2, variables string) (Authorization, error) 
 	if scope := strings.TrimSpace(substitute(config.Scope)); scope != "" {
 		query.Set("scope", scope)
 	}
+	if resource := strings.TrimSpace(substitute(config.Resource)); resource != "" {
+		query.Set("resource", resource)
+	}
 	if config.PKCE {
 		if started.CodeVerifier, err = randomToken(); err != nil {
 			return Authorization{}, err
@@ -117,6 +129,9 @@ func FetchToken(ctx context.Context, exchange TokenExchange, policy Policy) Toke
 	token := readToken(response, time.Now())
 	if token.RefreshToken == "" {
 		token.RefreshToken = exchange.Config.RefreshToken
+	}
+	if token.IDToken == "" && exchange.Refresh {
+		token.IDToken = exchange.Config.IDToken
 	}
 	return token
 }
@@ -147,6 +162,11 @@ func grantFields(exchange TokenExchange) ([]row, error) {
 			fields = append(fields, field("code_verifier", exchange.CodeVerifier))
 		}
 		return fields, nil
+	case GrantDeviceCode:
+		if exchange.DeviceCode == "" {
+			return nil, fmt.Errorf("start the device sign-in to get a token")
+		}
+		return []row{field("grant_type", deviceGrantType), field("device_code", exchange.DeviceCode)}, nil
 	default:
 		return nil, fmt.Errorf("unsupported OAuth 2 grant type %q", config.Grant)
 	}
@@ -155,12 +175,20 @@ func grantFields(exchange TokenExchange) ([]row, error) {
 func tokenRequest(exchange TokenExchange, fields []row) Request {
 	config := exchange.Config
 	isRefresh := fields[0].Value == grantRefreshToken
-	if config.Scope != "" && !isRefresh && config.Grant != GrantAuthorizationCode {
+	if config.Scope != "" && !isRefresh && config.Grant != GrantAuthorizationCode && config.Grant != GrantDeviceCode {
 		fields = append(fields, field("scope", config.Scope))
 	}
+	if config.Resource != "" {
+		fields = append(fields, field("resource", config.Resource))
+	}
+	return clientRequest(exchange, config.TokenURL, fields)
+}
+
+func clientRequest(exchange TokenExchange, address string, fields []row) Request {
+	config := exchange.Config
 	request := Request{
 		Method:    http.MethodPost,
-		URL:       config.TokenURL,
+		URL:       address,
 		Headers:   encodeRows([]row{field("Accept", contentTypeJSON)}),
 		BodyType:  BodyForm,
 		Variables: exchange.Variables,
@@ -180,14 +208,26 @@ func tokenRequest(exchange TokenExchange, fields []row) Request {
 
 func readToken(response Response, now time.Time) Token {
 	payload := decodeTokenPayload(response.Body)
+	if payload.Error == errorPending || payload.Error == errorSlowDown {
+		return Token{Pending: true, SlowDown: payload.Error == errorSlowDown}
+	}
 	if payload.AccessToken == "" {
 		return Token{Error: tokenFailure(response, payload)}
 	}
-	token := Token{AccessToken: payload.AccessToken, RefreshToken: payload.RefreshToken}
-	if seconds, err := payload.ExpiresIn.Float64(); err == nil && seconds > 0 {
-		token.ExpiresAt = now.Add(time.Duration(seconds * float64(time.Second))).UnixMilli()
+	return Token{
+		AccessToken:  payload.AccessToken,
+		RefreshToken: payload.RefreshToken,
+		IDToken:      payload.IDToken,
+		ExpiresAt:    expiryAt(now, payload.ExpiresIn),
 	}
-	return token
+}
+
+func expiryAt(now time.Time, expiresIn json.Number) int64 {
+	seconds, err := expiresIn.Float64()
+	if err != nil || seconds <= 0 {
+		return 0
+	}
+	return now.Add(time.Duration(seconds * float64(time.Second))).UnixMilli()
 }
 
 func decodeTokenPayload(body string) tokenPayload {
@@ -202,6 +242,7 @@ func decodeTokenPayload(body string) tokenPayload {
 	return tokenPayload{
 		AccessToken:      form.Get("access_token"),
 		RefreshToken:     form.Get("refresh_token"),
+		IDToken:          form.Get("id_token"),
 		ExpiresIn:        json.Number(form.Get("expires_in")),
 		Error:            form.Get("error"),
 		ErrorDescription: form.Get("error_description"),
@@ -219,13 +260,26 @@ func tokenFailure(response Response, payload tokenPayload) string {
 	}
 }
 
+func (c OAuth2) WithoutTokens() OAuth2 {
+	c.AccessToken, c.RefreshToken, c.IDToken, c.ExpiresAt, c.TokenEnvironment = "", "", "", 0, ""
+	return c
+}
+
+func sentToken(config OAuth2) string {
+	if config.SendIDToken {
+		return config.IDToken
+	}
+	return config.AccessToken
+}
+
 func oauthHeader(config OAuth2) (string, bool) {
-	if config.AccessToken == "" {
+	token := sentToken(config)
+	if token == "" {
 		return "", false
 	}
 	prefix := strings.TrimSpace(config.HeaderPrefix)
 	if prefix == "" {
 		prefix = defaultTokenPrefix
 	}
-	return prefix + " " + config.AccessToken, true
+	return prefix + " " + token, true
 }

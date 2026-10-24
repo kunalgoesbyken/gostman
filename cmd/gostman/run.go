@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/kunalgoesbyken/gostman/agent"
+	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/runner"
 )
 
@@ -31,12 +32,14 @@ func (o overrides) Set(pair string) error {
 }
 
 type invocation struct {
-	path    string
-	options runner.Options
-	reports []reporterSpec
-	redact  bool
-	extras  runExtras
-	files   fileAccess
+	path     string
+	options  runner.Options
+	reports  []reporterSpec
+	redact   bool
+	extras   runExtras
+	files    fileAccess
+	contract string
+	network  *networkSettings
 }
 
 func parseInterspersed(flags *flag.FlagSet, arguments []string) ([]string, error) {
@@ -72,8 +75,11 @@ func parseInvocation(arguments []string) (invocation, error) {
 	flags.Var(&reporters, "reporter", "")
 	flags.StringVar(&output, "output", "", "")
 	flags.BoolVar(&parsed.redact, "redact", false, "")
+	flags.StringVar(&parsed.contract, "contract", "", "")
 	parsed.extras.register(flags, &parsed.options)
-	networking := networkFlags(flags)
+	parsed.network = networkFlags(flags)
+	var signIn signInFlags
+	signIn.register(flags)
 
 	positional, err := parseInterspersed(flags, arguments)
 	switch {
@@ -91,7 +97,10 @@ func parseInvocation(arguments []string) (invocation, error) {
 	if err := parsed.extras.validate(parsed.options); err != nil {
 		return parsed, err
 	}
-	if parsed.options.Network, err = networking.network(); err != nil {
+	if err := parsed.network.check(); err != nil {
+		return parsed, err
+	}
+	if parsed.options.SignIn, err = signIn.token(); err != nil {
 		return parsed, err
 	}
 	if err := parsed.extras.apply(&parsed.options, capturesExchanges(parsed.reports)); err != nil {
@@ -125,6 +134,15 @@ func runCommand(arguments []string, stdout, stderr *os.File) int {
 	if err != nil {
 		return complain(stderr, err)
 	}
+	for _, warning := range stored.Warnings {
+		fmt.Fprintf(stderr, "warning: %s\n", warning)
+	}
+	if parsed.options.Network, err = parsed.network.network(stored); err != nil {
+		return complain(stderr, err)
+	}
+	if parsed.options.Contract, err = loadContract(parsed.contract, parsed.options.Network); err != nil {
+		return complain(stderr, err)
+	}
 	return parsed.execute(stored, stdout, stderr)
 }
 
@@ -151,6 +169,7 @@ func (i invocation) execute(stored runner.Collection, stdout, stderr *os.File) i
 		for _, reporter := range reporters {
 			reporter.Request(result)
 		}
+		warnUnresolved(stderr, result.QualifiedName(), result.Unresolved)
 	})
 	if err != nil {
 		return complain(stderr, err)
@@ -161,8 +180,20 @@ func (i invocation) execute(stored runner.Collection, stdout, stderr *os.File) i
 			return complain(stderr, err)
 		}
 	}
-	if outcome.HasFailed() || ctx.Err() != nil {
+	if ctx.Err() != nil {
 		return exitFailed
 	}
-	return exitPassed
+	return reportCode(outcome)
+}
+
+func reportCode(report runner.Report) int {
+	if !report.HasFailed() {
+		return exitPassed
+	}
+	for _, result := range report.Results {
+		if result.Status == engine.FailureStatus {
+			return exitUnsent
+		}
+	}
+	return exitFailed
 }

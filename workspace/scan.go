@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"io/fs"
 	"path"
+	"runtime"
 	"sort"
+	"sync"
 )
 
 const (
@@ -94,7 +96,7 @@ func (s *scanner) directory(directory, folderId string, depth int) {
 		return
 	}
 	var folders []*folderEntry
-	var requests []*requestEntry
+	var requestFiles []string
 	for _, entry := range entries {
 		name := entry.Name()
 		relative := joinPath(directory, name)
@@ -103,13 +105,61 @@ func (s *scanner) directory(directory, folderId string, depth int) {
 		case entry.Type() == fs.ModeDir:
 			folders = append(folders, s.readFolder(relative, folderId))
 		case entry.Type().IsRegular() && isYAMLFile(name):
-			requests = s.appendRequest(requests, relative, folderId)
+			requestFiles = append(requestFiles, relative)
 		case !entry.Type().IsRegular():
 			s.report(relative, errors.New("links and special files are not followed"))
 		}
 	}
-	s.adoptRequests(requests)
+	s.adoptRequests(s.readRequests(requestFiles, folderId))
 	s.adoptFolders(folders, depth)
+}
+
+type decodedRequest struct {
+	document requestDocument
+	err      error
+}
+
+func (s *scanner) decodeRequests(files []string) []decodedRequest {
+	decoded := make([]decodedRequest, len(files))
+	next := make(chan int)
+	var group sync.WaitGroup
+	for range min(runtime.GOMAXPROCS(0), len(files)) {
+		group.Add(1)
+		go func() {
+			defer group.Done()
+			for index := range next {
+				content, err := s.disk.readListed(files[index])
+				decoded[index].document, decoded[index].err = decodeFile(content, err, readRequestFile)
+			}
+		}()
+	}
+	for index := range files {
+		next <- index
+	}
+	close(next)
+	group.Wait()
+	return decoded
+}
+
+func (s *scanner) readRequests(files []string, folderId string) []*requestEntry {
+	var requests []*requestEntry
+	for index, result := range s.decodeRequests(files) {
+		relative := files[index]
+		if isForeign(result.err) {
+			continue
+		}
+		if result.err != nil {
+			s.report(relative, result.err)
+			continue
+		}
+		document := result.document
+		document.request.FolderId = folderId
+		if document.request.Name == "" {
+			document.request.Name = stemOf(relative)
+		}
+		requests = append(requests, &requestEntry{request: document.request, path: relative, order: document.order, extras: document.extras})
+	}
+	return requests
 }
 
 func (s *scanner) readFolder(directory, parentId string) *folderEntry {
@@ -133,23 +183,6 @@ func (s *scanner) readFolder(directory, parentId string) *folderEntry {
 		entry.folder.Name = name
 	}
 	return entry
-}
-
-func (s *scanner) appendRequest(requests []*requestEntry, relative, folderId string) []*requestEntry {
-	content, err := s.disk.read(relative)
-	document, err := decodeFile(content, err, readRequestFile)
-	if isForeign(err) {
-		return requests
-	}
-	if err != nil {
-		s.report(relative, err)
-		return requests
-	}
-	document.request.FolderId = folderId
-	if document.request.Name == "" {
-		document.request.Name = stemOf(relative)
-	}
-	return append(requests, &requestEntry{request: document.request, path: relative, order: document.order, extras: document.extras})
 }
 
 func (s *scanner) adoptRequests(requests []*requestEntry) {

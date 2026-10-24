@@ -12,6 +12,7 @@ const appVersion = JSON.parse(readFileSync(resolve(__dirname, '../wails.json'), 
 export default defineConfig({
   define: {__APP_VERSION__: JSON.stringify(appVersion), ...siteDefine},
   plugins: [react()],
+  cacheDir: 'node_modules/.vite-desktop',
   build: {
     outDir: 'dist',
     emptyOutDir: true,

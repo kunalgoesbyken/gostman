@@ -98,7 +98,7 @@ func importedTarget(path string) (workspace.Collection, error) {
 	if err != nil {
 		return workspace.Collection{}, fmt.Errorf("%s is not a Gostman workspace or a Gostman or Postman export: %w", path, err)
 	}
-	return importedCollection(result)
+	return result.Collection()
 }
 
 func summarize(report scan.Report) scanSummary {
@@ -109,10 +109,10 @@ func writeScanJSON(out io.Writer, report scan.Report, parsed scanning) error {
 	encoder := json.NewEncoder(out)
 	encoder.SetIndent("", "  ")
 	return encoder.Encode(scanDocument{
-		Scanned:  report.Scanned,
-		Summary:  summarize(report),
-		FailOn:   parsed.failOn,
-		Passed:   !report.Reaches(parsed.threshold),
+		Scanned:   report.Scanned,
+		Summary:   summarize(report),
+		FailOn:    parsed.failOn,
+		Passed:    !report.Reaches(parsed.threshold),
 		Findings:  report.Findings,
 		Truncated: report.Truncated,
 	})

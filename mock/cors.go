@@ -1,11 +1,8 @@
 package mock
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
-	"strings"
 
 	"github.com/kunalgoesbyken/gostman/loopback"
 )
@@ -43,23 +40,9 @@ func preflightAnswer(r *http.Request, settings Settings) answer {
 	return answer{status: http.StatusNoContent, headers: headers}
 }
 
-func canonicalOrigin(raw string) (parsed *url.URL, canonical string, err error) {
-	parsed, err = url.Parse(raw)
-	if err != nil {
-		return nil, "", err
-	}
-	if parsed.Scheme != "http" && parsed.Scheme != "https" {
-		return nil, "", errors.New("use http or https")
-	}
-	if parsed.Hostname() == "" || parsed.User != nil || parsed.Path != "" || parsed.RawQuery != "" || parsed.Fragment != "" || parsed.Opaque != "" {
-		return nil, "", errors.New("give only a scheme, host and optional port")
-	}
-	return parsed, parsed.Scheme + "://" + strings.ToLower(parsed.Host), nil
-}
-
 func (s Settings) validateOrigins() error {
 	for _, origin := range s.CORSOrigins {
-		if _, _, err := canonicalOrigin(origin); err != nil {
+		if _, err := loopback.ParseOrigin(origin); err != nil {
 			return fmt.Errorf("--cors-origin %q is not an origin: %w", origin, err)
 		}
 	}
@@ -67,15 +50,15 @@ func (s Settings) validateOrigins() error {
 }
 
 func (s Settings) allowsOrigin(origin string) bool {
-	parsed, canonical, err := canonicalOrigin(origin)
+	parsed, err := loopback.ParseOrigin(origin)
 	if err != nil {
 		return false
 	}
-	if loopback.IsHost(parsed.Hostname()) {
+	if parsed.IsLocal {
 		return true
 	}
 	for _, extra := range s.CORSOrigins {
-		if _, wanted, err := canonicalOrigin(extra); err == nil && wanted == canonical {
+		if wanted, err := loopback.ParseOrigin(extra); err == nil && wanted.Canonical == parsed.Canonical {
 			return true
 		}
 	}

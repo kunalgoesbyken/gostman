@@ -1,4 +1,6 @@
+import { isPlainObject } from '../dataUtils'
 import { jsonOrText, parseJSON, pretty } from './format'
+import { SOCKET_TEXT } from '../socketText'
 
 const ENGINE_PATH = '/socket.io/'
 const ENGINE_QUERY = [['EIO', '4'], ['transport', 'websocket']]
@@ -30,16 +32,32 @@ const TEXT = {
 
 const isDigit = (character) => character >= '0' && character <= '9'
 
-function namespaceOf(url) {
+function enginePathOf(request, substitute) {
+  const path = substitute(request?.options?.socketIoPath || '').trim()
+  if (!path) return ENGINE_PATH
+  const rooted = path.startsWith(PATH_SEPARATOR) ? path : PATH_SEPARATOR + path
+  return rooted.endsWith(PATH_SEPARATOR) ? rooted : rooted + PATH_SEPARATOR
+}
+
+function authPayload(request, substitute) {
+  const text = substitute(request?.options?.socketIoAuth || '').trim()
+  if (!text) return ''
+  const parsed = parseJSON(text)
+  if (!parsed || !isPlainObject(parsed.value)) throw new Error(SOCKET_TEXT.invalidAuth)
+  return JSON.stringify(parsed.value)
+}
+
+function namespaceOf(url, enginePath) {
   const { pathname } = new URL(url)
-  if (pathname.startsWith(ENGINE_PATH)) return DEFAULT_NAMESPACE
+  if (pathname.startsWith(enginePath)) return DEFAULT_NAMESPACE
   const trimmed = pathname.split(PATH_SEPARATOR).filter(Boolean).join(PATH_SEPARATOR)
   return trimmed ? PATH_SEPARATOR + trimmed : DEFAULT_NAMESPACE
 }
 
-function address(url) {
+function address(url, request, substitute) {
   const target = new URL(url)
-  if (!target.pathname.startsWith(ENGINE_PATH)) target.pathname = ENGINE_PATH
+  const enginePath = enginePathOf(request, substitute)
+  if (!target.pathname.startsWith(enginePath)) target.pathname = enginePath
   ENGINE_QUERY.forEach(([name, value]) => target.searchParams.set(name, value))
   return target.href
 }
@@ -60,9 +78,10 @@ function parsePacket(text) {
 
 const argumentsText = (args) => pretty(args.length === 1 ? args[0] : args)
 
-function createSession(channel, { url }) {
-  const namespace = namespaceOf(url)
+function createSession(channel, { url, request, substitute }) {
+  const namespace = namespaceOf(url, enginePathOf(request, substitute))
   const prefix = namespace === DEFAULT_NAMESPACE ? '' : namespace + NAMESPACE_END
+  const auth = authPayload(request, substitute)
 
   const packetHandlers = {
     [PACKET_CONNECT]: () => channel.info(TEXT.joined(namespace)),
@@ -76,7 +95,7 @@ function createSession(channel, { url }) {
   }
 
   const engineHandlers = {
-    [ENGINE_OPEN]: () => channel.sendText(ENGINE_MESSAGE + PACKET_CONNECT + prefix),
+    [ENGINE_OPEN]: () => channel.sendText(ENGINE_MESSAGE + PACKET_CONNECT + prefix + auth),
     [ENGINE_PING]: () => channel.sendText(ENGINE_PONG),
     [ENGINE_CLOSE]: () => channel.info(TEXT.closed),
     [ENGINE_MESSAGE]: (payload) => {
@@ -109,6 +128,7 @@ function createSession(channel, { url }) {
 export const socketIoProtocol = {
   label: 'Socket.IO',
   targetLabel: 'Event',
+  hasHandshake: true,
   address,
   createSession,
 }

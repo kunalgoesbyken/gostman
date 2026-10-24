@@ -50,7 +50,7 @@ func (c *Client) Compose(draft Draft) (runner.Listed, error) {
 	if err != nil {
 		return runner.Listed{}, err
 	}
-	request, err := c.session.Normalize(draftFields{
+	request, err := c.catalog.Normalize(draftFields{
 		Method:   methodOrDefault(draft.Method),
 		URL:      strings.TrimSpace(draft.URL),
 		Headers:  rows,

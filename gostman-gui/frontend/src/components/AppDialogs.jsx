@@ -10,7 +10,7 @@ import { VariablePromptDialog } from "./VariablePromptDialog"
 import { DeleteDataDialog } from "./DeleteDataDialog"
 import { useAppStore } from "../store/appStore"
 
-export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWorkspaces, hasLoadTest }) {
+export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWorkspaces, hasLoadTest, isAiOn, ai, backups, relay, updates }) {
   const alertDialog = useAppStore((s) => s.alertDialog)
   const confirmDialog = useAppStore((s) => s.confirmDialog)
   const promptDialog = useAppStore((s) => s.promptDialog)
@@ -51,6 +51,7 @@ export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWork
         environments={environments}
         workspaces={hasWorkspaces ? workspaces : null}
         hasLoadTest={hasLoadTest}
+        isAiOn={isAiOn}
         activeEnvironmentId={activeEnvironmentId}
         onClose={closeCommandPalette}
         onCommand={onCommand}
@@ -58,7 +59,7 @@ export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWork
 
       {aboutOpen && <AboutDialog onClose={closeAbout} />}
       {shortcutsDialogOpen && <ShortcutsDialog onClose={closeShortcutsDialog} />}
-      {preferencesDialogOpen && <PreferencesDialog listFonts={listFonts} windowFrame={windowFrame} onCommand={onCommand} onClose={closePreferencesDialog} />}
+      {preferencesDialogOpen && <PreferencesDialog listFonts={listFonts} windowFrame={windowFrame} onCommand={onCommand} backups={backups} relay={relay} updates={updates} ai={ai} onClose={closePreferencesDialog} />}
       {environmentDialogOpen && <EnvironmentDialog secrets={secrets} onClose={closeEnvironmentDialog} />}
       <VariablePromptDialog />
       {deleteDataDialog.isOpen && (

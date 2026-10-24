@@ -8,16 +8,21 @@ import (
 	"github.com/kunalgoesbyken/gostman/ai"
 )
 
-const aiKeyPrefix = "ai:"
+const (
+	aiKeyPrefix        = "ai:"
+	aiKeyBindingSuffix = ":base"
+	aiKeyMoved         = "This key was saved for a different address. Save it again for this base URL."
+)
 
 type AiReply struct {
 	Text  string    `json:"text"`
 	Error *ai.Error `json:"error"`
 }
 
-const aiKeyBindingSuffix = ":base"
-
-const aiKeyMoved = "This key was saved for a different address. Save it again for this base URL."
+type AiModelsReply struct {
+	Models []string  `json:"models"`
+	Error  *ai.Error `json:"error"`
+}
 
 func aiKeyName(provider string) string { return aiKeyPrefix + provider }
 
@@ -70,40 +75,52 @@ func (a *App) AiPreview(provider string, prompt ai.Prompt, secrets []string) ai.
 	return ai.Scrub(prompt, append(secrets, key))
 }
 
-func (a *App) AiComplete(id string, config ai.Config, prompt ai.Prompt, secrets []string, maxTokens int) AiReply {
+func aiFailure(err error) *ai.Error {
+	if err == nil {
+		return nil
+	}
+	var failed *ai.Error
+	if errors.As(err, &failed) {
+		return failed
+	}
+	return &ai.Error{Kind: ai.KindNetwork, Message: err.Error()}
+}
+
+func (a *App) withAiKey(id string, config ai.Config, call func(ctx context.Context, key string) error) *ai.Error {
 	ctx, cancel := context.WithCancel(a.ctx)
 	a.track(id, cancel)
 	defer a.release(id)
 	key, problem := boundAiKey(config)
 	if problem != nil {
-		return AiReply{Error: problem}
+		return problem
 	}
-	text, err := ai.Run(ctx, config, key, prompt, secrets, maxTokens)
-	return replyOf(text, err)
+	return aiFailure(call(ctx, key))
+}
+
+func (a *App) AiComplete(id string, config ai.Config, prompt ai.Prompt, secrets []string, maxTokens int) AiReply {
+	var text string
+	problem := a.withAiKey(id, config, func(ctx context.Context, key string) (err error) {
+		text, err = ai.Run(ctx, config, key, prompt, secrets, maxTokens)
+		return err
+	})
+	return AiReply{Text: text, Error: problem}
 }
 
 func (a *App) AiCheck(id string, config ai.Config) AiReply {
-	ctx, cancel := context.WithCancel(a.ctx)
-	a.track(id, cancel)
-	defer a.release(id)
-	key, problem := boundAiKey(config)
-	if problem != nil {
-		return AiReply{Error: problem}
-	}
-	return replyOf("", ai.Check(ctx, config, key))
+	return AiReply{Error: a.withAiKey(id, config, func(ctx context.Context, key string) error {
+		return ai.Check(ctx, config, key)
+	})}
+}
+
+func (a *App) AiModels(id string, config ai.Config) AiModelsReply {
+	var models []string
+	problem := a.withAiKey(id, config, func(ctx context.Context, key string) (err error) {
+		models, err = ai.Models(ctx, config, key)
+		return err
+	})
+	return AiModelsReply{Models: models, Error: problem}
 }
 
 func (a *App) AiCancel(id string) {
 	a.CancelRequest(id)
-}
-
-func replyOf(text string, err error) AiReply {
-	if err == nil {
-		return AiReply{Text: text}
-	}
-	var failed *ai.Error
-	if errors.As(err, &failed) {
-		return AiReply{Error: failed}
-	}
-	return AiReply{Error: &ai.Error{Kind: ai.KindNetwork, Message: err.Error()}}
 }

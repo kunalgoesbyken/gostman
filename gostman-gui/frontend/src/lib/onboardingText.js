@@ -24,12 +24,16 @@ export const ONBOARDING_TEXT = {
     },
     [STEP_VARIABLE]: {
       title: 'Add a variable',
-      hint: 'Define a value such as baseUrl once in an environment, then write {{baseUrl}} wherever it is needed.',
+      hint: 'Define baseUrl once in an environment, then write {{baseUrl}} wherever you need it.',
       action: 'Open environments',
+      legend: [
+        { name: '{{baseUrl}}', look: 'defined', label: 'defined' },
+        { name: '{{token}}', look: 'missing', label: 'not defined yet' },
+      ],
     },
     [STEP_CHECK]: {
       title: 'Add a check',
-      hint: 'Add an assertion such as res.status equals 200 and save the request. Each response then shows a pass or a fail.',
+      hint: 'Write an assertion such as res.status equals 200, or use Add checks from this response in the Tests tab. Then save the request, and each response shows a pass or a fail.',
       action: 'Open the Tests tab',
     },
     [STEP_RUN]: {

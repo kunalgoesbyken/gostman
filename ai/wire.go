@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-const maxReplyBytes = 1 << 20
+const maxReplyBytes = 4 << 20
 
 type apiError struct {
 	Error struct {
@@ -22,11 +22,21 @@ func post(ctx context.Context, client *http.Client, endpoint string, headers map
 	if err != nil {
 		return failure(KindConfig, "Could not build the request")
 	}
-	request, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(encoded))
+	return send(ctx, client, http.MethodPost, endpoint, headers, bytes.NewReader(encoded), reply)
+}
+
+func get(ctx context.Context, client *http.Client, endpoint string, headers map[string]string, reply any) error {
+	return send(ctx, client, http.MethodGet, endpoint, headers, nil, reply)
+}
+
+func send(ctx context.Context, client *http.Client, method, endpoint string, headers map[string]string, body io.Reader, reply any) error {
+	request, err := http.NewRequestWithContext(ctx, method, endpoint, body)
 	if err != nil {
 		return failure(KindConfig, "The base URL is not usable")
 	}
-	request.Header.Set("Content-Type", "application/json")
+	if body != nil {
+		request.Header.Set("Content-Type", "application/json")
+	}
 	for name, value := range headers {
 		request.Header.Set(name, value)
 	}

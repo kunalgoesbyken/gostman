@@ -1,6 +1,6 @@
 import SandboxWorker from './sandbox.worker.js?worker'
 import { errorLine } from './console'
-import { TIMED_OUT, TIMEOUT_MS } from './limits'
+import { scriptAllowance } from './limits'
 import { MESSAGE_REPLY, MESSAGE_RESULT, MESSAGE_SEND, MESSAGE_START } from './messages'
 
 export { applyRequestEdits, requestSubject, responseSubject } from './subjects'
@@ -18,7 +18,10 @@ async function answer(worker, { id, target }, send) {
   }
 }
 
-export function runInSandbox(job, send = () => Promise.reject(new Error(NO_SEND))) {
+const refuseSend = () => Promise.reject(new Error(NO_SEND))
+
+export function runInSandbox(job, send = refuseSend, timeoutMs = 0) {
+  const { limit, message } = scriptAllowance(timeoutMs)
   return new Promise((resolve) => {
     const worker = new SandboxWorker()
     let timer = 0
@@ -27,7 +30,7 @@ export function runInSandbox(job, send = () => Promise.reject(new Error(NO_SEND)
       worker.terminate()
       resolve(result)
     }
-    timer = setTimeout(() => finish(failure(TIMED_OUT)), TIMEOUT_MS)
+    timer = setTimeout(() => finish(failure(message)), limit)
     worker.onmessage = ({ data }) => {
       if (data.type === MESSAGE_RESULT) finish(data.result)
       if (data.type === MESSAGE_SEND) answer(worker, data, send)

@@ -2,6 +2,8 @@ package agent
 
 import (
 	"context"
+	"maps"
+	"slices"
 	"sort"
 
 	"github.com/kunalgoesbyken/gostman/engine"
@@ -11,6 +13,7 @@ import (
 
 type Client struct {
 	session *runner.Session
+	catalog *runner.Session
 	guard   *redact.Redactor
 	policy  engine.Policy
 }
@@ -20,9 +23,15 @@ func NewClient(policy engine.Policy) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	client := &Client{session: session, guard: redact.New(), policy: policy}
+	client := &Client{session: session, catalog: session, guard: redact.New(), policy: policy}
 	session.Watch(client.witness)
 	return client, nil
+}
+
+func (c *Client) separateCatalog() error {
+	catalog, err := runner.NewSession(c.policy)
+	c.catalog = catalog
+	return err
 }
 
 func sorted(names []string) []string {
@@ -30,12 +39,29 @@ func sorted(names []string) []string {
 	return names
 }
 
+func sortedKeys(values map[string]string) []string {
+	return slices.Sorted(maps.Keys(values))
+}
+
 func (c *Client) Enter(stored runner.Collection, environment string, overrides map[string]string) error {
 	if err := c.session.Enter(stored.Environments, environment, overrides); err != nil {
 		return err
 	}
+	c.fillDefaults(stored)
 	c.absorb()
 	return c.Study(stored)
+}
+
+func (c *Client) fillDefaults(stored runner.Collection) {
+	defaults, _ := runner.Environment{Variables: stored.Variables}.Values()
+	defined := c.session.Variables()
+	missing := map[string]string{}
+	for name, value := range defaults {
+		if _, set := defined[name]; !set {
+			missing[name] = value
+		}
+	}
+	c.session.Set(missing)
 }
 
 func (c *Client) SetVariables(overrides map[string]string) {
@@ -44,7 +70,7 @@ func (c *Client) SetVariables(overrides map[string]string) {
 }
 
 func (c *Client) Find(stored runner.Collection, reference string) (runner.Listed, error) {
-	return c.session.Find(stored, reference)
+	return c.catalog.Find(stored, reference)
 }
 
 func (c *Client) Text(text string) string {

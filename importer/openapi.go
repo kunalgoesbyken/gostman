@@ -14,21 +14,23 @@ func (c *collector) readOpenAPI(ctx context.Context, doc document, config Config
 		return
 	}
 	generated := loaded.Generate(openapi.Selection{})
-	c.read(generated.Title, FormatOpenAPI, func() {
-		folderIDs := map[string]string{}
-		for _, folder := range generated.Folders {
-			folderIDs[folder.ID] = c.addFolder(folder.Name, folderIDs[folder.ParentID])
+	c.read(generated.Title, FormatOpenAPI, func() { c.addGenerated(generated) })
+}
+
+func (c *collector) addGenerated(generated openapi.Collection) {
+	folderIDs := map[string]string{}
+	for _, folder := range generated.Folders {
+		folderIDs[folder.ID] = c.addFolder(folder.Name, folderIDs[folder.ParentID])
+	}
+	for _, request := range generated.Requests {
+		c.addRequest(openAPIRequest(request, folderIDs[request.FolderID]))
+	}
+	for name, value := range generated.Variables {
+		if _, taken := c.Variables[name]; !taken {
+			c.Variables[name] = value
 		}
-		for _, request := range generated.Requests {
-			c.addRequest(openAPIRequest(request, folderIDs[request.FolderID]))
-		}
-		for name, value := range generated.Variables {
-			if _, taken := c.Variables[name]; !taken {
-				c.Variables[name] = value
-			}
-		}
-		c.Warnings = append(c.Warnings, generated.Warnings...)
-	})
+	}
+	c.Warnings = append(c.Warnings, generated.Warnings...)
 }
 
 func openAPIRequest(source openapi.Request, folderID string) workspace.Request {
@@ -42,5 +44,6 @@ func openAPIRequest(source openapi.Request, folderID string) workspace.Request {
 	request.FolderId = folderID
 	request.Auth = source.Auth
 	request.Examples = source.Examples
+	request.Vars = source.Vars
 	return request
 }

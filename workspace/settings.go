@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var settingsKeys = []string{"description", "headers", "auth", "preScript", "postScript", "assertions"}
+var settingsKeys = []string{"description", "headers", "auth", "preScript", "postScript", "assertions", "scriptTimeoutMs"}
 
 func (b nodeBuilder) settings(root *yaml.Node, settings Settings, extras requestExtras) {
 	setField(root, "description", b.text(settings.Description))
@@ -16,6 +16,7 @@ func (b nodeBuilder) settings(root *yaml.Node, settings Settings, extras request
 	setField(root, "preScript", b.text(settings.PreScript))
 	setField(root, "postScript", b.text(settings.PostScript))
 	setField(root, "assertions", b.rows(settings.Assertions))
+	setField(root, "scriptTimeoutMs", integerNode(settings.ScriptTimeoutMs))
 }
 
 func (b nodeBuilder) settingsAuth(auth engine.Auth, extras requestExtras) *yaml.Node {
@@ -27,12 +28,13 @@ func (b nodeBuilder) settingsAuth(auth engine.Auth, extras requestExtras) *yaml.
 
 func readSettings(fields *fieldReader, extras *requestExtras, failure *error) Settings {
 	return Settings{
-		Description: fields.text("description"),
-		Headers:     fields.pairs("headers"),
-		Auth:        readAuth(fields.fields["auth"], extras, failure),
-		PreScript:   fields.text("preScript"),
-		PostScript:  fields.text("postScript"),
-		Assertions:  fields.jsonText("assertions", false, withEnabledDefaults),
+		Description:     fields.text("description"),
+		Headers:         fields.pairs("headers"),
+		Auth:            readAuth(fields.fields["auth"], extras, failure),
+		PreScript:       fields.text("preScript"),
+		PostScript:      fields.text("postScript"),
+		Assertions:      fields.jsonText("assertions", false, withEnabledDefaults),
+		ScriptTimeoutMs: fields.integer("scriptTimeoutMs"),
 	}
 }
 

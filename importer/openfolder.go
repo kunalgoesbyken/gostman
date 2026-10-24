@@ -2,7 +2,6 @@ package importer
 
 import (
 	"path"
-	"sort"
 	"strings"
 )
 
@@ -19,59 +18,58 @@ func bundled(doc document) bool {
 }
 
 func (c *collector) readOpenFolders(docs []document) {
-	for _, set := range c.openSets(docs) {
-		c.readOpenCollection(document{file: File{Name: set.root}, kind: kindOpenCollection, data: set.bundle()})
+	for _, set := range openSets(c.readWorkspaceEnvironments(c.safeDocuments(docs))) {
+		c.readOpenTree(document{file: File{Name: set.root}, kind: kindOpenCollection, data: set.bundle()}, set.root)
 	}
 }
 
-func (c *collector) openSets(docs []document) []*openSet {
-	var sets []*openSet
-	var loose []document
+func isOpenWorkspace(doc document) bool {
+	return (doc.kind == kindOpenItem || doc.kind == kindOpenCollection) && text(object(object(doc.data)["info"])["type"]) == itemWorkspace
+}
+
+func (c *collector) readWorkspaceEnvironments(docs []document) []document {
+	folders := map[string]string{}
 	for _, doc := range docs {
-		clean, ok := safeRelativePath(doc.file.Name)
-		if !ok {
-			c.skip(messageUnsafePath, doc.file.Name)
-			continue
+		if isOpenWorkspace(doc) {
+			folders[path.Join(path.Dir(doc.file.Name), brunoEnvironmentsFolder)] = cleanName(text(object(object(doc.data)["info"])["name"]), collectionBundled)
 		}
-		doc.file.Name = clean
-		if doc.kind == kindOpenCollection {
-			sets = append(sets, &openSet{root: path.Dir(clean), data: object(doc.data)})
-			continue
+	}
+	if len(folders) == 0 {
+		return docs
+	}
+	kept := make([]document, 0, len(docs))
+	drafts := map[string][]environmentDraft{}
+	for _, doc := range docs {
+		workspace, global := folders[path.Dir(doc.file.Name)]
+		switch {
+		case isOpenWorkspace(doc):
+		case global && doc.kind == kindOpenEnvironment:
+			draft := openEnvironment(object(doc.data), fileStem(doc.file.Name))
+			draft.global = true
+			drafts[workspace] = append(drafts[workspace], draft)
+		default:
+			kept = append(kept, doc)
 		}
-		loose = append(loose, doc)
 	}
-	sort.SliceStable(sets, func(i, j int) bool { return len(sets[i].root) > len(sets[j].root) })
-	roots := make([]string, len(sets))
-	for index, set := range sets {
-		roots[index] = set.root
+	for _, workspace := range sortedKeys(drafts) {
+		c.read(workspace, FormatBruno, func() { c.addDraftEnvironments(drafts[workspace]) })
 	}
-	var implicit *openSet
-	for _, doc := range loose {
-		var set *openSet
-		if index := owner(roots, doc.file.Name); index >= 0 {
-			set = sets[index]
-		} else {
-			implicit = implicitOpenSet(implicit, loose)
-			set = implicit
+	return kept
+}
+
+func openSets(docs []document) []*openSet {
+	var sets []*openSet
+	for _, group := range groupByRoot(docs, kindOpenCollection, collectionBundled) {
+		set := &openSet{root: group.root, data: object(group.head.data)}
+		if group.head.kind != kindOpenCollection {
+			set.data = map[string]any{"info": map[string]any{"name": group.name}}
 		}
-		set.assign(doc)
-	}
-	if implicit != nil {
-		sets = append(sets, implicit)
+		for _, doc := range group.docs {
+			set.assign(doc)
+		}
+		sets = append(sets, set)
 	}
 	return sets
-}
-
-func implicitOpenSet(existing *openSet, docs []document) *openSet {
-	if existing != nil {
-		return existing
-	}
-	root := commonDirectory(docs)
-	name := path.Base(root)
-	if root == "." || root == "/" {
-		name = collectionBundled
-	}
-	return &openSet{root: root, data: map[string]any{"info": map[string]any{"name": name}}}
 }
 
 func (set *openSet) assign(doc document) {

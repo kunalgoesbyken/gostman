@@ -11,10 +11,12 @@ import { cn } from "../lib/utils"
 import { docPath, docSlug } from "../docs/manifest"
 import { useAppStore } from "../store/appStore"
 import { usePopoverDismiss } from "../hooks/usePopoverDismiss"
+import "./variables.css"
 
 const TUTORIAL_URL = `${WEB_APP_URL}${docPath(docSlug("tutorial-first-collection.md"))}`
 const VIEWPORT_MARGIN = 8
 const POPOVER_WIDTH = 320
+const VARIABLE_LOOKS = { defined: "gm-var-ok", missing: "gm-var-missing" }
 
 export function useOnboardingProgress() {
   const requestHistory = useAppStore((s) => s.requestHistory)
@@ -33,18 +35,24 @@ export function useOnboardingCompletion() {
   const hydrated = useAppStore((s) => s.hydrated)
   const isDismissed = useAppStore((s) => s.welcomeDismissed)
   const showNotice = useAppStore((s) => s.showNotice)
+  const isRunnerOpen = useAppStore((s) => s.runner.isOpen)
   const { isComplete } = useOnboardingProgress()
   const wasComplete = useRef(null)
+  const isNoticeDue = useRef(false)
 
   useEffect(() => {
     if (!hydrated) {
       wasComplete.current = null
       return
     }
-    if (wasComplete.current === false && isComplete && !isDismissed) showNotice(TEXT.completeNotice)
+    if (wasComplete.current === false && isComplete && !isDismissed) isNoticeDue.current = true
     wasComplete.current = isComplete
     if (isComplete) rememberWelcomeDismissed()
-  }, [hydrated, isComplete, isDismissed, showNotice])
+    if (isNoticeDue.current && !isRunnerOpen) {
+      isNoticeDue.current = false
+      showNotice(TEXT.completeNotice)
+    }
+  }, [hydrated, isComplete, isDismissed, isRunnerOpen, showNotice])
 }
 
 function ProgressBar({ done, total }) {
@@ -71,19 +79,33 @@ function StepMarker({ number, isDone, isNext }) {
   )
 }
 
+function VariableLegend({ entries }) {
+  return (
+    <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+      {entries.map((entry) => (
+        <li key={entry.name} className="flex items-center gap-1.5">
+          <code className={cn("px-1 font-mono text-foreground", VARIABLE_LOOKS[entry.look])}>{entry.name}</code>
+          {entry.label}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 function Step({ id, number, isDone, isNext, onBegin }) {
   const text = TEXT.steps[id]
   return (
     <li className={cn("flex gap-3 rounded-md px-2 py-2", isNext && "bg-accent")} aria-current={isNext ? "step" : undefined}>
       <StepMarker number={number} isDone={isDone} isNext={isNext} />
       <div className="min-w-0 flex-1">
-        <p className={cn("text-xs font-medium leading-5", isDone && "text-muted-foreground line-through")}>
+        <p className={cn("text-xs font-medium leading-5", isDone && "text-muted-foreground")}>
           {isDone && <span className="sr-only">{TEXT.done}: </span>}
           {text.title}
         </p>
         {isNext && (
           <>
             <p className="mt-0.5 text-xs text-muted-foreground">{text.hint}</p>
+            {text.legend && <VariableLegend entries={text.legend} />}
             <Button size="sm" className="mt-2" onClick={() => onBegin(id)}>{text.action}</Button>
           </>
         )}
@@ -109,9 +131,12 @@ function TutorialLink() {
 
 function Completed() {
   return (
-    <div className="flex flex-col gap-2 px-2 py-1">
-      <p className="text-xs font-medium">{TEXT.completeTitle}</p>
-      <p className="text-xs text-muted-foreground">{TEXT.completeHint}</p>
+    <div className="flex gap-3">
+      <StepMarker isDone />
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-medium leading-5">{TEXT.completeTitle}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{TEXT.completeHint}</p>
+      </div>
     </div>
   )
 }
@@ -124,7 +149,7 @@ export function GettingStartedChecklist({ progress, onBegin, onHide }) {
         <h3 className="text-xs font-semibold">{TEXT.title}</h3>
         <span className="text-xs text-muted-foreground">{TEXT.progress(doneCount, steps.length)}</span>
         {onHide && (
-          <Button variant="ghost" size="sm" className="ml-auto" title={TEXT.hideLabel} onClick={onHide}>
+          <Button variant="ghost" size="sm" className="ms-auto" title={TEXT.hideLabel} onClick={onHide}>
             {TEXT.hide}
           </Button>
         )}
@@ -133,7 +158,7 @@ export function GettingStartedChecklist({ progress, onBegin, onHide }) {
       {isComplete ? (
         <Completed />
       ) : (
-        <ol className="flex flex-col gap-0.5">
+        <ol className="-mx-2 flex flex-col gap-0.5">
           {steps.map((step, index) => (
             <Step key={step.id} id={step.id} number={index + 1} isDone={step.isDone} isNext={step.id === nextId} onBegin={onBegin} />
           ))}

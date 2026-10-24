@@ -198,6 +198,10 @@ func (t *translator) render(node ast.Node) string {
 		return t.renderProperty(current)
 	case *ast.AwaitExpression:
 		t.awaitedCalls[current.Argument] = true
+	case *ast.AssignExpression:
+		if rendered, ok := t.renderLegacyTest(current); ok {
+			return rendered
+		}
 	}
 	return t.renderChildren(node, nil)
 }
@@ -234,6 +238,10 @@ func (t *translator) renderIdentifier(identifier *ast.Identifier) string {
 		return name
 	}
 	if t.dialect.roots[name] {
+		if replacement, ok := t.dialect.properties[name]; ok {
+			t.translated++
+			return replacement
+		}
 		t.fail(identifier, messageScriptValue, name)
 		return name
 	}
@@ -269,9 +277,6 @@ func (t *translator) renderMember(node ast.Expression) string {
 }
 
 func (t *translator) renderDot(dot *ast.DotExpression) string {
-	if string(dot.Identifier.Name) == jsonSchemaAssertion {
-		t.fail(dot, messageScriptUnsupported, jsonSchemaAssertion)
-	}
 	return t.renderChildren(dot, func(child ast.Node) bool { return child == ast.Node(&dot.Identifier) })
 }
 
@@ -295,7 +300,6 @@ func (t *translator) renderPath(node ast.Expression, path chain) string {
 }
 
 func (t *translator) property(node ast.Expression, path chain) (string, bool) {
-	t.noteScope(node, path)
 	if response, isResponse := t.dialect.responsePath(path); isResponse {
 		return responseProperty(responseRoot, response)
 	}
@@ -326,20 +330,6 @@ func memberObject(node ast.Expression) ast.Expression {
 		return member.Left
 	}
 	return node
-}
-
-func (t *translator) noteScope(node ast.Node, path chain) {
-	if len(path.segments) == 0 {
-		return
-	}
-	name := path.root
-	for _, segment := range path.segments {
-		name += "." + segment
-		if t.dialect.scoped[name] {
-			t.note(node, name, fmt.Sprintf(messageScriptScope, name))
-			return
-		}
-	}
 }
 
 func (t *translator) renderCall(call *ast.CallExpression) string {
@@ -392,7 +382,6 @@ func (t *translator) renderAliasCall(call *ast.CallExpression, path chain) strin
 }
 
 func (t *translator) callRule(call *ast.CallExpression, path chain, args []string) (string, bool) {
-	t.noteScope(call, path)
 	if response, isResponse := t.dialect.responsePath(path); isResponse {
 		return responseCall(responseRoot, response, args)
 	}

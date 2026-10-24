@@ -34,11 +34,12 @@ Gostman is a native desktop application built with Go and [Wails](https://wails.
 Both are good tools. Gostman is for people who want the paid-tier workflow without a paid tier or an account.
 
 - **Nothing to sign in to.** Collections are plain YAML files in a folder you can commit. The desktop app and the browser version both work without an account.
+- **No telemetry.** No analytics or crash reporting anywhere; the apps contact only the hosts you send to and the services you set up. [What Gostman connects to](docs/getting-started.md#what-gostman-connects-to) lists every network call.
 - **No tiers.** Data-driven runs, parallel runs, HTML reports, secret managers (Vault, AWS, Azure, Google Cloud, 1Password, Bitwarden, KeePassXC), the Git panel and any number of collections are all in the download. Bruno documents several of these under its [Pro and Ultimate plans](https://www.usebruno.com/pricing), and Postman lists custom data files in the Collection Runner on its [paid plans](https://www.postman.com/pricing/).
 - **Sharing without Git.** Send a folder to a teammate as an encrypted link or file that is built on your machine and never uploaded.
 - **More in the same download.** Load testing, Socket.IO, MQTT, GraphQL subscriptions, MCP servers, HAR import, traffic capture, a secret scanner and a mock server, plus a command line that is one binary with no Node.js to install.
 
-Prices and plans change, so check their pages before you decide. Gostman has no accounts, so it has no hosted collaboration, SSO or cloud monitors, and it has no VS Code extension. A side-by-side table is on [gostman.com](https://gostman.com). Moving from Bruno? [Coming from Bruno](docs/coming-from-bruno.md) covers importing a collection, its scripts and the `bru run` flags.
+Prices and plans change, so check their pages before you decide. Gostman has no accounts, so it has no hosted collaboration, SSO or cloud monitors, and it has no VS Code extension. A side-by-side table is on [gostman.com](https://gostman.com). Moving from Postman or Bruno? [Coming from Postman](docs/coming-from-postman.md) and [Coming from Bruno](docs/coming-from-bruno.md) cover importing a collection, its scripts and the `newman run` and `bru run` flags.
 
 ### Will Gostman add a paid tier?
 
@@ -129,12 +130,12 @@ Windows needs the WebView2 runtime, which ships with Windows 10 and 11; the inst
 
 [gostman.com](https://gostman.com) runs the same interface in the browser. Browsers cannot call arbitrary APIs directly, so requests are relayed through a small proxy. Two consequences:
 
-- The hosted proxy cannot reach `localhost` or private network addresses. Use the desktop app for local APIs.
+- The hosted proxy cannot reach `localhost` or private network addresses. Use the desktop app for local APIs, or run `gostman relay` and choose it under **Preferences**, **Privacy**.
 - Proxy, CA certificate and client certificate settings exist only in the desktop app.
 - A gRPC stream is collected and shown when it ends; messages for a client stream are written up front as a JSON array.
 - Responses larger than 3 MB are truncated. The desktop app reads up to 50 MB.
 
-Data in the web version is kept in the browser's local storage.
+Data in the web version is kept in the browser's IndexedDB.
 
 ## Documentation
 

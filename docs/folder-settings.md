@@ -9,7 +9,7 @@ Every folder and the collection itself can carry settings that the requests belo
 | Headers | Rows sent with every request below |
 | Auth | An auth scheme used by requests set to **Inherit** |
 | Vars | Variables for the requests below (the collection's own variables are the ones in Environments) |
-| Script | A pre-request and a post-response script |
+| Script | A pre-request and a post-response script; on the collection, also the time limit for every script |
 | Tests | Assertions checked after every response |
 | Docs | A description shown in generated documentation |
 

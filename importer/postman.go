@@ -3,6 +3,9 @@ package importer
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
+	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
@@ -13,56 +16,84 @@ const (
 	postmanSecretType = "secret"
 	listenPreRequest  = "prerequest"
 	listenTest        = "test"
-	globalsSuffix     = " (globals)"
+	globalsName       = "Globals"
+	behaviorRedirects = "followRedirects"
+	behaviorStrictSSL = "strictSSL"
+	behaviorPruning   = "disableBodyPruning"
+	behaviorCookies   = "disableCookies"
 )
+
+var mappedBehaviors = setOf(behaviorRedirects, behaviorStrictSSL, behaviorPruning, behaviorCookies)
 
 func (c *collector) readPostmanCollection(doc document) {
 	root := object(doc.data)
 	info := object(root["info"])
 	name := cleanName(text(info["name"]), strings.TrimSuffix(doc.file.Name, ".json"))
 	c.read(name, FormatPostman, func() {
-		rootID := c.addFolder(name, "")
-		for key, value := range variableMap(objects(root["variable"]), "key", "value") {
-			if _, taken := c.Variables[key]; !taken {
-				c.Variables[key] = value
-			}
-		}
-		base := c.postmanScope(root, fmt.Sprintf(labelCollection, name))
-		c.postmanItems(list(root["item"]), rootID, base, 0)
+		collection := c.postmanScope(root, labelCollection, name)
+		collection.description = describedText(info["description"])
+		rootID := c.addScopedFolder(name, "", c.collectionScope(collection))
+		c.postmanItems(list(root["item"]), rootID, object(root["protocolProfileBehavior"]), 0)
 		c.summarizeScripts(postmanDialect, name)
 	})
 }
 
-func (c *collector) postmanScope(node map[string]any, label string) scope {
-	var inherited scope
-	if auth, set := c.postmanAuth(object(node["auth"])); set {
-		inherited.auth = &auth
-	}
-	inherited.pre = nonEmpty(c.postmanScript(label, node, listenPreRequest))
-	inherited.post = nonEmpty(c.postmanScript(label, node, listenTest))
-	return inherited
-}
-
-func (c *collector) postmanFolderScope(node map[string]any, label string) scope {
-	inherited := c.postmanScope(node, label)
-	for _, entry := range objects(node["variable"]) {
-		if key := text(entry["key"]); key != "" && !flag(entry["disabled"]) {
-			inherited.vars = append(inherited.vars, row{Key: key, Value: text(entry["value"]), Enabled: true})
+func (c *collector) readPostmanDump(doc document) {
+	root := object(doc.data)
+	for index, entry := range list(root["collections"]) {
+		if classifyStructured(entry) != kindPostmanCollection {
+			c.skip(messagePostmanLegacy, doc.file.Name, legacyLabel(entry, index))
+			continue
 		}
+		c.readPostmanCollection(document{file: doc.file, data: entry})
 	}
-	return inherited
+	for _, entry := range list(root["environments"]) {
+		c.readPostmanEnvironment(document{file: doc.file, data: entry})
+	}
+	if globals := list(root["globals"]); len(globals) > 0 {
+		c.readPostmanEnvironment(document{file: doc.file, data: map[string]any{"name": globalsName, "values": globals, "_postman_variable_scope": postmanGlobals}})
+	}
 }
 
-func nonEmpty(value string) []string {
-	if strings.TrimSpace(value) == "" {
-		return nil
+func legacyLabel(entry any, index int) string {
+	if name := text(object(entry)["name"]); name != "" {
+		return strconv.Quote(name)
 	}
-	return []string{value}
+	return fmt.Sprintf(messageCollectionNumber, index+1)
 }
 
-func (c *collector) postmanItems(items []any, folderID string, inherited scope, depth int) {
+func (c *collector) postmanScope(node map[string]any, kind, name string) scope {
+	label := fmt.Sprintf(kind, name)
+	var settings scope
+	if auth, set := c.postmanAuth(object(node["auth"])); set {
+		settings.auth = &auth
+	}
+	settings.pre = c.postmanScript(label, node, listenPreRequest)
+	settings.post = c.postmanScript(label, node, listenTest)
+	settings.description = describedText(node["description"])
+	for _, entry := range objects(node["variable"]) {
+		key := text(entry["key"])
+		if strings.TrimSpace(key) == "" {
+			continue
+		}
+		qualified := cleanName(name, untitledFolder) + "/" + key
+		if flag(entry["disabled"]) {
+			c.flag(messageDisabledScopeVariables, qualified)
+			continue
+		}
+		value := text(entry["value"])
+		if text(entry["type"]) == postmanSecretType {
+			value = ""
+			c.flag(messageSecretVariables, qualified)
+		}
+		settings.vars = append(settings.vars, row{Key: key, Value: value, Enabled: true})
+	}
+	return settings
+}
+
+func (c *collector) postmanItems(items []any, folderID string, behavior map[string]any, depth int) {
 	if depth >= maxFolderDepth {
-		c.Warnings = append(c.Warnings, fmt.Sprintf(messageDepth, maxFolderDepth))
+		c.warnDepth()
 		return
 	}
 	for _, entry := range items {
@@ -70,48 +101,80 @@ func (c *collector) postmanItems(items []any, folderID string, inherited scope, 
 		switch {
 		case item == nil:
 		case item["item"] != nil:
-			id := c.addFolder(text(item["name"]), folderID)
-			c.postmanItems(list(item["item"]), id, inherited.within(c.postmanFolderScope(item, fmt.Sprintf(labelFolder, text(item["name"])))), depth+1)
+			name := text(item["name"])
+			id := c.addScopedFolder(name, folderID, c.postmanScope(item, labelFolder, name))
+			c.postmanItems(list(item["item"]), id, withBehavior(behavior, object(item["protocolProfileBehavior"])), depth+1)
 		case item["request"] != nil:
-			c.postmanRequest(item, folderID, inherited)
+			c.postmanRequest(item, folderID, withBehavior(behavior, object(item["protocolProfileBehavior"])))
 		}
 	}
 }
 
-func (c *collector) postmanRequest(item map[string]any, folderID string, inherited scope) {
-	label := fmt.Sprintf(labelRequest, text(item["name"]))
+func (c *collector) postmanRequest(item map[string]any, folderID string, behavior map[string]any) {
+	name := text(item["name"])
+	label := fmt.Sprintf(labelRequest, name)
 	source := object(item["request"])
 	if source == nil {
 		source = map[string]any{"url": item["request"], "method": "GET"}
 	}
-	headers := postmanRows(source["header"])
 	request := parts{
-		name:        text(item["name"]),
+		name:        name,
 		method:      text(source["method"]),
-		description: postmanDescription(source["description"]),
-		headers:     headers,
+		description: describedText(source["description"]),
+		headers:     postmanRows(source["header"]),
 		preScript:   c.postmanScript(label, item, listenPreRequest),
 		postScript:  c.postmanScript(label, item, listenTest),
-		options:     postmanOptions(object(item["protocolProfileBehavior"])),
+		options:     c.postmanOptions(name, behavior),
+		examples:    c.postmanExamples(name, item["response"]),
 	}
-	request.url, request.params = postmanURL(source["url"])
+	request.url, request.params, request.vars = postmanURL(source["url"])
 	if auth, set := c.postmanAuth(object(source["auth"])); set {
 		request.auth = &auth
 	}
-	c.postmanBody(object(source["body"]), &request)
-	c.build(request, inherited, folderID)
+	c.postmanBody(name, object(source["body"]), &request)
+	c.build(request, folderID)
 }
 
-func postmanDescription(value any) string {
-	if described := object(value); described != nil {
-		return text(described["content"])
+func (c *collector) postmanExamples(requestName string, responses any) string {
+	var drafts []exampleDraft
+	for _, response := range objects(responses) {
+		drafts = append(drafts, exampleDraft{
+			name:        text(response["name"]),
+			status:      text(response["code"]),
+			headers:     postmanRows(response["header"]),
+			body:        text(response["body"]),
+			contentType: exampleContentType(text(response["_postman_previewlanguage"])),
+		})
 	}
-	return text(value)
+	return c.savedExamples(requestName, drafts)
 }
 
-func postmanOptions(behavior map[string]any) engine.Options {
-	following, set := behavior["followRedirects"].(bool)
-	return engine.Options{NoFollowRedirects: set && !following}
+func withBehavior(outer, inner map[string]any) map[string]any {
+	if len(inner) == 0 {
+		return outer
+	}
+	merged := make(map[string]any, len(outer)+len(inner))
+	maps.Copy(merged, outer)
+	maps.Copy(merged, inner)
+	return merged
+}
+
+func (c *collector) postmanOptions(name string, behavior map[string]any) engine.Options {
+	if strict, given := behavior[behaviorStrictSSL].(bool); given && !strict {
+		c.flag(messageTLSKept, name)
+	}
+	var unmatched []string
+	for _, key := range sortedKeys(behavior) {
+		if !mappedBehaviors[key] && behavior[key] != nil && behavior[key] != false {
+			unmatched = append(unmatched, key)
+		}
+	}
+	if len(unmatched) > 0 {
+		c.Warnings = append(c.Warnings, fmt.Sprintf(messagePostmanBehavior, name, strings.Join(unmatched, ", ")))
+	}
+	following, set := behavior[behaviorRedirects].(bool)
+	withoutCookies := flag(behavior[behaviorCookies])
+	return engine.Options{NoFollowRedirects: set && !following, SkipCookies: withoutCookies, DiscardCookies: withoutCookies}
 }
 
 func postmanRows(value any) []row {
@@ -135,10 +198,10 @@ func headerLines(raw string) []row {
 	return keyedRows(rows)
 }
 
-func postmanURL(value any) (string, []row) {
+func postmanURL(value any) (string, []row, []row) {
 	source := object(value)
 	if source == nil {
-		return text(value), nil
+		return text(value), nil, nil
 	}
 	raw := text(source["raw"])
 	if raw == "" {
@@ -148,15 +211,20 @@ func postmanURL(value any) (string, []row) {
 	if source["query"] != nil {
 		raw, _, _ = strings.Cut(raw, "?")
 	}
-	return applyPathParams(raw, variableRows(source["variable"])), query
+	address, vars := pathParamVariables(raw, usedPathParams(raw, objects(source["variable"])))
+	return address, query, vars
 }
 
-func variableRows(value any) []row {
-	var rows []row
-	for _, entry := range objects(value) {
-		rows = append(rows, row{Key: text(entry["key"]), Value: text(entry["value"]), Enabled: true})
+func usedPathParams(raw string, entries []map[string]any) []row {
+	base, _, _ := strings.Cut(raw, "?")
+	segments := strings.Split(base, "/")
+	var params []row
+	for _, entry := range entries {
+		if key := text(entry["key"]); slices.Contains(segments, ":"+key) {
+			params = append(params, row{Key: key, Value: text(entry["value"])})
+		}
 	}
-	return rows
+	return params
 }
 
 func composePostmanURL(source map[string]any) string {
@@ -217,7 +285,7 @@ func joinLines(lines []any) string {
 	return strings.Join(texts, "\n")
 }
 
-func (c *collector) postmanBody(body map[string]any, request *parts) {
+func (c *collector) postmanBody(name string, body map[string]any, request *parts) {
 	if body == nil || flag(body["disabled"]) {
 		return
 	}
@@ -227,11 +295,14 @@ func (c *collector) postmanBody(body map[string]any, request *parts) {
 		language := text(object(object(body["options"])["raw"])["language"])
 		request.bodyType = rawBodyType(language, request.body, request.headers)
 	case "urlencoded":
-		request.body, request.bodyType = rowsJSON(postmanRows(body["urlencoded"])), bodyForm
+		request.body, request.bodyType = jsonList(postmanRows(body["urlencoded"])), bodyForm
 	case "formdata":
-		rows := postmanFormRows(objects(body["formdata"]))
-		request.body, request.bodyType = rowsJSON(rows), bodyMultipart
+		rows, typedText := postmanFormRows(objects(body["formdata"]))
+		request.body, request.bodyType = jsonList(rows), bodyMultipart
 		request.needsFiles = anyFile(rows)
+		if typedText {
+			c.flag(messagePartContentType, name)
+		}
 	case "file":
 		request.bodyType, request.needsFiles = bodyBinary, true
 	case "graphql":
@@ -276,16 +347,19 @@ func rawBodyType(language, body string, headers []row) string {
 	return bodyText
 }
 
-func postmanFormRows(entries []map[string]any) []row {
+func postmanFormRows(entries []map[string]any) ([]row, bool) {
 	var rows []row
+	typedText := false
 	for _, entry := range entries {
 		candidate := row{Key: text(entry["key"]), Enabled: !flag(entry["disabled"]), Type: rowTypeText, Value: text(entry["value"])}
 		if text(entry["type"]) == rowTypeFile {
 			candidate = row{Key: candidate.Key, Enabled: candidate.Enabled, Type: rowTypeFile, FileName: baseName(text(entry["src"])), ContentType: text(entry["contentType"])}
+		} else if text(entry["contentType"]) != "" {
+			typedText = true
 		}
 		rows = append(rows, candidate)
 	}
-	return keyedRows(rows)
+	return keyedRows(rows), typedText
 }
 
 func anyFile(rows []row) bool {
@@ -318,7 +392,7 @@ func postmanAuthFields(auth map[string]any, kind string) map[string]string {
 
 func (c *collector) postmanAuth(auth map[string]any) (engine.Auth, bool) {
 	kind := text(auth["type"])
-	if kind == "" || kind == "inherit" {
+	if kind == "" || kind == authInherit {
 		return engine.Auth{}, false
 	}
 	fields := postmanAuthFields(auth, kind)
@@ -341,6 +415,11 @@ func (c *collector) postmanAuth(auth map[string]any) (engine.Auth, bool) {
 		return c.postmanOAuth2(fields), true
 	case authJWT:
 		return postmanJWT(fields), true
+	case authEdgeGrid:
+		return engine.Auth{Type: authEdgeGrid, EdgeGrid: engine.EdgeGridAuth{
+			ClientToken: fields["clientToken"], ClientSecret: fields["clientSecret"], AccessToken: fields["accessToken"],
+			Nonce: fields["nonce"], Timestamp: fields["timestamp"], HeadersToSign: fields["headersToSign"],
+		}}, true
 	case authASAP:
 		return asapAuth(engine.ASAPAuth{
 			Algorithm: fields["alg"], Issuer: fields["iss"], Subject: fields["sub"], Audience: fields["aud"],
@@ -402,53 +481,25 @@ func postmanGrant(grant string) string {
 	return grant
 }
 
-func appendUnique(items []string, item string) []string {
-	for _, existing := range items {
-		if existing == item {
-			return items
-		}
-	}
-	return append(items, item)
-}
-
 func (c *collector) readPostmanEnvironment(doc document) {
 	root := object(doc.data)
 	name := cleanName(text(root["name"]), strings.TrimSuffix(doc.file.Name, ".json"))
-	if text(root["_postman_variable_scope"]) == postmanGlobals {
-		name += globalsSuffix
-	}
 	c.read(name, FormatPostman, func() {
-		values := map[string]string{}
-		secrets := map[string]map[string]bool{}
-		var secretNames []string
+		draft := environmentDraft{name: name, global: text(root["_postman_variable_scope"]) == postmanGlobals}
+		var disabled []string
 		for _, entry := range objects(root["values"]) {
 			key := text(entry["key"])
-			if key == "" || entry["enabled"] == false {
-				continue
-			}
-			values[key] = text(entry["value"])
-			if text(entry["type"]) == postmanSecretType {
-				secrets[key] = map[string]bool{"secret": true}
-				secretNames = append(secretNames, key)
+			switch {
+			case key == "":
+			case entry["enabled"] == false:
+				disabled = append(disabled, key)
+			default:
+				draft.variables = append(draft.variables, envVariable{name: key, value: text(entry["value"]), enabled: true, secret: text(entry["type"]) == postmanSecretType})
 			}
 		}
-		id := c.addEnvironment(name, values)
-		c.markSecrets(id, name, secrets, secretNames)
+		c.addDraftEnvironments([]environmentDraft{draft})
+		if len(disabled) > 0 {
+			c.Warnings = append(c.Warnings, fmt.Sprintf(messageDisabledVariables, name, listNames(disabled)))
+		}
 	})
-}
-
-func (c *collector) markSecrets(id, name string, secrets map[string]map[string]bool, names []string) {
-	if len(names) == 0 {
-		return
-	}
-	encoded, err := json.Marshal(secrets)
-	if err != nil {
-		return
-	}
-	for index := range c.Environments {
-		if c.Environments[index].Id == id {
-			c.Environments[index].Meta = string(encoded)
-		}
-	}
-	c.Warnings = append(c.Warnings, fmt.Sprintf(messageSecretVariables, name, listNames(names)))
 }

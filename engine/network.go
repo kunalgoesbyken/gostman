@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -24,18 +25,21 @@ const (
 
 var proxySchemes = map[string]bool{"http": true, "https": true, "socks5": true, "socks5h": true}
 
+type proxyFunc func(*http.Request) (*url.URL, error)
+
 type ClientCertificate struct {
-	Host    string `json:"host"`
-	CertPEM string `json:"certPem"`
-	KeyPEM  string `json:"keyPem"`
+	Host        string
+	Certificate tls.Certificate
 }
 
 type NetworkConfig struct {
-	ProxyMode    string              `json:"proxyMode"`
-	ProxyURL     string              `json:"proxyUrl"`
-	ProxyBypass  string              `json:"proxyBypass"`
-	Certificates []ClientCertificate `json:"certificates"`
-	CAPEM        string              `json:"caPem"`
+	ProxyMode    string
+	ProxyURL     string
+	ProxyBypass  string
+	ProxySource  string
+	Authorities  []*x509.Certificate
+	Certificates []ClientCertificate
+	Advice       Advice
 }
 
 type hostCertificate struct {
@@ -50,9 +54,11 @@ type transportKey struct {
 }
 
 type Network struct {
-	proxy        func(*http.Request) (*url.URL, error)
+	proxy        proxyFunc
+	proxySource  string
 	certificates []hostCertificate
 	roots        *x509.CertPool
+	advice       Advice
 
 	mu         sync.Mutex
 	transports map[transportKey]*http.Transport
@@ -60,42 +66,49 @@ type Network struct {
 
 var defaultNetwork = &Network{proxy: http.ProxyFromEnvironment, transports: map[transportKey]*http.Transport{}}
 
+func (c NetworkConfig) With(layer NetworkConfig) NetworkConfig {
+	if layer.ProxyMode != "" {
+		c.ProxyMode, c.ProxyURL, c.ProxyBypass, c.ProxySource = layer.ProxyMode, layer.ProxyURL, layer.ProxyBypass, layer.ProxySource
+	} else if strings.TrimSpace(layer.ProxyBypass) != "" {
+		c.ProxyBypass = strings.Join([]string{c.ProxyBypass, layer.ProxyBypass}, ",")
+	}
+	c.Authorities = append(slices.Clip(c.Authorities), layer.Authorities...)
+	c.Certificates = append(slices.Clip(layer.Certificates), c.Certificates...)
+	return c
+}
+
 func NewNetwork(config NetworkConfig) (*Network, error) {
 	proxy, err := proxyFor(config)
 	if err != nil {
 		return nil, err
 	}
-	roots, err := rootsFor(config.CAPEM)
-	if err != nil {
-		return nil, err
-	}
-	network := &Network{proxy: proxy, roots: roots, transports: map[transportKey]*http.Transport{}}
+	network := &Network{proxy: proxy, proxySource: config.ProxySource, roots: rootsFor(config.Authorities), advice: config.Advice, transports: map[transportKey]*http.Transport{}}
 	for _, entry := range config.Certificates {
 		host := strings.ToLower(strings.TrimSpace(entry.Host))
 		if host == "" {
 			return nil, fmt.Errorf("a client certificate has no host")
 		}
-		certificate, err := tls.X509KeyPair([]byte(entry.CertPEM), []byte(entry.KeyPEM))
-		if err != nil {
-			return nil, fmt.Errorf("client certificate for %s: %w", host, err)
-		}
-		network.certificates = append(network.certificates, hostCertificate{host, certificate})
+		network.certificates = append(network.certificates, hostCertificate{host, entry.Certificate})
 	}
 	return network, nil
 }
 
-func proxyFor(config NetworkConfig) (func(*http.Request) (*url.URL, error), error) {
+func proxyFor(config NetworkConfig) (proxyFunc, error) {
 	switch config.ProxyMode {
 	case ProxyNone:
 		return nil, nil
 	case ProxyCustom:
-		return customProxy(config.ProxyURL, config.ProxyBypass)
+		proxy, err := fixedProxy(config.ProxyURL)
+		if err != nil {
+			return nil, err
+		}
+		return bypassing(proxy, splitHosts(config.ProxyBypass)), nil
 	default:
-		return http.ProxyFromEnvironment, nil
+		return bypassing(http.ProxyFromEnvironment, splitHosts(config.ProxyBypass)), nil
 	}
 }
 
-func customProxy(raw, bypass string) (func(*http.Request) (*url.URL, error), error) {
+func fixedProxy(raw string) (proxyFunc, error) {
 	address := strings.TrimSpace(raw)
 	if !strings.Contains(address, "://") {
 		address = "http://" + address
@@ -107,7 +120,13 @@ func customProxy(raw, bypass string) (func(*http.Request) (*url.URL, error), err
 	if !proxySchemes[proxy.Scheme] {
 		return nil, fmt.Errorf("unsupported proxy scheme %q, use http, https or socks5", proxy.Scheme)
 	}
-	bypassed := splitHosts(bypass)
+	return http.ProxyURL(proxy), nil
+}
+
+func bypassing(proxy proxyFunc, bypassed []string) proxyFunc {
+	if len(bypassed) == 0 {
+		return proxy
+	}
 	return func(request *http.Request) (*url.URL, error) {
 		host := strings.ToLower(request.URL.Hostname())
 		for _, pattern := range bypassed {
@@ -115,8 +134,8 @@ func customProxy(raw, bypass string) (func(*http.Request) (*url.URL, error), err
 				return nil, nil
 			}
 		}
-		return proxy, nil
-	}, nil
+		return proxy(request)
+	}
 }
 
 func splitHosts(list string) []string {
@@ -136,18 +155,18 @@ func hostMatches(pattern, host string) bool {
 	return pattern == host
 }
 
-func rootsFor(pem string) (*x509.CertPool, error) {
-	if strings.TrimSpace(pem) == "" {
-		return nil, nil
+func rootsFor(authorities []*x509.Certificate) *x509.CertPool {
+	if len(authorities) == 0 {
+		return nil
 	}
 	roots, err := x509.SystemCertPool()
 	if err != nil {
 		roots = x509.NewCertPool()
 	}
-	if !roots.AppendCertsFromPEM([]byte(pem)) {
-		return nil, fmt.Errorf("the CA certificate file holds no PEM certificates")
+	for _, authority := range authorities {
+		roots.AddCert(authority)
 	}
-	return roots, nil
+	return roots
 }
 
 func (n *Network) certificateFor(host string) int {
@@ -160,6 +179,14 @@ func (n *Network) certificateFor(host string) int {
 	return noCertificate
 }
 
+func (n *Network) tlsConfig(key transportKey) *tls.Config {
+	config := &tls.Config{InsecureSkipVerify: key.insecureTLS, RootCAs: n.roots}
+	if !key.blockPrivate && key.certificate != noCertificate {
+		config.Certificates = []tls.Certificate{n.certificates[key.certificate].certificate}
+	}
+	return config
+}
+
 func (n *Network) transport(key transportKey) *http.Transport {
 	n.mu.Lock()
 	defer n.mu.Unlock()
@@ -167,7 +194,6 @@ func (n *Network) transport(key transportKey) *http.Transport {
 	if transport, ok := n.transports[key]; ok {
 		return transport
 	}
-	tlsConfig := &tls.Config{InsecureSkipVerify: key.insecureTLS, RootCAs: n.roots}
 	transport := &http.Transport{
 		Proxy:                 n.proxy,
 		DialContext:           dialer.DialContext,
@@ -177,13 +203,11 @@ func (n *Network) transport(key transportKey) *http.Transport {
 		IdleConnTimeout:       90 * time.Second,
 		TLSHandshakeTimeout:   15 * time.Second,
 		ExpectContinueTimeout: time.Second,
-		TLSClientConfig:       tlsConfig,
+		TLSClientConfig:       n.tlsConfig(key),
 	}
 	if key.blockPrivate {
 		transport.Proxy = nil
 		transport.DialContext = guardedDial
-	} else if key.certificate != noCertificate {
-		tlsConfig.Certificates = []tls.Certificate{n.certificates[key.certificate].certificate}
 	}
 	n.transports[key] = transport
 	return transport
@@ -201,17 +225,46 @@ func (r route) RoundTrip(request *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 	key := transportKey{r.blockPrivate, r.insecureTLS, r.network.certificateFor(request.URL.Hostname())}
-	return r.network.transport(key).RoundTrip(request)
+	response, err := r.network.transport(key).RoundTrip(request)
+	if err == nil {
+		return response, nil
+	}
+	err = &advisedError{advice: r.network.advice, hasCertificate: key.certificate != noCertificate, err: err}
+	if r.network.proxySource != "" {
+		return nil, &proxySourceError{r.network.proxySource, err}
+	}
+	return nil, err
+}
+
+type proxySourceError struct {
+	source string
+	err    error
+}
+
+func (e *proxySourceError) Error() string {
+	return e.err.Error()
+}
+
+func (e *proxySourceError) Unwrap() error {
+	return e.err
+}
+
+func (p Policy) network() *Network {
+	if p.Network == nil {
+		return defaultNetwork
+	}
+	return p.Network
 }
 
 func (p Policy) route(insecureTLS bool) route {
-	network := p.Network
-	if network == nil {
-		network = defaultNetwork
-	}
-	return route{network, p.BlockPrivate, insecureTLS, p.refusal}
+	return route{p.network(), p.BlockPrivate, insecureTLS, p.refusal}
 }
 
 func (p Policy) Transport(insecureTLS bool) http.RoundTripper {
 	return p.route(insecureTLS)
+}
+
+func (p Policy) TLSConfig(host string, insecureTLS bool) *tls.Config {
+	network := p.network()
+	return network.tlsConfig(transportKey{p.BlockPrivate, insecureTLS, network.certificateFor(host)})
 }

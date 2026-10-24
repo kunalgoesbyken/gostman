@@ -35,7 +35,7 @@ func NewSession(policy engine.Policy) (*Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	state := &session{scripts: scripts, policy: policy, variables: variables{}, common: newShared()}
+	state := &session{scripts: scripts, policy: policy, variables: variables{}, session: variables{}, common: newShared()}
 	return &Session{state: state}, nil
 }
 
@@ -85,7 +85,7 @@ func (e Environment) Values() (map[string]string, error) {
 }
 
 func (s *Session) Variables() map[string]string {
-	return s.state.variables.plain()
+	return s.state.current().plain()
 }
 
 func (s *Session) Observed() map[string]string {
@@ -121,9 +121,15 @@ func (s *Session) Run(ctx context.Context, stored Collection, options Options, o
 		return Report{}, err
 	}
 	s.state.modules = stored.Modules
+	s.state.common.signIn = options.SignIn
+	s.state.contract = newContract(options.Contract)
 	s.state.variables = layered(append(base, s.state.variables)...)
 	if err := s.state.learn(planned.library); err != nil {
 		return Report{}, err
+	}
+	total := len(planned.requests) * options.iterationCount()
+	if options.OnPlanned != nil {
+		options.OnPlanned(total)
 	}
 	started := time.Now()
 	results := s.state.runAll(ctx, planned, options, observe)
@@ -132,7 +138,7 @@ func (s *Session) Run(ctx context.Context, stored Collection, options Options, o
 		Environment: s.state.environment,
 		StartedAt:   started.UTC(),
 		DurationMs:  time.Since(started).Milliseconds(),
-		Summary:     summarize(results, len(planned.requests)*options.iterationCount()),
+		Summary:     summarize(results, total),
 		Results:     results,
 	}
 	if options.isIterating() {

@@ -37,6 +37,7 @@ function MenuItem({ item, onClose }) {
     >
       {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
       <span className="truncate">{item.label}</span>
+      {item.detail && <span className="ml-auto shrink-0">{item.detail}</span>}
     </button>
   )
 }

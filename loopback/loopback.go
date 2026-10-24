@@ -27,10 +27,13 @@ func Listen(port int) (net.Listener, error) {
 }
 
 func IsHost(hostport string) bool {
-	host := hostport
 	if name, _, err := net.SplitHostPort(hostport); err == nil {
-		host = name
+		return IsName(name)
 	}
+	return IsName(hostport)
+}
+
+func IsName(host string) bool {
 	if host == "localhost" {
 		return true
 	}

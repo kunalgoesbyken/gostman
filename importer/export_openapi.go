@@ -81,7 +81,7 @@ func splitOrigin(address string) (string, string) {
 }
 
 func openAPIPath(route string) string {
-	converted := mapVariables(route, func(inner string) string { return "{" + strings.TrimSpace(inner) + "}" })
+	converted := mapPlaceholders(route, func(inner string) string { return "{" + inner + "}" })
 	if strings.HasPrefix(converted, "/") {
 		return converted
 	}
@@ -145,8 +145,8 @@ func openAPIParameters(request workspace.Request, route string) []map[string]any
 			add("header", candidate.Key, false, candidate.Value)
 		}
 	}
-	mapVariables(route, func(inner string) string {
-		add("path", strings.TrimSpace(inner), true, "")
+	mapPlaceholders(route, func(inner string) string {
+		add("path", inner, true, "")
 		return inner
 	})
 	return parameters

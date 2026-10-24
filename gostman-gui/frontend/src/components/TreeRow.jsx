@@ -3,7 +3,10 @@ import { ChevronDown, ChevronRight, Folder, MoreHorizontal } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { MethodTag } from "./MethodTag"
 import { TagBadge } from "./TagBadge"
+import { MarkedRanges } from "./HighlightedText"
 import { ROW_FOLDER } from "../lib/collectionTree"
+import { matchRanges } from "../lib/textMatch"
+import { shownMethod } from "../lib/methodLabel"
 import { PLACE_AFTER, PLACE_BEFORE, PLACE_INSIDE } from "../lib/dropPlace"
 import { normalizeTags } from "../lib/tags"
 import { colorHex } from "../lib/swatches"
@@ -14,7 +17,6 @@ export const ROW_HEIGHT_PX = 28
 const INDENT_STEP_PX = 12
 const BASE_PADDING_PX = 12
 const MAX_INDENT_LEVELS = 10
-const UNTITLED = "Untitled"
 const SHOWN_TAGS = 2
 const FOLDER_FILL_OPACITY = 0.3
 
@@ -60,10 +62,10 @@ export const EmptyRow = memo(function EmptyRow({ row, dropPlace }) {
   )
 })
 
-export const TreeRow = memo(function TreeRow({ row, isActive, isTabStop, focusRequest, isMenuOpen, isDragged, dropPlace, onActivate, onPin, onOpenMenu, onPointerDown, onKeyDown, onFocus }) {
+export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop, focusRequest, isMenuOpen, isDragged, dropPlace, onActivate, onPin, onOpenMenu, onPointerDown, onKeyDown, onFocus }) {
   const isFolder = row.kind === ROW_FOLDER
   const item = isFolder ? row.folder : row.request
-  const name = item.name || UNTITLED
+  const name = item.name || TREE_TEXT.untitled
   const tags = normalizeTags(item.tags)
   const Chevron = row.isOpen ? ChevronDown : ChevronRight
   const mainRef = useRef(null)
@@ -88,6 +90,8 @@ export const TreeRow = memo(function TreeRow({ row, isActive, isTabStop, focusRe
       aria-expanded={isFolder ? row.isOpen : undefined}
       aria-selected={isActive}
       aria-level={row.depth + 1}
+      aria-posinset={row.position}
+      aria-setsize={row.siblings}
       aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown Control+C Control+V Control+D F2 Delete Shift+F10"
       onContextMenu={openMenuAtPointer}
       onKeyDown={(event) => onKeyDown(event, row)}
@@ -120,13 +124,15 @@ export const TreeRow = memo(function TreeRow({ row, isActive, isTabStop, focusRe
             <FolderIcon color={item.color} />
           </>
         ) : (
-          <MethodTag method={item.method} className="w-10" />
+          <MethodTag method={shownMethod(item)} className="w-10" />
         )}
-        <span className={cn("min-w-0 flex-1 truncate", isFolder && "font-medium text-foreground")}>{name}</span>
+        <span className={cn("min-w-0 flex-1 truncate", isFolder && "font-medium text-foreground")}>
+          {isFolder ? name : <MarkedRanges text={name} ranges={matchRanges(name, search)} />}
+        </span>
         <RowTags tags={tags} />
       </button>
       <IconButton
-        label={`Actions for ${name}`}
+        label={TREE_TEXT.actionsFor(name)}
         icon={MoreHorizontal}
         size="icon-xs"
         data-row-action

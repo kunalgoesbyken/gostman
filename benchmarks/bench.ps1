@@ -26,14 +26,16 @@ param(
   [int]$StartTimeoutSeconds = 60,
   [string]$GostmanPath,                                # override Gostman exe path
   [hashtable]$InstallerPaths = @{},                    # AppName -> local installer file
-  [string]$OutDir = $PSScriptRoot
+  [string]$OutDir = $PSScriptRoot,
+  [string]$DataDir,
+  [string]$Workspace
 )
 
 $ErrorActionPreference = 'Stop'
 
 $localApp = $env:LOCALAPPDATA
 $pf   = $env:ProgramFiles
-$repoBin = Join-Path $PSScriptRoot '..\..\gostman-gui\build\bin\Gostman.exe'
+$repoBin = Join-Path $PSScriptRoot '..\gostman-gui\build\bin\Gostman.exe'
 
 # name -> exe name, candidate exe paths (first existing wins), winget id, installer glob hints
 $catalog = [ordered]@{
@@ -139,6 +141,19 @@ function Stop-All([string]$exe) {
   Start-Sleep -Seconds 2
 }
 
+function Initialize-DataDir([string]$dir, [string]$folder) {
+  $appData = Join-Path $dir 'Gostman'
+  New-Item -ItemType Directory -Force -Path $appData | Out-Null
+  if (-not $folder) { return }
+  $root = (Resolve-Path -LiteralPath $folder).Path
+  $state = [ordered]@{
+    current = $root; recent = @($root); pinned = @(); names = @{}
+    folders = @{ $root = [ordered]@{ trusted = $true; activeEnvironmentId = ''; collapsed = @(); tokens = @{} } }
+  }
+  $json = $state | ConvertTo-Json -Depth 5
+  [IO.File]::WriteAllText((Join-Path $appData 'workspaces.json'), $json, (New-Object Text.UTF8Encoding $false))
+}
+
 function Measure-Once([string]$exe, [int]$settle, [int]$timeout) {
   $sw = [Diagnostics.Stopwatch]::StartNew()
   $proc = Start-Process -FilePath $exe -PassThru -WorkingDirectory (Split-Path $exe -Parent)
@@ -198,6 +213,11 @@ foreach ($name in $Apps) {
   $instBytes = Find-Installer $name $entry
   $instMB = if ($instBytes) { $instBytes / 1MB } else { $null }
 
+  $savedAppData = $env:APPDATA
+  if ($name -eq 'Gostman' -and $DataDir) {
+    Initialize-DataDir $DataDir $Workspace
+    $env:APPDATA = (Resolve-Path -LiteralPath $DataDir).Path
+  }
   $runsData = @()
   for ($i = 1; $i -le $Runs; $i++) {
     Write-Host ("  run {0}/{1} ..." -f $i, $Runs) -NoNewline
@@ -208,6 +228,7 @@ foreach ($name in $Apps) {
       $runsData += $r
     } else { Write-Host " no visible window within ${StartTimeoutSeconds}s" -ForegroundColor Red }
   }
+  $env:APPDATA = $savedAppData
 
   $ok = $runsData.Count -gt 0
   $results += [pscustomobject]@{
@@ -227,6 +248,7 @@ $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $meta = [ordered]@{
   Timestamp = (Get-Date).ToString('o'); CPU = $cpu; RAM_GB = $ram; WindowsBuild = $os.BuildNumber
   Disk = $disk; WebView2 = $wv2; Runs = $Runs; SettleSeconds = $SettleSeconds
+  DataDir = $DataDir; Workspace = $Workspace
 }
 if (-not (Test-Path $OutDir)) { New-Item -ItemType Directory -Force -Path $OutDir | Out-Null }
 $jsonPath = Join-Path $OutDir "results-$stamp.json"

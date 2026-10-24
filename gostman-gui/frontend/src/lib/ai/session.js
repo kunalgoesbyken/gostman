@@ -1,12 +1,14 @@
 import { create } from 'zustand'
 import { selectActiveTab, selectResolvedVariables, useAppStore } from '../../store/appStore'
+import { AI_TEXT } from '../aiText'
 import { requestSecrets, variableNames, variableSecrets } from './context'
-import { KIND_CANCELED } from './errors'
+import { KIND_CANCELED, errorMessage } from './errors'
 import { PROVIDERS, providerById } from './providers'
-import { BAD_REPLY, ReplyError } from './reply'
+import { ReplyError } from './reply'
 import {
-  DEFAULT_AI_SETTINGS, forgetAiSettings, isConfigured, loadAiSettings, providerConfig, saveAiSettings,
+  DEFAULT_AI_SETTINGS, forgetAiSettings, isAiEnabled, isConfigured, loadAiSettings, providerConfig, saveAiSettings,
 } from './settings'
+import { SECTION_AI, selectPreferencesSection } from '../preferencesSection'
 import { SCRIPT_POST, taskById } from './tasks'
 
 export const STAGE_INPUT = 'input'
@@ -15,20 +17,28 @@ export const STAGE_RUNNING = 'running'
 export const STAGE_PROPOSAL = 'proposal'
 export const STAGE_ERROR = 'error'
 
+export const STATUS_IDLE = 'idle'
+export const STATUS_RUNNING = 'running'
+export const STATUS_OK = 'ok'
+export const STATUS_ERROR = 'error'
+
 const CHARACTERS_PER_TOKEN = 4
-const OUTPUT_TOKENS = 3072
-const NEEDS_RESPONSE = 'Send the request first so there is a response to work from.'
-const NEEDS_TRUST = 'This folder is restricted. Trust it before generating scripts, because scripts from AI are untrusted until you review them.'
+const OUTPUT_TOKENS = 8192
+
+const IDLE = { status: STATUS_IDLE, message: '' }
+const NO_MODELS = { status: STATUS_IDLE, list: [], message: '' }
 
 const INITIAL_STATE = {
   settings: DEFAULT_AI_SETTINGS,
   keyStored: false,
-  settingsOpen: false,
-  test: { status: 'idle', message: '' },
+  test: IDLE,
+  models: NO_MODELS,
   dialog: null,
 }
 
 export const useAiStore = create(() => INITIAL_STATE)
+
+export const useAiEnabled = () => useAiStore((current) => isAiEnabled(current.settings))
 
 const state = () => useAiStore.getState()
 const patch = (changes) => useAiStore.setState(changes)
@@ -54,7 +64,7 @@ function gatherSource() {
   }
 }
 
-export function createAiActions(backend, { importData }) {
+export function createAiActions(backend, { importData, openapi }) {
   const ai = backend.ai
 
   const host = {
@@ -62,7 +72,12 @@ export function createAiActions(backend, { importData }) {
     updateRequest: (changes) => app().updateActiveRequest(changes),
     openRequest: (request) => app().openRequestTab(request),
     importDraft: (data) => importData(data),
+    importSpec: (result) => openapi.importSpec(result),
   }
+
+  const tools = { readSpec: (source) => openapi.read(source) }
+
+  const isCurrent = (id) => state().dialog?.requestId === id
 
   const refreshKey = async (provider = state().settings.provider) => {
     patch({ keyStored: await ai.keyStored(provider) })
@@ -82,27 +97,42 @@ export function createAiActions(backend, { importData }) {
   const run = async (dialog, source) => {
     const task = taskById(dialog.taskId)
     const id = newId()
-    patchDialog({ stage: STAGE_RUNNING, requestId: id, provider: state().settings.provider })
+    patchDialog({ stage: STAGE_RUNNING, requestId: id, waiting: '', provider: state().settings.provider })
     const reply = await ai.complete(id, providerConfig(state().settings), dialog.preview.raw, source.secrets, OUTPUT_TOKENS)
-    if (state().dialog?.requestId !== id) return
+    if (!isCurrent(id)) return
     if (reply.error) {
-      patchDialog(reply.error.kind === KIND_CANCELED ? { stage: STAGE_INPUT, error: null } : { stage: STAGE_ERROR, error: reply.error.message })
+      patchDialog(reply.error.kind === KIND_CANCELED ? { stage: STAGE_INPUT, error: null } : { stage: STAGE_ERROR, error: errorMessage(reply.error) })
       return
     }
     try {
       patchDialog({ stage: STAGE_PROPOSAL, proposal: task.parse(reply.text, source, dialog.input) })
     } catch (error) {
-      patchDialog({ stage: STAGE_ERROR, error: error instanceof ReplyError ? error.message : BAD_REPLY })
+      patchDialog({ stage: STAGE_ERROR, error: error instanceof ReplyError ? error.message : AI_TEXT.badReply })
     }
+  }
+
+  const proposeLocally = async (task, input) => {
+    const id = newId()
+    patchDialog({ stage: STAGE_RUNNING, requestId: id, waiting: AI_TEXT.readingSpec })
+    const proposal = await task.local(input, tools)
+    if (!isCurrent(id)) return { handled: true }
+    if (proposal) patchDialog({ stage: STAGE_PROPOSAL, proposal })
+    return { handled: Boolean(proposal) }
   }
 
   const submit = async () => {
     const dialog = state().dialog
     const task = taskById(dialog.taskId)
+    if (task.local && !dialog.input.done?.length && (await proposeLocally(task, dialog.input)).handled) return
+    const problem = task.refuse?.(dialog.input)
+    if (problem) {
+      patchDialog({ stage: STAGE_ERROR, error: problem })
+      return
+    }
     const source = gatherSource()
-    const raw = task.build(source, dialog.input)
+    const raw = { ...task.build(source, dialog.input), schema: task.schema }
     const scrubbed = await ai.preview(state().settings.provider, raw, source.secrets)
-    const preview = { raw, scrubbed, tokens: estimateTokens(scrubbed) }
+    const preview = { raw, scrubbed, tokens: estimateTokens(scrubbed), includeValues: task.offersValues ? dialog.input.includeValues : null }
     patchDialog({ preview, stage: STAGE_PREVIEW })
     if (state().settings.skipPreview[task.id]) await run(state().dialog, source)
   }
@@ -113,36 +143,45 @@ export function createAiActions(backend, { importData }) {
     await run(dialog, gatherSource())
   }
 
+  const continueProposal = async () => {
+    const { input, proposal } = state().dialog
+    patchDialog({ input: { ...input, ...proposal.next }, proposal: null })
+    await submit()
+  }
+
   const needsInput = (task) => task.needsText || task.needsScriptKind || task.offersValues
 
   const refuse = (task) => {
     const source = gatherSource()
-    if (task.needsResponse && !source.response) return NEEDS_RESPONSE
-    if (task.requiresTrust && source.isRestricted) return NEEDS_TRUST
+    if (task.needsResponse && !source.response) return AI_TEXT.needsResponse
+    if (task.requiresTrust && source.isRestricted) return AI_TEXT.needsTrust
     return ''
   }
 
   const start = async (taskId, input = {}) => {
+    if (!isAiEnabled(state().settings)) return
     const task = taskById(taskId)
     await refreshKey()
     if (!isUsable()) {
-      patch({ settingsOpen: true })
+      openSettings()
       return
     }
     const problem = refuse(task)
     if (problem) {
-      app().showAlert('AI', problem, 'OK', 'warning')
+      app().showAlert(AI_TEXT.name, problem, AI_TEXT.ok, 'warning')
       return
     }
     patch({
       dialog: {
         taskId,
         input: { text: '', scriptKind: SCRIPT_POST, includeValues: Boolean(task.valuesByDefault), ...input },
+        note: task.note?.(gatherSource()) || '',
         stage: STAGE_INPUT,
         preview: null,
         proposal: null,
         error: null,
         requestId: '',
+        waiting: '',
         provider: state().settings.provider,
       },
     })
@@ -167,7 +206,11 @@ export function createAiActions(backend, { importData }) {
 
   const saveKey = async (key, remember) => {
     const { settings } = state()
-    await ai.saveKey(providerConfig(settings), key, remember)
+    try {
+      await ai.saveKey(providerConfig(settings), key, remember)
+    } catch (error) {
+      patch({ test: { status: STATUS_ERROR, message: messageOf(error) } })
+    }
     await refreshKey(settings.provider)
   }
 
@@ -177,11 +220,24 @@ export function createAiActions(backend, { importData }) {
   }
 
   const testConnection = async () => {
-    const id = newId()
-    patch({ test: { status: 'running', message: '' } })
-    const reply = await ai.check(id, providerConfig(state().settings))
-    patch({ test: reply.error ? { status: 'error', message: reply.error.message } : { status: 'ok', message: 'Connected' } })
+    patch({ test: { status: STATUS_RUNNING, message: '' } })
+    const reply = await ai.check(newId(), providerConfig(state().settings))
+    patch({ test: reply.error ? { status: STATUS_ERROR, message: errorMessage(reply.error) } : { status: STATUS_OK, message: AI_TEXT.connected } })
   }
+
+  const listModels = async () => {
+    const { provider } = state().settings
+    patch({ models: { ...NO_MODELS, status: STATUS_RUNNING } })
+    const reply = await ai.models(newId(), providerConfig(state().settings))
+    if (state().settings.provider !== provider) return
+    patch({
+      models: reply.error
+        ? { ...NO_MODELS, status: STATUS_ERROR, message: errorMessage(reply.error) }
+        : { status: STATUS_OK, list: reply.models || [], message: '' },
+    })
+  }
+
+  const listLocalModels = () => (providerById(state().settings.provider).local ? listModels() : undefined)
 
   const forgetEverything = async () => {
     await Promise.all(PROVIDERS.map((provider) => ai.removeKey(provider.id)))
@@ -191,8 +247,14 @@ export function createAiActions(backend, { importData }) {
 
   const selectProvider = async (provider) => {
     saveSettings({ provider, baseUrl: '', model: '' })
-    patch({ test: INITIAL_STATE.test })
+    patch({ test: IDLE, models: NO_MODELS })
     await refreshKey(provider)
+    await listLocalModels()
+  }
+
+  const openSettings = () => {
+    selectPreferencesSection(SECTION_AI)
+    app().openPreferencesDialog()
   }
 
   const load = async () => {
@@ -200,11 +262,17 @@ export function createAiActions(backend, { importData }) {
     await refreshKey()
   }
 
+  const setInput = (changes) => {
+    const restart = 'text' in changes ? { done: [], folderName: '' } : {}
+    patchDialog({ input: { ...state().dialog.input, ...changes, ...restart } })
+  }
+
   return {
     load,
     start,
     submit,
     confirmPreview,
+    continueProposal,
     cancel,
     accept,
     openLink,
@@ -213,10 +281,13 @@ export function createAiActions(backend, { importData }) {
     saveKey,
     removeKey,
     testConnection,
+    listModels,
     forgetEverything,
-    openSettings: () => patch({ settingsOpen: true }),
-    closeSettings: () => patch({ settingsOpen: false, test: INITIAL_STATE.test }),
-    setInput: (changes) => patchDialog({ input: { ...state().dialog.input, ...changes } }),
+    openSettings,
+    prepareSettings: listLocalModels,
+    leaveSettings: () => patch({ test: IDLE }),
+    askBeforeEveryAction: () => saveSettings({ skipPreview: {} }),
+    setInput,
     backToInput: () => patchDialog({ stage: STAGE_INPUT, error: null, preview: null }),
     holdsKeyOnDevice: Boolean(ai.holdsKeyOnDevice),
   }

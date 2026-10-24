@@ -13,10 +13,25 @@ import { SCAN_TEXT } from "../../lib/scanText"
 import { useInstallable } from "../../lib/pwa"
 import { LOAD_TEST_TEXT } from "../../lib/loadTestText"
 import { WELCOME_TEXT } from "../../lib/welcomeText"
+import { AI_TEXT } from "../../lib/aiText"
 import { WORKSPACE_TEXT } from "../../lib/workspaceText"
 import { TREE_TEXT } from "../../lib/treeText"
 import { useShortcutLabel } from "../../hooks/useShortcuts"
 import { cn } from "../../lib/utils"
+
+const aiCommand = (id, text, action, extra = {}) => ({ id, label: text.label, description: text.description, keywords: text.keywords, icon: Bot, action, ...extra })
+
+const AI_SETTINGS_COMMAND = aiCommand("ai-settings", AI_TEXT.commands.settings, "aiSettings", { icon: Settings })
+
+const AI_COMMANDS = [
+  aiCommand("ai-request", AI_TEXT.commands.request, "aiRequest", { shortcutId: "aiGenerate" }),
+  aiCommand("ai-tests", AI_TEXT.commands.tests, "aiTests"),
+  aiCommand("ai-script", AI_TEXT.commands.script, "aiScript"),
+  aiCommand("ai-explain", AI_TEXT.commands.explain, "aiExplain", { shortcutId: "aiExplain" }),
+  aiCommand("ai-docs", AI_TEXT.commands.docs, "aiDocs"),
+  aiCommand("ai-search", AI_TEXT.commands.search, "aiSearch"),
+  aiCommand("ai-schema", AI_TEXT.commands.schema, "aiSchema"),
+]
 
 const COMMANDS = [
   { id: "send-request", label: "Send request", description: "Send the request in the current tab", icon: Send, shortcutId: "sendRequest", action: "sendRequest" },
@@ -47,14 +62,7 @@ const COMMANDS = [
   { id: "lint-spec", label: "Lint API spec", description: "Check the imported OpenAPI spec for problems", icon: ShieldCheck, keywords: "openapi swagger validate governance", action: "lintSpec" },
   { id: "export", label: "Export data", description: "Export collections and environments", icon: Download, action: "export" },
   { id: "share", label: "Share collection", description: "Create an encrypted link or file, no account needed", icon: Share2, action: "share" },
-  { id: "ai-request", label: "AI: new request from a description", description: "Draft a request, shown as a preview you accept", icon: Bot, shortcutId: "aiGenerate", action: "aiRequest", keywords: "generate" },
-  { id: "ai-tests", label: "AI: generate assertions and tests", description: "Propose checks for the last response", icon: Bot, action: "aiTests" },
-  { id: "ai-script", label: "AI: write a script", description: "Propose a pre-request or post-response script", icon: Bot, action: "aiScript" },
-  { id: "ai-explain", label: "AI: explain the response", description: "Explain a failure and suggest a fix", icon: Bot, shortcutId: "aiExplain", action: "aiExplain" },
-  { id: "ai-docs", label: "AI: document this request", description: "Propose a description for the request", icon: Bot, action: "aiDocs" },
-  { id: "ai-search", label: "AI: ask about the collection", description: "Find requests by describing them", icon: Bot, action: "aiSearch", keywords: "search find" },
-  { id: "ai-schema", label: "AI: requests from an API schema", description: "Turn an OpenAPI or GraphQL schema into requests", icon: Bot, action: "aiSchema" },
-  { id: "ai-settings", label: "AI settings", description: "Provider, model, key and consent", icon: Settings, action: "aiSettings" },
+  AI_SETTINGS_COMMAND,
   { id: "clear-history", label: "Clear history", description: "Delete every history entry", icon: History, action: "clearHistory" },
   { id: "welcome", label: WELCOME_TEXT.commandTitle, description: WELCOME_TEXT.commandDescription, icon: Hand, action: "showWelcome" },
   { id: "about", label: ABOUT_TEXT.commandTitle, description: ABOUT_TEXT.commandDescription, icon: Info, action: "about" },
@@ -242,15 +250,15 @@ function SectionTitle({ kind }) {
 
 const INSTALL_COMMAND = { id: "install-app", label: INSTALL_TEXT.label, description: INSTALL_TEXT.description, icon: MonitorDown, action: "installApp" }
 
-function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspaces, hasLoadTest, requests, folders, history, onClose, onCommand, onShowShortcuts }) {
+function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspaces, hasLoadTest, isAiOn, requests, folders, history, onClose, onCommand, onShowShortcuts }) {
   const [query, setQuery] = useState("")
   const [selectedIndex, setSelectedIndex] = useState(0)
   const inputRef = useRef(null)
   const canInstall = useInstallable()
 
   const commands = useMemo(
-    () => commandItems([...COMMANDS, ...(hasLoadTest ? [LOAD_TEST_COMMAND] : []), ...(canInstall ? [INSTALL_COMMAND] : []), ...workspaceCommands(workspaces), ...environmentCommands(environments, activeEnvironmentId)]),
-    [environments, activeEnvironmentId, workspaces, hasLoadTest, canInstall]
+    () => commandItems([...COMMANDS, ...(isAiOn ? AI_COMMANDS : []), ...(hasLoadTest ? [LOAD_TEST_COMMAND] : []), ...(canInstall ? [INSTALL_COMMAND] : []), ...workspaceCommands(workspaces), ...environmentCommands(environments, activeEnvironmentId)]),
+    [environments, activeEnvironmentId, workspaces, hasLoadTest, isAiOn, canInstall]
   )
   const requestRows = useMemo(() => requestItems(requests, folders), [requests, folders])
   const historyRows = useMemo(() => historyItems(history), [history])

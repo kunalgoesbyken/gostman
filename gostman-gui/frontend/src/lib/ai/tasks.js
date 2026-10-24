@@ -1,9 +1,13 @@
 import { OPERATORS, operatorOf, parseAssertions, serializeAssertions } from '../scripting/assertions'
+import { formatSize } from '../dataUtils'
+import { mayBeSpec } from '../openapiSpec'
 import { normalizeRequest } from '../request'
 import { serializeRows } from '../rows'
+import { AI_TEXT } from '../aiText'
 import { describeRequest, describeResponse, maskedUrl, shapeOf } from './context'
 import { SCRIPT_API, SHAPES, fence, prompt } from './prompts'
-import { ReplyError, BAD_REPLY, objectsIn, parseModelObject, requireContent, stringsIn, textField } from './reply'
+import { ReplyError, objectsIn, parseModelObject, requireContent, stringsIn, textField } from './reply'
+import { BODY_TYPES, METHODS, SCHEMAS } from './schemas'
 
 export const TASK_REQUEST = 'request'
 export const TASK_TESTS = 'tests'
@@ -16,8 +20,6 @@ export const TASK_SCHEMA = 'schema'
 export const SCRIPT_PRE = 'preScript'
 export const SCRIPT_POST = 'postScript'
 
-const METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']
-const BODY_TYPES = ['none', 'json', 'text', 'xml']
 const NAME_LIMIT = 120
 const URL_LIMIT = 2048
 const HEADER_LIMIT = 30
@@ -31,8 +33,11 @@ const SUGGESTION_LIMIT = 6
 const SUGGESTION_TEXT_LIMIT = 400
 const SEARCH_RESULT_LIMIT = 10
 const SEARCH_INDEX_LIMIT = 300
-const SCHEMA_REQUEST_LIMIT = 40
-const SPEC_LIMIT = 20000
+const SCHEMA_BATCH = 15
+const SCHEMA_TOTAL_LIMIT = 200
+const SCHEMA_ASSERTIONS = 3
+const SPEC_LIMIT = 64000
+const LISTED_LINES = 200
 const CURRENT_SCRIPT_LIMIT = 4096
 const WEB_SCHEMES = ['http://', 'https://']
 const TEMPLATE_START = '{{'
@@ -67,11 +72,11 @@ function validAssertions(list) {
 function draftFrom(raw) {
   const method = methodOf(raw.method)
   const url = textField(raw.url, URL_LIMIT).trim()
-  if (!method || !isUsableUrl(url)) throw new ReplyError(BAD_REPLY)
+  if (!method || !isUsableUrl(url)) throw new ReplyError(AI_TEXT.badReply)
   const body = textField(raw.body, BODY_LIMIT)
   const bodyType = BODY_TYPES.includes(raw.bodyType) ? raw.bodyType : ''
   return normalizeRequest({
-    name: textField(raw.name, NAME_LIMIT).trim() || 'AI request',
+    name: textField(raw.name, NAME_LIMIT).trim() || AI_TEXT.tasks.request.untitled,
     description: textField(raw.description, DESCRIPTION_LIMIT),
     method,
     url,
@@ -94,6 +99,14 @@ function draftText(draft) {
   return [`${draft.method} ${maskedUrl(draft.url)}`, ...headers, ...(draft.body ? ['', draft.body] : [])].join('\n')
 }
 
+const requestLine = (request) => `${request.method} ${request.url}  ${request.name}`
+
+function requestLines(requests) {
+  const shown = requests.slice(0, LISTED_LINES).map(requestLine)
+  const hidden = requests.length - shown.length
+  return [...shown, ...(hidden > 0 ? [AI_TEXT.tasks.schema.moreLines(hidden)] : [])].join('\n')
+}
+
 const sameAssertion = (first, second) => (
   first.expression === second.expression && first.operator === second.operator && first.value === second.value
 )
@@ -104,10 +117,9 @@ const joinScripts = (current, addition) => (current.trim() && addition.trim() ? 
 
 const requestTask = {
   id: TASK_REQUEST,
-  label: 'New request from a description',
-  inputLabel: 'Describe the request',
-  placeholder: 'POST a new user with name and email',
+  text: AI_TEXT.tasks.request,
   needsText: true,
+  schema: SCHEMAS.request,
   build: (source, input) => prompt(
     `Design one API request for this description: ${input.text}\nUse variables from the list when they fit, for example {{baseUrl}}. Reply with this shape: ${SHAPES.request}`,
     fence('variable-names', source.variableNames),
@@ -116,8 +128,8 @@ const requestTask = {
   parse: (text) => {
     const draft = draftFrom(parseModelObject(text))
     return {
-      sections: [{ label: 'New request (opens as an unsaved tab)', before: '', after: draftText(draft) }],
-      applyLabel: 'Open as new tab',
+      sections: [{ label: AI_TEXT.tasks.request.section, before: '', after: draftText(draft) }],
+      applyLabel: AI_TEXT.tasks.request.apply,
       apply: (host) => host.openDraft(draft),
     }
   },
@@ -125,9 +137,10 @@ const requestTask = {
 
 const testsTask = {
   id: TASK_TESTS,
-  label: 'Assertions and tests for a response',
+  text: AI_TEXT.tasks.tests,
   needsResponse: true,
   offersValues: true,
+  schema: SCHEMAS.tests,
   build: (source, input) => prompt(
     `Write assertions that check this request's response. Reply with {"assertions": [${SHAPES.assertion}], "script": string}. Operators: ${OPERATOR_NAMES}. ${source.isRestricted ? 'Leave "script" empty.' : 'The optional post-response script may add test() checks.'}\n${SCRIPT_API}`,
     fence('request', describeRequest(source.request)),
@@ -146,27 +159,26 @@ const testsTask = {
     const nextScript = joinScripts(source.request.postScript, script)
     return {
       sections: [
-        ...(added.length > 0 ? [{ label: 'Assertions', before: assertionText(existing), after: assertionText(merged) }] : []),
-        ...(script ? [{ label: 'Post-response script (AI-generated, review before running)', before: source.request.postScript, after: nextScript }] : []),
+        ...(added.length > 0 ? [{ label: AI_TEXT.tasks.tests.assertions, before: assertionText(existing), after: assertionText(merged) }] : []),
+        ...(script ? [{ label: AI_TEXT.tasks.tests.script, before: source.request.postScript, after: nextScript }] : []),
       ],
-      applyLabel: 'Add to request',
+      applyLabel: AI_TEXT.tasks.tests.apply,
       apply: (host) => host.updateRequest({ assertions: serializeAssertions(merged), ...(script && { postScript: nextScript }) }),
     }
   },
 }
 
-const SCRIPT_LABELS = { [SCRIPT_PRE]: 'pre-request', [SCRIPT_POST]: 'post-response' }
+const SCRIPT_KINDS = AI_TEXT.tasks.script.kinds
 
 const scriptTask = {
   id: TASK_SCRIPT,
-  label: 'Pre-request or post-response script',
-  inputLabel: 'What should the script do',
-  placeholder: 'Save the token from the response into the environment',
+  text: AI_TEXT.tasks.script,
   needsText: true,
   needsScriptKind: true,
   requiresTrust: true,
+  schema: SCHEMAS.script,
   build: (source, input) => prompt(
-    `Write the ${SCRIPT_LABELS[input.scriptKind]} JavaScript for this request: ${input.text}\nReply with {"script": string} holding the complete script.\n${SCRIPT_API}`,
+    `Write the ${SCRIPT_KINDS[input.scriptKind]} JavaScript for this request: ${input.text}\nReply with {"script": string} holding the complete script.\n${SCRIPT_API}`,
     fence('request', describeRequest(source.request)),
     fence('current-script', source.request[input.scriptKind].slice(0, CURRENT_SCRIPT_LIMIT)),
     fence('variable-names', source.variableNames),
@@ -175,8 +187,8 @@ const scriptTask = {
     const script = textField(parseModelObject(text).script, SCRIPT_LIMIT)
     requireContent(script)
     return {
-      sections: [{ label: `New ${SCRIPT_LABELS[input.scriptKind]} script (AI-generated, review before running)`, before: source.request[input.scriptKind], after: script }],
-      applyLabel: 'Replace script',
+      sections: [{ label: AI_TEXT.tasks.script.section(SCRIPT_KINDS[input.scriptKind]), before: source.request[input.scriptKind], after: script }],
+      applyLabel: AI_TEXT.tasks.script.apply,
       apply: (host) => host.updateRequest({ [input.scriptKind]: script }),
     }
   },
@@ -184,10 +196,11 @@ const scriptTask = {
 
 const explainTask = {
   id: TASK_EXPLAIN,
-  label: 'Explain a failed response',
+  text: AI_TEXT.tasks.explain,
   needsResponse: true,
   offersValues: true,
   valuesByDefault: true,
+  schema: SCHEMAS.explain,
   build: (source, input) => prompt(
     'Explain why this request failed or looks wrong and how to fix it. Reply with {"explanation": string, "causes": [string], "fixes": [string]}.',
     fence('request', describeRequest(source.request)),
@@ -201,9 +214,9 @@ const explainTask = {
     requireContent(explanation, causes, fixes)
     return {
       blocks: [
-        { heading: 'What happened', text: explanation },
-        { heading: 'Likely causes', items: causes },
-        { heading: 'Suggested fixes', items: fixes },
+        { heading: AI_TEXT.tasks.explain.happened, text: explanation },
+        { heading: AI_TEXT.tasks.explain.causes, items: causes },
+        { heading: AI_TEXT.tasks.explain.fixes, items: fixes },
       ].filter((block) => block.text || block.items?.length),
     }
   },
@@ -211,7 +224,8 @@ const explainTask = {
 
 const docsTask = {
   id: TASK_DOCS,
-  label: 'Document the request',
+  text: AI_TEXT.tasks.docs,
+  schema: SCHEMAS.docs,
   build: (source) => prompt(
     'Write short documentation for this request in Markdown: purpose, parameters, expected response. Reply with {"description": string}.',
     fence('request', describeRequest(source.request)),
@@ -221,8 +235,8 @@ const docsTask = {
     const description = textField(parseModelObject(text).description, DESCRIPTION_LIMIT)
     requireContent(description)
     return {
-      sections: [{ label: 'Description', before: source.request.description, after: description }],
-      applyLabel: 'Use as description',
+      sections: [{ label: AI_TEXT.tasks.docs.section, before: source.request.description, after: description }],
+      applyLabel: AI_TEXT.tasks.docs.apply,
       apply: (host) => host.updateRequest({ description }),
     }
   },
@@ -236,12 +250,16 @@ const searchEntries = (requests) => requests.slice(0, SEARCH_INDEX_LIMIT).map((r
   description: request.description.slice(0, NAME_LIMIT),
 }))
 
+const searchNote = (source) => (
+  source.requests.length > SEARCH_INDEX_LIMIT ? AI_TEXT.searchLimited(SEARCH_INDEX_LIMIT, source.requests.length) : ''
+)
+
 const searchTask = {
   id: TASK_SEARCH,
-  label: 'Ask about the collection',
-  inputLabel: 'What are you looking for',
-  placeholder: 'the endpoint that cancels an order',
+  text: AI_TEXT.tasks.search,
   needsText: true,
+  note: searchNote,
+  schema: SCHEMAS.search,
   build: (source, input) => prompt(
     `Find the requests in the list that best match: ${input.text}\nReply with {"matches": [{"id": string, "reason": string}]}, best first, at most ${SEARCH_RESULT_LIMIT}. Use only ids from the list.`,
     fence('requests', searchEntries(source.requests)),
@@ -257,29 +275,54 @@ const searchTask = {
         open: (host) => host.openRequest(request),
       }))
     requireContent(links)
-    return { links }
+    return { links, note: searchNote(source) }
   },
 }
 
+async function importedSpec(input, tools) {
+  if (!mayBeSpec(input.text)) return null
+  const result = await tools.readSpec({ text: input.text })
+  if (!result.success || result.requests.length === 0) return null
+  const text = AI_TEXT.tasks.schema
+  return {
+    note: text.importerNote,
+    sections: [{ label: text.importerSection(result.requests.length), before: '', after: requestLines(result.requests) }],
+    blocks: result.warnings?.length ? [{ heading: text.importerWarnings, items: result.warnings }] : [],
+    applyLabel: text.importApply(result.requests.length),
+    apply: (host) => host.importSpec(result),
+  }
+}
+
+const createdLines = (drafts) => drafts.map((draft) => `${draft.method} ${draft.url}`)
+
 const schemaTask = {
   id: TASK_SCHEMA,
-  label: 'Requests from an API schema',
-  inputLabel: 'Paste an OpenAPI document or GraphQL schema',
-  placeholder: 'openapi: 3.0.0 ...',
+  text: AI_TEXT.tasks.schema,
   needsText: true,
-  textLimit: SPEC_LIMIT,
-  build: (source, input) => prompt(
-    `Create requests that exercise this API, each with a few assertions. Start every URL with {{baseUrl}}. Reply with {"folderName": string, "requests": [{"name": string, "method": string, "url": string, "headers": [], "bodyType": string, "body": string, "assertions": [${SHAPES.assertion}]}]}, at most ${SCHEMA_REQUEST_LIMIT} requests. Operators: ${OPERATOR_NAMES}.`,
-    fence('schema', input.text.slice(0, SPEC_LIMIT)),
+  longText: true,
+  schema: SCHEMAS.schema,
+  refuse: (input) => (
+    input.text.length > SPEC_LIMIT ? AI_TEXT.tooLarge(formatSize(input.text.length), formatSize(SPEC_LIMIT)) : ''
   ),
-  parse: (text) => {
+  local: importedSpec,
+  build: (source, input) => prompt(
+    `Create requests that exercise the API described below, each with up to ${SCHEMA_ASSERTIONS} assertions. Start every URL with {{baseUrl}}. Reply with {"folderName": string, "requests": [{"name": string, "method": string, "url": string, "headers": [], "bodyType": string, "body": string, "assertions": [${SHAPES.assertion}]}], "more": boolean}. Make at most ${SCHEMA_BATCH} requests, skip every request listed under already-created, and set "more" to true when endpoints remain that you did not create yet. Operators: ${OPERATOR_NAMES}.`,
+    fence('api-description', input.text),
+    ...(input.done?.length ? [fence('already-created', createdLines(input.done))] : []),
+  ),
+  parse: (text, _source, input) => {
     const raw = parseModelObject(text)
-    const drafts = objectsIn(raw.requests, SCHEMA_REQUEST_LIMIT).map(draftFrom)
-    requireContent(drafts)
-    const folder = { id: crypto.randomUUID(), name: textField(raw.folderName, NAME_LIMIT).trim() || 'AI requests', parentId: '' }
+    const added = objectsIn(raw.requests, SCHEMA_BATCH).map(draftFrom)
+    requireContent(added)
+    const drafts = [...(input.done || []), ...added]
+    const name = input.folderName || textField(raw.folderName, NAME_LIMIT).trim() || AI_TEXT.tasks.schema.defaultFolder
+    const hasMore = raw.more === true && drafts.length < SCHEMA_TOTAL_LIMIT
+    const folder = { id: crypto.randomUUID(), name, parentId: '' }
     return {
-      sections: [{ label: `New folder "${folder.name}"`, before: '', after: drafts.map((draft) => `${draft.method} ${draft.url}  ${draft.name}`).join('\n') }],
-      applyLabel: 'Add folder and requests',
+      sections: [{ label: AI_TEXT.tasks.schema.folder(name), before: '', after: requestLines(drafts) }],
+      note: hasMore ? AI_TEXT.tasks.schema.moreNote : '',
+      next: hasMore ? { done: drafts, folderName: name } : null,
+      applyLabel: AI_TEXT.tasks.schema.apply(drafts.length),
       apply: (host) => host.importDraft({
         folders: [folder],
         requests: drafts.map((draft) => ({ ...draft, id: crypto.randomUUID(), folderId: folder.id })),

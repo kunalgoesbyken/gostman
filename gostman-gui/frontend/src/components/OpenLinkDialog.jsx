@@ -60,6 +60,7 @@ function Detected({ result, host }) {
       <p className="font-medium text-foreground">{OPEN_LINK_TEXT.detected(format)}</p>
       <p className="text-foreground">{describeCounts(source)}</p>
       {activeCount > 0 && <p className="text-warning">{OPEN_LINK_TEXT.activeNote(pluralize(activeCount, "item"))}</p>}
+      {(result.notes || []).map((note) => <p key={note} className="text-muted-foreground">{note}</p>)}
       {(result.warnings || []).map((warning) => <p key={warning} className="text-warning">{warning}</p>)}
       {(result.skipped || []).map((note) => <p key={note} className="text-muted-foreground">{note}</p>)}
     </div>

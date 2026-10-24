@@ -16,6 +16,8 @@ import { pluralize } from "../lib/dataUtils"
 import { DATA_FILE_ERROR, iterationCount, MAX_ITERATIONS, parseDataFile } from "../lib/runData"
 import { parseJsonBody, statusVariant } from "../lib/response"
 import { requestsInScope } from "../lib/runner"
+import { RUNNER_TEXT } from "../lib/runnerText"
+import { summarize } from "../lib/runReport"
 import { collectTags } from "../lib/tags"
 import { endSummary } from "../lib/sse"
 import { cn } from "../lib/utils"
@@ -148,13 +150,9 @@ function ResultRow({ result }) {
 }
 
 function describeRun(results, total, isRunning, iterations) {
-  if (results.length === 0) {
-    const scope = pluralize(total, "request")
-    return iterations > 1 ? `${scope} in scope, ${pluralize(iterations, "iteration")}.` : `${scope} in scope.`
-  }
-  const failed = results.filter((result) => result.hasFailed).length
-  const progress = isRunning ? `Running ${results.length} of ${total}` : `Ran ${results.length} of ${total}`
-  return `${progress} · ${results.length - failed} passed · ${failed} failed`
+  if (results.length === 0) return RUNNER_TEXT.inScope(total, iterations)
+  const { passed, failed, skipped } = summarize(results, total)
+  return RUNNER_TEXT.progress({ isRunning, done: results.length, total, passed, failed, skipped })
 }
 
 export function RunnerDialog({ runner, folders, requests, actions }) {

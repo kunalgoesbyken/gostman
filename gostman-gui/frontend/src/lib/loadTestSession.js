@@ -35,9 +35,11 @@ export const toBoundedCount = (text, highest) => {
   return Math.min(count, highest)
 }
 
+export const isLoadTestable = (request) => !isGrpcRequest(request) && !isMcpRequest(request)
+
 function unsupportedReason(request, variables) {
   if (!request.url.trim()) return LOAD_TEST_TEXT.noUrl
-  const isOtherProtocol = isGrpcRequest(request) || isMcpRequest(request) || isStreamRequest(request) || isSocketAddress(request.url, variables)
+  const isOtherProtocol = !isLoadTestable(request) || isStreamRequest(request) || isSocketAddress(request.url, variables)
   return isOtherProtocol ? LOAD_TEST_TEXT.unsupported : ''
 }
 

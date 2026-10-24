@@ -69,6 +69,7 @@ function BinaryBody({ body, onChange }) {
       <FileField
         fileName={file.fileName}
         data={file.data}
+        path={file.path}
         onChange={(attachment) => onChange(JSON.stringify(attachment))}
       />
     </PanelBody>

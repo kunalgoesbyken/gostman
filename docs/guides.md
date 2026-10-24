@@ -11,12 +11,12 @@ gostman import postman_collection.json --out api
 gostman run api
 ```
 
-- Requests, folders, environments, auth, examples and scripts come across. Common Postman script calls such as `pm.test`, `pm.expect`, `pm.environment.set` and `pm.response.json()` are rewritten to Gostman's script API, and so are Bruno calls such as `bru.setEnvVar`, `bru.getVar`, `bru.interpolate`, `bru.runRequest`, `bru.sendRequest` and `bru.sleep`. Bruno's `res("path")` queries and `bru.cookies` work as written. The import summary lists anything that was left out or needs a look.
+- Requests, folders, environments, auth and scripts come across. Postman collection and folder auth, variables and scripts become [folder settings](folder-settings.md), and saved examples become examples the [mock server](workspaces-and-mock.md) serves. Common Postman script calls such as `pm.test`, `pm.expect`, `pm.environment.set` and `pm.response.json()` are rewritten to Gostman's script API, and so are Bruno calls such as `bru.setEnvVar`, `bru.getVar`, `bru.interpolate`, `bru.runRequest`, `bru.sendRequest` and `bru.sleep`. Bruno's `res("path")` queries and `bru.cookies` work as written. The import summary lists anything that was left out or needs a look.
 - `.http` and `.rest` files from VS Code REST Client or JetBrains HTTP Client import as one folder per file, with file variables, `http-client.env.json` environments, request variables and the common JetBrains `client.*` and `response.*` script calls. Import a project folder with `gostman import requests/ --out api`.
 - Tokens and cookie values are never imported, and imports never switch off TLS verification. Sign in again where a request needs a token.
-- Export back with `gostman export api --format bruno --out bruno-api`, or `openapi`, `curl`, `har` and `http`.
+- Export back with `gostman export api --format bruno --out bruno-api`, or `postman`, `openapi`, `curl`, `har` and `http`.
 
-Reference: [Import, export and OpenAPI specs](import-export-and-specs.md). Moving from Bruno: [Coming from Bruno](coming-from-bruno.md).
+Reference: [Import, export and OpenAPI specs](import-export-and-specs.md). Moving from Postman: [Coming from Postman](coming-from-postman.md). Moving from Bruno: [Coming from Bruno](coming-from-bruno.md).
 
 ## Work on a frontend before the backend exists
 
@@ -45,7 +45,7 @@ Reference: [Capture](workspaces-and-mock.md#capture-desktop-and-cli).
 1. On the desktop app, open the storage menu in the header and choose **Save collection to folder**, inside your repository.
 2. Commit the folder. Each request is one YAML file, so reviews show which request changed and how.
 3. Keep secrets out: mark variables as **Secret**, or pass them at run time with `--var-from-env`. Run `gostman scan api` before committing.
-4. Teammates open the same folder with **Open folder** and choose **Reload from disk** after a pull.
+4. Teammates open the same folder with **Open folder**. After a pull the desktop app reloads the changed files by itself.
 
 Reference: [Collections and Git](collections-and-git.md) and [Secrets and network](secrets-and-network.md).
 

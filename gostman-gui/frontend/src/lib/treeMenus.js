@@ -1,4 +1,5 @@
-import { ArrowDown, ArrowUp, ClipboardPaste, Copy, FileSearch, Folder, FolderInput, FolderPlus, ListChecks, Palette, Pencil, Plus, RefreshCw, Settings2, Share2, Tag, Trash2 } from "lucide-react"
+import { ArrowDown, ArrowUp, ClipboardPaste, Copy, FileCheck, FileSearch, Folder, FolderInput, FolderPlus, ListChecks, Palette, Pencil, Plus, RefreshCw, Settings2, Share2, Tag, Trash2 } from "lucide-react"
+import { CONTRACT_TEXT } from "./checksText"
 import { ROOT_ID, ROW_FOLDER, ROW_REQUEST, listFolders } from "./collectionTree"
 import { FOLDER_SETTINGS_TEXT } from "./folderSettingsText"
 import { SPEC_TEXT } from "./specText"
@@ -8,10 +9,11 @@ import { TREE_TEXT } from "./treeText"
 export const MENU_ACTIONS = "actions"
 export const MENU_MOVE = "move"
 
-function specMenuItems(folder, actions) {
+function specMenuItems(folder, actions, checksContract) {
   return [
     { id: "spec-sync", label: SPEC_TEXT.checkForUpdates, icon: RefreshCw, onSelect: () => actions.openapi.check(folder.id) },
     { id: "spec-browse", label: SPEC_TEXT.browseSpec, icon: FileSearch, onSelect: () => actions.openapi.browseFolder(folder.id) },
+    { id: "spec-contract", label: checksContract ? CONTRACT_TEXT.stop : CONTRACT_TEXT.start, icon: FileCheck, onSelect: () => actions.openapi.toggleContract(folder.id) },
   ]
 }
 
@@ -28,14 +30,14 @@ function arrangeItems(source, context) {
 }
 
 function folderMenuItems(folder, context) {
-  const { actions, isLinked, editLabels } = context
+  const { actions, isLinked, editLabels, checksContract } = context
   const source = { kind: ROW_FOLDER, id: folder.id }
   return [
     { id: "new-request", label: "New request", icon: Plus, onSelect: () => actions.newRequest(folder.id) },
     { id: "new-subfolder", label: "New subfolder", icon: FolderPlus, onSelect: () => actions.createFolder(folder.id) },
     { id: "run", label: "Run folder", icon: ListChecks, onSelect: () => actions.openRunner(folder.id) },
     { id: "share", label: "Share folder", icon: Share2, onSelect: () => actions.shareFolder(folder.id) },
-    ...(isLinked ? specMenuItems(folder, actions) : []),
+    ...(isLinked ? specMenuItems(folder, actions, checksContract) : []),
     { id: "settings", label: FOLDER_SETTINGS_TEXT.menuSettings, icon: Settings2, onSelect: () => actions.openFolderSettings(folder.id) },
     { id: "labels", label: TREE_TEXT.editLabels, icon: Palette, onSelect: () => editLabels(source) },
     ...arrangeItems(source, { ...context, pasteRow: source }),

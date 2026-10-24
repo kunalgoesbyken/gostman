@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"math"
 	"net"
@@ -111,17 +110,18 @@ type connection struct {
 	*grpc.ClientConn
 	target  endpoint
 	failure *dialFailure
+	policy  engine.Policy
 }
 
 func dial(target endpoint, options engine.Options, policy engine.Policy) (*connection, error) {
 	failure := &dialFailure{}
-	dialContext := engine.DialContext(policy)
+	dialContext := policy.Dialer(target.secure)
 
 	client, err := grpc.NewClient(
 		"passthrough:///"+target.authority,
-		grpc.WithTransportCredentials(transportCredentials(target, options, failure)),
+		grpc.WithTransportCredentials(transportCredentials(target, options, policy, failure)),
 		grpc.WithContextDialer(func(ctx context.Context, address string) (net.Conn, error) {
-			conn, err := dialContext(ctx, "tcp", address)
+			conn, err := dialContext(ctx, address)
 			failure.record(err)
 			return conn, err
 		}),
@@ -131,14 +131,15 @@ func dial(target endpoint, options engine.Options, policy engine.Policy) (*conne
 	if err != nil {
 		return nil, configError("%q cannot be used as a gRPC address: %v", target.address, err)
 	}
-	return &connection{ClientConn: client, target: target, failure: failure}, nil
+	return &connection{ClientConn: client, target: target, failure: failure, policy: policy}, nil
 }
 
-func transportCredentials(target endpoint, options engine.Options, failure *dialFailure) credentials.TransportCredentials {
+func transportCredentials(target endpoint, options engine.Options, policy engine.Policy, failure *dialFailure) credentials.TransportCredentials {
 	if !target.secure {
 		return insecure.NewCredentials()
 	}
-	secured := credentials.NewTLS(&tls.Config{InsecureSkipVerify: options.InsecureTLS})
+	host, _, _ := net.SplitHostPort(target.authority)
+	secured := credentials.NewTLS(policy.TLSConfig(host, options.InsecureTLS))
 	return recordedCredentials{secured, failure}
 }
 
@@ -164,7 +165,8 @@ func (c *connection) ready(ctx context.Context) error {
 
 func (c *connection) connectError() error {
 	if err := c.failure.last(); err != nil {
-		return err
+		host, _, _ := net.SplitHostPort(c.target.authority)
+		return c.policy.Advised(host, err)
 	}
 	if c.target.secure {
 		return fmt.Errorf("%s did not complete the HTTP/2 handshake", c.target.authority)

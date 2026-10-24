@@ -17,12 +17,11 @@ var jetbrainsDialect = &dialect{
 		"client.global.get":        rename(environmentAccess + ".get"),
 		"client.global.set":        rename(environmentAccess + ".set"),
 		"client.global.clear":      rename(environmentAccess + ".unset"),
-		"request.variables.get":    rename(environmentAccess + ".get"),
-		"request.variables.set":    rename(environmentAccess + ".set"),
+		"request.variables.get":    rename(sessionAccess + ".get"),
+		"request.variables.set":    rename(sessionAccess + ".set"),
 		"request.environment.get":  rename(environmentAccess + ".get"),
 		"response.headers.valueOf": rename(responseRoot + ".getHeader"),
 	},
-	scoped: setOf("request.variables"),
 }
 
 func jetbrainsAssert(args []string) (string, bool) {

@@ -41,7 +41,7 @@ function ColumnLabels({ columns, typed, keyLabel, valueLabel }) {
 
 function ValueCell({ row, label, onChange }) {
   if (isFileRow(row)) {
-    return <FileField fileName={row.fileName} data={row.data} onChange={onChange} />
+    return <FileField fileName={row.fileName} data={row.data} path={row.path} onChange={onChange} />
   }
   return (
     <VariableInput

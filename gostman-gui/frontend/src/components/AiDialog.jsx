@@ -8,6 +8,7 @@ import { Notice, SectionLabel } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { Textarea } from "./ui/textarea"
 import { SkeletonLines } from "./ui/skeleton"
+import { AI_TEXT } from "../lib/aiText"
 import { formatSize } from "../lib/dataUtils"
 import { hostOf, providerById } from "../lib/ai/providers"
 import {
@@ -17,35 +18,39 @@ import { SCRIPT_POST, SCRIPT_PRE, taskById } from "../lib/ai/tasks"
 import { cn } from "../lib/utils"
 
 const SCRIPT_KINDS = [
-  { value: SCRIPT_PRE, label: "Pre-request" },
-  { value: SCRIPT_POST, label: "Post-response" },
+  { value: SCRIPT_PRE, label: AI_TEXT.preRequest },
+  { value: SCRIPT_POST, label: AI_TEXT.postResponse },
 ]
 
-const REVIEW_NOTE = "AI-generated. Review before you accept. Nothing is sent, saved or run until you decide."
-const VALUES_LABEL = "Include real response values (otherwise only the structure is sent)"
-const SHAPE_LABEL = "Include the body values (up to 4 KB, secret-looking fields are masked)"
+const PRE_CLASS = "overflow-auto whitespace-pre-wrap rounded border border-border bg-muted/40 p-2 font-mono text-xs"
 
-function InputStage({ task, input, actions }) {
+function Note({ text }) {
+  return text ? <p className="text-xs text-muted-foreground">{text}</p> : null
+}
+
+function InputStage({ task, dialog, actions }) {
+  const { input } = dialog
   return (
     <div className="flex flex-col gap-3">
+      <Note text={dialog.note} />
       {task.needsScriptKind && (
-        <SegmentedControl label="Script" options={SCRIPT_KINDS} value={input.scriptKind} onChange={(scriptKind) => actions.setInput({ scriptKind })} />
+        <SegmentedControl label={AI_TEXT.scriptLabel} options={SCRIPT_KINDS} value={input.scriptKind} onChange={(scriptKind) => actions.setInput({ scriptKind })} />
       )}
       {task.needsText && (
         <label className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-          {task.inputLabel}
+          {task.text.inputLabel}
           <Textarea
             autoFocus
-            rows={task.textLimit ? 10 : 4}
+            rows={task.longText ? 10 : 4}
             value={input.text}
-            placeholder={task.placeholder}
+            placeholder={task.text.placeholder}
             onChange={(event) => actions.setInput({ text: event.target.value })}
           />
         </label>
       )}
       {task.offersValues && (
-        <Checkbox checked={input.includeValues} onChange={(event) => actions.setInput({ includeValues: event.target.checked })} className="justify-start">
-          {task.valuesByDefault ? SHAPE_LABEL : VALUES_LABEL}
+        <Checkbox checked={input.includeValues} onChange={(event) => actions.setInput({ includeValues: event.target.checked })} className="h-auto items-start justify-start">
+          {task.valuesByDefault ? AI_TEXT.includeBodyValues : AI_TEXT.includeValues}
         </Checkbox>
       )}
     </div>
@@ -53,28 +58,35 @@ function InputStage({ task, input, actions }) {
 }
 
 function PreviewStage({ dialog, host, skipNextTime, onSkipChange }) {
-  const { scrubbed, tokens } = dialog.preview
+  const { scrubbed, tokens, includeValues } = dialog.preview
   const bytes = new TextEncoder().encode(scrubbed.system + scrubbed.user).length
   return (
     <div className="flex flex-col gap-3">
       <Notice tone="muted" icon={ShieldCheck} edge="border">
-        This is exactly what will be sent to {host}: about {formatSize(bytes)} ({tokens} tokens). Secrets are masked.
+        {AI_TEXT.previewNote(host, formatSize(bytes), tokens)}
+        {includeValues !== null && ` ${includeValues ? AI_TEXT.valuesIncluded : AI_TEXT.structureOnly}`}
       </Notice>
-      <SectionLabel>Instructions</SectionLabel>
-      <pre className="max-h-32 overflow-auto whitespace-pre-wrap rounded border border-border bg-muted/40 p-2 font-mono text-xs">{scrubbed.system}</pre>
-      <SectionLabel>Content</SectionLabel>
-      <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded border border-border bg-muted/40 p-2 font-mono text-xs">{scrubbed.user}</pre>
-      <Checkbox checked={skipNextTime} onChange={(event) => onSkipChange(event.target.checked)} className="justify-start">
-        Don't ask again for this action
+      <SectionLabel>{AI_TEXT.instructions}</SectionLabel>
+      <pre className={cn("max-h-32", PRE_CLASS)}>{scrubbed.system}</pre>
+      <SectionLabel>{AI_TEXT.content}</SectionLabel>
+      <pre className={cn("max-h-64", PRE_CLASS)}>{scrubbed.user}</pre>
+      {scrubbed.schema && (
+        <>
+          <SectionLabel>{AI_TEXT.replyFormat}</SectionLabel>
+          <pre className={cn("max-h-32", PRE_CLASS)}>{JSON.stringify(scrubbed.schema, null, 2)}</pre>
+        </>
+      )}
+      <Checkbox checked={skipNextTime} onChange={(event) => onSkipChange(event.target.checked)} className="h-auto items-start justify-start">
+        {AI_TEXT.skipPreview}
       </Checkbox>
     </div>
   )
 }
 
-function RunningStage({ provider }) {
+function RunningStage({ dialog }) {
   return (
     <div role="status" className="flex flex-col gap-3">
-      <p className="text-sm text-muted-foreground">Waiting for {provider.label}</p>
+      <p className="text-sm text-muted-foreground">{dialog.waiting || AI_TEXT.waitingFor(providerById(dialog.provider).label)}</p>
       <SkeletonLines className="p-0" />
     </div>
   )
@@ -85,8 +97,8 @@ function DiffPane({ label, text, compareTo }) {
   return (
     <div className="flex min-w-0 flex-col gap-1">
       <SectionLabel>{label}</SectionLabel>
-      <pre className="max-h-64 min-h-12 overflow-auto rounded border border-border bg-muted/40 p-2 font-mono text-xs">
-        {text === "" ? <span className="text-muted-foreground">Empty</span> : text.split("\n").map((line, index) => (
+      <pre className={cn("max-h-64 min-h-12", PRE_CLASS)}>
+        {text === "" ? <span className="text-muted-foreground">{AI_TEXT.empty}</span> : text.split("\n").map((line, index) => (
           <div key={index} className={cn("whitespace-pre-wrap", !known.has(line) && "bg-success/15")}>{line || " "}</div>
         ))}
       </pre>
@@ -99,8 +111,8 @@ function Section({ section }) {
     <div className="flex flex-col gap-2">
       <p className="text-xs font-medium">{section.label}</p>
       <div className="grid gap-2 sm:grid-cols-2">
-        <DiffPane label="Current" text={section.before} compareTo="" />
-        <DiffPane label="Proposed" text={section.after} compareTo={section.before} />
+        <DiffPane label={AI_TEXT.current} text={section.before} compareTo="" />
+        <DiffPane label={AI_TEXT.proposed} text={section.after} compareTo={section.before} />
       </div>
     </div>
   )
@@ -134,7 +146,7 @@ function Links({ links, onOpen }) {
 function ProposalStage({ proposal, actions }) {
   return (
     <div className="flex flex-col gap-4">
-      {proposal.apply && <p className="text-xs text-muted-foreground">{REVIEW_NOTE}</p>}
+      <Note text={proposal.note || (proposal.apply ? AI_TEXT.reviewNote : "")} />
       {proposal.sections?.map((section) => <Section key={section.label} section={section} />)}
       {proposal.blocks?.map((block) => <Block key={block.heading} block={block} />)}
       {proposal.links && <Links links={proposal.links} onOpen={actions.openLink} />}
@@ -147,40 +159,42 @@ function Footer({ dialog, task, actions, skipNextTime }) {
     const missing = task.needsText && !dialog.input.text.trim()
     return (
       <>
-        <Button variant="outline" onClick={actions.cancel}>Cancel</Button>
-        <Button disabled={missing} onClick={actions.submit}>Preview</Button>
+        <Button variant="outline" onClick={actions.cancel}>{AI_TEXT.cancel}</Button>
+        <Button disabled={missing} onClick={actions.submit}>{AI_TEXT.preview}</Button>
       </>
     )
   }
   if (dialog.stage === STAGE_PREVIEW) {
     return (
       <>
-        <Button variant="outline" onClick={actions.backToInput}>Back</Button>
-        <Button onClick={() => actions.confirmPreview(skipNextTime)}>Send to AI</Button>
+        <Button variant="outline" onClick={actions.backToInput}>{AI_TEXT.back}</Button>
+        <Button onClick={() => actions.confirmPreview(skipNextTime)}>{AI_TEXT.sendToAi}</Button>
       </>
     )
   }
-  if (dialog.stage === STAGE_RUNNING) return <Button variant="outline" onClick={actions.cancel}>Cancel</Button>
+  if (dialog.stage === STAGE_RUNNING) return <Button variant="outline" onClick={actions.cancel}>{AI_TEXT.cancel}</Button>
   if (dialog.stage === STAGE_ERROR) {
     return (
       <>
-        <Button variant="outline" onClick={actions.cancel}>Close</Button>
-        <Button onClick={actions.backToInput}>Try again</Button>
+        <Button variant="outline" onClick={actions.cancel}>{AI_TEXT.close}</Button>
+        <Button onClick={actions.backToInput}>{AI_TEXT.tryAgain}</Button>
       </>
     )
   }
+  const { proposal } = dialog
   return (
     <>
-      <Button variant="outline" onClick={actions.cancel}>{dialog.proposal.apply ? "Discard" : "Close"}</Button>
-      {dialog.proposal.apply && <Button onClick={actions.accept}>{dialog.proposal.applyLabel}</Button>}
+      <Button variant="outline" onClick={actions.cancel}>{proposal.apply ? AI_TEXT.discard : AI_TEXT.close}</Button>
+      {proposal.next && <Button variant="outline" onClick={actions.continueProposal}>{AI_TEXT.continueBatch}</Button>}
+      {proposal.apply && <Button onClick={actions.accept}>{proposal.applyLabel}</Button>}
     </>
   )
 }
 
 function Stage({ dialog, task, actions, host, skipNextTime, onSkipChange }) {
-  if (dialog.stage === STAGE_INPUT) return <InputStage task={task} input={dialog.input} actions={actions} />
+  if (dialog.stage === STAGE_INPUT) return <InputStage task={task} dialog={dialog} actions={actions} />
   if (dialog.stage === STAGE_PREVIEW) return <PreviewStage dialog={dialog} host={host} skipNextTime={skipNextTime} onSkipChange={onSkipChange} />
-  if (dialog.stage === STAGE_RUNNING) return <RunningStage provider={providerById(dialog.provider)} />
+  if (dialog.stage === STAGE_RUNNING) return <RunningStage dialog={dialog} />
   if (dialog.stage === STAGE_ERROR) return <p role="alert" className="text-sm text-destructive [overflow-wrap:anywhere]">{dialog.error}</p>
   if (dialog.stage === STAGE_PROPOSAL) return <ProposalStage proposal={dialog.proposal} actions={actions} />
   return null
@@ -191,15 +205,15 @@ export function AiDialog({ actions }) {
   const settings = useAiStore((s) => s.settings)
   const [skipNextTime, setSkipNextTime] = useState(false)
   const task = taskById(dialog.taskId)
+  const provider = providerById(settings.provider)
 
   return (
-    <Dialog label={task.label} size="lg" onClose={actions.cancel}>
+    <Dialog label={task.text.label} size="lg" onClose={actions.cancel}>
       <DialogHeader onClose={actions.cancel}>
-        <DialogTitle>{task.label}</DialogTitle>
+        <DialogTitle>{task.text.label}</DialogTitle>
         <span className="ml-auto mr-2 flex shrink-0 items-center gap-1 text-xs max-sm:hidden text-muted-foreground">
-          AI:
           <BrandIcon brand={settings.provider} />
-          {providerById(settings.provider).label}
+          {AI_TEXT.providerLabel(provider.label)}
         </span>
       </DialogHeader>
       <DialogBody>

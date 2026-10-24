@@ -23,7 +23,6 @@ type dialect struct {
 	objects    map[string]string
 	calls      map[string]callRule
 	specials   map[string]special
-	scoped     map[string]bool
 	retired    map[string]bool
 	implicit   map[string]string
 	receivers  map[string]receiver

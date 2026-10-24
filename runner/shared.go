@@ -13,6 +13,7 @@ type shared struct {
 	tokens  tokenCache
 	seen    map[string]string
 	witness func(engine.Request)
+	signIn  engine.Token
 
 	witnessMu sync.Mutex
 	signInMu  sync.Mutex

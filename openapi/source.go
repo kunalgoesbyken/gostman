@@ -139,6 +139,10 @@ func (o Options) fetch(ctx context.Context, address string) ([]byte, error) {
 	return data, nil
 }
 
+func Fetch(ctx context.Context, address string, opt Options) ([]byte, error) {
+	return opt.withAllowance().fetch(ctx, address)
+}
+
 func readLimited(reader io.Reader, limit int64) ([]byte, error) {
 	data, err := io.ReadAll(io.LimitReader(reader, limit+1))
 	if err != nil {

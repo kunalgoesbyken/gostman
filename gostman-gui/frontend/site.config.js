@@ -7,6 +7,7 @@ import { join, relative, resolve, sep } from 'path'
 import { guidePages } from './src/guides/pages.js'
 import { docFiles, docOutputFile, docPath, docSlug } from './src/docs/manifest.js'
 import { loadDocs } from './site-docs.js'
+import { CLIENT_METADATA_PATH, clientMetadata } from './src/lib/mcpClientMetadata.js'
 
 const DEFAULT_SITE_URL = 'https://gostman.com'
 const SITE_URL_TOKEN = '__SITE_URL__'
@@ -118,6 +119,7 @@ export function siteMeta() {
     async generateBundle(_options, bundle) {
       this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: sitemapXml(siteUrl) })
       this.emitFile({ type: 'asset', fileName: 'robots.txt', source: robotsTxt(siteUrl) })
+      this.emitFile({ type: 'asset', fileName: CLIENT_METADATA_PATH.slice(1), source: JSON.stringify(clientMetadata(siteUrl), null, 2) })
 
       const { renderGuidePage, renderDocsPage, renderLandingMarkup, assets } = await buildGuideRenderer(bundle)
       const docs = loadDocs(DOCS_DIR)

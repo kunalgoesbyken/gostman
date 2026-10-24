@@ -59,6 +59,13 @@ func (r Request) layers() []engine.Layer {
 	return layers
 }
 
+func (r Request) scriptTimeout() int64 {
+	if len(r.Lineage) == 0 {
+		return 0
+	}
+	return r.Lineage[0].ScriptTimeoutMs
+}
+
 func (r Request) folderScopes() []variables {
 	scopes := make([]variables, 0, len(r.Lineage))
 	for _, folder := range r.Lineage {

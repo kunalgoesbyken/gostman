@@ -6,7 +6,7 @@ const toPath = (path) => (Array.isArray(path) ? path.map(String) : String(path).
 
 const isSafe = (path) => path.every((key) => !BLOCKED_KEYS.has(key))
 
-const get = (object, path, fallback) => {
+export const get = (object, path, fallback) => {
   let current = object
   for (const key of toPath(path)) {
     if (current === null || current === undefined) return fallback

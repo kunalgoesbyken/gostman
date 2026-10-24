@@ -1,20 +1,28 @@
+import { NETWORK_TEXT } from './networkText'
+
 const PROXY_SYSTEM = 'system'
-const PROXY_NONE = 'none'
+export const PROXY_NONE = 'none'
 export const PROXY_CUSTOM = 'custom'
 
 export const PROXY_MODES = [
-  { value: PROXY_SYSTEM, label: 'Use the system proxy' },
-  { value: PROXY_NONE, label: 'No proxy' },
-  { value: PROXY_CUSTOM, label: 'Custom proxy' },
+  { value: PROXY_SYSTEM, label: NETWORK_TEXT.proxyModes.system },
+  { value: PROXY_NONE, label: NETWORK_TEXT.proxyModes.none },
+  { value: PROXY_CUSTOM, label: NETWORK_TEXT.proxyModes.custom },
 ]
 
-export const BLANK_CERTIFICATE = { host: '', certFile: '', keyFile: '' }
+export const BLANK_CERTIFICATE = { host: '', certFile: '', keyFile: '', passphrase: '', passphraseSaved: false }
 
 export const DEFAULT_SETTINGS = { proxyMode: PROXY_SYSTEM, proxyUrl: '', proxyBypass: '', certificates: [], caFile: '' }
 
 const asText = (value) => (typeof value === 'string' ? value : '')
 
-const toCertificate = (raw) => ({ host: asText(raw?.host), certFile: asText(raw?.certFile), keyFile: asText(raw?.keyFile) })
+const toCertificate = (raw) => ({
+  host: asText(raw?.host),
+  certFile: asText(raw?.certFile),
+  keyFile: asText(raw?.keyFile),
+  passphrase: '',
+  passphraseSaved: raw?.passphraseSaved === true,
+})
 
 export function normalizeSettings(raw) {
   return {
@@ -25,3 +33,9 @@ export function normalizeSettings(raw) {
     caFile: asText(raw?.caFile),
   }
 }
+
+const savedCertificate = (certificate) => ({ ...certificate, passphrase: '', passphraseSaved: certificate.passphraseSaved || certificate.passphrase !== '' })
+
+export const withoutPassphrases = (settings) => ({ ...settings, certificates: settings.certificates.map(savedCertificate) })
+
+export const hasCollectionNetwork = (status) => Boolean(status && (status.proxy || status.noProxy || status.ca || status.certificates?.length || status.error))

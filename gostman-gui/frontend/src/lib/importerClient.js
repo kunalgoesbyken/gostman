@@ -5,7 +5,7 @@ import { readZip } from './zipReader'
 
 const MAX_FILES = 5000
 const MAX_DEPTH = 32
-const IMPORTABLE = new Set(['bru', 'json', 'yml', 'yaml', 'xml', 'wsdl', 'xsd', 'har', 'http', 'rest'])
+const IMPORTABLE = new Set(['bru', 'json', 'yml', 'yaml', 'xml', 'wsdl', 'xsd', 'har', 'http', 'rest', 'proto'])
 const SKIPPED_SEGMENTS = ['node_modules']
 const BOM_LABELS = [
   { bytes: [0xff, 0xfe], label: 'utf-16le' },

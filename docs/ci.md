@@ -7,8 +7,11 @@
 | Code | Meaning |
 | --- | --- |
 | 0 | every request and check passed |
-| 1 | a request or a check failed |
+| 1 | a check or a script failed, or the run was interrupted |
 | 2 | the command or the input is wrong |
+| 3 | a request got no response: it could not be sent, the connection failed or timed out |
+
+A run with both kinds of failure exits 3.
 
 A 4xx or 5xx status alone is not a failure. Add a check such as `res.status equals 200` to the request.
 
@@ -41,6 +44,16 @@ gostman run api --reporter text --reporter junit:report.xml --reporter html:repo
 
 At most one reporter can go without a file, and it prints to stdout. When every report goes to a file, the text summary is printed.
 
+## Contract checks
+
+`--contract` checks every response against an OpenAPI spec, so a changed status code, a new content type or a field that became `null` fails the job even when no assertion covers it:
+
+```bash
+gostman run api --env CI --contract openapi.yaml --reporter junit:report.xml
+```
+
+Each check appears as a test in every report format. See [Contract checks](import-export-and-specs.md#contract-checks) for what is compared.
+
 ## Proxies and certificates
 
 Behind a corporate proxy or in front of an API that needs a client certificate, pass the files to `run`, `send` or `load`:
@@ -52,13 +65,15 @@ gostman run api --cacert corp-ca.pem --client-cert client.pem --client-key clien
 
 | Flag | Effect |
 | --- | --- |
-| `--cacert <file>` | trusts the PEM certificates in the file as well as the system's (repeatable) |
+| `--cacert <file>` | trusts the PEM or DER certificates in the file as well as the system's (repeatable) |
 | `--client-cert <file> --client-key <file>` | presents this PEM certificate to every host |
-| `--client-cert <host>=<cert>,<key>` | presents it to that host only; `*.example.com` covers subdomains (repeatable) |
+| `--client-cert <file>` | presents a PFX/P12 file, or a PEM file that holds the key, to every host |
+| `--client-cert <host>=<cert>,<key>` or `<host>=<file.p12>` | presents it to that host only; `*.example.com` covers subdomains (repeatable) |
+| `--client-cert-pass-env <NAME>` | reads the passphrase of encrypted keys and PFX/P12 files from this environment variable |
 | `--proxy <url>` | sends through this `http`, `https` or `socks5` proxy |
 | `--noproxy <hosts>` | comma-separated hosts that skip `--proxy` |
 
-Without `--proxy`, the `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY` variables of the job are used. OAuth 2 token requests and `sendRequest` in scripts go through the same proxy and certificates. Keys must be unencrypted PEM; convert a `.p12` or `.pfx` file with `openssl pkcs12 -in client.p12 -nodes -out client.pem`. Write certificates from CI secrets to files at the start of the job, not into the repository. A missing file or one without PEM data exits 2 before anything is sent.
+Without `--proxy`, the `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY` variables of the job are used. gRPC, OAuth 2 token requests and `sendRequest` in scripts go through the same proxy and certificates. A workspace's `network` section in `gostman.yaml` applies too, and the flags win over it. Write certificates from CI secrets to files at the start of the job, keep the passphrase in a secret variable, and pass its name: `--client-cert client.p12 --client-cert-pass-env CLIENT_CERT_PASSPHRASE`. A missing file, a file that is not a certificate, or a wrong or missing passphrase exits 2 before anything is sent.
 
 ## GitHub Actions
 
@@ -181,17 +196,4 @@ docker run --rm -v "$PWD:/workspace" -e API_TOKEN ghcr.io/kunalgoesbyken/gostman
 
 The `Dockerfile` at the root of the repository builds the same image: `docker build -t gostman --build-arg VERSION=1.7.1 .`
 
-The container works in `/workspace`. The mounted folder must be readable by the image user (uid 65532), and writable if reports are written there. The image has no shell, so pass the arguments to `gostman` directly.
-
-Use it in a pipeline as the job image:
-
-```yaml
-api-tests:
-  image:
-    name: ghcr.io/kunalgoesbyken/gostman:latest
-    entrypoint: [""]
-  script:
-    - gostman run api --env CI --var-from-env API_TOKEN
-```
-
-The distroless image has no shell, so GitLab jobs that need `script:` lines require a shell-based image. Use the download recipe above in that case.
+The container works in `/workspace`. The mounted folder must be readable by the image user (uid 65532), and writable if reports are written there. The image has no shell, so pass the arguments to `gostman` directly, as `docker run` does above. It cannot be the job image of a GitLab CI job, because GitLab runs `script:` lines in a shell; use the [GitLab CI](#gitlab-ci) recipe there.

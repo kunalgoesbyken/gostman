@@ -11,11 +11,12 @@ const DEFAULT_TOKENS = {
   GRAPHQL: 'primary',
   GRPC: 'info',
   MCP: 'info',
+  WS: 'info',
 }
 
 export const STYLED_METHODS = HTTP_METHODS.filter((method) => Object.hasOwn(DEFAULT_TOKENS, method))
 
-export const isStyledMethod = (method) => STYLED_METHODS.includes(method)
+export const hasMethodTone = (method) => Object.hasOwn(DEFAULT_TOKENS, method)
 
 export const methodToken = (method) => `--method-${method.toLowerCase()}`
 
@@ -24,7 +25,7 @@ export const methodBackgroundToken = (method) => `${methodToken(method)}-bg`
 export const defaultMethodToken = (method) => DEFAULT_TOKENS[method]
 
 export const methodStyle = (method) => (
-  isStyledMethod(method)
+  hasMethodTone(method)
     ? { color: `hsl(var(${methodToken(method)}, var(--${DEFAULT_TOKENS[method]})))`, backgroundColor: `var(${methodBackgroundToken(method)}, transparent)` }
     : undefined
 )

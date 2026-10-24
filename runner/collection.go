@@ -11,13 +11,16 @@ import (
 const byteOrderMark = "\xef\xbb\xbf"
 
 type Collection struct {
-	Requests     []json.RawMessage  `json:"requests"`
-	Folders      []Folder           `json:"folders"`
-	Environments []Environment      `json:"environments"`
-	Variables    string             `json:"variables"`
-	Settings     workspace.Settings `json:"settings"`
-	DotEnv       map[string]string  `json:"-"`
-	Modules      map[string]string  `json:"-"`
+	Requests     []json.RawMessage   `json:"requests"`
+	Folders      []Folder            `json:"folders"`
+	Environments []Environment       `json:"environments"`
+	Variables    string              `json:"variables"`
+	Settings     workspace.Settings  `json:"settings"`
+	DotEnv       map[string]string   `json:"-"`
+	Modules      map[string]string   `json:"-"`
+	Warnings     []string            `json:"-"`
+	Network      engine.NetworkFiles `json:"-"`
+	Root         string              `json:"-"`
 }
 
 type Folder struct {
@@ -59,6 +62,7 @@ type Request struct {
 	GrpcMethod       string         `json:"grpcMethod"`
 	GrpcMessage      string         `json:"grpcMessage"`
 	GrpcProtos       string         `json:"grpcProtos"`
+	McpMethod        string         `json:"mcpMethod"`
 	McpTool          string         `json:"mcpTool"`
 	McpArguments     string         `json:"mcpArguments"`
 	SocketProtocol   string         `json:"socketProtocol"`
@@ -73,6 +77,9 @@ type exportFile struct {
 
 func Load(path string) (Collection, error) {
 	if isDirectory(path) {
+		if isBrunoCollection(path) && !isWorkspace(path) {
+			return loadBruno(path)
+		}
 		return loadWorkspace(path)
 	}
 	content, err := ReadText(path)

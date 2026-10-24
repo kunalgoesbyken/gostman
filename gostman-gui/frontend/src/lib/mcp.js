@@ -23,8 +23,22 @@ export function toMcpTarget(request, variables) {
   return { url, headers, auth, options, variables, inherited }
 }
 
+export const MCP_CALL_TOOL = 'tools/call'
+export const MCP_READ_RESOURCE = 'resources/read'
+export const MCP_GET_PROMPT = 'prompts/get'
+
+export const MCP_OPERATIONS = [
+  MCP_CALL_TOOL, 'tools/list', MCP_READ_RESOURCE, 'resources/list', 'resources/templates/list', MCP_GET_PROMPT, 'prompts/list',
+]
+
+export const mcpOperation = (request) => request.mcpMethod || MCP_CALL_TOOL
+
+export const takesArguments = (operation) => operation === MCP_CALL_TOOL || operation === MCP_GET_PROMPT
+
+export const namesItem = (operation) => takesArguments(operation) || operation === MCP_READ_RESOURCE
+
 export function toMcpCall(request, variables) {
-  return { target: toMcpTarget(request, variables), tool: request.mcpTool, arguments: request.mcpArguments }
+  return { target: toMcpTarget(request, variables), method: mcpOperation(request), tool: request.mcpTool, arguments: request.mcpArguments }
 }
 
 export const findTool = (tools, name) => tools.find((tool) => tool.name === name)

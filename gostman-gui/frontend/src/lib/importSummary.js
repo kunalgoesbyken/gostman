@@ -7,6 +7,7 @@ export const countImported = (data) => ({
   requests: listOf(data.requests).length,
   folders: listOf(data.folders).length,
   environments: listOf(data.environments).length,
+  globals: listOf(data.globals).length,
   variables: isPlainObject(data.variables) ? Object.keys(data.variables).length : 0,
   folderSettings: listOf(data.folders).filter((folder) => !isBlankScope(folder)).length,
 })

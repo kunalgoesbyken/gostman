@@ -1,3 +1,4 @@
+import { fillPlaceholders } from "./placeholders.js"
 import { isSensitiveName } from "./sensitiveNames.js"
 import { ORIGIN_UNKNOWN, secretOrigin } from "./secretOrigins.js"
 import { colorTriplet } from "./swatches.js"
@@ -19,6 +20,8 @@ export const VARIABLE_TEXT = {
   prompt: "asked for when the request is sent",
   undefinedName: "is not defined in the active environment",
   secret: "secret",
+  resolvesTo: "resolves to",
+  through: (names) => `through ${names.join(", ")}`,
 }
 
 export const looksSecret = isSensitiveName
@@ -62,16 +65,31 @@ function builtInKind(name) {
   return isPromptName(name) ? "prompt" : null
 }
 
+const isSecretName = (name, variables) => variables.details?.get(name)?.secret === true || looksSecret(name)
+
+const NOT_COMPOSED = { resolved: "", chain: [] }
+
+function composition(value, variables) {
+  const chain = []
+  const resolved = fillPlaceholders(value, (name) => {
+    if (!variables.has(name)) return undefined
+    if (!chain.includes(name)) chain.push(name)
+    return isSecretName(name, variables) ? MASKED_VALUE : variables.get(name)
+  })
+  return chain.length > 0 ? { resolved, chain } : NOT_COMPOSED
+}
+
 export function describeReference(name, variables) {
   const kind = variables.has(name) ? null : builtInKind(name)
-  if (kind) return { name, defined: true, value: "", shown: builtInText(name, kind), secret: false, kind }
+  if (kind) return { name, defined: true, value: "", shown: builtInText(name, kind), secret: false, kind, ...NOT_COMPOSED }
   const defined = variables.has(name)
   const value = defined ? variables.get(name) : ""
   const detail = variables.details?.get(name)
-  const secret = defined && (detail?.secret === true || looksSecret(name))
+  const secret = defined && isSecretName(name, variables)
   const source = detail ? SOURCE_LABELS[detail.source] : ""
   const origin = secretOrigin(detail?.ref, variables.connections)
-  return { name, defined, value, shown: secret ? MASKED_VALUE : value, secret, kind: null, source, origin }
+  const composed = defined && !secret ? composition(value, variables) : NOT_COMPOSED
+  return { name, defined, value, shown: secret ? MASKED_VALUE : value, secret, kind: null, source, origin, ...composed }
 }
 
 export function referenceLook(name, variables) {

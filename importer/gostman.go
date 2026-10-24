@@ -54,7 +54,7 @@ func (c *collector) importGostman(backup *gostmanBackup) {
 }
 
 func withoutTokens(auth engine.Auth) engine.Auth {
-	auth.OAuth2.AccessToken, auth.OAuth2.RefreshToken, auth.OAuth2.ExpiresAt = "", "", 0
+	auth.OAuth2 = auth.OAuth2.WithoutTokens()
 	return auth
 }
 

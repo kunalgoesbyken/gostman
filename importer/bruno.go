@@ -1,7 +1,6 @@
 package importer
 
 import (
-	"encoding/json"
 	"fmt"
 	"path"
 	"sort"
@@ -11,8 +10,20 @@ import (
 	"github.com/kunalgoesbyken/gostman/engine"
 )
 
+const (
+	brunoCustomMethod     = "http"
+	brunoGrpcBlock        = "grpc"
+	brunoSocketBlock      = "ws"
+	brunoEdgeGrid         = "akamai-edgegrid"
+	grpcScriptPrefix      = "script:grpc:"
+	externalSecretsPrefix = "vars:externalsecrets:"
+	contentTypeMark       = "@contentType("
+	untitledMessage       = "message %d"
+	brunoCollectionName   = "Bruno collection"
+)
+
 var brunoMethods = map[string]bool{
-	"get": true, "post": true, "put": true, "delete": true, "patch": true, "options": true, "head": true, "trace": true, "connect": true,
+	"get": true, "post": true, "put": true, "delete": true, "patch": true, "options": true, "head": true, "trace": true, "connect": true, brunoCustomMethod: true,
 }
 
 var brunoAssertOperators = map[string]string{
@@ -49,6 +60,7 @@ type extractor struct {
 	Source     string `json:"source"`
 	Expression string `json:"expression"`
 	Enabled    bool   `json:"enabled"`
+	Scope      string `json:"scope,omitempty"`
 }
 
 func safeRelativePath(name string) (string, bool) {
@@ -65,15 +77,28 @@ func safeRelativePath(name string) (string, bool) {
 }
 
 func (c *collector) readBruno(docs []document) {
-	sets := c.brunoSets(docs)
-	for _, set := range sets {
+	for _, set := range c.brunoSets(c.safeDocuments(docs)) {
 		c.read(set.name, FormatBruno, func() { c.importBrunoSet(set) })
 	}
 }
 
 func (c *collector) brunoSets(docs []document) []*brunoSet {
 	var sets []*brunoSet
-	var loose []document
+	for _, group := range groupByRoot(docs, kindBrunoConfig, brunoCollectionName) {
+		set := &brunoSet{name: group.name, root: group.root, config: object(group.head.data)}
+		if group.head.kind == kindBrunoConfig {
+			set.name = cleanName(text(set.config["name"]), brunoCollectionName)
+		}
+		for _, doc := range group.docs {
+			c.assignBruno(set, doc)
+		}
+		sets = append(sets, set)
+	}
+	return sets
+}
+
+func (c *collector) safeDocuments(docs []document) []document {
+	kept := make([]document, 0, len(docs))
 	for _, doc := range docs {
 		clean, ok := safeRelativePath(doc.file.Name)
 		if !ok {
@@ -81,54 +106,57 @@ func (c *collector) brunoSets(docs []document) []*brunoSet {
 			continue
 		}
 		doc.file.Name = clean
-		if doc.kind == kindBrunoConfig {
-			config := object(doc.data)
-			sets = append(sets, &brunoSet{name: cleanName(text(config["name"]), "Bruno collection"), root: path.Dir(clean), config: config})
+		kept = append(kept, doc)
+	}
+	return kept
+}
+
+func fileStem(name string) string {
+	return strings.TrimSuffix(path.Base(name), path.Ext(name))
+}
+
+type documentGroup struct {
+	root string
+	name string
+	head document
+	docs []document
+}
+
+func groupByRoot(docs []document, headKind, fallback string) []documentGroup {
+	var groups []documentGroup
+	var loose, rest []document
+	for _, doc := range docs {
+		if doc.kind == headKind {
+			groups = append(groups, documentGroup{root: path.Dir(doc.file.Name), head: doc})
 			continue
 		}
 		loose = append(loose, doc)
 	}
-	sort.SliceStable(sets, func(i, j int) bool { return len(sets[i].root) > len(sets[j].root) })
-	roots := make([]string, len(sets))
-	for index, set := range sets {
-		roots[index] = set.root
-	}
-	var implicit *brunoSet
+	sort.SliceStable(groups, func(i, j int) bool { return len(groups[i].root) > len(groups[j].root) })
 	for _, doc := range loose {
-		var set *brunoSet
-		if index := owner(roots, doc.file.Name); index >= 0 {
-			set = sets[index]
-		} else {
-			implicit = c.implicitSet(implicit, loose)
-			set = implicit
+		if index := owningGroup(groups, doc.file.Name); index >= 0 {
+			groups[index].docs = append(groups[index].docs, doc)
+			continue
 		}
-		c.assignBruno(set, doc)
+		rest = append(rest, doc)
 	}
-	if implicit != nil {
-		sets = append(sets, implicit)
+	if len(rest) == 0 {
+		return groups
 	}
-	return sets
+	implicit := documentGroup{root: commonDirectory(loose), name: fallback, docs: rest}
+	if implicit.root != "." && implicit.root != "/" {
+		implicit.name = path.Base(implicit.root)
+	}
+	return append(groups, implicit)
 }
 
-func owner(roots []string, name string) int {
-	for index, root := range roots {
-		if root == "." || strings.HasPrefix(name, root+"/") {
+func owningGroup(groups []documentGroup, name string) int {
+	for index, group := range groups {
+		if group.root == "." || strings.HasPrefix(name, group.root+"/") {
 			return index
 		}
 	}
 	return -1
-}
-
-func (c *collector) implicitSet(existing *brunoSet, docs []document) *brunoSet {
-	if existing != nil {
-		return existing
-	}
-	root := commonDirectory(docs)
-	name := path.Base(root)
-	if root == "." || root == "/" {
-		name = "Bruno collection"
-	}
-	return &brunoSet{name: name, root: root}
 }
 
 func commonDirectory(docs []document) string {
@@ -178,18 +206,21 @@ func ignored(relative string, config map[string]any) bool {
 	return false
 }
 
+type treeContext struct {
+	root    string
+	dialect *dialect
+	ids     map[string]string
+}
+
 func (c *collector) importBrunoSet(set *brunoSet) {
-	rootID := c.addFolder(set.name, "")
-	folders := map[string]string{".": rootID}
-	scopes := map[string]scope{}
 	meta := map[string]bruFile{}
 	var requests []brunoFile
-	var collectionScope scope
+	var collection bruFile
 	for _, file := range set.files {
 		switch path.Base(file.path) {
 		case brunoCollectionFile:
 			if file.dir == "." {
-				collectionScope = c.brunoScope(file.bru, fmt.Sprintf(labelCollection, set.name))
+				collection = file.bru
 			}
 		case brunoFolderFile:
 			meta[file.dir] = file.bru
@@ -197,7 +228,15 @@ func (c *collector) importBrunoSet(set *brunoSet) {
 			requests = append(requests, file)
 		}
 	}
-	scopes["."] = collectionScope
+	paths := make([]requestPath, len(requests))
+	for index, request := range requests {
+		paths[index] = requestPath{path: strings.TrimSuffix(request.path, brunoExtension), name: brunoName(request)}
+	}
+	ids, translation := runTargets(paths)
+	ctx := treeContext{root: set.root, dialect: translation, ids: ids}
+	since := c.mark()
+	rootScope := c.collectionScope(c.brunoScope(ctx, collection, fmt.Sprintf(labelCollection, set.name)))
+	folders := map[string]string{".": c.addScopedFolder(set.name, "", rootScope)}
 	sort.SliceStable(requests, func(i, j int) bool { return brunoOrder(requests[i]) < brunoOrder(requests[j]) })
 	var ensure func(dir string) (string, bool)
 	ensure = func(dir string) (string, bool) {
@@ -213,29 +252,27 @@ func (c *collector) importBrunoSet(set *brunoSet) {
 		}
 		folder := meta[dir]
 		name := cleanName(folder.value("meta", "name"), path.Base(dir))
-		folders[dir] = c.addFolder(name, parentID)
-		scopes[dir] = scopes[path.Dir(dir)].within(c.brunoScope(folder, fmt.Sprintf(labelFolder, name)))
+		folders[dir] = c.addScopedFolder(name, parentID, c.brunoScope(ctx, folder, fmt.Sprintf(labelFolder, name)))
 		return folders[dir], true
 	}
 	for _, dir := range sortedFolderDirs(set, meta) {
 		ensure(dir)
 	}
-	skippedDeep := 0
 	for _, request := range requests {
 		folderID, ok := ensure(request.dir)
 		if !ok {
-			skippedDeep++
+			c.warnDepth()
 			continue
 		}
-		c.importBrunoRequest(request, scopes[request.dir], folderID)
+		c.importBrunoRequest(ctx, request, folderID)
 	}
-	if skippedDeep > 0 {
-		c.Warnings = append(c.Warnings, fmt.Sprintf(messageDepth, maxFolderDepth))
-	}
-	for _, environment := range set.environments {
-		c.importBrunoEnvironment(environment)
-	}
+	c.importBrunoEnvironments(set.environments)
+	c.noteDotEnv(set.name, since)
 	c.summarizeScripts(brunoDialect, set.name)
+}
+
+func brunoName(file brunoFile) string {
+	return cleanName(file.bru.value("meta", "name"), strings.TrimSuffix(path.Base(file.path), brunoExtension))
 }
 
 func sortedFolderDirs(set *brunoSet, meta map[string]bruFile) []string {
@@ -275,27 +312,24 @@ func brunoOrder(file brunoFile) string {
 	return fmt.Sprintf("%s/%09d/%s", file.dir, sequence(file.bru), file.path)
 }
 
-func (c *collector) brunoScope(file bruFile, label string) scope {
-	var inherited scope
-	for _, entry := range file.entries("headers") {
-		inherited.headers = append(inherited.headers, row{Key: entry.Key, Value: entry.Value, Enabled: entry.Enabled})
-	}
+func (c *collector) brunoScope(ctx treeContext, file bruFile, label string) scope {
+	inherited := scope{description: file.text("docs")}
+	inherited.headers = bruRows(file.entries("headers"))
 	inherited.vars = bruRows(file.entries("vars:pre-request"))
 	if mode := file.value("auth", "mode"); mode != "" {
 		if auth, ok := c.brunoAuth(file, mode); ok {
 			inherited.auth = &auth
 		}
 	}
-	pre, post := c.brunoScripts(file, label)
-	inherited.pre, inherited.post = nonEmpty(pre), nonEmpty(post)
+	inherited.pre, inherited.post = c.brunoScripts(ctx.dialect, file, label)
 	return inherited
 }
 
-func (c *collector) brunoScripts(file bruFile, label string) (string, string) {
-	pre := c.translateScript(brunoDialect, label, stagePre, file.text("script:pre-request"))
+func (c *collector) brunoScripts(d *dialect, file bruFile, label string) (string, string) {
+	pre := c.translateScript(d, label, stagePre, file.text("script:pre-request"))
 	post := joinScripts([]string{
-		c.translateScript(brunoDialect, label, stageAfter, file.text("script:post-response")),
-		c.translateScript(brunoDialect, label, stagePost, file.text("tests")),
+		c.translateScript(d, label, stageAfter, file.text("script:post-response")),
+		c.translateScript(d, label, stagePost, file.text("tests")),
 	})
 	return pre, post
 }
@@ -311,8 +345,8 @@ func bruRows(entries []bruEntry) []row {
 func (c *collector) brunoAuth(file bruFile, mode string) (engine.Auth, bool) {
 	value := func(key string) string { return file.value("auth:"+mode, key) }
 	switch mode {
-	case "none", "inherit":
-		return engine.Auth{}, mode == "none"
+	case authNone, authInherit:
+		return engine.Auth{}, mode == authNone
 	case authBasic, authDigest:
 		return credentialsAuth(mode, value("username"), value("password")), true
 	case authBearer:
@@ -323,51 +357,149 @@ func (c *collector) brunoAuth(file bruFile, mode string) (engine.Auth, bool) {
 		return awsAuth(value("accessKeyId"), value("secretAccessKey"), value("sessionToken"), value("region"), value("service")), true
 	case authAPIKey:
 		return apiKeyAuth(value("key"), value("value"), value("placement") == "queryparams"), true
+	case authOAuth1:
+		return brunoOAuth1(value), true
+	case brunoEdgeGrid:
+		return engine.Auth{Type: authEdgeGrid, EdgeGrid: engine.EdgeGridAuth{
+			ClientToken: value("clientToken"), ClientSecret: value("clientSecret"), AccessToken: value("accessToken"),
+			Nonce: value("nonce"), Timestamp: value("timestamp"), HeadersToSign: value("headersToSign"), MaxBody: value("maxBodySize"),
+		}}, true
 	case authOAuth2:
-		return oauth2Auth(oauth2Fields{
+		auth, ok := oauth2Auth(oauth2Fields{
 			Grant: value("grant_type"), AuthURL: value("authorization_url"), TokenURL: value("access_token_url"),
 			ClientID: value("client_id"), ClientSecret: value("client_secret"), Scope: value("scope"),
 			Username: value("username"), Password: value("password"), CallbackURL: value("callback_url"),
-			PKCE: value("pkce") == "true", SecretInBody: value("credentials_placement") == "body",
+			HeaderPrefix: value("token_header_prefix"), PKCE: value("pkce") == "true",
+			SecretInBody: value("credentials_placement") != basicAuthHeader, SendIDToken: value("token_source") == idTokenSource,
 		})
+		return auth, ok
 	}
 	return engine.Auth{}, false
 }
 
-func (c *collector) importBrunoRequest(file brunoFile, inherited scope, folderID string) {
-	bru := file.bru
-	name := cleanName(bru.value("meta", "name"), strings.TrimSuffix(path.Base(file.path), brunoExtension))
-	method := brunoMethod(bru)
-	if method == "" {
-		c.skip("%s: no request method block", file.path)
-		return
+func brunoOAuth1(value func(string) string) engine.Auth {
+	privateKey := value("private_key")
+	if _, isFile := fileReference(privateKey); isFile {
+		privateKey = ""
 	}
+	return engine.Auth{Type: authOAuth1, OAuth1: engine.OAuth1Auth{
+		ConsumerKey: value("consumer_key"), ConsumerSecret: value("consumer_secret"), Token: value("access_token"),
+		TokenSecret: value("token_secret"), SignatureMethod: value("signature_method"), PrivateKey: privateKey,
+		Realm: value("realm"), Callback: value("callback_url"), Verifier: value("verifier"), Nonce: value("nonce"),
+		Timestamp: value("timestamp"), In: value("placement"),
+	}}
+}
+
+func (c *collector) importBrunoRequest(ctx treeContext, file brunoFile, folderID string) {
+	bru := file.bru
+	name := brunoName(file)
 	request := parts{
+		id:          ctx.ids[strings.TrimSuffix(file.path, brunoExtension)],
 		name:        name,
-		method:      strings.ToUpper(method),
-		url:         bru.value(method, "url"),
 		description: bru.text("docs"),
 		tags:        bru.list("meta", "tags"),
-		headers:     bruRows(bru.entries("headers")),
-		params:      bruRows(bru.entries("params:query")),
 		vars:        bruRows(bru.entries("vars:pre-request")),
 	}
-	request.preScript, request.postScript = c.brunoScripts(bru, fmt.Sprintf(labelRequest, name))
-	request.url = applyPathParams(request.url, bruRows(bru.entries("params:path")))
+	label := fmt.Sprintf(labelRequest, name)
+	request.preScript, request.postScript = c.brunoScripts(ctx.dialect, bru, label)
+	request.assertions = c.brunoAssertions(bru.entries("assert"), name)
+	var block string
+	switch {
+	case bru.has(brunoGrpcBlock):
+		block = brunoGrpcBlock
+		c.brunoGrpc(ctx, bru, label, &request)
+	case bru.has(brunoSocketBlock):
+		block = brunoSocketBlock
+		socketParts(bru.value(block, "url"), brunoSocketMessages(bru), &request)
+		request.headers = bruRows(bru.entries("headers"))
+	default:
+		block = brunoMethod(bru)
+		if block == "" {
+			c.skip("%s: no request method block", file.path)
+			return
+		}
+		c.brunoHTTP(bru, block, &request)
+	}
+	if mode := bru.value(block, "auth"); mode != "" && mode != authInherit {
+		auth, supported := c.brunoAuth(bru, mode)
+		request.auth = c.checkedAuth(name, auth, supported)
+	}
+	c.build(request, folderID)
+}
+
+func (c *collector) brunoHTTP(bru bruFile, block string, request *parts) {
+	method := block
+	if block == brunoCustomMethod {
+		method = bru.value(block, "method")
+	}
+	request.method = strings.ToUpper(method)
+	address, pathVars := pathParamVariables(bru.value(block, "url"), bruRows(bru.entries("params:path")))
+	request.url = address
+	request.vars = append(request.vars, pathVars...)
+	request.headers = bruRows(bru.entries("headers"))
+	request.params = bruRows(append(bru.entries("params:query"), bru.entries("query")...))
 	if strings.Contains(request.url, "?") {
 		request.params = disabledOnly(request.params)
 	}
-	if mode := bru.value(method, "auth"); mode != "" && mode != "inherit" {
-		auth, ok := c.brunoAuth(bru, mode)
-		request.auth = &auth
-		if !ok {
-			c.flag(messageAuthDropped, name)
+	c.brunoBody(bru, block, request)
+	request.extractors = c.brunoExtractors(bru, request.name)
+	request.options = c.settingsOptions(request.name, requestSettings{
+		timeout:         bru.value("settings", "timeout"),
+		followRedirects: bru.value("settings", "followRedirects"),
+		maxRedirects:    bru.value("settings", "maxRedirects"),
+	})
+	request.examples = c.savedExamples(request.name, brunoExamples(bru))
+}
+
+func (c *collector) brunoGrpc(ctx treeContext, bru bruFile, label string, request *parts) {
+	call := grpcCall{
+		url:        bru.value(brunoGrpcBlock, "url"),
+		method:     bru.value(brunoGrpcBlock, "method"),
+		methodType: bru.value(brunoGrpcBlock, "methodType"),
+		protoPath:  bru.value(brunoGrpcBlock, "protoPath"),
+	}
+	for _, message := range bru.repeated["body:grpc"] {
+		call.messages = append(call.messages, parseSection(message).value("content"))
+	}
+	c.grpcParts(ctx.root, call, request)
+	request.headers = bruRows(bru.entries("metadata"))
+	var hooks []string
+	for name := range bru.blocks {
+		if hook, found := strings.CutPrefix(name, grpcScriptPrefix); found {
+			hooks = append(hooks, hook)
 		}
 	}
-	c.brunoBody(bru, method, &request)
-	request.assertions = c.brunoAssertions(bru, name)
-	request.extractors = c.brunoExtractors(bru, name)
-	c.build(request, inherited, folderID)
+	if len(hooks) > 0 {
+		sort.Strings(hooks)
+		c.Warnings = append(c.Warnings, droppedScripts(label, hooks))
+	}
+}
+
+func brunoSocketMessages(bru bruFile) []socketMessage {
+	var messages []socketMessage
+	for index, lines := range bru.repeated["body:ws"] {
+		message := parseSection(lines)
+		name := cleanName(message.value("name"), fmt.Sprintf(untitledMessage, index+1))
+		messages = append(messages, socketMessage{Name: name, Body: message.value("content")})
+	}
+	return messages
+}
+
+func brunoExamples(bru bruFile) []exampleDraft {
+	var drafts []exampleDraft
+	for _, lines := range bru.repeated["example"] {
+		example := parseSection(lines)
+		response := example.sections["response"]
+		body := response.sections["body"]
+		drafts = append(drafts, exampleDraft{
+			name:        example.value("name"),
+			status:      response.sections["status"].value("code"),
+			headers:     bruRows(response.sections["headers"].entries),
+			body:        body.value("content"),
+			contentType: exampleContentType(body.value("type")),
+		})
+	}
+	return drafts
 }
 
 func brunoMethod(file bruFile) string {
@@ -377,27 +509,6 @@ func brunoMethod(file bruFile) string {
 		}
 	}
 	return ""
-}
-
-func applyPathParams(url string, params []row) string {
-	base, query, hasQuery := strings.Cut(url, "?")
-	segments := strings.Split(base, "/")
-	for index, segment := range segments {
-		name, isParam := strings.CutPrefix(segment, ":")
-		if !isParam || name == "" {
-			continue
-		}
-		for _, param := range params {
-			if param.Key == name && param.Value != "" {
-				segments[index] = param.Value
-			}
-		}
-	}
-	rebuilt := strings.Join(segments, "/")
-	if hasQuery {
-		return rebuilt + "?" + query
-	}
-	return rebuilt
 }
 
 func (c *collector) brunoBody(file bruFile, method string, request *parts) {
@@ -412,10 +523,10 @@ func (c *collector) brunoBody(file bruFile, method string, request *parts) {
 		request.method = methodGraphQL
 		request.graphqlQuery, request.graphqlVars = file.text("body:graphql"), file.text("body:graphql:vars")
 	case "formUrlEncoded":
-		request.body, request.bodyType = rowsJSON(keyedRows(bruRows(file.entries("body:form-urlencoded")))), bodyForm
+		request.body, request.bodyType = jsonList(keyedRows(bruRows(file.entries("body:form-urlencoded")))), bodyForm
 	case "multipartForm":
-		request.body, request.bodyType = rowsJSON(multipartRows(file.entries("body:multipart-form"))), bodyMultipart
-		request.needsFiles = hasFileRow(file.entries("body:multipart-form"))
+		rows := multipartRows(file.entries("body:multipart-form"))
+		request.body, request.bodyType, request.needsFiles = jsonList(rows), bodyMultipart, anyFile(rows)
 	case "file":
 		request.bodyType, request.needsFiles = bodyBinary, true
 	}
@@ -424,22 +535,22 @@ func (c *collector) brunoBody(file bruFile, method string, request *parts) {
 func multipartRows(entries []bruEntry) []row {
 	rows := make([]row, 0, len(entries))
 	for _, entry := range entries {
-		if name, isFile := fileReference(entry.Value); isFile {
-			rows = append(rows, row{Key: entry.Key, Enabled: entry.Enabled, Type: rowTypeFile, FileName: name})
+		value, contentType := splitContentType(entry.Value)
+		if name, isFile := fileReference(value); isFile {
+			rows = append(rows, row{Key: entry.Key, Enabled: entry.Enabled, Type: rowTypeFile, FileName: name, ContentType: contentType})
 			continue
 		}
-		rows = append(rows, row{Key: entry.Key, Value: entry.Value, Enabled: entry.Enabled, Type: rowTypeText})
+		rows = append(rows, row{Key: entry.Key, Value: value, Enabled: entry.Enabled, Type: rowTypeText, ContentType: contentType})
 	}
 	return keyedRows(rows)
 }
 
-func hasFileRow(entries []bruEntry) bool {
-	for _, entry := range entries {
-		if _, isFile := fileReference(entry.Value); isFile {
-			return true
-		}
+func splitContentType(value string) (string, string) {
+	at := strings.LastIndex(value, contentTypeMark)
+	if at < 0 || !strings.HasSuffix(value, ")") {
+		return value, ""
 	}
-	return false
+	return strings.TrimSpace(value[:at]), strings.TrimSuffix(value[at+len(contentTypeMark):], ")")
 }
 
 func fileReference(value string) (string, bool) {
@@ -448,66 +559,89 @@ func fileReference(value string) (string, bool) {
 		return "", false
 	}
 	target, _, _ := strings.Cut(inner, ")")
-	target = strings.ReplaceAll(target, `\`, "/")
+	target, _, _ = strings.Cut(strings.ReplaceAll(target, `\`, "/"), "|")
 	return path.Base(target), true
 }
 
-func (c *collector) brunoAssertions(file bruFile, name string) string {
+func (c *collector) brunoAssertions(entries []bruEntry, name string) string {
 	var assertions []assertion
-	for _, entry := range file.entries("assert") {
+	for _, entry := range entries {
 		operator, value, _ := strings.Cut(entry.Value, " ")
-		mapped, known := brunoAssertOperators[operator]
-		if !known {
-			c.skip("%s: assertion %q uses the operator %q, which Gostman does not have", name, entry.Key, operator)
-			continue
+		if rule, ok := c.assertionRule(name, entry.Key, operator, strings.TrimSpace(value), entry.Enabled); ok {
+			assertions = append(assertions, rule)
 		}
-		assertions = append(assertions, assertion{Expression: entry.Key, Operator: mapped, Value: strings.TrimSpace(value), Enabled: entry.Enabled})
 	}
 	return jsonList(assertions)
+}
+
+func (c *collector) assertionRule(name, expression, operator, value string, enabled bool) (assertion, bool) {
+	mapped, known := brunoAssertOperators[operator]
+	if !known {
+		c.skip(messageAssertOperator, name, expression, operator)
+		return assertion{}, false
+	}
+	return assertion{Expression: expression, Operator: mapped, Value: value, Enabled: enabled}, true
 }
 
 func (c *collector) brunoExtractors(file bruFile, name string) string {
 	var extractors []extractor
 	for _, entry := range file.entries("vars:post-response") {
-		expression, ok := bodyExpression(entry.Value)
+		rule, ok := responseExtractor(entry.Key, entry.Value, entry.Enabled)
 		if !ok {
-			c.skip("%s: the post-response variable %q reads %q, which cannot be converted", name, entry.Key, entry.Value)
+			c.skip(messagePostResponseVariable, name, entry.Key, entry.Value)
 			continue
 		}
-		extractors = append(extractors, extractor{Name: entry.Key, Source: "body", Expression: expression, Enabled: entry.Enabled})
+		extractors = append(extractors, rule)
 	}
 	return jsonList(extractors)
 }
 
-func bodyExpression(expression string) (string, bool) {
-	rest, found := strings.CutPrefix(strings.TrimSpace(expression), "res.body")
-	if !found || (rest != "" && rest[0] != '.' && rest[0] != '[') {
-		return "", false
+func (c *collector) importBrunoEnvironments(files []brunoFile) {
+	drafts := make([]environmentDraft, 0, len(files))
+	for _, file := range files {
+		drafts = append(drafts, brunoEnvironment(file))
 	}
-	return "$" + rest, true
+	c.addBrunoEnvironments(drafts)
 }
 
-func jsonList[T any](items []T) string {
-	if len(items) == 0 {
-		return ""
-	}
-	encoded, err := json.Marshal(items)
-	if err != nil {
-		return ""
-	}
-	return string(encoded)
-}
-
-func (c *collector) importBrunoEnvironment(file brunoFile) {
-	name := strings.TrimSuffix(path.Base(file.path), brunoExtension)
-	variables := map[string]string{}
-	for _, entry := range file.bru.entries("vars") {
-		if entry.Enabled {
-			variables[entry.Key] = entry.Value
+func (c *collector) addBrunoEnvironments(drafts []environmentDraft) {
+	for _, draft := range drafts {
+		for _, variable := range draft.variables {
+			if variable.secret && variable.value == "" && variable.ref == nil {
+				c.flag(messageBrunoSecrets, draft.name+"/"+variable.name)
+			}
 		}
 	}
-	for _, secret := range file.bru.names("vars:secret") {
-		variables[secret] = ""
+	c.addDraftEnvironments(drafts)
+}
+
+func brunoEnvironment(file brunoFile) environmentDraft {
+	draft := environmentDraft{
+		name:    strings.TrimSuffix(path.Base(file.path), brunoExtension),
+		color:   file.bru.top["color"],
+		extends: file.bru.top["extends"],
 	}
-	c.addEnvironment(name, variables)
+	if parents := file.bru.names("extends"); draft.extends == "" && len(parents) > 0 {
+		draft.extends = parents[0]
+	}
+	for _, entry := range file.bru.entries("vars") {
+		draft.variables = append(draft.variables, envVariable{name: entry.Key, value: entry.Value, enabled: entry.Enabled})
+	}
+	for _, secret := range file.bru.names("vars:secret") {
+		name, disabled := strings.CutPrefix(secret, disabledMark)
+		draft.variables = append(draft.variables, envVariable{name: name, enabled: !disabled, secret: true})
+	}
+	blocks := make([]string, 0, len(file.bru.blocks))
+	for block := range file.bru.blocks {
+		blocks = append(blocks, block)
+	}
+	sort.Strings(blocks)
+	for _, block := range blocks {
+		if provider, found := strings.CutPrefix(block, externalSecretsPrefix); found {
+			for _, entry := range file.bru.entries(block) {
+				draft.variables = append(draft.variables, envVariable{name: entry.Key, enabled: entry.Enabled, ref: &secretRef{Provider: provider, Path: entry.Value}})
+			}
+		}
+	}
+	return draft
 }

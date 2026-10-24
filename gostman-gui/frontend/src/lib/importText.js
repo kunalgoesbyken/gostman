@@ -23,6 +23,7 @@ export const FORMAT_LABELS = {
 
 export const IMPORT_TEXT = {
   chooseFiles: 'Choose files',
+  importButton: 'Import',
   chooseFolder: 'Choose folder',
   dropHint: 'Drop files, a folder or a .zip here, or paste content below. Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI and Swagger, .http files (REST Client, JetBrains HTTP Client), Gostman exports and share links.',
   formatLabel: 'Format',
@@ -40,7 +41,7 @@ export const IMPORT_TEXT = {
   noFiles: 'No importable files were found.',
   filesSelected: (count) => `${count} files selected`,
   sourceLine: (source, label, counts) => `${source}: ${label}, ${counts}`,
-  totalLine: (sources, counts) => `${sources} files read: ${counts}`,
+  totalLine: (counts) => `In total: ${counts}`,
   summary: (counts) => `Found ${counts}`,
 }
 
@@ -51,4 +52,19 @@ export const EXPORT_TEXT = {
   building: 'Building the export',
   saveArchive: 'Save .zip',
   fileHeading: (name) => `# ${name}`,
+}
+
+const ACTIVE_KIND_LABELS = {
+  scripts: 'scripts',
+  oauth: 'OAuth 2.0 settings',
+  commands: 'commands that start local MCP servers',
+  files: '{{$file(...)}} placeholders that send files from this computer',
+}
+
+const joinedList = (items) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`)
+
+export const ACTIVE_IMPORT_TEXT = {
+  title: (kinds) => (kinds.length === 1 && kinds[0] === 'scripts' ? 'Import the scripts?' : 'Import scripts and sign-in settings?'),
+  confirm: 'Import them',
+  message: (items, kinds) => `${items} in this import carry ${joinedList(Object.keys(ACTIVE_KIND_LABELS).filter((kind) => kinds.includes(kind)).map((kind) => ACTIVE_KIND_LABELS[kind]))}. These run when a request is sent and can read your variables, so only import them from a source you trust. Cancel imports everything else without them.`,
 }

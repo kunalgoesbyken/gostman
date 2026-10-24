@@ -1,10 +1,16 @@
-import { AlertTriangle, Check, X } from "lucide-react"
-import { Notice } from "./ui/panel"
+import { AlertTriangle, Check, Info, X } from "lucide-react"
+import { Notice, SectionLabel } from "./ui/panel"
+import { CONTRACT_TEXT, TESTS_TEXT } from "../lib/checksText"
+import { CONTRACT_KIND } from "../lib/contract"
 import { cn } from "../lib/utils"
+
+const NO_NOTES = []
 
 export const countPassed = (results) => results.filter((result) => result.passed).length
 
-export const hasTestOutput = (tests) => Boolean(tests && (tests.results.length > 0 || tests.error))
+export const hasTestOutput = (tests) => Boolean(tests && (tests.results.length > 0 || tests.error || tests.notes?.length > 0))
+
+const isContract = (result) => result.kind === CONTRACT_KIND
 
 export function TestRow({ result }) {
   const Icon = result.passed ? Check : X
@@ -13,21 +19,35 @@ export function TestRow({ result }) {
       <Icon className={cn("mt-0.5 h-3.5 w-3.5 shrink-0", result.passed ? "text-success" : "text-destructive")} />
       <div className="min-w-0 flex-1">
         <p className="font-mono text-foreground">{result.name}</p>
-        {result.message && <p className="text-muted-foreground">{result.message}</p>}
+        {result.message && <p className="whitespace-pre-line text-muted-foreground">{result.message}</p>}
       </div>
     </li>
   )
 }
 
+function ResultList({ label, results }) {
+  if (results.length === 0) return null
+  return (
+    <ul aria-label={label}>
+      {results.map((result, index) => <TestRow key={index} result={result} />)}
+    </ul>
+  )
+}
+
 export function TestResults({ tests }) {
+  const contract = tests.results.filter(isContract)
+  const notes = tests.notes ?? NO_NOTES
   return (
     <>
       {tests.error && <Notice tone="destructive" icon={AlertTriangle}>{tests.error}</Notice>}
+      {notes.map((note) => <Notice key={note} tone="muted" icon={Info}>{note}</Notice>)}
       <div className="flex flex-col gap-3 p-3">
-        {tests.results.length > 0 && (
-          <ul aria-label="Test results">
-            {tests.results.map((result, index) => <TestRow key={index} result={result} />)}
-          </ul>
+        <ResultList label={TESTS_TEXT.results} results={tests.results.filter((result) => !isContract(result))} />
+        {contract.length > 0 && (
+          <section className="flex flex-col gap-1">
+            <SectionLabel>{CONTRACT_TEXT.heading}</SectionLabel>
+            <ResultList label={CONTRACT_TEXT.heading} results={contract} />
+          </section>
         )}
       </div>
     </>

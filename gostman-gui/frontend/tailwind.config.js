@@ -65,7 +65,7 @@ export default {
       },
       fontFamily: {
         sans: ["var(--font-ui)"],
-        mono: ["var(--font-mono)"],
+        mono: ["var(--font-mono)", { fontFeatureSettings: '"calt" 0, "liga" 0' }],
         brand: ["Outfit", "sans-serif"],
       },
       fontSize: {

@@ -4,7 +4,16 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
+)
+
+const (
+	geminiModels     = "models?pageSize=1000"
+	geminiModelName  = "models/"
+	geminiGenerate   = "generateContent"
+	geminiCutOff     = "MAX_TOKENS"
+	jsonResponseType = "application/json"
 )
 
 type geminiWire struct {
@@ -22,31 +31,57 @@ type geminiContent struct {
 
 type geminiReply struct {
 	Candidates []struct {
-		Content geminiContent `json:"content"`
+		Content      geminiContent `json:"content"`
+		FinishReason string        `json:"finishReason"`
 	} `json:"candidates"`
 }
 
-func (w geminiWire) Complete(ctx context.Context, call Call) (string, error) {
+type geminiModelList struct {
+	Models []struct {
+		Name    string   `json:"name"`
+		Methods []string `json:"supportedGenerationMethods"`
+	} `json:"models"`
+}
+
+func geminiHeaders(key string) map[string]string { return map[string]string{"x-goog-api-key": key} }
+
+func (w geminiWire) Complete(ctx context.Context, call Call) (Answer, error) {
+	generation := map[string]any{"maxOutputTokens": call.MaxTokens}
+	if call.Prompt.Schema != nil {
+		generation["responseMimeType"] = jsonResponseType
+		generation["responseJsonSchema"] = call.Prompt.Schema
+	}
 	body := map[string]any{
 		"systemInstruction": geminiContent{Parts: []geminiPart{{Text: call.Prompt.System}}},
 		"contents":          []geminiContent{{Role: "user", Parts: []geminiPart{{Text: call.Prompt.User}}}},
-		"generationConfig":  map[string]any{"maxOutputTokens": call.MaxTokens},
+		"generationConfig":  generation,
 	}
-	headers := map[string]string{"x-goog-api-key": call.Key}
-	endpoint := joinURL(call.BaseURL, "v1beta", "models", url.PathEscape(call.Model)+":generateContent")
+	endpoint := joinURL(call.BaseURL, "v1beta", "models", url.PathEscape(call.Model)+":"+geminiGenerate)
 	var reply geminiReply
-	if err := post(ctx, w.client, endpoint, headers, body, &reply); err != nil {
-		return "", err
+	if err := post(ctx, w.client, endpoint, geminiHeaders(call.Key), body, &reply); err != nil {
+		return Answer{}, err
 	}
 	if len(reply.Candidates) == 0 {
-		return "", failure(KindReply, "The provider returned no answer")
+		return Answer{}, nil
 	}
+	candidate := reply.Candidates[0]
 	var text strings.Builder
-	for _, part := range reply.Candidates[0].Content.Parts {
+	for _, part := range candidate.Content.Parts {
 		text.WriteString(part.Text)
 	}
-	if text.Len() == 0 {
-		return "", failure(KindReply, "The provider returned no answer")
+	return Answer{Text: text.String(), CutOff: candidate.FinishReason == geminiCutOff}, nil
+}
+
+func (w geminiWire) Models(ctx context.Context, call Call) ([]string, error) {
+	var reply geminiModelList
+	if err := get(ctx, w.client, joinURL(call.BaseURL, "v1beta", geminiModels), geminiHeaders(call.Key), &reply); err != nil {
+		return nil, err
 	}
-	return strings.TrimSpace(text.String()), nil
+	var ids []string
+	for _, model := range reply.Models {
+		if slices.Contains(model.Methods, geminiGenerate) {
+			ids = append(ids, strings.TrimPrefix(model.Name, geminiModelName))
+		}
+	}
+	return ids, nil
 }

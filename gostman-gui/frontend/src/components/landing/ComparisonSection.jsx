@@ -28,9 +28,13 @@ export function ComparisonSection() {
             className="text-3xl font-semibold tracking-tight md:text-5xl [text-wrap:balance]"
           />
           <p className="mt-5 leading-relaxed text-muted-foreground">
-            From their public pricing and docs, October 2026. Moving from Bruno? Read{" "}
+            From their public pricing and docs, October 2026. Moving from Bruno or Insomnia? Read{" "}
             <a href={docPath("coming-from-bruno")} className="text-foreground underline underline-offset-4 hover:text-primary">
               Coming from Bruno
+            </a>
+            {" "}or{" "}
+            <a href={docPath("coming-from-insomnia")} className="text-foreground underline underline-offset-4 hover:text-primary">
+              Coming from Insomnia
             </a>
             .
           </p>

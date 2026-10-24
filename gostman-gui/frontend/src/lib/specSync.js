@@ -97,4 +97,5 @@ export const defaultSelection = (plan) => new Set([
 export const specPatch = (request) => Object.fromEntries([
   ...SPEC_FIELDS.map((field) => [field, request[field]]),
   ['auth', request.auth],
+  ['vars', request.vars],
 ])

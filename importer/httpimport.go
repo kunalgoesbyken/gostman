@@ -68,7 +68,7 @@ func (c *collector) httpFolder(stem string, folders map[string]string) (string, 
 func (c *collector) importHTTPFile(doc httpDocument, stem string, folders map[string]string) {
 	folderID, ok := c.httpFolder(stem, folders)
 	if !ok {
-		c.Warnings = append(c.Warnings, fmt.Sprintf(messageDepth, maxFolderDepth))
+		c.warnDepth()
 		return
 	}
 	label := path.Base(stem)
@@ -82,7 +82,7 @@ func (c *collector) importHTTPFile(doc httpDocument, stem string, folders map[st
 	}
 	c.linkResponses(requests)
 	for _, request := range requests {
-		c.build(request, scope{}, folderID)
+		c.build(request, folderID)
 	}
 	c.summarizeScripts(jetbrainsDialect, label)
 }
@@ -179,14 +179,14 @@ func (c *collector) httpBody(request *parts, body, contentType string, graphQL b
 	request.body, request.bodyType = body, httpBodyType(body, contentType)
 	switch request.bodyType {
 	case bodyForm:
-		request.body = rowsJSON(formRows(body))
+		request.body = jsonList(formRows(body))
 	case bodyMultipart:
 		rows, ok := multipartBody(body, contentType)
 		if !ok {
 			request.bodyType = bodyText
 			break
 		}
-		request.body, request.needsFiles = rowsJSON(rows), anyFile(rows)
+		request.body, request.needsFiles = jsonList(rows), anyFile(rows)
 	}
 	if request.bodyType != bodyMultipart && mentionsFile(body) {
 		c.flag(messageHTTPBodyFile, request.name)

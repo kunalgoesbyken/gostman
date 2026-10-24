@@ -228,13 +228,7 @@ func (w *Workspace) foldersIn(directory string) []*folderEntry {
 	return children
 }
 
-func (w *Workspace) requestsIn(directory string) []*requestEntry {
-	var children []*requestEntry
-	for _, entry := range w.requests {
-		if parentOf(entry.path) == directory {
-			children = append(children, entry)
-		}
-	}
+func sortedRequests(children []*requestEntry) []*requestEntry {
 	sort.Slice(children, byOrderThenName(
 		func(i int) int64 { return children[i].order },
 		func(i int) string { return children[i].path },
@@ -256,9 +250,14 @@ func (w *Workspace) orderedFolders() []*folderEntry {
 }
 
 func (w *Workspace) orderedRequests() []*requestEntry {
-	ordered := w.requestsIn("")
+	byDirectory := map[string][]*requestEntry{}
+	for _, entry := range w.requests {
+		directory := parentOf(entry.path)
+		byDirectory[directory] = append(byDirectory[directory], entry)
+	}
+	ordered := sortedRequests(byDirectory[""])
 	for _, folder := range w.orderedFolders() {
-		ordered = append(ordered, w.requestsIn(folder.dir)...)
+		ordered = append(ordered, sortedRequests(byDirectory[folder.dir])...)
 	}
 	return ordered
 }

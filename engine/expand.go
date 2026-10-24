@@ -12,6 +12,7 @@ import (
 
 const (
 	promptPrefix       = "?"
+	dynamicPrefix      = "$"
 	dynamicSizeBound   = 256
 	maxRandomIntSpan   = 1 << 31
 	defaultRandomLimit = 1000
@@ -74,6 +75,19 @@ func ExpandTexts(texts []string, variables string) ([]string, error) {
 	return filled, nil
 }
 
+func FillVariables(values map[string]string) map[string]string {
+	substitution := substitutionOf(values)
+	substitution.generates = false
+	filled := make(map[string]string, len(values))
+	for name, value := range values {
+		if expanded, ok := substitution.nested(name, value); ok {
+			value = expanded
+		}
+		filled[name] = value
+	}
+	return filled
+}
+
 func PlaceholderSpans(text string) [][]int {
 	return placeholderRe.FindAllStringIndex(text, -1)
 }
@@ -124,7 +138,7 @@ func randomIntBetween(low, high int64) (string, bool) {
 	return strconv.FormatInt(low+rand.Int64N(span), 10), true
 }
 
-func isDynamicName(name string) bool {
+func IsDynamicVariable(name string) bool {
 	_, ok := generatorOf(name)
 	return ok || randomIntRangeRe.MatchString(name)
 }

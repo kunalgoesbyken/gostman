@@ -8,6 +8,7 @@ Gostman is an API client for REST, GraphQL, gRPC and WebSocket that you, your CI
 
 - [Getting started](getting-started.md): open Gostman in the browser, install the desktop app or the command line, and send a first request.
 - [What is free in Gostman](free-features.md): the features Postman and Bruno list under paid plans, and where Gostman covers each one.
+- [Coming from Postman](coming-from-postman.md): import Postman collections, environments and globals, what happens to `pm.*` scripts, and the `gostman run` flags that match `newman run`.
 - [Coming from Bruno](coming-from-bruno.md): import a Bruno collection, what happens to its scripts, and the `gostman run` flags that match `bru run`.
 
 ## Learn

@@ -185,13 +185,15 @@ Gostman keeps the cookies that responses set and sends them back to the same sit
 
 Share links never include cookies.
 
+Two switches in a request's **Settings** tab change this for one request: clear **Send cookies from the cookie jar** to send it without stored cookies, and clear **Store cookies the response sets** to keep the jar unchanged. The response still lists the cookies the server set. Both switches are saved with the request and are honoured by `gostman run`.
+
 ## Network settings
 
-Network settings sets the proxy and certificates used when the desktop app sends requests. Open the **Network settings** command from the command palette.
+Network settings sets the proxy and certificates used when the desktop app sends requests: HTTP, GraphQL, gRPC, WebSocket, server-sent events, MCP over HTTP and OAuth 2 token requests. Open the **Network settings** command from the command palette.
 
 ![The Network settings dialog with a custom proxy, hosts that bypass it and a CA certificate picker](../screenshots/network.png)
 
-Network settings are desktop only. In the web version the dialog shows `Available in the desktop app`: requests from the web version go through the hosted relay, which cannot use a proxy or certificates from your machine.
+Network settings are desktop only. In the web version the dialog shows `Available in the desktop app`: requests from the web version go through the hosted relay, which cannot use a proxy or certificates from your machine. To use them from the web version, run [`gostman relay`](cli.md#local-relay-for-the-web-app) with `--cacert`, `--client-cert` or `--proxy` and choose the local relay.
 
 Change the settings, then select **Save**. If something is invalid, the dialog shows the error and stays open; **Cancel** discards your changes.
 
@@ -205,22 +207,57 @@ Under **Proxy**, **Mode** has three options:
 | **No proxy** | Sends requests directly. |
 | **Custom proxy** | Sends requests through the proxy you enter. |
 
-With **Custom proxy**, two more fields appear:
+With **Custom proxy**, **Proxy address** appears, for example `http://user:password@proxy.example.com:8080`. The scheme can be `http`, `https` or `socks5`. An address without a scheme is treated as `http://`.
 
-- **Proxy address**, for example `http://user:password@proxy.example.com:8080`. The scheme can be `http`, `https` or `socks5`. An address without a scheme is treated as `http://`.
-- **Bypass for hosts**, a comma-separated list such as `localhost, *.internal.example.com`. Requests to these hosts skip the proxy. A leading `*` matches any host that ends with the rest of the pattern.
+With the system proxy or a custom one, **Bypass for hosts** takes a comma-separated list such as `localhost, *.internal.example.com`. Requests to these hosts skip the proxy. A leading `*` matches any host that ends with the rest of the pattern. gRPC and WebSocket connections reach the proxy with an HTTP `CONNECT` tunnel, or through SOCKS5.
 
 ### Certificates
 
 Under **Certificates**:
 
-- **CA certificate**: choose a PEM file with **Choose**. Its certificates are trusted in addition to the system's. The clear button removes it.
-- **Client certificate host**, **Certificate** and **Private key**: select **Add client certificate** to add a row. Enter the host, then choose the certificate file and the private key file.
+- **CA certificate**: choose a PEM or DER file with **Choose**. Its certificates are trusted in addition to the system's. The clear button removes it.
+- **Client certificate host**, **Certificate**, **Private key** and **Passphrase**: select **Add client certificate** to add a row. Enter the host, then choose the certificate file and, for a PEM certificate, the private key file.
 
-Certificates and keys are PEM files. A client certificate is presented only to its host; use `*.example.com` to cover subdomains. Keys must not be passphrase-protected. A row without a host is rejected when you save.
+A certificate can be:
+
+- a PEM certificate with a PEM key file;
+- a PEM file that holds both the certificate and the key, with no key file;
+- a PFX or P12 file (PKCS#12), with no key file. Files written by current OpenSSL (AES) and older ones (3DES, RC2) are both read.
+
+A key or PFX file protected by a passphrase needs the passphrase in the row. Encrypted PEM keys can be PKCS#8 (`BEGIN ENCRYPTED PRIVATE KEY`, AES or 3DES) or the older OpenSSL format (`Proc-Type: 4,ENCRYPTED`). The passphrase is kept in the system keychain, never in Gostman's data file, an export or a collection; the field then shows `Saved in the keychain`, and the clear button next to it forgets it. **Delete all data** removes it too.
+
+A client certificate is presented only to its host; use `*.example.com` to cover subdomains. A row without a host, a file that cannot be read or a wrong passphrase is rejected when you save, with the reason.
 
 Use **Remove certificate** to delete a row.
 
+### Network settings for a collection
+
+A workspace folder can carry its own proxy and certificates in the `network` section of `gostman.yaml`, so everyone who opens the collection gets them. Paths are relative to the folder and cannot leave it. Write the section by hand:
+
+```yaml
+network:
+  proxy: http://proxy.corp.example:3128
+  noProxy: localhost, *.internal.example.com
+  ca: certs/corp-root.pem
+  certificates:
+    - host: api.example.com
+      cert: certs/client.p12
+    - host: "*.mtls.example.com"
+      cert: certs/client.pem
+      key: certs/client-key.pem
+```
+
+| Field | Effect |
+| --- | --- |
+| `proxy` | a proxy address as above, `system` for the system proxy, or `none` to send directly |
+| `noProxy` | hosts that skip the proxy, added to the ones in Network settings |
+| `ca` | a PEM or DER file trusted in addition to the system's and Network settings' |
+| `certificates` | client certificates by host, in the same formats as above; they are tried before the ones in Network settings |
+
+Never put a passphrase in `gostman.yaml`. In the desktop app, **Network settings** lists the collection's section under **This collection (gostman.yaml)**, with a **Passphrase** field for each certificate that keeps the passphrase in the system keychain for this folder. In the command line, pass `--client-cert-pass-env`.
+
+A folder you did not create opens as restricted, and its `network` section is not applied until you trust the folder: before that, the folder cannot make Gostman read files or send traffic through a proxy it names. **This collection (gostman.yaml)** says whether the section is applied, and shows why when a file cannot be read.
+
 ### In the command line
 
-The command line does not read these settings. `gostman run`, `send` and `load` take the same proxy and certificates as flags: `--cacert`, `--client-cert` with `--client-key` or as `host=cert,key`, `--proxy` and `--noproxy`. Without `--proxy` they use the `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY` environment variables. See [Proxies and certificates](ci.md#proxies-and-certificates).
+The command line does not read the desktop settings. `gostman run`, `send`, `load` and `mcp` take the same proxy and certificates as flags: `--cacert`, `--client-cert` with `--client-key`, as `host=cert,key` or `host=file.p12`, `--client-cert-pass-env NAME` for passphrases, `--proxy` and `--noproxy`. Without `--proxy` they use the `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY` environment variables. A workspace folder's `network` section is applied as well, and the flags win over it. See [Proxies and certificates](ci.md#proxies-and-certificates).

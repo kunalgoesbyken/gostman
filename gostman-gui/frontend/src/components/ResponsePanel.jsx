@@ -2,44 +2,55 @@ import { Suspense, lazy, memo, useState, useMemo, useEffect, useRef, useCallback
 import { JsonView, darkStyles } from 'react-json-view-lite'
 import 'react-json-view-lite/dist/index.css'
 import {
-  AlertTriangle, BookmarkPlus, Check, ChevronDown, ChevronUp, Cookie, Copy, Download, FileDigit, FileText, FileX, History, List,
+  AlertTriangle, BookmarkPlus, Check, ChevronDown, ChevronUp, Cookie, Copy, Download, FileDigit, FileText, FileX, History, List, ListPlus,
   Maximize2, MessageCircleQuestion, Minimize2, Scissors, Search,
 } from "lucide-react"
 import { ConsolePanel } from "./ConsolePanel"
 import { AiButton } from "./AiButton"
 import { FilterBar, SearchBar } from "./ResponseSearchBar"
 import { HighlightedText } from "./HighlightedText"
+import { LargeText } from "./LargeText"
 import { useDebouncedValue } from "../hooks/useDebouncedValue"
+import { FORMAT_DONE, FORMAT_FAILED, FORMAT_WORKING, useOffThreadFilter, useOffThreadFormat } from "../hooks/useOffThreadJson"
 import { MAX_MATCHES, filterJson, findMatches, stepIndex } from "../lib/responseSearch"
 import { Badge } from "./ui/badge"
 import { ContextMenu } from "./ui/ContextMenu"
-import { IconButton } from "./ui/button"
+import { Button, IconButton } from "./ui/button"
 import { DataTable } from "./ui/dataTable"
 import { EmptyState } from "./ui/emptyState"
 import { Notice, SectionLabel, Toolbar } from "./ui/panel"
 import { ProtocolBody } from "./ProtocolBody"
 import { SegmentedControl } from "./ui/segmented"
-import { TabCount, Tabs, TabsList, TabsTrigger } from "./ui/tabs"
+import { OverflowTabsList, TabCount, Tabs } from "./ui/tabs"
 import { SkeletonLines } from "./ui/skeleton"
 import { TestResults, countPassed, hasTestOutput } from "./TestResults"
 import { VisualizeTab } from "./VisualizeTab"
 import { TimelineTab } from "./TimelineTab"
+import { UnresolvedNotice } from "./UnresolvedNotice"
 import { useClipboardCopy } from "../hooks/useClipboardCopy"
 import { formatSize, lookup } from "../lib/dataUtils"
 import { isFailedResponse } from "../lib/ai/tasks"
+import { MCP_PROTOCOL } from "../lib/mcp"
+import { shortcutLabel } from "../lib/platform"
+import { AI_TEXT } from "../lib/aiText"
+import { RESPONSE_CHECKS_TEXT } from "../lib/checksText"
 import { canSaveAsExample } from "../lib/examples"
 import { trimTree } from "../lib/jsonTree"
+import { LARGE_BODY_CHARS } from "../lib/largeText"
+import { RESPONSE_TEXT } from "../lib/responseText"
 import { breakdownTitle } from "../lib/timeline"
+import { canProposeChecks } from "../lib/responseChecks"
 import { describeResponse, formatTime } from "../lib/responseHistory"
+import { cn } from "../lib/utils"
 import {
-  DEFAULT_RESPONSE_SHARE, MIN_REQUEST_HEIGHT_PX, MIN_RESPONSE_HEIGHT_PX, TOOLBAR_HEIGHT_PX, rememberResponseShare, rememberedResponseShare,
+  DEFAULT_RESPONSE_SHARE, MIN_REQUEST_HEIGHT_PX, MIN_RESPONSE_HEIGHT_PX, rememberResponseShare, rememberedResponseShare,
 } from "../lib/layout"
 import {
-  BODY_KINDS, ERROR_TITLES, bodyBytes, bodyKind, mimeType, parseJsonBody, statusVariant, textBody,
+  BODY_KINDS, ERROR_TITLES, bodyBytes, bodyKind, looksLikeJson, mimeType, parseJsonBody, statusVariant, textBody,
 } from "../lib/response"
 
-const TEXT_DISPLAY_LIMIT = 500_000
 const JSON_EXPANDED_DEPTH = 2
+const MCP_EXPANDED_DEPTH = 3
 const TAB_BODY = 'body'
 const TAB_HEADERS = 'headers'
 const TAB_COOKIES = 'cookies'
@@ -49,22 +60,16 @@ const TAB_VISUALIZE = 'visualize'
 const TAB_TIMELINE = 'timeline'
 const NO_VALUE = '—'
 const SEARCH_DEBOUNCE_MS = 200
-const NO_FILTER = { active: false }
 
-const VIEW_LABELS = { pretty: 'Pretty', raw: 'Raw', preview: 'Preview' }
 const NO_HISTORY = []
 const MENU_GAP_PX = 4
 const LINK_BUTTON = 'font-medium text-primary underline-offset-2 hover:underline'
+const TOOLBAR_ROW = 'h-[calc(2.5rem-1px)]'
 
 const ResponseCompareDialog = lazy(() => import("./ResponseCompareDialog").then((module) => ({ default: module.ResponseCompareDialog })))
+const AddChecksDialog = lazy(() => import("./AddChecksDialog").then((module) => ({ default: module.AddChecksDialog })))
 
-const HISTORY_TEXT = {
-  menu: 'Earlier responses',
-  latest: 'Latest response',
-  showing: (at) => `Showing the response from ${formatTime(at)}.`,
-  compare: 'Compare with the latest',
-  back: 'Back to the latest',
-}
+const HISTORY_TEXT = RESPONSE_TEXT.history
 
 const MEDIA_KINDS = [BODY_KINDS.IMAGE, BODY_KINDS.PDF, BODY_KINDS.AUDIO, BODY_KINDS.VIDEO]
 
@@ -85,23 +90,25 @@ const JSON_STYLE = {
   punctuation: `${darkStyles.punctuation} !font-normal !text-muted-foreground`,
 }
 
-const flagText = (isSet) => (isSet ? 'Yes' : NO_VALUE)
+const flagText = (isSet) => (isSet ? RESPONSE_TEXT.yes : NO_VALUE)
 
 const testTone = (tests) => (tests.error || countPassed(tests.results) < tests.results.length ? 'destructive' : 'success')
 
+const COLUMN_TEXT = RESPONSE_TEXT.columns
+
 const HEADER_COLUMNS = [
-  { header: 'Name', key: 'key', width: 'w-1/3', cellClassName: 'text-foreground' },
-  { header: 'Value', key: 'value' },
+  { header: COLUMN_TEXT.name, key: 'key', width: 'w-1/3', cellClassName: 'text-foreground' },
+  { header: COLUMN_TEXT.value, key: 'value' },
 ]
 
 const COOKIE_COLUMNS = [
-  { header: 'Name', key: 'name', cellClassName: 'text-foreground' },
-  { header: 'Value', text: (cookie) => cookie.value || NO_VALUE },
-  { header: 'Domain', text: (cookie) => cookie.domain || NO_VALUE },
-  { header: 'Path', width: 'w-16', text: (cookie) => cookie.path || '/' },
-  { header: 'Expires', text: (cookie) => cookie.expires || 'Session' },
-  { header: 'Secure', width: 'w-20', text: (cookie) => flagText(cookie.secure) },
-  { header: 'HttpOnly', width: 'w-24', text: (cookie) => flagText(cookie.httpOnly) },
+  { header: COLUMN_TEXT.name, key: 'name', cellClassName: 'text-foreground' },
+  { header: COLUMN_TEXT.value, text: (cookie) => cookie.value || NO_VALUE },
+  { header: COLUMN_TEXT.domain, text: (cookie) => cookie.domain || NO_VALUE },
+  { header: COLUMN_TEXT.path, width: 'w-16', text: (cookie) => cookie.path || '/' },
+  { header: COLUMN_TEXT.expires, text: (cookie) => cookie.expires || RESPONSE_TEXT.sessionCookie },
+  { header: COLUMN_TEXT.secure, width: 'w-20', text: (cookie) => flagText(cookie.secure) },
+  { header: COLUMN_TEXT.httpOnly, width: 'w-24', text: (cookie) => flagText(cookie.httpOnly) },
 ]
 
 function viewsFor(kind, isText, isJson) {
@@ -110,13 +117,6 @@ function viewsFor(kind, isText, isJson) {
   if (kind === BODY_KINDS.TEXT) return ['raw']
   if (!MEDIA_KINDS.includes(kind)) return []
   return isText ? ['preview', 'raw'] : ['preview']
-}
-
-function displayableText(text) {
-  if (text.length <= TEXT_DISPLAY_LIMIT) return text
-  const lastCode = text.charCodeAt(TEXT_DISPLAY_LIMIT - 1)
-  const endsInsideSurrogatePair = lastCode >= 0xd800 && lastCode <= 0xdbff
-  return text.slice(0, endsInsideSurrogatePair ? TEXT_DISPLAY_LIMIT - 1 : TEXT_DISPLAY_LIMIT)
 }
 
 function useObjectUrl(response) {
@@ -133,40 +133,48 @@ function useObjectUrl(response) {
 
 function CopyButton({ text }) {
   const { copied, copy } = useClipboardCopy(text)
-  return <IconButton label={copied ? "Copied" : "Copy body"} icon={copied ? Check : Copy} onClick={copy} />
+  return <IconButton label={copied ? RESPONSE_TEXT.copied : RESPONSE_TEXT.copyBody} icon={copied ? Check : Copy} onClick={copy} />
 }
 
 function TextBody({ text, highlight }) {
-  const shown = displayableText(text)
+  if (text.length > LARGE_BODY_CHARS) return <LargeText text={text} highlight={highlight} />
   return (
-    <>
-      {shown.length < text.length && (
-        <Notice tone="warning" icon={Scissors}>
-          Showing the first {formatSize(TEXT_DISPLAY_LIMIT)} of this body. Download it to see everything.
-        </Notice>
-      )}
-      <pre className="whitespace-pre-wrap p-3 font-mono text-xs leading-relaxed text-foreground">
-        {highlight
-          ? <HighlightedText text={shown} matches={highlight.matches} length={highlight.length} activeIndex={highlight.index} />
-          : shown}
-      </pre>
-    </>
+    <pre className="whitespace-pre-wrap p-3 font-mono text-xs leading-relaxed text-foreground">
+      {highlight
+        ? <HighlightedText text={text} matches={highlight.matches} length={highlight.length} activeIndex={highlight.index} />
+        : text}
+    </pre>
   )
 }
 
-function BinaryBody({ response }) {
+function BinaryBody({ response, onSave }) {
   return (
     <EmptyState
       icon={FileDigit}
-      title={`Binary response, ${formatSize(response.size)}`}
-      description={`${mimeType(response)} cannot be shown as text. Download it to open it elsewhere.`}
+      title={RESPONSE_TEXT.binaryTitle(formatSize(response.size))}
+      description={RESPONSE_TEXT.binaryDescription(mimeType(response))}
+      action={onSave && <Button size="sm" variant="outline" onClick={onSave}><Download />{RESPONSE_TEXT.saveToFile}</Button>}
     />
+  )
+}
+
+function LargeBodyNotice({ size, canFormat, formatted, onFormat }) {
+  const isWorking = formatted.status === FORMAT_WORKING
+  return (
+    <Notice tone={formatted.status === FORMAT_FAILED ? 'warning' : undefined} icon={FileText}>
+      {formatted.error || RESPONSE_TEXT.largeBody(size)}{' '}
+      {canFormat && (
+        <button type="button" className={LINK_BUTTON} disabled={isWorking} onClick={onFormat}>
+          {isWorking ? RESPONSE_TEXT.formatting : RESPONSE_TEXT.formatAnyway}
+        </button>
+      )}
+    </Notice>
   )
 }
 
 function MediaElement({ kind, url, onError }) {
   if (kind === BODY_KINDS.IMAGE) {
-    return <img src={url} alt="Response body" onError={onError} className="max-h-full max-w-full rounded border border-border object-contain" />
+    return <img src={url} alt={RESPONSE_TEXT.bodyLabel} onError={onError} className="max-h-full max-w-full rounded border border-border object-contain" />
   }
   if (kind === BODY_KINDS.AUDIO) {
     return <audio src={url} controls onError={onError} className="w-full max-w-xl" />
@@ -192,56 +200,57 @@ function MediaPreview({ response, kind }) {
   )
 }
 
-function PrettyBody({ json, filtered, highlight }) {
+function PrettyBody({ json, formatted, filtered, highlight, depth }) {
+  if (formatted !== null) return <TextBody text={filtered ? filtered.text : formatted} highlight={highlight} />
   const data = filtered ? filtered.value : json
   if (highlight) return <TextBody text={JSON.stringify(data, null, 2)} highlight={highlight} />
   if (data === null || typeof data !== 'object') return <TextBody text={JSON.stringify(data, null, 2)} />
-  return <JsonTree data={data} />
+  return <JsonTree data={data} depth={depth} />
 }
 
-function JsonTree({ data }) {
+function JsonTree({ data, depth }) {
   const { value, omitted } = useMemo(() => trimTree(data), [data])
   return (
     <>
       {omitted > 0 && (
         <Notice tone="warning" icon={Scissors}>
-          Showing the start of this tree. {omitted} more values are hidden. Use Raw or the filter to see the rest.
+          {RESPONSE_TEXT.treeTrimmed(omitted)}
         </Notice>
       )}
       <div className="p-3">
-        <JsonView data={value} shouldExpandNode={(level) => level < JSON_EXPANDED_DEPTH} style={JSON_STYLE} />
+        <JsonView data={value} shouldExpandNode={(level) => level < depth} style={JSON_STYLE} />
       </div>
     </>
   )
 }
 
-function ResponseBody({ response, kind, view, json, filtered, highlight }) {
+function ResponseBody({ response, kind, view, json, formatted, filtered, highlight, onSave }) {
   if (kind === BODY_KINDS.EMPTY) {
     return (
       <EmptyState
         icon={FileX}
-        title="Empty response body"
-        description={`The server answered ${response.status} without a body.`}
+        title={RESPONSE_TEXT.emptyTitle}
+        description={RESPONSE_TEXT.emptyDescription(response.status)}
       />
     )
   }
-  if (kind === BODY_KINDS.BINARY) return <BinaryBody response={response} />
-  if (view === 'pretty') return <PrettyBody json={json} filtered={filtered} highlight={highlight} />
+  if (kind === BODY_KINDS.BINARY) return <BinaryBody response={response} onSave={onSave} />
+  if (view === 'pretty') return <PrettyBody json={json} formatted={formatted} filtered={filtered} highlight={highlight} depth={treeDepth(response)} />
   if (view === 'raw') return <TextBody text={filtered ? filtered.text : response.body} highlight={highlight} />
   if (kind === BODY_KINDS.HTML) {
-    return <iframe srcDoc={response.body} title="Response preview" className="block h-full w-full border-none bg-white" sandbox="" />
+    return <iframe srcDoc={response.body} title={RESPONSE_TEXT.previewTitle} className="block h-full w-full border-none bg-white" sandbox="" />
   }
   return <MediaPreview response={response} kind={kind} />
 }
 
 function ErrorBody({ response, onExplain }) {
-  const title = lookup(ERROR_TITLES, response.error) || 'Request failed'
-  return <EmptyState icon={AlertTriangle} title={title} description={response.body} className="whitespace-pre-line" action={<AiButton label="Explain this error with AI" onClick={onExplain}>Explain with AI</AiButton>} />
+  const title = lookup(ERROR_TITLES, response.error) || RESPONSE_TEXT.requestFailed
+  return <EmptyState icon={AlertTriangle} title={title} description={response.body} className="whitespace-pre-line" action={onExplain && <AiButton label={AI_TEXT.buttons.explainError} onClick={onExplain}>{AI_TEXT.buttons.explain}</AiButton>} />
 }
 
 function StatusSummary({ response }) {
   if (response.error) {
-    return <Badge variant="outline">{lookup(ERROR_TITLES, response.error) || 'Error'}</Badge>
+    return <Badge variant="outline">{lookup(ERROR_TITLES, response.error) || RESPONSE_TEXT.error}</Badge>
   }
   const timing = `${response.durationMs} ms · ${formatSize(response.size)}`
   const detail = [timing, breakdownTitle(response.timeline)].filter(Boolean).join('\n\n')
@@ -253,6 +262,28 @@ function StatusSummary({ response }) {
       <span title={detail} className="min-w-0 truncate font-mono text-2xs text-muted-foreground max-md:hidden">{timing}</span>
     </>
   )
+}
+
+const treeDepth = (response) => (response.protocol === MCP_PROTOCOL ? MCP_EXPANDED_DEPTH : JSON_EXPANDED_DEPTH)
+
+const tabItem = (value, badge = null, marked = false) => ({
+  value,
+  label: RESPONSE_TEXT.tabs[value],
+  marked,
+  detail: badge,
+  content: <>{RESPONSE_TEXT.tabs[value]}{badge}</>,
+})
+
+function responseTabs({ hasResult, hasTimeline, showsTests, headers, cookies, tests }) {
+  return [
+    tabItem(TAB_BODY),
+    hasResult && tabItem(TAB_HEADERS, <TabCount>{headers.length}</TabCount>, headers.length > 0),
+    hasResult && tabItem(TAB_COOKIES, <TabCount>{cookies.length}</TabCount>, cookies.length > 0),
+    hasTimeline && tabItem(TAB_TIMELINE),
+    showsTests && tabItem(TAB_TESTS, <TabCount tone={testTone(tests)}>{countPassed(tests.results)}/{tests.results.length}</TabCount>, true),
+    tabItem(TAB_CONSOLE),
+    tests?.visualization && tabItem(TAB_VISUALIZE),
+  ].filter(Boolean)
 }
 
 const clamp = (value, lowest, highest) => Math.max(lowest, Math.min(highest, value))
@@ -298,7 +329,7 @@ function usePanelResize() {
 
 function panelStyleFor(isFullscreen, isCollapsed, panelShare) {
   if (isFullscreen) return { position: 'fixed', inset: 0, zIndex: 40 }
-  if (isCollapsed) return { flex: `0 0 ${TOOLBAR_HEIGHT_PX}px` }
+  if (isCollapsed) return { flex: '0 0 auto' }
   return { flex: `0 1 ${panelShare}%`, minHeight: MIN_RESPONSE_HEIGHT_PX }
 }
 
@@ -310,7 +341,7 @@ function historyMenuItems(earlier, past, select) {
 function PastResponseNotice({ past, canCompare, onCompare, onBack }) {
   return (
     <Notice icon={History}>
-      {HISTORY_TEXT.showing(past.at)}{' '}
+      {HISTORY_TEXT.showing(formatTime(past.at))}{' '}
       {canCompare && (
         <>
           <button type="button" className={LINK_BUTTON} onClick={onCompare}>{HISTORY_TEXT.compare}</button>
@@ -330,6 +361,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
   const [pastAt, setPastAt] = useState(null)
   const [historyMenu, setHistoryMenu] = useState(null)
   const [isComparing, setIsComparing] = useState(false)
+  const [isAddingChecks, setIsAddingChecks] = useState(false)
   const { containerRef, panelShare, isDragging, startDrag, resetHeight } = usePanelResize()
 
   const earlier = useMemo(() => history.filter((entry) => entry.response !== response), [history, response])
@@ -339,8 +371,11 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
   const hasResult = Boolean(shown && !shown.error)
   const text = textBody(shown)
   const kind = hasResult ? bodyKind(shown) : BODY_KINDS.EMPTY
-  const json = useMemo(() => (kind === BODY_KINDS.TEXT ? parseJsonBody(text) : null), [kind, text])
-  const views = viewsFor(kind, text !== '', json !== null)
+  const isLarge = kind === BODY_KINDS.TEXT && text.length > LARGE_BODY_CHARS
+  const canFormat = isLarge && looksLikeJson(text)
+  const json = useMemo(() => (kind === BODY_KINDS.TEXT && !isLarge ? parseJsonBody(text) : null), [kind, isLarge, text])
+  const { formatted, format } = useOffThreadFormat(text)
+  const views = viewsFor(kind, text !== '', json !== null || formatted.text !== null)
   const view = views.includes(selectedView) ? selectedView : views[0]
   const headers = shown?.headers || []
   const cookies = shown?.cookies || []
@@ -358,15 +393,17 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
   const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS)
   const debouncedPath = useDebouncedValue(filterPath, SEARCH_DEBOUNCE_MS)
 
-  const filter = useMemo(() => (json === null ? NO_FILTER : filterJson(json, debouncedPath)), [json, debouncedPath])
+  const largeFilter = useOffThreadFilter(text, canFormat, debouncedPath)
+  const filter = useMemo(() => (json === null ? largeFilter : filterJson(json, debouncedPath)), [json, debouncedPath, largeFilter])
   const filtered = filter.active && !filter.error ? filter : null
   const canSearch = showsBody && hasBody && (view === 'pretty' || view === 'raw')
   const searching = searchOpen && canSearch && debouncedQuery !== ''
   const searchText = useMemo(() => {
     if (!searching) return ''
-    const base = view === 'pretty' ? JSON.stringify(filtered ? filtered.value : json, null, 2) : (filtered ? filtered.text : text)
-    return displayableText(base)
-  }, [searching, view, filtered, json, text])
+    if (filtered) return filtered.text
+    if (view === 'pretty') return formatted.text ?? JSON.stringify(json, null, 2)
+    return text
+  }, [searching, view, filtered, json, text, formatted.text])
   const matches = useMemo(() => findMatches(searchText, debouncedQuery), [searchText, debouncedQuery])
   const activeMatch = Math.min(matchIndex, Math.max(matches.length - 1, 0))
   const highlight = searching ? { matches, length: debouncedQuery.length, index: activeMatch } : null
@@ -404,22 +441,33 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
   const toggleCollapse = useCallback(() => setIsCollapsed((current) => !current), [])
 
   const renderContent = () => {
-    if (loading) return <SkeletonLines label="Sending request" lines={6} />
-    if (!shown) return <EmptyState icon={FileText} title="No response yet" description="Send a request to see the response here." />
+    if (loading) return <SkeletonLines label={RESPONSE_TEXT.sending} lines={6} />
+    if (!shown) return <EmptyState icon={FileText} title={RESPONSE_TEXT.noResponseTitle} description={RESPONSE_TEXT.noResponseDescription} />
     if (activeTab === TAB_TIMELINE && hasTimeline) return <TimelineTab timeline={shown.timeline} />
     if (shown.error) return <ErrorBody response={shown} onExplain={onExplain} />
     if (activeTab === TAB_TESTS && showsTests) return <TestResults tests={tests} />
     if (activeTab === TAB_CONSOLE) return <ConsolePanel />
     if (activeTab === TAB_VISUALIZE && tests?.visualization) return <VisualizeTab html={tests.visualization} />
     if (activeTab === TAB_HEADERS) {
-      if (headers.length === 0) return <EmptyState icon={List} title="No headers" description="The server sent no headers." />
+      if (headers.length === 0) return <EmptyState icon={List} title={RESPONSE_TEXT.noHeadersTitle} description={RESPONSE_TEXT.noHeadersDescription} />
       return <DataTable columns={HEADER_COLUMNS} rows={headers} />
     }
     if (activeTab === TAB_COOKIES) {
-      if (cookies.length === 0) return <EmptyState icon={Cookie} title="No cookies" description="The server sent no cookies." />
+      if (cookies.length === 0) return <EmptyState icon={Cookie} title={RESPONSE_TEXT.noCookiesTitle} description={RESPONSE_TEXT.noCookiesDescription} />
       return <DataTable columns={COOKIE_COLUMNS} rows={cookies} />
     }
-    return <ResponseBody response={shown} kind={kind} view={view} json={json} filtered={filtered} highlight={highlight} />
+    return (
+      <ResponseBody
+        response={shown}
+        kind={kind}
+        view={view}
+        json={json}
+        formatted={formatted.text}
+        filtered={filtered}
+        highlight={highlight}
+        onSave={past ? undefined : onDownload}
+      />
+    )
   }
 
   return (
@@ -428,8 +476,8 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
         <div
           role="separator"
           aria-orientation="horizontal"
-          aria-label="Resize the response panel"
-          title="Drag to resize. Double-click to reset."
+          aria-label={RESPONSE_TEXT.resize}
+          title={RESPONSE_TEXT.resizeHint}
           onMouseDown={startDrag}
           onDoubleClick={resetHeight}
           className={`h-1 shrink-0 cursor-row-resize border-t border-border ${isDragging ? 'bg-border' : 'hover:bg-border'}`}
@@ -438,7 +486,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
 
       <section
         ref={containerRef}
-        aria-label="Response"
+        aria-label={RESPONSE_TEXT.panel}
         data-pane="response"
         tabIndex={-1}
         onKeyDown={handleKeyDown}
@@ -446,51 +494,46 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
         style={panelStyleFor(isFullscreen, isCollapsed, panelShare)}
       >
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
-          <Toolbar className={isOpen ? "pl-1.5 pr-1.5" : "border-b-0 pl-1.5 pr-1.5"}>
+          <Toolbar className={cn("h-auto min-h-10 flex-wrap gap-y-0 pl-1.5 pr-1.5", !isOpen && "border-b-0")}>
             {!isFullscreen && (
               <IconButton
-                label={isCollapsed ? "Expand response" : "Collapse response"}
+                label={isCollapsed ? RESPONSE_TEXT.expand : RESPONSE_TEXT.collapse}
                 icon={isCollapsed ? ChevronUp : ChevronDown}
                 onClick={toggleCollapse}
               />
             )}
             {showsTabs ? (
-              <TabsList label="Response sections" className="pl-1.5">
-                <TabsTrigger value={TAB_BODY}>Body</TabsTrigger>
-                {hasResult && <TabsTrigger value={TAB_HEADERS}>Headers<TabCount>{headers.length}</TabCount></TabsTrigger>}
-                {hasResult && <TabsTrigger value={TAB_COOKIES}>Cookies<TabCount>{cookies.length}</TabCount></TabsTrigger>}
-                {hasTimeline && <TabsTrigger value={TAB_TIMELINE}>Timeline</TabsTrigger>}
-                {showsTests && (
-                  <TabsTrigger value={TAB_TESTS}>
-                    Tests<TabCount tone={testTone(tests)}>{countPassed(tests.results)}/{tests.results.length}</TabCount>
-                  </TabsTrigger>
-                )}
-                <TabsTrigger value={TAB_CONSOLE}>Console</TabsTrigger>
-                {tests?.visualization && <TabsTrigger value={TAB_VISUALIZE}>Visualize</TabsTrigger>}
-              </TabsList>
+              <OverflowTabsList
+                label={RESPONSE_TEXT.sections}
+                items={responseTabs({ hasResult, hasTimeline, showsTests, headers, cookies, tests })}
+                moreLabel={RESPONSE_TEXT.more}
+                moreHint={RESPONSE_TEXT.moreHint}
+                className={cn(TOOLBAR_ROW, "pl-1.5")}
+              />
             ) : (
-              <SectionLabel className="pl-1.5">Response</SectionLabel>
+              <SectionLabel className="pl-1.5">{RESPONSE_TEXT.panel}</SectionLabel>
             )}
 
-            <div className="ml-auto flex shrink-0 items-center gap-2">
+            <div className={cn(TOOLBAR_ROW, "ml-auto flex shrink-0 items-center gap-2")}>
               {shown && <StatusSummary response={shown} />}
             </div>
 
-            <div className="flex shrink-0 items-center gap-1">
+            <div className={cn(TOOLBAR_ROW, "flex shrink-0 items-center gap-1")}>
               {earlier.length > 0 && <IconButton label={HISTORY_TEXT.menu} icon={History} onClick={openHistory} />}
               {canSearch && (
                 <IconButton
-                  label={searchOpen ? "Close search" : "Search body (Ctrl+F)"}
+                  label={searchOpen ? RESPONSE_TEXT.closeSearch : RESPONSE_TEXT.searchBody(shortcutLabel("F"))}
                   icon={Search}
                   onClick={() => (searchOpen ? closeSearch() : setSearchOpen(true))}
                 />
               )}
               {showsBody && copyText && <CopyButton text={copyText} />}
-              {hasBody && !past && <IconButton label="Download body" icon={Download} onClick={onDownload} />}
-              {isFailedResponse(shown) && !shown.error && <IconButton label="Explain with AI" icon={MessageCircleQuestion} onClick={onExplain} />}
-              {canSaveAsExample(shown) && !past && <IconButton label="Save as example" icon={BookmarkPlus} onClick={onSaveExample} />}
+              {hasBody && !past && <IconButton label={RESPONSE_TEXT.downloadBody} icon={Download} onClick={onDownload} />}
+              {onExplain && isFailedResponse(shown) && !shown.error && <IconButton label={AI_TEXT.buttons.explain} icon={MessageCircleQuestion} onClick={onExplain} />}
+              {canSaveAsExample(shown) && !past && <IconButton label={RESPONSE_TEXT.saveExample} icon={BookmarkPlus} onClick={onSaveExample} />}
+              {canProposeChecks(shown) && !past && <IconButton label={RESPONSE_CHECKS_TEXT.button} icon={ListPlus} onClick={() => setIsAddingChecks(true)} />}
               <IconButton
-                label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+                label={isFullscreen ? RESPONSE_TEXT.exitFullscreen : RESPONSE_TEXT.fullscreen}
                 icon={isFullscreen ? Minimize2 : Maximize2}
                 onClick={toggleFullscreen}
               />
@@ -502,23 +545,27 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
           )}
 
           {isOpen && hasResult && shown.truncated && (
-            <Notice tone="warning" icon={Scissors}>
-              This response was cut off at {formatSize(shown.size)} because it exceeded the size limit.
-            </Notice>
+            <Notice tone="warning" icon={Scissors}>{RESPONSE_TEXT.truncated(formatSize(shown.size))}</Notice>
+          )}
+
+          {isOpen && <UnresolvedNotice response={shown} />}
+
+          {showsBody && isLarge && formatted.status !== FORMAT_DONE && (
+            <LargeBodyNotice size={formatSize(shown.size)} canFormat={canFormat} formatted={formatted} onFormat={format} />
           )}
 
           {showsBody && views.length > 1 && (
             <Toolbar>
               <SegmentedControl
-                label="Body view"
-                options={views.map((option) => ({ value: option, label: VIEW_LABELS[option] }))}
+                label={RESPONSE_TEXT.bodyView}
+                options={views.map((option) => ({ value: option, label: RESPONSE_TEXT.views[option] }))}
                 value={view}
                 onChange={setSelectedView}
               />
             </Toolbar>
           )}
 
-          {showsBody && hasBody && json !== null && (
+          {showsBody && hasBody && (json !== null || canFormat) && (
             <FilterBar path={filterPath} onPathChange={setFilterPath} error={filter.error} />
           )}
 
@@ -549,6 +596,11 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
       {isComparing && past && latestEntry && (
         <Suspense fallback={null}>
           <ResponseCompareDialog earlier={past} latest={latestEntry} onClose={() => setIsComparing(false)} />
+        </Suspense>
+      )}
+      {isAddingChecks && shown && (
+        <Suspense fallback={null}>
+          <AddChecksDialog response={shown} onClose={() => setIsAddingChecks(false)} />
         </Suspense>
       )}
     </>

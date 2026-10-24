@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -14,7 +13,6 @@ import (
 	"time"
 
 	"github.com/kunalgoesbyken/gostman/agent"
-	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/loadtest"
 	"github.com/kunalgoesbyken/gostman/runner"
 	"github.com/kunalgoesbyken/gostman/runner/report"
@@ -28,72 +26,52 @@ const (
 )
 
 type loading struct {
-	workspace   string
-	request     string
-	environment string
-	variables   map[string]string
-	headers     headerFlags
-	data        string
-	reporter    string
-	timeoutMs   int
-	insecure    bool
-	files       fileAccess
-	duration    time.Duration
-	ramp        time.Duration
-	maxErrors   string
-	config      loadtest.Config
-	limits      loadtest.Thresholds
-	network     *engine.Network
-	positional  []string
+	requestFlags
+	workspace  string
+	request    string
+	reporter   string
+	duration   time.Duration
+	ramp       time.Duration
+	maxErrors  string
+	config     loadtest.Config
+	limits     loadtest.Thresholds
+	positional []string
 }
 
 func parseLoading(arguments []string) (loading, error) {
-	parsed := loading{variables: map[string]string{}}
+	parsed := loading{}
 	flags := flag.NewFlagSet("load", flag.ContinueOnError)
 	flags.SetOutput(io.Discard)
+	parsed.register(flags)
 	flags.StringVar(&parsed.request, "request", "", "")
 	flags.StringVar(&parsed.workspace, "workspace", "", "")
-	flags.StringVar(&parsed.environment, "env", "", "")
-	variableFlags(flags, parsed.variables)
-	flags.Var(&parsed.headers, "H", "")
-	flags.Var(&parsed.headers, "header", "")
-	flags.StringVar(&parsed.data, "d", "", "")
-	flags.StringVar(&parsed.data, "data", "", "")
 	flags.IntVar(&parsed.config.Concurrency, "concurrency", loadtest.DefaultConcurrency, "")
 	flags.DurationVar(&parsed.duration, "duration", 0, "")
 	flags.IntVar(&parsed.config.Requests, "requests", 0, "")
 	flags.IntVar(&parsed.config.RatePerSecond, "rps", 0, "")
 	flags.DurationVar(&parsed.ramp, "ramp", 0, "")
 	flags.IntVar(&parsed.config.FailureStatus, "fail-status", loadtest.DefaultFailureFrom, "")
-	flags.IntVar(&parsed.timeoutMs, "timeout", 0, "")
-	flags.BoolVar(&parsed.insecure, "insecure", false, "")
-	parsed.files.register(flags)
 	flags.StringVar(&parsed.reporter, "reporter", report.FormatText, "")
 	flags.DurationVar(&parsed.limits.MaxP95, "max-p95", 0, "")
 	flags.StringVar(&parsed.maxErrors, "max-error-rate", "", "")
-	networking := networkFlags(flags)
 
 	positional, err := parseInterspersed(flags, arguments)
 	if err != nil {
 		return parsed, err
 	}
 	parsed.positional = positional
-	if err := parsed.finish(); err != nil {
-		return parsed, err
-	}
-	parsed.network, err = networking.network()
-	return parsed, err
+	return parsed, parsed.validate()
 }
 
-func (l *loading) finish() error {
+func (l *loading) validate() error {
 	if err := l.checkTarget(); err != nil {
 		return err
 	}
 	if l.reporter != report.FormatText && l.reporter != report.FormatJSON {
 		return fmt.Errorf("unknown reporter %q; choose %s or %s", l.reporter, report.FormatText, report.FormatJSON)
 	}
-	if l.timeoutMs < 0 {
-		return errors.New("--timeout takes a number of milliseconds, zero or more")
+	if err := l.finish(); err != nil {
+		return err
 	}
 	if err := l.parseErrorRate(); err != nil {
 		return err
@@ -111,7 +89,7 @@ func (l *loading) checkTarget() error {
 		return nil
 	case len(l.positional) == workspaceArgument && l.request == "":
 		return errors.New("name the saved request with --request, or give a method and a url")
-	case len(l.positional) == workspaceArgument && (len(l.headers) > 0 || l.data != ""):
+	case len(l.positional) == workspaceArgument && l.describesRequest():
 		return errors.New("--header and --data belong to a request given as a method and a url")
 	case len(l.positional) != workspaceArgument:
 		return errors.New("give a workspace folder or export file with --request, or a method and a url")
@@ -154,17 +132,7 @@ func (l loading) target(client *agent.Client, stored runner.Collection) (runner.
 	if !l.isAdHoc() {
 		return client.Find(stored, l.request)
 	}
-	return client.Compose(agent.Draft{Method: l.positional[0], URL: l.positional[1], Headers: l.headers, Body: l.data})
-}
-
-func (l loading) adjusted(target runner.Listed) runner.Listed {
-	if l.timeoutMs > 0 {
-		target.Request.Options.TimeoutMs = l.timeoutMs
-	}
-	if l.insecure {
-		target.Request.Options.InsecureTLS = true
-	}
-	return target
+	return l.compose(client, l.positional[0], l.positional[1])
 }
 
 func (l loading) progress(stderr io.Writer) func(loadtest.Snapshot) {
@@ -184,16 +152,16 @@ func printLoad(stdout io.Writer, reporter string, outcome loadtest.Report) error
 	if reporter == report.FormatText {
 		return loadtest.WriteText(stdout, outcome)
 	}
-	encoder := json.NewEncoder(stdout)
-	encoder.SetIndent("", "  ")
-	encoder.SetEscapeHTML(false)
-	return encoder.Encode(outcome)
+	return writeJSON(stdout, outcome)
 }
 
 func (l loading) verdict(stderr io.Writer, outcome loadtest.Report, interrupted bool) int {
 	breaches := outcome.Breaches(l.limits)
 	for _, breach := range breaches {
 		fmt.Fprintf(stderr, "%s: threshold breached: %s\n", programName, breach)
+	}
+	if outcome.NothingSucceeded() {
+		fmt.Fprintf(stderr, "%s: no request succeeded; the report shows sample errors\n", programName)
 	}
 	if len(breaches) > 0 || interrupted || outcome.NothingSucceeded() {
 		return exitFailed
@@ -206,11 +174,8 @@ func (l loading) execute(stdout, stderr io.Writer) int {
 	if err != nil {
 		return complain(stderr, err)
 	}
-	client, err := agent.NewClient(engine.Policy{Network: l.network, ReadFile: l.files.beside(l.fileRoot())})
+	client, err := l.open(stored, l.fileRoot())
 	if err != nil {
-		return complain(stderr, err)
-	}
-	if err := client.Enter(stored, l.environment, l.variables); err != nil {
 		return complain(stderr, err)
 	}
 	target, err := l.target(client, stored)

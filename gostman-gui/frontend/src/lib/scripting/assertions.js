@@ -1,5 +1,7 @@
 import { JSONPath } from 'jsonpath-plus'
+import { SCHEMA_TEXT } from '../checksText'
 import { isPlainObject, parseJSON } from '../dataUtils'
+import { schemaMismatches } from '../jsonSchema'
 import { substitutePlaceholders, variableMap } from '../placeholders'
 
 const isPrimitive = (value) => value === null || typeof value !== 'object'
@@ -23,6 +25,8 @@ const asList = (expected) => (Array.isArray(expected) ? expected : String(expect
 const compare = (accepts) => (actual, expected) => (
   !Number.isNaN(Number(actual)) && !Number.isNaN(Number(expected)) && accepts(Number(actual), Number(expected))
 )
+
+export const SCHEMA_OPERATOR = 'schema'
 
 export const OPERATORS = [
   { value: 'eq', label: 'equals', test: sameValue },
@@ -50,6 +54,7 @@ export const OPERATORS = [
   { value: 'isBoolean', label: 'is a boolean', unary: true, test: (actual) => typeof actual === 'boolean' },
   { value: 'isArray', label: 'is an array', unary: true, test: Array.isArray },
   { value: 'isObject', label: 'is an object', unary: true, test: isPlainObject },
+  { value: SCHEMA_OPERATOR, label: SCHEMA_TEXT.operator, hidesValue: true, verify: (actual, expected) => schemaMismatches(expected, actual).join('\n') },
 ]
 
 const DEFAULT_OPERATOR = OPERATORS[0]
@@ -95,15 +100,28 @@ export const isBlankAssertion = (assertion) => (
   assertion.expression === '' && assertion.value === '' && assertion.operator === DEFAULT_OPERATOR.value
 )
 
+const sameAssertion = (first, second) => (
+  first.expression.trim() === second.expression.trim() && first.operator === second.operator && first.value.trim() === second.value.trim()
+)
+
+export const isKnownAssertion = (json, candidate) => parseAssertions(json).some((assertion) => sameAssertion(assertion, candidate))
+
+export const withAddedAssertions = (json, additions) => serializeAssertions([...parseAssertions(json), ...additions])
+
 export const countActiveAssertions = (json) => (
   parseAssertions(json).filter((assertion) => assertion.enabled && assertion.expression.trim() !== '').length
 )
 
 const describe = (value) => (value === undefined ? 'undefined' : JSON.stringify(value))
 
-const titleOf = (assertion, operator) => (
-  [assertion.expression.trim(), operator.label, ...(operator.unary ? [] : [assertion.value])].join(' ')
+export const titleOf = (assertion, operator = operatorOf(assertion)) => (
+  [assertion.expression.trim(), operator.label, ...(operator.unary || operator.hidesValue ? [] : [assertion.value])].join(' ')
 )
+
+const verdict = (operator, actual, expected) => {
+  if (operator.verify) return operator.verify(actual, expected)
+  return operator.test(actual, expected) ? '' : `The value was ${describe(actual)}`
+}
 
 function resolve(expression, response) {
   const path = expression.startsWith('$') ? expression : `$.${expression}`
@@ -116,8 +134,8 @@ function evaluate(assertion, response, variables) {
   try {
     const actual = resolve(assertion.expression.trim(), response)
     const expected = substitutePlaceholders(assertion.value, variables)
-    const passed = Boolean(operator.test(actual, parseJSON(expected, expected)))
-    return { name, passed, message: passed ? '' : `The value was ${describe(actual)}` }
+    const message = verdict(operator, actual, parseJSON(expected, expected))
+    return { name, passed: message === '', message }
   } catch (error) {
     return { name, passed: false, message: error.message }
   }

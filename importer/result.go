@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 	"unicode"
 
@@ -24,6 +25,7 @@ type Source struct {
 	Requests     int    `json:"requests"`
 	Folders      int    `json:"folders"`
 	Environments int    `json:"environments"`
+	Globals      int    `json:"globals"`
 }
 
 type Result struct {
@@ -31,8 +33,10 @@ type Result struct {
 	Requests     []workspace.Request     `json:"requests"`
 	Folders      []workspace.Folder      `json:"folders"`
 	Environments []workspace.Environment `json:"environments"`
+	Globals      []workspace.Environment `json:"globals,omitempty"`
 	Variables    map[string]string       `json:"variables"`
 	Warnings     []string                `json:"warnings"`
+	Notes        []string                `json:"notes,omitempty"`
 	Skipped      []string                `json:"skipped"`
 }
 
@@ -41,13 +45,18 @@ type collector struct {
 	flags     map[string][]string
 	flagOrder []string
 	full      bool
+	inPlace   bool
 	scripts   scriptTally
 
 	visitedNodes map[*insomniaNode]bool
+	scoped       map[string]scopedFolder
+	protos       map[string]string
 }
 
+var importOnlyNotes = setOf(messageScripts, messageBrunoSecrets)
+
 func newCollector() *collector {
-	return &collector{Result: Result{Variables: map[string]string{}}, flags: map[string][]string{}, visitedNodes: map[*insomniaNode]bool{}}
+	return &collector{Result: Result{Variables: map[string]string{}}, flags: map[string][]string{}, visitedNodes: map[*insomniaNode]bool{}, scoped: map[string]scopedFolder{}}
 }
 
 func newID() string {
@@ -118,12 +127,6 @@ func (c *collector) addRequest(request workspace.Request) {
 	c.Requests = append(c.Requests, request)
 }
 
-func (c *collector) addEnvironment(name string, variables map[string]string) string {
-	environment := workspace.Environment{Id: newID(), Name: cleanName(name, untitledEnvironment), Variables: objectJSON(variables)}
-	c.Environments = append(c.Environments, environment)
-	return environment.Id
-}
-
 func (c *collector) skip(format string, args ...any) {
 	c.Skipped = append(c.Skipped, fmt.Sprintf(format, args...))
 }
@@ -136,16 +139,24 @@ func (c *collector) flag(kind, name string) {
 }
 
 func (c *collector) flagUnique(kind, name string) {
-	for _, existing := range c.flags[kind] {
-		if existing == name {
-			return
-		}
+	if !slices.Contains(c.flags[kind], name) {
+		c.flag(kind, name)
 	}
-	c.flag(kind, name)
+}
+
+func appendUnique(items []string, item string) []string {
+	if slices.Contains(items, item) {
+		return items
+	}
+	return append(items, item)
+}
+
+func (c *collector) warnDepth() {
+	c.Warnings = appendUnique(c.Warnings, fmt.Sprintf(messageDepth, maxFolderDepth))
 }
 
 func (c *collector) read(name, format string, run func()) {
-	requests, folders, environments := len(c.Requests), len(c.Folders), len(c.Environments)
+	requests, folders, environments, globals := len(c.Requests), len(c.Folders), len(c.Environments), len(c.Globals)
 	run()
 	c.Sources = append(c.Sources, Source{
 		Name:         name,
@@ -153,6 +164,7 @@ func (c *collector) read(name, format string, run func()) {
 		Requests:     len(c.Requests) - requests,
 		Folders:      len(c.Folders) - folders,
 		Environments: len(c.Environments) - environments,
+		Globals:      len(c.Globals) - globals,
 	})
 }
 
@@ -160,6 +172,9 @@ func (c *collector) result() Result {
 	result := c.Result
 	result.Warnings = append([]string{}, c.Warnings...)
 	for _, kind := range c.flagOrder {
+		if c.inPlace && importOnlyNotes[kind] {
+			continue
+		}
 		result.Warnings = append(result.Warnings, fmt.Sprintf(kind, listNames(c.flags[kind])))
 	}
 	if c.full {

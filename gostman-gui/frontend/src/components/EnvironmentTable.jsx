@@ -3,7 +3,7 @@ import { Eye, EyeOff, KeyRound, Lock, LockOpen, X } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Input } from "./ui/input"
-import { SectionLabel } from "./ui/panel"
+import { Notice, SectionLabel } from "./ui/panel"
 import { BLANK_REFERENCE, ReferenceFields } from "./SecretReferenceFields"
 import { useSecretConnections } from "../hooks/useSecretConnections"
 import { ENVIRONMENT_TEXT as TEXT } from "../lib/environmentText"
@@ -19,13 +19,40 @@ const matches = (row, needle) => (
   row.name.toLowerCase().includes(needle) || (!row.secret && asText(row.value).toLowerCase().includes(needle))
 )
 
+const isUnnamed = (row) => row.name.trim() === "" && (asText(row.value) !== "" || Boolean(row.ref))
+
+function ReadOnlyText({ text, label }) {
+  return (
+    <span aria-label={label} title={text} className="flex h-7 min-w-0 items-center font-mono text-xs text-foreground">
+      <span className="truncate">{text}</span>
+    </span>
+  )
+}
+
+function NameField({ row, isDraft, features, autoFocus, onChange }) {
+  if (features.readOnly) return <ReadOnlyText text={row.name} label={TEXT.variable} />
+  const isMissing = !isDraft && isUnnamed(row)
+  return (
+    <Input
+      value={row.name}
+      autoFocus={autoFocus}
+      placeholder={isMissing ? TEXT.nameRequired : TEXT.variable}
+      aria-label={TEXT.variable}
+      aria-invalid={isMissing}
+      spellCheck={false}
+      onChange={(event) => onChange({ name: event.target.value })}
+      className={cn("font-mono", isMissing && "border-warning placeholder:text-warning")}
+    />
+  )
+}
+
 function ValueField({ row, isRevealed, readOnly, autoFocus, onChange }) {
   const isHidden = row.secret && !isRevealed
+  if (readOnly) return <ReadOnlyText text={isHidden ? TEXT.hiddenValue : asText(row.value)} label={TEXT.value} />
   return (
     <Input
       type={isHidden ? "password" : "text"}
       value={asText(row.value)}
-      readOnly={readOnly}
       autoFocus={autoFocus}
       placeholder={TEXT.value}
       aria-label={TEXT.value}
@@ -60,16 +87,7 @@ function RowCells({ row, isDraft, isRevealed, focusField, features, references, 
           className={cn(isDraft && "invisible")}
         />
       ) : <span />}
-      <Input
-        value={row.name}
-        readOnly={features.readOnly}
-        autoFocus={focusField === "name"}
-        placeholder={TEXT.variable}
-        aria-label={TEXT.variable}
-        spellCheck={false}
-        onChange={(event) => onChange({ name: event.target.value })}
-        className="font-mono"
-      />
+      <NameField row={row} isDraft={isDraft} features={features} autoFocus={focusField === "name"} onChange={onChange} />
       {row.ref ? <ReferenceSummary reference={row.ref} /> : <ValueField row={row} isRevealed={isRevealed} readOnly={features.readOnly} autoFocus={focusField === "value"} onChange={onChange} />}
       {canReveal ? (
         <IconButton
@@ -143,6 +161,7 @@ export function EnvironmentTable({ rows, query, features, secrets, onChange }) {
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto">
+      {!features.readOnly && rows.some(isUnnamed) && <Notice tone="warning" role="status">{TEXT.unnamedRows}</Notice>}
       <div className={cn(references ? REFERENCE_COLUMNS : COLUMNS, "h-7 border-b border-border")}>
         <span />
         <SectionLabel>{TEXT.variable}</SectionLabel>

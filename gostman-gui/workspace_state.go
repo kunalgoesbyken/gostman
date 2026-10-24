@@ -21,8 +21,10 @@ const (
 type oauthTokens struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
+	IDToken      string `json:"idToken,omitempty"`
 	ExpiresAt    int64  `json:"expiresAt"`
 	Issuer       string `json:"issuer"`
+	Environment  string `json:"environment,omitempty"`
 }
 
 func issuerOf(request Request) string {
@@ -60,7 +62,9 @@ func (m workspaceMemory) withTokens(request Request) Request {
 	}
 	request.Auth.OAuth2.AccessToken = tokens.AccessToken
 	request.Auth.OAuth2.RefreshToken = tokens.RefreshToken
+	request.Auth.OAuth2.IDToken = tokens.IDToken
 	request.Auth.OAuth2.ExpiresAt = tokens.ExpiresAt
+	request.Auth.OAuth2.TokenEnvironment = tokens.Environment
 	return request
 }
 
@@ -86,8 +90,10 @@ func (m *workspaceMemory) keepTokens(requests []Request) {
 		m.Tokens[request.Id] = oauthTokens{
 			AccessToken:  config.AccessToken,
 			RefreshToken: config.RefreshToken,
+			IDToken:      config.IDToken,
 			ExpiresAt:    config.ExpiresAt,
 			Issuer:       issuerOf(request),
+			Environment:  config.TokenEnvironment,
 		}
 	}
 }

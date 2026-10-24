@@ -5,7 +5,9 @@ export const docSections = [
       { file: "README.md" },
       { file: "getting-started.md" },
       { file: "free-features.md", comparison: true },
+      { file: "coming-from-postman.md" },
       { file: "coming-from-bruno.md" },
+      { file: "coming-from-insomnia.md" },
     ],
   },
   {

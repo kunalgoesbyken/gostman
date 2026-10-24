@@ -24,7 +24,7 @@ export function NoticeToast() {
       aria-live="polite"
       className="fixed inset-x-4 bottom-10 z-40 flex items-center gap-2 rounded-md border border-border bg-background py-1.5 pl-3 pr-1.5 text-xs text-foreground sm:inset-x-auto sm:left-4 sm:max-w-sm"
     >
-      <span className="min-w-0 flex-1 truncate" title={notice.message}>{notice.message}</span>
+      <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">{notice.message}</span>
       {notice.undo && <Button size="sm" variant="outline" onClick={notice.undo}>{TREE_TEXT.undo}</Button>}
       <IconButton label={TREE_TEXT.dismiss} icon={X} size="icon-xs" onClick={dismiss} />
     </div>

@@ -7,10 +7,10 @@ import { Input } from "./ui/input"
 import { Notice, Panel, Toolbar } from "./ui/panel"
 import { Select } from "./ui/select"
 import { VariableInput, VariableTextarea } from "./VariableInput"
-import { pluralize } from "../lib/dataUtils"
 import { shortcutLabel } from "../lib/platform"
 import { PROTOCOL_OPTIONS, protocolOf, usesGraphQL } from "../lib/realtime/protocols"
 import { readSavedMessages, removeMessage, saveMessage } from "../lib/realtime/savedMessages"
+import { SOCKET_TEXT } from "../lib/socketText"
 import { useAppStore } from "../store/appStore"
 import {
   ENTRY_ERROR,
@@ -29,39 +29,27 @@ import {
 import { cn } from "../lib/utils"
 
 const PINNED_DISTANCE_PX = 24
+const HANDSHAKE_FIELD = "flex min-w-[12rem] flex-1 items-center gap-2"
+const HANDSHAKE_LABEL = "shrink-0 text-xs text-muted-foreground"
 const TIME_FORMAT = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })
 
 const STATUS_VIEWS = {
-  [SOCKET_IDLE]: { label: "Disconnected", dot: "bg-muted-foreground" },
-  [SOCKET_CONNECTING]: { label: "Connecting", dot: "bg-warning" },
-  [SOCKET_OPEN]: { label: "Connected", dot: "bg-success" },
-  [SOCKET_WAITING]: { label: "Waiting to reconnect", dot: "bg-warning" },
+  [SOCKET_IDLE]: { label: SOCKET_TEXT.statuses.idle, dot: "bg-muted-foreground" },
+  [SOCKET_CONNECTING]: { label: SOCKET_TEXT.statuses.connecting, dot: "bg-warning" },
+  [SOCKET_OPEN]: { label: SOCKET_TEXT.statuses.open, dot: "bg-success" },
+  [SOCKET_WAITING]: { label: SOCKET_TEXT.statuses.waiting, dot: "bg-warning" },
 }
 
 const ENTRY_VIEWS = {
-  [ENTRY_SENT]: { icon: ArrowUp, label: "Sent", tone: "text-info" },
-  [ENTRY_RECEIVED]: { icon: ArrowDown, label: "Received", tone: "text-success" },
-  [ENTRY_INFO]: { icon: Info, label: "Info", tone: "text-muted-foreground" },
-  [ENTRY_ERROR]: { icon: TriangleAlert, label: "Error", tone: "text-destructive" },
-}
-
-const TEXT = {
-  protocol: "Protocol",
-  graphql: "GraphQL subscription",
-  filter: "Topic filter, for example sensors/#",
-  subscribe: "Subscribe",
-  saved: "Saved messages",
-  savedPlaceholder: "Load a saved message",
-  noSaved: "No saved messages yet",
-  save: "Save",
-  saveTitle: "Save message",
-  saveMessage: "Name for this message. It is saved with the request.",
-  remove: "Delete saved message",
+  [ENTRY_SENT]: { icon: ArrowUp, label: SOCKET_TEXT.entries.sent, tone: "text-info" },
+  [ENTRY_RECEIVED]: { icon: ArrowDown, label: SOCKET_TEXT.entries.received, tone: "text-success" },
+  [ENTRY_INFO]: { icon: Info, label: SOCKET_TEXT.entries.info, tone: "text-muted-foreground" },
+  [ENTRY_ERROR]: { icon: TriangleAlert, label: SOCKET_TEXT.entries.error, tone: "text-destructive" },
 }
 
 function sizeNote(entry) {
-  if (entry.byteCount !== undefined) return `Binary, ${pluralize(entry.byteCount, "byte")}`
-  if (entry.fullLength !== undefined) return `Showing the first ${entry.text.length} of ${entry.fullLength} characters`
+  if (entry.byteCount !== undefined) return SOCKET_TEXT.binary(entry.byteCount)
+  if (entry.fullLength !== undefined) return SOCKET_TEXT.truncated(entry.text.length, entry.fullLength)
   return ""
 }
 
@@ -83,7 +71,7 @@ const LogEntry = memo(function LogEntry({ entry }) {
       </div>
       {isMessage && (
         <IconButton
-          label="Copy message"
+          label={SOCKET_TEXT.copy}
           icon={Copy}
           size="icon-xs"
           onClick={copy}
@@ -110,11 +98,11 @@ function MessageLog({ entries, dropped }) {
 
   return (
     <div ref={logRef} onScroll={trackPosition} className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
-      {dropped > 0 && <Notice>Older entries dropped: {dropped}. The log keeps the latest {LOG_LIMIT}.</Notice>}
+      {dropped > 0 && <Notice>{SOCKET_TEXT.dropped(dropped, LOG_LIMIT)}</Notice>}
       {entries.length === 0 && (
-        <EmptyState icon={Radio} title="No messages yet" description="Connect, then send a message or wait for the server." />
+        <EmptyState icon={Radio} title={SOCKET_TEXT.emptyTitle} description={SOCKET_TEXT.emptyDescription} />
       )}
-      <ul aria-label="Messages">
+      <ul aria-label={SOCKET_TEXT.log}>
         {entries.map((entry) => <LogEntry key={entry.id} entry={entry} />)}
       </ul>
     </div>
@@ -122,10 +110,10 @@ function MessageLog({ entries, dropped }) {
 }
 
 function ProtocolPicker({ request, disabled, onUpdateRequest }) {
-  if (usesGraphQL(request)) return <span className="shrink-0 text-xs text-muted-foreground">{TEXT.graphql}</span>
+  if (usesGraphQL(request)) return <span className="shrink-0 text-xs text-muted-foreground">{SOCKET_TEXT.graphql}</span>
   return (
     <Select
-      aria-label={TEXT.protocol}
+      aria-label={SOCKET_TEXT.protocol}
       className="w-28 shrink-0"
       value={request.socketProtocol || ""}
       disabled={disabled}
@@ -133,6 +121,37 @@ function ProtocolPicker({ request, disabled, onUpdateRequest }) {
     >
       {PROTOCOL_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
     </Select>
+  )
+}
+
+function HandshakeBar({ request, disabled, onUpdateRequest }) {
+  const options = request.options || {}
+  const update = (patch) => onUpdateRequest({ options: { ...options, ...patch } })
+  return (
+    <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-border px-3 py-2">
+      <label className={HANDSHAKE_FIELD}>
+        <span className={HANDSHAKE_LABEL}>{SOCKET_TEXT.socketIoPath}</span>
+        <VariableInput
+          placeholder={SOCKET_TEXT.socketIoPathPlaceholder}
+          value={options.socketIoPath || ""}
+          fileReads={false}
+          disabled={disabled}
+          className="font-mono"
+          onChange={(event) => update({ socketIoPath: event.target.value })}
+        />
+      </label>
+      <label className={cn(HANDSHAKE_FIELD, "flex-[3]")} title={SOCKET_TEXT.socketIoAuthNote}>
+        <span className={HANDSHAKE_LABEL}>{SOCKET_TEXT.socketIoAuth}</span>
+        <VariableInput
+          placeholder={SOCKET_TEXT.socketIoAuthPlaceholder}
+          value={options.socketIoAuth || ""}
+          fileReads={false}
+          disabled={disabled}
+          className="font-mono"
+          onChange={(event) => update({ socketIoAuth: event.target.value })}
+        />
+      </label>
+    </div>
   )
 }
 
@@ -144,12 +163,12 @@ function SubscribeBar({ tabId, session, isOpen, sockets }) {
   return (
     <form onSubmit={submit} className="flex shrink-0 items-center gap-2 border-b border-border px-3 py-2">
       <Input
-        aria-label={TEXT.filter}
-        placeholder={TEXT.filter}
+        aria-label={SOCKET_TEXT.filter}
+        placeholder={SOCKET_TEXT.filter}
         value={session.filter}
         onChange={(event) => sockets.setFilter(tabId, event.target.value)}
       />
-      <Button type="submit" size="sm" variant="outline" disabled={!isOpen || session.filter.trim() === ""}>{TEXT.subscribe}</Button>
+      <Button type="submit" size="sm" variant="outline" disabled={!isOpen || session.filter.trim() === ""}>{SOCKET_TEXT.subscribe}</Button>
     </form>
   )
 }
@@ -165,7 +184,7 @@ function SavedMessages({ tabId, request, session, sockets, onUpdateRequest }) {
     if (message) sockets.loadMessage(tabId, message)
   }
 
-  const save = () => showPrompt(TEXT.saveTitle, TEXT.saveMessage, current?.name || "", "", (name) => {
+  const save = () => showPrompt(SOCKET_TEXT.saveTitle, SOCKET_TEXT.saveMessage, current?.name || "", "", (name) => {
     const trimmed = name?.trim()
     if (trimmed) onUpdateRequest({ socketMessages: saveMessage(request.socketMessages, { name: trimmed, body: session.draft, target: session.draftTarget }) })
   })
@@ -175,17 +194,17 @@ function SavedMessages({ tabId, request, session, sockets, onUpdateRequest }) {
   return (
     <>
       <Select
-        aria-label={TEXT.saved}
+        aria-label={SOCKET_TEXT.saved}
         className="w-48 shrink-0"
         value={current?.name || ""}
         disabled={messages.length === 0}
         onChange={(event) => choose(event.target.value)}
       >
-        <option value="">{messages.length === 0 ? TEXT.noSaved : TEXT.savedPlaceholder}</option>
+        <option value="">{messages.length === 0 ? SOCKET_TEXT.noSaved : SOCKET_TEXT.savedPlaceholder}</option>
         {messages.map((message) => <option key={message.name} value={message.name}>{message.name}</option>)}
       </Select>
-      {current && <IconButton label={TEXT.remove} icon={Trash2} onClick={remove} />}
-      <Button size="sm" variant="outline" disabled={!hasDraft} onClick={save}>{TEXT.save}</Button>
+      {current && <IconButton label={SOCKET_TEXT.remove} icon={Trash2} onClick={remove} />}
+      <Button size="sm" variant="outline" disabled={!hasDraft} onClick={save}>{SOCKET_TEXT.save}</Button>
     </>
   )
 }
@@ -210,7 +229,7 @@ export function WebSocketPanel({ tabId, request, variables, sockets, onUpdateReq
 
   return (
     <Panel>
-      <Toolbar>
+      <Toolbar className="max-sm:h-auto max-sm:min-h-10 max-sm:flex-wrap max-sm:py-1.5">
         <span className="flex shrink-0 items-center gap-2 text-xs text-foreground">
           <span aria-hidden="true" className={cn("h-2 w-2 rounded-full", status.dot)} />
           {status.label}
@@ -223,20 +242,20 @@ export function WebSocketPanel({ tabId, request, variables, sockets, onUpdateReq
           checked={session.autoReconnect}
           onChange={(event) => sockets.setAutoReconnect(tabId, event.target.checked)}
         >
-          Auto-reconnect
+          {SOCKET_TEXT.autoReconnect}
         </Checkbox>
         {isIdle ? (
-          <Button size="sm" disabled={Boolean(target.error)} onClick={() => sockets.connect(tabId)}>Connect</Button>
+          <Button size="sm" disabled={Boolean(target.error)} onClick={() => sockets.connect(tabId)}>{SOCKET_TEXT.connect}</Button>
         ) : (
-          <Button variant="outline" size="sm" onClick={() => sockets.disconnect(tabId)}>Disconnect</Button>
+          <Button variant="outline" size="sm" onClick={() => sockets.disconnect(tabId)}>{SOCKET_TEXT.disconnect}</Button>
         )}
       </Toolbar>
 
       {unsentHeaders.length > 0 && (
-        <Notice>
-          A browser can only set Sec-WebSocket-Protocol on a WebSocket. Not sent from here: {unsentHeaders.join(", ")}. The desktop app sends every header.
-        </Notice>
+        <Notice>{SOCKET_TEXT.unsentHeaders(unsentHeaders)}</Notice>
       )}
+
+      {protocol.hasHandshake && <HandshakeBar request={request} disabled={!isIdle} onUpdateRequest={onUpdateRequest} />}
 
       {protocol.canSubscribe && <SubscribeBar tabId={tabId} session={session} isOpen={isOpen} sockets={sockets} />}
 
@@ -267,15 +286,15 @@ export function WebSocketPanel({ tabId, request, variables, sockets, onUpdateReq
           fileReads={false}
           onChange={(event) => sockets.setDraft(tabId, event.target.value)}
           onKeyDown={handleComposerKey}
-          placeholder={isOpen ? `Message (${shortcutLabel("Enter")} to send)` : "Connect to send messages"}
-          aria-label="Message"
+          placeholder={isOpen ? SOCKET_TEXT.composer(shortcutLabel("Enter")) : SOCKET_TEXT.composerClosed}
+          aria-label={SOCKET_TEXT.message}
           disabled={!isOpen}
           className="h-16 flex-1"
         />
         <div className="flex shrink-0 flex-col justify-between">
-          <Button size="sm" disabled={!canSend} onClick={() => sockets.sendMessage(tabId)}>Send</Button>
+          <Button size="sm" disabled={!canSend} onClick={() => sockets.sendMessage(tabId)}>{SOCKET_TEXT.send}</Button>
           <Button variant="ghost" size="sm" disabled={session.entries.length === 0} onClick={() => sockets.clearLog(tabId)}>
-            Clear
+            {SOCKET_TEXT.clear}
           </Button>
         </div>
       </div>

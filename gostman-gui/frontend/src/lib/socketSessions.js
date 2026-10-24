@@ -179,7 +179,7 @@ export function createSocketActions(backend) {
     const headers = preparedHeaders.map(({ key, value }) => [key, value])
     return {
       protocol,
-      url: protocol.address ? protocol.address(target.url) : target.url,
+      url: protocol.address ? protocol.address(target.url, request, target.substitute) : target.url,
       headers: protocol.subprotocol ? [...headers, [SUBPROTOCOL_HEADER, protocol.subprotocol]] : headers,
       context: { url: target.url, request: effective, prepared: { ...prepared, headers: preparedHeaders }, substitute: target.substitute },
     }

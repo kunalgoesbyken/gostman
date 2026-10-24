@@ -36,6 +36,7 @@ var requestLabels = map[string]string{
 	"grpcMessage":      "gRPC message",
 	"grpcProtos":       "gRPC proto files",
 	"mcpTool":          "MCP tool",
+	"mcpMethod":        "MCP operation",
 	"mcpArguments":     "MCP arguments",
 	"socketProtocol":   "realtime protocol",
 	"socketMessages":   "saved messages",
@@ -48,7 +49,7 @@ var requestLabels = map[string]string{
 	"order":            "position",
 }
 
-var requestOrder = []string{"name", "method", "url", "queryParams", "headers", "auth", "bodyType", "body", "graphqlQuery", "graphqlVariables", "grpcMethod", "grpcMessage", "grpcProtos", "mcpTool", "mcpArguments", "socketProtocol", "socketMessages", "options", "extractors", "assertions", "preScript", "postScript", "examples", "description", "tags", "order"}
+var requestOrder = []string{"name", "method", "url", "queryParams", "headers", "auth", "bodyType", "body", "graphqlQuery", "graphqlVariables", "grpcMethod", "grpcMessage", "grpcProtos", "mcpMethod", "mcpTool", "mcpArguments", "socketProtocol", "socketMessages", "options", "extractors", "assertions", "preScript", "postScript", "examples", "description", "tags", "order"}
 
 var showsValues = map[string]bool{"url": true, "method": true}
 

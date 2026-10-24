@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -70,6 +71,8 @@ func parseVariables(raw string) (map[string]string, error) {
 	return variables, nil
 }
 
+const maxNesting = 8
+
 type substitution struct {
 	variables map[string]string
 	budget    int
@@ -78,6 +81,10 @@ type substitution struct {
 	read      map[string]string
 	fileBytes int
 	err       error
+	filled    map[string]string
+	filling   map[string]bool
+	generates bool
+	missing   []string
 }
 
 func newSubstitution(variables string) (*substitution, error) {
@@ -85,7 +92,11 @@ func newSubstitution(variables string) (*substitution, error) {
 	if err != nil {
 		return nil, fmt.Errorf("environment variables are not valid JSON: %w", err)
 	}
-	return &substitution{variables: parsed, budget: maxEncodedBody}, nil
+	return substitutionOf(parsed), nil
+}
+
+func substitutionOf(variables map[string]string) *substitution {
+	return &substitution{variables: variables, budget: maxEncodedBody, filled: map[string]string{}, filling: map[string]bool{}, generates: true}
 }
 
 func (s *substitution) readingFiles(files FileReader) {
@@ -103,24 +114,63 @@ func (s *substitution) failure() error {
 	return nil
 }
 
-func (s *substitution) resolve(name string) (string, bool) {
+func (s *substitution) variable(name string) (string, string, bool) {
 	if value, ok := s.variables[name]; ok {
-		return value, true
+		return name, value, true
 	}
 	if asked, isPrompt := PromptName(name); isPrompt {
 		value, ok := s.variables[asked]
-		return value, ok
+		return asked, value, ok
 	}
-	return "", false
+	return "", "", false
 }
 
-func (s *substitution) lookup(match string) (string, bool) {
-	name := strings.TrimSpace(match[2 : len(match)-2])
+func (s *substitution) resolve(name string) (string, bool) {
+	key, value, ok := s.variable(name)
+	if !ok {
+		return "", false
+	}
+	return s.nested(key, value)
+}
+
+func (s *substitution) nested(name, value string) (string, bool) {
+	if !placeholderRe.MatchString(value) {
+		return value, true
+	}
+	if filled, ok := s.filled[name]; ok {
+		return filled, true
+	}
+	if s.filling[name] || len(s.filling) >= maxNesting {
+		return "", false
+	}
+	s.filling[name] = true
+	defer delete(s.filling, name)
+	if s.expandedSize(value, false) > maxEncodedBody {
+		s.exceeded = true
+		return "", false
+	}
+	filled := s.fill(value, false)
+	s.filled[name] = filled
+	return filled, true
+}
+
+func nameOf(match string) string {
+	return strings.TrimSpace(match[2 : len(match)-2])
+}
+
+func (s *substitution) lookup(match string, readsFiles bool) (string, bool) {
+	name := nameOf(match)
 	if value, ok := s.resolve(name); ok {
 		return value, true
 	}
 	if reference, ok := parseFileReference(name); ok {
+		if !readsFiles {
+			return "", false
+		}
 		return s.file(name, reference)
+	}
+	if !s.generates {
+		return "", false
 	}
 	return dynamicValue(name)
 }
@@ -150,43 +200,68 @@ func (s *substitution) file(name string, reference fileReference) (string, bool)
 	return value, true
 }
 
-func (s *substitution) sizeOf(match string) (int, bool) {
-	name := strings.TrimSpace(match[2 : len(match)-2])
+func (s *substitution) sizeOf(match string, readsFiles bool) (int, bool) {
+	name := nameOf(match)
 	if value, ok := s.resolve(name); ok {
 		return len(value), true
 	}
 	if reference, ok := parseFileReference(name); ok {
+		if !readsFiles {
+			return 0, false
+		}
 		value, found := s.file(name, reference)
 		return len(value), found
 	}
-	return generatedSizeBound(name), isDynamicName(name)
+	return generatedSizeBound(name), IsDynamicVariable(name)
 }
 
-func (s *substitution) expandedSize(input string) int {
+func (s *substitution) expandedSize(input string, readsFiles bool) int {
 	size := len(input)
 	for _, match := range placeholderRe.FindAllString(input, -1) {
-		if length, ok := s.sizeOf(match); ok {
+		if length, ok := s.sizeOf(match, readsFiles); ok {
 			size += length - len(match)
 		}
 	}
 	return size
 }
 
+func (s *substitution) fill(input string, readsFiles bool) string {
+	return placeholderRe.ReplaceAllStringFunc(input, func(match string) string {
+		if value, ok := s.lookup(match, readsFiles); ok {
+			return value
+		}
+		s.noteMissing(nameOf(match))
+		return match
+	})
+}
+
+func (s *substitution) noteMissing(name string) {
+	if s.isUndefined(name) && !slices.Contains(s.missing, name) {
+		s.missing = append(s.missing, name)
+	}
+}
+
+func (s *substitution) isUndefined(name string) bool {
+	if name == "" || strings.HasPrefix(name, dynamicPrefix) {
+		return false
+	}
+	if _, isPrompt := PromptName(name); isPrompt {
+		return false
+	}
+	_, _, defined := s.variable(name)
+	return !defined
+}
+
 func (s *substitution) apply(input string) string {
 	if s.exceeded {
 		return input
 	}
-	s.budget -= s.expandedSize(input)
+	s.budget -= s.expandedSize(input, true)
 	if s.budget < 0 {
 		s.exceeded = true
 		return input
 	}
-	return placeholderRe.ReplaceAllStringFunc(input, func(match string) string {
-		if value, ok := s.lookup(match); ok {
-			return value
-		}
-		return match
-	})
+	return s.fill(input, true)
 }
 
 type pairRow struct {

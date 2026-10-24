@@ -22,5 +22,13 @@ export function reconcileTabs(tabs, previousRequests, requests, folders, wasRest
     return before && !isRequestDirty(request, before) ? current : carried(request)
   }
 
-  return tabs.map((tab) => ({ ...tab, request: inKnownFolder(refresh(tab.request)) }))
+  const diskChangeOf = ({ request, diskChange }) => {
+    const current = request.id ? saved.get(request.id) : null
+    if (!current || !isRequestDirty(request, current)) return null
+    const before = previous.get(request.id)
+    const changedUnderDraft = Boolean(before) && isRequestDirty(request, before) && isRequestDirty(current, before)
+    return changedUnderDraft || diskChange ? current : null
+  }
+
+  return tabs.map((tab) => ({ ...tab, request: inKnownFolder(refresh(tab.request)), diskChange: diskChangeOf(tab) }))
 }

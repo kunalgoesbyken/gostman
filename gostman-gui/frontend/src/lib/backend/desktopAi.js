@@ -1,5 +1,5 @@
 import {
-  AiCancel, AiCheck, AiComplete, AiKeyStored, AiPreview, AiRemoveKey, AiSaveKey,
+  AiCancel, AiCheck, AiComplete, AiKeyStored, AiModels, AiPreview, AiRemoveKey, AiSaveKey,
 } from '../../../wailsjs/go/main/App'
 import { KIND_NETWORK, aiError } from '../ai/errors'
 
@@ -7,7 +7,7 @@ const answering = (run) => async (...args) => {
   try {
     return await run(...args)
   } catch (error) {
-    return { text: '', error: aiError(KIND_NETWORK, error?.message || String(error)) }
+    return { error: aiError(KIND_NETWORK, error?.message || String(error)) }
   }
 }
 
@@ -19,5 +19,6 @@ export const desktopAi = {
   preview: (provider, prompt, secrets) => AiPreview(provider, prompt, secrets),
   complete: answering((id, config, prompt, secrets, maxTokens) => AiComplete(id, config, prompt, secrets, maxTokens)),
   check: answering((id, config) => AiCheck(id, config)),
+  models: answering((id, config) => AiModels(id, config)),
   cancel: (id) => AiCancel(id),
 }

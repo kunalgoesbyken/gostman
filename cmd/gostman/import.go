@@ -10,6 +10,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/importer"
@@ -31,14 +32,21 @@ type transfer struct {
 	secret bool
 }
 
-func parseTransfer(name string, arguments []string, defaultFormat string) (transfer, error) {
+func importFlags(flags *flag.FlagSet, parsed *transfer) {
+	flags.BoolVar(&parsed.skip, "skip-static", false, "")
+}
+
+func exportFlags(flags *flag.FlagSet, parsed *transfer) {
+	flags.BoolVar(&parsed.secret, "include-secrets", false, "")
+}
+
+func parseTransfer(name string, arguments []string, defaultFormat string, register func(*flag.FlagSet, *transfer)) (transfer, error) {
 	parsed := transfer{}
 	flags := flag.NewFlagSet(name, flag.ContinueOnError)
 	flags.SetOutput(io.Discard)
 	flags.StringVar(&parsed.format, "format", defaultFormat, "")
 	flags.StringVar(&parsed.out, "out", "", "")
-	flags.BoolVar(&parsed.skip, "skip-static", false, "")
-	flags.BoolVar(&parsed.secret, "include-secrets", false, "")
+	register(flags, &parsed)
 	positional, err := parseInterspersed(flags, arguments)
 	if err != nil {
 		return parsed, err
@@ -54,7 +62,7 @@ func parseTransfer(name string, arguments []string, defaultFormat string) (trans
 }
 
 func importCommand(arguments []string, stdout, stderr *os.File) int {
-	parsed, err := parseTransfer("import", arguments, importer.FormatAuto)
+	parsed, err := parseTransfer("import", arguments, importer.FormatAuto, importFlags)
 	if err != nil {
 		return misuse(stderr, err.Error())
 	}
@@ -67,18 +75,61 @@ func importCommand(arguments []string, stdout, stderr *os.File) int {
 	if err != nil {
 		return complain(stderr, err)
 	}
-	collection, err := importedCollection(result)
+	collection, err := result.GlobalsAsVariables().Collection()
 	if err != nil {
 		return complain(stderr, err)
 	}
 	if _, err := workspace.Create(parsed.out, collection); err != nil {
-		return complain(stderr, err)
+		return complain(stderr, importTargetProblem(parsed.out, err))
 	}
 	if err := restrictPermissions(parsed.out); err != nil {
 		return complain(stderr, err)
 	}
 	reportImport(stdout, stderr, result, parsed.out)
+	reportGlobals(stderr, result.Globals)
+	reportSecrets(stderr, collection.Environments, result.Globals)
 	return exitPassed
+}
+
+func reportGlobals(stderr io.Writer, globals []workspace.Environment) {
+	names := make([]string, len(globals))
+	for index, global := range globals {
+		names[index] = strconv.Quote(global.Name)
+	}
+	if len(names) > 0 {
+		fmt.Fprintf(stderr, "note: gostman run has no global scope, so the variables of the global environment %s were added to the collection variables in gostman.yaml; a collection variable with the same name keeps its value\n", strings.Join(names, ", "))
+	}
+}
+
+func importTargetProblem(out string, err error) error {
+	if errors.Is(err, workspace.ErrNotEmpty) {
+		return fmt.Errorf("%s already holds files; import creates a new workspace, so name a new or empty folder with --out", out)
+	}
+	return err
+}
+
+func unwrittenSecrets(environments []workspace.Environment) []string {
+	var names []string
+	for _, environment := range environments {
+		values := map[string]any{}
+		_ = json.Unmarshal([]byte(environment.Variables), &values)
+		_, removed := workspace.WithoutSecretValues(environment)
+		for _, name := range removed {
+			if values[name] != "" {
+				names = append(names, environment.Name+"/"+name)
+			}
+		}
+	}
+	return names
+}
+
+func reportSecrets(stderr io.Writer, environments, globals []workspace.Environment) {
+	if names := unwrittenSecrets(environments); len(names) > 0 {
+		fmt.Fprintf(stderr, "note: the values of the secret variables %s were not written to the workspace; set them in the desktop app, which keeps them in the system keychain, or pass them with --var, --var-from-env or --env-file\n", strings.Join(names, ", "))
+	}
+	if names := unwrittenSecrets(globals); len(names) > 0 {
+		fmt.Fprintf(stderr, "note: the values of the secret global variables %s were not written to gostman.yaml; pass them with --var, --var-from-env or --env-file, or add them to an environment in the desktop app and mark them secret there\n", strings.Join(names, ", "))
+	}
 }
 
 func restrictPermissions(root string) error {
@@ -93,16 +144,6 @@ func restrictPermissions(root string) error {
 	})
 }
 
-func importedCollection(result importer.Result) (workspace.Collection, error) {
-	collection := workspace.Collection{Requests: result.Requests, Folders: result.Folders, Environments: result.Environments}
-	if len(result.Variables) == 0 {
-		return collection, nil
-	}
-	encoded, err := json.Marshal(result.Variables)
-	collection.Variables = string(encoded)
-	return collection, err
-}
-
 func plural(count int, noun string) string {
 	if count == 1 {
 		return "1 " + noun
@@ -111,15 +152,21 @@ func plural(count int, noun string) string {
 }
 
 func importSummary(counts importer.Counts) string {
-	parts := []string{plural(counts.Requests, "request"), plural(counts.Folders, "folder")}
-	optional := []struct {
+	items := []struct {
 		count int
 		noun  string
-	}{{counts.Environments, "environment"}, {counts.Variables, "variable"}, {counts.FolderSettings, "folder setting"}}
-	for _, item := range optional {
+	}{{counts.Requests, "request"}, {counts.Folders, "folder"}, {counts.Environments, "environment"}, {counts.Globals, "global environment"}, {counts.Variables, "collection variable"}, {counts.FolderSettings, "folder setting"}}
+	var parts []string
+	for _, item := range items {
 		if item.count > 0 {
 			parts = append(parts, plural(item.count, item.noun))
 		}
+	}
+	switch len(parts) {
+	case 0:
+		return plural(0, "request")
+	case 1:
+		return parts[0]
 	}
 	last := parts[len(parts)-1]
 	return strings.Join(parts[:len(parts)-1], ", ") + " and " + last
@@ -127,6 +174,9 @@ func importSummary(counts importer.Counts) string {
 
 func reportImport(stdout, stderr io.Writer, result importer.Result, out string) {
 	fmt.Fprintf(stdout, "Imported %s into %s.\n", importSummary(result.Counts()), out)
+	for _, note := range result.Notes {
+		fmt.Fprintf(stderr, "note: %s\n", note)
+	}
 	for _, warning := range result.Warnings {
 		fmt.Fprintf(stderr, "warning: %s\n", warning)
 	}
@@ -136,7 +186,7 @@ func reportImport(stdout, stderr io.Writer, result importer.Result, out string) 
 }
 
 func exportCommand(arguments []string, stdout, stderr *os.File) int {
-	parsed, err := parseTransfer("export", arguments, "")
+	parsed, err := parseTransfer("export", arguments, "", exportFlags)
 	if err != nil {
 		return misuse(stderr, err.Error())
 	}
@@ -147,15 +197,23 @@ func exportCommand(arguments []string, stdout, stderr *os.File) int {
 	if parsed.secret {
 		fmt.Fprintln(stderr, "warning: --include-secrets writes credentials into the exported files")
 	}
-	files, _, err := importer.Export(parsed.format, opened.Collection(), importer.Options{IncludeSecrets: parsed.secret})
+	files, err := exportFiles(parsed, opened.Collection())
 	if err != nil {
 		return complain(stderr, err)
 	}
 	if err := writeExport(files, parsed.out); err != nil {
 		return complain(stderr, err)
 	}
-	fmt.Fprintf(stdout, "Exported %d files to %s.\n", len(files), parsed.out)
+	fmt.Fprintf(stdout, "Exported %s to %s.\n", plural(len(files), "file"), parsed.out)
 	return exitPassed
+}
+
+func exportFiles(parsed transfer, collection workspace.Collection) ([]importer.File, error) {
+	if parsed.format == exportPostman {
+		return exportPostmanCollection(parsed.source, collection, parsed.secret)
+	}
+	files, _, err := importer.Export(parsed.format, collection, importer.Options{IncludeSecrets: parsed.secret})
+	return files, err
 }
 
 func writeExport(files []importer.File, out string) error {

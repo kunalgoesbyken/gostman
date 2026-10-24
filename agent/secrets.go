@@ -73,11 +73,29 @@ func tokenFields(config *engine.OAuth2) []secretField {
 		{hiddenPrefix + "oauth.password", &config.Password},
 		{hiddenPrefix + "oauth.accessToken", &config.AccessToken},
 		{hiddenPrefix + "oauth.refreshToken", &config.RefreshToken},
+		{hiddenPrefix + "oauth.idToken", &config.IDToken},
 	}
 }
 
 func isLiteral(value string) bool {
 	return value != "" && !hasPlaceholder(value)
+}
+
+func headerList(raw string) []engine.HeaderEntry {
+	var rows []engine.HeaderEntry
+	if json.Unmarshal([]byte(raw), &rows) != nil {
+		return nil
+	}
+	return rows
+}
+
+func literalCredential(headers []engine.HeaderEntry) (string, bool) {
+	for _, header := range headers {
+		if isCredentialHeader(header.Key) && isLiteral(header.Value) {
+			return header.Key, true
+		}
+	}
+	return "", false
 }
 
 func maskAuth(auth engine.Auth) engine.Auth {
@@ -91,11 +109,7 @@ func maskAuth(auth engine.Auth) engine.Auth {
 
 func variableNames(environment runner.Environment) []string {
 	values, _ := environment.Values()
-	names := make([]string, 0, len(values))
-	for name := range values {
-		names = append(names, name)
-	}
-	return sorted(names)
+	return sortedKeys(values)
 }
 
 func (c *Client) learnResolved(label, value string) {
@@ -106,16 +120,14 @@ func (c *Client) learnResolved(label, value string) {
 }
 
 func (c *Client) learnAll(values map[string]string) {
-	for name, value := range values {
+	for name, value := range engine.FillVariables(values) {
 		c.guard.Learn(name, value)
 	}
 }
 
 func (c *Client) learnEnvironment(environment runner.Environment) {
 	values, _ := environment.Values()
-	for name, value := range values {
-		c.guard.Learn(name, value)
-	}
+	c.learnAll(values)
 }
 
 func credentialOf(value string) string {
@@ -214,7 +226,7 @@ func (c *Client) Study(stored runner.Collection) error {
 		c.learnEnvironment(runner.Environment{Variables: folder.Variables})
 		c.learnCredentials(folder.Headers, folder.Auth, folder.Variables)
 	}
-	listed, err := c.session.Catalog(stored, "")
+	listed, err := c.catalog.Catalog(stored, "")
 	if err != nil {
 		return err
 	}

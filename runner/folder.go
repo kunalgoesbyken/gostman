@@ -14,6 +14,11 @@ func isDirectory(path string) bool {
 	return err == nil && info.IsDir()
 }
 
+func isWorkspace(root string) bool {
+	state, err := workspace.Inspect(root)
+	return err == nil && state == workspace.Existing
+}
+
 func loadWorkspace(root string) (Collection, error) {
 	state, err := workspace.Inspect(root)
 	if err != nil {
@@ -29,7 +34,12 @@ func loadWorkspace(root string) (Collection, error) {
 	if problems := files.Problems(); len(problems) > 0 {
 		return Collection{}, unreadableFiles(problems)
 	}
+	network, err := files.Network()
+	if err != nil {
+		return Collection{}, err
+	}
 	collection, err := FromWorkspace(files.Collection())
+	collection.Network, collection.Root = network.Files(), root
 	collection.DotEnv = files.DotEnv()
 	collection.Modules = scriptModules(root)
 	return collection, err

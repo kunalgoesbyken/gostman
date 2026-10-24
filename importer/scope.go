@@ -7,57 +7,90 @@ import (
 )
 
 type scope struct {
-	headers []row
-	vars    []row
-	auth    *engine.Auth
-	pre     []string
-	post    []string
+	headers     []row
+	vars        []row
+	auth        *engine.Auth
+	pre         string
+	post        string
+	description string
 }
 
-func (s scope) within(inner scope) scope {
-	merged := scope{
-		headers: mergeRows(s.headers, inner.headers),
-		vars:    mergeRows(s.vars, inner.vars),
-		auth:    s.auth,
-		pre:     append(append([]string{}, s.pre...), inner.pre...),
-		post:    append(append([]string{}, s.post...), inner.post...),
-	}
-	if inner.auth != nil {
-		merged.auth = inner.auth
-	}
-	return merged
+type scopedFolder struct {
+	parent string
+	auth   *engine.Auth
 }
 
-func (s scope) authFor(own *engine.Auth) engine.Auth {
+func (c *collector) addScopedFolder(name, parentID string, settings scope) string {
+	id := c.addFolder(name, parentID)
+	folder := &c.Folders[len(c.Folders)-1]
+	folder.Description = settings.description
+	folder.Headers = jsonList(settings.headers)
+	folder.Variables = enabledVariables(settings.vars)
+	folder.PreScript = joinScripts([]string{settings.pre})
+	folder.PostScript = joinScripts([]string{settings.post})
+	if settings.auth != nil {
+		folder.Auth = folderAuth(*settings.auth)
+	}
+	c.scoped[id] = scopedFolder{parent: parentID, auth: settings.auth}
+	c.flagScripts(folder.Name, folder.PreScript, folder.PostScript)
+	if folder.Auth.Type == authOAuth2 {
+		c.flag(messageOAuth, folder.Name)
+	}
+	return id
+}
+
+func folderAuth(auth engine.Auth) engine.Auth {
+	if auth.Type == "" {
+		return engine.Auth{Type: authNone}
+	}
+	return auth
+}
+
+func (c *collector) collectionScope(settings scope) scope {
+	for _, variable := range settings.vars {
+		if _, taken := c.Variables[variable.Key]; variable.Enabled && !taken {
+			c.Variables[variable.Key] = variable.Value
+		}
+	}
+	settings.vars = nil
+	return settings
+}
+
+func enabledVariables(rows []row) string {
+	values := map[string]string{}
+	for _, candidate := range rows {
+		if candidate.Enabled {
+			values[candidate.Key] = candidate.Value
+		}
+	}
+	if len(values) == 0 {
+		return ""
+	}
+	return objectJSON(values)
+}
+
+func (c *collector) requestAuth(own *engine.Auth, folderID string) engine.Auth {
 	switch {
 	case own != nil:
 		return *own
-	case s.auth != nil:
-		return *s.auth
+	case c.inheritsAuth(folderID):
+		return engine.Auth{Type: engine.AuthInherit}
 	}
 	return engine.Auth{}
 }
 
-func (s scope) preScript(own string) string {
-	return joinScripts(append(append([]string{}, s.pre...), own))
-}
-
-func (s scope) postScript(own string) string {
-	return joinScripts(append([]string{own}, s.post...))
-}
-
-func mergeRows(outer, inner []row) []row {
-	known := map[string]bool{}
-	for _, candidate := range inner {
-		known[strings.ToLower(candidate.Key)] = true
-	}
-	var merged []row
-	for _, candidate := range outer {
-		if !known[strings.ToLower(candidate.Key)] {
-			merged = append(merged, candidate)
+func (c *collector) inheritsAuth(folderID string) bool {
+	for depth := 0; depth <= maxFolderDepth; depth++ {
+		folder, scoped := c.scoped[folderID]
+		switch {
+		case !scoped:
+			return false
+		case folder.auth != nil:
+			return true
 		}
+		folderID = folder.parent
 	}
-	return append(merged, inner...)
+	return false
 }
 
 func joinScripts(scripts []string) string {

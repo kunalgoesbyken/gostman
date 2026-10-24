@@ -72,8 +72,10 @@ func indented(text, indent string) string {
 }
 
 func (t *Text) printFailures(result runner.Result) {
-	if result.Error != "" {
-		fmt.Fprintln(t.output, t.paint(styleRed, indented(result.Error, detailIndent)))
+	for _, problem := range []string{result.Error, result.Failure} {
+		if problem != "" {
+			fmt.Fprintln(t.output, t.paint(styleRed, indented(problem, detailIndent)))
+		}
 	}
 	for _, check := range result.Tests {
 		if check.Passed {
@@ -104,6 +106,7 @@ func printable(text string) string {
 func printableResult(result runner.Result) runner.Result {
 	result.Method, result.Name, result.Folder = printable(result.Method), printable(result.Name), printable(result.Folder)
 	result.Status, result.Skipped, result.Error = printable(result.Status), printable(result.Skipped), printable(result.Error)
+	result.Failure = printable(result.Failure)
 	tests := make([]runner.Check, len(result.Tests))
 	for i, check := range result.Tests {
 		check.Name, check.Message = printable(check.Name), printable(check.Message)
@@ -155,6 +158,25 @@ func (t *Text) Finish(report runner.Report) error {
 		t.paint(styleRed, counted(summary.FailedTests, "failed")),
 	)
 	duration := (time.Duration(report.DurationMs) * time.Millisecond).String()
-	_, err := fmt.Fprintf(t.output, "\nRequests  %s\nTests     %s\nDuration  %s\n", requests, tests, duration)
+	_, err := fmt.Fprintf(t.output, "\nRequests  %s\nTests     %s\n%sDuration  %s\n", requests, tests, t.contractLine(report), duration)
 	return err
+}
+
+func (t *Text) contractLine(report runner.Report) string {
+	total, failed := 0, 0
+	for _, result := range report.Results {
+		for _, check := range result.Tests {
+			if check.Kind != runner.ContractKind {
+				continue
+			}
+			total++
+			if !check.Passed {
+				failed++
+			}
+		}
+	}
+	if total == 0 {
+		return ""
+	}
+	return fmt.Sprintf("Contract  %s\n", counts(fmt.Sprintf("%d passed", total-failed), t.paint(styleRed, counted(failed, "failed"))))
 }

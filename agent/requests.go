@@ -55,10 +55,11 @@ type definition struct {
 	GraphqlVariables any                  `json:"graphqlVariables,omitempty"`
 	GrpcMethod       string               `json:"grpcMethod,omitempty"`
 	GrpcMessage      any                  `json:"grpcMessage,omitempty"`
+	McpMethod        string               `json:"mcpMethod,omitempty"`
 	McpTool          string               `json:"mcpTool,omitempty"`
 	McpArguments     any                  `json:"mcpArguments,omitempty"`
 	Auth             *engine.Auth         `json:"auth,omitempty"`
-	Options          engine.Options       `json:"options"`
+	Options          map[string]any       `json:"options,omitempty"`
 	Assertions       any                  `json:"assertions,omitempty"`
 	Extractors       any                  `json:"extractors,omitempty"`
 	PreScript        string               `json:"preScript,omitempty"`
@@ -112,7 +113,7 @@ func describeLine(entry runner.Listed, files workspace.Collection) requestLine {
 }
 
 func (d *Desk) listRequests(_ context.Context, current scene, arguments listArguments) (requestList, error) {
-	listed, err := d.client.session.Catalog(current.stored, arguments.Folder)
+	listed, err := d.client.catalog.Catalog(current.stored, arguments.Folder)
 	if err != nil {
 		return requestList{}, err
 	}
@@ -153,6 +154,26 @@ func graphqlVariables(request runner.Request) any {
 	return structured(request.GraphqlVariables)
 }
 
+func changedOptions(options engine.Options) map[string]any {
+	encoded, err := json.Marshal(options)
+	if err != nil {
+		return nil
+	}
+	var fields map[string]any
+	if json.Unmarshal(encoded, &fields) != nil {
+		return nil
+	}
+	for name, value := range fields {
+		if value == false || value == float64(0) || value == "" {
+			delete(fields, name)
+		}
+	}
+	if len(fields) == 0 {
+		return nil
+	}
+	return fields
+}
+
 func shownAuth(auth engine.Auth) *engine.Auth {
 	if auth.Type == "" {
 		return nil
@@ -161,11 +182,19 @@ func shownAuth(auth engine.Auth) *engine.Auth {
 	return &masked
 }
 
+func (d *Desk) find(stored runner.Collection, reference string) (runner.Listed, error) {
+	found, err := d.client.Find(stored, reference)
+	if err != nil {
+		return found, fmt.Errorf("%w. list_requests shows the saved requests with their ids and folders.", err)
+	}
+	return found, nil
+}
+
 func (d *Desk) getRequest(_ context.Context, current scene, arguments getArguments) (definition, error) {
 	if !hasText(arguments.Request) {
 		return definition{}, errors.New("Name the request by id or name; list_requests shows both.")
 	}
-	entry, err := d.client.Find(current.stored, arguments.Request)
+	entry, err := d.find(current.stored, arguments.Request)
 	if err != nil {
 		return definition{}, err
 	}
@@ -183,10 +212,11 @@ func (d *Desk) getRequest(_ context.Context, current scene, arguments getArgumen
 		GraphqlVariables: graphqlVariables(request),
 		GrpcMethod:       request.GrpcMethod,
 		GrpcMessage:      structured(request.GrpcMessage),
+		McpMethod:        request.McpMethod,
 		McpTool:          request.McpTool,
 		McpArguments:     structured(request.McpArguments),
 		Auth:             shownAuth(request.Auth),
-		Options:          request.Options,
+		Options:          changedOptions(request.Options),
 		Assertions:       structured(request.Assertions),
 		Extractors:       structured(request.Extractors),
 		PreScript:        request.PreScript,

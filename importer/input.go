@@ -28,7 +28,7 @@ var (
 	errBinary     = errors.New("the content is binary, not text")
 	errEmpty      = errors.New("the content is empty")
 
-	folderExtensions = map[string]bool{".bru": true, ".json": true, ".yml": true, ".yaml": true, ".xml": true, ".wsdl": true, ".xsd": true, ".har": true, httpExtension: true, restExtension: true}
+	folderExtensions = map[string]bool{".bru": true, ".json": true, ".yml": true, ".yaml": true, ".xml": true, ".wsdl": true, ".xsd": true, ".har": true, httpExtension: true, restExtension: true, protoExtension: true}
 )
 
 type File struct {
@@ -97,7 +97,7 @@ func readFolder(root string, limit int64) ([]File, error) {
 		if err != nil {
 			return err
 		}
-		if entry.IsDir() && path != root && strings.HasPrefix(entry.Name(), ".") {
+		if entry.IsDir() && path != root && (strings.HasPrefix(entry.Name(), ".") || entry.Name() == "node_modules") {
 			return filepath.SkipDir
 		}
 		if !entry.Type().IsRegular() || !folderExtensions[strings.ToLower(filepath.Ext(path))] {

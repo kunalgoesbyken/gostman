@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
-	"github.com/kunalgoesbyken/gostman/mcp"
 )
 
 const (
@@ -46,7 +45,7 @@ func setDefault(header http.Header, name, value string) {
 	}
 }
 
-func (l *httpLink) header() http.Header {
+func (l *httpLink) header(extra http.Header) http.Header {
 	header := http.Header{}
 	for _, entry := range l.headers {
 		header.Add(entry.Key, entry.Value)
@@ -55,24 +54,27 @@ func (l *httpLink) header() http.Header {
 	setDefault(header, headerContentType, typeJSON)
 	setDefault(header, headerSession, l.id)
 	setDefault(header, headerVersion, l.version)
+	for name := range extra {
+		setDefault(header, name, extra.Get(name))
+	}
 	return header
 }
 
-func (l *httpLink) exchange(ctx context.Context, method string, body io.Reader) (*http.Response, error) {
-	outgoing, err := http.NewRequestWithContext(ctx, method, l.address, body)
+func (l *httpLink) exchange(ctx context.Context, method string, body io.Reader, extra http.Header) (*http.Response, error) {
+	request, err := http.NewRequestWithContext(ctx, method, l.address, body)
 	if err != nil {
 		return nil, configError("%v", err)
 	}
-	outgoing.Header = l.header()
-	return l.client.Do(outgoing)
+	request.Header = l.header(extra)
+	return l.client.Do(request)
 }
 
-func (l *httpLink) post(ctx context.Context, payload any) (*http.Response, error) {
+func (l *httpLink) post(ctx context.Context, payload any, extra http.Header) (*http.Response, error) {
 	encoded, err := json.Marshal(payload)
 	if err != nil {
 		return nil, configError("the message cannot be encoded: %v", err)
 	}
-	return l.exchange(ctx, http.MethodPost, bytes.NewReader(encoded))
+	return l.exchange(ctx, http.MethodPost, bytes.NewReader(encoded), extra)
 }
 
 func isAccepted(incoming *http.Response) bool {
@@ -101,7 +103,7 @@ func (l *httpLink) rejected(incoming *http.Response) error {
 }
 
 func (l *httpLink) deliver(ctx context.Context, payload any) error {
-	incoming, err := l.post(ctx, payload)
+	incoming, err := l.post(ctx, payload, nil)
 	if err != nil {
 		return err
 	}
@@ -112,9 +114,9 @@ func (l *httpLink) deliver(ctx context.Context, payload any) error {
 	return nil
 }
 
-func (l *httpLink) roundTrip(ctx context.Context, id json.RawMessage, message mcp.Message, limit int64) (answer, envelope, error) {
+func (l *httpLink) roundTrip(ctx context.Context, request outgoing, limit int64) (answer, envelope, error) {
 	l.limit = limit
-	incoming, err := l.post(ctx, message)
+	incoming, err := l.post(ctx, request.message, request.header)
 	if err != nil {
 		return answer{}, envelope{}, err
 	}
@@ -122,11 +124,9 @@ func (l *httpLink) roundTrip(ctx context.Context, id json.RawMessage, message mc
 	if !isAccepted(incoming) {
 		return answer{}, envelope{}, l.rejected(incoming)
 	}
-	reply, err := l.reply(ctx, incoming, id)
-	if err != nil {
-		return answer{}, envelope{}, err
-	}
-	return describeAnswer(incoming), reply, nil
+	received := describeAnswer(incoming)
+	reply, err := l.reply(ctx, incoming, request.id, &received)
+	return received, reply, err
 }
 
 func (l *httpLink) established(sessionID, version string) {
@@ -139,7 +139,7 @@ func (l *httpLink) close() {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), farewellTimeout)
 	defer cancel()
-	if incoming, err := l.exchange(ctx, http.MethodDelete, nil); err == nil {
+	if incoming, err := l.exchange(ctx, http.MethodDelete, nil, nil); err == nil {
 		incoming.Body.Close()
 	}
 }

@@ -1,16 +1,19 @@
 import YAML from 'js-yaml'
 import { BODY_BINARY, BODY_FORM, BODY_JSON, BODY_MULTIPART, BODY_NONE, BODY_TEXT, BODY_TYPES, BODY_XML } from './body'
-import { buildCollectionTree, folderDepth, foldersIn, listFolders, MAX_FOLDER_DEPTH, requestsIn, ROOT_ID } from './collectionTree'
-import { SCRIPT_FIELDS, hasActiveContent, withoutActiveContent } from './activeContent'
+import { buildCollectionTree, folderDepth, listFolders, MAX_FOLDER_DEPTH, requestsIn, ROOT_ID } from './collectionTree'
+import { SCRIPT_FIELDS, activeKinds, hasActiveContent, withoutActiveContent } from './activeContent'
 import { isPlainObject, lookup, parseJSON, pluralize } from './dataUtils'
 import { sanitizeExamples } from './examples'
 import { readParamRows } from './queryString'
 import { SCHEMES } from './authSchemes'
-import { AUTH_INHERIT, hasActiveSettings, normalizeScopeSettings, withoutActiveSettings } from './inheritance'
+import { AUTH_INHERIT, AUTH_NONE, activeSettingsKinds, hasActiveSettings, normalizeScopeSettings, withoutActiveSettings } from './inheritance'
 import { clearToken } from './oauth'
 import { AUTH_OAUTH2, normalizeRequest } from './request'
-import { isFileRow, isSentRow, parseRows, ROW_FILE, ROW_TEXT } from './rows'
+import { isFileRow, isSentRow } from './rows'
 import { normalizeTags } from './tags'
+import { AUTH_API_KEY, AUTH_BASIC, AUTH_BEARER, GRAPHQL_METHOD, UNTITLED_REQUEST, apiKeyLocation, asText, sentRows } from './exportFields'
+
+export { exportToPostman } from './postmanExport'
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024
 
@@ -18,21 +21,13 @@ const MAX_NAMES_IN_WARNING = 5
 const MAX_NAME_LENGTH = 200
 const MAX_METHOD_LENGTH = 16
 
-const POSTMAN_SCHEMA = 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json'
 const GOSTMAN_FORMAT_VERSION = '2.0.0'
-const GRAPHQL_METHOD = 'GRAPHQL'
 const OPENAPI_METHODS = ['get', 'post', 'put', 'delete', 'patch', 'options', 'head', 'trace']
-const UNTITLED_REQUEST = 'Untitled request'
 const UNTITLED_FOLDER = 'Folder'
 const UNTITLED_ENVIRONMENT = 'Environment'
 const DEFAULT_METHOD = 'GET'
 const METHOD_TOKEN = /^[A-Z]+$/
 
-const AUTH_BASIC = 'basic'
-const AUTH_BEARER = 'bearer'
-const AUTH_API_KEY = 'apikey'
-const AUTH_IN_HEADER = 'header'
-const AUTH_IN_QUERY = 'query'
 const NO_AUTH = { type: '' }
 
 const BODY_CONTENT_TYPES = {
@@ -45,12 +40,6 @@ const BODY_CONTENT_TYPES = {
 }
 
 const asArray = (value) => (Array.isArray(value) ? value : [])
-
-const asText = (value) => (value === undefined || value === null ? '' : String(value))
-
-const sentRows = (json) => parseRows(json).filter(isSentRow)
-
-const apiKeyLocation = (location) => (location === AUTH_IN_QUERY ? AUTH_IN_QUERY : AUTH_IN_HEADER)
 
 const withLeadingSlash = (path) => (path.startsWith('/') ? path : `/${path}`)
 
@@ -67,11 +56,14 @@ function safeStringify(value) {
 
 const generateId = () => crypto.randomUUID()
 
-const hasKey = (entry) => asText(entry?.key).trim() !== ''
-
 export const countActiveRequests = (data) => (
   data.requests.filter(hasActiveContent).length + [...data.folders, data.settings].filter(hasActiveSettings).length
 )
+
+export const activeKindsOf = (data) => [...new Set([
+  ...data.requests.flatMap(activeKinds),
+  ...[...data.folders, data.settings].flatMap(activeSettingsKinds),
+])]
 
 export const withoutActiveRequests = (data) => ({
   ...data,
@@ -278,108 +270,6 @@ export function exportToOpenAPIYAML(requests, options = {}) {
   })
 }
 
-const POSTMAN_AUTH_WRITERS = {
-  [AUTH_BASIC]: ({ username, password }) => ({ username, password }),
-  [AUTH_BEARER]: ({ token }) => ({ token }),
-  [AUTH_API_KEY]: (auth) => ({ key: auth.key, value: auth.value, in: apiKeyLocation(auth.in) }),
-}
-
-function toPostmanAuth(auth) {
-  const fieldsOf = lookup(POSTMAN_AUTH_WRITERS, auth?.type)
-  if (!fieldsOf) return { type: 'noauth' }
-  const fields = Object.entries(fieldsOf(auth)).map(([key, value]) => ({ key, value: asText(value), type: 'string' }))
-  return { type: auth.type, [auth.type]: fields }
-}
-
-const disabledFlag = (row) => (row.enabled ? {} : { disabled: true })
-
-const toPostmanEntry = (row) => ({ key: row.key, value: row.value, ...disabledFlag(row) })
-
-const toPostmanEntries = (rows) => rows.filter(hasKey).map(toPostmanEntry)
-
-function toPostmanFormData(row) {
-  if (!isFileRow(row)) return { ...toPostmanEntry(row), type: ROW_TEXT }
-  return {
-    key: row.key,
-    type: ROW_FILE,
-    src: asText(row.fileName),
-    ...(row.contentType && { contentType: row.contentType }),
-    ...disabledFlag(row),
-  }
-}
-
-const POSTMAN_BODY_WRITERS = {
-  [BODY_NONE]: () => null,
-  [BODY_FORM]: (body) => ({ mode: 'urlencoded', urlencoded: toPostmanEntries(parseRows(body)) }),
-  [BODY_MULTIPART]: (body) => ({ mode: 'formdata', formdata: parseRows(body).filter(hasKey).map(toPostmanFormData) }),
-  [BODY_BINARY]: (body) => ({ mode: 'file', file: { src: asText(parseJSON(body, {})?.fileName) } }),
-}
-
-function toPostmanBody(request) {
-  if (request.method === GRAPHQL_METHOD) {
-    return {
-      mode: 'graphql',
-      graphql: { query: request.graphqlQuery || request.body, variables: request.graphqlVariables },
-    }
-  }
-  const write = lookup(POSTMAN_BODY_WRITERS, request.bodyType)
-  if (write) return write(request.body)
-  return { mode: 'raw', raw: request.body, options: { raw: { language: request.bodyType } } }
-}
-
-function toPostmanUrl(request) {
-  const address = request.url.split(/[?#]/)[0]
-  const schemeEnd = address.indexOf('://')
-  const [host, ...path] = (schemeEnd === -1 ? address : address.slice(schemeEnd + 3)).split('/')
-  return {
-    raw: request.url,
-    ...(schemeEnd !== -1 && { protocol: address.slice(0, schemeEnd) }),
-    host: host.split('.'),
-    path,
-    query: toPostmanEntries(readParamRows(request.url, request.queryParams)),
-  }
-}
-
-function toPostmanBehavior(options) {
-  const behavior = {
-    ...(options?.noFollowRedirects && { followRedirects: false }),
-    ...(options?.insecureTLS && { strictSSL: false }),
-  }
-  return Object.keys(behavior).length > 0 ? behavior : null
-}
-
-function toPostmanItem(request) {
-  const body = toPostmanBody(request)
-  const behavior = toPostmanBehavior(request.options)
-  return {
-    id: request.id,
-    name: request.name || UNTITLED_REQUEST,
-    ...(behavior && { protocolProfileBehavior: behavior }),
-    request: {
-      method: request.method === GRAPHQL_METHOD ? 'POST' : request.method,
-      header: toPostmanEntries(parseRows(request.headers)),
-      url: toPostmanUrl(request),
-      auth: toPostmanAuth(request.auth),
-      ...(body && { body }),
-    },
-    response: [],
-  }
-}
-
-export function exportToPostman(requests, folders = [], options = {}) {
-  const { name = 'Gostman Collection', variables = {} } = options
-  const tree = buildCollectionTree(folders, requests)
-  const itemsIn = (folderId) => [
-    ...foldersIn(tree, folderId).map((folder) => ({ id: folder.id, name: folder.name, item: itemsIn(folder.id) })),
-    ...requestsIn(tree, folderId).map(toPostmanItem),
-  ]
-  return {
-    info: { name, schema: POSTMAN_SCHEMA },
-    item: itemsIn(ROOT_ID),
-    variable: Object.entries(variables).map(([key, value]) => ({ key, value: asText(value) })),
-  }
-}
-
 const withoutToken = (request) => ({ ...request, auth: { ...request.auth, oauth2: clearToken(request.auth.oauth2) } })
 
 const withoutScopeToken = (scope) => (scope?.auth?.oauth2 ? { ...scope, auth: { ...scope.auth, oauth2: clearToken(scope.auth.oauth2) } } : scope)
@@ -545,10 +435,10 @@ export async function parseImport(text) {
 }
 
 const AUTH_TYPES = [AUTH_INHERIT, AUTH_BASIC, AUTH_BEARER, AUTH_API_KEY, AUTH_OAUTH2, ...Object.keys(SCHEMES)]
-const OAUTH_TEXT_FIELDS = ['grant', 'authUrl', 'tokenUrl', 'clientId', 'clientSecret', 'scope', 'username', 'password', 'callbackUrl', 'credentialsIn', 'headerPrefix']
+const OAUTH_TEXT_FIELDS = ['grant', 'authUrl', 'tokenUrl', 'clientId', 'clientSecret', 'scope', 'username', 'password', 'callbackUrl', 'credentialsIn', 'headerPrefix', 'resource', 'issuer']
 const AUTH_TEXT_FIELDS = ['username', 'password', 'token', 'key', 'value', 'domain']
 const SCHEME_SECTIONS = Object.values(SCHEMES).filter((scheme) => scheme.section)
-const REQUEST_TEXT_FIELDS = ['id', 'description', 'url', 'headers', 'body', 'queryParams', 'folderId', 'graphqlQuery', 'graphqlVariables', 'extractors', 'assertions', ...SCRIPT_FIELDS, 'grpcMethod', 'grpcMessage', 'grpcProtos', 'mcpTool', 'mcpArguments', 'socketProtocol', 'socketMessages', 'vars']
+const REQUEST_TEXT_FIELDS = ['id', 'description', 'url', 'headers', 'body', 'queryParams', 'folderId', 'graphqlQuery', 'graphqlVariables', 'extractors', 'assertions', ...SCRIPT_FIELDS, 'grpcMethod', 'grpcMessage', 'grpcProtos', 'mcpMethod', 'mcpTool', 'mcpArguments', 'socketProtocol', 'socketMessages', 'vars']
 const SCOPE_TEXT_FIELDS = ['description', 'headers', 'assertions', ...SCRIPT_FIELDS]
 const BODY_TYPE_VALUES = BODY_TYPES.map((type) => type.value)
 
@@ -575,16 +465,28 @@ function sanitizeSections(raw) {
   ]))
 }
 
-function sanitizeAuth(raw) {
-  if (!isPlainObject(raw) || !AUTH_TYPES.includes(raw.type)) return NO_AUTH
+const SCOPE_AUTH_TYPES = [AUTH_NONE, ...AUTH_TYPES]
+
+function sanitizeAuth(raw, types = AUTH_TYPES) {
+  if (!isPlainObject(raw) || !types.includes(raw.type)) return NO_AUTH
   return { ...pickStrings(raw, AUTH_TEXT_FIELDS), type: raw.type, in: apiKeyLocation(raw.in), oauth2: sanitizeOAuth(raw.oauth2), ...sanitizeSections(raw) }
 }
 
+const OPTION_COUNTS = ['timeoutMs', 'streamMaxEvents', 'streamMaxSeconds']
+const OPTION_FLAGS = ['noFollowRedirects', 'stream', 'streamReconnect', 'skipCookies', 'discardCookies']
+const OPTION_TEXTS = ['socketIoPath', 'socketIoAuth']
+
+function positiveCount(value) {
+  const count = Math.trunc(Number(value))
+  return Number.isFinite(count) && count > 0 ? count : 0
+}
+
 function sanitizeOptions(raw) {
-  const timeoutMs = Math.trunc(Number(raw?.timeoutMs))
+  const options = isPlainObject(raw) ? raw : {}
   return {
-    timeoutMs: Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 0,
-    noFollowRedirects: raw?.noFollowRedirects === true,
+    ...Object.fromEntries(OPTION_COUNTS.map((key) => [key, positiveCount(options[key])])),
+    ...Object.fromEntries(OPTION_FLAGS.map((key) => [key, options[key] === true])),
+    ...pickStrings(options, OPTION_TEXTS),
     insecureTLS: false,
   }
 }
@@ -604,7 +506,7 @@ function sanitizeRequest(raw) {
 
 const sanitizeScope = (raw) => normalizeScopeSettings({
   ...pickStrings(isPlainObject(raw) ? raw : {}, SCOPE_TEXT_FIELDS),
-  auth: sanitizeAuth(raw?.auth),
+  auth: sanitizeAuth(raw?.auth, SCOPE_AUTH_TYPES),
 })
 
 const sanitizeFolder = (raw) => ({
@@ -616,10 +518,21 @@ const sanitizeFolder = (raw) => ({
   ...sanitizeScope(raw),
 })
 
+const variableMark = (mark) => ({ ...(mark?.secret === true && { secret: true }), ...(mark?.enabled === false && { enabled: false }) })
+
+const secretMarks = (meta) => Object.fromEntries(
+  Object.entries(parseJSON(stringOf(meta), {}) || {})
+    .map(([name, mark]) => [name, variableMark(mark)])
+    .filter(([, mark]) => Object.keys(mark).length > 0),
+)
+
 const sanitizeEnvironment = (raw) => ({
   id: stringOf(raw.id),
   name: cleanName(raw.name, UNTITLED_ENVIRONMENT),
   variables: stringOf(raw.variables),
+  color: stringOf(raw.color),
+  extends: stringOf(raw.extends),
+  meta: JSON.stringify(secretMarks(raw.meta)),
 })
 
 function assignFreshIds(items, takenIds) {
@@ -660,8 +573,10 @@ export function sanitizeImport(data, existing) {
     requests,
     folders,
     environments: asArray(data?.environments).filter(isPlainObject).map(sanitizeEnvironment),
+    globals: asArray(data?.globals).filter(isPlainObject).map(sanitizeEnvironment),
     variables: isPlainObject(data?.variables) ? data.variables : {},
     settings: sanitizeScope(data?.settings),
+    notes: asArray(data?.notes).filter((note) => typeof note === 'string'),
     warnings: [
       ...asArray(data?.warnings).filter((warning) => typeof warning === 'string'),
       ...(requestsWithoutTls.length > 0 ? [tlsWarning(requestsWithoutTls)] : []),

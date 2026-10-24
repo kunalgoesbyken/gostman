@@ -11,6 +11,7 @@ const (
 	ActionRequests   = "requests"
 	ActionOperation  = "operation"
 	ActionSchema     = "schema"
+	ActionContract   = "contract"
 )
 
 type Query struct {
@@ -42,6 +43,7 @@ type Reply struct {
 	Collection *Collection `json:"collection,omitempty"`
 	Detail     *Detail     `json:"detail,omitempty"`
 	Schema     *SchemaNode `json:"schema,omitempty"`
+	Contract   *Contract   `json:"contract,omitempty"`
 }
 
 func (d *Document) Summary() Summary {
@@ -92,6 +94,9 @@ func Handle(ctx context.Context, query Query, opt Options) Reply {
 			return Reply{Error: err.Error()}
 		}
 		return Reply{Schema: schema}
+	case ActionContract:
+		contract := doc.Contract()
+		return Reply{Contract: &contract}
 	}
 	return Reply{Error: fmt.Sprintf("unknown action %q", query.Action)}
 }

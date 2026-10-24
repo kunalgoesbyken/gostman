@@ -25,7 +25,7 @@ const toResult = (result) => ({
   exchange: result.exchange,
 })
 
-function summarize(results, planned) {
+export function summarize(results, planned) {
   const skipped = results.filter((result) => result.skipped).length
   const failed = results.filter((result) => !result.skipped && result.hasFailed).length
   const tests = results.flatMap((result) => result.tests)

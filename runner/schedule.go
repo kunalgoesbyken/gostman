@@ -37,7 +37,7 @@ func (s *session) spawn() (*session, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &session{scripts: scripts, policy: s.policy, variables: variables{}, environment: s.environment, common: s.common, library: s.library, hosts: s.hosts, modules: s.modules}, nil
+	return &session{scripts: scripts, policy: s.policy, variables: variables{}, session: variables{}, environment: s.environment, common: s.common, library: s.library, hosts: s.hosts, modules: s.modules, contract: s.contract}, nil
 }
 
 func (s *session) crew(wanted int) []*session {
@@ -57,6 +57,7 @@ type schedule struct {
 	options Options
 	units   []unit
 	base    variables
+	session variables
 	count   int
 	outputs [][]Result
 	halted  atomic.Bool
@@ -79,18 +80,21 @@ func (c *schedule) work(ctx context.Context, worker *session, queue <-chan int) 
 		}
 		current := c.units[position]
 		worker.variables = startingFor(c.base, c.options, current.iteration, c.count)
+		worker.session = maps.Clone(c.session)
 		jumps := 0
+		progress := newProgress(len(current.indexes))
 		for cursor := 0; cursor < len(current.indexes); {
 			request := c.planned.requests[current.indexes[cursor]]
 			result := worker.attempt(ctx, request, c.planned.folderNames[request.FolderID], c.options.Capture)
-			worker.common.publish(worker.variables.plain())
-			if c.options.isIterating() {
-				result.Iteration = current.iteration + 1
-			}
+			worker.common.publish(worker.current().plain())
+			result.Iteration = c.iterationNumber(current)
 			following, problem := c.follow(current, cursor, result.flow, &jumps, limit)
+			reason := result.flow.passedOver(request.Name)
 			if problem != "" {
 				result.flag(problem)
+				reason = ""
 			}
+			progress.note(cursor, following, reason)
 			c.record(position, result)
 			if ctx.Err() != nil {
 				return
@@ -108,6 +112,48 @@ func (c *schedule) work(ctx context.Context, worker *session, queue <-chan int) 
 				break
 			}
 		}
+		c.recordPassedOver(position, current, progress)
+	}
+}
+
+type unitProgress struct {
+	attempted []bool
+	passed    []string
+}
+
+func newProgress(size int) unitProgress {
+	return unitProgress{attempted: make([]bool, size), passed: make([]string, size)}
+}
+
+func (p unitProgress) note(cursor, following int, reason string) {
+	p.attempted[cursor] = true
+	if reason == "" {
+		return
+	}
+	for skipped := cursor + 1; skipped < min(following, len(p.passed)); skipped++ {
+		if p.passed[skipped] == "" {
+			p.passed[skipped] = reason
+		}
+	}
+}
+
+func (c *schedule) iterationNumber(current unit) int {
+	if c.options.isIterating() {
+		return current.iteration + 1
+	}
+	return 0
+}
+
+func (c *schedule) recordPassedOver(position int, current unit, progress unitProgress) {
+	for cursor, index := range current.indexes {
+		if progress.attempted[cursor] || progress.passed[cursor] == "" {
+			continue
+		}
+		request := c.planned.requests[index]
+		result := identify(request, c.planned.folderNames[request.FolderID])
+		result.Skipped = progress.passed[cursor]
+		result.Iteration = c.iterationNumber(current)
+		c.record(position, result)
 	}
 }
 
@@ -119,6 +165,7 @@ func (s *session) runAll(ctx context.Context, planned plan, options Options, obs
 		options: options,
 		units:   units,
 		base:    maps.Clone(s.variables),
+		session: maps.Clone(s.session),
 		count:   count,
 		outputs: make([][]Result, len(units)),
 		observe: observe,

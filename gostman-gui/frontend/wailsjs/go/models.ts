@@ -37,6 +37,7 @@ export namespace ai {
 	export class Prompt {
 	    system: string;
 	    user: string;
+	    schema?: any;
 	
 	    static createFrom(source: any = {}) {
 	        return new Prompt(source);
@@ -46,6 +47,7 @@ export namespace ai {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.system = source["system"];
 	        this.user = source["user"];
+	        this.schema = source["schema"];
 	    }
 	}
 
@@ -381,6 +383,12 @@ export namespace engine {
 	    accessToken: string;
 	    refreshToken: string;
 	    expiresAt: number;
+	    resource: string;
+	    issuer: string;
+	    deviceUrl: string;
+	    sendIdToken: boolean;
+	    idToken: string;
+	    tokenEnvironment: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new OAuth2(source);
@@ -403,6 +411,12 @@ export namespace engine {
 	        this.accessToken = source["accessToken"];
 	        this.refreshToken = source["refreshToken"];
 	        this.expiresAt = source["expiresAt"];
+	        this.resource = source["resource"];
+	        this.issuer = source["issuer"];
+	        this.deviceUrl = source["deviceUrl"];
+	        this.sendIdToken = source["sendIdToken"];
+	        this.idToken = source["idToken"];
+	        this.tokenEnvironment = source["tokenEnvironment"];
 	    }
 	}
 	export class Auth {
@@ -490,6 +504,116 @@ export namespace engine {
 	        this.hostOnly = source["hostOnly"];
 	        this.expired = source["expired"];
 	    }
+	}
+	export class DeviceAuthorization {
+	    deviceCode: string;
+	    userCode: string;
+	    verificationUri: string;
+	    verificationUriComplete: string;
+	    expiresAt: number;
+	    interval: number;
+	    error: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DeviceAuthorization(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.deviceCode = source["deviceCode"];
+	        this.userCode = source["userCode"];
+	        this.verificationUri = source["verificationUri"];
+	        this.verificationUriComplete = source["verificationUriComplete"];
+	        this.expiresAt = source["expiresAt"];
+	        this.interval = source["interval"];
+	        this.error = source["error"];
+	    }
+	}
+	export class Discovery {
+	    issuer: string;
+	    authUrl: string;
+	    tokenUrl: string;
+	    deviceUrl: string;
+	    error: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Discovery(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.issuer = source["issuer"];
+	        this.authUrl = source["authUrl"];
+	        this.tokenUrl = source["tokenUrl"];
+	        this.deviceUrl = source["deviceUrl"];
+	        this.error = source["error"];
+	    }
+	}
+	export class Options {
+	    timeoutMs: number;
+	    noFollowRedirects: boolean;
+	    insecureTLS: boolean;
+	    stream: boolean;
+	    streamReconnect: boolean;
+	    streamMaxEvents: number;
+	    streamMaxSeconds: number;
+	    skipCookies: boolean;
+	    discardCookies: boolean;
+	    socketIoPath: string;
+	    socketIoAuth: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Options(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.timeoutMs = source["timeoutMs"];
+	        this.noFollowRedirects = source["noFollowRedirects"];
+	        this.insecureTLS = source["insecureTLS"];
+	        this.stream = source["stream"];
+	        this.streamReconnect = source["streamReconnect"];
+	        this.streamMaxEvents = source["streamMaxEvents"];
+	        this.streamMaxSeconds = source["streamMaxSeconds"];
+	        this.skipCookies = source["skipCookies"];
+	        this.discardCookies = source["discardCookies"];
+	        this.socketIoPath = source["socketIoPath"];
+	        this.socketIoAuth = source["socketIoAuth"];
+	    }
+	}
+	export class DiscoveryQuery {
+	    issuer: string;
+	    variables: string;
+	    options: Options;
+	
+	    static createFrom(source: any = {}) {
+	        return new DiscoveryQuery(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.issuer = source["issuer"];
+	        this.variables = source["variables"];
+	        this.options = this.convertValues(source["options"], Options);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	
 	
@@ -660,32 +784,25 @@ export namespace engine {
 		    return a;
 		}
 	}
-	
-	
-	export class Options {
-	    timeoutMs: number;
-	    noFollowRedirects: boolean;
-	    insecureTLS: boolean;
-	    stream: boolean;
-	    streamReconnect: boolean;
-	    streamMaxEvents: number;
-	    streamMaxSeconds: number;
+	export class Notification {
+	    method: string;
+	    params?: string;
+	    atMs: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new Options(source);
+	        return new Notification(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.timeoutMs = source["timeoutMs"];
-	        this.noFollowRedirects = source["noFollowRedirects"];
-	        this.insecureTLS = source["insecureTLS"];
-	        this.stream = source["stream"];
-	        this.streamReconnect = source["streamReconnect"];
-	        this.streamMaxEvents = source["streamMaxEvents"];
-	        this.streamMaxSeconds = source["streamMaxSeconds"];
+	        this.method = source["method"];
+	        this.params = source["params"];
+	        this.atMs = source["atMs"];
 	    }
 	}
+	
+	
+	
 	
 	export class Prepared {
 	    method: string;
@@ -829,6 +946,8 @@ export namespace engine {
 	    protocol?: string;
 	    streamEnd?: string;
 	    timeline?: Timeline;
+	    failed?: boolean;
+	    notifications?: Notification[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Response(source);
@@ -851,6 +970,8 @@ export namespace engine {
 	        this.protocol = source["protocol"];
 	        this.streamEnd = source["streamEnd"];
 	        this.timeline = this.convertValues(source["timeline"], Timeline);
+	        this.failed = source["failed"];
+	        this.notifications = this.convertValues(source["notifications"], Notification);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -877,8 +998,11 @@ export namespace engine {
 	export class Token {
 	    accessToken: string;
 	    refreshToken: string;
+	    idToken: string;
 	    expiresAt: number;
 	    error: string;
+	    pending?: boolean;
+	    slowDown?: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Token(source);
@@ -888,8 +1012,11 @@ export namespace engine {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.accessToken = source["accessToken"];
 	        this.refreshToken = source["refreshToken"];
+	        this.idToken = source["idToken"];
 	        this.expiresAt = source["expiresAt"];
 	        this.error = source["error"];
+	        this.pending = source["pending"];
+	        this.slowDown = source["slowDown"];
 	    }
 	}
 	export class TokenExchange {
@@ -900,6 +1027,7 @@ export namespace engine {
 	    codeVerifier: string;
 	    redirectUri: string;
 	    refresh: boolean;
+	    deviceCode: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new TokenExchange(source);
@@ -914,6 +1042,7 @@ export namespace engine {
 	        this.codeVerifier = source["codeVerifier"];
 	        this.redirectUri = source["redirectUri"];
 	        this.refresh = source["refresh"];
+	        this.deviceCode = source["deviceCode"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -1186,6 +1315,7 @@ export namespace importer {
 	    requests: workspace.Request[];
 	    folders: workspace.Folder[];
 	    environments: workspace.Environment[];
+	    globals?: workspace.Environment[];
 	    variables: Record<string, string>;
 	    warnings: string[];
 	    skipped: string[];
@@ -1203,6 +1333,7 @@ export namespace importer {
 	        this.requests = this.convertValues(source["requests"], workspace.Request);
 	        this.folders = this.convertValues(source["folders"], workspace.Folder);
 	        this.environments = this.convertValues(source["environments"], workspace.Environment);
+	        this.globals = this.convertValues(source["globals"], workspace.Environment);
 	        this.variables = source["variables"];
 	        this.warnings = source["warnings"];
 	        this.skipped = source["skipped"];
@@ -1493,6 +1624,38 @@ export namespace loadtest {
 
 export namespace main {
 	
+	export class AiModelsReply {
+	    models: string[];
+	    error?: ai.Error;
+	
+	    static createFrom(source: any = {}) {
+	        return new AiModelsReply(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.models = source["models"];
+	        this.error = this.convertValues(source["error"], ai.Error);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class AiReply {
 	    text: string;
 	    error?: ai.Error;
@@ -1529,6 +1692,7 @@ export namespace main {
 	    code: string;
 	    codeVerifier: string;
 	    redirectUri: string;
+	    issuer: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new AuthorizationResult(source);
@@ -1539,6 +1703,27 @@ export namespace main {
 	        this.code = source["code"];
 	        this.codeVerifier = source["codeVerifier"];
 	        this.redirectUri = source["redirectUri"];
+	        this.issuer = source["issuer"];
+	    }
+	}
+	export class Backup {
+	    id: string;
+	    kind: string;
+	    version: string;
+	    createdAt: number;
+	    size: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Backup(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.kind = source["kind"];
+	        this.version = source["version"];
+	        this.createdAt = source["createdAt"];
+	        this.size = source["size"];
 	    }
 	}
 	export class CaptureState {
@@ -1561,6 +1746,8 @@ export namespace main {
 	    host: string;
 	    certFile: string;
 	    keyFile: string;
+	    passphrase?: string;
+	    passphraseSaved?: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new CertificateFiles(source);
@@ -1571,7 +1758,51 @@ export namespace main {
 	        this.host = source["host"];
 	        this.certFile = source["certFile"];
 	        this.keyFile = source["keyFile"];
+	        this.passphrase = source["passphrase"];
+	        this.passphraseSaved = source["passphraseSaved"];
 	    }
+	}
+	export class CollectionNetwork {
+	    proxy: string;
+	    noProxy: string;
+	    ca: string;
+	    certificates: CertificateFiles[];
+	    active: boolean;
+	    restricted: boolean;
+	    error: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CollectionNetwork(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.proxy = source["proxy"];
+	        this.noProxy = source["noProxy"];
+	        this.ca = source["ca"];
+	        this.certificates = this.convertValues(source["certificates"], CertificateFiles);
+	        this.active = source["active"];
+	        this.restricted = source["restricted"];
+	        this.error = source["error"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class Environment {
 	    id: string;
@@ -1608,6 +1839,7 @@ export namespace main {
 	    preScript: string;
 	    postScript: string;
 	    assertions: string;
+	    scriptTimeoutMs?: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Folder(source);
@@ -1627,6 +1859,7 @@ export namespace main {
 	        this.preScript = source["preScript"];
 	        this.postScript = source["postScript"];
 	        this.assertions = source["assertions"];
+	        this.scriptTimeoutMs = source["scriptTimeoutMs"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -1759,6 +1992,22 @@ export namespace main {
 	        this.error = source["error"];
 	    }
 	}
+	export class Release {
+	    version: string;
+	    url: string;
+	    newer: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Release(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.url = source["url"];
+	        this.newer = source["newer"];
+	    }
+	}
 	export class Request {
 	    id: string;
 	    name: string;
@@ -1783,6 +2032,7 @@ export namespace main {
 	    grpcMethod: string;
 	    grpcMessage: string;
 	    grpcProtos: string;
+	    mcpMethod: string;
 	    mcpTool: string;
 	    mcpArguments: string;
 	    socketProtocol: string;
@@ -1820,6 +2070,7 @@ export namespace main {
 	        this.grpcMethod = source["grpcMethod"];
 	        this.grpcMessage = source["grpcMessage"];
 	        this.grpcProtos = source["grpcProtos"];
+	        this.mcpMethod = source["mcpMethod"];
 	        this.mcpTool = source["mcpTool"];
 	        this.mcpArguments = source["mcpArguments"];
 	        this.socketProtocol = source["socketProtocol"];
@@ -2062,6 +2313,96 @@ export namespace mcp {
 
 export namespace mcpclient {
 	
+	export class AuthAttempt {
+	    url: string;
+	    status?: number;
+	    error?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new AuthAttempt(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.url = source["url"];
+	        this.status = source["status"];
+	        this.error = source["error"];
+	    }
+	}
+	export class AuthStep {
+	    step: string;
+	    outcome: string;
+	    problem?: string;
+	    detail?: string;
+	    attempts?: AuthAttempt[];
+	
+	    static createFrom(source: any = {}) {
+	        return new AuthStep(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.step = source["step"];
+	        this.outcome = source["outcome"];
+	        this.problem = source["problem"];
+	        this.detail = source["detail"];
+	        this.attempts = this.convertValues(source["attempts"], AuthAttempt);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class AuthPlan {
+	    steps: AuthStep[];
+	    ready: boolean;
+	    config: engine.OAuth2;
+	    issuerRequired: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new AuthPlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.steps = this.convertValues(source["steps"], AuthStep);
+	        this.ready = source["ready"];
+	        this.config = this.convertValues(source["config"], engine.OAuth2);
+	        this.issuerRequired = source["issuerRequired"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class Target {
 	    url: string;
 	    headers: string;
@@ -2102,8 +2443,46 @@ export namespace mcpclient {
 		    return a;
 		}
 	}
+	export class AuthQuery {
+	    target: Target;
+	    redirectUri: string;
+	    clientMetadataUrl: string;
+	    native: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new AuthQuery(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.target = this.convertValues(source["target"], Target);
+	        this.redirectUri = source["redirectUri"];
+	        this.clientMetadataUrl = source["clientMetadataUrl"];
+	        this.native = source["native"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
 	export class Call {
 	    target: Target;
+	    method: string;
 	    tool: string;
 	    arguments: string;
 	
@@ -2114,6 +2493,7 @@ export namespace mcpclient {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.target = this.convertValues(source["target"], Target);
+	        this.method = source["method"];
 	        this.tool = source["tool"];
 	        this.arguments = source["arguments"];
 	    }
@@ -2136,40 +2516,68 @@ export namespace mcpclient {
 		    return a;
 		}
 	}
-	export class Tool {
+	export class Rejection {
 	    name: string;
-	    description: string;
-	    inputSchema: string;
-	    skeleton: string;
+	    reason: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new Tool(source);
+	        return new Rejection(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.reason = source["reason"];
+	    }
+	}
+	export class Problem {
+	    method: string;
+	    message: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Problem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.method = source["method"];
+	        this.message = source["message"];
+	    }
+	}
+	export class PromptArgument {
+	    name: string;
+	    description: string;
+	    required: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new PromptArgument(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.name = source["name"];
 	        this.description = source["description"];
-	        this.inputSchema = source["inputSchema"];
-	        this.skeleton = source["skeleton"];
+	        this.required = source["required"];
 	    }
 	}
-	export class Catalog {
-	    server: mcp.Implementation;
-	    protocolVersion: string;
-	    instructions: string;
-	    tools: Tool[];
+	export class Prompt {
+	    name: string;
+	    title: string;
+	    description: string;
+	    arguments: PromptArgument[];
+	    skeleton: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new Catalog(source);
+	        return new Prompt(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.server = this.convertValues(source["server"], mcp.Implementation);
-	        this.protocolVersion = source["protocolVersion"];
-	        this.instructions = source["instructions"];
-	        this.tools = this.convertValues(source["tools"], Tool);
+	        this.name = source["name"];
+	        this.title = source["title"];
+	        this.description = source["description"];
+	        this.arguments = this.convertValues(source["arguments"], PromptArgument);
+	        this.skeleton = source["skeleton"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -2190,6 +2598,124 @@ export namespace mcpclient {
 		    return a;
 		}
 	}
+	export class ResourceTemplate {
+	    uriTemplate: string;
+	    name: string;
+	    title: string;
+	    description: string;
+	    mimeType: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ResourceTemplate(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.uriTemplate = source["uriTemplate"];
+	        this.name = source["name"];
+	        this.title = source["title"];
+	        this.description = source["description"];
+	        this.mimeType = source["mimeType"];
+	    }
+	}
+	export class Resource {
+	    uri: string;
+	    name: string;
+	    title: string;
+	    description: string;
+	    mimeType: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Resource(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.uri = source["uri"];
+	        this.name = source["name"];
+	        this.title = source["title"];
+	        this.description = source["description"];
+	        this.mimeType = source["mimeType"];
+	    }
+	}
+	export class Tool {
+	    name: string;
+	    title: string;
+	    description: string;
+	    inputSchema: string;
+	    skeleton: string;
+	    fingerprint: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Tool(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.title = source["title"];
+	        this.description = source["description"];
+	        this.inputSchema = source["inputSchema"];
+	        this.skeleton = source["skeleton"];
+	        this.fingerprint = source["fingerprint"];
+	    }
+	}
+	export class Catalog {
+	    server: mcp.Implementation;
+	    protocolVersion: string;
+	    legacy: boolean;
+	    instructions: string;
+	    serverKey: string;
+	    tools: Tool[];
+	    resources: Resource[];
+	    resourceTemplates: ResourceTemplate[];
+	    prompts: Prompt[];
+	    problems: Problem[];
+	    rejected: Rejection[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Catalog(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.server = this.convertValues(source["server"], mcp.Implementation);
+	        this.protocolVersion = source["protocolVersion"];
+	        this.legacy = source["legacy"];
+	        this.instructions = source["instructions"];
+	        this.serverKey = source["serverKey"];
+	        this.tools = this.convertValues(source["tools"], Tool);
+	        this.resources = this.convertValues(source["resources"], Resource);
+	        this.resourceTemplates = this.convertValues(source["resourceTemplates"], ResourceTemplate);
+	        this.prompts = this.convertValues(source["prompts"], Prompt);
+	        this.problems = this.convertValues(source["problems"], Problem);
+	        this.rejected = this.convertValues(source["rejected"], Rejection);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	
+	
+	
+	
 	
 
 }
@@ -2830,6 +3356,90 @@ export namespace openapi {
 		    return a;
 		}
 	}
+	export class ContractResponse {
+	    content: Record<string, any>;
+	
+	    static createFrom(source: any = {}) {
+	        return new ContractResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.content = source["content"];
+	    }
+	}
+	export class ContractOperation {
+	    key: string;
+	    method: string;
+	    path: string;
+	    responses?: Record<string, ContractResponse>;
+	
+	    static createFrom(source: any = {}) {
+	        return new ContractOperation(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.key = source["key"];
+	        this.method = source["method"];
+	        this.path = source["path"];
+	        this.responses = this.convertValues(source["responses"], ContractResponse, true);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Contract {
+	    basePaths: string[];
+	    operations: ContractOperation[];
+	    root: Record<string, any>;
+	
+	    static createFrom(source: any = {}) {
+	        return new Contract(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.basePaths = source["basePaths"];
+	        this.operations = this.convertValues(source["operations"], ContractOperation);
+	        this.root = source["root"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
 	export class ResponseInfo {
 	    status: string;
 	    description: string;
@@ -3134,6 +3744,7 @@ export namespace openapi {
 	    collection?: Collection;
 	    detail?: Detail;
 	    schema?: SchemaNode;
+	    contract?: Contract;
 	
 	    static createFrom(source: any = {}) {
 	        return new Reply(source);
@@ -3146,6 +3757,7 @@ export namespace openapi {
 	        this.collection = this.convertValues(source["collection"], Collection);
 	        this.detail = this.convertValues(source["detail"], Detail);
 	        this.schema = this.convertValues(source["schema"], SchemaNode);
+	        this.contract = this.convertValues(source["contract"], Contract);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -3607,6 +4219,7 @@ export namespace workspace {
 	    preScript: string;
 	    postScript: string;
 	    assertions: string;
+	    scriptTimeoutMs?: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Settings(source);
@@ -3620,6 +4233,7 @@ export namespace workspace {
 	        this.preScript = source["preScript"];
 	        this.postScript = source["postScript"];
 	        this.assertions = source["assertions"];
+	        this.scriptTimeoutMs = source["scriptTimeoutMs"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -3674,6 +4288,7 @@ export namespace workspace {
 	    preScript: string;
 	    postScript: string;
 	    assertions: string;
+	    scriptTimeoutMs?: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Folder(source);
@@ -3692,6 +4307,7 @@ export namespace workspace {
 	        this.preScript = source["preScript"];
 	        this.postScript = source["postScript"];
 	        this.assertions = source["assertions"];
+	        this.scriptTimeoutMs = source["scriptTimeoutMs"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -3736,6 +4352,7 @@ export namespace workspace {
 	    grpcMethod: string;
 	    grpcMessage: string;
 	    grpcProtos: string;
+	    mcpMethod: string;
 	    mcpTool: string;
 	    mcpArguments: string;
 	    socketProtocol: string;
@@ -3773,6 +4390,7 @@ export namespace workspace {
 	        this.grpcMethod = source["grpcMethod"];
 	        this.grpcMessage = source["grpcMessage"];
 	        this.grpcProtos = source["grpcProtos"];
+	        this.mcpMethod = source["mcpMethod"];
 	        this.mcpTool = source["mcpTool"];
 	        this.mcpArguments = source["mcpArguments"];
 	        this.socketProtocol = source["socketProtocol"];

@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/mcpclient"
+	"github.com/kunalgoesbyken/gostman/openapi"
 )
 
 type Options struct {
@@ -25,7 +27,10 @@ type Options struct {
 	Capture       bool
 	StreamTimeout time.Duration
 	Network       *engine.Network
+	SignIn        engine.Token
 	Files         engine.FileReader
+	Contract      *openapi.Contract
+	OnPlanned     func(requests int)
 }
 
 func identify(request Request, folder string) Result {
@@ -62,6 +67,7 @@ func describe(request Request, folder string, outcome exchange) Result {
 	result.Protocol = response.Protocol
 	result.StreamEnd = response.StreamEnd
 	result.DurationMs = response.DurationMs
+	result.Unresolved = response.Unresolved
 	result.Tests = append(result.Tests, outcome.tests...)
 	result.Logs = append(result.Logs, outcome.logs...)
 	result.Visual = outcome.visual
@@ -69,7 +75,10 @@ func describe(request Request, folder string, outcome exchange) Result {
 	if response.Error != "" {
 		result.Error = response.Body
 	}
-	result.Failed = result.Error != "" || hasFailedCheck(result.Tests)
+	result.Failed = result.Error != "" || response.Failed || hasFailedCheck(result.Tests)
+	if response.Failed && response.Protocol == mcpclient.Protocol {
+		result.Failure = mcpclient.ToolErrorText(response.Body)
+	}
 	return result
 }
 

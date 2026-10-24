@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
+	"net/url"
 	"sync"
 
 	"github.com/google/uuid"
@@ -49,7 +52,7 @@ func (a *App) WSConnect(urlStr, headersJSON string) (string, error) {
 	id := uuid.NewString()
 	a.emitWSState(id, "connecting", urlStr)
 
-	conn, resp, err := websocket.DefaultDialer.DialContext(a.ctx, urlStr, header)
+	conn, resp, err := a.socketDialer(urlStr).DialContext(a.ctx, urlStr, header)
 	if err != nil {
 		detail := err.Error()
 		if resp != nil {
@@ -69,6 +72,20 @@ func (a *App) WSConnect(urlStr, headersJSON string) (string, error) {
 	go a.readLoop(id, c)
 
 	return id, nil
+}
+
+func (a *App) socketDialer(address string) *websocket.Dialer {
+	target, err := url.Parse(address)
+	if err != nil {
+		return websocket.DefaultDialer
+	}
+	policy := a.policy()
+	dial := policy.Dialer(target.Scheme == "wss")
+	return &websocket.Dialer{
+		NetDialContext:   func(ctx context.Context, _, address string) (net.Conn, error) { return dial(ctx, address) },
+		TLSClientConfig:  policy.TLSConfig(target.Hostname(), false),
+		HandshakeTimeout: websocket.DefaultDialer.HandshakeTimeout,
+	}
 }
 
 func (a *App) WSSend(id, message string) error {

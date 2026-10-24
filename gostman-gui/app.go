@@ -29,9 +29,6 @@ type App struct {
 
 	links linkInbox
 
-	networkMu sync.RWMutex
-	network   *engine.Network
-
 	frameless bool
 }
 
@@ -41,8 +38,10 @@ func NewApp(frameless bool) *App {
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	startBackups()
 	a.loadNetwork()
 	restoreWorkspace()
+	go diskWatch.watch(a.announceDiskChange)
 	a.receiveLaunchArguments()
 }
 
@@ -109,6 +108,7 @@ type Request struct {
 	GrpcMethod       string         `json:"grpcMethod"`
 	GrpcMessage      string         `json:"grpcMessage"`
 	GrpcProtos       string         `json:"grpcProtos"`
+	McpMethod        string         `json:"mcpMethod"`
 	McpTool          string         `json:"mcpTool"`
 	McpArguments     string         `json:"mcpArguments"`
 	SocketProtocol   string         `json:"socketProtocol"`
@@ -154,6 +154,10 @@ func writeData(data SavedData) error {
 	if err != nil {
 		return fmt.Errorf("failed to encode data: %w", err)
 	}
+	return writeDataFile(encoded)
+}
+
+func writeDataFile(encoded []byte) error {
 	temporary := jsonfilePath + ".tmp"
 	if err := os.WriteFile(temporary, encoded, 0644); err != nil {
 		return fmt.Errorf("failed to write data file: %w", err)
@@ -283,6 +287,9 @@ func (a *App) ResetData() error {
 		return err
 	}
 	if err := forgetSecrets(); err != nil {
+		return err
+	}
+	if err := forgetBackups(); err != nil {
 		return err
 	}
 	if err := removeIfPresent(filepath.Join(appFolder, mockAppDataFile)); err != nil {

@@ -5,7 +5,7 @@ import { Input } from "./ui/input"
 import { Notice, Panel, SectionLabel, Toolbar } from "./ui/panel"
 import { Select } from "./ui/select"
 import { EditorSkeleton } from "./ui/skeleton"
-import { MAX_ATTACHMENT_BYTES } from "../lib/attachments"
+import { maxAttachmentBytes } from "../lib/attachments"
 import { formatSize } from "../lib/dataUtils"
 import {
   GRPC_METHOD, findMethod, isBlankMessage, mergeProtoFiles, methodKind, parseProtoFiles, readProtoFile,
@@ -17,7 +17,7 @@ const SCHEMA_HINT = "Load the services through server reflection, or add the ser
 const STREAM_HINT = "This method reads a stream. Write a JSON array to send several messages."
 
 const tooLargeMessage = (file) => (
-  `${file.name} is ${formatSize(file.size)}. Files are limited to ${formatSize(MAX_ATTACHMENT_BYTES)}.`
+  `${file.name} is ${formatSize(file.size)}. Files are limited to ${formatSize(maxAttachmentBytes())}.`
 )
 
 function ProtoFilePicker({ files, onChange, onError }) {
@@ -27,7 +27,7 @@ function ProtoFilePicker({ files, onChange, onError }) {
     const picked = Array.from(event.target.files)
     event.target.value = ""
     if (picked.length === 0) return
-    const oversized = picked.find((file) => file.size > MAX_ATTACHMENT_BYTES)
+    const oversized = picked.find((file) => file.size > maxAttachmentBytes())
     if (oversized) {
       onError(tooLargeMessage(oversized))
       return

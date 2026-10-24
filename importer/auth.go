@@ -29,6 +29,8 @@ const (
 	grantPassword          = "password"
 	grantAuthorizationCode = "authorization_code"
 	credentialsInBody      = "body"
+	basicAuthHeader        = "basic_auth_header"
+	idTokenSource          = "id_token"
 )
 
 type oauth2Fields struct {
@@ -41,8 +43,11 @@ type oauth2Fields struct {
 	Username     string
 	Password     string
 	CallbackURL  string
+	HeaderPrefix string
+	Resource     string
 	PKCE         bool
 	SecretInBody bool
+	SendIDToken  bool
 }
 
 func credentialsAuth(kind, username, password string) engine.Auth {
@@ -101,7 +106,10 @@ func oauth2Auth(fields oauth2Fields) (engine.Auth, bool) {
 		Username:     fields.Username,
 		Password:     fields.Password,
 		CallbackURL:  fields.CallbackURL,
+		HeaderPrefix: fields.HeaderPrefix,
+		Resource:     fields.Resource,
 		PKCE:         fields.PKCE,
+		SendIDToken:  fields.SendIDToken,
 	}}
 	if fields.SecretInBody {
 		auth.OAuth2.CredentialsIn = credentialsInBody
@@ -109,13 +117,9 @@ func oauth2Auth(fields oauth2Fields) (engine.Auth, bool) {
 	return auth, true
 }
 
-func (c *collector) authOrFlag(auth engine.Auth, ok bool, requestName string) engine.Auth {
-	if !ok {
-		c.flag(messageAuthDropped, requestName)
-		return engine.Auth{}
+func (c *collector) checkedAuth(name string, auth engine.Auth, supported bool) *engine.Auth {
+	if !supported {
+		c.flag(messageAuthDropped, name)
 	}
-	if auth.Type == authOAuth2 {
-		c.flag(messageOAuth, requestName)
-	}
-	return auth
+	return &auth
 }

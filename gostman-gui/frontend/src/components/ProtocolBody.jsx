@@ -1,6 +1,8 @@
 import { useMemo } from "react"
+import { McpNotifications } from "./McpNotifications"
 import { SoapBody } from "./SoapBody"
 import { SseView } from "./SseView"
+import { LARGE_BODY_CHARS } from "../lib/largeText"
 import { readSoapResponse } from "../lib/soap"
 import { selectSession, useSseStore } from "../lib/sseSessions"
 import { useAppStore } from "../store/appStore"
@@ -17,7 +19,7 @@ function useStreamId(isLoading, response) {
 }
 
 function useSoap(response) {
-  const isXml = Boolean(response) && !response.error && XML_TYPES.includes(response.contentType)
+  const isXml = Boolean(response) && !response.error && XML_TYPES.includes(response.contentType) && response.body.length <= LARGE_BODY_CHARS
   return useMemo(() => (isXml ? readSoapResponse(response.body) : null), [isXml, response])
 }
 
@@ -26,5 +28,13 @@ export function ProtocolBody({ response, isLoading, isBodyShown, children }) {
   const soap = useSoap(isLoading ? null : response)
   if (streamId && (isLoading || isBodyShown)) return <SseView streamId={streamId} />
   if (soap && isBodyShown) return <SoapBody soap={soap} />
+  if (isBodyShown && !isLoading && response?.notifications?.length > 0) {
+    return (
+      <>
+        <McpNotifications notifications={response.notifications} />
+        {children}
+      </>
+    )
+  }
   return children
 }

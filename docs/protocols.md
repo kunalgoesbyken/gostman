@@ -22,7 +22,7 @@ Limits that apply to every protocol on this page:
 
 ## GraphQL
 
-Choose GRAPHQL in the method list, or open the GraphQL tab and select Send as GraphQL. Typing a query in the GraphQL tab also switches the method to GRAPHQL. The engine sends a POST request with a JSON body that holds `query` and, when you provide them, `variables`. If the query editor is empty, the engine falls back to the request body.
+Choose GRAPHQL in the method list; the GraphQL tab opens. If a request keeps a GraphQL query under another method, its GraphQL tab stays visible with Send as GraphQL, and typing in the query also switches the method to GRAPHQL. The engine sends a POST request with a JSON body that holds `query` and, when you provide them, `variables`. If the query editor is empty, the engine falls back to the request body.
 
 ![A GraphQL request named Countries by continent with a query, a Variables (JSON) section, the schema browser and a 200 OK response that shows the countries](../gostman-gui/frontend/src/assets/landing/graphql.webp)
 
@@ -100,7 +100,7 @@ Gostman does not run interactive streams. It collects them.
 
 ### Desktop and web
 
-gRPC works in both apps. In the web app the call goes through the proxy, so it cannot reach `localhost` or private addresses. Proxy and certificate settings apply only in the desktop app.
+gRPC works in both apps. In the web app the call goes through the proxy, so it cannot reach `localhost` or private addresses. In the desktop app and in `gostman run`, gRPC uses the proxy, the CA certificates and the client certificates of [Network settings](secrets-and-network.md#network-settings) and of the collection, like HTTP requests: a `grpcs://` server that asks for a client certificate gets the one set for its host.
 
 ## WebSocket
 
@@ -136,6 +136,9 @@ Choose Socket.IO in the Protocol list next to the status. Gostman speaks Socket.
 ![A Socket.IO session that joined the / namespace, received a welcome event, emitted question with a JSON argument and received question:ack back](../screenshots/socketio.png)
 
 - The URL path is the namespace: `ws://localhost:3000/admin` joins `/admin`, and `ws://localhost:3000` joins `/`. Gostman connects to `/socket.io/` on that host. A URL that already starts with `/socket.io/` is used as written and joins `/`.
+- **Path**, below the toolbar, changes `/socket.io/` for servers set up with another path, such as `/api/socket`. A URL that starts with that path joins `/`.
+- **Auth payload** is a JSON object sent with the namespace handshake, which the server reads as `socket.handshake.auth`, for example `{"token": "{{token}}"}`. Variables are filled in when you connect. Text that is not a JSON object stops the connection with a message.
+- Both are saved with the request and can be changed while disconnected.
 - Type an event name in Event and its argument in the message box. JSON is sent as JSON, other text as a string, and an empty box emits the event without arguments.
 - Received events show the event name above the arguments. Acknowledgements show as `ack` with their id, and a refused connection shows the server's message.
 - Gostman answers the server's pings. Binary Socket.IO packets are listed but not decoded.
@@ -264,22 +267,91 @@ In the desktop app, write `stdio:` followed by the command that starts the serve
 
 ![An MCP request with the server line storefront-mcp 1.2.0, the search_products tool, JSON arguments and an OK response](../gostman-gui/frontend/src/assets/landing/mcp.webp)
 
-### Load the tools
+### Protocol versions
 
-Select Load next to Server. Gostman connects, reads the tool list and shows the server's name, its version and the MCP protocol version it negotiated. The button changes to Reload. Hover the server line to see the server's instructions when it provides any.
+Gostman speaks MCP 2026-07-28 and the earlier revisions that start with an `initialize` handshake (2025-11-25, 2025-06-18, 2025-03-26 and 2024-11-05). Every Load and every call first sends `server/discover`. A server that answers it is used with 2026-07-28: each request carries its protocol version and client details in `_meta`, and over HTTP the `MCP-Protocol-Version`, `Mcp-Method` and `Mcp-Name` headers. A server that does not know `server/discover` gets the `initialize` handshake instead, and Gostman remembers that until the app restarts, so later calls skip the probe. A local server that does not answer the probe at all is given ten seconds before Gostman falls back. Headers you set on the Headers tab take precedence over the ones Gostman adds, so you can send a deliberately wrong `Mcp-Name` to test how a server validates it.
 
-Before you load tools, the Tool field is a text box where you can type a tool name. If the server lists no tools, the panel says so.
+When a tool's input schema marks a parameter with `x-mcp-header` and the server reports a header mismatch, Gostman reads the tool list, sends the parameter's value as an `Mcp-Param-` header and calls again. Tools whose `x-mcp-header` annotations break the rules of the specification are left out of the tool list and listed under Checks.
+
+### Load the server
+
+Select Load next to Server. Gostman connects and reads the server's tools, resources, resource templates and prompts, for each kind the server says it offers. The server line shows its name, its version and the MCP protocol version in use; the button changes to Reload. When the server gives instructions to the models that use it, an Instructions button appears next to Checks; select it to read them. A server that answers 401 or 403 needs credentials: see [Sign in with OAuth](#sign-in-with-oauth).
+
+Before you load the server, the item field is a text box where you can type a tool name, a resource URI or a prompt name. If the server lists nothing, the panel says so.
+
+### Operations
+
+The Operation list next to the item field chooses what Send does:
+
+| Operation | Sends | Input |
+| --- | --- | --- |
+| Call tool | `tools/call` | A tool and its JSON arguments |
+| List tools | `tools/list` | None |
+| Read resource | `resources/read` | A resource URI. The field suggests the listed resources and templates; fill in the template parts yourself. |
+| List resources | `resources/list` | None |
+| List resource templates | `resources/templates/list` | None |
+| Get prompt | `prompts/get` | A prompt and its arguments, as a JSON object of strings |
+| List prompts | `prompts/list` | None |
+
+List operations follow every page of the answer and return one body with all the items. The operation is saved with the request, so a collection can hold resource reads and prompt checks next to tool calls, and the collection runner and `gostman run` send them the same way.
 
 ### Call a tool
 
 1. Pick a tool from the Tool list.
 2. The tool's description appears under the toolbar.
-3. Select Schema to show the JSON Schema of the tool's arguments.
-4. Select Use example to replace the arguments with an example built from that schema. Choosing a tool fills the arguments with the example when they are empty or `{}`.
+3. Select Schema to show the JSON Schema of the tool's arguments, or the argument list of a prompt, next to the editor. On a phone it covers the panel until you close it.
+4. Select Use example to replace the arguments with an example built from that schema. Choosing a tool or a prompt fills the arguments with its example when they are empty, `{}`, or still the unedited example of the previous choice; arguments you edited are kept.
 5. Edit the JSON arguments and select Send. Type `{{` or `faker.` in the editor to pick a variable or a dynamic value.
 
 An empty arguments field is sent as `{}`.
 
 ### Result
 
-The response body is the tool's result, which includes `content` and an `isError` flag. The status is OK, or Tool error when the server marks the result as an error.
+The response body is the server's result. For a tool call it includes `content` and an `isError` flag. The status is one of:
+
+| Status | Meaning | Counts as failed |
+| --- | --- | --- |
+| OK | The server returned a result. | No |
+| Tool error | The tool ran and reported an error with `isError: true`. | Yes |
+| JSON-RPC error | The server refused the request, for example for an unknown tool. The body holds the error. | Yes |
+| Input required | The server asked for input Gostman does not provide, such as an elicitation. The body shows what it asked for. A result that only asks to be sent again with the server's `requestState` is retried automatically, up to three times. | Yes |
+| An HTTP status, such as 401 Unauthorized | The server did not accept the request. | Yes |
+
+A failed call is marked as failed in the collection runner and by `gostman run`, even when the request has no assertions, and it appears as a failure in JUnit reports. The text report and the JUnit failure message carry the tool's text content, such as `Tool error: Order 42 does not exist.` The status code stays the HTTP status of the exchange (200 for a tool error). To assert on the outcome, check the body or the status text:
+
+- `res.body.isError` is false
+- `res.statusText` equals `OK`
+
+Progress updates and log messages the server sends while it works (`notifications/progress` and `notifications/message`) are listed above the body under Notifications, with the time each one arrived: progress as done/total with its message, and log messages with their level, logger and data. Gostman asks 2026-07-28 servers for log messages at the debug level. The first 500 notifications of a call are kept.
+
+### Checks
+
+After a Load, the Checks button shows how many problems Gostman found in the tool definitions; select it to list them. The checks are fixed rules and do not use a model. They report:
+
+- a missing description, or one shorter than 20 characters
+- two tools with the same name, or names that differ only in case, `_`, `-` or `.`
+- names longer than 128 characters or with characters other than letters, digits, `_`, `-` and `.`
+- an input schema that is not an object, has a top-level type other than `object`, uses an unknown type, or has a malformed `properties` or `required`
+- parameters without a description, and required parameters the schema does not define
+- more than 40 tools
+- list requests that failed, and tools left out because of invalid `x-mcp-header` annotations
+
+### Tool changes
+
+For every server you load, Gostman keeps each tool's description and a fingerprint of its name, description and input schema on this device only; they never go into collection files or folders. The first Load of a server records them. When a later Load finds new, removed or changed tools, a warning lists them, because a changed description can carry instructions you have not seen before: new and removed tools by name, and for each changed tool its previous and current description, or a note that only its input schema changed. Read the changes, then select Accept changes to record the new state. Tools are compared on Load and Reload, not on every call.
+
+### Sign in with OAuth
+
+Select Sign in to get a token for a remote server that uses OAuth. Gostman follows the MCP authorization specification and shows each step as it runs. Select a finished step to see the requests it made and what came back. A step that fails opens by itself, with a plain explanation of what to change:
+
+1. **Ask the server.** Gostman sends a request with the request's current headers and auth. A 401 or 403 answer starts the sign-in. A server that answers anyway can still be signed in to when it publishes OAuth metadata.
+2. **Read the WWW-Authenticate challenge** for its `resource_metadata` address and `scope`. After a 403 with `insufficient_scope`, Gostman asks for the scopes you had plus the ones the server named.
+3. **Find the protected resource metadata** (RFC 9728) at the challenge's address, or at `/.well-known/oauth-protected-resource` with and then without the server's path. Its `resource` must cover the server's URL. When it names another resource, Gostman stops, because tokens issued for that resource would not be accepted by this server.
+4. **Find the authorization server metadata** at the RFC 8414 and OpenID Connect addresses, in the order the specification gives. The `issuer` in the document must be identical to the address it was found for, and the server must list S256 in `code_challenge_methods_supported`.
+5. **Get a client ID.** A client ID already on the Auth tab is used when it belongs to the same authorization server. Otherwise Gostman uses its client ID metadata document when the authorization server supports those, or registers itself with dynamic client registration. When neither is offered, register a client yourself, enter its client ID on the Auth tab and sign in again.
+6. **Sign in in the browser** with the authorization code flow, PKCE and the `resource` parameter. The desktop app opens the system browser and listens on `http://localhost:9876/callback`; the web app opens a pop-up.
+7. **Check the issuer of the answer** (RFC 9207). An answer that names a different issuer is discarded, and one without an issuer is rejected when the authorization server says it sends one.
+8. **Exchange the code for a token**, again with the `resource` parameter.
+9. **Call the server with the token** by loading it again.
+
+The token and the settings found during sign-in are stored on the request's Auth tab as an OAuth 2.0 authorization code configuration, like any other OAuth 2.0 token, and renewed with the refresh token when the server issues one. Tokens never go into collection files or folders. In a folder you have not trusted, sign-in is switched off like other OAuth 2.0 settings. Local servers started with `stdio:` take their credentials from environment variables instead.

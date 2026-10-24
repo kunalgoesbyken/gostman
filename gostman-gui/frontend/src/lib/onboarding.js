@@ -1,6 +1,6 @@
 import { isPlainObject, parseJSON } from './dataUtils'
-import { mockRequests } from './mockData'
 import { parseAssertions } from './scripting/assertions'
+import { readStoredJSON, writeStored } from './storage'
 
 const STORAGE_KEY = 'gostman.onboarding'
 
@@ -10,14 +10,14 @@ export const STEP_VARIABLE = 'variable'
 export const STEP_CHECK = 'check'
 export const STEP_RUN = 'run'
 
-const SEEDED_REQUEST_IDS = new Set(mockRequests.map((request) => request.id))
+const RETIRED_SAMPLE_REQUEST_ID = '1'
 
 const definesVariables = (text) => {
   const variables = parseJSON(text, {})
   return isPlainObject(variables) && Object.keys(variables).length > 0
 }
 
-const isOwnRequest = (request) => !SEEDED_REQUEST_IDS.has(request.id)
+const isOwnRequest = (request) => request.id !== RETIRED_SAMPLE_REQUEST_ID
 
 const hasCheck = (request) => parseAssertions(request.assertions).length > 0 || request.postScript.trim() !== ''
 
@@ -46,18 +46,8 @@ export function onboardingProgress(state) {
 }
 
 export function rememberedSteps() {
-  try {
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
-    return Array.isArray(stored) ? stored.filter((id) => STEP_IDS.includes(id)) : []
-  } catch {
-    return []
-  }
+  const stored = readStoredJSON(STORAGE_KEY, [])
+  return Array.isArray(stored) ? stored.filter((id) => STEP_IDS.includes(id)) : []
 }
 
-export function rememberSteps(steps) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(steps))
-  } catch {
-    return
-  }
-}
+export const rememberSteps = (steps) => writeStored(STORAGE_KEY, JSON.stringify(steps))

@@ -155,11 +155,20 @@ func (r *Redactor) Excerpt(text string, limit int) (string, bool) {
 }
 
 func (r *Redactor) Find(text string) (string, bool) {
-	found := r.spans(text)
+	found := r.Labels(text)
 	if len(found) == 0 {
 		return "", false
 	}
-	return found[0].label, true
+	return found[0], true
+}
+
+func (r *Redactor) Labels(text string) []string {
+	found := r.spans(text)
+	labels := make([]string, 0, len(found))
+	for _, hit := range found {
+		labels = append(labels, hit.label)
+	}
+	return labels
 }
 
 func (r *Redactor) tree(node any) any {

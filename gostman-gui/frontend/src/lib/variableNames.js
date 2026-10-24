@@ -18,6 +18,7 @@ export const SOURCE_LABELS = {
   folder: 'Folder',
   request: 'Request',
   process: '.env file',
+  session: 'Session',
 }
 
 const DYNAMIC_RANGE = /^\$randomInt\(\s*-?\d+\s*,\s*-?\d+\s*\)$/u

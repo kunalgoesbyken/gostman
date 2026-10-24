@@ -1,3 +1,5 @@
+import { readStored, writeStored } from './storage'
+
 const STORAGE_KEY = 'gostman.welcome'
 const DISMISSED = 'dismissed'
 
@@ -9,18 +11,6 @@ export const SAMPLE_REQUEST = {
 
 export const SHORTCUT_IDS = ['commandPalette', 'newRequest', 'sendRequest', 'saveRequest', 'findRequest', 'nextPane', 'shortcutsHelp']
 
-export function isWelcomeDismissed() {
-  try {
-    return localStorage.getItem(STORAGE_KEY) === DISMISSED
-  } catch {
-    return false
-  }
-}
+export const isWelcomeDismissed = () => readStored(STORAGE_KEY) === DISMISSED
 
-export function rememberWelcomeDismissed() {
-  try {
-    localStorage.setItem(STORAGE_KEY, DISMISSED)
-  } catch {
-    return
-  }
-}
+export const rememberWelcomeDismissed = () => writeStored(STORAGE_KEY, DISMISSED)

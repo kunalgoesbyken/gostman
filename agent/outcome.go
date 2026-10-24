@@ -16,20 +16,25 @@ const (
 	noteBinary    = "The body is binary and is not shown."
 	noteNoMatch   = "The select path matched nothing; the body is not shown. Check the path, or send again without select."
 	noteCutAtEdge = "The response was larger than Gostman reads, so the body is incomplete."
+	hintUndefined = "Placeholders listed in unresolved have no value, so they were left as written. Pass values in variables, or ask the developer to define them in the environment."
+	hintRefused   = "Gostman refused the address before sending: this server reaches only localhost, the hosts of the developer's own requests and hosts allowed with --allow-host, and no private address when started with --block-private. Ask the developer to allow the host; do not reach it another way."
 )
 
 type View struct {
 	Select         string
 	MaxBodyBytes   int
 	IncludeHeaders bool
+	IncludeBinary  bool
 }
 
 type BodySummary struct {
 	Bytes         int    `json:"bytes"`
 	ReturnedBytes int    `json:"returnedBytes"`
 	Truncated     bool   `json:"truncated"`
+	Encoding      string `json:"encoding"`
 	Select        string `json:"select,omitempty"`
 	Note          string `json:"note,omitempty"`
+	Text          string `json:"text,omitempty"`
 }
 
 type Outcome struct {
@@ -43,6 +48,8 @@ type Outcome struct {
 	ContentType  string               `json:"contentType"`
 	Failed       bool                 `json:"failed"`
 	Error        string               `json:"error,omitempty"`
+	Unresolved   []string             `json:"unresolved,omitempty"`
+	Hint         string               `json:"hint,omitempty"`
 	Skipped      string               `json:"skipped,omitempty"`
 	Tests        []runner.Check       `json:"tests"`
 	Logs         []runner.LogLine     `json:"logs"`
@@ -82,7 +89,7 @@ func (c *Client) chosenText(response engine.Response, view View) (string, string
 	if response.Error != "" {
 		return "", ""
 	}
-	if response.BodyEncoding == engine.EncodingBase64 {
+	if response.BodyEncoding == engine.EncodingBase64 && !view.IncludeBinary {
 		return "", noteBinary
 	}
 	if view.Select == "" {
@@ -108,13 +115,31 @@ func (c *Client) shownBody(response engine.Response, view View) (BodySummary, st
 		Bytes:         len(text),
 		ReturnedBytes: len(shown),
 		Truncated:     truncated,
+		Encoding:      encodingOf(response, view),
 		Select:        view.Select,
 		Note:          note,
 	}
 	return summary, shown
 }
 
+func encodingOf(response engine.Response, view View) string {
+	if response.BodyEncoding == engine.EncodingBase64 && view.Select == "" {
+		return engine.EncodingBase64
+	}
+	return engine.EncodingUTF8
+}
+
+func (o Outcome) Embed(text string) any {
+	o.Body.Text = text
+	return o
+}
+
 func (c *Client) Send(ctx context.Context, listed runner.Listed, view View) (Outcome, error) {
+	outcome, _, err := c.Exchange(ctx, listed, view)
+	return outcome, err
+}
+
+func (c *Client) Exchange(ctx context.Context, listed runner.Listed, view View) (Outcome, engine.Response, error) {
 	before := c.session.Variables()
 	exchanged := c.session.Send(ctx, listed.Request, listed.Folder)
 	c.absorb()
@@ -130,6 +155,7 @@ func (c *Client) Send(ctx context.Context, listed runner.Listed, view View) (Out
 		ContentType:  response.ContentType,
 		Failed:       result.Failed,
 		Error:        result.Error,
+		Unresolved:   result.Unresolved,
 		Skipped:      result.Skipped,
 		Tests:        result.Tests,
 		Logs:         result.Logs,
@@ -143,5 +169,5 @@ func (c *Client) Send(ctx context.Context, listed runner.Listed, view View) (Out
 	outcome.Body = summary
 	cleaned, err := redact.Clean(c.guard, outcome)
 	cleaned.Text = text
-	return cleaned, err
+	return cleaned, response, err
 }

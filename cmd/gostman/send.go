@@ -21,18 +21,24 @@ const currentFolder = "."
 
 type headerFlags []engine.HeaderEntry
 
-type sending struct {
-	workspace   string
+type requestFlags struct {
 	environment string
 	variables   map[string]string
 	headers     headerFlags
 	data        string
-	view        agent.View
 	timeoutMs   int
 	insecure    bool
+	envFile     string
 	files       fileAccess
-	network     *engine.Network
-	positional  []string
+	network     *networkSettings
+}
+
+type sending struct {
+	requestFlags
+	workspace  string
+	view       agent.View
+	asJSON     bool
+	positional []string
 }
 
 func (h *headerFlags) String() string {
@@ -48,24 +54,71 @@ func (h *headerFlags) Set(line string) error {
 	return nil
 }
 
+func (r *requestFlags) register(flags *flag.FlagSet) {
+	r.variables = map[string]string{}
+	flags.StringVar(&r.environment, "env", "", "")
+	variableFlags(flags, r.variables)
+	flags.Var(&r.headers, "H", "")
+	flags.Var(&r.headers, "header", "")
+	flags.StringVar(&r.data, "d", "", "")
+	flags.StringVar(&r.data, "data", "", "")
+	flags.IntVar(&r.timeoutMs, "timeout", 0, "")
+	flags.BoolVar(&r.insecure, "insecure", false, "")
+	flags.StringVar(&r.envFile, "env-file", "", "")
+	r.files.register(flags)
+	r.network = networkFlags(flags)
+}
+
+func (r *requestFlags) finish() error {
+	if r.timeoutMs < 0 {
+		return errors.New("--timeout takes a number of milliseconds, zero or more")
+	}
+	if err := mergeEnvFile(r.envFile, r.variables); err != nil {
+		return err
+	}
+	return r.network.check()
+}
+
+func (r requestFlags) describesRequest() bool {
+	return len(r.headers) > 0 || r.data != ""
+}
+
+func (r requestFlags) open(stored runner.Collection, fileRoot string) (*agent.Client, error) {
+	network, err := r.network.network(stored)
+	if err != nil {
+		return nil, err
+	}
+	client, err := agent.NewClient(engine.Policy{Network: network, ReadFile: r.files.beside(fileRoot)})
+	if err != nil {
+		return nil, err
+	}
+	return client, client.Enter(stored, r.environment, r.variables)
+}
+
+func (r requestFlags) compose(client *agent.Client, method, address string) (runner.Listed, error) {
+	return client.Compose(agent.Draft{Method: method, URL: address, Headers: r.headers, Body: r.data})
+}
+
+func (r requestFlags) adjusted(target runner.Listed) runner.Listed {
+	if r.timeoutMs > 0 {
+		target.Request.Options.TimeoutMs = r.timeoutMs
+	}
+	if r.insecure {
+		target.Request.Options.InsecureTLS = true
+	}
+	return target
+}
+
 func parseSending(arguments []string) (sending, error) {
-	parsed := sending{variables: map[string]string{}}
+	parsed := sending{}
 	flags := flag.NewFlagSet("send", flag.ContinueOnError)
 	flags.SetOutput(io.Discard)
+	parsed.register(flags)
 	flags.StringVar(&parsed.workspace, "workspace", "", "")
-	flags.StringVar(&parsed.environment, "env", "", "")
-	variableFlags(flags, parsed.variables)
-	flags.Var(&parsed.headers, "H", "")
-	flags.Var(&parsed.headers, "header", "")
-	flags.StringVar(&parsed.data, "d", "", "")
-	flags.StringVar(&parsed.data, "data", "", "")
 	flags.StringVar(&parsed.view.Select, "select", "", "")
 	flags.IntVar(&parsed.view.MaxBodyBytes, "max-body", agent.DefaultBodyBytes, "")
 	flags.BoolVar(&parsed.view.IncludeHeaders, "include-headers", false, "")
-	flags.IntVar(&parsed.timeoutMs, "timeout", 0, "")
-	flags.BoolVar(&parsed.insecure, "insecure", false, "")
-	parsed.files.register(flags)
-	networking := networkFlags(flags)
+	flags.BoolVar(&parsed.asJSON, "json", false, "")
 
 	positional, err := parseInterspersed(flags, arguments)
 	switch {
@@ -73,16 +126,14 @@ func parseSending(arguments []string) (sending, error) {
 		return parsed, err
 	case len(positional) != 1 && len(positional) != 2:
 		return parsed, errors.New("name a saved request, or give a method and a url")
-	case namesSavedRequest(positional) && (len(parsed.headers) > 0 || parsed.data != ""):
+	case namesSavedRequest(positional) && parsed.describesRequest():
 		return parsed, errors.New("--header and --data belong to a request given as a method and a url")
-	case parsed.timeoutMs < 0:
-		return parsed, errors.New("--timeout takes a number of milliseconds, zero or more")
 	case parsed.view.MaxBodyBytes < 1 || parsed.view.MaxBodyBytes > agent.HighestBodyBytes:
 		return parsed, fmt.Errorf("--max-body takes a number of bytes between 1 and %d", agent.HighestBodyBytes)
 	}
 	parsed.positional = positional
-	parsed.network, err = networking.network()
-	return parsed, err
+	parsed.view.IncludeBinary = parsed.asJSON
+	return parsed, parsed.finish()
 }
 
 func namesSavedRequest(positional []string) bool {
@@ -113,17 +164,7 @@ func (s sending) target(client *agent.Client, stored runner.Collection) (runner.
 	if namesSavedRequest(s.positional) {
 		return client.Find(stored, s.positional[0])
 	}
-	return client.Compose(agent.Draft{Method: s.positional[0], URL: s.positional[1], Headers: s.headers, Body: s.data})
-}
-
-func (s sending) adjusted(target runner.Listed) runner.Listed {
-	if s.timeoutMs > 0 {
-		target.Request.Options.TimeoutMs = s.timeoutMs
-	}
-	if s.insecure {
-		target.Request.Options.InsecureTLS = true
-	}
-	return target
+	return s.compose(client, s.positional[0], s.positional[1])
 }
 
 func (s sending) prepare() (*agent.Client, runner.Listed, error) {
@@ -131,26 +172,40 @@ func (s sending) prepare() (*agent.Client, runner.Listed, error) {
 	if err != nil {
 		return nil, runner.Listed{}, err
 	}
-	client, err := agent.NewClient(engine.Policy{Network: s.network, ReadFile: s.files.beside(s.fileRoot())})
+	client, err := s.open(stored, s.fileRoot())
 	if err != nil {
-		return nil, runner.Listed{}, err
-	}
-	if err := client.Enter(stored, s.environment, s.variables); err != nil {
 		return nil, runner.Listed{}, err
 	}
 	target, err := s.target(client, stored)
 	return client, s.adjusted(target), err
 }
 
-func printOutcome(stdout io.Writer, outcome agent.Outcome) error {
-	encoder := json.NewEncoder(stdout)
+func writeJSON(out io.Writer, value any) error {
+	encoder := json.NewEncoder(out)
 	encoder.SetIndent("", "  ")
 	encoder.SetEscapeHTML(false)
-	if err := encoder.Encode(outcome); err != nil || outcome.Text == "" {
+	return encoder.Encode(value)
+}
+
+func printOutcome(stdout io.Writer, outcome agent.Outcome, asJSON bool) error {
+	if asJSON {
+		return writeJSON(stdout, outcome.Embed(outcome.Text))
+	}
+	if err := writeJSON(stdout, outcome); err != nil || outcome.Text == "" {
 		return err
 	}
 	_, err := fmt.Fprintf(stdout, "\n%s\n", outcome.Text)
 	return err
+}
+
+func outcomeCode(outcome agent.Outcome) int {
+	switch {
+	case outcome.Status == engine.FailureStatus:
+		return exitUnsent
+	case outcome.Failed:
+		return exitFailed
+	}
+	return exitPassed
 }
 
 func sendCommand(arguments []string, stdout, stderr *os.File) int {
@@ -175,11 +230,12 @@ func sendCommand(arguments []string, stdout, stderr *os.File) int {
 	if err != nil {
 		return complain(stderr, errors.New(client.Text(err.Error())))
 	}
-	if err := printOutcome(stdout, outcome); err != nil {
+	if err := printOutcome(stdout, outcome, parsed.asJSON); err != nil {
 		return complain(stderr, err)
 	}
-	if outcome.Failed || ctx.Err() != nil {
+	warnUnresolved(stderr, "", outcome.Unresolved)
+	if ctx.Err() != nil {
 		return exitFailed
 	}
-	return exitPassed
+	return outcomeCode(outcome)
 }

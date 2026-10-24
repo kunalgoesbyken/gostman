@@ -23,11 +23,11 @@ type row struct {
 	ContentType string `json:"contentType,omitempty"`
 }
 
-func rowsJSON(rows []row) string {
-	if len(rows) == 0 {
+func jsonList[T any](items []T) string {
+	if len(items) == 0 {
 		return ""
 	}
-	encoded, err := json.Marshal(rows)
+	encoded, err := json.Marshal(items)
 	if err != nil {
 		return ""
 	}
@@ -79,7 +79,7 @@ func withQuery(base string, params []row) (string, string) {
 			disabled = append(disabled, param)
 		}
 	}
-	return appendQuery(base, enabled), rowsJSON(disabled)
+	return appendQuery(base, enabled), jsonList(disabled)
 }
 
 func appendQuery(base string, params []row) string {
@@ -129,6 +129,13 @@ func object(value any) map[string]any {
 	return nil
 }
 
+func describedText(value any) string {
+	if described := object(value); described != nil {
+		return text(described["content"])
+	}
+	return text(value)
+}
+
 func list(value any) []any {
 	items, _ := value.([]any)
 	return items
@@ -157,14 +164,4 @@ func texts(value any) []string {
 func flag(value any) bool {
 	set, _ := value.(bool)
 	return set
-}
-
-func variableMap(entries []map[string]any, keyField, valueField string) map[string]string {
-	values := map[string]string{}
-	for _, entry := range entries {
-		if key := text(entry[keyField]); strings.TrimSpace(key) != "" && !flag(entry["disabled"]) {
-			values[key] = text(entry[valueField])
-		}
-	}
-	return values
 }

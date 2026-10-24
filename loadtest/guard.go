@@ -37,6 +37,7 @@ func learnAuth(guard *redact.Redactor, auth engine.Auth) {
 		"clientSecret": auth.OAuth2.ClientSecret,
 		"accessToken":  auth.OAuth2.AccessToken,
 		"refreshToken": auth.OAuth2.RefreshToken,
+		"idToken":      auth.OAuth2.IDToken,
 		"oauthSecret":  auth.OAuth2.Password,
 	}
 	for name, secret := range secrets {

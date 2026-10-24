@@ -71,6 +71,8 @@ const MIXES = {
   more: { card: 0.025, muted: 0.06, accent: 0.085, border: 0.42, mutedForeground: 0.82 },
 }
 
+const DARK_SURFACE_MIXES = { muted: 0.1 }
+
 const TOKEN_NAMES = [
   'background', 'foreground', 'card', 'card-foreground', 'secondary', 'secondary-foreground',
   'muted', 'muted-foreground', 'accent', 'accent-foreground', 'border', 'input',
@@ -104,8 +106,10 @@ export const windowTone = (theme, mode) => toneOf(effectiveColors(theme, mode, W
 
 const toneProperties = (tone) => Object.fromEntries(TONE_TOKENS.map((name) => [`--${name}`, `var(--${tone}-${name})`]))
 
+const mixesFor = (background, contrast) => (isDarkColor(background) ? { ...MIXES[contrast], ...DARK_SURFACE_MIXES } : MIXES[contrast])
+
 function surfaceTokens({ background, foreground }, contrast) {
-  const mix = MIXES[contrast]
+  const mix = mixesFor(background, contrast)
   const toward = (amount) => hslTriplet(mixColors(background, foreground, amount))
   const text = hslTriplet(foreground)
   const muted = toward(mix.muted)

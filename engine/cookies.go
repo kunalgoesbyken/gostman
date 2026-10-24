@@ -48,6 +48,13 @@ func describeCookie(cookie *http.Cookie, host string, now time.Time) CookieInfo 
 	return info
 }
 
+func sentCookies(r Request) []CookieInfo {
+	if r.Options.SkipCookies {
+		return nil
+	}
+	return r.Cookies
+}
+
 func newJar(stored []CookieInfo, now time.Time) http.CookieJar {
 	jar, _ := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 	for _, info := range stored {

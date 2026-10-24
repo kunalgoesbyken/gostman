@@ -1,8 +1,11 @@
 import { create } from 'zustand'
-import { createJSONStorage, devtools, persist } from 'zustand/middleware'
+import { devtools, persist } from 'zustand/middleware'
 import { addConsoleGroup } from '../lib/consoleLog'
 import { mergeCookies, withoutCookie } from '../lib/cookies'
 import { isPlainObject, parseJSON } from '../lib/dataUtils'
+import { DATA_TEXT } from '../lib/dataText'
+import { TAB_DRAFTS_KEY, isStorageFull } from '../lib/storage'
+import { ENVIRONMENT_TEXT } from '../lib/environmentText'
 import { DEFAULT_SETTINGS, normalizeSettings } from '../lib/network'
 import { ROOT_SETTINGS_ID, isBlankScope, normalizeFolder, normalizeScopeSettings, updatedScope } from '../lib/inheritance'
 import { normalizeRequest } from '../lib/request'
@@ -11,19 +14,24 @@ import { rememberResponse } from '../lib/responseHistory'
 import { reconcileTabs } from '../lib/tabReconcile'
 import { isNarrowViewport, rememberSidebarOpen, rememberedSidebarOpen } from '../lib/layout'
 import { reorderTabs, stepTab } from '../lib/tabOrder'
-import { promptLayer, resolveLayers, scopeLayers, variableText } from '../lib/variableScopes'
+import { SCOPE_COLLECTION, SCOPE_ENVIRONMENT, SCOPE_GLOBAL, SCOPE_SESSION } from '../lib/scripting/scopes'
+import { promptLayer, resolveLayers, scopeLayers, scriptValues, variableText } from '../lib/variableScopes'
 import { isWelcomeDismissed, rememberWelcomeDismissed } from '../lib/welcome'
 import { rememberSteps, rememberedSteps } from '../lib/onboarding'
 import { NO_WORKSPACE, enterWorkspace, leaveWorkspace, persistableSessions, restoreSessions } from './workspaceSessions'
 
 const HISTORY_LIMIT = 50
-const HISTORY_IDENTITY_FIELDS = ['method', 'url', 'body', 'bodyType', 'graphqlQuery', 'graphqlVariables', 'grpcMethod', 'grpcMessage', 'mcpTool', 'mcpArguments']
+const HISTORY_IDENTITY_FIELDS = ['method', 'url', 'body', 'bodyType', 'graphqlQuery', 'graphqlVariables', 'grpcMethod', 'grpcMessage', 'mcpMethod', 'mcpTool', 'mcpArguments']
 const IMPORT_TAB = 'import'
 export const DEFAULT_REQUEST_PANEL = 'params'
 const EMPTY_VARIABLES = '{}'
 const DEFAULT_ENVIRONMENT_NAME = 'Default'
 const TAB_ID_PREFIX = 'tab-'
 const SAVE_FAILURE_TITLE = 'Changes could not be saved'
+
+const persistenceFailureMessage = (error) => (isStorageFull(error)
+  ? DATA_TEXT.tabsNotStored(error.room)
+  : `Your latest changes were not saved and will be lost when the app closes. Export your data to keep a copy. (${error?.message || String(error)})`)
 
 const CLOSED_ALERT = { isOpen: false, title: '', message: '', confirmText: 'OK', variant: 'default' }
 const CLOSED_CONFIRM = { isOpen: false, title: '', message: '', confirmText: 'OK', variant: 'default', onConfirm: null, onCancel: null, alternative: null }
@@ -113,6 +121,34 @@ const environmentExtras = ({ color, meta }) => ({
 
 const parseVariables = (text) => (text.trim() === '' ? {} : parseJSON(text, null))
 
+const hasEntries = (value) => isPlainObject(value) && Object.keys(value).length > 0
+
+const mergedValues = (existing, changes) => (
+  Object.fromEntries(Object.entries({ ...existing, ...changes }).filter(([, value]) => value !== null))
+)
+
+const withoutNames = (values, names) => Object.fromEntries(Object.entries(values).filter(([name]) => !names.includes(name)))
+
+const mergedVariablesText = (text, changes) => {
+  const current = parseVariables(text || EMPTY_VARIABLES)
+  return isPlainObject(current) ? JSON.stringify(mergedValues(current, changes), null, 2) : null
+}
+
+function withGlobalWrites(state, changes) {
+  const active = state.globalEnvironments.find((environment) => environment.id === state.activeGlobalEnvironmentId)
+  const target = active || createEnvironment(ENVIRONMENT_TEXT.scriptGlobals)
+  const variables = mergedVariablesText(target.variables, changes)
+  if (variables === null) return {}
+  const updated = { ...target, variables }
+  if (!active) return { globalEnvironments: [...state.globalEnvironments, updated], activeGlobalEnvironmentId: updated.id }
+  return { globalEnvironments: state.globalEnvironments.map((environment) => (environment.id === active.id ? updated : environment)) }
+}
+
+function withCollectionWrites(state, changes) {
+  const collectionVariables = mergedVariablesText(state.collectionVariables, changes)
+  return collectionVariables === null ? {} : { collectionVariables }
+}
+
 const mergeVariables = (existing, incoming) => {
   const current = parseVariables(existing)
   if (!isPlainObject(current)) return null
@@ -165,42 +201,36 @@ const WRITE_DELAY_MS = 400
 const pendingWrites = new Map()
 let writeTimer = 0
 
+let draftSource = null
+let draftsRestored = null
+let draftsFailure = null
+
 function flushWrites() {
   clearTimeout(writeTimer)
   for (const [name, value] of pendingWrites) {
-    try {
-      localStorage.setItem(name, value)
-    } catch (error) {
-      reportStorageFailure(error.message)
-    }
+    draftSource.write(name, JSON.stringify(value)).catch(reportStorageFailure)
   }
   pendingWrites.clear()
 }
 
 window.addEventListener('pagehide', flushWrites)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flushWrites()
+})
 
-const guardedStorage = createJSONStorage(() => ({
-  getItem: (name) => {
-    try {
-      return localStorage.getItem(name)
-    } catch {
-      return null
-    }
-  },
+const guardedStorage = {
+  getItem: async (name) => parseJSON(await draftSource.read(name) ?? '', null),
   setItem: (name, value) => {
+    if (!useAppStore.persist.hasHydrated()) return
     pendingWrites.set(name, value)
     clearTimeout(writeTimer)
     writeTimer = setTimeout(flushWrites, WRITE_DELAY_MS)
   },
   removeItem: (name) => {
     pendingWrites.delete(name)
-    try {
-      localStorage.removeItem(name)
-    } catch (error) {
-      reportStorageFailure(error.message)
-    }
+    draftSource?.remove(name).catch(reportStorageFailure)
   },
-}))
+}
 
 export const useAppStore = create(
   devtools(
@@ -218,6 +248,7 @@ export const useAppStore = create(
         globalEnvironments: [],
         activeGlobalEnvironmentId: '',
         collectionVariables: EMPTY_VARIABLES,
+        sessionVariables: {},
         collectionSettings: normalizeScopeSettings(),
         folderSettings: null,
         dotEnv: {},
@@ -326,6 +357,9 @@ export const useAppStore = create(
         patchOpenRequest: (id, changes) => set((state) => ({
           tabs: mapTabRequests(state.tabs, (request) => (request.id === id ? { ...request, ...changes } : request)),
         })),
+        resolveDiskChange: (tabId, loadsDisk) => set((state) => mapTab(state, tabId, (tab) => (
+          loadsDisk && tab.diskChange ? { ...tab, request: tab.diskChange, bodyDrafts: {}, diskChange: null } : { ...tab, diskChange: null }
+        ))),
 
         addFolder: (name, parentId = '') => set((state) => ({
           folders: [
@@ -474,6 +508,12 @@ export const useAppStore = create(
         }),
         setActiveEnvironmentIn: (scope, id) => set({ [ENVIRONMENT_LISTS[scope].active]: id }),
         setCollectionVariables: (collectionVariables) => set({ collectionVariables }),
+        mergeCollectionVariables: (additions) => {
+          if (!isPlainObject(additions) || Object.keys(additions).length === 0) return true
+          const merged = withCollectionWrites(get(), additions)
+          set(merged)
+          return Object.hasOwn(merged, 'collectionVariables')
+        },
         updateScopeSettings: (folderId, patch) => set((state) => updatedScope(state, folderId, patch)),
         openFolderSettings: (folderId = ROOT_SETTINGS_ID) => set({ folderSettings: { folderId } }),
         closeFolderSettings: () => set({ folderSettings: null }),
@@ -498,17 +538,41 @@ export const useAppStore = create(
           get().setActiveVariables(JSON.stringify(Object.fromEntries(merged), null, 2))
           return true
         },
-        mergeEnvironments: (incoming) => {
-          const environments = [...get().environments]
+        storeSessionVariables: (changes, forgotten = []) => set((state) => ({
+          sessionVariables: mergedValues(withoutNames(state.sessionVariables, forgotten), changes),
+        })),
+        clearSessionVariables: () => set({ sessionVariables: {} }),
+        applyVariableWrites: (writes) => {
+          const persistent = [SCOPE_ENVIRONMENT, SCOPE_COLLECTION, SCOPE_GLOBAL].filter((scope) => hasEntries(writes?.[scope]))
+          if (persistent.length === 0 && !hasEntries(writes?.[SCOPE_SESSION])) return true
+          const saved = !persistent.includes(SCOPE_ENVIRONMENT) || get().mergeActiveVariables(writes[SCOPE_ENVIRONMENT])
+          if (persistent.includes(SCOPE_COLLECTION)) set((state) => withCollectionWrites(state, writes[SCOPE_COLLECTION]))
+          if (persistent.includes(SCOPE_GLOBAL)) set((state) => withGlobalWrites(state, writes[SCOPE_GLOBAL]))
+          get().storeSessionVariables(writes[SCOPE_SESSION] || {}, persistent.flatMap((scope) => Object.keys(writes[scope])))
+          return saved
+        },
+        mergeEnvironments: (incoming, scope = 'collection') => {
+          const { list, active } = ENVIRONMENT_LISTS[scope]
+          const environments = [...get()[list]]
           const skippedNames = []
-          for (const { id, name, variables, color, meta } of asArray(incoming).filter(isEnvironment)) {
+          const placed = new Map()
+          const added = []
+          for (const { id, name, variables, color, meta, extends: parent } of asArray(incoming).filter(isEnvironment)) {
             const index = environments.findIndex((environment) => environment.name === name)
             const merged = index === -1 ? variables : mergeVariables(environments[index].variables, variables)
             if (merged === null) skippedNames.push(name)
-            else if (index === -1) environments.push(withUnusedId({ ...createEnvironment(name, variables), id, ...environmentExtras({ color, meta }) }, environments))
-            else environments[index] = { ...environments[index], variables: merged }
+            else if (index === -1) {
+              const environment = withUnusedId({ ...createEnvironment(name, variables), id, ...environmentExtras({ color, meta }) }, environments)
+              environments.push(environment)
+              added.push([environment, parent])
+              placed.set(id, environment.id)
+            } else {
+              environments[index] = { ...environments[index], variables: merged }
+              placed.set(id, environments[index].id)
+            }
           }
-          set({ environments })
+          for (const [environment, parent] of added) environment.extends = placed.get(parent) || ''
+          set({ [list]: environments, [active]: get()[active] || environments[0]?.id || '' })
           return skippedNames
         },
 
@@ -572,20 +636,19 @@ export const useAppStore = create(
         showDeleteData: (onDelete) => set({ deleteDataDialog: { isOpen: true, onDelete }, commandPaletteOpen: false }),
         closeDeleteData: () => set({ deleteDataDialog: CLOSED_DELETE_DATA }),
 
-        reportPersistenceFailure: (reason) => {
+        reportPersistenceFailure: (error) => {
           if (get().persistenceFailureReported) return
           set({ persistenceFailureReported: true })
-          get().showAlert(
-            SAVE_FAILURE_TITLE,
-            `Your latest changes were not saved and will be lost when the app closes. Export your data to keep a copy. (${reason})`,
-            'OK',
-            'warning',
-          )
+          get().showAlert(SAVE_FAILURE_TITLE, persistenceFailureMessage(error), 'OK', 'warning')
         },
       }),
       {
-        name: 'gostman-storage',
+        name: TAB_DRAFTS_KEY,
         storage: guardedStorage,
+        skipHydration: true,
+        onRehydrateStorage: () => (_, error) => {
+          draftsFailure = error || null
+        },
         partialize: (state) => ({
           tabs: state.tabs.map(persistableTab),
           isRestricted: state.isRestricted,
@@ -613,7 +676,17 @@ export const useAppStore = create(
   )
 )
 
-reportStorageFailure = (reason) => useAppStore.getState().reportPersistenceFailure(reason)
+reportStorageFailure = (error) => useAppStore.getState().reportPersistenceFailure(error)
+
+export function restoreTabDrafts(source) {
+  draftSource = source
+  draftsRestored ||= useAppStore.persist.rehydrate().then(() => {
+    if (useAppStore.persist.hasHydrated()) return
+    draftsRestored = null
+    throw draftsFailure || new Error(DATA_TEXT.tabsUnreadable)
+  })
+  return draftsRestored
+}
 
 useAppStore.subscribe((state, previous) => {
   if (state.isSidebarOpen !== previous.isSidebarOpen) rememberSidebarOpen(state.isSidebarOpen)
@@ -630,7 +703,7 @@ export function selectResolvedVariables(state) {
   const request = selectActiveTab(state)?.request
   const inputs = [
     state.globalEnvironments, state.activeGlobalEnvironmentId, state.collectionVariables, state.environments,
-    state.activeEnvironmentId, state.folders, state.dotEnv, request?.folderId, request?.vars,
+    state.activeEnvironmentId, state.folders, state.dotEnv, request?.folderId, request?.vars, state.sessionVariables,
   ]
   if (sameInputs(lastInputs, inputs)) return lastResolved
   lastInputs = inputs
@@ -640,6 +713,10 @@ export function selectResolvedVariables(state) {
 
 export const variableTextFor = (state, request, answers = {}, referenced = {}) => (
   variableText(resolveLayers([...scopeLayers(state, request, referenced), promptLayer(answers)]))
+)
+
+export const scriptVariablesFor = (state, request, referenced = {}) => (
+  scriptValues(resolveLayers(scopeLayers(state, request, referenced)))
 )
 
 export const selectActiveVariables = (state) => variableText(selectResolvedVariables(state))

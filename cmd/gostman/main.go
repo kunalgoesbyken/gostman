@@ -12,11 +12,12 @@ const (
 	exitPassed = 0
 	exitFailed = 1
 	exitUsage  = 2
+	exitUnsent = 3
 
 	programName = "gostman"
 	usageHint   = `Run "gostman help" to see the commands and flags.`
 	usage       = `Usage:
-  gostman run <export.json | workspace folder> [flags]
+  gostman run <export.json | workspace folder | Bruno folder> [flags]
   gostman send [flags] <request>
   gostman send [flags] <METHOD> <url>
   gostman load <export.json | workspace folder> --request <name> [flags]
@@ -25,16 +26,18 @@ const (
   gostman mock [workspace folder] [flags]
   gostman docs <workspace folder | export.json> [flags]
   gostman capture --upstream <url> [flags]
+  gostman relay [flags]
   gostman scan <workspace folder | export.json> [flags]
   gostman lint <spec file | address> [flags]
-  gostman init [folder]
+  gostman init [folder] [--skill]
   gostman import <file | folder> --out <workspace folder> [flags]
   gostman export <workspace folder> --format <format> --out <path>
   gostman version
 
 run
   Run every request of a Gostman export or workspace folder in order, with its
-  scripts, tests, extraction rules, cookies and OAuth 2 tokens.
+  scripts, tests, extraction rules, cookies and OAuth 2 tokens. A Bruno
+  collection folder (bruno.json or opencollection.yml) is converted in memory.
 
   --env <name>          environment to use (default: the first one)
   --folder <name|path>  run only this folder, for example auth or auth/tokens
@@ -42,7 +45,8 @@ run
   --var-from-env <NAME> set the variable NAME from the environment variable
                         NAME, so the value is not typed or stored (repeatable)
   --secrets             allow variables that reference a secret manager
-                        (Vault, AWS, Azure, GCP) to be read with the credentials
+                        (Vault, AWS, Azure, Google Cloud, 1Password,
+                        Bitwarden) to be read with the credentials
                         in the process environment; off by default so that a
                         collection you did not write cannot use them
                         (also for send and mcp)
@@ -86,20 +90,39 @@ run
                         printed to stdout.
   --redact              replace variable values and credentials in the report
                         with {{name}}
-  --cacert <file>       trust the PEM certificates in this file as well as the
-                        system's (repeatable)
+  --contract <spec>     check every HTTP response against this OpenAPI spec
+                        (file or address): the status, the content type and
+                        the body schema of the operation with the same method
+                        and path; each check is reported as a test
+  --cacert <file>       trust the PEM or DER certificates in this file as well
+                        as the system's (repeatable)
   --client-cert <file> --client-key <file>
-                        present this PEM certificate and key to every host
+                        present this PEM certificate and key to every host; a
+                        PFX/P12 file, or a PEM file that holds the key, needs
+                        no --client-key
   --client-cert <host=cert,key>
-                        present this PEM certificate and key to this host only;
-                        *.example.com covers subdomains (repeatable)
+                        present this certificate and key to this host only
+                        (host=file.p12 for a PFX/P12 file); *.example.com
+                        covers subdomains (repeatable)
+  --client-cert-pass-env <NAME>
+                        read the passphrase of encrypted keys and PFX/P12
+                        files from this environment variable
   --proxy <url>         send through this http, https or socks5 proxy instead
                         of the one in HTTPS_PROXY, HTTP_PROXY and NO_PROXY,
                         which are used otherwise
   --noproxy <hosts>     comma-separated hosts that skip --proxy; *.example.com
                         matches subdomains
-                        These also apply to OAuth 2 token requests and to
-                        sendRequest in scripts.
+                        These also apply to gRPC, OAuth 2 token requests and
+                        sendRequest in scripts. A workspace folder's
+                        gostman.yaml network section is applied first; these
+                        flags win over it.
+  --oauth-token-env <NAME>
+                        use this environment variable as the access token of
+                        requests whose OAuth 2 grant needs a browser sign-in
+                        (authorization code, device code)
+  --oauth-refresh-token-env <NAME>
+                        exchange this refresh token for an access token for
+                        those requests
 
 send
   Send one request through the same pipeline and print a JSON summary followed
@@ -110,13 +133,18 @@ send
   <METHOD> <url>        a request that is not saved
   --workspace <path>    workspace folder or export file (default: the current
                         folder when it is a workspace)
-  --env, --var, --var-from-env, --timeout, --insecure, --allow-files   as for run
-  --cacert, --client-cert, --client-key, --proxy, --noproxy   as for run
+  --env, --var, --var-from-env, --env-file, --timeout, --insecure,
+  --allow-files         as for run
+  --cacert, --client-cert, --client-key, --client-cert-pass-env, --proxy,
+  --noproxy             as for run
   -H, --header <name: value>  add a header to an unsaved request (repeatable)
   -d, --data <body>     body of an unsaved request
   --select <jsonpath>   print only this part of a JSON response body
   --max-body <bytes>    print at most this much of the body (default 8192)
   --include-headers     include the response headers in the summary
+  --json                print one JSON document: the summary with the body in
+                        body.text and its encoding (utf8 or base64) in
+                        body.encoding
 
 load
   Send one request many times at once and report throughput, latency
@@ -135,8 +163,10 @@ load
   --rps <n>             cap the total requests per second
   --ramp <time>         start the workers one after another over this time
   --fail-status <code>  count this status and above as failed (default 500)
-  --env, --var, --var-from-env, --timeout, --insecure, --allow-files   as for send
-  --cacert, --client-cert, --client-key, --proxy, --noproxy   as for run
+  --env, --var, --var-from-env, --env-file, --timeout, --insecure,
+  --allow-files         as for send
+  --cacert, --client-cert, --client-key, --client-cert-pass-env, --proxy,
+  --noproxy             as for run
   --reporter <format>   text or json (default text)
   --max-p95 <time>      exit 1 when the 95th percentile latency is higher
   --max-error-rate <p>  exit 1 when more than p percent fail, for example 1%
@@ -149,15 +179,24 @@ mcp
   stdin and stdout. Variable values never leave the process.
 
   --workspace <folder>  workspace folder (default: the current folder)
-  --env, --var, --var-from-env   as for run
+  --env, --var, --var-from-env, --env-file, --secrets, --secrets-env-file,
+  --timeout, --insecure as for run
+  --cacert, --client-cert, --client-key, --client-cert-pass-env, --proxy,
+  --noproxy             as for run
   --allow-host <host>   let the agent call this host as well (repeatable; * for
                         any). Without it the agent reaches only localhost and
-                        the hosts the workspace's own requests already use
+                        the hosts of requests a person wrote
   --block-private       refuse requests to private and loopback addresses
+  --expose-tag <tag>    offer each request with this tag as a tool of its own,
+                        its {{variables}} as parameters (repeatable)
+  --listen <port>       serve over Streamable HTTP at 127.0.0.1:<port>/mcp
+                        instead of stdin and stdout; clients send the bearer
+                        token printed at start (or GOSTMAN_MCP_TOKEN)
 
 mock
   Serve the saved examples of a workspace on 127.0.0.1, one route per request,
-  and print each request as it arrives.
+  and print each request as it arrives. A request picks another example of its
+  route with the x-mock-response-name or x-mock-response-code header.
 
   --env <name>          environment for {{variables}} in URLs; a variable in
                         the path matches any value
@@ -203,6 +242,19 @@ capture
                         Authorization, Cookie and Proxy-Authorization request
                         headers are never saved
 
+relay
+  Let the Gostman web app send its requests from this computer instead of the
+  hosted relay, so it reaches localhost and private addresses with nobody in
+  between. Listens on 127.0.0.1 only and answers only the Gostman web app,
+  pages served on localhost and programs on this computer.
+
+  --port <number>       port to listen on (default: a free port)
+  --origin <url>        also allow the web app served from this exact origin,
+                        e.g. https://gostman.example.com (repeatable)
+  --cacert, --client-cert, --client-key, --client-cert-pass-env, --proxy,
+  --noproxy             as for run; they apply to every request the web app
+                        sends through the relay
+
 scan
   Look for credentials typed into a Gostman workspace folder or a Gostman,
   Postman or other supported export: well-known token formats, random-looking
@@ -227,8 +279,12 @@ lint
                         give a rule id and error, warning, info or off
 
 init
-  Create an empty workspace in the folder (default: the current folder) and
-  print how to register the MCP server with a coding agent.
+  Create an empty workspace in the folder (default: the current folder), or in
+  a gostman folder inside it when it already holds other files, and print how
+  to register the MCP server with a coding agent. Nothing is overwritten.
+
+  --skill               also write the Gostman skill for coding agents to
+                        .claude/skills/gostman/SKILL.md in the current folder
 
 import
   Create a workspace from an Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI or
@@ -241,11 +297,12 @@ import
   --skip-static         HAR: leave out images, fonts, styles and scripts
 
 export
-  Write a workspace as bruno (a folder of .bru files), openapi, curl (a shell
-  script; credentials become environment variable placeholders), har or http
-  (.http files for VS Code REST Client and JetBrains HTTP Client).
+  Write a workspace as postman (a Collection v2.1 file with the collection
+  variables), bruno (a folder of .bru files), openapi, curl (a shell script;
+  credentials become environment variable placeholders, listed at the top),
+  har or http (.http files for VS Code REST Client and JetBrains HTTP Client).
 
-  --format <name>       bruno, openapi, curl, har or http
+  --format <name>       postman, bruno, openapi, curl, har or http
   --out <path>          file, or folder when the export has several files
                         (required)
   --include-secrets     write literal credentials; by default passwords, tokens
@@ -254,8 +311,10 @@ export
 
 Exit codes:
   0  every request and test passed (scan: nothing at or above --fail-on)
-  1  a request or a test failed (scan: a finding at or above --fail-on)
+  1  a test or a script failed (scan: a finding at or above --fail-on)
   2  the command or the input is wrong
+  3  run and send: a request got no response (it could not be sent, the
+     connection failed or timed out, or the host is not allowed)
 `
 )
 
@@ -315,6 +374,8 @@ func dispatch(arguments []string, stdout, stderr *os.File) int {
 		return docsCommand(arguments[1:], stdout, stderr)
 	case "capture":
 		return captureCommand(arguments[1:], stdout, stderr)
+	case "relay":
+		return relayCommand(arguments[1:], stdout, stderr)
 	case "scan":
 		return scanCommand(arguments[1:], stdout, stderr)
 	case "lint":

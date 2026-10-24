@@ -21,6 +21,12 @@ const DEFAULT_OAUTH2 = {
   accessToken: '',
   refreshToken: '',
   expiresAt: 0,
+  resource: '',
+  issuer: '',
+  deviceUrl: '',
+  sendIdToken: false,
+  idToken: '',
+  tokenEnvironment: '',
 }
 
 const DEFAULT_AUTH = { type: '', username: '', password: '', token: '', key: '', value: '', in: '', oauth2: DEFAULT_OAUTH2 }
@@ -33,6 +39,10 @@ const DEFAULT_OPTIONS = {
   streamReconnect: false,
   streamMaxEvents: 0,
   streamMaxSeconds: 0,
+  skipCookies: false,
+  discardCookies: false,
+  socketIoPath: '',
+  socketIoAuth: '',
 }
 
 const DEFAULT_REQUEST = {
@@ -59,6 +69,7 @@ const DEFAULT_REQUEST = {
   grpcMethod: '',
   grpcMessage: '',
   grpcProtos: '',
+  mcpMethod: '',
   mcpTool: '',
   mcpArguments: '',
   socketProtocol: '',

@@ -44,5 +44,5 @@ func describeError(err error) string {
 	if rpcStatus, ok := status.FromError(err); ok {
 		return fmt.Sprintf("%s: %s", codeName(rpcStatus.Code()), rpcStatus.Message())
 	}
-	return err.Error()
+	return engine.DescribeNetworkError(err)
 }

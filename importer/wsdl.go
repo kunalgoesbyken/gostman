@@ -67,7 +67,7 @@ func (c *collector) readWSDL(doc document, supporting []document) {
 		c.skip("%s: %v", doc.file.Name, err)
 		return
 	}
-	name := cleanName(root.attr("name"), strings.TrimSuffix(path.Base(doc.file.Name), path.Ext(doc.file.Name)))
+	name := cleanName(root.attr("name"), fileStem(doc.file.Name))
 	c.read(name, FormatWSDL, func() {
 		schemas := c.schemaSets(root, supporting)
 		rootID := c.addFolder(name, "")
@@ -363,7 +363,7 @@ func (c *collector) soapRequest(operation wsdlOperation, version soapVersion, sc
 		bodyType: bodyXML,
 		headers:  soapHeaders(version, operation.action),
 	}
-	c.build(request, scope{}, folderID)
+	c.build(request, folderID)
 }
 
 func soapHeaders(version soapVersion, action string) []row {

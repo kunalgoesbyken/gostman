@@ -65,9 +65,9 @@ type Route struct {
 	Method      string `json:"method"`
 	Path        string `json:"path"`
 	State       string `json:"state"`
-	Reason      string `json:"reason"`
-	ExampleID   string `json:"exampleId"`
-	ExampleName string `json:"exampleName"`
+	Reason      string `json:"reason,omitempty"`
+	ExampleID   string `json:"exampleId,omitempty"`
+	ExampleName string `json:"exampleName,omitempty"`
 }
 
 type Fault struct {

@@ -20,13 +20,13 @@ Open it with Ctrl+K, or with the **Commands** button in the header (shown on wid
 | Command | What it does | Shortcut |
 | --- | --- | --- |
 | **Send request** | Send the request in the current tab | Ctrl+Enter |
-| **New request** | Open a new empty tab | Ctrl+N |
+| **New request** | Open a new empty tab | Ctrl+N (Alt+N on the web) |
 | **Save request** | Save the request in the current tab | Ctrl+S |
 | **Duplicate request** | Save a copy of the current request | |
 | **Copy request** | Copy the saved request to paste it into a folder | |
 | **Paste request** | Paste the copied request or folder next to the current request | |
 | **Generate code** | Show the current request as code | |
-| **Close tab** | Close the current tab | Ctrl+W |
+| **Close tab** | Close the current tab | Ctrl+W (Alt+W on the web) |
 | **Close other tabs** | Keep only the current tab | Alt+Shift+W |
 | **Close saved tabs** | Close every tab without unsaved changes | Alt+Shift+S |
 | **Keep preview tab open** | Turn the preview tab into a regular tab | Alt+Shift+K |
@@ -54,7 +54,7 @@ Open it with Ctrl+K, or with the **Commands** button in the header (shown on wid
 | **AI: document this request** | Propose a description for the request | |
 | **AI: ask about the collection** | Find requests by describing them | |
 | **AI: requests from an API schema** | Turn an OpenAPI or GraphQL schema into requests | |
-| **AI settings** | Provider, model, key and consent | |
+| **AI settings** | Opens the AI section of Preferences: consent, provider, model and key | |
 | **Clear history** | Delete every history entry | |
 | **Show welcome** | Getting started steps, imports and shortcuts | |
 | **About Gostman** | Version, links and diagnostics | |
@@ -98,13 +98,14 @@ Preferences is a window you can move and resize inside the app. Pick a section o
 | Appearance | **Response panel** | **Below**, **Right** | **Below** |
 | Fonts | **Interface font** | The name of a font installed on this device | Empty, which uses the default |
 | Fonts | **Code font** | The name of a font installed on this device | Empty, which uses the default |
-| Editor | **Editor font size** | A whole number from 10 to 24 | 12 |
+| Editor | **Editor font size** | A whole number of pixels from 10 to 24 | 12 |
 | Editor | **Wrap long lines** | On or off | On |
 | Requests | **Default timeout** | A whole number of seconds from 0 to 3600 | 0 |
 | Requests | **Ask before discarding unsaved changes when closing a tab** | On or off | On |
 | Language | **Language** | **English** | **English** |
+| AI | **AI** | Consent, on or off, provider, base URL, API key and model; see [AI features](ai.md) | Off |
 
-- **Default timeout** applies to requests that set no timeout of their own. 0 uses the built-in limit. See [Variables, scripts and settings](scripting-and-settings.md) for request settings.
+- **Default timeout** applies to requests that set no timeout of their own. 0 uses the built-in limit of 30 seconds. See [Variables, scripts and settings](scripting-and-settings.md) for request settings.
 - A number field only takes effect while the value is a whole number inside the range. Otherwise the field is marked invalid, and it goes back to the saved value when you leave it.
 - **Language** lists English only. The dialog says more languages will appear when translations are available.
 - **Use the system title bar** appears in the desktop app on Windows and Linux, under Appearance. It replaces Gostman's own title bar and window buttons with your desktop's, and takes effect the next time Gostman starts. It is saved with the app's data rather than these preferences, so **Reset to defaults** leaves it unchanged. On macOS the system title bar is always used.
@@ -180,22 +181,55 @@ The About dialog's diagnostics report the theme setting.
 
 These settings are saved on this device, so the desktop app and each browser keep their own.
 
+### AI
+
+The AI section holds the consent line, the switch to turn AI on, the provider, base URL, API key and model. AI is off until you turn it on here; see [AI features](ai.md). **Reset to defaults** leaves these settings as they are; the button at the bottom of the section forgets them and every saved AI key.
+
 ### Data
 
-**Where it is saved** says where your collection is kept: in this browser, in the app's data, or in the open workspace folder.
+**Where it is saved** says where your collection is kept: in this browser, in the app's data, or in the open workspace folder. In the web version, the collection and the open tabs are in this browser's IndexedDB, and preferences in its local storage; see [Where your data is kept](getting-started.md#where-your-data-is-kept).
+
+**Backups** lists the automatic copies of your data; see [Backups](#backups) below.
 
 **Export data** opens the Export tab of the import dialog; see [Import, export and specs](import-export-and-specs.md).
 
-**Delete all data** opens a confirmation that lists exactly what is deleted and what is kept. The delete button stays off until you type the word it asks for; **Export first** opens the export instead. The command palette's **Delete all data** opens the same confirmation.
+**Delete all data** opens a confirmation that lists exactly what is deleted and what is kept. It warns at the top that the automatic backups are deleted too, so they cannot bring the data back. The delete button stays off until you type the word it asks for; **Export first** opens the export instead. The command palette's **Delete all data** opens the same confirmation.
 
 ![The Delete all data confirmation listing what is deleted and what is kept, with a field to type "delete", and Cancel, Export first and Delete all data buttons](../screenshots/delete-all-data.png)
 
 | | Desktop app | Web version |
 | --- | --- | --- |
-| Deleted | The collection in the app's data; global variables and every stored secret value, workspace folders' included; history, cookies, OAuth 2.0 tokens and unsaved tabs; secret manager connections and their credentials, AI provider keys and AI settings; the list of recent and trusted folders; proxy, certificate and mock server settings, and captured traffic | Requests, folders, examples and environments; global variables and secret values; history, cookies, OAuth 2.0 tokens and unsaved tabs; AI provider keys and AI settings |
+| Deleted | The collection in the app's data; global variables and every stored secret value, workspace folders' included; history, cookies, OAuth 2.0 tokens and unsaved tabs; secret manager connections and their credentials, AI provider keys and AI settings; the list of recent and trusted folders; proxy, certificate and mock server settings, and captured traffic; automatic backups | Requests, folders, examples and environments; global variables and secret values; history, cookies, OAuth 2.0 tokens and unsaved tabs; AI provider keys and AI settings; automatic backups |
 | Kept | Workspace folders and their files, preferences, getting started progress and files you exported | Preferences, getting started progress and files you exported |
 
-Running mock servers, captures and load tests stop first. When a workspace folder is open, **Export first** exports that folder's collection; switch to **This computer** to export the collection in the app's data.
+Running mock servers, captures and load tests stop first. The app then reloads, starts empty and shows **All data was deleted.** once. When a workspace folder is open, **Export first** exports that folder's collection; switch to **This computer** to export the collection in the app's data.
+
+#### Backups
+
+Gostman copies your data before a new version first touches it and at most once a day, and keeps the last 10 copies. Each row shows when the copy was made, the version that made it and its size.
+
+| | Desktop app | Web version |
+| --- | --- | --- |
+| What is copied | `gostman.json`, the app's data: the collection saved on this computer, history, cookies, OAuth 2.0 tokens, global variables and network settings | The data this browser keeps for Gostman: requests, folders, environments, history and cookies |
+| When | When the app starts, if the newest copy is from another version or older than a day, and then hourly while it runs | When the app opens, on the same rule |
+| Where | A `backups` folder next to `gostman.json`, readable by you only. **Open folder** shows it. | In this browser's IndexedDB. Clearing the site data deletes the copies as well, so export now and then. |
+| Not copied | Secret values, which are stored apart from it (in the system keychain when there is one), and workspace folders | Preferences |
+
+**Restore** asks first and says what is replaced. Before it replaces anything it makes one more copy of the current data, listed as **Before a restore**, so a restore can be undone the same way. Open tabs with unsaved changes keep them; when a request changed under such a tab, the tab offers **Keep my edits** or **Load from disk**.
+
+A workspace folder is plain files, so it is not copied: commit it to Git to keep its history. **Delete all data** deletes the backups as well, because they hold history, cookies and OAuth 2.0 tokens. Export first if you want a copy.
+
+In the web version, when the collection has 50 requests or more and nothing was exported as a **Gostman** file for 30 days, the status bar shows **Export a copy**. It opens the export; the × hides it for another 30 days.
+
+### Privacy
+
+**Telemetry** says what the app sends: nothing about you or your use. [What Gostman connects to](getting-started.md#what-gostman-connects-to) lists every network call each part makes.
+
+**Check for new versions** appears in the desktop app and is off until you switch it on. Then, once a day, the app reads the latest release from `api.github.com` (through your proxy settings) and, when it is newer, shows the version in the status bar. Selecting it opens the release notes and downloads on GitHub; the × hides it until the next version. Gostman never downloads or installs anything by itself. The web version is always current, so it has no such setting.
+
+**Send requests through** appears in the web version. **Hosted relay** sends requests through `gostman.com/api/proxy`, which cannot reach `localhost` or private addresses. **Local relay on this computer** sends them through `gostman relay` running on your machine, so they reach local and private addresses and nothing passes through a third party. Enter the address the command prints, such as `http://127.0.0.1:4030`, and press **Test**; when nothing answers, it says so and asks you to check that `gostman relay` is running at that address. While the local relay is chosen, a request fails with a message rather than falling back to the hosted relay when the local one does not answer. See [Local relay for the web app](cli.md#local-relay-for-the-web-app).
+
+**Reset to defaults** leaves both settings as they are.
 
 ## Keyboard shortcuts
 
@@ -212,7 +246,7 @@ Open the Keyboard shortcuts dialog with Ctrl+/, with the **Keyboard shortcuts** 
 | General | Keyboard shortcuts | Ctrl+/ | Ctrl+/ |
 | General | AI: new request from a description | Ctrl+Shift+U | Alt+Shift+U |
 | General | AI: explain the response | Ctrl+Shift+X | Alt+Shift+X |
-| Request | New request | Ctrl+N | Ctrl+N |
+| Request | New request | Ctrl+N | Alt+N |
 | Request | Save request | Ctrl+S | Ctrl+S |
 | Request | Send request | Ctrl+Enter | Ctrl+Enter |
 | Tabs | Close tab | Ctrl+W | Alt+W |

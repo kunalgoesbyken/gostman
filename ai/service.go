@@ -2,9 +2,11 @@ package ai
 
 import (
 	"context"
+	"errors"
 	"net"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 
@@ -14,15 +16,17 @@ import (
 const (
 	MaxPromptBytes  = 96 * 1024
 	MaxOutputBytes  = 64 * 1024
-	DefaultTokens   = 2048
-	MaxTokens       = 4096
+	DefaultTokens   = 4096
+	MaxTokens       = 8192
 	CheckTokens     = 32
-	RequestTimeout  = 90 * time.Second
+	MaxModels       = 1000
+	RequestTimeout  = 120 * time.Second
 	checkPrompt     = "Reply with the single word ok."
 	checkSystem     = "You are a connection test."
 	localhostName   = "localhost"
 	secretLabel     = "secret"
 	noAnswer        = "The provider returned no answer"
+	cutOff          = "The answer was cut off because it reached the length limit"
 	insecureWarning = "Use https for this base URL, or allow plain http for it in the AI settings"
 )
 
@@ -69,13 +73,10 @@ func ResolveBase(config Config) (string, *Error) {
 	return resolveBase(config, preset)
 }
 
-func resolve(config Config, key string) (Provider, string, *Error) {
+func connect(config Config, key string) (Provider, string, *Error) {
 	preset, known := presets()[config.Provider]
 	if !known {
 		return nil, "", failure(KindConfig, "Choose a provider")
-	}
-	if strings.TrimSpace(config.Model) == "" {
-		return nil, "", failure(KindConfig, "Enter a model id")
 	}
 	if preset.KeyRequired && key == "" {
 		return nil, "", failure(KindConfig, "Paste an API key for this provider")
@@ -92,7 +93,7 @@ func Scrub(prompt Prompt, secrets []string) Prompt {
 	for _, secret := range secrets {
 		scrubber.LearnSecret(secretLabel, secret)
 	}
-	return Prompt{System: scrubber.Text(prompt.System), User: scrubber.Text(prompt.User)}
+	return Prompt{System: scrubber.Text(prompt.System), User: scrubber.Text(prompt.User), Schema: prompt.Schema}
 }
 
 func withinLimit(prompt Prompt) *Error {
@@ -116,32 +117,75 @@ func capOutput(text string) string {
 	return text[:MaxOutputBytes]
 }
 
-func complete(ctx context.Context, config Config, key string, prompt Prompt, tokens int) (string, error) {
-	provider, base, problem := resolve(config, key)
+func rejectsSchema(err error) bool {
+	var failed *Error
+	return errors.As(err, &failed) && failed.Kind == KindRequest &&
+		(failed.Status == http.StatusBadRequest || failed.Status == http.StatusUnprocessableEntity)
+}
+
+func ask(ctx context.Context, provider Provider, call Call) (Answer, error) {
+	answer, err := provider.Complete(ctx, call)
+	if err != nil && call.Prompt.Schema != nil && rejectsSchema(err) {
+		call.Prompt.Schema = nil
+		return provider.Complete(ctx, call)
+	}
+	return answer, err
+}
+
+func complete(ctx context.Context, config Config, key string, prompt Prompt, tokens int) (Answer, error) {
+	if strings.TrimSpace(config.Model) == "" {
+		return Answer{}, failure(KindConfig, "Enter a model id")
+	}
+	provider, base, problem := connect(config, key)
 	if problem != nil {
-		return "", problem
+		return Answer{}, problem
 	}
 	if problem := withinLimit(prompt); problem != nil {
-		return "", problem
+		return Answer{}, problem
 	}
 	ctx, cancel := context.WithTimeout(ctx, RequestTimeout)
 	defer cancel()
 	call := Call{BaseURL: base, Model: strings.TrimSpace(config.Model), Key: key, Prompt: prompt, MaxTokens: tokens}
-	text, err := provider.Complete(ctx, call)
+	answer, err := ask(ctx, provider, call)
 	if err != nil {
-		return "", masked(err, key)
+		return Answer{}, masked(err, key)
 	}
-	if strings.TrimSpace(text) == "" {
-		return "", failure(KindReply, noAnswer)
-	}
-	return capOutput(text), nil
+	return answer, nil
 }
 
 func Run(ctx context.Context, config Config, key string, prompt Prompt, secrets []string, maxTokens int) (string, error) {
-	return complete(ctx, config, key, Scrub(prompt, append(secrets, key)), capTokens(maxTokens))
+	answer, err := complete(ctx, config, key, Scrub(prompt, append(secrets, key)), capTokens(maxTokens))
+	switch {
+	case err != nil:
+		return "", err
+	case answer.CutOff:
+		return "", failure(KindCutOff, cutOff)
+	case strings.TrimSpace(answer.Text) == "":
+		return "", failure(KindReply, noAnswer)
+	}
+	return capOutput(strings.TrimSpace(answer.Text)), nil
 }
 
 func Check(ctx context.Context, config Config, key string) error {
-	_, err := complete(ctx, config, key, Prompt{System: checkSystem, User: checkPrompt}, CheckTokens)
+	answer, err := complete(ctx, config, key, Prompt{System: checkSystem, User: checkPrompt}, CheckTokens)
+	if err == nil && !answer.CutOff && strings.TrimSpace(answer.Text) == "" {
+		return failure(KindReply, noAnswer)
+	}
 	return err
+}
+
+func Models(ctx context.Context, config Config, key string) ([]string, error) {
+	provider, base, problem := connect(config, key)
+	if problem != nil {
+		return nil, problem
+	}
+	ctx, cancel := context.WithTimeout(ctx, RequestTimeout)
+	defer cancel()
+	ids, err := provider.Models(ctx, Call{BaseURL: base, Key: key})
+	if err != nil {
+		return nil, masked(err, key)
+	}
+	slices.Sort(ids)
+	ids = slices.Compact(ids)
+	return ids[:min(len(ids), MaxModels)], nil
 }

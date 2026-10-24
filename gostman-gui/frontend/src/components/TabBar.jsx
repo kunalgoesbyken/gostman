@@ -10,6 +10,8 @@ import { PLACE_AFTER, PLACE_BEFORE } from "../lib/dropPlace"
 import { isFocusLost, moveFocus } from "../lib/rovingFocus"
 import { hintWithShortcut, isRemoveKey } from "../lib/shortcuts"
 import { isRequestDirty } from "../lib/requestChanges"
+import { shownMethod } from "../lib/methodLabel"
+import { TAB_BAR_TEXT as TEXT } from "../lib/tabBarText"
 import { tabMenuItems } from "../lib/tabMenu"
 import { cn } from "../lib/utils"
 
@@ -21,7 +23,7 @@ const Tab = memo(function Tab({ tab, saved, isActive, dropPlace, isDragged, onSe
   const tabRef = useRef(null)
   const { request } = tab
   const isDirty = useMemo(() => isRequestDirty(request, saved), [request, saved])
-  const title = request.name || request.url || "Untitled"
+  const title = request.name || request.url || TEXT.untitled
 
   useEffect(() => {
     if (isActive) tabRef.current.scrollIntoView({ block: "nearest", inline: "nearest" })
@@ -75,11 +77,11 @@ const Tab = memo(function Tab({ tab, saved, isActive, dropPlace, isDragged, onSe
         onKeyDown={handleKeyDown}
         className="flex h-full min-w-0 flex-1 items-center gap-1.5 pl-3 text-left"
       >
-        <MethodTag method={request.method} />
+        <MethodTag method={shownMethod(request)} />
         <span className={cn("truncate", tab.isPreview && "italic")}>{title}</span>
-        {isDirty && <span aria-label="Unsaved changes" className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground" />}
+        {isDirty && <span aria-label={TEXT.unsaved} className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground" />}
       </button>
-      <IconButton label={`Close ${title}`} icon={X} size="icon-xs" tabIndex={-1} onClick={() => onClose(tab.id)} className="hover:bg-muted" />
+      <IconButton label={TEXT.close(title)} icon={X} size="icon-xs" tabIndex={-1} onClick={() => onClose(tab.id)} className="hover:bg-muted" />
     </div>
   )
 })
@@ -122,7 +124,7 @@ export const TabBar = memo(function TabBar({ tabs, activeTabId, requests, action
 
   return (
     <div data-pane="tabs" className="flex h-10 shrink-0 items-stretch border-b border-border">
-      <div ref={listRef} role="tablist" aria-label="Open requests" onKeyDown={(event) => moveFocus(event, TAB_KEYS)} className="flex min-w-0 items-stretch overflow-x-auto scrollbar-none">
+      <div ref={listRef} role="tablist" aria-label={TEXT.openRequests} onKeyDown={(event) => moveFocus(event, TAB_KEYS)} className="flex min-w-0 items-stretch overflow-x-auto scrollbar-none">
         {tabs.map((tab) => (
           <Tab
             key={tab.id}
@@ -142,7 +144,7 @@ export const TabBar = memo(function TabBar({ tabs, activeTabId, requests, action
         ))}
       </div>
       <div className="flex shrink-0 items-center px-1.5">
-        <IconButton label={hintWithShortcut("New request", newRequestShortcut)} icon={Plus} onClick={onNewTab} />
+        <IconButton label={hintWithShortcut(TEXT.newRequest, newRequestShortcut)} icon={Plus} onClick={onNewTab} />
       </div>
       {menu && <ContextMenu position={menu.position} title="" items={menuItems} onClose={closeMenu} />}
     </div>

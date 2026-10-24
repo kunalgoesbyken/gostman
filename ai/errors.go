@@ -24,6 +24,7 @@ const (
 	KindConfig    Kind = "config"
 	KindTooLarge  Kind = "too_large"
 	KindReply     Kind = "reply"
+	KindCutOff    Kind = "cut_off"
 )
 
 const (

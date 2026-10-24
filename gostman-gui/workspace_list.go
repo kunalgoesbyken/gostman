@@ -31,11 +31,19 @@ func (s *workspaceState) isKnown(path string) bool {
 	return slices.Contains(s.Recent, path)
 }
 
+func defaultName(path string) string {
+	name, parent := filepath.Base(path), filepath.Base(filepath.Dir(path))
+	if strings.EqualFold(name, nestedWorkspace) && parent != "." && !strings.ContainsAny(parent, `\/`) {
+		return parent
+	}
+	return name
+}
+
 func (s *workspaceState) displayName(path string) string {
 	if name := strings.TrimSpace(s.Names[path]); name != "" {
 		return name
 	}
-	return filepath.Base(path)
+	return defaultName(path)
 }
 
 func (s *workspaceState) pin(path string, pinned bool) {
@@ -47,7 +55,7 @@ func (s *workspaceState) pin(path string, pinned bool) {
 
 func (s *workspaceState) rename(path string, name string) {
 	trimmed := strings.TrimSpace(name)
-	if trimmed == "" || trimmed == filepath.Base(path) {
+	if trimmed == "" || trimmed == defaultName(path) {
 		delete(s.Names, path)
 		return
 	}
@@ -124,6 +132,10 @@ func revealCommand(path string) *exec.Cmd {
 	return exec.Command("xdg-open", path)
 }
 
+func revealFolder(path string) error {
+	return revealFolder(path)
+}
+
 func (a *App) PinWorkspace(path string, pinned bool) (WorkspaceStatus, error) {
 	if err := changeKnownWorkspace(path, func(state *workspaceState) { state.pin(path, pinned) }); err != nil {
 		return WorkspaceStatus{}, err
@@ -163,10 +175,5 @@ func (a *App) RevealWorkspace(path string) error {
 	if !folderExists(path) {
 		return errors.New(missingFolder)
 	}
-	command := revealCommand(path)
-	if err := command.Start(); err != nil {
-		return err
-	}
-	go command.Wait()
-	return nil
+	return revealFolder(path)
 }

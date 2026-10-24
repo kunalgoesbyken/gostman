@@ -8,6 +8,7 @@ import { chordLabel, modifiersPrefix } from "../lib/chords"
 import { isApplePlatform, isDesktopApp } from "../lib/platform"
 import { updatePreferences, usePreferences } from "../lib/preferences"
 import { MOVING_KEYS, SHORTCUT_GROUPS, checkChord, shortcutRows, withChord, withoutChord } from "../lib/shortcuts"
+import { useAiEnabled } from "../lib/ai/session"
 import { SHORTCUT_TEXT } from "../lib/shortcutText"
 
 const CAPTURE_PLACEHOLDER = "…"
@@ -86,7 +87,11 @@ export function ShortcutsDialog({ onClose }) {
   const [session, setSession] = useState(null)
   const isDesktop = isDesktopApp()
   const isApple = isApplePlatform()
-  const rows = useMemo(() => shortcutRows(shortcuts, isDesktop, isApple), [shortcuts, isDesktop, isApple])
+  const isAiOn = useAiEnabled()
+  const rows = useMemo(
+    () => shortcutRows(shortcuts, isDesktop, isApple).filter((row) => isAiOn || !row.ai),
+    [shortcuts, isDesktop, isApple, isAiOn]
+  )
   const context = useMemo(() => ({ isDesktop, isApple, overrides: shortcuts }), [isDesktop, isApple, shortcuts])
 
   const save = useCallback((overrides) => {

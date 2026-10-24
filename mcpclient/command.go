@@ -16,7 +16,6 @@ import (
 
 	"github.com/kunalgoesbyken/gostman/childproc"
 	"github.com/kunalgoesbyken/gostman/engine"
-	"github.com/kunalgoesbyken/gostman/mcp"
 )
 
 const (
@@ -38,9 +37,11 @@ const (
 type commandLink struct {
 	process *exec.Cmd
 	input   io.WriteCloser
-	output  *bufio.Reader
 	stderr  *tail
 	done    chan struct{}
+	lines   chan []byte
+	quit    chan struct{}
+	failure error
 }
 
 type tail struct {
@@ -139,14 +140,16 @@ func openCommand(ctx context.Context, command string, target Target, expansion *
 	if err := expansion.Err(); err != nil {
 		return nil, configError("%v", err)
 	}
-	started, err := startCommand(ctx, args, environment)
+	limit := policy.ResponseLimit()
+	start := func(ctx context.Context) (link, error) { return startCommand(ctx, args, environment, limit) }
+	started, err := start(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &session{link: started, address: CommandPrefix + line, expansion: expansion, limit: policy.ResponseLimit()}, nil
+	return &session{link: started, reopen: start, address: CommandPrefix + line, expansion: expansion, limit: limit, started: time.Now()}, nil
 }
 
-func startCommand(ctx context.Context, args []string, environment []string) (*commandLink, error) {
+func startCommand(ctx context.Context, args []string, environment []string, limit int64) (*commandLink, error) {
 	process := exec.CommandContext(ctx, args[0], args[1:]...)
 	process.Env = environment
 	childproc.NoWindow(process)
@@ -163,12 +166,45 @@ func startCommand(ctx context.Context, args []string, environment []string) (*co
 	if err := process.Start(); err != nil {
 		return nil, configError("the command could not start: %v", err)
 	}
-	started := &commandLink{process: process, input: input, output: bufio.NewReader(output), stderr: stderr, done: make(chan struct{})}
+	started := &commandLink{
+		process: process,
+		input:   input,
+		stderr:  stderr,
+		done:    make(chan struct{}),
+		lines:   make(chan []byte),
+		quit:    make(chan struct{}),
+	}
+	go started.pump(bufio.NewReader(output), limit)
 	go func() {
 		process.Wait()
 		close(started.done)
 	}()
 	return started, nil
+}
+
+func (c *commandLink) pump(output *bufio.Reader, limit int64) {
+	defer close(c.lines)
+	for {
+		line, err := readLine(output, limit)
+		if err != nil {
+			c.failure = err
+			return
+		}
+		select {
+		case c.lines <- line:
+		case <-c.quit:
+			return
+		}
+	}
+}
+
+func (c *commandLink) exited() bool {
+	select {
+	case <-c.done:
+		return true
+	default:
+		return false
+	}
 }
 
 func (c *commandLink) write(payload any) error {
@@ -190,10 +226,10 @@ func (c *commandLink) stopped() error {
 	return protocolError("the command stopped before it answered: %s", detail)
 }
 
-func (c *commandLink) readLine(limit int64) ([]byte, error) {
+func readLine(output *bufio.Reader, limit int64) ([]byte, error) {
 	var line []byte
 	for {
-		chunk, err := c.output.ReadSlice('\n')
+		chunk, err := output.ReadSlice('\n')
 		line = append(line, chunk...)
 		if int64(len(line)) > limit {
 			return nil, answerTooLarge(limit)
@@ -202,31 +238,43 @@ func (c *commandLink) readLine(limit int64) ([]byte, error) {
 			return line, nil
 		}
 		if !errors.Is(err, bufio.ErrBufferFull) {
-			return nil, c.stopped()
+			return nil, err
 		}
 	}
 }
 
-func (c *commandLink) roundTrip(_ context.Context, id json.RawMessage, message mcp.Message, limit int64) (answer, envelope, error) {
-	if err := c.write(message); err != nil {
-		return answer{}, envelope{}, err
+func (c *commandLink) next(ctx context.Context) ([]byte, error) {
+	select {
+	case line, open := <-c.lines:
+		if open {
+			return line, nil
+		}
+		var tooLarge *failure
+		if errors.As(c.failure, &tooLarge) {
+			return nil, c.failure
+		}
+		return nil, c.stopped()
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+}
+
+func (c *commandLink) roundTrip(ctx context.Context, request outgoing, limit int64) (answer, envelope, error) {
+	received := answer{status: statusOK, code: commandStatusCode}
+	if err := c.write(request.message); err != nil {
+		return received, envelope{}, err
 	}
 	for {
-		line, err := c.readLine(limit)
+		line, err := c.next(ctx)
 		if err != nil {
-			return answer{}, envelope{}, err
+			return received, envelope{}, err
 		}
-		var incoming envelope
-		if json.Unmarshal(line, &incoming) != nil {
-			continue
+		if int64(len(line)) > limit {
+			return received, envelope{}, answerTooLarge(limit)
 		}
-		if incoming.answers(id) {
-			return answer{status: statusOK, code: commandStatusCode}, incoming, nil
-		}
-		if incoming.isRequest() {
-			if err := c.write(answerTo(incoming)); err != nil {
-				return answer{}, envelope{}, err
-			}
+		reply, done, err := received.take(line, request.id, c.write)
+		if err != nil || done {
+			return received, reply, err
 		}
 	}
 }
@@ -238,6 +286,7 @@ func (c *commandLink) deliver(_ context.Context, payload any) error {
 func (c *commandLink) established(string, string) {}
 
 func (c *commandLink) close() {
+	close(c.quit)
 	c.input.Close()
 	select {
 	case <-c.done:

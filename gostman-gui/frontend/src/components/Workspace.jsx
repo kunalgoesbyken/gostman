@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, lazy, 
 import { AlertTriangle } from "lucide-react"
 import { Sidebar } from "./Sidebar"
 import { RequestBar } from "./RequestBar"
+import { DiskChangeNotice } from "./DiskChangeNotice"
 import { ResponsePanel } from "./ResponsePanel"
 import { AppDialogs } from "./AppDialogs"
 import { AppHeader } from "./AppHeader"
@@ -15,14 +16,14 @@ import { DialogPending } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
 import { WelcomePanel } from "./WelcomePanel"
 import { GettingStartedButton, useOnboardingCompletion } from "./GettingStarted"
-import { selectActiveVariables, selectIsDialogOpen, selectResolvedVariables, useActiveTab, useAppStore } from "../store/appStore"
+import { restoreTabDrafts, selectActiveVariables, selectIsDialogOpen, selectResolvedVariables, useActiveTab, useAppStore } from "../store/appStore"
 import { useAutoSave } from "../hooks/useAutoSave"
 import { useRequestFieldHandlers } from "../hooks/useRequestFieldHandlers"
 import { useShortcuts } from "../hooks/useShortcuts"
 import { useSharedSecretConnections } from "../hooks/useSecretConnections"
 import { useCaptureStore } from "../lib/captureSession"
-import { useLoadTestStore } from "../lib/loadTestSession"
-import { useAiStore } from "../lib/ai/session"
+import { isLoadTestable, useLoadTestStore } from "../lib/loadTestSession"
+import { useAiEnabled, useAiStore } from "../lib/ai/session"
 import { TASK_EXPLAIN, TASK_REQUEST } from "../lib/ai/tasks"
 import { MIN_REQUEST_HEIGHT_PX, isNarrowViewport } from "../lib/layout"
 import { isBlankRequest } from "../lib/requestChanges"
@@ -33,6 +34,10 @@ import { createWorkspaceActions } from "../lib/workspaceActions"
 import { whenIdle } from "../lib/idle"
 import { PANE_ADDRESS, PANE_SIDEBAR, cyclePane, focusPane, watchPaneFocus } from "../lib/panes"
 import { SIDEBAR_TEXT } from "../lib/sidebarText"
+import { DATA_TEXT } from "../lib/dataText"
+import { takeDataDeleted } from "../lib/storage"
+import { isWebSocketURL } from "../lib/socketUrl"
+import { isSocketAddress, selectSession, useSocketStore } from "../lib/socketSessions"
 
 const CodeSnippetDialog = lazy(() => import("./CodeSnippetDialog").then((module) => ({ default: module.CodeSnippetDialog })))
 const ImportExportDialog = lazy(() => import("./ImportExportDialog").then((module) => ({ default: module.ImportExportDialog })))
@@ -50,7 +55,6 @@ const SpecSyncDialog = lazy(() => import("./SpecSyncDialog").then((module) => ({
 const FolderSettings = lazy(() => import("./FolderSettings").then((module) => ({ default: module.FolderSettings })))
 const RunnerDialog = lazy(() => import("./RunnerDialog").then((module) => ({ default: module.RunnerDialog })))
 const AiDialog = lazy(() => import("./AiDialog").then((module) => ({ default: module.AiDialog })))
-const AiSettingsDialog = lazy(() => import("./AiSettingsDialog").then((module) => ({ default: module.AiSettingsDialog })))
 const loadCodeEditor = () => import("./CodeEditor")
 const CodeEditor = lazy(() => loadCodeEditor().then((module) => ({ default: module.CodeEditor })))
 
@@ -73,7 +77,12 @@ function returnFocusFromClosedSidebar() {
   })
 }
 
-const createShortcutHandlers = (actions) => {
+const aiShortcutHandlers = (actions) => ({
+  aiGenerate: () => actions.ai.start(TASK_REQUEST),
+  aiExplain: () => actions.ai.start(TASK_EXPLAIN),
+})
+
+const createShortcutHandlers = (actions, isAiOn) => {
   const handlers = {
     commandPalette: () => store().openCommandPalette(),
     findRequest: () => store().openCommandPalette("requests"),
@@ -93,8 +102,7 @@ const createShortcutHandlers = (actions) => {
     nextPane: () => cyclePane(1),
     previousPane: () => cyclePane(-1),
     focusAddress: () => focusPane(PANE_ADDRESS),
-    aiGenerate: () => actions.ai.start(TASK_REQUEST),
-    aiExplain: () => actions.ai.start(TASK_EXPLAIN),
+    ...(isAiOn && aiShortcutHandlers(actions)),
   }
   if (actions.storage) {
     handlers.workspaceSwitcher = actions.storage.openSwitcher
@@ -106,6 +114,8 @@ const createShortcutHandlers = (actions) => {
 }
 
 const messageOf = (error) => error?.message || String(error)
+
+const isSocketOnly = (tab) => isWebSocketURL(tab.request.url) && !tab.response
 
 function LoadFailure({ reason, onRetry }) {
   return (
@@ -124,6 +134,7 @@ function useStoredData(backend) {
   const isHydrated = useAppStore((s) => s.hydrated)
   const hydrate = useAppStore((s) => s.hydrate)
   const showAlert = useAppStore((s) => s.showAlert)
+  const showNotice = useAppStore((s) => s.showNotice)
   const [failure, setFailure] = useState(null)
 
   useEffect(() => {
@@ -133,15 +144,16 @@ function useStoredData(backend) {
       if (!isCurrent) return
       hydrate(data)
       if (data.notice) showAlert("Saved data was unreadable", data.notice, "OK", "warning")
+      if (takeDataDeleted()) showNotice(DATA_TEXT.deleted)
     }
     const fail = (error) => {
       if (isCurrent) setFailure(messageOf(error))
     }
-    backend.load().then(adopt).catch(fail)
+    Promise.all([backend.load(), restoreTabDrafts(backend.tabDrafts)]).then(([data]) => adopt(data)).catch(fail)
     return () => {
       isCurrent = false
     }
-  }, [backend, isHydrated, failure, hydrate, showAlert])
+  }, [backend, isHydrated, failure, hydrate, showAlert, showNotice])
 
   const retry = useCallback(() => setFailure(null), [])
 
@@ -172,7 +184,7 @@ function usePersistence(backend) {
 
   const persist = useCallback((write) => {
     if (!useAppStore.getState().hydrated) return
-    write().catch((error) => reportPersistenceFailure(messageOf(error)))
+    write().catch(reportPersistenceFailure)
   }, [reportPersistenceFailure])
 
   const saveFolders = useCallback((value) => persist(() => backend.saveFolders(value)), [backend, persist])
@@ -228,9 +240,8 @@ function LoadedWorkspace({ backend, onBack }) {
   const captureDialogOpen = useCaptureStore((s) => s.isOpen)
   const loadTestDialogOpen = useLoadTestStore((s) => s.isOpen)
   const aiDialog = useAiStore((s) => s.dialog !== null)
-  const aiSettingsOpen = useAiStore((s) => s.settingsOpen)
-  const aiDialogOpen = aiDialog || aiSettingsOpen
-  const isDialogOpen = useAppStore(selectIsDialogOpen) || captureDialogOpen || loadTestDialogOpen || aiDialogOpen
+  const isAiOn = useAiEnabled()
+  const isDialogOpen = useAppStore(selectIsDialogOpen) || captureDialogOpen || loadTestDialogOpen || aiDialog
   const sharedLink = useSyncExternalStore(subscribeToSharedLink, pendingSharedLink)
   const openLink = useSyncExternalStore(subscribeToOpenLink, currentOpenLink)
 
@@ -252,6 +263,8 @@ function LoadedWorkspace({ backend, onBack }) {
 
   const activeTab = useActiveTab()
   const activeRequest = activeTab.request
+  const isSocket = useMemo(() => isSocketAddress(activeRequest.url, variables), [activeRequest.url, variables])
+  const socketStatus = useSocketStore((state) => selectSession(activeTab.id)(state).status)
   const isLoading = activeTab.pendingId !== null
   const showsWelcome = welcomeVisible && isBlankRequest(activeRequest) && activeTab.response === null && !isLoading
 
@@ -267,6 +280,7 @@ function LoadedWorkspace({ backend, onBack }) {
   const variablesMap = useMemo(() => exportableVariables(resolvedVariables), [resolvedVariables])
   const shareableEnvironments = useMemo(() => withoutSecretValues(environments), [environments])
   const openNewTab = useCallback(() => newTab(), [newTab])
+  const disconnectSocket = useCallback(() => actions.sockets.disconnect(activeTab.id), [actions, activeTab.id])
   const scannedCollection = useMemo(
     () => ({ requests, folders, environments: shareableEnvironments, settings: collectionSettings }),
     [requests, folders, shareableEnvironments, collectionSettings]
@@ -280,12 +294,13 @@ function LoadedWorkspace({ backend, onBack }) {
   const updateField = useCallback((field, value) => updateActiveRequest({ [field]: value }), [updateActiveRequest])
   const fieldHandlers = useRequestFieldHandlers(updateField)
 
-  const shortcuts = useMemo(() => createShortcutHandlers(actions), [actions])
+  const shortcuts = useMemo(() => createShortcutHandlers(actions, isAiOn), [actions, isAiOn])
 
   useShortcuts(shortcuts, !isDialogOpen && !sharedLink && !openLink)
   useEffect(watchPaneFocus, [])
   useEffect(returnFocusFromClosedSidebar, [])
   usePersistence(backend)
+  useEffect(() => actions.storage?.followDisk(), [actions])
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background text-foreground">
@@ -334,6 +349,8 @@ function LoadedWorkspace({ backend, onBack }) {
             onNewTab={openNewTab}
           />
 
+          <DiskChangeNotice />
+
           <RequestBar
             activeRequest={activeRequest}
             {...fieldHandlers}
@@ -341,8 +358,10 @@ function LoadedWorkspace({ backend, onBack }) {
             onCancel={actions.cancel}
             onSave={actions.save}
             onGenerateCode={actions.generateCode}
-            onLoadTest={actions.loadTest.isAvailable ? actions.loadTest.open : null}
+            onLoadTest={actions.loadTest.isAvailable && isLoadTestable(activeRequest) ? actions.loadTest.open : null}
             onPasteCurl={actions.pasteCurl}
+            onDisconnect={disconnectSocket}
+            socketStatus={isSocket ? socketStatus : null}
             loading={isLoading}
           />
 
@@ -366,15 +385,15 @@ function LoadedWorkspace({ backend, onBack }) {
               />
             </section>
 
-            <ResponsePanel
+            {!isSocketOnly(activeTab) && <ResponsePanel
               response={activeTab.response}
               history={activeTab.responses}
               tests={activeTab.tests}
               loading={isLoading}
               onDownload={actions.download}
               onSaveExample={actions.examples.saveResponse}
-              onExplain={() => actions.ai.start(TASK_EXPLAIN)}
-            />
+              onExplain={isAiOn ? () => actions.ai.start(TASK_EXPLAIN) : null}
+            />}
           </div>}
         </main>
       </div>
@@ -420,15 +439,20 @@ function LoadedWorkspace({ backend, onBack }) {
         {specDialog?.mode === "sync" && <SpecSyncDialog dialog={specDialog} link={specLinks[specDialog.folderId]} actions={actions.openapi} onClose={closeSpecDialog} />}
         {folderSettings && <FolderSettings backend={backend} scope={folderSettings} EditorComponent={CodeEditor} onClose={closeFolderSettings} />}
         {aiDialog && <AiDialog actions={actions.ai} />}
-        {aiSettingsOpen && <AiSettingsDialog actions={actions.ai} />}
         {runner.isOpen && <RunnerDialog runner={runner} folders={folders} requests={requests} actions={actions} />}
       </Suspense>
 
-      <StatusBar onOpenMock={actions.mock.open} onOpenCapture={actions.capture.open} />
+      <StatusBar
+        onOpenMock={actions.mock.open}
+        onOpenCapture={actions.capture.open}
+        updates={backend.updates}
+        remindsExport={actions.backups?.remindsExport}
+        onExport={() => actions.runCommand("export")}
+      />
 
       <NoticeToast />
 
-      <AppDialogs onCommand={actions.runCommand} secrets={actions.secrets} listFonts={backend.listInstalledFonts} windowFrame={backend.windowFrame} hasWorkspaces={Boolean(actions.storage)} hasLoadTest={actions.loadTest.isAvailable} />
+      <AppDialogs onCommand={actions.runCommand} secrets={actions.secrets} listFonts={backend.listInstalledFonts} windowFrame={backend.windowFrame} hasWorkspaces={Boolean(actions.storage)} hasLoadTest={actions.loadTest.isAvailable} isAiOn={isAiOn} ai={actions.ai} backups={actions.backups} relay={backend.relay} updates={backend.updates} />
     </div>
   )
 }

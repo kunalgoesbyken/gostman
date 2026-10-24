@@ -23,7 +23,7 @@ Gostman reads the content after a short pause and shows a summary before anythin
 
 | Format | Notes |
 | --- | --- |
-| Postman | Postman files. Collection variables are imported once as variables, not copied into every request |
+| Postman | Collections (v2.0 and v2.1), environments, globals and the JSON file of Postman's **Export data**. Collection variables become collection variables; collection and folder auth and scripts become [folder settings](folder-settings.md) and requests inherit them. Globals become a global environment in the app; `gostman import` adds them to the collection variables in `gostman.yaml`. See [Coming from Postman](coming-from-postman.md) |
 | OpenAPI | OpenAPI and Swagger specs |
 | Insomnia | Insomnia exports |
 | HAR | HAR captures |
@@ -78,7 +78,7 @@ Environments come from:
 - `http-client.env.json` and `http-client.private.env.json` (JetBrains). Each top-level name becomes an environment, and values from the private file are added to it and marked secret. Values that are objects, such as JetBrains auth settings, are left out with a note.
 - A `settings.json` with `rest-client.environmentVariables` (REST Client). Each environment gets the `$shared` values, and `{{$shared name}}` is replaced with the shared value. Comments and trailing commas are allowed. Folders that start with a dot are not searched, so add `.vscode/settings.json` to the import yourself.
 
-JetBrains response handlers (`> {% ... %}`) become post-response scripts and pre-request handlers (`< {% ... %}`) become pre-request scripts. Common calls are rewritten: `client.test` to `test`, `client.assert(value, message)` to `expect(value, message).to.be.ok`, `client.global.set` and `get` and `request.variables.set` and `get` to `env.set` and `env.get`, `client.log` to `console.log`, `response.body` and `response.status` to `res.body` and `res.status`, and `response.headers.valueOf(name)` to `res.getHeader(name)`. Anything else is kept as written and listed in the summary.
+JetBrains response handlers (`> {% ... %}`) become post-response scripts and pre-request handlers (`< {% ... %}`) become pre-request scripts. Common calls are rewritten: `client.test` to `test`, `client.assert(value, message)` to `expect(value, message).to.be.ok`, `client.global.set` and `get` to `env.set` and `env.get`, `request.variables.set` and `get` to `env.session.set` and `env.session.get` (session values, never saved), `client.log` to `console.log`, `response.body` and `response.status` to `res.body` and `res.status`, and `response.headers.valueOf(name)` to `res.getHeader(name)`. Anything else is kept as written and listed in the summary.
 
 Not imported, and listed in the summary: bodies read from files with `< path` (the request keeps the file name, attach the file again), response handlers in separate `.js` files, `>>` response redirects and `WEBSOCKET` and `GRPC` requests.
 
@@ -102,7 +102,7 @@ Imports are untrusted input, as described in the project notes:
 - They never disable TLS verification. If a request in the file turned verification off, it is kept on and a warning names up to five such requests.
 - They never carry OAuth tokens.
 - Folders in a loop or nested deeper than 32 levels are moved to the top level, with a warning.
-- Variables from the file are merged into the active environment. If the active environment is not valid JSON, the variables are skipped with a note. An environment whose variables are not valid JSON is skipped by name.
+- Collection variables from the file are merged into the collection variables (**Environments**, **Collection variables**). If those are not valid JSON, the variables are skipped with a note. An environment whose variables are not valid JSON is skipped by name.
 - Collection settings are adopted only when the open collection has none, see [Folder and collection settings](folder-settings.md).
 
 ### Scripts and OAuth 2.0
@@ -124,13 +124,13 @@ The **Export** tab previews the content, shows how many requests, folders and en
 | Format | What you get |
 | --- | --- |
 | Gostman | Full backup: requests, folders and every environment. OAuth tokens are removed |
-| Postman | Collection v2.1 with the active environment as collection variables |
+| Postman | Collection v2.1 with the variables in use, except secret ones, as collection variables, scripts, saved examples, and the auth, scripts and variables of folders and the collection |
 | OpenAPI JSON | OpenAPI 3.0 description of the HTTP requests |
 | OpenAPI YAML | OpenAPI 3.0 description of the HTTP requests |
 | Markdown | Readable API documentation |
 | HTML docs | One self-contained page to publish or print. Credentials are left out and variables stay as `{{name}}` |
 | Bruno | A folder of `.bru` files with environments, saved as a `.zip` |
-| curl script | One curl command per request. Credentials become environment variable placeholders |
+| curl script | One curl command per request. Credentials become environment variable placeholders, and the variables to set are listed at the top |
 | HAR | HTTP Archive 1.2 with the requests and no responses |
 | .http files | Requests for VS Code REST Client and JetBrains HTTP Client, one file per folder, with environments in `http-client.env.json` |
 
@@ -169,7 +169,7 @@ What the page contains and how it redacts values is described in [Sharing and do
 
 ### Importing a spec
 
-Load a spec from an address, a file or pasted text, then choose **Import**. Each operation becomes a request. A spec loaded from an address or an opened file is linked to the folder that the import creates, so you can sync it later. Variables that the spec defines are added to the active environment when it does not have them yet.
+Load a spec from an address, a file or pasted text, then choose **Import**. Each operation becomes a request. A spec loaded from an address or an opened file is linked to the folder that the import creates, so you can sync it later. Variables that the spec defines, such as `baseUrl`, are added to the collection variables (**Environments**, **Collection variables**) unless a variable with that name is already set. A path parameter becomes a `{{name}}` placeholder in the URL with a request variable that holds the example value, so `/users/{id}` is imported as `/users/{{id}}`.
 
 ### Spec viewer
 
@@ -188,6 +188,20 @@ For a folder linked to a spec, the folder menu has **Check for spec updates**. I
 - **Removed operations**
 
 Each item has a checkbox. Operations you edited in Gostman are marked **edited here** and start unchecked, because checking one replaces your edits to its URL, parameters, body and authentication. Choose **Apply selected** to add, update and remove the checked requests. When nothing differs, the dialog says **The collection already matches the spec.** A folder without a saved address shows **This collection has no saved spec address.**
+
+### Contract checks
+
+Every HTTP response to a request in a linked folder, or in one of its subfolders, is checked against the spec. The checks appear under **Contract** in the Tests tab of the response, count in its total, and fail a request in the runner like any other check:
+
+- **Status 200 is documented for GET /pets/{id}**: the spec lists this status for the operation, as the exact code, a range such as `2XX`, or `default`. When it does not, the message lists the documented statuses and the other checks are skipped.
+- **Content type application/json is documented**: the response's content type is one the spec lists for that status. `application/*` and `*/*` in the spec match too. This is checked only when the spec documents a body for the status.
+- **Body matches the documented schema**: the JSON body matches the response schema, with each problem listed by its place in the body; see [JSON Schema checks](scripting-and-settings.md#json-schema-checks). This is checked only for JSON content types with a schema.
+
+A request created from the spec is checked against its own operation. Other requests are matched by method and path: the path's last segments must fit the operation's template, such as `/pets/{id}`, and a path that starts with the base path of one of the spec's servers is preferred. When no operation matches, a note in the Tests tab says so and nothing is checked. Schemas may use `$ref` to the spec's components and to other files the spec refers to.
+
+The spec is read again after each sync and once per app session. When it cannot be read, a note in the Tests tab says why. To switch the checks off for a folder, choose **Stop checking responses against the spec** in its menu; **Check responses against the spec** switches them back on.
+
+`gostman run --contract spec.yaml` runs the same checks on the command line; see [Command line](cli.md).
 
 ### Linter
 

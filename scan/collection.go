@@ -54,6 +54,7 @@ func (s *scanner) sorted() []Finding {
 	}
 	slices.SortStableFunc(found, func(a, b Finding) int {
 		return cmp.Or(
+			cmp.Compare(severityRanks[b.Severity], severityRanks[a.Severity]),
 			cmp.Compare(a.Location.Path, b.Location.Path),
 			cmp.Compare(a.Location.Field, b.Location.Field),
 			cmp.Compare(a.Rule, b.Rule),

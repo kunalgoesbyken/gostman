@@ -85,6 +85,7 @@ type Request struct {
 	FolderID    string      `json:"folderId"`
 	Auth        engine.Auth `json:"auth"`
 	Examples    string      `json:"examples"`
+	Vars        string      `json:"vars"`
 }
 
 type param struct {
@@ -178,17 +179,15 @@ func (d *Document) GenerateRequest(o *Operation) *Request {
 
 	path := o.Path
 	var query []string
-	var disabled, headers []Row
+	var disabled, headers, vars []Row
 	for _, p := range params {
 		value := d.paramValue(p)
 		switch p.in {
 		case "path":
-			if value == "" {
-				value = "{{" + p.name + "}}"
-			} else {
-				value = url.PathEscape(value)
+			path = strings.ReplaceAll(path, "{"+p.name+"}", "{{"+p.name+"}}")
+			if value != "" {
+				vars = append(vars, Row{Key: p.name, Value: value, Enabled: true})
 			}
-			path = strings.ReplaceAll(path, "{"+p.name+"}", value)
 		case "query":
 			if p.required {
 				query = append(query, url.QueryEscape(p.name)+"="+url.QueryEscape(value))
@@ -209,6 +208,7 @@ func (d *Document) GenerateRequest(o *Operation) *Request {
 		request.URL += "?" + strings.Join(query, "&")
 	}
 	request.QueryParams = encodeRows(disabled)
+	request.Vars = encodeRows(vars)
 
 	body := d.requestBody(o, params)
 	request.Body, request.BodyType = body.text, body.kind

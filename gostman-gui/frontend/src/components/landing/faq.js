@@ -9,7 +9,7 @@ export const FAQ = [
   },
   {
     question: "Where are my collections kept?",
-    answer: "On your machine. The desktop app keeps them in its data folder or in a folder of YAML files you choose, and the web version keeps them in your browser's local storage. Nothing is synced to a Gostman server.",
+    answer: "On your machine. The desktop app keeps them in its data folder or in a folder of YAML files you choose, and the web version keeps them in your browser's storage. Nothing is synced to a Gostman server.",
   },
   {
     question: "Does the web version send my requests through a server?",

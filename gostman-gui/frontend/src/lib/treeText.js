@@ -1,4 +1,6 @@
 export const TREE_TEXT = {
+  searchPlaceholder: 'Search name, URL or tag',
+  treeLabel: 'Collections',
   moveUp: 'Move up',
   moveDown: 'Move down',
   moveToFolder: 'Move to folder',
@@ -24,6 +26,8 @@ export const TREE_TEXT = {
   noResultsTitle: 'No results',
   noResultsDescription: 'No request name, URL or tag matches.',
   emptyFolder: 'This folder is empty',
+  untitled: 'Untitled',
+  actionsFor: (name) => `Actions for ${name}`,
   dropHere: 'Drop here to move to the top level',
   editLabels: 'Colour and tags…',
   editTags: 'Tags…',

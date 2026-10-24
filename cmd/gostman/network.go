@@ -1,8 +1,6 @@
 package main
 
 import (
-	"crypto/tls"
-	"crypto/x509"
 	"errors"
 	"flag"
 	"fmt"
@@ -10,9 +8,22 @@ import (
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/runner"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 const everyHost = "*"
+
+var (
+	cliAdvice = engine.Advice{
+		UntrustedAuthority: "Pass the file of its certificate authority with --cacert, or skip verification with --insecure.",
+		ClientCertificate:  "If the server requires a client certificate, pass it with --client-cert.",
+	}
+	relayAdvice = engine.Advice{
+		UntrustedAuthority: "Restart gostman relay with --cacert and the file of its certificate authority, or turn off certificate verification for this request.",
+		ClientCertificate:  "If the server requires a client certificate, restart gostman relay with --client-cert.",
+	}
+)
 
 type fileList []string
 
@@ -49,8 +60,8 @@ func (c *clientCertificates) Set(value string) error {
 		return c.setUnscoped(value)
 	}
 	cert, key, paired := strings.Cut(files, ",")
-	if strings.TrimSpace(host) == "" || !paired || cert == "" || key == "" {
-		return errors.New("write it as host=cert.pem,key.pem, or give the certificate file and its key with --client-key")
+	if strings.TrimSpace(host) == "" || cert == "" || (paired && key == "") {
+		return errors.New("write it as host=cert.pem,key.pem or host=cert.p12, or give the certificate file and its key with --client-key")
 	}
 	c.scoped = append(c.scoped, certificateFiles{host: host, cert: cert, key: key})
 	return nil
@@ -68,61 +79,56 @@ func (c *clientCertificates) setUnscoped(path string) error {
 }
 
 type networkSettings struct {
-	authorities  fileList
-	certificates clientCertificates
-	key          string
-	proxy        string
-	bypass       string
+	authorities   fileList
+	certificates  clientCertificates
+	key           string
+	passphraseEnv string
+	proxy         string
+	bypass        string
+	advice        engine.Advice
 }
 
 func networkFlags(flags *flag.FlagSet) *networkSettings {
-	settings := &networkSettings{}
+	settings := &networkSettings{advice: cliAdvice}
 	flags.Var(&settings.authorities, "cacert", "")
 	flags.Var(&settings.certificates, "client-cert", "")
 	flags.StringVar(&settings.key, "client-key", "", "")
+	flags.StringVar(&settings.passphraseEnv, "client-cert-pass-env", "", "")
 	flags.StringVar(&settings.proxy, "proxy", "", "")
 	flags.StringVar(&settings.bypass, "noproxy", "", "")
 	return settings
 }
 
-func (s *networkSettings) isDefault() bool {
-	return len(s.authorities) == 0 && len(s.certificates.scoped) == 0 && s.certificates.unscoped == "" && s.key == "" && s.proxy == "" && s.bypass == ""
-}
-
-func (s *networkSettings) network() (*engine.Network, error) {
-	if s.isDefault() {
-		return nil, nil
-	}
-	if err := s.check(); err != nil {
-		return nil, err
-	}
-	config := engine.NetworkConfig{ProxyMode: engine.ProxySystem}
-	if s.proxy != "" {
-		config.ProxyMode = engine.ProxyCustom
-		config.ProxyURL = s.proxy
-		config.ProxyBypass = s.bypass
-	}
-	authorities, err := readAuthorities(s.authorities)
-	if err != nil {
-		return nil, err
-	}
-	config.CAPEM = authorities
-	certificates, err := readCertificates(s.allCertificates())
-	if err != nil {
-		return nil, err
-	}
-	config.Certificates = certificates
-	return engine.NewNetwork(config)
-}
-
 func (s *networkSettings) check() error {
 	switch {
-	case (s.certificates.unscoped == "") != (s.key == ""):
-		return errors.New("--client-cert <file> and --client-key <file> go together")
+	case s.certificates.unscoped == "" && s.key != "":
+		return errors.New("--client-key <file> belongs to --client-cert <file>")
 	case s.bypass != "" && s.proxy == "":
 		return errors.New("--noproxy lists hosts that skip --proxy; with the HTTPS_PROXY environment variable, use NO_PROXY")
 	}
 	return nil
+}
+
+func (s *networkSettings) passphrase() (string, error) {
+	if s.passphraseEnv == "" {
+		return "", nil
+	}
+	value, found := os.LookupEnv(s.passphraseEnv)
+	if !found {
+		return "", fmt.Errorf("--client-cert-pass-env names %s, which is not set", s.passphraseEnv)
+	}
+	return value, nil
+}
+
+func (s *networkSettings) files() engine.NetworkFiles {
+	files := engine.NetworkFiles{CAFiles: s.authorities}
+	if s.proxy != "" {
+		files.ProxyMode, files.ProxyURL, files.ProxyBypass, files.ProxySource = engine.ProxyCustom, s.proxy, s.bypass, "the --proxy flag"
+	}
+	for _, entry := range s.allCertificates() {
+		files.Certificates = append(files.Certificates, engine.CertificateFiles{Host: entry.host, CertFile: entry.cert, KeyFile: entry.key})
+	}
+	return files
 }
 
 func (s *networkSettings) allCertificates() []certificateFiles {
@@ -132,45 +138,36 @@ func (s *networkSettings) allCertificates() []certificateFiles {
 	return append(s.certificates.scoped, certificateFiles{host: everyHost, cert: s.certificates.unscoped, key: s.key})
 }
 
-func readAuthorities(paths []string) (string, error) {
-	var bundle strings.Builder
-	for _, path := range paths {
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return "", fmt.Errorf("--cacert: %w", err)
-		}
-		if !x509.NewCertPool().AppendCertsFromPEM(content) {
-			return "", fmt.Errorf("--cacert %s holds no PEM certificates", path)
-		}
-		bundle.Write(content)
-		bundle.WriteString("\n")
+func withPassphrase(files engine.NetworkFiles, passphrase string) engine.NetworkFiles {
+	certificates := make([]engine.CertificateFiles, len(files.Certificates))
+	for i, entry := range files.Certificates {
+		entry.Passphrase = passphrase
+		certificates[i] = entry
 	}
-	return bundle.String(), nil
+	files.Certificates = certificates
+	return files
 }
 
-func readCertificates(entries []certificateFiles) ([]engine.ClientCertificate, error) {
-	certificates := make([]engine.ClientCertificate, 0, len(entries))
-	for _, entry := range entries {
-		certificate, err := readCertificate(entry)
-		if err != nil {
-			return nil, err
-		}
-		certificates = append(certificates, certificate)
+func withPassphraseHint(err error) error {
+	if errors.Is(err, engine.ErrPassphraseNeeded) {
+		return fmt.Errorf("%w: put it in an environment variable and pass the variable's name with --client-cert-pass-env", err)
 	}
-	return certificates, nil
+	return err
 }
 
-func readCertificate(entry certificateFiles) (engine.ClientCertificate, error) {
-	cert, err := os.ReadFile(entry.cert)
+func (s *networkSettings) network(stored runner.Collection) (*engine.Network, error) {
+	given, collected := s.files(), stored.Network
+	passphrase, err := s.passphrase()
 	if err != nil {
-		return engine.ClientCertificate{}, fmt.Errorf("--client-cert: %w", err)
+		return nil, err
 	}
-	key, err := os.ReadFile(entry.key)
+	layer, err := withPassphrase(collected, passphrase).Read(engine.FolderFiles(stored.Root))
 	if err != nil {
-		return engine.ClientCertificate{}, fmt.Errorf("--client-key: %w", err)
+		return nil, fmt.Errorf("%s network: %w", workspace.ManifestName, withPassphraseHint(err))
 	}
-	if _, err := tls.X509KeyPair(cert, key); err != nil {
-		return engine.ClientCertificate{}, fmt.Errorf("client certificate %s with key %s: %w", entry.cert, entry.key, err)
+	flagged, err := withPassphrase(given, passphrase).Read(os.ReadFile)
+	if err != nil {
+		return nil, withPassphraseHint(err)
 	}
-	return engine.ClientCertificate{Host: entry.host, CertPEM: string(cert), KeyPEM: string(key)}, nil
+	return engine.NewNetwork(engine.NetworkConfig{ProxyMode: engine.ProxySystem, Advice: s.advice}.With(layer).With(flagged))
 }

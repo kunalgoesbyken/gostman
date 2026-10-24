@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -39,10 +38,13 @@ type filePart struct {
 	FileName    string `json:"fileName"`
 	ContentType string `json:"contentType"`
 	Data        string `json:"data"`
+	Path        string `json:"path"`
 	Enabled     *bool  `json:"enabled"`
 }
 
 func (p filePart) isFile() bool { return p.Type == "file" }
+
+func (p filePart) isAttached() bool { return p.Path != "" }
 
 func (p filePart) disabled() bool { return p.Enabled != nil && !*p.Enabled }
 
@@ -61,7 +63,7 @@ func (p filePart) contentType() string {
 	return p.ContentType
 }
 
-func buildBody(r Request, isGraphQL bool, substitute func(string) string) ([]byte, string, error) {
+func buildBody(r Request, isGraphQL bool, substitute func(string) string, stream *bodyStream) ([]byte, string, error) {
 	if isGraphQL {
 		return graphqlBody(r, substitute)
 	}
@@ -71,9 +73,9 @@ func buildBody(r Request, isGraphQL bool, substitute func(string) string) ([]byt
 	case BodyForm:
 		return formBody(r.Body, substitute)
 	case BodyMultipart:
-		return multipartBody(r.Body, substitute)
+		return multipartBody(r.Body, substitute, stream)
 	case BodyBinary:
-		return binaryBody(r.Body)
+		return binaryBody(r.Body, stream)
 	default:
 		return rawBody(r, substitute)
 	}
@@ -122,7 +124,14 @@ func formBody(raw string, substitute func(string) string) ([]byte, string, error
 	return []byte(strings.Join(fields, "&")), "application/x-www-form-urlencoded", nil
 }
 
-func multipartBody(raw string, substitute func(string) string) ([]byte, string, error) {
+func inline(stream *bodyStream) []byte {
+	if stream.streamed() {
+		return nil
+	}
+	return stream.bytes()
+}
+
+func multipartBody(raw string, substitute func(string) string, stream *bodyStream) ([]byte, string, error) {
 	var parts []filePart
 	if strings.TrimSpace(raw) != "" {
 		if err := json.Unmarshal([]byte(raw), &parts); err != nil {
@@ -130,36 +139,42 @@ func multipartBody(raw string, substitute func(string) string) ([]byte, string, 
 		}
 	}
 
-	var buffer bytes.Buffer
-	writer := multipart.NewWriter(&buffer)
+	writer := multipart.NewWriter(stream)
 	for _, part := range parts {
 		if part.disabled() || strings.TrimSpace(part.Key) == "" {
 			continue
 		}
-		if err := writePart(writer, part, substitute); err != nil {
+		if err := writePart(writer, part, substitute, stream); err != nil {
 			return nil, "", err
 		}
 	}
 	if err := writer.Close(); err != nil {
 		return nil, "", err
 	}
-	return buffer.Bytes(), writer.FormDataContentType(), nil
+	return inline(stream), writer.FormDataContentType(), nil
 }
 
-func writePart(writer *multipart.Writer, part filePart, substitute func(string) string) error {
+func writePart(writer *multipart.Writer, part filePart, substitute func(string) string, stream *bodyStream) error {
 	key := substitute(part.Key)
 	if !part.isFile() {
 		return writer.WriteField(key, substitute(part.Value))
+	}
+
+	header := textproto.MIMEHeader{}
+	header.Set("Content-Disposition", fmt.Sprintf(`form-data; name=%q; filename=%q`, key, part.FileName))
+	if part.isAttached() {
+		header.Set("Content-Type", attachedType(part.ContentType, part.Path))
+		if _, err := writer.CreatePart(header); err != nil {
+			return err
+		}
+		return stream.attach(part.FileName, part.Path)
 	}
 
 	data, err := part.bytes()
 	if err != nil {
 		return err
 	}
-	header := textproto.MIMEHeader{}
-	header.Set("Content-Disposition", fmt.Sprintf(`form-data; name=%q; filename=%q`, key, part.FileName))
 	header.Set("Content-Type", part.contentType())
-
 	target, err := writer.CreatePart(header)
 	if err != nil {
 		return err
@@ -168,13 +183,16 @@ func writePart(writer *multipart.Writer, part filePart, substitute func(string) 
 	return err
 }
 
-func binaryBody(raw string) ([]byte, string, error) {
+func binaryBody(raw string, stream *bodyStream) ([]byte, string, error) {
 	if strings.TrimSpace(raw) == "" {
 		return nil, "", nil
 	}
 	var file filePart
 	if err := json.Unmarshal([]byte(raw), &file); err != nil {
 		return nil, "", fmt.Errorf("file body is not valid: %w", err)
+	}
+	if file.isAttached() {
+		return nil, attachedType(file.ContentType, file.Path), stream.attach(file.FileName, file.Path)
 	}
 	data, err := file.bytes()
 	if err != nil {

@@ -8,33 +8,46 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/mcp"
 )
 
 const (
-	statusOK        = "OK"
-	statusToolError = "Tool error"
-	statusRefused   = "JSON-RPC error"
+	statusOK            = "OK"
+	statusToolError     = "Tool error"
+	statusRefused       = "JSON-RPC error"
+	statusInputRequired = "Input required"
 
 	fieldIsError = "isError"
+	contentText  = "text"
 
-	shownRejection = 300
+	shownRejection  = 300
+	credentialsHint = ". It needs credentials: select Sign in to get a token with OAuth, or set them on the Auth or Headers tab"
 )
 
 type envelope struct {
 	ID     json.RawMessage `json:"id"`
 	Method string          `json:"method"`
+	Params json.RawMessage `json:"params"`
 	Result json.RawMessage `json:"result"`
 	Error  *mcp.Failure    `json:"error"`
 }
 
+type notice struct {
+	method string
+	params json.RawMessage
+	at     time.Time
+}
+
 type answer struct {
-	status string
-	code   int
-	header http.Header
-	result json.RawMessage
+	status  string
+	code    int
+	header  http.Header
+	result  json.RawMessage
+	pending bool
+	notices []notice
 }
 
 type rejection struct {
@@ -60,11 +73,35 @@ func (e envelope) isRequest() bool {
 	return e.Method != "" && hasID(e.ID)
 }
 
+func (e envelope) isNotification() bool {
+	return e.Method != "" && !hasID(e.ID)
+}
+
 func (e envelope) answers(id json.RawMessage) bool {
 	if e.Method != "" {
 		return false
 	}
 	return bytes.Equal(e.ID, id) || (e.Error != nil && !hasID(e.ID))
+}
+
+func (e envelope) notice() notice {
+	return notice{method: e.Method, params: e.Params, at: time.Now()}
+}
+
+func (a *answer) take(data []byte, id json.RawMessage, respond func(any) error) (envelope, bool, error) {
+	var incoming envelope
+	if json.Unmarshal(data, &incoming) != nil {
+		return envelope{}, false, nil
+	}
+	switch {
+	case incoming.answers(id):
+		return incoming, true, nil
+	case incoming.isNotification():
+		a.notices = append(a.notices, incoming.notice())
+	case incoming.isRequest():
+		return envelope{}, false, respond(answerTo(incoming))
+	}
+	return envelope{}, false, nil
 }
 
 func mediaType(header http.Header) string {
@@ -88,45 +125,39 @@ func flatten(header http.Header) []engine.HeaderEntry {
 	return entries
 }
 
-func (a answer) response(address, status, contentType string, body []byte) engine.Response {
+func (s *session) respond(a answer, status, contentType string, body []byte, failed bool) engine.Response {
 	return engine.Response{
-		Status:       status,
-		StatusCode:   a.code,
-		Headers:      flatten(a.header),
-		Body:         string(body),
-		BodyEncoding: engine.EncodingUTF8,
-		ContentType:  contentType,
-		Size:         int64(len(body)),
-		URL:          address,
-		Protocol:     Protocol,
+		Status:        status,
+		StatusCode:    a.code,
+		Headers:       flatten(a.header),
+		Body:          string(body),
+		BodyEncoding:  engine.EncodingUTF8,
+		ContentType:   contentType,
+		Size:          int64(len(body)),
+		URL:           s.address,
+		Protocol:      Protocol,
+		Failed:        failed,
+		Notifications: s.notices,
 	}
 }
 
 func (r *rejection) Error() string {
+	message := fmt.Sprintf("the server answered %s", r.status)
 	shown := []rune(strings.TrimSpace(r.body))
 	if len(shown) > shownRejection {
 		shown = shown[:shownRejection]
 	}
-	if len(shown) == 0 {
-		return fmt.Sprintf("the server answered %s", r.status)
+	if len(shown) > 0 {
+		message += ": " + string(shown)
 	}
-	return fmt.Sprintf("the server answered %s: %s", r.status, string(shown))
-}
-
-func (r *rejection) response(address string) engine.Response {
-	return r.answer.response(address, r.status, mediaType(r.header), []byte(r.body))
+	if r.code == http.StatusUnauthorized || r.code == http.StatusForbidden {
+		message += credentialsHint
+	}
+	return message
 }
 
 func (r *refusal) Error() string {
 	return fmt.Sprintf("the server answered %s with error %d: %s", r.method, r.reason.Code, r.reason.Message)
-}
-
-func (r *refusal) response(address string) engine.Response {
-	body, err := json.Marshal(refusalBody{r.reason})
-	if err != nil {
-		return engine.Failure(engine.ErrorNetwork, r.Error())
-	}
-	return r.answer.response(address, statusRefused, typeJSON, body)
 }
 
 func withErrorFlag(result json.RawMessage) ([]byte, bool) {
@@ -146,11 +177,35 @@ func withErrorFlag(result json.RawMessage) ([]byte, bool) {
 	return encoded, false
 }
 
-func (a answer) outcome(address string) engine.Response {
-	body, failed := withErrorFlag(a.result)
-	status := statusOK
-	if failed {
-		status = statusToolError
+func ToolErrorText(body string) string {
+	var result struct {
+		Content []struct {
+			Type string `json:"type"`
+			Text string `json:"text"`
+		} `json:"content"`
 	}
-	return a.response(address, status, typeJSON, body)
+	if json.Unmarshal([]byte(body), &result) != nil {
+		return ""
+	}
+	var lines []string
+	for _, item := range result.Content {
+		if item.Type == contentText && strings.TrimSpace(item.Text) != "" {
+			lines = append(lines, item.Text)
+		}
+	}
+	return strings.Join(lines, "\n")
+}
+
+func (s *session) outcome(a answer, method string) engine.Response {
+	if a.pending {
+		return s.respond(a, statusInputRequired, typeJSON, a.result, true)
+	}
+	if method != MethodCallTool {
+		return s.respond(a, statusOK, typeJSON, a.result, false)
+	}
+	body, failed := withErrorFlag(a.result)
+	if failed {
+		return s.respond(a, statusToolError, typeJSON, body, true)
+	}
+	return s.respond(a, statusOK, typeJSON, body, false)
 }

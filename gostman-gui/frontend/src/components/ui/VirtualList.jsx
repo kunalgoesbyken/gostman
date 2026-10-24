@@ -9,7 +9,7 @@ export function scrollIndexIntoView(container, index, rowHeight) {
   else if (top + rowHeight > container.scrollTop + container.clientHeight) container.scrollTop = top + rowHeight - container.clientHeight
 }
 
-export function VirtualList({ items, rowHeight, renderRow, className, scrollRef, ...props }) {
+export function VirtualList({ items, rowHeight, renderRow, className, scrollRef, pinnedIndex = -1, ...props }) {
   const ownRef = useRef(null)
   const containerRef = scrollRef || ownRef
   const [scrollTop, setScrollTop] = useState(0)
@@ -29,6 +29,7 @@ export function VirtualList({ items, rowHeight, renderRow, className, scrollRef,
   const visibleTop = Math.min(currentScrollTop, Math.max(0, totalHeight - viewportHeight))
   const first = Math.max(0, Math.floor(visibleTop / rowHeight) - OVERSCAN_ROWS)
   const last = Math.min(items.length, Math.ceil((visibleTop + viewportHeight) / rowHeight) + OVERSCAN_ROWS)
+  const isPinnedHidden = pinnedIndex >= 0 && pinnedIndex < items.length && (pinnedIndex < first || pinnedIndex >= last)
 
   return (
     <div
@@ -37,8 +38,13 @@ export function VirtualList({ items, rowHeight, renderRow, className, scrollRef,
       className={cn("overflow-y-auto", className)}
       {...props}
     >
-      <div style={{ height: totalHeight, paddingTop: first * rowHeight }}>
+      <div className="relative" style={{ height: totalHeight, paddingTop: first * rowHeight }}>
         {items.slice(first, last).map(renderRow)}
+        {isPinnedHidden && (
+          <div className="absolute inset-x-0" style={{ top: pinnedIndex * rowHeight }}>
+            {renderRow(items[pinnedIndex])}
+          </div>
+        )}
       </div>
     </div>
   )

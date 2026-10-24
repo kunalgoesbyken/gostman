@@ -9,6 +9,8 @@ const (
 
 	skippedByScript = "Skipped by a script."
 	stoppedByScript = "Not sent because a script stopped the run."
+	passedByJump    = "Not run because a script in %q continued the run with %q."
+	passedByStop    = "Not run because a script in %q stopped the run."
 )
 
 type flow struct {
@@ -25,6 +27,16 @@ func (f flow) reason() string {
 		return stoppedByScript
 	}
 	return skippedByScript
+}
+
+func (f flow) passedOver(name string) string {
+	switch f.Action {
+	case flowNext:
+		return fmt.Sprintf(passedByJump, name, f.Target)
+	case flowStop:
+		return fmt.Sprintf(passedByStop, name)
+	}
+	return ""
 }
 
 func (r *Result) flag(message string) {

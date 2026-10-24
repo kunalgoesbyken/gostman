@@ -18,6 +18,7 @@ export function requestSubject(request) {
     url: request.url,
     headers: sentHeaders(request),
     body: scriptBody(request),
+    bodyType: request.bodyType,
     timeout: request.options?.timeoutMs ?? 0,
   }
 }

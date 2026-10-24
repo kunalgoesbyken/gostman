@@ -30,6 +30,7 @@ export const RESPONSE_LAYOUTS = ['below', 'right']
 export const LANGUAGES = [{ value: 'en', direction: 'ltr' }]
 export const EDITOR_FONT_SIZES = { min: 10, max: 24 }
 export const REQUEST_TIMEOUT_SECONDS = { min: 0, max: 3600 }
+export const BUILT_IN_TIMEOUT_SECONDS = 30
 
 export const DEFAULT_PREFERENCES = {
   theme: 'system',

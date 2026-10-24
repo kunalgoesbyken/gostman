@@ -1,12 +1,9 @@
 package importer
 
 import (
-	"bytes"
 	"encoding/json"
 	"encoding/xml"
-	"errors"
 	"fmt"
-	"io"
 	"path"
 	"strings"
 
@@ -30,23 +27,23 @@ const (
 	kindSchema              = "schema"
 	kindPostmanCollection   = "postman-collection"
 	kindPostmanEnvironment  = "postman-environment"
+	kindPostmanDump         = "postman-dump"
 	kindOpenAPI             = "openapi"
 	kindBruno               = "bruno"
 	kindBrunoConfig         = "bruno-config"
 	kindOpenCollection      = "opencollection"
 	kindOpenItem            = "opencollection-item"
 	kindOpenEnvironment     = "opencollection-environment"
+	kindBrunoEnvironment    = "bruno-environment"
 	kindGostman             = "gostman"
 	kindHTTP                = "http"
 	kindHTTPEnvironment     = "http-environment"
 	kindUnknown             = ""
 	postmanSchemaMarker     = "getpostman.com/json/collection"
-	insomniaV5Prefix        = "collection.insomnia.rest/5"
 	insomniaExportType      = "export"
 	wsdlNamespace           = "http://schemas.xmlsoap.org/wsdl/"
 	wsdl2Namespace          = "http://www.w3.org/ns/wsdl"
 	schemaNamespace         = "http://www.w3.org/2001/XMLSchema"
-	brunoConfigFile         = "bruno.json"
 	brunoCollectionFile     = "collection.bru"
 	brunoFolderFile         = "folder.bru"
 	brunoEnvironmentsFolder = "environments"
@@ -62,12 +59,14 @@ var kindFormats = map[string]string{
 	kindSchema:             FormatWSDL,
 	kindPostmanCollection:  FormatPostman,
 	kindPostmanEnvironment: FormatPostman,
+	kindPostmanDump:        FormatPostman,
 	kindOpenAPI:            FormatOpenAPI,
 	kindBruno:              FormatBruno,
 	kindBrunoConfig:        FormatBruno,
 	kindOpenCollection:     FormatBruno,
 	kindOpenItem:           FormatBruno,
 	kindOpenEnvironment:    FormatBruno,
+	kindBrunoEnvironment:   FormatBruno,
 	kindGostman:            FormatGostman,
 	kindHTTP:               FormatHTTP,
 	kindHTTPEnvironment:    FormatHTTP,
@@ -171,12 +170,14 @@ func classifyStructured(data any) string {
 	switch {
 	case text(root["_type"]) == insomniaExportType && root["resources"] != nil:
 		return kindInsomnia
-	case strings.HasPrefix(text(root["type"]), insomniaV5Prefix):
+	case isInsomniaV5(text(root["type"])):
 		return kindInsomnia
 	case object(root["log"]) != nil && object(root["log"])["entries"] != nil:
 		return kindHAR
 	case strings.Contains(text(info["schema"]), postmanSchemaMarker) || info["_postman_id"] != nil:
 		return kindPostmanCollection
+	case isPostmanDump(root):
+		return kindPostmanDump
 	case root["_postman_variable_scope"] != nil || isPostmanEnvironment(root):
 		return kindPostmanEnvironment
 	case root["openapi"] != nil || root["swagger"] != nil:
@@ -189,6 +190,8 @@ func classifyStructured(data any) string {
 		return kindHTTPEnvironment
 	case text(root["type"]) == "collection" && text(root["name"]) != "":
 		return kindBrunoConfig
+	case text(info["type"]) == kindBrunoEnvironment:
+		return kindBrunoEnvironment
 	case text(info["type"]) != "" && text(info["name"]) != "":
 		return kindOpenItem
 	case isOpenEnvironment(root):
@@ -198,8 +201,18 @@ func classifyStructured(data any) string {
 }
 
 func isOpenEnvironment(root map[string]any) bool {
-	_, listed := root["variables"].([]any)
-	return listed && text(root["name"]) != ""
+	variables, listed := root["variables"].([]any)
+	if !listed || text(root["name"]) != "" {
+		return listed
+	}
+	entries := objects(variables)
+	return len(entries) > 0 && len(entries) == len(variables) && text(entries[0]["name"]) != ""
+}
+
+func isPostmanDump(root map[string]any) bool {
+	_, collections := root["collections"].([]any)
+	_, environments := root["environments"].([]any)
+	return collections && environments
 }
 
 func isPostmanEnvironment(root map[string]any) bool {
@@ -219,24 +232,4 @@ func looksLikeBru(source string) bool {
 		name, found = strings.CutSuffix(line, " [")
 	}
 	return found && brunoBlocks[name]
-}
-
-func firstXMLError(source string) error {
-	decoder := xml.NewDecoder(strings.NewReader(source))
-	for {
-		if _, err := decoder.Token(); err != nil {
-			if errors.Is(err, io.EOF) {
-				return nil
-			}
-			return err
-		}
-	}
-}
-
-func decodeXML(source string, target any) error {
-	decoder := xml.NewDecoder(bytes.NewReader([]byte(source)))
-	if err := decoder.Decode(target); err != nil {
-		return fmt.Errorf(messageDocumentRead, err)
-	}
-	return nil
 }
