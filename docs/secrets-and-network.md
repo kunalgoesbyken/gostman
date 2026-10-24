@@ -43,7 +43,7 @@ The other fields depend on the service. A star marks a required field. Fields th
 | Google Cloud Secret Manager | **Token** *, **Project**, **Address** |
 | KeePassXC | No fields. Select **Connect to KeePassXC**; see [KeePassXC](#keepassxc). |
 | 1Password | **Account**, **Token**, **Program** |
-| Bitwarden | **Session key** *, **Program** |
+| Bitwarden | **Master password** with **Unlock**, which fills **Session key** *; **Program**. See [Bitwarden](#bitwarden). |
 | Bitwarden Secrets Manager | **Token** *, **Address**, **Program** |
 
 For the password managers, **Program** is the location of their command line tool. Leave it empty and Gostman finds it on the `PATH` and in the usual install folders. Under the service, the form explains how to set each one up.
@@ -126,10 +126,12 @@ The path is `vault/item` or `vault/item/section`, and the field is the field's l
 
 Gostman runs the Bitwarden CLI (`bw`), which must be installed and logged in.
 
-1. In a terminal, run `bw login`, then `bw unlock --raw`.
-2. Paste the printed session key into **Session key**. It stays valid until you run `bw lock` or `bw logout`.
+1. In a terminal, run `bw login` once.
+2. In the connection form, enter your master password and select **Unlock**. Gostman passes the password to `bw unlock` and keeps only the session key it returns, in the system keychain. Select **Save**.
 
-The path is the item's exact name or its ID. If several items have the name, Gostman lists their IDs. The field can be `password`, `username`, `notes`, `uri`, `totp` (needs Premium) or the name of a custom field. The CLI reads its local copy of the vault, so run `bw sync` after changing an item elsewhere.
+The session lasts until you run `bw lock` or `bw logout`. The CLI keeps one session at a time, so unlocking in a terminal ends the one Gostman holds, and the other way round. When that happens, edit the connection and select **Unlock** again. To share one session with a terminal, paste the key from `bw unlock --raw` into **Session key** instead.
+
+The path is the item's exact name or its ID. If several items have the name, Gostman lists their IDs. The field can be `password`, `username`, `notes`, `uri`, `totp` (needs Premium) or the name of a custom field. The CLI reads its local copy of the vault; when an item is not found, Gostman runs `bw sync` and looks again. Run `bw sync` yourself after changing a value elsewhere.
 
 #### Bitwarden Secrets Manager
 

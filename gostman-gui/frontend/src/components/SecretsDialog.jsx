@@ -17,9 +17,28 @@ const NEW_CONNECTION = { alias: "", kind: "", values: {}, stored: [], isSaved: f
 
 const labelOf = (kind, field) => TEXT.kindFields[kind]?.[field.name] || TEXT.fields[field.name] || field.name
 
+const hasValue = (draft, name) => Boolean(draft.values[name]?.trim()) || draft.stored.includes(name)
+
 function isComplete(draft, kinds) {
   const kind = kinds.find((candidate) => candidate.name === draft.kind)
-  return draft.alias.trim() !== "" && (!kind?.pairing || Boolean(draft.values.association))
+  return draft.alias.trim() !== "" && (kind?.fields ?? []).every((field) => !field.required || hasValue(draft, field.name))
+}
+
+function useAttempt() {
+  const [isWaiting, setIsWaiting] = useState(false)
+  const [problem, setProblem] = useState("")
+  const attempt = async (action) => {
+    setIsWaiting(true)
+    setProblem("")
+    try {
+      await action()
+    } catch (error) {
+      setProblem(error.message)
+    } finally {
+      setIsWaiting(false)
+    }
+  }
+  return { isWaiting, problem, attempt }
 }
 
 function ConnectionRow({ connection, onEdit, onRemove }) {
@@ -88,23 +107,12 @@ function FieldNote({ role, className, children }) {
   )
 }
 
-function PairingField({ kind, draft, secrets, onPaired }) {
+function PairingField({ kind, draft, secrets, onFilled }) {
   const text = TEXT.pairing[kind.name]
-  const [isWaiting, setIsWaiting] = useState(false)
-  const [problem, setProblem] = useState("")
+  const { isWaiting, problem, attempt } = useAttempt()
   const pairedAs = draft.values.association
 
-  const connect = async () => {
-    setIsWaiting(true)
-    setProblem("")
-    try {
-      onPaired(await secrets.pair(kind.name))
-    } catch (error) {
-      setProblem(error.message)
-    } finally {
-      setIsWaiting(false)
-    }
-  }
+  const connect = () => attempt(async () => onFilled(await secrets.pair(kind.name)))
 
   return (
     <>
@@ -123,10 +131,60 @@ function PairingField({ kind, draft, secrets, onPaired }) {
   )
 }
 
-function ConnectionForm({ draft, isNew, kinds, secrets, onChange, onPaired }) {
+function UnlockField({ kind, draft, secrets, onFilled }) {
+  const text = TEXT.unlocking[kind.name]
+  const { isWaiting, problem, attempt } = useAttempt()
+  const [password, setPassword] = useState("")
+  const [isUnlocked, setIsUnlocked] = useState(false)
+
+  const unlock = (event) => {
+    event.preventDefault()
+    attempt(async () => {
+      onFilled(await secrets.unlock({ alias: draft.alias, kind: draft.kind, values: draft.values }, password))
+      setPassword("")
+      setIsUnlocked(true)
+    })
+  }
+
+  const edit = (event) => {
+    setPassword(event.target.value)
+    setIsUnlocked(false)
+  }
+
+  return (
+    <>
+      <Field label={text.label} grouped>
+        <form className="flex min-w-0 gap-2" onSubmit={unlock}>
+          <Input
+            type="password"
+            value={password}
+            aria-label={text.label}
+            autoComplete="off"
+            spellCheck={false}
+            disabled={isWaiting}
+            onChange={edit}
+            className="min-w-0 flex-1"
+          />
+          <Button type="submit" variant="outline" size="sm" disabled={isWaiting || password === ""}>
+            {isWaiting ? text.waiting : text.unlock}
+          </Button>
+        </form>
+      </Field>
+      <FieldNote
+        role={problem ? "alert" : "status"}
+        className={problem ? "text-destructive" : isUnlocked ? "text-success" : "text-muted-foreground"}
+      >
+        {problem || (isUnlocked ? text.unlocked : text.note)}
+      </FieldNote>
+    </>
+  )
+}
+
+function ConnectionForm({ draft, isNew, kinds, secrets, onChange, onFilled }) {
   const [reference, setReference] = useState(BLANK_REFERENCE)
   const kind = kinds.find((candidate) => candidate.name === draft.kind)
   const setValue = (name, value) => onChange({ ...draft, values: { ...draft.values, [name]: value } })
+  const fill = (values) => onFilled(kind.name, values)
   return (
     <div className="flex flex-col gap-2">
       <Field label={TEXT.alias}>
@@ -145,12 +203,17 @@ function ConnectionForm({ draft, isNew, kinds, secrets, onChange, onPaired }) {
       </Field>
       {TEXT.kindHints[draft.kind] && <FieldNote className="text-muted-foreground">{TEXT.kindHints[draft.kind]}</FieldNote>}
       {kind?.pairing ? (
-        <PairingField kind={kind} draft={draft} secrets={secrets} onPaired={(values) => onPaired(kind.name, values)} />
-      ) : kind?.fields.map((field) => (
-        <Field key={field.name} label={field.required ? `${labelOf(kind.name, field)} *` : labelOf(kind.name, field)}>
-          <CredentialInput field={field} draft={draft} onChange={setValue} />
-        </Field>
-      ))}
+        <PairingField kind={kind} draft={draft} secrets={secrets} onFilled={fill} />
+      ) : (
+        <>
+          {kind?.unlocking && <UnlockField kind={kind} draft={draft} secrets={secrets} onFilled={fill} />}
+          {kind?.fields.map((field) => (
+            <Field key={field.name} label={field.required ? `${labelOf(kind.name, field)} *` : labelOf(kind.name, field)}>
+              <CredentialInput field={field} draft={draft} onChange={setValue} />
+            </Field>
+          ))}
+        </>
+      )}
       {!isNew && (
         <>
           <SectionLabel className="pt-3">{TEXT.testTitle}</SectionLabel>
@@ -186,7 +249,7 @@ function ConnectionManager({ secrets, onClose }) {
     setEditing({ ...connection, values: connection.values || {}, stored: connection.stored || [], isSaved: true })
   }
 
-  const pair = (kindName, values) => setEditing((current) => (
+  const fill = (kindName, values) => setEditing((current) => (
     current?.kind === kindName ? { ...current, values: { ...current.values, ...values } } : current
   ))
 
@@ -218,7 +281,7 @@ function ConnectionManager({ secrets, onClose }) {
               kinds={kinds}
               secrets={secrets}
               onChange={(next) => { setProblem(""); setEditing(next) }}
-              onPaired={pair}
+              onFilled={fill}
             />
           </div>
         ) : (

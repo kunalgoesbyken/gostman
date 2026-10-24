@@ -418,6 +418,10 @@ export function TrustWorkspace() {
   return window['go']['main']['App']['TrustWorkspace']();
 }
 
+export function UnlockSecretConnection(arg1, arg2) {
+  return window['go']['main']['App']['UnlockSecretConnection'](arg1, arg2);
+}
+
 export function UpdateMock(arg1, arg2, arg3) {
   return window['go']['main']['App']['UpdateMock'](arg1, arg2, arg3);
 }

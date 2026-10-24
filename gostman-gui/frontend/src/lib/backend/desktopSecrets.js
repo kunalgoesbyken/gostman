@@ -6,6 +6,7 @@ import {
   SecretConnections,
   SecretKinds,
   TestSecretReference,
+  UnlockSecretConnection,
 } from '../../../wailsjs/go/main/App'
 
 const listeners = new Set()
@@ -30,6 +31,7 @@ export const desktopSecrets = {
   save: announcing(failing((connection) => SaveSecretConnection(connection))),
   remove: announcing(failing((alias) => DeleteSecretConnection(alias))),
   pair: failing((kind) => PairSecretConnection(kind)),
+  unlock: failing((connection, password) => UnlockSecretConnection(connection, password)),
   test: failing((reference) => TestSecretReference(reference)),
   resolve: failing((references) => ResolveSecretReferences(references)),
   subscribe: (listener) => {

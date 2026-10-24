@@ -47,16 +47,18 @@ type Field struct {
 }
 
 type KindInfo struct {
-	Name     string  `json:"name"`
-	Fields   []Field `json:"fields"`
-	Versions bool    `json:"versions"`
-	Pairing  bool    `json:"pairing"`
+	Name      string  `json:"name"`
+	Fields    []Field `json:"fields"`
+	Versions  bool    `json:"versions"`
+	Pairing   bool    `json:"pairing"`
+	Unlocking bool    `json:"unlocking"`
 }
 
 type kind struct {
-	info  KindInfo
-	build func(Connection, *gateway) (Provider, error)
-	pair  func(context.Context) (map[string]string, error)
+	info   KindInfo
+	build  func(Connection, *gateway) (Provider, error)
+	pair   func(context.Context) (map[string]string, error)
+	unlock func(context.Context, Connection, string) (map[string]string, error)
 }
 
 var catalog = []kind{
@@ -114,7 +116,8 @@ var catalog = []kind{
 			{Name: fieldSession, Secret: true, Required: true, Env: []string{bitwardenSessionEnv}},
 			{Name: fieldCommand},
 		}},
-		build: newBitwarden,
+		build:  newBitwarden,
+		unlock: unlockBitwarden,
 	},
 	{
 		info: KindInfo{Name: KindBitwardenSecrets, Fields: []Field{
@@ -139,6 +142,7 @@ func Kinds() []KindInfo {
 	for i, entry := range catalog {
 		infos[i] = entry.info
 		infos[i].Pairing = entry.pair != nil
+		infos[i].Unlocking = entry.unlock != nil
 	}
 	return infos
 }
@@ -149,6 +153,14 @@ func Pair(ctx context.Context, kindName string) (map[string]string, error) {
 		return nil, fmt.Errorf("%q connections are not set up by connecting to an app", kindName)
 	}
 	return entry.pair(ctx)
+}
+
+func Unlock(ctx context.Context, connection Connection, password string) (map[string]string, error) {
+	entry, found := kindNamed(connection.Kind)
+	if !found || entry.unlock == nil {
+		return nil, fmt.Errorf("%q connections are not unlocked with a password", connection.Kind)
+	}
+	return entry.unlock(ctx, connection, password)
 }
 
 func kindNamed(name string) (kind, bool) {

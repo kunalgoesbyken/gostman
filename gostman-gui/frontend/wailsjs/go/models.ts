@@ -3540,6 +3540,7 @@ export namespace secrets {
 	    fields: Field[];
 	    versions: boolean;
 	    pairing: boolean;
+	    unlocking: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new KindInfo(source);
@@ -3551,6 +3552,7 @@ export namespace secrets {
 	        this.fields = this.convertValues(source["fields"], Field);
 	        this.versions = source["versions"];
 	        this.pairing = source["pairing"];
+	        this.unlocking = source["unlocking"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

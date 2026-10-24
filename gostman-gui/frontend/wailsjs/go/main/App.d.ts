@@ -225,6 +225,8 @@ export function TestSecretReference(arg1:secrets.Ref):Promise<number>;
 
 export function TrustWorkspace():Promise<void>;
 
+export function UnlockSecretConnection(arg1:main.SecretConnection,arg2:string):Promise<Record<string, string>>;
+
 export function UpdateMock(arg1:Array<mock.Source>,arg2:string,arg3:mock.Config):Promise<main.MockState>;
 
 export function WSClose(arg1:string):Promise<void>;

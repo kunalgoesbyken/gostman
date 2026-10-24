@@ -108,6 +108,10 @@ func (a *App) PairSecretConnection(kind string) (map[string]string, error) {
 	return secrets.Pair(a.ctx, kind)
 }
 
+func (a *App) UnlockSecretConnection(connection SecretConnection, password string) (map[string]string, error) {
+	return secrets.Unlock(a.ctx, secrets.Connection{Alias: connection.Alias, Kind: connection.Kind, Values: connection.Values}, password)
+}
+
 func (a *App) SecretConnections() ([]SecretConnection, error) {
 	connections.mu.Lock()
 	records, err := connections.read()

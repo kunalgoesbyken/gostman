@@ -34,7 +34,7 @@ export const SECRETS_TEXT = {
   },
   kindHints: {
     onepassword: "Reads items with the 1Password CLI (op). To approve access in the 1Password app, turn on Settings → Developer → Integrate with 1Password CLI and leave the token empty. For CI, use a service account token instead. Account is only needed when you are signed in to several accounts.",
-    bitwarden: "Reads items with the Bitwarden CLI (bw). In a terminal, run bw login, then bw unlock --raw, and paste the session key here. Run bw sync after you change an item in another app.",
+    bitwarden: "Reads items with the Bitwarden CLI (bw). Run bw login in a terminal once, then unlock here with your master password. bw keeps one session at a time, so unlocking here ends a session open in a terminal, and the other way round.",
     "bitwarden-secrets": "Reads secrets with the Bitwarden Secrets Manager CLI (bws) and a machine account access token. Leave Server address empty for bitwarden.com; set it for the EU cloud or a self-hosted server.",
     keepassxc: "Connects to KeePassXC the way its browser extension does, so your master password never reaches Gostman. In KeePassXC, turn on Enable browser integration under Settings → Browser Integration and unlock your database. KeePassXC 2.7 to 2.8 freezes when an app reads an entry without a URL, so give the entries you use a URL.",
   },
@@ -65,6 +65,7 @@ export const SECRETS_TEXT = {
     kv_version: "2",
     account: "my.1password.com",
     command: "Found automatically",
+    session_key: "Filled in when you unlock, or paste one from bw unlock --raw",
   },
   pairing: {
     keepassxc: {
@@ -75,6 +76,15 @@ export const SECRETS_TEXT = {
       prompt: "Switch to KeePassXC. Unlock the database if it asks, then name this connection and choose Save and allow access.",
       unpaired: "Not connected yet.",
       paired: (name) => `Connected. KeePassXC knows this connection as "${name}".`,
+    },
+  },
+  unlocking: {
+    bitwarden: {
+      label: "Master password",
+      unlock: "Unlock",
+      waiting: "Unlocking",
+      note: "Gostman passes it to bw unlock and keeps only the session key, in the system keychain.",
+      unlocked: "Unlocked. Select Save to keep the session.",
     },
   },
 }
