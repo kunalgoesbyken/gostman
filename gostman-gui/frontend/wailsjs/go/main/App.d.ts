@@ -209,6 +209,8 @@ export function SecretKinds():Promise<Array<secrets.KindInfo>>;
 
 export function SendRequest(arg1:string,arg2:engine.Request):Promise<engine.Response>;
 
+export function SetSecretConnectionEnabled(arg1:string,arg2:boolean):Promise<void>;
+
 export function StartCapture(arg1:capture.Settings):Promise<main.CaptureState>;
 
 export function StartMock(arg1:Array<mock.Source>,arg2:string,arg3:mock.Config):Promise<main.MockState>;

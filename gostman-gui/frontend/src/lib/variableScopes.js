@@ -1,4 +1,5 @@
 import { isPlainObject, parseJSON } from './dataUtils'
+import { placeholderNames } from './placeholders'
 import { parseRows } from './rows'
 import { PROCESS_PREFIX, PROMPT_PREFIX } from './variableNames'
 
@@ -152,7 +153,12 @@ export const promptLayer = (answers) => ({
   entries: Object.entries(answers).map(([name, value]) => ({ name: PROMPT_PREFIX + name, value })),
 })
 
-export function referenceTargets(state, request) {
+const withoutPromptPrefix = (name) => (name.startsWith(PROMPT_PREFIX) ? name.slice(PROMPT_PREFIX.length).trim() : name)
+
+export const usedVariableNames = (value) => new Set(collectStrings(value, []).flatMap(placeholderNames).map(withoutPromptPrefix))
+
+export function referenceTargets(state, request, used) {
   const resolved = resolveLayers(scopeLayers(state, request))
-  return Object.fromEntries(Array.from(resolved).filter(([, { ref }]) => ref).map(([name, { ref }]) => [name, ref]))
+  const isWanted = ([name, { ref }]) => ref && (!used || used.has(name))
+  return Object.fromEntries(Array.from(resolved).filter(isWanted).map(([name, { ref }]) => [name, ref]))
 }

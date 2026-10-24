@@ -98,11 +98,14 @@ export function ReferenceFields({ reference: stored, connections, kinds, isLoade
         >
           <option value="" disabled>{TEXT.noConnection}</option>
           {isUnknown && <option value={reference.provider}>{reference.provider}</option>}
-          {connections.map((candidate) => <option key={candidate.alias} value={candidate.alias}>{candidate.alias}</option>)}
+          {connections.map((candidate) => (
+            <option key={candidate.alias} value={candidate.alias}>{candidate.disabled ? TEXT.offOption(candidate.alias) : candidate.alias}</option>
+          ))}
         </Select>
         <ReferenceTarget reference={reference} kind={kind} secrets={secrets} onChange={onChange} />
       </div>
       {isUnknown && <p role="alert" className="text-xs text-warning">{TEXT.unknownConnection(reference.provider)}</p>}
+      {connection?.disabled && <p className="text-xs text-muted-foreground">{TEXT.connectionOff(connection.alias)}</p>}
       {isLoaded && connections.length === 0 && !isUnknown && <p className="text-xs text-muted-foreground">{TEXT.noConnections}</p>}
     </div>
   )

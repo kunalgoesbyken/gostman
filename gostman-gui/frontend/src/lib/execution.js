@@ -18,8 +18,8 @@ import { applyRequestEdits, requestSubject, responseSubject, runInSandbox } from
 import { acceptedCookies, scriptCookies } from './scripting/scriptCookies'
 import { scriptedRequest } from './scripting/subjects'
 import { SECRETS_TEXT } from './secretsText'
-import { ENTRY_KINDS, exchangeEntry, scriptEntry, withActivity } from './timeline'
-import { promptNames, referenceTargets } from './variableScopes'
+import { ENTRY_KINDS, exchangeEntry, scriptEntry, secretsEntry, withActivity } from './timeline'
+import { promptNames, referenceTargets, usedVariableNames } from './variableScopes'
 import { findActiveEnvironment, useAppStore, variableTextFor } from '../store/appStore'
 
 const CONFIG_ERROR = 'config'
@@ -119,11 +119,17 @@ const postSteps = (lineage, request) => [
 
 const hasActiveInheritance = (lineage) => lineage.some(({ settings }) => hasActiveContent(settings))
 
-async function resolveReferences(backend, request) {
-  const targets = referenceTargets(store(), request)
+const runsScripts = (lineage, request) => [...preSteps(lineage, request), ...postSteps(lineage, request)].some((step) => hasText(step.script))
+
+const namesInUse = (lineage, request) => (
+  runsScripts(lineage, request) ? undefined : usedVariableNames([request, lineage.map(({ settings }) => settings)])
+)
+
+async function resolveReferences(backend, request, lineage, trace) {
+  const targets = referenceTargets(store(), request, namesInUse(lineage, request))
   if (Object.keys(targets).length === 0) return {}
   if (!backend.secrets) throw new Error(SECRETS_TEXT.desktopOnly)
-  return backend.secrets.resolve(targets)
+  return trace.timed(secretsEntry(targets), () => backend.secrets.resolve(targets))
 }
 
 const REQUIRE_CALL = 'require('
@@ -196,7 +202,7 @@ export function createExecutor(backend) {
 
     let referenced
     try {
-      referenced = await resolveReferences(backend, request)
+      referenced = await resolveReferences(backend, request, lineage, trace)
     } catch (error) {
       return stop(request, error.message)
     }

@@ -386,6 +386,10 @@ export function SendRequest(arg1, arg2) {
   return window['go']['main']['App']['SendRequest'](arg1, arg2);
 }
 
+export function SetSecretConnectionEnabled(arg1, arg2) {
+  return window['go']['main']['App']['SetSecretConnectionEnabled'](arg1, arg2);
+}
+
 export function StartCapture(arg1) {
   return window['go']['main']['App']['StartCapture'](arg1);
 }

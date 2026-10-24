@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, Eye, EyeOff, FileCode, Info } from 'lucide-react'
+import { ChevronDown, ChevronRight, Eye, EyeOff, FileCode, Info, KeyRound } from 'lucide-react'
 import { ConsoleLine } from './ConsolePanel'
 import { TestRow, countPassed } from './TestResults'
 import { Badge } from './ui/badge'
@@ -206,8 +206,30 @@ function ScriptRow({ entry }) {
   )
 }
 
+function SecretsRow({ entry }) {
+  return (
+    <li className={rowClass(entry)}>
+      <div className="flex w-full min-w-0 items-center gap-2 text-xs">
+        <span className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+        <KeyRound className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <span className="min-w-0 flex-1 truncate text-foreground">{TIMELINE_TEXT.secrets}</span>
+        <span className="shrink-0 text-muted-foreground">{TIMELINE_TEXT.secretsRead(entry.read)}</span>
+        <Duration ms={entry.totalMs} />
+      </div>
+      {entry.skipped.length > 0 && (
+        <ul className="mt-1.5 flex flex-col gap-0.5 pl-11">
+          {entry.skipped.map(({ name, connection }) => (
+            <li key={name} dir="auto" className="break-words text-2xs text-warning">{TIMELINE_TEXT.secretSkipped(name, connection)}</li>
+          ))}
+        </ul>
+      )}
+    </li>
+  )
+}
+
 function TimelineRow({ row, scale }) {
   if (row.entry.kind === ENTRY_KINDS.SCRIPT) return <ScriptRow entry={row.entry} />
+  if (row.entry.kind === ENTRY_KINDS.SECRETS) return <SecretsRow entry={row.entry} />
   if (row.hop) return <HopRow entry={row.entry} hop={row.hop} number={row.number} scale={scale} />
   return <PlainRow entry={row.entry} number={row.number} />
 }
@@ -217,7 +239,7 @@ export function TimelineTab({ timeline }) {
   const hops = timelineHops(timeline)
   const rows = timelineRows(timeline)
   const requests = rows.filter((row) => row.number).length
-  const scripts = rows.length - requests
+  const scripts = rows.filter((row) => row.entry.kind === ENTRY_KINDS.SCRIPT).length
   return (
     <div className="flex flex-col">
       {timeline.proxied && <Notice icon={Info}>{TIMELINE_TEXT.proxied}</Notice>}

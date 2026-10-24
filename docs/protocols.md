@@ -78,7 +78,7 @@ If the server reports no services, the panel shows No services were found.
 1. Pick a method from the Method list. It groups methods by service. Before you load services you can type a name in the form `package.Service/Method`.
 2. The label next to the list shows the kind: Unary, Server streaming, Client streaming or Bidirectional streaming.
 3. Select Use example to replace the message with a generated example of the method's input type. Choosing a method fills the message with that example when the message is empty or `{}`.
-4. Edit the JSON message and select Send.
+4. Edit the JSON message and select Send. Placeholders in the message are filled in when it is sent; type `{{` or `faker.` in the editor to pick a variable or a dynamic value.
 
 Messages are written as JSON and converted with the protobuf JSON mapping.
 
@@ -115,6 +115,8 @@ Enter a `ws://` or `wss://` URL. The Send button becomes Connect, and the WebSoc
 - Type in the Message box and select Send, or press Ctrl+Enter. On macOS the shortcut is shown with the Command key. The box is disabled until the session is connected.
 - Placeholders in the message and in its event or topic are filled in when you send it: environment variables, and dynamic values such as `{{$randomEmail}}` or `{{$faker.date.future}}`. Type `{{` or `faker.` to pick one. The log shows the message as it was sent. A message that cannot be filled in is not sent, and stays in the box.
 - Sent messages are text. Clear empties the log.
+
+![The WebSocket tab: the log shows a sent message whose generated id and email were filled in, and the message box suggests faker.date names](../screenshots/websocket-variables.png)
 
 ### Message log
 
@@ -274,7 +276,7 @@ Before you load tools, the Tool field is a text box where you can type a tool na
 2. The tool's description appears under the toolbar.
 3. Select Schema to show the JSON Schema of the tool's arguments.
 4. Select Use example to replace the arguments with an example built from that schema. Choosing a tool fills the arguments with the example when they are empty or `{}`.
-5. Edit the JSON arguments and select Send.
+5. Edit the JSON arguments and select Send. Type `{{` or `faker.` in the editor to pick a variable or a dynamic value.
 
 An empty arguments field is sent as `{}`.
 

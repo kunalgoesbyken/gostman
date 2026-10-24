@@ -19,14 +19,14 @@ import (
 const (
 	connectionsFileName   = "secret-connections.json"
 	connectionSecretScope = "connections"
-	restrictedReferences  = "This folder is not trusted yet, so secret manager references are not resolved. Open the folder menu in the header and choose Trust this folder."
 )
 
 type SecretConnection struct {
-	Alias  string            `json:"alias"`
-	Kind   string            `json:"kind"`
-	Values map[string]string `json:"values"`
-	Stored []string          `json:"stored,omitempty"`
+	Alias    string            `json:"alias"`
+	Kind     string            `json:"kind"`
+	Values   map[string]string `json:"values"`
+	Stored   []string          `json:"stored,omitempty"`
+	Disabled bool              `json:"disabled,omitempty"`
 }
 
 type connectionBook struct {
@@ -35,9 +35,16 @@ type connectionBook struct {
 }
 
 type connectionRecord struct {
-	Kind   string            `json:"kind"`
-	Values map[string]string `json:"values"`
+	Kind     string            `json:"kind"`
+	Values   map[string]string `json:"values"`
+	Disabled bool              `json:"disabled,omitempty"`
 }
+
+var (
+	errConnectionOff     = errors.New("turn it on under Secret managers to read from it")
+	errUnknownConnection = errors.New("add it under Secret managers")
+	errRestricted        = errors.New("This folder is not trusted yet, so secret manager references are not resolved. Open the folder menu in the header and choose Trust this folder.")
+)
 
 var (
 	connections    = &connectionBook{path: filepath.Join(appFolder, connectionsFileName)}
@@ -84,6 +91,10 @@ func storedCredentials(alias string, record connectionRecord) map[string]string 
 	return stored
 }
 
+func unknownConnection(alias string) error {
+	return fmt.Errorf("there is no secret manager connection named %q; %w", alias, errUnknownConnection)
+}
+
 func lookupConnection(alias string) (secrets.Connection, error) {
 	connections.mu.Lock()
 	records, err := connections.read()
@@ -93,7 +104,10 @@ func lookupConnection(alias string) (secrets.Connection, error) {
 	}
 	record, found := records[alias]
 	if !found {
-		return secrets.Connection{}, fmt.Errorf("there is no secret manager connection named %q; add it under Secret managers", alias)
+		return secrets.Connection{}, unknownConnection(alias)
+	}
+	if record.Disabled {
+		return secrets.Connection{}, fmt.Errorf("the secret manager connection %q is off; %w", alias, errConnectionOff)
 	}
 	values := maps.Clone(record.Values)
 	maps.Copy(values, storedCredentials(alias, record))
@@ -123,7 +137,7 @@ func (a *App) SecretConnections() ([]SecretConnection, error) {
 	for _, alias := range slices.Sorted(maps.Keys(records)) {
 		record := records[alias]
 		stored := slices.Sorted(maps.Keys(storedCredentials(alias, record)))
-		listed = append(listed, SecretConnection{Alias: alias, Kind: record.Kind, Values: record.Values, Stored: stored})
+		listed = append(listed, SecretConnection{Alias: alias, Kind: record.Kind, Values: record.Values, Stored: stored, Disabled: record.Disabled})
 	}
 	return listed, nil
 }
@@ -156,6 +170,7 @@ func (a *App) SaveSecretConnection(connection SecretConnection) error {
 		return fmt.Errorf("connection %q is a %s connection; delete it to create one of another kind", connection.Alias, existing.Kind)
 	}
 	record, entered := splitConnection(connection)
+	record.Disabled = existing.Disabled
 	merged := storedCredentials(connection.Alias, record)
 	maps.Copy(merged, entered)
 	maps.Copy(merged, record.Values)
@@ -168,6 +183,22 @@ func (a *App) SaveSecretConnection(connection SecretConnection) error {
 		}
 	}
 	records[connection.Alias] = record
+	return connections.write(records)
+}
+
+func (a *App) SetSecretConnectionEnabled(alias string, enabled bool) error {
+	connections.mu.Lock()
+	defer connections.mu.Unlock()
+	records, err := connections.read()
+	if err != nil {
+		return err
+	}
+	record, found := records[alias]
+	if !found {
+		return unknownConnection(alias)
+	}
+	record.Disabled = !enabled
+	records[alias] = record
 	return connections.write(records)
 }
 
@@ -202,7 +233,7 @@ func workspaceIsRestricted() bool {
 
 func (a *App) resolveReference(reference secrets.Ref) (string, error) {
 	if workspaceIsRestricted() {
-		return "", errors.New(restrictedReferences)
+		return "", errRestricted
 	}
 	return secretResolver.Resolve(a.ctx, reference)
 }
@@ -211,12 +242,22 @@ func (a *App) ResolveSecretReferences(references map[string]secrets.Ref) (map[st
 	resolved := make(map[string]string, len(references))
 	for _, name := range slices.Sorted(maps.Keys(references)) {
 		value, err := a.resolveReference(references[name])
+		if errors.Is(err, errConnectionOff) {
+			continue
+		}
 		if err != nil {
-			return nil, fmt.Errorf("variable %q: %w", name, err)
+			return nil, unresolved(name, references[name], err)
 		}
 		resolved[name] = value
 	}
 	return resolved, nil
+}
+
+func unresolved(name string, reference secrets.Ref, err error) error {
+	if errors.Is(err, errUnknownConnection) || errors.Is(err, errRestricted) {
+		return fmt.Errorf("variable %q: %w", name, err)
+	}
+	return fmt.Errorf("variable %q could not be read from %q. While it is unavailable, you can turn the connection off under Secret managers, and variables that use it are then empty. Details: %w", name, reference.Provider, err)
 }
 
 func (a *App) TestSecretReference(reference secrets.Ref) (int, error) {

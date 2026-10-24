@@ -7,6 +7,7 @@ import { FIELD_COLUMNS, Field } from "./ui/field"
 import { Input } from "./ui/input"
 import { Notice, SectionLabel } from "./ui/panel"
 import { Select } from "./ui/select"
+import { Switch } from "./ui/switch"
 import { BLANK_REFERENCE, ReferenceTarget } from "./SecretReferenceFields"
 import { useSecretConnections } from "../hooks/useSecretConnections"
 import { SECRETS_TEXT as TEXT } from "../lib/secretsText"
@@ -41,19 +42,22 @@ function useAttempt() {
   return { isWaiting, problem, attempt }
 }
 
-function ConnectionRow({ connection, onEdit, onRemove }) {
+function ConnectionRow({ connection, onSwitch, onEdit, onRemove }) {
   return (
     <div className="flex h-9 items-center gap-3 border-b border-border px-4">
       <KeyRound className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-      <span className="min-w-0 flex-1 truncate text-xs font-medium">{connection.alias}</span>
+      <span className={cn("min-w-0 flex-1 truncate text-xs font-medium", connection.disabled && "text-muted-foreground")}>{connection.alias}</span>
       <span className="truncate text-xs text-muted-foreground">{TEXT.kinds[connection.kind] || connection.kind}</span>
+      <Switch label={TEXT.switchLabel(connection.alias)} checked={!connection.disabled} onCheckedChange={onSwitch} className="w-14">
+        {connection.disabled ? TEXT.turnedOff : TEXT.turnedOn}
+      </Switch>
       <IconButton label={TEXT.edit} icon={Pencil} size="icon-xs" onClick={onEdit} />
       <IconButton label={TEXT.remove} icon={Trash2} size="icon-xs" onClick={onRemove} />
     </div>
   )
 }
 
-function ConnectionList({ connections, onAdd, onEdit, onRemove }) {
+function ConnectionList({ connections, onAdd, onSwitch, onEdit, onRemove }) {
   const addButton = (
     <Button variant="outline" size="sm" onClick={onAdd}>
       <Plus />
@@ -71,6 +75,7 @@ function ConnectionList({ connections, onAdd, onEdit, onRemove }) {
             <ConnectionRow
               key={connection.alias}
               connection={connection}
+              onSwitch={(enabled) => onSwitch(connection, enabled)}
               onEdit={() => onEdit(connection)}
               onRemove={() => onRemove(connection)}
             />
@@ -262,6 +267,15 @@ function ConnectionManager({ secrets, onClose }) {
     }
   }
 
+  const switchConnection = async (connection, enabled) => {
+    setProblem("")
+    try {
+      await secrets.setEnabled(connection.alias, enabled)
+    } catch (error) {
+      setProblem(error.message)
+    }
+  }
+
   const remove = (connection) => showConfirm(
     TEXT.remove,
     TEXT.confirmRemove(connection.alias),
@@ -285,7 +299,7 @@ function ConnectionManager({ secrets, onClose }) {
             />
           </div>
         ) : (
-          <ConnectionList connections={connections} onAdd={startAdding} onEdit={startEditing} onRemove={remove} />
+          <ConnectionList connections={connections} onAdd={startAdding} onSwitch={switchConnection} onEdit={startEditing} onRemove={remove} />
         )}
       </DialogBody>
       <DialogFooter>

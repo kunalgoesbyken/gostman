@@ -5,6 +5,7 @@ import {
   SaveSecretConnection,
   SecretConnections,
   SecretKinds,
+  SetSecretConnectionEnabled,
   TestSecretReference,
   UnlockSecretConnection,
 } from '../../../wailsjs/go/main/App'
@@ -30,6 +31,7 @@ export const desktopSecrets = {
   connections: failing(() => SecretConnections()),
   save: announcing(failing((connection) => SaveSecretConnection(connection))),
   remove: announcing(failing((alias) => DeleteSecretConnection(alias))),
+  setEnabled: announcing(failing((alias, enabled) => SetSecretConnectionEnabled(alias, enabled))),
   pair: failing((kind) => PairSecretConnection(kind)),
   unlock: failing((connection, password) => UnlockSecretConnection(connection, password)),
   test: failing((reference) => TestSecretReference(reference)),

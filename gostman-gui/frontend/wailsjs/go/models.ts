@@ -1946,6 +1946,7 @@ export namespace main {
 	    kind: string;
 	    values: Record<string, string>;
 	    stored?: string[];
+	    disabled?: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new SecretConnection(source);
@@ -1957,6 +1958,7 @@ export namespace main {
 	        this.kind = source["kind"];
 	        this.values = source["values"];
 	        this.stored = source["stored"];
+	        this.disabled = source["disabled"];
 	    }
 	}
 	

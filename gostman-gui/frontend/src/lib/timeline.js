@@ -37,9 +37,12 @@ export const TIMELINE_TEXT = {
   failed: (count) => `${count} failed`,
   scriptFailed: 'Failed',
   noOutput: 'No console output or test results.',
+  secrets: 'Secret managers',
+  secretsRead: (count) => `${pluralize(count, 'secret')} read`,
+  secretSkipped: (name, connection) => `${name} is empty because the connection "${connection}" is off`,
 }
 
-export const ENTRY_KINDS = { SCRIPT: 'script', SEND: 'send', REQUEST: 'request' }
+export const ENTRY_KINDS = { SCRIPT: 'script', SECRETS: 'secrets', SEND: 'send', REQUEST: 'request' }
 
 const EMPTY_TIMELINE = { hops: [], totalMs: 0 }
 
@@ -56,7 +59,7 @@ export function formatMs(ms) {
 
 const timelineEntries = (timeline) => timeline.activity ?? [{ kind: ENTRY_KINDS.REQUEST, hops: timeline.hops }]
 
-const isScript = (entry) => entry.kind === ENTRY_KINDS.SCRIPT
+const isExchange = (entry) => entry.kind === ENTRY_KINDS.SEND || entry.kind === ENTRY_KINDS.REQUEST
 
 export const timelineHops = (timeline) => timelineEntries(timeline).flatMap((entry) => entry.hops ?? [])
 
@@ -73,14 +76,14 @@ export function timelineScale(timeline) {
 }
 
 function entryRows(entry, position) {
-  if (isScript(entry) || entry.hops.length === 0) return [{ key: `${position}`, entry }]
+  if (!isExchange(entry) || entry.hops.length === 0) return [{ key: `${position}`, entry }]
   return entry.hops.map((hop, index) => ({ key: `${position}-${index}`, entry, hop }))
 }
 
 export function timelineRows(timeline) {
   let number = 0
   return timelineEntries(timeline).flatMap(entryRows).map((row) => {
-    if (isScript(row.entry)) return row
+    if (!isExchange(row.entry)) return row
     number += 1
     return { ...row, number }
   })
@@ -94,6 +97,14 @@ export const scriptEntry = (label) => (run, startMs, endMs) => ({
   logs: run.logs,
   tests: run.tests,
   failed: Boolean(run.error),
+})
+
+export const secretsEntry = (targets) => (resolved, startMs, endMs) => ({
+  kind: ENTRY_KINDS.SECRETS,
+  startMs,
+  totalMs: endMs - startMs,
+  read: Object.keys(resolved).length,
+  skipped: Object.entries(targets).filter(([name]) => !(name in resolved)).map(([name, ref]) => ({ name, connection: ref.provider })),
 })
 
 const exchangeSummary = (request, response) => ({

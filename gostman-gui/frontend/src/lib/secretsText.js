@@ -1,11 +1,14 @@
 export const SECRETS_TEXT = {
   title: "Secret managers",
-  intro: "A connection says where a secret manager or password manager is and how to sign in. It is kept on this computer, with credentials in the system keychain, and is never part of a collection. Variables refer to a connection by its name.",
+  intro: "A connection says where a secret manager or password manager is and how to sign in. It is kept on this computer, with credentials in the system keychain, and is never part of a collection. Variables refer to a connection by its name. A request reads only the secrets it uses. Turn a connection off while its service is unavailable; variables that use it are then empty.",
   empty: "No connections yet. Add one to read secrets from Vault, AWS, Azure, Google Cloud, 1Password, Bitwarden or KeePassXC.",
   add: "Add connection",
   edit: "Edit connection",
   remove: "Delete connection",
   confirmRemove: (alias) => `Delete the connection "${alias}"? Variables that use it stop resolving.`,
+  turnedOn: "On",
+  turnedOff: "Off",
+  switchLabel: (alias) => `Read secrets from ${alias}`,
   alias: "Name",
   aliasPlaceholder: "production",
   kind: "Service",
@@ -90,6 +93,8 @@ export const SECRETS_TEXT = {
 }
 
 export const REFERENCE_TEXT = {
+  offOption: (alias) => `${alias} (off)`,
+  connectionOff: (alias) => `The connection "${alias}" is off, so this variable is empty. Turn it on under Secret managers.`,
   manager: "Secret manager",
   useManager: "Read from a secret manager",
   usePlain: "Type a value",

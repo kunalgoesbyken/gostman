@@ -83,6 +83,26 @@ Select the key button again (**Type a value**) to go back to a plain value.
 
 If the connection name on a variable does not exist on this computer, the row shows `There is no connection named "..." on this computer`, and you can add it or choose another.
 
+### Turn a connection off
+
+A send reads only the secrets that the request and its folders use, so a service that is down stops only the requests that need it. A request with a pre-request or post-response script reads every secret of the environment, because a script can read any variable.
+
+If a secret cannot be read, the request is not sent, and the message names the variable, the connection and the cause, for example `variable "stagingKey" could not be read from "staging-vault". While it is unavailable, you can turn the connection off under Secret managers, and variables that use it are then empty.`
+
+Each connection in **Secret managers** has an **On** switch. Switch a connection **Off** while its service is unavailable, or so that its app stops asking you to unlock it. Its settings and saved credentials stay, so switching it **On** again is all it takes to read from it again.
+
+![The Secret managers dialog with the connection staging-vault switched Off and team-vault On](../screenshots/secret-managers-off.png)
+
+While a connection is off:
+
+- Variables that use it are empty, and **Test** says that the connection is off.
+- In the environment, the connection list shows it as `staging-vault (off)`, and the variable says that it is empty until you turn the connection on.
+- The request's **Timeline** has a **Secret managers** step with how many secrets were read and how long it took, and a line for each variable that was left empty.
+
+![An environment where the variable stagingKey reads from staging-vault (off), with the note that the variable is empty](../screenshots/secret-variable-off.png)
+
+![The Timeline of a request: Secret managers read 1 secret, stagingKey is empty because the connection staging-vault is off, then the POST request](../screenshots/timeline-secret-managers.png)
+
 ### Password managers
 
 Gostman reads password managers through the same connection and reference as the secret managers. Each one has its own way of letting Gostman in.
