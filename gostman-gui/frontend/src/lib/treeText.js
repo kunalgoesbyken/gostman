@@ -37,7 +37,7 @@ export const LABEL_TEXT = {
   colourNote: 'Shown on the folder icon in the sidebar and saved with the collection.',
   tags: 'Tags',
   tagsPlaceholder: 'Add a tag, then press Enter',
-  folderTagsNote: "Folder tags apply to every request inside it: the runner's tag filters and gostman run --tags treat them as the request's own.",
+  folderTagsNote: "Folder tags apply to every request inside it, also in the sidebar search and the runner's tag filters.",
   requestTagsNote: 'Tags group requests across folders. Filter by them in the sidebar search and the runner.',
   tagColours: 'Tag colours',
   tagColoursNote: 'A tag keeps its colour everywhere it is used. Without a choice, a colour is picked from the tag name. Tag colours are kept on this device.',

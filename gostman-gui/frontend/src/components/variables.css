@@ -25,7 +25,6 @@
 }
 
 .gm-var-secret {
-  --gm-secret: 220 9% 46%;
   background: hsl(var(--gm-secret) / 0.16);
   text-decoration: underline dashed hsl(var(--gm-secret));
   text-decoration-thickness: 2px;

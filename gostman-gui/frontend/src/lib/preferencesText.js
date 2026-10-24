@@ -55,12 +55,7 @@ export const PREFERENCES_TEXT = {
   methods: {
     title: 'Method colours',
     hint: 'The colour of each request method in the sidebar, tabs and lists. Add a background to show methods as badges.',
-    editing: 'Colours for',
-    columns: { method: 'Method', foreground: 'Text', background: 'Background', contrast: 'Contrast', reset: 'Reset' },
-    roles: { foreground: 'text', background: 'background' },
-    colorLabel: (method, role) => `${method} ${role} colour`,
-    hexLabel: (method, role) => `${method} ${role} hex value`,
-    reset: (method) => `Reset ${method}`,
+    method: 'Method',
     resetMode: { light: 'Reset light method colours', dark: 'Reset dark method colours' },
   },
   theme: {
@@ -107,7 +102,7 @@ export const PREFERENCES_TEXT = {
     hexLabel: (surface, role) => `${surface} ${role} hex value`,
     ratio: (ratio) => `${ratio}:1`,
     lowContrast: (minimum) => `Text may be hard to read. Aim for at least ${minimum}:1.`,
-    resetSurface: (surface) => `Reset ${surface}`,
+    resetRow: (name) => `Reset ${name}`,
     resetMode: { light: 'Reset light colours', dark: 'Reset dark colours' },
     share: 'Share a theme',
     shareHint: 'A theme holds the palette, the accent colour, and your custom part and method colours for both modes.',

@@ -8,7 +8,7 @@ const SIMPLE_ESCAPES = new Set(['"', '\\', '/', 'b', 'f', 'n', 'r', 't'])
 const HEX_DIGIT = /^[0-9a-fA-F]$/
 const FIRST_CONTROL = ' '
 
-export const JSON_FORMAT_TEXT = {
+const TEXT = {
   expectedValue: 'Expected a value',
   unexpectedEnd: 'The JSON ends too early',
   unexpected: (character) => `Unexpected ${character}`,
@@ -26,8 +26,6 @@ export const JSON_FORMAT_TEXT = {
   extraText: 'Unexpected text after the JSON value',
   tooDeep: 'The JSON is nested too deeply to format',
 }
-
-const TEXT = JSON_FORMAT_TEXT
 
 class JsonProblem extends Error {
   constructor(offset, message) {

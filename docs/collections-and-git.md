@@ -83,9 +83,13 @@ A folder also has **Rename** and **Delete**.
 
 **Colour and tags…** on a folder, or **Tags…** on a request, opens a small window:
 
+![The Colour and tags window for the Users folder: orange selected as the folder colour, the WIP tag, and the colour of the WIP tag](../screenshots/colour-and-tags.png)
+
 - **Folder colour** offers six colours and a custom one (the swatch with a plus), which opens your system's colour picker. Choose the selected colour again to remove it. The colour is saved with the folder, in `folder.yaml` for a folder workspace, so everyone who opens the collection sees it.
 - **Tags** adds and removes tags. Type a tag and press Enter, or pick one used elsewhere in the collection. A request's tags can also be edited in its **Settings** tab.
 - **Tag colours** sets the colour of each tag. Without a choice, a colour is picked from the tag's name, so a tag looks the same on every computer. A tag you colour keeps that colour everywhere it appears; these choices are kept on this device and survive **Reset to defaults**.
+
+![The sidebar with orange, teal and purple folders, WIP and Billing folder tags, and request tags such as Smoke, Todo and Testing](../screenshots/folder-colours-tags.png)
 
 Folder tags apply to every request inside the folder, including requests in its subfolders. The sidebar search, the runner's **Only tags** and **Skip tags** filters, and `gostman run --tags` and `--exclude-tags` all treat them as the request's own tags.
 

@@ -19,7 +19,7 @@ const textHash = (text) => Array.from(text).reduce((hash, char) => (hash * 31 + 
 
 export const automaticSwatch = (text) => AUTOMATIC_SWATCHES[textHash(text) % AUTOMATIC_SWATCHES.length]
 
-export const isSwatchName = (value) => lookup(SWATCHES, value) !== undefined
+const isSwatchName = (value) => lookup(SWATCHES, value) !== undefined
 
 export const isColorChoice = (value) => isSwatchName(value) || isHexColor(value)
 

@@ -23,12 +23,10 @@ export const methodBackgroundToken = (method) => `${methodToken(method)}-bg`
 
 export const defaultMethodToken = (method) => DEFAULT_TOKENS[method]
 
-export const methodTextStyle = (method) => (
-  isStyledMethod(method) ? { color: `hsl(var(${methodToken(method)}, var(--${DEFAULT_TOKENS[method]})))` } : undefined
-)
-
-export const methodBadgeStyle = (method) => (
-  isStyledMethod(method) ? { ...methodTextStyle(method), backgroundColor: `var(${methodBackgroundToken(method)}, transparent)` } : undefined
+export const methodStyle = (method) => (
+  isStyledMethod(method)
+    ? { color: `hsl(var(${methodToken(method)}, var(--${DEFAULT_TOKENS[method]})))`, backgroundColor: `var(${methodBackgroundToken(method)}, transparent)` }
+    : undefined
 )
 
 export const hasMethodBackground = (methodColors, mode, method) => Boolean(methodColors[mode][method]?.background)

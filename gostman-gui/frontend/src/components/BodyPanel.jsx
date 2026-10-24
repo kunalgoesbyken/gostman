@@ -28,27 +28,25 @@ import { SOAP_11, soapTemplate } from "../lib/soap"
 
 const PLAIN_TEXT_LANGUAGE = "plaintext"
 const EDITOR_LANGUAGES = { [BODY_JSON]: "json", [BODY_XML]: "xml", [BODY_SOAP]: "xml" }
-const FORMATTED_TYPES = [BODY_JSON, BODY_XML]
+const FORMATTED_TYPE_NAMES = { [BODY_JSON]: "JSON", [BODY_XML]: "XML" }
 const FORMAT_CHORD = { shift: true, alt: true, key: "f" }
 
 const BODY_TEXT = {
   format: "Format",
   formatTitle: (type, chord) => `Indent the ${type} body (${chord}). {{variables}} are kept as written.`,
-  problemAt: ({ line, column, message }) => `Line ${line}, column ${column}: ${message}`,
-  cannotFormat: (type, problem) => `The ${type} cannot be formatted. ${problem}`,
+  cannotFormatAt: (type, { line, column, message }) => `The ${type} cannot be formatted at line ${line}, column ${column}: ${message}`,
+  cannotFormat: (type, { message }) => `The ${type} cannot be formatted: ${message}`,
   goToLine: (line) => `Go to line ${line}`,
 }
 
-const TYPE_NAMES = { [BODY_JSON]: "JSON", [BODY_XML]: "XML" }
+const isFormattedType = (bodyType) => Object.hasOwn(FORMATTED_TYPE_NAMES, bodyType)
 
-const sentence = (text) => text.charAt(0).toUpperCase() + text.slice(1)
-
-const problemText = (error) => (error.column === undefined ? sentence(error.message) : BODY_TEXT.problemAt(error))
+const problemText = (type, error) => (error.column === undefined ? BODY_TEXT.cannotFormat(type, error) : BODY_TEXT.cannotFormatAt(type, error))
 
 function FormatProblem({ bodyType, error, onReveal }) {
   return (
     <Notice tone="destructive">
-      {BODY_TEXT.cannotFormat(TYPE_NAMES[bodyType], problemText(error))}
+      {problemText(FORMATTED_TYPE_NAMES[bodyType], error)}
       {error.offset !== undefined && (
         <button type="button" onClick={() => onReveal(error.offset)} className="ml-2 underline">
           {BODY_TEXT.goToLine(error.line)}
@@ -83,7 +81,7 @@ function RawBody({ body, bodyType, editorPath, editorRef, onChange, onFormat, Ed
       <Suspense fallback={<EditorSkeleton />}>
         <EditorComponent
           ref={editorRef}
-          onFormat={FORMATTED_TYPES.includes(bodyType) ? onFormat : undefined}
+          onFormat={isFormattedType(bodyType) ? onFormat : undefined}
           value={body}
           onChange={(event) => onChange(event.target.value)}
           language={lookup(EDITOR_LANGUAGES, bodyType) || PLAIN_TEXT_LANGUAGE}
@@ -125,7 +123,7 @@ function BodyEditor({ request, editorPath, editorRef, onChange, onFormat, Editor
 function useBodyFormatting(request) {
   const editorRef = useRef(null)
   const [problem, setProblem] = useState(null)
-  const isFormatted = FORMATTED_TYPES.includes(request.bodyType)
+  const isFormatted = isFormattedType(request.bodyType)
   const shownProblem = problem && problem.body === request.body && problem.bodyType === request.bodyType ? problem.error : null
 
   const onFormat = (result) => setProblem(result.error ? { error: result.error, body: request.body, bodyType: request.bodyType } : null)
@@ -151,7 +149,7 @@ export function BodyPanel({ request, drafts, editorPath, replacedByGraphQL, onUp
           <Button
             variant="ghost"
             size="sm"
-            title={BODY_TEXT.formatTitle(TYPE_NAMES[request.bodyType], chordLabel(FORMAT_CHORD, isApplePlatform()))}
+            title={BODY_TEXT.formatTitle(FORMATTED_TYPE_NAMES[request.bodyType], chordLabel(FORMAT_CHORD, isApplePlatform()))}
             disabled={request.body.trim() === ""}
             onClick={formatting.format}
             className="ml-auto"

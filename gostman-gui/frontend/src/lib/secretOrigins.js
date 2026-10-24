@@ -4,10 +4,8 @@ const ORIGIN_ON = "on"
 export const ORIGIN_OFF = "off"
 export const ORIGIN_UNKNOWN = "unknown"
 
-export const automaticColor = automaticSwatch
-
 export const connectionColor = (connection) => (
-  isColorChoice(connection.color) ? connection.color : automaticColor(connection.alias)
+  isColorChoice(connection.color) ? connection.color : automaticSwatch(connection.alias)
 )
 
 export const connectionDirectory = (connections) => new Map(connections.map((connection) => [connection.alias, connection]))

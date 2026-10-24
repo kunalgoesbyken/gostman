@@ -5,7 +5,7 @@ import { Input } from "./ui/input"
 import { Select } from "./ui/select"
 import { VariableInput } from "./VariableInput"
 import { HTTP_METHODS } from "../lib/constants"
-import { methodTextStyle } from "../lib/methodColors"
+import { methodStyle } from "../lib/methodColors"
 import { useShortcutLabel } from "../hooks/useShortcuts"
 import { LOAD_TEST_TEXT } from "../lib/loadTestText"
 import { hintWithShortcut } from "../lib/shortcuts"
@@ -74,7 +74,7 @@ export const RequestBar = memo(function RequestBar({
           onChange={(event) => onMethodChange(event.target.value)}
           aria-label="HTTP method"
           controlSize="md"
-          style={methodTextStyle(activeRequest.method)}
+          style={methodStyle(activeRequest.method)}
           className="w-28 font-mono font-semibold"
         >
           {methodOptions(activeRequest.method).map((method) => (

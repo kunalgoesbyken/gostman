@@ -13,7 +13,8 @@ import { Switch } from "./ui/switch"
 import { ConnectionMark } from "./ConnectionMark"
 import { BLANK_REFERENCE, ReferenceTarget } from "./SecretReferenceFields"
 import { useSecretConnections } from "../hooks/useSecretConnections"
-import { automaticColor, connectionColor } from "../lib/secretOrigins"
+import { connectionColor } from "../lib/secretOrigins"
+import { automaticSwatch } from "../lib/swatches"
 import { SECRETS_TEXT as TEXT } from "../lib/secretsText"
 import { useAppStore } from "../store/appStore"
 import { cn } from "../lib/utils"
@@ -206,7 +207,7 @@ function ConnectionForm({ draft, isNew, kinds, secrets, onChange, onFilled }) {
         />
       </Field>
       <Field label={TEXT.colour} grouped>
-        <ColorPicker label={TEXT.colour} value={draft.color} automatic={draft.alias.trim() && automaticColor(draft.alias.trim())} onChange={(color) => onChange({ ...draft, color })} />
+        <ColorPicker label={TEXT.colour} value={draft.color} automatic={draft.alias.trim() && automaticSwatch(draft.alias.trim())} onChange={(color) => onChange({ ...draft, color })} />
       </Field>
       <FieldNote className="text-muted-foreground">{TEXT.colourNote}</FieldNote>
       <Field label={TEXT.kind}>

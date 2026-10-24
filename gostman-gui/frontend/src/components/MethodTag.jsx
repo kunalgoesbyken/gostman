@@ -1,15 +1,14 @@
-import { resolveTheme, usePreferencesStore } from "../lib/preferences"
-import { hasMethodBackground, isStyledMethod, methodBadgeStyle } from "../lib/methodColors"
+import { usePreferencesStore, useResolvedTheme } from "../lib/preferences"
+import { hasMethodBackground, isStyledMethod, methodStyle } from "../lib/methodColors"
 import { cn } from "../lib/utils"
 
 export function MethodTag({ method, className }) {
-  const hasBackground = usePreferencesStore((state) => (
-    hasMethodBackground(state.preferences.methodColors, resolveTheme(state.preferences.theme, state.systemIsDark), method)
-  ))
+  const mode = useResolvedTheme()
+  const hasBackground = usePreferencesStore((state) => hasMethodBackground(state.preferences.methodColors, mode, method))
 
   return (
     <span
-      style={methodBadgeStyle(method)}
+      style={methodStyle(method)}
       className={cn(
         "shrink-0 truncate font-mono text-3xs font-semibold",
         !isStyledMethod(method) && "text-muted-foreground",

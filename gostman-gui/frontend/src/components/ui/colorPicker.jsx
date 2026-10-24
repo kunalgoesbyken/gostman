@@ -11,6 +11,7 @@ const CUSTOM = "custom"
 const OPTIONS = [...SWATCH_NAMES, CUSTOM]
 const STARTING_CUSTOM_COLOR = "#14b8a6"
 const SELECTED_RING = "ring-1 ring-foreground ring-offset-1 ring-offset-background"
+const PICKER_MARK = { [OPENS_PICKER]: "" }
 const SWATCH_SIZES = {
   sm: { button: "h-5 w-5", dot: "h-3.5 w-3.5" },
   md: { button: "h-6 w-6", dot: "h-4 w-4" },
@@ -67,7 +68,7 @@ export function CustomColorSwatch({ value, isSelected, isTabStop, size = "sm", o
         title={title}
         tabIndex={isTabStop ? 0 : -1}
         onClick={choose}
-        {...{ [OPENS_PICKER]: "" }}
+        {...PICKER_MARK}
         className={cn("flex items-center justify-center rounded-full", sizes.button, isSelected && SELECTED_RING)}
       >
         {isSelected ? (

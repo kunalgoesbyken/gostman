@@ -128,6 +128,8 @@ At the bottom of the window:
 
 The last swatch, marked with a plus, picks a custom accent. Gostman keeps your colour where it is readable and darkens or lightens it where it is not, so text in the accent colour reaches 4.5:1 against the window. When it changes your colour, a note under **Accent colour** shows the shade used in each mode.
 
+![A custom yellow accent selected, with the note that it is shown as #8f7307 in light mode and #facc15 in dark mode](../screenshots/custom-accent.png)
+
 **Palette** sets the background and text colours of the whole window. Each palette has a light and a dark version, shown side by side in its preview, and most give the sidebar a slightly different tone.
 
 **Custom colours** set the background and text colour of one part of the window on top of the palette:
@@ -153,6 +155,10 @@ The last swatch, marked with a plus, picks a custom accent. Gostman keeps your c
 - The reset button at the end of a row clears that part; **Reset light colours** or **Reset dark colours** clears them all for that version.
 
 **Method colours** set the colour of each request method (GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, GRAPHQL, GRPC and MCP) in the sidebar, tabs, history, runner and the method menu of the address bar. Each method has a **Text** colour and a **Background**; with a background, the method is shown as a badge. They work like custom colours: **Light** and **Dark** choose the version you edit, **Contrast** warns below 4.5:1, and the reset buttons clear one method or all of them.
+
+![Method colours with white text on green, amber, blue, red and purple backgrounds for GET, POST, PUT, DELETE and PATCH, each with its contrast ratio](../screenshots/method-colours.png)
+
+![The same method badges in the sidebar, the open tab and the method menu of the address bar](../screenshots/method-badges.png)
 
 **Share a theme**: **Copy theme** copies the palette, the accent colour, and every custom and method colour, for both versions, as text. **Import theme** takes such text and applies it. A theme only holds colours; anything else, or a colour not written as `#rrggbb`, is refused.
 
