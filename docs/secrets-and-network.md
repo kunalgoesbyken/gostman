@@ -31,6 +31,7 @@ Open **Environments** from the header, then select **Secret managers**. Select *
 | Field | Meaning |
 | --- | --- |
 | **Name** | The name variables use to refer to the connection, such as `production`. It cannot be changed after the connection is saved. |
+| **Colour** | The colour of fields that read from this connection. Without a choice, one is picked from the name; the colour it will use has a dashed outline. |
 | **Service** | HashiCorp Vault, AWS Secrets Manager, Azure Key Vault, Google Cloud Secret Manager, KeePassXC, 1Password, Bitwarden or Bitwarden Secrets Manager. It cannot be changed after the connection is saved. |
 
 The other fields depend on the service. A star marks a required field. Fields that hold credentials are masked.
@@ -48,7 +49,7 @@ The other fields depend on the service. A star marks a required field. Fields th
 
 For the password managers, **Program** is the location of their command line tool. Leave it empty and Gostman finds it on the `PATH` and in the usual install folders. Under the service, the form explains how to set each one up.
 
-Select **Save**. The list shows each connection with its service, and buttons to edit (**Edit connection**) or remove (**Delete connection**) it. Deleting a connection asks for confirmation, and variables that use it stop resolving.
+Select **Save**. The list shows each connection with its colour, the service's logo, its service, and buttons to edit (**Edit connection**) or remove (**Delete connection**) it. Deleting a connection asks for confirmation, and variables that use it stop resolving.
 
 When you edit a connection, a credential that is already saved shows `Saved. Leave empty to keep it.`
 
@@ -82,6 +83,14 @@ For the password managers the version box is hidden and the field box is called 
 Select the key button again (**Type a value**) to go back to a plain value.
 
 If the connection name on a variable does not exist on this computer, the row shows `There is no connection named "..." on this computer`, and you can add it or choose another.
+
+### See where a value comes from
+
+In the address bar, the request tables and the editors, a variable that reads from a secret manager is tinted with its connection's colour and has a dashed underline, so a request shows at a glance which fields come from which connection. Plain variables keep a solid underline.
+
+![The address bar with stripe_key tinted orange for vault-prod and probe_ref tinted blue for team-1password, and the hover card of stripe_key naming vault-prod, HashiCorp Vault, the secret path and the JSON field](../screenshots/secret-origins.png)
+
+Hover over the variable to see where its value comes from: the connection's colour, the service's logo, the connection name and service, the secret path, and the field and version if they are set. The value itself stays masked. A variable that uses a connection that is off has a dotted, muted underline, and one whose connection does not exist on this computer is marked like an undefined variable; the hover card says which.
 
 ### Turn a connection off
 

@@ -1,6 +1,6 @@
 # Preferences, shortcuts and the command palette
 
-This page covers the command palette and its commands, the Preferences dialog, the Keyboard shortcuts dialog and how to change a shortcut, moving around the app with the keyboard alone, the themes, colours and fonts, and the About dialog. Throughout, Ctrl means Command on macOS.
+This page covers the command palette and its commands, the Preferences window, the Keyboard shortcuts dialog and how to change a shortcut, moving around the app with the keyboard alone, the themes, colours and fonts, and the About dialog. Throughout, Ctrl means Command on macOS.
 
 ## Command palette
 
@@ -31,7 +31,7 @@ Open it with Ctrl+K, or with the **Commands** button in the header (shown on wid
 | **Close saved tabs** | Close every tab without unsaved changes | Alt+Shift+S |
 | **Keep preview tab open** | Turn the preview tab into a regular tab | Alt+Shift+K |
 | **Reopen closed tab** | Bring back the tab you closed last | Ctrl+Shift+T |
-| **Toggle sidebar** | Show or hide collections and history | Ctrl+B |
+| **Toggle sidebar** | Show or hide collections and history; the button at the left of the header does the same | Ctrl+B |
 | **Keyboard shortcuts** | See every shortcut | Ctrl+/ |
 | **New folder** | Create a folder at the top level | |
 | **Collapse all folders** | Close every folder in the sidebar | |
@@ -58,7 +58,7 @@ Open it with Ctrl+K, or with the **Commands** button in the header (shown on wid
 | **Clear history** | Delete every history entry | |
 | **Show welcome** | Getting started steps, imports and shortcuts | |
 | **About Gostman** | Version, links and diagnostics | |
-| **Reset app** | Delete all data and reload | |
+| **Delete all data** | See what is deleted and what is kept, then confirm; see [Data](#data) | |
 
 The shortcuts above are the defaults on the desktop app. The web version uses different keys for some of them; see [Default shortcuts](#default-shortcuts). The AI commands are described in [AI features](ai.md). **Run requests**, **Load test this request** and **Scan for secrets** are described in [Running, load testing and scanning](runner-load-and-scan.md). **Manage cookies** and **Network settings** are described in [Secrets and network settings](secrets-and-network.md).
 
@@ -71,15 +71,27 @@ Some commands appear only when they apply:
 
 ## Preferences
 
-Open **Preferences** from the command palette. Changes apply as soon as you make them. They are saved on this device, in local storage under `gostman.preferences`.
+Open **Preferences** from the command palette or with **Preferences** in the status bar. Changes apply as soon as you make them, and the window does not dim the app, so you see each change in place. They are saved on this device, in local storage under `gostman.preferences`.
 
-![The Preferences dialog with theme, contrast, accent colour, text size, density, response panel position, interface and code fonts, editor font size and line wrapping](../screenshots/preferences.png)
+![The Preferences window open on its Theme section, with the theme, contrast, accent colour and the eight palettes, over the app](../screenshots/preferences.png)
+
+Preferences is a window you can move and resize inside the app. Pick a section on the left; the window remembers the last one.
+
+![Resizing the sidebar by dragging its edge, hiding and showing it from the header, then moving and resizing the Preferences window and trying a palette](../screenshots/window-tour.gif)
+
+- Drag the title bar to move it, and drag an edge or a corner to resize it. It always stays inside the app.
+- With the keyboard, focus the grip at the left of the title (**Move window**): the arrow keys move the window and Shift with the arrow keys resizes it.
+- Double-click the title bar, or press Home on the grip, to restore the default size and position.
+- Size and position are remembered. On a phone it fills the screen instead, with the sections as a row of tabs.
+- Esc closes it. Clicking outside does not, so you can try settings while it stays open.
 
 | Section | Setting | Options | Default |
 | --- | --- | --- | --- |
-| Appearance | **Theme** | **System**, **Light**, **Dark** | **System** |
-| Appearance | **Contrast** | **System**, **Standard**, **More** | **System** |
-| Appearance | **Accent colour** | **Cyan**, **Blue**, **Violet**, **Pink**, **Graphite** | **Cyan** |
+| Theme | **Theme** | **System**, **Light**, **Dark** | **System** |
+| Theme | **Contrast** | **System**, **Standard**, **More** | **System** |
+| Theme | **Accent colour** | **Cyan**, **Blue**, **Violet**, **Pink**, **Graphite** | **Cyan** |
+| Theme | **Palette** | **Default**, **Neutral**, **Slate**, **Paper**, **Moss**, **Dusk**, **Ocean**, **Ink** | **Default** |
+| Theme | **Custom colours** | A background and a text colour for each part of the window, for light and for dark | None |
 | Appearance | **Text size** | 90%, 100%, 110%, 125% | 100% |
 | Appearance | **Density** | **Comfortable**, **Compact** | **Comfortable** |
 | Appearance | **Response panel** | **Below**, **Right** | **Below** |
@@ -96,11 +108,11 @@ Open **Preferences** from the command palette. Changes apply as soon as you make
 - **Language** lists English only. The dialog says more languages will appear when translations are available.
 - **Use the system title bar** appears in the desktop app on Windows and Linux, under Appearance. It replaces Gostman's own title bar and window buttons with your desktop's, and takes effect the next time Gostman starts. It is saved with the app's data rather than these preferences, so **Reset to defaults** leaves it unchanged. On macOS the system title bar is always used.
 
-At the bottom of the dialog:
+At the bottom of the window:
 
 - **Keyboard shortcuts** closes Preferences and opens the Keyboard shortcuts dialog.
-- **Reset to defaults** restores every setting in the table. It keeps the shortcuts you changed; reset those in the Keyboard shortcuts dialog.
-- **Done** closes the dialog.
+- **Reset to defaults** restores every setting in the table, including the palette and custom colours. It keeps the shortcuts you changed; reset those in the Keyboard shortcuts dialog.
+- **Done** closes the window.
 
 ### Themes and colours
 
@@ -111,7 +123,35 @@ At the bottom of the dialog:
 
 **Contrast** makes borders, field outlines and secondary text stronger. **System** turns it on when your operating system asks for more contrast, **More** always does, and **Standard** never does.
 
-**Accent colour** sets the colour of buttons, selected tabs, links and focus outlines. Each accent has its own shade for light and dark, chosen so that text in that colour and text on it stay easy to read. The landing page and the documentation keep the Gostman colours.
+**Accent colour** sets the colour of buttons, selected tabs, links and focus outlines. Each accent has its own shade for light and dark, chosen so that text in that colour and text on it stay easy to read.
+
+**Palette** sets the background and text colours of the whole window. Each palette has a light and a dark version, shown side by side in its preview, and most give the sidebar a slightly different tone.
+
+**Custom colours** set the background and text colour of one part of the window on top of the palette:
+
+![Custom colours with a dark sidebar in the light theme: the sidebar row shows its colours and a contrast of 11.8:1, and the sidebar behind the window has changed](../screenshots/custom-colours.png)
+
+| Part | Covers |
+| --- | --- |
+| **Window** | The title bar, the status bar and every part not listed below |
+| **Sidebar** | Collections and history |
+| **Tabs and address bar** | The tab strip and the method, URL and Send row |
+| **Request editor** | The request tabs: params, headers, auth and the rest |
+| **Body editor** | Request bodies, gRPC messages, MCP arguments and saved examples |
+| **Script editor** | Pre-request and post-response scripts |
+| **Response** | The response panel |
+| **Dialogs** | Every dialog and window, Preferences included |
+| **Menus and pop-ups** | Context menus, drop-down lists and the command palette |
+
+- Use **Light** and **Dark** above the table to choose which version you edit. While you edit the version that is not showing, a note says how to see it in place.
+- Pick a colour or type it as `#rrggbb`. Only the colours you change are saved; the others follow the palette.
+- **Contrast** shows how readable the text is on that background. Below 4.5:1 it turns into a warning.
+- Borders, secondary text and highlights of each part are worked out from its two colours, so they stay readable. A dark part in the light theme, or a light part in the dark theme, uses the method, status and syntax colours made for its own background.
+- The reset button at the end of a row clears that part; **Reset light colours** or **Reset dark colours** clears them all for that version.
+
+**Share a theme**: **Copy theme** copies the palette and every custom colour, for both versions, as text. **Import theme** takes such text and applies it. A theme only holds colours; anything else, or a colour not written as `#rrggbb`, is refused.
+
+Theme, contrast, accent and palette also apply to the landing page and the documentation in the same browser.
 
 ![Gostman in the light theme with a request and its JSON response](../screenshots/appearance.png)
 
@@ -128,6 +168,23 @@ The About dialog's diagnostics report the theme setting.
 - Select **Suggest installed fonts**, and the font fields then suggest the names of the fonts installed on your device as you type. The up and down arrows move through the list, Enter picks a name and Esc closes the list. The desktop app reads them on Windows, macOS and Linux. In the browser the button appears in Chrome and Edge, which ask for permission first; in other browsers, type the name.
 
 These settings are saved on this device, so the desktop app and each browser keep their own.
+
+### Data
+
+**Where it is saved** says where your collection is kept: in this browser, in the app's data, or in the open workspace folder.
+
+**Export data** opens the Export tab of the import dialog; see [Import, export and specs](import-export-and-specs.md).
+
+**Delete all data** opens a confirmation that lists exactly what is deleted and what is kept. The delete button stays off until you type the word it asks for; **Export first** opens the export instead. The command palette's **Delete all data** opens the same confirmation.
+
+![The Delete all data confirmation listing what is deleted and what is kept, with a field to type "delete", and Cancel, Export first and Delete all data buttons](../screenshots/delete-all-data.png)
+
+| | Desktop app | Web version |
+| --- | --- | --- |
+| Deleted | The collection in the app's data; global variables and every stored secret value, workspace folders' included; history, cookies, OAuth 2.0 tokens and unsaved tabs; secret manager connections and their credentials, AI provider keys and AI settings; the list of recent and trusted folders; proxy, certificate and mock server settings, and captured traffic | Requests, folders, examples and environments; global variables and secret values; history, cookies, OAuth 2.0 tokens and unsaved tabs; AI provider keys and AI settings |
+| Kept | Workspace folders and their files, preferences, getting started progress and files you exported | Preferences, getting started progress and files you exported |
+
+Running mock servers, captures and load tests stop first. When a workspace folder is open, **Export first** exports that folder's collection; switch to **This computer** to export the collection in the app's data.
 
 ## Keyboard shortcuts
 

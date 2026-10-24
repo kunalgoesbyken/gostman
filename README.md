@@ -96,7 +96,8 @@ Open the same folder in the desktop app with **Open folder** to see the requests
 - **Mock server and capture:** serve saved examples or an OpenAPI spec locally, and record traffic from your own app.
 - **OpenAPI:** import, sync with a remote spec, and a spec viewer with a linter (`gostman lint`).
 - **Docs:** generate one HTML page with Markdown descriptions and an optional Try it panel.
-- **Secret managers:** HashiCorp Vault, AWS, Azure and Google Cloud; the password managers KeePassXC, 1Password and Bitwarden; and your OS keychain for stored values.
+- **Secret managers:** HashiCorp Vault, AWS, Azure and Google Cloud; the password managers KeePassXC, 1Password and Bitwarden; and your OS keychain for stored values. Fields that read from a connection are tinted with its colour.
+- **Themes:** light and dark, eight palettes, accent colours, and your own background and text colour for each part of the window, with a contrast check.
 - **Sharing:** encrypted share links that never upload anything, and Open in Gostman links.
 - **For coding agents:** `gostman mcp` lets Claude Code, Codex and Cursor call your API through the collection without seeing your secrets.
 - **AI assistant** (optional, bring your own key): generate requests, tests and scripts, and explain errors.

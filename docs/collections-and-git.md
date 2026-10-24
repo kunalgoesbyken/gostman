@@ -17,6 +17,16 @@ The buttons next to the view tabs are:
 | New folder | Creates a folder |
 | New request | Creates a request; the tooltip shows its keyboard shortcut |
 
+To hide the sidebar, select the sidebar button at the left of the header, press Ctrl+B, or run **Toggle sidebar** from the command palette. The same button shows it again.
+
+On a window at least 768 pixels wide, the sidebar sits next to the requests and you can change its width:
+
+- Drag its right edge. Dragging it almost closed and letting go hides the sidebar, and the width you had comes back when you show it again.
+- Focus the edge (**Resize sidebar**) and use the left and right arrows, or Home and End for the narrowest and widest.
+- Double-click the edge to return to the default width.
+
+The width, from 224 to 480 pixels, and whether the sidebar is shown are remembered. The sidebar never takes so much room that the requests get narrower than 480 pixels. On a narrower window it opens over the requests instead, starts hidden and closes when you open a request.
+
 ## Collection tree
 
 The tree lists folders and requests. Each request row shows its method and name, and hovering a row shows its URL and tags. Folders can hold other folders. An import moves folders nested deeper than 32 levels to the top level.
