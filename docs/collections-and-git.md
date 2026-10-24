@@ -6,7 +6,7 @@ This page covers the sidebar and collection tree, request tabs, the welcome pane
 
 The sidebar has two views, **Collections** and **History**. The History tab shows a count of saved entries when there are any.
 
-![Gostman with the sidebar showing nested folders and requests, a search field, and open request tabs](../screenshots/app.png)
+![Gostman with the storefront-api folder open: folders of requests in the sidebar, a search field, a request and its response](../screenshots/app.png)
 
 The buttons next to the view tabs are:
 
@@ -151,7 +151,7 @@ A folder you did not create opens as restricted. In a restricted folder, scripts
 
 ## Git panel
 
-The **Git** panel is a desktop feature. It works on the open folder, so open or save the collection to a folder first, or clone a repository from the workspace menu. The panel refreshes when the app window regains focus.
+The **Git** panel is a desktop feature. It works on the open folder, so open or save the collection to a folder first, or clone a repository from the workspace menu. Open it with **Git** in the workspace menu, or with the branch name in the status bar at the bottom of the window. The panel refreshes when the app window regains focus.
 
 ![The Git panel with one changed request file, its diff showing the URL change, and a commit message ready to commit](../screenshots/git-panel.png)
 

@@ -27,7 +27,7 @@ The collection is the outermost level. A request belongs to its folder, which ma
 
 **Tests** accumulate: the request's assertions and every folder's and the collection's are all checked.
 
-**Docs** are shown above the requests of that folder in the generated HTML page; the collection's description appears at the top. The text is shown as written (Markdown is not rendered) and is escaped.
+**Docs** are shown above the requests of that folder in the generated HTML page; the collection's description appears at the top. The text is rendered as Markdown; HTML in it is escaped, never rendered.
 
 ## What is sent
 
@@ -61,7 +61,7 @@ Keys Gostman does not know are kept when it rewrites the file. Gostman exports a
 
 ## Trust
 
-Imports are untrusted. Scripts and OAuth 2.0 settings on folders and on the collection are counted in the import prompt and dropped if you decline them. In a folder you have not trusted, a request is not sent when its folder or the collection carries a script or OAuth 2.0 settings, exactly as for a request that carries them.
+Imports are untrusted. Scripts, OAuth 2.0 settings and [file reads](variables.md#reading-files) on folders and on the collection are counted in the import prompt and dropped if you decline them. In a folder you have not trusted, a request is not sent when its folder or the collection carries a script, OAuth 2.0 settings or a file read, exactly as for a request that carries them.
 
 ## The CLI
 

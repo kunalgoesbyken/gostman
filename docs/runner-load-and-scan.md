@@ -4,11 +4,11 @@ This page covers the Run requests dialog (the collection runner), the Load test 
 
 ## Run requests
 
-The Run requests dialog sends the requests of your collection one after another and shows the outcome of each. Open it with the **Run requests** command, or with **Run folder** in a folder's menu in the sidebar, which preselects that folder.
+The Run requests dialog sends the requests of your collection one after another and shows the outcome of each. Open it with the **Run requests** command or the **Run requests** button at the top of the sidebar, or with **Run folder** in a folder's menu in the sidebar, which preselects that folder.
 
 Requests run in sidebar order, with their scripts, extraction rules and assertions, using the active environment. WebSocket requests are skipped.
 
-![The Run requests dialog after a run: Sign in, Current user, List items and Reports passed with a 200 OK status, and Export failed with a 500 status because the check res.status equals 200 did not hold. The footer reads Ran 5 of 5, 4 passed, 1 failed.](../gostman-gui/frontend/src/assets/landing/runner.webp)
+![The Run requests dialog after running the Orders folder: List orders, Create order, Upload receipt and Monthly report passed, and Export orders failed with a 500 status because the check res.status equals 200 did not hold. The footer reads Ran 5 of 5, 4 passed, 1 failed.](../gostman-gui/frontend/src/assets/landing/runner.webp)
 
 ### Options
 
@@ -65,11 +65,11 @@ The report is not redacted for you. Review it before you share it.
 
 ## Load test
 
-The Load test dialog sends the current request many times at once and measures how the server responds. Open it with the **Load test this request** command while the request you want to test is the active tab.
+The Load test dialog sends the current request many times at once and measures how the server responds. Open it with the **Load test** button next to **Code** in the request bar, or with the **Load test this request** command while the request you want to test is the active tab.
 
-![A finished load test: 1001 requests at 200 per second with no failures, and a latency table from min to max](../screenshots/load-test.png)
+![A finished load test with 20 workers for 5 seconds: every request succeeded, with a latency table from min to max](../screenshots/load-test.png)
 
-The command appears only in the desktop app. In the web version the palette does not offer it.
+The button and the command appear only in the desktop app. In the web version neither the request bar nor the palette offers them.
 
 Only test systems you own or have permission to test.
 
@@ -110,7 +110,7 @@ For thresholds that fail a pipeline, a fixed request count or a ramp-up, use `go
 
 The Scan for secrets dialog looks through your collection for credentials that were typed into it, before you share or commit it. Open it with the **Scan for secrets** command.
 
-![The Scan for secrets dialog with one high finding: a Stripe live key in the X-Api-Key header of Auth/Partner callback, shown only as sk_l****](../screenshots/scan.png)
+![The Scan for secrets dialog with one medium finding: a JSON Web Token in the token variable of the Local environment, shown only as eyJh****](../screenshots/scan.png)
 
 It looks for well-known token formats, random-looking values in credential fields and passwords typed into auth settings. Values written as `{{variables}}` are not reported. Nothing leaves the window except the check itself, and only a few characters of a value are ever shown.
 

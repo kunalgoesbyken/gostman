@@ -148,7 +148,7 @@ export function ProductShowcase() {
         role="tabpanel"
         id={panelId(active.id)}
         aria-labelledby={tabId(active.id)}
-        className="mt-6 aspect-[1240/760] overflow-hidden rounded-lg border border-primary/25 bg-background shadow-[0_30px_80px_-24px_hsl(var(--primary)/0.4)]"
+        className="mt-6 aspect-[8/5] overflow-hidden rounded-lg border border-primary/25 bg-background shadow-[0_30px_80px_-24px_hsl(var(--primary)/0.4)]"
       >
         <AnimatePresence mode="wait" initial={false}>
           <m.img

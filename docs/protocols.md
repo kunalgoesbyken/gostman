@@ -11,7 +11,7 @@ The method list in the request bar offers GET, POST, PUT, DELETE, PATCH, HEAD an
 - Type a URL in the bar, or paste a curl command into it to turn the command into a request.
 - Use `{{name}}` placeholders for variables from the active environment.
 - The Body tab offers None, JSON, Text, XML, SOAP, Form URL-encoded, Multipart and File.
-- The Settings tab has Follow redirects and Verify TLS certificates.
+- The Settings tab has Timeout (ms), Follow redirects and Verify TLS certificates.
 - The Code button generates a snippet for the request. The snippet comes from the same engine, so it matches what is sent.
 
 Limits that apply to every protocol on this page:
@@ -22,9 +22,9 @@ Limits that apply to every protocol on this page:
 
 ## GraphQL
 
-Choose GRAPHQL in the method list, or open the GraphQL tab and select Send as GraphQL. The engine sends a POST request with a JSON body that holds `query` and, when you provide them, `variables`. If the query editor is empty, the engine falls back to the request body.
+Choose GRAPHQL in the method list, or open the GraphQL tab and select Send as GraphQL. Typing a query in the GraphQL tab also switches the method to GRAPHQL. The engine sends a POST request with a JSON body that holds `query` and, when you provide them, `variables`. If the query editor is empty, the engine falls back to the request body.
 
-![A GraphQL request named Countries with a query, a Variables (JSON) section and a 200 OK response that shows data and countries](../gostman-gui/frontend/src/assets/landing/graphql.webp)
+![A GraphQL request named Countries by continent with a query, a Variables (JSON) section, the schema browser and a 200 OK response that shows the countries](../gostman-gui/frontend/src/assets/landing/graphql.webp)
 
 ### Query and variables
 
@@ -59,7 +59,7 @@ With an `http` or `https` URL, Gostman sends GraphQL as a normal HTTP request. T
 
 Choose GRPC in the method list. The address is a `grpc://host:port` URL for plaintext or `grpcs://host:port` for TLS. The default port is 80 for `grpc://` and 443 for `grpcs://`. TLS certificates are verified unless you turn off Verify TLS certificates in Settings.
 
-![A gRPC request with the source set to Server reflection, a method picker showing Echo as Unary, a JSON message and a JSON response](../gostman-gui/frontend/src/assets/landing/grpc.webp)
+![A gRPC request with the source set to Server reflection, the method storefront.v1.Catalog/GetProduct, a JSON message and a JSON response](../gostman-gui/frontend/src/assets/landing/grpc.webp)
 
 ### Load the services
 
@@ -106,7 +106,7 @@ gRPC works in both apps. In the web app the call goes through the proxy, so it c
 
 Enter a `ws://` or `wss://` URL. The Send button becomes Connect, and the WebSocket tab opens. Placeholders in the URL and in the headers are replaced with environment values. If the URL uses a variable the active environment does not define, the panel shows which ones are missing.
 
-![A WebSocket session that is Connected to wss://echo.websocket.org with sent and received messages in the log and an empty message box](../gostman-gui/frontend/src/assets/landing/websocket.webp)
+![A WebSocket session connected to ws://localhost:4000/live: a hello message, a subscribe message that was sent and three order events received in the log](../gostman-gui/frontend/src/assets/landing/websocket.webp)
 
 ### Connect and send
 
@@ -133,7 +133,7 @@ Save keeps the message box, and the event or topic, under a name. The saved mess
 
 Choose Socket.IO in the Protocol list next to the status. Gostman speaks Socket.IO 3 and 4 (Engine.IO 4) over WebSocket.
 
-![A Socket.IO session that joined the / namespace, received a welcome event, emitted echo with a JSON argument and received echoed back](../screenshots/socketio.png)
+![A Socket.IO session that joined the / namespace, received a welcome event, emitted question with a JSON argument and received question:ack back](../screenshots/socketio.png)
 
 - The URL path is the namespace: `ws://localhost:3000/admin` joins `/admin`, and `ws://localhost:3000` joins `/`. Gostman connects to `/socket.io/` on that host. A URL that already starts with `/socket.io/` is used as written and joins `/`.
 - Type an event name in Event and its argument in the message box. JSON is sent as JSON, other text as a string, and an empty box emits the event without arguments.
@@ -144,7 +144,7 @@ Choose Socket.IO in the Protocol list next to the status. Gostman speaks Socket.
 
 Choose MQTT in the Protocol list to talk to a broker over MQTT 3.1.1 on WebSocket, for example `ws://localhost:8080/mqtt`. The `mqtt` subprotocol is sent for you.
 
-![An MQTT session subscribed to sensors/#, publishing to sensors/kitchen and receiving messages on sensors/kitchen and sensors/temp](../screenshots/mqtt.png)
+![An MQTT session subscribed to sensors/#, receiving readings on sensors/warehouse and sensors/cold-store](../screenshots/mqtt.png)
 
 - Set Auth to Basic to send a user name and password; other auth types send none. Each connection uses a new client ID that starts with `gostman-` and a clean session.
 - Type a topic filter such as `sensors/#` and select Subscribe. The broker's answer is shown in the log.
@@ -251,18 +251,18 @@ Choose MCP in the method list and enter the server's URL. An MCP tab appears. Go
 
 In the desktop app, write `stdio:` followed by the command that starts the server, for example `stdio:npx -y @modelcontextprotocol/server-everything` or `stdio:python server.py`.
 
-![The Run a program on this computer? confirmation showing the command stdio:npx -y @modelcontextprotocol/server-everything](../screenshots/mcp-stdio-confirm.png)
+![The Run a program on this computer? confirmation showing the command stdio:storefront-mcp](../screenshots/mcp-stdio-confirm.png)
 
-- The first time a command runs, Gostman shows it and asks **Run a program on this computer?**. Cancel is the default. You are asked again when the command changes or the app restarts.
+- The first time a command runs, Gostman shows it and asks **Run a program on this computer?**. Cancel is the default. You are asked again when the command or its environment changes, or the app restarts.
 - The command is split into a program and its arguments; it is not passed to a shell, so pipes, `&&` and `$VAR` have no special meaning. Put an argument with spaces in double or single quotes.
 - The enabled rows on the Headers tab become environment variables of the program, for example `API_KEY`, and `{{variables}}` work in both.
 - Each Load and each call start the program again and stop it when the answer arrives. When it stops early, its error output is shown.
 - In a folder you have not trusted, local commands are switched off like scripts. The collection runner runs a local command only after you have confirmed it from its tab.
 - The web app, `gostman run` and the MCP server for coding agents never start local commands.
 
-![An MCP request to a local server started with npx: the server line, the echo tool, its JSON arguments and the response](../screenshots/mcp-stdio.png)
+![An MCP request to a local server started with the command storefront-mcp: the server line, the get_product tool, its JSON arguments and the response](../screenshots/mcp-stdio.png)
 
-![An MCP request with the server line gostman-mcp-test-server 1.0.0 MCP 2025-06-18, the echo tool, JSON arguments and an OK response](../gostman-gui/frontend/src/assets/landing/mcp.webp)
+![An MCP request with the server line storefront-mcp 1.2.0, the search_products tool, JSON arguments and an OK response](../gostman-gui/frontend/src/assets/landing/mcp.webp)
 
 ### Load the tools
 

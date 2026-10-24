@@ -22,7 +22,7 @@ The Go engine, the desktop and web apps and the CLI resolve a name the same way,
 
 Each environment is a table of rows: a name, a value, an on/off switch and a lock.
 
-![The Environments dialog with the Local environment selected: a green colour label, five variables, and the secret ones masked with a lock](../screenshots/environments.png)
+![The Environments dialog with the Local environment selected: a green colour label, its variables, and the secret ones masked](../screenshots/environments.png)
 
 - **Secret** (lock): the value is masked in the table (the eye reveals it) and in hover previews and suggestions. It is never written to the workspace YAML, to exports or to share links. See [Secret variables](#secret-variables).
 - **Colour**: a label shown next to the environment picker, so production is hard to mistake for staging.

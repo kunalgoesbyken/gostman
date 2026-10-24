@@ -64,7 +64,7 @@ Gostman has no accounts and no cloud sync. Requests, collections and environment
 
 ## Limits of the web version
 
-Browsers cannot call arbitrary APIs directly, so the web version relays requests through a small proxy. Two consequences:
+Browsers cannot call arbitrary APIs directly, so the web version relays requests through a small proxy. The consequences:
 
 - The hosted proxy cannot reach `localhost` or private network addresses. Use the desktop app for local APIs.
 - Proxy, CA certificate and client certificate settings exist only in the desktop app.

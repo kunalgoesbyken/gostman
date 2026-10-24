@@ -107,7 +107,7 @@ Imports are untrusted input, as described in the project notes:
 
 ### Scripts and OAuth 2.0
 
-Scripts and OAuth 2.0 settings are kept when you import them, but you decide first. If the import contains any request, folder or collection setting that carries them, Gostman asks **Import scripts and sign-in settings?** with the number of items. Choose **Import them** to keep them. Cancel to import everything else without them.
+Scripts, OAuth 2.0 settings, local MCP commands and file reads are kept when you import them, but you decide first. If the import contains any request, folder or collection setting that carries them, Gostman asks **Import scripts and sign-in settings?** with the number of items. Choose **Import them** to keep them. Cancel to import everything else without them.
 
 In a folder workspace, imported items that carry scripts, OAuth 2.0 settings, local MCP commands or file reads stay restricted until you trust the folder, see [Collections, tabs and Git](collections-and-git.md).
 

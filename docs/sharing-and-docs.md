@@ -6,6 +6,7 @@ The **Share** tab of the import dialog encrypts a folder or the whole collection
 - Variable values and saved responses are left out unless you tick them. OAuth tokens, cookies and history are never included.
 - The recipient sees what is inside before importing, and their own variable values are kept.
 - A link carries up to 32 KB; larger selections go as a file.
+- A secret scan runs on the selection. When it finds credentials, no link or file is made until you choose **Share anyway**.
 
 **Export → HTML docs** (or `gostman docs`) writes one self-contained documentation page: every request with its description, parameters, headers, body, a curl example and saved examples. Values in auth settings, credential headers and parameters with names such as `token` or `key` are shown as `<redacted>`; other literal secrets in bodies are not detected, so review the page before publishing.
 

@@ -29,7 +29,7 @@ Gostman is an API client for REST, GraphQL, gRPC and WebSocket that you, your CI
 ## Test and automate
 
 - [Runner, load testing and secret scanning](runner-load-and-scan.md): the in-app runner and the dialogs for load tests and scans.
-- [Command line](cli.md): `run`, `send`, `mock`, `capture`, `docs`, `load`, `scan` and `lint`.
+- [Command line](cli.md): `run`, `send`, `mock`, `capture`, `docs`, `load`, `scan`, `lint`, `import` and `export`.
 - [Gostman in CI](ci.md): exit codes, reports, recipes for GitHub Actions, GitLab CI and Jenkins, and a run against the mock server.
 - [Use from a coding agent](agents.md): the MCP server for Claude Code, Codex and Cursor.
 

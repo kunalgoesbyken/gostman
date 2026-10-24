@@ -6,7 +6,7 @@ This page covers the command palette and its commands, the Preferences dialog, t
 
 The command palette runs most actions in Gostman from the keyboard.
 
-![The command palette filtered by tab, listing tab commands with their shortcuts and a matching saved request](../screenshots/command-palette.png)
+![The command palette filtered by run, listing Run requests and other matching commands, saved requests and history entries](../screenshots/command-palette.png)
 
 Open it with Ctrl+K, or with the **Commands** button in the header (shown on wide windows). Type to filter, use the up and down arrows to move, press Enter to run the highlighted row and Esc to close it. The **?** button in the palette opens the Keyboard shortcuts dialog.
 
@@ -34,6 +34,7 @@ Open it with Ctrl+K, or with the **Commands** button in the header (shown on wid
 | **Toggle sidebar** | Show or hide collections and history | Ctrl+B |
 | **Keyboard shortcuts** | See every shortcut | Ctrl+/ |
 | **New folder** | Create a folder at the top level | |
+| **Collapse all folders** | Close every folder in the sidebar | |
 | **Run requests** | Run every request in a folder with its tests | |
 | **Request examples** | See the saved responses of the current request | |
 | **Mock server** | Serve saved examples on a local port | |
@@ -112,7 +113,7 @@ At the bottom of the dialog:
 
 **Accent colour** sets the colour of buttons, selected tabs, links and focus outlines. Each accent has its own shade for light and dark, chosen so that text in that colour and text on it stay easy to read. The landing page and the documentation keep the Gostman colours.
 
-![Gostman in the light theme with more contrast, the violet accent and 110% text size](../screenshots/appearance.png)
+![Gostman in the light theme with a request and its JSON response](../screenshots/appearance.png)
 
 **Text size** scales all text and the spacing around it. **Compact** density makes everything a little smaller again. **Editor font size** is separate and sets the size of the code editors.
 

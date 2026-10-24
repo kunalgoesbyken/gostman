@@ -25,6 +25,7 @@ The request bar sits above the request tabs.
 | Send | Sends the request. While a request is running the button becomes Cancel. |
 | Save | Saves the request. |
 | Code | Opens the code generator. See [Code generation](#code-generation). |
+| Load test | Desktop app only. Opens the Load test dialog for this request. See [Load test](runner-load-and-scan.md#load-test). |
 
 When the URL is a WebSocket address, the Send button is labelled Connect. Send and Save show their keyboard shortcuts in their tooltips; see [Preferences, shortcuts and the command palette](preferences-and-shortcuts.md).
 
@@ -89,7 +90,7 @@ Details:
 
 - File attachments, in the File type and in Multipart file rows, are limited to 5 MB. A larger file is refused with a message.
 - Switching between raw types (JSON, Text, XML, SOAP) keeps the same text. Switching between the groups None, Form URL-encoded, Multipart, File and raw types keeps a separate draft for each group, so you can switch back without losing it.
-- For SOAP, the toolbar offers SOAP 1.1 and SOAP 1.2, a SOAP action field and a Format button. Choosing SOAP with an empty body inserts a SOAP 1.1 template.
+- For SOAP, the toolbar offers SOAP 1.1 and SOAP 1.2, a SOAPAction field and a Format XML button. Choosing SOAP with an empty body inserts a SOAP 1.1 template.
 - When the method is GRAPHQL, the Body tab shows a notice: the body is built from the GraphQL tab and the Body tab is not sent.
 
 ![Multipart body with two text fields, a file field and a disabled row](../screenshots/request-body.png)
@@ -182,9 +183,9 @@ A name written as `{{?name}}` is asked for when you send the request. A dialog t
 
 The response panel sits below the request. Drag its top edge to resize it and double-click the edge to reset the height; the height you choose is kept for the next time you open the app. The chevron button collapses it, and the fullscreen button expands it.
 
-![A JPEG response shown in the Body tab of the response panel](../screenshots/response-image.png)
+![A PNG image response shown in the Body tab of the response panel](../screenshots/response-image.png)
 
-Before the first send the panel reads "No response yet". While a request runs it reads "Sending request".
+Before the first send the panel reads "No response yet". While a request runs it shows placeholder lines.
 
 ### Summary and toolbar
 
@@ -334,4 +335,4 @@ Code opens the Generate code dialog. Pick a language from the list at the top:
 
 Copy copies the snippet for the selected language. Text is escaped for each language, so quotes, `$`, backslashes, line breaks and non-ASCII characters arrive as typed. The snippets are built from the request as the engine prepares it, so variables, inherited headers and auth appear as they are sent.
 
-![The Generate code dialog with C# selected, showing an HttpClient call with a JSON body and a signed Hawk Authorization header](../screenshots/code.png)
+![The Generate code dialog with cURL selected, showing a POST with a JSON body and a bearer Authorization header](../screenshots/code.png)

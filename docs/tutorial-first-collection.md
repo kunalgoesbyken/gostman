@@ -26,7 +26,7 @@ Send it again to confirm nothing changed. See [Variables](variables.md) for ever
 ## 3. Group requests in a folder
 
 1. Create a folder named **Todos** with the folder button in the sidebar and drag **List todos** into it.
-2. Open the folder's **Settings** from its menu, add a header `Accept: application/json` on the **Headers** tab and save.
+2. Open the folder's **Settings** from its menu, add a header `Accept: application/json` on the **Headers** tab and close the dialog. Folder settings are saved as you change them.
 
 Every request in the folder now sends that header without repeating it. Auth, variables, scripts and assertions can be set on a folder the same way; see [Folder and collection settings](folder-settings.md).
 
@@ -93,6 +93,7 @@ PASS  POST     Todos/Create a todo  201 Created  286 ms  2/2 tests
 
 Requests  3 passed
 Tests     7 passed
+Duration  412ms
 ```
 
 The command exits with `1` when a request or a check fails, which is what a CI pipeline needs.

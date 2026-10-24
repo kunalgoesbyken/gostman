@@ -4,7 +4,7 @@ Short recipes for common jobs. Each one lists the steps and links to the referen
 
 ## Move a collection from Postman, Insomnia, Bruno or .http files
 
-In the app, choose **Import** in the sidebar (or on the welcome panel) and drop the export file or folder. From the command line:
+In the app, choose **Import** in the header (or on the welcome panel) and drop the export file or folder. From the command line:
 
 ```bash
 gostman import postman_collection.json --out api
@@ -21,7 +21,7 @@ Reference: [Import, export and OpenAPI specs](import-export-and-specs.md). Movin
 ## Work on a frontend before the backend exists
 
 1. Save one response per endpoint as an example: in the response panel, choose **Save as example**. Edit its body to the shape you agreed on.
-2. Start the mock server from the header, or run `gostman mock api --port 4010`.
+2. Start the mock server with **Mock server** at the bottom of the window, or run `gostman mock api --port 4010`.
 3. Point the frontend at `http://127.0.0.1:4010`.
 
 With only an OpenAPI spec, `gostman mock --openapi openapi.yaml` serves every operation from it. Add delays and error rates with `--delay` and `--error-rate` to see how the interface handles a slow or failing API. To run the collection's checks against the mock in CI, see [Run against the mock server](ci.md#run-against-the-mock-server).

@@ -42,9 +42,9 @@ The other fields depend on the service. A star marks a required field. Fields th
 | Azure Key Vault | **Address** *, **Tenant ID**, **Client ID**, **Client secret**, **Token**, **Sign-in address** |
 | Google Cloud Secret Manager | **Token** *, **Project**, **Address** |
 | KeePassXC | No fields. Select **Connect to KeePassXC**; see [KeePassXC](#keepassxc). |
-| 1Password | **Account**, **Token**, **Program** |
+| 1Password | **Account**, **Service account token**, **Program** |
 | Bitwarden | **Master password** with **Unlock**, which fills **Session key** *; **Program**. See [Bitwarden](#bitwarden). |
-| Bitwarden Secrets Manager | **Token** *, **Address**, **Program** |
+| Bitwarden Secrets Manager | **Access token** *, **Server address**, **Program** |
 
 For the password managers, **Program** is the location of their command line tool. Leave it empty and Gostman finds it on the `PATH` and in the usual install folders. Under the service, the form explains how to set each one up.
 
@@ -136,8 +136,8 @@ The **Field** can be:
 
 Gostman runs the 1Password CLI (`op`), which must be installed.
 
-- With the 1Password app: turn on **Settings → Developer → Integrate with 1Password CLI** and leave **Token** empty. 1Password asks you to approve access, for example with Windows Hello or Touch ID.
-- For CI or without the app: put a service account token in **Token**.
+- With the 1Password app: turn on **Settings → Developer → Integrate with 1Password CLI** and leave **Service account token** empty. 1Password asks you to approve access, for example with Windows Hello or Touch ID.
+- For CI or without the app: fill in **Service account token**.
 - **Account** is only needed when you are signed in to several accounts, for example `my.1password.com`.
 
 The path is `vault/item` or `vault/item/section`, and the field is the field's label, such as `username`, `password` or `credential`. Names are not case-sensitive. A name with characters other than letters, digits, spaces, `-`, `_` and `.` must be given by its ID. The field `totp` reads the current one-time password.
@@ -155,7 +155,7 @@ The path is the item's exact name or its ID. If several items have the name, Gos
 
 #### Bitwarden Secrets Manager
 
-Gostman runs the Secrets Manager CLI (`bws`) with the access token of a machine account. Leave **Address** empty for bitwarden.com, or set it for the EU cloud (`https://vault.bitwarden.eu`) or a self-hosted server. The path is the secret's ID, and the field is `value` (the default), `key` or `note`.
+Gostman runs the Secrets Manager CLI (`bws`) with the access token of a machine account. Leave **Server address** empty for bitwarden.com, or set it for the EU cloud (`https://vault.bitwarden.eu`) or a self-hosted server. The path is the secret's ID, and the field is `value` (the default), `key` or `note`.
 
 ### What is stored and what is not
 
@@ -168,7 +168,7 @@ Gostman runs the Secrets Manager CLI (`bws`) with the access token of a machine 
 
 Gostman keeps the cookies that responses set and sends them back to the same site on later requests. Open the **Manage cookies** command to see them in the **Cookies** dialog.
 
-![The Cookies dialog listing session_id, theme and locale cookies for httpbin.org with their path and expiry](../screenshots/cookies.png)
+![The Cookies dialog listing the session_id and locale cookies for localhost with their path and expiry](../screenshots/cookies.png)
 
 - The table lists **Name**, **Value**, **Domain**, **Path** and **Expires** for each cookie, and the title shows the count.
 - **Filter by name or domain** narrows the list.
@@ -180,7 +180,7 @@ Share links never include cookies.
 
 Network settings sets the proxy and certificates used when the desktop app sends requests. Open the **Network settings** command from the command palette.
 
-![The Network settings dialog with a custom proxy, hosts that bypass it, a CA certificate picker and a client certificate row for api.example.com](../screenshots/network.png)
+![The Network settings dialog with a custom proxy, hosts that bypass it and a CA certificate picker](../screenshots/network.png)
 
 Network settings are desktop only. In the web version the dialog shows `Available in the desktop app`: requests from the web version go through the hosted relay, which cannot use a proxy or certificates from your machine.
 
