@@ -6,7 +6,7 @@ import { ABOUT_LINKS, buildDiagnostics, openExternal } from "../lib/about"
 import { ABOUT_TEXT as TEXT } from "../lib/aboutText"
 import { usePreferences } from "../lib/preferences"
 import { useAppStore } from "../store/appStore"
-import logo from "../assets/logo.webp"
+import { Logo } from "./ui/logo"
 
 export function AboutDialog({ onClose }) {
   const requests = useAppStore((s) => s.requests)
@@ -23,7 +23,7 @@ export function AboutDialog({ onClose }) {
       </DialogHeader>
       <DialogBody className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
-          <img src={logo} alt="" className="h-14 w-14 shrink-0 rounded-lg" />
+          <Logo className="h-14 w-14" />
           <div className="min-w-0">
             <p className="font-brand text-base font-semibold">Gostman</p>
             <p className="font-mono text-xs text-muted-foreground">{TEXT.version(__APP_VERSION__)}</p>

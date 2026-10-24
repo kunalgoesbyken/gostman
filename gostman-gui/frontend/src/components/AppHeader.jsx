@@ -8,7 +8,7 @@ import { promptInstall, useInstallable } from "../lib/pwa"
 import { INSTALL_TEXT } from "../lib/installText"
 import { useShortcutLabel } from "../hooks/useShortcuts"
 import { useWindowFrame } from "../hooks/useWindowFrame"
-import logo from "../assets/logo.webp"
+import { Logo } from "./ui/logo"
 
 const DRAG = { "--wails-draggable": "drag" }
 const NO_DRAG = { "--wails-draggable": "no-drag" }
@@ -30,7 +30,7 @@ export function AppHeader({ storage, windowFrame, onImport, onReset, onOpenComma
 
       {onBack || isDesktop ? (
         <div className="flex shrink-0 items-center gap-2">
-          <img src={logo} alt="" className="h-6 w-6 rounded max-sm:hidden" />
+          <Logo className="h-6 w-6 max-sm:hidden" />
           <h1 className="font-brand text-sm font-semibold max-sm:sr-only">Gostman</h1>
         </div>
       ) : (
