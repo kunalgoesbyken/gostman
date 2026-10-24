@@ -56,15 +56,30 @@ const DEFAULT_OPERATOR = OPERATORS[0]
 
 export const BLANK_ASSERTION = { expression: '', operator: DEFAULT_OPERATOR.value, value: '', enabled: true }
 
+const OPERATOR_NAMES = OPERATORS.map((operator) => operator.value).join(', ')
+
+const unknownOperator = (name) => ({
+  value: name,
+  label: name,
+  test: () => {
+    throw new Error(`"${name}" is not a check. Use one of: ${OPERATOR_NAMES}`)
+  },
+})
+
 export const operatorOf = (assertion) => (
-  OPERATORS.find((operator) => operator.value === assertion.operator) || DEFAULT_OPERATOR
+  assertion.operator
+    ? OPERATORS.find((operator) => operator.value === assertion.operator) || unknownOperator(assertion.operator)
+    : DEFAULT_OPERATOR
 )
 
-const asText = (value) => (typeof value === 'string' ? value : '')
+const asText = (value) => {
+  if (value === undefined || value === null) return ''
+  return typeof value === 'string' ? value : JSON.stringify(value)
+}
 
 const toAssertion = (raw) => ({
   expression: asText(raw.expression),
-  operator: operatorOf(raw).value,
+  operator: asText(raw.operator) || DEFAULT_OPERATOR.value,
   value: asText(raw.value),
   enabled: raw.enabled !== false,
 })

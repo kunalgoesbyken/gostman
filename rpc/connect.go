@@ -23,7 +23,11 @@ const (
 
 	defaultPlainPort = "80"
 	defaultTLSPort   = "443"
+
+	schemeSeparator = "://"
 )
+
+var schemeAliases = map[string]string{"http": schemePlain, "https": schemeTLS}
 
 type endpoint struct {
 	address   string
@@ -36,9 +40,12 @@ func parseEndpoint(raw string) (endpoint, error) {
 	if address == "" {
 		return endpoint{}, configError("enter a gRPC address such as grpc://localhost:50051")
 	}
-	parsed, err := url.Parse(address)
+	parsed, err := url.Parse(withScheme(address))
 	if err != nil || parsed.Hostname() == "" {
-		return endpoint{}, configError("%q is not a gRPC address, use grpc://host:port or grpcs://host:port", address)
+		return endpoint{}, configError("%q is not a gRPC address, use host:port, grpc://host:port or grpcs://host:port", address)
+	}
+	if alias, ok := schemeAliases[parsed.Scheme]; ok {
+		parsed.Scheme = alias
 	}
 	if parsed.Scheme != schemePlain && parsed.Scheme != schemeTLS {
 		return endpoint{}, configError("unsupported scheme %q, use grpc:// for plaintext or grpcs:// for TLS", parsed.Scheme)
@@ -53,6 +60,16 @@ func parseEndpoint(raw string) (endpoint, error) {
 		port = defaultPlainPort
 	}
 	return endpoint{address: address, authority: net.JoinHostPort(parsed.Hostname(), port), secure: secure}, nil
+}
+
+func withScheme(address string) string {
+	if strings.Contains(address, schemeSeparator) {
+		return address
+	}
+	if _, port, err := net.SplitHostPort(address); err == nil && port == defaultTLSPort {
+		return schemeTLS + schemeSeparator + address
+	}
+	return schemePlain + schemeSeparator + address
 }
 
 type dialFailure struct {

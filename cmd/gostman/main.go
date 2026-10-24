@@ -278,9 +278,27 @@ func misuse(stderr io.Writer, message string) int {
 	return exitUsage
 }
 
+var helpFlags = map[string]bool{"-h": true, "-help": true, "--help": true}
+
+func asksForHelp(arguments []string) bool {
+	for _, argument := range arguments {
+		if argument == "--" {
+			return false
+		}
+		if helpFlags[argument] {
+			return true
+		}
+	}
+	return false
+}
+
 func dispatch(arguments []string, stdout, stderr *os.File) int {
 	if len(arguments) == 0 {
 		return misuse(stderr, "name a command")
+	}
+	if asksForHelp(arguments[1:]) {
+		fmt.Fprint(stdout, usage)
+		return exitPassed
 	}
 	switch arguments[0] {
 	case "run":

@@ -57,7 +57,7 @@ With an `http` or `https` URL, Gostman sends GraphQL as a normal HTTP request. T
 
 ## gRPC
 
-Choose GRPC in the method list. The address is a `grpc://host:port` URL for plaintext or `grpcs://host:port` for TLS. The default port is 80 for `grpc://` and 443 for `grpcs://`. TLS certificates are verified unless you turn off Verify TLS certificates in Settings.
+Choose GRPC in the method list. The address is a `grpc://host:port` URL for plaintext or `grpcs://host:port` for TLS; `http://` and `https://` mean the same. A bare `host:port` is plaintext, except on port 443, which uses TLS. The default port is 80 for `grpc://` and 443 for `grpcs://`. TLS certificates are verified unless you turn off Verify TLS certificates in Settings.
 
 ![A gRPC request with the source set to Server reflection, the method storefront.v1.Catalog/GetProduct, a JSON message and a JSON response](../gostman-gui/frontend/src/assets/landing/grpc.webp)
 

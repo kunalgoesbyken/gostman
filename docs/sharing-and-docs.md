@@ -8,6 +8,29 @@ The **Share** tab of the import dialog encrypts a folder or the whole collection
 - A link carries up to 32 KB; larger selections go as a file.
 - A secret scan runs on the selection. When it finds credentials, no link or file is made until you choose **Share anyway**.
 
+Open it from **Import → Share**, or right-click a folder and choose **Share folder**, which selects that folder for you. The tab has these settings:
+
+| Setting | What it does |
+| --- | --- |
+| **Share** | **Everything**, or one folder with the folders and requests inside it |
+| **Share variable values** | Off: the recipient gets the variable names only. On: the values too, except secret ones |
+| **Include saved example responses** | Adds the examples saved with each request |
+| **Protection** | **Random key** puts the key in the link. **Passphrase** asks for one of at least 8 characters, which is not in the link; tell the recipient through another channel |
+| **Send as** | **Link** gives a link to copy. **Encrypted file** gives **Save file** and, with a random key, the key to send separately |
+
+A request whose Auth tab holds a typed-in password, token or key is flagged under the settings: that value belongs to the request and is shared with it. Use a `{{variable}}` instead to keep it out.
+
+### Opening a share
+
+Opening a link shows **Shared with you**. Nothing is added until you choose **Import**:
+
+1. If the share has a passphrase, or is a file sent without its key, enter it and choose **Open**. A wrong passphrase or a changed share says so and imports nothing.
+2. The dialog lists the folders, requests and environments inside, and which variables come with values.
+3. **Import** adds them next to what you have. A folder with the same name as one of yours is added as a second folder, and variables you already have keep your values.
+4. If a request carries scripts or OAuth 2.0 settings, you are asked about those separately, as with any import.
+
+An encrypted file is opened like any other import: drop it on the **Import** tab or choose it with **Choose files**.
+
 **Export → HTML docs** (or `gostman docs`) writes one self-contained documentation page: every request with its description, parameters, headers, body, a curl example and saved examples. Values in auth settings, credential headers and parameters with names such as `token` or `key` are shown as `<redacted>`; other literal secrets in bodies are not detected, so review the page before publishing.
 
 ![A generated documentation page with a sidebar of requests and the details of one](../gostman-gui/frontend/src/assets/landing/docs.webp)
