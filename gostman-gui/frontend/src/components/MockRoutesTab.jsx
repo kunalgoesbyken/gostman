@@ -9,6 +9,7 @@ import { MethodTag } from "./MethodTag"
 import { MockBehaviorFields } from "./MockBehaviorFields"
 import { MockSpecImport } from "./MockSpecImport"
 import { ROUTE_CONFLICT, ROUTE_DISABLED, ROUTE_NO_EXAMPLE, ROUTE_SERVED, emptyBehavior } from "../lib/mockServer"
+import { exampleLabel } from "../lib/examples"
 import { MOCK_TEXT } from "../lib/mockText"
 import { cn } from "../lib/utils"
 
@@ -24,7 +25,7 @@ function ExampleChoice({ route, examples, selected, onSelect }) {
   return (
     <Select value={selected || route.exampleId} onChange={(event) => onSelect(route.requestId, event.target.value)} aria-label={MOCK_TEXT.exampleFor(route.name)}>
       {examples.map((example) => (
-        <option key={example.id} value={example.id}>{example.status} {example.name}</option>
+        <option key={example.id} value={example.id}>{exampleLabel(example)}</option>
       ))}
     </Select>
   )

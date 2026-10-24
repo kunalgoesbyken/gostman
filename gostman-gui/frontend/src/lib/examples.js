@@ -47,6 +47,10 @@ export const exampleSize = (example) => (
   isBinaryExample(example) ? base64ByteLength(example.body) : new TextEncoder().encode(example.body).length
 )
 
+const namesStatus = (example) => example.name === String(example.status) || example.name.startsWith(`${example.status} `)
+
+export const exampleLabel = (example) => (namesStatus(example) ? example.name : `${example.status} ${example.name}`)
+
 export const servedByDefault = (examples) => examples.find((example) => example.isDefault) || examples[0]
 
 function withinBodyLimit(example) {
