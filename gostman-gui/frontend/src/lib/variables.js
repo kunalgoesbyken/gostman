@@ -1,4 +1,5 @@
 import { isSensitiveName } from "./sensitiveNames.js"
+import { mapText, someText } from "./textValues.js"
 import { DYNAMIC_PREFIX, DYNAMIC_VARIABLES, FAKER_VARIABLES, SOURCE_LABELS, callsFile, describeDynamic, isDynamicName, isFakerQuery, isPromptName } from "./variableNames.js"
 
 const TOKEN = /\{\{\s*([^{}]*?)\s*\}\}/gu
@@ -27,9 +28,27 @@ export function findReferences(text) {
   }))
 }
 
-export const hasFileReference = (text) => Array.from(text.matchAll(ENGINE_PLACEHOLDER), ([, inner]) => inner).some(callsFile)
+function parsedJSON(text) {
+  try {
+    return { value: JSON.parse(text) }
+  } catch {
+    return null
+  }
+}
 
-export const withoutFileReferences = (text) => text.replace(ENGINE_PLACEHOLDER, (match, inner) => (callsFile(inner) ? "" : match))
+const callsFileDirectly = (text) => Array.from(text.matchAll(ENGINE_PLACEHOLDER), ([, inner]) => inner).some(callsFile)
+
+export function hasFileReference(text) {
+  if (callsFileDirectly(text)) return true
+  const parsed = parsedJSON(text)
+  return Boolean(parsed) && someText(parsed.value, hasFileReference)
+}
+
+export function withoutFileReferences(text) {
+  const stripped = text.replace(ENGINE_PLACEHOLDER, (match, inner) => (callsFile(inner) ? "" : match))
+  if (!hasFileReference(stripped)) return stripped
+  return JSON.stringify(mapText(parsedJSON(stripped).value, withoutFileReferences))
+}
 
 export const isDefined = (name, variables) => variables.has(name) || isDynamicName(name) || isPromptName(name)
 

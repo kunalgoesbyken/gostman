@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 )
 
@@ -34,6 +35,23 @@ func ReadsFiles(text string) bool {
 	for _, match := range placeholderRe.FindAllStringSubmatch(text, -1) {
 		if _, ok := parseFileReference(strings.TrimSpace(match[1])); ok {
 			return true
+		}
+	}
+	decoded, err := decodeJSON(text)
+	return err == nil && anyText(decoded, ReadsFiles)
+}
+
+func anyText(value any, test func(string) bool) bool {
+	switch typed := value.(type) {
+	case string:
+		return test(typed)
+	case []any:
+		return slices.ContainsFunc(typed, func(item any) bool { return anyText(item, test) })
+	case map[string]any:
+		for key, item := range typed {
+			if test(key) || anyText(item, test) {
+				return true
+			}
 		}
 	}
 	return false

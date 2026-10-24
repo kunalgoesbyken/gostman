@@ -2,7 +2,9 @@ package engine
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"regexp"
 	"sort"
 	"strconv"
@@ -16,12 +18,19 @@ type pair struct {
 
 var placeholderRe = regexp.MustCompile(`{{([^}]+)}}`)
 
+var errTrailingJSON = errors.New("unexpected text after the JSON value")
+
 func decodeJSON(raw string) (any, error) {
 	dec := json.NewDecoder(strings.NewReader(raw))
 	dec.UseNumber()
 	var v any
-	err := dec.Decode(&v)
-	return v, err
+	if err := dec.Decode(&v); err != nil {
+		return nil, err
+	}
+	if _, err := dec.Token(); err != io.EOF {
+		return nil, errTrailingJSON
+	}
+	return v, nil
 }
 
 func scalarString(v any) string {
