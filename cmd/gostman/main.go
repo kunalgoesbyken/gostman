@@ -53,6 +53,11 @@ run
   --delay <ms>          wait between requests
   --timeout <ms>        timeout for requests that do not set their own
   --insecure            skip TLS certificate verification
+  --allow-files         let {{$file(path)}} and {{$fileBase64(path)}} read
+                        files; relative paths start at the workspace folder or
+                        the folder of the export file; off by default so that
+                        a collection you did not write cannot send your files
+                        (also for send and load)
   --data <file>         run once per row of a CSV (header row) or JSON (array of
                         objects) file; a row's values override the environment,
                         and the variables iteration and iterationCount are set
@@ -105,7 +110,7 @@ send
   <METHOD> <url>        a request that is not saved
   --workspace <path>    workspace folder or export file (default: the current
                         folder when it is a workspace)
-  --env, --var, --var-from-env, --timeout, --insecure   as for run
+  --env, --var, --var-from-env, --timeout, --insecure, --allow-files   as for run
   --cacert, --client-cert, --client-key, --proxy, --noproxy   as for run
   -H, --header <name: value>  add a header to an unsaved request (repeatable)
   -d, --data <body>     body of an unsaved request
@@ -130,7 +135,7 @@ load
   --rps <n>             cap the total requests per second
   --ramp <time>         start the workers one after another over this time
   --fail-status <code>  count this status and above as failed (default 500)
-  --env, --var, --var-from-env, --timeout, --insecure   as for send
+  --env, --var, --var-from-env, --timeout, --insecure, --allow-files   as for send
   --cacert, --client-cert, --client-key, --proxy, --noproxy   as for run
   --reporter <format>   text or json (default text)
   --max-p95 <time>      exit 1 when the 95th percentile latency is higher

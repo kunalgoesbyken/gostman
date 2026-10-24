@@ -1,7 +1,8 @@
 import { isSensitiveName } from "./sensitiveNames.js"
-import { DYNAMIC_PREFIX, DYNAMIC_VARIABLES, FAKER_VARIABLES, SOURCE_LABELS, describeDynamic, isDynamicName, isFakerQuery, isFileName, isPromptName } from "./variableNames.js"
+import { DYNAMIC_PREFIX, DYNAMIC_VARIABLES, FAKER_VARIABLES, SOURCE_LABELS, callsFile, describeDynamic, isDynamicName, isFakerQuery, isPromptName } from "./variableNames.js"
 
 const TOKEN = /\{\{\s*([^{}]*?)\s*\}\}/gu
+const ENGINE_PLACEHOLDER = /\{\{([^}]+)\}\}/gu
 const OPEN_REFERENCE = /\{\{\s*([\p{L}\p{N}_.$?-]*)$/u
 const WORD_BEFORE_CARET = /[\p{L}\p{N}_.$]*$/u
 export const CLOSING_REFERENCE = /^\s*\}\}/
@@ -26,9 +27,9 @@ export function findReferences(text) {
   }))
 }
 
-export const hasFileReference = (text) => findReferences(text).some(({ name }) => isFileName(name))
+export const hasFileReference = (text) => Array.from(text.matchAll(ENGINE_PLACEHOLDER), ([, inner]) => inner).some(callsFile)
 
-export const withoutFileReferences = (text) => text.replace(TOKEN, (match, name) => (isFileName(name) ? "" : match))
+export const withoutFileReferences = (text) => text.replace(ENGINE_PLACEHOLDER, (match, inner) => (callsFile(inner) ? "" : match))
 
 export const isDefined = (name, variables) => variables.has(name) || isDynamicName(name) || isPromptName(name)
 

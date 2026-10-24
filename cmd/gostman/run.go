@@ -36,6 +36,7 @@ type invocation struct {
 	reports []reporterSpec
 	redact  bool
 	extras  runExtras
+	files   fileAccess
 }
 
 func parseInterspersed(flags *flag.FlagSet, arguments []string) ([]string, error) {
@@ -67,6 +68,7 @@ func parseInvocation(arguments []string) (invocation, error) {
 	flags.IntVar(&delayMs, "delay", 0, "")
 	flags.IntVar(&timeoutMs, "timeout", 0, "")
 	flags.BoolVar(&parsed.options.Insecure, "insecure", false, "")
+	parsed.files.register(flags)
 	flags.Var(&reporters, "reporter", "")
 	flags.StringVar(&output, "output", "", "")
 	flags.BoolVar(&parsed.redact, "redact", false, "")
@@ -99,7 +101,7 @@ func parseInvocation(arguments []string) (invocation, error) {
 		return parsed, err
 	}
 	parsed.path = positional[0]
-	parsed.options.Files = filesBeside(parsed.path)
+	parsed.options.Files = parsed.files.beside(parsed.path)
 	parsed.options.Delay = time.Duration(delayMs) * time.Millisecond
 	parsed.options.Timeout = time.Duration(timeoutMs) * time.Millisecond
 	return parsed, nil

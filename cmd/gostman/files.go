@@ -1,13 +1,25 @@
 package main
 
 import (
+	"flag"
 	"os"
 	"path/filepath"
 
 	"github.com/kunalgoesbyken/gostman/engine"
 )
 
-func filesBeside(source string) engine.FileReader {
+type fileAccess struct {
+	allowed bool
+}
+
+func (f *fileAccess) register(flags *flag.FlagSet) {
+	flags.BoolVar(&f.allowed, "allow-files", false, "")
+}
+
+func (f fileAccess) beside(source string) engine.FileReader {
+	if !f.allowed {
+		return nil
+	}
 	root, err := filepath.Abs(source)
 	if err != nil {
 		root = source

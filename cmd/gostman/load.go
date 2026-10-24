@@ -37,6 +37,7 @@ type loading struct {
 	reporter    string
 	timeoutMs   int
 	insecure    bool
+	files       fileAccess
 	duration    time.Duration
 	ramp        time.Duration
 	maxErrors   string
@@ -66,6 +67,7 @@ func parseLoading(arguments []string) (loading, error) {
 	flags.IntVar(&parsed.config.FailureStatus, "fail-status", loadtest.DefaultFailureFrom, "")
 	flags.IntVar(&parsed.timeoutMs, "timeout", 0, "")
 	flags.BoolVar(&parsed.insecure, "insecure", false, "")
+	parsed.files.register(flags)
 	flags.StringVar(&parsed.reporter, "reporter", report.FormatText, "")
 	flags.DurationVar(&parsed.limits.MaxP95, "max-p95", 0, "")
 	flags.StringVar(&parsed.maxErrors, "max-error-rate", "", "")
@@ -204,7 +206,7 @@ func (l loading) execute(stdout, stderr io.Writer) int {
 	if err != nil {
 		return complain(stderr, err)
 	}
-	client, err := agent.NewClient(engine.Policy{Network: l.network, ReadFile: filesBeside(l.fileRoot())})
+	client, err := agent.NewClient(engine.Policy{Network: l.network, ReadFile: l.files.beside(l.fileRoot())})
 	if err != nil {
 		return complain(stderr, err)
 	}

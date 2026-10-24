@@ -19,7 +19,7 @@ const (
 var fileReferenceRe = regexp.MustCompile(`^\$file(Base64)?\((.*)\)$`)
 
 var (
-	errFilesUnavailable = errors.New("{{$file(...)}} reads files only in the desktop app and the gostman command line")
+	errFilesUnavailable = errors.New("{{$file(...)}} reads files only in the desktop app, or in gostman run, send and load with --allow-files")
 	errRelativeFilePath = errors.New("open a workspace folder to use a relative path in {{$file(...)}}, or give an absolute path")
 )
 
@@ -28,6 +28,15 @@ type FileReader func(path string) ([]byte, error)
 type fileReference struct {
 	path   string
 	base64 bool
+}
+
+func ReadsFiles(text string) bool {
+	for _, match := range placeholderRe.FindAllStringSubmatch(text, -1) {
+		if _, ok := parseFileReference(strings.TrimSpace(match[1])); ok {
+			return true
+		}
+	}
+	return false
 }
 
 func parseFileReference(name string) (fileReference, bool) {

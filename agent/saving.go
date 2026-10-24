@@ -9,6 +9,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
@@ -165,6 +166,13 @@ func leak(label string) error {
 	return fmt.Errorf("Not saved: the request contains the value of the variable %q. Write {{%s}} in its place so the value stays out of the workspace files.", label, label)
 }
 
+func refuseFileReads(supplied []string) error {
+	if slices.ContainsFunc(supplied, engine.ReadsFiles) {
+		return errors.New("Not saved: {{$file(...)}} reads files on this computer, so only a person can add it to a request.")
+	}
+	return nil
+}
+
 func (d *Desk) refuseSecrets(supplied []string) error {
 	for _, text := range supplied {
 		if label, found := d.client.guard.Find(text); found {
@@ -250,6 +258,9 @@ func (d *Desk) saveRequest(_ context.Context, current scene, arguments saveArgum
 		return saved{}, err
 	}
 	if err := change.check(); err != nil {
+		return saved{}, err
+	}
+	if err := refuseFileReads(change.supplied); err != nil {
 		return saved{}, err
 	}
 	if err := d.refuseSecrets(change.supplied); err != nil {

@@ -30,6 +30,7 @@ type sending struct {
 	view        agent.View
 	timeoutMs   int
 	insecure    bool
+	files       fileAccess
 	network     *engine.Network
 	positional  []string
 }
@@ -63,6 +64,7 @@ func parseSending(arguments []string) (sending, error) {
 	flags.BoolVar(&parsed.view.IncludeHeaders, "include-headers", false, "")
 	flags.IntVar(&parsed.timeoutMs, "timeout", 0, "")
 	flags.BoolVar(&parsed.insecure, "insecure", false, "")
+	parsed.files.register(flags)
 	networking := networkFlags(flags)
 
 	positional, err := parseInterspersed(flags, arguments)
@@ -129,7 +131,7 @@ func (s sending) prepare() (*agent.Client, runner.Listed, error) {
 	if err != nil {
 		return nil, runner.Listed{}, err
 	}
-	client, err := agent.NewClient(engine.Policy{Network: s.network, ReadFile: filesBeside(s.fileRoot())})
+	client, err := agent.NewClient(engine.Policy{Network: s.network, ReadFile: s.files.beside(s.fileRoot())})
 	if err != nil {
 		return nil, runner.Listed{}, err
 	}
