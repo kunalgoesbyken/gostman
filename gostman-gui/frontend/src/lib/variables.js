@@ -1,6 +1,6 @@
 import { isSensitiveName } from "./sensitiveNames.js"
 import { mapText, someText } from "./textValues.js"
-import { DYNAMIC_PREFIX, DYNAMIC_VARIABLES, FAKER_VARIABLES, SOURCE_LABELS, callsFile, describeDynamic, isDynamicName, isFakerQuery, isPromptName } from "./variableNames.js"
+import { DYNAMIC_PREFIX, DYNAMIC_VARIABLES, FAKER_VARIABLES, SOURCE_LABELS, callsFile, describeDynamic, isDynamicName, isFakerQuery, isFileName, isPromptName } from "./variableNames.js"
 
 const TOKEN = /\{\{\s*([^{}]*?)\s*\}\}/gu
 const ENGINE_PLACEHOLDER = /\{\{([^}]+)\}\}/gu
@@ -78,14 +78,17 @@ export function openReference(text, caret) {
   return isFakerQuery(word) ? { start: caret - word.length, query: word } : null
 }
 
-function builtInNames(query) {
+const GENERATED_VARIABLES = DYNAMIC_VARIABLES.filter((name) => !isFileName(name))
+
+function builtInNames(query, fileReads) {
   if (isFakerQuery(query)) return FAKER_VARIABLES
-  return query.startsWith(DYNAMIC_PREFIX) ? DYNAMIC_VARIABLES : []
+  if (!query.startsWith(DYNAMIC_PREFIX)) return []
+  return fileReads ? DYNAMIC_VARIABLES : GENERATED_VARIABLES
 }
 
-export function suggestNames(variables, query) {
+export function suggestNames(variables, query, { fileReads = true } = {}) {
   const needle = query.toLowerCase()
-  const names = [...Array.from(variables.keys()), ...builtInNames(query)].filter((name) => name.toLowerCase().includes(needle))
+  const names = [...Array.from(variables.keys()), ...builtInNames(query, fileReads)].filter((name) => name.toLowerCase().includes(needle))
   const rank = (name) => (name.toLowerCase().startsWith(needle) ? 0 : 1)
   return names.sort((a, b) => rank(a) - rank(b) || a.localeCompare(b)).slice(0, MAX_SUGGESTIONS)
 }

@@ -6,7 +6,7 @@ import { EmptyState } from "./ui/emptyState"
 import { Input } from "./ui/input"
 import { Notice, Panel, Toolbar } from "./ui/panel"
 import { Select } from "./ui/select"
-import { Textarea } from "./ui/textarea"
+import { VariableInput, VariableTextarea } from "./VariableInput"
 import { pluralize } from "../lib/dataUtils"
 import { shortcutLabel } from "../lib/platform"
 import { PROTOCOL_OPTIONS, protocolOf, usesGraphQL } from "../lib/realtime/protocols"
@@ -244,12 +244,12 @@ export function WebSocketPanel({ tabId, request, variables, sockets, onUpdateReq
 
       <div className="flex shrink-0 items-center gap-2 border-t border-border px-3 pt-3">
         {protocol.targetLabel && (
-          <Input
+          <VariableInput
             aria-label={protocol.targetLabel}
             placeholder={protocol.targetLabel}
             value={session.draftTarget}
+            fileReads={false}
             onChange={(event) => sockets.setDraftTarget(tabId, event.target.value)}
-            className="flex-1"
           />
         )}
         <SavedMessages
@@ -262,8 +262,9 @@ export function WebSocketPanel({ tabId, request, variables, sockets, onUpdateReq
       </div>
 
       <div className="flex shrink-0 items-stretch gap-2 p-3">
-        <Textarea
+        <VariableTextarea
           value={session.draft}
+          fileReads={false}
           onChange={(event) => sockets.setDraft(tabId, event.target.value)}
           onKeyDown={handleComposerKey}
           placeholder={isOpen ? `Message (${shortcutLabel("Enter")} to send)` : "Connect to send messages"}

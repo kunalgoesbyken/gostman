@@ -82,6 +82,10 @@ export function DescribeMcp(arg1) {
   return window['go']['main']['App']['DescribeMcp'](arg1);
 }
 
+export function ExpandTexts(arg1, arg2) {
+  return window['go']['main']['App']['ExpandTexts'](arg1, arg2);
+}
+
 export function FetchLink(arg1) {
   return window['go']['main']['App']['FetchLink'](arg1);
 }

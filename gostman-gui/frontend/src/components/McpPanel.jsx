@@ -127,6 +127,8 @@ export function McpPanel({ request, catalog, editorPath, onUpdateRequest, onLoad
             onChange={(event) => onUpdateRequest({ mcpArguments: event.target.value })}
             language="json"
             path={editorPath}
+            variables
+            fileReads={false}
             height="100%"
           />
         </Suspense>

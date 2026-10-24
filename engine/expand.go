@@ -59,6 +59,21 @@ func (e *Expansion) Err() error {
 	return e.substitution.failure()
 }
 
+func ExpandTexts(texts []string, variables string) ([]string, error) {
+	expansion, err := NewExpansion(variables)
+	if err != nil {
+		return nil, err
+	}
+	filled := make([]string, len(texts))
+	for i, text := range texts {
+		filled[i] = expansion.Text(text)
+	}
+	if err := expansion.Err(); err != nil {
+		return nil, err
+	}
+	return filled, nil
+}
+
 func PlaceholderSpans(text string) [][]int {
 	return placeholderRe.FindAllStringIndex(text, -1)
 }

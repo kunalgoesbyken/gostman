@@ -252,6 +252,7 @@ export const webBackend = {
   send,
   cancel: (id) => inFlight.get(id)?.abort(),
   prepare: (request, variables) => postForResult('prepare=1', toEngineRequest(request, variables), 'prepared'),
+  expand: (texts, variables) => postForResult('expand=1', { texts, variables }, 'texts'),
   parseCurl: (command) => postForResult('curl=1', { command }, 'request'),
   openapi: (query) => postJSON(`${PROXY_URL}?openapi=1`, query),
   lint: (query) => postJSON(`${PROXY_URL}?lint=1`, query),

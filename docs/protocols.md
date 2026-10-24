@@ -113,6 +113,7 @@ Enter a `ws://` or `wss://` URL. The Send button becomes Connect, and the WebSoc
 - The status next to the address is Disconnected, Connecting, Connected or Waiting to reconnect.
 - Connect opens the session and Disconnect closes it. Each tab keeps its own session, and closing the tab ends it.
 - Type in the Message box and select Send, or press Ctrl+Enter. On macOS the shortcut is shown with the Command key. The box is disabled until the session is connected.
+- Placeholders in the message and in its event or topic are filled in when you send it: environment variables, and dynamic values such as `{{$randomEmail}}` or `{{$faker.date.future}}`. Type `{{` or `faker.` to pick one. The log shows the message as it was sent. A message that cannot be filled in is not sent, and stays in the box.
 - Sent messages are text. Clear empties the log.
 
 ### Message log

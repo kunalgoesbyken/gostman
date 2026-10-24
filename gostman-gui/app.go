@@ -316,6 +316,10 @@ func (a *App) PrepareRequest(request engine.Request) (engine.Prepared, error) {
 	return engine.Prepare(request)
 }
 
+func (a *App) ExpandTexts(texts []string, variables string) ([]string, error) {
+	return engine.ExpandTexts(texts, variables)
+}
+
 func (a *App) SaveFile(suggestedName, base64Data string) (bool, error) {
 	content, err := base64.StdEncoding.DecodeString(base64Data)
 	if err != nil {

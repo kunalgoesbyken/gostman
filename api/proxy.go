@@ -54,6 +54,16 @@ type authorizationResult struct {
 	Error         string                `json:"error,omitempty"`
 }
 
+type expandPayload struct {
+	Texts     []string `json:"texts"`
+	Variables string   `json:"variables"`
+}
+
+type expandResult struct {
+	Texts []string `json:"texts,omitempty"`
+	Error string   `json:"error,omitempty"`
+}
+
 type curlPayload struct {
 	Command string `json:"command"`
 }
@@ -110,6 +120,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, parseCurl(r))
 	case query.Has("prepare"):
 		writeJSON(w, prepare(r))
+	case query.Has("expand"):
+		writeJSON(w, expandTexts(r))
 	case query.Get("oauth") == "start":
 		writeJSON(w, startAuthorization(r))
 	case query.Get("oauth") == "token":
@@ -184,6 +196,18 @@ func prepare(r *http.Request) prepareResult {
 		return prepareResult{Error: err.Error()}
 	}
 	return prepareResult{Prepared: &prepared}
+}
+
+func expandTexts(r *http.Request) expandResult {
+	var payload expandPayload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		return expandResult{Error: err.Error()}
+	}
+	texts, err := engine.ExpandTexts(payload.Texts, payload.Variables)
+	if err != nil {
+		return expandResult{Error: err.Error()}
+	}
+	return expandResult{Texts: texts}
 }
 
 func scanSecrets(r *http.Request) scan.Reply {

@@ -1,9 +1,17 @@
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import { CONTROL_BASE, CONTROL_SIZES } from "./ui/input"
+import { placeBelow, useDismiss } from "./ui/select"
+import { Textarea } from "./ui/textarea"
 import { useVariableMap } from "../hooks/useVariableMap"
 import { VARIABLE_TEXT, applyCompletion, describeReference, findReferences, isDefined, openReference, suggestNames } from "../lib/variables"
 import { cn } from "../lib/utils"
 import "./variables.css"
+
+const STEPS = { ArrowDown: 1, ArrowUp: -1 }
+const CARET_KEYS = new Set(["ArrowLeft", "ArrowRight", "Home", "End"])
+
+const picksSuggestion = (event) => event.key === "Tab" || (event.key === "Enter" && !event.ctrlKey && !event.metaKey)
 
 function Mirror({ text, variables, innerRef, className }) {
   const parts = useMemo(() => {
@@ -48,11 +56,13 @@ function Tooltip({ info, anchor }) {
   )
 }
 
-function Suggestions({ names, variables, active, onPick }) {
-  return (
+function Suggestions({ names, variables, active, placement, listRef, onPick }) {
+  return createPortal(
     <ul
+      ref={listRef}
       role="listbox"
-      className="absolute left-0 top-full z-50 mt-1 max-h-48 min-w-48 max-w-full overflow-auto rounded-md border border-border bg-card py-1 text-xs shadow-lg"
+      style={placement}
+      className="fixed z-50 max-w-[min(32rem,calc(100vw-1rem))] overflow-auto rounded-md border border-border bg-card py-1 text-xs shadow-lg"
     >
       {names.map((name, index) => (
         <li
@@ -69,74 +79,104 @@ function Suggestions({ names, variables, active, onPick }) {
           <span className="truncate text-muted-foreground">{describeReference(name, variables).shown}</span>
         </li>
       ))}
-    </ul>
+    </ul>,
+    document.body,
   )
 }
 
-export const VariableInput = forwardRef(function VariableInput(
-  { className, controlSize = "sm", value = "", onChange, onKeyDown, onBlur, onScroll, ...props },
-  ref,
-) {
+function useCompletion(fieldRef, { fileReads, onChange, onKeyDown, onBlur, onCaretMove }) {
   const variables = useVariableMap()
-  const inputRef = useRef(null)
-  const mirrorRef = useRef(null)
+  const listRef = useRef(null)
   const [open, setOpen] = useState(null)
   const [active, setActive] = useState(0)
+  const close = useCallback(() => setOpen(null), [])
+  useDismiss(open !== null, close, fieldRef, listRef)
+
+  const names = open ? suggestNames(variables, open.query, { fileReads }) : []
+  const showing = open !== null && names.length > 0
+
+  const refresh = (field) => {
+    const caret = field.selectionStart ?? 0
+    const reference = field.selectionEnd === caret ? openReference(field.value, caret) : null
+    setOpen(reference && { ...reference, caret, placement: placeBelow(field) })
+    setActive(0)
+    if (onCaretMove) requestAnimationFrame(onCaretMove)
+  }
+
+  const pick = (name) => {
+    const field = fieldRef.current
+    const done = applyCompletion(field.value, open, open.caret, name)
+    close()
+    onChange?.({ target: { value: done.text } })
+    requestAnimationFrame(() => {
+      field.setSelectionRange(done.caret, done.caret)
+      onCaretMove?.()
+    })
+  }
+
+  const handleKeyDown = (event) => {
+    if (showing && STEPS[event.key]) {
+      event.preventDefault()
+      setActive((active + STEPS[event.key] + names.length) % names.length)
+      return
+    }
+    if (showing && picksSuggestion(event)) {
+      event.preventDefault()
+      pick(names[active])
+      return
+    }
+    if (showing && event.key === "Escape") {
+      event.preventDefault()
+      event.stopPropagation()
+      close()
+      return
+    }
+    onKeyDown?.(event)
+  }
+
+  const fieldProps = {
+    onChange: (event) => {
+      onChange?.(event)
+      refresh(event.target)
+    },
+    onKeyDown: handleKeyDown,
+    onKeyUp: (event) => {
+      if (CARET_KEYS.has(event.key)) refresh(event.target)
+    },
+    onClick: (event) => refresh(event.target),
+    onBlur: (event) => {
+      close()
+      onBlur?.(event)
+    },
+  }
+
+  const list = showing && (
+    <Suggestions names={names} variables={variables} active={active} placement={open.placement} listRef={listRef} onPick={pick} />
+  )
+
+  return { variables, showing, fieldProps, list }
+}
+
+export const VariableInput = forwardRef(function VariableInput(
+  { className, controlSize = "sm", value = "", fileReads = true, onChange, onKeyDown, onBlur, onScroll, ...props },
+  ref,
+) {
+  const inputRef = useRef(null)
+  const mirrorRef = useRef(null)
   const [hover, setHover] = useState(null)
   useImperativeHandle(ref, () => inputRef.current)
-
-  const text = String(value)
-  const names = open ? suggestNames(variables, open.query) : []
-  const showing = open && names.length > 0
 
   const syncScroll = useCallback(() => {
     const input = inputRef.current
     if (input && mirrorRef.current) mirrorRef.current.style.transform = `translateX(${-input.scrollLeft}px)`
   }, [])
 
-  const refresh = (input) => {
-    const caret = input.selectionStart ?? 0
-    const reference = input.selectionEnd === caret ? openReference(input.value, caret) : null
-    setOpen(reference && { ...reference, caret })
-    setActive(0)
-    requestAnimationFrame(syncScroll)
+  const leave = (event) => {
+    setHover(null)
+    onBlur?.(event)
   }
 
-  const emit = (next) => onChange?.({ target: { value: next } })
-
-  const pick = (name) => {
-    const input = inputRef.current
-    const done = applyCompletion(input.value, open, open.caret, name)
-    setOpen(null)
-    emit(done.text)
-    requestAnimationFrame(() => {
-      input.setSelectionRange(done.caret, done.caret)
-      syncScroll()
-    })
-  }
-
-  const handleKeyDown = (event) => {
-    if (showing) {
-      const step = { ArrowDown: 1, ArrowUp: -1 }[event.key]
-      if (step) {
-        event.preventDefault()
-        setActive((active + step + names.length) % names.length)
-        return
-      }
-      if (event.key === "Enter" || event.key === "Tab") {
-        event.preventDefault()
-        pick(names[active])
-        return
-      }
-      if (event.key === "Escape") {
-        event.preventDefault()
-        event.stopPropagation()
-        setOpen(null)
-        return
-      }
-    }
-    onKeyDown?.(event)
-  }
+  const { variables, showing, fieldProps, list } = useCompletion(inputRef, { fileReads, onChange, onKeyDown, onBlur: leave, onCaretMove: syncScroll })
 
   const handleMouseMove = (event) => {
     const { clientX: x, clientY: y } = event
@@ -155,36 +195,39 @@ export const VariableInput = forwardRef(function VariableInput(
 
   return (
     <div className="relative min-w-0 flex-1">
-      <Mirror text={text} variables={variables} innerRef={mirrorRef} className={look} />
+      <Mirror text={String(value)} variables={variables} innerRef={mirrorRef} className={look} />
       <input
         {...props}
+        {...fieldProps}
         ref={inputRef}
         type="text"
         value={value}
         className={cn(look, "relative")}
-        onChange={(event) => {
-          onChange?.(event)
-          refresh(event.target)
-        }}
-        onKeyDown={handleKeyDown}
-        onKeyUp={(event) => {
-          if (event.key === "ArrowLeft" || event.key === "ArrowRight" || event.key === "Home" || event.key === "End") refresh(event.target)
-        }}
-        onClick={(event) => refresh(event.target)}
         onScroll={(event) => {
           syncScroll()
           onScroll?.(event)
-        }}
-        onBlur={(event) => {
-          setOpen(null)
-          setHover(null)
-          onBlur?.(event)
         }}
         onMouseMove={handleMouseMove}
         onMouseLeave={() => setHover(null)}
       />
       {hover && !showing && <Tooltip info={hover.info} anchor={hover.anchor} />}
-      {showing && <Suggestions names={names} variables={variables} active={active} onPick={pick} />}
+      {list}
     </div>
+  )
+})
+
+export const VariableTextarea = forwardRef(function VariableTextarea(
+  { value = "", fileReads = true, onChange, onKeyDown, onBlur, ...props },
+  ref,
+) {
+  const textareaRef = useRef(null)
+  useImperativeHandle(ref, () => textareaRef.current)
+  const { fieldProps, list } = useCompletion(textareaRef, { fileReads, onChange, onKeyDown, onBlur })
+
+  return (
+    <>
+      <Textarea {...props} {...fieldProps} ref={textareaRef} value={value} />
+      {list}
+    </>
   )
 })

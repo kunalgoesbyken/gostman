@@ -29,6 +29,7 @@ const HIGH_SURROGATE_START = 0xd800
 const HIGH_SURROGATE_END = 0xdbff
 const INVALID_VARIABLES = "The active environment's variables are not valid JSON."
 const INVALID_ADDRESS = 'Enter a ws:// or wss:// URL in the address bar.'
+const NOT_CONNECTED = 'Not sent: the connection closed before the message went out.'
 const SUBPROTOCOL_HEADER = 'Sec-WebSocket-Protocol'
 
 const IDLE_SESSION = { status: SOCKET_IDLE, entries: [], dropped: 0, autoReconnect: false, draft: '', draftTarget: '', filter: '' }
@@ -40,6 +41,7 @@ export const selectSession = (tabId) => (state) => state.sessions[tabId] || IDLE
 const links = new Map()
 const retryTimers = new Map()
 const queuedEntries = new Map()
+const outgoing = new Map()
 let flushTimer = null
 let entrySequence = 0
 
@@ -123,6 +125,7 @@ function release(tabId) {
 function dispose(tabId) {
   release(tabId)
   queuedEntries.delete(tabId)
+  outgoing.delete(tabId)
   useSocketStore.setState((state) => {
     const { [tabId]: removed, ...sessions } = state.sessions
     return { sessions }
@@ -244,9 +247,14 @@ export function createSocketActions(backend) {
     if (wasActive) log(tabId, { kind: ENTRY_INFO, text: 'Disconnected' })
   }
 
-  function withOpenSession(tabId, use) {
+  function openSession(tabId) {
     const session = links.get(tabId)?.session
-    if (!session || sessionOf(tabId).status !== SOCKET_OPEN) return
+    return session && sessionOf(tabId).status === SOCKET_OPEN ? session : null
+  }
+
+  function withOpenSession(tabId, use) {
+    const session = openSession(tabId)
+    if (!session) return
     try {
       use(session)
     } catch (error) {
@@ -254,14 +262,31 @@ export function createSocketActions(backend) {
     }
   }
 
+  async function filledTexts(texts) {
+    if (!texts.some((text) => placeholderNames(text).length > 0)) return texts
+    return backend.expand(texts, selectActiveVariables(useAppStore.getState()))
+  }
+
+  async function deliver(tabId, message) {
+    try {
+      const [body, target] = await filledTexts([message.body, message.target])
+      const session = openSession(tabId)
+      if (!session) throw new Error(NOT_CONNECTED)
+      const sent = session.compose({ body, target })
+      log(tabId, { ...textEntry(ENTRY_SENT, sent.text), label: sent.label })
+    } catch (error) {
+      log(tabId, { kind: ENTRY_ERROR, text: messageOf(error) })
+      patchSession(tabId, (session) => (session.draft === '' ? { draft: message.body } : {}))
+    }
+  }
+
   function sendMessage(tabId) {
     const { draft, draftTarget } = sessionOf(tabId)
     if (draft === '' && draftTarget.trim() === '') return
-    withOpenSession(tabId, (session) => {
-      const sent = session.compose({ body: draft, target: draftTarget })
-      log(tabId, { ...textEntry(ENTRY_SENT, sent.text), label: sent.label })
-      patchSession(tabId, () => ({ draft: '' }))
-    })
+    if (!openSession(tabId)) return
+    patchSession(tabId, () => ({ draft: '' }))
+    const previous = outgoing.get(tabId) || Promise.resolve()
+    outgoing.set(tabId, previous.then(() => deliver(tabId, { body: draft, target: draftTarget })))
   }
 
   const subscribe = (tabId) => withOpenSession(tabId, (session) => session.subscribe(sessionOf(tabId).filter))

@@ -1,5 +1,5 @@
 import { EditorState } from '@codemirror/state'
-import { Decoration, EditorView, ViewPlugin, hoverTooltip, keymap } from '@codemirror/view'
+import { Decoration, EditorView, ViewPlugin, hoverTooltip, keymap, tooltips } from '@codemirror/view'
 import { HighlightStyle, indentUnit, syntaxHighlighting, syntaxTree } from '@codemirror/language'
 import { indentWithTab } from '@codemirror/commands'
 import { linter } from '@codemirror/lint'
@@ -113,6 +113,7 @@ export const baseExtensions = [
   indentUnit.of(INDENT),
   theme,
   syntaxHighlighting(highlightStyle),
+  tooltips({ parent: document.body }),
 ]
 
 const maskReferences = (text, references) => references.reduceRight(
@@ -201,7 +202,7 @@ const describeVariables = (variables) => hoverTooltip((view, pos) => {
   }
 })
 
-const completeVariables = (variables) => (context) => {
+const completeVariables = (variables, options) => (context) => {
   const line = context.state.doc.lineAt(context.pos)
   const caret = context.pos - line.from
   const open = openReference(line.text, caret)
@@ -211,7 +212,7 @@ const completeVariables = (variables) => (context) => {
     from: line.from + open.start,
     to: context.pos + (closing ? closing[0].length : 0),
     filter: false,
-    options: suggestNames(variables, open.query).map((name) => ({
+    options: suggestNames(variables, open.query, options).map((name) => ({
       label: name,
       apply: `{{${name}}}`,
       detail: describeReference(name, variables).shown,
@@ -220,8 +221,8 @@ const completeVariables = (variables) => (context) => {
   }
 }
 
-export function variableExtension(variables) {
-  const completion = [{ autocomplete: completeVariables(variables) }]
+export function variableExtension(variables, options) {
+  const completion = [{ autocomplete: completeVariables(variables, options) }]
   return [
     highlightVariables(variables),
     describeVariables(variables),

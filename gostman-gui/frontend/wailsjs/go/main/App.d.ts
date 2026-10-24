@@ -57,6 +57,8 @@ export function DescribeGrpc(arg1:rpc.Target):Promise<rpc.Schema>;
 
 export function DescribeMcp(arg1:mcpclient.Target):Promise<mcpclient.Catalog>;
 
+export function ExpandTexts(arg1:Array<string>,arg2:string):Promise<Array<string>>;
+
 export function FetchLink(arg1:string):Promise<deeplink.Reply>;
 
 export function FetchToken(arg1:engine.TokenExchange):Promise<engine.Token>;

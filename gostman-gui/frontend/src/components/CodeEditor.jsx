@@ -11,22 +11,22 @@ const externalChange = Annotation.define()
 
 const isUserChange = (update) => update.docChanged && !update.transactions.some((transaction) => transaction.annotation(externalChange))
 
-function useEditorConfig(language, variables) {
+function useEditorConfig(language, variables, fileReads) {
   const { wrapLines } = usePreferences()
   const variableMap = useVariableMap()
   return useMemo(
-    () => [languageExtension(language), wrapExtension(wrapLines), variables ? variableExtension(variableMap) : []],
-    [language, wrapLines, variables, variableMap],
+    () => [languageExtension(language), wrapExtension(wrapLines), variables ? variableExtension(variableMap, { fileReads }) : []],
+    [language, wrapLines, variables, fileReads, variableMap],
   )
 }
 
-export function CodeEditor({ value = '', onChange, language = 'json', path, height = '300px', variables = false }) {
+export function CodeEditor({ value = '', onChange, language = 'json', path, height = '300px', variables = false, fileReads = true }) {
   const hostRef = useRef(null)
   const viewRef = useRef(null)
   const onChangeRef = useRef(onChange)
   const compartment = useMemo(() => new Compartment(), [])
   const { editorFontSize } = usePreferences()
-  const config = useEditorConfig(language, variables)
+  const config = useEditorConfig(language, variables, fileReads)
 
   useEffect(() => {
     onChangeRef.current = onChange

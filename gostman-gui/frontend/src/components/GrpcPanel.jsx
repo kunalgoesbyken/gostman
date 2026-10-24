@@ -151,6 +151,8 @@ export function GrpcPanel({ request, schema, editorPath, onUpdateRequest, onProt
             onChange={(event) => onUpdateRequest({ grpcMessage: event.target.value })}
             language="json"
             path={editorPath}
+            variables
+            fileReads={false}
             height="100%"
           />
         </Suspense>
