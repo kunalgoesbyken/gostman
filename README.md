@@ -1,5 +1,8 @@
 <div align="center">
-  <img src="gostman-gui/build/appicon.png" alt="Gostman" width="96" height="96">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="screenshots/logo-dark.png">
+    <img src="screenshots/logo-light.png" alt="Gostman" width="96" height="96">
+  </picture>
   <h1>Gostman</h1>
   <p>An open source API client for REST, GraphQL, gRPC and WebSocket. Desktop app, web app and command line, with no account and no paid tier.</p>
 
