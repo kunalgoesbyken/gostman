@@ -1,5 +1,6 @@
 id: env-public
 name: Public
+order: 1
 variables:
   base_url: https://jsonplaceholder.typicode.com
   title: Write the first test

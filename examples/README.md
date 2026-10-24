@@ -4,7 +4,7 @@ Each folder here is a Gostman workspace: plain YAML files you can open in the de
 
 | Folder | What it shows |
 | --- | --- |
-| [`todo-api`](todo-api) | Folder headers, an environment, chaining one response into the next request, assertions that compare against variables, a saved example for the mock server, and a data file. Calls [JSONPlaceholder](https://jsonplaceholder.typicode.com). |
+| [`todo-api`](todo-api) | Folder headers, two environments, chaining one response into the next request, assertions that compare against variables, a saved example on every request for the mock server, and a data file. Calls [JSONPlaceholder](https://jsonplaceholder.typicode.com), or the mock with the `Mock` environment. |
 | [`auth-and-secrets`](auth-and-secrets) | Auth set once on a folder and inherited by its requests, a request with its own auth, a request that expects a 401, secrets passed at run time instead of stored in the files, and a post-response script that fails the run when a secret is missing. Calls [httpbin](https://httpbin.org). |
 
 ## Run them
@@ -15,6 +15,7 @@ Install the command line first (see [Getting started](../docs/getting-started.md
 gostman run examples/todo-api --env Public
 gostman run examples/todo-api --env Public --data examples/todo-api/todos.csv --only "Todos/Create a todo"
 gostman mock examples/todo-api --port 4010
+gostman run examples/todo-api --env Mock    # in a second terminal, while the mock runs
 
 API_TOKEN=any-token PASSWORD=any-password \
   gostman run examples/auth-and-secrets --env Public --var-from-env API_TOKEN --var-from-env PASSWORD
@@ -36,6 +37,7 @@ The [tutorial](../docs/tutorial-first-collection.md) builds `todo-api` from scra
 todo-api/
   gostman.yaml              marks the folder as a workspace
   environments/Public.yaml  variables for the Public environment
+  environments/Mock.yaml    the same variables, with base_url on the mock server
   Todos/folder.yaml         folder settings: headers, auth, variables
   Todos/List todos.yaml     one file per request
   todos.csv                 a data file for gostman run --data

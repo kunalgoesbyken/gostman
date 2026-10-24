@@ -20,3 +20,16 @@ assertions:
   - expression: res.body.title
     operator: eq
     value: "{{title}}"
+examples: |
+  [
+    {
+      "id": "example-created-todo",
+      "name": "Created",
+      "status": 201,
+      "headers": [{ "key": "Content-Type", "value": "application/json" }],
+      "body": "{\n  \"userId\": 1,\n  \"id\": 201,\n  \"title\": \"{{request.body.json.title}}\",\n  \"completed\": {{request.body.json.completed}}\n}",
+      "bodyEncoding": "utf8",
+      "contentType": "application/json",
+      "isDefault": true
+    }
+  ]

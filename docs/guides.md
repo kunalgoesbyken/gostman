@@ -24,7 +24,7 @@ Reference: [Import, export and OpenAPI specs](import-export-and-specs.md). Movin
 2. Start the mock server from the header, or run `gostman mock api --port 4010`.
 3. Point the frontend at `http://127.0.0.1:4010`.
 
-With only an OpenAPI spec, `gostman mock --openapi openapi.yaml` serves every operation from it. Add delays and error rates with `--delay` and `--error-rate` to see how the interface handles a slow or failing API.
+With only an OpenAPI spec, `gostman mock --openapi openapi.yaml` serves every operation from it. Add delays and error rates with `--delay` and `--error-rate` to see how the interface handles a slow or failing API. To run the collection's checks against the mock in CI, see [Run against the mock server](ci.md#run-against-the-mock-server).
 
 Reference: [Folders, mock server and capture](workspaces-and-mock.md).
 

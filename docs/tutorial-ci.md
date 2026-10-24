@@ -85,3 +85,4 @@ For a test dashboard, use `reporter: junit` with `output: report.xml` and a JUni
 - Check the collection for credentials typed into it before each commit with `gostman scan`. See [Command line](cli.md#secret-scanner).
 - Read secrets from HashiCorp Vault, AWS, Azure, Google Cloud, 1Password or Bitwarden instead of CI variables. See [Secret managers](variables.md#secret-managers).
 - Run the collection once per row of a data file with `data: users.csv`.
+- Run it against saved examples instead of the live API with `gostman mock`. See [Run against the mock server](ci.md#run-against-the-mock-server).

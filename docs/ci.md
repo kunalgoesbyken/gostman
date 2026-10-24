@@ -102,6 +102,27 @@ Without the action:
           API_TOKEN: ${{ secrets.API_TOKEN }}
 ```
 
+## Run against the mock server
+
+To run the collection without reaching the real API, serve its saved examples with `gostman mock` and point an environment at it. [`examples/todo-api`](../examples/todo-api) has an example for every request and a `Mock` environment whose `base_url` is `http://127.0.0.1:4010`:
+
+```yaml
+      - run: |
+          curl -fsSL -o gostman.tar.gz https://github.com/kunalgoesbyken/gostman/releases/latest/download/gostman-cli-linux-amd64.tar.gz
+          tar -xzf gostman.tar.gz
+          ./gostman mock examples/todo-api --port 4010 > mock.log 2>&1 &
+          curl --silent --fail --retry 20 --retry-connrefused --retry-delay 1 -o /dev/null http://127.0.0.1:4010/todos/1
+          ./gostman run examples/todo-api --env Mock --reporter junit --output report.xml
+```
+
+- `gostman mock` runs until it is stopped, so `&` starts it in the background. The runner stops it when the job ends.
+- The `curl` line waits until the mock answers one of its routes. Without it, the first requests can fail while the mock is still starting.
+- The action runs the collection as soon as it has installed the CLI, so this recipe downloads the CLI itself.
+- The mock listens on `127.0.0.1` only and refuses other `Host` headers. Start it in the same job as `gostman run`, not in a service container.
+- `mock.log` lists every request the mock answered. Upload it with the report when a run fails.
+
+An example can echo what the request sent, as `Create a todo` does with `{{request.body.json.title}}`, so checks that compare against variables and runs with `--data` pass against the mock too. A run against the mock tests the collection, its scripts and its checks, not the API. To test your own service without its dependencies, mock the API it calls, start the service pointed at the mock, then run the collection against the service. Templating and the other mock options are in [Folders, mock server and capture](workspaces-and-mock.md#examples-and-the-mock-server-desktop).
+
 ## GitLab CI
 
 ```yaml
