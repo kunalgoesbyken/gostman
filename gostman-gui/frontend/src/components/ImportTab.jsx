@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { FileText, FolderOpen, Upload } from "lucide-react"
+import { BrandIcon } from "./ui/brandIcon"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Select } from "./ui/select"
@@ -133,7 +134,7 @@ function FormatRow({ format, onFormat, showStatic, skipStatic, onSkipStatic }) {
       <label className="flex items-center gap-2 text-muted-foreground">
         {IMPORT_TEXT.formatLabel}
         <Select value={format} onChange={(event) => onFormat(event.target.value)} aria-label={IMPORT_TEXT.formatLabel} className="w-48">
-          {IMPORT_FORMATS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+          {IMPORT_FORMATS.map((option) => <option key={option.value} value={option.value} icon={<BrandIcon brand={option.value} />}>{option.label}</option>)}
         </Select>
       </label>
       {showStatic && (

@@ -1,3 +1,5 @@
+import { BrandStrip } from "../ui/brandIcon"
+
 export function FeatureGroup({ group, number }) {
   return (
     <div className="border-t border-border/60 pt-5">
@@ -13,7 +15,10 @@ export function FeatureGroup({ group, number }) {
             <dt className="text-sm font-medium">
               <a href={row.href} className="underline-offset-4 hover:text-primary hover:underline">{row.term}</a>
             </dt>
-            <dd className="text-sm leading-relaxed text-muted-foreground">{row.text}</dd>
+            <dd className="text-sm leading-relaxed text-muted-foreground">
+              {row.text}
+              <BrandStrip brands={row.brands} className="mt-3" />
+            </dd>
           </div>
         ))}
       </dl>

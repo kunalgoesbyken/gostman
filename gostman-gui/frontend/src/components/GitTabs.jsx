@@ -1,12 +1,14 @@
 import { useState } from "react"
-import { ExternalLink, GitBranch, History, Plus, RotateCcw, Trash2 } from "lucide-react"
+import { ExternalLink, GitBranch, History, Plus, RotateCcw, Server, Trash2 } from "lucide-react"
 import { Badge } from "./ui/badge"
+import { BrandIcon } from "./ui/brandIcon"
 import { Button, IconButton } from "./ui/button"
 import { EmptyState } from "./ui/emptyState"
 import { Input } from "./ui/input"
 import { Notice, SectionLabel } from "./ui/panel"
 import { GitDiffView } from "./GitDiffView"
 import { useAppStore } from "../store/appStore"
+import { codeHostOf, pullRequestRemote } from "../lib/codeHost"
 
 const ROW_CLASS = "flex min-h-9 items-center gap-2 border-b border-border px-3 text-xs"
 const FORM_CLASS = "flex shrink-0 items-center gap-2 border-b border-border px-3 py-2"
@@ -142,6 +144,7 @@ function RemoteRow({ remote, isReadOnly, onChange }) {
   const showPrompt = useAppStore((s) => s.showPrompt)
   return (
     <div className={ROW_CLASS}>
+      <BrandIcon brand={codeHostOf(remote.url)} fallback={Server} className="text-muted-foreground" />
       <span className="shrink-0 font-medium">{remote.name}</span>
       <span className="min-w-0 flex-1 truncate font-mono text-muted-foreground" title={remote.url}>{remote.url}</span>
       <Button size="sm" variant="outline" disabled={isReadOnly} onClick={() => showPrompt("Change remote address", `New address for ${remote.name}`, remote.url, "", (url) => url?.trim() && onChange(url.trim()))}>
@@ -179,7 +182,7 @@ export function RemotesTab({ remotes, isReadOnly, actions }) {
       {remotes.length > 0 && (
         <div className="flex shrink-0 justify-end border-t border-border px-3 py-2">
           <Button size="sm" variant="outline" onClick={actions.openPullRequest}>
-            <ExternalLink />
+            <BrandIcon brand={codeHostOf(pullRequestRemote(remotes).url)} fallback={ExternalLink} />
             Create pull request in browser
           </Button>
         </div>

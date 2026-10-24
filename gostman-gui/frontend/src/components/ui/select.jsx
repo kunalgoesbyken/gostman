@@ -20,7 +20,7 @@ function readEntries(children, group = "") {
     if (child.type === "optgroup") return readEntries(child.props.children, child.props.label || "")
     if (child.type !== "option") return []
     const label = textOf(child.props.children)
-    return [{ value: String(child.props.value ?? label), label, group, disabled: Boolean(child.props.disabled) }]
+    return [{ value: String(child.props.value ?? label), label, group, disabled: Boolean(child.props.disabled), icon: child.props.icon }]
   })
 }
 
@@ -58,7 +58,11 @@ export function useDismiss(isOpen, close, anchorRef, listRef) {
   }, [isOpen, close, anchorRef, listRef])
 }
 
-export function OptionRow({ id, entry, isSelected, isActive, onChoose, onPoint }) {
+function OptionIcon({ icon }) {
+  return <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center text-muted-foreground">{icon}</span>
+}
+
+export function OptionRow({ id, entry, isSelected, isActive, hasIcons = false, onChoose, onPoint }) {
   return (
     <div
       id={id}
@@ -79,6 +83,7 @@ export function OptionRow({ id, entry, isSelected, isActive, onChoose, onPoint }
       )}
     >
       <Check className={cn("h-3.5 w-3.5 shrink-0", !isSelected && "invisible")} />
+      {hasIcons && <OptionIcon icon={entry.icon} />}
       <span className="truncate">{entry.label}</span>
     </div>
   )
@@ -98,6 +103,7 @@ const Select = React.forwardRef(function Select(
   const isOpen = placement !== null
   const selectedIndex = entries.findIndex((entry) => entry.value === String(value ?? ""))
   const selected = entries[selectedIndex]
+  const hasIcons = entries.some((entry) => entry.icon)
 
   const close = React.useCallback(() => setPlacement(null), [])
   useDismiss(isOpen, close, anchorRef, listRef)
@@ -156,9 +162,10 @@ const Select = React.forwardRef(function Select(
         title={title || selected?.label}
         onClick={() => (isOpen ? close() : open())}
         onKeyDown={handleKeyDown}
-        className={cn(CONTROL_BASE, CONTROL_SIZES[controlSize], "flex max-w-full items-center pr-7 text-left", className)}
+        className={cn(CONTROL_BASE, CONTROL_SIZES[controlSize], "flex max-w-full items-center gap-2 pr-7 text-left", className)}
         {...props}
       >
+        {selected?.icon && <OptionIcon icon={selected.icon} />}
         <span className="truncate">{selected ? selected.label : String(value ?? "")}</span>
       </button>
       <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -179,6 +186,7 @@ const Select = React.forwardRef(function Select(
                 entry={entry}
                 isSelected={index === selectedIndex}
                 isActive={index === activeIndex}
+                hasIcons={hasIcons}
                 onChoose={() => choose(entry)}
                 onPoint={() => setActiveIndex(index)}
               />

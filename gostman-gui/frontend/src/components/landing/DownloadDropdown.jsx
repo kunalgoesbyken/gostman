@@ -2,11 +2,9 @@ import { useCallback, useRef, useState } from "react"
 import { Button, buttonVariants } from "../ui/button"
 import { cn } from "../../lib/utils"
 import { Download, ChevronDown, ArrowUpRight } from "./icons"
-import { AppleIcon, WindowsIcon, LinuxIcon } from "../Icons"
+import { BrandIcon } from "../ui/brandIcon"
 import { DOWNLOADS, downloadUrl, groupByOs, isExternal } from "./downloads"
 import { usePopoverDismiss } from "../../hooks/usePopoverDismiss"
-
-const ICONS = { macos: AppleIcon, windows: WindowsIcon, linux: LinuxIcon }
 
 const GROUPS = groupByOs(DOWNLOADS)
 
@@ -33,13 +31,12 @@ function DownloadLink({ download, onClose, className, children }) {
 }
 
 function DownloadGroup({ group, onClose }) {
-  const Icon = ICONS[group.os]
   const [first] = group.downloads
 
   if (group.downloads.length === 1) {
     return (
       <DownloadLink download={first} onClose={onClose} className="py-3">
-        <Icon className="h-5 w-5 text-foreground/90" />
+        <BrandIcon brand={group.os} className="h-5 w-5 text-foreground/90" />
         <div className="min-w-0 flex-1">
           <div className="font-semibold">{group.name}</div>
           <div className="text-xs text-muted-foreground">{first.note}</div>
@@ -51,7 +48,7 @@ function DownloadGroup({ group, onClose }) {
   return (
     <div className="pb-1.5">
       <div className="flex items-center gap-3 px-4 pb-1 pt-3">
-        <Icon className="h-5 w-5 text-foreground/90" />
+        <BrandIcon brand={group.os} className="h-5 w-5 text-foreground/90" />
         <div className="font-semibold">{group.name}</div>
       </div>
       {group.downloads.map((download) => (
@@ -89,7 +86,7 @@ export const DownloadDropdown = ({ primary, variant }) => {
       {primary ? (
         <>
           <a href={downloadUrl(primary)} className={cn(buttonVariants({ size: "lg", variant }), LARGE, "min-w-0 flex-1 rounded-r-none px-5 sm:px-8")}>
-            <Download className="h-5 w-5" />
+            <BrandIcon brand={primary.os} className="h-5 w-5" />
             Download for {primary.name}
           </a>
           <Button

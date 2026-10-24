@@ -1,12 +1,14 @@
+import { BrandIcon } from "../ui/brandIcon"
 import { Brand } from "./Brand"
 import { FOOTER_COLUMNS } from "./footerLinks"
 
-const FOOTER_LINK = "text-sm text-muted-foreground transition-colors hover:text-foreground"
+const FOOTER_LINK = "inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
 
 function FooterLink({ link }) {
   const target = link.external ? { target: "_blank", rel: "noopener noreferrer" } : {}
   return (
     <a href={link.href} className={FOOTER_LINK} {...target}>
+      <BrandIcon brand={link.brand} className="h-4 w-4" />
       {link.label}
     </a>
   )

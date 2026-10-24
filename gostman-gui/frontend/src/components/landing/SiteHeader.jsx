@@ -1,8 +1,8 @@
+import { BrandIcon } from "../ui/brandIcon"
 import { buttonVariants } from "../ui/button"
 import { cn } from "../../lib/utils"
 import { Brand } from "./Brand"
 import { NavBar } from "./NavBar"
-import { Github } from "./icons"
 import { docPath } from "../../docs/manifest"
 import { RELEASES_URL, REPOSITORY_URL } from "../../lib/siteLinks"
 
@@ -19,7 +19,7 @@ export function SiteHeader() {
         <a href="/web" className={NAV_LINK}>Web app</a>
         <a href={RELEASES_URL} rel="noopener" className={cn(NAV_LINK, "max-sm:hidden")}>Download</a>
         <a href={REPOSITORY_URL} rel="noopener" className={NAV_LINK}>
-          <Github className="h-4 w-4" aria-hidden="true" />
+          <BrandIcon brand="github" className="h-4 w-4" />
           <span className="max-sm:sr-only">GitHub</span>
         </a>
       </div>

@@ -1,7 +1,8 @@
 import { Button, buttonVariants } from "../ui/button"
 import { cn } from "../../lib/utils"
+import { BrandIcon } from "../ui/brandIcon"
 import { useBrowserOs } from "../../hooks/useBrowserOs"
-import { Download, Globe } from "./icons"
+import { Globe } from "./icons"
 import { DOWNLOADS, downloadFor, downloadUrl, groupByOs, isExternal } from "./downloads"
 
 const NAME_COLUMN = "w-20 shrink-0 font-medium"
@@ -26,7 +27,10 @@ function DownloadRow({ download }) {
 function DownloadGroup({ group }) {
   return (
     <li className="flex gap-4 border-t border-border/30 py-0.5 text-sm">
-      <span className={cn(NAME_COLUMN, "py-2.5")}>{group.name}</span>
+      <span className={cn(NAME_COLUMN, "flex items-center gap-2 self-start py-2.5")}>
+        <BrandIcon brand={group.os} />
+        {group.name}
+      </span>
       <ul className="min-w-0 flex-1">
         {group.downloads.map((download) => (
           <DownloadRow key={download.kind} download={download} />
@@ -50,7 +54,7 @@ export function DownloadPanel({ onGetStarted }) {
       {primary ? (
         <a href={downloadUrl(primary)} className={cn(buttonVariants({ size: "lg" }), "mt-6 w-full justify-between gap-3")}>
           <span className="inline-flex items-center gap-2">
-            <Download className="h-4 w-4" />
+            <BrandIcon brand={primary.os} className="h-4 w-4" />
             Download for {primary.name}
           </span>
           <span className="font-mono text-xs opacity-80">{primary.kind}</span>

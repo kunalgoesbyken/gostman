@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { KeyRound, MonitorDown, Pencil, Plus, Trash2 } from "lucide-react"
+import { BrandIcon } from "./ui/brandIcon"
 import { Button, IconButton } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
@@ -45,7 +46,7 @@ function useAttempt() {
 function ConnectionRow({ connection, onSwitch, onEdit, onRemove }) {
   return (
     <div className="flex h-9 items-center gap-3 border-b border-border px-4">
-      <KeyRound className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+      <BrandIcon brand={connection.kind} fallback={KeyRound} className="text-muted-foreground" />
       <span className={cn("min-w-0 flex-1 truncate text-xs font-medium", connection.disabled && "text-muted-foreground")}>{connection.alias}</span>
       <span className="truncate text-xs text-muted-foreground">{TEXT.kinds[connection.kind] || connection.kind}</span>
       <Switch label={TEXT.switchLabel(connection.alias)} checked={!connection.disabled} onCheckedChange={onSwitch} className="w-14">
@@ -203,7 +204,11 @@ function ConnectionForm({ draft, isNew, kinds, secrets, onChange, onFilled }) {
       </Field>
       <Field label={TEXT.kind}>
         <Select value={draft.kind} disabled={!isNew} onChange={(event) => onChange({ ...draft, kind: event.target.value, values: {} })}>
-          {kinds.map((candidate) => <option key={candidate.name} value={candidate.name}>{TEXT.kinds[candidate.name] || candidate.name}</option>)}
+          {kinds.map((candidate) => (
+            <option key={candidate.name} value={candidate.name} icon={<BrandIcon brand={candidate.name} fallback={KeyRound} />}>
+              {TEXT.kinds[candidate.name] || candidate.name}
+            </option>
+          ))}
         </Select>
       </Field>
       {TEXT.kindHints[draft.kind] && <FieldNote className="text-muted-foreground">{TEXT.kindHints[draft.kind]}</FieldNote>}

@@ -1,14 +1,24 @@
 import { cn } from "../../lib/utils"
+import { BrandIcon } from "../ui/brandIcon"
 import { COMPARISON_ROWS, PRODUCTS } from "./comparisonData"
 import { StatusGlyph } from "./StatusGlyph"
 
 const BAND = "bg-[linear-gradient(hsl(var(--primary)/0.08),hsl(var(--primary)/0.08))]"
 const HEAD_CELL = "px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground md:border-b md:border-border/60"
 
+function ProductName({ product }) {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <BrandIcon brand={product.id} />
+      {product.name}
+    </span>
+  )
+}
+
 function Cell({ product, claim }) {
   return (
     <td className={cn("block px-4 pb-4 pt-0 align-top text-sm leading-relaxed md:table-cell md:border-b md:border-border/30 md:py-5", product.id === "gostman" && BAND)}>
-      <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted-foreground md:hidden">{product.name}</span>
+      <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted-foreground md:hidden"><ProductName product={product} /></span>
       <span className="flex items-start gap-2.5">
         <StatusGlyph state={claim.state} />
         <span className={product.id === "gostman" ? "text-foreground" : "text-foreground/80"}>
@@ -45,7 +55,7 @@ export function ComparisonTable() {
           </th>
           {PRODUCTS.map((product) => (
             <th key={product.id} scope="col" className={cn(HEAD_CELL, product.id === "gostman" && BAND)}>
-              {product.name}
+              <ProductName product={product} />
             </th>
           ))}
         </tr>

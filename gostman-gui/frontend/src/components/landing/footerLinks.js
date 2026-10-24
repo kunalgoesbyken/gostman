@@ -3,7 +3,7 @@ import { guidePages } from "../../guides/pages"
 import { ISSUES_URL, LICENSE_URL, RELEASES_URL, REPOSITORY_URL } from "../../lib/siteLinks"
 
 const internal = (label, href) => ({ label, href })
-const external = (label, href) => ({ label, href, external: true })
+const external = (label, href, brand) => ({ label, href, brand, external: true })
 
 export const FOOTER_COLUMNS = [
   {
@@ -31,7 +31,7 @@ export const FOOTER_COLUMNS = [
   {
     title: "Project",
     links: [
-      external("Source on GitHub", REPOSITORY_URL),
+      external("Source on GitHub", REPOSITORY_URL, "github"),
       external("Report an issue", ISSUES_URL),
       external("Releases", RELEASES_URL),
       external("MIT licence", LICENSE_URL),

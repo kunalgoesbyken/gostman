@@ -1,8 +1,10 @@
 import { Check, Copy } from "lucide-react"
+import { BrandIcon } from "./ui/brandIcon"
 import { Button } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { useClipboardCopy } from "../hooks/useClipboardCopy"
 import { ABOUT_LINKS, buildDiagnostics, openExternal } from "../lib/about"
+import { codeHostOf } from "../lib/codeHost"
 import { ABOUT_TEXT as TEXT } from "../lib/aboutText"
 import { usePreferences } from "../lib/preferences"
 import { useAppStore } from "../store/appStore"
@@ -33,7 +35,8 @@ export function AboutDialog({ onClose }) {
         <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
           {ABOUT_LINKS.map((link) => (
             <li key={link.id}>
-              <a href={link.url} target="_blank" rel="noopener noreferrer" onClick={(event) => openExternal(event, link.url)} className="text-primary underline-offset-2 hover:underline">
+              <a href={link.url} target="_blank" rel="noopener noreferrer" onClick={(event) => openExternal(event, link.url)} className="inline-flex items-center gap-1 text-primary underline-offset-2 hover:underline">
+                <BrandIcon brand={codeHostOf(link.url)} />
                 {TEXT.links[link.id]}
               </a>
             </li>

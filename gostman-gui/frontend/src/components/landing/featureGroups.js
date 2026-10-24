@@ -17,7 +17,7 @@ export const FEATURE_INDEX = [
     title: "Variables and secrets",
     rows: [
       { term: "Variables done properly", href: docPath("variables"), text: "Secret variables in your OS keychain, plus global, collection, folder and request scopes, dynamic variables and prompts." },
-      { term: "Secret managers", href: docPath("secrets-and-network"), text: "Pull values from Vault, AWS, Azure, Google Cloud, 1Password, Bitwarden or KeePassXC at send time." },
+      { term: "Secret managers", href: docPath("secrets-and-network"), text: "Pull values from Vault, AWS, Azure, Google Cloud, 1Password, Bitwarden or KeePassXC at send time.", brands: ["vault", "aws", "azure", "gcp", "onepassword", "bitwarden", "keepassxc"] },
     ],
   },
   {
@@ -34,13 +34,13 @@ export const FEATURE_INDEX = [
     rows: [
       { term: "A real Git panel", href: docPath("collections-and-git"), text: "Diff, commit, push, branches, stash and conflict resolution, in the desktop app." },
       { term: "Plain files", href: docPath("collections-and-git"), text: "Nested collections, tabs and history, kept as plain YAML files in a folder or in app storage." },
-      { term: "Import and export", href: docPath("import-export-and-specs"), text: "Import Postman, OpenAPI, Insomnia, HAR, WSDL, Bruno collections, .http files and curl commands. Export to Postman, OpenAPI, Markdown, .http files or a backup." },
+      { term: "Import and export", href: docPath("import-export-and-specs"), text: "Import Postman, OpenAPI, Insomnia, HAR, WSDL, Bruno collections, .http files and curl commands. Export to Postman, OpenAPI, Markdown, .http files or a backup.", brands: ["postman", "openapi", "insomnia", "bruno"] },
       { term: "Agent-ready, and in the browser", href: docPath("agents"), text: "An MCP server with secret redaction and a host allowlist, and a web version with nothing to install." },
     ],
   },
 ]
 
-const AI_ROW = { term: AI_FEATURE.title, href: docPath("ai"), text: AI_FEATURE.description }
+const AI_ROW = { term: AI_FEATURE.title, href: docPath("ai"), text: AI_FEATURE.description, brands: AI_FEATURE.brands }
 
 export const FEATURE_GROUPS = FEATURE_INDEX.map((group, index) =>
   AI_AVAILABLE && index === FEATURE_INDEX.length - 1 ? { ...group, rows: [...group.rows, AI_ROW] } : group,

@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Check } from "lucide-react"
+import { BrandIcon } from "./ui/brandIcon"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
@@ -99,7 +100,7 @@ export function AiSettingsDialog({ actions }) {
         </Checkbox>
         <Field label="Provider">
           <Select value={settings.provider} onChange={(event) => actions.selectProvider(event.target.value)} aria-label="Provider">
-            {PROVIDERS.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
+            {PROVIDERS.map((option) => <option key={option.id} value={option.id} icon={<BrandIcon brand={option.id} />}>{option.label}</option>)}
           </Select>
         </Field>
         <Field label="Base URL">

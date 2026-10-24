@@ -20,6 +20,7 @@ export const guidePages = [
       },
       {
         heading: "Moving over from Postman",
+        brands: ["postman", "openapi", "insomnia", "bruno"],
         paragraphs: [
           "Import a Postman collection, or OpenAPI, Insomnia, HAR, WSDL, Bruno, .http files and curl. Collections export back to Postman, OpenAPI, HAR, Bruno, .http files and Markdown.",
           "Imported scripts are kept and listed in the import summary. Gostman scripts use test() and expect() rather than the Postman pm API, so review them after importing.",
@@ -37,8 +38,8 @@ export const guidePages = [
         heading: "Prices and plans",
         paragraphs: ["Postman and Bruno change their plans, so check their own pricing pages before you decide."],
         links: [
-          { label: "Postman pricing", href: "https://www.postman.com/pricing/" },
-          { label: "Bruno pricing", href: "https://www.usebruno.com/pricing" },
+          { label: "Postman pricing", href: "https://www.postman.com/pricing/", brand: "postman" },
+          { label: "Bruno pricing", href: "https://www.usebruno.com/pricing", brand: "bruno" },
         ],
       },
     ],
@@ -53,6 +54,7 @@ export const guidePages = [
     sections: [
       {
         heading: "What the run gives you",
+        brands: ["github-actions", "docker", "gitlab"],
         items: [
           "Exit code 0 when every request and check passed, 1 when one failed, 2 when the command or input is wrong",
           "Text, JSON, JUnit and HTML reports",
@@ -75,6 +77,7 @@ export const guidePages = [
     heading: "An API client your coding agent can use over MCP",
     intro: "Claude Code, Codex and Cursor can call Gostman through MCP in place of improvised curl commands. They use the collection you already have, so requests, variables and environments are the ones your team reviewed.",
     code: "gostman mcp",
+    brands: ["claude", "openai", "cursor"],
     sections: [
       {
         heading: "How secrets are handled",

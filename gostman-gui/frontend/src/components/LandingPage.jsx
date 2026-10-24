@@ -6,7 +6,8 @@ import { popIn } from "../lib/motion"
 import { REPOSITORY, REPOSITORY_URL } from "../lib/siteLinks"
 import { docPath } from "../docs/manifest"
 import { useSmoothScroll } from "../lib/landingMotion"
-import { ArrowRight, Check, Download, Github, Globe } from "./landing/icons"
+import { ArrowRight, Check, Download, Globe } from "./landing/icons"
+import { BrandIcon, BrandStrip } from "./ui/brandIcon"
 
 import captureShot from "../assets/landing/capture.webp"
 import docsShot from "../assets/landing/docs.webp"
@@ -73,6 +74,7 @@ const SPOTLIGHTS = [
       "Linux, macOS and Windows builds on every release",
     ],
     capture: CLI_RUN,
+    brands: ["linux", "macos", "windows"],
   },
   {
     title: "A collection you can read in a pull request",
@@ -132,6 +134,7 @@ const SPOTLIGHTS = [
       "Agents reach only the hosts your collection already uses, unless you allow more",
     ],
     capture: AGENT_SESSION,
+    brands: ["claude", "openai", "cursor"],
   },
 ]
 
@@ -216,6 +219,7 @@ function Spotlight({ spotlight, isReversed }) {
       <div className={cn("min-w-0 lg:col-span-5", isReversed && "lg:order-2")}>
         <SplitHeading as="h3" text={spotlight.title} className="text-2xl md:text-3xl font-semibold tracking-tight [text-wrap:balance]" />
         <p className="mt-4 leading-relaxed text-muted-foreground">{spotlight.description}</p>
+        <BrandStrip brands={spotlight.brands} className="mt-4" />
         <PointList points={spotlight.points} className="mt-6 space-y-3" />
       </div>
       <div className={cn("reveal-on-scroll min-w-0 lg:col-span-7", isReversed && "lg:order-1")}>
@@ -264,7 +268,7 @@ export function LandingPage({ onGetStarted }) {
               Web app
             </button>
             <a href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer" className={NAV_LINK}>
-              <Github className="h-4 w-4" aria-hidden="true" />
+              <BrandIcon brand="github" className="h-4 w-4" />
               <span className="hidden font-medium sm:inline">Star</span>
               {stars !== null ? (
                 <m.span

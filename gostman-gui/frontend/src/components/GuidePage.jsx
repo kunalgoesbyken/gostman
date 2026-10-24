@@ -1,3 +1,4 @@
+import { BrandIcon, BrandStrip } from "./ui/brandIcon"
 import { buttonVariants } from "./ui/button"
 import { cn } from "../lib/utils"
 import { PointList } from "./landing/PointList"
@@ -7,11 +8,14 @@ import { RELEASES_URL } from "../lib/siteLinks"
 
 const BODY_TEXT = "mt-4 leading-relaxed text-muted-foreground"
 
+const DESKTOP_PLATFORMS = ["windows", "macos", "linux"]
+
 function LinkRow({ links }) {
   return (
     <p className={cn(BODY_TEXT, "flex flex-wrap gap-x-6 gap-y-2")}>
       {links.map((link) => (
-        <a key={link.href} href={link.href} rel="noopener" className="text-primary underline-offset-4 hover:underline">
+        <a key={link.href} href={link.href} rel="noopener" className="inline-flex items-center gap-2 text-primary underline-offset-4 hover:underline">
+          <BrandIcon brand={link.brand} className="h-4 w-4" />
           {link.label}
         </a>
       ))}
@@ -27,6 +31,7 @@ function Section({ block }) {
         <p key={text} className={BODY_TEXT}>{text}</p>
       ))}
       {block.items ? <PointList points={block.items} className="mt-5 space-y-3" /> : null}
+      <BrandStrip brands={block.brands} className="mt-5" />
       {block.links ? <LinkRow links={block.links} /> : null}
     </section>
   )
@@ -40,6 +45,7 @@ export function GuidePage({ page }) {
       <main className="relative mx-auto max-w-3xl px-6 pt-36 pb-20">
         <h1 className="text-4xl md:text-5xl font-semibold tracking-tight leading-[1.1] [text-wrap:balance]">{page.heading}</h1>
         <p className="mt-6 text-lg leading-relaxed text-muted-foreground">{page.intro}</p>
+        <BrandStrip brands={page.brands} className="mt-5" />
         {page.code ? (
           <pre className="mt-8 overflow-x-auto rounded-lg border border-border/60 bg-card p-4 font-mono text-sm">
             <code>{page.code}</code>
@@ -50,6 +56,7 @@ export function GuidePage({ page }) {
             Open the web app
           </a>
           <a href={RELEASES_URL} rel="noopener" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "text-base px-6 border-border/60 hover:bg-muted/50")}>
+            <BrandStrip brands={DESKTOP_PLATFORMS} className="gap-1.5 text-current" />
             Download for Windows, macOS and Linux
           </a>
         </div>

@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { ShieldCheck } from "lucide-react"
+import { BrandIcon } from "./ui/brandIcon"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
@@ -195,7 +196,11 @@ export function AiDialog({ actions }) {
     <Dialog label={task.label} size="lg" onClose={actions.cancel}>
       <DialogHeader onClose={actions.cancel}>
         <DialogTitle>{task.label}</DialogTitle>
-        <span className="ml-auto mr-2 shrink-0 text-xs max-sm:hidden text-muted-foreground">AI: {providerById(settings.provider).label}</span>
+        <span className="ml-auto mr-2 flex shrink-0 items-center gap-1 text-xs max-sm:hidden text-muted-foreground">
+          AI:
+          <BrandIcon brand={settings.provider} />
+          {providerById(settings.provider).label}
+        </span>
       </DialogHeader>
       <DialogBody>
         <Stage

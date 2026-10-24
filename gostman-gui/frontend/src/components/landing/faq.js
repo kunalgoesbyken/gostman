@@ -18,6 +18,7 @@ export const FAQ = [
   {
     question: "Can I bring my Postman or Bruno collections?",
     answer: "Yes. Import Postman, Bruno (.bru files or the YAML format), Insomnia, OpenAPI, HAR, .http files and curl. Common pm.* and bru.* script calls are rewritten to Gostman's script API. An import only adds data, and it lists any scripts it carries before you accept them.",
+    brands: ["postman", "bruno", "insomnia", "openapi"],
   },
   {
     question: "How does a team share a collection?",
@@ -26,5 +27,6 @@ export const FAQ = [
   {
     question: "Can it run in CI?",
     answer: "Yes. gostman run sends a folder with its scripts and assertions, prints what failed and exits non-zero, with text, JSON, JUnit and HTML reports. The repository includes a GitHub Action and a Dockerfile.",
+    brands: ["github-actions", "docker"],
   },
 ]
