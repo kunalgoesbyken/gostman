@@ -30,6 +30,7 @@ func NewExpansion(variables string) (*Expansion, error) {
 	if err != nil {
 		return nil, err
 	}
+	substitution.readingFiles(refusing(errFilesHTTPOnly))
 	return &Expansion{substitution}, nil
 }
 

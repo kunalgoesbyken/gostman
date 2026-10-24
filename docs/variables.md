@@ -111,6 +111,7 @@ Every generator also has a name in the style of the faker library, such as `{{$f
 - A file can be up to 10 MB, all the files a request reads at most 10 MB together, and the whole request at most 10 MB once filled in. A file that cannot be read stops the send with a message.
 - File placeholders count as active content, like scripts: a folder that is not trusted does not read files, imports ask before keeping them, and importing without active content removes them.
 - The code snippet view shows the placeholder, not the file.
+- Files are read in HTTP and GraphQL requests. A gRPC or MCP request that uses `{{$file(...)}}` is not sent.
 
 ## Prompt variables
 

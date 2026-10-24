@@ -23,6 +23,7 @@ var fileReferenceRe = regexp.MustCompile(`^\$file(Base64)?\((.*)\)$`)
 var (
 	errFilesUnavailable = errors.New("{{$file(...)}} reads files only in the desktop app, or in gostman run, send and load with --allow-files")
 	errRelativeFilePath = errors.New("open a workspace folder to use a relative path in {{$file(...)}}, or give an absolute path")
+	errFilesHTTPOnly    = errors.New("{{$file(...)}} reads files only in HTTP and GraphQL requests")
 )
 
 type FileReader func(path string) ([]byte, error)
@@ -73,8 +74,10 @@ func (r fileReference) encode(data []byte) string {
 	return string(data)
 }
 
-func refuseFiles(string) ([]byte, error) {
-	return nil, errFilesUnavailable
+func refusing(reason error) FileReader {
+	return func(string) ([]byte, error) {
+		return nil, reason
+	}
 }
 
 func FolderFiles(root string) FileReader {

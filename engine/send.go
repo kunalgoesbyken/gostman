@@ -40,7 +40,7 @@ type Policy struct {
 
 func (p Policy) fileReader() FileReader {
 	if p.ReadFile == nil {
-		return refuseFiles
+		return refusing(errFilesUnavailable)
 	}
 	return p.ReadFile
 }
