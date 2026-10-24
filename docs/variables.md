@@ -107,8 +107,8 @@ Every generator also has a name in the style of the faker library, such as `{{$f
 ```
 
 - Files are read when the request is sent: by the desktop app, and by `gostman run`, `send` and `load` when you pass `--allow-files`, so a collection you did not write cannot send your files. The web app and agent sessions (`gostman mcp`) do not read files, a request that uses them there is not sent, and an agent cannot save a request that reads a file.
-- A relative path starts at the workspace folder in the desktop app, and at the workspace folder or export file given to the CLI (the current folder for a request given as a method and a URL). Without a workspace folder, use an absolute path. `~/` is your home folder.
-- A file can be up to 10 MB, and the whole request at most 10 MB once filled in. A file that cannot be read stops the send with a message.
+- A path starts at the workspace folder in the desktop app, and at the workspace folder or export file given to the CLI (the current folder for a request given as a method and a URL), and must stay inside that folder: `..`, absolute paths, `~/` and links that lead outside it are refused, so a collection cannot read other files on your computer. Without a workspace folder, the desktop app reads absolute paths, and `~/` is your home folder.
+- A file can be up to 10 MB, all the files a request reads at most 10 MB together, and the whole request at most 10 MB once filled in. A file that cannot be read stops the send with a message.
 - File placeholders count as active content, like scripts: a folder that is not trusted does not read files, imports ask before keeping them, and importing without active content removes them.
 - The code snippet view shows the placeholder, not the file.
 

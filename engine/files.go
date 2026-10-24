@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -78,26 +79,57 @@ func refuseFiles(string) ([]byte, error) {
 
 func FolderFiles(root string) FileReader {
 	return func(path string) ([]byte, error) {
-		resolved, err := resolveFilePath(root, path)
+		if err := requirePath(path); err != nil {
+			return nil, err
+		}
+		if isHomePath(path) || !filepath.IsLocal(path) {
+			return nil, fmt.Errorf("%q is outside the collection folder; a collection reads only files inside its folder", path)
+		}
+		folder, err := os.OpenRoot(root)
 		if err != nil {
 			return nil, err
 		}
-		info, err := os.Stat(resolved)
+		defer folder.Close()
+		file, err := folder.Open(path)
 		if err != nil {
-			return nil, unreadable(path, resolved, err)
+			return nil, unreadable(path, filepath.Join(root, path), err)
 		}
-		if info.IsDir() {
-			return nil, fmt.Errorf("%q is a folder, not a file", path)
-		}
-		if info.Size() > maxRequestBody {
-			return nil, fmt.Errorf("file %q is larger than 10 MB", path)
-		}
-		data, err := os.ReadFile(resolved)
-		if err != nil {
-			return nil, unreadable(path, resolved, err)
-		}
-		return data, nil
+		defer file.Close()
+		return readFile(path, file)
 	}
+}
+
+func LocalFiles() FileReader {
+	return func(path string) ([]byte, error) {
+		resolved, err := localPath(path)
+		if err != nil {
+			return nil, err
+		}
+		file, err := os.Open(resolved)
+		if err != nil {
+			return nil, unreadable(path, resolved, err)
+		}
+		defer file.Close()
+		return readFile(path, file)
+	}
+}
+
+func readFile(path string, file *os.File) ([]byte, error) {
+	info, err := file.Stat()
+	if err != nil {
+		return nil, fmt.Errorf("cannot read file %q: %w", path, err)
+	}
+	if info.IsDir() {
+		return nil, fmt.Errorf("%q is a folder, not a file", path)
+	}
+	data, err := io.ReadAll(io.LimitReader(file, maxRequestBody+1))
+	if err != nil {
+		return nil, fmt.Errorf("cannot read file %q: %w", path, err)
+	}
+	if len(data) > maxRequestBody {
+		return nil, fmt.Errorf("file %q is larger than 10 MB", path)
+	}
+	return data, nil
 }
 
 func unreadable(path, resolved string, err error) error {
@@ -107,22 +139,30 @@ func unreadable(path, resolved string, err error) error {
 	return fmt.Errorf("cannot read file %q: %w", path, err)
 }
 
-func resolveFilePath(root, path string) (string, error) {
+func requirePath(path string) error {
 	if path == "" {
-		return "", errors.New("{{$file(...)}} needs a file path between the parentheses")
+		return errors.New("{{$file(...)}} needs a file path between the parentheses")
 	}
-	if path == homePrefix || strings.HasPrefix(path, homePrefix+"/") || strings.HasPrefix(path, homePrefix+`\`) {
+	return nil
+}
+
+func isHomePath(path string) bool {
+	return path == homePrefix || strings.HasPrefix(path, homePrefix+"/") || strings.HasPrefix(path, homePrefix+`\`)
+}
+
+func localPath(path string) (string, error) {
+	if err := requirePath(path); err != nil {
+		return "", err
+	}
+	if isHomePath(path) {
 		home, err := os.UserHomeDir()
 		if err != nil {
 			return "", err
 		}
 		return filepath.Join(home, path[len(homePrefix):]), nil
 	}
-	if filepath.IsAbs(path) {
-		return filepath.Clean(path), nil
-	}
-	if root == "" {
+	if !filepath.IsAbs(path) {
 		return "", errRelativeFilePath
 	}
-	return filepath.Join(root, path), nil
+	return filepath.Clean(path), nil
 }

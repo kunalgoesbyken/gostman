@@ -76,6 +76,7 @@ type substitution struct {
 	exceeded  bool
 	files     FileReader
 	read      map[string]string
+	fileBytes int
 	err       error
 }
 
@@ -131,11 +132,17 @@ func (s *substitution) file(name string, reference fileReference) (string, bool)
 	if value, ok := s.read[name]; ok {
 		return value, true
 	}
+	if s.exceeded || s.err != nil {
+		return "", false
+	}
 	data, err := s.files(reference.path)
 	if err != nil {
-		if s.err == nil {
-			s.err = err
-		}
+		s.err = err
+		return "", false
+	}
+	s.fileBytes += len(data)
+	if s.fileBytes > maxRequestBody {
+		s.exceeded = true
 		return "", false
 	}
 	value := reference.encode(data)

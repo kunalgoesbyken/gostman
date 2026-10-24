@@ -307,7 +307,7 @@ func (a *App) SaveCollectionToFolder(path string) (WorkspaceStatus, error) {
 func workspaceFiles() engine.FileReader {
 	store, isFolder := storage.current().(folderStore)
 	if !isFolder {
-		return engine.FolderFiles("")
+		return engine.LocalFiles()
 	}
 	root := store.folder.Root()
 	read := engine.FolderFiles(root)
