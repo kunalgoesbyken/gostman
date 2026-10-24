@@ -28,7 +28,12 @@ const escapeAttribute = (text) =>
 
 const slugify = (text) => text.toLowerCase().trim().replace(/[^\p{L}\p{N}\s_-]/gu, '').replace(/\s+/g, '-')
 
-const plainText = (tokens = []) => tokens.map((token) => (token.tokens ? plainText(token.tokens) : token.text ?? '')).join('')
+const HTML_ESCAPES = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" }
+
+const unescapeHtml = (text) => text.replace(/&(?:amp|lt|gt|quot|#39);/g, (entity) => HTML_ESCAPES[entity])
+
+const plainText = (tokens = []) =>
+  tokens.map((token) => (token.tokens ? plainText(token.tokens) : unescapeHtml(token.text ?? ''))).join('')
 
 function summarize(text) {
   if (text.length <= DESCRIPTION_LIMIT) return text

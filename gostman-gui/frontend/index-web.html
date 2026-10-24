@@ -10,6 +10,7 @@
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="theme-color" content="#050810" />
@@ -44,7 +45,8 @@
       "downloadUrl": "https://github.com/kunalgoesbyken/gostman/releases/latest",
       "codeRepository": "https://github.com/kunalgoesbyken/gostman",
       "sameAs": ["https://github.com/kunalgoesbyken/gostman"],
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "publisher": { "@id": "__SITE_URL__/#organization" }
     }
     </script>
     <script type="application/ld+json">
@@ -53,7 +55,19 @@
       "@type": "WebSite",
       "name": "Gostman",
       "alternateName": "Gostman API client",
-      "url": "__SITE_URL__/"
+      "url": "__SITE_URL__/",
+      "publisher": { "@id": "__SITE_URL__/#organization" }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "@id": "__SITE_URL__/#organization",
+      "name": "Gostman",
+      "url": "__SITE_URL__/",
+      "logo": "__SITE_URL__/icon-512.png",
+      "sameAs": ["https://github.com/kunalgoesbyken/gostman"]
     }
     </script>
 </head>

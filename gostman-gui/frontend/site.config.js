@@ -36,6 +36,25 @@ Disallow: /api/
 Sitemap: ${url}/sitemap.xml
 `
 
+const llmsLink = (url, path, title, description) => `- [${title}](${url}${path})${description ? `: ${description}` : ''}`
+
+function llmsTxt(url, docs) {
+  const pagesByPath = new Map(docs.pages.map((page) => [docPath(page.slug), page]))
+  const docLink = (path) => llmsLink(url, path, pagesByPath.get(path).title, pagesByPath.get(path).description)
+  return [
+    '# Gostman',
+    '',
+    `> ${pagesByPath.get(docPath('')).description}`,
+    '',
+    '## Guides',
+    ...guidePages.map((page) => llmsLink(url, `/${page.path}`, page.heading, page.description)),
+    '',
+    '## Docs',
+    ...docs.nav.flatMap((section) => ['', `### ${section.title}`, ...section.items.map((item) => docLink(item.href))]),
+    '',
+  ].join('\n')
+}
+
 const contentHash = (source) => createHash('sha256').update(source).digest('hex')
 
 function bundledImageUrls(bundle) {
@@ -104,6 +123,7 @@ export function siteMeta() {
       const docs = loadDocs(DOCS_DIR)
       const stylesheets = stylesheetsOf(bundle)
       const emit = (fileName, source) => this.emitFile({ type: 'asset', fileName, source })
+      emit('llms.txt', llmsTxt(siteUrl, docs))
       assets.forEach((asset) => emit(asset.fileName, asset.source))
       docs.images.forEach((image) => emit(image.fileName, image.source))
       guidePages.forEach((page) => emit(`${page.path}/index.html`, renderGuidePage(page, { siteUrl, stylesheets })))
