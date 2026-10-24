@@ -99,6 +99,7 @@ func parseInvocation(arguments []string) (invocation, error) {
 		return parsed, err
 	}
 	parsed.path = positional[0]
+	parsed.options.Files = filesBeside(parsed.path)
 	parsed.options.Delay = time.Duration(delayMs) * time.Millisecond
 	parsed.options.Timeout = time.Duration(timeoutMs) * time.Millisecond
 	return parsed, nil

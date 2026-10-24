@@ -3,7 +3,7 @@ export const WORKSPACE_TEXT = {
   localHint: "The collection is saved in the app's data on this computer",
   browserLabel: 'This browser',
   browserHint: 'The collection is saved in this browser. Keeping it as files in a folder needs the desktop app.',
-  restrictedHint: 'Scripts, OAuth 2.0 settings and local MCP commands in this folder are off until you trust it',
+  restrictedHint: 'Scripts, OAuth 2.0 settings, local MCP commands and file reads in this folder are off until you trust it',
   switcherLabel: 'Switch workspace',
   switcherCommand: 'Switch workspace',
   switcherDescription: 'Choose another folder, pinned or recent',

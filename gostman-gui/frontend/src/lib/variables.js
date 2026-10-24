@@ -1,8 +1,9 @@
 import { isSensitiveName } from "./sensitiveNames.js"
-import { DYNAMIC_PREFIX, DYNAMIC_VARIABLES, SOURCE_LABELS, isDynamicName, isPromptName } from "./variableNames.js"
+import { DYNAMIC_PREFIX, DYNAMIC_VARIABLES, FAKER_VARIABLES, SOURCE_LABELS, describeDynamic, isDynamicName, isFakerQuery, isFileName, isPromptName } from "./variableNames.js"
 
 const TOKEN = /\{\{\s*([^{}]*?)\s*\}\}/gu
 const OPEN_REFERENCE = /\{\{\s*([\p{L}\p{N}_.$?-]*)$/u
+const WORD_BEFORE_CARET = /[\p{L}\p{N}_.$]*$/u
 export const CLOSING_REFERENCE = /^\s*\}\}/
 
 export const MASKED_VALUE = "••••••••"
@@ -25,7 +26,13 @@ export function findReferences(text) {
   }))
 }
 
+export const hasFileReference = (text) => findReferences(text).some(({ name }) => isFileName(name))
+
+export const withoutFileReferences = (text) => text.replace(TOKEN, (match, name) => (isFileName(name) ? "" : match))
+
 export const isDefined = (name, variables) => variables.has(name) || isDynamicName(name) || isPromptName(name)
+
+const builtInText = (name, kind) => (kind === "dynamic" && describeDynamic(name)) || VARIABLE_TEXT[kind]
 
 function builtInKind(name) {
   if (isDynamicName(name)) return "dynamic"
@@ -34,7 +41,7 @@ function builtInKind(name) {
 
 export function describeReference(name, variables) {
   const kind = variables.has(name) ? null : builtInKind(name)
-  if (kind) return { name, defined: true, value: "", shown: VARIABLE_TEXT[kind], secret: false, kind }
+  if (kind) return { name, defined: true, value: "", shown: builtInText(name, kind), secret: false, kind }
   const defined = variables.has(name)
   const value = defined ? variables.get(name) : ""
   const detail = variables.details?.get(name)
@@ -44,12 +51,17 @@ export function describeReference(name, variables) {
 }
 
 export function openReference(text, caret) {
-  const match = OPEN_REFERENCE.exec(text.slice(0, caret))
-  if (!match) return null
-  return { start: caret - match[0].length, query: match[1] }
+  const before = text.slice(0, caret)
+  const match = OPEN_REFERENCE.exec(before)
+  if (match) return { start: caret - match[0].length, query: match[1] }
+  const word = WORD_BEFORE_CARET.exec(before)[0]
+  return isFakerQuery(word) ? { start: caret - word.length, query: word } : null
 }
 
-const builtInNames = (query) => (query.startsWith(DYNAMIC_PREFIX) ? DYNAMIC_VARIABLES : [])
+function builtInNames(query) {
+  if (isFakerQuery(query)) return FAKER_VARIABLES
+  return query.startsWith(DYNAMIC_PREFIX) ? DYNAMIC_VARIABLES : []
+}
 
 export function suggestNames(variables, query) {
   const needle = query.toLowerCase()

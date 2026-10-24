@@ -1,0 +1,646 @@
+{
+  "variables": [
+    {
+      "name": "$guid",
+      "description": "Random UUID v4"
+    },
+    {
+      "name": "$uuid",
+      "description": "Random UUID v4"
+    },
+    {
+      "name": "$randomUUID",
+      "description": "Random UUID v4"
+    },
+    {
+      "name": "$timestamp",
+      "description": "Unix time in seconds"
+    },
+    {
+      "name": "$timestampMs",
+      "description": "Unix time in milliseconds"
+    },
+    {
+      "name": "$isoTimestamp",
+      "description": "Current UTC time, ISO 8601"
+    },
+    {
+      "name": "$randomInt",
+      "description": "Integer from 0 to 1000"
+    },
+    {
+      "name": "$randomInt(min,max)",
+      "description": "Integer from min to max"
+    },
+    {
+      "name": "$randomBoolean",
+      "description": "true or false"
+    },
+    {
+      "name": "$randomHex",
+      "description": "16 hex characters"
+    },
+    {
+      "name": "$randomAlphaNumeric",
+      "description": "12 letters and digits"
+    },
+    {
+      "name": "$randomColor",
+      "description": "Hex colour such as #3fa2c4"
+    },
+    {
+      "name": "$randomHexColor",
+      "description": "Hex colour such as #3fa2c4"
+    },
+    {
+      "name": "$randomColorName",
+      "description": "Colour name such as teal"
+    },
+    {
+      "name": "$randomAbbreviation",
+      "description": "Tech abbreviation such as JSON"
+    },
+    {
+      "name": "$randomIP",
+      "description": "IPv4 address"
+    },
+    {
+      "name": "$randomIPV6",
+      "description": "IPv6 address"
+    },
+    {
+      "name": "$randomMACAddress",
+      "description": "MAC address"
+    },
+    {
+      "name": "$randomPassword",
+      "description": "15 letters and digits"
+    },
+    {
+      "name": "$randomLocale",
+      "description": "Two-letter language code"
+    },
+    {
+      "name": "$randomUserAgent",
+      "description": "Browser user agent"
+    },
+    {
+      "name": "$randomProtocol",
+      "description": "http or https"
+    },
+    {
+      "name": "$randomSemver",
+      "description": "Semantic version such as 2.5.8"
+    },
+    {
+      "name": "$randomFirstName",
+      "description": "First name"
+    },
+    {
+      "name": "$randomLastName",
+      "description": "Last name"
+    },
+    {
+      "name": "$randomFullName",
+      "description": "First and last name"
+    },
+    {
+      "name": "$randomNamePrefix",
+      "description": "Name prefix such as Dr."
+    },
+    {
+      "name": "$randomNameSuffix",
+      "description": "Name suffix such as PhD"
+    },
+    {
+      "name": "$randomJobArea",
+      "description": "Job area such as Intranet"
+    },
+    {
+      "name": "$randomJobDescriptor",
+      "description": "Job descriptor such as Senior"
+    },
+    {
+      "name": "$randomJobTitle",
+      "description": "Job title"
+    },
+    {
+      "name": "$randomJobType",
+      "description": "Job type such as Manager"
+    },
+    {
+      "name": "$randomPhoneNumber",
+      "description": "Phone number such as 494-261-3424"
+    },
+    {
+      "name": "$randomPhoneNumberExt",
+      "description": "Phone number with extension"
+    },
+    {
+      "name": "$randomCity",
+      "description": "City name"
+    },
+    {
+      "name": "$randomStreetName",
+      "description": "Street name"
+    },
+    {
+      "name": "$randomStreetAddress",
+      "description": "Street address"
+    },
+    {
+      "name": "$randomZipCode",
+      "description": "Five-digit postal code"
+    },
+    {
+      "name": "$randomState",
+      "description": "US state"
+    },
+    {
+      "name": "$randomCountry",
+      "description": "Country name"
+    },
+    {
+      "name": "$randomCountryCode",
+      "description": "Two-letter country code"
+    },
+    {
+      "name": "$randomLatitude",
+      "description": "Latitude"
+    },
+    {
+      "name": "$randomLongitude",
+      "description": "Longitude"
+    },
+    {
+      "name": "$randomTimeZone",
+      "description": "IANA time zone such as Europe/Paris"
+    },
+    {
+      "name": "$randomAvatarImage",
+      "description": "Avatar image URL"
+    },
+    {
+      "name": "$randomImageUrl",
+      "description": "Placeholder image URL"
+    },
+    {
+      "name": "$randomAbstractImage",
+      "description": "Placeholder image URL (abstract)"
+    },
+    {
+      "name": "$randomAnimalsImage",
+      "description": "Placeholder image URL (animals)"
+    },
+    {
+      "name": "$randomBusinessImage",
+      "description": "Placeholder image URL (business)"
+    },
+    {
+      "name": "$randomCatsImage",
+      "description": "Placeholder image URL (cats)"
+    },
+    {
+      "name": "$randomCityImage",
+      "description": "Placeholder image URL (city)"
+    },
+    {
+      "name": "$randomFoodImage",
+      "description": "Placeholder image URL (food)"
+    },
+    {
+      "name": "$randomNightlifeImage",
+      "description": "Placeholder image URL (nightlife)"
+    },
+    {
+      "name": "$randomFashionImage",
+      "description": "Placeholder image URL (fashion)"
+    },
+    {
+      "name": "$randomPeopleImage",
+      "description": "Placeholder image URL (people)"
+    },
+    {
+      "name": "$randomNatureImage",
+      "description": "Placeholder image URL (nature)"
+    },
+    {
+      "name": "$randomSportsImage",
+      "description": "Placeholder image URL (sports)"
+    },
+    {
+      "name": "$randomTransportImage",
+      "description": "Placeholder image URL (transport)"
+    },
+    {
+      "name": "$randomImageDataUri",
+      "description": "SVG image as a data URI",
+      "long": true
+    },
+    {
+      "name": "$randomBankAccount",
+      "description": "Eight-digit bank account number"
+    },
+    {
+      "name": "$randomBankAccountName",
+      "description": "Account name such as Savings Account"
+    },
+    {
+      "name": "$randomBankAccountBic",
+      "description": "BIC bank code"
+    },
+    {
+      "name": "$randomBankAccountIban",
+      "description": "IBAN with valid check digits"
+    },
+    {
+      "name": "$randomCreditCardMask",
+      "description": "Last four card digits"
+    },
+    {
+      "name": "$randomCreditCardNumber",
+      "description": "Test card number that passes the Luhn check"
+    },
+    {
+      "name": "$randomTransactionType",
+      "description": "Transaction type such as payment"
+    },
+    {
+      "name": "$randomCurrencyCode",
+      "description": "Three-letter currency code"
+    },
+    {
+      "name": "$randomCurrencyName",
+      "description": "Currency name"
+    },
+    {
+      "name": "$randomCurrencySymbol",
+      "description": "Currency symbol"
+    },
+    {
+      "name": "$randomBitcoin",
+      "description": "Bitcoin-style address"
+    },
+    {
+      "name": "$randomPrice",
+      "description": "Price from 0.00 to 999.99"
+    },
+    {
+      "name": "$randomCompanyName",
+      "description": "Company name"
+    },
+    {
+      "name": "$randomCompanySuffix",
+      "description": "Company suffix such as LLC"
+    },
+    {
+      "name": "$randomBs",
+      "description": "Business phrase"
+    },
+    {
+      "name": "$randomBsAdjective",
+      "description": "Business adjective"
+    },
+    {
+      "name": "$randomBsBuzz",
+      "description": "Business verb"
+    },
+    {
+      "name": "$randomBsNoun",
+      "description": "Business noun"
+    },
+    {
+      "name": "$randomCatchPhrase",
+      "description": "Catchphrase"
+    },
+    {
+      "name": "$randomCatchPhraseAdjective",
+      "description": "Catchphrase adjective"
+    },
+    {
+      "name": "$randomCatchPhraseDescriptor",
+      "description": "Catchphrase descriptor"
+    },
+    {
+      "name": "$randomCatchPhraseNoun",
+      "description": "Catchphrase noun"
+    },
+    {
+      "name": "$randomDatabaseColumn",
+      "description": "Database column name"
+    },
+    {
+      "name": "$randomDatabaseType",
+      "description": "Database data type"
+    },
+    {
+      "name": "$randomDatabaseCollation",
+      "description": "Database collation"
+    },
+    {
+      "name": "$randomDatabaseEngine",
+      "description": "Database engine"
+    },
+    {
+      "name": "$randomDateFuture",
+      "description": "UTC time in the next year, ISO 8601"
+    },
+    {
+      "name": "$randomDatePast",
+      "description": "UTC time in the past year, ISO 8601"
+    },
+    {
+      "name": "$randomDateRecent",
+      "description": "UTC time in the past day, ISO 8601"
+    },
+    {
+      "name": "$randomDateSoon",
+      "description": "UTC time in the next day, ISO 8601"
+    },
+    {
+      "name": "$randomBirthdate",
+      "description": "Date of birth for an adult, YYYY-MM-DD"
+    },
+    {
+      "name": "$randomWeekday",
+      "description": "Day of the week"
+    },
+    {
+      "name": "$randomMonth",
+      "description": "Month name"
+    },
+    {
+      "name": "$randomDomainName",
+      "description": "Domain name"
+    },
+    {
+      "name": "$randomDomainSuffix",
+      "description": "Domain suffix such as com"
+    },
+    {
+      "name": "$randomDomainWord",
+      "description": "Domain name without suffix"
+    },
+    {
+      "name": "$randomEmail",
+      "description": "Email address on an example domain"
+    },
+    {
+      "name": "$randomExampleEmail",
+      "description": "Email address on an example domain"
+    },
+    {
+      "name": "$randomUserName",
+      "description": "User name"
+    },
+    {
+      "name": "$randomUrl",
+      "description": "URL"
+    },
+    {
+      "name": "$randomFileName",
+      "description": "File name"
+    },
+    {
+      "name": "$randomFileType",
+      "description": "File type such as video"
+    },
+    {
+      "name": "$randomFileExt",
+      "description": "File extension"
+    },
+    {
+      "name": "$randomCommonFileName",
+      "description": "File name with a common extension"
+    },
+    {
+      "name": "$randomCommonFileType",
+      "description": "Common file type"
+    },
+    {
+      "name": "$randomCommonFileExt",
+      "description": "Common file extension such as png"
+    },
+    {
+      "name": "$randomFilePath",
+      "description": "File path"
+    },
+    {
+      "name": "$randomDirectoryPath",
+      "description": "Directory path"
+    },
+    {
+      "name": "$randomMimeType",
+      "description": "MIME type"
+    },
+    {
+      "name": "$randomProduct",
+      "description": "Product such as Chair"
+    },
+    {
+      "name": "$randomProductAdjective",
+      "description": "Product adjective"
+    },
+    {
+      "name": "$randomProductMaterial",
+      "description": "Product material"
+    },
+    {
+      "name": "$randomProductName",
+      "description": "Full product name"
+    },
+    {
+      "name": "$randomDepartment",
+      "description": "Shop department"
+    },
+    {
+      "name": "$randomNoun",
+      "description": "Tech noun"
+    },
+    {
+      "name": "$randomVerb",
+      "description": "Tech verb"
+    },
+    {
+      "name": "$randomIngverb",
+      "description": "Tech verb ending in -ing"
+    },
+    {
+      "name": "$randomAdjective",
+      "description": "Tech adjective"
+    },
+    {
+      "name": "$randomWord",
+      "description": "Word"
+    },
+    {
+      "name": "$randomWords",
+      "description": "Two to four words"
+    },
+    {
+      "name": "$randomPhrase",
+      "description": "Tech phrase"
+    },
+    {
+      "name": "$randomLoremWord",
+      "description": "Lorem ipsum word"
+    },
+    {
+      "name": "$randomLoremWords",
+      "description": "Three lorem ipsum words"
+    },
+    {
+      "name": "$randomLoremSentence",
+      "description": "Lorem ipsum sentence"
+    },
+    {
+      "name": "$randomLoremSentences",
+      "description": "Two to six lorem ipsum sentences",
+      "long": true
+    },
+    {
+      "name": "$randomLoremParagraph",
+      "description": "Lorem ipsum paragraph",
+      "long": true
+    },
+    {
+      "name": "$randomLoremParagraphs",
+      "description": "Three lorem ipsum paragraphs on one line",
+      "long": true
+    },
+    {
+      "name": "$randomLoremText",
+      "description": "Lorem ipsum text of random length",
+      "long": true
+    },
+    {
+      "name": "$randomLoremSlug",
+      "description": "Lorem ipsum URL slug"
+    },
+    {
+      "name": "$randomLoremLines",
+      "description": "One to five lorem ipsum sentences",
+      "long": true
+    },
+    {
+      "name": "$file(path)",
+      "description": "Text of a file, read when the request is sent (desktop app and CLI)"
+    },
+    {
+      "name": "$fileBase64(path)",
+      "description": "A file as base64, read when the request is sent (desktop app and CLI)"
+    }
+  ],
+  "fakerAliases": {
+    "$faker.string.uuid": "$randomUUID",
+    "$faker.string.alphanumeric": "$randomAlphaNumeric",
+    "$faker.string.hexadecimal": "$randomHex",
+    "$faker.number.int": "$randomInt",
+    "$faker.datatype.boolean": "$randomBoolean",
+    "$faker.color.human": "$randomColorName",
+    "$faker.color.rgb": "$randomHexColor",
+    "$faker.person.firstName": "$randomFirstName",
+    "$faker.person.lastName": "$randomLastName",
+    "$faker.person.fullName": "$randomFullName",
+    "$faker.person.prefix": "$randomNamePrefix",
+    "$faker.person.suffix": "$randomNameSuffix",
+    "$faker.person.jobTitle": "$randomJobTitle",
+    "$faker.person.jobArea": "$randomJobArea",
+    "$faker.person.jobDescriptor": "$randomJobDescriptor",
+    "$faker.person.jobType": "$randomJobType",
+    "$faker.phone.number": "$randomPhoneNumber",
+    "$faker.location.city": "$randomCity",
+    "$faker.location.street": "$randomStreetName",
+    "$faker.location.streetAddress": "$randomStreetAddress",
+    "$faker.location.zipCode": "$randomZipCode",
+    "$faker.location.state": "$randomState",
+    "$faker.location.country": "$randomCountry",
+    "$faker.location.countryCode": "$randomCountryCode",
+    "$faker.location.latitude": "$randomLatitude",
+    "$faker.location.longitude": "$randomLongitude",
+    "$faker.location.timeZone": "$randomTimeZone",
+    "$faker.location.locale": "$randomLocale",
+    "$faker.internet.email": "$randomEmail",
+    "$faker.internet.exampleEmail": "$randomExampleEmail",
+    "$faker.internet.userName": "$randomUserName",
+    "$faker.internet.password": "$randomPassword",
+    "$faker.internet.url": "$randomUrl",
+    "$faker.internet.domainName": "$randomDomainName",
+    "$faker.internet.domainSuffix": "$randomDomainSuffix",
+    "$faker.internet.domainWord": "$randomDomainWord",
+    "$faker.internet.ip": "$randomIP",
+    "$faker.internet.ipv4": "$randomIP",
+    "$faker.internet.ipv6": "$randomIPV6",
+    "$faker.internet.mac": "$randomMACAddress",
+    "$faker.internet.protocol": "$randomProtocol",
+    "$faker.internet.userAgent": "$randomUserAgent",
+    "$faker.internet.color": "$randomHexColor",
+    "$faker.system.semver": "$randomSemver",
+    "$faker.system.fileName": "$randomFileName",
+    "$faker.system.commonFileName": "$randomCommonFileName",
+    "$faker.system.fileType": "$randomFileType",
+    "$faker.system.commonFileType": "$randomCommonFileType",
+    "$faker.system.fileExt": "$randomFileExt",
+    "$faker.system.commonFileExt": "$randomCommonFileExt",
+    "$faker.system.filePath": "$randomFilePath",
+    "$faker.system.directoryPath": "$randomDirectoryPath",
+    "$faker.system.mimeType": "$randomMimeType",
+    "$faker.image.avatar": "$randomAvatarImage",
+    "$faker.image.url": "$randomImageUrl",
+    "$faker.image.dataUri": "$randomImageDataUri",
+    "$faker.finance.accountNumber": "$randomBankAccount",
+    "$faker.finance.accountName": "$randomBankAccountName",
+    "$faker.finance.creditCardNumber": "$randomCreditCardNumber",
+    "$faker.finance.bic": "$randomBankAccountBic",
+    "$faker.finance.iban": "$randomBankAccountIban",
+    "$faker.finance.transactionType": "$randomTransactionType",
+    "$faker.finance.currencyCode": "$randomCurrencyCode",
+    "$faker.finance.currencyName": "$randomCurrencyName",
+    "$faker.finance.currencySymbol": "$randomCurrencySymbol",
+    "$faker.finance.bitcoinAddress": "$randomBitcoin",
+    "$faker.finance.amount": "$randomPrice",
+    "$faker.company.name": "$randomCompanyName",
+    "$faker.company.catchPhrase": "$randomCatchPhrase",
+    "$faker.company.catchPhraseAdjective": "$randomCatchPhraseAdjective",
+    "$faker.company.catchPhraseDescriptor": "$randomCatchPhraseDescriptor",
+    "$faker.company.catchPhraseNoun": "$randomCatchPhraseNoun",
+    "$faker.company.buzzPhrase": "$randomBs",
+    "$faker.company.buzzAdjective": "$randomBsAdjective",
+    "$faker.company.buzzVerb": "$randomBsBuzz",
+    "$faker.company.buzzNoun": "$randomBsNoun",
+    "$faker.database.column": "$randomDatabaseColumn",
+    "$faker.database.type": "$randomDatabaseType",
+    "$faker.database.collation": "$randomDatabaseCollation",
+    "$faker.database.engine": "$randomDatabaseEngine",
+    "$faker.date.past": "$randomDatePast",
+    "$faker.date.future": "$randomDateFuture",
+    "$faker.date.recent": "$randomDateRecent",
+    "$faker.date.soon": "$randomDateSoon",
+    "$faker.date.birthdate": "$randomBirthdate",
+    "$faker.date.month": "$randomMonth",
+    "$faker.date.weekday": "$randomWeekday",
+    "$faker.commerce.price": "$randomPrice",
+    "$faker.commerce.product": "$randomProduct",
+    "$faker.commerce.productAdjective": "$randomProductAdjective",
+    "$faker.commerce.productMaterial": "$randomProductMaterial",
+    "$faker.commerce.productName": "$randomProductName",
+    "$faker.commerce.department": "$randomDepartment",
+    "$faker.hacker.abbreviation": "$randomAbbreviation",
+    "$faker.hacker.adjective": "$randomAdjective",
+    "$faker.hacker.noun": "$randomNoun",
+    "$faker.hacker.verb": "$randomVerb",
+    "$faker.hacker.ingverb": "$randomIngverb",
+    "$faker.hacker.phrase": "$randomPhrase",
+    "$faker.word.sample": "$randomWord",
+    "$faker.word.words": "$randomWords",
+    "$faker.lorem.word": "$randomLoremWord",
+    "$faker.lorem.words": "$randomLoremWords",
+    "$faker.lorem.sentence": "$randomLoremSentence",
+    "$faker.lorem.sentences": "$randomLoremSentences",
+    "$faker.lorem.paragraph": "$randomLoremParagraph",
+    "$faker.lorem.paragraphs": "$randomLoremParagraphs",
+    "$faker.lorem.text": "$randomLoremText",
+    "$faker.lorem.slug": "$randomLoremSlug",
+    "$faker.lorem.lines": "$randomLoremLines"
+  }
+}

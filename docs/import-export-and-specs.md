@@ -109,11 +109,11 @@ Imports are untrusted input, as described in the project notes:
 
 Scripts and OAuth 2.0 settings are kept when you import them, but you decide first. If the import contains any request, folder or collection setting that carries them, Gostman asks **Import scripts and sign-in settings?** with the number of items. Choose **Import them** to keep them. Cancel to import everything else without them.
 
-In a folder workspace, imported items that carry scripts, OAuth 2.0 settings or local MCP commands stay restricted until you trust the folder, see [Collections, tabs and Git](collections-and-git.md).
+In a folder workspace, imported items that carry scripts, OAuth 2.0 settings, local MCP commands or file reads stay restricted until you trust the folder, see [Collections, tabs and Git](collections-and-git.md).
 
 ### Share links
 
-Pasting a share link, or choosing a share file, shows a preview with the requests, folders and environments. A share protected with a passphrase asks for it, and a file sent without its key asks for the key. Variables you already have keep your values. Shared imports go through the same prompt for scripts, OAuth 2.0 settings and local MCP commands. Creating shares is covered in [Sharing and documentation](sharing-and-docs.md).
+Pasting a share link, or choosing a share file, shows a preview with the requests, folders and environments. A share protected with a passphrase asks for it, and a file sent without its key asks for the key. Variables you already have keep your values. Shared imports go through the same prompt for scripts, OAuth 2.0 settings, local MCP commands and file reads. Creating shares is covered in [Sharing and documentation](sharing-and-docs.md).
 
 ## Exporting
 
@@ -206,4 +206,4 @@ A link can ask Gostman to download a published collection or spec and import it.
 
 The builder refuses addresses that are not valid web addresses, are longer than 2,048 characters, contain a user name or password, or do not use `https`.
 
-When someone opens the link, the **Open from a link** dialog shows the source host and address and a warning to continue only if they trust the sender. Nothing is downloaded until they choose **Download**, and nothing is imported until they choose **Import**. After the download, the dialog shows the detected format, the counts, and how many items carry scripts, OAuth 2.0 settings or local MCP commands. Those items are asked about before import, and imported folders stay restricted until you trust them. The link formats, size limits and restrictions are in [Sharing and documentation](sharing-and-docs.md).
+When someone opens the link, the **Open from a link** dialog shows the source host and address and a warning to continue only if they trust the sender. Nothing is downloaded until they choose **Download**, and nothing is imported until they choose **Import**. After the download, the dialog shows the detected format, the counts, and how many items carry scripts, OAuth 2.0 settings, local MCP commands or file reads. Those items are asked about before import, and imported folders stay restricted until you trust them. The link formats, size limits and restrictions are in [Sharing and documentation](sharing-and-docs.md).

@@ -65,6 +65,9 @@ type substitution struct {
 	variables map[string]string
 	budget    int
 	exceeded  bool
+	files     FileReader
+	read      map[string]string
+	err       error
 }
 
 func newSubstitution(variables string) (*substitution, error) {
@@ -75,7 +78,15 @@ func newSubstitution(variables string) (*substitution, error) {
 	return &substitution{variables: parsed, budget: maxEncodedBody}, nil
 }
 
-func (s *substitution) overflow() error {
+func (s *substitution) readingFiles(files FileReader) {
+	s.files = files
+	s.read = map[string]string{}
+}
+
+func (s *substitution) failure() error {
+	if s.err != nil {
+		return s.err
+	}
 	if s.exceeded {
 		return fmt.Errorf("the request is larger than 10 MB once variables are filled in")
 	}
@@ -98,7 +109,29 @@ func (s *substitution) lookup(match string) (string, bool) {
 	if value, ok := s.resolve(name); ok {
 		return value, true
 	}
+	if reference, ok := parseFileReference(name); ok {
+		return s.file(name, reference)
+	}
 	return dynamicValue(name)
+}
+
+func (s *substitution) file(name string, reference fileReference) (string, bool) {
+	if s.files == nil {
+		return "", false
+	}
+	if value, ok := s.read[name]; ok {
+		return value, true
+	}
+	data, err := s.files(reference.path)
+	if err != nil {
+		if s.err == nil {
+			s.err = err
+		}
+		return "", false
+	}
+	value := reference.encode(data)
+	s.read[name] = value
+	return value, true
 }
 
 func (s *substitution) sizeOf(match string) (int, bool) {
@@ -106,7 +139,11 @@ func (s *substitution) sizeOf(match string) (int, bool) {
 	if value, ok := s.resolve(name); ok {
 		return len(value), true
 	}
-	return dynamicSizeBound, isDynamicName(name)
+	if reference, ok := parseFileReference(name); ok {
+		value, found := s.file(name, reference)
+		return len(value), found
+	}
+	return generatedSizeBound(name), isDynamicName(name)
 }
 
 func (s *substitution) expandedSize(input string) int {

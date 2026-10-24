@@ -25,6 +25,7 @@ type Options struct {
 	Capture       bool
 	StreamTimeout time.Duration
 	Network       *engine.Network
+	Files         engine.FileReader
 }
 
 func identify(request Request, folder string) Result {
@@ -94,7 +95,7 @@ func pause(ctx context.Context, delay time.Duration) {
 }
 
 func Run(ctx context.Context, stored Collection, options Options, observe func(Result)) (Report, error) {
-	session, err := NewSession(engine.Policy{Network: options.Network})
+	session, err := NewSession(engine.Policy{Network: options.Network, ReadFile: options.Files})
 	if err != nil {
 		return Report{}, err
 	}

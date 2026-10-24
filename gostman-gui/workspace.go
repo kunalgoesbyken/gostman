@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/workspace"
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -18,6 +19,7 @@ const (
 	missingFolder   = "this folder no longer exists"
 	noFolderChosen  = "choose a folder first"
 	fallbackNotice  = "The folder %s could not be opened: %v. The collection saved on this computer is shown instead."
+	untrustedFiles  = "this folder is not trusted yet, so its requests cannot read files; trust the folder first"
 )
 
 type WorkspaceStatus struct {
@@ -300,6 +302,21 @@ func (a *App) SaveCollectionToFolder(path string) (WorkspaceStatus, error) {
 		return WorkspaceStatus{}, err
 	}
 	return activate(folder)
+}
+
+func workspaceFiles() engine.FileReader {
+	store, isFolder := storage.current().(folderStore)
+	if !isFolder {
+		return engine.FolderFiles("")
+	}
+	root := store.folder.Root()
+	read := engine.FolderFiles(root)
+	return func(path string) ([]byte, error) {
+		if memory, err := recallWorkspace(root); err != nil || !memory.Trusted {
+			return nil, errors.New(untrustedFiles)
+		}
+		return read(path)
+	}
 }
 
 func (a *App) TrustWorkspace() error {

@@ -8,12 +8,11 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 )
 
 const (
 	promptPrefix       = "?"
-	dynamicSizeBound   = 64
+	dynamicSizeBound   = 256
 	maxRandomIntSpan   = 1 << 31
 	defaultRandomLimit = 1000
 	hexDigits          = "0123456789abcdef"
@@ -21,35 +20,6 @@ const (
 )
 
 var randomIntRangeRe = regexp.MustCompile(`^\$randomInt\(\s*(-?\d+)\s*,\s*(-?\d+)\s*\)$`)
-
-var (
-	firstNames = []string{"Ada", "Alan", "Grace", "Linus", "Margaret", "Dennis", "Barbara", "Ken", "Radia", "Edsger", "Hedy", "Tim"}
-	lastNames  = []string{"Lovelace", "Turing", "Hopper", "Torvalds", "Hamilton", "Ritchie", "Liskov", "Thompson", "Perlman", "Dijkstra", "Lamarr", "Berners"}
-	words      = []string{"amber", "breeze", "cobalt", "dune", "ember", "fjord", "glacier", "harbor", "indigo", "juniper", "kelp", "lagoon", "meadow", "nectar", "orchid", "prairie"}
-	mailHosts  = []string{"example.com", "example.org", "example.net"}
-)
-
-var dynamicGenerators = map[string]func() string{
-	"$guid":               newGUID,
-	"$uuid":               newGUID,
-	"$timestamp":          func() string { return strconv.FormatInt(time.Now().Unix(), 10) },
-	"$timestampMs":        func() string { return strconv.FormatInt(time.Now().UnixMilli(), 10) },
-	"$isoTimestamp":       func() string { return time.Now().UTC().Format("2006-01-02T15:04:05.000Z") },
-	"$randomInt":          func() string { return strconv.Itoa(rand.IntN(defaultRandomLimit + 1)) },
-	"$randomBoolean":      func() string { return strconv.FormatBool(rand.IntN(2) == 1) },
-	"$randomHex":          func() string { return randomFrom(hexDigits, 16) },
-	"$randomAlphaNumeric": func() string { return randomFrom(alphaNumerics, 12) },
-	"$randomFirstName":    func() string { return pick(firstNames) },
-	"$randomLastName":     func() string { return pick(lastNames) },
-	"$randomFullName":     func() string { return pick(firstNames) + " " + pick(lastNames) },
-	"$randomUserName":     func() string { return strings.ToLower(pick(firstNames)) + strconv.Itoa(rand.IntN(1000)) },
-	"$randomEmail":        randomEmail,
-	"$randomWord":         func() string { return pick(words) },
-	"$randomIP": func() string {
-		return fmt.Sprintf("%d.%d.%d.%d", 1+rand.IntN(223), rand.IntN(256), rand.IntN(256), 1+rand.IntN(254))
-	},
-	"$randomColor": func() string { return "#" + randomFrom(hexDigits, 6) },
-}
 
 type Expansion struct {
 	substitution *substitution
@@ -85,7 +55,7 @@ func (e *Expansion) Headers(raw string, auth Auth) ([]HeaderEntry, error) {
 }
 
 func (e *Expansion) Err() error {
-	return e.substitution.overflow()
+	return e.substitution.failure()
 }
 
 func PlaceholderSpans(text string) [][]int {
@@ -139,14 +109,12 @@ func randomIntBetween(low, high int64) (string, bool) {
 }
 
 func isDynamicName(name string) bool {
-	if _, ok := dynamicGenerators[name]; ok {
-		return true
-	}
-	return randomIntRangeRe.MatchString(name)
+	_, ok := generatorOf(name)
+	return ok || randomIntRangeRe.MatchString(name)
 }
 
 func dynamicValue(name string) (string, bool) {
-	if generate, ok := dynamicGenerators[name]; ok {
+	if generate, ok := generatorOf(name); ok {
 		return generate(), true
 	}
 	if found := randomIntRangeRe.FindStringSubmatch(name); found != nil {

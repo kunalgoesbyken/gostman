@@ -1,4 +1,4 @@
-import { NO_AUTH, NO_SCRIPTS, hasActiveContent } from './activeContent'
+import { NO_AUTH, NO_SCRIPTS, hasActiveContent, withoutFileContent } from './activeContent'
 import { FOLDER_SETTINGS_TEXT as TEXT } from './folderSettingsText'
 import { AUTH_OAUTH2, normalizeAuth } from './request'
 import { parseRows, countSentRows } from './rows'
@@ -63,6 +63,6 @@ export const isBlankScope = (settings) => JSON.stringify(normalizeScopeSettings(
 export const hasActiveSettings =(raw) => hasActiveContent(normalizeScopeSettings(raw))
 
 export function withoutActiveSettings(raw) {
-  const settings = normalizeScopeSettings(raw)
+  const settings = withoutFileContent(normalizeScopeSettings(raw))
   return { ...raw, ...settings, ...NO_SCRIPTS, auth: settings.auth.type === AUTH_OAUTH2 ? normalizeAuth(NO_AUTH) : settings.auth }
 }

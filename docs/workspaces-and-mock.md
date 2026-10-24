@@ -10,7 +10,7 @@ The control next to the logo shows where the collection lives. **Open folder** k
 - OAuth tokens, cookies, history, network settings and open tabs are never written to the folder.
 - Values typed into environments and auth fields are written as typed. Keep secrets in an environment file that Git ignores, or pass them at run time.
 - After a `git pull`, choose **Reload from disk**. Files that cannot be read are listed and left untouched.
-- A folder you did not create opens with its scripts, OAuth 2.0 settings and local MCP commands switched off until you choose **Trust this folder**.
+- A folder you did not create opens with its scripts, OAuth 2.0 settings, local MCP commands and file reads switched off until you choose **Trust this folder**.
 
 ## Examples and the mock server (desktop)
 

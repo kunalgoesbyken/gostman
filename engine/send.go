@@ -35,6 +35,14 @@ type Policy struct {
 	MaxStreamDuration time.Duration
 	MinStreamRetry    time.Duration
 	RunCommands       bool
+	ReadFile          FileReader
+}
+
+func (p Policy) fileReader() FileReader {
+	if p.ReadFile == nil {
+		return refuseFiles
+	}
+	return p.ReadFile
 }
 
 func (p Policy) refusal(host string) error {
@@ -102,7 +110,7 @@ func newExchange(ctx context.Context, r Request, policy Policy, timeline *record
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	prepared, err := Prepare(r)
+	prepared, err := prepare(r, policy.fileReader())
 	if err != nil {
 		return nil, nil, nil, err
 	}

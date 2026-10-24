@@ -18,7 +18,7 @@ export const OPEN_LINK_TEXT = {
   detected: (format) => `Detected: ${format}`,
   downloadedFrom: (host) => `Downloaded from ${host}`,
   unknownFormat: 'Gostman could not tell what kind of file this is.',
-  activeNote: (count) => `${count} carry scripts, OAuth 2.0 settings or local MCP commands. You are asked before those are imported, and imported folders stay restricted until you trust them.`,
+  activeNote: (count) => `${count} carry scripts, OAuth 2.0 settings, local MCP commands or file reads. You are asked before those are imported, and imported folders stay restricted until you trust them.`,
   badgeAlt: 'Open in Gostman',
   builderTitle: 'Open in Gostman link',
   builderHint: 'Paste the address of a collection or spec published online (a Postman collection, OpenAPI file, Insomnia, HAR or Gostman export). The links below let readers of your README open it in Gostman after a confirmation.',

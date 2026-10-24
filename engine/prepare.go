@@ -23,6 +23,10 @@ const (
 )
 
 func Prepare(r Request) (Prepared, error) {
+	return prepare(r, nil)
+}
+
+func prepare(r Request, files FileReader) (Prepared, error) {
 	r, err := Resolve(r)
 	if err != nil {
 		return Prepared{}, err
@@ -30,6 +34,9 @@ func Prepare(r Request) (Prepared, error) {
 	expansion, err := newSubstitution(r.Variables)
 	if err != nil {
 		return Prepared{}, err
+	}
+	if files != nil {
+		expansion.readingFiles(files)
 	}
 	substitute := expansion.apply
 
@@ -68,7 +75,7 @@ func Prepare(r Request) (Prepared, error) {
 		return Prepared{}, err
 	}
 	headers, body = signRequest(r.Auth, substitute, method, target, headers, body)
-	if err := expansion.overflow(); err != nil {
+	if err := expansion.failure(); err != nil {
 		return Prepared{}, err
 	}
 

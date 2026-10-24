@@ -134,6 +134,13 @@ func (l loading) isAdHoc() bool {
 	return len(l.positional) == adHocArguments
 }
 
+func (l loading) fileRoot() string {
+	if l.isAdHoc() {
+		return currentFolder
+	}
+	return l.positional[0]
+}
+
 func (l loading) collection() (runner.Collection, error) {
 	if l.isAdHoc() {
 		return runner.Collection{}, nil
@@ -197,7 +204,7 @@ func (l loading) execute(stdout, stderr io.Writer) int {
 	if err != nil {
 		return complain(stderr, err)
 	}
-	client, err := agent.NewClient(engine.Policy{Network: l.network})
+	client, err := agent.NewClient(engine.Policy{Network: l.network, ReadFile: filesBeside(l.fileRoot())})
 	if err != nil {
 		return complain(stderr, err)
 	}

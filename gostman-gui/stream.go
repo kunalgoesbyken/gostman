@@ -19,7 +19,7 @@ func (a *App) StreamRequest(id string, request engine.Request) engine.Response {
 	a.track(id, cancel)
 	defer a.release(id)
 
-	return engine.Stream(ctx, request, a.policy(), func(messages []engine.StreamMessage) {
+	return engine.Stream(ctx, request, a.sendPolicy(), func(messages []engine.StreamMessage) {
 		wailsruntime.EventsEmit(a.ctx, streamEventName, StreamBatch{StreamId: id, Messages: messages})
 	})
 }

@@ -86,6 +86,12 @@ func (a *App) policy() engine.Policy {
 	return engine.Policy{Network: a.network, RevealSecrets: true}
 }
 
+func (a *App) sendPolicy() engine.Policy {
+	policy := a.policy()
+	policy.ReadFile = workspaceFiles()
+	return policy
+}
+
 func (a *App) SaveSettings(settings Settings) error {
 	network, err := buildNetwork(settings)
 	if err != nil {

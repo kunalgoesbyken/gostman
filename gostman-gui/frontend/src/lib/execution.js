@@ -28,7 +28,7 @@ const UNUSABLE_ADDRESS = 'The address cannot be used by a script.'
 const SEND_LIMIT = `A script may call sendRequest ${MAX_SENDS} times.`
 const PRE_REQUEST = 'Pre-request script'
 const POST_RESPONSE = 'Post-response script'
-export const RESTRICTED = 'This folder is not trusted yet, so its scripts, OAuth 2.0 settings and local MCP commands are switched off. Open the folder menu in the header and choose Trust this folder.'
+export const RESTRICTED = 'This folder is not trusted yet, so its scripts, OAuth 2.0 settings, local MCP commands and file reads are switched off. Open the folder menu in the header and choose Trust this folder.'
 
 const store = () => useAppStore.getState()
 const variablesText = (request, answers, referenced) => variableTextFor(store(), request, answers, referenced)

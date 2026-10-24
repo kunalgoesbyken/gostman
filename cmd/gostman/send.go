@@ -100,6 +100,13 @@ func (s sending) collection() (runner.Collection, error) {
 	return runner.Collection{}, nil
 }
 
+func (s sending) fileRoot() string {
+	if s.workspace != "" {
+		return s.workspace
+	}
+	return currentFolder
+}
+
 func (s sending) target(client *agent.Client, stored runner.Collection) (runner.Listed, error) {
 	if namesSavedRequest(s.positional) {
 		return client.Find(stored, s.positional[0])
@@ -122,7 +129,7 @@ func (s sending) prepare() (*agent.Client, runner.Listed, error) {
 	if err != nil {
 		return nil, runner.Listed{}, err
 	}
-	client, err := agent.NewClient(engine.Policy{Network: s.network})
+	client, err := agent.NewClient(engine.Policy{Network: s.network, ReadFile: filesBeside(s.fileRoot())})
 	if err != nil {
 		return nil, runner.Listed{}, err
 	}

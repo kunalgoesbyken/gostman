@@ -286,7 +286,7 @@ func (a *App) SendRequest(id string, request engine.Request) engine.Response {
 	a.track(id, cancel)
 	defer a.release(id)
 
-	return engine.Send(ctx, request, a.policy())
+	return engine.Send(ctx, request, a.sendPolicy())
 }
 
 func (a *App) CancelRequest(id string) {

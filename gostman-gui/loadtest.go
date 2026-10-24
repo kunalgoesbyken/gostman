@@ -47,7 +47,7 @@ func (a *App) RunLoadTest(request engine.Request, config loadtest.Config) (loadt
 	}
 	defer endLoadTest()
 
-	report, err := loadtest.Run(ctx, loadtest.Plan{Config: config, Request: request, Policy: a.policy()}, a.emitLoadTestProgress)
+	report, err := loadtest.Run(ctx, loadtest.Plan{Config: config, Request: request, Policy: a.sendPolicy()}, a.emitLoadTestProgress)
 	if err != nil {
 		return loadtest.Report{}, errors.New(loadtest.Guard(request).Text(err.Error()))
 	}
