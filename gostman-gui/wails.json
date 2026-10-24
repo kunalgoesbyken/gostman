@@ -14,7 +14,7 @@
   "info": {
     "companyName": "Gostman",
     "productName": "Gostman",
-    "productVersion": "1.7.7",
+    "productVersion": "1.7.8",
     "copyright": "Gostman contributors",
     "comments": "An API client for REST, GraphQL, gRPC and WebSocket",
     "protocols": [
