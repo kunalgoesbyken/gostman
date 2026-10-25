@@ -1,3 +1,5 @@
+import { shellWord } from './shellWords'
+
 const quoted = (text) => `"${text}"`
 const plural = (count, one, many) => `${count} ${count === 1 ? one : many}`
 const listed = (names) => names.join(', ')
@@ -235,7 +237,7 @@ export const FLOW_VIEW_TEXT = {
   maxSendsHint: (cap) => `A run stops after this many requests, so a loop without an end cannot run forever (at most ${cap}).`,
   selectHint: 'Select a step to edit it, or use + to add one. Steps run from top to bottom; branches are drawn on the right.',
   problems: (count) => `${count} ${count === 1 ? 'thing needs' : 'things need'} attention before the flow can run`,
-  cli: (name) => `gostman flow run "${name}"`,
+  cli: (name) => `gostman flow run ${shellWord(name)}`,
   cliHint: 'Run it from a terminal or CI in the workspace folder:',
 }
 

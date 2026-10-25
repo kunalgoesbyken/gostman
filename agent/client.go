@@ -126,13 +126,13 @@ func runRedacted(ctx context.Context, stored runner.Collection, options runner.O
 func (c *Client) RunFlow(ctx context.Context, stored runner.Collection, flow workspace.Flow, options runner.Options, watch runner.FlowWatch) (runner.Report, error) {
 	report, err := c.session.RunFlow(ctx, stored, flow, options, runner.FlowWatch{
 		Result: func(result runner.Result) {
-			c.absorbShared()
+			c.absorb()
 			if cleaned, err := redact.Clean(c.guard, result); err == nil && watch.Result != nil {
 				watch.Result(cleaned)
 			}
 		},
 		Step: func(event runner.FlowEvent) {
-			c.absorbShared()
+			c.absorb()
 			if cleaned, err := redact.Clean(c.guard, event); err == nil && watch.Step != nil {
 				watch.Step(cleaned)
 			}

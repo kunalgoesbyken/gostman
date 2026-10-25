@@ -1,18 +1,14 @@
+import { shellQuote, shellWord } from './shellWords'
 import { readStored, writeStored } from './storage'
 import { DEFAULT_PART_TYPE, formContentType, formSegments, isContentType, uploadOf } from './uploadParts'
 
 const CONTENT_TYPE = 'content-type'
-const BARE_SHELL_WORD = /^[A-Za-z0-9_-]+$/
 const CURL_GLOB_CHARACTERS = /[[\]{}]/
 
 const FIRST_PRINTABLE = 0x20
 const C_ESCAPES = { '"': '\\"', '\\': '\\\\', '\n': '\\n', '\r': '\\r', '\t': '\\t' }
 
 const quote = (text) => JSON.stringify(text)
-
-const shellQuote = (text) => `'${text.replaceAll("'", `'\\''`)}'`
-
-const shellWord = (text) => (BARE_SHELL_WORD.test(text) ? text : shellQuote(text))
 
 const singleQuote = (text) => `'${text.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`
 
