@@ -3,7 +3,9 @@ import { AlertTriangle, Play, Redo2, Save, Square, Undo2, Workflow } from "lucid
 import { Button, IconButton } from "../ui/button"
 import { Field } from "../ui/field"
 import { Input } from "../ui/input"
-import { SPLIT_PANES, SectionLabel } from "../ui/panel"
+import { PANE_WIDTH, ResizablePane, SPLIT_PANES, SectionLabel } from "../ui/panel"
+import { EDGE_START } from "../../hooks/usePaneResize"
+import { FLOW_PANE } from "../../lib/layout"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
 import { Textarea } from "../ui/textarea"
 import { FlowCanvas } from "./FlowCanvas"
@@ -242,7 +244,7 @@ export function FlowView({ tab, actions, EditorComponent }) {
             onMove={move}
           />
         </div>
-        <aside aria-label={TEXT.panelLabel} className="flex min-h-0 shrink-0 flex-col border-border max-sm:min-h-0 max-sm:flex-1 max-sm:border-t sm:w-[32rem] sm:max-w-[48%] sm:border-s">
+        <ResizablePane as="aside" pane={FLOW_PANE} edge={EDGE_START} aria-label={TEXT.panelLabel} className={cn(PANE_WIDTH, "flex min-h-0 shrink-0 flex-col border-border max-sm:min-h-0 max-sm:flex-1 max-sm:border-t sm:border-s")}>
           <Tabs value={panel} onValueChange={setPanel} className="flex min-h-0 flex-1 flex-col">
             <div className="flex h-10 shrink-0 items-center border-b border-border px-3">
               <TabsList label={TEXT.panelLabel}>
@@ -267,14 +269,14 @@ export function FlowView({ tab, actions, EditorComponent }) {
                   EditorComponent={EditorComponent}
                 />
               ) : (
-                <FlowSettings flow={flow} problems={problems} index={context.index} requests={catalog} onChange={change} onSelectStep={select} />
+                <FlowSettings flow={flow} problems={problems} index={context.index} requests={catalog} onChange={change} onSelectStep={setSelected} />
               )}
             </TabsContent>
             <TabsContent value={PANEL_RUN} className="flex min-h-0 flex-1 flex-col">
               <FlowRunPanel run={run} canRun={flow.steps.length > 0} onRun={() => actions.run(tab.id)} onReport={() => actions.downloadReport(tab.id)} onSelectStep={select} />
             </TabsContent>
           </Tabs>
-        </aside>
+        </ResizablePane>
       </div>
       {picker && <RequestPicker catalog={catalog} onChoose={chooseRequest} onClose={() => setPicker(null)} />}
     </div>

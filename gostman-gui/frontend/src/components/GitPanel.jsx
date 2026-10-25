@@ -4,7 +4,7 @@ import { Badge } from "./ui/badge"
 import { Button, IconButton } from "./ui/button"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
-import { Notice, SectionLabel } from "./ui/panel"
+import { Notice, PANE_WIDTH, ResizablePane, SectionLabel } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { Textarea } from "./ui/textarea"
 import { ConflictEditor } from "./ConflictEditor"
@@ -12,6 +12,9 @@ import { GitDiffView } from "./GitDiffView"
 import { BranchesTab, HistoryTab, RemotesTab, StashesTab } from "./GitTabs"
 import { TAB_BRANCHES, TAB_CHANGES, TAB_HISTORY, TAB_REMOTES, TAB_STASHES, hasWorktreeChange, isStaged, useGitStore } from "../lib/gitSession"
 import { GIT_TEXT as TEXT } from "../lib/gitText"
+import { EDGE_END } from "../hooks/usePaneResize"
+import { GIT_CHANGES_PANE } from "../lib/layout"
+import { cn } from "../lib/utils"
 import { WORKSPACE_TEXT } from "../lib/workspaceText"
 
 const tabOptions = () => [
@@ -100,7 +103,7 @@ function ChangesTab({ state, selection, diff, conflict, isBusy, actions }) {
 
   return (
     <div className="flex min-h-0 flex-1">
-      <div className="flex min-h-0 w-80 shrink-0 flex-col border-e border-border">
+      <ResizablePane pane={GIT_CHANGES_PANE} edge={EDGE_END} className={cn(PANE_WIDTH, "flex min-h-0 w-80 shrink-0 flex-col border-e border-border")}>
         <div className="min-h-0 flex-1 overflow-y-auto">
           {state.changes.length === 0 && <EmptyState icon={state.merging ? GitMerge : GitBranch} title={state.merging ? TEXT.mergeReady : TEXT.clean} />}
           <ChangeSection title={TEXT.sections.conflicts} changes={conflicts} staged={false} {...shared} />
@@ -121,7 +124,7 @@ function ChangesTab({ state, selection, diff, conflict, isBusy, actions }) {
           isDisabled={isReadOnly}
           onCommit={actions.commit}
         />
-      </div>
+      </ResizablePane>
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         {!selected && <EmptyState icon={GitBranch} title={TEXT.pickFile} />}
         {selected && conflict && <ConflictEditor key={conflict.path} conflict={conflict} isBusy={isReadOnly} onResolve={actions.resolve} />}

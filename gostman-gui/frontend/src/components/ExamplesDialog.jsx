@@ -5,7 +5,9 @@ import { Button, IconButton } from "./ui/button"
 import { DataTable } from "./ui/dataTable"
 import { Dialog, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
-import { SPLIT_LIST, SPLIT_PANES, Toolbar } from "./ui/panel"
+import { ResizablePane, SPLIT_LIST, SPLIT_PANES, Toolbar } from "./ui/panel"
+import { EDGE_END } from "../hooks/usePaneResize"
+import { EXAMPLES_PANE } from "../lib/layout"
 import { SegmentedControl } from "./ui/segmented"
 import { TabCount } from "./ui/tabs"
 import { EditorSkeleton } from "./ui/skeleton"
@@ -156,7 +158,8 @@ export function ExamplesDialog({ request, actions, EditorComponent }) {
       </DialogHeader>
       {selected ? (
         <div className={SPLIT_PANES}>
-          <ul aria-label={EXAMPLES_TEXT.listLabel} className={cn(SPLIT_LIST, "w-56 overflow-y-auto py-1")}>
+          <ResizablePane pane={EXAMPLES_PANE} edge={EDGE_END} className={SPLIT_LIST}>
+          <ul aria-label={EXAMPLES_TEXT.listLabel} className="min-h-0 flex-1 overflow-y-auto py-1">
             {examples.map((example) => (
               <ExampleRow
                 key={example.id}
@@ -167,6 +170,7 @@ export function ExamplesDialog({ request, actions, EditorComponent }) {
               />
             ))}
           </ul>
+          </ResizablePane>
           <ExampleDetail
             key={selected.id}
             example={selected}

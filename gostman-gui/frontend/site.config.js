@@ -8,6 +8,7 @@ import { guidePages } from './src/guides/pages.js'
 import { docFiles, docOutputFile, docPath, docSlug } from './src/docs/manifest.js'
 import { loadDocs } from './site-docs.js'
 import { CLIENT_METADATA_PATH, clientMetadata } from './src/lib/mcpClientMetadata.js'
+import { REPOSITORY } from './src/lib/siteLinks.js'
 
 const DEFAULT_SITE_URL = 'https://gostman.com'
 const SITE_URL_TOKEN = '__SITE_URL__'
@@ -15,6 +16,7 @@ const GUIDE_ENTRY = resolve('src/guides/render.jsx')
 const DOCS_DIR = resolve('../../docs')
 const EMPTY_ROOT = '<div id="root"></div>'
 const IMAGE_FILES = /\.(png|jpe?g|webp)$/
+const STARS_TIMEOUT_MS = 4000
 export const DOCS_ENTRY = 'docs'
 
 export const siteUrl = (process.env.SITE_URL || DEFAULT_SITE_URL).replace(/\/+$/, '')
@@ -90,7 +92,7 @@ async function buildGuideRenderer(bundle) {
     assetNames: 'assets/[name]-[hash]',
     loader: { '.jpg': 'file', '.png': 'file', '.webp': 'file' },
     plugins: [bundledImageUrls(bundle)],
-    define: { 'process.env.NODE_ENV': '"production"' },
+    define: { 'process.env.NODE_ENV': '"production"', __GITHUB_STARS__: siteDefine.__GITHUB_STARS__ },
     logLevel: 'silent',
   })
 
@@ -156,4 +158,19 @@ export function siteMeta() {
   }
 }
 
-export const siteDefine = { __SITE_URL__: JSON.stringify(siteUrl) }
+async function fetchGitHubStars() {
+  const headers = { Accept: 'application/vnd.github+json', 'User-Agent': 'Gostman-Site-Build' }
+  if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`
+  try {
+    const response = await fetch(`https://api.github.com/repos/${REPOSITORY}`, { headers, signal: AbortSignal.timeout(STARS_TIMEOUT_MS) })
+    if (!response.ok) return null
+    const { stargazers_count: stars } = await response.json()
+    return Number.isFinite(stars) ? stars : null
+  } catch {
+    return null
+  }
+}
+
+const githubStars = await fetchGitHubStars()
+
+export const siteDefine = { __SITE_URL__: JSON.stringify(siteUrl), __GITHUB_STARS__: JSON.stringify(githubStars) }

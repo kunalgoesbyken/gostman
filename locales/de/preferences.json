@@ -27,7 +27,8 @@
       "wrapLines": "Lange Zeilen umbrechen",
       "requestTimeout": "Standard-Zeitlimit",
       "confirmCloseTab": "Beim Schließen eines Tabs vor dem Verwerfen ungespeicherter Änderungen fragen",
-      "language": "Sprache"
+      "language": "Sprache",
+      "sidebarViews": "Tabs der Seitenleiste"
     },
     "themes": {
       "system": "System",
@@ -161,6 +162,9 @@
     "languageHelpLink": "Fragen Sie auf GitHub nach",
     "languageTranslate": "Jeder kann auf {{link}} beim Übersetzen helfen.",
     "languageTranslateLink": "Weblate",
-    "accentAdjusted": "Im hellen Modus als {{light}} und im dunklen Modus als {{dark}} dargestellt, damit Text in dieser Farbe lesbar bleibt."
+    "accentAdjusted": "Im hellen Modus als {{light}} und im dunklen Modus als {{dark}} dargestellt, damit Text in dieser Farbe lesbar bleibt.",
+    "sidebarViewsHint": "Legen Sie fest, welche Tabs die Seitenleiste zeigt und in welcher Reihenfolge. Mit einem Rechtsklick auf die Tabs in der Seitenleiste lassen sie sich dort ein- und ausblenden.",
+    "moveViewUp": "{{name}} nach oben",
+    "moveViewDown": "{{name}} nach unten"
   }
 }

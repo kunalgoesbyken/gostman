@@ -8,7 +8,9 @@
     "newRequest": "New request",
     "toggle": "Toggle sidebar",
     "close": "Close sidebar",
-    "resize": "Resize sidebar"
+    "resize": "Resize sidebar",
+    "viewsMenu": "Sidebar tabs",
+    "resetViews": "Show all tabs in the default order"
   },
   "history": {
     "search": "Search history",

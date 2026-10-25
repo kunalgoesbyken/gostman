@@ -10,6 +10,7 @@
     "getDesktopApp": "デスクトップアプリを入手",
     "copy": "コピー",
     "copied": "コピーしました",
-    "ok": "OK"
+    "ok": "OK",
+    "resizePanel": "パネルのサイズを変更"
   }
 }

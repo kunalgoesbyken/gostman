@@ -10,6 +10,7 @@
     "getDesktopApp": "Desktop-App laden",
     "copy": "Kopieren",
     "copied": "Kopiert",
-    "ok": "OK"
+    "ok": "OK",
+    "resizePanel": "Größe des Bereichs ändern"
   }
 }

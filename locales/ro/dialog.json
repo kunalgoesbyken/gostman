@@ -10,6 +10,7 @@
     "getDesktopApp": "Obțineți aplicația desktop",
     "copy": "Copiere",
     "copied": "Copiat",
-    "ok": "OK"
+    "ok": "OK",
+    "resizePanel": "Redimensionează panoul"
   }
 }

@@ -8,7 +8,9 @@
     "newRequest": "Neue Anfrage",
     "toggle": "Seitenleiste ein-/ausblenden",
     "close": "Seitenleiste schließen",
-    "resize": "Größe der Seitenleiste ändern"
+    "resize": "Größe der Seitenleiste ändern",
+    "viewsMenu": "Tabs der Seitenleiste",
+    "resetViews": "Alle Tabs in der Standardreihenfolge anzeigen"
   },
   "history": {
     "search": "Verlauf durchsuchen",

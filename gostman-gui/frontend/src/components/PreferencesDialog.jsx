@@ -5,13 +5,16 @@ import { Checkbox } from "./ui/checkbox"
 import { Combobox } from "./ui/combobox"
 import { Dialog, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
-import { SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
+import { ResizablePane, SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
+import { EDGE_END } from "../hooks/usePaneResize"
+import { PREFERENCES_PANE } from "../lib/layout"
 import { Select } from "./ui/select"
 import { AiSection } from "./preferences/AiSection"
 import { DataSection } from "./preferences/DataSection"
 import { PrivacySection } from "./preferences/PrivacySection"
 import { ChoiceRow, PreferenceRow, optionsOf } from "./preferences/PreferenceRows"
 import { ThemeSection } from "./preferences/ThemeSection"
+import { SidebarViewsGroup } from "./preferences/SidebarViewsGroup"
 import { RichText } from "./ui/richText"
 import { useAppStore } from "../store/appStore"
 import { awaitsRestart, useWindowFrame } from "../hooks/useWindowFrame"
@@ -162,6 +165,7 @@ function AppearanceSection({ preferences, windowFrame }) {
       <ChoiceRow label={fields.density} name="density" options={optionsOf(DENSITIES, PREFERENCES_TEXT.densities)} preferences={preferences} />
       <ChoiceRow label={fields.responseLayout} name="responseLayout" options={optionsOf(RESPONSE_LAYOUTS, PREFERENCES_TEXT.layouts)} preferences={preferences} />
       <SystemTitleBarRow windowFrame={windowFrame} />
+      <SidebarViewsGroup preferences={preferences} />
     </>
   )
 }
@@ -323,12 +327,13 @@ export function PreferencesDialog({ listFonts, windowFrame, onCommand, backups, 
         <DialogTitle>{PREFERENCES_TEXT.title}</DialogTitle>
       </DialogHeader>
       <div className={SPLIT_PANES}>
+        <ResizablePane pane={PREFERENCES_PANE} edge={EDGE_END} className={SPLIT_LIST}>
         <div
           role="tablist"
           aria-label={PREFERENCES_TEXT.sectionsLabel}
           aria-orientation="vertical"
           onKeyDown={(event) => moveFocus(event, SECTION_KEYS)}
-          className={cn(SPLIT_LIST, "w-44 gap-0.5 overflow-y-auto p-2 max-sm:flex-row max-sm:overflow-x-auto max-sm:scrollbar-none")}
+          className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto p-2 max-sm:flex-row max-sm:overflow-x-auto max-sm:scrollbar-none"
         >
           {SECTIONS.map((section) => (
             <SectionTab
@@ -341,6 +346,7 @@ export function PreferencesDialog({ listFonts, windowFrame, onCommand, backups, 
             />
           ))}
         </div>
+        </ResizablePane>
         <div
           key={selected.id}
           role="tabpanel"

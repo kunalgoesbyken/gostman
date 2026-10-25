@@ -8,7 +8,9 @@
     "newRequest": "Nuova richiesta",
     "toggle": "Mostra o nascondi la barra laterale",
     "close": "Chiudi barra laterale",
-    "resize": "Ridimensiona barra laterale"
+    "resize": "Ridimensiona barra laterale",
+    "viewsMenu": "Schede della barra laterale",
+    "resetViews": "Mostra tutte le schede nell’ordine predefinito"
   },
   "history": {
     "search": "Cerca nella cronologia",

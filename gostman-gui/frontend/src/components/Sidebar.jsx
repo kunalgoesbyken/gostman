@@ -1,64 +1,75 @@
 import { memo, useState } from "react"
-import { FolderPlus, ListChecks, Plus, Settings2 } from "lucide-react"
+import { Check, FolderPlus, ListChecks, Plus, RotateCcw, Settings2 } from "lucide-react"
 import { IconButton } from "./ui/button"
-import { Toolbar } from "./ui/panel"
+import { ContextMenu } from "./ui/ContextMenu"
+import { ResizablePane, Toolbar } from "./ui/panel"
 import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { CollectionTree } from "./CollectionTree"
 import { HistoryList } from "./HistoryList"
 import { FlowList } from "./flows/FlowList"
-import { FLOW_TEXT } from "../lib/flowsText"
 import { rootSettingsTitle } from "../lib/inheritance"
-import { SIDEBAR_TEXT } from "../lib/sidebarText"
+import { SIDEBAR_PANE } from "../lib/layout"
+import { SIDEBAR_TEXT, sidebarViewName } from "../lib/sidebarText"
+import { DEFAULT_SIDEBAR_VIEWS, VIEW_COLLECTIONS, VIEW_FLOWS, VIEW_HISTORY, canHideView, visibleViews, withViewVisible } from "../lib/sidebarViews"
+import { updatePreferences, usePreferences } from "../lib/preferences"
 import { cn } from "../lib/utils"
 import { useShortcutLabel } from "../hooks/useShortcuts"
-import { RESIZE_CLOSING, RESIZE_IDLE, useSidebarResize } from "../hooks/useSidebarResize"
+import { EDGE_END } from "../hooks/usePaneResize"
 import { hintWithShortcut } from "../lib/shortcuts"
 import { useAppStore } from "../store/appStore"
 
-const VIEW_COLLECTIONS = "collections"
-const VIEW_HISTORY = "history"
-const VIEW_FLOWS = "flows"
 const VIEW_CLASS = "flex min-h-0 flex-1 flex-col"
 
-function SidebarResizer({ phase, separatorProps }) {
-  return (
-    <div
-      {...separatorProps}
-      aria-label={SIDEBAR_TEXT.resize}
-      data-active={phase !== RESIZE_IDLE || undefined}
-      className="group absolute inset-y-0 -end-1 z-10 flex w-2 cursor-col-resize touch-none justify-center outline-none max-md:hidden"
-    >
-      <span className="h-full w-0.5 transition-colors group-hover:bg-ring group-hover:delay-150 group-focus-visible:bg-ring group-data-[active]:bg-ring" />
-    </div>
-  )
+const Unchecked = ({ className }) => <span aria-hidden="true" className={className} />
+
+function viewMenuItems(views) {
+  const toggles = views.map((entry) => ({
+    label: sidebarViewName(entry.id),
+    icon: entry.visible ? Check : Unchecked,
+    disabled: entry.visible && !canHideView(views, entry.id),
+    keepOpen: true,
+    onSelect: () => updatePreferences({ sidebarViews: withViewVisible(views, entry.id, !entry.visible) }),
+  }))
+  return [...toggles, { label: SIDEBAR_TEXT.resetViews, icon: RotateCcw, onSelect: () => updatePreferences({ sidebarViews: DEFAULT_SIDEBAR_VIEWS }) }]
 }
 
 export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory, activeRequestId, actions }) {
-  const [view, setView] = useState(VIEW_COLLECTIONS)
+  const views = usePreferences().sidebarViews
+  const shown = visibleViews(views)
+  const [chosen, setView] = useState(VIEW_COLLECTIONS)
+  const view = shown.includes(chosen) ? chosen : shown[0]
+  const [menuPosition, setMenuPosition] = useState(null)
   const newRequestShortcut = useShortcutLabel("newRequest")
   const closeSidebar = useAppStore((s) => s.closeSidebar)
   const settingsLabel = useAppStore((s) => rootSettingsTitle(s.workspaceStatus.path))
-  const { asideRef, style, phase, separatorProps } = useSidebarResize(closeSidebar)
 
   return (
-    <aside
-      ref={asideRef}
+    <ResizablePane
+      as="aside"
+      pane={SIDEBAR_PANE}
+      edge={EDGE_END}
+      label={SIDEBAR_TEXT.resize}
+      onClose={closeSidebar}
+      handleClassName="max-md:hidden"
       data-pane="sidebar"
-      style={style}
-      className={cn(
-        "flex w-72 max-w-full shrink-0 flex-col border-e border-border transition-opacity max-md:absolute max-md:inset-y-0 max-md:start-0 max-md:z-30 max-md:bg-background max-md:shadow-lg md:relative md:w-[var(--sidebar-width)]",
-        phase === RESIZE_CLOSING && "opacity-50"
-      )}
+      className="flex w-72 max-w-full shrink-0 flex-col border-e border-border max-md:absolute max-md:inset-y-0 max-md:start-0 max-md:z-30 max-md:bg-background max-md:shadow-lg md:relative md:w-[var(--sidebar-width)]"
     >
       <Tabs value={view} onValueChange={setView} className="flex min-h-0 flex-1 flex-col">
         <Toolbar className="ps-2 pe-1">
-          <TabsList label={SIDEBAR_TEXT.views} className="flex-1 gap-2">
-            <TabsTrigger value={VIEW_COLLECTIONS}>{SIDEBAR_TEXT.collections}</TabsTrigger>
-            <TabsTrigger value={VIEW_FLOWS}>{FLOW_TEXT.sidebarTab}</TabsTrigger>
-            <TabsTrigger value={VIEW_HISTORY}>
-              {SIDEBAR_TEXT.history}
-              {requestHistory.length > 0 && <TabCount>{requestHistory.length}</TabCount>}
-            </TabsTrigger>
+          <TabsList
+            label={SIDEBAR_TEXT.views}
+            className="flex-1 gap-2"
+            onContextMenu={(event) => {
+              event.preventDefault()
+              setMenuPosition({ x: event.clientX, y: event.clientY })
+            }}
+          >
+            {shown.map((id) => (
+              <TabsTrigger key={id} value={id}>
+                {sidebarViewName(id)}
+                {id === VIEW_HISTORY && requestHistory.length > 0 && <TabCount>{requestHistory.length}</TabCount>}
+              </TabsTrigger>
+            ))}
           </TabsList>
           <div className={cn("flex shrink-0 items-center gap-0", view === VIEW_FLOWS && "hidden")}>
             <IconButton label={SIDEBAR_TEXT.runRequests} icon={ListChecks} onClick={() => actions.openRunner()} />
@@ -78,7 +89,7 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
           <HistoryList entries={requestHistory} actions={actions} />
         </TabsContent>
       </Tabs>
-      <SidebarResizer phase={phase} separatorProps={separatorProps} />
-    </aside>
+      {menuPosition && <ContextMenu position={menuPosition} title={SIDEBAR_TEXT.viewsMenu} items={viewMenuItems(views)} onClose={() => setMenuPosition(null)} />}
+    </ResizablePane>
   )
 })

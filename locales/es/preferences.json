@@ -27,7 +27,8 @@
       "wrapLines": "Ajustar líneas largas",
       "requestTimeout": "Tiempo de espera predeterminado",
       "confirmCloseTab": "Preguntar antes de descartar cambios sin guardar al cerrar una pestaña",
-      "language": "Idioma"
+      "language": "Idioma",
+      "sidebarViews": "Pestañas de la barra lateral"
     },
     "themes": {
       "system": "Sistema",
@@ -162,6 +163,9 @@
     "languageHelpLink": "Pregunta en GitHub",
     "languageTranslate": "Cualquiera puede ayudar a traducir en {{link}}.",
     "languageTranslateLink": "Weblate",
-    "accentAdjusted": "Se muestra como {{light}} en modo claro y como {{dark}} en modo oscuro para que el texto de este color siga siendo legible."
+    "accentAdjusted": "Se muestra como {{light}} en modo claro y como {{dark}} en modo oscuro para que el texto de este color siga siendo legible.",
+    "sidebarViewsHint": "Elige qué pestañas muestra la barra lateral y en qué orden. Haz clic derecho en las pestañas de la barra lateral para mostrarlas u ocultarlas allí.",
+    "moveViewUp": "Subir {{name}}",
+    "moveViewDown": "Bajar {{name}}"
   }
 }

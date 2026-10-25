@@ -1,5 +1,5 @@
 import { memo, useState } from "react"
-import { Copy, MoreHorizontal, Pencil, Plus, Sparkles, Trash2, Workflow } from "lucide-react"
+import { Copy, LayoutTemplate, MoreHorizontal, Pencil, Plus, Trash2, Workflow } from "lucide-react"
 import { Button, IconButton } from "../ui/button"
 import { ContextMenu } from "../ui/ContextMenu"
 import { EmptyState } from "../ui/emptyState"
@@ -76,7 +76,7 @@ export const FlowList = memo(function FlowList({ actions }) {
               {FLOW_TEXT.newFlow}
             </Button>
             <Button size="sm" variant="ghost" onClick={() => actions.create(true)}>
-              <Sparkles />
+              <LayoutTemplate />
               {FLOW_TEXT.example}
             </Button>
           </div>
@@ -90,7 +90,7 @@ export const FlowList = memo(function FlowList({ actions }) {
       <Toolbar className="justify-between pe-1.5">
         <span className="text-xs text-muted-foreground">{FLOW_TEXT.count(flows.length)}</span>
         <div className="flex items-center">
-          <IconButton label={FLOW_TEXT.example} icon={Sparkles} onClick={() => actions.create(true)} />
+          <IconButton label={FLOW_TEXT.example} icon={LayoutTemplate} onClick={() => actions.create(true)} />
           <IconButton label={FLOW_TEXT.newFlow} icon={Plus} onClick={() => actions.create(false)} />
         </div>
       </Toolbar>

@@ -8,7 +8,9 @@
     "newRequest": "Nova requisição",
     "toggle": "Alternar barra lateral",
     "close": "Fechar barra lateral",
-    "resize": "Redimensionar barra lateral"
+    "resize": "Redimensionar barra lateral",
+    "viewsMenu": "Abas da barra lateral",
+    "resetViews": "Mostrar todas as abas na ordem padrão"
   },
   "history": {
     "search": "Buscar no histórico",

@@ -10,6 +10,7 @@
     "getDesktopApp": "Scarica l'app desktop",
     "copy": "Copia",
     "copied": "Copiato",
-    "ok": "OK"
+    "ok": "OK",
+    "resizePanel": "Ridimensiona il pannello"
   }
 }

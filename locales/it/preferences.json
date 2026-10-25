@@ -27,7 +27,8 @@
       "wrapLines": "A capo automatico per le righe lunghe",
       "requestTimeout": "Timeout predefinito",
       "confirmCloseTab": "Chiedi prima di scartare le modifiche non salvate alla chiusura di una scheda",
-      "language": "Lingua"
+      "language": "Lingua",
+      "sidebarViews": "Schede della barra laterale"
     },
     "themes": {
       "system": "Sistema",
@@ -162,6 +163,9 @@
     "languageHelpLink": "Chiedi su GitHub",
     "languageTranslate": "Chiunque può aiutare a tradurre su {{link}}.",
     "languageTranslateLink": "Weblate",
-    "accentAdjusted": "Mostrato come {{light}} in modalità chiara e {{dark}} in modalità scura, così il testo di questo colore resta leggibile."
+    "accentAdjusted": "Mostrato come {{light}} in modalità chiara e {{dark}} in modalità scura, così il testo di questo colore resta leggibile.",
+    "sidebarViewsHint": "Scegli quali schede mostra la barra laterale e in che ordine. Fai clic destro sulle schede della barra laterale per mostrarle o nasconderle.",
+    "moveViewUp": "Sposta {{name}} in su",
+    "moveViewDown": "Sposta {{name}} in giù"
   }
 }

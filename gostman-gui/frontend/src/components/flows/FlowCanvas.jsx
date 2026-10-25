@@ -1,9 +1,10 @@
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { Plus } from "lucide-react"
 import { ContextMenu } from "../ui/ContextMenu"
 import { FlowNode, iconOf } from "./FlowNode"
 import { FLOW_CANVAS_TEXT as TEXT, FLOW_KIND_TEXT, FLOW_VIEW_TEXT } from "../../lib/flowsText"
 import { fallsThrough, jumpsOf } from "../../lib/flows/describe"
+import { NODE_RUNNING } from "../../lib/flows/flowRunner"
 import { STEP_FOR_EACH, STEP_KINDS, STEP_REQUEST, indexSteps } from "../../lib/flows/model"
 import { stepTitle } from "../../lib/flows/validate"
 import { ORIENTATION, moveFocus } from "../../lib/rovingFocus"
@@ -222,6 +223,14 @@ export function FlowCanvas({ flow, context, nodes, problems, selected, onSelect,
     observer.observe(container)
     return () => observer.disconnect()
   }, [flow, nodes, selected])
+
+  const runningId = Object.keys(nodes).find((id) => nodes[id].state === NODE_RUNNING)
+  const followedId = runningId || selected
+
+  useEffect(() => {
+    if (!followedId) return
+    containerRef.current.querySelector(`[data-step-node="${CSS.escape(followedId)}"]`)?.scrollIntoView({ block: "nearest", inline: "nearest" })
+  }, [followedId])
 
   const onKeyDown = useCallback((event, id) => {
     if (isRemoveKey(event)) {

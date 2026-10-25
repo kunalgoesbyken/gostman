@@ -8,7 +8,9 @@
     "newRequest": "新建请求",
     "toggle": "切换侧边栏",
     "close": "关闭侧边栏",
-    "resize": "调整侧边栏大小"
+    "resize": "调整侧边栏大小",
+    "viewsMenu": "侧边栏标签页",
+    "resetViews": "按默认顺序显示所有标签页"
   },
   "history": {
     "search": "搜索历史记录",

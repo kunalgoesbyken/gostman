@@ -3,7 +3,9 @@ import { AlertTriangle, Check, ChevronRight, Info, Loader2, X } from "lucide-rea
 import { Button, IconButton } from "./ui/button"
 import { Combobox } from "./ui/combobox"
 import { Input } from "./ui/input"
-import { Notice, Panel, SIDE_PANE, STACKED_TOOLBAR, SectionLabel, Toolbar, ToolbarSummary } from "./ui/panel"
+import { Notice, Panel, ResizablePane, SIDE_PANE, STACKED_TOOLBAR, SectionLabel, Toolbar, ToolbarSummary } from "./ui/panel"
+import { EDGE_START } from "../hooks/usePaneResize"
+import { MCP_SCHEMA_PANE } from "../lib/layout"
 import { Select } from "./ui/select"
 import { EditorSkeleton } from "./ui/skeleton"
 import { isBlankMessage } from "../lib/grpc"
@@ -209,7 +211,7 @@ function SchemaPane({ operation, item, onClose }) {
   const isPrompt = operation === MCP_GET_PROMPT
   const detail = isPrompt ? MCP_TEXT.promptArguments(item) : item.inputSchema
   return (
-    <aside aria-label={MCP_TEXT.schemaTitles[operation]} className={cn(SIDE_PANE, "w-2/5 min-w-52 max-w-md")}>
+    <ResizablePane as="aside" pane={MCP_SCHEMA_PANE} edge={EDGE_START} aria-label={MCP_TEXT.schemaTitles[operation]} className={SIDE_PANE}>
       <Toolbar>
         <SectionLabel className="min-w-0 flex-1 truncate">{MCP_TEXT.schemaTitles[operation]}</SectionLabel>
         <IconButton label={MCP_TEXT.closeSchema} icon={X} onClick={onClose} />
@@ -217,7 +219,7 @@ function SchemaPane({ operation, item, onClose }) {
       <pre dir="ltr" className="min-h-0 flex-1 overflow-auto whitespace-pre-wrap px-3 py-2 font-mono text-xs text-muted-foreground [overflow-wrap:anywhere]">
         {detail || MCP_TEXT.noArguments}
       </pre>
-    </aside>
+    </ResizablePane>
   )
 }
 

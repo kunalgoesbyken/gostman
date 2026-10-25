@@ -8,5 +8,6 @@
   "dialog.copied": "The same button right after the copy worked.",
   "dialog.ok": "Button that acknowledges a message.",
   "dialog.close": "Button that closes a dialog. Verb.",
-  "dialog.save": "Button that saves the changes made in a dialog. Verb."
+  "dialog.save": "Button that saves the changes made in a dialog. Verb.",
+  "dialog.resizePanel": "Accessible label of the drag handle on the edge of a side pane (Flows step panel, GraphQL and MCP panes, dialog lists). It is moved with the mouse or the arrow keys."
 }

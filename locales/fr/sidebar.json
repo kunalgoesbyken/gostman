@@ -8,7 +8,9 @@
     "newRequest": "Nouvelle requête",
     "toggle": "Afficher ou masquer la barre latérale",
     "close": "Fermer la barre latérale",
-    "resize": "Redimensionner la barre latérale"
+    "resize": "Redimensionner la barre latérale",
+    "viewsMenu": "Onglets de la barre latérale",
+    "resetViews": "Afficher tous les onglets dans l’ordre par défaut"
   },
   "history": {
     "search": "Rechercher dans l’historique",

@@ -27,7 +27,8 @@
       "wrapLines": "Wrap long lines",
       "requestTimeout": "Default timeout",
       "confirmCloseTab": "Ask before discarding unsaved changes when closing a tab",
-      "language": "Language"
+      "language": "Language",
+      "sidebarViews": "Sidebar tabs"
     },
     "themes": {
       "system": "System",
@@ -161,6 +162,9 @@
     "languageHelpLink": "Ask on GitHub",
     "languageTranslate": "Anyone can help translate on {{link}}.",
     "languageTranslateLink": "Weblate",
-    "accentAdjusted": "Shown as {{light}} in light mode and {{dark}} in dark mode so text in this colour stays readable."
+    "accentAdjusted": "Shown as {{light}} in light mode and {{dark}} in dark mode so text in this colour stays readable.",
+    "sidebarViewsHint": "Choose which tabs the sidebar shows and in what order. Right-click the tabs in the sidebar to show or hide them there.",
+    "moveViewUp": "Move {{name}} up",
+    "moveViewDown": "Move {{name}} down"
   }
 }

@@ -10,6 +10,7 @@
     "getDesktopApp": "Obtener la app de escritorio",
     "copy": "Copiar",
     "copied": "Copiado",
-    "ok": "Aceptar"
+    "ok": "Aceptar",
+    "resizePanel": "Cambiar el tamaño del panel"
   }
 }

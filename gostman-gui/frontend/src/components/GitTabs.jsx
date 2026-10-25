@@ -5,7 +5,10 @@ import { BrandIcon } from "./ui/brandIcon"
 import { Button, IconButton } from "./ui/button"
 import { EmptyState } from "./ui/emptyState"
 import { Input } from "./ui/input"
-import { Notice, SectionLabel } from "./ui/panel"
+import { Notice, PANE_WIDTH, ResizablePane, SectionLabel } from "./ui/panel"
+import { EDGE_END } from "../hooks/usePaneResize"
+import { GIT_HISTORY_PANE } from "../lib/layout"
+import { cn } from "../lib/utils"
 import { GitDiffView } from "./GitDiffView"
 import { useAppStore } from "../store/appStore"
 import { codeHostOf, pullRequestRemote } from "../lib/codeHost"
@@ -116,7 +119,8 @@ export function HistoryTab({ history, isReadOnly, actions }) {
         <Button type="submit" size="sm" variant="outline">{TEXT.showHistory}</Button>
       </form>
       <div className="flex min-h-0 flex-1">
-        <div className="min-h-0 w-80 shrink-0 overflow-y-auto border-e border-border">
+        <ResizablePane pane={GIT_HISTORY_PANE} edge={EDGE_END} className={cn(PANE_WIDTH, "flex min-h-0 w-80 shrink-0 flex-col border-e border-border")}>
+          <div className="min-h-0 flex-1 overflow-y-auto">
           {history.commits.length === 0 && <EmptyState icon={History} title={TEXT.noCommits} />}
           {history.commits.map((commit) => (
             <button
@@ -130,7 +134,8 @@ export function HistoryTab({ history, isReadOnly, actions }) {
               <span className="block truncate text-muted-foreground">{commit.short} · {commit.author} · {formatDate(commit.date)}</span>
             </button>
           ))}
-        </div>
+          </div>
+        </ResizablePane>
         {history.version && <VersionPane version={history.version} isReadOnly={isReadOnly} onRestore={actions.restoreVersion} />}
       </div>
     </div>

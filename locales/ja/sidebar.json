@@ -8,7 +8,9 @@
     "newRequest": "新しいリクエスト",
     "toggle": "サイドバーの表示を切り替え",
     "close": "サイドバーを閉じる",
-    "resize": "サイドバーのサイズを変更"
+    "resize": "サイドバーのサイズを変更",
+    "viewsMenu": "サイドバーのタブ",
+    "resetViews": "すべてのタブを既定の順序で表示"
   },
   "history": {
     "search": "履歴を検索",

@@ -110,7 +110,7 @@ const cookieColumns = () => [
   { header: COLUMN_TEXT.name, key: 'name', cellClassName: 'text-foreground' },
   { header: COLUMN_TEXT.value, text: (cookie) => cookie.value || NO_VALUE },
   { header: COLUMN_TEXT.domain, text: (cookie) => cookie.domain || NO_VALUE },
-  { header: COLUMN_TEXT.path, width: 'w-16', text: (cookie) => cookie.path || '/' },
+  { header: COLUMN_TEXT.path, width: 'w-24', text: (cookie) => cookie.path || '/' },
   { header: COLUMN_TEXT.expires, text: (cookie) => cookie.expires || RESPONSE_TEXT.sessionCookie },
   { header: COLUMN_TEXT.secure, width: 'w-20', text: (cookie) => flagText(cookie.secure) },
   { header: COLUMN_TEXT.httpOnly, width: 'w-24', text: (cookie) => flagText(cookie.httpOnly) },

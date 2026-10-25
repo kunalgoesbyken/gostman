@@ -4,7 +4,9 @@ import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
-import { SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
+import { ResizablePane, SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
+import { EDGE_END } from "../hooks/usePaneResize"
+import { SPEC_PANE } from "../lib/layout"
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs"
 import { VirtualList } from "./ui/VirtualList"
 import { SkeletonLines } from "./ui/skeleton"
@@ -226,7 +228,7 @@ export function SpecViewer({ dialog, actions, onClose }) {
         )}
         {summary.value && tab !== TAB_LINT && (
           <div className={SPLIT_PANES}>
-            <div className={cn(SPLIT_LIST, "w-72 max-sm:h-2/5")}>
+            <ResizablePane pane={SPEC_PANE} edge={EDGE_END} className={cn(SPLIT_LIST, "max-sm:h-2/5")}>
               <SearchField value={query} onChange={setQuery} placeholder={isOperations ? SPEC_TEXT.searchOperations : SPEC_TEXT.searchModels} />
               <div className="min-h-0 flex-1">
                 {isOperations ? (
@@ -237,7 +239,7 @@ export function SpecViewer({ dialog, actions, onClose }) {
                   <ModelList names={summary.value.schemas} query={query} selected={modelName} onSelect={setModelName} />
                 )}
               </div>
-            </div>
+            </ResizablePane>
             <div className="min-w-0 flex-1 overflow-y-auto">
               {isOperations ? (
                 <Status state={detail}>

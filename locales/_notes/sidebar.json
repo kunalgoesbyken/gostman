@@ -11,5 +11,7 @@
   "history.sentAgo.hours": "Very short age label: hours ago, for example 3h.",
   "history.sentAgo.days": "Very short age label: days ago, for example 2d.",
   "history.sentAgoSpoken": "Spoken version of the short age label for screen readers.",
-  "history.sentAgoSpoken.date": "{{date}} is a formatted date."
+  "history.sentAgoSpoken.date": "{{date}} is a formatted date.",
+  "sidebar.viewsMenu": "Title of the menu opened by right-clicking the sidebar tabs (Collections, Flows, History).",
+  "sidebar.resetViews": "Menu item that shows every sidebar tab again in the original order."
 }

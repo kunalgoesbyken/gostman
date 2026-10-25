@@ -27,7 +27,8 @@
       "wrapLines": "Zawijaj długie wiersze",
       "requestTimeout": "Domyślny limit czasu",
       "confirmCloseTab": "Pytaj przed odrzuceniem niezapisanych zmian przy zamykaniu karty",
-      "language": "Język"
+      "language": "Język",
+      "sidebarViews": "Karty panelu bocznego"
     },
     "themes": {
       "system": "Systemowy",
@@ -163,6 +164,9 @@
     "languageHelpLink": "Napisz na GitHubie",
     "languageTranslate": "Każdy może pomóc w tłumaczeniu na {{link}}.",
     "languageTranslateLink": "Weblate",
-    "accentAdjusted": "Pokazywany jako {{light}} w trybie jasnym i {{dark}} w trybie ciemnym, aby tekst w tym kolorze pozostał czytelny."
+    "accentAdjusted": "Pokazywany jako {{light}} w trybie jasnym i {{dark}} w trybie ciemnym, aby tekst w tym kolorze pozostał czytelny.",
+    "sidebarViewsHint": "Wybierz, które karty pokazuje panel boczny i w jakiej kolejności. Kliknij prawym przyciskiem karty w panelu bocznym, aby je tam pokazać lub ukryć.",
+    "moveViewUp": "Przesuń w górę: {{name}}",
+    "moveViewDown": "Przesuń w dół: {{name}}"
   }
 }

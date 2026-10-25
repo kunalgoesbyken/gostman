@@ -27,7 +27,8 @@
       "wrapLines": "Încadrare linii lungi",
       "requestTimeout": "Timeout implicit",
       "confirmCloseTab": "Întreabă înainte de a renunța la modificările nesalvate la închiderea unei file",
-      "language": "Limbă"
+      "language": "Limbă",
+      "sidebarViews": "File din bara laterală"
     },
     "themes": {
       "system": "Sistem",
@@ -162,6 +163,9 @@
     "languageHelpLink": "Întrebați pe GitHub",
     "languageTranslate": "Oricine poate ajuta la traducere pe {{link}}.",
     "languageTranslateLink": "Weblate",
-    "accentAdjusted": "Afișat ca {{light}} în modul luminos și ca {{dark}} în modul întunecat, astfel încât textul de această culoare să rămână lizibil."
+    "accentAdjusted": "Afișat ca {{light}} în modul luminos și ca {{dark}} în modul întunecat, astfel încât textul de această culoare să rămână lizibil.",
+    "sidebarViewsHint": "Alegeți ce file afișează bara laterală și în ce ordine. Faceți clic dreapta pe filele din bara laterală pentru a le afișa sau ascunde acolo.",
+    "moveViewUp": "Mutare {{name}} în sus",
+    "moveViewDown": "Mutare {{name}} în jos"
   }
 }

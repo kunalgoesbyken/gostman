@@ -199,7 +199,7 @@ function SavedMessages({ tabId, request, session, sockets, onUpdateRequest }) {
     <>
       <Select
         aria-label={SOCKET_TEXT.saved}
-        className="w-48 shrink-0"
+        className="w-auto min-w-48 max-w-xs shrink-0"
         value={current?.name || ""}
         disabled={messages.length === 0}
         onChange={(event) => choose(event.target.value)}

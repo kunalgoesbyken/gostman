@@ -7,6 +7,7 @@ import { FONT_SLOTS, applyFont } from './fonts.js'
 import { LANGUAGES, LANGUAGE_VALUES, SYSTEM_LANGUAGE } from './i18n/languages.js'
 import { readStored, writeStored } from './storage.js'
 import { normalizeTagColors } from './tagColors.js'
+import { DEFAULT_SIDEBAR_VIEWS, normalizeSidebarViews } from './sidebarViews.js'
 import {
   DEFAULT_PALETTE, EMPTY_CUSTOM_COLORS, EMPTY_METHOD_COLORS, PALETTE_IDS, WINDOW_PROPERTIES, methodStyleSheet, normalizeCustomColors, normalizeMethodColors,
   parseTheme, serializeTheme, themeStyleSheet, windowProperties, windowTone,
@@ -53,6 +54,7 @@ export const DEFAULT_PREFERENCES = {
   confirmCloseTab: true,
   language: SYSTEM_LANGUAGE,
   shortcuts: {},
+  sidebarViews: DEFAULT_SIDEBAR_VIEWS,
 }
 
 const oneOf = (allowed) => (value) => allowed.includes(value)
@@ -92,6 +94,7 @@ export function normalizePreferences(raw) {
     methodColors: normalizeMethodColors(source.methodColors),
     tagColors: normalizeTagColors(source.tagColors),
     shortcuts: sanitizeOverrides(source.shortcuts),
+    sidebarViews: normalizeSidebarViews(source.sidebarViews),
   })
 }
 

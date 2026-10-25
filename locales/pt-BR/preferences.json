@@ -27,7 +27,8 @@
       "wrapLines": "Quebrar linhas longas",
       "requestTimeout": "Tempo limite padrão",
       "confirmCloseTab": "Perguntar antes de descartar alterações não salvas ao fechar uma aba",
-      "language": "Idioma"
+      "language": "Idioma",
+      "sidebarViews": "Abas da barra lateral"
     },
     "themes": {
       "system": "Sistema",
@@ -162,6 +163,9 @@
     "languageHelpLink": "Pergunte no GitHub",
     "languageTranslate": "Qualquer pessoa pode ajudar a traduzir no {{link}}.",
     "languageTranslateLink": "Weblate",
-    "accentAdjusted": "Mostrada como {{light}} no modo claro e {{dark}} no modo escuro para que o texto nesta cor continue legível."
+    "accentAdjusted": "Mostrada como {{light}} no modo claro e {{dark}} no modo escuro para que o texto nesta cor continue legível.",
+    "sidebarViewsHint": "Escolha quais abas a barra lateral mostra e em que ordem. Clique com o botão direito nas abas da barra lateral para mostrá-las ou ocultá-las ali.",
+    "moveViewUp": "Mover {{name}} para cima",
+    "moveViewDown": "Mover {{name}} para baixo"
   }
 }

@@ -27,7 +27,8 @@
       "wrapLines": "长行自动换行",
       "requestTimeout": "默认超时",
       "confirmCloseTab": "关闭标签页时，若有未保存的更改，先询问",
-      "language": "语言"
+      "language": "语言",
+      "sidebarViews": "侧边栏标签页"
     },
     "themes": {
       "system": "跟随系统",
@@ -160,6 +161,9 @@
     "languageHelpLink": "在 GitHub 上告诉我们",
     "languageTranslate": "任何人都可以在 {{link}} 上参与翻译。",
     "languageTranslateLink": "Weblate",
-    "accentAdjusted": "在浅色模式下显示为{{light}}，在深色模式下显示为{{dark}}，以保证此颜色的文字清晰可读。"
+    "accentAdjusted": "在浅色模式下显示为{{light}}，在深色模式下显示为{{dark}}，以保证此颜色的文字清晰可读。",
+    "sidebarViewsHint": "选择侧边栏显示哪些标签页以及它们的顺序。也可以在侧边栏中右键单击标签页来显示或隐藏它们。",
+    "moveViewUp": "上移 {{name}}",
+    "moveViewDown": "下移 {{name}}"
   }
 }

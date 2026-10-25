@@ -28,10 +28,11 @@ function Tabs({ value, onValueChange, children, className }) {
   )
 }
 
-function TabsList({ className, label, children }) {
+function TabsList({ className, label, children, onContextMenu }) {
   return (
     <div
       role="tablist"
+      onContextMenu={onContextMenu}
       aria-label={label}
       onKeyDown={(event) => moveFocus(event, TAB_KEYS)}
       className={cn("flex h-full min-w-0 items-stretch gap-4 overflow-x-auto scrollbar-none", className)}

@@ -8,7 +8,9 @@
     "newRequest": "Nowe żądanie",
     "toggle": "Przełącz panel boczny",
     "close": "Zamknij panel boczny",
-    "resize": "Zmień rozmiar panelu bocznego"
+    "resize": "Zmień rozmiar panelu bocznego",
+    "viewsMenu": "Karty panelu bocznego",
+    "resetViews": "Pokaż wszystkie karty w domyślnej kolejności"
   },
   "history": {
     "search": "Szukaj w historii",

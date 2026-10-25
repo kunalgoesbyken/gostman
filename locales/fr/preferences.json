@@ -27,7 +27,8 @@
       "wrapLines": "Retour à la ligne automatique",
       "requestTimeout": "Délai d’expiration par défaut",
       "confirmCloseTab": "Demander avant d’abandonner les modifications non enregistrées à la fermeture d’un onglet",
-      "language": "Langue"
+      "language": "Langue",
+      "sidebarViews": "Onglets de la barre latérale"
     },
     "themes": {
       "system": "Système",
@@ -106,7 +107,7 @@
         "background": "Arrière-plan",
         "foreground": "Texte",
         "contrast": "Contraste",
-        "reset": "Réinit."
+        "reset": "Réinitialiser"
       },
       "surfaces": {
         "window": "Fenêtre",
@@ -162,6 +163,9 @@
     "languageHelpLink": "Demandez sur GitHub",
     "languageTranslate": "Tout le monde peut aider à traduire sur {{link}}.",
     "languageTranslateLink": "Weblate",
-    "accentAdjusted": "Affichée en {{light}} en mode clair et en {{dark}} en mode sombre pour que le texte de cette couleur reste lisible."
+    "accentAdjusted": "Affichée en {{light}} en mode clair et en {{dark}} en mode sombre pour que le texte de cette couleur reste lisible.",
+    "sidebarViewsHint": "Choisissez les onglets affichés dans la barre latérale et leur ordre. Faites un clic droit sur les onglets de la barre latérale pour les afficher ou les masquer.",
+    "moveViewUp": "Monter {{name}}",
+    "moveViewDown": "Descendre {{name}}"
   }
 }

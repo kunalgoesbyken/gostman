@@ -27,7 +27,8 @@
       "wrapLines": "長い行を折り返す",
       "requestTimeout": "既定のタイムアウト",
       "confirmCloseTab": "タブを閉じるとき、未保存の変更を破棄する前に確認する",
-      "language": "言語"
+      "language": "言語",
+      "sidebarViews": "サイドバーのタブ"
     },
     "themes": {
       "system": "システム",
@@ -160,6 +161,9 @@
     "languageHelpLink": "GitHubで知らせる",
     "languageTranslate": "{{link}}で誰でも翻訳に参加できます。",
     "languageTranslateLink": "Weblate",
-    "accentAdjusted": "この色の文字が読みやすいよう、ライトモードでは{{light}}、ダークモードでは{{dark}}で表示されます。"
+    "accentAdjusted": "この色の文字が読みやすいよう、ライトモードでは{{light}}、ダークモードでは{{dark}}で表示されます。",
+    "sidebarViewsHint": "サイドバーに表示するタブと順序を選びます。サイドバーのタブを右クリックしても表示・非表示を切り替えられます。",
+    "moveViewUp": "{{name}}を上へ移動",
+    "moveViewDown": "{{name}}を下へ移動"
   }
 }

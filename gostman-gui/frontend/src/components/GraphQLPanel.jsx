@@ -4,7 +4,9 @@ import { parse, print } from "graphql"
 import { Button } from "./ui/button"
 import { EmptyState } from "./ui/emptyState"
 import { Input } from "./ui/input"
-import { Notice, Panel, PanelBody, SIDE_PANE, SectionLabel, Toolbar } from "./ui/panel"
+import { Notice, Panel, PanelBody, ResizablePane, SIDE_PANE, SectionLabel, Toolbar } from "./ui/panel"
+import { EDGE_START } from "../hooks/usePaneResize"
+import { GRAPHQL_SCHEMA_PANE } from "../lib/layout"
 import { Textarea } from "./ui/textarea"
 import { SkeletonLines } from "./ui/skeleton"
 import { GraphQLBuilder } from "./GraphQLBuilder"
@@ -145,7 +147,7 @@ function SchemaContent({ schema }) {
 
 function SchemaPane({ schema, onLoad }) {
   return (
-    <aside aria-label={TEXT.schema} className={cn(SIDE_PANE, "w-2/5 min-w-52 max-w-80")}>
+    <ResizablePane as="aside" pane={GRAPHQL_SCHEMA_PANE} edge={EDGE_START} aria-label={TEXT.schema} className={SIDE_PANE}>
       <Toolbar>
         <SectionLabel className="flex-1">{TEXT.schema}</SectionLabel>
         <Button variant="outline" size="sm" disabled={Boolean(schema?.loading)} onClick={onLoad}>
@@ -153,7 +155,7 @@ function SchemaPane({ schema, onLoad }) {
         </Button>
       </Toolbar>
       <SchemaContent schema={schema} />
-    </aside>
+    </ResizablePane>
   )
 }
 

@@ -4,7 +4,9 @@ import { Button, IconButton } from "./ui/button"
 import { ColorDot, ColorPicker } from "./ui/colorPicker"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
-import { Notice, SectionLabel, SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
+import { Notice, ResizablePane, SectionLabel, SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
+import { EDGE_END } from "../hooks/usePaneResize"
+import { ENVIRONMENT_PANE } from "../lib/layout"
 import { SegmentedControl } from "./ui/segmented"
 import { Select } from "./ui/select"
 import { CollectionVariablesTable } from "./CollectionVariablesTable"
@@ -330,7 +332,7 @@ export function EnvironmentDialog({ secrets, onClose }) {
           </Button>
         </DialogHeader>
         <div className={SPLIT_PANES}>
-          <nav aria-label={TEXT.title} className={cn(SPLIT_LIST, "w-56")}>
+          <ResizablePane as="nav" pane={ENVIRONMENT_PANE} edge={EDGE_END} aria-label={TEXT.title} className={SPLIT_LIST}>
             <div className="min-h-0 flex-1 overflow-y-auto py-1 max-sm:hidden">
               {sections.map((section) => (
                 <Fragment key={section.key}>
@@ -356,7 +358,7 @@ export function EnvironmentDialog({ secrets, onClose }) {
                 {isGlobal ? TEXT.newGlobal : TEXT.newEnvironment}
               </Button>
             </div>
-          </nav>
+          </ResizablePane>
           <section className="flex min-w-0 flex-1 flex-col">
             <Editor scope={scope} selectedId={resolvedSelection} environments={list} activeId={activeId} scoping={scoping} holder={holder} secrets={secrets} pendingVariable={pendingVariable} />
           </section>

@@ -38,5 +38,8 @@
   "preferences.theme.palettes.default": "Name of the standard colour palette.",
   "preferences.theme.columns.reset": "Column heading above the buttons that restore a colour to its default.",
   "preferences.languageTranslate": "Second sentence under the Language list. {{link}} is the link text from languageTranslateLink and opens the Gostman project on Weblate, where people translate the app.",
-  "preferences.languageTranslateLink": "Name of the translation platform. Keep Weblate as written."
+  "preferences.languageTranslateLink": "Name of the translation platform. Keep Weblate as written.",
+  "preferences.fields.sidebarViews": "Heading of the Appearance setting that lists the sidebar tabs with a checkbox and move buttons each.",
+  "preferences.moveViewUp": "Accessible label of a button. {{name}} is a sidebar tab name such as History.",
+  "preferences.moveViewDown": "Accessible label of a button. {{name}} is a sidebar tab name such as History."
 }

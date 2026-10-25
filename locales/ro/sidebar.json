@@ -8,7 +8,9 @@
     "newRequest": "Cerere nouă",
     "toggle": "Comutare bară laterală",
     "close": "Închidere bară laterală",
-    "resize": "Redimensionare bară laterală"
+    "resize": "Redimensionare bară laterală",
+    "viewsMenu": "File din bara laterală",
+    "resetViews": "Afișare toate filele în ordinea implicită"
   },
   "history": {
     "search": "Căutare în istoric",

@@ -1,8 +1,7 @@
-import { useState, useEffect, useRef } from "react"
-import { LazyMotion, m, useReducedMotion } from "framer-motion"
+import { useState, useEffect } from "react"
+import { LazyMotion } from "framer-motion"
 import { Button, buttonVariants } from "./ui/button"
 import { cn } from "../lib/utils"
-import { popIn } from "../lib/motion"
 import { REPOSITORY, REPOSITORY_URL } from "../lib/siteLinks"
 import { docPath } from "../docs/manifest"
 import { useSmoothScroll } from "../lib/landingMotion"
@@ -36,6 +35,10 @@ const loadMotionFeatures = () => import("../lib/motionFeatures").then((module) =
 const starCount = (value) => (Number.isFinite(value) ? value : null)
 
 const REPOSITORY_API_URL = `https://api.github.com/repos/${REPOSITORY}`
+
+const BUILD_STARS = typeof __GITHUB_STARS__ === "number" ? __GITHUB_STARS__ : null
+
+const STAR_FORMAT = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 })
 
 const HIGHLIGHTS = ["Open source, MIT licence", "Collections stay on your machine", "Share through Git or a link"]
 
@@ -138,52 +141,40 @@ const SPOTLIGHTS = [
   },
 ]
 
+const isJsonResponse = (response) => response.ok && (response.headers.get("content-type") ?? "").includes("application/json")
+
+async function latestStars(signal) {
+  const own = await fetch("/api/stars", { signal })
+  if (isJsonResponse(own)) return starCount((await own.json()).stars)
+  const github = await fetch(REPOSITORY_API_URL, { signal })
+  return isJsonResponse(github) ? starCount((await github.json()).stargazers_count) : null
+}
+
 const useGitHubStars = () => {
-  const [stars, setStars] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const controllerRef = useRef(null)
+  const [stars, setStars] = useState(BUILD_STARS)
 
   useEffect(() => {
-    if (controllerRef.current) {
-      controllerRef.current.abort()
-    }
-
     const controller = new AbortController()
-    controllerRef.current = controller
-
-    const fetchStars = async () => {
-      setIsLoading(true)
-      try {
-        const response = await fetch("/api/stars", { signal: controller.signal })
-        const contentType = response.headers.get("content-type")
-        if (!response.ok || (contentType && contentType.includes("text/html"))) {
-          throw new Error("Local/API endpoint unavailable")
-        }
-        const data = await response.json()
-        setStars(starCount(data.stars))
-      } catch (err) {
-        if (err.name === "AbortError") return
-        try {
-          const ghResponse = await fetch(REPOSITORY_API_URL, { signal: controller.signal })
-          if (!ghResponse.ok) return
-          const ghData = await ghResponse.json()
-          setStars(starCount(ghData.stargazers_count))
-        } catch {
-          setStars(null)
-        }
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    const timeoutId = setTimeout(fetchStars, 100)
-    return () => {
-      clearTimeout(timeoutId)
-      controller.abort()
-    }
+    latestStars(controller.signal)
+      .then((count) => count !== null && setStars(count))
+      .catch(() => {})
+    return () => controller.abort()
   }, [])
 
-  return { stars, isLoading }
+  return stars
+}
+
+function GitHubStarLink({ stars }) {
+  const label = stars === null ? `Star ${REPOSITORY} on GitHub` : `Star ${REPOSITORY} on GitHub, ${stars} stars`
+  return (
+    <a href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer" aria-label={label} className={NAV_LINK}>
+      <BrandIcon brand="github" className="h-4 w-4" />
+      <span className="hidden font-medium sm:inline">Star</span>
+      {stars !== null && (
+        <span className="border-s border-border/70 ps-2 font-medium tabular-nums text-muted-foreground">{STAR_FORMAT.format(stars)}</span>
+      )}
+    </a>
+  )
 }
 
 function TryWebButton({ onClick, isPrimary }) {
@@ -242,8 +233,7 @@ function Spotlight({ spotlight, isReversed }) {
 }
 
 export function LandingPage({ onGetStarted }) {
-  const { stars, isLoading } = useGitHubStars()
-  const reduceMotion = useReducedMotion()
+  const stars = useGitHubStars()
 
   useSmoothScroll()
 
@@ -267,22 +257,7 @@ export function LandingPage({ onGetStarted }) {
             <button type="button" onClick={onGetStarted} className={cn(NAV_LINK, "hidden sm:inline-flex")}>
               Web app
             </button>
-            <a href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer" className={NAV_LINK}>
-              <BrandIcon brand="github" className="h-4 w-4" />
-              <span className="hidden font-medium sm:inline">Star</span>
-              {stars !== null ? (
-                <m.span
-                  className="font-mono text-xs text-muted-foreground"
-                  {...(reduceMotion ? {} : popIn)}
-                  key={stars}
-                  aria-live="polite"
-                >
-                  {stars.toLocaleString()}
-                </m.span>
-              ) : isLoading ? (
-                <div className="h-4 w-8 bg-muted/20 animate-pulse rounded" />
-              ) : null}
-            </a>
+            <GitHubStarLink stars={stars} />
             <a href="#download" className={buttonVariants({ size: "sm", className: "gap-2" })}>
               <Download className="h-4 w-4" />
               Download

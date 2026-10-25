@@ -8,7 +8,9 @@
     "newRequest": "Nueva solicitud",
     "toggle": "Mostrar u ocultar barra lateral",
     "close": "Cerrar barra lateral",
-    "resize": "Cambiar tamaño de la barra lateral"
+    "resize": "Cambiar tamaño de la barra lateral",
+    "viewsMenu": "Pestañas de la barra lateral",
+    "resetViews": "Mostrar todas las pestañas en el orden predeterminado"
   },
   "history": {
     "search": "Buscar en el historial",
