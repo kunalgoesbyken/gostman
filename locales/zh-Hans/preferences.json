@@ -158,6 +158,8 @@
     "languageSwitch": "切换语言",
     "languageHelp": "没有你的语言，或发现翻译有误？{{link}}。",
     "languageHelpLink": "在 GitHub 上告诉我们",
+    "languageTranslate": "任何人都可以在 {{link}} 上参与翻译。",
+    "languageTranslateLink": "Weblate",
     "accentAdjusted": "在浅色模式下显示为{{light}}，在深色模式下显示为{{dark}}，以保证此颜色的文字清晰可读。"
   }
 }

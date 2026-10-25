@@ -451,11 +451,11 @@ export async function parseImport(text) {
     const result = await reader.read(text)
     if (!result.success) return result
     if (result.requests.length === 0 && result.folders.length === 0) {
-      return importFailure(IMPORT_EXPORT_TEXT.noRequests(reader.label))
+      return importFailure(IMPORT_EXPORT_TEXT.noRequests)
     }
     return { ...result, label: reader.label }
   } catch (error) {
-    return importFailure(error?.message || IMPORT_EXPORT_TEXT.unreadable(reader.label))
+    return importFailure(error?.message || IMPORT_EXPORT_TEXT.unreadable)
   }
 }
 

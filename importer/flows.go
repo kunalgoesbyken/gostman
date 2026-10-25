@@ -15,7 +15,7 @@ func (c *collector) gostmanFlows(raw []json.RawMessage, requests idMap) {
 	for _, item := range raw {
 		var flow workspace.Flow
 		if err := json.Unmarshal(item, &flow); err != nil {
-			c.skip(locales.ImporterGostmanItem, locales.Params{"what": "flow"})
+			c.skip(locales.ImporterGostmanItemFlow, nil)
 			continue
 		}
 		flow.Id = newID()

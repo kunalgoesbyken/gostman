@@ -159,6 +159,8 @@
     "languageSwitch": "Switch language",
     "languageHelp": "Missing your language, or found a wrong translation? {{link}}.",
     "languageHelpLink": "Ask on GitHub",
+    "languageTranslate": "Anyone can help translate on {{link}}.",
+    "languageTranslateLink": "Weblate",
     "accentAdjusted": "Shown as {{light}} in light mode and {{dark}} in dark mode so text in this colour stays readable."
   }
 }

@@ -28,7 +28,7 @@ import {
 } from "../lib/preferences"
 import { SECTION_AI, selectPreferencesSection, usePreferencesSection } from "../lib/preferencesSection"
 import { PREFERENCES_TEXT } from "../lib/preferencesText"
-import { TRANSLATIONS_ISSUE_URL } from "../lib/siteLinks"
+import { TRANSLATE_URL, TRANSLATIONS_ISSUE_URL } from "../lib/siteLinks"
 import { cn } from "../lib/utils"
 
 const { fields, sections } = PREFERENCES_TEXT
@@ -210,13 +210,22 @@ function RequestsSection({ preferences }) {
   )
 }
 
-function LanguageHelp() {
-  const link = (
-    <a key="issue" href={TRANSLATIONS_ISSUE_URL} target="_blank" rel="noopener noreferrer" onClick={(event) => openExternal(event, TRANSLATIONS_ISSUE_URL)} className="text-primary underline-offset-2 hover:underline">
-      {PREFERENCES_TEXT.languageHelpLink}
+function ExternalLink({ href, children }) {
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" onClick={(event) => openExternal(event, href)} className="text-primary underline-offset-2 hover:underline">
+      {children}
     </a>
   )
-  return <p className="text-2xs text-muted-foreground"><RichText parts={PREFERENCES_TEXT.languageHelpParts(link)} /></p>
+}
+
+function LanguageHelp() {
+  const issue = <ExternalLink key="issue" href={TRANSLATIONS_ISSUE_URL}>{PREFERENCES_TEXT.languageHelpLink}</ExternalLink>
+  const weblate = <ExternalLink key="weblate" href={TRANSLATE_URL}>{PREFERENCES_TEXT.languageTranslateLink}</ExternalLink>
+  return (
+    <p className="text-2xs text-muted-foreground">
+      <RichText parts={PREFERENCES_TEXT.languageHelpParts(issue)} /> <RichText parts={PREFERENCES_TEXT.languageTranslateParts(weblate)} />
+    </p>
+  )
 }
 
 function LanguageSection({ preferences }) {

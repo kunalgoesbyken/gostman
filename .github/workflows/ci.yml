@@ -120,7 +120,8 @@ jobs:
       #
       # This step asserts the two outputs really are two different apps, using
       # markers that exist on only one side:
-      #   * `api/proxy`   - web-only HTTP proxy endpoint (src/lib/api.js)
+      #   * `api/proxy`   - web-only HTTP proxy endpoint (src/lib/api.js), which
+      #                     lives in the lazy web backend chunk, not the entry
       #   * `SendRequest` - desktop-only Wails binding (wailsjs/go/main/App)
       # -----------------------------------------------------------------------
       - name: Verify desktop and web bundles are different apps
@@ -209,11 +210,11 @@ jobs:
           fi
 
           echo
-          echo "== Web bundle MUST contain the proxy endpoint =="
-          if grep -q 'api/proxy' "$WEB_JS"; then
-            echo "  ok: found 'api/proxy' in web bundle"
+          echo "== Web build MUST contain the proxy endpoint (entry or lazy chunks) =="
+          if grep -qF 'api/proxy' "$WEB_DIR"/assets/*.js; then
+            echo "  ok: found 'api/proxy' in the web build"
           else
-            fail "web bundle $WEB_JS does not contain 'api/proxy' (expected in the web build)."
+            fail "no chunk in $WEB_DIR/assets contains 'api/proxy' (expected in the web build)."
           fi
 
           echo

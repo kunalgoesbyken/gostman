@@ -1,7 +1,8 @@
 {
   "schema.operator": "Name of a check type in the operator list, read as a sentence: <expression> matches schema. Compares a value with a JSON Schema.",
   "schema.root": "Start of a sentence about the whole value being checked, for example: The value should be a string.",
-  "schema.type": "{{where}} is either The value or a path such as $.items[0]. {{expected}} is a list of allowed kinds, {{actual}} describes what was found.",
+  "schema.type": "{{where}} is either The value or a path such as $.items[0]. {{expected}} is a list of two or more allowed kinds, joined with \"or\" and each written as in schema.kinds; {{actual}} describes what was found. Used only when the schema allows several kinds. A form such as \"{{where}}: expected one of {{expected}}, found {{actual}}.\" is fine.",
+  "schema.typeOnly": "Used when the schema allows exactly one kind. One message for each kind, so the sentence can use the article, gender or case that fits the kind. {{where}} is either The value or a path such as $.items[0]; {{actual}} describes what was found (see schema.previewArray, schema.previewObject and schema.previewText), or is a plain value such as null, 5 or true.",
   "schema.enum": "{{allowed}} is a list of allowed values, written as JSON.",
   "schema.const": "{{expected}} is the only allowed value, written as JSON.",
   "schema.minLength": "Counts characters of a text. {{actual}} is the length found.",

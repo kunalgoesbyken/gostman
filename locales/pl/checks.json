@@ -22,6 +22,15 @@
     "previewObject": "obiekt",
     "previewText": "tekst „{{text}}”",
     "type": "{{where}}: oczekiwano typu {{expected}}, jest {{actual}}.",
+    "typeOnly": {
+      "null": "{{where}}: oczekiwano null, jest {{actual}}.",
+      "string": "{{where}}: oczekiwano ciągu znaków, jest {{actual}}.",
+      "number": "{{where}}: oczekiwano liczby, jest {{actual}}.",
+      "integer": "{{where}}: oczekiwano liczby całkowitej, jest {{actual}}.",
+      "boolean": "{{where}}: oczekiwano wartości logicznej, jest {{actual}}.",
+      "array": "{{where}}: oczekiwano tablicy, jest {{actual}}.",
+      "object": "{{where}}: oczekiwano obiektu, jest {{actual}}."
+    },
     "required": "{{where}}: brakuje pola, którego wymaga schemat.",
     "additionalProperties": "{{where}}: pola nie ma w schemacie, który nie dopuszcza innych pól.",
     "enum": "{{where}}: oczekiwano jednej z wartości {{allowed}}, jest {{actual}}.",

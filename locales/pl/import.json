@@ -181,18 +181,33 @@
       "commands": "polecenia uruchamiające lokalne serwery MCP",
       "files": "odczyty plików wysyłające pliki z tego komputera"
     },
-    "kindNouns": {
-      "scripts": "skrypty",
-      "oauth": "ustawienia OAuth",
-      "commands": "polecenia",
-      "files": "odczyty plików"
+    "titleOne": {
+      "scripts": "Zaimportować skrypty?",
+      "oauth": "Zaimportować ustawienia OAuth?",
+      "commands": "Zaimportować polecenia?",
+      "files": "Zaimportować odczyty plików?"
     },
-    "titleOne": "Zaimportować: {{kind}}?",
     "titleMany": "Przejrzyj przed importem",
-    "withOne": "Importuj z: {{kind}}",
+    "withOne": {
+      "scripts": "Importuj ze skryptami",
+      "oauth": "Importuj z ustawieniami OAuth",
+      "commands": "Importuj z poleceniami",
+      "files": "Importuj z odczytami plików"
+    },
     "withMany": "Importuj wszystko",
-    "withoutOne": "Importuj bez: {{kind}}",
+    "withoutOne": {
+      "scripts": "Importuj bez skryptów",
+      "oauth": "Importuj bez ustawień OAuth",
+      "commands": "Importuj bez poleceń",
+      "files": "Importuj bez odczytów plików"
+    },
     "withoutMany": "Importuj bez nich",
+    "leftOutOne": {
+      "scripts": "Skrypty zostały pominięte.",
+      "oauth": "Ustawienia OAuth 2.0 zostały pominięte.",
+      "commands": "Polecenia uruchamiające lokalne serwery MCP zostały pominięte.",
+      "files": "Odczyty plików wysyłające pliki z tego komputera zostały pominięte."
+    },
     "leftOut": "Pominięto: {{kinds}}.",
     "message_one": "{{count}} element tego importu zawiera: {{kinds}}. Są one uruchamiane przy wysyłaniu żądania i mogą odczytywać zmienne, więc importuj je tylko ze źródła zaufanego. Bez nich cała reszta nadal zostanie zaimportowana.",
     "message_few": "{{count}} elementy tego importu zawierają: {{kinds}}. Są one uruchamiane przy wysyłaniu żądania i mogą odczytywać zmienne, więc importuj je tylko ze źródła zaufanego. Bez nich cała reszta nadal zostanie zaimportowana.",

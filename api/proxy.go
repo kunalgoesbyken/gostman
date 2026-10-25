@@ -264,10 +264,7 @@ func lintSpec(r *http.Request) lint.Reply {
 	if err := json.NewDecoder(r.Body).Decode(&query); err != nil {
 		return lint.Reply{Error: err.Error()}
 	}
-	if query.Source.Text == "" {
-		return lint.Reply{Error: "the web app lints the spec text it is given and does not fetch addresses"}
-	}
-	query.Source = openapi.Source{Text: query.Source.Text}
+	query.Source = openapi.Source{Text: query.Source.Text, URL: query.Source.URL}
 	reply := lint.Handle(r.Context(), query, openapi.Options{Policy: Policy, MaxBytes: maxOpenAPIBytes})
 	if encoded, err := json.Marshal(reply); err == nil && len(encoded) > maxOpenAPIReplyBytes {
 		return lint.Reply{Error: "the findings are too many to show in the web app"}

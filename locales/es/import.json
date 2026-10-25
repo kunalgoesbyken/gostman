@@ -168,18 +168,33 @@
       "commands": "comandos que inician servidores MCP locales",
       "files": "lecturas de archivos que envían archivos de este equipo"
     },
-    "kindNouns": {
-      "scripts": "scripts",
-      "oauth": "ajustes de OAuth",
-      "commands": "comandos",
-      "files": "lecturas de archivos"
+    "titleOne": {
+      "scripts": "¿Importar scripts?",
+      "oauth": "¿Importar ajustes de OAuth?",
+      "commands": "¿Importar comandos?",
+      "files": "¿Importar lecturas de archivos?"
     },
-    "titleOne": "¿Importar {{kind}}?",
     "titleMany": "Revisar antes de importar",
-    "withOne": "Importar con {{kind}}",
+    "withOne": {
+      "scripts": "Importar con scripts",
+      "oauth": "Importar con ajustes de OAuth",
+      "commands": "Importar con comandos",
+      "files": "Importar con lecturas de archivos"
+    },
     "withMany": "Importar todo",
-    "withoutOne": "Importar sin {{kind}}",
+    "withoutOne": {
+      "scripts": "Importar sin scripts",
+      "oauth": "Importar sin ajustes de OAuth",
+      "commands": "Importar sin comandos",
+      "files": "Importar sin lecturas de archivos"
+    },
     "withoutMany": "Importar sin ellos",
+    "leftOutOne": {
+      "scripts": "Se omitieron los scripts.",
+      "oauth": "Se omitieron los ajustes de OAuth 2.0.",
+      "commands": "Se omitieron los comandos que inician servidores MCP locales.",
+      "files": "Se omitieron las lecturas de archivos que envían archivos de este equipo."
+    },
     "leftOut": "Se omitieron: {{kinds}}.",
     "message_one": "{{count}} elemento de esta importación incluye {{kinds}}. Se ejecutan al enviar una solicitud y pueden leer tus variables, así que impórtalos solo de una fuente en la que confíes. Sin ellos, todo lo demás se importa igualmente.",
     "message_many": "{{count}} de elementos de esta importación incluyen {{kinds}}. Se ejecutan al enviar una solicitud y pueden leer tus variables, así que impórtalos solo de una fuente en la que confíes. Sin ellos, todo lo demás se importa igualmente.",

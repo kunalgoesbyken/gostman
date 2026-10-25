@@ -18,10 +18,7 @@ The issue stays open. It holds a table with the status of each language.
 
 ## Translate
 
-Translation will happen on Weblate once the Gostman project there is live. Until then, send a pull request that edits the files in `locales/<language>/` as described under [How the files work](#how-the-files-work). Both routes end in the same files, and the same checks run on both.
-
-> [!NOTE]
-> Weblate is not set up yet. This page will link to it when it is.
+Translate on [Weblate](https://hosted.weblate.org/engage/gostman/). Changes arrive as pull requests, and CI checks them like any other change. You can also send a pull request that edits the files in `locales/<language>/` as described under [How the files work](#how-the-files-work). Both routes end in the same files, and the same checks run on both.
 
 Before you start:
 
@@ -192,6 +189,6 @@ Translations are meant to be edited on [Weblate](https://weblate.org) (hosted, f
 3. Add the Component discovery add-on with a regular expression that matches `locales/<language>/<namespace>.json`, so each namespace becomes a component. Add the Cleanup translation files, Add missing languages and Squash Git commits add-ons.
 4. Add a GitHub webhook to `https://hosted.weblate.org/hooks/github/` for push events.
 5. Upload `locales/_glossary/<language>.csv` to the project glossary. Paste the notes from `locales/_notes/` into the matching strings as explanations.
-6. Link the project from the README, this page and the Language section of Preferences.
+6. Done: the project is linked from the README, this page and the Language section of Preferences.
 
 Seed translations are never marked "needs editing", because Weblate does not write that state back to the files. Drafts are tracked in [#15](https://github.com/kunalgoesbyken/gostman/issues/15) instead.

@@ -16,6 +16,15 @@
     "previewObject": "オブジェクト",
     "previewText": "テキスト「{{text}}」",
     "type": "{{where}}は{{expected}}である必要がありますが、{{actual}}です。",
+    "typeOnly": {
+      "null": "{{where}}はnullである必要がありますが、{{actual}}です。",
+      "string": "{{where}}は文字列である必要がありますが、{{actual}}です。",
+      "number": "{{where}}は数値である必要がありますが、{{actual}}です。",
+      "integer": "{{where}}は整数である必要がありますが、{{actual}}です。",
+      "boolean": "{{where}}はtrueまたはfalseである必要がありますが、{{actual}}です。",
+      "array": "{{where}}は配列である必要がありますが、{{actual}}です。",
+      "object": "{{where}}はオブジェクトである必要がありますが、{{actual}}です。"
+    },
     "required": "{{where}}がありませんが、スキーマで必須とされています。",
     "additionalProperties": "{{where}}はスキーマにありません。スキーマは他のフィールドを許可していません。",
     "enum": "{{where}}は{{allowed}}のいずれかである必要がありますが、{{actual}}です。",

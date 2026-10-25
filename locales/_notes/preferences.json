@@ -36,5 +36,7 @@
   "preferences.themes.dark": "Name of the dark colour theme.",
   "preferences.contrasts.system": "Choice that follows the operating system setting for contrast.",
   "preferences.theme.palettes.default": "Name of the standard colour palette.",
-  "preferences.theme.columns.reset": "Column heading above the buttons that restore a colour to its default."
+  "preferences.theme.columns.reset": "Column heading above the buttons that restore a colour to its default.",
+  "preferences.languageTranslate": "Second sentence under the Language list. {{link}} is the link text from languageTranslateLink and opens the Gostman project on Weblate, where people translate the app.",
+  "preferences.languageTranslateLink": "Name of the translation platform. Keep Weblate as written."
 }

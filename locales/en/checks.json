@@ -18,6 +18,15 @@
     "previewObject": "an object",
     "previewText": "the text \"{{text}}\"",
     "type": "{{where}} should be {{expected}}, but it is {{actual}}.",
+    "typeOnly": {
+      "null": "{{where}} should be null, but it is {{actual}}.",
+      "string": "{{where}} should be a string, but it is {{actual}}.",
+      "number": "{{where}} should be a number, but it is {{actual}}.",
+      "integer": "{{where}} should be a whole number, but it is {{actual}}.",
+      "boolean": "{{where}} should be true or false, but it is {{actual}}.",
+      "array": "{{where}} should be an array, but it is {{actual}}.",
+      "object": "{{where}} should be an object, but it is {{actual}}."
+    },
     "required": "{{where}} is missing, but the schema requires it.",
     "additionalProperties": "{{where}} is not in the schema, which allows no other fields.",
     "enum": "{{where}} should be one of {{allowed}}, but it is {{actual}}.",

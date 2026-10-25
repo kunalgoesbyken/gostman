@@ -119,7 +119,7 @@ func (c *collector) reportUnresolved(root *xmlNode, included map[string]bool) {
 		}
 	}
 	if len(missing) > 0 {
-		c.lead(locales.New(locales.ImporterUnresolved, locales.Params{"what": "The WSDL", "files": strings.Join(missing, ", ")}))
+		c.lead(locales.New(locales.ImporterUnresolved, locales.Params{"files": strings.Join(missing, ", ")}))
 	}
 }
 

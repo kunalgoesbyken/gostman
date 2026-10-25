@@ -20,6 +20,15 @@
     "previewObject": "un obiect",
     "previewText": "textul „{{text}}”",
     "type": "{{where}} ar trebui să fie {{expected}}, dar este {{actual}}.",
+    "typeOnly": {
+      "null": "{{where}} ar trebui să fie null, dar este {{actual}}.",
+      "string": "{{where}} ar trebui să fie un șir de caractere, dar este {{actual}}.",
+      "number": "{{where}} ar trebui să fie un număr, dar este {{actual}}.",
+      "integer": "{{where}} ar trebui să fie un număr întreg, dar este {{actual}}.",
+      "boolean": "{{where}} ar trebui să fie true sau false, dar este {{actual}}.",
+      "array": "{{where}} ar trebui să fie un array, dar este {{actual}}.",
+      "object": "{{where}} ar trebui să fie un obiect, dar este {{actual}}."
+    },
     "required": "{{where}} lipsește, dar schema îl cere.",
     "additionalProperties": "{{where}} nu se află în schemă, care nu permite alte câmpuri.",
     "enum": "{{where}} ar trebui să fie una dintre {{allowed}}, dar este {{actual}}.",

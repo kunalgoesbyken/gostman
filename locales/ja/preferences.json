@@ -158,6 +158,8 @@
     "languageSwitch": "言語を切り替え",
     "languageHelp": "お使いの言語がない、または誤訳を見つけましたか？{{link}}。",
     "languageHelpLink": "GitHubで知らせる",
+    "languageTranslate": "{{link}}で誰でも翻訳に参加できます。",
+    "languageTranslateLink": "Weblate",
     "accentAdjusted": "この色の文字が読みやすいよう、ライトモードでは{{light}}、ダークモードでは{{dark}}で表示されます。"
   }
 }

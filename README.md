@@ -152,7 +152,9 @@ The same pages are published at [gostman.com/docs](https://gostman.com/docs). Th
 
 ## Translations
 
-The app interface can be shown in other languages, and some first drafts are checked by native speakers over time. To ask for a language, offer to translate or report a wrong translation, use [issue #15](https://github.com/kunalgoesbyken/gostman/issues/15). [Translating Gostman](docs/translating.md) explains how the translation files work and how to send changes.
+[![Translation status](https://hosted.weblate.org/widget/gostman/svg-badge.svg)](https://hosted.weblate.org/engage/gostman/)
+
+Gostman is translated on [Weblate](https://hosted.weblate.org/engage/gostman/). The first drafts of each language are checked by native speakers over time. To ask for a language, offer to translate or report a wrong translation, use [issue #15](https://github.com/kunalgoesbyken/gostman/issues/15). [Translating Gostman](docs/translating.md) explains how the translation files work and how to send changes.
 
 ## Contributing
 

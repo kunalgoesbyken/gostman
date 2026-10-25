@@ -11,10 +11,8 @@ const ACTIVE_KINDS = ['scripts', 'oauth', 'commands', 'files']
 const text = messages('import', english, (t) => {
   const quoted = (names) => names.map((name) => t('importResult.quoted', { name }))
   const forNames = (key) => (names) => t(key, { count: names.length, names: formatList(quoted(names)) })
-  const kindsIn = (group, kinds) => ACTIVE_KINDS.filter((kind) => kinds.includes(kind)).map((kind) => t(`activeImport.${group}.${kind}`))
-  const listedKinds = (kinds) => formatList(kindsIn('kindLabels', kinds))
-  const onlyKind = (kinds) => (kinds.length === 1 ? t(`activeImport.kindNouns.${kinds[0]}`) : '')
-  const choice = (oneKey, manyKey) => (kinds) => (onlyKind(kinds) ? t(oneKey, { kind: onlyKind(kinds) }) : t(manyKey))
+  const listedKinds = (kinds) => formatList(ACTIVE_KINDS.filter((kind) => kinds.includes(kind)).map((kind) => t(`activeImport.kindLabels.${kind}`)))
+  const choice = (oneKey, manyKey) => (kinds) => (kinds.length === 1 ? t(`${oneKey}.${kinds[0]}`) : t(manyKey, { kinds: listedKinds(kinds) }))
   const countedItems = (counts) => [
     t('importCount.request', { count: counts.requests.length }),
     t('importCount.folder', { count: counts.folders.length }),
@@ -64,7 +62,7 @@ const text = messages('import', english, (t) => {
       title: choice('activeImport.titleOne', 'activeImport.titleMany'),
       withThem: choice('activeImport.withOne', 'activeImport.withMany'),
       withoutThem: choice('activeImport.withoutOne', 'activeImport.withoutMany'),
-      leftOut: (kinds) => t('activeImport.leftOut', { kinds: listedKinds(kinds) }),
+      leftOut: choice('activeImport.leftOutOne', 'activeImport.leftOut'),
       message: (count, kinds) => t('activeImport.message', { count, kinds: listedKinds(kinds) }),
     },
   }

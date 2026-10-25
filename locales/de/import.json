@@ -155,18 +155,33 @@
       "commands": "Befehle, die lokale MCP-Server starten",
       "files": "Dateizugriffe, die Dateien von diesem Computer senden"
     },
-    "kindNouns": {
-      "scripts": "Skripte",
-      "oauth": "OAuth-Einstellungen",
-      "commands": "Befehle",
-      "files": "Dateizugriffe"
+    "titleOne": {
+      "scripts": "Skripte importieren?",
+      "oauth": "OAuth-Einstellungen importieren?",
+      "commands": "Befehle importieren?",
+      "files": "Dateizugriffe importieren?"
     },
-    "titleOne": "{{kind}} importieren?",
     "titleMany": "Vor dem Import prüfen",
-    "withOne": "Mit {{kind}} importieren",
+    "withOne": {
+      "scripts": "Mit Skripten importieren",
+      "oauth": "Mit OAuth-Einstellungen importieren",
+      "commands": "Mit Befehlen importieren",
+      "files": "Mit Dateizugriffen importieren"
+    },
     "withMany": "Alles importieren",
-    "withoutOne": "Ohne {{kind}} importieren",
+    "withoutOne": {
+      "scripts": "Ohne Skripte importieren",
+      "oauth": "Ohne OAuth-Einstellungen importieren",
+      "commands": "Ohne Befehle importieren",
+      "files": "Ohne Dateizugriffe importieren"
+    },
     "withoutMany": "Ohne sie importieren",
+    "leftOutOne": {
+      "scripts": "Die Skripte wurden ausgelassen.",
+      "oauth": "Die OAuth-2.0-Einstellungen wurden ausgelassen.",
+      "commands": "Die Befehle, die lokale MCP-Server starten, wurden ausgelassen.",
+      "files": "Die Dateizugriffe, die Dateien von diesem Computer senden, wurden ausgelassen."
+    },
     "leftOut": "{{kinds}} wurden ausgelassen.",
     "message_one": "{{count}} Element in diesem Import enthält {{kinds}}. Diese laufen beim Senden einer Anfrage und können Ihre Variablen lesen, importieren Sie sie daher nur aus einer Quelle, der Sie vertrauen. Ohne sie wird alles andere trotzdem importiert.",
     "message_other": "{{count}} Elemente in diesem Import enthalten {{kinds}}. Diese laufen beim Senden einer Anfrage und können Ihre Variablen lesen, importieren Sie sie daher nur aus einer Quelle, der Sie vertrauen. Ohne sie wird alles andere trotzdem importiert."

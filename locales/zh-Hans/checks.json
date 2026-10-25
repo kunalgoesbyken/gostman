@@ -16,6 +16,15 @@
     "previewObject": "对象",
     "previewText": "文本“{{text}}”",
     "type": "{{where}}应为{{expected}}，但实际是{{actual}}。",
+    "typeOnly": {
+      "null": "{{where}}应为null，但实际是{{actual}}。",
+      "string": "{{where}}应为字符串，但实际是{{actual}}。",
+      "number": "{{where}}应为数字，但实际是{{actual}}。",
+      "integer": "{{where}}应为整数，但实际是{{actual}}。",
+      "boolean": "{{where}}应为true 或 false，但实际是{{actual}}。",
+      "array": "{{where}}应为数组，但实际是{{actual}}。",
+      "object": "{{where}}应为对象，但实际是{{actual}}。"
+    },
     "required": "{{where}}缺失，但 schema 要求必须有。",
     "additionalProperties": "{{where}}不在 schema 中，而 schema 不允许其他字段。",
     "enum": "{{where}}应为 {{allowed}} 之一，但实际是{{actual}}。",

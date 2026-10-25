@@ -3,6 +3,7 @@ export const REPOSITORY = `${OWNER}/gostman`
 export const REPOSITORY_URL = `https://github.com/${REPOSITORY}`
 export const ISSUES_URL = `${REPOSITORY_URL}/issues`
 export const TRANSLATIONS_ISSUE_URL = `${ISSUES_URL}/15`
+export const TRANSLATE_URL = "https://hosted.weblate.org/engage/gostman/"
 export const RELEASES_URL = `${REPOSITORY_URL}/releases/latest`
 export const DOCS_URL = `${REPOSITORY_URL}/blob/main/docs`
 export const HOMEBREW_TAP = `${OWNER}/tap`

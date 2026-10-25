@@ -12,6 +12,7 @@ const literal = (value) => (typeof value === 'string' ? quoted(value) : JSON.str
 
 const text = messages('checks', english, (t) => {
   const kindName = (type) => (hasMessage('checks', `schema.kinds.${type}`) ? t(`schema.kinds.${type}`) : type)
+  const typeKey = (expected) => (expected.length === 1 && hasMessage('checks', `schema.typeOnly.${expected[0]}`) ? `schema.typeOnly.${expected[0]}` : 'schema.type')
 
   function preview(value) {
     if (value === null || value === undefined) return String(value)
@@ -33,7 +34,7 @@ const text = messages('checks', english, (t) => {
       get editorHint() {
         return t('schema.editorHint', { example: SCHEMA_NAME_EXAMPLE })
       },
-      type: (where, expected, actual) => t('schema.type', { where, expected: formatList(expected.map(kindName), 'disjunction'), actual: preview(actual) }),
+      type: (where, expected, actual) => t(typeKey(expected), { where, expected: formatList(expected.map(kindName), 'disjunction'), actual: preview(actual) }),
       enum: (where, allowed, actual) => t('schema.enum', { where, allowed: formatList(allowed.map(literal), 'unit'), actual: preview(actual) }),
       const: (where, expected, actual) => t('schema.const', { where, expected: literal(expected), actual: preview(actual) }),
       minimum: withLimit('schema.minimum'),

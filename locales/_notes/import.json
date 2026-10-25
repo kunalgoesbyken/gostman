@@ -62,16 +62,16 @@
   "importResult.settingsWrapped": "{{name}} is the name of a new collection.",
   "fileReads.heading": "Introduces a list of file paths that an imported request reads from this computer.",
   "fileReads.more": "Last line of a truncated list of file paths.",
-  "activeImport.kindLabels": "Noun phrases used in a list, for example scripts and OAuth 2.0 settings, in the question before import.",
-  "activeImport.kindNouns": "Short nouns used in the buttons when only one kind of item is affected.",
-  "activeImport.titleOne": "Title of the question before import when one kind of item is affected. {{kind}} is a short noun, for example scripts.",
+  "activeImport.kindLabels": "Noun phrases used in a list, for example scripts and OAuth 2.0 settings. They appear as the object of \"carry\" in the question before import and in the \"left out\" sentence when several kinds are listed, so a form that also reads after a colon (for example \"Left out: ...\") is fine.",
+  "activeImport.titleOne": "Title of the question before import when one kind of item is affected. One message for each kind, so the article and the case can agree with the noun.",
   "activeImport.titleMany": "Title of the question before import when several kinds are affected.",
-  "activeImport.withOne": "Button that imports everything. {{kind}} is a short noun.",
+  "activeImport.withOne": "Button that imports everything. One message for each kind of item that is affected; the noun is the object of \"with\".",
   "activeImport.withMany": "Button that imports everything including the risky items.",
-  "activeImport.withoutOne": "Button that imports without the risky items. {{kind}} is a short noun.",
+  "activeImport.withoutOne": "Button that imports without the risky items. One message for each kind of item that is affected; the noun is the object of \"without\".",
   "activeImport.withoutMany": "Button that imports without the risky items.",
-  "activeImport.leftOut": "{{kinds}} is a list of noun phrases such as scripts and OAuth 2.0 settings.",
+  "activeImport.leftOut": "Used when several kinds were left out. {{kinds}} is a list of noun phrases such as scripts and OAuth 2.0 settings of different grammatical gender, so a form with a colon (for example \"Left out: {{kinds}}.\") avoids agreement problems.",
   "activeImport.message": "{{count}} is a number of items, {{kinds}} is a list of noun phrases. Scripts run when a request is sent, so they are risky.",
   "transfer.tabs.import": "Tab name for bringing data into Gostman. Noun or verb, whichever is the shorter tab label.",
-  "transfer.tabs.export": "Tab name for taking data out of Gostman. Noun or verb, whichever is the shorter tab label."
+  "transfer.tabs.export": "Tab name for taking data out of Gostman. Noun or verb, whichever is the shorter tab label.",
+  "activeImport.leftOutOne": "Sentence shown after the user chose to import without the risky items, when exactly one kind was left out. One message for each kind, so the verb and article can agree with the noun."
 }

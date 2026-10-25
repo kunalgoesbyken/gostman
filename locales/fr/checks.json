@@ -20,6 +20,15 @@
     "previewObject": "un objet",
     "previewText": "le texte « {{text}} »",
     "type": "{{where}} doit être {{expected}}, mais c’est {{actual}}.",
+    "typeOnly": {
+      "null": "{{where}} doit être null, mais c’est {{actual}}.",
+      "string": "{{where}} doit être une chaîne, mais c’est {{actual}}.",
+      "number": "{{where}} doit être un nombre, mais c’est {{actual}}.",
+      "integer": "{{where}} doit être un entier, mais c’est {{actual}}.",
+      "boolean": "{{where}} doit être vrai ou faux, mais c’est {{actual}}.",
+      "array": "{{where}} doit être un tableau, mais c’est {{actual}}.",
+      "object": "{{where}} doit être un objet, mais c’est {{actual}}."
+    },
     "required": "{{where}} est absent, mais le schéma l’exige.",
     "additionalProperties": "{{where}} ne figure pas dans le schéma, qui n’autorise aucun autre champ.",
     "enum": "{{where}} doit être l’une des valeurs {{allowed}}, mais c’est {{actual}}.",

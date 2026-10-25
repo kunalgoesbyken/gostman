@@ -139,8 +139,14 @@ func applyPathParams(address string, params []row) string {
 	return rebuilt
 }
 
+var droppedScriptCodes = map[locales.Code]locales.Code{
+	locales.ImporterPlaceCollection: locales.ImporterGrpcScriptsCollection,
+	locales.ImporterPlaceFolder:     locales.ImporterGrpcScriptsFolder,
+	locales.ImporterPlaceRequest:    locales.ImporterGrpcScriptsRequest,
+}
+
 func droppedScripts(label locales.Message, kinds []string) locales.Message {
-	return locales.New(locales.ImporterGrpcScripts, locales.Params{"label": label, "kinds": strings.Join(kinds, ", ")})
+	return locales.New(droppedScriptCodes[label.Code], locales.Params{"name": label.Params["name"], "kinds": strings.Join(kinds, ", ")})
 }
 
 type importMark struct {

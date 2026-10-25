@@ -160,6 +160,8 @@
     "languageSwitch": "Cambiar idioma",
     "languageHelp": "¿Falta tu idioma o has encontrado una traducción incorrecta? {{link}}.",
     "languageHelpLink": "Pregunta en GitHub",
+    "languageTranslate": "Cualquiera puede ayudar a traducir en {{link}}.",
+    "languageTranslateLink": "Weblate",
     "accentAdjusted": "Se muestra como {{light}} en modo claro y como {{dark}} en modo oscuro para que el texto de este color siga siendo legible."
   }
 }

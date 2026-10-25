@@ -155,18 +155,33 @@
       "commands": "commands that start local MCP servers",
       "files": "file reads that send files from this computer"
     },
-    "kindNouns": {
-      "scripts": "scripts",
-      "oauth": "OAuth settings",
-      "commands": "commands",
-      "files": "file reads"
+    "titleOne": {
+      "scripts": "Import the scripts?",
+      "oauth": "Import the OAuth settings?",
+      "commands": "Import the commands?",
+      "files": "Import the file reads?"
     },
-    "titleOne": "Import the {{kind}}?",
     "titleMany": "Review before importing",
-    "withOne": "Import with {{kind}}",
+    "withOne": {
+      "scripts": "Import with scripts",
+      "oauth": "Import with OAuth settings",
+      "commands": "Import with commands",
+      "files": "Import with file reads"
+    },
     "withMany": "Import everything",
-    "withoutOne": "Import without {{kind}}",
+    "withoutOne": {
+      "scripts": "Import without scripts",
+      "oauth": "Import without OAuth settings",
+      "commands": "Import without commands",
+      "files": "Import without file reads"
+    },
     "withoutMany": "Import without them",
+    "leftOutOne": {
+      "scripts": "The scripts were left out.",
+      "oauth": "The OAuth 2.0 settings were left out.",
+      "commands": "The commands that start local MCP servers were left out.",
+      "files": "The file reads that send files from this computer were left out."
+    },
     "leftOut": "The {{kinds}} were left out.",
     "message_one": "{{count}} item in this import carries {{kinds}}. These run when a request is sent and can read your variables, so only import them from a source you trust. Without them, everything else is still imported.",
     "message_other": "{{count}} items in this import carry {{kinds}}. These run when a request is sent and can read your variables, so only import them from a source you trust. Without them, everything else is still imported."

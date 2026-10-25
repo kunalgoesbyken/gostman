@@ -142,18 +142,33 @@
       "commands": "用于启动本地 MCP 服务器的命令",
       "files": "会发送这台电脑上文件的文件读取"
     },
-    "kindNouns": {
-      "scripts": "脚本",
-      "oauth": "OAuth 设置",
-      "commands": "命令",
-      "files": "文件读取"
+    "titleOne": {
+      "scripts": "导入脚本？",
+      "oauth": "导入 OAuth 设置？",
+      "commands": "导入命令？",
+      "files": "导入文件读取？"
     },
-    "titleOne": "导入{{kind}}？",
     "titleMany": "导入前请检查",
-    "withOne": "连同{{kind}}一起导入",
+    "withOne": {
+      "scripts": "连同脚本一起导入",
+      "oauth": "连同 OAuth 设置一起导入",
+      "commands": "连同命令一起导入",
+      "files": "连同文件读取一起导入"
+    },
     "withMany": "全部导入",
-    "withoutOne": "不含{{kind}}导入",
+    "withoutOne": {
+      "scripts": "不含脚本导入",
+      "oauth": "不含 OAuth 设置导入",
+      "commands": "不含命令导入",
+      "files": "不含文件读取导入"
+    },
     "withoutMany": "不含它们导入",
+    "leftOutOne": {
+      "scripts": "已排除脚本。",
+      "oauth": "已排除 OAuth 2.0 设置。",
+      "commands": "已排除用于启动本地 MCP 服务器的命令。",
+      "files": "已排除会发送这台电脑上文件的文件读取。"
+    },
     "leftOut": "已排除{{kinds}}。",
     "message_other": "此次导入中有 {{count}} 项带有{{kinds}}。它们会在发送请求时运行，并且可以读取你的变量，因此请只从你信任的来源导入。不含它们时，其余内容仍会导入。"
   }

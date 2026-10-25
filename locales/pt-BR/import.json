@@ -168,18 +168,33 @@
       "commands": "comandos que iniciam servidores MCP locais",
       "files": "leituras de arquivos que enviam arquivos deste computador"
     },
-    "kindNouns": {
-      "scripts": "scripts",
-      "oauth": "configurações de OAuth",
-      "commands": "comandos",
-      "files": "leituras de arquivos"
+    "titleOne": {
+      "scripts": "Importar scripts?",
+      "oauth": "Importar configurações de OAuth?",
+      "commands": "Importar comandos?",
+      "files": "Importar leituras de arquivos?"
     },
-    "titleOne": "Importar {{kind}}?",
     "titleMany": "Revise antes de importar",
-    "withOne": "Importar com {{kind}}",
+    "withOne": {
+      "scripts": "Importar com scripts",
+      "oauth": "Importar com configurações de OAuth",
+      "commands": "Importar com comandos",
+      "files": "Importar com leituras de arquivos"
+    },
     "withMany": "Importar tudo",
-    "withoutOne": "Importar sem {{kind}}",
+    "withoutOne": {
+      "scripts": "Importar sem scripts",
+      "oauth": "Importar sem configurações de OAuth",
+      "commands": "Importar sem comandos",
+      "files": "Importar sem leituras de arquivos"
+    },
     "withoutMany": "Importar sem eles",
+    "leftOutOne": {
+      "scripts": "Os scripts foram deixados de fora.",
+      "oauth": "As configurações de OAuth 2.0 foram deixadas de fora.",
+      "commands": "Os comandos que iniciam servidores MCP locais foram deixados de fora.",
+      "files": "As leituras de arquivos que enviam arquivos deste computador foram deixadas de fora."
+    },
     "leftOut": "Foram deixados de fora: {{kinds}}.",
     "message_one": "{{count}} item desta importação traz {{kinds}}. Isso é executado quando uma requisição é enviada e pode ler suas variáveis, então importe apenas de uma fonte em que você confia. Sem isso, todo o resto ainda é importado.",
     "message_many": "{{count}} de itens desta importação trazem {{kinds}}. Isso é executado quando uma requisição é enviada e pode ler suas variáveis, então importe apenas de uma fonte em que você confia. Sem isso, todo o resto ainda é importado.",

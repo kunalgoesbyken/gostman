@@ -20,6 +20,15 @@
     "previewObject": "un objeto",
     "previewText": "el texto «{{text}}»",
     "type": "{{where}} debería ser {{expected}}, pero es {{actual}}.",
+    "typeOnly": {
+      "null": "{{where}} debería ser null, pero es {{actual}}.",
+      "string": "{{where}} debería ser una cadena, pero es {{actual}}.",
+      "number": "{{where}} debería ser un número, pero es {{actual}}.",
+      "integer": "{{where}} debería ser un número entero, pero es {{actual}}.",
+      "boolean": "{{where}} debería ser verdadero o falso, pero es {{actual}}.",
+      "array": "{{where}} debería ser un array, pero es {{actual}}.",
+      "object": "{{where}} debería ser un objeto, pero es {{actual}}."
+    },
     "required": "{{where}} falta, pero el esquema lo requiere.",
     "additionalProperties": "{{where}} no está en el esquema, que no admite otros campos.",
     "enum": "{{where}} debería ser uno de {{allowed}}, pero es {{actual}}.",

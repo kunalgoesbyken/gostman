@@ -168,18 +168,33 @@
       "commands": "comenzi care pornesc servere MCP locale",
       "files": "citiri de fișiere care trimit fișiere de pe acest computer"
     },
-    "kindNouns": {
-      "scripts": "scripturi",
-      "oauth": "setări OAuth",
-      "commands": "comenzi",
-      "files": "citiri de fișiere"
+    "titleOne": {
+      "scripts": "Importați scripturile?",
+      "oauth": "Importați setările OAuth?",
+      "commands": "Importați comenzile?",
+      "files": "Importați citirile de fișiere?"
     },
-    "titleOne": "Importați {{kind}}?",
     "titleMany": "Verificare înainte de import",
-    "withOne": "Import cu {{kind}}",
+    "withOne": {
+      "scripts": "Import cu scripturi",
+      "oauth": "Import cu setări OAuth",
+      "commands": "Import cu comenzi",
+      "files": "Import cu citiri de fișiere"
+    },
     "withMany": "Importare tot",
-    "withoutOne": "Import fără {{kind}}",
+    "withoutOne": {
+      "scripts": "Import fără scripturi",
+      "oauth": "Import fără setări OAuth",
+      "commands": "Import fără comenzi",
+      "files": "Import fără citiri de fișiere"
+    },
     "withoutMany": "Import fără ele",
+    "leftOutOne": {
+      "scripts": "Scripturile au fost omise.",
+      "oauth": "Setările OAuth 2.0 au fost omise.",
+      "commands": "Comenzile care pornesc servere MCP locale au fost omise.",
+      "files": "Citirile de fișiere care trimit fișiere de pe acest computer au fost omise."
+    },
     "leftOut": "Au fost omise: {{kinds}}.",
     "message_one": "{{count}} element din acest import conține: {{kinds}}. Acestea rulează când o cerere este trimisă și vă pot citi variabilele, deci importați-le doar dintr-o sursă de încredere. Fără ele, restul este importat în continuare.",
     "message_few": "{{count}} elemente din acest import conțin: {{kinds}}. Acestea rulează când o cerere este trimisă și vă pot citi variabilele, deci importați-le doar dintr-o sursă de încredere. Fără ele, restul este importat în continuare.",

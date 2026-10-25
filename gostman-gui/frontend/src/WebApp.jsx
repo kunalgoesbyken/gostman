@@ -2,11 +2,14 @@ import { lazy, Suspense, useCallback, useEffect } from "react"
 import { LandingPage } from "./components/LandingPage"
 import { useRoute } from "./hooks/useRoute"
 import { bootLanguage } from "./lib/i18n/boot"
-import { webBackend } from "./lib/backend/web"
 import { registerServiceWorker } from "./lib/pwa"
 import { preventInputZoom } from "./lib/viewport"
 
-const Workspace = lazy(() => bootLanguage().then(() => import("./components/Workspace")).then((module) => ({ default: module.Workspace })))
+const WebWorkspace = lazy(async () => {
+  await bootLanguage()
+  const [{ Workspace }, { webBackend }] = await Promise.all([import("./components/Workspace"), import("./lib/backend/web")])
+  return { default: (props) => <Workspace backend={webBackend} {...props} /> }
+})
 
 function WebApp() {
   const { route, navigate } = useRoute()
@@ -26,7 +29,7 @@ function WebApp() {
 
   return (
     <Suspense fallback={null}>
-      <Workspace backend={webBackend} onBack={openLanding} />
+      <WebWorkspace onBack={openLanding} />
     </Suspense>
   )
 }

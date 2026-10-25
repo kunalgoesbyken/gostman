@@ -5,8 +5,12 @@ import { formatList } from './i18n/format'
 const text = messages('importExport', english, (t) => ({
   importExport: {
     invalidYaml: (reason) => t('importExport.invalidYaml', { reason }),
-    noRequests: (label) => t('importExport.noRequests', { label }),
-    unreadable: (label) => t('importExport.unreadable', { label }),
+    get noRequests() {
+      return t('importExport.noRequests')
+    },
+    get unreadable() {
+      return t('importExport.unreadable')
+    },
     tlsKept: (shownNames, hiddenCount) => t('importExport.tlsKept', {
       names: hiddenCount > 0 ? t('importExport.namesMore', { names: formatList(shownNames, 'unit'), count: hiddenCount }) : formatList(shownNames),
     }),

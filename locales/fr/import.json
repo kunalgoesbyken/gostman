@@ -168,18 +168,33 @@
       "commands": "commandes qui lancent des serveurs MCP locaux",
       "files": "lectures de fichiers qui envoient des fichiers de cet ordinateur"
     },
-    "kindNouns": {
-      "scripts": "scripts",
-      "oauth": "paramètres OAuth",
-      "commands": "commandes",
-      "files": "lectures de fichiers"
+    "titleOne": {
+      "scripts": "Importer les scripts ?",
+      "oauth": "Importer les paramètres OAuth ?",
+      "commands": "Importer les commandes ?",
+      "files": "Importer les lectures de fichiers ?"
     },
-    "titleOne": "Importer les {{kind}} ?",
     "titleMany": "À relire avant l’import",
-    "withOne": "Importer avec les {{kind}}",
+    "withOne": {
+      "scripts": "Importer avec les scripts",
+      "oauth": "Importer avec les paramètres OAuth",
+      "commands": "Importer avec les commandes",
+      "files": "Importer avec les lectures de fichiers"
+    },
     "withMany": "Tout importer",
-    "withoutOne": "Importer sans les {{kind}}",
+    "withoutOne": {
+      "scripts": "Importer sans les scripts",
+      "oauth": "Importer sans les paramètres OAuth",
+      "commands": "Importer sans les commandes",
+      "files": "Importer sans les lectures de fichiers"
+    },
     "withoutMany": "Importer sans eux",
+    "leftOutOne": {
+      "scripts": "Les scripts ont été exclus.",
+      "oauth": "Les paramètres OAuth 2.0 ont été exclus.",
+      "commands": "Les commandes qui lancent des serveurs MCP locaux ont été exclues.",
+      "files": "Les lectures de fichiers qui envoient des fichiers de cet ordinateur ont été exclues."
+    },
     "leftOut": "Les {{kinds}} ont été exclus.",
     "message_one": "{{count}} élément de cet import contient des {{kinds}}. Ils s’exécutent lors de l’envoi d’une requête et peuvent lire vos variables : n’importez-les donc que depuis une source de confiance. Sans eux, tout le reste est quand même importé.",
     "message_other": "{{count}} éléments de cet import contiennent des {{kinds}}. Ils s’exécutent lors de l’envoi d’une requête et peuvent lire vos variables : n’importez-les donc que depuis une source de confiance. Sans eux, tout le reste est quand même importé.",

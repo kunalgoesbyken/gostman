@@ -44,7 +44,7 @@ func (c *collector) readPostmanDump(doc document) {
 	root := object(doc.data)
 	for index, entry := range list(root["collections"]) {
 		if classifyStructured(entry) != kindPostmanCollection {
-			c.skip(locales.ImporterPostmanLegacy, locales.Params{"file": doc.file.Name, "collection": legacyLabel(entry, index)})
+			c.skipLegacyCollection(doc.file.Name, entry, index)
 			continue
 		}
 		c.readPostmanCollection(document{file: doc.file, data: entry})
@@ -57,11 +57,12 @@ func (c *collector) readPostmanDump(doc document) {
 	}
 }
 
-func legacyLabel(entry any, index int) any {
+func (c *collector) skipLegacyCollection(file string, entry any, index int) {
 	if name := text(object(entry)["name"]); name != "" {
-		return strconv.Quote(name)
+		c.skip(locales.ImporterPostmanLegacyNamed, locales.Params{"file": file, "collection": strconv.Quote(name)})
+		return
 	}
-	return locales.New(locales.ImporterCollectionNumber, locales.Params{"number": index + 1})
+	c.skip(locales.ImporterPostmanLegacyNumbered, locales.Params{"file": file, "number": index + 1})
 }
 
 func (c *collector) postmanScope(node map[string]any, kind, name string) scope {

@@ -73,7 +73,7 @@ func (c *collector) gostmanSettings(raw json.RawMessage) {
 		return
 	}
 	if err := json.Unmarshal(raw, &settings); err != nil {
-		c.skip(locales.ImporterGostmanItem, locales.Params{"what": "settings"})
+		c.skip(locales.ImporterGostmanItemSettings, nil)
 		return
 	}
 	settings.Auth = withoutTokens(settings.Auth)
@@ -146,7 +146,7 @@ func (c *collector) gostmanFolders(raw []json.RawMessage, ids idMap) {
 	for _, item := range raw {
 		var folder workspace.Folder
 		if err := json.Unmarshal(item, &folder); err != nil {
-			c.skip(locales.ImporterGostmanItem, locales.Params{"what": "folder"})
+			c.skip(locales.ImporterGostmanItemFolder, nil)
 			continue
 		}
 		decoded = append(decoded, folder)
@@ -168,7 +168,7 @@ func (c *collector) gostmanRequests(raw []json.RawMessage, folders, requests idM
 	for _, item := range raw {
 		var request workspace.Request
 		if err := json.Unmarshal(item, &request); err != nil {
-			c.skip(locales.ImporterGostmanItem, locales.Params{"what": "request"})
+			c.skip(locales.ImporterGostmanItemRequest, nil)
 			continue
 		}
 		request.Id = requests.fresh(request.Id)
@@ -190,7 +190,7 @@ func (c *collector) gostmanGlobals(raw []json.RawMessage) {
 	for _, item := range raw {
 		var global workspace.Environment
 		if err := json.Unmarshal(item, &global); err != nil {
-			c.skip(locales.ImporterGostmanItem, locales.Params{"what": "global environment"})
+			c.skip(locales.ImporterGostmanItemGlobalEnvironment, nil)
 			continue
 		}
 		global.Id, global.FolderId, global.Extends = newID(), "", ""
@@ -205,7 +205,7 @@ func (c *collector) gostmanEnvironments(raw []json.RawMessage, folders idMap) {
 	for _, item := range raw {
 		var environment workspace.Environment
 		if err := json.Unmarshal(item, &environment); err != nil {
-			c.skip(locales.ImporterGostmanItem, locales.Params{"what": "environment"})
+			c.skip(locales.ImporterGostmanItemEnvironment, nil)
 			continue
 		}
 		decoded = append(decoded, environment)

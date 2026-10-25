@@ -168,18 +168,33 @@
       "commands": "comandi che avviano server MCP locali",
       "files": "letture di file che inviano file da questo computer"
     },
-    "kindNouns": {
-      "scripts": "script",
-      "oauth": "impostazioni OAuth",
-      "commands": "comandi",
-      "files": "letture di file"
+    "titleOne": {
+      "scripts": "Importare gli script?",
+      "oauth": "Importare le impostazioni OAuth?",
+      "commands": "Importare i comandi?",
+      "files": "Importare le letture di file?"
     },
-    "titleOne": "Importare {{kind}}?",
     "titleMany": "Controlla prima di importare",
-    "withOne": "Importa con {{kind}}",
+    "withOne": {
+      "scripts": "Importa con gli script",
+      "oauth": "Importa con le impostazioni OAuth",
+      "commands": "Importa con i comandi",
+      "files": "Importa con le letture di file"
+    },
     "withMany": "Importa tutto",
-    "withoutOne": "Importa senza {{kind}}",
+    "withoutOne": {
+      "scripts": "Importa senza gli script",
+      "oauth": "Importa senza le impostazioni OAuth",
+      "commands": "Importa senza i comandi",
+      "files": "Importa senza le letture di file"
+    },
     "withoutMany": "Importa senza di essi",
+    "leftOutOne": {
+      "scripts": "Gli script sono stati esclusi.",
+      "oauth": "Le impostazioni OAuth 2.0 sono state escluse.",
+      "commands": "I comandi che avviano server MCP locali sono stati esclusi.",
+      "files": "Le letture di file che inviano file da questo computer sono state escluse."
+    },
     "leftOut": "Esclusi: {{kinds}}.",
     "message_one": "{{count}} elemento di questa importazione contiene {{kinds}}. Questi vengono eseguiti quando una richiesta viene inviata e possono leggere le tue variabili, quindi importali solo da una fonte di cui ti fidi. Senza di essi, tutto il resto viene comunque importato.",
     "message_many": "{{count}} di elementi di questa importazione contengono {{kinds}}. Questi vengono eseguiti quando una richiesta viene inviata e possono leggere le tue variabili, quindi importali solo da una fonte di cui ti fidi. Senza di essi, tutto il resto viene comunque importato.",
