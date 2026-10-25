@@ -82,6 +82,22 @@ func (d disk) readListed(relative string) ([]byte, error) {
 	return os.ReadFile(filepath.Join(d.root, filepath.FromSlash(relative)))
 }
 
+func (d disk) listWalked(relative string) ([]fs.DirEntry, error) {
+	return os.ReadDir(filepath.Join(d.root, filepath.FromSlash(relative)))
+}
+
+func (d disk) readWalked(relative string) ([]byte, error) {
+	target := filepath.Join(d.root, filepath.FromSlash(relative))
+	info, err := os.Lstat(target)
+	if err != nil {
+		return nil, err
+	}
+	if !info.Mode().IsRegular() {
+		return nil, fmt.Errorf("%s is not a regular file", relative)
+	}
+	return os.ReadFile(target)
+}
+
 func (d disk) exists(relative string) bool {
 	target, err := d.resolve(relative)
 	if err != nil {

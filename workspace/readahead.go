@@ -57,7 +57,7 @@ func (a *readAhead) spawn(table map[string]*pending, key string, work func(*pend
 
 func (a *readAhead) survey(directory string, depth int) {
 	a.spawn(a.listings, directory, func(job *pending) {
-		job.entries, job.err = a.disk.list(directory)
+		job.entries, job.err = a.list(directory)
 		for _, entry := range job.entries {
 			relative := joinPath(directory, entry.Name())
 			switch kindOf(directory, entry) {
@@ -73,6 +73,13 @@ func (a *readAhead) survey(directory string, depth int) {
 	})
 }
 
+func (a *readAhead) list(directory string) ([]fs.DirEntry, error) {
+	if directory == "" {
+		return a.disk.list(directory)
+	}
+	return a.disk.listWalked(directory)
+}
+
 func (a *readAhead) readRequest(relative string) {
 	a.spawn(a.files, relative, func(job *pending) {
 		content, err := a.disk.readListed(relative)
@@ -82,7 +89,7 @@ func (a *readAhead) readRequest(relative string) {
 
 func (a *readAhead) readFolderFile(relative string) {
 	a.spawn(a.files, relative, func(job *pending) {
-		job.content, job.err = a.disk.read(relative)
+		job.content, job.err = a.disk.readWalked(relative)
 	})
 }
 

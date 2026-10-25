@@ -116,6 +116,8 @@ After the change, one bounded pool (twice the CPU count, between 4 and 32 reader
 
 A second round of the 25-minute test did not give a usable comparison: the first folder took 12.8 s (before), the next 30.6 s (after), and the four after that 1.2 to 1.7 s whichever code opened them, so something else on the machine had read them in the meantime.
 
+Follow-up: the walk no longer re-checks every parent folder of each folder it lists and of each `folder.yaml` (the parent listing already showed them to be plain folders). Warm opens of the 5,000-request folder, 4 alternating runs each: 0.95 to 2.2 s before (median 1.07 s), 0.57 to 0.99 s after (median 0.70 s); the collection and problems hashes are identical. The first read of freshly written files is dominated by the operating system (11 to 17 s in two of the first runs, with the same code); more readers (64, 256) made no consistent difference.
+
 ## Scripts in the web runner (2026-10-25)
 
 Production builds of the web app served by `vite preview`, headless Chromium 153.0.8010.12 at 1400 by 950, driven by Playwright; other jobs kept the CPU busy, so the spread is wide. A local Go server answered every request through a local `cmd/local` proxy. The collection: 30 GET requests in one folder, each with a pre-request and a post-response script, and the folder with one of each too, so four script stages per request. "Before" is the build without the worker pool, "After" with it, run interleaved.
