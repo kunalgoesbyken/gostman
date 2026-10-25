@@ -21,13 +21,21 @@ The request bar sits above the request tabs.
 | --- | --- |
 | Request name | A text field that shows "Untitled request" until you name the request. |
 | HTTP method | GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, GRAPHQL, GRPC or MCP. |
-| Request URL | Accepts `{{variables}}`. Pasting a command that starts with `curl ` fills the request from it. Press Enter to send. |
+| Request URL | Accepts `{{variables}}`. Pasting a command that starts with `curl ` fills the request from it, see [Pasting curl commands](#pasting-curl-commands). Press Enter to send. |
 | Send | Sends the request. While a request is running the button becomes Cancel. |
 | Save | Saves the request. |
 | Code | Opens the code generator. See [Code generation](#code-generation). |
 | Load test | Desktop app only, and not shown for gRPC and MCP requests. Opens the Load test dialog for this request. See [Load test](runner-load-and-scan.md#load-test). |
 
 When the URL is a WebSocket address, the method list shows WS (or GRAPHQL for GraphQL subscriptions) and the Send button is labelled Connect; while the connection is open it becomes Disconnect. Send and Save show their keyboard shortcuts in their tooltips; see [Preferences, shortcuts and the command palette](preferences-and-shortcuts.md).
+
+### Pasting curl commands
+
+A curl command pasted into the address bar fills the method, URL, headers, body, basic auth, cookies and timeout. Options with no counterpart, such as `-o` or `--proxy`, are ignored.
+
+- `-F name=@path` becomes a Multipart file row that reads the file from disk, keeping `;type=` and `;filename=`, and `-F name=<path` a text row filled from the file. `--form-string` and `--data-raw` keep a leading `@` as text.
+- `-d @path`, `--data-binary @path` and `--json @path` become a body of `{{$file(path)}}`, see [Reading files](variables.md#reading-files).
+- When the command reads files, through these or a `{{$file(...)}}` placeholder of its own, a prompt lists the paths before anything is filled in. **Paste with file reads** keeps them, **Paste without file reads** fills in the rest and leaves the file parts empty, and **Cancel** leaves the request as it was. The files are read only when the request is sent, and only where file reads are allowed: the desktop app reads them, the web app does not.
 
 ## Request tabs
 
@@ -59,6 +67,7 @@ The bookmark button at the right end of the tab row opens the saved [examples](#
 Params and Headers use a table with a checkbox, a name and a value for each row. Clear the checkbox ("Send this row") to keep a row without sending it. The remove button deletes a row, and the empty row at the bottom adds a new one. Names and values accept `{{variables}}`.
 
 - The Params rows mirror the query string in the URL. Unchecked rows are kept in the table but not sent.
+- Gostman sends `User-Agent: Gostman/<version>` unless a header of the request, a folder or an auth setting sets one. The web app's proxy sends `Gostman` without a version.
 - The Headers tab shows a count of headers inherited from folders or the collection, and lists them under **Inherited** below the table with the folder they come from. Click the folder name to open its settings. An inherited header that a row of the request replaces is marked **Replaced**, and one that an unchecked row with the same name stops is marked **Switched off**. See [Folder and collection settings](folder-settings.md).
 
 #### Bulk edit
@@ -74,7 +83,7 @@ Authorization: Bearer {{token}}
 ![The Headers tab in bulk edit: four headers as name: value lines, the last one starting with // so it is not sent](../screenshots/bulk-edit.png)
 
 - The name ends at the first colon, and spaces around the name and the value are dropped.
-- A line that starts with `//` is kept without being sent, like an unchecked row.
+- A line that starts with `//` or `#` is kept without being sent, like an unchecked row; switching back to text writes it with `//`.
 - Blank lines are ignored. **Edit as table** switches back.
 - Typing `{{` suggests variable names, as in the table.
 
@@ -92,13 +101,13 @@ Choose a body type with the buttons at the top of the Body tab.
 | XML | Code editor with XML highlighting. |
 | SOAP | XML editor with a toolbar. |
 | Form URL-encoded | Table of name and value rows. |
-| Multipart | Table of rows where each row has a Type of Text or File. |
-| File | Choose a single file to send as the body. |
+| Multipart | Table of rows where each row has a Type of Text or File. Use it to upload files with form fields, as an HTML form does. |
+| File | Choose a single file to upload as the whole body. |
 
 Details:
 
 - File attachments, in the File type and in Multipart file rows, work differently in the two apps:
-  - The desktop app keeps only the file's path and reads the file from disk while the request is sent, so the file is never loaded into memory or saved in the collection. The file row shows its current size on disk, and hovering it shows the path. The files of one request can be up to 1 GB together. A folder you have not trusted cannot send them, and the CLI does not send them. AWS Signature, Hawk, EdgeGrid and OAuth 1.0 sign the whole body, so with them the files are limited to 10 MB. A large upload can take longer than the default 30 second timeout; raise it under **Settings**.
+  - The desktop app keeps only the file's path and reads the file from disk while the request is sent, so the file is never loaded into memory or saved in the collection. The file row shows its current size on disk, and hovering it shows the path. The files of one request can be up to 1 GB together. A folder you have not trusted cannot send them, and the CLI does not send them. Files on network shares (`\\server\share\...` or `//server/share/...`) and device paths are refused, so Windows never sends your sign-in to another computer; copy the file to this computer or map the share to a drive letter. AWS Signature, Hawk, EdgeGrid and OAuth 1.0 sign the whole body, so with them the files are limited to 10 MB. A large upload can take longer than the default 30 second timeout; raise it under **Settings**.
   - The web app keeps the file's content in the request, and a file is limited to 3 MB, because the hosted proxy accepts requests of at most 4.5 MB. A larger file is refused with a message that says so.
 - Switching between raw types (JSON, Text, XML, SOAP) keeps the same text. Switching between the groups None, Form URL-encoded, Multipart, File and raw types keeps a separate draft for each group, so you can switch back without losing it.
 - For JSON and XML, **Format** at the right of the toolbar (or Shift+Alt+F in the editor) indents the body. `{{variables}}` are kept as written, also where JSON expects a value, and numbers, key order and duplicate keys are left exactly as they are. Undo (Ctrl+Z) restores the previous text. When the body is not valid, nothing is changed: a notice names the problem with its line and column, for example "The JSON cannot be formatted at line 3, column 3: Expected ',' or '}' after the property value", the cursor moves to that place, and **Go to line** takes you back to it later. The same message appears when you hover the underlined spot while typing.
@@ -274,7 +283,7 @@ The Body tab chooses a view from the response type.
 | No body | "Empty response body" with the status. |
 
 - Pretty shows a collapsible tree. The first two levels are expanded. Very large trees are trimmed, and a notice tells you how many values are hidden.
-- The HTML preview runs in a sandboxed frame.
+- The HTML preview runs in a sandboxed frame without scripts, forms or navigation. Images, styles and fonts from other addresses are blocked, so a page cannot reveal your IP address or make the desktop app reach devices on your network; images and fonts written into the page as `data:` addresses still show. **Load remote content** in the notice above the preview loads them for that response only, and **Block again** switches them off. The next response starts blocked again.
 - A body over 500,000 characters is shown whole as plain text, without the tree or colours, so the window stays responsive. Only the lines on screen are drawn, and long lines are wrapped to the width of the panel. For JSON, **Format anyway** in the notice above the body pretty-prints it in the background and then offers Pretty and Raw; the rest of the app keeps working while it formats.
 
 ### Filter and search
@@ -319,7 +328,7 @@ The bar at the bottom of the window holds shortcuts to dialogs and shows state:
 
 ## History
 
-The History tab at the top of the sidebar lists sent requests, with the method, the URL, the HTTP status of the response, in the colours of the response panel, and the time since sending (for example "5m" or "2d"). Sends that got no response show no status. The tab shows a count.
+The History tab at the top of the sidebar lists sent requests, with the method, the URL, the HTTP status of the response, in the colours of the response panel, and the time since sending (for example "5m" or "2d"). Sends that got no response are marked **No response**. Screen readers read the time in full, for example "sent 5 minutes ago". The tab shows a count.
 
 - Click an entry to open it as a request tab.
 - Search history filters by method, URL and status, so `404` finds the requests that got one.

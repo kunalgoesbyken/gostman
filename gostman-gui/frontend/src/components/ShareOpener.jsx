@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Button } from "./ui/button"
+import { CodeText } from "./ui/ConfirmDialog"
 import { Input } from "./ui/input"
 import { MethodTag } from "./MethodTag"
 import { CREDENTIAL_PASSPHRASE, credentialNeeded, openShare, readShareReference } from "../lib/share"
 import { describeShared, readShared } from "../lib/shareContent"
-import { IMPORT_TEXT, collectionCounts } from "../lib/importText"
+import { FILE_READS_TEXT, IMPORT_TEXT, collectionCounts } from "../lib/importText"
 import { SHARE_OPEN_TEXT } from "../lib/shareText"
 
 const IDLE = { status: "idle" }
@@ -81,7 +82,7 @@ function CredentialForm({ kind, isOpening, onSubmit }) {
 }
 
 function SharePreview({ summary }) {
-  const { requests, folders, environments, activeCount, activeKinds, exampleCount, warnings } = summary
+  const { requests, folders, environments, activeCount, activeKinds, filePaths, exampleCount, warnings } = summary
   return (
     <div className="flex min-h-0 flex-col gap-2 text-xs">
       <p className="font-medium text-foreground">
@@ -101,6 +102,12 @@ function SharePreview({ summary }) {
         <p className="text-warning">
           {SHARE_OPEN_TEXT.activeContent(activeCount, activeKinds)}
         </p>
+      )}
+      {filePaths.length > 0 && (
+        <>
+          <p className="text-warning">{FILE_READS_TEXT.heading(filePaths.length)}</p>
+          <CodeText>{FILE_READS_TEXT.list(filePaths)}</CodeText>
+        </>
       )}
       {warnings.map((warning) => <p key={warning} className="text-warning">{warning}</p>)}
       <ul aria-label={SHARE_OPEN_TEXT.requestsLabel} className="max-h-48 min-h-0 overflow-y-auto rounded-md border border-border py-1">

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 const (
@@ -33,6 +34,7 @@ func (c *collector) readPostmanCollection(doc document) {
 		collection := c.postmanScope(root, labelCollection, name)
 		collection.description = describedText(info["description"])
 		rootID := c.addScopedFolder(name, "", c.collectionScope(collection))
+		c.postmanRoots = append(c.postmanRoots, rootID)
 		c.postmanItems(list(root["item"]), rootID, object(root["protocolProfileBehavior"]), 0)
 		c.summarizeScripts(postmanDialect, name)
 	})
@@ -486,10 +488,17 @@ func (c *collector) postmanOAuth2(fields map[string]string) engine.Auth {
 		PKCE: fields["grant_type"] == "authorization_code_with_pkce", SecretInBody: fields["client_authentication"] == "body",
 	})
 	if !ok {
-		c.Warnings = appendUnique(c.Warnings, fmt.Sprintf(messageAuthType, authOAuth2+" "+fields["grant_type"]))
+		c.warnOnce(RemarkOAuth, unsupportedGrant(fields["grant_type"]))
 		return engine.Auth{}
 	}
 	return auth
+}
+
+func unsupportedGrant(grant string) string {
+	if strings.TrimSpace(grant) == "" {
+		return messageOAuthNoGrant
+	}
+	return fmt.Sprintf(messageOAuthGrant, grant)
 }
 
 func postmanGrant(grant string) string {
@@ -500,6 +509,26 @@ func postmanGrant(grant string) string {
 		return grantPassword
 	}
 	return grant
+}
+
+func (c *collector) notePostmanEnvironments(added []workspace.Environment) {
+	if c.postmanEnvironments == nil {
+		c.postmanEnvironments = map[string]bool{}
+	}
+	for _, environment := range added {
+		c.postmanEnvironments[environment.Id] = true
+	}
+}
+
+func (c *collector) scopePostmanEnvironments() {
+	if len(c.postmanRoots) != 1 {
+		return
+	}
+	for index, environment := range c.Environments {
+		if c.postmanEnvironments[environment.Id] && environment.FolderId == "" {
+			c.Environments[index].FolderId = c.postmanRoots[0]
+		}
+	}
 }
 
 func (c *collector) readPostmanEnvironment(doc document) {
@@ -518,7 +547,9 @@ func (c *collector) readPostmanEnvironment(doc document) {
 				draft.variables = append(draft.variables, envVariable{name: key, value: text(entry["value"]), enabled: true, secret: text(entry["type"]) == postmanSecretType})
 			}
 		}
+		known := len(c.Environments)
 		c.addDraftEnvironments([]environmentDraft{draft})
+		c.notePostmanEnvironments(c.Environments[known:])
 		if len(disabled) > 0 {
 			c.Warnings = append(c.Warnings, fmt.Sprintf(messageDisabledVariables, name, listNames(disabled)))
 		}

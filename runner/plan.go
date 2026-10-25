@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -29,7 +30,54 @@ type plan struct {
 	folderNames map[string]string
 }
 
+type placement struct {
+	Index     int    `json:"index"`
+	FolderID  string `json:"folderId"`
+	SortOrder int64  `json:"sortOrder"`
+}
+
+func (s *Session) Normalized(stored, earlier Collection) (Collection, error) {
+	known := map[string]Request{}
+	if len(earlier.Normalized) == len(earlier.Requests) {
+		for index, raw := range earlier.Requests {
+			known[string(raw)] = earlier.Normalized[index]
+		}
+	}
+	var fresh []json.RawMessage
+	for _, raw := range stored.Requests {
+		if _, found := known[string(raw)]; !found {
+			fresh = append(fresh, raw)
+		}
+	}
+	requests, err := normalize(s.state.scripts, Collection{Requests: fresh})
+	if err != nil {
+		return stored, err
+	}
+	for index, raw := range fresh {
+		known[string(raw)] = requests[index]
+	}
+	stored.Normalized = make([]Request, len(stored.Requests))
+	for index, raw := range stored.Requests {
+		stored.Normalized[index] = known[string(raw)]
+	}
+	return stored, nil
+}
+
 func normalize(scripts *sandbox.Sandbox, stored Collection) ([]Request, error) {
+	if stored.Normalized != nil {
+		return stored.Normalized, nil
+	}
+	requests := make([]Request, 0, len(stored.Requests))
+	if len(stored.Requests) == 0 {
+		return requests, nil
+	}
+	if err := scripts.Call("normalizeRequests", &requests, stored.Requests); err == nil {
+		return requests, nil
+	}
+	return normalizeEach(scripts, stored)
+}
+
+func normalizeEach(scripts *sandbox.Sandbox, stored Collection) ([]Request, error) {
 	requests := make([]Request, 0, len(stored.Requests))
 	for index, raw := range stored.Requests {
 		var request Request
@@ -91,6 +139,22 @@ func (o Options) applyTo(request Request) Request {
 	return request
 }
 
+func inFolder(scripts *sandbox.Sandbox, folders []Folder, requests []Request, folderID string, sharedOrder bool) ([]Request, error) {
+	placements := make([]placement, len(requests))
+	for index, request := range requests {
+		placements[index] = placement{Index: index, FolderID: request.FolderID, SortOrder: request.SortOrder}
+	}
+	var placed []placement
+	if err := scripts.Call("requestsInFolder", &placed, folders, placements, folderID, sharedOrder); err != nil {
+		return nil, err
+	}
+	ordered := make([]Request, len(placed))
+	for position, found := range placed {
+		ordered[position] = requests[found.Index]
+	}
+	return ordered, nil
+}
+
 func prepare(scripts *sandbox.Sandbox, stored Collection, options Options) (plan, error) {
 	requests, err := normalize(scripts, stored)
 	if err != nil {
@@ -105,8 +169,8 @@ func prepare(scripts *sandbox.Sandbox, stored Collection, options Options) (plan
 	if err != nil {
 		return plan{}, err
 	}
-	var ordered []Request
-	if err := scripts.Call("requestsInFolder", &ordered, folders, requests, folderID, stored.SharedOrder); err != nil {
+	ordered, err := inFolder(scripts, folders, requests, folderID, stored.SharedOrder)
+	if err != nil {
 		return plan{}, err
 	}
 	planned := plan{library: requests, folderNames: map[string]string{}}

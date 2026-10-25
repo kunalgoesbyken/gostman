@@ -24,6 +24,7 @@ type Settings struct {
 	Root         string
 	Environment  string
 	Variables    map[string]string
+	Secrets      map[string]bool
 	Policy       engine.Policy
 	AllowedHosts []string
 	Timeout      time.Duration
@@ -44,11 +45,25 @@ type Desk struct {
 	reach     *destinations
 	responses responseLog
 	exposed   []exposure
+	seen      *snapshot
+	earlier   runner.Collection
 }
 
 type scene struct {
 	files  workspace.Collection
 	stored runner.Collection
+}
+
+type reading struct {
+	files   workspace.Collection
+	authors authorship
+	dotEnv  map[string]string
+	modules map[string]string
+}
+
+type snapshot struct {
+	read    reading
+	current scene
 }
 
 type attached interface {
@@ -85,6 +100,8 @@ func Open(settings Settings) (*Desk, error) {
 	if err := client.separateCatalog(); err != nil {
 		return nil, err
 	}
+	client.MarkSecret(settings.Secrets)
+	client.session.Confine(secretScope{client: client, reach: reach})
 	desk := &Desk{
 		files:    files,
 		client:   client,
@@ -114,8 +131,7 @@ func (d *Desk) authors() (authorship, error) {
 	return authorship{requests: requests, variables: variables}, err
 }
 
-func (d *Desk) study(files workspace.Collection) {
-	authors, err := d.authors()
+func (d *Desk) study(files workspace.Collection, authors authorship, err error) {
 	if err != nil {
 		d.reach.forget()
 		return
@@ -134,12 +150,29 @@ func (d *Desk) refresh() (scene, error) {
 		return scene{}, err
 	}
 	files := d.files.Collection()
-	d.study(files)
+	authors, err := d.authors()
+	extras := runner.WithFolderFiles(runner.Collection{}, d.files)
+	read := reading{files: files, authors: authors, dotEnv: extras.DotEnv, modules: extras.Modules}
+	if err == nil && d.seen != nil && reflect.DeepEqual(d.seen.read, read) {
+		return d.seen.current, nil
+	}
+	d.seen = nil
+	d.study(files, authors, err)
 	stored, err := runner.FromWorkspace(files)
 	if err != nil {
 		return scene{}, err
 	}
-	return scene{files: files, stored: stored}, d.client.Study(stored)
+	stored.DotEnv, stored.Modules = extras.DotEnv, extras.Modules
+	if stored, err = d.client.catalog.Normalized(stored, d.earlier); err != nil {
+		return scene{}, err
+	}
+	d.earlier = stored
+	current := scene{files: files, stored: stored}
+	if err := d.client.Study(stored); err != nil {
+		return current, err
+	}
+	d.seen = &snapshot{read: read, current: current}
+	return current, nil
 }
 
 func (d *Desk) outside(work func()) {

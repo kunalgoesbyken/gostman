@@ -23,6 +23,8 @@ type scriptExport struct {
 	unchanged int
 	adapted   int
 	defined   map[string]bool
+	rewritten int
+	from      []string
 	checks    int
 	kept      int
 	skipped   int
@@ -100,18 +102,33 @@ func (e *scriptExport) script(place exportPlace, stage, source string, counted b
 		for _, name := range adapted.defined {
 			e.defined[name] = true
 		}
-	case len(adapted.notes) == 0:
+	case len(adapted.notes) == 0 && len(adapted.from) == 0:
 		e.unchanged++
 	}
+	e.countRewritten(adapted.from)
 	for _, note := range adapted.notes {
 		e.warn(place, stage, note.line, note.text)
 	}
 	return adapted.text
 }
 
+func (e *scriptExport) countRewritten(from []string) {
+	if len(from) == 0 {
+		return
+	}
+	e.rewritten++
+	for _, api := range from {
+		e.from = appendUnique(e.from, api)
+	}
+}
+
 func (e *scriptExport) scriptWithChecks(place exportPlace, extract, source, checks string, keepNative bool) (string, string) {
-	var kept []assertion
+	var kept, restored []assertion
 	var tests []string
+	if keepNative {
+		source, restored = brunoRowsIn(source)
+		e.kept += len(restored)
+	}
 	for _, row := range readChecks(checks) {
 		if strings.TrimSpace(row.Expression) == "" {
 			continue
@@ -137,6 +154,7 @@ func (e *scriptExport) scriptWithChecks(place exportPlace, extract, source, chec
 		}
 		tests = append(tests, code)
 	}
+	kept = append(kept, restored...)
 	generated := strings.Join(tests, "\n\n")
 	if e.target.assertRows {
 		e.tests[place.id] = e.script(place, stageChecks, generated, false)
@@ -194,6 +212,7 @@ func (e *scriptExport) warn(place exportPlace, stage string, line int, text stri
 func (e *scriptExport) report() Report {
 	var notes []string
 	notes = appendCounted(notes, messageExportUnchanged, e.unchanged, e.target.name)
+	notes = appendCounted(notes, messageExportRewritten, e.rewritten, joinedWith(e.from, "or"), e.target.name)
 	notes = appendCounted(notes, messageExportAdapted, e.adapted, listedNames(e.defined), e.target.name)
 	notes = appendCounted(notes, messageExportChecks, e.checks, e.target.name)
 	notes = appendCounted(notes, messageExportKept, e.kept)
@@ -228,8 +247,12 @@ func listedNames(defined map[string]bool) string {
 			names = append(names, global)
 		}
 	}
+	return joinedWith(names, "and")
+}
+
+func joinedWith(names []string, conjunction string) string {
 	if len(names) < 2 {
 		return strings.Join(names, "")
 	}
-	return strings.Join(names[:len(names)-1], ", ") + " and " + names[len(names)-1]
+	return strings.Join(names[:len(names)-1], ", ") + " " + conjunction + " " + names[len(names)-1]
 }

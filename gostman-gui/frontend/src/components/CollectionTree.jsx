@@ -16,7 +16,7 @@ import { buildCollectionTree, buildSearchIndex, findMatches, flattenCollection, 
 import { checksContract, syncsSpec } from "../lib/contractCheck"
 import { PLACE_AFTER, PLACE_BEFORE, PLACE_INSIDE } from "../lib/dropPlace"
 import { hasModifier, isFocusLost } from "../lib/rovingFocus"
-import { isRemoveKey, matchesBinding } from "../lib/shortcuts"
+import { TREE_CHORDS, isRemoveKey, matchesBinding } from "../lib/shortcuts"
 import { MENU_ACTIONS, MENU_MOVE, menuItemsFor } from "../lib/treeMenus"
 import { STEP_DOWN, STEP_UP, TARGET_ROOT, canDropFolder } from "../lib/treeMoves"
 import { firstChildRow, firstRow, lastRow, nearestRow, pageFrom, parentRow, rowLabel, stepFrom } from "../lib/treeNavigation"
@@ -26,12 +26,11 @@ import { cn } from "../lib/utils"
 
 const FOLDER_EDGE_RATIO = 0.25
 const EXPAND_DELAY_MS = 600
-const ARROW_STEPS = { ArrowUp: STEP_UP, ArrowDown: STEP_DOWN }
-const COPY = { mod: true, key: "c" }
-const PASTE = { mod: true, key: "v" }
-const DUPLICATE = { mod: true, key: "d" }
+const REDO_CHORDS = [TREE_CHORDS.redo, TREE_CHORDS.redoAlternative]
 
 const isMenuKey = (event) => event.key === "ContextMenu" || (event.shiftKey && event.key === "F10")
+
+const isSource = (source, kind, id) => source?.kind === kind && source.id === id
 
 const sourceOf = (row) => (row.kind === ROW_FOLDER ? { kind: ROW_FOLDER, id: row.folder.id } : { kind: row.kind, id: row.request.id })
 
@@ -249,11 +248,14 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
   }, [rows, tabStopKey, focusRowAt])
 
   const editItem = useCallback((event, source) => {
-    const step = event.altKey ? ARROW_STEPS[event.key] : undefined
-    if (step) return () => actions.tree.stepItem(source, step)
-    if (matchesBinding(COPY, event)) return () => actions.tree.copyItem(source)
-    if (matchesBinding(PASTE, event)) return () => actions.tree.pasteItem(source)
-    if (matchesBinding(DUPLICATE, event)) return () => actions.tree.duplicateItem(source)
+    if (matchesBinding(TREE_CHORDS.moveUp, event)) return () => actions.tree.stepItem(source, STEP_UP)
+    if (matchesBinding(TREE_CHORDS.moveDown, event)) return () => actions.tree.stepItem(source, STEP_DOWN)
+    if (matchesBinding(TREE_CHORDS.copy, event)) return () => actions.tree.copyItem(source)
+    if (matchesBinding(TREE_CHORDS.cut, event)) return () => actions.tree.cutItem(source)
+    if (matchesBinding(TREE_CHORDS.paste, event)) return () => actions.tree.pasteItem(source)
+    if (matchesBinding(TREE_CHORDS.duplicate, event)) return () => actions.tree.duplicateItem(source)
+    if (matchesBinding(TREE_CHORDS.undo, event)) return actions.tree.undo
+    if (REDO_CHORDS.some((chord) => matchesBinding(chord, event))) return actions.tree.redo
     return null
   }, [actions])
 
@@ -319,7 +321,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
         isTabStop={row.key === tabStopKey}
         focusRequest={focusRequest?.key === row.key ? focusRequest.count : 0}
         isMenuOpen={menu?.row.key === row.key}
-        isDragged={drag?.source.kind === row.kind && drag.source.id === id}
+        isMoving={isSource(drag?.source, row.kind, id) || (Boolean(treeClipboard?.cut) && isSource(treeClipboard, row.kind, id))}
         dropPlace={dropPlace}
         onActivate={activateRow}
         onPin={pinRow}

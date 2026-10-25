@@ -165,6 +165,10 @@ function resolve(expression, response) {
   return queryJson(pathOf(expression), { [RESPONSE_ROOT]: response })
 }
 
+const resolvedTitle = (assertion, operator, expected) => (
+  expected === assertion.value ? {} : { resolvedName: titleOf({ ...assertion, value: CHECK_RUN_TEXT.resolvedValue(expected, assertion.value) }, operator) }
+)
+
 function evaluate(assertion, response, variables) {
   const operator = operatorOf(assertion)
   const name = titleOf(assertion, operator)
@@ -172,7 +176,7 @@ function evaluate(assertion, response, variables) {
     const actual = resolve(assertion.expression.trim(), response)
     const expected = substitutePlaceholders(assertion.value, variables)
     const message = verdict(operator, actual, parseJSON(expected, expected))
-    return { name, passed: message === '', message }
+    return { name, passed: message === '', message, ...resolvedTitle(assertion, operator, expected) }
   } catch (error) {
     return { name, passed: false, message: error.message }
   }

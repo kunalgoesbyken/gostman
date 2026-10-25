@@ -37,7 +37,7 @@ func parseServing(arguments []string) (serving, error) {
 	flags.SetOutput(io.Discard)
 	flags.StringVar(&settings.Root, "workspace", currentFolder, "")
 	flags.StringVar(&settings.Environment, "env", "", "")
-	variableFlags(flags, settings.Variables)
+	settings.Secrets = variableFlags(flags, settings.Variables)
 	flags.StringVar(&envFile, "env-file", "", "")
 	flags.BoolVar(&settings.Policy.BlockPrivate, "block-private", false, "")
 	flags.Func("allow-host", "", func(host string) error {
@@ -67,7 +67,7 @@ func parseServing(arguments []string) (serving, error) {
 	if err := loopback.CheckPort(parsed.listen); err != nil {
 		return parsed, fmt.Errorf("--listen: %w", err)
 	}
-	if err := mergeEnvFile(envFile, settings.Variables); err != nil {
+	if _, err := mergeEnvFile(envFile, settings.Variables); err != nil {
 		return parsed, err
 	}
 	settings.Timeout = time.Duration(timeoutMs) * time.Millisecond
@@ -76,6 +76,9 @@ func parseServing(arguments []string) (serving, error) {
 }
 
 func (s *serving) connect() error {
+	if info, err := os.Stat(s.settings.Root); err != nil || !info.IsDir() {
+		return fmt.Errorf("%s is not a folder; --workspace takes the folder that holds gostman.yaml, which \"gostman init\" creates", s.settings.Root)
+	}
 	stored, err := runner.Load(s.settings.Root)
 	if err != nil {
 		return err

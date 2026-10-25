@@ -6,6 +6,8 @@ import (
 	"os"
 	"runtime/debug"
 	"strings"
+
+	"github.com/kunalgoesbyken/gostman/engine"
 )
 
 const (
@@ -53,10 +55,9 @@ run
   --secrets             allow variables that reference a secret manager
                         (Vault, AWS, Azure, Google Cloud, 1Password,
                         Bitwarden, Bitwarden Secrets Manager) to be read
-                        with the credentials
-                        in the process environment; off by default so that a
-                        collection you did not write cannot use them
-                        (also for send and mcp)
+                        with the credentials in the process environment; off
+                        by default so that a collection you did not write
+                        cannot use them (also for send and mcp)
   --secrets-env-file <file>
                         like --secrets, with the connection settings read from
                         KEY=value lines; the process environment wins
@@ -87,16 +88,20 @@ run
                         (comma list, repeatable)
   --exclude-tags <a,b>  skip requests with any of these tags (comma list,
                         repeatable); combines with --folder, --only and --tags
-  --env-file <file>     read KEY=value lines as variables (--var wins)
+  --env-file <file>     read KEY=value lines as variables (--var wins); they
+                        count as secret for --redact
   --reporter <format[:file]>
                         text, json, junit or html (default text); with :file
                         the report goes to that file (repeatable, at most one
                         without a file, which prints to stdout)
-  --output <file>       write the report given without a file to this file
-                        When every report goes to a file, the text summary is
-                        printed to stdout.
-  --redact              replace variable values and credentials in the report
-                        with {{name}}
+  --output <file>       write the report given without a file to this file;
+                        when every report goes to a file, the text summary is
+                        still printed to stdout
+  --redact              replace secret values in the report with {{name}}:
+                        variables marked secret or with sensitive names,
+                        secret manager, --var-from-env and --env-file values,
+                        tokens, credentials and cookies; other values such as
+                        base_url stay readable
   --contract <spec>     check every HTTP response against this OpenAPI spec
                         (file or address): the status, the content type and
                         the body schema of the operation with the same method
@@ -135,8 +140,9 @@ send
   Send one request through the same pipeline. Stdout gets only the response
   body, or only the selected value with --select, so it can be piped; the JSON
   summary and warnings go to stderr. With --json, stdout gets one JSON
-  document with the summary and the body. Variable values and credentials are
-  always replaced with {{name}} in what is printed.
+  document with the summary and the body. Secret values are replaced with
+  {{name}} in what is printed unless --reveal is given, as with run --redact;
+  other values such as base_url stay readable.
 
   <request>             id, name or Folder/Name of a saved request
   <METHOD> <url>        a request that is not saved
@@ -156,6 +162,10 @@ send
   --json                print one JSON document: the summary with the body in
                         body.text and its encoding (utf8 or base64) in
                         body.encoding
+  --reveal              print secret values and credentials as they are, for
+                        example a token for the next command; anything that
+                        reads the output sees them, so keep it out of logs
+                        and never use it from a coding agent
 
 load
   Send one request many times at once and report throughput, latency
@@ -280,6 +290,7 @@ scan
                         severity that makes the command exit with status 1
   --skip-examples       leave out saved example responses, which are scanned
                         by default because they can hold real tokens
+
 lint
   Check an OpenAPI 3.x or Swagger 2.0 document (JSON or YAML, a file or an
   http(s) address) against the built-in rules and print the findings.
@@ -301,8 +312,9 @@ init
 
 import
   Create a workspace from an Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI,
-  Gostman export or .http file or folder. Imports add data only; scripts and OAuth settings are
-  kept and reported, tokens and cookie values are never carried over.
+  Gostman export or .http file or folder. Imports add data only; scripts and
+  OAuth settings are kept and reported, tokens and cookie values are never
+  carried over.
 
   --format <name>       auto, insomnia, har, wsdl, bruno, postman, openapi,
                         gostman or http (default auto: detected from the
@@ -325,7 +337,8 @@ export
 
 Exit codes:
   0  every request and check passed (scan, lint, load: no threshold reached)
-  1  a check, a script or an MCP tool call failed, or the run was interrupted (scan, lint, load: a threshold was reached)
+  1  a check, a script or an MCP tool call failed, or the run was interrupted
+     (scan, lint, load: a threshold was reached)
   2  the command or the input is wrong
   3  a request got no response: it could not be sent, the connection failed
      or timed out (run and send)
@@ -343,6 +356,7 @@ func currentVersion() string {
 }
 
 func main() {
+	engine.ProductVersion = currentVersion()
 	os.Exit(dispatch(os.Args[1:], os.Stdout, os.Stderr))
 }
 
@@ -397,7 +411,7 @@ func dispatch(arguments []string, stdout, stderr *os.File) int {
 		return misuse(stderr, "name a command")
 	}
 	if asksForHelp(arguments[1:]) {
-		fmt.Fprint(stdout, usage)
+		fmt.Fprint(stdout, helpFor(arguments[0]))
 		return exitPassed
 	}
 	switch arguments[0] {
@@ -431,7 +445,7 @@ func dispatch(arguments []string, stdout, stderr *os.File) int {
 		fmt.Fprintln(stdout, currentVersion())
 		return exitPassed
 	case "help", "--help", "-h":
-		fmt.Fprint(stdout, usage)
+		fmt.Fprint(stdout, helpFor(strings.Join(arguments[1:min(len(arguments), 2)], "")))
 		return exitPassed
 	default:
 		return misuse(stderr, fmt.Sprintf("unknown command %q", arguments[0]))

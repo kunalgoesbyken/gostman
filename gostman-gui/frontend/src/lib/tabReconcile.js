@@ -24,7 +24,10 @@ export function reconcileTabs(tabs, previousRequests, requests, folders, wasRest
     return before && !isRequestDirty(request, before) ? current : carried(request)
   }
 
-  const vanishedOf = (tab) => (tab.request.id && !saved.has(tab.request.id) ? lastSaved(tab) || null : null)
+  const vanishedOf = (tab) => {
+    const before = tab.request.id && !saved.has(tab.request.id) ? lastSaved(tab) : null
+    return before ? inKnownFolder(before) : null
+  }
 
   const diskChangeOf = (tab) => {
     const { request, diskChange } = tab

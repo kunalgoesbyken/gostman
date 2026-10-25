@@ -2,7 +2,7 @@ import { fillPlaceholders } from "./placeholders.js"
 import { isSensitiveName } from "./sensitiveNames.js"
 import { ORIGIN_UNKNOWN, secretOrigin } from "./secretOrigins.js"
 import { colorTriplet } from "./swatches.js"
-import { mapText, someText } from "./textValues.js"
+import { mapText, someText, textsIn } from "./textValues.js"
 import { DYNAMIC_PREFIX, DYNAMIC_VARIABLES, FAKER_VARIABLES, SOURCE_LABELS, callsFile, describeDynamic, isDynamicName, isFakerQuery, isFileName, isPromptName } from "./variableNames.js"
 
 const TOKEN = /\{\{\s*([^{}]*?)\s*\}\}/gu
@@ -52,6 +52,12 @@ export function hasFileReference(text) {
   return Boolean(parsed) && someText(parsed.value, hasFileReference)
 }
 
+export function fileReferencesIn(text) {
+  const direct = Array.from(text.matchAll(ENGINE_PLACEHOLDER), ([, inner]) => inner.trim()).filter(callsFile)
+  const parsed = parsedJSON(text)
+  return parsed ? [...direct, ...textsIn(parsed.value).flatMap(fileReferencesIn)] : direct
+}
+
 export function withoutFileReferences(text) {
   const stripped = text.replace(ENGINE_PLACEHOLDER, (match, inner) => (callsFile(inner) ? "" : match))
   if (!hasFileReference(stripped)) return stripped
@@ -88,7 +94,7 @@ export function describeReference(name, variables) {
   const value = defined ? variables.get(name) : ""
   const detail = variables.details?.get(name)
   const secret = defined && isSecretName(name, variables)
-  const source = detail ? SOURCE_LABELS[detail.source] : ""
+  const source = detail ? [SOURCE_LABELS[detail.source], detail.owner].filter(Boolean).join(": ") : ""
   const origin = secretOrigin(detail?.ref, variables.connections)
   const composed = defined && !secret ? composition(value, variables) : NOT_COMPOSED
   return { name, defined, value, shown: secret ? MASKED_VALUE : value, secret, kind: null, source, origin, ...composed }

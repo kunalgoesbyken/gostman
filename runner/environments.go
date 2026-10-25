@@ -80,20 +80,31 @@ func (c Collection) ChooseEnvironment(folderID, name string) (Environment, error
 	if name == "" {
 		return firstOf(own, shared), nil
 	}
-	if matches := scope.named(own, name); len(matches) == 1 {
-		return matches[0], nil
+	if matches := scope.named(own, name); len(matches) > 0 {
+		return single(matches, name)
 	}
 	matches := scope.named(offered, name)
 	labels := slices.Compact(slices.Sorted(slices.Values(scope.labels(matches))))
 	switch {
 	case len(matches) > 0 && len(labels) == 1:
-		return matches[0], nil
+		return single(matches, name)
 	case len(labels) > 1:
 		return Environment{}, fmt.Errorf("several collections have an environment named %q; pass one of %s to --env, or choose a collection with --folder", name, strings.Join(labels, ", "))
 	case len(offered) == 0:
 		return Environment{}, fmt.Errorf("there is no environment named %q: the collection has no environments", name)
 	}
 	return Environment{}, fmt.Errorf("there is no environment named %q; the collection has %s", name, strings.Join(scope.labels(offered), ", "))
+}
+
+func single(matches []Environment, name string) (Environment, error) {
+	if len(matches) == 1 {
+		return matches[0], nil
+	}
+	ids := make([]string, 0, len(matches))
+	for _, environment := range matches {
+		ids = append(ids, environment.ID)
+	}
+	return Environment{}, fmt.Errorf("%d environments are named %q (ids %s), so --env cannot tell which one you mean; rename one of them", len(matches), name, strings.Join(ids, ", "))
 }
 
 func (s *Session) folderID(folders []Folder, wanted string) (string, error) {

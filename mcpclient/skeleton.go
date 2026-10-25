@@ -53,6 +53,13 @@ func indented(document []byte) string {
 	return shown.String()
 }
 
+func indentedOptional(document []byte) string {
+	if len(document) == 0 || string(document) == encodedNull {
+		return ""
+	}
+	return indented(document)
+}
+
 func skeleton(inputSchema json.RawMessage) string {
 	var root schemaNode
 	if json.Unmarshal(inputSchema, &root) != nil {

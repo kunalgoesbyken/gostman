@@ -141,7 +141,7 @@ func (r receiver) supports(path chain) bool {
 }
 
 func (t *translator) renderBrunoSend(call *ast.CallExpression) string {
-	t.note(call, "sendRequest-scope", messageScriptSendScope)
+	t.note(call, noteSendScope, messageScriptSendScope)
 	if len(call.ArgumentList) == 0 {
 		t.fail(call, messageScriptUnsupported, "bru.sendRequest()")
 		return t.text(call)

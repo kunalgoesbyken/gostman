@@ -1,10 +1,11 @@
-import { hasActiveContent } from './activeContent'
+import { addsFileReads, hasActiveContent, readsFiles } from './activeContent'
 import { defaultExtractScope, enabledExtractors, isUsableResponse, parseExtractors, writesFrom } from './chaining'
 import { isPlainObject, parseJSON } from './dataUtils'
 import { isGrpcRequest } from './grpc'
 import { inheritedAuthSource, layersOf, lineageOf, withInheritance } from './inheritance'
 import { LOCAL_COMMAND_TEXT, needsApproval } from './localCommands'
 import { isLocalCommand, isMcpRequest } from './mcp'
+import { mcpOutputChecks } from './mcpOutput'
 import { withFreshToken } from './oauth'
 import { failureResponse } from './response'
 import { isStreamRequest } from './sse'
@@ -23,15 +24,18 @@ import { scriptedRequest } from './scripting/subjects'
 import { rememberResolved } from './resolvedSecrets'
 import { SECRETS_TEXT } from './secretsText'
 import { ENTRY_KINDS, exchangeEntry, scriptEntry, secretsEntry, withActivity } from './timeline'
-import { promptNames, referenceTargets, usedVariableNames } from './variableScopes'
+import { promptNames, referenceTargets, resolveLayers, scopeLayers, usedVariableNames } from './variableScopes'
+import { shownUrl } from './shownUrl'
 import { environmentFor, scriptLayersFor, useAppStore, variableTextFor } from '../store/appStore'
 
 const CONFIG_ERROR = 'config'
+const CANCELLED_ERROR = 'cancelled'
 const SCRIPT_ERROR = 'script'
 export const RESTRICTED_ERROR = 'restricted'
 const PROMPT_DECLINED = 'The request was not sent because the values it asks for were not provided.'
 const UNUSABLE_ADDRESS = 'The address cannot be used by a script.'
 const SEND_LIMIT = `A script may call sendRequest ${MAX_SENDS} times.`
+const SCRIPT_FILE_READS = 'A script cannot add {{$file(...)}} placeholders or files attached from disk to a request. Put them in the request itself.'
 const PRE_REQUEST = 'Pre-request script'
 const POST_RESPONSE = 'Post-response script'
 export const RESTRICTED = 'This folder is not trusted yet, so its scripts, OAuth 2.0 settings, local MCP commands and file reads are switched off. Open the folder menu in the header and choose Trust this folder.'
@@ -138,6 +142,8 @@ export async function applyExtractors(request, response) {
   return { saved: store().applyVariableWrites(writes, request), written: Object.fromEntries(Object.entries(writes).map(([scope, values]) => [scope, Object.keys(values)])) }
 }
 
+const outputRun = (response) => ({ tests: mcpOutputChecks(response), logs: [], error: '' })
+
 const extractionRun = (extraction) => ({ tests: [], logs: [errorLine(extraction.error)], error: extraction.error })
 
 const scopeLabel = (stage, name) => `${stage} (${name})`
@@ -215,6 +221,7 @@ function createScriptSender(backend, trace) {
     sent += 1
     const { requests } = store()
     const request = scriptedRequest(target, requests)
+    if (typeof target !== 'string' && readsFiles(request)) throw new Error(SCRIPT_FILE_READS)
     const timed = { ...request, options: { ...request.options, timeoutMs: request.options.timeoutMs || SEND_TIMEOUT_MS, noFollowRedirects: true } }
     const variables = variablesText(timed, {})
     const host = addressHost(timed.url, variables)
@@ -264,10 +271,11 @@ export function createExecutor(backend) {
       if (pre.error) return stop(request, pre.error, SCRIPT_ERROR)
       if (holdsBack(pre.flow)) return { ...stop(request, reasonFor(pre.flow)), skipped: reasonFor(pre.flow) }
       request = applyRequestEdits(request, pre.request, inherited)
+      if (addsFileReads(original, request)) return stop(request, SCRIPT_FILE_READS, SCRIPT_ERROR)
     }
 
     const answers = await askForValues(request, referenced, prompts)
-    if (answers === null) return stop(request, PROMPT_DECLINED)
+    if (answers === null) return stop(request, PROMPT_DECLINED, CANCELLED_ERROR)
 
     let renewal
     try {
@@ -297,8 +305,10 @@ export function createExecutor(backend) {
         }, request, context))
       }
       runs.push(await checkContract(linkFor(store().specLinks, lineage), request, response))
+      runs.push(outputRun(response))
     }
-    return { auth: request.auth, response, tests: report(runs), extraction }
+    const resolvedUrl = shownUrl(response.url, resolveLayers(scopeLayers(store(), request, referenced)), outgoing.auth)
+    return { auth: request.auth, response, tests: report(runs), extraction, resolvedUrl }
   }
 
   return async function execute(original, sendId, prompts = askEveryTime) {

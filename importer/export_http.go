@@ -63,7 +63,7 @@ func httpFolderFiles(tree exportTree, id, directory string, inherited map[string
 	var files []File
 	for _, folder := range tree.folders[id] {
 		stem := uniqueName(used, safeStem(folder.Name, folderFallback), "")
-		variables := mergedValues(inherited, variableValues(folder.Variables))
+		variables := mergedValues(mergedValues(inherited, variableValues(folder.CollectionVariables)), variableValues(folder.Variables))
 		if requests := tree.requests[folder.Id]; len(requests) > 0 {
 			files = append(files, File{Name: path.Join(directory, stem+httpExtension), Text: httpFileText(variables, requests)})
 		}

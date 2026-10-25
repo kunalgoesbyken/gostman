@@ -48,7 +48,9 @@ const unescapeHtml = (text) => text.replace(/&(?:amp|lt|gt|quot|#39);/g, (entity
 const plainText = (tokens = []) =>
   tokens.map((token) => (token.tokens ? plainText(token.tokens) : unescapeHtml(token.text ?? ''))).join('')
 
-const tableText = (token) => [...token.header, ...token.rows.flat()].map((cell) => plainText(cell.tokens)).join(' ')
+const CELL_SEPARATOR = ' · '
+
+const tableText = (token) => [...token.header, ...token.rows.flat()].map((cell) => plainText(cell.tokens).trim()).filter(Boolean).join(CELL_SEPARATOR)
 
 function tokenText(token) {
   if (token.type === 'table') return tableText(token)
@@ -194,7 +196,7 @@ const introTokens = (tokens) => {
   return end === -1 ? tokens : tokens.slice(0, end)
 }
 
-function searchSections(tokens, headings, page) {
+function searchSections(tokens, headings, page, keywords = []) {
   const sections = [{ id: '', heading: '', parts: [] }]
   let cursor = 0
   tokens.forEach((token) => {
@@ -209,13 +211,14 @@ function searchSections(tokens, headings, page) {
     sections.at(-1).parts.push(tokenText(token))
   })
   return sections
-    .map((section) => searchRecord(page, section))
-    .filter(([, section, , text]) => section || text)
+    .map((section) => searchRecord(page, section, section.id || section.heading ? [] : keywords))
+    .filter(([, section, , text, keywords]) => section || text || keywords)
 }
 
-function searchRecord(page, section) {
+function searchRecord(page, section, keywords) {
   const href = section.id ? `${page.href}#${section.id}` : page.href
-  return [page.title, section.heading, href, collapse(section.parts.join(' '))]
+  const record = [page.title, section.heading, href, collapse(section.parts.join(' '))]
+  return keywords.length ? [...record, keywords] : record
 }
 
 function renderDoc(entry, section, docsDir) {
@@ -250,7 +253,7 @@ function renderDoc(entry, section, docsDir) {
     html,
     toc: state.toc,
   }
-  return { page, images: state.images, search: searchSections(tokens, state.headings, page) }
+  return { page, images: state.images, search: searchSections(tokens, state.headings, page, entry.keywords) }
 }
 
 const outlineOf = (page) => {

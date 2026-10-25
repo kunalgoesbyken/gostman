@@ -1,3 +1,4 @@
+import { withoutActiveContent } from './activeContent'
 import { CONTRACT_TEXT } from './checksText'
 import { checksContract } from './contractCheck'
 import { parseJSON } from './dataUtils'
@@ -20,6 +21,8 @@ const owningRoot = ({ folders, variables }) => (
   folders.map((folder, index) => (index === 0 ? { ...folder, collectionVariables: JSON.stringify(variables || {}, null, 2) } : folder))
 )
 
+const sharedVariables = (result) => (result.folders.length > 0 ? {} : missingVariables(result.variables))
+
 function folderForTag(tag, rootId, created) {
   if (tag === '') return rootId
   const known = [...store().folders, ...created].find((folder) => folder.name === tag && folder.parentId === rootId)
@@ -34,10 +37,10 @@ export function createSpecActions({ backend, attempt, addImported }) {
 
   const importSpec = attempt('Import failed', async (result) => {
     const existing = { requestIds: idsOf(store().requests), folderIds: idsOf(store().folders) }
-    const data = sanitizeImport({ ...result, folders: owningRoot(result), variables: missingVariables(result.variables) }, existing)
-    await addImported(data)
+    const data = sanitizeImport({ ...result, folders: owningRoot(result), variables: sharedVariables(result) }, existing)
+    const imported = await addImported(data)
     const { source, hash, operations } = result.spec
-    if (!source) return
+    if (!imported || !source) return
     const present = new Set(idsOf(store().requests))
     const entries = data.requests
       .map((request, index) => [operations[index], request])
@@ -100,7 +103,7 @@ export function createSpecActions({ backend, attempt, addImported }) {
     const picks = selectedChanges(plan, selected)
     const keys = [...picks.added.map((operation) => operation.key), ...picks.changed.map((item) => item.newKey)]
     const fetched = keys.length > 0 ? await client.requestsFor(link.source, keys) : { requests: [], operations: [] }
-    const generated = new Map(fetched.operations.map((operation, index) => [operation.key, { operation, request: fetched.requests[index] }]))
+    const generated = new Map(fetched.operations.map((operation, index) => [operation.key, { operation, request: withoutActiveContent(fetched.requests[index]) }]))
     const ops = { ...link.ops }
     await removeRequests(picks.removed, ops)
     await updateRequests(picks.changed, generated, ops)

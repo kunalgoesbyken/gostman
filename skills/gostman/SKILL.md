@@ -9,7 +9,7 @@ Gostman keeps API requests as YAML files in a workspace folder (`gostman.yaml` a
 
 ## With the MCP server
 
-If the `gostman` MCP tools are available, use them instead of curl:
+If the `gostman` MCP tools are available, use them instead of curl and instead of the command line:
 
 1. `list_requests` to find saved requests, `get_request` to read one.
 2. `send_request` with `request` (an id, a name, or `folder/path/Name` as `list_requests` shows it) for a saved request, or `url` for an ad hoc one. Use `select` (a JSONPath) to keep large bodies small.
@@ -36,7 +36,9 @@ gostman scan api
 
 - Write `{{name}}` wherever a credential or environment-specific value belongs. Never put a token, password or key into a request, a command line or a file.
 - A value shown as `{{name}}` or `{{redacted:...}}` was hidden on purpose. Keep using `{{name}}`; do not try to recover the value.
+- Never pass `--reveal` to `gostman send`. It exists for people and CI scripts and prints secret values in plain text, which would put them in the conversation. To use a value from one response in another request, run both in one `run_folder` or `gostman run`, or let an extractor store it as `{{name}}`.
 - Agent sessions reach only localhost and the hosts of requests the developer wrote. If a host is refused, ask the developer to start the server with `--allow-host <host>`; do not work around it with curl.
+- A secret is filled in only for an address (scheme, host and port) where one of the developer's own requests sends it; `localhost` and `127.0.0.1` count as different addresses. Elsewhere its placeholder is sent as written and the result lists it under `withheld`. Send the developer's request instead, or ask the developer to save a request that sends the secret to that address; changing a request's host or adding a `{{placeholder}}` to it makes it yours, not the developer's. A request that became yours no longer sends literal credentials from the developer (also listed under `withheld`), and cookies go back only to the address that set them. New requests from `save_request` inherit folder and collection auth.
 - Secrets come from the developer: `--var-from-env NAME`, `--env-file`, or a secret manager with `--secrets`. Ask for them; do not invent values.
 - A `{{name}}` that no variable defines is sent as written, and the `send_request` result lists it under `unresolved`. Check `list_environments`, or pass the value in `variables`, before changing the request.
 - To log in, give the login request an extractor, such as `save_request` with `{"extractors": [{"name": "token", "source": "body", "expression": "$.token"}]}`, and send it. Later requests use `{{token}}`; never copy a token from a response into `variables`.

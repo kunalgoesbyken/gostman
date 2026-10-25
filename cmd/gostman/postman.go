@@ -33,7 +33,7 @@ func exportPostmanCollection(source string, collection workspace.Collection, inc
 	if err != nil {
 		return nil, report, err
 	}
-	options := postmanOptions{DefaultName: workspaceName(source), Variables: postmanVariables(collection.Variables, placeholders), Settings: collection.Settings, SharedOrder: collection.SharedOrder}
+	options := postmanOptions{DefaultName: workspaceName(source), Variables: postmanVariables(placeholders, collection.Variables, soleCollectionList(collection)), Settings: collection.Settings, SharedOrder: collection.SharedOrder}
 	var exported json.RawMessage
 	if err := sandbox.Render(postmanBuilder, &exported, collection.Requests, collection.Folders, options); err != nil {
 		return nil, report, err
@@ -45,9 +45,29 @@ func exportPostmanCollection(source string, collection workspace.Collection, inc
 	return []importer.File{{Name: postmanFile, Text: indented.String() + "\n"}}, report, nil
 }
 
-func postmanVariables(source string, placeholders []string) map[string]any {
+func soleCollectionList(collection workspace.Collection) string {
+	var top []workspace.Folder
+	for _, folder := range collection.Folders {
+		if folder.ParentId == "" {
+			top = append(top, folder)
+		}
+	}
+	for _, request := range collection.Requests {
+		if request.FolderId == "" {
+			return ""
+		}
+	}
+	if len(top) != 1 {
+		return ""
+	}
+	return top[0].CollectionVariables
+}
+
+func postmanVariables(placeholders []string, sources ...string) map[string]any {
 	values := map[string]any{}
-	_ = json.Unmarshal([]byte(source), &values)
+	for _, source := range sources {
+		_ = json.Unmarshal([]byte(source), &values)
+	}
 	for _, name := range placeholders {
 		if _, present := values[name]; !present {
 			values[name] = ""

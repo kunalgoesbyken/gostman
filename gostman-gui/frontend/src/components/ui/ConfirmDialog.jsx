@@ -5,9 +5,13 @@ import { DIALOG_TEXT } from "../../lib/dialogText"
 const CONFIRM_VARIANTS = { destructive: "destructive", outline: "outline" }
 const TEXT_CLASS = "whitespace-pre-wrap text-xs leading-relaxed text-muted-foreground"
 
+export function CodeText({ children }) {
+  return <pre className="max-h-40 shrink-0 overflow-auto whitespace-pre-wrap rounded border border-border bg-muted/40 p-2 font-mono text-xs text-foreground [overflow-wrap:anywhere]">{children}</pre>
+}
+
 function MessagePart({ part }) {
   if (typeof part === "string") return <p className={TEXT_CLASS}>{part}</p>
-  return <pre className="max-h-40 overflow-auto whitespace-pre-wrap rounded border border-border bg-muted/40 p-2 font-mono text-xs text-foreground [overflow-wrap:anywhere]">{part.code}</pre>
+  return <CodeText>{part.code}</CodeText>
 }
 
 function ConfirmMessage({ message }) {

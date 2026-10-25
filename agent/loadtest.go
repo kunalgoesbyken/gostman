@@ -28,17 +28,32 @@ type loadArguments struct {
 	RatePerSecond   int    `json:"rps"`
 }
 
+type loadReport struct {
+	loadtest.Report
+	Withheld []string `json:"withheld,omitempty"`
+	Hint     string   `json:"hint,omitempty"`
+}
+
 func (c *Client) LoadTest(ctx context.Context, listed runner.Listed, config loadtest.Config, observe func(loadtest.Snapshot)) (loadtest.Report, error) {
-	prepared, err := c.session.Outgoing(ctx, listed.Request)
+	report, err := c.measure(ctx, listed, config, observe)
+	return report.Report, err
+}
+
+func (c *Client) measure(ctx context.Context, listed runner.Listed, config loadtest.Config, observe func(loadtest.Snapshot)) (loadReport, error) {
+	prepared, withheld, err := c.session.OutgoingWithheld(ctx, listed.Request)
 	c.absorb()
 	if err != nil {
-		return loadtest.Report{}, err
+		return loadReport{Withheld: withheld}, err
 	}
 	report, err := loadtest.Run(ctx, loadtest.Plan{Config: config, Request: prepared, Policy: c.policy}, observe)
 	if err != nil {
-		return loadtest.Report{}, err
+		return loadReport{}, err
 	}
-	return redact.Clean(c.guard, report)
+	measured := loadReport{Report: report, Withheld: withheld}
+	if len(withheld) > 0 {
+		measured.Hint = hintWithheld
+	}
+	return redact.Clean(c.guard, measured)
 }
 
 func (a loadArguments) config() (loadtest.Config, error) {
@@ -81,22 +96,22 @@ func loadProgress(ctx context.Context, config loadtest.Config) func(loadtest.Sna
 	}
 }
 
-func (d *Desk) loadTest(ctx context.Context, current scene, arguments loadArguments) (loadtest.Report, error) {
+func (d *Desk) loadTest(ctx context.Context, current scene, arguments loadArguments) (loadReport, error) {
 	if !hasText(arguments.Request) {
-		return loadtest.Report{}, errors.New("Name the saved request to load test; list_requests shows them.")
+		return loadReport{}, errors.New("Name the saved request to load test; list_requests shows them.")
 	}
 	config, err := arguments.config()
 	if err != nil {
-		return loadtest.Report{}, err
+		return loadReport{}, err
 	}
 	target, err := d.find(current.stored, arguments.Request)
 	if err != nil {
-		return loadtest.Report{}, err
+		return loadReport{}, err
 	}
 	target.Request = d.tune(target.Request)
-	var report loadtest.Report
+	var report loadReport
 	d.outside(func() {
-		report, err = d.client.LoadTest(ctx, target, config, loadProgress(ctx, config))
+		report, err = d.client.measure(ctx, target, config, loadProgress(ctx, config))
 	})
 	return report, err
 }

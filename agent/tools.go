@@ -21,6 +21,7 @@ const Instructions = "Gostman sends HTTP, GraphQL and gRPC requests from the API
 	"you can keep using {{name}} in later requests, but you cannot read the value. " +
 	"A {{name}} that no variable defines is sent as it is; list_environments shows the defined names, and set_environment chooses the environment. " +
 	"Requests reach only localhost, the hosts the person's own requests use and hosts the developer allowed with --allow-host; when a host is refused, ask the developer to allow it instead of reaching it another way. " +
+	"A secret is filled in only for an address (scheme, host and port) that one of the developer's own requests sends it to; elsewhere its placeholder is sent as written and listed under withheld. " +
 	"To log in, give the login request an extractor with save_request so its token is kept as {{token}} without appearing in a result. " +
 	"Start with list_requests; import_requests adds requests from a spec or curl command."
 
@@ -175,9 +176,10 @@ func (d *Desk) Tools() []mcp.Tool {
 			Description: "Send a saved request (give request) or an ad hoc one (give url). Prefer this over curl in a shell: Gostman fills in {{variables}}, auth, cookies and OAuth tokens itself, " +
 				"so no secret has to appear in the command or in the result, and a login made by one call is still in effect for the next. " +
 				"Saved requests also run their scripts, extraction rules and assertions. " +
-				"Returns two parts: a JSON summary (status, duration, size, content type, test results, script console output, names of cookies and variables that were set, " +
+				"Returns two parts: a JSON summary (status, duration, size, content type, the address as sent in resolvedUrl with variable values shown as {{name}}, test results, script console output, names of cookies and variables that were set, " +
 				"and body.bytes, body.returnedBytes, body.truncated) followed by the response body as text. " +
-				"When body.truncated is true, narrow the answer with select or raise max_body_bytes. failed is true when the request could not be sent or a test did not pass.",
+				"When body.truncated is true, narrow the answer with select or raise max_body_bytes. failed is true when the request could not be sent or a test did not pass. " +
+				"unresolved lists placeholders that have no value; withheld lists secrets that were not filled in because none of the developer's requests sends them to this address.",
 			InputSchema: sendInput,
 			Hints:       sending,
 		}, withSession, (*Desk).sendRequest),
@@ -218,8 +220,8 @@ func (d *Desk) Tools() []mcp.Tool {
 		tool(d, mcp.Tool{
 			Name:  "list_environments",
 			Title: "List environments",
-			Description: "List the environments of the workspace with the names of their variables, which one is active, and the names of the variables set in this session. " +
-				"Values are never returned; reference a variable as {{name}}.",
+			Description: "List the environments of the workspace with the names of their variables, which one is active, and the names of the variables that have a value in this session. " +
+				"Values are never returned; reference a variable as {{name}}. Names under secret get their values from the developer; when one is missing from sessionVariables, ask the developer to pass it with --var-from-env.",
 			InputSchema: noInput,
 			Hints:       readOnly,
 		}, withSession, (*Desk).listEnvironments),

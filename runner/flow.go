@@ -6,11 +6,13 @@ const (
 	flowNext = "next"
 	flowSkip = "skip"
 	flowStop = "stop"
+	flowEnd  = "end"
 
 	skippedByScript = "Skipped by a script."
 	stoppedByScript = "Not sent because a script stopped the run."
 	passedByJump    = "Not run because a script in %q continued the run with %q."
 	passedByStop    = "Not run because a script in %q stopped the run."
+	passedByEnd     = "Not run because a script in %q ended iteration %d."
 	endlessJumps    = "The script in %q kept continuing the run with %q, so the run was stopped after %d requests. A pass may send at most %d more requests than the %d it holds; give the loop a way to end, such as a retry count."
 )
 
@@ -30,11 +32,13 @@ func (f flow) reason() string {
 	return skippedByScript
 }
 
-func (f flow) passedOver(name string) string {
-	switch f.Action {
-	case flowNext:
+func (f flow) passedOver(name string, iteration int) string {
+	switch {
+	case f.Action == flowNext:
 		return fmt.Sprintf(passedByJump, name, f.Target)
-	case flowStop:
+	case f.Action == flowEnd && iteration > 0:
+		return fmt.Sprintf(passedByEnd, name, iteration)
+	case f.Action == flowStop, f.Action == flowEnd:
 		return fmt.Sprintf(passedByStop, name)
 	}
 	return ""
@@ -74,6 +78,9 @@ func (c *schedule) follow(current unit, cursor int, outcome flow, step flowStep)
 	switch outcome.Action {
 	case flowStop:
 		c.halted.Store(true)
+		return len(current.indexes), ""
+	case flowEnd:
+		c.ended.Store(current.iteration, true)
 		return len(current.indexes), ""
 	case flowNext:
 		planned := len(current.indexes)

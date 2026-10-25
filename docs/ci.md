@@ -23,14 +23,25 @@ Keep secrets out of the collection. Map them to variables from the job environme
 gostman run api --env CI --var-from-env API_TOKEN --redact
 ```
 
-`--redact` replaces variable values and credentials in the report with `{{name}}`. HTML reports include each request and response body, and so does a JSON report written in the same run as an HTML one, so redact before sharing them.
+`--redact` replaces the secret values in the report with `{{name}}`: variables marked secret or with a sensitive name (such as `token`, `password` or `api_key`), values from a secret manager, `--var-from-env` and `--env-file`, OAuth 2 tokens, credentials and cookies. Ordinary values such as `base_url` stay readable, so the URL each request was sent to shows in every report. A value passed with `--var` is not treated as secret. HTML reports include each request and response body, and so does a JSON report written in the same run as an HTML one, so redact before sharing them, and remember that a body can hold other private data that is not a variable.
+
+### Passing a value between commands
+
+Requests that depend on each other belong in one `gostman run`, where a login's token reaches the next request without ever being printed. When a script needs the value itself, `gostman send` prints it only with `--reveal`:
+
+```bash
+TOKEN=$(gostman send --workspace api Login --select '$.token' --var-from-env PASSWORD --reveal)
+echo "::add-mask::$TOKEN"
+```
+
+`--reveal` prints secrets in plain text, so mask the value in the job log (as above on GitHub Actions) and never echo it. Without `--reveal` the output shows `{{token}}`.
 
 ## Reports
 
 | Flag | Result |
 | --- | --- |
 | `--reporter text` | readable summary on stdout (default) |
-| `--reporter junit --output report.xml` | JUnit XML for test dashboards |
+| `--reporter junit --output report.xml` | JUnit XML for test dashboards; each request is a test suite whose `system-out` starts with the method and the URL as sent |
 | `--reporter json --output report.json` | machine-readable results; each result has the URL as written (`url`) and as sent (`resolvedUrl`, secrets shown as `{{name}}`) |
 | `--reporter html --output report.html` | one self-contained page, with a filter for failures |
 

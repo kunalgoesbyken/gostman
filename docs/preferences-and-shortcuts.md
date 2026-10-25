@@ -324,6 +324,10 @@ Each list, row of tabs and set of options is one stop for the Tab key, so Tab mo
 | Enter | Collection tree | Open the request in a tab, or open or close the folder |
 | Space | Collection tree | Preview the request, or open or close the folder |
 | Start typing | Collection tree | Jump to the next request or folder whose name starts with what you type. Accents and letter case are ignored, and any script works |
+| Alt+Up Arrow, Alt+Down Arrow | Collection tree | Move the request or folder up or down |
+| Ctrl+X, Ctrl+C, Ctrl+V | Collection tree | Cut, copy or paste the request or folder |
+| Ctrl+D | Collection tree | Duplicate the request or folder |
+| Ctrl+Z, Ctrl+Shift+Z or Ctrl+Y | Collection tree | Undo or redo the last move, paste or duplicate |
 | F2 | Collection tree | Rename the request or folder |
 | Delete or Ctrl+Backspace | Collection tree | Delete the request or folder, after you confirm |
 | Delete or Ctrl+Backspace | Open tabs | Close the tab |

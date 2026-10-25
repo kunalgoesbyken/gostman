@@ -8,6 +8,7 @@ import (
 	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/redact"
 	"github.com/kunalgoesbyken/gostman/runner"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 const (
@@ -121,7 +122,39 @@ func (c *Client) learnResolved(label, value string) {
 
 func (c *Client) learnAll(values map[string]string) {
 	for name, value := range engine.FillVariables(values) {
-		c.guard.Learn(name, value)
+		c.learnVariable(name, value)
+	}
+}
+
+func (c *Client) learnVariable(name, value string) {
+	if c.isSecretName(name) {
+		c.learnResolved(name, value)
+		return
+	}
+	c.guard.Learn(name, value)
+}
+
+func (c *Client) MarkSecret(names map[string]bool) {
+	for name, secret := range names {
+		if secret {
+			c.secrets.Store(name, true)
+		}
+	}
+}
+
+func (c *Client) isSecretName(name string) bool {
+	_, marked := c.secrets.Load(name)
+	return marked || redact.IsSensitiveName(name)
+}
+
+func (c *Client) markSecrets(stored runner.Collection) {
+	for _, environment := range stored.Environments {
+		marked, _ := markedSecret(environment.Meta)
+		c.MarkSecret(marked)
+	}
+	c.MarkSecret(workspace.SecretNames(stored.VariablesMeta))
+	for _, folder := range stored.Folders {
+		c.MarkSecret(workspace.SecretNames(folder.CollectionVariablesMeta))
 	}
 }
 
@@ -217,6 +250,7 @@ func (c *Client) witness(sent engine.Request) {
 }
 
 func (c *Client) Study(stored runner.Collection) error {
+	c.markSecrets(stored)
 	for _, environment := range stored.Environments {
 		c.learnEnvironment(environment)
 	}

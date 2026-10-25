@@ -8,6 +8,9 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/redact"
 )
 
 const (
@@ -239,7 +242,7 @@ func (w *walker) object(m map[string]any, here func(any) node, depth int) (any, 
 			continue
 		}
 		if value, ok := w.value(property, depth+1); ok {
-			result.set(name, value)
+			result.set(name, w.credential(name, value))
 		}
 	}
 	if len(result.keys) == 0 {
@@ -250,6 +253,13 @@ func (w *walker) object(m map[string]any, here func(any) node, depth int) (any, 
 		}
 	}
 	return result, true
+}
+
+func (w *walker) credential(name string, value any) any {
+	if _, isText := value.(string); !isText || w.mode != forRequest || !redact.IsSensitiveName(name) || !engine.IsVariableName(name) {
+		return value
+	}
+	return "{{" + name + "}}"
 }
 
 func (w *walker) array(m map[string]any, here func(any) node, depth int) (any, bool) {

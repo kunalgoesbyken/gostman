@@ -101,6 +101,16 @@ func parametersOf(request runner.Request) []string {
 	return names
 }
 
+func (d *Desk) plainParameters(request runner.Request) []string {
+	var plain []string
+	for _, name := range parametersOf(request) {
+		if !d.client.isSecretName(name) {
+			plain = append(plain, name)
+		}
+	}
+	return plain
+}
+
 func toolName(name string) string {
 	var built strings.Builder
 	joined := true
@@ -135,11 +145,31 @@ func freeName(wanted string, taken map[string]bool) string {
 	return name
 }
 
-func argumentsNote(parameters []string) string {
+func argumentsNote(parameters []string, keepsOthers bool) string {
+	kept := " Any other parameter named above keeps its saved value."
 	if len(parameters) == 0 {
-		return "Takes no arguments: any parameter named above keeps its saved value."
+		if keepsOthers {
+			return "Takes no arguments: any parameter named above keeps its saved value."
+		}
+		return "Takes no arguments."
 	}
-	return "Arguments: " + strings.Join(parameters, ", ") + ". Any other parameter named above keeps its saved value."
+	note := "Arguments: " + strings.Join(parameters, ", ") + "."
+	if keepsOthers {
+		note += kept
+	}
+	return note
+}
+
+func keepsOtherParameters(request runner.Request, parameters []string) bool {
+	texts := []string{request.URL, request.Headers, request.Body, request.GraphqlQuery, request.GraphqlVariables, request.GrpcMessage, request.McpArguments, encodedText(request.Auth)}
+	for _, text := range texts {
+		for _, name := range variablesIn(text) {
+			if !slices.Contains(parameters, name) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func describeExposed(request runner.Request, stored workspace.Request, parameters []string) string {
@@ -147,7 +177,7 @@ func describeExposed(request runner.Request, stored workspace.Request, parameter
 	if description == "" {
 		description = fmt.Sprintf("Send %s %s from the Gostman workspace.", request.Method, request.URL)
 	}
-	note := argumentsNote(parameters)
+	note := argumentsNote(parameters, keepsOtherParameters(request, parameters))
 	room := max(0, toolDescriptionLimit-len([]rune(note))-len(paragraphBreak))
 	if runes := []rune(description); len(runes) > room {
 		description = string(runes[:room])
@@ -171,7 +201,7 @@ func (d *Desk) expose(current scene, tags []string) ([]exposure, error) {
 		if !workspace.SharesTag(request.Tags, wanted) {
 			continue
 		}
-		parameters := parametersOf(request)
+		parameters := d.plainParameters(request)
 		item := exposure{
 			requestID:   request.ID,
 			name:        request.Name,

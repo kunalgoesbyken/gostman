@@ -8,13 +8,14 @@ const RESULT_LIMIT = 20
 export const termsOf = (query) => query.toLowerCase().split(/\s+/).filter(Boolean)
 
 export const prepareIndex = (records) =>
-  records.map(([title, section, href, text]) => ({
+  records.map(([title, section, href, text, keywords = []]) => ({
     title,
     section,
     href,
     text,
+    keywords: keywords.map((keyword) => keyword.toLowerCase()),
     lower: {
-      heading: (section || title).toLowerCase(),
+      heading: [section || title, ...keywords].join(" ").toLowerCase(),
       page: section ? title.toLowerCase() : "",
       text: text.toLowerCase(),
     },
@@ -26,7 +27,7 @@ const termScore = (entry, term) =>
 function score(entry, terms, phrase) {
   const scores = terms.map((term) => termScore(entry, term))
   if (scores.includes(0)) return 0
-  const startBonus = entry.lower.heading.startsWith(phrase) ? HEADING_START_BONUS : 0
+  const startBonus = entry.lower.heading.startsWith(phrase) || entry.keywords.includes(phrase) ? HEADING_START_BONUS : 0
   return scores.reduce((sum, value) => sum + value, 0) + startBonus
 }
 

@@ -2,8 +2,9 @@ import { useState } from "react"
 import { Button } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { SkeletonLines } from "./ui/skeleton"
+import { CodeText } from "./ui/ConfirmDialog"
 import { describeCounts } from "../lib/importCounts"
-import { FORMAT_LABELS } from "../lib/importText"
+import { FILE_READS_TEXT, FORMAT_LABELS } from "../lib/importText"
 import { pluralize } from "../lib/dataUtils"
 import { OPEN_LINK_TEXT } from "../lib/openLinkText"
 import { describeShared } from "../lib/shareContent"
@@ -53,13 +54,15 @@ function Source({ link }) {
 function Detected({ result, host }) {
   const [source] = result.sources
   const format = FORMAT_LABELS[source.format] || source.format
-  const { activeCount } = describeShared(result)
+  const { activeCount, filePaths } = describeShared(result)
   return (
     <div role="status" className="flex flex-col gap-1 text-xs [overflow-wrap:anywhere]">
       <p className="text-foreground">{OPEN_LINK_TEXT.downloadedFrom(host)}</p>
       <p className="font-medium text-foreground">{OPEN_LINK_TEXT.detected(format)}</p>
       <p className="text-foreground">{describeCounts(source)}</p>
       {activeCount > 0 && <p className="text-warning">{OPEN_LINK_TEXT.activeNote(pluralize(activeCount, "item"))}</p>}
+      {filePaths.length > 0 && <p className="text-warning">{FILE_READS_TEXT.heading(filePaths.length)}</p>}
+      {filePaths.length > 0 && <CodeText>{FILE_READS_TEXT.list(filePaths)}</CodeText>}
       {(result.notes || []).map((note) => <p key={note} className="text-muted-foreground">{note}</p>)}
       {(result.warnings || []).map((warning) => <p key={warning} className="text-warning">{warning}</p>)}
       {(result.skipped || []).map((note) => <p key={note} className="text-muted-foreground">{note}</p>)}

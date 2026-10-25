@@ -20,7 +20,7 @@ import { parseExamples } from "../lib/examples"
 import { FOLDER_SETTINGS_TEXT as INHERIT_TEXT } from "../lib/folderSettingsText"
 import { GRAPHQL_METHOD } from "../lib/graphqlSchema"
 import { GRPC_PANEL, isBlankMessage } from "../lib/grpc"
-import { AUTH_INHERIT, countInheritedHeaders, inheritedAuthSource, lineageOf } from "../lib/inheritance"
+import { AUTH_INHERIT, countInheritedHeaders, inheritedAuthLayer } from "../lib/inheritance"
 import { MCP_PANEL } from "../lib/mcp"
 import { readParamRows } from "../lib/queryString"
 import {
@@ -51,11 +51,14 @@ function TabBadge({ value }) {
   return <TabCount>{value}</TabCount>
 }
 
+const AUTHORIZATION_AUTH = ["basic", "bearer", "oauth2"]
+
 function InheritedMark({ title, children }) {
   return (
     <span title={title} className="inline-flex items-center gap-0.5 font-mono text-3xs text-muted-foreground">
       <CornerLeftUp aria-hidden="true" className="h-3 w-3" />
-      {children}
+      {children && <span aria-hidden="true">{children}</span>}
+      <span className="sr-only">{title}</span>
     </span>
   )
 }
@@ -112,7 +115,8 @@ export const RequestTabs = memo(function RequestTabs({
   const isAiOn = useAiEnabled()
   const socketStatus = useSocketStore((state) => selectSession(tabId)(state).status)
   const { url, queryParams, headers, body, bodyType, auth, options, method, extractors, assertions, examples, preScript, postScript, vars } = activeRequest
-  const authSource = useAppStore((state) => inheritedAuthSource({ type: AUTH_INHERIT }, lineageOf(state, activeRequest.folderId))?.name ?? null)
+  const authSource = useAppStore((state) => inheritedAuthLayer(state, activeRequest.folderId)?.name ?? null)
+  const authSourceType = useAppStore((state) => inheritedAuthLayer(state, activeRequest.folderId)?.settings.auth.type ?? null)
   const isSocket = useMemo(() => isSocketAddress(url, variables), [url, variables])
   const kind = requestKind(activeRequest, isSocket)
   const isGraphQL = method === GRAPHQL_METHOD
@@ -194,7 +198,7 @@ export const RequestTabs = memo(function RequestTabs({
               onChange={(rows) => onUpdateRequest({ headers: serializeRows(rows) })}
               keyLabel={TEXT.headerLabel}
             >
-              <InheritedHeaders folderId={activeRequest.folderId} ownRows={headerRows} />
+              <InheritedHeaders folderId={activeRequest.folderId} ownRows={headerRows} authSource={auth.type === AUTH_INHERIT && AUTHORIZATION_AUTH.includes(authSourceType) ? authSource : null} onOpenAuth={() => setActivePanel(AUTH_PANEL)} />
             </KeyValueEditor>
           </Panel>
         </TabsContent>
@@ -218,7 +222,7 @@ export const RequestTabs = memo(function RequestTabs({
             auth={auth}
             tokenRequest={tokenRequest}
             actions={actions}
-            inheritance={{ source: authSource, noAuthValue: "" }}
+            inheritance={{ source: authSource, sourceType: authSourceType, noAuthValue: "" }}
             onChange={(next) => onUpdateRequest({ auth: next })}
           />
         </TabsContent>

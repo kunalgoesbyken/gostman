@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strings"
 	"sync"
@@ -148,7 +149,10 @@ func Create(root string, collection Collection) (*Workspace, error) {
 	if err != nil {
 		return nil, err
 	}
-	if state == Existing || state == Foreign {
+	switch state {
+	case Existing:
+		return fillBlank(absolute, collection)
+	case Foreign:
 		return nil, ErrNotEmpty
 	}
 	if err := os.MkdirAll(absolute, dirPermissions); err != nil {
@@ -166,6 +170,40 @@ func Create(root string, collection Collection) (*Workspace, error) {
 		return nil, err
 	}
 	return workspace, workspace.fill(collection)
+}
+
+func fillBlank(root string, collection Collection) (*Workspace, error) {
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		return nil, err
+	}
+	for _, entry := range entries {
+		if entry.Name() != ManifestName && !isHidden(entry.Name()) {
+			return nil, ErrNotEmpty
+		}
+	}
+	existing, err := Open(root)
+	if err != nil {
+		return nil, err
+	}
+	if !existing.isBlank() {
+		return nil, ErrNotEmpty
+	}
+	return existing, existing.fill(collection)
+}
+
+func blankSettings() Settings {
+	manifest, _ := encodeManifest()
+	root, _ := parseDocument(manifest)
+	settings, _ := readManifestSettings(root)
+	return settings
+}
+
+func (w *Workspace) isBlank() bool {
+	held := w.Collection()
+	return len(held.Requests)+len(held.Folders)+len(held.Environments) == 0 &&
+		held.Variables == emptyObject && held.VariablesMeta == emptyObject &&
+		reflect.DeepEqual(held.Settings, blankSettings())
 }
 
 func (w *Workspace) fill(collection Collection) error {

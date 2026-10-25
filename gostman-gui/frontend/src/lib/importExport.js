@@ -1,7 +1,7 @@
 import YAML from 'js-yaml'
 import { BODY_BINARY, BODY_FORM, BODY_JSON, BODY_MULTIPART, BODY_NONE, BODY_TEXT, BODY_TYPES, BODY_XML } from './body'
 import { buildCollectionTree, folderDepth, listFolders, MAX_FOLDER_DEPTH, requestsIn, ROOT_ID } from './collectionTree'
-import { SCRIPT_FIELDS, activeKinds, hasActiveContent, withoutActiveContent } from './activeContent'
+import { SCRIPT_FIELDS, activeKinds, filePathsIn, hasActiveContent, withoutActiveContent } from './activeContent'
 import { isPlainObject, lookup, parseJSON, pluralize } from './dataUtils'
 import { sanitizeExamples } from './examples'
 import { readParamRows } from './queryString'
@@ -14,6 +14,7 @@ import { cleanOrder } from './sortOrder'
 import { rootNumbering, sharedNumbering } from './treeMoves'
 import { cleanColorChoice } from './swatches'
 import { normalizeTags } from './tags'
+import { remark, remarksOf } from './importRemarks'
 import { AUTH_API_KEY, AUTH_BASIC, AUTH_BEARER, GRAPHQL_METHOD, UNTITLED_REQUEST, apiKeyLocation, asText, sentRows } from './exportFields'
 
 export { exportToPostman } from './postmanExport'
@@ -67,6 +68,8 @@ export const activeKindsOf = (data) => [...new Set([
   ...data.requests.flatMap(activeKinds),
   ...[...data.folders, data.settings].flatMap(activeSettingsKinds),
 ])]
+
+export const fileReadPathsOf = (data) => filePathsIn([...data.requests, ...[...data.folders, data.settings].map(normalizeScopeSettings)])
 
 export const withoutActiveRequests = (data) => ({
   ...data,
@@ -287,7 +290,7 @@ const markedOnly = (meta) => {
   return Object.keys(marks).length > 0 ? JSON.stringify(marks) : undefined
 }
 
-export function exportToGostman(requests, folders, environments, settings, collectionVariables = {}, sharedOrder = false) {
+export function exportToGostman(requests, folders, environments, settings, collectionVariables = {}, sharedOrder = false, globals = []) {
   return {
     version: GOSTMAN_FORMAT_VERSION,
     exportedAt: new Date().toISOString(),
@@ -295,6 +298,7 @@ export function exportToGostman(requests, folders, environments, settings, colle
       requests: requests.map(withoutToken),
       folders: folders.map(withoutScopeToken),
       environments,
+      ...(globals.length > 0 && { globals }),
       variables: objectOf(collectionVariables.variables),
       variablesMeta: markedOnly(collectionVariables.meta),
       settings: withoutScopeToken(settings),
@@ -316,6 +320,7 @@ function importGostman(data) {
     requests: backup.requests,
     folders: backup.folders,
     environments: asArray(backup.environments),
+    globals: asArray(backup.globals),
     variables: objectOf(backup.variables),
     variablesMeta: stringOf(backup.variablesMeta),
     settings: backup.settings,
@@ -610,11 +615,10 @@ export function sanitizeImport(data, existing) {
     variables: objectOf(data?.variables),
     variablesMeta: JSON.stringify(secretMarks(data?.variablesMeta)),
     settings: sanitizeScope(data?.settings),
-    notes: asArray(data?.notes).filter((note) => typeof note === 'string'),
-    warnings: [
-      ...asArray(data?.warnings).filter((warning) => typeof warning === 'string'),
-      ...(requestsWithoutTls.length > 0 ? [tlsWarning(requestsWithoutTls)] : []),
-      ...(flattenedCount > 0 ? [`${pluralize(flattenedCount, 'folder')} nested in a loop or deeper than ${MAX_FOLDER_DEPTH} levels moved to the top level.`] : []),
+    remarks: [
+      ...remarksOf(data),
+      ...(requestsWithoutTls.length > 0 ? [remark(tlsWarning(requestsWithoutTls), true)] : []),
+      ...(flattenedCount > 0 ? [remark(`${pluralize(flattenedCount, 'folder')} nested in a loop or deeper than ${MAX_FOLDER_DEPTH} levels moved to the top level.`, true)] : []),
     ],
   }
 }

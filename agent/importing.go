@@ -39,23 +39,25 @@ type importArguments struct {
 type importedLine struct {
 	ID     string `json:"id"`
 	Name   string `json:"name"`
+	Folder string `json:"folder,omitempty"`
 	Method string `json:"method"`
 	URL    string `json:"url"`
 }
 
 type importReport struct {
-	Sources      []importer.Source `json:"sources"`
-	Folder       string            `json:"folder,omitempty"`
-	Folders      int               `json:"folders"`
-	Requests     []importedLine    `json:"requests"`
-	MoreRequests int               `json:"moreRequests,omitempty"`
-	Settings     bool              `json:"collectionSettings,omitempty"`
-	Environments []string          `json:"environments,omitempty"`
-	Variables    []string          `json:"variables,omitempty"`
-	LeftOut      []string          `json:"leftOut,omitempty"`
-	Warnings     []string          `json:"warnings,omitempty"`
-	Notes        []string          `json:"notes,omitempty"`
-	Skipped      []string          `json:"skipped,omitempty"`
+	Sources      []importer.Source   `json:"sources"`
+	Folder       string              `json:"folder,omitempty"`
+	Folders      int                 `json:"folders"`
+	Requests     []importedLine      `json:"requests"`
+	MoreRequests int                 `json:"moreRequests,omitempty"`
+	Settings     bool                `json:"collectionSettings,omitempty"`
+	Environments []string            `json:"environments,omitempty"`
+	Variables    []string            `json:"variables,omitempty"`
+	ByCollection map[string][]string `json:"collectionVariables,omitempty"`
+	LeftOut      []string            `json:"leftOut,omitempty"`
+	Warnings     []string            `json:"warnings,omitempty"`
+	Notes        []string            `json:"notes,omitempty"`
+	Skipped      []string            `json:"skipped,omitempty"`
 }
 
 func (a importArguments) format() string {
@@ -236,11 +238,26 @@ func (d *Desk) storeFolders(current scene, result *importer.Result, path string)
 		return "", err
 	}
 	rehome(result, plan.parentID)
+	if err := d.markFolderValues(result.Folders); err != nil {
+		return "", err
+	}
 	joined := strings.Join(plan.segments, folderDivider)
 	if len(result.Folders) == 0 && !plan.grown {
 		return joined, nil
 	}
 	return joined, d.files.SaveFolders(append(plan.folders, result.Folders...))
+}
+
+func (d *Desk) markFolderValues(folders []workspace.Folder) error {
+	for _, folder := range folders {
+		if err := d.files.MarkAgentVariables(folder.Id, currentValues(folder.Variables)); err != nil {
+			return err
+		}
+		if err := d.files.MarkAgentVariables(collectionListOf(folder.Id), currentValues(folder.CollectionVariables)); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (d *Desk) storeRequests(requests []workspace.Request) error {
@@ -318,10 +335,13 @@ func (d *Desk) storeVariables(values map[string]string) ([]string, error) {
 	if err != nil || len(written) == 0 {
 		return nil, err
 	}
+	if err := d.files.MarkAgentVariables(collectionScope, written); err != nil {
+		return nil, err
+	}
 	return sortedKeys(written), d.files.SaveVariables(text)
 }
 
-func describeImport(result importer.Result, notes []string) importReport {
+func describeImport(result importer.Result, notes []string, pathOf func(string) string) importReport {
 	report := importReport{
 		Sources:  result.Sources,
 		Folders:  len(result.Folders),
@@ -336,9 +356,24 @@ func describeImport(result importer.Result, notes []string) importReport {
 			report.MoreRequests = len(result.Requests) - shownImported
 			break
 		}
-		report.Requests = append(report.Requests, importedLine{ID: request.Id, Name: request.Name, Method: request.Method, URL: request.URL})
+		report.Requests = append(report.Requests, importedLine{ID: request.Id, Name: request.Name, Folder: pathOf(request.FolderId), Method: request.Method, URL: request.URL})
 	}
+	report.ByCollection = collectionVariableNames(result.Folders, pathOf)
 	return report
+}
+
+func collectionVariableNames(folders []workspace.Folder, pathOf func(string) string) map[string][]string {
+	names := map[string][]string{}
+	for _, folder := range folders {
+		entries, _ := workspace.ParseVariableEntries(folder.CollectionVariables)
+		for _, entry := range entries {
+			names[pathOf(folder.Id)] = append(names[pathOf(folder.Id)], entry.Name)
+		}
+	}
+	if len(names) == 0 {
+		return nil
+	}
+	return names
 }
 
 func (d *Desk) importRequests(ctx context.Context, current scene, arguments importArguments) (importReport, error) {
@@ -365,7 +400,7 @@ func (d *Desk) importRequests(ctx context.Context, current scene, arguments impo
 	if err := d.storeRequests(result.Requests); err != nil {
 		return importReport{}, err
 	}
-	report := describeImport(result, notes)
+	report := describeImport(result, notes, folderPaths(d.files.Collection().Folders))
 	report.Folder = folder
 	if report.Environments, err = d.storeEnvironments(current, result.Environments); err != nil {
 		return importReport{}, err

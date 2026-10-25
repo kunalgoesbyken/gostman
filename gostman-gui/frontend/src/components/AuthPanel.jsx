@@ -100,8 +100,14 @@ function typeOptions(inheritance) {
   return [INHERIT_TYPE, { ...noAuth, value: inheritance.noAuthValue }, ...others]
 }
 
+function inheritedNote({ source, sourceType }) {
+  if (!source) return TEXT.inheritsNothing
+  const scheme = AUTH_METHODS.find((method) => method.value === sourceType)
+  return scheme ? TEXT.inheritsSchemeFrom(source, scheme.label) : TEXT.inheritsFrom(source)
+}
+
 function authNote(auth, inheritance, hasFields) {
-  if (inheritance && auth.type === AUTH_INHERIT) return inheritance.source ? TEXT.inheritsFrom(inheritance.source) : TEXT.inheritsNothing
+  if (inheritance && auth.type === AUTH_INHERIT) return inheritedNote(inheritance)
   if (hasFields) return AUTH_TEXT.fieldsNote
   return inheritance?.noAuthNote || AUTH_TEXT.noAuthNote
 }

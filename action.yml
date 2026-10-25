@@ -35,7 +35,7 @@ inputs:
     required: false
     default: ''
   redact:
-    description: Replace variable values and credentials in the report with their names.
+    description: Replace secret values in the report with their names (secret and sensitive-named variables, --var-from-env and --env-file values, secret manager values, tokens, credentials and cookies). Other values, such as base_url, stay readable.
     required: false
     default: 'true'
   bail:
@@ -88,7 +88,11 @@ runs:
         dest="$RUNNER_TEMP/gostman-bin"
         mkdir -p "$dest"
         curl --fail --silent --show-error --location --output "$dest/$asset" "$url"
-        tar -xf "$dest/$asset" -C "$dest"
+        if [ "$ext" = zip ]; then
+          unzip -q -o "$dest/$asset" -d "$dest"
+        else
+          tar -xzf "$dest/$asset" -C "$dest"
+        fi
         echo "$dest" >> "$GITHUB_PATH"
 
     - name: Run collection
@@ -117,8 +121,8 @@ runs:
           read -r -a extra <<< "$GOSTMAN_EXTRA_ARGS"
           args+=("${extra[@]}")
         fi
-        gostman "${args[@]}"
-        code=$?
+        code=0
+        gostman "${args[@]}" || code=$?
         echo "exit-code=$code" >> "$GITHUB_OUTPUT"
         echo "report=$GOSTMAN_OUTPUT" >> "$GITHUB_OUTPUT"
         exit "$code"

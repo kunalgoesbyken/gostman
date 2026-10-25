@@ -97,6 +97,8 @@ export const inheritedAuthSource = (auth, lineage) => (
   auth.type === AUTH_INHERIT ? [...lineage].reverse().find(setsAuth) || null : null
 )
 
+export const inheritedAuthLayer = (state, folderId) => inheritedAuthSource({ type: AUTH_INHERIT }, lineageOf(state, folderId))
+
 export function updatedScope(state, folderId, patch) {
   if (folderId === ROOT_SETTINGS_ID) return { collectionSettings: { ...state.collectionSettings, ...patch } }
   return { folders: state.folders.map((folder) => (folder.id === folderId ? { ...folder, ...patch } : folder)) }

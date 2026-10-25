@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Eye, EyeOff, KeyRound, Lock, LockOpen, X } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
@@ -39,11 +39,12 @@ function ReadOnlyText({ text, label }) {
   )
 }
 
-function NameField({ row, isDraft, features, autoFocus, onChange }) {
+function NameField({ row, isDraft, features, autoFocus, inputRef, onChange }) {
   if (features.readOnly) return <ReadOnlyText text={row.name} label={TEXT.variable} />
   const isMissing = !isDraft && isUnnamed(row)
   return (
     <Input
+      ref={inputRef}
       value={row.name}
       autoFocus={autoFocus}
       placeholder={isMissing ? TEXT.nameRequired : TEXT.variable}
@@ -56,7 +57,7 @@ function NameField({ row, isDraft, features, autoFocus, onChange }) {
   )
 }
 
-function ValueField({ row, isRevealed, readOnly, autoFocus, onChange }) {
+function ValueField({ row, isRevealed, readOnly, autoFocus, onBlur, onChange }) {
   const isHidden = row.secret && !isRevealed
   if (readOnly) return <ReadOnlyText text={isHidden ? TEXT.hiddenValue : asText(row.value)} label={TEXT.value} />
   return (
@@ -69,6 +70,7 @@ function ValueField({ row, isRevealed, readOnly, autoFocus, onChange }) {
       autoComplete="off"
       spellCheck={false}
       onChange={(event) => onChange({ value: event.target.value })}
+      onBlur={onBlur}
       className="font-mono"
     />
   )
@@ -87,8 +89,13 @@ function ReferenceSummary({ reference }) {
 function RowCells({ row, isDraft, isRevealed, focusField, features, references, onChange, onRemove, onToggleReveal }) {
   const canReveal = row.secret
   const toggleReference = () => onChange(row.ref ? { ref: undefined } : { ref: { ...BLANK_REFERENCE, provider: references.connections[0]?.alias ?? "" }, value: "", secret: false })
+  const rowRef = useRef(null)
+  const nameRef = useRef(null)
+  const askForName = (event) => {
+    if (!isDraft && isUnnamed(row) && rowRef.current?.contains(event.relatedTarget)) nameRef.current?.focus()
+  }
   return (
-    <div className={cn(references ? REFERENCE_COLUMNS : COLUMNS, "h-9")}>
+    <div ref={rowRef} className={cn(references ? REFERENCE_COLUMNS : COLUMNS, "h-9")}>
       {features.enabled ? (
         <Checkbox
           label={TEXT.enabled}
@@ -97,8 +104,8 @@ function RowCells({ row, isDraft, isRevealed, focusField, features, references, 
           className={cn(isDraft && "invisible")}
         />
       ) : <span />}
-      <NameField row={row} isDraft={isDraft} features={features} autoFocus={focusField === "name"} onChange={onChange} />
-      {row.ref ? <ReferenceSummary reference={row.ref} /> : <ValueField row={row} isRevealed={isRevealed} readOnly={features.readOnly} autoFocus={focusField === "value"} onChange={onChange} />}
+      <NameField row={row} isDraft={isDraft} features={features} autoFocus={focusField === "name"} inputRef={nameRef} onChange={onChange} />
+      {row.ref ? <ReferenceSummary reference={row.ref} /> : <ValueField row={row} isRevealed={isRevealed} readOnly={features.readOnly} autoFocus={focusField === "value"} onBlur={askForName} onChange={onChange} />}
       {canReveal ? (
         <IconButton
           label={isRevealed ? TEXT.hide : TEXT.reveal}

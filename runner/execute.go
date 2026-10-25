@@ -28,8 +28,10 @@ type session struct {
 	common   *shared
 	library  []Request
 	hosts    []string
+	learned  *hostsMemo
 	modules  map[string]string
 	contract *contract
+	confine  Confinement
 }
 
 type job struct {
@@ -62,6 +64,8 @@ type exchange struct {
 	errors   []string
 	flow     flow
 	visual   string
+	withheld []string
+	possible []string
 }
 
 func hasText(text string) bool {
@@ -91,10 +95,10 @@ func (s *session) scoped(request Request) variables {
 }
 
 func (s *session) runStage(ctx context.Context, stage string, work job, request Request) stageRun {
-	work.Layers = s.values.scriptLayers(request, s.once)
+	work.Layers = s.scriptLayers(request)
 	work.Modules = s.modules
 	work.Environment = s.values.environmentName(request.Lineage)
-	if err := s.scripts.Call("scriptCookies", &work.Cookies, s.common.cookieList(), s.hosts); err != nil {
+	if err := s.scripts.Call("scriptCookies", &work.Cookies, s.cookiesFor(request), s.hosts); err != nil {
 		return stageRun{Error: stage + ": " + err.Error()}
 	}
 	allowance, err := s.scripts.Allowance(request.scriptTimeout(), hasText(work.Script))
@@ -105,10 +109,10 @@ func (s *session) runStage(ctx context.Context, stage string, work job, request 
 	if err := s.runJob(ctx, allowance, work, &run); err != nil {
 		return stageRun{Error: stage + ": " + err.Error()}
 	}
-	if err := s.storeScriptCookies(run.Cookies); err != nil {
+	if err := s.storeScriptCookies(request, run.Cookies); err != nil {
 		return stageRun{Error: stage + ": " + err.Error()}
 	}
-	s.values.write(request.Lineage, run.Writes)
+	s.keepWrites(request, run.Writes)
 	if run.Error != "" {
 		run.Error = stage + ": " + run.Error
 	}
@@ -161,7 +165,8 @@ func (s *session) runPreRequests(ctx context.Context, request Request, outcome *
 func (s *session) transmit(ctx context.Context, request Request) (engine.Response, error) {
 	if request.Method == grpcMethod {
 		var call rpc.Call
-		if err := s.scripts.Call("toGrpcCall", &call, request, s.scoped(request).text()); err != nil {
+		scope, _ := s.sendable(request)
+		if err := s.scripts.Call("toGrpcCall", &call, request, scope.text()); err != nil {
 			return engine.Response{}, err
 		}
 		call.Target.Inherited = request.layers()
@@ -169,7 +174,8 @@ func (s *session) transmit(ctx context.Context, request Request) (engine.Respons
 	}
 	if request.Method == mcpMethod {
 		var call mcpclient.Call
-		if err := s.scripts.Call("toMcpCall", &call, request, s.scoped(request).text()); err != nil {
+		scope, _ := s.sendable(request)
+		if err := s.scripts.Call("toMcpCall", &call, request, scope.text()); err != nil {
 			return engine.Response{}, err
 		}
 		call.Target.Inherited = request.layers()
@@ -189,7 +195,8 @@ func (s *session) transmit(ctx context.Context, request Request) (engine.Respons
 
 func (s *session) httpRequest(request Request) (engine.Request, error) {
 	var prepared engine.Request
-	if err := s.scripts.Call("toEngineRequest", &prepared, request, s.scoped(request).text(), s.common.cookieList()); err != nil {
+	scope, _ := s.sendable(request)
+	if err := s.scripts.Call("toEngineRequest", &prepared, request, scope.text(), s.cookiesFor(request)); err != nil {
 		return prepared, err
 	}
 	prepared.Inherited = request.layers()
@@ -204,7 +211,7 @@ func (s *session) announce(prepared engine.Request) {
 	s.common.announce(prepared)
 }
 
-func (s *session) storeCookies(received []engine.CookieInfo) error {
+func (s *session) storeCookies(request Request, received []engine.CookieInfo) error {
 	if len(received) == 0 {
 		return nil
 	}
@@ -215,6 +222,7 @@ func (s *session) storeCookies(received []engine.CookieInfo) error {
 		return err
 	}
 	s.common.cookies = merged
+	s.common.tag(s.cookieOrigin(request), received)
 	return nil
 }
 
@@ -222,10 +230,10 @@ func (s *session) keepCookies(request Request, received []engine.CookieInfo) err
 	if request.Options.DiscardCookies {
 		return nil
 	}
-	return s.storeCookies(received)
+	return s.storeCookies(request, received)
 }
 
-func (s *session) storeScriptCookies(changes []engine.CookieInfo) error {
+func (s *session) storeScriptCookies(request Request, changes []engine.CookieInfo) error {
 	if len(changes) == 0 {
 		return nil
 	}
@@ -233,7 +241,7 @@ func (s *session) storeScriptCookies(changes []engine.CookieInfo) error {
 	if err := s.scripts.Call("acceptedCookies", &accepted, changes, s.hosts); err != nil {
 		return err
 	}
-	return s.storeCookies(accepted)
+	return s.storeCookies(request, accepted)
 }
 
 func (s *session) extract(request Request, response engine.Response) error {
@@ -248,7 +256,7 @@ func (s *session) extract(request Request, response engine.Response) error {
 	if err := s.scripts.Shared(allowance, "extractWrites", &extracted, request, response); err != nil {
 		return err
 	}
-	s.values.write(request.Lineage, extracted)
+	s.keepWrites(request, extracted)
 	return nil
 }
 
@@ -325,12 +333,16 @@ func (s *session) execute(ctx context.Context, request Request) (exchange, error
 		return outcome, nil
 	}
 
+	request, dropped := s.vetted(request)
 	request, err = s.withFreshToken(ctx, request)
 	if err != nil {
+		outcome.withheld = append(dropped, heldBy(err)...)
 		outcome.stop(err.Error())
 		return outcome, nil
 	}
 
+	outcome.withheld, outcome.possible = s.withheldFrom(request)
+	outcome.withheld = append(dropped, outcome.withheld...)
 	outcome.response, err = s.transmit(ctx, request)
 	if err != nil {
 		return outcome, err
@@ -347,5 +359,20 @@ func (s *session) execute(ctx context.Context, request Request) (exchange, error
 	if err := s.runPostResponse(ctx, request, &outcome); err != nil {
 		return outcome, err
 	}
+	if err := s.checkMcpOutput(&outcome); err != nil {
+		return outcome, err
+	}
 	return outcome, s.checkContract(request, &outcome)
+}
+
+func (s *session) checkMcpOutput(outcome *exchange) error {
+	if outcome.response.Protocol != mcpclient.Protocol {
+		return nil
+	}
+	var checks []Check
+	if err := s.scripts.Call("mcpOutputChecks", &checks, outcome.response); err != nil {
+		return err
+	}
+	outcome.tests = append(outcome.tests, checks...)
+	return nil
 }

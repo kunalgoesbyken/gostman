@@ -58,7 +58,7 @@ export function TagsInput({ value, onChange, label, placeholder, suggestions = [
     <div
       className={cn(
         CONTROL_BASE,
-        "flex h-auto min-h-7 flex-wrap items-center gap-1 py-0.5 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-ring",
+        "flex h-auto min-h-7 flex-wrap items-center gap-1 py-0.5 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-ring focus-within:[outline-style:solid]",
         disabled && "cursor-not-allowed opacity-50",
         className
       )}
@@ -73,7 +73,7 @@ export function TagsInput({ value, onChange, label, placeholder, suggestions = [
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         onBlur={() => commit(draft)}
-        className="h-5 min-w-[6rem] flex-1 bg-transparent text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed"
+        className="h-5 min-w-[6rem] flex-1 bg-transparent [&::-webkit-calendar-picker-indicator]:hidden text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed"
       />
       {offered.length > 0 && (
         <datalist id={listId}>

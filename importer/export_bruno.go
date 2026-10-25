@@ -45,7 +45,8 @@ func brunoRootOf(collection workspace.Collection, tree exportTree) brunoTop {
 	shared := variableValues(collection.Variables)
 	top := tree.folders[""]
 	if len(top) == 1 && len(tree.requests[""]) == 0 && blankSettings(collection.Settings) && strings.TrimSpace(tree.tests[""]) == "" {
-		return brunoTop{name: top[0].Name, id: top[0].Id, settings: top[0].Settings, variables: mergedValues(shared, variableValues(top[0].Variables))}
+		owned := mergedValues(variableValues(top[0].CollectionVariables), variableValues(top[0].Variables))
+		return brunoTop{name: top[0].Name, id: top[0].Id, settings: top[0].Settings, variables: mergedValues(shared, owned)}
 	}
 	return brunoTop{name: exportName, settings: collection.Settings, variables: shared}
 }
@@ -335,7 +336,7 @@ func assertionEntries(source string) []bruEntry {
 		return nil
 	}
 	for _, rule := range rules {
-		if _, known := brunoAssertOperators[rule.Operator]; !known || rule.Expression == "" {
+		if !isBrunoWritable(rule.Operator) || rule.Expression == "" {
 			continue
 		}
 		entries = append(entries, bruEntry{Key: rule.Expression, Value: strings.TrimSpace(rule.Operator + " " + rule.Value), Enabled: rule.Enabled})
@@ -343,11 +344,16 @@ func assertionEntries(source string) []bruEntry {
 	return entries
 }
 
+const defaultEnvironmentName = "Default"
+
 func brunoEnvironments(environments []workspace.Environment) []File {
 	var files []File
 	used := map[string]bool{}
 	for _, environment := range environments {
 		variables, secrets := environmentVariables(environment)
+		if len(variables) == 0 && len(secrets) == 0 && environment.Name == defaultEnvironmentName {
+			continue
+		}
 		w := &bruWriter{}
 		w.dict("vars", variables)
 		w.names("vars:secret", secrets)

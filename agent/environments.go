@@ -3,8 +3,11 @@ package agent
 import (
 	"context"
 	"errors"
+	"maps"
+	"slices"
 
 	"github.com/kunalgoesbyken/gostman/runner"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 type noArguments struct{}
@@ -17,6 +20,7 @@ type environmentLine struct {
 	Name      string   `json:"name"`
 	Active    bool     `json:"active"`
 	Variables []string `json:"variables"`
+	Secret    []string `json:"secret,omitempty"`
 }
 
 type environmentList struct {
@@ -42,10 +46,12 @@ func (d *Desk) describeEnvironments(environments []runner.Environment) environme
 		SessionVariables: d.sessionVariableNames(),
 	}
 	for _, environment := range environments {
+		secret := slices.Sorted(maps.Keys(workspace.SecretNames(environment.Meta)))
 		list.Environments = append(list.Environments, environmentLine{
 			Name:      environment.Name,
 			Active:    environment.Name == active,
-			Variables: variableNames(environment),
+			Variables: slices.Compact(sorted(append(variableNames(environment), secret...))),
+			Secret:    secret,
 		})
 	}
 	return list

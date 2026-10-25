@@ -112,7 +112,7 @@ func (c *collector) noteReferences(environment string, variables []envVariable) 
 		if _, seen := byProvider[variable.ref.Provider]; !seen {
 			providers = append(providers, variable.ref.Provider)
 		}
-		byProvider[variable.ref.Provider] = append(byProvider[variable.ref.Provider], variable.name+" ("+variable.ref.Path+")")
+		byProvider[variable.ref.Provider] = append(byProvider[variable.ref.Provider], variable.name+" ("+variable.ref.place()+")")
 	}
 	for _, provider := range providers {
 		c.Warnings = append(c.Warnings, fmt.Sprintf(messageExternalSecrets, environment, listNames(byProvider[provider]), provider))

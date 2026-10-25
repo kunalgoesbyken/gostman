@@ -153,6 +153,7 @@ func newExchange(ctx context.Context, r Request, policy Policy, timeline *record
 	for _, header := range prepared.Headers {
 		outgoing.Header.Add(header.Key, header.Value)
 	}
+	withDefaultUserAgent(outgoing.Header)
 	if host := outgoing.Header.Get("Host"); host != "" {
 		outgoing.Host = host
 	}

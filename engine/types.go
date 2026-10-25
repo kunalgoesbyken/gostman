@@ -146,6 +146,7 @@ type Response struct {
 	Failed        bool           `json:"failed,omitempty"`
 	Notifications []Notification `json:"notifications,omitempty"`
 	Unresolved    []string       `json:"unresolved,omitempty"`
+	OutputSchema  string         `json:"outputSchema,omitempty"`
 }
 
 type Notification struct {

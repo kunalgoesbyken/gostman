@@ -3,6 +3,8 @@ package agent
 import (
 	"context"
 	"fmt"
+	"slices"
+	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/redact"
@@ -16,9 +18,13 @@ const (
 	noteBinary       = "The body is binary and is not shown."
 	noteNoMatch      = "The select path matched nothing; the body is not shown. Check the path, or send again without select."
 	noteCutAtEdge    = "The response was larger than Gostman reads, so the body is incomplete."
-	hintUndefined    = "Placeholders listed in unresolved have no value, so they were left as written. Pass values in variables, or ask the developer to define them in the environment."
+	noteRedacted     = "The body holds the values of %s, shown as placeholders because variable values and credentials are never printed. A later request in the same session or run can use the placeholders to send them."
+	noteRevealable   = "The body holds the values of %s, shown as placeholders: variable values and credentials are hidden by default. To hand such a value to the next command, add --reveal, which prints them in plain text, or run both requests together with gostman run."
+	hintUndefined    = "Placeholders listed in unresolved have no value, so they were left as written. Pass plain values in variables; a token usually comes from sending a login request that has an extractor (save_request); otherwise ask the developer to define them in the environment."
 	hintRunUndefined = "Some requests were sent with placeholders that have no value, left as written; they are listed under unresolved, here or in failures. Give values in data, or ask the developer to define them in the environment."
 	hintSignIn       = "This request needs an OAuth 2.0 sign-in in a browser, which an agent cannot do. Ask the developer to restart gostman mcp with --oauth-token-env NAME or --oauth-refresh-token-env NAME."
+	hintWithheld     = "Gostman did not fill in what withheld lists: in an agent session a secret goes only to an address (scheme, host and port) that one of the developer's own requests sends it to, so its placeholder was sent as written, or the OAuth 2.0 token was left out. Send one of the developer's requests instead (list_requests), or ask the developer to save a request that sends it to this address; do not try to get the value another way."
+	hintRunWithheld  = "Some requests were sent without secret values, left as written; they are listed under withheld, here or in failures. A secret goes only to an address that one of the developer's own requests sends it to; ask the developer if a request needs it."
 	hintRefused      = "Gostman refused the address before sending: this server reaches only localhost, the hosts of the developer's own requests and hosts allowed with --allow-host, and no private address when started with --block-private. Ask the developer to allow the host; do not reach it another way."
 )
 
@@ -27,6 +33,7 @@ type View struct {
 	MaxBodyBytes   int
 	IncludeHeaders bool
 	IncludeBinary  bool
+	Revealable     bool
 }
 
 type BodySummary struct {
@@ -43,6 +50,7 @@ type Outcome struct {
 	Request      string               `json:"request,omitempty"`
 	Method       string               `json:"method"`
 	URL          string               `json:"url"`
+	ResolvedURL  string               `json:"resolvedUrl,omitempty"`
 	Status       string               `json:"status"`
 	StatusCode   int                  `json:"statusCode"`
 	DurationMs   int64                `json:"durationMs"`
@@ -51,6 +59,7 @@ type Outcome struct {
 	Failed       bool                 `json:"failed"`
 	Error        string               `json:"error,omitempty"`
 	Unresolved   []string             `json:"unresolved,omitempty"`
+	Withheld     []string             `json:"withheld,omitempty"`
 	Hint         string               `json:"hint,omitempty"`
 	Skipped      string               `json:"skipped,omitempty"`
 	Tests        []runner.Check       `json:"tests"`
@@ -112,6 +121,9 @@ func (c *Client) shownBody(response engine.Response, view View) (BodySummary, st
 	if note == "" && response.Truncated {
 		note = noteCutAtEdge
 	}
+	if note == "" {
+		note = c.redactionNote(text, view)
+	}
 	shown, truncated := c.guard.Excerpt(text, view.limit())
 	summary := BodySummary{
 		Bytes:         len(text),
@@ -122,6 +134,25 @@ func (c *Client) shownBody(response engine.Response, view View) (BodySummary, st
 		Note:          note,
 	}
 	return summary, shown
+}
+
+func (v View) redactedNote() string {
+	if v.Revealable {
+		return noteRevealable
+	}
+	return noteRedacted
+}
+
+func (c *Client) redactionNote(text string, view View) string {
+	labels := slices.Compact(sorted(c.guard.Labels(text)))
+	if len(labels) == 0 {
+		return ""
+	}
+	markers := make([]string, len(labels))
+	for index, label := range labels {
+		markers[index] = redact.Marker(label)
+	}
+	return fmt.Sprintf(view.redactedNote(), strings.Join(markers, ", "))
 }
 
 func encodingOf(response engine.Response, view View) string {
@@ -150,6 +181,7 @@ func (c *Client) Exchange(ctx context.Context, listed runner.Listed, view View) 
 		Request:      listed.QualifiedName(),
 		Method:       result.Method,
 		URL:          result.URL,
+		ResolvedURL:  result.ResolvedURL,
 		Status:       result.Status,
 		StatusCode:   result.StatusCode,
 		DurationMs:   result.DurationMs,
@@ -158,6 +190,7 @@ func (c *Client) Exchange(ctx context.Context, listed runner.Listed, view View) 
 		Failed:       result.Failed,
 		Error:        result.Error,
 		Unresolved:   result.Unresolved,
+		Withheld:     result.Withheld,
 		Skipped:      result.Skipped,
 		Tests:        result.Tests,
 		Logs:         result.Logs,

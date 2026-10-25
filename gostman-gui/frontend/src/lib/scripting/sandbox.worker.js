@@ -1,4 +1,5 @@
 import { evaluateExtractors } from '../chaining'
+import { contractChecks } from '../contract'
 import { runJob } from './job'
 import { MESSAGE_REPLY, MESSAGE_RESULT, MESSAGE_SEND } from './messages'
 
@@ -15,7 +16,11 @@ function removeGlobal(name) {
 
 BLOCKED_GLOBALS.forEach(removeGlobal)
 
-const run = (job) => (job.extractors ? { outcomes: evaluateExtractors(job.extractors, job.response) } : runJob(job))
+function run(job) {
+  if (job.extractors) return { outcomes: evaluateExtractors(job.extractors, job.response) }
+  if (job.contract) return { tests: contractChecks(job.contract.operation, job.contract.root, job.contract.response) }
+  return runJob(job)
+}
 
 const pending = new Map()
 let sequence = 0

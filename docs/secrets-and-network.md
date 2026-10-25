@@ -8,7 +8,7 @@ Each row of an environment, and of a collection variables list, has a lock butto
 
 - A secret value is masked in the table. The eye button (**Show value** and **Hide value**) reveals it.
 - Secret values are kept in the system keychain or an encrypted file on this computer, never in the collection folder or in exports. On the web they stay in the browser and are left out of exports.
-- Only the name of a secret variable is written to the environment file (or, for collection variables, to `gostman.yaml`), never its value. Copying a workspace folder to another computer leaves the secret values behind.
+- Only the name of a secret variable is written to the environment file (or, for collection variables, to `gostman.yaml` or the top-level folder's `folder.yaml`), never its value. Copying a workspace folder to another computer leaves the secret values behind.
 
 The Environments dialog states the same at the bottom: the desktop app says values are kept in the system keychain or an encrypted file on this computer, and the web version says they stay in the browser.
 
@@ -196,6 +196,8 @@ Network settings sets the proxy and certificates used when the desktop app sends
 Network settings are desktop only. In the web version the dialog shows `Available in the desktop app`: requests from the web version go through the hosted relay, which cannot use a proxy or certificates from your machine. To use them from the web version, run [`gostman relay`](cli.md#local-relay-for-the-web-app) with `--cacert`, `--client-cert` or `--proxy` and choose the local relay.
 
 Change the settings, then select **Save**. If something is invalid, the dialog shows the error and stays open; **Cancel** discards your changes.
+
+Gostman connects only where you send a request. An HTML response in Preview loads no images, styles or fonts from other addresses until you choose **Load remote content**, so a page cannot reveal your IP address or reach devices on your network (see [Body views](requests-and-responses.md#body-views)). `{{$file(...)}}` and file attachments never read from network shares, so a collection cannot make Windows send your sign-in to another computer (see [Reading files](variables.md#reading-files)).
 
 ### Proxy
 

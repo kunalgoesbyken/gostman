@@ -62,7 +62,7 @@ export const EmptyRow = memo(function EmptyRow({ row, dropPlace }) {
   )
 })
 
-export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop, focusRequest, isMenuOpen, isDragged, dropPlace, onActivate, onPin, onOpenMenu, onPointerDown, onKeyDown, onFocus }) {
+export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop, focusRequest, isMenuOpen, isMoving, dropPlace, onActivate, onPin, onOpenMenu, onPointerDown, onKeyDown, onFocus }) {
   const isFolder = row.kind === ROW_FOLDER
   const item = isFolder ? row.folder : row.request
   const name = item.name || TREE_TEXT.untitled
@@ -95,7 +95,7 @@ export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop,
         "group relative flex select-none items-center pr-1.5 text-xs [-webkit-touch-callout:none]",
         isActive || isMenuOpen || dropPlace === PLACE_INSIDE ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground",
         dropPlace === PLACE_INSIDE && "ring-1 ring-inset ring-primary",
-        isDragged && "opacity-50"
+        isMoving && "opacity-50"
       )}
     >
       <DropLine place={dropPlace} />
@@ -108,7 +108,7 @@ export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop,
         aria-level={row.depth + 1}
         aria-posinset={row.position}
         aria-setsize={row.siblings}
-        aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown Control+C Control+V Control+D F2 Delete Shift+F10"
+        aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown Control+C Control+X Control+V Control+D Control+Z Control+Shift+Z F2 Delete Shift+F10"
         data-row-main
         data-pane-entry
         tabIndex={isTabStop ? 0 : -1}

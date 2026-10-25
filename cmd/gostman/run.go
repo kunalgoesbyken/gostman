@@ -36,6 +36,7 @@ type invocation struct {
 	options  runner.Options
 	reports  []reporterSpec
 	redact   bool
+	secrets  map[string]bool
 	extras   runExtras
 	files    fileAccess
 	contract string
@@ -66,7 +67,8 @@ func parseInvocation(arguments []string) (invocation, error) {
 	flags.SetOutput(io.Discard)
 	flags.StringVar(&parsed.options.Environment, "env", "", "")
 	flags.StringVar(&parsed.options.Folder, "folder", "", "")
-	variableFlags(flags, parsed.options.Variables)
+	parsed.secrets = variableFlags(flags, parsed.options.Variables)
+	parsed.options.Secrets = parsed.secrets
 	flags.BoolVar(&parsed.options.Bail, "bail", false, "")
 	flags.IntVar(&delayMs, "delay", 0, "")
 	flags.IntVar(&timeoutMs, "timeout", 0, "")
@@ -103,7 +105,7 @@ func parseInvocation(arguments []string) (invocation, error) {
 	if parsed.options.SignIn, err = signIn.token(); err != nil {
 		return parsed, err
 	}
-	if err := parsed.extras.apply(&parsed.options, capturesExchanges(parsed.reports)); err != nil {
+	if err := parsed.extras.apply(&parsed.options, capturesExchanges(parsed.reports), parsed.secrets); err != nil {
 		return parsed, err
 	}
 	if err := parsed.options.CheckIterations(); err != nil {
@@ -137,6 +139,7 @@ func runCommand(arguments []string, stdout, stderr *os.File) int {
 	for _, warning := range stored.Warnings {
 		fmt.Fprintf(stderr, "warning: %s\n", warning)
 	}
+	warnShortData(stderr, parsed.options)
 	if parsed.options.Network, err = parsed.network.network(stored); err != nil {
 		return complain(stderr, err)
 	}
@@ -148,7 +151,7 @@ func runCommand(arguments []string, stdout, stderr *os.File) int {
 
 func (i invocation) pipeline() func(context.Context, runner.Collection, runner.Options, func(runner.Result)) (runner.Report, error) {
 	if i.redact {
-		return agent.RunRedacted
+		return agent.Redacting(i.secrets)
 	}
 	return runner.Run
 }
@@ -165,11 +168,12 @@ func (i invocation) execute(stored runner.Collection, stdout, stderr *os.File) i
 	defer release()
 	context.AfterFunc(ctx, release)
 
+	warned := map[string]bool{}
 	outcome, err := i.pipeline()(ctx, stored, i.options, func(result runner.Result) {
 		for _, reporter := range reporters {
 			reporter.Request(result)
 		}
-		warnUnresolved(stderr, result.QualifiedName(), result.Unresolved)
+		warnUnresolved(stderr, result.QualifiedName(), firstMentions(warned, result.Unresolved))
 	})
 	if err != nil {
 		return complain(stderr, err)

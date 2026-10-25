@@ -78,6 +78,7 @@ func buildCallRules() map[string]callRule {
 	rules := map[string]callRule{
 		"pm.test":                          rename("test"),
 		"pm.expect":                        rename("expect"),
+		"pm.expect.fail":                   rename("expect.fail"),
 		"pm.setNextRequest":                rename("setNextRequest"),
 		"pm.execution.setNextRequest":      rename("setNextRequest"),
 		"pm.execution.skipRequest":         rename("skipRequest"),

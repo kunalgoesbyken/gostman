@@ -16,6 +16,7 @@ type Collection struct {
 	Requests      []json.RawMessage   `json:"requests"`
 	Folders       []Folder            `json:"folders"`
 	Environments  []Environment       `json:"environments"`
+	Globals       []Environment       `json:"globals"`
 	Variables     string              `json:"variables"`
 	VariablesMeta string              `json:"variablesMeta"`
 	Settings      workspace.Settings  `json:"settings"`
@@ -25,6 +26,7 @@ type Collection struct {
 	Warnings      []string            `json:"-"`
 	Network       engine.NetworkFiles `json:"-"`
 	Root          string              `json:"-"`
+	Normalized    []Request           `json:"-"`
 }
 
 type Folder struct {

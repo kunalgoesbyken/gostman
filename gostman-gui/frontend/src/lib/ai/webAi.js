@@ -6,7 +6,7 @@ import {
 import {
   PROVIDER_ANTHROPIC, PROVIDER_GEMINI, PROVIDER_OPENAI, providerById,
 } from './providers'
-import { scrubPrompt, scrubText } from './scrub'
+import { scrubPrompt, scrubText } from '../redact'
 
 const KEY_PREFIX = 'gostman-ai-key:'
 const BASE_SUFFIX = ':base'

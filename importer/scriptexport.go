@@ -30,6 +30,7 @@ type scriptTarget struct {
 	name       string
 	native     map[string]bool
 	foreign    map[string]string
+	sources    map[string]*dialect
 	shims      []shim
 	missing    map[string]string
 	hints      map[string]string
@@ -59,6 +60,7 @@ type scriptRead struct {
 type adaptedScript struct {
 	text    string
 	defined []string
+	from    []string
 	notes   []scriptNote
 	unread  bool
 }
@@ -354,9 +356,33 @@ func adaptScript(target *scriptTarget, source string) adaptedScript {
 	if !ok {
 		return adaptedScript{text: source, unread: true}
 	}
+	r, from, translationNotes := target.withForeignTranslated(r)
 	wanted, notes := target.wanted(r, r.uses(target))
 	target, pathNotes := target.forScript(r, wanted)
-	return adaptedScript{text: target.header(wanted, target.namesBesideHeader(r)) + target.wrapped(r, source), defined: target.definedNames(wanted), notes: append(notes, pathNotes...)}
+	return adaptedScript{text: target.header(wanted, target.namesBesideHeader(r)) + target.wrapped(r, r.source), defined: target.definedNames(wanted), from: from, notes: slices.Concat(translationNotes, notes, pathNotes)}
+}
+
+func (target *scriptTarget) withForeignTranslated(r scriptRead) (scriptRead, []string, []scriptNote) {
+	var from []string
+	var notes []scriptNote
+	for _, root := range slices.Sorted(maps.Keys(target.sources)) {
+		if !r.reaches(func(path chain) bool { return path.root == root }) {
+			continue
+		}
+		d := target.sources[root]
+		translation := translateSource(d, r.source)
+		translated, ok := readScript(translation.text)
+		if !ok || translation.translated == 0 {
+			continue
+		}
+		r, from = translated, append(from, d.api)
+		notes = append(notes, slices.DeleteFunc(translation.notes, coveredOnExport)...)
+	}
+	return r, from, notes
+}
+
+func coveredOnExport(note scriptNote) bool {
+	return note.key == noteSendScope || note.key == noteLeftOver
 }
 
 func (target *scriptTarget) wraps(r scriptRead) bool {
@@ -510,9 +536,10 @@ func withoutDefinitions(target *scriptTarget, source string) (string, bool) {
 	definitions := target.leadingDefinitions(r)
 	target = target.withRequestTable(requestTableIn(definitions))
 	for count := len(definitions); count > 0; count-- {
-		header := target.header(target.keysWithin(definitions[:count]), declaredIn(r.body.List[count:]))
+		keys := target.keysWithin(definitions[:count])
+		header := target.header(keys, declaredIn(r.body.List[count:]))
 		if header != "" && strings.HasPrefix(source, header) {
-			return source[len(header):], true
+			return withBakedGlobals(keys, source[len(header):]), true
 		}
 	}
 	return source, false

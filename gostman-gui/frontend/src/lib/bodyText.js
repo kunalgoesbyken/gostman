@@ -8,5 +8,6 @@ export const BODY_TEXT = {
   goToLine: (line) => `Go to line ${line}`,
   noBody: 'No body',
   noBodyDescription: 'This request is sent without a body.',
+  multipartOnGet: 'GET requests rarely carry a body, and many servers ignore it. Switch the method to POST or PUT if this should be uploaded.',
   replacedByGraphQL: 'The method is GRAPHQL, so the body is built from the GraphQL tab and this one is not sent.',
 }

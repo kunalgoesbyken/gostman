@@ -79,6 +79,21 @@ func originOf(u *url.URL) string {
 	return scheme + "://" + net.JoinHostPort(strings.ToLower(u.Hostname()), port)
 }
 
+func Origin(address string) string {
+	raw := strings.TrimSpace(address)
+	if raw == "" {
+		return ""
+	}
+	if !strings.Contains(raw, "://") {
+		raw = defaultScheme(raw) + "://" + raw
+	}
+	target, err := url.Parse(strings.ReplaceAll(raw, " ", "%20"))
+	if err != nil || target.Host == "" {
+		return ""
+	}
+	return originOf(target)
+}
+
 type digestRoundTripper struct {
 	base     http.RoundTripper
 	username string

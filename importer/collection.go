@@ -2,7 +2,6 @@ package importer
 
 import (
 	"encoding/json"
-	"fmt"
 	"maps"
 	"slices"
 
@@ -10,46 +9,16 @@ import (
 )
 
 func (r Result) Collection() (workspace.Collection, error) {
-	collection, _, err := r.Folded()
-	return collection, err
-}
-
-func (r Result) Folded() (workspace.Collection, []string, error) {
-	collection := workspace.Collection{Requests: r.Requests, Folders: r.Folders, Environments: append(append([]workspace.Environment{}, r.Environments...), r.Globals...), SharedOrder: r.SharedOrder}
+	collection := workspace.Collection{Requests: r.Requests, Folders: r.Folders, Environments: append(append([]workspace.Environment{}, r.Environments...), r.Globals...), VariablesMeta: r.VariablesMeta, SharedOrder: r.SharedOrder}
 	if r.Settings != nil {
 		collection.Settings = *r.Settings
 	}
-	var shared string
-	if len(r.Variables) > 0 {
-		encoded, err := json.Marshal(r.Variables)
-		if err != nil {
-			return collection, nil, err
-		}
-		shared = string(encoded)
+	if len(r.Variables) == 0 {
+		return collection, nil
 	}
-	var dropped []workspace.DroppedVariable
-	collection.Variables, collection.VariablesMeta, dropped = workspace.FoldVariableLists(shared, r.VariablesMeta, OwnedLists(r.Folders))
-	return collection, droppedWarnings(dropped), nil
-}
-
-func droppedWarnings(dropped []workspace.DroppedVariable) []string {
-	warnings := make([]string, len(dropped))
-	for i, variable := range dropped {
-		if variable.KeptFrom == "" {
-			warnings[i] = fmt.Sprintf(messageDroppedShared, variable.Name, variable.From)
-			continue
-		}
-		warnings[i] = fmt.Sprintf(messageDroppedVariable, variable.Name, variable.From, variable.KeptFrom)
-	}
-	return warnings
-}
-
-func OwnedLists(folders []workspace.Folder) []workspace.VariableList {
-	lists := make([]workspace.VariableList, len(folders))
-	for i, folder := range folders {
-		lists[i] = workspace.VariableList{Name: folder.Name, Variables: folder.CollectionVariables, Meta: folder.CollectionVariablesMeta}
-	}
-	return lists
+	encoded, err := json.Marshal(r.Variables)
+	collection.Variables = string(encoded)
+	return collection, err
 }
 
 func (r Result) GlobalsAsVariables() Result {
@@ -71,7 +40,7 @@ func (r Result) GlobalsAsVariables() Result {
 	r.Variables = merged
 	r.VariablesMeta = workspace.MarkSecret(r.VariablesMeta, markedNames(secret)...)
 	r.Globals = nil
-	return r
+	return r.scriptsReadingCollection()
 }
 
 func markedNames(marks map[string]bool) []string {

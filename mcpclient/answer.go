@@ -20,11 +20,13 @@ const (
 	statusRefused       = "JSON-RPC error"
 	statusInputRequired = "Input required"
 
-	fieldIsError = "isError"
+	fieldIsError    = "isError"
+	fieldStructured = "structuredContent"
+	encodedNull     = "null"
 	contentText  = "text"
 
 	shownRejection  = 300
-	credentialsHint = ". It needs credentials: select Sign in to get a token with OAuth, or set them on the Auth or Headers tab"
+	credentialsHint = ". It needs credentials: select Sign in to get a token with OAuth, or set them on the Auth or Headers tab."
 )
 
 type envelope struct {

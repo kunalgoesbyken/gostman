@@ -1,4 +1,4 @@
-import { hslTriplet, isDarkColor, isHexColor, mixColors } from './color.js'
+import { hslTriplet, isDarkColor, isHexColor, mixColors, readableOn } from './color.js'
 import { isPlainObject, parseJSON } from './dataUtils.js'
 import { STYLED_METHODS, methodBackgroundToken, methodToken } from './methodColors.js'
 
@@ -73,6 +73,8 @@ const MIXES = {
 
 const DARK_SURFACE_MIXES = { muted: 0.1 }
 
+const MINIMUM_CONTRAST = { text: 4.5, control: 3 }
+
 const TOKEN_NAMES = [
   'background', 'foreground', 'card', 'card-foreground', 'secondary', 'secondary-foreground',
   'muted', 'muted-foreground', 'accent', 'accent-foreground', 'border', 'input',
@@ -111,9 +113,11 @@ const mixesFor = (background, contrast) => (isDarkColor(background) ? { ...MIXES
 function surfaceTokens({ background, foreground }, contrast) {
   const mix = mixesFor(background, contrast)
   const toward = (amount) => hslTriplet(mixColors(background, foreground, amount))
+  const readableToward = (amount, surface, minimum) => hslTriplet(readableOn(mixColors(background, foreground, amount), surface, minimum))
   const text = hslTriplet(foreground)
   const muted = toward(mix.muted)
   const border = toward(mix.border)
+  const accentColor = mixColors(background, foreground, mix.accent)
   return {
     background: hslTriplet(background),
     foreground: text,
@@ -122,11 +126,11 @@ function surfaceTokens({ background, foreground }, contrast) {
     secondary: muted,
     'secondary-foreground': text,
     muted,
-    'muted-foreground': toward(mix.mutedForeground),
+    'muted-foreground': readableToward(mix.mutedForeground, accentColor, MINIMUM_CONTRAST.text),
     accent: toward(mix.accent),
     'accent-foreground': text,
     border,
-    input: toward(mix.input),
+    input: readableToward(mix.input, background, MINIMUM_CONTRAST.control),
   }
 }
 

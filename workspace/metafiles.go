@@ -14,7 +14,7 @@ const (
 
 var (
 	manifestKeys    = []string{"format", "version"}
-	folderKeys      = append([]string{"id", "name", "order", "color", "tags", "variables"}, settingsKeys...)
+	folderKeys      = append([]string{"id", "name", "order", "color", "tags", "variables", "collectionVariables", "collectionVariablesMeta"}, settingsKeys...)
 	environmentKeys = []string{"id", "name", "order", "color", "extends", "variables", "meta"}
 )
 
@@ -75,6 +75,8 @@ func (b nodeBuilder) folder(document folderDocument) *yaml.Node {
 	setField(root, "color", b.text(strings.TrimSpace(folder.Color)))
 	setField(root, "tags", b.textList(NormalizeTags(folder.Tags)))
 	setField(root, "variables", b.folderVariables(folder.Variables))
+	setField(root, "collectionVariables", b.jsonText(folder.CollectionVariables))
+	setField(root, "collectionVariablesMeta", b.jsonText(VariableMarks(folder.CollectionVariablesMeta)))
 	b.settings(root, folder.Settings, document.extras)
 	root.Content = append(root.Content, document.extras.request...)
 	return root
@@ -99,6 +101,9 @@ func readFolder(root *yaml.Node) (folderDocument, error) {
 		Tags:      NormalizeTags(fields.textList("tags")),
 		Variables: fields.variables(),
 		Settings:  readSettings(fields, &document.extras, &failure),
+
+		CollectionVariables:     fields.jsonText("collectionVariables", true, unchanged),
+		CollectionVariablesMeta: fields.jsonText("collectionVariablesMeta", false, unchanged),
 	}
 	return document, failure
 }

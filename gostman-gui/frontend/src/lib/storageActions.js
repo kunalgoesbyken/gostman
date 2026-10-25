@@ -8,7 +8,7 @@ const CLONE_TITLE = 'Clone repository'
 const CLONE_MESSAGE = 'Address of the repository to clone. Sign-in uses your git credential helper or SSH agent. Next, choose the folder to clone into.'
 const CLONE_PLACEHOLDER = 'https://github.com/owner/repository.git'
 const CLONE_CONFIRM = 'Choose folder'
-const TRUST_PROMPT = 'Requests in this folder can carry scripts, OAuth 2.0 settings, commands that start local MCP servers and {{$file(...)}} placeholders that send files from this computer. They run when a request is sent and can read your variables, so trust the folder only if you know where its files came from.'
+const TRUST_PROMPT = 'Requests in this folder can carry scripts, OAuth 2.0 settings, commands that start local MCP servers and {{$file(...)}} placeholders that send files from this computer. They run when a request is sent and can read your variables. Its gostman.yaml can also send your requests through a proxy and add a CA certificate it names, and its variables can read your secret managers. Trust the folder only if you know where its files came from.'
 const SKIPPED_NOTE = 'These files were skipped and left unchanged. Fix them, then choose Reload from disk.'
 
 const store = () => useAppStore.getState()
@@ -47,9 +47,11 @@ export function createStorageActions(backend) {
     return switched
   }
 
+  const report = (notice) => (notice.includes('\n') ? store().showAlert(TEXT.noticesTitle, notice) : store().showNotice(notice))
+
   const switchAndReport = async (change) => {
     const status = await switchStorage(change)
-    if (status.notice) store().showNotice(status.notice)
+    if (status.notice) report(status.notice)
     showProblems(status.problems)
   }
 

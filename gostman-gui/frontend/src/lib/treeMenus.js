@@ -1,9 +1,10 @@
-import { ArrowDown, ArrowUp, ClipboardPaste, Copy, FileCheck, FileSearch, Folder, FolderInput, FolderPlus, ListChecks, Palette, Pencil, Plus, RefreshCw, Settings2, Share2, Tag, Trash2 } from "lucide-react"
+import { ArrowDown, ArrowUp, ClipboardPaste, Copy, FileCheck, FileSearch, Folder, FolderInput, FolderPlus, ListChecks, Palette, Pencil, Plus, RefreshCw, Scissors, Settings2, Share2, Tag, Trash2 } from "lucide-react"
 import { CONTRACT_TEXT } from "./checksText"
 import { DIALOG_TEXT } from "./dialogText"
 import { ROOT_ID, ROW_FOLDER, ROW_REQUEST, listFolders } from "./collectionTree"
 import { FOLDER_SETTINGS_TEXT } from "./folderSettingsText"
 import { SPEC_TEXT } from "./specText"
+import { TREE_CHORDS, bindingLabel } from "./shortcuts"
 import { STEP_DOWN, STEP_UP, canDropFolder } from "./treeMoves"
 import { TREE_TEXT } from "./treeText"
 
@@ -21,12 +22,13 @@ function specMenuItems(folder, actions, { checksContract, syncsSpec }) {
 function arrangeItems(source, context) {
   const { actions, showMoveTargets, hasClipboard, pasteRow } = context
   return [
-    { id: "move-up", label: TREE_TEXT.moveUp, icon: ArrowUp, disabled: !actions.tree.canStep(source, STEP_UP), onSelect: () => actions.tree.stepItem(source, STEP_UP) },
-    { id: "move-down", label: TREE_TEXT.moveDown, icon: ArrowDown, disabled: !actions.tree.canStep(source, STEP_DOWN), onSelect: () => actions.tree.stepItem(source, STEP_DOWN) },
+    { id: "move-up", label: TREE_TEXT.moveUp, icon: ArrowUp, shortcut: bindingLabel(TREE_CHORDS.moveUp), disabled: !actions.tree.canStep(source, STEP_UP), onSelect: () => actions.tree.stepItem(source, STEP_UP) },
+    { id: "move-down", label: TREE_TEXT.moveDown, icon: ArrowDown, shortcut: bindingLabel(TREE_CHORDS.moveDown), disabled: !actions.tree.canStep(source, STEP_DOWN), onSelect: () => actions.tree.stepItem(source, STEP_DOWN) },
     { id: "move", label: TREE_TEXT.moveToFolder, icon: FolderInput, keepOpen: true, onSelect: showMoveTargets },
-    { id: "copy", label: TREE_TEXT.copy, icon: Copy, onSelect: () => actions.tree.copyItem(source) },
-    { id: "paste", label: TREE_TEXT.paste, icon: ClipboardPaste, disabled: !hasClipboard, onSelect: () => actions.tree.pasteItem(pasteRow) },
-    { id: "duplicate", label: TREE_TEXT.duplicate, icon: Copy, onSelect: () => actions.tree.duplicateItem(source) },
+    { id: "cut", label: TREE_TEXT.cut, icon: Scissors, shortcut: bindingLabel(TREE_CHORDS.cut), onSelect: () => actions.tree.cutItem(source) },
+    { id: "copy", label: TREE_TEXT.copy, icon: Copy, shortcut: bindingLabel(TREE_CHORDS.copy), onSelect: () => actions.tree.copyItem(source) },
+    { id: "paste", label: TREE_TEXT.paste, icon: ClipboardPaste, shortcut: bindingLabel(TREE_CHORDS.paste), disabled: !hasClipboard, onSelect: () => actions.tree.pasteItem(pasteRow) },
+    { id: "duplicate", label: TREE_TEXT.duplicate, icon: Copy, shortcut: bindingLabel(TREE_CHORDS.duplicate), onSelect: () => actions.tree.duplicateItem(source) },
   ]
 }
 

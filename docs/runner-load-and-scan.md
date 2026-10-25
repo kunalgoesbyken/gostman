@@ -42,7 +42,7 @@ Values that scripts and Extract rules write during the run are kept after it, as
 
 ### Parallel runs
 
-With **Parallel** above 1, requests are sent together and see another one's extracted variables only if it finished first, so use it for requests that do not depend on each other. With several iterations, the parallel count applies inside each iteration, and iterations run one after another, in the runner and in `gostman run` alike. Values written in one iteration carry over to the next.
+With **Parallel** above 1, requests are sent together and see another one's extracted variables only if it finished first, so use it for requests that do not depend on each other. A script can still send its own request again with `setNextRequest`, as a retry does; continuing with another request stops the run, because the order cannot change. With several iterations, the parallel count applies inside each iteration, and iterations run one after another, in the runner and in `gostman run` alike. Values written in one iteration carry over to the next.
 
 ### Results
 
@@ -67,7 +67,7 @@ Requests in a folder linked to an OpenAPI spec also get the spec's contract chec
 
 **Download HTML report**, at the bottom of the dialog, saves the results of the last run as `gostman-report.html`. It is disabled while a run is going and when there are no results. The command line produces the same report with `--reporter html`; see [Command line](cli.md) and [Gostman in CI](ci.md).
 
-The report is not redacted for you. Review it before you share it.
+Each request shows its folder path and the URL it was sent to, with secret values in the URL replaced by `{{name}}`: variables marked secret or with a sensitive name such as `token` or `api_key`, values from a secret manager or a `.env` file, and OAuth 2 tokens. The rest of the report, such as request and response bodies, is not redacted for you. Review it before you share it.
 
 ## Load test
 

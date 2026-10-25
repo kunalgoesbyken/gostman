@@ -18,7 +18,7 @@ export function TestRow({ result }) {
     <li className="flex items-start gap-2 py-1 text-xs">
       <Icon className={cn("mt-0.5 h-3.5 w-3.5 shrink-0", result.passed ? "text-success" : "text-destructive")} />
       <div className="min-w-0 flex-1">
-        <p className="font-mono text-foreground">{result.name}</p>
+        <p className="font-mono text-foreground">{result.resolvedName || result.name}</p>
         {result.message && <p className="whitespace-pre-line text-muted-foreground">{result.message}</p>}
       </div>
     </li>

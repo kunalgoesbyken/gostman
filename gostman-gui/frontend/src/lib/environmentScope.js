@@ -25,9 +25,9 @@ export const isSameScope = (first, second, folders) => {
 
 export const collectionIdOf = (folders, folderId) => folderIdsUp(byIdOf(folders), folderId).at(-1) || SHARED
 
-export const isCollectionRoot = (folders, folderId, workspacePath) => (
-  holdsCollections(workspacePath) && Boolean(folderId) && collectionIdOf(folders, folderId) === folderId
-)
+export const isCollectionFolder = (folders, folderId) => Boolean(folderId) && collectionIdOf(folders, folderId) === folderId
+
+export const isCollectionRoot = (folders, folderId, workspacePath) => holdsCollections(workspacePath) && isCollectionFolder(folders, folderId)
 
 export function offeredEnvironments(environments, folders, folderId) {
   const byId = byIdOf(folders)
@@ -90,7 +90,7 @@ export function environmentsForShare(environments, folders, selectedFolders) {
 
 export const ownsCollectionVariables = (folder) => typeof folder?.collectionVariables === 'string'
 
-const withoutCollectionVariables = ({ collectionVariables, collectionVariablesMeta, ...folder }) => folder
+export const hasCollectionLists = (folders) => folders.some(ownsCollectionVariables)
 
 const variablesOf = (folder) => {
   const parsed = parseJSON(folder.collectionVariables || '{}', null)
@@ -104,7 +104,7 @@ export function variableHolders(folders, folderId) {
 
 export const variableHolderFor = (folders, folderId) => variableHolders(folders, folderId).at(-1)
 
-const ownedVariableNames = (folders) => new Set(folders.filter(ownsCollectionVariables).flatMap((folder) => Object.keys(variablesOf(folder))))
+export const ownedVariableCount = (folders) => folders.filter(ownsCollectionVariables).reduce((count, folder) => count + Object.keys(variablesOf(folder)).length, 0)
 
 export function foldersForShare(folders, selectedFolders, shared = {}) {
   const kept = new Set(selectedFolders.map((folder) => folder.id))
@@ -115,28 +115,9 @@ export function foldersForShare(folders, selectedFolders, shared = {}) {
   return selectedFolders.map((folder) => (folder === root ? { ...folder, collectionVariables: JSON.stringify(carried, null, 2) } : folder))
 }
 
-const withoutNames = (values, names) => Object.fromEntries(Object.entries(values).filter(([name]) => !names.has(name)))
-
-const marksOf = (meta) => {
-  const parsed = parseJSON(meta || '{}', null)
-  return isPlainObject(parsed) ? parsed : {}
-}
-
-function withOwnedVariables(data) {
-  const owners = data.folders.filter(ownsCollectionVariables).reverse()
-  const ownedMarks = Object.assign({}, ...owners.map((folder) => marksOf(folder.collectionVariablesMeta)))
-  return {
-    variables: Object.assign({}, ...owners.map(variablesOf), data.variables),
-    variablesMeta: JSON.stringify({ ...ownedMarks, ...marksOf(data.variablesMeta) }),
-  }
-}
-
-export function scopedImport(data, workspacePath) {
-  if (!holdsCollections(workspacePath)) {
-    return { ...data, ...withOwnedVariables(data), folders: data.folders.map(withoutCollectionVariables), environments: data.environments.map(asShared) }
-  }
-  return { ...data, variables: withoutNames(data.variables, ownedVariableNames(data.folders)) }
-}
+export const scopedImport = (data, workspacePath) => (
+  holdsCollections(workspacePath) ? data : { ...data, environments: data.environments.map(asShared) }
+)
 
 export function scopedFolderNames(data) {
   const holding = new Set(data.environments.map((environment) => environment.folderId).filter(Boolean))

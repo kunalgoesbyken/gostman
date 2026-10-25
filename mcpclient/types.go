@@ -24,12 +24,13 @@ type Call struct {
 }
 
 type Tool struct {
-	Name        string `json:"name"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	InputSchema string `json:"inputSchema"`
-	Skeleton    string `json:"skeleton"`
-	Fingerprint string `json:"fingerprint"`
+	Name         string `json:"name"`
+	Title        string `json:"title"`
+	Description  string `json:"description"`
+	InputSchema  string `json:"inputSchema"`
+	OutputSchema string `json:"outputSchema"`
+	Skeleton     string `json:"skeleton"`
+	Fingerprint  string `json:"fingerprint"`
 }
 
 type Resource struct {

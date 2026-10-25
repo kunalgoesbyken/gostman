@@ -26,6 +26,7 @@ export const RUNNER_TEXT = {
   anyTag: 'Any',
   noTag: 'None',
   skipped: 'Skipped',
+  outcomes: { passed: 'Passed', failed: 'Failed', skipped: 'Skipped' },
   tests: (passed, total) => `${passed}/${total} checks`,
   duration: (milliseconds) => `${milliseconds} ms`,
   results: 'Run results',
@@ -35,7 +36,7 @@ export const RUNNER_TEXT = {
   nothingToRunHint: 'Save requests to the collection, or pick another folder or tag filter, then run them here.',
   emptyBody: 'The response had no body.',
   truncated: 'Only the start of a long body is kept in a run. Send the request on its own to see all of it.',
-  idle: "Requests run in sidebar order with their scripts, extraction rules and assertions, using the environment chosen for their collection. A data file runs everything once per row. With parallel above 1, requests are sent together and do not see each other's extracted variables.",
+  idle: "Requests run in sidebar order with their scripts, extract rules and checks, using the environment chosen for their collection. A data file runs everything once per row. With parallel above 1, requests are sent together and do not see each other's extracted variables.",
   inScope: (requests, iterations) => (
     iterations > 1 ? `${pluralize(requests, 'request')} in scope, ${pluralize(iterations, 'iteration')}.` : `${pluralize(requests, 'request')} in scope.`
   ),

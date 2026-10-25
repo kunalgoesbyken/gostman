@@ -108,6 +108,10 @@ export function compactRequest(request) {
   }
 }
 
+export const isUntouchedRequest = (request) => (
+  JSON.stringify(compactRequest(normalizeRequest(request))) === JSON.stringify(compactRequest(normalizeRequest({ folderId: request.folderId })))
+)
+
 export function toEngineRequest(request, variables, cookies = []) {
   const { inherited = [] } = request
   const { method, url, headers, queryParams, body, bodyType, graphqlQuery, graphqlVariables, auth, options } = normalizeRequest(request)

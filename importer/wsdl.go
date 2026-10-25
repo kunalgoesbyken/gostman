@@ -210,9 +210,6 @@ func (c *collector) wsdl1(root *xmlNode, schemas []*schemaSet, rootID string) {
 }
 
 func (c *collector) setEndpoint(rootID, name, address string) {
-	if _, taken := c.Variables[name]; !taken {
-		c.Variables[name] = address
-	}
 	c.ownCollectionVariables(rootID, map[string]string{name: address})
 }
 

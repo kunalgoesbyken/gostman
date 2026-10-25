@@ -43,6 +43,7 @@ export const ENVIRONMENT_TEXT = {
   collectionNote: "Collection variables apply to every request. An environment variable with the same name wins.",
   ownCollectionNote: (collection) => `Collection variables of ${collection}, used by its requests only. They win over shared collection variables; an environment variable with the same name wins over both.`,
   sharedCollectionNote: "Shared collection variables apply to requests in every collection. A collection's own variables and environment variables with the same name win.",
+  sharedFolderNote: "Shared collection variables apply to every request. A top-level folder's own collection variables win over them, and an environment variable with the same name wins over both.",
   precedence: "Precedence from lowest to highest: Globals, Collection variables (shared, then the collection's own), Environment (inherited ones first), Folder, Request, Session.",
   secretNote: "Secret values are kept in the system keychain or an encrypted file on this computer, never in the collection folder or exports.",
   secretNoteWeb: "Secret values stay in this browser and are left out of exports.",

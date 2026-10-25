@@ -113,7 +113,7 @@ func (c *activeCollection) use(store collectionStore) {
 func (c *activeCollection) announce(notice string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.notice = strings.TrimSpace(c.notice + " " + notice)
+	c.notice = strings.TrimSpace(c.notice + "\n\n" + notice)
 }
 
 func (c *activeCollection) takeNotice() string {

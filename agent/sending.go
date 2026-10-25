@@ -45,10 +45,12 @@ type failedRequest struct {
 	Folder      string           `json:"folder"`
 	Method      string           `json:"method"`
 	URL         string           `json:"url"`
+	ResolvedURL string           `json:"resolvedUrl,omitempty"`
 	Status      string           `json:"status"`
 	Iteration   int              `json:"iteration,omitempty"`
 	Error       string           `json:"error,omitempty"`
 	Unresolved  []string         `json:"unresolved,omitempty"`
+	Withheld    []string         `json:"withheld,omitempty"`
 	FailedTests []runner.Check   `json:"failedTests"`
 	Logs        []runner.LogLine `json:"logs"`
 }
@@ -65,6 +67,7 @@ type runDigest struct {
 	Summary     runner.Summary      `json:"summary"`
 	Failures    []failedRequest     `json:"failures"`
 	Unresolved  []unresolvedRequest `json:"unresolved,omitempty"`
+	Withheld    []unresolvedRequest `json:"withheld,omitempty"`
 	Hint        string              `json:"hint,omitempty"`
 }
 
@@ -128,6 +131,8 @@ func (d *Desk) deliver(ctx context.Context, target runner.Listed, view View) (Ou
 		outcome.Hint = hintRefused
 	case strings.Contains(outcome.Error, runner.SignInNeeded):
 		outcome.Hint = hintSignIn
+	case len(outcome.Withheld) > 0:
+		outcome.Hint = hintWithheld
 	case len(outcome.Unresolved) > 0:
 		outcome.Hint = hintUndefined
 	}
@@ -167,10 +172,12 @@ func describeFailure(result runner.Result) failedRequest {
 		Folder:      result.Folder,
 		Method:      result.Method,
 		URL:         result.URL,
+		ResolvedURL: result.ResolvedURL,
 		Status:      result.Status,
 		Iteration:   result.Iteration,
 		Error:       result.Error,
 		Unresolved:  result.Unresolved,
+		Withheld:    result.Withheld,
 		FailedTests: failedChecks(result.Tests),
 		Logs:        result.Logs,
 	}
@@ -184,20 +191,33 @@ func digest(report runner.Report) runDigest {
 		Summary:     report.Summary,
 		Failures:    []failedRequest{},
 	}
-	undefined := false
+	var hints []string
 	for _, result := range report.Results {
-		undefined = undefined || len(result.Unresolved) > 0
-		switch {
-		case result.Failed:
+		hints = noteHint(hints, len(result.Unresolved) > 0, hintRunUndefined)
+		hints = noteHint(hints, len(result.Withheld) > 0, hintRunWithheld)
+		if result.Failed {
 			summary.Failures = append(summary.Failures, describeFailure(result))
-		case len(result.Unresolved) > 0:
-			summary.Unresolved = append(summary.Unresolved, unresolvedRequest{Request: result.QualifiedName(), Placeholders: result.Unresolved})
+			continue
 		}
+		summary.Unresolved = listPlaceholders(summary.Unresolved, result, result.Unresolved)
+		summary.Withheld = listPlaceholders(summary.Withheld, result, result.Withheld)
 	}
-	if undefined {
-		summary.Hint = hintRunUndefined
-	}
+	summary.Hint = strings.Join(hints, " ")
 	return summary
+}
+
+func noteHint(hints []string, applies bool, hint string) []string {
+	if !applies || slices.Contains(hints, hint) {
+		return hints
+	}
+	return append(hints, hint)
+}
+
+func listPlaceholders(lists []unresolvedRequest, result runner.Result, placeholders []string) []unresolvedRequest {
+	if len(placeholders) == 0 {
+		return lists
+	}
+	return append(lists, unresolvedRequest{Request: result.QualifiedName(), Placeholders: placeholders})
 }
 
 func (d *Desk) observeRun(ctx context.Context, options *runner.Options) func(runner.Result) {

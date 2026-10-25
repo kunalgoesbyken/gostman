@@ -16,7 +16,7 @@ import { DialogPending } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
 import { WelcomePanel } from "./WelcomePanel"
 import { GettingStartedButton, useOnboardingCompletion } from "./GettingStarted"
-import { restoreTabDrafts, selectActiveVariables, selectIsDialogOpen, selectResolvedVariables, useActiveTab, useAppStore } from "../store/appStore"
+import { resolvedVariablesFor, restoreTabDrafts, selectActiveVariables, selectIsDialogOpen, selectResolvedVariables, useActiveTab, useAppStore } from "../store/appStore"
 import { useAutoSave } from "../hooks/useAutoSave"
 import { useRequestFieldHandlers } from "../hooks/useRequestFieldHandlers"
 import { useShortcuts } from "../hooks/useShortcuts"
@@ -61,6 +61,11 @@ const loadCodeEditor = () => import("./CodeEditor")
 const CodeEditor = lazy(() => loadCodeEditor().then((module) => ({ default: module.CodeEditor })))
 
 const ENVIRONMENT_SAVE_DELAY_MS = 400
+
+const activeFirst = (environments, activeId) => [
+  ...environments.filter((environment) => environment.id === activeId),
+  ...environments.filter((environment) => environment.id !== activeId),
+]
 const REQUEST_AREA_STYLE = { minHeight: MIN_REQUEST_HEIGHT_PX }
 
 const store = () => useAppStore.getState()
@@ -237,12 +242,14 @@ function LoadedWorkspace({ backend, onBack }) {
   const specLinks = useAppStore((s) => s.specLinks)
   const closeSpecDialog = useAppStore((s) => s.closeSpecDialog)
   const settings = useAppStore((s) => s.settings)
-  const runner = useAppStore((s) => s.runner)
+  const isRunnerOpen = useAppStore((s) => s.runner.isOpen)
   const folderSettings = useAppStore((s) => s.folderSettings)
   const collectionSettings = useAppStore((s) => s.collectionSettings)
   const sharedOrder = useAppStore((s) => s.sharedOrder)
   const sharedVariables = useAppStore((s) => s.collectionVariables)
   const sharedVariablesMeta = useAppStore((s) => s.collectionVariablesMeta)
+  const globalEnvironments = useAppStore((s) => s.globalEnvironments)
+  const activeGlobalEnvironmentId = useAppStore((s) => s.activeGlobalEnvironmentId)
   const closeFolderSettings = useAppStore((s) => s.closeFolderSettings)
   const captureDialogOpen = useCaptureStore((s) => s.isOpen)
   const loadTestDialogOpen = useLoadTestStore((s) => s.isOpen)
@@ -284,7 +291,12 @@ function LoadedWorkspace({ backend, onBack }) {
   useSharedSecretConnections(actions.secrets)
   const resolvedVariables = useAppStore(selectResolvedVariables)
   const variablesMap = useMemo(() => exportableVariables(resolvedVariables), [resolvedVariables])
+  const variablesFor = useCallback((folderId) => exportableVariables(resolvedVariablesFor(useAppStore.getState(), folderId)), [])
   const shareableEnvironments = useMemo(() => withoutSecretValues(environments), [environments])
+  const shareableGlobals = useMemo(
+    () => withoutSecretValues(activeFirst(globalEnvironments, activeGlobalEnvironmentId)),
+    [globalEnvironments, activeGlobalEnvironmentId]
+  )
   const shareableFolders = useMemo(() => foldersWithoutSecrets(folders), [folders])
   const shareableVariables = useMemo(
     () => ({ variables: listWithoutSecrets(sharedVariables, sharedVariablesMeta), meta: sharedVariablesMeta }),
@@ -426,8 +438,10 @@ function LoadedWorkspace({ backend, onBack }) {
             requests={requests}
             folders={shareableFolders}
             environments={shareableEnvironments}
+            globals={shareableGlobals}
             collectionVariables={shareableVariables}
             variables={variablesMap}
+            variablesFor={variablesFor}
             settings={collectionSettings}
             sharedOrder={sharedOrder}
             onImport={actions.importData}
@@ -457,7 +471,7 @@ function LoadedWorkspace({ backend, onBack }) {
         {specDialog?.mode === "sync" && <SpecSyncDialog dialog={specDialog} link={specLinks[specDialog.folderId]} actions={actions.openapi} onClose={closeSpecDialog} />}
         {folderSettings && <FolderSettings backend={backend} scope={folderSettings} EditorComponent={CodeEditor} onClose={closeFolderSettings} />}
         {aiDialog && <AiDialog actions={actions.ai} />}
-        {runner.isOpen && <RunnerDialog runner={runner} folders={folders} requests={requests} actions={actions} />}
+        {isRunnerOpen && <RunnerDialog folders={folders} requests={requests} actions={actions} />}
       </Suspense>
 
       <StatusBar

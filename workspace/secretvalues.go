@@ -108,84 +108,33 @@ func WithoutSecretVariables(variables, meta string) (string, []string) {
 	return EncodeVariableEntries(kept), removed
 }
 
-type VariableList struct {
-	Name      string
-	Variables string
-	Meta      string
+type variableMark struct {
+	Secret  bool  `json:"secret,omitempty"`
+	Enabled *bool `json:"enabled,omitempty"`
 }
 
-type DroppedVariable struct {
-	Name     string
-	From     string
-	KeptFrom string
+func (m variableMark) kept() variableMark {
+	if m.Enabled != nil && *m.Enabled {
+		m.Enabled = nil
+	}
+	return m
 }
 
-func FoldVariableLists(variables, meta string, lists []VariableList) (string, string, []DroppedVariable) {
-	entries, err := ParseVariableEntries(variables)
-	if err != nil {
-		return variables, meta, nil
+func VariableMarks(meta string) string {
+	var marks map[string]variableMark
+	if json.Unmarshal([]byte(meta), &marks) != nil {
+		return ""
 	}
-	kept := map[string]json.RawMessage{}
-	owner := map[string]string{}
-	claimable := map[string]bool{}
-	for _, entry := range entries {
-		kept[entry.Name] = entry.Raw
-		claimable[entry.Name] = true
-	}
-	added := false
-	var dropped []DroppedVariable
-	for _, list := range lists {
-		owned, err := ParseVariableEntries(list.Variables)
-		if err != nil {
-			continue
-		}
-		for _, entry := range owned {
-			if current, taken := kept[entry.Name]; taken {
-				switch {
-				case sameValue(current, entry.Raw) && claimable[entry.Name]:
-					owner[entry.Name] = list.Name
-					claimable[entry.Name] = false
-				case !sameValue(current, entry.Raw):
-					dropped = append(dropped, DroppedVariable{Name: entry.Name, From: list.Name, KeptFrom: owner[entry.Name]})
-				}
-				continue
-			}
-			kept[entry.Name] = entry.Raw
-			owner[entry.Name] = list.Name
-			entries = append(entries, entry)
-			added = true
-			meta = carryMark(meta, list.Meta, entry.Name)
+	kept := map[string]variableMark{}
+	for name, mark := range marks {
+		if mark = mark.kept(); mark != (variableMark{}) {
+			kept[name] = mark
 		}
 	}
-	if !added {
-		return variables, meta, dropped
+	if len(kept) == 0 {
+		return ""
 	}
-	return EncodeVariableEntries(entries), meta, dropped
-}
-
-func sameValue(first, second json.RawMessage) bool {
-	return plainValue(first) == plainValue(second)
-}
-
-func plainValue(raw json.RawMessage) string {
-	var text string
-	if json.Unmarshal(raw, &text) == nil {
-		return text
-	}
-	return string(bytes.TrimSpace(raw))
-}
-
-func carryMark(meta, source, name string) string {
-	var marks map[string]json.RawMessage
-	json.Unmarshal([]byte(source), &marks)
-	mark, marked := marks[name]
-	if !marked {
-		return meta
-	}
-	target := map[string]json.RawMessage{}
-	json.Unmarshal([]byte(meta), &target)
-	target[name] = mark
-	encoded, _ := json.Marshal(target)
+	encoded, _ := json.Marshal(kept)
 	return string(encoded)
 }
 

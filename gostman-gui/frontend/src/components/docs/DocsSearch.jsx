@@ -55,12 +55,13 @@ function Option({ result, id, active, terms, onPick, onHover }) {
       id={id}
       role="option"
       aria-selected={active}
+      aria-labelledby={result.section ? `${id}-heading ${id}-page` : `${id}-heading`}
       onClick={() => onPick(result)}
       onMouseMove={onHover}
       className={classes("cursor-pointer rounded-md px-3 py-2", active && "bg-muted")}
     >
-      {result.section ? <p className="truncate text-xs text-muted-foreground">{result.title}</p> : null}
-      <p className="truncate text-sm font-medium text-foreground">
+      {result.section ? <p id={`${id}-page`} className="truncate text-xs text-muted-foreground">{result.title}</p> : null}
+      <p id={`${id}-heading`} className="truncate text-sm font-medium text-foreground">
         <Highlighted text={result.section || result.title} terms={terms} />
       </p>
       {result.text ? (

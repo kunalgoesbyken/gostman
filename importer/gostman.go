@@ -16,6 +16,7 @@ type gostmanBackup struct {
 	Requests      []json.RawMessage `json:"requests"`
 	Folders       []json.RawMessage `json:"folders"`
 	Environments  []json.RawMessage `json:"environments"`
+	Globals       []json.RawMessage `json:"globals"`
 	Variables     json.RawMessage   `json:"variables"`
 	VariablesMeta string            `json:"variablesMeta"`
 	Settings      json.RawMessage   `json:"settings"`
@@ -55,14 +56,15 @@ func (c *collector) importGostman(backup *gostmanBackup, name string) {
 		workspace.ShareOrder(c.Folders[firstFolder:], c.Requests[firstRequest:])
 	}
 	c.gostmanEnvironments(backup.Environments, folders)
-	c.gostmanSettings(backup.Settings, name)
+	c.gostmanGlobals(backup.Globals)
+	c.gostmanSettings(backup.Settings)
 	for key, value := range exportedVariables(backup.Variables) {
 		c.Variables[key] = text(value)
 	}
 	c.keepMarks(c.withoutReferences(name, backup.VariablesMeta))
 }
 
-func (c *collector) gostmanSettings(raw json.RawMessage, name string) {
+func (c *collector) gostmanSettings(raw json.RawMessage) {
 	var settings workspace.Settings
 	if c.Settings != nil || len(raw) == 0 || string(raw) == "null" {
 		return
@@ -72,9 +74,9 @@ func (c *collector) gostmanSettings(raw json.RawMessage, name string) {
 		return
 	}
 	settings.Auth = withoutTokens(settings.Auth)
-	c.flagScripts(name, settings.PreScript, settings.PostScript)
+	c.flagScripts(labelOuterSettings, settings.PreScript, settings.PostScript)
 	if settings.Auth.Type == authOAuth2 {
-		c.flag(messageOAuth, name)
+		c.flag(messageOAuth, labelOuterSettings)
 	}
 	c.Settings = &settings
 }
@@ -178,6 +180,20 @@ func (c *collector) gostmanRequests(raw []json.RawMessage, folders idMap) {
 			c.flag(messageOAuth, request.Name)
 		}
 		c.keepRequest(request)
+	}
+}
+
+func (c *collector) gostmanGlobals(raw []json.RawMessage) {
+	for _, item := range raw {
+		var global workspace.Environment
+		if err := json.Unmarshal(item, &global); err != nil {
+			c.skip(messageGostmanItem, "global environment")
+			continue
+		}
+		global.Id, global.FolderId, global.Extends = newID(), "", ""
+		global.Name = cleanName(global.Name, untitledEnvironment)
+		global.Meta = c.withoutReferences(global.Name, global.Meta)
+		c.Globals = append(c.Globals, global)
 	}
 }
 

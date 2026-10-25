@@ -177,15 +177,26 @@ func (v variables) forget(changes variables) {
 	}
 }
 
-func baseScopes(stored Collection) (variables, variables, error) {
+func baseScopes(stored Collection) (variables, variables, variables, error) {
 	collection, err := Environment{Variables: stored.Variables, Meta: stored.VariablesMeta}.ownScope()
 	if err != nil {
-		return nil, nil, fmt.Errorf("the collection variables are not a JSON object")
+		return nil, nil, nil, fmt.Errorf("the collection variables are not a JSON object")
+	}
+	globals, err := globalScope(stored.Globals)
+	if err != nil {
+		return nil, nil, nil, err
 	}
 	processed := variables{}
 	for name, value := range stored.DotEnv {
 		encoded, _ := json.Marshal(value)
 		processed[processEnvironmentPrefix+name] = encoded
 	}
-	return processed, collection, nil
+	return processed, globals, collection, nil
+}
+
+func globalScope(globals []Environment) (variables, error) {
+	if len(globals) == 0 {
+		return variables{}, nil
+	}
+	return globals[0].ownScope()
 }

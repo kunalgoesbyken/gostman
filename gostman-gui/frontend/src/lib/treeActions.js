@@ -1,5 +1,5 @@
 import { ROOT_ID, ROW_FOLDER, ROW_REQUEST } from './collectionTree'
-import { PLACE_INSIDE } from './dropPlace'
+import { PLACE_AFTER, PLACE_INSIDE } from './dropPlace'
 import { normalizeRequest } from './request'
 import { TREE_TEXT } from './treeText'
 import { TARGET_ROOT, cloneDestination, pasteDestination, planClone, planMove, planStep, sharingPatches } from './treeMoves'
@@ -16,7 +16,13 @@ const targetFor = (folderId) => (
 
 const idFactoryFor = (kind) => (kind === ROW_FOLDER ? newFolderId : newId)
 
+const HISTORY_LIMIT = 50
+
+const pasteTarget = ({ containerId, anchor }) => (anchor ? { ...anchor, place: PLACE_AFTER } : targetFor(containerId))
+
 export function createTreeActions(backend, attempt) {
+  const history = { done: [], undone: [] }
+
   async function applyPatches(patches) {
     const changed = patches[ROW_REQUEST]
     if (patches[ROW_FOLDER].length > 0) store().patchFolders(patches[ROW_FOLDER])
@@ -41,27 +47,39 @@ export function createTreeActions(backend, attempt) {
     return planner(snapshot())
   }
 
-  const offerUndo = (message, revert) => {
-    const undo = attempt(TREE_TEXT.undoFailed, async () => {
-      await revert()
-      store().dismissNotice()
-    })
-    store().showNotice(message, undo)
+  const undoLatest = attempt(TREE_TEXT.undoFailed, async () => {
+    const step = history.done.pop()
+    if (!step) return
+    await step.undo()
+    history.undone.push(step)
+    store().dismissNotice()
+  })
+
+  const redoLatest = attempt(TREE_TEXT.redoFailed, async () => {
+    const step = history.undone.pop()
+    if (!step) return
+    await step.redo()
+    history.done.push(step)
+    store().showNotice(step.message, undoLatest)
+  })
+
+  function record(step) {
+    history.done = [...history.done.slice(1 - HISTORY_LIMIT), step]
+    history.undone = []
+    store().showNotice(step.message, undoLatest)
   }
 
-  const moveItem = attempt(TREE_TEXT.moveFailed, async (source, target) => {
-    const plan = await planShared((state) => planMove(state, source, target))
-    if (!plan) return
+  async function relocate(planner) {
+    const plan = await planShared(planner)
+    if (!plan) return false
     await applyPatches(plan.patches)
-    offerUndo(TREE_TEXT.moved(plan.subject.name), () => applyPatches(plan.undo))
-  })
+    record({ message: TREE_TEXT.moved(plan.subject.name), undo: () => applyPatches(plan.undo), redo: () => applyPatches(plan.patches) })
+    return true
+  }
 
-  const stepItem = attempt(TREE_TEXT.moveFailed, async (source, direction) => {
-    const plan = await planShared((state) => planStep(state, source, direction))
-    if (!plan) return
-    await applyPatches(plan.patches)
-    offerUndo(TREE_TEXT.moved(plan.subject.name), () => applyPatches(plan.undo))
-  })
+  const moveItem = attempt(TREE_TEXT.moveFailed, (source, target) => relocate((state) => planMove(state, source, target)))
+
+  const stepItem = attempt(TREE_TEXT.moveFailed, (source, direction) => relocate((state) => planStep(state, source, direction)))
 
   const canStep = (source, direction) => planStep(snapshot(), source, direction) !== null
 
@@ -86,7 +104,7 @@ export function createTreeActions(backend, attempt) {
     const plan = await planShared((state) => planClone(state, source, destination, idFactoryFor(source.kind)))
     if (!plan) return
     await persistClone(plan)
-    offerUndo(label(plan.root.name), () => discard(plan.created))
+    record({ message: label(plan.root.name), undo: () => discard(plan.created), redo: () => persistClone(plan) })
   }
 
   const duplicateItem = attempt(TREE_TEXT.cloneFailed, (source) => {
@@ -96,12 +114,20 @@ export function createTreeActions(backend, attempt) {
 
   const copyItem = (source) => store().setTreeClipboard(source)
 
-  const pasteItem = attempt(TREE_TEXT.cloneFailed, (row) => {
-    const clip = store().treeClipboard
-    if (!clip) return undefined
-    const destination = pasteDestination(snapshot(), row)
-    return cloneInto(clip, destination, TREE_TEXT.pasted)
+  const cutItem = (source) => store().setTreeClipboard({ ...source, cut: true })
+
+  const pasteCopy = attempt(TREE_TEXT.cloneFailed, (clip, row) => cloneInto(clip, pasteDestination(snapshot(), row), TREE_TEXT.pasted))
+
+  const pasteCut = attempt(TREE_TEXT.moveFailed, async (clip, row) => {
+    const moved = await relocate((state) => planMove(state, clip, pasteTarget(pasteDestination(state, row))))
+    if (moved) store().setTreeClipboard(null)
   })
 
-  return { moveItem, stepItem, canStep, moveToFolder, duplicateItem, copyItem, pasteItem, shareOrder }
+  const pasteItem = (row) => {
+    const clip = store().treeClipboard
+    if (!clip) return undefined
+    return clip.cut ? pasteCut(clip, row) : pasteCopy(clip, row)
+  }
+
+  return { moveItem, stepItem, canStep, moveToFolder, duplicateItem, copyItem, cutItem, pasteItem, undo: undoLatest, redo: redoLatest, shareOrder }
 }

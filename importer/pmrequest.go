@@ -13,7 +13,7 @@ const sendRequestWrapper = "((callback, target) => sendRequest(target).then((res
 const postmanTargetAdapter = `((target) => typeof target === "string" ? { url: target } : { ...target, url: target.url?.raw ?? target.url, headers: Array.isArray(target.header) ? Object.fromEntries(target.header.map((row) => [row.key, row.value])) : target.header ?? target.headers, body: target.body?.raw ?? target.body })`
 
 func (t *translator) renderSendRequest(call *ast.CallExpression) string {
-	t.note(call, "sendRequest-scope", messageScriptSendScope)
+	t.note(call, noteSendScope, messageScriptSendScope)
 	if len(call.ArgumentList) == 0 {
 		t.fail(call, messageScriptUnsupported, "pm.sendRequest()")
 		return t.text(call)

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react"
+import { memo, useMemo, useRef, useState } from "react"
 import { Check, ChevronDown, ChevronRight, Download, ListChecks, Minus, Play, Square, Upload, X } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
@@ -22,6 +22,7 @@ import { summarize } from "../lib/runReport"
 import { collectTags } from "../lib/tags"
 import { endSummary } from "../lib/sse"
 import { cn } from "../lib/utils"
+import { useAppStore } from "../store/appStore"
 
 const PATH_SEPARATOR = " / "
 
@@ -48,8 +49,10 @@ function TagFilterField({ label, ...props }) {
 }
 
 function outcomeIcon(result) {
-  if (result.skipped) return { Icon: Minus, tone: "text-muted-foreground" }
-  return result.hasFailed ? { Icon: X, tone: "text-destructive" } : { Icon: Check, tone: "text-success" }
+  if (result.skipped) return { Icon: Minus, tone: "text-muted-foreground", label: RUNNER_TEXT.outcomes.skipped }
+  return result.hasFailed
+    ? { Icon: X, tone: "text-destructive", label: RUNNER_TEXT.outcomes.failed }
+    : { Icon: Check, tone: "text-success", label: RUNNER_TEXT.outcomes.passed }
 }
 
 function ResultSummary({ result }) {
@@ -77,7 +80,7 @@ function readableBody(response) {
 function ExchangeDetail({ result }) {
   const passed = result.tests.filter((test) => test.passed)
   const { request, response } = result.exchange
-  const url = response.url || request.url
+  const url = result.resolvedUrl || request.url
   return (
     <div className="flex flex-col gap-2 pb-1.5 pl-[1.375rem]">
       <p className="truncate font-mono text-2xs text-muted-foreground" title={url}>{url}</p>
@@ -96,8 +99,8 @@ function ExchangeDetail({ result }) {
   )
 }
 
-function ResultRow({ result }) {
-  const { Icon, tone } = outcomeIcon(result)
+const ResultRow = memo(function ResultRow({ result }) {
+  const { Icon, tone, label } = outcomeIcon(result)
   const [isOpen, setIsOpen] = useState(false)
   const failures = result.tests.filter((test) => !test.passed)
   const detail = result.skipped || result.error
@@ -106,7 +109,7 @@ function ResultRow({ result }) {
   const Chevron = isOpen ? ChevronDown : ChevronRight
 
   return (
-    <li className="border-b border-border">
+    <li className="border-b border-border [contain-intrinsic-size:auto_2.25rem] [content-visibility:auto]">
       <button
         type="button"
         disabled={!canExpand}
@@ -114,7 +117,8 @@ function ResultRow({ result }) {
         onClick={() => setIsOpen(!isOpen)}
         className="flex h-9 w-full items-center gap-2 px-3 text-left hover:bg-accent disabled:cursor-default disabled:hover:bg-transparent"
       >
-        <Icon className={cn("h-3.5 w-3.5 shrink-0", tone)} />
+        <Icon aria-hidden="true" className={cn("h-3.5 w-3.5 shrink-0", tone)} />
+        <span className="sr-only">{label}</span>
         <MethodTag method={shownMethod(result)} className="w-12" />
         {result.iteration > 0 && <span className="shrink-0 font-mono text-2xs text-muted-foreground">#{result.iteration}</span>}
         <span title={`${result.name}\n${result.url}`} className="min-w-0 flex-1 truncate text-xs text-foreground">{result.name}</span>
@@ -138,7 +142,7 @@ function ResultRow({ result }) {
       </div>
     </li>
   )
-}
+})
 
 function idleTitle(isRunning, total) {
   if (isRunning) return RUNNER_TEXT.running
@@ -149,10 +153,11 @@ function describeRun(results, requestCount, isRunning, iterations) {
   const total = requestCount * iterations
   if (results.length === 0) return RUNNER_TEXT.inScope(requestCount, iterations)
   const { passed, failed, skipped } = summarize(results, total)
-  return RUNNER_TEXT.progress({ isRunning, done: results.length, total, passed, failed, skipped })
+  return RUNNER_TEXT.progress({ isRunning, done: passed + failed, total, passed, failed, skipped })
 }
 
-export function RunnerDialog({ runner, folders, requests, actions }) {
+export function RunnerDialog({ folders, requests, actions }) {
+  const runner = useAppStore((s) => s.runner)
   const [folderId, setFolderId] = useState(runner.folderId)
   const [delayMs, setDelayMs] = useState(0)
   const [stopOnFailure, setStopOnFailure] = useState(false)
@@ -245,23 +250,25 @@ export function RunnerDialog({ runner, folders, requests, actions }) {
             {dataName} · {RUNNER_TEXT.rows(rows.length)}
           </Button>
         )}
-        <NumberField
-          label={RUNNER_TEXT.iterations}
-          min={0}
-          max={MAX_ITERATIONS}
-          value={iterationLimit || ""}
-          placeholder={String(iterationCount(rows, 0))}
-          disabled={isRunning}
-          onChange={(event) => setIterationLimit(Math.min(MAX_ITERATIONS, toCount(event.target.value)))}
-        />
-        <NumberField
-          label={RUNNER_TEXT.parallel}
-          min={1}
-          value={parallel > 1 ? parallel : ""}
-          placeholder="1"
-          disabled={isRunning}
-          onChange={(event) => setParallel(Math.max(1, toCount(event.target.value)))}
-        />
+        <div className="flex items-center gap-2">
+          <NumberField
+            label={RUNNER_TEXT.iterations}
+            min={0}
+            max={MAX_ITERATIONS}
+            value={iterationLimit || ""}
+            placeholder={String(iterationCount(rows, 0))}
+            disabled={isRunning}
+            onChange={(event) => setIterationLimit(Math.min(MAX_ITERATIONS, toCount(event.target.value)))}
+          />
+          <NumberField
+            label={RUNNER_TEXT.parallel}
+            min={1}
+            value={parallel > 1 ? parallel : ""}
+            placeholder="1"
+            disabled={isRunning}
+            onChange={(event) => setParallel(Math.max(1, toCount(event.target.value)))}
+          />
+        </div>
       </Toolbar>
       {knownTags.length > 0 && (
         <Toolbar className="h-auto flex-wrap py-1.5">

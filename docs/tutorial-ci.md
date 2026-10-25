@@ -16,12 +16,16 @@ No environment defines `API_TOKEN`. It is supplied when the collection runs, so 
 
 ## 2. Run it locally
 
+Clone the repository with `git clone https://github.com/kunalgoesbyken/gostman` and run these commands from its root, with the [command line](getting-started.md#install-the-command-line) installed:
+
 ```bash
 export API_TOKEN=any-token PASSWORD=any-password
 gostman run examples/auth-and-secrets --env Public --var-from-env API_TOKEN --var-from-env PASSWORD
 ```
 
-`--var-from-env API_TOKEN` reads the shell variable of that name and makes it available as `{{API_TOKEN}}`. Every request passes.
+On Windows PowerShell, set the variables with `$env:API_TOKEN = "any-token"` and `$env:PASSWORD = "any-password"` instead of `export`.
+
+`--var-from-env API_TOKEN` reads the shell variable of that name and makes it available as `{{API_TOKEN}}`. Every request passes. When the shell variable is not set, the command stops before sending anything and says so.
 
 ## 3. Make a missing secret fail the run
 
@@ -35,9 +39,13 @@ test("API_TOKEN was supplied at run time", () => {
 
 ```
 FAIL  GET      Protected/Check the token  200 OK  957 ms  2/3 checks
+      https://httpbin.org/bearer
       FAIL  API_TOKEN was supplied at run time
             expected undefined to be a string
+warning: Protected/Check the token: {{API_TOKEN}} is not defined. Define it in an environment, or pass --var API_TOKEN=...
 ```
+
+**Basic auth** fails the same way for `PASSWORD`.
 
 The command exits with `1`, so a pipeline with a missing secret fails instead of passing against the wrong credentials. Put this check on the collection's settings to cover every request.
 
@@ -76,7 +84,7 @@ The action installs the command line and runs the collection. `if: always()` upl
 
 ## 5. Read the report
 
-Open the run in the **Actions** tab and download **api-report**. The HTML page shows every request with its timing, checks, request and response, and a filter for failures. `redact: true` replaced the token and password with `{{API_TOKEN}}` and `{{PASSWORD}}`, so the report can be shared. Response bodies are still included.
+Open the run in the **Actions** tab and download **api-report**. The HTML page shows every request with its timing, checks, request and response, and a filter for failures. `redact: true` replaced the token and password with `{{API_TOKEN}}` and `{{PASSWORD}}`, so the report can be shared, while ordinary values such as the base URL stay readable and each request shows the URL it was sent to. Response bodies are still included.
 
 For a test dashboard, use `reporter: junit` with `output: report.xml` and a JUnit reporting action instead.
 

@@ -12,9 +12,28 @@ import (
 	"github.com/kunalgoesbyken/gostman/runner/sandbox"
 )
 
+type hostsMemo struct {
+	library []Request
+	scope   string
+	hosts   []string
+}
+
+func (m *hostsMemo) holds(library []Request, scope string) bool {
+	return m != nil && m.scope == scope && len(m.library) == len(library) && (len(library) == 0 || &m.library[0] == &library[0])
+}
+
 func (s *session) learn(library []Request) error {
 	s.library = library
-	return s.scripts.Call("collectionHosts", &s.hosts, library, s.values.known().text())
+	scope := s.values.known().text()
+	if s.learned.holds(library, scope) {
+		s.hosts = s.learned.hosts
+		return nil
+	}
+	if err := s.scripts.Call("collectionHosts", &s.hosts, library, scope); err != nil {
+		return err
+	}
+	s.learned = &hostsMemo{library: library, scope: scope, hosts: s.hosts}
+	return nil
 }
 
 func (s *session) scripted() *session {

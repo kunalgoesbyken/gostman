@@ -38,6 +38,7 @@ export const WORKSPACE_TEXT = {
   forgetConfirm: 'Remove',
   problems: (text) => `Show ${text}`,
   alertTitle: 'Folder not available',
+  noticesTitle: 'About this folder',
   listFailed: 'Could not read the list of folders',
   openFailed: 'Could not open the folder',
   saveFailed: 'Could not save the collection to the folder',
@@ -52,6 +53,7 @@ export const WORKSPACE_TEXT = {
   diskReloaded: 'Files changed on disk were reloaded.',
   diskReloadedWithProblems: (count) => `Files changed on disk were reloaded. ${pluralize(count, 'file')} could not be read; choose Reload from disk to see which.`,
   diskChanged: 'This request changed on disk while you were editing it.',
+  vanished: 'This request is no longer in the collection, for example after a Git pull, a branch switch or a restore. Save to add it back, or close the tab.',
   keepMine: 'Keep my edits',
   loadTheirs: 'Load from disk',
 }

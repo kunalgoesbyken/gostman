@@ -66,6 +66,7 @@ func (s *Session) Enter(stored Collection, folder, name string, overrides map[st
 	s.state.values.useEnvironments(primary.ID, slots, chosen, stored.lineages()(folderID))
 	s.resolved = resolved
 	s.state.common.keepSecrets(resolved)
+	s.state.common.keepMarked(markedSecrets(stored))
 	return nil
 }
 
@@ -89,11 +90,11 @@ func startingSlots(environments, used []Environment, overrides map[string]string
 }
 
 func (s *Session) LoadCollectionVariables(stored Collection) error {
-	process, collection, err := baseScopes(stored)
+	process, globals, collection, err := baseScopes(stored)
 	if err != nil {
 		return err
 	}
-	s.state.values.load(process, collection)
+	s.state.values.load(process, globals, collection)
 	return nil
 }
 
@@ -111,6 +112,7 @@ func (s *Session) SignIn(token engine.Token) {
 
 func (s *Session) Remember(values map[string]string) {
 	s.state.values.remember(values)
+	s.state.vouch(anyOrigin, values)
 }
 
 func (s *Session) Watch(witness func(engine.Request)) {
@@ -149,6 +151,7 @@ func (s *Session) Tokens() []engine.OAuth2 {
 func (s *Session) Send(ctx context.Context, request Request, folder string, arguments map[string]string) Outcome {
 	s.state.once = variables{}
 	s.state.once.override(arguments)
+	s.state.vouch(anyOrigin, arguments)
 	exchanged, err := s.state.execute(ctx, request)
 	s.state.once = nil
 	s.state.common.publish(s.state.scoped(request).plain())
@@ -164,6 +167,7 @@ func (s *Session) Run(ctx context.Context, stored Collection, options Options, o
 	if err := options.CheckIterations(); err != nil {
 		return Report{}, err
 	}
+	s.state.common.addMarked(options.Secrets)
 	planned, err := prepare(s.state.scripts, stored, options)
 	if err != nil {
 		return Report{}, err
@@ -182,6 +186,9 @@ func (s *Session) Run(ctx context.Context, stored Collection, options Options, o
 	}
 	s.state.contract = newContract(options.Contract)
 	s.state.values.remember(options.Variables)
+	for _, row := range options.Data {
+		s.state.vouch(anyOrigin, variables(row).plain())
+	}
 	if err := s.state.learn(planned.library); err != nil {
 		return Report{}, err
 	}

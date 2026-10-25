@@ -30,6 +30,8 @@ export const GIT_TEXT = {
   fetch: 'Fetch',
   pull: (behind) => withCount('Pull', behind),
   push: (ahead) => withCount('Push', ahead),
+  fetched: ({ behind }) => (behind > 0 ? `Fetched. ${pluralize(behind, 'new commit')} to pull.` : 'Fetched. Nothing new to pull.'),
+  pushed: ({ upstream }) => (upstream ? `Pushed to ${upstream}.` : 'Pushed.'),
   clean: 'No changes. Your collection matches the last commit.',
   mergeReady: 'Every conflict is resolved. Commit to finish the merge.',
   pickFile: 'Select a file to see what changed.',

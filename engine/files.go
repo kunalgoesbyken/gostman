@@ -94,7 +94,7 @@ func refusing(reason error) FileReader {
 
 func FolderFiles(root string) FileReader {
 	return func(path string) ([]byte, error) {
-		if err := requirePath(path); err != nil {
+		if err := requireDrivePath(path); err != nil {
 			return nil, err
 		}
 		if isHomePath(path) || !filepath.IsLocal(path) {
@@ -169,12 +169,36 @@ func requirePath(path string) error {
 	return nil
 }
 
+func requireDrivePath(path string) error {
+	if err := requirePath(path); err != nil {
+		return err
+	}
+	if isNetworkPath(path) || isDeviceName(filepath.Clean(path)) {
+		return fmt.Errorf(`"%s" is a network or device path. Files are read only from this computer's drives, so your Windows sign-in is never sent to another computer. Copy the file to this computer or map the share to a drive letter`, path)
+	}
+	return nil
+}
+
+func isNetworkPath(path string) bool {
+	startsDoubled := len(path) >= 2 && isSeparator(path[0]) && isSeparator(path[1])
+	return startsDoubled || len(filepath.VolumeName(path)) > len("C:")
+}
+
+func isSeparator(char byte) bool {
+	return char == '/' || char == '\\'
+}
+
+func isDeviceName(path string) bool {
+	base := filepath.Base(path)
+	return !slices.Contains([]string{".", "..", string(filepath.Separator)}, base) && !filepath.IsLocal(base)
+}
+
 func isHomePath(path string) bool {
 	return path == homePrefix || strings.HasPrefix(path, homePrefix+"/") || strings.HasPrefix(path, homePrefix+`\`)
 }
 
 func localPath(path string) (string, error) {
-	if err := requirePath(path); err != nil {
+	if err := requireDrivePath(path); err != nil {
 		return "", err
 	}
 	if isHomePath(path) {

@@ -3,7 +3,7 @@
 Every folder and every collection can carry settings that the requests below them share. Where you open them depends on where the collection lives:
 
 - **In the app's own storage** (the web app, and the desktop app without a folder open) each top-level folder is a collection. Open its settings from its menu with **Collection settings**; deeper folders have **Settings**. The settings button above the collection tree opens **Settings for all collections**: settings that apply to every request in every collection, and the shared collection variables.
-- **In a folder workspace** the folder is one collection. The settings button opens **Collection settings**, kept in `gostman.yaml`, and every folder's menu has **Settings**.
+- **In a folder workspace** the folder is one collection. The settings button opens **Collection settings**, kept in `gostman.yaml`, and every folder's menu has **Settings**. For collection variables only, a top-level folder still counts as a collection: it can keep its own list, as in the app's own storage, so a collection saved to a folder or imported with `gostman import` resolves the same values.
 
 The command palette has **Collection settings**, which opens the settings of the active request's collection (in the app's own storage, a request outside any folder gets **Settings for all collections**), and, in the app's own storage, **Settings for all collections**.
 
@@ -13,7 +13,7 @@ The command palette has **Collection settings**, which opens the settings of the
 | --- | --- |
 | Headers | Rows sent with every request below |
 | Auth | An auth scheme used by requests set to **Inherit** |
-| Vars | Folder variables for the requests below. In the **Collection settings** of a top-level folder, **Collection variables** switches to the collection's own collection variables, which an environment overrides, and **Folder variables** back. **Settings for all collections**, and **Collection settings** in a folder workspace, edit the shared collection variables here. Collection variables have a secret lock; folder variables have no on/off checkbox or secret lock, so keep secrets in an environment or a collection variable marked secret |
+| Vars | Folder variables for the requests below. In the settings of a top-level folder (**Collection settings** in the app's own storage, **Settings** in a folder workspace), **Collection variables** switches to the collection's own collection variables, which an environment overrides, and **Folder variables** back. **Settings for all collections**, and **Collection settings** in a folder workspace, edit the shared collection variables here. Collection variables have a secret lock; folder variables have no on/off checkbox or secret lock, so keep secrets in an environment or a collection variable marked secret |
 | Script | A script under **Before the request** and one under **After the response**; at the outermost level, also **Time limit (s)** for every script |
 | Checks | Assertions checked after every response |
 | Docs | A description shown in generated documentation |
@@ -48,6 +48,11 @@ In a folder workspace a folder's settings live in its `folder.yaml` and the coll
 name: Payments
 variables:
   region: eu
+collectionVariables:
+  apiVersion: v2
+collectionVariablesMeta:
+  apiKey:
+    secret: true
 headers:
   - key: X-Team
     value: payments
@@ -62,7 +67,9 @@ assertions:
 description: Endpoints owned by the payments team.
 ```
 
-Keys Gostman does not know are kept when it rewrites the file. Gostman exports and share links carry folder settings with each folder, and the outermost settings with a full export. Importing never overwrites existing settings: the outermost settings are adopted only when the open collection has none (in the app's own storage, when **Settings for all collections** is empty).
+`collectionVariables` is the collection's own list, kept by a top-level folder. `collectionVariablesMeta` holds its secret marks (`secret: true`) and switched-off rows (`enabled: false`). A secret variable such as `apiKey` above is written by name only: the desktop app keeps its value in the keychain, and `gostman run` takes it with `--var`.
+
+Keys Gostman does not know are kept when it rewrites the file. Gostman exports and share links carry folder settings with each folder, and the outermost settings with a full export. Importing never overwrites existing settings, and never changes the settings that apply to your other collections. In the app's own storage, the outermost settings of an import go to the imported collection's own **Collection settings**, or to a new **Imported collection** that holds the import when they cannot be copied without changing what a request inherits, see [Import, export and specs](import-export-and-specs.md). In a folder workspace they are adopted only when the collection has none.
 
 ## Trust
 

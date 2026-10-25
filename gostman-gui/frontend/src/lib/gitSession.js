@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { GIT_TEXT } from './gitText'
 import { useAppStore } from '../store/appStore'
 
 export const TAB_CHANGES = 'changes'
@@ -51,16 +52,19 @@ export function createGitActions(backend) {
     if (git().state.isRepo) await loadTab(git().tab)
   }
 
-  async function perform(operation, { filesChange = false } = {}) {
+  async function perform(operation, { filesChange = false, done = null } = {}) {
     patch({ isBusy: true })
+    let succeeded = false
     try {
       const output = await operation()
       patch({ output: typeof output === 'string' ? output : '' })
+      succeeded = true
     } catch (error) {
       app().showAlert('Git', messageOf(error), 'OK', 'warning')
     } finally {
       if (filesChange) app().suspendPersistence()
       await refresh().catch(() => {})
+      if (succeeded && done && !git().output.trim()) patch({ output: done(git().state) })
       patch({ isBusy: false })
     }
   }
@@ -108,9 +112,9 @@ export function createGitActions(backend) {
       'Discard',
     ),
     commit: withReselect((message, stageAll) => backend.commit(message, stageAll)),
-    fetch: () => perform(() => backend.fetch()),
+    fetch: () => perform(() => backend.fetch(), { done: GIT_TEXT.fetched }),
     pull: () => perform(() => backend.pull(), { filesChange: true }),
-    push: () => perform(() => backend.push()),
+    push: () => perform(() => backend.push(), { done: GIT_TEXT.pushed }),
     init: () => perform(() => backend.init()),
     createBranch: (name) => perform(() => backend.createBranch(name), { filesChange: true }),
     switchBranch: (name, remote) => perform(() => backend.switchBranch(name, remote), { filesChange: true }),

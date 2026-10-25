@@ -13,12 +13,18 @@ const BUTTON_CLASS = "min-w-0 max-w-[14rem] shrink"
 const keepMenuOpenState = (event) => event.stopPropagation()
 
 function useGitState(git, path) {
+  const requests = useAppStore((s) => s.requests)
+  const folders = useAppStore((s) => s.folders)
+
   useEffect(() => {
     const refresh = () => git.refreshState().catch(() => {})
-    refresh()
     window.addEventListener("focus", refresh)
     return () => window.removeEventListener("focus", refresh)
-  }, [git, path])
+  }, [git])
+
+  useEffect(() => {
+    git.refreshState().catch(() => {})
+  }, [git, path, requests, folders])
 }
 
 function BrowserStorage() {

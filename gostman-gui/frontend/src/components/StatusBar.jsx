@@ -12,12 +12,21 @@ import { STATUS_ITEM_CLASS, StatusItem } from "./StatusItem"
 
 const gitLabel = (git) => (git.detached ? TEXT.detached : git.branch) + (git.changes.length > 0 ? ` (${git.changes.length})` : "")
 
+const portOf = (address) => {
+  try {
+    return new URL(address).port
+  } catch {
+    return ""
+  }
+}
+
 export function StatusBar({ onOpenMock, onOpenCapture, updates, remindsExport, onExport }) {
   const openCookies = useAppStore((s) => s.openCookiesDialog)
   const openSettings = useAppStore((s) => s.openSettingsDialog)
   const openPreferences = useAppStore((s) => s.openPreferencesDialog)
   const openAbout = useAppStore((s) => s.openAbout)
   const isMockRunning = useMockStore((s) => s.isRunning)
+  const mockPort = useMockStore((s) => portOf(s.address))
   const isCapturing = useCaptureStore((s) => s.isRunning)
   const git = useGitStore((s) => s.state)
 
@@ -25,7 +34,7 @@ export function StatusBar({ onOpenMock, onOpenCapture, updates, remindsExport, o
     <footer className="flex h-6 max-sm:h-10 shrink-0 items-center justify-between overflow-hidden border-t border-border bg-background px-1 text-2xs text-muted-foreground">
       <div className="flex h-full items-center">
         <StatusItem icon={Settings} label={TEXT.network} onClick={openSettings} />
-        <StatusItem icon={Server} label={TEXT.mock(isMockRunning)} active={isMockRunning} onClick={onOpenMock} />
+        <StatusItem icon={Server} label={TEXT.mock(isMockRunning, mockPort)} active={isMockRunning} onClick={onOpenMock} />
         <StatusItem icon={Radio} label={TEXT.capture(isCapturing)} active={isCapturing} onClick={onOpenCapture} />
         {git.hasFolder && <StatusItem icon={GitBranch} label={git.isRepo ? gitLabel(git) : TEXT.git} onClick={openGit} />}
       </div>

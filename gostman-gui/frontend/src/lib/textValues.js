@@ -5,6 +5,15 @@ export function someText(value, test) {
   return false
 }
 
+export function textsIn(value) {
+  const found = []
+  someText(value, (text) => {
+    found.push(text)
+    return false
+  })
+  return found
+}
+
 export function mapText(value, change) {
   if (typeof value === 'string') return change(value)
   if (Array.isArray(value)) return value.map((item) => mapText(item, change))

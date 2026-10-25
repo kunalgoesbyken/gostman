@@ -1,8 +1,10 @@
 import { useMemo } from "react"
+import { McpMedia } from "./McpMedia"
 import { McpNotifications } from "./McpNotifications"
 import { SoapBody } from "./SoapBody"
 import { SseView } from "./SseView"
 import { LARGE_BODY_CHARS } from "../lib/largeText"
+import { mcpMedia } from "../lib/mcpMedia"
 import { readSoapResponse } from "../lib/soap"
 import { selectSession, useSseStore } from "../lib/sseSessions"
 import { useAppStore } from "../store/appStore"
@@ -23,15 +25,22 @@ function useSoap(response) {
   return useMemo(() => (isXml ? readSoapResponse(response.body) : null), [isXml, response])
 }
 
+function useMedia(response) {
+  return useMemo(() => mcpMedia(response), [response])
+}
+
 export function ProtocolBody({ response, isLoading, isBodyShown, children }) {
   const streamId = useStreamId(isLoading, response)
   const soap = useSoap(isLoading ? null : response)
+  const media = useMedia(isLoading ? null : response)
   if (streamId && (isLoading || isBodyShown)) return <SseView streamId={streamId} />
   if (soap && isBodyShown) return <SoapBody soap={soap} />
-  if (isBodyShown && !isLoading && response?.notifications?.length > 0) {
+  const notifications = response?.notifications ?? []
+  if (isBodyShown && !isLoading && (notifications.length > 0 || media.length > 0)) {
     return (
       <>
-        <McpNotifications notifications={response.notifications} />
+        {notifications.length > 0 && <McpNotifications notifications={notifications} />}
+        {media.length > 0 && <McpMedia media={media} />}
         {children}
       </>
     )

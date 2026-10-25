@@ -322,6 +322,10 @@ A failed call is marked as failed in the collection runner and by `gostman run`,
 - `res.body.isError` is false
 - `res.statusText` equals `OK`
 
+Image and audio content in a tool result is shown above the body: images (PNG, JPEG, GIF, WebP, AVIF, BMP) as pictures and audio (MP3, WAV, Ogg, WebM, FLAC, AAC) with a player. Other types stay as text in the body, and the data is never run as script.
+
+When the tool declares an output schema and its result carries `structuredContent`, Gostman checks the content against the schema (the same validator as the `matches schema` check) and adds a check named Result matches the tool output schema to the response's Checks tab, listing every violation. A result that does not conform counts as a failed check in the collection runner and in `gostman run`.
+
 Progress updates and log messages the server sends while it works (`notifications/progress` and `notifications/message`) are listed above the body under Notifications, with the time each one arrived: progress as done/total with its message, and log messages with their level, logger and data. Gostman asks 2026-07-28 servers for log messages at the debug level. The first 500 notifications of a call are kept.
 
 ### Checks

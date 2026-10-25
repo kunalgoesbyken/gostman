@@ -93,11 +93,10 @@ func importCommand(arguments []string, stdout, stderr *os.File) int {
 	if err != nil {
 		return complain(stderr, err)
 	}
-	collection, dropped, err := result.GlobalsAsVariables().Folded()
+	collection, err := result.GlobalsAsVariables().Collection()
 	if err != nil {
 		return complain(stderr, err)
 	}
-	result.Warnings = append(result.Warnings, dropped...)
 	if _, err := workspace.Create(parsed.out, collection); err != nil {
 		return complain(stderr, importTargetProblem(parsed.out, err))
 	}
@@ -106,7 +105,7 @@ func importCommand(arguments []string, stdout, stderr *os.File) int {
 	}
 	reportImport(stdout, stderr, result, parsed.out)
 	reportGlobals(stderr, result.Globals)
-	reportSecrets(stderr, append(collection.Environments, collectionVariables(collection)), result.Globals)
+	reportSecrets(stderr, append(collection.Environments, variableLists(collection)...), result.Globals)
 	return exitPassed
 }
 
@@ -116,17 +115,23 @@ func reportGlobals(stderr io.Writer, globals []workspace.Environment) {
 		names[index] = strconv.Quote(global.Name)
 	}
 	if len(names) > 0 {
-		fmt.Fprintf(stderr, "note: gostman run has no global scope, so the variables of the global environment %s were added to the collection variables in gostman.yaml; a collection variable with the same name keeps its value\n", strings.Join(names, ", "))
+		fmt.Fprintf(stderr, "note: gostman run has no global scope, so the variables of the global environment %s were added to the collection variables in gostman.yaml, and scripts that read or set globals use the collection variables instead; a collection variable with the same name keeps its value\n", strings.Join(names, ", "))
 	}
 }
 
-func collectionVariables(collection workspace.Collection) workspace.Environment {
-	return workspace.Environment{Name: workspace.ManifestName, Variables: collection.Variables, Meta: collection.VariablesMeta}
+func variableLists(collection workspace.Collection) []workspace.Environment {
+	lists := []workspace.Environment{{Name: workspace.ManifestName, Variables: collection.Variables, Meta: collection.VariablesMeta}}
+	for _, folder := range collection.Folders {
+		if folder.CollectionVariables != "" {
+			lists = append(lists, workspace.Environment{Name: folder.Name, Variables: folder.CollectionVariables, Meta: folder.CollectionVariablesMeta})
+		}
+	}
+	return lists
 }
 
 func importTargetProblem(out string, err error) error {
 	if errors.Is(err, workspace.ErrNotEmpty) {
-		return fmt.Errorf("%s already holds files; import creates a new workspace, so name a new or empty folder with --out", out)
+		return fmt.Errorf("%s already holds files; import creates a new workspace, so name with --out a new or empty folder, or one that gostman init has just set up", out)
 	}
 	return err
 }
@@ -174,37 +179,8 @@ func plural(count int, noun string) string {
 	return fmt.Sprintf("%d %ss", count, noun)
 }
 
-func importSummary(counts importer.Counts) string {
-	items := []struct {
-		count int
-		noun  string
-	}{{counts.Requests, "request"}, {counts.Folders, "folder"}, {counts.Environments, "environment"}, {counts.Globals, "global environment"}, {counts.Variables, "collection variable"}, {counts.FolderSettings, "folder setting"}}
-	var parts []string
-	for _, item := range items {
-		if item.count > 0 {
-			parts = append(parts, plural(item.count, item.noun))
-		}
-	}
-	switch len(parts) {
-	case 0:
-		return plural(0, "request")
-	case 1:
-		return parts[0]
-	}
-	last := parts[len(parts)-1]
-	return strings.Join(parts[:len(parts)-1], ", ") + " and " + last
-}
-
-func writtenVariables(result importer.Result) int {
-	collection, _ := result.Collection()
-	entries, _ := workspace.ParseVariableEntries(collection.Variables)
-	return len(entries)
-}
-
 func reportImport(stdout, stderr io.Writer, result importer.Result, out string) {
-	counts := result.Counts()
-	counts.Variables = writtenVariables(result)
-	fmt.Fprintf(stdout, "Imported %s into %s.\n", importSummary(counts), out)
+	fmt.Fprintf(stdout, "Imported into %s: %s.\n", out, result.Counts().Describe())
 	for _, note := range result.Notes {
 		fmt.Fprintf(stderr, "note: %s\n", note)
 	}

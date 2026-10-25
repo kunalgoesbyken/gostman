@@ -3,7 +3,7 @@ import { JsonView, darkStyles } from 'react-json-view-lite'
 import 'react-json-view-lite/dist/index.css'
 import {
   AlertTriangle, BookmarkPlus, Check, ChevronDown, ChevronUp, Cookie, Copy, Download, FileDigit, FileText, FileX, History, List, ListPlus,
-  Maximize2, MessageCircleQuestion, Minimize2, Scissors, Search,
+  Maximize2, MessageCircleQuestion, Minimize2, Scissors, Search, ShieldCheck,
 } from "lucide-react"
 import { ConsolePanel } from "./ConsolePanel"
 import { AiButton } from "./AiButton"
@@ -37,7 +37,8 @@ import { RESPONSE_CHECKS_TEXT } from "../lib/checksText"
 import { canSaveAsExample } from "../lib/examples"
 import { trimTree } from "../lib/jsonTree"
 import { LARGE_BODY_CHARS } from "../lib/largeText"
-import { RESPONSE_TEXT } from "../lib/responseText"
+import { PREVIEW_TEXT, RESPONSE_TEXT } from "../lib/responseText"
+import { previewDocument } from "../lib/visualizeFrame"
 import { breakdownTitle } from "../lib/timeline"
 import { canProposeChecks } from "../lib/responseChecks"
 import { describeResponse, formatTime } from "../lib/responseHistory"
@@ -48,7 +49,7 @@ import {
   DEFAULT_RESPONSE_SHARE, MIN_REQUEST_HEIGHT_PX, MIN_RESPONSE_HEIGHT_PX, rememberResponseShare, rememberedResponseShare,
 } from "../lib/layout"
 import {
-  BODY_KINDS, ERROR_TITLES, bodyBytes, bodyKind, looksLikeJson, mimeType, parseJsonBody, statusVariant, textBody,
+  BODY_KINDS, ERROR_TITLES, bodyBytes, bodyKind, dataUrl, isScriptableImage, looksLikeJson, mimeType, parseJsonBody, statusVariant, textBody,
 } from "../lib/response"
 
 const JSON_EXPANDED_DEPTH = 2
@@ -125,6 +126,10 @@ function useObjectUrl(response) {
   const [url, setUrl] = useState(null)
 
   useEffect(() => {
+    if (isScriptableImage(response)) {
+      setUrl(dataUrl(response))
+      return undefined
+    }
     const objectUrl = URL.createObjectURL(new Blob([bodyBytes(response)], { type: mimeType(response) }))
     setUrl(objectUrl)
     return () => URL.revokeObjectURL(objectUrl)
@@ -226,6 +231,23 @@ function JsonTree({ data, depth }) {
   )
 }
 
+function HtmlPreview({ response }) {
+  const [loadedFor, setLoadedFor] = useState(null)
+  const remote = loadedFor === response
+  const srcDoc = useMemo(() => previewDocument(response.body, { remote, url: response.url }), [response, remote])
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <Notice icon={ShieldCheck}>
+        {remote ? PREVIEW_TEXT.loaded : PREVIEW_TEXT.blocked}
+        <button type="button" onClick={() => setLoadedFor(remote ? null : response)} className="ml-2 font-medium underline">
+          {remote ? PREVIEW_TEXT.block : PREVIEW_TEXT.load}
+        </button>
+      </Notice>
+      <iframe srcDoc={srcDoc} title={RESPONSE_TEXT.previewTitle} sandbox="" referrerPolicy="no-referrer" className="block min-h-0 w-full flex-1 border-none bg-white" />
+    </div>
+  )
+}
+
 function ResponseBody({ response, kind, view, json, formatted, filtered, highlight, onSave }) {
   if (kind === BODY_KINDS.EMPTY) {
     return (
@@ -239,9 +261,7 @@ function ResponseBody({ response, kind, view, json, formatted, filtered, highlig
   if (kind === BODY_KINDS.BINARY) return <BinaryBody response={response} onSave={onSave} />
   if (view === 'pretty') return <PrettyBody json={json} formatted={formatted} filtered={filtered} highlight={highlight} depth={treeDepth(response)} />
   if (view === 'raw') return <TextBody text={filtered ? filtered.text : response.body} highlight={highlight} />
-  if (kind === BODY_KINDS.HTML) {
-    return <iframe srcDoc={response.body} title={RESPONSE_TEXT.previewTitle} className="block h-full w-full border-none bg-white" sandbox="" />
-  }
+  if (kind === BODY_KINDS.HTML) return <HtmlPreview response={response} />
   return <MediaPreview response={response} kind={kind} />
 }
 
@@ -257,7 +277,8 @@ function ErrorBody({ response, onExplain, onTrust }) {
 
 function StatusSummary({ response }) {
   if (response.error) {
-    return <Badge variant="outline">{lookup(ERROR_TITLES, response.error) || RESPONSE_TEXT.error}</Badge>
+    const label = response.error === RESTRICTED_ERROR ? RESPONSE_TEXT.error : lookup(ERROR_TITLES, response.error) || RESPONSE_TEXT.error
+    return <Badge variant="outline">{label}</Badge>
   }
   const timing = `${response.durationMs} ms · ${formatSize(response.size)}`
   const detail = [timing, breakdownTitle(response.timeline)].filter(Boolean).join('\n\n')
@@ -542,6 +563,9 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
             <div className="ml-auto flex min-w-0 max-w-full items-center gap-2">
               <div role="status" className={cn(TOOLBAR_ROW, "flex min-w-0 items-center gap-2")}>
                 {shown && <StatusSummary response={shown} />}
+                {showsTests && !past && tests.results.length > 0 && (
+                  <span className="sr-only">{RESPONSE_TEXT.checksPassed(countPassed(tests.results), tests.results.length)}</span>
+                )}
               </div>
 
               <div className={cn(TOOLBAR_ROW, "flex shrink-0 items-center gap-1")}>

@@ -122,6 +122,7 @@ func RedactSecrets(collection workspace.Collection) (workspace.Collection, []str
 		r.owner = folder.Name
 		folder.Settings = r.settings(folder.Settings)
 		folder.Variables = clearSensitive(folder.Variables)
+		folder.CollectionVariables = clearSensitive(folder.CollectionVariables)
 		redacted.Folders[index] = folder
 	}
 	r.owner = collectionOwner

@@ -1,6 +1,7 @@
 import { isLocalCommand, trimAsciiSpace } from './mcp'
-import { parseVariableMap, substitutePlaceholders } from './placeholders'
+import { fillPlaceholders, parseVariableMap } from './placeholders'
 import { isSentRow, parseRows } from './rows'
+import { PROMPT_PREFIX, isPromptName } from './variableNames'
 
 export const LOCAL_COMMAND_TEXT = {
   title: 'Run a program on this computer?',
@@ -18,7 +19,8 @@ const approved = new Set()
 
 function describeCommand(request, variablesJSON) {
   const variables = parseVariableMap(variablesJSON) || new Map()
-  const substitute = (text) => substitutePlaceholders(text, variables)
+  const valueOf = (name) => variables.get(name) ?? (isPromptName(name) ? variables.get(name.slice(PROMPT_PREFIX.length).trim()) : undefined)
+  const substitute = (text) => fillPlaceholders(text, valueOf)
   return {
     line: substitute(trimAsciiSpace(request.url)),
     environment: parseRows(request.headers).filter(isSentRow).map(({ key, value }) => `${substitute(key)}=${substitute(value)}`),

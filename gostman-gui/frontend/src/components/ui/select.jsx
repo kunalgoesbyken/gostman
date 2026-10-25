@@ -35,9 +35,11 @@ export function placeBelow(anchor) {
   const above = top - VIEWPORT_MARGIN
   const opensUp = below < Math.min(MAX_LIST_HEIGHT, 160) && above > below
   const maxHeight = Math.min(MAX_LIST_HEIGHT, opensUp ? above : below) - LIST_GAP
+  const placedLeft = Math.max(VIEWPORT_MARGIN, Math.min(left, window.innerWidth - width - VIEWPORT_MARGIN))
   return {
-    left: Math.max(VIEWPORT_MARGIN, Math.min(left, window.innerWidth - width - VIEWPORT_MARGIN)),
+    left: placedLeft,
     minWidth: width,
+    maxWidth: window.innerWidth - placedLeft - VIEWPORT_MARGIN,
     maxHeight,
     ...(opensUp ? { bottom: window.innerHeight - top + LIST_GAP } : { top: bottom + LIST_GAP }),
   }

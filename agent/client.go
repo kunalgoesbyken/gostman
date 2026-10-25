@@ -5,6 +5,7 @@ import (
 	"maps"
 	"slices"
 	"sort"
+	"sync"
 
 	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/redact"
@@ -16,14 +17,20 @@ type Client struct {
 	catalog *runner.Session
 	guard   *redact.Redactor
 	policy  engine.Policy
+	secrets sync.Map
+	labels  sync.Map
 }
 
 func NewClient(policy engine.Policy) (*Client, error) {
+	return NewScopedClient(policy, redact.AllValues)
+}
+
+func NewScopedClient(policy engine.Policy, scope redact.Scope) (*Client, error) {
 	session, err := runner.NewSession(policy)
 	if err != nil {
 		return nil, err
 	}
-	client := &Client{session: session, catalog: session, guard: redact.New(), policy: policy}
+	client := &Client{session: session, catalog: session, guard: redact.NewScoped(scope), policy: policy}
 	session.Watch(client.witness)
 	return client, nil
 }
@@ -48,6 +55,7 @@ func (c *Client) Enter(stored runner.Collection, environment string, overrides m
 }
 
 func (c *Client) EnterFolder(stored runner.Collection, folder, environment string, overrides map[string]string) error {
+	c.markSecrets(stored)
 	if err := c.session.Enter(stored, folder, environment, overrides); err != nil {
 		return err
 	}
@@ -96,11 +104,18 @@ func (c *Client) Run(ctx context.Context, stored runner.Collection, options runn
 	return redact.Clean(c.guard, report)
 }
 
-func RunRedacted(ctx context.Context, stored runner.Collection, options runner.Options, observe func(runner.Result)) (runner.Report, error) {
-	client, err := NewClient(engine.Policy{Network: options.Network, ReadFile: options.Files})
+func Redacting(secrets map[string]bool) func(context.Context, runner.Collection, runner.Options, func(runner.Result)) (runner.Report, error) {
+	return func(ctx context.Context, stored runner.Collection, options runner.Options, observe func(runner.Result)) (runner.Report, error) {
+		return runRedacted(ctx, stored, options, observe, secrets)
+	}
+}
+
+func runRedacted(ctx context.Context, stored runner.Collection, options runner.Options, observe func(runner.Result), secrets map[string]bool) (runner.Report, error) {
+	client, err := NewScopedClient(engine.Policy{Network: options.Network, ReadFile: options.Files}, redact.SecretValues)
 	if err != nil {
 		return runner.Report{}, err
 	}
+	client.MarkSecret(secrets)
 	if err := client.EnterFolder(stored, options.Folder, options.Environment, options.Variables); err != nil {
 		return runner.Report{}, err
 	}

@@ -2,6 +2,7 @@ package importer
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -76,6 +77,7 @@ func (c *collector) brunoChecks(d *dialect, label string, checks []brunoCheck) (
 			rows = append(rows, row)
 		case check.enabled:
 			tests = append(tests, check.test())
+			c.scripts.checks++
 		default:
 			c.skip(messageAssertOff, label, check.expression+": "+check.written)
 		}
@@ -99,6 +101,45 @@ func (check brunoCheck) test() string {
 	}
 	lines = append(lines, assertion+";")
 	return testFunction + "(" + jsString(check.expression+": "+check.written) + ", () => {" + newline + "  " + strings.Join(lines, newline+"  ") + newline + "});"
+}
+
+func brunoRowsIn(source string) (string, []assertion) {
+	chunks := strings.Split(strings.TrimRight(source, newline), testSeparator)
+	var rows []assertion
+	kept := len(chunks)
+	for ; kept > 0; kept-- {
+		row, ok := brunoRowOf(chunks[kept-1])
+		if !ok {
+			break
+		}
+		rows = append(rows, row)
+	}
+	if len(rows) == 0 {
+		return source, nil
+	}
+	slices.Reverse(rows)
+	return strings.Join(chunks[:kept], testSeparator), rows
+}
+
+func brunoRowOf(chunk string) (assertion, bool) {
+	title, ok := testTitle(chunk)
+	if !ok {
+		return assertion{}, false
+	}
+	expression, written, found := strings.Cut(title, ": ")
+	if !found {
+		return assertion{}, false
+	}
+	check := readBrunoCheck(expression, written, true)
+	if check.test() != chunk {
+		return assertion{}, false
+	}
+	return assertion{Expression: check.expression, Operator: check.operator, Value: check.value, Enabled: true}, true
+}
+
+func isBrunoWritable(operator string) bool {
+	_, known := brunoAssertOperators[operator]
+	return known || brunoUnaryOperators[operator] || brunoValueOperators[operator]
 }
 
 func (check brunoCheck) expected() string {

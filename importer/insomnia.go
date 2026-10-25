@@ -918,7 +918,7 @@ func (s *insomniaImport) report(name string) {
 		c.Warnings = append(c.Warnings, fmt.Sprintf(messageUnmappedTag, tag, owners))
 	}
 	if len(s.templates.files) > 0 {
-		c.Warnings = append(c.Warnings, fmt.Sprintf(messageFileTags, listNames(s.templates.files)))
+		c.warn(RemarkFiles, fmt.Sprintf(messageFileTags, listNames(s.templates.files)))
 	}
 	if s.space.cookies > 0 {
 		c.Warnings = append(c.Warnings, fmt.Sprintf(messageInsomniaCookies, name))

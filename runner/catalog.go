@@ -76,5 +76,14 @@ func (s *Session) Find(stored Collection, reference string) (Listed, error) {
 			return Listed{}, fmt.Errorf("%q matches several requests (%s); use an id", reference, describeListed(found))
 		}
 	}
-	return Listed{}, fmt.Errorf("there is no request with the id or name %q", reference)
+	return Listed{}, notFound(listed, reference)
+}
+
+func notFound(listed []Listed, reference string) error {
+	name := reference[strings.LastIndex(reference, pathSeparator)+len(pathSeparator):]
+	named := filterListed(listed, func(candidate Listed) bool { return strings.EqualFold(candidate.Request.Name, strings.TrimSpace(name)) })
+	if len(named) > 0 {
+		return fmt.Errorf("there is no request with the id or name %q; requests named %q: %s", reference, name, describeListed(named))
+	}
+	return fmt.Errorf("there is no request with the id or name %q", reference)
 }

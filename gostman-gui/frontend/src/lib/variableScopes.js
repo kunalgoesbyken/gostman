@@ -137,7 +137,7 @@ export function scopeLayers(state, request, referenced = {}) {
     dotEnvLayer(state.dotEnv),
     ...(activeGlobal ? environmentLayers('global', state.globalEnvironments, activeGlobal, referenced) : [emptyLayer('global')]),
     listLayer('collection', state.collectionVariables, state.collectionVariablesMeta),
-    ...variableHolders(state.folders, request?.folderId).map((folder) => listLayer('collection', folder.collectionVariables, folder.collectionVariablesMeta)),
+    ...variableHolders(state.folders, request?.folderId).map((folder) => ({ ...listLayer('collection', folder.collectionVariables, folder.collectionVariablesMeta), owner: folder.name })),
     ...(activeEnvironment ? environmentLayers('environment', state.environments, activeEnvironment, referenced) : [emptyLayer('environment')]),
     ...folderLayers(state.folders, request?.folderId),
     rowsLayer(request?.vars),
@@ -149,7 +149,7 @@ export function resolveLayers(layers) {
   const resolved = new Map()
   for (const layer of layers) {
     for (const { name, value, secret, ref } of layer.entries) {
-      resolved.set(name, { value: asText(value), typed: value, secret: secret === true, source: layer.source, ref })
+      resolved.set(name, { value: asText(value), typed: value, secret: secret === true, source: layer.source, owner: layer.owner, ref })
     }
   }
   return resolved

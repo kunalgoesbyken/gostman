@@ -4,12 +4,17 @@ import { CopyTextButton } from "./CopyTextButton"
 import { DEFAULT_DOCS_OPTIONS, DocsOptions } from "./DocsOptions"
 import { ScanNotice } from "./ScanNotice"
 import { Button } from "./ui/button"
+import { Field } from "./ui/field"
 import { SegmentedControl } from "./ui/segmented"
+import { Select } from "./ui/select"
 import { useSecretScan } from "../hooks/useSecretScan"
 import { SCAN_TEXT } from "../lib/scanText"
 import { buildDocs } from "../lib/docs"
 import { EXPORT_TEXT } from "../lib/importText"
 import { noteExport } from "../lib/exportReminder"
+import { withoutSensitiveValues } from "../lib/sensitiveNames"
+import { collectionFolders } from "../lib/environmentScope"
+import { collectionSelection } from "../lib/shareContent"
 import { cn } from "../lib/utils"
 import {
   exportToGostman,
@@ -24,6 +29,13 @@ const FILE_BASE_NAME = "gostman-export"
 const JSON_MIME = "application/json"
 const ZIP_MIME = "application/zip"
 const BACKUP_FORMAT = "gostman"
+const ALL_COLLECTIONS = ""
+const ENVIRONMENT_FORMATS = [BACKUP_FORMAT, "bruno", "http"]
+const UNSAFE_NAME_CHARACTERS = new Set(["\\", "/", ":", "*", "?", "\"", "<", ">", "|"])
+
+const fileStem = (collection) => (
+  collection ? Array.from(collection.name, (character) => (UNSAFE_NAME_CHARACTERS.has(character) ? " " : character)).join("").trim() || FILE_BASE_NAME : FILE_BASE_NAME
+)
 
 const toJSON = (value) => JSON.stringify(value, null, 2)
 
@@ -33,7 +45,7 @@ const EXPORT_FORMATS = [
     ...EXPORT_TEXT.formats.gostman,
     extension: "json",
     mime: JSON_MIME,
-    build: ({ requests, folders, environments, settings, collectionVariables, sharedOrder }) => toJSON(exportToGostman(requests, folders, environments, settings, collectionVariables, sharedOrder)),
+    build: ({ requests, folders, environments, settings, collectionVariables, sharedOrder, globals }) => toJSON(exportToGostman(requests, folders, environments, settings, collectionVariables, sharedOrder, globals)),
   },
   {
     value: "postman",
@@ -41,7 +53,10 @@ const EXPORT_FORMATS = [
     extension: "postman_collection.json",
     mime: JSON_MIME,
     adapt: "postman",
-    build: ({ requests, folders, variables, settings, sharedOrder }) => toJSON(exportToPostman(requests, folders, { variables, settings, sharedOrder })),
+    secretsNote: EXPORT_TEXT.variableSecretsNote,
+    build: ({ requests, folders, variables, settings, sharedOrder, includeSecrets }) => (
+      toJSON(exportToPostman(requests, folders, { variables: includeSecrets ? variables : withoutSensitiveValues(variables), settings, sharedOrder }))
+    ),
   },
   {
     value: "openapi-json",
@@ -182,11 +197,27 @@ function buildExport(format, data) {
   }
 }
 
-export function ExportTab({ requests, folders, environments, collectionVariables, variables, settings, sharedOrder, importer, scan, onGoToRequest, onSaveFile, onSaveBase64 }) {
+function CollectionPicker({ collections, value, onChange }) {
+  if (collections.length < 2) return null
+  return (
+    <Field label={EXPORT_TEXT.collectionField}>
+      <Select value={value} onChange={(event) => onChange(event.target.value)} aria-label={EXPORT_TEXT.collectionField}>
+        <option value={ALL_COLLECTIONS}>{EXPORT_TEXT.allCollections}</option>
+        {collections.map((collection) => <option key={collection.id} value={collection.id}>{collection.name}</option>)}
+      </Select>
+    </Field>
+  )
+}
+
+export function ExportTab({ requests, folders, environments, globals, collectionVariables, variables, variablesFor, settings, sharedOrder, importer, scan, onGoToRequest, onSaveFile, onSaveBase64 }) {
   const [formatId, setFormatId] = useState(EXPORT_FORMATS[0].value)
+  const [collectionId, setCollectionId] = useState(ALL_COLLECTIONS)
+  const collections = useMemo(() => collectionFolders(folders), [folders])
+  const collection = collections.find((candidate) => candidate.id === collectionId)
+  const scoped = useMemo(() => collectionSelection({ requests, folders, environments }, collectionId), [requests, folders, environments, collectionId])
   const scanned = useMemo(
-    () => ({ requests, folders, environments, variables: collectionVariables?.variables, settings }),
-    [requests, folders, environments, collectionVariables, settings]
+    () => ({ ...scoped, variables: collectionVariables?.variables, settings }),
+    [scoped, collectionVariables, settings]
   )
   const scanState = useSecretScan(scan, scanned, false)
   const [docsOptions, setDocsOptions] = useState(DEFAULT_DOCS_OPTIONS)
@@ -194,52 +225,55 @@ export function ExportTab({ requests, folders, environments, collectionVariables
 
   const format = ALL_FORMATS.find((candidate) => candidate.value === formatId)
   const data = useMemo(
-    () => ({ requests, folders, environments, collectionVariables, variables, settings, sharedOrder }),
-    [requests, folders, environments, collectionVariables, variables, settings, sharedOrder]
+    () => ({ ...scoped, globals, collectionVariables, variables: collectionId && variablesFor ? variablesFor(collectionId) : variables, settings, sharedOrder }),
+    [scoped, globals, collectionId, collectionVariables, variables, variablesFor, settings, sharedOrder]
   )
   const scripts = useAdaptedScripts(format, data, importer)
   const source = format.adapt ? scripts.adapted : data
   const local = useMemo(
-    () => (format.backend || !source ? { content: "", error: "" } : buildExport(format, { ...source, docsOptions })),
-    [format, source, docsOptions]
+    () => (format.backend || !source ? { content: "", error: "" } : buildExport(format, { ...source, docsOptions, includeSecrets })),
+    [format, source, docsOptions, includeSecrets]
   )
   const remote = useBackendExport(format, data, importer, includeSecrets)
   const content = format.backend ? (remote.reply ? previewOf(remote.reply.files) : "") : local.content
   const error = format.backend ? remote.error : local.error
   const report = format.backend ? { notes: remote.reply?.notes || [], warnings: remote.reply?.warnings || [] } : scripts
   const save = () => {
-    if (remote.reply?.archive) onSaveBase64("gostman-export.zip", remote.reply.archive, ZIP_MIME)
+    if (format.backend && remote.reply?.archive) onSaveBase64(`${fileStem(collection)}.zip`, remote.reply.archive, ZIP_MIME)
     else if (format.backend) onSaveFile(format.fileName, remote.reply.files[0].text, format.mime)
-    else onSaveFile(format.fileName || `${FILE_BASE_NAME}.${format.extension}`, content, format.mime)
+    else onSaveFile(format.fileName || `${fileStem(collection)}.${format.extension}`, content, format.mime)
     if (format.value === BACKUP_FORMAT) noteExport()
   }
   const preview = content.length > PREVIEW_LIMIT ? `${content.slice(0, PREVIEW_LIMIT)}\n…` : content
 
   return (
     <>
-      <div className="flex shrink-0 flex-wrap items-center gap-2">
+      <CollectionPicker collections={collections} value={collectionId} onChange={setCollectionId} />
+
+      <Field label={EXPORT_TEXT.formatField} grouped>
         <SegmentedControl label={EXPORT_TEXT.formatLabel} options={ALL_FORMATS} value={formatId} onChange={setFormatId} />
-        <div className="ml-auto flex shrink-0 items-center gap-2">
-          <CopyTextButton text={content} />
-          <Button size="sm" onClick={save} disabled={!content || remote.isBuilding || scripts.isAdapting}>
-            <Download />
-            {EXPORT_TEXT.saveFile}
-          </Button>
-        </div>
+      </Field>
+
+      <div className="flex shrink-0 items-center justify-end gap-2">
+        <CopyTextButton text={content} />
+        <Button size="sm" onClick={save} disabled={!content || remote.isBuilding || scripts.isAdapting}>
+          <Download />
+          {EXPORT_TEXT.saveFile}
+        </Button>
       </div>
 
-      {format.backend && (
+      {(format.backend || format.secretsNote) && (
         <label className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
           <input type="checkbox" checked={includeSecrets} onChange={(event) => setIncludeSecrets(event.target.checked)} />
           {EXPORT_TEXT.includeSecrets}
-          <span>{includeSecrets ? EXPORT_TEXT.secretsWarning : EXPORT_TEXT.secretsNote}</span>
+          <span>{includeSecrets ? EXPORT_TEXT.secretsWarning : format.secretsNote || EXPORT_TEXT.secretsNote}</span>
         </label>
       )}
 
       {format.hasDocsOptions && <DocsOptions options={docsOptions} onChange={setDocsOptions} />}
 
       <p className="shrink-0 text-xs text-muted-foreground">
-        {EXPORT_TEXT.summary(format.description, { requests, folders, environments })}
+        {EXPORT_TEXT.summary(format.description, { ...scoped, environments: ENVIRONMENT_FORMATS.includes(format.value) ? scoped.environments : null }, collection?.name)}
       </p>
 
       <ExportReport notes={report.notes} warnings={report.warnings} tool={format.label} />

@@ -60,7 +60,37 @@ func invokeWith(ctx context.Context, call Call, expansion *engine.Expansion, pol
 	if err != nil {
 		return session.failed(ctx, err)
 	}
-	return session.outcome(received, request.method)
+	response := session.outcome(received, request.method)
+	if request.method == MethodCallTool {
+		response.OutputSchema = session.outputSchema(ctx, request, received)
+	}
+	return response
+}
+
+func hasStructuredContent(result json.RawMessage) bool {
+	var fields map[string]json.RawMessage
+	if json.Unmarshal(result, &fields) != nil {
+		return false
+	}
+	content, present := fields[fieldStructured]
+	return present && string(content) != encodedNull
+}
+
+func (s *session) outputSchema(ctx context.Context, request rpc, received answer) string {
+	params, isCall := request.params.(mcp.CallParams)
+	if !isCall || received.pending || !hasStructuredContent(received.result) {
+		return ""
+	}
+	tools, _, err := listAll[listedTool](ctx, newLister(s), MethodListTools)
+	if err != nil {
+		return ""
+	}
+	for _, tool := range tools {
+		if tool.Name == params.Name {
+			return indentedOptional(tool.Output)
+		}
+	}
+	return ""
 }
 
 func methodOf(call Call) string {

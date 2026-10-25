@@ -485,7 +485,7 @@ func (c *collector) brunoGrpc(ctx treeContext, bru bruFile, label string, reques
 	}
 	if len(hooks) > 0 {
 		sort.Strings(hooks)
-		c.Warnings = append(c.Warnings, droppedScripts(label, hooks))
+		c.warn(RemarkScripts, droppedScripts(label, hooks))
 	}
 }
 
@@ -607,8 +607,10 @@ func (c *collector) importBrunoEnvironments(files []brunoFile, folderID string) 
 }
 
 func (c *collector) addBrunoEnvironments(drafts []environmentDraft) {
-	for _, draft := range drafts {
-		for _, variable := range draft.variables {
+	used := c.placeholderNames()
+	for index, draft := range drafts {
+		drafts[index].variables = withSecretFields(draft.variables, used)
+		for _, variable := range drafts[index].variables {
 			if variable.secret && variable.value == "" && variable.ref == nil {
 				c.flag(messageBrunoSecrets, draft.name+"/"+variable.name)
 			}

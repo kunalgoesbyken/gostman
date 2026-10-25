@@ -38,4 +38,14 @@ class GuardedScript extends SafeScript {
   }
 }
 
-export const queryJson = (path, json) => JSONPath({ path, json, wrap: false, eval: GuardedScript })
+const LIBRARY_PREFIX = 'jsonPath: '
+
+const withoutLibraryPrefix = (message) => (message.startsWith(LIBRARY_PREFIX) ? message.slice(LIBRARY_PREFIX.length) : message)
+
+export function queryJson(path, json) {
+  try {
+    return JSONPath({ path, json, wrap: false, eval: GuardedScript })
+  } catch (error) {
+    throw new Error(withoutLibraryPrefix(String(error?.message ?? error)))
+  }
+}

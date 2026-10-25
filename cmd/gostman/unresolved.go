@@ -28,6 +28,17 @@ func unresolvedAdvice(names []string) string {
 	return fmt.Sprintf("%s. Define %s in an environment, or pass %s", engine.NotDefined(names), pronoun, strings.Join(flags, " "))
 }
 
+func firstMentions(warned map[string]bool, names []string) []string {
+	var fresh []string
+	for _, name := range names {
+		if !warned[name] {
+			warned[name] = true
+			fresh = append(fresh, name)
+		}
+	}
+	return fresh
+}
+
 func warnUnresolved(stderr io.Writer, label string, names []string) {
 	if len(names) == 0 {
 		return

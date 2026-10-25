@@ -1,4 +1,4 @@
-import { CHECK_RUN_TEXT, JSON_PATH_TEXT } from '../checksText'
+import { CHECK_RUN_TEXT, CONTRACT_TEXT, JSON_PATH_TEXT } from '../checksText'
 
 export const TIMEOUT_MS = 10_000
 export const MIN_TIMEOUT_MS = 1_000
@@ -33,3 +33,5 @@ export const extractAllowance = (milliseconds) => allowance(milliseconds, JSON_P
 export const pathAllowance = () => allowance(0, JSON_PATH_TEXT.pathTimedOut)
 
 export const filterAllowance = () => allowance(0, JSON_PATH_TEXT.filterTimedOut)
+
+export const contractAllowance = () => allowance(0, CONTRACT_TEXT.timedOut)

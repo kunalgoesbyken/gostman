@@ -105,3 +105,5 @@ export function runInSandbox(job, send = refuseSend, timeoutMs = 0) {
 }
 
 export const extractInSandbox = (extractors, response, allowance) => runInWorker({ extractors, response }, refuseSend, allowance, true)
+
+export const checkContractInSandbox = (contract, allowance) => runInWorker({ contract }, refuseSend, allowance, true)

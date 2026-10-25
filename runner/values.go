@@ -168,10 +168,10 @@ func (v *values) write(lineage []Folder, writes scopedWrites) {
 	v.session.change(writes[scopeSession])
 }
 
-func (v *values) load(process, collection variables) {
+func (v *values) load(process, globals, collection variables) {
 	v.mu.Lock()
 	defer v.mu.Unlock()
-	v.process, v.collection = process, collection
+	v.process, v.globals, v.collection = process, globals, collection
 }
 
 func (v *values) useEnvironments(primary string, slots map[string]*environmentSlot, chosen map[string]string, focus []Folder) {

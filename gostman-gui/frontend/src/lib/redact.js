@@ -1,6 +1,6 @@
-import { bytesToBase64 } from '../base64'
+import { bytesToBase64 } from './base64'
 
-const MARKER = '{{secret}}'
+const SCRUB_LABEL = 'secret'
 const MIN_SECRET_LENGTH = 3
 const LITERALS = new Set(['true', 'false', 'null', 'undefined'])
 const ALIGNMENTS = 3
@@ -73,15 +73,26 @@ const isSecret = (value) => value.length >= MIN_SECRET_LENGTH && !LITERALS.has(v
 const variants = (value) => [value, ...percentEncoded(value), ...jsonEscaped(value), ...base64Encoded(value)]
   .filter((form) => form.length >= MIN_SECRET_LENGTH)
 
-function formsOf(secrets) {
-  const values = new Set(secrets.map((secret) => String(secret).trim()).filter(isSecret))
-  return [...new Set([...values].flatMap(variants))]
+const marker = (label) => `{{${label}}}`
+
+function labelledForms(secrets) {
+  const seen = new Set()
+  const forms = []
+  for (const { label, value } of secrets) {
+    const trimmed = String(value).trim()
+    if (!isSecret(trimmed) || seen.has(trimmed)) continue
+    seen.add(trimmed)
+    for (const form of new Set(variants(trimmed))) forms.push({ form, label })
+  }
+  return forms
 }
 
-function occurrences(text, form) {
+const formsOf = (secrets) => labelledForms(secrets.map((value) => ({ label: SCRUB_LABEL, value })))
+
+function occurrences(text, { form, label }) {
   const found = []
   for (let start = text.indexOf(form); start !== -1; start = text.indexOf(form, start + 1)) {
-    found.push({ start, end: start + form.length })
+    found.push({ start, end: start + form.length, width: form.length, label })
   }
   return found
 }
@@ -89,8 +100,12 @@ function occurrences(text, form) {
 function merged(spans) {
   return spans.sort((first, second) => first.start - second.start).reduce((kept, span) => {
     const last = kept[kept.length - 1]
-    if (last && span.start < last.end) last.end = Math.max(last.end, span.end)
-    else kept.push({ ...span })
+    if (!last || span.start >= last.end) {
+      kept.push({ ...span })
+      return kept
+    }
+    last.end = Math.max(last.end, span.end)
+    if (span.width > last.width) Object.assign(last, { width: span.width, label: span.label })
     return kept
   }, [])
 }
@@ -101,13 +116,15 @@ function scrubWith(text, forms) {
   let cleaned = ''
   let position = 0
   for (const span of spans) {
-    cleaned += text.slice(position, span.start) + MARKER
+    cleaned += text.slice(position, span.start) + marker(span.label)
     position = span.end
   }
   return cleaned + text.slice(position)
 }
 
 export const scrubText = (text, secrets) => scrubWith(text, formsOf(secrets))
+
+export const redactText = (text, labelled) => scrubWith(text, labelledForms(labelled))
 
 export function scrubPrompt(prompt, secrets) {
   const forms = formsOf(secrets)

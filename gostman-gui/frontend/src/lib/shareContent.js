@@ -2,8 +2,9 @@ import { buildCollectionTree, collectRequests, foldersIn, ROOT_ID } from './coll
 import { isSecretField, SCHEMES } from './authSchemes'
 import { isPlainObject, parseJSON } from './dataUtils'
 import { parseExamples } from './examples'
-import { activeKindsOf, countActiveRequests, exportToGostman, parseImport, sanitizeImport } from './importExport'
+import { activeKindsOf, countActiveRequests, exportToGostman, fileReadPathsOf, parseImport, sanitizeImport } from './importExport'
 import { ShareError } from './share'
+import { warningsIn } from './importRemarks'
 import { SCRIPT_FIELDS } from './activeContent'
 import { placeholderNames } from './placeholders'
 import { environmentChain, environmentEntries, usedVariableNames, withEntries } from './variableScopes'
@@ -25,6 +26,13 @@ function folderSelection(requests, folders, folder) {
     requests: collectRequests(tree, folder.id),
     folders: [{ ...folder, parentId: ROOT_ID }, ...descendantsOf(tree, folder.id)],
   }
+}
+
+export function collectionSelection({ requests, folders, environments }, collectionId) {
+  const folder = folders.find((candidate) => candidate.id === collectionId)
+  if (!folder) return { requests, folders, environments }
+  const selected = folderSelection(requests, folders, folder)
+  return { ...selected, environments: environmentsForShare(environments, folders, selected.folders) }
 }
 
 function folderChain(folders, folderId) {
@@ -149,8 +157,9 @@ export function describeShared(imported) {
     environments: data.environments.map(describeEnvironment),
     activeCount: countActiveRequests(data),
     activeKinds: activeKindsOf(data),
+    filePaths: fileReadPathsOf(data),
     exampleCount: exampleCount(data.requests),
-    warnings: data.warnings,
+    warnings: warningsIn(data.remarks),
   }
 }
 

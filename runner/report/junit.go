@@ -93,9 +93,12 @@ func checkCase(check runner.Check, suite string) junitCase {
 	return described
 }
 
-func logOutput(logs []runner.LogLine) string {
-	lines := make([]string, 0, len(logs))
-	for _, line := range logs {
+func suiteOutput(result runner.Result) string {
+	lines := make([]string, 0, len(result.Logs)+1)
+	if result.ResolvedURL != "" {
+		lines = append(lines, strings.TrimSpace(result.Method+" "+result.ResolvedURL))
+	}
+	for _, line := range result.Logs {
 		lines = append(lines, line.Level+": "+line.Text)
 	}
 	return strings.Join(lines, "\n")
@@ -120,7 +123,7 @@ func suiteOf(result runner.Result, timestamp string) junitSuite {
 		Name:      qualifiedName(result),
 		Time:      seconds(result.DurationMs),
 		Timestamp: timestamp,
-		Output:    logOutput(result.Logs),
+		Output:    suiteOutput(result),
 	}
 	suite.add(requestCase(result, suite.Name))
 	for _, check := range result.Tests {

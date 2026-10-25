@@ -10,9 +10,10 @@ import (
 )
 
 const (
-	conflictStart = "<<<<<<< "
-	conflictEnd   = ">>>>>>> "
-	logLimit      = "100"
+	conflictStart     = "<<<<<<< "
+	conflictEnd       = ">>>>>>> "
+	logLimit          = "100"
+	stagedOutsideHint = "Git cannot merge while files outside the collection folder are staged: %s. Commit or unstage them in your usual Git tool, then pull again."
 )
 
 type Diff struct {
@@ -282,7 +283,18 @@ func (r Repo) Pull() (string, error) {
 	if err != nil && r.merging() {
 		return out, nil
 	}
-	return out, err
+	if err != nil {
+		return out, r.explainStagedOutside(err)
+	}
+	return out, nil
+}
+
+func (r Repo) explainStagedOutside(err error) error {
+	outside, listErr := r.stagedOutside()
+	if listErr != nil || len(outside) == 0 {
+		return err
+	}
+	return &Error{Message: fmt.Sprintf(stagedOutsideHint, strings.Join(outside, ", ")) + "\n\n" + err.Error()}
 }
 
 func (r Repo) firstRemote() (string, error) {

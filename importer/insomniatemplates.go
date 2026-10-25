@@ -122,7 +122,7 @@ func tagLabel(tag templateTag) string {
 func (t *insomniaTemplates) mapped(tag templateTag) (string, bool) {
 	switch tag.name {
 	case "uuid":
-		return dynamic("$uuid"), true
+		return dynamic("$randomUUID"), true
 	case "now":
 		format, known := nowFormats[strings.ToLower(tag.arg(0))]
 		return dynamic(format), known

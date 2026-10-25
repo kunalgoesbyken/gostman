@@ -40,9 +40,13 @@ func loadWorkspace(root string) (Collection, error) {
 	}
 	collection, err := FromWorkspace(files.Collection())
 	collection.Network, collection.Root = network.Files(), root
+	return WithFolderFiles(collection, files), err
+}
+
+func WithFolderFiles(collection Collection, files *workspace.Workspace) Collection {
 	collection.DotEnv = files.DotEnv()
-	collection.Modules = scriptModules(root)
-	return collection, err
+	collection.Modules = scriptModules(files.Root())
+	return collection
 }
 
 func unreadableFiles(problems []workspace.Problem) error {

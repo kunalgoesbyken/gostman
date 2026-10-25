@@ -22,6 +22,7 @@ const (
 type Source struct {
 	Name         string `json:"name"`
 	Format       string `json:"format"`
+	Collections  int    `json:"collections"`
 	Requests     int    `json:"requests"`
 	Folders      int    `json:"folders"`
 	Environments int    `json:"environments"`
@@ -39,12 +40,26 @@ type Result struct {
 	Settings      *workspace.Settings     `json:"settings,omitempty"`
 	Warnings      []string                `json:"warnings"`
 	Notes         []string                `json:"notes,omitempty"`
+	Remarks       []Remark                `json:"remarks,omitempty"`
 	Skipped       []string                `json:"skipped"`
 	SharedOrder   bool                    `json:"sharedOrder"`
 }
 
+const (
+	RemarkScripts = "scripts"
+	RemarkOAuth   = "oauth"
+	RemarkFiles   = "files"
+)
+
+type Remark struct {
+	Kind    string `json:"kind,omitempty"`
+	Text    string `json:"text"`
+	Warning bool   `json:"warning,omitempty"`
+}
+
 type collector struct {
 	Result
+	remarks   []Remark
 	flags     map[string][]string
 	flagOrder []string
 	full      bool
@@ -55,9 +70,20 @@ type collector struct {
 	scoped       map[string]scopedFolder
 	protos       map[string]string
 	places       map[string]int64
+
+	postmanRoots        []string
+	postmanEnvironments map[string]bool
 }
 
 var importOnlyNotes = setOf(messageScripts, messageBrunoSecrets)
+
+var flagKinds = map[string]string{
+	messageScripts:         RemarkScripts,
+	messageForeignCalls:    RemarkScripts,
+	messageHTTPHandlerFile: RemarkScripts,
+	messageOAuth:           RemarkOAuth,
+	messageOAuthAudience:   RemarkOAuth,
+}
 
 var singularMessages = map[string]string{
 	messageHTTPVariables:          "The variable %s has no Gostman equivalent and was kept as written.",
@@ -188,30 +214,66 @@ func (c *collector) warnDepth() {
 func (c *collector) read(name, format string, run func()) {
 	requests, folders, environments, globals := len(c.Requests), len(c.Folders), len(c.Environments), len(c.Globals)
 	run()
+	collections := countCollections(c.Folders[folders:])
 	c.Sources = append(c.Sources, Source{
 		Name:         name,
 		Format:       format,
+		Collections:  collections,
 		Requests:     len(c.Requests) - requests,
-		Folders:      len(c.Folders) - folders,
+		Folders:      len(c.Folders) - folders - collections,
 		Environments: len(c.Environments) - environments,
 		Globals:      len(c.Globals) - globals,
 	})
 }
 
+func (c *collector) warn(kind, text string) {
+	c.remarks = append(c.remarks, Remark{Kind: kind, Text: text, Warning: true})
+}
+
+func (c *collector) warnOnce(kind, text string) {
+	if !slices.ContainsFunc(c.remarks, func(remark Remark) bool { return remark.Text == text }) {
+		c.warn(kind, text)
+	}
+}
+
+func (c *collector) note(kind, text string) {
+	c.remarks = append(c.remarks, Remark{Kind: kind, Text: text})
+}
+
 func (c *collector) result() Result {
 	result := c.Result
 	result.SharedOrder = true
-	result.Warnings = append([]string{}, c.Warnings...)
+	remarks := append(plainRemarks(c.Warnings, true), c.remarks...)
 	for _, kind := range c.flagOrder {
 		if c.inPlace && importOnlyNotes[kind] {
 			continue
 		}
-		result.Warnings = append(result.Warnings, fmt.Sprintf(wordingFor(kind, len(c.flags[kind])), listNames(c.flags[kind])))
+		remarks = append(remarks, Remark{Kind: flagKinds[kind], Text: fmt.Sprintf(wordingFor(kind, len(c.flags[kind])), listNames(c.flags[kind])), Warning: true})
 	}
 	if c.full {
-		result.Warnings = append(result.Warnings, fmt.Sprintf(messageTooMany, maxRequests))
+		remarks = append(remarks, Remark{Text: fmt.Sprintf(messageTooMany, maxRequests), Warning: true})
 	}
+	result.Remarks = append(remarks, plainRemarks(c.Notes, false)...)
+	result.Warnings, result.Notes = remarkTexts(result.Remarks, true), remarkTexts(result.Remarks, false)
 	return result
+}
+
+func plainRemarks(texts []string, warning bool) []Remark {
+	remarks := make([]Remark, len(texts))
+	for index, text := range texts {
+		remarks[index] = Remark{Text: text, Warning: warning}
+	}
+	return remarks
+}
+
+func remarkTexts(remarks []Remark, warning bool) []string {
+	texts := []string{}
+	for _, remark := range remarks {
+		if remark.Warning == warning {
+			texts = append(texts, remark.Text)
+		}
+	}
+	return texts
 }
 
 func listNames(names []string) string {

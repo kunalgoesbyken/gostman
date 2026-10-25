@@ -10,8 +10,10 @@ const embeddable = (json) => UNSAFE.reduce((text, character) => text.split(chara
 const toResult = (result) => ({
   id: result.id,
   name: result.name,
+  folder: result.folder || '',
   method: result.method,
   url: result.url,
+  resolvedUrl: result.resolvedUrl || '',
   skipped: result.skipped || '',
   status: result.status || '',
   statusCode: result.statusCode || 0,
@@ -25,6 +27,8 @@ const toResult = (result) => ({
   exchange: result.exchange,
 })
 
+const reached = (results) => new Set(results.map((result) => `${result.id} ${result.iteration || 0}`)).size
+
 export function summarize(results, planned) {
   const skipped = results.filter((result) => result.skipped).length
   const failed = results.filter((result) => !result.skipped && result.hasFailed).length
@@ -34,11 +38,13 @@ export function summarize(results, planned) {
     passed: results.length - skipped - failed,
     failed,
     skipped,
-    notRun: Math.max(planned - results.length, 0),
+    notRun: Math.max(planned - reached(results), 0),
     tests: tests.length,
     failedTests: tests.filter((test) => !test.passed).length,
   }
 }
+
+export const environmentsUsed = (results, environmentOf) => [...new Set(results.map(environmentOf).filter(Boolean))].join(', ')
 
 export function buildReportPage(results, run, environment) {
   const report = {

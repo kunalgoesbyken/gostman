@@ -43,7 +43,7 @@ function outcomeFor(extractor, response, preview) {
 function Outcome({ outcome }) {
   const text = outcome.reason || String(outcome.value)
   return (
-    <span title={text} className={cn("truncate text-xs", outcome.reason ? "text-muted-foreground" : "font-mono text-foreground")}>
+    <span title={text} className={cn("text-xs", outcome.reason ? "line-clamp-3 text-muted-foreground [overflow-wrap:anywhere]" : "truncate font-mono text-foreground")}>
       {text}
     </span>
   )
@@ -120,9 +120,9 @@ export function ExtractPanel({ extractors, response, extraction, onChange, onRun
 
   return (
     <Panel>
-      <Toolbar>
-        <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground" title={TEXT.summary}>{TEXT.summary}</p>
-        <Button variant="outline" size="sm" disabled={rows.length === 0 || !isUsableResponse(response)} onClick={onRun}>
+      <Toolbar className="h-auto min-h-10 py-1.5">
+        <p className="min-w-0 flex-1 text-xs text-muted-foreground">{TEXT.summary}</p>
+        <Button variant="outline" size="sm" className="shrink-0" disabled={rows.length === 0 || !isUsableResponse(response)} onClick={onRun}>
           <Play />
           {TEXT.runNow}
         </Button>

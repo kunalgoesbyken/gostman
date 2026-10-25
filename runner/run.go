@@ -14,6 +14,7 @@ type Options struct {
 	Environment   string
 	Folder        string
 	Variables     map[string]string
+	Secrets       map[string]bool
 	Bail          bool
 	Delay         time.Duration
 	Timeout       time.Duration
@@ -67,7 +68,8 @@ func describe(request Request, folder string, outcome exchange) Result {
 	result.Protocol = response.Protocol
 	result.StreamEnd = response.StreamEnd
 	result.DurationMs = response.DurationMs
-	result.Unresolved = response.Unresolved
+	result.Unresolved, result.Withheld = parted(response.Unresolved, outcome.possible)
+	result.Withheld = append(outcome.withheld, result.Withheld...)
 	result.Tests = append(result.Tests, outcome.tests...)
 	result.Logs = append(result.Logs, outcome.logs...)
 	result.Visual = outcome.visual

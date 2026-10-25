@@ -183,7 +183,7 @@ func (l loading) execute(stdout, stderr io.Writer) int {
 		return complain(stderr, err)
 	}
 
-	fmt.Fprintf(stderr, "%s: %s\n", programName, loadtest.OwnershipNotice)
+	fmt.Fprintf(stderr, "note: %s\n", loadtest.OwnershipNotice)
 	ctx, release := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer release()
 	context.AfterFunc(ctx, release)

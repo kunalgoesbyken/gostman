@@ -25,9 +25,7 @@ const (
 	fallbackNotice  = "The folder %s could not be opened: %v. The collection saved on this computer is shown instead."
 	untrustedFiles  = "this folder is not trusted yet, so its requests cannot read files; trust the folder first"
 
-	droppedVariableNotice = "%s from %q was not saved because %q also sets it. Set it in that folder's variables if you need both."
-	droppedSharedNotice   = "%s from %q was not saved because a shared collection variable also sets it. Set it in that folder's variables if you need both."
-	renamedEnvironment    = "The environment %q of %q is saved as %q, because a folder workspace keeps one list of environments and another one has the same name."
+	renamedEnvironment = "The environment %q of %q is saved as %q, because a folder workspace keeps one list of environments and another one has the same name."
 )
 
 type WorkspaceStatus struct {
@@ -57,7 +55,7 @@ func toFileRequests(requests []Request) []workspace.Request {
 func toFileFolders(folders []Folder) []workspace.Folder {
 	converted := make([]workspace.Folder, len(folders))
 	for i, folder := range folders {
-		converted[i] = workspace.Folder{Id: folder.Id, Name: folder.Name, ParentId: folder.ParentId, SortOrder: folder.SortOrder, Variables: folder.Variables, Color: folder.Color, Tags: folder.Tags, Settings: folder.Settings}
+		converted[i] = workspace.Folder{Id: folder.Id, Name: folder.Name, ParentId: folder.ParentId, SortOrder: folder.SortOrder, Variables: folder.Variables, Color: folder.Color, Tags: folder.Tags, Settings: folder.Settings, CollectionVariables: folder.CollectionVariables, CollectionVariablesMeta: folder.CollectionVariablesMeta}
 	}
 	return converted
 }
@@ -93,7 +91,7 @@ func fromFileRequests(loaded []workspace.Request, memory workspaceMemory) []Requ
 func fromFileFolders(loaded []workspace.Folder, memory workspaceMemory) []Folder {
 	folders := make([]Folder, len(loaded))
 	for i, folder := range loaded {
-		folders[i] = Folder{Id: folder.Id, Name: folder.Name, ParentId: folder.ParentId, SortOrder: folder.SortOrder, Variables: folder.Variables, Color: folder.Color, Tags: folder.Tags, Settings: folder.Settings, IsOpen: !memory.isCollapsed(folder.Id)}
+		folders[i] = Folder{Id: folder.Id, Name: folder.Name, ParentId: folder.ParentId, SortOrder: folder.SortOrder, Variables: folder.Variables, Color: folder.Color, Tags: folder.Tags, Settings: folder.Settings, CollectionVariables: folder.CollectionVariables, CollectionVariablesMeta: folder.CollectionVariablesMeta, IsOpen: !memory.isCollapsed(folder.Id)}
 	}
 	return folders
 }
@@ -331,9 +329,8 @@ func (a *App) SaveCollectionToFolder(path string) (WorkspaceStatus, error) {
 	shared, renamed := sharedEnvironments(data.Environments, data.Folders)
 	stripped, secrets := splitSecrets(shared)
 	data.Environments = stripped
-	var dropped []workspace.DroppedVariable
-	data.CollectionVariables, data.CollectionVariablesMeta, dropped = workspace.FoldVariableLists(data.CollectionVariables, data.CollectionVariablesMeta, folderLists(data.Folders))
 	_, sharedSecrets := splitSecrets(sharedVariablesList(data.CollectionVariables, data.CollectionVariablesMeta))
+	_, folderSecrets := splitSecrets(folderVariableLists(data.Folders))
 	folder, err := workspace.Create(target, toFileCollection(data))
 	if errors.Is(err, workspace.ErrNotEmpty) {
 		return WorkspaceStatus{}, errors.New(occupiedFolder)
@@ -347,6 +344,9 @@ func (a *App) SaveCollectionToFolder(path string) (WorkspaceStatus, error) {
 	if err := vault.keep(folder.Root()+sharedVariablesScope, sharedSecrets); err != nil {
 		return WorkspaceStatus{}, err
 	}
+	if err := vault.keep(folder.Root()+folderVariablesScope, folderSecrets); err != nil {
+		return WorkspaceStatus{}, err
+	}
 	store := folderStore{folder: folder}
 	err = store.remember(func(memory *workspaceMemory) {
 		trust(memory)
@@ -358,7 +358,6 @@ func (a *App) SaveCollectionToFolder(path string) (WorkspaceStatus, error) {
 		return WorkspaceStatus{}, err
 	}
 	announcePlacement(chosen, target)
-	announceDropped(dropped)
 	for _, notice := range renamed {
 		storage.announce(notice)
 	}
@@ -406,16 +405,6 @@ func unusedName(wanted string, taken map[string]bool) string {
 	}
 	taken[name] = true
 	return name
-}
-
-func announceDropped(dropped []workspace.DroppedVariable) {
-	for _, variable := range dropped {
-		if variable.KeptFrom == "" {
-			storage.announce(fmt.Sprintf(droppedSharedNotice, variable.Name, variable.From))
-			continue
-		}
-		storage.announce(fmt.Sprintf(droppedVariableNotice, variable.Name, variable.From, variable.KeptFrom))
-	}
 }
 
 func workspaceFiles() engine.FileReader {

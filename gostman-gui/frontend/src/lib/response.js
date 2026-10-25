@@ -10,6 +10,7 @@ const GRPC_PROTOCOL = 'grpc'
 const GRPC_OK = 0
 
 const HTML_TYPES = ['text/html', 'application/xhtml+xml']
+const SCRIPTABLE_IMAGE = 'image/svg+xml'
 
 const FILE_EXTENSIONS = {
   'application/json': 'json',
@@ -114,6 +115,10 @@ export function bodyBase64(response) {
 export function mimeType(response) {
   return response.contentType || FALLBACK_MIME
 }
+
+export const isScriptableImage = (response) => mimeType(response) === SCRIPTABLE_IMAGE
+
+export const dataUrl = (response) => `data:${mimeType(response)};base64,${bodyBase64(response)}`
 
 function lastPathSegment(url) {
   try {

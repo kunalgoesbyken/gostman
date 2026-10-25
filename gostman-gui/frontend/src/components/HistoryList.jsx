@@ -21,14 +21,36 @@ const ENTRY_KEYS = { selector: "[data-history-entry]", orientation: ORIENTATION.
 
 const entrySelector = (id) => `[data-history-entry="${CSS.escape(id)}"]`
 
-function formatRelativeTime(isoString) {
+const AGE_STEPS = [
+  { below: HOUR_MS, unit: MINUTE_MS, key: "minutes" },
+  { below: DAY_MS, unit: HOUR_MS, key: "hours" },
+  { below: WEEK_MS, unit: DAY_MS, key: "days" },
+]
+
+function relativeTime(isoString) {
   const sentAt = new Date(isoString)
   const elapsed = Date.now() - sentAt.getTime()
-  if (elapsed < MINUTE_MS) return HISTORY_TEXT.sentAgo.now
-  if (elapsed < HOUR_MS) return HISTORY_TEXT.sentAgo.minutes(Math.floor(elapsed / MINUTE_MS))
-  if (elapsed < DAY_MS) return HISTORY_TEXT.sentAgo.hours(Math.floor(elapsed / HOUR_MS))
-  if (elapsed < WEEK_MS) return HISTORY_TEXT.sentAgo.days(Math.floor(elapsed / DAY_MS))
-  return sentAt.toLocaleDateString()
+  if (elapsed < MINUTE_MS) return { short: HISTORY_TEXT.sentAgo.now, spoken: HISTORY_TEXT.sentAgoSpoken.now }
+  const step = AGE_STEPS.find(({ below }) => elapsed < below)
+  if (!step) return { short: sentAt.toLocaleDateString(), spoken: HISTORY_TEXT.sentAgoSpoken.date(sentAt.toLocaleDateString()) }
+  const count = Math.floor(elapsed / step.unit)
+  return { short: HISTORY_TEXT.sentAgo[step.key](count), spoken: HISTORY_TEXT.sentAgoSpoken[step.key](count) }
+}
+
+function SentAt({ timestamp }) {
+  const { short, spoken } = relativeTime(timestamp)
+  return (
+    <span className="shrink-0 pr-1 text-2xs group-focus-within:hidden group-hover:hidden">
+      <span aria-hidden="true">{short}</span>
+      <span className="sr-only">{spoken}</span>
+    </span>
+  )
+}
+
+function StatusMark({ entry }) {
+  if (entry.statusCode > 0) return <Badge variant={statusVariant(entry)} className="px-1 py-0 font-mono">{entry.statusCode}</Badge>
+  if (entry.noResponse) return <Badge variant="serverError" className="px-1 py-0">{HISTORY_TEXT.noResponse}</Badge>
+  return null
 }
 
 function HistoryRow({ entry, isTabStop, onOpen, onDelete, onFocus }) {
@@ -53,10 +75,8 @@ function HistoryRow({ entry, isTabStop, onOpen, onDelete, onFocus }) {
       >
         <MethodTag compact method={entry.method} className="w-10" />
         <span className="min-w-0 flex-1 truncate">{entry.url}</span>
-        {entry.statusCode > 0 && <Badge variant={statusVariant(entry)} className="px-1 py-0 font-mono">{entry.statusCode}</Badge>}
-        <span className="shrink-0 pr-1 text-2xs group-focus-within:hidden group-hover:hidden">
-          {formatRelativeTime(entry.timestamp)}
-        </span>
+        <StatusMark entry={entry} />
+        <SentAt timestamp={entry.timestamp} />
       </button>
       <IconButton
         label={HISTORY_TEXT.remove}

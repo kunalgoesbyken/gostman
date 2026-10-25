@@ -10,6 +10,18 @@ export const SHORTCUT_GROUPS = ['General', 'Request', 'Tabs', 'Navigation']
 
 const REMOVE_CHORDS = [{ key: 'delete' }, { mod: true, key: 'backspace' }]
 
+export const TREE_CHORDS = {
+  moveUp: { alt: true, key: 'arrowup' },
+  moveDown: { alt: true, key: 'arrowdown' },
+  cut: { mod: true, key: 'x' },
+  copy: { mod: true, key: 'c' },
+  paste: { mod: true, key: 'v' },
+  duplicate: { mod: true, key: 'd' },
+  undo: { mod: true, key: 'z' },
+  redo: { mod: true, shift: true, key: 'z' },
+  redoAlternative: { mod: true, key: 'y' },
+}
+
 export const MOVING_KEYS = [
   { id: 'lists', chords: [{ key: 'arrowup' }, { key: 'arrowdown' }, { key: 'home' }, { key: 'end' }] },
   { id: 'pages', chords: [{ key: 'pageup' }, { key: 'pagedown' }] },
@@ -18,6 +30,10 @@ export const MOVING_KEYS = [
   { id: 'open', chords: [{ key: 'enter' }] },
   { id: 'preview', chords: [{ key: 'space' }] },
   { id: 'jump', chords: [] },
+  { id: 'reorder', chords: [TREE_CHORDS.moveUp, TREE_CHORDS.moveDown] },
+  { id: 'clipboard', chords: [TREE_CHORDS.cut, TREE_CHORDS.copy, TREE_CHORDS.paste] },
+  { id: 'duplicate', chords: [TREE_CHORDS.duplicate] },
+  { id: 'undoTree', chords: [TREE_CHORDS.undo, TREE_CHORDS.redo] },
   { id: 'rename', chords: [{ key: 'f2' }] },
   { id: 'remove', chords: REMOVE_CHORDS },
   { id: 'menu', chords: [{ shift: true, key: 'f10' }] },

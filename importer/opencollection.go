@@ -138,7 +138,7 @@ func (c *collector) openScripts(d *dialect, entries []map[string]any, label stri
 		}
 	}
 	if len(hooks) > 0 {
-		c.Warnings = append(c.Warnings, droppedScripts(label, hooks))
+		c.warn(RemarkScripts, droppedScripts(label, hooks))
 	}
 	return joinScripts(pre), joinScripts(post)
 }

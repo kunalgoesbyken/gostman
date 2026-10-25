@@ -1,4 +1,13 @@
+export const MCP_OUTPUT_TEXT = {
+  name: 'Result matches the tool output schema',
+}
+
 export const MCP_TEXT = {
+  media: {
+    heading: 'Images and audio in the result',
+    image: (number) => `Image ${number} in the result`,
+    audio: (number) => `Audio ${number} in the result`,
+  },
   server: 'Server',
   argumentsLabel: 'Arguments',
   notLoaded: 'Not loaded',

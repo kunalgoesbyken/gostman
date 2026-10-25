@@ -32,6 +32,8 @@ const EDITOR_LANGUAGES = { [BODY_JSON]: "json", [BODY_XML]: "xml", [BODY_SOAP]: 
 const FORMATTED_TYPE_NAMES = { [BODY_JSON]: "JSON", [BODY_XML]: "XML" }
 const FORMAT_CHORD = { shift: true, alt: true, key: "f" }
 
+const BODILESS_METHODS = ["GET", "HEAD"]
+
 const isFormattedType = (bodyType) => Object.hasOwn(FORMATTED_TYPE_NAMES, bodyType)
 
 const problemText = (type, error) => (error.column === undefined ? BODY_TEXT.cannotFormat(type, error) : BODY_TEXT.cannotFormatAt(type, error))
@@ -158,6 +160,7 @@ export function BodyPanel({ request, drafts, editorPath, replacedByGraphQL, onUp
       {replacedByGraphQL && (
         <Notice>{BODY_TEXT.replacedByGraphQL}</Notice>
       )}
+      {request.bodyType === BODY_MULTIPART && BODILESS_METHODS.includes(request.method) && <Notice>{BODY_TEXT.multipartOnGet}</Notice>}
       {formatting.shownProblem && <FormatProblem bodyType={request.bodyType} error={formatting.shownProblem} onReveal={formatting.reveal} />}
       <BodyEditor
         request={request}

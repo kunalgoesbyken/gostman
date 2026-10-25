@@ -6,12 +6,12 @@ import {
 import { createCaptureActions } from './captureSession'
 import { createLoadTestActions } from './loadTestSession'
 import { generateAllSnippets } from './codeGenerator'
-import { activeKindsOf, countActiveRequests, sanitizeImport, withoutActiveRequests } from './importExport'
+import { activeKindsOf, countActiveRequests, fileReadPathsOf, sanitizeImport, withoutActiveRequests } from './importExport'
 import { asSentence, pluralize } from './dataUtils'
 import { createExampleActions } from './exampleActions'
 import { createImporterClient } from './importerClient'
 import { createScanClient } from './scanClient'
-import { RESTRICTED, applyExtractors, createExecutor } from './execution'
+import { RESTRICTED, RESTRICTED_ERROR, applyExtractors, createExecutor } from './execution'
 import { introspectionRequest, readSchema } from './graphqlSchema'
 import { cancelSignIn, clearToken, discoverIssuer, obtainToken } from './oauth'
 import { OAUTH_TEXT } from './oauthText'
@@ -26,7 +26,7 @@ import { createMockActions } from './mockServer'
 import { withoutPassphrases } from './network'
 import { STEP_CHECK, STEP_RUN, STEP_SAVE, STEP_SEND, STEP_VARIABLE } from './onboarding'
 import { getPreferences } from './preferences'
-import { AUTH_OAUTH2, normalizeRequest } from './request'
+import { AUTH_OAUTH2, isUntouchedRequest, normalizeRequest } from './request'
 import { promptInstall } from './pwa'
 import { SAMPLE_REQUEST } from './welcome'
 import { isRequestDirty } from './requestChanges'
@@ -34,7 +34,7 @@ import { bodyBase64, downloadName, httpStatusOf, mimeType } from './response'
 import { keepingOwnVariables } from './shareContent'
 import { clientUrl } from './sharedLink'
 import { createRunner } from './runner'
-import { buildReportPage } from './runReport'
+import { buildReportPage, environmentsUsed } from './runReport'
 import { createSocketActions, isSocketAddress } from './socketSessions'
 import { TESTS_PANEL } from './requestSections'
 import { createSpecActions } from './specActions'
@@ -48,13 +48,17 @@ import { ROW_REQUEST } from './collectionTree'
 import { describeCounts } from './importCounts'
 import { DATA_TEXT } from './dataText'
 import { markDataDeleted } from './storage'
-import { ACTIVE_IMPORT_TEXT, IMPORT_RESULT_TEXT } from './importText'
+import { ACTIVE_IMPORT_TEXT, IMPORT_RESULT_TEXT, fileReadsParts } from './importText'
+import { withImportedSettings } from './importedSettings'
+import { notesIn, remark, warningsIn, withoutRemarksOn } from './importRemarks'
+import { filePathsIn, withoutActiveContent } from './activeContent'
+import { CURL_FILES_TEXT } from './requestBarText'
 import { countImported } from './importSummary'
 import { SCOPE_GLOBAL } from './variableScopes'
 import { environmentForFolder, findActiveEnvironment, selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
-import { scopedFolderNames, scopedImport } from './environmentScope'
+import { ownedVariableCount, scopedFolderNames, scopedImport } from './environmentScope'
 
-const UNRECORDED_ERRORS = ['config', 'script', 'cancelled']
+const UNRECORDED_ERRORS = ['config', 'script', 'cancelled', RESTRICTED_ERROR]
 const EXPORT_TAB = 'export'
 const SHARE_TAB = 'share'
 const DESTRUCTIVE = 'destructive'
@@ -268,7 +272,7 @@ export function createWorkspaceActions(backend) {
     const { auth, response, tests, extraction } = await execute(tab.request, pendingId)
     store().finishTabRequest(tab.id, pendingId, response, { tests, extraction })
     if (auth.oauth2 !== tab.request.auth.oauth2) setToken(tab.id, auth.oauth2)
-    if (!UNRECORDED_ERRORS.includes(response.error)) store().addToHistory(tab.request, httpStatusOf(response))
+    if (!UNRECORDED_ERRORS.includes(response.error)) store().addToHistory(tab.request, httpStatusOf(response), Boolean(response.error) && !response.statusCode)
   }
 
   const saveSettings = async (settings) => {
@@ -321,11 +325,29 @@ export function createWorkspaceActions(backend) {
     store().openCodeDialog(generateAllSnippets(prepared))
   })
 
-  const pasteCurl = attempt('Could not read the curl command', async (command) => {
-    const tab = activeTab()
-    const parsed = await backend.parseCurl(command)
+  const fillFromCurl = (tabId, parsed) => {
+    const tab = tabById(tabId)
+    if (!tab) return
     const { id, name, folderId, extractors, examples: kept } = tab.request
-    store().updateTabRequest(tab.id, { ...normalizeRequest(parsed), id, name, folderId, extractors, examples: kept })
+    store().updateTabRequest(tabId, { ...parsed, id, name, folderId, extractors, examples: kept })
+  }
+
+  const askAboutCurlFiles = (tabId, parsed, paths) => store().showConfirm(
+    CURL_FILES_TEXT.title,
+    [CURL_FILES_TEXT.message, ...fileReadsParts(paths)],
+    () => fillFromCurl(tabId, parsed),
+    null,
+    'outline',
+    CURL_FILES_TEXT.withThem,
+    { text: CURL_FILES_TEXT.withoutThem, run: () => fillFromCurl(tabId, withoutActiveContent(parsed)) },
+  )
+
+  const pasteCurl = attempt('Could not read the curl command', async (command) => {
+    const tabId = activeTab().id
+    const parsed = normalizeRequest(await backend.parseCurl(command))
+    const paths = filePathsIn([parsed])
+    if (paths.length > 0) askAboutCurlFiles(tabId, parsed, paths)
+    else fillFromCurl(tabId, parsed)
   })
 
   const scopedNote = (data) => {
@@ -338,7 +360,8 @@ export function createWorkspaceActions(backend) {
 
   const addImported = attempt('Import failed', async (imported) => {
     await tree.shareOrder()
-    const data = scopedImport(placedAfterRoot(store(), imported), store().workspaceStatus.path)
+    const workspacePath = store().workspaceStatus.path
+    const data = scopedImport(placedAfterRoot(store(), withImportedSettings(imported, workspacePath)), workspacePath)
     const { requests, folders } = data
     if (requests.length > 0) store().upsertRequests(await backend.saveRequests(requests))
     store().mergeFolders(folders)
@@ -352,30 +375,33 @@ export function createWorkspaceActions(backend) {
       ...(variablesMerged ? [] : ['Collection variables were skipped because the existing collection variables are not valid JSON.']),
       ...[...skippedEnvironments, ...skippedGlobals].map((name) => `Environment ${quoted(name)} was skipped because its variables are not valid JSON.`),
       ...[...environments.joined, ...globals.joined].map(IMPORT_RESULT_TEXT.joinedEnvironment),
-      ...data.warnings,
+      ...warningsIn(data.remarks),
     ]
-    const counts = countImported(imported)
+    const counts = countImported(data)
     const merged = {
       ...counts,
       environments: counts.environments - skippedEnvironments.length,
       globals: counts.globals - skippedGlobals.length,
-      variables: variablesMerged ? counts.variables : 0,
+      variables: variablesMerged ? counts.variables : ownedVariableCount(data.folders),
     }
     const summary = `Imported ${describeCounts(merged)}.`
-    store().showAlert('Import complete', [summary, ...scopedNote(data), ...data.notes, ...warnings].join('\n'), 'OK', warnings.length > 0 ? 'warning' : 'success')
+    store().showAlert('Import complete', [summary, ...scopedNote(data), ...notesIn(data.remarks), ...warnings].join('\n'), 'OK', warnings.length > 0 ? 'warning' : 'success')
   })
 
-  const leavingOutActive = (data, kinds) => ({ ...withoutActiveRequests(data), notes: [...data.notes, ACTIVE_IMPORT_TEXT.leftOut(kinds)] })
+  const leavingOutActive = (data, kinds) => ({
+    ...withoutActiveRequests(data),
+    remarks: [remark(ACTIVE_IMPORT_TEXT.leftOut(kinds)), ...withoutRemarksOn(data.remarks, kinds)],
+  })
 
   const askAboutActive = (data) => new Promise((resolve) => {
     const kinds = activeKindsOf(data)
-    const proceed = (chosen) => () => {
+    const proceed = (chosen) => async () => {
+      await addImported(chosen)
       resolve(true)
-      return addImported(chosen)
     }
     store().showConfirm(
       ACTIVE_IMPORT_TEXT.title(kinds),
-      ACTIVE_IMPORT_TEXT.message(countActiveRequests(data), kinds),
+      [ACTIVE_IMPORT_TEXT.message(countActiveRequests(data), kinds), ...fileReadsParts(fileReadPathsOf(data))],
       proceed(data),
       () => resolve(false),
       'outline',
@@ -384,17 +410,20 @@ export function createWorkspaceActions(backend) {
     )
   })
 
-  const importData = attempt('Import failed', async (imported) => {
-    const existing = { requestIds: idsOf(store().requests), folderIds: idsOf(store().folders) }
-    const data = sanitizeImport(imported, existing)
+  const addReviewed = async (data) => {
     if (countActiveRequests(data) > 0) return askAboutActive(data)
     await addImported(data)
     return true
+  }
+
+  const importData = attempt('Import failed', (imported) => {
+    const existing = { requestIds: idsOf(store().requests), folderIds: idsOf(store().folders) }
+    return addReviewed(sanitizeImport(imported, existing))
   })
 
   const importShared = (imported) => importData(keepingOwnVariables(imported, store().environments, store().folders))
 
-  const openapi = createSpecActions({ backend, attempt, addImported })
+  const openapi = createSpecActions({ backend, attempt, addImported: addReviewed })
 
   const importer = createImporterClient(backend)
 
@@ -413,7 +442,9 @@ export function createWorkspaceActions(backend) {
     const run = runner.describeRun()
     if (!run) return undefined
     const { runner: state } = store()
-    const environment = environmentForFolder(store(), state.folderId)?.name || ''
+    const requests = new Map(store().requests.map((request) => [request.id, request]))
+    const environmentOf = (folderId) => environmentForFolder(store(), folderId)?.name
+    const environment = environmentsUsed(state.results, (result) => environmentOf(requests.get(result.id)?.folderId)) || environmentOf(state.folderId) || ''
     return saveTextFile(RUN_REPORT_FILE, buildReportPage(state.results, run, environment), RUN_REPORT_TYPE)
   }
 
@@ -550,8 +581,10 @@ export function createWorkspaceActions(backend) {
     [STEP_RUN]: () => store().openRunner(),
   }
 
-  const openNewRequest = (folderId) => {
-    store().newTab(folderId)
+  const openNewRequest = (folderId = '') => {
+    const waiting = store().tabs.find((tab) => !tab.response && (tab.request.folderId || '') === folderId && isUntouchedRequest(tab.request))
+    if (waiting) store().setActiveTab(waiting.id)
+    else store().newTab(folderId)
     focusAddressSoon()
   }
 

@@ -12,7 +12,7 @@ import { bulkTextToRows, fitsBulkText, rowsToBulkText } from "../lib/bulkRows"
 import { KEY_VALUE_TEXT as TEXT } from "../lib/keyValueText"
 import { cn } from "../lib/utils"
 
-const PLAIN_COLUMNS = "grid-cols-[1.5rem_minmax(0,1fr)_minmax(0,1fr)_1.75rem]"
+export const PLAIN_COLUMNS = "grid-cols-[1.5rem_minmax(0,1fr)_minmax(0,1fr)_1.75rem]"
 const TYPED_COLUMNS = "grid-cols-[1.5rem_minmax(0,1fr)_5rem_minmax(0,1.5fr)_1.75rem]"
 
 export const ROW_GRID = "grid items-center gap-x-2"

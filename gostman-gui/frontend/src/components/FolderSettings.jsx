@@ -3,7 +3,7 @@ import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
 import { Notice, Panel, PanelBody, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
+import { OverflowTabsList, Tabs, TabsContent } from "./ui/tabs"
 import { AuthPanel } from "./AuthPanel"
 import { CollectionVariablesTable } from "./CollectionVariablesTable"
 import { EnvironmentTable } from "./EnvironmentTable"
@@ -12,9 +12,9 @@ import { MarkdownField } from "./MarkdownField"
 import { AssertionEditor, ScriptEditor } from "./TestsPanel"
 import { isPlainObject, parseJSON } from "../lib/dataUtils"
 import { ENVIRONMENT_TEXT } from "../lib/environmentText"
-import { holdsCollections, isCollectionRoot } from "../lib/environmentScope"
+import { hasCollectionLists, holdsCollections, isCollectionFolder, ownsCollectionVariables } from "../lib/environmentScope"
 import { FOLDER_SETTINGS_TEXT as TEXT } from "../lib/folderSettingsText"
-import { AUTH_INHERIT, AUTH_NONE, ROOT_SETTINGS_ID, hasActiveSettings, inheritedAuthSource, lineageOf, normalizeScopeSettings, settingsTitle } from "../lib/inheritance"
+import { AUTH_INHERIT, AUTH_NONE, ROOT_SETTINGS_ID, hasActiveSettings, inheritedAuthLayer, normalizeScopeSettings, settingsTitle } from "../lib/inheritance"
 import { cancelSignIn, clearToken, discoverIssuer, obtainToken } from "../lib/oauth"
 import { OAUTH_TEXT } from "../lib/oauthText"
 import { parseRows, serializeRows } from "../lib/rows"
@@ -32,6 +32,7 @@ const TAB_TESTS = "tests"
 const TAB_DOCS = "docs"
 const VIEW_PRE = "preScript"
 const VIEW_POST = "postScript"
+const TAB_ITEMS = Object.entries(TEXT.tabs).map(([value, label]) => ({ value, label, content: label }))
 const VARIABLE_FEATURES = { enabled: false, secret: false, readOnly: false }
 const SCRIPT_VIEWS = [
   { value: VIEW_PRE, label: TEXT.preScript },
@@ -87,10 +88,13 @@ function CollectionVarsTab({ folder, onChange }) {
   )
 }
 
-function VarsTab({ folder, isCollection, holdsCollectionList, onChange }) {
-  if (!folder) {
-    return <Panel><CollectionVariables note={holdsCollectionList ? ENVIRONMENT_TEXT.sharedCollectionNote : ENVIRONMENT_TEXT.collectionNote} /></Panel>
-  }
+function rootVariablesNote(state) {
+  if (holdsCollections(state.workspaceStatus.path)) return ENVIRONMENT_TEXT.sharedCollectionNote
+  return hasCollectionLists(state.folders) ? ENVIRONMENT_TEXT.sharedFolderNote : ENVIRONMENT_TEXT.collectionNote
+}
+
+function VarsTab({ folder, isCollection, rootNote, onChange }) {
+  if (!folder) return <Panel><CollectionVariables note={rootNote} /></Panel>
   if (isCollection) return <CollectionVarsTab folder={folder} onChange={onChange} />
   return <Panel><FolderVariables variables={folder.variables} onChange={(variables) => onChange({ variables })} /></Panel>
 }
@@ -199,9 +203,9 @@ function useFolderAuthActions(backend, scopeId, auth, onChange) {
   return { tokenRequest, actions }
 }
 
-function AuthTab({ backend, scopeId, auth, source, isCollection, onChange }) {
+function AuthTab({ backend, scopeId, auth, source, sourceType, isCollection, onChange }) {
   const { tokenRequest, actions } = useFolderAuthActions(backend, scopeId, auth, onChange)
-  const inheritance = isCollection ? undefined : { source, noAuthValue: AUTH_NONE, noAuthNote: TEXT.folderNoAuth }
+  const inheritance = isCollection ? undefined : { source, sourceType, noAuthValue: AUTH_NONE, noAuthNote: TEXT.folderNoAuth }
   const shown = isCollection ? auth : { ...auth, type: auth.type || AUTH_INHERIT }
 
   return (
@@ -215,20 +219,19 @@ function AuthTab({ backend, scopeId, auth, source, isCollection, onChange }) {
 function useScope(scope) {
   const folder = useAppStore((state) => state.folders.find((candidate) => candidate.id === scope.folderId))
   const collectionSettings = useAppStore((state) => state.collectionSettings)
-  const parentSource = useAppStore((state) => (
-    folder ? inheritedAuthSource({ type: AUTH_INHERIT }, lineageOf(state, folder.parentId))?.name ?? null : null
-  ))
+  const parentSource = useAppStore((state) => (folder ? inheritedAuthLayer(state, folder.parentId)?.name ?? null : null))
+  const parentSourceType = useAppStore((state) => (folder ? inheritedAuthLayer(state, folder.parentId)?.settings.auth.type ?? null : null))
   const title = useAppStore((state) => settingsTitle(state, folder))
-  const isCollectionFolder = useAppStore((state) => isCollectionRoot(state.folders, scope.folderId, state.workspaceStatus.path))
-  const holdsCollectionList = useAppStore((state) => holdsCollections(state.workspaceStatus.path))
+  const ownsCollectionList = useAppStore((state) => isCollectionFolder(state.folders, scope.folderId) || ownsCollectionVariables(state.folders.find((candidate) => candidate.id === scope.folderId)))
+  const rootNote = useAppStore(rootVariablesNote)
   const isCollection = scope.folderId === ROOT_SETTINGS_ID
   const source = isCollection ? collectionSettings : folder
-  return { source, folder, isCollection, isCollectionFolder, holdsCollectionList, parentSource, title }
+  return { source, folder, isCollection, ownsCollectionList, rootNote, parentSource, parentSourceType, title }
 }
 
 export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
   const [tab, setTab] = useState(TAB_HEADERS)
-  const { source, folder, isCollection, isCollectionFolder, holdsCollectionList, parentSource, title } = useScope(scope)
+  const { source, folder, isCollection, ownsCollectionList, rootNote, parentSource, parentSourceType, title } = useScope(scope)
   const isRestricted = useAppStore((state) => state.isRestricted)
   const update = useAppStore((state) => state.updateScopeSettings)
   const settings = useMemo(() => normalizeScopeSettings(source), [source])
@@ -246,11 +249,7 @@ export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
       <Tabs value={tab} onValueChange={setTab} className="flex min-h-0 flex-1 flex-col">
         <DialogHeader onClose={onClose}>
           <DialogTitle>{title}</DialogTitle>
-          <TabsList label={title} className="ml-4">
-            {Object.entries(TEXT.tabs).map(([value, label]) => (
-              <TabsTrigger key={value} value={value}>{label}</TabsTrigger>
-            ))}
-          </TabsList>
+          <OverflowTabsList label={title} items={TAB_ITEMS} moreLabel={TEXT.more} moreHint={TEXT.moreHint} className="ml-4" />
         </DialogHeader>
         {isRestricted && hasActiveSettings(settings) && <Notice tone="warning">{TEXT.restrictedNote}</Notice>}
         <div className="min-h-0 flex-1 overflow-hidden">
@@ -260,7 +259,7 @@ export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
               <KeyValueEditor
                 rows={parseRows(settings.headers)}
                 onChange={(rows) => patch({ headers: serializeRows(rows) })}
-                keyLabel="Header"
+                keyLabel={TEXT.headerLabel}
               />
             </Panel>
           </TabsContent>
@@ -270,12 +269,13 @@ export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
               scopeId={scope.folderId}
               auth={settings.auth}
               source={parentSource}
+              sourceType={parentSourceType}
               isCollection={isCollection}
               onChange={patch}
             />
           </TabsContent>
           <TabsContent value={TAB_VARS} className="h-full min-h-0">
-            <VarsTab folder={folder} isCollection={isCollectionFolder} holdsCollectionList={holdsCollectionList} onChange={patch} />
+            <VarsTab folder={folder} isCollection={ownsCollectionList} rootNote={rootNote} onChange={patch} />
           </TabsContent>
           <TabsContent value={TAB_SCRIPT} className="h-full min-h-0">
             <ScriptTab settings={settings} path={path} isCollection={isCollection} EditorComponent={EditorComponent} onChange={patch} />

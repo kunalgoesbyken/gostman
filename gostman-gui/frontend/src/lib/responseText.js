@@ -13,6 +13,13 @@ export const VISUALIZE_TEXT = {
   note: 'Rendered from a script. Scripts, network access, forms and navigation are blocked inside this view.',
 }
 
+export const PREVIEW_TEXT = {
+  blocked: 'Images, styles and fonts from other addresses are blocked, so this page cannot reveal your IP address or reach devices on your network.',
+  loaded: 'Images, styles and fonts from other addresses are loaded for this response. Scripts and forms stay blocked.',
+  load: 'Load remote content',
+  block: 'Block again',
+}
+
 export const RESPONSE_TEXT = {
   copyBaseUrl: 'Copy base URL',
   bodyLabel: 'Response body',
@@ -46,6 +53,7 @@ export const RESPONSE_TEXT = {
   },
   views: { pretty: 'Pretty', raw: 'Raw', preview: 'Preview' },
   bodyView: 'Body view',
+  checksPassed: (passed, total) => `${passed} of ${total} checks passed`,
   history: {
     menu: 'Earlier responses',
     latest: 'Latest response',

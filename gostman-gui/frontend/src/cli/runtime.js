@@ -1,5 +1,6 @@
 import { extractVariables, extractWrites as scopedExtraction, parseExtractors } from '../lib/chaining'
 import { buildCollectionTree, collectRequests, listFolders } from '../lib/collectionTree'
+import { normalizeRequest } from '../lib/request'
 import { SCOPE_SESSION } from '../lib/scripting/scopes'
 
 export { contractChecks, operationKey } from '../lib/contract'
@@ -7,6 +8,7 @@ export { mergeCookies } from '../lib/cookies'
 export { buildDocs } from '../lib/docs'
 export { toGrpcCall } from '../lib/grpc'
 export { toMcpCall } from '../lib/mcp'
+export { mcpOutputChecks } from '../lib/mcpOutput'
 export { exportToPostman } from '../lib/postmanExport'
 export { normalizeRequest, toEngineRequest } from '../lib/request'
 export { countActiveAssertions } from '../lib/scripting/assertions'
@@ -24,6 +26,8 @@ export const requestsInFolder = (folders, requests, folderId, sharedOrder) => (
 export const folderPaths = (folders) => (
   listFolders(buildCollectionTree(folders, [])).map(({ folder, path }) => ({ id: folder.id, path }))
 )
+
+export const normalizeRequests = (requests) => requests.map((request) => normalizeRequest(request))
 
 export const extract = (request, response) => extractVariables(parseExtractors(request.extractors), response)
 

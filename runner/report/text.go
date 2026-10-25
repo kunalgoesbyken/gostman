@@ -15,6 +15,8 @@ const (
 	markFail = "FAIL"
 	markSkip = "SKIP"
 
+	logLevelError = "error"
+
 	styleReset  = "\x1b[0m"
 	styleRed    = "\x1b[31m"
 	styleGreen  = "\x1b[32m"
@@ -68,7 +70,13 @@ func outcomeOf(result runner.Result) string {
 }
 
 func indented(text, indent string) string {
-	return indent + strings.ReplaceAll(text, "\n", "\n"+indent)
+	lines := strings.Split(text, "\n")
+	for index, line := range lines {
+		if line != "" {
+			lines[index] = indent + line
+		}
+	}
+	return strings.Join(lines, "\n")
 }
 
 func (t *Text) printFailures(result runner.Result) {
@@ -88,8 +96,15 @@ func (t *Text) printFailures(result runner.Result) {
 	}
 }
 
+func restatesError(result runner.Result, line runner.LogLine) bool {
+	return line.Level == logLevelError && line.Text != "" && strings.Contains(result.Error, line.Text)
+}
+
 func (t *Text) printLogs(result runner.Result) {
 	for _, line := range result.Logs {
+		if restatesError(result, line) {
+			continue
+		}
 		fmt.Fprintln(t.output, t.paint(styleDim, indented(line.Level+": "+line.Text, detailIndent)))
 	}
 }

@@ -156,6 +156,7 @@ func (c *collector) importDocuments(ctx context.Context, docs []document, option
 			c.readOpenAPI(ctx, doc, config)
 		}
 	}
+	c.scopePostmanEnvironments()
 	if len(bruno) > 0 {
 		c.readBruno(bruno)
 	}

@@ -21,6 +21,13 @@ const (
 	skillFilePerm    = 0o644
 	skillFolderPerm  = 0o755
 	registrationText = `
+Add requests by opening the folder in the Gostman app, or import a collection
+and run it:
+  gostman import <file> --out "%[1]s"
+  gostman run "%[1]s"
+
+To let a coding agent use the workspace, register the MCP server.
+
 Claude Code:
   claude mcp add gostman -- gostman mcp --workspace "%[1]s"
 
@@ -35,7 +42,8 @@ Other MCP clients (stdio), in the client's server list:
   }
 
 Keep secrets out of the workspace files: pass them with --var-from-env NAME
-and reference them in requests as {{NAME}}.
+and reference them in requests as {{NAME}}. The agent gets a secret only for
+addresses where one of your own requests sends it.
 `
 )
 

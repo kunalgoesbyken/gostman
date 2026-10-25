@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
 	"github.com/kunalgoesbyken/gostman/importer"
 	"github.com/kunalgoesbyken/gostman/openapi"
@@ -121,7 +120,7 @@ func writeScanJSON(out io.Writer, report scan.Report, parsed scanning) error {
 func writeScanText(out io.Writer, report scan.Report, parsed scanning) error {
 	for _, finding := range report.Findings {
 		_, err := fmt.Fprintf(out, "%-6s %s  %s  %s  %s  fp:%s  %s\n",
-			strings.ToUpper(string(finding.Severity)), finding.Location.Path, finding.Location.Field,
+			finding.Severity, finding.Location.Path, finding.Location.Field,
 			finding.Rule, finding.Preview, finding.Fingerprint, finding.Reason)
 		if err != nil {
 			return err

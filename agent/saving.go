@@ -11,6 +11,7 @@ import (
 
 	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/mcpclient"
+	"github.com/kunalgoesbyken/gostman/scan"
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
@@ -80,6 +81,7 @@ func (r *revision) text(target *string, value *string) {
 
 func (d *Desk) blankRequest() (workspace.Request, error) {
 	defaults, err := d.client.catalog.Normalize(struct{}{})
+	defaults.Auth.Type = engine.AuthInherit
 	return workspace.Request{Id: rand.Text(), Auth: defaults.Auth, Options: defaults.Options}, err
 }
 
@@ -271,6 +273,25 @@ func (d *Desk) refuseSecrets(supplied []string) error {
 	return nil
 }
 
+func refuseLookalikeRequest(arguments saveArguments, request workspace.Request) error {
+	draft := workspace.Request{Name: request.Name, BodyType: request.BodyType}
+	if arguments.URL != nil {
+		draft.URL = request.URL
+	}
+	if arguments.Headers != nil {
+		draft.Headers = request.Headers
+	}
+	if arguments.Body != nil {
+		draft.Body = request.Body
+	}
+	report := scan.Scan(workspace.Collection{Requests: []workspace.Request{draft}}, scan.Options{})
+	if len(report.Findings) == 0 {
+		return nil
+	}
+	finding := report.Findings[0]
+	return fmt.Errorf("Not saved: the %s looks like a credential (%s). Keep it in a variable the developer sets and write {{name}} in its place.", finding.Location.Field, finding.Reason)
+}
+
 func folderSegments(path string) ([]string, error) {
 	var segments []string
 	for _, segment := range strings.Split(path, folderDivider) {
@@ -343,16 +364,24 @@ func (d *Desk) place(current scene, change *revision, path *string) error {
 	return d.files.SaveFolders(plan.folders)
 }
 
-func (d *Desk) folderPath(id string) string {
+func folderPaths(folders []workspace.Folder) func(string) string {
 	names := map[string]workspace.Folder{}
-	for _, folder := range d.files.Collection().Folders {
+	for _, folder := range folders {
 		names[folder.Id] = folder
 	}
-	var path []string
-	for folder, found := names[id]; found; folder, found = names[folder.ParentId] {
-		path = append([]string{folder.Name}, path...)
+	return func(id string) string {
+		var path []string
+		visited := map[string]bool{}
+		for folder, found := names[id]; found && !visited[folder.Id]; folder, found = names[folder.ParentId] {
+			visited[folder.Id] = true
+			path = append([]string{folder.Name}, path...)
+		}
+		return strings.Join(path, folderDivider)
 	}
-	return strings.Join(path, folderDivider)
+}
+
+func (d *Desk) folderPath(id string) string {
+	return folderPaths(d.files.Collection().Folders)(id)
 }
 
 func (d *Desk) saveRequest(_ context.Context, current scene, arguments saveArguments) (saved, error) {
@@ -375,10 +404,13 @@ func (d *Desk) saveRequest(_ context.Context, current scene, arguments saveArgum
 	if err := d.refuseSecrets(change.supplied); err != nil {
 		return saved{}, err
 	}
+	if err := refuseLookalikeRequest(arguments, change.request); err != nil {
+		return saved{}, err
+	}
 	if err := d.place(current, &change, arguments.Folder); err != nil {
 		return saved{}, err
 	}
-	if change.created || redirected(change.original, change.request) {
+	if change.created || redirected(change.original, change.request) || addsPlaceholders(change.original, change.request) {
 		if err := d.files.MarkAgentAuthored(change.request.Id); err != nil {
 			return saved{}, err
 		}

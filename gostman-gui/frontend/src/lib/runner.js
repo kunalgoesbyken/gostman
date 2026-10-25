@@ -7,16 +7,20 @@ import { sizeSandboxPool } from './scripting/sandbox'
 import { withRunStreamBudget } from './runStream'
 import { isSocketAddress } from './socketSessions'
 import { matchesTags } from './tags'
+import { folderChain } from './variableScopes'
 import { useAppStore, variableTextFor } from '../store/appStore'
 
 const SKIPPED_SOCKET = 'WebSocket requests are not part of a run.'
 const BODY_LIMIT = 64 * 1024
 const BASE64 = 'base64'
+const FOLDER_SEPARATOR = '/'
 
 const store = () => useAppStore.getState()
 const pause = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds))
 
-const identify = ({ id, name, method, url }) => ({ id, name, method, url })
+const folderPath = (folderId) => folderChain(store().folders, folderId).map((folder) => folder.name).join(FOLDER_SEPARATOR)
+
+const identify = ({ id, name, method, url, folderId }) => ({ id, name, method, url, folder: folderPath(folderId) })
 
 const flagged = (result, problem) => ({ ...result, error: [result.error, problem].filter(Boolean).join('\n'), hasFailed: true })
 
@@ -28,7 +32,6 @@ function capture(request, response) {
   return {
     request: { method: request.method, url: request.url, headers: request.headers, body: request.body },
     response: {
-      url: response.url || '',
       headers: response.headers || [],
       body,
       contentType: response.contentType,
@@ -38,11 +41,12 @@ function capture(request, response) {
   }
 }
 
-function summarize(request, { response, tests }, iteration) {
+function summarize(request, { response, tests, resolvedUrl }, iteration) {
   const failures = tests.results.filter((result) => !result.passed)
   return {
     ...identify(request),
     iteration,
+    resolvedUrl,
     status: response.status,
     statusCode: response.statusCode,
     protocol: response.protocol,
@@ -95,7 +99,7 @@ export function createRunner(backend, execute) {
   async function runIteration(run, requests, iteration, options) {
     const queue = [...requests]
     const workers = Math.min(Math.max(options.parallel, 1), queue.length)
-    const { follow, passedOver } = createFlowFollower(run, requests, queue, workers > 1)
+    const { follow, passedOver } = createFlowFollower(run, requests, queue, { isParallel: workers > 1, iteration })
     const attempted = new Set()
     const lanes = Array.from({ length: workers }, async () => {
       while (queue.length > 0 && !run.isStopped && !run.isHalted) {
@@ -103,7 +107,7 @@ export function createRunner(backend, execute) {
         attempted.add(request)
         const outcome = await runOne(run, request, iteration)
         if (run.isStopped) return
-        const problem = follow(outcome.flow, request.name)
+        const problem = follow(outcome.flow, request)
         const result = problem ? flagged(outcome, problem) : outcome
         store().addRunResult(result)
         if (options.stopOnFailure && result.hasFailed) run.isHalted = true

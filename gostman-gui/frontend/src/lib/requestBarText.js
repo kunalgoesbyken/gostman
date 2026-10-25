@@ -17,3 +17,10 @@ export const REQUEST_BAR_TEXT = {
   codeHint: 'Generate code',
   codeLanguage: 'Language',
 }
+
+export const CURL_FILES_TEXT = {
+  title: 'Paste the file reads?',
+  message: 'This curl command reads files from this computer and sends them with the request, so only keep them if you trust where the command came from. Without them, the rest of the command is still filled in.',
+  withThem: 'Paste with file reads',
+  withoutThem: 'Paste without file reads',
+}

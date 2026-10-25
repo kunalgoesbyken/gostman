@@ -29,7 +29,7 @@ export function leaveWorkspace(state, path) {
 
 export function persistableSessions(sessions, persistableTab) {
   return Object.fromEntries(Object.entries(sessions).map(([path, session]) => [path, {
-    tabs: session.tabs.map(persistableTab),
+    tabs: session.tabs.map(persistableTab(session.requests)),
     activeTabId: session.activeTabId,
     nextTabId: session.nextTabId,
   }]))

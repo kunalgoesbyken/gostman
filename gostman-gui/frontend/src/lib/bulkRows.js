@@ -1,6 +1,7 @@
 import { isBlankRow } from './rows'
 
 const DISABLED_PREFIX = '//'
+const DISABLED_PREFIXES = [DISABLED_PREFIX, '#']
 const SEPARATOR = ':'
 const KEY_START = 1
 
@@ -16,8 +17,8 @@ function splitPair(text) {
 
 function lineToRow(line) {
   const text = line.trim()
-  const enabled = !text.startsWith(DISABLED_PREFIX)
-  return { ...splitPair(enabled ? text : text.slice(DISABLED_PREFIX.length).trim()), enabled }
+  const prefix = DISABLED_PREFIXES.find((candidate) => text.startsWith(candidate))
+  return { ...splitPair(prefix ? text.slice(prefix.length).trim() : text), enabled: !prefix }
 }
 
 export const bulkTextToRows = (text) => text.split(/\r?\n/).map(lineToRow).filter((row) => !isBlankRow(row))

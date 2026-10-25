@@ -198,7 +198,7 @@ li small { display: block; color: var(--muted); margin-left: 42px; white-space: 
 
   var meta = [];
   if (report.collection) meta.push(report.collection);
-  if (report.environment) meta.push('environment ' + report.environment);
+  if (report.environment) meta.push((report.environment.indexOf(', ') < 0 ? 'environment ' : 'environments ') + report.environment);
   if (report.startedAt) meta.push(new Date(report.startedAt).toLocaleString());
   meta.push((report.durationMs || 0) + ' ms');
   if (report.iterations) meta.push(report.iterations + ' iterations');
@@ -206,7 +206,7 @@ li small { display: block; color: var(--muted); margin-left: 42px; white-space: 
   document.getElementById('meta').textContent = meta.join('  |  ');
 
   var cards = document.getElementById('cards');
-  cards.appendChild(card(summary.requests, 'requests'));
+  cards.appendChild(card(summary.requests, 'planned'));
   cards.appendChild(card(summary.passed, 'passed', 'pass'));
   cards.appendChild(card(summary.failed, 'failed', summary.failed ? 'fail' : ''));
   cards.appendChild(card(summary.skipped, 'skipped'));

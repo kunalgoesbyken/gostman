@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -79,7 +80,7 @@ func (e runExtras) validate(options runner.Options) error {
 	return nil
 }
 
-func (e runExtras) apply(options *runner.Options, capture bool) error {
+func (e runExtras) apply(options *runner.Options, capture bool, secrets map[string]bool) error {
 	if e.dataFile != "" {
 		rows, err := runner.LoadData(e.dataFile)
 		if err != nil {
@@ -87,12 +88,18 @@ func (e runExtras) apply(options *runner.Options, capture bool) error {
 		}
 		options.Data = rows
 	}
-	if err := mergeEnvFile(e.envFile, options.Variables); err != nil {
+	if err := mergeSecretEnvFile(e.envFile, options.Variables, secrets); err != nil {
 		return err
 	}
 	options.Capture = capture
 	options.StreamTimeout = time.Duration(e.streamSeconds) * time.Second
 	return nil
+}
+
+func warnShortData(stderr io.Writer, options runner.Options) {
+	if rows := len(options.Data); rows > 0 && options.Iterations > rows {
+		fmt.Fprintf(stderr, "warning: --iterations %d asks for more iterations than the data file has rows, so the run has %d, one per row\n", options.Iterations, rows)
+	}
 }
 
 func unquote(value string) string {
@@ -105,20 +112,30 @@ func unquote(value string) string {
 	return value
 }
 
-func mergeEnvFile(path string, variables map[string]string) error {
+func mergeEnvFile(path string, variables map[string]string) ([]string, error) {
 	if path == "" {
-		return nil
+		return nil, nil
 	}
 	values, err := readEnvFile(path)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	var merged []string
 	for name, value := range values {
 		if _, taken := variables[name]; !taken {
 			variables[name] = value
+			merged = append(merged, name)
 		}
 	}
-	return nil
+	return merged, nil
+}
+
+func mergeSecretEnvFile(path string, variables map[string]string, secrets map[string]bool) error {
+	merged, err := mergeEnvFile(path, variables)
+	for _, name := range merged {
+		secrets[name] = true
+	}
+	return err
 }
 
 func readEnvFile(path string) (map[string]string, error) {

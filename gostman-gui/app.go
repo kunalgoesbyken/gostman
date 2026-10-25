@@ -125,7 +125,8 @@ type Request struct {
 
 type HistoryEntry struct {
 	Request
-	StatusCode int `json:"statusCode,omitempty"`
+	StatusCode int  `json:"statusCode,omitempty"`
+	NoResponse bool `json:"noResponse,omitempty"`
 }
 
 var (

@@ -49,7 +49,7 @@ function Tooltip({ info, anchor }) {
     <div
       role="tooltip"
       style={{ position: "fixed", left: anchor.left, top: anchor.bottom + 4 }}
-      className="pointer-events-none z-50 max-w-xs break-all rounded-md border border-border bg-card px-2 py-1 text-xs text-foreground shadow-lg"
+      className="pointer-events-none z-50 max-w-xs [overflow-wrap:anywhere] rounded-md border border-border bg-card px-2 py-1 text-xs text-foreground shadow-lg"
     >
       <VariableCard info={info} />
     </div>

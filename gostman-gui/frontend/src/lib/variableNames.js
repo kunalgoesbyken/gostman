@@ -22,7 +22,7 @@ export const SOURCE_LABELS = {
 }
 
 const DYNAMIC_RANGE = /^\$randomInt\(\s*-?\d+\s*,\s*-?\d+\s*\)$/u
-const FILE_REFERENCE = /^\$file(Base64)?\(.*\)$/u
+const FILE_REFERENCE = /^\$file(Base64)?\((.*)\)$/u
 const FILE_CALL = /\$file(?:Base64)?\(/u
 const RANGE_TEMPLATE = '$randomInt(min,max)'
 const FILE_TEMPLATE = '$file(path)'
@@ -38,6 +38,8 @@ function templateOf(name) {
 export const isFileName = (name) => FILE_REFERENCE.test(name)
 
 export const callsFile = (text) => FILE_CALL.test(text)
+
+export const filePathOf = (name) => FILE_REFERENCE.exec(name)?.[2].trim() || ''
 
 export const isDynamicName = (name) => DESCRIPTIONS.has(templateOf(name))
 

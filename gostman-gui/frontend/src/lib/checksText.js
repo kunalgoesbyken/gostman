@@ -82,6 +82,7 @@ export const CONTRACT_TEXT = {
   notJson: 'The body is not valid JSON.',
   unmatched: (method, path) => `No operation in the spec matches ${method} ${path}, so this response was not checked against it.`,
   unreadable: (message) => `The spec could not be read, so this response was not checked against it: ${message}`,
+  timedOut: (seconds) => `Checking this response against the spec took more than ${plural(seconds, 'second', 'seconds')} and was stopped. Check the schema patterns for a slow regular expression.`,
   start: 'Check responses against the spec',
   stop: 'Stop checking responses against the spec',
   link: 'Check responses against a spec…',
@@ -124,6 +125,7 @@ export const TESTS_TEXT = {
   expected: 'Expected',
   expectedValue: 'Expected value',
   expectedPlaceholder: '200',
+  noExpectedValue: 'No value needed',
   schemaPlaceholder: '{"type": "object"}',
   verify: 'Verify this assertion',
   remove: 'Remove assertion',
@@ -134,6 +136,7 @@ export const CHECK_RUN_TEXT = {
   stage: 'Checks',
   scriptTimedOut: (seconds) => `The script ran for more than ${plural(seconds, 'second', 'seconds')} and was stopped.`,
   checksTimedOut: (seconds) => `The checks ran for more than ${plural(seconds, 'second', 'seconds')} and were stopped.`,
+  resolvedValue: (value, written) => `${value} (${written})`,
   outsideResponse: (expression, suggestion) => `"${expression}" does not start at the response, so it finds nothing. Write ${suggestion}.`,
   patternTooSlow: (seconds) => `The regular expression ran for more than ${plural(seconds, 'second', 'seconds')} and was stopped. Simplify the pattern, for example by removing nested repeats such as (a+)+.`,
 }

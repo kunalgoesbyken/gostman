@@ -27,15 +27,32 @@ type span struct {
 	label string
 }
 
+type Scope int
+
+const (
+	AllValues Scope = iota
+	SecretValues
+	NoValues
+)
+
 type Redactor struct {
 	mu     sync.RWMutex
+	scope  Scope
 	known  map[string]bool
 	forms  []form
 	margin int
 }
 
 func New() *Redactor {
-	return &Redactor{known: map[string]bool{}}
+	return NewScoped(AllValues)
+}
+
+func NewScoped(scope Scope) *Redactor {
+	return &Redactor{scope: scope, known: map[string]bool{}}
+}
+
+func (r *Redactor) keeps(label string) bool {
+	return r.scope == AllValues || (r.scope == SecretValues && IsSensitiveName(label))
 }
 
 func Marker(label string) string {
@@ -43,13 +60,13 @@ func Marker(label string) string {
 }
 
 func (r *Redactor) Learn(label, value string) {
-	if IsMeaningful(value) {
+	if r.keeps(label) && IsMeaningful(value) {
 		r.remember(label, strings.TrimSpace(value), minimumLength)
 	}
 }
 
 func (r *Redactor) LearnSecret(label, value string) {
-	if isSecret(value) {
+	if r.scope != NoValues && isSecret(value) {
 		r.remember(label, strings.TrimSpace(value), secretLength)
 	}
 }
@@ -65,6 +82,12 @@ func (r *Redactor) remember(label, value string, shortest int) {
 		r.forms = append(r.forms, form{text: variant, label: label})
 		r.margin = max(r.margin, len(variant))
 	}
+}
+
+func (r *Redactor) Size() int {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return len(r.forms)
 }
 
 func (r *Redactor) longest() int {

@@ -1,5 +1,5 @@
 import { Fragment, useMemo, useState } from "react"
-import { Check, Copy, KeyRound, Plus, Trash2 } from "lucide-react"
+import { Braces, Check, Copy, FileText, KeyRound, Plus, Timer, Trash2 } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { ColorDot, ColorPicker } from "./ui/colorPicker"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
@@ -31,7 +31,22 @@ const SCOPE_OPTIONS = [
 const ENVIRONMENT_FEATURES = { enabled: true, secret: true, references: true, readOnly: false }
 const DOT_ENV_FEATURES = { enabled: false, secret: false, readOnly: true }
 
-function ListItem({ label, color, isSelected, isActive, onSelect }) {
+const groupName = (group) => (group.id ? group.name : TEXT.shared)
+
+const SHARED_SECTION = "shared"
+const MORE_SECTION = "more"
+
+const sectionOptions = (section) => section.items.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)
+
+function ListMarker({ icon: Icon, color }) {
+  return (
+    <span className="flex w-3 shrink-0 justify-center">
+      {Icon ? <Icon aria-hidden="true" className="h-3 w-3" /> : <ColorDot color={color} />}
+    </span>
+  )
+}
+
+function ListItem({ label, color, icon, isSelected, isActive, onSelect }) {
   return (
     <button
       type="button"
@@ -39,7 +54,7 @@ function ListItem({ label, color, isSelected, isActive, onSelect }) {
       aria-current={isSelected}
       className={cn("flex h-8 w-full items-center gap-2 px-3 text-left text-xs", isSelected ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-accent")}
     >
-      <ColorDot color={color} />
+      <ListMarker icon={icon} color={color} />
       <span className="min-w-0 flex-1 truncate">{label}</span>
       {isActive && <Check className="h-3.5 w-3.5 shrink-0" aria-label={TEXT.isActive} />}
     </button>
@@ -153,9 +168,10 @@ function EnvironmentEditor({ scope, environment, environments, isActive, scoping
 
 function CollectionVariablesEditor({ holder, isShared }) {
   const [query, setQuery] = useState("")
+  const sharedNote = useAppStore((s) => (holdsCollections(s.workspaceStatus.path) ? TEXT.sharedCollectionNote : TEXT.sharedFolderNote))
   return (
     <>
-      <Notice edge="border-b">{holder ? TEXT.ownCollectionNote(holder.name) : isShared ? TEXT.sharedCollectionNote : TEXT.collectionNote}</Notice>
+      <Notice edge="border-b">{holder ? TEXT.ownCollectionNote(holder.name) : isShared ? sharedNote : TEXT.collectionNote}</Notice>
       <SearchField value={query} onChange={setQuery} placeholder={TEXT.search} />
       <CollectionVariablesTable holder={holder} query={query} />
     </>
@@ -274,6 +290,28 @@ export function EnvironmentDialog({ secrets, onClose }) {
     if (!isManagingSecrets) onClose()
   }
 
+  const sections = [
+    ...groups.map((group) => ({
+      key: group.id || SHARED_SECTION,
+      label: isGrouped ? groupName(group) : "",
+      separated: group === firstOther,
+      items: [
+        ...group.environments.map((environment) => ({ id: environment.id, label: environment.name, color: environment.color, isActive: environment.id === activeId })),
+        ...(isGrouped && group.variables ? [{ id: group.variables, label: TEXT.collectionVariables, icon: Braces }] : []),
+      ],
+    })),
+    {
+      key: MORE_SECTION,
+      label: "",
+      separated: isGrouped,
+      items: [
+        ...(!isGrouped && !isGlobal ? [{ id: COLLECTION_VARIABLES_ID, label: TEXT.collectionVariables, icon: Braces }] : []),
+        ...(hasDotEnv ? [{ id: DOT_ENV_ID, label: TEXT.dotEnv, icon: FileText }] : []),
+        ...(!isGlobal ? [{ id: SESSION_ID, label: TEXT.sessionValues, icon: Timer }] : []),
+      ],
+    },
+  ]
+
   const resolvedSelection = list.some((candidate) => candidate.id === selectedId) || [COLLECTION_VARIABLES_ID, SHARED_VARIABLES_ID, DOT_ENV_ID, SESSION_ID].includes(selectedId)
     ? selectedId
     : list[0]?.id || ""
@@ -291,40 +329,24 @@ export function EnvironmentDialog({ secrets, onClose }) {
         </DialogHeader>
         <div className={SPLIT_PANES}>
           <nav aria-label={TEXT.title} className={cn(SPLIT_LIST, "w-56")}>
-            <div className="min-h-0 flex-1 overflow-y-auto py-1">
-              {groups.map((group) => (
-                <Fragment key={group.id}>
-                  {group === firstOther && <div role="separator" className="my-1 border-t border-border" />}
-                  {isGrouped && <SectionLabel className="block truncate px-3 pb-1 pt-2">{group.id ? group.name : TEXT.shared}</SectionLabel>}
-                  {group.environments.map((environment) => (
-                    <ListItem
-                      key={environment.id}
-                      label={environment.name}
-                      color={environment.color}
-                      isSelected={environment.id === resolvedSelection}
-                      isActive={environment.id === activeId}
-                      onSelect={() => setSelectedId(environment.id)}
-                    />
+            <div className="min-h-0 flex-1 overflow-y-auto py-1 max-sm:hidden">
+              {sections.map((section) => (
+                <Fragment key={section.key}>
+                  {section.separated && <div role="separator" className="my-1 border-t border-border" />}
+                  {section.label && <SectionLabel className="block truncate px-3 pb-1 pt-2" title={section.label}>{section.label}</SectionLabel>}
+                  {section.items.map((item) => (
+                    <ListItem key={item.id} {...item} isSelected={item.id === resolvedSelection} onSelect={() => setSelectedId(item.id)} />
                   ))}
-                  {isGrouped && group.variables && (
-                    <ListItem label={TEXT.collectionVariables} isSelected={resolvedSelection === group.variables} onSelect={() => setSelectedId(group.variables)} />
-                  )}
                 </Fragment>
               ))}
-              {isGrouped && <div role="separator" className="my-1 border-t border-border" />}
-              {!isGrouped && !isGlobal && (
-                <ListItem
-                  label={TEXT.collectionVariables}
-                  isSelected={resolvedSelection === COLLECTION_VARIABLES_ID}
-                  onSelect={() => setSelectedId(COLLECTION_VARIABLES_ID)}
-                />
-              )}
-              {hasDotEnv && (
-                <ListItem label={TEXT.dotEnv} isSelected={resolvedSelection === DOT_ENV_ID} onSelect={() => setSelectedId(DOT_ENV_ID)} />
-              )}
-              {!isGlobal && (
-                <ListItem label={TEXT.sessionValues} isSelected={resolvedSelection === SESSION_ID} onSelect={() => setSelectedId(SESSION_ID)} />
-              )}
+            </div>
+            <div className="p-2 pb-0 sm:hidden">
+              <Select value={resolvedSelection} onChange={(event) => setSelectedId(event.target.value)} aria-label={TEXT.title}>
+                {sections.map((section) => (section.label
+                  ? <optgroup key={section.key} label={section.label}>{sectionOptions(section)}</optgroup>
+                  : <Fragment key={section.key}>{sectionOptions(section)}</Fragment>
+                ))}
+              </Select>
             </div>
             <div className="border-t border-border p-2">
               <Button variant="outline" size="sm" className="w-full" onClick={create}>

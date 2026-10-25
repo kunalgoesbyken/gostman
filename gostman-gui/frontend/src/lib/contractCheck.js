@@ -1,5 +1,7 @@
 import { CONTRACT_TEXT } from './checksText'
-import { contractChecks, findOperation } from './contract'
+import { findOperation } from './contract'
+import { contractAllowance } from './scripting/limits'
+import { checkContractInSandbox } from './scripting/sandbox'
 
 const ACTION_CONTRACT = 'contract'
 const NO_CHECKS = { tests: [], logs: [], error: '', note: '' }
@@ -48,6 +50,7 @@ export function createContractChecker(backend) {
     const linked = linkedOperation(contract, link, request.id)
     const { operation, note } = linked ? { operation: linked, note: '' } : findOperation(contract, request.method, response.url)
     if (!operation) return { ...NO_CHECKS, note }
-    return { ...NO_CHECKS, tests: contractChecks(operation, contract.root, response) }
+    const checked = await checkContractInSandbox({ operation, root: contract.root, response }, contractAllowance())
+    return { ...NO_CHECKS, tests: checked.tests, note: checked.error || '' }
   }
 }

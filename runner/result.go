@@ -36,6 +36,7 @@ type Result struct {
 	Error       string    `json:"error"`
 	Failure     string    `json:"failure,omitempty"`
 	Unresolved  []string  `json:"unresolved,omitempty"`
+	Withheld    []string  `json:"withheld,omitempty"`
 	Failed      bool      `json:"failed"`
 	Tests       []Check   `json:"tests"`
 	Logs        []LogLine `json:"logs"`
@@ -89,8 +90,23 @@ func (r Result) PassedTests() int {
 	return passed
 }
 
+type planSlot struct {
+	id        string
+	folder    string
+	name      string
+	iteration int
+}
+
+func reached(results []Result) int {
+	slots := map[planSlot]bool{}
+	for _, result := range results {
+		slots[planSlot{result.ID, result.Folder, result.Name, result.Iteration}] = true
+	}
+	return len(slots)
+}
+
 func summarize(results []Result, planned int) Summary {
-	summary := Summary{Requests: planned, NotRun: max(planned-len(results), 0)}
+	summary := Summary{Requests: planned, NotRun: max(planned-reached(results), 0)}
 	for _, result := range results {
 		summary.Tests += len(result.Tests)
 		summary.FailedTests += len(result.Tests) - result.PassedTests()

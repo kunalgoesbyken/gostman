@@ -49,10 +49,10 @@ The tree is one stop for the Tab key. Inside it, the arrow keys move between row
 You can rearrange the tree in three ways:
 
 - **Drag and drop.** Drag a request or folder onto another row. Dropping on the upper or lower part of a row places the item before or after it. For a folder, dropping in the middle puts the item inside it, the lower part of an open folder puts it first inside, and a closed folder opens after you hold the item over it. Dropping in the empty area of the tree moves the item to the top level. A folder cannot be dropped into itself or into one of its own subfolders.
-- **Keyboard.** With a row focused, press Alt+Up Arrow or Alt+Down Arrow to move it, Ctrl+C to copy, Ctrl+V to paste and Ctrl+D to duplicate. On macOS the Ctrl shortcuts use the Command key.
+- **Keyboard.** With a row focused, press Alt+Up Arrow or Alt+Down Arrow to move it, Ctrl+X to cut, Ctrl+C to copy, Ctrl+V to paste and Ctrl+D to duplicate. A cut row is dimmed until you paste it, and pasting moves it instead of copying it. On macOS the Ctrl shortcuts use the Command key.
 - **Context menu.** Described below.
 
-After a move, paste or duplicate, a notice names the item and offers **Undo**.
+After a move, paste or duplicate, a notice names the item and offers **Undo**. With a row focused, Ctrl+Z undoes the last of these changes, one at a time, and Ctrl+Shift+Z or Ctrl+Y redoes them.
 
 ### Order of requests and folders
 
@@ -70,7 +70,7 @@ For a request:
 - **Tags…**, see [Folder colours and tags](#folder-colours-and-tags)
 - **Share request**, which opens the Share tab, see [Sharing and documentation](sharing-and-docs.md)
 - **Move up**, **Move down**, **Move to folder**
-- **Copy**, **Paste**, **Duplicate**
+- **Cut**, **Copy**, **Paste**, **Duplicate**
 - **Delete**
 
 **Move to folder** lists **Top level** and every folder as a target. The current location and folders that would nest a folder inside itself are disabled.
@@ -173,7 +173,7 @@ The footer of the menu has these actions:
 | --- | --- |
 | Trust this folder | Shown only for a restricted folder |
 | Open folder | Picks a folder to use as the collection. An empty folder becomes a new collection; a folder that already holds other files, such as a repository root, gets the collection in a `gostman` folder inside it |
-| Save collection to folder | Writes the current collection into a folder you pick, or into a new `gostman` folder inside it when it already holds other files. A folder is one collection, so each collection's own collection variables join the shared ones in `gostman.yaml`; a name already set keeps its value, and secret values stay in the keychain. Environments become shared too; when two collections, or a collection and the shared list, both have an environment with the same name, the collection's one is renamed after it, such as `Dev (Ledger)`, and a notice says so |
+| Save collection to folder | Writes the current collection into a folder you pick, or into a new `gostman` folder inside it when it already holds other files. The shared collection variables go to `gostman.yaml` and each collection's own to its top-level folder's `folder.yaml`, so every request resolves the same values as before; secret values stay in the keychain. A folder keeps one list of environments, so environments become shared; when two collections, or a collection and the shared list, both have an environment with the same name, the collection's one is renamed after it, such as `Dev (Ledger)`, and a dialog lists every renamed environment |
 | Clone repository | Asks for a repository address, then a folder to clone into |
 | Git | Opens the Git panel; needs an open folder |
 | Reload from disk | Rereads the folder at once; changes made outside the app are also picked up by themselves within a few seconds. Needs an open folder |
@@ -184,7 +184,7 @@ Files that cannot be read are skipped and left unchanged. Fix them, then choose 
 
 ### Trust
 
-A folder you did not create opens as restricted. In a restricted folder, scripts, OAuth 2.0 settings, local MCP commands and [file reads](variables.md#reading-files) are switched off and the Git panel is read-only. **Trust this folder** asks for confirmation, explains that requests can carry scripts, OAuth 2.0 settings, local MCP commands and file reads that run when a request is sent and can read your variables, and then lifts the restriction.
+A folder you did not create opens as restricted. In a restricted folder, scripts, OAuth 2.0 settings, local MCP commands and [file reads](variables.md#reading-files) are switched off and the Git panel is read-only. **Trust this folder** asks for confirmation, explains that requests can carry scripts, OAuth 2.0 settings, local MCP commands and file reads that run when a request is sent and can read your variables, and that the folder's `network` section and [secret references](secrets-and-network.md) apply once it is trusted, and then lifts the restriction.
 
 Opening a restricted folder shows a notice that says so. A request that is stopped because the folder is restricted shows a **Trust this folder** button in the response pane.
 

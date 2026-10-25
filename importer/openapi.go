@@ -25,13 +25,10 @@ func (c *collector) addGenerated(generated openapi.Collection) {
 	for _, request := range generated.Requests {
 		c.addRequest(openAPIRequest(request, folderIDs[request.FolderID]))
 	}
-	for name, value := range generated.Variables {
-		if _, taken := c.Variables[name]; !taken {
-			c.Variables[name] = value
-		}
-	}
 	if len(generated.Folders) > 0 {
 		c.ownCollectionVariables(folderIDs[generated.Folders[0].ID], generated.Variables)
+	} else {
+		c.shareVariables(generated.Variables)
 	}
 	c.Warnings = append(c.Warnings, generated.Warnings...)
 }

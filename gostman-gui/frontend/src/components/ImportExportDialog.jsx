@@ -15,8 +15,10 @@ export function ImportExportDialog({
   requests,
   folders,
   environments,
+  globals,
   collectionVariables,
   variables,
+  variablesFor,
   settings,
   sharedOrder,
   onImport,
@@ -51,8 +53,10 @@ export function ImportExportDialog({
             requests={requests}
             folders={folders}
             environments={environments}
+            globals={globals}
             collectionVariables={collectionVariables}
             variables={variables}
+            variablesFor={variablesFor}
             settings={settings}
             sharedOrder={sharedOrder}
             importer={importer}

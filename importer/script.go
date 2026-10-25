@@ -19,9 +19,15 @@ const (
 	maxTreeDepth    = 1500
 )
 
+const (
+	noteSendScope = "sendRequest-scope"
+	noteLeftOver  = "left-over"
+)
+
 type scriptNote struct {
 	line int
 	text string
+	key  string
 }
 
 type scriptTranslation struct {
@@ -136,7 +142,7 @@ func (t *translator) lineOf(offset int) int {
 
 func (t *translator) fail(at ast.Node, format string, args ...any) {
 	t.failed++
-	t.notes = append(t.notes, scriptNote{line: t.lineOf(int(at.Idx0()) - 1), text: fmt.Sprintf(format, args...)})
+	t.notes = append(t.notes, scriptNote{line: t.lineOf(int(at.Idx0()) - 1), text: fmt.Sprintf(format, args...), key: noteLeftOver})
 }
 
 func (t *translator) note(at ast.Node, key, text string) {
@@ -144,7 +150,7 @@ func (t *translator) note(at ast.Node, key, text string) {
 		return
 	}
 	t.noted[key] = true
-	t.notes = append(t.notes, scriptNote{line: t.lineOf(int(at.Idx0()) - 1), text: text})
+	t.notes = append(t.notes, scriptNote{line: t.lineOf(int(at.Idx0()) - 1), text: text, key: key})
 }
 
 func (t *translator) splice(from, to int, children []span) string {

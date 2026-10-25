@@ -5,12 +5,12 @@ export const docSections = [
     docs: [
       { file: "README.md", label: "Introduction" },
       { file: "getting-started.md" },
-      { file: "free-features.md", label: "What is free", comparison: true },
-      { file: "coming-from-postman.md" },
-      { file: "coming-from-bruno.md" },
-      { file: "coming-from-insomnia.md" },
-      { file: "tutorial-first-collection.md", label: "Your first collection" },
-      { file: "tutorial-ci.md", label: "Your first CI run" },
+      { file: "free-features.md", label: "What is free", comparison: true, keywords: ["pricing", "price", "cost", "paid", "plans"] },
+      { file: "coming-from-postman.md", keywords: ["postman", "newman"] },
+      { file: "coming-from-bruno.md", keywords: ["bruno"] },
+      { file: "coming-from-insomnia.md", keywords: ["insomnia"] },
+      { file: "tutorial-first-collection.md" },
+      { file: "tutorial-ci.md" },
     ],
   },
   {
@@ -33,7 +33,7 @@ export const docSections = [
     title: "Testing and automation",
     aliases: ["test-and-automate"],
     docs: [
-      { file: "scripting-and-settings.md", label: "Scripts and checks", aliases: { "tests-and-scripts": "checks-and-scripts" } },
+      { file: "scripting-and-settings.md", label: "Scripts and checks", aliases: { "tests-and-scripts": "checks-and-scripts" }, keywords: ["tests", "assertions"] },
       { file: "runner-load-and-scan.md", label: "Run, load test and scan" },
       { file: "ci.md", label: "CI", outline: true },
     ],
@@ -56,13 +56,13 @@ export const docSections = [
   {
     title: "Reference",
     docs: [
-      { file: "cli.md", outline: true },
+      { file: "cli.md", outline: true, keywords: ["cli", "terminal", "command"] },
       { file: "preferences-and-shortcuts.md", label: "Preferences and shortcuts", outline: true },
     ],
   },
   {
     title: "Help",
-    docs: [{ file: "guides.md" }, { file: "troubleshooting.md", aliases: { "tests-and-runs": "checks-and-runs" } }],
+    docs: [{ file: "guides.md" }, { file: "troubleshooting.md", aliases: { "tests-and-runs": "checks-and-runs" }, keywords: ["localhost", "error", "problem"] }],
   },
 ]
 

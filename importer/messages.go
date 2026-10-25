@@ -6,9 +6,9 @@ const (
 	messageOAuth                  = "OAuth 2 settings were imported for %s without tokens. Authorize again before sending."
 	messageAuthDropped            = "The authentication type of %s is not supported and was left out."
 	messageAuthType               = "The authentication type %s is not supported and was left out."
+	messageOAuthGrant             = "The OAuth 2.0 grant type %q is not supported, so this auth was left out."
+	messageOAuthNoGrant           = "An OAuth 2.0 auth without a grant type was left out. Set it up again in the Auth tab."
 	messageFiles                  = "Files are not part of an export. Attach them again in %s."
-	messageDroppedVariable        = "%s from %q was not written to gostman.yaml because %q also sets it. Set it in that folder's variables if you need both."
-	messageDroppedShared          = "%s from %q was not written to gostman.yaml because a shared collection variable also sets it. Set it in that folder's variables if you need both."
 	messageSecretVariables        = "The secret folder variables %s were left out, because folder variables cannot be marked secret. Add each one to an environment, or to the collection variables in the Vars tab of the top-level folder's Collection settings, and mark it secret with its lock."
 	messageReferencesDropped      = "The secret manager references of %s were removed, because an imported file could use them to read your secrets. Pick the connection and path again with the key icon on each row."
 	messageAssertOff              = "%s: the turned-off assertion %q was left out, because only a test can keep its meaning and a test cannot be turned off"
@@ -45,7 +45,7 @@ const (
 	messageMaxRedirects           = "%s limits the number of redirects, which Gostman does not; it follows up to 10."
 	messageGrpcScripts            = "Gostman does not run the %[2]s scripts of %[1]s, so they were left out."
 	messageEnvironmentExtends     = "Environment %q inherits from %q, which was not imported, so it inherits nothing."
-	messageExternalSecrets        = "Environment %q reads %s from the secret provider %q. Imports never carry secret manager references, so these are secret variables without a value: add a connection under Secret managers, then pick it and the path with the key icon on each row."
+	messageExternalSecrets        = "Environment %q reads %s from the secret provider %q. Imports never carry secret manager references, so each one is imported as an empty secret variable. Fill it in under Environments, or add a connection under Secret managers and pick the path with the key icon on its row; gostman run takes the value with --var."
 	messageBrunoSecrets           = "The secret variables %s have no value, because Bruno keeps secret values outside the collection files. Fill them in under Environments, or pass them to gostman run with --var."
 	messageDotEnv                 = "%q reads {{process.env.NAME}} from the collection's .env file, which is not imported. Add each value to an environment as a secret variable named process.env.NAME, or, in a folder workspace, copy .env next to gostman.yaml and keep it out of Git; gostman run on the Bruno folder reads it where it is."
 	messageOpenItemType           = "%s: OpenCollection items of type %q are not imported"
@@ -82,6 +82,8 @@ const (
 	messageScriptMore          = "%s %s, %s: %d more lines need attention."
 	messageScriptTotals        = "%s scripts in %q: %s of %s rewritten for Gostman, %d left to rewrite by hand."
 	messageScriptsRewritten    = "%s scripts in %q: %s of %s rewritten for Gostman."
+	messageScriptsLeft         = "%s scripts in %q: %s of %s to rewrite by hand, because Gostman has no equivalent."
+	messageScriptChecks        = "%s in %q became test() checks at the end of the post-response scripts rather than rows in the Checks tab, so they compare values exactly as Bruno does."
 	messageScriptInternal      = "The script could not be translated and was kept unchanged."
 	messageScriptTooLarge      = "The script is larger than %d KB and was kept unchanged."
 	messageScriptTooDeep       = "The script nests too deeply to translate and was kept unchanged."
@@ -118,6 +120,7 @@ const (
 )
 
 var (
+	messageExportRewritten      = countedText{"%d script that called %s was rewritten with %s's API.", "%d scripts that called %s were rewritten with %s's API."}
 	messageExportUnchanged      = countedText{"%d script needs no change for %s and is exported as written.", "%d scripts need no change for %s and are exported as written."}
 	messageExportAdapted        = countedText{"%d script got a few lines at the top that define %s with %s's API, so the rest runs as written.", "%d scripts got a few lines at the top that define %s with %s's API, so the rest runs as written."}
 	messageExportChecks         = countedText{"%d assertion row became a %s test.", "%d assertion rows became %s tests."}

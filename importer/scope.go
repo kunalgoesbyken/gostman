@@ -2,7 +2,6 @@ package importer
 
 import (
 	"encoding/json"
-	"slices"
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
@@ -56,20 +55,16 @@ func folderAuth(auth engine.Auth) engine.Auth {
 }
 
 func (c *collector) collectionScope(settings scope) scope {
-	for _, variable := range settings.vars {
-		if _, taken := c.Variables[variable.Key]; variable.Enabled && !taken {
-			c.Variables[variable.Key] = variable.Value
-			c.markSecret(settings.secrets, variable.Key)
-		}
-	}
 	settings.collection = settings.vars
 	settings.vars = nil
 	return settings
 }
 
-func (c *collector) markSecret(secrets []string, name string) {
-	if slices.Contains(secrets, name) {
-		c.VariablesMeta = workspace.MarkSecret(c.VariablesMeta, name)
+func (c *collector) shareVariables(values map[string]string) {
+	for name, value := range values {
+		if _, taken := c.Variables[name]; !taken {
+			c.Variables[name] = value
+		}
 	}
 }
 
@@ -91,7 +86,7 @@ func (c *collector) ownCollectionVariables(folderID string, values map[string]st
 
 func (c *collector) addCollectionVariables(folderID string, variables []envVariable) {
 	values := map[string]string{}
-	marks, shared := map[string]variableFlags{}, map[string]variableFlags{}
+	marks := map[string]variableFlags{}
 	for _, variable := range variables {
 		if variable.name == "" {
 			continue
@@ -101,12 +96,7 @@ func (c *collector) addCollectionVariables(folderID string, variables []envVaria
 		if flags != (variableFlags{}) {
 			marks[variable.name] = flags
 		}
-		if _, taken := c.Variables[variable.name]; !taken {
-			c.Variables[variable.name] = variable.value
-			shared[variable.name] = flags
-		}
 	}
-	c.keepMarks(marksText(shared))
 	for index := range c.Folders {
 		if c.Folders[index].Id == folderID {
 			c.Folders[index].CollectionVariables = objectJSON(values)

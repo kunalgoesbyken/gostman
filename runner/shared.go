@@ -10,18 +10,21 @@ import (
 type shared struct {
 	mu      sync.Mutex
 	cookies []engine.CookieInfo
+	origins map[string]string
 	tokens  tokenCache
 	seen    map[string]string
 	witness func(engine.Request)
 	signIn  engine.Token
 	secrets map[string]string
+	marked  map[string]bool
+	vouched map[vouch]bool
 
 	witnessMu sync.Mutex
 	signInMu  sync.Mutex
 }
 
 func newShared() *shared {
-	return &shared{cookies: []engine.CookieInfo{}, tokens: tokenCache{}, seen: map[string]string{}}
+	return &shared{cookies: []engine.CookieInfo{}, origins: map[string]string{}, tokens: tokenCache{}, seen: map[string]string{}, vouched: map[vouch]bool{}}
 }
 
 func (c *shared) cookieList() []engine.CookieInfo {

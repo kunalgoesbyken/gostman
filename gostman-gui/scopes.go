@@ -51,14 +51,6 @@ func (v *secretVault) withSharedSecrets(variables, meta string) string {
 	return v.withSecrets(sharedVariablesList(variables, meta), secretScope()+sharedVariablesScope)[0].Variables
 }
 
-func folderLists(folders []Folder) []workspace.VariableList {
-	lists := make([]workspace.VariableList, len(folders))
-	for i, folder := range folders {
-		lists[i] = workspace.VariableList{Name: folder.Name, Variables: folder.CollectionVariables, Meta: folder.CollectionVariablesMeta}
-	}
-	return lists
-}
-
 func folderVariableLists(folders []Folder) []Environment {
 	lists := make([]Environment, len(folders))
 	for i, folder := range folders {

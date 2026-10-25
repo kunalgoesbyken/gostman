@@ -13,6 +13,7 @@ import (
 
 	"github.com/kunalgoesbyken/gostman/agent"
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/redact"
 	"github.com/kunalgoesbyken/gostman/runner"
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
@@ -24,6 +25,7 @@ type headerFlags []engine.HeaderEntry
 type requestFlags struct {
 	environment string
 	variables   map[string]string
+	secrets     map[string]bool
 	headers     headerFlags
 	data        string
 	timeoutMs   int
@@ -31,6 +33,7 @@ type requestFlags struct {
 	envFile     string
 	files       fileAccess
 	network     *networkSettings
+	reveal      bool
 }
 
 type sending struct {
@@ -58,7 +61,7 @@ func (h *headerFlags) Set(line string) error {
 func (r *requestFlags) register(flags *flag.FlagSet) {
 	r.variables = map[string]string{}
 	flags.StringVar(&r.environment, "env", "", "")
-	variableFlags(flags, r.variables)
+	r.secrets = variableFlags(flags, r.variables)
 	flags.Var(&r.headers, "H", "")
 	flags.Var(&r.headers, "header", "")
 	flags.StringVar(&r.data, "d", "", "")
@@ -74,7 +77,7 @@ func (r *requestFlags) finish() error {
 	if r.timeoutMs < 0 {
 		return errors.New("--timeout takes a number of milliseconds, zero or more")
 	}
-	if err := mergeEnvFile(r.envFile, r.variables); err != nil {
+	if err := mergeSecretEnvFile(r.envFile, r.variables, r.secrets); err != nil {
 		return err
 	}
 	return r.network.check()
@@ -89,15 +92,23 @@ func (r requestFlags) open(stored runner.Collection, fileRoot string) (*agent.Cl
 	if err != nil {
 		return nil, err
 	}
-	client, err := agent.NewClient(engine.Policy{Network: network, ReadFile: r.files.beside(fileRoot)})
+	client, err := agent.NewScopedClient(engine.Policy{Network: network, ReadFile: r.files.beside(fileRoot)}, r.scope())
 	if err != nil {
 		return nil, err
 	}
+	client.MarkSecret(r.secrets)
 	if err := client.Enter(stored, r.environment, r.variables); err != nil {
 		return nil, err
 	}
 	client.Remember(r.variables)
 	return client, nil
+}
+
+func (r requestFlags) scope() redact.Scope {
+	if r.reveal {
+		return redact.NoValues
+	}
+	return redact.SecretValues
 }
 
 func (r requestFlags) compose(client *agent.Client, method, address string) (runner.Listed, error) {
@@ -124,6 +135,7 @@ func parseSending(arguments []string) (sending, error) {
 	flags.IntVar(&parsed.view.MaxBodyBytes, "max-body", agent.DefaultBodyBytes, "")
 	flags.BoolVar(&parsed.view.IncludeHeaders, "include-headers", false, "")
 	flags.BoolVar(&parsed.asJSON, "json", false, "")
+	flags.BoolVar(&parsed.reveal, "reveal", false, "")
 	parsed.signIn.register(flags)
 
 	positional, err := parseInterspersed(flags, arguments)
@@ -139,6 +151,7 @@ func parseSending(arguments []string) (sending, error) {
 	}
 	parsed.positional = positional
 	parsed.view.IncludeBinary = parsed.asJSON
+	parsed.view.Revealable = true
 	return parsed, parsed.finish()
 }
 
@@ -212,8 +225,15 @@ func printOutcome(stdout, stderr io.Writer, outcome agent.Outcome, asJSON bool) 
 	if err := writeJSON(stderr, outcome); err != nil || outcome.Text == "" {
 		return err
 	}
-	_, err := fmt.Fprintln(stdout, outcome.Text)
+	_, err := fmt.Fprint(stdout, endingLine(outcome.Text))
 	return err
+}
+
+func endingLine(text string) string {
+	if strings.HasSuffix(text, "\n") {
+		return text
+	}
+	return text + "\n"
 }
 
 func outcomeCode(outcome agent.Outcome) int {

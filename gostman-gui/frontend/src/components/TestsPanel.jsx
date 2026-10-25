@@ -12,6 +12,7 @@ import { Select } from "./ui/select"
 import { EditorSkeleton } from "./ui/skeleton"
 import { ROW_GRID, ROW_STACK } from "./KeyValueEditor"
 import { SchemaDialog } from "./SchemaDialog"
+import { VariableInput } from "./VariableInput"
 import {
   BLANK_ASSERTION, OPERATORS, SCHEMA_OPERATOR, isBlankAssertion, operatorOf, parseAssertions, serializeAssertions,
 } from "../lib/scripting/assertions"
@@ -48,10 +49,10 @@ function ColumnLabels() {
 
 function ExpectedInput({ assertion, isUnary, placeholder = TEXT.expectedPlaceholder, onChange, className }) {
   return (
-    <Input
+    <VariableInput
       value={isUnary ? "" : assertion.value}
       title={assertion.value}
-      placeholder={isUnary ? "" : placeholder}
+      placeholder={isUnary ? TEXT.noExpectedValue : placeholder}
       aria-label={TEXT.expectedValue}
       spellCheck={false}
       disabled={isUnary}

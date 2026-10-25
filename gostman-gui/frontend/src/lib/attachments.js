@@ -37,6 +37,11 @@ const holdsAttachedFile = (parsed) => (Array.isArray(parsed) ? parsed.some(isAtt
 
 export const attachesFile = (body) => holdsAttachedFile(parseJSON(body, null))
 
+export function attachedPaths(body) {
+  const parsed = parseJSON(body, null)
+  return (Array.isArray(parsed) ? parsed : [parsed]).filter(isAttachedFile).map((file) => file.path)
+}
+
 const detached = (value) => (isAttachedFile(value) ? { ...value, path: '' } : value)
 
 export function withoutAttachedFiles(body) {

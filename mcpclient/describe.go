@@ -24,6 +24,7 @@ type listedTool struct {
 	Title       string          `json:"title"`
 	Description string          `json:"description"`
 	InputSchema json.RawMessage `json:"inputSchema"`
+	Output      json.RawMessage `json:"outputSchema"`
 }
 
 type listedPrompt struct {
@@ -175,12 +176,13 @@ func (c *Catalog) addTool(listed listedTool, mirrorsHeaders bool) {
 		}
 	}
 	c.Tools = append(c.Tools, Tool{
-		Name:        listed.Name,
-		Title:       listed.Title,
-		Description: listed.Description,
-		InputSchema: indented(listed.InputSchema),
-		Skeleton:    skeleton(listed.InputSchema),
-		Fingerprint: toolFingerprint(listed),
+		Name:         listed.Name,
+		Title:        listed.Title,
+		Description:  listed.Description,
+		InputSchema:  indented(listed.InputSchema),
+		OutputSchema: indentedOptional(listed.Output),
+		Skeleton:     skeleton(listed.InputSchema),
+		Fingerprint:  toolFingerprint(listed),
 	})
 }
 

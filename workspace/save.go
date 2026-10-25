@@ -257,6 +257,7 @@ func (w *Workspace) storeFolder(folder Folder) error {
 	if folder.SortOrder > 0 {
 		entry.order = folder.SortOrder
 	}
+	folder.CollectionVariables, _ = WithoutSecretVariables(folder.CollectionVariables, folder.CollectionVariablesMeta)
 	document := folderDocument{folderContent: folderContent{folder: folder, order: entry.order}, extras: entry.extras}
 	content, err := normalizeFolder(document)
 	if err != nil {
@@ -265,6 +266,7 @@ func (w *Workspace) storeFolder(folder Folder) error {
 	entry.folder = folder
 	entry.folder.Variables, entry.folder.Settings = content.folder.Variables, content.folder.Settings
 	entry.folder.Color, entry.folder.Tags = content.folder.Color, content.folder.Tags
+	entry.folder.CollectionVariables, entry.folder.CollectionVariablesMeta = content.folder.CollectionVariables, content.folder.CollectionVariablesMeta
 	if reflect.DeepEqual(entry.stored, content) {
 		return nil
 	}

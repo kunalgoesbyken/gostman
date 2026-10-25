@@ -974,6 +974,7 @@ export namespace engine {
 	    failed?: boolean;
 	    notifications?: Notification[];
 	    unresolved?: string[];
+	    outputSchema?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Response(source);
@@ -999,6 +1000,7 @@ export namespace engine {
 	        this.failed = source["failed"];
 	        this.notifications = this.convertValues(source["notifications"], Notification);
 	        this.unresolved = source["unresolved"];
+	        this.outputSchema = source["outputSchema"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -1316,9 +1318,26 @@ export namespace importer {
 		    return a;
 		}
 	}
+	export class Remark {
+	    kind?: string;
+	    text: string;
+	    warning?: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Remark(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.text = source["text"];
+	        this.warning = source["warning"];
+	    }
+	}
 	export class Source {
 	    name: string;
 	    format: string;
+	    collections: number;
 	    requests: number;
 	    folders: number;
 	    environments: number;
@@ -1332,6 +1351,7 @@ export namespace importer {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.name = source["name"];
 	        this.format = source["format"];
+	        this.collections = source["collections"];
 	        this.requests = source["requests"];
 	        this.folders = source["folders"];
 	        this.environments = source["environments"];
@@ -1350,6 +1370,7 @@ export namespace importer {
 	    settings?: workspace.Settings;
 	    warnings: string[];
 	    notes?: string[];
+	    remarks?: Remark[];
 	    skipped: string[];
 	    sharedOrder: boolean;
 	    files?: File[];
@@ -1373,6 +1394,7 @@ export namespace importer {
 	        this.settings = this.convertValues(source["settings"], workspace.Settings);
 	        this.warnings = source["warnings"];
 	        this.notes = source["notes"];
+	        this.remarks = this.convertValues(source["remarks"], Remark);
 	        this.skipped = source["skipped"];
 	        this.sharedOrder = source["sharedOrder"];
 	        this.files = this.convertValues(source["files"], File);
@@ -2024,6 +2046,7 @@ export namespace main {
 	    timestamp: string;
 	    sortOrder: number;
 	    statusCode?: number;
+	    noResponse?: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new HistoryEntry(source);
@@ -2063,6 +2086,7 @@ export namespace main {
 	        this.timestamp = source["timestamp"];
 	        this.sortOrder = source["sortOrder"];
 	        this.statusCode = source["statusCode"];
+	        this.noResponse = source["noResponse"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -2790,6 +2814,7 @@ export namespace mcpclient {
 	    title: string;
 	    description: string;
 	    inputSchema: string;
+	    outputSchema: string;
 	    skeleton: string;
 	    fingerprint: string;
 	
@@ -2803,6 +2828,7 @@ export namespace mcpclient {
 	        this.title = source["title"];
 	        this.description = source["description"];
 	        this.inputSchema = source["inputSchema"];
+	        this.outputSchema = source["outputSchema"];
 	        this.skeleton = source["skeleton"];
 	        this.fingerprint = source["fingerprint"];
 	    }

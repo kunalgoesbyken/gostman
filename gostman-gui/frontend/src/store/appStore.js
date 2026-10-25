@@ -9,7 +9,7 @@ import { ENVIRONMENT_TEXT } from '../lib/environmentText'
 import { DEFAULT_SETTINGS, normalizeSettings } from '../lib/network'
 import { ROOT_SETTINGS_ID, isBlankScope, normalizeFolder, normalizeScopeSettings, updatedScope } from '../lib/inheritance'
 import { normalizeRequest } from '../lib/request'
-import { isBlankRequest } from '../lib/requestChanges'
+import { isBlankRequest, isRequestDirty } from '../lib/requestChanges'
 import { rememberResponse } from '../lib/responseHistory'
 import { reconcileTabs } from '../lib/tabReconcile'
 import { isNarrowViewport, rememberSidebarOpen, rememberedSidebarOpen } from '../lib/layout'
@@ -51,11 +51,29 @@ const createTab = (id, request, isPreview = false) => ({ id, request: normalizeR
 
 const FIRST_TAB = createTab(`${TAB_ID_PREFIX}1`)
 
-const persistableTab = ({ id, request, isPreview }) => ({ id, isPreview, request: { ...request, examples: '' } })
+const savedLookups = new WeakMap()
+
+const savedLookup = (requests) => {
+  if (!savedLookups.has(requests)) savedLookups.set(requests, new Map(requests.map((request) => [request.id, request])))
+  return savedLookups.get(requests)
+}
+
+const persistableTab = (requests) => {
+  const saved = savedLookup(requests)
+  return ({ id, request, isPreview, vanished }) => {
+    const baseline = (request.id && saved.get(request.id)) || vanished
+    return { id, isPreview, isSaved: Boolean(baseline) && !isRequestDirty(request, baseline), request: { ...request, examples: '' } }
+  }
+}
+
+const restoreTab = ({ id, request, isPreview, isSaved }) => {
+  const tab = createTab(id, request, isPreview === true)
+  return isSaved === true ? { ...tab, vanished: tab.request } : tab
+}
 
 const restoreTabs = (tabs) => {
   const restorable = asArray(tabs).filter((tab) => tab?.id && tab.request)
-  return restorable.length > 0 ? restorable.map((tab) => createTab(tab.id, tab.request, tab.isPreview === true)) : [FIRST_TAB]
+  return restorable.length > 0 ? restorable.map(restoreTab) : [FIRST_TAB]
 }
 
 const nextIdAfter = (tabs) => 1 + tabs.reduce((highest, tab) => {
@@ -214,7 +232,7 @@ const withoutTabs = (state, closing) => {
 
 const historyStatus = (value) => (Number.isSafeInteger(value) && value > 0 ? value : 0)
 
-const historyEntry = (raw) => ({ ...normalizeRequest(raw), statusCode: historyStatus(raw?.statusCode) })
+const historyEntry = (raw) => ({ ...normalizeRequest(raw), statusCode: historyStatus(raw?.statusCode), noResponse: raw?.noResponse === true })
 
 const isSameCall = (first, second) => HISTORY_IDENTITY_FIELDS.every((field) => first[field] === second[field])
 
@@ -456,8 +474,8 @@ export const useAppStore = create(
           ? { folders: state.folders.map((folder) => (folder.isOpen ? { ...folder, isOpen: false } : folder)) }
           : state)),
 
-        addToHistory: (request, statusCode = 0) => set((state) => {
-          const entry = { ...historyEntry({ ...request, statusCode }), examples: '', id: createId('hist'), timestamp: new Date().toISOString() }
+        addToHistory: (request, statusCode = 0, noResponse = false) => set((state) => {
+          const entry = { ...historyEntry({ ...request, statusCode, noResponse }), examples: '', id: createId('hist'), timestamp: new Date().toISOString() }
           const others = state.requestHistory.filter((existing) => !isSameCall(existing, entry))
           return { requestHistory: [entry, ...others].slice(0, HISTORY_LIMIT) }
         }),
@@ -698,7 +716,7 @@ export const useAppStore = create(
           draftsFailure = error || null
         },
         partialize: (state) => ({
-          tabs: state.tabs.map(persistableTab),
+          tabs: state.tabs.map(persistableTab(state.requests)),
           isRestricted: state.isRestricted,
           specLinks: state.specLinks,
           environmentChoices: state.environmentChoices,
@@ -768,6 +786,8 @@ export const variableTextFor = (state, request, answers = {}, referenced = {}) =
 export const scriptLayersFor = (state, request, referenced = {}) => scriptLayers(scopeLayers(state, request, referenced))
 
 export const selectActiveVariables = (state) => variableText(selectResolvedVariables(state))
+
+export const resolvedVariablesFor = (state, folderId) => resolveLayers(scopeLayers(state, { folderId }))
 
 export const selectIsDialogOpen = (state) => (
   state.codeDialogOpen

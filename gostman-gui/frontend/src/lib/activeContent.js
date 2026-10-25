@@ -1,8 +1,9 @@
-import { attachesFile, withoutAttachedFiles } from './attachments'
+import { attachedPaths, attachesFile, withoutAttachedFiles } from './attachments'
 import { isLocalCommand } from './mcp'
 import { AUTH_OAUTH2, normalizeRequest } from './request'
-import { someText, mapText } from './textValues'
-import { hasFileReference, withoutFileReferences } from './variables'
+import { someText, mapText, textsIn } from './textValues'
+import { fileReferencesIn, hasFileReference, withoutFileReferences } from './variables'
+import { filePathOf } from './variableNames'
 
 export const SCRIPT_FIELDS = ['preScript', 'postScript']
 
@@ -11,9 +12,20 @@ export const NO_SCRIPTS = Object.fromEntries(SCRIPT_FIELDS.map((field) => [field
 
 const hasScript = (request) => SCRIPT_FIELDS.some((field) => request[field].trim() !== '')
 
-const readsFiles = (request) => someText(request, hasFileReference) || attachesFile(request.body)
+export const readsFiles = (request) => someText(request, hasFileReference) || attachesFile(request.body)
 
 export const withoutFileContent = (value) => mapText(value, withoutFileReferences)
+
+const fileReadsOf = (request) => [...textsIn(request).flatMap(fileReferencesIn), ...attachedPaths(request.body)]
+
+export function addsFileReads(before, after) {
+  const known = new Set(fileReadsOf(before))
+  return fileReadsOf(after).some((read) => !known.has(read))
+}
+
+const readPathsOf = (value) => [...textsIn(value).flatMap(fileReferencesIn).map(filePathOf), ...attachedPaths(value.body)]
+
+export const filePathsIn = (values) => [...new Set(values.filter(Boolean).flatMap(readPathsOf).filter(Boolean))]
 
 const ACTIVE_CHECKS = {
   scripts: hasScript,

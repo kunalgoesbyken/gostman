@@ -78,6 +78,11 @@ function MoreContent({ label, marked }) {
 
 const widthOf = (element) => element.getBoundingClientRect().width
 
+const paddingOf = (element) => {
+  const style = getComputedStyle(element)
+  return parseFloat(style.paddingLeft) + parseFloat(style.paddingRight)
+}
+
 const sameLayout = (current, next) => current?.full === next.full && current.shown.join() === next.shown.join()
 
 function useFittedIndexes(items, activeValue) {
@@ -92,8 +97,9 @@ function useFittedIndexes(items, activeValue) {
     const measured = Array.from(measureRef.current?.children ?? [], widthOf)
     if (!strip || measured.length === 0) return
     const widths = measured.slice(0, -1)
-    const full = widths.reduce((total, width) => total + width, 0) + STRIP_GAP_PX * Math.max(widths.length - 1, 0)
-    const shown = visibleIndexes({ widths, moreWidth: measured.at(-1), room: widthOf(strip), gap: STRIP_GAP_PX, activeIndex })
+    const padding = paddingOf(strip)
+    const full = widths.reduce((total, width) => total + width, padding) + STRIP_GAP_PX * Math.max(widths.length - 1, 0)
+    const shown = visibleIndexes({ widths, moreWidth: measured.at(-1), room: widthOf(strip) - padding, gap: STRIP_GAP_PX, activeIndex })
     const next = { full, shown }
     if (sameLayout(layoutRef.current, next)) return
     layoutRef.current = next

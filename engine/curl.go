@@ -10,19 +10,30 @@ import (
 )
 
 type row struct {
-	Key     string `json:"key"`
-	Value   string `json:"value"`
-	Enabled bool   `json:"enabled"`
-	Type    string `json:"type,omitempty"`
+	Key         string `json:"key"`
+	Value       string `json:"value"`
+	Enabled     bool   `json:"enabled"`
+	Type        string `json:"type,omitempty"`
+	FileName    string `json:"fileName,omitempty"`
+	ContentType string `json:"contentType,omitempty"`
+	Path        string `json:"path,omitempty"`
 }
+
+const (
+	curlFilePrefix    = "@"
+	curlContentPrefix = "<"
+	curlStdin         = "-"
+	formParamType     = "type"
+	formParamFileName = "filename"
+)
 
 var curlValueFlags = map[string]string{
 	"-X": "request", "--request": "request",
 	"-H": "header", "--header": "header",
-	"-d": "data", "--data": "data", "--data-raw": "data", "--data-binary": "data", "--data-ascii": "data",
+	"-d": "data", "--data": "data", "--data-raw": "data-raw", "--data-binary": "data", "--data-ascii": "data",
 	"--data-urlencode": "data-urlencode",
 	"--json":           "json",
-	"-F":               "form", "--form": "form", "--form-string": "form",
+	"-F":               "form", "--form": "form", "--form-string": "form-string",
 	"-u": "user", "--user": "user",
 	"-b": "cookie", "--cookie": "cookie",
 	"-A": "user-agent", "--user-agent": "user-agent",
@@ -107,14 +118,18 @@ func (c *curlCommand) applyValue(kind, value string) {
 			c.addHeader(strings.TrimSpace(key), strings.TrimSpace(headerValue))
 		}
 	case "data":
+		c.data = append(c.data, fileData(value))
+	case "data-raw":
 		c.data = append(c.data, value)
 	case "data-urlencode":
 		c.data = append(c.data, urlEncodeData(value))
 	case "json":
-		c.data = append(c.data, value)
+		c.data = append(c.data, fileData(value))
 		c.addHeader(headerContentType, contentTypeJSON)
 	case "form":
 		c.formParts = append(c.formParts, formRow(value))
+	case "form-string":
+		c.formParts = append(c.formParts, textRow(value))
 	case "user":
 		username, password, _ := strings.Cut(value, ":")
 		c.request.Auth = Auth{Type: authBasic, Username: username, Password: password}
@@ -218,9 +233,56 @@ func formRows(data string) ([]row, bool) {
 	return rows, true
 }
 
-func formRow(value string) row {
+func textRow(value string) row {
 	key, content, _ := strings.Cut(value, "=")
 	return row{Key: key, Value: strings.Trim(content, `"`), Enabled: true, Type: "text"}
+}
+
+func formRow(value string) row {
+	key, content, _ := strings.Cut(value, "=")
+	switch {
+	case readsCurlFile(content, curlFilePrefix):
+		return fileRow(key, content[len(curlFilePrefix):])
+	case readsCurlFile(content, curlContentPrefix):
+		path, _ := formParams(content[len(curlContentPrefix):])
+		return row{Key: key, Value: curlFileReference(path), Enabled: true, Type: "text"}
+	}
+	return textRow(value)
+}
+
+func fileRow(key, spec string) row {
+	path, params := formParams(spec)
+	name := params[formParamFileName]
+	if name == "" {
+		name = path[strings.LastIndexAny(path, `/\`)+1:]
+	}
+	return row{Key: key, Enabled: true, Type: "file", FileName: name, ContentType: params[formParamType], Path: path}
+}
+
+func formParams(spec string) (string, map[string]string) {
+	fields := strings.Split(spec, ";")
+	params := map[string]string{}
+	for _, field := range fields[1:] {
+		if name, value, found := strings.Cut(field, "="); found {
+			params[strings.ToLower(strings.TrimSpace(name))] = strings.Trim(strings.TrimSpace(value), `"`)
+		}
+	}
+	return strings.Trim(fields[0], `"`), params
+}
+
+func readsCurlFile(value, prefix string) bool {
+	return strings.HasPrefix(value, prefix) && len(value) > len(prefix) && value[len(prefix):] != curlStdin
+}
+
+func fileData(value string) string {
+	if !readsCurlFile(value, curlFilePrefix) {
+		return value
+	}
+	return curlFileReference(value[len(curlFilePrefix):])
+}
+
+func curlFileReference(path string) string {
+	return "{{$file(" + path + ")}}"
 }
 
 func urlEncodeData(value string) string {

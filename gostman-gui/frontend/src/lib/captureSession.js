@@ -34,6 +34,7 @@ const app = () => useAppStore.getState()
 const messageOf = (error) => error?.message || String(error)
 const quoted = (name) => `"${name}"`
 const newestFirst = (first, second) => second.id - first.id
+const portOf = (address) => toPort(new URL(address).port)
 
 function mergeLogs(...logs) {
   const byId = new Map(logs.flat().map((exchange) => [exchange.id, exchange]))
@@ -86,7 +87,7 @@ export function createCaptureActions(backend) {
   function adopt({ running, address, upstream }) {
     if (running) listen()
     else unlisten()
-    patch({ isRunning: running, address, upstream: running ? upstream : capture().upstream })
+    patch({ isRunning: running, address, upstream: running ? upstream : capture().upstream, port: running ? portOf(address) : capture().port })
   }
 
   async function sync() {
