@@ -296,6 +296,7 @@ export const useAppStore = create(
         folderSettings: null,
         dotEnv: {},
         sharedOrder: false,
+        runExclusions: {},
         secretConnections: null,
         environmentDialogOpen: false,
         pendingVariable: '',
@@ -670,6 +671,7 @@ export const useAppStore = create(
 
         openRunner: (folderId = '') => set({ runner: { ...CLOSED_RUNNER, isOpen: true, folderId } }),
         closeRunner: () => set({ runner: CLOSED_RUNNER }),
+        setRunExclusions: (folderId, ids) => set((state) => ({ runExclusions: { ...state.runExclusions, [folderId]: ids } })),
         startRun: () => set((state) => ({ runner: { ...state.runner, isRunning: true, results: [] } })),
         addRunResult: (result) => set((state) => ({
           runner: { ...state.runner, results: [...state.runner.results, result] },

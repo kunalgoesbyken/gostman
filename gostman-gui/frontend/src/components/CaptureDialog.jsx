@@ -287,12 +287,14 @@ function CapturePanel({ folders, requests, actions }) {
   )
 }
 
+const CAPTURE_WINDOW = { id: "capture", width: 896, height: 640, minWidth: 560, minHeight: 400 }
+
 export function CaptureDialog({ folders, requests, actions }) {
   const isRunning = useCaptureStore((state) => state.isRunning)
   const address = useCaptureStore((state) => state.address)
 
   return (
-    <Dialog label={CAPTURE_TEXT.title} size={actions.isAvailable ? "lg" : "sm"} className={actions.isAvailable ? "h-[40rem] max-w-4xl" : undefined} onClose={actions.close}>
+    <Dialog label={CAPTURE_TEXT.title} size={actions.isAvailable ? "lg" : "sm"} className={actions.isAvailable ? "h-[40rem] max-w-4xl" : undefined} floating={actions.isAvailable ? CAPTURE_WINDOW : undefined} onClose={actions.close}>
       <DialogHeader onClose={actions.close}>
         <DialogTitle>{CAPTURE_TEXT.title}</DialogTitle>
         {isRunning && <Badge variant="success">{CAPTURE_TEXT.running}</Badge>}

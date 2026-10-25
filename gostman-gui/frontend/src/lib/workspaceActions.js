@@ -44,7 +44,9 @@ import { createTabActions } from './tabActions'
 import { createTreeActions } from './treeActions'
 import { placedAfterRoot } from './treeMoves'
 import { focusAddressSoon } from './panes'
-import { ROW_REQUEST } from './collectionTree'
+import { ROW_FOLDER, ROW_REQUEST, folderDepth } from './collectionTree'
+import { countKinds } from './treeSelection'
+import { TREE_TEXT } from './treeText'
 import { describeCounts } from './importCounts'
 import { DATA_TEXT } from './dataText'
 import { markDataDeleted } from './storage'
@@ -500,6 +502,35 @@ export function createWorkspaceActions(backend) {
     )
   }
 
+  const removeItems = attempt(TREE_TEXT.deleteManyFailed, async (entries) => {
+    const requestIds = entries.filter((entry) => entry.kind === ROW_REQUEST).map((entry) => entry.id)
+    if (requestIds.length > 0) {
+      await backend.deleteRequests(requestIds)
+      store().removeRequests(requestIds)
+    }
+    const parentOf = new Map(store().folders.map((folder) => [folder.id, folder.parentId || '']))
+    const chosen = new Set(entries.filter((entry) => entry.kind === ROW_FOLDER).map((entry) => entry.id))
+    const deepestFirst = [...chosen].sort((first, second) => folderDepth(second, parentOf) - folderDepth(first, parentOf))
+    for (const id of deepestFirst) {
+      const folder = store().folders.find((candidate) => candidate.id === id)
+      if (folder) await removeFolder(folder)
+    }
+  })
+
+  function deleteItems(entries, onDone) {
+    const { requests, folders } = countKinds(entries)
+    store().showConfirm(
+      TREE_TEXT.deleteManyTitle,
+      TREE_TEXT.deleteManyMessage(requests, folders),
+      async () => {
+        await removeItems(entries)
+        onDone?.()
+      },
+      null,
+      DESTRUCTIVE,
+    )
+  }
+
   function clearHistory() {
     const entryCount = store().requestHistory.length
     if (entryCount === 0) return
@@ -707,6 +738,7 @@ export function createWorkspaceActions(backend) {
     duplicateRequest,
     moveRequest: (request, folderId) => tree.moveToFolder({ kind: ROW_REQUEST, id: request.id }, folderId),
     deleteRequest,
+    deleteItems,
     clearHistory,
     closeTab,
     tree,

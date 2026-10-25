@@ -1,6 +1,6 @@
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
-import { ChevronsDownUp, ClipboardPaste, FileJson, FileWarning, Plus, Search, Upload } from "lucide-react"
+import { ChevronsDownUp, ClipboardPaste, FileJson, FileWarning, FolderInput, Plus, Search, Trash2, Upload, X } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
 import { EmptyState } from "./ui/emptyState"
@@ -17,16 +17,18 @@ import { checksContract, syncsSpec } from "../lib/contractCheck"
 import { PLACE_AFTER, PLACE_BEFORE, PLACE_INSIDE } from "../lib/dropPlace"
 import { hasModifier, isFocusLost } from "../lib/rovingFocus"
 import { TREE_CHORDS, isRemoveKey, matchesBinding } from "../lib/shortcuts"
-import { MENU_ACTIONS, MENU_MOVE, menuItemsFor } from "../lib/treeMenus"
+import { MENU_ACTIONS, MENU_MOVE, MENU_OWNER_SELECTION, menuItemsFor } from "../lib/treeMenus"
 import { STEP_DOWN, STEP_UP, TARGET_ROOT, canDropFolder } from "../lib/treeMoves"
 import { firstChildRow, firstRow, lastRow, nearestRow, pageFrom, parentRow, rowLabel, stepFrom } from "../lib/treeNavigation"
 import { TREE_TEXT } from "../lib/treeText"
+import { isSelectable, existingKeys, orderedEntries, outermostEntries, rangeBetween, toggled } from "../lib/treeSelection"
 import { findByPrefix, isTypedCharacter } from "../lib/typeahead"
 import { cn } from "../lib/utils"
 
 const FOLDER_EDGE_RATIO = 0.25
 const EXPAND_DELAY_MS = 600
 const REDO_CHORDS = [TREE_CHORDS.redo, TREE_CHORDS.redoAlternative]
+const NO_SELECTION = new Set()
 
 const isMenuKey = (event) => event.key === "ContextMenu" || (event.shiftKey && event.key === "F10")
 
@@ -72,6 +74,19 @@ function dropPlaceFor(drop, row) {
   if (row.kind === ROW_EMPTY) return drop.kind === ROW_FOLDER && drop.id === row.parentId ? drop.place : null
   const id = row.kind === ROW_FOLDER ? row.folder.id : row.request.id
   return drop.kind === row.kind && drop.id === id ? drop.place : null
+}
+
+const isToggleClick = (event, isPicking) => event.ctrlKey || event.metaKey || (isPicking && !event.shiftKey)
+
+function SelectionBar({ count, onMove, onDelete, onClear }) {
+  return (
+    <div role="toolbar" aria-label={TREE_TEXT.selectionBar} className="flex h-8 shrink-0 items-center gap-0.5 border-b border-border bg-accent/50 pl-3 pr-1">
+      <span role="status" className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">{TREE_TEXT.selectedCount(count)}</span>
+      <IconButton label={TREE_TEXT.moveSelection} icon={FolderInput} onClick={onMove} aria-haspopup="menu" />
+      <IconButton label={TREE_TEXT.deleteSelection} icon={Trash2} onClick={onDelete} className="hover:text-destructive" />
+      <IconButton label={TREE_TEXT.clearSelection} icon={X} onClick={onClear} />
+    </div>
+  )
 }
 
 function DragChip({ drag, name }) {
@@ -173,6 +188,21 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
   const focusedRowIndex = useMemo(() => rows.findIndex((row) => row.key === focusedKey), [rows, focusedKey])
   const hasClipboard = treeClipboard !== null
 
+  const [selection, setSelection] = useState(NO_SELECTION)
+  const [isPicking, setIsPicking] = useState(false)
+  const anchorKey = useRef(null)
+  const selected = useMemo(() => existingKeys(selection, folders, requests), [selection, folders, requests])
+  const selectedEntries = useMemo(() => orderedEntries(selected, tree), [selected, tree])
+  const hasSelection = selected.size > 0
+  const clearSelection = useCallback(() => {
+    setSelection(NO_SELECTION)
+    setIsPicking(false)
+  }, [])
+
+  useEffect(() => {
+    if (!hasSelection) setIsPicking(false)
+  }, [hasSelection])
+
   const clearQuery = useCallback(() => setQuery(""), [])
   useRevealRow(rows, scrollRef, clearQuery)
 
@@ -180,14 +210,16 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
     const rowElement = element.closest("[data-row-key]")
     if (!rowElement) return element.closest("[role=tree]") ? { kind: TARGET_ROOT } : null
     const row = rowsByKey.get(rowElement.dataset.rowKey)
-    if (!row) return null
+    if (!row || (source.group && selected.has(row.key))) return null
     const { top, height } = rowElement.getBoundingClientRect()
     return dropFor(source, row, (point.y - top) / height, tree, folders)
-  }, [rowsByKey, tree, folders])
+  }, [rowsByKey, tree, folders, selected])
+
+  const dropItems = useCallback((source, target) => (source.group ? actions.tree.moveItems(source.group, target) : actions.tree.moveItem(source, target)), [actions])
 
   const { drag, begin } = usePointerDrag({
     resolveDrop,
-    onDrop: actions.tree.moveItem,
+    onDrop: dropItems,
     scrollRef,
   })
   useExpandOnHover(drag, toggleFolder, folders)
@@ -197,11 +229,41 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
     else actions.previewRequest(row.request)
   }, [toggleFolder, actions])
 
+  const chooseRow = useCallback((row, event) => {
+    if (event && isToggleClick(event, isPicking)) {
+      anchorKey.current = row.key
+      setSelection(toggled(selected, row.key))
+      return
+    }
+    if (event?.shiftKey) {
+      const range = rangeBetween(rows, anchorKey.current ?? focusedKey ?? row.key, row.key)
+      setSelection(new Set(event.ctrlKey || event.metaKey ? [...selected, ...range] : range))
+      return
+    }
+    anchorKey.current = row.key
+    clearSelection()
+    activateRow(row)
+  }, [isPicking, selected, rows, focusedKey, clearSelection, activateRow])
+
+  const selectRow = useCallback((source) => {
+    const key = `${source.kind}:${source.id}`
+    anchorKey.current = key
+    setIsPicking(true)
+    setSelection(new Set([...selected, key]))
+  }, [selected])
+
   const pinRow = useCallback((row) => {
     if (row.kind !== ROW_FOLDER) actions.openRequest(row.request)
   }, [actions])
 
-  const openMenu = useCallback((row, position) => setMenu({ row, position, view: MENU_ACTIONS }), [])
+  const openMenu = useCallback((row, position) => {
+    const owner = selected.size > 1 && selected.has(row.key) ? MENU_OWNER_SELECTION : undefined
+    setMenu({ row, owner, position, view: MENU_ACTIONS })
+  }, [selected])
+  const openSelectionMenu = useCallback((event, view) => {
+    const { left, bottom } = event.currentTarget.getBoundingClientRect()
+    setMenu({ row: null, owner: MENU_OWNER_SELECTION, position: { x: left, y: bottom }, view })
+  }, [])
   const closeMenu = useCallback(() => setMenu(null), [])
   const closeLabels = useCallback(() => setLabelTarget(null), [])
   const openMenuBelow = useCallback((element, row) => {
@@ -210,8 +272,10 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
   }, [openMenu])
 
   const startDrag = useCallback((event, row) => {
-    if (!isSearching) begin(event, sourceOf(row))
-  }, [begin, isSearching])
+    if (isSearching) return
+    const isGroup = selected.has(row.key) && selected.size > 1
+    begin(event, isGroup ? { ...sourceOf(row), group: outermostEntries(selectedEntries, folders, requests) } : sourceOf(row))
+  }, [begin, isSearching, selected, selectedEntries, folders, requests])
 
   const tabStopKey = useMemo(() => {
     if (rowsByKey.has(focusedKey)) return focusedKey
@@ -259,8 +323,24 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
     return null
   }, [actions])
 
+  const selectWithKeys = useCallback((event, row, index) => {
+    const extendTo = (step) => () => {
+      const next = stepFrom(rows, index, step)
+      if (anchorKey.current === null) anchorKey.current = row.key
+      focusRowAt(next)
+      setSelection(new Set(rangeBetween(rows, anchorKey.current, rows[next].key)))
+    }
+    if (matchesBinding(TREE_CHORDS.extendDown, event)) return extendTo(1)
+    if (matchesBinding(TREE_CHORDS.extendUp, event)) return extendTo(-1)
+    if (matchesBinding(TREE_CHORDS.toggleSelect, event)) return () => chooseRow(row, { ctrlKey: true })
+    if (matchesBinding(TREE_CHORDS.selectAll, event)) return () => setSelection(new Set(rows.filter(isSelectable).map((candidate) => candidate.key)))
+    if (hasSelection && event.key === "Escape") return clearSelection
+    return null
+  }, [rows, hasSelection, chooseRow, focusRowAt, clearSelection])
+
   const navigate = useCallback((event, row, index) => {
     const isFolder = row.kind === ROW_FOLDER
+    if (isRemoveKey(event) && selected.size > 1 && selected.has(row.key)) return () => actions.deleteItems(selectedEntries, clearSelection)
     if (isRemoveKey(event)) return () => (isFolder ? actions.deleteFolder(row.folder) : actions.deleteRequest(row.request))
     if (isTypedCharacter(event, typeahead.isTyping())) return () => focusRowAt(findByPrefix(rows.map(rowLabel), index, typeahead.type(event.key)))
     if (hasModifier(event)) return null
@@ -280,7 +360,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
       F2: () => (isFolder ? actions.renameFolder(row.folder) : actions.renameRequest(row.request)),
     }
     return keys[event.key] ?? null
-  }, [rows, isSearching, toggleFolder, focusRowAt, pinRow, activateRow, actions, typeahead])
+  }, [rows, isSearching, toggleFolder, focusRowAt, pinRow, activateRow, actions, typeahead, selected, selectedEntries, clearSelection])
 
   const handleKeyDown = useCallback((event, row) => {
     if (event.target.closest("[data-row-action]")) return
@@ -288,24 +368,31 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
     const element = event.currentTarget
     const run = isMenuKey(event)
       ? () => openMenuBelow(element, row)
-      : editItem(event, sourceOf(row)) || navigate(event, row, index)
+      : selectWithKeys(event, row, index) || editItem(event, sourceOf(row)) || navigate(event, row, index)
     if (!run) return
     event.preventDefault()
     run()
-  }, [rows, openMenuBelow, editItem, navigate])
+  }, [rows, openMenuBelow, selectWithKeys, editItem, navigate])
 
   const menuItems = useMemo(() => {
     if (!menu) return []
     const showMoveTargets = () => setMenu((current) => current && { ...current, view: MENU_MOVE })
+    const folder = menu.row?.kind === ROW_FOLDER ? menu.row.folder : null
     const context = {
       actions, tree, state: { folders, requests }, showMoveTargets, hasClipboard, editLabels: setLabelTarget,
-      isLinked: menu.row.kind === ROW_FOLDER && Boolean(specLinks[menu.row.folder.id]),
-      isCollection: menu.row.kind === ROW_FOLDER && isCollectionRoot(folders, menu.row.folder.id, workspacePath),
-      checksContract: menu.row.kind === ROW_FOLDER && checksContract(specLinks[menu.row.folder.id]),
-      syncsSpec: menu.row.kind === ROW_FOLDER && syncsSpec(specLinks[menu.row.folder.id]),
+      entries: selectedEntries, clearSelection, selectRow,
+      isLinked: Boolean(folder) && Boolean(specLinks[folder.id]),
+      isCollection: Boolean(folder) && isCollectionRoot(folders, folder.id, workspacePath),
+      checksContract: Boolean(folder) && checksContract(specLinks[folder.id]),
+      syncsSpec: Boolean(folder) && syncsSpec(specLinks[folder.id]),
     }
     return menuItemsFor(menu, context)
-  }, [menu, tree, folders, requests, actions, specLinks, hasClipboard, workspacePath])
+  }, [menu, tree, folders, requests, actions, specLinks, hasClipboard, workspacePath, selectedEntries, clearSelection, selectRow])
+
+  const menuTitle = () => {
+    if (menu.view !== MENU_MOVE) return ""
+    return menu.owner ? TREE_TEXT.moveSelectionTitle(selectedEntries.length) : TREE_TEXT.moveTitle((menu.row.folder || menu.row.request).name)
+  }
 
   const renderRow = (row) => {
     const dropPlace = dropPlaceFor(drag?.drop, row)
@@ -320,10 +407,11 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
         isActive={!isFolder && id === activeRequestId}
         isTabStop={row.key === tabStopKey}
         focusRequest={focusRequest?.key === row.key ? focusRequest.count : 0}
-        isMenuOpen={menu?.row.key === row.key}
-        isMoving={isSource(drag?.source, row.kind, id) || (Boolean(treeClipboard?.cut) && isSource(treeClipboard, row.kind, id))}
+        isMenuOpen={menu?.row?.key === row.key}
+        isMoving={isSource(drag?.source, row.kind, id) || (Boolean(drag?.source.group) && selected.has(row.key)) || (Boolean(treeClipboard?.cut) && isSource(treeClipboard, row.kind, id))}
+        isSelected={selected.has(row.key)}
         dropPlace={dropPlace}
-        onActivate={activateRow}
+        onActivate={chooseRow}
         onPin={pinRow}
         onOpenMenu={openMenu}
         onPointerDown={startDrag}
@@ -334,7 +422,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
   }
 
   const draggedRow = drag && rowsByKey.get(`${drag.source.kind}:${drag.source.id}`)
-  const draggedName = draggedRow && (draggedRow.folder || draggedRow.request).name
+  const draggedName = drag?.source.group ? TREE_TEXT.dragCount(drag.source.group.length) : draggedRow && (draggedRow.folder || draggedRow.request).name
   const isDropAtRoot = drag?.drop?.kind === TARGET_ROOT
 
   return (
@@ -343,11 +431,20 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
         <IconButton label={TREE_TEXT.collapseAll} icon={ChevronsDownUp} className="shrink-0" disabled={isSearching || folders.length === 0} onClick={collapseFolders} />
       </SearchField>
 
+      {hasSelection && (
+        <SelectionBar
+          count={selected.size}
+          onMove={(event) => openSelectionMenu(event, MENU_MOVE)}
+          onDelete={() => actions.deleteItems(selectedEntries, clearSelection)}
+          onClear={clearSelection}
+        />
+      )}
+
       <div className={cn("min-h-0 flex-1", isDropAtRoot && "ring-1 ring-inset ring-primary")}>
         {rows.length === 0 ? (
           <TreeEmptyState isSearching={isSearching} hasClipboard={hasClipboard} actions={actions} />
         ) : (
-          <VirtualList role="tree" aria-label={TREE_TEXT.treeLabel} items={rows} rowHeight={ROW_HEIGHT_PX} renderRow={renderRow} scrollRef={scrollRef} pinnedIndex={focusedRowIndex} className="h-full py-1" />
+          <VirtualList role="tree" aria-multiselectable="true" aria-label={TREE_TEXT.treeLabel} items={rows} rowHeight={ROW_HEIGHT_PX} renderRow={renderRow} scrollRef={scrollRef} pinnedIndex={focusedRowIndex} className="h-full py-1" />
         )}
       </div>
 
@@ -358,7 +455,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
       {menu && (
         <ContextMenu
           position={menu.position}
-          title={menu.view === MENU_MOVE ? TREE_TEXT.moveTitle((menu.row.folder || menu.row.request).name) : ""}
+          title={menuTitle()}
           items={menuItems}
           onClose={closeMenu}
         />

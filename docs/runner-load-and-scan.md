@@ -23,9 +23,12 @@ Scripts can change the order with `setNextRequest`; see [Scripting](scripting-an
 | **Iterations** | Limits the number of iterations. Empty shows the number that will run: the row count of the data file, or 1. The highest value is 10000. |
 | **Parallel** | Sends up to this many requests at once. Empty means 1. |
 | **Only tags** and **Skip tags** | Shown when a request or folder in the collection has tags. **Only tags** keeps the requests that have at least one of the tags you add; empty keeps every request. **Skip tags** leaves out requests that have any of them. A folder's tags count for every request inside it. Case is ignored. Both apply inside the chosen folder, and the footer counts what is left. Set a request's tags in its [Settings](requests-and-responses.md#settings) tab or with **Tags…** in its menu in the sidebar, and a folder's with **Colour and tags…**. |
+| **Requests list** | Before a run, a list shows every request that is in scope with a checkbox. Clear a checkbox to leave that request out of this run; **Select all** and **Select none** change them together, and the count (`10 of 12 requests`) updates. The choice is remembered for that scope while the app stays open, and is never written to a request or a file, so `gostman run` is not affected. After a run, **Choose requests** brings the list back and **Show results** returns to the outcome. |
 | **Run** and **Stop** | Starts the run. While a run is going, **Stop** cancels the requests in flight and ends it. |
 
-All controls except **Stop** are disabled while a run is going. **Run** is disabled when no request is in scope.
+All controls except **Stop** are disabled while a run is going. **Run** is disabled when no request is in scope or every request is cleared. The run, its totals, the planned count in the footer and the HTML report use only the requests left checked.
+
+![The Run requests list with two requests cleared: the count reads 10 of 12 requests and Select all and Select none sit beside it](../screenshots/runner-select.png)
 
 ### Data files
 

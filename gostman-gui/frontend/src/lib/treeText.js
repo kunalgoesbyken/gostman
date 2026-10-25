@@ -14,6 +14,7 @@ export const TREE_TEXT = {
   paste: 'Paste',
   duplicate: 'Duplicate',
   moved: (name) => `Moved "${name}"`,
+  movedMany: (count) => `Moved ${pluralize(count, 'item')}`,
   pasted: (name) => `Added "${name}"`,
   duplicated: (name) => `Duplicated "${name}"`,
   undo: 'Undo',
@@ -42,6 +43,21 @@ export const TREE_TEXT = {
   editLabels: 'Colour and tags…',
   editTags: 'Tags…',
   shareRequest: 'Share request',
+  select: 'Select',
+  selectedCount: (count) => `${count} selected`,
+  selectionBar: 'Selected items',
+  clearSelection: 'Clear selection',
+  moveSelection: 'Move to folder…',
+  deleteSelection: 'Delete',
+  moveSelectionTitle: (count) => `Move ${pluralize(count, 'item')} to`,
+  dragCount: (count) => pluralize(count, 'item'),
+  deleteManyTitle: 'Delete selected items',
+  deleteManyMessage: (requests, folders) => {
+    const subject = [requests > 0 && pluralize(requests, 'request'), folders > 0 && pluralize(folders, 'folder')].filter(Boolean).join(' and ')
+    const rest = folders > 0 ? ' Anything inside a deleted folder that you did not select moves up one level.' : ''
+    return `Delete ${subject}?${rest} This can't be undone.`
+  },
+  deleteManyFailed: 'Could not delete the selected items',
   moreTags: (count) => `+${count}`,
 }
 

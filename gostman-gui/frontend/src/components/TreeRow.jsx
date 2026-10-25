@@ -62,7 +62,7 @@ export const EmptyRow = memo(function EmptyRow({ row, dropPlace }) {
   )
 })
 
-export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop, focusRequest, isMenuOpen, isMoving, dropPlace, onActivate, onPin, onOpenMenu, onPointerDown, onKeyDown, onFocus }) {
+export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop, focusRequest, isMenuOpen, isMoving, isSelected, dropPlace, onActivate, onPin, onOpenMenu, onPointerDown, onKeyDown, onFocus }) {
   const isFolder = row.kind === ROW_FOLDER
   const item = isFolder ? row.folder : row.request
   const name = item.name || TREE_TEXT.untitled
@@ -93,7 +93,7 @@ export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop,
       style={{ height: ROW_HEIGHT_PX }}
       className={cn(
         "group relative flex select-none items-center pr-1.5 text-xs [-webkit-touch-callout:none]",
-        isActive || isMenuOpen || dropPlace === PLACE_INSIDE ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground",
+        isSelected ? "bg-primary/15 text-foreground" : isActive || isMenuOpen || dropPlace === PLACE_INSIDE ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground",
         dropPlace === PLACE_INSIDE && "ring-1 ring-inset ring-primary",
         isMoving && "opacity-50"
       )}
@@ -104,7 +104,7 @@ export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop,
         type="button"
         role="treeitem"
         aria-expanded={isFolder ? row.isOpen : undefined}
-        aria-selected={isActive}
+        aria-selected={isSelected || isActive}
         aria-level={row.depth + 1}
         aria-posinset={row.position}
         aria-setsize={row.siblings}
@@ -112,7 +112,7 @@ export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop,
         data-row-main
         data-pane-entry
         tabIndex={isTabStop ? 0 : -1}
-        onClick={() => onActivate(row)}
+        onClick={(event) => onActivate(row, event)}
         onDoubleClick={() => onPin(row)}
         onPointerDown={(event) => onPointerDown(event, row)}
         title={[name, !isFolder && item.url, tags.join(", ")].filter(Boolean).join("\n")}

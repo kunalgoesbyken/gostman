@@ -71,6 +71,11 @@ export function requestsInScope({ folders, requests, sharedOrder }, folderId, ta
   return collectRequests(buildCollectionTree(folders, requests, sharedOrder), folderId).filter((request) => matchesTags(tagsOf(request), tagFilter))
 }
 
+export function requestsToRun(state, folderId, tagFilter) {
+  const excluded = new Set(state.runExclusions[folderId])
+  return requestsInScope(state, folderId, tagFilter).filter((request) => !excluded.has(request.id))
+}
+
 function sessionGiver(before) {
   let given = {}
   return (next) => {
@@ -124,7 +129,7 @@ export function createRunner(backend, execute) {
   async function start({ folderId, delayMs, stopOnFailure, parallel = 1, rows = [], iterations = 0, tagFilter = NO_TAG_FILTER }) {
     const run = { isStopped: false, isHalted: false, sendIds: new Set(), prompts: rememberPrompts(), giveSession: sessionGiver(store().sessionVariables) }
     current = run
-    const requests = requestsInScope(store(), folderId, tagFilter)
+    const requests = requestsToRun(store(), folderId, tagFilter)
     const count = iterationCount(rows, iterations)
     const isIterating = rows.length > 0 || count > 1
     sizeSandboxPool(parallel)

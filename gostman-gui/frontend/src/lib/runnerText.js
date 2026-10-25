@@ -37,9 +37,17 @@ export const RUNNER_TEXT = {
   emptyBody: 'The response had no body.',
   truncated: 'Only the start of a long body is kept in a run. Send the request on its own to see all of it.',
   idle: "Requests run in sidebar order with their scripts, extract rules and checks, using the environment chosen for their collection. A data file runs everything once per row. With parallel above 1, requests are sent together and do not see each other's extracted variables.",
-  inScope: (requests, iterations) => (
-    iterations > 1 ? `${pluralize(requests, 'request')} in scope, ${pluralize(iterations, 'iteration')}.` : `${pluralize(requests, 'request')} in scope.`
-  ),
+  inScope: (selected, total, iterations) => {
+    const requests = selected === total ? pluralize(total, 'request') : `${selected} of ${pluralize(total, 'request')}`
+    return iterations > 1 ? `${requests} in scope, ${pluralize(iterations, 'iteration')}.` : `${requests} in scope.`
+  },
+  selection: 'Requests to run',
+  selected: (selected, total) => `${selected} of ${pluralize(total, 'request')}`,
+  selectAll: 'Select all',
+  selectNone: 'Select none',
+  chooseRequests: 'Choose requests',
+  showResults: 'Show results',
+  includeRequest: (name) => `Run ${name}`,
   progress: ({ isRunning, done, total, passed, failed, skipped }) => [
     done > total ? `${isRunning ? 'Running' : 'Ran'} ${done}, more than the ${total} planned, as scripts repeated requests` : `${isRunning ? 'Running' : 'Ran'} ${done} of ${total}`,
     `${passed} passed`,

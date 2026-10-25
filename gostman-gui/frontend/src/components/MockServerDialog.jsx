@@ -135,12 +135,14 @@ function ServerPanel({ folders, requests, actions }) {
   )
 }
 
+const MOCK_WINDOW = { id: "mock", width: 768, height: 576, minWidth: 480, minHeight: 360 }
+
 export function MockServerDialog({ folders, requests, actions }) {
   const isRunning = useMockStore((state) => state.isRunning)
   const address = useMockStore((state) => state.address)
 
   return (
-    <Dialog label={MOCK_TEXT.title} size={actions.isAvailable ? "lg" : "sm"} onClose={actions.close}>
+    <Dialog label={MOCK_TEXT.title} size={actions.isAvailable ? "lg" : "sm"} floating={actions.isAvailable ? MOCK_WINDOW : undefined} onClose={actions.close}>
       <DialogHeader onClose={actions.close}>
         <DialogTitle>{MOCK_TEXT.title}</DialogTitle>
         {isRunning && <Badge variant="success">{MOCK_TEXT.running}</Badge>}

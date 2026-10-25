@@ -8,6 +8,8 @@ import { TRANSFER_TEXT } from "../lib/importText"
 
 const TAB_CLASS = "flex min-h-0 flex-1 flex-col gap-3 p-4"
 
+const TRANSFER_WINDOW = { id: "import-export", width: 768, height: 576, minWidth: 480, minHeight: 360 }
+
 export function ImportExportDialog({
   initialTab,
   shareFolderId,
@@ -35,7 +37,7 @@ export function ImportExportDialog({
   const [activeTab, setActiveTab] = useState(initialTab)
 
   return (
-    <Dialog label={TRANSFER_TEXT.title} size="lg" onClose={onClose}>
+    <Dialog label={TRANSFER_TEXT.title} size="lg" floating={TRANSFER_WINDOW} onClose={onClose}>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
         <DialogHeader onClose={onClose}>
           <TabsList label={TRANSFER_TEXT.tabsLabel}>

@@ -77,6 +77,30 @@ export function createTreeActions(backend, attempt) {
     return true
   }
 
+  const isAppending = (target) => target.kind === TARGET_ROOT || target.place === PLACE_INSIDE
+
+  async function relocateAll(sources, target) {
+    const plans = []
+    let next = target
+    for (const source of sources) {
+      const plan = await planShared((state) => planMove(state, source, next))
+      if (!plan) continue
+      await applyPatches(plan.patches)
+      plans.push(plan)
+      if (!isAppending(target)) next = { ...source, place: PLACE_AFTER }
+    }
+    if (plans.length === 0) return false
+    const message = plans.length === 1 ? TREE_TEXT.moved(plans[0].subject.name) : TREE_TEXT.movedMany(plans.length)
+    const undo = async () => {
+      for (const plan of [...plans].reverse()) await applyPatches(plan.undo)
+    }
+    const redo = async () => {
+      for (const plan of plans) await applyPatches(plan.patches)
+    }
+    record({ message, undo, redo })
+    return true
+  }
+
   const moveItem = attempt(TREE_TEXT.moveFailed, (source, target) => relocate((state) => planMove(state, source, target)))
 
   const stepItem = attempt(TREE_TEXT.moveFailed, (source, direction) => relocate((state) => planStep(state, source, direction)))
@@ -84,6 +108,10 @@ export function createTreeActions(backend, attempt) {
   const canStep = (source, direction) => planStep(snapshot(), source, direction) !== null
 
   const moveToFolder = (source, folderId) => moveItem(source, targetFor(folderId))
+
+  const moveItems = attempt(TREE_TEXT.moveFailed, (sources, target) => relocateAll(sources, target))
+
+  const moveItemsToFolder = (sources, folderId) => moveItems(sources, targetFor(folderId))
 
   async function discard(created) {
     const ids = created.requests.map((request) => request.id)
@@ -129,5 +157,5 @@ export function createTreeActions(backend, attempt) {
     return clip.cut ? pasteCut(clip, row) : pasteCopy(clip, row)
   }
 
-  return { moveItem, stepItem, canStep, moveToFolder, duplicateItem, copyItem, cutItem, pasteItem, undo: undoLatest, redo: redoLatest, shareOrder }
+  return { moveItem, moveItems, moveItemsToFolder, stepItem, canStep, moveToFolder, duplicateItem, copyItem, cutItem, pasteItem, undo: undoLatest, redo: redoLatest, shareOrder }
 }

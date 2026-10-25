@@ -8,6 +8,7 @@ import { AuthPanel } from "./AuthPanel"
 import { BodyPanel } from "./BodyPanel"
 import { InheritedHeaders } from "./InheritedHeaders"
 import { KeyValueEditor } from "./KeyValueEditor"
+import { HEADER_SUGGESTIONS } from "../lib/httpHeaders"
 import { ParamsPanel } from "./ParamsPanel"
 import { SettingsPanel } from "./SettingsPanel"
 import { ExtractPanel } from "./ExtractPanel"
@@ -197,6 +198,7 @@ export const RequestTabs = memo(function RequestTabs({
               rows={headerRows}
               onChange={(rows) => onUpdateRequest({ headers: serializeRows(rows) })}
               keyLabel={TEXT.headerLabel}
+              suggestions={HEADER_SUGGESTIONS}
             >
               <InheritedHeaders folderId={activeRequest.folderId} ownRows={headerRows} authSource={auth.type === AUTH_INHERIT && AUTHORIZATION_AUTH.includes(authSourceType) ? authSource : null} onOpenAuth={() => setActivePanel(AUTH_PANEL)} />
             </KeyValueEditor>

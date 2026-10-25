@@ -30,6 +30,8 @@ function CookieRow({ cookie, onRemove }) {
   )
 }
 
+const COOKIES_WINDOW = { id: "cookies", width: 768, height: 576, minWidth: 480, minHeight: 320 }
+
 export function CookiesDialog({ onClose }) {
   const cookies = useAppStore((s) => s.cookies)
   const removeCookie = useAppStore((s) => s.removeCookie)
@@ -42,7 +44,7 @@ export function CookiesDialog({ onClose }) {
   }, [cookies, query])
 
   return (
-    <Dialog label={TEXT.title} size="lg" onClose={onClose}>
+    <Dialog label={TEXT.title} size="lg" floating={COOKIES_WINDOW} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <DialogTitle>{TEXT.title}</DialogTitle>
         <TabCount>{cookies.length}</TabCount>

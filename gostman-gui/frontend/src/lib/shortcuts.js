@@ -20,6 +20,10 @@ export const TREE_CHORDS = {
   undo: { mod: true, key: 'z' },
   redo: { mod: true, shift: true, key: 'z' },
   redoAlternative: { mod: true, key: 'y' },
+  toggleSelect: { ctrl: true, key: 'space' },
+  extendUp: { shift: true, key: 'arrowup' },
+  extendDown: { shift: true, key: 'arrowdown' },
+  selectAll: { mod: true, key: 'a' },
 }
 
 export const MOVING_KEYS = [
@@ -34,6 +38,7 @@ export const MOVING_KEYS = [
   { id: 'clipboard', chords: [TREE_CHORDS.cut, TREE_CHORDS.copy, TREE_CHORDS.paste] },
   { id: 'duplicate', chords: [TREE_CHORDS.duplicate] },
   { id: 'undoTree', chords: [TREE_CHORDS.undo, TREE_CHORDS.redo] },
+  { id: 'select', chords: [TREE_CHORDS.toggleSelect, TREE_CHORDS.extendUp, TREE_CHORDS.extendDown, TREE_CHORDS.selectAll] },
   { id: 'rename', chords: [{ key: 'f2' }] },
   { id: 'remove', chords: REMOVE_CHORDS },
   { id: 'menu', chords: [{ shift: true, key: 'f10' }] },

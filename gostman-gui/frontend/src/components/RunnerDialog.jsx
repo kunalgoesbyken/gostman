@@ -17,6 +17,7 @@ import { DATA_FILE_ERROR, dataColumns, iterationCount, MAX_ITERATIONS, parseData
 import { parseJsonBody, statusVariant } from "../lib/response"
 import { shownMethod } from "../lib/methodLabel"
 import { requestsInScope } from "../lib/runner"
+import { folderChain } from "../lib/variableScopes"
 import { RUNNER_TEXT } from "../lib/runnerText"
 import { summarize } from "../lib/runReport"
 import { collectTags } from "../lib/tags"
@@ -149,12 +150,50 @@ function idleTitle(isRunning, total) {
   return total === 0 ? RUNNER_TEXT.nothingToRun : RUNNER_TEXT.nothingRun
 }
 
-function describeRun(results, requestCount, isRunning, iterations) {
-  const total = requestCount * iterations
-  if (results.length === 0) return RUNNER_TEXT.inScope(requestCount, iterations)
+function describeRun(results, { selected, scoped }, isRunning, iterations) {
+  const total = selected * iterations
+  if (results.length === 0) return RUNNER_TEXT.inScope(selected, scoped, iterations)
   const { passed, failed, skipped } = summarize(results, total)
   return RUNNER_TEXT.progress({ isRunning, done: passed + failed, total, passed, failed, skipped })
 }
+
+function RequestChoice({ request, folders, isChecked, onToggle }) {
+  const path = folderChain(folders, request.folderId).map((folder) => folder.name).join(PATH_SEPARATOR)
+  return (
+    <li className="border-b border-border">
+      <label className="flex h-9 cursor-pointer items-center gap-2 px-3 hover:bg-accent">
+        <input type="checkbox" checked={isChecked} aria-label={RUNNER_TEXT.includeRequest(request.name)} onChange={onToggle} className="h-3.5 w-3.5 shrink-0 accent-primary" />
+        <MethodTag method={shownMethod(request)} className="w-12" />
+        <span title={`${request.name}
+${request.url}`} className="min-w-0 truncate text-xs text-foreground">{request.name}</span>
+        {path && <span className="min-w-0 flex-1 truncate text-2xs text-muted-foreground max-sm:hidden">{path}</span>}
+      </label>
+    </li>
+  )
+}
+
+function RequestChoices({ scoped, folders, excluded, onChange }) {
+  const scopedIds = scoped.map((request) => request.id)
+  const selected = scoped.filter((request) => !excluded.has(request.id)).length
+  const toggle = (id) => onChange(excluded.has(id) ? [...excluded].filter((other) => other !== id) : [...excluded, id])
+
+  return (
+    <>
+      <div className="sticky top-0 z-10 flex h-8 items-center gap-1 border-b border-border bg-background pl-4 pr-2">
+        <p role="status" className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{RUNNER_TEXT.selected(selected, scoped.length)}</p>
+        <Button variant="ghost" size="sm" disabled={selected === scoped.length} onClick={() => onChange([...excluded].filter((id) => !scopedIds.includes(id)))}>{RUNNER_TEXT.selectAll}</Button>
+        <Button variant="ghost" size="sm" disabled={selected === 0} onClick={() => onChange([...new Set([...excluded, ...scopedIds])])}>{RUNNER_TEXT.selectNone}</Button>
+      </div>
+      <ul aria-label={RUNNER_TEXT.selection}>
+        {scoped.map((request) => (
+          <RequestChoice key={request.id} request={request} folders={folders} isChecked={!excluded.has(request.id)} onToggle={() => toggle(request.id)} />
+        ))}
+      </ul>
+    </>
+  )
+}
+
+const RUNNER_WINDOW = { id: "runner", width: 768, height: 576, minWidth: 480, minHeight: 360 }
 
 export function RunnerDialog({ folders, requests, actions }) {
   const runner = useAppStore((s) => s.runner)
@@ -173,11 +212,18 @@ export function RunnerDialog({ folders, requests, actions }) {
   const scopes = useMemo(() => listFolders(buildCollectionTree(folders, [])), [folders])
   const knownTags = useMemo(() => collectTags([...requests, ...folders]), [requests, folders])
   const tagFilter = useMemo(() => ({ include: includeTags, exclude: excludeTags }), [includeTags, excludeTags])
-  const requestCount = useMemo(() => requestsInScope({ folders, requests }, folderId, tagFilter).length, [folders, requests, folderId, tagFilter])
+  const sharedOrder = useAppStore((s) => s.sharedOrder)
+  const excludedIds = useAppStore((s) => s.runExclusions[folderId])
+  const setRunExclusions = useAppStore((s) => s.setRunExclusions)
+  const [showChoices, setShowChoices] = useState(true)
+  const scoped = useMemo(() => requestsInScope({ folders, requests, sharedOrder }, folderId, tagFilter), [folders, requests, sharedOrder, folderId, tagFilter])
+  const excluded = useMemo(() => new Set(excludedIds), [excludedIds])
+  const requestCount = useMemo(() => scoped.filter((request) => !excluded.has(request.id)).length, [scoped, excluded])
   const { isRunning, results } = runner
   const iterations = iterationCount(rows, iterationLimit)
   const columns = useMemo(() => dataColumns(rows), [rows])
   const total = requestCount * iterations
+  const isChoosing = scoped.length > 0 && !isRunning && (results.length === 0 || showChoices)
 
   async function chooseData(event) {
     const [file] = event.target.files
@@ -199,7 +245,7 @@ export function RunnerDialog({ folders, requests, actions }) {
   }
 
   return (
-    <Dialog label={RUNNER_TEXT.title} size="lg" onClose={actions.closeRunner}>
+    <Dialog label={RUNNER_TEXT.title} size="lg" floating={RUNNER_WINDOW} onClose={actions.closeRunner}>
       <DialogHeader onClose={actions.closeRunner}>
         <DialogTitle>{RUNNER_TEXT.title}</DialogTitle>
       </DialogHeader>
@@ -231,7 +277,7 @@ export function RunnerDialog({ folders, requests, actions }) {
               {RUNNER_TEXT.stop}
             </Button>
           ) : (
-            <Button size="sm" disabled={total === 0} onClick={() => actions.startRun({ folderId, delayMs, stopOnFailure, parallel, rows, iterations: iterationLimit, tagFilter })}>
+            <Button size="sm" disabled={total === 0} onClick={() => { setShowChoices(false); actions.startRun({ folderId, delayMs, stopOnFailure, parallel, rows, iterations: iterationLimit, tagFilter }) }}>
               <Play />
               {RUNNER_TEXT.run}
             </Button>
@@ -279,7 +325,9 @@ export function RunnerDialog({ folders, requests, actions }) {
       {dataError && <p role="alert" className="shrink-0 px-4 py-1 text-xs text-destructive">{dataError}</p>}
       {!dataError && columns.length > 0 && <p className="shrink-0 px-4 py-1 text-xs text-muted-foreground">{RUNNER_TEXT.dataOverrides(columns)}</p>}
       <div className="min-h-0 flex-1 overflow-y-auto [overflow-wrap:anywhere]">
-        {results.length === 0 ? (
+        {isChoosing ? (
+          <RequestChoices scoped={scoped} folders={folders} excluded={excluded} onChange={(ids) => setRunExclusions(folderId, ids)} />
+        ) : results.length === 0 ? (
           <EmptyState
             icon={ListChecks}
             title={idleTitle(isRunning, total)}
@@ -293,8 +341,13 @@ export function RunnerDialog({ folders, requests, actions }) {
       </div>
       <div className="flex shrink-0 items-center gap-2 border-t border-border py-1 pl-4 pr-2">
         <p role="status" className="min-w-0 flex-1 text-xs text-muted-foreground">
-          {describeRun(results, requestCount, isRunning, iterations)}
+          {describeRun(results, { selected: requestCount, scoped: scoped.length }, isRunning, iterations)}
         </p>
+        {results.length > 0 && (
+          <Button variant="ghost" size="sm" disabled={isRunning} onClick={() => setShowChoices(!showChoices)}>
+            {showChoices ? RUNNER_TEXT.showResults : RUNNER_TEXT.chooseRequests}
+          </Button>
+        )}
         <Button variant="ghost" size="sm" disabled={isRunning || results.length === 0} onClick={actions.downloadRunReport}>
           <Download />
           {RUNNER_TEXT.report}

@@ -78,15 +78,17 @@ Open **Preferences** from the command palette or with **Preferences** in the sta
 
 ![The Preferences window open on its Theme section, with the theme, contrast, accent colour and the eight palettes, over the app](../screenshots/preferences.png)
 
-Preferences is a window you can move and resize inside the app. Its sections, in order, are Appearance, Theme, Fonts, Editor, Requests, Language, AI, Privacy and Data. Pick one on the left; Preferences opens on Appearance the first time and on the last section you used after that.
+Preferences is a window you can move and resize inside the app. Its sections, in order, are Appearance, Theme, Fonts, Editor, Requests, Language, AI, Privacy and Data. Pick one on the left; Preferences opens on Appearance the first time and on the last section you used after that. Run requests, Collection settings, Network, Mock server, Capture, Cookies and Import, Export and Share are windows of the same kind.
 
 ![Resizing the sidebar by dragging its edge, hiding and showing it from the header, then moving and resizing the Preferences window and trying a palette](../screenshots/window-tour.gif)
 
 - Drag the title bar to move it, and drag an edge or a corner to resize it. It always stays inside the app.
 - With the keyboard, focus the grip at the left of the title (**Move window**): the arrow keys move the window and Shift with the arrow keys resizes it.
 - Double-click the title bar, or press Home on the grip, to restore the default size and position.
-- Size and position are remembered. On a phone it fills the screen instead, with the sections as a row of tabs.
-- Esc closes it. Clicking outside does not, so you can try settings while it stays open.
+- Size and position are remembered, per window. On a phone every window fills the screen instead.
+- Esc closes it, and with several windows open it closes only the one on top. Clicking outside does not close it, so you can keep one open beside your work. When a window is made small, its content scrolls.
+
+![The Run requests window being dragged smaller over the request editor, with its list of requests scrolling inside](../screenshots/floating-dialogs.png)
 
 | Section | Setting | Options | Default |
 | --- | --- | --- | --- |
@@ -329,7 +331,11 @@ Each list, row of tabs and set of options is one stop for the Tab key, so Tab mo
 | Ctrl+D | Collection tree | Duplicate the request or folder |
 | Ctrl+Z, Ctrl+Shift+Z or Ctrl+Y | Collection tree | Undo or redo the last move, paste or duplicate |
 | F2 | Collection tree | Rename the request or folder |
-| Delete or Ctrl+Backspace | Collection tree | Delete the request or folder, after you confirm |
+| Delete or Ctrl+Backspace | Collection tree | Delete the request or folder, or all the selected items, after you confirm |
+| Shift+Up Arrow, Shift+Down Arrow | Collection tree | Extend the selection |
+| Ctrl+Space | Collection tree | Add or remove the focused row from the selection |
+| Ctrl+A | Collection tree | Select every visible row |
+| Esc | Collection tree | Clear the selection |
 | Delete or Ctrl+Backspace | Open tabs | Close the tab |
 | Delete or Ctrl+Backspace | History | Remove the entry |
 | Shift+F10 or the Menu key | Collection tree | Show the actions for the request or folder |

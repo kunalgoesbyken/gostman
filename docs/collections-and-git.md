@@ -50,7 +50,20 @@ You can rearrange the tree in three ways:
 
 - **Drag and drop.** Drag a request or folder onto another row. Dropping on the upper or lower part of a row places the item before or after it. For a folder, dropping in the middle puts the item inside it, the lower part of an open folder puts it first inside, and a closed folder opens after you hold the item over it. Dropping in the empty area of the tree moves the item to the top level. A folder cannot be dropped into itself or into one of its own subfolders.
 - **Keyboard.** With a row focused, press Alt+Up Arrow or Alt+Down Arrow to move it, Ctrl+X to cut, Ctrl+C to copy, Ctrl+V to paste and Ctrl+D to duplicate. A cut row is dimmed until you paste it, and pasting moves it instead of copying it. On macOS the Ctrl shortcuts use the Command key.
+- **Several at once.** See [Select several items](#select-several-items).
 - **Context menu.** Described below.
+
+### Select several items
+
+Hold Ctrl (Command on macOS) and click rows to add or remove them from a selection, or click one row and then Shift+click another to select everything between them. The selected rows are tinted and a bar above the tree shows `3 selected` with **Move to folder…**, **Delete** and **Clear selection**. On a phone, or whenever you have no modifier key, choose **Select** in a row's menu; while a selection exists, tapping rows adds and removes them.
+
+![Four requests selected in the sidebar, the selection bar above the tree and the Move to folder menu listing the folders](../screenshots/multi-select.png)
+
+- **Move to folder…** lists the folders, as the menu for one item does. The items keep their relative order, are added at the end of the folder and move as one step, so **Undo** (or Ctrl+Z) puts them all back. A folder is never moved into itself or one of its own subfolders; when a selected folder and something inside it are both selected, the folder moves with its contents.
+- **Delete** asks first and says how many requests and folders it will delete. As with a single folder, anything inside a deleted folder that you did not select moves up one level. This cannot be undone.
+- Drag one of the selected rows to move the whole selection to the place you drop it.
+- With the keyboard: Shift+Up Arrow and Shift+Down Arrow extend the selection, Ctrl+Space toggles the focused row, Ctrl+A selects every visible row, Delete deletes the selection and Esc clears it. The tree announces itself as a multi-select list to screen readers.
+- Right-click a selected row to get the same actions for the whole selection.
 
 After a move, paste or duplicate, a notice names the item and offers **Undo**. With a row focused, Ctrl+Z undoes the last of these changes, one at a time, and Ctrl+Shift+Z or Ctrl+Y redoes them.
 

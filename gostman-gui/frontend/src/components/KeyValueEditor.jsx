@@ -37,7 +37,7 @@ function ColumnLabels({ columns, typed, keyLabel, valueLabel }) {
   )
 }
 
-function ValueCell({ row, label, onChange }) {
+function ValueCell({ row, label, suggest, onChange }) {
   if (isFileRow(row)) {
     return <FileField fileName={row.fileName} data={row.data} path={row.path} onChange={onChange} />
   }
@@ -45,6 +45,7 @@ function ValueCell({ row, label, onChange }) {
     <VariableInput
       value={row.value}
       title={row.value}
+      suggest={suggest}
       placeholder={label}
       aria-label={label}
       spellCheck={false}
@@ -54,7 +55,7 @@ function ValueCell({ row, label, onChange }) {
   )
 }
 
-function Row({ row, columns, typed, isDraft, keyLabel, valueLabel, onChange, onReplace, onRemove }) {
+function Row({ row, columns, typed, isDraft, keyLabel, valueLabel, suggestions, onChange, onReplace, onRemove }) {
   return (
     <div className={cn(ROW_GRID, columns, !row.enabled && "opacity-50")}>
       <Checkbox
@@ -66,6 +67,7 @@ function Row({ row, columns, typed, isDraft, keyLabel, valueLabel, onChange, onR
       <VariableInput
         value={row.key}
         title={row.key}
+        suggest={suggestions?.names}
         placeholder={keyLabel}
         aria-label={keyLabel}
         spellCheck={false}
@@ -82,7 +84,7 @@ function Row({ row, columns, typed, isDraft, keyLabel, valueLabel, onChange, onR
           <option value={ROW_FILE}>{TEXT.file}</option>
         </Select>
       )}
-      <ValueCell row={row} label={valueLabel} onChange={onChange} />
+      <ValueCell row={row} label={valueLabel} suggest={suggestions && ((text) => suggestions.values(row.key, text))} onChange={onChange} />
       <IconButton label={TEXT.removeRow} icon={X} onClick={onRemove} className={cn(isDraft && "invisible")} />
     </div>
   )
@@ -116,7 +118,7 @@ function BulkEditor({ rows, keyLabel, onChange }) {
   )
 }
 
-function TableEditor({ rows, typed, keyLabel, valueLabel, onChange }) {
+function TableEditor({ rows, typed, keyLabel, valueLabel, suggestions, onChange }) {
   const columns = typed ? TYPED_COLUMNS : PLAIN_COLUMNS
   const shown = [...rows, draftRow(typed)]
 
@@ -137,6 +139,7 @@ function TableEditor({ rows, typed, keyLabel, valueLabel, onChange }) {
             isDraft={index === rows.length}
             keyLabel={keyLabel}
             valueLabel={valueLabel}
+            suggestions={suggestions}
             onChange={(patch) => replaceRow(index, { ...row, ...patch })}
             onReplace={(replacement) => replaceRow(index, replacement)}
             onRemove={() => removeRow(index)}
@@ -163,7 +166,7 @@ function ModeSwitch({ rows, showsBulk, onSwitch }) {
   )
 }
 
-export function KeyValueEditor({ rows, onChange, keyLabel = TEXT.key, valueLabel = TEXT.value, typed = false, children }) {
+export function KeyValueEditor({ rows, onChange, keyLabel = TEXT.key, valueLabel = TEXT.value, typed = false, suggestions, children }) {
   const [isBulk, setIsBulk] = useState(false)
   const showsBulk = isBulk && !typed
 
@@ -172,7 +175,7 @@ export function KeyValueEditor({ rows, onChange, keyLabel = TEXT.key, valueLabel
       {showsBulk ? (
         <BulkEditor rows={rows} keyLabel={keyLabel} onChange={onChange} />
       ) : (
-        <TableEditor rows={rows} typed={typed} keyLabel={keyLabel} valueLabel={valueLabel} onChange={onChange} />
+        <TableEditor rows={rows} typed={typed} keyLabel={keyLabel} valueLabel={valueLabel} suggestions={suggestions} onChange={onChange} />
       )}
       {!typed && (
         <div className="mt-2 flex justify-end">

@@ -8,6 +8,7 @@ import { AuthPanel } from "./AuthPanel"
 import { CollectionVariablesTable } from "./CollectionVariablesTable"
 import { EnvironmentTable } from "./EnvironmentTable"
 import { KeyValueEditor } from "./KeyValueEditor"
+import { HEADER_SUGGESTIONS } from "../lib/httpHeaders"
 import { MarkdownField } from "./MarkdownField"
 import { AssertionEditor, ScriptEditor } from "./TestsPanel"
 import { isPlainObject, parseJSON } from "../lib/dataUtils"
@@ -229,6 +230,8 @@ function useScope(scope) {
   return { source, folder, isCollection, ownsCollectionList, rootNote, parentSource, parentSourceType, title }
 }
 
+const SETTINGS_WINDOW = { id: "folder-settings", width: 768, height: 576, minWidth: 480, minHeight: 360 }
+
 export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
   const [tab, setTab] = useState(TAB_HEADERS)
   const { source, folder, isCollection, ownsCollectionList, rootNote, parentSource, parentSourceType, title } = useScope(scope)
@@ -245,7 +248,7 @@ export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
   const path = `settings/${scope.folderId || "collection"}`
 
   return (
-    <Dialog label={title} size="lg" onClose={onClose}>
+    <Dialog label={title} size="lg" floating={SETTINGS_WINDOW} onClose={onClose}>
       <Tabs value={tab} onValueChange={setTab} className="flex min-h-0 flex-1 flex-col">
         <DialogHeader onClose={onClose}>
           <DialogTitle>{title}</DialogTitle>
@@ -260,6 +263,7 @@ export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
                 rows={parseRows(settings.headers)}
                 onChange={(rows) => patch({ headers: serializeRows(rows) })}
                 keyLabel={TEXT.headerLabel}
+                suggestions={HEADER_SUGGESTIONS}
               />
             </Panel>
           </TabsContent>

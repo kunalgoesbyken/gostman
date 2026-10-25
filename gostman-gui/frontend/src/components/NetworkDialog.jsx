@@ -216,6 +216,8 @@ function CollectionSection({ actions }) {
   )
 }
 
+const NETWORK_WINDOW = { id: "network", width: 768, height: 576, minWidth: 480, minHeight: 320 }
+
 export function NetworkDialog({ settings, actions, onClose }) {
   const [draft, setDraft] = useState(settings)
   const [failure, setFailure] = useState("")
@@ -235,7 +237,7 @@ export function NetworkDialog({ settings, actions, onClose }) {
   }
 
   return (
-    <Dialog label={TEXT.title} size={actions.canConfigureNetwork ? "lg" : "sm"} onClose={onClose}>
+    <Dialog label={TEXT.title} size={actions.canConfigureNetwork ? "lg" : "sm"} floating={actions.canConfigureNetwork ? NETWORK_WINDOW : undefined} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <DialogTitle>{TEXT.title}</DialogTitle>
       </DialogHeader>
