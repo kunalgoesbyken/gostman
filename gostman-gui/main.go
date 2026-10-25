@@ -12,7 +12,6 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
-	"github.com/wailsapp/wails/v2/pkg/options/windows"
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -66,7 +65,7 @@ func main() {
 		OnStartup:        app.startup,
 		OnShutdown:       app.stopServers,
 		Menu:             applicationMenu(),
-		Windows:          &windows.Options{Theme: theme.frame, WindowIsTranslucent: true, BackdropType: windows.Mica},
+		Windows:          windowsOptions(theme),
 		Mac:              &mac.Options{OnUrlOpen: app.receiveLink},
 		Bind:             []interface{}{app},
 		SingleInstanceLock: &options.SingleInstanceLock{

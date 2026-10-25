@@ -43,6 +43,13 @@ func savedWindowTheme() windowTheme {
 	return windowThemes[defaultWindowTheme]
 }
 
+func windowsOptions(theme windowTheme) *windows.Options {
+	if !supportsSystemBackdrop() {
+		return &windows.Options{Theme: theme.frame}
+	}
+	return &windows.Options{Theme: theme.frame, WindowIsTranslucent: true, BackdropType: windows.Mica}
+}
+
 func (a *App) applyWindowTheme(theme windowTheme) {
 	theme.applyFrame(a.ctx)
 	wailsruntime.WindowSetBackgroundColour(a.ctx, theme.background.R, theme.background.G, theme.background.B, theme.background.A)
