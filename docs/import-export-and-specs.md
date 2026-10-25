@@ -122,7 +122,7 @@ Pasting a share link, or choosing a share file, shows a preview with the request
 
 The **Export** tab previews the content, shows how many requests, folders and environments the collection has, and offers a copy button and **Save file**. With more than one collection, **Collection** exports one of them, with its own and the shared environments, or all of them; the file is named after the collection. A secret scan runs on the collection and shows a notice when it finds credentials; it does not block the export, see [Notices in Share and Export](runner-load-and-scan.md#notices-in-share-and-export). The preview shows the first 20,000 characters; the saved file is complete.
 
-![The Export tab with the Gostman format selected, a warning that one possible secret is written into the export, and the export preview](../screenshots/export.png)
+![The Export tab with All collections and the Gostman format selected, Copy and Save file buttons, a note that secret values are left out, and the export preview](../screenshots/export.png)
 
 | Format | What you get |
 | --- | --- |
