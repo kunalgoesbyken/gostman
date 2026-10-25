@@ -26,7 +26,7 @@ Send it again to confirm nothing changed. See [Variables](variables.md) for ever
 ## 3. Group requests in a folder
 
 1. Create a folder named **Todos** with the folder button in the sidebar and drag **List todos** into it.
-2. Open the folder's **Settings** from its menu, add a header `Accept: application/json` on the **Headers** tab and close the dialog. Folder settings are saved as you change them.
+2. Open the folder's menu and choose **Collection settings** (a folder at the top level of the sidebar is a collection), add a header `Accept: application/json` on the **Headers** tab and close the dialog. Folder settings are saved as you change them.
 
 Every request in the folder now sends that header without repeating it. Auth, variables, scripts and assertions can be set on a folder the same way; see [Folder and collection settings](folder-settings.md).
 

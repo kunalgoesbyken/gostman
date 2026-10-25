@@ -48,6 +48,10 @@ const exchange = async (backend, payload, environmentId) => withToken(payload.co
 
 function pause(milliseconds, signal) {
   return new Promise((resolve, reject) => {
+    if (signal.aborted) {
+      reject(new Error(OAUTH_TEXT.cancelled))
+      return
+    }
     const timer = setTimeout(resolve, milliseconds)
     signal.addEventListener('abort', () => {
       clearTimeout(timer)
@@ -62,6 +66,7 @@ async function pollDevice(backend, payload, started, signal) {
   while (Date.now() < deadline) {
     await pause(interval, signal)
     const token = await backend.fetchToken({ ...payload, deviceCode: started.deviceCode })
+    if (signal.aborted) throw new Error(OAUTH_TEXT.cancelled)
     if (token.slowDown) interval += SLOW_DOWN_MS
     if (!token.pending) return token
   }
@@ -69,14 +74,16 @@ async function pollDevice(backend, payload, started, signal) {
 }
 
 async function deviceToken(backend, payload, onDevice) {
-  const started = await backend.startDeviceAuthorization(payload)
-  if (started.error) throw new Error(started.error)
-  onDevice?.({ userCode: started.userCode, verificationUri: started.verificationUriComplete || started.verificationUri })
-  deviceSignIn = new AbortController()
+  const controller = new AbortController()
+  deviceSignIn = controller
   try {
-    return await pollDevice(backend, payload, started, deviceSignIn.signal)
+    const started = await backend.startDeviceAuthorization(payload)
+    if (started.error) throw new Error(started.error)
+    if (controller.signal.aborted) throw new Error(OAUTH_TEXT.cancelled)
+    onDevice?.({ userCode: started.userCode, verificationUri: started.verificationUriComplete || started.verificationUri })
+    return await pollDevice(backend, payload, started, controller.signal)
   } finally {
-    deviceSignIn = null
+    if (deviceSignIn === controller) deviceSignIn = null
   }
 }
 

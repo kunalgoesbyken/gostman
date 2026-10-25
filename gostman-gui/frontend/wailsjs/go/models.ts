@@ -1347,6 +1347,7 @@ export namespace importer {
 	    globals?: workspace.Environment[];
 	    variables: Record<string, string>;
 	    variablesMeta?: string;
+	    settings?: workspace.Settings;
 	    warnings: string[];
 	    notes?: string[];
 	    skipped: string[];
@@ -1369,6 +1370,7 @@ export namespace importer {
 	        this.globals = this.convertValues(source["globals"], workspace.Environment);
 	        this.variables = source["variables"];
 	        this.variablesMeta = source["variablesMeta"];
+	        this.settings = this.convertValues(source["settings"], workspace.Settings);
 	        this.warnings = source["warnings"];
 	        this.notes = source["notes"];
 	        this.skipped = source["skipped"];

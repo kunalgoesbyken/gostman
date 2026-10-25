@@ -121,7 +121,6 @@ export const REFERENCE_TEXT = {
     "bitwarden-secrets": "value",
   },
   version: "Version",
-  versionPlaceholder: "latest",
   test: "Test",
   testing: "Testing",
   worked: (length) => `Read the secret: ${pluralize(length, 'character')}`,

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
@@ -26,6 +27,7 @@ const (
 
 	droppedVariableNotice = "%s from %q was not saved because %q also sets it. Set it in that folder's variables if you need both."
 	droppedSharedNotice   = "%s from %q was not saved because a shared collection variable also sets it. Set it in that folder's variables if you need both."
+	renamedEnvironment    = "The environment %q of %q is saved as %q, because a folder workspace keeps one list of environments and another one has the same name."
 )
 
 type WorkspaceStatus struct {
@@ -139,11 +141,16 @@ func (s folderStore) saveRequests(requests []Request) error {
 	return s.write(func() error { return s.folder.SaveRequests(toFileRequests(requests)) })
 }
 
-func (s folderStore) deleteRequest(id string) error {
-	if err := s.remember(func(memory *workspaceMemory) { delete(memory.Tokens, id) }); err != nil {
+func (s folderStore) deleteRequests(ids []string) error {
+	forget := func(memory *workspaceMemory) {
+		for _, id := range ids {
+			delete(memory.Tokens, id)
+		}
+	}
+	if err := s.remember(forget); err != nil {
 		return err
 	}
-	return s.write(func() error { return s.folder.DeleteRequest(id) })
+	return s.write(func() error { return s.folder.DeleteRequests(ids) })
 }
 
 func (s folderStore) saveFolders(folders []Folder) error {
@@ -321,7 +328,8 @@ func (a *App) SaveCollectionToFolder(path string) (WorkspaceStatus, error) {
 	if err != nil {
 		return WorkspaceStatus{}, err
 	}
-	stripped, secrets := splitSecrets(data.Environments)
+	shared, renamed := sharedEnvironments(data.Environments, data.Folders)
+	stripped, secrets := splitSecrets(shared)
 	data.Environments = stripped
 	var dropped []workspace.DroppedVariable
 	data.CollectionVariables, data.CollectionVariablesMeta, dropped = workspace.FoldVariableLists(data.CollectionVariables, data.CollectionVariablesMeta, folderLists(data.Folders))
@@ -351,7 +359,53 @@ func (a *App) SaveCollectionToFolder(path string) (WorkspaceStatus, error) {
 	}
 	announcePlacement(chosen, target)
 	announceDropped(dropped)
+	for _, notice := range renamed {
+		storage.announce(notice)
+	}
 	return activate(folder)
+}
+
+func sharedEnvironments(environments []Environment, folders []Folder) ([]Environment, []string) {
+	names := map[string]string{}
+	for _, folder := range folders {
+		names[folder.Id] = folder.Name
+	}
+	scopeOf := func(environment Environment) string {
+		if _, known := names[environment.FolderId]; known {
+			return environment.FolderId
+		}
+		return ""
+	}
+	scopes := map[string]map[string]bool{}
+	taken := map[string]bool{}
+	for _, environment := range environments {
+		if scopes[environment.Name] == nil {
+			scopes[environment.Name] = map[string]bool{}
+		}
+		scopes[environment.Name][scopeOf(environment)] = true
+		taken[environment.Name] = true
+	}
+	var notices []string
+	shared := slices.Clone(environments)
+	for i, environment := range shared {
+		scope := scopeOf(environment)
+		if scope == "" || len(scopes[environment.Name]) < 2 {
+			continue
+		}
+		renamed := unusedName(fmt.Sprintf("%s (%s)", environment.Name, names[scope]), taken)
+		notices = append(notices, fmt.Sprintf(renamedEnvironment, environment.Name, names[scope], renamed))
+		shared[i].Name = renamed
+	}
+	return shared, notices
+}
+
+func unusedName(wanted string, taken map[string]bool) string {
+	name := wanted
+	for count := 2; taken[name]; count++ {
+		name = fmt.Sprintf("%s %d", wanted, count)
+	}
+	taken[name] = true
+	return name
 }
 
 func announceDropped(dropped []workspace.DroppedVariable) {

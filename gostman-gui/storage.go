@@ -10,7 +10,7 @@ import (
 type collectionStore interface {
 	collection(data SavedData) (SavedData, error)
 	saveRequests(requests []Request) error
-	deleteRequest(id string) error
+	deleteRequests(ids []string) error
 	saveFolders(folders []Folder) error
 	saveEnvironments(environments []Environment, activeId string) error
 	saveVariables(text, meta string) error
@@ -41,11 +41,15 @@ func (appDataStore) saveRequests(requests []Request) error {
 	})
 }
 
-func (appDataStore) deleteRequest(id string) error {
+func (appDataStore) deleteRequests(ids []string) error {
+	removed := make(map[string]bool, len(ids))
+	for _, id := range ids {
+		removed[id] = true
+	}
 	return mutateData(func(data *SavedData) {
 		kept := data.Requests[:0]
 		for _, request := range data.Requests {
-			if request.Id != id {
+			if !removed[request.Id] {
 				kept = append(kept, request)
 			}
 		}

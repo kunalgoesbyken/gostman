@@ -6,7 +6,7 @@ This page covers the Run requests dialog (the collection runner), the Load test 
 
 The Run requests dialog sends the requests of your collection one after another and shows the outcome of each. Open it with the **Run requests** command or the **Run requests** button at the top of the sidebar, or with **Run folder** in a folder's menu in the sidebar, which preselects that folder.
 
-Requests run in sidebar order, with their scripts, extraction rules and assertions, using the active environment, from top to bottom: a folder's requests run where the folder sits, so a Login request above a Users folder runs before every request in it. `gostman run` and an agent's `run_folder` use the same order, and so do exports and imports where the other tool allows it; see [Order of requests and folders](collections-and-git.md#order-of-requests-and-folders). WebSocket requests are skipped.
+Requests run in sidebar order, with their scripts, extraction rules and checks, each using the environment chosen for its collection (see [Environments per collection](variables.md#environments-per-collection)), from top to bottom: a folder's requests run where the folder sits, so a Login request above a Users folder runs before every request in it. `gostman run` and an agent's `run_folder` use the same order, and so do exports and imports where the other tool allows it; see [Order of requests and folders](collections-and-git.md#order-of-requests-and-folders). WebSocket requests are skipped.
 
 Scripts can change the order with `setNextRequest`; see [Scripting](scripting-and-settings.md). A pass through the run may send at most 1000 more requests than it holds, so a loop that never ends, such as a retry on a 401 that always comes back, stops the run with a message that names the request that kept jumping, and that request counts as failed.
 
@@ -38,11 +38,11 @@ A data file runs the whole selection once per row.
 - With a data file loaded, the dialog shows its name and row count. Select that button to remove the file.
 - If **Iterations** is set, only that many rows are used, up to the number of rows in the file. Without a data file, **Iterations** repeats the run that many times.
 
-The active environment's variables are restored after the run.
+Values that scripts and Extract rules write during the run are kept after it, as when you send a request on its own; only the data file's values are put back.
 
 ### Parallel runs
 
-With **Parallel** above 1, requests are sent together and do not see each other's extracted variables, so use it for requests that do not depend on each other. With several iterations, the parallel count applies inside each iteration, and iterations run one after another.
+With **Parallel** above 1, requests are sent together and see another one's extracted variables only if it finished first, so use it for requests that do not depend on each other. With several iterations, the parallel count applies inside each iteration, and iterations run one after another, in the runner and in `gostman run` alike. Values written in one iteration carry over to the next.
 
 ### Results
 

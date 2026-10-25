@@ -3,6 +3,8 @@ package runner
 import (
 	"context"
 	"encoding/json"
+	"maps"
+	"slices"
 	"time"
 
 	"github.com/kunalgoesbyken/gostman/engine"
@@ -35,7 +37,7 @@ func NewSession(policy engine.Policy) (*Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	state := &session{scripts: scripts, policy: policy, variables: variables{}, session: variables{}, common: newShared()}
+	state := &session{scripts: scripts, policy: policy, values: newValues(), common: newShared()}
 	return &Session{state: state}, nil
 }
 
@@ -44,46 +46,63 @@ func (s *Session) Enter(stored Collection, folder, name string, overrides map[st
 	if err != nil {
 		return err
 	}
-	environment, err := stored.ChooseEnvironment(folderID, name)
+	primary, byCollection, err := stored.environmentsFor(folderID, name)
 	if err != nil {
 		return err
 	}
 	if err := s.LoadCollectionVariables(stored); err != nil {
 		return err
 	}
-	environments := stored.Environments
-	starting, err := startingVariables(environments, environment, overrides)
+	chosen := map[string]string{}
+	used := []Environment{primary}
+	for _, collection := range slices.Sorted(maps.Keys(byCollection)) {
+		chosen[collection] = byCollection[collection].ID
+		used = append(used, byCollection[collection])
+	}
+	slots, resolved, err := startingSlots(stored.Environments, used, overrides)
 	if err != nil {
 		return err
 	}
-	resolved, err := resolveReferences(context.Background(), environments, environment, overrides)
-	if err != nil {
-		return err
-	}
-	starting.override(resolved)
-	s.state.variables = starting
-	s.state.session = variables{}
+	s.state.values.useEnvironments(primary.ID, slots, chosen, stored.lineages()(folderID))
 	s.resolved = resolved
 	s.state.common.keepSecrets(resolved)
-	s.state.environment = environment.Name
 	return nil
 }
 
+func startingSlots(environments, used []Environment, overrides map[string]string) (map[string]*environmentSlot, map[string]string, error) {
+	slots := map[string]*environmentSlot{}
+	resolved := map[string]string{}
+	for _, environment := range used {
+		if slots[environment.ID] != nil {
+			continue
+		}
+		found, err := resolveReferences(context.Background(), environments, environment, overrides)
+		if err != nil {
+			return nil, nil, err
+		}
+		if slots[environment.ID], err = startingSlot(environments, environment, overrides, found); err != nil {
+			return nil, nil, err
+		}
+		maps.Copy(resolved, found)
+	}
+	return slots, resolved, nil
+}
+
 func (s *Session) LoadCollectionVariables(stored Collection) error {
-	base, err := baseScopes(stored)
+	process, collection, err := baseScopes(stored)
 	if err != nil {
 		return err
 	}
-	s.state.collection = layered(base...)
+	s.state.values.load(process, collection)
 	return nil
 }
 
 func (s *Session) Environment() string {
-	return s.state.environment
+	return s.state.values.primaryName()
 }
 
 func (s *Session) Set(overrides map[string]string) {
-	s.state.variables.override(overrides)
+	s.state.values.setEnvironment(overrides)
 }
 
 func (s *Session) SignIn(token engine.Token) {
@@ -91,7 +110,7 @@ func (s *Session) SignIn(token engine.Token) {
 }
 
 func (s *Session) Remember(values map[string]string) {
-	s.state.session.override(values)
+	s.state.values.remember(values)
 }
 
 func (s *Session) Watch(witness func(engine.Request)) {
@@ -112,7 +131,7 @@ func (e Environment) Values() (map[string]string, error) {
 }
 
 func (s *Session) Variables() map[string]string {
-	return s.state.current().plain()
+	return s.state.values.current().plain()
 }
 
 func (s *Session) Observed() map[string]string {
@@ -127,8 +146,12 @@ func (s *Session) Tokens() []engine.OAuth2 {
 	return s.state.common.tokenList()
 }
 
-func (s *Session) Send(ctx context.Context, request Request, folder string) Outcome {
+func (s *Session) Send(ctx context.Context, request Request, folder string, arguments map[string]string) Outcome {
+	s.state.once = variables{}
+	s.state.once.override(arguments)
 	exchanged, err := s.state.execute(ctx, request)
+	s.state.once = nil
+	s.state.common.publish(s.state.scoped(request).plain())
 	if err != nil {
 		exchanged.stop(err.Error())
 	}
@@ -145,22 +168,20 @@ func (s *Session) Run(ctx context.Context, stored Collection, options Options, o
 	if err != nil {
 		return Report{}, err
 	}
-	base, err := baseScopes(stored)
+	folderID, err := s.folderID(stored.Folders, options.Folder)
 	if err != nil {
 		return Report{}, err
 	}
-	owned, err := s.collectionLayers(stored, options.Folder)
-	if err != nil {
+	if err := s.LoadCollectionVariables(stored); err != nil {
 		return Report{}, err
 	}
-	base = append(base, owned...)
+	s.state.values.focusOn(stored.lineages()(folderID))
 	s.state.modules = stored.Modules
 	if options.SignIn != (engine.Token{}) {
 		s.state.common.signIn = options.SignIn
 	}
 	s.state.contract = newContract(options.Contract)
-	s.state.collection = layered(base...)
-	s.state.session.override(options.Variables)
+	s.state.values.remember(options.Variables)
 	if err := s.state.learn(planned.library); err != nil {
 		return Report{}, err
 	}
@@ -169,12 +190,10 @@ func (s *Session) Run(ctx context.Context, stored Collection, options Options, o
 		options.OnPlanned(total)
 	}
 	started := time.Now()
-	before := layered(s.state.session)
 	results := s.state.runAll(ctx, planned, options, observe)
-	s.state.session.withdraw(options.Data, before)
 	report := Report{
 		Version:     ReportVersion,
-		Environment: s.state.environment,
+		Environment: s.state.values.environmentNames(),
 		StartedAt:   started.UTC(),
 		DurationMs:  time.Since(started).Milliseconds(),
 		Summary:     summarize(results, total),

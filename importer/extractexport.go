@@ -86,12 +86,8 @@ func jsonPathMembers(path string) (string, bool) {
 	if !found || members == "" {
 		return "", found
 	}
-	program, err := parser.ParseFile(nil, "", path, 0)
-	if err != nil || len(program.Body) != 1 {
-		return "", false
-	}
-	statement, ok := program.Body[0].(*ast.ExpressionStatement)
-	return members, ok && isMemberPath(statement.Expression, jsonPathRootName)
+	expression, ok := soleExpression(path)
+	return members, ok && isMemberPath(expression, jsonPathRootName)
 }
 
 func withoutExtractLines(target *scriptTarget, source string) (string, []extractor) {

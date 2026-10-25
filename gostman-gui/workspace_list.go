@@ -133,7 +133,12 @@ func revealCommand(path string) *exec.Cmd {
 }
 
 func revealFolder(path string) error {
-	return revealFolder(path)
+	command := revealCommand(path)
+	if err := command.Start(); err != nil {
+		return err
+	}
+	go command.Wait()
+	return nil
 }
 
 func (a *App) PinWorkspace(path string, pinned bool) (WorkspaceStatus, error) {

@@ -4,7 +4,7 @@ import { mayBeSpec } from '../openapiSpec'
 import { normalizeRequest } from '../request'
 import { serializeRows } from '../rows'
 import { AI_TEXT } from '../aiText'
-import { describeRequest, describeResponse, maskedUrl, shapeOf } from './context'
+import { describeRequest, describeResponse, maskedUrl } from './context'
 import { SCRIPT_API, SHAPES, fence, prompt } from './prompts'
 import { ReplyError, objectsIn, parseModelObject, requireContent, stringsIn, textField } from './reply'
 import { BODY_TYPES, METHODS, SCHEMAS } from './schemas'
@@ -229,7 +229,7 @@ const docsTask = {
   build: (source) => prompt(
     'Write short documentation for this request in Markdown: purpose, parameters, expected response. Reply with {"description": string}.',
     fence('request', describeRequest(source.request)),
-    fence('last-response-shape', source.response ? shapeOf(describeResponse(source.response, false).body) : ''),
+    fence('last-response-shape', source.response ? describeResponse(source.response, false).body : ''),
   ),
   parse: (text, source) => {
     const description = textField(parseModelObject(text).description, DESCRIPTION_LIMIT)

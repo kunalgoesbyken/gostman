@@ -15,7 +15,7 @@ The command palette has **Collection settings**, which opens the settings of the
 | Auth | An auth scheme used by requests set to **Inherit** |
 | Vars | Folder variables for the requests below. In the **Collection settings** of a top-level folder, **Collection variables** switches to the collection's own collection variables, which an environment overrides, and **Folder variables** back. **Settings for all collections**, and **Collection settings** in a folder workspace, edit the shared collection variables here. Collection variables have a secret lock; folder variables have no on/off checkbox or secret lock, so keep secrets in an environment or a collection variable marked secret |
 | Script | A script under **Before the request** and one under **After the response**; at the outermost level, also **Time limit (s)** for every script |
-| Tests | Assertions checked after every response |
+| Checks | Assertions checked after every response |
 | Docs | A description shown in generated documentation |
 
 The outermost level is **Settings for all collections**, or **Collection settings** in a folder workspace. A request belongs to its folder, which may sit inside other folders; in the app's own storage the top-level one is its collection.
@@ -26,7 +26,7 @@ The outermost level is **Settings for all collections**, or **Collection setting
 
 **Auth** is chosen by the nearest level that sets one. A request whose Auth type is **Inherit** uses the auth of its folder, else its parent folder, and so on up to the outermost level. A folder whose type is left on **Inherit**, the default for folders, passes the question outward. **No auth** on a folder stops the search: requests that inherit from it are sent without authentication. The outermost level has no **Inherit** choice; when it is left on **No auth**, a request that inherits and finds no auth on the way is sent without authentication. A request that sets its own type, including **No auth**, never inherits. New requests keep **No auth** until you choose Inherit.
 
-**Variables** follow [Variables](variables.md): collection variables, then the environment, then each folder from the outermost to the request's folder, then the request's own Vars, with session values above them all. A folder variable overrides an environment variable of the same name.
+**Variables** follow [Variables](variables.md): globals, then collection variables, then the environment, then each folder from the outermost to the request's folder, then the request's own Vars, with session values above them all. A folder variable overrides an environment variable of the same name.
 
 **Scripts** run outside in before the request is sent: the outermost level's, each folder's, then the request's. After the response they run inside out: the request's, each folder's from the innermost, then the outermost level's. Each one sees the variables as they stand when it starts. A script that fails stops the request.
 

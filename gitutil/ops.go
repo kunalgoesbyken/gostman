@@ -218,7 +218,59 @@ func (r Repo) Commit(message string) (string, error) {
 	if !r.hasIdentity() {
 		return "", ErrNoIdentity
 	}
-	return r.runWriteInput([]byte(message), "commit", "-F", "-")
+	outside, err := r.stagedOutside()
+	if err != nil {
+		return "", err
+	}
+	if len(outside) == 0 || r.merging() {
+		return r.runWriteInput([]byte(message), "commit", "-F", "-")
+	}
+	return r.commitScope(message)
+}
+
+func (r Repo) stagedOutside() ([]string, error) {
+	if r.Scope == "" {
+		return nil, nil
+	}
+	out, err := r.run("diff", "--cached", "--name-only", "--no-renames", "-z")
+	if err != nil {
+		return nil, err
+	}
+	var outside []string
+	for _, file := range strings.Split(out, "\x00") {
+		if _, err := r.path(file); file != "" && err != nil {
+			outside = append(outside, file)
+		}
+	}
+	return outside, nil
+}
+
+func (r Repo) commitScope(message string) (string, error) {
+	folder, err := os.MkdirTemp("", "gostman-index-")
+	if err != nil {
+		return "", err
+	}
+	defer os.RemoveAll(folder)
+	staged, err := r.run("ls-files", "--stage", "-z", "--", r.Scope)
+	if err != nil {
+		return "", err
+	}
+	scoped := r
+	scoped.index = filepath.Join(folder, "index")
+	start := []string{"read-tree", "--empty"}
+	if r.HasCommits() {
+		start = []string{"read-tree", "HEAD"}
+	}
+	if _, err := scoped.runWrite(start...); err != nil {
+		return "", err
+	}
+	if _, err := scoped.runWrite("rm", "--cached", "-r", "-q", "--ignore-unmatch", "--", r.Scope); err != nil {
+		return "", err
+	}
+	if _, err := scoped.runWriteInput([]byte(staged), "update-index", "-z", "--index-info"); err != nil {
+		return "", err
+	}
+	return scoped.runWriteInput([]byte(message), "commit", "-F", "-")
 }
 
 func (r Repo) Fetch() (string, error) {

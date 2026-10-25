@@ -431,6 +431,11 @@ func httpEnvironmentFiles(environments []workspace.Environment, includeSecrets b
 		var meta map[string]map[string]any
 		_ = json.Unmarshal([]byte(environment.Variables), &values)
 		_ = json.Unmarshal([]byte(environment.Meta), &meta)
+		for key := range workspace.SecretNames(environment.Meta) {
+			if _, present := values[key]; !present && meta[key]["enabled"] != false {
+				values[key] = json.RawMessage(`""`)
+			}
+		}
 		name := oneLine(environment.Name)
 		if public[name] == nil {
 			public[name] = map[string]json.RawMessage{}

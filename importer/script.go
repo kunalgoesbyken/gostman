@@ -47,6 +47,7 @@ type translator struct {
 	awaitedCalls map[ast.Expression]bool
 	noted        map[string]bool
 	renamed      map[string]string
+	outerScopes  map[ast.Node]map[string]bool
 }
 
 func keptAsWritten(source, reason string) scriptTranslation {
@@ -98,8 +99,7 @@ func translateParsed(d *dialect, source string) scriptTranslation {
 }
 
 func translateBody(d *dialect, source string, body *ast.BlockStatement, renamed map[string]string) (*translator, string) {
-	t := &translator{dialect: d, source: source, wrapped: scriptPrefix + source + scriptSuffix, async: []bool{true}, declared: map[string]bool{}, needs: map[string]bool{}, noted: map[string]bool{}, awaitedCalls: map[ast.Expression]bool{}, renamed: renamed}
-	t.collectDeclared(body)
+	t := &translator{dialect: d, source: source, wrapped: scriptPrefix + source + scriptSuffix, async: []bool{true}, declared: declaredIn(body.List), needs: map[string]bool{}, noted: map[string]bool{}, awaitedCalls: map[ast.Expression]bool{}, renamed: renamed, outerScopes: map[ast.Node]map[string]bool{}}
 	return t, t.splice(len(scriptPrefix), len(scriptPrefix)+len(source), childNodes(body))
 }
 
@@ -189,6 +189,19 @@ func (t *translator) render(node ast.Node) string {
 	if t.depth > maxTreeDepth {
 		t.truncated = true
 		return t.text(node)
+	}
+	if scope, outside := t.outerScopes[node]; outside {
+		inner := t.declared
+		t.declared = scope
+		defer func() { t.declared = inner }()
+	}
+	if opensScope(node) {
+		outer := t.declared
+		t.declared = shadowedWithin(outer, node)
+		defer func() { t.declared = outer }()
+		if child := outsideScope(node); child != nil {
+			t.outerScopes[child] = outer
+		}
 	}
 	switch current := node.(type) {
 	case *ast.CallExpression:
@@ -375,6 +388,10 @@ func (t *translator) renderRooted(call *ast.CallExpression, path chain) string {
 		t.translated++
 		return replacement
 	}
+	return t.unsupportedCall(call, path, args)
+}
+
+func (t *translator) unsupportedCall(call *ast.CallExpression, path chain, args []string) string {
 	t.fail(call, messageScriptUnsupported, path.text()+"()")
 	return t.text(call.Callee) + "(" + strings.Join(args, ", ") + ")"
 }
@@ -388,7 +405,7 @@ func (t *translator) keepNative(node ast.Node, label string, supported bool, kep
 
 func (t *translator) renderAliasCall(call *ast.CallExpression, path chain) string {
 	args := t.renderArguments(call)
-	if replacement, ok := responseCall(t.bindingName(path.root), path.path(), args); ok {
+	if replacement, ok := responseCall(t.bindingName(path.root), path.path(), args, call.ArgumentList); ok {
 		t.translated++
 		return replacement
 	}
@@ -397,7 +414,7 @@ func (t *translator) renderAliasCall(call *ast.CallExpression, path chain) strin
 
 func (t *translator) callRule(call *ast.CallExpression, path chain, args []string) (string, bool) {
 	if response, isResponse := t.dialect.responsePath(path); isResponse {
-		return responseCall(responseRoot, response, args)
+		return responseCall(responseRoot, response, args, call.ArgumentList)
 	}
 	rule, found := t.dialect.calls[path.text()]
 	if found {
@@ -428,6 +445,8 @@ func (t *translator) collectDeclared(root ast.Node) {
 			t.declareIdentifier(current.Name)
 		case *ast.CatchStatement:
 			t.declareTarget(current.Parameter)
+		case *ast.ForDeclaration:
+			t.declareTarget(current.Target)
 		case *ast.ParameterList:
 			t.declareTarget(current.Rest)
 		}
@@ -442,14 +461,33 @@ func (t *translator) declareIdentifier(identifier *ast.Identifier) {
 }
 
 func (t *translator) declareTarget(target ast.Node) {
-	if target == nil {
-		return
-	}
-	visit(target, func(node ast.Node) {
-		if identifier, ok := node.(*ast.Identifier); ok {
-			t.declared[string(identifier.Name)] = true
+	switch current := target.(type) {
+	case *ast.Identifier:
+		t.declareIdentifier(current)
+	case *ast.ArrayPattern:
+		for _, element := range current.Elements {
+			t.declareTarget(element)
 		}
-	}, 0)
+		t.declareTarget(current.Rest)
+	case *ast.ObjectPattern:
+		for _, property := range current.Properties {
+			t.declareTarget(property)
+		}
+		t.declareTarget(current.Rest)
+	case *ast.PropertyShort:
+		t.declareIdentifier(&current.Name)
+	case *ast.PropertyKeyed:
+		t.declareTarget(current.Value)
+	case *ast.AssignExpression:
+		t.declareTarget(current.Left)
+	}
+}
+
+func (t *translator) declareParameters(parameters *ast.ParameterList) {
+	if parameters != nil {
+		t.declareBindings(parameters.List)
+		t.declareTarget(parameters.Rest)
+	}
 }
 
 func visit(node ast.Node, run func(ast.Node), depth int) {

@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/dop251/goja/ast"
-	"github.com/dop251/goja/parser"
 )
 
 const (
@@ -43,20 +42,20 @@ var checkRules = map[string]checkRule{
 	"gte":         {label: "is at least", code: numberCheck("at.least")},
 	"lt":          {label: "is less than", code: numberCheck("below")},
 	"lte":         {label: "is at most", code: numberCheck("at.most")},
-	"contains":    {label: "contains", code: valueCheck("to.include")},
-	"notContains": {label: "does not contain", code: valueCheck("to.not.include")},
+	"contains":    {label: "contains", code: includesCheck("true")},
+	"notContains": {label: "does not contain", code: includesCheck("false")},
 	"startsWith":  {label: "starts with", code: textCheck("startsWith")},
 	"endsWith":    {label: "ends with", code: textCheck("endsWith")},
 	"matches": {label: "matches regex", code: func(actual string, expected checkValue) string {
-		return fmt.Sprintf("expect(String(%s)).to.match(new RegExp(%s))", actual, expected.text())
+		return fmt.Sprintf("expect(String(%s)).to.match(new RegExp(String(%s)))", actual, expected.literal)
 	}},
 	"in":          {label: "is one of", code: oneOfCheck},
-	"length":      {label: "has length", code: valueCheck("to.have.lengthOf")},
+	"length":      {label: "has length", code: lengthCheck},
 	"isDefined":   {label: "is defined", unary: true, code: unaryCheck("to.not.be.undefined")},
 	"isUndefined": {label: "is undefined", unary: true, code: unaryCheck("to.be.undefined")},
 	"isNull":      {label: "is null", unary: true, code: unaryCheck("to.be.null")},
-	"isEmpty":     {label: "is empty", unary: true, code: unaryCheck("to.be.empty")},
-	"isNotEmpty":  {label: "is not empty", unary: true, code: unaryCheck("to.not.be.empty")},
+	"isEmpty":     {label: "is empty", unary: true, code: emptyCheck("true")},
+	"isNotEmpty":  {label: "is not empty", unary: true, code: emptyCheck("false")},
 	"isTrue":      {label: "is true", unary: true, code: unaryCheck("to.be.true")},
 	"isFalse":     {label: "is false", unary: true, code: unaryCheck("to.be.false")},
 	"isNumber":    {label: "is a number", unary: true, code: unaryCheck(`to.be.a("number")`)},
@@ -89,18 +88,11 @@ func readCheckValue(raw string) checkValue {
 	return checkValue{raw: raw, literal: jsString(raw)}
 }
 
-func (v checkValue) text() string {
-	if v.placeholder || strings.HasPrefix(v.literal, `"`) {
+func (v checkValue) number() string {
+	if v.isNumber() {
 		return v.literal
 	}
-	return jsString(v.raw)
-}
-
-func (v checkValue) number() string {
-	if v.placeholder {
-		return "Number(" + v.literal + ")"
-	}
-	return v.literal
+	return "Number(" + v.literal + ")"
 }
 
 func equalCheck(chainText string) func(string, checkValue) string {
@@ -124,15 +116,25 @@ func numberCheck(method string) func(string, checkValue) string {
 	}
 }
 
-func valueCheck(chainText string) func(string, checkValue) string {
+func includesCheck(outcome string) func(string, checkValue) string {
 	return func(actual string, expected checkValue) string {
-		return fmt.Sprintf("expect(%s).%s(%s)", actual, chainText, expected.literal)
+		return fmt.Sprintf(inclusion, actual, expected.literal, outcome)
 	}
 }
 
 func textCheck(method string) func(string, checkValue) string {
 	return func(actual string, expected checkValue) string {
-		return fmt.Sprintf("expect(%s).to.satisfy((value) => String(value).%s(%s))", actual, method, expected.text())
+		return fmt.Sprintf("expect(%s).to.satisfy((value) => String(value).%s(String(%s)))", actual, method, expected.literal)
+	}
+}
+
+func lengthCheck(actual string, expected checkValue) string {
+	return fmt.Sprintf("const size = ((value) => %s)(%s);\n  %s", sizeOfValue, actual, equalCheck("to")("size", expected))
+}
+
+func emptyCheck(outcome string) func(string, checkValue) string {
+	return func(actual string, _ checkValue) string {
+		return fmt.Sprintf("const value = %s;\n  expect(value === null || value === undefined || %s === 0).to.be.%s", actual, sizeOfValue, outcome)
 	}
 }
 
@@ -143,17 +145,11 @@ func unaryCheck(chainText string) func(string, checkValue) string {
 }
 
 func oneOfCheck(actual string, expected checkValue) string {
-	if expected.placeholder {
-		return fmt.Sprintf("expect(String(%s)).to.be.oneOf(%s.split(\",\").map((item) => item.trim()))", actual, expected.literal)
-	}
+	choices := fmt.Sprintf("String(%s).split(\",\").map((item) => item.trim())", expected.literal)
 	if strings.HasPrefix(expected.literal, "[") {
-		return fmt.Sprintf("expect(%s).to.be.oneOf(%s)", actual, expected.literal)
+		choices = expected.literal + ".map(text)"
 	}
-	var items []string
-	for _, item := range strings.Split(expected.raw, ",") {
-		items = append(items, readCheckValue(strings.TrimSpace(item)).literal)
-	}
-	return fmt.Sprintf("expect(%s).to.be.oneOf([%s])", actual, strings.Join(items, ", "))
+	return fmt.Sprintf(oneOfEquality, actual, choices)
 }
 
 func readChecks(source string) []checkRow {
@@ -190,12 +186,8 @@ func (row checkRow) title() string {
 
 func checkExpression(expression string) (string, bool) {
 	trimmed := strings.TrimPrefix(strings.TrimSpace(expression), pathRootPrefix)
-	program, err := parser.ParseFile(nil, "", trimmed, 0)
-	if err != nil || len(program.Body) != 1 {
-		return "", false
-	}
-	statement, ok := program.Body[0].(*ast.ExpressionStatement)
-	if !ok || !isMemberPath(statement.Expression, checkRoot) {
+	parsed, ok := soleExpression(trimmed)
+	if !ok || !isMemberPath(parsed, checkRoot) {
 		return "", false
 	}
 	return trimmed, true

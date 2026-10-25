@@ -332,9 +332,9 @@ func (c *collector) brunoScripts(d *dialect, file bruFile, label string) (string
 
 func (c *collector) brunoRequestScripts(d *dialect, file bruFile, label string) (string, string, []extractor, []assertion) {
 	pre := c.translateScript(d, label, stagePre, file.text("script:pre-request"))
-	after, rules, _ := c.translateAfterScript(d, label, stageAfter, file.text("script:post-response"))
-	tests, _, rows := c.translateAfterScript(d, label, stagePost, file.text("tests"))
-	return pre, joinScripts([]string{after, tests}), rules, rows
+	after, rules, rows := c.translateAfterScript(d, label, stageAfter, file.text("script:post-response"))
+	tests, testRules, testRows := c.translateAfterScript(d, label, stagePost, file.text("tests"))
+	return pre, joinScripts([]string{after, tests}), append(rules, testRules...), append(rows, testRows...)
 }
 
 func (c *collector) withTests(d *dialect, file bruFile, label, after string) string {
@@ -411,7 +411,9 @@ func (c *collector) importBrunoRequest(ctx treeContext, file brunoFile, folderID
 	var peeled []extractor
 	var checks []assertion
 	request.preScript, request.postScript, peeled, checks = c.brunoRequestScripts(ctx.dialect, bru, label)
-	request.assertions = c.brunoAssertions(bru.entries("assert"), name, checks)
+	rows, tests := c.brunoChecks(ctx.dialect, label, brunoAssertChecks(bru.entries("assert")))
+	request.postScript = joinScripts([]string{request.postScript, tests})
+	request.assertions = jsonList(append(rows, checks...))
 	var block string
 	switch {
 	case bru.has(brunoGrpcBlock):
@@ -575,24 +577,12 @@ func fileReference(value string) (string, bool) {
 	return path.Base(target), true
 }
 
-func (c *collector) brunoAssertions(entries []bruEntry, name string, restored []assertion) string {
-	var assertions []assertion
-	for _, entry := range entries {
-		operator, value, _ := strings.Cut(entry.Value, " ")
-		if rule, ok := c.assertionRule(name, entry.Key, operator, strings.TrimSpace(value), entry.Enabled); ok {
-			assertions = append(assertions, rule)
-		}
+func brunoAssertChecks(entries []bruEntry) []brunoCheck {
+	checks := make([]brunoCheck, len(entries))
+	for index, entry := range entries {
+		checks[index] = readBrunoCheck(entry.Key, entry.Value, entry.Enabled)
 	}
-	return jsonList(append(assertions, restored...))
-}
-
-func (c *collector) assertionRule(name, expression, operator, value string, enabled bool) (assertion, bool) {
-	mapped, known := brunoAssertOperators[operator]
-	if !known {
-		c.skip(messageAssertOperator, name, expression, operator)
-		return assertion{}, false
-	}
-	return assertion{Expression: expression, Operator: mapped, Value: value, Enabled: enabled}, true
+	return checks
 }
 
 func (c *collector) brunoExtractors(file bruFile, name string) string {

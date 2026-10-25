@@ -7,7 +7,7 @@
 | Code | Meaning |
 | --- | --- |
 | 0 | every request and check passed |
-| 1 | a check or a script failed, or the run was interrupted |
+| 1 | a check, a script or an MCP tool call failed, or the run was interrupted |
 | 2 | the command or the input is wrong |
 | 3 | a request got no response: it could not be sent, the connection failed or timed out |
 
@@ -194,6 +194,6 @@ New releases publish `ghcr.io/kunalgoesbyken/gostman` for `linux/amd64` and `lin
 docker run --rm -v "$PWD:/workspace" -e API_TOKEN ghcr.io/kunalgoesbyken/gostman run api --env CI --var-from-env API_TOKEN
 ```
 
-The `Dockerfile` at the root of the repository builds the same image: `docker build -t gostman --build-arg VERSION=1.7.1 .`
+The `Dockerfile` at the root of the repository builds the same image with `docker build -t gostman .`. `gostman version` then prints `dev`; add `--build-arg VERSION=<version>` to set it.
 
 The container works in `/workspace`. The mounted folder must be readable by the image user (uid 65532), and writable if reports are written there. The image has no shell, so pass the arguments to `gostman` directly, as `docker run` does above. It cannot be the job image of a GitLab CI job, because GitLab runs `script:` lines in a shell; use the [GitLab CI](#gitlab-ci) recipe there.

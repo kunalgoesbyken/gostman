@@ -1,5 +1,5 @@
 import { SCHEMA_TEXT } from './checksText'
-import { isPlainObject, parseJSON } from './dataUtils'
+import { isPlainObject, lookup, parseJSON } from './dataUtils'
 import { FORMAT_CHECKS } from './schemaFormats'
 
 const MAX_DEPTH = 96
@@ -45,7 +45,9 @@ const unescapeToken = (token) => decodeToken(token).replaceAll('~1', '/').replac
 
 function resolveReference(root, reference) {
   if (!reference.startsWith('#')) throw new Error(SCHEMA_TEXT.external(reference))
-  const tokens = reference.slice(1).split('/').slice(1).map(unescapeToken)
+  const pointer = reference.slice(1)
+  if (pointer !== '' && !pointer.startsWith('/')) throw new Error(SCHEMA_TEXT.unresolved(reference))
+  const tokens = pointer.split('/').slice(1).map(unescapeToken)
   const target = tokens.reduce((node, token) => (node !== null && typeof node === 'object' && Object.hasOwn(node, token) ? node[token] : undefined), root)
   if (target === undefined) throw new Error(SCHEMA_TEXT.unresolved(reference))
   return target
@@ -66,7 +68,7 @@ const isNullable = (schema) => schema.nullable === true || schema['x-nullable'] 
 function checkType(schema, data, path) {
   if (schema.type === undefined) return []
   const expected = [].concat(schema.type)
-  return expected.some((type) => TYPE_CHECKS[type]?.(data)) ? [] : [problem(path, 'type', { expected, actual: data })]
+  return expected.some((type) => lookup(TYPE_CHECKS, type)?.(data)) ? [] : [problem(path, 'type', { expected, actual: data })]
 }
 
 function checkValue(schema, data, path) {
@@ -100,7 +102,7 @@ function checkString(schema, data, path) {
   if (typeof schema.minLength === 'number' && length < schema.minLength) found.push(problem(path, 'minLength', { limit: schema.minLength, actual: length }))
   if (typeof schema.maxLength === 'number' && length > schema.maxLength) found.push(problem(path, 'maxLength', { limit: schema.maxLength, actual: length }))
   if (typeof schema.pattern === 'string' && !patternOf(schema.pattern).test(data)) found.push(problem(path, 'pattern', { pattern: schema.pattern, actual: data }))
-  const format = FORMAT_CHECKS[schema.format]
+  const format = lookup(FORMAT_CHECKS, schema.format)
   if (format && !format(data)) found.push(problem(path, 'format', { format: schema.format, actual: data }))
   return found
 }
@@ -144,12 +146,17 @@ function requiredBy(schema, data) {
   return { required, pairs }
 }
 
-function checkObject(schema, data, path, inner) {
+const dependentSchemasOf = (schema) => ({
+  ...(isPlainObject(schema.dependencies) ? schema.dependencies : {}),
+  ...(isPlainObject(schema.dependentSchemas) ? schema.dependentSchemas : {}),
+})
+
+function checkObject(schema, data, path, inner, isWriteOnly) {
   if (!isPlainObject(data)) return []
   const found = []
   const keys = Object.keys(data)
   const { required, pairs } = requiredBy(schema, data)
-  required.filter((key) => !Object.hasOwn(data, key)).forEach((key) => found.push(problem([...path, key], 'required')))
+  required.filter((key) => !Object.hasOwn(data, key) && !isWriteOnly(key)).forEach((key) => found.push(problem([...path, key], 'required')))
   pairs.filter(([, needed]) => !Object.hasOwn(data, needed)).forEach(([present, needed]) => found.push(problem(path, 'dependentRequired', { present, needed })))
   const properties = isPlainObject(schema.properties) ? schema.properties : {}
   const patterns = Object.entries(isPlainObject(schema.patternProperties) ? schema.patternProperties : {}).map(([pattern, patternSchema]) => [patternOf(pattern), patternSchema])
@@ -165,9 +172,9 @@ function checkObject(schema, data, path, inner) {
   if (schema.propertyNames !== undefined) {
     keys.filter((key) => inner(schema.propertyNames, key, path).length > 0).forEach((key) => found.push(problem(path, 'propertyNames', { name: key })))
   }
-  if (isPlainObject(schema.dependentSchemas)) {
-    Object.entries(schema.dependentSchemas).filter(([key]) => Object.hasOwn(data, key)).forEach(([, dependent]) => found.push(...inner(dependent, data, path)))
-  }
+  Object.entries(dependentSchemasOf(schema))
+    .filter(([key, dependent]) => Object.hasOwn(data, key) && !Array.isArray(dependent))
+    .forEach(([, dependent]) => found.push(...inner(dependent, data, path)))
   if (typeof schema.minProperties === 'number' && keys.length < schema.minProperties) found.push(problem(path, 'minProperties', { limit: schema.minProperties, actual: keys.length }))
   if (typeof schema.maxProperties === 'number' && keys.length > schema.maxProperties) found.push(problem(path, 'maxProperties', { limit: schema.maxProperties, actual: keys.length }))
   return found
@@ -182,9 +189,9 @@ function unmatched(keyword, path, branches, data) {
   return [problem(path, keyword), ...closest]
 }
 
-function checkCombinators(schema, data, path, inner) {
+function checkAlternatives(schema, data, path, inner, chosen) {
+  if (chosen) return inner(chosen, data, path)
   const found = []
-  if (Array.isArray(schema.allOf)) schema.allOf.forEach((part) => found.push(...inner(part, data, path)))
   if (Array.isArray(schema.anyOf) && schema.anyOf.length > 0) {
     const branches = schema.anyOf.map((part) => inner(part, data, path))
     if (!branches.some((branch) => branch.length === 0)) found.push(...unmatched('anyOf', path, branches, data))
@@ -195,6 +202,13 @@ function checkCombinators(schema, data, path, inner) {
     if (passing === 0) found.push(...unmatched('oneOf', path, branches, data))
     if (passing > 1) found.push(problem(path, 'oneOfMany', { count: passing }))
   }
+  return found
+}
+
+function checkCombinators(schema, data, path, inner, chosen) {
+  const found = []
+  if (Array.isArray(schema.allOf)) schema.allOf.forEach((part) => found.push(...inner(part, data, path)))
+  found.push(...checkAlternatives(schema, data, path, inner, chosen))
   if (schema.not !== undefined && inner(schema.not, data, path).length === 0) found.push(problem(path, 'not'))
   if (schema.if !== undefined) {
     const branch = inner(schema.if, data, path).length === 0 ? schema.then : schema.else
@@ -203,22 +217,50 @@ function checkCombinators(schema, data, path, inner) {
   return found
 }
 
-function validate(root, schema, data, path, depth) {
+function referenced(root, schema) {
+  if (!isPlainObject(schema) || typeof schema.$ref !== 'string') return schema
+  try {
+    return resolveReference(root, schema.$ref)
+  } catch {
+    return schema
+  }
+}
+
+function writeOnlyCheck(context, schema) {
+  if (!context.isResponse || !isPlainObject(schema.properties)) return () => false
+  return (key) => [lookup(schema.properties, key), referenced(context.root, lookup(schema.properties, key))]
+    .some((property) => isPlainObject(property) && property.writeOnly === true)
+}
+
+const refName = (reference) => reference.split('/').pop()
+
+function discriminatedBranch(context, schema, data) {
+  const propertyName = schema.discriminator?.propertyName
+  if (!context.isResponse || typeof propertyName !== 'string' || !isPlainObject(data) || typeof data[propertyName] !== 'string') return null
+  const value = data[propertyName]
+  const mapping = isPlainObject(schema.discriminator.mapping) ? schema.discriminator.mapping : {}
+  const target = lookup(mapping, value)
+  const branches = [schema.oneOf, schema.anyOf].filter(Array.isArray).flat()
+  const matches = (branch) => isPlainObject(branch) && typeof branch.$ref === 'string' && (target ? branch.$ref === target : refName(branch.$ref) === value)
+  return branches.find(matches) ?? (typeof target === 'string' ? { $ref: target } : null)
+}
+
+function validate(context, schema, data, path, depth) {
   if (depth > MAX_DEPTH) throw new Error(SCHEMA_TEXT.tooDeep)
   if (schema === true || schema === undefined || schema === null) return []
   if (schema === false) return [problem(path, 'false')]
   if (!isPlainObject(schema)) throw new Error(SCHEMA_TEXT.notSchema)
   if (data === null && isNullable(schema)) return []
-  const inner = (part, value, at) => validate(root, part, value, at, depth + 1)
+  const inner = (part, value, at) => validate(context, part, value, at, depth + 1)
   return [
-    ...(typeof schema.$ref === 'string' ? inner(resolveReference(root, schema.$ref), data, path) : []),
+    ...(typeof schema.$ref === 'string' ? inner(resolveReference(context.root, schema.$ref), data, path) : []),
     ...checkType(schema, data, path),
     ...checkValue(schema, data, path),
     ...checkNumber(schema, data, path),
     ...checkString(schema, data, path),
     ...checkArray(schema, data, path, inner),
-    ...checkObject(schema, data, path, inner),
-    ...checkCombinators(schema, data, path, inner),
+    ...checkObject(schema, data, path, inner, writeOnlyCheck(context, schema)),
+    ...checkCombinators(schema, data, path, inner, discriminatedBranch(context, schema, data)),
   ]
 }
 
@@ -234,7 +276,10 @@ export function schemaText(value, indent) {
   return isPlainObject(parsed) || typeof parsed === 'boolean' ? JSON.stringify(parsed, null, indent) : value.trim()
 }
 
-export const schemaErrors = (schema, data, root = schema) => validate(root, readSchema(schema), data, [], 0)
+export function schemaErrors(schema, data, root, isResponse = false) {
+  const parsed = readSchema(schema)
+  return validate({ root: root ?? parsed, isResponse }, parsed, data, [], 0)
+}
 
 const segmentText = (segment) => {
   if (typeof segment === 'number') return `[${segment}]`
@@ -266,4 +311,4 @@ function describeSchemaErrors(errors) {
   return errors.length > MAX_SHOWN ? [...lines, SCHEMA_TEXT.more(errors.length - MAX_SHOWN)] : lines
 }
 
-export const schemaMismatches = (schema, data, root) => describeSchemaErrors(schemaErrors(schema, data, root))
+export const schemaMismatches = (schema, data, root, isResponse) => describeSchemaErrors(schemaErrors(schema, data, root, isResponse))

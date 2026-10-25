@@ -210,7 +210,7 @@ func (d *Desk) Tools() []mcp.Tool {
 			Name:  "import_requests",
 			Title: "Import requests",
 			Description: "Add requests to the workspace from an OpenAPI or Swagger spec, a Postman, Insomnia or Bruno collection, a HAR file, .http requests or a curl command. " +
-				"Nothing existing is changed. Scripts and OAuth 2.0 settings are removed (listed in leftOut; warnings describe the source document), " +
+				"Nothing existing is changed: the collection settings of a Gostman export are adopted only when the workspace has none. Scripts and OAuth 2.0 settings are removed (listed in leftOut; warnings describe the source document), " +
 				"and an import that holds a credential, reads local files or runs local commands is refused. Returns what was added.",
 			InputSchema: importInput,
 			Hints:       mcp.Hints{OpenWorld: true},

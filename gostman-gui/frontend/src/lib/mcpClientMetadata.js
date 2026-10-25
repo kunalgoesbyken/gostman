@@ -1,11 +1,11 @@
 import { OAUTH_CALLBACK_PATH } from './backend/oauthPopup.js'
 
 export const CLIENT_METADATA_PATH = '/oauth/client-metadata.json'
-export const DESKTOP_REDIRECT_URIS = ['http://localhost:9876/callback', 'http://127.0.0.1:9876/callback']
+const DESKTOP_REDIRECT_URIS = ['http://localhost:9876/callback', 'http://127.0.0.1:9876/callback']
 
 export const clientMetadataUrl = (siteUrl) => `${siteUrl}${CLIENT_METADATA_PATH}`
 
-export const redirectUris = (siteUrl) => [...DESKTOP_REDIRECT_URIS, `${siteUrl}${OAUTH_CALLBACK_PATH}`]
+const redirectUris = (siteUrl) => [...DESKTOP_REDIRECT_URIS, `${siteUrl}${OAUTH_CALLBACK_PATH}`]
 
 export const clientMetadata = (siteUrl) => ({
   client_id: clientMetadataUrl(siteUrl),

@@ -88,7 +88,7 @@ The hosted relay sends your request and returns the answer. It stores neither, a
 Browsers cannot call arbitrary APIs directly, so the web version relays requests through a small proxy. The consequences:
 
 - The hosted proxy cannot reach `localhost` or private network addresses. Use the desktop app for local APIs, or start `gostman relay` on your computer and choose it under **Preferences**, **Privacy**; see [Local relay for the web app](cli.md#local-relay-for-the-web-app).
-- Proxy, CA certificate and client certificate settings exist only in the desktop app.
+- The web app has no proxy, CA certificate or client certificate settings. Use the desktop app, or start `gostman relay` with `--proxy`, `--cacert` or `--client-cert`.
 - A gRPC stream is collected and shown when it ends. Messages for a client stream are written up front as a JSON array.
 - Responses larger than 3 MB are truncated. The desktop app reads up to 50 MB.
 

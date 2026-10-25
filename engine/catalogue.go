@@ -9,16 +9,11 @@ import (
 var catalogueJSON []byte
 
 type catalogueFile struct {
-	Variables []struct {
-		Name string `json:"name"`
-		Long bool   `json:"long"`
-	} `json:"variables"`
 	FakerAliases map[string]string `json:"fakerAliases"`
 }
 
 type catalogue struct {
-	aliases  map[string]string
-	longText map[string]bool
+	aliases map[string]string
 }
 
 var builtIns = loadCatalogue()
@@ -28,13 +23,7 @@ func loadCatalogue() catalogue {
 	if err := json.Unmarshal(catalogueJSON, &file); err != nil {
 		panic(err)
 	}
-	loaded := catalogue{aliases: file.FakerAliases, longText: map[string]bool{}}
-	for _, variable := range file.Variables {
-		if variable.Long {
-			loaded.longText[variable.Name] = true
-		}
-	}
-	return loaded
+	return catalogue{aliases: file.FakerAliases}
 }
 
 func (c catalogue) canonical(name string) string {

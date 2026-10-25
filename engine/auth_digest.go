@@ -24,6 +24,7 @@ const (
 	digestNonceCount = "00000001"
 	digestDefaultAlg = "MD5"
 	digestClientSize = 8
+	digestIntegrity  = "auth-int"
 	challengeDrain   = 1 << 20
 
 	headerWWWAuthenticate = "Www-Authenticate"
@@ -35,7 +36,7 @@ var (
 		"SHA-256":     sha256.New,
 		"SHA-512-256": sha512.New512_256,
 	}
-	digestQopPreference = []string{"auth", "auth-int"}
+	digestQopPreference = []string{"auth", digestIntegrity}
 )
 
 func authRoute(r Request, origin *url.URL, base http.RoundTripper) http.RoundTripper {
@@ -93,7 +94,7 @@ func (t digestRoundTripper) RoundTrip(req *http.Request) (*http.Response, error)
 	if !ok {
 		return response, nil
 	}
-	retry, body, err := replay(req)
+	retry, body, err := replay(req, challenge.qop == digestIntegrity)
 	if err != nil {
 		return response, nil
 	}
@@ -104,14 +105,17 @@ func (t digestRoundTripper) RoundTrip(req *http.Request) (*http.Response, error)
 	return t.base.RoundTrip(retry)
 }
 
-func replay(req *http.Request) (*http.Request, []byte, error) {
+func replay(req *http.Request, withBody bool) (*http.Request, []byte, error) {
 	retry := req.Clone(req.Context())
 	if req.Body == nil || req.Body == http.NoBody || req.GetBody == nil {
 		return retry, nil, nil
 	}
-	body, err := readBody(req)
-	if err != nil {
-		return nil, nil, err
+	var body []byte
+	var err error
+	if withBody {
+		if body, err = readBody(req); err != nil {
+			return nil, nil, err
+		}
 	}
 	if retry.Body, err = req.GetBody(); err != nil {
 		return nil, nil, err
@@ -270,7 +274,7 @@ func (c digestChallenge) answer(username, password, method, uri string, body []b
 		ha1 = digest(ha1 + ":" + nonce + ":" + cnonce)
 	}
 	a2 := method + ":" + uri
-	if c.qop == "auth-int" {
+	if c.qop == digestIntegrity {
 		a2 += ":" + digest(string(body))
 	}
 	ha2 := digest(a2)

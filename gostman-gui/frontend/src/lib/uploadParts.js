@@ -5,7 +5,7 @@ const ESCAPE = '\\'
 const QUOTE = '"'
 const FALLBACK_FILE = 'file.bin'
 
-export const FORM_BOUNDARY = 'GostmanFormBoundary7MA4YWxkTrZu0gW'
+const FORM_BOUNDARY = 'GostmanFormBoundary7MA4YWxkTrZu0gW'
 export const DEFAULT_PART_TYPE = 'application/octet-stream'
 
 export const isContentType = ({ key }) => key.toLowerCase() === CONTENT_TYPE

@@ -11,7 +11,10 @@ import (
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
-const curlFormSyntax = `=@<;"`
+const (
+	curlFormSyntax     = `=@<;"`
+	curlGlobCharacters = "[]{}"
+)
 
 const tokenCharacters = "!#$%&'*+-.^_`|~"
 
@@ -131,6 +134,18 @@ func (s *curlScript) list(name string) {
 
 func shellQuote(value string, onVariable func(string)) string {
 	var out strings.Builder
+	splitPlaceholders(value, func(text string) { out.WriteString(singleQuoted(text)) }, func(raw string) {
+		name := shellName(raw)
+		onVariable(name)
+		out.WriteString(`"${` + name + `}"`)
+	})
+	if out.Len() == 0 {
+		return "''"
+	}
+	return out.String()
+}
+
+func splitPlaceholders(value string, literal, variable func(string)) {
 	remaining := value
 	for remaining != "" {
 		start := strings.Index(remaining, variableOpen)
@@ -139,20 +154,20 @@ func shellQuote(value string, onVariable func(string)) string {
 			end = strings.Index(remaining[start:], variableClose)
 		}
 		if start < 0 || end < 0 {
-			out.WriteString(singleQuoted(remaining))
-			break
+			literal(remaining)
+			return
 		}
 		end += start
-		name := shellName(strings.TrimSpace(remaining[start+len(variableOpen) : end]))
-		onVariable(name)
-		out.WriteString(singleQuoted(remaining[:start]))
-		out.WriteString(`"${` + name + `}"`)
+		literal(remaining[:start])
+		variable(strings.TrimSpace(remaining[start+len(variableOpen) : end]))
 		remaining = remaining[end+len(variableClose):]
 	}
-	if out.Len() == 0 {
-		return "''"
-	}
-	return out.String()
+}
+
+func needsGlobOff(address string) bool {
+	globbed := false
+	splitPlaceholders(address, func(text string) { globbed = globbed || strings.ContainsAny(text, curlGlobCharacters) }, func(string) {})
+	return globbed
 }
 
 func singleQuoted(value string) string {
@@ -210,6 +225,9 @@ func (s *curlScript) command(request workspace.Request) string {
 		arguments = append(arguments, s.headerArgument(contentTypeHeader, contentType))
 	}
 	arguments = append(arguments, body...)
+	if needsGlobOff(address) {
+		arguments = append(arguments, "--globoff")
+	}
 	arguments = append(arguments, "--url "+s.quote(address))
 	return "# " + oneLine(request.Name) + "\n" + strings.Join(arguments, curlJoin) + "\n\n"
 }

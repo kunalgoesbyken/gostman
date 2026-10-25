@@ -21,17 +21,15 @@ const (
 )
 
 type session struct {
-	scripts     *sandbox.Sandbox
-	policy      engine.Policy
-	collection  variables
-	variables   variables
-	session     variables
-	environment string
-	common      *shared
-	library     []Request
-	hosts       []string
-	modules     map[string]string
-	contract    *contract
+	scripts  *sandbox.Sandbox
+	policy   engine.Policy
+	values   *values
+	once     variables
+	common   *shared
+	library  []Request
+	hosts    []string
+	modules  map[string]string
+	contract *contract
 }
 
 type job struct {
@@ -39,7 +37,7 @@ type job struct {
 	Assertions  string              `json:"assertions"`
 	Request     json.RawMessage     `json:"request"`
 	Response    json.RawMessage     `json:"response,omitempty"`
-	Variables   variables           `json:"variables"`
+	Layers      []scriptLayer       `json:"layers"`
 	Modules     map[string]string   `json:"modules,omitempty"`
 	Cookies     []engine.CookieInfo `json:"cookies"`
 	Environment string              `json:"environment"`
@@ -89,32 +87,13 @@ func (x *exchange) stop(message string) {
 }
 
 func (s *session) scoped(request Request) variables {
-	scopes := append(append(append([]variables{s.collection}, request.collectionScopes()...), s.variables), request.folderScopes()...)
-	return layered(append(scopes, requestScope(request.Vars), s.session)...)
-}
-
-func (s *session) known() variables {
-	return layered(s.collection, s.variables)
-}
-
-func (s *session) current() variables {
-	return layered(s.collection, s.variables, s.session)
-}
-
-func (s *session) write(writes scopedWrites) {
-	for scope, changes := range writes {
-		if scope != scopeSession {
-			s.variables.change(changes)
-			s.session.forget(changes)
-		}
-	}
-	s.session.change(writes[scopeSession])
+	return s.values.scoped(request, s.once)
 }
 
 func (s *session) runStage(ctx context.Context, stage string, work job, request Request) stageRun {
-	work.Variables = s.scoped(request)
+	work.Layers = s.values.scriptLayers(request, s.once)
 	work.Modules = s.modules
-	work.Environment = s.environment
+	work.Environment = s.values.environmentName(request.Lineage)
 	if err := s.scripts.Call("scriptCookies", &work.Cookies, s.common.cookieList(), s.hosts); err != nil {
 		return stageRun{Error: stage + ": " + err.Error()}
 	}
@@ -129,7 +108,7 @@ func (s *session) runStage(ctx context.Context, stage string, work job, request 
 	if err := s.storeScriptCookies(run.Cookies); err != nil {
 		return stageRun{Error: stage + ": " + err.Error()}
 	}
-	s.write(run.Writes)
+	s.values.write(request.Lineage, run.Writes)
 	if run.Error != "" {
 		run.Error = stage + ": " + run.Error
 	}
@@ -143,14 +122,14 @@ func (s *session) runJob(ctx context.Context, allowance sandbox.Allowance, work 
 	return s.scripts.Shared(allowance, "runJob", run, work)
 }
 
-func (s *session) subject(function string, source any) (json.RawMessage, error) {
+func (s *session) subject(function string, sources ...any) (json.RawMessage, error) {
 	var described json.RawMessage
-	err := s.scripts.Call(function, &described, source)
+	err := s.scripts.Call(function, &described, sources...)
 	return described, err
 }
 
 func (s *session) runPreRequest(ctx context.Context, request Request, scripted step, outcome *exchange) (Request, bool, error) {
-	described, err := s.subject("requestSubject", request)
+	described, err := s.subject("requestSubject", request, request.layers())
 	if err != nil {
 		return request, false, err
 	}
@@ -161,7 +140,7 @@ func (s *session) runPreRequest(ctx context.Context, request Request, scripted s
 		return request, false, nil
 	}
 	var edited Request
-	if err := s.scripts.Call("applyRequestEdits", &edited, request, run.Request); err != nil {
+	if err := s.scripts.Call("applyRequestEdits", &edited, request, run.Request, request.layers()); err != nil {
 		return request, false, err
 	}
 	edited.Lineage = request.Lineage
@@ -269,7 +248,7 @@ func (s *session) extract(request Request, response engine.Response) error {
 	if err := s.scripts.Shared(allowance, "extractWrites", &extracted, request, response); err != nil {
 		return err
 	}
-	s.write(extracted)
+	s.values.write(request.Lineage, extracted)
 	return nil
 }
 
@@ -301,7 +280,7 @@ func (s *session) runPostResponse(ctx context.Context, request Request, outcome 
 	if err != nil || len(steps) == 0 {
 		return err
 	}
-	sent, err := s.subject("requestSubject", request)
+	sent, err := s.subject("requestSubject", request, request.layers())
 	if err != nil {
 		return err
 	}

@@ -45,6 +45,7 @@ type Repo struct {
 	Dir        string
 	Scope      string
 	Restricted bool
+	index      string
 }
 
 type Error struct {
@@ -140,6 +141,9 @@ func (r Repo) exec(ctx context.Context, timeout time.Duration, stdin []byte, arg
 	command.Dir = r.Dir
 	childproc.NoWindow(command)
 	command.Env = environment()
+	if r.index != "" {
+		command.Env = append(command.Env, "GIT_INDEX_FILE="+r.index)
+	}
 	if stdin != nil {
 		command.Stdin = bytes.NewReader(stdin)
 	}

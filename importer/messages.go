@@ -9,7 +9,9 @@ const (
 	messageFiles                  = "Files are not part of an export. Attach them again in %s."
 	messageDroppedVariable        = "%s from %q was not written to gostman.yaml because %q also sets it. Set it in that folder's variables if you need both."
 	messageDroppedShared          = "%s from %q was not written to gostman.yaml because a shared collection variable also sets it. Set it in that folder's variables if you need both."
-	messageSecretVariables        = "The values of the secret variables %s were not imported. Set them again in an environment and mark them secret."
+	messageSecretVariables        = "The secret folder variables %s were left out, because folder variables cannot be marked secret. Add each one to an environment, or to the collection variables in the Vars tab of the top-level folder's Collection settings, and mark it secret with its lock."
+	messageReferencesDropped      = "The secret manager references of %s were removed, because an imported file could use them to read your secrets. Pick the connection and path again with the key icon on each row."
+	messageAssertOff              = "%s: the turned-off assertion %q was left out, because only a test can keep its meaning and a test cannot be turned off"
 	messageTLSKept                = "TLS verification was turned off in Postman for %s; it was kept on. Turn it off in the request's Settings tab if you trust these hosts."
 	messagePostmanBehavior        = "Postman settings of %q have no Gostman equivalent and were left out: %s."
 	messagePartContentType        = "Multipart text fields in %s set a content type, which Gostman sends only for file fields."
@@ -42,9 +44,8 @@ const (
 	messageProtoMissing           = "The .proto file of %s was not part of the import. Add it in the request's gRPC tab, or load the services through reflection."
 	messageMaxRedirects           = "%s limits the number of redirects, which Gostman does not; it follows up to 10."
 	messageGrpcScripts            = "Gostman does not run the %[2]s scripts of %[1]s, so they were left out."
-	messageAssertOperator         = "%s: assertion %q uses the operator %q, which Gostman does not have"
 	messageEnvironmentExtends     = "Environment %q inherits from %q, which was not imported, so it inherits nothing."
-	messageExternalSecrets        = "Environment %q reads %s from the secret provider %q. Gostman keeps them as references to a connection with that name: add it under Secret managers and check each path."
+	messageExternalSecrets        = "Environment %q reads %s from the secret provider %q. Imports never carry secret manager references, so these are secret variables without a value: add a connection under Secret managers, then pick it and the path with the key icon on each row."
 	messageBrunoSecrets           = "The secret variables %s have no value, because Bruno keeps secret values outside the collection files. Fill them in under Environments, or pass them to gostman run with --var."
 	messageDotEnv                 = "%q reads {{process.env.NAME}} from the collection's .env file, which is not imported. Add each value to an environment as a secret variable named process.env.NAME, or, in a folder workspace, copy .env next to gostman.yaml and keep it out of Git; gostman run on the Bruno folder reads it where it is."
 	messageOpenItemType           = "%s: OpenCollection items of type %q are not imported"
@@ -111,6 +112,9 @@ const (
 	reasonPostmanTimeout      = "Postman scripts cannot read or change a request's timeout"
 	reasonBrunoCollectionList = "Bruno cannot list collection variables"
 	reasonBrunoVisualize      = "bru.visualize takes finished HTML or a table definition, not a template"
+	reasonBrunoSize           = "Bruno's res has no size; read res.getSize().body instead"
+	reasonBrunoURL            = "Bruno's res.url is built from the request, not the address of the final response"
+	reasonBrunoStatusText     = "Bruno's res.statusText holds only the reason, such as OK, where Gostman's starts with the code, such as 200 OK"
 )
 
 var (

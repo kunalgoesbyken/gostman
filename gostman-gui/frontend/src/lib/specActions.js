@@ -4,7 +4,7 @@ import { parseJSON } from './dataUtils'
 import { sanitizeImport } from './importExport'
 import { createSpecClient } from './openapiSpec'
 import { normalizeRequest } from './request'
-import { createLink, diffSpec, linkEntry, selectedChanges, specPatch } from './specSync'
+import { createLink, diffSpec, linkEntry, selectedChanges, specPatch, upgradedLink } from './specSync'
 import { SPEC_ALERTS, SPEC_TEXT } from './specText'
 import { selectActiveVariables, useAppStore } from '../store/appStore'
 
@@ -47,19 +47,21 @@ export function createSpecActions({ backend, attempt, addImported }) {
   })
 
   const check = attempt(SPEC_ALERTS.syncTitle, async (folderId) => {
-    const link = store().specLinks[folderId]
-    if (!link?.source) throw new Error(SPEC_TEXT.sourceMissing)
+    const saved = store().specLinks[folderId]
+    if (!saved?.source) throw new Error(SPEC_TEXT.sourceMissing)
+    const link = upgradedLink(saved, store().requests)
+    store().setSpecLink(folderId, link)
     const summary = await client.summary(link.source)
     const plan = { ...diffSpec(link, summary.operations, store().requests), hash: summary.hash }
     store().openSpecDialog({ mode: 'sync', folderId, plan })
   })
 
   async function removeRequests(items, ops) {
-    for (const item of items) {
-      await backend.deleteRequest(item.requestId)
-      store().removeRequest(item.requestId)
-      delete ops[item.key]
-    }
+    if (items.length === 0) return
+    const ids = items.map((item) => item.requestId)
+    await backend.deleteRequests(ids)
+    store().removeRequests(ids)
+    items.forEach((item) => { delete ops[item.key] })
   }
 
   async function updateRequests(items, generated, ops) {

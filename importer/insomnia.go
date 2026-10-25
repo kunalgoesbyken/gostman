@@ -819,14 +819,18 @@ func (s *insomniaImport) environments() {
 		baseName = cleanName(space.name, baseEnvironmentName)
 	}
 	base := s.environmentVariables(space.base, baseName)
+	inCollection := s.root != "" && !space.global
 	var drafts []environmentDraft
-	if len(base) > 0 {
+	switch {
+	case inCollection:
+		s.c.addCollectionVariables(s.root, base)
+	case len(base) > 0:
 		drafts = append(drafts, environmentDraft{name: baseName, color: text(space.base["color"]), global: space.global, variables: base})
 	}
 	for _, sub := range space.subs {
 		name := cleanName(text(sub["name"]), untitledEnvironment)
 		draft := environmentDraft{name: name, color: text(sub["color"]), global: space.global, variables: s.environmentVariables(sub, name)}
-		if len(base) > 0 && name != baseName {
+		if !inCollection && len(base) > 0 && name != baseName {
 			draft.extends = baseName
 		}
 		drafts = append(drafts, draft)

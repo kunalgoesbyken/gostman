@@ -116,28 +116,62 @@ func (t *translator) collectHoisted(node ast.Node, depth int) {
 	}
 }
 
+func opensScope(node ast.Node) bool {
+	switch node.(type) {
+	case *ast.FunctionLiteral, *ast.ArrowFunctionLiteral, *ast.ClassLiteral, *ast.BlockStatement, *ast.SwitchStatement, *ast.CatchStatement, *ast.ForOfStatement, *ast.ForInStatement, *ast.ForStatement:
+		return true
+	}
+	return false
+}
+
+func outsideScope(node ast.Node) ast.Node {
+	if switched, isSwitch := node.(*ast.SwitchStatement); isSwitch {
+		return switched.Discriminant
+	}
+	return nil
+}
+
+func scopeOfChild(parent, child ast.Node, outer, inner map[string]bool) map[string]bool {
+	if child == outsideScope(parent) {
+		return outer
+	}
+	return inner
+}
+
 func shadowedWithin(shadowed map[string]bool, scope ast.Node) map[string]bool {
 	t := &translator{declared: maps.Clone(shadowed)}
 	switch current := scope.(type) {
 	case *ast.FunctionLiteral:
 		t.declareIdentifier(current.Name)
-		t.collectDeclared(current.ParameterList)
+		t.declareParameters(current.ParameterList)
 	case *ast.ArrowFunctionLiteral:
-		t.collectDeclared(current.ParameterList)
+		t.declareParameters(current.ParameterList)
+	case *ast.ClassLiteral:
+		t.declareIdentifier(current.Name)
 	case *ast.BlockStatement:
 		maps.Copy(t.declared, declaredIn(current.List))
+	case *ast.SwitchStatement:
+		for _, clause := range current.Body {
+			maps.Copy(t.declared, declaredIn(clause.Consequent))
+		}
 	case *ast.CatchStatement:
 		t.declareTarget(current.Parameter)
 	case *ast.ForOfStatement:
-		t.declareTarget(current.Into)
+		t.declareLoopTarget(current.Into)
 	case *ast.ForInStatement:
-		t.declareTarget(current.Into)
+		t.declareLoopTarget(current.Into)
 	case *ast.ForStatement:
 		if initializer, lexical := current.Initializer.(*ast.ForLoopInitializerLexicalDecl); lexical {
 			t.declareBindings(initializer.LexicalDeclaration.List)
 		}
 	}
 	return t.declared
+}
+
+func (t *translator) declareLoopTarget(into ast.ForInto) {
+	if declaration, lexical := into.(*ast.ForDeclaration); lexical {
+		t.declareTarget(declaration.Target)
+	}
 }
 
 func (r scriptRead) offset(index int) int {
@@ -176,6 +210,28 @@ func (target *scriptTarget) isFree(r scriptRead, shadowed map[string]bool, name 
 	return slices.Contains(gostmanGlobals, name) && !r.declared[name] && !shadowed[name] && !target.native[name]
 }
 
+func (r scriptRead) reaches(match func(chain) bool) bool {
+	var walk func(node ast.Node, depth int, shadowed map[string]bool) bool
+	walk = func(node ast.Node, depth int, shadowed map[string]bool) bool {
+		if depth > maxTreeDepth {
+			return false
+		}
+		outer := shadowed
+		if opensScope(node) {
+			shadowed = shadowedWithin(shadowed, node)
+		}
+		if expression, isExpression := node.(ast.Expression); isExpression {
+			if path, pure := chainOf(expression); pure && len(path.segments) > 0 && !shadowed[path.root] && match(path) {
+				return true
+			}
+		}
+		return slices.ContainsFunc(childNodes(node), func(child span) bool {
+			return walk(child.node, depth+1, scopeOfChild(node, child.node, outer, shadowed))
+		})
+	}
+	return walk(r.body, 0, map[string]bool{})
+}
+
 func (r scriptRead) uses(target *scriptTarget) []scriptUse {
 	var found []scriptUse
 	record := func(key string, node ast.Node) { found = append(found, scriptUse{key: key, node: node}) }
@@ -185,13 +241,19 @@ func (r scriptRead) uses(target *scriptTarget) []scriptUse {
 		if depth > maxTreeDepth {
 			return
 		}
+		outer := shadowed
+		if opensScope(node) {
+			shadowed = shadowedWithin(shadowed, node)
+		}
 		switch current := node.(type) {
-		case *ast.FunctionLiteral, *ast.ArrowFunctionLiteral, *ast.BlockStatement, *ast.CatchStatement, *ast.ForOfStatement, *ast.ForInStatement, *ast.ForStatement:
-			shadowed = shadowedWithin(shadowed, current)
 		case *ast.DotExpression:
-			if path, pure := chainOf(current); pure && target.isFree(r, shadowed, path.root) {
+			path, pure := chainOf(current)
+			if pure && target.isFree(r, shadowed, path.root) {
 				record(target.keyOf(path), current)
 				return
+			}
+			if reason, missing := target.missing[path.text()]; pure && missing && target.native[path.root] && !r.declared[path.root] && !shadowed[path.root] {
+				noteAt(fmt.Sprintf(messageExportMissing, path.text(), target.name, reason), current)
 			}
 			if hint, hinted := target.hints[string(current.Identifier.Name)]; hinted {
 				noteAt(hint, current)
@@ -233,7 +295,7 @@ func (r scriptRead) uses(target *scriptTarget) []scriptUse {
 			}
 		}
 		for _, child := range childNodes(node) {
-			walk(child.node, depth+1, shadowed)
+			walk(child.node, depth+1, scopeOfChild(node, child.node, outer, shadowed))
 		}
 	}
 	walk(r.body, 0, map[string]bool{})
@@ -294,11 +356,22 @@ func adaptScript(target *scriptTarget, source string) adaptedScript {
 	}
 	wanted, notes := target.wanted(r, r.uses(target))
 	target, pathNotes := target.forScript(r, wanted)
-	return adaptedScript{text: target.header(wanted, r.declared) + target.wrapped(r, source), defined: target.definedNames(wanted), notes: append(notes, pathNotes...)}
+	return adaptedScript{text: target.header(wanted, target.namesBesideHeader(r)) + target.wrapped(r, source), defined: target.definedNames(wanted), notes: append(notes, pathNotes...)}
+}
+
+func (target *scriptTarget) wraps(r scriptRead) bool {
+	return target.wrapOpen != "" && hasTopLevelAwait(r.body)
+}
+
+func (target *scriptTarget) namesBesideHeader(r scriptRead) map[string]bool {
+	if target.wraps(r) {
+		return nil
+	}
+	return r.declared
 }
 
 func (target *scriptTarget) wrapped(r scriptRead, source string) string {
-	if target.wrapOpen == "" || !hasTopLevelAwait(r.body) {
+	if !target.wraps(r) {
 		return source
 	}
 	return target.wrapOpen + "\n" + source + "\n" + target.wrapClose

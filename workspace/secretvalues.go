@@ -139,7 +139,6 @@ func FoldVariableLists(variables, meta string, lists []VariableList) (string, st
 		if err != nil {
 			continue
 		}
-		secret := SecretNames(list.Meta)
 		for _, entry := range owned {
 			if current, taken := kept[entry.Name]; taken {
 				switch {
@@ -155,9 +154,7 @@ func FoldVariableLists(variables, meta string, lists []VariableList) (string, st
 			owner[entry.Name] = list.Name
 			entries = append(entries, entry)
 			added = true
-			if secret[entry.Name] {
-				meta = MarkSecret(meta, entry.Name)
-			}
+			meta = carryMark(meta, list.Meta, entry.Name)
 		}
 	}
 	if !added {
@@ -176,6 +173,20 @@ func plainValue(raw json.RawMessage) string {
 		return text
 	}
 	return string(bytes.TrimSpace(raw))
+}
+
+func carryMark(meta, source, name string) string {
+	var marks map[string]json.RawMessage
+	json.Unmarshal([]byte(source), &marks)
+	mark, marked := marks[name]
+	if !marked {
+		return meta
+	}
+	target := map[string]json.RawMessage{}
+	json.Unmarshal([]byte(meta), &target)
+	target[name] = mark
+	encoded, _ := json.Marshal(target)
+	return string(encoded)
 }
 
 func MarkSecret(meta string, names ...string) string {

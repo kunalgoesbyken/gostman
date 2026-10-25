@@ -40,9 +40,11 @@ run
   scripts, checks, extraction rules, cookies and OAuth 2 tokens. A Bruno
   collection folder (bruno.json or opencollection.yml) is converted in memory.
 
-  --env <name>          environment to use (default: the first one, or with
-                        --folder that collection's first); an environment
-                        kept with one collection can be named Collection/Name
+  --env <name>          environment to use (default: the first one); in an
+                        export with environments per collection, each
+                        collection uses its own environment of that name or
+                        the shared one; with --folder, one environment, which
+                        can be named Collection/Name
   --folder <name|path>  run only this folder, for example auth or auth/tokens
   --var <key=value>     set a variable; it wins over the environment, folder
                         and request variables (repeatable)
@@ -76,10 +78,9 @@ run
   --stream-timeout <s>  time budget for each streaming (SSE) request in a run
                         (default 10 seconds, at most 100 events unless the
                         request sets its own); the report says how it ended
-  --parallel <n>        run up to n at once: iterations when there are several
-                        (each keeps its order and extraction chaining),
-                        otherwise single requests, which do not see each
-                        other's extracted variables
+  --parallel <n>        send up to n requests of an iteration at once;
+                        iterations run one after another, and requests sent
+                        together see only values written before they started
   --only <name>         run only requests with this name, id or Folder/Name
                         (repeatable)
   --tags <a,b>          run only requests with at least one of these tags
@@ -324,10 +325,10 @@ export
 
 Exit codes:
   0  every request and check passed (scan, lint, load: no threshold reached)
-  1  a check or a script failed (scan, lint, load: a threshold was reached)
+  1  a check, a script or an MCP tool call failed, or the run was interrupted (scan, lint, load: a threshold was reached)
   2  the command or the input is wrong
-  3  run and send: a request got no response (it could not be sent, the
-     connection failed or timed out, or the host is not allowed)
+  3  a request got no response: it could not be sent, the connection failed
+     or timed out (run and send)
 `
 )
 

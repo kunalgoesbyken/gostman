@@ -36,7 +36,7 @@ function sortedGroups(groups) {
   return groups
 }
 
-export function orderSiblings(folders, requests, shared) {
+function orderSiblings(folders, requests, shared) {
   const siblings = []
   let folderIndex = 0
   let requestIndex = 0

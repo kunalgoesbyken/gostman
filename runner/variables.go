@@ -99,14 +99,22 @@ func findEnvironment(environments []Environment, id string) (Environment, bool) 
 	return Environment{}, false
 }
 
-func startingVariables(environments []Environment, environment Environment, overrides map[string]string) (variables, error) {
+func startingSlot(environments []Environment, environment Environment, overrides, resolved map[string]string) (*environmentSlot, error) {
 	scopes, err := environmentScopes(environments, environment)
 	if err != nil {
 		return nil, err
 	}
-	starting := layered(scopes...)
-	starting.override(overrides)
-	return starting, nil
+	last := len(scopes) - 1
+	slot := &environmentSlot{name: environment.Name, inherited: layered(scopes[:last]...), own: scopes[last]}
+	slot.own.override(overrides)
+	for name, value := range resolved {
+		target := slot.own
+		if _, isOwn := slot.own[name]; !isOwn && slot.inherited[name] != nil {
+			target = slot.inherited
+		}
+		target.override(map[string]string{name: value})
+	}
+	return slot, nil
 }
 
 type variableRow struct {
@@ -153,21 +161,31 @@ func (v variables) change(changes variables) {
 	}
 }
 
+func (v variables) withValues() variables {
+	kept := variables{}
+	for name, value := range v {
+		if !isNull(value) {
+			kept[name] = value
+		}
+	}
+	return kept
+}
+
 func (v variables) forget(changes variables) {
 	for name := range changes {
 		delete(v, name)
 	}
 }
 
-func baseScopes(stored Collection) ([]variables, error) {
-	collection, err := parseVariables(stored.Variables)
+func baseScopes(stored Collection) (variables, variables, error) {
+	collection, err := Environment{Variables: stored.Variables, Meta: stored.VariablesMeta}.ownScope()
 	if err != nil {
-		return nil, fmt.Errorf("the collection variables are not a JSON object")
+		return nil, nil, fmt.Errorf("the collection variables are not a JSON object")
 	}
 	processed := variables{}
 	for name, value := range stored.DotEnv {
 		encoded, _ := json.Marshal(value)
 		processed[processEnvironmentPrefix+name] = encoded
 	}
-	return []variables{processed, collection}, nil
+	return processed, collection, nil
 }

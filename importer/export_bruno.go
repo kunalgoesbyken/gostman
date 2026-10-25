@@ -362,14 +362,12 @@ func environmentVariables(environment workspace.Environment) ([]bruEntry, []stri
 	var meta map[string]map[string]any
 	_ = json.Unmarshal([]byte(environment.Variables), &values)
 	_ = json.Unmarshal([]byte(environment.Meta), &meta)
+	secrets := workspace.SecretNames(environment.Meta)
 	var entries []bruEntry
-	var secrets []string
 	for _, candidate := range objectRows(values) {
-		if meta[candidate.Key]["secret"] == true {
-			secrets = append(secrets, candidate.Key)
-			continue
+		if !secrets[candidate.Key] {
+			entries = append(entries, bruEntry{Key: candidate.Key, Value: candidate.Value, Enabled: meta[candidate.Key]["enabled"] != false})
 		}
-		entries = append(entries, bruEntry{Key: candidate.Key, Value: candidate.Value, Enabled: meta[candidate.Key]["enabled"] != false})
 	}
-	return entries, secrets
+	return entries, sortedKeys(secrets)
 }

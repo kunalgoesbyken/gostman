@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import { selectActiveTab, selectResolvedVariables, useAppStore } from '../../store/appStore'
 import { AI_TEXT } from '../aiText'
+import { lineageOf } from '../inheritance'
+import { resolvedSecretValues } from '../resolvedSecrets'
 import { requestSecrets, variableNames, variableSecrets } from './context'
 import { KIND_CANCELED, errorMessage } from './errors'
 import { PROVIDERS, providerById } from './providers'
@@ -17,7 +19,7 @@ export const STAGE_RUNNING = 'running'
 export const STAGE_PROPOSAL = 'proposal'
 export const STAGE_ERROR = 'error'
 
-export const STATUS_IDLE = 'idle'
+const STATUS_IDLE = 'idle'
 export const STATUS_RUNNING = 'running'
 export const STATUS_OK = 'ok'
 export const STATUS_ERROR = 'error'
@@ -60,7 +62,7 @@ function gatherSource() {
     variableNames: variableNames(resolved),
     folderNames: snapshot.folders.map((folder) => folder.name),
     isRestricted: snapshot.isRestricted,
-    secrets: [...requestSecrets(tab.request), ...variableSecrets(resolved)],
+    secrets: [...requestSecrets(tab.request, lineageOf(snapshot, tab.request.folderId)), ...variableSecrets(resolved), ...resolvedSecretValues()],
   }
 }
 
@@ -98,7 +100,8 @@ export function createAiActions(backend, { importData, openapi }) {
     const task = taskById(dialog.taskId)
     const id = newId()
     patchDialog({ stage: STAGE_RUNNING, requestId: id, waiting: '', provider: state().settings.provider })
-    const reply = await ai.complete(id, providerConfig(state().settings), dialog.preview.raw, source.secrets, OUTPUT_TOKENS)
+    const secrets = [...dialog.preview.secrets, ...source.secrets]
+    const reply = await ai.complete(id, providerConfig(state().settings), dialog.preview.raw, secrets, OUTPUT_TOKENS)
     if (!isCurrent(id)) return
     if (reply.error) {
       patchDialog(reply.error.kind === KIND_CANCELED ? { stage: STAGE_INPUT, error: null } : { stage: STAGE_ERROR, error: errorMessage(reply.error) })
@@ -132,9 +135,12 @@ export function createAiActions(backend, { importData, openapi }) {
     const source = gatherSource()
     const raw = { ...task.build(source, dialog.input), schema: task.schema }
     const scrubbed = await ai.preview(state().settings.provider, raw, source.secrets)
-    const preview = { raw, scrubbed, tokens: estimateTokens(scrubbed), includeValues: task.offersValues ? dialog.input.includeValues : null }
+    const preview = {
+      raw, scrubbed, secrets: source.secrets, tokens: estimateTokens(scrubbed), includeValues: task.offersValues ? dialog.input.includeValues : null,
+    }
     patchDialog({ preview, stage: STAGE_PREVIEW })
-    if (state().settings.skipPreview[task.id]) await run(state().dialog, source)
+    const current = state().dialog
+    if (current?.preview === preview && state().settings.skipPreview[task.id]) await run(current, source)
   }
 
   const confirmPreview = async (skipNextTime) => {

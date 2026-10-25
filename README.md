@@ -39,7 +39,7 @@ Both are good tools. Gostman is for people who want the paid-tier workflow witho
 - **Sharing without Git.** Send a folder to a teammate as an encrypted link or file that is built on your machine and never uploaded.
 - **More in the same download.** Load testing, Socket.IO, MQTT, GraphQL subscriptions, MCP servers, HAR import, traffic capture, a secret scanner and a mock server, plus a command line that is one binary with no Node.js to install.
 
-Prices and plans change, so check their pages before you decide. Gostman has no accounts, so it has no hosted collaboration, SSO or cloud monitors, and it has no VS Code extension. [What is free in Gostman](docs/free-features.md) compares the paid features of Postman, Bruno and Insomnia with Gostman. Moving from Postman or Bruno? [Coming from Postman](docs/coming-from-postman.md) and [Coming from Bruno](docs/coming-from-bruno.md) cover importing a collection, its scripts and the `newman run` and `bru run` flags.
+Prices and plans change, so check their pages before you decide. Gostman has no accounts, so it has no hosted collaboration, SSO or cloud monitors, and it has no VS Code extension. [What is free in Gostman](docs/free-features.md) compares the paid features of Postman, Bruno and Insomnia with Gostman. Moving from Postman, Bruno or Insomnia? [Coming from Postman](docs/coming-from-postman.md), [Coming from Bruno](docs/coming-from-bruno.md) and [Coming from Insomnia](docs/coming-from-insomnia.md) cover importing a collection, its scripts and the matching `gostman run` flags.
 
 ### Will Gostman add a paid tier?
 
@@ -143,10 +143,12 @@ Data in the web version is kept in the browser's IndexedDB.
 The same pages are published at [gostman.com/docs](https://gostman.com/docs). The tutorials and guides are listed under [Learn](#learn); the reference pages are:
 
 - Start: [Getting started](docs/getting-started.md), [What is free in Gostman](docs/free-features.md), and coming from [Postman](docs/coming-from-postman.md), [Bruno](docs/coming-from-bruno.md) or [Insomnia](docs/coming-from-insomnia.md)
-- Send requests: [Requests and responses](docs/requests-and-responses.md), [Protocols](docs/protocols.md), [Variables](docs/variables.md), [Folder and collection settings](docs/folder-settings.md), [Scripts and checks](docs/scripting-and-settings.md)
-- Test and automate: [Running, load testing and scanning](docs/runner-load-and-scan.md), [Command line](docs/cli.md), [Gostman in CI](docs/ci.md), [Use from a coding agent](docs/agents.md)
-- Your data: [Collections, tabs and Git](docs/collections-and-git.md), [Folders, mock server and capture](docs/workspaces-and-mock.md), [Import, export and OpenAPI specs](docs/import-export-and-specs.md), [Sharing and documentation](docs/sharing-and-docs.md)
-- Settings and security: [Secrets and network settings](docs/secrets-and-network.md), [Preferences, shortcuts and the command palette](docs/preferences-and-shortcuts.md), [AI features](docs/ai.md)
+- Requests: [Requests and responses](docs/requests-and-responses.md), [Protocols](docs/protocols.md)
+- Variables and secrets: [Variables](docs/variables.md), [Secrets and network settings](docs/secrets-and-network.md)
+- Testing and automation: [Scripts and checks](docs/scripting-and-settings.md), [Running, load testing and scanning](docs/runner-load-and-scan.md), [Gostman in CI](docs/ci.md)
+- Collections and Git: [Collections, tabs and Git](docs/collections-and-git.md), [Folder and collection settings](docs/folder-settings.md), [Folders, mock server and capture](docs/workspaces-and-mock.md), [Import, export and OpenAPI specs](docs/import-export-and-specs.md), [Sharing and documentation](docs/sharing-and-docs.md)
+- Agents and AI: [Use from a coding agent](docs/agents.md), [AI features](docs/ai.md)
+- Reference: [Command line](docs/cli.md), [Preferences, shortcuts and the command palette](docs/preferences-and-shortcuts.md)
 
 ## Contributing
 

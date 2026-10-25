@@ -2,6 +2,7 @@ export const DOCS_TEXT = {
   skipLink: "Skip to content",
   docs: "Docs",
   home: "Gostman home",
+  siteNav: "Gostman",
   links: { webApp: "Web app", download: "Download", github: "GitHub" },
   navLabel: "Documentation",
   breadcrumb: "Breadcrumb",

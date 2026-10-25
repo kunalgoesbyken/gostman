@@ -16,9 +16,9 @@ The method list in the request bar offers GET, POST, PUT, DELETE, PATCH, HEAD an
 
 Limits that apply to every protocol on this page:
 
-- The web app relays requests through a small proxy. The hosted proxy cannot reach `localhost` or private network addresses, so use the desktop app for local servers.
-- Proxy, CA certificate and client certificate settings exist only in the desktop app.
-- The web app truncates responses larger than 3 MB. The desktop app reads up to 50 MB.
+- The web app relays requests through a small proxy. The hosted proxy cannot reach `localhost` or private network addresses, so use the desktop app or the [local relay](cli.md#local-relay-for-the-web-app) for local servers.
+- Proxy, CA certificate and client certificate settings exist only in the desktop app; the local relay takes them as flags.
+- Through the hosted proxy the web app truncates responses larger than 3 MB. The desktop app and the local relay read up to 50 MB.
 
 ## GraphQL
 
@@ -100,7 +100,7 @@ Gostman does not run interactive streams. It collects them.
 
 ### Desktop and web
 
-gRPC works in both apps. In the web app the call goes through the proxy, so it cannot reach `localhost` or private addresses. In the desktop app and in `gostman run`, gRPC uses the proxy, the CA certificates and the client certificates of [Network settings](secrets-and-network.md#network-settings) and of the collection, like HTTP requests: a `grpcs://` server that asks for a client certificate gets the one set for its host.
+gRPC works in both apps. In the web app the call goes through the hosted proxy, so it cannot reach `localhost` or private addresses unless you use the [local relay](cli.md#local-relay-for-the-web-app). In the desktop app and in `gostman run`, gRPC uses the proxy, the CA certificates and the client certificates of [Network settings](secrets-and-network.md#network-settings) and of the collection, like HTTP requests: a `grpcs://` server that asks for a client certificate gets the one set for its host.
 
 ## WebSocket
 

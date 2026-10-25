@@ -42,6 +42,7 @@ import { createStorageActions } from './storageActions'
 import { createBackupActions } from './backupActions'
 import { createTabActions } from './tabActions'
 import { createTreeActions } from './treeActions'
+import { placedAfterRoot } from './treeMoves'
 import { focusAddressSoon } from './panes'
 import { ROW_REQUEST } from './collectionTree'
 import { describeCounts } from './importCounts'
@@ -225,13 +226,14 @@ export function createWorkspaceActions(backend) {
     showSteps([])
     try {
       const request = withInheritance(store(), tabById(tabId).request)
+      const tokenEnvironment = activeEnvironmentId()
       const oauth2 = await signInToMcp(backend, request, activeVariables(), showSteps)
       const steps = tabById(tabId)?.mcpAuth?.steps ?? []
       if (!oauth2 || !tabById(tabId)) {
         showSteps(steps, false)
         return
       }
-      store().updateTabRequest(tabId, { auth: { ...tabById(tabId).request.auth, type: AUTH_OAUTH2, oauth2: { ...oauth2, tokenEnvironment: activeEnvironmentId() } } })
+      store().updateTabRequest(tabId, { auth: { ...tabById(tabId).request.auth, type: AUTH_OAUTH2, oauth2: { ...oauth2, tokenEnvironment } } })
       const catalog = await describeMcpServer(tabId)
       store().patchTab(tabId, { mcpCatalog: catalog })
       showSteps([...steps, retryStep(catalog)], false)
@@ -300,7 +302,7 @@ export function createWorkspaceActions(backend) {
   })
 
   const removeRequest = attempt('Could not delete the request', async (id) => {
-    await backend.deleteRequest(id)
+    await backend.deleteRequests([id])
     store().removeRequest(id)
   })
 
@@ -336,7 +338,7 @@ export function createWorkspaceActions(backend) {
 
   const addImported = attempt('Import failed', async (imported) => {
     await tree.shareOrder()
-    const data = scopedImport(imported, store().workspaceStatus.path)
+    const data = scopedImport(placedAfterRoot(store(), imported), store().workspaceStatus.path)
     const { requests, folders } = data
     if (requests.length > 0) store().upsertRequests(await backend.saveRequests(requests))
     store().mergeFolders(folders)

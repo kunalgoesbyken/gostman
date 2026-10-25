@@ -111,6 +111,22 @@ function uniqueId(base, ids) {
   return count ? `${base}-${count}` : base
 }
 
+const anchorTargets = (ids = []) => ids.map((id) => `<span id="${id}" class="docs-alias"></span>`).join('')
+
+function invertAliases(aliases = {}) {
+  const byTarget = new Map()
+  Object.entries(aliases).forEach(([alias, target]) => byTarget.set(target, [...(byTarget.get(target) ?? []), alias]))
+  return byTarget
+}
+
+function assertAnchors(file, ids, aliases = {}) {
+  const missing = Object.values(aliases).find((target) => !ids.includes(target))
+  if (missing) throw new Error(`Docs alias target #${missing} is not a heading in ${file}`)
+  const all = [...ids, ...Object.keys(aliases)]
+  const duplicate = all.find((id, index) => all.indexOf(id) !== index)
+  if (duplicate) throw new Error(`Docs anchor #${duplicate} is used twice in ${file}`)
+}
+
 function headingContent(text, inline, depth) {
   const step = depth === 2 && text.match(STEP_PREFIX)
   if (!step) return inline
@@ -149,7 +165,7 @@ function createMarked({ file, docsDir, state }) {
         state.headings.push({ id, text, depth })
         if (TOC_DEPTHS.includes(depth)) state.toc.push({ id, text, depth })
         const content = headingContent(text, this.parser.parseInline(tokens), depth)
-        return `<h${depth} id="${id}"><a class="docs-anchor" href="#${id}">${content}</a></h${depth}>\n`
+        return `<h${depth} id="${id}">${anchorTargets(state.aliases.get(id))}<a class="docs-anchor" href="#${id}">${content}</a></h${depth}>\n`
       },
       link({ href, title, tokens }) {
         const titleAttribute = title ? ` title="${escapeAttribute(title)}"` : ''
@@ -204,7 +220,7 @@ function searchRecord(page, section) {
 
 function renderDoc(entry, section, docsDir) {
   const { file } = entry
-  const state = { title: '', toc: [], headings: [], ids: new Map(), images: new Map() }
+  const state = { title: '', toc: [], headings: [], ids: new Map(), images: new Map(), aliases: invertAliases(entry.aliases) }
   const marked = createMarked({ file, docsDir, state })
   const home = file === HOME_FILE
   const allTokens = marked.lexer(readFileSync(resolve(docsDir, file), 'utf8'))
@@ -214,6 +230,7 @@ function renderDoc(entry, section, docsDir) {
   const lead = hasLead ? marked.parser([tokens[leadIndex]]) : ''
   const html = marked.parser(hasLead ? tokens.filter((_, index) => index !== leadIndex) : tokens)
   if (!state.title) throw new Error(`Docs file has no title heading: ${file}`)
+  assertAnchors(file, state.headings.map((heading) => heading.id), entry.aliases)
 
   const firstParagraph = tokens.find((token) => token.type === 'paragraph')
   const slug = docSlug(file)
@@ -259,6 +276,7 @@ export function loadDocs(docsDir) {
   }))
   const directory = docSections.map((section) => ({
     title: section.title,
+    anchors: [slugify(section.title), ...(section.aliases ?? [])],
     items: section.docs.map((doc) => ({ ...link(pageOf(doc.file)), description: pageOf(doc.file).description })),
   }))
   const pages = rendered.map(({ page }, index) => ({
@@ -266,6 +284,7 @@ export function loadDocs(docsDir) {
     previous: rendered[index - 1] ? link(rendered[index - 1].page) : null,
     next: rendered[index + 1] ? link(rendered[index + 1].page) : null,
   }))
+  assertAnchors(HOME_FILE, directory.flatMap((section) => section.anchors))
   const images = new Map(rendered.flatMap(({ images }) => [...images]))
   const search = rendered.flatMap((entry) => entry.search)
 

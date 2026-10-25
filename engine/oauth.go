@@ -36,6 +36,7 @@ type Authorization struct {
 	State        string `json:"state"`
 	CodeVerifier string `json:"codeVerifier"`
 	RedirectURI  string `json:"redirectUri"`
+	Issuer       string `json:"issuer"`
 }
 
 type TokenExchange struct {
@@ -91,7 +92,7 @@ func StartAuthorization(config OAuth2, variables string) (Authorization, error) 
 	if err != nil {
 		return Authorization{}, err
 	}
-	started := Authorization{State: state, RedirectURI: strings.TrimSpace(substitute(config.CallbackURL))}
+	started := Authorization{State: state, RedirectURI: strings.TrimSpace(substitute(config.CallbackURL)), Issuer: strings.TrimSpace(substitute(config.Issuer))}
 
 	query := target.Query()
 	query.Set("response_type", "code")

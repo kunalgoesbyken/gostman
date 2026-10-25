@@ -25,6 +25,11 @@ func (a *App) DiscoverMcpAuthorization(query mcpclient.AuthQuery) mcpclient.Auth
 
 func (a *App) mcpPolicy() engine.Policy {
 	policy := a.policy()
-	policy.RunCommands = true
+	policy.RunCommands = isTrustedHere()
 	return policy
+}
+
+func isTrustedHere() bool {
+	store, isFolder := storage.current().(folderStore)
+	return !isFolder || requireTrust(store.folder.Root()) == nil
 }

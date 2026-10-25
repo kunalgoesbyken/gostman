@@ -123,6 +123,21 @@ export function sharedNumbering(state) {
   return { folders: patched(state.folders, ROW_FOLDER), requests: patched(state.requests, ROW_REQUEST) }
 }
 
+export function rootNumbering({ folders, requests }) {
+  const places = new Map(siblingsIn(buildCollectionTree(folders, requests, true), ROOT_ID).map(({ item }, index) => [item, index + 1]))
+  const placed = (item) => (places.has(item) ? { ...item, sortOrder: places.get(item) } : item)
+  return { folders: folders.map(placed), requests: requests.map(placed) }
+}
+
+const isAtRoot = (kind) => (item) => (item[PARENT_KEYS[kind]] || ROOT_ID) === ROOT_ID
+
+export function placedAfterRoot(existing, imported) {
+  const roots = [...existing.folders.filter(isAtRoot(ROW_FOLDER)), ...existing.requests.filter(isAtRoot(ROW_REQUEST))]
+  const highest = roots.reduce((top, item) => Math.max(top, cleanOrder(item.sortOrder)), 0)
+  const shifted = (kind) => (item) => (isAtRoot(kind)(item) && cleanOrder(item.sortOrder) > 0 ? { ...item, sortOrder: highest + item.sortOrder } : item)
+  return { ...imported, folders: imported.folders.map(shifted(ROW_FOLDER)), requests: imported.requests.map(shifted(ROW_REQUEST)) }
+}
+
 export function planMove({ folders, requests, sharedOrder }, source, target) {
   const lookups = lookupsOf(folders, requests)
   const subject = lookups.items[source.kind].get(source.id)

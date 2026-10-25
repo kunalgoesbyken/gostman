@@ -5,7 +5,7 @@ import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { createHash } from 'crypto'
 import { readFileSync, writeFileSync } from 'fs'
-import { DOCS_ENTRY, siteDefine, siteMeta } from './site.config.js'
+import { DOCS_ENTRY, chunkClosure, siteDefine, siteMeta } from './site.config.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -41,13 +41,6 @@ function serveWebEntryInDev(entry) {
       })
     },
   }
-}
-
-const chunkClosure = (bundle, fileName, seen = new Set()) => {
-  if (seen.has(fileName)) return seen
-  seen.add(fileName)
-  bundle[fileName].imports.forEach((imported) => chunkClosure(bundle, imported, seen))
-  return seen
 }
 
 const withLinks = (html, links) => String(html).replace('</head>', `${links.join('\n')}\n</head>`)

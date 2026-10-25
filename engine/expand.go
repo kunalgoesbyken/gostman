@@ -14,7 +14,6 @@ import (
 const (
 	promptPrefix       = "?"
 	dynamicPrefix      = "$"
-	dynamicSizeBound   = 256
 	maxRandomIntSpan   = 1 << 31
 	defaultRandomLimit = 1000
 	hexDigits          = "0123456789abcdef"
@@ -85,6 +84,7 @@ func FillVariables(values map[string]string) map[string]string {
 	substitution.generates = false
 	filled := make(map[string]string, len(values))
 	for name, value := range values {
+		substitution.expansions = 0
 		if expanded, ok := substitution.nested(name, value); ok {
 			value = expanded
 		}

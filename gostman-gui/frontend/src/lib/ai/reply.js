@@ -23,7 +23,7 @@ export function parseModelObject(text) {
 
 export const textField = (value, limit) => (typeof value === 'string' ? value.slice(0, limit) : '')
 
-export const listField = (value, limit) => (Array.isArray(value) ? value.slice(0, limit) : [])
+const listField =(value, limit) => (Array.isArray(value) ? value.slice(0, limit) : [])
 
 export const objectsIn = (value, limit) => listField(value, limit).filter(isPlainObject)
 

@@ -155,7 +155,9 @@ func (c *collector) openRequest(ctx treeContext, name, location string, item map
 	}
 	label := fmt.Sprintf(labelRequest, name)
 	request.preScript, request.postScript = c.openScripts(ctx.dialect, runtimeScripts(item), label)
-	request.assertions = c.openAssertions(name, runtime["assertions"])
+	rows, tests := c.brunoChecks(ctx.dialect, label, openAssertChecks(runtime["assertions"]))
+	request.postScript = joinScripts([]string{request.postScript, tests})
+	request.assertions = jsonList(rows)
 	var described map[string]any
 	switch kind := text(info["type"]); {
 	case object(item["http"]) != nil || kind == itemGraphQL && object(item["graphql"]) != nil:
@@ -383,18 +385,13 @@ func openMultipart(value any) []row {
 	return keyedRows(rows)
 }
 
-func (c *collector) openAssertions(name string, value any) string {
-	var assertions []assertion
+func openAssertChecks(value any) []brunoCheck {
+	var checks []brunoCheck
 	for _, entry := range objects(value) {
-		operator, operand, _ := strings.Cut(strings.TrimSpace(text(entry["operator"])), " ")
-		if operand == "" {
-			operand = text(entry["value"])
-		}
-		if rule, ok := c.assertionRule(name, text(entry["expression"]), operator, operand, !flag(entry["disabled"])); ok {
-			assertions = append(assertions, rule)
-		}
+		written := strings.TrimSpace(text(entry["operator"]) + " " + text(entry["value"]))
+		checks = append(checks, readBrunoCheck(text(entry["expression"]), written, !flag(entry["disabled"])))
 	}
-	return jsonList(assertions)
+	return checks
 }
 
 func openEnvironment(environment map[string]any, name string) environmentDraft {

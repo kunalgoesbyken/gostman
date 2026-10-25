@@ -87,8 +87,8 @@ func (c *collector) postmanScope(node map[string]any, kind, name string) scope {
 		case kind == labelCollection:
 			settings.secrets = append(settings.secrets, key)
 		default:
-			value = ""
 			c.flag(messageSecretVariables, qualified)
+			continue
 		}
 		settings.vars = append(settings.vars, row{Key: key, Value: value, Enabled: true})
 	}

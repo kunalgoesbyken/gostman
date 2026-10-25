@@ -26,6 +26,8 @@ const (
 	curlCommand    = "curl"
 	leftOutScripts = "scripts"
 	leftOutOAuth   = "OAuth 2.0 settings"
+	keptSettings   = "collection settings, because the collection already has its own"
+	referenceMark  = "ref"
 )
 
 type importArguments struct {
@@ -47,6 +49,7 @@ type importReport struct {
 	Folders      int               `json:"folders"`
 	Requests     []importedLine    `json:"requests"`
 	MoreRequests int               `json:"moreRequests,omitempty"`
+	Settings     bool              `json:"collectionSettings,omitempty"`
 	Environments []string          `json:"environments,omitempty"`
 	Variables    []string          `json:"variables,omitempty"`
 	LeftOut      []string          `json:"leftOut,omitempty"`
@@ -127,7 +130,7 @@ func readsFilesAnywhere(result importer.Result) bool {
 
 func runsCommands(requests []workspace.Request) bool {
 	for _, request := range requests {
-		if strings.HasPrefix(strings.TrimSpace(request.URL), mcpclient.CommandPrefix) {
+		if mcpclient.IsCommand(request.URL) {
 			return true
 		}
 	}
@@ -152,6 +155,9 @@ func disarm(pre, post *string, auth *engine.Auth, label string) []string {
 
 func disarmAll(result *importer.Result) []string {
 	var notes []string
+	if settings := result.Settings; settings != nil {
+		notes = append(notes, disarm(&settings.PreScript, &settings.PostScript, &settings.Auth, "the collection")...)
+	}
 	for index := range result.Folders {
 		folder := &result.Folders[index]
 		notes = append(notes, disarm(&folder.PreScript, &folder.PostScript, &folder.Auth, fmt.Sprintf("folder %q", folder.Name))...)
@@ -251,11 +257,22 @@ func (d *Desk) storeRequests(requests []workspace.Request) error {
 	return d.files.SaveRequests(requests)
 }
 
-func objectOrEmpty(text string) string {
-	if hasText(text) {
-		return text
+func withoutReferences(meta string) string {
+	var marks map[string]map[string]json.RawMessage
+	if json.Unmarshal([]byte(meta), &marks) != nil || marks == nil {
+		return emptyObject
 	}
-	return emptyObject
+	for name, mark := range marks {
+		delete(mark, referenceMark)
+		if len(mark) == 0 {
+			delete(marks, name)
+		}
+	}
+	encoded, err := json.Marshal(marks)
+	if err != nil {
+		return emptyObject
+	}
+	return string(encoded)
 }
 
 func environmentNamed(environments []workspace.Environment, name string) int {
@@ -276,7 +293,7 @@ func (d *Desk) storeEnvironments(current scene, imported []workspace.Environment
 	for _, environment := range imported {
 		position := environmentNamed(environments, environment.Name)
 		if position < 0 {
-			environments = append(environments, workspace.Environment{Id: environment.Id, Name: environment.Name, Variables: emptyObject, Meta: objectOrEmpty(environment.Meta), Color: environment.Color, Extends: environment.Extends})
+			environments = append(environments, workspace.Environment{Id: environment.Id, Name: environment.Name, Variables: emptyObject, Meta: withoutReferences(environment.Meta), Color: environment.Color, Extends: environment.Extends})
 			position = len(environments) - 1
 		}
 		target := &environments[position]
@@ -353,6 +370,20 @@ func (d *Desk) importRequests(ctx context.Context, current scene, arguments impo
 	if report.Environments, err = d.storeEnvironments(current, result.Environments); err != nil {
 		return importReport{}, err
 	}
-	report.Variables, err = d.storeVariables(result.Variables)
+	if report.Variables, err = d.storeVariables(result.Variables); err != nil {
+		return importReport{}, err
+	}
+	report.Settings, err = d.storeSettings(result.Settings, &report)
 	return report, err
+}
+
+func (d *Desk) storeSettings(imported *workspace.Settings, report *importReport) (bool, error) {
+	switch {
+	case imported == nil || !importer.CarriesSettings(*imported):
+		return false, nil
+	case importer.CarriesSettings(d.files.Settings()):
+		report.LeftOut = append(report.LeftOut, keptSettings)
+		return false, nil
+	}
+	return true, d.files.SaveSettings(*imported)
 }

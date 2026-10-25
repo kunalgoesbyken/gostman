@@ -268,8 +268,8 @@ func (a *App) SaveRequests(requests []Request) ([]Request, error) {
 	return requests, storage.current().saveRequests(requests)
 }
 
-func (a *App) DeleteRequest(id string) error {
-	return storage.current().deleteRequest(id)
+func (a *App) DeleteRequests(ids []string) error {
+	return storage.current().deleteRequests(ids)
 }
 
 func (a *App) SaveFolders(folders []Folder) error {

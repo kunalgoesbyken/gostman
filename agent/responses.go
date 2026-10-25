@@ -94,6 +94,7 @@ type responseReport struct {
 
 type differ struct {
 	shapeOnly bool
+	clean     func(string) string
 	found     []difference
 	more      int
 }
@@ -192,11 +193,14 @@ func mediaType(contentType string) string {
 	return parsed
 }
 
-func clipped(value any) any {
-	if text, isText := value.(string); isText && len(text) > shownValue {
-		return text[:shownValue] + "..."
-	}
-	switch value.(type) {
+func (d *differ) clipped(value any) any {
+	switch shown := value.(type) {
+	case string:
+		cleaned := d.clean(shown)
+		if len(cleaned) > shownValue {
+			return cleaned[:shownValue] + "..."
+		}
+		return cleaned
 	case map[string]any, []any:
 		return nil
 	}
@@ -225,7 +229,7 @@ func (d *differ) note(path, change string, expected, actual any) {
 		d.more++
 		return
 	}
-	d.found = append(d.found, difference{Path: path, Change: change, Expected: clipped(expected), Actual: clipped(actual)})
+	d.found = append(d.found, difference{Path: path, Change: change, Expected: d.clipped(expected), Actual: d.clipped(actual)})
 }
 
 func (d *differ) compare(path string, expected, actual any) {
@@ -300,8 +304,8 @@ func decodeDocument(text string) (any, bool) {
 	return document, true
 }
 
-func compareBodies(expected, actual string, shapeOnly bool) differ {
-	found := differ{shapeOnly: shapeOnly}
+func compareBodies(expected, actual string, shapeOnly bool, clean func(string) string) differ {
+	found := differ{shapeOnly: shapeOnly, clean: clean}
 	wanted, wantedJSON := decodeDocument(expected)
 	got, gotJSON := decodeDocument(actual)
 	switch {
@@ -322,7 +326,7 @@ func kindName(isJSON bool) string {
 	return "text"
 }
 
-func compareWith(example savedExample, response engine.Response, shapeOnly bool) comparison {
+func compareWith(example savedExample, response engine.Response, shapeOnly bool, clean func(string) string) comparison {
 	result := comparison{
 		Example:            example.Name,
 		ExpectedStatus:     example.Status,
@@ -330,7 +334,7 @@ func compareWith(example savedExample, response engine.Response, shapeOnly bool)
 		ContentTypeMatches: example.ContentType == "" || mediaType(example.ContentType) == mediaType(response.ContentType),
 	}
 	if example.BodyEncoding != engine.EncodingBase64 && response.BodyEncoding != engine.EncodingBase64 {
-		found := compareBodies(example.Body, response.Body, shapeOnly)
+		found := compareBodies(example.Body, response.Body, shapeOnly, clean)
 		result.Differences, result.MoreDifferences = found.found, found.more
 	} else if example.Body != response.Body {
 		result.Differences = []difference{{Path: rootPath, Change: changeValue}}
@@ -377,7 +381,7 @@ func (d *Desk) lastResponse(_ context.Context, current scene, arguments response
 	if err != nil {
 		return responseReport{}, err
 	}
-	compared := compareWith(example, response, arguments.ShapeOnly)
+	compared := compareWith(example, response, arguments.ShapeOnly, d.client.Text)
 	report.Comparison = &compared
 	return report, nil
 }

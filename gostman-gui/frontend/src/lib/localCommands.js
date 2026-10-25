@@ -16,7 +16,7 @@ export const LOCAL_COMMAND_TEXT = {
 
 const approved = new Set()
 
-export function describeCommand(request, variablesJSON) {
+function describeCommand(request, variablesJSON) {
   const variables = parseVariableMap(variablesJSON) || new Map()
   const substitute = (text) => substitutePlaceholders(text, variables)
   return {

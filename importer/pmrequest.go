@@ -26,6 +26,16 @@ func (t *translator) renderSendRequest(call *ast.CallExpression) string {
 	return t.awaited(call, sendRequestWrapper+"("+t.renderCallback(call.ArgumentList[1])+", "+target+")")
 }
 
+func (t *translator) renderBodyUpdate(call *ast.CallExpression) string {
+	path, _ := chainOf(call.Callee)
+	args := t.renderArguments(call)
+	if len(args) != 1 || isObjectLiteral(call.ArgumentList[0]) {
+		return t.unsupportedCall(call, path, args)
+	}
+	t.translated++
+	return "req.setBody(" + args[0] + ")"
+}
+
 func (t *translator) renderLegacyTest(assign *ast.AssignExpression) (string, bool) {
 	target, isBracket := assign.Left.(*ast.BracketExpression)
 	if !t.dialect.retired[legacyTests] || !isBracket || assign.Operator != token.ASSIGN || t.declared[legacyTests] {

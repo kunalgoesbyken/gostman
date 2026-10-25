@@ -64,18 +64,21 @@ func (s environmentScope) named(environments []Environment, name string) []Envir
 
 func (c Collection) ChooseEnvironment(folderID, name string) (Environment, error) {
 	scope := newEnvironmentScope(c.Folders, folderID)
-	var own, offered []Environment
+	var own, shared, offered []Environment
 	for _, environment := range c.Environments {
-		isOwn := scope.chain[environment.FolderID]
+		isOwn, isShared := scope.chain[environment.FolderID], scope.isShared(environment)
 		if isOwn {
 			own = append(own, environment)
 		}
-		if isOwn || folderID == "" || scope.isShared(environment) {
+		if isShared {
+			shared = append(shared, environment)
+		}
+		if isOwn || folderID == "" || isShared {
 			offered = append(offered, environment)
 		}
 	}
 	if name == "" {
-		return firstOf(own, offered), nil
+		return firstOf(own, shared), nil
 	}
 	if matches := scope.named(own, name); len(matches) == 1 {
 		return matches[0], nil
@@ -104,12 +107,43 @@ func (s *Session) folderID(folders []Folder, wanted string) (string, error) {
 	return chooseFolder(paths, wanted)
 }
 
-func (s *Session) collectionLayers(stored Collection, folder string) ([]variables, error) {
-	folderID, err := s.folderID(stored.Folders, folder)
-	if err != nil || folderID == "" {
-		return nil, err
+func (c Collection) collectionsWithEnvironments() []string {
+	lineageOf := c.lineages()
+	var ids []string
+	for _, environment := range c.Environments {
+		if id := collectionOf(lineageOf(environment.FolderID)); id != "" && !slices.Contains(ids, id) {
+			ids = append(ids, id)
+		}
 	}
-	return Request{Lineage: stored.lineages()(folderID)}.collectionScopes(), nil
+	return ids
+}
+
+func (c Collection) sharedEnvironment(name string) Environment {
+	scope := newEnvironmentScope(c.Folders, "")
+	for _, environment := range c.Environments {
+		if scope.isShared(environment) && (name == "" || environment.Name == name) {
+			return environment
+		}
+	}
+	return Environment{}
+}
+
+func (c Collection) environmentsFor(folderID, name string) (Environment, map[string]Environment, error) {
+	collections := c.collectionsWithEnvironments()
+	if folderID != "" || len(collections) == 0 {
+		chosen, err := c.ChooseEnvironment(folderID, name)
+		return chosen, nil, err
+	}
+	lineageOf := c.lineages()
+	byCollection := make(map[string]Environment, len(collections))
+	for _, id := range collections {
+		chosen, err := c.ChooseEnvironment(id, name)
+		if err != nil {
+			return Environment{}, nil, fmt.Errorf("collection %q: %w; pass --folder to run one collection", lineageOf(id)[1].Name, err)
+		}
+		byCollection[id] = chosen
+	}
+	return c.sharedEnvironment(name), byCollection, nil
 }
 
 func firstOf(groups ...[]Environment) Environment {

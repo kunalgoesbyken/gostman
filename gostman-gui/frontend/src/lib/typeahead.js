@@ -9,9 +9,9 @@ export const isTypedCharacter = (event, isTyping) => (
 )
 
 export function findByPrefix(labels, currentIndex, prefix) {
-  const startOffset = [...prefix].length === 1 ? 1 : 0
-  for (let offset = startOffset; offset < labels.length + startOffset; offset += 1) {
-    const index = (currentIndex + offset) % labels.length
+  const start = currentIndex < 0 ? 0 : currentIndex + ([...prefix].length === 1 ? 1 : 0)
+  for (let offset = 0; offset < labels.length; offset += 1) {
+    const index = (start + offset) % labels.length
     if (labels[index] !== null && startsWithText(labels[index], prefix)) return index
   }
   return -1

@@ -57,7 +57,6 @@ export const OAUTH_TEXT = {
   cancelled: "The sign-in was cancelled.",
   popup: {
     blocked: "The sign-in window was blocked. Allow pop-ups for this site and try again.",
-    closed: "The sign-in window was closed before the sign-in finished.",
     timedOut: "No sign-in arrived within five minutes.",
     noCode: "The provider did not return an authorization code.",
     refused: (reason) => `The provider refused the sign-in: ${reason}`,

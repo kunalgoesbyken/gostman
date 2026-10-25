@@ -5,8 +5,6 @@ export const OAUTH_CALLBACK_PATH = '/oauth-callback'
 const CHANNEL_NAME = 'gostman-oauth'
 const POPUP_FEATURES = 'popup,width=520,height=680'
 const SIGN_IN_TIMEOUT_MS = 5 * 60 * 1000
-const CLOSED_POLL_MS = 500
-const CLOSED_GRACE_MS = 1500
 const TEXT = OAUTH_TEXT.popup
 
 let cancelPending = () => {}
@@ -35,11 +33,8 @@ export function signInWithPopup(url, state, issuer = '') {
   return new Promise((resolve, reject) => {
     const channel = new BroadcastChannel(CHANNEL_NAME)
     let timer = 0
-    let watcher = 0
-    let closedAt = 0
     const settle = (finish) => (value) => {
       clearTimeout(timer)
-      clearInterval(watcher)
       channel.close()
       cancelPending = () => {}
       finish(value)
@@ -48,11 +43,6 @@ export function signInWithPopup(url, state, issuer = '') {
     const succeed = settle(resolve)
 
     timer = setTimeout(() => fail(new Error(TEXT.timedOut)), SIGN_IN_TIMEOUT_MS)
-    watcher = setInterval(() => {
-      if (!popup.closed) return
-      closedAt ||= Date.now()
-      if (Date.now() - closedAt >= CLOSED_GRACE_MS) fail(new Error(TEXT.closed))
-    }, CLOSED_POLL_MS)
     cancelPending = () => {
       popup.close()
       fail(new Error(OAUTH_TEXT.cancelled))

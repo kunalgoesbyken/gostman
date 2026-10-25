@@ -12,13 +12,15 @@ const isLetter = (character) => (character >= 'a' && character <= 'z') || (chara
 const isDigits = (text) => text.length > 0 && [...text].every(isDigit)
 const hasSpace = (text) => [...text].some((character) => character.trim() === '')
 const isTwoDigits = (text, highest) => text.length === 2 && isDigits(text) && Number(text) <= highest
+const isLeapYear = (year) => year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)
+const daysIn = (year, month) => (month === 2 && !isLeapYear(year) ? 28 : DAYS_IN_MONTH[month - 1])
 
 function isDate(text) {
   if (text.length !== 10 || text[4] !== '-' || text[7] !== '-') return false
   const [year, month, day] = [text.slice(0, 4), text.slice(5, 7), text.slice(8)]
   if (!isDigits(year) || !isDigits(month) || !isDigits(day)) return false
   const monthNumber = Number(month)
-  return monthNumber >= 1 && monthNumber <= 12 && Number(day) >= 1 && Number(day) <= DAYS_IN_MONTH[monthNumber - 1]
+  return monthNumber >= 1 && monthNumber <= 12 && Number(day) >= 1 && Number(day) <= daysIn(Number(year), monthNumber)
 }
 
 function isClock(text, withSeconds) {

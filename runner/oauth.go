@@ -59,11 +59,11 @@ func isTokenFresh(config engine.OAuth2, now time.Time) bool {
 	return config.ExpiresAt == 0 || config.ExpiresAt-expiryMargin.Milliseconds() > now.UnixMilli()
 }
 
-func (s *session) exchange(ctx context.Context, config engine.OAuth2, options engine.Options, refresh bool) (engine.OAuth2, error) {
+func (s *session) exchange(ctx context.Context, config engine.OAuth2, request Request, refresh bool) (engine.OAuth2, error) {
 	token := engine.FetchToken(ctx, engine.TokenExchange{
 		Config:    config,
-		Variables: s.known().text(),
-		Options:   options,
+		Variables: s.scoped(request).text(),
+		Options:   request.Options,
 		Refresh:   refresh,
 	}, s.policy)
 	if token.Error != "" {
@@ -76,10 +76,10 @@ func (s *session) exchange(ctx context.Context, config engine.OAuth2, options en
 	return config, nil
 }
 
-func (s *session) renewToken(ctx context.Context, config engine.OAuth2, options engine.Options) (engine.OAuth2, error) {
+func (s *session) renewToken(ctx context.Context, config engine.OAuth2, request Request) (engine.OAuth2, error) {
 	browserOnly := needsSignIn(config)
 	if config.RefreshToken != "" {
-		renewed, err := s.exchange(ctx, config, options, true)
+		renewed, err := s.exchange(ctx, config, request, true)
 		if err == nil {
 			return renewed, nil
 		}
@@ -90,7 +90,7 @@ func (s *session) renewToken(ctx context.Context, config engine.OAuth2, options 
 	if browserOnly {
 		return config, errors.New(SignInNeeded)
 	}
-	return s.exchange(ctx, config, options, false)
+	return s.exchange(ctx, config, request, false)
 }
 
 func (s *session) withFreshToken(ctx context.Context, request Request) (Request, error) {
@@ -103,7 +103,7 @@ func (s *session) withFreshToken(ctx context.Context, request Request) (Request,
 	defer s.common.signInMu.Unlock()
 	config := seeded(s.common.recall(request.Auth.OAuth2), s.common.signIn)
 	if !isTokenFresh(config, time.Now()) {
-		renewed, err := s.renewToken(ctx, config, request.Options)
+		renewed, err := s.renewToken(ctx, config, request)
 		if err != nil {
 			return request, err
 		}

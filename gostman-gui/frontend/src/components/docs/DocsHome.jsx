@@ -19,9 +19,14 @@ function StartCard({ item }) {
   )
 }
 
+function AnchorTargets({ ids }) {
+  return ids.map((id) => <span key={id} id={id} />)
+}
+
 function AreaLinks({ group, extra }) {
   return (
     <div>
+      <AnchorTargets ids={group.anchors} />
       <h3 className="text-sm font-medium text-foreground">{group.title}</h3>
       <ul className="mt-3 space-y-2">
         {group.items.map((item) => (
@@ -48,6 +53,7 @@ export function DocsHome({ directory }) {
   return (
     <>
       <section aria-labelledby="docs-home-start" className="mt-12">
+        <AnchorTargets ids={start.anchors} />
         <h2 id="docs-home-start" className={HEADING}>{DOCS_TEXT.homePage.start}</h2>
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {start.items.slice(1).map((item) => (

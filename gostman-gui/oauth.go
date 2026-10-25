@@ -121,7 +121,7 @@ func (a *App) Authorize(config engine.OAuth2, variables string) (AuthorizationRe
 	defer a.release(authorizationKey)
 
 	wailsruntime.BrowserOpenURL(a.ctx, started.URL)
-	outcome, err := awaitCallback(ctx, listener, path, started.State, config.Issuer)
+	outcome, err := awaitCallback(ctx, listener, path, started.State, started.Issuer)
 	if err != nil {
 		return AuthorizationResult{}, err
 	}

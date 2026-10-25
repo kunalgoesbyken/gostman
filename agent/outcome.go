@@ -143,7 +143,7 @@ func (c *Client) Send(ctx context.Context, listed runner.Listed, view View) (Out
 
 func (c *Client) Exchange(ctx context.Context, listed runner.Listed, view View) (Outcome, engine.Response, error) {
 	before := c.session.Variables()
-	exchanged := c.session.Send(ctx, listed.Request, listed.Folder)
+	exchanged := c.session.Send(ctx, listed.Request, listed.Folder, listed.Arguments)
 	c.absorb()
 	result, response := exchanged.Result, exchanged.Response
 	outcome := Outcome{

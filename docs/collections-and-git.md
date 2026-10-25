@@ -56,7 +56,7 @@ After a move, paste or duplicate, a notice names the item and offers **Undo**.
 
 ### Order of requests and folders
 
-Inside each folder, requests and subfolders share one order, as in Postman and Insomnia: a request can sit above, between or below folders, and Alt+Up Arrow or **Move up** steps past a folder the same way it steps past a request. The runner, `gostman run` and an agent's `run_folder` send requests in this order, and the Postman, curl script and HAR exports write it. Imports from Postman, Insomnia and single-file OpenCollection keep the order of the source. Bruno lists folders before requests, so Bruno imports show folders first, and a Bruno export warns about requests that will run later there.
+Inside each folder, requests and subfolders share one order, as in Postman and Insomnia: a request can sit above, between or below folders, and Alt+Up Arrow or **Move up** steps past a folder the same way it steps past a request. The runner, `gostman run` and an agent's `run_folder` send requests in this order, and the Postman, curl script and HAR exports write it. Imports from Postman, Insomnia and single-file OpenCollection keep the order of the source, and imported top-level items are placed after the ones you already have. Bruno lists folders before requests, so Bruno imports show folders first, and a Bruno export warns about requests that will run later there.
 
 Collections from older versions show folders first, exactly as before, and nothing moves when you open them. The first time you move, copy, duplicate or import something, Gostman numbers every folder's contents in the order they already show, so nothing changes position, and from then on every folder keeps the order you give it. Exports carry this too: a Gostman export from an older version still runs folders first.
 
@@ -68,6 +68,7 @@ For a request:
 
 - **Rename**
 - **Tags…**, see [Folder colours and tags](#folder-colours-and-tags)
+- **Share request**, which opens the Share tab, see [Sharing and documentation](sharing-and-docs.md)
 - **Move up**, **Move down**, **Move to folder**
 - **Copy**, **Paste**, **Duplicate**
 - **Delete**
@@ -79,7 +80,7 @@ For a folder, the menu adds these entries before the move and copy entries:
 - **New request** and **New subfolder** inside the folder
 - **Run folder**
 - **Share folder**, which opens the Share tab, see [Sharing and documentation](sharing-and-docs.md)
-- **Check for spec updates**, **Browse API spec** and **Check responses against the spec** (or **Stop checking responses against the spec**), only for a folder linked to an OpenAPI spec, see [Import, export and OpenAPI specs](import-export-and-specs.md)
+- **Check for spec updates**, **Browse API spec** and **Check responses against the spec** (or **Stop checking responses against the spec**), only for a folder linked to an OpenAPI spec (**Check for spec updates** only when the spec has an address to sync from); any other folder has **Check responses against a spec…**, which links one. See [Import, export and OpenAPI specs](import-export-and-specs.md)
 - **Settings**, the folder settings described in [Folder and collection settings](folder-settings.md); on a top-level folder in the app's own storage it is **Collection settings**, because that folder is a collection
 - **Colour and tags…**, see [Folder colours and tags](#folder-colours-and-tags)
 
@@ -172,7 +173,7 @@ The footer of the menu has these actions:
 | --- | --- |
 | Trust this folder | Shown only for a restricted folder |
 | Open folder | Picks a folder to use as the collection. An empty folder becomes a new collection; a folder that already holds other files, such as a repository root, gets the collection in a `gostman` folder inside it |
-| Save collection to folder | Writes the current collection into a folder you pick, or into a new `gostman` folder inside it when it already holds other files. A folder is one collection, so each collection's own collection variables join the shared ones in `gostman.yaml`; a name already set keeps its value, and secret values stay in the keychain |
+| Save collection to folder | Writes the current collection into a folder you pick, or into a new `gostman` folder inside it when it already holds other files. A folder is one collection, so each collection's own collection variables join the shared ones in `gostman.yaml`; a name already set keeps its value, and secret values stay in the keychain. Environments become shared too; when two collections, or a collection and the shared list, both have an environment with the same name, the collection's one is renamed after it, such as `Dev (Ledger)`, and a notice says so |
 | Clone repository | Asks for a repository address, then a folder to clone into |
 | Git | Opens the Git panel; needs an open folder |
 | Reload from disk | Rereads the folder at once; changes made outside the app are also picked up by themselves within a few seconds. Needs an open folder |
@@ -200,7 +201,7 @@ If the panel cannot work, it says why:
 - **Git cannot use this folder**, with the reason Git gave.
 - **This folder is not a Git repository**, with an **Initialize repository** button.
 
-In a repository, the header shows the current branch (or **Detached HEAD**) and the buttons **Fetch**, **Pull** and **Push**. Pull and Push show how many commits you are behind or ahead. When the collection is one folder of a larger repository, such as `gostman/` in your project, the header also shows that folder: only changes inside it are listed, and **Stage all**, **Commit all changes**, **Stash changes** and the whole-repository history leave other files alone, while branches, pull and push apply to the whole repository. In a restricted folder, the panel shows a notice with a **Trust this folder** link and everything that changes the repository is disabled.
+In a repository, the header shows the current branch (or **Detached HEAD**) and the buttons **Fetch**, **Pull** and **Push**. Pull and Push show how many commits you are behind or ahead. When the collection is one folder of a larger repository, such as `gostman/` in your project, the header also shows that folder: only changes inside it are listed, and **Stage all**, **Commit all changes**, **Stash changes** and the whole-repository history leave other files alone; a commit takes only the staged files inside the folder, and files you staged elsewhere in the repository stay staged (a commit that finishes a merge takes everything, as the merge does), while branches, pull and push apply to the whole repository. In a restricted folder, the panel shows a notice with a **Trust this folder** link and everything that changes the repository is disabled.
 
 The panel has five sections: **Changes**, **Branches**, **Stashes**, **History** and **Remotes**. Output from a Git operation appears in a notice at the top.
 

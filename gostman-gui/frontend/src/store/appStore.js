@@ -15,7 +15,7 @@ import { reconcileTabs } from '../lib/tabReconcile'
 import { isNarrowViewport, rememberSidebarOpen, rememberedSidebarOpen } from '../lib/layout'
 import { reorderTabs, stepTab } from '../lib/tabOrder'
 import { SCOPE_COLLECTION, SCOPE_ENVIRONMENT, SCOPE_GLOBAL, SCOPE_SESSION } from '../lib/scripting/scopes'
-import { promptLayer, resolveLayers, scopeLayers, scriptValues, variableText, withSecretMarks } from '../lib/variableScopes'
+import { promptLayer, resolveLayers, scopeLayers, scriptLayers, variableText, withSecretMarks } from '../lib/variableScopes'
 import { choiceFor, chosenEnvironment, isSameScope, isScoped, variableHolderFor } from '../lib/environmentScope'
 import { isWelcomeDismissed, rememberWelcomeDismissed } from '../lib/welcome'
 import { rememberSteps, rememberedSteps } from '../lib/onboarding'
@@ -133,6 +133,8 @@ const mergedValues = (existing, changes) => (
 )
 
 const withoutNames = (values, names) => Object.fromEntries(Object.entries(values).filter(([name]) => !names.includes(name)))
+
+const namesWithValues = (values) => Object.keys(values).filter((name) => values[name] !== null)
 
 const mergedVariablesText = (text, changes) => {
   const current = parseVariables(text || EMPTY_VARIABLES)
@@ -584,7 +586,7 @@ export const useAppStore = create(
           const saved = !persistent.includes(SCOPE_ENVIRONMENT) || get().mergeActiveVariables(writes[SCOPE_ENVIRONMENT], request)
           if (persistent.includes(SCOPE_COLLECTION)) set((state) => withCollectionWrites(state, writes[SCOPE_COLLECTION], contextFolderId(state, request)))
           if (persistent.includes(SCOPE_GLOBAL)) set((state) => withGlobalWrites(state, writes[SCOPE_GLOBAL]))
-          get().storeSessionVariables(writes[SCOPE_SESSION] || {}, persistent.flatMap((scope) => Object.keys(writes[scope])))
+          get().storeSessionVariables(writes[SCOPE_SESSION] || {}, persistent.flatMap((scope) => namesWithValues(writes[scope])))
           return saved
         },
         mergeEnvironments: (incoming, scope = 'collection') => {
@@ -751,7 +753,7 @@ export function selectResolvedVariables(state) {
   const request = selectActiveTab(state)?.request
   const inputs = [
     state.globalEnvironments, state.activeGlobalEnvironmentId, state.collectionVariables, state.collectionVariablesMeta, state.environments,
-    state.activeEnvironmentId, state.environmentChoices, state.folders, state.dotEnv, request?.folderId, request?.vars, state.sessionVariables,
+    state.activeEnvironmentId, state.environmentChoices, state.folders, state.dotEnv, request?.folderId, request?.vars, state.sessionVariables, state.isRestricted,
   ]
   if (sameInputs(lastInputs, inputs)) return lastResolved
   lastInputs = inputs
@@ -763,9 +765,7 @@ export const variableTextFor = (state, request, answers = {}, referenced = {}) =
   variableText(resolveLayers([...scopeLayers(state, request, referenced), promptLayer(answers)]))
 )
 
-export const scriptVariablesFor = (state, request, referenced = {}) => (
-  scriptValues(resolveLayers(scopeLayers(state, request, referenced)))
-)
+export const scriptLayersFor = (state, request, referenced = {}) => scriptLayers(scopeLayers(state, request, referenced))
 
 export const selectActiveVariables = (state) => variableText(selectResolvedVariables(state))
 

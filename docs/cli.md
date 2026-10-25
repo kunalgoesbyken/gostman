@@ -36,7 +36,7 @@ gostman export orders-api --format openapi --out openapi.json
 
 ### Environments
 
-`--env name` picks the environment; without it, `run`, `send`, `load` and `mcp` use the first environment of the collection. In an export from the app, an environment can belong to one collection (a top-level folder, see [Environments per collection](variables.md#environments-per-collection)): with `--folder`, `run` offers the shared environments and those of that folder's collection, and without `--env` uses the collection's first. When several collections have an environment with the name you give, `--env` names one as `Collection/Name`, for example `--env "Orders API/Local"`, or `--folder` picks the collection.
+`--env name` picks the environment; without it, `run`, `send`, `load` and `mcp` use the first environment of the collection. In an export from the app, an environment can belong to one collection (a top-level folder, see [Environments per collection](variables.md#environments-per-collection)), and each request uses its own collection's environment, as in the app. Without `--env`, that is the collection's first own environment, or the first shared one for a collection without its own. `--env Local` picks each collection's own `Local`, or the shared `Local` for a collection without one; if a collection that has environments of its own has neither, the run stops before sending anything and names it. With `--folder`, `run` uses one environment for the whole run, chosen from the shared environments and those of that folder's collection (the collection's first without `--env`); `--env "Orders API/Local"` names one environment of one collection.
 
 ### Secret managers
 
@@ -48,11 +48,11 @@ An environment variable can read its value from HashiCorp Vault (KV 1 and 2), AW
 
 ### Data-driven runs
 
-`--data users.csv` (header row, UTF-8, quoted fields may hold commas and line breaks) or `--data users.json` (an array of objects) runs the whole collection once per row. A row's columns become variables that win over request, folder and environment variables and over `--var`; every value from a CSV is text. `iteration` (from 1) and `iterationCount` are set for scripts and `{{iteration}}` in requests. `--iterations n` repeats a run n times, or uses only the first n rows. Each iteration starts from the environment's variables again.
+`--data users.csv` (header row, UTF-8, quoted fields may hold commas and line breaks) or `--data users.json` (an array of objects) runs the whole collection once per row. A row's columns become variables that win over request, folder and environment variables and over `--var`; every value from a CSV is text. `iteration` (from 1) and `iterationCount` are set for scripts and `{{iteration}}` in requests. `--iterations n` repeats a run n times, or uses only the first n rows. Values that scripts and Extract rules write carry over to the next iteration, as in the app and in Postman; only the row's own columns change from one iteration to the next.
 
 ### Parallel runs
 
-`--parallel n` sends up to n at once. With several iterations, whole iterations run side by side and each keeps its own order and extraction chaining. With one iteration, single requests run side by side and do not see each other's extracted variables, so use it for independent requests. Cookies and OAuth 2 tokens are shared between workers, and a token is fetched once.
+`--parallel n` sends up to n requests of an iteration at once; iterations run one after another, as in the app's runner. Requests that run side by side see a value another one wrote only if it finished first, so use it for independent requests, and a script cannot change the order (`setNextRequest` stops the run). Variables, cookies and OAuth 2 tokens are shared between workers, and a token is fetched once.
 
 ### Tags
 
@@ -60,7 +60,7 @@ An environment variable can read its value from HashiCorp Vault (KV 1 and 2), AW
 
 ### Reports
 
-`--reporter text|json|junit|html`, or `format:file` to write that report to a file. Repeat it to write several reports in one run: `--reporter text --reporter junit:report.xml --reporter html:report.html`. At most one reporter can go without a file, and it prints to stdout; when every report goes to a file, the text summary is printed. `--output file` names the file of the reporter given without one, so `--reporter junit --output report.xml` works as before. `--reporter html:report.html` writes one self-contained page with a summary, every request's timing, checks, request and response, and a filter for failures; response bodies are included, so add `--redact` before sharing it. The desktop and web runner dialogs take a data file and a parallel count the same way and can download the same report; there, iterations run one after another and the parallel count applies inside each. Colour is off when `NO_COLOR` is set or the output is not a terminal.
+`--reporter text|json|junit|html`, or `format:file` to write that report to a file. Repeat it to write several reports in one run: `--reporter text --reporter junit:report.xml --reporter html:report.html`. At most one reporter can go without a file, and it prints to stdout; when every report goes to a file, the text summary is printed. `--output file` names the file of the reporter given without one, so `--reporter junit --output report.xml` works as before. `--reporter html:report.html` writes one self-contained page with a summary, every request's timing, checks, request and response, and a filter for failures; response bodies are included, so add `--redact` before sharing it. The desktop and web runner dialogs take a data file and a parallel count the same way and can download the same report. Colour is off when `NO_COLOR` is set or the output is not a terminal.
 
 ### Contract checks
 
@@ -85,9 +85,9 @@ The authorization code and device code grants need a person in a browser, so `ru
 | Code | Meaning |
 | --- | --- |
 | 0 | every request and check passed |
-| 1 | a check or a script failed, or the run was interrupted |
+| 1 | a check, a script or an MCP tool call failed, or the run was interrupted |
 | 2 | the command or the input is wrong |
-| 3 | a request got no response: it could not be sent, the connection failed or timed out, or the host is not allowed |
+| 3 | a request got no response: it could not be sent, the connection failed or timed out |
 
 A run with both kinds of failure exits 3. Scripts that only test for a non-zero code keep working. `load`, `scan` and `lint` exit 1 when their threshold is reached and 2 on wrong input.
 
@@ -166,7 +166,7 @@ gostman export orders-api --format curl --out requests.sh
 ```
 
 - `import <file | folder> --out <folder>` creates a workspace from a Postman, Insomnia, Bruno, HAR, WSDL, OpenAPI/Swagger, Gostman export or `.http` file, or a folder such as a Bruno collection. `--format auto|insomnia|har|wsdl|bruno|postman|openapi|gostman|http` (default `auto`, detected from the content; `gostman` is an export file from the desktop or web app). `--skip-static` leaves images, fonts, styles and scripts out of a HAR file; `export` does not take it. It prints what was imported, with warnings and skipped items on stderr.
-- Imports add data only. Scripts and OAuth settings are kept and reported; tokens and cookie values are never carried over. The values of variables marked secret, such as Postman `secret` variables, are not written to the workspace; they stay marked secret, and `import` lists the ones that had a value so you can set them in the desktop app (kept in the system keychain) or pass them with `--var`, `--var-from-env` or `--env-file`. Secret globals become empty collection variables in `gostman.yaml`, which has no keychain, so pass those with the same flags, or move them to an environment in the desktop app and mark them secret there. `--out` must be a new or empty folder, so `import` cannot add to a workspace that `init` created; import into a new folder, or add requests from a coding agent with the `import_requests` tool. The files are created readable by you only.
+- Imports add data only. Scripts and OAuth settings are kept and reported; tokens, cookie values and secret manager references are never carried over. The values of variables marked secret, such as Postman `secret` variables, are not written to the workspace; they stay marked secret, and `import` lists the ones that had a value so you can set them in the desktop app (kept in the system keychain) or pass them with `--var`, `--var-from-env` or `--env-file`. Secret globals become collection variables in `gostman.yaml` that keep their secret mark and have no value, which has no keychain, so pass those with the same flags, or move them to an environment in the desktop app and mark them secret there. `--out` must be a new or empty folder, so `import` cannot add to a workspace that `init` created; import into a new folder, or add requests from a coding agent with the `import_requests` tool. The files are created readable by you only.
 - `export <workspace> --format <format> --out <path>` writes `postman` (Collection v2.1 with the collection variables, see [Back to Postman](coming-from-postman.md#back-to-postman)), `bruno` (a folder of `.bru` files), `openapi`, `curl` (a shell script that lists the environment variables to set at the top), `har` or `http` (`.http` files for VS Code REST Client and JetBrains HTTP Client). `--out` is a file, or a folder when the export has several files.
 - Passwords, tokens and secret-named headers or variables become `{{NAME}}` placeholders named after the field, such as `{{TOKEN}}` or `{{X_API_KEY}}`; the same value used by several requests gets one placeholder, and they re-import as empty variables. A value that already uses a variable, such as `Bearer {{API_TOKEN}}`, is kept as written. `--include-secrets` writes the literal values instead and prints a warning; `import` does not take it.
 

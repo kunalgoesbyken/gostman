@@ -48,7 +48,7 @@ function toolFindings(tool) {
   const properties = schema.properties ?? {}
   const undocumented = Object.keys(properties).filter((name) => !String(properties[name].description ?? '').trim())
   if (undocumented.length > 0) add('undocumentedParameters', undocumented.join(', '))
-  const unknown = (schema.required ?? []).filter((name) => !(name in properties))
+  const unknown = (schema.required ?? []).filter((name) => !Object.hasOwn(properties, name))
   if (unknown.length > 0) add('unknownRequired', unknown.join(', '))
   return findings
 }

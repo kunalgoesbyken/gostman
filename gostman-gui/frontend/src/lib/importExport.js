@@ -10,8 +10,8 @@ import { AUTH_INHERIT, AUTH_NONE, activeSettingsKinds, hasActiveSettings, normal
 import { clearToken } from './oauth'
 import { AUTH_OAUTH2, normalizeRequest } from './request'
 import { isFileRow, isSentRow } from './rows'
-import { cleanOrder, compareOrder } from './sortOrder'
-import { sharedNumbering } from './treeMoves'
+import { cleanOrder } from './sortOrder'
+import { rootNumbering, sharedNumbering } from './treeMoves'
 import { cleanColorChoice } from './swatches'
 import { normalizeTags } from './tags'
 import { AUTH_API_KEY, AUTH_BASIC, AUTH_BEARER, GRAPHQL_METHOD, UNTITLED_REQUEST, apiKeyLocation, asText, sentRows } from './exportFields'
@@ -458,7 +458,7 @@ export async function parseImport(text) {
 }
 
 const AUTH_TYPES = [AUTH_INHERIT, AUTH_BASIC, AUTH_BEARER, AUTH_API_KEY, AUTH_OAUTH2, ...Object.keys(SCHEMES)]
-const OAUTH_TEXT_FIELDS = ['grant', 'authUrl', 'tokenUrl', 'clientId', 'clientSecret', 'scope', 'username', 'password', 'callbackUrl', 'credentialsIn', 'headerPrefix', 'resource', 'issuer']
+const OAUTH_TEXT_FIELDS = ['grant', 'authUrl', 'tokenUrl', 'clientId', 'clientSecret', 'scope', 'username', 'password', 'callbackUrl', 'credentialsIn', 'headerPrefix', 'resource', 'issuer', 'deviceUrl']
 const AUTH_TEXT_FIELDS = ['username', 'password', 'token', 'key', 'value', 'domain']
 const SCHEME_SECTIONS = Object.values(SCHEMES).filter((scheme) => scheme.section)
 const REQUEST_TEXT_FIELDS = ['id', 'description', 'url', 'headers', 'body', 'queryParams', 'folderId', 'graphqlQuery', 'graphqlVariables', 'extractors', 'assertions', ...SCRIPT_FIELDS, 'grpcMethod', 'grpcMessage', 'grpcProtos', 'mcpMethod', 'mcpTool', 'mcpArguments', 'socketProtocol', 'socketMessages', 'vars']
@@ -478,7 +478,7 @@ function cleanMethod(value) {
 
 function sanitizeOAuth(raw) {
   if (!isPlainObject(raw)) return {}
-  return { ...pickStrings(raw, OAUTH_TEXT_FIELDS), pkce: raw.pkce !== false }
+  return { ...pickStrings(raw, OAUTH_TEXT_FIELDS), pkce: raw.pkce !== false, sendIdToken: raw.sendIdToken === true }
 }
 
 function sanitizeSections(raw) {
@@ -531,6 +531,7 @@ function sanitizeRequest(raw) {
 const sanitizeScope = (raw) => normalizeScopeSettings({
   ...pickStrings(isPlainObject(raw) ? raw : {}, SCOPE_TEXT_FIELDS),
   auth: sanitizeAuth(raw?.auth, SCOPE_AUTH_TYPES),
+  scriptTimeoutMs: raw?.scriptTimeoutMs,
 })
 
 const sanitizeFolder = (raw) => ({
@@ -584,10 +585,6 @@ function flattenDeepFolders(folders) {
   return folders.map((folder) => (isTooDeep(folder) ? { ...folder, parentId: ROOT_ID } : folder))
 }
 
-function placedAfterExisting(items, parentOf) {
-  return [...items].sort(compareOrder).map((item) => (parentOf(item) === ROOT_ID ? { ...item, sortOrder: 0 } : item))
-}
-
 export function sanitizeImport(data, existing) {
   const rawRequests = asArray(data?.requests).filter(isPlainObject)
   const requestsWithoutTls = rawRequests
@@ -603,9 +600,7 @@ export function sanitizeImport(data, existing) {
   const requestIds = assignFreshIds(rawRequests.map(sanitizeRequest), existing.requestIds)
   const linkedRequests = requestIds.assigned.map((request) => ({ ...request, folderId: inImport(request.folderId), timestamp: '' }))
   const linked = { folders: flattenedFolders, requests: linkedRequests }
-  const ordered = data?.sharedOrder === true ? linked : sharedNumbering(linked)
-  const folders = placedAfterExisting(ordered.folders, (folder) => folder.parentId)
-  const requests = placedAfterExisting(ordered.requests, (request) => request.folderId)
+  const { folders, requests } = rootNumbering(data?.sharedOrder === true ? linked : sharedNumbering(linked))
 
   return {
     requests,

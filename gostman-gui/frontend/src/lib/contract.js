@@ -11,6 +11,7 @@ const ANY_TYPE = '*/*'
 const JSON_TYPE = 'application/json'
 const JSON_SUFFIX = '+json'
 const DEFAULT_RESPONSE = 'default'
+const HEAD_METHOD = 'HEAD'
 const NO_OPERATION = { operation: null, note: '' }
 const NOT_JSON = Symbol('not json')
 
@@ -23,12 +24,10 @@ function decodeSegment(segment) {
 }
 
 function pathOf(address) {
-  const text = String(address ?? '')
+  const text = String(address ?? '').split(/[?#]/)[0]
   const scheme = text.indexOf(SCHEME_MARK)
   const start = scheme >= 0 ? text.indexOf('/', scheme + SCHEME_MARK.length) : text.indexOf('/')
-  if (start < 0) return '/'
-  const rest = text.slice(start)
-  return rest.split('?')[0].split('#')[0]
+  return start < 0 ? '/' : text.slice(start)
 }
 
 const segmentsOf = (path) => path.split('/').filter(Boolean).map(decodeSegment)
@@ -106,7 +105,7 @@ function bodyResult(schema, root, text) {
   const value = parseJSON(text, NOT_JSON)
   if (value === NOT_JSON) return result(CONTRACT_TEXT.body, CONTRACT_TEXT.notJson)
   try {
-    return result(CONTRACT_TEXT.body, schemaMismatches(schema, value, root).join('\n'))
+    return result(CONTRACT_TEXT.body, schemaMismatches(schema, value, root, true).join('\n'))
   } catch (error) {
     return result(CONTRACT_TEXT.body, error.message)
   }
@@ -125,7 +124,8 @@ export function contractChecks(operation, root, response) {
   const documented = documentedType(types, actual)
   const typeResult = result(CONTRACT_TEXT.contentType(actual), documented === undefined ? CONTRACT_TEXT.contentTypeMissing(types) : '')
   const schema = documented === undefined ? null : content[documented]
-  if (schema === null || schema === undefined || !isJsonType(actual)) return [statusResult, typeResult]
+  const isBodiless = text === '' && operation.method === HEAD_METHOD
+  if (schema === null || schema === undefined || !isJsonType(actual) || isBodiless) return [statusResult, typeResult]
   return [statusResult, typeResult, bodyResult(schema, root, text)]
 }
 

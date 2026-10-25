@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/mcpclient"
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
@@ -254,6 +255,13 @@ func refuseFileReads(supplied []string) error {
 	return nil
 }
 
+func refuseCommands(request workspace.Request, arguments saveArguments) error {
+	if mcpclient.IsCommand(request.URL) && (arguments.URL != nil || arguments.Headers != nil) {
+		return errors.New("Not saved: a stdio: address runs a command on this computer, so only a person sets its command and environment, in the Gostman app.")
+	}
+	return nil
+}
+
 func (d *Desk) refuseSecrets(supplied []string) error {
 	for _, text := range supplied {
 		if label, found := d.client.guard.Find(text); found {
@@ -359,6 +367,9 @@ func (d *Desk) saveRequest(_ context.Context, current scene, arguments saveArgum
 		return saved{}, err
 	}
 	if err := refuseFileReads(change.supplied); err != nil {
+		return saved{}, err
+	}
+	if err := refuseCommands(change.request, arguments); err != nil {
 		return saved{}, err
 	}
 	if err := d.refuseSecrets(change.supplied); err != nil {

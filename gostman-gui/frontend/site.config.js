@@ -106,7 +106,7 @@ async function buildGuideRenderer(bundle) {
   return { renderGuidePage, renderDocsPage, renderLandingMarkup, assets }
 }
 
-const chunkClosure = (bundle, fileName, seen = new Set()) => {
+export const chunkClosure = (bundle, fileName, seen = new Set()) => {
   if (seen.has(fileName)) return seen
   seen.add(fileName)
   bundle[fileName].imports.forEach((imported) => chunkClosure(bundle, imported, seen))

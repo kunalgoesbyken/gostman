@@ -171,17 +171,19 @@ func (w *Workspace) SaveRequests(requests []Request) error {
 	return nil
 }
 
-func (w *Workspace) DeleteRequest(id string) error {
+func (w *Workspace) DeleteRequests(ids []string) error {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	entry := w.requests[id]
-	if entry == nil {
-		return nil
+	for _, id := range ids {
+		entry := w.requests[id]
+		if entry == nil {
+			continue
+		}
+		if err := w.disk.remove(entry.path); err != nil {
+			return err
+		}
+		delete(w.requests, id)
 	}
-	if err := w.disk.remove(entry.path); err != nil {
-		return err
-	}
-	delete(w.requests, id)
 	return nil
 }
 

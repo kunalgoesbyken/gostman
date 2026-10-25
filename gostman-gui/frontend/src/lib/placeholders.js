@@ -24,21 +24,23 @@ export function parseVariableMap(json) {
 }
 
 const MAX_NESTING = 8
+const MAX_EXPANSIONS = 10000
 
 const hasPlaceholder = (text) => ONE_PLACEHOLDER.test(text)
 
-function fill(text, valueOf, filling) {
+function fill(text, valueOf, filling, work) {
   return text.replace(PLACEHOLDER, (placeholder, raw) => {
     const name = raw.trim()
     const value = valueOf(name)
     if (value === undefined) return placeholder
     if (!hasPlaceholder(value)) return value
-    if (filling.includes(name) || filling.length >= MAX_NESTING) return placeholder
-    return fill(value, valueOf, [...filling, name])
+    if (filling.includes(name) || filling.length >= MAX_NESTING || work.spent >= MAX_EXPANSIONS) return placeholder
+    work.spent += 1
+    return fill(value, valueOf, [...filling, name], work)
   })
 }
 
-export const fillPlaceholders = (text, valueOf) => fill(text, valueOf, [])
+export const fillPlaceholders = (text, valueOf) => fill(text, valueOf, [], { spent: 0 })
 
 export const substitutePlaceholders = (text, variables) => fillPlaceholders(text, (name) => variables.get(name))
 

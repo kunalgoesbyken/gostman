@@ -277,9 +277,10 @@ async function saveRequest(request) {
   return saved
 }
 
-async function deleteRequest(id) {
+async function deleteRequests(ids) {
+  const removed = new Set(ids)
   await mutateData((data) => {
-    data.requests = (data.requests || []).filter((request) => request.id !== id)
+    data.requests = (data.requests || []).filter((request) => !removed.has(request.id))
   })
 }
 
@@ -322,7 +323,7 @@ async function saveCookies(cookies) {
 
 async function authorize(config, variables) {
   const started = await postForResult('oauth=start', { config, variables }, 'authorization')
-  const { code, issuer } = await signInWithPopup(started.url, started.state, config.issuer)
+  const { code, issuer } = await signInWithPopup(started.url, started.state, started.issuer)
   return { code, issuer, codeVerifier: started.codeVerifier, redirectUri: started.redirectUri }
 }
 
@@ -383,7 +384,7 @@ export const webBackend = {
   load,
   saveRequest,
   saveRequests,
-  deleteRequest,
+  deleteRequests,
   saveFolders,
   saveHistory,
   saveEnvironments,

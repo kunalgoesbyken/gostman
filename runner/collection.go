@@ -13,17 +13,18 @@ import (
 const byteOrderMark = "\xef\xbb\xbf"
 
 type Collection struct {
-	Requests     []json.RawMessage   `json:"requests"`
-	Folders      []Folder            `json:"folders"`
-	Environments []Environment       `json:"environments"`
-	Variables    string              `json:"variables"`
-	Settings     workspace.Settings  `json:"settings"`
-	SharedOrder  bool                `json:"sharedOrder"`
-	DotEnv       map[string]string   `json:"-"`
-	Modules      map[string]string   `json:"-"`
-	Warnings     []string            `json:"-"`
-	Network      engine.NetworkFiles `json:"-"`
-	Root         string              `json:"-"`
+	Requests      []json.RawMessage   `json:"requests"`
+	Folders       []Folder            `json:"folders"`
+	Environments  []Environment       `json:"environments"`
+	Variables     string              `json:"variables"`
+	VariablesMeta string              `json:"variablesMeta"`
+	Settings      workspace.Settings  `json:"settings"`
+	SharedOrder   bool                `json:"sharedOrder"`
+	DotEnv        map[string]string   `json:"-"`
+	Modules       map[string]string   `json:"-"`
+	Warnings      []string            `json:"-"`
+	Network       engine.NetworkFiles `json:"-"`
+	Root          string              `json:"-"`
 }
 
 type Folder struct {
@@ -34,7 +35,8 @@ type Folder struct {
 	Variables string   `json:"variables"`
 	Tags      []string `json:"tags"`
 	workspace.Settings
-	CollectionVariables string `json:"collectionVariables"`
+	CollectionVariables     string `json:"collectionVariables"`
+	CollectionVariablesMeta string `json:"collectionVariablesMeta"`
 }
 
 type Environment struct {

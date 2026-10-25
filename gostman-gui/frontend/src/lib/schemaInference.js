@@ -1,4 +1,4 @@
-import { isPlainObject } from './dataUtils'
+import { isPlainObject, lookup } from './dataUtils'
 
 const MAX_DEPTH = 32
 const MAX_ITEMS = 100
@@ -14,7 +14,7 @@ function mergeProperties(first, second) {
   if (!first || !second) return first || second
   const keys = [...new Set([...Object.keys(first.properties), ...Object.keys(second.properties)])]
   return {
-    properties: Object.fromEntries(keys.map((key) => [key, merge(first.properties[key], second.properties[key])])),
+    properties: Object.fromEntries(keys.map((key) => [key, merge(lookup(first.properties, key), lookup(second.properties, key))])),
     required: first.required.filter((key) => second.required.includes(key)),
   }
 }

@@ -41,12 +41,6 @@ type exposure struct {
 	required    []string
 }
 
-type variableRow struct {
-	Key     string `json:"key"`
-	Value   any    `json:"value"`
-	Enabled *bool  `json:"enabled,omitempty"`
-}
-
 func isParameterName(name string) bool {
 	if name == "" || len(name) > toolNameLimit {
 		return false
@@ -212,7 +206,7 @@ func (e exposure) hints() mcp.Hints {
 func (e exposure) input() schema {
 	properties := map[string]schema{}
 	for _, name := range e.parameters {
-		hint := "Fills {{" + name + "}}. Defaults to the environment's value."
+		hint := "Fills {{" + name + "}}. Defaults to the variable's current value."
 		if slices.Contains(e.required, name) {
 			hint = "Fills {{" + name + "}}."
 		}
@@ -226,17 +220,6 @@ func argumentText(raw json.RawMessage) string {
 		return text
 	}
 	return string(raw)
-}
-
-func withArguments(existing string, values map[string]string) (string, error) {
-	var rows []variableRow
-	json.Unmarshal([]byte(existing), &rows)
-	rows = slices.DeleteFunc(rows, func(row variableRow) bool { _, replaced := values[row.Key]; return replaced })
-	for _, name := range sortedKeys(values) {
-		rows = append(rows, variableRow{Key: name, Value: values[name]})
-	}
-	encoded, err := json.Marshal(rows)
-	return string(encoded), err
 }
 
 func (d *Desk) checkArgument(name, value string, marked map[string]bool) error {
@@ -276,9 +259,7 @@ func (d *Desk) sendExposed(ctx context.Context, current scene, item exposure, ar
 	if err != nil {
 		return Outcome{}, fmt.Errorf("%s is no longer in the workspace: %w", item.name, err)
 	}
-	if target.Request.Vars, err = withArguments(target.Request.Vars, values); err != nil {
-		return Outcome{}, err
-	}
+	target.Arguments = values
 	return d.deliver(ctx, target, View{})
 }
 

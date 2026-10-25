@@ -7,7 +7,7 @@ const REMIND_AFTER_MS = 30 * 24 * 60 * 60 * 1000
 
 const timeOf = (value) => (Number.isFinite(value) ? value : 0)
 
-export const useExportReminderStore = createStoredState(STORAGE_KEY, (source) => ({
+const useExportReminderStore = createStoredState(STORAGE_KEY, (source) => ({
   since: timeOf(source.since),
   dismissedAt: timeOf(source.dismissedAt),
 }))

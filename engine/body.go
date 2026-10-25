@@ -44,7 +44,7 @@ type filePart struct {
 
 func (p filePart) isFile() bool { return p.Type == "file" }
 
-func (p filePart) isAttached() bool { return p.Path != "" }
+func (p filePart) isAttached() bool { return p.Path != "" && p.FileName != "" }
 
 func (p filePart) disabled() bool { return p.Enabled != nil && !*p.Enabled }
 

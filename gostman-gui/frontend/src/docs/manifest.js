@@ -1,6 +1,7 @@
 export const docSections = [
   {
     title: "Start",
+    aliases: ["where-to-start", "learn"],
     docs: [
       { file: "README.md", label: "Introduction" },
       { file: "getting-started.md" },
@@ -14,13 +15,15 @@ export const docSections = [
   },
   {
     title: "Requests",
+    aliases: ["send-requests"],
     docs: [
-      { file: "requests-and-responses.md", outline: true },
-      { file: "protocols.md", outline: true },
+      { file: "requests-and-responses.md", outline: true, aliases: { tests: "checks" } },
+      { file: "protocols.md", outline: true, aliases: { "load-the-tools": "load-the-server" } },
     ],
   },
   {
     title: "Variables and secrets",
+    aliases: ["settings-and-security"],
     docs: [
       { file: "variables.md", outline: true },
       { file: "secrets-and-network.md", label: "Secrets and network", outline: true },
@@ -28,14 +31,16 @@ export const docSections = [
   },
   {
     title: "Testing and automation",
+    aliases: ["test-and-automate"],
     docs: [
-      { file: "scripting-and-settings.md", label: "Scripts and checks" },
+      { file: "scripting-and-settings.md", label: "Scripts and checks", aliases: { "tests-and-scripts": "checks-and-scripts" } },
       { file: "runner-load-and-scan.md", label: "Run, load test and scan" },
       { file: "ci.md", label: "CI", outline: true },
     ],
   },
   {
     title: "Collections and Git",
+    aliases: ["your-data"],
     docs: [
       { file: "collections-and-git.md", label: "Collections, tabs and Git", outline: true },
       { file: "folder-settings.md", label: "Folder settings" },
@@ -57,7 +62,7 @@ export const docSections = [
   },
   {
     title: "Help",
-    docs: [{ file: "guides.md" }, { file: "troubleshooting.md" }],
+    docs: [{ file: "guides.md" }, { file: "troubleshooting.md", aliases: { "tests-and-runs": "checks-and-runs" } }],
   },
 ]
 

@@ -49,7 +49,7 @@ inputs:
 
 outputs:
   exit-code:
-    description: Exit code of gostman run. 0 passed, 1 a request or check failed, 2 wrong input.
+    description: Exit code of gostman run. 0 passed, 1 a check, a script or an MCP tool call failed, or the run was interrupted, 2 wrong input, 3 a request got no response: it could not be sent, the connection failed or timed out.
     value: ${{ steps.run.outputs.exit-code }}
   report:
     description: Path of the report file, empty when no output was requested.

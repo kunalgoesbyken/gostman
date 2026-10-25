@@ -328,7 +328,11 @@
   .docs-prose h2,
   .docs-prose h3,
   .docs-prose h4 {
-    @apply scroll-mt-4 font-semibold tracking-tight text-foreground;
+    @apply relative scroll-mt-4 font-semibold tracking-tight text-foreground;
+  }
+
+  .docs-alias {
+    @apply absolute top-0 scroll-mt-4;
   }
 
   .docs-prose h2 {

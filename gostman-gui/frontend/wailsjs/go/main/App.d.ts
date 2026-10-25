@@ -55,7 +55,7 @@ export function CloseWorkspace():Promise<main.WorkspaceStatus>;
 
 export function CollectionNetwork():Promise<main.CollectionNetwork>;
 
-export function DeleteRequest(arg1:string):Promise<void>;
+export function DeleteRequests(arg1:Array<string>):Promise<void>;
 
 export function DeleteSecretConnection(arg1:string):Promise<void>;
 

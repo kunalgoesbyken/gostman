@@ -3,7 +3,7 @@ import { createStoredState } from './storage'
 const STORAGE_KEY = 'gostman.relay'
 const WEB_PROTOCOLS = ['http:', 'https:']
 
-export const RELAY_HOSTED = 'hosted'
+const RELAY_HOSTED = 'hosted'
 export const RELAY_LOCAL = 'local'
 export const RELAY_MODES = [RELAY_HOSTED, RELAY_LOCAL]
 

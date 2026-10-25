@@ -71,20 +71,29 @@ func parseVariables(raw string) (map[string]string, error) {
 	return variables, nil
 }
 
-const maxNesting = 8
+const (
+	maxNesting           = 8
+	maxExpansions        = 10000
+	maxRequestExpansions = 100000
+)
+
+var errOverworked = errors.New("the variables refer to each other too many times to fill in; simplify the variables that contain {{...}}")
 
 type substitution struct {
-	variables map[string]string
-	budget    int
-	exceeded  bool
-	files     FileReader
-	read      map[string]string
-	fileBytes int
-	err       error
-	filled    map[string]string
-	filling   map[string]bool
-	generates bool
-	missing   []string
+	variables  map[string]string
+	budget     int
+	exceeded   bool
+	files      FileReader
+	read       map[string]string
+	fileBytes  int
+	err        error
+	filling    []string
+	expansions int
+	total      int
+	overworked bool
+	generated  map[slot]string
+	generates  bool
+	missing    []string
 }
 
 func newSubstitution(variables string) (*substitution, error) {
@@ -96,7 +105,7 @@ func newSubstitution(variables string) (*substitution, error) {
 }
 
 func substitutionOf(variables map[string]string) *substitution {
-	return &substitution{variables: variables, budget: maxEncodedBody, filled: map[string]string{}, filling: map[string]bool{}, generates: true}
+	return &substitution{variables: variables, budget: maxEncodedBody, generates: true, generated: map[slot]string{}}
 }
 
 func (s *substitution) readingFiles(files FileReader) {
@@ -110,6 +119,9 @@ func (s *substitution) failure() error {
 	}
 	if s.exceeded {
 		return fmt.Errorf("the request is larger than 10 MB once variables are filled in")
+	}
+	if s.overworked {
+		return errOverworked
 	}
 	return nil
 }
@@ -137,21 +149,27 @@ func (s *substitution) nested(name, value string) (string, bool) {
 	if !placeholderRe.MatchString(value) {
 		return value, true
 	}
-	if filled, ok := s.filled[name]; ok {
-		return filled, true
-	}
-	if s.filling[name] || len(s.filling) >= maxNesting {
+	if slices.Contains(s.filling, name) || len(s.filling) >= maxNesting || !s.spend() {
 		return "", false
 	}
-	s.filling[name] = true
-	defer delete(s.filling, name)
-	if s.expandedSize(value, false) > maxEncodedBody {
-		s.exceeded = true
-		return "", false
+	s.filling = append(s.filling, name)
+	defer func() { s.filling = s.filling[:len(s.filling)-1] }()
+	return s.fill(value, false, maxEncodedBody, name)
+}
+
+func (s *substitution) spend() bool {
+	s.overworked = s.overworked || s.total >= maxRequestExpansions
+	if s.exceeded || s.overworked || s.expansions >= maxExpansions {
+		return false
 	}
-	filled := s.fill(value, false)
-	s.filled[name] = filled
-	return filled, true
+	s.expansions++
+	s.total++
+	return true
+}
+
+type slot struct {
+	owner string
+	index int
 }
 
 func IsVariableName(name string) bool {
@@ -163,7 +181,7 @@ func nameOf(match string) string {
 	return strings.TrimSpace(match[2 : len(match)-2])
 }
 
-func (s *substitution) lookup(match string, readsFiles bool) (string, bool) {
+func (s *substitution) lookup(match string, readsFiles bool, at slot) (string, bool) {
 	name := nameOf(match)
 	if value, ok := s.resolve(name); ok {
 		return value, true
@@ -177,7 +195,18 @@ func (s *substitution) lookup(match string, readsFiles bool) (string, bool) {
 	if !s.generates {
 		return "", false
 	}
-	return dynamicValue(name)
+	return s.generate(name, at)
+}
+
+func (s *substitution) generate(name string, at slot) (string, bool) {
+	if value, ok := s.generated[at]; ok {
+		return value, true
+	}
+	value, ok := dynamicValue(name)
+	if ok && at.owner != "" {
+		s.generated[at] = value
+	}
+	return value, ok
 }
 
 func (s *substitution) file(name string, reference fileReference) (string, bool) {
@@ -205,39 +234,30 @@ func (s *substitution) file(name string, reference fileReference) (string, bool)
 	return value, true
 }
 
-func (s *substitution) sizeOf(match string, readsFiles bool) (int, bool) {
-	name := nameOf(match)
-	if value, ok := s.resolve(name); ok {
-		return len(value), true
-	}
-	if reference, ok := parseFileReference(name); ok {
-		if !readsFiles {
-			return 0, false
+func (s *substitution) fill(input string, readsFiles bool, limit int, owner string) (string, bool) {
+	var filled strings.Builder
+	last := 0
+	for index, span := range placeholderRe.FindAllStringIndex(input, -1) {
+		match := input[span[0]:span[1]]
+		value, ok := s.lookup(match, readsFiles, slot{owner: owner, index: index})
+		if !ok {
+			s.noteMissing(nameOf(match))
+			value = match
 		}
-		value, found := s.file(name, reference)
-		return len(value), found
-	}
-	return generatedSizeBound(name), IsDynamicVariable(name)
-}
-
-func (s *substitution) expandedSize(input string, readsFiles bool) int {
-	size := len(input)
-	for _, match := range placeholderRe.FindAllString(input, -1) {
-		if length, ok := s.sizeOf(match, readsFiles); ok {
-			size += length - len(match)
+		filled.WriteString(input[last:span[0]])
+		filled.WriteString(value)
+		last = span[1]
+		if filled.Len() > limit {
+			s.exceeded = true
+			return "", false
 		}
 	}
-	return size
-}
-
-func (s *substitution) fill(input string, readsFiles bool) string {
-	return placeholderRe.ReplaceAllStringFunc(input, func(match string) string {
-		if value, ok := s.lookup(match, readsFiles); ok {
-			return value
-		}
-		s.noteMissing(nameOf(match))
-		return match
-	})
+	filled.WriteString(input[last:])
+	if filled.Len() > limit {
+		s.exceeded = true
+		return "", false
+	}
+	return filled.String(), true
 }
 
 func (s *substitution) noteMissing(name string) {
@@ -261,12 +281,13 @@ func (s *substitution) apply(input string) string {
 	if s.exceeded {
 		return input
 	}
-	s.budget -= s.expandedSize(input, true)
-	if s.budget < 0 {
-		s.exceeded = true
+	s.expansions = 0
+	filled, ok := s.fill(input, true, s.budget, "")
+	if !ok {
 		return input
 	}
-	return s.fill(input, true)
+	s.budget -= len(filled)
+	return filled
 }
 
 type pairRow struct {

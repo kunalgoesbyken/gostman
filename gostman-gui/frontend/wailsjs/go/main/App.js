@@ -78,8 +78,8 @@ export function CollectionNetwork() {
   return window['go']['main']['App']['CollectionNetwork']();
 }
 
-export function DeleteRequest(arg1) {
-  return window['go']['main']['App']['DeleteRequest'](arg1);
+export function DeleteRequests(arg1) {
+  return window['go']['main']['App']['DeleteRequests'](arg1);
 }
 
 export function DeleteSecretConnection(arg1) {

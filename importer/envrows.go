@@ -37,6 +37,15 @@ type environmentDraft struct {
 	variables []envVariable
 }
 
+func (v envVariable) flags() variableFlags {
+	flags := variableFlags{Secret: v.secret || v.ref != nil}
+	if !v.enabled {
+		disabled := false
+		flags.Enabled = &disabled
+	}
+	return flags
+}
+
 func inFolder(drafts []environmentDraft, folderID string) []environmentDraft {
 	for index := range drafts {
 		drafts[index].folder = folderID
@@ -73,12 +82,7 @@ func (c *collector) addDraftEnvironment(draft environmentDraft, id, parent strin
 			continue
 		}
 		values[variable.name] = variable.value
-		entry := variableFlags{Secret: variable.secret, Ref: variable.ref}
-		if !variable.enabled {
-			disabled := false
-			entry.Enabled = &disabled
-		}
-		if entry != (variableFlags{}) {
+		if entry := variable.flags(); entry != (variableFlags{}) {
 			flags[variable.name] = entry
 		}
 	}
@@ -108,7 +112,7 @@ func (c *collector) noteReferences(environment string, variables []envVariable) 
 		if _, seen := byProvider[variable.ref.Provider]; !seen {
 			providers = append(providers, variable.ref.Provider)
 		}
-		byProvider[variable.ref.Provider] = append(byProvider[variable.ref.Provider], variable.name)
+		byProvider[variable.ref.Provider] = append(byProvider[variable.ref.Provider], variable.name+" ("+variable.ref.Path+")")
 	}
 	for _, provider := range providers {
 		c.Warnings = append(c.Warnings, fmt.Sprintf(messageExternalSecrets, environment, listNames(byProvider[provider]), provider))

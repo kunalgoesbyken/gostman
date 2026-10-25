@@ -6,9 +6,10 @@ import (
 )
 
 type Listed struct {
-	Request Request
-	Folder  string
-	Checks  int
+	Request   Request
+	Folder    string
+	Checks    int
+	Arguments map[string]string
 }
 
 func (l Listed) QualifiedName() string {

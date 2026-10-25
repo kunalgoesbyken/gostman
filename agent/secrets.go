@@ -224,6 +224,7 @@ func (c *Client) Study(stored runner.Collection) error {
 	c.learnCredentials(stored.Settings.Headers, stored.Settings.Auth, stored.Variables)
 	for _, folder := range stored.Folders {
 		c.learnEnvironment(runner.Environment{Variables: folder.Variables})
+		c.learnEnvironment(runner.Environment{Variables: folder.CollectionVariables})
 		c.learnCredentials(folder.Headers, folder.Auth, folder.Variables)
 	}
 	listed, err := c.catalog.Catalog(stored, "")

@@ -17,7 +17,6 @@ export const OPEN_LINK_TEXT = {
   import: 'Import',
   detected: (format) => `Detected: ${format}`,
   downloadedFrom: (host) => `Downloaded from ${host}`,
-  unknownFormat: 'Gostman could not tell what kind of file this is.',
   activeNote: (count) => `Scripts, OAuth 2.0 settings, local MCP commands or file reads in ${count}. You are asked before those are imported, and imported folders stay restricted until you trust them.`,
   badgeAlt: 'Open in Gostman',
   builderTitle: 'Open in Gostman link',

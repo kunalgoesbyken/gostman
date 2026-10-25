@@ -3,6 +3,7 @@ import { DEFAULT_PART_TYPE, formContentType, formSegments, isContentType, upload
 
 const CONTENT_TYPE = 'content-type'
 const BARE_SHELL_WORD = /^[A-Za-z0-9_-]+$/
+const CURL_GLOB_CHARACTERS = /[[\]{}]/
 
 const FIRST_PRINTABLE = 0x20
 const C_ESCAPES = { '"': '\\"', '\\': '\\\\', '\n': '\\n', '\r': '\\r', '\t': '\\t' }
@@ -35,7 +36,9 @@ function doubleQuoteWith(controlEscape, extraEscapes = {}) {
   }
 }
 
-const csharpQuote = doubleQuoteWith(fourDigitEscape)
+const CSHARP_LINE_BREAKS = Object.fromEntries([0x85, 0x2028, 0x2029].map((code) => [String.fromCodePoint(code), fourDigitEscape(code)]))
+
+const csharpQuote = doubleQuoteWith(fourDigitEscape, CSHARP_LINE_BREAKS)
 const kotlinQuote = doubleQuoteWith(fourDigitEscape, { $: '\\$' })
 const swiftQuote = doubleQuoteWith(bracedEscape)
 const rustQuote = doubleQuoteWith(bracedEscape)
@@ -77,7 +80,7 @@ function generateCurl(request) {
   const { method, url, headers, body } = request
   const methodFlag = method === 'HEAD' ? '--head' : `-X ${shellWord(method)}`
   return [
-    `curl ${methodFlag} ${shellQuote(url)}`,
+    `curl ${methodFlag}${CURL_GLOB_CHARACTERS.test(url) ? ' --globoff' : ''} ${shellQuote(url)}`,
     ...curlHeaderLines(headers, body).map((line) => `-H ${shellQuote(line)}`),
     ...curlBody(request),
   ].join(' \\\n  ')
@@ -520,14 +523,14 @@ function generateDart(request) {
 
 const powershellPart = (part) => (part.file === undefined
   ? `    ${powershellQuote(part.name)} = ${powershellQuote(part.value)}`
-  : `    ${powershellQuote(part.name)} = Get-Item ${powershellQuote(part.file)}`)
+  : `    ${powershellQuote(part.name)} = Get-Item -LiteralPath ${powershellQuote(part.file)}`)
 
 function powershellBody({ body, file, parts }, lines, call) {
   if (parts) {
     lines.push('$form = @{', ...parts.map(powershellPart), '}')
     call.push('-Form $form')
   } else if (file) {
-    call.push(`-InFile ${powershellQuote(file)}`)
+    call.push(`-InFile ([WildcardPattern]::Escape(${powershellQuote(file)}))`)
   } else if (body) {
     lines.push(`$body = [System.Text.Encoding]::UTF8.GetBytes(${powershellQuote(body)})`)
     call.push('-Body $body')

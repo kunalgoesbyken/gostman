@@ -72,8 +72,7 @@ function referencedNames(selected, entries) {
   return names
 }
 
-function referencedEnvironments(selected, environments) {
-  const names = referencedNames(selected, environments.flatMap(environmentEntries))
+function referencedEnvironments(environments, names) {
   const reduced = environments.map((environment) => withEntries(environment, environmentEntries(environment).filter(({ name }) => names.has(name))))
   const used = reduced.filter((environment) => variableNames(environment).length > 0)
   const kept = new Set(used.flatMap((environment) => environmentChain(reduced, environment)))
@@ -89,16 +88,26 @@ export const sharedCollectionVariableNames = (exported) => uniqueSorted([
   ...exported.gostman.folders.filter(ownsCollectionVariables).flatMap((folder) => variableNames({ variables: folder.collectionVariables })),
 ])
 
-function referencedValues(selected, list) {
-  const entries = environmentEntries(list)
-  const names = referencedNames(selected, entries)
-  return Object.fromEntries(entries.filter(({ name }) => names.has(name)).map(({ name, value }) => [name, value]))
+const valuesOf = (entries) => Object.fromEntries(entries.map(({ name, value }) => [name, value]))
+
+const listEntries = (folder) => environmentEntries({ variables: folder.collectionVariables, meta: folder.collectionVariablesMeta })
+
+const keepingNames = (folder, names) => (ownsCollectionVariables(folder)
+  ? { ...folder, collectionVariables: JSON.stringify(valuesOf(listEntries(folder).filter(({ name }) => names.has(name))), null, 2) }
+  : folder)
+
+function referencedScopes(selected, environments, folders, collectionVariables) {
+  const scoped = environmentsForShare(environments, folders, selected.folders)
+  const carried = foldersForShare(folders, selected.folders, valuesOf(environmentEntries(collectionVariables)))
+  const names = referencedNames(selected, [...scoped.flatMap(environmentEntries), ...carried.filter(ownsCollectionVariables).flatMap(listEntries)])
+  return { environments: referencedEnvironments(scoped, names), folders: carried.map((folder) => keepingNames(folder, names)) }
 }
 
 export function buildSharedExport({ requests, folders, environments, collectionVariables = {}, settings, sharedOrder }, { folderId, includeVariables, includeExamples }) {
   const selected = selectionOf(requests, folders, folderId)
-  const shared = folderId ? referencedEnvironments(selected, environmentsForShare(environments, folders, selected.folders)) : environments
-  const sharedFolders = folderId ? foldersForShare(folders, selected.folders, referencedValues(selected, collectionVariables)) : selected.folders
+  const { environments: shared, folders: sharedFolders } = folderId
+    ? referencedScopes(selected, environments, folders, collectionVariables)
+    : { environments, folders: selected.folders }
   const sharedList = folderId ? {} : collectionVariables
   return exportToGostman(
     includeExamples ? selected.requests : selected.requests.map(withoutExamples),

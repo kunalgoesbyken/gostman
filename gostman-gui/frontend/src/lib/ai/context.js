@@ -1,9 +1,10 @@
+import { SCHEMES, isSecretField } from '../authSchemes'
 import { isPlainObject, parseJSON } from '../dataUtils'
-import { parseRows } from '../rows'
+import { isFileRow, parseRows } from '../rows'
 import { textBody } from '../response'
 import { isSensitiveName } from '../sensitiveNames'
 
-export const MASK = '{{redacted}}'
+const MASK = '{{redacted}}'
 
 const BODY_EXCERPT_BYTES = 4096
 const REQUEST_BODY_BYTES = 6144
@@ -13,6 +14,8 @@ const TEMPLATE_OPEN = '{{'
 const SCHEME_SEPARATOR = '://'
 const AUTHORITY_END = ['/', '?', '#']
 const USERINFO_END = '@'
+const ROW_BODIES = ['form', 'multipart']
+const BODY_BINARY = 'binary'
 
 const isTemplate = (value) => String(value).includes(TEMPLATE_OPEN)
 
@@ -20,10 +23,14 @@ const maskedValue = (name, value) => (isSensitiveName(name) && !isTemplate(value
 
 const excerpt = (text, limit) => (text.length > limit ? `${text.slice(0, limit)}\n[truncated]` : text)
 
-export function maskedRows(raw) {
+const describedRow = (row) => (
+  isFileRow(row) ? { key: row.key, file: row.fileName || '' } : { key: row.key, value: maskedValue(row.key, row.value) }
+)
+
+function maskedRows(raw) {
   return parseRows(raw)
     .filter((row) => row.enabled !== false && row.key)
-    .map((row) => ({ key: row.key, value: maskedValue(row.key, row.value) }))
+    .map(describedRow)
 }
 
 function maskedPairs(text) {
@@ -61,7 +68,7 @@ function maskedTree(node) {
   ]))
 }
 
-export function shapeOf(node, depth = 0) {
+function shapeOf(node, depth = 0) {
   if (node === null) return 'null'
   if (Array.isArray(node)) {
     return depth >= SHAPE_DEPTH ? 'array' : { array: node.length, of: node.length > 0 ? shapeOf(node[0], depth + 1) : 'unknown' }
@@ -74,17 +81,23 @@ export function shapeOf(node, depth = 0) {
 }
 
 function parsedJson(text) {
-  const parsed = parseJSON(text, undefined)
+  const parsed = parseJSON(text, null)
   return parsed !== null && typeof parsed === 'object' ? parsed : undefined
 }
 
-export function describeBody(request) {
+function describedFile(body) {
+  const file = parsedJson(body)
+  return { file: file?.fileName || '', contentType: file?.contentType || '' }
+}
+
+function describeBody(request) {
   const body = request.body || ''
   if (request.graphqlQuery) return { graphqlQuery: excerpt(request.graphqlQuery, REQUEST_BODY_BYTES) }
   if (!body.trim()) return ''
+  if (ROW_BODIES.includes(request.bodyType)) return maskedRows(body)
+  if (request.bodyType === BODY_BINARY) return describedFile(body)
   const json = parsedJson(body)
   if (json !== undefined) return excerpt(JSON.stringify(maskedTree(json), null, 2), REQUEST_BODY_BYTES)
-  if (request.bodyType === 'form') return maskedPairs(body).map(([name, value]) => `${name}=${value}`).join('&')
   return excerpt(body, REQUEST_BODY_BYTES)
 }
 
@@ -130,9 +143,15 @@ const OAUTH_SECRET_FIELDS = ['clientSecret', 'accessToken', 'refreshToken', 'idT
 
 const fieldValues = (source, fields) => fields.map((field) => source?.[field]).filter(Boolean)
 
-export function requestSecrets(request) {
-  return [...fieldValues(request.auth, AUTH_SECRET_FIELDS), ...fieldValues(request.auth?.oauth2, OAUTH_SECRET_FIELDS)]
-}
+const schemeSecrets = (auth) => Object.values(SCHEMES).flatMap(({ section, fields }) => (
+  fieldValues(section ? auth[section] : auth, fields.filter(isSecretField).map((field) => field.key))
+))
+
+const authSecrets = (auth) => (
+  isPlainObject(auth) ? [...fieldValues(auth, AUTH_SECRET_FIELDS), ...fieldValues(auth.oauth2, OAUTH_SECRET_FIELDS), ...schemeSecrets(auth)] : []
+)
+
+export const requestSecrets = (request, lineage = []) => [request.auth, ...lineage.map(({ settings }) => settings.auth)].flatMap(authSecrets)
 
 export function variableSecrets(resolved) {
   return Array.from(resolved)

@@ -52,7 +52,7 @@ export const SPEC_TEXT = {
   syncedAt: 'Last synced',
   unchanged: (count) => `${count} unchanged`,
   sourceMissing: 'This collection has no saved spec address.',
-  keepEditsNote: 'Operations you edited are unchecked. Checking one replaces your edits to its URL, parameters, body and authentication.',
+  keepEditsNote: 'Operations you edited are unchecked. Checking one replaces your edits to its URL, parameters, path variables, body and authentication.',
 }
 
 export const SPEC_ALERTS = {

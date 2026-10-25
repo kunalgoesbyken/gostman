@@ -13,9 +13,14 @@ const brunoTarget = (options) => (
 
 const savedName = (path) => String(path).split(PATH_SEPARATOR).pop()
 
-const processValue = (environment) => (name) => environment.get(PROCESS_PREFIX + name) ?? environment.get(name)
+const processValue = (layered) => (name) => layered.get(PROCESS_PREFIX + name) ?? layered.get(name)
 
 const environmentWrite = (scopes) => (name, value, options) => scopes[options?.persist ? SCOPE_ENVIRONMENT : SCOPE_SESSION].set(name, value)
+
+const unsavedFirst = (scopes, read) => (name) => {
+  const session = scopes[SCOPE_SESSION]
+  return session.has(name) ? session[read](name) : scopes[SCOPE_ENVIRONMENT][read](name)
+}
 
 const pause = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds))
 
@@ -28,31 +33,33 @@ const variableCalls = (scopes) => Object.fromEntries(Object.entries(VARIABLE_FAM
   [`deleteAll${family}s`, scopes[scope].clear],
 ]))
 
-const iterationData = (environment) => ({
-  get: (name) => (name === undefined ? environment.all() : environment.get(name)),
-  has: environment.has,
-  unset: environment.unset,
-  stringify: () => JSON.stringify(environment.all()),
+const iterationData = (layered, session) => ({
+  get: (name) => (name === undefined ? layered.all() : layered.get(name)),
+  has: layered.has,
+  unset: session.unset,
+  stringify: () => JSON.stringify(layered.all()),
 })
 
 export function createBruno({ scopes, environmentName, flow, request, cookies, sendRequest, respond }) {
-  const environment = scopes[SCOPE_ENVIRONMENT]
+  const { layered } = scopes
   const send = (options, callback) => respond(sendRequest(brunoTarget(options)).then(brunoResponse), callback)
   return {
     ...variableCalls(scopes),
     setEnvVar: environmentWrite(scopes),
-    getFolderVar: environment.get,
-    getRequestVar: environment.get,
-    getProcessEnv: processValue(environment),
+    getEnvVar: unsavedFirst(scopes, 'get'),
+    hasEnvVar: unsavedFirst(scopes, 'has'),
+    getFolderVar: layered.get,
+    getRequestVar: layered.get,
+    getProcessEnv: processValue(layered),
     getEnvName: () => environmentName,
     getRequestName: () => request.name,
-    interpolate: environment.interpolate,
+    interpolate: layered.interpolate,
     isSafeMode: () => true,
     cookies,
     sleep: pause,
     sendRequest: send,
     runRequest: (path) => sendRequest(savedName(path)).then(brunoResponse),
     setNextRequest: flow.setNextRequest,
-    runner: { ...flow, iterationData: iterationData(environment) },
+    runner: { ...flow, iterationData: iterationData(layered, scopes[SCOPE_SESSION]) },
   }
 }

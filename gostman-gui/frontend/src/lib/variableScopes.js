@@ -5,7 +5,9 @@ import { connectionDirectory } from './secretOrigins'
 import { chosenEnvironment, variableHolders } from './environmentScope'
 import { PROCESS_PREFIX, PROMPT_PREFIX } from './variableNames'
 
-export { SCOPE_COLLECTION, SCOPE_GLOBAL } from './scripting/scopes'
+import { SCOPE_COLLECTION, SCOPE_ENVIRONMENT, SCOPE_GLOBAL, SCOPE_SESSION } from './scripting/scopes'
+
+export { SCOPE_COLLECTION, SCOPE_GLOBAL }
 
 const PROMPT_TOKEN = /\{\{\s*\?([^{}]*?)\s*\}\}/gu
 
@@ -87,6 +89,8 @@ const environmentLayers = (source, environments, environment, referenced) => (
   }))
 )
 
+const emptyLayer = (source) => ({ source, entries: [] })
+
 const objectLayer = (source, text) => ({
   source,
   entries: Object.entries(parseObject(text)).filter(([, value]) => value !== null).map(([name, value]) => ({ name, value })),
@@ -131,10 +135,10 @@ export function scopeLayers(state, request, referenced = {}) {
   const activeEnvironment = chosenEnvironment(state, request?.folderId || '')
   return [
     dotEnvLayer(state.dotEnv),
-    ...(activeGlobal ? environmentLayers('global', state.globalEnvironments, activeGlobal, referenced) : []),
+    ...(activeGlobal ? environmentLayers('global', state.globalEnvironments, activeGlobal, referenced) : [emptyLayer('global')]),
     listLayer('collection', state.collectionVariables, state.collectionVariablesMeta),
     ...variableHolders(state.folders, request?.folderId).map((folder) => listLayer('collection', folder.collectionVariables, folder.collectionVariablesMeta)),
-    ...(activeEnvironment ? environmentLayers('environment', state.environments, activeEnvironment, referenced) : []),
+    ...(activeEnvironment ? environmentLayers('environment', state.environments, activeEnvironment, referenced) : [emptyLayer('environment')]),
     ...folderLayers(state.folders, request?.folderId),
     rowsLayer(request?.vars),
     sessionLayer(state.sessionVariables),
@@ -151,9 +155,21 @@ export function resolveLayers(layers) {
   return resolved
 }
 
-export const scriptValues = (resolved) => (
+const scriptValues = (resolved) => (
   Object.fromEntries(Array.from(resolved, ([name, { typed }]) => [name, typed]))
 )
+
+const SCRIPT_SCOPES = { global: SCOPE_GLOBAL, collection: SCOPE_COLLECTION, environment: SCOPE_ENVIRONMENT, session: SCOPE_SESSION }
+
+export function scriptLayers(layers) {
+  const groups = []
+  for (const layer of layers) {
+    const scope = SCRIPT_SCOPES[layer.source] ?? ''
+    if (groups.at(-1)?.scope === scope) groups.at(-1).layers.push(layer)
+    else groups.push({ scope, layers: [layer] })
+  }
+  return groups.map(({ scope, layers: grouped }) => ({ scope, values: scriptValues(resolveLayers(grouped)) }))
+}
 
 export const variableText = (resolved) => (
   JSON.stringify(Object.fromEntries(Array.from(resolved, ([name, { value }]) => [name, value])))

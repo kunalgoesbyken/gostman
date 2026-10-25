@@ -2,7 +2,7 @@ import { useBrowserOs } from "../../hooks/useBrowserOs"
 import { Search } from "../landing/icons"
 import { DOCS_TEXT } from "../../lib/docsText"
 
-export function useShortcutLabel() {
+function useShortcutLabel() {
   const os = useBrowserOs()
   if (!os) return ""
   return os === "macos" ? DOCS_TEXT.search.shortcut.macos : DOCS_TEXT.search.shortcut.other

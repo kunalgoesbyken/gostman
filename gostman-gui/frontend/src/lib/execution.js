@@ -2,7 +2,7 @@ import { hasActiveContent } from './activeContent'
 import { defaultExtractScope, enabledExtractors, isUsableResponse, parseExtractors, writesFrom } from './chaining'
 import { isPlainObject, parseJSON } from './dataUtils'
 import { isGrpcRequest } from './grpc'
-import { inheritedAuthSource, lineageOf, withInheritance } from './inheritance'
+import { inheritedAuthSource, layersOf, lineageOf, withInheritance } from './inheritance'
 import { LOCAL_COMMAND_TEXT, needsApproval } from './localCommands'
 import { isLocalCommand, isMcpRequest } from './mcp'
 import { withFreshToken } from './oauth'
@@ -20,10 +20,11 @@ import { errorLine } from './scripting/console'
 import { applyRequestEdits, extractInSandbox, requestSubject, responseSubject, runInSandbox } from './scripting/sandbox'
 import { acceptedCookies, scriptCookies } from './scripting/scriptCookies'
 import { scriptedRequest } from './scripting/subjects'
+import { rememberResolved } from './resolvedSecrets'
 import { SECRETS_TEXT } from './secretsText'
 import { ENTRY_KINDS, exchangeEntry, scriptEntry, secretsEntry, withActivity } from './timeline'
 import { promptNames, referenceTargets, usedVariableNames } from './variableScopes'
-import { environmentFor, scriptVariablesFor, useAppStore, variableTextFor } from '../store/appStore'
+import { environmentFor, scriptLayersFor, useAppStore, variableTextFor } from '../store/appStore'
 
 const CONFIG_ERROR = 'config'
 const SCRIPT_ERROR = 'script'
@@ -60,11 +61,11 @@ function createTrace() {
 const scriptHosts = () => collectionHostsBy(store().requests, (candidate) => variablesText(candidate, {}))
 
 async function runStage(stage, job, request, { send, trace, referenced, timeoutMs }) {
-  const variables = scriptVariablesFor(store(), request, referenced)
+  const layers = scriptLayersFor(store(), request, referenced)
   const hosts = scriptHosts()
   const cookies = scriptCookies(store().cookies, hosts)
   const environment = environmentFor(store(), request)?.name ?? ''
-  const run = await trace.timed(scriptEntry(stage), () => runInSandbox({ ...job, variables, cookies, environment }, send, timeoutMs))
+  const run = await trace.timed(scriptEntry(stage), () => runInSandbox({ ...job, layers, cookies, environment }, send, timeoutMs))
   if (isPlainObject(run.writes)) store().applyVariableWrites(run.writes, request)
   const changed = acceptedCookies(run.cookies, hosts)
   if (changed.length > 0) store().storeCookies(changed)
@@ -169,7 +170,9 @@ async function resolveReferences(backend, request, lineage, trace) {
   const targets = referenceTargets(store(), request, namesInUse(lineage, request))
   if (Object.keys(targets).length === 0) return {}
   if (!backend.secrets) throw new Error(SECRETS_TEXT.desktopOnly)
-  return trace.timed(secretsEntry(targets), () => backend.secrets.resolve(targets))
+  const resolved = await trace.timed(secretsEntry(targets), () => backend.secrets.resolve(targets))
+  rememberResolved(resolved)
+  return resolved
 }
 
 const REQUIRE_CALL = 'require('
@@ -252,14 +255,15 @@ export function createExecutor(backend) {
     const variablesOf = (candidate, answers) => variablesText(candidate, answers, referenced)
     const context = { send: createScriptSender(backend, trace), trace, referenced, timeoutMs: lineage[0]?.settings.scriptTimeoutMs }
 
+    const inherited = layersOf(lineage)
     const modules = await loadModules(backend, [...preSteps(lineage, request), ...postSteps(lineage, request)])
 
     for (const step of preSteps(lineage, request)) {
-      const pre = await runStage(step.label, { script: step.script, request: requestSubject(request), modules }, request, context)
+      const pre = await runStage(step.label, { script: step.script, request: requestSubject(request, inherited), modules }, request, context)
       runs.push(pre)
       if (pre.error) return stop(request, pre.error, SCRIPT_ERROR)
       if (holdsBack(pre.flow)) return { ...stop(request, reasonFor(pre.flow)), skipped: reasonFor(pre.flow) }
-      request = applyRequestEdits(request, pre.request)
+      request = applyRequestEdits(request, pre.request, inherited)
     }
 
     const answers = await askForValues(request, referenced, prompts)
@@ -274,7 +278,7 @@ export function createExecutor(backend) {
     request = renewal.request
     const { outgoing } = renewal
 
-    if (isLocalCommand(outgoing) && needsApproval(backend, outgoing, variablesOf(request, answers))) return stop(request, LOCAL_COMMAND_TEXT.notApproved)
+    if (isLocalCommand(outgoing) && needsApproval(backend, outgoing, variablesText(outgoing))) return stop(request, LOCAL_COMMAND_TEXT.notApproved)
 
     const transmit = () => transportFor(backend, outgoing)(sendId, withInheritance(store(), outgoing), variablesOf(request, answers), store().cookies)
     const response = await trace.timed(exchangeEntry(ENTRY_KINDS.REQUEST, outgoing), transmit)
@@ -287,7 +291,7 @@ export function createExecutor(backend) {
         runs.push(await runStage(step.label, {
           script: step.script,
           assertions: step.assertions,
-          request: requestSubject(request),
+          request: requestSubject(request, inherited),
           response: responseSubject(response),
           modules,
         }, request, context))

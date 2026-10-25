@@ -234,8 +234,7 @@
     },
     {
       "name": "$randomImageDataUri",
-      "description": "SVG image as a data URI",
-      "long": true
+      "description": "SVG image as a data URI"
     },
     {
       "name": "$randomBankAccount",
@@ -495,23 +494,19 @@
     },
     {
       "name": "$randomLoremSentences",
-      "description": "Two to six lorem ipsum sentences",
-      "long": true
+      "description": "Two to six lorem ipsum sentences"
     },
     {
       "name": "$randomLoremParagraph",
-      "description": "Lorem ipsum paragraph",
-      "long": true
+      "description": "Lorem ipsum paragraph"
     },
     {
       "name": "$randomLoremParagraphs",
-      "description": "Three lorem ipsum paragraphs on one line",
-      "long": true
+      "description": "Three lorem ipsum paragraphs on one line"
     },
     {
       "name": "$randomLoremText",
-      "description": "Lorem ipsum text of random length",
-      "long": true
+      "description": "Lorem ipsum text of random length"
     },
     {
       "name": "$randomLoremSlug",
@@ -519,8 +514,7 @@
     },
     {
       "name": "$randomLoremLines",
-      "description": "One to five lorem ipsum sentences",
-      "long": true
+      "description": "One to five lorem ipsum sentences"
     },
     {
       "name": "$file(path)",

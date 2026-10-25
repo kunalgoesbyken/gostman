@@ -36,6 +36,7 @@ type Result struct {
 	Globals       []workspace.Environment `json:"globals,omitempty"`
 	Variables     map[string]string       `json:"variables"`
 	VariablesMeta string                  `json:"variablesMeta,omitempty"`
+	Settings      *workspace.Settings     `json:"settings,omitempty"`
 	Warnings      []string                `json:"warnings"`
 	Notes         []string                `json:"notes,omitempty"`
 	Skipped       []string                `json:"skipped"`
@@ -60,8 +61,9 @@ var importOnlyNotes = setOf(messageScripts, messageBrunoSecrets)
 
 var singularMessages = map[string]string{
 	messageHTTPVariables:          "The variable %s has no Gostman equivalent and was kept as written.",
-	messageSecretVariables:        "The value of the secret variable %s was not imported. Set it again in an environment and mark it secret.",
+	messageSecretVariables:        "The secret folder variable %s was left out, because folder variables cannot be marked secret. Add it to an environment, or to the collection variables in the Vars tab of the top-level folder's Collection settings, and mark it secret with its lock.",
 	messageDisabledScopeVariables: "The switched-off variable %s was left out.",
+	messageReferencesDropped:      "The secret manager reference of %s was removed, because an imported file could use it to read your secrets. Pick the connection and path again with the key icon on its row.",
 	messageBrunoSecrets:           "The secret variable %s has no value, because Bruno keeps secret values outside the collection files. Fill it in under Environments, or pass it to gostman run with --var.",
 	messageInsomniaVault:          "The vault secret %s has no value, because Insomnia exports it encrypted. Fill it in under Environments, or pass it to gostman run with --var.",
 }

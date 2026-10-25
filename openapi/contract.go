@@ -10,13 +10,15 @@ const (
 	maxContractNodes = 200000
 	nullableKey      = "x-nullable"
 	extensionMark    = "x-"
+	discriminatorKey = "discriminator"
+	schemasPointer   = "#/components/schemas/"
 )
 
 var (
 	schemaMapKeywords   = map[string]bool{"properties": true, "patternProperties": true, "$defs": true, "definitions": true, "dependentSchemas": true}
 	schemaListKeywords  = map[string]bool{"allOf": true, "anyOf": true, "oneOf": true, "prefixItems": true}
 	schemaValueKeywords = map[string]bool{"additionalProperties": true, "additionalItems": true, "not": true, "if": true, "then": true, "else": true, "contains": true, "propertyNames": true}
-	annotationKeywords  = map[string]bool{"description": true, "title": true, "example": true, "examples": true, "externalDocs": true, "xml": true, "discriminator": true, "$comment": true}
+	annotationKeywords  = map[string]bool{"description": true, "title": true, "example": true, "examples": true, "externalDocs": true, "xml": true, "$comment": true}
 )
 
 type Contract struct {
@@ -144,12 +146,39 @@ func (b *bundler) schema(n node, depth int) any {
 			out[key] = b.schemaList(child, depth)
 		case schemaValueKeywords[key], key == "items":
 			out[key] = b.schema(child, depth+1)
+		case key == discriminatorKey:
+			if kept := b.discriminator(child); kept != nil {
+				out[key] = kept
+			}
 		case annotationKeywords[key], strings.HasPrefix(key, extensionMark) && key != nullableKey:
 		default:
 			out[key] = value
 		}
 	}
 	return out
+}
+
+func (b *bundler) discriminator(n node) map[string]any {
+	source := asMap(n.v)
+	name := asString(source["propertyName"])
+	if text, isText := n.v.(string); isText {
+		name = text
+	}
+	if name == "" {
+		return nil
+	}
+	mapping := map[string]any{}
+	for value, target := range asMap(source["mapping"]) {
+		ref := asString(target)
+		if !strings.Contains(ref, "/") {
+			ref = schemasPointer + ref
+		}
+		if n.d == b.l.main && strings.HasPrefix(ref, "#") {
+			b.keep(ref)
+			mapping[value] = ref
+		}
+	}
+	return map[string]any{"propertyName": name, "mapping": mapping}
 }
 
 func (b *bundler) schemaMap(n node, depth int) map[string]any {

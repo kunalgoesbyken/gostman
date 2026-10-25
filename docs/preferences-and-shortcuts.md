@@ -27,12 +27,12 @@ Open it with Ctrl+K, or with the **Commands** button in the header (shown on wid
 | **Paste request** | Paste the copied request or folder next to the current request | |
 | **Generate code** | Show the current request as code | |
 | **AI: new request from a description** | Draft a request, shown as a preview you accept | Ctrl+Shift+U |
-| **AI: generate assertions and tests** | Propose checks for the last response | |
+| **AI: generate checks** | Propose checks for the last response | |
 | **AI: write a script** | Propose a pre-request or post-response script | |
 | **AI: explain the response** | Explain a failure and suggest a fix | Ctrl+Shift+X |
 | **AI: document this request** | Propose a description for the request | |
 | **AI: ask about the collection** | Find requests by describing them | |
-| **AI: requests from an API schema** | Turn an OpenAPI or GraphQL schema into requests | |
+| **AI: requests from an API description** | Turn an API description into requests; OpenAPI documents use the built-in importer | |
 | **Close tab** | Close the current tab | Ctrl+W (Alt+W on the web) |
 | **Close other tabs** | Keep only the current tab | Alt+Shift+W |
 | **Close saved tabs** | Close every tab without unsaved changes | Alt+Shift+S |
@@ -166,7 +166,7 @@ The last swatch, marked with a plus, picks a custom accent. Gostman keeps your c
 
 **Share a theme**: **Copy theme** copies the palette, the accent colour, and every custom and method colour, for both versions, as text. **Import theme** takes such text and applies it. A theme only holds colours; anything else, or a colour not written as `#rrggbb`, is refused.
 
-Theme, contrast, accent and palette also apply to the landing page and the documentation in the same browser.
+Theme, contrast and accent also apply to the landing page and the documentation in the same browser, and the palette to the landing page.
 
 ![Gostman in the light theme with a request and its JSON response](../screenshots/appearance.png)
 

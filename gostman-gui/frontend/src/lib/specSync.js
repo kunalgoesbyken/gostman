@@ -1,6 +1,6 @@
 import { normalizeRequest } from './request'
 
-export const SPEC_FIELDS = ['name', 'description', 'method', 'url', 'headers', 'queryParams', 'body', 'bodyType']
+const SPEC_FIELDS = ['name', 'description', 'method', 'url', 'headers', 'queryParams', 'body', 'bodyType']
 
 const AUTH_FIELDS = ['type', 'token', 'username', 'password', 'key', 'value', 'in']
 const HASH_BASE = 36
@@ -15,18 +15,35 @@ function hashText(text) {
   return (hash >>> 0).toString(HASH_BASE)
 }
 
-export function requestFingerprint(request) {
-  const normalized = normalizeRequest(request)
+function fingerprintOf(normalized, extra) {
   const fields = SPEC_FIELDS.map((field) => normalized[field])
   const auth = AUTH_FIELDS.map((field) => normalized.auth[field])
-  return hashText(JSON.stringify([fields, auth]))
+  return hashText(JSON.stringify([fields, auth, ...extra]))
 }
+
+function requestFingerprint(request) {
+  const normalized = normalizeRequest(request)
+  return fingerprintOf(normalized, [normalized.vars])
+}
+
+const fingerprintWithoutVars = (request) => fingerprintOf(normalizeRequest(request), [])
 
 export const linkEntry = (requestId, specHash, request, operationId) => (
   [requestId, specHash, requestFingerprint(request), operationId]
 )
 
 const readEntry = ([requestId, specHash, localHash, operationId]) => ({ requestId, specHash, localHash, operationId })
+
+function upgradedEntry(entry, requestsById) {
+  const { requestId, specHash, localHash, operationId } = readEntry(entry)
+  const request = requestsById.get(requestId)
+  return request && fingerprintWithoutVars(request) === localHash ? linkEntry(requestId, specHash, request, operationId) : entry
+}
+
+export function upgradedLink(link, requests) {
+  const requestsById = new Map(requests.map((request) => [request.id, request]))
+  return { ...link, ops: Object.fromEntries(Object.entries(link.ops).map(([key, entry]) => [key, upgradedEntry(entry, requestsById)])) }
+}
 
 export function createLink(source, hash, entries) {
   return { source, hash, syncedAt: new Date().toISOString(), ops: Object.fromEntries(entries) }

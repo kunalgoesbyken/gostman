@@ -66,16 +66,6 @@ func (r Request) scriptTimeout() int64 {
 	return r.Lineage[0].ScriptTimeoutMs
 }
 
-func (r Request) collectionScopes() []variables {
-	var scopes []variables
-	for _, folder := range r.Lineage {
-		if scope, err := parseVariables(folder.CollectionVariables); err == nil && len(scope) > 0 {
-			scopes = append(scopes, scope)
-		}
-	}
-	return scopes
-}
-
 func (r Request) folderScopes() []variables {
 	scopes := make([]variables, 0, len(r.Lineage))
 	for _, folder := range r.Lineage {

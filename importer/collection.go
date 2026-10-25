@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"maps"
+	"slices"
 
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
@@ -15,6 +16,9 @@ func (r Result) Collection() (workspace.Collection, error) {
 
 func (r Result) Folded() (workspace.Collection, []string, error) {
 	collection := workspace.Collection{Requests: r.Requests, Folders: r.Folders, Environments: append(append([]workspace.Environment{}, r.Environments...), r.Globals...), SharedOrder: r.SharedOrder}
+	if r.Settings != nil {
+		collection.Settings = *r.Settings
+	}
 	var shared string
 	if len(r.Variables) > 0 {
 		encoded, err := json.Marshal(r.Variables)
@@ -52,17 +56,29 @@ func (r Result) GlobalsAsVariables() Result {
 	if len(r.Globals) == 0 {
 		return r
 	}
-	merged := map[string]string{}
+	merged, secret := map[string]string{}, map[string]bool{}
 	for _, global := range r.Globals {
-		maps.Copy(merged, valuesWithoutSecrets(global))
+		values, hidden := valuesWithoutSecrets(global)
+		for name, value := range values {
+			merged[name] = value
+			secret[name] = slices.Contains(hidden, name)
+		}
 	}
 	maps.Copy(merged, r.Variables)
+	for name := range r.Variables {
+		delete(secret, name)
+	}
 	r.Variables = merged
+	r.VariablesMeta = workspace.MarkSecret(r.VariablesMeta, markedNames(secret)...)
 	r.Globals = nil
 	return r
 }
 
-func valuesWithoutSecrets(environment workspace.Environment) map[string]string {
+func markedNames(marks map[string]bool) []string {
+	return slices.DeleteFunc(sortedKeys(marks), func(name string) bool { return !marks[name] })
+}
+
+func valuesWithoutSecrets(environment workspace.Environment) (map[string]string, []string) {
 	kept, secret := workspace.WithoutSecretValues(environment)
 	var flags map[string]variableFlags
 	_ = json.Unmarshal([]byte(environment.Meta), &flags)
@@ -80,7 +96,7 @@ func valuesWithoutSecrets(environment workspace.Environment) map[string]string {
 	for _, name := range secret {
 		values[name] = ""
 	}
-	return values
+	return values, secret
 }
 
 func switchedOff(flags variableFlags) bool {

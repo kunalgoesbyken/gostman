@@ -89,6 +89,40 @@ func (c *collector) ownCollectionVariables(folderID string, values map[string]st
 	}
 }
 
+func (c *collector) addCollectionVariables(folderID string, variables []envVariable) {
+	values := map[string]string{}
+	marks, shared := map[string]variableFlags{}, map[string]variableFlags{}
+	for _, variable := range variables {
+		if variable.name == "" {
+			continue
+		}
+		values[variable.name] = variable.value
+		flags := variable.flags()
+		if flags != (variableFlags{}) {
+			marks[variable.name] = flags
+		}
+		if _, taken := c.Variables[variable.name]; !taken {
+			c.Variables[variable.name] = variable.value
+			shared[variable.name] = flags
+		}
+	}
+	c.keepMarks(marksText(shared))
+	for index := range c.Folders {
+		if c.Folders[index].Id == folderID {
+			c.Folders[index].CollectionVariables = objectJSON(values)
+			c.Folders[index].CollectionVariablesMeta = marksText(marks)
+		}
+	}
+}
+
+func marksText(marks map[string]variableFlags) string {
+	if len(marks) == 0 {
+		return ""
+	}
+	encoded, _ := json.Marshal(marks)
+	return string(encoded)
+}
+
 func collectionVariables(rows []row) string {
 	if text := enabledVariables(rows); text != "" {
 		return text
@@ -153,40 +187,14 @@ func (c *collector) flagScripts(name, pre, post string) {
 	}
 }
 
-var foreignAPIs = []string{"pm.", "bru.", "insomnia."}
+var foreignRoots = setOf(postmanRoot, brunoRoot, insomniaRoot)
 
 func callsForeignAPI(script string) bool {
-	for _, api := range foreignAPIs {
-		if mentions(script, api) {
-			return true
-		}
-	}
-	return false
-}
-
-func mentions(script, api string) bool {
-	for offset := 0; offset < len(script); {
-		index := strings.Index(script[offset:], api)
-		if index < 0 {
-			return false
-		}
-		at := offset + index
-		if (at == 0 || !isIdentifierByte(script[at-1])) && !startsNative(script[at:]) {
-			return true
-		}
-		offset = at + len(api)
-	}
-	return false
-}
-
-func startsNative(text string) bool {
-	for prefix := range brunoDialect.native {
-		rest, found := strings.CutPrefix(text, prefix)
-		if found && (rest == "" || !isIdentifierByte(rest[0])) {
-			return true
-		}
-	}
-	return false
+	read, ok := readScript(script)
+	return ok && read.reaches(func(path chain) bool {
+		_, native := brunoDialect.nativePath(path)
+		return foreignRoots[path.root] && !native
+	})
 }
 
 func isIdentifierByte(b byte) bool {

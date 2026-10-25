@@ -20,7 +20,7 @@ export function DocsHeader({ onSearch, onMenu }) {
         <a href={docPath("")} className="text-sm font-medium text-foreground">
           {DOCS_TEXT.docs}
         </a>
-        <nav aria-label={DOCS_TEXT.home} className="ml-auto flex items-center gap-1">
+        <nav aria-label={DOCS_TEXT.siteNav} className="ml-auto flex items-center gap-1">
           <a href="/web" className={`${LINK} max-md:hidden`}>{DOCS_TEXT.links.webApp}</a>
           <a href={RELEASES_URL} rel="noopener" className={`${LINK} max-md:hidden`}>{DOCS_TEXT.links.download}</a>
           <a href={REPOSITORY_URL} rel="noopener" className={`${LINK} max-sm:hidden`}>

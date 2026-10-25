@@ -233,6 +233,9 @@ var brunoTarget = &scriptTarget{
 		"env.collection.all": reasonBrunoCollectionList,
 		"visualize":          reasonBrunoVisualize,
 		"visualize.table":    reasonBrunoVisualize,
+		"res.size":           reasonBrunoSize,
+		"res.url":            reasonBrunoURL,
+		"res.statusText":     reasonBrunoStatusText,
 	}),
 	hints: map[string]string{"matchSchema": messageExportBrunoSchema, "jsonSchema": messageExportBrunoSchema},
 	schema: func(actual, schema string) string {

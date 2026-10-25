@@ -97,7 +97,7 @@ function postmanRequest(request) {
   }
 }
 
-export function postmanResponse(response) {
+function postmanResponse(response) {
   if (!response) return undefined
   const text = () => (typeof response.body === 'string' ? response.body : JSON.stringify(response.body) ?? '')
   const wrapped = {
@@ -156,32 +156,32 @@ const postmanJar = (jar, respond) => ({
   clear: (url, callback) => respond(jar.deleteCookies(url), callback),
 })
 
-function iterationData(environment) {
-  return { get: environment.get, has: environment.has, toObject: environment.all, toJSON: environment.all }
+function iterationData(layered) {
+  return { get: layered.get, has: layered.has, toObject: layered.all, toJSON: layered.all }
 }
 
-function infoOf(environment, request, response) {
+function infoOf(layered, request, response) {
   return {
     eventName: response ? EVENT_TEST : EVENT_PRE_REQUEST,
-    iteration: Math.max(Number(environment.get('iteration')) || 1, 1) - 1,
-    iterationCount: Number(environment.get('iterationCount')) || 1,
+    iteration: Math.max(Number(layered.get('iteration')) || 1, 1) - 1,
+    iterationCount: Number(layered.get('iterationCount')) || 1,
     requestName: request.name,
     requestId: '',
   }
 }
 
 export function createPostman({ scopes, environmentName, request, response, cookies, flow, test, sendRequest, respond, visualize }) {
-  const environment = scopes[SCOPE_ENVIRONMENT]
+  const { layered } = scopes
   return {
-    environment: { ...variableScope(environment), name: environmentName },
-    variables: variableScope(scopes[SCOPE_SESSION]),
+    environment: { ...variableScope(scopes[SCOPE_ENVIRONMENT]), name: environmentName },
+    variables: variableScope({ ...scopes[SCOPE_SESSION], ...layered }),
     collectionVariables: variableScope(scopes[SCOPE_COLLECTION]),
     globals: variableScope(scopes[SCOPE_GLOBAL]),
-    iterationData: iterationData(environment),
+    iterationData: iterationData(layered),
     request: postmanRequest(request),
     response: postmanResponse(response),
     cookies: { ...cookies, jar: () => postmanJar(cookies.jar(), respond) },
-    info: infoOf(environment, request, response),
+    info: infoOf(layered, request, response),
     sendRequest: (options, callback) => respond(sendRequest(postmanTarget(options)).then(postmanResponse), callback),
     visualizer: { set: (template, data) => visualize(template, data) },
     execution: { setNextRequest: flow.setNextRequest, skipRequest: flow.skipRequest },

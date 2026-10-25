@@ -19,6 +19,7 @@ use(postmanAssertions)
 
 const createEnvironment = (scopes, environmentName) => ({
   ...scopes[SCOPE_ENVIRONMENT],
+  ...scopes.layered,
   name: environmentName,
   session: scopes[SCOPE_SESSION],
   collection: scopes[SCOPE_COLLECTION],
@@ -72,15 +73,15 @@ async function sendRequest(target) {
   return createResponse(JSON.parse(await send(JSON.stringify(target))))
 }
 
-export async function runJob({ script, assertions, request, response, variables, modules, cookies, environment: environmentName }) {
+export async function runJob({ script, assertions, request, response, layers, modules, cookies, environment: environmentName }) {
   const logs = []
   const tests = []
   const runner = createTestRunner(tests)
   const tracker = createTracker()
-  const scopes = createScopes(variables)
+  const scopes = createScopes(layers)
   const name = environmentName ?? ''
-  const scriptRequest = createRequest(request, scopes[SCOPE_ENVIRONMENT].interpolate)
-  const jar = createCookies(cookies, () => scopes[SCOPE_ENVIRONMENT].interpolate(scriptRequest.url ?? ''))
+  const scriptRequest = createRequest(request, scopes.layered.interpolate)
+  const jar = createCookies(cookies, () => scopes.layered.interpolate(scriptRequest.url ?? ''))
   const flow = createFlow()
   let visualization = ''
   const visualize = createVisualizer((html) => { visualization = html })
@@ -115,7 +116,7 @@ export async function runJob({ script, assertions, request, response, variables,
     logs.push(errorLine(error))
   }
 
-  const assertionResults = response ? evaluateAssertions(assertions || '', response, variables) : []
+  const assertionResults = response ? evaluateAssertions(assertions || '', response, scopes.layered.all()) : []
   return {
     tests: [...assertionResults, ...tests],
     logs,

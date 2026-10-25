@@ -31,14 +31,14 @@ func (r Result) Counts() Counts {
 		Variables:    len(r.Variables),
 	}
 	for _, folder := range r.Folders {
-		if carriesSettings(folder.Settings) {
+		if CarriesSettings(folder.Settings) {
 			counts.FolderSettings++
 		}
 	}
 	return counts
 }
 
-func carriesSettings(settings workspace.Settings) bool {
+func CarriesSettings(settings workspace.Settings) bool {
 	switch {
 	case strings.TrimSpace(settings.Description) != "":
 		return true

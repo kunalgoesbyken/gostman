@@ -4,7 +4,7 @@ const STATUS_CLASSES = {
   info: [100, 199], success: [200, 299], redirection: [300, 399], clientError: [400, 499], serverError: [500, 599], error: [400, 599],
 }
 const STATUS_CODES = {
-  ok: 200, accepted: 202, withoutContent: 204, badRequest: 400, unauthorized: 401, forbidden: 403, notFound: 404, rateLimited: 429,
+  ok: 200, accepted: 202, withoutContent: 204, badRequest: 400, unauthorised: 401, unauthorized: 401, forbidden: 403, notFound: 404, notAcceptable: 406, rateLimited: 429,
 }
 const NOT_A_RESPONSE = 'Only a response such as pm.response can be checked this way.'
 

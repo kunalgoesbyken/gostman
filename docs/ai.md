@@ -35,7 +35,7 @@ Some browsers ask for permission before a website may reach a server on your own
 
 ## What is sent
 
-Every action shows a preview of the exact text before it is sent, with a byte and token estimate, plus the reply format Gostman asks for. Secret variable values, auth fields, sensitive header values and sensitive JSON keys are masked, also when they appear URL-encoded, JSON-escaped or base64-encoded. Variables are sent by name only.
+Every action shows a preview of the exact text before it is sent, with a byte and token estimate, plus the reply format Gostman asks for. Secret variable values, auth fields (including auth the request inherits from its folders and collection), values read from a secret manager during this session, sensitive header values and sensitive JSON keys are masked, also when they appear URL-encoded, JSON-escaped or base64-encoded. Variables are sent by name only.
 
 Response bodies:
 
@@ -52,7 +52,7 @@ If an answer reaches the length limit, Gostman shows "The answer was cut off" in
 
 ## What AI can do
 
-Draft a request, assertions and tests, pre and post scripts, a failure explanation, request docs, a collection search, and requests from an API description. Results are proposals shown as a preview; nothing is sent, saved or run until you accept, and scripts run only when you press Send. In a restricted folder, script generation is disabled and accepted scripts stay inert until the folder is trusted.
+Draft a request, checks, pre-request and post-response scripts, a failure explanation, request docs, a collection search, and requests from an API description. Results are proposals shown as a preview; nothing is sent, saved or run until you accept, and scripts run only when you press Send. In a restricted folder, script generation is disabled and accepted scripts stay inert until the folder is trusted.
 
 Besides the **AI:** commands in the command palette, three buttons appear in place once AI is on:
 

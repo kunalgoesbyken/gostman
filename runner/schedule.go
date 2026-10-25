@@ -2,7 +2,6 @@ package runner
 
 import (
 	"context"
-	"maps"
 	"sync"
 	"sync/atomic"
 
@@ -14,22 +13,31 @@ type unit struct {
 	indexes   []int
 }
 
-func planUnits(iterations, requests, parallel int) []unit {
+func planUnits(iterations, requests, parallel int) ([]unit, [][]int) {
 	var units []unit
-	if iterations == 1 && parallel > 1 {
-		for index := 0; index < requests; index++ {
-			units = append(units, unit{iteration: 0, indexes: []int{index}})
-		}
-		return units
-	}
-	for iteration := 0; iteration < iterations; iteration++ {
-		indexes := make([]int, requests)
-		for index := range indexes {
-			indexes[index] = index
-		}
+	waves := make([][]int, iterations)
+	add := func(iteration int, indexes []int) {
+		waves[iteration] = append(waves[iteration], len(units))
 		units = append(units, unit{iteration: iteration, indexes: indexes})
 	}
-	return units
+	for iteration := range iterations {
+		if parallel <= 1 {
+			add(iteration, sequence(requests))
+			continue
+		}
+		for index := range requests {
+			add(iteration, []int{index})
+		}
+	}
+	return units, waves
+}
+
+func sequence(count int) []int {
+	indexes := make([]int, count)
+	for index := range indexes {
+		indexes[index] = index
+	}
+	return indexes
 }
 
 func (s *session) spawn() (*session, error) {
@@ -37,7 +45,7 @@ func (s *session) spawn() (*session, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &session{scripts: scripts, policy: s.policy, collection: s.collection, variables: variables{}, session: variables{}, environment: s.environment, common: s.common, library: s.library, hosts: s.hosts, modules: s.modules, contract: s.contract}, nil
+	return &session{scripts: scripts, policy: s.policy, values: s.values, common: s.common, library: s.library, hosts: s.hosts, modules: s.modules, contract: s.contract}, nil
 }
 
 func (s *session) crew(wanted int) []*session {
@@ -56,9 +64,6 @@ type schedule struct {
 	planned plan
 	options Options
 	units   []unit
-	base    variables
-	session variables
-	count   int
 	outputs [][]Result
 	halted  atomic.Bool
 	emit    sync.Mutex
@@ -79,14 +84,12 @@ func (c *schedule) work(ctx context.Context, worker *session, queue <-chan int) 
 			continue
 		}
 		current := c.units[position]
-		worker.variables = startingFor(c.base, c.options, current.iteration, c.count)
-		worker.session = sessionFor(c.session, c.options.rowFor(current.iteration))
 		sent := 0
 		progress := newProgress(len(current.indexes))
 		for cursor := 0; cursor < len(current.indexes); {
 			request := c.planned.requests[current.indexes[cursor]]
 			result := worker.attempt(ctx, request, c.planned.folderNames[request.FolderID], c.options.Capture)
-			worker.common.publish(worker.current().plain())
+			worker.common.publish(worker.scoped(request).plain())
 			result.Iteration = c.iterationNumber(current)
 			sent++
 			following, problem := c.follow(current, cursor, result.flow, flowStep{name: request.Name, sent: sent, repeats: repeats})
@@ -159,38 +162,38 @@ func (c *schedule) recordPassedOver(position int, current unit, progress unitPro
 }
 
 func (s *session) runAll(ctx context.Context, planned plan, options Options, observe func(Result)) []Result {
-	count := options.iterationCount()
-	units := planUnits(count, len(planned.requests), options.Parallel)
-	run := &schedule{
-		planned: planned,
-		options: options,
-		units:   units,
-		base:    maps.Clone(s.variables),
-		session: maps.Clone(s.session),
-		count:   count,
-		outputs: make([][]Result, len(units)),
-		observe: observe,
+	units, waves := planUnits(options.iterationCount(), len(planned.requests), options.Parallel)
+	run := &schedule{planned: planned, options: options, units: units, outputs: make([][]Result, len(units)), observe: observe}
+	crew := s.crew(min(max(options.Parallel, 1), max(len(planned.requests), 1)))
+	give := s.values.giver()
+	for iteration, wave := range waves {
+		if run.halted.Load() || ctx.Err() != nil {
+			break
+		}
+		give(options.givenFor(iteration))
+		run.perform(ctx, crew[:min(len(crew), max(len(wave), 1))], wave)
 	}
-	queue := make(chan int, len(run.units))
-	for position := range run.units {
-		queue <- position
-	}
-	close(queue)
-
-	crew := s.crew(min(max(options.Parallel, 1), max(len(run.units), 1)))
-	var group sync.WaitGroup
-	for _, worker := range crew {
-		group.Add(1)
-		go func() {
-			defer group.Done()
-			run.work(ctx, worker, queue)
-		}()
-	}
-	group.Wait()
-
+	give(nil)
 	var results []Result
 	for _, output := range run.outputs {
 		results = append(results, output...)
 	}
 	return results
+}
+
+func (c *schedule) perform(ctx context.Context, crew []*session, wave []int) {
+	queue := make(chan int, len(wave))
+	for _, position := range wave {
+		queue <- position
+	}
+	close(queue)
+	var group sync.WaitGroup
+	for _, worker := range crew {
+		group.Add(1)
+		go func() {
+			defer group.Done()
+			c.work(ctx, worker, queue)
+		}()
+	}
+	group.Wait()
 }

@@ -68,8 +68,9 @@ export function createTreeActions(backend, attempt) {
   const moveToFolder = (source, folderId) => moveItem(source, targetFor(folderId))
 
   async function discard(created) {
-    for (const request of created.requests) await backend.deleteRequest(request.id)
-    store().removeRequests(created.requests.map((request) => request.id))
+    const ids = created.requests.map((request) => request.id)
+    if (ids.length > 0) await backend.deleteRequests(ids)
+    store().removeRequests(ids)
     store().removeFolders(created.folders.map((folder) => folder.id))
   }
 

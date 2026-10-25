@@ -14,7 +14,7 @@ import (
 
 func (s *session) learn(library []Request) error {
 	s.library = library
-	return s.scripts.Call("collectionHosts", &s.hosts, library, s.known().text())
+	return s.scripts.Call("collectionHosts", &s.hosts, library, s.values.known().text())
 }
 
 func (s *session) scripted() *session {

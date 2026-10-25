@@ -5,6 +5,8 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+
+	"github.com/dop251/goja/ast"
 )
 
 const (
@@ -49,7 +51,7 @@ var (
 			"responseTime":           responseRoot + ".responseTime",
 		},
 		calls:    buildCallRules(),
-		specials: map[string]special{"pm.sendRequest": (*translator).renderSendRequest},
+		specials: map[string]special{"pm.sendRequest": (*translator).renderSendRequest, "pm.request.body.update": (*translator).renderBodyUpdate},
 		retired:  map[string]bool{legacyTests: true, "xml2Json": true, "cheerio": true},
 		implicit: map[string]string{"_": "lodash", "CryptoJS": "crypto-js", "moment": "moment"},
 	}
@@ -85,7 +87,6 @@ func buildCallRules() map[string]callRule {
 		"pm.request.url.getPath":           withoutArguments("req.getPath()"),
 		"pm.request.url.getQueryString":    withoutArguments("req.getQueryString()"),
 		"pm.request.body.toString":         withoutArguments("req.getBody({ raw: true })"),
-		"pm.request.body.update":           updateBody,
 		"pm.visualizer.set":                upTo(2, rename("visualize")),
 		"postman.getResponseHeader":        upTo(1, rename(responseRoot+".getHeader")),
 		"tv4.validate":                     validateSchema,
@@ -106,10 +107,12 @@ func buildCallRules() map[string]callRule {
 		rules["pm."+scope+".clear"] = withoutArguments(access + ".clear()")
 		rules["pm."+scope+".replaceIn"] = rename(access + ".interpolate")
 	}
-	for _, name := range []string{"get", "has"} {
-		rules["pm.iterationData."+name] = rename(environmentAccess + "." + name)
+	for _, scope := range []string{"iterationData", "variables"} {
+		for _, name := range []string{"get", "has"} {
+			rules["pm."+scope+"."+name] = rename(environmentAccess + "." + name)
+		}
+		rules["pm."+scope+".toObject"] = withoutArguments(environmentAccess + ".all()")
 	}
-	rules["pm.iterationData.toObject"] = withoutArguments(environmentAccess + ".all()")
 	for _, name := range append(append([]string{}, listMethods...), editingMethods...) {
 		if name != "get" {
 			rules["pm.request.headers."+name] = rename("req.headerList." + name)
@@ -126,13 +129,6 @@ func upTo(limit int, rule callRule) callRule {
 		replacement, ok := rule(args)
 		return replacement, ok && len(args) <= limit
 	}
-}
-
-func updateBody(args []string) (string, bool) {
-	if len(args) != 1 || strings.HasPrefix(strings.TrimSpace(args[0]), "{") {
-		return "", false
-	}
-	return "req.setBody(" + args[0] + ")", true
 }
 
 func validateSchema(args []string) (string, bool) {
@@ -154,7 +150,7 @@ func withoutArguments(replacement string) callRule {
 	}
 }
 
-func responseCall(root, path string, args []string) (string, bool) {
+func responseCall(root, path string, args []string, given []ast.Expression) (string, bool) {
 	switch path {
 	case "json":
 		return root + ".body", len(args) == 0
@@ -169,9 +165,9 @@ func responseCall(root, path string, args []string) (string, bool) {
 	case "to.have.header":
 		return headerAssertion(root, args)
 	case "to.have.body":
-		return bodyAssertion(root, args)
+		return bodyAssertion(root, args, given)
 	case "to.have.jsonBody":
-		return jsonBodyAssertion(root, args)
+		return jsonBodyAssertion(root, args, given)
 	}
 	if method, found := strings.CutPrefix(path, "headers."); found && slices.Contains(listMethods, method) {
 		return root + ".headerList." + method + "(" + strings.Join(args, ", ") + ")", true
@@ -189,20 +185,20 @@ func headerAssertion(root string, args []string) (string, bool) {
 	return "", false
 }
 
-func bodyAssertion(root string, args []string) (string, bool) {
+func bodyAssertion(root string, args []string, given []ast.Expression) (string, bool) {
 	body := "expect(" + fmt.Sprintf(responseText, root) + ")"
 	switch {
 	case len(args) == 0:
 		return body + ".to.not.be.empty", true
 	case len(args) > 1:
 		return "", false
-	case strings.HasPrefix(args[0], "/"):
+	case isPattern(given[0]):
 		return body + ".to.match(" + args[0] + ")", true
 	}
 	return body + ".to.equal(" + args[0] + ")", true
 }
 
-func jsonBodyAssertion(root string, args []string) (string, bool) {
+func jsonBodyAssertion(root string, args []string, given []ast.Expression) (string, bool) {
 	body := "expect(" + root + ".body)"
 	switch {
 	case len(args) == 0:
@@ -211,7 +207,7 @@ func jsonBodyAssertion(root string, args []string) (string, bool) {
 		return body + ".to.have.deep.nested.property(" + args[0] + ", " + args[1] + ")", true
 	case len(args) > 2:
 		return "", false
-	case strings.HasPrefix(args[0], "{") || strings.HasPrefix(args[0], "["):
+	case isStructure(given[0]):
 		return body + ".to.deep.equal(" + args[0] + ")", true
 	}
 	return body + ".to.have.nested.property(" + args[0] + ")", true
@@ -251,4 +247,22 @@ func statusAssertion(root, path string) (string, bool) {
 		return subject + "be.within(" + strconv.Itoa(bounds[0]) + ", " + strconv.Itoa(bounds[1]) + ")", true
 	}
 	return "", false
+}
+
+func isPattern(argument ast.Expression) bool {
+	_, pattern := argument.(*ast.RegExpLiteral)
+	return pattern
+}
+
+func isObjectLiteral(argument ast.Expression) bool {
+	_, object := argument.(*ast.ObjectLiteral)
+	return object
+}
+
+func isStructure(argument ast.Expression) bool {
+	switch argument.(type) {
+	case *ast.ObjectLiteral, *ast.ArrayLiteral:
+		return true
+	}
+	return false
 }

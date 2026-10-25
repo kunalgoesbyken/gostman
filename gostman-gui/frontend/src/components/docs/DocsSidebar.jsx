@@ -86,8 +86,11 @@ export function DocsSidebar({ nav, currentHref, prefix, onNavigate }) {
   const ref = useRef(null)
 
   useEffect(() => {
-    const container = ref.current?.closest("[data-scroll-container]")
-    keepVisible(container, ref.current?.querySelector('[aria-current="page"]'))
+    const frame = requestAnimationFrame(() => {
+      const container = ref.current?.closest("[data-scroll-container]")
+      keepVisible(container, ref.current?.querySelector('[aria-current="page"]'))
+    })
+    return () => cancelAnimationFrame(frame)
   }, [])
 
   return (

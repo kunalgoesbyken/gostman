@@ -12,7 +12,6 @@ import (
 const (
 	isoLayout       = "2006-01-02T15:04:05.000Z"
 	dateLayout      = "2006-01-02"
-	longTextBound   = 4096
 	digits          = "0123456789"
 	upperLetters    = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	passwordLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
@@ -153,13 +152,6 @@ func buildGenerators() map[string]func() string {
 func generatorOf(name string) (func() string, bool) {
 	generate, ok := dynamicGenerators[builtIns.canonical(name)]
 	return generate, ok
-}
-
-func generatedSizeBound(name string) int {
-	if builtIns.longText[builtIns.canonical(name)] {
-		return longTextBound
-	}
-	return dynamicSizeBound
 }
 
 func randomHexColor() string {

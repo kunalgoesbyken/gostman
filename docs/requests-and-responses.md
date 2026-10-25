@@ -33,11 +33,11 @@ When the URL is a WebSocket address, the method list shows WS (or GRAPHQL for Gr
 
 The row below the request bar holds the tabs. Only the tabs that apply to the kind of request are shown, and a protocol's own tab comes first:
 
-- HTTP: Params, Headers, Body, Auth, Vars, Extract, Tests, Settings.
-- GraphQL (method GRAPHQL): GraphQL, Params, Headers, Auth, Vars, Extract, Tests, Settings.
-- gRPC (method GRPC): gRPC, Headers, Auth, Vars, Extract, Tests, Settings.
+- HTTP: Params, Headers, Body, Auth, Vars, Extract, Checks, Settings.
+- GraphQL (method GRAPHQL): GraphQL, Params, Headers, Auth, Vars, Extract, Checks, Settings.
+- gRPC (method GRPC): gRPC, Headers, Auth, Vars, Extract, Checks, Settings.
 - WebSocket, Socket.IO and MQTT (a `ws://` or `wss://` URL): WebSocket, Params, Headers, Auth, Vars, Settings. With the method GRAPHQL the GraphQL tab follows WebSocket.
-- MCP: MCP, Params, Headers, Auth, Vars, Extract, Tests, Settings. A local `stdio:` server has no Params or Auth tab.
+- MCP: MCP, Params, Headers, Auth, Vars, Extract, Checks, Settings. A local `stdio:` server has no Params or Auth tab.
 
 A tab that does not apply stays visible while it still holds something, for example a GraphQL query on a request whose method is now POST, so nothing you entered is hidden. A count or a dot on a tab shows that it has content. When the row is too narrow, the tabs that do not fit move into a More menu; the selected tab always stays in the row.
 
@@ -49,7 +49,7 @@ A tab that does not apply stays visible while it still holds something, for exam
 | Auth | Authentication |
 | Vars | Variables for this request |
 | Extract | Rules that copy response values into variables |
-| Tests | Assertions and scripts |
+| Checks | Assertions and scripts |
 | Settings | Timeout, redirects, TLS, cookies, streaming, tags and description |
 
 The bookmark button at the right end of the tab row opens the saved [examples](#examples) of the request.
@@ -124,8 +124,6 @@ The Type list in the Auth tab holds these choices:
 - AWS Signature V4: Access key ID, Secret access key, Session token, Region and Service.
 - OAuth 1.0: consumer key and secret, access token and token secret, signature method (HMAC-SHA1, HMAC-SHA256, RSA-SHA1, RSA-SHA256 or PLAINTEXT), and optional realm, callback URL, verifier, nonce and timestamp. Send in chooses Authorization header, Query params or Form body.
 - Akamai EdgeGrid: Client token, Client secret and Access token are required. Headers to sign, Max body size, Nonce and Timestamp are optional.
-
-Password, token and secret fields accept `{{variables}}` like other fields, with the same suggestions and colours. A value made only of placeholders, such as `{{token}}`, stays readable; a value with typed text in it is masked, and the eye button shows it.
 - JWT Bearer: Gostman signs a token from Payload (JSON) for every request. HS256, HS384 and HS512 use a Secret, plain or Base64; the RS, PS and ES algorithms use a Private key (PEM). Extra header fields such as `kid` are optional. Add to puts the token in the Authorization header after Header prefix (default `Bearer`) or in a query parameter (default `token`). A payload that is not a JSON object stops the send with a message.
 - ASAP (Atlassian): Issuer, Audience, Key ID and Private key are required; Subject, Additional claims and Expires after (default `1h`) are optional. Each request gets a new token with `iat`, `exp` and `jti`, sent as a Bearer token.
 - Hawk: Hawk Auth ID and Hawk Auth Key, with the Algorithm `sha256` or `sha1`. Payload hash set to Include adds a hash of the body. Extra data, App ID and Delegation are optional; Nonce and Timestamp are generated when empty.
@@ -134,12 +132,12 @@ JWT Bearer and ASAP also apply to WebSocket and gRPC connections, because they d
 
 ![The Auth tab set to JWT Bearer with HS256, a masked secret, a JSON payload that uses {{user_id}} and {{$timestamp}}, a kid header field and the Authorization header placement](../screenshots/auth-jwt.png)
 
-Secret fields are masked. The eye button shows or hides the value. Values can use `{{variables}}`, and auth overrides a header or parameter of the same name.
+Password, token and secret fields accept `{{variables}}` like other fields, with the same suggestions and colours. A value made only of placeholders, such as `{{token}}`, stays readable; a value with typed text in it is masked, and the eye button shows it. Auth overrides a header or parameter of the same name.
 
 OAuth 2.0 has these fields:
 
 - Grant type: Client credentials, Password, Authorization code or Device code.
-- Issuer, with **Discover**: enter the provider's issuer, such as `https://login.example.com/realm`, and Discover reads its `/.well-known/openid-configuration` and fills in the authorization, token and device authorization URLs. The document must name the same issuer, or nothing is filled in. With an issuer set, a sign-in answer that names another issuer is discarded. An issuer written as a variable, such as `{{idp}}`, is kept as you wrote it, and the URLs it fills in start with the variable, such as `{{idp}}/token`, so each environment can point at its own provider.
+- Issuer, with **Discover**: enter the provider's issuer, such as `https://login.example.com/realm`, and Discover reads its `/.well-known/openid-configuration` and fills in the authorization, token and device authorization URLs. The document must name the same issuer, or nothing is filled in. With an issuer set, a sign-in answer that names another issuer is discarded; an issuer written with variables is compared after they are filled in. An issuer written as a variable, such as `{{idp}}`, is kept as you wrote it, and the URLs it fills in start with the variable, such as `{{idp}}/token`, so each environment can point at its own provider.
 - Authorization URL and Callback URL, for Authorization code only.
 - Device authorization URL, for Device code only.
 - Token URL, Client ID, Client secret and Scope.
@@ -150,7 +148,7 @@ OAuth 2.0 has these fields:
 - Send the ID token instead of the access token: sends the OpenID Connect ID token the provider returned, for APIs that expect it. The provider returns one when the scope includes `openid`.
 - Access token, or ID token when the option above is on.
 
-Get token requests a token and Clear token removes it. The panel shows whether a token exists and when it expires. For Authorization code, the panel waits for you to finish signing in in your browser, and Cancel stops the wait. In the web version the sign-in opens in a pop-up; closing the pop-up before you finish stops the wait with a message. For Device code, the panel shows a code and a link to the provider's sign-in page; open it on any device, enter the code, and the token arrives when you finish. Cancel stops the wait. For the callback address to register with your provider, see [Scripts and checks](scripting-and-settings.md#oauth-20-callback).
+Get token requests a token and Clear token removes it. The panel shows whether a token exists and when it expires. For Authorization code, the panel waits for you to finish signing in in your browser, and Cancel stops the wait. In the web version the sign-in opens in a pop-up; if you close it before you finish, choose Cancel. For Device code, the panel shows a code and a link to the provider's sign-in page; open it on any device, enter the code, and the token arrives when you finish. Cancel stops the wait. For the callback address to register with your provider, see [Scripts and checks](scripting-and-settings.md#oauth-20-callback).
 
 A token belongs to the environment that was active when it was fetched or typed in. After you switch environments it is not sent: the panel says so, a client credentials or password token is fetched again for the new environment, and the other grants ask you to choose Get token. Tokens saved by an earlier version of Gostman have no environment, so they are treated the same way once.
 
@@ -235,7 +233,7 @@ The toolbar buttons are:
 - Add checks from this response, for an HTTP response
 - Fullscreen
 
-Responses are limited to 50 MB in the desktop app and the CLI, and to 3 MB in the web app. A longer response is cut off at the limit, and the panel says so; the body shown, copied and saved is then only the first part.
+Responses are limited to 50 MB in the desktop app, the CLI and the [local relay](cli.md#local-relay-for-the-web-app), and to 3 MB in the web app through the hosted proxy. A longer response is cut off at the limit, and the panel says so; the body shown, copied and saved is then only the first part.
 
 ### Earlier responses and comparing
 
@@ -258,7 +256,7 @@ Each tab keeps its last 10 responses while the app is open. They are kept in mem
 | Headers | The request completed | Name and Value table, with a count. |
 | Cookies | The request completed | Name, Value, Domain, Path, Expires, Secure and HttpOnly. |
 | Timeline | The response has timing data, or scripts ran | See [Timeline](#timeline). |
-| Tests | There are test results or a script error | Each result with a pass or fail mark. The count shows passed over total. |
+| Checks | There are check results or a script error | Each result with a pass or fail mark. The count shows passed over total. |
 | Console | The request completed | Output of `console.log()` in scripts. |
 | Visualize | A script called `visualize()` | See [Visualize](#visualize). |
 

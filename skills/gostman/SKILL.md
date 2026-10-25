@@ -30,7 +30,7 @@ gostman lint openapi.yaml
 gostman scan api
 ```
 
-`gostman send` prints only the body, or the `--select` match, on stdout and its JSON summary on stderr. `gostman send --json` prints one JSON document on stdout; the body is in `body.text`, with `body.encoding` (`utf8` or `base64`). Exit codes: 0 passed, 1 a check failed, 2 the command or input is wrong, 3 a request got no response (connection, DNS, TLS, timeout, or a host that is not allowed). Each `gostman send` starts afresh, so a variable extracted by one `send` is not there for the next; pass it with `--var name=value` or use `gostman run`. `gostman help` lists every flag.
+`gostman send` prints only the body, or the `--select` match, on stdout and its JSON summary on stderr. `gostman send --json` prints one JSON document on stdout; the body is in `body.text`, with `body.encoding` (`utf8` or `base64`). Exit codes: 0 passed, 1 a check, a script or an MCP tool call failed, or the run was interrupted, 2 the command or input is wrong, 3 a request got no response: it could not be sent, the connection failed or timed out. Each `gostman send` starts afresh, so a variable extracted by one `send` is not there for the next; pass it with `--var name=value` or use `gostman run`. `gostman help` lists every flag.
 
 ## Rules
 
