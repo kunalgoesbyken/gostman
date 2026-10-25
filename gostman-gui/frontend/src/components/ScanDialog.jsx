@@ -8,6 +8,8 @@ import { TabCount } from "./ui/tabs"
 import { useSecretScan } from "../hooks/useSecretScan"
 import { SCAN_TEXT } from "../lib/scanText"
 
+const SCAN_WINDOW = { id: "scan", width: 768, height: 576, minWidth: 480, minHeight: 320 }
+
 function ScanResult({ state, onGoToRequest }) {
   if (state.isScanning) return <p role="status" className="p-4 text-xs text-muted-foreground">{SCAN_TEXT.scanning}</p>
   if (state.error) return <p role="alert" className="p-4 text-xs text-destructive [overflow-wrap:anywhere]">{SCAN_TEXT.failed(state.error)}</p>
@@ -23,7 +25,7 @@ export function ScanDialog({ scan, collection, onGoToRequest, onClose }) {
   const count = state.report?.findings.length ?? 0
 
   return (
-    <Dialog label={SCAN_TEXT.title} size="lg" onClose={onClose}>
+    <Dialog label={SCAN_TEXT.title} size="lg" floating={SCAN_WINDOW} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <DialogTitle>{SCAN_TEXT.title}</DialogTitle>
         <TabCount>{count}</TabCount>

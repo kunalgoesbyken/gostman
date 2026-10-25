@@ -31,6 +31,8 @@ const SCOPE_OPTIONS = [
 const ENVIRONMENT_FEATURES = { enabled: true, secret: true, references: true, readOnly: false }
 const DOT_ENV_FEATURES = { enabled: false, secret: false, readOnly: true }
 
+const ENVIRONMENTS_WINDOW = { id: "environments", width: 1024, height: 640, minWidth: 640, minHeight: 400 }
+
 const groupName = (group) => (group.id ? group.name : TEXT.shared)
 
 const SHARED_SECTION = "shared"
@@ -318,7 +320,7 @@ export function EnvironmentDialog({ secrets, onClose }) {
 
   return (
     <>
-      <Dialog label={TEXT.title} size="lg" onClose={closeUnlessCovered} className="max-w-5xl">
+      <Dialog label={TEXT.title} size="lg" floating={ENVIRONMENTS_WINDOW} onClose={closeUnlessCovered} className="max-w-5xl">
         <DialogHeader onClose={onClose}>
           <DialogTitle>{TEXT.title}</DialogTitle>
           <SegmentedControl label={TEXT.scope} options={SCOPE_OPTIONS} value={scope} onChange={changeScope} className="ml-2" />

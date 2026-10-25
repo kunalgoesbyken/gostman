@@ -23,6 +23,8 @@ const PERCENTILE_COLUMNS = [
   { header: LOAD_TEST_TEXT.percentileColumns.value, key: "value" },
 ]
 
+const LOAD_TEST_WINDOW = { id: "load-test", width: 768, height: 640, minWidth: 480, minHeight: 360 }
+
 const fixed = (number) => number.toFixed(FRACTION_DIGITS)
 
 const percentileRows = (latency) => Object.entries(LOAD_TEST_TEXT.percentiles)
@@ -183,7 +185,7 @@ export function LoadTestDialog({ actions }) {
   const { request, blocked, failure, isRunning } = load
 
   return (
-    <Dialog label={LOAD_TEST_TEXT.title} size="lg" onClose={actions.close}>
+    <Dialog label={LOAD_TEST_TEXT.title} size="lg" floating={LOAD_TEST_WINDOW} onClose={actions.close}>
       <DialogHeader onClose={actions.close}>
         <DialogTitle>{LOAD_TEST_TEXT.title}</DialogTitle>
         {isRunning && <Badge variant="success">{LOAD_TEST_TEXT.running}</Badge>}

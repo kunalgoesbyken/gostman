@@ -78,7 +78,7 @@ Open **Preferences** from the command palette or with **Preferences** in the sta
 
 ![The Preferences window open on its Theme section, with the theme, contrast, accent colour and the eight palettes, over the app](../screenshots/preferences.png)
 
-Preferences is a window you can move and resize inside the app. Its sections, in order, are Appearance, Theme, Fonts, Editor, Requests, Language, AI, Privacy and Data. Pick one on the left; Preferences opens on Appearance the first time and on the last section you used after that. Run requests, Collection settings, Network, Mock server, Capture, Cookies and Import, Export and Share are windows of the same kind.
+Preferences is a window you can move and resize inside the app. Its sections, in order, are Appearance, Theme, Fonts, Editor, Requests, Language, AI, Privacy and Data. Pick one on the left; Preferences opens on Appearance the first time and on the last section you used after that. Run requests, Collection settings, Network, Mock server, Capture, Cookies, Environments, Load test, Scan and Import, Export and Share are windows of the same kind.
 
 ![Resizing the sidebar by dragging its edge, hiding and showing it from the header, then moving and resizing the Preferences window and trying a palette](../screenshots/window-tour.gif)
 
