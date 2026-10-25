@@ -1,0 +1,18 @@
+{
+  "keyValue": {
+    "key": "Chiave",
+    "value": "Valore",
+    "type": "Tipo",
+    "sendRow": "Invia questa riga",
+    "fieldType": "Tipo di campo",
+    "text": "Testo",
+    "file": "File",
+    "removeRow": "Rimuovi riga",
+    "bulkLabel": "{{keyLabel}}: righe come testo",
+    "bulkPlaceholder": "{{keyLabel}}: valore",
+    "bulkHint": "Una riga per linea come nome: valore. Inizia una riga con // o # per conservarla senza inviarla.",
+    "bulkUnavailable": "Le righe con i due punti nel nome, o con spazi all'inizio o alla fine, possono essere modificate solo nella tabella.",
+    "editAsTable": "Modifica come tabella",
+    "bulkEdit": "Modifica in blocco"
+  }
+}

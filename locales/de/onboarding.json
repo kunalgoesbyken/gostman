@@ -1,0 +1,43 @@
+{
+  "onboarding": {
+    "title": "Erste Schritte",
+    "progress": "{{done}} von {{total}} erledigt",
+    "next": "Als Nächstes",
+    "completeTitle": "Alles eingerichtet",
+    "completeNotice": "Sie haben die ersten Schritte abgeschlossen.",
+    "completeHint": "Sie haben die wichtigsten Teile von Gostman ausprobiert. Das Tutorial geht weiter mit verketteten Anfragen, Skripten und dem Ausführen Ihrer Prüfungen in CI.",
+    "tutorial": "Tutorial lesen",
+    "hide": "Ausblenden",
+    "hideLabel": "Die Schritte zum Einstieg ausblenden",
+    "done": "Fertig",
+    "steps": {
+      "send": {
+        "title": "Eine Anfrage senden",
+        "hint": "Senden Sie eine Beispielanfrage an einen öffentlichen Echo-Dienst und lesen Sie die Antwort.",
+        "action": "Beispielanfrage senden"
+      },
+      "save": {
+        "title": "In Ihrer Sammlung speichern",
+        "hint": "Gespeicherte Anfragen erscheinen in der Seitenleiste und bleiben auf diesem Gerät.",
+        "action": "Anfrage speichern"
+      },
+      "variable": {
+        "title": "Eine Variable hinzufügen",
+        "hint": "Definieren Sie baseUrl einmal in einer Umgebung und schreiben Sie dann {{example}} überall, wo Sie sie brauchen.",
+        "action": "Umgebungen öffnen",
+        "defined": "definiert",
+        "missing": "noch nicht definiert"
+      },
+      "check": {
+        "title": "Eine Prüfung hinzufügen",
+        "hint": "Schreiben Sie eine Assertion wie „res.status ist gleich 200“ oder nutzen Sie „Prüfungen aus dieser Antwort hinzufügen“ im Tab „Prüfungen“. Speichern Sie dann die Anfrage, und jede Antwort zeigt „bestanden“ oder „fehlgeschlagen“.",
+        "action": "Tab „Prüfungen“ öffnen"
+      },
+      "run": {
+        "title": "Ihre Anfragen gemeinsam ausführen",
+        "hint": "Der Runner sendet jede gespeicherte Anfrage der Reihe nach und meldet, welche Prüfungen bestanden haben.",
+        "action": "Runner öffnen"
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "tabBar": {
+    "openRequests": "Open requests",
+    "newRequest": "New request",
+    "untitled": "Untitled",
+    "unsaved": "Unsaved changes",
+    "close": "Close {{title}}"
+  }
+}

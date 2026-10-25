@@ -1,4 +1,4 @@
-import { CHECK_RUN_TEXT, SCHEMA_TEXT } from '../checksText'
+import { CHECK_RUN_TEXT, OPERATOR_TEXT, SCHEMA_TEXT } from '../checksText'
 import { isPlainObject, parseJSON } from '../dataUtils'
 import { queryJson } from '../jsonPath'
 import { schemaMismatches } from '../jsonSchema'
@@ -37,32 +37,32 @@ const compare = (accepts) => (actual, expected) => (
 export const SCHEMA_OPERATOR = 'schema'
 
 export const OPERATORS = [
-  { value: 'eq', label: 'equals', test: sameValue },
-  { value: 'neq', label: 'does not equal', test: (actual, expected) => !sameValue(actual, expected) },
-  { value: 'gt', label: 'is greater than', test: compare((actual, expected) => actual > expected) },
-  { value: 'gte', label: 'is at least', test: compare((actual, expected) => actual >= expected) },
-  { value: 'lt', label: 'is less than', test: compare((actual, expected) => actual < expected) },
-  { value: 'lte', label: 'is at most', test: compare((actual, expected) => actual <= expected) },
-  { value: 'contains', label: 'contains', test: includes },
-  { value: 'notContains', label: 'does not contain', test: (actual, expected) => !includes(actual, expected) },
-  { value: 'startsWith', label: 'starts with', test: (actual, expected) => String(actual).startsWith(String(expected)) },
-  { value: 'endsWith', label: 'ends with', test: (actual, expected) => String(actual).endsWith(String(expected)) },
-  { value: 'matches', label: 'matches regex', test: matchesPattern },
-  { value: 'in', label: 'is one of', test: (actual, expected) => asList(expected).some((item) => sameValue(actual, item)) },
-  { value: 'length', label: 'has length', test: (actual, expected) => sameValue(sizeOf(actual), expected) },
-  { value: 'isDefined', label: 'is defined', unary: true, test: (actual) => actual !== undefined },
-  { value: 'isUndefined', label: 'is undefined', unary: true, test: (actual) => actual === undefined },
-  { value: 'isNull', label: 'is null', unary: true, test: (actual) => actual === null },
-  { value: 'isEmpty', label: 'is empty', unary: true, test: isEmpty },
-  { value: 'isNotEmpty', label: 'is not empty', unary: true, test: (actual) => !isEmpty(actual) },
-  { value: 'isTrue', label: 'is true', unary: true, test: (actual) => actual === true },
-  { value: 'isFalse', label: 'is false', unary: true, test: (actual) => actual === false },
-  { value: 'isNumber', label: 'is a number', unary: true, test: (actual) => typeof actual === 'number' },
-  { value: 'isString', label: 'is a string', unary: true, test: (actual) => typeof actual === 'string' },
-  { value: 'isBoolean', label: 'is a boolean', unary: true, test: (actual) => typeof actual === 'boolean' },
-  { value: 'isArray', label: 'is an array', unary: true, test: Array.isArray },
-  { value: 'isObject', label: 'is an object', unary: true, test: isPlainObject },
-  { value: SCHEMA_OPERATOR, label: SCHEMA_TEXT.operator, hidesValue: true, verify: (actual, expected) => schemaMismatches(expected, actual).join('\n') },
+  { value: 'eq', get label() { return OPERATOR_TEXT.eq }, test: sameValue },
+  { value: 'neq', get label() { return OPERATOR_TEXT.neq }, test: (actual, expected) => !sameValue(actual, expected) },
+  { value: 'gt', get label() { return OPERATOR_TEXT.gt }, test: compare((actual, expected) => actual > expected) },
+  { value: 'gte', get label() { return OPERATOR_TEXT.gte }, test: compare((actual, expected) => actual >= expected) },
+  { value: 'lt', get label() { return OPERATOR_TEXT.lt }, test: compare((actual, expected) => actual < expected) },
+  { value: 'lte', get label() { return OPERATOR_TEXT.lte }, test: compare((actual, expected) => actual <= expected) },
+  { value: 'contains', get label() { return OPERATOR_TEXT.contains }, test: includes },
+  { value: 'notContains', get label() { return OPERATOR_TEXT.notContains }, test: (actual, expected) => !includes(actual, expected) },
+  { value: 'startsWith', get label() { return OPERATOR_TEXT.startsWith }, test: (actual, expected) => String(actual).startsWith(String(expected)) },
+  { value: 'endsWith', get label() { return OPERATOR_TEXT.endsWith }, test: (actual, expected) => String(actual).endsWith(String(expected)) },
+  { value: 'matches', get label() { return OPERATOR_TEXT.matches }, test: matchesPattern },
+  { value: 'in', get label() { return OPERATOR_TEXT.in }, test: (actual, expected) => asList(expected).some((item) => sameValue(actual, item)) },
+  { value: 'length', get label() { return OPERATOR_TEXT.length }, test: (actual, expected) => sameValue(sizeOf(actual), expected) },
+  { value: 'isDefined', get label() { return OPERATOR_TEXT.isDefined }, unary: true, test: (actual) => actual !== undefined },
+  { value: 'isUndefined', get label() { return OPERATOR_TEXT.isUndefined }, unary: true, test: (actual) => actual === undefined },
+  { value: 'isNull', get label() { return OPERATOR_TEXT.isNull }, unary: true, test: (actual) => actual === null },
+  { value: 'isEmpty', get label() { return OPERATOR_TEXT.isEmpty }, unary: true, test: isEmpty },
+  { value: 'isNotEmpty', get label() { return OPERATOR_TEXT.isNotEmpty }, unary: true, test: (actual) => !isEmpty(actual) },
+  { value: 'isTrue', get label() { return OPERATOR_TEXT.isTrue }, unary: true, test: (actual) => actual === true },
+  { value: 'isFalse', get label() { return OPERATOR_TEXT.isFalse }, unary: true, test: (actual) => actual === false },
+  { value: 'isNumber', get label() { return OPERATOR_TEXT.isNumber }, unary: true, test: (actual) => typeof actual === 'number' },
+  { value: 'isString', get label() { return OPERATOR_TEXT.isString }, unary: true, test: (actual) => typeof actual === 'string' },
+  { value: 'isBoolean', get label() { return OPERATOR_TEXT.isBoolean }, unary: true, test: (actual) => typeof actual === 'boolean' },
+  { value: 'isArray', get label() { return OPERATOR_TEXT.isArray }, unary: true, test: Array.isArray },
+  { value: 'isObject', get label() { return OPERATOR_TEXT.isObject }, unary: true, test: isPlainObject },
+  { value: SCHEMA_OPERATOR, get label() { return SCHEMA_TEXT.operator }, hidesValue: true, verify: (actual, expected) => schemaMismatches(expected, actual).join('\n') },
 ]
 
 const DEFAULT_OPERATOR = OPERATORS[0]
@@ -75,7 +75,7 @@ const unknownOperator = (name) => ({
   value: name,
   label: name,
   test: () => {
-    throw new Error(`"${name}" is not a check. Use one of: ${OPERATOR_NAMES}`)
+    throw new Error(CHECK_RUN_TEXT.unknownOperator(name, OPERATOR_NAMES))
   },
 })
 
@@ -127,7 +127,7 @@ export const titleOf = (assertion, operator = operatorOf(assertion)) => (
 
 const verdict = (operator, actual, expected) => {
   if (operator.verify) return operator.verify(actual, expected)
-  return operator.test(actual, expected) ? '' : `The value was ${describe(actual)}`
+  return operator.test(actual, expected) ? '' : CHECK_RUN_TEXT.valueWas(describe(actual))
 }
 
 const RESPONSE_ROOT = 'res'

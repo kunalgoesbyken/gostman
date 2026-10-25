@@ -4,6 +4,7 @@ import { isSentRow, parseRows } from './rows'
 import { withInheritance } from './inheritance'
 import { toHttpURL, toSocketURL } from './socketUrl'
 import { protocolOf } from './realtime/protocols'
+import { SOCKET_SESSIONS_TEXT as TEXT } from './socketSessionsText'
 import { UNRESOLVED_TEXT } from './unresolvedText'
 import { selectActiveVariables, useAppStore } from '../store/appStore'
 
@@ -29,9 +30,6 @@ const FLUSH_DELAY_MS = 50
 const RECONNECT_DELAY_MS = 3000
 const HIGH_SURROGATE_START = 0xd800
 const HIGH_SURROGATE_END = 0xdbff
-const INVALID_VARIABLES = "The active environment's variables are not valid JSON."
-const INVALID_ADDRESS = 'Enter a ws:// or wss:// URL in the address bar.'
-const NOT_CONNECTED = 'Not sent: the connection closed before the message went out.'
 const SUBPROTOCOL_HEADER = 'Sec-WebSocket-Protocol'
 const DYNAMIC_PREFIX = '$'
 
@@ -111,13 +109,13 @@ const frameEntry = (frame) => (frame.bytes ? binaryEntry(frame.bytes) : textEntr
 
 export function resolveSocketTarget(request, variablesJSON) {
   const variables = parseVariableMap(variablesJSON)
-  if (!variables) return { error: INVALID_VARIABLES }
+  if (!variables) return { error: TEXT.invalidVariables }
   const substitute = (text) => substitutePlaceholders(text, variables)
   const address = substitute(request.url)
   const unknownNames = placeholderNames(address)
-  if (unknownNames.length > 0) return { error: `The URL uses variables the active environment does not define: ${unknownNames.join(', ')}.` }
+  if (unknownNames.length > 0) return { error: TEXT.undefinedVariables(unknownNames) }
   const url = toSocketURL(address)
-  if (!url) return { error: INVALID_ADDRESS }
+  if (!url) return { error: TEXT.invalidAddress }
   const headers = parseRows(request.headers)
     .filter(isSentRow)
     .map(({ key, value }) => [substitute(key), substitute(value)])
@@ -171,13 +169,13 @@ export function createSocketActions(backend) {
       return
     }
     setStatus(tabId, SOCKET_WAITING)
-    log(tabId, { kind: ENTRY_INFO, text: `Reconnecting in ${RECONNECT_DELAY_MS / 1000} s` })
+    log(tabId, { kind: ENTRY_INFO, text: TEXT.reconnecting(RECONNECT_DELAY_MS / 1000) })
     retryTimers.set(tabId, setTimeout(() => connect(tabId), RECONNECT_DELAY_MS))
   }
 
   function createChannel(tabId, link, isCurrent) {
     const failed = (error) => {
-      if (isCurrent()) log(tabId, { kind: ENTRY_ERROR, text: `Could not send: ${messageOf(error)}` })
+      if (isCurrent()) log(tabId, { kind: ENTRY_ERROR, text: TEXT.couldNotSend(messageOf(error)) })
     }
     const deliver = (write) => {
       link.ready.then(write).catch(failed)
@@ -220,7 +218,7 @@ export function createSocketActions(backend) {
     const handlers = {
       onOpen: whileCurrent(() => {
         setStatus(tabId, SOCKET_OPEN)
-        log(tabId, { kind: ENTRY_INFO, text: 'Connected' })
+        log(tabId, { kind: ENTRY_INFO, text: TEXT.connected })
         link.session.onOpen?.()
       }),
       onMessage: whileCurrent((frame) => link.session.onFrame(frame)),
@@ -243,7 +241,7 @@ export function createSocketActions(backend) {
       link.transport = transport
       markReady()
     } catch (error) {
-      if (isCurrent()) handleLoss(tabId, { kind: ENTRY_ERROR, text: `Could not connect: ${messageOf(error)}` })
+      if (isCurrent()) handleLoss(tabId, { kind: ENTRY_ERROR, text: TEXT.couldNotConnect(messageOf(error)) })
     }
   }
 
@@ -259,7 +257,7 @@ export function createSocketActions(backend) {
       return
     }
     setStatus(tabId, SOCKET_CONNECTING)
-    log(tabId, { kind: ENTRY_INFO, text: `Connecting to ${target.url}` })
+    log(tabId, { kind: ENTRY_INFO, text: TEXT.connecting(target.url) })
     await dial(tabId, target, tab.request)
   }
 
@@ -267,7 +265,7 @@ export function createSocketActions(backend) {
     const wasActive = sessionOf(tabId).status !== SOCKET_IDLE
     release(tabId)
     setStatus(tabId, SOCKET_IDLE)
-    if (wasActive) log(tabId, { kind: ENTRY_INFO, text: 'Disconnected' })
+    if (wasActive) log(tabId, { kind: ENTRY_INFO, text: TEXT.disconnected })
   }
 
   function openSession(tabId) {
@@ -294,7 +292,7 @@ export function createSocketActions(backend) {
     try {
       const [body, target] = await filledTexts([message.body, message.target])
       const session = openSession(tabId)
-      if (!session) throw new Error(NOT_CONNECTED)
+      if (!session) throw new Error(TEXT.notConnected)
       const sent = session.compose({ body, target })
       log(tabId, { ...textEntry(ENTRY_SENT, sent.text), label: sent.label })
       warnUnresolved(tabId, leftoverNames([body, target]))

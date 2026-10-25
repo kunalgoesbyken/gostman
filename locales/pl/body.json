@@ -1,0 +1,22 @@
+{
+  "body": {
+    "typeLabel": "Typ treści",
+    "editorLabel": "Treść żądania",
+    "format": "Formatuj",
+    "formatTitle": "Wcięcie treści {{type}} ({{chord}}). {{example}} pozostają bez zmian.",
+    "cannotFormatAt": "Nie można sformatować treści {{type}} w wierszu {{line}}, kolumnie {{column}}: {{message}}",
+    "cannotFormat": "Nie można sformatować treści {{type}}: {{message}}",
+    "goToLine": "Przejdź do wiersza {{line}}",
+    "noBody": "Brak treści",
+    "noBodyDescription": "To żądanie jest wysyłane bez treści.",
+    "multipartOnGet": "Żądania GET rzadko mają treść, a wiele serwerów ją pomija. Jeśli treść ma zostać przesłana, zmień metodę na POST lub PUT.",
+    "replacedByGraphQL": "Metoda to GRAPHQL, więc treść jest budowana na karcie GraphQL, a ta nie jest wysyłana.",
+    "types": {
+      "none": "Brak",
+      "text": "Tekst",
+      "form": "Formularz URL-encoded",
+      "multipart": "Multipart",
+      "file": "Plik"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "soap": {
+    "versionLabel": "SOAPバージョン",
+    "format": "XMLを整形",
+    "formatTitle": "エンベロープをインデントします。コメントとCDATAセクションは保持されます。",
+    "fault": "SOAP Fault",
+    "faultCode": "コード",
+    "faultReason": "理由",
+    "faultActor": "アクター",
+    "faultDetail": "詳細",
+    "malformed": "XMLを整形できません：{{message}}"
+  }
+}

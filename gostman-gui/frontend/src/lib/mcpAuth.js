@@ -1,6 +1,7 @@
 import { WEB_APP_URL } from './constants'
 import { metadataUrlFor } from './mcpClientMetadata'
 import { toMcpTarget } from './mcp'
+import { MCP_TEXT } from './mcpText'
 import { withToken } from './oauth'
 
 export const STEP_RUNNING = 'running'
@@ -37,7 +38,7 @@ const rejection = (problem, message = '') => Object.assign(new Error(message), {
 
 function checkIssuer(received, plan) {
   const expected = plan.config.issuer
-  if (received && expected && received !== expected) throw rejection('issuerWrong', `expected "${expected}", received "${received}"`)
+  if (received && expected && received !== expected) throw rejection('issuerWrong', MCP_TEXT.issuerDetail(expected, received))
   if (!received && plan.issuerRequired) throw rejection('issuerMissing')
   return { detail: received || '' }
 }

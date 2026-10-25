@@ -1,0 +1,39 @@
+{
+  "components": {
+    "unused": "{{kind}}/{{name}} is defined but never referenced",
+    "invalidRef": "invalid $ref: {{detail}}"
+  },
+  "info": {
+    "fieldMissing": "info.{{field}} is missing or empty",
+    "noServers": "no servers are listed, so clients cannot tell where the API is served",
+    "noHost": "no host is set, so clients cannot tell where the API is served",
+    "serverNotHttps": "{{url}} does not use https",
+    "httpOnly": "the API is offered over http only"
+  },
+  "operations": {
+    "noOperationId": "the operation has no operationId",
+    "duplicateOperationId": "operationId \"{{id}}\" is already used by {{earlier}}",
+    "noSummary": "the operation has neither a summary nor a description",
+    "undeclaredTag": "tag \"{{tag}}\" is not declared in the top-level tags",
+    "deprecatedWithoutDescription": "the operation is deprecated but has no description saying what to use instead",
+    "noSecurity": "the spec defines security schemes but this operation requires none"
+  },
+  "paths": {
+    "none": "the document defines no paths",
+    "noLeadingSlash": "path \"{{path}}\" does not start with a slash",
+    "ambiguous": "{{path}} cannot be told apart from {{earlier}}",
+    "parameterUndeclared": "path parameter \"{{name}}\" is in the path but not declared",
+    "parameterUnused": "path parameter \"{{name}}\" is declared but not in the path"
+  },
+  "responses": {
+    "noSuccess": "the operation declares no 2xx response",
+    "noError": "the operation declares neither a default nor a 4xx response",
+    "noSchema": "response {{status}} has no schema",
+    "mediaWithoutSchema": "response {{status}} declares {{media}} without a schema",
+    "bodyOnRead": "{{method}} operations should not have a request body",
+    "noBodyExample": "the {{media}} request body has no example"
+  },
+  "security": {
+    "undefinedScheme": "security scheme \"{{name}}\" is used but not defined"
+  }
+}

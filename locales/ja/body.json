@@ -1,0 +1,22 @@
+{
+  "body": {
+    "typeLabel": "ボディの種類",
+    "editorLabel": "リクエストボディ",
+    "format": "整形",
+    "formatTitle": "{{type}}ボディをインデントします（{{chord}}）。{{example}}は書かれたとおりに残ります。",
+    "cannotFormatAt": "{{type}}を整形できません（{{line}}行目、{{column}}列目）：{{message}}",
+    "cannotFormat": "{{type}}を整形できません：{{message}}",
+    "goToLine": "{{line}}行目へ移動",
+    "noBody": "ボディなし",
+    "noBodyDescription": "このリクエストはボディなしで送信されます。",
+    "multipartOnGet": "GETリクエストにボディを含めることはまれで、多くのサーバーは無視します。アップロードする場合は、メソッドをPOSTまたはPUTに切り替えてください。",
+    "replacedByGraphQL": "メソッドがGRAPHQLのため、ボディは「GraphQL」タブから作成され、このボディは送信されません。",
+    "types": {
+      "none": "なし",
+      "text": "テキスト",
+      "form": "Form URL-encoded",
+      "multipart": "Multipart",
+      "file": "ファイル"
+    }
+  }
+}

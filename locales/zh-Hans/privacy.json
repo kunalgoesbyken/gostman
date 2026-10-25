@@ -1,0 +1,30 @@
+{
+  "privacy": {
+    "telemetryLabel": "遥测",
+    "telemetryHint": "Gostman 没有遥测、统计分析或崩溃报告。它只会连接你发送请求的主机，以及你自己设置的服务。",
+    "docsLink": "Gostman 会连接什么",
+    "updatesLabel": "检查新版本",
+    "updatesHint": "每天从 GitHub 读取一次最新发布版本，并显示在状态栏中。不会下载或安装任何内容。",
+    "updatesFailed": "上次检查未能连接 GitHub。明天会再次检查。",
+    "updatesCurrent": "这已是最新版本（{{version}}）。",
+    "updateAvailable": "有新版本 {{version}}",
+    "updatesNewer": "GitHub 上有新版本 {{version}}。",
+    "updateHint": "在 GitHub 上打开发行说明和下载页面",
+    "updateDismiss": "到下一个版本前不再显示",
+    "relayLabel": "请求发送方式",
+    "relayHint": "托管的中继无法访问 localhost 或私有地址。本地中继从这台电脑发送请求，中间没有任何第三方。",
+    "relayModes": {
+      "hosted": "托管中继",
+      "local": "这台电脑上的本地中继"
+    },
+    "relayAddressLabel": "本地中继地址",
+    "relayAddressHint": "用 gostman relay 启动它，然后输入它打印出的地址。",
+    "relayAddressInvalid": "请输入形如 http://127.0.0.1:4030 的地址。",
+    "relayCheck": "测试",
+    "relayChecking": "正在测试…",
+    "relayReachable": "本地中继已响应。",
+    "relayMissing": "请在“偏好设置”的“隐私”中输入本地中继的地址，或切换回托管中继。",
+    "relayUnreachable": "{{address}} 处的本地中继没有响应。请用 gostman relay 启动它，或在“偏好设置”的“隐私”中切换回托管中继。",
+    "relayCheckUnreachable": "{{address}} 处的本地中继没有响应。请检查 gostman relay 是否正在运行，以及地址是否与它打印的一致。"
+  }
+}

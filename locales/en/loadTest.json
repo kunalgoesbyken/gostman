@@ -1,0 +1,60 @@
+{
+  "loadTest": {
+    "title": "Load test",
+    "commandTitle": "Load test this request",
+    "commandDescription": "Send the current request many times at once and measure latency",
+    "barLabel": "Load test",
+    "barHint": "Load test this request",
+    "notice": "Only test systems you own or have permission to test. Each worker sends the request as it is shown here, without scripts or shared cookies.",
+    "unsupported": "Only HTTP requests can be load tested. gRPC, MCP, WebSocket and streaming requests are not supported.",
+    "noUrl": "Give the request a URL first.",
+    "concurrency": "Concurrent workers",
+    "duration": "Duration (seconds)",
+    "rateLimit": "Requests per second cap",
+    "rateLimitHint": "Leave empty for no cap",
+    "start": "Start",
+    "stop": "Stop",
+    "running": "Running",
+    "stopped": "Stopped early",
+    "progress": {
+      "elapsed": "Elapsed",
+      "requests": "Requests",
+      "rate": "Requests/s",
+      "p95": "p95",
+      "failed": "Failed"
+    },
+    "summary": {
+      "total": "Requests",
+      "succeeded": "Succeeded",
+      "failed": "Failed",
+      "rate": "Requests/s",
+      "received": "Received"
+    },
+    "failureBreakdown": "{{networkErrors}} network, {{statusFailures}} with status {{failureStatus}} or above",
+    "percentilesLabel": "Latency",
+    "percentileColumns": {
+      "name": "Measure",
+      "value": "Milliseconds"
+    },
+    "percentiles": {
+      "minMs": "min",
+      "meanMs": "mean",
+      "p50Ms": "p50",
+      "p90Ms": "p90",
+      "p95Ms": "p95",
+      "p99Ms": "p99",
+      "maxMs": "max"
+    },
+    "seconds": "{{value}} s",
+    "milliseconds": "{{value}} ms",
+    "statusCount": "{{code}} x {{count}}",
+    "statusLabel": "Status codes",
+    "histogramLabel": "Latency distribution",
+    "histogramBarLabel_one": "{{from}} to {{to}} ms: {{count}} request",
+    "histogramBarLabel_other": "{{from}} to {{to}} ms: {{count}} requests",
+    "errorsLabel": "Error samples",
+    "accuracy": "Percentiles are accurate to within {{percent}}%.",
+    "emptyTitle": "No results yet",
+    "emptyHint": "Choose the load and press Start."
+  }
+}

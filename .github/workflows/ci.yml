@@ -40,6 +40,15 @@ jobs:
       - name: go vet ./...
         run: go vet ./...
 
+      - name: Verify the generated message codes are current
+        shell: bash
+        run: |
+          go generate ./locales
+          if ! git diff --exit-code --stat -- locales; then
+            echo "locales/codes_*.go is stale: run 'go generate ./locales' and commit the result."
+            exit 1
+          fi
+
   # ---------------------------------------------------------------------------
   # Frontend builds + the entry-point regression guard + the Wails Go module.
   #
@@ -85,6 +94,10 @@ jobs:
             echo "runner/sandbox/bundle.js is stale: run 'npm run build:cli' in gostman-gui/frontend and commit the result."
             exit 1
           fi
+
+      - name: Check translation files
+        working-directory: ./gostman-gui/frontend
+        run: npm run i18n:check
 
       # Desktop target: index.html -> src/main.jsx -> App.jsx (Wails bindings).
       - name: Build desktop frontend (dist/)

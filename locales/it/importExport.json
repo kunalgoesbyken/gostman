@@ -1,0 +1,19 @@
+{
+  "importExport": {
+    "untitledFolder": "Cartella",
+    "untitledEnvironment": "Ambiente",
+    "gostmanExport": "Export di Gostman",
+    "undetected": "Impossibile rilevare il formato. Usa una raccolta Postman, una specifica OpenAPI o Swagger oppure un export di Gostman.",
+    "noRequests": "Nessuna richiesta o cartella in: {{label}}.",
+    "unreadable": "Impossibile leggere: {{label}}.",
+    "invalidYaml": "YAML non valido: {{reason}}",
+    "missingGostman": "Formato di export di Gostman non valido: manca l'oggetto gostman",
+    "requestsNotArray": "Formato di export di Gostman non valido: requests deve essere un array",
+    "foldersNotArray": "Formato di export di Gostman non valido: folders deve essere un array",
+    "namesMore": "{{names}} e altri {{count}}",
+    "tlsKept": "La verifica TLS era disattivata nella raccolta per {{names}}; è stata mantenuta attiva. Disattivala nella scheda Impostazioni della richiesta se ti fidi di questi host.",
+    "flattened_one": "{{count}} cartella annidata in un ciclo o a più di {{levels}} livelli di profondità è stata spostata al livello principale.",
+    "flattened_many": "{{count}} di cartelle annidate in un ciclo o a più di {{levels}} livelli di profondità sono state spostate al livello principale.",
+    "flattened_other": "{{count}} cartelle annidate in un ciclo o a più di {{levels}} livelli di profondità sono state spostate al livello principale."
+  }
+}

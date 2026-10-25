@@ -1,0 +1,31 @@
+{
+  "scan": {
+    "title": "Scan for secrets",
+    "commandDescription": "Find credentials typed into requests before you share or commit them",
+    "intro": "Looks for well-known token formats, random-looking values in credential fields and passwords typed into auth settings. Values written as {{example}} are fine. Nothing leaves this window except the check itself, and only a few characters of a value are ever shown.",
+    "includeExamples": "Include saved example responses",
+    "scanning": "Scanning",
+    "clean": "No secrets found",
+    "cleanDescription": "No token formats, random-looking credential values or typed-in passwords were found.",
+    "failed": "The check could not run: {{message}}",
+    "goToRequest": "Go to request",
+    "findings": "Findings",
+    "showFindings": "Show findings",
+    "hideFindings": "Hide findings",
+    "shareAnyway": "Share anyway",
+    "found_one": "{{count}} possible secret found",
+    "found_other": "{{count}} possible secrets found",
+    "foundShare": "These stay in the link or file you create. Replace them with {{example}} first, or share anyway.",
+    "foundExport": "These are written into the export. Replace them with {{example}} first if the file will be shared or committed.",
+    "severity": {
+      "high": "High",
+      "medium": "Medium"
+    },
+    "kinds": {
+      "request": "Request",
+      "folder": "Folder",
+      "environment": "Environment",
+      "collection": "Collection"
+    }
+  }
+}

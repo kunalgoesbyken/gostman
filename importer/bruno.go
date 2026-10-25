@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const (
@@ -102,7 +103,7 @@ func (c *collector) safeDocuments(docs []document) []document {
 	for _, doc := range docs {
 		clean, ok := safeRelativePath(doc.file.Name)
 		if !ok {
-			c.skip(messageUnsafePath, doc.file.Name)
+			c.skip(locales.ImporterUnsafePath, locales.Params{"path": doc.file.Name})
 			continue
 		}
 		doc.file.Name = clean
@@ -182,7 +183,7 @@ func (c *collector) assignBruno(set *brunoSet, doc document) {
 	}
 	parsed, err := parseBru(doc.file.Text)
 	if err != nil {
-		c.skip("%s: %v", doc.file.Name, err)
+		c.skip(locales.ImporterSkipFileError, locales.Params{"file": doc.file.Name, "detail": err.Error()})
 		return
 	}
 	file := brunoFile{path: relative, dir: path.Dir(relative), bru: parsed}
@@ -235,7 +236,7 @@ func (c *collector) importBrunoSet(set *brunoSet) {
 	ids, translation := runTargets(paths)
 	ctx := treeContext{root: set.root, dialect: translation, ids: ids}
 	since := c.mark()
-	rootScope := c.collectionScope(c.brunoScope(ctx, collection, fmt.Sprintf(labelCollection, set.name)))
+	rootScope := c.collectionScope(c.brunoScope(ctx, collection, placeLabel(labelCollection, set.name)))
 	folders := map[string]string{".": c.addScopedFolder(set.name, "", rootScope)}
 	sort.SliceStable(requests, func(i, j int) bool { return brunoOrder(requests[i]) < brunoOrder(requests[j]) })
 	var ensure func(dir string) (string, bool)
@@ -252,7 +253,7 @@ func (c *collector) importBrunoSet(set *brunoSet) {
 		}
 		folder := meta[dir]
 		name := cleanName(folder.value("meta", "name"), path.Base(dir))
-		folders[dir] = c.addScopedFolder(name, parentID, c.brunoScope(ctx, folder, fmt.Sprintf(labelFolder, name)))
+		folders[dir] = c.addScopedFolder(name, parentID, c.brunoScope(ctx, folder, placeLabel(labelFolder, name)))
 		return folders[dir], true
 	}
 	for _, dir := range sortedFolderDirs(set, meta) {
@@ -312,7 +313,7 @@ func brunoOrder(file brunoFile) string {
 	return fmt.Sprintf("%s/%09d/%s", file.dir, sequence(file.bru), file.path)
 }
 
-func (c *collector) brunoScope(ctx treeContext, file bruFile, label string) scope {
+func (c *collector) brunoScope(ctx treeContext, file bruFile, label locales.Message) scope {
 	inherited := scope{description: file.text("docs")}
 	inherited.headers = bruRows(file.entries("headers"))
 	inherited.vars = bruRows(file.entries("vars:pre-request"))
@@ -325,19 +326,19 @@ func (c *collector) brunoScope(ctx treeContext, file bruFile, label string) scop
 	return inherited
 }
 
-func (c *collector) brunoScripts(d *dialect, file bruFile, label string) (string, string) {
+func (c *collector) brunoScripts(d *dialect, file bruFile, label locales.Message) (string, string) {
 	pre := c.translateScript(d, label, stagePre, file.text("script:pre-request"))
 	return pre, c.withTests(d, file, label, c.translateScript(d, label, stageAfter, file.text("script:post-response")))
 }
 
-func (c *collector) brunoRequestScripts(d *dialect, file bruFile, label string) (string, string, []extractor, []assertion) {
+func (c *collector) brunoRequestScripts(d *dialect, file bruFile, label locales.Message) (string, string, []extractor, []assertion) {
 	pre := c.translateScript(d, label, stagePre, file.text("script:pre-request"))
 	after, rules, rows := c.translateAfterScript(d, label, stageAfter, file.text("script:post-response"))
 	tests, testRules, testRows := c.translateAfterScript(d, label, stagePost, file.text("tests"))
 	return pre, joinScripts([]string{after, tests}), append(rules, testRules...), append(rows, testRows...)
 }
 
-func (c *collector) withTests(d *dialect, file bruFile, label, after string) string {
+func (c *collector) withTests(d *dialect, file bruFile, label locales.Message, after string) string {
 	return joinScripts([]string{after, c.translateScript(d, label, stagePost, file.text("tests"))})
 }
 
@@ -407,7 +408,7 @@ func (c *collector) importBrunoRequest(ctx treeContext, file brunoFile, folderID
 		tags:        bru.list("meta", "tags"),
 		vars:        bruRows(bru.entries("vars:pre-request")),
 	}
-	label := fmt.Sprintf(labelRequest, name)
+	label := placeLabel(labelRequest, name)
 	var peeled []extractor
 	var checks []assertion
 	request.preScript, request.postScript, peeled, checks = c.brunoRequestScripts(ctx.dialect, bru, label)
@@ -426,7 +427,7 @@ func (c *collector) importBrunoRequest(ctx treeContext, file brunoFile, folderID
 	default:
 		block = brunoMethod(bru)
 		if block == "" {
-			c.skip("%s: no request method block", file.path)
+			c.skip(locales.ImporterSkipNoMethodBlock, locales.Params{"file": file.path})
 			return
 		}
 		c.brunoHTTP(bru, block, &request)
@@ -465,7 +466,7 @@ func (c *collector) brunoHTTP(bru bruFile, block string, request *parts) {
 	request.examples = c.savedExamples(request.name, brunoExamples(bru))
 }
 
-func (c *collector) brunoGrpc(ctx treeContext, bru bruFile, label string, request *parts) {
+func (c *collector) brunoGrpc(ctx treeContext, bru bruFile, label locales.Message, request *parts) {
 	call := grpcCall{
 		url:        bru.value(brunoGrpcBlock, "url"),
 		method:     bru.value(brunoGrpcBlock, "method"),
@@ -590,7 +591,7 @@ func (c *collector) brunoExtractors(file bruFile, name string) string {
 	for _, entry := range file.entries("vars:post-response") {
 		rule, ok := responseExtractor(entry.Key, entry.Value, entry.Enabled)
 		if !ok {
-			c.skip(messagePostResponseVariable, name, entry.Key, entry.Value)
+			c.skip(locales.ImporterPostResponseVariable, locales.Params{"name": name, "variable": entry.Key, "expression": entry.Value})
 			continue
 		}
 		extractors = append(extractors, rule)
@@ -612,7 +613,7 @@ func (c *collector) addBrunoEnvironments(drafts []environmentDraft) {
 		drafts[index].variables = withSecretFields(draft.variables, used)
 		for _, variable := range drafts[index].variables {
 			if variable.secret && variable.value == "" && variable.ref == nil {
-				c.flag(messageBrunoSecrets, draft.name+"/"+variable.name)
+				c.flag(locales.ImporterBrunoSecrets, draft.name+"/"+variable.name)
 			}
 		}
 	}

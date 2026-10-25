@@ -1,0 +1,17 @@
+{
+  "awsAccessKeyId": "ID klucza dostępu AWS",
+  "githubToken": "token GitHub",
+  "githubFineGrainedToken": "szczegółowy osobisty token dostępu GitHub",
+  "gitlabToken": "osobisty token dostępu GitLab",
+  "slackToken": "token Slack",
+  "stripeLiveKey": "produkcyjny klucz tajny lub ograniczony Stripe",
+  "googleApiKey": "klucz API Google",
+  "npmToken": "token dostępu npm",
+  "pypiToken": "token przesyłania PyPI",
+  "jwt": "JSON Web Token",
+  "privateKeyBlock": "klucz prywatny PEM",
+  "bearerLiteral": "token Bearer wpisany w żądaniu",
+  "highEntropyValue": "losowo wyglądająca wartość w polu o nazwie przypominającej dane uwierzytelniające",
+  "authLiteral": "dane uwierzytelniające wpisane w ustawieniach uwierzytelniania zamiast {{example}}",
+  "urlCredentials": "hasło zapisane w adresie URL"
+}

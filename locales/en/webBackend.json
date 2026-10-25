@@ -1,0 +1,8 @@
+{
+  "webBackend": {
+    "unreadableData": "The saved data in this browser cannot be read, so nothing was changed.",
+    "proxyAnswered": "The proxy answered with HTTP {{status}} instead of a result",
+    "cancelled": "the request was cancelled",
+    "streamCutOff": "The connection to the proxy ended before the stream finished."
+  }
+}

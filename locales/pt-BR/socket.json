@@ -1,0 +1,48 @@
+{
+  "socket": {
+    "socketIoPath": "Caminho",
+    "socketIoAuth": "Payload de autenticação",
+    "socketIoAuthNote": "Um objeto JSON enviado com o handshake do namespace, lido pelo servidor como socket.handshake.auth.",
+    "invalidAuth": "O payload de autenticação do Socket.IO deve ser um objeto JSON.",
+    "statuses": {
+      "idle": "Desconectado",
+      "connecting": "Conectando",
+      "open": "Conectado",
+      "waiting": "Aguardando para reconectar"
+    },
+    "entries": {
+      "sent": "Enviada",
+      "received": "Recebida",
+      "info": "Info",
+      "warning": "Aviso",
+      "error": "Erro"
+    },
+    "protocol": "Protocolo",
+    "graphql": "Assinatura GraphQL",
+    "filter": "Filtro de tópico, por exemplo sensors/#",
+    "subscribe": "Inscrever-se",
+    "saved": "Mensagens salvas",
+    "savedPlaceholder": "Carregar uma mensagem salva",
+    "noSaved": "Ainda não há mensagens salvas",
+    "save": "Salvar",
+    "saveTitle": "Salvar mensagem",
+    "saveMessage": "Nome desta mensagem. Ela é salva com a requisição.",
+    "remove": "Excluir mensagem salva",
+    "binary_one": "Binário, {{count}} byte",
+    "binary_many": "Binário, {{count}} de bytes",
+    "binary_other": "Binário, {{count}} bytes",
+    "truncated": "Mostrando os primeiros {{shown}} de {{total}} caracteres",
+    "copy": "Copiar mensagem",
+    "dropped": "Entradas mais antigas descartadas: {{dropped}}. O registro mantém as últimas {{limit}}.",
+    "emptyTitle": "Ainda não há mensagens",
+    "emptyDescription": "Conecte-se e depois envie uma mensagem ou espere o servidor.",
+    "log": "Mensagens",
+    "autoReconnect": "Reconexão automática",
+    "unsentHeaders": "Um navegador só pode definir Sec-WebSocket-Protocol em um WebSocket. Não enviados daqui: {{names}}. O app para desktop envia todos os cabeçalhos.",
+    "composer": "Mensagem ({{shortcut}} para enviar)",
+    "composerClosed": "Conecte-se para enviar mensagens",
+    "message": "Mensagem",
+    "send": "Enviar",
+    "clear": "Limpar"
+  }
+}

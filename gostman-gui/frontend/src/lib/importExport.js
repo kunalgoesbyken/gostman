@@ -2,7 +2,7 @@ import YAML from 'js-yaml'
 import { BODY_BINARY, BODY_FORM, BODY_JSON, BODY_MULTIPART, BODY_NONE, BODY_TEXT, BODY_TYPES, BODY_XML } from './body'
 import { buildCollectionTree, folderDepth, listFolders, MAX_FOLDER_DEPTH, requestsIn, ROOT_ID } from './collectionTree'
 import { SCRIPT_FIELDS, activeKinds, filePathsIn, hasActiveContent, withoutActiveContent } from './activeContent'
-import { isPlainObject, lookup, parseJSON, pluralize } from './dataUtils'
+import { isPlainObject, lookup, parseJSON } from './dataUtils'
 import { sanitizeExamples } from './examples'
 import { readParamRows } from './queryString'
 import { SCHEMES } from './authSchemes'
@@ -16,6 +16,7 @@ import { cleanColorChoice } from './swatches'
 import { normalizeTags } from './tags'
 import { remark, remarksOf } from './importRemarks'
 import { FLOW_IMPORT_TEXT } from './flowsText'
+import { IMPORT_EXPORT_TEXT } from './importExportText'
 import { STEP_REQUEST, compactFlow, mapSteps, normalizeFlow } from './flows/model'
 import { AUTH_API_KEY, AUTH_BASIC, AUTH_BEARER, GRAPHQL_METHOD, UNTITLED_REQUEST, apiKeyLocation, asText, sentRows } from './exportFields'
 
@@ -29,8 +30,6 @@ const MAX_METHOD_LENGTH = 16
 
 const GOSTMAN_FORMAT_VERSION = '2.0.0'
 const OPENAPI_METHODS = ['get', 'post', 'put', 'delete', 'patch', 'options', 'head', 'trace']
-const UNTITLED_FOLDER = 'Folder'
-const UNTITLED_ENVIRONMENT = 'Environment'
 const DEFAULT_METHOD = 'GET'
 const METHOD_TOKEN = /^[A-Z]+$/
 
@@ -80,14 +79,8 @@ export const withoutActiveRequests = (data) => ({
   settings: withoutActiveSettings(data.settings),
 })
 
-function listNames(names) {
-  const shown = names.slice(0, MAX_NAMES_IN_WARNING).map((name) => `"${name}"`).join(', ')
-  const hidden = names.length - MAX_NAMES_IN_WARNING
-  return hidden > 0 ? `${shown} and ${hidden} more` : shown
-}
-
 const tlsWarning = (requestNames) => (
-  `TLS verification was disabled in the collection for ${listNames(requestNames)}; it was kept enabled. Turn it off in the request's Settings tab if you trust these hosts.`
+  IMPORT_EXPORT_TEXT.tlsKept(requestNames.slice(0, MAX_NAMES_IN_WARNING).map((name) => `"${name}"`), requestNames.length - MAX_NAMES_IN_WARNING)
 )
 
 const BINARY_SCHEMA = { type: 'string', format: 'binary' }
@@ -310,13 +303,13 @@ export function exportToGostman(requests, folders, environments, settings, colle
   }
 }
 
-const invalidGostmanBackup = (reason) => ({ success: false, error: `Invalid Gostman export format: ${reason}` })
+const invalidGostmanBackup = (error) => ({ success: false, error })
 
 function importGostman(data) {
   const backup = data?.gostman
-  if (!isPlainObject(backup)) return invalidGostmanBackup('missing gostman object')
-  if (!Array.isArray(backup.requests)) return invalidGostmanBackup('requests must be an array')
-  if (!Array.isArray(backup.folders)) return invalidGostmanBackup('folders must be an array')
+  if (!isPlainObject(backup)) return invalidGostmanBackup(IMPORT_EXPORT_TEXT.missingGostman)
+  if (!Array.isArray(backup.requests)) return invalidGostmanBackup(IMPORT_EXPORT_TEXT.requestsNotArray)
+  if (!Array.isArray(backup.folders)) return invalidGostmanBackup(IMPORT_EXPORT_TEXT.foldersNotArray)
   return {
     success: true,
     warnings: [],
@@ -336,7 +329,7 @@ function parseYAML(yamlString) {
   try {
     return YAML.load(yamlString)
   } catch (error) {
-    throw new Error(`Invalid YAML: ${error.message}`)
+    throw new Error(IMPORT_EXPORT_TEXT.invalidYaml(error.message))
   }
 }
 
@@ -446,23 +439,23 @@ function detectImportFormat(text) {
 }
 
 const IMPORT_READERS = new Map([
-  ['gostman', { label: 'Gostman export', read: (text) => importGostman(JSON.parse(text)) }],
+  ['gostman', { get label() { return IMPORT_EXPORT_TEXT.gostmanExport }, read: (text) => importGostman(JSON.parse(text)) }],
 ])
 
 const importFailure = (error) => ({ success: false, error })
 
 export async function parseImport(text) {
   const reader = IMPORT_READERS.get(detectImportFormat(text))
-  if (!reader) return importFailure('Could not detect the format. Use a Postman collection, an OpenAPI or Swagger spec or a Gostman export.')
+  if (!reader) return importFailure(IMPORT_EXPORT_TEXT.undetected)
   try {
     const result = await reader.read(text)
     if (!result.success) return result
     if (result.requests.length === 0 && result.folders.length === 0) {
-      return importFailure(`This ${reader.label} contains no requests or folders.`)
+      return importFailure(IMPORT_EXPORT_TEXT.noRequests(reader.label))
     }
     return { ...result, label: reader.label }
   } catch (error) {
-    return importFailure(error?.message || `This ${reader.label} could not be read.`)
+    return importFailure(error?.message || IMPORT_EXPORT_TEXT.unreadable(reader.label))
   }
 }
 
@@ -545,7 +538,7 @@ const sanitizeScope = (raw) => normalizeScopeSettings({
 
 const sanitizeFolder = (raw) => ({
   id: stringOf(raw.id),
-  name: cleanName(raw.name, UNTITLED_FOLDER),
+  name: cleanName(raw.name, IMPORT_EXPORT_TEXT.untitledFolder),
   isOpen: raw.isOpen === true,
   parentId: stringOf(raw.parentId),
   sortOrder: cleanOrder(raw.sortOrder),
@@ -567,7 +560,7 @@ const secretMarks = (meta) => Object.fromEntries(
 
 const sanitizeEnvironment = (raw) => ({
   id: stringOf(raw.id),
-  name: cleanName(raw.name, UNTITLED_ENVIRONMENT),
+  name: cleanName(raw.name, IMPORT_EXPORT_TEXT.untitledEnvironment),
   variables: stringOf(raw.variables),
   color: stringOf(raw.color),
   extends: stringOf(raw.extends),
@@ -645,7 +638,7 @@ export function sanitizeImport(data, existing) {
       ...remarksOf(data),
       ...flows.remarks,
       ...(requestsWithoutTls.length > 0 ? [remark(tlsWarning(requestsWithoutTls), true)] : []),
-      ...(flattenedCount > 0 ? [remark(`${pluralize(flattenedCount, 'folder')} nested in a loop or deeper than ${MAX_FOLDER_DEPTH} levels moved to the top level.`, true)] : []),
+      ...(flattenedCount > 0 ? [remark(IMPORT_EXPORT_TEXT.flattened(flattenedCount, MAX_FOLDER_DEPTH), true)] : []),
     ],
   }
 }

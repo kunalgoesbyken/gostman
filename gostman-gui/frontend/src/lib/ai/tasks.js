@@ -1,5 +1,5 @@
 import { OPERATORS, operatorOf, parseAssertions, serializeAssertions } from '../scripting/assertions'
-import { formatSize } from '../dataUtils'
+import { formatBytes } from '../byteSize'
 import { mayBeSpec } from '../openapiSpec'
 import { normalizeRequest } from '../request'
 import { serializeRows } from '../rows'
@@ -117,7 +117,9 @@ const joinScripts = (current, addition) => (current.trim() && addition.trim() ? 
 
 const requestTask = {
   id: TASK_REQUEST,
-  text: AI_TEXT.tasks.request,
+  get text() {
+    return AI_TEXT.tasks.request
+  },
   needsText: true,
   schema: SCHEMAS.request,
   build: (source, input) => prompt(
@@ -137,7 +139,9 @@ const requestTask = {
 
 const testsTask = {
   id: TASK_TESTS,
-  text: AI_TEXT.tasks.tests,
+  get text() {
+    return AI_TEXT.tasks.tests
+  },
   needsResponse: true,
   offersValues: true,
   schema: SCHEMAS.tests,
@@ -168,17 +172,19 @@ const testsTask = {
   },
 }
 
-const SCRIPT_KINDS = AI_TEXT.tasks.script.kinds
+const SCRIPT_PROMPT_KINDS = { preScript: 'pre-request', postScript: 'post-response' }
 
 const scriptTask = {
   id: TASK_SCRIPT,
-  text: AI_TEXT.tasks.script,
+  get text() {
+    return AI_TEXT.tasks.script
+  },
   needsText: true,
   needsScriptKind: true,
   requiresTrust: true,
   schema: SCHEMAS.script,
   build: (source, input) => prompt(
-    `Write the ${SCRIPT_KINDS[input.scriptKind]} JavaScript for this request: ${input.text}\nReply with {"script": string} holding the complete script.\n${SCRIPT_API}`,
+    `Write the ${SCRIPT_PROMPT_KINDS[input.scriptKind]} JavaScript for this request: ${input.text}\nReply with {"script": string} holding the complete script.\n${SCRIPT_API}`,
     fence('request', describeRequest(source.request)),
     fence('current-script', source.request[input.scriptKind].slice(0, CURRENT_SCRIPT_LIMIT)),
     fence('variable-names', source.variableNames),
@@ -187,7 +193,7 @@ const scriptTask = {
     const script = textField(parseModelObject(text).script, SCRIPT_LIMIT)
     requireContent(script)
     return {
-      sections: [{ label: AI_TEXT.tasks.script.section(SCRIPT_KINDS[input.scriptKind]), before: source.request[input.scriptKind], after: script }],
+      sections: [{ label: AI_TEXT.tasks.script.section(input.scriptKind), before: source.request[input.scriptKind], after: script }],
       applyLabel: AI_TEXT.tasks.script.apply,
       apply: (host) => host.updateRequest({ [input.scriptKind]: script }),
     }
@@ -196,7 +202,9 @@ const scriptTask = {
 
 const explainTask = {
   id: TASK_EXPLAIN,
-  text: AI_TEXT.tasks.explain,
+  get text() {
+    return AI_TEXT.tasks.explain
+  },
   needsResponse: true,
   offersValues: true,
   valuesByDefault: true,
@@ -224,7 +232,9 @@ const explainTask = {
 
 const docsTask = {
   id: TASK_DOCS,
-  text: AI_TEXT.tasks.docs,
+  get text() {
+    return AI_TEXT.tasks.docs
+  },
   schema: SCHEMAS.docs,
   build: (source) => prompt(
     'Write short documentation for this request in Markdown: purpose, parameters, expected response. Reply with {"description": string}.',
@@ -256,7 +266,9 @@ const searchNote = (source) => (
 
 const searchTask = {
   id: TASK_SEARCH,
-  text: AI_TEXT.tasks.search,
+  get text() {
+    return AI_TEXT.tasks.search
+  },
   needsText: true,
   note: searchNote,
   schema: SCHEMAS.search,
@@ -297,12 +309,14 @@ const createdLines = (drafts) => drafts.map((draft) => `${draft.method} ${draft.
 
 const schemaTask = {
   id: TASK_SCHEMA,
-  text: AI_TEXT.tasks.schema,
+  get text() {
+    return AI_TEXT.tasks.schema
+  },
   needsText: true,
   longText: true,
   schema: SCHEMAS.schema,
   refuse: (input) => (
-    input.text.length > SPEC_LIMIT ? AI_TEXT.tooLarge(formatSize(input.text.length), formatSize(SPEC_LIMIT)) : ''
+    input.text.length > SPEC_LIMIT ? AI_TEXT.tooLarge(formatBytes(input.text.length), formatBytes(SPEC_LIMIT)) : ''
   ),
   local: importedSpec,
   build: (source, input) => prompt(

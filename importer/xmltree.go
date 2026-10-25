@@ -2,8 +2,9 @@ package importer
 
 import (
 	"encoding/xml"
-	"fmt"
 	"strings"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 type xmlNode struct {
@@ -16,7 +17,7 @@ func parseXML(source string) (*xmlNode, error) {
 	decoder := xml.NewDecoder(strings.NewReader(source))
 	var root xmlNode
 	if err := decoder.Decode(&root); err != nil {
-		return nil, fmt.Errorf(messageDocumentRead, err)
+		return nil, locales.Wrap(locales.ImporterDocumentRead, nil, err)
 	}
 	return &root, nil
 }

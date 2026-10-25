@@ -1,0 +1,20 @@
+{
+  "about": {
+    "title": "Despre Gostman",
+    "commandTitle": "Despre Gostman",
+    "commandDescription": "Versiune, linkuri și diagnostic",
+    "tagline": "Un client API open source pentru REST, GraphQL, gRPC și WebSocket. Fără cont; datele rămân pe dispozitivul dvs.",
+    "version": "Versiunea {{version}}",
+    "links": {
+      "website": "Site web",
+      "source": "Cod sursă",
+      "releases": "Versiuni",
+      "issues": "Raportați o problemă"
+    },
+    "diagnosticsHint": "Diagnosticul include doar versiunea, platforma și numărul de elemente. Nu include niciodată cereri, URL-uri, variabile, tokenuri sau secrete.",
+    "copyDiagnostics": "Copiere diagnostic",
+    "copied": "Copiat",
+    "versionButton": "Despre Gostman",
+    "close": "Închidere"
+  }
+}

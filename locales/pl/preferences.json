@@ -1,0 +1,166 @@
+{
+  "preferences": {
+    "title": "Preferencje",
+    "sectionsLabel": "Sekcje",
+    "sections": {
+      "appearance": "Wygląd",
+      "theme": "Kolory",
+      "fonts": "Czcionki",
+      "editor": "Edytor",
+      "requests": "Żądania",
+      "language": "Język",
+      "ai": "AI",
+      "privacy": "Prywatność",
+      "data": "Dane"
+    },
+    "fields": {
+      "theme": "Motyw",
+      "contrast": "Kontrast",
+      "accent": "Kolor akcentu",
+      "textScale": "Rozmiar tekstu",
+      "interfaceFont": "Czcionka interfejsu",
+      "codeFont": "Czcionka kodu",
+      "density": "Gęstość",
+      "responseLayout": "Panel odpowiedzi",
+      "systemTitleBar": "Użyj systemowego paska tytułu",
+      "editorFontSize": "Rozmiar czcionki edytora",
+      "wrapLines": "Zawijaj długie wiersze",
+      "requestTimeout": "Domyślny limit czasu",
+      "confirmCloseTab": "Pytaj przed odrzuceniem niezapisanych zmian przy zamykaniu karty",
+      "language": "Język"
+    },
+    "themes": {
+      "system": "Systemowy",
+      "light": "Jasny",
+      "dark": "Ciemny"
+    },
+    "contrasts": {
+      "system": "Systemowy",
+      "standard": "Standardowy",
+      "more": "Wyższy"
+    },
+    "accents": {
+      "cyan": "Cyjan",
+      "blue": "Niebieski",
+      "violet": "Fioletowy",
+      "pink": "Różowy",
+      "graphite": "Grafitowy"
+    },
+    "densities": {
+      "comfortable": "Wygodna",
+      "compact": "Zwarta"
+    },
+    "layouts": {
+      "below": "Poniżej",
+      "right": "Po prawej"
+    },
+    "seconds": "s",
+    "pixels": "px",
+    "contrastHint": "Wyższy rysuje mocniejsze obramowania i tekst pomocniczy.",
+    "systemTitleBarHint": "Pokazuje pasek tytułu i przyciski okna pulpitu zamiast własnych elementów Gostmana. Zmiana działa po ponownym uruchomieniu.",
+    "systemTitleBarRestart": "Uruchom Gostman ponownie, aby zastosować tę zmianę.",
+    "systemTitleBarFailed": "Nie udało się zapisać ustawienia.",
+    "defaultFont": "Domyślna",
+    "interfaceFontHint": "Dowolna czcionka zainstalowana na tym urządzeniu.",
+    "codeFontHint": "Edytory, pasek adresu i inny kod.",
+    "fontMissing": "Nie znaleziono na tym urządzeniu, więc używana jest czcionka domyślna.",
+    "suggestFonts": "Podpowiadaj zainstalowane czcionki",
+    "fontsSuggested": "Zainstalowane czcionki są podpowiadane podczas wpisywania nazwy czcionki.",
+    "fontsDenied": "Nie udało się odczytać zainstalowanych czcionek.",
+    "shortcuts": "Skróty klawiszowe",
+    "reset": "Przywróć domyślne",
+    "close": "Gotowe",
+    "statusLabel": "Preferencje",
+    "commandDescription": "Motyw, kolory, czcionki, rozmiar tekstu, edytor, układ i wartości domyślne",
+    "methods": {
+      "title": "Kolory metod",
+      "hint": "Kolor każdej metody żądania w panelu bocznym, na kartach i na listach. Dodaj tło, aby pokazywać metody jako plakietki.",
+      "method": "Metoda",
+      "resetMode": {
+        "light": "Przywróć jasne kolory metod",
+        "dark": "Przywróć ciemne kolory metod"
+      }
+    },
+    "theme": {
+      "palette": "Paleta",
+      "paletteHint": "Każda paleta ma wersję jasną i ciemną. Własne kolory są nakładane na wierzch.",
+      "palettes": {
+        "default": "Domyślna",
+        "neutral": "Neutralna",
+        "slate": "Łupkowa",
+        "paper": "Papier",
+        "moss": "Mech",
+        "dusk": "Zmierzch",
+        "ocean": "Ocean",
+        "ink": "Atrament"
+      },
+      "colors": "Kolory własne",
+      "colorsHint": "Ustaw kolor tła i tekstu każdej części okna. Zachowywane są tylko zmienione kolory.",
+      "editing": "Kolory dla",
+      "previewHint": {
+        "light": "Okno jest teraz ciemne. Ustaw motyw na Jasny, aby zobaczyć te kolory w działaniu.",
+        "dark": "Okno jest teraz jasne. Ustaw motyw na Ciemny, aby zobaczyć te kolory w działaniu."
+      },
+      "columns": {
+        "surface": "Część",
+        "background": "Tło",
+        "foreground": "Tekst",
+        "contrast": "Kontrast",
+        "reset": "Przywróć"
+      },
+      "surfaces": {
+        "window": "Okno",
+        "sidebar": "Panel boczny",
+        "tabs": "Karty i pasek adresu",
+        "request": "Edytor żądania",
+        "body": "Edytor treści",
+        "script": "Edytor skryptów",
+        "response": "Odpowiedź",
+        "dialog": "Okna dialogowe",
+        "menu": "Menu i okna podręczne"
+      },
+      "surfaceHints": {
+        "window": "Pasek tytułu, pasek stanu i każda część niewymieniona tutaj.",
+        "body": "Także komunikaty gRPC, argumenty MCP i zapisane przykłady.",
+        "script": "Skrypty przed żądaniem i po odpowiedzi.",
+        "menu": "Menu kontekstowe, listy i paleta poleceń."
+      },
+      "roles": {
+        "background": "tło",
+        "foreground": "tekst"
+      },
+      "sample": "Aa",
+      "resetMode": {
+        "light": "Przywróć jasne kolory",
+        "dark": "Przywróć ciemne kolory"
+      },
+      "share": "Udostępnij motyw",
+      "shareHint": "Motyw zawiera paletę, kolor akcentu oraz własne kolory części i metod dla obu trybów.",
+      "copy": "Kopiuj motyw",
+      "copied": "Skopiowano motyw do schowka.",
+      "copyFailed": "Nie udało się skopiować motywu do schowka.",
+      "import": "Importuj motyw",
+      "importLabel": "Motyw do zaimportowania",
+      "importPlaceholder": "Wklej motyw skopiowany z Gostmana",
+      "apply": "Zastosuj",
+      "cancel": "Anuluj",
+      "imported": "Zastosowano motyw.",
+      "invalid": "To nie jest motyw Gostmana albo zawiera nieznane części lub kolory niezapisane jako #rrggbb.",
+      "colorLabel": "Kolor: {{surface}}, {{role}}",
+      "hexLabel": "Wartość hex: {{surface}}, {{role}}",
+      "ratio": "{{ratio}}:1",
+      "lowContrast": "Tekst może być trudny do odczytania. Dąż do co najmniej {{minimum}}:1.",
+      "resetRow": "Przywróć: {{name}}"
+    },
+    "timeoutHint_one": "Dotyczy żądań bez własnego limitu czasu. 0 oznacza wbudowany limit: {{count}} sekunda.",
+    "timeoutHint_few": "Dotyczy żądań bez własnego limitu czasu. 0 oznacza wbudowany limit: {{count}} sekundy.",
+    "timeoutHint_many": "Dotyczy żądań bez własnego limitu czasu. 0 oznacza wbudowany limit: {{count}} sekund.",
+    "timeoutHint_other": "Dotyczy żądań bez własnego limitu czasu. 0 oznacza wbudowany limit: {{count}} sekundy.",
+    "languageSystem": "Jak w systemie ({{language}})",
+    "languageSwitchHint": "Gostman załaduje się ponownie, aby pokazać nowy język. Otwarte karty i niezapisane wersje robocze zostają zachowane; odpowiedzi pokazane na kartach są czyszczone.",
+    "languageSwitch": "Zmień język",
+    "languageHelp": "Brakuje języka albo znaleziono błędne tłumaczenie? {{link}}.",
+    "languageHelpLink": "Napisz na GitHubie",
+    "accentAdjusted": "Pokazywany jako {{light}} w trybie jasnym i {{dark}} w trybie ciemnym, aby tekst w tym kolorze pozostał czytelny."
+  }
+}

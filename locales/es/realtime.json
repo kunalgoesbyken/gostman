@@ -1,0 +1,41 @@
+{
+  "realtime": {
+    "targets": {
+      "topic": "Topic",
+      "event": "Evento"
+    },
+    "browser": {
+      "closed": "Conexión cerrada (código {{code}})",
+      "closedWithReason": "Conexión cerrada (código {{code}}: {{reason}})",
+      "notConnected": "No se pudo conectar (código {{code}})",
+      "notConnectedWithReason": "No se pudo conectar (código {{code}}: {{reason}})"
+    },
+    "graphql": {
+      "subscribing": "Conexión confirmada. Suscribiéndose.",
+      "complete": "La suscripción se completó"
+    },
+    "socketIo": {
+      "joined": "Se unió al namespace {{namespace}}",
+      "left": "El servidor salió del namespace",
+      "closed": "El servidor cerró la sesión de Socket.IO",
+      "refused": "El servidor rechazó la conexión",
+      "binary": "Los paquetes binarios de Socket.IO no se decodifican.",
+      "noEvent": "Introduce el nombre de un evento que emitir.",
+      "ack": "ack {{id}}"
+    },
+    "mqtt": {
+      "connected": "Conectado al broker",
+      "refusedVersion": "El broker rechazó la conexión: no es compatible con MQTT 3.1.1",
+      "refusedIdentifier": "El broker rechazó la conexión: se rechazó el ID de cliente",
+      "refusedUnavailable": "El broker rechazó la conexión: el broker no está disponible",
+      "refusedCredentials": "El broker rechazó la conexión: el usuario o la contraseña son incorrectos",
+      "refusedUnauthorized": "El broker rechazó la conexión: el cliente no está autorizado",
+      "refusedOther": "El broker rechazó la conexión: código {{code}}",
+      "subscribed": "Suscrito a {{filter}}",
+      "subscribeRefused": "El broker rechazó la suscripción a {{filter}}",
+      "notBinary": "Se esperaban datos MQTT binarios y se recibió texto.",
+      "noTopic": "Introduce un topic en el que publicar.",
+      "noFilter": "Introduce un filtro de topics al que suscribirte."
+    }
+  }
+}

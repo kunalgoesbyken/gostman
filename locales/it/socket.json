@@ -1,0 +1,48 @@
+{
+  "socket": {
+    "socketIoPath": "Percorso",
+    "socketIoAuth": "Payload di autenticazione",
+    "socketIoAuthNote": "Un oggetto JSON inviato con l'handshake del namespace, letto dal server come socket.handshake.auth.",
+    "invalidAuth": "Il payload di autenticazione di Socket.IO deve essere un oggetto JSON.",
+    "statuses": {
+      "idle": "Disconnesso",
+      "connecting": "Connessione in corso",
+      "open": "Connesso",
+      "waiting": "In attesa di riconnessione"
+    },
+    "entries": {
+      "sent": "Inviato",
+      "received": "Ricevuto",
+      "info": "Info",
+      "warning": "Avviso",
+      "error": "Errore"
+    },
+    "protocol": "Protocollo",
+    "graphql": "Sottoscrizione GraphQL",
+    "filter": "Filtro di topic, ad esempio sensors/#",
+    "subscribe": "Sottoscrivi",
+    "saved": "Messaggi salvati",
+    "savedPlaceholder": "Carica un messaggio salvato",
+    "noSaved": "Ancora nessun messaggio salvato",
+    "save": "Salva",
+    "saveTitle": "Salva messaggio",
+    "saveMessage": "Nome per questo messaggio. Viene salvato con la richiesta.",
+    "remove": "Elimina messaggio salvato",
+    "binary_one": "Binario, {{count}} byte",
+    "binary_many": "Binario, {{count}} di byte",
+    "binary_other": "Binario, {{count}} byte",
+    "truncated": "Mostrati i primi {{shown}} di {{total}} caratteri",
+    "copy": "Copia messaggio",
+    "dropped": "Voci meno recenti eliminate: {{dropped}}. Il log conserva le ultime {{limit}}.",
+    "emptyTitle": "Ancora nessun messaggio",
+    "emptyDescription": "Connettiti, poi invia un messaggio o attendi il server.",
+    "log": "Messaggi",
+    "autoReconnect": "Riconnessione automatica",
+    "unsentHeaders": "Un browser può impostare su un WebSocket solo Sec-WebSocket-Protocol. Non inviati da qui: {{names}}. L'app desktop invia ogni header.",
+    "composer": "Messaggio ({{shortcut}} per inviare)",
+    "composerClosed": "Connettiti per inviare messaggi",
+    "message": "Messaggio",
+    "send": "Invia",
+    "clear": "Svuota"
+  }
+}

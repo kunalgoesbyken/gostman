@@ -4,7 +4,7 @@ import { EditorView } from '@codemirror/view'
 import { MergeView } from '@codemirror/merge'
 import { useVariableMap } from '../hooks/useVariableMap'
 import { usePreferences } from '../lib/preferences'
-import { baseExtensions, canFormat, formatDocument, formatKeymap, languageExtension, revealOffset, variableExtension, wrapExtension } from '../lib/codeEditor'
+import { baseExtensions, canFormat, formatDocument, formatKeymap, languageExtension, phraseExtension, revealOffset, variableExtension, wrapExtension } from '../lib/codeEditor'
 import { LARGE_BODY_CHARS } from '../lib/largeText'
 import './variables.css'
 
@@ -73,6 +73,7 @@ export const CodeEditor = forwardRef(function CodeEditor(
         doc: value,
         extensions: [
           baseExtensions,
+          phraseExtension(),
           compartment.of(config),
           EditorView.updateListener.of((update) => {
             if (!isUserChange(update)) return
@@ -101,7 +102,7 @@ export const CodeEditor = forwardRef(function CodeEditor(
     view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: value }, annotations: externalChange.of(true) })
   }, [value])
 
-  return <div ref={hostRef} data-surface={surface} className="overflow-hidden" style={{ height, fontSize: editorFontSize }} />
+  return <div ref={hostRef} dir="ltr" data-surface={surface} className="overflow-hidden" style={{ height, fontSize: editorFontSize }} />
 })
 
 export function CodeDiff({ original, modified, language }) {
@@ -110,7 +111,7 @@ export function CodeDiff({ original, modified, language }) {
   const config = useEditorConfig(language, false)
 
   useEffect(() => {
-    const extensions = [baseExtensions, config, EditorState.readOnly.of(true)]
+    const extensions = [baseExtensions, phraseExtension(), config, EditorState.readOnly.of(true)]
     const view = new MergeView({
       parent: hostRef.current,
       a: { doc: original, extensions },
@@ -119,5 +120,5 @@ export function CodeDiff({ original, modified, language }) {
     return () => view.destroy()
   }, [original, modified, config])
 
-  return <div ref={hostRef} className="h-full [&>.cm-mergeView]:h-full" style={{ fontSize: editorFontSize }} />
+  return <div ref={hostRef} dir="ltr" className="h-full [&>.cm-mergeView]:h-full" style={{ fontSize: editorFontSize }} />
 }

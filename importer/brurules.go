@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/dop251/goja/ast"
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const (
@@ -83,7 +84,7 @@ func (t *translator) noteStringifiedBody(call *ast.CallExpression) {
 		return
 	}
 	if path, pure := chainOf(inner.Callee); pure && path.text() == requestReceiver+".getBody" {
-		t.note(call, "stringified-body", messageScriptBodyText)
+		t.note(call, "stringified-body", locales.ImporterScriptBodyText)
 	}
 }
 
@@ -127,7 +128,7 @@ func (t *translator) receiver(root string) (receiver, bool) {
 func (t *translator) renderReceiver(call *ast.CallExpression, path chain, kind receiver) string {
 	kept := t.text(call.Callee) + "(" + strings.Join(t.renderArguments(call), ", ") + ")"
 	if !kind.supports(path) {
-		t.fail(call, messageScriptUnsupported, path.text()+"()")
+		t.fail(call, locales.ImporterScriptUnsupported, locales.Params{"name": path.text() + "()"})
 	}
 	return kept
 }
@@ -141,9 +142,9 @@ func (r receiver) supports(path chain) bool {
 }
 
 func (t *translator) renderBrunoSend(call *ast.CallExpression) string {
-	t.note(call, noteSendScope, messageScriptSendScope)
+	t.note(call, noteSendScope, locales.ImporterScriptSendScope)
 	if len(call.ArgumentList) == 0 {
-		t.fail(call, messageScriptUnsupported, "bru.sendRequest()")
+		t.fail(call, locales.ImporterScriptUnsupported, locales.Params{"name": "bru.sendRequest()"})
 		return t.text(call)
 	}
 	t.translated++
@@ -161,7 +162,7 @@ func (t *translator) renderBrunoSend(call *ast.CallExpression) string {
 func (t *translator) renderEnvironmentWrite(call *ast.CallExpression) string {
 	args := call.ArgumentList
 	if len(args) < 2 || len(args) > 3 {
-		t.fail(call, messageScriptUnsupported, "bru.setEnvVar()")
+		t.fail(call, locales.ImporterScriptUnsupported, locales.Params{"name": "bru.setEnvVar()"})
 		return t.text(call)
 	}
 	access := sessionAccess
@@ -191,7 +192,7 @@ func (t *translator) brunoRequestField(property ast.Property) (string, bool) {
 	keyed, ok := property.(*ast.PropertyKeyed)
 	name, named := propertyName(keyed)
 	if !ok || !named {
-		t.fail(property, messageScriptOption, "computed")
+		t.fail(property, locales.ImporterScriptOption, locales.Params{"name": "computed"})
 		return "", false
 	}
 	switch name {
@@ -200,7 +201,7 @@ func (t *translator) brunoRequestField(property ast.Property) (string, bool) {
 	case "data":
 		return "body: " + t.render(keyed.Value), true
 	}
-	t.fail(property, messageScriptOption, name)
+	t.fail(property, locales.ImporterScriptOption, locales.Params{"name": name})
 	return "", false
 }
 
@@ -248,19 +249,19 @@ func requestKey(location string) string {
 
 func (t *translator) renderRunRequest(call *ast.CallExpression, targets map[string]string) string {
 	if len(call.ArgumentList) != 1 {
-		t.fail(call, messageScriptUnsupported, "bru.runRequest()")
+		t.fail(call, locales.ImporterScriptUnsupported, locales.Params{"name": "bru.runRequest()"})
 		return t.text(call)
 	}
 	literal, ok := call.ArgumentList[0].(*ast.StringLiteral)
 	if !ok {
-		t.fail(call, messageScriptRequestPath)
+		t.fail(call, locales.ImporterScriptRequestPath, nil)
 		return t.text(call)
 	}
 	requested := string(literal.Value)
 	target, found := targets[requestKey(requested)]
 	if !found {
 		target = requested[strings.LastIndex(requested, "/")+1:]
-		t.note(call, "runRequest-"+requested, fmt.Sprintf(messageScriptRunRequest, requested, target))
+		t.noteSaid(call, "runRequest-"+requested, locales.New(locales.ImporterScriptRunRequest, locales.Params{"requested": requested, "target": target}))
 	}
 	t.translated++
 	return "sendRequest(" + strconv.Quote(target) + ").then(" + brunoResponseShape + ")"

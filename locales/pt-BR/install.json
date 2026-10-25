@@ -1,0 +1,6 @@
+{
+  "install": {
+    "label": "Instalar app",
+    "description": "Adiciona o Gostman a este dispositivo e o abre em sua própria janela"
+  }
+}

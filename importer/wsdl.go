@@ -1,10 +1,11 @@
 package importer
 
 import (
-	"fmt"
 	"path"
 	"strings"
 	"unicode"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const (
@@ -64,7 +65,7 @@ type wsdlPart struct {
 func (c *collector) readWSDL(doc document, supporting []document) {
 	root, err := parseXML(doc.file.Text)
 	if err != nil {
-		c.skip("%s: %v", doc.file.Name, err)
+		c.skip(locales.ImporterSkipFileError, locales.Params{"file": doc.file.Name, "detail": err.Error()})
 		return
 	}
 	name := cleanName(root.attr("name"), fileStem(doc.file.Name))
@@ -91,7 +92,7 @@ func (c *collector) schemaSets(root *xmlNode, supporting []document) []*schemaSe
 	for _, doc := range supporting {
 		parsed, err := parseXML(doc.file.Text)
 		if err != nil {
-			c.skip("%s: %v", doc.file.Name, err)
+			c.skip(locales.ImporterSkipFileError, locales.Params{"file": doc.file.Name, "detail": err.Error()})
 			continue
 		}
 		included[path.Base(doc.file.Name)] = true
@@ -118,7 +119,7 @@ func (c *collector) reportUnresolved(root *xmlNode, included map[string]bool) {
 		}
 	}
 	if len(missing) > 0 {
-		c.Warnings = append(c.Warnings, fmt.Sprintf(messageUnresolved, "The WSDL", strings.Join(missing, ", ")))
+		c.lead(locales.New(locales.ImporterUnresolved, locales.Params{"what": "The WSDL", "files": strings.Join(missing, ", ")}))
 	}
 }
 
@@ -192,7 +193,7 @@ func (c *collector) wsdl1(root *xmlNode, schemas []*schemaSet, rootID string) {
 			}
 			version, found := bindingVersion(binding)
 			if !found {
-				c.skip("%s: only SOAP bindings are imported", port.attr("name"))
+				c.skip(locales.ImporterSkipSoapOnly, locales.Params{"name": port.attr("name")})
 				continue
 			}
 			c.setEndpoint(rootID, endpoint, portAddress(port))

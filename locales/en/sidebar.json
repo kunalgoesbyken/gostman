@@ -1,0 +1,38 @@
+{
+  "sidebar": {
+    "views": "Sidebar view",
+    "collections": "Collections",
+    "history": "History",
+    "runRequests": "Run requests",
+    "newFolder": "New folder",
+    "newRequest": "New request",
+    "toggle": "Toggle sidebar",
+    "close": "Close sidebar",
+    "resize": "Resize sidebar"
+  },
+  "history": {
+    "search": "Search history",
+    "emptyTitle": "No history yet",
+    "emptyDescription": "Sent requests appear here.",
+    "noMatches": "No sent request matches.",
+    "remove": "Remove from history",
+    "clear": "Clear history",
+    "noResponse": "No response",
+    "sentAgo": {
+      "now": "now",
+      "minutes": "{{count}}m",
+      "hours": "{{count}}h",
+      "days": "{{count}}d"
+    },
+    "sentAgoSpoken": {
+      "now": "sent just now",
+      "minutes_one": "sent {{count}} minute ago",
+      "minutes_other": "sent {{count}} minutes ago",
+      "hours_one": "sent {{count}} hour ago",
+      "hours_other": "sent {{count}} hours ago",
+      "days_one": "sent {{count}} day ago",
+      "days_other": "sent {{count}} days ago",
+      "date": "sent on {{date}}"
+    }
+  }
+}

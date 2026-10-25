@@ -1,0 +1,39 @@
+{
+  "codeEditor": {
+    "syntaxError": "Eroare de sintaxă",
+    "phrases": {
+      "foldLine": "Restrângere linie",
+      "unfoldLine": "Extindere linie",
+      "foldedLines": "Linii restrânse",
+      "unfoldedLines": "Linii extinse",
+      "foldedCode": "cod restrâns",
+      "unfold": "extindere",
+      "completions": "Completări",
+      "controlCharacter": "Caracter de control",
+      "diagnostics": "Diagnostic",
+      "noDiagnostics": "Fără probleme",
+      "goToLine": "Salt la linie",
+      "go": "salt",
+      "close": "închidere",
+      "find": "Căutare",
+      "replace": "Înlocuire",
+      "all": "toate",
+      "byWord": "cuvânt întreg",
+      "matchCase": "litere mari/mici",
+      "next": "următorul",
+      "previous": "precedentul",
+      "regexp": "regexp",
+      "replaceAll": "înlocuire totală",
+      "currentMatch": "rezultatul curent",
+      "onLine": "pe linia",
+      "to": "până la",
+      "selectionDeleted": "Selecție ștearsă",
+      "replacedMatches": "{{count}} rezultate înlocuite",
+      "replacedMatchOnLine": "rezultat înlocuit pe linia {{line}}",
+      "unchangedLines": "{{count}} linii neschimbate",
+      "accept": "Acceptare",
+      "reject": "Respingere",
+      "revertChunk": "Anulați acest fragment"
+    }
+  }
+}

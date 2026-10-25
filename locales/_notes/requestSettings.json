@@ -1,0 +1,9 @@
+{
+  "requestSettings.timeout": "Label of the field for the time limit of a request, in milliseconds.",
+  "requestSettings.timeoutPlaceholder": "{{milliseconds}} is the default time limit in milliseconds.",
+  "requestSettings.verifyTls": "Checkbox label. TLS certificates are the certificates of HTTPS servers.",
+  "requestSettings.sendCookies": "Checkbox label. The cookie jar is the store of saved cookies.",
+  "requestSettings.tags": "Label of the field for tags: short words used to group and filter requests.",
+  "requestSettings.tagsPlaceholder": "Example tags separated by commas. Replace with natural examples in your language.",
+  "requestSettings.description": "Label of the free text field that documents a request."
+}

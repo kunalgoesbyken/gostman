@@ -1,0 +1,10 @@
+{
+  "localCommand": {
+    "title": "Eseguire un programma su questo computer?",
+    "intro": "Questa richiesta avvia un server MCP locale con il tuo account utente:",
+    "environmentIntro": "Con queste variabili d'ambiente dalla scheda Header:",
+    "warning": "Eseguilo solo se sai cosa fa questo programma. Gostman lo chiede di nuovo quando il comando o il suo ambiente cambiano, oppure l'app viene riavviata.",
+    "confirm": "Esegui",
+    "notApproved": "Questa richiesta avvia un programma su questo computer. Inviala una volta dalla sua scheda e conferma il comando, poi eseguila di nuovo."
+  }
+}

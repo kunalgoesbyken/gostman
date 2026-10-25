@@ -1,0 +1,15 @@
+{
+  "dialog": {
+    "moveWindow": "Mover janela",
+    "moveHint": "Arraste ou use as teclas de seta para mover. Shift e as setas redimensionam. Clique duas vezes na barra de título ou pressione Home para restaurar o tamanho e a posição padrão.",
+    "close": "Fechar",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "rename": "Renomear",
+    "create": "Criar",
+    "getDesktopApp": "Obter o app para desktop",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "ok": "OK"
+  }
+}

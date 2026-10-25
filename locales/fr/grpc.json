@@ -1,0 +1,27 @@
+{
+  "grpc": {
+    "services": "Services",
+    "messageLabel": "Message de la requête",
+    "reflection": "Réflexion du serveur",
+    "sendAsGrpc": "Envoyer en gRPC",
+    "addProtos": "Ajouter des fichiers .proto",
+    "removeFiles": "Retirer les fichiers",
+    "load": "Charger",
+    "reload": "Recharger",
+    "schemaHint": "Chargez les services par réflexion du serveur, ou ajoutez les fichiers .proto du service. L’adresse, les en-têtes et l’authentification de cette requête sont utilisés.",
+    "noServices": "Aucun service trouvé.",
+    "tooLarge": "{{name}} fait {{size}}. Les fichiers sont limités à {{limit}}.",
+    "method": "Méthode",
+    "methodLabel": "Méthode gRPC",
+    "chooseMethod": "Choisir une méthode",
+    "useExample": "Utiliser un exemple",
+    "useExampleTitle": "Remplace le message par un exemple d’entrée de la méthode",
+    "streamHint": "Cette méthode lit un flux. Écrivez un tableau JSON pour envoyer plusieurs messages.",
+    "kinds": {
+      "bidirectional": "Streaming bidirectionnel",
+      "client": "Streaming client",
+      "server": "Streaming serveur",
+      "unary": "Unaire"
+    }
+  }
+}

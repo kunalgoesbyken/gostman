@@ -54,6 +54,7 @@ export function ReferenceTarget({ reference: stored, kind, secrets, onChange }) 
           aria-label={TEXT.path}
           spellCheck={false}
           onChange={(event) => edit({ path: event.target.value })}
+          dir="ltr"
           className="font-mono"
         />
         <Input
@@ -63,6 +64,7 @@ export function ReferenceTarget({ reference: stored, kind, secrets, onChange }) 
           title={fieldName}
           spellCheck={false}
           onChange={(event) => edit({ field: event.target.value })}
+          dir="ltr"
           className="font-mono"
         />
         {showsVersion && (
@@ -73,6 +75,7 @@ export function ReferenceTarget({ reference: stored, kind, secrets, onChange }) 
             title={TEXT.versions[kindName] || TEXT.version}
             spellCheck={false}
             onChange={(event) => edit({ version: event.target.value })}
+            dir="ltr"
             className="font-mono"
           />
         )}
@@ -91,7 +94,7 @@ export function ReferenceFields({ reference: stored, connections, kinds, isLoade
   const kind = kinds.find((candidate) => candidate.name === connection?.kind)
   const isUnknown = isLoaded && reference.provider !== "" && !connection
   return (
-    <div className="flex flex-col gap-1 pb-2 pl-10 pr-3">
+    <div className="flex flex-col gap-1 pb-2 ps-10 pe-3">
       <div className="grid grid-cols-[minmax(0,10rem)_minmax(0,1fr)] items-start gap-2">
         <Select
           value={reference.provider}

@@ -1,0 +1,39 @@
+{
+  "codeEditor": {
+    "syntaxError": "Syntaxfehler",
+    "phrases": {
+      "foldLine": "Zeile einklappen",
+      "unfoldLine": "Zeile ausklappen",
+      "foldedLines": "Eingeklappte Zeilen",
+      "unfoldedLines": "Ausgeklappte Zeilen",
+      "foldedCode": "eingeklappter Code",
+      "unfold": "ausklappen",
+      "completions": "Vervollständigungen",
+      "controlCharacter": "Steuerzeichen",
+      "diagnostics": "Diagnose",
+      "noDiagnostics": "Keine Probleme",
+      "goToLine": "Zu Zeile springen",
+      "go": "los",
+      "close": "schließen",
+      "find": "Suchen",
+      "replace": "Ersetzen",
+      "all": "alle",
+      "byWord": "ganzes Wort",
+      "matchCase": "Groß-/Kleinschreibung",
+      "next": "weiter",
+      "previous": "zurück",
+      "regexp": "Regex",
+      "replaceAll": "alle ersetzen",
+      "currentMatch": "aktueller Treffer",
+      "onLine": "in Zeile",
+      "to": "bis",
+      "selectionDeleted": "Auswahl gelöscht",
+      "replacedMatches": "{{count}} Treffer ersetzt",
+      "replacedMatchOnLine": "Treffer in Zeile {{line}} ersetzt",
+      "unchangedLines": "{{count}} unveränderte Zeilen",
+      "accept": "Übernehmen",
+      "reject": "Ablehnen",
+      "revertChunk": "Diesen Block zurücksetzen"
+    }
+  }
+}

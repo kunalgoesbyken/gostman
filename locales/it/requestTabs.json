@@ -1,0 +1,28 @@
+{
+  "requestTabs": {
+    "sections": "Sezioni della richiesta",
+    "more": "Altro",
+    "moreHint": "Altre sezioni della richiesta",
+    "loading": "Caricamento",
+    "examples": "Esempi",
+    "examplesHint": "Esempi di risposta salvati",
+    "headerLabel": "Header",
+    "variableLabel": "Variabile",
+    "paramLabel": "Parametro",
+    "paramsNote": "Queste righe rispecchiano la query string nell'URL. Le righe deselezionate vengono conservate qui ma non inviate.",
+    "labels": {
+      "params": "Parametri",
+      "headers": "Header",
+      "body": "Corpo",
+      "auth": "Auth",
+      "graphql": "GraphQL",
+      "grpc": "gRPC",
+      "mcp": "MCP",
+      "websocket": "WebSocket",
+      "vars": "Var",
+      "extract": "Estrai",
+      "tests": "Controlli",
+      "settings": "Impostazioni"
+    }
+  }
+}

@@ -14,9 +14,9 @@ function InheritedRow({ row, onOpen }) {
   return (
     <div className={cn(ROW_GRID, PLAIN_COLUMNS, "h-7")}>
       <span />
-      <span title={row.key} className={cn(CELL, "px-2", tone)}>{row.key}</span>
+      <span title={row.key} className={cn(CELL, "px-2", tone)}><bdi dir="ltr">{row.key}</bdi></span>
       <span className="col-span-2 flex min-w-0 items-center gap-2">
-        <span title={row.value} className={cn(CELL, "min-w-0 flex-1 px-2", tone)}>{row.value}</span>
+        <span title={row.value} className={cn(CELL, "min-w-0 flex-1 px-2", tone)}><bdi dir="ltr">{row.value}</bdi></span>
         <span className="flex min-w-0 shrink items-center gap-2 text-2xs text-muted-foreground">
           {!isSent && <span className="shrink-0">{TEXT.headerStates[row.state]}</span>}
           <button type="button" title={TEXT.openSource(row.source.name)} onClick={() => onOpen(row.source.id)} className="truncate rounded px-1 underline-offset-2 hover:text-foreground hover:underline">
@@ -32,7 +32,7 @@ function InheritedAuthRow({ source, onOpen }) {
   return (
     <div className={cn(ROW_GRID, PLAIN_COLUMNS, "h-7")}>
       <span />
-      <span className={cn(CELL, "px-2 text-foreground")}>{TEXT.authorizationHeader}</span>
+      <span className={cn(CELL, "px-2 text-foreground")}><bdi dir="ltr">{TEXT.authorizationHeader}</bdi></span>
       <span className="col-span-2 flex min-w-0 items-center gap-2">
         <span className={cn(CELL, "min-w-0 flex-1 px-2 text-foreground")}>{TEXT.authorizationValue(source)}</span>
         <button type="button" title={TEXT.openAuthTabTitle} onClick={onOpen} className="shrink-0 rounded px-1 text-2xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
@@ -55,7 +55,7 @@ export function InheritedHeaders({ folderId, ownRows, authSource, onOpenAuth }) 
   if (rows.length === 0 && !authSource) return null
   return (
     <section aria-label={TEXT.inheritedTitle} className="flex flex-col gap-1">
-      <SectionLabel className="pl-8">{TEXT.inheritedTitle}</SectionLabel>
+      <SectionLabel className="ps-8">{TEXT.inheritedTitle}</SectionLabel>
       {authSource && <InheritedAuthRow source={authSource} onOpen={onOpenAuth} />}
       {rows.map((row, index) => <InheritedRow key={index} row={row} onOpen={openFolderSettings} />)}
     </section>

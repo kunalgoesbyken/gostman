@@ -1,0 +1,46 @@
+{
+  "sse": {
+    "allTypes": "すべてのイベントタイプ",
+    "searchLabel": "イベントを検索",
+    "searchPlaceholder": "イベントを検索",
+    "pause": "自動スクロールを一時停止",
+    "resume": "自動スクロールを再開",
+    "clear": "イベントをクリア",
+    "copyAll": "表示中のイベントをコピー",
+    "copied": "コピーしました",
+    "copyEvent": "イベントデータをコピー",
+    "noEvents": "イベントはまだありません",
+    "waiting": "サーバーがイベントを送信するのを待っています。",
+    "noMatches": "一致するイベントがありません",
+    "noMatchesHint": "タイプの絞り込みや検索を変更すると、さらに表示されます。",
+    "clipped": "このイベントは長すぎるため、残りを省略しました。",
+    "shown": "{{total}}件中{{shown}}件を表示",
+    "received": "{{count}}件受信",
+    "dropped_other": "古い{{count}}件のイベントは一覧に表示されなくなりました。ダウンロードしたレスポンスには、すべてのイベントが含まれています。",
+    "reconnecting": "{{seconds}}秒後に再接続します（{{attempt}}回目）"
+  },
+  "sseSettings": {
+    "stream": "Server-Sent Eventsとしてストリーミング",
+    "reconnect": "サーバーがストリームを閉じたら再接続",
+    "maxEvents": "最大イベント数",
+    "maxEventsPlaceholder": "既定値10000",
+    "maxSeconds": "最大秒数",
+    "maxSecondsPlaceholder": "既定値300"
+  },
+  "status": {
+    "connecting": "接続中",
+    "open": "ストリーミング中",
+    "reconnecting": "再接続中",
+    "ended": "終了"
+  },
+  "streamEnd": {
+    "closed": "サーバーがストリームを閉じました。",
+    "cancelled": "ストリームを停止しました。",
+    "maxEvents": "イベント数の上限で停止しました。設定で引き上げられます。",
+    "maxBytes": "サイズの上限で停止しました。",
+    "maxDuration": "時間の上限で停止しました。設定で引き上げられます。",
+    "failed": "ストリームが失敗しました。",
+    "failedWith": "ストリームが失敗しました。{{detail}}",
+    "hostedLimit": "時間の上限で停止しました。Webアプリのストリーミングは最大{{seconds}}秒です。デスクトップアプリではより長くストリーミングできます。"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "dialog": {
+    "moveWindow": "Mover ventana",
+    "moveHint": "Arrastra o usa las teclas de flecha para mover. Shift y las flechas cambian el tamaño. Haz doble clic en la barra de título o pulsa Home para restaurar el tamaño y la posición predeterminados.",
+    "close": "Cerrar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "rename": "Renombrar",
+    "create": "Crear",
+    "getDesktopApp": "Obtener la app de escritorio",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "ok": "Aceptar"
+  }
+}

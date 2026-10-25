@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/dop251/goja/ast"
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const insomniaRoot = "insomnia"
@@ -73,7 +74,7 @@ func (t *translator) renderUnitSend(call *ast.CallExpression, targets map[string
 		target, known = targets[requestKey(string(literal.Value))]
 	}
 	if len(call.ArgumentList) != 1 || !known {
-		t.fail(call, messageScriptUnsupported, insomniaRoot+".send()")
+		t.fail(call, locales.ImporterScriptUnsupported, locales.Params{"name": insomniaRoot + ".send()"})
 		return t.text(call)
 	}
 	t.translated++

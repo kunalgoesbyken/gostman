@@ -1,0 +1,18 @@
+{
+  "variables": {
+    "dynamic": "wird bei jedem Senden der Anfrage erzeugt",
+    "prompt": "wird beim Senden der Anfrage abgefragt",
+    "undefinedName": "ist in der aktiven Umgebung nicht definiert",
+    "resolvesTo": "ergibt",
+    "through": "über {{names}}",
+    "sources": {
+      "global": "Global",
+      "collection": "Sammlung",
+      "environment": "Umgebung",
+      "folder": "Ordner",
+      "request": "Anfrage",
+      "process": ".env-Datei",
+      "session": "Sitzung"
+    }
+  }
+}

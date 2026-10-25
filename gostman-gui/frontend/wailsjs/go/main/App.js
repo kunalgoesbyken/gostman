@@ -302,8 +302,8 @@ export function PickFile(arg1) {
   return window['go']['main']['App']['PickFile'](arg1);
 }
 
-export function PickWorkspaceFolder() {
-  return window['go']['main']['App']['PickWorkspaceFolder']();
+export function PickWorkspaceFolder(arg1) {
+  return window['go']['main']['App']['PickWorkspaceFolder'](arg1);
 }
 
 export function PinWorkspace(arg1, arg2) {

@@ -1,0 +1,30 @@
+{
+  "privacy": {
+    "telemetryLabel": "Telemetrie",
+    "telemetryHint": "Gostman nu are telemetrie, analiză de utilizare sau raportare a erorilor. Contactează doar gazdele către care trimiteți cereri și serviciile pe care le configurați singuri.",
+    "docsLink": "La ce se conectează Gostman",
+    "updatesLabel": "Verificare versiuni noi",
+    "updatesHint": "O dată pe zi, citește ultima versiune de pe GitHub și o afișează în bara de stare. Nimic nu este descărcat sau instalat.",
+    "updatesFailed": "Ultima verificare nu a ajuns la GitHub. Rulează din nou mâine.",
+    "updatesCurrent": "Aceasta este cea mai recentă versiune ({{version}}).",
+    "updateAvailable": "Versiunea {{version}} este disponibilă",
+    "updatesNewer": "Versiunea {{version}} este disponibilă pe GitHub.",
+    "updateHint": "Deschide notele de lansare și descărcările pe GitHub",
+    "updateDismiss": "Ascundere până la versiunea următoare",
+    "relayLabel": "Trimitere cereri prin",
+    "relayHint": "Releul găzduit nu poate ajunge la localhost sau la adrese private. Un releu local trimite cererile de pe acest computer, fără nimeni la mijloc.",
+    "relayModes": {
+      "hosted": "Releu găzduit",
+      "local": "Releu local pe acest computer"
+    },
+    "relayAddressLabel": "Adresa releului local",
+    "relayAddressHint": "Porniți-l cu gostman relay și introduceți adresa pe care o afișează.",
+    "relayAddressInvalid": "Introduceți o adresă precum http://127.0.0.1:4030.",
+    "relayCheck": "Testare",
+    "relayChecking": "Se testează…",
+    "relayReachable": "Releul local a răspuns.",
+    "relayMissing": "Introduceți adresa releului local la Preferințe, Confidențialitate sau reveniți la releul găzduit.",
+    "relayUnreachable": "Releul local de la {{address}} nu a răspuns. Porniți-l cu gostman relay sau reveniți la releul găzduit la Preferințe, Confidențialitate.",
+    "relayCheckUnreachable": "Releul local de la {{address}} nu a răspuns. Verificați dacă gostman relay rulează și dacă adresa coincide cu cea afișată de el."
+  }
+}

@@ -1,12 +1,15 @@
 import { DATA_TEXT as TEXT } from './dataText'
+import { DIALOG_TEXT } from './dialogText'
+import { formatDateTime } from './i18n/format'
 import { isDesktopApp } from './platform'
-import { getPreferences } from './preferences'
 import { useAppStore } from '../store/appStore'
 
 const store = () => useAppStore.getState()
 const messageOf = (error) => error?.message || String(error)
 
-export const backupDate = (backup) => new Intl.DateTimeFormat(getPreferences().language, { dateStyle: 'medium', timeStyle: 'short' }).format(backup.createdAt)
+const BACKUP_DATE = { dateStyle: 'medium', timeStyle: 'short' }
+
+export const backupDate = (backup) => formatDateTime(backup.createdAt, BACKUP_DATE)
 
 const restoreMessage = (backup) => {
   const message = isDesktopApp() ? TEXT.restoreMessageDesktop : TEXT.restoreMessageBrowser
@@ -24,7 +27,7 @@ export function createBackupActions(backend) {
       await restoring
       store().showNotice(TEXT.restored(backupDate(backup)))
     } catch (error) {
-      store().showAlert(TEXT.restoreFailed, messageOf(error), 'OK', 'warning')
+      store().showAlert(TEXT.restoreFailed, messageOf(error), DIALOG_TEXT.ok, 'warning')
     }
   }
 
@@ -32,7 +35,7 @@ export function createBackupActions(backend) {
     try {
       await backups.openFolder()
     } catch (error) {
-      store().showAlert(TEXT.openBackupsFailed, messageOf(error), 'OK', 'warning')
+      store().showAlert(TEXT.openBackupsFailed, messageOf(error), DIALOG_TEXT.ok, 'warning')
     }
   }
 

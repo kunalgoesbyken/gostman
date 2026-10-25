@@ -1,0 +1,39 @@
+{
+  "components": {
+    "unused": "{{kind}}/{{name}} jest zdefiniowane, ale nigdy nie jest przywoływane",
+    "invalidRef": "nieprawidłowy $ref: {{detail}}"
+  },
+  "info": {
+    "fieldMissing": "info.{{field}} brakuje lub jest puste",
+    "noServers": "nie wymieniono żadnych serwerów, więc klienci nie wiedzą, gdzie działa API",
+    "noHost": "nie ustawiono hosta, więc klienci nie wiedzą, gdzie działa API",
+    "serverNotHttps": "{{url}} nie używa https",
+    "httpOnly": "API jest udostępniane wyłącznie przez http"
+  },
+  "operations": {
+    "noOperationId": "operacja nie ma operationId",
+    "duplicateOperationId": "operationId „{{id}}” jest już używane przez {{earlier}}",
+    "noSummary": "operacja nie ma ani summary, ani description",
+    "undeclaredTag": "znacznik „{{tag}}” nie jest zadeklarowany w znacznikach najwyższego poziomu",
+    "deprecatedWithoutDescription": "operacja jest wycofana, ale nie ma opisu, czego użyć zamiast niej",
+    "noSecurity": "specyfikacja definiuje schematy zabezpieczeń, ale ta operacja żadnego nie wymaga"
+  },
+  "paths": {
+    "none": "dokument nie definiuje żadnych ścieżek",
+    "noLeadingSlash": "ścieżka „{{path}}” nie zaczyna się od ukośnika",
+    "ambiguous": "{{path}} nie da się odróżnić od {{earlier}}",
+    "parameterUndeclared": "parametr ścieżki „{{name}}” występuje w ścieżce, ale nie jest zadeklarowany",
+    "parameterUnused": "parametr ścieżki „{{name}}” jest zadeklarowany, ale nie występuje w ścieżce"
+  },
+  "responses": {
+    "noSuccess": "operacja nie deklaruje odpowiedzi 2xx",
+    "noError": "operacja nie deklaruje ani odpowiedzi default, ani 4xx",
+    "noSchema": "odpowiedź {{status}} nie ma schematu",
+    "mediaWithoutSchema": "odpowiedź {{status}} deklaruje {{media}} bez schematu",
+    "bodyOnRead": "operacje {{method}} nie powinny mieć treści żądania",
+    "noBodyExample": "treść żądania {{media}} nie ma przykładu"
+  },
+  "security": {
+    "undefinedScheme": "schemat zabezpieczeń „{{name}}” jest używany, ale nie jest zdefiniowany"
+  }
+}

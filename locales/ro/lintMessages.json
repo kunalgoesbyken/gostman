@@ -1,0 +1,39 @@
+{
+  "components": {
+    "unused": "{{kind}}/{{name}} este definit, dar nu este niciodată referit",
+    "invalidRef": "$ref nevalid: {{detail}}"
+  },
+  "info": {
+    "fieldMissing": "info.{{field}} lipsește sau este gol",
+    "noServers": "nu sunt listate servere, deci clienții nu pot ști unde este servit API-ul",
+    "noHost": "nu este setată nicio gazdă, deci clienții nu pot ști unde este servit API-ul",
+    "serverNotHttps": "{{url}} nu folosește https",
+    "httpOnly": "API-ul este oferit doar prin http"
+  },
+  "operations": {
+    "noOperationId": "operația nu are operationId",
+    "duplicateOperationId": "operationId „{{id}}” este deja folosit de {{earlier}}",
+    "noSummary": "operația nu are nici summary, nici description",
+    "undeclaredTag": "eticheta „{{tag}}” nu este declarată în tags de nivel superior",
+    "deprecatedWithoutDescription": "operația este depreciată, dar nu are o descriere care să spună ce să se folosească în schimb",
+    "noSecurity": "specificația definește scheme de securitate, dar această operație nu cere niciuna"
+  },
+  "paths": {
+    "none": "documentul nu definește nicio cale",
+    "noLeadingSlash": "calea „{{path}}” nu începe cu slash",
+    "ambiguous": "{{path}} nu poate fi deosebit de {{earlier}}",
+    "parameterUndeclared": "parametrul de cale „{{name}}” se află în cale, dar nu este declarat",
+    "parameterUnused": "parametrul de cale „{{name}}” este declarat, dar nu se află în cale"
+  },
+  "responses": {
+    "noSuccess": "operația nu declară niciun răspuns 2xx",
+    "noError": "operația nu declară nici default, nici un răspuns 4xx",
+    "noSchema": "răspunsul {{status}} nu are schemă",
+    "mediaWithoutSchema": "răspunsul {{status}} declară {{media}} fără schemă",
+    "bodyOnRead": "operațiile {{method}} nu ar trebui să aibă corp de cerere",
+    "noBodyExample": "corpul cererii {{media}} nu are exemplu"
+  },
+  "security": {
+    "undefinedScheme": "schema de securitate „{{name}}” este folosită, dar nu este definită"
+  }
+}

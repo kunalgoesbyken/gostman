@@ -1,0 +1,8 @@
+{
+  "components.unused": "{{kind}} is a section of an OpenAPI document such as schemas or parameters and stays as written; {{name}} is the name of the item.",
+  "components.invalidRef": "$ref is the OpenAPI keyword and stays as written. {{detail}} is the technical reason, in English.",
+  "info.fieldMissing": "{{field}} is a field of the info object of an OpenAPI document, such as version or description. It stays as written.",
+  "operations.duplicateOperationId": "{{earlier}} is the other operation, written like GET /users.",
+  "paths.ambiguous": "{{path}} and {{earlier}} are URL paths with parameters in braces.",
+  "responses.mediaWithoutSchema": "{{status}} is an HTTP status code and {{media}} a media type such as application/json."
+}

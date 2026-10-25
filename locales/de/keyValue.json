@@ -1,0 +1,18 @@
+{
+  "keyValue": {
+    "key": "Schlüssel",
+    "value": "Wert",
+    "type": "Typ",
+    "sendRow": "Diese Zeile senden",
+    "fieldType": "Feldtyp",
+    "text": "Text",
+    "file": "Datei",
+    "removeRow": "Zeile entfernen",
+    "bulkLabel": "Zeilen für {{keyLabel}} als Text",
+    "bulkPlaceholder": "{{keyLabel}}: Wert",
+    "bulkHint": "Eine Zeile pro Eintrag als Name: Wert. Beginnen Sie eine Zeile mit // oder #, um sie zu behalten, ohne sie zu senden.",
+    "bulkUnavailable": "Zeilen mit einem Doppelpunkt im Namen oder mit Leerzeichen am Anfang oder Ende lassen sich nur in der Tabelle bearbeiten.",
+    "editAsTable": "Als Tabelle bearbeiten",
+    "bulkEdit": "Als Text bearbeiten"
+  }
+}

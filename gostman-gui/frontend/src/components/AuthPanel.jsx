@@ -15,9 +15,9 @@ import { AUTH_API_KEY, AUTH_BASIC, AUTH_BEARER, AUTH_METHODS, AUTH_NONE } from "
 const IN_HEADER = "header"
 const IN_QUERY = "query"
 
-const INHERIT_TYPE = { value: AUTH_INHERIT, label: TEXT.inherit }
+const inheritType = () => ({ value: AUTH_INHERIT, label: TEXT.inherit })
 
-const AUTH_TYPES = [{ value: AUTH_NONE, label: TEXT.noAuth }, ...AUTH_METHODS]
+const authTypes = () => [{ value: AUTH_NONE, label: TEXT.noAuth }, ...AUTH_METHODS]
 
 function BasicFields({ auth, onFieldChange }) {
   return (
@@ -95,9 +95,9 @@ const FIELDS_BY_TYPE = {
 }
 
 function typeOptions(inheritance) {
-  if (!inheritance) return AUTH_TYPES
-  const [noAuth, ...others] = AUTH_TYPES
-  return [INHERIT_TYPE, { ...noAuth, value: inheritance.noAuthValue }, ...others]
+  if (!inheritance) return authTypes()
+  const [noAuth, ...others] = authTypes()
+  return [inheritType(), { ...noAuth, value: inheritance.noAuthValue }, ...others]
 }
 
 function inheritedNote({ source, sourceType }) {

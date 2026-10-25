@@ -1,0 +1,17 @@
+{
+  "body.typeLabel": "Accessible label of the control that chooses the body type.",
+  "body.editorLabel": "Accessible label of the body editor.",
+  "body.format": "Button that indents the body. Short.",
+  "body.formatTitle": "{{type}} is JSON or XML, {{chord}} is a keyboard shortcut, {{example}} is the variable syntax of Gostman. Keep the last two as given.",
+  "body.cannotFormatAt": "{{type}} is JSON or XML; {{message}} is a technical parser message in English.",
+  "body.cannotFormat": "{{type}} is JSON or XML; {{message}} is a technical parser message in English.",
+  "body.goToLine": "Link that moves the cursor to the line with the error.",
+  "body.noBody": "Title of the empty state shown for body type None.",
+  "body.multipartOnGet": "GET, POST and PUT are HTTP methods and stay in English.",
+  "body.replacedByGraphQL": "GRAPHQL is a method name of Gostman and stays in English. GraphQL tab is an interface label.",
+  "body.types.none": "Body type: the request has no body.",
+  "body.types.text": "Body type: plain text. Not the same as the Text option of a form field.",
+  "body.types.form": "Body type: application/x-www-form-urlencoded form data.",
+  "body.types.multipart": "Body type: multipart/form-data.",
+  "body.types.file": "Body type: the body is the content of one file."
+}

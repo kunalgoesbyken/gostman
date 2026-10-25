@@ -1,0 +1,28 @@
+{
+  "requestTabs": {
+    "sections": "Secțiunile cererii",
+    "more": "Mai multe",
+    "moreHint": "Mai multe secțiuni ale cererii",
+    "loading": "Se încarcă",
+    "examples": "Exemple",
+    "examplesHint": "Exemple de răspuns salvate",
+    "headerLabel": "Antet",
+    "variableLabel": "Variabilă",
+    "paramLabel": "Parametru",
+    "paramsNote": "Aceste rânduri oglindesc query string-ul din URL. Rândurile debifate sunt păstrate aici, dar nu sunt trimise.",
+    "labels": {
+      "params": "Parametri",
+      "headers": "Antete",
+      "body": "Corp",
+      "auth": "Auth",
+      "graphql": "GraphQL",
+      "grpc": "gRPC",
+      "mcp": "MCP",
+      "websocket": "WebSocket",
+      "vars": "Variabile",
+      "extract": "Extragere",
+      "tests": "Verificări",
+      "settings": "Setări"
+    }
+  }
+}

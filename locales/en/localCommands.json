@@ -1,0 +1,10 @@
+{
+  "localCommand": {
+    "title": "Run a program on this computer?",
+    "intro": "This request starts a local MCP server with your user account:",
+    "environmentIntro": "With these environment variables from the Headers tab:",
+    "warning": "Run it only if you know what this program does. Gostman asks again when the command or its environment changes, or the app restarts.",
+    "confirm": "Run",
+    "notApproved": "This request starts a program on this computer. Send it once from its own tab and confirm the command, then run it again."
+  }
+}

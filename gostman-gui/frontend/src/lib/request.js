@@ -1,6 +1,7 @@
 import { resolveBodyType } from './body'
 import { foldQueryParams } from './queryString'
 import { normalizeTags } from './tags'
+import { TAB_BAR_TEXT } from './tabBarText'
 
 export const AUTH_OAUTH2 = 'oauth2'
 export const GRANT_CLIENT_CREDENTIALS = 'client_credentials'
@@ -47,7 +48,9 @@ const DEFAULT_OPTIONS = {
 
 const DEFAULT_REQUEST = {
   id: '',
-  name: 'New request',
+  get name() {
+    return TAB_BAR_TEXT.newRequest
+  },
   description: '',
   tags: [],
   method: 'GET',

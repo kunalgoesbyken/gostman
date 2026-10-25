@@ -1,48 +1,16 @@
-import { pluralize } from "./dataUtils"
+import english from '../../../../locales/en/socket.json'
+import { messages } from './i18n/core'
+import { formatList, formatNumber } from './i18n/format'
 
-export const SOCKET_TEXT = {
-  socketIoPath: "Path",
-  socketIoPathPlaceholder: "/socket.io/",
-  socketIoAuth: "Auth payload",
-  socketIoAuthPlaceholder: '{"token": "{{token}}"}',
-  socketIoAuthNote: "A JSON object sent with the namespace handshake, read by the server as socket.handshake.auth.",
-  invalidAuth: "The Socket.IO auth payload must be a JSON object.",
-  statuses: {
-    idle: "Disconnected",
-    connecting: "Connecting",
-    open: "Connected",
-    waiting: "Waiting to reconnect",
+const text = messages('socket', english, (t) => ({
+  socket: {
+    socketIoPathPlaceholder: '/socket.io/',
+    socketIoAuthPlaceholder: '{"token": "{{token}}"}',
+    truncated: (shown, total) => t('socket.truncated', { shown: formatNumber(shown), total: formatNumber(total) }),
+    dropped: (dropped, limit) => t('socket.dropped', { dropped: formatNumber(dropped), limit: formatNumber(limit) }),
+    unsentHeaders: (names) => t('socket.unsentHeaders', { names: formatList(names, 'unit') }),
+    composer: (shortcut) => t('socket.composer', { shortcut }),
   },
-  entries: {
-    sent: "Sent",
-    received: "Received",
-    info: "Info",
-    warning: "Warning",
-    error: "Error",
-  },
-  protocol: "Protocol",
-  graphql: "GraphQL subscription",
-  filter: "Topic filter, for example sensors/#",
-  subscribe: "Subscribe",
-  saved: "Saved messages",
-  savedPlaceholder: "Load a saved message",
-  noSaved: "No saved messages yet",
-  save: "Save",
-  saveTitle: "Save message",
-  saveMessage: "Name for this message. It is saved with the request.",
-  remove: "Delete saved message",
-  binary: (bytes) => `Binary, ${pluralize(bytes, "byte")}`,
-  truncated: (shown, total) => `Showing the first ${shown} of ${total} characters`,
-  copy: "Copy message",
-  dropped: (dropped, limit) => `Older entries dropped: ${dropped}. The log keeps the latest ${limit}.`,
-  emptyTitle: "No messages yet",
-  emptyDescription: "Connect, then send a message or wait for the server.",
-  log: "Messages",
-  autoReconnect: "Auto-reconnect",
-  unsentHeaders: (names) => `A browser can only set Sec-WebSocket-Protocol on a WebSocket. Not sent from here: ${names.join(", ")}. The desktop app sends every header.`,
-  composer: (shortcut) => `Message (${shortcut} to send)`,
-  composerClosed: "Connect to send messages",
-  message: "Message",
-  send: "Send",
-  clear: "Clear",
-}
+}))
+
+export const SOCKET_TEXT = text.socket

@@ -1,59 +1,16 @@
-import { pluralize } from './dataUtils'
+import english from '../../../../locales/en/workspace.json'
+import { messages } from './i18n/core'
 
-export const WORKSPACE_TEXT = {
-  localLabel: 'This computer',
-  localHint: "The collection is saved in the app's data on this computer",
-  browserLabel: 'This browser',
-  browserHint: 'The collection is saved in this browser. Keeping it as files in a folder needs the desktop app.',
-  restrictedHint: 'Scripts, OAuth 2.0 settings, local MCP commands and file reads in this folder are off until you trust it',
-  trusted: 'This folder is trusted now. Its scripts, OAuth 2.0 settings, local MCP commands and file reads are on.',
-  restrictedOpened: 'This folder is not trusted yet. Its scripts, OAuth 2.0 settings, local MCP commands and file reads stay off until you choose Trust this folder in the folder menu.',
-  switcherLabel: 'Switch workspace',
-  switcherCommand: 'Switch workspace',
-  switcherDescription: 'Choose another folder, pinned or recent',
-  switchTo: (name) => `Open workspace: ${name}`,
-  switchDescription: 'Switch to this workspace and keep the tabs of the current one',
-  pinned: 'Pinned',
-  recent: 'Recent',
-  current: 'Current',
-  missing: 'Folder not found',
-  noWorkspaces: 'Folders you open are listed here, so you can switch between them.',
-  thisComputer: 'This computer (no folder)',
-  openFolder: 'Open folder',
-  saveToFolder: 'Save collection to folder',
-  clone: 'Clone repository',
-  git: 'Git',
-  reload: 'Reload from disk',
-  close: 'Close folder',
-  trust: 'Trust this folder',
-  pin: 'Pin',
-  unpin: 'Unpin',
-  rename: 'Rename',
-  reveal: 'Show in file explorer',
-  forget: 'Remove from list',
-  renameTitle: 'Rename workspace',
-  renameMessage: 'Name shown in the list. The folder on disk keeps its name. Leave empty to use the folder name.',
-  forgetTitle: 'Remove from list',
-  forgetMessage: (name) => `Remove ${name} from the list? The folder and its files stay on disk, and its trust and saved tokens are forgotten.`,
-  forgetConfirm: 'Remove',
-  problems: (text) => `Show ${text}`,
-  alertTitle: 'Folder not available',
-  noticesTitle: 'About this folder',
-  listFailed: 'Could not read the list of folders',
-  openFailed: 'Could not open the folder',
-  saveFailed: 'Could not save the collection to the folder',
-  reloadFailed: 'Could not reload the folder',
-  cloneFailed: 'Could not clone the repository',
-  closeFailed: 'Could not close the folder',
-  trustFailed: 'Could not trust the folder',
-  pinFailed: 'Could not pin the workspace',
-  renameFailed: 'Could not rename the workspace',
-  forgetFailed: 'Could not remove the workspace',
-  revealFailed: 'Could not open the folder in the file explorer',
-  diskReloaded: 'Files changed on disk were reloaded.',
-  diskReloadedWithProblems: (count) => `Files changed on disk were reloaded. ${pluralize(count, 'file')} could not be read; choose Reload from disk to see which.`,
-  diskChanged: 'This request changed on disk while you were editing it.',
-  vanished: 'This request is no longer in the collection, for example after a Git pull, a branch switch or a restore. Save to add it back, or close the tab.',
-  keepMine: 'Keep my edits',
-  loadTheirs: 'Load from disk',
-}
+const text = messages('workspace', english, (t) => ({
+  storageActions: {
+    get trustMessage() {
+      return t('storageActions.trustMessage', { example: '{{$file(...)}}' })
+    },
+    describeProblem: ({ path, line, message }) => (
+      line ? t('storageActions.problemAtLine', { path, line, message }) : t('storageActions.problem', { path, message })
+    ),
+  },
+}))
+
+export const WORKSPACE_TEXT = text.workspace
+export const STORAGE_ACTIONS_TEXT = text.storageActions

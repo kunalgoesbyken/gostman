@@ -1,0 +1,32 @@
+{
+  "scan": {
+    "title": "Buscar secretos",
+    "commandDescription": "Encuentra credenciales escritas en las solicitudes antes de compartirlas o subirlas",
+    "intro": "Busca formatos de token conocidos, valores de aspecto aleatorio en campos de credenciales y contraseñas escritas en los ajustes de autenticación. Los valores escritos como {{example}} no suponen problema. Nada sale de esta ventana salvo la propia comprobación, y solo se muestran unos pocos caracteres de cada valor.",
+    "includeExamples": "Incluir respuestas de ejemplo guardadas",
+    "scanning": "Analizando",
+    "clean": "No se encontraron secretos",
+    "cleanDescription": "No se encontraron formatos de token, valores de credenciales de aspecto aleatorio ni contraseñas escritas.",
+    "failed": "No se pudo ejecutar la comprobación: {{message}}",
+    "goToRequest": "Ir a la solicitud",
+    "findings": "Hallazgos",
+    "showFindings": "Mostrar hallazgos",
+    "hideFindings": "Ocultar hallazgos",
+    "shareAnyway": "Compartir de todos modos",
+    "found_one": "Se encontró {{count}} posible secreto",
+    "found_many": "Se encontraron {{count}} de posibles secretos",
+    "found_other": "Se encontraron {{count}} posibles secretos",
+    "foundShare": "Estos permanecen en el enlace o archivo que crees. Sustitúyelos antes por {{example}} o comparte de todos modos.",
+    "foundExport": "Estos se escriben en la exportación. Sustitúyelos antes por {{example}} si el archivo se va a compartir o subir a un repositorio.",
+    "severity": {
+      "high": "Alta",
+      "medium": "Media"
+    },
+    "kinds": {
+      "request": "Solicitud",
+      "folder": "Carpeta",
+      "environment": "Entorno",
+      "collection": "Colección"
+    }
+  }
+}

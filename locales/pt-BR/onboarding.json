@@ -1,0 +1,43 @@
+{
+  "onboarding": {
+    "title": "Primeiros passos",
+    "progress": "{{done}} de {{total}} concluídos",
+    "next": "Próximo",
+    "completeTitle": "Tudo pronto",
+    "completeNotice": "Você concluiu os primeiros passos.",
+    "completeHint": "Você experimentou as principais partes do Gostman. O tutorial vai além, com encadeamento de requisições, scripts e execução das suas verificações no CI.",
+    "tutorial": "Ler o tutorial",
+    "hide": "Ocultar",
+    "hideLabel": "Ocultar as etapas de primeiros passos",
+    "done": "Concluído",
+    "steps": {
+      "send": {
+        "title": "Enviar uma requisição",
+        "hint": "Envie uma requisição de exemplo para um serviço de eco público e leia a resposta.",
+        "action": "Enviar requisição de exemplo"
+      },
+      "save": {
+        "title": "Salvar na sua coleção",
+        "hint": "As requisições salvas aparecem na barra lateral e ficam neste dispositivo.",
+        "action": "Salvar requisição"
+      },
+      "variable": {
+        "title": "Adicionar uma variável",
+        "hint": "Defina baseUrl uma só vez em um ambiente e escreva {{example}} onde precisar.",
+        "action": "Abrir ambientes",
+        "defined": "definida",
+        "missing": "ainda não definida"
+      },
+      "check": {
+        "title": "Adicionar uma verificação",
+        "hint": "Escreva uma asserção como res.status é igual a 200, ou use Adicionar verificações desta resposta na aba Verificações. Depois salve a requisição, e cada resposta mostra aprovação ou falha.",
+        "action": "Abrir a aba Verificações"
+      },
+      "run": {
+        "title": "Executar suas requisições em conjunto",
+        "hint": "O executor envia todas as requisições salvas em ordem e informa quais verificações passaram.",
+        "action": "Abrir o executor"
+      }
+    }
+  }
+}

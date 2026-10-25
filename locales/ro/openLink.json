@@ -1,0 +1,33 @@
+{
+  "openLink": {
+    "notAddress": "Aceasta nu este o adresă web pe care Gostman o poate deschide.",
+    "tooLong": "Această adresă este prea lungă.",
+    "credentials": "Adresele care conțin un nume de utilizator sau o parolă nu sunt permise.",
+    "scheme": "Sunt permise doar adresele https.",
+    "noHost": "Adresa nu are nume de gazdă.",
+    "reachFailure": "Gostman nu a putut contacta serverul care trimite acest fișier. Verificați conexiunea și încercați din nou.",
+    "title": "Deschidere dintr-un link",
+    "invalidTitle": "Acest link nu poate fi deschis",
+    "intro": "Un link a cerut ca Gostman să descarce o colecție sau o specificație. Nimic nu este descărcat sau adăugat până nu alegeți Descărcare și nimic nu este importat până nu alegeți Import.",
+    "trustNote": "Continuați doar dacă aveți încredere în persoana care v-a trimis acest link.",
+    "hostLabel": "De la",
+    "addressLabel": "Adresă",
+    "cancel": "Anulare",
+    "download": "Descărcare",
+    "downloading": "Se descarcă",
+    "import": "Import",
+    "detected": "Detectat: {{format}}",
+    "downloadedFrom": "Descărcat de la {{host}}",
+    "items_one": "{{count}} element",
+    "items_few": "{{count}} elemente",
+    "items_other": "{{count}} de elemente",
+    "activeNote": "Scripturi, setări OAuth 2.0, comenzi MCP locale sau citiri de fișiere în {{items}}. Veți fi întrebat înainte ca acestea să fie importate, iar dosarele importate rămân restricționate până le acordați încredere.",
+    "badgeAlt": "Deschide în Gostman",
+    "builderTitle": "Link „Deschide în Gostman”",
+    "builderHint": "Lipiți adresa unei colecții sau specificații publicate online (o colecție Postman, un fișier OpenAPI, Insomnia, HAR sau un export Gostman). Linkurile de mai jos permit cititorilor README-ului dvs. să o deschidă în Gostman după o confirmare.",
+    "builderLabel": "Adresa publică a colecției",
+    "desktopLabel": "Link pentru aplicația desktop",
+    "webLabel": "Link pentru aplicația web",
+    "badgeLabel": "Insignă README (Markdown)"
+  }
+}

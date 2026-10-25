@@ -1,0 +1,15 @@
+{
+  "scan.title": "Title of the dialog. The scan looks for credentials typed into requests.",
+  "scan.commandDescription": "Description in the command palette.",
+  "scan.intro": "{{example}} is a variable placeholder with double braces; keep the parameter.",
+  "scan.clean": "Title of the result when nothing was found.",
+  "scan.failed": "{{message}} is the technical reason.",
+  "scan.goToRequest": "Button that opens the request where a finding is.",
+  "scan.findings": "Heading of the list of findings.",
+  "scan.shareAnyway": "Button that continues sharing although findings exist.",
+  "scan.found": "Number of possible secrets in a warning banner.",
+  "scan.foundShare": "{{example}} is a variable placeholder with double braces.",
+  "scan.foundExport": "{{example}} is a variable placeholder with double braces.",
+  "scan.severity": "How likely a finding is a real secret.",
+  "scan.kinds": "What a finding belongs to."
+}

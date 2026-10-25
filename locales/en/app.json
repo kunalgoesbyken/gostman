@@ -1,0 +1,26 @@
+{
+  "app": {
+    "loading": "Loading",
+    "loadingEditor": "Loading editor",
+    "backToLanding": "Back to the landing page",
+    "requestSection": "Request",
+    "window": {
+      "minimize": "Minimize",
+      "maximize": "Maximize",
+      "restore": "Restore"
+    },
+    "crash": {
+      "title": "Gostman ran into an error",
+      "description": "Your saved requests are not affected. Reload to continue. If it happens again, report it with this message:\n\n{{error}}",
+      "reload": "Reload"
+    },
+    "loadFailure": {
+      "title": "Saved data could not be loaded",
+      "description": "Nothing was changed or overwritten. {{reason}}",
+      "retry": "Try again",
+      "unreadable": "Saved data was unreadable",
+      "ok": "OK"
+    },
+    "labelled": "{{label}}: {{name}}"
+  }
+}

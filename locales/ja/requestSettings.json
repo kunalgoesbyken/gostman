@@ -1,0 +1,14 @@
+{
+  "requestSettings": {
+    "timeout": "タイムアウト（ms）",
+    "timeoutPlaceholder": "{{milliseconds}}（デフォルト）",
+    "followRedirects": "リダイレクトに従う",
+    "verifyTls": "TLS証明書を検証",
+    "sendCookies": "Cookie Jarのcookieを送信",
+    "storeCookies": "レスポンスが設定したCookieを保存",
+    "tags": "タグ",
+    "tagsPlaceholder": "スモーク, 回帰",
+    "description": "説明",
+    "descriptionPlaceholder": "このリクエストの内容（Markdown）。生成されるドキュメントに表示されます"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "localCommand": {
+    "title": "Ein Programm auf diesem Computer ausführen?",
+    "intro": "Diese Anfrage startet mit Ihrem Benutzerkonto einen lokalen MCP-Server:",
+    "environmentIntro": "Mit diesen Umgebungsvariablen aus dem Tab „Header“:",
+    "warning": "Führen Sie es nur aus, wenn Sie wissen, was dieses Programm tut. Gostman fragt erneut, wenn sich der Befehl oder seine Umgebung ändert oder die App neu startet.",
+    "confirm": "Ausführen",
+    "notApproved": "Diese Anfrage startet ein Programm auf diesem Computer. Senden Sie sie einmal aus ihrem eigenen Tab, bestätigen Sie den Befehl und führen Sie sie dann erneut aus."
+  }
+}

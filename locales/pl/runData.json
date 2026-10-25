@@ -1,0 +1,11 @@
+{
+  "runData": {
+    "tooManyRows_one": "Plik danych może mieć najwyżej {{count}} wiersz.",
+    "tooManyRows_few": "Plik danych może mieć najwyżej {{count}} wiersze.",
+    "tooManyRows_many": "Plik danych może mieć najwyżej {{count}} wierszy.",
+    "tooManyRows_other": "Plik danych może mieć najwyżej {{count}} wiersza.",
+    "empty": "Plik danych nie ma wierszy.",
+    "notArray": "Plik danych JSON musi być tablicą obiektów, jeden obiekt na iterację.",
+    "unreadable": "Nie można odczytać pliku danych."
+  }
+}

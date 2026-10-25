@@ -1,0 +1,26 @@
+{
+  "app": {
+    "loading": "Caricamento",
+    "loadingEditor": "Caricamento dell'editor",
+    "backToLanding": "Torna alla pagina iniziale",
+    "requestSection": "Richiesta",
+    "window": {
+      "minimize": "Riduci a icona",
+      "maximize": "Ingrandisci",
+      "restore": "Ripristina"
+    },
+    "crash": {
+      "title": "Gostman ha riscontrato un errore",
+      "description": "Le richieste salvate non sono interessate. Ricarica per continuare. Se succede di nuovo, segnalalo con questo messaggio:\n\n{{error}}",
+      "reload": "Ricarica"
+    },
+    "loadFailure": {
+      "title": "Impossibile caricare i dati salvati",
+      "description": "Non è stato modificato né sovrascritto nulla. {{reason}}",
+      "retry": "Riprova",
+      "unreadable": "I dati salvati non erano leggibili",
+      "ok": "OK"
+    },
+    "labelled": "{{label}}: {{name}}"
+  }
+}

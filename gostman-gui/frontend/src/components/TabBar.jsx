@@ -4,6 +4,7 @@ import { IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
 import { TAB_KEYS } from "./ui/tabs"
 import { MethodTag } from "./MethodTag"
+import { isRtl } from "../hooks/direction"
 import { usePointerDrag } from "../hooks/usePointerDrag"
 import { useShortcutLabel } from "../hooks/useShortcuts"
 import { PLACE_AFTER, PLACE_BEFORE } from "../lib/dropPlace"
@@ -50,7 +51,7 @@ const Tab = memo(function Tab({ tab, saved, isActive, dropPlace, isDragged, onSe
       onCloseFromKeyboard(tab.id)
       return
     }
-    const step = event.altKey && event.shiftKey ? STEP_KEYS[event.key] : undefined
+    const step = event.altKey && event.shiftKey ? STEP_KEYS[event.key] * (isRtl() ? -1 : 1) : undefined
     if (!step) return
     event.preventDefault()
     onStep(tab.id, step)
@@ -65,12 +66,12 @@ const Tab = memo(function Tab({ tab, saved, isActive, dropPlace, isDragged, onSe
       onAuxClick={closeOnMiddleClick}
       onContextMenu={openMenuAtPointer}
       className={cn(
-        "group relative flex w-44 shrink-0 select-none items-center border-b-2 border-r border-r-border pr-1.5 text-xs [-webkit-touch-callout:none]",
+        "group relative flex w-44 shrink-0 select-none items-center border-b-2 border-e border-e-border pe-1.5 text-xs [-webkit-touch-callout:none]",
         isActive ? "border-b-primary text-foreground" : "border-b-transparent text-muted-foreground hover:bg-accent hover:text-foreground",
         isDragged && "opacity-50"
       )}
     >
-      {dropPlace && <span aria-hidden className={cn("pointer-events-none absolute inset-y-0 w-0.5 bg-primary", dropPlace === PLACE_BEFORE ? "left-0" : "right-0")} />}
+      {dropPlace && <span aria-hidden className={cn("pointer-events-none absolute inset-y-0 w-0.5 bg-primary", dropPlace === PLACE_BEFORE ? "start-0" : "end-0")} />}
       <button
         type="button"
         role="tab"
@@ -80,7 +81,7 @@ const Tab = memo(function Tab({ tab, saved, isActive, dropPlace, isDragged, onSe
         onDoubleClick={() => onPin(tab.id)}
         onPointerDown={(event) => onPointerDown(event, tab.id)}
         onKeyDown={handleKeyDown}
-        className="flex h-full min-w-0 flex-1 items-center gap-1.5 pl-3 text-left"
+        className="flex h-full min-w-0 flex-1 items-center gap-1.5 ps-3 text-start"
       >
         {isFlow ? <Workflow aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : <MethodTag method={shownMethod(request)} />}
         <span className={cn("truncate", tab.isPreview && "italic")}>{title}</span>
@@ -95,7 +96,7 @@ function resolveTabDrop(element, point, source) {
   const tabElement = element.closest("[data-tab-id]")
   if (!tabElement || tabElement.dataset.tabId === source.id) return null
   const { left, width } = tabElement.getBoundingClientRect()
-  return { id: tabElement.dataset.tabId, place: (point.x - left) / width < 0.5 ? PLACE_BEFORE : PLACE_AFTER }
+  return { id: tabElement.dataset.tabId, place: (isRtl() ? 1 - (point.x - left) / width : (point.x - left) / width) < 0.5 ? PLACE_BEFORE : PLACE_AFTER }
 }
 
 export const TabBar = memo(function TabBar({ tabs, activeTabId, requests, actions, onTabSelect, onTabClose, onNewTab }) {

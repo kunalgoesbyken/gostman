@@ -1,0 +1,12 @@
+{
+  "chaining.sources.body": "Option of the From picker of an extract rule: read the value from the JSON body.",
+  "chaining.sources.header": "Option: read the value from a response header.",
+  "chaining.sources.cookie": "Option: read the value from a cookie set by the response.",
+  "chaining.sources.status": "Option: use the HTTP status code of the response.",
+  "chaining.enterPath": "{{example}} is a JSONPath expression. Keep it as given.",
+  "chaining.invalidPath": "{{error}} is a technical message in English.",
+  "chaining.noMatch": "Shown in the value column of an extract rule when the path finds nothing.",
+  "chaining.noHeader": "{{name}} is a header name.",
+  "chaining.noCookie": "{{name}} is a cookie name.",
+  "chaining.badVariableName": "Keep the single closing brace as given."
+}

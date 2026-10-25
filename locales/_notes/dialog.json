@@ -1,0 +1,12 @@
+{
+  "dialog.moveWindow": "Accessible label of the grip that lets a dialog be dragged around.",
+  "dialog.moveHint": "Keyboard and mouse instructions for moving and resizing a dialog window. Keep the key names Shift and Home.",
+  "dialog.rename": "Confirm button of a rename prompt.",
+  "dialog.create": "Confirm button of a prompt that creates something.",
+  "dialog.getDesktopApp": "Link or button that leads to the download page of the desktop app.",
+  "dialog.copy": "Button that copies text to the clipboard.",
+  "dialog.copied": "The same button right after the copy worked.",
+  "dialog.ok": "Button that acknowledges a message.",
+  "dialog.close": "Button that closes a dialog. Verb.",
+  "dialog.save": "Button that saves the changes made in a dialog. Verb."
+}

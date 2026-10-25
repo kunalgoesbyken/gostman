@@ -1,0 +1,19 @@
+{
+  "importExport": {
+    "untitledFolder": "Pasta",
+    "untitledEnvironment": "Ambiente",
+    "gostmanExport": "Exportação do Gostman",
+    "undetected": "Não foi possível detectar o formato. Use uma coleção do Postman, uma especificação OpenAPI ou Swagger ou uma exportação do Gostman.",
+    "noRequests": "Este {{label}} não contém requisições nem pastas.",
+    "unreadable": "Não foi possível ler este {{label}}.",
+    "invalidYaml": "YAML inválido: {{reason}}",
+    "missingGostman": "Formato de exportação do Gostman inválido: falta o objeto gostman",
+    "requestsNotArray": "Formato de exportação do Gostman inválido: requests deve ser um array",
+    "foldersNotArray": "Formato de exportação do Gostman inválido: folders deve ser um array",
+    "namesMore": "{{names}} e mais {{count}}",
+    "tlsKept": "A verificação TLS estava desativada na coleção para {{names}}; ela foi mantida ativada. Desative-a na aba Ajustes da requisição se você confia nesses hosts.",
+    "flattened_one": "{{count}} pasta aninhada em um laço ou a mais de {{levels}} níveis de profundidade foi movida para o nível superior.",
+    "flattened_many": "{{count}} de pastas aninhadas em um laço ou a mais de {{levels}} níveis de profundidade foram movidas para o nível superior.",
+    "flattened_other": "{{count}} pastas aninhadas em um laço ou a mais de {{levels}} níveis de profundidade foram movidas para o nível superior."
+  }
+}

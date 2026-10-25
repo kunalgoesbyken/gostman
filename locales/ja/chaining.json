@@ -1,0 +1,24 @@
+{
+  "chaining": {
+    "sources": {
+      "body": "JSONボディ",
+      "header": "ヘッダー",
+      "cookie": "Cookie",
+      "status": "ステータスコード"
+    },
+    "binaryBody": "レスポンスボディはJSONではなくバイナリです",
+    "emptyBody": "レスポンスボディが空です",
+    "cutOff": "レスポンスが切り捨てられたため、ボディは完全なJSONではありません",
+    "notJson": "レスポンスボディがJSONではありません",
+    "enterPath": "{{example}}のようなJSONPathを入力してください",
+    "invalidPath": "無効なJSONPath：{{error}}",
+    "noMatch": "このパスに一致するものはボディにありません",
+    "matchedNull": "一致した値はnullです",
+    "enterHeader": "ヘッダー名を入力してください",
+    "noHeader": "レスポンスに{{name}}ヘッダーがありません",
+    "enterCookie": "Cookie名を入力してください",
+    "noCookie": "レスポンスに{{name}}というCookieがありません",
+    "nameVariable": "変数に名前を付けてください",
+    "badVariableName": "変数名には}を含めず、先頭と末尾にスペースを置けません"
+  }
+}

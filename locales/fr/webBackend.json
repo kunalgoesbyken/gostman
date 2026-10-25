@@ -1,0 +1,8 @@
+{
+  "webBackend": {
+    "unreadableData": "Les données enregistrées dans ce navigateur ne peuvent pas être lues : rien n’a été modifié.",
+    "proxyAnswered": "Le proxy a répondu HTTP {{status}} au lieu d’un résultat",
+    "cancelled": "la requête a été annulée",
+    "streamCutOff": "La connexion au proxy s’est terminée avant la fin du flux."
+  }
+}

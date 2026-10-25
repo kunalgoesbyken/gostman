@@ -1,0 +1,39 @@
+{
+  "codeEditor": {
+    "syntaxError": "構文エラー",
+    "phrases": {
+      "foldLine": "行を折りたたむ",
+      "unfoldLine": "行を展開",
+      "foldedLines": "折りたたんだ行",
+      "unfoldedLines": "展開した行",
+      "foldedCode": "折りたたまれたコード",
+      "unfold": "展開",
+      "completions": "入力候補",
+      "controlCharacter": "制御文字",
+      "diagnostics": "診断",
+      "noDiagnostics": "診断はありません",
+      "goToLine": "行へ移動",
+      "go": "移動",
+      "close": "閉じる",
+      "find": "検索",
+      "replace": "置換",
+      "all": "すべて",
+      "byWord": "単語単位",
+      "matchCase": "大文字小文字を区別",
+      "next": "次へ",
+      "previous": "前へ",
+      "regexp": "正規表現",
+      "replaceAll": "すべて置換",
+      "currentMatch": "現在の一致",
+      "onLine": "行",
+      "to": "から",
+      "selectionDeleted": "選択範囲を削除しました",
+      "replacedMatches": "{{count}}件の一致を置換しました",
+      "replacedMatchOnLine": "{{line}}行目の一致を置換しました",
+      "unchangedLines": "変更のない{{count}}行",
+      "accept": "承認",
+      "reject": "却下",
+      "revertChunk": "このブロックを元に戻す"
+    }
+  }
+}

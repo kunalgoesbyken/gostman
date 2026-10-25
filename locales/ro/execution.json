@@ -1,0 +1,13 @@
+{
+  "execution": {
+    "promptDeclined": "Cererea nu a fost trimisă deoarece valorile solicitate nu au fost furnizate.",
+    "unusableAddress": "Adresa nu poate fi folosită de un script.",
+    "sendLimit": "Un script poate apela sendRequest de {{limit}} ori.",
+    "hostNotPermitted": "Gazda „{{host}}” nu este folosită de această colecție, deci scripturile nu o pot apela.",
+    "scriptFileReads": "Un script nu poate adăuga într-o cerere substituenți {{example}} sau fișiere atașate de pe disc. Puneți-le în cererea însăși.",
+    "preRequest": "Script pre-cerere",
+    "postResponse": "Script post-răspuns",
+    "scopeLabel": "{{stage}} ({{name}})",
+    "restricted": "Acest dosar nu este încă de încredere, deci scripturile, setările OAuth 2.0, comenzile MCP locale și citirile de fișiere sunt dezactivate. Deschideți meniul dosarului din antet și alegeți Acordare încredere acestui dosar."
+  }
+}

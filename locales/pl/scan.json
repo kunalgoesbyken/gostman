@@ -1,0 +1,33 @@
+{
+  "scan": {
+    "title": "Skanowanie w poszukiwaniu sekretów",
+    "commandDescription": "Znajdź dane uwierzytelniające wpisane w żądaniach, zanim zostaną udostępnione lub zatwierdzone",
+    "intro": "Szuka znanych formatów tokenów, losowo wyglądających wartości w polach z danymi uwierzytelniającymi oraz haseł wpisanych w ustawieniach uwierzytelniania. Wartości zapisane jako {{example}} są w porządku. Nic nie opuszcza tego okna poza samym sprawdzeniem, a pokazywane jest tylko kilka znaków wartości.",
+    "includeExamples": "Uwzględnij zapisane przykładowe odpowiedzi",
+    "scanning": "Skanowanie",
+    "clean": "Nie znaleziono sekretów",
+    "cleanDescription": "Nie znaleziono formatów tokenów, losowo wyglądających wartości danych uwierzytelniających ani wpisanych haseł.",
+    "failed": "Nie udało się wykonać sprawdzenia: {{message}}",
+    "goToRequest": "Przejdź do żądania",
+    "findings": "Wyniki",
+    "showFindings": "Pokaż wyniki",
+    "hideFindings": "Ukryj wyniki",
+    "shareAnyway": "Udostępnij mimo to",
+    "found_one": "Znaleziono {{count}} możliwy sekret",
+    "found_few": "Znaleziono {{count}} możliwe sekrety",
+    "found_many": "Znaleziono {{count}} możliwych sekretów",
+    "found_other": "Znaleziono {{count}} możliwego sekretu",
+    "foundShare": "Pozostają one w tworzonym linku lub pliku. Najpierw zastąp je przez {{example}} albo udostępnij mimo to.",
+    "foundExport": "Są one zapisywane w eksporcie. Jeśli plik będzie udostępniany lub zatwierdzany, najpierw zastąp je przez {{example}}.",
+    "severity": {
+      "high": "Wysoka",
+      "medium": "Średnia"
+    },
+    "kinds": {
+      "request": "Żądanie",
+      "folder": "Folder",
+      "environment": "Środowisko",
+      "collection": "Kolekcja"
+    }
+  }
+}

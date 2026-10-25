@@ -1,0 +1,33 @@
+{
+  "openLink": {
+    "notAddress": "Ce n’est pas une adresse web que Gostman peut ouvrir.",
+    "tooLong": "Cette adresse est trop longue.",
+    "credentials": "Les adresses contenant un nom d’utilisateur ou un mot de passe ne sont pas autorisées.",
+    "scheme": "Seules les adresses https sont autorisées.",
+    "noHost": "L’adresse n’a pas de nom d’hôte.",
+    "reachFailure": "Gostman n’a pas pu joindre le serveur qui envoie ce fichier. Vérifiez votre connexion et réessayez.",
+    "title": "Ouvrir depuis un lien",
+    "invalidTitle": "Ce lien ne peut pas être ouvert",
+    "intro": "Un lien a demandé à Gostman de télécharger une collection ou une spécification. Rien n’est téléchargé ni ajouté tant que vous ne choisissez pas Télécharger, et rien n’est importé tant que vous ne choisissez pas Importer.",
+    "trustNote": "Ne continuez que si vous faites confiance à la personne qui vous a envoyé ce lien.",
+    "hostLabel": "De",
+    "addressLabel": "Adresse",
+    "cancel": "Annuler",
+    "download": "Télécharger",
+    "downloading": "Téléchargement",
+    "import": "Importer",
+    "detected": "Détecté : {{format}}",
+    "downloadedFrom": "Téléchargé depuis {{host}}",
+    "items_one": "{{count}} élément",
+    "items_other": "{{count}} éléments",
+    "items_many": "{{count}} d’éléments",
+    "activeNote": "Des scripts, des paramètres OAuth 2.0, des commandes MCP locales ou des lectures de fichiers figurent dans {{items}}. Une confirmation vous est demandée avant leur import, et les dossiers importés restent restreints tant que vous ne les approuvez pas.",
+    "badgeAlt": "Ouvrir dans Gostman",
+    "builderTitle": "Lien Ouvrir dans Gostman",
+    "builderHint": "Collez l’adresse d’une collection ou d’une spécification publiée en ligne (une collection Postman, un fichier OpenAPI, un export Insomnia, HAR ou Gostman). Les liens ci-dessous permettent aux lecteurs de votre README de l’ouvrir dans Gostman après confirmation.",
+    "builderLabel": "Adresse publique de la collection",
+    "desktopLabel": "Lien pour l’application de bureau",
+    "webLabel": "Lien pour l’application web",
+    "badgeLabel": "Badge du README (Markdown)"
+  }
+}

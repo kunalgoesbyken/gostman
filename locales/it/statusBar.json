@@ -1,0 +1,13 @@
+{
+  "statusBar": {
+    "network": "Rete",
+    "mockStopped": "Server mock",
+    "mockRunning": "Server mock (in esecuzione)",
+    "mockRunningOn": "Server mock (in esecuzione su :{{port}})",
+    "captureStopped": "Cattura",
+    "captureRunning": "Cattura (in esecuzione)",
+    "git": "Git",
+    "detached": "HEAD scollegato",
+    "cookies": "Cookie"
+  }
+}

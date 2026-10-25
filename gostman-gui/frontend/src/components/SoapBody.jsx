@@ -1,15 +1,15 @@
 import { AlertTriangle } from "lucide-react"
 import { Notice } from "./ui/panel"
-import { SOAP_TEXT } from "../lib/soap"
+import { SOAP_TEXT } from "../lib/soapText"
 
-const FAULT_FIELDS = [
+const faultFields = () => [
   ['code', SOAP_TEXT.faultCode],
   ['reason', SOAP_TEXT.faultReason],
   ['actor', SOAP_TEXT.faultActor],
 ]
 
 function FaultSummary({ fault }) {
-  const fields = FAULT_FIELDS.filter(([key]) => fault[key])
+  const fields = faultFields().filter(([key]) => fault[key])
   return (
     <section aria-label={SOAP_TEXT.fault} className="border-b border-border">
       <Notice tone="destructive" icon={AlertTriangle} edge="">{SOAP_TEXT.fault}</Notice>
@@ -23,7 +23,7 @@ function FaultSummary({ fault }) {
         {fault.detail && (
           <div className="contents">
             <dt className="text-muted-foreground">{SOAP_TEXT.faultDetail}</dt>
-            <dd><pre className="whitespace-pre-wrap font-mono text-foreground">{fault.detail}</pre></dd>
+            <dd><pre dir="ltr" className="whitespace-pre-wrap font-mono text-foreground">{fault.detail}</pre></dd>
           </div>
         )}
       </dl>
@@ -35,7 +35,7 @@ export function SoapBody({ soap }) {
   return (
     <>
       {soap.fault && <FaultSummary fault={soap.fault} />}
-      <pre className="whitespace-pre-wrap p-3 font-mono text-xs leading-relaxed text-foreground">{soap.formatted}</pre>
+      <pre dir="ltr" className="whitespace-pre-wrap p-3 font-mono text-xs leading-relaxed text-foreground">{soap.formatted}</pre>
     </>
   )
 }

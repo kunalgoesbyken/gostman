@@ -1,0 +1,39 @@
+{
+  "components": {
+    "unused": "{{kind}}/{{name}} ist definiert, wird aber nie referenziert",
+    "invalidRef": "ungültiger $ref: {{detail}}"
+  },
+  "info": {
+    "fieldMissing": "info.{{field}} fehlt oder ist leer",
+    "noServers": "es sind keine Server aufgeführt, daher können Clients nicht erkennen, wo die API bereitgestellt wird",
+    "noHost": "es ist kein Host gesetzt, daher können Clients nicht erkennen, wo die API bereitgestellt wird",
+    "serverNotHttps": "{{url}} verwendet kein https",
+    "httpOnly": "die API wird nur über http angeboten"
+  },
+  "operations": {
+    "noOperationId": "die Operation hat keine operationId",
+    "duplicateOperationId": "die operationId „{{id}}“ wird bereits von {{earlier}} verwendet",
+    "noSummary": "die Operation hat weder eine Zusammenfassung noch eine Beschreibung",
+    "undeclaredTag": "der Tag „{{tag}}“ ist in den Tags der obersten Ebene nicht deklariert",
+    "deprecatedWithoutDescription": "die Operation ist veraltet, hat aber keine Beschreibung, was stattdessen zu verwenden ist",
+    "noSecurity": "die Spezifikation definiert Sicherheitsschemata, aber diese Operation verlangt keines"
+  },
+  "paths": {
+    "none": "das Dokument definiert keine Pfade",
+    "noLeadingSlash": "der Pfad „{{path}}“ beginnt nicht mit einem Schrägstrich",
+    "ambiguous": "{{path}} lässt sich nicht von {{earlier}} unterscheiden",
+    "parameterUndeclared": "der Pfadparameter „{{name}}“ steht im Pfad, ist aber nicht deklariert",
+    "parameterUnused": "der Pfadparameter „{{name}}“ ist deklariert, steht aber nicht im Pfad"
+  },
+  "responses": {
+    "noSuccess": "die Operation deklariert keine 2xx-Antwort",
+    "noError": "die Operation deklariert weder eine default- noch eine 4xx-Antwort",
+    "noSchema": "die Antwort {{status}} hat kein Schema",
+    "mediaWithoutSchema": "die Antwort {{status}} deklariert {{media}} ohne Schema",
+    "bodyOnRead": "{{method}}-Operationen sollten keinen Request-Body haben",
+    "noBodyExample": "der Request-Body ({{media}}) hat kein Beispiel"
+  },
+  "security": {
+    "undefinedScheme": "das Sicherheitsschema „{{name}}“ wird verwendet, ist aber nicht definiert"
+  }
+}

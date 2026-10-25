@@ -25,8 +25,8 @@ const SHARED_VARIABLES_ID = "shared-collection-variables"
 const DOT_ENV_ID = "dot-env"
 const SESSION_ID = "session-values"
 const SCOPE_OPTIONS = [
-  { value: SCOPE_COLLECTION, label: TEXT.environmentsTab },
-  { value: SCOPE_GLOBAL, label: TEXT.globalsTab },
+  { value: SCOPE_COLLECTION, get label() { return TEXT.environmentsTab } },
+  { value: SCOPE_GLOBAL, get label() { return TEXT.globalsTab } },
 ]
 const ENVIRONMENT_FEATURES = { enabled: true, secret: true, references: true, readOnly: false }
 const DOT_ENV_FEATURES = { enabled: false, secret: false, readOnly: true }
@@ -54,7 +54,7 @@ function ListItem({ label, color, icon, isSelected, isActive, onSelect }) {
       type="button"
       onClick={onSelect}
       aria-current={isSelected}
-      className={cn("flex h-8 w-full items-center gap-2 px-3 text-left text-xs", isSelected ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-accent")}
+      className={cn("flex h-8 w-full items-center gap-2 px-3 text-start text-xs", isSelected ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-accent")}
     >
       <ListMarker icon={icon} color={color} />
       <span className="min-w-0 flex-1 truncate">{label}</span>
@@ -144,7 +144,7 @@ function EnvironmentEditor({ scope, environment, environments, isActive, scoping
         <ColorPicker label={TEXT.colour} value={environment.color} onChange={(color) => patch({ color })} />
         <ExtendsSelect environment={environment} environments={environments} onChange={(parent) => patch({ extends: parent })} />
         {(scoping?.collections.length > 1 || owner) && <ScopeSelect owner={owner} collections={scoping.collections} onChange={(folderId) => patch({ folderId })} />}
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ms-auto flex items-center gap-1">
           {isOffered ? (
             <Button
               variant="outline"
@@ -323,8 +323,8 @@ export function EnvironmentDialog({ secrets, onClose }) {
       <Dialog label={TEXT.title} size="lg" floating={ENVIRONMENTS_WINDOW} onClose={closeUnlessCovered} className="max-w-5xl">
         <DialogHeader onClose={onClose}>
           <DialogTitle>{TEXT.title}</DialogTitle>
-          <SegmentedControl label={TEXT.scope} options={SCOPE_OPTIONS} value={scope} onChange={changeScope} className="ml-2" />
-          <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setIsManagingSecrets(true)}>
+          <SegmentedControl label={TEXT.scope} options={SCOPE_OPTIONS} value={scope} onChange={changeScope} className="ms-2" />
+          <Button variant="ghost" size="sm" className="ms-auto" onClick={() => setIsManagingSecrets(true)}>
             <KeyRound />
             <span className="max-sm:sr-only">{SECRETS_TEXT.title}</span>
           </Button>

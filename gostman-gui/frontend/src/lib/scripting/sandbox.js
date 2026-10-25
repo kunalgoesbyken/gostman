@@ -1,11 +1,12 @@
 import SandboxWorker from './sandbox.worker.js?worker'
+import { catalogueMessage } from '../i18n/core'
 import { errorLine } from './console'
 import { scriptAllowance } from './limits'
+import { SCRIPT_RUNTIME_TEXT } from '../scriptRuntimeText'
 import { MESSAGE_REPLY, MESSAGE_RESULT, MESSAGE_SEND, MESSAGE_START } from './messages'
 
 export { applyRequestEdits, requestSubject, responseSubject } from './subjects'
 
-const NOT_STARTED = 'The script could not be started.'
 const NO_SEND = 'sendRequest is not available here.'
 
 const failure = (error) => ({ tests: [], logs: [errorLine(error)], error })
@@ -19,6 +20,13 @@ async function answer(worker, { id, target }, send) {
 }
 
 const refuseSend = () => Promise.reject(new Error(NO_SEND))
+
+function startWorker() {
+  const worker = new SandboxWorker()
+  const language = catalogueMessage()
+  if (language) worker.postMessage(language)
+  return worker
+}
 
 const hasScript = (job) => typeof job.script === 'string' && job.script.trim() !== ''
 
@@ -44,7 +52,7 @@ function keepWarm() {
 }
 
 function addSpare() {
-  const worker = new SandboxWorker()
+  const worker = startWorker()
   worker.onerror = () => {
     const index = spareWorkers.indexOf(worker)
     if (index !== -1) spareWorkers.splice(index, 1)
@@ -64,12 +72,12 @@ export const sizeSandboxPool = (parallel) => {
 }
 
 function scriptWorker() {
-  const worker = spareWorkers.shift() || new SandboxWorker()
+  const worker = spareWorkers.shift() || startWorker()
   refillSpares()
   return worker
 }
 
-const checkWorker = () => idleCheckWorkers.pop() || new SandboxWorker()
+const checkWorker = () => idleCheckWorkers.pop() || startWorker()
 
 function release(worker, isReusable) {
   if (isReusable && idleCheckWorkers.length < IDLE_CHECK_WORKERS) idleCheckWorkers.push(worker)
@@ -94,7 +102,7 @@ function runInWorker(job, send, { limit, message }, isReusable) {
       if (data.type === MESSAGE_RESULT) finish(data.result, true)
       if (data.type === MESSAGE_SEND) answer(worker, data, send)
     }
-    worker.onerror = (event) => finish(failure(event.message || NOT_STARTED), false)
+    worker.onerror = (event) => finish(failure(event.message || SCRIPT_RUNTIME_TEXT.notStarted), false)
     worker.postMessage({ type: MESSAGE_START, job })
   })
 }

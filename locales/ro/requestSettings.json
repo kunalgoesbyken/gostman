@@ -1,0 +1,14 @@
+{
+  "requestSettings": {
+    "timeout": "Timeout (ms)",
+    "timeoutPlaceholder": "{{milliseconds}} (implicit)",
+    "followRedirects": "Urmărire redirecționări",
+    "verifyTls": "Verificare certificate TLS",
+    "sendCookies": "Trimitere cookie-uri din cookie jar",
+    "storeCookies": "Stocare cookie-uri setate de răspuns",
+    "tags": "Etichete",
+    "tagsPlaceholder": "smoke, regresie",
+    "description": "Descriere",
+    "descriptionPlaceholder": "Ce face această cerere (Markdown), afișat în documentația generată"
+  }
+}

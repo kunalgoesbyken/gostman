@@ -3,7 +3,6 @@ package engine
 import (
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -11,6 +10,8 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const (
@@ -21,9 +22,9 @@ const (
 var fileReferenceRe = regexp.MustCompile(`^\$file(Base64)?\((.*)\)$`)
 
 var (
-	errFilesUnavailable = errors.New("{{$file(...)}} reads files only in the desktop app, or in gostman run, send and load with --allow-files")
-	errRelativeFilePath = errors.New("open a workspace folder to use a relative path in {{$file(...)}}, or give an absolute path")
-	errFilesHTTPOnly    = errors.New("{{$file(...)}} reads files only in HTTP and GraphQL requests")
+	errFilesUnavailable = locales.Errorf(locales.EngineFilesUnavailable, fileExample())
+	errRelativeFilePath = locales.Errorf(locales.EngineFilesRelativePath, fileExample())
+	errFilesHTTPOnly    = locales.Errorf(locales.EngineFilesHttpOnly, fileExample())
 )
 
 type FileReader func(path string) ([]byte, error)
@@ -98,7 +99,7 @@ func FolderFiles(root string) FileReader {
 			return nil, err
 		}
 		if isHomePath(path) || !filepath.IsLocal(path) {
-			return nil, fmt.Errorf("%q is outside the collection folder; a collection reads only files inside its folder", path)
+			return nil, locales.Errorf(locales.EngineFilesOutsideFolder, locales.Params{"path": path})
 		}
 		folder, err := os.OpenRoot(root)
 		if err != nil {
@@ -140,31 +141,31 @@ func openLocal(path string) (*os.File, error) {
 func readFile(path string, file *os.File) ([]byte, error) {
 	info, err := file.Stat()
 	if err != nil {
-		return nil, fmt.Errorf("cannot read file %q: %w", path, err)
+		return nil, locales.Wrap(locales.EngineFilesUnreadable, locales.Params{"path": path}, err)
 	}
 	if info.IsDir() {
-		return nil, fmt.Errorf("%q is a folder, not a file", path)
+		return nil, locales.Errorf(locales.EngineFilesIsFolder, locales.Params{"path": path})
 	}
 	data, err := io.ReadAll(io.LimitReader(file, maxRequestBody+1))
 	if err != nil {
-		return nil, fmt.Errorf("cannot read file %q: %w", path, err)
+		return nil, locales.Wrap(locales.EngineFilesUnreadable, locales.Params{"path": path}, err)
 	}
 	if len(data) > maxRequestBody {
-		return nil, fmt.Errorf("file %q is larger than 10 MB", path)
+		return nil, locales.Errorf(locales.EngineFilesTooLarge, locales.Params{"path": path})
 	}
 	return data, nil
 }
 
 func unreadable(path, resolved string, err error) error {
 	if errors.Is(err, fs.ErrNotExist) {
-		return fmt.Errorf("file %q was not found at %s", path, resolved)
+		return locales.Errorf(locales.EngineFilesNotFound, locales.Params{"path": path, "resolved": resolved})
 	}
-	return fmt.Errorf("cannot read file %q: %w", path, err)
+	return locales.Wrap(locales.EngineFilesUnreadable, locales.Params{"path": path}, err)
 }
 
 func requirePath(path string) error {
 	if path == "" {
-		return errors.New("{{$file(...)}} needs a file path between the parentheses")
+		return locales.Errorf(locales.EngineFilesPathMissing, fileExample())
 	}
 	return nil
 }
@@ -174,7 +175,7 @@ func requireDrivePath(path string) error {
 		return err
 	}
 	if isNetworkPath(path) || isDeviceName(filepath.Clean(path)) {
-		return fmt.Errorf(`"%s" is a network or device path. Files are read only from this computer's drives, so your Windows sign-in is never sent to another computer. Copy the file to this computer or map the share to a drive letter`, path)
+		return locales.Errorf(locales.EngineFilesNetworkPath, locales.Params{"path": path})
 	}
 	return nil
 }
@@ -212,4 +213,8 @@ func localPath(path string) (string, error) {
 		return "", errRelativeFilePath
 	}
 	return filepath.Clean(path), nil
+}
+
+func fileExample() locales.Params {
+	return locales.Params{"example": "{{$file(...)}}"}
 }

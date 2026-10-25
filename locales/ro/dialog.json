@@ -1,0 +1,15 @@
+{
+  "dialog": {
+    "moveWindow": "Mutare fereastră",
+    "moveHint": "Trageți sau folosiți tastele săgeți pentru a muta. Shift și tastele săgeți redimensionează. Faceți dublu clic pe bara de titlu sau apăsați Home pentru a reveni la dimensiunea și poziția implicite.",
+    "close": "Închidere",
+    "cancel": "Anulare",
+    "save": "Salvare",
+    "rename": "Redenumire",
+    "create": "Creare",
+    "getDesktopApp": "Obțineți aplicația desktop",
+    "copy": "Copiere",
+    "copied": "Copiat",
+    "ok": "OK"
+  }
+}

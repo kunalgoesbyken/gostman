@@ -3,8 +3,9 @@ import { createPortal } from "react-dom"
 import { AlertTriangle, Check, Download, ExternalLink, Folder, FolderOpen, GitBranch, HardDrive, Pencil, Pin, PinOff, RefreshCw, Save, ShieldCheck, Trash2, X } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { SectionLabel } from "./ui/panel"
-import { pluralize } from "../lib/dataUtils"
+import { alignInline } from "../hooks/direction"
 import { openGit } from "../lib/gitSession"
+import { APP_TEXT } from "../lib/appText"
 import { WORKSPACE_TEXT as TEXT } from "../lib/workspaceText"
 import { cn } from "../lib/utils"
 
@@ -24,14 +25,14 @@ function WorkspaceRow({ entry, storage, onClose }) {
     run()
   }
   return (
-    <div role="presentation" className={cn("group flex items-center gap-1 pl-3 pr-1 hover:bg-accent", entry.current && "bg-accent/60")}>
+    <div role="presentation" className={cn("group flex items-center gap-1 ps-3 pe-1 hover:bg-accent", entry.current && "bg-accent/60")}>
       <button
         type="button"
         role="menuitem"
         title={entry.path}
         aria-current={entry.current ? "true" : undefined}
         onClick={select}
-        className="flex h-10 min-w-0 flex-1 items-center gap-2 text-left"
+        className="flex h-10 min-w-0 flex-1 items-center gap-2 text-start"
       >
         <Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
         <span className="min-w-0 flex-1">
@@ -43,13 +44,13 @@ function WorkspaceRow({ entry, storage, onClose }) {
       </button>
       <IconButton
         size="icon-xs"
-        label={`${entry.pinned ? TEXT.unpin : TEXT.pin}: ${entry.name}`}
+        label={APP_TEXT.labelled(entry.pinned ? TEXT.unpin : TEXT.pin, entry.name)}
         icon={entry.pinned ? PinOff : Pin}
         onClick={() => storage.pin(entry.path, !entry.pinned)}
       />
-      <IconButton size="icon-xs" label={`${TEXT.rename}: ${entry.name}`} icon={Pencil} onClick={() => closeThen(() => storage.promptRename(entry))} />
-      {!entry.missing && <IconButton size="icon-xs" label={`${TEXT.reveal}: ${entry.name}`} icon={ExternalLink} onClick={() => closeThen(() => storage.reveal(entry.path))} />}
-      {!entry.current && <IconButton size="icon-xs" label={`${TEXT.forget}: ${entry.name}`} icon={Trash2} onClick={() => closeThen(() => storage.confirmForget(entry))} />}
+      <IconButton size="icon-xs" label={APP_TEXT.labelled(TEXT.rename, entry.name)} icon={Pencil} onClick={() => closeThen(() => storage.promptRename(entry))} />
+      {!entry.missing && <IconButton size="icon-xs" label={APP_TEXT.labelled(TEXT.reveal, entry.name)} icon={ExternalLink} onClick={() => closeThen(() => storage.reveal(entry.path))} />}
+      {!entry.current && <IconButton size="icon-xs" label={APP_TEXT.labelled(TEXT.forget, entry.name)} icon={Trash2} onClick={() => closeThen(() => storage.confirmForget(entry))} />}
     </div>
   )
 }
@@ -66,7 +67,7 @@ function ComputerRow({ isCurrent, storage, onClose }) {
       title={TEXT.localHint}
       aria-current={isCurrent ? "true" : undefined}
       onClick={select}
-      className={cn("flex h-10 w-full items-center gap-2 px-3 text-left hover:bg-accent", isCurrent && "bg-accent/60")}
+      className={cn("flex h-10 w-full items-center gap-2 px-3 text-start hover:bg-accent", isCurrent && "bg-accent/60")}
     >
       {isCurrent ? <Check className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : <HardDrive className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
       <span className="truncate text-xs font-medium">{TEXT.thisComputer}</span>
@@ -81,7 +82,7 @@ function ActionRow({ action, onClose }) {
     action.run()
   }
   return (
-    <button type="button" role="menuitem" disabled={action.disabled} onClick={run} className="flex h-8 w-full items-center gap-2 px-3 text-left text-xs hover:bg-accent disabled:pointer-events-none disabled:opacity-40">
+    <button type="button" role="menuitem" disabled={action.disabled} onClick={run} className="flex h-8 w-full items-center gap-2 px-3 text-start text-xs hover:bg-accent disabled:pointer-events-none disabled:opacity-40">
       <Icon className="h-3.5 w-3.5 shrink-0" />
       <span className="truncate">{action.label}</span>
     </button>
@@ -92,7 +93,7 @@ function footerActions(status, storage, isRestricted) {
   const hasFolder = status.path !== ""
   const problems = status.problems.length === 0 ? [] : [{
     id: "problems",
-    label: TEXT.problems(pluralize(status.problems.length, "unreadable file")),
+    label: TEXT.problems(status.problems.length),
     icon: AlertTriangle,
     run: () => storage.showProblems(status.problems),
   }]
@@ -125,7 +126,7 @@ export function WorkspaceMenu({ anchor, status, storage, isRestricted, onClose }
 
   useLayoutEffect(() => {
     const { width, height } = menuRef.current.getBoundingClientRect()
-    setPlacement({ left: clamp(anchor.x, width, window.innerWidth), top: clamp(anchor.y, height, window.innerHeight) })
+    setPlacement({ left: clamp(alignInline(anchor.x, width), width, window.innerWidth), top: clamp(anchor.y, height, window.innerHeight) })
     menuRef.current.querySelector("button[aria-current], button:not(:disabled)")?.focus()
   }, [anchor])
 

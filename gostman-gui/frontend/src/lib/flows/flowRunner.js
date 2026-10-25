@@ -1,11 +1,12 @@
 import { create } from 'zustand'
 import { parseJSON } from '../dataUtils'
 import { rememberPrompts } from '../execution'
-import { SKIPPED_SOCKET, runResult, sessionGiver, skipped } from '../runner'
+import { runResult, sessionGiver, skipped } from '../runner'
 import { withRunStreamBudget } from '../runStream'
 import { flowAllowance } from '../scripting/limits'
 import { flowTurnInSandbox, sizeSandboxPool } from '../scripting/sandbox'
 import { isSocketAddress } from '../socketSessions'
+import { RUNNER_TEXT } from '../runnerText'
 import { useAppStore, variableTextFor } from '../../store/appStore'
 import { requestCatalog } from './catalog'
 import { ACTION_DONE, ACTION_WAIT, EVENT_HANDLED } from './engine'
@@ -95,7 +96,7 @@ export function createFlowRunner(execute, cancel) {
     run.sendIds.add(sendId)
     run.giveSession(action.variables || {})
     const outcome = isSocketAddress(request.url, variableTextFor(store(), request))
-      ? { skipped: SKIPPED_SOCKET }
+      ? { skipped: RUNNER_TEXT.socketSkipped }
       : await execute(withRunStreamBudget(request), sendId, run.prompts)
     run.giveSession({})
     run.sendIds.delete(sendId)

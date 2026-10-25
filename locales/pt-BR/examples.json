@@ -1,0 +1,26 @@
+{
+  "examples": {
+    "title": "Exemplos",
+    "bodyLabel": "Corpo do exemplo",
+    "listLabel": "Exemplos salvos",
+    "emptyTitle": "Nenhum exemplo ainda",
+    "emptyHint": "Envie a requisição e escolha Salvar como exemplo no painel de resposta. O servidor mock responde com eles.",
+    "servedByDefault": "Servido por padrão",
+    "serveByDefault": "Servir por padrão",
+    "format": "Formatar o corpo",
+    "rename": "Renomear exemplo",
+    "remove": "Excluir exemplo",
+    "section": "Seção do exemplo",
+    "body": "Corpo",
+    "headersCount": "Cabeçalhos ({{count}})",
+    "noContentType": "Sem tipo de conteúdo",
+    "binaryTitle": "Corpo binário, {{size}}",
+    "binaryHint": "Não pode ser editado como texto e é servido exatamente como foi armazenado.",
+    "noHeadersHint": "Este exemplo foi salvo sem cabeçalhos.",
+    "unsaved": "O corpo tem alterações não salvas.",
+    "discard": "Descartar",
+    "saveBody": "Salvar corpo",
+    "bodyTooLarge": "Este corpo tem {{size}}. Um exemplo guarda um corpo de até {{limit}}.",
+    "tooMany": "Uma requisição guarda até {{limit}} exemplos. Exclua um para salvar outro."
+  }
+}

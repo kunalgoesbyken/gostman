@@ -1,3 +1,5 @@
+import { REALTIME_TEXT } from '../realtimeText'
+
 const PROTOCOL_HEADER = 'sec-websocket-protocol'
 const PROTOCOL_SEPARATOR = ','
 
@@ -11,11 +13,7 @@ const subprotocols = (headers) => headers
 
 const toFrame = (data) => (typeof data === 'string' ? { text: data } : { bytes: new Uint8Array(data) })
 
-function describeClose(event, wasOpen) {
-  const outcome = wasOpen ? 'Connection closed' : 'Could not connect'
-  const reason = event.reason ? `: ${event.reason}` : ''
-  return `${outcome} (code ${event.code}${reason})`
-}
+const describeClose = (event, wasOpen) => REALTIME_TEXT.browser.describeClose(event.code, event.reason, wasOpen)
 
 export const unsentBrowserHeaders = (headers) => headers
   .filter((header) => !isProtocolHeader(header))

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"slices"
 	"strings"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 type unresolvedError struct {
@@ -59,4 +61,12 @@ func NotDefined(names []string) string {
 	default:
 		return strings.Join(placeholders[:last], ", ") + " and " + placeholders[last] + " are not defined"
 	}
+}
+
+func notDefinedMessage(names []string) locales.Message {
+	placeholders := make([]string, len(names))
+	for i, name := range names {
+		placeholders[i] = "{{" + name + "}}"
+	}
+	return locales.New(locales.EngineRequestNotDefined, locales.Params{"names": placeholders, "count": len(names)})
 }

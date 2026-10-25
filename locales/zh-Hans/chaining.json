@@ -1,0 +1,24 @@
+{
+  "chaining": {
+    "sources": {
+      "body": "JSON 响应体",
+      "header": "响应头",
+      "cookie": "Cookie",
+      "status": "状态码"
+    },
+    "binaryBody": "响应体是二进制内容，不是 JSON",
+    "emptyBody": "响应体为空",
+    "cutOff": "响应被截断，因此其响应体不是完整的 JSON",
+    "notJson": "响应体不是 JSON",
+    "enterPath": "请输入 JSONPath，例如 {{example}}",
+    "invalidPath": "JSONPath 无效：{{error}}",
+    "noMatch": "响应体中没有与此路径匹配的内容",
+    "matchedNull": "匹配到的值为 null",
+    "enterHeader": "请输入请求头名称",
+    "noHeader": "响应中没有 {{name}} 请求头",
+    "enterCookie": "请输入 Cookie 名称",
+    "noCookie": "响应中没有 {{name}} Cookie",
+    "nameVariable": "请为变量命名",
+    "badVariableName": "变量名不能包含 }，也不能以空格开头或结尾"
+  }
+}

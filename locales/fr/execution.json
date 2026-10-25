@@ -1,0 +1,13 @@
+{
+  "execution": {
+    "promptDeclined": "La requête n’a pas été envoyée car les valeurs demandées n’ont pas été fournies.",
+    "unusableAddress": "L’adresse ne peut pas être utilisée par un script.",
+    "sendLimit": "Un script peut appeler sendRequest {{limit}} fois.",
+    "hostNotPermitted": "L’hôte « {{host}} » n’est pas utilisé par cette collection : les scripts ne peuvent donc pas l’appeler.",
+    "scriptFileReads": "Un script ne peut pas ajouter à une requête des espaces réservés {{example}} ni des fichiers joints depuis le disque. Mettez-les dans la requête elle-même.",
+    "preRequest": "Script de pré-requête",
+    "postResponse": "Script de post-réponse",
+    "scopeLabel": "{{stage}} ({{name}})",
+    "restricted": "Ce dossier n’est pas encore approuvé : ses scripts, ses paramètres OAuth 2.0, ses commandes MCP locales et ses lectures de fichiers sont désactivés. Ouvrez le menu du dossier dans l’en-tête et choisissez Approuver ce dossier."
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "zip": {
+    "notZip": "Arhiva nu a putut fi citită ca fișier zip.",
+    "unsupported": "Arhiva folosește criptare, zip64 sau o metodă de comprimare care nu este acceptată.",
+    "tooMany": "Arhiva are mai mult de {{limit}} fișiere.",
+    "tooLarge": "Arhiva se extinde la mai mult de {{limit}} byte."
+  }
+}

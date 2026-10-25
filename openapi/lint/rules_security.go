@@ -1,8 +1,9 @@
 package lint
 
 import (
-	"fmt"
 	"strconv"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 func securityRules() []Rule {
@@ -26,7 +27,7 @@ func undefinedSchemes(schemes map[string]any, requirements []any, at string) []I
 	for index, requirement := range requirements {
 		for _, name := range sortedKeys(asMap(requirement)) {
 			if _, defined := schemes[name]; !defined {
-				issues = append(issues, Issue{Path: at + "/" + strconv.Itoa(index) + pointer(name), Message: fmt.Sprintf("security scheme %q is used but not defined", name)})
+				issues = append(issues, issueAt(at+"/"+strconv.Itoa(index)+pointer(name), locales.LintSecurityUndefinedScheme, locales.Params{"name": name}))
 			}
 		}
 	}
@@ -40,5 +41,5 @@ func operationSecurity(s *Spec, op Operation) []Issue {
 	if _, stated := op.Data["security"]; stated {
 		return nil
 	}
-	return []Issue{{Path: op.Pointer, Message: "the spec defines security schemes but this operation requires none"}}
+	return []Issue{issueAt(op.Pointer, locales.LintOperationsNoSecurity, nil)}
 }

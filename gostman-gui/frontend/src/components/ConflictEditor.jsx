@@ -11,12 +11,12 @@ const hasMarkers = (text) => /^<{7} /m.test(text) && /^>{7} /m.test(text)
 
 function Side({ label, content, isGone, onAccept, acceptLabel }) {
   return (
-    <section className="flex min-h-0 min-w-0 flex-1 flex-col border-r border-border last:border-r-0">
+    <section className="flex min-h-0 min-w-0 flex-1 flex-col border-e border-border last:border-e-0">
       <div className="flex h-8 shrink-0 items-center justify-between gap-2 border-b border-border px-3">
         <SectionLabel>{label}</SectionLabel>
         <Button size="sm" variant="outline" onClick={onAccept}>{acceptLabel}</Button>
       </div>
-      <pre aria-label={label} className="min-h-0 flex-1 overflow-auto whitespace-pre-wrap p-3 font-mono text-xs [overflow-wrap:anywhere]">
+      <pre dir="ltr" aria-label={label} className="min-h-0 flex-1 overflow-auto whitespace-pre-wrap p-3 font-mono text-xs [overflow-wrap:anywhere]">
         {isGone ? <span className="text-muted-foreground">{TEXT.deletedSide}</span> : content}
       </pre>
     </section>

@@ -1,0 +1,21 @@
+{
+  "jsonFormat": {
+    "expectedValue": "Ein Wert wurde erwartet",
+    "unexpectedEnd": "Das JSON endet zu früh",
+    "unexpected": "Unerwartet: {{character}}",
+    "endOfText": "Textende",
+    "expectedKey": "Ein Eigenschaftsname in doppelten Anführungszeichen wurde erwartet",
+    "expectedColon": "„:“ nach dem Eigenschaftsnamen erwartet",
+    "expectedObjectEnd": "„,“ oder „}“ nach dem Eigenschaftswert erwartet",
+    "expectedArrayEnd": "„,“ oder „]“ nach dem Element erwartet",
+    "trailingComma": "Entfernen Sie das Komma vor „{{closer}}“",
+    "unclosedString": "Diesem String fehlt das schließende Anführungszeichen",
+    "lineBreakInString": "Zeilenumbrüche in einem String müssen als \\n geschrieben werden",
+    "controlInString": "Steuerzeichen in einem String müssen maskiert werden",
+    "badEscape": "Unbekannte Escape-Sequenz in einem String",
+    "badNumber": "Diese Zahl ist kein gültiges JSON",
+    "unclosedReference": "Diesem {{reference}} fehlt das schließende {{closer}}",
+    "extraText": "Unerwarteter Text nach dem JSON-Wert",
+    "tooDeep": "Das JSON ist zu tief verschachtelt zum Formatieren"
+  }
+}

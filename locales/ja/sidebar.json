@@ -1,0 +1,35 @@
+{
+  "sidebar": {
+    "views": "サイドバーの表示",
+    "collections": "コレクション",
+    "history": "履歴",
+    "runRequests": "リクエストを実行",
+    "newFolder": "新しいフォルダー",
+    "newRequest": "新しいリクエスト",
+    "toggle": "サイドバーの表示を切り替え",
+    "close": "サイドバーを閉じる",
+    "resize": "サイドバーのサイズを変更"
+  },
+  "history": {
+    "search": "履歴を検索",
+    "emptyTitle": "履歴はまだありません",
+    "emptyDescription": "送信したリクエストがここに表示されます。",
+    "noMatches": "一致する送信済みリクエストはありません。",
+    "remove": "履歴から削除",
+    "clear": "履歴をクリア",
+    "noResponse": "レスポンスなし",
+    "sentAgo": {
+      "now": "今",
+      "minutes": "{{count}}分",
+      "hours": "{{count}}時間",
+      "days": "{{count}}日"
+    },
+    "sentAgoSpoken": {
+      "now": "たった今送信",
+      "minutes_other": "{{count}}分前に送信",
+      "hours_other": "{{count}}時間前に送信",
+      "days_other": "{{count}}日前に送信",
+      "date": "{{date}}に送信"
+    }
+  }
+}

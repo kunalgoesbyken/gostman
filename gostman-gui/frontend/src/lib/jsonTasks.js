@@ -1,4 +1,5 @@
 import JsonWorker from './json.worker.js?worker'
+import { catalogueMessage } from './i18n/core'
 import { filterAllowance } from './scripting/limits'
 
 let worker = null
@@ -15,6 +16,8 @@ function take(id) {
 function connect() {
   if (worker) return worker
   worker = new JsonWorker()
+  const language = catalogueMessage()
+  if (language) worker.postMessage(language)
   worker.onmessage = ({ data }) => {
     const entry = take(data.id)
     if (!entry) return

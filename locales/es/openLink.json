@@ -1,0 +1,33 @@
+{
+  "openLink": {
+    "notAddress": "Esto no es una dirección web que Gostman pueda abrir.",
+    "tooLong": "Esta dirección es demasiado larga.",
+    "credentials": "No se permiten direcciones que contengan usuario o contraseña.",
+    "scheme": "Solo se permiten direcciones https.",
+    "noHost": "La dirección no tiene nombre de host.",
+    "reachFailure": "Gostman no pudo conectar con el servidor que envía este archivo. Comprueba tu conexión e inténtalo de nuevo.",
+    "title": "Abrir desde un enlace",
+    "invalidTitle": "No se puede abrir este enlace",
+    "intro": "Un enlace ha pedido a Gostman que descargue una colección o una especificación. No se descarga ni se añade nada hasta que eliges Descargar, y no se importa nada hasta que eliges Importar.",
+    "trustNote": "Continúa solo si confías en la persona que te envió este enlace.",
+    "hostLabel": "Desde",
+    "addressLabel": "Dirección",
+    "cancel": "Cancelar",
+    "download": "Descargar",
+    "downloading": "Descargando",
+    "import": "Importar",
+    "detected": "Detectado: {{format}}",
+    "downloadedFrom": "Descargado de {{host}}",
+    "items_one": "{{count}} elemento",
+    "items_many": "{{count}} de elementos",
+    "items_other": "{{count}} elementos",
+    "activeNote": "Scripts, ajustes de OAuth 2.0, comandos MCP locales o lecturas de archivos en {{items}}. Se te preguntará antes de importarlos, y las carpetas importadas permanecen restringidas hasta que confíes en ellas.",
+    "badgeAlt": "Abrir en Gostman",
+    "builderTitle": "Enlace Abrir en Gostman",
+    "builderHint": "Pega la dirección de una colección o especificación publicada en línea (una colección de Postman, un archivo OpenAPI, Insomnia, HAR o una exportación de Gostman). Los enlaces de abajo permiten a quien lea tu README abrirla en Gostman tras una confirmación.",
+    "builderLabel": "Dirección pública de la colección",
+    "desktopLabel": "Enlace de la app de escritorio",
+    "webLabel": "Enlace de la app web",
+    "badgeLabel": "Insignia para el README (Markdown)"
+  }
+}

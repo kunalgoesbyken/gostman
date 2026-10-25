@@ -1,0 +1,48 @@
+source,target
+request,cerere
+response,răspuns
+collection,colecție
+collection settings,setările colecției
+folder,dosar
+workspace,spațiu de lucru
+environment,mediu
+variable,variabilă
+secret,secret
+secret manager,manager de secrete
+header,antet
+body,corp
+query parameter,parametru de interogare
+path parameter,parametru de cale
+cookie,cookie
+auth,autentificare
+token,token
+pre-request script,script pre-cerere
+post-response script,script post-răspuns
+check,verificare
+assertion,aserțiune
+extract rule,regulă de extragere
+runner / run,rulare / rulează
+iteration,iterație
+flow,flux
+step,pas
+mock server,server mock
+capture,captură
+example,exemplu
+history,istoric
+tab,filă
+sidebar,bară laterală
+preferences,preferințe
+theme,temă
+scan,scanare
+finding,constatare
+load test,test de încărcare
+import,importă
+export,exportă
+share link,link de partajare
+trust (a folder),acordă încredere
+restricted,restricționat
+proxy,proxy
+certificate,certificat
+timeout,timeout
+send,trimite
+command palette,paletă de comenzi

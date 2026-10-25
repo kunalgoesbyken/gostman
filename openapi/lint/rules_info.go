@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 func infoRules() []Rule {
@@ -22,7 +24,7 @@ func infoField(name string) func(*Spec) []Issue {
 		if !blank(asMap(s.Root["info"])[name]) {
 			return nil
 		}
-		return []Issue{{Path: pointer("info", name), Message: "info." + name + " is missing or empty"}}
+		return []Issue{issueAt(pointer("info", name), locales.LintInfoFieldMissing, locales.Params{"field": name})}
 	}
 }
 
@@ -33,14 +35,14 @@ func serversDefined(s *Spec) []Issue {
 	if len(asList(s.Root["servers"])) > 0 {
 		return nil
 	}
-	return []Issue{{Path: "/servers", Message: "no servers are listed, so clients cannot tell where the API is served"}}
+	return []Issue{issueAt("/servers", locales.LintInfoNoServers, nil)}
 }
 
 func hostDefined(s *Spec) []Issue {
 	if !blank(s.Root["host"]) {
 		return nil
 	}
-	return []Issue{{Path: "/host", Message: "no host is set, so clients cannot tell where the API is served"}}
+	return []Issue{issueAt("/host", locales.LintInfoNoHost, nil)}
 }
 
 func serversHTTPS(s *Spec) []Issue {
@@ -51,7 +53,7 @@ func serversHTTPS(s *Spec) []Issue {
 	for index, raw := range asList(s.Root["servers"]) {
 		address := asString(asMap(raw)["url"])
 		if insecureAddress(address) {
-			issues = append(issues, Issue{Path: pointer("servers", strconv.Itoa(index), "url"), Message: address + " does not use https"})
+			issues = append(issues, issueAt(pointer("servers", strconv.Itoa(index), "url"), locales.LintInfoServerNotHttps, locales.Params{"url": address}))
 		}
 	}
 	return issues
@@ -65,7 +67,7 @@ func schemesHTTPS(s *Spec) []Issue {
 	if !offers["http"] || offers["https"] || loopbackHost(hostOf(asString(s.Root["host"]))) {
 		return nil
 	}
-	return []Issue{{Path: "/schemes", Message: "the API is offered over http only"}}
+	return []Issue{issueAt("/schemes", locales.LintInfoHttpOnly, nil)}
 }
 
 func hostOf(authority string) string {

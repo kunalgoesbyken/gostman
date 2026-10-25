@@ -13,10 +13,7 @@ const OPENING = { status: "opening" }
 const READY = "ready"
 const FAILED = "failed"
 
-const CREDENTIAL_FIELDS = {
-  key: { ...SHARE_OPEN_TEXT.credentials.key, type: "text" },
-  passphrase: { ...SHARE_OPEN_TEXT.credentials.passphrase, type: "password" },
-}
+const credentialField = (kind) => ({ ...SHARE_OPEN_TEXT.credentials[kind], type: kind === "key" ? "text" : "password" })
 
 const messageOf = (error) => error?.message || String(error)
 
@@ -54,7 +51,7 @@ function Failure({ children }) {
 
 function CredentialForm({ kind, isOpening, onSubmit }) {
   const [credential, setCredential] = useState("")
-  const field = CREDENTIAL_FIELDS[kind]
+  const field = credentialField(kind)
 
   const submit = (event) => {
     event.preventDefault()
@@ -73,6 +70,7 @@ function CredentialForm({ kind, isOpening, onSubmit }) {
           aria-label={field.label}
           autoComplete="off"
           autoFocus
+          dir="ltr"
           className="font-mono"
         />
         <Button type="submit" size="sm" disabled={credential.trim() === "" || isOpening}>{SHARE_OPEN_TEXT.open}</Button>
@@ -114,7 +112,7 @@ function SharePreview({ summary }) {
         {requests.map((request) => (
           <li key={request.id} className="flex items-center gap-2 px-2 py-0.5">
             <MethodTag method={request.method} className="w-12" />
-            <span className="min-w-0 flex-1 truncate text-foreground" title={request.url}>{request.name}</span>
+            <span dir="auto" className="min-w-0 flex-1 truncate text-foreground" title={request.url}>{request.name}</span>
           </li>
         ))}
       </ul>

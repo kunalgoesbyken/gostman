@@ -1,0 +1,163 @@
+{
+  "preferences": {
+    "title": "設定",
+    "sectionsLabel": "セクション",
+    "sections": {
+      "appearance": "外観",
+      "theme": "テーマ",
+      "fonts": "フォント",
+      "editor": "エディター",
+      "requests": "リクエスト",
+      "language": "言語",
+      "ai": "AI",
+      "privacy": "プライバシー",
+      "data": "データ"
+    },
+    "fields": {
+      "theme": "テーマ",
+      "contrast": "コントラスト",
+      "accent": "アクセントカラー",
+      "textScale": "文字サイズ",
+      "interfaceFont": "インターフェースのフォント",
+      "codeFont": "コードのフォント",
+      "density": "密度",
+      "responseLayout": "レスポンスパネル",
+      "systemTitleBar": "システムのタイトルバーを使用",
+      "editorFontSize": "エディターのフォントサイズ",
+      "wrapLines": "長い行を折り返す",
+      "requestTimeout": "既定のタイムアウト",
+      "confirmCloseTab": "タブを閉じるとき、未保存の変更を破棄する前に確認する",
+      "language": "言語"
+    },
+    "themes": {
+      "system": "システム",
+      "light": "ライト",
+      "dark": "ダーク"
+    },
+    "contrasts": {
+      "system": "システム",
+      "standard": "標準",
+      "more": "強め"
+    },
+    "accents": {
+      "cyan": "シアン",
+      "blue": "ブルー",
+      "violet": "バイオレット",
+      "pink": "ピンク",
+      "graphite": "グラファイト"
+    },
+    "densities": {
+      "comfortable": "ゆったり",
+      "compact": "コンパクト"
+    },
+    "layouts": {
+      "below": "下",
+      "right": "右"
+    },
+    "seconds": "秒",
+    "pixels": "px",
+    "contrastHint": "「強め」にすると、境界線と補助テキストがよりはっきり表示されます。",
+    "systemTitleBarHint": "Gostman独自のタイトルバーとウィンドウボタンの代わりに、デスクトップのものを表示します。再起動後に反映されます。",
+    "systemTitleBarRestart": "この変更を反映するにはGostmanを再起動してください。",
+    "systemTitleBarFailed": "設定を保存できませんでした。",
+    "defaultFont": "既定",
+    "interfaceFontHint": "このデバイスにインストールされている任意のフォント。",
+    "codeFontHint": "エディター、アドレスバー、その他のコード。",
+    "fontMissing": "このデバイスに見つからないため、既定のフォントを使用します。",
+    "suggestFonts": "インストール済みのフォントを候補に表示",
+    "fontsSuggested": "フォント名の入力中に、インストール済みのフォントが候補として表示されます。",
+    "fontsDenied": "インストール済みのフォントを読み取れませんでした。",
+    "shortcuts": "キーボードショートカット",
+    "reset": "既定に戻す",
+    "close": "完了",
+    "statusLabel": "設定",
+    "commandDescription": "テーマ、色、フォント、文字サイズ、エディター、レイアウト、既定値",
+    "methods": {
+      "title": "メソッドの色",
+      "hint": "サイドバー、タブ、一覧に表示される各リクエストメソッドの色です。背景を設定すると、メソッドがバッジとして表示されます。",
+      "method": "メソッド",
+      "resetMode": {
+        "light": "ライトのメソッドの色をリセット",
+        "dark": "ダークのメソッドの色をリセット"
+      }
+    },
+    "theme": {
+      "palette": "パレット",
+      "paletteHint": "各パレットにライト版とダーク版があります。独自に設定した色は、その上に適用されます。",
+      "palettes": {
+        "default": "既定",
+        "neutral": "ニュートラル",
+        "slate": "スレート",
+        "paper": "ペーパー",
+        "moss": "モス",
+        "dusk": "ダスク",
+        "ocean": "オーシャン",
+        "ink": "インク"
+      },
+      "colors": "カスタムカラー",
+      "colorsHint": "ウィンドウの各部分の背景色と文字色を設定します。変更した色だけが保持されます。",
+      "editing": "色の対象",
+      "previewHint": {
+        "light": "現在のウィンドウはダークです。これらの色をその場で確認するには、テーマを「ライト」にしてください。",
+        "dark": "現在のウィンドウはライトです。これらの色をその場で確認するには、テーマを「ダーク」にしてください。"
+      },
+      "columns": {
+        "surface": "部分",
+        "background": "背景",
+        "foreground": "文字",
+        "contrast": "コントラスト",
+        "reset": "リセット"
+      },
+      "surfaces": {
+        "window": "ウィンドウ",
+        "sidebar": "サイドバー",
+        "tabs": "タブとアドレスバー",
+        "request": "リクエストエディター",
+        "body": "ボディエディター",
+        "script": "スクリプトエディター",
+        "response": "レスポンス",
+        "dialog": "ダイアログ",
+        "menu": "メニューとポップアップ"
+      },
+      "surfaceHints": {
+        "window": "タイトルバー、ステータスバー、ここに挙げていないすべての部分。",
+        "body": "gRPCメッセージ、MCPの引数、保存した例にも適用されます。",
+        "script": "リクエスト前スクリプトとレスポンス後スクリプト。",
+        "menu": "コンテキストメニュー、リスト、コマンドパレット。"
+      },
+      "roles": {
+        "background": "背景",
+        "foreground": "文字"
+      },
+      "sample": "あア亜",
+      "resetMode": {
+        "light": "ライトの色をリセット",
+        "dark": "ダークの色をリセット"
+      },
+      "share": "テーマを共有",
+      "shareHint": "テーマには、パレット、アクセントカラー、両モードのカスタムの部分の色とメソッドの色が含まれます。",
+      "copy": "テーマをコピー",
+      "copied": "テーマをクリップボードにコピーしました。",
+      "copyFailed": "テーマをクリップボードにコピーできませんでした。",
+      "import": "テーマを読み込む",
+      "importLabel": "読み込むテーマ",
+      "importPlaceholder": "Gostmanからコピーしたテーマを貼り付け",
+      "apply": "適用",
+      "cancel": "キャンセル",
+      "imported": "テーマを適用しました。",
+      "invalid": "Gostmanのテーマではないか、不明な部分があるか、#rrggbb形式ではない色が含まれています。",
+      "colorLabel": "{{surface}}の{{role}}の色",
+      "hexLabel": "{{surface}}の{{role}}の16進値",
+      "ratio": "{{ratio}}:1",
+      "lowContrast": "文字が読みにくい可能性があります。{{minimum}}:1以上を目安にしてください。",
+      "resetRow": "{{name}}をリセット"
+    },
+    "timeoutHint_other": "独自のタイムアウトを設定していないリクエストに適用されます。0にすると、組み込みの上限である{{count}}秒が使われます。",
+    "languageSystem": "システムに合わせる（{{language}}）",
+    "languageSwitchHint": "新しい言語を表示するためにGostmanを再読み込みします。開いているタブと未保存の下書きは保持されますが、タブに表示中のレスポンスはクリアされます。",
+    "languageSwitch": "言語を切り替え",
+    "languageHelp": "お使いの言語がない、または誤訳を見つけましたか？{{link}}。",
+    "languageHelpLink": "GitHubで知らせる",
+    "accentAdjusted": "この色の文字が読みやすいよう、ライトモードでは{{light}}、ダークモードでは{{dark}}で表示されます。"
+  }
+}

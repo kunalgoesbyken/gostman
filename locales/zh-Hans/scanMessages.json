@@ -1,0 +1,17 @@
+{
+  "awsAccessKeyId": "AWS 访问密钥 ID",
+  "githubToken": "GitHub 令牌",
+  "githubFineGrainedToken": "GitHub 细粒度个人访问令牌",
+  "gitlabToken": "GitLab 个人访问令牌",
+  "slackToken": "Slack 令牌",
+  "stripeLiveKey": "Stripe 生产环境密钥或受限密钥",
+  "googleApiKey": "Google API 密钥",
+  "npmToken": "npm 访问令牌",
+  "pypiToken": "PyPI 上传令牌",
+  "jwt": "JSON Web Token",
+  "privateKeyBlock": "PEM 私钥",
+  "bearerLiteral": "直接写在请求中的 Bearer 令牌",
+  "highEntropyValue": "名称类似凭据的字段中看起来随机的值",
+  "authLiteral": "直接写在认证设置中的凭据，而不是 {{example}}",
+  "urlCredentials": "写在 URL 中的密码"
+}

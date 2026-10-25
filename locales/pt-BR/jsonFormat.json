@@ -1,0 +1,21 @@
+{
+  "jsonFormat": {
+    "expectedValue": "Era esperado um valor",
+    "unexpectedEnd": "O JSON termina cedo demais",
+    "unexpected": "{{character}} inesperado",
+    "endOfText": "fim do texto",
+    "expectedKey": "Era esperado um nome de propriedade entre aspas duplas",
+    "expectedColon": "Era esperado ':' após o nome da propriedade",
+    "expectedObjectEnd": "Era esperado ',' ou '}' após o valor da propriedade",
+    "expectedArrayEnd": "Era esperado ',' ou ']' após o item",
+    "trailingComma": "Remova a vírgula antes de '{{closer}}'",
+    "unclosedString": "Esta string não tem aspas de fechamento",
+    "lineBreakInString": "Quebras de linha dentro de uma string devem ser escritas como \\n",
+    "controlInString": "Caracteres de controle dentro de uma string devem ter escape",
+    "badEscape": "Sequência de escape desconhecida em uma string",
+    "badNumber": "Este número não é um JSON válido",
+    "unclosedReference": "Este {{reference}} não tem o {{closer}} de fechamento",
+    "extraText": "Texto inesperado após o valor JSON",
+    "tooDeep": "O JSON tem aninhamento profundo demais para formatar"
+  }
+}

@@ -1,3 +1,8 @@
+import { formatTime as formatMoment } from './i18n/format'
+
+const CLOCK_OPTIONS = { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }
+const MILLISECOND_DIGITS = 3
+
 export const MAX_CONSOLE_GROUPS = 100
 export const ALL_LEVELS = 'all'
 
@@ -21,5 +26,5 @@ export function filterGroups(groups, level) {
 
 export function formatTime(at) {
   const date = new Date(at)
-  return `${date.toLocaleTimeString(undefined, { hour12: false })}.${String(date.getMilliseconds()).padStart(3, '0')}`
+  return `${formatMoment(date, CLOCK_OPTIONS)}.${String(date.getMilliseconds()).padStart(MILLISECOND_DIGITS, '0')}`
 }

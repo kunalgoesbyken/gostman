@@ -1,0 +1,188 @@
+{
+  "importFormats": {
+    "auto": "Detectare automată",
+    "http": "Fișiere .http"
+  },
+  "formatLabels": {
+    "insomnia": "Export Insomnia",
+    "har": "Captură HAR",
+    "wsdl": "Serviciu WSDL",
+    "bruno": "Colecție Bruno",
+    "postman": "Fișier Postman",
+    "openapi": "Specificație OpenAPI",
+    "gostman": "Export Gostman",
+    "http": "Fișier .http"
+  },
+  "import": {
+    "chooseFiles": "Alegere fișiere",
+    "importButton": "Import",
+    "chooseFolder": "Alegere dosar",
+    "dropHint": "Trageți aici fișiere, un dosar sau un .zip ori lipiți conținut mai jos. Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI și Swagger, fișiere .http (REST Client, JetBrains HTTP Client), exporturi Gostman și linkuri de partajare.",
+    "formatLabel": "Format",
+    "pastePlaceholder": "Lipiți o colecție, o specificație, o captură sau un link de partajare",
+    "pasteLabel": "Conținut de importat",
+    "pastedName": "lipit",
+    "reading": "Se citește conținutul",
+    "skipStatic": "Omitere imagini, fonturi, stiluri și scripturi",
+    "skippedHeading": "Omise",
+    "binaryFailure": "{{name}} nu este un fișier text.",
+    "tooMany": "Există mai mult de {{limit}} fișiere.",
+    "tooLarge": "{{name}} are {{size}}. Fișierele sunt limitate la {{limit}}.",
+    "totalTooLarge": "Fișierele împreună depășesc {{limit}}.",
+    "noFiles": "Nu au fost găsite fișiere care pot fi importate.",
+    "filesSelected_one": "{{count}} fișier selectat",
+    "filesSelected_few": "{{count}} fișiere selectate",
+    "filesSelected_other": "{{count}} de fișiere selectate",
+    "clearFiles": "Golire",
+    "sourceLine": "{{source}}: {{label}}, {{counts}}",
+    "totalLine": "În total: {{counts}}"
+  },
+  "export": {
+    "includeSecrets": "Includere credențiale",
+    "secretsNote": "Parolele, tokenurile și antetele sau variabilele cu nume de secret sunt înlocuite cu substituenți {{placeholder}}.",
+    "secretsWarning": "Credențialele sunt scrise în fișier ca text simplu.",
+    "variableSecretsNote": "Variabilele cu nume de parolă, token sau cheie sunt exportate fără valorile lor.",
+    "saveFile": "Salvare fișier",
+    "formatLabel": "Formatul exportului",
+    "previewLabel": "Previzualizarea exportului",
+    "summaryNamed": "{{description}}. „{{name}}” are {{counts}}.",
+    "summaryAll": "{{description}}. Aveți {{counts}}.",
+    "collectionField": "Colecție",
+    "formatField": "Format",
+    "allCollections": "Toate colecțiile",
+    "failed": "Exportul nu a putut fi construit: {{reason}}",
+    "adaptFailed": "Scripturile și verificările sunt exportate așa cum sunt scrise, deoarece nu au putut fi adaptate: {{reason}}",
+    "reportLabel": "Ce s-a schimbat pentru instrumentul țintă",
+    "checkHeading_one": "{{count}} element de verificat înainte de a folosi acest export în {{tool}}",
+    "checkHeading_few": "{{count}} elemente de verificat înainte de a folosi acest export în {{tool}}",
+    "checkHeading_other": "{{count}} de elemente de verificat înainte de a folosi acest export în {{tool}}",
+    "changedHeading": "Ce s-a schimbat pentru {{tool}}",
+    "formats": {
+      "gostman": {
+        "label": "Gostman",
+        "description": "Copie de rezervă completă: cereri, dosare, toate mediile, variabilele globale și variabilele colecției, fără valori secrete"
+      },
+      "postman": {
+        "label": "Postman",
+        "description": "Collection v2.1, pe care îl importă și Insomnia. Scripturile și verificările sunt adaptate pentru a rula în ambele, iar variabilele folosite, cu excepția celor secrete, devin variabile ale colecției"
+      },
+      "openapiJson": {
+        "label": "OpenAPI JSON",
+        "description": "Descriere OpenAPI 3.0 a cererilor HTTP"
+      },
+      "openapiYaml": {
+        "label": "OpenAPI YAML",
+        "description": "Descriere OpenAPI 3.0 a cererilor HTTP"
+      },
+      "markdown": {
+        "label": "Markdown",
+        "description": "Documentație API lizibilă"
+      },
+      "html": {
+        "label": "Documentație HTML",
+        "description": "O pagină de sine stătătoare, de publicat sau tipărit. Credențialele sunt omise, iar variabilele rămân ca {{example}}"
+      },
+      "bruno": {
+        "label": "Bruno",
+        "description": "Un dosar de fișiere .bru cu medii, salvat ca .zip. Scripturile și verificările sunt adaptate pentru a rula în Bruno"
+      },
+      "curl": {
+        "label": "Script curl",
+        "description": "O comandă curl pe cerere. Credențialele devin substituenți de variabile de mediu"
+      },
+      "har": {
+        "label": "HAR",
+        "description": "HTTP Archive 1.2 cu cererile, fără răspunsuri"
+      },
+      "http": {
+        "label": "Fișiere .http",
+        "description": "Cereri pentru VS Code REST Client și JetBrains HTTP Client, un fișier pe dosar, cu medii http-client.env.json"
+      }
+    },
+    "docs": {
+      "titlePlaceholder": "Titlu (implicit: API documentation)",
+      "titleLabel": "Titlul documentației",
+      "includeExamples": "Includere exemple de răspuns",
+      "playground": "Includere panou Try it"
+    }
+  },
+  "transfer": {
+    "title": "Import și export",
+    "tabsLabel": "Import sau export",
+    "tabs": {
+      "import": "Import",
+      "export": "Export",
+      "share": "Partajare"
+    }
+  },
+  "importCount": {
+    "collection_one": "{{count}} colecție",
+    "collection_few": "{{count}} colecții",
+    "collection_other": "{{count}} de colecții",
+    "folder_one": "{{count}} dosar",
+    "folder_few": "{{count}} dosare",
+    "folder_other": "{{count}} de dosare",
+    "request_one": "{{count}} cerere",
+    "request_few": "{{count}} cereri",
+    "request_other": "{{count}} de cereri",
+    "flow_one": "{{count}} flux",
+    "flow_few": "{{count}} fluxuri",
+    "flow_other": "{{count}} de fluxuri",
+    "environment_one": "{{count}} mediu",
+    "environment_few": "{{count}} medii",
+    "environment_other": "{{count}} de medii",
+    "global_one": "{{count}} mediu global",
+    "global_few": "{{count}} medii globale",
+    "global_other": "{{count}} de medii globale",
+    "variable_one": "{{count}} variabilă a colecției",
+    "variable_few": "{{count}} variabile ale colecției",
+    "variable_other": "{{count}} de variabile ale colecției",
+    "holding": "{{collections}} cu {{inside}}",
+    "settingsFor": "setări pentru {{owners}}"
+  },
+  "importResult": {
+    "quoted": "„{{name}}”",
+    "joinedEnvironment": "Exista deja un mediu numit „{{name}}”, deci variabilele importate au fost adăugate în el. Variabilele pe care le avea deja și-au păstrat valorile.",
+    "scopedEnvironments_one": "Mediile din {{names}} se aplică doar cererilor sale. Pentru a folosi un mediu peste tot, setați Disponibil în la Fiecare colecție, la Medii.",
+    "scopedEnvironments_few": "Mediile din {{names}} se aplică doar cererilor lor. Pentru a folosi un mediu peste tot, setați Disponibil în la Fiecare colecție, la Medii.",
+    "scopedEnvironments_other": "Mediile din {{names}} se aplică doar cererilor lor. Pentru a folosi un mediu peste tot, setați Disponibil în la Fiecare colecție, la Medii.",
+    "scopedVariables_one": "Variabilele colecției din {{names}} se aplică doar cererilor sale; o variabilă de mediu cu același nume are tot prioritate.",
+    "scopedVariables_few": "Variabilele colecției din {{names}} se aplică doar cererilor lor; o variabilă de mediu cu același nume are tot prioritate.",
+    "scopedVariables_other": "Variabilele colecției din {{names}} se aplică doar cererilor lor; o variabilă de mediu cu același nume are tot prioritate.",
+    "importedCollectionName": "Colecție importată",
+    "settingsAttached_one": "Setările pentru toate colecțiile din acest import au fost adăugate la setările colecției {{names}}, deci se aplică doar cererilor sale. Propriile dvs. setări pentru toate colecțiile nu au fost modificate.",
+    "settingsAttached_few": "Setările pentru toate colecțiile din acest import au fost adăugate la setările colecțiilor {{names}}, deci se aplică doar cererilor lor. Propriile dvs. setări pentru toate colecțiile nu au fost modificate.",
+    "settingsAttached_other": "Setările pentru toate colecțiile din acest import au fost adăugate la setările colecțiilor {{names}}, deci se aplică doar cererilor lor. Propriile dvs. setări pentru toate colecțiile nu au fost modificate.",
+    "settingsWrapped": "Setările pentru toate colecțiile din acest import au fost puse pe o colecție nouă, „{{name}}”, care conține tot ce a fost importat, deci se aplică doar acelor cereri. Propriile dvs. setări pentru toate colecțiile nu au fost modificate."
+  },
+  "fileReads": {
+    "heading_one": "Fișierul pe care îl citește de pe acest computer:",
+    "heading_few": "Cele {{count}} fișiere pe care le citește de pe acest computer:",
+    "heading_other": "Cele {{count}} de fișiere pe care le citește de pe acest computer:",
+    "more": "și încă {{count}}"
+  },
+  "activeImport": {
+    "kindLabels": {
+      "scripts": "scripturi",
+      "oauth": "setări OAuth 2.0",
+      "commands": "comenzi care pornesc servere MCP locale",
+      "files": "citiri de fișiere care trimit fișiere de pe acest computer"
+    },
+    "kindNouns": {
+      "scripts": "scripturi",
+      "oauth": "setări OAuth",
+      "commands": "comenzi",
+      "files": "citiri de fișiere"
+    },
+    "titleOne": "Importați {{kind}}?",
+    "titleMany": "Verificare înainte de import",
+    "withOne": "Import cu {{kind}}",
+    "withMany": "Importare tot",
+    "withoutOne": "Import fără {{kind}}",
+    "withoutMany": "Import fără ele",
+    "leftOut": "Au fost omise: {{kinds}}.",
+    "message_one": "{{count}} element din acest import conține: {{kinds}}. Acestea rulează când o cerere este trimisă și vă pot citi variabilele, deci importați-le doar dintr-o sursă de încredere. Fără ele, restul este importat în continuare.",
+    "message_few": "{{count}} elemente din acest import conțin: {{kinds}}. Acestea rulează când o cerere este trimisă și vă pot citi variabilele, deci importați-le doar dintr-o sursă de încredere. Fără ele, restul este importat în continuare.",
+    "message_other": "{{count}} de elemente din acest import conțin: {{kinds}}. Acestea rulează când o cerere este trimisă și vă pot citi variabilele, deci importați-le doar dintr-o sursă de încredere. Fără ele, restul este importat în continuare."
+  }
+}

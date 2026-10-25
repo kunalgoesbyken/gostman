@@ -2,8 +2,9 @@ package lint
 
 import (
 	"errors"
-	"fmt"
 	"strings"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 var componentKinds = []string{"schemas", "parameters", "responses", "requestBodies", "headers", "examples", "links", "callbacks"}
@@ -84,7 +85,7 @@ func componentUnused(s *Spec) []Issue {
 		for _, name := range sortedKeys(pool) {
 			key := componentKey{kind: kind, name: name}
 			if !used[key] {
-				issues = append(issues, Issue{Path: s.componentPointer(key), Message: fmt.Sprintf("%s/%s is defined but never referenced", kind, name)})
+				issues = append(issues, issueAt(s.componentPointer(key), locales.LintComponentsUnused, locales.Params{"kind": kind, "name": name}))
 			}
 		}
 	}
@@ -98,7 +99,7 @@ func refValid(s *Spec) []Issue {
 		if err == nil || errors.Is(err, errExternalRef) {
 			continue
 		}
-		issues = append(issues, Issue{Path: use.Pointer + "/$ref", Message: "invalid $ref: " + err.Error()})
+		issues = append(issues, issueFrom(use.Pointer+"/$ref", locales.LintComponentsInvalidRef, nil, err))
 	}
 	return issues
 }

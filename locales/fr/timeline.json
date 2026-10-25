@@ -1,0 +1,77 @@
+{
+  "timeline": {
+    "proxied": "Les durées ont été mesurées par le proxy Gostman, du proxy à la cible. Elles n’incluent pas le trajet de votre navigateur au proxy.",
+    "reused": "Connexion réutilisée",
+    "newConnection": "Nouvelle connexion",
+    "omitted_one": "{{count}} requête de plus non affichée.",
+    "omitted_other": "{{count}} requêtes de plus non affichées.",
+    "omitted_many": "{{count}} de requêtes de plus non affichées.",
+    "failedBefore": "Échec avant la connexion",
+    "failedAt": "Échec à l’étape : {{label}}",
+    "requestHeaders": "En-têtes de la requête",
+    "responseHeaders": "En-têtes de la réponse",
+    "reveal": "Afficher la valeur",
+    "hide": "Masquer la valeur",
+    "expanded": "Masquer les détails",
+    "collapsed": "Afficher les détails",
+    "total": "Total",
+    "breakdown": "Répartition du temps",
+    "breakdownProxied": "Répartition du temps (mesurée par le proxy Gostman)",
+    "requests_one": "{{count}} requête",
+    "requests_other": "{{count}} requêtes",
+    "requests_many": "{{count}} de requêtes",
+    "scripts_one": "{{count}} script",
+    "scripts_other": "{{count}} scripts",
+    "scripts_many": "{{count}} de scripts",
+    "consoleLines_one": "{{count}} ligne de console",
+    "consoleLines_other": "{{count}} lignes de console",
+    "consoleLines_many": "{{count}} de lignes de console",
+    "passed": "{{count}} réussies",
+    "failed": "{{count}} en échec",
+    "scriptFailed": "Échec",
+    "noOutput": "Aucune sortie de console ni résultat de vérification.",
+    "secrets": "Gestionnaires de secrets",
+    "secretsRead_one": "{{count}} secret lu",
+    "secretsRead_other": "{{count}} secrets lus",
+    "secretsRead_many": "{{count}} de secrets lus",
+    "secretSkipped": "{{name}} est vide car la connexion « {{connection}} » est désactivée",
+    "seconds": "{{value}} s",
+    "milliseconds": "{{value}} ms",
+    "phases": {
+      "dns": {
+        "label": "Résolution DNS",
+        "short": "DNS"
+      },
+      "connect": {
+        "label": "Connexion TCP",
+        "short": "Connexion"
+      },
+      "tls": {
+        "label": "Négociation TLS",
+        "short": "TLS"
+      },
+      "firstByte": {
+        "label": "Attente du premier octet",
+        "short": "TTFB"
+      },
+      "download": {
+        "label": "Téléchargement du contenu",
+        "short": "Téléch."
+      }
+    },
+    "facts": {
+      "remoteAddress": "Adresse distante",
+      "protocol": "Protocole",
+      "connection": "Connexion",
+      "tls": "TLS",
+      "certificateSubject": "Sujet du certificat",
+      "certificateIssuer": "Émetteur du certificat",
+      "requestBody": "Corps de la requête",
+      "redirectsTo": "Redirige vers",
+      "cookiesSet": "Cookies définis"
+    },
+    "tlsAlpn": "ALPN {{protocol}}",
+    "tlsExpires": "expire le {{date}}",
+    "tlsExpired": "expire le {{date}} (expiré)"
+  }
+}

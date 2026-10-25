@@ -48,7 +48,7 @@ func buildGenerators() map[string]func() string {
 		"$randomIPV6":          randomIPv6,
 		"$randomMACAddress":    randomMAC,
 		"$randomPassword":      func() string { return randomFrom(passwordLetters, 15) },
-		"$randomLocale":        func() string { return pick(locales) },
+		"$randomLocale":        func() string { return pick(sampleLocales) },
 		"$randomUserAgent":     func() string { return pick(userAgents) },
 		"$randomProtocol":      func() string { return pick(internetProtocols) },
 		"$randomSemver":        func() string { return fmt.Sprintf("%d.%d.%d", rand.IntN(10), rand.IntN(20), rand.IntN(30)) },

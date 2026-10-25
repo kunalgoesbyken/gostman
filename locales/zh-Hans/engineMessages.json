@@ -1,0 +1,68 @@
+{
+  "network": {
+    "hostNotFound": "找不到主机 {{host}}。请检查地址是否有拼写错误，以及这台电脑是否已联网。",
+    "untrustedAuthority": "服务器的证书不是由这台电脑信任的机构签发的。{{advice}}",
+    "handshakeCertificate": "服务器中断了 TLS 握手。请检查它是否接受为此主机设置的客户端证书。",
+    "handshake": "服务器中断了 TLS 握手。{{advice}}",
+    "hostMismatch": "服务器的证书对 {{host}} 无效。请检查地址是否与证书签发时的地址一致。",
+    "certificateExpired": "服务器的证书已过期或尚未生效。请检查这台电脑的时钟，或更新证书。",
+    "proxyConnect": "无法连接到代理服务器。请检查 {{source}} 中的代理地址。",
+    "proxyConnectSettings": "无法连接到代理服务器。请检查网络设置中的代理地址。",
+    "dial": "无法连接 {{host}}。请检查服务器是否正在运行，以及主机和端口是否正确。",
+    "dialServer": "无法连接服务器。请检查服务器是否正在运行，以及主机和端口是否正确。"
+  },
+  "advice": {
+    "untrustedAuthority": "请信任其证书颁发机构，或为此请求关闭证书验证。",
+    "clientCertificate": "如果服务器需要客户端证书，请在桌面应用的网络设置中为此主机添加一个。"
+  },
+  "failure": {
+    "timeout": "请求超时",
+    "cancelled": "请求已取消"
+  },
+  "blocked": {
+    "address": "私有地址和本地地址已被阻止",
+    "addressResolved": "私有地址和本地地址已被阻止：{{host}} 解析为 {{address}}",
+    "host": "此主机不在允许调用的主机列表中",
+    "hostNamed": "此主机不在允许调用的主机列表中：{{host}}"
+  },
+  "request": {
+    "urlRequired": "请输入要发送请求的 URL",
+    "urlScheme": "不支持的 URL 协议“{{scheme}}”，请使用 http 或 https",
+    "urlInvalid": "“{{url}}”不是有效的 URL",
+    "urlInvalidMissing": "“{{url}}”不是有效的 URL，原因：{{reason}}",
+    "notDefined_other": "{{names}} 未定义",
+    "headersInvalid": "请求头无效：{{detail}}",
+    "queryInvalid": "查询参数无效：{{detail}}",
+    "variablesInvalid": "环境变量不是有效的 JSON：{{detail}}",
+    "bodyTooLarge": "请求体超过 10 MB",
+    "tooLargeExpanded": "填入变量后，请求超过 10 MB",
+    "variablesTooDeep": "变量之间相互引用的次数过多，无法填入；请简化包含 {{example}} 的变量",
+    "redirects": "重定向 {{count}} 次后已停止",
+    "trailingJson": "JSON 值之后有多余的文本",
+    "expectedObject": "应为 JSON 对象",
+    "expectedRows": "应为 JSON 对象或行列表"
+  },
+  "files": {
+    "unavailable": "{{example}} 只能在桌面应用中读取文件，或在带有 --allow-files 的 gostman run、send 和 load 中读取文件",
+    "relativePath": "请先打开工作区文件夹，才能在 {{example}} 中使用相对路径，或者改用绝对路径",
+    "httpOnly": "{{example}} 只能在 HTTP 和 GraphQL 请求中读取文件",
+    "outsideFolder": "“{{path}}”位于集合文件夹之外；集合只能读取其文件夹内的文件",
+    "unreadable": "无法读取文件“{{path}}”：{{detail}}",
+    "isFolder": "“{{path}}”是文件夹，不是文件",
+    "tooLarge": "文件“{{path}}”超过 10 MB",
+    "notFound": "在 {{resolved}} 找不到文件“{{path}}”",
+    "pathMissing": "{{example}} 的括号之间需要填写文件路径",
+    "networkPath": "“{{path}}”是网络路径或设备路径。只会读取这台电脑磁盘上的文件，因此你的 Windows 登录凭据不会被发送到其他电脑。请把文件复制到这台电脑，或把共享映射为驱动器号"
+  },
+  "attachments": {
+    "unavailable": "从磁盘附加的文件只有桌面应用才能发送",
+    "tooLarge": "附加的文件加起来超过 {{size}} GB",
+    "signed": "此认证方式会对整个请求体签名，因此附加的文件连同请求体合计最多 {{size}} MB",
+    "failed": "附加的文件“{{name}}”：{{detail}}",
+    "notRegular": "“{{path}}”不是常规文件"
+  },
+  "proxy": {
+    "invalidAddress": "“{{address}}”不是有效的代理地址",
+    "unsupportedScheme": "不支持的代理协议“{{scheme}}”，请使用 http、https 或 socks5"
+  }
+}

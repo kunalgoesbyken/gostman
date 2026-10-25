@@ -1,0 +1,22 @@
+{
+  "body": {
+    "typeLabel": "Tipo de corpo",
+    "editorLabel": "Corpo da requisição",
+    "format": "Formatar",
+    "formatTitle": "Indenta o corpo {{type}} ({{chord}}). {{example}} são mantidos como escritos.",
+    "cannotFormatAt": "Não foi possível formatar o {{type}} na linha {{line}}, coluna {{column}}: {{message}}",
+    "cannotFormat": "Não foi possível formatar o {{type}}: {{message}}",
+    "goToLine": "Ir para a linha {{line}}",
+    "noBody": "Sem corpo",
+    "noBodyDescription": "Esta requisição é enviada sem corpo.",
+    "multipartOnGet": "Requisições GET raramente têm corpo, e muitos servidores o ignoram. Mude o método para POST ou PUT se isto deve ser enviado.",
+    "replacedByGraphQL": "O método é GRAPHQL, então o corpo é montado a partir da aba GraphQL e este não é enviado.",
+    "types": {
+      "none": "Nenhum",
+      "text": "Texto",
+      "form": "Form URL-encoded",
+      "multipart": "Multipart",
+      "file": "Arquivo"
+    }
+  }
+}

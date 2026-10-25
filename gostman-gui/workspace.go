@@ -303,8 +303,11 @@ func (a *App) WorkspaceStatus() (WorkspaceStatus, error) {
 	return currentStatus()
 }
 
-func (a *App) PickWorkspaceFolder() (string, error) {
-	return wailsruntime.OpenDirectoryDialog(a.ctx, wailsruntime.OpenDialogOptions{Title: pickFolderTitle, CanCreateDirectories: true})
+func (a *App) PickWorkspaceFolder(title string) (string, error) {
+	if strings.TrimSpace(title) == "" {
+		title = pickFolderTitle
+	}
+	return wailsruntime.OpenDirectoryDialog(a.ctx, wailsruntime.OpenDialogOptions{Title: title, CanCreateDirectories: true})
 }
 
 func (a *App) OpenWorkspace(path string) (WorkspaceStatus, error) {

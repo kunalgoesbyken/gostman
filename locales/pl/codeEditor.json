@@ -1,0 +1,39 @@
+{
+  "codeEditor": {
+    "syntaxError": "Błąd składni",
+    "phrases": {
+      "foldLine": "Zwiń wiersz",
+      "unfoldLine": "Rozwiń wiersz",
+      "foldedLines": "Zwinięte wiersze",
+      "unfoldedLines": "Rozwinięte wiersze",
+      "foldedCode": "zwinięty kod",
+      "unfold": "rozwiń",
+      "completions": "Podpowiedzi",
+      "controlCharacter": "Znak sterujący",
+      "diagnostics": "Diagnostyka",
+      "noDiagnostics": "Brak uwag diagnostycznych",
+      "goToLine": "Przejdź do wiersza",
+      "go": "przejdź",
+      "close": "zamknij",
+      "find": "Znajdź",
+      "replace": "Zamień",
+      "all": "wszystkie",
+      "byWord": "całe słowa",
+      "matchCase": "uwzględnij wielkość liter",
+      "next": "następne",
+      "previous": "poprzednie",
+      "regexp": "regexp",
+      "replaceAll": "zamień wszystkie",
+      "currentMatch": "bieżące dopasowanie",
+      "onLine": "w wierszu",
+      "to": "do",
+      "selectionDeleted": "Usunięto zaznaczenie",
+      "replacedMatches": "zamieniono dopasowania: {{count}}",
+      "replacedMatchOnLine": "zamieniono dopasowanie w wierszu {{line}}",
+      "unchangedLines": "Niezmienione wiersze: {{count}}",
+      "accept": "Akceptuj",
+      "reject": "Odrzuć",
+      "revertChunk": "Cofnij ten fragment"
+    }
+  }
+}

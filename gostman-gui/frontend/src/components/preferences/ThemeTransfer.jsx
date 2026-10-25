@@ -40,6 +40,7 @@ function ImportForm({ onDone, onCancel }) {
         value={text}
         onChange={change}
         rows={6}
+        dir="ltr"
         autoFocus
         className="text-2xs"
       />

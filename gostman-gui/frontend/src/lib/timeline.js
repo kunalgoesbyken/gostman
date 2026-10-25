@@ -1,60 +1,45 @@
-import { formatSize, lookup, pluralize } from './dataUtils'
+import { lookup } from './dataUtils'
+import { formatBytes } from './byteSize'
 import { ERROR_TITLES } from './response'
+import { errorBodyOf } from './responseError'
+import { TIMELINE_TEXT } from './timelineText'
 
 const MS_PER_SECOND = 1000
 const FINE_MS = 10
 const NEGLIGIBLE_MS = 0.05
 const MIN_SEGMENT_PERCENT = 0.4
 
-export const PHASES = [
-  { key: 'dnsMs', label: 'DNS lookup', short: 'DNS', color: 'bg-info', failures: ['dns'] },
-  { key: 'connectMs', label: 'TCP connect', short: 'Connect', color: 'bg-warning', failures: ['connect'] },
-  { key: 'tlsMs', label: 'TLS handshake', short: 'TLS', color: 'bg-syntax-boolean', failures: ['tls'] },
-  { key: 'firstByteMs', label: 'Waiting for first byte', short: 'TTFB', color: 'bg-success', failures: ['request', 'response'] },
-  { key: 'downloadMs', label: 'Content download', short: 'Download', color: 'bg-primary', failures: ['download'] },
-]
+const phase = (name, key, color, failures) => ({
+  key,
+  get label() {
+    return TIMELINE_TEXT.phases[name].label
+  },
+  get short() {
+    return TIMELINE_TEXT.phases[name].short
+  },
+  color,
+  failures,
+})
 
-export const TIMELINE_TEXT = {
-  proxied: 'Timings were measured by the Gostman proxy, from the proxy to the target. They do not include the trip from your browser to the proxy.',
-  reused: 'Reused connection',
-  newConnection: 'New connection',
-  omitted: (count) => `${pluralize(count, 'more request')} not shown.`,
-  failedBefore: 'Failed before connecting',
-  failedAt: (label) => `Failed at: ${label}`,
-  requestHeaders: 'Request headers',
-  responseHeaders: 'Response headers',
-  reveal: 'Reveal value',
-  hide: 'Hide value',
-  expanded: 'Hide details',
-  collapsed: 'Show details',
-  total: 'Total',
-  breakdown: 'Time breakdown',
-  expired: 'expired',
-  requests: (count) => pluralize(count, 'request'),
-  scripts: (count) => pluralize(count, 'script'),
-  consoleLines: (count) => pluralize(count, 'console line'),
-  passed: (count) => `${count} passed`,
-  failed: (count) => `${count} failed`,
-  scriptFailed: 'Failed',
-  noOutput: 'No console output or test results.',
-  secrets: 'Secret managers',
-  secretsRead: (count) => `${pluralize(count, 'secret')} read`,
-  secretSkipped: (name, connection) => `${name} is empty because the connection "${connection}" is off`,
-}
+export const PHASES = [
+  phase('dns', 'dnsMs', 'bg-info', ['dns']),
+  phase('connect', 'connectMs', 'bg-warning', ['connect']),
+  phase('tls', 'tlsMs', 'bg-syntax-boolean', ['tls']),
+  phase('firstByte', 'firstByteMs', 'bg-success', ['request', 'response']),
+  phase('download', 'downloadMs', 'bg-primary', ['download']),
+]
 
 export const ENTRY_KINDS = { SCRIPT: 'script', SECRETS: 'secrets', SEND: 'send', REQUEST: 'request' }
 
 const EMPTY_TIMELINE = { hops: [], totalMs: 0 }
 
-const failureLabels = Object.fromEntries(PHASES.flatMap((phase) => phase.failures.map((failure) => [failure, phase.label])))
-
-export const failureLabel = (failure) => failureLabels[failure] || failure
+export const failureLabel = (failure) => PHASES.find((candidate) => candidate.failures.includes(failure))?.label || failure
 
 export function formatMs(ms) {
-  if (ms >= MS_PER_SECOND) return `${(ms / MS_PER_SECOND).toFixed(2)} s`
-  if (ms >= FINE_MS) return `${Math.round(ms)} ms`
-  if (ms < NEGLIGIBLE_MS) return '0 ms'
-  return `${ms.toFixed(1)} ms`
+  if (ms >= MS_PER_SECOND) return TIMELINE_TEXT.seconds((ms / MS_PER_SECOND).toFixed(2))
+  if (ms >= FINE_MS) return TIMELINE_TEXT.milliseconds(Math.round(ms))
+  if (ms < NEGLIGIBLE_MS) return TIMELINE_TEXT.milliseconds(0)
+  return TIMELINE_TEXT.milliseconds(ms.toFixed(1))
 }
 
 const timelineEntries = (timeline) => timeline.activity ?? [{ kind: ENTRY_KINDS.REQUEST, hops: timeline.hops }]
@@ -114,7 +99,7 @@ const exchangeSummary = (request, response) => ({
   statusCode: response.statusCode,
   protocol: response.protocol,
   failed: Boolean(response.error),
-  detail: response.error ? response.body : '',
+  detail: response.error ? errorBodyOf(response) : '',
 })
 
 export const exchangeEntry = (kind, request) => (response, startMs, endMs) => ({
@@ -153,7 +138,7 @@ export function phaseTotals(hops) {
 export function breakdownTitle(timeline) {
   if (!timeline?.hops.length) return ''
   const lines = phaseTotals(timeline.hops).map(({ phase, ms }) => `${phase.short} ${formatMs(ms)}`)
-  const heading = timeline.proxied ? `${TIMELINE_TEXT.breakdown} (measured by the Gostman proxy)` : TIMELINE_TEXT.breakdown
+  const heading = timeline.proxied ? TIMELINE_TEXT.breakdownProxied : TIMELINE_TEXT.breakdown
   return [heading, ...lines].join('\n')
 }
 
@@ -161,21 +146,32 @@ export function isExpired(notAfter) {
   return Date.parse(notAfter) < Date.now()
 }
 
-function tlsSummary(tls) {
-  const expiry = tls.notAfter ? ` · expires ${tls.notAfter.slice(0, 10)}${isExpired(tls.notAfter) ? ` (${TIMELINE_TEXT.expired})` : ''}` : ''
-  return `${tls.version} · ${tls.cipher}${tls.protocol ? ` · ALPN ${tls.protocol}` : ''}${expiry}`
+const CERTIFICATE_DATE_LENGTH = 10
+const FACT_SEPARATOR = ' · '
+
+const expiryOf = (notAfter) => {
+  const date = notAfter.slice(0, CERTIFICATE_DATE_LENGTH)
+  return isExpired(notAfter) ? TIMELINE_TEXT.tlsExpired({ date }) : TIMELINE_TEXT.tlsExpires({ date })
 }
 
+const tlsSummary = (tls) => [
+  tls.version,
+  tls.cipher,
+  tls.protocol && TIMELINE_TEXT.tlsAlpn(tls.protocol),
+  tls.notAfter && expiryOf(tls.notAfter),
+].filter(Boolean).join(FACT_SEPARATOR)
+
 export function hopFacts(hop) {
+  const labels = TIMELINE_TEXT.facts
   return [
-    ['Remote address', hop.remote],
-    ['Protocol', hop.proto],
-    ['Connection', hop.remote && (hop.reused ? TIMELINE_TEXT.reused : TIMELINE_TEXT.newConnection)],
-    ['TLS', hop.tls && tlsSummary(hop.tls)],
-    ['Certificate subject', hop.tls?.subject],
-    ['Certificate issuer', hop.tls?.issuer],
-    ['Request body', hop.requestBytes > 0 && formatSize(hop.requestBytes)],
-    ['Redirects to', hop.location],
-    ['Cookies set', hop.cookiesSet?.length > 0 && hop.cookiesSet.join(', ')],
+    [labels.remoteAddress, hop.remote],
+    [labels.protocol, hop.proto],
+    [labels.connection, hop.remote && (hop.reused ? TIMELINE_TEXT.reused : TIMELINE_TEXT.newConnection)],
+    [labels.tls, hop.tls && tlsSummary(hop.tls)],
+    [labels.certificateSubject, hop.tls?.subject],
+    [labels.certificateIssuer, hop.tls?.issuer],
+    [labels.requestBody, hop.requestBytes > 0 && formatBytes(hop.requestBytes)],
+    [labels.redirectsTo, hop.location],
+    [labels.cookiesSet, hop.cookiesSet?.length > 0 && hop.cookiesSet.join(', ')],
   ].filter(([, value]) => value)
 }

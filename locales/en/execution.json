@@ -1,0 +1,13 @@
+{
+  "execution": {
+    "promptDeclined": "The request was not sent because the values it asks for were not provided.",
+    "unusableAddress": "The address cannot be used by a script.",
+    "sendLimit": "A script may call sendRequest {{limit}} times.",
+    "hostNotPermitted": "The host \"{{host}}\" is not used by this collection, so scripts may not call it.",
+    "scriptFileReads": "A script cannot add {{example}} placeholders or files attached from disk to a request. Put them in the request itself.",
+    "preRequest": "Pre-request script",
+    "postResponse": "Post-response script",
+    "scopeLabel": "{{stage}} ({{name}})",
+    "restricted": "This folder is not trusted yet, so its scripts, OAuth 2.0 settings, local MCP commands and file reads are switched off. Open the folder menu in the header and choose Trust this folder."
+  }
+}

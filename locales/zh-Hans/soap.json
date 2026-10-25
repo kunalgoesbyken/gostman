@@ -1,0 +1,13 @@
+{
+  "soap": {
+    "versionLabel": "SOAP 版本",
+    "format": "格式化 XML",
+    "formatTitle": "缩进信封。注释和 CDATA 区段会保留。",
+    "fault": "SOAP Fault",
+    "faultCode": "代码",
+    "faultReason": "原因",
+    "faultActor": "Actor",
+    "faultDetail": "详情",
+    "malformed": "无法格式化 XML：{{message}}"
+  }
+}

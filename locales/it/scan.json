@@ -1,0 +1,32 @@
+{
+  "scan": {
+    "title": "Cerca segreti",
+    "commandDescription": "Trova le credenziali scritte nelle richieste prima di condividerle o di farne il commit",
+    "intro": "Cerca formati di token noti, valori dall'aspetto casuale nei campi delle credenziali e password scritte nelle impostazioni di autenticazione. I valori scritti come {{example}} vanno bene. Nulla lascia questa finestra tranne il controllo stesso, e di un valore vengono mostrati al massimo pochi caratteri.",
+    "includeExamples": "Includi le risposte di esempio salvate",
+    "scanning": "Scansione in corso",
+    "clean": "Nessun segreto trovato",
+    "cleanDescription": "Non sono stati trovati formati di token, valori di credenziali dall'aspetto casuale o password scritte a mano.",
+    "failed": "Impossibile eseguire il controllo: {{message}}",
+    "goToRequest": "Vai alla richiesta",
+    "findings": "Risultati",
+    "showFindings": "Mostra i risultati",
+    "hideFindings": "Nascondi i risultati",
+    "shareAnyway": "Condividi comunque",
+    "found_one": "{{count}} possibile segreto trovato",
+    "found_many": "{{count}} di possibili segreti trovati",
+    "found_other": "{{count}} possibili segreti trovati",
+    "foundShare": "Questi restano nel link o nel file che crei. Sostituiscili prima con {{example}}, oppure condividi comunque.",
+    "foundExport": "Questi vengono scritti nell'export. Sostituiscili prima con {{example}} se il file verrà condiviso o ne verrà fatto il commit.",
+    "severity": {
+      "high": "Alta",
+      "medium": "Media"
+    },
+    "kinds": {
+      "request": "Richiesta",
+      "folder": "Cartella",
+      "environment": "Ambiente",
+      "collection": "Raccolta"
+    }
+  }
+}

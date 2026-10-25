@@ -1,0 +1,15 @@
+{
+  "dialog": {
+    "moveWindow": "移动窗口",
+    "moveHint": "拖动或使用方向键移动。Shift 加方向键可调整大小。双击标题栏或按 Home 可恢复默认大小和位置。",
+    "close": "关闭",
+    "cancel": "取消",
+    "save": "保存",
+    "rename": "重命名",
+    "create": "创建",
+    "getDesktopApp": "获取桌面应用",
+    "copy": "复制",
+    "copied": "已复制",
+    "ok": "确定"
+  }
+}

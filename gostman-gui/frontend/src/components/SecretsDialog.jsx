@@ -104,6 +104,7 @@ function CredentialInput({ field, draft, onChange }) {
       autoComplete="off"
       spellCheck={false}
       onChange={(event) => onChange(field.name, event.target.value)}
+      dir="ltr"
       className="font-mono"
     />
   )
@@ -170,6 +171,7 @@ function UnlockField({ kind, draft, secrets, onFilled }) {
             type="password"
             value={password}
             aria-label={text.label}
+            dir="ltr"
             autoComplete="off"
             spellCheck={false}
             disabled={isWaiting}
@@ -201,6 +203,7 @@ function ConnectionForm({ draft, isNew, kinds, secrets, onChange, onFilled }) {
       <Field label={TEXT.alias}>
         <Input
           value={draft.alias}
+          dir="ltr"
           disabled={!isNew}
           placeholder={TEXT.aliasPlaceholder}
           spellCheck={false}
@@ -310,7 +313,7 @@ function ConnectionManager({ secrets, onClose }) {
         )}
       </DialogBody>
       <DialogFooter>
-        {(problem || failure) && <p role="alert" className="mr-auto min-w-0 self-center text-xs text-destructive">{problem || failure}</p>}
+        {(problem || failure) && <p role="alert" className="me-auto min-w-0 self-center text-xs text-destructive">{problem || failure}</p>}
         {editing ? (
           <>
             <Button variant="outline" onClick={() => setEditing(null)}>{TEXT.cancel}</Button>

@@ -1,0 +1,43 @@
+{
+  "onboarding": {
+    "title": "Get started",
+    "progress": "{{done}} of {{total}} done",
+    "next": "Next",
+    "completeTitle": "You are set up",
+    "completeNotice": "You finished getting started.",
+    "completeHint": "You have tried the main parts of Gostman. The tutorial goes further with chaining requests, scripts and running your checks in CI.",
+    "tutorial": "Read the tutorial",
+    "hide": "Hide",
+    "hideLabel": "Hide the getting started steps",
+    "done": "Done",
+    "steps": {
+      "send": {
+        "title": "Send a request",
+        "hint": "Send a sample request to a public echo service and read the response.",
+        "action": "Send sample request"
+      },
+      "save": {
+        "title": "Save it to your collection",
+        "hint": "Saved requests appear in the sidebar and stay on this device.",
+        "action": "Save request"
+      },
+      "variable": {
+        "title": "Add a variable",
+        "hint": "Define baseUrl once in an environment, then write {{example}} wherever you need it.",
+        "action": "Open environments",
+        "defined": "defined",
+        "missing": "not defined yet"
+      },
+      "check": {
+        "title": "Add a check",
+        "hint": "Write an assertion such as res.status equals 200, or use Add checks from this response in the Checks tab. Then save the request, and each response shows a pass or a fail.",
+        "action": "Open the Checks tab"
+      },
+      "run": {
+        "title": "Run your requests together",
+        "hint": "The runner sends every saved request in order and reports which checks passed.",
+        "action": "Open the runner"
+      }
+    }
+  }
+}

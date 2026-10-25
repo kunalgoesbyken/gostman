@@ -1,0 +1,31 @@
+{
+  "openLink": {
+    "notAddress": "Gostmanで開けるWebアドレスではありません。",
+    "tooLong": "このアドレスは長すぎます。",
+    "credentials": "ユーザー名やパスワードを含むアドレスは使用できません。",
+    "scheme": "httpsのアドレスのみ使用できます。",
+    "noHost": "アドレスにホスト名がありません。",
+    "reachFailure": "Gostmanはこのファイルを送信するサーバーに接続できませんでした。接続を確認して、もう一度お試しください。",
+    "title": "リンクから開く",
+    "invalidTitle": "このリンクは開けません",
+    "intro": "リンクから、Gostmanにコレクションまたは仕様のダウンロードが要求されました。「ダウンロード」を選ぶまで何もダウンロードされず、「インポート」を選ぶまで何もインポートされません。",
+    "trustNote": "このリンクを送った相手を信頼できる場合にのみ、続行してください。",
+    "hostLabel": "取得元",
+    "addressLabel": "アドレス",
+    "cancel": "キャンセル",
+    "download": "ダウンロード",
+    "downloading": "ダウンロード中",
+    "import": "インポート",
+    "detected": "検出：{{format}}",
+    "downloadedFrom": "{{host}}からダウンロードしました",
+    "items_other": "{{count}}件の項目",
+    "activeNote": "{{items}}にスクリプト、OAuth 2.0設定、ローカルMCPコマンド、ファイル読み取りが含まれています。インポートの前に確認があり、インポートしたフォルダーは信頼するまで制限付きのままです。",
+    "badgeAlt": "Gostmanで開く",
+    "builderTitle": "「Gostmanで開く」リンク",
+    "builderHint": "オンラインで公開されているコレクションまたは仕様（Postmanコレクション、OpenAPIファイル、Insomnia、HAR、Gostmanのエクスポート）のアドレスを貼り付けてください。下のリンクを使うと、READMEの読者が確認のうえでGostmanで開けます。",
+    "builderLabel": "コレクションの公開アドレス",
+    "desktopLabel": "デスクトップアプリのリンク",
+    "webLabel": "Webアプリのリンク",
+    "badgeLabel": "READMEバッジ（Markdown）"
+  }
+}

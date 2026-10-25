@@ -1,0 +1,18 @@
+{
+  "variables": {
+    "dynamic": "générée à chaque envoi de la requête",
+    "prompt": "demandée lors de l’envoi de la requête",
+    "undefinedName": "n’est pas définie dans l’environnement actif",
+    "resolvesTo": "vaut",
+    "through": "via {{names}}",
+    "sources": {
+      "global": "Globale",
+      "collection": "Collection",
+      "environment": "Environnement",
+      "folder": "Dossier",
+      "request": "Requête",
+      "process": "Fichier .env",
+      "session": "Session"
+    }
+  }
+}

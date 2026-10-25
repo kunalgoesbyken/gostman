@@ -1,6 +1,6 @@
-const collator = new Intl.Collator(undefined, { sensitivity: 'base', usage: 'search' })
+import { searchCollator } from './i18n/format'
 
-const startsWithText = (label, prefix) => collator.compare(label.slice(0, prefix.length), prefix) === 0
+const startsWithText = (label, prefix) => searchCollator().compare(label.slice(0, prefix.length), prefix) === 0
 
 const isShortcutChord = (event) => (event.ctrlKey || event.metaKey || event.altKey) && !event.getModifierState('AltGraph')
 

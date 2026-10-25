@@ -1,0 +1,61 @@
+{
+  "oauth": {
+    "grants": {
+      "clientCredentials": "Client Credentials",
+      "password": "Passwort",
+      "authorizationCode": "Authorization Code",
+      "deviceCode": "Device Code"
+    },
+    "fields": {
+      "grant": "Grant-Typ",
+      "issuer": "Aussteller",
+      "authUrl": "Autorisierungs-URL",
+      "deviceUrl": "URL der Geräteautorisierung",
+      "callbackUrl": "Callback-URL",
+      "callbackTitle": "Registrieren Sie {{url}} beim Provider als Redirect-URI",
+      "tokenUrl": "Token-URL",
+      "clientId": "Client-ID",
+      "clientSecret": "Client Secret",
+      "username": "Benutzername",
+      "password": "Passwort",
+      "scope": "Scope",
+      "credentialsIn": "Zugangsdaten senden in",
+      "credentialsHeader": "Basic-Auth-Header",
+      "credentialsBody": "Body der Anfrage",
+      "pkce": "PKCE verwenden",
+      "headerPrefix": "Header-Präfix",
+      "sendIdToken": "ID-Token statt Zugriffstoken senden",
+      "accessToken": "Zugriffstoken",
+      "idToken": "ID-Token"
+    },
+    "discover": "Ermitteln",
+    "discoverTitle": "Die Endpunkte aus /.well-known/openid-configuration des Ausstellers eintragen",
+    "discovered": "Endpunkte von {{issuer}} eingetragen.",
+    "discovering": "Das Discovery-Dokument des Ausstellers wird gelesen.",
+    "getToken": "Token holen",
+    "cancel": "Abbrechen",
+    "clearToken": "Token löschen",
+    "waitingForBrowser": "Warten, bis die Anmeldung in Ihrem Browser abgeschlossen ist.",
+    "requesting": "Ein Token wird angefordert.",
+    "waitingForDevice": "Warten, bis Sie den Code eingeben und sich anmelden.",
+    "deviceCode": "Geben Sie diesen Code auf der Anmeldeseite ein:",
+    "openSignInPage": "Anmeldeseite öffnen",
+    "noToken": "Noch kein Token.",
+    "otherEnvironment": "Das Token wurde mit einer anderen Umgebung geholt und wird daher nicht gesendet. Holen Sie ein Token für diese Umgebung.",
+    "noIdToken": "Der Provider hat kein ID-Token zurückgegeben. Fügen Sie openid zum Scope hinzu und holen Sie ein neues Token.",
+    "noExpiry": "Der Provider hat keine Ablaufzeit gemeldet.",
+    "expires": "Läuft ab: {{expiry}}.",
+    "expired": "Abgelaufen: {{expiry}}. Ein neues Token wird angefordert, wenn es sich ohne Anmeldung erneuern lässt.",
+    "signInNeeded": "Diese Anfrage braucht ein OAuth-2-Token. Öffnen Sie den Tab „Auth“ und wählen Sie „Token holen“.",
+    "signInForEnvironment": "Das OAuth-2-Token wurde mit einer anderen Umgebung geholt und wird daher nicht gesendet. Öffnen Sie den Tab „Auth“ und wählen Sie „Token holen“, um sich für diese Umgebung anzumelden.",
+    "deviceExpired": "Der Device Code ist abgelaufen, bevor die Anmeldung abgeschlossen war. Holen Sie erneut ein Token.",
+    "cancelled": "Die Anmeldung wurde abgebrochen.",
+    "popup": {
+      "blocked": "Das Anmeldefenster wurde blockiert. Erlauben Sie Pop-ups für diese Website und versuchen Sie es erneut.",
+      "timedOut": "Innerhalb von fünf Minuten ging keine Anmeldung ein.",
+      "noCode": "Der Provider hat keinen Authorization Code zurückgegeben.",
+      "refused": "Der Provider hat die Anmeldung abgelehnt: {{reason}}",
+      "wrongIssuer": "Die Anmeldeantwort nennt den Aussteller „{{received}}“ statt „{{expected}}“ und wurde daher verworfen."
+    }
+  }
+}

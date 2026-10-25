@@ -1,0 +1,41 @@
+{
+  "realtime": {
+    "targets": {
+      "topic": "トピック",
+      "event": "イベント"
+    },
+    "browser": {
+      "closed": "接続が閉じられました（コード{{code}}）",
+      "closedWithReason": "接続が閉じられました（コード{{code}}：{{reason}}）",
+      "notConnected": "接続できませんでした（コード{{code}}）",
+      "notConnectedWithReason": "接続できませんでした（コード{{code}}：{{reason}}）"
+    },
+    "graphql": {
+      "subscribing": "接続が承認されました。サブスクライブしています。",
+      "complete": "サブスクリプションが完了しました"
+    },
+    "socketIo": {
+      "joined": "名前空間{{namespace}}に参加しました",
+      "left": "サーバーが名前空間から退出しました",
+      "closed": "サーバーがSocket.IOセッションを閉じました",
+      "refused": "サーバーが接続を拒否しました",
+      "binary": "バイナリのSocket.IOパケットはデコードされません。",
+      "noEvent": "送信するイベント名を入力してください。",
+      "ack": "ack {{id}}"
+    },
+    "mqtt": {
+      "connected": "ブローカーに接続しました",
+      "refusedVersion": "ブローカーが接続を拒否しました：ブローカーがMQTT 3.1.1に対応していません",
+      "refusedIdentifier": "ブローカーが接続を拒否しました：クライアントIDが拒否されました",
+      "refusedUnavailable": "ブローカーが接続を拒否しました：ブローカーが利用できません",
+      "refusedCredentials": "ブローカーが接続を拒否しました：ユーザー名またはパスワードが正しくありません",
+      "refusedUnauthorized": "ブローカーが接続を拒否しました：クライアントが認可されていません",
+      "refusedOther": "ブローカーが接続を拒否しました：コード{{code}}",
+      "subscribed": "{{filter}}をサブスクライブしました",
+      "subscribeRefused": "ブローカーが{{filter}}のサブスクライブを拒否しました",
+      "notBinary": "MQTTのバイナリデータが必要ですが、テキストを受け取りました。",
+      "noTopic": "パブリッシュ先のトピックを入力してください。",
+      "noFilter": "サブスクライブするトピックフィルターを入力してください。"
+    }
+  }
+}

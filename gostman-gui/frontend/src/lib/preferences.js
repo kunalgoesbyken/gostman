@@ -4,6 +4,7 @@ import { sanitizeOverrides } from './chords.js'
 import { isHexColor } from './color.js'
 import { isPlainObject, parseJSON } from './dataUtils.js'
 import { FONT_SLOTS, applyFont } from './fonts.js'
+import { LANGUAGES, LANGUAGE_VALUES, SYSTEM_LANGUAGE } from './i18n/languages.js'
 import { readStored, writeStored } from './storage.js'
 import { normalizeTagColors } from './tagColors.js'
 import {
@@ -27,7 +28,7 @@ export const TEXT_SCALES = [90, 100, 110, 125]
 export const FONT_NAME_LENGTH = 100
 export const DENSITIES = ['comfortable', 'compact']
 export const RESPONSE_LAYOUTS = ['below', 'right']
-export const LANGUAGES = [{ value: 'en', direction: 'ltr' }]
+export { LANGUAGES }
 export const EDITOR_FONT_SIZES = { min: 10, max: 24 }
 export const REQUEST_TIMEOUT_SECONDS = { min: 0, max: 3600 }
 export const BUILT_IN_TIMEOUT_SECONDS = 30
@@ -50,7 +51,7 @@ export const DEFAULT_PREFERENCES = {
   wrapLines: true,
   requestTimeoutSeconds: 0,
   confirmCloseTab: true,
-  language: 'en',
+  language: SYSTEM_LANGUAGE,
   shortcuts: {},
 }
 
@@ -74,7 +75,7 @@ const VALIDATORS = {
   wrapLines: isFlag,
   requestTimeoutSeconds: integerWithin(REQUEST_TIMEOUT_SECONDS),
   confirmCloseTab: isFlag,
-  language: oneOf(LANGUAGES.map((language) => language.value)),
+  language: oneOf(LANGUAGE_VALUES),
 }
 
 const withUsableAccent = (preferences) => (
@@ -164,7 +165,6 @@ function applyThemeColors(root, preferences, mode, contrast) {
 
 function applyToDocument({ preferences, systemIsDark, systemWantsMoreContrast }) {
   const root = document.documentElement
-  const language = LANGUAGES.find((candidate) => candidate.value === preferences.language)
   const mode = resolveTheme(preferences.theme, systemIsDark)
   const contrast = resolveContrast(preferences.contrast, systemWantsMoreContrast)
   root.classList.toggle('dark', windowTone(preferences, mode) === 'dark')
@@ -175,8 +175,6 @@ function applyToDocument({ preferences, systemIsDark, systemWantsMoreContrast })
   Object.entries(FONT_SLOTS).forEach(([name, slot]) => applyFont(root, slot, preferences[name]))
   root.dataset.density = preferences.density
   root.dataset.responseLayout = preferences.responseLayout
-  root.lang = language.value
-  root.dir = language.direction
 }
 
 function watchSystemSettings() {

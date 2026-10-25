@@ -1,0 +1,61 @@
+{
+  "loadTest": {
+    "title": "Test de charge",
+    "commandTitle": "Tester la charge de cette requête",
+    "commandDescription": "Envoie la requête actuelle de nombreuses fois simultanément et mesure la latence",
+    "barLabel": "Test de charge",
+    "barHint": "Tester la charge de cette requête",
+    "notice": "Ne testez que des systèmes qui vous appartiennent ou que vous avez l’autorisation de tester. Chaque travailleur envoie la requête telle qu’elle est affichée ici, sans scripts ni cookies partagés.",
+    "unsupported": "Seules les requêtes HTTP peuvent être soumises à un test de charge. Les requêtes gRPC, MCP, WebSocket et en streaming ne sont pas prises en charge.",
+    "noUrl": "Donnez d’abord une URL à la requête.",
+    "concurrency": "Travailleurs simultanés",
+    "duration": "Durée (secondes)",
+    "rateLimit": "Plafond de requêtes par seconde",
+    "rateLimitHint": "Laissez vide pour aucun plafond",
+    "start": "Démarrer",
+    "stop": "Arrêter",
+    "running": "En cours",
+    "stopped": "Arrêté avant la fin",
+    "progress": {
+      "elapsed": "Écoulé",
+      "requests": "Requêtes",
+      "rate": "Requêtes/s",
+      "p95": "p95",
+      "failed": "Échecs"
+    },
+    "summary": {
+      "total": "Requêtes",
+      "succeeded": "Réussies",
+      "failed": "Échecs",
+      "rate": "Requêtes/s",
+      "received": "Reçu"
+    },
+    "failureBreakdown": "{{networkErrors}} réseau, {{statusFailures}} avec un statut {{failureStatus}} ou supérieur",
+    "percentilesLabel": "Latence",
+    "percentileColumns": {
+      "name": "Mesure",
+      "value": "Millisecondes"
+    },
+    "percentiles": {
+      "minMs": "min",
+      "meanMs": "moy.",
+      "p50Ms": "p50",
+      "p90Ms": "p90",
+      "p95Ms": "p95",
+      "p99Ms": "p99",
+      "maxMs": "max"
+    },
+    "seconds": "{{value}} s",
+    "milliseconds": "{{value}} ms",
+    "statusCount": "{{code}} x {{count}}",
+    "statusLabel": "Codes de statut",
+    "histogramLabel": "Distribution de la latence",
+    "histogramBarLabel_one": "De {{from}} à {{to}} ms : {{count}} requête",
+    "histogramBarLabel_other": "De {{from}} à {{to}} ms : {{count}} requêtes",
+    "histogramBarLabel_many": "De {{from}} à {{to}} ms : {{count}} de requêtes",
+    "errorsLabel": "Exemples d’erreurs",
+    "accuracy": "Les percentiles sont précis à {{percent}} % près.",
+    "emptyTitle": "Aucun résultat pour l’instant",
+    "emptyHint": "Choisissez la charge et appuyez sur Démarrer."
+  }
+}

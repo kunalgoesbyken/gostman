@@ -1,0 +1,21 @@
+{
+  "jsonFormat": {
+    "expectedValue": "Une valeur était attendue",
+    "unexpectedEnd": "Le JSON se termine trop tôt",
+    "unexpected": "{{character}} inattendu",
+    "endOfText": "fin du texte",
+    "expectedKey": "Un nom de propriété entre guillemets doubles était attendu",
+    "expectedColon": "« : » était attendu après le nom de la propriété",
+    "expectedObjectEnd": "« , » ou « } » était attendu après la valeur de la propriété",
+    "expectedArrayEnd": "« , » ou « ] » était attendu après l’élément",
+    "trailingComma": "Supprimez la virgule avant « {{closer}} »",
+    "unclosedString": "Cette chaîne n’a pas de guillemet fermant",
+    "lineBreakInString": "Les retours à la ligne dans une chaîne doivent s’écrire \\n",
+    "controlInString": "Les caractères de contrôle dans une chaîne doivent être échappés",
+    "badEscape": "Séquence d’échappement inconnue dans une chaîne",
+    "badNumber": "Ce nombre n’est pas du JSON valide",
+    "unclosedReference": "Ce {{reference}} n’a pas de {{closer}} fermant",
+    "extraText": "Texte inattendu après la valeur JSON",
+    "tooDeep": "Le JSON est imbriqué trop profondément pour être formaté"
+  }
+}

@@ -20,6 +20,7 @@ export function ColorField({ label, hexLabel, value, isCustom, onChange }) {
       <input type="color" aria-label={label} title={label} value={value} onChange={(event) => onChange(event.target.value)} className="color-swatch" />
       <Input
         aria-label={hexLabel}
+        dir="ltr"
         aria-invalid={!isValid}
         value={draft}
         maxLength={7}

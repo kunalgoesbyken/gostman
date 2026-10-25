@@ -1,0 +1,28 @@
+{
+  "requestTabs": {
+    "sections": "リクエストのセクション",
+    "more": "その他",
+    "moreHint": "その他のリクエストセクション",
+    "loading": "読み込み中",
+    "examples": "例",
+    "examplesHint": "保存済みのレスポンスの例",
+    "headerLabel": "ヘッダー",
+    "variableLabel": "変数",
+    "paramLabel": "パラメーター",
+    "paramsNote": "これらの行は、URLのクエリ文字列を反映しています。チェックを外した行はここに残りますが、送信されません。",
+    "labels": {
+      "params": "パラメーター",
+      "headers": "ヘッダー",
+      "body": "ボディ",
+      "auth": "認証",
+      "graphql": "GraphQL",
+      "grpc": "gRPC",
+      "mcp": "MCP",
+      "websocket": "WebSocket",
+      "vars": "変数",
+      "extract": "抽出",
+      "tests": "チェック",
+      "settings": "設定"
+    }
+  }
+}

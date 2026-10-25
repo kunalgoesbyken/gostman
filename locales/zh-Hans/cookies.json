@@ -1,0 +1,10 @@
+{
+  "cookies": {
+    "clearAll": "全部清除",
+    "filter": "按名称或域名筛选",
+    "emptyTitle": "没有存储的 Cookie",
+    "emptyHint": "响应设置的 Cookie 会保存在这里，并在之后的请求中发回同一站点。",
+    "noMatches": "没有匹配的 Cookie 名称或域名。",
+    "remove": "删除 Cookie {{name}}"
+  }
+}

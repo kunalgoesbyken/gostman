@@ -1,0 +1,160 @@
+{
+  "importFormats": {
+    "auto": "自动检测",
+    "http": ".http 文件"
+  },
+  "formatLabels": {
+    "insomnia": "Insomnia 导出文件",
+    "har": "HAR 抓包",
+    "wsdl": "WSDL 服务",
+    "bruno": "Bruno 集合",
+    "postman": "Postman 文件",
+    "openapi": "OpenAPI 规范",
+    "gostman": "Gostman 导出文件",
+    "http": ".http 文件"
+  },
+  "import": {
+    "chooseFiles": "选择文件",
+    "importButton": "导入",
+    "chooseFolder": "选择文件夹",
+    "dropHint": "将文件、文件夹或 .zip 拖放到这里，或在下方粘贴内容。支持 Insomnia、HAR、WSDL、Bruno、Postman、OpenAPI 和 Swagger、.http 文件（REST Client、JetBrains HTTP Client）、Gostman 导出文件和分享链接。",
+    "formatLabel": "格式",
+    "pastePlaceholder": "粘贴集合、规范、抓包文件或分享链接",
+    "pasteLabel": "要导入的内容",
+    "pastedName": "粘贴的内容",
+    "reading": "正在读取内容",
+    "skipStatic": "排除图片、字体、样式和脚本",
+    "skippedHeading": "已排除",
+    "binaryFailure": "{{name}} 不是文本文件。",
+    "tooMany": "文件超过 {{limit}} 个。",
+    "tooLarge": "{{name}} 大小为 {{size}}。文件上限为 {{limit}}。",
+    "totalTooLarge": "这些文件加起来超过了 {{limit}}。",
+    "noFiles": "没有找到可导入的文件。",
+    "filesSelected_other": "已选择 {{count}} 个文件",
+    "clearFiles": "清除",
+    "sourceLine": "{{source}}：{{label}}，{{counts}}",
+    "totalLine": "总计：{{counts}}"
+  },
+  "export": {
+    "includeSecrets": "包含凭据",
+    "secretsNote": "密码、令牌，以及名称含机密字样的请求头或变量，会被替换为 {{placeholder}} 占位符。",
+    "secretsWarning": "凭据将以明文写入文件。",
+    "variableSecretsNote": "名称类似密码、令牌或密钥的变量，导出时不包含其值。",
+    "saveFile": "保存文件",
+    "formatLabel": "导出格式",
+    "previewLabel": "导出预览",
+    "summaryNamed": "{{description}}。“{{name}}”包含 {{counts}}。",
+    "summaryAll": "{{description}}。你共有 {{counts}}。",
+    "collectionField": "集合",
+    "formatField": "格式",
+    "allCollections": "所有集合",
+    "failed": "无法生成导出内容：{{reason}}",
+    "adaptFailed": "脚本和检查按原样导出，因为无法适配：{{reason}}",
+    "reportLabel": "针对目标工具所做的更改",
+    "checkHeading_other": "在 {{tool}} 中使用前，有 {{count}} 处需要检查",
+    "changedHeading": "针对 {{tool}} 所做的更改",
+    "formats": {
+      "gostman": {
+        "label": "Gostman",
+        "description": "完整备份：请求、文件夹、所有环境、全局变量和集合变量，不含机密值"
+      },
+      "postman": {
+        "label": "Postman",
+        "description": "Collection v2.1，Insomnia 也可导入。脚本和检查已调整为两者都能运行，用到的变量（机密变量除外）会变为集合变量"
+      },
+      "openapiJson": {
+        "label": "OpenAPI JSON",
+        "description": "HTTP 请求的 OpenAPI 3.0 描述"
+      },
+      "openapiYaml": {
+        "label": "OpenAPI YAML",
+        "description": "HTTP 请求的 OpenAPI 3.0 描述"
+      },
+      "markdown": {
+        "label": "Markdown",
+        "description": "便于阅读的 API 文档"
+      },
+      "html": {
+        "label": "HTML 文档",
+        "description": "单个独立页面，可发布或打印。不含凭据，变量保持为 {{example}}"
+      },
+      "bruno": {
+        "label": "Bruno",
+        "description": "包含环境的 .bru 文件夹，保存为 .zip。脚本和检查已调整为可在 Bruno 中运行"
+      },
+      "curl": {
+        "label": "curl 脚本",
+        "description": "每个请求对应一条 curl 命令。凭据会变为环境变量占位符"
+      },
+      "har": {
+        "label": "HAR",
+        "description": "HTTP Archive 1.2，包含请求，不含响应"
+      },
+      "http": {
+        "label": ".http 文件",
+        "description": "适用于 VS Code REST Client 和 JetBrains HTTP Client 的请求，每个文件夹一个文件，环境保存在 http-client.env.json 中"
+      }
+    },
+    "docs": {
+      "titlePlaceholder": "标题（默认：API documentation）",
+      "titleLabel": "文档标题",
+      "includeExamples": "包含示例响应",
+      "playground": "包含“试一试”面板"
+    }
+  },
+  "transfer": {
+    "title": "导入和导出",
+    "tabsLabel": "导入或导出",
+    "tabs": {
+      "import": "导入",
+      "export": "导出",
+      "share": "分享"
+    }
+  },
+  "importCount": {
+    "collection_other": "{{count}} 个集合",
+    "folder_other": "{{count}} 个文件夹",
+    "request_other": "{{count}} 个请求",
+    "flow_other": "{{count}} 个流程",
+    "environment_other": "{{count}} 个环境",
+    "global_other": "{{count}} 个全局环境",
+    "variable_other": "{{count}} 个集合变量",
+    "holding": "{{collections}}，含 {{inside}}",
+    "settingsFor": "{{owners}}的设置"
+  },
+  "importResult": {
+    "quoted": "“{{name}}”",
+    "joinedEnvironment": "已存在名为“{{name}}”的环境，因此导入的变量已添加到其中。它原有的变量保留原值。",
+    "scopedEnvironments_other": "来自 {{names}} 的环境只适用于各自的请求。若要让某个环境适用于所有位置，请在“环境”中把“适用于”设为“所有集合”。",
+    "scopedVariables_other": "来自 {{names}} 的集合变量只适用于各自的请求；同名的环境变量仍然优先。",
+    "importedCollectionName": "导入的集合",
+    "settingsAttached_other": "此次导入中适用于所有集合的设置，已添加到 {{names}} 的集合设置中，因此只适用于它们的请求。你自己的“所有集合的设置”没有改变。",
+    "settingsWrapped": "此次导入中适用于所有集合的设置，已放入新建的集合“{{name}}”，该集合包含所有导入的内容，因此只适用于这些请求。你自己的“所有集合的设置”没有改变。"
+  },
+  "fileReads": {
+    "heading_other": "它从这台电脑读取的 {{count}} 个文件：",
+    "more": "另有 {{count}} 个"
+  },
+  "activeImport": {
+    "kindLabels": {
+      "scripts": "脚本",
+      "oauth": "OAuth 2.0 设置",
+      "commands": "用于启动本地 MCP 服务器的命令",
+      "files": "会发送这台电脑上文件的文件读取"
+    },
+    "kindNouns": {
+      "scripts": "脚本",
+      "oauth": "OAuth 设置",
+      "commands": "命令",
+      "files": "文件读取"
+    },
+    "titleOne": "导入{{kind}}？",
+    "titleMany": "导入前请检查",
+    "withOne": "连同{{kind}}一起导入",
+    "withMany": "全部导入",
+    "withoutOne": "不含{{kind}}导入",
+    "withoutMany": "不含它们导入",
+    "leftOut": "已排除{{kinds}}。",
+    "message_other": "此次导入中有 {{count}} 项带有{{kinds}}。它们会在发送请求时运行，并且可以读取你的变量，因此请只从你信任的来源导入。不含它们时，其余内容仍会导入。"
+  }
+}

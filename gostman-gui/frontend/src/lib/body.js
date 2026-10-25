@@ -1,3 +1,5 @@
+import { BODY_TEXT as LABEL_TEXT } from './bodyText'
+
 export const BODY_NONE = 'none'
 export const BODY_JSON = 'json'
 export const BODY_TEXT = 'text'
@@ -8,14 +10,14 @@ export const BODY_BINARY = 'binary'
 export const BODY_SOAP = 'soap'
 
 export const BODY_TYPES = [
-  { value: BODY_NONE, label: 'None' },
+  { value: BODY_NONE, get label() { return LABEL_TEXT.types.none } },
   { value: BODY_JSON, label: 'JSON' },
-  { value: BODY_TEXT, label: 'Text' },
+  { value: BODY_TEXT, get label() { return LABEL_TEXT.types.text } },
   { value: BODY_XML, label: 'XML' },
   { value: BODY_SOAP, label: 'SOAP' },
-  { value: BODY_FORM, label: 'Form URL-encoded' },
-  { value: BODY_MULTIPART, label: 'Multipart' },
-  { value: BODY_BINARY, label: 'File' },
+  { value: BODY_FORM, get label() { return LABEL_TEXT.types.form } },
+  { value: BODY_MULTIPART, get label() { return LABEL_TEXT.types.multipart } },
+  { value: BODY_BINARY, get label() { return LABEL_TEXT.types.file } },
 ]
 
 const RAW_KIND = 'raw'

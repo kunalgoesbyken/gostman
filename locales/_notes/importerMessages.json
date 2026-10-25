@@ -1,0 +1,20 @@
+{
+  "scripts": "{{names}} is a list of quoted request or folder names. This and the next messages are shown after importing a collection.",
+  "andMore": "{{names}} is a list of quoted names; {{count}} is the number of names that are not shown.",
+  "place": "Where a script note applies. Used as {{label}} in the script messages, for example: Postman request \"Login\", pre-request script, line 3: ...",
+  "stage": "The script that a note applies to. Used as {{stage}} in the script messages.",
+  "script": "Notes about scripts translated from another tool. {{tool}} is the name of that tool, {{api}} the name of its script object, for example pm.*.",
+  "script.line": "{{label}} and {{stage}} are short phrases, {{note}} is one of the script messages.",
+  "script.rewritten": "A use is one place where a script calls the other tool's API.",
+  "script.checks": "Assertions are rows of Bruno's assert block.",
+  "skip": "Items that were not imported at all.",
+  "skip.fileError": "{{detail}} is the technical reason from the file parser, in English.",
+  "grpcScripts": "{{kinds}} is a comma separated list such as pre-request, post-response; {{label}} says which request or folder.",
+  "externalSecrets": "{{names}} is a list of variable names with the place they read from in brackets.",
+  "httpProcessEnv": "{{example}} is the literal text of a variable placeholder, with double braces.",
+  "dotEnv": "{{example}} is the literal text of a variable placeholder, with double braces. process.env.NAME is a variable name and stays as written.",
+  "liquidFilters": "{{example}} is the literal text of a template expression with a filter, with double braces.",
+  "fileTags": "{{example}} is the literal text of a file function, with double braces.",
+  "authType": "{{type}} is the name of the authentication type in the other tool, for example digest.",
+  "documentRead": "{{detail}} is the technical reason from the file parser, in English."
+}

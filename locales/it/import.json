@@ -1,0 +1,188 @@
+{
+  "importFormats": {
+    "auto": "Rileva automaticamente",
+    "http": "File .http"
+  },
+  "formatLabels": {
+    "insomnia": "Export di Insomnia",
+    "har": "Cattura HAR",
+    "wsdl": "Servizio WSDL",
+    "bruno": "Raccolta Bruno",
+    "postman": "File Postman",
+    "openapi": "Specifica OpenAPI",
+    "gostman": "Export di Gostman",
+    "http": "File .http"
+  },
+  "import": {
+    "chooseFiles": "Scegli file",
+    "importButton": "Importa",
+    "chooseFolder": "Scegli cartella",
+    "dropHint": "Trascina qui file, una cartella o uno .zip, oppure incolla il contenuto qui sotto. Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI e Swagger, file .http (REST Client, JetBrains HTTP Client), export di Gostman e link di condivisione.",
+    "formatLabel": "Formato",
+    "pastePlaceholder": "Incolla una raccolta, una specifica, una cattura o un link di condivisione",
+    "pasteLabel": "Contenuto da importare",
+    "pastedName": "incollato",
+    "reading": "Lettura del contenuto",
+    "skipStatic": "Escludi immagini, font, stili e script",
+    "skippedHeading": "Esclusi",
+    "binaryFailure": "{{name}} non è un file di testo.",
+    "tooMany": "Ci sono più di {{limit}} file.",
+    "tooLarge": "{{name}} pesa {{size}}. I file sono limitati a {{limit}}.",
+    "totalTooLarge": "Insieme, i file superano {{limit}}.",
+    "noFiles": "Non è stato trovato nessun file importabile.",
+    "filesSelected_one": "{{count}} file selezionato",
+    "filesSelected_many": "{{count}} di file selezionati",
+    "filesSelected_other": "{{count}} file selezionati",
+    "clearFiles": "Cancella",
+    "sourceLine": "{{source}}: {{label}}, {{counts}}",
+    "totalLine": "In totale: {{counts}}"
+  },
+  "export": {
+    "includeSecrets": "Includi le credenziali",
+    "secretsNote": "Password, token e header o variabili con nomi segreti vengono sostituiti con segnaposto {{placeholder}}.",
+    "secretsWarning": "Le credenziali vengono scritte nel file in chiaro.",
+    "variableSecretsNote": "Le variabili con un nome simile a password, token o chiave vengono esportate senza i loro valori.",
+    "saveFile": "Salva file",
+    "formatLabel": "Formato di esportazione",
+    "previewLabel": "Anteprima dell'esportazione",
+    "summaryNamed": "{{description}}. \"{{name}}\" contiene {{counts}}.",
+    "summaryAll": "{{description}}. Hai {{counts}}.",
+    "collectionField": "Raccolta",
+    "formatField": "Formato",
+    "allCollections": "Tutte le raccolte",
+    "failed": "Impossibile creare l'esportazione: {{reason}}",
+    "adaptFailed": "Script e controlli vengono esportati come sono scritti, perché non è stato possibile adattarli: {{reason}}",
+    "reportLabel": "Cosa è cambiato per lo strumento di destinazione",
+    "checkHeading_one": "{{count}} cosa da controllare prima di usarlo in {{tool}}",
+    "checkHeading_many": "{{count}} di cose da controllare prima di usarlo in {{tool}}",
+    "checkHeading_other": "{{count}} cose da controllare prima di usarlo in {{tool}}",
+    "changedHeading": "Cosa è cambiato per {{tool}}",
+    "formats": {
+      "gostman": {
+        "label": "Gostman",
+        "description": "Backup completo: richieste, cartelle, tutti gli ambienti, le variabili globali e le variabili di raccolta, senza i valori segreti"
+      },
+      "postman": {
+        "label": "Postman",
+        "description": "Raccolta v2.1, che importa anche Insomnia. Script e controlli vengono adattati per funzionare in entrambi, e le variabili in uso, tranne quelle segrete, diventano variabili di raccolta"
+      },
+      "openapiJson": {
+        "label": "OpenAPI JSON",
+        "description": "Descrizione OpenAPI 3.0 delle richieste HTTP"
+      },
+      "openapiYaml": {
+        "label": "OpenAPI YAML",
+        "description": "Descrizione OpenAPI 3.0 delle richieste HTTP"
+      },
+      "markdown": {
+        "label": "Markdown",
+        "description": "Documentazione API leggibile"
+      },
+      "html": {
+        "label": "Documentazione HTML",
+        "description": "Una pagina autonoma da pubblicare o stampare. Le credenziali sono escluse e le variabili restano come {{example}}"
+      },
+      "bruno": {
+        "label": "Bruno",
+        "description": "Una cartella di file .bru con gli ambienti, salvata come .zip. Script e controlli vengono adattati per funzionare in Bruno"
+      },
+      "curl": {
+        "label": "Script curl",
+        "description": "Un comando curl per richiesta. Le credenziali diventano segnaposto di variabili d'ambiente"
+      },
+      "har": {
+        "label": "HAR",
+        "description": "HTTP Archive 1.2 con le richieste e senza risposte"
+      },
+      "http": {
+        "label": "File .http",
+        "description": "Richieste per VS Code REST Client e JetBrains HTTP Client, un file per cartella, con gli ambienti http-client.env.json"
+      }
+    },
+    "docs": {
+      "titlePlaceholder": "Titolo (predefinito: API documentation)",
+      "titleLabel": "Titolo della documentazione",
+      "includeExamples": "Includi le risposte di esempio",
+      "playground": "Includi un pannello Prova"
+    }
+  },
+  "transfer": {
+    "title": "Importa ed esporta",
+    "tabsLabel": "Importa o esporta",
+    "tabs": {
+      "import": "Importa",
+      "export": "Esporta",
+      "share": "Condividi"
+    }
+  },
+  "importCount": {
+    "collection_one": "{{count}} raccolta",
+    "collection_many": "{{count}} di raccolte",
+    "collection_other": "{{count}} raccolte",
+    "folder_one": "{{count}} cartella",
+    "folder_many": "{{count}} di cartelle",
+    "folder_other": "{{count}} cartelle",
+    "request_one": "{{count}} richiesta",
+    "request_many": "{{count}} di richieste",
+    "request_other": "{{count}} richieste",
+    "flow_one": "{{count}} flusso",
+    "flow_many": "{{count}} di flussi",
+    "flow_other": "{{count}} flussi",
+    "environment_one": "{{count}} ambiente",
+    "environment_many": "{{count}} di ambienti",
+    "environment_other": "{{count}} ambienti",
+    "global_one": "{{count}} ambiente globale",
+    "global_many": "{{count}} di ambienti globali",
+    "global_other": "{{count}} ambienti globali",
+    "variable_one": "{{count}} variabile di raccolta",
+    "variable_many": "{{count}} di variabili di raccolta",
+    "variable_other": "{{count}} variabili di raccolta",
+    "holding": "{{collections}} con {{inside}}",
+    "settingsFor": "impostazioni per {{owners}}"
+  },
+  "importResult": {
+    "quoted": "\"{{name}}\"",
+    "joinedEnvironment": "Esisteva già un ambiente chiamato \"{{name}}\", quindi le variabili importate sono state aggiunte a esso. Le variabili che aveva già hanno mantenuto i loro valori.",
+    "scopedEnvironments_one": "Gli ambienti di {{names}} si applicano solo alle sue richieste. Per usare un ambiente ovunque, imposta Disponibile in su Ogni raccolta in Ambienti.",
+    "scopedEnvironments_many": "Gli ambienti di {{names}} si applicano solo alle loro richieste. Per usare un ambiente ovunque, imposta Disponibile in su Ogni raccolta in Ambienti.",
+    "scopedEnvironments_other": "Gli ambienti di {{names}} si applicano solo alle loro richieste. Per usare un ambiente ovunque, imposta Disponibile in su Ogni raccolta in Ambienti.",
+    "scopedVariables_one": "Le variabili di raccolta di {{names}} si applicano solo alle sue richieste; una variabile d'ambiente con lo stesso nome ha comunque la precedenza.",
+    "scopedVariables_many": "Le variabili di raccolta di {{names}} si applicano solo alle loro richieste; una variabile d'ambiente con lo stesso nome ha comunque la precedenza.",
+    "scopedVariables_other": "Le variabili di raccolta di {{names}} si applicano solo alle loro richieste; una variabile d'ambiente con lo stesso nome ha comunque la precedenza.",
+    "importedCollectionName": "Raccolta importata",
+    "settingsAttached_one": "Le impostazioni per tutte le raccolte contenute in questa importazione sono state aggiunte alle impostazioni della raccolta di {{names}}, quindi si applicano solo alle sue richieste. Le tue impostazioni per tutte le raccolte non sono state modificate.",
+    "settingsAttached_many": "Le impostazioni per tutte le raccolte contenute in questa importazione sono state aggiunte alle impostazioni della raccolta di {{names}}, quindi si applicano solo alle loro richieste. Le tue impostazioni per tutte le raccolte non sono state modificate.",
+    "settingsAttached_other": "Le impostazioni per tutte le raccolte contenute in questa importazione sono state aggiunte alle impostazioni della raccolta di {{names}}, quindi si applicano solo alle loro richieste. Le tue impostazioni per tutte le raccolte non sono state modificate.",
+    "settingsWrapped": "Le impostazioni per tutte le raccolte contenute in questa importazione sono state messe su una nuova raccolta, \"{{name}}\", che contiene tutto ciò che è stato importato, quindi si applicano solo a quelle richieste. Le tue impostazioni per tutte le raccolte non sono state modificate."
+  },
+  "fileReads": {
+    "heading_one": "Il file che legge da questo computer:",
+    "heading_many": "I {{count}} di file che legge da questo computer:",
+    "heading_other": "I {{count}} file che legge da questo computer:",
+    "more": "e {{count}} in più"
+  },
+  "activeImport": {
+    "kindLabels": {
+      "scripts": "script",
+      "oauth": "impostazioni OAuth 2.0",
+      "commands": "comandi che avviano server MCP locali",
+      "files": "letture di file che inviano file da questo computer"
+    },
+    "kindNouns": {
+      "scripts": "script",
+      "oauth": "impostazioni OAuth",
+      "commands": "comandi",
+      "files": "letture di file"
+    },
+    "titleOne": "Importare {{kind}}?",
+    "titleMany": "Controlla prima di importare",
+    "withOne": "Importa con {{kind}}",
+    "withMany": "Importa tutto",
+    "withoutOne": "Importa senza {{kind}}",
+    "withoutMany": "Importa senza di essi",
+    "leftOut": "Esclusi: {{kinds}}.",
+    "message_one": "{{count}} elemento di questa importazione contiene {{kinds}}. Questi vengono eseguiti quando una richiesta viene inviata e possono leggere le tue variabili, quindi importali solo da una fonte di cui ti fidi. Senza di essi, tutto il resto viene comunque importato.",
+    "message_many": "{{count}} di elementi di questa importazione contengono {{kinds}}. Questi vengono eseguiti quando una richiesta viene inviata e possono leggere le tue variabili, quindi importali solo da una fonte di cui ti fidi. Senza di essi, tutto il resto viene comunque importato.",
+    "message_other": "{{count}} elementi di questa importazione contengono {{kinds}}. Questi vengono eseguiti quando una richiesta viene inviata e possono leggere le tue variabili, quindi importali solo da una fonte di cui ti fidi. Senza di essi, tutto il resto viene comunque importato."
+  }
+}

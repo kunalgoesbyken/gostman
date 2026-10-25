@@ -84,7 +84,7 @@ function ExchangeDetail({ result }) {
   const { request, response } = result.exchange
   const url = result.resolvedUrl || request.url
   return (
-    <div className="flex flex-col gap-2 pb-1.5 pl-[1.375rem]">
+    <div className="flex flex-col gap-2 pb-1.5 ps-[1.375rem]">
       <p className="truncate font-mono text-2xs text-muted-foreground" title={url}>{url}</p>
       {passed.length > 0 && (
         <ul>
@@ -92,7 +92,7 @@ function ExchangeDetail({ result }) {
         </ul>
       )}
       {response.body ? (
-        <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-md border border-border bg-muted/40 p-2 font-mono text-2xs text-foreground">{readableBody(response)}</pre>
+        <pre dir="ltr" className="max-h-64 overflow-auto whitespace-pre-wrap rounded-md border border-border bg-muted/40 p-2 font-mono text-2xs text-foreground">{readableBody(response)}</pre>
       ) : (
         <p className="text-xs text-muted-foreground">{RUNNER_TEXT.emptyBody}</p>
       )}
@@ -117,28 +117,28 @@ export const ResultRow = memo(function ResultRow({ result }) {
         disabled={!canExpand}
         aria-expanded={canExpand ? isOpen : undefined}
         onClick={() => setIsOpen(!isOpen)}
-        className="flex h-9 w-full items-center gap-2 px-3 text-left hover:bg-accent disabled:cursor-default disabled:hover:bg-transparent"
+        className="flex min-h-9 w-full flex-wrap items-center gap-x-2 gap-y-0.5 px-3 py-1 text-start hover:bg-accent disabled:cursor-default disabled:hover:bg-transparent"
       >
         <Icon aria-hidden="true" className={cn("h-3.5 w-3.5 shrink-0", tone)} />
         <span className="sr-only">{label}</span>
         <MethodTag method={shownMethod(result)} className="w-12" />
         {result.iteration > 0 && <span className="shrink-0 font-mono text-2xs text-muted-foreground">#{result.iteration}</span>}
         {result.attempts > 1 && <span className="shrink-0 font-mono text-2xs text-muted-foreground">{RUNNER_TEXT.attempt(result.attempt, result.attempts)}</span>}
-        <span title={`${result.name}\n${result.url}`} className="min-w-0 flex-1 truncate text-xs text-foreground">{result.name}</span>
+        <span title={`${result.name}\n${result.url}`} className="min-w-[5rem] flex-1 truncate text-xs text-foreground">{result.name}</span>
         <ResultSummary result={result} />
-        {canExpand && <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
+        {canExpand && <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground rtl:-scale-x-100" />}
       </button>
       <div className="px-3">
-        {result.handled && <p className="pb-1.5 pl-[1.375rem] text-xs text-warning">{result.handled}</p>}
-        {detail && <p className="whitespace-pre-line pb-1.5 pl-[1.375rem] text-xs text-muted-foreground">{detail}</p>}
+        {result.handled && <p className="pb-1.5 ps-[1.375rem] text-xs text-warning">{result.handled}</p>}
+        {detail && <p className="whitespace-pre-line pb-1.5 ps-[1.375rem] text-xs text-muted-foreground">{detail}</p>}
         {hasUnresolved(result.unresolved) && (
-          <p className="pb-1.5 pl-[1.375rem] text-xs text-warning">
+          <p className="pb-1.5 ps-[1.375rem] text-xs text-warning">
             <UnresolvedNames names={result.unresolved} isFailed={!result.isAnswered} />
           </p>
         )}
-        {streamNote && <p className="pb-1.5 pl-[1.375rem] text-xs text-muted-foreground">{streamNote}</p>}
+        {streamNote && <p className="pb-1.5 ps-[1.375rem] text-xs text-muted-foreground">{streamNote}</p>}
         {failures.length > 0 && (
-          <ul className="pb-1.5 pl-[1.375rem]">
+          <ul className="pb-1.5 ps-[1.375rem]">
             {failures.map((test, index) => <TestRow key={index} result={test} />)}
           </ul>
         )}
@@ -182,7 +182,7 @@ function RequestChoices({ scoped, folders, excluded, onChange }) {
 
   return (
     <>
-      <div className="sticky top-0 z-10 flex h-8 items-center gap-1 border-b border-border bg-background pl-4 pr-2">
+      <div className="sticky top-0 z-10 flex h-8 items-center gap-1 border-b border-border bg-background ps-4 pe-2">
         <p role="status" className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{RUNNER_TEXT.selected(selected, scoped.length)}</p>
         <Button variant="ghost" size="sm" disabled={selected === scoped.length} onClick={() => onChange([...excluded].filter((id) => !scopedIds.includes(id)))}>{RUNNER_TEXT.selectAll}</Button>
         <Button variant="ghost" size="sm" disabled={selected === 0} onClick={() => onChange([...new Set([...excluded, ...scopedIds])])}>{RUNNER_TEXT.selectNone}</Button>
@@ -273,7 +273,7 @@ export function RunnerDialog({ folders, requests, actions }) {
         <Checkbox checked={stopOnFailure} disabled={isRunning} onChange={(event) => setStopOnFailure(event.target.checked)}>
           {RUNNER_TEXT.stopOnFailure}
         </Checkbox>
-        <div className="ml-auto">
+        <div className="ms-auto">
           {isRunning ? (
             <Button variant="destructive" size="sm" onClick={actions.stopRun}>
               <Square />
@@ -342,7 +342,7 @@ export function RunnerDialog({ folders, requests, actions }) {
           </ul>
         )}
       </div>
-      <div className="flex shrink-0 items-center gap-2 border-t border-border py-1 pl-4 pr-2">
+      <div className="flex shrink-0 items-center gap-2 border-t border-border py-1 ps-4 pe-2">
         <p role="status" className="min-w-0 flex-1 text-xs text-muted-foreground">
           {describeRun(results, { selected: requestCount, scoped: scoped.length }, isRunning, iterations)}
         </p>

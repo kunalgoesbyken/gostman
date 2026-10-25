@@ -150,6 +150,10 @@ The same pages are published at [gostman.com/docs](https://gostman.com/docs). Th
 - Agents and AI: [Use from a coding agent](docs/agents.md), [AI features](docs/ai.md)
 - Reference: [Command line](docs/cli.md), [Preferences, shortcuts and the command palette](docs/preferences-and-shortcuts.md)
 
+## Translations
+
+The app interface can be shown in other languages, and some first drafts are checked by native speakers over time. To ask for a language, offer to translate or report a wrong translation, use [issue #15](https://github.com/kunalgoesbyken/gostman/issues/15). [Translating Gostman](docs/translating.md) explains how the translation files work and how to send changes.
+
 ## Contributing
 
 Issues and pull requests are welcome. For anything larger than a small fix, please open an issue first to agree on the approach. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to build, test and release.

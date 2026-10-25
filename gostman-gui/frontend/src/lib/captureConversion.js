@@ -1,5 +1,5 @@
 import { BODY_BINARY, BODY_FORM, BODY_JSON, BODY_NONE, BODY_TEXT, BODY_XML } from './body'
-import { pluralize } from './dataUtils'
+import { CAPTURE_ACTION_TEXT } from './captureText'
 import { exampleFromResponse, serializeExamples, withExample } from './examples'
 import { normalizeRequest } from './request'
 import { serializeRows } from './rows'
@@ -12,8 +12,6 @@ const ENCODING_BASE64 = 'base64'
 const FORM_TYPE = 'application/x-www-form-urlencoded'
 const JSON_MARKER = 'json'
 const XML_MARKER = 'xml'
-const EXAMPLE_NAME = 'Captured'
-const FALLBACK_FOLDER_NAME = 'Captured'
 const QUERY_MARK = '?'
 const FIELD_SEPARATOR = '&'
 const VALUE_SEPARATOR = '='
@@ -74,14 +72,14 @@ function examplesOf(exchange) {
   if (!hasWholeResponse(exchange)) return ''
   const { headers, body, bodyEncoding, contentType } = exchange.response
   const response = {
-    status: EXAMPLE_NAME,
+    status: CAPTURE_ACTION_TEXT.fallbackFolderName,
     statusCode: exchange.status,
     headers: headers.filter((header) => !isDecodedEncoding(header)),
     body,
     bodyEncoding,
     contentType,
   }
-  return serializeExamples(withExample([], exampleFromResponse(response, EXAMPLE_NAME)))
+  return serializeExamples(withExample([], exampleFromResponse(response, CAPTURE_ACTION_TEXT.fallbackFolderName)))
 }
 
 function toDraft(exchange, folderId) {
@@ -110,19 +108,17 @@ function withoutRepeats(exchanges) {
   })
 }
 
-const BODY_NOTE = 'Bodies are saved as they were captured. Check them for tokens or personal data before sharing the collection.'
-
 function describe({ unsavable, duplicates, drafts }) {
   const withheld = unique(drafts.flatMap((draft) => draft.withheld))
   const incomplete = drafts.filter((draft) => draft.isIncomplete).length
   const withoutExample = drafts.filter((draft) => draft.request.examples === '').length
   return [
-    withheld.length > 0 && `Left out these request headers: ${withheld.join(', ')}. Add credentials as variables before sending.`,
-    duplicates > 0 && `Skipped ${pluralize(duplicates, 'duplicate')} of the same method, path and body.`,
-    unsavable > 0 && `Skipped ${pluralize(unsavable, 'exchange')} that failed or switched to a WebSocket.`,
-    withoutExample > 0 && `Kept no example for ${pluralize(withoutExample, 'response')} that arrived incomplete.`,
-    incomplete > 0 && `${pluralize(incomplete, 'request')} had a body larger than 2 MB, which is saved incomplete.`,
-    drafts.length > 0 && BODY_NOTE,
+    withheld.length > 0 && CAPTURE_ACTION_TEXT.withheld(withheld),
+    duplicates > 0 && CAPTURE_ACTION_TEXT.duplicates(duplicates),
+    unsavable > 0 && CAPTURE_ACTION_TEXT.unsavable(unsavable),
+    withoutExample > 0 && CAPTURE_ACTION_TEXT.withoutExample(withoutExample),
+    incomplete > 0 && CAPTURE_ACTION_TEXT.incomplete(incomplete),
+    drafts.length > 0 && CAPTURE_ACTION_TEXT.bodyNote,
   ].filter(Boolean)
 }
 
@@ -140,6 +136,6 @@ export function suggestedFolderName(exchanges) {
   try {
     return new URL(exchanges[0].url).host
   } catch {
-    return FALLBACK_FOLDER_NAME
+    return CAPTURE_ACTION_TEXT.fallbackFolderName
   }
 }

@@ -1,0 +1,16 @@
+{
+  "realtime.targets.topic": "Label of the MQTT topic field of the message composer. Keep it short.",
+  "realtime.targets.event": "Label of the Socket.IO event name field of the message composer. Keep it short.",
+  "realtime.browser.closed": "Entry of the message log. {{code}} is a WebSocket close code.",
+  "realtime.browser.closedWithReason": "{{code}} is a WebSocket close code; {{reason}} is text from the server.",
+  "realtime.browser.notConnected": "Entry of the message log when the connection could not be opened. {{code}} is a WebSocket close code.",
+  "realtime.browser.notConnectedWithReason": "{{code}} is a WebSocket close code; {{reason}} is text from the server.",
+  "realtime.graphql.subscribing": "Log entry of a GraphQL subscription over WebSocket.",
+  "realtime.graphql.complete": "Log entry: the server ended the subscription.",
+  "realtime.socketIo.joined": "{{namespace}} is a Socket.IO namespace such as /chat.",
+  "realtime.socketIo.ack": "Label of a Socket.IO acknowledgement. {{id}} is its number. Keep ack.",
+  "realtime.mqtt": "Log entries of an MQTT connection. The broker is the MQTT server.",
+  "realtime.mqtt.refusedOther": "{{code}} is a numeric MQTT return code.",
+  "realtime.mqtt.subscribed": "{{filter}} is an MQTT topic filter.",
+  "realtime.mqtt.subscribeRefused": "{{filter}} is an MQTT topic filter."
+}

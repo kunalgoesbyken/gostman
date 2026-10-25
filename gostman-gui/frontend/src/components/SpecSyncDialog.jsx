@@ -3,6 +3,7 @@ import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { MethodTag } from "./MethodTag"
+import { formatDateTime } from "../lib/i18n/format"
 import { sourceLabel } from "../lib/openapiSpec"
 import { defaultSelection, isEmptyPlan } from "../lib/specSync"
 import { SPEC_TEXT } from "../lib/specText"
@@ -12,7 +13,7 @@ function Change({ id, label, method, detail, edited, checked, onToggle }) {
     <li className="flex min-h-7 items-center gap-2">
       <Checkbox label={label} checked={checked} onChange={() => onToggle(id)} />
       <MethodTag method={method} className="w-12" />
-      <span className="min-w-0 flex-1 truncate text-xs" title={label}>{detail}</span>
+      <span className="min-w-0 flex-1 truncate text-xs" title={label}><bdi dir="auto">{detail}</bdi></span>
       {edited && <span className="shrink-0 text-2xs text-warning">{SPEC_TEXT.locallyEdited}</span>}
     </li>
   )
@@ -31,7 +32,7 @@ function Group({ title, count, children }) {
 function Summary({ link, plan }) {
   return (
     <p className="pb-3 text-xs text-muted-foreground">
-      {sourceLabel(link.source)} - {SPEC_TEXT.syncedAt} {new Date(link.syncedAt).toLocaleString()}
+      <span dir="ltr">{sourceLabel(link.source)}</span> - {SPEC_TEXT.syncedAt(formatDateTime(link.syncedAt))}
       {plan.unchanged > 0 && ` - ${SPEC_TEXT.unchanged(plan.unchanged)}`}
     </p>
   )

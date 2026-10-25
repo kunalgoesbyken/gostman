@@ -48,7 +48,7 @@ export function CookiesDialog({ onClose }) {
       <DialogHeader onClose={onClose}>
         <DialogTitle>{TEXT.title}</DialogTitle>
         <TabCount>{cookies.length}</TabCount>
-        <Button variant="outline" size="sm" className="ml-auto" disabled={cookies.length === 0} onClick={clearCookies}>
+        <Button variant="outline" size="sm" className="ms-auto" disabled={cookies.length === 0} onClick={clearCookies}>
           {TEXT.clearAll}
         </Button>
       </DialogHeader>

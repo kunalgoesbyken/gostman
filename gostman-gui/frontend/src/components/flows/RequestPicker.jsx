@@ -55,7 +55,7 @@ export function RequestPicker({ catalog, onChoose, onClose }) {
                   tabIndex={-1}
                   onMouseMove={() => setActive(position)}
                   onClick={() => onChoose(request)}
-                  className={cn("flex h-9 w-full items-center gap-2 px-3 text-left", request === chosen && "bg-accent")}
+                  className={cn("flex h-9 w-full items-center gap-2 px-3 text-start", request === chosen && "bg-accent")}
                 >
                   <MethodTag method={request.method} className="w-12" />
                   <span className="min-w-0 truncate text-xs text-foreground" title={request.path}>{request.path}</span>

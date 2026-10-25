@@ -1,0 +1,61 @@
+{
+  "loadTest": {
+    "title": "Teste de carga",
+    "commandTitle": "Fazer teste de carga desta requisição",
+    "commandDescription": "Envia a requisição atual muitas vezes ao mesmo tempo e mede a latência",
+    "barLabel": "Teste de carga",
+    "barHint": "Fazer teste de carga desta requisição",
+    "notice": "Teste apenas sistemas que são seus ou que você tem permissão para testar. Cada worker envia a requisição como ela é mostrada aqui, sem scripts nem cookies compartilhados.",
+    "unsupported": "Só requisições HTTP podem passar por teste de carga. Requisições gRPC, MCP, WebSocket e de streaming não são compatíveis.",
+    "noUrl": "Informe uma URL na requisição primeiro.",
+    "concurrency": "Workers simultâneos",
+    "duration": "Duração (segundos)",
+    "rateLimit": "Limite de requisições por segundo",
+    "rateLimitHint": "Deixe vazio para não limitar",
+    "start": "Iniciar",
+    "stop": "Parar",
+    "running": "Em execução",
+    "stopped": "Interrompido antes do fim",
+    "progress": {
+      "elapsed": "Decorrido",
+      "requests": "Requisições",
+      "rate": "Requisições/s",
+      "p95": "p95",
+      "failed": "Falhas"
+    },
+    "summary": {
+      "total": "Requisições",
+      "succeeded": "Com sucesso",
+      "failed": "Falhas",
+      "rate": "Requisições/s",
+      "received": "Recebido"
+    },
+    "failureBreakdown": "{{networkErrors}} de rede, {{statusFailures}} com status {{failureStatus}} ou superior",
+    "percentilesLabel": "Latência",
+    "percentileColumns": {
+      "name": "Medida",
+      "value": "Milissegundos"
+    },
+    "percentiles": {
+      "minMs": "mín.",
+      "meanMs": "média",
+      "p50Ms": "p50",
+      "p90Ms": "p90",
+      "p95Ms": "p95",
+      "p99Ms": "p99",
+      "maxMs": "máx."
+    },
+    "seconds": "{{value}} s",
+    "milliseconds": "{{value}} ms",
+    "statusCount": "{{code}} x {{count}}",
+    "statusLabel": "Códigos de status",
+    "histogramLabel": "Distribuição da latência",
+    "histogramBarLabel_one": "{{from}} a {{to}} ms: {{count}} requisição",
+    "histogramBarLabel_many": "{{from}} a {{to}} ms: {{count}} de requisições",
+    "histogramBarLabel_other": "{{from}} a {{to}} ms: {{count}} requisições",
+    "errorsLabel": "Amostras de erro",
+    "accuracy": "Os percentis têm precisão de até {{percent}}%.",
+    "emptyTitle": "Ainda não há resultados",
+    "emptyHint": "Escolha a carga e pressione Iniciar."
+  }
+}

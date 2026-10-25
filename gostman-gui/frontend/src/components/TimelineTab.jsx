@@ -8,9 +8,10 @@ import { Notice, SectionLabel } from './ui/panel'
 import { cn } from '../lib/utils'
 import { statusVariant } from '../lib/response'
 import {
-  ENTRY_KINDS, TIMELINE_TEXT, failureLabel, formatMs, hopFacts, hopSegments, phaseTotals, timelineHops, timelineRows,
+  ENTRY_KINDS, failureLabel, formatMs, hopFacts, hopSegments, phaseTotals, timelineHops, timelineRows,
   timelineScale, timelineTotalMs,
 } from '../lib/timeline'
+import { TIMELINE_TEXT } from '../lib/timelineText'
 
 function Legend({ hops }) {
   return (
@@ -97,7 +98,7 @@ function HopCaption({ hop }) {
   return <p className="font-mono text-2xs text-muted-foreground">{parts.join(' · ')}</p>
 }
 
-const rowClass = (entry) => cn('border-b border-border py-2 pr-3', entry.kind === ENTRY_KINDS.SEND ? 'pl-8' : 'pl-3')
+const rowClass = (entry) => cn('border-b border-border py-2 pe-3', entry.kind === ENTRY_KINDS.SEND ? 'ps-8' : 'ps-3')
 
 function RowToggle({ open, onToggle, children }) {
   const Chevron = open ? ChevronDown : ChevronRight
@@ -107,9 +108,9 @@ function RowToggle({ open, onToggle, children }) {
       aria-expanded={open}
       aria-label={open ? TIMELINE_TEXT.expanded : TIMELINE_TEXT.collapsed}
       onClick={onToggle}
-      className="flex w-full min-w-0 items-center gap-2 text-left text-xs"
+      className="flex w-full min-w-0 items-center gap-2 text-start text-xs"
     >
-      <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+      <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
       {children}
     </button>
   )
@@ -138,7 +139,7 @@ function HopRow({ entry, hop, number, scale }) {
         <HopStatus hop={hop} />
         <Duration ms={hop.totalMs} />
       </RowToggle>
-      <div className="mt-1.5 flex flex-col gap-1 pl-5">
+      <div className="mt-1.5 flex flex-col gap-1 ps-5">
         <Waterfall hop={hop} scale={scale} />
         <HopCaption hop={hop} />
         {open && <HopDetails hop={hop} />}
@@ -157,7 +158,7 @@ function PlainRow({ entry, number }) {
         <Badge variant={summary.failed ? 'serverError' : statusVariant(summary)} className="font-mono">{summary.status}</Badge>
         <Duration ms={entry.totalMs} />
       </div>
-      {summary.detail && <p dir="auto" className="mt-1.5 break-words pl-5 text-2xs text-muted-foreground">{summary.detail}</p>}
+      {summary.detail && <p dir="auto" className="mt-1.5 break-words ps-5 text-2xs text-muted-foreground">{summary.detail}</p>}
     </li>
   )
 }
@@ -197,7 +198,7 @@ function ScriptRow({ entry }) {
         <Duration ms={entry.totalMs} />
       </RowToggle>
       {(open || entry.logs.length > 0) && (
-        <div className="mt-1.5 flex flex-col gap-1 pl-5">
+        <div className="mt-1.5 flex flex-col gap-1 ps-5">
           {entry.logs.length > 0 && <p className="font-mono text-2xs text-muted-foreground">{TIMELINE_TEXT.consoleLines(entry.logs.length)}</p>}
           {open && <ScriptDetails entry={entry} />}
         </div>
@@ -217,7 +218,7 @@ function SecretsRow({ entry }) {
         <Duration ms={entry.totalMs} />
       </div>
       {entry.skipped.length > 0 && (
-        <ul className="mt-1.5 flex flex-col gap-0.5 pl-11">
+        <ul className="mt-1.5 flex flex-col gap-0.5 ps-11">
           {entry.skipped.map(({ name, connection }) => (
             <li key={name} dir="auto" className="break-words text-2xs text-warning">{TIMELINE_TEXT.secretSkipped(name, connection)}</li>
           ))}

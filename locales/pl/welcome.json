@@ -1,0 +1,20 @@
+{
+  "welcome": {
+    "title": "Witamy w Gostman",
+    "intro": "Konto nie jest potrzebne. Nic nie opuszcza tego urządzenia, dopóki nie zostanie wysłane żądanie.",
+    "dismiss": "Zamknij powitanie",
+    "commandTitle": "Pokaż powitanie",
+    "commandDescription": "Kroki na dobry początek, importy i skróty",
+    "otherTitle": "Inne sposoby rozpoczęcia",
+    "importTitle": "Importuj żądania",
+    "importHint": "Z Postman, Bruno, Insomnia, OpenAPI, HAR, plików .http lub curl.",
+    "folderTitle": "Otwórz folder",
+    "folderHint": "Trzymaj żądania jako pliki obok kodu i udostępniaj je przez git.",
+    "collectionTitle": "Utwórz folder",
+    "collectionHint": "Pogrupuj powiązane żądania w panelu bocznym.",
+    "curlTitle": "Wklej polecenie curl",
+    "curlHint": "Wklej je w pasku adresu, a żądanie zostanie uzupełnione.",
+    "shortcutsTitle": "Skróty klawiszowe",
+    "sampleRequestName": "Przykładowe żądanie"
+  }
+}

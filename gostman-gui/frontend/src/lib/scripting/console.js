@@ -1,6 +1,7 @@
 import { LEVELS } from '../consoleLog'
 import { isPlainObject } from '../dataUtils'
 import { MAX_LOG_CHARS, MAX_LOG_ENTRIES } from './limits'
+import { SCRIPT_RUNTIME_TEXT } from '../scriptRuntimeText'
 
 const LEVEL_DEFAULT = 'log'
 const LEVEL_WARN = 'warn'
@@ -8,7 +9,6 @@ const LEVEL_ERROR = 'error'
 const INDEX_COLUMN = '(index)'
 const VALUE_COLUMN = 'Value'
 const COLUMN_GAP = '  '
-const TRUNCATED_OUTPUT = 'Console output was truncated.'
 
 export const printable = (value) => {
   if (typeof value === 'string') return value
@@ -52,7 +52,7 @@ const isTabular = (value) => value !== null && typeof value === 'object'
 export function createConsole(logs) {
   const write = (level, text) => {
     if (logs.length > MAX_LOG_ENTRIES) return
-    logs.push(logs.length === MAX_LOG_ENTRIES ? logLine(LEVEL_WARN, TRUNCATED_OUTPUT) : logLine(level, text))
+    logs.push(logs.length === MAX_LOG_ENTRIES ? logLine(LEVEL_WARN, SCRIPT_RUNTIME_TEXT.consoleTruncated) : logLine(level, text))
   }
   const writer = (level) => (...values) => write(level, values.map(printable).join(' '))
   return {

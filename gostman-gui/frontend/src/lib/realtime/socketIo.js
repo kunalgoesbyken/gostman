@@ -1,7 +1,9 @@
 import { isPlainObject } from '../dataUtils'
 import { jsonOrText, parseJSON, pretty } from './format'
+import { REALTIME_TEXT } from '../realtimeText'
 import { SOCKET_TEXT } from '../socketText'
 
+const TEXT = REALTIME_TEXT.socketIo
 const ENGINE_PATH = '/socket.io/'
 const ENGINE_QUERY = [['EIO', '4'], ['transport', 'websocket']]
 const DEFAULT_NAMESPACE = '/'
@@ -20,15 +22,6 @@ const PACKET_EVENT = '2'
 const PACKET_ACK = '3'
 const PACKET_CONNECT_ERROR = '4'
 
-const TEXT = {
-  joined: (namespace) => `Joined the namespace ${namespace}`,
-  left: 'The server left the namespace',
-  closed: 'The server closed the Socket.IO session',
-  refused: 'The server refused the connection',
-  binary: 'Binary Socket.IO packets are not decoded.',
-  noEvent: 'Enter an event name to emit.',
-  ack: (id) => `ack ${id}`,
-}
 
 const isDigit = (character) => character >= '0' && character <= '9'
 
@@ -127,7 +120,9 @@ function createSession(channel, { url, request, substitute }) {
 
 export const socketIoProtocol = {
   label: 'Socket.IO',
-  targetLabel: 'Event',
+  get targetLabel() {
+    return REALTIME_TEXT.targets.event
+  },
   hasHandshake: true,
   address,
   createSession,

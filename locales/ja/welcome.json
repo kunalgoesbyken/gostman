@@ -1,0 +1,20 @@
+{
+  "welcome": {
+    "title": "Gostmanへようこそ",
+    "intro": "アカウントは不要です。リクエストを送信するまで、このデバイスから何も送信されません。",
+    "dismiss": "ようこそ画面を閉じる",
+    "commandTitle": "ようこそ画面を表示",
+    "commandDescription": "はじめにのステップ、インポート、ショートカット",
+    "otherTitle": "ほかの始め方",
+    "importTitle": "リクエストをインポート",
+    "importHint": "Postman、Bruno、Insomnia、OpenAPI、HAR、.httpファイル、curlから。",
+    "folderTitle": "フォルダーを開く",
+    "folderHint": "リクエストをファイルとしてコードの隣に置き、gitで共有します。",
+    "collectionTitle": "フォルダーを作成",
+    "collectionHint": "関連するリクエストをサイドバーでまとめます。",
+    "curlTitle": "curlコマンドを貼り付け",
+    "curlHint": "アドレスバーに貼り付けると、リクエストが入力されます。",
+    "shortcutsTitle": "キーボードショートカット",
+    "sampleRequestName": "サンプルリクエスト"
+  }
+}

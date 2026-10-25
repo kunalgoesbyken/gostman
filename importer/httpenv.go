@@ -4,6 +4,8 @@ import (
 	"path"
 	"sort"
 	"strings"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const (
@@ -148,7 +150,7 @@ func (c *collector) plainValues(file, environment string, entries map[string]any
 	values := map[string]string{}
 	for _, key := range sortedKeys(entries) {
 		if object(entries[key]) != nil || list(entries[key]) != nil {
-			c.skip(messageHTTPEnvironmentValue, file, key, environment)
+			c.skip(locales.ImporterHttpEnvironmentValue, locales.Params{"file": file, "key": key, "environment": environment})
 			continue
 		}
 		values[key] = text(entries[key])

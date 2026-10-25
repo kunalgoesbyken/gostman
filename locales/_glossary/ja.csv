@@ -1,0 +1,49 @@
+source,target
+request,リクエスト
+response,レスポンス
+collection,コレクション
+collection settings,コレクション設定
+folder,フォルダー
+workspace,ワークスペース
+environment,環境
+variable,変数
+secret,シークレット
+secret manager,シークレットマネージャー
+header,ヘッダー
+body,ボディ
+query parameter,クエリパラメーター
+path parameter,パスパラメーター
+cookie,Cookie
+auth,認証
+authentication,認証
+token,トークン
+pre-request script,リクエスト前スクリプト
+post-response script,レスポンス後スクリプト
+check,チェック
+assertion,アサーション
+extract rule,抽出ルール
+runner,ランナー
+run,実行
+iteration,イテレーション
+flow,フロー
+step,ステップ
+mock server,モックサーバー
+capture,キャプチャ
+example,例
+history,履歴
+tab,タブ
+sidebar,サイドバー
+preferences,設定
+theme,テーマ
+scan,スキャン
+finding,検出結果
+load test,負荷テスト
+import,インポート
+export,エクスポート
+share link,共有リンク
+trust,信頼
+restricted,制限付き
+proxy,プロキシ
+certificate,証明書
+timeout,タイムアウト
+send,送信

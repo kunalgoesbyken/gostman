@@ -975,6 +975,7 @@ export namespace engine {
 	    notifications?: Notification[];
 	    unresolved?: string[];
 	    outputSchema?: string;
+	    localized?: locales.Message;
 	
 	    static createFrom(source: any = {}) {
 	        return new Response(source);
@@ -1001,6 +1002,7 @@ export namespace engine {
 	        this.notifications = this.convertValues(source["notifications"], Notification);
 	        this.unresolved = source["unresolved"];
 	        this.outputSchema = source["outputSchema"];
+	        this.localized = this.convertValues(source["localized"], locales.Message);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -1322,6 +1324,7 @@ export namespace importer {
 	    kind?: string;
 	    text: string;
 	    warning?: boolean;
+	    localized?: locales.Message;
 	
 	    static createFrom(source: any = {}) {
 	        return new Remark(source);
@@ -1332,7 +1335,26 @@ export namespace importer {
 	        this.kind = source["kind"];
 	        this.text = source["text"];
 	        this.warning = source["warning"];
+	        this.localized = this.convertValues(source["localized"], locales.Message);
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class Source {
 	    name: string;
@@ -1372,7 +1394,9 @@ export namespace importer {
 	    notes?: string[];
 	    remarks?: Remark[];
 	    skipped: string[];
+	    skippedLocalized?: locales.Message[];
 	    sharedOrder: boolean;
+	    flows?: workspace.Flow[];
 	    files?: File[];
 	    archive?: string;
 	    collection?: workspace.Collection;
@@ -1396,7 +1420,9 @@ export namespace importer {
 	        this.notes = source["notes"];
 	        this.remarks = this.convertValues(source["remarks"], Remark);
 	        this.skipped = source["skipped"];
+	        this.skippedLocalized = this.convertValues(source["skippedLocalized"], locales.Message);
 	        this.sharedOrder = source["sharedOrder"];
+	        this.flows = this.convertValues(source["flows"], workspace.Flow);
 	        this.files = this.convertValues(source["files"], File);
 	        this.archive = source["archive"];
 	        this.collection = this.convertValues(source["collection"], workspace.Collection);
@@ -1447,6 +1473,7 @@ export namespace lint {
 	    message: string;
 	    path: string;
 	    operation?: string;
+	    localized?: locales.Message;
 	
 	    static createFrom(source: any = {}) {
 	        return new Finding(source);
@@ -1459,7 +1486,26 @@ export namespace lint {
 	        this.message = source["message"];
 	        this.path = source["path"];
 	        this.operation = source["operation"];
+	        this.localized = this.convertValues(source["localized"], locales.Message);
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class Query {
 	    source: openapi.Source;
@@ -1679,6 +1725,27 @@ export namespace loadtest {
 		    }
 		    return a;
 		}
+	}
+
+}
+
+export namespace locales {
+	
+	export class Message {
+	    code: string;
+	    params?: Record<string, any>;
+	    detail?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Message(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.code = source["code"];
+	        this.params = source["params"];
+	        this.detail = source["detail"];
+	    }
 	}
 
 }
@@ -3263,6 +3330,7 @@ export namespace mock {
 	    reason?: string;
 	    exampleId?: string;
 	    exampleName?: string;
+	    localized?: locales.Message;
 	
 	    static createFrom(source: any = {}) {
 	        return new Route(source);
@@ -3278,7 +3346,26 @@ export namespace mock {
 	        this.reason = source["reason"];
 	        this.exampleId = source["exampleId"];
 	        this.exampleName = source["exampleName"];
+	        this.localized = this.convertValues(source["localized"], locales.Message);
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	
 	
@@ -4223,6 +4310,7 @@ export namespace scan {
 	    preview: string;
 	    reason: string;
 	    fingerprint: string;
+	    localized?: locales.Message;
 	
 	    static createFrom(source: any = {}) {
 	        return new Finding(source);
@@ -4236,6 +4324,7 @@ export namespace scan {
 	        this.preview = source["preview"];
 	        this.reason = source["reason"];
 	        this.fingerprint = source["fingerprint"];
+	        this.localized = this.convertValues(source["localized"], locales.Message);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

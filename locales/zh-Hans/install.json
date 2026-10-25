@@ -1,0 +1,6 @@
+{
+  "install": {
+    "label": "安装应用",
+    "description": "将 Gostman 添加到此设备，并在独立窗口中打开"
+  }
+}

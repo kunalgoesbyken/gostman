@@ -1,0 +1,5 @@
+{
+  "appStore.saveFailedTitle": "Title of a warning shown when open tabs or drafts cannot be written to storage.",
+  "appStore.saveFailed": "{{reason}} is a technical error message from the browser or the app. Keep it unchanged.",
+  "appStore.delete": "Default label of the confirm button in a destructive confirmation dialog."
+}

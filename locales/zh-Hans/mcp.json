@@ -1,0 +1,155 @@
+{
+  "mcp": {
+    "media": {
+      "heading": "结果中的图像和音频",
+      "image": "结果中的图像 {{number}}",
+      "audio": "结果中的音频 {{number}}"
+    },
+    "server": "服务器",
+    "argumentsLabel": "参数",
+    "notLoaded": "未加载",
+    "load": "加载",
+    "reload": "重新加载",
+    "signIn": "登录",
+    "signingIn": "正在登录…",
+    "signInHint": "查明此服务器希望你如何登录，必要时向其授权服务器注册 Gostman，在浏览器中登录，并将令牌保存在“认证”标签页中",
+    "serverProtocol": "MCP {{version}}",
+    "serverProtocolLegacy": "MCP {{version}}（initialize 握手）",
+    "instructions": "说明",
+    "instructionsHint": "显示此服务器提供给使用它的模型的说明",
+    "operation": "操作",
+    "operations": {
+      "toolsCall": "调用工具",
+      "toolsList": "列出工具",
+      "resourcesRead": "读取资源",
+      "resourcesList": "列出资源",
+      "resourceTemplatesList": "列出资源模板",
+      "promptsGet": "获取提示词",
+      "promptsList": "列出提示词"
+    },
+    "itemLabels": {
+      "tool": "MCP 工具",
+      "resource": "资源 URI",
+      "prompt": "MCP 提示词"
+    },
+    "choose": {
+      "tool": "选择工具",
+      "prompt": "选择提示词"
+    },
+    "noInput": "此操作不需要输入。“发送”会列出服务器返回的全部内容，包括所有分页。",
+    "readHint": "“发送”会读取此 URI 的资源。请选择一个已列出的资源，或填写模板。",
+    "schema": "Schema",
+    "schemaHints": {
+      "tool": "在编辑器旁显示该工具参数的 JSON Schema",
+      "prompt": "在编辑器旁显示该提示词的参数"
+    },
+    "schemaTitles": {
+      "tool": "输入 schema",
+      "prompt": "提示词参数"
+    },
+    "closeSchema": "关闭",
+    "noArguments": "此提示词没有参数。",
+    "example": "使用示例",
+    "exampleHint": "用根据 schema 生成的示例替换参数",
+    "promptArgumentRequired": "{{name}}（必填）",
+    "promptArgumentDescribed": "{{label}}：{{description}}",
+    "catalogHints": {
+      "remote": "加载此 URL 处 MCP 服务器的工具、资源和提示词。此请求的请求头和认证会随每次调用一起发送。在桌面应用中，可在地址栏写 stdio: 加命令来启动本地服务器，例如 {{example}}。",
+      "local": "“加载”会在这台电脑上启动此命令并读取它提供的内容；每次调用都会再次启动它。“请求头”标签页中的行会作为环境变量传给它。"
+    },
+    "empty": "此服务器没有列出任何工具、资源或提示词。",
+    "checks": "检查",
+    "checksHint": "在此服务器的工具定义中发现的问题",
+    "noFindings": "工具定义中没有发现问题。",
+    "findings": {
+      "missingDescription": "{{tool}}：没有描述。模型根据描述选择工具，因此很可能无法正确使用它。",
+      "shortDescription": "{{tool}}：描述“{{detail}}”太短。请说明该工具做什么、何时使用以及返回什么。",
+      "duplicateName": "{{tool}}：有多个工具使用此名称，调用时无法区分它们。",
+      "similarNames": "{{tool}}：与 {{detail}} 几乎一样，模型很容易选错。",
+      "invalidName": "{{tool}}：名称应为 1 到 128 个字符，且只能使用字母、数字、_、- 和 .",
+      "invalidSchema": "{{tool}}：输入 schema 无法使用：{{detail}}。",
+      "undocumentedParameters": "{{tool}}：以下参数没有描述：{{detail}}。",
+      "unknownRequired": "{{tool}}：required 列出了 schema 中没有定义的参数：{{detail}}。",
+      "manyTools": "此服务器列出了 {{count}} 个工具。工具列表过大会让模型更难选对工具，有些客户端也只会加载其中一部分。",
+      "rejected": "{{tool}}：按规范要求，已从工具列表中排除，因为{{detail}}。",
+      "listFailed": "{{method}} 失败：{{detail}}"
+    },
+    "schemaProblems": {
+      "notObject": "它不是 JSON 对象",
+      "rootType": "顶层类型应为 \"object\"",
+      "properties": "properties 不是由 schema 组成的对象",
+      "property": "{{name}} 的 schema 不是对象",
+      "type": "{{name}} 的类型“{{type}}”未知",
+      "required": "required 不是名称列表"
+    },
+    "changes": {
+      "title": "此服务器的工具自你上次接受以来已发生变化。",
+      "added": "新增：{{names}}。",
+      "removed": "移除：{{names}}。",
+      "descriptionChanged": "{{name}}：描述已更改。",
+      "schemaChanged": "{{name}}：输入 schema 已更改。",
+      "definitionChanged": "{{name}}：描述或输入 schema 已更改。",
+      "before": "之前",
+      "now": "现在",
+      "noDescription": "（无）",
+      "advice": "让代理使用这些工具之前，请先阅读这些更改。更改后的描述可能带有服务器之前没有向你展示的指令。",
+      "accept": "接受更改",
+      "firstSeen": "首次加载此服务器：Gostman 会在此设备上记住它的工具，并在工具发生变化时提醒你。"
+    },
+    "auth": {
+      "title": "登录",
+      "close": "关闭",
+      "retry": "重试",
+      "steps": {
+        "probe": "询问服务器",
+        "challenge": "读取 WWW-Authenticate 质询",
+        "resource": "查找受保护资源的元数据（RFC 9728）",
+        "server": "查找授权服务器的元数据（RFC 8414 或 OpenID Connect）",
+        "registration": "获取客户端 ID",
+        "browser": "在浏览器中登录",
+        "issuer": "检查响应中的签发者（RFC 9207）",
+        "token": "用授权码换取令牌",
+        "retry": "携带令牌调用服务器"
+      },
+      "outcomes": {
+        "ok": "完成",
+        "warning": "警告",
+        "failed": "失败",
+        "stopped": "已停止",
+        "running": "进行中"
+      },
+      "explanations": {
+        "localCommand": "以 stdio: 启动的本地服务器从环境中读取凭据，而不使用 OAuth。请改为在“请求头”标签页的某一行中填入令牌。",
+        "unreachable": "Gostman 无法连接服务器。请检查 URL、网络和代理设置。",
+        "noResourceMetadata": "服务器要求登录，但没有给出 resource_metadata 参数，因此 Gostman 改为在常用的标准地址查找元数据。",
+        "answered": "服务器没有要求登录就作出了响应，例如因为此请求已带有有效的令牌。Gostman 仍会查找 OAuth 元数据，以便你重新登录。",
+        "notProtected": "服务器没有要求登录就作出了响应，也没有发布 OAuth 元数据，因此不需要令牌。",
+        "resourceMetadataMissing": "在下列任一地址都没有找到受保护资源的元数据。使用 OAuth 的 MCP 服务器必须发布这些元数据，可以位于其 401 响应中的 resource_metadata 地址，也可以位于 /.well-known/oauth-protected-resource。",
+        "resourceMetadataInvalid": "受保护资源的元数据没有指明任何授权服务器，因此 Gostman 不知道该在哪里登录。",
+        "resourceMismatch": "受保护资源的元数据中指明的资源不是此服务器的 URL。为该资源签发的令牌在这里不会被接受（audience 不匹配），因此 Gostman 已停止。请把该文档中的 resource 设为服务器 URL，或设为服务器 URL 以其开头的 URL。",
+        "serverMetadataMissing": "授权服务器的标准地址都没有返回元数据。授权服务器必须发布 OAuth 2.0 授权服务器元数据或 OpenID Connect 发现文档。",
+        "issuerMismatch": "授权服务器元数据中的 issuer 与受保护资源元数据的 authorization_servers 中列出的地址不同。规范要求两者逐字符完全一致，因此不会使用这些元数据。请让两个值一致；末尾多出的斜杠是常见原因。",
+        "serverMetadataIncomplete": "授权服务器元数据中没有 authorization_endpoint 或 token_endpoint。",
+        "noPkce": "授权服务器元数据的 code_challenge_methods_supported 中没有列出 S256，而 MCP 客户端不得在没有 PKCE 的情况下登录。请在授权服务器上支持使用 S256 的 PKCE，并把 S256 加入该列表。",
+        "insecureEndpoint": "授权或令牌端点在远程主机上使用明文 HTTP。规范要求这些端点使用 HTTPS。",
+        "insufficientScope": "令牌有效，但缺少此请求所需的 scope。重新登录时会请求你原有的 scope，再加上服务器指明的 scope。",
+        "noRegistration": "授权服务器既不支持动态客户端注册，也不支持客户端 ID 元数据文档。请自行在它那里注册一个客户端，在“认证”标签页（OAuth 2.0）中填入其客户端 ID，然后重新登录。",
+        "registrationRefused": "授权服务器拒绝注册 Gostman。许多身份提供商关闭了动态客户端注册：请自行注册一个客户端，并在“认证”标签页中填入其客户端 ID。",
+        "serverChanged": "授权服务器不是已保存的客户端 ID 所属的那个，因此 Gostman 重新进行了注册，而没有复用它。",
+        "browserFailed": "浏览器中的登录没有完成。",
+        "issuerMissing": "授权服务器元数据设置了 authorization_response_iss_parameter_supported，但响应中没有 iss 参数，因此为防范混淆攻击而被拒绝。请在重定向回 Gostman 时加上 iss，或不再声明支持它。",
+        "issuerWrong": "响应中的 iss 参数不是 Gostman 所登录的授权服务器的 issuer，因此为防范混淆攻击而丢弃了该响应。请按授权服务器元数据中的原样发送 issuer。",
+        "tokenFailed": "令牌端点没有返回访问令牌。请检查客户端 ID、重定向地址和 resource 参数是否被接受。",
+        "stillRejected": "服务器仍然拒绝该令牌。它可能期望不同的 audience 或 scope：请将下方的 resource 和 scope 与服务器所检查的内容对比。"
+      },
+      "attempts": "请求"
+    },
+    "notifications": "通知（{{count}}）",
+    "notificationTime": "{{milliseconds}} ms",
+    "progressOf": "{{progress}}/{{total}}",
+    "issuerDetail": "预期“{{expected}}”，收到“{{received}}”"
+  },
+  "mcpOutput": {
+    "name": "结果符合工具的输出 schema"
+  }
+}

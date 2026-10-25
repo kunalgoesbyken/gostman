@@ -73,7 +73,7 @@ function ServerControls({ mock, scopes, actions }) {
           className="w-20 font-mono"
         />
       </label>
-      <div className="ml-auto">
+      <div className="ms-auto">
         {isRunning ? (
           <Button variant="destructive" size="sm" onClick={actions.stop}>
             <Square />

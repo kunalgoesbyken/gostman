@@ -1,0 +1,26 @@
+{
+  "examples": {
+    "title": "Exemple",
+    "bodyLabel": "Corpul exemplului",
+    "listLabel": "Exemple salvate",
+    "emptyTitle": "Încă nu există exemple",
+    "emptyHint": "Trimiteți cererea, apoi alegeți Salvare ca exemplu în panoul de răspuns. Serverul mock răspunde cu acestea.",
+    "servedByDefault": "Servit implicit",
+    "serveByDefault": "Servire implicită",
+    "format": "Formatare corp",
+    "rename": "Redenumire exemplu",
+    "remove": "Ștergere exemplu",
+    "section": "Secțiunea exemplului",
+    "body": "Corp",
+    "headersCount": "Antete ({{count}})",
+    "noContentType": "Fără tip de conținut",
+    "binaryTitle": "Corp binar, {{size}}",
+    "binaryHint": "Nu poate fi editat ca text și este servit exact așa cum este stocat.",
+    "noHeadersHint": "Acest exemplu a fost salvat fără antete.",
+    "unsaved": "Corpul are modificări nesalvate.",
+    "discard": "Renunțare",
+    "saveBody": "Salvare corp",
+    "bodyTooLarge": "Acest corp are {{size}}. Un exemplu păstrează un corp de până la {{limit}}.",
+    "tooMany": "O cerere păstrează până la {{limit}} exemple. Ștergeți unul pentru a salva altul."
+  }
+}

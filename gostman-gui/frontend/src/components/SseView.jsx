@@ -10,10 +10,12 @@ import { VirtualList } from "./ui/VirtualList"
 import { useClipboardCopy } from "../hooks/useClipboardCopy"
 import { useDebouncedValue } from "../hooks/useDebouncedValue"
 import { cn } from "../lib/utils"
+import { compareText } from "../lib/i18n/format"
 import {
-  SSE_TEXT, STATUS_TEXT, STREAM_ENDED, STREAM_RECONNECTING,
+  STREAM_ENDED, STREAM_RECONNECTING,
   endSummary, eventsToText, filterEvents, formatEventTime, prettyEventData,
 } from "../lib/sse"
+import { SSE_TEXT, STATUS_TEXT } from "../lib/sseText"
 import { clearEvents, selectSession, useSseStore } from "../lib/sseSessions"
 
 const ROW_HEIGHT_PX = 28
@@ -26,7 +28,7 @@ const MS_PER_SECOND = 1000
 const firstLine = (data) => data.split("\n", 1)[0].slice(0, PREVIEW_LIMIT)
 
 function typeOptions(types) {
-  return Object.entries(types).sort(([first], [second]) => first.localeCompare(second))
+  return Object.entries(types).sort(([first], [second]) => compareText(first, second))
 }
 
 function StatusBadge({ session }) {
@@ -53,11 +55,11 @@ function EventRow({ event, isSelected, onSelect }) {
       aria-pressed={isSelected}
       style={{ height: ROW_HEIGHT_PX }}
       className={cn(
-        "flex w-full items-center gap-2 px-3 text-left text-xs hover:bg-accent",
+        "flex w-full items-center gap-2 px-3 text-start text-xs hover:bg-accent",
         isSelected && "bg-accent"
       )}
     >
-      <span className="w-12 shrink-0 text-right font-mono text-muted-foreground">{event.index}</span>
+      <span className="w-12 shrink-0 text-end font-mono text-muted-foreground">{event.index}</span>
       <span className="w-24 shrink-0 font-mono text-muted-foreground">{formatEventTime(event.time)}</span>
       <Badge variant="outline" className="max-w-[8rem] shrink-0"><span className="truncate">{event.type}</span></Badge>
       {event.id && <span className="max-w-[6rem] shrink-0 truncate font-mono text-muted-foreground" title={event.id}>{event.id}</span>}
@@ -76,7 +78,7 @@ function EventDetail({ event }) {
         <IconButton label={copied ? SSE_TEXT.copied : SSE_TEXT.copyEvent} icon={copied ? Check : Copy} onClick={copy} />
       </Toolbar>
       {event.truncated && <Notice tone="warning">{SSE_TEXT.clipped}</Notice>}
-      <pre className="min-h-0 flex-1 overflow-auto whitespace-pre-wrap p-3 font-mono text-xs leading-relaxed text-foreground [overflow-wrap:anywhere]">
+      <pre dir="ltr" className="min-h-0 flex-1 overflow-auto whitespace-pre-wrap p-3 font-mono text-xs leading-relaxed text-foreground [overflow-wrap:anywhere]">
         {text.slice(0, DETAIL_LIMIT)}
       </pre>
     </>
@@ -129,7 +131,7 @@ export const SseView = memo(function SseView({ streamId }) {
       <Toolbar>
         <StatusBadge session={session} />
         <Counters session={session} shown={shown.length} />
-        <div className="ml-auto flex shrink-0 items-center gap-1">
+        <div className="ms-auto flex shrink-0 items-center gap-1">
           <Select value={type} onChange={(event) => setType(event.target.value)} aria-label={SSE_TEXT.allTypes} className="w-36">
             <option value={ALL_TYPES}>{SSE_TEXT.allTypes}</option>
             {typeOptions(session.types).map(([name, count]) => <option key={name} value={name}>{`${name} (${count})`}</option>)}

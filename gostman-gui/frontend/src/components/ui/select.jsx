@@ -23,7 +23,7 @@ function readEntries(children, group = "") {
     if (child.type === "optgroup") return readEntries(child.props.children, child.props.label || "")
     if (child.type !== "option") return []
     const label = textOf(child.props.children)
-    return [{ value: String(child.props.value ?? label), label, group, disabled: Boolean(child.props.disabled), icon: child.props.icon }]
+    return [{ value: String(child.props.value ?? label), label, group, disabled: Boolean(child.props.disabled), icon: child.props.icon, lang: child.props.lang }]
   })
 }
 
@@ -75,6 +75,7 @@ export function OptionRow({ id, entry, isSelected, isActive, hasIcons = false, o
       aria-selected={isSelected}
       aria-disabled={entry.disabled}
       title={entry.label}
+      lang={entry.lang}
       ref={(element) => {
         if (isActive) element?.scrollIntoView({ block: "nearest" })
       }}
@@ -82,7 +83,7 @@ export function OptionRow({ id, entry, isSelected, isActive, hasIcons = false, o
       onClick={entry.disabled ? undefined : onChoose}
       onMouseMove={onPoint}
       className={cn(
-        "flex h-7 cursor-default items-center gap-2 pl-2 pr-3 text-xs",
+        "flex h-7 cursor-default items-center gap-2 ps-2 pe-3 text-xs",
         entry.disabled ? "opacity-40" : "text-foreground",
         isActive && !entry.disabled && "bg-accent"
       )}
@@ -95,7 +96,7 @@ export function OptionRow({ id, entry, isSelected, isActive, hasIcons = false, o
 }
 
 const Select = React.forwardRef(function Select(
-  { className, children, controlSize = "sm", value, onChange, disabled, title, ...props },
+  { className, children, controlSize = "sm", value, onChange, disabled, title, dir, ...props },
   forwardedRef
 ) {
   const entries = React.useMemo(() => readEntries(children), [children])
@@ -185,7 +186,7 @@ const Select = React.forwardRef(function Select(
   }
 
   return (
-    <div className="relative min-w-0">
+    <div dir={dir} className="relative min-w-0">
       <button
         type="button"
         role="combobox"
@@ -198,19 +199,20 @@ const Select = React.forwardRef(function Select(
         title={title || selected?.label}
         onClick={() => (isOpen ? close() : open())}
         onKeyDown={handleKeyDown}
-        className={cn(CONTROL_BASE, CONTROL_SIZES[controlSize], "flex max-w-full items-center gap-2 pr-7 text-left", className)}
+        className={cn(CONTROL_BASE, CONTROL_SIZES[controlSize], "flex max-w-full items-center gap-2 pe-7 text-start", className)}
         {...props}
       >
         {selected?.icon && <OptionIcon icon={selected.icon} />}
-        <span className="truncate">{selected ? selected.label : String(value ?? "")}</span>
+        <span className="truncate" lang={selected?.lang}>{selected ? selected.label : String(value ?? "")}</span>
       </button>
-      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+      <ChevronDown className="pointer-events-none absolute end-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
       {isOpen && createPortal(
         <div
           ref={listRef}
           id={listId}
           role="listbox"
           data-surface="menu"
+          dir={dir}
           style={placement}
           className={LIST_CLASS}
         >

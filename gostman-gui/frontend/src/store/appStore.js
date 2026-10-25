@@ -4,6 +4,8 @@ import { addConsoleGroup } from '../lib/consoleLog'
 import { mergeCookies, withoutCookie } from '../lib/cookies'
 import { isPlainObject, parseJSON } from '../lib/dataUtils'
 import { DATA_TEXT } from '../lib/dataText'
+import { APP_STORE_TEXT } from '../lib/appStoreText'
+import { DIALOG_TEXT } from '../lib/dialogText'
 import { TAB_DRAFTS_KEY, isStorageFull } from '../lib/storage'
 import { ENVIRONMENT_TEXT } from '../lib/environmentText'
 import { DEFAULT_SETTINGS, normalizeSettings } from '../lib/network'
@@ -28,19 +30,17 @@ const HISTORY_IDENTITY_FIELDS = ['method', 'url', 'body', 'bodyType', 'graphqlQu
 const IMPORT_TAB = 'import'
 export const DEFAULT_REQUEST_PANEL = 'params'
 const EMPTY_VARIABLES = '{}'
-const DEFAULT_ENVIRONMENT_NAME = 'Default'
 const TAB_ID_PREFIX = 'tab-'
-const SAVE_FAILURE_TITLE = 'Changes could not be saved'
 
 const persistenceFailureMessage = (error) => (isStorageFull(error)
   ? DATA_TEXT.tabsNotStored(error.room)
-  : `Your latest changes were not saved and will be lost when the app closes. Export your data to keep a copy. (${error?.message || String(error)})`)
+  : APP_STORE_TEXT.saveFailed(error?.message || String(error)))
 
-const CLOSED_ALERT = { isOpen: false, title: '', message: '', confirmText: 'OK', variant: 'default' }
-const CLOSED_CONFIRM = { isOpen: false, title: '', message: '', confirmText: 'OK', variant: 'default', onConfirm: null, onCancel: null, alternative: null }
+const CLOSED_ALERT = { isOpen: false, title: '', message: '', confirmText: '', variant: 'default' }
+const CLOSED_CONFIRM = { isOpen: false, title: '', message: '', confirmText: '', variant: 'default', onConfirm: null, onCancel: null, alternative: null }
 const CLOSED_RUNNER = { isOpen: false, folderId: '', isRunning: false, results: [] }
 const CLOSED_VARIABLE_PROMPT = { isOpen: false, names: [], defaults: {}, isForRun: false, resolve: null }
-const CLOSED_PROMPT = { isOpen: false, title: '', message: '', placeholder: '', defaultValue: '', confirmText: 'OK', onConfirm: null }
+const CLOSED_PROMPT = { isOpen: false, title: '', message: '', placeholder: '', defaultValue: '', confirmText: '', onConfirm: null }
 const CLOSED_DELETE_DATA = { isOpen: false, onDelete: null }
 
 const MAX_CLOSED_TABS = 10
@@ -144,7 +144,7 @@ const restoreEnvironments = (data) => {
   const environments = asArray(data.environments).filter((environment) => environment?.id)
   return environments.length > 0
     ? environments
-    : [createEnvironment(DEFAULT_ENVIRONMENT_NAME, data.variables || EMPTY_VARIABLES)]
+    : [createEnvironment(ENVIRONMENT_TEXT.defaultName, data.variables || EMPTY_VARIABLES)]
 }
 
 const contextFolderId = (state, request) => (request || selectActiveTab(state)?.request)?.folderId || ''
@@ -273,11 +273,12 @@ let draftsFailure = null
 
 function flushWrites() {
   clearTimeout(writeTimer)
-  for (const [name, value] of pendingWrites) {
-    draftSource.write(name, JSON.stringify(value)).catch(reportStorageFailure)
-  }
+  const writes = [...pendingWrites].map(([name, value]) => draftSource.write(name, JSON.stringify(value)).catch(reportStorageFailure))
   pendingWrites.clear()
+  return Promise.all(writes)
 }
+
+export const flushPendingWrites = flushWrites
 
 window.addEventListener('pagehide', flushWrites)
 document.addEventListener('visibilitychange', () => {
@@ -714,7 +715,7 @@ export const useAppStore = create(
         appendConsole: (group) => set((state) => ({ consoleGroups: addConsoleGroup(state.consoleGroups, group) })),
         clearConsole: () => set({ consoleGroups: [] }),
 
-        showAlert: (title, message, confirmText = 'OK', variant = 'default') => set({
+        showAlert: (title, message, confirmText = DIALOG_TEXT.ok, variant = 'default') => set({
           alertDialog: { isOpen: true, title, message, confirmText, variant },
         }),
         closeAlert: () => set({ alertDialog: CLOSED_ALERT }),
@@ -723,7 +724,7 @@ export const useAppStore = create(
             isOpen: true,
             title,
             message,
-            confirmText: confirmText || (variant === 'destructive' ? 'Delete' : 'OK'),
+            confirmText: confirmText || (variant === 'destructive' ? APP_STORE_TEXT.delete : DIALOG_TEXT.ok),
             variant,
             onConfirm,
             onCancel,
@@ -731,7 +732,7 @@ export const useAppStore = create(
           },
         }),
         closeConfirm: () => set({ confirmDialog: CLOSED_CONFIRM }),
-        showPrompt: (title, message, defaultValue = '', placeholder = '', onConfirm, confirmText = CLOSED_PROMPT.confirmText) => set({
+        showPrompt: (title, message, defaultValue = '', placeholder = '', onConfirm, confirmText = DIALOG_TEXT.ok) => set({
           promptDialog: { ...CLOSED_PROMPT, isOpen: true, title, message, placeholder, defaultValue, onConfirm, confirmText },
         }),
         closePrompt: () => set({ promptDialog: CLOSED_PROMPT }),
@@ -741,7 +742,7 @@ export const useAppStore = create(
         reportPersistenceFailure: (error) => {
           if (get().persistenceFailureReported) return
           set({ persistenceFailureReported: true })
-          get().showAlert(SAVE_FAILURE_TITLE, persistenceFailureMessage(error), 'OK', 'warning')
+          get().showAlert(APP_STORE_TEXT.saveFailedTitle, persistenceFailureMessage(error), DIALOG_TEXT.ok, 'warning')
         },
       }),
       {

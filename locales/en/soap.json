@@ -1,0 +1,13 @@
+{
+  "soap": {
+    "versionLabel": "SOAP version",
+    "format": "Format XML",
+    "formatTitle": "Indent the envelope. Comments and CDATA sections are kept.",
+    "fault": "SOAP Fault",
+    "faultCode": "Code",
+    "faultReason": "Reason",
+    "faultActor": "Actor",
+    "faultDetail": "Detail",
+    "malformed": "The XML cannot be formatted: {{message}}"
+  }
+}

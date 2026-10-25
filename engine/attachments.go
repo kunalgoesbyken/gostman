@@ -3,21 +3,21 @@ package engine
 import (
 	"bytes"
 	"context"
-	"errors"
-	"fmt"
 	"io"
 	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const maxAttachedBytes = 1 << 30
 
 var (
-	errAttachmentsUnavailable = errors.New("files attached from disk are sent only by the desktop app")
-	errAttachmentsTooLarge    = fmt.Errorf("the attached files are larger than %d GB together", maxAttachedBytes>>30)
-	errSignedAttachment       = fmt.Errorf("this authentication signs the whole body, so attached files are limited to %d MB together with it", maxRequestBody>>20)
+	errAttachmentsUnavailable = locales.Errorf(locales.EngineAttachmentsUnavailable, nil)
+	errAttachmentsTooLarge    = locales.Errorf(locales.EngineAttachmentsTooLarge, locales.Params{"size": maxAttachedBytes >> 30})
+	errSignedAttachment       = locales.Errorf(locales.EngineAttachmentsSigned, locales.Params{"size": maxRequestBody >> 20})
 )
 
 type FileOpener func(path string) (*os.File, error)
@@ -60,15 +60,15 @@ func (b *bodyStream) attach(name, path string) error {
 	}
 	file, err := b.open(path)
 	if err != nil {
-		return fmt.Errorf("attached file %q: %w", name, err)
+		return locales.Wrap(locales.EngineAttachmentsFailed, locales.Params{"name": name}, err)
 	}
 	info, err := file.Stat()
 	if err == nil && !info.Mode().IsRegular() {
-		err = fmt.Errorf("%q is not a regular file", path)
+		err = locales.Errorf(locales.EngineAttachmentsNotRegular, locales.Params{"path": path})
 	}
 	if err != nil {
 		file.Close()
-		return fmt.Errorf("attached file %q: %w", name, err)
+		return locales.Wrap(locales.EngineAttachmentsFailed, locales.Params{"name": name}, err)
 	}
 	b.attached += info.Size()
 	b.segments = append(b.segments, segment{file: file, size: info.Size()})

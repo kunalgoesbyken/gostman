@@ -1,0 +1,5 @@
+{
+  "zip.unsupported": "zip64 is the name of a zip format extension and stays unchanged.",
+  "zip.tooMany": "{{limit}} is a number of files.",
+  "zip.tooLarge": "{{limit}} is a number of bytes."
+}

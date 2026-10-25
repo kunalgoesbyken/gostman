@@ -10,6 +10,7 @@ import { MockBehaviorFields } from "./MockBehaviorFields"
 import { MockSpecImport } from "./MockSpecImport"
 import { ROUTE_CONFLICT, ROUTE_DISABLED, ROUTE_NO_EXAMPLE, ROUTE_SERVED, emptyBehavior } from "../lib/mockServer"
 import { exampleLabel } from "../lib/examples"
+import { localizedText } from "../lib/localized"
 import { MOCK_TEXT } from "../lib/mockText"
 import { cn } from "../lib/utils"
 
@@ -17,10 +18,12 @@ const ROUTE_COLUMNS = "grid grid-cols-[1.25rem_3.5rem_minmax(0,1.25fr)_minmax(0,
 const CELL = "truncate font-mono text-xs"
 const SWITCHABLE = [ROUTE_SERVED, ROUTE_DISABLED, ROUTE_NO_EXAMPLE, ROUTE_CONFLICT]
 
+const reasonOf = (route) => localizedText(route.localized, route.reason)
+
 function ExampleChoice({ route, examples, selected, onSelect }) {
   if (route.state === ROUTE_NO_EXAMPLE) return <span className="truncate text-xs text-muted-foreground">{MOCK_TEXT.noExample}</span>
   if (route.state !== ROUTE_SERVED) {
-    return <span title={route.reason} className="truncate text-xs text-warning">{route.reason}</span>
+    return <span title={reasonOf(route)} className="truncate text-xs text-warning">{reasonOf(route)}</span>
   }
   return (
     <Select value={selected || route.exampleId} onChange={(event) => onSelect(route.requestId, event.target.value)} aria-label={MOCK_TEXT.exampleFor(route.name)}>
@@ -63,10 +66,10 @@ function RouteTable({ routes, examplesOf, config, actions }) {
     <>
       <div className={`${ROUTE_COLUMNS} h-8 shrink-0 border-b border-border`}>
         <span />
-        <SectionLabel className="truncate">{MOCK_TEXT.routeColumns.method}</SectionLabel>
-        <SectionLabel className="truncate">{MOCK_TEXT.routeColumns.path}</SectionLabel>
-        <SectionLabel className="truncate">{MOCK_TEXT.routeColumns.request}</SectionLabel>
-        <SectionLabel className="truncate">{MOCK_TEXT.routeColumns.example}</SectionLabel>
+        <SectionLabel title={MOCK_TEXT.routeColumns.method} className="truncate">{MOCK_TEXT.routeColumns.method}</SectionLabel>
+        <SectionLabel title={MOCK_TEXT.routeColumns.path} className="truncate">{MOCK_TEXT.routeColumns.path}</SectionLabel>
+        <SectionLabel title={MOCK_TEXT.routeColumns.request} className="truncate">{MOCK_TEXT.routeColumns.request}</SectionLabel>
+        <SectionLabel title={MOCK_TEXT.routeColumns.example} className="truncate">{MOCK_TEXT.routeColumns.example}</SectionLabel>
         <span />
       </div>
       <div aria-label={MOCK_TEXT.routesLabel} className="min-h-0 flex-1 overflow-y-auto">

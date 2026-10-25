@@ -1,0 +1,129 @@
+{
+  "command": {
+    "title": "Paletă de comenzi",
+    "heading": "Comenzi",
+    "sections": {
+      "request": "Cereri"
+    },
+    "searchCommands": "Căutare comenzi",
+    "searchRequests": "Căutare cereri",
+    "commandsPlaceholder": "Tastați o comandă sau numele unei cereri",
+    "requestsPlaceholder": "Mergeți la o cerere sau la o intrare din istoric",
+    "results": "Rezultate",
+    "nothingMatches": "Nu există rezultate",
+    "sentEarlier": "Trimisă anterior",
+    "switchEnvironment": "Schimbare mediu: {{name}}",
+    "switchEnvironmentDescription": "Folosește variabilele acestui mediu",
+    "settingsKeywords": "antete autentificare variabile scripturi verificări",
+    "commands": {
+      "sendRequest": {
+        "label": "Trimitere cerere",
+        "description": "Trimite cererea din fila curentă"
+      },
+      "newRequest": {
+        "description": "Deschide o filă nouă goală"
+      },
+      "saveRequest": {
+        "label": "Salvare cerere",
+        "description": "Salvează cererea din fila curentă"
+      },
+      "duplicateRequest": {
+        "label": "Duplicare cerere",
+        "description": "Salvează o copie a cererii curente"
+      },
+      "copyRequest": {
+        "label": "Copiere cerere",
+        "description": "Copiază cererea salvată pentru a o lipi într-un dosar"
+      },
+      "pasteRequest": {
+        "label": "Lipire cerere",
+        "description": "Lipește cererea sau dosarul copiat lângă cererea curentă"
+      },
+      "generateCode": {
+        "description": "Afișează cererea curentă ca cod"
+      },
+      "closeTab": {
+        "label": "Închidere filă",
+        "description": "Închide fila curentă"
+      },
+      "closeOtherTabs": {
+        "description": "Păstrează doar fila curentă"
+      },
+      "closeSavedTabs": {
+        "description": "Închide fiecare filă fără modificări nesalvate"
+      },
+      "keepTab": {
+        "label": "Păstrare filă de previzualizare deschisă",
+        "description": "Transformă fila de previzualizare într-o filă obișnuită"
+      },
+      "reopenTab": {
+        "label": "Redeschidere filă închisă",
+        "description": "Readuce fila închisă ultima"
+      },
+      "toggleSidebar": {
+        "description": "Afișează sau ascunde colecțiile și istoricul"
+      },
+      "shortcuts": {
+        "description": "Afișează toate scurtăturile"
+      },
+      "newFolder": {
+        "description": "Creează un dosar la nivelul superior"
+      },
+      "runCollection": {
+        "description": "Rulează toată colecția sau un singur dosar, cu verificările și scripturile sale"
+      },
+      "collapseFolders": {
+        "keywords": "închidere restrângere arbore"
+      },
+      "examples": {
+        "label": "Exemple de cerere",
+        "description": "Afișează răspunsurile salvate ale cererii curente"
+      },
+      "mockServer": {
+        "description": "Servește exemplele salvate pe un port local"
+      },
+      "capture": {
+        "label": "Captură trafic",
+        "description": "Redirecționează traficul unei aplicații către API-ul ei și îl salvează ca cereri"
+      },
+      "cookies": {
+        "label": "Gestionare cookie-uri",
+        "description": "Vedeți și ștergeți cookie-urile stocate"
+      },
+      "environments": {
+        "label": "Gestionare medii",
+        "description": "Creați medii și editați variabilele lor, variabilele colecției și cele globale",
+        "keywords": "variabile globale"
+      },
+      "scanSecrets": {
+        "keywords": "credențiale tokenuri parole scurgere"
+      },
+      "network": {
+        "label": "Setări de rețea",
+        "description": "Proxy și certificate"
+      },
+      "import": {
+        "label": "Importare date",
+        "description": "Importă fișiere Postman, Insomnia, Bruno, OpenAPI, HAR și altele"
+      },
+      "lintSpec": {
+        "description": "Verifică specificația OpenAPI importată pentru probleme",
+        "keywords": "openapi swagger validare guvernanță"
+      },
+      "loadTest": {
+        "keywords": "performanță stres"
+      },
+      "export": {
+        "label": "Exportare date",
+        "description": "Exportă colecții și medii"
+      },
+      "share": {
+        "label": "Partajare colecție",
+        "description": "Creează un link sau un fișier criptat, fără cont"
+      },
+      "clearHistory": {
+        "description": "Șterge fiecare intrare din istoric"
+      }
+    }
+  }
+}

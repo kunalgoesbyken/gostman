@@ -6,13 +6,13 @@ import { Notice, Panel, STACKED_TOOLBAR, SectionLabel, Toolbar, ToolbarSummary }
 import { Select } from "./ui/select"
 import { EditorSkeleton } from "./ui/skeleton"
 import { maxAttachmentBytes } from "../lib/attachments"
-import { formatSize } from "../lib/dataUtils"
+import { formatBytes } from "../lib/byteSize"
 import {
   GRPC_METHOD, findMethod, isBlankMessage, mergeProtoFiles, methodKind, parseProtoFiles, readProtoFile,
 } from "../lib/grpc"
 import { GRPC_TEXT as TEXT } from "../lib/grpcText"
 
-const tooLargeMessage = (file) => TEXT.tooLarge(file.name, formatSize(file.size), formatSize(maxAttachmentBytes()))
+const tooLargeMessage = (file) => TEXT.tooLarge(file.name, formatBytes(file.size), formatBytes(maxAttachmentBytes()))
 
 function ProtoFilePicker({ files, onChange, onError }) {
   const inputRef = useRef(null)
@@ -61,6 +61,7 @@ function MethodField({ services, method, isListed, onChange }) {
   if (!services) {
     return (
       <Input
+        dir="ltr"
         value={method}
         onChange={(event) => onChange(event.target.value)}
         placeholder={TEXT.methodPlaceholder}
@@ -137,7 +138,7 @@ export function GrpcPanel({ request, schema, editorPath, onUpdateRequest, onProt
         </Button>
       </Toolbar>
       {selected?.clientStreaming && <Notice>{TEXT.streamHint}</Notice>}
-      <div className="min-h-0 flex-1">
+      <div dir="ltr" className="min-h-0 flex-1">
         <Suspense fallback={<EditorSkeleton />}>
           <EditorComponent
             value={grpcMessage}

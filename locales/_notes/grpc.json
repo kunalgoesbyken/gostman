@@ -1,0 +1,13 @@
+{
+  "grpc.services": "Label of the list of gRPC services loaded from the server or from .proto files.",
+  "grpc.reflection": "Shown when the services come from server reflection. Server reflection is a gRPC feature.",
+  "grpc.load": "Button that loads the services. Short.",
+  "grpc.reload": "Button that loads the services again. Short.",
+  "grpc.method": "Label of the picker for a gRPC method.",
+  "grpc.useExample": "Button that fills the message with a generated example. Short.",
+  "grpc.kinds.unary": "gRPC call kind: one request, one response.",
+  "grpc.kinds.bidirectional": "gRPC call kind: both sides send a stream.",
+  "grpc.kinds.client": "gRPC call kind: the client sends a stream.",
+  "grpc.kinds.server": "gRPC call kind: the server sends a stream.",
+  "grpc.tooLarge": "{{size}} and {{limit}} are file sizes."
+}

@@ -25,11 +25,9 @@ const STATUS_SERVER = 500
 
 const TEXT = AI_TEXT.errors
 
-const MESSAGES_BY_KIND = { [KIND_CUT_OFF]: AI_TEXT.cutOff }
-
 export const aiError = (kind, message, status = 0) => ({ kind, status, message })
 
-export const errorMessage = (error) => MESSAGES_BY_KIND[error.kind] || error.message
+export const errorMessage = (error) => (error.kind === KIND_CUT_OFF ? AI_TEXT.cutOff : error.message)
 
 export const rejectsSchema = (error) => (
   error.kind === KIND_REQUEST && (error.status === STATUS_BAD_REQUEST || error.status === STATUS_UNPROCESSABLE)
@@ -45,23 +43,24 @@ function classify(status) {
 
 export const cleanDetail = (text) => String(text).split(/\s+/).filter(Boolean).join(' ').slice(0, DETAIL_LIMIT)
 
-function retryNote(retryAfter) {
+function retrySeconds(retryAfter) {
   const seconds = Number(retryAfter)
-  return retryAfter && Number.isInteger(seconds) && seconds > 0 && seconds <= MAX_RETRY_SECONDS ? TEXT.retryIn(seconds) : ''
+  return retryAfter && Number.isInteger(seconds) && seconds > 0 && seconds <= MAX_RETRY_SECONDS ? seconds : 0
 }
 
 export function statusError(status, detail, retryAfter = '') {
   const [kind, summary] = classify(status)
-  const hinted = summary + retryNote(retryAfter)
-  return aiError(kind, detail ? `${hinted}: ${detail}` : hinted, status)
+  const seconds = retrySeconds(retryAfter)
+  const hinted = seconds > 0 ? TEXT.retryIn(summary, seconds) : summary
+  return aiError(kind, detail ? TEXT.withDetail(hinted, detail) : hinted, status)
 }
 
 const browserAdvice = (provider, origin) => {
   if (provider === PROVIDER_OLLAMA) return TEXT.ollamaAdvice(origin)
   if (provider === PROVIDER_LM_STUDIO) return TEXT.lmStudioAdvice
-  if (provider === PROVIDER_CUSTOM) return `${TEXT.customAdvice(origin)} ${TEXT.desktopAdvice}`
-  if (provider === PROVIDER_ANTHROPIC) return `${TEXT.anthropicAdvice} ${TEXT.desktopAdvice}`
-  return `${TEXT.generalAdvice} ${TEXT.desktopAdvice}`
+  if (provider === PROVIDER_CUSTOM) return TEXT.customAdvice(origin)
+  if (provider === PROVIDER_ANTHROPIC) return TEXT.anthropicAdvice
+  return TEXT.generalAdvice
 }
 
 export const unreachableMessage = ({ provider, host, origin, reason }) => TEXT.unreachable(host, reason, browserAdvice(provider, origin))

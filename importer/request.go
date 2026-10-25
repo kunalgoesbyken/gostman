@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/locales"
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
@@ -69,10 +70,10 @@ func (c *collector) build(p parts, folderID string) {
 	}
 	c.flagScripts(request.Name, request.PreScript, request.PostScript)
 	if request.Auth.Type == authOAuth2 {
-		c.flag(messageOAuth, request.Name)
+		c.flag(locales.ImporterOauth, request.Name)
 	}
 	if p.needsFiles {
-		c.flag(messageFiles, request.Name)
+		c.flag(locales.ImporterFiles, request.Name)
 	}
 	c.addRequest(request)
 }

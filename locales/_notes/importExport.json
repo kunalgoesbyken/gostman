@@ -1,0 +1,13 @@
+{
+  "importExport.untitledFolder": "Name given to an imported folder that has none. Saved as data.",
+  "importExport.untitledEnvironment": "Name given to an imported environment that has none. Saved as data.",
+  "importExport.gostmanExport": "Name of the file format when reported in messages, for example This Gostman export contains no requests.",
+  "importExport.undetected": "Postman, OpenAPI, Swagger and Gostman are product and format names and stay.",
+  "importExport.noRequests": "{{label}} is the name of the format, for example Gostman export.",
+  "importExport.unreadable": "{{label}} is the name of the format.",
+  "importExport.invalidYaml": "{{reason}} is the technical reason from the parser.",
+  "importExport.missingGostman": "gostman is the name of a key in the file and stays as written.",
+  "importExport.namesMore": "{{names}} is a list of names and {{count}} the number of further names.",
+  "importExport.tlsKept": "{{names}} is a list of request names in quotes. TLS verification stays on; the user can turn it off per request.",
+  "importExport.flattened": "{{levels}} is the maximum folder depth."
+}

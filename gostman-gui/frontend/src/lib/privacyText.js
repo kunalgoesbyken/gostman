@@ -1,29 +1,10 @@
-export const PRIVACY_TEXT = {
-  telemetryLabel: 'Telemetry',
-  telemetryHint: 'Gostman has no telemetry, analytics or crash reporting. It contacts only the hosts you send requests to and the services you set up yourself.',
-  docsLink: 'What Gostman connects to',
-  updatesLabel: 'Check for new versions',
-  updatesHint: 'Once a day, read the latest release from GitHub and show it in the status bar. Nothing is downloaded or installed.',
-  updatesFailed: 'The last check did not reach GitHub. It runs again tomorrow.',
-  updatesCurrent: (version) => `This is the latest version (${version}).`,
-  updateAvailable: (version) => `Version ${version} is available`,
-  updatesNewer: (version) => `Version ${version} is available on GitHub.`,
-  updateHint: 'Open the release notes and downloads on GitHub',
-  updateDismiss: 'Hide until the next version',
-  relayLabel: 'Send requests through',
-  relayHint: 'The hosted relay cannot reach localhost or private addresses. A local relay sends requests from this computer, with nobody in between.',
-  relayModes: {
-    hosted: 'Hosted relay',
-    local: 'Local relay on this computer',
+import english from '../../../../locales/en/privacy.json'
+import { messages } from './i18n/core'
+
+const text = messages('privacy', english, () => ({
+  privacy: {
+    relayAddressPlaceholder: 'http://127.0.0.1:4030',
   },
-  relayAddressLabel: 'Local relay address',
-  relayAddressHint: 'Start it with gostman relay and enter the address it prints.',
-  relayAddressPlaceholder: 'http://127.0.0.1:4030',
-  relayAddressInvalid: 'Enter an address such as http://127.0.0.1:4030.',
-  relayCheck: 'Test',
-  relayChecking: 'Testing…',
-  relayReachable: 'The local relay answered.',
-  relayMissing: 'Enter the address of the local relay under Preferences, Privacy, or switch back to the hosted relay.',
-  relayUnreachable: (address) => `The local relay at ${address} did not answer. Start it with gostman relay, or switch back to the hosted relay under Preferences, Privacy.`,
-  relayCheckUnreachable: (address) => `The local relay at ${address} did not answer. Check that gostman relay is running and that the address matches the one it printed.`,
-}
+}))
+
+export const PRIVACY_TEXT = text.privacy

@@ -1,0 +1,30 @@
+{
+  "privacy": {
+    "telemetryLabel": "Télémétrie",
+    "telemetryHint": "Gostman n’a ni télémétrie, ni analyse d’usage, ni rapport de plantage. Il ne contacte que les hôtes auxquels vous envoyez des requêtes et les services que vous configurez vous-même.",
+    "docsLink": "À quoi Gostman se connecte",
+    "updatesLabel": "Rechercher de nouvelles versions",
+    "updatesHint": "Une fois par jour, lit la dernière version publiée sur GitHub et l’affiche dans la barre d’état. Rien n’est téléchargé ni installé.",
+    "updatesFailed": "La dernière vérification n’a pas atteint GitHub. Elle sera relancée demain.",
+    "updatesCurrent": "Vous avez la dernière version ({{version}}).",
+    "updateAvailable": "La version {{version}} est disponible",
+    "updatesNewer": "La version {{version}} est disponible sur GitHub.",
+    "updateHint": "Ouvrir les notes de version et les téléchargements sur GitHub",
+    "updateDismiss": "Masquer jusqu’à la prochaine version",
+    "relayLabel": "Envoyer les requêtes via",
+    "relayHint": "Le relais hébergé ne peut pas joindre localhost ni les adresses privées. Un relais local envoie les requêtes depuis cet ordinateur, sans intermédiaire.",
+    "relayModes": {
+      "hosted": "Relais hébergé",
+      "local": "Relais local sur cet ordinateur"
+    },
+    "relayAddressLabel": "Adresse du relais local",
+    "relayAddressHint": "Lancez-le avec gostman relay et saisissez l’adresse qu’il affiche.",
+    "relayAddressInvalid": "Saisissez une adresse comme http://127.0.0.1:4030.",
+    "relayCheck": "Tester",
+    "relayChecking": "Test en cours…",
+    "relayReachable": "Le relais local a répondu.",
+    "relayMissing": "Saisissez l’adresse du relais local dans Préférences, Confidentialité, ou revenez au relais hébergé.",
+    "relayUnreachable": "Le relais local à {{address}} n’a pas répondu. Lancez-le avec gostman relay, ou revenez au relais hébergé dans Préférences, Confidentialité.",
+    "relayCheckUnreachable": "Le relais local à {{address}} n’a pas répondu. Vérifiez que gostman relay est lancé et que l’adresse correspond à celle qu’il a affichée."
+  }
+}

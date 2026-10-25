@@ -1,0 +1,129 @@
+{
+  "command": {
+    "title": "コマンドパレット",
+    "heading": "コマンド",
+    "sections": {
+      "request": "リクエスト"
+    },
+    "searchCommands": "コマンドを検索",
+    "searchRequests": "リクエストを検索",
+    "commandsPlaceholder": "コマンドまたはリクエスト名を入力",
+    "requestsPlaceholder": "リクエストまたは履歴の項目へ移動",
+    "results": "結果",
+    "nothingMatches": "一致するものがありません",
+    "sentEarlier": "送信済み",
+    "switchEnvironment": "環境を切り替え：{{name}}",
+    "switchEnvironmentDescription": "この環境の変数を使用します",
+    "settingsKeywords": "ヘッダー 認証 変数 スクリプト チェック headers auth variables scripts checks",
+    "commands": {
+      "sendRequest": {
+        "label": "リクエストを送信",
+        "description": "現在のタブのリクエストを送信します"
+      },
+      "newRequest": {
+        "description": "空の新しいタブを開きます"
+      },
+      "saveRequest": {
+        "label": "リクエストを保存",
+        "description": "現在のタブのリクエストを保存します"
+      },
+      "duplicateRequest": {
+        "label": "リクエストを複製",
+        "description": "現在のリクエストのコピーを保存します"
+      },
+      "copyRequest": {
+        "label": "リクエストをコピー",
+        "description": "保存済みのリクエストをコピーして、フォルダーに貼り付けられるようにします"
+      },
+      "pasteRequest": {
+        "label": "リクエストを貼り付け",
+        "description": "コピーしたリクエストまたはフォルダーを、現在のリクエストの隣に貼り付けます"
+      },
+      "generateCode": {
+        "description": "現在のリクエストをコードで表示します"
+      },
+      "closeTab": {
+        "label": "タブを閉じる",
+        "description": "現在のタブを閉じます"
+      },
+      "closeOtherTabs": {
+        "description": "現在のタブだけを残します"
+      },
+      "closeSavedTabs": {
+        "description": "未保存の変更がないタブをすべて閉じます"
+      },
+      "keepTab": {
+        "label": "プレビュータブを開いたままにする",
+        "description": "プレビュータブを通常のタブにします"
+      },
+      "reopenTab": {
+        "label": "閉じたタブを開き直す",
+        "description": "最後に閉じたタブを元に戻します"
+      },
+      "toggleSidebar": {
+        "description": "コレクションと履歴の表示／非表示を切り替えます"
+      },
+      "shortcuts": {
+        "description": "すべてのショートカットを表示します"
+      },
+      "newFolder": {
+        "description": "最上位にフォルダーを作成します"
+      },
+      "runCollection": {
+        "description": "コレクション全体または1つのフォルダーを、チェックとスクリプトを含めて実行します"
+      },
+      "collapseFolders": {
+        "keywords": "閉じる 折りたたむ ツリー close fold tree"
+      },
+      "examples": {
+        "label": "リクエストの例",
+        "description": "現在のリクエストの保存済みレスポンスを表示します"
+      },
+      "mockServer": {
+        "description": "保存済みの例をローカルポートで提供します"
+      },
+      "capture": {
+        "label": "通信をキャプチャ",
+        "description": "アプリの通信をAPIに転送し、リクエストとして保存します"
+      },
+      "cookies": {
+        "label": "Cookieを管理",
+        "description": "保存されているCookieを表示・削除します"
+      },
+      "environments": {
+        "label": "環境を管理",
+        "description": "環境を作成し、その変数、コレクション変数、グローバル変数を編集します",
+        "keywords": "変数 グローバル variables globals"
+      },
+      "scanSecrets": {
+        "keywords": "認証情報 トークン パスワード 漏洩 credentials tokens passwords leak"
+      },
+      "network": {
+        "label": "ネットワーク設定",
+        "description": "プロキシと証明書"
+      },
+      "import": {
+        "label": "データをインポート",
+        "description": "Postman、Insomnia、Bruno、OpenAPI、HARなどのファイルをインポートします"
+      },
+      "lintSpec": {
+        "description": "インポートしたOpenAPI仕様に問題がないか確認します",
+        "keywords": "openapi swagger validate governance 検証"
+      },
+      "loadTest": {
+        "keywords": "パフォーマンス ストレス performance stress"
+      },
+      "export": {
+        "label": "データをエクスポート",
+        "description": "コレクションと環境をエクスポートします"
+      },
+      "share": {
+        "label": "コレクションを共有",
+        "description": "暗号化されたリンクまたはファイルを作成します（アカウント不要）"
+      },
+      "clearHistory": {
+        "description": "履歴の項目をすべて削除します"
+      }
+    }
+  }
+}

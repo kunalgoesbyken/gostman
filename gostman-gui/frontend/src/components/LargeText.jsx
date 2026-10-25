@@ -83,7 +83,7 @@ export const LargeText = memo(function LargeText({ text, highlight }) {
       role="document"
       aria-label={RESPONSE_TEXT.bodyLabel}
       onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
-      className="relative h-full overflow-y-auto overflow-x-hidden font-mono text-xs text-foreground outline-none"
+      dir="ltr" className="relative h-full overflow-y-auto overflow-x-hidden font-mono text-xs text-foreground outline-none"
     >
       <span ref={sampleRef} aria-hidden className="invisible absolute whitespace-pre">{SAMPLE}</span>
       <div style={{ height: height + 2 * PADDING_PX }} />

@@ -1,0 +1,31 @@
+{
+  "scan": {
+    "title": "Nach Secrets suchen",
+    "commandDescription": "In Anfragen eingetippte Zugangsdaten finden, bevor Sie sie teilen oder committen",
+    "intro": "Sucht nach bekannten Token-Formaten, zufällig wirkenden Werten in Feldern für Zugangsdaten und in die Auth-Einstellungen eingetippten Passwörtern. Werte, die als {{example}} geschrieben sind, sind unbedenklich. Außer der Prüfung selbst verlässt nichts dieses Fenster, und von einem Wert werden nie mehr als ein paar Zeichen angezeigt.",
+    "includeExamples": "Gespeicherte Beispielantworten einbeziehen",
+    "scanning": "Suche läuft",
+    "clean": "Keine Secrets gefunden",
+    "cleanDescription": "Es wurden keine Token-Formate, zufällig wirkenden Zugangsdaten oder eingetippten Passwörter gefunden.",
+    "failed": "Die Prüfung konnte nicht laufen: {{message}}",
+    "goToRequest": "Zur Anfrage",
+    "findings": "Befunde",
+    "showFindings": "Befunde anzeigen",
+    "hideFindings": "Befunde ausblenden",
+    "shareAnyway": "Trotzdem teilen",
+    "found_one": "{{count}} mögliches Secret gefunden",
+    "found_other": "{{count}} mögliche Secrets gefunden",
+    "foundShare": "Diese bleiben im Link oder in der Datei, die Sie erstellen. Ersetzen Sie sie zuerst durch {{example}} oder teilen Sie trotzdem.",
+    "foundExport": "Diese werden in den Export geschrieben. Ersetzen Sie sie zuerst durch {{example}}, wenn die Datei geteilt oder committet wird.",
+    "severity": {
+      "high": "Hoch",
+      "medium": "Mittel"
+    },
+    "kinds": {
+      "request": "Anfrage",
+      "folder": "Ordner",
+      "environment": "Umgebung",
+      "collection": "Sammlung"
+    }
+  }
+}

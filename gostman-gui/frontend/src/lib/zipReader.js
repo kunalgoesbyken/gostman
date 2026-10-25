@@ -1,3 +1,5 @@
+import { ZIP_TEXT } from './zipReaderText'
+
 const END_SIGNATURE = 0x06054b50
 const CENTRAL_SIGNATURE = 0x02014b50
 const LOCAL_SIGNATURE = 0x04034b50
@@ -9,13 +11,6 @@ const METHOD_STORED = 0
 const METHOD_DEFLATE = 8
 const FLAG_ENCRYPTED = 1
 
-export const ZIP_ERRORS = {
-  notZip: 'The archive could not be read as a zip file.',
-  unsupported: 'The archive uses encryption, zip64 or a compression method that is not supported.',
-  tooMany: (limit) => `The archive has more than ${limit} files.`,
-  tooLarge: (limit) => `The archive expands to more than ${limit} bytes.`,
-}
-
 const isSafeName = (name) => name !== '' && !name.startsWith('/') && !name.includes('\\') && !name.includes(':') && !name.split('/').some((part) => part === '..')
 
 function findEnd(view) {
@@ -23,19 +18,19 @@ function findEnd(view) {
   for (let offset = view.byteLength - END_RECORD_BYTES; offset >= lowest; offset -= 1) {
     if (view.getUint32(offset, true) === END_SIGNATURE) return offset
   }
-  throw new Error(ZIP_ERRORS.notZip)
+  throw new Error(ZIP_TEXT.notZip)
 }
 
 function listEntries(view, bytes, limits) {
   const end = findEnd(view)
   const count = view.getUint16(end + 10, true)
-  if (count === 0xffff) throw new Error(ZIP_ERRORS.unsupported)
-  if (count > limits.files) throw new Error(ZIP_ERRORS.tooMany(limits.files))
+  if (count === 0xffff) throw new Error(ZIP_TEXT.unsupported)
+  if (count > limits.files) throw new Error(ZIP_TEXT.tooMany(limits.files))
   const decoder = new TextDecoder()
   const entries = []
   let offset = view.getUint32(end + 16, true)
   for (let index = 0; index < count; index += 1) {
-    if (offset + CENTRAL_HEADER_BYTES > view.byteLength || view.getUint32(offset, true) !== CENTRAL_SIGNATURE) throw new Error(ZIP_ERRORS.notZip)
+    if (offset + CENTRAL_HEADER_BYTES > view.byteLength || view.getUint32(offset, true) !== CENTRAL_SIGNATURE) throw new Error(ZIP_TEXT.notZip)
     const nameLength = view.getUint16(offset + 28, true)
     const extraLength = view.getUint16(offset + 30, true)
     const commentLength = view.getUint16(offset + 32, true)
@@ -61,7 +56,7 @@ async function inflate(compressed, limit) {
     total += chunk.value.length
     if (total > limit) {
       await reader.cancel()
-      throw new Error(ZIP_ERRORS.tooLarge(limit))
+      throw new Error(ZIP_TEXT.tooLarge(limit))
     }
     chunks.push(chunk.value)
   }
@@ -69,14 +64,14 @@ async function inflate(compressed, limit) {
 }
 
 async function extract(entry, view, bytes, limit) {
-  if (entry.flags & FLAG_ENCRYPTED) throw new Error(ZIP_ERRORS.unsupported)
-  if (entry.size > limit) throw new Error(ZIP_ERRORS.tooLarge(limit))
-  if (entry.local + LOCAL_HEADER_BYTES > view.byteLength || view.getUint32(entry.local, true) !== LOCAL_SIGNATURE) throw new Error(ZIP_ERRORS.notZip)
+  if (entry.flags & FLAG_ENCRYPTED) throw new Error(ZIP_TEXT.unsupported)
+  if (entry.size > limit) throw new Error(ZIP_TEXT.tooLarge(limit))
+  if (entry.local + LOCAL_HEADER_BYTES > view.byteLength || view.getUint32(entry.local, true) !== LOCAL_SIGNATURE) throw new Error(ZIP_TEXT.notZip)
   const start = entry.local + LOCAL_HEADER_BYTES + view.getUint16(entry.local + 26, true) + view.getUint16(entry.local + 28, true)
   const compressed = bytes.subarray(start, start + entry.compressedSize)
   if (entry.method === METHOD_STORED) return new Blob([compressed])
   if (entry.method === METHOD_DEFLATE) return inflate(compressed, limit)
-  throw new Error(ZIP_ERRORS.unsupported)
+  throw new Error(ZIP_TEXT.unsupported)
 }
 
 export async function readZip(buffer, limits) {

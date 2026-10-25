@@ -3,6 +3,7 @@ import { CheckCircle2 } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { EmptyState } from "./ui/emptyState"
 import { VirtualList } from "./ui/VirtualList"
+import { localizedText } from "../lib/localized"
 import { SPEC_TEXT } from "../lib/specText"
 import { LINT_SEVERITIES, groupFindings } from "../lib/lintFindings"
 import { cn } from "../lib/utils"
@@ -26,8 +27,8 @@ function SeverityFilter({ severity, count, isShown, onToggle }) {
 function FindingBody({ finding }) {
   return (
     <>
-      <span className="block truncate text-xs text-foreground">{finding.message}</span>
-      <span className="block truncate font-mono text-2xs text-muted-foreground">{finding.rule} · {finding.operation || finding.path}</span>
+      <span title={localizedText(finding.localized, finding.message)} className="block truncate text-xs text-foreground">{localizedText(finding.localized, finding.message)}</span>
+      <span className="block truncate font-mono text-2xs text-muted-foreground"><bdi dir="ltr">{finding.rule} · {finding.operation || finding.path}</bdi></span>
     </>
   )
 }
@@ -41,7 +42,7 @@ function FindingRow({ row, onOpenOperation }) {
     )
   }
   const { finding } = row
-  const className = "block w-full px-4 py-1.5 text-left"
+  const className = "block w-full px-4 py-1.5 text-start"
   const style = { height: ROW_HEIGHT_PX }
   if (!finding.operation) {
     return <div style={style} title={finding.path} className={className}><FindingBody finding={finding} /></div>

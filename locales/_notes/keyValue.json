@@ -1,0 +1,14 @@
+{
+  "keyValue.key": "Default column label of a table of name and value rows (for example a header name).",
+  "keyValue.value": "Default column label of a table of name and value rows.",
+  "keyValue.type": "Column label of the Text or File choice of a multipart form row.",
+  "keyValue.sendRow": "Accessible label of the checkbox that enables a row.",
+  "keyValue.fieldType": "Accessible label of the Text or File picker of a multipart row.",
+  "keyValue.text": "Option: the value of the row is text. Not the same as the Text body type.",
+  "keyValue.file": "Option: the value of the row is a file.",
+  "keyValue.bulkLabel": "{{keyLabel}} is the name of the kind of row, such as Header or Parameter.",
+  "keyValue.bulkPlaceholder": "{{keyLabel}} is the name of the kind of row; the text shows the name: value format.",
+  "keyValue.bulkHint": "Keep // and # as given; they are comment markers.",
+  "keyValue.editAsTable": "Button that returns from the text view to the table view.",
+  "keyValue.bulkEdit": "Button that switches the table to a text area with one row per line."
+}

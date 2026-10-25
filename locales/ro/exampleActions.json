@@ -1,0 +1,12 @@
+{
+  "exampleActions": {
+    "saveFailure": "Exemplul nu a putut fi salvat",
+    "changeFailure": "Exemplul nu a putut fi modificat",
+    "saved": "Exemplul „{{example}}” a fost salvat împreună cu „{{request}}”.",
+    "saveTitle": "Salvare ca exemplu",
+    "nameLabel": "Numele exemplului",
+    "renameTitle": "Redenumire exemplu",
+    "deleteTitle": "Ștergere exemplu",
+    "deleteMessage": "Ștergeți exemplul „{{name}}”? Această acțiune nu poate fi anulată."
+  }
+}

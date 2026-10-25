@@ -1,4 +1,6 @@
-export const INSTALL_TEXT = {
-  label: 'Install app',
-  description: 'Add Gostman to this device and open it in its own window',
-}
+import english from '../../../../locales/en/install.json'
+import { messages } from './i18n/core'
+
+const text = messages('install', english)
+
+export const INSTALL_TEXT = text.install

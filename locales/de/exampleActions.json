@@ -1,0 +1,12 @@
+{
+  "exampleActions": {
+    "saveFailure": "Das Beispiel konnte nicht gespeichert werden",
+    "changeFailure": "Das Beispiel konnte nicht geändert werden",
+    "saved": "Beispiel „{{example}}“ wurde mit „{{request}}“ gespeichert.",
+    "saveTitle": "Als Beispiel speichern",
+    "nameLabel": "Name des Beispiels",
+    "renameTitle": "Beispiel umbenennen",
+    "deleteTitle": "Beispiel löschen",
+    "deleteMessage": "Beispiel „{{name}}“ löschen? Das lässt sich nicht rückgängig machen."
+  }
+}

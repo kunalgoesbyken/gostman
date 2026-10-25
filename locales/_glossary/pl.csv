@@ -1,0 +1,49 @@
+source,target
+request,żądanie
+response,odpowiedź
+collection,kolekcja
+collection settings,ustawienia kolekcji
+folder,folder
+workspace,obszar roboczy
+environment,środowisko
+variable,zmienna
+secret,sekret
+secret manager,menedżer sekretów
+header,nagłówek
+body,treść
+query parameter,parametr zapytania
+path parameter,parametr ścieżki
+cookie,cookie
+auth,uwierzytelnianie (etykieta karty: Auth)
+authentication,uwierzytelnianie
+token,token
+pre-request script,skrypt przed żądaniem
+post-response script,skrypt po odpowiedzi
+check,sprawdzenie
+assertion,asercja
+extract rule,reguła wyodrębniania
+runner,uruchamianie
+run,uruchomienie (rzeczownik) / uruchomić
+iteration,iteracja
+flow,przepływ
+step,krok
+mock server,serwer mock
+capture,przechwytywanie
+example,przykład
+history,historia
+tab,karta
+sidebar,panel boczny
+preferences,preferencje
+theme,motyw
+scan,skanowanie
+finding,wynik
+load test,test obciążeniowy
+import,import
+export,eksport
+share link,link do udostępniania
+trust,zaufać
+restricted,ograniczony
+proxy,proxy
+certificate,certyfikat
+timeout,limit czasu
+send,wyślij

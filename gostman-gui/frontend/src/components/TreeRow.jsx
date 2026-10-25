@@ -1,4 +1,5 @@
 import { memo, useLayoutEffect, useRef } from "react"
+import { inlineStart } from "../hooks/direction"
 import { ChevronDown, ChevronRight, Folder, MoreHorizontal } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { MethodTag } from "./MethodTag"
@@ -32,7 +33,7 @@ function RowTags({ tags }) {
   const hidden = tags.length - SHOWN_TAGS
 
   return (
-    <span className="flex min-w-0 max-w-[50%] shrink items-center gap-1 pl-1">
+    <span className="flex min-w-0 max-w-[50%] shrink items-center gap-1 ps-1">
       {tags.slice(0, SHOWN_TAGS).map((tag) => <TagBadge key={tag} tag={tag} className="px-1 text-3xs leading-4" />)}
       {hidden > 0 && (
         <>
@@ -79,8 +80,8 @@ export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop,
     onOpenMenu(row, { x: event.clientX, y: event.clientY })
   }
   const openMenuBelowButton = (event) => {
-    const { left, bottom } = event.currentTarget.getBoundingClientRect()
-    onOpenMenu(row, { x: left, y: bottom })
+    const rect = event.currentTarget.getBoundingClientRect()
+    onOpenMenu(row, { x: inlineStart(rect), y: rect.bottom })
   }
 
   return (
@@ -92,7 +93,7 @@ export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop,
       onFocus={() => onFocus(row)}
       style={{ height: ROW_HEIGHT_PX }}
       className={cn(
-        "group relative flex select-none items-center pr-1.5 text-xs [-webkit-touch-callout:none]",
+        "group relative flex select-none items-center pe-1.5 text-xs [-webkit-touch-callout:none]",
         isSelected ? "bg-primary/15 text-foreground" : isActive || isMenuOpen || dropPlace === PLACE_INSIDE ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground",
         dropPlace === PLACE_INSIDE && "ring-1 ring-inset ring-primary",
         isMoving && "opacity-50"
@@ -117,11 +118,11 @@ export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop,
         onPointerDown={(event) => onPointerDown(event, row)}
         title={[name, !isFolder && item.url, tags.join(", ")].filter(Boolean).join("\n")}
         style={{ paddingLeft: indentOf(row.depth) }}
-        className="flex h-full min-w-0 flex-1 items-center gap-1.5 text-left"
+        className="flex h-full min-w-0 flex-1 items-center gap-1.5 text-start"
       >
         {isFolder ? (
           <>
-            <Chevron className="h-3.5 w-3.5 shrink-0" />
+            <Chevron className="h-3.5 w-3.5 shrink-0 rtl:-scale-x-100" />
             <FolderIcon color={item.color} />
           </>
         ) : (

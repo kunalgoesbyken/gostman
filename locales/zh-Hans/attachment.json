@@ -1,0 +1,11 @@
+{
+  "attachment": {
+    "choose": "选择文件",
+    "replace": "替换",
+    "none": "未选择文件",
+    "pickTitle": "选择要发送的文件",
+    "fromDisk": "发送请求时从 {{path}} 读取",
+    "tooLarge": "{{name}} 大小为 {{size}}。网页版最多可发送 {{limit}} 的文件，因为其托管代理最多接受 {{proxyLimit}} 的请求。桌面应用最多可直接从磁盘发送 {{desktopLimit}} 的文件。",
+    "proxyTooLarge": "请求超过了网页版可经代理传递的 {{proxyLimit}}。较大的请求体和文件请从桌面应用或 CLI 发送。"
+  }
+}

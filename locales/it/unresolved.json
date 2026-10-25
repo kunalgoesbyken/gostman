@@ -1,0 +1,15 @@
+{
+  "unresolved": {
+    "sentAsWritten_one": "Questa variabile non è definita, quindi è stata inviata così com'è scritta:",
+    "sentAsWritten_many": "Queste variabili non sono definite, quindi sono state inviate così come sono scritte:",
+    "sentAsWritten_other": "Queste variabili non sono definite, quindi sono state inviate così come sono scritte:",
+    "notDefined_one": "Questa variabile non è definita:",
+    "notDefined_many": "Queste variabili non sono definite:",
+    "notDefined_other": "Queste variabili non sono definite:",
+    "openEnvironments": "Apri Ambienti",
+    "extractedBy": "{{reference}} è impostata da una regola di estrazione su \"{{request}}\", quindi invia prima quella richiesta.",
+    "extractedByOnly": "È impostata da una regola di estrazione su \"{{request}}\", quindi invia prima quella richiesta.",
+    "openSource": "Apri \"{{request}}\"",
+    "define": "Aggiungi {{reference}} all'ambiente attivo"
+  }
+}

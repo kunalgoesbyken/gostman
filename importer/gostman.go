@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/locales"
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
@@ -42,7 +43,7 @@ func (c *collector) readGostman(doc document) {
 	name := cleanName(strings.TrimSuffix(doc.file.Name, ".json"), "Gostman")
 	var parsed gostmanExportFile
 	if err := json.Unmarshal([]byte(doc.file.Text), &parsed); err != nil || parsed.Gostman == nil {
-		c.skip(messageGostmanInvalid, doc.file.Name)
+		c.skip(locales.ImporterGostmanInvalid, locales.Params{"file": doc.file.Name})
 		return
 	}
 	c.read(name, FormatGostman, func() { c.importGostman(parsed.Gostman, name) })
@@ -72,13 +73,13 @@ func (c *collector) gostmanSettings(raw json.RawMessage) {
 		return
 	}
 	if err := json.Unmarshal(raw, &settings); err != nil {
-		c.skip(messageGostmanItem, "settings")
+		c.skip(locales.ImporterGostmanItem, locales.Params{"what": "settings"})
 		return
 	}
 	settings.Auth = withoutTokens(settings.Auth)
 	c.flagScripts(labelOuterSettings, settings.PreScript, settings.PostScript)
 	if settings.Auth.Type == authOAuth2 {
-		c.flag(messageOAuth, labelOuterSettings)
+		c.flag(locales.ImporterOauth, labelOuterSettings)
 	}
 	c.Settings = &settings
 }
@@ -91,7 +92,7 @@ func (c *collector) withoutReferences(owner, meta string) string {
 	kept := map[string]variableFlags{}
 	for _, name := range sortedKeys(marks) {
 		if marks[name].Ref != nil {
-			c.flag(messageReferencesDropped, owner+"/"+name)
+			c.flag(locales.ImporterReferencesDropped, owner+"/"+name)
 		}
 		if mark := plainMark(marks[name]); mark != (variableFlags{}) {
 			kept[name] = mark
@@ -145,7 +146,7 @@ func (c *collector) gostmanFolders(raw []json.RawMessage, ids idMap) {
 	for _, item := range raw {
 		var folder workspace.Folder
 		if err := json.Unmarshal(item, &folder); err != nil {
-			c.skip(messageGostmanItem, "folder")
+			c.skip(locales.ImporterGostmanItem, locales.Params{"what": "folder"})
 			continue
 		}
 		decoded = append(decoded, folder)
@@ -167,7 +168,7 @@ func (c *collector) gostmanRequests(raw []json.RawMessage, folders, requests idM
 	for _, item := range raw {
 		var request workspace.Request
 		if err := json.Unmarshal(item, &request); err != nil {
-			c.skip(messageGostmanItem, "request")
+			c.skip(locales.ImporterGostmanItem, locales.Params{"what": "request"})
 			continue
 		}
 		request.Id = requests.fresh(request.Id)
@@ -179,7 +180,7 @@ func (c *collector) gostmanRequests(raw []json.RawMessage, folders, requests idM
 		request.Timestamp = ""
 		c.flagScripts(request.Name, request.PreScript, request.PostScript)
 		if request.Auth.Type == authOAuth2 {
-			c.flag(messageOAuth, request.Name)
+			c.flag(locales.ImporterOauth, request.Name)
 		}
 		c.keepRequest(request)
 	}
@@ -189,7 +190,7 @@ func (c *collector) gostmanGlobals(raw []json.RawMessage) {
 	for _, item := range raw {
 		var global workspace.Environment
 		if err := json.Unmarshal(item, &global); err != nil {
-			c.skip(messageGostmanItem, "global environment")
+			c.skip(locales.ImporterGostmanItem, locales.Params{"what": "global environment"})
 			continue
 		}
 		global.Id, global.FolderId, global.Extends = newID(), "", ""
@@ -204,7 +205,7 @@ func (c *collector) gostmanEnvironments(raw []json.RawMessage, folders idMap) {
 	for _, item := range raw {
 		var environment workspace.Environment
 		if err := json.Unmarshal(item, &environment); err != nil {
-			c.skip(messageGostmanItem, "environment")
+			c.skip(locales.ImporterGostmanItem, locales.Params{"what": "environment"})
 			continue
 		}
 		decoded = append(decoded, environment)

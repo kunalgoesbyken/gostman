@@ -1,0 +1,12 @@
+{
+  "socketSessions.invalidVariables": "Log entry. The variables of the active environment are stored as JSON.",
+  "socketSessions.invalidAddress": "Log entry. ws:// and wss:// are WebSocket address prefixes and stay as given.",
+  "socketSessions.notConnected": "Log entry when a message could not be sent because the connection closed.",
+  "socketSessions.undefinedVariables": "{{names}} is a list of variable names.",
+  "socketSessions.reconnecting": "Log entry. {{seconds}} is a number of seconds; s is the abbreviation of seconds.",
+  "socketSessions.couldNotSend": "{{message}} is a technical message in English.",
+  "socketSessions.connected": "Log entry: the connection is open.",
+  "socketSessions.couldNotConnect": "{{message}} is a technical message in English.",
+  "socketSessions.connecting": "{{url}} is the address being connected to.",
+  "socketSessions.disconnected": "Log entry: the user closed the connection."
+}

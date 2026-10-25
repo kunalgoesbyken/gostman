@@ -1,0 +1,15 @@
+{
+  "unresolved": {
+    "sentAsWritten_one": "Esta variable no está definida, así que se envió tal cual:",
+    "sentAsWritten_many": "Estas variables no están definidas, así que se enviaron tal cual:",
+    "sentAsWritten_other": "Estas variables no están definidas, así que se enviaron tal cual:",
+    "notDefined_one": "Esta variable no está definida:",
+    "notDefined_many": "Estas variables no están definidas:",
+    "notDefined_other": "Estas variables no están definidas:",
+    "openEnvironments": "Abrir Entornos",
+    "extractedBy": "{{reference}} la establece una regla de extracción de «{{request}}», así que envía primero esa solicitud.",
+    "extractedByOnly": "La establece una regla de extracción de «{{request}}», así que envía primero esa solicitud.",
+    "openSource": "Abrir «{{request}}»",
+    "define": "Añadir {{reference}} al entorno activo"
+  }
+}

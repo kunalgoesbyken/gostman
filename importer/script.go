@@ -8,6 +8,7 @@ import (
 
 	"github.com/dop251/goja/ast"
 	"github.com/dop251/goja/parser"
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const (
@@ -28,6 +29,11 @@ type scriptNote struct {
 	line int
 	text string
 	key  string
+	said *locales.Message
+}
+
+func importNote(line int, key string, said locales.Message) scriptNote {
+	return scriptNote{line: line, text: said.String(), key: key, said: &said}
 }
 
 type scriptTranslation struct {
@@ -56,19 +62,19 @@ type translator struct {
 	outerScopes  map[ast.Node]map[string]bool
 }
 
-func keptAsWritten(source, reason string) scriptTranslation {
-	return scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: reason}}, failed: 1}
+func keptAsWritten(source string, reason locales.Message) scriptTranslation {
+	return scriptTranslation{text: source, notes: []scriptNote{importNote(1, "", reason)}, failed: 1}
 }
 
 func translateSource(d *dialect, source string) scriptTranslation {
 	if len(source) > maxScriptBytes {
-		return keptAsWritten(source, fmt.Sprintf(messageScriptTooLarge, maxScriptBytes>>10))
+		return keptAsWritten(source, locales.New(locales.ImporterScriptTooLarge, locales.Params{"size": maxScriptBytes >> 10}))
 	}
 	done := make(chan scriptTranslation, 1)
 	go func() {
 		defer func() {
 			if recover() != nil {
-				done <- keptAsWritten(source, messageScriptInternal)
+				done <- keptAsWritten(source, locales.New(locales.ImporterScriptInternal, nil))
 			}
 		}()
 		done <- translateParsed(d, source)
@@ -77,21 +83,21 @@ func translateSource(d *dialect, source string) scriptTranslation {
 	case result := <-done:
 		return result
 	case <-time.After(translateBudget):
-		return keptAsWritten(source, messageScriptTooSlow)
+		return keptAsWritten(source, locales.New(locales.ImporterScriptTooSlow, nil))
 	}
 }
 
 func translateParsed(d *dialect, source string) scriptTranslation {
 	program, err := parser.ParseFile(nil, "", scriptPrefix+source+scriptSuffix, 0)
 	if err != nil {
-		return scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: messageScriptSyntax}}, failed: 1}
+		return scriptTranslation{text: source, notes: []scriptNote{importNote(1, "", locales.New(locales.ImporterScriptSyntax, nil))}, failed: 1}
 	}
 	body := scriptBody(program)
 	if body == nil {
 		return scriptTranslation{text: source}
 	}
 	if exceedsDepth(body, maxTreeDepth) {
-		return scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: messageScriptTooDeep}}, failed: 1}
+		return scriptTranslation{text: source, notes: []scriptNote{importNote(1, "", locales.New(locales.ImporterScriptTooDeep, nil))}, failed: 1}
 	}
 	candidates := renameCandidates(d, body)
 	t, text := translateBody(d, source, body, candidates)
@@ -99,7 +105,7 @@ func translateParsed(d *dialect, source string) scriptTranslation {
 		t, text = translateBody(d, source, body, needed)
 	}
 	if t.truncated {
-		return scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: messageScriptTooDeep}}, failed: 1}
+		return scriptTranslation{text: source, notes: []scriptNote{importNote(1, "", locales.New(locales.ImporterScriptTooDeep, nil))}, failed: 1}
 	}
 	return scriptTranslation{text: t.withRequires(text), notes: t.sortedNotes(), translated: t.translated, failed: t.failed}
 }
@@ -140,17 +146,21 @@ func (t *translator) lineOf(offset int) int {
 	return strings.Count(t.source[:local], "\n") + 1
 }
 
-func (t *translator) fail(at ast.Node, format string, args ...any) {
+func (t *translator) fail(at ast.Node, code locales.Code, params locales.Params) {
 	t.failed++
-	t.notes = append(t.notes, scriptNote{line: t.lineOf(int(at.Idx0()) - 1), text: fmt.Sprintf(format, args...), key: noteLeftOver})
+	t.notes = append(t.notes, importNote(t.lineOf(int(at.Idx0())-1), noteLeftOver, locales.New(code, params)))
 }
 
-func (t *translator) note(at ast.Node, key, text string) {
+func (t *translator) note(at ast.Node, key string, code locales.Code) {
+	t.noteSaid(at, key, locales.New(code, nil))
+}
+
+func (t *translator) noteSaid(at ast.Node, key string, said locales.Message) {
 	if t.noted[key] {
 		return
 	}
 	t.noted[key] = true
-	t.notes = append(t.notes, scriptNote{line: t.lineOf(int(at.Idx0()) - 1), text: text, key: key})
+	t.notes = append(t.notes, importNote(t.lineOf(int(at.Idx0())-1), key, said))
 }
 
 func (t *translator) splice(from, to int, children []span) string {
@@ -272,7 +282,7 @@ func (t *translator) renderIdentifier(identifier *ast.Identifier) string {
 			t.translated++
 			return replacement
 		}
-		t.fail(identifier, messageScriptValue, name)
+		t.fail(identifier, locales.ImporterScriptValue, locales.Params{"name": name})
 		return name
 	}
 	t.noteFreeIdentifier(identifier, name)
@@ -285,7 +295,7 @@ func (t *translator) noteFreeIdentifier(identifier *ast.Identifier, name string)
 		return
 	}
 	if t.dialect.retired[name] {
-		t.fail(identifier, messageScriptRetired, name)
+		t.fail(identifier, locales.ImporterScriptRetired, locales.Params{"name": name})
 	}
 }
 
@@ -325,7 +335,7 @@ func (t *translator) renderPath(node ast.Expression, path chain) string {
 		t.translated++
 		return replacement
 	}
-	t.fail(node, messageScriptUnsupported, path.text())
+	t.fail(node, locales.ImporterScriptUnsupported, locales.Params{"name": path.text()})
 	return t.text(node)
 }
 
@@ -398,13 +408,13 @@ func (t *translator) renderRooted(call *ast.CallExpression, path chain) string {
 }
 
 func (t *translator) unsupportedCall(call *ast.CallExpression, path chain, args []string) string {
-	t.fail(call, messageScriptUnsupported, path.text()+"()")
+	t.fail(call, locales.ImporterScriptUnsupported, locales.Params{"name": path.text() + "()"})
 	return t.text(call.Callee) + "(" + strings.Join(args, ", ") + ")"
 }
 
 func (t *translator) keepNative(node ast.Node, label string, supported bool, kept string) string {
 	if !supported {
-		t.fail(node, messageScriptUnsupported, label)
+		t.fail(node, locales.ImporterScriptUnsupported, locales.Params{"name": label})
 	}
 	return kept
 }

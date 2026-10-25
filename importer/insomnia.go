@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/locales"
 	"github.com/kunalgoesbyken/gostman/openapi"
 	"gopkg.in/yaml.v3"
 )
@@ -184,7 +185,7 @@ func (space *insomniaSpace) addV4Child(child map[string]any, byParent map[string
 
 func (c *collector) reportSkippedKinds(skipped map[string]int) {
 	for _, kind := range sortedKeys(skipped) {
-		c.skip("%d %s items are not supported", skipped[kind], kind)
+		c.skip(locales.ImporterSkipUnsupportedItems, locales.Params{"count": skipped[kind], "kind": kind})
 	}
 }
 
@@ -448,14 +449,14 @@ func (s *insomniaImport) specDescription(description string) string {
 	if s.space.spec == "" {
 		return description
 	}
-	s.c.Warnings = append(s.c.Warnings, fmt.Sprintf(messageInsomniaSpec, s.space.name))
+	s.c.lead(locales.New(locales.ImporterInsomniaSpec, locales.Params{"name": s.space.name}))
 	return joinScripts([]string{description, "```yaml\n" + strings.TrimRight(s.space.spec, "\n") + "\n```"})
 }
 
 func (s *insomniaImport) generate(ctx context.Context, config Config) {
 	loaded, err := openapi.Load(ctx, openapi.Source{Text: s.space.spec}, config.OpenAPI)
 	if err != nil {
-		s.c.skip("%s: %v", s.space.name, err)
+		s.c.skip(locales.ImporterSkipFileError, locales.Params{"file": s.space.name, "detail": err.Error()})
 		return
 	}
 	s.c.addGenerated(loaded.Generate(openapi.Selection{}))
@@ -473,7 +474,7 @@ func (s *insomniaImport) nodes(nodes []*insomniaNode, folderID string, depth int
 			continue
 		}
 		if len(c.visitedNodes) >= maxInsomniaNodes {
-			c.Warnings = appendUnique(c.Warnings, fmt.Sprintf(messageTooManyItems, maxInsomniaNodes))
+			c.leadOnce(locales.New(locales.ImporterTooManyItems, locales.Params{"count": maxInsomniaNodes}))
 			return
 		}
 		c.visitedNodes[node] = true
@@ -495,7 +496,7 @@ func (s *insomniaImport) folderScope(fields map[string]any, name string) scope {
 		inherited.vars = append(inherited.vars, row{Key: variable.name, Value: variable.value, Enabled: true})
 	}
 	inherited.auth = s.auth(object(fields["authentication"]), name)
-	inherited.pre, inherited.post = s.scripts(fields, fmt.Sprintf(labelFolder, name))
+	inherited.pre, inherited.post = s.scripts(fields, placeLabel(labelFolder, name))
 	return inherited
 }
 
@@ -506,7 +507,7 @@ func insomniaDescription(fields map[string]any) string {
 	return text(object(fields["meta"])["description"])
 }
 
-func (s *insomniaImport) scripts(fields map[string]any, label string) (string, string) {
+func (s *insomniaImport) scripts(fields map[string]any, label locales.Message) (string, string) {
 	scripts := object(fields["scripts"])
 	pre := text(fields["preRequestScript"]) + text(scripts["preRequest"])
 	post := text(fields["afterResponseScript"]) + text(scripts["afterResponse"])
@@ -528,7 +529,7 @@ func (s *insomniaImport) request(node *insomniaNode, folderID string) {
 	s.templates.owner = name
 	s.templates.takePrompts()
 	request := parts{id: s.ids[id], name: name, description: insomniaDescription(fields), headers: s.rows(fields["headers"])}
-	request.preScript, request.postScript = s.scripts(fields, fmt.Sprintf(labelRequest, name))
+	request.preScript, request.postScript = s.scripts(fields, placeLabel(labelRequest, name))
 	request.auth = s.auth(object(fields["authentication"]), name)
 	switch node.kind {
 	case insomniaRequest:
@@ -628,7 +629,7 @@ func (s *insomniaImport) grpcRequest(fields map[string]any, request *parts) {
 	}, request)
 	request.headers = s.rows(fields["metadata"])
 	if reflection := object(fields["reflectionApi"]); flag(reflection["enabled"]) {
-		s.c.flag(messageBufReflection, request.name)
+		s.c.flag(locales.ImporterBufReflection, request.name)
 	}
 	protoID := text(fields["protoFileId"])
 	if protoID == "" {
@@ -636,7 +637,7 @@ func (s *insomniaImport) grpcRequest(fields map[string]any, request *parts) {
 	}
 	files, found := s.space.protos[protoID]
 	if !found {
-		s.c.flag(messageProtoMissing, request.name)
+		s.c.flag(locales.ImporterProtoMissing, request.name)
 		return
 	}
 	request.grpcProtos = jsonList(files)
@@ -670,7 +671,7 @@ func (s *insomniaImport) socketIORequest(fields map[string]any, payloads []map[s
 		event := text(payload["eventName"])
 		arguments := objects(payload["args"])
 		if len(arguments) > 1 {
-			s.c.flag(messageSocketIOArguments, request.name)
+			s.c.flag(locales.ImporterSocketIoArguments, request.name)
 		}
 		body := ""
 		if len(arguments) > 0 {
@@ -730,7 +731,7 @@ func (s *insomniaImport) convertAuth(auth map[string]any, kind, name string) (en
 		}), true
 	case authOAuth2:
 		if value("audience") != "" {
-			s.c.flag(messageOAuthAudience, name)
+			s.c.flag(locales.ImporterOauthAudience, name)
 		}
 		return oauth2Auth(oauth2Fields{
 			Grant: value("grantType"), AuthURL: value("authorizationUrl"), TokenURL: value("accessTokenUrl"),
@@ -773,7 +774,7 @@ func (s *insomniaImport) mocks(rootName, rootID string) {
 			}})
 			s.c.build(request, folderID)
 		}
-		s.c.Warnings = append(s.c.Warnings, fmt.Sprintf(messageInsomniaMock, server.name))
+		s.c.lead(locales.New(locales.ImporterInsomniaMock, locales.Params{"name": server.name}))
 	}
 }
 
@@ -782,15 +783,15 @@ func (s *insomniaImport) unitTests() {
 	for _, test := range s.space.tests {
 		index, built := s.built[test.requestID]
 		if !built {
-			s.c.skip(messageUnitTestTarget, test.suite, test.name)
+			s.c.skip(locales.ImporterUnitTestTarget, locales.Params{"suite": test.suite, "name": test.name})
 			continue
 		}
 		request := &s.c.Requests[index]
-		label := fmt.Sprintf(labelRequest, request.Name)
+		label := placeLabel(labelRequest, request.Name)
 		code := s.c.translateScript(translation, label, stagePost, test.code)
 		block := "test(" + strconv.Quote(test.suite+" / "+test.name) + ", async () => {\n" + indent(code) + "\n});"
 		request.PostScript = joinScripts([]string{request.PostScript, block})
-		s.c.flagUnique(messageScripts, request.Name)
+		s.c.flagUnique(locales.ImporterScripts, request.Name)
 	}
 }
 
@@ -802,7 +803,7 @@ func (s *insomniaImport) attachLinks() {
 			continue
 		}
 		rules[index] = withRule(rules[index], link.rule)
-		s.c.flagUnique(messageResponseTags, s.c.Requests[index].Name)
+		s.c.flagUnique(locales.ImporterResponseTags, s.c.Requests[index].Name)
 	}
 	for index, added := range rules {
 		s.c.Requests[index].Extractors = jsonList(added)
@@ -842,7 +843,7 @@ func (s *insomniaImport) environmentVariables(environment map[string]any, name s
 	variables := s.readEnvironmentVariables(environment, name)
 	for _, variable := range variables {
 		if strings.HasPrefix(variable.name, insomniaVaultRoot) && variable.value == "" {
-			s.c.flag(messageInsomniaVault, name+"/"+variable.name)
+			s.c.flag(locales.ImporterInsomniaVault, name+"/"+variable.name)
 		}
 	}
 	return variables
@@ -912,21 +913,21 @@ func (s *insomniaImport) report(name string) {
 	for _, tag := range sortedKeys(s.templates.unmapped) {
 		owners := listNames(s.templates.unmapped[tag])
 		if tag == filterMark {
-			c.Warnings = append(c.Warnings, fmt.Sprintf(messageLiquidFilters, owners))
+			c.lead(locales.New(locales.ImporterLiquidFilters, locales.Params{"names": owners, "example": "{{ name | upcase }}"}))
 			continue
 		}
-		c.Warnings = append(c.Warnings, fmt.Sprintf(messageUnmappedTag, tag, owners))
+		c.lead(locales.New(locales.ImporterUnmappedTag, locales.Params{"tag": tag, "names": owners}))
 	}
 	if len(s.templates.files) > 0 {
-		c.warn(RemarkFiles, fmt.Sprintf(messageFileTags, listNames(s.templates.files)))
+		c.warn(RemarkFiles, locales.New(locales.ImporterFileTags, locales.Params{"names": listNames(s.templates.files), "example": "{{$file(path)}}"}))
 	}
 	if s.space.cookies > 0 {
-		c.Warnings = append(c.Warnings, fmt.Sprintf(messageInsomniaCookies, name))
+		c.lead(locales.New(locales.ImporterInsomniaCookies, locales.Params{"name": name}))
 	}
 	if s.space.certificates > 0 {
-		c.Warnings = append(c.Warnings, fmt.Sprintf(messageInsomniaCertificates, name, s.space.certificates))
+		c.lead(locales.New(locales.ImporterInsomniaCertificates, locales.Params{"name": name, "count": s.space.certificates}))
 	}
 	if s.space.specFile != "" {
-		c.Warnings = append(c.Warnings, fmt.Sprintf(messageInsomniaSpecFile, name, s.space.specFile))
+		c.lead(locales.New(locales.ImporterInsomniaSpecFile, locales.Params{"name": name, "file": s.space.specFile}))
 	}
 }

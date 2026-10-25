@@ -1,0 +1,48 @@
+{
+  "socket": {
+    "socketIoPath": "Ruta",
+    "socketIoAuth": "Payload de auth",
+    "socketIoAuthNote": "Un objeto JSON enviado con el handshake del namespace, que el servidor lee como socket.handshake.auth.",
+    "invalidAuth": "El payload de auth de Socket.IO debe ser un objeto JSON.",
+    "statuses": {
+      "idle": "Desconectado",
+      "connecting": "Conectando",
+      "open": "Conectado",
+      "waiting": "Esperando para reconectar"
+    },
+    "entries": {
+      "sent": "Enviado",
+      "received": "Recibido",
+      "info": "Información",
+      "warning": "Aviso",
+      "error": "Error"
+    },
+    "protocol": "Protocolo",
+    "graphql": "Suscripción GraphQL",
+    "filter": "Filtro de topics, por ejemplo sensors/#",
+    "subscribe": "Suscribirse",
+    "saved": "Mensajes guardados",
+    "savedPlaceholder": "Cargar un mensaje guardado",
+    "noSaved": "Aún no hay mensajes guardados",
+    "save": "Guardar",
+    "saveTitle": "Guardar mensaje",
+    "saveMessage": "Nombre de este mensaje. Se guarda con la solicitud.",
+    "remove": "Eliminar mensaje guardado",
+    "binary_one": "Binario, {{count}} byte",
+    "binary_many": "Binario, {{count}} de bytes",
+    "binary_other": "Binario, {{count}} bytes",
+    "truncated": "Mostrando los primeros {{shown}} de {{total}} caracteres",
+    "copy": "Copiar mensaje",
+    "dropped": "Entradas anteriores descartadas: {{dropped}}. El registro conserva las últimas {{limit}}.",
+    "emptyTitle": "Aún no hay mensajes",
+    "emptyDescription": "Conéctate y envía un mensaje, o espera al servidor.",
+    "log": "Mensajes",
+    "autoReconnect": "Reconexión automática",
+    "unsentHeaders": "Un navegador solo puede establecer Sec-WebSocket-Protocol en un WebSocket. No se envía desde aquí: {{names}}. La app de escritorio envía todos los encabezados.",
+    "composer": "Mensaje ({{shortcut}} para enviar)",
+    "composerClosed": "Conéctate para enviar mensajes",
+    "message": "Mensaje",
+    "send": "Enviar",
+    "clear": "Limpiar"
+  }
+}

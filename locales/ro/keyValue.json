@@ -1,0 +1,18 @@
+{
+  "keyValue": {
+    "key": "Cheie",
+    "value": "Valoare",
+    "type": "Tip",
+    "sendRow": "Trimite acest rând",
+    "fieldType": "Tipul câmpului",
+    "text": "Text",
+    "file": "Fișier",
+    "removeRow": "Eliminare rând",
+    "bulkLabel": "Rânduri {{keyLabel}} ca text",
+    "bulkPlaceholder": "{{keyLabel}}: valoare",
+    "bulkHint": "Un rând pe linie, ca nume: valoare. Începeți o linie cu // sau # pentru a o păstra fără a o trimite.",
+    "bulkUnavailable": "Rândurile cu două puncte în nume sau cu spații la început ori la sfârșit pot fi editate doar în tabel.",
+    "editAsTable": "Editare ca tabel",
+    "bulkEdit": "Editare în bloc"
+  }
+}

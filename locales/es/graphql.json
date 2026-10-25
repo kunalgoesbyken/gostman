@@ -1,0 +1,29 @@
+{
+  "graphql": {
+    "query": "Query",
+    "queryLabel": "Query GraphQL",
+    "variables": "Variables (JSON)",
+    "variablesLabel": "Variables de GraphQL",
+    "invalidJson": "JSON no válido: {{message}}",
+    "syntaxAt": "{{message}} (línea {{line}}, columna {{column}})",
+    "sendAsGraphql": "Enviar como GraphQL",
+    "prettify": "Embellecer",
+    "prettifyTitle": "Reformatea la query. Se eliminan los comentarios.",
+    "cannotPrettify": "No se puede embellecer: {{detail}}",
+    "notSent": "No se envía mientras el método es {{method}}.",
+    "schema": "Esquema",
+    "schemaDescription": "Obtenlo para explorar los tipos y campos de este endpoint. La query de introspección usa la URL, los encabezados y la autenticación de esta solicitud.",
+    "searchLabel": "Buscar en el esquema",
+    "searchPlaceholder_one": "Buscar en {{count}} tipo y sus campos",
+    "searchPlaceholder_many": "Buscar en {{count}} de tipos y campos",
+    "searchPlaceholder_other": "Buscar en {{count}} tipos y campos",
+    "noMatch": "Nada coincide.",
+    "moreMatches_one": "{{count}} tipo más coincide. Acota la búsqueda para verlo.",
+    "moreMatches_many": "{{count}} de tipos más coinciden. Acota la búsqueda para verlos.",
+    "moreMatches_other": "{{count}} tipos más coinciden. Acota la búsqueda para verlos.",
+    "noFields": "Sin campos.",
+    "schemaTooLarge": "El esquema supera el límite de tamaño de respuesta.",
+    "noJsonBody": "El endpoint respondió {{status}} sin cuerpo JSON.",
+    "noSchema": "El endpoint respondió {{status}} sin esquema."
+  }
+}

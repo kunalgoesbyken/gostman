@@ -72,6 +72,7 @@ function ExtractorRow({ extractor, isDraft, response, preview, fallbackScope, on
         className={cn(isDraft && "invisible")}
       />
       <Input
+        dir="ltr"
         value={extractor.name}
         title={extractor.name}
         placeholder={TEXT.namePlaceholder}
@@ -86,6 +87,7 @@ function ExtractorRow({ extractor, isDraft, response, preview, fallbackScope, on
         ))}
       </Select>
       <Input
+        dir="ltr"
         value={readsStatus ? "" : extractor.expression}
         title={extractor.expression}
         placeholder={hintFor(extractor.source)}

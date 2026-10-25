@@ -1,0 +1,18 @@
+{
+  "keyValue": {
+    "key": "Clé",
+    "value": "Valeur",
+    "type": "Type",
+    "sendRow": "Envoyer cette ligne",
+    "fieldType": "Type de champ",
+    "text": "Texte",
+    "file": "Fichier",
+    "removeRow": "Supprimer la ligne",
+    "bulkLabel": "Lignes {{keyLabel}} en texte",
+    "bulkPlaceholder": "{{keyLabel}}: valeur",
+    "bulkHint": "Une ligne par entrée, sous la forme nom: valeur. Commencez une ligne par // ou # pour la conserver sans l’envoyer.",
+    "bulkUnavailable": "Les lignes dont le nom contient deux-points, ou des espaces au début ou à la fin, ne peuvent être modifiées que dans le tableau.",
+    "editAsTable": "Modifier en tableau",
+    "bulkEdit": "Édition groupée"
+  }
+}

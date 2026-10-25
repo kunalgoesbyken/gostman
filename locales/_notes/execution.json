@@ -1,0 +1,11 @@
+{
+  "execution.promptDeclined": "Shown when the person closes the prompt for variable values without answering.",
+  "execution.unusableAddress": "Error shown when a script calls sendRequest with an address that is empty or unusable.",
+  "execution.sendLimit": "{{limit}} is a number, the most calls a single script may make. sendRequest is a function name; keep it unchanged.",
+  "execution.hostNotPermitted": "{{host}} is a host name such as api.example.com.",
+  "execution.scriptFileReads": "{{example}} is the placeholder syntax for reading a file and must stay unchanged.",
+  "execution.preRequest": "Name of the script stage that runs before a request is sent. Appears in the timeline and in check results.",
+  "execution.postResponse": "Name of the script stage that runs after a response arrives. Appears in the timeline and in check results.",
+  "execution.scopeLabel": "A script stage followed by the folder or collection it comes from, for example Pre-request script (Payments). {{stage}} is one of the two stage names, {{name}} is a folder or collection name.",
+  "execution.restricted": "Shown when something in an untrusted workspace folder needs scripts, OAuth, local commands or file reads. Trust this folder is the name of the menu item."
+}

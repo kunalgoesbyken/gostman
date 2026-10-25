@@ -1,0 +1,164 @@
+{
+  "preferences": {
+    "title": "Einstellungen",
+    "sectionsLabel": "Bereiche",
+    "sections": {
+      "appearance": "Darstellung",
+      "theme": "Farben",
+      "fonts": "Schriften",
+      "editor": "Editor",
+      "requests": "Anfragen",
+      "language": "Sprache",
+      "ai": "KI",
+      "privacy": "Datenschutz",
+      "data": "Daten"
+    },
+    "fields": {
+      "theme": "Design",
+      "contrast": "Kontrast",
+      "accent": "Akzentfarbe",
+      "textScale": "Textgröße",
+      "interfaceFont": "Schrift der Oberfläche",
+      "codeFont": "Schrift für Code",
+      "density": "Dichte",
+      "responseLayout": "Antwortbereich",
+      "systemTitleBar": "Systemtitelleiste verwenden",
+      "editorFontSize": "Schriftgröße im Editor",
+      "wrapLines": "Lange Zeilen umbrechen",
+      "requestTimeout": "Standard-Zeitlimit",
+      "confirmCloseTab": "Beim Schließen eines Tabs vor dem Verwerfen ungespeicherter Änderungen fragen",
+      "language": "Sprache"
+    },
+    "themes": {
+      "system": "System",
+      "light": "Hell",
+      "dark": "Dunkel"
+    },
+    "contrasts": {
+      "system": "System",
+      "standard": "Standard",
+      "more": "Höher"
+    },
+    "accents": {
+      "cyan": "Cyan",
+      "blue": "Blau",
+      "violet": "Violett",
+      "pink": "Pink",
+      "graphite": "Graphit"
+    },
+    "densities": {
+      "comfortable": "Großzügig",
+      "compact": "Kompakt"
+    },
+    "layouts": {
+      "below": "Unten",
+      "right": "Rechts"
+    },
+    "seconds": "Sekunden",
+    "pixels": "px",
+    "contrastHint": "„Höher“ zeichnet stärkere Rahmen und sekundären Text.",
+    "systemTitleBarHint": "Zeigt die Titelleiste und Fensterschaltflächen Ihres Desktops statt der eigenen von Gostman. Wirkt nach einem Neustart.",
+    "systemTitleBarRestart": "Starten Sie Gostman neu, um diese Änderung anzuwenden.",
+    "systemTitleBarFailed": "Die Einstellung konnte nicht gespeichert werden.",
+    "defaultFont": "Standard",
+    "interfaceFontHint": "Jede auf diesem Gerät installierte Schrift.",
+    "codeFontHint": "Editoren, Adressleiste und anderer Code.",
+    "fontMissing": "Auf diesem Gerät nicht gefunden, daher wird die Standardschrift verwendet.",
+    "suggestFonts": "Installierte Schriften vorschlagen",
+    "fontsSuggested": "Installierte Schriften werden beim Eingeben eines Schriftnamens vorgeschlagen.",
+    "fontsDenied": "Die installierten Schriften konnten nicht gelesen werden.",
+    "shortcuts": "Tastenkürzel",
+    "reset": "Auf Standard zurücksetzen",
+    "close": "Fertig",
+    "statusLabel": "Einstellungen",
+    "commandDescription": "Design, Farben, Schriften, Textgröße, Editor, Layout und Standardwerte",
+    "methods": {
+      "title": "Methodenfarben",
+      "hint": "Die Farbe jeder Anfragemethode in Seitenleiste, Tabs und Listen. Fügen Sie einen Hintergrund hinzu, um Methoden als Badges darzustellen.",
+      "method": "Methode",
+      "resetMode": {
+        "light": "Helle Methodenfarben zurücksetzen",
+        "dark": "Dunkle Methodenfarben zurücksetzen"
+      }
+    },
+    "theme": {
+      "palette": "Palette",
+      "paletteHint": "Jede Palette hat eine helle und eine dunkle Version. Ihre eigenen Farben werden darübergelegt.",
+      "palettes": {
+        "default": "Standard",
+        "neutral": "Neutral",
+        "slate": "Schiefer",
+        "paper": "Papier",
+        "moss": "Moos",
+        "dusk": "Dämmerung",
+        "ocean": "Ozean",
+        "ink": "Tinte"
+      },
+      "colors": "Eigene Farben",
+      "colorsHint": "Legen Sie Hintergrund- und Textfarbe jedes Fensterbereichs fest. Nur die Farben, die Sie ändern, bleiben erhalten.",
+      "editing": "Farben für",
+      "previewHint": {
+        "light": "Das Fenster ist jetzt dunkel. Stellen Sie das Design auf „Hell“, um diese Farben an Ort und Stelle zu sehen.",
+        "dark": "Das Fenster ist jetzt hell. Stellen Sie das Design auf „Dunkel“, um diese Farben an Ort und Stelle zu sehen."
+      },
+      "columns": {
+        "surface": "Bereich",
+        "background": "Hintergrund",
+        "foreground": "Text",
+        "contrast": "Kontrast",
+        "reset": "Zurücksetzen"
+      },
+      "surfaces": {
+        "window": "Fenster",
+        "sidebar": "Seitenleiste",
+        "tabs": "Tabs und Adressleiste",
+        "request": "Anfrage-Editor",
+        "body": "Body-Editor",
+        "script": "Skript-Editor",
+        "response": "Antwort",
+        "dialog": "Dialoge",
+        "menu": "Menüs und Pop-ups"
+      },
+      "surfaceHints": {
+        "window": "Titelleiste, Statusleiste und jeder Bereich, der hier nicht aufgeführt ist.",
+        "body": "Auch gRPC-Nachrichten, MCP-Argumente und gespeicherte Beispiele.",
+        "script": "Pre-Request- und Post-Response-Skripte.",
+        "menu": "Kontextmenüs, Listen und die Befehlspalette."
+      },
+      "roles": {
+        "background": "Hintergrund",
+        "foreground": "Text"
+      },
+      "sample": "Aa",
+      "resetMode": {
+        "light": "Helle Farben zurücksetzen",
+        "dark": "Dunkle Farben zurücksetzen"
+      },
+      "share": "Ein Design teilen",
+      "shareHint": "Ein Design umfasst die Palette, die Akzentfarbe sowie Ihre eigenen Bereichs- und Methodenfarben für beide Modi.",
+      "copy": "Design kopieren",
+      "copied": "Design in die Zwischenablage kopiert.",
+      "copyFailed": "Das Design konnte nicht in die Zwischenablage kopiert werden.",
+      "import": "Design importieren",
+      "importLabel": "Zu importierendes Design",
+      "importPlaceholder": "Ein aus Gostman kopiertes Design einfügen",
+      "apply": "Anwenden",
+      "cancel": "Abbrechen",
+      "imported": "Design angewendet.",
+      "invalid": "Dies ist kein Gostman-Design, oder es enthält unbekannte Bereiche oder Farben, die nicht als #rrggbb geschrieben sind.",
+      "colorLabel": "{{surface}}: {{role}}farbe",
+      "hexLabel": "{{surface}}: Hex-Wert für {{role}}",
+      "ratio": "{{ratio}}:1",
+      "lowContrast": "Text ist möglicherweise schwer lesbar. Streben Sie mindestens {{minimum}}:1 an.",
+      "resetRow": "{{name}} zurücksetzen"
+    },
+    "timeoutHint_one": "Gilt für Anfragen, die kein eigenes Zeitlimit festlegen. 0 verwendet das eingebaute Limit von {{count}} Sekunde.",
+    "timeoutHint_other": "Gilt für Anfragen, die kein eigenes Zeitlimit festlegen. 0 verwendet das eingebaute Limit von {{count}} Sekunden.",
+    "languageSystem": "Wie das System ({{language}})",
+    "languageSwitchHint": "Gostman lädt neu, um die neue Sprache anzuzeigen. Geöffnete Tabs und ungespeicherte Entwürfe bleiben erhalten; in Tabs angezeigte Antworten werden geleert.",
+    "languageSwitch": "Sprache wechseln",
+    "languageHelp": "Ihre Sprache fehlt oder Sie haben eine falsche Übersetzung gefunden? {{link}}.",
+    "languageHelpLink": "Fragen Sie auf GitHub nach",
+    "accentAdjusted": "Im hellen Modus als {{light}} und im dunklen Modus als {{dark}} dargestellt, damit Text in dieser Farbe lesbar bleibt."
+  }
+}

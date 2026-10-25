@@ -1,0 +1,48 @@
+{
+  "sse": {
+    "allTypes": "Tutti i tipi di evento",
+    "searchLabel": "Cerca eventi",
+    "searchPlaceholder": "Cerca eventi",
+    "pause": "Metti in pausa lo scorrimento automatico",
+    "resume": "Riprendi lo scorrimento automatico",
+    "clear": "Svuota eventi",
+    "copyAll": "Copia gli eventi mostrati",
+    "copied": "Copiato",
+    "copyEvent": "Copia i dati dell'evento",
+    "noEvents": "Ancora nessun evento",
+    "waiting": "In attesa che il server invii un evento.",
+    "noMatches": "Nessun evento corrisponde",
+    "noMatchesHint": "Cambia il filtro per tipo o la ricerca per vederne altri.",
+    "clipped": "Questo evento era troppo lungo, quindi il resto è stato escluso.",
+    "shown": "{{shown}} di {{total}} mostrati",
+    "received": "{{count}} ricevuti",
+    "dropped_one": "L'evento meno recente non è più elencato. La risposta scaricata contiene ancora tutti gli eventi.",
+    "dropped_many": "I {{count}} di eventi meno recenti non sono più elencati. La risposta scaricata contiene ancora tutti gli eventi.",
+    "dropped_other": "I {{count}} eventi meno recenti non sono più elencati. La risposta scaricata contiene ancora tutti gli eventi.",
+    "reconnecting": "Riconnessione tra {{seconds}} s (tentativo {{attempt}})"
+  },
+  "sseSettings": {
+    "stream": "Trasmetti come server-sent events",
+    "reconnect": "Riconnetti quando il server chiude lo stream",
+    "maxEvents": "Eventi massimi",
+    "maxEventsPlaceholder": "Predefinito 10000",
+    "maxSeconds": "Secondi massimi",
+    "maxSecondsPlaceholder": "Predefinito 300"
+  },
+  "status": {
+    "connecting": "Connessione in corso",
+    "open": "In streaming",
+    "reconnecting": "Riconnessione",
+    "ended": "Terminato"
+  },
+  "streamEnd": {
+    "closed": "Il server ha chiuso lo stream.",
+    "cancelled": "Lo stream è stato fermato.",
+    "maxEvents": "Fermato al limite di eventi. Alzalo in Impostazioni.",
+    "maxBytes": "Fermato al limite di dimensione.",
+    "maxDuration": "Fermato al limite di tempo. Alzalo in Impostazioni.",
+    "failed": "Lo stream non è riuscito.",
+    "failedWith": "Lo stream non è riuscito. {{detail}}",
+    "hostedLimit": "Fermato al limite di tempo. L'app web trasmette per al massimo {{seconds}} secondi; l'app desktop può trasmettere più a lungo."
+  }
+}

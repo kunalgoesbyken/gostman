@@ -1,0 +1,69 @@
+{
+  "network": {
+    "hostNotFound": "Der Host {{host}} wurde nicht gefunden. Prüfen Sie die Adresse auf Tippfehler und ob dieser Computer online ist.",
+    "untrustedAuthority": "Das Zertifikat des Servers ist nicht von einer Stelle signiert, der dieser Computer vertraut. {{advice}}",
+    "handshakeCertificate": "Der Server hat den TLS-Handshake beendet. Prüfen Sie, ob er das für diesen Host gesetzte Clientzertifikat akzeptiert.",
+    "handshake": "Der Server hat den TLS-Handshake beendet. {{advice}}",
+    "hostMismatch": "Das Zertifikat des Servers ist nicht für {{host}} gültig. Prüfen Sie, ob die Adresse diejenige ist, für die das Zertifikat ausgestellt wurde.",
+    "certificateExpired": "Das Zertifikat des Servers ist abgelaufen oder noch nicht gültig. Prüfen Sie die Uhr dieses Computers oder erneuern Sie das Zertifikat.",
+    "proxyConnect": "Verbindung zum Proxyserver nicht möglich. Prüfen Sie die Proxyadresse in {{source}}.",
+    "proxyConnectSettings": "Verbindung zum Proxyserver nicht möglich. Prüfen Sie die Proxyadresse in den Netzwerkeinstellungen.",
+    "dial": "Verbindung zu {{host}} nicht möglich. Prüfen Sie, ob der Server läuft und Host und Port stimmen.",
+    "dialServer": "Verbindung zum Server nicht möglich. Prüfen Sie, ob der Server läuft und Host und Port stimmen."
+  },
+  "advice": {
+    "untrustedAuthority": "Vertrauen Sie der Zertifizierungsstelle oder schalten Sie die Zertifikatsprüfung für diese Anfrage aus.",
+    "clientCertificate": "Verlangt der Server ein Clientzertifikat, fügen Sie in den Netzwerkeinstellungen der Desktop-App eines für diesen Host hinzu."
+  },
+  "failure": {
+    "timeout": "die Anfrage hat das Zeitlimit überschritten",
+    "cancelled": "die Anfrage wurde abgebrochen"
+  },
+  "blocked": {
+    "address": "private und lokale Adressen sind gesperrt",
+    "addressResolved": "private und lokale Adressen sind gesperrt: {{host}} wird zu {{address}} aufgelöst",
+    "host": "dieser Host steht nicht auf der Liste der Hosts, die aufgerufen werden dürfen",
+    "hostNamed": "dieser Host steht nicht auf der Liste der Hosts, die aufgerufen werden dürfen: {{host}}"
+  },
+  "request": {
+    "urlRequired": "geben Sie eine URL ein, an die die Anfrage gesendet wird",
+    "urlScheme": "nicht unterstütztes URL-Schema „{{scheme}}“, verwenden Sie http oder https",
+    "urlInvalid": "„{{url}}“ ist keine gültige URL",
+    "urlInvalidMissing": "„{{url}}“ ist keine gültige URL, weil {{reason}}",
+    "notDefined_one": "{{names}} ist nicht definiert",
+    "notDefined_other": "{{names}} sind nicht definiert",
+    "headersInvalid": "die Header sind ungültig: {{detail}}",
+    "queryInvalid": "die Query-Parameter sind ungültig: {{detail}}",
+    "variablesInvalid": "die Umgebungsvariablen sind kein gültiges JSON: {{detail}}",
+    "bodyTooLarge": "der Body der Anfrage ist größer als 10 MB",
+    "tooLargeExpanded": "die Anfrage ist nach dem Einsetzen der Variablen größer als 10 MB",
+    "variablesTooDeep": "die Variablen verweisen zu oft aufeinander, um sie einzusetzen; vereinfachen Sie die Variablen, die {{example}} enthalten",
+    "redirects": "nach {{count}} Weiterleitungen abgebrochen",
+    "trailingJson": "unerwarteter Text nach dem JSON-Wert",
+    "expectedObject": "ein JSON-Objekt wurde erwartet",
+    "expectedRows": "ein JSON-Objekt oder eine Liste von Zeilen wurde erwartet"
+  },
+  "files": {
+    "unavailable": "{{example}} liest Dateien nur in der Desktop-App oder in gostman run, send und load mit --allow-files",
+    "relativePath": "öffnen Sie einen Arbeitsbereichsordner, um in {{example}} einen relativen Pfad zu verwenden, oder geben Sie einen absoluten Pfad an",
+    "httpOnly": "{{example}} liest Dateien nur in HTTP- und GraphQL-Anfragen",
+    "outsideFolder": "„{{path}}“ liegt außerhalb des Sammlungsordners; eine Sammlung liest nur Dateien in ihrem Ordner",
+    "unreadable": "Datei „{{path}}“ kann nicht gelesen werden: {{detail}}",
+    "isFolder": "„{{path}}“ ist ein Ordner, keine Datei",
+    "tooLarge": "Datei „{{path}}“ ist größer als 10 MB",
+    "notFound": "Datei „{{path}}“ wurde unter {{resolved}} nicht gefunden",
+    "pathMissing": "{{example}} braucht einen Dateipfad zwischen den Klammern",
+    "networkPath": "„{{path}}“ ist ein Netzwerk- oder Gerätepfad. Dateien werden nur von den Laufwerken dieses Computers gelesen, damit Ihre Windows-Anmeldung nie an einen anderen Computer gesendet wird. Kopieren Sie die Datei auf diesen Computer oder verbinden Sie die Freigabe mit einem Laufwerksbuchstaben"
+  },
+  "attachments": {
+    "unavailable": "von der Festplatte angehängte Dateien werden nur von der Desktop-App gesendet",
+    "tooLarge": "die angehängten Dateien sind zusammen größer als {{size}} GB",
+    "signed": "diese Authentifizierung signiert den gesamten Body, daher sind angehängte Dateien zusammen mit ihm auf {{size}} MB begrenzt",
+    "failed": "angehängte Datei „{{name}}“: {{detail}}",
+    "notRegular": "„{{path}}“ ist keine reguläre Datei"
+  },
+  "proxy": {
+    "invalidAddress": "„{{address}}“ ist keine gültige Proxyadresse",
+    "unsupportedScheme": "nicht unterstütztes Proxy-Schema „{{scheme}}“, verwenden Sie http, https oder socks5"
+  }
+}

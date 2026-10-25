@@ -1,0 +1,14 @@
+{
+  "variables.dynamic": "Shown in the hover card of a built-in dynamic variable such as the one that makes a random number. Starts with a lowercase letter because it follows the variable name.",
+  "variables.prompt": "Shown in the hover card of a prompt variable, whose value the person types in when the request is sent. Starts with a lowercase letter because it follows the variable name.",
+  "variables.undefinedName": "Shown in the hover card after the name of a variable that has no value. Starts with a lowercase letter because it follows the variable name.",
+  "variables.resolvesTo": "Shown in the hover card between a variable that contains other variables and its final value. Followed by the value.",
+  "variables.through": "Shown in brackets after the final value of a variable that goes through other variables. {{names}} is a list of variable names.",
+  "variables.sources.global": "Where a variable's value comes from, shown in brackets in the hover card: a global variable.",
+  "variables.sources.collection": "Where a variable's value comes from: the collection variables.",
+  "variables.sources.environment": "Where a variable's value comes from: the active environment.",
+  "variables.sources.folder": "Where a variable's value comes from: a folder's own variables.",
+  "variables.sources.request": "Where a variable's value comes from: the request's own variables.",
+  "variables.sources.process": "Where a variable's value comes from: a file named .env. Keep the file name unchanged.",
+  "variables.sources.session": "Where a variable's value comes from: values set during this session only, which are never saved."
+}

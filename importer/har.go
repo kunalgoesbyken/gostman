@@ -3,6 +3,8 @@ package importer
 import (
 	"net/url"
 	"strings"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const (
@@ -47,14 +49,14 @@ func (c *collector) readHAR(doc document, options Options) {
 			seen[identity] = true
 			c.harRequest(source, rootID, hosts)
 		}
-		c.noteSkipped(duplicates, "duplicate requests")
-		c.noteSkipped(assets, "static assets")
+		c.noteSkipped(duplicates, locales.ImporterSkipDuplicateRequests)
+		c.noteSkipped(assets, locales.ImporterSkipStaticAssets)
 	})
 }
 
-func (c *collector) noteSkipped(count int, what string) {
+func (c *collector) noteSkipped(count int, code locales.Code) {
 	if count > 0 {
-		c.skip("%d %s were left out", count, what)
+		c.skip(code, locales.Params{"count": count})
 	}
 }
 
@@ -76,7 +78,7 @@ func (c *collector) harRequest(source map[string]any, rootID string, hosts map[s
 	address := text(source["url"])
 	target, ok := parseHARAddress(address)
 	if !ok {
-		c.skip("%q is not an address that can be requested", address)
+		c.skip(locales.ImporterSkipBadAddress, locales.Params{"address": address})
 		return
 	}
 	folderID, known := hosts[target.host]

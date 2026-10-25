@@ -5,13 +5,13 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"io"
 	"mime"
 	"net/http"
 	"time"
 	"unicode/utf8"
 
+	"github.com/kunalgoesbyken/gostman/locales"
 	"github.com/kunalgoesbyken/gostman/redact"
 )
 
@@ -23,7 +23,7 @@ const (
 	maxEncodedBody     = maxRequestBody * 3 / 2
 )
 
-var errBodyTooLarge = errors.New("request body is larger than 10 MB")
+var errBodyTooLarge = locales.Errorf(locales.EngineRequestBodyTooLarge, nil)
 
 type Policy struct {
 	BlockPrivate      bool
@@ -57,7 +57,7 @@ func (p Policy) refusal(host string) error {
 	if p.Permit == nil || p.Permit(host) {
 		return nil
 	}
-	return fmt.Errorf("%w: %s", errHostNotPermitted, host)
+	return locales.Caused(locales.EngineBlockedHostNamed, locales.Params{"host": host}, errHostNotPermitted)
 }
 
 func Send(ctx context.Context, r Request, policy Policy) Response {
@@ -97,7 +97,7 @@ func (s *exchangeSetup) perform(ctx context.Context, limit int64) Response {
 }
 
 func setupFailure(err error) Response {
-	failure := Failure(ErrorConfig, err.Error())
+	failure := withLocalized(Failure(ErrorConfig, err.Error()), locales.Whole(err))
 	failure.Unresolved = UnresolvedIn(err)
 	return failure
 }
@@ -167,7 +167,7 @@ func newExchange(ctx context.Context, r Request, policy Policy, timeline *record
 				return http.ErrUseLastResponse
 			}
 			if len(via) >= maxRedirects {
-				return fmt.Errorf("stopped after %d redirects", maxRedirects)
+				return locales.Errorf(locales.EngineRequestRedirects, locales.Params{"count": maxRedirects})
 			}
 			if originOf(next.URL) != originOf(via[0].URL) {
 				dropCredentials(next.Header)
@@ -221,14 +221,25 @@ func Failure(kind, message string) Response {
 	return Response{Status: FailureStatus, Error: kind, Body: message, BodyEncoding: EncodingUTF8}
 }
 
+func Failed(kind string, said locales.Message) Response {
+	failure := Failure(kind, said.String())
+	failure.Localized = &said
+	return failure
+}
+
+func withLocalized(response Response, said *locales.Message) Response {
+	response.Localized = said
+	return response
+}
+
 func classify(ctx context.Context, err error) Response {
 	switch {
 	case errors.Is(err, errBlockedAddress), errors.Is(err, errHostNotPermitted):
-		return Failure(ErrorBlocked, err.Error())
+		return withLocalized(Failure(ErrorBlocked, err.Error()), locales.Find(err))
 	case errors.Is(ctx.Err(), context.DeadlineExceeded):
-		return Failure(ErrorTimeout, "the request timed out")
+		return Failed(ErrorTimeout, locales.New(locales.EngineFailureTimeout, nil))
 	case errors.Is(ctx.Err(), context.Canceled):
-		return Failure(ErrorCancelled, "the request was cancelled")
+		return Failed(ErrorCancelled, locales.New(locales.EngineFailureCancelled, nil))
 	default:
 		return networkFailure(err)
 	}

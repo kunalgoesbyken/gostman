@@ -1,0 +1,27 @@
+{
+  "grpc": {
+    "services": "Services",
+    "messageLabel": "Anfragenachricht",
+    "reflection": "Server Reflection",
+    "sendAsGrpc": "Als gRPC senden",
+    "addProtos": ".proto-Dateien hinzufügen",
+    "removeFiles": "Dateien entfernen",
+    "load": "Laden",
+    "reload": "Neu laden",
+    "schemaHint": "Laden Sie die Services per Server Reflection oder fügen Sie die .proto-Dateien des Service hinzu. Adresse, Header und Auth dieser Anfrage werden verwendet.",
+    "noServices": "Es wurden keine Services gefunden.",
+    "tooLarge": "{{name}} ist {{size}} groß. Dateien sind auf {{limit}} begrenzt.",
+    "method": "Methode",
+    "methodLabel": "gRPC-Methode",
+    "chooseMethod": "Methode wählen",
+    "useExample": "Beispiel nutzen",
+    "useExampleTitle": "Die Nachricht durch ein Beispiel für die Eingabe der Methode ersetzen",
+    "streamHint": "Diese Methode liest einen Stream. Schreiben Sie ein JSON-Array, um mehrere Nachrichten zu senden.",
+    "kinds": {
+      "bidirectional": "Bidirektionales Streaming",
+      "client": "Client-Streaming",
+      "server": "Server-Streaming",
+      "unary": "Unary"
+    }
+  }
+}

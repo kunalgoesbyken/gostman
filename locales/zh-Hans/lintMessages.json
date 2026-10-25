@@ -1,0 +1,39 @@
+{
+  "components": {
+    "unused": "{{kind}}/{{name}} 已定义，但从未被引用",
+    "invalidRef": "$ref 无效：{{detail}}"
+  },
+  "info": {
+    "fieldMissing": "info.{{field}} 缺失或为空",
+    "noServers": "未列出任何服务器，客户端无法得知 API 部署在哪里",
+    "noHost": "未设置主机，客户端无法得知 API 部署在哪里",
+    "serverNotHttps": "{{url}} 未使用 https",
+    "httpOnly": "该 API 仅通过 http 提供"
+  },
+  "operations": {
+    "noOperationId": "该操作没有 operationId",
+    "duplicateOperationId": "operationId“{{id}}”已被 {{earlier}} 使用",
+    "noSummary": "该操作既没有 summary 也没有 description",
+    "undeclaredTag": "标签“{{tag}}”未在顶层 tags 中声明",
+    "deprecatedWithoutDescription": "该操作已弃用，但没有说明应改用什么的 description",
+    "noSecurity": "规范定义了安全方案，但此操作不要求任何一种"
+  },
+  "paths": {
+    "none": "文档未定义任何路径",
+    "noLeadingSlash": "路径“{{path}}”不是以斜杠开头",
+    "ambiguous": "{{path}} 与 {{earlier}} 无法区分",
+    "parameterUndeclared": "路径参数“{{name}}”出现在路径中，但没有声明",
+    "parameterUnused": "路径参数“{{name}}”已声明，但不在路径中"
+  },
+  "responses": {
+    "noSuccess": "该操作没有声明 2xx 响应",
+    "noError": "该操作既没有声明 default 响应，也没有声明 4xx 响应",
+    "noSchema": "响应 {{status}} 没有 schema",
+    "mediaWithoutSchema": "响应 {{status}} 声明了 {{media}}，但没有 schema",
+    "bodyOnRead": "{{method}} 操作不应带有请求体",
+    "noBodyExample": "{{media}} 请求体没有示例"
+  },
+  "security": {
+    "undefinedScheme": "使用了安全方案“{{name}}”，但没有定义"
+  }
+}

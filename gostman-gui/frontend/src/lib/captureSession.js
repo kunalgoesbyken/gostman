@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 import { draftRequests, isSavable, suggestedFolderName } from './captureConversion'
 import { ROOT_ID } from './collectionTree'
-import { pluralize } from './dataUtils'
+import { CAPTURE_ACTION_TEXT } from './captureText'
+import { DIALOG_TEXT } from './dialogText'
 import { isAsking } from './exampleActions'
 import { toPort } from './mockServer'
 import { useAppStore } from '../store/appStore'
@@ -10,9 +11,6 @@ export const NEW_FOLDER = 'capture:new-folder'
 
 const DEFAULT_PORT = 4020
 const LOG_LIMIT = 500
-const TOP_LEVEL = 'the top level'
-const NOTHING_TO_SAVE = 'None of the selected exchanges can be saved as a request.'
-const NO_LONGER_KEPT = 'That exchange is no longer kept. Gostman keeps the latest 500.'
 
 const INITIAL_STATE = {
   isOpen: false,
@@ -32,7 +30,6 @@ const capture = () => useCaptureStore.getState()
 const patch = (changes) => useCaptureStore.setState(changes)
 const app = () => useAppStore.getState()
 const messageOf = (error) => error?.message || String(error)
-const quoted = (name) => `"${name}"`
 const newestFirst = (first, second) => second.id - first.id
 const portOf = (address) => toPort(new URL(address).port)
 
@@ -56,7 +53,9 @@ function destinationFor(target, exchanges) {
   return app().folders.find((folder) => folder.id === target) || { id: ROOT_ID, name: '' }
 }
 
-const describeDestination = (folder) => (folder.id === ROOT_ID ? TOP_LEVEL : quoted(folder.name))
+const savedSummary = (count, folder) => (
+  folder.id === ROOT_ID ? CAPTURE_ACTION_TEXT.savedTopLevel(count) : CAPTURE_ACTION_TEXT.savedToFolder({ count, name: folder.name })
+)
 
 export function createCaptureActions(backend) {
   const server = backend.capture
@@ -136,7 +135,7 @@ export function createCaptureActions(backend) {
     const current = inspection
     const [detail] = await server.details([id])
     if (current !== inspection) return
-    patch({ detail: detail || null, failure: detail ? '' : NO_LONGER_KEPT })
+    patch({ detail: detail || null, failure: detail ? '' : CAPTURE_ACTION_TEXT.noLongerKept })
   })
 
   function openAsRequest(exchange) {
@@ -144,21 +143,21 @@ export function createCaptureActions(backend) {
     if (requests.length === 0) return
     app().openRequestTab(requests[0])
     patch({ isOpen: false })
-    if (notes.length > 0) app().showAlert('Opened as a new request', notes.join('\n'), 'OK', 'warning')
+    if (notes.length > 0) app().showAlert(CAPTURE_ACTION_TEXT.openedTitle, notes.join('\n'), DIALOG_TEXT.ok, 'warning')
   }
 
   const saveToFolder = report(async (ids, target) => {
     const exchanges = await server.details(ids)
     const savable = exchanges.filter(isSavable)
     if (savable.length === 0) {
-      app().showAlert('Nothing saved', NOTHING_TO_SAVE, 'OK', 'warning')
+      app().showAlert(CAPTURE_ACTION_TEXT.nothingSavedTitle, CAPTURE_ACTION_TEXT.nothingToSave, DIALOG_TEXT.ok, 'warning')
       return
     }
     const destination = destinationFor(target, savable)
     const { requests, notes } = draftRequests(exchanges, destination.id)
     app().upsertRequests(await backend.saveRequests(requests))
-    const summary = `Saved ${pluralize(requests.length, 'request')} to ${describeDestination(destination)}.`
-    app().showAlert('Saved', [summary, ...notes].join('\n'), 'OK', notes.length > 0 ? 'warning' : 'success')
+    const summary = savedSummary(requests.length, destination)
+    app().showAlert(CAPTURE_ACTION_TEXT.savedTitle, [summary, ...notes].join('\n'), DIALOG_TEXT.ok, notes.length > 0 ? 'warning' : 'success')
   })
 
   return {

@@ -1,0 +1,28 @@
+{
+  "requestTabs": {
+    "sections": "Sekcje żądania",
+    "more": "Więcej",
+    "moreHint": "Więcej sekcji żądania",
+    "loading": "Ładowanie",
+    "examples": "Przykłady",
+    "examplesHint": "Zapisane przykłady odpowiedzi",
+    "headerLabel": "Nagłówek",
+    "variableLabel": "Zmienna",
+    "paramLabel": "Parametr",
+    "paramsNote": "Te wiersze odzwierciedlają ciąg zapytania w adresie URL. Odznaczone wiersze są tu przechowywane, ale nie są wysyłane.",
+    "labels": {
+      "params": "Parametry",
+      "headers": "Nagłówki",
+      "body": "Treść",
+      "auth": "Auth",
+      "graphql": "GraphQL",
+      "grpc": "gRPC",
+      "mcp": "MCP",
+      "websocket": "WebSocket",
+      "vars": "Zmienne",
+      "extract": "Wyodrębnij",
+      "tests": "Sprawdzenia",
+      "settings": "Ustawienia"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "localCommand.title": "Confirmation before the app starts a program on the user computer. This is a safety question.",
+  "localCommand.intro": "Followed by the command line in a code box.",
+  "localCommand.environmentIntro": "Followed by a list of environment variables in a code box.",
+  "localCommand.warning": "Warns that the program runs with the rights of the user.",
+  "localCommand.confirm": "Confirm button that starts the program.",
+  "localCommand.notApproved": "Error shown when a request that starts a program is sent from somewhere other than its own tab."
+}

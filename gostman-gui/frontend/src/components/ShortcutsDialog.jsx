@@ -63,7 +63,7 @@ function ShortcutRow({ row, isCapturing, liveKeys, error, conflict, actions }) {
       <div className="flex min-h-8 flex-wrap items-center gap-x-3 gap-y-1 text-xs">
         <span className="min-w-0 flex-1 basis-40">
           {row.label}
-          {row.isCustom && <Badge className="ml-2 align-middle">{SHORTCUT_TEXT.customised}</Badge>}
+          {row.isCustom && <Badge className="ms-2 align-middle">{SHORTCUT_TEXT.customised}</Badge>}
         </span>
         <span className="flex shrink-0 items-center gap-1">
           <KeysDisplay keys={row.keys} isCapturing={isCapturing} liveKeys={liveKeys} />

@@ -12,12 +12,9 @@ import { basicSetup } from 'codemirror'
 import { findJsonProblem, formatJson, lineAndColumn } from './jsonFormat'
 import { formatXml } from './soap'
 import { CLOSING_REFERENCE, SECRET_TINT, describeReference, findReferences, referenceAtCaret, referenceLook, suggestNames } from './variables'
+import { CODE_EDITOR_TEXT } from './codeEditorText'
 import { LARGE_BODY_CHARS } from './largeText'
 import { mountVariableCard } from '../components/VariableCard'
-
-const EDITOR_TEXT = {
-  syntaxError: 'Syntax error',
-}
 
 const FONT_FAMILY = 'var(--font-mono)'
 const FONT_FEATURES = '"calt" 0, "liga" 0'
@@ -122,6 +119,52 @@ export const baseExtensions = [
   tooltips({ parent: document.body }),
 ]
 
+const LIBRARY_PHRASES = {
+  'Fold line': 'foldLine',
+  'Unfold line': 'unfoldLine',
+  'Folded lines': 'foldedLines',
+  'Unfolded lines': 'unfoldedLines',
+  'folded code': 'foldedCode',
+  unfold: 'unfold',
+  Completions: 'completions',
+  'Control character': 'controlCharacter',
+  Diagnostics: 'diagnostics',
+  'No diagnostics': 'noDiagnostics',
+  'Go to line': 'goToLine',
+  go: 'go',
+  close: 'close',
+  Find: 'find',
+  Replace: 'replace',
+  all: 'all',
+  'by word': 'byWord',
+  'match case': 'matchCase',
+  next: 'next',
+  previous: 'previous',
+  regexp: 'regexp',
+  'replace all': 'replaceAll',
+  'current match': 'currentMatch',
+  'on line': 'onLine',
+  to: 'to',
+  'Selection deleted': 'selectionDeleted',
+  'replaced $ matches': 'replacedMatches',
+  'replaced match on line $': 'replacedMatchOnLine',
+  '$ unchanged lines': 'unchangedLines',
+  Accept: 'accept',
+  Reject: 'reject',
+  'Revert this chunk': 'revertChunk',
+}
+
+const LIBRARY_ARGUMENT = '$'
+
+const libraryPhrase = (key) => {
+  const phrase = CODE_EDITOR_TEXT.phrases[key]
+  return typeof phrase === 'function' ? phrase({ count: LIBRARY_ARGUMENT, line: LIBRARY_ARGUMENT }) : phrase
+}
+
+export const phraseExtension = () => EditorState.phrases.of(
+  Object.fromEntries(Object.entries(LIBRARY_PHRASES).map(([english, key]) => [english, libraryPhrase(key)])),
+)
+
 const isTooLargeToLint = (view) => view.state.doc.length > LARGE_BODY_CHARS
 
 function syntaxErrors(view) {
@@ -129,7 +172,7 @@ function syntaxErrors(view) {
   const diagnostics = []
   syntaxTree(view.state).iterate({
     enter: (node) => {
-      if (node.type.isError) diagnostics.push({ from: node.from, to: node.to, severity: 'error', message: EDITOR_TEXT.syntaxError })
+      if (node.type.isError) diagnostics.push({ from: node.from, to: node.to, severity: 'error', message: CODE_EDITOR_TEXT.syntaxError })
     },
   })
   return diagnostics

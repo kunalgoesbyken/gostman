@@ -1,0 +1,39 @@
+{
+  "requestBar": {
+    "name": "リクエスト名",
+    "untitled": "無題のリクエスト",
+    "method": "HTTPメソッド",
+    "url": "リクエストURL",
+    "methodPlaceholders": {
+      "grpc": {
+        "full": "サーバーアドレスを入力（例：localhost:50051）",
+        "medium": "サーバーアドレス",
+        "short": "アドレス"
+      },
+      "mcp": {
+        "full": "MCPサーバーのURLを入力",
+        "medium": "MCPサーバーのURL",
+        "short": "URL"
+      }
+    },
+    "send": "送信",
+    "connect": "接続",
+    "disconnect": "切断",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "code": "コード",
+    "codeHint": "コードを生成",
+    "codeLanguage": "言語",
+    "urlPlaceholders": {
+      "full": "URLを入力、またはcurlコマンドを貼り付け",
+      "medium": "URLまたはcurlコマンド",
+      "short": "URL"
+    }
+  },
+  "curlFiles": {
+    "title": "ファイルの読み取りも貼り付けますか？",
+    "message": "このcurlコマンドは、このコンピューターのファイルを読み取ってリクエストと一緒に送信します。コマンドの出所が信頼できる場合のみ残してください。残さなくても、コマンドのそれ以外の部分は入力されます。",
+    "withThem": "ファイルの読み取りを含めて貼り付け",
+    "withoutThem": "ファイルの読み取りなしで貼り付け"
+  }
+}

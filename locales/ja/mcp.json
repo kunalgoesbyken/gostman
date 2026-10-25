@@ -1,0 +1,155 @@
+{
+  "mcp": {
+    "media": {
+      "heading": "結果に含まれる画像と音声",
+      "image": "結果の画像{{number}}",
+      "audio": "結果の音声{{number}}"
+    },
+    "server": "サーバー",
+    "argumentsLabel": "引数",
+    "notLoaded": "未読み込み",
+    "load": "読み込み",
+    "reload": "再読み込み",
+    "signIn": "サインイン",
+    "signingIn": "サインイン中…",
+    "signInHint": "このサーバーのサインイン方法を調べ、必要に応じてGostmanを認可サーバーに登録し、ブラウザーでサインインして、トークンを「認証」タブに保存します",
+    "serverProtocol": "MCP {{version}}",
+    "serverProtocolLegacy": "MCP {{version}}（initializeハンドシェイク）",
+    "instructions": "手順",
+    "instructionsHint": "このサーバーを利用するモデル向けの手順を表示します",
+    "operation": "操作",
+    "operations": {
+      "toolsCall": "ツールを呼び出し",
+      "toolsList": "ツールを一覧表示",
+      "resourcesRead": "リソースを読み取り",
+      "resourcesList": "リソースを一覧表示",
+      "resourceTemplatesList": "リソーステンプレートを一覧表示",
+      "promptsGet": "プロンプトを取得",
+      "promptsList": "プロンプトを一覧表示"
+    },
+    "itemLabels": {
+      "tool": "MCPツール",
+      "resource": "リソースURI",
+      "prompt": "MCPプロンプト"
+    },
+    "choose": {
+      "tool": "ツールを選択",
+      "prompt": "プロンプトを選択"
+    },
+    "noInput": "この操作には入力がありません。送信すると、サーバーが返すすべての項目を全ページ分一覧表示します。",
+    "readHint": "送信すると、このURIのリソースを読み取ります。一覧のリソースを選ぶか、テンプレートを入力してください。",
+    "schema": "スキーマ",
+    "schemaHints": {
+      "tool": "ツールの引数のJSON Schemaをエディターの横に表示します",
+      "prompt": "プロンプトの引数をエディターの横に表示します"
+    },
+    "schemaTitles": {
+      "tool": "入力スキーマ",
+      "prompt": "プロンプトの引数"
+    },
+    "closeSchema": "閉じる",
+    "noArguments": "このプロンプトには引数がありません。",
+    "example": "例を使用",
+    "exampleHint": "引数をスキーマから作成した例に置き換えます",
+    "promptArgumentRequired": "{{name}}（必須）",
+    "promptArgumentDescribed": "{{label}}：{{description}}",
+    "catalogHints": {
+      "remote": "このURLのMCPサーバーのツール、リソース、プロンプトを読み込みます。このリクエストのヘッダーと認証は、すべての呼び出しで送信されます。デスクトップアプリでは、アドレスバーにstdio:とコマンドを書くと、代わりにローカルサーバーを起動できます。例：{{example}}。",
+      "local": "「読み込み」はこのコンピューターでこのコマンドを起動し、提供される内容を読み取ります。呼び出しのたびに再度起動します。「ヘッダー」タブの行は環境変数として渡されます。"
+    },
+    "empty": "このサーバーにはツール、リソース、プロンプトがありません。",
+    "checks": "チェック",
+    "checksHint": "このサーバーのツール定義で見つかった問題",
+    "noFindings": "ツール定義に問題は見つかりませんでした。",
+    "findings": {
+      "missingDescription": "{{tool}}：説明がありません。モデルは説明を見てツールを選ぶため、このツールはうまく使われにくくなります。",
+      "shortDescription": "{{tool}}：説明「{{detail}}」が短すぎます。ツールの機能、使う場面、返す内容を書いてください。",
+      "duplicateName": "{{tool}}：同じ名前のツールが複数あるため、呼び出しで区別できません。",
+      "similarNames": "{{tool}}：{{detail}}とほぼ同じに見えるため、モデルが取り違えやすくなります。",
+      "invalidName": "{{tool}}：名前は1〜128文字で、英字、数字、_、-、.のみ使えます。",
+      "invalidSchema": "{{tool}}：入力スキーマが使用できません：{{detail}}。",
+      "undocumentedParameters": "{{tool}}：説明のないパラメーター：{{detail}}。",
+      "unknownRequired": "{{tool}}：requiredに、スキーマで定義されていないパラメーターが含まれています：{{detail}}。",
+      "manyTools": "このサーバーには{{count}}個のツールがあります。ツールが多いと、モデルが適切なツールを選びにくくなり、一部しか読み込まないクライアントもあります。",
+      "rejected": "{{tool}}：{{detail}}ため、仕様に従ってツール一覧から除外されました。",
+      "listFailed": "{{method}}が失敗しました：{{detail}}"
+    },
+    "schemaProblems": {
+      "notObject": "JSONオブジェクトではない",
+      "rootType": "最上位の型が「object」ではない",
+      "properties": "propertiesがスキーマのオブジェクトではない",
+      "property": "{{name}}のスキーマがオブジェクトではない",
+      "type": "{{name}}の型「{{type}}」が不明である",
+      "required": "requiredが名前のリストではない"
+    },
+    "changes": {
+      "title": "前回承認した後に、このサーバーのツールが変更されました。",
+      "added": "追加：{{names}}。",
+      "removed": "削除：{{names}}。",
+      "descriptionChanged": "{{name}}：説明が変更されました。",
+      "schemaChanged": "{{name}}：入力スキーマが変更されました。",
+      "definitionChanged": "{{name}}：説明または入力スキーマが変更されました。",
+      "before": "変更前",
+      "now": "現在",
+      "noDescription": "（なし）",
+      "advice": "エージェントがこれらのツールを使う前に、変更内容を確認してください。変更された説明に、これまで表示されなかった指示が含まれている可能性があります。",
+      "accept": "変更を承認",
+      "firstSeen": "このサーバーを初めて読み込みました。Gostmanはこのデバイスにツールを記憶し、変更があると警告します。"
+    },
+    "auth": {
+      "title": "サインイン",
+      "close": "閉じる",
+      "retry": "再試行",
+      "steps": {
+        "probe": "サーバーに問い合わせ",
+        "challenge": "WWW-Authenticateチャレンジを読み取り",
+        "resource": "保護リソースメタデータを検索（RFC 9728）",
+        "server": "認可サーバーメタデータを検索（RFC 8414またはOpenID Connect）",
+        "registration": "クライアントIDを取得",
+        "browser": "ブラウザーでサインイン",
+        "issuer": "応答の発行者を確認（RFC 9207）",
+        "token": "コードをトークンに交換",
+        "retry": "トークンを付けてサーバーを呼び出し"
+      },
+      "outcomes": {
+        "ok": "完了",
+        "warning": "警告",
+        "failed": "失敗",
+        "stopped": "停止",
+        "running": "実行中"
+      },
+      "explanations": {
+        "localCommand": "stdio:で起動するローカルサーバーは、OAuthではなく環境変数から認証情報を読み取ります。代わりに、「ヘッダー」タブの行にトークンを入力してください。",
+        "unreachable": "Gostmanはサーバーに接続できませんでした。URL、ネットワーク、プロキシ設定を確認してください。",
+        "noResourceMetadata": "サーバーはresource_metadataパラメーターなしでサインインを求めたため、Gostmanは代わりに既知のアドレスでメタデータを探します。",
+        "answered": "サーバーはサインインを求めずに応答しました。たとえば、このリクエストがすでに有効なトークンを持っている場合です。再度サインインできるように、GostmanはOAuthメタデータを探します。",
+        "notProtected": "サーバーはサインインを求めずに応答し、OAuthメタデータも公開していないため、トークンは不要です。",
+        "resourceMetadataMissing": "以下のどのアドレスにも、保護リソースメタデータが見つかりませんでした。OAuthを使うMCPサーバーは、401応答のresource_metadataアドレス、または/.well-known/oauth-protected-resourceで公開する必要があります。",
+        "resourceMetadataInvalid": "保護リソースメタデータに認可サーバーが指定されていないため、Gostmanはサインイン先を判断できません。",
+        "resourceMismatch": "保護リソースメタデータに記載されたリソースが、このサーバーのURLではありません。そのリソース向けに発行されたトークンはここでは受け付けられない（オーディエンスの不一致）ため、Gostmanは処理を停止します。そのドキュメントのresourceを、サーバーのURL、またはサーバーのURLが先頭に一致するURLに設定してください。",
+        "serverMetadataMissing": "認可サーバーの既知のアドレスのどれからもメタデータが返されませんでした。認可サーバーは、OAuth 2.0認可サーバーメタデータまたはOpenID Connectディスカバリードキュメントを公開する必要があります。",
+        "issuerMismatch": "認可サーバーメタデータのissuerが、保護リソースメタデータのauthorization_serversに記載されたアドレスと異なります。仕様ではこの2つが1文字単位で完全に一致する必要があるため、このメタデータは使用されません。2つの値を一致させてください。末尾のスラッシュが原因のことがよくあります。",
+        "serverMetadataIncomplete": "認可サーバーメタデータにauthorization_endpointまたはtoken_endpointがありません。",
+        "noPkce": "認可サーバーメタデータのcode_challenge_methods_supportedにS256が含まれておらず、MCPクライアントはPKCEなしでサインインしてはいけません。認可サーバーでS256のPKCEに対応し、そのリストにS256を追加してください。",
+        "insecureEndpoint": "認可エンドポイントまたはトークンエンドポイントが、リモートホストで通常のHTTPを使っています。仕様では、これらのエンドポイントにHTTPSが必要です。",
+        "insufficientScope": "トークンは有効ですが、このリクエストに必要なスコープが足りません。再度サインインすると、これまでのスコープに加えて、サーバーが指定したスコープを要求します。",
+        "noRegistration": "認可サーバーは、動的クライアント登録もクライアントIDメタデータドキュメントも提供していません。自分でクライアントを登録し、そのクライアントIDを「認証」タブ（OAuth 2.0）に入力してから、もう一度サインインしてください。",
+        "registrationRefused": "認可サーバーがGostmanの登録を拒否しました。多くのIDプロバイダーでは動的クライアント登録が無効になっています。自分でクライアントを登録し、そのクライアントIDを「認証」タブに入力してください。",
+        "serverChanged": "認可サーバーが、保存されたクライアントIDの発行元ではないため、Gostmanは再利用せずに再登録しました。",
+        "browserFailed": "ブラウザーでのサインインが完了しませんでした。",
+        "issuerMissing": "認可サーバーメタデータでauthorization_response_iss_parameter_supportedが設定されていますが、応答にissパラメーターがなかったため、取り違え攻撃を防ぐために拒否されました。Gostmanへのリダイレクトにissを追加するか、対応の通知をやめてください。",
+        "issuerWrong": "応答のissパラメーターが、Gostmanがサインインした認可サーバーの発行者ではないため、取り違え攻撃を防ぐために応答は破棄されました。認可サーバーメタデータに記載されたとおりの発行者を送ってください。",
+        "tokenFailed": "トークンエンドポイントがアクセストークンを返しませんでした。クライアントID、リダイレクトアドレス、resourceパラメーターが受け付けられるか確認してください。",
+        "stillRejected": "サーバーはまだトークンを拒否しています。別のオーディエンスやスコープを想定している可能性があります。以下のresourceとscopeを、サーバーが検査する内容と比較してください。"
+      },
+      "attempts": "リクエスト"
+    },
+    "notifications": "通知（{{count}}）",
+    "notificationTime": "{{milliseconds}} ms",
+    "progressOf": "{{progress}}/{{total}}",
+    "issuerDetail": "期待値「{{expected}}」、受信値「{{received}}」"
+  },
+  "mcpOutput": {
+    "name": "結果がツールの出力スキーマに一致する"
+  }
+}

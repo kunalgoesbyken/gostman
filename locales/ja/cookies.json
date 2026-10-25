@@ -1,0 +1,10 @@
+{
+  "cookies": {
+    "clearAll": "すべてクリア",
+    "filter": "名前またはドメインで絞り込み",
+    "emptyTitle": "保存されているCookieはありません",
+    "emptyHint": "レスポンスで設定されたCookieはここに保持され、以降のリクエストで同じサイトに送り返されます。",
+    "noMatches": "一致するCookieの名前やドメインがありません。",
+    "remove": "Cookie {{name}}を削除"
+  }
+}

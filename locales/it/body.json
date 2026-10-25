@@ -1,0 +1,22 @@
+{
+  "body": {
+    "typeLabel": "Tipo di corpo",
+    "editorLabel": "Corpo della richiesta",
+    "format": "Formatta",
+    "formatTitle": "Indenta il corpo {{type}} ({{chord}}). {{example}} vengono lasciati come scritti.",
+    "cannotFormatAt": "Impossibile formattare il {{type}} alla riga {{line}}, colonna {{column}}: {{message}}",
+    "cannotFormat": "Impossibile formattare il {{type}}: {{message}}",
+    "goToLine": "Vai alla riga {{line}}",
+    "noBody": "Nessun corpo",
+    "noBodyDescription": "Questa richiesta viene inviata senza corpo.",
+    "multipartOnGet": "Le richieste GET raramente hanno un corpo e molti server lo ignorano. Passa il metodo a POST o PUT se deve essere caricato.",
+    "replacedByGraphQL": "Il metodo è GRAPHQL, quindi il corpo viene costruito dalla scheda GraphQL e questo non viene inviato.",
+    "types": {
+      "none": "Nessuno",
+      "text": "Testo",
+      "form": "Form URL-encoded",
+      "multipart": "Multipart",
+      "file": "File"
+    }
+  }
+}

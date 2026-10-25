@@ -1,0 +1,26 @@
+{
+  "examples": {
+    "title": "Ejemplos",
+    "bodyLabel": "Cuerpo del ejemplo",
+    "listLabel": "Ejemplos guardados",
+    "emptyTitle": "Aún no hay ejemplos",
+    "emptyHint": "Envía la solicitud y elige Guardar como ejemplo en el panel de respuesta. El servidor simulado responde con ellos.",
+    "servedByDefault": "Se sirve por defecto",
+    "serveByDefault": "Servir por defecto",
+    "format": "Formatear el cuerpo",
+    "rename": "Renombrar ejemplo",
+    "remove": "Eliminar ejemplo",
+    "section": "Sección del ejemplo",
+    "body": "Cuerpo",
+    "headersCount": "Encabezados ({{count}})",
+    "noContentType": "Sin tipo de contenido",
+    "binaryTitle": "Cuerpo binario, {{size}}",
+    "binaryHint": "No se puede editar como texto y se sirve exactamente como se guardó.",
+    "noHeadersHint": "Este ejemplo se guardó sin encabezados.",
+    "unsaved": "El cuerpo tiene cambios sin guardar.",
+    "discard": "Descartar",
+    "saveBody": "Guardar cuerpo",
+    "bodyTooLarge": "Este cuerpo pesa {{size}}. Un ejemplo admite un cuerpo de hasta {{limit}}.",
+    "tooMany": "Una solicitud admite hasta {{limit}} ejemplos. Elimina uno para guardar otro."
+  }
+}

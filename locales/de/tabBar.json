@@ -1,0 +1,9 @@
+{
+  "tabBar": {
+    "openRequests": "Geöffnete Anfragen",
+    "newRequest": "Neue Anfrage",
+    "untitled": "Unbenannt",
+    "unsaved": "Ungespeicherte Änderungen",
+    "close": "{{title}} schließen"
+  }
+}

@@ -1,0 +1,53 @@
+source,target
+request,solicitud
+response,respuesta
+collection,colección
+collection settings,ajustes de la colección
+settings for all collections,ajustes para todas las colecciones
+folder,carpeta
+workspace,espacio de trabajo
+environment,entorno
+variable,variable
+secret,secreto
+secret manager,gestor de secretos
+header,encabezado
+body,cuerpo
+query parameter,parámetro de consulta
+path parameter,parámetro de ruta
+cookie,cookie
+auth,Auth (pestaña) / autenticación
+token,token
+pre-request script,script previo a la solicitud
+post-response script,script posterior a la respuesta
+check (assertion),prueba (aserción en las filas de la pestaña Pruebas)
+extract rule,regla de extracción
+runner / run,ejecutor / ejecutar
+iteration,iteración
+flow,flujo
+step,paso
+mock server,servidor simulado
+capture,captura
+example (saved example),ejemplo
+history,historial
+tab,pestaña
+sidebar,barra lateral
+preferences,preferencias
+theme,tema
+scan,análisis / buscar
+finding,hallazgo
+load test,prueba de carga
+import,importar
+export,exportar
+share link,enlace para compartir
+trust (a folder),confiar en
+restricted,restringido
+proxy,proxy
+certificate,certificado
+timeout,tiempo de espera
+send,enviar
+settings,ajustes
+language,idioma
+AI,IA
+branch,rama
+commit,commit
+fetch / pull / push / stage / stash,se mantienen en inglés (verbos de Git)

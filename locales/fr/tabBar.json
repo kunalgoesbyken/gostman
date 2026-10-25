@@ -1,0 +1,9 @@
+{
+  "tabBar": {
+    "openRequests": "Requêtes ouvertes",
+    "newRequest": "Nouvelle requête",
+    "untitled": "Sans titre",
+    "unsaved": "Modifications non enregistrées",
+    "close": "Fermer {{title}}"
+  }
+}

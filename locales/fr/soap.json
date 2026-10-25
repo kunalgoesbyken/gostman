@@ -1,0 +1,13 @@
+{
+  "soap": {
+    "versionLabel": "Version de SOAP",
+    "format": "Formater le XML",
+    "formatTitle": "Indente l’enveloppe. Les commentaires et les sections CDATA sont conservés.",
+    "fault": "SOAP Fault",
+    "faultCode": "Code",
+    "faultReason": "Raison",
+    "faultActor": "Acteur",
+    "faultDetail": "Détail",
+    "malformed": "Le XML ne peut pas être formaté : {{message}}"
+  }
+}

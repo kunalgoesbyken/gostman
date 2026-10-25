@@ -1,5 +1,7 @@
 package engine
 
+import "github.com/kunalgoesbyken/gostman/locales"
+
 type Auth struct {
 	Type     string `json:"type"`
 	Username string `json:"username"`
@@ -147,6 +149,8 @@ type Response struct {
 	Notifications []Notification `json:"notifications,omitempty"`
 	Unresolved    []string       `json:"unresolved,omitempty"`
 	OutputSchema  string         `json:"outputSchema,omitempty"`
+
+	Localized *locales.Message `json:"localized,omitempty"`
 }
 
 type Notification struct {

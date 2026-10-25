@@ -1,0 +1,39 @@
+{
+  "codeEditor": {
+    "syntaxError": "Syntax error",
+    "phrases": {
+      "foldLine": "Fold line",
+      "unfoldLine": "Unfold line",
+      "foldedLines": "Folded lines",
+      "unfoldedLines": "Unfolded lines",
+      "foldedCode": "folded code",
+      "unfold": "unfold",
+      "completions": "Completions",
+      "controlCharacter": "Control character",
+      "diagnostics": "Diagnostics",
+      "noDiagnostics": "No diagnostics",
+      "goToLine": "Go to line",
+      "go": "go",
+      "close": "close",
+      "find": "Find",
+      "replace": "Replace",
+      "all": "all",
+      "byWord": "by word",
+      "matchCase": "match case",
+      "next": "next",
+      "previous": "previous",
+      "regexp": "regexp",
+      "replaceAll": "replace all",
+      "currentMatch": "current match",
+      "onLine": "on line",
+      "to": "to",
+      "selectionDeleted": "Selection deleted",
+      "replacedMatches": "replaced {{count}} matches",
+      "replacedMatchOnLine": "replaced match on line {{line}}",
+      "unchangedLines": "{{count}} unchanged lines",
+      "accept": "Accept",
+      "reject": "Reject",
+      "revertChunk": "Revert this chunk"
+    }
+  }
+}

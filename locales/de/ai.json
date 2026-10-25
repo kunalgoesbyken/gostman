@@ -1,0 +1,210 @@
+{
+  "ai": {
+    "name": "KI",
+    "ok": "OK",
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "back": "Zurück",
+    "discard": "Verwerfen",
+    "tryAgain": "Erneut versuchen",
+    "preview": "Vorschau",
+    "sendToAi": "An KI senden",
+    "continueBatch": "Nächste Anfragen erstellen",
+    "empty": "Leer",
+    "current": "Aktuell",
+    "proposed": "Vorschlag",
+    "instructions": "Anweisungen",
+    "content": "Inhalt",
+    "replyFormat": "Antwortformat",
+    "scriptLabel": "Skript",
+    "preRequest": "Pre-Request",
+    "postResponse": "Post-Response",
+    "providerLabel": "KI: {{label}}",
+    "waitingFor": "Warten auf {{label}}",
+    "readingSpec": "OpenAPI-Dokument wird gelesen",
+    "reviewNote": "Von KI erzeugt. Prüfen Sie es vor der Übernahme. Es wird nichts gesendet, gespeichert oder ausgeführt, bevor Sie entscheiden.",
+    "previewNote": "Genau dies wird an {{host}} gesendet: etwa {{size}} ({{tokens}} Tokens). Secrets sind maskiert.",
+    "previewNoteValues": "Genau dies wird an {{host}} gesendet: etwa {{size}} ({{tokens}} Tokens). Secrets sind maskiert. Werte des Antwort-Bodys sind enthalten (bis zu 4 KB, sensible Schlüssel maskiert).",
+    "previewNoteStructure": "Genau dies wird an {{host}} gesendet: etwa {{size}} ({{tokens}} Tokens). Secrets sind maskiert. Enthalten ist nur die Struktur des Antwort-Bodys, nicht seine Werte.",
+    "skipPreview": "Für diese Aktion nicht mehr fragen (sie wird ohne diese Vorschau gesendet)",
+    "includeValues": "Echte Werte der Antwort einbeziehen (sonst wird nur die Struktur gesendet)",
+    "includeBodyValues": "Werte des Bodys einbeziehen (bis zu 4 KB, sensible Schlüssel maskiert). Abwählen, um nur die Struktur zu senden.",
+    "needsResponse": "Senden Sie zuerst die Anfrage, damit es eine Antwort gibt, auf der aufgebaut werden kann.",
+    "needsTrust": "Dieser Ordner ist eingeschränkt. Vertrauen Sie ihm, bevor Sie Skripte erzeugen, denn Skripte von KI gelten als nicht vertrauenswürdig, bis Sie sie geprüft haben.",
+    "badReply": "Das Modell hat nicht im erwarteten Format geantwortet. Versuchen Sie es erneut oder wählen Sie ein leistungsfähigeres Modell.",
+    "cutOff": "Die Antwort wurde abgeschnitten, weil sie die Längengrenze erreicht hat. Versuchen Sie es mit weniger Inhalt erneut oder wählen Sie ein Modell, das kürzere Antworten schreibt.",
+    "connected": "Verbunden",
+    "cancelled": "Abgebrochen",
+    "tooLarge": "Der Text ist {{size}} groß; die Grenze liegt bei {{limit}}. Fügen Sie einen kleineren Teil ein. Ein vollständiges OpenAPI- oder Swagger-Dokument beliebiger Größe lässt sich mit „Daten importieren“ importieren.",
+    "searchLimited": "Ihre Sammlung hat {{total}} Anfragen. Nur die ersten {{sent}} werden gesendet, spätere Anfragen können daher nicht gefunden werden.",
+    "tasks": {
+      "request": {
+        "label": "Neue Anfrage aus einer Beschreibung",
+        "inputLabel": "Anfrage beschreiben",
+        "placeholder": "POST: neuen Benutzer mit Name und E-Mail anlegen",
+        "section": "Neue Anfrage (öffnet als ungespeicherter Tab)",
+        "apply": "Als neuen Tab öffnen",
+        "untitled": "KI-Anfrage"
+      },
+      "tests": {
+        "label": "Prüfungen für eine Antwort",
+        "assertions": "Assertions",
+        "script": "Post-Response-Skript (von KI erzeugt, vor dem Ausführen prüfen)",
+        "apply": "Zur Anfrage hinzufügen"
+      },
+      "script": {
+        "label": "Pre-Request- oder Post-Response-Skript",
+        "inputLabel": "Was soll das Skript tun",
+        "placeholder": "Das Token aus der Antwort in der Umgebung speichern",
+        "sectionPreScript": "Neues Pre-Request-Skript (von KI erzeugt, vor dem Ausführen prüfen)",
+        "sectionPostScript": "Neues Post-Response-Skript (von KI erzeugt, vor dem Ausführen prüfen)",
+        "apply": "Skript ersetzen"
+      },
+      "explain": {
+        "label": "Fehlgeschlagene Antwort erklären",
+        "happened": "Was passiert ist",
+        "causes": "Wahrscheinliche Ursachen",
+        "fixes": "Lösungsvorschläge"
+      },
+      "docs": {
+        "label": "Anfrage dokumentieren",
+        "section": "Beschreibung",
+        "apply": "Als Beschreibung verwenden"
+      },
+      "search": {
+        "label": "Zur Sammlung fragen",
+        "inputLabel": "Wonach suchen Sie",
+        "placeholder": "der Endpunkt, der eine Bestellung storniert"
+      },
+      "schema": {
+        "label": "Anfragen aus einer API-Beschreibung",
+        "inputLabel": "Fügen Sie ein OpenAPI- oder Swagger-Dokument, ein GraphQL-Schema oder Text einer API-Dokumentation ein",
+        "placeholder": "openapi: 3.1.0 ...",
+        "folder": "Neuer Ordner „{{name}}“",
+        "defaultFolder": "KI-Anfragen",
+        "apply_one": "Ordner und {{count}} Anfrage hinzufügen",
+        "apply_other": "Ordner und {{count}} Anfragen hinzufügen",
+        "moreNote": "Die API hat mehr Endpunkte, als in eine Antwort passen. Erstellen Sie die nächsten Anfragen, um fortzufahren; derselbe Text wird erneut gesendet, zusammen mit der Liste der bereits erstellten Anfragen.",
+        "importerSection_one": "OpenAPI-Import: {{count}} Anfrage",
+        "importerSection_other": "OpenAPI-Import: {{count}} Anfragen",
+        "importerNote": "Dies ist ein OpenAPI- oder Swagger-Dokument, daher liest es der integrierte Importer vollständig. Es wurde nichts an KI gesendet. Um Assertions hinzuzufügen, senden Sie eine Anfrage und nutzen Sie „Prüfungen für eine Antwort“.",
+        "importerWarnings": "Hinweise des Importers",
+        "importApply_one": "{{count}} Anfrage importieren",
+        "importApply_other": "{{count}} Anfragen importieren",
+        "moreLines_one": "und {{count}} weitere",
+        "moreLines_other": "und {{count}} weitere"
+      }
+    },
+    "buttons": {
+      "generate": "Mit KI erzeugen",
+      "generateTests": "Prüfungen mit KI erzeugen",
+      "generateScript": "Dieses Skript mit KI erzeugen",
+      "explain": "Mit KI erklären",
+      "explainError": "Diesen Fehler mit KI erklären",
+      "document": "Mit KI schreiben",
+      "documentLabel": "Beschreibung mit KI schreiben"
+    },
+    "commands": {
+      "request": {
+        "label": "KI: neue Anfrage aus einer Beschreibung",
+        "description": "Eine Anfrage entwerfen, als Vorschau zur Übernahme",
+        "keywords": "erzeugen generieren"
+      },
+      "tests": {
+        "label": "KI: Prüfungen erzeugen",
+        "description": "Prüfungen für die letzte Antwort vorschlagen"
+      },
+      "script": {
+        "label": "KI: Skript schreiben",
+        "description": "Ein Pre-Request- oder Post-Response-Skript vorschlagen"
+      },
+      "explain": {
+        "label": "KI: Antwort erklären",
+        "description": "Einen Fehler erklären und eine Lösung vorschlagen"
+      },
+      "docs": {
+        "label": "KI: diese Anfrage dokumentieren",
+        "description": "Eine Beschreibung für die Anfrage vorschlagen"
+      },
+      "search": {
+        "label": "KI: zur Sammlung fragen",
+        "description": "Anfragen anhand einer Beschreibung finden",
+        "keywords": "suchen finden"
+      },
+      "schema": {
+        "label": "KI: Anfragen aus einer API-Beschreibung",
+        "description": "OpenAPI-Dokumente nutzen den integrierten Importer; andere Beschreibungen gehen an KI",
+        "keywords": "openapi swagger graphql schema"
+      },
+      "settings": {
+        "label": "KI-Einstellungen",
+        "description": "KI ein- oder ausschalten, Anbieter, Modell und Schlüssel",
+        "keywords": "deaktivieren aktivieren einstellungen"
+      }
+    },
+    "settings": {
+      "offNote": "KI ist aus. Es werden keine KI-Schaltflächen, -Befehle oder -Kürzel angezeigt, und es wird nichts an einen KI-Anbieter gesendet.",
+      "onNote": "KI ist an. KI-Schaltflächen und -Befehle werden angezeigt; gesendet wird erst, wenn Sie eine KI-Aktion ausführen.",
+      "needsSetup": "KI ist an. Bevor eine KI-Aktion laufen kann, wählen Sie ein Modell und speichern Sie einen API-Schlüssel, falls der Anbieter einen braucht.",
+      "previewNote": "Jede Aktion zeigt vorab genau, was gesendet wird, bevor etwas Ihren Rechner verlässt, es sei denn, Sie haben für diese Aktion „Nicht mehr fragen“ gewählt.",
+      "consent": "Mir ist bewusst, dass beim Ausführen einer KI-Aktion die in der Vorschau gezeigten Details der Anfrage oder Antwort an {{host}} gesendet werden und die Abrechnung zwischen mir und dem Anbieter erfolgt.",
+      "enable": "KI-Funktionen einschalten",
+      "enableAfterConsent": "KI-Funktionen einschalten (zuerst die Zeile darüber ankreuzen)",
+      "provider": "Anbieter",
+      "baseUrl": "Basis-URL",
+      "baseUrlPlaceholder": "https://host/v1",
+      "allowInsecure": "Unverschlüsseltes http zu dieser Adresse erlauben (Loopback-Adressen sind immer erlaubt)",
+      "model": "Modell-ID",
+      "listModels": "Modelle auflisten",
+      "modelsFound_one": "{{count}} Modell gefunden. Wählen Sie eines oder geben Sie eine ID ein.",
+      "modelsFound_other": "{{count}} Modelle gefunden. Wählen Sie eines oder geben Sie eine ID ein.",
+      "noModels": "Der Anbieter hat keine Modelle aufgelistet. Geben Sie eine Modell-ID ein.",
+      "localNoModels": "Der Server läuft, hat aber keine Modelle. Laden Sie eines herunter und listen Sie erneut auf.",
+      "apiKey": "API-Schlüssel",
+      "keySaved": "Schlüssel gespeichert",
+      "removeKey": "Schlüssel entfernen",
+      "pasteKey": "API-Schlüssel einfügen",
+      "optionalKey": "Optional",
+      "saveKey": "Schlüssel speichern",
+      "remember": "Auf diesem Gerät merken (sonst nur bis zum Schließen des Tabs)",
+      "test": "Verbindung testen",
+      "skipped_one": "{{count}} Aktion wird ohne Vorschau gesendet.",
+      "skipped_other": "{{count}} Aktionen werden ohne Vorschau gesendet.",
+      "askAgain": "Vorschau wieder anzeigen",
+      "browserNote": "Im Browser gehen Aufrufe direkt von dieser Seite zum Anbieter; Ihr Schlüssel erreicht nie Gostman-Server. Der Anbieter muss Cross-Origin-Aufrufe erlauben. Ein lokales Ollama braucht OLLAMA_ORIGINS mit dieser Website, und LM Studio braucht aktiviertes CORS in den Servereinstellungen. Blockiert ein Anbieter Browser, nutzen Sie die Desktop-App.",
+      "desktopNote": "Ihr Schlüssel liegt im Schlüsselbund des Betriebssystems, und die Desktop-App ruft den Anbieter selbst auf. Die Seite liest den Schlüssel nie zurück.",
+      "forget": "KI ausschalten und Schlüssel vergessen",
+      "forgetWhileOff": "KI-Schlüssel und -Einstellungen vergessen"
+    },
+    "errors": {
+      "invalidBase": "Die Basis-URL ist keine gültige Adresse",
+      "insecureBase": "Verwenden Sie eine https-Basis-URL oder erlauben Sie dafür unverschlüsseltes http in den KI-Einstellungen",
+      "enterModel": "Geben Sie eine Modell-ID ein",
+      "pasteKey": "Fügen Sie einen API-Schlüssel für diesen Anbieter ein",
+      "keyMoved": "Dieser Schlüssel wurde für eine andere Adresse gespeichert. Speichern Sie ihn erneut für diese Basis-URL.",
+      "tooLarge": "Die Anfrage ist zu groß zum Senden. Wählen Sie weniger Inhalt aus",
+      "noAnswer": "Der Anbieter hat keine Antwort geliefert",
+      "notJson": "Der Anbieter hat mit etwas geantwortet, das kein JSON ist. Prüfen Sie die Basis-URL",
+      "timedOut": "Der Anbieter hat nicht rechtzeitig geantwortet",
+      "rejectedKey": "Der Anbieter hat den Schlüssel abgelehnt, oder das Konto darf dieses Modell nicht nutzen",
+      "rateLimited": "Der Anbieter drosselt Anfragen oder das Kontingent ist aufgebraucht. Warten Sie einen Moment und versuchen Sie es erneut",
+      "providerTimeout": "Beim Anbieter ist eine Zeitüberschreitung aufgetreten",
+      "providerProblem": "Beim Anbieter ist ein Problem aufgetreten. Versuchen Sie es gleich noch einmal",
+      "refused": "Der Anbieter hat die Anfrage abgelehnt ({{status}})",
+      "retryIn": "{{summary}} (erneut in {{seconds}} s)",
+      "withDetail": "{{summary}}: {{detail}}",
+      "unreachable": "{{host}} ist nicht erreichbar. Die Adresse ist möglicherweise falsch, oder der Anbieter erlaubt keine Aufrufe von einer Webseite (CORS). {{advice}}",
+      "unreachableWithReason": "{{host}} ist nicht erreichbar ({{reason}}). Die Adresse ist möglicherweise falsch, oder der Anbieter erlaubt keine Aufrufe von einer Webseite (CORS). {{advice}}",
+      "ollamaAdvice": "Starten Sie Ollama mit OLLAMA_ORIGINS={{origin}} neu oder nutzen Sie die Desktop-App.",
+      "lmStudioAdvice": "Starten Sie den LM-Studio-Server mit aktiviertem CORS (Entwicklereinstellungen oder lms server start --cors) oder nutzen Sie die Desktop-App.",
+      "customAdvice": "Der Server muss den OPTIONS-Preflight beantworten und {{origin}} mit den Headern Authorization und Content-Type erlauben. Die Desktop-App unterliegt dieser Einschränkung nicht.",
+      "anthropicAdvice": "Anthropic erlaubt Browseraufrufe nur mit seinem Direktzugriffs-Header, den Gostman sendet. Prüfen Sie daher auch Schlüssel und Verbindung. Die Desktop-App unterliegt dieser Einschränkung nicht.",
+      "generalAdvice": "Prüfen Sie die Basis-URL und Ihre Verbindung. Die Desktop-App unterliegt dieser Einschränkung nicht."
+    },
+    "providers": {
+      "local": "{{name}} (lokal)",
+      "custom": "OpenAI-kompatible URL",
+      "customModelHint": "Modell-ID"
+    }
+  }
+}

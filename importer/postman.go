@@ -2,13 +2,13 @@ package importer
 
 import (
 	"encoding/json"
-	"fmt"
 	"maps"
 	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/locales"
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
@@ -44,7 +44,7 @@ func (c *collector) readPostmanDump(doc document) {
 	root := object(doc.data)
 	for index, entry := range list(root["collections"]) {
 		if classifyStructured(entry) != kindPostmanCollection {
-			c.skip(messagePostmanLegacy, doc.file.Name, legacyLabel(entry, index))
+			c.skip(locales.ImporterPostmanLegacy, locales.Params{"file": doc.file.Name, "collection": legacyLabel(entry, index)})
 			continue
 		}
 		c.readPostmanCollection(document{file: doc.file, data: entry})
@@ -57,15 +57,15 @@ func (c *collector) readPostmanDump(doc document) {
 	}
 }
 
-func legacyLabel(entry any, index int) string {
+func legacyLabel(entry any, index int) any {
 	if name := text(object(entry)["name"]); name != "" {
 		return strconv.Quote(name)
 	}
-	return fmt.Sprintf(messageCollectionNumber, index+1)
+	return locales.New(locales.ImporterCollectionNumber, locales.Params{"number": index + 1})
 }
 
 func (c *collector) postmanScope(node map[string]any, kind, name string) scope {
-	label := fmt.Sprintf(kind, name)
+	label := placeLabel(kind, name)
 	var settings scope
 	if auth, set := c.postmanAuth(object(node["auth"])); set {
 		settings.auth = &auth
@@ -80,7 +80,7 @@ func (c *collector) postmanScope(node map[string]any, kind, name string) scope {
 		}
 		qualified := cleanName(name, untitledFolder) + "/" + key
 		if flag(entry["disabled"]) {
-			c.flag(messageDisabledScopeVariables, qualified)
+			c.flag(locales.ImporterDisabledScopeVariables, qualified)
 			continue
 		}
 		value := text(entry["value"])
@@ -89,7 +89,7 @@ func (c *collector) postmanScope(node map[string]any, kind, name string) scope {
 		case kind == labelCollection:
 			settings.secrets = append(settings.secrets, key)
 		default:
-			c.flag(messageSecretVariables, qualified)
+			c.flag(locales.ImporterSecretVariables, qualified)
 			continue
 		}
 		settings.vars = append(settings.vars, row{Key: key, Value: value, Enabled: true})
@@ -118,7 +118,7 @@ func (c *collector) postmanItems(items []any, folderID string, behavior map[stri
 
 func (c *collector) postmanRequest(item map[string]any, folderID string, behavior map[string]any) {
 	name := text(item["name"])
-	label := fmt.Sprintf(labelRequest, name)
+	label := placeLabel(labelRequest, name)
 	source := object(item["request"])
 	if source == nil {
 		source = map[string]any{"url": item["request"], "method": "GET"}
@@ -167,7 +167,7 @@ func withBehavior(outer, inner map[string]any) map[string]any {
 
 func (c *collector) postmanOptions(name string, behavior map[string]any) engine.Options {
 	if strict, given := behavior[behaviorStrictSSL].(bool); given && !strict {
-		c.flag(messageTLSKept, name)
+		c.flag(locales.ImporterTlsKept, name)
 	}
 	var unmatched []string
 	for _, key := range sortedKeys(behavior) {
@@ -176,7 +176,7 @@ func (c *collector) postmanOptions(name string, behavior map[string]any) engine.
 		}
 	}
 	if len(unmatched) > 0 {
-		c.Warnings = append(c.Warnings, fmt.Sprintf(messagePostmanBehavior, name, strings.Join(unmatched, ", ")))
+		c.lead(locales.New(locales.ImporterPostmanBehavior, locales.Params{"name": name, "settings": strings.Join(unmatched, ", ")}))
 	}
 	following, set := behavior[behaviorRedirects].(bool)
 	withoutCookies := flag(behavior[behaviorCookies])
@@ -267,13 +267,13 @@ func joinParts(value any, separator string) string {
 	return strings.Join(parts, separator)
 }
 
-func (c *collector) postmanScript(label string, node map[string]any, listen string) string {
+func (c *collector) postmanScript(label locales.Message, node map[string]any, listen string) string {
 	return joinScripts(postmanEvents(node, listen, func(code string) string {
 		return c.translateScript(postmanDialect, label, stageName(listen), code)
 	}))
 }
 
-func (c *collector) postmanAfterScript(label string, item map[string]any) (string, string, string) {
+func (c *collector) postmanAfterScript(label locales.Message, item map[string]any) (string, string, string) {
 	var rules []extractor
 	var rows []assertion
 	scripts := postmanEvents(item, listenTest, func(code string) string {
@@ -324,7 +324,7 @@ func (c *collector) postmanBody(name string, body map[string]any, request *parts
 		request.body, request.bodyType = jsonList(rows), bodyMultipart
 		request.needsFiles = anyFile(rows)
 		if typedText {
-			c.flag(messagePartContentType, name)
+			c.flag(locales.ImporterPartContentType, name)
 		}
 	case "file":
 		request.bodyType, request.needsFiles = bodyBinary, true
@@ -454,7 +454,7 @@ func (c *collector) postmanAuth(auth map[string]any) (engine.Auth, bool) {
 			App: fields["app"], Dlg: fields["delegation"], Nonce: fields["nonce"], Timestamp: fields["timestamp"],
 		}, fields["includePayloadHash"] == "true"), true
 	}
-	c.Warnings = appendUnique(c.Warnings, fmt.Sprintf(messageAuthType, kind))
+	c.leadOnce(locales.New(locales.ImporterAuthType, locales.Params{"type": kind}))
 	return engine.Auth{}, true
 }
 
@@ -494,11 +494,11 @@ func (c *collector) postmanOAuth2(fields map[string]string) engine.Auth {
 	return auth
 }
 
-func unsupportedGrant(grant string) string {
+func unsupportedGrant(grant string) locales.Message {
 	if strings.TrimSpace(grant) == "" {
-		return messageOAuthNoGrant
+		return locales.New(locales.ImporterOauthNoGrant, nil)
 	}
-	return fmt.Sprintf(messageOAuthGrant, grant)
+	return locales.New(locales.ImporterOauthGrant, locales.Params{"grant": grant})
 }
 
 func postmanGrant(grant string) string {
@@ -551,7 +551,7 @@ func (c *collector) readPostmanEnvironment(doc document) {
 		c.addDraftEnvironments([]environmentDraft{draft})
 		c.notePostmanEnvironments(c.Environments[known:])
 		if len(disabled) > 0 {
-			c.Warnings = append(c.Warnings, fmt.Sprintf(messageDisabledVariables, name, listNames(disabled)))
+			c.lead(locales.New(locales.ImporterDisabledVariables, locales.Params{"name": name, "names": listNames(disabled)}))
 		}
 	})
 }

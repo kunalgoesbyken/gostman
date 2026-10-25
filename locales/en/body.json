@@ -1,0 +1,22 @@
+{
+  "body": {
+    "typeLabel": "Body type",
+    "editorLabel": "Request body",
+    "format": "Format",
+    "formatTitle": "Indent the {{type}} body ({{chord}}). {{example}} are kept as written.",
+    "cannotFormatAt": "The {{type}} cannot be formatted at line {{line}}, column {{column}}: {{message}}",
+    "cannotFormat": "The {{type}} cannot be formatted: {{message}}",
+    "goToLine": "Go to line {{line}}",
+    "noBody": "No body",
+    "noBodyDescription": "This request is sent without a body.",
+    "multipartOnGet": "GET requests rarely carry a body, and many servers ignore it. Switch the method to POST or PUT if this should be uploaded.",
+    "replacedByGraphQL": "The method is GRAPHQL, so the body is built from the GraphQL tab and this one is not sent.",
+    "types": {
+      "none": "None",
+      "text": "Text",
+      "form": "Form URL-encoded",
+      "multipart": "Multipart",
+      "file": "File"
+    }
+  }
+}

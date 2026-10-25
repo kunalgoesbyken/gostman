@@ -1,0 +1,26 @@
+{
+  "examples": {
+    "title": "Exemples",
+    "bodyLabel": "Corps de l’exemple",
+    "listLabel": "Exemples enregistrés",
+    "emptyTitle": "Aucun exemple pour l’instant",
+    "emptyHint": "Envoyez la requête, puis choisissez Enregistrer comme exemple dans le panneau de réponse. Le serveur fictif répond avec ces exemples.",
+    "servedByDefault": "Servi par défaut",
+    "serveByDefault": "Servir par défaut",
+    "format": "Formater le corps",
+    "rename": "Renommer l’exemple",
+    "remove": "Supprimer l’exemple",
+    "section": "Partie de l’exemple",
+    "body": "Corps",
+    "headersCount": "En-têtes ({{count}})",
+    "noContentType": "Aucun type de contenu",
+    "binaryTitle": "Corps binaire, {{size}}",
+    "binaryHint": "Il ne peut pas être modifié comme du texte et est servi exactement tel qu’il est stocké.",
+    "noHeadersHint": "Cet exemple a été enregistré sans en-têtes.",
+    "unsaved": "Le corps a des modifications non enregistrées.",
+    "discard": "Rejeter",
+    "saveBody": "Enregistrer le corps",
+    "bodyTooLarge": "Ce corps fait {{size}}. Un exemple conserve un corps de {{limit}} au maximum.",
+    "tooMany": "Une requête conserve jusqu’à {{limit}} exemples. Supprimez-en un pour en enregistrer un autre."
+  }
+}

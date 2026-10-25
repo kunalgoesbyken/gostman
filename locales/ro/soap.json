@@ -1,0 +1,13 @@
+{
+  "soap": {
+    "versionLabel": "Versiune SOAP",
+    "format": "Formatare XML",
+    "formatTitle": "Indentează plicul. Comentariile și secțiunile CDATA sunt păstrate.",
+    "fault": "SOAP Fault",
+    "faultCode": "Cod",
+    "faultReason": "Motiv",
+    "faultActor": "Actor",
+    "faultDetail": "Detalii",
+    "malformed": "XML-ul nu poate fi formatat: {{message}}"
+  }
+}

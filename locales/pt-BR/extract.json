@@ -1,0 +1,29 @@
+{
+  "extract": {
+    "noResponse": "Envie a requisição para ver um valor",
+    "failedResponse": "A última requisição falhou",
+    "summary": "As linhas marcadas são executadas após cada resposta e guardam o valor, pronto para usar como {{example}}. Os valores de sessão ficam na memória até você limpá-los ou fechar o app; os valores de ambiente são salvos com o ambiente ativo.",
+    "invalidEnvironment": "Nada foi salvo: as variáveis do ambiente ativo não são um JSON válido.",
+    "nothing": "A última execução não produziu valores.",
+    "savedTo": {
+      "session": "{{names}} guardado como valores de sessão.",
+      "environment": "{{names}} salvo no ambiente ativo."
+    },
+    "scopes": {
+      "session": "Sessão",
+      "environment": "Ambiente"
+    },
+    "variable": "Variável",
+    "from": "De",
+    "path": "Caminho ou nome",
+    "value": "Valor na última resposta",
+    "keepIn": "Guardar em",
+    "run": "Executar este extrator",
+    "name": "Nome da variável",
+    "namePlaceholder": "nome_da_variavel",
+    "source": "Origem do valor",
+    "scope": "Onde o valor é guardado",
+    "remove": "Remover extrator",
+    "runNow": "Executar agora"
+  }
+}

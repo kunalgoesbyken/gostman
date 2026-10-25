@@ -6,7 +6,7 @@ import { cn } from "../lib/utils"
 export function SearchField({ value, onChange, placeholder, onKeyDown, className, children }) {
   return (
     <Toolbar className={cn("relative", className)}>
-      <Search className="pointer-events-none absolute left-5 h-3.5 w-3.5 text-muted-foreground" />
+      <Search className="pointer-events-none absolute start-5 h-3.5 w-3.5 text-muted-foreground" />
       <Input
         type="search"
         value={value}
@@ -15,7 +15,7 @@ export function SearchField({ value, onChange, placeholder, onKeyDown, className
         placeholder={placeholder}
         aria-label={placeholder}
         spellCheck={false}
-        className="pl-7"
+        className="ps-7"
       />
       {children}
     </Toolbar>

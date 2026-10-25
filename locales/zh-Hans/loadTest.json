@@ -1,0 +1,59 @@
+{
+  "loadTest": {
+    "title": "负载测试",
+    "commandTitle": "对此请求做负载测试",
+    "commandDescription": "同时多次发送当前请求并测量延迟",
+    "barLabel": "负载测试",
+    "barHint": "对此请求做负载测试",
+    "notice": "只测试你自己拥有或获准测试的系统。每个并发进程都会按这里显示的内容发送请求，不运行脚本，也不共享 Cookie。",
+    "unsupported": "只能对 HTTP 请求做负载测试。不支持 gRPC、MCP、WebSocket 和流式请求。",
+    "noUrl": "请先为请求填写 URL。",
+    "concurrency": "并发数",
+    "duration": "持续时间（秒）",
+    "rateLimit": "每秒请求数上限",
+    "rateLimitHint": "留空表示不限制",
+    "start": "开始",
+    "stop": "停止",
+    "running": "运行中",
+    "stopped": "已提前停止",
+    "progress": {
+      "elapsed": "已用时间",
+      "requests": "请求数",
+      "rate": "请求数/秒",
+      "p95": "p95",
+      "failed": "失败"
+    },
+    "summary": {
+      "total": "请求数",
+      "succeeded": "成功",
+      "failed": "失败",
+      "rate": "请求数/秒",
+      "received": "已接收"
+    },
+    "failureBreakdown": "{{networkErrors}} 个网络错误，{{statusFailures}} 个状态码为 {{failureStatus}} 及以上",
+    "percentilesLabel": "延迟",
+    "percentileColumns": {
+      "name": "指标",
+      "value": "毫秒"
+    },
+    "percentiles": {
+      "minMs": "最小",
+      "meanMs": "平均",
+      "p50Ms": "p50",
+      "p90Ms": "p90",
+      "p95Ms": "p95",
+      "p99Ms": "p99",
+      "maxMs": "最大"
+    },
+    "seconds": "{{value}} s",
+    "milliseconds": "{{value}} ms",
+    "statusCount": "{{code}} x {{count}}",
+    "statusLabel": "状态码",
+    "histogramLabel": "延迟分布",
+    "histogramBarLabel_other": "{{from}} 至 {{to}} ms：{{count}} 个请求",
+    "errorsLabel": "错误样例",
+    "accuracy": "百分位数的误差在 {{percent}}% 以内。",
+    "emptyTitle": "还没有结果",
+    "emptyHint": "选择负载，然后点击“开始”。"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "loadTest": {
+    "title": "Lasttest",
+    "commandTitle": "Diese Anfrage per Lasttest prüfen",
+    "commandDescription": "Die aktuelle Anfrage vielfach gleichzeitig senden und die Latenz messen",
+    "barLabel": "Lasttest",
+    "barHint": "Diese Anfrage per Lasttest prüfen",
+    "notice": "Testen Sie nur Systeme, die Ihnen gehören oder für die Sie eine Erlaubnis haben. Jeder Worker sendet die Anfrage so, wie sie hier angezeigt wird, ohne Skripte oder geteilte Cookies.",
+    "unsupported": "Nur HTTP-Anfragen lassen sich per Lasttest prüfen. gRPC-, MCP-, WebSocket- und Streaming-Anfragen werden nicht unterstützt.",
+    "noUrl": "Geben Sie der Anfrage zuerst eine URL.",
+    "concurrency": "Gleichzeitige Worker",
+    "duration": "Dauer (Sekunden)",
+    "rateLimit": "Obergrenze für Anfragen pro Sekunde",
+    "rateLimitHint": "Leer lassen für keine Obergrenze",
+    "start": "Starten",
+    "stop": "Stoppen",
+    "running": "Läuft",
+    "stopped": "Vorzeitig gestoppt",
+    "progress": {
+      "elapsed": "Verstrichen",
+      "requests": "Anfragen",
+      "rate": "Anfragen/s",
+      "p95": "p95",
+      "failed": "Fehlgeschlagen"
+    },
+    "summary": {
+      "total": "Anfragen",
+      "succeeded": "Erfolgreich",
+      "failed": "Fehlgeschlagen",
+      "rate": "Anfragen/s",
+      "received": "Empfangen"
+    },
+    "failureBreakdown": "{{networkErrors}} Netzwerk, {{statusFailures}} mit Status {{failureStatus}} oder höher",
+    "percentilesLabel": "Latenz",
+    "percentileColumns": {
+      "name": "Messwert",
+      "value": "Millisekunden"
+    },
+    "percentiles": {
+      "minMs": "min",
+      "meanMs": "Mittel",
+      "p50Ms": "p50",
+      "p90Ms": "p90",
+      "p95Ms": "p95",
+      "p99Ms": "p99",
+      "maxMs": "max"
+    },
+    "seconds": "{{value}} s",
+    "milliseconds": "{{value}} ms",
+    "statusCount": "{{code}} x {{count}}",
+    "statusLabel": "Statuscodes",
+    "histogramLabel": "Verteilung der Latenz",
+    "histogramBarLabel_one": "{{from}} bis {{to}} ms: {{count}} Anfrage",
+    "histogramBarLabel_other": "{{from}} bis {{to}} ms: {{count}} Anfragen",
+    "errorsLabel": "Fehlerbeispiele",
+    "accuracy": "Die Perzentile sind auf {{percent}} % genau.",
+    "emptyTitle": "Noch keine Ergebnisse",
+    "emptyHint": "Wählen Sie die Last und klicken Sie auf „Starten“."
+  }
+}

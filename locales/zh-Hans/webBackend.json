@@ -1,0 +1,8 @@
+{
+  "webBackend": {
+    "unreadableData": "无法读取此浏览器中保存的数据，因此没有做任何更改。",
+    "proxyAnswered": "代理返回的是 HTTP {{status}}，而不是结果",
+    "cancelled": "请求已取消",
+    "streamCutOff": "与代理的连接在流结束之前就断开了。"
+  }
+}

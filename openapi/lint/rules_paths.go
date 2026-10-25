@@ -1,8 +1,9 @@
 package lint
 
 import (
-	"fmt"
 	"strings"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 func pathRules() []Rule {
@@ -18,14 +19,14 @@ func pathsDefined(s *Spec) []Issue {
 	if len(asMap(s.Root["paths"])) > 0 {
 		return nil
 	}
-	return []Issue{{Path: "/paths", Message: "the document defines no paths"}}
+	return []Issue{issueAt("/paths", locales.LintPathsNone, nil)}
 }
 
 func pathLeadingSlash(s *Spec) []Issue {
 	var issues []Issue
 	for _, path := range s.Paths {
 		if !strings.HasPrefix(path, "/") {
-			issues = append(issues, Issue{Path: pointer("paths", path), Message: fmt.Sprintf("path %q does not start with a slash", path)})
+			issues = append(issues, issueAt(pointer("paths", path), locales.LintPathsNoLeadingSlash, locales.Params{"path": path}))
 		}
 	}
 	return issues
@@ -66,7 +67,7 @@ func pathTemplateAmbiguous(s *Spec) []Issue {
 			first[shape] = path
 			continue
 		}
-		issues = append(issues, Issue{Path: pointer("paths", path), Message: fmt.Sprintf("%s cannot be told apart from %s", path, earlier)})
+		issues = append(issues, issueAt(pointer("paths", path), locales.LintPathsAmbiguous, locales.Params{"path": path, "earlier": earlier}))
 	}
 	return issues
 }
@@ -83,12 +84,12 @@ func pathParamsDeclared(s *Spec, op Operation) []Issue {
 	for _, name := range templateVariables(op.Path) {
 		used[name] = true
 		if _, ok := declared[name]; !ok {
-			issues = append(issues, Issue{Path: op.Pointer, Message: fmt.Sprintf("path parameter %q is in the path but not declared", name)})
+			issues = append(issues, issueAt(op.Pointer, locales.LintPathsParameterUndeclared, locales.Params{"name": name}))
 		}
 	}
 	for name, parameter := range declared {
 		if !used[name] {
-			issues = append(issues, Issue{Path: parameter.Pointer, Message: fmt.Sprintf("path parameter %q is declared but not in the path", name)})
+			issues = append(issues, issueAt(parameter.Pointer, locales.LintPathsParameterUnused, locales.Params{"name": name}))
 		}
 	}
 	return issues

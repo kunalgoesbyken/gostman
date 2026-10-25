@@ -1,0 +1,49 @@
+source,target
+request,Anfrage
+response,Antwort
+collection,Sammlung
+collection settings,Sammlungseinstellungen
+folder,Ordner
+workspace,Arbeitsbereich
+environment,Umgebung
+variable,Variable
+secret,Secret
+secret manager,Secret-Manager
+header,Header
+body,Body
+query parameter,Query-Parameter
+path parameter,Pfadparameter
+cookie,Cookie
+auth,Auth
+authentication,Authentifizierung
+token,Token
+pre-request script,Pre-Request-Skript
+post-response script,Post-Response-Skript
+check,Prüfung
+assertion,Assertion
+extract rule,Extraktionsregel
+runner,Runner
+run,Durchlauf (Substantiv) / ausführen
+iteration,Iteration
+flow,Ablauf
+step,Schritt
+mock server,Mock-Server
+capture,Mitschnitt
+example,Beispiel
+history,Verlauf
+tab,Tab
+sidebar,Seitenleiste
+preferences,Einstellungen
+theme,Design
+scan,Scan
+finding,Befund
+load test,Lasttest
+import,Import
+export,Export
+share link,Freigabelink
+trust,vertrauen
+restricted,eingeschränkt
+proxy,Proxy
+certificate,Zertifikat
+timeout,Zeitlimit
+send,Senden

@@ -1,0 +1,41 @@
+{
+  "realtime": {
+    "targets": {
+      "topic": "Topic",
+      "event": "Event"
+    },
+    "browser": {
+      "closed": "Verbindung geschlossen (Code {{code}})",
+      "closedWithReason": "Verbindung geschlossen (Code {{code}}: {{reason}})",
+      "notConnected": "Verbindung nicht möglich (Code {{code}})",
+      "notConnectedWithReason": "Verbindung nicht möglich (Code {{code}}: {{reason}})"
+    },
+    "graphql": {
+      "subscribing": "Verbindung bestätigt. Subscription wird gestartet.",
+      "complete": "Die Subscription ist abgeschlossen"
+    },
+    "socketIo": {
+      "joined": "Dem Namespace {{namespace}} beigetreten",
+      "left": "Der Server hat den Namespace verlassen",
+      "closed": "Der Server hat die Socket.IO-Sitzung geschlossen",
+      "refused": "Der Server hat die Verbindung abgelehnt",
+      "binary": "Binäre Socket.IO-Pakete werden nicht dekodiert.",
+      "noEvent": "Geben Sie einen Event-Namen zum Senden ein.",
+      "ack": "ack {{id}}"
+    },
+    "mqtt": {
+      "connected": "Mit dem Broker verbunden",
+      "refusedVersion": "Der Broker hat die Verbindung abgelehnt: Der Broker unterstützt MQTT 3.1.1 nicht",
+      "refusedIdentifier": "Der Broker hat die Verbindung abgelehnt: Die Client-ID wurde zurückgewiesen",
+      "refusedUnavailable": "Der Broker hat die Verbindung abgelehnt: Der Broker ist nicht verfügbar",
+      "refusedCredentials": "Der Broker hat die Verbindung abgelehnt: Benutzername oder Passwort ist falsch",
+      "refusedUnauthorized": "Der Broker hat die Verbindung abgelehnt: Der Client ist nicht autorisiert",
+      "refusedOther": "Der Broker hat die Verbindung abgelehnt: Code {{code}}",
+      "subscribed": "{{filter}} abonniert",
+      "subscribeRefused": "Der Broker hat das Abonnement von {{filter}} abgelehnt",
+      "notBinary": "Binäre MQTT-Daten erwartet, Text erhalten.",
+      "noTopic": "Geben Sie ein Topic zum Veröffentlichen ein.",
+      "noFilter": "Geben Sie einen Topic-Filter zum Abonnieren ein."
+    }
+  }
+}

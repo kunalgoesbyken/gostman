@@ -1,0 +1,155 @@
+{
+  "mcp": {
+    "media": {
+      "heading": "Obrazy i dźwięk w wyniku",
+      "image": "Obraz {{number}} w wyniku",
+      "audio": "Dźwięk {{number}} w wyniku"
+    },
+    "server": "Serwer",
+    "argumentsLabel": "Argumenty",
+    "notLoaded": "Nie wczytano",
+    "load": "Wczytaj",
+    "reload": "Wczytaj ponownie",
+    "signIn": "Zaloguj",
+    "signingIn": "Logowanie…",
+    "signInHint": "Sprawdź, jak ten serwer wymaga logowania, w razie potrzeby zarejestruj Gostman na jego serwerze autoryzacji, zaloguj się w przeglądarce i zachowaj token na karcie Auth",
+    "serverProtocol": "MCP {{version}}",
+    "serverProtocolLegacy": "MCP {{version}} (uzgadnianie initialize)",
+    "instructions": "Instrukcje",
+    "instructionsHint": "Pokaż instrukcje, które ten serwer przekazuje modelom z niego korzystającym",
+    "operation": "Operacja",
+    "operations": {
+      "toolsCall": "Wywołaj narzędzie",
+      "toolsList": "Wyświetl narzędzia",
+      "resourcesRead": "Odczytaj zasób",
+      "resourcesList": "Wyświetl zasoby",
+      "resourceTemplatesList": "Wyświetl szablony zasobów",
+      "promptsGet": "Pobierz prompt",
+      "promptsList": "Wyświetl prompty"
+    },
+    "itemLabels": {
+      "tool": "Narzędzie MCP",
+      "resource": "URI zasobu",
+      "prompt": "Prompt MCP"
+    },
+    "choose": {
+      "tool": "Wybierz narzędzie",
+      "prompt": "Wybierz prompt"
+    },
+    "noInput": "Ta operacja nie przyjmuje danych wejściowych. Wyślij wyświetla wszystko, co zwraca serwer, na wszystkich stronach.",
+    "readHint": "Wyślij odczytuje zasób pod tym URI. Wybierz zasób z listy albo uzupełnij szablon.",
+    "schema": "Schemat",
+    "schemaHints": {
+      "tool": "Pokaż JSON Schema argumentów narzędzia obok edytora",
+      "prompt": "Pokaż argumenty promptu obok edytora"
+    },
+    "schemaTitles": {
+      "tool": "Schemat wejściowy",
+      "prompt": "Argumenty promptu"
+    },
+    "closeSchema": "Zamknij",
+    "noArguments": "Ten prompt nie przyjmuje argumentów.",
+    "example": "Użyj przykładu",
+    "exampleHint": "Zastąp argumenty przykładem zbudowanym ze schematu",
+    "promptArgumentRequired": "{{name}} (wymagany)",
+    "promptArgumentDescribed": "{{label}}: {{description}}",
+    "catalogHints": {
+      "remote": "Wczytaj narzędzia, zasoby i prompty serwera MCP pod tym adresem URL. Nagłówki i uwierzytelnianie tego żądania są wysyłane z każdym wywołaniem. W aplikacji desktopowej wpisz w pasku adresu stdio: i polecenie, aby zamiast tego uruchomić serwer lokalny, na przykład {{example}}.",
+      "local": "Wczytaj uruchamia to polecenie na tym komputerze i odczytuje, co oferuje; każde wywołanie uruchamia je ponownie. Wiersze z karty Nagłówki są przekazywane do niego jako zmienne środowiskowe."
+    },
+    "empty": "Ten serwer nie udostępnia żadnych narzędzi, zasobów ani promptów.",
+    "checks": "Sprawdzenia",
+    "checksHint": "Problemy znalezione w definicjach narzędzi tego serwera",
+    "noFindings": "Nie znaleziono problemów w definicjach narzędzi.",
+    "findings": {
+      "missingDescription": "{{tool}}: brak opisu. Model wybiera narzędzia na podstawie ich opisów, więc raczej nie użyje tego dobrze.",
+      "shortDescription": "{{tool}}: opis „{{detail}}” jest bardzo krótki. Napisz, co narzędzie robi, kiedy go używać i co zwraca.",
+      "duplicateName": "{{tool}}: więcej niż jedno narzędzie ma tę nazwę, więc wywołania nie potrafią ich odróżnić.",
+      "similarNames": "{{tool}}: wygląda niemal tak samo jak {{detail}}, co ułatwia modelowi wybór niewłaściwego.",
+      "invalidName": "{{tool}}: nazwa powinna mieć od 1 do 128 znaków i zawierać tylko litery, cyfry, _, - i .",
+      "invalidSchema": "{{tool}}: schemat wejściowy nie nadaje się do użycia: {{detail}}.",
+      "undocumentedParameters": "{{tool}}: parametry bez opisu: {{detail}}.",
+      "unknownRequired": "{{tool}}: required wymienia parametry, których schemat nie definiuje: {{detail}}.",
+      "manyTools": "Ten serwer udostępnia narzędzi: {{count}}. Długie listy narzędzi utrudniają modelowi wybór właściwego, a niektórzy klienci wczytują tylko ich część.",
+      "rejected": "{{tool}}: pominięto na liście narzędzi, zgodnie z wymaganiami specyfikacji, ponieważ {{detail}}.",
+      "listFailed": "{{method}} nie powiodło się: {{detail}}"
+    },
+    "schemaProblems": {
+      "notObject": "nie jest obiektem JSON",
+      "rootType": "typ najwyższego poziomu powinien być „object”",
+      "properties": "properties nie jest obiektem schematów",
+      "property": "schemat {{name}} nie jest obiektem",
+      "type": "{{name}} ma nieznany typ „{{type}}”",
+      "required": "required nie jest listą nazw"
+    },
+    "changes": {
+      "title": "Narzędzia tego serwera zmieniły się od ostatniego zaakceptowania.",
+      "added": "Nowe: {{names}}.",
+      "removed": "Usunięte: {{names}}.",
+      "descriptionChanged": "{{name}}: opis się zmienił.",
+      "schemaChanged": "{{name}}: schemat wejściowy się zmienił.",
+      "definitionChanged": "{{name}}: opis lub schemat wejściowy się zmienił.",
+      "before": "Przed",
+      "now": "Teraz",
+      "noDescription": "(brak)",
+      "advice": "Przeczytaj zmiany, zanim agent użyje tych narzędzi. Zmieniony opis może zawierać instrukcje, których serwer wcześniej nie pokazywał.",
+      "accept": "Zaakceptuj zmiany",
+      "firstSeen": "Pierwsze wczytanie tego serwera: Gostman zapamiętuje jego narzędzia na tym urządzeniu i ostrzega, gdy się zmienią."
+    },
+    "auth": {
+      "title": "Logowanie",
+      "close": "Zamknij",
+      "retry": "Spróbuj ponownie",
+      "steps": {
+        "probe": "Zapytaj serwer",
+        "challenge": "Odczytaj wyzwanie WWW-Authenticate",
+        "resource": "Znajdź metadane chronionego zasobu (RFC 9728)",
+        "server": "Znajdź metadane serwera autoryzacji (RFC 8414 lub OpenID Connect)",
+        "registration": "Pobierz ID klienta",
+        "browser": "Zaloguj się w przeglądarce",
+        "issuer": "Sprawdź wystawcę odpowiedzi (RFC 9207)",
+        "token": "Wymień kod na token",
+        "retry": "Wywołaj serwer z tokenem"
+      },
+      "outcomes": {
+        "ok": "Gotowe",
+        "warning": "Ostrzeżenie",
+        "failed": "Nieudane",
+        "stopped": "Zatrzymane",
+        "running": "W toku"
+      },
+      "explanations": {
+        "localCommand": "Serwery lokalne uruchamiane przez stdio: odczytują dane uwierzytelniające ze swojego środowiska, a nie z OAuth. Zamiast tego umieść token w wierszu na karcie Nagłówki.",
+        "unreachable": "Gostman nie mógł połączyć się z serwerem. Sprawdź adres URL, sieć i ustawienia proxy.",
+        "noResourceMetadata": "Serwer zażądał logowania bez parametru resource_metadata, więc Gostman szuka metadanych pod adresami well-known.",
+        "answered": "Serwer odpowiedział bez żądania logowania, na przykład dlatego, że to żądanie już zawiera ważny token. Gostman nadal szuka metadanych OAuth, aby można było zalogować się ponownie.",
+        "notProtected": "Serwer odpowiedział bez żądania logowania i nie publikuje metadanych OAuth, więc nie potrzebuje tokenu.",
+        "resourceMetadataMissing": "Nie znaleziono metadanych chronionego zasobu pod żadnym z poniższych adresów. Serwer MCP używający OAuth musi je publikować, pod adresem resource_metadata w odpowiedzi 401 albo pod /.well-known/oauth-protected-resource.",
+        "resourceMetadataInvalid": "Metadane chronionego zasobu nie wskazują żadnego serwera autoryzacji, więc Gostman nie wie, gdzie się zalogować.",
+        "resourceMismatch": "Zasób wskazany w metadanych chronionego zasobu nie jest adresem URL tego serwera. Tokeny wydane dla tego zasobu nie zostałyby tu przyjęte (niezgodność audience), więc Gostman się zatrzymuje. Ustaw resource w tym dokumencie na adres URL serwera albo na adres, od którego zaczyna się adres URL serwera.",
+        "serverMetadataMissing": "Żaden z adresów well-known serwera autoryzacji nie zwrócił metadanych. Serwer autoryzacji musi publikować metadane serwera autoryzacji OAuth 2.0 lub dokument wykrywania OpenID Connect.",
+        "issuerMismatch": "Wystawca (issuer) w metadanych serwera autoryzacji różni się od adresu wymienionego w authorization_servers w metadanych chronionego zasobu. Specyfikacja wymaga, aby były identyczne, znak po znaku, więc metadane nie są używane. Doprowadź obie wartości do zgodności; częstą przyczyną jest końcowy ukośnik.",
+        "serverMetadataIncomplete": "Metadane serwera autoryzacji nie zawierają authorization_endpoint ani token_endpoint.",
+        "noPkce": "Metadane serwera autoryzacji nie wymieniają S256 w code_challenge_methods_supported, a klienci MCP nie mogą logować się bez PKCE. Włącz na serwerze autoryzacji obsługę PKCE z S256 i dodaj S256 do tej listy.",
+        "insecureEndpoint": "Punkt końcowy autoryzacji lub tokenu używa zwykłego HTTP na zdalnym hoście. Specyfikacja wymaga HTTPS dla tych punktów końcowych.",
+        "insufficientScope": "Token jest ważny, ale brakuje mu zakresu (scope), którego potrzebuje to żądanie. Ponowne logowanie prosi o dotychczasowe zakresy oraz te wskazane przez serwer.",
+        "noRegistration": "Serwer autoryzacji nie oferuje ani dynamicznej rejestracji klienta, ani dokumentów metadanych ID klienta. Zarejestruj w nim klienta samodzielnie, wpisz jego ID klienta na karcie Auth (OAuth 2.0) i zaloguj się ponownie.",
+        "registrationRefused": "Serwer autoryzacji odmówił zarejestrowania Gostmana. Wielu dostawców tożsamości wyłącza dynamiczną rejestrację klienta: zarejestruj klienta samodzielnie i wpisz jego ID klienta na karcie Auth.",
+        "serverChanged": "Serwer autoryzacji nie jest tym, do którego należy zapisane ID klienta, więc Gostman zarejestrował się ponownie zamiast go użyć.",
+        "browserFailed": "Logowanie w przeglądarce nie zostało ukończone.",
+        "issuerMissing": "Metadane serwera autoryzacji ustawiają authorization_response_iss_parameter_supported, ale odpowiedź nie zawierała parametru iss, więc została odrzucona, aby zapobiec atakowi typu mix-up. Dodaj iss do przekierowania z powrotem do Gostmana albo przestań deklarować jego obsługę.",
+        "issuerWrong": "Parametr iss odpowiedzi nie jest wystawcą serwera autoryzacji, w którym Gostman się logował, więc odpowiedź została odrzucona, aby zapobiec atakowi typu mix-up. Wysyłaj wystawcę dokładnie tak, jak występuje w metadanych serwera autoryzacji.",
+        "tokenFailed": "Punkt końcowy tokenu nie zwrócił tokenu dostępu. Sprawdź, czy ID klienta, adres przekierowania i parametr resource są akceptowane.",
+        "stillRejected": "Serwer nadal odrzuca token. Może oczekiwać innego odbiorcy (audience) lub zakresu (scope): porównaj resource i scope poniżej z tym, co sprawdza serwer."
+      },
+      "attempts": "Żądania"
+    },
+    "notifications": "Powiadomienia ({{count}})",
+    "notificationTime": "{{milliseconds}} ms",
+    "progressOf": "{{progress}}/{{total}}",
+    "issuerDetail": "oczekiwano „{{expected}}”, otrzymano „{{received}}”"
+  },
+  "mcpOutput": {
+    "name": "Wynik pasuje do schematu wyjściowego narzędzia"
+  }
+}

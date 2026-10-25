@@ -1,0 +1,19 @@
+{
+  "importExport": {
+    "untitledFolder": "Dossier",
+    "untitledEnvironment": "Environnement",
+    "gostmanExport": "Export Gostman",
+    "undetected": "Format non détecté. Utilisez une collection Postman, une spécification OpenAPI ou Swagger, ou un export Gostman.",
+    "noRequests": "Ce fichier ({{label}}) ne contient ni requêtes ni dossiers.",
+    "unreadable": "Ce fichier ({{label}}) n’a pas pu être lu.",
+    "invalidYaml": "YAML non valide : {{reason}}",
+    "missingGostman": "Format d’export Gostman non valide : objet gostman manquant",
+    "requestsNotArray": "Format d’export Gostman non valide : requests doit être un tableau",
+    "foldersNotArray": "Format d’export Gostman non valide : folders doit être un tableau",
+    "namesMore": "{{names}} et {{count}} de plus",
+    "tlsKept": "La vérification TLS était désactivée dans la collection pour {{names}} ; elle a été laissée activée. Désactivez-la dans l’onglet Paramètres de la requête si vous faites confiance à ces hôtes.",
+    "flattened_one": "{{count}} dossier imbriqué dans une boucle ou sur plus de {{levels}} niveaux a été déplacé à la racine.",
+    "flattened_other": "{{count}} dossiers imbriqués dans une boucle ou sur plus de {{levels}} niveaux ont été déplacés à la racine.",
+    "flattened_many": "{{count}} de dossiers imbriqués dans une boucle ou sur plus de {{levels}} niveaux ont été déplacés à la racine."
+  }
+}

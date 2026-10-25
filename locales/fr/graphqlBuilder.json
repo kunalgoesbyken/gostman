@@ -1,0 +1,28 @@
+{
+  "builder": {
+    "rootLabel": "Type d’opération",
+    "rootNames": {
+      "query": "Query",
+      "mutation": "Mutation",
+      "subscription": "Subscription"
+    },
+    "title": "Constructeur",
+    "paneLabel": "Constructeur de requête",
+    "filterLabel": "Filtrer les champs",
+    "filterPlaceholder": "Filtrer les champs",
+    "expand": "Développer",
+    "collapse": "Réduire",
+    "select": "Sélectionner {{name}}",
+    "include": "Inclure l’argument {{name}}",
+    "viaFragment": "Sélectionné via un fragment dans l’éditeur. Modifiez-le là.",
+    "noSchemaTitle": "Aucun schéma chargé",
+    "noSchemaDescription": "Récupérez-le pour construire une requête à partir des champs du point d’accès. La requête d’introspection utilise l’URL, les en-têtes et l’authentification de cette requête.",
+    "fetch": "Récupérer le schéma",
+    "refresh": "Actualiser le schéma",
+    "loading": "Récupération du schéma",
+    "syntaxError": "Le constructeur est en pause tant que l’éditeur contient une erreur de syntaxe : {{message}}",
+    "subscription": "Les subscriptions diffusent des résultats sur une connexion durable. Activez Diffuser en événements envoyés par le serveur dans les paramètres pour les lire depuis des serveurs qui les livrent ainsi.",
+    "noRoot": "Ce schéma n’a pas de type racine pour cette opération.",
+    "empty": "Aucun résultat pour ce filtre."
+  }
+}

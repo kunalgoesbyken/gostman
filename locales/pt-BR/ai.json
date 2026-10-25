@@ -1,0 +1,216 @@
+{
+  "ai": {
+    "name": "IA",
+    "ok": "OK",
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "back": "Voltar",
+    "discard": "Descartar",
+    "tryAgain": "Tentar novamente",
+    "preview": "Pré-visualizar",
+    "sendToAi": "Enviar para a IA",
+    "continueBatch": "Criar as próximas requisições",
+    "empty": "Vazio",
+    "current": "Atual",
+    "proposed": "Proposto",
+    "instructions": "Instruções",
+    "content": "Conteúdo",
+    "replyFormat": "Formato da resposta",
+    "scriptLabel": "Script",
+    "preRequest": "Pré-requisição",
+    "postResponse": "Pós-resposta",
+    "providerLabel": "IA: {{label}}",
+    "waitingFor": "Aguardando {{label}}",
+    "readingSpec": "Lendo o documento OpenAPI",
+    "reviewNote": "Gerado por IA. Revise antes de aceitar. Nada é enviado, salvo ou executado até você decidir.",
+    "previewNote": "Isto é exatamente o que será enviado para {{host}}: cerca de {{size}} ({{tokens}} tokens). Os segredos são ocultados.",
+    "previewNoteValues": "Isto é exatamente o que será enviado para {{host}}: cerca de {{size}} ({{tokens}} tokens). Os segredos são ocultados. Valores do corpo da resposta estão incluídos (até 4 KB, chaves sensíveis ocultadas).",
+    "previewNoteStructure": "Isto é exatamente o que será enviado para {{host}}: cerca de {{size}} ({{tokens}} tokens). Os segredos são ocultados. Só a estrutura do corpo da resposta é incluída, não seus valores.",
+    "skipPreview": "Não perguntar novamente para esta ação (ela será enviada sem esta pré-visualização)",
+    "includeValues": "Incluir os valores reais da resposta (caso contrário, só a estrutura é enviada)",
+    "includeBodyValues": "Incluir os valores do corpo (até 4 KB, chaves sensíveis ocultadas). Desmarque para enviar só a estrutura.",
+    "needsResponse": "Envie a requisição primeiro para haver uma resposta de onde partir.",
+    "needsTrust": "Esta pasta é restrita. Confie nela antes de gerar scripts, pois scripts da IA não são confiáveis até você revisá-los.",
+    "badReply": "O modelo não respondeu no formato esperado. Tente novamente ou escolha um modelo mais capaz.",
+    "cutOff": "A resposta foi cortada por ter atingido o limite de tamanho. Tente novamente com menos conteúdo ou escolha um modelo que escreva respostas mais curtas.",
+    "connected": "Conectado",
+    "cancelled": "Cancelado",
+    "tooLarge": "O texto tem {{size}}; o limite é {{limit}}. Cole uma parte menor. Um documento OpenAPI ou Swagger completo, de qualquer tamanho, pode ser importado com Importar dados.",
+    "searchLimited": "Sua coleção tem {{total}} requisições. Apenas as primeiras {{sent}} são enviadas, então as requisições seguintes não podem ser encontradas.",
+    "tasks": {
+      "request": {
+        "label": "Nova requisição a partir de uma descrição",
+        "inputLabel": "Descreva a requisição",
+        "placeholder": "POST de um novo usuário com nome e e-mail",
+        "section": "Nova requisição (abre como uma aba não salva)",
+        "apply": "Abrir em nova aba",
+        "untitled": "Requisição da IA"
+      },
+      "tests": {
+        "label": "Verificações para uma resposta",
+        "assertions": "Asserções",
+        "script": "Script pós-resposta (gerado por IA, revise antes de executar)",
+        "apply": "Adicionar à requisição"
+      },
+      "script": {
+        "label": "Script de pré-requisição ou pós-resposta",
+        "inputLabel": "O que o script deve fazer",
+        "placeholder": "Salvar o token da resposta no ambiente",
+        "sectionPreScript": "Novo script de pré-requisição (gerado por IA, revise antes de executar)",
+        "sectionPostScript": "Novo script pós-resposta (gerado por IA, revise antes de executar)",
+        "apply": "Substituir script"
+      },
+      "explain": {
+        "label": "Explicar uma resposta com falha",
+        "happened": "O que aconteceu",
+        "causes": "Causas prováveis",
+        "fixes": "Correções sugeridas"
+      },
+      "docs": {
+        "label": "Documentar a requisição",
+        "section": "Descrição",
+        "apply": "Usar como descrição"
+      },
+      "search": {
+        "label": "Perguntar sobre a coleção",
+        "inputLabel": "O que você procura",
+        "placeholder": "o endpoint que cancela um pedido"
+      },
+      "schema": {
+        "label": "Requisições a partir de uma descrição de API",
+        "inputLabel": "Cole um documento OpenAPI ou Swagger, um esquema GraphQL ou o texto de uma documentação de API",
+        "placeholder": "openapi: 3.1.0 ...",
+        "folder": "Nova pasta \"{{name}}\"",
+        "defaultFolder": "Requisições da IA",
+        "apply_one": "Adicionar pasta e {{count}} requisição",
+        "apply_many": "Adicionar pasta e {{count}} de requisições",
+        "apply_other": "Adicionar pasta e {{count}} requisições",
+        "moreNote": "A API tem mais endpoints do que cabem em uma resposta. Crie as próximas requisições para continuar; o mesmo texto é enviado novamente com a lista das requisições já criadas.",
+        "importerSection_one": "Importação OpenAPI: {{count}} requisição",
+        "importerSection_many": "Importação OpenAPI: {{count}} de requisições",
+        "importerSection_other": "Importação OpenAPI: {{count}} requisições",
+        "importerNote": "Este é um documento OpenAPI ou Swagger, então o importador integrado lê tudo. Nada foi enviado para a IA. Para adicionar asserções, envie uma requisição e use \"Verificações para uma resposta\".",
+        "importerWarnings": "Observações do importador",
+        "importApply_one": "Importar {{count}} requisição",
+        "importApply_many": "Importar {{count}} de requisições",
+        "importApply_other": "Importar {{count}} requisições",
+        "moreLines_one": "e mais {{count}}",
+        "moreLines_many": "e mais {{count}}",
+        "moreLines_other": "e mais {{count}}"
+      }
+    },
+    "buttons": {
+      "generate": "Gerar com IA",
+      "generateTests": "Gerar verificações com IA",
+      "generateScript": "Gerar este script com IA",
+      "explain": "Explicar com IA",
+      "explainError": "Explicar este erro com IA",
+      "document": "Escrever com IA",
+      "documentLabel": "Escrever a descrição com IA"
+    },
+    "commands": {
+      "request": {
+        "label": "IA: nova requisição a partir de uma descrição",
+        "description": "Esboça uma requisição, mostrada em uma pré-visualização que você aceita",
+        "keywords": "gerar"
+      },
+      "tests": {
+        "label": "IA: gerar verificações",
+        "description": "Propõe verificações para a última resposta"
+      },
+      "script": {
+        "label": "IA: escrever um script",
+        "description": "Propõe um script de pré-requisição ou pós-resposta"
+      },
+      "explain": {
+        "label": "IA: explicar a resposta",
+        "description": "Explica uma falha e sugere uma correção"
+      },
+      "docs": {
+        "label": "IA: documentar esta requisição",
+        "description": "Propõe uma descrição para a requisição"
+      },
+      "search": {
+        "label": "IA: perguntar sobre a coleção",
+        "description": "Encontre requisições descrevendo-as",
+        "keywords": "buscar pesquisar encontrar"
+      },
+      "schema": {
+        "label": "IA: requisições a partir de uma descrição de API",
+        "description": "Documentos OpenAPI usam o importador integrado; outras descrições vão para a IA",
+        "keywords": "openapi swagger graphql esquema"
+      },
+      "settings": {
+        "label": "Configurações de IA",
+        "description": "Ativar ou desativar a IA, provedor, modelo e chave",
+        "keywords": "desativar ativar preferências"
+      }
+    },
+    "settings": {
+      "offNote": "A IA está desativada. Nenhum botão, comando ou atalho de IA é exibido e nada é enviado a um provedor de IA.",
+      "onNote": "A IA está ativada. Botões e comandos de IA são exibidos, e nada é enviado até você executar uma ação de IA.",
+      "needsSetup": "A IA está ativada. Antes de executar uma ação de IA, escolha um modelo e salve uma chave de API, se o provedor exigir.",
+      "previewNote": "Cada ação mostra uma pré-visualização do que exatamente será enviado antes de qualquer coisa sair da sua máquina, a menos que você tenha escolhido \"Não perguntar novamente\" para essa ação.",
+      "consent": "Entendo que, ao executar uma ação de IA, os detalhes da requisição ou resposta pré-visualizados são enviados para {{host}}, e que a cobrança é entre mim e o provedor.",
+      "enable": "Ativar recursos de IA",
+      "enableAfterConsent": "Ativar recursos de IA (marque a linha acima primeiro)",
+      "provider": "Provedor",
+      "baseUrl": "URL base",
+      "baseUrlPlaceholder": "https://host/v1",
+      "allowInsecure": "Permitir http simples para este endereço (endereços de loopback são sempre permitidos)",
+      "model": "ID do modelo",
+      "listModels": "Listar modelos",
+      "modelsFound_one": "{{count}} modelo encontrado. Escolha um ou digite um ID.",
+      "modelsFound_many": "{{count}} de modelos encontrados. Escolha um ou digite um ID.",
+      "modelsFound_other": "{{count}} modelos encontrados. Escolha um ou digite um ID.",
+      "noModels": "O provedor não listou nenhum modelo. Digite um ID de modelo.",
+      "localNoModels": "O servidor está em execução, mas não tem modelos. Baixe um e liste novamente.",
+      "apiKey": "Chave de API",
+      "keySaved": "Chave salva",
+      "removeKey": "Remover chave",
+      "pasteKey": "Cole a chave de API",
+      "optionalKey": "Opcional",
+      "saveKey": "Salvar chave",
+      "remember": "Lembrar neste dispositivo (caso contrário, só até a aba ser fechada)",
+      "test": "Testar conexão",
+      "skipped_one": "{{count}} ação é enviada sem pré-visualização.",
+      "skipped_many": "{{count}} de ações são enviadas sem pré-visualização.",
+      "skipped_other": "{{count}} ações são enviadas sem pré-visualização.",
+      "askAgain": "Mostrar a pré-visualização novamente",
+      "browserNote": "No navegador, as chamadas vão direto desta página para o provedor; sua chave nunca chega aos servidores do Gostman. O provedor precisa permitir chamadas entre origens. Um Ollama local precisa de OLLAMA_ORIGINS definido com este site, e o LM Studio precisa de CORS ativado nas configurações do servidor. Se um provedor bloquear navegadores, use o app para desktop.",
+      "desktopNote": "Sua chave fica no chaveiro do sistema operacional e o app para desktop chama o provedor diretamente. A página nunca lê a chave de volta.",
+      "forget": "Desativar a IA e esquecer as chaves",
+      "forgetWhileOff": "Esquecer chaves e configurações de IA"
+    },
+    "errors": {
+      "invalidBase": "A URL base não é um endereço válido",
+      "insecureBase": "Use uma URL base https ou permita http simples para ela nas configurações de IA",
+      "enterModel": "Informe um ID de modelo",
+      "pasteKey": "Cole uma chave de API para este provedor",
+      "keyMoved": "Esta chave foi salva para outro endereço. Salve-a novamente para esta URL base.",
+      "tooLarge": "A requisição é grande demais para ser enviada. Selecione menos conteúdo",
+      "noAnswer": "O provedor não retornou resposta",
+      "notJson": "O provedor respondeu com algo que não é JSON. Verifique a URL base",
+      "timedOut": "O provedor não respondeu a tempo",
+      "rejectedKey": "O provedor rejeitou a chave, ou a conta pode não usar este modelo",
+      "rateLimited": "O provedor está limitando as chamadas ou sem cota. Aguarde um momento e tente novamente",
+      "providerTimeout": "O provedor excedeu o tempo limite",
+      "providerProblem": "O provedor teve um problema. Tente novamente em instantes",
+      "refused": "O provedor recusou a requisição ({{status}})",
+      "retryIn": "{{summary}} (nova tentativa em {{seconds}} s)",
+      "withDetail": "{{summary}}: {{detail}}",
+      "unreachable": "Não foi possível acessar {{host}}. O endereço pode estar errado, ou o provedor não permite chamadas de uma página web (CORS). {{advice}}",
+      "unreachableWithReason": "Não foi possível acessar {{host}} ({{reason}}). O endereço pode estar errado, ou o provedor não permite chamadas de uma página web (CORS). {{advice}}",
+      "ollamaAdvice": "Inicie o Ollama com OLLAMA_ORIGINS={{origin}} e reinicie-o, ou use o app para desktop.",
+      "lmStudioAdvice": "Inicie o servidor do LM Studio com CORS ativado (configurações de Developer, ou lms server start --cors), ou use o app para desktop.",
+      "customAdvice": "O servidor deve responder ao preflight OPTIONS e permitir {{origin}} com os cabeçalhos Authorization e Content-Type. O app para desktop não está sujeito a esse limite.",
+      "anthropicAdvice": "A Anthropic só permite chamadas de navegador que levem o cabeçalho de acesso direto dela, que o Gostman envia; verifique também a chave e sua conexão. O app para desktop não está sujeito a esse limite.",
+      "generalAdvice": "Verifique a URL base e sua conexão. O app para desktop não está sujeito a esse limite."
+    },
+    "providers": {
+      "local": "{{name}} (local)",
+      "custom": "URL compatível com OpenAI",
+      "customModelHint": "ID do modelo"
+    }
+  }
+}

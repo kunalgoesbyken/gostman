@@ -1,0 +1,71 @@
+{
+  "network": {
+    "hostNotFound": "Nie znaleziono hosta {{host}}. Sprawdź, czy adres nie zawiera literówek i czy ten komputer jest online.",
+    "untrustedAuthority": "Certyfikat serwera nie jest podpisany przez urząd, któremu ufa ten komputer. {{advice}}",
+    "handshakeCertificate": "Serwer zakończył uzgadnianie TLS. Sprawdź, czy akceptuje certyfikat klienta ustawiony dla tego hosta.",
+    "handshake": "Serwer zakończył uzgadnianie TLS. {{advice}}",
+    "hostMismatch": "Certyfikat serwera nie jest ważny dla {{host}}. Sprawdź, czy adres jest tym, dla którego wystawiono certyfikat.",
+    "certificateExpired": "Certyfikat serwera wygasł lub jeszcze nie jest ważny. Sprawdź zegar tego komputera albo odnów certyfikat.",
+    "proxyConnect": "Nie udało się połączyć z serwerem proxy. Sprawdź adres proxy w: {{source}}.",
+    "proxyConnectSettings": "Nie udało się połączyć z serwerem proxy. Sprawdź adres proxy w ustawieniach sieci.",
+    "dial": "Nie udało się połączyć z {{host}}. Sprawdź, czy serwer działa oraz czy host i port są poprawne.",
+    "dialServer": "Nie udało się połączyć z serwerem. Sprawdź, czy serwer działa oraz czy host i port są poprawne."
+  },
+  "advice": {
+    "untrustedAuthority": "Zaufaj jego urzędowi certyfikacji albo wyłącz weryfikację certyfikatu dla tego żądania.",
+    "clientCertificate": "Jeśli serwer wymaga certyfikatu klienta, dodaj go dla tego hosta w ustawieniach sieci aplikacji desktopowej."
+  },
+  "failure": {
+    "timeout": "upłynął limit czasu żądania",
+    "cancelled": "żądanie zostało anulowane"
+  },
+  "blocked": {
+    "address": "adresy prywatne i lokalne są zablokowane",
+    "addressResolved": "adresy prywatne i lokalne są zablokowane: {{host}} wskazuje na {{address}}",
+    "host": "tego hosta nie ma na liście hostów, z którymi można się łączyć",
+    "hostNamed": "tego hosta nie ma na liście hostów, z którymi można się łączyć: {{host}}"
+  },
+  "request": {
+    "urlRequired": "wpisz adres URL, na który ma zostać wysłane żądanie",
+    "urlScheme": "nieobsługiwany schemat URL „{{scheme}}”, użyj http lub https",
+    "urlInvalid": "„{{url}}” nie jest poprawnym adresem URL",
+    "urlInvalidMissing": "„{{url}}” nie jest poprawnym adresem URL, ponieważ {{reason}}",
+    "notDefined_one": "zmienna nie jest zdefiniowana: {{names}}",
+    "notDefined_few": "zmienne nie są zdefiniowane: {{names}}",
+    "notDefined_many": "zmienne nie są zdefiniowane: {{names}}",
+    "notDefined_other": "zmienne nie są zdefiniowane: {{names}}",
+    "headersInvalid": "nagłówki są nieprawidłowe: {{detail}}",
+    "queryInvalid": "parametry zapytania są nieprawidłowe: {{detail}}",
+    "variablesInvalid": "zmienne środowiska nie są poprawnym JSON-em: {{detail}}",
+    "bodyTooLarge": "treść żądania jest większa niż 10 MB",
+    "tooLargeExpanded": "żądanie jest większe niż 10 MB po wstawieniu zmiennych",
+    "variablesTooDeep": "zmienne odwołują się do siebie zbyt wiele razy, aby je wstawić; uprość zmienne zawierające {{example}}",
+    "redirects": "zatrzymano po liczbie przekierowań: {{count}}",
+    "trailingJson": "nieoczekiwany tekst po wartości JSON",
+    "expectedObject": "oczekiwano obiektu JSON",
+    "expectedRows": "oczekiwano obiektu JSON lub listy wierszy"
+  },
+  "files": {
+    "unavailable": "{{example}} odczytuje pliki tylko w aplikacji desktopowej lub w gostman run, send i load z --allow-files",
+    "relativePath": "otwórz folder obszaru roboczego, aby użyć ścieżki względnej w {{example}}, albo podaj ścieżkę bezwzględną",
+    "httpOnly": "{{example}} odczytuje pliki tylko w żądaniach HTTP i GraphQL",
+    "outsideFolder": "„{{path}}” znajduje się poza folderem kolekcji; kolekcja odczytuje tylko pliki wewnątrz swojego folderu",
+    "unreadable": "nie można odczytać pliku „{{path}}”: {{detail}}",
+    "isFolder": "„{{path}}” jest folderem, a nie plikiem",
+    "tooLarge": "plik „{{path}}” jest większy niż 10 MB",
+    "notFound": "nie znaleziono pliku „{{path}}” w {{resolved}}",
+    "pathMissing": "{{example}} wymaga ścieżki pliku w nawiasach",
+    "networkPath": "„{{path}}” jest ścieżką sieciową lub urządzenia. Pliki są odczytywane tylko z dysków tego komputera, aby logowanie do systemu Windows nigdy nie trafiało do innego komputera. Skopiuj plik na ten komputer lub zmapuj udział na literę dysku"
+  },
+  "attachments": {
+    "unavailable": "pliki załączone z dysku wysyła tylko aplikacja desktopowa",
+    "tooLarge": "załączone pliki razem są większe niż {{size}} GB",
+    "signed": "to uwierzytelnianie podpisuje całą treść, więc załączone pliki razem z nią są ograniczone do {{size}} MB",
+    "failed": "załączony plik „{{name}}”: {{detail}}",
+    "notRegular": "„{{path}}” nie jest zwykłym plikiem"
+  },
+  "proxy": {
+    "invalidAddress": "„{{address}}” nie jest poprawnym adresem proxy",
+    "unsupportedScheme": "nieobsługiwany schemat proxy „{{scheme}}”, użyj http, https lub socks5"
+  }
+}

@@ -14,7 +14,7 @@ import { TAB_BRANCHES, TAB_CHANGES, TAB_HISTORY, TAB_REMOTES, TAB_STASHES, hasWo
 import { GIT_TEXT as TEXT } from "../lib/gitText"
 import { WORKSPACE_TEXT } from "../lib/workspaceText"
 
-const TABS = [
+const tabOptions = () => [
   { value: TAB_CHANGES, label: TEXT.tabs.changes },
   { value: TAB_BRANCHES, label: TEXT.tabs.branches },
   { value: TAB_STASHES, label: TEXT.tabs.stashes },
@@ -31,12 +31,12 @@ function ChangeRow({ change, staged, isSelected, isReadOnly, actions }) {
   const ToggleIcon = staged ? Minus : Plus
   return (
     <div className={`group flex items-center gap-2 border-b border-border px-3 py-1.5 text-xs ${isSelected ? "bg-muted" : "hover:bg-accent"}`}>
-      <button type="button" onClick={() => actions.select(change, staged)} className="flex min-w-0 flex-1 flex-col text-left">
+      <button type="button" onClick={() => actions.select(change, staged)} className="flex min-w-0 flex-1 flex-col text-start">
         <span className="flex min-w-0 items-center gap-2">
           <span title={change.conflict ? TEXT.conflictLabel : TEXT.statusLabels[letter]} className="w-3 shrink-0 font-mono font-medium text-muted-foreground">{letter}</span>
           <span className="truncate" title={change.path}>{change.path}</span>
         </span>
-        {change.summary.length > 0 && <span className="truncate pl-5 text-muted-foreground" title={change.summary.join("\n")}>{change.summary[0]}</span>}
+        {change.summary.length > 0 && <span className="truncate ps-5 text-muted-foreground" title={change.summary.join("\n")}>{change.summary[0]}</span>}
       </button>
       <IconButton label={TEXT.historyOf(change.path)} icon={History} size="icon-xs" onClick={() => actions.showHistory(change.path)} />
       {!staged && !change.conflict && <IconButton label={TEXT.discard(change.path)} icon={Undo2} size="icon-xs" disabled={isReadOnly} onClick={() => actions.discard(change)} />}
@@ -100,7 +100,7 @@ function ChangesTab({ state, selection, diff, conflict, isBusy, actions }) {
 
   return (
     <div className="flex min-h-0 flex-1">
-      <div className="flex min-h-0 w-80 shrink-0 flex-col border-r border-border">
+      <div className="flex min-h-0 w-80 shrink-0 flex-col border-e border-border">
         <div className="min-h-0 flex-1 overflow-y-auto">
           {state.changes.length === 0 && <EmptyState icon={state.merging ? GitMerge : GitBranch} title={state.merging ? TEXT.mergeReady : TEXT.clean} />}
           <ChangeSection title={TEXT.sections.conflicts} changes={conflicts} staged={false} {...shared} />
@@ -191,17 +191,17 @@ export function GitPanel({ actions, onTrust }) {
         <DialogTitle>{TEXT.title}</DialogTitle>
         {state.isRepo && (
           <Badge variant="outline" title={state.upstream || TEXT.noUpstream}>
-            <GitBranch className="mr-1 size-3" />
+            <GitBranch className="me-1 size-3" />
             {state.detached ? TEXT.detached : state.branch}
           </Badge>
         )}
         {state.isRepo && state.scope && (
           <Badge variant="outline" title={TEXT.scopeTitle}>
-            <Folder className="mr-1 size-3" />
+            <Folder className="me-1 size-3" />
             {TEXT.scope(state.scope)}
           </Badge>
         )}
-        {state.isRepo && <div className="ml-auto"><SyncButtons state={state} isDisabled={isBusy} actions={actions} /></div>}
+        {state.isRepo && <div className="ms-auto"><SyncButtons state={state} isDisabled={isBusy} actions={actions} /></div>}
       </DialogHeader>
       {state.restricted && (
         <Notice tone="warning" icon={ShieldAlert}>
@@ -219,7 +219,7 @@ export function GitPanel({ actions, onTrust }) {
       {state.isRepo ? (
         <>
           <div className="flex shrink-0 items-center border-b border-border px-3 py-1.5">
-            <SegmentedControl label={TEXT.sectionsLabel} options={TABS} value={tab} onChange={actions.setTab} />
+            <SegmentedControl label={TEXT.sectionsLabel} options={tabOptions()} value={tab} onChange={actions.setTab} />
           </div>
           <TabBody tab={tab} store={store} actions={actions} />
         </>

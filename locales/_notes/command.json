@@ -1,0 +1,22 @@
+{
+  "command.title": "Accessible name of the command palette dialog. The palette is opened with Ctrl+K and lists actions and requests.",
+  "command.heading": "Heading of the list of actions in the palette.",
+  "command.sections.request": "Heading of the list of saved requests in the palette.",
+  "command.commandsPlaceholder": "Placeholder of the palette search field.",
+  "command.requestsPlaceholder": "Placeholder when the palette opens in the \"go to request\" mode.",
+  "command.sentEarlier": "Second line of a result that comes from the history.",
+  "command.switchEnvironment": "Palette entry. {{name}} is the environment. An environment is a named set of variables.",
+  "command.switchEnvironmentDescription": "Description of that entry.",
+  "command.settingsKeywords": "Extra search words, separated by spaces, that find the settings commands. Not shown. Use words people would type in your language.",
+  "command.commands": "Each command has a label and a description. Labels that are not in this file reuse the name of the feature from another part of the app.",
+  "command.commands.collapseFolders.keywords": "Extra search words, separated by spaces. Not shown.",
+  "command.commands.environments.keywords": "Extra search words, separated by spaces. Not shown.",
+  "command.commands.scanSecrets.keywords": "Extra search words, separated by spaces. Not shown.",
+  "command.commands.lintSpec.keywords": "Extra search words, separated by spaces. Not shown. Keep the product and format names.",
+  "command.commands.loadTest.keywords": "Extra search words, separated by spaces. Not shown.",
+  "command.commands.capture.label": "Capture records the calls another app makes, using a proxy.",
+  "command.commands.capture.description": "Describes the capture feature: forwarding calls to the real API and saving them as requests.",
+  "command.commands.mockServer.description": "A mock server answers requests with saved example responses.",
+  "command.commands.copyRequest.description": "Copies the saved request so it can be pasted into a folder.",
+  "command.results": "Accessible label of the list of matching commands in the command palette."
+}

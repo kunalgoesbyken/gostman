@@ -3,14 +3,15 @@ package engine
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"time"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 var (
-	errBlockedAddress   = errors.New("private and local addresses are blocked")
-	errHostNotPermitted = errors.New("this host is not on the list of hosts that may be called")
+	errBlockedAddress   = locales.Errorf(locales.EngineBlockedAddress, nil)
+	errHostNotPermitted = locales.Errorf(locales.EngineBlockedHost, nil)
 )
 
 var blockedNetworks = mustParseCIDRs(
@@ -79,7 +80,7 @@ func guardedDial(ctx context.Context, network, address string) (net.Conn, error)
 	}
 	for _, candidate := range addresses {
 		if isBlockedIP(candidate.IP) {
-			return nil, fmt.Errorf("%w: %s resolves to %s", errBlockedAddress, host, candidate.IP)
+			return nil, locales.Caused(locales.EngineBlockedAddressResolved, locales.Params{"host": host, "address": candidate.IP.String()}, errBlockedAddress)
 		}
 	}
 

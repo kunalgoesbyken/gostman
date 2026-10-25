@@ -1,3 +1,4 @@
+import { CHAINING_TEXT } from './chainingText'
 import { isPlainObject, parseJSON } from './dataUtils'
 import { queryJson } from './jsonPath'
 import { findHeader, textBody } from './response'
@@ -10,10 +11,10 @@ const SOURCE_COOKIE = 'cookie'
 export const SOURCE_STATUS = 'status'
 
 export const EXTRACTOR_SOURCES = [
-  { value: SOURCE_BODY, label: 'JSON body', hint: '$.data.token' },
-  { value: SOURCE_HEADER, label: 'Header', hint: 'Location' },
-  { value: SOURCE_COOKIE, label: 'Cookie', hint: 'session' },
-  { value: SOURCE_STATUS, label: 'Status code', hint: '' },
+  { value: SOURCE_BODY, get label() { return CHAINING_TEXT.sources.body }, hint: '$.data.token' },
+  { value: SOURCE_HEADER, get label() { return CHAINING_TEXT.sources.header }, hint: 'Location' },
+  { value: SOURCE_COOKIE, get label() { return CHAINING_TEXT.sources.cookie }, hint: 'session' },
+  { value: SOURCE_STATUS, get label() { return CHAINING_TEXT.sources.status }, hint: '' },
 ]
 
 export const BLANK_EXTRACTOR = { name: '', source: SOURCE_BODY, expression: '', enabled: true }
@@ -52,11 +53,11 @@ export const isBlankExtractor = (extractor) => (
 
 function parseBody(response) {
   const text = textBody(response)
-  if (text.trim() === '') return missing(response.body ? 'The response body is binary, not JSON' : 'The response body is empty')
+  if (text.trim() === '') return missing(response.body ? CHAINING_TEXT.binaryBody : CHAINING_TEXT.emptyBody)
   try {
     return { json: JSON.parse(text) }
   } catch {
-    return missing(response.truncated ? 'The response was cut off, so its body is not complete JSON' : 'The response body is not JSON')
+    return missing(response.truncated ? CHAINING_TEXT.cutOff : CHAINING_TEXT.notJson)
   }
 }
 
@@ -74,26 +75,26 @@ export function evaluateJsonPath(json, path) {
 }
 
 function fromBody(response, path) {
-  if (path === '') return missing('Enter a JSONPath such as $.data.id')
+  if (path === '') return missing(CHAINING_TEXT.enterPath)
   const body = jsonBody(response)
   if (body.reason) return body
   const { value: match, error } = evaluateJsonPath(body.json, path)
-  if (error) return missing(`Invalid JSONPath: ${error}`)
-  if (match === undefined) return missing('Nothing in the body matches this path')
-  if (match === null) return missing('The matched value is null')
+  if (error) return missing(CHAINING_TEXT.invalidPath(error))
+  if (match === undefined) return missing(CHAINING_TEXT.noMatch)
+  if (match === null) return missing(CHAINING_TEXT.matchedNull)
   return found(typeof match === 'object' ? JSON.stringify(match) : match)
 }
 
 function fromHeader(response, name) {
-  if (name === '') return missing('Enter a header name')
+  if (name === '') return missing(CHAINING_TEXT.enterHeader)
   const value = findHeader(response.headers, name)
-  return value === null ? missing(`The response has no ${name} header`) : found(value)
+  return value === null ? missing(CHAINING_TEXT.noHeader(name)) : found(value)
 }
 
 function fromCookie(response, name) {
-  if (name === '') return missing('Enter a cookie name')
+  if (name === '') return missing(CHAINING_TEXT.enterCookie)
   const cookie = (response.cookies || []).find((candidate) => candidate.name === name)
-  return cookie ? found(cookie.value) : missing(`The response has no ${name} cookie`)
+  return cookie ? found(cookie.value) : missing(CHAINING_TEXT.noCookie(name))
 }
 
 const READERS = {
@@ -111,7 +112,7 @@ export const readsBodyPath = (extractor) => (
 
 export function evaluateExtractor(extractor, response) {
   if (!isVariableName(extractor.name)) {
-    return missing(extractor.name === '' ? 'Name the variable' : 'A variable name has no } and does not start or end with a space')
+    return missing(extractor.name === '' ? CHAINING_TEXT.nameVariable : CHAINING_TEXT.badVariableName)
   }
   return READERS[extractor.source](response, extractor.expression.trim())
 }

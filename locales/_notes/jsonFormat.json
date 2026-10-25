@@ -1,0 +1,11 @@
+{
+  "jsonFormat.expectedValue": "Message from the JSON formatter. The messages in this file describe a mistake in JSON typed by the user; they are shown in the body editor.",
+  "jsonFormat.unexpected": "{{character}} is the character that was found, in quotes, or the words that end of text stands for.",
+  "jsonFormat.endOfText": "Inserted after Unexpected when the text ends where something was expected.",
+  "jsonFormat.expectedColon": "Keep the quoted colon as given.",
+  "jsonFormat.expectedObjectEnd": "Keep the quoted comma and brace as given.",
+  "jsonFormat.expectedArrayEnd": "Keep the quoted comma and bracket as given.",
+  "jsonFormat.trailingComma": "{{closer}} is the closing brace or bracket.",
+  "jsonFormat.lineBreakInString": "Keep \\n as given: it is the escape sequence for a line break.",
+  "jsonFormat.unclosedReference": "{{reference}} is the variable syntax of Gostman with the word variable inside double braces; {{closer}} is the closing double brace. Keep both as given."
+}

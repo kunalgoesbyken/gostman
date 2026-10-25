@@ -3,16 +3,21 @@ package engine
 import (
 	"crypto/x509"
 	"errors"
-	"fmt"
 	"net"
 	"net/url"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 func networkFailure(err error) Response {
-	return Failure(ErrorNetwork, DescribeNetworkError(err))
+	hint := networkHint(err)
+	if hint == nil {
+		return Failure(ErrorNetwork, err.Error())
+	}
+	return Failed(ErrorNetwork, hint.WithDetail(err.Error()))
 }
 
-func networkHint(err error) string {
+func networkHint(err error) *locales.Message {
 	var lookup *net.DNSError
 	var authority x509.UnknownAuthorityError
 	var hostname x509.HostnameError
@@ -21,42 +26,61 @@ func networkHint(err error) string {
 	advice, hasCertificate := adviceFor(err)
 	switch {
 	case errors.As(err, &lookup):
-		return fmt.Sprintf("The host %s could not be found. Check the address for typos and that this computer is online.", lookup.Name)
+		return hint(locales.EngineNetworkHostNotFound, locales.Params{"host": lookup.Name})
 	case errors.As(err, &authority):
-		return "The server's certificate is not signed by an authority this computer trusts. " + advice.UntrustedAuthority
+		return hint(locales.EngineNetworkUntrustedAuthority, locales.Params{"advice": adviceText(advice.UntrustedAuthority, AppAdvice.UntrustedAuthority, locales.EngineAdviceUntrustedAuthority)})
 	case refusedHandshake(err) && hasCertificate:
-		return "The server ended the TLS handshake. Check that it accepts the client certificate set for this host."
+		return hint(locales.EngineNetworkHandshakeCertificate, nil)
 	case refusedHandshake(err):
-		return "The server ended the TLS handshake. " + advice.ClientCertificate
+		return hint(locales.EngineNetworkHandshake, locales.Params{"advice": adviceText(advice.ClientCertificate, AppAdvice.ClientCertificate, locales.EngineAdviceClientCertificate)})
 	case errors.As(err, &hostname):
-		return fmt.Sprintf("The server's certificate is not valid for %s. Check that the address is the one the certificate was issued for.", hostname.Host)
+		return hint(locales.EngineNetworkHostMismatch, locales.Params{"host": hostname.Host})
 	case errors.As(err, &invalid) && invalid.Reason == x509.Expired:
-		return "The server's certificate has expired or is not valid yet. Check the clock on this computer, or renew the certificate."
+		return hint(locales.EngineNetworkCertificateExpired, nil)
 	case errors.As(err, &dial) && dial.Op == "proxyconnect":
-		return fmt.Sprintf("Could not connect to the proxy server. Check the proxy address in %s.", proxySourceOf(err))
+		return proxyHint(err)
 	case errors.As(err, &dial) && dial.Op == "dial":
-		return fmt.Sprintf("Could not connect to %s. Check that the server is running and that the host and port are right.", requestHost(err, dial))
+		return dialHint(err, dial)
 	}
-	return ""
+	return nil
 }
 
-func proxySourceOf(err error) string {
+func hint(code locales.Code, params locales.Params) *locales.Message {
+	message := locales.New(code, params)
+	return &message
+}
+
+func adviceText(text, appText string, code locales.Code) any {
+	if text == appText {
+		return locales.New(code, nil)
+	}
+	return text
+}
+
+func proxyHint(err error) *locales.Message {
 	var configured *proxySourceError
 	if errors.As(err, &configured) {
-		return configured.source
+		return hint(locales.EngineNetworkProxyConnect, locales.Params{"source": configured.source})
 	}
-	return "the network settings"
+	return hint(locales.EngineNetworkProxyConnectSettings, nil)
 }
 
-func requestHost(err error, dial *net.OpError) string {
+func dialHint(err error, dial *net.OpError) *locales.Message {
+	if host, known := requestHost(err, dial); known {
+		return hint(locales.EngineNetworkDial, locales.Params{"host": host})
+	}
+	return hint(locales.EngineNetworkDialServer, nil)
+}
+
+func requestHost(err error, dial *net.OpError) (string, bool) {
 	var request *url.Error
 	if errors.As(err, &request) {
 		if address, parseErr := url.Parse(request.URL); parseErr == nil && address.Host != "" {
-			return address.Host
+			return address.Host, true
 		}
 	}
 	if dial.Addr != nil {
-		return dial.Addr.String()
+		return dial.Addr.String(), true
 	}
-	return "the server"
+	return "", false
 }

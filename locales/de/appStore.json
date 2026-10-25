@@ -1,0 +1,7 @@
+{
+  "appStore": {
+    "saveFailedTitle": "Änderungen konnten nicht gespeichert werden",
+    "saveFailed": "Ihre letzten Änderungen wurden nicht gespeichert und gehen beim Schließen der App verloren. Exportieren Sie Ihre Daten, um eine Kopie zu behalten. ({{reason}})",
+    "delete": "Löschen"
+  }
+}

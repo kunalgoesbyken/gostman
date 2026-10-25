@@ -1,0 +1,9 @@
+{
+  "tabBar": {
+    "openRequests": "已打开的请求",
+    "newRequest": "新建请求",
+    "untitled": "未命名",
+    "unsaved": "有未保存的更改",
+    "close": "关闭 {{title}}"
+  }
+}

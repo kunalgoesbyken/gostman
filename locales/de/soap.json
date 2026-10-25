@@ -1,0 +1,13 @@
+{
+  "soap": {
+    "versionLabel": "SOAP-Version",
+    "format": "XML formatieren",
+    "formatTitle": "Das Envelope einrücken. Kommentare und CDATA-Abschnitte bleiben erhalten.",
+    "fault": "SOAP Fault",
+    "faultCode": "Code",
+    "faultReason": "Grund",
+    "faultActor": "Akteur",
+    "faultDetail": "Detail",
+    "malformed": "Das XML lässt sich nicht formatieren: {{message}}"
+  }
+}

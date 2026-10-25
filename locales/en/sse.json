@@ -1,0 +1,47 @@
+{
+  "sse": {
+    "allTypes": "All event types",
+    "searchLabel": "Search events",
+    "searchPlaceholder": "Search events",
+    "pause": "Pause autoscroll",
+    "resume": "Resume autoscroll",
+    "clear": "Clear events",
+    "copyAll": "Copy shown events",
+    "copied": "Copied",
+    "copyEvent": "Copy event data",
+    "noEvents": "No events yet",
+    "waiting": "Waiting for the server to send an event.",
+    "noMatches": "No events match",
+    "noMatchesHint": "Change the type filter or the search to see more.",
+    "clipped": "This event was too long, so the rest was left out.",
+    "shown": "{{shown}} of {{total}} shown",
+    "received": "{{count}} received",
+    "dropped_one": "The oldest event is no longer listed. The downloaded response still has every event.",
+    "dropped_other": "The {{count}} oldest events are no longer listed. The downloaded response still has every event.",
+    "reconnecting": "Reconnecting in {{seconds}} s (attempt {{attempt}})"
+  },
+  "sseSettings": {
+    "stream": "Stream as server-sent events",
+    "reconnect": "Reconnect when the server closes the stream",
+    "maxEvents": "Max events",
+    "maxEventsPlaceholder": "Default 10000",
+    "maxSeconds": "Max seconds",
+    "maxSecondsPlaceholder": "Default 300"
+  },
+  "status": {
+    "connecting": "Connecting",
+    "open": "Streaming",
+    "reconnecting": "Reconnecting",
+    "ended": "Ended"
+  },
+  "streamEnd": {
+    "closed": "The server closed the stream.",
+    "cancelled": "The stream was stopped.",
+    "maxEvents": "Stopped at the event limit. Raise it under Settings.",
+    "maxBytes": "Stopped at the size limit.",
+    "maxDuration": "Stopped at the time limit. Raise it under Settings.",
+    "failed": "The stream failed.",
+    "failedWith": "The stream failed. {{detail}}",
+    "hostedLimit": "Stopped at the time limit. The web app streams for at most {{seconds}} seconds; the desktop app can stream longer."
+  }
+}

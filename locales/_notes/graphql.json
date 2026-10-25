@@ -1,0 +1,13 @@
+{
+  "graphql.query": "Section label above the GraphQL query editor.",
+  "graphql.variables": "Section label of the GraphQL variables; the value is JSON.",
+  "graphql.sendAsGraphql": "Button that changes the request method to GRAPHQL.",
+  "graphql.prettify": "Button that reformats the query. Short.",
+  "graphql.schema": "Button and heading for the GraphQL schema: the list of types the endpoint offers.",
+  "graphql.notSent": "{{method}} is an HTTP method name and stays in English.",
+  "graphql.searchPlaceholder": "Placeholder of the schema search box. {{count}} is the number of types.",
+  "graphql.moreMatches": "{{count}} is how many matching types are not shown.",
+  "graphql.noFields": "Shown under a schema type that has no fields.",
+  "graphql.noJsonBody": "{{status}} is an HTTP status code.",
+  "graphql.noSchema": "{{status}} is an HTTP status code."
+}

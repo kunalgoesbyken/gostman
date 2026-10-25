@@ -12,6 +12,7 @@ import { isStreamRequest } from './sse'
 import { transmitStream } from './sseTransport'
 import { countActiveAssertions } from './scripting/assertions'
 import { CHECK_RUN_TEXT } from './checksText'
+import { EXECUTION_TEXT } from './executionText'
 import { consoleGroup } from './consoleLog'
 import { createContractChecker, linkFor } from './contractCheck'
 import { addressHost, collectionHostsBy, isPermittedHost } from './scripting/destinations'
@@ -32,13 +33,6 @@ const CONFIG_ERROR = 'config'
 const CANCELLED_ERROR = 'cancelled'
 const SCRIPT_ERROR = 'script'
 export const RESTRICTED_ERROR = 'restricted'
-const PROMPT_DECLINED = 'The request was not sent because the values it asks for were not provided.'
-const UNUSABLE_ADDRESS = 'The address cannot be used by a script.'
-const SEND_LIMIT = `A script may call sendRequest ${MAX_SENDS} times.`
-const SCRIPT_FILE_READS = 'A script cannot add {{$file(...)}} placeholders or files attached from disk to a request. Put them in the request itself.'
-const PRE_REQUEST = 'Pre-request script'
-const POST_RESPONSE = 'Post-response script'
-export const RESTRICTED = 'This folder is not trusted yet, so its scripts, OAuth 2.0 settings, local MCP commands and file reads are switched off. Open the folder menu in the header and choose Trust this folder.'
 
 const store = () => useAppStore.getState()
 const variablesText = (request, answers, referenced) => variableTextFor(store(), request, answers, referenced)
@@ -146,14 +140,14 @@ const outputRun = (response) => ({ tests: mcpOutputChecks(response), logs: [], e
 
 const extractionRun = (extraction) => ({ tests: [], logs: [errorLine(extraction.error)], error: extraction.error })
 
-const scopeLabel = (stage, name) => `${stage} (${name})`
+const scopeLabel = (stage, name) => EXECUTION_TEXT.scopeLabel(stage, name)
 
 const preSteps = (lineage, request) => [
-  ...lineage.map(({ name, settings }) => ({ label: scopeLabel(PRE_REQUEST, name), script: settings.preScript })),
-  { label: PRE_REQUEST, script: request.preScript },
+  ...lineage.map(({ name, settings }) => ({ label: scopeLabel(EXECUTION_TEXT.preRequest, name), script: settings.preScript })),
+  { label: EXECUTION_TEXT.preRequest, script: request.preScript },
 ].filter((step) => hasText(step.script))
 
-const postLabel = (script) => (hasText(script) ? POST_RESPONSE : CHECK_RUN_TEXT.stage)
+const postLabel = (script) => (hasText(script) ? EXECUTION_TEXT.postResponse : CHECK_RUN_TEXT.stage)
 
 const postSteps = (lineage, request) => [
   { label: postLabel(request.postScript), script: request.postScript, assertions: request.assertions },
@@ -217,17 +211,17 @@ let consoleSequence = 0
 function createScriptSender(backend, trace) {
   let sent = 0
   return async (target) => {
-    if (sent >= MAX_SENDS) throw new Error(SEND_LIMIT)
+    if (sent >= MAX_SENDS) throw new Error(EXECUTION_TEXT.sendLimit(MAX_SENDS))
     sent += 1
     const { requests } = store()
     const request = scriptedRequest(target, requests)
-    if (typeof target !== 'string' && readsFiles(request)) throw new Error(SCRIPT_FILE_READS)
+    if (typeof target !== 'string' && readsFiles(request)) throw new Error(EXECUTION_TEXT.scriptFileReads)
     const timed = { ...request, options: { ...request.options, timeoutMs: request.options.timeoutMs || SEND_TIMEOUT_MS, noFollowRedirects: true } }
     const variables = variablesText(timed, {})
     const host = addressHost(timed.url, variables)
-    if (host === '') throw new Error(UNUSABLE_ADDRESS)
+    if (host === '') throw new Error(EXECUTION_TEXT.unusableAddress)
     if (!isPermittedHost(host, scriptHosts())) {
-      throw new Error(`The host "${host}" is not used by this collection, so scripts may not call it.`)
+      throw new Error(EXECUTION_TEXT.hostNotPermitted(host))
     }
     scriptSends += 1
     const sendId = `script-${scriptSends}`
@@ -251,7 +245,7 @@ export function createExecutor(backend) {
 
     const lineage = lineageOf(store(), original.folderId)
     let request = original
-    if (store().isRestricted && (hasActiveContent(request) || hasActiveInheritance(lineage))) return stop(request, RESTRICTED, RESTRICTED_ERROR)
+    if (store().isRestricted && (hasActiveContent(request) || hasActiveInheritance(lineage))) return stop(request, EXECUTION_TEXT.restricted, RESTRICTED_ERROR)
 
     let referenced
     try {
@@ -271,11 +265,11 @@ export function createExecutor(backend) {
       if (pre.error) return stop(request, pre.error, SCRIPT_ERROR)
       if (holdsBack(pre.flow)) return { ...stop(request, reasonFor(pre.flow)), skipped: reasonFor(pre.flow) }
       request = applyRequestEdits(request, pre.request, inherited)
-      if (addsFileReads(original, request)) return stop(request, SCRIPT_FILE_READS, SCRIPT_ERROR)
+      if (addsFileReads(original, request)) return stop(request, EXECUTION_TEXT.scriptFileReads, SCRIPT_ERROR)
     }
 
     const answers = await askForValues(request, referenced, prompts)
-    if (answers === null) return stop(request, PROMPT_DECLINED, CANCELLED_ERROR)
+    if (answers === null) return stop(request, EXECUTION_TEXT.promptDeclined, CANCELLED_ERROR)
 
     let renewal
     try {

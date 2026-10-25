@@ -1,0 +1,8 @@
+{
+  "zip": {
+    "notZip": "Não foi possível ler o arquivo compactado como um arquivo zip.",
+    "unsupported": "O arquivo compactado usa criptografia, zip64 ou um método de compactação que não é compatível.",
+    "tooMany": "O arquivo compactado tem mais de {{limit}} arquivos.",
+    "tooLarge": "O arquivo compactado se expande para mais de {{limit}} bytes."
+  }
+}

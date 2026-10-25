@@ -38,8 +38,13 @@ Checks run by CI:
 ```bash
 go build ./... && go vet ./...                           # repository root
 cd gostman-gui && go build ./... && go vet ./...
-cd gostman-gui/frontend && npm run build && npm run build:web
+cd gostman-gui/frontend && npm run i18n:check && npm run build && npm run build:web
+go generate ./locales && git diff --exit-code -- locales     # repository root
 ```
+
+## Translations
+
+Interface text lives in `locales/en/` and is translated in `locales/<language>/`. Do not hard-code English in components: add it to the text module and its JSON file. Run `npm run i18n:check` in `gostman-gui/frontend` after editing any file in `locales/`, and `go generate ./locales` after changing a Go message. To request a language or report a translation, use [issue #15](https://github.com/kunalgoesbyken/gostman/issues/15). [docs/translating.md](docs/translating.md) has the details.
 
 ## Layout
 

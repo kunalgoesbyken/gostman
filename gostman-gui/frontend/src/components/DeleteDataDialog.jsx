@@ -5,17 +5,18 @@ import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./u
 import { Input } from "./ui/input"
 import { Notice, SectionLabel } from "./ui/panel"
 import { DATA_TEXT as TEXT } from "../lib/dataText"
+import { searchCollator } from "../lib/i18n/format"
 import { isDesktopShell } from "../lib/windowControls"
 import { WORKSPACE_TEXT } from "../lib/workspaceText"
 import { useAppStore } from "../store/appStore"
 
-const isConfirmWord = (typed) => typed.trim().localeCompare(TEXT.confirmWord, undefined, { sensitivity: "accent" }) === 0
+const isConfirmWord = (typed) => searchCollator().compare(typed.trim(), TEXT.confirmWord) === 0
 
 function ItemList({ heading, items }) {
   return (
     <section aria-label={heading} className="space-y-1.5">
       <SectionLabel className="block">{heading}</SectionLabel>
-      <ul className="list-disc space-y-1 pl-4 text-xs leading-relaxed">
+      <ul className="list-disc space-y-1 ps-4 text-xs leading-relaxed">
         {items.map((item) => <li key={item}>{item}</li>)}
       </ul>
     </section>

@@ -1,0 +1,210 @@
+{
+  "ai": {
+    "name": "AI",
+    "ok": "OK",
+    "cancel": "Cancel",
+    "close": "Close",
+    "back": "Back",
+    "discard": "Discard",
+    "tryAgain": "Try again",
+    "preview": "Preview",
+    "sendToAi": "Send to AI",
+    "continueBatch": "Make the next requests",
+    "empty": "Empty",
+    "current": "Current",
+    "proposed": "Proposed",
+    "instructions": "Instructions",
+    "content": "Content",
+    "replyFormat": "Reply format",
+    "scriptLabel": "Script",
+    "preRequest": "Pre-request",
+    "postResponse": "Post-response",
+    "providerLabel": "AI: {{label}}",
+    "waitingFor": "Waiting for {{label}}",
+    "readingSpec": "Reading the OpenAPI document",
+    "reviewNote": "AI-generated. Review before you accept. Nothing is sent, saved or run until you decide.",
+    "previewNote": "This is exactly what will be sent to {{host}}: about {{size}} ({{tokens}} tokens). Secrets are masked.",
+    "previewNoteValues": "This is exactly what will be sent to {{host}}: about {{size}} ({{tokens}} tokens). Secrets are masked. Response body values are included (up to 4 KB, sensitive keys masked).",
+    "previewNoteStructure": "This is exactly what will be sent to {{host}}: about {{size}} ({{tokens}} tokens). Secrets are masked. Only the structure of the response body is included, not its values.",
+    "skipPreview": "Don't ask again for this action (it will be sent without this preview)",
+    "includeValues": "Include real response values (otherwise only the structure is sent)",
+    "includeBodyValues": "Include the body values (up to 4 KB, sensitive keys masked). Untick to send only the structure.",
+    "needsResponse": "Send the request first so there is a response to work from.",
+    "needsTrust": "This folder is restricted. Trust it before generating scripts, because scripts from AI are untrusted until you review them.",
+    "badReply": "The model did not answer in the expected format. Try again, or pick a more capable model.",
+    "cutOff": "The answer was cut off because it reached the length limit. Try again with less content, or pick a model that writes shorter answers.",
+    "connected": "Connected",
+    "cancelled": "Cancelled",
+    "tooLarge": "The text is {{size}}; the limit is {{limit}}. Paste a smaller part. A complete OpenAPI or Swagger document of any size can be imported with Import data.",
+    "searchLimited": "Your collection has {{total}} requests. Only the first {{sent}} are sent, so requests after them cannot be found.",
+    "tasks": {
+      "request": {
+        "label": "New request from a description",
+        "inputLabel": "Describe the request",
+        "placeholder": "POST a new user with name and email",
+        "section": "New request (opens as an unsaved tab)",
+        "apply": "Open as new tab",
+        "untitled": "AI request"
+      },
+      "tests": {
+        "label": "Checks for a response",
+        "assertions": "Assertions",
+        "script": "Post-response script (AI-generated, review before running)",
+        "apply": "Add to request"
+      },
+      "script": {
+        "label": "Pre-request or post-response script",
+        "inputLabel": "What should the script do",
+        "placeholder": "Save the token from the response into the environment",
+        "sectionPreScript": "New pre-request script (AI-generated, review before running)",
+        "sectionPostScript": "New post-response script (AI-generated, review before running)",
+        "apply": "Replace script"
+      },
+      "explain": {
+        "label": "Explain a failed response",
+        "happened": "What happened",
+        "causes": "Likely causes",
+        "fixes": "Suggested fixes"
+      },
+      "docs": {
+        "label": "Document the request",
+        "section": "Description",
+        "apply": "Use as description"
+      },
+      "search": {
+        "label": "Ask about the collection",
+        "inputLabel": "What are you looking for",
+        "placeholder": "the endpoint that cancels an order"
+      },
+      "schema": {
+        "label": "Requests from an API description",
+        "inputLabel": "Paste an OpenAPI or Swagger document, a GraphQL schema or API documentation text",
+        "placeholder": "openapi: 3.1.0 ...",
+        "folder": "New folder \"{{name}}\"",
+        "defaultFolder": "AI requests",
+        "apply_one": "Add folder and {{count}} request",
+        "apply_other": "Add folder and {{count}} requests",
+        "moreNote": "The API has more endpoints than fit in one answer. Make the next requests to continue; the same text is sent again with the list of requests already made.",
+        "importerSection_one": "OpenAPI import: {{count}} request",
+        "importerSection_other": "OpenAPI import: {{count}} requests",
+        "importerNote": "This is an OpenAPI or Swagger document, so the built-in importer reads all of it. Nothing was sent to AI. To add assertions, send a request and use \"Checks for a response\".",
+        "importerWarnings": "Importer notes",
+        "importApply_one": "Import {{count}} request",
+        "importApply_other": "Import {{count}} requests",
+        "moreLines_one": "and {{count}} more",
+        "moreLines_other": "and {{count}} more"
+      }
+    },
+    "buttons": {
+      "generate": "Generate with AI",
+      "generateTests": "Generate checks with AI",
+      "generateScript": "Generate this script with AI",
+      "explain": "Explain with AI",
+      "explainError": "Explain this error with AI",
+      "document": "Write with AI",
+      "documentLabel": "Write the description with AI"
+    },
+    "commands": {
+      "request": {
+        "label": "AI: new request from a description",
+        "description": "Draft a request, shown as a preview you accept",
+        "keywords": "generate"
+      },
+      "tests": {
+        "label": "AI: generate checks",
+        "description": "Propose checks for the last response"
+      },
+      "script": {
+        "label": "AI: write a script",
+        "description": "Propose a pre-request or post-response script"
+      },
+      "explain": {
+        "label": "AI: explain the response",
+        "description": "Explain a failure and suggest a fix"
+      },
+      "docs": {
+        "label": "AI: document this request",
+        "description": "Propose a description for the request"
+      },
+      "search": {
+        "label": "AI: ask about the collection",
+        "description": "Find requests by describing them",
+        "keywords": "search find"
+      },
+      "schema": {
+        "label": "AI: requests from an API description",
+        "description": "OpenAPI documents use the built-in importer; other descriptions go to AI",
+        "keywords": "openapi swagger graphql schema"
+      },
+      "settings": {
+        "label": "AI settings",
+        "description": "Turn AI on or off, provider, model and key",
+        "keywords": "disable enable preferences"
+      }
+    },
+    "settings": {
+      "offNote": "AI is off. No AI buttons, commands or shortcuts are shown, and nothing is sent to an AI provider.",
+      "onNote": "AI is on. AI buttons and commands are shown, and nothing is sent until you run an AI action.",
+      "needsSetup": "AI is on. Before an AI action can run, choose a model, and save an API key if the provider needs one.",
+      "previewNote": "Each action shows a preview of exactly what will be sent before anything leaves your machine, unless you chose \"Don't ask again\" for that action.",
+      "consent": "I understand that when I run an AI action, the previewed request or response details are sent to {{host}}, and billing is between me and the provider.",
+      "enable": "Turn on AI features",
+      "enableAfterConsent": "Turn on AI features (tick the line above first)",
+      "provider": "Provider",
+      "baseUrl": "Base URL",
+      "baseUrlPlaceholder": "https://host/v1",
+      "allowInsecure": "Allow plain http to this address (loopback addresses are always allowed)",
+      "model": "Model id",
+      "listModels": "List models",
+      "modelsFound_one": "{{count}} model found. Pick one or type an id.",
+      "modelsFound_other": "{{count}} models found. Pick one or type an id.",
+      "noModels": "The provider listed no models. Type a model id.",
+      "localNoModels": "The server is running but has no models. Download one, then list again.",
+      "apiKey": "API key",
+      "keySaved": "Key saved",
+      "removeKey": "Remove key",
+      "pasteKey": "Paste API key",
+      "optionalKey": "Optional",
+      "saveKey": "Save key",
+      "remember": "Remember on this device (otherwise only until the tab closes)",
+      "test": "Test connection",
+      "skipped_one": "{{count}} action is sent without a preview.",
+      "skipped_other": "{{count}} actions are sent without a preview.",
+      "askAgain": "Show the preview again",
+      "browserNote": "In the browser, calls go straight from this page to the provider; your key never reaches Gostman servers. The provider must allow cross-origin calls. A local Ollama needs OLLAMA_ORIGINS set to this site, and LM Studio needs CORS turned on in its server settings. If a provider blocks browsers, use the desktop app.",
+      "desktopNote": "Your key is kept in the OS keychain and the desktop app calls the provider itself. The page never reads the key back.",
+      "forget": "Turn off AI and forget keys",
+      "forgetWhileOff": "Forget AI keys and settings"
+    },
+    "errors": {
+      "invalidBase": "The base URL is not a valid address",
+      "insecureBase": "Use an https base URL, or allow plain http for it in the AI settings",
+      "enterModel": "Enter a model id",
+      "pasteKey": "Paste an API key for this provider",
+      "keyMoved": "This key was saved for a different address. Save it again for this base URL.",
+      "tooLarge": "The request is too large to send. Select less content",
+      "noAnswer": "The provider returned no answer",
+      "notJson": "The provider answered with something that is not JSON. Check the base URL",
+      "timedOut": "The provider did not answer in time",
+      "rejectedKey": "The provider rejected the key, or the account may not use this model",
+      "rateLimited": "The provider is rate limiting or out of quota. Wait a moment and try again",
+      "providerTimeout": "The provider timed out",
+      "providerProblem": "The provider had a problem. Try again shortly",
+      "refused": "The provider refused the request ({{status}})",
+      "retryIn": "{{summary}} (retry in {{seconds}}s)",
+      "withDetail": "{{summary}}: {{detail}}",
+      "unreachable": "Could not reach {{host}}. The address may be wrong, or the provider does not allow calls from a web page (CORS). {{advice}}",
+      "unreachableWithReason": "Could not reach {{host}} ({{reason}}). The address may be wrong, or the provider does not allow calls from a web page (CORS). {{advice}}",
+      "ollamaAdvice": "Start Ollama with OLLAMA_ORIGINS={{origin}} and restart it, or use the desktop app.",
+      "lmStudioAdvice": "Start the LM Studio server with CORS turned on (Developer settings, or lms server start --cors), or use the desktop app.",
+      "customAdvice": "The server must answer the OPTIONS preflight and allow {{origin}} with the Authorization and Content-Type headers. The desktop app is not subject to this limit.",
+      "anthropicAdvice": "Anthropic only allows browser calls that carry its direct-access header, which Gostman sends, so also check the key and your connection. The desktop app is not subject to this limit.",
+      "generalAdvice": "Check the base URL and your connection. The desktop app is not subject to this limit."
+    },
+    "providers": {
+      "local": "{{name}} (local)",
+      "custom": "OpenAI-compatible URL",
+      "customModelHint": "model id"
+    }
+  }
+}

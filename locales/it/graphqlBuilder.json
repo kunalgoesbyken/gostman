@@ -1,0 +1,28 @@
+{
+  "builder": {
+    "rootLabel": "Tipo di operazione",
+    "rootNames": {
+      "query": "Query",
+      "mutation": "Mutation",
+      "subscription": "Subscription"
+    },
+    "title": "Builder",
+    "paneLabel": "Query builder",
+    "filterLabel": "Filtra campi",
+    "filterPlaceholder": "Filtra campi",
+    "expand": "Espandi",
+    "collapse": "Comprimi",
+    "select": "Seleziona {{name}}",
+    "include": "Includi l'argomento {{name}}",
+    "viaFragment": "Selezionato tramite un fragment nell'editor. Modificalo lì.",
+    "noSchemaTitle": "Nessuno schema caricato",
+    "noSchemaDescription": "Caricalo per costruire una query dai campi dell'endpoint. La query di introspezione usa URL, header e autenticazione di questa richiesta.",
+    "fetch": "Carica schema",
+    "refresh": "Aggiorna schema",
+    "loading": "Caricamento dello schema",
+    "syntaxError": "Il builder è in pausa finché l'editor ha un errore di sintassi: {{message}}",
+    "subscription": "Le subscription trasmettono risultati su una connessione di lunga durata. Attiva Trasmetti come server-sent events nelle Impostazioni per leggerle dai server che le consegnano in quel modo.",
+    "noRoot": "Questo schema non ha un tipo radice per questa operazione.",
+    "empty": "Nessuna corrispondenza con il filtro."
+  }
+}

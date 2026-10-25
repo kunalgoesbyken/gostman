@@ -1,0 +1,38 @@
+{
+  "sidebar": {
+    "views": "Ansicht der Seitenleiste",
+    "collections": "Sammlungen",
+    "history": "Verlauf",
+    "runRequests": "Anfragen ausführen",
+    "newFolder": "Neuer Ordner",
+    "newRequest": "Neue Anfrage",
+    "toggle": "Seitenleiste ein-/ausblenden",
+    "close": "Seitenleiste schließen",
+    "resize": "Größe der Seitenleiste ändern"
+  },
+  "history": {
+    "search": "Verlauf durchsuchen",
+    "emptyTitle": "Noch kein Verlauf",
+    "emptyDescription": "Gesendete Anfragen erscheinen hier.",
+    "noMatches": "Keine gesendete Anfrage passt.",
+    "remove": "Aus dem Verlauf entfernen",
+    "clear": "Verlauf löschen",
+    "noResponse": "Keine Antwort",
+    "sentAgo": {
+      "now": "jetzt",
+      "minutes": "{{count}} Min.",
+      "hours": "{{count}} Std.",
+      "days": "{{count}} T."
+    },
+    "sentAgoSpoken": {
+      "now": "gerade eben gesendet",
+      "minutes_one": "vor {{count}} Minute gesendet",
+      "minutes_other": "vor {{count}} Minuten gesendet",
+      "hours_one": "vor {{count}} Stunde gesendet",
+      "hours_other": "vor {{count}} Stunden gesendet",
+      "days_one": "vor {{count}} Tag gesendet",
+      "days_other": "vor {{count}} Tagen gesendet",
+      "date": "gesendet am {{date}}"
+    }
+  }
+}

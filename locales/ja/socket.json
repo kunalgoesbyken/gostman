@@ -1,0 +1,46 @@
+{
+  "socket": {
+    "socketIoPath": "パス",
+    "socketIoAuth": "認証ペイロード",
+    "socketIoAuthNote": "名前空間のハンドシェイクで送信されるJSONオブジェクトで、サーバーではsocket.handshake.authとして読み取られます。",
+    "invalidAuth": "Socket.IOの認証ペイロードはJSONオブジェクトである必要があります。",
+    "statuses": {
+      "idle": "未接続",
+      "connecting": "接続中",
+      "open": "接続済み",
+      "waiting": "再接続を待機中"
+    },
+    "entries": {
+      "sent": "送信",
+      "received": "受信",
+      "info": "情報",
+      "warning": "警告",
+      "error": "エラー"
+    },
+    "protocol": "プロトコル",
+    "graphql": "GraphQLサブスクリプション",
+    "filter": "トピックフィルター（例：sensors/#）",
+    "subscribe": "購読",
+    "saved": "保存済みメッセージ",
+    "savedPlaceholder": "保存済みメッセージを読み込む",
+    "noSaved": "保存済みメッセージはまだありません",
+    "save": "保存",
+    "saveTitle": "メッセージを保存",
+    "saveMessage": "このメッセージの名前。リクエストと一緒に保存されます。",
+    "remove": "保存済みメッセージを削除",
+    "binary_other": "バイナリ、{{count}}バイト",
+    "truncated": "{{total}}文字のうち最初の{{shown}}文字を表示しています",
+    "copy": "メッセージをコピー",
+    "dropped": "古いエントリーを{{dropped}}件削除しました。ログには最新の{{limit}}件が保持されます。",
+    "emptyTitle": "メッセージはまだありません",
+    "emptyDescription": "接続してからメッセージを送信するか、サーバーからの受信を待ってください。",
+    "log": "メッセージ",
+    "autoReconnect": "自動再接続",
+    "unsentHeaders": "ブラウザーがWebSocketで設定できるのはSec-WebSocket-Protocolだけです。ここからは送信されないヘッダー：{{names}}。デスクトップアプリはすべてのヘッダーを送信します。",
+    "composer": "メッセージ（{{shortcut}}で送信）",
+    "composerClosed": "メッセージを送信するには接続してください",
+    "message": "メッセージ",
+    "send": "送信",
+    "clear": "クリア"
+  }
+}

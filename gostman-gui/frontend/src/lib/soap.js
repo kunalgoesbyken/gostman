@@ -8,19 +8,6 @@ export const SOAP_VERSIONS = [
   { value: SOAP_12, label: 'SOAP 1.2' },
 ]
 
-export const SOAP_TEXT = {
-  versionLabel: 'SOAP version',
-  actionLabel: 'SOAPAction',
-  actionPlaceholder: 'SOAPAction',
-  format: 'Format XML',
-  formatTitle: 'Indent the envelope. Comments and CDATA sections are kept.',
-  fault: 'SOAP Fault',
-  faultCode: 'Code',
-  faultReason: 'Reason',
-  faultActor: 'Actor',
-  faultDetail: 'Detail',
-  malformed: (message) => `The XML cannot be formatted: ${message}`,
-}
 
 const NAMESPACES = {
   [SOAP_11]: 'http://schemas.xmlsoap.org/soap/envelope/',

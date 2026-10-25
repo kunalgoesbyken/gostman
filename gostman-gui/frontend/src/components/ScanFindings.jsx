@@ -1,5 +1,6 @@
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
+import { localizedText } from "../lib/localized"
 import { SCAN_TEXT } from "../lib/scanText"
 
 const SEVERITY_VARIANTS = { high: "serverError", medium: "clientError" }
@@ -20,7 +21,7 @@ function Finding({ finding, onGoToRequest }) {
         <p className="text-muted-foreground">{location.field}</p>
         <p className="text-muted-foreground">
           <span className="font-mono text-foreground">{finding.preview}</span>
-          {" "}{finding.reason} ({finding.rule})
+          {" "}{localizedText(finding.localized, finding.reason)} ({finding.rule})
         </p>
       </div>
       {canOpen && (

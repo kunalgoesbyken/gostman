@@ -1,0 +1,24 @@
+{
+  "chaining": {
+    "sources": {
+      "body": "Corp JSON",
+      "header": "Antet",
+      "cookie": "Cookie",
+      "status": "Cod de stare"
+    },
+    "binaryBody": "Corpul răspunsului este binar, nu JSON",
+    "emptyBody": "Corpul răspunsului este gol",
+    "cutOff": "Răspunsul a fost întrerupt, deci corpul său nu este JSON complet",
+    "notJson": "Corpul răspunsului nu este JSON",
+    "enterPath": "Introduceți un JSONPath, de exemplu {{example}}",
+    "invalidPath": "JSONPath nevalid: {{error}}",
+    "noMatch": "Nimic din corp nu corespunde acestei căi",
+    "matchedNull": "Valoarea găsită este null",
+    "enterHeader": "Introduceți un nume de antet",
+    "noHeader": "Răspunsul nu are antetul {{name}}",
+    "enterCookie": "Introduceți un nume de cookie",
+    "noCookie": "Răspunsul nu are cookie-ul {{name}}",
+    "nameVariable": "Denumiți variabila",
+    "badVariableName": "Numele unei variabile nu conține } și nu începe și nu se termină cu un spațiu"
+  }
+}

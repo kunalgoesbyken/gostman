@@ -24,7 +24,7 @@ export function NoticeToast() {
   return (
     <div role="status" aria-live="polite" onMouseEnter={hold} onMouseLeave={release} onFocus={hold} onBlur={release}>
       {notice && (
-        <div className="fixed inset-x-4 bottom-10 z-40 flex items-center gap-2 rounded-md border border-border bg-background py-1.5 pl-3 pr-1.5 text-xs text-foreground sm:inset-x-auto sm:right-4 sm:max-w-sm">
+        <div className="fixed inset-x-4 bottom-10 z-40 flex items-center gap-2 rounded-md border border-border bg-background py-1.5 ps-3 pe-1.5 text-xs text-foreground sm:inset-x-auto sm:end-4 sm:max-w-sm">
           <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">{notice.message}</span>
           {notice.undo && <Button size="sm" variant="outline" onClick={notice.undo}>{TREE_TEXT.undo}</Button>}
           <IconButton label={TREE_TEXT.dismiss} icon={X} size="icon-xs" onClick={dismiss} />

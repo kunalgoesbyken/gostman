@@ -1,0 +1,29 @@
+{
+  "extract": {
+    "noResponse": "Send the request to see a value",
+    "failedResponse": "The last request failed",
+    "summary": "Checked rows run after every response and keep their value, ready to use as {{example}}. Session values stay in memory until you clear them or close the app; environment values are saved with the active environment.",
+    "invalidEnvironment": "Nothing was saved: the active environment's variables are not valid JSON.",
+    "nothing": "The last run produced no values.",
+    "savedTo": {
+      "session": "Kept {{names}} as session values.",
+      "environment": "Saved {{names}} to the active environment."
+    },
+    "scopes": {
+      "session": "Session",
+      "environment": "Environment"
+    },
+    "variable": "Variable",
+    "from": "From",
+    "path": "Path or name",
+    "value": "Value in last response",
+    "keepIn": "Keep in",
+    "run": "Run this extractor",
+    "name": "Variable name",
+    "namePlaceholder": "variable_name",
+    "source": "Value source",
+    "scope": "Where the value is kept",
+    "remove": "Remove extractor",
+    "runNow": "Run now"
+  }
+}

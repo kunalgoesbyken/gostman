@@ -87,7 +87,7 @@ func findingsOf(rule Rule, severity Severity, spec *Spec) []Finding {
 		if operation == "" {
 			operation = operationAt(issue.Path)
 		}
-		findings = append(findings, Finding{Rule: rule.ID, Severity: severity, Message: issue.Message, Path: issue.Path, Operation: operation})
+		findings = append(findings, Finding{Rule: rule.ID, Severity: severity, Message: issue.Message, Path: issue.Path, Operation: operation, Localized: issue.Localized})
 	}
 	return findings
 }

@@ -1,0 +1,27 @@
+{
+  "graphql": {
+    "query": "Query",
+    "queryLabel": "GraphQL-Query",
+    "variables": "Variablen (JSON)",
+    "variablesLabel": "GraphQL-Variablen",
+    "invalidJson": "Kein gültiges JSON: {{message}}",
+    "syntaxAt": "{{message}} (Zeile {{line}}, Spalte {{column}})",
+    "sendAsGraphql": "Als GraphQL senden",
+    "prettify": "Formatieren",
+    "prettifyTitle": "Die Query neu formatieren. Kommentare werden entfernt.",
+    "cannotPrettify": "Formatieren nicht möglich: {{detail}}",
+    "notSent": "Wird nicht gesendet, solange die Methode {{method}} ist.",
+    "schema": "Schema",
+    "schemaDescription": "Laden Sie es, um die Typen und Felder dieses Endpunkts zu durchsuchen. Die Introspection-Query verwendet URL, Header und Auth dieser Anfrage.",
+    "searchLabel": "Schema durchsuchen",
+    "searchPlaceholder_one": "{{count}} Typ und seine Felder durchsuchen",
+    "searchPlaceholder_other": "{{count}} Typen und Felder durchsuchen",
+    "noMatch": "Keine Treffer.",
+    "moreMatches_one": "{{count}} weiterer Typ passt. Schränken Sie die Suche ein, um ihn zu sehen.",
+    "moreMatches_other": "{{count}} weitere Typen passen. Schränken Sie die Suche ein, um sie zu sehen.",
+    "noFields": "Keine Felder.",
+    "schemaTooLarge": "Das Schema ist größer als die Grenze für die Antwortgröße.",
+    "noJsonBody": "Der Endpunkt antwortete mit {{status}} ohne JSON-Body.",
+    "noSchema": "Der Endpunkt antwortete mit {{status}} ohne Schema."
+  }
+}

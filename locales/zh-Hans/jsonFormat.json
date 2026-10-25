@@ -1,0 +1,21 @@
+{
+  "jsonFormat": {
+    "expectedValue": "此处应有一个值",
+    "unexpectedEnd": "JSON 结束得过早",
+    "unexpected": "意外的 {{character}}",
+    "endOfText": "文本结尾",
+    "expectedKey": "此处应为用双引号括起的属性名",
+    "expectedColon": "属性名后应有 ':'",
+    "expectedObjectEnd": "属性值后应有 ',' 或 '}'",
+    "expectedArrayEnd": "项之后应有 ',' 或 ']'",
+    "trailingComma": "请删除 '{{closer}}' 之前的逗号",
+    "unclosedString": "此字符串没有结束引号",
+    "lineBreakInString": "字符串内的换行必须写成 \n",
+    "controlInString": "字符串内的控制字符必须转义",
+    "badEscape": "字符串中有未知的转义序列",
+    "badNumber": "此数字不是有效的 JSON",
+    "unclosedReference": "此 {{reference}} 没有结束的 {{closer}}",
+    "extraText": "JSON 值之后有多余的文本",
+    "tooDeep": "JSON 嵌套过深，无法格式化"
+  }
+}

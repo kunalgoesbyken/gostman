@@ -1,0 +1,39 @@
+{
+  "requestBar": {
+    "name": "Nombre de la solicitud",
+    "untitled": "Solicitud sin título",
+    "method": "Método HTTP",
+    "url": "URL de la solicitud",
+    "methodPlaceholders": {
+      "grpc": {
+        "full": "Introduce la dirección del servidor, por ejemplo localhost:50051",
+        "medium": "Dirección del servidor",
+        "short": "Dirección"
+      },
+      "mcp": {
+        "full": "Introduce la URL del servidor MCP",
+        "medium": "URL del servidor MCP",
+        "short": "URL"
+      }
+    },
+    "send": "Enviar",
+    "connect": "Conectar",
+    "disconnect": "Desconectar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "code": "Código",
+    "codeHint": "Generar código",
+    "codeLanguage": "Lenguaje",
+    "urlPlaceholders": {
+      "full": "Introduce una URL o pega un comando curl",
+      "medium": "URL o comando curl",
+      "short": "URL"
+    }
+  },
+  "curlFiles": {
+    "title": "¿Pegar las lecturas de archivos?",
+    "message": "Este comando curl lee archivos de este equipo y los envía con la solicitud, así que conserva las lecturas solo si confías en el origen del comando. Sin ellas, el resto del comando se rellena igualmente.",
+    "withThem": "Pegar con lecturas de archivos",
+    "withoutThem": "Pegar sin lecturas de archivos"
+  }
+}

@@ -9,7 +9,7 @@ import { SegmentedControl } from "./ui/segmented"
 import { Textarea } from "./ui/textarea"
 import { SkeletonLines } from "./ui/skeleton"
 import { AI_TEXT } from "../lib/aiText"
-import { formatSize } from "../lib/dataUtils"
+import { formatBytes } from "../lib/byteSize"
 import { hostOf, providerById } from "../lib/ai/providers"
 import {
   STAGE_ERROR, STAGE_INPUT, STAGE_PREVIEW, STAGE_PROPOSAL, STAGE_RUNNING, useAiStore,
@@ -18,8 +18,8 @@ import { SCRIPT_POST, SCRIPT_PRE, taskById } from "../lib/ai/tasks"
 import { cn } from "../lib/utils"
 
 const SCRIPT_KINDS = [
-  { value: SCRIPT_PRE, label: AI_TEXT.preRequest },
-  { value: SCRIPT_POST, label: AI_TEXT.postResponse },
+  { value: SCRIPT_PRE, get label() { return AI_TEXT.preRequest } },
+  { value: SCRIPT_POST, get label() { return AI_TEXT.postResponse } },
 ]
 
 const PRE_CLASS = "overflow-auto whitespace-pre-wrap rounded border border-border bg-muted/40 p-2 font-mono text-xs"
@@ -63,17 +63,16 @@ function PreviewStage({ dialog, host, skipNextTime, onSkipChange }) {
   return (
     <div className="flex flex-col gap-3">
       <Notice tone="muted" icon={ShieldCheck} edge="border">
-        {AI_TEXT.previewNote(host, formatSize(bytes), tokens)}
-        {includeValues !== null && ` ${includeValues ? AI_TEXT.valuesIncluded : AI_TEXT.structureOnly}`}
+        {AI_TEXT.previewNote(host, formatBytes(bytes), tokens, includeValues)}
       </Notice>
       <SectionLabel>{AI_TEXT.instructions}</SectionLabel>
-      <pre className={cn("max-h-32", PRE_CLASS)}>{scrubbed.system}</pre>
+      <pre dir="ltr" className={cn("max-h-32", PRE_CLASS)}>{scrubbed.system}</pre>
       <SectionLabel>{AI_TEXT.content}</SectionLabel>
-      <pre className={cn("max-h-64", PRE_CLASS)}>{scrubbed.user}</pre>
+      <pre dir="ltr" className={cn("max-h-64", PRE_CLASS)}>{scrubbed.user}</pre>
       {scrubbed.schema && (
         <>
           <SectionLabel>{AI_TEXT.replyFormat}</SectionLabel>
-          <pre className={cn("max-h-32", PRE_CLASS)}>{JSON.stringify(scrubbed.schema, null, 2)}</pre>
+          <pre dir="ltr" className={cn("max-h-32", PRE_CLASS)}>{JSON.stringify(scrubbed.schema, null, 2)}</pre>
         </>
       )}
       <Checkbox checked={skipNextTime} onChange={(event) => onSkipChange(event.target.checked)} className="h-auto items-start justify-start">
@@ -97,7 +96,7 @@ function DiffPane({ label, text, compareTo }) {
   return (
     <div className="flex min-w-0 flex-col gap-1">
       <SectionLabel>{label}</SectionLabel>
-      <pre className={cn("max-h-64 min-h-12", PRE_CLASS)}>
+      <pre dir="ltr" className={cn("max-h-64 min-h-12", PRE_CLASS)}>
         {text === "" ? <span className="text-muted-foreground">{AI_TEXT.empty}</span> : text.split("\n").map((line, index) => (
           <div key={index} className={cn("whitespace-pre-wrap", !known.has(line) && "bg-success/15")}>{line || " "}</div>
         ))}
@@ -123,7 +122,7 @@ function Block({ block }) {
     <div className="flex flex-col gap-1">
       <SectionLabel>{block.heading}</SectionLabel>
       {block.text && <p className="whitespace-pre-wrap text-sm">{block.text}</p>}
-      {block.items && <ul className="list-disc pl-4 text-sm">{block.items.map((item) => <li key={item}>{item}</li>)}</ul>}
+      {block.items && <ul className="list-disc ps-4 text-sm">{block.items.map((item) => <li key={item}>{item}</li>)}</ul>}
     </div>
   )
 }
@@ -133,7 +132,7 @@ function Links({ links, onOpen }) {
     <ul className="flex flex-col gap-1">
       {links.map((link) => (
         <li key={link.label}>
-          <button type="button" onClick={() => onOpen(link)} className="w-full rounded px-2 py-1.5 text-left hover:bg-accent">
+          <button type="button" onClick={() => onOpen(link)} className="w-full rounded px-2 py-1.5 text-start hover:bg-accent">
             <span className="block truncate text-sm">{link.label}</span>
             <span className="block text-xs text-muted-foreground">{link.detail}</span>
           </button>
@@ -211,7 +210,7 @@ export function AiDialog({ actions }) {
     <Dialog label={task.text.label} size="lg" onClose={actions.cancel}>
       <DialogHeader onClose={actions.cancel}>
         <DialogTitle>{task.text.label}</DialogTitle>
-        <span className="ml-auto mr-2 flex shrink-0 items-center gap-1 text-xs max-sm:hidden text-muted-foreground">
+        <span className="ms-auto me-2 flex shrink-0 items-center gap-1 text-xs max-sm:hidden text-muted-foreground">
           <BrandIcon brand={settings.provider} />
           {AI_TEXT.providerLabel(provider.label)}
         </span>

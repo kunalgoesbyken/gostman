@@ -7,6 +7,7 @@ import (
 	"unicode"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const (
@@ -68,7 +69,7 @@ func (c *collector) httpPlaceholders(text, label string, prompts map[string]bool
 		}
 		mapped, known := c.systemVariable(inner, label)
 		if !known {
-			c.flagUnique(messageHTTPVariables, variableOpen+inner+variableClose)
+			c.flagUnique(locales.ImporterHttpVariables, variableOpen+inner+variableClose)
 		}
 		return variableOpen + mapped + variableClose
 	})
@@ -89,7 +90,7 @@ func (c *collector) systemVariable(inner, label string) (string, bool) {
 		return mapped, true
 	}
 	if name, ok := environmentReference(fields); ok {
-		c.flagUnique(messageHTTPProcessEnv, label)
+		c.flagUnique(locales.ImporterHttpProcessEnv, label)
 		return processPrefix + name, true
 	}
 	return inner, false

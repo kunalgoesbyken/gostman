@@ -1,0 +1,11 @@
+{
+  "attachment": {
+    "choose": "Escolher arquivo",
+    "replace": "Substituir",
+    "none": "Nenhum arquivo selecionado",
+    "pickTitle": "Escolha um arquivo para enviar",
+    "fromDisk": "Lido de {{path}} quando a requisição for enviada",
+    "tooLarge": "{{name}} tem {{size}}. O app web envia arquivos de até {{limit}}, porque seu proxy hospedado aceita requisições de no máximo {{proxyLimit}}. O app para desktop envia arquivos de até {{desktopLimit}} direto do disco.",
+    "proxyTooLarge": "A requisição é maior que os {{proxyLimit}} que o app web consegue passar pelo proxy. Envie corpos e arquivos grandes pelo app para desktop ou pela CLI."
+  }
+}

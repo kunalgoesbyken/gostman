@@ -1,26 +1,6 @@
-export const REQUEST_TABS_TEXT = {
-  sections: 'Request sections',
-  more: 'More',
-  moreHint: 'More request sections',
-  loading: 'Loading',
-  examples: 'Examples',
-  examplesHint: 'Saved response examples',
-  headerLabel: 'Header',
-  variableLabel: 'Variable',
-  paramLabel: 'Parameter',
-  paramsNote: 'These rows mirror the query string in the URL. Unchecked rows are kept here but not sent.',
-  labels: {
-    params: 'Params',
-    headers: 'Headers',
-    body: 'Body',
-    auth: 'Auth',
-    graphql: 'GraphQL',
-    grpc: 'gRPC',
-    mcp: 'MCP',
-    websocket: 'WebSocket',
-    vars: 'Vars',
-    extract: 'Extract',
-    tests: 'Checks',
-    settings: 'Settings',
-  },
-}
+import english from '../../../../locales/en/requestTabs.json'
+import { messages } from './i18n/core'
+
+const text = messages('requestTabs', english)
+
+export const REQUEST_TABS_TEXT = text.requestTabs

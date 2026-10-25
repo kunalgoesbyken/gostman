@@ -1,0 +1,29 @@
+{
+  "extract": {
+    "noResponse": "Wyślij żądanie, aby zobaczyć wartość",
+    "failedResponse": "Ostatnie żądanie zakończyło się błędem",
+    "summary": "Zaznaczone wiersze wykonują się po każdej odpowiedzi i zachowują swoją wartość, gotową do użycia jako {{example}}. Wartości sesji pozostają w pamięci, dopóki ich nie wyczyścisz lub nie zamkniesz aplikacji; wartości środowiska są zapisywane z aktywnym środowiskiem.",
+    "invalidEnvironment": "Nic nie zapisano: zmienne aktywnego środowiska nie są poprawnym JSON-em.",
+    "nothing": "Ostatnie uruchomienie nie dało żadnych wartości.",
+    "savedTo": {
+      "session": "Zachowano jako wartości sesji: {{names}}.",
+      "environment": "Zapisano w aktywnym środowisku: {{names}}."
+    },
+    "scopes": {
+      "session": "Sesja",
+      "environment": "Środowisko"
+    },
+    "variable": "Zmienna",
+    "from": "Z",
+    "path": "Ścieżka lub nazwa",
+    "value": "Wartość w ostatniej odpowiedzi",
+    "keepIn": "Zachowaj w",
+    "run": "Uruchom tę regułę wyodrębniania",
+    "name": "Nazwa zmiennej",
+    "namePlaceholder": "variable_name",
+    "source": "Źródło wartości",
+    "scope": "Gdzie wartość jest przechowywana",
+    "remove": "Usuń regułę wyodrębniania",
+    "runNow": "Uruchom teraz"
+  }
+}

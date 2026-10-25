@@ -1,0 +1,216 @@
+{
+  "ai": {
+    "name": "IA",
+    "ok": "OK",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "back": "Retour",
+    "discard": "Rejeter",
+    "tryAgain": "Réessayer",
+    "preview": "Aperçu",
+    "sendToAi": "Envoyer à l’IA",
+    "continueBatch": "Créer les requêtes suivantes",
+    "empty": "Vide",
+    "current": "Actuel",
+    "proposed": "Proposé",
+    "instructions": "Instructions",
+    "content": "Contenu",
+    "replyFormat": "Format de réponse",
+    "scriptLabel": "Script",
+    "preRequest": "Pré-requête",
+    "postResponse": "Post-réponse",
+    "providerLabel": "IA : {{label}}",
+    "waitingFor": "En attente de {{label}}",
+    "readingSpec": "Lecture du document OpenAPI",
+    "reviewNote": "Généré par IA. Relisez avant d’accepter. Rien n’est envoyé, enregistré ni exécuté tant que vous n’avez pas décidé.",
+    "previewNote": "Voici exactement ce qui sera envoyé à {{host}} : environ {{size}} ({{tokens}} jetons). Les secrets sont masqués.",
+    "previewNoteValues": "Voici exactement ce qui sera envoyé à {{host}} : environ {{size}} ({{tokens}} jetons). Les secrets sont masqués. Les valeurs du corps de la réponse sont incluses (4 Ko au maximum, clés sensibles masquées).",
+    "previewNoteStructure": "Voici exactement ce qui sera envoyé à {{host}} : environ {{size}} ({{tokens}} jetons). Les secrets sont masqués. Seule la structure du corps de la réponse est incluse, pas ses valeurs.",
+    "skipPreview": "Ne plus demander pour cette action (elle sera envoyée sans cet aperçu)",
+    "includeValues": "Inclure les vraies valeurs de la réponse (sinon seule la structure est envoyée)",
+    "includeBodyValues": "Inclure les valeurs du corps (4 Ko au maximum, clés sensibles masquées). Décochez pour n’envoyer que la structure.",
+    "needsResponse": "Envoyez d’abord la requête pour disposer d’une réponse sur laquelle travailler.",
+    "needsTrust": "Ce dossier est restreint. Approuvez-le avant de générer des scripts : les scripts issus de l’IA ne sont pas fiables tant que vous ne les avez pas relus.",
+    "badReply": "Le modèle n’a pas répondu dans le format attendu. Réessayez ou choisissez un modèle plus performant.",
+    "cutOff": "La réponse a été coupée car elle a atteint la limite de longueur. Réessayez avec moins de contenu ou choisissez un modèle qui répond plus brièvement.",
+    "connected": "Connecté",
+    "cancelled": "Annulé",
+    "tooLarge": "Le texte fait {{size}} ; la limite est de {{limit}}. Collez une partie plus petite. Un document OpenAPI ou Swagger complet, quelle que soit sa taille, peut être importé avec Importer des données.",
+    "searchLimited": "Votre collection contient {{total}} requêtes. Seules les {{sent}} premières sont envoyées : les requêtes suivantes ne peuvent donc pas être trouvées.",
+    "tasks": {
+      "request": {
+        "label": "Nouvelle requête à partir d’une description",
+        "inputLabel": "Décrivez la requête",
+        "placeholder": "POST d’un nouvel utilisateur avec nom et e-mail",
+        "section": "Nouvelle requête (s’ouvre dans un onglet non enregistré)",
+        "apply": "Ouvrir dans un nouvel onglet",
+        "untitled": "Requête IA"
+      },
+      "tests": {
+        "label": "Vérifications pour une réponse",
+        "assertions": "Assertions",
+        "script": "Script de post-réponse (généré par IA, à relire avant exécution)",
+        "apply": "Ajouter à la requête"
+      },
+      "script": {
+        "label": "Script de pré-requête ou de post-réponse",
+        "inputLabel": "Que doit faire le script ?",
+        "placeholder": "Enregistrer le jeton de la réponse dans l’environnement",
+        "sectionPreScript": "Nouveau script de pré-requête (généré par IA, à relire avant exécution)",
+        "sectionPostScript": "Nouveau script de post-réponse (généré par IA, à relire avant exécution)",
+        "apply": "Remplacer le script"
+      },
+      "explain": {
+        "label": "Expliquer une réponse en échec",
+        "happened": "Ce qui s’est passé",
+        "causes": "Causes probables",
+        "fixes": "Corrections suggérées"
+      },
+      "docs": {
+        "label": "Documenter la requête",
+        "section": "Description",
+        "apply": "Utiliser comme description"
+      },
+      "search": {
+        "label": "Interroger la collection",
+        "inputLabel": "Que cherchez-vous ?",
+        "placeholder": "le point d’accès qui annule une commande"
+      },
+      "schema": {
+        "label": "Requêtes à partir d’une description d’API",
+        "inputLabel": "Collez un document OpenAPI ou Swagger, un schéma GraphQL ou le texte d’une documentation d’API",
+        "placeholder": "openapi: 3.1.0 ...",
+        "folder": "Nouveau dossier « {{name}} »",
+        "defaultFolder": "Requêtes IA",
+        "apply_one": "Ajouter le dossier et {{count}} requête",
+        "apply_other": "Ajouter le dossier et {{count}} requêtes",
+        "apply_many": "Ajouter le dossier et {{count}} de requêtes",
+        "moreNote": "L’API compte plus de points d’accès qu’une seule réponse ne peut en contenir. Créez les requêtes suivantes pour continuer ; le même texte est renvoyé avec la liste des requêtes déjà créées.",
+        "importerSection_one": "Import OpenAPI : {{count}} requête",
+        "importerSection_other": "Import OpenAPI : {{count}} requêtes",
+        "importerSection_many": "Import OpenAPI : {{count}} de requêtes",
+        "importerNote": "Il s’agit d’un document OpenAPI ou Swagger : l’importeur intégré le lit en entier. Rien n’a été envoyé à l’IA. Pour ajouter des assertions, envoyez une requête et utilisez « Vérifications pour une réponse ».",
+        "importerWarnings": "Remarques de l’importeur",
+        "importApply_one": "Importer {{count}} requête",
+        "importApply_other": "Importer {{count}} requêtes",
+        "importApply_many": "Importer {{count}} de requêtes",
+        "moreLines_one": "et {{count}} de plus",
+        "moreLines_other": "et {{count}} de plus",
+        "moreLines_many": "et {{count}} de plus"
+      }
+    },
+    "buttons": {
+      "generate": "Générer avec l’IA",
+      "generateTests": "Générer des vérifications avec l’IA",
+      "generateScript": "Générer ce script avec l’IA",
+      "explain": "Expliquer avec l’IA",
+      "explainError": "Expliquer cette erreur avec l’IA",
+      "document": "Rédiger avec l’IA",
+      "documentLabel": "Rédiger la description avec l’IA"
+    },
+    "commands": {
+      "request": {
+        "label": "IA : nouvelle requête à partir d’une description",
+        "description": "Rédige une requête, présentée en aperçu à valider",
+        "keywords": "générer"
+      },
+      "tests": {
+        "label": "IA : générer des vérifications",
+        "description": "Propose des vérifications pour la dernière réponse"
+      },
+      "script": {
+        "label": "IA : écrire un script",
+        "description": "Propose un script de pré-requête ou de post-réponse"
+      },
+      "explain": {
+        "label": "IA : expliquer la réponse",
+        "description": "Explique un échec et suggère une correction"
+      },
+      "docs": {
+        "label": "IA : documenter cette requête",
+        "description": "Propose une description pour la requête"
+      },
+      "search": {
+        "label": "IA : interroger la collection",
+        "description": "Trouve des requêtes à partir de leur description",
+        "keywords": "chercher rechercher trouver"
+      },
+      "schema": {
+        "label": "IA : requêtes à partir d’une description d’API",
+        "description": "Les documents OpenAPI passent par l’importeur intégré ; les autres descriptions vont à l’IA",
+        "keywords": "openapi swagger graphql schéma"
+      },
+      "settings": {
+        "label": "Paramètres de l’IA",
+        "description": "Activer ou désactiver l’IA, fournisseur, modèle et clé",
+        "keywords": "désactiver activer préférences"
+      }
+    },
+    "settings": {
+      "offNote": "L’IA est désactivée. Aucun bouton, commande ni raccourci d’IA n’est affiché, et rien n’est envoyé à un fournisseur d’IA.",
+      "onNote": "L’IA est activée. Les boutons et commandes d’IA sont affichés, et rien n’est envoyé tant que vous ne lancez pas une action d’IA.",
+      "needsSetup": "L’IA est activée. Avant de pouvoir lancer une action d’IA, choisissez un modèle et enregistrez une clé d’API si le fournisseur en exige une.",
+      "previewNote": "Chaque action affiche un aperçu exact de ce qui sera envoyé avant que quoi que ce soit ne quitte votre machine, sauf si vous avez choisi « Ne plus demander » pour cette action.",
+      "consent": "Je comprends que, lorsque je lance une action d’IA, les détails de la requête ou de la réponse affichés dans l’aperçu sont envoyés à {{host}}, et que la facturation relève de ma relation avec le fournisseur.",
+      "enable": "Activer les fonctions d’IA",
+      "enableAfterConsent": "Activer les fonctions d’IA (cochez d’abord la ligne ci-dessus)",
+      "provider": "Fournisseur",
+      "baseUrl": "URL de base",
+      "baseUrlPlaceholder": "https://host/v1",
+      "allowInsecure": "Autoriser http simple vers cette adresse (les adresses de boucle locale sont toujours autorisées)",
+      "model": "ID du modèle",
+      "listModels": "Lister les modèles",
+      "modelsFound_one": "{{count}} modèle trouvé. Choisissez-en un ou saisissez un ID.",
+      "modelsFound_other": "{{count}} modèles trouvés. Choisissez-en un ou saisissez un ID.",
+      "modelsFound_many": "{{count}} de modèles trouvés. Choisissez-en un ou saisissez un ID.",
+      "noModels": "Le fournisseur n’a listé aucun modèle. Saisissez un ID de modèle.",
+      "localNoModels": "Le serveur fonctionne mais n’a aucun modèle. Téléchargez-en un, puis relancez la liste.",
+      "apiKey": "Clé d’API",
+      "keySaved": "Clé enregistrée",
+      "removeKey": "Supprimer la clé",
+      "pasteKey": "Collez la clé d’API",
+      "optionalKey": "Facultative",
+      "saveKey": "Enregistrer la clé",
+      "remember": "Mémoriser sur cet appareil (sinon seulement jusqu’à la fermeture de l’onglet)",
+      "test": "Tester la connexion",
+      "skipped_one": "{{count}} action est envoyée sans aperçu.",
+      "skipped_other": "{{count}} actions sont envoyées sans aperçu.",
+      "skipped_many": "{{count}} d’actions sont envoyées sans aperçu.",
+      "askAgain": "Afficher à nouveau l’aperçu",
+      "browserNote": "Dans le navigateur, les appels partent directement de cette page vers le fournisseur ; votre clé n’atteint jamais les serveurs de Gostman. Le fournisseur doit autoriser les appels cross-origin. Un Ollama local exige que OLLAMA_ORIGINS soit défini sur ce site, et LM Studio exige que CORS soit activé dans les paramètres de son serveur. Si un fournisseur bloque les navigateurs, utilisez l’application de bureau.",
+      "desktopNote": "Votre clé est conservée dans le trousseau du système et l’application de bureau appelle elle-même le fournisseur. La page ne relit jamais la clé.",
+      "forget": "Désactiver l’IA et oublier les clés",
+      "forgetWhileOff": "Oublier les clés et paramètres d’IA"
+    },
+    "errors": {
+      "invalidBase": "L’URL de base n’est pas une adresse valide",
+      "insecureBase": "Utilisez une URL de base en https, ou autorisez http simple pour elle dans les paramètres de l’IA",
+      "enterModel": "Saisissez un ID de modèle",
+      "pasteKey": "Collez une clé d’API pour ce fournisseur",
+      "keyMoved": "Cette clé a été enregistrée pour une autre adresse. Enregistrez-la à nouveau pour cette URL de base.",
+      "tooLarge": "La requête est trop volumineuse pour être envoyée. Sélectionnez moins de contenu",
+      "noAnswer": "Le fournisseur n’a renvoyé aucune réponse",
+      "notJson": "Le fournisseur a répondu autre chose que du JSON. Vérifiez l’URL de base",
+      "timedOut": "Le fournisseur n’a pas répondu à temps",
+      "rejectedKey": "Le fournisseur a refusé la clé, ou le compte n’est peut-être pas autorisé à utiliser ce modèle",
+      "rateLimited": "Le fournisseur limite le débit ou le quota est épuisé. Patientez un instant et réessayez",
+      "providerTimeout": "Le fournisseur a dépassé le délai",
+      "providerProblem": "Le fournisseur a rencontré un problème. Réessayez dans un instant",
+      "refused": "Le fournisseur a refusé la requête ({{status}})",
+      "retryIn": "{{summary}} (nouvel essai dans {{seconds}} s)",
+      "withDetail": "{{summary}} : {{detail}}",
+      "unreachable": "Impossible de joindre {{host}}. L’adresse est peut-être incorrecte, ou le fournisseur n’autorise pas les appels depuis une page web (CORS). {{advice}}",
+      "unreachableWithReason": "Impossible de joindre {{host}} ({{reason}}). L’adresse est peut-être incorrecte, ou le fournisseur n’autorise pas les appels depuis une page web (CORS). {{advice}}",
+      "ollamaAdvice": "Lancez Ollama avec OLLAMA_ORIGINS={{origin}} puis redémarrez-le, ou utilisez l’application de bureau.",
+      "lmStudioAdvice": "Lancez le serveur LM Studio avec CORS activé (paramètres Developer, ou lms server start --cors), ou utilisez l’application de bureau.",
+      "customAdvice": "Le serveur doit répondre à la requête préliminaire OPTIONS et autoriser {{origin}} avec les en-têtes Authorization et Content-Type. L’application de bureau n’est pas soumise à cette limite.",
+      "anthropicAdvice": "Anthropic n’autorise que les appels de navigateur qui portent son en-tête d’accès direct, que Gostman envoie ; vérifiez donc aussi la clé et votre connexion. L’application de bureau n’est pas soumise à cette limite.",
+      "generalAdvice": "Vérifiez l’URL de base et votre connexion. L’application de bureau n’est pas soumise à cette limite."
+    },
+    "providers": {
+      "local": "{{name}} (local)",
+      "custom": "URL compatible OpenAI",
+      "customModelHint": "ID du modèle"
+    }
+  }
+}

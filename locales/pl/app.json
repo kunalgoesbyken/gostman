@@ -1,0 +1,26 @@
+{
+  "app": {
+    "loading": "Ładowanie",
+    "loadingEditor": "Ładowanie edytora",
+    "backToLanding": "Wróć do strony głównej",
+    "requestSection": "Żądanie",
+    "window": {
+      "minimize": "Minimalizuj",
+      "maximize": "Maksymalizuj",
+      "restore": "Przywróć"
+    },
+    "crash": {
+      "title": "W programie Gostman wystąpił błąd",
+      "description": "Zapisane żądania nie zostały naruszone. Załaduj ponownie, aby kontynuować. Jeśli błąd się powtórzy, zgłoś go wraz z tym komunikatem:\n\n{{error}}",
+      "reload": "Załaduj ponownie"
+    },
+    "loadFailure": {
+      "title": "Nie udało się wczytać zapisanych danych",
+      "description": "Nic nie zostało zmienione ani nadpisane. {{reason}}",
+      "retry": "Spróbuj ponownie",
+      "unreadable": "Zapisane dane były nieczytelne",
+      "ok": "OK"
+    },
+    "labelled": "{{label}}: {{name}}"
+  }
+}

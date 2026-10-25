@@ -1,0 +1,41 @@
+{
+  "realtime": {
+    "targets": {
+      "topic": "Topic",
+      "event": "Eveniment"
+    },
+    "browser": {
+      "closed": "Conexiune închisă (cod {{code}})",
+      "closedWithReason": "Conexiune închisă (cod {{code}}: {{reason}})",
+      "notConnected": "Nu s-a putut conecta (cod {{code}})",
+      "notConnectedWithReason": "Nu s-a putut conecta (cod {{code}}: {{reason}})"
+    },
+    "graphql": {
+      "subscribing": "Conexiune confirmată. Se face abonarea.",
+      "complete": "Abonamentul s-a încheiat"
+    },
+    "socketIo": {
+      "joined": "S-a alăturat namespace-ului {{namespace}}",
+      "left": "Serverul a părăsit namespace-ul",
+      "closed": "Serverul a închis sesiunea Socket.IO",
+      "refused": "Serverul a refuzat conexiunea",
+      "binary": "Pachetele Socket.IO binare nu sunt decodate.",
+      "noEvent": "Introduceți un nume de eveniment de emis.",
+      "ack": "ack {{id}}"
+    },
+    "mqtt": {
+      "connected": "Conectat la broker",
+      "refusedVersion": "Brokerul a refuzat conexiunea: brokerul nu acceptă MQTT 3.1.1",
+      "refusedIdentifier": "Brokerul a refuzat conexiunea: ID-ul clientului a fost respins",
+      "refusedUnavailable": "Brokerul a refuzat conexiunea: brokerul nu este disponibil",
+      "refusedCredentials": "Brokerul a refuzat conexiunea: numele de utilizator sau parola sunt greșite",
+      "refusedUnauthorized": "Brokerul a refuzat conexiunea: clientul nu este autorizat",
+      "refusedOther": "Brokerul a refuzat conexiunea: cod {{code}}",
+      "subscribed": "Abonat la {{filter}}",
+      "subscribeRefused": "Brokerul a refuzat abonarea la {{filter}}",
+      "notBinary": "Se aștepta date MQTT binare, dar s-a primit text.",
+      "noTopic": "Introduceți un topic în care să publicați.",
+      "noFilter": "Introduceți un filtru de topic la care să vă abonați."
+    }
+  }
+}

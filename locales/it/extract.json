@@ -1,0 +1,29 @@
+{
+  "extract": {
+    "noResponse": "Invia la richiesta per vedere un valore",
+    "failedResponse": "L'ultima richiesta non è riuscita",
+    "summary": "Le righe selezionate vengono eseguite dopo ogni risposta e conservano il loro valore, pronto da usare come {{example}}. I valori di sessione restano in memoria finché non li cancelli o chiudi l'app; i valori d'ambiente vengono salvati con l'ambiente attivo.",
+    "invalidEnvironment": "Non è stato salvato nulla: le variabili dell'ambiente attivo non sono un JSON valido.",
+    "nothing": "L'ultima esecuzione non ha prodotto valori.",
+    "savedTo": {
+      "session": "Conservate {{names}} come valori di sessione.",
+      "environment": "Salvate {{names}} nell'ambiente attivo."
+    },
+    "scopes": {
+      "session": "Sessione",
+      "environment": "Ambiente"
+    },
+    "variable": "Variabile",
+    "from": "Da",
+    "path": "Percorso o nome",
+    "value": "Valore nell'ultima risposta",
+    "keepIn": "Conserva in",
+    "run": "Esegui questo estrattore",
+    "name": "Nome della variabile",
+    "namePlaceholder": "nome_variabile",
+    "source": "Origine del valore",
+    "scope": "Dove viene conservato il valore",
+    "remove": "Rimuovi estrattore",
+    "runNow": "Esegui ora"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "sidebar": {
+    "views": "Widok panelu bocznego",
+    "collections": "Kolekcje",
+    "history": "Historia",
+    "runRequests": "Uruchom żądania",
+    "newFolder": "Nowy folder",
+    "newRequest": "Nowe żądanie",
+    "toggle": "Przełącz panel boczny",
+    "close": "Zamknij panel boczny",
+    "resize": "Zmień rozmiar panelu bocznego"
+  },
+  "history": {
+    "search": "Szukaj w historii",
+    "emptyTitle": "Brak historii",
+    "emptyDescription": "Wysłane żądania pojawiają się tutaj.",
+    "noMatches": "Żadne wysłane żądanie nie pasuje.",
+    "remove": "Usuń z historii",
+    "clear": "Wyczyść historię",
+    "noResponse": "Brak odpowiedzi",
+    "sentAgo": {
+      "now": "teraz",
+      "minutes": "{{count}} min",
+      "hours": "{{count}} godz.",
+      "days": "{{count}} d"
+    },
+    "sentAgoSpoken": {
+      "now": "wysłano przed chwilą",
+      "minutes_one": "wysłano {{count}} minutę temu",
+      "minutes_few": "wysłano {{count}} minuty temu",
+      "minutes_many": "wysłano {{count}} minut temu",
+      "minutes_other": "wysłano {{count}} minuty temu",
+      "hours_one": "wysłano {{count}} godzinę temu",
+      "hours_few": "wysłano {{count}} godziny temu",
+      "hours_many": "wysłano {{count}} godzin temu",
+      "hours_other": "wysłano {{count}} godziny temu",
+      "days_one": "wysłano {{count}} dzień temu",
+      "days_few": "wysłano {{count}} dni temu",
+      "days_many": "wysłano {{count}} dni temu",
+      "days_other": "wysłano {{count}} dnia temu",
+      "date": "wysłano {{date}}"
+    }
+  }
+}

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const brunoExpected = `((text) => {
@@ -67,7 +69,7 @@ func readBrunoCheck(expression, written string, enabled bool) brunoCheck {
 	return check
 }
 
-func (c *collector) brunoChecks(d *dialect, label string, checks []brunoCheck) ([]assertion, string) {
+func (c *collector) brunoChecks(d *dialect, label locales.Message, checks []brunoCheck) ([]assertion, string) {
 	var rows []assertion
 	var tests []string
 	for _, check := range checks {
@@ -79,7 +81,7 @@ func (c *collector) brunoChecks(d *dialect, label string, checks []brunoCheck) (
 			tests = append(tests, check.test())
 			c.scripts.checks++
 		default:
-			c.skip(messageAssertOff, label, check.expression+": "+check.written)
+			c.skip(locales.ImporterAssertOff, locales.Params{"where": label, "assertion": check.expression + ": " + check.written})
 		}
 	}
 	return rows, c.translateStripped(d, label, stageChecks, strings.Join(tests, testSeparator))

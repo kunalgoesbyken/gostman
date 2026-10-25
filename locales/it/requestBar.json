@@ -1,0 +1,39 @@
+{
+  "requestBar": {
+    "name": "Nome della richiesta",
+    "untitled": "Richiesta senza titolo",
+    "method": "Metodo HTTP",
+    "url": "URL della richiesta",
+    "methodPlaceholders": {
+      "grpc": {
+        "full": "Inserisci l'indirizzo del server, ad esempio localhost:50051",
+        "medium": "Indirizzo del server",
+        "short": "Indirizzo"
+      },
+      "mcp": {
+        "full": "Inserisci l'URL del server MCP",
+        "medium": "URL del server MCP",
+        "short": "URL"
+      }
+    },
+    "send": "Invia",
+    "connect": "Connetti",
+    "disconnect": "Disconnetti",
+    "cancel": "Annulla",
+    "save": "Salva",
+    "code": "Codice",
+    "codeHint": "Genera codice",
+    "codeLanguage": "Linguaggio",
+    "urlPlaceholders": {
+      "full": "Inserisci un URL o incolla un comando curl",
+      "medium": "URL o comando curl",
+      "short": "URL"
+    }
+  },
+  "curlFiles": {
+    "title": "Incollare le letture di file?",
+    "message": "Questo comando curl legge file da questo computer e li invia con la richiesta, quindi mantienili solo se ti fidi della provenienza del comando. Senza di essi, il resto del comando viene comunque compilato.",
+    "withThem": "Incolla con le letture di file",
+    "withoutThem": "Incolla senza le letture di file"
+  }
+}

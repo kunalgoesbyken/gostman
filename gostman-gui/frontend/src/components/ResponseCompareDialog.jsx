@@ -8,19 +8,21 @@ import { RESPONSE_TEXT } from "../lib/responseText"
 
 const TEXT = RESPONSE_TEXT.history
 
-const PART_OPTIONS = Object.entries(COMPARE_PARTS).map(([value, part]) => ({ value, label: part.label }))
+const partOptions = () => Object.entries(COMPARE_PARTS).map(([value, part]) => ({ value, label: part.label }))
+
+const FIRST_PART = Object.keys(COMPARE_PARTS)[0]
 
 export function ResponseCompareDialog({ earlier, latest, onClose }) {
-  const [partName, setPartName] = useState(PART_OPTIONS[0].value)
+  const [partName, setPartName] = useState(FIRST_PART)
   const part = COMPARE_PARTS[partName]
 
   return (
     <Dialog label={TEXT.compareTitle} size="lg" className="max-w-6xl" onClose={onClose}>
       <DialogHeader onClose={onClose}>
-        <SegmentedControl label={TEXT.compareParts} options={PART_OPTIONS} value={partName} onChange={setPartName} />
+        <SegmentedControl label={TEXT.compareParts} options={partOptions()} value={partName} onChange={setPartName} />
         <span className="flex min-w-0 flex-1 items-center gap-2 truncate font-mono text-xs text-muted-foreground">
           {describeResponse(earlier)}
-          <ArrowRight aria-label={TEXT.comparedWith} className="h-3.5 w-3.5 shrink-0" />
+          <ArrowRight aria-label={TEXT.comparedWith} className="h-3.5 w-3.5 shrink-0 rtl:-scale-x-100" />
           {describeResponse(latest)}
         </span>
       </DialogHeader>

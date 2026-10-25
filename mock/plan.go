@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const (
@@ -16,13 +17,6 @@ const (
 	methodMCP     = "MCP"
 
 	maxRoutes = 10_000
-
-	reasonGraphQL   = "GraphQL requests are not served."
-	reasonGRPC      = "gRPC requests are not served."
-	reasonMCP       = "MCP requests are not served."
-	reasonWebSocket = "WebSocket requests are not served."
-	reasonNoExample = "Save a response as an example to serve this route."
-	reasonDisabled  = "This route is switched off."
 
 	headerResponseName = "X-Mock-Response-Name"
 	headerResponseCode = "X-Mock-Response-Code"
@@ -105,13 +99,13 @@ func buildTable(sources []Source, variables string, config Config) (*table, erro
 
 func (t *table) admit(source Source, expand func(string) string) (Route, error) {
 	route := Route{RequestID: source.ID, Name: source.Name, Method: methodOf(source)}
-	if reason := unservedReason(route.Method, expand(source.URL)); reason != "" {
-		return route.withState(StateSkipped, reason), nil
+	if reason, unserved := unservedReason(route.Method, expand(source.URL)); unserved {
+		return route.withReason(StateSkipped, reason), nil
 	}
 	shape := shapeOf(source)
 	route.Path = shape.String()
 	if source.Disabled {
-		return route.withState(StateDisabled, reasonDisabled), nil
+		return route.withReason(StateDisabled, locales.New(locales.MockRouteDisabled, nil)), nil
 	}
 	if err := source.Behavior.validate(); err != nil {
 		return Route{}, fmt.Errorf("%s: %w", source.Name, err)
@@ -121,17 +115,17 @@ func (t *table) admit(source Source, expand func(string) string) (Route, error) 
 	example, found := selectExample(examples, source.ExampleID)
 	if !found {
 		t.unanswered = append(t.unanswered, servedRoute{name: source.Name, method: route.Method, shape: shape})
-		return route.withState(StateNoExample, reasonNoExample), nil
+		return route.withReason(StateNoExample, locales.New(locales.MockRouteNoExample, nil)), nil
 	}
 	route.ExampleID, route.ExampleName = example.ID, example.Name
 	served, err := answerFrom(example)
 	if err != nil {
-		return route.withState(StateSkipped, err.Error()), nil
+		return route.withReason(StateSkipped, reasonOf(err)), nil
 	}
 
 	key := route.Method + " " + shape.key()
 	if owner, taken := t.owners[key]; taken {
-		return route.withState(StateConflict, fmt.Sprintf("%s %s is already served by %q.", route.Method, route.Path, owner)), nil
+		return route.withReason(StateConflict, locales.New(locales.MockRouteConflict, locales.Params{"method": route.Method, "path": route.Path, "owner": owner})), nil
 	}
 	t.owners[key] = source.Name
 	t.served = append(t.served, servedRoute{
@@ -142,7 +136,7 @@ func (t *table) admit(source Source, expand func(string) string) (Route, error) 
 		examples: servedExamples(examples),
 		behavior: source.Behavior,
 	})
-	return route.withState(StateServed, ""), nil
+	return route.withState(StateServed), nil
 }
 
 func shapeOf(source Source) pattern {
@@ -246,9 +240,21 @@ func (r *compiledRule) decide(route servedRoute, routed bool, params map[string]
 	return chosen
 }
 
-func (r Route) withState(state, reason string) Route {
-	r.State, r.Reason = state, reason
+func (r Route) withState(state string) Route {
+	r.State = state
 	return r
+}
+
+func (r Route) withReason(state string, reason locales.Message) Route {
+	r.State, r.Reason, r.Localized = state, reason.String(), &reason
+	return r
+}
+
+func reasonOf(err error) locales.Message {
+	if said := locales.Whole(err); said != nil {
+		return *said
+	}
+	return locales.Message{Code: locales.Code(err.Error())}
 }
 
 func methodOf(source Source) string {
@@ -259,20 +265,18 @@ func methodOf(source Source) string {
 	return method
 }
 
-func unservedReason(method, address string) string {
-	if method == methodGraphQL {
-		return reasonGraphQL
+func unservedReason(method, address string) (locales.Message, bool) {
+	switch {
+	case method == methodGraphQL:
+		return locales.New(locales.MockRouteGraphqlNotServed, nil), true
+	case method == methodGRPC:
+		return locales.New(locales.MockRouteGrpcNotServed, nil), true
+	case method == methodMCP:
+		return locales.New(locales.MockRouteMcpNotServed, nil), true
+	case isSocketAddress(address):
+		return locales.New(locales.MockRouteWebSocketNotServed, nil), true
 	}
-	if method == methodGRPC {
-		return reasonGRPC
-	}
-	if method == methodMCP {
-		return reasonMCP
-	}
-	if isSocketAddress(address) {
-		return reasonWebSocket
-	}
-	return ""
+	return locales.Message{}, false
 }
 
 func isSocketAddress(address string) bool {

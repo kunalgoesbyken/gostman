@@ -1,0 +1,10 @@
+{
+  "cookies": {
+    "clearAll": "Borrar todo",
+    "filter": "Filtrar por nombre o dominio",
+    "emptyTitle": "No hay cookies guardadas",
+    "emptyHint": "Las cookies que establecen las respuestas se guardan aquí y se devuelven al mismo sitio en solicitudes posteriores.",
+    "noMatches": "Ningún nombre de cookie ni dominio coincide.",
+    "remove": "Eliminar la cookie {{name}}"
+  }
+}

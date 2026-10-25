@@ -34,7 +34,7 @@ const isUnnamed = (row) => row.name.trim() === "" && (asText(row.value) !== "" |
 function ReadOnlyText({ text, label }) {
   return (
     <span aria-label={label} title={text} className="flex h-7 min-w-0 items-center font-mono text-xs text-foreground">
-      <span className="truncate">{text}</span>
+      <span dir="ltr" className="truncate">{text}</span>
     </span>
   )
 }
@@ -49,6 +49,7 @@ function NameField({ row, isDraft, features, autoFocus, inputRef, onChange }) {
       autoFocus={autoFocus}
       placeholder={isMissing ? TEXT.nameRequired : TEXT.variable}
       aria-label={TEXT.variable}
+      dir="ltr"
       aria-invalid={isMissing}
       spellCheck={false}
       onChange={(event) => onChange({ name: event.target.value })}
@@ -67,6 +68,7 @@ function ValueField({ row, isRevealed, readOnly, autoFocus, onBlur, onChange }) 
       autoFocus={autoFocus}
       placeholder={TEXT.value}
       aria-label={TEXT.value}
+      dir="ltr"
       autoComplete="off"
       spellCheck={false}
       onChange={(event) => onChange({ value: event.target.value })}
@@ -81,7 +83,7 @@ function ReferenceSummary({ reference }) {
   return (
     <span title={target} className="flex h-7 min-w-0 items-center gap-1.5 rounded-md border border-dashed border-border px-2 text-xs text-muted-foreground">
       <KeyRound className="h-3.5 w-3.5 shrink-0" />
-      <span className="truncate font-mono">{target}</span>
+      <span dir="ltr" className="truncate font-mono">{target}</span>
     </span>
   )
 }

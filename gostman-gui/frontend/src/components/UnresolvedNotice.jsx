@@ -6,7 +6,7 @@ import { UNRESOLVED_TEXT } from "../lib/unresolvedText"
 import { parseExtractors } from "../lib/chaining"
 
 const LINK_BUTTON = "font-medium text-primary underline-offset-2 hover:underline"
-const NAME_BUTTON = "mr-1.5 rounded-sm font-mono text-foreground underline-offset-2 hover:underline"
+const NAME_BUTTON = "me-1.5 rounded-sm font-mono text-foreground underline-offset-2 hover:underline"
 
 const describe = (isFailed, count) => (isFailed ? UNRESOLVED_TEXT.notDefined(count) : UNRESOLVED_TEXT.sentAsWritten(count))
 

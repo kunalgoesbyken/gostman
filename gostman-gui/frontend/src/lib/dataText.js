@@ -1,101 +1,37 @@
-import { formatSize } from './dataUtils'
+import english from '../../../../locales/en/data.json'
+import { formatBytes } from './byteSize'
+import { messages } from './i18n/core'
 
-const GIGABYTE = 1024 ** 3
+const text = messages('data', english, (t) => {
+  const usageParams = ({ usage, quota }) => ({ usage: formatBytes(usage), quota: formatBytes(quota) })
+  const itemsOf = (group) => Object.keys(english.data[group]).map((name) => t(`data.${group}.${name}`))
+  const withRoom = (key) => (room) => {
+    if (!room) return t(key)
+    return room.quota ? t(`${key}Usage`, usageParams(room)) : t(`${key}NoUsage`)
+  }
 
-const storageSize = (bytes) => (bytes >= GIGABYTE ? `${(bytes / GIGABYTE).toFixed(1)} GB` : formatSize(bytes))
+  return {
+    data: {
+      backupVersion: (version) => (version ? t('data.backupVersion', { version }) : t('data.backupVersionUnknown')),
+      restoreMessageDesktop: (date, version) => t('data.restoreMessageDesktop', { date, version }),
+      restoreMessageBrowser: (date, version) => t('data.restoreMessageBrowser', { date, version }),
+      browserStorageFull: withRoom('data.browserStorageFull'),
+      tabsNotStored: withRoom('data.tabsNotStored'),
+      damagedDataKept: (key, inDatabase) => t(inDatabase ? 'data.damagedDataKeptDatabase' : 'data.damagedDataKeptLocal', { key }),
+      get deletedInBrowser() {
+        return itemsOf('deletedInBrowser')
+      },
+      get deletedOnDesktop() {
+        return itemsOf('deletedOnDesktop')
+      },
+      get keptInBrowser() {
+        return itemsOf('keptInBrowser')
+      },
+      get keptOnDesktop() {
+        return itemsOf('keptOnDesktop')
+      },
+    },
+  }
+})
 
-const roomUsage = ({ usage, quota }) => (quota ? `Gostman uses ${storageSize(usage)} of the ${storageSize(quota)} this browser allows for this site. If that is far from full, the disk itself is nearly full.` : '')
-
-const sentences = (...parts) => parts.filter(Boolean).join(' ')
-
-export const DATA_TEXT = {
-  location: 'Where it is saved',
-  browserLocation: 'In this browser on this device. Clearing the site data for this page deletes it too.',
-  appDataLocation: "In the app's data on this computer.",
-  folderLocation: (path) => `Requests and environments are files in ${path}. History, cookies, tokens and secret values are in the app's data on this computer.`,
-  backupsLabel: 'Backups',
-  backupsHintDesktop: "A copy of the app's data is made the first time a new version starts and at most once a day. The last 10 are kept next to it. Secret values are stored apart from it, in the system keychain when there is one, and are not copied.",
-  backupsHintBrowser: 'A copy of the data in this browser is made when the app opens, at most once a day and when a new version starts. The last 10 are kept in this browser, so clearing its site data deletes them too. Export to keep a copy elsewhere.',
-  folderBackupsNote: 'The open workspace folder is plain files, so it is not copied here. Commit it to Git to keep its history.',
-  openBackupsFolder: 'Open folder',
-  backupsEmpty: 'No backups yet.',
-  backupsLoading: 'Reading backups…',
-  backupsUnavailable: 'Backups could not be read.',
-  backupVersion: (version) => (version ? `version ${version}` : 'unknown version'),
-  beforeRestore: 'Before a restore',
-  restoreAction: 'Restore',
-  restoreLabel: (date) => `Restore the backup from ${date}`,
-  restoreTitle: 'Restore backup',
-  restoreMessageDesktop: (date, version) => `Replace the app's data with the backup from ${date} (${version})? The collection saved on this computer, history, cookies, global variables and network settings go back to that copy. Workspace folders and secret values are not changed. A backup of the current data is made first, so you can undo this.`,
-  restoreMessageBrowser: (date, version) => `Replace the data in this browser with the backup from ${date} (${version})? Requests, folders, environments, history and cookies go back to that copy. A backup of the current data is made first, so you can undo this.`,
-  restoreConfirm: 'Restore',
-  restoreFailed: 'Could not restore the backup',
-  restored: (date) => `Restored the backup from ${date}.`,
-  backupUnreadable: 'This backup cannot be read, so nothing was changed.',
-  openBackupsFailed: 'Could not open the backups folder',
-  browserStorageFull: (room) => sentences(
-    "There is no room left in this browser's storage for Gostman.",
-    room ? roomUsage(room) : 'This browser does not let Gostman use its database here, as in some private windows, so the data is kept in local storage, which holds only a few megabytes.',
-    'Make large bodies smaller or delete requests you no longer need. The desktop app saves to a file and has no such limit.',
-  ),
-  tabsNotStored: (room) => sentences(
-    'Your open tabs and their unsaved changes could not be stored, so they will be gone after a reload.',
-    room ? roomUsage(room) : 'The storage for open tabs holds only a few megabytes, and a very large body fills it.',
-    'Make the body smaller, or save the request and close its tab.',
-  ),
-  tabsUnreadable: 'The open tabs saved in this browser could not be read.',
-  databaseUnavailable: "This browser's database, where your Gostman data is kept, could not be opened. Close other Gostman tabs or restart the browser, then try again.",
-  damagedDataKept: (key, inDatabase) => `The saved data in this browser could not be read, so the app started empty. The unreadable copy was kept in this browser's ${inDatabase ? 'IndexedDB, in the "gostman" database,' : 'local storage'} under "${key}".`,
-  exportReminder: 'Export a copy',
-  exportReminderHint: 'Your collection lives only in this browser. Export it to keep a copy somewhere else.',
-  exportReminderDismiss: 'Hide this reminder',
-  exportLabel: 'Export',
-  exportHint: 'Save your collection and environments to a file you can import later.',
-  exportAction: 'Export data…',
-  deleteLabel: 'Delete',
-  deleteHint: 'Shows what is deleted and what is kept, then asks you to confirm.',
-  deleteAction: 'Delete all data…',
-  commandTitle: 'Delete all data',
-  commandDescription: 'See what is deleted and what is kept, then confirm',
-  commandKeywords: 'reset erase wipe clear',
-  title: 'Delete all data',
-  deletedHeading: 'Deleted',
-  keptHeading: 'Kept',
-  deletedInBrowser: [
-    'Requests, folders, examples and environments',
-    'Global variables and secret values',
-    'History, cookies, OAuth 2.0 tokens and open tabs with unsaved changes',
-    'AI provider keys and AI settings',
-    'Automatic backups kept in this browser',
-  ],
-  deletedOnDesktop: [
-    "The collection in the app's data: requests, folders, examples and environments",
-    'Global variables and every secret value, including those of workspace folders',
-    'History, cookies, OAuth 2.0 tokens and open tabs with unsaved changes',
-    'Secret manager connections, AI provider keys and AI settings',
-    'The list of recent folders and which ones you trusted',
-    'Proxy, certificate and mock server settings, and captured traffic',
-    "Automatic backups of the app's data",
-  ],
-  keptInBrowser: [
-    'Preferences, such as theme, fonts, language and shortcuts',
-    'Your progress in the getting started steps',
-    'Files you exported',
-  ],
-  keptOnDesktop: [
-    'Workspace folders and the requests and environments in their files',
-    'Preferences, such as theme, fonts, language and shortcuts',
-    'Your progress in the getting started steps',
-    'Files you exported',
-  ],
-  backupsWarning: "Automatic backups are deleted too, so they can't bring your data back afterwards.",
-  exportAdvice: "This can't be undone. Export first to keep a copy of your collection and environments.",
-  folderExportAdvice: (place) => `This can't be undone. Export first saves the open folder's collection. To keep the collection in the app's data, switch to ${place} and export it there.`,
-  confirmWord: 'delete',
-  confirmPrompt: (word) => `Type "${word}" to confirm`,
-  cancel: 'Cancel',
-  exportFirst: 'Export first',
-  confirm: 'Delete all data',
-  failed: 'Could not delete all data',
-  deleted: 'All data was deleted.',
-}
+export const DATA_TEXT = text.data

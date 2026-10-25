@@ -1,0 +1,48 @@
+source,target
+request,richiesta
+response,risposta
+collection,raccolta
+collection settings,impostazioni della raccolta
+folder,cartella
+workspace,workspace
+environment,ambiente
+variable,variabile
+secret,segreto
+secret manager,gestore di segreti
+header,header
+body,corpo
+query parameter,parametro query
+path parameter,parametro di percorso
+cookie,cookie
+auth,autenticazione (scheda: Auth)
+token,token
+pre-request script,script pre-richiesta
+post-response script,script post-risposta
+check,controllo
+assertion,asserzione
+extract rule,regola di estrazione
+runner / run,runner / esegui
+iteration,iterazione
+flow,flusso
+step,passaggio
+mock server,server mock
+capture,cattura
+example,esempio
+history,cronologia
+tab,scheda
+sidebar,barra laterale
+preferences,preferenze
+theme,tema
+scan,scansione / cerca segreti
+finding,risultato
+load test,test di carico
+import,importa
+export,esporta
+share link,link di condivisione
+trust (a folder),considera attendibile
+restricted,limitata / non attendibile
+proxy,proxy
+certificate,certificato
+timeout,timeout
+send,invia
+command palette,riquadro comandi

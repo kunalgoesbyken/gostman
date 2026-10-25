@@ -1,0 +1,165 @@
+{
+  "preferences": {
+    "title": "Preferințe",
+    "sectionsLabel": "Secțiuni",
+    "sections": {
+      "appearance": "Aspect",
+      "theme": "Temă",
+      "fonts": "Fonturi",
+      "editor": "Editor",
+      "requests": "Cereri",
+      "language": "Limbă",
+      "ai": "AI",
+      "privacy": "Confidențialitate",
+      "data": "Date"
+    },
+    "fields": {
+      "theme": "Temă",
+      "contrast": "Contrast",
+      "accent": "Culoare de accent",
+      "textScale": "Dimensiunea textului",
+      "interfaceFont": "Font pentru interfață",
+      "codeFont": "Font pentru cod",
+      "density": "Densitate",
+      "responseLayout": "Panou de răspuns",
+      "systemTitleBar": "Folosire bară de titlu a sistemului",
+      "editorFontSize": "Dimensiunea fontului din editor",
+      "wrapLines": "Încadrare linii lungi",
+      "requestTimeout": "Timeout implicit",
+      "confirmCloseTab": "Întreabă înainte de a renunța la modificările nesalvate la închiderea unei file",
+      "language": "Limbă"
+    },
+    "themes": {
+      "system": "Sistem",
+      "light": "Luminoasă",
+      "dark": "Întunecată"
+    },
+    "contrasts": {
+      "system": "Sistem",
+      "standard": "Standard",
+      "more": "Mai mult"
+    },
+    "accents": {
+      "cyan": "Cyan",
+      "blue": "Albastru",
+      "violet": "Violet",
+      "pink": "Roz",
+      "graphite": "Grafit"
+    },
+    "densities": {
+      "comfortable": "Confortabilă",
+      "compact": "Compactă"
+    },
+    "layouts": {
+      "below": "Dedesubt",
+      "right": "Dreapta"
+    },
+    "seconds": "secunde",
+    "pixels": "px",
+    "contrastHint": "Mai mult desenează borduri și text secundar mai pronunțate.",
+    "systemTitleBarHint": "Afișează bara de titlu și butoanele ferestrei din desktopul dvs. în locul celor proprii Gostman. Se aplică după repornire.",
+    "systemTitleBarRestart": "Reporniți Gostman pentru a aplica această modificare.",
+    "systemTitleBarFailed": "Setarea nu a putut fi salvată.",
+    "defaultFont": "Implicit",
+    "interfaceFontHint": "Orice font instalat pe acest dispozitiv.",
+    "codeFontHint": "Editoare, bara de adrese și alte tipuri de cod.",
+    "fontMissing": "Nu a fost găsit pe acest dispozitiv, deci este folosit fontul implicit.",
+    "suggestFonts": "Sugerare fonturi instalate",
+    "fontsSuggested": "Fonturile instalate sunt sugerate pe măsură ce tastați numele unui font.",
+    "fontsDenied": "Fonturile instalate nu au putut fi citite.",
+    "shortcuts": "Scurtături de tastatură",
+    "reset": "Revenire la valorile implicite",
+    "close": "Gata",
+    "statusLabel": "Preferințe",
+    "commandDescription": "Temă, culori, fonturi, dimensiunea textului, editor, aspect și valori implicite",
+    "methods": {
+      "title": "Culorile metodelor",
+      "hint": "Culoarea fiecărei metode de cerere în bara laterală, file și liste. Adăugați un fundal pentru a afișa metodele ca insigne.",
+      "method": "Metodă",
+      "resetMode": {
+        "light": "Resetare culori metode, tema luminoasă",
+        "dark": "Resetare culori metode, tema întunecată"
+      }
+    },
+    "theme": {
+      "palette": "Paletă",
+      "paletteHint": "Fiecare paletă are o versiune luminoasă și una întunecată. Culorile dvs. proprii sunt aplicate peste ea.",
+      "palettes": {
+        "default": "Implicită",
+        "neutral": "Neutră",
+        "slate": "Ardezie",
+        "paper": "Hârtie",
+        "moss": "Mușchi",
+        "dusk": "Amurg",
+        "ocean": "Ocean",
+        "ink": "Cerneală"
+      },
+      "colors": "Culori personalizate",
+      "colorsHint": "Setați culoarea fundalului și a textului pentru fiecare parte a ferestrei. Sunt păstrate doar culorile pe care le schimbați.",
+      "editing": "Culori pentru",
+      "previewHint": {
+        "light": "Fereastra este acum întunecată. Setați tema la Luminoasă pentru a vedea aceste culori aplicate.",
+        "dark": "Fereastra este acum luminoasă. Setați tema la Întunecată pentru a vedea aceste culori aplicate."
+      },
+      "columns": {
+        "surface": "Parte",
+        "background": "Fundal",
+        "foreground": "Text",
+        "contrast": "Contrast",
+        "reset": "Resetare"
+      },
+      "surfaces": {
+        "window": "Fereastră",
+        "sidebar": "Bară laterală",
+        "tabs": "File și bara de adrese",
+        "request": "Editorul cererii",
+        "body": "Editorul corpului",
+        "script": "Editorul de scripturi",
+        "response": "Răspuns",
+        "dialog": "Dialoguri",
+        "menu": "Meniuri și ferestre pop-up"
+      },
+      "surfaceHints": {
+        "window": "Bara de titlu, bara de stare și fiecare parte nelistată aici.",
+        "body": "Include și mesajele gRPC, argumentele MCP și exemplele salvate.",
+        "script": "Scripturile pre-cerere și post-răspuns.",
+        "menu": "Meniuri contextuale, liste și paleta de comenzi."
+      },
+      "roles": {
+        "background": "fundal",
+        "foreground": "text"
+      },
+      "sample": "Aa",
+      "resetMode": {
+        "light": "Resetare culori, tema luminoasă",
+        "dark": "Resetare culori, tema întunecată"
+      },
+      "share": "Partajare temă",
+      "shareHint": "O temă conține paleta, culoarea de accent și culorile personalizate ale părților și metodelor, pentru ambele moduri.",
+      "copy": "Copiere temă",
+      "copied": "Tema a fost copiată în clipboard.",
+      "copyFailed": "Tema nu a putut fi copiată în clipboard.",
+      "import": "Importare temă",
+      "importLabel": "Tema de importat",
+      "importPlaceholder": "Lipiți o temă copiată din Gostman",
+      "apply": "Aplicare",
+      "cancel": "Anulare",
+      "imported": "Tema a fost aplicată.",
+      "invalid": "Aceasta nu este o temă Gostman sau are părți necunoscute ori culori care nu sunt scrise ca #rrggbb.",
+      "colorLabel": "Culoarea de {{role}} pentru {{surface}}",
+      "hexLabel": "Valoarea hex a culorii de {{role}} pentru {{surface}}",
+      "ratio": "{{ratio}}:1",
+      "lowContrast": "Textul poate fi greu de citit. Țintiți cel puțin {{minimum}}:1.",
+      "resetRow": "Resetare {{name}}"
+    },
+    "timeoutHint_one": "Se aplică cererilor care nu își setează propriul timeout. 0 folosește limita încorporată de {{count}} secundă.",
+    "timeoutHint_few": "Se aplică cererilor care nu își setează propriul timeout. 0 folosește limita încorporată de {{count}} secunde.",
+    "timeoutHint_other": "Se aplică cererilor care nu își setează propriul timeout. 0 folosește limita încorporată de {{count}} de secunde.",
+    "languageSystem": "La fel ca sistemul ({{language}})",
+    "languageSwitchHint": "Gostman se reîncarcă pentru a afișa noua limbă. Filele deschise și ciornele nesalvate sunt păstrate; răspunsurile afișate în file sunt șterse.",
+    "languageSwitch": "Schimbare limbă",
+    "languageHelp": "Lipsește limba dvs. sau ați găsit o traducere greșită? {{link}}.",
+    "languageHelpLink": "Întrebați pe GitHub",
+    "accentAdjusted": "Afișat ca {{light}} în modul luminos și ca {{dark}} în modul întunecat, astfel încât textul de această culoare să rămână lizibil."
+  }
+}

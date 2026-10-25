@@ -1,0 +1,6 @@
+{
+  "install": {
+    "label": "Installer l’application",
+    "description": "Ajoute Gostman à cet appareil et l’ouvre dans sa propre fenêtre"
+  }
+}

@@ -1,138 +1,90 @@
-export const MCP_OUTPUT_TEXT = {
-  name: 'Result matches the tool output schema',
-}
+import english from '../../../../locales/en/mcp.json'
+import { messages } from './i18n/core'
+import { formatList } from './i18n/format'
 
-export const MCP_TEXT = {
-  media: {
-    heading: 'Images and audio in the result',
-    image: (number) => `Image ${number} in the result`,
-    audio: (number) => `Audio ${number} in the result`,
-  },
-  server: 'Server',
-  argumentsLabel: 'Arguments',
-  notLoaded: 'Not loaded',
-  load: 'Load',
-  reload: 'Reload',
-  signIn: 'Sign in',
-  signingIn: 'Signing in…',
-  signInHint: 'Find out how this server wants you to sign in, register Gostman with its authorization server when needed, sign in in the browser and keep the token on the Auth tab',
-  serverLabel: ({ server, protocolVersion, legacy }) => [
-    server.name,
-    server.version,
-    protocolVersion && `MCP ${protocolVersion}${legacy ? ' (initialize handshake)' : ''}`,
-  ].filter(Boolean).join(' '),
-  instructions: 'Instructions',
-  instructionsHint: 'Show the instructions this server gives to the models that use it',
-  operation: 'Operation',
-  operations: {
-    'tools/call': 'Call tool',
-    'tools/list': 'List tools',
-    'resources/read': 'Read resource',
-    'resources/list': 'List resources',
-    'resources/templates/list': 'List resource templates',
-    'prompts/get': 'Get prompt',
-    'prompts/list': 'List prompts',
-  },
-  itemLabels: { 'tools/call': 'MCP tool', 'resources/read': 'Resource URI', 'prompts/get': 'MCP prompt' },
-  choose: { 'tools/call': 'Choose a tool', 'prompts/get': 'Choose a prompt' },
-  placeholders: { 'tools/call': 'tool_name', 'resources/read': 'file:///path/to/resource', 'prompts/get': 'prompt_name' },
-  noInput: 'This operation takes no input. Send lists everything the server returns, across all pages.',
-  readHint: 'Send reads the resource at this URI. Pick a listed resource, or fill in a template.',
-  schema: 'Schema',
-  schemaHints: { 'tools/call': "Show the JSON Schema of the tool's arguments next to the editor", 'prompts/get': "Show the prompt's arguments next to the editor" },
-  schemaTitles: { 'tools/call': 'Input schema', 'prompts/get': 'Prompt arguments' },
-  closeSchema: 'Close',
-  noArguments: 'This prompt takes no arguments.',
-  example: 'Use example',
-  exampleHint: 'Replace the arguments with an example built from the schema',
-  promptArguments: (prompt) => prompt.arguments.map((argument) => `${argument.name}${argument.required ? ' (required)' : ''}${argument.description ? `: ${argument.description}` : ''}`).join('\n'),
-  catalogHints: {
-    remote: 'Load the tools, resources and prompts of the MCP server at this URL. The headers and auth of this request are sent with every call. In the desktop app, write stdio: and a command in the address bar to start a local server instead, for example stdio:npx -y @modelcontextprotocol/server-everything.',
-    local: 'Load starts this command on this computer and reads what it offers; every call starts it again. The rows on the Headers tab are passed to it as environment variables.',
-  },
-  empty: 'This server lists no tools, resources or prompts.',
-  checks: 'Checks',
-  checksHint: 'Problems found in the tool definitions of this server',
-  noFindings: 'No problems found in the tool definitions.',
-  findings: {
-    missingDescription: (tool) => `${tool}: no description. A model chooses tools by their descriptions, so it is unlikely to use this one well.`,
-    shortDescription: (tool, detail) => `${tool}: the description "${detail}" is very short. Say what the tool does, when to use it and what it returns.`,
-    duplicateName: (tool) => `${tool}: more than one tool has this name, so calls cannot tell them apart.`,
-    similarNames: (tool, detail) => `${tool}: looks almost the same as ${detail}, which makes it easy for a model to pick the wrong one.`,
-    invalidName: (tool) => `${tool}: the name should be 1 to 128 characters long and use only letters, digits, _, - and .`,
-    invalidSchema: (tool, detail) => `${tool}: the input schema is not usable: ${detail}.`,
-    undocumentedParameters: (tool, detail) => `${tool}: parameters without a description: ${detail}.`,
-    unknownRequired: (tool, detail) => `${tool}: required lists parameters that the schema does not define: ${detail}.`,
-    manyTools: (count) => `This server lists ${count} tools. Large tool lists make it harder for a model to pick the right tool, and some clients load only part of them.`,
-    rejected: (tool, detail) => `${tool}: left out of the tool list, as the specification requires, because ${detail}.`,
-    listFailed: (method, detail) => `${method} failed: ${detail}`,
-  },
-  schemaProblems: {
-    notObject: 'it is not a JSON object',
-    rootType: 'the top-level type should be "object"',
-    properties: 'properties is not an object of schemas',
-    property: (name) => `the schema of ${name} is not an object`,
-    type: (name, type) => `${name} has the unknown type "${type}"`,
-    required: 'required is not a list of names',
-  },
-  changes: {
-    title: 'The tools of this server changed since you last accepted them.',
-    added: (names) => `New: ${names}.`,
-    removed: (names) => `Removed: ${names}.`,
-    descriptionChanged: (name) => `${name}: the description changed.`,
-    schemaChanged: (name) => `${name}: the input schema changed.`,
-    definitionChanged: (name) => `${name}: the description or the input schema changed.`,
-    before: 'Before',
-    now: 'Now',
-    noDescription: '(none)',
-    advice: 'Read the changes before an agent uses these tools. A changed description can carry instructions the server did not show you before.',
-    accept: 'Accept changes',
-    firstSeen: 'First load of this server: Gostman remembers its tools on this device and warns you when they change.',
-  },
-  auth: {
-    title: 'Sign-in',
-    close: 'Close',
-    retry: 'Try again',
-    steps: {
-      probe: 'Ask the server',
-      challenge: 'Read the WWW-Authenticate challenge',
-      resource: 'Find the protected resource metadata (RFC 9728)',
-      server: 'Find the authorization server metadata (RFC 8414 or OpenID Connect)',
-      registration: 'Get a client ID',
-      browser: 'Sign in in the browser',
-      issuer: 'Check the issuer of the answer (RFC 9207)',
-      token: 'Exchange the code for a token',
-      retry: 'Call the server with the token',
-    },
-    outcomes: { ok: 'Done', warning: 'Warning', failed: 'Failed', stopped: 'Stopped', running: 'In progress' },
-    explanations: {
-      localCommand: 'Local servers started with stdio: read credentials from their environment, not from OAuth. Put the token in a row on the Headers tab instead.',
-      unreachable: 'Gostman could not reach the server. Check the URL, the network and the proxy settings.',
-      noResourceMetadata: 'The server asked for a sign-in without a resource_metadata parameter, so Gostman looks for the metadata at the well-known addresses instead.',
-      answered: 'The server answered without asking for a sign-in, for example because this request already carries a valid token. Gostman still looks for OAuth metadata so you can sign in again.',
-      notProtected: 'The server answered without asking for a sign-in and publishes no OAuth metadata, so it does not need a token.',
-      resourceMetadataMissing: 'No protected resource metadata was found at any of the addresses below. An MCP server that uses OAuth must publish it, either at the resource_metadata address in its 401 answer or at /.well-known/oauth-protected-resource.',
-      resourceMetadataInvalid: 'The protected resource metadata names no authorization server, so Gostman does not know where to sign in.',
-      resourceMismatch: 'The resource named in the protected resource metadata is not this server\'s URL. Tokens issued for that resource would not be accepted here (an audience mismatch), so Gostman stops. Set resource in that document to the server URL, or to a URL the server URL starts with.',
-      serverMetadataMissing: 'None of the well-known addresses of the authorization server returned metadata. The authorization server must publish OAuth 2.0 authorization server metadata or an OpenID Connect discovery document.',
-      issuerMismatch: 'The issuer in the authorization server metadata differs from the address listed in authorization_servers of the protected resource metadata. The specification requires them to be identical, character for character, so the metadata is not used. Make the two values match; a trailing slash is a common cause.',
-      serverMetadataIncomplete: 'The authorization server metadata has no authorization_endpoint or token_endpoint.',
-      noPkce: 'The authorization server metadata does not list S256 in code_challenge_methods_supported, and MCP clients must not sign in without PKCE. Support PKCE with S256 on the authorization server and add S256 to that list.',
-      insecureEndpoint: 'The authorization or token endpoint uses plain HTTP on a remote host. The specification requires HTTPS for these endpoints.',
-      insufficientScope: 'The token is valid but lacks a scope this request needs. Signing in again asks for the scopes you had plus the ones the server named.',
-      noRegistration: 'The authorization server offers neither dynamic client registration nor client ID metadata documents. Register a client with it yourself, enter its client ID on the Auth tab (OAuth 2.0) and sign in again.',
-      registrationRefused: 'The authorization server refused to register Gostman. Many identity providers turn dynamic client registration off: register a client yourself and enter its client ID on the Auth tab.',
-      serverChanged: 'The authorization server is not the one the saved client ID belongs to, so Gostman registered again instead of reusing it.',
-      browserFailed: 'The sign-in in the browser did not finish.',
-      issuerMissing: 'The authorization server metadata sets authorization_response_iss_parameter_supported, but the answer had no iss parameter, so it was rejected to prevent a mix-up attack. Add iss to the redirect back to Gostman, or stop advertising support for it.',
-      issuerWrong: 'The iss parameter of the answer is not the issuer of the authorization server Gostman signed in with, so the answer was discarded to prevent a mix-up attack. Send the issuer exactly as it appears in the authorization server metadata.',
-      tokenFailed: 'The token endpoint did not return an access token. Check that the client ID, the redirect address and the resource parameter are accepted.',
-      stillRejected: 'The server still refuses the token. It may expect a different audience or scope: compare the resource and scope below with what the server checks.',
-    },
-    attempts: 'Requests',
-    attempt: ({ url, status, error }) => [url, status || error].filter(Boolean).join(' → '),
-  },
-  notifications: (count) => `Notifications (${count})`,
-  notificationTime: (milliseconds) => `${milliseconds} ms`,
-  progress: ({ progress, total, message }) => [total === undefined ? `${progress}` : `${progress}/${total}`, message].filter(Boolean).join(' · '),
+const STDIO_EXAMPLE = 'stdio:npx -y @modelcontextprotocol/server-everything'
+const OPERATION_KEYS = {
+  'tools/call': 'toolsCall',
+  'tools/list': 'toolsList',
+  'resources/read': 'resourcesRead',
+  'resources/list': 'resourcesList',
+  'resources/templates/list': 'resourceTemplatesList',
+  'prompts/get': 'promptsGet',
+  'prompts/list': 'promptsList',
 }
+const ITEM_KINDS = { 'tools/call': 'tool', 'resources/read': 'resource', 'prompts/get': 'prompt' }
+const SCHEMA_KINDS = { 'tools/call': 'tool', 'prompts/get': 'prompt' }
+const TOOL_PLACEHOLDERS = { 'tools/call': 'tool_name', 'resources/read': 'file:///path/to/resource', 'prompts/get': 'prompt_name' }
+
+const asList = (names) => (Array.isArray(names) ? formatList(names, 'unit') : names)
+
+const text = messages('mcp', english, (t) => {
+  const byOperation = (group, kinds) => Object.fromEntries(Object.entries(kinds).map(([operation, kind]) => [operation, t(`mcp.${group}.${kind}`)]))
+  const finding = (key) => (tool, detail) => t(`mcp.findings.${key}`, { tool, detail })
+
+  return {
+    mcp: {
+      media: {
+        image: (number) => t('mcp.media.image', { number }),
+        audio: (number) => t('mcp.media.audio', { number }),
+      },
+      issuerDetail: (expected, received) => t('mcp.issuerDetail', { expected, received }),
+      serverLabel: ({ server, protocolVersion, legacy }) => [
+        server.name,
+        server.version,
+        protocolVersion && t(legacy ? 'mcp.serverProtocolLegacy' : 'mcp.serverProtocol', { version: protocolVersion }),
+      ].filter(Boolean).join(' '),
+      get operations() {
+        return Object.fromEntries(Object.entries(OPERATION_KEYS).map(([operation, key]) => [operation, t(`mcp.operations.${key}`)]))
+      },
+      get itemLabels() {
+        return byOperation('itemLabels', ITEM_KINDS)
+      },
+      get choose() {
+        return byOperation('choose', SCHEMA_KINDS)
+      },
+      placeholders: TOOL_PLACEHOLDERS,
+      get schemaHints() {
+        return byOperation('schemaHints', SCHEMA_KINDS)
+      },
+      get schemaTitles() {
+        return byOperation('schemaTitles', SCHEMA_KINDS)
+      },
+      promptArguments: (prompt) => prompt.arguments.map((argument) => {
+        const label = argument.required ? t('mcp.promptArgumentRequired', { name: argument.name }) : argument.name
+        return argument.description ? t('mcp.promptArgumentDescribed', { label, description: argument.description }) : label
+      }).join('\n'),
+      catalogHints: {
+        get remote() {
+          return t('mcp.catalogHints.remote', { example: STDIO_EXAMPLE })
+        },
+      },
+      findings: {
+        shortDescription: finding('shortDescription'),
+        similarNames: finding('similarNames'),
+        invalidSchema: finding('invalidSchema'),
+        undocumentedParameters: finding('undocumentedParameters'),
+        unknownRequired: finding('unknownRequired'),
+        rejected: finding('rejected'),
+        listFailed: (method, detail) => t('mcp.findings.listFailed', { method, detail }),
+      },
+      schemaProblems: {
+        type: (name, type) => t('mcp.schemaProblems.type', { name, type }),
+      },
+      changes: {
+        added: (names) => t('mcp.changes.added', { names: asList(names) }),
+        removed: (names) => t('mcp.changes.removed', { names: asList(names) }),
+      },
+      auth: {
+        attempt: ({ url, status, error }) => [url, status || error].filter(Boolean).join(' → '),
+      },
+      progress: ({ progress, total, message }) => [
+        total === undefined ? `${progress}` : t('mcp.progressOf', { progress, total }),
+        message,
+      ].filter(Boolean).join(' · '),
+    },
+  }
+})
+
+export const MCP_TEXT = text.mcp
+export const MCP_OUTPUT_TEXT = text.mcpOutput

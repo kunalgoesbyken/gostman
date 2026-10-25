@@ -1,0 +1,18 @@
+{
+  "variables": {
+    "dynamic": "gerada a cada envio da requisição",
+    "prompt": "solicitada quando a requisição é enviada",
+    "undefinedName": "não está definida no ambiente ativo",
+    "resolvesTo": "resolve para",
+    "through": "por meio de {{names}}",
+    "sources": {
+      "global": "Global",
+      "collection": "Coleção",
+      "environment": "Ambiente",
+      "folder": "Pasta",
+      "request": "Requisição",
+      "process": "Arquivo .env",
+      "session": "Sessão"
+    }
+  }
+}

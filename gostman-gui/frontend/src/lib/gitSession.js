@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { GIT_TEXT } from './gitText'
+import { DIALOG_TEXT } from './dialogText'
+import { GIT_SESSION_TEXT, GIT_TEXT } from './gitText'
 import { useAppStore } from '../store/appStore'
 
 export const TAB_CHANGES = 'changes'
@@ -30,6 +31,7 @@ const git = () => useGitStore.getState()
 const patch = (changes) => useGitStore.setState(changes)
 const app = () => useAppStore.getState()
 const messageOf = (error) => error?.message || String(error)
+const alertFailure = (error) => app().showAlert(GIT_TEXT.title, messageOf(error), DIALOG_TEXT.ok, 'warning')
 
 export const openGit = () => patch({ isOpen: true })
 
@@ -60,7 +62,7 @@ export function createGitActions(backend) {
       patch({ output: typeof output === 'string' ? output : '' })
       succeeded = true
     } catch (error) {
-      app().showAlert('Git', messageOf(error), 'OK', 'warning')
+      alertFailure(error)
     } finally {
       if (filesChange) app().suspendPersistence()
       await refresh().catch(() => {})
@@ -77,7 +79,7 @@ export function createGitActions(backend) {
       if (change.conflict) return patch({ conflict: await backend.conflict(change.path) })
       patch({ diff: await backend.diff(change.path, staged, change.untracked) })
     } catch (error) {
-      app().showAlert('Git', messageOf(error), 'OK', 'warning')
+      alertFailure(error)
     }
   }
 
@@ -94,22 +96,22 @@ export function createGitActions(backend) {
   }
 
   return {
-    refresh: () => refresh().catch((error) => app().showAlert('Git', messageOf(error), 'OK', 'warning')),
+    refresh: () => refresh().catch((error) => alertFailure(error)),
     close: () => patch({ isOpen: false, selection: null, diff: null, conflict: null }),
     refreshState,
     setTab: async (tab) => {
       patch({ tab })
-      await loadTab(tab).catch((error) => app().showAlert('Git', messageOf(error), 'OK', 'warning'))
+      await loadTab(tab).catch((error) => alertFailure(error))
     },
     select,
     stage: withReselect((paths) => backend.stage(paths)),
     unstage: withReselect((paths) => backend.unstage(paths)),
     stageAll: withReselect(() => backend.stageAll()),
     discard: (change) => confirmThen(
-      'Discard changes?',
-      `${change.path} goes back to its last committed state. This cannot be undone.`,
+      GIT_SESSION_TEXT.discardTitle,
+      GIT_SESSION_TEXT.discardMessage(change.path),
       withReselect(() => backend.discard(change.path, change.untracked), { filesChange: true }),
-      'Discard',
+      GIT_SESSION_TEXT.discardConfirm,
     ),
     commit: withReselect((message, stageAll) => backend.commit(message, stageAll)),
     fetch: () => perform(() => backend.fetch(), { done: GIT_TEXT.fetched }),
@@ -119,21 +121,26 @@ export function createGitActions(backend) {
     createBranch: (name) => perform(() => backend.createBranch(name), { filesChange: true }),
     switchBranch: (name, remote) => perform(() => backend.switchBranch(name, remote), { filesChange: true }),
     deleteBranch: (name) => confirmThen(
-      'Delete branch?',
-      `The branch ${name} is deleted. Git refuses if it has commits that are not merged.`,
+      GIT_SESSION_TEXT.deleteBranchTitle,
+      GIT_SESSION_TEXT.deleteBranchMessage(name),
       () => perform(() => backend.deleteBranch(name, false)),
-      'Delete',
+      GIT_SESSION_TEXT.deleteBranchConfirm,
     ),
     saveStash: (message) => perform(() => backend.saveStash(message), { filesChange: true }),
     applyStash: (index) => perform(() => backend.stashAction('apply', index), { filesChange: true }),
     popStash: (index) => perform(() => backend.stashAction('pop', index), { filesChange: true }),
-    dropStash: (index) => confirmThen('Drop stash?', 'The stashed changes are deleted.', () => perform(() => backend.stashAction('drop', index)), 'Drop'),
+    dropStash: (index) => confirmThen(
+      GIT_SESSION_TEXT.dropStashTitle,
+      GIT_SESSION_TEXT.dropStashMessage,
+      () => perform(() => backend.stashAction('drop', index)),
+      GIT_SESSION_TEXT.dropStashConfirm,
+    ),
     showHistory: async (path) => {
       patch({ tab: TAB_HISTORY, history: { path, commits: [], version: null } })
       try {
         patch({ history: { path, commits: await backend.log(path), version: null } })
       } catch (error) {
-        app().showAlert('Git', messageOf(error), 'OK', 'warning')
+        alertFailure(error)
       }
     },
     showVersion: async (commit) => {
@@ -142,24 +149,24 @@ export function createGitActions(backend) {
         const version = await backend.version(commit.hash, path)
         patch({ history: { ...git().history, version: { ...version, commit } } })
       } catch (error) {
-        app().showAlert('Git', messageOf(error), 'OK', 'warning')
+        alertFailure(error)
       }
     },
     restoreVersion: (commit) => {
       const { path } = git().history
       confirmThen(
-        'Restore this version?',
-        `${path} is replaced by its content at ${commit.short}. The current content stays in Git only if it was committed.`,
+        GIT_SESSION_TEXT.restoreTitle,
+        GIT_SESSION_TEXT.restoreMessage(path, commit.short),
         () => perform(() => backend.restoreVersion(commit.hash, path), { filesChange: true }),
-        'Restore',
+        GIT_SESSION_TEXT.restoreConfirm,
       )
     },
     resolve: withReselect((path, content) => backend.resolve(path, content), { filesChange: true }),
     abortMerge: () => confirmThen(
-      'Abort the merge?',
-      'Everything from the merge is undone, including conflict resolutions you already made.',
+      GIT_SESSION_TEXT.abortMergeTitle,
+      GIT_SESSION_TEXT.abortMergeMessage,
       () => perform(() => backend.abortMerge(), { filesChange: true }),
-      'Abort merge',
+      GIT_SESSION_TEXT.abortMergeConfirm,
     ),
     addRemote: (name, url) => perform(() => backend.addRemote(name, url)),
     setRemoteUrl: (name, url) => perform(() => backend.setRemoteUrl(name, url)),

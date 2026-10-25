@@ -1,0 +1,39 @@
+{
+  "codeEditor": {
+    "syntaxError": "Erro de sintaxe",
+    "phrases": {
+      "foldLine": "Recolher linha",
+      "unfoldLine": "Expandir linha",
+      "foldedLines": "Linhas recolhidas",
+      "unfoldedLines": "Linhas expandidas",
+      "foldedCode": "código recolhido",
+      "unfold": "expandir",
+      "completions": "Sugestões",
+      "controlCharacter": "Caractere de controle",
+      "diagnostics": "Diagnósticos",
+      "noDiagnostics": "Nenhum diagnóstico",
+      "goToLine": "Ir para a linha",
+      "go": "ir",
+      "close": "fechar",
+      "find": "Localizar",
+      "replace": "Substituir",
+      "all": "todos",
+      "byWord": "palavra inteira",
+      "matchCase": "diferenciar maiúsculas",
+      "next": "próximo",
+      "previous": "anterior",
+      "regexp": "regexp",
+      "replaceAll": "substituir tudo",
+      "currentMatch": "ocorrência atual",
+      "onLine": "na linha",
+      "to": "até",
+      "selectionDeleted": "Seleção excluída",
+      "replacedMatches": "{{count}} ocorrências substituídas",
+      "replacedMatchOnLine": "ocorrência substituída na linha {{line}}",
+      "unchangedLines": "{{count}} linhas sem alteração",
+      "accept": "Aceitar",
+      "reject": "Rejeitar",
+      "revertChunk": "Reverter este trecho"
+    }
+  }
+}

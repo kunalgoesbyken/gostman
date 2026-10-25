@@ -1,0 +1,10 @@
+{
+  "runData": {
+    "tooManyRows_one": "Un archivo de datos puede tener como máximo {{count}} fila.",
+    "tooManyRows_many": "Un archivo de datos puede tener como máximo {{count}} de filas.",
+    "tooManyRows_other": "Un archivo de datos puede tener como máximo {{count}} filas.",
+    "empty": "El archivo de datos no tiene filas.",
+    "notArray": "Un archivo de datos JSON debe ser un array de objetos, un objeto por iteración.",
+    "unreadable": "No se puede leer el archivo de datos."
+  }
+}

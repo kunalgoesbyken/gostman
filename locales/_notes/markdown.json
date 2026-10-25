@@ -1,0 +1,6 @@
+{
+  "markdown.edit": "Tab: edit the description as Markdown text.",
+  "markdown.preview": "Tab: show the rendered description.",
+  "markdown.modeLabel": "Accessible label of the Edit and Preview switch.",
+  "markdown.empty": "Shown in the preview when the description is empty."
+}

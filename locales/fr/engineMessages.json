@@ -1,0 +1,70 @@
+{
+  "network": {
+    "hostNotFound": "L’hôte {{host}} est introuvable. Vérifiez qu’il n’y a pas de faute de frappe dans l’adresse et que cet ordinateur est en ligne.",
+    "untrustedAuthority": "Le certificat du serveur n’est pas signé par une autorité à laquelle cet ordinateur fait confiance. {{advice}}",
+    "handshakeCertificate": "Le serveur a mis fin à la négociation TLS. Vérifiez qu’il accepte le certificat client défini pour cet hôte.",
+    "handshake": "Le serveur a mis fin à la négociation TLS. {{advice}}",
+    "hostMismatch": "Le certificat du serveur n’est pas valable pour {{host}}. Vérifiez que l’adresse est bien celle pour laquelle le certificat a été émis.",
+    "certificateExpired": "Le certificat du serveur a expiré ou n’est pas encore valide. Vérifiez l’horloge de cet ordinateur, ou renouvelez le certificat.",
+    "proxyConnect": "Impossible de se connecter au serveur proxy. Vérifiez l’adresse du proxy dans {{source}}.",
+    "proxyConnectSettings": "Impossible de se connecter au serveur proxy. Vérifiez l’adresse du proxy dans les paramètres réseau.",
+    "dial": "Impossible de se connecter à {{host}}. Vérifiez que le serveur fonctionne et que l’hôte et le port sont corrects.",
+    "dialServer": "Impossible de se connecter au serveur. Vérifiez que le serveur fonctionne et que l’hôte et le port sont corrects."
+  },
+  "advice": {
+    "untrustedAuthority": "Faites confiance à son autorité de certification, ou désactivez la vérification des certificats pour cette requête.",
+    "clientCertificate": "Si le serveur exige un certificat client, ajoutez-en un pour cet hôte dans les paramètres réseau de l’application de bureau."
+  },
+  "failure": {
+    "timeout": "la requête a expiré",
+    "cancelled": "la requête a été annulée"
+  },
+  "blocked": {
+    "address": "les adresses privées et locales sont bloquées",
+    "addressResolved": "les adresses privées et locales sont bloquées : {{host}} correspond à {{address}}",
+    "host": "cet hôte ne figure pas dans la liste des hôtes pouvant être appelés",
+    "hostNamed": "cet hôte ne figure pas dans la liste des hôtes pouvant être appelés : {{host}}"
+  },
+  "request": {
+    "urlRequired": "saisissez une URL à laquelle envoyer la requête",
+    "urlScheme": "schéma d’URL non pris en charge « {{scheme}} », utilisez http ou https",
+    "urlInvalid": "« {{url}} » n’est pas une URL valide",
+    "urlInvalidMissing": "« {{url}} » n’est pas une URL valide car {{reason}}",
+    "notDefined_one": "{{names}} n’est pas défini",
+    "notDefined_other": "{{names}} ne sont pas définis",
+    "notDefined_many": "{{names}} ne sont pas définis",
+    "headersInvalid": "les en-têtes ne sont pas valides : {{detail}}",
+    "queryInvalid": "les paramètres de requête ne sont pas valides : {{detail}}",
+    "variablesInvalid": "les variables d’environnement ne sont pas du JSON valide : {{detail}}",
+    "bodyTooLarge": "le corps de la requête dépasse 10 Mo",
+    "tooLargeExpanded": "la requête dépasse 10 Mo une fois les variables remplacées",
+    "variablesTooDeep": "les variables se référencent trop de fois les unes les autres pour être remplacées ; simplifiez les variables qui contiennent {{example}}",
+    "redirects": "arrêt après {{count}} redirections",
+    "trailingJson": "texte inattendu après la valeur JSON",
+    "expectedObject": "un objet JSON était attendu",
+    "expectedRows": "un objet JSON ou une liste de lignes était attendu"
+  },
+  "files": {
+    "unavailable": "{{example}} ne lit les fichiers que dans l’application de bureau, ou dans gostman run, send et load avec --allow-files",
+    "relativePath": "ouvrez un dossier d’espace de travail pour utiliser un chemin relatif dans {{example}}, ou donnez un chemin absolu",
+    "httpOnly": "{{example}} ne lit les fichiers que dans les requêtes HTTP et GraphQL",
+    "outsideFolder": "« {{path}} » est en dehors du dossier de la collection ; une collection ne lit que les fichiers de son dossier",
+    "unreadable": "impossible de lire le fichier « {{path}} » : {{detail}}",
+    "isFolder": "« {{path}} » est un dossier, pas un fichier",
+    "tooLarge": "le fichier « {{path}} » dépasse 10 Mo",
+    "notFound": "le fichier « {{path}} » est introuvable à l’emplacement {{resolved}}",
+    "pathMissing": "{{example}} a besoin d’un chemin de fichier entre les parenthèses",
+    "networkPath": "« {{path}} » est un chemin réseau ou de périphérique. Les fichiers ne sont lus que sur les lecteurs de cet ordinateur, afin que votre session Windows ne soit jamais envoyée à un autre ordinateur. Copiez le fichier sur cet ordinateur ou associez le partage à une lettre de lecteur"
+  },
+  "attachments": {
+    "unavailable": "les fichiers joints depuis le disque ne sont envoyés que par l’application de bureau",
+    "tooLarge": "les fichiers joints dépassent ensemble {{size}} Go",
+    "signed": "cette authentification signe tout le corps : les fichiers joints sont donc limités à {{size}} Mo avec lui",
+    "failed": "fichier joint « {{name}} » : {{detail}}",
+    "notRegular": "« {{path}} » n’est pas un fichier ordinaire"
+  },
+  "proxy": {
+    "invalidAddress": "« {{address}} » n’est pas une adresse de proxy valide",
+    "unsupportedScheme": "schéma de proxy non pris en charge « {{scheme}} », utilisez http, https ou socks5"
+  }
+}

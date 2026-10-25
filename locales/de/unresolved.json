@@ -1,0 +1,13 @@
+{
+  "unresolved": {
+    "sentAsWritten_one": "Diese Variable ist nicht definiert und wurde daher wie geschrieben gesendet:",
+    "sentAsWritten_other": "Diese Variablen sind nicht definiert und wurden daher wie geschrieben gesendet:",
+    "notDefined_one": "Diese Variable ist nicht definiert:",
+    "notDefined_other": "Diese Variablen sind nicht definiert:",
+    "openEnvironments": "Umgebungen öffnen",
+    "extractedBy": "{{reference}} wird von einer Extraktionsregel in „{{request}}“ gesetzt, senden Sie diese Anfrage daher zuerst.",
+    "extractedByOnly": "Sie wird von einer Extraktionsregel in „{{request}}“ gesetzt, senden Sie diese Anfrage daher zuerst.",
+    "openSource": "„{{request}}“ öffnen",
+    "define": "{{reference}} zur aktiven Umgebung hinzufügen"
+  }
+}

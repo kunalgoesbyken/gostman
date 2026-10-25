@@ -3,12 +3,25 @@ package lint
 import (
 	"sort"
 	"strings"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 type Issue struct {
 	Path      string
 	Operation string
 	Message   string
+	Localized *locales.Message
+}
+
+func issueAt(path string, code locales.Code, params locales.Params) Issue {
+	message := locales.New(code, params)
+	return Issue{Path: path, Message: message.English(), Localized: &message}
+}
+
+func issueFrom(path string, code locales.Code, params locales.Params, err error) Issue {
+	message := locales.New(code, params).WithDetail(err.Error())
+	return Issue{Path: path, Message: message.English(), Localized: &message}
 }
 
 type Rule struct {

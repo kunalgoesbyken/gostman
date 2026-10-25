@@ -1,0 +1,13 @@
+{
+  "statusBar": {
+    "network": "Red",
+    "mockStopped": "Servidor simulado",
+    "mockRunning": "Servidor simulado (activo)",
+    "mockRunningOn": "Servidor simulado (activo en :{{port}})",
+    "captureStopped": "Captura",
+    "captureRunning": "Captura (activa)",
+    "git": "Git",
+    "detached": "HEAD desacoplado",
+    "cookies": "Cookies"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "attachment": {
+    "choose": "Alegere fișier",
+    "replace": "Înlocuire",
+    "none": "Niciun fișier selectat",
+    "pickTitle": "Alegeți un fișier de trimis",
+    "fromDisk": "Citit din {{path}} la trimiterea cererii",
+    "tooLarge": "{{name}} are {{size}}. Aplicația web trimite fișiere de până la {{limit}}, deoarece proxy-ul găzduit acceptă cereri de cel mult {{proxyLimit}}. Aplicația desktop trimite fișiere de până la {{desktopLimit}} direct de pe disc.",
+    "proxyTooLarge": "Cererea depășește {{proxyLimit}}, cât poate trece aplicația web prin proxy-ul său. Trimiteți corpuri și fișiere mari din aplicația desktop sau din CLI."
+  }
+}

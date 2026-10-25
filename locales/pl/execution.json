@@ -1,0 +1,13 @@
+{
+  "execution": {
+    "promptDeclined": "Żądanie nie zostało wysłane, ponieważ nie podano wartości, o które prosi.",
+    "unusableAddress": "Skrypt nie może użyć tego adresu.",
+    "sendLimit": "Skrypt może wywołać sendRequest co najwyżej {{limit}} razy.",
+    "hostNotPermitted": "Host „{{host}}” nie jest używany przez tę kolekcję, więc skrypty nie mogą się z nim łączyć.",
+    "scriptFileReads": "Skrypt nie może dodawać do żądania symboli zastępczych {{example}} ani plików załączonych z dysku. Umieść je w samym żądaniu.",
+    "preRequest": "Skrypt przed żądaniem",
+    "postResponse": "Skrypt po odpowiedzi",
+    "scopeLabel": "{{stage}} ({{name}})",
+    "restricted": "Ten folder nie jest jeszcze zaufany, więc jego skrypty, ustawienia OAuth 2.0, lokalne polecenia MCP i odczyty plików są wyłączone. Otwórz menu folderu w nagłówku i wybierz Zaufaj temu folderowi."
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "graphql": {
+    "query": "Zapytanie",
+    "queryLabel": "Zapytanie GraphQL",
+    "variables": "Zmienne (JSON)",
+    "variablesLabel": "Zmienne GraphQL",
+    "invalidJson": "Nieprawidłowy JSON: {{message}}",
+    "syntaxAt": "{{message}} (wiersz {{line}}, kolumna {{column}})",
+    "sendAsGraphql": "Wyślij jako GraphQL",
+    "prettify": "Formatuj",
+    "prettifyTitle": "Sformatuj zapytanie ponownie. Komentarze zostaną usunięte.",
+    "cannotPrettify": "Nie można sformatować: {{detail}}",
+    "notSent": "Nie jest wysyłane, gdy metodą jest {{method}}.",
+    "schema": "Schemat",
+    "schemaDescription": "Pobierz go, aby przeglądać typy i pola tego punktu końcowego. Zapytanie introspekcyjne używa adresu URL, nagłówków i uwierzytelniania tego żądania.",
+    "searchLabel": "Szukaj w schemacie",
+    "searchPlaceholder_one": "Szukaj wśród {{count}} typu i jego pól",
+    "searchPlaceholder_few": "Szukaj wśród {{count}} typów i pól",
+    "searchPlaceholder_many": "Szukaj wśród {{count}} typów i pól",
+    "searchPlaceholder_other": "Szukaj wśród {{count}} typu i pól",
+    "noMatch": "Brak dopasowań.",
+    "moreMatches_one": "Pasuje jeszcze {{count}} typ. Zawęź wyszukiwanie, aby go zobaczyć.",
+    "moreMatches_few": "Pasują jeszcze {{count}} typy. Zawęź wyszukiwanie, aby je zobaczyć.",
+    "moreMatches_many": "Pasuje jeszcze {{count}} typów. Zawęź wyszukiwanie, aby je zobaczyć.",
+    "moreMatches_other": "Pasuje jeszcze {{count}} typu. Zawęź wyszukiwanie, aby je zobaczyć.",
+    "noFields": "Brak pól.",
+    "schemaTooLarge": "Schemat jest większy niż limit rozmiaru odpowiedzi.",
+    "noJsonBody": "Punkt końcowy odpowiedział statusem {{status}} bez treści JSON.",
+    "noSchema": "Punkt końcowy odpowiedział statusem {{status}} bez schematu."
+  }
+}

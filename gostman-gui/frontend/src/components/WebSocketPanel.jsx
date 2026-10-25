@@ -7,6 +7,7 @@ import { Input } from "./ui/input"
 import { Notice, Panel, Toolbar } from "./ui/panel"
 import { Select } from "./ui/select"
 import { VariableInput, VariableTextarea } from "./VariableInput"
+import { formatTime } from "../lib/i18n/format"
 import { shortcutLabel } from "../lib/platform"
 import { PROTOCOL_OPTIONS, protocolOf, usesGraphQL } from "../lib/realtime/protocols"
 import { readSavedMessages, removeMessage, saveMessage } from "../lib/realtime/savedMessages"
@@ -33,21 +34,21 @@ import { cn } from "../lib/utils"
 const PINNED_DISTANCE_PX = 24
 const HANDSHAKE_FIELD = "flex min-w-[12rem] flex-1 items-center gap-2"
 const HANDSHAKE_LABEL = "shrink-0 text-xs text-muted-foreground"
-const TIME_FORMAT = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })
+const TIME_FORMAT = { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }
 
 const STATUS_VIEWS = {
-  [SOCKET_IDLE]: { label: SOCKET_TEXT.statuses.idle, dot: "bg-muted-foreground" },
-  [SOCKET_CONNECTING]: { label: SOCKET_TEXT.statuses.connecting, dot: "bg-warning" },
-  [SOCKET_OPEN]: { label: SOCKET_TEXT.statuses.open, dot: "bg-success" },
-  [SOCKET_WAITING]: { label: SOCKET_TEXT.statuses.waiting, dot: "bg-warning" },
+  [SOCKET_IDLE]: { get label() { return SOCKET_TEXT.statuses.idle }, dot: "bg-muted-foreground" },
+  [SOCKET_CONNECTING]: { get label() { return SOCKET_TEXT.statuses.connecting }, dot: "bg-warning" },
+  [SOCKET_OPEN]: { get label() { return SOCKET_TEXT.statuses.open }, dot: "bg-success" },
+  [SOCKET_WAITING]: { get label() { return SOCKET_TEXT.statuses.waiting }, dot: "bg-warning" },
 }
 
 const ENTRY_VIEWS = {
-  [ENTRY_SENT]: { icon: ArrowUp, label: SOCKET_TEXT.entries.sent, tone: "text-info" },
-  [ENTRY_RECEIVED]: { icon: ArrowDown, label: SOCKET_TEXT.entries.received, tone: "text-success" },
-  [ENTRY_INFO]: { icon: Info, label: SOCKET_TEXT.entries.info, tone: "text-muted-foreground" },
-  [ENTRY_WARNING]: { icon: TriangleAlert, label: SOCKET_TEXT.entries.warning, tone: "text-warning" },
-  [ENTRY_ERROR]: { icon: TriangleAlert, label: SOCKET_TEXT.entries.error, tone: "text-destructive" },
+  [ENTRY_SENT]: { icon: ArrowUp, get label() { return SOCKET_TEXT.entries.sent }, tone: "text-info" },
+  [ENTRY_RECEIVED]: { icon: ArrowDown, get label() { return SOCKET_TEXT.entries.received }, tone: "text-success" },
+  [ENTRY_INFO]: { icon: Info, get label() { return SOCKET_TEXT.entries.info }, tone: "text-muted-foreground" },
+  [ENTRY_WARNING]: { icon: TriangleAlert, get label() { return SOCKET_TEXT.entries.warning }, tone: "text-warning" },
+  [ENTRY_ERROR]: { icon: TriangleAlert, get label() { return SOCKET_TEXT.entries.error }, tone: "text-destructive" },
 }
 
 function sizeNote(entry) {
@@ -66,11 +67,11 @@ const LogEntry = memo(function LogEntry({ entry }) {
 
   return (
     <li className="group grid grid-cols-[3.75rem_1rem_minmax(0,1fr)_1.5rem] items-start gap-2 border-b border-border px-3 py-1">
-      <time className="font-mono text-2xs leading-6 text-muted-foreground">{TIME_FORMAT.format(entry.time)}</time>
+      <time className="font-mono text-2xs leading-6 text-muted-foreground">{formatTime(entry.time, TIME_FORMAT)}</time>
       <Icon aria-label={label} className={cn("mt-[5px] h-3.5 w-3.5", tone)} />
       <div className="min-w-0 py-0.5">
         {note && <p className="text-2xs leading-5 text-muted-foreground">{note}</p>}
-        <pre className={cn("whitespace-pre-wrap break-all font-mono text-xs leading-5", isMessage ? "text-foreground" : tone)}>{entry.text}</pre>
+        <pre dir="ltr" className={cn("whitespace-pre-wrap break-all font-mono text-xs leading-5", isMessage ? "text-foreground" : tone)}>{entry.text}</pre>
       </div>
       {isMessage && (
         <IconButton

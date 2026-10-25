@@ -1,0 +1,14 @@
+{
+  "socketSessions": {
+    "invalidVariables": "Les variables de l’environnement actif ne sont pas du JSON valide.",
+    "invalidAddress": "Saisissez une URL ws:// ou wss:// dans la barre d’adresse.",
+    "notConnected": "Non envoyé : la connexion s’est fermée avant l’envoi du message.",
+    "undefinedVariables": "L’URL utilise des variables que l’environnement actif ne définit pas : {{names}}.",
+    "reconnecting": "Reconnexion dans {{seconds}} s",
+    "couldNotSend": "Envoi impossible : {{message}}",
+    "connected": "Connecté",
+    "couldNotConnect": "Connexion impossible : {{message}}",
+    "connecting": "Connexion à {{url}}",
+    "disconnected": "Déconnecté"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "socketSessions": {
+    "invalidVariables": "アクティブな環境の変数が有効なJSONではありません。",
+    "invalidAddress": "アドレスバーにws:// またはwss:// のURLを入力してください。",
+    "notConnected": "送信されませんでした：メッセージが送信される前に接続が閉じられました。",
+    "undefinedVariables": "URLが、アクティブな環境で定義されていない変数を使用しています：{{names}}。",
+    "reconnecting": "{{seconds}}秒後に再接続します",
+    "couldNotSend": "送信できませんでした：{{message}}",
+    "connected": "接続しました",
+    "couldNotConnect": "接続できませんでした：{{message}}",
+    "connecting": "{{url}}に接続しています",
+    "disconnected": "切断されました"
+  }
+}

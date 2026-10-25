@@ -1,0 +1,19 @@
+{
+  "network": "Hints shown above the raw error when a request could not be sent. The raw error text from the system follows after a blank line and is not translated.",
+  "network.hostNotFound": "{{host}} is the host name of the request, for example api.example.com.",
+  "network.untrustedAuthority": "{{advice}} is a sentence telling what to do about the certificate.",
+  "network.handshake": "{{advice}} is a sentence that mentions the network settings.",
+  "network.proxyConnect": "{{source}} is where the proxy address was set, for example a settings name or a command line flag. It stays as written.",
+  "network.dial": "{{host}} is a host name with an optional port, for example localhost:3000.",
+  "advice": "Sentences inserted into the network hints above.",
+  "failure": "The whole response body shown when a request fails. Keep it short and in lower case if your language allows it.",
+  "blocked": "Shown when the web version of Gostman refuses to call a local or private address, or when an agent session may not call a host.",
+  "request": "Problems found in a request before it is sent. They are shown as the error of the response.",
+  "request.variablesTooDeep": "{{example}} is the literal text of a variable placeholder, with double braces.",
+  "request.notDefined": "{{names}} is a list of variable placeholders written with double braces, for example {{token}} and {{host}}. They are variables with no value.",
+  "request.urlInvalidMissing": "{{reason}} is a sentence saying which variables are not defined.",
+  "request.headersInvalid": "{{detail}} is the technical reason, in English, from the JSON parser.",
+  "files": "Errors about the file functions that read a file into a request. {{example}} is the literal text of the function, with double braces.",
+  "attachments": "Errors about files attached to a request body from disk.",
+  "proxy": "Errors in the proxy address of the network settings."
+}

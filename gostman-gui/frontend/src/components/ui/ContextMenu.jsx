@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { SectionLabel } from "./panel"
 import { focusOrigin, returnFocusTo } from "../../lib/panes"
+import { alignInline } from "../../hooks/direction"
 import { isFocusLost } from "../../lib/rovingFocus"
 import { cn } from "../../lib/utils"
 
@@ -40,14 +41,14 @@ function MenuItem({ item, onClose }) {
       title={item.label}
       style={{ paddingLeft: BASE_PADDING_PX + Math.min(item.indent || 0, MAX_INDENT_LEVELS) * INDENT_STEP_PX }}
       className={cn(
-        "flex h-7 w-full items-center gap-2 pr-3 text-left text-xs hover:bg-accent disabled:pointer-events-none disabled:opacity-40",
+        "flex h-7 w-full items-center gap-2 pe-3 text-start text-xs hover:bg-accent disabled:pointer-events-none disabled:opacity-40",
         item.destructive && "text-destructive"
       )}
     >
       {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
       <span className="truncate">{item.label}</span>
-      {item.detail && <span className="ml-auto shrink-0">{item.detail}</span>}
-      {item.shortcut && <kbd className="ml-auto">{item.shortcut}</kbd>}
+      {item.detail && <span className="ms-auto shrink-0">{item.detail}</span>}
+      {item.shortcut && <kbd className="ms-auto">{item.shortcut}</kbd>}
     </button>
   )
 }
@@ -64,7 +65,7 @@ export function ContextMenu({ position, title, items, onClose }) {
   useLayoutEffect(() => {
     const { width, height } = menuRef.current.getBoundingClientRect()
     setPlacement({
-      left: clampToViewport(position.x, width, window.innerWidth),
+      left: clampToViewport(alignInline(position.x, width), width, window.innerWidth),
       top: clampToViewport(position.y, height, window.innerHeight),
     })
   }, [position, items])
@@ -107,7 +108,7 @@ export function ContextMenu({ position, title, items, onClose }) {
       data-surface="menu"
       onKeyDown={handleKeyDown}
       style={placement || { left: 0, top: 0, visibility: "hidden" }}
-      className="fixed z-50 max-h-[calc(100dvh-1rem)] w-56 overflow-y-auto rounded-md border border-border bg-background py-1 shadow-lg"
+      className="fixed z-50 max-h-[calc(100dvh-1rem)] w-max min-w-56 max-w-[min(24rem,calc(100vw-1rem))] overflow-y-auto rounded-md border border-border bg-background py-1 shadow-lg"
     >
       {title && <SectionLabel className="block truncate px-3 py-1" title={title}>{title}</SectionLabel>}
       {items.map((item) => <MenuItem key={item.id} item={item} onClose={onClose} />)}

@@ -1,0 +1,43 @@
+{
+  "onboarding": {
+    "title": "Na dobry początek",
+    "progress": "Gotowe: {{done}} z {{total}}",
+    "next": "Dalej",
+    "completeTitle": "Wszystko gotowe",
+    "completeNotice": "Kroki na dobry początek zostały ukończone.",
+    "completeHint": "Wypróbowano główne części Gostmana. Samouczek idzie dalej: łączenie żądań, skrypty i uruchamianie sprawdzeń w CI.",
+    "tutorial": "Przeczytaj samouczek",
+    "hide": "Ukryj",
+    "hideLabel": "Ukryj kroki na dobry początek",
+    "done": "Gotowe",
+    "steps": {
+      "send": {
+        "title": "Wyślij żądanie",
+        "hint": "Wyślij przykładowe żądanie do publicznej usługi echo i przeczytaj odpowiedź.",
+        "action": "Wyślij przykładowe żądanie"
+      },
+      "save": {
+        "title": "Zapisz je w kolekcji",
+        "hint": "Zapisane żądania pojawiają się w panelu bocznym i pozostają na tym urządzeniu.",
+        "action": "Zapisz żądanie"
+      },
+      "variable": {
+        "title": "Dodaj zmienną",
+        "hint": "Zdefiniuj baseUrl raz w środowisku, a potem pisz {{example}} wszędzie tam, gdzie jest potrzebne.",
+        "action": "Otwórz środowiska",
+        "defined": "zdefiniowana",
+        "missing": "jeszcze niezdefiniowana"
+      },
+      "check": {
+        "title": "Dodaj sprawdzenie",
+        "hint": "Napisz asercję, na przykład res.status równa się 200, albo użyj Dodaj sprawdzenia z tej odpowiedzi na karcie Sprawdzenia. Potem zapisz żądanie, a każda odpowiedź pokaże wynik: powodzenie lub niepowodzenie.",
+        "action": "Otwórz kartę Sprawdzenia"
+      },
+      "run": {
+        "title": "Uruchom żądania razem",
+        "hint": "Moduł uruchamiania wysyła po kolei wszystkie zapisane żądania i raportuje, które sprawdzenia przeszły.",
+        "action": "Otwórz moduł uruchamiania"
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "cookies": {
+    "clearAll": "Ștergere toate",
+    "filter": "Filtrare după nume sau domeniu",
+    "emptyTitle": "Niciun cookie stocat",
+    "emptyHint": "Cookie-urile setate de răspunsuri sunt păstrate aici și trimise înapoi aceluiași site la cererile următoare.",
+    "noMatches": "Niciun nume de cookie sau domeniu nu corespunde.",
+    "remove": "Ștergere cookie {{name}}"
+  }
+}

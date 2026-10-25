@@ -1,0 +1,129 @@
+{
+  "command": {
+    "title": "Paleta poleceń",
+    "heading": "Polecenia",
+    "sections": {
+      "request": "Żądania"
+    },
+    "searchCommands": "Szukaj poleceń",
+    "searchRequests": "Szukaj żądań",
+    "commandsPlaceholder": "Wpisz polecenie lub nazwę żądania",
+    "requestsPlaceholder": "Przejdź do żądania lub wpisu historii",
+    "results": "Wyniki",
+    "nothingMatches": "Brak dopasowań",
+    "sentEarlier": "Wysłano wcześniej",
+    "switchEnvironment": "Przełącz środowisko: {{name}}",
+    "switchEnvironmentDescription": "Użyj zmiennych tego środowiska",
+    "settingsKeywords": "nagłówki uwierzytelnianie zmienne skrypty sprawdzenia",
+    "commands": {
+      "sendRequest": {
+        "label": "Wyślij żądanie",
+        "description": "Wyślij żądanie z bieżącej karty"
+      },
+      "newRequest": {
+        "description": "Otwórz nową pustą kartę"
+      },
+      "saveRequest": {
+        "label": "Zapisz żądanie",
+        "description": "Zapisz żądanie z bieżącej karty"
+      },
+      "duplicateRequest": {
+        "label": "Duplikuj żądanie",
+        "description": "Zapisz kopię bieżącego żądania"
+      },
+      "copyRequest": {
+        "label": "Kopiuj żądanie",
+        "description": "Skopiuj zapisane żądanie, aby wkleić je do folderu"
+      },
+      "pasteRequest": {
+        "label": "Wklej żądanie",
+        "description": "Wklej skopiowane żądanie lub folder obok bieżącego żądania"
+      },
+      "generateCode": {
+        "description": "Pokaż bieżące żądanie jako kod"
+      },
+      "closeTab": {
+        "label": "Zamknij kartę",
+        "description": "Zamknij bieżącą kartę"
+      },
+      "closeOtherTabs": {
+        "description": "Zostaw tylko bieżącą kartę"
+      },
+      "closeSavedTabs": {
+        "description": "Zamknij każdą kartę bez niezapisanych zmian"
+      },
+      "keepTab": {
+        "label": "Zachowaj kartę podglądu",
+        "description": "Zamień kartę podglądu w zwykłą kartę"
+      },
+      "reopenTab": {
+        "label": "Otwórz ponownie zamkniętą kartę",
+        "description": "Przywróć ostatnio zamkniętą kartę"
+      },
+      "toggleSidebar": {
+        "description": "Pokaż lub ukryj kolekcje i historię"
+      },
+      "shortcuts": {
+        "description": "Zobacz wszystkie skróty"
+      },
+      "newFolder": {
+        "description": "Utwórz folder na najwyższym poziomie"
+      },
+      "runCollection": {
+        "description": "Uruchom całą kolekcję lub jeden folder wraz ze sprawdzeniami i skryptami"
+      },
+      "collapseFolders": {
+        "keywords": "zamknij zwiń drzewo"
+      },
+      "examples": {
+        "label": "Przykłady żądania",
+        "description": "Zobacz zapisane odpowiedzi bieżącego żądania"
+      },
+      "mockServer": {
+        "description": "Udostępnij zapisane przykłady na lokalnym porcie"
+      },
+      "capture": {
+        "label": "Przechwytywanie ruchu",
+        "description": "Przekazuj ruch aplikacji do jej API i zapisz go jako żądania"
+      },
+      "cookies": {
+        "label": "Zarządzaj cookies",
+        "description": "Zobacz i usuń zapisane cookies"
+      },
+      "environments": {
+        "label": "Zarządzaj środowiskami",
+        "description": "Twórz środowiska i edytuj ich zmienne, zmienne kolekcji oraz zmienne globalne",
+        "keywords": "zmienne globalne"
+      },
+      "scanSecrets": {
+        "keywords": "dane uwierzytelniające tokeny hasła wyciek"
+      },
+      "network": {
+        "label": "Ustawienia sieci",
+        "description": "Proxy i certyfikaty"
+      },
+      "import": {
+        "label": "Importuj dane",
+        "description": "Importuj pliki Postman, Insomnia, Bruno, OpenAPI, HAR i inne"
+      },
+      "lintSpec": {
+        "description": "Sprawdź zaimportowaną specyfikację OpenAPI pod kątem problemów",
+        "keywords": "openapi swagger walidacja zgodność"
+      },
+      "loadTest": {
+        "keywords": "wydajność obciążenie"
+      },
+      "export": {
+        "label": "Eksportuj dane",
+        "description": "Eksportuj kolekcje i środowiska"
+      },
+      "share": {
+        "label": "Udostępnij kolekcję",
+        "description": "Utwórz zaszyfrowany link lub plik, bez konta"
+      },
+      "clearHistory": {
+        "description": "Usuń wszystkie wpisy historii"
+      }
+    }
+  }
+}

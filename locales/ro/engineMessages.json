@@ -1,0 +1,70 @@
+{
+  "network": {
+    "hostNotFound": "Gazda {{host}} nu a fost găsită. Verificați adresa pentru greșeli de scriere și dacă acest computer este conectat la internet.",
+    "untrustedAuthority": "Certificatul serverului nu este semnat de o autoritate în care acest computer are încredere. {{advice}}",
+    "handshakeCertificate": "Serverul a încheiat handshake-ul TLS. Verificați dacă acceptă certificatul de client setat pentru această gazdă.",
+    "handshake": "Serverul a încheiat handshake-ul TLS. {{advice}}",
+    "hostMismatch": "Certificatul serverului nu este valid pentru {{host}}. Verificați dacă adresa este cea pentru care a fost emis certificatul.",
+    "certificateExpired": "Certificatul serverului a expirat sau nu este încă valid. Verificați ceasul acestui computer sau reînnoiți certificatul.",
+    "proxyConnect": "Nu s-a putut face conectarea la serverul proxy. Verificați adresa proxy din {{source}}.",
+    "proxyConnectSettings": "Nu s-a putut face conectarea la serverul proxy. Verificați adresa proxy din setările de rețea.",
+    "dial": "Nu s-a putut face conectarea la {{host}}. Verificați dacă serverul rulează și dacă gazda și portul sunt corecte.",
+    "dialServer": "Nu s-a putut face conectarea la server. Verificați dacă serverul rulează și dacă gazda și portul sunt corecte."
+  },
+  "advice": {
+    "untrustedAuthority": "Acordați încredere autorității sale de certificare sau dezactivați verificarea certificatelor pentru această cerere.",
+    "clientCertificate": "Dacă serverul cere un certificat de client, adăugați unul pentru această gazdă în setările de rețea ale aplicației desktop."
+  },
+  "failure": {
+    "timeout": "cererea a expirat",
+    "cancelled": "cererea a fost anulată"
+  },
+  "blocked": {
+    "address": "adresele private și locale sunt blocate",
+    "addressResolved": "adresele private și locale sunt blocate: {{host}} se rezolvă la {{address}}",
+    "host": "această gazdă nu se află în lista gazdelor care pot fi apelate",
+    "hostNamed": "această gazdă nu se află în lista gazdelor care pot fi apelate: {{host}}"
+  },
+  "request": {
+    "urlRequired": "introduceți un URL la care să se trimită cererea",
+    "urlScheme": "schemă URL neacceptată „{{scheme}}”, folosiți http sau https",
+    "urlInvalid": "„{{url}}” nu este un URL valid",
+    "urlInvalidMissing": "„{{url}}” nu este un URL valid deoarece {{reason}}",
+    "notDefined_one": "variabila {{names}} nu este definită",
+    "notDefined_few": "variabilele {{names}} nu sunt definite",
+    "notDefined_other": "variabilele {{names}} nu sunt definite",
+    "headersInvalid": "antetele nu sunt valide: {{detail}}",
+    "queryInvalid": "parametrii query nu sunt valizi: {{detail}}",
+    "variablesInvalid": "variabilele mediului nu sunt JSON valid: {{detail}}",
+    "bodyTooLarge": "corpul cererii este mai mare de 10 MB",
+    "tooLargeExpanded": "cererea este mai mare de 10 MB după completarea variabilelor",
+    "variablesTooDeep": "variabilele se referă una la alta de prea multe ori pentru a fi completate; simplificați variabilele care conțin {{example}}",
+    "redirects": "oprit după {{count}} redirecționări",
+    "trailingJson": "text neașteptat după valoarea JSON",
+    "expectedObject": "se aștepta un obiect JSON",
+    "expectedRows": "se aștepta un obiect JSON sau o listă de rânduri"
+  },
+  "files": {
+    "unavailable": "{{example}} citește fișiere doar în aplicația desktop sau în gostman run, send și load cu --allow-files",
+    "relativePath": "deschideți un dosar de spațiu de lucru pentru a folosi o cale relativă în {{example}} sau indicați o cale absolută",
+    "httpOnly": "{{example}} citește fișiere doar în cereri HTTP și GraphQL",
+    "outsideFolder": "„{{path}}” se află în afara dosarului colecției; o colecție citește doar fișiere din dosarul ei",
+    "unreadable": "fișierul „{{path}}” nu poate fi citit: {{detail}}",
+    "isFolder": "„{{path}}” este un dosar, nu un fișier",
+    "tooLarge": "fișierul „{{path}}” este mai mare de 10 MB",
+    "notFound": "fișierul „{{path}}” nu a fost găsit la {{resolved}}",
+    "pathMissing": "{{example}} necesită o cale de fișier între paranteze",
+    "networkPath": "„{{path}}” este o cale de rețea sau de dispozitiv. Fișierele sunt citite doar de pe unitățile acestui computer, astfel încât autentificarea dvs. Windows nu este trimisă niciodată altui computer. Copiați fișierul pe acest computer sau mapați resursa partajată la o literă de unitate"
+  },
+  "attachments": {
+    "unavailable": "fișierele atașate de pe disc sunt trimise doar de aplicația desktop",
+    "tooLarge": "fișierele atașate depășesc împreună {{size}} GB",
+    "signed": "această autentificare semnează întregul corp, deci fișierele atașate sunt limitate la {{size}} MB împreună cu el",
+    "failed": "fișierul atașat „{{name}}”: {{detail}}",
+    "notRegular": "„{{path}}” nu este un fișier obișnuit"
+  },
+  "proxy": {
+    "invalidAddress": "„{{address}}” nu este o adresă proxy validă",
+    "unsupportedScheme": "schemă proxy neacceptată „{{scheme}}”, folosiți http, https sau socks5"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "appStore": {
+    "saveFailedTitle": "无法保存更改",
+    "saveFailed": "你最近的更改没有保存，应用关闭后将会丢失。请导出数据以保留副本。（{{reason}}）",
+    "delete": "删除"
+  }
+}

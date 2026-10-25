@@ -1,0 +1,20 @@
+{
+  "importExport": {
+    "untitledFolder": "Folder",
+    "untitledEnvironment": "Środowisko",
+    "gostmanExport": "Eksport Gostman",
+    "undetected": "Nie udało się wykryć formatu. Użyj kolekcji Postman, specyfikacji OpenAPI lub Swagger albo eksportu Gostman.",
+    "noRequests": "Ten plik ({{label}}) nie zawiera żadnych żądań ani folderów.",
+    "unreadable": "Nie udało się odczytać tego pliku ({{label}}).",
+    "invalidYaml": "Nieprawidłowy YAML: {{reason}}",
+    "missingGostman": "Nieprawidłowy format eksportu Gostman: brak obiektu gostman",
+    "requestsNotArray": "Nieprawidłowy format eksportu Gostman: requests musi być tablicą",
+    "foldersNotArray": "Nieprawidłowy format eksportu Gostman: folders musi być tablicą",
+    "namesMore": "{{names}} i jeszcze {{count}}",
+    "tlsKept": "Weryfikacja TLS była wyłączona w kolekcji dla: {{names}}; pozostawiono ją włączoną. Wyłącz ją na karcie Ustawienia żądania, jeśli ufasz tym hostom.",
+    "flattened_one": "{{count}} folder zagnieżdżony w pętli lub głębiej niż {{levels}} poziomów przeniesiono na najwyższy poziom.",
+    "flattened_few": "{{count}} foldery zagnieżdżone w pętli lub głębiej niż {{levels}} poziomów przeniesiono na najwyższy poziom.",
+    "flattened_many": "{{count}} folderów zagnieżdżonych w pętli lub głębiej niż {{levels}} poziomów przeniesiono na najwyższy poziom.",
+    "flattened_other": "{{count}} folderu zagnieżdżonego w pętli lub głębiej niż {{levels}} poziomów przeniesiono na najwyższy poziom."
+  }
+}

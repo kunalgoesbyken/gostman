@@ -4,11 +4,11 @@ import { Button } from "./ui/button"
 import { canAttachFromDisk, maxAttachmentBytes, measureAttachment, pickAttachment, readAttachment } from "../lib/attachments"
 import { ATTACHMENT_TEXT } from "../lib/attachmentText"
 import { base64ByteLength } from "../lib/base64"
-import { formatSize } from "../lib/dataUtils"
+import { formatBytes } from "../lib/byteSize"
 
 const SUMMARY = "min-w-0 flex-1 truncate text-xs"
 
-const sized = (fileName, size) => (size === null ? fileName : `${fileName} (${formatSize(size)})`)
+const sized = (fileName, size) => (size === null ? fileName : `${fileName} (${formatBytes(size)})`)
 
 function useDiskSize(path) {
   const [measured, setMeasured] = useState(null)
@@ -46,7 +46,7 @@ function useFilePicker(onChange) {
     if (!file) return
     const limit = maxAttachmentBytes()
     if (file.size > limit) {
-      setError(ATTACHMENT_TEXT.tooLarge(file.name, formatSize(file.size), formatSize(limit)))
+      setError(ATTACHMENT_TEXT.tooLarge(file.name, formatBytes(file.size), formatBytes(limit)))
       return
     }
     setError("")

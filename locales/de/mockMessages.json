@@ -1,0 +1,12 @@
+{
+  "route": {
+    "graphqlNotServed": "GraphQL-Anfragen werden nicht ausgeliefert.",
+    "grpcNotServed": "gRPC-Anfragen werden nicht ausgeliefert.",
+    "mcpNotServed": "MCP-Anfragen werden nicht ausgeliefert.",
+    "webSocketNotServed": "WebSocket-Anfragen werden nicht ausgeliefert.",
+    "noExample": "Speichern Sie eine Antwort als Beispiel, um diese Route auszuliefern.",
+    "disabled": "Diese Route ist ausgeschaltet.",
+    "exampleBodyInvalid": "der Body des Beispiels „{{name}}“ ist kein gültiges Base64",
+    "conflict": "{{method}} {{path}} wird bereits von „{{owner}}“ ausgeliefert."
+  }
+}

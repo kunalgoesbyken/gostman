@@ -2,9 +2,9 @@ package importer
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
 
+	"github.com/kunalgoesbyken/gostman/locales"
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
@@ -15,7 +15,7 @@ func (c *collector) gostmanFlows(raw []json.RawMessage, requests idMap) {
 	for _, item := range raw {
 		var flow workspace.Flow
 		if err := json.Unmarshal(item, &flow); err != nil {
-			c.skip(messageGostmanItem, "flow")
+			c.skip(locales.ImporterGostmanItem, locales.Params{"what": "flow"})
 			continue
 		}
 		flow.Id = newID()
@@ -23,7 +23,7 @@ func (c *collector) gostmanFlows(raw []json.RawMessage, requests idMap) {
 		missing := false
 		flow.Steps = namedSteps(linkedSteps(flow.Steps, requests, &missing), paths)
 		if missing {
-			c.warn(RemarkFlows, fmt.Sprintf(messageFlowRequests, flow.Name))
+			c.warn(RemarkFlows, locales.New(locales.ImporterFlowRequests, locales.Params{"name": flow.Name}))
 		}
 		c.Flows = append(c.Flows, flow)
 	}

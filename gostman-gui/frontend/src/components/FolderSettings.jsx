@@ -19,7 +19,7 @@ import { AUTH_INHERIT, AUTH_NONE, ROOT_SETTINGS_ID, hasActiveSettings, inherited
 import { cancelSignIn, clearToken, discoverIssuer, obtainToken } from "../lib/oauth"
 import { OAUTH_TEXT } from "../lib/oauthText"
 import { parseRows, serializeRows } from "../lib/rows"
-import { RESTRICTED } from "../lib/execution"
+import { EXECUTION_TEXT } from "../lib/executionText"
 import { isDesktopShell } from "../lib/windowControls"
 import { MAX_TIMEOUT_MS, MIN_TIMEOUT_MS, TIMEOUT_MS } from "../lib/scripting/limits"
 import { environmentEntries, withEntries } from "../lib/variableScopes"
@@ -33,18 +33,18 @@ const TAB_TESTS = "tests"
 const TAB_DOCS = "docs"
 const VIEW_PRE = "preScript"
 const VIEW_POST = "postScript"
-const TAB_ITEMS = Object.entries(TEXT.tabs).map(([value, label]) => ({ value, label, content: label }))
+const tabItems = () => Object.entries(TEXT.tabs).map(([value, label]) => ({ value, label, content: label }))
 const VARIABLE_FEATURES = { enabled: false, secret: false, readOnly: false }
 const SCRIPT_VIEWS = [
-  { value: VIEW_PRE, label: TEXT.preScript },
-  { value: VIEW_POST, label: TEXT.postScript },
+  { value: VIEW_PRE, get label() { return TEXT.preScript } },
+  { value: VIEW_POST, get label() { return TEXT.postScript } },
 ]
 
 const VARS_COLLECTION = "collection"
 const VARS_FOLDER = "folder"
 const VARS_VIEWS = [
-  { value: VARS_COLLECTION, label: ENVIRONMENT_TEXT.collectionVariables },
-  { value: VARS_FOLDER, label: TEXT.folderVariables },
+  { value: VARS_COLLECTION, get label() { return ENVIRONMENT_TEXT.collectionVariables } },
+  { value: VARS_FOLDER, get label() { return TEXT.folderVariables } },
 ]
 
 const isVariableObject = (text) => isPlainObject(parseJSON(text, null))
@@ -106,7 +106,7 @@ const timeLimitOf = (text) => Math.min(Math.round(Number(text) * MS_PER_SECOND) 
 
 function TimeLimitField({ value, onChange }) {
   return (
-    <label className="ml-auto flex items-center gap-2 text-xs text-muted-foreground" title={TEXT.timeLimitNote}>
+    <label className="ms-auto flex items-center gap-2 text-xs text-muted-foreground" title={TEXT.timeLimitNote}>
       <span className="max-sm:sr-only">{TEXT.timeLimit}</span>
       <Input
         type="number"
@@ -168,7 +168,7 @@ function useFolderAuthActions(backend, scopeId, auth, onChange) {
 
   const getToken = async () => {
     if (useAppStore.getState().isRestricted) {
-      setTokenRequest({ isPending: false, error: RESTRICTED })
+      setTokenRequest({ isPending: false, error: EXECUTION_TEXT.restricted })
       return
     }
     setTokenRequest({ isPending: true, error: "" })
@@ -252,7 +252,7 @@ export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
       <Tabs value={tab} onValueChange={setTab} className="flex min-h-0 flex-1 flex-col">
         <DialogHeader onClose={onClose}>
           <DialogTitle>{title}</DialogTitle>
-          <OverflowTabsList label={title} items={TAB_ITEMS} moreLabel={TEXT.more} moreHint={TEXT.moreHint} className="ml-4" />
+          <OverflowTabsList label={title} items={tabItems()} moreLabel={TEXT.more} moreHint={TEXT.moreHint} className="ms-4 max-sm:ms-0" />
         </DialogHeader>
         {isRestricted && hasActiveSettings(settings) && <Notice tone="warning">{TEXT.restrictedNote}</Notice>}
         <div className="min-h-0 flex-1 overflow-hidden">

@@ -1,0 +1,12 @@
+{
+  "exampleActions": {
+    "saveFailure": "无法保存示例",
+    "changeFailure": "无法更改示例",
+    "saved": "示例“{{example}}”已与“{{request}}”一起保存。",
+    "saveTitle": "保存为示例",
+    "nameLabel": "示例名称",
+    "renameTitle": "重命名示例",
+    "deleteTitle": "删除示例",
+    "deleteMessage": "要删除示例“{{name}}”吗？此操作无法撤销。"
+  }
+}

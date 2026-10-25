@@ -8,29 +8,6 @@ export const ROW_FRAGMENT = 'fragment'
 
 const PATH_SEPARATOR = '/'
 
-export const BUILDER_TEXT = {
-  rootLabel: 'Operation type',
-  rootNames: { query: 'Query', mutation: 'Mutation', subscription: 'Subscription' },
-  title: 'Builder',
-  paneLabel: 'Query builder',
-  filterLabel: 'Filter fields',
-  filterPlaceholder: 'Filter fields',
-  expand: 'Expand',
-  collapse: 'Collapse',
-  select: (name) => `Select ${name}`,
-  include: (name) => `Include the argument ${name}`,
-  viaFragment: 'Selected through a fragment in the editor. Edit it there.',
-  noSchemaTitle: 'No schema loaded',
-  noSchemaDescription: "Fetch it to build a query from the endpoint's fields. The introspection query uses this request's URL, headers and auth.",
-  fetch: 'Fetch schema',
-  refresh: 'Refresh schema',
-  loading: 'Fetching the schema',
-  syntaxError: (message) => `The builder is paused while the editor has a syntax error: ${message}`,
-  subscription: 'Subscriptions stream results over a long-lived connection. Turn on Stream as server-sent events in Settings to read them from servers that deliver subscriptions that way.',
-  noRoot: 'This schema has no root type for this operation.',
-  empty: 'Nothing matches the filter.',
-}
-
 const keyOf = (path) => path.join(PATH_SEPARATOR)
 
 const isOpen = (expansion, key, hasSelection) => expansion.get(key) ?? hasSelection

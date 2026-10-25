@@ -1,4 +1,5 @@
 import { evaluateExtractors } from '../chaining'
+import { installFromMessage } from '../i18n/core'
 import { contractChecks } from '../contract'
 import { flowTurn } from '../flows/engine'
 import { runJob } from './job'
@@ -41,6 +42,7 @@ function settle({ id, response, error }) {
 }
 
 self.onmessage = async ({ data }) => {
+  if (installFromMessage(data)) return
   if (data.type === MESSAGE_REPLY) {
     settle(data)
     return

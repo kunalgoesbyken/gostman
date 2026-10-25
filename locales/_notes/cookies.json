@@ -1,0 +1,5 @@
+{
+  "cookies.clearAll": "Button that deletes every stored cookie.",
+  "cookies.filter": "Placeholder of the search field of the cookie list.",
+  "cookies.remove": "{{name}} is a cookie name. Accessible label of a delete button."
+}

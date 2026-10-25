@@ -1,0 +1,27 @@
+{
+  "grpc": {
+    "services": "サービス",
+    "messageLabel": "リクエストメッセージ",
+    "reflection": "サーバーリフレクション",
+    "sendAsGrpc": "gRPCとして送信",
+    "addProtos": ".protoファイルを追加",
+    "removeFiles": "ファイルを削除",
+    "load": "読み込む",
+    "reload": "再読み込み",
+    "schemaHint": "サーバーリフレクションでサービスを読み込むか、サービスの .protoファイルを追加してください。このリクエストのアドレス、ヘッダー、認証が使用されます。",
+    "noServices": "サービスが見つかりませんでした。",
+    "tooLarge": "{{name}}は{{size}}です。ファイルは{{limit}}までです。",
+    "method": "メソッド",
+    "methodLabel": "gRPCメソッド",
+    "chooseMethod": "メソッドを選択",
+    "useExample": "例を使用",
+    "useExampleTitle": "メッセージを、このメソッドの入力の例に置き換えます",
+    "streamHint": "このメソッドはストリームを読み取ります。複数のメッセージを送信するには、JSON配列を書いてください。",
+    "kinds": {
+      "bidirectional": "双方向ストリーミング",
+      "client": "クライアントストリーミング",
+      "server": "サーバーストリーミング",
+      "unary": "単項"
+    }
+  }
+}

@@ -1,6 +1,10 @@
 package scan
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/kunalgoesbyken/gostman/locales"
+)
 
 type charset uint8
 
@@ -21,7 +25,11 @@ const (
 type rule struct {
 	ID       string
 	Severity Severity
-	Reason   string
+	Reason   locales.Message
+}
+
+func said(code locales.Code) locales.Message {
+	return locales.New(code, nil)
 }
 
 type format struct {
@@ -47,30 +55,30 @@ type scheme struct {
 }
 
 var formats = []format{
-	{rule: rule{"aws-access-key-id", High, "AWS access key id"}, Prefixes: []string{"AKIA", "ASIA", "ABIA", "ACCA"}, MinBody: 16, MaxBody: 16, Charset: upper | digit},
-	{rule: rule{"github-token", High, "GitHub token"}, Prefixes: []string{"ghp_", "gho_", "ghu_", "ghs_", "ghr_"}, MinBody: 36, MaxBody: 36, Charset: alphanumeric},
-	{rule: rule{"github-fine-grained-token", High, "GitHub fine-grained personal access token"}, Prefixes: []string{"github_pat_"}, MinBody: 82, MaxBody: 82, Charset: alphanumeric | underscore},
-	{rule: rule{"gitlab-token", High, "GitLab personal access token"}, Prefixes: []string{"glpat-"}, MinBody: 20, MaxBody: 40, Charset: urlSafe},
-	{rule: rule{"slack-token", High, "Slack token"}, Prefixes: []string{"xoxb-", "xoxp-", "xoxa-", "xoxr-", "xoxs-", "xapp-"}, MinBody: 20, MaxBody: 200, Charset: alphanumeric | dash},
-	{rule: rule{"stripe-live-key", High, "Stripe live secret or restricted key"}, Prefixes: []string{"sk_live_", "rk_live_"}, MinBody: 24, MaxBody: 99, Charset: alphanumeric},
-	{rule: rule{"google-api-key", Medium, "Google API key"}, Prefixes: []string{"AIza"}, MinBody: 35, MaxBody: 35, Charset: urlSafe},
-	{rule: rule{"npm-token", High, "npm access token"}, Prefixes: []string{"npm_"}, MinBody: 36, MaxBody: 36, Charset: alphanumeric},
-	{rule: rule{"pypi-token", High, "PyPI upload token"}, Prefixes: []string{"pypi-AgEI"}, MinBody: 50, MaxBody: 400, Charset: urlSafe},
-	{rule: rule{"jwt", Medium, "JSON Web Token"}, Prefixes: []string{"eyJ"}, MinBody: 30, MaxBody: 8192, Charset: urlSafe | dot, Segments: 3},
+	{rule: rule{"aws-access-key-id", High, said(locales.ScanAwsAccessKeyId)}, Prefixes: []string{"AKIA", "ASIA", "ABIA", "ACCA"}, MinBody: 16, MaxBody: 16, Charset: upper | digit},
+	{rule: rule{"github-token", High, said(locales.ScanGithubToken)}, Prefixes: []string{"ghp_", "gho_", "ghu_", "ghs_", "ghr_"}, MinBody: 36, MaxBody: 36, Charset: alphanumeric},
+	{rule: rule{"github-fine-grained-token", High, said(locales.ScanGithubFineGrainedToken)}, Prefixes: []string{"github_pat_"}, MinBody: 82, MaxBody: 82, Charset: alphanumeric | underscore},
+	{rule: rule{"gitlab-token", High, said(locales.ScanGitlabToken)}, Prefixes: []string{"glpat-"}, MinBody: 20, MaxBody: 40, Charset: urlSafe},
+	{rule: rule{"slack-token", High, said(locales.ScanSlackToken)}, Prefixes: []string{"xoxb-", "xoxp-", "xoxa-", "xoxr-", "xoxs-", "xapp-"}, MinBody: 20, MaxBody: 200, Charset: alphanumeric | dash},
+	{rule: rule{"stripe-live-key", High, said(locales.ScanStripeLiveKey)}, Prefixes: []string{"sk_live_", "rk_live_"}, MinBody: 24, MaxBody: 99, Charset: alphanumeric},
+	{rule: rule{"google-api-key", Medium, said(locales.ScanGoogleApiKey)}, Prefixes: []string{"AIza"}, MinBody: 35, MaxBody: 35, Charset: urlSafe},
+	{rule: rule{"npm-token", High, said(locales.ScanNpmToken)}, Prefixes: []string{"npm_"}, MinBody: 36, MaxBody: 36, Charset: alphanumeric},
+	{rule: rule{"pypi-token", High, said(locales.ScanPypiToken)}, Prefixes: []string{"pypi-AgEI"}, MinBody: 50, MaxBody: 400, Charset: urlSafe},
+	{rule: rule{"jwt", Medium, said(locales.ScanJwt)}, Prefixes: []string{"eyJ"}, MinBody: 30, MaxBody: 8192, Charset: urlSafe | dot, Segments: 3},
 }
 
 var blocks = []block{
-	{rule: rule{"private-key-block", High, "PEM private key"}, Opening: "-----BEGIN ", Closing: "PRIVATE KEY-----", Trailer: "-----END "},
+	{rule: rule{"private-key-block", High, said(locales.ScanPrivateKeyBlock)}, Opening: "-----BEGIN ", Closing: "PRIVATE KEY-----", Trailer: "-----END "},
 }
 
 var schemes = []scheme{
-	{rule: rule{"bearer-literal", Medium, "Bearer token typed into the request"}, Name: "bearer", MinLen: 20},
+	{rule: rule{"bearer-literal", Medium, said(locales.ScanBearerLiteral)}, Name: "bearer", MinLen: 20},
 }
 
 var (
-	entropyRule = rule{"high-entropy-value", Medium, "random-looking value in a field named like a credential"}
-	literalRule = rule{"auth-literal", Medium, "credential typed into the auth settings instead of a {{variable}}"}
-	urlRule     = rule{"url-credentials", Medium, "password written into the URL"}
+	entropyRule = rule{"high-entropy-value", Medium, said(locales.ScanHighEntropyValue)}
+	literalRule = rule{"auth-literal", Medium, locales.New(locales.ScanAuthLiteral, locales.Params{"example": "{{variable}}"})}
+	urlRule     = rule{"url-credentials", Medium, said(locales.ScanUrlCredentials)}
 )
 
 func (c charset) has(r rune) bool {

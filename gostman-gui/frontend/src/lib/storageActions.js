@@ -1,32 +1,25 @@
-import { pluralize } from './dataUtils'
 import { DIALOG_TEXT } from './dialogText'
 import { createGitActions } from './gitSession'
-import { WORKSPACE_TEXT as TEXT } from './workspaceText'
+import { STORAGE_ACTIONS_TEXT, WORKSPACE_TEXT as TEXT } from './workspaceText'
+import { TREE_TEXT } from './treeText'
 import { useAppStore } from '../store/appStore'
 
-const CLONE_TITLE = 'Clone repository'
-const CLONE_MESSAGE = 'Address of the repository to clone. Sign-in uses your git credential helper or SSH agent. Next, choose the folder to clone into.'
 const CLONE_PLACEHOLDER = 'https://github.com/owner/repository.git'
-const CLONE_CONFIRM = 'Choose folder'
-const TRUST_PROMPT = 'Requests in this folder can carry scripts, OAuth 2.0 settings, commands that start local MCP servers and {{$file(...)}} placeholders that send files from this computer. They run when a request is sent and can read your variables. Its gostman.yaml can also send your requests through a proxy and add a CA certificate it names, and its variables can read your secret managers. Trust the folder only if you know where its files came from.'
-const SKIPPED_NOTE = 'These files were skipped and left unchanged. Fix them, then choose Reload from disk.'
 
 const store = () => useAppStore.getState()
 const messageOf = (error) => error?.message || String(error)
 
-const describeProblem = ({ path, line, message }) => (line ? `${path} (line ${line}): ${message}` : `${path}: ${message}`)
-
 function showProblems(problems) {
   if (problems.length === 0) return
-  const title = `${pluralize(problems.length, 'file')} could not be read`
-  store().showAlert(title, [SKIPPED_NOTE, ...problems.map(describeProblem)].join('\n'), 'OK', 'warning')
+  const title = TREE_TEXT.unreadableTitle(problems.length)
+  store().showAlert(title, [STORAGE_ACTIONS_TEXT.skippedNote, ...problems.map(STORAGE_ACTIONS_TEXT.describeProblem)].join('\n'), DIALOG_TEXT.ok, 'warning')
 }
 
 const attempt = (failureTitle, run) => async (...args) => {
   try {
     await run(...args)
   } catch (error) {
-    store().showAlert(failureTitle, messageOf(error), 'OK', 'warning')
+    store().showAlert(failureTitle, messageOf(error), DIALOG_TEXT.ok, 'warning')
   }
 }
 
@@ -65,9 +58,9 @@ export function createStorageActions(backend) {
     if (parent) await switchAndReport(() => storage.git.clone(address.trim(), parent))
   })
 
-  const promptClone = () => store().showPrompt(CLONE_TITLE, CLONE_MESSAGE, '', CLONE_PLACEHOLDER, (address) => {
+  const promptClone = () => store().showPrompt(STORAGE_ACTIONS_TEXT.cloneTitle, STORAGE_ACTIONS_TEXT.cloneMessage, '', CLONE_PLACEHOLDER, (address) => {
     if (address?.trim()) clone(address)
-  }, CLONE_CONFIRM)
+  }, STORAGE_ACTIONS_TEXT.cloneConfirm)
 
   const git = createGitActions(storage.git)
 
@@ -78,7 +71,14 @@ export function createStorageActions(backend) {
     await git.refreshState()
   })
 
-  const confirmTrust = () => store().showConfirm('Trust this folder?', TRUST_PROMPT, trust, null, 'default', 'Trust')
+  const confirmTrust = () => store().showConfirm(
+    STORAGE_ACTIONS_TEXT.trustTitle,
+    STORAGE_ACTIONS_TEXT.trustMessage,
+    trust,
+    null,
+    'default',
+    STORAGE_ACTIONS_TEXT.trustConfirm,
+  )
 
   const adopt = (status) => store().adoptWorkspaceStatus(status)
 
@@ -114,7 +114,7 @@ export function createStorageActions(backend) {
   const refresh = attempt(TEXT.listFailed, async () => {
     const status = await storage.status()
     adopt(status)
-    if (status.notice) store().showAlert(TEXT.alertTitle, status.notice, 'OK', 'warning')
+    if (status.notice) store().showAlert(TEXT.alertTitle, status.notice, DIALOG_TEXT.ok, 'warning')
   })
 
   const reopen = attempt(TEXT.openFailed, (path) => switchAndReport(() => storage.openFolder(path)))

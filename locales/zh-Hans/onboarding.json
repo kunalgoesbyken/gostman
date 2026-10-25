@@ -1,0 +1,43 @@
+{
+  "onboarding": {
+    "title": "快速入门",
+    "progress": "已完成 {{done}}/{{total}}",
+    "next": "下一步",
+    "completeTitle": "一切就绪",
+    "completeNotice": "你已完成入门步骤。",
+    "completeHint": "你已经试过 Gostman 的主要功能。教程会进一步介绍请求串联、脚本，以及在 CI 中运行检查。",
+    "tutorial": "阅读教程",
+    "hide": "隐藏",
+    "hideLabel": "隐藏入门步骤",
+    "done": "完成",
+    "steps": {
+      "send": {
+        "title": "发送请求",
+        "hint": "向公共的回显服务发送一个示例请求，并查看响应。",
+        "action": "发送示例请求"
+      },
+      "save": {
+        "title": "保存到集合",
+        "hint": "已保存的请求会显示在侧边栏中，并保留在此设备上。",
+        "action": "保存请求"
+      },
+      "variable": {
+        "title": "添加变量",
+        "hint": "在环境中一次性定义 baseUrl，然后在需要的地方写 {{example}}。",
+        "action": "打开环境",
+        "defined": "已定义",
+        "missing": "尚未定义"
+      },
+      "check": {
+        "title": "添加检查",
+        "hint": "写一条断言，例如 res.status 等于 200，或在“检查”标签页中使用“根据此响应添加检查”。然后保存请求，之后每个响应都会显示通过或失败。",
+        "action": "打开“检查”标签页"
+      },
+      "run": {
+        "title": "批量运行请求",
+        "hint": "运行器会按顺序发送每个已保存的请求，并报告哪些检查通过了。",
+        "action": "打开运行器"
+      }
+    }
+  }
+}

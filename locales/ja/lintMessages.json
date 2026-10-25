@@ -1,0 +1,39 @@
+{
+  "components": {
+    "unused": "{{kind}}/{{name}}は定義されていますが、参照されていません",
+    "invalidRef": "無効な$ref：{{detail}}"
+  },
+  "info": {
+    "fieldMissing": "info.{{field}}がないか、空です",
+    "noServers": "serversが記載されていないため、クライアントはAPIの提供先を判断できません",
+    "noHost": "hostが設定されていないため、クライアントはAPIの提供先を判断できません",
+    "serverNotHttps": "{{url}}はhttpsを使っていません",
+    "httpOnly": "APIはhttpでのみ提供されています"
+  },
+  "operations": {
+    "noOperationId": "操作にoperationIdがありません",
+    "duplicateOperationId": "operationId「{{id}}」は{{earlier}}ですでに使われています",
+    "noSummary": "操作にsummaryもdescriptionもありません",
+    "undeclaredTag": "タグ「{{tag}}」が最上位のtagsに宣言されていません",
+    "deprecatedWithoutDescription": "操作は非推奨ですが、代わりに使うものを示すdescriptionがありません",
+    "noSecurity": "仕様にはセキュリティスキームが定義されていますが、この操作では何も要求されていません"
+  },
+  "paths": {
+    "none": "ドキュメントにパスが定義されていません",
+    "noLeadingSlash": "パス「{{path}}」がスラッシュで始まっていません",
+    "ambiguous": "{{path}}を{{earlier}}と区別できません",
+    "parameterUndeclared": "パスパラメーター「{{name}}」がパスにありますが、宣言されていません",
+    "parameterUnused": "パスパラメーター「{{name}}」は宣言されていますが、パスにありません"
+  },
+  "responses": {
+    "noSuccess": "操作に2xxのレスポンスが宣言されていません",
+    "noError": "操作にdefaultも4xxのレスポンスも宣言されていません",
+    "noSchema": "レスポンス{{status}}にスキーマがありません",
+    "mediaWithoutSchema": "レスポンス{{status}}に{{media}}が宣言されていますが、スキーマがありません",
+    "bodyOnRead": "{{method}}操作にはリクエストボディを設定しないでください",
+    "noBodyExample": "{{media}}のリクエストボディに例がありません"
+  },
+  "security": {
+    "undefinedScheme": "セキュリティスキーム「{{name}}」は使われていますが、定義されていません"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "onboarding": {
+    "title": "Per iniziare",
+    "progress": "{{done}} di {{total}} completati",
+    "next": "Prossimo",
+    "completeTitle": "Tutto pronto",
+    "completeNotice": "Hai finito i primi passi.",
+    "completeHint": "Hai provato le parti principali di Gostman. Il tutorial va oltre, con il concatenamento delle richieste, gli script e l'esecuzione dei controlli in CI.",
+    "tutorial": "Leggi il tutorial",
+    "hide": "Nascondi",
+    "hideLabel": "Nascondi i primi passi",
+    "done": "Fatto",
+    "steps": {
+      "send": {
+        "title": "Invia una richiesta",
+        "hint": "Invia una richiesta di esempio a un servizio echo pubblico e leggi la risposta.",
+        "action": "Invia richiesta di esempio"
+      },
+      "save": {
+        "title": "Salvala nella tua raccolta",
+        "hint": "Le richieste salvate compaiono nella barra laterale e restano su questo dispositivo.",
+        "action": "Salva richiesta"
+      },
+      "variable": {
+        "title": "Aggiungi una variabile",
+        "hint": "Definisci baseUrl una volta in un ambiente, poi scrivi {{example}} dove ti serve.",
+        "action": "Apri gli ambienti",
+        "defined": "definita",
+        "missing": "non ancora definita"
+      },
+      "check": {
+        "title": "Aggiungi un controllo",
+        "hint": "Scrivi un'asserzione come res.status è uguale a 200, oppure usa Aggiungi controlli da questa risposta nella scheda Controlli. Poi salva la richiesta e ogni risposta mostrerà un esito positivo o negativo.",
+        "action": "Apri la scheda Controlli"
+      },
+      "run": {
+        "title": "Esegui le tue richieste insieme",
+        "hint": "Il runner invia ogni richiesta salvata in ordine e riporta quali controlli sono riusciti.",
+        "action": "Apri il runner"
+      }
+    }
+  }
+}

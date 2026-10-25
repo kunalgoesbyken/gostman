@@ -1,0 +1,70 @@
+{
+  "network": {
+    "hostNotFound": "Não foi possível encontrar o host {{host}}. Verifique se há erros de digitação no endereço e se este computador está online.",
+    "untrustedAuthority": "O certificado do servidor não é assinado por uma autoridade em que este computador confia. {{advice}}",
+    "handshakeCertificate": "O servidor encerrou o handshake TLS. Verifique se ele aceita o certificado de cliente definido para este host.",
+    "handshake": "O servidor encerrou o handshake TLS. {{advice}}",
+    "hostMismatch": "O certificado do servidor não é válido para {{host}}. Verifique se o endereço é aquele para o qual o certificado foi emitido.",
+    "certificateExpired": "O certificado do servidor expirou ou ainda não é válido. Verifique o relógio deste computador ou renove o certificado.",
+    "proxyConnect": "Não foi possível conectar ao servidor proxy. Verifique o endereço do proxy em {{source}}.",
+    "proxyConnectSettings": "Não foi possível conectar ao servidor proxy. Verifique o endereço do proxy nas configurações de rede.",
+    "dial": "Não foi possível conectar a {{host}}. Verifique se o servidor está em execução e se o host e a porta estão corretos.",
+    "dialServer": "Não foi possível conectar ao servidor. Verifique se o servidor está em execução e se o host e a porta estão corretos."
+  },
+  "advice": {
+    "untrustedAuthority": "Confie na autoridade certificadora dele ou desative a verificação de certificado para esta requisição.",
+    "clientCertificate": "Se o servidor exigir um certificado de cliente, adicione um para este host nas configurações de rede do app para desktop."
+  },
+  "failure": {
+    "timeout": "a requisição excedeu o tempo limite",
+    "cancelled": "a requisição foi cancelada"
+  },
+  "blocked": {
+    "address": "endereços privados e locais são bloqueados",
+    "addressResolved": "endereços privados e locais são bloqueados: {{host}} resolve para {{address}}",
+    "host": "este host não está na lista de hosts que podem ser chamados",
+    "hostNamed": "este host não está na lista de hosts que podem ser chamados: {{host}}"
+  },
+  "request": {
+    "urlRequired": "informe uma URL para enviar a requisição",
+    "urlScheme": "esquema de URL não compatível \"{{scheme}}\", use http ou https",
+    "urlInvalid": "\"{{url}}\" não é uma URL válida",
+    "urlInvalidMissing": "\"{{url}}\" não é uma URL válida porque {{reason}}",
+    "notDefined_one": "{{names}} não está definida",
+    "notDefined_many": "{{names}} não estão definidas",
+    "notDefined_other": "{{names}} não estão definidas",
+    "headersInvalid": "os cabeçalhos não são válidos: {{detail}}",
+    "queryInvalid": "os parâmetros de consulta não são válidos: {{detail}}",
+    "variablesInvalid": "as variáveis de ambiente não são um JSON válido: {{detail}}",
+    "bodyTooLarge": "o corpo da requisição é maior que 10 MB",
+    "tooLargeExpanded": "a requisição é maior que 10 MB depois que as variáveis são preenchidas",
+    "variablesTooDeep": "as variáveis se referem umas às outras vezes demais para serem preenchidas; simplifique as variáveis que contêm {{example}}",
+    "redirects": "interrompido após {{count}} redirecionamentos",
+    "trailingJson": "texto inesperado após o valor JSON",
+    "expectedObject": "era esperado um objeto JSON",
+    "expectedRows": "era esperado um objeto JSON ou uma lista de linhas"
+  },
+  "files": {
+    "unavailable": "{{example}} lê arquivos apenas no app para desktop, ou em gostman run, send e load com --allow-files",
+    "relativePath": "abra uma pasta de espaço de trabalho para usar um caminho relativo em {{example}}, ou informe um caminho absoluto",
+    "httpOnly": "{{example}} lê arquivos apenas em requisições HTTP e GraphQL",
+    "outsideFolder": "\"{{path}}\" está fora da pasta da coleção; uma coleção lê apenas arquivos dentro da própria pasta",
+    "unreadable": "não foi possível ler o arquivo \"{{path}}\": {{detail}}",
+    "isFolder": "\"{{path}}\" é uma pasta, não um arquivo",
+    "tooLarge": "o arquivo \"{{path}}\" é maior que 10 MB",
+    "notFound": "o arquivo \"{{path}}\" não foi encontrado em {{resolved}}",
+    "pathMissing": "{{example}} precisa de um caminho de arquivo entre os parênteses",
+    "networkPath": "\"{{path}}\" é um caminho de rede ou de dispositivo. Os arquivos são lidos apenas das unidades deste computador, para que seu login do Windows nunca seja enviado a outro computador. Copie o arquivo para este computador ou mapeie o compartilhamento para uma letra de unidade"
+  },
+  "attachments": {
+    "unavailable": "arquivos anexados do disco são enviados apenas pelo app para desktop",
+    "tooLarge": "os arquivos anexados somam mais de {{size}} GB",
+    "signed": "esta autenticação assina o corpo inteiro, então os arquivos anexados ficam limitados a {{size}} MB junto com ele",
+    "failed": "arquivo anexado \"{{name}}\": {{detail}}",
+    "notRegular": "\"{{path}}\" não é um arquivo comum"
+  },
+  "proxy": {
+    "invalidAddress": "\"{{address}}\" não é um endereço de proxy válido",
+    "unsupportedScheme": "esquema de proxy não compatível \"{{scheme}}\", use http, https ou socks5"
+  }
+}

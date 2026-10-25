@@ -1,0 +1,30 @@
+{
+  "privacy": {
+    "telemetryLabel": "テレメトリー",
+    "telemetryHint": "Gostmanにはテレメトリー、アナリティクス、クラッシュレポートの機能はありません。通信先は、リクエストを送信するホストと、ご自身で設定したサービスのみです。",
+    "docsLink": "Gostmanの接続先",
+    "updatesLabel": "新しいバージョンを確認",
+    "updatesHint": "1日1回、GitHubから最新のリリースを読み取り、ステータスバーに表示します。ダウンロードもインストールも行いません。",
+    "updatesFailed": "前回の確認ではGitHubに接続できませんでした。明日もう一度確認します。",
+    "updatesCurrent": "これが最新バージョン（{{version}}）です。",
+    "updateAvailable": "バージョン{{version}}を利用できます",
+    "updatesNewer": "GitHubでバージョン{{version}}を利用できます。",
+    "updateHint": "GitHubでリリースノートとダウンロードを開く",
+    "updateDismiss": "次のバージョンまで非表示",
+    "relayLabel": "リクエストの送信経路",
+    "relayHint": "ホスト型リレーは、localhostやプライベートアドレスに接続できません。ローカルリレーは、間に何も挟まずに、このコンピューターからリクエストを送信します。",
+    "relayModes": {
+      "hosted": "ホスト型リレー",
+      "local": "このコンピューターのローカルリレー"
+    },
+    "relayAddressLabel": "ローカルリレーのアドレス",
+    "relayAddressHint": "gostman relayで起動し、表示されたアドレスを入力してください。",
+    "relayAddressInvalid": "http://127.0.0.1:4030のようなアドレスを入力してください。",
+    "relayCheck": "テスト",
+    "relayChecking": "テスト中…",
+    "relayReachable": "ローカルリレーが応答しました。",
+    "relayMissing": "「設定」の「プライバシー」でローカルリレーのアドレスを入力するか、ホスト型リレーに戻してください。",
+    "relayUnreachable": "{{address}}のローカルリレーが応答しませんでした。gostman relayで起動するか、「設定」の「プライバシー」でホスト型リレーに戻してください。",
+    "relayCheckUnreachable": "{{address}}のローカルリレーが応答しませんでした。gostman relayが実行中で、表示されたアドレスと一致しているか確認してください。"
+  }
+}

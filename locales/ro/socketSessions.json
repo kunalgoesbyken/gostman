@@ -1,0 +1,14 @@
+{
+  "socketSessions": {
+    "invalidVariables": "Variabilele mediului activ nu sunt JSON valid.",
+    "invalidAddress": "Introduceți un URL ws:// sau wss:// în bara de adrese.",
+    "notConnected": "Netrimis: conexiunea s-a închis înainte de plecarea mesajului.",
+    "undefinedVariables": "URL-ul folosește variabile pe care mediul activ nu le definește: {{names}}.",
+    "reconnecting": "Reconectare în {{seconds}} s",
+    "couldNotSend": "Nu s-a putut trimite: {{message}}",
+    "connected": "Conectat",
+    "couldNotConnect": "Nu s-a putut conecta: {{message}}",
+    "connecting": "Se conectează la {{url}}",
+    "disconnected": "Deconectat"
+  }
+}

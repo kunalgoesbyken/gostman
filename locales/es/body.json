@@ -1,0 +1,22 @@
+{
+  "body": {
+    "typeLabel": "Tipo de cuerpo",
+    "editorLabel": "Cuerpo de la solicitud",
+    "format": "Formatear",
+    "formatTitle": "Aplica sangría al cuerpo {{type}} ({{chord}}). {{example}} se conservan tal como están escritos.",
+    "cannotFormatAt": "No se puede formatear el {{type}} en la línea {{line}}, columna {{column}}: {{message}}",
+    "cannotFormat": "No se puede formatear el {{type}}: {{message}}",
+    "goToLine": "Ir a la línea {{line}}",
+    "noBody": "Sin cuerpo",
+    "noBodyDescription": "Esta solicitud se envía sin cuerpo.",
+    "multipartOnGet": "Las solicitudes GET rara vez llevan cuerpo y muchos servidores lo ignoran. Cambia el método a POST o PUT si quieres subirlo.",
+    "replacedByGraphQL": "El método es GRAPHQL, así que el cuerpo se construye desde la pestaña GraphQL y este no se envía.",
+    "types": {
+      "none": "Ninguno",
+      "text": "Texto",
+      "form": "Form URL-encoded",
+      "multipart": "Multipart",
+      "file": "Archivo"
+    }
+  }
+}

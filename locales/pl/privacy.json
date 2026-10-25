@@ -1,0 +1,30 @@
+{
+  "privacy": {
+    "telemetryLabel": "Telemetria",
+    "telemetryHint": "Gostman nie ma telemetrii, analityki ani raportowania awarii. Łączy się tylko z hostami, do których wysyłane są żądania, oraz z usługami skonfigurowanymi samodzielnie.",
+    "docsLink": "Z czym łączy się Gostman",
+    "updatesLabel": "Sprawdzaj nowe wersje",
+    "updatesHint": "Raz dziennie odczytuje najnowsze wydanie z GitHuba i pokazuje je na pasku stanu. Nic nie jest pobierane ani instalowane.",
+    "updatesFailed": "Ostatnie sprawdzenie nie dotarło do GitHuba. Zostanie powtórzone jutro.",
+    "updatesCurrent": "To najnowsza wersja ({{version}}).",
+    "updateAvailable": "Dostępna jest wersja {{version}}",
+    "updatesNewer": "Wersja {{version}} jest dostępna na GitHubie.",
+    "updateHint": "Otwórz informacje o wydaniu i pliki do pobrania na GitHubie",
+    "updateDismiss": "Ukryj do następnej wersji",
+    "relayLabel": "Wysyłaj żądania przez",
+    "relayHint": "Hostowany przekaźnik nie może połączyć się z localhost ani z adresami prywatnymi. Lokalny przekaźnik wysyła żądania z tego komputera, bez pośredników.",
+    "relayModes": {
+      "hosted": "Hostowany przekaźnik",
+      "local": "Lokalny przekaźnik na tym komputerze"
+    },
+    "relayAddressLabel": "Adres lokalnego przekaźnika",
+    "relayAddressHint": "Uruchom go poleceniem gostman relay i wpisz adres, który wyświetli.",
+    "relayAddressInvalid": "Wpisz adres, na przykład http://127.0.0.1:4030.",
+    "relayCheck": "Testuj",
+    "relayChecking": "Testowanie…",
+    "relayReachable": "Lokalny przekaźnik odpowiedział.",
+    "relayMissing": "Wpisz adres lokalnego przekaźnika w Preferencje, Prywatność albo wróć do hostowanego przekaźnika.",
+    "relayUnreachable": "Lokalny przekaźnik pod adresem {{address}} nie odpowiedział. Uruchom go poleceniem gostman relay albo wróć do hostowanego przekaźnika w Preferencje, Prywatność.",
+    "relayCheckUnreachable": "Lokalny przekaźnik pod adresem {{address}} nie odpowiedział. Sprawdź, czy gostman relay działa i czy adres zgadza się z wyświetlonym."
+  }
+}

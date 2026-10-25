@@ -1,0 +1,174 @@
+{
+  "importFormats": {
+    "auto": "Automatisch erkennen",
+    "http": ".http-Dateien"
+  },
+  "formatLabels": {
+    "insomnia": "Insomnia-Export",
+    "har": "HAR-Mitschnitt",
+    "wsdl": "WSDL-Dienst",
+    "bruno": "Bruno-Sammlung",
+    "postman": "Postman-Datei",
+    "openapi": "OpenAPI-Spezifikation",
+    "gostman": "Gostman-Export",
+    "http": ".http-Datei"
+  },
+  "import": {
+    "chooseFiles": "Dateien wählen",
+    "importButton": "Importieren",
+    "chooseFolder": "Ordner wählen",
+    "dropHint": "Legen Sie hier Dateien, einen Ordner oder eine .zip ab oder fügen Sie unten Inhalt ein. Unterstützt werden Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI und Swagger, .http-Dateien (REST Client, JetBrains HTTP Client), Gostman-Exporte und Freigabelinks.",
+    "formatLabel": "Format",
+    "pastePlaceholder": "Eine Sammlung, Spezifikation, einen Mitschnitt oder Freigabelink einfügen",
+    "pasteLabel": "Zu importierender Inhalt",
+    "pastedName": "eingefügt",
+    "reading": "Inhalt wird gelesen",
+    "skipStatic": "Bilder, Schriften, Styles und Skripte auslassen",
+    "skippedHeading": "Ausgelassen",
+    "binaryFailure": "{{name}} ist keine Textdatei.",
+    "tooMany": "Es sind mehr als {{limit}} Dateien.",
+    "tooLarge": "{{name}} ist {{size}} groß. Dateien sind auf {{limit}} begrenzt.",
+    "totalTooLarge": "Die Dateien zusammen sind größer als {{limit}}.",
+    "noFiles": "Es wurden keine importierbaren Dateien gefunden.",
+    "filesSelected_one": "{{count}} Datei ausgewählt",
+    "filesSelected_other": "{{count}} Dateien ausgewählt",
+    "clearFiles": "Leeren",
+    "sourceLine": "{{source}}: {{label}}, {{counts}}",
+    "totalLine": "Insgesamt: {{counts}}"
+  },
+  "export": {
+    "includeSecrets": "Zugangsdaten einbeziehen",
+    "secretsNote": "Passwörter, Tokens und Header oder Variablen mit Secret-Namen werden durch {{placeholder}}-Platzhalter ersetzt.",
+    "secretsWarning": "Zugangsdaten werden im Klartext in die Datei geschrieben.",
+    "variableSecretsNote": "Variablen, die wie ein Passwort, Token oder Schlüssel benannt sind, werden ohne ihre Werte exportiert.",
+    "saveFile": "Datei speichern",
+    "formatLabel": "Exportformat",
+    "previewLabel": "Vorschau des Exports",
+    "summaryNamed": "{{description}}. „{{name}}“ hat {{counts}}.",
+    "summaryAll": "{{description}}. Sie haben {{counts}}.",
+    "collectionField": "Sammlung",
+    "formatField": "Format",
+    "allCollections": "Alle Sammlungen",
+    "failed": "Der Export konnte nicht erstellt werden: {{reason}}",
+    "adaptFailed": "Skripte und Prüfungen werden wie geschrieben exportiert, weil sie nicht angepasst werden konnten: {{reason}}",
+    "reportLabel": "Was sich für das Zielwerkzeug geändert hat",
+    "checkHeading_one": "{{count}} Punkt vor der Verwendung in {{tool}} prüfen",
+    "checkHeading_other": "{{count}} Punkte vor der Verwendung in {{tool}} prüfen",
+    "changedHeading": "Was sich für {{tool}} geändert hat",
+    "formats": {
+      "gostman": {
+        "label": "Gostman",
+        "description": "Vollständiges Backup: Anfragen, Ordner, alle Umgebungen, die globalen Variablen und die Sammlungsvariablen, ohne Secret-Werte"
+      },
+      "postman": {
+        "label": "Postman",
+        "description": "Sammlung v2.1, die auch Insomnia importiert. Skripte und Prüfungen werden angepasst, damit sie in beiden laufen, und die verwendeten Variablen außer Secrets werden zu Sammlungsvariablen"
+      },
+      "openapiJson": {
+        "label": "OpenAPI JSON",
+        "description": "OpenAPI-3.0-Beschreibung der HTTP-Anfragen"
+      },
+      "openapiYaml": {
+        "label": "OpenAPI YAML",
+        "description": "OpenAPI-3.0-Beschreibung der HTTP-Anfragen"
+      },
+      "markdown": {
+        "label": "Markdown",
+        "description": "Lesbare API-Dokumentation"
+      },
+      "html": {
+        "label": "HTML-Doku",
+        "description": "Eine eigenständige Seite zum Veröffentlichen oder Drucken. Zugangsdaten werden ausgelassen, und Variablen bleiben als {{example}} stehen"
+      },
+      "bruno": {
+        "label": "Bruno",
+        "description": "Ein Ordner mit .bru-Dateien samt Umgebungen, gespeichert als .zip. Skripte und Prüfungen werden angepasst, damit sie in Bruno laufen"
+      },
+      "curl": {
+        "label": "curl-Skript",
+        "description": "Ein curl-Befehl pro Anfrage. Zugangsdaten werden zu Platzhaltern für Umgebungsvariablen"
+      },
+      "har": {
+        "label": "HAR",
+        "description": "HTTP Archive 1.2 mit den Anfragen und ohne Antworten"
+      },
+      "http": {
+        "label": ".http-Dateien",
+        "description": "Anfragen für VS Code REST Client und JetBrains HTTP Client, eine Datei pro Ordner, mit Umgebungen als http-client.env.json"
+      }
+    },
+    "docs": {
+      "titlePlaceholder": "Titel (Standard: API documentation)",
+      "titleLabel": "Titel der Dokumentation",
+      "includeExamples": "Beispielantworten einbeziehen",
+      "playground": "Ein „Try it“-Panel einbeziehen"
+    }
+  },
+  "transfer": {
+    "title": "Import und Export",
+    "tabsLabel": "Import oder Export",
+    "tabs": {
+      "import": "Import",
+      "export": "Export",
+      "share": "Teilen"
+    }
+  },
+  "importCount": {
+    "collection_one": "{{count}} Sammlung",
+    "collection_other": "{{count}} Sammlungen",
+    "folder_one": "{{count}} Ordner",
+    "folder_other": "{{count}} Ordner",
+    "request_one": "{{count}} Anfrage",
+    "request_other": "{{count}} Anfragen",
+    "flow_one": "{{count}} Ablauf",
+    "flow_other": "{{count}} Abläufe",
+    "environment_one": "{{count}} Umgebung",
+    "environment_other": "{{count}} Umgebungen",
+    "global_one": "{{count}} globale Umgebung",
+    "global_other": "{{count}} globale Umgebungen",
+    "variable_one": "{{count}} Sammlungsvariable",
+    "variable_other": "{{count}} Sammlungsvariablen",
+    "holding": "{{collections}} mit {{inside}}",
+    "settingsFor": "Einstellungen für {{owners}}"
+  },
+  "importResult": {
+    "quoted": "„{{name}}“",
+    "joinedEnvironment": "Eine Umgebung namens „{{name}}“ gab es bereits, daher wurden die importierten Variablen ihr hinzugefügt. Bereits vorhandene Variablen behielten ihre Werte.",
+    "scopedEnvironments_one": "Umgebungen aus {{names}} gelten nur für deren Anfragen. Um eine Umgebung überall zu verwenden, setzen Sie unter „Umgebungen“ „Verfügbar in“ auf „Jede Sammlung“.",
+    "scopedEnvironments_other": "Umgebungen aus {{names}} gelten nur für deren Anfragen. Um eine Umgebung überall zu verwenden, setzen Sie unter „Umgebungen“ „Verfügbar in“ auf „Jede Sammlung“.",
+    "scopedVariables_one": "Sammlungsvariablen aus {{names}} gelten nur für deren Anfragen; eine Umgebungsvariable mit gleichem Namen hat weiterhin Vorrang.",
+    "scopedVariables_other": "Sammlungsvariablen aus {{names}} gelten nur für deren Anfragen; eine Umgebungsvariable mit gleichem Namen hat weiterhin Vorrang.",
+    "importedCollectionName": "Importierte Sammlung",
+    "settingsAttached_one": "Die Einstellungen für alle Sammlungen aus diesem Import wurden den Sammlungseinstellungen von {{names}} hinzugefügt und gelten daher nur für deren Anfragen. Ihre eigenen Einstellungen für alle Sammlungen blieben unverändert.",
+    "settingsAttached_other": "Die Einstellungen für alle Sammlungen aus diesem Import wurden den Sammlungseinstellungen von {{names}} hinzugefügt und gelten daher nur für deren Anfragen. Ihre eigenen Einstellungen für alle Sammlungen blieben unverändert.",
+    "settingsWrapped": "Die Einstellungen für alle Sammlungen aus diesem Import wurden auf eine neue Sammlung „{{name}}“ gelegt, die alles Importierte enthält, und gelten daher nur für diese Anfragen. Ihre eigenen Einstellungen für alle Sammlungen blieben unverändert."
+  },
+  "fileReads": {
+    "heading_one": "Die Datei, die sie von diesem Computer liest:",
+    "heading_other": "Die {{count}} Dateien, die sie von diesem Computer liest:",
+    "more": "und {{count}} weitere"
+  },
+  "activeImport": {
+    "kindLabels": {
+      "scripts": "Skripte",
+      "oauth": "OAuth-2.0-Einstellungen",
+      "commands": "Befehle, die lokale MCP-Server starten",
+      "files": "Dateizugriffe, die Dateien von diesem Computer senden"
+    },
+    "kindNouns": {
+      "scripts": "Skripte",
+      "oauth": "OAuth-Einstellungen",
+      "commands": "Befehle",
+      "files": "Dateizugriffe"
+    },
+    "titleOne": "{{kind}} importieren?",
+    "titleMany": "Vor dem Import prüfen",
+    "withOne": "Mit {{kind}} importieren",
+    "withMany": "Alles importieren",
+    "withoutOne": "Ohne {{kind}} importieren",
+    "withoutMany": "Ohne sie importieren",
+    "leftOut": "{{kinds}} wurden ausgelassen.",
+    "message_one": "{{count}} Element in diesem Import enthält {{kinds}}. Diese laufen beim Senden einer Anfrage und können Ihre Variablen lesen, importieren Sie sie daher nur aus einer Quelle, der Sie vertrauen. Ohne sie wird alles andere trotzdem importiert.",
+    "message_other": "{{count}} Elemente in diesem Import enthalten {{kinds}}. Diese laufen beim Senden einer Anfrage und können Ihre Variablen lesen, importieren Sie sie daher nur aus einer Quelle, der Sie vertrauen. Ohne sie wird alles andere trotzdem importiert."
+  }
+}

@@ -22,6 +22,9 @@ const EDGE_TONES = {
   else: MUTED_EDGE,
   next: MUTED_EDGE,
 }
+const BASE_PAD_START = 80
+const RETRY_LABEL_GAP = 28
+const LABEL_CHAR_WIDTH = 5.6
 const SOURCE_SHARE = { then: 0.38, next: 0.5, onFailure: 0.72, else: 0.72 }
 
 const relativeBox = (element, origin) => {
@@ -142,6 +145,11 @@ function Connectors({ boxes, steps, index }) {
   )
 }
 
+function startPadding(steps) {
+  const labels = steps.filter((step) => step.kind === STEP_REQUEST && step.retry.times > 1).map((step) => TEXT.retryShort(step.retry.times).length)
+  return Math.max(BASE_PAD_START, RETRY_LABEL_GAP + Math.max(0, ...labels) * LABEL_CHAR_WIDTH)
+}
+
 function slotLabel(previous, parentTitle) {
   if (previous) return TEXT.insert
   return parentTitle ? TEXT.insertInto(parentTitle) : TEXT.addFirst
@@ -242,7 +250,7 @@ export function FlowCanvas({ flow, context, nodes, problems, selected, onSelect,
   const view = { context, nodes, problems, selected, positions, onSelect, onOpen, onKeyDown, onAdd }
 
   return (
-    <div ref={containerRef} role="group" aria-label={TEXT.canvasLabel(flow.name)} className="relative min-h-full w-max min-w-full pb-16 pl-20 pr-32 pt-4">
+    <div ref={containerRef} role="group" dir="ltr" aria-label={TEXT.canvasLabel(flow.name)} style={{ paddingLeft: startPadding(flow.steps) }} className="relative min-h-full w-max min-w-full pb-16 pr-32 pt-4">
       <span className="mb-1 inline-flex h-5 items-center rounded-full border border-border px-2 text-2xs text-muted-foreground">{FLOW_VIEW_TEXT.start}</span>
       <StepList steps={flow.steps} parent="" parentTitle="" view={view} />
       {boxes && <Connectors boxes={boxes} steps={flow.steps} index={index} />}

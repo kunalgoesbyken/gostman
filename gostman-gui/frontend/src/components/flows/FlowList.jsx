@@ -33,7 +33,7 @@ function FlowRow({ flow, isActive, actions, onMenu }) {
         onClick={() => actions.open(flow.id)}
         onKeyDown={handleKeyDown}
         className={cn(
-          "flex h-8 min-w-0 flex-1 items-center gap-2 pl-3 pr-9 text-left text-xs hover:bg-accent",
+          "flex h-8 min-w-0 flex-1 items-center gap-2 ps-3 pe-9 text-start text-xs hover:bg-accent",
           isActive ? "bg-accent text-foreground" : "text-muted-foreground"
         )}
       >
@@ -46,7 +46,7 @@ function FlowRow({ flow, isActive, actions, onMenu }) {
         icon={MoreHorizontal}
         size="icon-xs"
         onClick={openMenu}
-        className="absolute right-1.5 opacity-0 focus-visible:opacity-100 group-hover:opacity-100 max-md:opacity-100"
+        className="absolute end-1.5 opacity-0 focus-visible:opacity-100 group-hover:opacity-100 max-md:opacity-100"
       />
     </li>
   )
@@ -87,7 +87,7 @@ export const FlowList = memo(function FlowList({ actions }) {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <Toolbar className="justify-between pr-1.5">
+      <Toolbar className="justify-between pe-1.5">
         <span className="text-xs text-muted-foreground">{FLOW_TEXT.count(flows.length)}</span>
         <div className="flex items-center">
           <IconButton label={FLOW_TEXT.example} icon={Sparkles} onClick={() => actions.create(true)} />

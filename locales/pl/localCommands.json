@@ -1,0 +1,10 @@
+{
+  "localCommand": {
+    "title": "Uruchomić program na tym komputerze?",
+    "intro": "To żądanie uruchamia lokalny serwer MCP z uprawnieniami bieżącego konta użytkownika:",
+    "environmentIntro": "Z tymi zmiennymi środowiskowymi z karty Nagłówki:",
+    "warning": "Uruchom go tylko wtedy, gdy wiadomo, co ten program robi. Gostman zapyta ponownie, gdy polecenie lub jego środowisko się zmieni albo aplikacja zostanie uruchomiona ponownie.",
+    "confirm": "Uruchom",
+    "notApproved": "To żądanie uruchamia program na tym komputerze. Wyślij je raz z jego własnej karty i potwierdź polecenie, a potem uruchom je ponownie."
+  }
+}

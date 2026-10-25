@@ -5,7 +5,7 @@ import { APP_TEXT } from "../lib/appText"
 
 function SidebarSkeleton() {
   return (
-    <div className="flex w-[var(--sidebar-width)] shrink-0 flex-col border-r border-border max-md:hidden" style={sidebarWidthStyle(rememberedSidebarWidth())}>
+    <div className="flex w-[var(--sidebar-width)] shrink-0 flex-col border-e border-border max-md:hidden" style={sidebarWidthStyle(rememberedSidebarWidth())}>
       <div className="flex h-10 shrink-0 items-center gap-3 border-b border-border px-3">
         <Skeleton className="h-3 w-20" />
         <Skeleton className="h-3 w-14" />
@@ -44,7 +44,7 @@ export function AppSkeleton() {
       <div className="flex h-12 shrink-0 items-center gap-3 border-b border-border px-3">
         <Skeleton className="h-6 w-6" />
         <Skeleton className="h-3 w-20" />
-        <Skeleton className="ml-auto h-7 w-48 max-sm:w-20" />
+        <Skeleton className="ms-auto h-7 w-48 max-sm:w-20" />
       </div>
       <div className="flex min-h-0 flex-1">
         {isSidebarOpen && <SidebarSkeleton />}

@@ -1,0 +1,27 @@
+{
+  "grpc": {
+    "services": "Servicii",
+    "messageLabel": "Mesajul cererii",
+    "reflection": "Server reflection",
+    "sendAsGrpc": "Trimitere ca gRPC",
+    "addProtos": "Adăugare fișiere .proto",
+    "removeFiles": "Eliminare fișiere",
+    "load": "Încărcare",
+    "reload": "Reîncărcare",
+    "schemaHint": "Încărcați serviciile prin server reflection sau adăugați fișierele .proto ale serviciului. Sunt folosite adresa, antetele și autentificarea acestei cereri.",
+    "noServices": "Nu a fost găsit niciun serviciu.",
+    "tooLarge": "{{name}} are {{size}}. Fișierele sunt limitate la {{limit}}.",
+    "method": "Metodă",
+    "methodLabel": "Metodă gRPC",
+    "chooseMethod": "Alegeți o metodă",
+    "useExample": "Folosire exemplu",
+    "useExampleTitle": "Înlocuiește mesajul cu un exemplu de intrare a metodei",
+    "streamHint": "Această metodă citește un stream. Scrieți un array JSON pentru a trimite mai multe mesaje.",
+    "kinds": {
+      "bidirectional": "Streaming bidirecțional",
+      "client": "Streaming client",
+      "server": "Streaming server",
+      "unary": "Unary"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "unresolved.sentAsWritten": "Ends with a colon; the names of the undefined variables follow as buttons.",
+  "unresolved.notDefined": "Ends with a colon; the names of the undefined variables follow as buttons.",
+  "unresolved.openEnvironments": "Button that opens the environments window.",
+  "unresolved.extractedBy": "{{reference}} is a variable name in double braces; {{request}} is a request name.",
+  "unresolved.extractedByOnly": "It stands for the one undefined variable named before this sentence. {{request}} is a request name.",
+  "unresolved.openSource": "{{request}} is a request name.",
+  "unresolved.define": "{{reference}} is a variable name in double braces. Tooltip of a button."
+}

@@ -1,0 +1,13 @@
+{
+  "onboarding.title": "Heading of the getting started checklist.",
+  "onboarding.progress": "{{done}} of {{total}} steps are complete.",
+  "onboarding.next": "Label before the title of the next step, for example \"Next: Save it to your collection\".",
+  "onboarding.completeTitle": "Heading when every step is done.",
+  "onboarding.hide": "Button that hides the checklist.",
+  "onboarding.steps.send.hint": "An echo service sends back what it receives.",
+  "onboarding.steps.variable.hint": "{{example}} is the literal variable syntax and stays unchanged. baseUrl is a variable name.",
+  "onboarding.steps.variable.defined": "Legend entry for a variable that has a value (shown in a normal colour).",
+  "onboarding.steps.variable.missing": "Legend entry for a variable without a value (shown in a warning colour).",
+  "onboarding.steps.check.hint": "res.status is script code and stays as it is. Add checks is a button name in the Checks tab.",
+  "onboarding.done": "Button that finishes the guided tour. Verb."
+}

@@ -1,0 +1,164 @@
+{
+  "preferences": {
+    "title": "Preferences",
+    "sectionsLabel": "Sections",
+    "sections": {
+      "appearance": "Appearance",
+      "theme": "Theme",
+      "fonts": "Fonts",
+      "editor": "Editor",
+      "requests": "Requests",
+      "language": "Language",
+      "ai": "AI",
+      "privacy": "Privacy",
+      "data": "Data"
+    },
+    "fields": {
+      "theme": "Theme",
+      "contrast": "Contrast",
+      "accent": "Accent colour",
+      "textScale": "Text size",
+      "interfaceFont": "Interface font",
+      "codeFont": "Code font",
+      "density": "Density",
+      "responseLayout": "Response panel",
+      "systemTitleBar": "Use the system title bar",
+      "editorFontSize": "Editor font size",
+      "wrapLines": "Wrap long lines",
+      "requestTimeout": "Default timeout",
+      "confirmCloseTab": "Ask before discarding unsaved changes when closing a tab",
+      "language": "Language"
+    },
+    "themes": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "contrasts": {
+      "system": "System",
+      "standard": "Standard",
+      "more": "More"
+    },
+    "accents": {
+      "cyan": "Cyan",
+      "blue": "Blue",
+      "violet": "Violet",
+      "pink": "Pink",
+      "graphite": "Graphite"
+    },
+    "densities": {
+      "comfortable": "Comfortable",
+      "compact": "Compact"
+    },
+    "layouts": {
+      "below": "Below",
+      "right": "Right"
+    },
+    "seconds": "seconds",
+    "pixels": "px",
+    "contrastHint": "More draws stronger borders and secondary text.",
+    "systemTitleBarHint": "Shows your desktop's title bar and window buttons instead of Gostman's own. Applies after a restart.",
+    "systemTitleBarRestart": "Restart Gostman to apply this change.",
+    "systemTitleBarFailed": "The setting could not be saved.",
+    "defaultFont": "Default",
+    "interfaceFontHint": "Any font installed on this device.",
+    "codeFontHint": "Editors, the address bar and other code.",
+    "fontMissing": "Not found on this device, so the default font is used.",
+    "suggestFonts": "Suggest installed fonts",
+    "fontsSuggested": "Installed fonts are suggested as you type a font name.",
+    "fontsDenied": "The installed fonts could not be read.",
+    "shortcuts": "Keyboard shortcuts",
+    "reset": "Reset to defaults",
+    "close": "Done",
+    "statusLabel": "Preferences",
+    "commandDescription": "Theme, colours, fonts, text size, editor, layout and defaults",
+    "methods": {
+      "title": "Method colours",
+      "hint": "The colour of each request method in the sidebar, tabs and lists. Add a background to show methods as badges.",
+      "method": "Method",
+      "resetMode": {
+        "light": "Reset light method colours",
+        "dark": "Reset dark method colours"
+      }
+    },
+    "theme": {
+      "palette": "Palette",
+      "paletteHint": "Each palette has a light and a dark version. Your own colours are applied on top.",
+      "palettes": {
+        "default": "Default",
+        "neutral": "Neutral",
+        "slate": "Slate",
+        "paper": "Paper",
+        "moss": "Moss",
+        "dusk": "Dusk",
+        "ocean": "Ocean",
+        "ink": "Ink"
+      },
+      "colors": "Custom colours",
+      "colorsHint": "Set the background and text colour of each part of the window. Only the colours you change are kept.",
+      "editing": "Colours for",
+      "previewHint": {
+        "light": "The window is dark now. Set the theme to Light to see these colours in place.",
+        "dark": "The window is light now. Set the theme to Dark to see these colours in place."
+      },
+      "columns": {
+        "surface": "Part",
+        "background": "Background",
+        "foreground": "Text",
+        "contrast": "Contrast",
+        "reset": "Reset"
+      },
+      "surfaces": {
+        "window": "Window",
+        "sidebar": "Sidebar",
+        "tabs": "Tabs and address bar",
+        "request": "Request editor",
+        "body": "Body editor",
+        "script": "Script editor",
+        "response": "Response",
+        "dialog": "Dialogs",
+        "menu": "Menus and pop-ups"
+      },
+      "surfaceHints": {
+        "window": "Title bar, status bar and every part not listed here.",
+        "body": "Also gRPC messages, MCP arguments and saved examples.",
+        "script": "Pre-request and post-response scripts.",
+        "menu": "Context menus, lists and the command palette."
+      },
+      "roles": {
+        "background": "background",
+        "foreground": "text"
+      },
+      "sample": "Aa",
+      "resetMode": {
+        "light": "Reset light colours",
+        "dark": "Reset dark colours"
+      },
+      "share": "Share a theme",
+      "shareHint": "A theme holds the palette, the accent colour, and your custom part and method colours for both modes.",
+      "copy": "Copy theme",
+      "copied": "Theme copied to the clipboard.",
+      "copyFailed": "The theme could not be copied to the clipboard.",
+      "import": "Import theme",
+      "importLabel": "Theme to import",
+      "importPlaceholder": "Paste a theme copied from Gostman",
+      "apply": "Apply",
+      "cancel": "Cancel",
+      "imported": "Theme applied.",
+      "invalid": "This is not a Gostman theme, or it has unknown parts or colours that are not written as #rrggbb.",
+      "colorLabel": "{{surface}} {{role}} colour",
+      "hexLabel": "{{surface}} {{role}} hex value",
+      "ratio": "{{ratio}}:1",
+      "lowContrast": "Text may be hard to read. Aim for at least {{minimum}}:1.",
+      "resetRow": "Reset {{name}}"
+    },
+    "timeoutHint_one": "Applies to requests that set no timeout of their own. 0 uses the built-in limit of {{count}} second.",
+    "timeoutHint_other": "Applies to requests that set no timeout of their own. 0 uses the built-in limit of {{count}} seconds.",
+    "languageSystem": "Same as the system ({{language}})",
+    "languageSwitchHint": "Gostman reloads to show the new language. Open tabs and unsaved drafts are kept; responses shown in tabs are cleared.",
+    "languageSwitch": "Switch language",
+    "languageHelp": "Missing your language, or found a wrong translation? {{link}}.",
+    "languageHelpLink": "Ask on GitHub",
+    "accentAdjusted": "Shown as {{light}} in light mode and {{dark}} in dark mode so text in this colour stays readable."
+  }
+}

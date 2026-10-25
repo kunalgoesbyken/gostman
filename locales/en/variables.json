@@ -1,0 +1,18 @@
+{
+  "variables": {
+    "dynamic": "generated each time the request is sent",
+    "prompt": "asked for when the request is sent",
+    "undefinedName": "is not defined in the active environment",
+    "resolvesTo": "resolves to",
+    "through": "through {{names}}",
+    "sources": {
+      "global": "Global",
+      "collection": "Collection",
+      "environment": "Environment",
+      "folder": "Folder",
+      "request": "Request",
+      "process": ".env file",
+      "session": "Session"
+    }
+  }
+}

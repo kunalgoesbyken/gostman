@@ -14,6 +14,7 @@ import { SHARE_FILE_EXTENSION, findShareReference } from "../lib/share"
 import { SPEC_TEXT } from "../lib/specText"
 import { cn } from "../lib/utils"
 import { describeCounts } from "../lib/importCounts"
+import { notesIn, remarksOf, skippedOf, warningsIn } from "../lib/importRemarks"
 import { countImported } from "../lib/importSummary"
 
 const PARSE_DELAY_MS = 300
@@ -62,8 +63,10 @@ function SourceLines({ result }) {
 }
 
 function ImportSummary({ result, grow, onImport, onBrowse }) {
-  const warnings = result.warnings || []
-  const skipped = result.skipped || []
+  const remarks = remarksOf(result)
+  const warnings = warningsIn(remarks)
+  const notes = notesIn(remarks)
+  const skipped = skippedOf(result)
   const isUnlinked = result.spec && !result.spec.source
   return (
     <div role="status" className={cn("flex items-start gap-3 rounded-md border border-border p-3", grow ? "min-h-0 flex-1" : "shrink-0")}>
@@ -74,7 +77,7 @@ function ImportSummary({ result, grow, onImport, onBrowse }) {
           </p>
         )}
         {isUnlinked && <p className="pt-1 text-muted-foreground">{SPEC_TEXT.syncNote}</p>}
-        {(result.notes || []).map((note) => (
+        {notes.map((note) => (
           <p key={note} className="pt-1 text-muted-foreground">{note}</p>
         ))}
         {warnings.map((warning) => (
@@ -108,6 +111,7 @@ function AddressRow({ address, onChange, onLoad, onPickFile }) {
     <form onSubmit={submit} className="flex shrink-0 items-center gap-2">
       <Input
         type="url"
+        dir="ltr"
         value={address}
         onChange={(event) => onChange(event.target.value)}
         placeholder={SPEC_TEXT.addressPlaceholder}
@@ -130,7 +134,7 @@ function FormatRow({ format, onFormat, showStatic, skipStatic, onSkipStatic }) {
     <div className="flex shrink-0 flex-wrap items-center gap-3 text-xs">
       <label className="flex items-center gap-2 text-muted-foreground">
         {IMPORT_TEXT.formatLabel}
-        <Select value={format} onChange={(event) => onFormat(event.target.value)} aria-label={IMPORT_TEXT.formatLabel} className="w-48">
+        <Select value={format} onChange={(event) => onFormat(event.target.value)} aria-label={IMPORT_TEXT.formatLabel} className="w-auto min-w-48">
           {IMPORT_FORMATS.map((option) => <option key={option.value} value={option.value} icon={<BrandIcon brand={option.value} fallback={FileText} />}>{option.label}</option>)}
         </Select>
       </label>
@@ -285,6 +289,7 @@ export function ImportTab({ openapi, importer, onPickSpecFile, onImport, onImpor
             onChange={(event) => updateText(event.target.value)}
             placeholder={IMPORT_TEXT.pastePlaceholder}
             aria-label={IMPORT_TEXT.pasteLabel}
+            dir="ltr"
             className="min-h-24 flex-1"
           />
         </>

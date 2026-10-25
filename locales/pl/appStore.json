@@ -1,0 +1,7 @@
+{
+  "appStore": {
+    "saveFailedTitle": "Nie udało się zapisać zmian",
+    "saveFailed": "Ostatnie zmiany nie zostały zapisane i zostaną utracone po zamknięciu aplikacji. Wyeksportuj dane, aby zachować kopię. ({{reason}})",
+    "delete": "Usuń"
+  }
+}

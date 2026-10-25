@@ -1,0 +1,90 @@
+{
+  "share": {
+    "protections": {
+      "key": "Losowy klucz",
+      "passphrase": "Fraza hasłowa"
+    },
+    "deliveries": {
+      "link": "Link",
+      "file": "Zaszyfrowany plik"
+    },
+    "privacy": "Szyfrowane w tym oknie i nigdy nie przesyłane. Tokeny OAuth, cookies, historia i ustawienia sieci nigdy nie są dołączane.",
+    "summaryWithValues": "{{counts}} (z wartościami).",
+    "summaryNamesOnly": "{{counts}} (tylko nazwy zmiennych).",
+    "tooLong": "Ten wybór wymaga linku o rozmiarze {{size}}. Linki są ograniczone do {{limit}}, ponieważ aplikacje czatu i poczty ucinają dłuższe. Wyślij go zamiast tego jako zaszyfrowany plik.",
+    "linkNotePassphrase": "Frazy hasłowej nie ma w linku. Przekaż ją odbiorcy innym kanałem. {{size}}.",
+    "linkNoteKey": "Klucz jest częścią linku, po znaku #, więc każdy, kto ma cały link, może odczytać kolekcję. {{size}}.",
+    "linkLabel": "Link do udostępniania",
+    "fileNotePassphrase": "Odbiorca otworzy plik za pomocą frazy hasłowej. Przekaż mu ją innym kanałem.",
+    "fileNoteKey": "Plik nie może zostać otwarty bez poniższego klucza. Wyślij klucz innym kanałem niż plik.",
+    "saveFile": "Zapisz plik",
+    "keyLabel": "Klucz",
+    "scopeField": "Udostępnij",
+    "scopeLabel": "Co udostępnić",
+    "everything": "Wszystko",
+    "requestScope": "Żądanie: {{path}}",
+    "sharedVariablesNone": "Żadne zmienne środowiska nie są udostępniane, ponieważ nic tutaj ich nie używa.",
+    "sharedVariables": "Udostępniane są tylko zmienne środowiska używane tutaj: {{names}}.",
+    "sharedCollectionVariables": "Te zmienne kolekcji są udostępniane razem z ich kolekcjami: {{names}}.",
+    "includeVariables": "Udostępnij wartości zmiennych (wyłączone: udostępniane są tylko nazwy zmiennych)",
+    "includeExamples": "Dołącz zapisane przykładowe odpowiedzi",
+    "protection": "Ochrona",
+    "passphrasePlaceholder": "Fraza hasłowa, co najmniej znaków: {{length}}",
+    "passphraseLabel": "Fraza hasłowa",
+    "sendAs": "Wyślij jako",
+    "literalCredentials_one": "{{count}} żądanie zawiera hasło, token lub klucz wpisane bezpośrednio na karcie Auth. Jest to część żądania i jest udostępniane razem z nim.",
+    "literalCredentials_few": "{{count}} żądania zawierają hasło, token lub klucz wpisane bezpośrednio na karcie Auth. Są to części żądań i są udostępniane razem z nimi.",
+    "literalCredentials_many": "{{count}} żądań zawiera hasło, token lub klucz wpisane bezpośrednio na karcie Auth. Są to części żądań i są udostępniane razem z nimi.",
+    "literalCredentials_other": "{{count}} żądania zawiera hasło, token lub klucz wpisane bezpośrednio na karcie Auth. Są to części żądań i są udostępniane razem z nimi.",
+    "nothing": "Nie ma tu jeszcze nic do udostępnienia."
+  },
+  "shareOpen": {
+    "title": "Udostępniona kolekcja",
+    "dialogLabel": "Udostępniona kolekcja",
+    "intro": "Ten link zawiera zaszyfrowaną kolekcję. Jest odszyfrowywana w tym oknie i nic nie jest dodawane, dopóki nie wybierzesz Importuj.",
+    "credentials": {
+      "key": {
+        "label": "Klucz",
+        "hint": "Ten plik został wysłany bez klucza. Wklej klucz podany przez nadawcę."
+      },
+      "passphrase": {
+        "label": "Fraza hasłowa",
+        "hint": "To udostępnienie jest zablokowane frazą hasłową. Poproś o nią nadawcę."
+      }
+    },
+    "open": "Otwórz",
+    "cancel": "Anuluj",
+    "environmentNoValues_one": "{{name}}: {{count}} zmienna, tylko nazwy, bez wartości",
+    "environmentNoValues_few": "{{name}}: {{count}} zmienne, tylko nazwy, bez wartości",
+    "environmentNoValues_many": "{{name}}: {{count}} zmiennych, tylko nazwy, bez wartości",
+    "environmentNoValues_other": "{{name}}: {{count}} zmiennej, tylko nazwy, bez wartości",
+    "environmentValues_one": "{{name}}: {{count}} zmienna, z wartością: {{values}}",
+    "environmentValues_few": "{{name}}: {{count}} zmienne, z wartością: {{values}}",
+    "environmentValues_many": "{{name}}: {{count}} zmiennych, z wartością: {{values}}",
+    "environmentValues_other": "{{name}}: {{count}} zmiennej, z wartością: {{values}}",
+    "folders": "Foldery: {{names}}",
+    "keepValues": "Zmienne, które już istnieją, zachowują swoje wartości.",
+    "examples_one": "{{count}} zapisana przykładowa odpowiedź",
+    "examples_few": "{{count}} zapisane przykładowe odpowiedzi",
+    "examples_many": "{{count}} zapisanych przykładowych odpowiedzi",
+    "examples_other": "{{count}} zapisanej przykładowej odpowiedzi",
+    "activeContent_one": "Elementów zawierających {{kinds}}: {{count}}. Przed ich zaimportowaniem pojawi się pytanie.",
+    "activeContent_few": "Elementów zawierających {{kinds}}: {{count}}. Przed ich zaimportowaniem pojawi się pytanie.",
+    "activeContent_many": "Elementów zawierających {{kinds}}: {{count}}. Przed ich zaimportowaniem pojawi się pytanie.",
+    "activeContent_other": "Elementów zawierających {{kinds}}: {{count}}. Przed ich zaimportowaniem pojawi się pytanie.",
+    "requestsLabel": "Udostępnione żądania",
+    "deriving": "Wyprowadzanie klucza i odszyfrowywanie",
+    "decrypting": "Odszyfrowywanie"
+  },
+  "shareErrors": {
+    "unavailable": "Udostępnianie wymaga Web Crypto API, które nie jest dostępne w tym oknie.",
+    "incomplete": "To udostępnienie jest niekompletne. Skopiuj cały link lub wybierz cały plik i spróbuj ponownie.",
+    "cannotDecompress": "To udostępnienie jest skompresowane, a ta przeglądarka nie potrafi go zdekompresować. Otwórz je w aktualnej przeglądarce lub w aplikacji desktopowej.",
+    "tooLarge": "To udostępnienie po rozpakowaniu przekracza to, co Gostman importuje naraz, więc nie zostało otwarte.",
+    "unreadable": "To udostępnienie zostało odszyfrowane, ale jego zawartość nie jest czytelnym tekstem.",
+    "failedLink": "Nie udało się odszyfrować tego udostępnienia. Link został zmieniony lub ucięty po drodze.",
+    "failedKey": "Nie udało się odszyfrować tego udostępnienia. Klucz jest nieprawidłowy lub plik został zmieniony.",
+    "failedPassphrase": "Nie udało się odszyfrować tego udostępnienia. Fraza hasłowa jest nieprawidłowa lub udostępnienie zostało zmienione.",
+    "unknownVersion": "To udostępnienie używa formatu „{{version}}”, którego ta wersja Gostmana nie potrafi otworzyć. Zaktualizuj Gostman i spróbuj ponownie."
+  }
+}

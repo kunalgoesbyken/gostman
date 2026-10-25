@@ -1,0 +1,4 @@
+{
+  "install.label": "Command that installs the web app as an app on this device (progressive web app).",
+  "install.description": "Description of that command."
+}

@@ -1,4 +1,7 @@
+import { REALTIME_TEXT } from '../realtimeText'
+
 const SUBPROTOCOL = 'mqtt'
+const TEXT = REALTIME_TEXT.mqtt
 const PROTOCOL_NAME = 'MQTT'
 const PROTOCOL_LEVEL = 4
 const KEEP_ALIVE_SECONDS = 60
@@ -24,23 +27,6 @@ const SUBSCRIBE_FLAGS = 0x02
 const SUBACK_FAILURE = 0x80
 const AUTH_BASIC = 'basic'
 
-const REFUSALS = {
-  1: 'the broker does not support MQTT 3.1.1',
-  2: 'the client ID was rejected',
-  3: 'the broker is unavailable',
-  4: 'the user name or password is wrong',
-  5: 'the client is not authorized',
-}
-
-const TEXT = {
-  connected: 'Connected to the broker',
-  refused: (code) => `The broker refused the connection: ${REFUSALS[code] || `code ${code}`}`,
-  subscribed: (filter) => `Subscribed to ${filter}`,
-  subscribeRefused: (filter) => `The broker refused the subscription to ${filter}`,
-  notBinary: 'Expected binary MQTT data, got text.',
-  noTopic: 'Enter a topic to publish to.',
-  noFilter: 'Enter a topic filter to subscribe to.',
-}
 
 const encoder = new TextEncoder()
 const strictDecoder = new TextDecoder('utf-8', { fatal: true })
@@ -206,7 +192,9 @@ function createSession(channel, { request, substitute }) {
 
 export const mqttProtocol = {
   label: 'MQTT',
-  targetLabel: 'Topic',
+  get targetLabel() {
+    return REALTIME_TEXT.targets.topic
+  },
   subprotocol: SUBPROTOCOL,
   canSubscribe: true,
   createSession,

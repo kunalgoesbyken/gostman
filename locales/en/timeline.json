@@ -1,0 +1,72 @@
+{
+  "timeline": {
+    "proxied": "Timings were measured by the Gostman proxy, from the proxy to the target. They do not include the trip from your browser to the proxy.",
+    "reused": "Reused connection",
+    "newConnection": "New connection",
+    "omitted_one": "{{count}} more request not shown.",
+    "omitted_other": "{{count}} more requests not shown.",
+    "failedBefore": "Failed before connecting",
+    "failedAt": "Failed at: {{label}}",
+    "requestHeaders": "Request headers",
+    "responseHeaders": "Response headers",
+    "reveal": "Reveal value",
+    "hide": "Hide value",
+    "expanded": "Hide details",
+    "collapsed": "Show details",
+    "total": "Total",
+    "breakdown": "Time breakdown",
+    "breakdownProxied": "Time breakdown (measured by the Gostman proxy)",
+    "requests_one": "{{count}} request",
+    "requests_other": "{{count}} requests",
+    "scripts_one": "{{count}} script",
+    "scripts_other": "{{count}} scripts",
+    "consoleLines_one": "{{count}} console line",
+    "consoleLines_other": "{{count}} console lines",
+    "passed": "{{count}} passed",
+    "failed": "{{count}} failed",
+    "scriptFailed": "Failed",
+    "noOutput": "No console output or check results.",
+    "secrets": "Secret managers",
+    "secretsRead_one": "{{count}} secret read",
+    "secretsRead_other": "{{count}} secrets read",
+    "secretSkipped": "{{name}} is empty because the connection \"{{connection}}\" is off",
+    "seconds": "{{value}} s",
+    "milliseconds": "{{value}} ms",
+    "phases": {
+      "dns": {
+        "label": "DNS lookup",
+        "short": "DNS"
+      },
+      "connect": {
+        "label": "TCP connect",
+        "short": "Connect"
+      },
+      "tls": {
+        "label": "TLS handshake",
+        "short": "TLS"
+      },
+      "firstByte": {
+        "label": "Waiting for first byte",
+        "short": "TTFB"
+      },
+      "download": {
+        "label": "Content download",
+        "short": "Download"
+      }
+    },
+    "facts": {
+      "remoteAddress": "Remote address",
+      "protocol": "Protocol",
+      "connection": "Connection",
+      "tls": "TLS",
+      "certificateSubject": "Certificate subject",
+      "certificateIssuer": "Certificate issuer",
+      "requestBody": "Request body",
+      "redirectsTo": "Redirects to",
+      "cookiesSet": "Cookies set"
+    },
+    "tlsAlpn": "ALPN {{protocol}}",
+    "tlsExpires": "expires {{date}}",
+    "tlsExpired": "expires {{date}} (expired)"
+  }
+}

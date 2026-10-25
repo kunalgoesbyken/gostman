@@ -7,8 +7,8 @@ import { MARKDOWN_TEXT } from "../lib/markdownText"
 const MODE_EDIT = "edit"
 const MODE_PREVIEW = "preview"
 const MODES = [
-  { value: MODE_EDIT, label: MARKDOWN_TEXT.edit },
-  { value: MODE_PREVIEW, label: MARKDOWN_TEXT.preview },
+  { value: MODE_EDIT, get label() { return MARKDOWN_TEXT.edit } },
+  { value: MODE_PREVIEW, get label() { return MARKDOWN_TEXT.preview } },
 ]
 
 export function MarkdownField({ value, onChange, placeholder, rows, label, className }) {

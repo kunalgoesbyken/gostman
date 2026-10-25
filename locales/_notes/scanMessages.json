@@ -1,0 +1,4 @@
+{
+  "authLiteral": "{{example}} is the literal text of a variable placeholder, with double braces.",
+  "highEntropyValue": "Shown as the reason of a finding in the credential scan. A field named like a credential holds text that looks random."
+}

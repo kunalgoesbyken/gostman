@@ -1,0 +1,33 @@
+{
+  "openLink": {
+    "notAddress": "Este não é um endereço web que o Gostman possa abrir.",
+    "tooLong": "Este endereço é longo demais.",
+    "credentials": "Endereços que contêm nome de usuário ou senha não são permitidos.",
+    "scheme": "Somente endereços https são permitidos.",
+    "noHost": "O endereço não tem nome de host.",
+    "reachFailure": "O Gostman não conseguiu acessar o servidor que envia este arquivo. Verifique sua conexão e tente novamente.",
+    "title": "Abrir a partir de um link",
+    "invalidTitle": "Este link não pode ser aberto",
+    "intro": "Um link pediu ao Gostman para baixar uma coleção ou uma especificação. Nada é baixado nem adicionado até você escolher Baixar, e nada é importado até você escolher Importar.",
+    "trustNote": "Continue somente se você confia em quem lhe enviou este link.",
+    "hostLabel": "De",
+    "addressLabel": "Endereço",
+    "cancel": "Cancelar",
+    "download": "Baixar",
+    "downloading": "Baixando",
+    "import": "Importar",
+    "detected": "Detectado: {{format}}",
+    "downloadedFrom": "Baixado de {{host}}",
+    "items_one": "{{count}} item",
+    "items_many": "{{count}} de itens",
+    "items_other": "{{count}} itens",
+    "activeNote": "Scripts, configurações de OAuth 2.0, comandos MCP locais ou leituras de arquivos em {{items}}. Você é consultado antes de importá-los, e as pastas importadas continuam restritas até você confiar nelas.",
+    "badgeAlt": "Abrir no Gostman",
+    "builderTitle": "Link Abrir no Gostman",
+    "builderHint": "Cole o endereço de uma coleção ou especificação publicada online (uma coleção do Postman, arquivo OpenAPI, exportação do Insomnia, HAR ou Gostman). Os links abaixo permitem que os leitores do seu README a abram no Gostman após uma confirmação.",
+    "builderLabel": "Endereço público da coleção",
+    "desktopLabel": "Link do app para desktop",
+    "webLabel": "Link do app web",
+    "badgeLabel": "Selo para o README (Markdown)"
+  }
+}

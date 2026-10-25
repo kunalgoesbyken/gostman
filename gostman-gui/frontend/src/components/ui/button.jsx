@@ -34,8 +34,10 @@ const Button = React.forwardRef(({ className, variant, size, type = "button", ..
 ))
 Button.displayName = "Button"
 
-const IconButton = React.forwardRef(({ label, icon: Icon, size = "icon-sm", variant = "ghost", ...props }, ref) => (
-  <Button ref={ref} size={size} variant={variant} aria-label={label} title={label} {...props}>
+const MIRRORED = "rtl:[&_svg]:-scale-x-100"
+
+const IconButton = React.forwardRef(({ label, icon: Icon, size = "icon-sm", variant = "ghost", mirrored, className, ...props }, ref) => (
+  <Button ref={ref} size={size} variant={variant} aria-label={label} title={label} className={cn(mirrored && MIRRORED, className)} {...props}>
     <Icon />
   </Button>
 ))

@@ -4,6 +4,8 @@ Gostman reads Postman collections, environments and globals, rewrites the common
 
 Gostman has no paid tier, no account and no licence key. Collection runs of any size, mock servers, secret managers, CSV and JSON data files and any number of collections are in the free download. See [What is free in Gostman](free-features.md).
 
+For how the two tools differ and where Postman is stronger, see [Gostman and Postman compared](gostman-vs-postman.md).
+
 ## Concepts
 
 | In Postman | In Gostman |
@@ -182,5 +184,5 @@ Extract rules become lines at the top of the post-response script, such as `pm.c
 
 - Cloud workspaces with live sync, roles, comments and an activity feed. Gostman shares through Git or encrypted links. See [Sharing and documentation](sharing-and-docs.md).
 - Hosted monitors and hosted mock servers. Gostman runs both where you run it.
-- Flows, the public API network, and a package library for `pm.require`.
+- The public API network, and a package library for `pm.require`.
 - A larger community and a longer history. Gostman is a smaller project; report problems on [GitHub](https://github.com/kunalgoesbyken/gostman/issues).

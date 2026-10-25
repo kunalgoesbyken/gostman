@@ -1,0 +1,25 @@
+{
+  "graphql": {
+    "query": "クエリ",
+    "queryLabel": "GraphQLクエリ",
+    "variables": "変数（JSON）",
+    "variablesLabel": "GraphQL変数",
+    "invalidJson": "有効なJSONではありません：{{message}}",
+    "syntaxAt": "{{message}}（{{line}}行目、{{column}}列目）",
+    "sendAsGraphql": "GraphQLとして送信",
+    "prettify": "整形",
+    "prettifyTitle": "クエリを整形します。コメントは削除されます。",
+    "cannotPrettify": "整形できません：{{detail}}",
+    "notSent": "メソッドが{{method}}の間は送信されません。",
+    "schema": "スキーマ",
+    "schemaDescription": "取得すると、このエンドポイントの型とフィールドを閲覧できます。イントロスペクションクエリには、このリクエストのURL、ヘッダー、認証が使われます。",
+    "searchLabel": "スキーマを検索",
+    "searchPlaceholder_other": "{{count}}個の型とフィールドを検索",
+    "noMatch": "一致するものはありません。",
+    "moreMatches_other": "ほかに{{count}}個の型が一致します。表示するには検索を絞り込んでください。",
+    "noFields": "フィールドはありません。",
+    "schemaTooLarge": "スキーマがレスポンスサイズの上限を超えています。",
+    "noJsonBody": "エンドポイントはJSONボディなしで{{status}}を返しました。",
+    "noSchema": "エンドポイントはスキーマなしで{{status}}を返しました。"
+  }
+}

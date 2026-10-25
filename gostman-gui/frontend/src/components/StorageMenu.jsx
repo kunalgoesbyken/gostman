@@ -3,8 +3,10 @@ import { AlertTriangle, ChevronDown, Folder, HardDrive, ShieldAlert } from "luci
 import { Button } from "./ui/button"
 import { GitPanel } from "./GitPanel"
 import { WorkspaceMenu } from "./WorkspaceMenu"
+import { inlineStart } from "../hooks/direction"
 import { useShortcutLabel } from "../hooks/useShortcuts"
 import { hintWithShortcut } from "../lib/shortcuts"
+import { APP_TEXT } from "../lib/appText"
 import { WORKSPACE_TEXT as TEXT } from "../lib/workspaceText"
 import { useAppStore } from "../store/appStore"
 
@@ -65,7 +67,7 @@ function FolderStorage({ storage }) {
         variant="ghost"
         aria-haspopup="menu"
         aria-expanded={isOpen}
-        aria-label={`${TEXT.switcherLabel}: ${hasFolder ? status.name : TEXT.localLabel}`}
+        aria-label={APP_TEXT.labelled(TEXT.switcherLabel, hasFolder ? status.name : TEXT.localLabel)}
         title={title}
         onMouseDown={keepMenuOpenState}
         onClick={() => setOpen(!isOpen)}
@@ -77,7 +79,7 @@ function FolderStorage({ storage }) {
         {status.problems.length > 0 && <AlertTriangle className="text-warning" />}
         <ChevronDown />
       </Button>
-      {rect && <WorkspaceMenu anchor={{ x: rect.left, y: rect.bottom }} status={status} storage={storage} isRestricted={isRestricted} onClose={closeMenu} />}
+      {rect && <WorkspaceMenu anchor={{ x: inlineStart(rect), y: rect.bottom }} status={status} storage={storage} isRestricted={isRestricted} onClose={closeMenu} />}
       <GitPanel actions={storage.git} onTrust={storage.confirmTrust} />
     </>
   )

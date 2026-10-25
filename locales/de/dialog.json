@@ -1,0 +1,15 @@
+{
+  "dialog": {
+    "moveWindow": "Fenster verschieben",
+    "moveHint": "Ziehen oder mit den Pfeiltasten verschieben. Shift und Pfeiltasten ändern die Größe. Doppelklick auf die Titelleiste oder Home stellt Standardgröße und -position wieder her.",
+    "close": "Schließen",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "rename": "Umbenennen",
+    "create": "Erstellen",
+    "getDesktopApp": "Desktop-App laden",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "ok": "OK"
+  }
+}

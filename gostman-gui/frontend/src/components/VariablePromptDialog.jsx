@@ -23,7 +23,7 @@ function OpenVariablePrompt({ names, defaults, isForRun, onAnswer }) {
           <p className="text-xs text-muted-foreground">{isForRun ? TEXT.promptRunMessage : TEXT.promptMessage}</p>
           {names.map((name, index) => (
             <label key={name} className="flex flex-col gap-1 text-xs text-muted-foreground">
-              {name}
+              <span><bdi dir="ltr">{name}</bdi></span>
               <Input
                 autoFocus={index === 0}
                 controlSize="md"
@@ -31,6 +31,7 @@ function OpenVariablePrompt({ names, defaults, isForRun, onAnswer }) {
                 onChange={(event) => setValues({ ...values, [name]: event.target.value })}
                 autoComplete="off"
                 spellCheck={false}
+                dir="ltr"
                 className="font-mono"
               />
             </label>

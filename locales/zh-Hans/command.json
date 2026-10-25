@@ -1,0 +1,129 @@
+{
+  "command": {
+    "title": "命令面板",
+    "heading": "命令",
+    "sections": {
+      "request": "请求"
+    },
+    "searchCommands": "搜索命令",
+    "searchRequests": "搜索请求",
+    "commandsPlaceholder": "输入命令或请求名称",
+    "requestsPlaceholder": "转到请求或历史记录",
+    "results": "结果",
+    "nothingMatches": "没有匹配项",
+    "sentEarlier": "之前发送过",
+    "switchEnvironment": "切换环境：{{name}}",
+    "switchEnvironmentDescription": "使用此环境的变量",
+    "settingsKeywords": "请求头 认证 变量 脚本 检查 headers auth variables scripts checks",
+    "commands": {
+      "sendRequest": {
+        "label": "发送请求",
+        "description": "发送当前标签页中的请求"
+      },
+      "newRequest": {
+        "description": "打开一个新的空白标签页"
+      },
+      "saveRequest": {
+        "label": "保存请求",
+        "description": "保存当前标签页中的请求"
+      },
+      "duplicateRequest": {
+        "label": "复制请求",
+        "description": "保存当前请求的副本"
+      },
+      "copyRequest": {
+        "label": "拷贝请求",
+        "description": "拷贝已保存的请求，以便粘贴到文件夹中"
+      },
+      "pasteRequest": {
+        "label": "粘贴请求",
+        "description": "将拷贝的请求或文件夹粘贴到当前请求旁边"
+      },
+      "generateCode": {
+        "description": "将当前请求显示为代码"
+      },
+      "closeTab": {
+        "label": "关闭标签页",
+        "description": "关闭当前标签页"
+      },
+      "closeOtherTabs": {
+        "description": "只保留当前标签页"
+      },
+      "closeSavedTabs": {
+        "description": "关闭所有没有未保存更改的标签页"
+      },
+      "keepTab": {
+        "label": "保持预览标签页打开",
+        "description": "将预览标签页变为普通标签页"
+      },
+      "reopenTab": {
+        "label": "重新打开已关闭的标签页",
+        "description": "恢复你最近关闭的标签页"
+      },
+      "toggleSidebar": {
+        "description": "显示或隐藏集合和历史记录"
+      },
+      "shortcuts": {
+        "description": "查看所有快捷键"
+      },
+      "newFolder": {
+        "description": "在顶层创建文件夹"
+      },
+      "runCollection": {
+        "description": "运行整个集合或某个文件夹，包括其检查和脚本"
+      },
+      "collapseFolders": {
+        "keywords": "关闭 折叠 树 close fold tree"
+      },
+      "examples": {
+        "label": "请求示例",
+        "description": "查看当前请求已保存的响应"
+      },
+      "mockServer": {
+        "description": "在本地端口提供已保存的示例"
+      },
+      "capture": {
+        "label": "捕获流量",
+        "description": "将应用的流量转发到其 API 并保存为请求"
+      },
+      "cookies": {
+        "label": "管理 Cookie",
+        "description": "查看并删除已存储的 Cookie"
+      },
+      "environments": {
+        "label": "管理环境",
+        "description": "创建环境并编辑其变量、集合变量和全局变量",
+        "keywords": "变量 全局变量 variables globals"
+      },
+      "scanSecrets": {
+        "keywords": "凭据 令牌 密码 泄露 credentials tokens passwords leak"
+      },
+      "network": {
+        "label": "网络设置",
+        "description": "代理和证书"
+      },
+      "import": {
+        "label": "导入数据",
+        "description": "导入 Postman、Insomnia、Bruno、OpenAPI、HAR 等文件"
+      },
+      "lintSpec": {
+        "description": "检查已导入的 OpenAPI 规范是否有问题",
+        "keywords": "验证 规范 openapi swagger validate governance"
+      },
+      "loadTest": {
+        "keywords": "性能 压力 performance stress"
+      },
+      "export": {
+        "label": "导出数据",
+        "description": "导出集合和环境"
+      },
+      "share": {
+        "label": "分享集合",
+        "description": "创建加密链接或文件，无需账号"
+      },
+      "clearHistory": {
+        "description": "删除所有历史记录"
+      }
+    }
+  }
+}

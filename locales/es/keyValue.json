@@ -1,0 +1,18 @@
+{
+  "keyValue": {
+    "key": "Clave",
+    "value": "Valor",
+    "type": "Tipo",
+    "sendRow": "Enviar esta fila",
+    "fieldType": "Tipo de campo",
+    "text": "Texto",
+    "file": "Archivo",
+    "removeRow": "Quitar fila",
+    "bulkLabel": "Filas de {{keyLabel}} como texto",
+    "bulkPlaceholder": "{{keyLabel}}: valor",
+    "bulkHint": "Una fila por línea con el formato nombre: valor. Empieza una línea con // o # para conservarla sin enviarla.",
+    "bulkUnavailable": "Las filas con dos puntos en el nombre, o con espacios al principio o al final, solo se pueden editar en la tabla.",
+    "editAsTable": "Editar como tabla",
+    "bulkEdit": "Edición en bloque"
+  }
+}

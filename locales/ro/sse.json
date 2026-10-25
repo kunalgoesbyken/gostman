@@ -1,0 +1,48 @@
+{
+  "sse": {
+    "allTypes": "Toate tipurile de evenimente",
+    "searchLabel": "Căutare evenimente",
+    "searchPlaceholder": "Căutare evenimente",
+    "pause": "Pauză derulare automată",
+    "resume": "Reluare derulare automată",
+    "clear": "Golire evenimente",
+    "copyAll": "Copiere evenimente afișate",
+    "copied": "Copiat",
+    "copyEvent": "Copiere date eveniment",
+    "noEvents": "Încă nu există evenimente",
+    "waiting": "Se așteaptă ca serverul să trimită un eveniment.",
+    "noMatches": "Niciun eveniment nu corespunde",
+    "noMatchesHint": "Schimbați filtrul de tip sau căutarea pentru a vedea mai multe.",
+    "clipped": "Acest eveniment a fost prea lung, deci restul a fost omis.",
+    "shown": "{{shown}} din {{total}} afișate",
+    "received": "Primite: {{count}}",
+    "dropped_one": "Cel mai vechi eveniment nu mai este listat. Răspunsul descărcat are în continuare toate evenimentele.",
+    "dropped_few": "Cele mai vechi {{count}} evenimente nu mai sunt listate. Răspunsul descărcat are în continuare toate evenimentele.",
+    "dropped_other": "Cele mai vechi {{count}} de evenimente nu mai sunt listate. Răspunsul descărcat are în continuare toate evenimentele.",
+    "reconnecting": "Reconectare în {{seconds}} s (încercarea {{attempt}})"
+  },
+  "sseSettings": {
+    "stream": "Stream ca server-sent events",
+    "reconnect": "Reconectare când serverul închide stream-ul",
+    "maxEvents": "Evenimente max.",
+    "maxEventsPlaceholder": "Implicit 10000",
+    "maxSeconds": "Secunde max.",
+    "maxSecondsPlaceholder": "Implicit 300"
+  },
+  "status": {
+    "connecting": "Se conectează",
+    "open": "Stream activ",
+    "reconnecting": "Se reconectează",
+    "ended": "Încheiat"
+  },
+  "streamEnd": {
+    "closed": "Serverul a închis stream-ul.",
+    "cancelled": "Stream-ul a fost oprit.",
+    "maxEvents": "Oprit la limita de evenimente. Măriți-o la Setări.",
+    "maxBytes": "Oprit la limita de dimensiune.",
+    "maxDuration": "Oprit la limita de timp. Măriți-o la Setări.",
+    "failed": "Stream-ul a eșuat.",
+    "failedWith": "Stream-ul a eșuat. {{detail}}",
+    "hostedLimit": "Oprit la limita de timp. Aplicația web transmite cel mult {{seconds}} secunde; aplicația desktop poate transmite mai mult."
+  }
+}

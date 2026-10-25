@@ -1,25 +1,27 @@
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import { AlertTriangle, RotateCcw } from "lucide-react"
 import { ColorField } from "./ColorField"
 import { PreferenceGroup, optionsOf } from "./PreferenceRows"
 import { Button, IconButton } from "../ui/button"
 import { SegmentedControl } from "../ui/segmented"
 import { MIN_TEXT_CONTRAST, contrastRatio } from "../../lib/color"
+import { formatNumber } from "../../lib/i18n/format"
 import { updatePreferences, useResolvedTheme } from "../../lib/preferences"
 import { PREFERENCES_TEXT } from "../../lib/preferencesText"
 import { MODES, withSurfaceColor, withoutMode, withoutSurface } from "../../lib/themes"
 
 const TEXT = PREFERENCES_TEXT.theme
-const MODE_OPTIONS = optionsOf(MODES, PREFERENCES_TEXT.themes)
-const HEADER = "whitespace-nowrap pb-1.5 pr-3 text-left text-2xs font-medium uppercase tracking-wide text-muted-foreground"
-const CELL = "py-2 pr-3"
+const modeOptions = () => optionsOf(MODES, PREFERENCES_TEXT.themes)
+const ONE_DECIMAL = { minimumFractionDigits: 1, maximumFractionDigits: 1 }
+const HEADER = "whitespace-nowrap pb-1.5 pe-3 text-start text-2xs font-medium uppercase tracking-wide text-muted-foreground"
+const CELL = "py-2 pe-3"
 
 const roundedDown = (ratio) => Math.floor(ratio * 10) / 10
 
-function ContrastValue({ ratio, format }) {
-  const text = TEXT.ratio(format.format(roundedDown(ratio)))
+function ContrastValue({ ratio }) {
+  const text = TEXT.ratio(formatNumber(roundedDown(ratio), ONE_DECIMAL))
   if (ratio >= MIN_TEXT_CONTRAST) return <span className="font-mono text-2xs text-muted-foreground">{text}</span>
-  const warning = TEXT.lowContrast(format.format(MIN_TEXT_CONTRAST))
+  const warning = TEXT.lowContrast(formatNumber(MIN_TEXT_CONTRAST, ONE_DECIMAL))
 
   return (
     <span title={warning} className="inline-flex items-center gap-1 font-mono text-2xs text-warning">
@@ -30,10 +32,10 @@ function ContrastValue({ ratio, format }) {
   )
 }
 
-function ColorRow({ row, roles, custom, format, onColor, onReset }) {
+function ColorRow({ row, roles, custom, onColor, onReset }) {
   return (
     <tr className="border-b border-border last:border-b-0">
-      <th scope="row" className={`${CELL} text-left font-normal`}>{row.sample}</th>
+      <th scope="row" className={`${CELL} text-start font-normal`}>{row.sample}</th>
       {roles.map((role) => (
         <td key={role} className={CELL}>
           <ColorField
@@ -46,9 +48,9 @@ function ColorRow({ row, roles, custom, format, onColor, onReset }) {
         </td>
       ))}
       <td className={`${CELL} whitespace-nowrap`}>
-        <ContrastValue ratio={contrastRatio(row.colors.background, row.colors.foreground)} format={format} />
+        <ContrastValue ratio={contrastRatio(row.colors.background, row.colors.foreground)} />
       </td>
-      <td className="py-2 text-right">
+      <td className="py-2 text-end">
         <IconButton label={TEXT.resetRow(row.name)} icon={RotateCcw} size="icon-xs" disabled={!custom} onClick={onReset} />
       </td>
     </tr>
@@ -58,7 +60,6 @@ function ColorRow({ row, roles, custom, format, onColor, onReset }) {
 export function ColorModeTable({ title, hint, nameColumn, colorKey, roles, preferences, rowsFor, resetModeLabel }) {
   const resolvedMode = useResolvedTheme()
   const [mode, setMode] = useState(resolvedMode)
-  const format = useMemo(() => new Intl.NumberFormat(preferences.language, { minimumFractionDigits: 1, maximumFractionDigits: 1 }), [preferences.language])
   const colors = preferences[colorKey]
   const update = (next) => updatePreferences({ [colorKey]: next })
 
@@ -66,7 +67,7 @@ export function ColorModeTable({ title, hint, nameColumn, colorKey, roles, prefe
     <PreferenceGroup
       title={title}
       hint={hint}
-      action={<SegmentedControl label={TEXT.editing} options={MODE_OPTIONS} value={mode} onChange={setMode} />}
+      action={<SegmentedControl label={TEXT.editing} options={modeOptions()} value={mode} onChange={setMode} />}
     >
       {mode !== resolvedMode && <p role="status" className="text-2xs text-muted-foreground">{TEXT.previewHint[mode]}</p>}
       <div className="overflow-x-auto">
@@ -86,7 +87,6 @@ export function ColorModeTable({ title, hint, nameColumn, colorKey, roles, prefe
                 row={row}
                 roles={roles}
                 custom={colors[mode][row.id]}
-                format={format}
                 onColor={(role, value) => update(withSurfaceColor(colors, mode, row.id, role, value))}
                 onReset={() => update(withoutSurface(colors, mode, row.id))}
               />

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const (
@@ -119,7 +120,7 @@ func oauth2Auth(fields oauth2Fields) (engine.Auth, bool) {
 
 func (c *collector) checkedAuth(name string, auth engine.Auth, supported bool) *engine.Auth {
 	if !supported {
-		c.flag(messageAuthDropped, name)
+		c.flag(locales.ImporterAuthDropped, name)
 	}
 	return &auth
 }

@@ -1,0 +1,5 @@
+{
+  "route": "Why a saved request is not served by the mock server, shown in the routes list.",
+  "route.conflict": "{{method}} is an HTTP method, {{path}} the route and {{owner}} the name of the request that already uses it.",
+  "route.exampleBodyInvalid": "{{name}} is the name of a saved example."
+}

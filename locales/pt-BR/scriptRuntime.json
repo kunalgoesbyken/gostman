@@ -1,0 +1,6 @@
+{
+  "scriptRuntime": {
+    "consoleTruncated": "A saída do console foi truncada.",
+    "notStarted": "Não foi possível iniciar o script."
+  }
+}

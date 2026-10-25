@@ -43,7 +43,7 @@ function FormatProblem({ bodyType, error, onReveal }) {
     <Notice tone="destructive">
       {problemText(FORMATTED_TYPE_NAMES[bodyType], error)}
       {error.offset !== undefined && (
-        <button type="button" onClick={() => onReveal(error.offset)} className="ml-2 underline">
+        <button type="button" onClick={() => onReveal(error.offset)} className="ms-2 underline">
           {BODY_TEXT.goToLine(error.line)}
         </button>
       )}
@@ -73,7 +73,7 @@ function BinaryBody({ body, onChange }) {
 
 function RawBody({ body, bodyType, editorPath, editorRef, onChange, onFormat, EditorComponent }) {
   return (
-    <div className="min-h-0 flex-1">
+    <div dir="ltr" className="min-h-0 flex-1">
       <Suspense fallback={<EditorSkeleton />}>
         <EditorComponent
           ref={editorRef}
@@ -149,7 +149,7 @@ export function BodyPanel({ request, drafts, editorPath, replacedByGraphQL, onUp
             title={BODY_TEXT.formatTitle(FORMATTED_TYPE_NAMES[request.bodyType], chordLabel(FORMAT_CHORD, isApplePlatform()))}
             disabled={request.body.trim() === ""}
             onClick={formatting.format}
-            className="ml-auto"
+            className="ms-auto"
           >
             <Braces />
             {BODY_TEXT.format}

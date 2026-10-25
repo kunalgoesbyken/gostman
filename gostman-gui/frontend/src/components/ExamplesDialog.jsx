@@ -10,7 +10,7 @@ import { SegmentedControl } from "./ui/segmented"
 import { TabCount } from "./ui/tabs"
 import { EditorSkeleton } from "./ui/skeleton"
 import { canFormat } from "../lib/codeEditor"
-import { formatSize } from "../lib/dataUtils"
+import { formatBytes } from "../lib/byteSize"
 import { exampleSize, isBinaryExample, parseExamples, servedByDefault } from "../lib/examples"
 import { EXAMPLES_TEXT } from "../lib/examplesText"
 import { statusVariant } from "../lib/response"
@@ -23,8 +23,8 @@ const FALLBACK_LANGUAGE = "plaintext"
 const LANGUAGES = ["json", "html", "xml"]
 
 const HEADER_COLUMNS = [
-  { header: RESPONSE_TEXT.columns.name, key: "key", width: "w-1/3", cellClassName: "text-foreground" },
-  { header: RESPONSE_TEXT.columns.value, key: "value" },
+  { get header() { return RESPONSE_TEXT.columns.name }, key: "key", width: "w-1/3", cellClassName: "text-foreground" },
+  { get header() { return RESPONSE_TEXT.columns.value }, key: "value" },
 ]
 
 const languageOf = (contentType) => LANGUAGES.find((language) => contentType.includes(language)) || FALLBACK_LANGUAGE
@@ -42,7 +42,7 @@ function ExampleRow({ example, isSelected, isDefault, onSelect }) {
         title={example.name}
         onClick={onSelect}
         className={cn(
-          "flex h-8 w-full items-center gap-2 px-3 text-left text-xs",
+          "flex h-8 w-full items-center gap-2 px-3 text-start text-xs",
           isSelected ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"
         )}
       >
@@ -63,25 +63,27 @@ function ExampleBody({ example, draft, editorRef, onDraftChange, EditorComponent
     return (
       <EmptyState
         icon={FileDigit}
-        title={EXAMPLES_TEXT.binaryTitle(formatSize(exampleSize(example)))}
+        title={EXAMPLES_TEXT.binaryTitle(formatBytes(exampleSize(example)))}
         description={EXAMPLES_TEXT.binaryHint}
       />
     )
   }
   return (
-    <Suspense fallback={<EditorSkeleton />}>
-      <EditorComponent
-        ref={editorRef}
-        value={draft}
-        onChange={(event) => onDraftChange(event.target.value)}
-        onFormat={ignoreFormatResult}
-        language={languageOf(example.contentType)}
-        path={`examples/${example.id}`}
-        height="100%"
-        surface="body"
-        label={EXAMPLES_TEXT.bodyLabel}
-      />
-    </Suspense>
+    <div dir="ltr" className="contents">
+      <Suspense fallback={<EditorSkeleton />}>
+        <EditorComponent
+          ref={editorRef}
+          value={draft}
+          onChange={(event) => onDraftChange(event.target.value)}
+          onFormat={ignoreFormatResult}
+          language={languageOf(example.contentType)}
+          path={`examples/${example.id}`}
+          height="100%"
+          surface="body"
+          label={EXAMPLES_TEXT.bodyLabel}
+        />
+      </Suspense>
+    </div>
   )
 }
 
@@ -89,7 +91,7 @@ function ExampleDetail({ example, isDefault, draft, onDraftChange, actions, Edit
   const [view, setView] = useState(VIEW_BODY)
   const editorRef = useRef(null)
   const isEdited = draft !== example.body
-  const summary = EXAMPLES_TEXT.summary(example.contentType || EXAMPLES_TEXT.noContentType, formatSize(exampleSize(example)))
+  const summary = EXAMPLES_TEXT.summary(example.contentType || EXAMPLES_TEXT.noContentType, formatBytes(exampleSize(example)))
   const views = [
     { value: VIEW_BODY, label: EXAMPLES_TEXT.body },
     { value: VIEW_HEADERS, label: EXAMPLES_TEXT.headersCount(example.headers.length) },
@@ -128,7 +130,7 @@ function ExampleDetail({ example, isDefault, draft, onDraftChange, actions, Edit
       </div>
       {isEdited && (
         <DialogFooter>
-          <p className="mr-auto min-w-0 self-center truncate text-xs text-muted-foreground">{EXAMPLES_TEXT.unsaved}</p>
+          <p className="me-auto min-w-0 self-center truncate text-xs text-muted-foreground">{EXAMPLES_TEXT.unsaved}</p>
           <Button variant="outline" onClick={() => onDraftChange(example.body)}>{EXAMPLES_TEXT.discard}</Button>
           <Button onClick={() => actions.saveBody(example, draft)}>{EXAMPLES_TEXT.saveBody}</Button>
         </DialogFooter>

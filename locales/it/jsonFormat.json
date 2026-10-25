@@ -1,0 +1,21 @@
+{
+  "jsonFormat": {
+    "expectedValue": "Era previsto un valore",
+    "unexpectedEnd": "Il JSON termina troppo presto",
+    "unexpected": "{{character}} inatteso",
+    "endOfText": "fine del testo",
+    "expectedKey": "Era previsto il nome di una proprietà tra virgolette doppie",
+    "expectedColon": "Era previsto ':' dopo il nome della proprietà",
+    "expectedObjectEnd": "Erano previsti ',' o '}' dopo il valore della proprietà",
+    "expectedArrayEnd": "Erano previsti ',' o ']' dopo l'elemento",
+    "trailingComma": "Rimuovi la virgola prima di '{{closer}}'",
+    "unclosedString": "Questa stringa non ha le virgolette di chiusura",
+    "lineBreakInString": "Le interruzioni di riga dentro una stringa devono essere scritte come \\n",
+    "controlInString": "I caratteri di controllo dentro una stringa devono essere preceduti da un escape",
+    "badEscape": "Sequenza di escape sconosciuta in una stringa",
+    "badNumber": "Questo numero non è un JSON valido",
+    "unclosedReference": "Questo {{reference}} non ha {{closer}} di chiusura",
+    "extraText": "Testo inatteso dopo il valore JSON",
+    "tooDeep": "Il JSON è annidato in modo troppo profondo per essere formattato"
+  }
+}

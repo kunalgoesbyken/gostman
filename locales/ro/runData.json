@@ -1,0 +1,10 @@
+{
+  "runData": {
+    "tooManyRows_one": "Un fișier de date poate avea cel mult {{count}} rând.",
+    "tooManyRows_few": "Un fișier de date poate avea cel mult {{count}} rânduri.",
+    "tooManyRows_other": "Un fișier de date poate avea cel mult {{count}} de rânduri.",
+    "empty": "Fișierul de date nu are rânduri.",
+    "notArray": "Un fișier de date JSON trebuie să fie un array de obiecte, câte un obiect pe iterație.",
+    "unreadable": "Fișierul de date nu poate fi citit."
+  }
+}

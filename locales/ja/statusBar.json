@@ -1,0 +1,13 @@
+{
+  "statusBar": {
+    "network": "ネットワーク",
+    "mockStopped": "モックサーバー",
+    "mockRunning": "モックサーバー（実行中）",
+    "mockRunningOn": "モックサーバー（:{{port}}で実行中）",
+    "captureStopped": "キャプチャ",
+    "captureRunning": "キャプチャ（実行中）",
+    "git": "Git",
+    "detached": "Detached HEAD",
+    "cookies": "Cookie"
+  }
+}

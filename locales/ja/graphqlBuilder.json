@@ -1,0 +1,28 @@
+{
+  "builder": {
+    "rootLabel": "オペレーションの種類",
+    "rootNames": {
+      "query": "Query",
+      "mutation": "Mutation",
+      "subscription": "Subscription"
+    },
+    "title": "ビルダー",
+    "paneLabel": "クエリビルダー",
+    "filterLabel": "フィールドを絞り込む",
+    "filterPlaceholder": "フィールドを絞り込む",
+    "expand": "展開",
+    "collapse": "折りたたむ",
+    "select": "{{name}}を選択",
+    "include": "引数{{name}}を含める",
+    "viaFragment": "エディターのフラグメントで選択されています。そちらで編集してください。",
+    "noSchemaTitle": "スキーマが読み込まれていません",
+    "noSchemaDescription": "取得すると、エンドポイントのフィールドからクエリを組み立てられます。イントロスペクションクエリには、このリクエストのURL、ヘッダー、認証が使われます。",
+    "fetch": "スキーマを取得",
+    "refresh": "スキーマを再取得",
+    "loading": "スキーマを取得中",
+    "syntaxError": "エディターに構文エラーがあるため、ビルダーは一時停止しています：{{message}}",
+    "subscription": "サブスクリプションは、長時間維持される接続で結果をストリーミングします。その方法でサブスクリプションを配信するサーバーから読み取るには、「設定」で「Server-Sent Eventsとしてストリーム」をオンにしてください。",
+    "noRoot": "このスキーマには、このオペレーションのルート型がありません。",
+    "empty": "フィルターに一致するものはありません。"
+  }
+}

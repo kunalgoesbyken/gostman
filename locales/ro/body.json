@@ -1,0 +1,22 @@
+{
+  "body": {
+    "typeLabel": "Tipul corpului",
+    "editorLabel": "Corpul cererii",
+    "format": "Formatare",
+    "formatTitle": "Indentează corpul {{type}} ({{chord}}). {{example}} sunt păstrate așa cum sunt scrise.",
+    "cannotFormatAt": "Corpul {{type}} nu poate fi formatat la linia {{line}}, coloana {{column}}: {{message}}",
+    "cannotFormat": "Corpul {{type}} nu poate fi formatat: {{message}}",
+    "goToLine": "Mergeți la linia {{line}}",
+    "noBody": "Fără corp",
+    "noBodyDescription": "Această cerere este trimisă fără corp.",
+    "multipartOnGet": "Cererile GET poartă rar un corp, iar multe servere îl ignoră. Schimbați metoda în POST sau PUT dacă acesta trebuie încărcat.",
+    "replacedByGraphQL": "Metoda este GRAPHQL, deci corpul este construit din fila GraphQL, iar acesta nu este trimis.",
+    "types": {
+      "none": "Fără",
+      "text": "Text",
+      "form": "Form URL-encoded",
+      "multipart": "Multipart",
+      "file": "Fișier"
+    }
+  }
+}

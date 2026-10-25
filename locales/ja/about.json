@@ -1,0 +1,20 @@
+{
+  "about": {
+    "title": "Gostmanについて",
+    "commandTitle": "Gostmanについて",
+    "commandDescription": "バージョン、リンク、診断情報",
+    "tagline": "REST、GraphQL、gRPC、WebSocket向けのオープンソースのAPIクライアントです。アカウントは不要で、データはお使いのデバイスに残ります。",
+    "version": "バージョン{{version}}",
+    "links": {
+      "website": "Webサイト",
+      "source": "ソースコード",
+      "releases": "リリース",
+      "issues": "問題を報告"
+    },
+    "diagnosticsHint": "診断情報には、バージョン、プラットフォーム、件数のみが含まれます。リクエスト、URL、変数、トークン、シークレットは含まれません。",
+    "copyDiagnostics": "診断情報をコピー",
+    "copied": "コピーしました",
+    "versionButton": "Gostmanについて",
+    "close": "閉じる"
+  }
+}

@@ -1,20 +1,11 @@
-export const GRPC_TEXT = {
-  services: 'Services',
-  messageLabel: 'Request message',
-  reflection: 'Server reflection',
-  sendAsGrpc: 'Send as gRPC',
-  addProtos: 'Add .proto files',
-  removeFiles: 'Remove files',
-  load: 'Load',
-  reload: 'Reload',
-  schemaHint: "Load the services through server reflection, or add the service's .proto files. The address, headers and auth of this request are used.",
-  noServices: 'No services were found.',
-  tooLarge: (name, size, limit) => `${name} is ${size}. Files are limited to ${limit}.`,
-  method: 'Method',
-  methodLabel: 'gRPC method',
-  methodPlaceholder: 'package.Service/Method',
-  chooseMethod: 'Choose a method',
-  useExample: 'Use example',
-  useExampleTitle: "Replace the message with an example of the method's input",
-  streamHint: 'This method reads a stream. Write a JSON array to send several messages.',
-}
+import english from '../../../../locales/en/grpc.json'
+import { messages } from './i18n/core'
+
+const text = messages('grpc', english, (t) => ({
+  grpc: {
+    methodPlaceholder: 'package.Service/Method',
+    tooLarge: (name, size, limit) => t('grpc.tooLarge', { name, size, limit }),
+  },
+}))
+
+export const GRPC_TEXT = text.grpc

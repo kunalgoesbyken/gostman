@@ -27,11 +27,11 @@ function NotificationRow({ notification }) {
   const { level, text } = summarize(notification)
   return (
     <li className="contents">
-      <span className="text-right text-muted-foreground">{MCP_TEXT.notificationTime(notification.atMs)}</span>
+      <span className="text-end text-muted-foreground">{MCP_TEXT.notificationTime(notification.atMs)}</span>
       <span className="min-w-0 [overflow-wrap:anywhere]">
         <span className="text-foreground">{notification.method}</span>
-        {level && <span className={cn("ml-2", LEVEL_TONES[level] ?? "text-muted-foreground")}>{level}</span>}
-        <span className="ml-2 text-muted-foreground">{text}</span>
+        {level && <span className={cn("ms-2", LEVEL_TONES[level] ?? "text-muted-foreground")}>{level}</span>}
+        <span className="ms-2 text-muted-foreground">{text}</span>
       </span>
     </li>
   )

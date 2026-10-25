@@ -1,0 +1,14 @@
+{
+  "requestSettings": {
+    "timeout": "超时（ms）",
+    "timeoutPlaceholder": "{{milliseconds}}（默认）",
+    "followRedirects": "跟随重定向",
+    "verifyTls": "验证 TLS 证书",
+    "sendCookies": "发送 Cookie 罐中的 Cookie",
+    "storeCookies": "保存响应设置的 Cookie",
+    "tags": "标签",
+    "tagsPlaceholder": "冒烟测试, 回归测试",
+    "description": "描述",
+    "descriptionPlaceholder": "说明这个请求的作用（Markdown），会显示在生成的文档中"
+  }
+}

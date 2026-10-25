@@ -1,42 +1,12 @@
-export const CAPTURE_TEXT = {
-  title: 'Capture traffic',
-  running: 'Running',
-  desktopOnly: 'Available in the desktop app',
-  webNotice: 'Capturing traffic needs the desktop app, which can listen on a local port and forward to your API.',
-  limitation: 'Point your app at the local address instead of the API. An app whose base URL cannot be changed is not captured.',
-  upstreamPlaceholder: 'API to forward to, for example https://api.example.com',
-  upstreamLabel: 'API to forward to',
-  port: 'Port',
-  portTitle: 'Port on 127.0.0.1',
-  start: 'Start',
-  stop: 'Stop',
-  idleHint: 'Enter the API your app talks to, then start the capture.',
-  listening: (address) => `Calls your app sends to ${address} appear here.`,
-  failed: 'ERR',
-  sides: { request: 'Request', response: 'Response' },
-  body: 'Body',
-  headersCount: (count) => `Headers (${count})`,
-  selectExchange: (title) => `Select ${title}`,
-  selectAll: 'Select every exchange shown',
-  duration: (ms) => `${ms} ms`,
-  columns: { time: 'Time', method: 'Method', path: 'Path', status: 'Status', duration: 'Duration', size: 'Size' },
-  destinationLabel: 'Folder to save into',
-  newFolder: (name) => `New folder ${name}`,
-  noBody: 'No body',
-  binaryBody: (size) => `Binary body, ${size}`,
-  selectedExchange: 'Selected exchange',
-  message: 'Message',
-  messageSection: 'Message section',
-  saveAsRequest: 'Save as request',
-  closeDetails: 'Close details',
-  upgraded: 'This call switched to a WebSocket. Its frames are forwarded but not recorded.',
-  interrupted: 'The response ended before it was complete.',
-  truncated: 'This body was forwarded whole, but only its first 2 MB are kept here.',
-  exchanges: 'Exchanges',
-  filterPlaceholder: 'Filter by method, path or status',
-  filterLabel: 'Filter exchanges',
-  saveSelected: 'Save selected to folder',
-  clear: 'Clear',
-  emptyTitle: 'No calls captured yet',
-  listLabel: 'Captured exchanges',
-}
+import english from '../../../../locales/en/capture.json'
+import { messages } from './i18n/core'
+import { formatList } from './i18n/format'
+
+const text = messages('capture', english, (t) => ({
+  captureAction: {
+    withheld: (headers) => t('captureAction.withheld', { headers: formatList(headers, 'unit') }),
+  },
+}))
+
+export const CAPTURE_TEXT = text.capture
+export const CAPTURE_ACTION_TEXT = text.captureAction

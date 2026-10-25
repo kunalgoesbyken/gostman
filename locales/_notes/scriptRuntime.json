@@ -1,0 +1,4 @@
+{
+  "scriptRuntime.consoleTruncated": "Last line of a script's console output when it printed more lines than are kept.",
+  "scriptRuntime.notStarted": "Error shown when the script sandbox fails to start."
+}

@@ -1,3 +1,5 @@
+import { JSON_FORMAT_TEXT as TEXT } from './jsonFormatText'
+
 const INDENT = '  '
 const MAX_DEPTH = 512
 const REFERENCE_OPEN = '{{'
@@ -8,24 +10,6 @@ const SIMPLE_ESCAPES = new Set(['"', '\\', '/', 'b', 'f', 'n', 'r', 't'])
 const HEX_DIGIT = /^[0-9a-fA-F]$/
 const FIRST_CONTROL = ' '
 
-const TEXT = {
-  expectedValue: 'Expected a value',
-  unexpectedEnd: 'The JSON ends too early',
-  unexpected: (character) => `Unexpected ${character}`,
-  expectedKey: 'Expected a property name in double quotes',
-  expectedColon: "Expected ':' after the property name",
-  expectedObjectEnd: "Expected ',' or '}' after the property value",
-  expectedArrayEnd: "Expected ',' or ']' after the item",
-  trailingComma: (closer) => `Remove the comma before '${closer}'`,
-  unclosedString: 'This string has no closing quote',
-  lineBreakInString: 'Line breaks inside a string must be written as \\n',
-  controlInString: 'Control characters inside a string must be escaped',
-  badEscape: 'Unknown escape sequence in a string',
-  badNumber: 'This number is not valid JSON',
-  unclosedReference: 'This {{variable}} has no closing }}',
-  extraText: 'Unexpected text after the JSON value',
-  tooDeep: 'The JSON is nested too deeply to format',
-}
 
 class JsonProblem extends Error {
   constructor(offset, message) {
@@ -36,7 +20,7 @@ class JsonProblem extends Error {
 
 const isDigit = (character) => character >= '0' && character <= '9'
 
-const describe = (character) => (character === undefined ? 'end of text' : JSON.stringify(character))
+const describe = (character) => (character === undefined ? TEXT.endOfText : JSON.stringify(character))
 
 function createReader(text) {
   let at = 0

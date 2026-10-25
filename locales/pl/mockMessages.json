@@ -1,0 +1,12 @@
+{
+  "route": {
+    "graphqlNotServed": "Żądania GraphQL nie są udostępniane.",
+    "grpcNotServed": "Żądania gRPC nie są udostępniane.",
+    "mcpNotServed": "Żądania MCP nie są udostępniane.",
+    "webSocketNotServed": "Żądania WebSocket nie są udostępniane.",
+    "noExample": "Zapisz odpowiedź jako przykład, aby udostępnić tę trasę.",
+    "disabled": "Ta trasa jest wyłączona.",
+    "exampleBodyInvalid": "treść przykładu „{{name}}” nie jest poprawnym base64",
+    "conflict": "{{method}} {{path}} jest już udostępniane przez „{{owner}}”."
+  }
+}

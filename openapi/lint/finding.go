@@ -1,5 +1,7 @@
 package lint
 
+import "github.com/kunalgoesbyken/gostman/locales"
+
 type Severity string
 
 const (
@@ -25,6 +27,8 @@ type Finding struct {
 	Message   string   `json:"message"`
 	Path      string   `json:"path"`
 	Operation string   `json:"operation,omitempty"`
+
+	Localized *locales.Message `json:"localized,omitempty"`
 }
 
 type Counts struct {

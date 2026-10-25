@@ -1,0 +1,41 @@
+{
+  "realtime": {
+    "targets": {
+      "topic": "主题",
+      "event": "事件"
+    },
+    "browser": {
+      "closed": "连接已关闭（代码 {{code}}）",
+      "closedWithReason": "连接已关闭（代码 {{code}}：{{reason}}）",
+      "notConnected": "无法连接（代码 {{code}}）",
+      "notConnectedWithReason": "无法连接（代码 {{code}}：{{reason}}）"
+    },
+    "graphql": {
+      "subscribing": "连接已确认。正在订阅。",
+      "complete": "订阅已完成"
+    },
+    "socketIo": {
+      "joined": "已加入命名空间 {{namespace}}",
+      "left": "服务器已离开该命名空间",
+      "closed": "服务器已关闭 Socket.IO 会话",
+      "refused": "服务器拒绝了连接",
+      "binary": "不会解码二进制 Socket.IO 数据包。",
+      "noEvent": "请输入要发出的事件名称。",
+      "ack": "ack {{id}}"
+    },
+    "mqtt": {
+      "connected": "已连接到代理",
+      "refusedVersion": "代理拒绝了连接：代理不支持 MQTT 3.1.1",
+      "refusedIdentifier": "代理拒绝了连接：客户端 ID 被拒绝",
+      "refusedUnavailable": "代理拒绝了连接：代理不可用",
+      "refusedCredentials": "代理拒绝了连接：用户名或密码错误",
+      "refusedUnauthorized": "代理拒绝了连接：客户端未获授权",
+      "refusedOther": "代理拒绝了连接：代码 {{code}}",
+      "subscribed": "已订阅 {{filter}}",
+      "subscribeRefused": "代理拒绝了对 {{filter}} 的订阅",
+      "notBinary": "应为二进制 MQTT 数据，收到的是文本。",
+      "noTopic": "请输入要发布到的主题。",
+      "noFilter": "请输入要订阅的主题过滤器。"
+    }
+  }
+}

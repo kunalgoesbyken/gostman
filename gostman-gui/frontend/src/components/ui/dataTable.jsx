@@ -1,6 +1,7 @@
 import { cn } from "../../lib/utils"
 
-const CELL = "truncate px-3 py-1.5 text-left"
+const CELL = "truncate px-3 py-1.5 text-start"
+const HEADER_CELL = "whitespace-normal px-3 py-1.5 text-start align-bottom [overflow-wrap:anywhere]"
 
 const textOf = (column, row) => (column.text ? column.text(row) : row[column.key])
 
@@ -13,7 +14,7 @@ export function DataTable({ columns, rows }) {
             <th
               key={column.header}
               title={column.header}
-              className={cn(CELL, "text-2xs font-medium uppercase tracking-wide text-muted-foreground", column.width)}
+              className={cn(HEADER_CELL, "text-2xs font-medium uppercase tracking-wide text-muted-foreground", column.width)}
             >
               {column.header}
             </th>

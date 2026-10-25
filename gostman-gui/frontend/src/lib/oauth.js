@@ -7,10 +7,10 @@ export const GRANT_AUTHORIZATION_CODE = 'authorization_code'
 export const GRANT_DEVICE_CODE = 'device_code'
 
 export const GRANTS = [
-  { value: GRANT_CLIENT_CREDENTIALS, label: OAUTH_TEXT.grants.clientCredentials },
-  { value: GRANT_PASSWORD, label: OAUTH_TEXT.grants.password },
-  { value: GRANT_AUTHORIZATION_CODE, label: OAUTH_TEXT.grants.authorizationCode },
-  { value: GRANT_DEVICE_CODE, label: OAUTH_TEXT.grants.deviceCode },
+  { value: GRANT_CLIENT_CREDENTIALS, get label() { return OAUTH_TEXT.grants.clientCredentials } },
+  { value: GRANT_PASSWORD, get label() { return OAUTH_TEXT.grants.password } },
+  { value: GRANT_AUTHORIZATION_CODE, get label() { return OAUTH_TEXT.grants.authorizationCode } },
+  { value: GRANT_DEVICE_CODE, get label() { return OAUTH_TEXT.grants.deviceCode } },
 ]
 
 const EXPIRY_MARGIN_MS = 30_000

@@ -1,0 +1,12 @@
+{
+  "exampleActions": {
+    "saveFailure": "Nie udało się zapisać przykładu",
+    "changeFailure": "Nie udało się zmienić przykładu",
+    "saved": "Przykład „{{example}}” został zapisany z żądaniem „{{request}}”.",
+    "saveTitle": "Zapisz jako przykład",
+    "nameLabel": "Nazwa przykładu",
+    "renameTitle": "Zmień nazwę przykładu",
+    "deleteTitle": "Usuń przykład",
+    "deleteMessage": "Usunąć przykład „{{name}}”? Tej operacji nie można cofnąć."
+  }
+}

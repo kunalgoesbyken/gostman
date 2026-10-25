@@ -9,7 +9,7 @@ import { Textarea } from "./ui/textarea"
 import { SkeletonLines } from "./ui/skeleton"
 import { GraphQLBuilder } from "./GraphQLBuilder"
 import { isPlainObject } from "../lib/dataUtils"
-import { BUILDER_TEXT } from "../lib/graphqlBuilder"
+import { BUILDER_TEXT } from "../lib/graphqlBuilderText"
 import { GRAPHQL_METHOD } from "../lib/graphqlSchema"
 import { GRAPHQL_TEXT as TEXT } from "../lib/graphqlText"
 import { parseVariableMap, substitutePlaceholders } from "../lib/placeholders"
@@ -61,9 +61,9 @@ function ErrorLine({ children }) {
 }
 
 function SchemaMembers({ members }) {
-  if (members.length === 0) return <p className="pb-2 pl-5 text-xs text-muted-foreground">{TEXT.noFields}</p>
+  if (members.length === 0) return <p className="pb-2 ps-5 text-xs text-muted-foreground">{TEXT.noFields}</p>
   return (
-    <ul className="flex flex-col gap-1.5 pb-2 pl-5">
+    <ul className="flex flex-col gap-1.5 pb-2 ps-5">
       {members.map((member) => (
         <li key={member.name}>
           <code className="font-mono text-xs text-foreground">{member.signature}</code>
@@ -84,9 +84,9 @@ function SchemaType({ type, hits, isOpen, onToggle }) {
         onClick={onToggle}
         aria-expanded={isOpen}
         title={type.description ? `${type.name}\n${type.description}` : type.name}
-        className="flex h-7 w-full items-center gap-1.5 rounded px-1 text-left text-xs hover:bg-accent"
+        className="flex h-7 w-full items-center gap-1.5 rounded px-1 text-start text-xs hover:bg-accent"
       >
-        <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground rtl:-scale-x-100" />
         <span className="min-w-0 flex-1 truncate font-mono text-foreground">{type.name}</span>
         <span className="shrink-0 text-2xs text-muted-foreground">{type.label}</span>
       </button>
@@ -167,15 +167,16 @@ function VariablesSection({ variables, problem, onChange }) {
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
-        className="flex h-10 shrink-0 items-center gap-1.5 border-t border-border px-3 text-left"
+        className="flex h-10 shrink-0 items-center gap-1.5 border-t border-border px-3 text-start"
       >
-        <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground rtl:-scale-x-100" />
         <SectionLabel>{TEXT.variables}</SectionLabel>
-        {problem && <span className="min-w-0 truncate pl-2 text-xs text-destructive" title={problem}>{problem}</span>}
+        {problem && <span className="min-w-0 truncate ps-2 text-xs text-destructive" title={problem}>{problem}</span>}
       </button>
       {isOpen && (
         <div className="min-h-11 flex-1 px-3 pb-3 pt-1">
           <Textarea
+            dir="ltr"
             value={variables}
             onChange={(event) => onChange(event.target.value)}
             placeholder={TEXT.variablesPlaceholder}
@@ -253,6 +254,7 @@ export function GraphQLPanel({ query, variables, environment, schema, method, on
         </Toolbar>
         <div className="flex min-h-[4.25rem] flex-[2] flex-col gap-1 p-3">
           <Textarea
+            dir="ltr"
             value={query}
             onChange={(event) => handleQueryChange(event.target.value)}
             placeholder={TEXT.queryPlaceholder}

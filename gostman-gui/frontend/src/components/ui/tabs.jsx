@@ -1,4 +1,5 @@
 import * as React from "react"
+import { inlineStart } from "../../hooks/direction"
 import { ChevronDown } from "lucide-react"
 import { ContextMenu } from "./ContextMenu"
 import { ORIENTATION, moveFocus } from "../../lib/rovingFocus"
@@ -142,8 +143,8 @@ function OverflowTabsList({ className, label, items, moreLabel, moreHint }) {
   const isMarked = hidden.some((item) => item.marked)
 
   const toggleMenu = (event) => {
-    const { left, bottom } = event.currentTarget.getBoundingClientRect()
-    setMenu(menu ? null : { x: left, y: bottom })
+    const rect = event.currentTarget.getBoundingClientRect()
+    setMenu(menu ? null : { x: inlineStart(rect), y: rect.bottom })
   }
 
   const pick = (tab) => {

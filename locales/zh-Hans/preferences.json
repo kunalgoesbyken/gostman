@@ -1,0 +1,163 @@
+{
+  "preferences": {
+    "title": "偏好设置",
+    "sectionsLabel": "分区",
+    "sections": {
+      "appearance": "外观",
+      "theme": "主题",
+      "fonts": "字体",
+      "editor": "编辑器",
+      "requests": "请求",
+      "language": "语言",
+      "ai": "AI",
+      "privacy": "隐私",
+      "data": "数据"
+    },
+    "fields": {
+      "theme": "主题",
+      "contrast": "对比度",
+      "accent": "强调色",
+      "textScale": "文字大小",
+      "interfaceFont": "界面字体",
+      "codeFont": "代码字体",
+      "density": "密度",
+      "responseLayout": "响应面板",
+      "systemTitleBar": "使用系统标题栏",
+      "editorFontSize": "编辑器字号",
+      "wrapLines": "长行自动换行",
+      "requestTimeout": "默认超时",
+      "confirmCloseTab": "关闭标签页时，若有未保存的更改，先询问",
+      "language": "语言"
+    },
+    "themes": {
+      "system": "跟随系统",
+      "light": "浅色",
+      "dark": "深色"
+    },
+    "contrasts": {
+      "system": "跟随系统",
+      "standard": "标准",
+      "more": "更高"
+    },
+    "accents": {
+      "cyan": "青色",
+      "blue": "蓝色",
+      "violet": "紫罗兰",
+      "pink": "粉色",
+      "graphite": "石墨灰"
+    },
+    "densities": {
+      "comfortable": "舒适",
+      "compact": "紧凑"
+    },
+    "layouts": {
+      "below": "下方",
+      "right": "右侧"
+    },
+    "seconds": "秒",
+    "pixels": "px",
+    "contrastHint": "“更高”会使用更醒目的边框和次要文字。",
+    "systemTitleBarHint": "显示桌面系统的标题栏和窗口按钮，而不是 Gostman 自带的。重启后生效。",
+    "systemTitleBarRestart": "重启 Gostman 以应用此更改。",
+    "systemTitleBarFailed": "无法保存该设置。",
+    "defaultFont": "默认",
+    "interfaceFontHint": "此设备上安装的任意字体。",
+    "codeFontHint": "用于编辑器、地址栏和其他代码。",
+    "fontMissing": "此设备上找不到该字体，因此使用默认字体。",
+    "suggestFonts": "建议已安装的字体",
+    "fontsSuggested": "输入字体名称时会提示已安装的字体。",
+    "fontsDenied": "无法读取已安装的字体。",
+    "shortcuts": "键盘快捷键",
+    "reset": "恢复默认设置",
+    "close": "完成",
+    "statusLabel": "偏好设置",
+    "commandDescription": "主题、颜色、字体、文字大小、编辑器、布局和默认值",
+    "methods": {
+      "title": "方法颜色",
+      "hint": "每种请求方法在侧边栏、标签页和列表中的颜色。添加背景色后，方法会显示为徽章。",
+      "method": "方法",
+      "resetMode": {
+        "light": "重置浅色方法颜色",
+        "dark": "重置深色方法颜色"
+      }
+    },
+    "theme": {
+      "palette": "配色",
+      "paletteHint": "每种配色都有浅色和深色两个版本。你自定义的颜色会叠加在其上。",
+      "palettes": {
+        "default": "默认",
+        "neutral": "中性",
+        "slate": "岩灰",
+        "paper": "纸张",
+        "moss": "苔绿",
+        "dusk": "暮色",
+        "ocean": "海洋",
+        "ink": "墨色"
+      },
+      "colors": "自定义颜色",
+      "colorsHint": "设置窗口各部分的背景色和文字颜色。只会保留你更改过的颜色。",
+      "editing": "颜色适用于",
+      "previewHint": {
+        "light": "窗口目前是深色。将主题设为“浅色”，即可看到这些颜色的实际效果。",
+        "dark": "窗口目前是浅色。将主题设为“深色”，即可看到这些颜色的实际效果。"
+      },
+      "columns": {
+        "surface": "部分",
+        "background": "背景",
+        "foreground": "文字",
+        "contrast": "对比度",
+        "reset": "重置"
+      },
+      "surfaces": {
+        "window": "窗口",
+        "sidebar": "侧边栏",
+        "tabs": "标签页和地址栏",
+        "request": "请求编辑器",
+        "body": "请求体编辑器",
+        "script": "脚本编辑器",
+        "response": "响应",
+        "dialog": "对话框",
+        "menu": "菜单和弹出层"
+      },
+      "surfaceHints": {
+        "window": "标题栏、状态栏，以及此处未列出的所有部分。",
+        "body": "也适用于 gRPC 消息、MCP 参数和已保存的示例。",
+        "script": "预请求脚本和响应后脚本。",
+        "menu": "右键菜单、列表和命令面板。"
+      },
+      "roles": {
+        "background": "背景",
+        "foreground": "文字"
+      },
+      "sample": "文字",
+      "resetMode": {
+        "light": "重置浅色颜色",
+        "dark": "重置深色颜色"
+      },
+      "share": "分享主题",
+      "shareHint": "主题包含配色、强调色，以及两种模式下你自定义的各部分颜色和方法颜色。",
+      "copy": "复制主题",
+      "copied": "主题已复制到剪贴板。",
+      "copyFailed": "无法将主题复制到剪贴板。",
+      "import": "导入主题",
+      "importLabel": "要导入的主题",
+      "importPlaceholder": "粘贴从 Gostman 复制的主题",
+      "apply": "应用",
+      "cancel": "取消",
+      "imported": "已应用主题。",
+      "invalid": "这不是 Gostman 主题，或者其中含有未知的部分，或颜色不是 #rrggbb 格式。",
+      "colorLabel": "{{surface}}{{role}}颜色",
+      "hexLabel": "{{surface}}{{role}}十六进制值",
+      "ratio": "{{ratio}}:1",
+      "lowContrast": "文字可能难以阅读。建议至少达到 {{minimum}}:1。",
+      "resetRow": "重置{{name}}"
+    },
+    "timeoutHint_other": "适用于未设置自身超时的请求。0 表示使用内置上限 {{count}} 秒。",
+    "languageSystem": "与系统一致（{{language}}）",
+    "languageSwitchHint": "Gostman 会重新加载以显示新语言。已打开的标签页和未保存的草稿会保留；标签页中显示的响应会被清除。",
+    "languageSwitch": "切换语言",
+    "languageHelp": "没有你的语言，或发现翻译有误？{{link}}。",
+    "languageHelpLink": "在 GitHub 上告诉我们",
+    "accentAdjusted": "在浅色模式下显示为{{light}}，在深色模式下显示为{{dark}}，以保证此颜色的文字清晰可读。"
+  }
+}

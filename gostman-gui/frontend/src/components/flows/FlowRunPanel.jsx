@@ -15,7 +15,7 @@ const STATUS_TONES = { passed: "text-success", failed: "text-destructive", runni
 
 function Writes({ writes }) {
   return (
-    <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 pb-1.5 pl-[1.375rem] font-mono text-2xs">
+    <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 pb-1.5 ps-[1.375rem] font-mono text-2xs">
       {Object.entries(writes).map(([name, value]) => (
         <div key={name} className="contents">
           <dt className="text-muted-foreground">{name}</dt>
@@ -31,7 +31,7 @@ const StepEntry = memo(function StepEntry({ entry, onSelectStep }) {
   const isFailed = entry.event.status === EVENT_FAILED
   return (
     <li className="border-b border-border">
-      <button type="button" onClick={() => onSelectStep(entry.step)} className="flex min-h-9 w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-accent">
+      <button type="button" onClick={() => onSelectStep(entry.step)} className="flex min-h-9 w-full items-center gap-2 px-3 py-1.5 text-start hover:bg-accent">
         <Icon aria-hidden="true" className={cn("h-3.5 w-3.5 shrink-0", isFailed ? "text-destructive" : "text-muted-foreground")} />
         <span className="shrink-0 text-xs text-foreground">{entry.title}</span>
         <span className={cn("min-w-0 flex-1 truncate text-2xs", isFailed ? "text-destructive" : "text-muted-foreground")} title={entry.event.summary}>{entry.event.summary}</span>

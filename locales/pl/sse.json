@@ -1,0 +1,49 @@
+{
+  "sse": {
+    "allTypes": "Wszystkie typy zdarzeń",
+    "searchLabel": "Szukaj zdarzeń",
+    "searchPlaceholder": "Szukaj zdarzeń",
+    "pause": "Wstrzymaj autoprzewijanie",
+    "resume": "Wznów autoprzewijanie",
+    "clear": "Wyczyść zdarzenia",
+    "copyAll": "Kopiuj pokazane zdarzenia",
+    "copied": "Skopiowano",
+    "copyEvent": "Kopiuj dane zdarzenia",
+    "noEvents": "Brak zdarzeń",
+    "waiting": "Oczekiwanie, aż serwer wyśle zdarzenie.",
+    "noMatches": "Żadne zdarzenie nie pasuje",
+    "noMatchesHint": "Zmień filtr typu lub wyszukiwanie, aby zobaczyć więcej.",
+    "clipped": "To zdarzenie było zbyt długie, więc resztę pominięto.",
+    "shown": "Pokazano {{shown}} z {{total}}",
+    "received": "Odebrano: {{count}}",
+    "dropped_one": "Najstarsze zdarzenie nie jest już wyświetlane. Pobrana odpowiedź nadal zawiera wszystkie zdarzenia.",
+    "dropped_few": "{{count}} najstarsze zdarzenia nie są już wyświetlane. Pobrana odpowiedź nadal zawiera wszystkie zdarzenia.",
+    "dropped_many": "{{count}} najstarszych zdarzeń nie jest już wyświetlanych. Pobrana odpowiedź nadal zawiera wszystkie zdarzenia.",
+    "dropped_other": "{{count}} najstarszego zdarzenia nie jest już wyświetlane. Pobrana odpowiedź nadal zawiera wszystkie zdarzenia.",
+    "reconnecting": "Ponowne łączenie za {{seconds}} s (próba {{attempt}})"
+  },
+  "sseSettings": {
+    "stream": "Strumień jako server-sent events",
+    "reconnect": "Połącz ponownie, gdy serwer zamknie strumień",
+    "maxEvents": "Maks. zdarzeń",
+    "maxEventsPlaceholder": "Domyślnie 10000",
+    "maxSeconds": "Maks. sekund",
+    "maxSecondsPlaceholder": "Domyślnie 300"
+  },
+  "status": {
+    "connecting": "Łączenie",
+    "open": "Strumieniowanie",
+    "reconnecting": "Ponowne łączenie",
+    "ended": "Zakończono"
+  },
+  "streamEnd": {
+    "closed": "Serwer zamknął strumień.",
+    "cancelled": "Strumień został zatrzymany.",
+    "maxEvents": "Zatrzymano na limicie zdarzeń. Zwiększ go w Ustawieniach.",
+    "maxBytes": "Zatrzymano na limicie rozmiaru.",
+    "maxDuration": "Zatrzymano na limicie czasu. Zwiększ go w Ustawieniach.",
+    "failed": "Strumień zakończył się błędem.",
+    "failedWith": "Strumień zakończył się błędem. {{detail}}",
+    "hostedLimit": "Zatrzymano na limicie czasu. Aplikacja internetowa strumieniuje najdłużej przez {{seconds}} s; aplikacja desktopowa może strumieniować dłużej."
+  }
+}

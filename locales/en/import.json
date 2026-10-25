@@ -1,0 +1,174 @@
+{
+  "importFormats": {
+    "auto": "Detect automatically",
+    "http": ".http files"
+  },
+  "formatLabels": {
+    "insomnia": "Insomnia export",
+    "har": "HAR capture",
+    "wsdl": "WSDL service",
+    "bruno": "Bruno collection",
+    "postman": "Postman file",
+    "openapi": "OpenAPI spec",
+    "gostman": "Gostman export",
+    "http": ".http file"
+  },
+  "import": {
+    "chooseFiles": "Choose files",
+    "importButton": "Import",
+    "chooseFolder": "Choose folder",
+    "dropHint": "Drop files, a folder or a .zip here, or paste content below. Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI and Swagger, .http files (REST Client, JetBrains HTTP Client), Gostman exports and share links.",
+    "formatLabel": "Format",
+    "pastePlaceholder": "Paste a collection, a spec, a capture or a share link",
+    "pasteLabel": "Content to import",
+    "pastedName": "pasted",
+    "reading": "Reading the content",
+    "skipStatic": "Leave out images, fonts, styles and scripts",
+    "skippedHeading": "Left out",
+    "binaryFailure": "{{name}} is not a text file.",
+    "tooMany": "There are more than {{limit}} files.",
+    "tooLarge": "{{name}} is {{size}}. Files are limited to {{limit}}.",
+    "totalTooLarge": "The files together are larger than {{limit}}.",
+    "noFiles": "No importable files were found.",
+    "filesSelected_one": "{{count}} file selected",
+    "filesSelected_other": "{{count}} files selected",
+    "clearFiles": "Clear",
+    "sourceLine": "{{source}}: {{label}}, {{counts}}",
+    "totalLine": "In total: {{counts}}"
+  },
+  "export": {
+    "includeSecrets": "Include credentials",
+    "secretsNote": "Passwords, tokens and secret-named headers or variables are replaced with {{placeholder}} placeholders.",
+    "secretsWarning": "Credentials are written into the file in plain text.",
+    "variableSecretsNote": "Variables named like a password, token or key are exported without their values.",
+    "saveFile": "Save file",
+    "formatLabel": "Export format",
+    "previewLabel": "Export preview",
+    "summaryNamed": "{{description}}. \"{{name}}\" has {{counts}}.",
+    "summaryAll": "{{description}}. You have {{counts}}.",
+    "collectionField": "Collection",
+    "formatField": "Format",
+    "allCollections": "All collections",
+    "failed": "Could not build the export: {{reason}}",
+    "adaptFailed": "Scripts and checks are exported as written, because they could not be adapted: {{reason}}",
+    "reportLabel": "What changed for the target tool",
+    "checkHeading_one": "{{count}} thing to check before using this in {{tool}}",
+    "checkHeading_other": "{{count}} things to check before using this in {{tool}}",
+    "changedHeading": "What changed for {{tool}}",
+    "formats": {
+      "gostman": {
+        "label": "Gostman",
+        "description": "Full backup: requests, folders, every environment, the global variables and the collection variables, without secret values"
+      },
+      "postman": {
+        "label": "Postman",
+        "description": "Collection v2.1, which Insomnia also imports. Scripts and checks are adapted to run in both, and the variables in use, except secret ones, become collection variables"
+      },
+      "openapiJson": {
+        "label": "OpenAPI JSON",
+        "description": "OpenAPI 3.0 description of the HTTP requests"
+      },
+      "openapiYaml": {
+        "label": "OpenAPI YAML",
+        "description": "OpenAPI 3.0 description of the HTTP requests"
+      },
+      "markdown": {
+        "label": "Markdown",
+        "description": "Readable API documentation"
+      },
+      "html": {
+        "label": "HTML docs",
+        "description": "One self-contained page to publish or print. Credentials are left out and variables stay as {{example}}"
+      },
+      "bruno": {
+        "label": "Bruno",
+        "description": "A folder of .bru files with environments, saved as a .zip. Scripts and checks are adapted to run in Bruno"
+      },
+      "curl": {
+        "label": "curl script",
+        "description": "One curl command per request. Credentials become environment variable placeholders"
+      },
+      "har": {
+        "label": "HAR",
+        "description": "HTTP Archive 1.2 with the requests and no responses"
+      },
+      "http": {
+        "label": ".http files",
+        "description": "Requests for VS Code REST Client and JetBrains HTTP Client, one file per folder, with http-client.env.json environments"
+      }
+    },
+    "docs": {
+      "titlePlaceholder": "Title (default: API documentation)",
+      "titleLabel": "Documentation title",
+      "includeExamples": "Include example responses",
+      "playground": "Include a Try it panel"
+    }
+  },
+  "transfer": {
+    "title": "Import and export",
+    "tabsLabel": "Import or export",
+    "tabs": {
+      "import": "Import",
+      "export": "Export",
+      "share": "Share"
+    }
+  },
+  "importCount": {
+    "collection_one": "{{count}} collection",
+    "collection_other": "{{count}} collections",
+    "folder_one": "{{count}} folder",
+    "folder_other": "{{count}} folders",
+    "request_one": "{{count}} request",
+    "request_other": "{{count}} requests",
+    "flow_one": "{{count}} flow",
+    "flow_other": "{{count}} flows",
+    "environment_one": "{{count}} environment",
+    "environment_other": "{{count}} environments",
+    "global_one": "{{count}} global environment",
+    "global_other": "{{count}} global environments",
+    "variable_one": "{{count}} collection variable",
+    "variable_other": "{{count}} collection variables",
+    "holding": "{{collections}} with {{inside}}",
+    "settingsFor": "settings for {{owners}}"
+  },
+  "importResult": {
+    "quoted": "\"{{name}}\"",
+    "joinedEnvironment": "An environment named \"{{name}}\" already existed, so the imported variables were added to it. Variables it already had kept their values.",
+    "scopedEnvironments_one": "Environments from {{names}} apply only to its requests. To use an environment everywhere, set Available in to Every collection under Environments.",
+    "scopedEnvironments_other": "Environments from {{names}} apply only to their requests. To use an environment everywhere, set Available in to Every collection under Environments.",
+    "scopedVariables_one": "Collection variables from {{names}} apply only to its requests; an environment variable with the same name still wins.",
+    "scopedVariables_other": "Collection variables from {{names}} apply only to their requests; an environment variable with the same name still wins.",
+    "importedCollectionName": "Imported collection",
+    "settingsAttached_one": "The settings for all collections in this import were added to the collection settings of {{names}}, so they apply only to its requests. Your own settings for all collections were not changed.",
+    "settingsAttached_other": "The settings for all collections in this import were added to the collection settings of {{names}}, so they apply only to their requests. Your own settings for all collections were not changed.",
+    "settingsWrapped": "The settings for all collections in this import were put on a new collection, \"{{name}}\", which holds everything imported, so they apply only to those requests. Your own settings for all collections were not changed."
+  },
+  "fileReads": {
+    "heading_one": "The file it reads from this computer:",
+    "heading_other": "The {{count}} files it reads from this computer:",
+    "more": "and {{count}} more"
+  },
+  "activeImport": {
+    "kindLabels": {
+      "scripts": "scripts",
+      "oauth": "OAuth 2.0 settings",
+      "commands": "commands that start local MCP servers",
+      "files": "file reads that send files from this computer"
+    },
+    "kindNouns": {
+      "scripts": "scripts",
+      "oauth": "OAuth settings",
+      "commands": "commands",
+      "files": "file reads"
+    },
+    "titleOne": "Import the {{kind}}?",
+    "titleMany": "Review before importing",
+    "withOne": "Import with {{kind}}",
+    "withMany": "Import everything",
+    "withoutOne": "Import without {{kind}}",
+    "withoutMany": "Import without them",
+    "leftOut": "The {{kinds}} were left out.",
+    "message_one": "{{count}} item in this import carries {{kinds}}. These run when a request is sent and can read your variables, so only import them from a source you trust. Without them, everything else is still imported.",
+    "message_other": "{{count}} items in this import carry {{kinds}}. These run when a request is sent and can read your variables, so only import them from a source you trust. Without them, everything else is still imported."
+  }
+}

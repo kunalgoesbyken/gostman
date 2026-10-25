@@ -1,0 +1,155 @@
+{
+  "mcp": {
+    "media": {
+      "heading": "Images et audio du résultat",
+      "image": "Image {{number}} du résultat",
+      "audio": "Audio {{number}} du résultat"
+    },
+    "server": "Serveur",
+    "argumentsLabel": "Arguments",
+    "notLoaded": "Non chargé",
+    "load": "Charger",
+    "reload": "Recharger",
+    "signIn": "Se connecter",
+    "signingIn": "Connexion…",
+    "signInHint": "Découvre comment ce serveur veut que vous vous connectiez, enregistre Gostman auprès de son serveur d’autorisation si nécessaire, vous connecte dans le navigateur et conserve le jeton dans l’onglet Auth",
+    "serverProtocol": "MCP {{version}}",
+    "serverProtocolLegacy": "MCP {{version}} (négociation initialize)",
+    "instructions": "Instructions",
+    "instructionsHint": "Affiche les instructions que ce serveur donne aux modèles qui l’utilisent",
+    "operation": "Opération",
+    "operations": {
+      "toolsCall": "Appeler un outil",
+      "toolsList": "Lister les outils",
+      "resourcesRead": "Lire une ressource",
+      "resourcesList": "Lister les ressources",
+      "resourceTemplatesList": "Lister les modèles de ressources",
+      "promptsGet": "Obtenir un prompt",
+      "promptsList": "Lister les prompts"
+    },
+    "itemLabels": {
+      "tool": "Outil MCP",
+      "resource": "URI de la ressource",
+      "prompt": "Prompt MCP"
+    },
+    "choose": {
+      "tool": "Choisir un outil",
+      "prompt": "Choisir un prompt"
+    },
+    "noInput": "Cette opération ne prend aucune entrée. Envoyer liste tout ce que le serveur renvoie, sur toutes les pages.",
+    "readHint": "Envoyer lit la ressource à cet URI. Choisissez une ressource listée, ou remplissez un modèle.",
+    "schema": "Schéma",
+    "schemaHints": {
+      "tool": "Affiche le JSON Schema des arguments de l’outil à côté de l’éditeur",
+      "prompt": "Affiche les arguments du prompt à côté de l’éditeur"
+    },
+    "schemaTitles": {
+      "tool": "Schéma d’entrée",
+      "prompt": "Arguments du prompt"
+    },
+    "closeSchema": "Fermer",
+    "noArguments": "Ce prompt ne prend aucun argument.",
+    "example": "Utiliser un exemple",
+    "exampleHint": "Remplace les arguments par un exemple construit à partir du schéma",
+    "promptArgumentRequired": "{{name}} (obligatoire)",
+    "promptArgumentDescribed": "{{label}} : {{description}}",
+    "catalogHints": {
+      "remote": "Charge les outils, ressources et prompts du serveur MCP à cette URL. Les en-têtes et l’authentification de cette requête sont envoyés à chaque appel. Dans l’application de bureau, écrivez stdio: et une commande dans la barre d’adresse pour lancer plutôt un serveur local, par exemple {{example}}.",
+      "local": "Charger lance cette commande sur cet ordinateur et lit ce qu’elle propose ; chaque appel la relance. Les lignes de l’onglet En-têtes lui sont transmises comme variables d’environnement."
+    },
+    "empty": "Ce serveur ne liste ni outils, ni ressources, ni prompts.",
+    "checks": "Vérifications",
+    "checksHint": "Problèmes trouvés dans les définitions d’outils de ce serveur",
+    "noFindings": "Aucun problème trouvé dans les définitions d’outils.",
+    "findings": {
+      "missingDescription": "{{tool}} : aucune description. Un modèle choisit les outils d’après leurs descriptions : il risque de mal utiliser celui-ci.",
+      "shortDescription": "{{tool}} : la description « {{detail}} » est très courte. Indiquez ce que fait l’outil, quand l’utiliser et ce qu’il renvoie.",
+      "duplicateName": "{{tool}} : plusieurs outils portent ce nom, les appels ne peuvent donc pas les distinguer.",
+      "similarNames": "{{tool}} : presque identique à {{detail}}, ce qui facilite l’erreur de choix pour un modèle.",
+      "invalidName": "{{tool}} : le nom doit comporter de 1 à 128 caractères et n’utiliser que des lettres, des chiffres, _, - et .",
+      "invalidSchema": "{{tool}} : le schéma d’entrée est inutilisable : {{detail}}.",
+      "undocumentedParameters": "{{tool}} : paramètres sans description : {{detail}}.",
+      "unknownRequired": "{{tool}} : required liste des paramètres que le schéma ne définit pas : {{detail}}.",
+      "manyTools": "Ce serveur liste {{count}} outils. Les longues listes d’outils compliquent le choix du bon outil par un modèle, et certains clients n’en chargent qu’une partie.",
+      "rejected": "{{tool}} : exclu de la liste d’outils, comme l’exige la spécification, car {{detail}}.",
+      "listFailed": "{{method}} a échoué : {{detail}}"
+    },
+    "schemaProblems": {
+      "notObject": "ce n’est pas un objet JSON",
+      "rootType": "le type de premier niveau devrait être « object »",
+      "properties": "properties n’est pas un objet de schémas",
+      "property": "le schéma de {{name}} n’est pas un objet",
+      "type": "{{name}} a le type inconnu « {{type}} »",
+      "required": "required n’est pas une liste de noms"
+    },
+    "changes": {
+      "title": "Les outils de ce serveur ont changé depuis votre dernière acceptation.",
+      "added": "Nouveaux : {{names}}.",
+      "removed": "Supprimés : {{names}}.",
+      "descriptionChanged": "{{name}} : la description a changé.",
+      "schemaChanged": "{{name}} : le schéma d’entrée a changé.",
+      "definitionChanged": "{{name}} : la description ou le schéma d’entrée a changé.",
+      "before": "Avant",
+      "now": "Maintenant",
+      "noDescription": "(aucune)",
+      "advice": "Lisez les changements avant qu’un agent n’utilise ces outils. Une description modifiée peut contenir des instructions que le serveur ne vous avait pas montrées auparavant.",
+      "accept": "Accepter les changements",
+      "firstSeen": "Premier chargement de ce serveur : Gostman mémorise ses outils sur cet appareil et vous avertit lorsqu’ils changent."
+    },
+    "auth": {
+      "title": "Connexion",
+      "close": "Fermer",
+      "retry": "Réessayer",
+      "steps": {
+        "probe": "Interroger le serveur",
+        "challenge": "Lire le défi WWW-Authenticate",
+        "resource": "Trouver les métadonnées de la ressource protégée (RFC 9728)",
+        "server": "Trouver les métadonnées du serveur d’autorisation (RFC 8414 ou OpenID Connect)",
+        "registration": "Obtenir un ID client",
+        "browser": "Se connecter dans le navigateur",
+        "issuer": "Vérifier l’émetteur de la réponse (RFC 9207)",
+        "token": "Échanger le code contre un jeton",
+        "retry": "Appeler le serveur avec le jeton"
+      },
+      "outcomes": {
+        "ok": "Terminé",
+        "warning": "Avertissement",
+        "failed": "Échec",
+        "stopped": "Arrêté",
+        "running": "En cours"
+      },
+      "explanations": {
+        "localCommand": "Les serveurs locaux lancés avec stdio: lisent leurs identifiants dans leur environnement, pas via OAuth. Mettez plutôt le jeton dans une ligne de l’onglet En-têtes.",
+        "unreachable": "Gostman n’a pas pu joindre le serveur. Vérifiez l’URL, le réseau et les paramètres du proxy.",
+        "noResourceMetadata": "Le serveur a demandé une connexion sans paramètre resource_metadata : Gostman cherche donc les métadonnées aux adresses well-known.",
+        "answered": "Le serveur a répondu sans demander de connexion, par exemple parce que cette requête porte déjà un jeton valide. Gostman cherche tout de même les métadonnées OAuth pour que vous puissiez vous reconnecter.",
+        "notProtected": "Le serveur a répondu sans demander de connexion et ne publie aucune métadonnée OAuth : il n’a donc pas besoin de jeton.",
+        "resourceMetadataMissing": "Aucune métadonnée de ressource protégée n’a été trouvée aux adresses ci-dessous. Un serveur MCP qui utilise OAuth doit les publier, soit à l’adresse resource_metadata de sa réponse 401, soit à /.well-known/oauth-protected-resource.",
+        "resourceMetadataInvalid": "Les métadonnées de la ressource protégée ne désignent aucun serveur d’autorisation : Gostman ne sait donc pas où se connecter.",
+        "resourceMismatch": "La ressource nommée dans les métadonnées de la ressource protégée n’est pas l’URL de ce serveur. Les jetons émis pour cette ressource ne seraient pas acceptés ici (audience non concordante) : Gostman s’arrête donc. Réglez resource dans ce document sur l’URL du serveur, ou sur une URL par laquelle commence l’URL du serveur.",
+        "serverMetadataMissing": "Aucune des adresses well-known du serveur d’autorisation n’a renvoyé de métadonnées. Le serveur d’autorisation doit publier les métadonnées de serveur d’autorisation OAuth 2.0 ou un document de découverte OpenID Connect.",
+        "issuerMismatch": "L’émetteur des métadonnées du serveur d’autorisation diffère de l’adresse listée dans authorization_servers des métadonnées de la ressource protégée. La spécification exige qu’ils soient identiques, caractère pour caractère : les métadonnées ne sont donc pas utilisées. Faites correspondre les deux valeurs ; une barre oblique finale est une cause fréquente.",
+        "serverMetadataIncomplete": "Les métadonnées du serveur d’autorisation n’ont ni authorization_endpoint ni token_endpoint.",
+        "noPkce": "Les métadonnées du serveur d’autorisation ne listent pas S256 dans code_challenge_methods_supported, et les clients MCP ne doivent pas se connecter sans PKCE. Prenez en charge PKCE avec S256 sur le serveur d’autorisation et ajoutez S256 à cette liste.",
+        "insecureEndpoint": "Le point d’accès d’autorisation ou de jeton utilise HTTP simple sur un hôte distant. La spécification exige HTTPS pour ces points d’accès.",
+        "insufficientScope": "Le jeton est valide mais il lui manque une portée dont cette requête a besoin. Se reconnecter demande les portées que vous aviez plus celles que le serveur a nommées.",
+        "noRegistration": "Le serveur d’autorisation ne propose ni enregistrement dynamique de client ni documents de métadonnées d’ID client. Enregistrez vous-même un client auprès de lui, saisissez son ID client dans l’onglet Auth (OAuth 2.0) et reconnectez-vous.",
+        "registrationRefused": "Le serveur d’autorisation a refusé d’enregistrer Gostman. De nombreux fournisseurs d’identité désactivent l’enregistrement dynamique de client : enregistrez vous-même un client et saisissez son ID client dans l’onglet Auth.",
+        "serverChanged": "Le serveur d’autorisation n’est pas celui auquel appartient l’ID client enregistré : Gostman s’est donc enregistré de nouveau au lieu de le réutiliser.",
+        "browserFailed": "La connexion dans le navigateur n’a pas abouti.",
+        "issuerMissing": "Les métadonnées du serveur d’autorisation définissent authorization_response_iss_parameter_supported, mais la réponse n’avait pas de paramètre iss : elle a donc été rejetée pour empêcher une attaque par confusion. Ajoutez iss à la redirection vers Gostman, ou cessez d’annoncer sa prise en charge.",
+        "issuerWrong": "Le paramètre iss de la réponse n’est pas l’émetteur du serveur d’autorisation avec lequel Gostman s’est connecté : la réponse a donc été écartée pour empêcher une attaque par confusion. Envoyez l’émetteur exactement tel qu’il apparaît dans les métadonnées du serveur d’autorisation.",
+        "tokenFailed": "Le point d’accès de jeton n’a pas renvoyé de jeton d’accès. Vérifiez que l’ID client, l’adresse de redirection et le paramètre resource sont acceptés.",
+        "stillRejected": "Le serveur refuse toujours le jeton. Il attend peut-être une autre audience ou une autre portée : comparez la ressource et la portée ci-dessous avec ce que le serveur vérifie."
+      },
+      "attempts": "Requêtes"
+    },
+    "notifications": "Notifications ({{count}})",
+    "notificationTime": "{{milliseconds}} ms",
+    "progressOf": "{{progress}}/{{total}}",
+    "issuerDetail": "attendu « {{expected}} », reçu « {{received}} »"
+  },
+  "mcpOutput": {
+    "name": "Le résultat correspond au schéma de sortie de l’outil"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "builder": {
+    "rootLabel": "Operationstyp",
+    "rootNames": {
+      "query": "Query",
+      "mutation": "Mutation",
+      "subscription": "Subscription"
+    },
+    "title": "Builder",
+    "paneLabel": "Query-Builder",
+    "filterLabel": "Felder filtern",
+    "filterPlaceholder": "Felder filtern",
+    "expand": "Aufklappen",
+    "collapse": "Zuklappen",
+    "select": "{{name}} auswählen",
+    "include": "Das Argument {{name}} einbeziehen",
+    "viaFragment": "Über ein Fragment im Editor ausgewählt. Bearbeiten Sie es dort.",
+    "noSchemaTitle": "Kein Schema geladen",
+    "noSchemaDescription": "Laden Sie es, um eine Query aus den Feldern des Endpunkts zu bauen. Die Introspection-Query verwendet URL, Header und Auth dieser Anfrage.",
+    "fetch": "Schema laden",
+    "refresh": "Schema aktualisieren",
+    "loading": "Schema wird geladen",
+    "syntaxError": "Der Builder pausiert, solange der Editor einen Syntaxfehler hat: {{message}}",
+    "subscription": "Subscriptions streamen Ergebnisse über eine langlebige Verbindung. Schalten Sie in den Einstellungen „Als Server-Sent Events streamen“ ein, um sie von Servern zu lesen, die Subscriptions so liefern.",
+    "noRoot": "Dieses Schema hat keinen Root-Typ für diese Operation.",
+    "empty": "Nichts passt zum Filter."
+  }
+}

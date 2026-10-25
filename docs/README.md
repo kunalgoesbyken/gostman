@@ -11,6 +11,9 @@ Gostman is an API client for REST, GraphQL, gRPC and WebSocket that you, your CI
 - [Coming from Postman](coming-from-postman.md): import Postman collections, environments and globals, what happens to `pm.*` scripts, and the `gostman run` flags that match `newman run`.
 - [Coming from Bruno](coming-from-bruno.md): import a Bruno collection, what happens to its scripts, and the `gostman run` flags that match `bru run`.
 - [Coming from Insomnia](coming-from-insomnia.md): import an Insomnia export and what happens to its environments, template tags and scripts.
+- [Gostman and Postman compared](gostman-vs-postman.md): storage, accounts, protocols, CI, secrets, AI and price side by side, and where Postman is stronger.
+- [Gostman and Bruno compared](gostman-vs-bruno.md): two file-based clients compared on plans, protocols, CLI and agents, and where Bruno is stronger.
+- [Gostman and Insomnia compared](gostman-vs-insomnia.md): storage options, mocks, vaults, protocols and price side by side, and where Insomnia is stronger.
 - [Tutorial: test an API](tutorial-first-collection.md): build a collection with variables, chained requests and checks, then run it from the app and the command line.
 - [Tutorial: run your API tests in CI](tutorial-ci.md): run the collection on every pull request with secrets kept out of the files.
 
@@ -53,4 +56,5 @@ Gostman is an API client for REST, GraphQL, gRPC and WebSocket that you, your CI
 
 - [Guides by task](guides.md): migrate from Postman, mock a backend, record traffic, load test, publish docs and more.
 - [Troubleshooting](troubleshooting.md): common problems and their fixes.
+- [Translating Gostman](translating.md): request a language, help translate, and how the translation files work.
 - [Example collections](../examples/README.md): ready-to-run workspaces you can open or run.

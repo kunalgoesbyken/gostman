@@ -1,0 +1,10 @@
+{
+  "localCommand": {
+    "title": "¿Ejecutar un programa en este equipo?",
+    "intro": "Esta solicitud inicia un servidor MCP local con tu cuenta de usuario:",
+    "environmentIntro": "Con estas variables de entorno de la pestaña Encabezados:",
+    "warning": "Ejecútalo solo si sabes lo que hace este programa. Gostman vuelve a preguntar cuando cambia el comando o su entorno, o cuando se reinicia la app.",
+    "confirm": "Ejecutar",
+    "notApproved": "Esta solicitud inicia un programa en este equipo. Envíala una vez desde su propia pestaña, confirma el comando y vuelve a ejecutarla."
+  }
+}

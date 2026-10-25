@@ -4,10 +4,17 @@ const PROXY_SYSTEM = 'system'
 export const PROXY_NONE = 'none'
 export const PROXY_CUSTOM = 'custom'
 
+const proxyMode = (value, name) => ({
+  value,
+  get label() {
+    return NETWORK_TEXT.proxyModes[name]
+  },
+})
+
 export const PROXY_MODES = [
-  { value: PROXY_SYSTEM, label: NETWORK_TEXT.proxyModes.system },
-  { value: PROXY_NONE, label: NETWORK_TEXT.proxyModes.none },
-  { value: PROXY_CUSTOM, label: NETWORK_TEXT.proxyModes.custom },
+  proxyMode(PROXY_SYSTEM, 'system'),
+  proxyMode(PROXY_NONE, 'none'),
+  proxyMode(PROXY_CUSTOM, 'custom'),
 ]
 
 export const BLANK_CERTIFICATE = { host: '', certFile: '', keyFile: '', passphrase: '', passphraseSaved: false }

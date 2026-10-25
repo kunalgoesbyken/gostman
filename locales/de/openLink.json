@@ -1,0 +1,32 @@
+{
+  "openLink": {
+    "notAddress": "Dies ist keine Webadresse, die Gostman öffnen kann.",
+    "tooLong": "Diese Adresse ist zu lang.",
+    "credentials": "Adressen mit Benutzername oder Passwort sind nicht erlaubt.",
+    "scheme": "Nur https-Adressen sind erlaubt.",
+    "noHost": "Die Adresse hat keinen Hostnamen.",
+    "reachFailure": "Gostman konnte den Server, der diese Datei sendet, nicht erreichen. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+    "title": "Über einen Link öffnen",
+    "invalidTitle": "Dieser Link kann nicht geöffnet werden",
+    "intro": "Ein Link hat Gostman aufgefordert, eine Sammlung oder Spezifikation herunterzuladen. Es wird nichts heruntergeladen oder hinzugefügt, bis Sie „Herunterladen“ wählen, und nichts importiert, bis Sie „Importieren“ wählen.",
+    "trustNote": "Fahren Sie nur fort, wenn Sie der Person vertrauen, die Ihnen diesen Link geschickt hat.",
+    "hostLabel": "Von",
+    "addressLabel": "Adresse",
+    "cancel": "Abbrechen",
+    "download": "Herunterladen",
+    "downloading": "Wird heruntergeladen",
+    "import": "Importieren",
+    "detected": "Erkannt: {{format}}",
+    "downloadedFrom": "Heruntergeladen von {{host}}",
+    "items_one": "{{count}} Element",
+    "items_other": "{{count}} Elemente",
+    "activeNote": "Skripte, OAuth-2.0-Einstellungen, lokale MCP-Befehle oder Dateizugriffe in {{items}}. Sie werden vor deren Import gefragt, und importierte Ordner bleiben eingeschränkt, bis Sie ihnen vertrauen.",
+    "badgeAlt": "In Gostman öffnen",
+    "builderTitle": "Link „In Gostman öffnen“",
+    "builderHint": "Fügen Sie die Adresse einer online veröffentlichten Sammlung oder Spezifikation ein (Postman-Sammlung, OpenAPI-Datei, Insomnia, HAR oder Gostman-Export). Mit den Links unten können die Leser Ihrer README sie nach einer Bestätigung in Gostman öffnen.",
+    "builderLabel": "Öffentliche Adresse der Sammlung",
+    "desktopLabel": "Link zur Desktop-App",
+    "webLabel": "Link zur Web-App",
+    "badgeLabel": "README-Badge (Markdown)"
+  }
+}

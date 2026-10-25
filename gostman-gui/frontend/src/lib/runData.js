@@ -1,4 +1,5 @@
 import { isPlainObject } from './dataUtils.js'
+import { RUN_DATA_TEXT } from './runDataText'
 
 const BYTE_ORDER_MARK = '﻿'
 const QUOTE = '"'
@@ -7,10 +8,18 @@ const JSON_EXTENSION = /\.json$/i
 export const MAX_ITERATIONS = 10000
 
 export const DATA_FILE_ERROR = {
-  tooManyRows: `A data file can have at most ${MAX_ITERATIONS} rows.`,
-  empty: 'The data file has no rows.',
-  notArray: 'A JSON data file must be an array of objects, one object per iteration.',
-  unreadable: 'The data file cannot be read.',
+  get tooManyRows() {
+    return RUN_DATA_TEXT.tooManyRows(MAX_ITERATIONS)
+  },
+  get empty() {
+    return RUN_DATA_TEXT.empty
+  },
+  get notArray() {
+    return RUN_DATA_TEXT.notArray
+  },
+  get unreadable() {
+    return RUN_DATA_TEXT.unreadable
+  },
 }
 
 function splitRecords(text) {

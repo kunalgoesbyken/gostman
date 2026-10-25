@@ -1,23 +1,11 @@
-export const EXAMPLES_TEXT = {
-  title: 'Examples',
-  bodyLabel: 'Example body',
-  listLabel: 'Saved examples',
-  emptyTitle: 'No examples yet',
-  emptyHint: 'Send the request, then choose Save as example in the response panel. The mock server answers with these.',
-  servedByDefault: 'Served by default',
-  serveByDefault: 'Serve by default',
-  format: 'Format the body',
-  rename: 'Rename example',
-  remove: 'Delete example',
-  section: 'Example section',
-  body: 'Body',
-  headersCount: (count) => `Headers (${count})`,
-  noContentType: 'No content type',
-  summary: (contentType, size) => `${contentType} · ${size}`,
-  binaryTitle: (size) => `Binary body, ${size}`,
-  binaryHint: 'It cannot be edited as text and is served exactly as stored.',
-  noHeadersHint: 'This example was saved without headers.',
-  unsaved: 'The body has unsaved changes.',
-  discard: 'Discard',
-  saveBody: 'Save body',
-}
+import english from '../../../../locales/en/examples.json'
+import { messages } from './i18n/core'
+
+const text = messages('examples', english, (t) => ({
+  examples: {
+    bodyTooLarge: (size, limit) => t('examples.bodyTooLarge', { size, limit }),
+    summary: (contentType, size) => `${contentType} · ${size}`,
+  },
+}))
+
+export const EXAMPLES_TEXT = text.examples

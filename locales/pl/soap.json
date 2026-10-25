@@ -1,0 +1,13 @@
+{
+  "soap": {
+    "versionLabel": "Wersja SOAP",
+    "format": "Formatuj XML",
+    "formatTitle": "Wcięcie koperty. Komentarze i sekcje CDATA są zachowywane.",
+    "fault": "SOAP Fault",
+    "faultCode": "Kod",
+    "faultReason": "Przyczyna",
+    "faultActor": "Aktor",
+    "faultDetail": "Szczegóły",
+    "malformed": "Nie można sformatować XML: {{message}}"
+  }
+}

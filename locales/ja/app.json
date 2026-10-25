@@ -1,0 +1,26 @@
+{
+  "app": {
+    "loading": "読み込み中",
+    "loadingEditor": "エディターを読み込み中",
+    "backToLanding": "紹介ページに戻る",
+    "requestSection": "リクエスト",
+    "window": {
+      "minimize": "最小化",
+      "maximize": "最大化",
+      "restore": "元に戻す"
+    },
+    "crash": {
+      "title": "Gostmanでエラーが発生しました",
+      "description": "保存済みのリクエストには影響ありません。再読み込みして続行してください。再び発生した場合は、次のメッセージを添えて報告してください：\n\n{{error}}",
+      "reload": "再読み込み"
+    },
+    "loadFailure": {
+      "title": "保存済みのデータを読み込めませんでした",
+      "description": "何も変更や上書きはされていません。{{reason}}",
+      "retry": "やり直す",
+      "unreadable": "保存済みのデータが読み取れませんでした",
+      "ok": "OK"
+    },
+    "labelled": "{{label}}：{{name}}"
+  }
+}

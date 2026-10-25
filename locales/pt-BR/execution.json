@@ -1,0 +1,13 @@
+{
+  "execution": {
+    "promptDeclined": "A requisição não foi enviada porque os valores solicitados não foram informados.",
+    "unusableAddress": "O endereço não pode ser usado por um script.",
+    "sendLimit": "Um script pode chamar sendRequest {{limit}} vezes.",
+    "hostNotPermitted": "O host \"{{host}}\" não é usado por esta coleção, então os scripts não podem chamá-lo.",
+    "scriptFileReads": "Um script não pode adicionar placeholders {{example}} nem arquivos anexados do disco a uma requisição. Coloque-os na própria requisição.",
+    "preRequest": "Script de pré-requisição",
+    "postResponse": "Script pós-resposta",
+    "scopeLabel": "{{stage}} ({{name}})",
+    "restricted": "Esta pasta ainda não é confiável, então seus scripts, configurações de OAuth 2.0, comandos MCP locais e leituras de arquivos estão desativados. Abra o menu da pasta no cabeçalho e escolha Confiar nesta pasta."
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "examples": {
+    "title": "Beispiele",
+    "bodyLabel": "Body des Beispiels",
+    "listLabel": "Gespeicherte Beispiele",
+    "emptyTitle": "Noch keine Beispiele",
+    "emptyHint": "Senden Sie die Anfrage und wählen Sie im Antwortbereich „Als Beispiel speichern“. Der Mock-Server antwortet damit.",
+    "servedByDefault": "Standardmäßig ausgeliefert",
+    "serveByDefault": "Standardmäßig ausliefern",
+    "format": "Body formatieren",
+    "rename": "Beispiel umbenennen",
+    "remove": "Beispiel löschen",
+    "section": "Bereich des Beispiels",
+    "body": "Body",
+    "headersCount": "Header ({{count}})",
+    "noContentType": "Kein Content-Type",
+    "binaryTitle": "Binärer Body, {{size}}",
+    "binaryHint": "Er lässt sich nicht als Text bearbeiten und wird genau so ausgeliefert, wie er gespeichert ist.",
+    "noHeadersHint": "Dieses Beispiel wurde ohne Header gespeichert.",
+    "unsaved": "Der Body hat ungespeicherte Änderungen.",
+    "discard": "Verwerfen",
+    "saveBody": "Body speichern",
+    "bodyTooLarge": "Dieser Body ist {{size}} groß. Ein Beispiel behält einen Body von bis zu {{limit}}.",
+    "tooMany": "Eine Anfrage behält bis zu {{limit}} Beispiele. Löschen Sie eines, um ein weiteres zu speichern."
+  }
+}

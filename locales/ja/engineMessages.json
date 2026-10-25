@@ -1,0 +1,68 @@
+{
+  "network": {
+    "hostNotFound": "ホスト{{host}}が見つかりませんでした。アドレスに誤字がないか、このコンピューターがオンラインであるかを確認してください。",
+    "untrustedAuthority": "サーバーの証明書は、このコンピューターが信頼する認証局によって署名されていません。{{advice}}",
+    "handshakeCertificate": "サーバーがTLSハンドシェイクを終了しました。このホストに設定したクライアント証明書をサーバーが受け付けるか確認してください。",
+    "handshake": "サーバーがTLSハンドシェイクを終了しました。{{advice}}",
+    "hostMismatch": "サーバーの証明書は{{host}}では無効です。アドレスが証明書の発行対象と一致しているか確認してください。",
+    "certificateExpired": "サーバーの証明書の有効期限が切れているか、まだ有効ではありません。このコンピューターの時計を確認するか、証明書を更新してください。",
+    "proxyConnect": "プロキシサーバーに接続できませんでした。{{source}}のプロキシアドレスを確認してください。",
+    "proxyConnectSettings": "プロキシサーバーに接続できませんでした。ネットワーク設定のプロキシアドレスを確認してください。",
+    "dial": "{{host}}に接続できませんでした。サーバーが起動していて、ホストとポートが正しいか確認してください。",
+    "dialServer": "サーバーに接続できませんでした。サーバーが起動していて、ホストとポートが正しいか確認してください。"
+  },
+  "advice": {
+    "untrustedAuthority": "その認証局を信頼するか、このリクエストの証明書検証をオフにしてください。",
+    "clientCertificate": "サーバーがクライアント証明書を要求する場合は、デスクトップアプリのネットワーク設定で、このホスト用の証明書を追加してください。"
+  },
+  "failure": {
+    "timeout": "リクエストがタイムアウトしました",
+    "cancelled": "リクエストがキャンセルされました"
+  },
+  "blocked": {
+    "address": "プライベートアドレスとローカルアドレスはブロックされています",
+    "addressResolved": "プライベートアドレスとローカルアドレスはブロックされています：{{host}}は{{address}}に解決されます",
+    "host": "このホストは、呼び出しが許可されたホストの一覧にありません",
+    "hostNamed": "このホストは、呼び出しが許可されたホストの一覧にありません：{{host}}"
+  },
+  "request": {
+    "urlRequired": "リクエストの送信先URLを入力してください",
+    "urlScheme": "URLスキーム「{{scheme}}」には対応していません。httpまたはhttpsを使用してください",
+    "urlInvalid": "「{{url}}」は有効なURLではありません",
+    "urlInvalidMissing": "「{{url}}」は有効なURLではありません。理由：{{reason}}",
+    "notDefined_other": "{{names}}が定義されていません",
+    "headersInvalid": "ヘッダーが無効です：{{detail}}",
+    "queryInvalid": "クエリパラメーターが無効です：{{detail}}",
+    "variablesInvalid": "環境変数が有効なJSONではありません：{{detail}}",
+    "bodyTooLarge": "リクエストボディが10 MBを超えています",
+    "tooLargeExpanded": "変数を展開すると、リクエストが10 MBを超えます",
+    "variablesTooDeep": "変数が互いを何度も参照しているため展開できません。{{example}}を含む変数を単純にしてください",
+    "redirects": "{{count}}回のリダイレクトで停止しました",
+    "trailingJson": "JSON値の後ろに予期しないテキストがあります",
+    "expectedObject": "JSONオブジェクトが必要です",
+    "expectedRows": "JSONオブジェクトまたは行のリストが必要です"
+  },
+  "files": {
+    "unavailable": "{{example}}がファイルを読み取れるのは、デスクトップアプリ、または--allow-filesを付けたgostman run、send、loadのみです",
+    "relativePath": "{{example}}で相対パスを使うにはワークスペースフォルダーを開くか、絶対パスを指定してください",
+    "httpOnly": "{{example}}がファイルを読み取れるのは、HTTPとGraphQLのリクエストのみです",
+    "outsideFolder": "「{{path}}」はコレクションのフォルダーの外にあります。コレクションが読み取れるのは、そのフォルダー内のファイルのみです",
+    "unreadable": "ファイル「{{path}}」を読み取れません：{{detail}}",
+    "isFolder": "「{{path}}」はファイルではなくフォルダーです",
+    "tooLarge": "ファイル「{{path}}」が10 MBを超えています",
+    "notFound": "ファイル「{{path}}」が{{resolved}}に見つかりませんでした",
+    "pathMissing": "{{example}}では、かっこの間にファイルパスが必要です",
+    "networkPath": "「{{path}}」はネットワークパスまたはデバイスパスです。ファイルはこのコンピューターのドライブからのみ読み取るため、Windowsのサインイン情報が他のコンピューターに送信されることはありません。ファイルをこのコンピューターにコピーするか、共有をドライブ文字に割り当ててください"
+  },
+  "attachments": {
+    "unavailable": "ディスクから添付したファイルを送信できるのは、デスクトップアプリのみです",
+    "tooLarge": "添付ファイルの合計が{{size}} GBを超えています",
+    "signed": "この認証はボディ全体に署名するため、添付ファイルはボディと合わせて{{size}} MBまでに制限されます",
+    "failed": "添付ファイル「{{name}}」：{{detail}}",
+    "notRegular": "「{{path}}」は通常のファイルではありません"
+  },
+  "proxy": {
+    "invalidAddress": "「{{address}}」は有効なプロキシアドレスではありません",
+    "unsupportedScheme": "プロキシスキーム「{{scheme}}」には対応していません。http、https、socks5のいずれかを使用してください"
+  }
+}

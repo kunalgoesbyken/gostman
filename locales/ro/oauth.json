@@ -1,0 +1,61 @@
+{
+  "oauth": {
+    "grants": {
+      "clientCredentials": "Client credentials",
+      "password": "Password",
+      "authorizationCode": "Authorization code",
+      "deviceCode": "Device code"
+    },
+    "fields": {
+      "grant": "Tip de grant",
+      "issuer": "Emitent",
+      "authUrl": "URL de autorizare",
+      "deviceUrl": "URL de autorizare a dispozitivului",
+      "callbackUrl": "URL de callback",
+      "callbackTitle": "Înregistrați {{url}} ca URI de redirecționare la furnizor",
+      "tokenUrl": "URL de token",
+      "clientId": "ID client",
+      "clientSecret": "Secret client",
+      "username": "Nume de utilizator",
+      "password": "Parolă",
+      "scope": "Scope",
+      "credentialsIn": "Trimitere credențiale în",
+      "credentialsHeader": "Antet Basic auth",
+      "credentialsBody": "Corpul cererii",
+      "pkce": "Folosire PKCE",
+      "headerPrefix": "Prefix de antet",
+      "sendIdToken": "Trimitere ID token în loc de token de acces",
+      "accessToken": "Token de acces",
+      "idToken": "ID token"
+    },
+    "discover": "Descoperire",
+    "discoverTitle": "Completează endpointurile din /.well-known/openid-configuration al emitentului",
+    "discovered": "Endpointuri completate din {{issuer}}.",
+    "discovering": "Se citește documentul de descoperire al emitentului.",
+    "getToken": "Obținere token",
+    "cancel": "Anulare",
+    "clearToken": "Ștergere token",
+    "waitingForBrowser": "Se așteaptă încheierea autentificării în browser.",
+    "requesting": "Se cere un token.",
+    "waitingForDevice": "Se așteaptă să introduceți codul și să vă autentificați.",
+    "deviceCode": "Introduceți acest cod pe pagina de autentificare:",
+    "openSignInPage": "Deschidere pagină de autentificare",
+    "noToken": "Încă nu există token.",
+    "otherEnvironment": "Tokenul a fost obținut cu alt mediu, deci nu este trimis. Obțineți un token pentru acest mediu.",
+    "noIdToken": "Furnizorul nu a returnat un ID token. Adăugați openid la scope și obțineți un token nou.",
+    "noExpiry": "Furnizorul nu a raportat un moment de expirare.",
+    "expires": "Expiră {{expiry}}.",
+    "expired": "A expirat {{expiry}}. Un token nou este cerut atunci când poate fi reînnoit fără autentificare.",
+    "signInNeeded": "Această cerere are nevoie de un token OAuth 2. Deschideți fila Auth și alegeți Obținere token.",
+    "signInForEnvironment": "Tokenul OAuth 2 a fost obținut cu alt mediu, deci nu este trimis. Deschideți fila Auth și alegeți Obținere token pentru a vă autentifica pentru acest mediu.",
+    "deviceExpired": "Codul dispozitivului a expirat înainte de încheierea autentificării. Obțineți din nou un token.",
+    "cancelled": "Autentificarea a fost anulată.",
+    "popup": {
+      "blocked": "Fereastra de autentificare a fost blocată. Permiteți ferestrele pop-up pentru acest site și încercați din nou.",
+      "timedOut": "Nicio autentificare nu a sosit în cinci minute.",
+      "noCode": "Furnizorul nu a returnat un cod de autorizare.",
+      "refused": "Furnizorul a refuzat autentificarea: {{reason}}",
+      "wrongIssuer": "Răspunsul de autentificare indică emitentul „{{received}}” în loc de „{{expected}}”, deci a fost ignorat."
+    }
+  }
+}

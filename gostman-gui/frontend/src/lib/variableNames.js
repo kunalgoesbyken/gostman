@@ -11,16 +11,6 @@ const FAKER_TARGETS = new Map(Object.entries(catalogue.fakerAliases))
 export const DYNAMIC_VARIABLES = Array.from(DESCRIPTIONS.keys())
 export const FAKER_VARIABLES = Array.from(FAKER_TARGETS.keys())
 
-export const SOURCE_LABELS = {
-  global: 'Global',
-  collection: 'Collection',
-  environment: 'Environment',
-  folder: 'Folder',
-  request: 'Request',
-  process: '.env file',
-  session: 'Session',
-}
-
 const DYNAMIC_RANGE = /^\$randomInt\(\s*-?\d+\s*,\s*-?\d+\s*\)$/u
 const FILE_REFERENCE = /^\$file(Base64)?\((.*)\)$/u
 const FILE_CALL = /\$file(?:Base64)?\(/u

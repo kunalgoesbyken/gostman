@@ -1,0 +1,9 @@
+{
+  "tabBar": {
+    "openRequests": "開いているリクエスト",
+    "newRequest": "新しいリクエスト",
+    "untitled": "無題",
+    "unsaved": "未保存の変更",
+    "close": "{{title}}を閉じる"
+  }
+}

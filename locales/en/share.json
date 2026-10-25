@@ -1,0 +1,80 @@
+{
+  "share": {
+    "protections": {
+      "key": "Random key",
+      "passphrase": "Passphrase"
+    },
+    "deliveries": {
+      "link": "Link",
+      "file": "Encrypted file"
+    },
+    "privacy": "Encrypted in this window and never uploaded. OAuth tokens, cookies, history and network settings are never included.",
+    "summaryWithValues": "{{counts}} (with their values).",
+    "summaryNamesOnly": "{{counts}} (variable names only).",
+    "tooLong": "This selection needs a link of {{size}}. Links stop at {{limit}} because chat and mail apps cut longer ones short. Send it as an encrypted file instead.",
+    "linkNotePassphrase": "The passphrase is not in the link. Tell the recipient through another channel. {{size}}.",
+    "linkNoteKey": "The key is part of the link, after the # sign, so anyone who has the whole link can read the collection. {{size}}.",
+    "linkLabel": "Share link",
+    "fileNotePassphrase": "The recipient opens the file with your passphrase. Tell them through another channel.",
+    "fileNoteKey": "The file cannot be opened without the key below. Send the key through a different channel than the file.",
+    "saveFile": "Save file",
+    "keyLabel": "Key",
+    "scopeField": "Share",
+    "scopeLabel": "What to share",
+    "everything": "Everything",
+    "requestScope": "Request: {{path}}",
+    "sharedVariablesNone": "No environment variables are shared, because nothing here uses one.",
+    "sharedVariables": "Only the environment variables used here are shared: {{names}}.",
+    "sharedCollectionVariables": "These collection variables are shared with their collections: {{names}}.",
+    "includeVariables": "Share variable values (off: only the variable names are shared)",
+    "includeExamples": "Include saved example responses",
+    "protection": "Protection",
+    "passphrasePlaceholder": "Passphrase, at least {{length}} characters",
+    "passphraseLabel": "Passphrase",
+    "sendAs": "Send as",
+    "literalCredentials_one": "{{count}} request holds a password, token or key typed directly into the Auth tab. It is part of the request and is shared with it.",
+    "literalCredentials_other": "{{count}} requests hold a password, token or key typed directly into the Auth tab. Those are part of the request and are shared with it.",
+    "nothing": "There is nothing to share here yet."
+  },
+  "shareOpen": {
+    "title": "Shared with you",
+    "dialogLabel": "Shared collection",
+    "intro": "This link carries an encrypted collection. It is decrypted in this window and nothing is added until you choose Import.",
+    "credentials": {
+      "key": {
+        "label": "Key",
+        "hint": "This file was sent without its key. Paste the key the sender gave you."
+      },
+      "passphrase": {
+        "label": "Passphrase",
+        "hint": "This share is locked with a passphrase. Ask the sender for it."
+      }
+    },
+    "open": "Open",
+    "cancel": "Cancel",
+    "environmentNoValues_one": "{{name}}: {{count}} variable, names only, no values",
+    "environmentNoValues_other": "{{name}}: {{count}} variables, names only, no values",
+    "environmentValues_one": "{{name}}: {{count}} variable, {{values}} with a value",
+    "environmentValues_other": "{{name}}: {{count}} variables, {{values}} with a value",
+    "folders": "Folders: {{names}}",
+    "keepValues": "Variables you already have keep your values.",
+    "examples_one": "{{count}} saved example response",
+    "examples_other": "{{count}} saved example responses",
+    "activeContent_one": "{{count}} item carries {{kinds}}. You are asked before those are imported.",
+    "activeContent_other": "{{count}} items carry {{kinds}}. You are asked before those are imported.",
+    "requestsLabel": "Shared requests",
+    "deriving": "Deriving the key and decrypting",
+    "decrypting": "Decrypting"
+  },
+  "shareErrors": {
+    "unavailable": "Sharing needs the Web Crypto API, which is not available in this window.",
+    "incomplete": "This share is incomplete. Copy the whole link, or choose the whole file, and try again.",
+    "cannotDecompress": "This share is compressed and this browser cannot decompress it. Open it in a current browser or in the desktop app.",
+    "tooLarge": "This share unpacks to more than Gostman imports at once, so it was not opened.",
+    "unreadable": "This share was decrypted but its contents are not readable text.",
+    "failedLink": "This share could not be decrypted. The link was changed or cut short on the way.",
+    "failedKey": "This share could not be decrypted. The key is wrong, or the file was changed.",
+    "failedPassphrase": "This share could not be decrypted. The passphrase is wrong, or the share was changed.",
+    "unknownVersion": "This share uses format \"{{version}}\", which this version of Gostman cannot open. Update Gostman and try again."
+  }
+}

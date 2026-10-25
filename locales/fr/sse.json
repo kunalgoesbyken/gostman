@@ -1,0 +1,48 @@
+{
+  "sse": {
+    "allTypes": "Tous les types d’événements",
+    "searchLabel": "Rechercher des événements",
+    "searchPlaceholder": "Rechercher des événements",
+    "pause": "Suspendre le défilement automatique",
+    "resume": "Reprendre le défilement automatique",
+    "clear": "Effacer les événements",
+    "copyAll": "Copier les événements affichés",
+    "copied": "Copié",
+    "copyEvent": "Copier les données de l’événement",
+    "noEvents": "Aucun événement pour l’instant",
+    "waiting": "En attente d’un événement du serveur.",
+    "noMatches": "Aucun événement ne correspond",
+    "noMatchesHint": "Modifiez le filtre de type ou la recherche pour en voir davantage.",
+    "clipped": "Cet événement était trop long : la suite a été omise.",
+    "shown": "{{shown}} sur {{total}} affichés",
+    "received": "{{count}} reçus",
+    "dropped_one": "L’événement le plus ancien n’est plus listé. La réponse téléchargée contient tous les événements.",
+    "dropped_other": "Les {{count}} événements les plus anciens ne sont plus listés. La réponse téléchargée contient tous les événements.",
+    "dropped_many": "Les {{count}} d’événements les plus anciens ne sont plus listés. La réponse téléchargée contient tous les événements.",
+    "reconnecting": "Reconnexion dans {{seconds}} s (tentative {{attempt}})"
+  },
+  "sseSettings": {
+    "stream": "Diffuser en événements envoyés par le serveur",
+    "reconnect": "Se reconnecter lorsque le serveur ferme le flux",
+    "maxEvents": "Événements max.",
+    "maxEventsPlaceholder": "10000 par défaut",
+    "maxSeconds": "Secondes max.",
+    "maxSecondsPlaceholder": "300 par défaut"
+  },
+  "status": {
+    "connecting": "Connexion",
+    "open": "Diffusion",
+    "reconnecting": "Reconnexion",
+    "ended": "Terminé"
+  },
+  "streamEnd": {
+    "closed": "Le serveur a fermé le flux.",
+    "cancelled": "Le flux a été arrêté.",
+    "maxEvents": "Arrêt à la limite d’événements. Relevez-la sous Paramètres.",
+    "maxBytes": "Arrêt à la limite de taille.",
+    "maxDuration": "Arrêt à la limite de durée. Relevez-la sous Paramètres.",
+    "failed": "Le flux a échoué.",
+    "failedWith": "Le flux a échoué. {{detail}}",
+    "hostedLimit": "Arrêt à la limite de durée. L’application web diffuse au plus {{seconds}} secondes ; l’application de bureau peut diffuser plus longtemps."
+  }
+}

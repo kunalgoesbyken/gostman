@@ -1,0 +1,25 @@
+{
+  "graphql": {
+    "query": "查询",
+    "queryLabel": "GraphQL 查询",
+    "variables": "变量（JSON）",
+    "variablesLabel": "GraphQL 变量",
+    "invalidJson": "不是有效的 JSON：{{message}}",
+    "syntaxAt": "{{message}}（第 {{line}} 行，第 {{column}} 列）",
+    "sendAsGraphql": "以 GraphQL 发送",
+    "prettify": "美化",
+    "prettifyTitle": "重新格式化查询。注释会被移除。",
+    "cannotPrettify": "无法美化：{{detail}}",
+    "notSent": "方法为 {{method}} 时不会发送。",
+    "schema": "Schema",
+    "schemaDescription": "获取后即可浏览此端点的类型和字段。内省查询会使用此请求的 URL、请求头和认证。",
+    "searchLabel": "搜索 schema",
+    "searchPlaceholder_other": "在 {{count}} 个类型和字段中搜索",
+    "noMatch": "没有匹配项。",
+    "moreMatches_other": "另有 {{count}} 个类型匹配。请缩小搜索范围以查看。",
+    "noFields": "没有字段。",
+    "schemaTooLarge": "Schema 超过了响应大小限制。",
+    "noJsonBody": "端点返回了 {{status}}，但没有 JSON 响应体。",
+    "noSchema": "端点返回了 {{status}}，但没有 schema。"
+  }
+}

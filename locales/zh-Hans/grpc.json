@@ -1,0 +1,27 @@
+{
+  "grpc": {
+    "services": "服务",
+    "messageLabel": "请求消息",
+    "reflection": "服务器反射",
+    "sendAsGrpc": "以 gRPC 发送",
+    "addProtos": "添加 .proto 文件",
+    "removeFiles": "移除文件",
+    "load": "加载",
+    "reload": "重新加载",
+    "schemaHint": "通过服务器反射加载服务，或添加该服务的 .proto 文件。将使用此请求的地址、请求头和认证。",
+    "noServices": "未找到任何服务。",
+    "tooLarge": "{{name}} 大小为 {{size}}。文件上限为 {{limit}}。",
+    "method": "方法",
+    "methodLabel": "gRPC 方法",
+    "chooseMethod": "选择方法",
+    "useExample": "使用示例",
+    "useExampleTitle": "用该方法输入的示例替换消息",
+    "streamHint": "此方法读取流。写成 JSON 数组即可发送多条消息。",
+    "kinds": {
+      "bidirectional": "双向流",
+      "client": "客户端流",
+      "server": "服务器流",
+      "unary": "一元"
+    }
+  }
+}

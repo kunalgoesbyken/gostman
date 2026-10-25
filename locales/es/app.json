@@ -1,0 +1,26 @@
+{
+  "app": {
+    "loading": "Cargando",
+    "loadingEditor": "Cargando editor",
+    "backToLanding": "Volver a la página de inicio",
+    "requestSection": "Solicitud",
+    "window": {
+      "minimize": "Minimizar",
+      "maximize": "Maximizar",
+      "restore": "Restaurar"
+    },
+    "crash": {
+      "title": "Gostman ha encontrado un error",
+      "description": "Tus solicitudes guardadas no se han visto afectadas. Recarga para continuar. Si vuelve a ocurrir, infórmalo con este mensaje:\n\n{{error}}",
+      "reload": "Recargar"
+    },
+    "loadFailure": {
+      "title": "No se pudieron cargar los datos guardados",
+      "description": "No se cambió ni se sobrescribió nada. {{reason}}",
+      "retry": "Reintentar",
+      "unreadable": "Los datos guardados eran ilegibles",
+      "ok": "Aceptar"
+    },
+    "labelled": "{{label}}: {{name}}"
+  }
+}

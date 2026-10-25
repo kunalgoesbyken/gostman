@@ -1,0 +1,26 @@
+{
+  "app": {
+    "loading": "Wird geladen",
+    "loadingEditor": "Editor wird geladen",
+    "backToLanding": "Zurück zur Startseite",
+    "requestSection": "Anfrage",
+    "window": {
+      "minimize": "Minimieren",
+      "maximize": "Maximieren",
+      "restore": "Wiederherstellen"
+    },
+    "crash": {
+      "title": "In Gostman ist ein Fehler aufgetreten",
+      "description": "Ihre gespeicherten Anfragen sind nicht betroffen. Laden Sie neu, um fortzufahren. Tritt es erneut auf, melden Sie es mit dieser Meldung:\n\n{{error}}",
+      "reload": "Neu laden"
+    },
+    "loadFailure": {
+      "title": "Gespeicherte Daten konnten nicht geladen werden",
+      "description": "Es wurde nichts geändert oder überschrieben. {{reason}}",
+      "retry": "Erneut versuchen",
+      "unreadable": "Gespeicherte Daten waren nicht lesbar",
+      "ok": "OK"
+    },
+    "labelled": "{{label}}: {{name}}"
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "share": {
+    "protections": {
+      "key": "随机密钥",
+      "passphrase": "密码短语"
+    },
+    "deliveries": {
+      "link": "链接",
+      "file": "加密文件"
+    },
+    "privacy": "在此窗口中加密，绝不上传。OAuth 令牌、Cookie、历史记录和网络设置绝不会包含在内。",
+    "summaryWithValues": "{{counts}}（含其值）。",
+    "summaryNamesOnly": "{{counts}}（仅变量名）。",
+    "tooLong": "所选内容需要 {{size}} 的链接。链接上限为 {{limit}}，因为聊天和邮件应用会截断更长的链接。请改为以加密文件发送。",
+    "linkNotePassphrase": "密码短语不在链接中，请通过其他渠道告诉接收者。{{size}}。",
+    "linkNoteKey": "密钥是链接的一部分，位于 # 号之后，因此任何拥有完整链接的人都能读取该集合。{{size}}。",
+    "linkLabel": "分享链接",
+    "fileNotePassphrase": "接收者使用你的密码短语打开此文件。请通过其他渠道告诉他们。",
+    "fileNoteKey": "没有下方的密钥就无法打开此文件。请通过与文件不同的渠道发送密钥。",
+    "saveFile": "保存文件",
+    "keyLabel": "密钥",
+    "scopeField": "分享",
+    "scopeLabel": "分享内容",
+    "everything": "全部",
+    "requestScope": "请求：{{path}}",
+    "sharedVariablesNone": "不分享任何环境变量，因为这里没有用到任何环境变量。",
+    "sharedVariables": "只分享这里用到的环境变量：{{names}}。",
+    "sharedCollectionVariables": "这些集合变量会随其集合一起分享：{{names}}。",
+    "includeVariables": "分享变量值（关闭时只分享变量名）",
+    "includeExamples": "包含已保存的示例响应",
+    "protection": "保护方式",
+    "passphrasePlaceholder": "密码短语，至少 {{length}} 个字符",
+    "passphraseLabel": "密码短语",
+    "sendAs": "发送方式",
+    "literalCredentials_other": "有 {{count}} 个请求直接在“认证”标签页中写入了密码、令牌或密钥。它们属于请求的一部分，会随请求一起分享。",
+    "nothing": "这里还没有可分享的内容。"
+  },
+  "shareOpen": {
+    "title": "别人分享给你的内容",
+    "dialogLabel": "已分享的集合",
+    "intro": "此链接包含一个加密的集合。它会在此窗口中解密，在你选择“导入”之前不会添加任何内容。",
+    "credentials": {
+      "key": {
+        "label": "密钥",
+        "hint": "发送此文件时没有附带密钥。请粘贴发送者给你的密钥。"
+      },
+      "passphrase": {
+        "label": "密码短语",
+        "hint": "此分享使用密码短语加密。请向发送者索取。"
+      }
+    },
+    "open": "打开",
+    "cancel": "取消",
+    "environmentNoValues_other": "{{name}}：{{count}} 个变量，仅变量名，无值",
+    "environmentValues_other": "{{name}}：{{count}} 个变量，其中 {{values}} 个有值",
+    "folders": "文件夹：{{names}}",
+    "keepValues": "你已有的变量保留你的值。",
+    "examples_other": "{{count}} 个已保存的示例响应",
+    "activeContent_other": "有 {{count}} 项带有{{kinds}}。导入这些内容之前会先询问你。",
+    "requestsLabel": "已分享的请求",
+    "deriving": "正在派生密钥并解密",
+    "decrypting": "正在解密"
+  },
+  "shareErrors": {
+    "unavailable": "分享需要 Web Crypto API，而此窗口中不可用。",
+    "incomplete": "此分享不完整。请复制完整的链接，或选择完整的文件，然后重试。",
+    "cannotDecompress": "此分享经过压缩，而此浏览器无法解压。请在较新的浏览器或桌面应用中打开。",
+    "tooLarge": "此分享解压后超过了 Gostman 一次可导入的上限，因此没有打开。",
+    "unreadable": "此分享已解密，但其内容不是可读文本。",
+    "failedLink": "无法解密此分享。链接在传递过程中被修改或被截断了。",
+    "failedKey": "无法解密此分享。密钥有误，或文件被修改过。",
+    "failedPassphrase": "无法解密此分享。密码短语有误，或分享内容被修改过。",
+    "unknownVersion": "此分享使用格式“{{version}}”，当前版本的 Gostman 无法打开。请更新 Gostman 后重试。"
+  }
+}

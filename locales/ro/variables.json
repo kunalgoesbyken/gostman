@@ -1,0 +1,18 @@
+{
+  "variables": {
+    "dynamic": "generată la fiecare trimitere a cererii",
+    "prompt": "cerută la trimiterea cererii",
+    "undefinedName": "nu este definită în mediul activ",
+    "resolvesTo": "se rezolvă la",
+    "through": "prin {{names}}",
+    "sources": {
+      "global": "Globală",
+      "collection": "Colecție",
+      "environment": "Mediu",
+      "folder": "Dosar",
+      "request": "Cerere",
+      "process": "Fișier .env",
+      "session": "Sesiune"
+    }
+  }
+}

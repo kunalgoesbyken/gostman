@@ -1,0 +1,155 @@
+{
+  "mcp": {
+    "media": {
+      "heading": "Immagini e audio nel risultato",
+      "image": "Immagine {{number}} nel risultato",
+      "audio": "Audio {{number}} nel risultato"
+    },
+    "server": "Server",
+    "argumentsLabel": "Argomenti",
+    "notLoaded": "Non caricato",
+    "load": "Carica",
+    "reload": "Ricarica",
+    "signIn": "Accedi",
+    "signingIn": "Accesso in corso…",
+    "signInHint": "Scopri come questo server vuole che tu acceda, registra Gostman presso il suo server di autorizzazione quando serve, accedi nel browser e conserva il token nella scheda Auth",
+    "serverProtocol": "MCP {{version}}",
+    "serverProtocolLegacy": "MCP {{version}} (handshake initialize)",
+    "instructions": "Istruzioni",
+    "instructionsHint": "Mostra le istruzioni che questo server dà ai modelli che lo usano",
+    "operation": "Operazione",
+    "operations": {
+      "toolsCall": "Chiama strumento",
+      "toolsList": "Elenca strumenti",
+      "resourcesRead": "Leggi risorsa",
+      "resourcesList": "Elenca risorse",
+      "resourceTemplatesList": "Elenca template di risorse",
+      "promptsGet": "Ottieni prompt",
+      "promptsList": "Elenca prompt"
+    },
+    "itemLabels": {
+      "tool": "Strumento MCP",
+      "resource": "URI della risorsa",
+      "prompt": "Prompt MCP"
+    },
+    "choose": {
+      "tool": "Scegli uno strumento",
+      "prompt": "Scegli un prompt"
+    },
+    "noInput": "Questa operazione non richiede input. Invia elenca tutto ciò che il server restituisce, in tutte le pagine.",
+    "readHint": "Invia legge la risorsa a questo URI. Scegli una risorsa elencata, oppure compila un template.",
+    "schema": "Schema",
+    "schemaHints": {
+      "tool": "Mostra accanto all'editor lo JSON Schema degli argomenti dello strumento",
+      "prompt": "Mostra accanto all'editor gli argomenti del prompt"
+    },
+    "schemaTitles": {
+      "tool": "Schema di input",
+      "prompt": "Argomenti del prompt"
+    },
+    "closeSchema": "Chiudi",
+    "noArguments": "Questo prompt non richiede argomenti.",
+    "example": "Usa esempio",
+    "exampleHint": "Sostituisci gli argomenti con un esempio costruito dallo schema",
+    "promptArgumentRequired": "{{name}} (obbligatorio)",
+    "promptArgumentDescribed": "{{label}}: {{description}}",
+    "catalogHints": {
+      "remote": "Carica gli strumenti, le risorse e i prompt del server MCP a questo URL. Gli header e l'autenticazione di questa richiesta vengono inviati a ogni chiamata. Nell'app desktop, scrivi stdio: e un comando nella barra degli indirizzi per avviare invece un server locale, ad esempio {{example}}.",
+      "local": "Carica avvia questo comando su questo computer e legge ciò che offre; ogni chiamata lo avvia di nuovo. Le righe della scheda Header gli vengono passate come variabili d'ambiente."
+    },
+    "empty": "Questo server non elenca strumenti, risorse o prompt.",
+    "checks": "Controlli",
+    "checksHint": "Problemi trovati nelle definizioni degli strumenti di questo server",
+    "noFindings": "Nessun problema trovato nelle definizioni degli strumenti.",
+    "findings": {
+      "missingDescription": "{{tool}}: nessuna descrizione. Un modello sceglie gli strumenti in base alle loro descrizioni, quindi è improbabile che usi bene questo.",
+      "shortDescription": "{{tool}}: la descrizione \"{{detail}}\" è molto breve. Di' cosa fa lo strumento, quando usarlo e cosa restituisce.",
+      "duplicateName": "{{tool}}: più di uno strumento ha questo nome, quindi le chiamate non possono distinguerli.",
+      "similarNames": "{{tool}}: sembra quasi uguale a {{detail}}, il che rende facile per un modello scegliere quello sbagliato.",
+      "invalidName": "{{tool}}: il nome dovrebbe essere lungo da 1 a 128 caratteri e usare solo lettere, cifre, _, - e .",
+      "invalidSchema": "{{tool}}: lo schema di input non è utilizzabile: {{detail}}.",
+      "undocumentedParameters": "{{tool}}: parametri senza descrizione: {{detail}}.",
+      "unknownRequired": "{{tool}}: required elenca parametri che lo schema non definisce: {{detail}}.",
+      "manyTools": "Questo server elenca {{count}} strumenti. Elenchi di strumenti molto grandi rendono più difficile per un modello scegliere lo strumento giusto, e alcuni client ne caricano solo una parte.",
+      "rejected": "{{tool}}: escluso dall'elenco degli strumenti, come richiede la specifica, perché {{detail}}.",
+      "listFailed": "{{method}} non è riuscito: {{detail}}"
+    },
+    "schemaProblems": {
+      "notObject": "non è un oggetto JSON",
+      "rootType": "il tipo di primo livello dovrebbe essere \"object\"",
+      "properties": "properties non è un oggetto di schemi",
+      "property": "lo schema di {{name}} non è un oggetto",
+      "type": "{{name}} ha il tipo sconosciuto \"{{type}}\"",
+      "required": "required non è un elenco di nomi"
+    },
+    "changes": {
+      "title": "Gli strumenti di questo server sono cambiati dall'ultima volta che li hai accettati.",
+      "added": "Nuovi: {{names}}.",
+      "removed": "Rimossi: {{names}}.",
+      "descriptionChanged": "{{name}}: la descrizione è cambiata.",
+      "schemaChanged": "{{name}}: lo schema di input è cambiato.",
+      "definitionChanged": "{{name}}: la descrizione o lo schema di input sono cambiati.",
+      "before": "Prima",
+      "now": "Ora",
+      "noDescription": "(nessuna)",
+      "advice": "Leggi le modifiche prima che un agente usi questi strumenti. Una descrizione modificata può contenere istruzioni che il server non ti aveva mostrato prima.",
+      "accept": "Accetta le modifiche",
+      "firstSeen": "Primo caricamento di questo server: Gostman ricorda i suoi strumenti su questo dispositivo e ti avvisa quando cambiano."
+    },
+    "auth": {
+      "title": "Accesso",
+      "close": "Chiudi",
+      "retry": "Riprova",
+      "steps": {
+        "probe": "Interroga il server",
+        "challenge": "Leggi la richiesta WWW-Authenticate",
+        "resource": "Trova i metadati della risorsa protetta (RFC 9728)",
+        "server": "Trova i metadati del server di autorizzazione (RFC 8414 o OpenID Connect)",
+        "registration": "Ottieni un client ID",
+        "browser": "Accedi nel browser",
+        "issuer": "Controlla l'issuer della risposta (RFC 9207)",
+        "token": "Scambia il codice con un token",
+        "retry": "Chiama il server con il token"
+      },
+      "outcomes": {
+        "ok": "Fatto",
+        "warning": "Avviso",
+        "failed": "Non riuscito",
+        "stopped": "Interrotto",
+        "running": "In corso"
+      },
+      "explanations": {
+        "localCommand": "I server locali avviati con stdio: leggono le credenziali dal proprio ambiente, non da OAuth. Metti invece il token in una riga della scheda Header.",
+        "unreachable": "Gostman non è riuscito a raggiungere il server. Controlla l'URL, la rete e le impostazioni del proxy.",
+        "noResourceMetadata": "Il server ha chiesto un accesso senza un parametro resource_metadata, quindi Gostman cerca i metadati agli indirizzi well-known.",
+        "answered": "Il server ha risposto senza chiedere un accesso, ad esempio perché questa richiesta contiene già un token valido. Gostman cerca comunque i metadati OAuth, così puoi accedere di nuovo.",
+        "notProtected": "Il server ha risposto senza chiedere un accesso e non pubblica metadati OAuth, quindi non ha bisogno di un token.",
+        "resourceMetadataMissing": "Non sono stati trovati metadati della risorsa protetta a nessuno degli indirizzi qui sotto. Un server MCP che usa OAuth deve pubblicarli, all'indirizzo resource_metadata nella sua risposta 401 oppure a /.well-known/oauth-protected-resource.",
+        "resourceMetadataInvalid": "I metadati della risorsa protetta non indicano alcun server di autorizzazione, quindi Gostman non sa dove accedere.",
+        "resourceMismatch": "La risorsa indicata nei metadati della risorsa protetta non è l'URL di questo server. I token emessi per quella risorsa qui non verrebbero accettati (mancata corrispondenza dell'audience), quindi Gostman si ferma. Imposta resource in quel documento sull'URL del server, oppure su un URL da cui inizia l'URL del server.",
+        "serverMetadataMissing": "Nessuno degli indirizzi well-known del server di autorizzazione ha restituito metadati. Il server di autorizzazione deve pubblicare i metadati del server di autorizzazione OAuth 2.0 oppure un documento di discovery OpenID Connect.",
+        "issuerMismatch": "L'issuer nei metadati del server di autorizzazione è diverso dall'indirizzo elencato in authorization_servers dei metadati della risorsa protetta. La specifica richiede che siano identici, carattere per carattere, quindi i metadati non vengono usati. Fai in modo che i due valori coincidano; una barra finale è una causa frequente.",
+        "serverMetadataIncomplete": "I metadati del server di autorizzazione non hanno authorization_endpoint o token_endpoint.",
+        "noPkce": "I metadati del server di autorizzazione non elencano S256 in code_challenge_methods_supported, e i client MCP non devono accedere senza PKCE. Supporta PKCE con S256 sul server di autorizzazione e aggiungi S256 a quell'elenco.",
+        "insecureEndpoint": "L'endpoint di autorizzazione o del token usa HTTP semplice su un host remoto. La specifica richiede HTTPS per questi endpoint.",
+        "insufficientScope": "Il token è valido ma manca uno scope di cui questa richiesta ha bisogno. Accedendo di nuovo vengono richiesti gli scope che avevi più quelli indicati dal server.",
+        "noRegistration": "Il server di autorizzazione non offre né la registrazione dinamica dei client né i documenti di metadati del client ID. Registra tu stesso un client presso di esso, inserisci il suo client ID nella scheda Auth (OAuth 2.0) e accedi di nuovo.",
+        "registrationRefused": "Il server di autorizzazione ha rifiutato di registrare Gostman. Molti identity provider disattivano la registrazione dinamica dei client: registra tu stesso un client e inserisci il suo client ID nella scheda Auth.",
+        "serverChanged": "Il server di autorizzazione non è quello a cui appartiene il client ID salvato, quindi Gostman si è registrato di nuovo invece di riutilizzarlo.",
+        "browserFailed": "L'accesso nel browser non è stato completato.",
+        "issuerMissing": "I metadati del server di autorizzazione impostano authorization_response_iss_parameter_supported, ma la risposta non aveva il parametro iss, quindi è stata rifiutata per prevenire un attacco di tipo mix-up. Aggiungi iss al reindirizzamento verso Gostman, oppure smetti di dichiararne il supporto.",
+        "issuerWrong": "Il parametro iss della risposta non è l'issuer del server di autorizzazione con cui Gostman ha effettuato l'accesso, quindi la risposta è stata scartata per prevenire un attacco di tipo mix-up. Invia l'issuer esattamente come appare nei metadati del server di autorizzazione.",
+        "tokenFailed": "L'endpoint del token non ha restituito un token di accesso. Controlla che il client ID, l'indirizzo di reindirizzamento e il parametro resource siano accettati.",
+        "stillRejected": "Il server rifiuta ancora il token. Potrebbe aspettarsi un'audience o uno scope diversi: confronta resource e scope qui sotto con ciò che il server verifica."
+      },
+      "attempts": "Richieste"
+    },
+    "notifications": "Notifiche ({{count}})",
+    "notificationTime": "{{milliseconds}} ms",
+    "progressOf": "{{progress}}/{{total}}",
+    "issuerDetail": "atteso \"{{expected}}\", ricevuto \"{{received}}\""
+  },
+  "mcpOutput": {
+    "name": "Il risultato corrisponde allo schema di output dello strumento"
+  }
+}

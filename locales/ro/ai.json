@@ -1,0 +1,216 @@
+{
+  "ai": {
+    "name": "AI",
+    "ok": "OK",
+    "cancel": "Anulare",
+    "close": "Închidere",
+    "back": "Înapoi",
+    "discard": "Renunțare",
+    "tryAgain": "Încercați din nou",
+    "preview": "Previzualizare",
+    "sendToAi": "Trimitere la AI",
+    "continueBatch": "Creați următoarele cereri",
+    "empty": "Gol",
+    "current": "Curent",
+    "proposed": "Propus",
+    "instructions": "Instrucțiuni",
+    "content": "Conținut",
+    "replyFormat": "Formatul răspunsului",
+    "scriptLabel": "Script",
+    "preRequest": "Pre-cerere",
+    "postResponse": "Post-răspuns",
+    "providerLabel": "AI: {{label}}",
+    "waitingFor": "Se așteaptă {{label}}",
+    "readingSpec": "Se citește documentul OpenAPI",
+    "reviewNote": "Generat de AI. Verificați înainte de a accepta. Nimic nu este trimis, salvat sau rulat până nu decideți.",
+    "previewNote": "Exact acest text va fi trimis către {{host}}: aproximativ {{size}} ({{tokens}} tokenuri). Secretele sunt mascate.",
+    "previewNoteValues": "Exact acest text va fi trimis către {{host}}: aproximativ {{size}} ({{tokens}} tokenuri). Secretele sunt mascate. Sunt incluse valorile din corpul răspunsului (până la 4 KB, cheile sensibile sunt mascate).",
+    "previewNoteStructure": "Exact acest text va fi trimis către {{host}}: aproximativ {{size}} ({{tokens}} tokenuri). Secretele sunt mascate. Este inclusă doar structura corpului răspunsului, nu și valorile.",
+    "skipPreview": "Nu mai întreba pentru această acțiune (va fi trimisă fără această previzualizare)",
+    "includeValues": "Includeți valorile reale din răspuns (altfel se trimite doar structura)",
+    "includeBodyValues": "Includeți valorile din corp (până la 4 KB, cheile sensibile sunt mascate). Debifați pentru a trimite doar structura.",
+    "needsResponse": "Trimiteți mai întâi cererea, ca să existe un răspuns de la care să se pornească.",
+    "needsTrust": "Acest dosar este restricționat. Acordați-i încredere înainte de a genera scripturi, deoarece scripturile de la AI nu sunt de încredere până nu le verificați.",
+    "badReply": "Modelul nu a răspuns în formatul așteptat. Încercați din nou sau alegeți un model mai capabil.",
+    "cutOff": "Răspunsul a fost întrerupt deoarece a atins limita de lungime. Încercați din nou cu mai puțin conținut sau alegeți un model care scrie răspunsuri mai scurte.",
+    "connected": "Conectat",
+    "cancelled": "Anulat",
+    "tooLarge": "Textul are {{size}}; limita este {{limit}}. Lipiți o parte mai mică. Un document OpenAPI sau Swagger complet, de orice dimensiune, poate fi importat cu Importare date.",
+    "searchLimited": "Colecția dvs. are {{total}} cereri. Doar primele {{sent}} sunt trimise, deci cererile de după ele nu pot fi găsite.",
+    "tasks": {
+      "request": {
+        "label": "Cerere nouă dintr-o descriere",
+        "inputLabel": "Descrieți cererea",
+        "placeholder": "POST pentru un utilizator nou, cu nume și e-mail",
+        "section": "Cerere nouă (se deschide într-o filă nesalvată)",
+        "apply": "Deschidere într-o filă nouă",
+        "untitled": "Cerere AI"
+      },
+      "tests": {
+        "label": "Verificări pentru un răspuns",
+        "assertions": "Aserțiuni",
+        "script": "Script post-răspuns (generat de AI, verificați înainte de rulare)",
+        "apply": "Adăugare la cerere"
+      },
+      "script": {
+        "label": "Script pre-cerere sau post-răspuns",
+        "inputLabel": "Ce ar trebui să facă scriptul",
+        "placeholder": "Salvează tokenul din răspuns în mediu",
+        "sectionPreScript": "Script pre-cerere nou (generat de AI, verificați înainte de rulare)",
+        "sectionPostScript": "Script post-răspuns nou (generat de AI, verificați înainte de rulare)",
+        "apply": "Înlocuire script"
+      },
+      "explain": {
+        "label": "Explicarea unui răspuns eșuat",
+        "happened": "Ce s-a întâmplat",
+        "causes": "Cauze probabile",
+        "fixes": "Remedieri sugerate"
+      },
+      "docs": {
+        "label": "Documentarea cererii",
+        "section": "Descriere",
+        "apply": "Utilizare ca descriere"
+      },
+      "search": {
+        "label": "Întrebări despre colecție",
+        "inputLabel": "Ce căutați",
+        "placeholder": "endpointul care anulează o comandă"
+      },
+      "schema": {
+        "label": "Cereri dintr-o descriere a API-ului",
+        "inputLabel": "Lipiți un document OpenAPI sau Swagger, o schemă GraphQL sau textul documentației unui API",
+        "placeholder": "openapi: 3.1.0 ...",
+        "folder": "Dosar nou „{{name}}”",
+        "defaultFolder": "Cereri AI",
+        "apply_one": "Adăugare dosar și {{count}} cerere",
+        "apply_few": "Adăugare dosar și {{count}} cereri",
+        "apply_other": "Adăugare dosar și {{count}} de cereri",
+        "moreNote": "API-ul are mai multe endpointuri decât încap într-un singur răspuns. Creați următoarele cereri pentru a continua; același text este trimis din nou, împreună cu lista cererilor deja create.",
+        "importerSection_one": "Import OpenAPI: {{count}} cerere",
+        "importerSection_few": "Import OpenAPI: {{count}} cereri",
+        "importerSection_other": "Import OpenAPI: {{count}} de cereri",
+        "importerNote": "Acesta este un document OpenAPI sau Swagger, așa că importatorul încorporat îl citește integral. Nimic nu a fost trimis la AI. Pentru a adăuga aserțiuni, trimiteți o cerere și folosiți „Verificări pentru un răspuns”.",
+        "importerWarnings": "Note ale importatorului",
+        "importApply_one": "Importă {{count}} cerere",
+        "importApply_few": "Importă {{count}} cereri",
+        "importApply_other": "Importă {{count}} de cereri",
+        "moreLines_one": "și încă {{count}}",
+        "moreLines_few": "și încă {{count}}",
+        "moreLines_other": "și încă {{count}}"
+      }
+    },
+    "buttons": {
+      "generate": "Generare cu AI",
+      "generateTests": "Generare verificări cu AI",
+      "generateScript": "Generare script cu AI",
+      "explain": "Explicare cu AI",
+      "explainError": "Explicați această eroare cu AI",
+      "document": "Scriere cu AI",
+      "documentLabel": "Scrieți descrierea cu AI"
+    },
+    "commands": {
+      "request": {
+        "label": "AI: cerere nouă dintr-o descriere",
+        "description": "Schițează o cerere, afișată ca previzualizare pe care o acceptați",
+        "keywords": "generează"
+      },
+      "tests": {
+        "label": "AI: generare verificări",
+        "description": "Propune verificări pentru ultimul răspuns"
+      },
+      "script": {
+        "label": "AI: scriere script",
+        "description": "Propune un script pre-cerere sau post-răspuns"
+      },
+      "explain": {
+        "label": "AI: explicare răspuns",
+        "description": "Explică o eroare și sugerează o remediere"
+      },
+      "docs": {
+        "label": "AI: documentare cerere",
+        "description": "Propune o descriere pentru cerere"
+      },
+      "search": {
+        "label": "AI: întrebare despre colecție",
+        "description": "Găsește cereri după descriere",
+        "keywords": "căutare găsire"
+      },
+      "schema": {
+        "label": "AI: cereri dintr-o descriere a API-ului",
+        "description": "Documentele OpenAPI folosesc importatorul încorporat; alte descrieri sunt trimise la AI",
+        "keywords": "openapi swagger graphql schemă"
+      },
+      "settings": {
+        "label": "Setări AI",
+        "description": "Activare sau dezactivare AI, furnizor, model și cheie",
+        "keywords": "dezactivare activare preferințe"
+      }
+    },
+    "settings": {
+      "offNote": "AI este dezactivat. Nu sunt afișate butoane, comenzi sau scurtături AI și nimic nu este trimis către un furnizor AI.",
+      "onNote": "AI este activat. Butoanele și comenzile AI sunt afișate, iar nimic nu este trimis până nu rulați o acțiune AI.",
+      "needsSetup": "AI este activat. Înainte de a putea rula o acțiune AI, alegeți un model și salvați o cheie API, dacă furnizorul are nevoie de una.",
+      "previewNote": "Fiecare acțiune afișează o previzualizare a exact ceea ce va fi trimis înainte ca ceva să părăsească dispozitivul dvs., cu excepția cazului în care ați ales „Nu mai întreba” pentru acea acțiune.",
+      "consent": "Înțeleg că, atunci când rulez o acțiune AI, detaliile cererii sau ale răspunsului din previzualizare sunt trimise către {{host}}, iar facturarea se face între mine și furnizor.",
+      "enable": "Activare funcții AI",
+      "enableAfterConsent": "Activare funcții AI (bifați mai întâi rândul de mai sus)",
+      "provider": "Furnizor",
+      "baseUrl": "URL de bază",
+      "baseUrlPlaceholder": "https://host/v1",
+      "allowInsecure": "Permite http simplu către această adresă (adresele loopback sunt permise întotdeauna)",
+      "model": "ID model",
+      "listModels": "Listare modele",
+      "modelsFound_one": "{{count}} model găsit. Alegeți unul sau introduceți un ID.",
+      "modelsFound_few": "{{count}} modele găsite. Alegeți unul sau introduceți un ID.",
+      "modelsFound_other": "{{count}} de modele găsite. Alegeți unul sau introduceți un ID.",
+      "noModels": "Furnizorul nu a listat niciun model. Introduceți un ID de model.",
+      "localNoModels": "Serverul rulează, dar nu are modele. Descărcați unul, apoi listați din nou.",
+      "apiKey": "Cheie API",
+      "keySaved": "Cheie salvată",
+      "removeKey": "Eliminare cheie",
+      "pasteKey": "Lipiți cheia API",
+      "optionalKey": "Opțional",
+      "saveKey": "Salvare cheie",
+      "remember": "Reține pe acest dispozitiv (altfel doar până la închiderea filei)",
+      "test": "Testare conexiune",
+      "skipped_one": "{{count}} acțiune este trimisă fără previzualizare.",
+      "skipped_few": "{{count}} acțiuni sunt trimise fără previzualizare.",
+      "skipped_other": "{{count}} de acțiuni sunt trimise fără previzualizare.",
+      "askAgain": "Afișare din nou a previzualizării",
+      "browserNote": "În browser, apelurile merg direct de pe această pagină către furnizor; cheia dvs. nu ajunge niciodată pe serverele Gostman. Furnizorul trebuie să permită apeluri cross-origin. Un Ollama local are nevoie ca OLLAMA_ORIGINS să fie setat la acest site, iar LM Studio are nevoie de CORS activat în setările serverului. Dacă un furnizor blochează browserele, folosiți aplicația desktop.",
+      "desktopNote": "Cheia dvs. este păstrată în keychain-ul sistemului de operare, iar aplicația desktop apelează singură furnizorul. Pagina nu citește niciodată cheia înapoi.",
+      "forget": "Dezactivare AI și ștergere chei",
+      "forgetWhileOff": "Ștergere chei și setări AI"
+    },
+    "errors": {
+      "invalidBase": "URL-ul de bază nu este o adresă validă",
+      "insecureBase": "Folosiți un URL de bază https sau permiteți http simplu pentru el în setările AI",
+      "enterModel": "Introduceți un ID de model",
+      "pasteKey": "Lipiți o cheie API pentru acest furnizor",
+      "keyMoved": "Această cheie a fost salvată pentru o altă adresă. Salvați-o din nou pentru acest URL de bază.",
+      "tooLarge": "Cererea este prea mare pentru a fi trimisă. Selectați mai puțin conținut",
+      "noAnswer": "Furnizorul nu a returnat niciun răspuns",
+      "notJson": "Furnizorul a răspuns cu ceva care nu este JSON. Verificați URL-ul de bază",
+      "timedOut": "Furnizorul nu a răspuns la timp",
+      "rejectedKey": "Furnizorul a respins cheia sau este posibil ca contul să nu poată folosi acest model",
+      "rateLimited": "Furnizorul limitează cererile sau cota a fost epuizată. Așteptați puțin și încercați din nou",
+      "providerTimeout": "Furnizorul a depășit timpul de răspuns",
+      "providerProblem": "Furnizorul a întâmpinat o problemă. Încercați din nou în scurt timp",
+      "refused": "Furnizorul a refuzat cererea ({{status}})",
+      "retryIn": "{{summary}} (reîncercare în {{seconds}} s)",
+      "withDetail": "{{summary}}: {{detail}}",
+      "unreachable": "{{host}} nu a putut fi contactat. Adresa poate fi greșită sau furnizorul nu permite apeluri dintr-o pagină web (CORS). {{advice}}",
+      "unreachableWithReason": "{{host}} nu a putut fi contactat ({{reason}}). Adresa poate fi greșită sau furnizorul nu permite apeluri dintr-o pagină web (CORS). {{advice}}",
+      "ollamaAdvice": "Porniți Ollama cu OLLAMA_ORIGINS={{origin}} și reporniți-l sau folosiți aplicația desktop.",
+      "lmStudioAdvice": "Porniți serverul LM Studio cu CORS activat (setările Developer sau lms server start --cors) sau folosiți aplicația desktop.",
+      "customAdvice": "Serverul trebuie să răspundă la cererea preflight OPTIONS și să permită {{origin}} cu antetele Authorization și Content-Type. Aplicația desktop nu are această limitare.",
+      "anthropicAdvice": "Anthropic permite doar apeluri din browser care au antetul său de acces direct, pe care Gostman îl trimite, deci verificați și cheia și conexiunea. Aplicația desktop nu are această limitare.",
+      "generalAdvice": "Verificați URL-ul de bază și conexiunea. Aplicația desktop nu are această limitare."
+    },
+    "providers": {
+      "local": "{{name}} (local)",
+      "custom": "URL compatibil OpenAI",
+      "customModelHint": "ID model"
+    }
+  }
+}

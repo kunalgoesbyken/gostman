@@ -1,0 +1,14 @@
+{
+  "socketSessions": {
+    "invalidVariables": "当前环境的变量不是有效的 JSON。",
+    "invalidAddress": "请在地址栏中输入 ws:// 或 wss:// URL。",
+    "notConnected": "未发送：消息发出之前连接已关闭。",
+    "undefinedVariables": "URL 使用了当前环境中未定义的变量：{{names}}。",
+    "reconnecting": "{{seconds}} s 后重新连接",
+    "couldNotSend": "无法发送：{{message}}",
+    "connected": "已连接",
+    "couldNotConnect": "无法连接：{{message}}",
+    "connecting": "正在连接 {{url}}",
+    "disconnected": "已断开"
+  }
+}

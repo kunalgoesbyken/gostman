@@ -1,0 +1,20 @@
+{
+  "about": {
+    "title": "关于 Gostman",
+    "commandTitle": "关于 Gostman",
+    "commandDescription": "版本、链接和诊断信息",
+    "tagline": "开源 API 客户端，支持 REST、GraphQL、gRPC 和 WebSocket。无需账号，数据保存在你的设备上。",
+    "version": "版本 {{version}}",
+    "links": {
+      "website": "官网",
+      "source": "源代码",
+      "releases": "发布版本",
+      "issues": "报告问题"
+    },
+    "diagnosticsHint": "诊断信息只包含版本、平台和数量，绝不包含请求、URL、变量、令牌或机密。",
+    "copyDiagnostics": "复制诊断信息",
+    "copied": "已复制",
+    "versionButton": "关于 Gostman",
+    "close": "关闭"
+  }
+}

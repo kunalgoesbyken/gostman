@@ -1,0 +1,21 @@
+{
+  "jsonFormat": {
+    "expectedValue": "Se aștepta o valoare",
+    "unexpectedEnd": "JSON-ul se termină prea devreme",
+    "unexpected": "{{character}} neașteptat",
+    "endOfText": "sfârșit de text",
+    "expectedKey": "Se aștepta un nume de proprietate între ghilimele duble",
+    "expectedColon": "Se aștepta ':' după numele proprietății",
+    "expectedObjectEnd": "Se aștepta ',' sau '}' după valoarea proprietății",
+    "expectedArrayEnd": "Se aștepta ',' sau ']' după element",
+    "trailingComma": "Eliminați virgula dinaintea lui '{{closer}}'",
+    "unclosedString": "Acest șir nu are ghilimele de închidere",
+    "lineBreakInString": "Întreruperile de linie dintr-un șir trebuie scrise ca \\n",
+    "controlInString": "Caracterele de control dintr-un șir trebuie escapate",
+    "badEscape": "Secvență de escape necunoscută într-un șir",
+    "badNumber": "Acest număr nu este JSON valid",
+    "unclosedReference": "Acest {{reference}} nu are {{closer}} de închidere",
+    "extraText": "Text neașteptat după valoarea JSON",
+    "tooDeep": "JSON-ul este imbricat prea adânc pentru a fi formatat"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "keyValue": {
+    "key": "キー",
+    "value": "値",
+    "type": "種類",
+    "sendRow": "この行を送信",
+    "fieldType": "フィールドの種類",
+    "text": "テキスト",
+    "file": "ファイル",
+    "removeRow": "行を削除",
+    "bulkLabel": "{{keyLabel}}の行をテキストで編集",
+    "bulkPlaceholder": "{{keyLabel}}: 値",
+    "bulkHint": "1行に1つ、名前: 値の形式で入力します。//または#で始まる行は、送信せずに残します。",
+    "bulkUnavailable": "名前にコロンを含む行や、先頭または末尾にスペースがある行は、表でのみ編集できます。",
+    "editAsTable": "表で編集",
+    "bulkEdit": "一括編集"
+  }
+}

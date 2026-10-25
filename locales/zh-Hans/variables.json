@@ -1,0 +1,18 @@
+{
+  "variables": {
+    "dynamic": "每次发送请求时生成",
+    "prompt": "发送请求时询问",
+    "undefinedName": "在当前环境中未定义",
+    "resolvesTo": "解析为",
+    "through": "经由 {{names}}",
+    "sources": {
+      "global": "全局",
+      "collection": "集合",
+      "environment": "环境",
+      "folder": "文件夹",
+      "request": "请求",
+      "process": ".env 文件",
+      "session": "会话"
+    }
+  }
+}

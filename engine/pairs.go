@@ -2,14 +2,14 @@ package engine
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"io"
 	"regexp"
 	"slices"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 type pair struct {
@@ -19,7 +19,7 @@ type pair struct {
 
 var placeholderRe = regexp.MustCompile(`{{([^}]+)}}`)
 
-var errTrailingJSON = errors.New("unexpected text after the JSON value")
+var errTrailingJSON = locales.Errorf(locales.EngineRequestTrailingJson, nil)
 
 func decodeJSON(raw string) (any, error) {
 	dec := json.NewDecoder(strings.NewReader(raw))
@@ -60,7 +60,7 @@ func parseVariables(raw string) (map[string]string, error) {
 	}
 	object, ok := decoded.(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("expected a JSON object")
+		return nil, locales.Errorf(locales.EngineRequestExpectedObject, nil)
 	}
 	variables := make(map[string]string, len(object))
 	for key, value := range object {
@@ -77,7 +77,7 @@ const (
 	maxRequestExpansions = 100000
 )
 
-var errOverworked = errors.New("the variables refer to each other too many times to fill in; simplify the variables that contain {{...}}")
+var errOverworked = locales.Errorf(locales.EngineRequestVariablesTooDeep, locales.Params{"example": "{{...}}"})
 
 type substitution struct {
 	variables  map[string]string
@@ -99,7 +99,7 @@ type substitution struct {
 func newSubstitution(variables string) (*substitution, error) {
 	parsed, err := parseVariables(variables)
 	if err != nil {
-		return nil, fmt.Errorf("environment variables are not valid JSON: %w", err)
+		return nil, locales.Wrap(locales.EngineRequestVariablesInvalid, nil, err)
 	}
 	return substitutionOf(parsed), nil
 }
@@ -118,7 +118,7 @@ func (s *substitution) failure() error {
 		return s.err
 	}
 	if s.exceeded {
-		return fmt.Errorf("the request is larger than 10 MB once variables are filled in")
+		return locales.Errorf(locales.EngineRequestTooLargeExpanded, nil)
 	}
 	if s.overworked {
 		return errOverworked
@@ -309,7 +309,7 @@ func parseRows(raw string) ([]pairRow, error) {
 	case []any:
 		return rowsFromList(value), nil
 	default:
-		return nil, fmt.Errorf("expected a JSON object or a list of rows")
+		return nil, locales.Errorf(locales.EngineRequestExpectedRows, nil)
 	}
 }
 

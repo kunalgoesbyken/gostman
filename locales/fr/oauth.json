@@ -1,0 +1,61 @@
+{
+  "oauth": {
+    "grants": {
+      "clientCredentials": "Identifiants client",
+      "password": "Mot de passe",
+      "authorizationCode": "Code d’autorisation",
+      "deviceCode": "Code d’appareil"
+    },
+    "fields": {
+      "grant": "Type d’octroi",
+      "issuer": "Émetteur",
+      "authUrl": "URL d’autorisation",
+      "deviceUrl": "URL d’autorisation de l’appareil",
+      "callbackUrl": "URL de rappel",
+      "callbackTitle": "Enregistrez {{url}} comme URI de redirection auprès du fournisseur",
+      "tokenUrl": "URL du jeton",
+      "clientId": "ID client",
+      "clientSecret": "Secret client",
+      "username": "Nom d’utilisateur",
+      "password": "Mot de passe",
+      "scope": "Portée",
+      "credentialsIn": "Envoyer les identifiants dans",
+      "credentialsHeader": "En-tête Basic auth",
+      "credentialsBody": "Corps de la requête",
+      "pkce": "Utiliser PKCE",
+      "headerPrefix": "Préfixe d’en-tête",
+      "sendIdToken": "Envoyer le jeton d’ID au lieu du jeton d’accès",
+      "accessToken": "Jeton d’accès",
+      "idToken": "Jeton d’ID"
+    },
+    "discover": "Découvrir",
+    "discoverTitle": "Renseigne les points d’accès à partir de /.well-known/openid-configuration de l’émetteur",
+    "discovered": "Points d’accès renseignés à partir de {{issuer}}.",
+    "discovering": "Lecture du document de découverte de l’émetteur.",
+    "getToken": "Obtenir un jeton",
+    "cancel": "Annuler",
+    "clearToken": "Effacer le jeton",
+    "waitingForBrowser": "En attente de la fin de la connexion dans votre navigateur.",
+    "requesting": "Demande d’un jeton.",
+    "waitingForDevice": "En attente que vous saisissiez le code et vous connectiez.",
+    "deviceCode": "Saisissez ce code sur la page de connexion :",
+    "openSignInPage": "Ouvrir la page de connexion",
+    "noToken": "Pas encore de jeton.",
+    "otherEnvironment": "Le jeton a été obtenu avec un autre environnement : il n’est donc pas envoyé. Obtenez un jeton pour cet environnement.",
+    "noIdToken": "Le fournisseur n’a renvoyé aucun jeton d’ID. Ajoutez openid à la portée et obtenez un nouveau jeton.",
+    "noExpiry": "Le fournisseur n’a pas indiqué d’heure d’expiration.",
+    "expires": "Expire {{expiry}}.",
+    "expired": "Expiré {{expiry}}. Un nouveau jeton est demandé lorsqu’il peut être renouvelé sans connexion.",
+    "signInNeeded": "Cette requête a besoin d’un jeton OAuth 2. Ouvrez l’onglet Auth et choisissez Obtenir un jeton.",
+    "signInForEnvironment": "Le jeton OAuth 2 a été obtenu avec un autre environnement : il n’est donc pas envoyé. Ouvrez l’onglet Auth et choisissez Obtenir un jeton pour vous connecter pour cet environnement.",
+    "deviceExpired": "Le code d’appareil a expiré avant la fin de la connexion. Obtenez de nouveau un jeton.",
+    "cancelled": "La connexion a été annulée.",
+    "popup": {
+      "blocked": "La fenêtre de connexion a été bloquée. Autorisez les fenêtres contextuelles pour ce site et réessayez.",
+      "timedOut": "Aucune connexion reçue en cinq minutes.",
+      "noCode": "Le fournisseur n’a pas renvoyé de code d’autorisation.",
+      "refused": "Le fournisseur a refusé la connexion : {{reason}}",
+      "wrongIssuer": "La réponse de connexion nomme l’émetteur « {{received}} » au lieu de « {{expected}} » : elle a donc été écartée."
+    }
+  }
+}

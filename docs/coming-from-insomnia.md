@@ -4,6 +4,8 @@ Gostman reads Insomnia exports in both formats, turns Insomnia's template tags i
 
 Gostman has no paid tier, no account and no licence key. Git in the app, secret managers, collection runs, mock servers and any number of users are in the free download. See [What is free in Gostman](free-features.md).
 
+For how the two tools differ and where Insomnia is stronger, see [Gostman and Insomnia compared](gostman-vs-insomnia.md).
+
 ## Export from Insomnia
 
 Gostman reads both export formats:

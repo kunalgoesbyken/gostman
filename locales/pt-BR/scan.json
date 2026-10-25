@@ -1,0 +1,32 @@
+{
+  "scan": {
+    "title": "Procurar segredos",
+    "commandDescription": "Encontre credenciais digitadas em requisições antes de compartilhá-las ou fazer commit",
+    "intro": "Procura formatos conhecidos de token, valores de aparência aleatória em campos de credenciais e senhas digitadas nas configurações de autenticação. Valores escritos como {{example}} estão certos. Nada sai desta janela além da própria verificação, e apenas alguns caracteres de um valor são mostrados.",
+    "includeExamples": "Incluir respostas de exemplo salvas",
+    "scanning": "Analisando",
+    "clean": "Nenhum segredo encontrado",
+    "cleanDescription": "Nenhum formato de token, valor de credencial de aparência aleatória ou senha digitada foi encontrado.",
+    "failed": "Não foi possível executar a verificação: {{message}}",
+    "goToRequest": "Ir para a requisição",
+    "findings": "Achados",
+    "showFindings": "Mostrar achados",
+    "hideFindings": "Ocultar achados",
+    "shareAnyway": "Compartilhar mesmo assim",
+    "found_one": "{{count}} possível segredo encontrado",
+    "found_many": "{{count}} de possíveis segredos encontrados",
+    "found_other": "{{count}} possíveis segredos encontrados",
+    "foundShare": "Eles permanecem no link ou arquivo que você criar. Substitua-os por {{example}} primeiro, ou compartilhe mesmo assim.",
+    "foundExport": "Eles são gravados na exportação. Substitua-os por {{example}} primeiro se o arquivo for compartilhado ou for receber commit.",
+    "severity": {
+      "high": "Alta",
+      "medium": "Média"
+    },
+    "kinds": {
+      "request": "Requisição",
+      "folder": "Pasta",
+      "environment": "Ambiente",
+      "collection": "Coleção"
+    }
+  }
+}

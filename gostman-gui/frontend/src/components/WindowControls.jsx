@@ -24,7 +24,7 @@ export function WindowControls() {
   const maximiseLabel = isMaximised ? APP_TEXT.window.restore : APP_TEXT.window.maximize
 
   return (
-    <div className="-mr-3 flex h-full shrink-0 items-stretch" style={NO_DRAG}>
+    <div className="-me-3 flex h-full shrink-0 items-stretch" style={NO_DRAG}>
       <button type="button" aria-label={APP_TEXT.window.minimize} title={APP_TEXT.window.minimize} className={BUTTON_CLASS} onClick={windowControls.minimise}>
         <Minus />
       </button>

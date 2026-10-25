@@ -15,7 +15,7 @@ export function Switch({ checked, label, onCheckedChange, children, className, .
           checked ? "bg-primary" : "bg-muted-foreground/40",
         )}
       >
-        <span aria-hidden="true" className={cn("h-3 w-3 rounded-full bg-background transition-transform", checked ? "translate-x-3.5" : "translate-x-0.5")} />
+        <span aria-hidden="true" className={cn("h-3 w-3 rounded-full bg-background transition-transform", checked ? "translate-x-3.5 rtl:-translate-x-3.5" : "translate-x-0.5 rtl:-translate-x-0.5")} />
       </button>
       {children && <span aria-hidden="true" className="whitespace-nowrap">{children}</span>}
     </span>

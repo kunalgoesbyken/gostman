@@ -1,16 +1,15 @@
-export const AUTH_TEXT = {
-  type: 'Type',
-  username: 'Username',
-  password: 'Password',
-  token: 'Token',
-  key: 'Key',
-  keyPlaceholder: 'X-API-Key',
-  value: 'Value',
-  addTo: 'Add to',
-  inHeader: 'Header',
-  inQuery: 'Query params',
-  noAuthNote: 'This request is sent without authentication.',
-  fieldsNote: 'Values can use {{variables}}. This overrides a header or parameter of the same name.',
-  showValue: 'Show value',
-  hideValue: 'Hide value',
-}
+import english from '../../../../locales/en/auth.json'
+import { messages } from './i18n/core'
+
+const FIELDS_EXAMPLE = '{{variables}}'
+
+const text = messages('auth', english, (t) => ({
+  auth: {
+    keyPlaceholder: 'X-API-Key',
+    get fieldsNote() {
+      return t('auth.fieldsNote', { example: FIELDS_EXAMPLE })
+    },
+  },
+}))
+
+export const AUTH_TEXT = text.auth

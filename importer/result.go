@@ -8,6 +8,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/kunalgoesbyken/gostman/locales"
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
@@ -42,6 +43,7 @@ type Result struct {
 	Notes         []string                `json:"notes,omitempty"`
 	Remarks       []Remark                `json:"remarks,omitempty"`
 	Skipped       []string                `json:"skipped"`
+	SkippedSaid   []locales.Message       `json:"skippedLocalized,omitempty"`
 	SharedOrder   bool                    `json:"sharedOrder"`
 	Flows         []workspace.Flow        `json:"flows,omitempty"`
 }
@@ -57,13 +59,16 @@ type Remark struct {
 	Kind    string `json:"kind,omitempty"`
 	Text    string `json:"text"`
 	Warning bool   `json:"warning,omitempty"`
+
+	Localized *locales.Message `json:"localized,omitempty"`
 }
 
 type collector struct {
 	Result
+	leading   []Remark
 	remarks   []Remark
-	flags     map[string][]string
-	flagOrder []string
+	flags     map[locales.Code][]string
+	flagOrder []locales.Code
 	full      bool
 	inPlace   bool
 	scripts   scriptTally
@@ -77,34 +82,18 @@ type collector struct {
 	postmanEnvironments map[string]bool
 }
 
-var importOnlyNotes = setOf(messageScripts, messageBrunoSecrets)
+var importOnlyNotes = map[locales.Code]bool{locales.ImporterScripts: true, locales.ImporterBrunoSecrets: true}
 
-var flagKinds = map[string]string{
-	messageScripts:         RemarkScripts,
-	messageForeignCalls:    RemarkScripts,
-	messageHTTPHandlerFile: RemarkScripts,
-	messageOAuth:           RemarkOAuth,
-	messageOAuthAudience:   RemarkOAuth,
-}
-
-var singularMessages = map[string]string{
-	messageHTTPVariables:          "The variable %s has no Gostman equivalent and was kept as written.",
-	messageSecretVariables:        "The secret folder variable %s was left out, because folder variables cannot be marked secret. Add it to an environment, or to the collection variables in the Vars tab of the top-level folder's Collection settings, and mark it secret with its lock.",
-	messageDisabledScopeVariables: "The switched-off variable %s was left out.",
-	messageReferencesDropped:      "The secret manager reference of %s was removed, because an imported file could use it to read your secrets. Pick the connection and path again with the key icon on its row.",
-	messageBrunoSecrets:           "The secret variable %s has no value, because Bruno keeps secret values outside the collection files. Fill it in under Environments, or pass it to gostman run with --var.",
-	messageInsomniaVault:          "The vault secret %s has no value, because Insomnia exports it encrypted. Fill it in under Environments, or pass it to gostman run with --var.",
-}
-
-func wordingFor(kind string, count int) string {
-	if singular, ok := singularMessages[kind]; ok && count == 1 {
-		return singular
-	}
-	return kind
+var flagKinds = map[locales.Code]string{
+	locales.ImporterScripts:         RemarkScripts,
+	locales.ImporterForeignCalls:    RemarkScripts,
+	locales.ImporterHttpHandlerFile: RemarkScripts,
+	locales.ImporterOauth:           RemarkOAuth,
+	locales.ImporterOauthAudience:   RemarkOAuth,
 }
 
 func newCollector() *collector {
-	return &collector{Result: Result{Variables: map[string]string{}}, flags: map[string][]string{}, visitedNodes: map[*insomniaNode]bool{}, scoped: map[string]scopedFolder{}, places: map[string]int64{}}
+	return &collector{Result: Result{Variables: map[string]string{}}, flags: map[locales.Code][]string{}, visitedNodes: map[*insomniaNode]bool{}, scoped: map[string]scopedFolder{}, places: map[string]int64{}}
 }
 
 func newID() string {
@@ -185,32 +174,27 @@ func (c *collector) keepRequest(request workspace.Request) {
 	c.Requests = append(c.Requests, request)
 }
 
-func (c *collector) skip(format string, args ...any) {
-	c.Skipped = append(c.Skipped, fmt.Sprintf(format, args...))
+func (c *collector) skip(code locales.Code, params locales.Params) {
+	said := locales.New(code, params)
+	c.Skipped = append(c.Skipped, said.String())
+	c.SkippedSaid = append(c.SkippedSaid, said)
 }
 
-func (c *collector) flag(kind, name string) {
-	if _, seen := c.flags[kind]; !seen {
-		c.flagOrder = append(c.flagOrder, kind)
+func (c *collector) flag(code locales.Code, name string) {
+	if _, seen := c.flags[code]; !seen {
+		c.flagOrder = append(c.flagOrder, code)
 	}
-	c.flags[kind] = append(c.flags[kind], name)
+	c.flags[code] = append(c.flags[code], name)
 }
 
-func (c *collector) flagUnique(kind, name string) {
-	if !slices.Contains(c.flags[kind], name) {
-		c.flag(kind, name)
+func (c *collector) flagUnique(code locales.Code, name string) {
+	if !slices.Contains(c.flags[code], name) {
+		c.flag(code, name)
 	}
-}
-
-func appendUnique(items []string, item string) []string {
-	if slices.Contains(items, item) {
-		return items
-	}
-	return append(items, item)
 }
 
 func (c *collector) warnDepth() {
-	c.Warnings = appendUnique(c.Warnings, fmt.Sprintf(messageDepth, maxFolderDepth))
+	c.leadOnce(locales.New(locales.ImporterDepth, locales.Params{"count": maxFolderDepth}))
 }
 
 func (c *collector) read(name, format string, run func()) {
@@ -228,32 +212,58 @@ func (c *collector) read(name, format string, run func()) {
 	})
 }
 
-func (c *collector) warn(kind, text string) {
-	c.remarks = append(c.remarks, Remark{Kind: kind, Text: text, Warning: true})
+func appendUnique(items []string, item string) []string {
+	if slices.Contains(items, item) {
+		return items
+	}
+	return append(items, item)
 }
 
-func (c *collector) warnOnce(kind, text string) {
-	if !slices.ContainsFunc(c.remarks, func(remark Remark) bool { return remark.Text == text }) {
-		c.warn(kind, text)
+func remarkOf(kind string, said locales.Message, warning bool) Remark {
+	return Remark{Kind: kind, Text: said.String(), Warning: warning, Localized: &said}
+}
+
+func (c *collector) warn(kind string, said locales.Message) {
+	c.remarks = append(c.remarks, remarkOf(kind, said, true))
+}
+
+func (c *collector) warnOnce(kind string, said locales.Message) {
+	if !slices.ContainsFunc(c.remarks, func(remark Remark) bool { return remark.Text == said.String() }) {
+		c.warn(kind, said)
 	}
 }
 
-func (c *collector) note(kind, text string) {
-	c.remarks = append(c.remarks, Remark{Kind: kind, Text: text})
+func (c *collector) note(kind string, said locales.Message) {
+	c.remarks = append(c.remarks, remarkOf(kind, said, false))
+}
+
+func (c *collector) lead(said locales.Message) {
+	c.leading = append(c.leading, remarkOf("", said, true))
+}
+
+func (c *collector) leadOnce(said locales.Message) {
+	if !slices.ContainsFunc(c.leading, func(remark Remark) bool { return remark.Text == said.String() }) {
+		c.lead(said)
+	}
+}
+
+func (c *collector) leadText(texts []string) {
+	c.leading = append(c.leading, plainRemarks(texts, true)...)
 }
 
 func (c *collector) result() Result {
 	result := c.Result
 	result.SharedOrder = true
-	remarks := append(plainRemarks(c.Warnings, true), c.remarks...)
-	for _, kind := range c.flagOrder {
-		if c.inPlace && importOnlyNotes[kind] {
+	remarks := append(slices.Clone(c.leading), c.remarks...)
+	for _, code := range c.flagOrder {
+		if c.inPlace && importOnlyNotes[code] {
 			continue
 		}
-		remarks = append(remarks, Remark{Kind: flagKinds[kind], Text: fmt.Sprintf(wordingFor(kind, len(c.flags[kind])), listNames(c.flags[kind])), Warning: true})
+		names := c.flags[code]
+		remarks = append(remarks, remarkOf(flagKinds[code], locales.New(code, locales.Params{"names": listNames(names), "count": len(names)}), true))
 	}
 	if c.full {
-		remarks = append(remarks, Remark{Text: fmt.Sprintf(messageTooMany, maxRequests), Warning: true})
+		remarks = append(remarks, remarkOf("", locales.New(locales.ImporterTooMany, locales.Params{"count": maxRequests}), true))
 	}
 	result.Remarks = append(remarks, plainRemarks(c.Notes, false)...)
 	result.Warnings, result.Notes = remarkTexts(result.Remarks, true), remarkTexts(result.Remarks, false)
@@ -278,18 +288,30 @@ func remarkTexts(remarks []Remark, warning bool) []string {
 	return texts
 }
 
-func listNames(names []string) string {
+func flagged(code locales.Code, names []string) locales.Message {
+	params := locales.Params{"names": listNames(names), "count": len(names)}
+	if code == locales.ImporterHttpProcessEnv {
+		params["example"] = "{{process.env.NAME}}"
+	}
+	return locales.New(code, params)
+}
+
+func listNames(names []string) any {
 	shown := names
 	if len(shown) > shownNames {
 		shown = shown[:shownNames]
 	}
-	quoted := make([]string, len(shown))
-	for index, name := range shown {
+	listed := locales.Unit(quotedNames(shown))
+	if hidden := len(names) - len(shown); hidden > 0 {
+		return locales.New(locales.ImporterAndMore, locales.Params{"names": listed, "count": hidden})
+	}
+	return listed
+}
+
+func quotedNames(names []string) []string {
+	quoted := make([]string, len(names))
+	for index, name := range names {
 		quoted[index] = `"` + name + `"`
 	}
-	text := strings.Join(quoted, ", ")
-	if hidden := len(names) - len(shown); hidden > 0 {
-		return fmt.Sprintf(messageAndMore, text, hidden)
-	}
-	return text
+	return quoted
 }

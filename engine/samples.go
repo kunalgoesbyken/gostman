@@ -48,7 +48,7 @@ var (
 		{"Portugal", "PT"}, {"Singapore", "SG"}, {"South Africa", "ZA"}, {"South Korea", "KR"}, {"Spain", "ES"}, {"Sweden", "SE"},
 		{"Switzerland", "CH"}, {"Turkey", "TR"}, {"United Kingdom", "GB"}, {"United States", "US"}, {"Vietnam", "VN"},
 	}
-	locales = []string{"en", "fr", "de", "es", "it", "pt", "nl", "sv", "da", "fi", "no", "pl", "cs", "ru", "uk", "tr", "ar", "he", "hi", "ja", "ko", "zh"}
+	sampleLocales = []string{"en", "fr", "de", "es", "it", "pt", "nl", "sv", "da", "fi", "no", "pl", "cs", "ru", "uk", "tr", "ar", "he", "hi", "ja", "ko", "zh"}
 
 	currencies = []currency{
 		{"USD", "US Dollar", "$"}, {"EUR", "Euro", "€"}, {"GBP", "Pound Sterling", "£"}, {"JPY", "Yen", "¥"},

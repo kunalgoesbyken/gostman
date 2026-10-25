@@ -1,0 +1,7 @@
+{
+  "appStore": {
+    "saveFailedTitle": "Não foi possível salvar as alterações",
+    "saveFailed": "Suas alterações mais recentes não foram salvas e serão perdidas quando o app for fechado. Exporte seus dados para manter uma cópia. ({{reason}})",
+    "delete": "Excluir"
+  }
+}

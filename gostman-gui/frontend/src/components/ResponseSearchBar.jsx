@@ -31,7 +31,7 @@ export function SearchBar({ query, onQueryChange, index, count, capped, onStep, 
 
   return (
     <Toolbar className="relative gap-1">
-      <Search className="pointer-events-none absolute left-5 h-3.5 w-3.5 text-muted-foreground" />
+      <Search className="pointer-events-none absolute start-5 h-3.5 w-3.5 text-muted-foreground" />
       <Input
         ref={inputRef}
         value={query}
@@ -40,7 +40,7 @@ export function SearchBar({ query, onQueryChange, index, count, capped, onStep, 
         placeholder={TEXT.findInBody}
         aria-label={TEXT.findInBody}
         spellCheck={false}
-        className="pl-7"
+        className="ps-7"
       />
       <span aria-live="polite" className="min-w-16 shrink-0 whitespace-nowrap px-1 text-center font-mono text-2xs text-muted-foreground">
         {statusText(query, index, count, capped)}
@@ -65,7 +65,8 @@ export function FilterBar({ path, onPathChange, error }) {
           aria-label={TEXT.filterLabel}
           aria-invalid={Boolean(error)}
           spellCheck={false}
-          className={`pl-7 font-mono ${error ? 'border-destructive' : ''}`}
+          dir="ltr"
+          className={`ps-7 font-mono ${error ? 'border-destructive' : ''}`}
         />
         {path !== '' && <IconButton label={TEXT.clearFilter} icon={X} onClick={() => onPathChange('')} />}
       </Toolbar>

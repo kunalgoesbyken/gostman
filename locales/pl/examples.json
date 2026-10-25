@@ -1,0 +1,26 @@
+{
+  "examples": {
+    "title": "Przykłady",
+    "bodyLabel": "Treść przykładu",
+    "listLabel": "Zapisane przykłady",
+    "emptyTitle": "Brak przykładów",
+    "emptyHint": "Wyślij żądanie, a potem wybierz Zapisz jako przykład w panelu odpowiedzi. Serwer mock odpowiada tymi przykładami.",
+    "servedByDefault": "Zwracany domyślnie",
+    "serveByDefault": "Zwracaj domyślnie",
+    "format": "Formatuj treść",
+    "rename": "Zmień nazwę przykładu",
+    "remove": "Usuń przykład",
+    "section": "Sekcja przykładu",
+    "body": "Treść",
+    "headersCount": "Nagłówki ({{count}})",
+    "noContentType": "Brak typu zawartości",
+    "binaryTitle": "Treść binarna, {{size}}",
+    "binaryHint": "Nie można jej edytować jako tekstu i jest zwracana dokładnie tak, jak została zapisana.",
+    "noHeadersHint": "Ten przykład został zapisany bez nagłówków.",
+    "unsaved": "Treść ma niezapisane zmiany.",
+    "discard": "Odrzuć",
+    "saveBody": "Zapisz treść",
+    "bodyTooLarge": "Ta treść ma {{size}}. Przykład może zawierać treść do {{limit}}.",
+    "tooMany": "Żądanie może mieć do {{limit}} przykładów. Usuń jeden, aby zapisać kolejny."
+  }
+}

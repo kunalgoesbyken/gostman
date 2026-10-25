@@ -2,8 +2,9 @@ import { fillPlaceholders } from "./placeholders.js"
 import { isSensitiveName } from "./sensitiveNames.js"
 import { ORIGIN_UNKNOWN, secretOrigin } from "./secretOrigins.js"
 import { colorTriplet } from "./swatches.js"
+import { VARIABLE_TEXT } from "./variablesText.js"
 import { mapText, someText, textsIn } from "./textValues.js"
-import { DYNAMIC_PREFIX, DYNAMIC_VARIABLES, FAKER_VARIABLES, SOURCE_LABELS, callsFile, describeDynamic, isDynamicName, isFakerQuery, isFileName, isPromptName } from "./variableNames.js"
+import { DYNAMIC_PREFIX, DYNAMIC_VARIABLES, FAKER_VARIABLES, callsFile, describeDynamic, isDynamicName, isFakerQuery, isFileName, isPromptName } from "./variableNames.js"
 
 const TOKEN = /\{\{\s*([^{}]*?)\s*\}\}/gu
 export const ENGINE_PLACEHOLDER = /\{\{([^}]+)\}\}/gu
@@ -14,15 +15,6 @@ export const SECRET_TINT = "--gm-secret"
 
 export const MASKED_VALUE = "••••••••"
 export const MAX_SUGGESTIONS = 50
-
-export const VARIABLE_TEXT = {
-  dynamic: "generated each time the request is sent",
-  prompt: "asked for when the request is sent",
-  undefinedName: "is not defined in the active environment",
-  secret: "secret",
-  resolvesTo: "resolves to",
-  through: (names) => `through ${names.join(", ")}`,
-}
 
 export const looksSecret = isSensitiveName
 
@@ -94,7 +86,7 @@ export function describeReference(name, variables) {
   const value = defined ? variables.get(name) : ""
   const detail = variables.details?.get(name)
   const secret = defined && isSecretName(name, variables)
-  const source = detail ? [SOURCE_LABELS[detail.source], detail.owner].filter(Boolean).join(": ") : ""
+  const source = detail ? [VARIABLE_TEXT.sources[detail.source], detail.owner].filter(Boolean).join(": ") : ""
   const origin = secretOrigin(detail?.ref, variables.connections)
   const composed = defined && !secret ? composition(value, variables) : NOT_COMPOSED
   return { name, defined, value, shown: secret ? MASKED_VALUE : value, secret, kind: null, source, origin, ...composed }

@@ -10,6 +10,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const (
@@ -124,10 +126,10 @@ func fixedProxy(raw string) (proxyFunc, error) {
 	}
 	proxy, err := url.Parse(address)
 	if err != nil || proxy.Host == "" {
-		return nil, fmt.Errorf("%q is not a valid proxy address", raw)
+		return nil, locales.Errorf(locales.EngineProxyInvalidAddress, locales.Params{"address": raw})
 	}
 	if !proxySchemes[proxy.Scheme] {
-		return nil, fmt.Errorf("unsupported proxy scheme %q, use http, https or socks5", proxy.Scheme)
+		return nil, locales.Errorf(locales.EngineProxyUnsupportedScheme, locales.Params{"scheme": proxy.Scheme})
 	}
 	return http.ProxyURL(proxy), nil
 }

@@ -1,0 +1,30 @@
+{
+  "scan": {
+    "title": "扫描机密",
+    "commandDescription": "在分享或提交之前，找出请求中直接写入的凭据",
+    "intro": "查找常见的令牌格式、凭据字段中看起来随机的值，以及直接写在认证设置中的密码。写成 {{example}} 的值没有问题。除检查本身外，没有任何内容会离开此窗口，并且只会显示值的前几个字符。",
+    "includeExamples": "包含已保存的示例响应",
+    "scanning": "正在扫描",
+    "clean": "未发现机密",
+    "cleanDescription": "没有发现令牌格式、看起来随机的凭据值或直接写入的密码。",
+    "failed": "无法执行检查：{{message}}",
+    "goToRequest": "转到请求",
+    "findings": "发现项",
+    "showFindings": "显示发现项",
+    "hideFindings": "隐藏发现项",
+    "shareAnyway": "仍然分享",
+    "found_other": "发现 {{count}} 个可能的机密",
+    "foundShare": "它们会保留在你创建的链接或文件中。请先把它们替换为 {{example}}，或仍然分享。",
+    "foundExport": "它们会被写入导出内容。如果文件要分享或提交，请先把它们替换为 {{example}}。",
+    "severity": {
+      "high": "高",
+      "medium": "中"
+    },
+    "kinds": {
+      "request": "请求",
+      "folder": "文件夹",
+      "environment": "环境",
+      "collection": "集合"
+    }
+  }
+}

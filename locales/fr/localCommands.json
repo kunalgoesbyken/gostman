@@ -1,0 +1,10 @@
+{
+  "localCommand": {
+    "title": "Exécuter un programme sur cet ordinateur ?",
+    "intro": "Cette requête lance un serveur MCP local avec votre compte utilisateur :",
+    "environmentIntro": "Avec ces variables d’environnement de l’onglet En-têtes :",
+    "warning": "Ne l’exécutez que si vous savez ce que fait ce programme. Gostman redemande lorsque la commande ou son environnement change, ou que l’application redémarre.",
+    "confirm": "Exécuter",
+    "notApproved": "Cette requête lance un programme sur cet ordinateur. Envoyez-la une fois depuis son propre onglet et confirmez la commande, puis relancez-la."
+  }
+}

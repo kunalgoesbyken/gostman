@@ -1,0 +1,67 @@
+{
+  "timeline": {
+    "proxied": "耗时由 Gostman 代理测得，范围是从代理到目标服务器，不包括从你的浏览器到代理这一段。",
+    "reused": "复用连接",
+    "newConnection": "新建连接",
+    "omitted_other": "另有 {{count}} 个请求未显示。",
+    "failedBefore": "连接之前就失败了",
+    "failedAt": "失败阶段：{{label}}",
+    "requestHeaders": "请求头",
+    "responseHeaders": "响应头",
+    "reveal": "显示值",
+    "hide": "隐藏值",
+    "expanded": "隐藏详情",
+    "collapsed": "显示详情",
+    "total": "总计",
+    "breakdown": "耗时明细",
+    "breakdownProxied": "耗时明细（由 Gostman 代理测得）",
+    "requests_other": "{{count}} 个请求",
+    "scripts_other": "{{count}} 个脚本",
+    "consoleLines_other": "{{count}} 行控制台输出",
+    "passed": "{{count}} 项通过",
+    "failed": "{{count}} 项失败",
+    "scriptFailed": "失败",
+    "noOutput": "没有控制台输出或检查结果。",
+    "secrets": "机密管理器",
+    "secretsRead_other": "已读取 {{count}} 个机密",
+    "secretSkipped": "{{name}} 为空，因为连接“{{connection}}”已关闭",
+    "seconds": "{{value}} s",
+    "milliseconds": "{{value}} ms",
+    "phases": {
+      "dns": {
+        "label": "DNS 解析",
+        "short": "DNS"
+      },
+      "connect": {
+        "label": "TCP 连接",
+        "short": "连接"
+      },
+      "tls": {
+        "label": "TLS 握手",
+        "short": "TLS"
+      },
+      "firstByte": {
+        "label": "等待首字节",
+        "short": "TTFB"
+      },
+      "download": {
+        "label": "内容下载",
+        "short": "下载"
+      }
+    },
+    "facts": {
+      "remoteAddress": "远程地址",
+      "protocol": "协议",
+      "connection": "连接",
+      "tls": "TLS",
+      "certificateSubject": "证书主体",
+      "certificateIssuer": "证书颁发者",
+      "requestBody": "请求体",
+      "redirectsTo": "重定向到",
+      "cookiesSet": "设置的 Cookie"
+    },
+    "tlsAlpn": "ALPN {{protocol}}",
+    "tlsExpires": "{{date}} 到期",
+    "tlsExpired": "{{date}} 到期（已过期）"
+  }
+}

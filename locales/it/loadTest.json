@@ -1,0 +1,61 @@
+{
+  "loadTest": {
+    "title": "Test di carico",
+    "commandTitle": "Esegui un test di carico su questa richiesta",
+    "commandDescription": "Invia la richiesta corrente molte volte insieme e misura la latenza",
+    "barLabel": "Test di carico",
+    "barHint": "Esegui un test di carico su questa richiesta",
+    "notice": "Testa solo sistemi di tua proprietà o per i quali hai il permesso di farlo. Ogni worker invia la richiesta così come è mostrata qui, senza script né cookie condivisi.",
+    "unsupported": "Solo le richieste HTTP possono essere sottoposte a un test di carico. Le richieste gRPC, MCP, WebSocket e in streaming non sono supportate.",
+    "noUrl": "Dai prima un URL alla richiesta.",
+    "concurrency": "Worker simultanei",
+    "duration": "Durata (secondi)",
+    "rateLimit": "Limite di richieste al secondo",
+    "rateLimitHint": "Lascia vuoto per nessun limite",
+    "start": "Avvia",
+    "stop": "Ferma",
+    "running": "In esecuzione",
+    "stopped": "Fermato in anticipo",
+    "progress": {
+      "elapsed": "Trascorso",
+      "requests": "Richieste",
+      "rate": "Richieste/s",
+      "p95": "p95",
+      "failed": "Fallite"
+    },
+    "summary": {
+      "total": "Richieste",
+      "succeeded": "Riuscite",
+      "failed": "Fallite",
+      "rate": "Richieste/s",
+      "received": "Ricevuti"
+    },
+    "failureBreakdown": "{{networkErrors}} di rete, {{statusFailures}} con stato {{failureStatus}} o superiore",
+    "percentilesLabel": "Latenza",
+    "percentileColumns": {
+      "name": "Misura",
+      "value": "Millisecondi"
+    },
+    "percentiles": {
+      "minMs": "min",
+      "meanMs": "media",
+      "p50Ms": "p50",
+      "p90Ms": "p90",
+      "p95Ms": "p95",
+      "p99Ms": "p99",
+      "maxMs": "max"
+    },
+    "seconds": "{{value}} s",
+    "milliseconds": "{{value}} ms",
+    "statusCount": "{{code}} x {{count}}",
+    "statusLabel": "Codici di stato",
+    "histogramLabel": "Distribuzione della latenza",
+    "histogramBarLabel_one": "Da {{from}} a {{to}} ms: {{count}} richiesta",
+    "histogramBarLabel_many": "Da {{from}} a {{to}} ms: {{count}} di richieste",
+    "histogramBarLabel_other": "Da {{from}} a {{to}} ms: {{count}} richieste",
+    "errorsLabel": "Esempi di errori",
+    "accuracy": "I percentili hanno una precisione entro il {{percent}}%.",
+    "emptyTitle": "Ancora nessun risultato",
+    "emptyHint": "Scegli il carico e premi Avvia."
+  }
+}

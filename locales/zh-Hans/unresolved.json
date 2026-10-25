@@ -1,0 +1,11 @@
+{
+  "unresolved": {
+    "sentAsWritten_other": "这些变量未定义，因此按原样发送了：",
+    "notDefined_other": "这些变量未定义：",
+    "openEnvironments": "打开环境",
+    "extractedBy": "{{reference}} 由“{{request}}”上的提取规则设置，请先发送该请求。",
+    "extractedByOnly": "它由“{{request}}”上的提取规则设置，请先发送该请求。",
+    "openSource": "打开“{{request}}”",
+    "define": "将 {{reference}} 添加到当前环境"
+  }
+}

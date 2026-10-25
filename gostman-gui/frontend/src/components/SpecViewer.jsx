@@ -53,10 +53,10 @@ function OperationRow({ row, isActive, onSelect }) {
       style={{ height: ROW_HEIGHT_PX }}
       onClick={() => onSelect(operation.key)}
       title={operation.summary || operation.key}
-      className={cn("flex w-full items-center gap-2 px-3 text-left text-xs", isActive ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground")}
+      className={cn("flex w-full items-center gap-2 px-3 text-start text-xs", isActive ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground")}
     >
       <MethodTag method={operation.method} className="w-12" />
-      <span className={cn("truncate", operation.deprecated && "line-through")}>{operation.path}</span>
+      <span dir="ltr" className={cn("truncate", operation.deprecated && "line-through")}>{operation.path}</span>
     </button>
   )
 }
@@ -72,7 +72,7 @@ function Section({ title, children }) {
 
 function Example({ text }) {
   if (!text) return null
-  return <pre className="max-h-48 overflow-auto rounded-md border border-border p-2 font-mono text-2xs">{text}</pre>
+  return <pre dir="ltr" className="max-h-48 overflow-auto rounded-md border border-border p-2 font-mono text-2xs">{text}</pre>
 }
 
 function Bodies({ bodies }) {
@@ -91,9 +91,9 @@ function OperationDetail({ detail, onSend }) {
     <div className="p-4">
       <div className="flex items-start gap-2">
         <MethodTag method={operation.method} className="pt-0.5" />
-        <h2 className="min-w-0 flex-1 font-mono text-sm [overflow-wrap:anywhere]">{operation.path}</h2>
+        <h2 className="min-w-0 flex-1 font-mono text-sm [overflow-wrap:anywhere]"><bdi dir="ltr">{operation.path}</bdi></h2>
         <Button size="sm" onClick={onSend}>
-          <Send />
+          <Send className="rtl:-scale-x-100" />
           {SPEC_TEXT.sendToTab}
         </Button>
       </div>
@@ -169,9 +169,9 @@ function ModelList({ names, query, selected, onSelect }) {
       type="button"
       style={{ height: ROW_HEIGHT_PX }}
       onClick={() => onSelect(name)}
-      className={cn("flex w-full items-center px-3 text-left font-mono text-xs", name === selected ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground")}
+      className={cn("flex w-full items-center px-3 text-start font-mono text-xs", name === selected ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground")}
     >
-      <span className="truncate">{name}</span>
+      <span dir="ltr" className="truncate">{name}</span>
     </button>
   )
   return <VirtualList items={shown} rowHeight={ROW_HEIGHT_PX} renderRow={renderRow} className="h-full py-1" />
@@ -210,7 +210,7 @@ export function SpecViewer({ dialog, actions, onClose }) {
     <Dialog label={SPEC_TEXT.viewerTitle} size="lg" className="max-w-5xl" onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <DialogTitle>{summary.value?.info.title || SPEC_TEXT.viewerTitle}</DialogTitle>
-        <Tabs value={tab} onValueChange={changeTab} className="ml-4 h-full">
+        <Tabs value={tab} onValueChange={changeTab} className="ms-4 h-full">
           <TabsList label={SPEC_TEXT.viewerTitle}>
             <TabsTrigger value={TAB_OPERATIONS}>{SPEC_TEXT.operations}</TabsTrigger>
             <TabsTrigger value={TAB_MODELS}>{SPEC_TEXT.models}</TabsTrigger>

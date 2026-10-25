@@ -1,0 +1,41 @@
+{
+  "sidebar": {
+    "views": "Vizualizarea barei laterale",
+    "collections": "Colecții",
+    "history": "Istoric",
+    "runRequests": "Rulare cereri",
+    "newFolder": "Dosar nou",
+    "newRequest": "Cerere nouă",
+    "toggle": "Comutare bară laterală",
+    "close": "Închidere bară laterală",
+    "resize": "Redimensionare bară laterală"
+  },
+  "history": {
+    "search": "Căutare în istoric",
+    "emptyTitle": "Încă nu există istoric",
+    "emptyDescription": "Cererile trimise apar aici.",
+    "noMatches": "Nicio cerere trimisă nu corespunde.",
+    "remove": "Eliminare din istoric",
+    "clear": "Golire istoric",
+    "noResponse": "Fără răspuns",
+    "sentAgo": {
+      "now": "acum",
+      "minutes": "{{count}} min",
+      "hours": "{{count}} h",
+      "days": "{{count}} z"
+    },
+    "sentAgoSpoken": {
+      "now": "trimisă chiar acum",
+      "minutes_one": "trimisă acum {{count}} minut",
+      "minutes_few": "trimisă acum {{count}} minute",
+      "minutes_other": "trimisă acum {{count}} de minute",
+      "hours_one": "trimisă acum {{count}} oră",
+      "hours_few": "trimisă acum {{count}} ore",
+      "hours_other": "trimisă acum {{count}} de ore",
+      "days_one": "trimisă acum {{count}} zi",
+      "days_few": "trimisă acum {{count}} zile",
+      "days_other": "trimisă acum {{count}} de zile",
+      "date": "trimisă la {{date}}"
+    }
+  }
+}

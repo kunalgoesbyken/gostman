@@ -1,0 +1,39 @@
+{
+  "requestBar": {
+    "name": "Numele cererii",
+    "untitled": "Cerere fără titlu",
+    "method": "Metodă HTTP",
+    "url": "URL-ul cererii",
+    "methodPlaceholders": {
+      "grpc": {
+        "full": "Introduceți adresa serverului, de exemplu localhost:50051",
+        "medium": "Adresa serverului",
+        "short": "Adresă"
+      },
+      "mcp": {
+        "full": "Introduceți URL-ul serverului MCP",
+        "medium": "URL server MCP",
+        "short": "URL"
+      }
+    },
+    "send": "Trimite",
+    "connect": "Conectare",
+    "disconnect": "Deconectare",
+    "cancel": "Anulare",
+    "save": "Salvare",
+    "code": "Cod",
+    "codeHint": "Generare cod",
+    "codeLanguage": "Limbaj",
+    "urlPlaceholders": {
+      "full": "Introduceți un URL sau lipiți o comandă curl",
+      "medium": "URL sau comandă curl",
+      "short": "URL"
+    }
+  },
+  "curlFiles": {
+    "title": "Lipiți citirile de fișiere?",
+    "message": "Această comandă curl citește fișiere de pe acest computer și le trimite împreună cu cererea, deci păstrați-le doar dacă aveți încredere în sursa comenzii. Fără ele, restul comenzii este completat în continuare.",
+    "withThem": "Lipire cu citiri de fișiere",
+    "withoutThem": "Lipire fără citiri de fișiere"
+  }
+}

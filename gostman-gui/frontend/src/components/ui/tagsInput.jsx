@@ -11,7 +11,7 @@ const SEPARATOR = ","
 
 function TagChip({ tag, disabled, onRemove }) {
   return (
-    <TagBadge tag={tag} className="gap-0.5 py-0.5 pl-1.5 pr-0.5 text-2xs">
+    <TagBadge tag={tag} className="gap-0.5 py-0.5 ps-1.5 pe-0.5 text-2xs">
       <button
         type="button"
         disabled={disabled}

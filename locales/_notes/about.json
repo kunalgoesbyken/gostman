@@ -1,0 +1,9 @@
+{
+  "about.commandTitle": "Name of the command in the command palette that opens the About dialog.",
+  "about.commandDescription": "Description of that command.",
+  "about.versionButton": "Accessible label of the button in the status bar that shows the version.",
+  "about.links.releases": "Link to the list of published versions (release notes) on GitHub.",
+  "about.links.issues": "Link to GitHub where bugs are reported.",
+  "about.copied": "Shown briefly after the diagnostics text was copied to the clipboard.",
+  "about.close": "Button that closes the About dialog."
+}

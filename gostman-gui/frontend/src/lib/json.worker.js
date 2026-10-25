@@ -1,3 +1,4 @@
+import { installFromMessage } from './i18n/core'
 import { filterJson } from './responseSearch'
 
 const PRETTY_INDENT = 2
@@ -22,6 +23,7 @@ const TASKS = {
 }
 
 self.onmessage = ({ data }) => {
+  if (installFromMessage(data)) return
   try {
     self.postMessage({ id: data.id, ...TASKS[data.task](data) })
   } catch (error) {

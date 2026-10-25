@@ -1,0 +1,14 @@
+{
+  "socketSessions": {
+    "invalidVariables": "Zmienne aktywnego środowiska nie są poprawnym JSON-em.",
+    "invalidAddress": "Wpisz adres URL ws:// lub wss:// w pasku adresu.",
+    "notConnected": "Nie wysłano: połączenie zostało zamknięte, zanim wiadomość wyszła.",
+    "undefinedVariables": "Adres URL używa zmiennych, których aktywne środowisko nie definiuje: {{names}}.",
+    "reconnecting": "Ponowne łączenie za {{seconds}} s",
+    "couldNotSend": "Nie udało się wysłać: {{message}}",
+    "connected": "Połączono",
+    "couldNotConnect": "Nie udało się połączyć: {{message}}",
+    "connecting": "Łączenie z {{url}}",
+    "disconnected": "Rozłączono"
+  }
+}

@@ -19,7 +19,8 @@ import { isSavable, suggestedFolderName } from "../lib/captureConversion"
 import { NEW_FOLDER, useCaptureStore } from "../lib/captureSession"
 import { CAPTURE_TEXT } from "../lib/captureText"
 import { ROOT_ID, buildCollectionTree, listFolders } from "../lib/collectionTree"
-import { formatSize } from "../lib/dataUtils"
+import { formatBytes } from "../lib/byteSize"
+import { formatTime } from "../lib/i18n/format"
 import { parseJsonBody, statusVariant } from "../lib/response"
 import { RESPONSE_TEXT } from "../lib/responseText"
 import { TREE_TEXT } from "../lib/treeText"
@@ -35,12 +36,14 @@ const SIDE_RESPONSE = "response"
 const PART_HEADERS = "headers"
 const PART_BODY = "body"
 
-const SIDES = [
+const CLOCK_OPTIONS = { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" }
+
+const sides = () => [
   { value: SIDE_REQUEST, label: CAPTURE_TEXT.sides.request },
   { value: SIDE_RESPONSE, label: CAPTURE_TEXT.sides.response },
 ]
 
-const HEADER_COLUMNS = [
+const headerColumns = () => [
   { header: RESPONSE_TEXT.columns.name, key: "key", width: "w-1/3", cellClassName: "text-foreground" },
   { header: RESPONSE_TEXT.columns.value, key: "value" },
 ]
@@ -65,6 +68,7 @@ function CaptureControls({ capture, actions }) {
         spellCheck={false}
         disabled={isRunning}
         onChange={(event) => actions.setUpstream(event.target.value)}
+        dir="ltr"
         className="font-mono"
       />
       <Input
@@ -109,13 +113,13 @@ function ExchangeRow({ exchange, isChecked, isCurrent, onToggle, onInspect }) {
   return (
     <div className={cn("flex h-7 items-center gap-2 border-b border-border px-3", isCurrent && "bg-accent")}>
       <Checkbox label={CAPTURE_TEXT.selectExchange(titleOf(exchange))} checked={isChecked} onChange={() => onToggle(exchange.id)} />
-      <button type="button" aria-current={isCurrent} onClick={() => onInspect(exchange.id)} className={cn(COLUMNS, "h-full text-left")}>
-        <span className={`${CELL} text-muted-foreground`}>{new Date(exchange.time).toLocaleTimeString([], { hour12: false })}</span>
+      <button type="button" aria-current={isCurrent} onClick={() => onInspect(exchange.id)} className={cn(COLUMNS, "h-full text-start")}>
+        <span className={`${CELL} text-muted-foreground`}>{formatTime(exchange.time, CLOCK_OPTIONS)}</span>
         <MethodTag method={exchange.method} />
         <span title={exchange.path} className={`${CELL} text-foreground`}>{exchange.path}</span>
         <StatusBadge exchange={exchange} />
-        <span className={`${CELL} text-right text-muted-foreground`}>{CAPTURE_TEXT.duration(exchange.durationMs)}</span>
-        <span className={`${CELL} text-right text-muted-foreground`}>{formatSize(exchange.response.size)}</span>
+        <span className={`${CELL} text-end text-muted-foreground`}>{CAPTURE_TEXT.duration(exchange.durationMs)}</span>
+        <span className={`${CELL} text-end text-muted-foreground`}>{formatBytes(exchange.response.size)}</span>
       </button>
     </div>
   )
@@ -126,12 +130,12 @@ function ListHeader({ isAllChecked, onToggleAll }) {
     <div className="flex h-8 shrink-0 items-center gap-2 border-b border-border px-3">
       <Checkbox label={CAPTURE_TEXT.selectAll} checked={isAllChecked} onChange={onToggleAll} />
       <div className={COLUMNS}>
-        <SectionLabel className="truncate">{CAPTURE_TEXT.columns.time}</SectionLabel>
-        <SectionLabel className="truncate">{CAPTURE_TEXT.columns.method}</SectionLabel>
-        <SectionLabel className="truncate">{CAPTURE_TEXT.columns.path}</SectionLabel>
-        <SectionLabel className="truncate">{CAPTURE_TEXT.columns.status}</SectionLabel>
-        <SectionLabel className="truncate text-right">{CAPTURE_TEXT.columns.duration}</SectionLabel>
-        <SectionLabel className="truncate text-right">{CAPTURE_TEXT.columns.size}</SectionLabel>
+        <SectionLabel title={CAPTURE_TEXT.columns.time} className="truncate">{CAPTURE_TEXT.columns.time}</SectionLabel>
+        <SectionLabel title={CAPTURE_TEXT.columns.method} className="truncate">{CAPTURE_TEXT.columns.method}</SectionLabel>
+        <SectionLabel title={CAPTURE_TEXT.columns.path} className="truncate">{CAPTURE_TEXT.columns.path}</SectionLabel>
+        <SectionLabel title={CAPTURE_TEXT.columns.status} className="truncate">{CAPTURE_TEXT.columns.status}</SectionLabel>
+        <SectionLabel title={CAPTURE_TEXT.columns.duration} className="truncate text-end">{CAPTURE_TEXT.columns.duration}</SectionLabel>
+        <SectionLabel title={CAPTURE_TEXT.columns.size} className="truncate text-end">{CAPTURE_TEXT.columns.size}</SectionLabel>
       </div>
     </div>
   )
@@ -159,14 +163,14 @@ function Destination({ value, onChange, folders, requests, suggestedName }) {
 function MessageBody({ message }) {
   if (!message.body) return <EmptyState icon={FileText} title={CAPTURE_TEXT.noBody} />
   if (message.bodyEncoding === ENCODING_BASE64) {
-    return <EmptyState icon={FileDigit} title={CAPTURE_TEXT.binaryBody(formatSize(message.size))} description={message.contentType} />
+    return <EmptyState icon={FileDigit} title={CAPTURE_TEXT.binaryBody(formatBytes(message.size))} description={message.contentType} />
   }
-  return <pre className="whitespace-pre-wrap p-3 font-mono text-xs text-foreground [overflow-wrap:anywhere]">{readable(message.body)}</pre>
+  return <pre dir="ltr" className="whitespace-pre-wrap p-3 font-mono text-xs text-foreground [overflow-wrap:anywhere]">{readable(message.body)}</pre>
 }
 
 function MessageHeaders({ headers }) {
   if (headers.length === 0) return <EmptyState icon={List} title={RESPONSE_TEXT.noHeadersTitle} />
-  return <DataTable columns={HEADER_COLUMNS} rows={headers} />
+  return <DataTable columns={headerColumns()} rows={headers} />
 }
 
 function ExchangeDetail({ exchange, actions }) {
@@ -181,9 +185,9 @@ function ExchangeDetail({ exchange, actions }) {
   return (
     <section aria-label={CAPTURE_TEXT.selectedExchange} className="flex h-64 shrink-0 flex-col border-t border-border">
       <Toolbar>
-        <SegmentedControl label={CAPTURE_TEXT.message} options={SIDES} value={side} onChange={setSide} />
+        <SegmentedControl label={CAPTURE_TEXT.message} options={sides()} value={side} onChange={setSide} />
         <SegmentedControl label={CAPTURE_TEXT.messageSection} options={parts} value={part} onChange={setPart} />
-        <span title={exchange.url} className={`${CELL} min-w-0 flex-1 text-right text-muted-foreground`}>{exchange.url}</span>
+        <span title={exchange.url} className={`${CELL} min-w-0 flex-1 text-end text-muted-foreground`}>{exchange.url}</span>
         <Button variant="outline" size="sm" disabled={!isSavable(exchange)} onClick={() => actions.openAsRequest(exchange)}>
           {CAPTURE_TEXT.saveAsRequest}
         </Button>

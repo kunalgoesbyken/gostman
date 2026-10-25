@@ -1,0 +1,19 @@
+{
+  "importExport": {
+    "untitledFolder": "Dosar",
+    "untitledEnvironment": "Mediu",
+    "gostmanExport": "Export Gostman",
+    "undetected": "Formatul nu a putut fi detectat. Folosiți o colecție Postman, o specificație OpenAPI sau Swagger ori un export Gostman.",
+    "noRequests": "Acest fișier ({{label}}) nu conține cereri sau dosare.",
+    "unreadable": "Acest fișier ({{label}}) nu a putut fi citit.",
+    "invalidYaml": "YAML nevalid: {{reason}}",
+    "missingGostman": "Format de export Gostman nevalid: lipsește obiectul gostman",
+    "requestsNotArray": "Format de export Gostman nevalid: requests trebuie să fie un array",
+    "foldersNotArray": "Format de export Gostman nevalid: folders trebuie să fie un array",
+    "namesMore": "{{names}} și încă {{count}}",
+    "tlsKept": "Verificarea TLS fusese dezactivată în colecție pentru {{names}}; a fost păstrată activată. Dezactivați-o în fila Setări a cererii dacă aveți încredere în aceste gazde.",
+    "flattened_one": "{{count}} dosar imbricat într-o buclă sau mai adânc de {{levels}} niveluri a fost mutat la nivelul superior.",
+    "flattened_few": "{{count}} dosare imbricate într-o buclă sau mai adânc de {{levels}} niveluri au fost mutate la nivelul superior.",
+    "flattened_other": "{{count}} de dosare imbricate într-o buclă sau mai adânc de {{levels}} niveluri au fost mutate la nivelul superior."
+  }
+}

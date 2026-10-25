@@ -1,0 +1,160 @@
+{
+  "importFormats": {
+    "auto": "自動検出",
+    "http": ".httpファイル"
+  },
+  "formatLabels": {
+    "insomnia": "Insomniaのエクスポート",
+    "har": "HARキャプチャ",
+    "wsdl": "WSDLサービス",
+    "bruno": "Brunoのコレクション",
+    "postman": "Postmanのファイル",
+    "openapi": "OpenAPI仕様",
+    "gostman": "Gostmanのエクスポート",
+    "http": ".httpファイル"
+  },
+  "import": {
+    "chooseFiles": "ファイルを選択",
+    "importButton": "インポート",
+    "chooseFolder": "フォルダーを選択",
+    "dropHint": "ファイル、フォルダー、.zipをここにドロップするか、下に内容を貼り付けてください。Insomnia、HAR、WSDL、Bruno、Postman、OpenAPIとSwagger、.httpファイル（REST Client、JetBrains HTTP Client）、Gostmanのエクスポート、共有リンクに対応しています。",
+    "formatLabel": "形式",
+    "pastePlaceholder": "コレクション、仕様、キャプチャ、共有リンクを貼り付け",
+    "pasteLabel": "インポートする内容",
+    "pastedName": "貼り付け",
+    "reading": "内容を読み込んでいます",
+    "skipStatic": "画像、フォント、スタイル、スクリプトを除外",
+    "skippedHeading": "除外したもの",
+    "binaryFailure": "{{name}}はテキストファイルではありません。",
+    "tooMany": "ファイルが{{limit}}個を超えています。",
+    "tooLarge": "{{name}}は{{size}}です。ファイルのサイズは{{limit}}までです。",
+    "totalTooLarge": "ファイルの合計サイズが{{limit}}を超えています。",
+    "noFiles": "インポートできるファイルが見つかりませんでした。",
+    "filesSelected_other": "{{count}}個のファイルを選択中",
+    "clearFiles": "クリア",
+    "sourceLine": "{{source}}：{{label}}、{{counts}}",
+    "totalLine": "合計：{{counts}}"
+  },
+  "export": {
+    "includeSecrets": "認証情報を含める",
+    "secretsNote": "パスワード、トークン、およびシークレットらしい名前のヘッダーや変数は、{{placeholder}}のプレースホルダーに置き換えられます。",
+    "secretsWarning": "認証情報は平文でファイルに書き込まれます。",
+    "variableSecretsNote": "パスワード、トークン、キーのような名前の変数は、値を除いてエクスポートされます。",
+    "saveFile": "ファイルを保存",
+    "formatLabel": "エクスポート形式",
+    "previewLabel": "エクスポートのプレビュー",
+    "summaryNamed": "{{description}}。「{{name}}」には{{counts}}があります。",
+    "summaryAll": "{{description}}。{{counts}}があります。",
+    "collectionField": "コレクション",
+    "formatField": "形式",
+    "allCollections": "すべてのコレクション",
+    "failed": "エクスポートを作成できませんでした：{{reason}}",
+    "adaptFailed": "スクリプトとチェックは変換できなかったため、そのままエクスポートされます：{{reason}}",
+    "reportLabel": "対象ツール向けに変更された点",
+    "checkHeading_other": "{{tool}}で使用する前に確認が必要な点：{{count}}件",
+    "changedHeading": "{{tool}}向けに変更された点",
+    "formats": {
+      "gostman": {
+        "label": "Gostman",
+        "description": "完全なバックアップ（リクエスト、フォルダー、すべての環境、グローバル変数、コレクション変数。シークレットの値は含みません）"
+      },
+      "postman": {
+        "label": "Postman",
+        "description": "コレクションv2.1（Insomniaでもインポート可能）。スクリプトとチェックは両方で動作するように変換され、使用中の変数はシークレットを除いてコレクション変数になります"
+      },
+      "openapiJson": {
+        "label": "OpenAPI JSON",
+        "description": "HTTPリクエストのOpenAPI 3.0記述"
+      },
+      "openapiYaml": {
+        "label": "OpenAPI YAML",
+        "description": "HTTPリクエストのOpenAPI 3.0記述"
+      },
+      "markdown": {
+        "label": "Markdown",
+        "description": "読みやすいAPIドキュメント"
+      },
+      "html": {
+        "label": "HTMLドキュメント",
+        "description": "公開や印刷に使える単体のページ。認証情報は含まれず、変数は{{example}}のまま残ります"
+      },
+      "bruno": {
+        "label": "Bruno",
+        "description": "環境を含む.bruファイルのフォルダーを.zipで保存。スクリプトとチェックはBrunoで動作するように変換されます"
+      },
+      "curl": {
+        "label": "curlスクリプト",
+        "description": "リクエストごとに1つのcurlコマンド。認証情報は環境変数のプレースホルダーになります"
+      },
+      "har": {
+        "label": "HAR",
+        "description": "リクエストのみでレスポンスを含まないHTTP Archive 1.2"
+      },
+      "http": {
+        "label": ".httpファイル",
+        "description": "VS Code REST ClientとJetBrains HTTP Client用のリクエスト。フォルダーごとに1ファイルで、環境はhttp-client.env.jsonに保存"
+      }
+    },
+    "docs": {
+      "titlePlaceholder": "タイトル（既定：API documentation）",
+      "titleLabel": "ドキュメントのタイトル",
+      "includeExamples": "レスポンスの例を含める",
+      "playground": "お試しパネルを含める"
+    }
+  },
+  "transfer": {
+    "title": "インポートとエクスポート",
+    "tabsLabel": "インポートまたはエクスポート",
+    "tabs": {
+      "import": "インポート",
+      "export": "エクスポート",
+      "share": "共有"
+    }
+  },
+  "importCount": {
+    "collection_other": "{{count}}件のコレクション",
+    "folder_other": "{{count}}件のフォルダー",
+    "request_other": "{{count}}件のリクエスト",
+    "flow_other": "{{count}}件のフロー",
+    "environment_other": "{{count}}件の環境",
+    "global_other": "{{count}}件のグローバル環境",
+    "variable_other": "{{count}}件のコレクション変数",
+    "holding": "{{inside}}を含む{{collections}}",
+    "settingsFor": "{{owners}}の設定"
+  },
+  "importResult": {
+    "quoted": "「{{name}}」",
+    "joinedEnvironment": "「{{name}}」という名前の環境がすでにあるため、インポートした変数をその環境に追加しました。すでにあった変数の値はそのままです。",
+    "scopedEnvironments_other": "{{names}}の環境は、そのリクエストにのみ適用されます。環境をどこでも使うには、環境の「利用範囲」を「すべてのコレクション」に設定してください。",
+    "scopedVariables_other": "{{names}}のコレクション変数は、そのリクエストにのみ適用されます。同じ名前の環境変数がある場合は、環境変数が優先されます。",
+    "importedCollectionName": "インポートしたコレクション",
+    "settingsAttached_other": "このインポートに含まれるすべてのコレクションの設定は、{{names}}のコレクション設定に追加されたため、そのリクエストにのみ適用されます。あなた自身のすべてのコレクションの設定は変更されていません。",
+    "settingsWrapped": "このインポートに含まれるすべてのコレクションの設定は、インポートしたものすべてを含む新しいコレクション「{{name}}」に設定されたため、それらのリクエストにのみ適用されます。あなた自身のすべてのコレクションの設定は変更されていません。"
+  },
+  "fileReads": {
+    "heading_other": "このコンピューターから読み取る{{count}}個のファイル：",
+    "more": "ほか{{count}}件"
+  },
+  "activeImport": {
+    "kindLabels": {
+      "scripts": "スクリプト",
+      "oauth": "OAuth 2.0設定",
+      "commands": "ローカルのMCPサーバーを起動するコマンド",
+      "files": "このコンピューターのファイルを送信するファイル読み取り"
+    },
+    "kindNouns": {
+      "scripts": "スクリプト",
+      "oauth": "OAuth設定",
+      "commands": "コマンド",
+      "files": "ファイル読み取り"
+    },
+    "titleOne": "{{kind}}をインポートしますか？",
+    "titleMany": "インポート前に確認",
+    "withOne": "{{kind}}を含めてインポート",
+    "withMany": "すべてインポート",
+    "withoutOne": "{{kind}}なしでインポート",
+    "withoutMany": "除外してインポート",
+    "leftOut": "{{kinds}}は除外されました。",
+    "message_other": "このインポートの{{count}}件の項目に、{{kinds}}が含まれています。これらはリクエストの送信時に実行され、変数を読み取れるため、信頼できる提供元のものだけをインポートしてください。除外しても、それ以外はすべてインポートされます。"
+  }
+}

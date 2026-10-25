@@ -1,0 +1,18 @@
+{
+  "importExport": {
+    "untitledFolder": "Ordner",
+    "untitledEnvironment": "Umgebung",
+    "gostmanExport": "Gostman-Export",
+    "undetected": "Das Format konnte nicht erkannt werden. Verwenden Sie eine Postman-Sammlung, eine OpenAPI- oder Swagger-Spezifikation oder einen Gostman-Export.",
+    "noRequests": "Dieser Inhalt ({{label}}) enthält keine Anfragen oder Ordner.",
+    "unreadable": "Dieser Inhalt ({{label}}) konnte nicht gelesen werden.",
+    "invalidYaml": "Ungültiges YAML: {{reason}}",
+    "missingGostman": "Ungültiges Gostman-Exportformat: Objekt „gostman“ fehlt",
+    "requestsNotArray": "Ungültiges Gostman-Exportformat: „requests“ muss ein Array sein",
+    "foldersNotArray": "Ungültiges Gostman-Exportformat: „folders“ muss ein Array sein",
+    "namesMore": "{{names}} und {{count}} weitere",
+    "tlsKept": "Die TLS-Prüfung war in der Sammlung für {{names}} deaktiviert; sie blieb aktiviert. Schalten Sie sie im Tab „Optionen“ der Anfrage aus, wenn Sie diesen Hosts vertrauen.",
+    "flattened_one": "{{count}} Ordner, der in einer Schleife oder tiefer als {{levels}} Ebenen verschachtelt war, wurde auf die oberste Ebene verschoben.",
+    "flattened_other": "{{count}} Ordner, die in einer Schleife oder tiefer als {{levels}} Ebenen verschachtelt waren, wurden auf die oberste Ebene verschoben."
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "localCommand": {
+    "title": "Executar um programa neste computador?",
+    "intro": "Esta requisição inicia um servidor MCP local com a sua conta de usuário:",
+    "environmentIntro": "Com estas variáveis de ambiente da aba Cabeçalhos:",
+    "warning": "Execute somente se você souber o que este programa faz. O Gostman pergunta de novo quando o comando ou seu ambiente mudar, ou o app for reiniciado.",
+    "confirm": "Executar",
+    "notApproved": "Esta requisição inicia um programa neste computador. Envie-a uma vez pela própria aba e confirme o comando; depois execute-a de novo."
+  }
+}

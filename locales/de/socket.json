@@ -1,0 +1,47 @@
+{
+  "socket": {
+    "socketIoPath": "Pfad",
+    "socketIoAuth": "Auth-Payload",
+    "socketIoAuthNote": "Ein JSON-Objekt, das mit dem Namespace-Handshake gesendet und vom Server als socket.handshake.auth gelesen wird.",
+    "invalidAuth": "Der Socket.IO-Auth-Payload muss ein JSON-Objekt sein.",
+    "statuses": {
+      "idle": "Getrennt",
+      "connecting": "Verbindet",
+      "open": "Verbunden",
+      "waiting": "Warten auf Wiederverbindung"
+    },
+    "entries": {
+      "sent": "Gesendet",
+      "received": "Empfangen",
+      "info": "Info",
+      "warning": "Warnung",
+      "error": "Fehler"
+    },
+    "protocol": "Protokoll",
+    "graphql": "GraphQL-Subscription",
+    "filter": "Topic-Filter, z. B. sensors/#",
+    "subscribe": "Abonnieren",
+    "saved": "Gespeicherte Nachrichten",
+    "savedPlaceholder": "Gespeicherte Nachricht laden",
+    "noSaved": "Noch keine gespeicherten Nachrichten",
+    "save": "Speichern",
+    "saveTitle": "Nachricht speichern",
+    "saveMessage": "Name für diese Nachricht. Sie wird mit der Anfrage gespeichert.",
+    "remove": "Gespeicherte Nachricht löschen",
+    "binary_one": "Binär, {{count}} Byte",
+    "binary_other": "Binär, {{count}} Bytes",
+    "truncated": "Angezeigt werden die ersten {{shown}} von {{total}} Zeichen",
+    "copy": "Nachricht kopieren",
+    "dropped": "Ältere Einträge verworfen: {{dropped}}. Das Protokoll behält die letzten {{limit}}.",
+    "emptyTitle": "Noch keine Nachrichten",
+    "emptyDescription": "Verbinden Sie sich und senden Sie dann eine Nachricht oder warten Sie auf den Server.",
+    "log": "Nachrichten",
+    "autoReconnect": "Automatisch neu verbinden",
+    "unsentHeaders": "Ein Browser kann bei einem WebSocket nur Sec-WebSocket-Protocol setzen. Von hier nicht gesendet: {{names}}. Die Desktop-App sendet jeden Header.",
+    "composer": "Nachricht ({{shortcut}} zum Senden)",
+    "composerClosed": "Verbinden, um Nachrichten zu senden",
+    "message": "Nachricht",
+    "send": "Senden",
+    "clear": "Leeren"
+  }
+}

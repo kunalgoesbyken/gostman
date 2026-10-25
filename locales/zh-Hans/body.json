@@ -1,0 +1,22 @@
+{
+  "body": {
+    "typeLabel": "请求体类型",
+    "editorLabel": "请求体",
+    "format": "格式化",
+    "formatTitle": "缩进 {{type}} 请求体（{{chord}}）。{{example}} 会按原样保留。",
+    "cannotFormatAt": "无法格式化 {{type}}（第 {{line}} 行，第 {{column}} 列）：{{message}}",
+    "cannotFormat": "无法格式化 {{type}}：{{message}}",
+    "goToLine": "转到第 {{line}} 行",
+    "noBody": "无请求体",
+    "noBodyDescription": "此请求不带请求体发送。",
+    "multipartOnGet": "GET 请求很少带请求体，许多服务器会忽略它。如需上传，请把方法改为 POST 或 PUT。",
+    "replacedByGraphQL": "方法为 GRAPHQL，因此请求体由 GraphQL 标签页生成，此处的内容不会发送。",
+    "types": {
+      "none": "无",
+      "text": "文本",
+      "form": "表单 URL 编码",
+      "multipart": "Multipart",
+      "file": "文件"
+    }
+  }
+}

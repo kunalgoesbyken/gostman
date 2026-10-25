@@ -1,6 +1,10 @@
 package lint
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/kunalgoesbyken/gostman/locales"
+)
 
 func operationRules() []Rule {
 	return []Rule{
@@ -16,7 +20,7 @@ func operationIDDefined(_ *Spec, op Operation) []Issue {
 	if !blank(op.Data["operationId"]) {
 		return nil
 	}
-	return []Issue{{Path: op.Pointer, Message: "the operation has no operationId"}}
+	return []Issue{issueAt(op.Pointer, locales.LintOperationsNoOperationId, nil)}
 }
 
 func operationIDUnique(s *Spec) []Issue {
@@ -32,7 +36,7 @@ func operationIDUnique(s *Spec) []Issue {
 			first[id] = op.Key
 			continue
 		}
-		issues = append(issues, Issue{Path: op.Pointer + "/operationId", Message: fmt.Sprintf("operationId %q is already used by %s", id, earlier)})
+		issues = append(issues, issueAt(op.Pointer+"/operationId", locales.LintOperationsDuplicateOperationId, locales.Params{"id": id, "earlier": earlier}))
 	}
 	return issues
 }
@@ -41,7 +45,7 @@ func operationSummary(_ *Spec, op Operation) []Issue {
 	if !blank(op.Data["summary"]) || !blank(op.Data["description"]) {
 		return nil
 	}
-	return []Issue{{Path: op.Pointer, Message: "the operation has neither a summary nor a description"}}
+	return []Issue{issueAt(op.Pointer, locales.LintOperationsNoSummary, nil)}
 }
 
 func declaredTags(root map[string]any) map[string]bool {
@@ -56,7 +60,7 @@ func operationTagsDeclared(s *Spec, op Operation) []Issue {
 	var issues []Issue
 	for index, raw := range asList(op.Data["tags"]) {
 		if tag := asString(raw); !s.Tags[tag] {
-			issues = append(issues, Issue{Path: fmt.Sprintf("%s/tags/%d", op.Pointer, index), Message: fmt.Sprintf("tag %q is not declared in the top-level tags", tag)})
+			issues = append(issues, issueAt(fmt.Sprintf("%s/tags/%d", op.Pointer, index), locales.LintOperationsUndeclaredTag, locales.Params{"tag": tag}))
 		}
 	}
 	return issues
@@ -66,5 +70,5 @@ func deprecatedDescription(_ *Spec, op Operation) []Issue {
 	if !asBool(op.Data["deprecated"]) || !blank(op.Data["description"]) {
 		return nil
 	}
-	return []Issue{{Path: op.Pointer + "/deprecated", Message: "the operation is deprecated but has no description saying what to use instead"}}
+	return []Issue{issueAt(op.Pointer+"/deprecated", locales.LintOperationsDeprecatedWithoutDescription, nil)}
 }

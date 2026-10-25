@@ -1,5 +1,7 @@
 import { getIntrospectionQuery } from 'graphql'
 import { isPlainObject } from './dataUtils'
+import { GRAPHQL_TEXT } from './graphqlText'
+import { compareText } from './i18n/format'
 import { parseJsonBody, textBody } from './response'
 
 export const GRAPHQL_METHOD = 'GRAPHQL'
@@ -66,12 +68,12 @@ function summarize(schema) {
       description: type.description || '',
       members: membersOf(type),
     }))
-    .sort((first, second) => rank(first) - rank(second) || first.name.localeCompare(second.name))
+    .sort((first, second) => rank(first) - rank(second) || compareText(first.name, second.name))
 }
 
 function unreadableBody(response) {
-  if (response.truncated) return 'The schema is larger than the response size limit.'
-  return `The endpoint answered ${response.status} without a JSON body.`
+  if (response.truncated) return GRAPHQL_TEXT.schemaTooLarge
+  return GRAPHQL_TEXT.noJsonBody(response.status)
 }
 
 export function readSchema(response) {
@@ -80,7 +82,7 @@ export function readSchema(response) {
   if (!isPlainObject(payload)) return { error: unreadableBody(response) }
   const schema = payload.data?.__schema
   if (!isPlainObject(schema)) {
-    return { error: payload.errors?.[0]?.message || `The endpoint answered ${response.status} without a schema.` }
+    return { error: payload.errors?.[0]?.message || GRAPHQL_TEXT.noSchema(response.status) }
   }
   return { types: summarize(schema), introspection: schema }
 }

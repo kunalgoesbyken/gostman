@@ -8,7 +8,8 @@ import { SegmentedControl } from "./ui/segmented"
 import { VirtualList } from "./ui/VirtualList"
 import { SkeletonLines } from "./ui/skeleton"
 import { useDebouncedValue } from "../hooks/useDebouncedValue"
-import { BUILDER_TEXT, ROW_ARGUMENT, ROW_FIELD, ROW_FRAGMENT, buildRows, filterRows } from "../lib/graphqlBuilder"
+import { ROW_ARGUMENT, ROW_FIELD, ROW_FRAGMENT, buildRows, filterRows } from "../lib/graphqlBuilder"
+import { BUILDER_TEXT } from "../lib/graphqlBuilderText"
 import { firstOperation, parseQuery, setArgumentIncluded, setFieldSelected, setFragmentSelected } from "../lib/graphqlDocument"
 import { buildIndex } from "../lib/graphqlModel"
 import { cn } from "../lib/utils"
@@ -33,8 +34,8 @@ function BuilderRow({ row, disabled, onToggleOpen, onToggleSelected }) {
   const title = row.locked ? BUILDER_TEXT.viaFragment : [row.name, row.description].filter(Boolean).join("\n")
   return (
     <div
-      style={{ height: ROW_HEIGHT_PX, paddingLeft: BASE_INDENT_PX + row.depth * INDENT_PX }}
-      className="flex items-center gap-1.5 pr-2 text-xs hover:bg-accent"
+      style={{ height: ROW_HEIGHT_PX, paddingInlineStart: BASE_INDENT_PX + row.depth * INDENT_PX }}
+      className="flex items-center gap-1.5 pe-2 text-xs hover:bg-accent"
     >
       {row.composite ? (
         <button
@@ -44,7 +45,7 @@ function BuilderRow({ row, disabled, onToggleOpen, onToggleSelected }) {
           onClick={() => onToggleOpen(row)}
           className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-muted-foreground hover:text-foreground"
         >
-          <Chevron className="h-3.5 w-3.5" />
+          <Chevron className="h-3.5 w-3.5 rtl:-scale-x-100" />
         </button>
       ) : (
         <span className="w-5 shrink-0" />
@@ -63,7 +64,7 @@ function BuilderRow({ row, disabled, onToggleOpen, onToggleSelected }) {
       >
         {rowText(row)}
       </span>
-      <span className="ml-auto max-w-[45%] shrink-0 truncate font-mono text-2xs text-muted-foreground" title={row.label}>{row.label}</span>
+      <span className="ms-auto max-w-[45%] shrink-0 truncate font-mono text-2xs text-muted-foreground" title={row.label}>{row.label}</span>
     </div>
   )
 }

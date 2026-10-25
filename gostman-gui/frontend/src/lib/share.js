@@ -1,4 +1,5 @@
 import { base64ToBytes, bytesToBase64 } from './base64'
+import { SHARE_ERRORS_TEXT as ERRORS } from './shareText'
 
 export const MAX_LINK_FRAGMENT_LENGTH = 32 * 1024
 const MAX_SHARED_BYTES = 10 * 1024 * 1024
@@ -34,28 +35,19 @@ const GZIP = 'gzip'
 const BASE64URL = /^[A-Za-z0-9_-]*$/
 const WHITESPACE = /\s+/g
 
-const UNAVAILABLE = 'Sharing needs the Web Crypto API, which is not available in this window.'
-const INCOMPLETE = 'This share is incomplete. Copy the whole link, or choose the whole file, and try again.'
-const CANNOT_DECOMPRESS = 'This share is compressed and this browser cannot decompress it. Open it in a current browser or in the desktop app.'
-const TOO_LARGE = 'This share unpacks to more than Gostman imports at once, so it was not opened.'
-const UNREADABLE = 'This share was decrypted but its contents are not readable text.'
-const FAILURES = {
-  '': 'This share could not be decrypted. The link was changed or cut short on the way.',
-  [CREDENTIAL_KEY]: 'This share could not be decrypted. The key is wrong, or the file was changed.',
-  [CREDENTIAL_PASSPHRASE]: 'This share could not be decrypted. The passphrase is wrong, or the share was changed.',
-}
+const FAILURE_NAMES = { '': 'failedLink', [CREDENTIAL_KEY]: 'failedKey', [CREDENTIAL_PASSPHRASE]: 'failedPassphrase' }
+
+const failureFor = (credential) => ERRORS[FAILURE_NAMES[credential]]
 
 export class ShareError extends Error {}
 
-const unknownVersion = (version) => new ShareError(
-  `This share uses format "${version}", which this version of Gostman cannot open. Update Gostman and try again.`
-)
+const unknownVersion = (version) => new ShareError(ERRORS.unknownVersion(version))
 
 const encoder = new TextEncoder()
 
 function subtle() {
   const api = globalThis.crypto?.subtle
-  if (!api) throw new ShareError(UNAVAILABLE)
+  if (!api) throw new ShareError(ERRORS.unavailable)
   return api
 }
 
@@ -74,7 +66,7 @@ function joinBytes(...parts) {
 const toBase64Url = (bytes) => bytesToBase64(bytes).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '')
 
 function fromBase64Url(text) {
-  if (!BASE64URL.test(text) || text.length % 4 === 1) throw new ShareError(INCOMPLETE)
+  if (!BASE64URL.test(text) || text.length % 4 === 1) throw new ShareError(ERRORS.incomplete)
   return base64ToBytes(text.replaceAll('-', '+').replaceAll('_', '/'))
 }
 
@@ -92,7 +84,7 @@ async function readWithin(stream, limit) {
     total += value.length
     if (total > limit) {
       await reader.cancel()
-      throw new ShareError(TOO_LARGE)
+      throw new ShareError(ERRORS.tooLarge)
     }
     chunks.push(value)
   }
@@ -103,17 +95,17 @@ const transformed = (bytes, transform) => new Blob([bytes]).stream().pipeThrough
 const compress = (bytes) => readWithin(transformed(bytes, new CompressionStream(GZIP)), MAX_SHARED_BYTES)
 
 async function decompress(bytes) {
-  if (!canDecompress()) throw new ShareError(CANNOT_DECOMPRESS)
+  if (!canDecompress()) throw new ShareError(ERRORS.cannotDecompress)
   try {
     return await readWithin(transformed(bytes, new DecompressionStream(GZIP)), MAX_SHARED_BYTES)
   } catch (error) {
-    throw error instanceof ShareError ? error : new ShareError(UNREADABLE)
+    throw error instanceof ShareError ? error : new ShareError(ERRORS.unreadable)
   }
 }
 
 async function pack(text) {
   const plain = encoder.encode(text)
-  if (plain.length > MAX_SHARED_BYTES) throw new ShareError(TOO_LARGE)
+  if (plain.length > MAX_SHARED_BYTES) throw new ShareError(ERRORS.tooLarge)
   const compressed = canCompress() ? await compress(plain) : plain
   return compressed.length < plain.length
     ? joinBytes(Uint8Array.of(PACKED_GZIP), compressed)
@@ -124,7 +116,7 @@ async function unpacked(packed) {
   const content = packed.subarray(1)
   if (packed[0] === PACKED_GZIP) return decompress(content)
   if (packed[0] === PACKED_PLAIN) return content
-  throw new ShareError(UNREADABLE)
+  throw new ShareError(ERRORS.unreadable)
 }
 
 async function unpack(packed) {
@@ -132,7 +124,7 @@ async function unpack(packed) {
   try {
     return new TextDecoder('utf-8', { fatal: true }).decode(content)
   } catch {
-    throw new ShareError(UNREADABLE)
+    throw new ShareError(ERRORS.unreadable)
   }
 }
 
@@ -198,9 +190,9 @@ export function findShareReference(text) {
 export function readShareReference(reference) {
   const parts = reference.split(PART_SEPARATOR)
   const [version, secret, data] = parts
-  if (!version) throw new ShareError(INCOMPLETE)
+  if (!version) throw new ShareError(ERRORS.incomplete)
   if (!VERSIONS.includes(version)) throw unknownVersion(version)
-  if (parts.length !== PART_COUNT) throw new ShareError(INCOMPLETE)
+  if (parts.length !== PART_COUNT) throw new ShareError(ERRORS.incomplete)
   return { version, secret, data }
 }
 
@@ -220,7 +212,7 @@ function unlockingKey(share, credential, failure) {
 }
 
 async function unseal(key, version, sealed, failure) {
-  if (sealed.length < IV_BYTES + TAG_BYTES) throw new ShareError(INCOMPLETE)
+  if (sealed.length < IV_BYTES + TAG_BYTES) throw new ShareError(ERRORS.incomplete)
   try {
     const opened = await subtle().decrypt(cipherFor(version, sealed.subarray(0, IV_BYTES)), key, sealed.subarray(IV_BYTES))
     return new Uint8Array(opened)
@@ -230,7 +222,7 @@ async function unseal(key, version, sealed, failure) {
 }
 
 export async function openShare(share, credential = '') {
-  const failure = FAILURES[credentialNeeded(share)]
+  const failure = failureFor(credentialNeeded(share))
   const key = await unlockingKey(share, credential, failure)
   return unpack(await unseal(key, share.version, fromBase64Url(share.data), failure))
 }

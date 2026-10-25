@@ -85,7 +85,7 @@ function ChangedTool({ change }) {
   return (
     <div className="space-y-1">
       <p className="font-mono">{text.descriptionChanged(change.name)}</p>
-      <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 pl-3">
+      <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 ps-3">
         <dt className="text-muted-foreground">{text.before}</dt>
         <dd className="whitespace-pre-wrap text-foreground">{change.before || text.noDescription}</dd>
         <dt className="text-muted-foreground">{text.now}</dt>
@@ -99,8 +99,8 @@ function ToolChanges({ changes, onAccept }) {
   const text = MCP_TEXT.changes
   if (changes.firstSeen) return <Notice icon={Info}>{text.firstSeen}</Notice>
   const lines = [
-    changes.added.length > 0 && text.added(changes.added.join(", ")),
-    changes.removed.length > 0 && text.removed(changes.removed.join(", ")),
+    changes.added.length > 0 && text.added(changes.added),
+    changes.removed.length > 0 && text.removed(changes.removed),
   ].filter(Boolean)
   return (
     <div role="alert" className={cn(SECTION_CLASS, "text-warning")}>
@@ -140,7 +140,7 @@ function StepHeading({ step, expandable }) {
       <Icon className={cn("h-3.5 w-3.5 shrink-0", OUTCOME_TONES[step.outcome], step.outcome === STEP_RUNNING && "animate-spin")} />
       <span className="min-w-0 flex-1 font-medium text-foreground">{text.steps[step.step] ?? step.step}</span>
       <span className={cn("shrink-0 text-2xs", OUTCOME_TONES[step.outcome])}>{text.outcomes[step.outcome] ?? step.outcome}</span>
-      <ChevronRight aria-hidden="true" className={cn("h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-open:rotate-90", !expandable && "invisible")} />
+      <ChevronRight aria-hidden="true" className={cn("h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-open:rotate-90 rtl:rotate-180 rtl:group-open:rotate-90", !expandable && "invisible")} />
     </span>
   )
 }
@@ -148,7 +148,7 @@ function StepHeading({ step, expandable }) {
 function StepDetails({ step }) {
   const text = MCP_TEXT.auth
   return (
-    <div className="space-y-1 pb-1 pl-5 pt-1">
+    <div className="space-y-1 pb-1 ps-5 pt-1">
       {step.problem && text.explanations[step.problem] && <p className="text-foreground">{text.explanations[step.problem]}</p>}
       {step.detail && <p className={DETAIL_CLASS}>{step.detail}</p>}
       {step.attempts?.length > 0 && (
@@ -214,7 +214,7 @@ function SchemaPane({ operation, item, onClose }) {
         <SectionLabel className="min-w-0 flex-1 truncate">{MCP_TEXT.schemaTitles[operation]}</SectionLabel>
         <IconButton label={MCP_TEXT.closeSchema} icon={X} onClick={onClose} />
       </Toolbar>
-      <pre className="min-h-0 flex-1 overflow-auto whitespace-pre-wrap px-3 py-2 font-mono text-xs text-muted-foreground [overflow-wrap:anywhere]">
+      <pre dir="ltr" className="min-h-0 flex-1 overflow-auto whitespace-pre-wrap px-3 py-2 font-mono text-xs text-muted-foreground [overflow-wrap:anywhere]">
         {detail || MCP_TEXT.noArguments}
       </pre>
     </aside>
@@ -265,7 +265,7 @@ export function McpPanel({ tabId, request, catalog, editorPath, onUpdateRequest,
         {isLoaded && (
           <Button variant="outline" size="sm" aria-pressed={showsChecks} title={MCP_TEXT.checksHint} onClick={() => setShowsChecks(!showsChecks)}>
             {MCP_TEXT.checks}
-            <span className={cn("ml-1 font-mono", findings.length > 0 ? "text-warning" : "text-muted-foreground")}>{findings.length}</span>
+            <span className={cn("ms-1 font-mono", findings.length > 0 ? "text-warning" : "text-muted-foreground")}>{findings.length}</span>
           </Button>
         )}
         {!isLocal && (
@@ -322,7 +322,7 @@ export function McpPanel({ tabId, request, catalog, editorPath, onUpdateRequest,
       {!namesItem(operation) && <Notice>{MCP_TEXT.noInput}</Notice>}
       {takesArguments(operation) && (
         <div className="flex min-h-24 flex-1">
-          <div className="min-h-0 min-w-0 flex-1">
+          <div dir="ltr" className="min-h-0 min-w-0 flex-1">
             <Suspense fallback={<EditorSkeleton />}>
               <EditorComponent
                 value={mcpArguments}

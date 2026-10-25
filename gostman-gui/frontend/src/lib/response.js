@@ -1,5 +1,6 @@
 import { base64ToBytes, textToBase64 } from './base64'
 import { MCP_OK, MCP_PROTOCOL } from './mcp'
+import { ERROR_TITLES_TEXT } from './responseText'
 
 const ENCODING_BASE64 = 'base64'
 const FALLBACK_MIME = 'application/octet-stream'
@@ -30,15 +31,9 @@ const FILE_EXTENSIONS = {
   'text/xml': 'xml',
 }
 
-export const ERROR_TITLES = {
-  config: 'Invalid request',
-  script: 'Script failed',
-  network: 'Network error',
-  timeout: 'Request timed out',
-  cancelled: 'Request cancelled',
-  blocked: 'Address blocked',
-  restricted: 'Folder not trusted',
-}
+const ERROR_TITLES = ERROR_TITLES_TEXT
+
+export { ERROR_TITLES }
 
 export const BODY_KINDS = {
   EMPTY: 'empty',

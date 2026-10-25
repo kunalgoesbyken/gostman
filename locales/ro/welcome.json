@@ -1,0 +1,20 @@
+{
+  "welcome": {
+    "title": "Bun venit în Gostman",
+    "intro": "Nu este nevoie de cont. Nimic nu părăsește acest dispozitiv până nu trimiteți o cerere.",
+    "dismiss": "Închidere mesaj de bun venit",
+    "commandTitle": "Afișare mesaj de bun venit",
+    "commandDescription": "Pași de început, importuri și scurtături",
+    "otherTitle": "Alte moduri de a începe",
+    "importTitle": "Importați cereri",
+    "importHint": "Din Postman, Bruno, Insomnia, OpenAPI, HAR, fișiere .http sau curl.",
+    "folderTitle": "Deschideți un dosar",
+    "folderHint": "Păstrați cererile ca fișiere lângă codul dvs. și partajați-le prin git.",
+    "collectionTitle": "Creați un dosar",
+    "collectionHint": "Grupați cererile asemănătoare în bara laterală.",
+    "curlTitle": "Lipiți o comandă curl",
+    "curlHint": "Lipiți-o în bara de adrese și cererea se completează.",
+    "shortcutsTitle": "Scurtături de tastatură",
+    "sampleRequestName": "Cerere de probă"
+  }
+}

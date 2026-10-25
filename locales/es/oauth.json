@@ -1,0 +1,61 @@
+{
+  "oauth": {
+    "grants": {
+      "clientCredentials": "Credenciales de cliente",
+      "password": "Contraseña",
+      "authorizationCode": "Código de autorización",
+      "deviceCode": "Código de dispositivo"
+    },
+    "fields": {
+      "grant": "Tipo de concesión",
+      "issuer": "Emisor",
+      "authUrl": "URL de autorización",
+      "deviceUrl": "URL de autorización del dispositivo",
+      "callbackUrl": "URL de callback",
+      "callbackTitle": "Registra {{url}} como URI de redirección en el proveedor",
+      "tokenUrl": "URL del token",
+      "clientId": "ID de cliente",
+      "clientSecret": "Secreto de cliente",
+      "username": "Usuario",
+      "password": "Contraseña",
+      "scope": "Scope",
+      "credentialsIn": "Enviar credenciales en",
+      "credentialsHeader": "Encabezado Basic auth",
+      "credentialsBody": "Cuerpo de la solicitud",
+      "pkce": "Usar PKCE",
+      "headerPrefix": "Prefijo del encabezado",
+      "sendIdToken": "Enviar el ID token en lugar del token de acceso",
+      "accessToken": "Token de acceso",
+      "idToken": "ID token"
+    },
+    "discover": "Descubrir",
+    "discoverTitle": "Rellena los endpoints a partir de /.well-known/openid-configuration del emisor",
+    "discovered": "Endpoints rellenados desde {{issuer}}.",
+    "discovering": "Leyendo el documento de descubrimiento del emisor.",
+    "getToken": "Obtener token",
+    "cancel": "Cancelar",
+    "clearToken": "Borrar token",
+    "waitingForBrowser": "Esperando a que termine el inicio de sesión en tu navegador.",
+    "requesting": "Solicitando un token.",
+    "waitingForDevice": "Esperando a que introduzcas el código e inicies sesión.",
+    "deviceCode": "Introduce este código en la página de inicio de sesión:",
+    "openSignInPage": "Abrir la página de inicio de sesión",
+    "noToken": "Aún no hay token.",
+    "otherEnvironment": "El token se obtuvo con otro entorno, así que no se envía. Obtén un token para este entorno.",
+    "noIdToken": "El proveedor no devolvió ningún ID token. Añade openid al scope y obtén un token nuevo.",
+    "noExpiry": "El proveedor no indicó cuándo caduca.",
+    "expires": "Caduca el {{expiry}}.",
+    "expired": "Caducó el {{expiry}}. Se solicita un token nuevo cuando se puede renovar sin iniciar sesión.",
+    "signInNeeded": "Esta solicitud necesita un token OAuth 2. Abre la pestaña Auth y elige Obtener token.",
+    "signInForEnvironment": "El token OAuth 2 se obtuvo con otro entorno, así que no se envía. Abre la pestaña Auth y elige Obtener token para iniciar sesión en este entorno.",
+    "deviceExpired": "El código de dispositivo caducó antes de terminar el inicio de sesión. Obtén un token de nuevo.",
+    "cancelled": "Se canceló el inicio de sesión.",
+    "popup": {
+      "blocked": "Se bloqueó la ventana de inicio de sesión. Permite las ventanas emergentes de este sitio e inténtalo de nuevo.",
+      "timedOut": "No llegó ningún inicio de sesión en cinco minutos.",
+      "noCode": "El proveedor no devolvió un código de autorización.",
+      "refused": "El proveedor rechazó el inicio de sesión: {{reason}}",
+      "wrongIssuer": "La respuesta del inicio de sesión nombra al emisor «{{received}}» en lugar de «{{expected}}», así que se descartó."
+    }
+  }
+}

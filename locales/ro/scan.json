@@ -1,0 +1,32 @@
+{
+  "scan": {
+    "title": "Scanare după secrete",
+    "commandDescription": "Găsiți credențialele introduse în cereri înainte de a le partaja sau a face commit",
+    "intro": "Caută formate cunoscute de tokenuri, valori cu aspect aleatoriu în câmpuri de credențiale și parole introduse în setările de autentificare. Valorile scrise ca {{example}} sunt în regulă. Nimic nu părăsește această fereastră în afară de verificarea însăși și sunt afișate doar câteva caractere dintr-o valoare.",
+    "includeExamples": "Includere răspunsuri de exemplu salvate",
+    "scanning": "Se scanează",
+    "clean": "Nu au fost găsite secrete",
+    "cleanDescription": "Nu au fost găsite formate de tokenuri, valori de credențiale cu aspect aleatoriu sau parole introduse direct.",
+    "failed": "Verificarea nu a putut rula: {{message}}",
+    "goToRequest": "Mergeți la cerere",
+    "findings": "Constatări",
+    "showFindings": "Afișare constatări",
+    "hideFindings": "Ascundere constatări",
+    "shareAnyway": "Partajare oricum",
+    "found_one": "{{count}} posibil secret găsit",
+    "found_few": "{{count}} posibile secrete găsite",
+    "found_other": "{{count}} de posibile secrete găsite",
+    "foundShare": "Acestea rămân în linkul sau fișierul pe care îl creați. Înlocuiți-le mai întâi cu {{example}} sau partajați oricum.",
+    "foundExport": "Acestea sunt scrise în export. Înlocuiți-le mai întâi cu {{example}} dacă fișierul va fi partajat sau va primi commit.",
+    "severity": {
+      "high": "Ridicată",
+      "medium": "Medie"
+    },
+    "kinds": {
+      "request": "Cerere",
+      "folder": "Dosar",
+      "environment": "Mediu",
+      "collection": "Colecție"
+    }
+  }
+}

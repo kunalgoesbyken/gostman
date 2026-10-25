@@ -1,0 +1,67 @@
+{
+  "timeline": {
+    "proxied": "所要時間はGostmanプロキシがプロキシからターゲットまでを計測したものです。ブラウザーからプロキシまでの時間は含まれません。",
+    "reused": "再利用された接続",
+    "newConnection": "新しい接続",
+    "omitted_other": "ほか{{count}}件のリクエストは表示されていません。",
+    "failedBefore": "接続前に失敗",
+    "failedAt": "失敗した段階：{{label}}",
+    "requestHeaders": "リクエストヘッダー",
+    "responseHeaders": "レスポンスヘッダー",
+    "reveal": "値を表示",
+    "hide": "値を隠す",
+    "expanded": "詳細を隠す",
+    "collapsed": "詳細を表示",
+    "total": "合計",
+    "breakdown": "所要時間の内訳",
+    "breakdownProxied": "所要時間の内訳（Gostmanプロキシによる計測）",
+    "requests_other": "{{count}}件のリクエスト",
+    "scripts_other": "{{count}}件のスクリプト",
+    "consoleLines_other": "コンソール{{count}}行",
+    "passed": "{{count}}件成功",
+    "failed": "{{count}}件失敗",
+    "scriptFailed": "失敗",
+    "noOutput": "コンソールの出力もチェックの結果もありません。",
+    "secrets": "シークレットマネージャー",
+    "secretsRead_other": "{{count}}件のシークレットを読み取り",
+    "secretSkipped": "接続「{{connection}}」がオフのため、{{name}}は空です",
+    "seconds": "{{value}}秒",
+    "milliseconds": "{{value}} ms",
+    "phases": {
+      "dns": {
+        "label": "DNS検索",
+        "short": "DNS"
+      },
+      "connect": {
+        "label": "TCP接続",
+        "short": "接続"
+      },
+      "tls": {
+        "label": "TLSハンドシェイク",
+        "short": "TLS"
+      },
+      "firstByte": {
+        "label": "最初のバイトを待機",
+        "short": "TTFB"
+      },
+      "download": {
+        "label": "コンテンツのダウンロード",
+        "short": "ダウンロード"
+      }
+    },
+    "facts": {
+      "remoteAddress": "リモートアドレス",
+      "protocol": "プロトコル",
+      "connection": "接続",
+      "tls": "TLS",
+      "certificateSubject": "証明書のサブジェクト",
+      "certificateIssuer": "証明書の発行者",
+      "requestBody": "リクエストボディ",
+      "redirectsTo": "リダイレクト先",
+      "cookiesSet": "設定されたCookie"
+    },
+    "tlsAlpn": "ALPN {{protocol}}",
+    "tlsExpires": "有効期限：{{date}}",
+    "tlsExpired": "有効期限：{{date}}（期限切れ）"
+  }
+}

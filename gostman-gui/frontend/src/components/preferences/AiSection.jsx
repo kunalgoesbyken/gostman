@@ -14,7 +14,7 @@ import { STATUS_ERROR, STATUS_OK, STATUS_RUNNING, useAiStore } from "../../lib/a
 import { isAiEnabled, isConfigured } from "../../lib/ai/settings"
 
 const TEXT = AI_TEXT.settings
-const CHECKBOX_CLASS = "h-auto min-h-6 items-start justify-start py-0.5 text-left text-xs text-foreground"
+const CHECKBOX_CLASS = "h-auto min-h-6 items-start justify-start py-0.5 text-start text-xs text-foreground"
 
 function KeyField({ actions, keyStored, provider }) {
   const [draft, setDraft] = useState("")
@@ -43,6 +43,7 @@ function KeyField({ actions, keyStored, provider }) {
           placeholder={provider.keyRequired ? TEXT.pasteKey : TEXT.optionalKey}
           aria-label={TEXT.apiKey}
           onChange={(event) => setDraft(event.target.value)}
+          dir="ltr"
           className="min-w-0 font-mono"
         />
         <Button size="sm" disabled={!draft.trim()} onClick={save}>{TEXT.saveKey}</Button>
@@ -79,6 +80,7 @@ function ModelField({ settings, models, provider, canList, actions }) {
           aria-label={TEXT.model}
           spellCheck={false}
           onChange={(event) => actions.saveSettings({ model: event.target.value })}
+          dir="ltr"
           className="min-w-0 font-mono"
         />
         <Button size="sm" variant="outline" disabled={!canList || models.status === STATUS_RUNNING} onClick={actions.listModels}>
@@ -172,6 +174,7 @@ export function AiSection({ actions }) {
           aria-label={TEXT.baseUrl}
           spellCheck={false}
           onChange={(event) => actions.saveSettings({ baseUrl: event.target.value })}
+          dir="ltr"
           className="font-mono"
         />
       </Field>

@@ -1,0 +1,17 @@
+{
+  "awsAccessKeyId": "AWSアクセスキーID",
+  "githubToken": "GitHubトークン",
+  "githubFineGrainedToken": "GitHubのファイングレインド個人アクセストークン",
+  "gitlabToken": "GitLabの個人アクセストークン",
+  "slackToken": "Slackトークン",
+  "stripeLiveKey": "Stripeの本番用シークレットキーまたは制限付きキー",
+  "googleApiKey": "Google APIキー",
+  "npmToken": "npmアクセストークン",
+  "pypiToken": "PyPIアップロードトークン",
+  "jwt": "JSON Web Token",
+  "privateKeyBlock": "PEM形式の秘密鍵",
+  "bearerLiteral": "リクエストに直接入力されたBearerトークン",
+  "highEntropyValue": "認証情報のような名前のフィールドにある、ランダムに見える値",
+  "authLiteral": "{{example}}ではなく、認証設定に直接入力された認証情報",
+  "urlCredentials": "URLに書き込まれたパスワード"
+}

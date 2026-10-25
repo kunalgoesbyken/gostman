@@ -60,6 +60,7 @@ function CertificateRow({ certificate, onChange, onRemove, onPick }) {
         aria-label={TEXT.hostLabel}
         spellCheck={false}
         onChange={(event) => onChange({ ...certificate, host: event.target.value })}
+        dir="ltr"
         className="font-mono"
       />
       <PathField label={TEXT.certificateFile} path={certificate.certFile} onPick={pickInto("certFile", TEXT.chooseCertificate)} />
@@ -105,6 +106,7 @@ function SettingsForm({ draft, onChange, onPick }) {
             placeholder={TEXT.proxyAddressPlaceholder}
             spellCheck={false}
             onChange={(event) => update({ proxyUrl: event.target.value })}
+            dir="ltr"
             className="font-mono"
           />
         </Field>
@@ -116,6 +118,7 @@ function SettingsForm({ draft, onChange, onPick }) {
             placeholder={TEXT.bypassPlaceholder}
             spellCheck={false}
             onChange={(event) => update({ proxyBypass: event.target.value })}
+            dir="ltr"
             className="font-mono"
           />
         </Field>
@@ -130,10 +133,10 @@ function SettingsForm({ draft, onChange, onPick }) {
         <div className="overflow-x-auto">
           <div className="flex min-w-[40rem] flex-col gap-2">
             <div className={`${CERTIFICATE_COLUMNS} pt-2`}>
-              <SectionLabel className="truncate">{TEXT.certificateHost}</SectionLabel>
-              <SectionLabel className="truncate">{TEXT.certificate}</SectionLabel>
-              <SectionLabel className="truncate">{TEXT.privateKey}</SectionLabel>
-              <SectionLabel className="truncate">{TEXT.passphrase}</SectionLabel>
+              <SectionLabel title={TEXT.certificateHost} className="truncate">{TEXT.certificateHost}</SectionLabel>
+              <SectionLabel title={TEXT.certificate} className="truncate">{TEXT.certificate}</SectionLabel>
+              <SectionLabel title={TEXT.privateKey} className="truncate">{TEXT.privateKey}</SectionLabel>
+              <SectionLabel title={TEXT.passphrase} className="truncate">{TEXT.passphrase}</SectionLabel>
               <span />
             </div>
             {draft.certificates.map((certificate, index) => (
@@ -251,7 +254,7 @@ export function NetworkDialog({ settings, actions, onClose }) {
       )}
       {actions.canConfigureNetwork && (
         <DialogFooter>
-          {failure && <p role="alert" className="mr-auto min-w-0 self-center text-xs text-destructive">{failure}</p>}
+          {failure && <p role="alert" className="me-auto min-w-0 self-center text-xs text-destructive">{failure}</p>}
           <Button variant="outline" onClick={onClose}>{TEXT.cancel}</Button>
           <Button onClick={save}>{TEXT.save}</Button>
         </DialogFooter>

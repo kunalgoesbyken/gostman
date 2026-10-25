@@ -1,0 +1,28 @@
+{
+  "requestTabs": {
+    "sections": "Secciones de la solicitud",
+    "more": "Más",
+    "moreHint": "Más secciones de la solicitud",
+    "loading": "Cargando",
+    "examples": "Ejemplos",
+    "examplesHint": "Ejemplos de respuesta guardados",
+    "headerLabel": "Encabezado",
+    "variableLabel": "Variable",
+    "paramLabel": "Parámetro",
+    "paramsNote": "Estas filas reflejan la query string de la URL. Las filas sin marcar se conservan aquí pero no se envían.",
+    "labels": {
+      "params": "Params",
+      "headers": "Encabezados",
+      "body": "Cuerpo",
+      "auth": "Auth",
+      "graphql": "GraphQL",
+      "grpc": "gRPC",
+      "mcp": "MCP",
+      "websocket": "WebSocket",
+      "vars": "Vars",
+      "extract": "Extracción",
+      "tests": "Pruebas",
+      "settings": "Ajustes"
+    }
+  }
+}

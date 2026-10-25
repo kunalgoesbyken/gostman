@@ -1,0 +1,17 @@
+{
+  "awsAccessKeyId": "ID cheie de acces AWS",
+  "githubToken": "Token GitHub",
+  "githubFineGrainedToken": "Token de acces personal GitHub cu permisiuni detaliate",
+  "gitlabToken": "Token de acces personal GitLab",
+  "slackToken": "Token Slack",
+  "stripeLiveKey": "Cheie secretă live sau restricționată Stripe",
+  "googleApiKey": "Cheie API Google",
+  "npmToken": "Token de acces npm",
+  "pypiToken": "Token de încărcare PyPI",
+  "jwt": "JSON Web Token",
+  "privateKeyBlock": "Cheie privată PEM",
+  "bearerLiteral": "Token Bearer introdus direct în cerere",
+  "highEntropyValue": "valoare cu aspect aleatoriu într-un câmp numit ca o credențială",
+  "authLiteral": "credențială introdusă direct în setările de autentificare în loc de {{example}}",
+  "urlCredentials": "parolă scrisă în URL"
+}

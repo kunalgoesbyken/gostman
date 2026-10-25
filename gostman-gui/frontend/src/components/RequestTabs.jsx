@@ -57,7 +57,7 @@ const AUTHORIZATION_AUTH = ["basic", "bearer", "oauth2"]
 function InheritedMark({ title, children }) {
   return (
     <span title={title} className="inline-flex items-center gap-0.5 font-mono text-3xs text-muted-foreground">
-      <CornerLeftUp aria-hidden="true" className="h-3 w-3" />
+      <CornerLeftUp aria-hidden="true" className="h-3 w-3 rtl:-scale-x-100" />
       {children && <span aria-hidden="true">{children}</span>}
       <span className="sr-only">{title}</span>
     </span>
@@ -179,7 +179,7 @@ export const RequestTabs = memo(function RequestTabs({
           aria-label={TEXT.examples}
           title={TEXT.examplesHint}
           onClick={actions.examples.open}
-          className="ml-auto shrink-0 px-1.5"
+          className="ms-auto shrink-0 px-1.5"
         >
           <Bookmark />
           <TabBadge value={exampleCount} />

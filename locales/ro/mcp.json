@@ -1,0 +1,155 @@
+{
+  "mcp": {
+    "media": {
+      "heading": "Imagini și audio în rezultat",
+      "image": "Imaginea {{number}} din rezultat",
+      "audio": "Audio {{number}} din rezultat"
+    },
+    "server": "Server",
+    "argumentsLabel": "Argumente",
+    "notLoaded": "Neîncărcat",
+    "load": "Încărcare",
+    "reload": "Reîncărcare",
+    "signIn": "Autentificare",
+    "signingIn": "Autentificare…",
+    "signInHint": "Aflați cum vrea acest server să vă autentificați, înregistrați Gostman la serverul său de autorizare când este nevoie, autentificați-vă în browser și păstrați tokenul în fila Auth",
+    "serverProtocol": "MCP {{version}}",
+    "serverProtocolLegacy": "MCP {{version}} (handshake initialize)",
+    "instructions": "Instrucțiuni",
+    "instructionsHint": "Afișează instrucțiunile pe care acest server le dă modelelor care îl folosesc",
+    "operation": "Operație",
+    "operations": {
+      "toolsCall": "Apelare tool",
+      "toolsList": "Listare tool-uri",
+      "resourcesRead": "Citire resursă",
+      "resourcesList": "Listare resurse",
+      "resourceTemplatesList": "Listare șabloane de resurse",
+      "promptsGet": "Obținere prompt",
+      "promptsList": "Listare prompturi"
+    },
+    "itemLabels": {
+      "tool": "Tool MCP",
+      "resource": "URI resursă",
+      "prompt": "Prompt MCP"
+    },
+    "choose": {
+      "tool": "Alegeți un tool",
+      "prompt": "Alegeți un prompt"
+    },
+    "noInput": "Această operație nu primește date de intrare. Trimite listează tot ce returnează serverul, din toate paginile.",
+    "readHint": "Trimite citește resursa de la acest URI. Alegeți o resursă listată sau completați un șablon.",
+    "schema": "Schemă",
+    "schemaHints": {
+      "tool": "Afișează JSON Schema a argumentelor tool-ului lângă editor",
+      "prompt": "Afișează argumentele prompt-ului lângă editor"
+    },
+    "schemaTitles": {
+      "tool": "Schema de intrare",
+      "prompt": "Argumentele prompt-ului"
+    },
+    "closeSchema": "Închidere",
+    "noArguments": "Acest prompt nu primește argumente.",
+    "example": "Folosire exemplu",
+    "exampleHint": "Înlocuiește argumentele cu un exemplu construit din schemă",
+    "promptArgumentRequired": "{{name}} (obligatoriu)",
+    "promptArgumentDescribed": "{{label}}: {{description}}",
+    "catalogHints": {
+      "remote": "Încarcă tool-urile, resursele și prompturile serverului MCP de la acest URL. Antetele și autentificarea acestei cereri sunt trimise cu fiecare apel. În aplicația desktop, scrieți stdio: și o comandă în bara de adrese pentru a porni în schimb un server local, de exemplu {{example}}.",
+      "local": "Încărcare pornește această comandă pe acest computer și citește ce oferă; fiecare apel o pornește din nou. Rândurile din fila Antete îi sunt transmise ca variabile de mediu."
+    },
+    "empty": "Acest server nu listează tool-uri, resurse sau prompturi.",
+    "checks": "Verificări",
+    "checksHint": "Probleme găsite în definițiile tool-urilor acestui server",
+    "noFindings": "Nu au fost găsite probleme în definițiile tool-urilor.",
+    "findings": {
+      "missingDescription": "{{tool}}: fără descriere. Un model alege tool-urile după descrieri, deci este puțin probabil să-l folosească bine pe acesta.",
+      "shortDescription": "{{tool}}: descrierea „{{detail}}” este foarte scurtă. Spuneți ce face tool-ul, când se folosește și ce returnează.",
+      "duplicateName": "{{tool}}: mai multe tool-uri au acest nume, deci apelurile nu le pot deosebi.",
+      "similarNames": "{{tool}}: arată aproape la fel ca {{detail}}, ceea ce face ușor ca un model să-l aleagă pe cel greșit.",
+      "invalidName": "{{tool}}: numele ar trebui să aibă între 1 și 128 de caractere și să folosească doar litere, cifre, _, - și .",
+      "invalidSchema": "{{tool}}: schema de intrare nu este utilizabilă: {{detail}}.",
+      "undocumentedParameters": "{{tool}}: parametri fără descriere: {{detail}}.",
+      "unknownRequired": "{{tool}}: required listează parametri pe care schema nu îi definește: {{detail}}.",
+      "manyTools": "Acest server listează {{count}} tool-uri. Listele mari de tool-uri îi fac mai greu unui model să aleagă tool-ul potrivit, iar unii clienți încarcă doar o parte din ele.",
+      "rejected": "{{tool}}: omis din lista de tool-uri, așa cum cere specificația, deoarece {{detail}}.",
+      "listFailed": "{{method}} a eșuat: {{detail}}"
+    },
+    "schemaProblems": {
+      "notObject": "nu este un obiect JSON",
+      "rootType": "tipul de nivel superior ar trebui să fie „object”",
+      "properties": "properties nu este un obiect de scheme",
+      "property": "schema lui {{name}} nu este un obiect",
+      "type": "{{name}} are tipul necunoscut „{{type}}”",
+      "required": "required nu este o listă de nume"
+    },
+    "changes": {
+      "title": "Tool-urile acestui server s-au schimbat de când le-ați acceptat ultima dată.",
+      "added": "Noi: {{names}}.",
+      "removed": "Eliminate: {{names}}.",
+      "descriptionChanged": "{{name}}: descrierea s-a schimbat.",
+      "schemaChanged": "{{name}}: schema de intrare s-a schimbat.",
+      "definitionChanged": "{{name}}: descrierea sau schema de intrare s-a schimbat.",
+      "before": "Înainte",
+      "now": "Acum",
+      "noDescription": "(niciuna)",
+      "advice": "Citiți modificările înainte ca un agent să folosească aceste tool-uri. O descriere schimbată poate conține instrucțiuni pe care serverul nu vi le-a arătat înainte.",
+      "accept": "Acceptare modificări",
+      "firstSeen": "Prima încărcare a acestui server: Gostman reține tool-urile sale pe acest dispozitiv și vă avertizează când se schimbă."
+    },
+    "auth": {
+      "title": "Autentificare",
+      "close": "Închidere",
+      "retry": "Încercați din nou",
+      "steps": {
+        "probe": "Interogarea serverului",
+        "challenge": "Citirea provocării WWW-Authenticate",
+        "resource": "Găsirea metadatelor resursei protejate (RFC 9728)",
+        "server": "Găsirea metadatelor serverului de autorizare (RFC 8414 sau OpenID Connect)",
+        "registration": "Obținerea unui ID de client",
+        "browser": "Autentificare în browser",
+        "issuer": "Verificarea emitentului răspunsului (RFC 9207)",
+        "token": "Schimbarea codului pe un token",
+        "retry": "Apelarea serverului cu tokenul"
+      },
+      "outcomes": {
+        "ok": "Gata",
+        "warning": "Avertisment",
+        "failed": "Eșuat",
+        "stopped": "Oprit",
+        "running": "În curs"
+      },
+      "explanations": {
+        "localCommand": "Serverele locale pornite cu stdio: citesc credențialele din mediul lor, nu din OAuth. Puneți în schimb tokenul pe un rând din fila Antete.",
+        "unreachable": "Gostman nu a putut contacta serverul. Verificați URL-ul, rețeaua și setările proxy.",
+        "noResourceMetadata": "Serverul a cerut autentificare fără un parametru resource_metadata, deci Gostman caută metadatele la adresele well-known.",
+        "answered": "Serverul a răspuns fără a cere autentificare, de exemplu pentru că această cerere poartă deja un token valid. Gostman caută totuși metadatele OAuth, ca să vă puteți autentifica din nou.",
+        "notProtected": "Serverul a răspuns fără a cere autentificare și nu publică metadate OAuth, deci nu are nevoie de token.",
+        "resourceMetadataMissing": "Nu au fost găsite metadate ale resursei protejate la niciuna dintre adresele de mai jos. Un server MCP care folosește OAuth trebuie să le publice, fie la adresa resource_metadata din răspunsul său 401, fie la /.well-known/oauth-protected-resource.",
+        "resourceMetadataInvalid": "Metadatele resursei protejate nu numesc niciun server de autorizare, deci Gostman nu știe unde să se autentifice.",
+        "resourceMismatch": "Resursa numită în metadatele resursei protejate nu este URL-ul acestui server. Tokenurile emise pentru acea resursă nu ar fi acceptate aici (nepotrivire de audience), deci Gostman se oprește. Setați resource din acel document la URL-ul serverului sau la un URL cu care începe URL-ul serverului.",
+        "serverMetadataMissing": "Nicio adresă well-known a serverului de autorizare nu a returnat metadate. Serverul de autorizare trebuie să publice metadatele serverului de autorizare OAuth 2.0 sau un document de descoperire OpenID Connect.",
+        "issuerMismatch": "Emitentul din metadatele serverului de autorizare diferă de adresa listată în authorization_servers din metadatele resursei protejate. Specificația cere ca ele să fie identice, caracter cu caracter, deci metadatele nu sunt folosite. Faceți cele două valori să coincidă; o cauză frecventă este un slash final.",
+        "serverMetadataIncomplete": "Metadatele serverului de autorizare nu au authorization_endpoint sau token_endpoint.",
+        "noPkce": "Metadatele serverului de autorizare nu listează S256 în code_challenge_methods_supported, iar clienții MCP nu trebuie să se autentifice fără PKCE. Acceptați PKCE cu S256 pe serverul de autorizare și adăugați S256 la acea listă.",
+        "insecureEndpoint": "Endpointul de autorizare sau de token folosește HTTP simplu pe o gazdă la distanță. Specificația cere HTTPS pentru aceste endpointuri.",
+        "insufficientScope": "Tokenul este valid, dar îi lipsește un scope de care are nevoie această cerere. O nouă autentificare cere scope-urile pe care le aveați plus cele numite de server.",
+        "noRegistration": "Serverul de autorizare nu oferă nici înregistrare dinamică de client, nici documente de metadate ale ID-ului de client. Înregistrați singuri un client la el, introduceți ID-ul clientului în fila Auth (OAuth 2.0) și autentificați-vă din nou.",
+        "registrationRefused": "Serverul de autorizare a refuzat să înregistreze Gostman. Mulți furnizori de identitate dezactivează înregistrarea dinamică de client: înregistrați singuri un client și introduceți ID-ul său în fila Auth.",
+        "serverChanged": "Serverul de autorizare nu este cel căruia îi aparține ID-ul de client salvat, deci Gostman s-a înregistrat din nou în loc să-l reutilizeze.",
+        "browserFailed": "Autentificarea în browser nu s-a încheiat.",
+        "issuerMissing": "Metadatele serverului de autorizare setează authorization_response_iss_parameter_supported, dar răspunsul nu avea parametrul iss, deci a fost respins pentru a preveni un atac de tip mix-up. Adăugați iss la redirecționarea înapoi către Gostman sau nu mai anunțați suport pentru el.",
+        "issuerWrong": "Parametrul iss al răspunsului nu este emitentul serverului de autorizare cu care s-a autentificat Gostman, deci răspunsul a fost ignorat pentru a preveni un atac de tip mix-up. Trimiteți emitentul exact așa cum apare în metadatele serverului de autorizare.",
+        "tokenFailed": "Endpointul de token nu a returnat un token de acces. Verificați dacă ID-ul clientului, adresa de redirecționare și parametrul resource sunt acceptate.",
+        "stillRejected": "Serverul refuză în continuare tokenul. Se poate să aștepte alt audience sau scope: comparați resource și scope de mai jos cu ce verifică serverul."
+      },
+      "attempts": "Cereri"
+    },
+    "notifications": "Notificări ({{count}})",
+    "notificationTime": "{{milliseconds}} ms",
+    "progressOf": "{{progress}}/{{total}}",
+    "issuerDetail": "așteptat „{{expected}}”, primit „{{received}}”"
+  },
+  "mcpOutput": {
+    "name": "Rezultatul respectă schema de ieșire a tool-ului"
+  }
+}

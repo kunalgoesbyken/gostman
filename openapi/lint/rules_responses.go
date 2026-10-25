@@ -1,9 +1,10 @@
 package lint
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const defaultResponse = "default"
@@ -35,14 +36,14 @@ func successResponse(_ *Spec, op Operation) []Issue {
 	if hasResponse(op, func(status string) bool { return statusClass(status, '2') }) {
 		return nil
 	}
-	return []Issue{{Path: op.Pointer + "/responses", Message: "the operation declares no 2xx response"}}
+	return []Issue{issueAt(op.Pointer+"/responses", locales.LintResponsesNoSuccess, nil)}
 }
 
 func errorResponse(_ *Spec, op Operation) []Issue {
 	if hasResponse(op, func(status string) bool { return status == defaultResponse || statusClass(status, '4') }) {
 		return nil
 	}
-	return []Issue{{Path: op.Pointer + "/responses", Message: "the operation declares neither a default nor a 4xx response"}}
+	return []Issue{issueAt(op.Pointer+"/responses", locales.LintResponsesNoError, nil)}
 }
 
 func responseSchema(s *Spec, op Operation) []Issue {
@@ -67,14 +68,14 @@ func swaggerResponseSchema(response map[string]any, op Operation, status, at str
 	if !statusClass(status, '2') || status == "204" || status == "205" {
 		return nil
 	}
-	return []Issue{{Path: at, Message: fmt.Sprintf("response %s has no schema", status)}}
+	return []Issue{issueAt(at, locales.LintResponsesNoSchema, locales.Params{"status": status})}
 }
 
 func mediaWithoutSchema(content map[string]any, status, at string) []Issue {
 	var issues []Issue
 	for _, media := range sortedKeys(content) {
 		if item := asMap(content[media]); item != nil && item["schema"] == nil {
-			issues = append(issues, Issue{Path: at + pointer("content", media), Message: fmt.Sprintf("response %s declares %s without a schema", status, media)})
+			issues = append(issues, issueAt(at+pointer("content", media), locales.LintResponsesMediaWithoutSchema, locales.Params{"status": status, "media": media}))
 		}
 	}
 	return issues
@@ -90,14 +91,14 @@ func requestBodyOnRead(s *Spec, op Operation) []Issue {
 	if op.Data["requestBody"] == nil {
 		return nil
 	}
-	return []Issue{{Path: op.Pointer + "/requestBody", Message: op.Method + " operations should not have a request body"}}
+	return []Issue{issueAt(op.Pointer+"/requestBody", locales.LintResponsesBodyOnRead, locales.Params{"method": op.Method})}
 }
 
 func swaggerBodyParameters(s *Spec, op Operation) []Issue {
 	var issues []Issue
 	for _, parameter := range s.Parameters(op) {
 		if parameter.In == "body" || parameter.In == "formData" {
-			issues = append(issues, Issue{Path: parameter.Pointer, Message: op.Method + " operations should not have a request body"})
+			issues = append(issues, issueAt(parameter.Pointer, locales.LintResponsesBodyOnRead, locales.Params{"method": op.Method}))
 		}
 	}
 	return issues
@@ -110,7 +111,7 @@ func requestBodyExample(s *Spec, op Operation) []Issue {
 	for _, media := range sortedKeys(content) {
 		item := asMap(content[media])
 		if item != nil && !s.hasExample(item) {
-			issues = append(issues, Issue{Path: op.Pointer + pointer("requestBody", "content", media), Message: fmt.Sprintf("the %s request body has no example", media)})
+			issues = append(issues, issueAt(op.Pointer+pointer("requestBody", "content", media), locales.LintResponsesNoBodyExample, locales.Params{"media": media}))
 		}
 	}
 	return issues

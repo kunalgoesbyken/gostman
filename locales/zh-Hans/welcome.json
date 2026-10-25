@@ -1,0 +1,20 @@
+{
+  "welcome": {
+    "title": "欢迎使用 Gostman",
+    "intro": "无需账号。在你发送请求之前，不会有任何内容离开此设备。",
+    "dismiss": "关闭欢迎页",
+    "commandTitle": "显示欢迎页",
+    "commandDescription": "入门步骤、导入和快捷键",
+    "otherTitle": "其他开始方式",
+    "importTitle": "导入请求",
+    "importHint": "来自 Postman、Bruno、Insomnia、OpenAPI、HAR、.http 文件或 curl。",
+    "folderTitle": "打开文件夹",
+    "folderHint": "把请求保存为文件，放在代码旁边，并通过 git 分享。",
+    "collectionTitle": "创建文件夹",
+    "collectionHint": "在侧边栏中把相关请求归到一起。",
+    "curlTitle": "粘贴 curl 命令",
+    "curlHint": "粘贴到地址栏，请求就会自动填好。",
+    "shortcutsTitle": "键盘快捷键",
+    "sampleRequestName": "示例请求"
+  }
+}

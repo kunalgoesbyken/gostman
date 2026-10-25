@@ -1,0 +1,30 @@
+{
+  "privacy": {
+    "telemetryLabel": "Telemetría",
+    "telemetryHint": "Gostman no tiene telemetría, analítica ni informes de fallos. Solo contacta con los hosts a los que envías solicitudes y con los servicios que configuras tú.",
+    "docsLink": "Con qué se conecta Gostman",
+    "updatesLabel": "Buscar versiones nuevas",
+    "updatesHint": "Una vez al día, lee la última versión publicada en GitHub y la muestra en la barra de estado. No se descarga ni se instala nada.",
+    "updatesFailed": "La última comprobación no llegó a GitHub. Se repite mañana.",
+    "updatesCurrent": "Esta es la última versión ({{version}}).",
+    "updateAvailable": "Hay una versión {{version}} disponible",
+    "updatesNewer": "Hay una versión {{version}} disponible en GitHub.",
+    "updateHint": "Abre las notas de la versión y las descargas en GitHub",
+    "updateDismiss": "Ocultar hasta la próxima versión",
+    "relayLabel": "Enviar solicitudes a través de",
+    "relayHint": "El relay alojado no puede llegar a localhost ni a direcciones privadas. Un relay local envía las solicitudes desde este equipo, sin nadie por el medio.",
+    "relayModes": {
+      "hosted": "Relay alojado",
+      "local": "Relay local en este equipo"
+    },
+    "relayAddressLabel": "Dirección del relay local",
+    "relayAddressHint": "Inícialo con gostman relay e introduce la dirección que muestra.",
+    "relayAddressInvalid": "Introduce una dirección como http://127.0.0.1:4030.",
+    "relayCheck": "Probar",
+    "relayChecking": "Probando…",
+    "relayReachable": "El relay local respondió.",
+    "relayMissing": "Introduce la dirección del relay local en Preferencias, Privacidad, o vuelve al relay alojado.",
+    "relayUnreachable": "El relay local en {{address}} no respondió. Inícialo con gostman relay o vuelve al relay alojado en Preferencias, Privacidad.",
+    "relayCheckUnreachable": "El relay local en {{address}} no respondió. Comprueba que gostman relay se está ejecutando y que la dirección coincide con la que mostró."
+  }
+}

@@ -4,14 +4,14 @@ import { createRoot } from "react-dom/client"
 import { ConnectionMark } from "./ConnectionMark"
 import { ORIGIN_OFF, ORIGIN_UNKNOWN } from "../lib/secretOrigins"
 import { REFERENCE_TEXT, SECRETS_TEXT } from "../lib/secretsText"
-import { VARIABLE_TEXT } from "../lib/variables"
+import { VARIABLE_TEXT } from "../lib/variablesText"
 
 function ValueLine({ info }) {
   return (
     <p className="font-mono">
-      <span className="text-muted-foreground">{info.name}</span>
+      <span dir="ltr" className="text-muted-foreground">{info.name}</span>
       <span className="text-muted-foreground"> = </span>
-      {info.defined ? info.shown : <span className="text-warning">{VARIABLE_TEXT.undefinedName}</span>}
+      {info.defined ? <span dir="ltr">{info.shown}</span> : <span className="text-warning">{VARIABLE_TEXT.undefinedName}</span>}
       {info.source && <span className="text-muted-foreground"> ({info.source})</span>}
     </p>
   )
@@ -21,7 +21,7 @@ function ResolvedLine({ info }) {
   return (
     <p className="font-mono">
       <span className="text-muted-foreground">{VARIABLE_TEXT.resolvesTo} </span>
-      <span className="[overflow-wrap:anywhere]">{info.resolved}</span>
+      <span dir="ltr" className="[overflow-wrap:anywhere]">{info.resolved}</span>
       <span className="text-muted-foreground"> ({VARIABLE_TEXT.through(info.chain)})</span>
     </p>
   )
@@ -49,7 +49,7 @@ function OriginTarget({ origin }) {
       {rows.map(([label, value]) => (
         <Fragment key={label}>
           <dt className="text-muted-foreground">{label}</dt>
-          <dd className="font-mono [overflow-wrap:anywhere]">{value}</dd>
+          <dd dir="ltr" className="font-mono [overflow-wrap:anywhere]">{value}</dd>
         </Fragment>
       ))}
     </dl>

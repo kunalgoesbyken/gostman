@@ -48,7 +48,7 @@ function SendButton({ loading, socketStatus, hint, onSend, onCancel, onDisconnec
   const label = socketStatus === null ? TEXT.send : TEXT.connect
   return (
     <Button onClick={onSend} title={hint(label)} className="max-sm:flex-1">
-      {socketStatus === null ? <Send /> : <Plug />}
+      {socketStatus === null ? <Send className="rtl:-scale-x-100" /> : <Plug />}
       {label}
     </Button>
   )
@@ -117,6 +117,7 @@ export const RequestBar = memo(function RequestBar({
             onChange={(event) => onMethodChange(event.target.value)}
             aria-label={TEXT.method}
             controlSize="md"
+            dir="ltr"
             style={methodStyle(method)}
             className="w-28 font-mono font-semibold"
           >

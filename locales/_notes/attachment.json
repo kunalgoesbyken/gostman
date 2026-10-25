@@ -1,0 +1,8 @@
+{
+  "attachment.choose": "Button that opens a file picker, shown when no file is chosen.",
+  "attachment.replace": "Button that opens a file picker, shown when a file is already chosen.",
+  "attachment.pickTitle": "Title of the operating system file dialog.",
+  "attachment.fromDisk": "{{path}} is a file path. Tooltip over a file name.",
+  "attachment.tooLarge": "{{size}}, {{limit}}, {{proxyLimit}} and {{desktopLimit}} are file sizes such as 4.5 MB.",
+  "attachment.proxyTooLarge": "{{proxyLimit}} is a file size such as 4.5 MB. CLI is the command-line tool."
+}

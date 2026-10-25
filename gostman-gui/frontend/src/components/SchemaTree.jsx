@@ -26,7 +26,7 @@ function Facts({ node }) {
 export function SchemaTree({ node }) {
   const children = node.properties || []
   return (
-    <div className="text-xs">
+    <div dir="ltr" className="text-xs">
       <div className="flex flex-wrap items-baseline gap-x-2">
         {node.name && <span className="font-mono font-medium text-foreground">{node.name}</span>}
         <span className="font-mono text-muted-foreground">{typeText(node)}</span>
@@ -34,7 +34,7 @@ export function SchemaTree({ node }) {
       </div>
       <Facts node={node} />
       {(children.length > 0 || node.items || node.additionalProperties || node.options) && (
-        <div className="ml-1 mt-1 space-y-2 border-l border-border pl-3">
+        <div className="ms-1 mt-1 space-y-2 border-s border-border ps-3">
           {children.map((child) => <SchemaTree key={child.name} node={child} />)}
           {node.items && <SchemaTree node={{ ...node.items, name: "items" }} />}
           {node.additionalProperties && <SchemaTree node={{ ...node.additionalProperties, name: "additionalProperties" }} />}

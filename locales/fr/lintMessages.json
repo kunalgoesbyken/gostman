@@ -1,0 +1,39 @@
+{
+  "components": {
+    "unused": "{{kind}}/{{name}} est défini mais jamais référencé",
+    "invalidRef": "$ref non valide : {{detail}}"
+  },
+  "info": {
+    "fieldMissing": "info.{{field}} est absent ou vide",
+    "noServers": "aucun serveur n’est listé : les clients ne peuvent pas savoir où l’API est servie",
+    "noHost": "aucun hôte n’est défini : les clients ne peuvent pas savoir où l’API est servie",
+    "serverNotHttps": "{{url}} n’utilise pas https",
+    "httpOnly": "l’API n’est proposée qu’en http"
+  },
+  "operations": {
+    "noOperationId": "l’opération n’a pas d’operationId",
+    "duplicateOperationId": "l’operationId « {{id}} » est déjà utilisé par {{earlier}}",
+    "noSummary": "l’opération n’a ni résumé ni description",
+    "undeclaredTag": "le tag « {{tag}} » n’est pas déclaré dans les tags de premier niveau",
+    "deprecatedWithoutDescription": "l’opération est obsolète mais n’a pas de description indiquant quoi utiliser à la place",
+    "noSecurity": "la spécification définit des schémas de sécurité mais cette opération n’en exige aucun"
+  },
+  "paths": {
+    "none": "le document ne définit aucun chemin",
+    "noLeadingSlash": "le chemin « {{path}} » ne commence pas par une barre oblique",
+    "ambiguous": "{{path}} ne peut pas être distingué de {{earlier}}",
+    "parameterUndeclared": "le paramètre de chemin « {{name}} » figure dans le chemin mais n’est pas déclaré",
+    "parameterUnused": "le paramètre de chemin « {{name}} » est déclaré mais ne figure pas dans le chemin"
+  },
+  "responses": {
+    "noSuccess": "l’opération ne déclare aucune réponse 2xx",
+    "noError": "l’opération ne déclare ni réponse par défaut ni réponse 4xx",
+    "noSchema": "la réponse {{status}} n’a pas de schéma",
+    "mediaWithoutSchema": "la réponse {{status}} déclare {{media}} sans schéma",
+    "bodyOnRead": "les opérations {{method}} ne devraient pas avoir de corps de requête",
+    "noBodyExample": "le corps de requête {{media}} n’a pas d’exemple"
+  },
+  "security": {
+    "undefinedScheme": "le schéma de sécurité « {{name}} » est utilisé mais pas défini"
+  }
+}

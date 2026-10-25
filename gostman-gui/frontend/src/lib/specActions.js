@@ -2,6 +2,8 @@ import { withoutActiveContent } from './activeContent'
 import { CONTRACT_TEXT } from './checksText'
 import { checksContract } from './contractCheck'
 import { parseJSON } from './dataUtils'
+import { DIALOG_TEXT } from './dialogText'
+import { compareText } from './i18n/format'
 import { sanitizeImport } from './importExport'
 import { createSpecClient } from './openapiSpec'
 import { normalizeRequest } from './request'
@@ -35,7 +37,7 @@ function folderForTag(tag, rootId, created) {
 export function createSpecActions({ backend, attempt, addImported }) {
   const client = createSpecClient(backend)
 
-  const importSpec = attempt('Import failed', async (result) => {
+  const importSpec = attempt(SPEC_ALERTS.importFailed, async (result) => {
     const existing = { requestIds: idsOf(store().requests), folderIds: idsOf(store().folders) }
     const data = sanitizeImport({ ...result, folders: owningRoot(result), variables: sharedVariables(result) }, existing)
     const imported = await addImported(data)
@@ -114,7 +116,7 @@ export function createSpecActions({ backend, attempt, addImported }) {
       added: picks.added.length,
       changed: picks.changed.length,
       removed: picks.removed.length,
-    }), 'OK', 'success')
+    }), DIALOG_TEXT.ok, 'success')
   })
 
   const sourceFor = (address) => (address.startsWith('http://') || address.startsWith('https://') ? { url: address } : { path: address })
@@ -145,7 +147,7 @@ export function createSpecActions({ backend, attempt, addImported }) {
       store().showAlert(SPEC_ALERTS.lintTitle, SPEC_TEXT.lintNoSpec)
       return
     }
-    const [newest] = linked.sort((a, b) => (b.syncedAt || '').localeCompare(a.syncedAt || ''))
+    const [newest] = linked.sort((a, b) => compareText(b.syncedAt || '', a.syncedAt || ''))
     store().openSpecDialog({ mode: 'view', source: newest.source, tab: 'lint' })
   }
 

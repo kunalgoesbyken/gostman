@@ -1,0 +1,28 @@
+{
+  "builder": {
+    "rootLabel": "操作类型",
+    "rootNames": {
+      "query": "查询",
+      "mutation": "变更",
+      "subscription": "订阅"
+    },
+    "title": "构建器",
+    "paneLabel": "查询构建器",
+    "filterLabel": "筛选字段",
+    "filterPlaceholder": "筛选字段",
+    "expand": "展开",
+    "collapse": "折叠",
+    "select": "选择 {{name}}",
+    "include": "包含参数 {{name}}",
+    "viaFragment": "已通过编辑器中的片段选中。请在那里编辑。",
+    "noSchemaTitle": "未加载 schema",
+    "noSchemaDescription": "获取后即可根据端点的字段构建查询。内省查询会使用此请求的 URL、请求头和认证。",
+    "fetch": "获取 schema",
+    "refresh": "刷新 schema",
+    "loading": "正在获取 schema",
+    "syntaxError": "编辑器存在语法错误，构建器已暂停：{{message}}",
+    "subscription": "订阅通过长连接流式返回结果。要从以这种方式提供订阅的服务器读取，请在设置中开启“以服务器发送事件流式传输”。",
+    "noRoot": "此 schema 没有适用于该操作的根类型。",
+    "empty": "没有符合筛选条件的内容。"
+  }
+}

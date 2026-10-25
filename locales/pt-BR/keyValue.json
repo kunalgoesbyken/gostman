@@ -1,0 +1,18 @@
+{
+  "keyValue": {
+    "key": "Chave",
+    "value": "Valor",
+    "type": "Tipo",
+    "sendRow": "Enviar esta linha",
+    "fieldType": "Tipo do campo",
+    "text": "Texto",
+    "file": "Arquivo",
+    "removeRow": "Remover linha",
+    "bulkLabel": "Linhas de {{keyLabel}} como texto",
+    "bulkPlaceholder": "{{keyLabel}}: valor",
+    "bulkHint": "Uma linha por registro, como nome: valor. Comece uma linha com // ou # para mantê-la sem enviá-la.",
+    "bulkUnavailable": "Linhas com dois-pontos no nome, ou com espaços no início ou no fim, só podem ser editadas na tabela.",
+    "editAsTable": "Editar como tabela",
+    "bulkEdit": "Edição em massa"
+  }
+}

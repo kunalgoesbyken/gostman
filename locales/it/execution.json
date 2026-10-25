@@ -1,0 +1,13 @@
+{
+  "execution": {
+    "promptDeclined": "La richiesta non è stata inviata perché i valori richiesti non sono stati forniti.",
+    "unusableAddress": "L'indirizzo non può essere usato da uno script.",
+    "sendLimit": "Uno script può chiamare sendRequest {{limit}} volte.",
+    "hostNotPermitted": "L'host \"{{host}}\" non è usato da questa raccolta, quindi gli script non possono chiamarlo.",
+    "scriptFileReads": "Uno script non può aggiungere a una richiesta segnaposto {{example}} né file allegati dal disco. Inseriscili nella richiesta stessa.",
+    "preRequest": "Script pre-richiesta",
+    "postResponse": "Script post-risposta",
+    "scopeLabel": "{{stage}} ({{name}})",
+    "restricted": "Questa cartella non è ancora attendibile, quindi i suoi script, le impostazioni OAuth 2.0, i comandi MCP locali e la lettura dei file sono disattivati. Apri il menu della cartella nell'intestazione e scegli Considera attendibile questa cartella."
+  }
+}

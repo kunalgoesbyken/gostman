@@ -11,6 +11,7 @@ import {
   sidebarWidthValue,
   widestSidebarFor,
 } from "../lib/layout"
+import { isRtl } from "./direction"
 
 const KEY_STEP_PX = 16
 const CLOSE_BELOW_PX = SIDEBAR_MIN_WIDTH_PX / 2
@@ -20,9 +21,11 @@ export const RESIZE_IDLE = "idle"
 const RESIZE_ACTIVE = "active"
 export const RESIZE_CLOSING = "closing"
 
+const inlineSign = () => (isRtl() ? -1 : 1)
+
 const KEY_TARGETS = {
-  ArrowLeft: (width) => width - KEY_STEP_PX,
-  ArrowRight: (width) => width + KEY_STEP_PX,
+  ArrowLeft: (width) => width - inlineSign() * KEY_STEP_PX,
+  ArrowRight: (width) => width + inlineSign() * KEY_STEP_PX,
   Home: () => SIDEBAR_MIN_WIDTH_PX,
   End: (width, widest) => widest,
 }
@@ -67,7 +70,7 @@ export function useSidebarResize(onClose) {
   const onPointerMove = (event) => {
     const drag = dragRef.current
     if (!drag) return
-    const wanted = drag.startWidth + event.clientX - drag.startX
+    const wanted = drag.startWidth + inlineSign() * (event.clientX - drag.startX)
     drag.willClose = wanted < CLOSE_BELOW_PX
     drag.width = clamp(wanted, SIDEBAR_MIN_WIDTH_PX, drag.widest)
     preview(drag.width)

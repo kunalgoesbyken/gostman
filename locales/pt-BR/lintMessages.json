@@ -1,0 +1,39 @@
+{
+  "components": {
+    "unused": "{{kind}}/{{name}} está definido, mas nunca é referenciado",
+    "invalidRef": "$ref inválido: {{detail}}"
+  },
+  "info": {
+    "fieldMissing": "info.{{field}} está ausente ou vazio",
+    "noServers": "nenhum servidor é listado, então os clientes não sabem onde a API é servida",
+    "noHost": "nenhum host é definido, então os clientes não sabem onde a API é servida",
+    "serverNotHttps": "{{url}} não usa https",
+    "httpOnly": "a API é oferecida somente por http"
+  },
+  "operations": {
+    "noOperationId": "a operação não tem operationId",
+    "duplicateOperationId": "o operationId \"{{id}}\" já é usado por {{earlier}}",
+    "noSummary": "a operação não tem resumo nem descrição",
+    "undeclaredTag": "a tag \"{{tag}}\" não está declarada nas tags de nível superior",
+    "deprecatedWithoutDescription": "a operação está obsoleta, mas não tem descrição dizendo o que usar no lugar",
+    "noSecurity": "a especificação define esquemas de segurança, mas esta operação não exige nenhum"
+  },
+  "paths": {
+    "none": "o documento não define caminhos",
+    "noLeadingSlash": "o caminho \"{{path}}\" não começa com uma barra",
+    "ambiguous": "{{path}} não pode ser diferenciado de {{earlier}}",
+    "parameterUndeclared": "o parâmetro de caminho \"{{name}}\" está no caminho, mas não foi declarado",
+    "parameterUnused": "o parâmetro de caminho \"{{name}}\" foi declarado, mas não está no caminho"
+  },
+  "responses": {
+    "noSuccess": "a operação não declara resposta 2xx",
+    "noError": "a operação não declara resposta default nem 4xx",
+    "noSchema": "a resposta {{status}} não tem esquema",
+    "mediaWithoutSchema": "a resposta {{status}} declara {{media}} sem um esquema",
+    "bodyOnRead": "operações {{method}} não deveriam ter corpo de requisição",
+    "noBodyExample": "o corpo de requisição {{media}} não tem exemplo"
+  },
+  "security": {
+    "undefinedScheme": "o esquema de segurança \"{{name}}\" é usado, mas não está definido"
+  }
+}

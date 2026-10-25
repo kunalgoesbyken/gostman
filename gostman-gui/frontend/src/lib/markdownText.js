@@ -1,6 +1,6 @@
-export const MARKDOWN_TEXT = {
-  edit: "Edit",
-  preview: "Preview",
-  modeLabel: "Description view",
-  empty: "Nothing to preview.",
-}
+import english from '../../../../locales/en/markdown.json'
+import { messages } from './i18n/core'
+
+const text = messages('markdown', english)
+
+export const MARKDOWN_TEXT = text.markdown

@@ -1,0 +1,17 @@
+{
+  "unresolved": {
+    "sentAsWritten_one": "Ta zmienna nie jest zdefiniowana, więc została wysłana bez zmian:",
+    "sentAsWritten_few": "Te zmienne nie są zdefiniowane, więc zostały wysłane bez zmian:",
+    "sentAsWritten_many": "Te zmienne nie są zdefiniowane, więc zostały wysłane bez zmian:",
+    "sentAsWritten_other": "Te zmienne nie są zdefiniowane, więc zostały wysłane bez zmian:",
+    "notDefined_one": "Ta zmienna nie jest zdefiniowana:",
+    "notDefined_few": "Te zmienne nie są zdefiniowane:",
+    "notDefined_many": "Te zmienne nie są zdefiniowane:",
+    "notDefined_other": "Te zmienne nie są zdefiniowane:",
+    "openEnvironments": "Otwórz środowiska",
+    "extractedBy": "{{reference}} jest ustawiana przez regułę wyodrębniania w „{{request}}”, więc najpierw wyślij to żądanie.",
+    "extractedByOnly": "Jest ustawiana przez regułę wyodrębniania w „{{request}}”, więc najpierw wyślij to żądanie.",
+    "openSource": "Otwórz „{{request}}”",
+    "define": "Dodaj {{reference}} do aktywnego środowiska"
+  }
+}

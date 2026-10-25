@@ -1,100 +1,16 @@
-import { pluralize } from './dataUtils'
+import english from '../../../../locales/en/tree.json'
+import { messages } from './i18n/core'
+import { formatList } from './i18n/format'
 
-export const TREE_TEXT = {
-  searchPlaceholder: 'Search name, URL or tag',
-  treeLabel: 'Collections',
-  moveUp: 'Move up',
-  moveDown: 'Move down',
-  moveToFolder: 'Move to folder',
-  collapseAll: 'Collapse all folders',
-  collapseAllDescription: 'Close every folder in the sidebar',
-  topLevel: 'Top level',
-  copy: 'Copy',
-  cut: 'Cut',
-  paste: 'Paste',
-  duplicate: 'Duplicate',
-  moved: (name) => `Moved "${name}"`,
-  movedMany: (count) => `Moved ${pluralize(count, 'item')}`,
-  pasted: (name) => `Added "${name}"`,
-  duplicated: (name) => `Duplicated "${name}"`,
-  undo: 'Undo',
-  dismiss: 'Dismiss',
-  moveTitle: (name) => `Move "${name}" to`,
-  moveFailed: 'Could not move the item',
-  undoFailed: 'Could not undo',
-  redoFailed: 'Could not redo',
-  cloneFailed: 'Could not copy the item',
-  emptyTitle: 'No requests yet',
-  emptyDescription: 'Create a request, import a collection or paste one you copied.',
-  newRequest: 'New request',
-  newSubfolder: 'New subfolder',
-  runFolder: 'Run folder',
-  shareFolder: 'Share folder',
-  delete: 'Delete',
-  emptyImport: 'Import',
-  unreadableTitle: (count) => `${pluralize(count, 'file')} could not be read`,
-  unreadableDescription: 'Their requests are hidden until the files are fixed. A file with a merge conflict comes back once you resolve it in the Git panel.',
-  unreadableAction: 'Show files',
-  noResultsTitle: 'No results',
-  noResultsDescription: 'No request name, URL or tag matches.',
-  emptyFolder: 'This folder is empty',
-  untitled: 'Untitled',
-  actionsFor: (name) => `Actions for ${name}`,
-  editLabels: 'Colour and tags…',
-  editTags: 'Tags…',
-  shareRequest: 'Share request',
-  select: 'Select',
-  selectedCount: (count) => `${count} selected`,
-  selectionBar: 'Selected items',
-  clearSelection: 'Clear selection',
-  moveSelection: 'Move to folder…',
-  deleteSelection: 'Delete',
-  moveSelectionTitle: (count) => `Move ${pluralize(count, 'item')} to`,
-  dragCount: (count) => pluralize(count, 'item'),
-  deleteManyTitle: 'Delete selected items',
-  deleteManyMessage: (requests, folders) => {
-    const subject = [requests > 0 && pluralize(requests, 'request'), folders > 0 && pluralize(folders, 'folder')].filter(Boolean).join(' and ')
-    const rest = folders > 0 ? ' Anything inside a deleted folder that you did not select moves up one level.' : ''
-    return `Delete ${subject}?${rest} This can't be undone.`
+const text = messages('tree', english, (t) => ({
+  tree: {
+    deleteManyMessage: (requests, folders) => {
+      const counted = [requests > 0 && t('tree.requestCount', { count: requests }), folders > 0 && t('tree.folderCount', { count: folders })]
+      return t(folders > 0 ? 'tree.deleteManyMessageFolders' : 'tree.deleteManyMessage', { subject: formatList(counted.filter(Boolean)) })
+    },
   },
-  deleteManyFailed: 'Could not delete the selected items',
-  moreTags: (count) => `+${count}`,
-}
+}))
 
-export const LABEL_TEXT = {
-  folderTitle: (name) => `Colour and tags: ${name}`,
-  requestTitle: (name) => `Tags: ${name}`,
-  colour: 'Folder colour',
-  colourNote: 'Shown on the folder icon in the sidebar and saved with the collection.',
-  tags: 'Tags',
-  tagsPlaceholder: 'Add a tag, then press Enter',
-  folderTagsNote: "Folder tags apply to every request inside it, also in the sidebar search and the runner's tag filters.",
-  requestTagsNote: 'Tags group requests across folders. Filter by them in the sidebar search and the runner.',
-  tagColours: 'Tag colours',
-  tagColoursNote: 'A tag keeps its colour everywhere it is used. Without a choice, a colour is picked from the tag name. Tag colours are kept on this device.',
-  tagColour: (tag) => `Colour of the ${tag} tag`,
-  removeTag: (tag) => `Remove tag ${tag}`,
-  done: 'Done',
-}
-
-export const TAB_TEXT = {
-  close: 'Close',
-  closeOthers: 'Close other tabs',
-  closeRight: 'Close tabs to the right',
-  closeSaved: 'Close saved tabs',
-  keepOpen: 'Keep tab open',
-  revealInTree: 'Reveal in collection',
-  copyAsCurl: 'Copy as cURL',
-  moveLeft: 'Move left',
-  moveRight: 'Move right',
-  previewHint: 'Preview tab. Edit or double-click to keep it open.',
-  closeTabsTitle: 'Close tabs',
-  closeTabsMessage: (count) => (count === 1
-    ? 'One of these tabs has unsaved changes. Close it and discard the changes?'
-    : `${count} of these tabs have unsaved changes. Close them and discard the changes?`),
-  discard: 'Discard',
-  curlCopied: 'cURL command copied to the clipboard.',
-  curlFailed: 'Could not copy as cURL',
-  noCurl: 'Only HTTP requests can be copied as cURL.',
-  noClipboard: 'The clipboard is not available here.',
-}
+export const TREE_TEXT = text.tree
+export const LABEL_TEXT = text.label
+export const TAB_TEXT = text.tab

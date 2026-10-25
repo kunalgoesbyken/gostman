@@ -26,7 +26,7 @@ function SidebarResizer({ phase, separatorProps }) {
       {...separatorProps}
       aria-label={SIDEBAR_TEXT.resize}
       data-active={phase !== RESIZE_IDLE || undefined}
-      className="group absolute inset-y-0 -right-1 z-10 flex w-2 cursor-col-resize touch-none justify-center outline-none max-md:hidden"
+      className="group absolute inset-y-0 -end-1 z-10 flex w-2 cursor-col-resize touch-none justify-center outline-none max-md:hidden"
     >
       <span className="h-full w-0.5 transition-colors group-hover:bg-ring group-hover:delay-150 group-focus-visible:bg-ring group-data-[active]:bg-ring" />
     </div>
@@ -46,13 +46,13 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
       data-pane="sidebar"
       style={style}
       className={cn(
-        "flex w-72 max-w-full shrink-0 flex-col border-r border-border transition-opacity max-md:absolute max-md:inset-y-0 max-md:left-0 max-md:z-30 max-md:bg-background max-md:shadow-lg md:relative md:w-[var(--sidebar-width)]",
+        "flex w-72 max-w-full shrink-0 flex-col border-e border-border transition-opacity max-md:absolute max-md:inset-y-0 max-md:start-0 max-md:z-30 max-md:bg-background max-md:shadow-lg md:relative md:w-[var(--sidebar-width)]",
         phase === RESIZE_CLOSING && "opacity-50"
       )}
     >
       <Tabs value={view} onValueChange={setView} className="flex min-h-0 flex-1 flex-col">
-        <Toolbar className="pr-1.5">
-          <TabsList label={SIDEBAR_TEXT.views} className="flex-1">
+        <Toolbar className="ps-2 pe-1">
+          <TabsList label={SIDEBAR_TEXT.views} className="flex-1 gap-2">
             <TabsTrigger value={VIEW_COLLECTIONS}>{SIDEBAR_TEXT.collections}</TabsTrigger>
             <TabsTrigger value={VIEW_FLOWS}>{FLOW_TEXT.sidebarTab}</TabsTrigger>
             <TabsTrigger value={VIEW_HISTORY}>

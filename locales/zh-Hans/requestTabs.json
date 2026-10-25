@@ -1,0 +1,28 @@
+{
+  "requestTabs": {
+    "sections": "请求分区",
+    "more": "更多",
+    "moreHint": "更多请求分区",
+    "loading": "加载中",
+    "examples": "示例",
+    "examplesHint": "已保存的响应示例",
+    "headerLabel": "请求头",
+    "variableLabel": "变量",
+    "paramLabel": "参数",
+    "paramsNote": "这些行与 URL 中的查询字符串保持一致。未勾选的行会保留在这里，但不会发送。",
+    "labels": {
+      "params": "参数",
+      "headers": "请求头",
+      "body": "请求体",
+      "auth": "认证",
+      "graphql": "GraphQL",
+      "grpc": "gRPC",
+      "mcp": "MCP",
+      "websocket": "WebSocket",
+      "vars": "变量",
+      "extract": "提取",
+      "tests": "检查",
+      "settings": "设置"
+    }
+  }
+}

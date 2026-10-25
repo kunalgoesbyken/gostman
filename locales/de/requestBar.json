@@ -1,0 +1,39 @@
+{
+  "requestBar": {
+    "name": "Name der Anfrage",
+    "untitled": "Unbenannte Anfrage",
+    "method": "HTTP-Methode",
+    "url": "URL der Anfrage",
+    "methodPlaceholders": {
+      "grpc": {
+        "full": "Serveradresse eingeben, z. B. localhost:50051",
+        "medium": "Serveradresse",
+        "short": "Adresse"
+      },
+      "mcp": {
+        "full": "URL des MCP-Servers eingeben",
+        "medium": "URL des MCP-Servers",
+        "short": "URL"
+      }
+    },
+    "send": "Senden",
+    "connect": "Verbinden",
+    "disconnect": "Trennen",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "code": "Code",
+    "codeHint": "Code erzeugen",
+    "codeLanguage": "Sprache",
+    "urlPlaceholders": {
+      "full": "URL eingeben oder curl-Befehl einfügen",
+      "medium": "URL oder curl-Befehl",
+      "short": "URL"
+    }
+  },
+  "curlFiles": {
+    "title": "Dateizugriffe einfügen?",
+    "message": "Dieser curl-Befehl liest Dateien von diesem Computer und sendet sie mit der Anfrage. Behalten Sie sie daher nur, wenn Sie der Herkunft des Befehls vertrauen. Ohne sie wird der Rest des Befehls trotzdem übernommen.",
+    "withThem": "Mit Dateizugriffen einfügen",
+    "withoutThem": "Ohne Dateizugriffe einfügen"
+  }
+}

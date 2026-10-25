@@ -1,0 +1,61 @@
+{
+  "oauth": {
+    "grants": {
+      "clientCredentials": "クライアント認証情報",
+      "password": "パスワード",
+      "authorizationCode": "認可コード",
+      "deviceCode": "デバイスコード"
+    },
+    "fields": {
+      "grant": "グラントタイプ",
+      "issuer": "発行者",
+      "authUrl": "認可URL",
+      "deviceUrl": "デバイス認可URL",
+      "callbackUrl": "コールバックURL",
+      "callbackTitle": "{{url}}をリダイレクトURIとしてプロバイダーに登録してください",
+      "tokenUrl": "トークンURL",
+      "clientId": "クライアントID",
+      "clientSecret": "クライアントシークレット",
+      "username": "ユーザー名",
+      "password": "パスワード",
+      "scope": "スコープ",
+      "credentialsIn": "認証情報の送信先",
+      "credentialsHeader": "Basic認証ヘッダー",
+      "credentialsBody": "リクエストボディ",
+      "pkce": "PKCEを使用",
+      "headerPrefix": "ヘッダーのプレフィックス",
+      "sendIdToken": "アクセストークンの代わりにIDトークンを送信",
+      "accessToken": "アクセストークン",
+      "idToken": "IDトークン"
+    },
+    "discover": "検出",
+    "discoverTitle": "発行者の /.well-known/openid-configurationからエンドポイントを入力します",
+    "discovered": "{{issuer}}からエンドポイントを入力しました。",
+    "discovering": "発行者のディスカバリードキュメントを読み取っています。",
+    "getToken": "トークンを取得",
+    "cancel": "キャンセル",
+    "clearToken": "トークンをクリア",
+    "waitingForBrowser": "ブラウザーでのサインインの完了を待っています。",
+    "requesting": "トークンをリクエストしています。",
+    "waitingForDevice": "コードの入力とサインインを待っています。",
+    "deviceCode": "サインインページでこのコードを入力してください：",
+    "openSignInPage": "サインインページを開く",
+    "noToken": "トークンはまだありません。",
+    "otherEnvironment": "このトークンは別の環境で取得されたため、送信されません。この環境用のトークンを取得してください。",
+    "noIdToken": "プロバイダーがIDトークンを返しませんでした。スコープにopenidを追加して、新しいトークンを取得してください。",
+    "noExpiry": "プロバイダーが有効期限を返しませんでした。",
+    "expires": "有効期限：{{expiry}}。",
+    "expired": "{{expiry}}に期限切れになりました。サインインなしで更新できる場合は、新しいトークンがリクエストされます。",
+    "signInNeeded": "このリクエストにはOAuth 2トークンが必要です。認証タブを開いて「トークンを取得」を選択してください。",
+    "signInForEnvironment": "このOAuth 2トークンは別の環境で取得されたため、送信されません。認証タブを開いて「トークンを取得」を選択し、この環境用にサインインしてください。",
+    "deviceExpired": "サインインが完了する前にデバイスコードの期限が切れました。もう一度トークンを取得してください。",
+    "cancelled": "サインインはキャンセルされました。",
+    "popup": {
+      "blocked": "サインインのウィンドウがブロックされました。このサイトのポップアップを許可して、もう一度お試しください。",
+      "timedOut": "5分以内にサインインが完了しませんでした。",
+      "noCode": "プロバイダーが認可コードを返しませんでした。",
+      "refused": "プロバイダーがサインインを拒否しました：{{reason}}",
+      "wrongIssuer": "サインインの応答の発行者が「{{expected}}」ではなく「{{received}}」だったため、破棄しました。"
+    }
+  }
+}

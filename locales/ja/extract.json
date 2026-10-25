@@ -1,0 +1,29 @@
+{
+  "extract": {
+    "noResponse": "リクエストを送信すると値が表示されます",
+    "failedResponse": "直前のリクエストは失敗しました",
+    "summary": "チェックした行はレスポンスのたびに実行され、値が保持されて{{example}}として使えるようになります。セッションの値は、クリアするかアプリを閉じるまでメモリに保持されます。環境の値は、アクティブな環境とともに保存されます。",
+    "invalidEnvironment": "何も保存されませんでした：アクティブな環境の変数が有効なJSONではありません。",
+    "nothing": "直前の実行では値が得られませんでした。",
+    "savedTo": {
+      "session": "{{names}}をセッションの値として保持しました。",
+      "environment": "{{names}}をアクティブな環境に保存しました。"
+    },
+    "scopes": {
+      "session": "セッション",
+      "environment": "環境"
+    },
+    "variable": "変数",
+    "from": "取得元",
+    "path": "パスまたは名前",
+    "value": "直前のレスポンスの値",
+    "keepIn": "保持先",
+    "run": "この抽出ルールを実行",
+    "name": "変数名",
+    "namePlaceholder": "variable_name",
+    "source": "値の取得元",
+    "scope": "値の保持先",
+    "remove": "抽出ルールを削除",
+    "runNow": "今すぐ実行"
+  }
+}

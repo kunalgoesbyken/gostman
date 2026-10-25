@@ -57,12 +57,14 @@ func (s *scanner) examine(at site, field, value string, check judge) {
 }
 
 func (s *scanner) add(at site, field string, hit match) {
+	reason := hit.Reason
 	finding := Finding{
 		Location:    Location{Kind: at.kind, Path: at.path, Field: field, RequestID: at.requestID},
 		Rule:        hit.ID,
 		Severity:    hit.Severity,
 		Preview:     mask(hit.value),
-		Reason:      hit.Reason,
+		Reason:      hit.Reason.English(),
+		Localized:   &reason,
 		Fingerprint: fingerprint(hit.value),
 	}
 	key := fmt.Sprintf("%s\x00%s\x00%s\x00%s\x00%s", at.kind, at.path, field, finding.Rule, finding.Fingerprint)

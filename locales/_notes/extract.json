@@ -1,0 +1,16 @@
+{
+  "extract.noResponse": "Shown in the value column before the request was sent.",
+  "extract.summary": "{{example}} is the variable syntax of Gostman with the word variable_name inside double braces. Keep it as given.",
+  "extract.savedTo.session": "{{names}} is a list of variable names. Session values live in memory only.",
+  "extract.savedTo.environment": "{{names}} is a list of variable names.",
+  "extract.scopes.session": "Where an extracted value is kept: in memory until the app closes.",
+  "extract.scopes.environment": "Where an extracted value is kept: saved with the active environment.",
+  "extract.variable": "Column label: the name of the variable that receives the value.",
+  "extract.from": "Column label: where the value is read from (body, header, cookie, status).",
+  "extract.path": "Column label: a JSONPath, header name or cookie name.",
+  "extract.value": "Column label: the value found in the last response.",
+  "extract.keepIn": "Column label: where the value is kept.",
+  "extract.run": "Accessible label of the checkbox that enables an extract rule.",
+  "extract.namePlaceholder": "Example variable name; keep letters, digits and underscores.",
+  "extract.runNow": "Button that applies the rules to the last response again."
+}

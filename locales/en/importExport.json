@@ -1,0 +1,18 @@
+{
+  "importExport": {
+    "untitledFolder": "Folder",
+    "untitledEnvironment": "Environment",
+    "gostmanExport": "Gostman export",
+    "undetected": "Could not detect the format. Use a Postman collection, an OpenAPI or Swagger spec or a Gostman export.",
+    "noRequests": "This {{label}} contains no requests or folders.",
+    "unreadable": "This {{label}} could not be read.",
+    "invalidYaml": "Invalid YAML: {{reason}}",
+    "missingGostman": "Invalid Gostman export format: missing gostman object",
+    "requestsNotArray": "Invalid Gostman export format: requests must be an array",
+    "foldersNotArray": "Invalid Gostman export format: folders must be an array",
+    "namesMore": "{{names}} and {{count}} more",
+    "tlsKept": "TLS verification was disabled in the collection for {{names}}; it was kept enabled. Turn it off in the request's Settings tab if you trust these hosts.",
+    "flattened_one": "{{count}} folder nested in a loop or deeper than {{levels}} levels moved to the top level.",
+    "flattened_other": "{{count}} folders nested in a loop or deeper than {{levels}} levels moved to the top level."
+  }
+}

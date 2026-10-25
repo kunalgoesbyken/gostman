@@ -16,6 +16,7 @@ import { PRIVACY_TEXT } from '../privacyText'
 import { RelayUnreachableError, currentRelay } from '../relay'
 import { createStorageGate } from './storageGate'
 import { TAB_DRAFTS_KEY, isStorageFull } from '../storage'
+import { WEB_BACKEND_TEXT } from '../webBackendText'
 import { KIND_BEFORE_RESTORE } from '../backupKinds'
 import { clearSnapshots, listSnapshots, readSnapshot, saveSnapshot, snapshotIfDue } from './webBackups'
 import { webRecords } from './webRecords'
@@ -29,7 +30,6 @@ const OPENAPI_PAGE_SIZE = 200
 const HTTP_PAYLOAD_TOO_LARGE = 413
 const DATA_KEY = 'gostman-data'
 const DAMAGED_DATA_PREFIX = 'gostman-data-damaged-'
-const UNREADABLE_DATA = 'The saved data in this browser cannot be read, so nothing was changed.'
 const LEGACY_KEYS = {
   requests: 'gostman_requests',
   folders: 'gostman_folders',
@@ -137,7 +137,7 @@ async function readDocument() {
   const raw = await readText(DATA_KEY)
   if (raw === null) return emptyData()
   const stored = parseDocument(raw)
-  if (!stored) throw new Error(UNREADABLE_DATA)
+  if (!stored) throw new Error(WEB_BACKEND_TEXT.unreadableData)
   return stored
 }
 
@@ -179,7 +179,7 @@ async function postJSON(query, payload, signal) {
   const contentType = response.headers.get('content-type') || ''
   if (response.status === HTTP_PAYLOAD_TOO_LARGE) throw new Error(ATTACHMENT_TEXT.proxyTooLarge)
   if (!response.ok || !contentType.includes('application/json')) {
-    throw new Error(`The proxy answered with HTTP ${response.status} instead of a result`)
+    throw new Error(WEB_BACKEND_TEXT.proxyAnswered(response.status))
   }
   return response.json()
 }
@@ -196,7 +196,7 @@ async function exchange(query, id, payload) {
   try {
     return await postJSON(query, payload, controller.signal)
   } catch (error) {
-    if (controller.signal.aborted) return failureResponse('cancelled', 'the request was cancelled')
+    if (controller.signal.aborted) return failureResponse('cancelled', WEB_BACKEND_TEXT.cancelled)
     return failureResponse('network', error.message)
   } finally {
     inFlight.delete(id)

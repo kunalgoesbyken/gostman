@@ -1,0 +1,6 @@
+{
+  "exampleActions.saved": "Notice after saving an example response. {{example}} is the example name and {{request}} the request name. A saved example is a stored response.",
+  "exampleActions.saveTitle": "Title of the prompt that asks for a name for the response being saved as an example.",
+  "exampleActions.nameLabel": "Message inside the prompt.",
+  "exampleActions.deleteMessage": "{{name}} is the example name."
+}

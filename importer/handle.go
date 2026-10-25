@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/kunalgoesbyken/gostman/locales"
 	"github.com/kunalgoesbyken/gostman/openapi"
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
@@ -93,7 +94,7 @@ func emptyError(files []File, result Result) error {
 	if len(files) == 1 && len(result.Skipped) == 1 {
 		return errors.New(result.Skipped[0])
 	}
-	return errors.New(messageEmpty)
+	return locales.Errorf(locales.ImporterEmpty, nil)
 }
 
 func (c *collector) accept(files []File, format string) []document {
@@ -102,13 +103,13 @@ func (c *collector) accept(files []File, format string) []document {
 		doc := classify(file)
 		switch {
 		case doc.err != nil:
-			c.skip("%s: %v", file.Name, doc.err)
+			c.skip(locales.ImporterSkipFileError, locales.Params{"file": file.Name, "detail": doc.err.Error()})
 		case doc.kind == kindUnknown:
-			c.skip(messageNotRecognized, file.Name)
+			c.skip(locales.ImporterNotRecognized, locales.Params{"file": file.Name})
 		case format != "" && format != FormatAuto && kindFormats[doc.kind] != format:
-			c.skip(messageNotFormat, file.Name, format)
+			c.skip(locales.ImporterNotFormat, locales.Params{"file": file.Name, "format": format})
 		case kindFormats[doc.kind] == "":
-			c.skip(messageNotRecognized, file.Name)
+			c.skip(locales.ImporterNotRecognized, locales.Params{"file": file.Name})
 		default:
 			accepted = append(accepted, doc)
 		}

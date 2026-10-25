@@ -1,20 +1,24 @@
-export const SCAN_TEXT = {
-  title: 'Scan for secrets',
-  commandDescription: 'Find credentials typed into requests before you share or commit them',
-  intro: 'Looks for well-known token formats, random-looking values in credential fields and passwords typed into auth settings. Values written as {{variables}} are fine. Nothing leaves this window except the check itself, and only a few characters of a value are ever shown.',
-  includeExamples: 'Include saved example responses',
-  scanning: 'Scanning',
-  clean: 'No secrets found',
-  cleanDescription: 'No token formats, random-looking credential values or typed-in passwords were found.',
-  failed: (message) => `The check could not run: ${message}`,
-  goToRequest: 'Go to request',
-  findings: 'Findings',
-  showFindings: 'Show findings',
-  hideFindings: 'Hide findings',
-  shareAnyway: 'Share anyway',
-  found: (count) => `${count} possible ${count === 1 ? 'secret' : 'secrets'} found`,
-  foundShare: 'These stay in the link or file you create. Replace them with {{variables}} first, or share anyway.',
-  foundExport: 'These are written into the export. Replace them with {{variables}} first if the file will be shared or committed.',
-  severity: { high: 'High', medium: 'Medium' },
-  kinds: { request: 'Request', folder: 'Folder', environment: 'Environment', collection: 'Collection' },
-}
+import english from '../../../../locales/en/scan.json'
+import { messages } from './i18n/core'
+
+const VARIABLE_EXAMPLE = '{{variables}}'
+
+const text = messages('scan', english, (t) => {
+  const withExample = (key) => t(key, { example: VARIABLE_EXAMPLE })
+
+  return {
+    scan: {
+      get intro() {
+        return withExample('scan.intro')
+      },
+      get foundShare() {
+        return withExample('scan.foundShare')
+      },
+      get foundExport() {
+        return withExample('scan.foundExport')
+      },
+    },
+  }
+})
+
+export const SCAN_TEXT = text.scan

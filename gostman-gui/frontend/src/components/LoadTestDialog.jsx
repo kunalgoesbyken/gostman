@@ -7,8 +7,10 @@ import { EmptyState } from "./ui/emptyState"
 import { Input } from "./ui/input"
 import { Notice, SectionLabel } from "./ui/panel"
 import { MethodTag } from "./MethodTag"
-import { formatSize } from "../lib/dataUtils"
-import { LATENCY_ACCURACY_PERCENT, LOAD_LIMITS, LOAD_TEST_TEXT } from "../lib/loadTestText"
+import { formatBytes } from "../lib/byteSize"
+import { formatNumber } from "../lib/i18n/format"
+import { LATENCY_ACCURACY_PERCENT, LOAD_LIMITS } from "../lib/loadTestLimits"
+import { LOAD_TEST_TEXT } from "../lib/loadTestText"
 import { useLoadTestStore } from "../lib/loadTestSession"
 import { statusVariant } from "../lib/response"
 
@@ -18,14 +20,14 @@ const TOTAL_PERCENT = 100
 const HISTOGRAM_HEIGHT_REM = 7
 const BAR_MINIMUM_PERCENT = 1
 
-const PERCENTILE_COLUMNS = [
+const percentileColumns = () => [
   { header: LOAD_TEST_TEXT.percentileColumns.name, key: "name", width: "w-1/2", cellClassName: "text-foreground" },
   { header: LOAD_TEST_TEXT.percentileColumns.value, key: "value" },
 ]
 
 const LOAD_TEST_WINDOW = { id: "load-test", width: 768, height: 640, minWidth: 480, minHeight: 360 }
 
-const fixed = (number) => number.toFixed(FRACTION_DIGITS)
+const fixed = (number) => formatNumber(number, { minimumFractionDigits: FRACTION_DIGITS, maximumFractionDigits: FRACTION_DIGITS })
 
 const percentileRows = (latency) => Object.entries(LOAD_TEST_TEXT.percentiles)
   .map(([key, name]) => ({ name, value: fixed(latency[key]) }))
@@ -84,10 +86,10 @@ function Progress({ progress }) {
   return (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-5" role="status">
       <Figure label={text.elapsed} value={LOAD_TEST_TEXT.seconds(fixed(progress.elapsedMs / MS_PER_SECOND))} />
-      <Figure label={text.requests} value={progress.total} />
-      <Figure label={text.rate} value={Math.round(progress.requestsPerSecond)} />
+      <Figure label={text.requests} value={formatNumber(progress.total)} />
+      <Figure label={text.rate} value={formatNumber(Math.round(progress.requestsPerSecond))} />
       <Figure label={text.p95} value={LOAD_TEST_TEXT.milliseconds(fixed(progress.p95Ms))} />
-      <Figure label={text.failed} value={progress.failed} />
+      <Figure label={text.failed} value={formatNumber(progress.failed)} />
     </div>
   )
 }
@@ -147,22 +149,22 @@ function Results({ report }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-        <Figure label={text.total} value={report.total} />
-        <Figure label={text.succeeded} value={report.succeeded} />
+        <Figure label={text.total} value={formatNumber(report.total)} />
+        <Figure label={text.succeeded} value={formatNumber(report.succeeded)} />
         <Figure
           label={text.failed}
-          value={report.failed}
+          value={formatNumber(report.failed)}
           title={LOAD_TEST_TEXT.failureBreakdown(report.networkErrors, report.statusFailures, report.config.failureStatus)}
         />
-        <Figure label={text.rate} value={report.requestsPerSecond} />
-        <Figure label={text.received} value={formatSize(report.bytesReceived)} />
+        <Figure label={text.rate} value={formatNumber(report.requestsPerSecond)} />
+        <Figure label={text.received} value={formatBytes(report.bytesReceived)} />
       </div>
       {report.stopped && <Badge className="self-start" variant="clientError">{LOAD_TEST_TEXT.stopped}</Badge>}
       {report.total > 0 && (
         <>
           <div className="flex flex-col gap-1">
             <SectionLabel>{LOAD_TEST_TEXT.percentilesLabel}</SectionLabel>
-            <DataTable columns={PERCENTILE_COLUMNS} rows={percentileRows(report.latency)} />
+            <DataTable columns={percentileColumns()} rows={percentileRows(report.latency)} />
             <p className="text-2xs text-muted-foreground">{LOAD_TEST_TEXT.accuracy(LATENCY_ACCURACY_PERCENT)}</p>
           </div>
           <Histogram bins={report.distribution} />

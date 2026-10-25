@@ -1,0 +1,17 @@
+{
+  "requestTabs.sections": "Accessible label of the row of tabs of the request editor.",
+  "requestTabs.more": "Label of the button that opens the tabs that do not fit.",
+  "requestTabs.loading": "Accessible label shown while a tab loads.",
+  "requestTabs.examples": "Button that opens the saved response examples of the request.",
+  "requestTabs.headerLabel": "Singular name of a row of the Headers tab; used in the label of the bulk editor.",
+  "requestTabs.variableLabel": "Singular name of a row of the Vars tab.",
+  "requestTabs.paramLabel": "Singular name of a row of the Params tab.",
+  "requestTabs.labels.params": "Tab: query string parameters. Short.",
+  "requestTabs.labels.headers": "Tab: HTTP headers.",
+  "requestTabs.labels.body": "Tab: the body of the request.",
+  "requestTabs.labels.auth": "Tab: authentication. Short.",
+  "requestTabs.labels.vars": "Tab: variables of the request. Short for variables.",
+  "requestTabs.labels.extract": "Tab: rules that copy values from the response into variables.",
+  "requestTabs.labels.tests": "Tab: checks that run after the response arrives.",
+  "requestTabs.labels.settings": "Tab: per-request settings such as timeout."
+}

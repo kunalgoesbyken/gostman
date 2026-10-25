@@ -9,13 +9,14 @@ import { Notice, SectionLabel } from "./ui/panel"
 import { GitDiffView } from "./GitDiffView"
 import { useAppStore } from "../store/appStore"
 import { codeHostOf, pullRequestRemote } from "../lib/codeHost"
+import { formatDateTime } from "../lib/i18n/format"
 import { GIT_TEXT as TEXT } from "../lib/gitText"
 
 const ROW_CLASS = "flex min-h-9 items-center gap-2 border-b border-border px-3 text-xs"
 const FORM_CLASS = "flex shrink-0 items-center gap-2 border-b border-border px-3 py-2"
 const SHORT_DATE = { dateStyle: "medium", timeStyle: "short" }
 
-const formatDate = (iso) => new Date(iso).toLocaleString(undefined, SHORT_DATE)
+const formatDate = (iso) => formatDateTime(new Date(iso), SHORT_DATE)
 
 function AddForm({ placeholder, label, icon: Icon, disabled, onSubmit }) {
   const [text, setText] = useState("")
@@ -115,7 +116,7 @@ export function HistoryTab({ history, isReadOnly, actions }) {
         <Button type="submit" size="sm" variant="outline">{TEXT.showHistory}</Button>
       </form>
       <div className="flex min-h-0 flex-1">
-        <div className="min-h-0 w-80 shrink-0 overflow-y-auto border-r border-border">
+        <div className="min-h-0 w-80 shrink-0 overflow-y-auto border-e border-border">
           {history.commits.length === 0 && <EmptyState icon={History} title={TEXT.noCommits} />}
           {history.commits.map((commit) => (
             <button
@@ -123,7 +124,7 @@ export function HistoryTab({ history, isReadOnly, actions }) {
               type="button"
               disabled={!history.path}
               onClick={() => actions.showVersion(commit)}
-              className="block w-full border-b border-border px-3 py-2 text-left text-xs enabled:hover:bg-accent"
+              className="block w-full border-b border-border px-3 py-2 text-start text-xs enabled:hover:bg-accent"
             >
               <span className="block truncate font-medium">{commit.subject}</span>
               <span className="block truncate text-muted-foreground">{commit.short} · {commit.author} · {formatDate(commit.date)}</span>
@@ -142,7 +143,7 @@ function RemoteRow({ remote, isReadOnly, onChange }) {
     <div className={ROW_CLASS}>
       <BrandIcon brand={codeHostOf(remote.url)} fallback={Server} className="text-muted-foreground" />
       <span className="shrink-0 font-medium">{remote.name}</span>
-      <span className="min-w-0 flex-1 truncate font-mono text-muted-foreground" title={remote.url}>{remote.url}</span>
+      <span dir="ltr" className="min-w-0 flex-1 truncate font-mono text-muted-foreground" title={remote.url}>{remote.url}</span>
       <Button size="sm" variant="outline" disabled={isReadOnly} onClick={() => showPrompt(TEXT.changeRemoteTitle, TEXT.changeRemoteMessage(remote.name), remote.url, "", (url) => url?.trim() && onChange(url.trim()), TEXT.changeRemoteConfirm)}>
         {TEXT.changeRemote}
       </Button>

@@ -1,4 +1,5 @@
 import { evaluateJsonPath } from './chaining'
+import { RESPONSE_TEXT } from './responseText'
 
 export const MAX_MATCHES = 2000
 
@@ -25,7 +26,7 @@ export function filterJson(json, path) {
   const trimmed = path.trim()
   if (trimmed === '') return { active: false }
   const { value, error } = evaluateJsonPath(json, trimmed)
-  if (error) return { active: true, error: `Invalid JSONPath: ${error}` }
-  if (value === undefined) return { active: true, error: 'Nothing in the body matches this path' }
+  if (error) return { active: true, error: RESPONSE_TEXT.invalidJsonPath(error) }
+  if (value === undefined) return { active: true, error: RESPONSE_TEXT.noPathMatch }
   return { active: true, value, text: JSON.stringify(value, null, 2) }
 }

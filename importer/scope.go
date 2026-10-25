@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/locales"
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
@@ -42,7 +43,7 @@ func (c *collector) addScopedFolder(name, parentID string, settings scope) strin
 	c.scoped[id] = scopedFolder{parent: parentID, auth: settings.auth}
 	c.flagScripts(folder.Name, folder.PreScript, folder.PostScript)
 	if folder.Auth.Type == authOAuth2 {
-		c.flag(messageOAuth, folder.Name)
+		c.flag(locales.ImporterOauth, folder.Name)
 	}
 	return id
 }
@@ -171,9 +172,9 @@ func (c *collector) flagScripts(name, pre, post string) {
 	if strings.TrimSpace(pre) == "" && strings.TrimSpace(post) == "" {
 		return
 	}
-	c.flag(messageScripts, name)
+	c.flag(locales.ImporterScripts, name)
 	if callsForeignAPI(pre) || callsForeignAPI(post) {
-		c.flag(messageForeignCalls, name)
+		c.flag(locales.ImporterForeignCalls, name)
 	}
 }
 

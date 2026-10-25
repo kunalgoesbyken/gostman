@@ -1,0 +1,26 @@
+{
+  "app": {
+    "loading": "加载中",
+    "loadingEditor": "正在加载编辑器",
+    "backToLanding": "返回首页",
+    "requestSection": "请求",
+    "window": {
+      "minimize": "最小化",
+      "maximize": "最大化",
+      "restore": "还原"
+    },
+    "crash": {
+      "title": "Gostman 遇到错误",
+      "description": "已保存的请求不受影响。请重新加载后继续。如果再次出现，请附上以下信息报告：\n\n{{error}}",
+      "reload": "重新加载"
+    },
+    "loadFailure": {
+      "title": "无法加载已保存的数据",
+      "description": "没有任何内容被更改或覆盖。{{reason}}",
+      "retry": "重试",
+      "unreadable": "已保存的数据无法读取",
+      "ok": "确定"
+    },
+    "labelled": "{{label}}：{{name}}"
+  }
+}

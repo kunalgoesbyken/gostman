@@ -1,0 +1,13 @@
+{
+  "statusBar": {
+    "network": "网络",
+    "mockStopped": "模拟服务器",
+    "mockRunning": "模拟服务器（运行中）",
+    "mockRunningOn": "模拟服务器（运行于 :{{port}}）",
+    "captureStopped": "捕获",
+    "captureRunning": "捕获（运行中）",
+    "git": "Git",
+    "detached": "HEAD 已分离",
+    "cookies": "Cookie"
+  }
+}

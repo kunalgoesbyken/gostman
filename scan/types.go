@@ -1,6 +1,9 @@
 package scan
 
-import "github.com/kunalgoesbyken/gostman/workspace"
+import (
+	"github.com/kunalgoesbyken/gostman/locales"
+	"github.com/kunalgoesbyken/gostman/workspace"
+)
 
 type Severity string
 
@@ -30,6 +33,8 @@ type Finding struct {
 	Preview     string   `json:"preview"`
 	Reason      string   `json:"reason"`
 	Fingerprint string   `json:"fingerprint"`
+
+	Localized *locales.Message `json:"localized,omitempty"`
 }
 
 type Counts struct {

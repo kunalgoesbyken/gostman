@@ -1,0 +1,35 @@
+{
+  "sidebar": {
+    "views": "侧边栏视图",
+    "collections": "集合",
+    "history": "历史记录",
+    "runRequests": "运行请求",
+    "newFolder": "新建文件夹",
+    "newRequest": "新建请求",
+    "toggle": "切换侧边栏",
+    "close": "关闭侧边栏",
+    "resize": "调整侧边栏大小"
+  },
+  "history": {
+    "search": "搜索历史记录",
+    "emptyTitle": "还没有历史记录",
+    "emptyDescription": "发送过的请求会显示在这里。",
+    "noMatches": "没有匹配的已发送请求。",
+    "remove": "从历史记录中移除",
+    "clear": "清除历史记录",
+    "noResponse": "无响应",
+    "sentAgo": {
+      "now": "刚刚",
+      "minutes": "{{count}} 分钟",
+      "hours": "{{count}} 小时",
+      "days": "{{count}} 天"
+    },
+    "sentAgoSpoken": {
+      "now": "刚刚发送",
+      "minutes_other": "{{count}} 分钟前发送",
+      "hours_other": "{{count}} 小时前发送",
+      "days_other": "{{count}} 天前发送",
+      "date": "发送于 {{date}}"
+    }
+  }
+}

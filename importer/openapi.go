@@ -3,6 +3,7 @@ package importer
 import (
 	"context"
 
+	"github.com/kunalgoesbyken/gostman/locales"
 	"github.com/kunalgoesbyken/gostman/openapi"
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
@@ -10,7 +11,7 @@ import (
 func (c *collector) readOpenAPI(ctx context.Context, doc document, config Config) {
 	loaded, err := openapi.Load(ctx, openapi.Source{Text: doc.file.Text}, config.OpenAPI)
 	if err != nil {
-		c.skip("%s: %v", doc.file.Name, err)
+		c.skip(locales.ImporterSkipFileError, locales.Params{"file": doc.file.Name, "detail": err.Error()})
 		return
 	}
 	generated := loaded.Generate(openapi.Selection{})
@@ -30,7 +31,7 @@ func (c *collector) addGenerated(generated openapi.Collection) {
 	} else {
 		c.shareVariables(generated.Variables)
 	}
-	c.Warnings = append(c.Warnings, generated.Warnings...)
+	c.leadText(generated.Warnings)
 }
 
 func openAPIRequest(source openapi.Request, folderID string) workspace.Request {

@@ -3,10 +3,10 @@ package importer
 import (
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"path"
 	"strings"
 
+	"github.com/kunalgoesbyken/gostman/locales"
 	"gopkg.in/yaml.v3"
 )
 
@@ -131,7 +131,7 @@ func importableName(name string) bool {
 }
 
 func unsupportedType(name string) error {
-	return fmt.Errorf(messageUnsupportedTypeDetail, path.Ext(strings.ToLower(name)))
+	return locales.Errorf(locales.ImporterUnsupportedType, locales.Params{"type": path.Ext(strings.ToLower(name))})
 }
 
 func classifyXML(source string) string {

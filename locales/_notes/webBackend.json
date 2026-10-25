@@ -1,0 +1,6 @@
+{
+  "webBackend.unreadableData": "Error shown when the data saved by the web app in the browser is damaged.",
+  "webBackend.proxyAnswered": "{{status}} is an HTTP status code. The proxy is the server that forwards requests for the web app.",
+  "webBackend.cancelled": "Reason text in lower case, shown after the title of a cancelled request.",
+  "webBackend.streamCutOff": "Error shown when the connection to the proxy ends before a stream finishes."
+}

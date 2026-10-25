@@ -1,0 +1,15 @@
+{
+  "dialog": {
+    "moveWindow": "Sposta finestra",
+    "moveHint": "Trascina o usa i tasti freccia per spostare. Shift e i tasti freccia ridimensionano. Fai doppio clic sulla barra del titolo o premi Home per ripristinare dimensione e posizione predefinite.",
+    "close": "Chiudi",
+    "cancel": "Annulla",
+    "save": "Salva",
+    "rename": "Rinomina",
+    "create": "Crea",
+    "getDesktopApp": "Scarica l'app desktop",
+    "copy": "Copia",
+    "copied": "Copiato",
+    "ok": "OK"
+  }
+}

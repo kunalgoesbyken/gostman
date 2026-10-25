@@ -6,7 +6,7 @@ const CONFIRM_VARIANTS = { destructive: "destructive", outline: "outline" }
 const TEXT_CLASS = "whitespace-pre-wrap text-xs leading-relaxed text-muted-foreground"
 
 export function CodeText({ children }) {
-  return <pre className="max-h-40 shrink-0 overflow-auto whitespace-pre-wrap rounded border border-border bg-muted/40 p-2 font-mono text-xs text-foreground [overflow-wrap:anywhere]">{children}</pre>
+  return <pre dir="ltr" className="max-h-40 shrink-0 overflow-auto whitespace-pre-wrap rounded border border-border bg-muted/40 p-2 font-mono text-xs text-foreground [overflow-wrap:anywhere]">{children}</pre>
 }
 
 function MessagePart({ part }) {

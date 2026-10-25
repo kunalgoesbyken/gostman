@@ -1,0 +1,61 @@
+{
+  "oauth": {
+    "grants": {
+      "clientCredentials": "客户端凭据",
+      "password": "密码",
+      "authorizationCode": "授权码",
+      "deviceCode": "设备码"
+    },
+    "fields": {
+      "grant": "授权类型",
+      "issuer": "签发者（Issuer）",
+      "authUrl": "授权 URL",
+      "deviceUrl": "设备授权 URL",
+      "callbackUrl": "回调 URL",
+      "callbackTitle": "请在提供商处将 {{url}} 注册为重定向 URI",
+      "tokenUrl": "令牌 URL",
+      "clientId": "客户端 ID",
+      "clientSecret": "客户端机密",
+      "username": "用户名",
+      "password": "密码",
+      "scope": "Scope",
+      "credentialsIn": "凭据发送方式",
+      "credentialsHeader": "Basic 认证请求头",
+      "credentialsBody": "请求体",
+      "pkce": "使用 PKCE",
+      "headerPrefix": "请求头前缀",
+      "sendIdToken": "发送 ID 令牌而不是访问令牌",
+      "accessToken": "访问令牌",
+      "idToken": "ID 令牌"
+    },
+    "discover": "发现",
+    "discoverTitle": "根据签发者的 /.well-known/openid-configuration 填入端点",
+    "discovered": "已根据 {{issuer}} 填入端点。",
+    "discovering": "正在读取签发者的发现文档。",
+    "getToken": "获取令牌",
+    "cancel": "取消",
+    "clearToken": "清除令牌",
+    "waitingForBrowser": "正在等待你在浏览器中完成登录。",
+    "requesting": "正在请求令牌。",
+    "waitingForDevice": "正在等待你输入代码并登录。",
+    "deviceCode": "请在登录页面输入此代码：",
+    "openSignInPage": "打开登录页面",
+    "noToken": "还没有令牌。",
+    "otherEnvironment": "该令牌是在另一个环境中获取的，因此不会发送。请为此环境获取令牌。",
+    "noIdToken": "提供商没有返回 ID 令牌。请在 scope 中加入 openid，然后重新获取令牌。",
+    "noExpiry": "提供商没有提供过期时间。",
+    "expires": "{{expiry}} 过期。",
+    "expired": "{{expiry}} 已过期。如果无需登录即可续期，会请求新的令牌。",
+    "signInNeeded": "此请求需要 OAuth 2 令牌。请打开“认证”标签页，然后选择“获取令牌”。",
+    "signInForEnvironment": "该 OAuth 2 令牌是在另一个环境中获取的，因此不会发送。请打开“认证”标签页，选择“获取令牌”，为此环境登录。",
+    "deviceExpired": "设备码在登录完成之前已过期。请重新获取令牌。",
+    "cancelled": "登录已取消。",
+    "popup": {
+      "blocked": "登录窗口被拦截。请允许此网站弹出窗口，然后重试。",
+      "timedOut": "五分钟内没有收到登录结果。",
+      "noCode": "提供商没有返回授权码。",
+      "refused": "提供商拒绝了登录：{{reason}}",
+      "wrongIssuer": "登录响应中的签发者是“{{received}}”，而不是“{{expected}}”，因此已被丢弃。"
+    }
+  }
+}

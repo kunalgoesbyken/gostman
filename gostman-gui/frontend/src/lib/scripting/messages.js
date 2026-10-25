@@ -1,3 +1,4 @@
+export { LANGUAGE_MESSAGE as MESSAGE_LANGUAGE } from '../i18n/core'
 export const MESSAGE_START = 'start'
 export const MESSAGE_SEND = 'send'
 export const MESSAGE_REPLY = 'reply'

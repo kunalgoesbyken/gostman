@@ -1,0 +1,9 @@
+{
+  "statusBar.mockStopped": "Status bar item that opens the mock server. The mock server answers requests from saved examples on this computer.",
+  "statusBar.mockRunning": "Same item while the server is running.",
+  "statusBar.mockRunningOn": "Same item while the server is running; {{port}} is the port number.",
+  "statusBar.captureStopped": "Status bar item that opens traffic capture, a proxy that records calls from another app.",
+  "statusBar.captureRunning": "Same item while the capture is running.",
+  "statusBar.git": "Status bar item that opens the Git panel. Git is a product name.",
+  "statusBar.detached": "Git term: HEAD is not on a branch. Keep HEAD."
+}

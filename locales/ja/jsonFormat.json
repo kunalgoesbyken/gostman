@@ -1,0 +1,21 @@
+{
+  "jsonFormat": {
+    "expectedValue": "値が必要です",
+    "unexpectedEnd": "JSONが途中で終わっています",
+    "unexpected": "予期しない{{character}}です",
+    "endOfText": "テキストの終端",
+    "expectedKey": "二重引用符で囲んだプロパティ名が必要です",
+    "expectedColon": "プロパティ名の後に':'が必要です",
+    "expectedObjectEnd": "プロパティ値の後に','または'}'が必要です",
+    "expectedArrayEnd": "項目の後に','または']'が必要です",
+    "trailingComma": "'{{closer}}'の前のカンマを削除してください",
+    "unclosedString": "この文字列に閉じる引用符がありません",
+    "lineBreakInString": "文字列内の改行は\\nと書く必要があります",
+    "controlInString": "文字列内の制御文字はエスケープする必要があります",
+    "badEscape": "文字列内に不明なエスケープシーケンスがあります",
+    "badNumber": "この数値は有効なJSONではありません",
+    "unclosedReference": "この{{reference}}に閉じる{{closer}}がありません",
+    "extraText": "JSON値の後に予期しないテキストがあります",
+    "tooDeep": "JSONのネストが深すぎて整形できません"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "appStore": {
+    "saveFailedTitle": "Modificările nu au putut fi salvate",
+    "saveFailed": "Ultimele modificări nu au fost salvate și se vor pierde la închiderea aplicației. Exportați datele pentru a păstra o copie. ({{reason}})",
+    "delete": "Ștergere"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "onboarding": {
+    "title": "Primeros pasos",
+    "progress": "{{done}} de {{total}} completados",
+    "next": "Siguiente",
+    "completeTitle": "Todo listo",
+    "completeNotice": "Has terminado los primeros pasos.",
+    "completeHint": "Has probado las partes principales de Gostman. El tutorial va más allá con el encadenado de solicitudes, los scripts y la ejecución de tus pruebas en CI.",
+    "tutorial": "Leer el tutorial",
+    "hide": "Ocultar",
+    "hideLabel": "Ocultar los pasos iniciales",
+    "done": "Hecho",
+    "steps": {
+      "send": {
+        "title": "Envía una solicitud",
+        "hint": "Envía una solicitud de ejemplo a un servicio de eco público y lee la respuesta.",
+        "action": "Enviar solicitud de ejemplo"
+      },
+      "save": {
+        "title": "Guárdala en tu colección",
+        "hint": "Las solicitudes guardadas aparecen en la barra lateral y permanecen en este dispositivo.",
+        "action": "Guardar solicitud"
+      },
+      "variable": {
+        "title": "Añade una variable",
+        "hint": "Define baseUrl una sola vez en un entorno y escribe {{example}} donde la necesites.",
+        "action": "Abrir entornos",
+        "defined": "definida",
+        "missing": "sin definir aún"
+      },
+      "check": {
+        "title": "Añade una prueba",
+        "hint": "Escribe una aserción como res.status es igual a 200, o usa Añadir pruebas desde esta respuesta en la pestaña Pruebas. Después guarda la solicitud y cada respuesta mostrará si pasa o falla.",
+        "action": "Abrir la pestaña Pruebas"
+      },
+      "run": {
+        "title": "Ejecuta tus solicitudes juntas",
+        "hint": "El ejecutor envía en orden todas las solicitudes guardadas e indica qué pruebas han pasado.",
+        "action": "Abrir el ejecutor"
+      }
+    }
+  }
+}

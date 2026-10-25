@@ -1,0 +1,47 @@
+{
+  "sse": {
+    "allTypes": "Alle Ereignistypen",
+    "searchLabel": "Ereignisse durchsuchen",
+    "searchPlaceholder": "Ereignisse durchsuchen",
+    "pause": "Automatisches Scrollen pausieren",
+    "resume": "Automatisches Scrollen fortsetzen",
+    "clear": "Ereignisse leeren",
+    "copyAll": "Angezeigte Ereignisse kopieren",
+    "copied": "Kopiert",
+    "copyEvent": "Ereignisdaten kopieren",
+    "noEvents": "Noch keine Ereignisse",
+    "waiting": "Warten darauf, dass der Server ein Ereignis sendet.",
+    "noMatches": "Keine Ereignisse passen",
+    "noMatchesHint": "Ändern Sie den Typfilter oder die Suche, um mehr zu sehen.",
+    "clipped": "Dieses Ereignis war zu lang, daher wurde der Rest ausgelassen.",
+    "shown": "{{shown}} von {{total}} angezeigt",
+    "received": "{{count}} empfangen",
+    "dropped_one": "Das älteste Ereignis wird nicht mehr aufgelistet. Die heruntergeladene Antwort enthält weiterhin jedes Ereignis.",
+    "dropped_other": "Die {{count}} ältesten Ereignisse werden nicht mehr aufgelistet. Die heruntergeladene Antwort enthält weiterhin jedes Ereignis.",
+    "reconnecting": "Neuverbindung in {{seconds}} s (Versuch {{attempt}})"
+  },
+  "sseSettings": {
+    "stream": "Als Server-Sent Events streamen",
+    "reconnect": "Neu verbinden, wenn der Server den Stream schließt",
+    "maxEvents": "Max. Ereignisse",
+    "maxEventsPlaceholder": "Standard 10000",
+    "maxSeconds": "Max. Sekunden",
+    "maxSecondsPlaceholder": "Standard 300"
+  },
+  "status": {
+    "connecting": "Verbindet",
+    "open": "Streamt",
+    "reconnecting": "Verbindet neu",
+    "ended": "Beendet"
+  },
+  "streamEnd": {
+    "closed": "Der Server hat den Stream geschlossen.",
+    "cancelled": "Der Stream wurde gestoppt.",
+    "maxEvents": "Am Ereignislimit gestoppt. Erhöhen Sie es unter „Optionen“.",
+    "maxBytes": "Am Größenlimit gestoppt.",
+    "maxDuration": "Am Zeitlimit gestoppt. Erhöhen Sie es unter „Optionen“.",
+    "failed": "Der Stream ist fehlgeschlagen.",
+    "failedWith": "Der Stream ist fehlgeschlagen. {{detail}}",
+    "hostedLimit": "Am Zeitlimit gestoppt. Die Web-App streamt höchstens {{seconds}} Sekunden; die Desktop-App kann länger streamen."
+  }
+}

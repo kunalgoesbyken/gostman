@@ -1,0 +1,14 @@
+{
+  "requestSettings": {
+    "timeout": "Tempo limite (ms)",
+    "timeoutPlaceholder": "{{milliseconds}} (padrão)",
+    "followRedirects": "Seguir redirecionamentos",
+    "verifyTls": "Verificar certificados TLS",
+    "sendCookies": "Enviar cookies do cookie jar",
+    "storeCookies": "Guardar cookies definidos pela resposta",
+    "tags": "Tags",
+    "tagsPlaceholder": "smoke, regressão",
+    "description": "Descrição",
+    "descriptionPlaceholder": "O que esta requisição faz (Markdown), exibido na documentação gerada"
+  }
+}

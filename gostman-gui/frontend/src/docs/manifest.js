@@ -9,6 +9,9 @@ export const docSections = [
       { file: "coming-from-postman.md", keywords: ["postman", "newman"] },
       { file: "coming-from-bruno.md", keywords: ["bruno"] },
       { file: "coming-from-insomnia.md", keywords: ["insomnia"] },
+      { file: "gostman-vs-postman.md", label: "Gostman vs Postman", keywords: ["compare", "comparison", "alternative", "postman", "difference", "versus"] },
+      { file: "gostman-vs-bruno.md", label: "Gostman vs Bruno", keywords: ["compare", "comparison", "alternative", "bruno", "difference", "versus"] },
+      { file: "gostman-vs-insomnia.md", label: "Gostman vs Insomnia", keywords: ["compare", "comparison", "alternative", "insomnia", "difference", "versus"] },
       { file: "tutorial-first-collection.md" },
       { file: "tutorial-ci.md" },
     ],
@@ -63,7 +66,7 @@ export const docSections = [
   },
   {
     title: "Help",
-    docs: [{ file: "guides.md" }, { file: "troubleshooting.md", aliases: { "tests-and-runs": "checks-and-runs" }, keywords: ["localhost", "error", "problem"] }],
+    docs: [{ file: "guides.md" }, { file: "troubleshooting.md", aliases: { "tests-and-runs": "checks-and-runs" }, keywords: ["localhost", "error", "problem"] }, { file: "translating.md", label: "Translating", keywords: ["language", "translation", "localization", "i18n", "weblate"] }],
   },
 ]
 

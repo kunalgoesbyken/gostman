@@ -40,7 +40,7 @@ function RunMark({ node }) {
   if (!look) return null
   const Icon = look.icon
   return (
-    <span className="ml-auto flex shrink-0 items-center gap-1 font-mono text-2xs text-muted-foreground">
+    <span className="ms-auto flex shrink-0 items-center gap-1 font-mono text-2xs text-muted-foreground">
       {node.attempts > 1 && <span>{TEXT.attempt(node.attempt, node.attempts)}</span>}
       {node.visits > 1 && node.attempts <= 1 && <span>{TEXT.visits(node.visits)}</span>}
       <Icon aria-hidden="true" className={cn("h-3.5 w-3.5", look.tone)} />
@@ -73,7 +73,7 @@ export const FlowNode = memo(function FlowNode({ step, position, count, context,
       onDoubleClick={() => onOpen(step.id)}
       onKeyDown={(event) => onKeyDown(event, step.id)}
       className={cn(
-        "flex w-[17rem] max-w-full flex-col gap-1 rounded-md border bg-card px-3 py-2 text-left text-card-foreground transition-colors hover:bg-accent",
+        "flex w-[17rem] max-w-full flex-col gap-1 rounded-md border bg-card px-3 py-2 text-start text-card-foreground transition-colors hover:bg-accent",
         look ? look.border : "border-border",
         isSelected && "ring-2 ring-ring ring-offset-1 ring-offset-background"
       )}

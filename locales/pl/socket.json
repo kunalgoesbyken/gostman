@@ -1,0 +1,49 @@
+{
+  "socket": {
+    "socketIoPath": "Ścieżka",
+    "socketIoAuth": "Dane uwierzytelniające",
+    "socketIoAuthNote": "Obiekt JSON wysyłany z uzgadnianiem przestrzeni nazw, odczytywany przez serwer jako socket.handshake.auth.",
+    "invalidAuth": "Dane uwierzytelniające Socket.IO muszą być obiektem JSON.",
+    "statuses": {
+      "idle": "Rozłączono",
+      "connecting": "Łączenie",
+      "open": "Połączono",
+      "waiting": "Oczekiwanie na ponowne połączenie"
+    },
+    "entries": {
+      "sent": "Wysłano",
+      "received": "Odebrano",
+      "info": "Informacja",
+      "warning": "Ostrzeżenie",
+      "error": "Błąd"
+    },
+    "protocol": "Protokół",
+    "graphql": "Subskrypcja GraphQL",
+    "filter": "Filtr tematów, na przykład sensors/#",
+    "subscribe": "Subskrybuj",
+    "saved": "Zapisane wiadomości",
+    "savedPlaceholder": "Wczytaj zapisaną wiadomość",
+    "noSaved": "Brak zapisanych wiadomości",
+    "save": "Zapisz",
+    "saveTitle": "Zapisz wiadomość",
+    "saveMessage": "Nazwa tej wiadomości. Jest zapisywana razem z żądaniem.",
+    "remove": "Usuń zapisaną wiadomość",
+    "binary_one": "Binarne, {{count}} bajt",
+    "binary_few": "Binarne, {{count}} bajty",
+    "binary_many": "Binarne, {{count}} bajtów",
+    "binary_other": "Binarne, {{count}} bajta",
+    "truncated": "Pokazano pierwsze znaki: {{shown}} z {{total}}",
+    "copy": "Kopiuj wiadomość",
+    "dropped": "Odrzucone starsze wpisy: {{dropped}}. Dziennik zachowuje najnowsze: {{limit}}.",
+    "emptyTitle": "Brak wiadomości",
+    "emptyDescription": "Połącz się, a potem wyślij wiadomość lub poczekaj na serwer.",
+    "log": "Wiadomości",
+    "autoReconnect": "Łącz ponownie automatycznie",
+    "unsentHeaders": "Przeglądarka może ustawić w WebSocket tylko Sec-WebSocket-Protocol. Nie wysłano stąd: {{names}}. Aplikacja desktopowa wysyła wszystkie nagłówki.",
+    "composer": "Wiadomość ({{shortcut}}, aby wysłać)",
+    "composerClosed": "Połącz się, aby wysyłać wiadomości",
+    "message": "Wiadomość",
+    "send": "Wyślij",
+    "clear": "Wyczyść"
+  }
+}

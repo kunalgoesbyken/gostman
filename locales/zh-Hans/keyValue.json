@@ -1,0 +1,18 @@
+{
+  "keyValue": {
+    "key": "键",
+    "value": "值",
+    "type": "类型",
+    "sendRow": "发送此行",
+    "fieldType": "字段类型",
+    "text": "文本",
+    "file": "文件",
+    "removeRow": "移除行",
+    "bulkLabel": "以文本形式编辑{{keyLabel}}行",
+    "bulkPlaceholder": "{{keyLabel}}: value",
+    "bulkHint": "每行一条，格式为 name: value。以 // 或 # 开头的行会保留但不发送。",
+    "bulkUnavailable": "名称中含冒号、或首尾有空格的行，只能在表格中编辑。",
+    "editAsTable": "以表格编辑",
+    "bulkEdit": "批量编辑"
+  }
+}

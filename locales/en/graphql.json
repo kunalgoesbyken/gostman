@@ -1,0 +1,27 @@
+{
+  "graphql": {
+    "query": "Query",
+    "queryLabel": "GraphQL query",
+    "variables": "Variables (JSON)",
+    "variablesLabel": "GraphQL variables",
+    "invalidJson": "Not valid JSON: {{message}}",
+    "syntaxAt": "{{message}} (line {{line}}, column {{column}})",
+    "sendAsGraphql": "Send as GraphQL",
+    "prettify": "Prettify",
+    "prettifyTitle": "Reformat the query. Comments are removed.",
+    "cannotPrettify": "Cannot prettify: {{detail}}",
+    "notSent": "Not sent while the method is {{method}}.",
+    "schema": "Schema",
+    "schemaDescription": "Fetch it to browse this endpoint's types and fields. The introspection query uses this request's URL, headers and auth.",
+    "searchLabel": "Search the schema",
+    "searchPlaceholder_one": "Search {{count}} type and its fields",
+    "searchPlaceholder_other": "Search {{count}} types and fields",
+    "noMatch": "Nothing matches.",
+    "moreMatches_one": "{{count}} more type matches. Narrow the search to see it.",
+    "moreMatches_other": "{{count}} more types match. Narrow the search to see them.",
+    "noFields": "No fields.",
+    "schemaTooLarge": "The schema is larger than the response size limit.",
+    "noJsonBody": "The endpoint answered {{status}} without a JSON body.",
+    "noSchema": "The endpoint answered {{status}} without a schema."
+  }
+}

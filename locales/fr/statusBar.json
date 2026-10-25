@@ -1,0 +1,13 @@
+{
+  "statusBar": {
+    "network": "Réseau",
+    "mockStopped": "Serveur fictif",
+    "mockRunning": "Serveur fictif (en cours)",
+    "mockRunningOn": "Serveur fictif (en cours sur :{{port}})",
+    "captureStopped": "Capture",
+    "captureRunning": "Capture (en cours)",
+    "git": "Git",
+    "detached": "HEAD détaché",
+    "cookies": "Cookies"
+  }
+}

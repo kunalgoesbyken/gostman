@@ -1,24 +1,19 @@
-export const EXTRACT_TEXT = {
-  noResponse: "Send the request to see a value",
-  failedResponse: "The last request failed",
-  summary: "Checked rows run after every response and keep their value, ready to use as {{variable_name}}. Session values stay in memory until you clear them or close the app; environment values are saved with the active environment.",
-  invalidEnvironment: "Nothing was saved: the active environment's variables are not valid JSON.",
-  nothing: "The last run produced no values.",
-  savedTo: {
-    session: (names) => `Kept ${names.join(", ")} as session values.`,
-    environment: (names) => `Saved ${names.join(", ")} to the active environment.`,
+import english from '../../../../locales/en/extract.json'
+import { messages } from './i18n/core'
+import { formatList } from './i18n/format'
+
+const VARIABLE_EXAMPLE = '{{variable_name}}'
+
+const text = messages('extract', english, (t) => ({
+  extract: {
+    get summary() {
+      return t('extract.summary', { example: VARIABLE_EXAMPLE })
+    },
+    savedTo: {
+      session: (names) => t('extract.savedTo.session', { names: formatList(names, 'unit') }),
+      environment: (names) => t('extract.savedTo.environment', { names: formatList(names, 'unit') }),
+    },
   },
-  scopes: { session: "Session", environment: "Environment" },
-  variable: "Variable",
-  from: "From",
-  path: "Path or name",
-  value: "Value in last response",
-  keepIn: "Keep in",
-  run: "Run this extractor",
-  name: "Variable name",
-  namePlaceholder: "variable_name",
-  source: "Value source",
-  scope: "Where the value is kept",
-  remove: "Remove extractor",
-  runNow: "Run now",
-}
+}))
+
+export const EXTRACT_TEXT = text.extract

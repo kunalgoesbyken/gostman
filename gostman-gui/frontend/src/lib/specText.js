@@ -1,63 +1,7 @@
-export const SPEC_TEXT = {
-  label: 'OpenAPI spec',
-  addressPlaceholder: 'https://example.com/openapi.json',
-  addressLabel: 'Address of an OpenAPI spec',
-  load: 'Load',
-  chooseSpecFile: 'Open spec file',
-  browse: 'Browse',
-  syncNote: 'Sync is available for specs loaded from an address or an opened file.',
-  checkForUpdates: 'Check for spec updates',
-  browseSpec: 'Browse API spec',
-  viewerTitle: 'API spec',
-  syncTitle: 'Spec updates',
-  operations: 'Operations',
-  models: 'Models',
-  searchOperations: 'Search operations',
-  searchModels: 'Search models',
-  noOperations: 'No operation matches.',
-  noModels: 'No model matches.',
-  pickOperation: 'Select an operation to see its details.',
-  pickModel: 'Select a model to see its fields.',
-  sendToTab: 'Send to request tab',
-  parameters: 'Parameters',
-  requestBody: 'Request body',
-  responses: 'Responses',
-  security: 'Authentication',
-  required: 'required',
-  deprecated: 'deprecated',
-  circular: 'circular reference',
-  truncated: 'more levels not shown',
-  loading: 'Reading the spec',
-  upToDate: 'The collection already matches the spec.',
-  added: 'New operations',
-  changed: 'Changed operations',
-  removed: 'Removed operations',
-  locallyEdited: 'edited here',
-  apply: 'Apply selected',
-  close: 'Close',
-  lint: 'Lint',
-  lintClean: 'No problems found.',
-  lintNoSpec: 'No OpenAPI spec has been imported yet. Import one from a file or an address with Import data, then run Lint API spec again.',
-  lintCount: {
-    error: (count) => `${count} ${count === 1 ? 'error' : 'errors'}`,
-    warning: (count) => `${count} ${count === 1 ? 'warning' : 'warnings'}`,
-    info: (count) => `${count} info`,
-  },
-  lintHeading: {
-    error: (count) => `Errors (${count})`,
-    warning: (count) => `Warnings (${count})`,
-    info: (count) => `Info (${count})`,
-  },
-  untagged: 'No tag',
-  syncedAt: 'Last synced',
-  unchanged: (count) => `${count} unchanged`,
-  sourceMissing: 'This collection has no saved spec address.',
-  keepEditsNote: 'Operations you edited are unchecked. Checking one replaces your edits to its URL, parameters, path variables, body and authentication.',
-}
+import english from '../../../../locales/en/spec.json'
+import { messages } from './i18n/core'
 
-export const SPEC_ALERTS = {
-  syncTitle: 'Spec sync failed',
-  applied: (counts) => `Added ${counts.added}, updated ${counts.changed} and removed ${counts.removed} requests.`,
-  appliedTitle: 'Spec synced',
-  lintTitle: 'Lint API spec',
-}
+const text = messages('spec', english)
+
+export const SPEC_TEXT = text.spec
+export const SPEC_ALERTS = text.specAlerts

@@ -1,0 +1,15 @@
+{
+  "sidebar.views": "Accessible label of the switch between the Collections and History lists.",
+  "sidebar.collections": "Tab that shows saved requests organised in folders.",
+  "sidebar.history": "Tab that shows requests that were sent before.",
+  "sidebar.runRequests": "Button that runs all requests of a folder one after the other.",
+  "sidebar.toggle": "Button and command that shows or hides the sidebar.",
+  "history.search": "Placeholder and label of the search field of the history.",
+  "history.noResponse": "Shown for a history entry that never got an answer from the server.",
+  "history.sentAgo.now": "Very short age label of a history entry, shown at the right of the row.",
+  "history.sentAgo.minutes": "Very short age label: minutes ago, for example 5m. Keep it to a few characters.",
+  "history.sentAgo.hours": "Very short age label: hours ago, for example 3h.",
+  "history.sentAgo.days": "Very short age label: days ago, for example 2d.",
+  "history.sentAgoSpoken": "Spoken version of the short age label for screen readers.",
+  "history.sentAgoSpoken.date": "{{date}} is a formatted date."
+}

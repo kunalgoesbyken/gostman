@@ -1,0 +1,165 @@
+{
+  "preferences": {
+    "title": "Preferências",
+    "sectionsLabel": "Seções",
+    "sections": {
+      "appearance": "Aparência",
+      "theme": "Tema",
+      "fonts": "Fontes",
+      "editor": "Editor",
+      "requests": "Requisições",
+      "language": "Idioma",
+      "ai": "IA",
+      "privacy": "Privacidade",
+      "data": "Dados"
+    },
+    "fields": {
+      "theme": "Tema",
+      "contrast": "Contraste",
+      "accent": "Cor de destaque",
+      "textScale": "Tamanho do texto",
+      "interfaceFont": "Fonte da interface",
+      "codeFont": "Fonte do código",
+      "density": "Densidade",
+      "responseLayout": "Painel de resposta",
+      "systemTitleBar": "Usar a barra de título do sistema",
+      "editorFontSize": "Tamanho da fonte do editor",
+      "wrapLines": "Quebrar linhas longas",
+      "requestTimeout": "Tempo limite padrão",
+      "confirmCloseTab": "Perguntar antes de descartar alterações não salvas ao fechar uma aba",
+      "language": "Idioma"
+    },
+    "themes": {
+      "system": "Sistema",
+      "light": "Claro",
+      "dark": "Escuro"
+    },
+    "contrasts": {
+      "system": "Sistema",
+      "standard": "Padrão",
+      "more": "Maior"
+    },
+    "accents": {
+      "cyan": "Ciano",
+      "blue": "Azul",
+      "violet": "Violeta",
+      "pink": "Rosa",
+      "graphite": "Grafite"
+    },
+    "densities": {
+      "comfortable": "Confortável",
+      "compact": "Compacta"
+    },
+    "layouts": {
+      "below": "Abaixo",
+      "right": "À direita"
+    },
+    "seconds": "segundos",
+    "pixels": "px",
+    "contrastHint": "Maior desenha bordas e textos secundários mais fortes.",
+    "systemTitleBarHint": "Mostra a barra de título e os botões de janela do seu desktop em vez dos do Gostman. Vale após reiniciar.",
+    "systemTitleBarRestart": "Reinicie o Gostman para aplicar esta alteração.",
+    "systemTitleBarFailed": "Não foi possível salvar a configuração.",
+    "defaultFont": "Padrão",
+    "interfaceFontHint": "Qualquer fonte instalada neste dispositivo.",
+    "codeFontHint": "Editores, a barra de endereço e outros códigos.",
+    "fontMissing": "Não encontrada neste dispositivo, então a fonte padrão é usada.",
+    "suggestFonts": "Sugerir fontes instaladas",
+    "fontsSuggested": "As fontes instaladas são sugeridas conforme você digita o nome de uma fonte.",
+    "fontsDenied": "Não foi possível ler as fontes instaladas.",
+    "shortcuts": "Atalhos de teclado",
+    "reset": "Restaurar padrões",
+    "close": "Concluir",
+    "statusLabel": "Preferências",
+    "commandDescription": "Tema, cores, fontes, tamanho do texto, editor, layout e padrões",
+    "methods": {
+      "title": "Cores dos métodos",
+      "hint": "A cor de cada método de requisição na barra lateral, nas abas e nas listas. Adicione um fundo para mostrar os métodos como selos.",
+      "method": "Método",
+      "resetMode": {
+        "light": "Restaurar cores de método do tema claro",
+        "dark": "Restaurar cores de método do tema escuro"
+      }
+    },
+    "theme": {
+      "palette": "Paleta",
+      "paletteHint": "Cada paleta tem uma versão clara e uma escura. Suas próprias cores são aplicadas por cima.",
+      "palettes": {
+        "default": "Padrão",
+        "neutral": "Neutra",
+        "slate": "Ardósia",
+        "paper": "Papel",
+        "moss": "Musgo",
+        "dusk": "Crepúsculo",
+        "ocean": "Oceano",
+        "ink": "Tinta"
+      },
+      "colors": "Cores personalizadas",
+      "colorsHint": "Defina a cor de fundo e a cor do texto de cada parte da janela. Apenas as cores que você alterar são mantidas.",
+      "editing": "Cores para",
+      "previewHint": {
+        "light": "A janela está escura agora. Defina o tema como Claro para ver estas cores aplicadas.",
+        "dark": "A janela está clara agora. Defina o tema como Escuro para ver estas cores aplicadas."
+      },
+      "columns": {
+        "surface": "Parte",
+        "background": "Fundo",
+        "foreground": "Texto",
+        "contrast": "Contraste",
+        "reset": "Restaurar"
+      },
+      "surfaces": {
+        "window": "Janela",
+        "sidebar": "Barra lateral",
+        "tabs": "Abas e barra de endereço",
+        "request": "Editor de requisição",
+        "body": "Editor de corpo",
+        "script": "Editor de script",
+        "response": "Resposta",
+        "dialog": "Diálogos",
+        "menu": "Menus e pop-ups"
+      },
+      "surfaceHints": {
+        "window": "Barra de título, barra de status e toda parte não listada aqui.",
+        "body": "Também mensagens gRPC, argumentos MCP e exemplos salvos.",
+        "script": "Scripts de pré-requisição e pós-resposta.",
+        "menu": "Menus de contexto, listas e a paleta de comandos."
+      },
+      "roles": {
+        "background": "fundo",
+        "foreground": "texto"
+      },
+      "sample": "Aa",
+      "resetMode": {
+        "light": "Restaurar cores do tema claro",
+        "dark": "Restaurar cores do tema escuro"
+      },
+      "share": "Compartilhar um tema",
+      "shareHint": "Um tema contém a paleta, a cor de destaque e suas cores personalizadas de partes e de métodos para os dois modos.",
+      "copy": "Copiar tema",
+      "copied": "Tema copiado para a área de transferência.",
+      "copyFailed": "Não foi possível copiar o tema para a área de transferência.",
+      "import": "Importar tema",
+      "importLabel": "Tema a importar",
+      "importPlaceholder": "Cole um tema copiado do Gostman",
+      "apply": "Aplicar",
+      "cancel": "Cancelar",
+      "imported": "Tema aplicado.",
+      "invalid": "Isto não é um tema do Gostman, ou tem partes desconhecidas ou cores que não estão escritas como #rrggbb.",
+      "colorLabel": "Cor de {{role}} de {{surface}}",
+      "hexLabel": "Valor hex de {{role}} de {{surface}}",
+      "ratio": "{{ratio}}:1",
+      "lowContrast": "O texto pode ser difícil de ler. Busque ao menos {{minimum}}:1.",
+      "resetRow": "Restaurar {{name}}"
+    },
+    "timeoutHint_one": "Vale para requisições que não definem tempo limite próprio. 0 usa o limite interno de {{count}} segundo.",
+    "timeoutHint_many": "Vale para requisições que não definem tempo limite próprio. 0 usa o limite interno de {{count}} de segundos.",
+    "timeoutHint_other": "Vale para requisições que não definem tempo limite próprio. 0 usa o limite interno de {{count}} segundos.",
+    "languageSystem": "Igual ao sistema ({{language}})",
+    "languageSwitchHint": "O Gostman recarrega para mostrar o novo idioma. As abas abertas e os rascunhos não salvos são mantidos; as respostas mostradas nas abas são apagadas.",
+    "languageSwitch": "Trocar idioma",
+    "languageHelp": "Não encontrou o seu idioma ou achou uma tradução errada? {{link}}.",
+    "languageHelpLink": "Pergunte no GitHub",
+    "accentAdjusted": "Mostrada como {{light}} no modo claro e {{dark}} no modo escuro para que o texto nesta cor continue legível."
+  }
+}

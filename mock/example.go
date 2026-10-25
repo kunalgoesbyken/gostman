@@ -3,9 +3,10 @@ package mock
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const (
@@ -87,7 +88,7 @@ func exampleBody(example Example) ([]byte, error) {
 	}
 	body, err := base64.StdEncoding.DecodeString(example.Body)
 	if err != nil {
-		return nil, fmt.Errorf("the body of example %q is not valid base64", example.Name)
+		return nil, locales.Errorf(locales.MockRouteExampleBodyInvalid, locales.Params{"name": example.Name})
 	}
 	return body, nil
 }

@@ -1,0 +1,30 @@
+{
+  "privacy": {
+    "telemetryLabel": "Telemetrie",
+    "telemetryHint": "Gostman hat weder Telemetrie noch Analysen noch Absturzberichte. Es kontaktiert nur die Hosts, an die Sie Anfragen senden, und die Dienste, die Sie selbst einrichten.",
+    "docsLink": "Womit sich Gostman verbindet",
+    "updatesLabel": "Nach neuen Versionen suchen",
+    "updatesHint": "Einmal täglich das neueste Release von GitHub lesen und in der Statusleiste anzeigen. Es wird nichts heruntergeladen oder installiert.",
+    "updatesFailed": "Die letzte Prüfung hat GitHub nicht erreicht. Sie läuft morgen erneut.",
+    "updatesCurrent": "Dies ist die neueste Version ({{version}}).",
+    "updateAvailable": "Version {{version}} ist verfügbar",
+    "updatesNewer": "Version {{version}} ist auf GitHub verfügbar.",
+    "updateHint": "Release Notes und Downloads auf GitHub öffnen",
+    "updateDismiss": "Bis zur nächsten Version ausblenden",
+    "relayLabel": "Anfragen senden über",
+    "relayHint": "Das gehostete Relay kann localhost und private Adressen nicht erreichen. Ein lokales Relay sendet Anfragen von diesem Computer, ohne jemanden dazwischen.",
+    "relayModes": {
+      "hosted": "Gehostetes Relay",
+      "local": "Lokales Relay auf diesem Computer"
+    },
+    "relayAddressLabel": "Adresse des lokalen Relays",
+    "relayAddressHint": "Starten Sie es mit gostman relay und geben Sie die ausgegebene Adresse ein.",
+    "relayAddressInvalid": "Geben Sie eine Adresse wie http://127.0.0.1:4030 ein.",
+    "relayCheck": "Testen",
+    "relayChecking": "Wird getestet …",
+    "relayReachable": "Das lokale Relay hat geantwortet.",
+    "relayMissing": "Geben Sie unter „Einstellungen“, „Datenschutz“ die Adresse des lokalen Relays ein oder wechseln Sie zurück zum gehosteten Relay.",
+    "relayUnreachable": "Das lokale Relay unter {{address}} hat nicht geantwortet. Starten Sie es mit gostman relay oder wechseln Sie unter „Einstellungen“, „Datenschutz“ zurück zum gehosteten Relay.",
+    "relayCheckUnreachable": "Das lokale Relay unter {{address}} hat nicht geantwortet. Prüfen Sie, ob gostman relay läuft und die Adresse mit der ausgegebenen übereinstimmt."
+  }
+}

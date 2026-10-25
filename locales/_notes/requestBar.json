@@ -1,0 +1,22 @@
+{
+  "requestBar.name": "Accessible label of the field for the name of a request.",
+  "requestBar.untitled": "Name shown for a request that has no name yet.",
+  "requestBar.method": "Accessible label of the HTTP method picker.",
+  "requestBar.url": "Accessible label of the address input.",
+  "requestBar.urlPlaceholders.full": "Placeholder of the address input when there is room. The three variants go from long to short for narrower screens.",
+  "requestBar.urlPlaceholders.medium": "Shorter placeholder of the address input.",
+  "requestBar.urlPlaceholders.short": "Shortest placeholder of the address input. Keep URL.",
+  "requestBar.methodPlaceholders.grpc.full": "Placeholder of the address input for gRPC requests; localhost:50051 is an example address.",
+  "requestBar.methodPlaceholders.mcp.full": "Placeholder of the address input for MCP requests.",
+  "requestBar.send": "Button that sends the request.",
+  "requestBar.connect": "Button that opens a WebSocket or similar live connection.",
+  "requestBar.disconnect": "Button that closes a live connection.",
+  "requestBar.cancel": "Button that cancels a request in flight.",
+  "requestBar.save": "Button that saves the request to the collection.",
+  "requestBar.code": "Button that opens generated code for the request, as in code snippet.",
+  "requestBar.codeHint": "Tooltip and title for the button that opens code generation.",
+  "requestBar.codeLanguage": "Label of the programming language picker of the code snippet window. Not a human language.",
+  "curlFiles.title": "Title of a confirmation after pasting a curl command that reads local files.",
+  "curlFiles.withThem": "Button: paste the command including its file reads.",
+  "curlFiles.withoutThem": "Button: paste the command without its file reads."
+}

@@ -2,13 +2,13 @@ package importer
 
 import (
 	"encoding/json"
-	"fmt"
 	"mime"
 	"net/url"
 	"path"
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const (
@@ -35,7 +35,7 @@ func (c *collector) readHTTP(docs []document) {
 		}
 		clean, ok := safeRelativePath(doc.file.Name)
 		if !ok {
-			c.skip(messageUnsafePath, doc.file.Name)
+			c.skip(locales.ImporterUnsafePath, locales.Params{"path": doc.file.Name})
 			continue
 		}
 		stem := strings.TrimSuffix(clean, path.Ext(clean))
@@ -109,7 +109,7 @@ func (c *collector) setFolderVariables(id string, values map[string]string) {
 func (c *collector) httpRequest(section httpSection, label string, variables map[string]string) (parts, bool) {
 	name := cleanName(section.name, section.method+" "+section.url)
 	if streamMethods[section.method] {
-		c.skip(messageHTTPStream, name, section.method)
+		c.skip(locales.ImporterHttpStream, locales.Params{"name": name, "method": section.method})
 		return parts{}, false
 	}
 	expand := func(text string) string { return c.httpPlaceholders(text, label, section.prompts) }
@@ -133,14 +133,14 @@ func (c *collector) httpRequest(section httpSection, label string, variables map
 		request.headers = append(request.headers, header)
 	}
 	c.httpBody(&request, expand(strings.Join(section.body, "\n")), contentType, graphQL)
-	scriptLabel := fmt.Sprintf(labelRequest, name)
+	scriptLabel := placeLabel(labelRequest, name)
 	request.preScript = c.translateScript(jetbrainsDialect, scriptLabel, stagePre, section.preScript)
 	request.postScript = c.translateScript(jetbrainsDialect, scriptLabel, stageAfter, section.postScript)
 	if section.handlerFile {
-		c.flag(messageHTTPHandlerFile, name)
+		c.flag(locales.ImporterHttpHandlerFile, name)
 	}
 	if section.redirect {
-		c.flag(messageHTTPRedirect, name)
+		c.flag(locales.ImporterHttpRedirect, name)
 	}
 	return request, true
 }
@@ -189,7 +189,7 @@ func (c *collector) httpBody(request *parts, body, contentType string, graphQL b
 		request.body, request.needsFiles = jsonList(rows), anyFile(rows)
 	}
 	if request.bodyType != bodyMultipart && mentionsFile(body) {
-		c.flag(messageHTTPBodyFile, request.name)
+		c.flag(locales.ImporterHttpBodyFile, request.name)
 	}
 	if request.bodyType == bodyMultipart || strings.EqualFold(strings.TrimSpace(contentType), defaultContentTypes[request.bodyType]) {
 		request.headers = withoutContentType(request.headers)
@@ -352,7 +352,7 @@ func (c *collector) linkResponses(requests []parts) {
 				return variableOpen + inner + variableClose
 			}
 			if !reference.supported {
-				c.flagUnique(messageHTTPVariables, variableOpen+inner+variableClose)
+				c.flagUnique(locales.ImporterHttpVariables, variableOpen+inner+variableClose)
 				return variableOpen + inner + variableClose
 			}
 			rules[target] = withRule(rules[target], reference.rule)

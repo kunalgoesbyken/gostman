@@ -1,0 +1,12 @@
+{
+  "exampleActions": {
+    "saveFailure": "Não foi possível salvar o exemplo",
+    "changeFailure": "Não foi possível alterar o exemplo",
+    "saved": "O exemplo \"{{example}}\" foi salvo com \"{{request}}\".",
+    "saveTitle": "Salvar como exemplo",
+    "nameLabel": "Nome do exemplo",
+    "renameTitle": "Renomear exemplo",
+    "deleteTitle": "Excluir exemplo",
+    "deleteMessage": "Excluir o exemplo \"{{name}}\"? Isto não pode ser desfeito."
+  }
+}

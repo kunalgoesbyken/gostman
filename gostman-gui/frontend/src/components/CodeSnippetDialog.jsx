@@ -25,7 +25,7 @@ export function CodeSnippetDialog({ snippets, onClose }) {
         <CopyTextButton text={snippets[languageId]} />
       </DialogHeader>
       <DialogBody>
-        <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed text-foreground">{snippets[languageId]}</pre>
+        <pre dir="ltr" className="whitespace-pre-wrap font-mono text-xs leading-relaxed text-foreground">{snippets[languageId]}</pre>
       </DialogBody>
     </Dialog>
   )

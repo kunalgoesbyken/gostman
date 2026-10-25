@@ -1,0 +1,12 @@
+{
+  "route": {
+    "graphqlNotServed": "不提供 GraphQL 请求。",
+    "grpcNotServed": "不提供 gRPC 请求。",
+    "mcpNotServed": "不提供 MCP 请求。",
+    "webSocketNotServed": "不提供 WebSocket 请求。",
+    "noExample": "请把某个响应保存为示例，以提供此路由。",
+    "disabled": "此路由已关闭。",
+    "exampleBodyInvalid": "示例“{{name}}”的响应体不是有效的 base64",
+    "conflict": "{{method}} {{path}} 已由“{{owner}}”提供。"
+  }
+}

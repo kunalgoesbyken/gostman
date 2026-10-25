@@ -1,0 +1,18 @@
+{
+  "variables": {
+    "dynamic": "generowana przy każdym wysłaniu żądania",
+    "prompt": "pytanie o wartość przy wysyłaniu żądania",
+    "undefinedName": "nie jest zdefiniowana w aktywnym środowisku",
+    "resolvesTo": "daje wartość",
+    "through": "przez {{names}}",
+    "sources": {
+      "global": "Globalna",
+      "collection": "Kolekcja",
+      "environment": "Środowisko",
+      "folder": "Folder",
+      "request": "Żądanie",
+      "process": "Plik .env",
+      "session": "Sesja"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "importExport": {
+    "untitledFolder": "フォルダー",
+    "untitledEnvironment": "環境",
+    "gostmanExport": "Gostmanのエクスポート",
+    "undetected": "形式を検出できませんでした。Postmanコレクション、OpenAPIまたはSwaggerの仕様、Gostmanのエクスポートを使用してください。",
+    "noRequests": "この{{label}}には、リクエストもフォルダーも含まれていません。",
+    "unreadable": "この{{label}}を読み取れませんでした。",
+    "invalidYaml": "無効なYAML：{{reason}}",
+    "missingGostman": "Gostmanのエクスポート形式が無効です：gostmanオブジェクトがありません",
+    "requestsNotArray": "Gostmanのエクスポート形式が無効です：requestsは配列である必要があります",
+    "foldersNotArray": "Gostmanのエクスポート形式が無効です：foldersは配列である必要があります",
+    "namesMore": "{{names}}ほか{{count}}件",
+    "tlsKept": "コレクションでは{{names}}のTLS検証が無効になっていましたが、有効のままにしました。これらのホストを信頼できる場合は、リクエストの設定タブでオフにしてください。",
+    "flattened_other": "ループ内にある、または{{levels}}階層より深くネストされた{{count}}件のフォルダーを最上位に移動しました。"
+  }
+}

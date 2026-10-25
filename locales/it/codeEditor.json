@@ -1,0 +1,39 @@
+{
+  "codeEditor": {
+    "syntaxError": "Errore di sintassi",
+    "phrases": {
+      "foldLine": "Comprimi riga",
+      "unfoldLine": "Espandi riga",
+      "foldedLines": "Righe compresse",
+      "unfoldedLines": "Righe espanse",
+      "foldedCode": "codice compresso",
+      "unfold": "espandi",
+      "completions": "Completamenti",
+      "controlCharacter": "Carattere di controllo",
+      "diagnostics": "Diagnostica",
+      "noDiagnostics": "Nessuna diagnostica",
+      "goToLine": "Vai alla riga",
+      "go": "vai",
+      "close": "chiudi",
+      "find": "Trova",
+      "replace": "Sostituisci",
+      "all": "tutti",
+      "byWord": "parola intera",
+      "matchCase": "maiuscole/minuscole",
+      "next": "successivo",
+      "previous": "precedente",
+      "regexp": "regexp",
+      "replaceAll": "sostituisci tutto",
+      "currentMatch": "corrispondenza attuale",
+      "onLine": "alla riga",
+      "to": "a",
+      "selectionDeleted": "Selezione eliminata",
+      "replacedMatches": "{{count}} corrispondenze sostituite",
+      "replacedMatchOnLine": "corrispondenza sostituita alla riga {{line}}",
+      "unchangedLines": "{{count}} righe invariate",
+      "accept": "Accetta",
+      "reject": "Rifiuta",
+      "revertChunk": "Ripristina questo blocco"
+    }
+  }
+}

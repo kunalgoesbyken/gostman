@@ -2,8 +2,9 @@ package engine
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const AuthInherit = "inherit"
@@ -57,7 +58,7 @@ func mergeHeaders(own string, layers []Layer) ([]pair, error) {
 	for _, source := range layerHeaders(own, layers) {
 		rows, err := parseRows(source)
 		if err != nil {
-			return nil, fmt.Errorf("headers are not valid: %w", err)
+			return nil, locales.Wrap(locales.EngineRequestHeadersInvalid, nil, err)
 		}
 		merged = overlay(merged, rows)
 	}

@@ -39,7 +39,7 @@ const fileStem = (collection) => (
 
 const toJSON = (value) => JSON.stringify(value, null, 2)
 
-const EXPORT_FORMATS = [
+const exportFormats = () => [
   {
     value: BACKUP_FORMAT,
     ...EXPORT_TEXT.formats.gostman,
@@ -89,7 +89,7 @@ const EXPORT_FORMATS = [
   },
 ]
 
-const BACKEND_FORMATS = [
+const backendFormats = () => [
   { value: "bruno", ...EXPORT_TEXT.formats.bruno, mime: ZIP_MIME, backend: "bruno" },
   { value: "curl", ...EXPORT_TEXT.formats.curl, fileName: "requests.sh", mime: "text/x-shellscript", backend: "curl" },
   { value: "har", ...EXPORT_TEXT.formats.har, fileName: "requests.har", mime: JSON_MIME, backend: "har" },
@@ -152,7 +152,7 @@ function ExportReport({ notes, warnings, tool }) {
             <TriangleAlert aria-hidden="true" className="size-3.5 shrink-0 text-warning" />
             {EXPORT_TEXT.checkHeading(warnings.length, tool)}
           </h3>
-          <ul className="flex list-disc flex-col gap-1 pl-5 text-foreground marker:text-warning">
+          <ul className="flex list-disc flex-col gap-1 ps-5 text-foreground marker:text-warning">
             {warnings.map((warning, index) => <li key={index}>{warning}</li>)}
           </ul>
         </div>
@@ -187,7 +187,7 @@ function useBackendExport(format, data, importer, includeSecrets) {
   return state
 }
 
-const ALL_FORMATS = [...EXPORT_FORMATS, ...BACKEND_FORMATS]
+const allFormats = () => [...exportFormats(), ...backendFormats()]
 
 function buildExport(format, data) {
   try {
@@ -210,7 +210,8 @@ function CollectionPicker({ collections, value, onChange }) {
 }
 
 export function ExportTab({ requests, folders, environments, globals, collectionVariables, variables, variablesFor, settings, sharedOrder, flows = [], importer, scan, onGoToRequest, onSaveFile, onSaveBase64 }) {
-  const [formatId, setFormatId] = useState(EXPORT_FORMATS[0].value)
+  const formats = useMemo(allFormats, [])
+  const [formatId, setFormatId] = useState(BACKUP_FORMAT)
   const [collectionId, setCollectionId] = useState(ALL_COLLECTIONS)
   const collections = useMemo(() => collectionFolders(folders), [folders])
   const collection = collections.find((candidate) => candidate.id === collectionId)
@@ -223,7 +224,7 @@ export function ExportTab({ requests, folders, environments, globals, collection
   const [docsOptions, setDocsOptions] = useState(DEFAULT_DOCS_OPTIONS)
   const [includeSecrets, setIncludeSecrets] = useState(false)
 
-  const format = ALL_FORMATS.find((candidate) => candidate.value === formatId)
+  const format = formats.find((candidate) => candidate.value === formatId)
   const data = useMemo(
     () => ({ ...scoped, globals, collectionVariables, variables: collectionId && variablesFor ? variablesFor(collectionId) : variables, settings, sharedOrder, flows: collectionId ? [] : flows }),
     [scoped, globals, collectionId, collectionVariables, variables, variablesFor, settings, sharedOrder, flows]
@@ -251,7 +252,7 @@ export function ExportTab({ requests, folders, environments, globals, collection
       <CollectionPicker collections={collections} value={collectionId} onChange={setCollectionId} />
 
       <Field label={EXPORT_TEXT.formatField} grouped>
-        <SegmentedControl label={EXPORT_TEXT.formatLabel} options={ALL_FORMATS} value={formatId} onChange={setFormatId} />
+        <SegmentedControl label={EXPORT_TEXT.formatLabel} options={formats} value={formatId} onChange={setFormatId} />
       </Field>
 
       <div className="flex shrink-0 items-center justify-end gap-2">

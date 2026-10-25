@@ -1,0 +1,75 @@
+source,target
+request,requisição
+response,resposta
+collection,coleção
+collection settings,configurações da coleção
+settings for all collections,configurações de todas as coleções
+folder,pasta
+subfolder,subpasta
+workspace,espaço de trabalho
+environment,ambiente
+variable,variável
+collection variables,variáveis da coleção
+globals,globais
+session,sessão
+secret,segredo
+secret manager,gerenciador de segredos
+header,cabeçalho
+body,corpo
+query parameter,parâmetro de consulta
+path parameter,parâmetro de caminho
+params,params
+cookie,cookie
+cookie jar,cookie jar
+auth,autenticação
+auth (tab),Auth
+token,token
+access token,token de acesso
+pre-request script,script de pré-requisição
+post-response script,script pós-resposta
+check,verificação
+assertion,asserção
+extract rule,regra de extração
+extract (tab),Extração
+runner,executor
+run,executar
+iteration,iteração
+flow,fluxo
+step,etapa
+mock server,servidor mock
+capture,captura
+example,exemplo
+history,histórico
+tab,aba
+sidebar,barra lateral
+preferences,preferências
+settings (app),configurações
+settings (request tab),ajustes
+theme,tema
+scan,procurar
+finding,achado
+load test,teste de carga
+import,importar
+export,exportar
+share,compartilhar
+share link,link de compartilhamento
+passphrase (share),senha de proteção
+trust (a folder),confiar
+restricted,restrito
+proxy,proxy
+certificate,certificado
+timeout,tempo limite
+send,enviar
+cancel,cancelar
+save,salvar
+delete,excluir
+remove,remover
+discard,descartar
+copy,copiar
+close,fechar
+retry,tentar novamente
+pull / push / fetch / commit / branch / stash,mantidos em inglês (uso comum no Brasil)
+tag,tag
+lint,lint
+schema,esquema
+provider (AI),provedor

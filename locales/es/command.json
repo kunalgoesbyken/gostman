@@ -1,0 +1,129 @@
+{
+  "command": {
+    "title": "Paleta de comandos",
+    "heading": "Comandos",
+    "sections": {
+      "request": "Solicitudes"
+    },
+    "searchCommands": "Buscar comandos",
+    "searchRequests": "Buscar solicitudes",
+    "commandsPlaceholder": "Escribe un comando o el nombre de una solicitud",
+    "requestsPlaceholder": "Ir a una solicitud o entrada del historial",
+    "results": "Resultados",
+    "nothingMatches": "Nada coincide",
+    "sentEarlier": "Enviada antes",
+    "switchEnvironment": "Cambiar de entorno: {{name}}",
+    "switchEnvironmentDescription": "Usar las variables de este entorno",
+    "settingsKeywords": "encabezados auth autenticación variables scripts pruebas",
+    "commands": {
+      "sendRequest": {
+        "label": "Enviar solicitud",
+        "description": "Envía la solicitud de la pestaña actual"
+      },
+      "newRequest": {
+        "description": "Abre una pestaña nueva vacía"
+      },
+      "saveRequest": {
+        "label": "Guardar solicitud",
+        "description": "Guarda la solicitud de la pestaña actual"
+      },
+      "duplicateRequest": {
+        "label": "Duplicar solicitud",
+        "description": "Guarda una copia de la solicitud actual"
+      },
+      "copyRequest": {
+        "label": "Copiar solicitud",
+        "description": "Copia la solicitud guardada para pegarla en una carpeta"
+      },
+      "pasteRequest": {
+        "label": "Pegar solicitud",
+        "description": "Pega la solicitud o carpeta copiada junto a la solicitud actual"
+      },
+      "generateCode": {
+        "description": "Muestra la solicitud actual como código"
+      },
+      "closeTab": {
+        "label": "Cerrar pestaña",
+        "description": "Cierra la pestaña actual"
+      },
+      "closeOtherTabs": {
+        "description": "Deja solo la pestaña actual"
+      },
+      "closeSavedTabs": {
+        "description": "Cierra todas las pestañas sin cambios sin guardar"
+      },
+      "keepTab": {
+        "label": "Mantener abierta la pestaña de vista previa",
+        "description": "Convierte la pestaña de vista previa en una pestaña normal"
+      },
+      "reopenTab": {
+        "label": "Reabrir pestaña cerrada",
+        "description": "Recupera la última pestaña que cerraste"
+      },
+      "toggleSidebar": {
+        "description": "Muestra u oculta las colecciones y el historial"
+      },
+      "shortcuts": {
+        "description": "Ver todos los atajos"
+      },
+      "newFolder": {
+        "description": "Crea una carpeta en el nivel superior"
+      },
+      "runCollection": {
+        "description": "Ejecuta toda la colección o una carpeta, con sus pruebas y scripts"
+      },
+      "collapseFolders": {
+        "keywords": "cerrar plegar árbol"
+      },
+      "examples": {
+        "label": "Ejemplos de la solicitud",
+        "description": "Ver las respuestas guardadas de la solicitud actual"
+      },
+      "mockServer": {
+        "description": "Sirve los ejemplos guardados en un puerto local"
+      },
+      "capture": {
+        "label": "Capturar tráfico",
+        "description": "Reenvía el tráfico de una app a su API y lo guarda como solicitudes"
+      },
+      "cookies": {
+        "label": "Gestionar cookies",
+        "description": "Ver y eliminar las cookies guardadas"
+      },
+      "environments": {
+        "label": "Gestionar entornos",
+        "description": "Crea entornos y edita sus variables, las variables de colección y las globales",
+        "keywords": "variables globales"
+      },
+      "scanSecrets": {
+        "keywords": "credenciales tokens contraseñas filtración"
+      },
+      "network": {
+        "label": "Ajustes de red",
+        "description": "Proxy y certificados"
+      },
+      "import": {
+        "label": "Importar datos",
+        "description": "Importa archivos de Postman, Insomnia, Bruno, OpenAPI, HAR y otros"
+      },
+      "lintSpec": {
+        "description": "Comprueba si la especificación OpenAPI importada tiene problemas",
+        "keywords": "openapi swagger validar gobernanza"
+      },
+      "loadTest": {
+        "keywords": "rendimiento estrés carga"
+      },
+      "export": {
+        "label": "Exportar datos",
+        "description": "Exporta colecciones y entornos"
+      },
+      "share": {
+        "label": "Compartir colección",
+        "description": "Crea un enlace o archivo cifrado, sin necesidad de cuenta"
+      },
+      "clearHistory": {
+        "description": "Elimina todas las entradas del historial"
+      }
+    }
+  }
+}

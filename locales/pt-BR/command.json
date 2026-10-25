@@ -1,0 +1,129 @@
+{
+  "command": {
+    "title": "Paleta de comandos",
+    "heading": "Comandos",
+    "sections": {
+      "request": "Requisições"
+    },
+    "searchCommands": "Buscar comandos",
+    "searchRequests": "Buscar requisições",
+    "commandsPlaceholder": "Digite um comando ou o nome de uma requisição",
+    "requestsPlaceholder": "Ir para uma requisição ou item do histórico",
+    "results": "Resultados",
+    "nothingMatches": "Nada corresponde",
+    "sentEarlier": "Enviada antes",
+    "switchEnvironment": "Trocar de ambiente: {{name}}",
+    "switchEnvironmentDescription": "Usar as variáveis deste ambiente",
+    "settingsKeywords": "cabeçalhos autenticação auth variáveis scripts verificações",
+    "commands": {
+      "sendRequest": {
+        "label": "Enviar requisição",
+        "description": "Envia a requisição da aba atual"
+      },
+      "newRequest": {
+        "description": "Abre uma nova aba vazia"
+      },
+      "saveRequest": {
+        "label": "Salvar requisição",
+        "description": "Salva a requisição da aba atual"
+      },
+      "duplicateRequest": {
+        "label": "Duplicar requisição",
+        "description": "Salva uma cópia da requisição atual"
+      },
+      "copyRequest": {
+        "label": "Copiar requisição",
+        "description": "Copia a requisição salva para colá-la em uma pasta"
+      },
+      "pasteRequest": {
+        "label": "Colar requisição",
+        "description": "Cola a requisição ou pasta copiada ao lado da requisição atual"
+      },
+      "generateCode": {
+        "description": "Mostra a requisição atual como código"
+      },
+      "closeTab": {
+        "label": "Fechar aba",
+        "description": "Fecha a aba atual"
+      },
+      "closeOtherTabs": {
+        "description": "Mantém só a aba atual"
+      },
+      "closeSavedTabs": {
+        "description": "Fecha todas as abas sem alterações não salvas"
+      },
+      "keepTab": {
+        "label": "Manter a aba de pré-visualização aberta",
+        "description": "Transforma a aba de pré-visualização em uma aba comum"
+      },
+      "reopenTab": {
+        "label": "Reabrir aba fechada",
+        "description": "Traz de volta a última aba que você fechou"
+      },
+      "toggleSidebar": {
+        "description": "Mostra ou oculta coleções e histórico"
+      },
+      "shortcuts": {
+        "description": "Veja todos os atalhos"
+      },
+      "newFolder": {
+        "description": "Cria uma pasta no nível superior"
+      },
+      "runCollection": {
+        "description": "Executa a coleção inteira ou uma pasta, com suas verificações e scripts"
+      },
+      "collapseFolders": {
+        "keywords": "fechar recolher árvore"
+      },
+      "examples": {
+        "label": "Exemplos da requisição",
+        "description": "Veja as respostas salvas da requisição atual"
+      },
+      "mockServer": {
+        "description": "Serve os exemplos salvos em uma porta local"
+      },
+      "capture": {
+        "label": "Capturar tráfego",
+        "description": "Encaminha o tráfego de um app para a API dele e o salva como requisições"
+      },
+      "cookies": {
+        "label": "Gerenciar cookies",
+        "description": "Veja e exclua os cookies armazenados"
+      },
+      "environments": {
+        "label": "Gerenciar ambientes",
+        "description": "Crie ambientes e edite suas variáveis, variáveis da coleção e globais",
+        "keywords": "variáveis globais"
+      },
+      "scanSecrets": {
+        "keywords": "credenciais tokens senhas vazamento"
+      },
+      "network": {
+        "label": "Configurações de rede",
+        "description": "Proxy e certificados"
+      },
+      "import": {
+        "label": "Importar dados",
+        "description": "Importe arquivos do Postman, Insomnia, Bruno, OpenAPI, HAR e outros"
+      },
+      "lintSpec": {
+        "description": "Verifica problemas na especificação OpenAPI importada",
+        "keywords": "openapi swagger validar governança"
+      },
+      "loadTest": {
+        "keywords": "desempenho estresse performance"
+      },
+      "export": {
+        "label": "Exportar dados",
+        "description": "Exporta coleções e ambientes"
+      },
+      "share": {
+        "label": "Compartilhar coleção",
+        "description": "Cria um link ou arquivo criptografado, sem precisar de conta"
+      },
+      "clearHistory": {
+        "description": "Exclui todos os itens do histórico"
+      }
+    }
+  }
+}

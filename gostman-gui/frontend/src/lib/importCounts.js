@@ -1,17 +1,16 @@
-import { pluralize } from './dataUtils.js'
 import { IMPORT_COUNT_TEXT as TEXT } from './importText.js'
 
-const counted = (counts, nouns) => TEXT.list(nouns.filter(([key]) => counts[key] > 0).map(([key, noun]) => pluralize(counts[key], noun)))
+const counted = (counts, nouns) => TEXT.list(nouns.filter(([key]) => counts[key] > 0).map(([key, noun]) => TEXT[noun](counts[key])))
 
 function structure(counts) {
-  const inside = counted(counts, [['folders', TEXT.folder], ['requests', TEXT.request]])
-  if (!(counts.collections > 0)) return inside || pluralize(0, TEXT.request)
-  const collections = pluralize(counts.collections, TEXT.collection)
+  const inside = counted(counts, [['folders', 'folder'], ['requests', 'request']])
+  if (!(counts.collections > 0)) return inside || TEXT.request(0)
+  const collections = TEXT.collection(counts.collections)
   return inside ? TEXT.holding(collections, inside) : collections
 }
 
 export function describeCounts(counts) {
-  const values = counted(counts, [['flows', TEXT.flow], ['environments', TEXT.environment], ['globals', TEXT.global], ['variables', TEXT.variable]])
-  const settings = counted(counts, [['collectionSettings', TEXT.collection], ['folderSettings', TEXT.folder]])
+  const values = counted(counts, [['flows', 'flow'], ['environments', 'environment'], ['globals', 'global'], ['variables', 'variable']])
+  const settings = counted(counts, [['collectionSettings', 'collection'], ['folderSettings', 'folder']])
   return [structure(counts), values, settings && TEXT.settingsFor(settings)].filter(Boolean).join(TEXT.separator)
 }

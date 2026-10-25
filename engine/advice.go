@@ -3,6 +3,8 @@ package engine
 import (
 	"errors"
 	"net"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const opRemoteError = "remote error"
@@ -13,8 +15,8 @@ type Advice struct {
 }
 
 var AppAdvice = Advice{
-	UntrustedAuthority: "Trust its certificate authority, or turn off certificate verification for this request.",
-	ClientCertificate:  "If the server requires a client certificate, add one for this host in the desktop app's network settings.",
+	UntrustedAuthority: locales.New(locales.EngineAdviceUntrustedAuthority, nil).English(),
+	ClientCertificate:  locales.New(locales.EngineAdviceClientCertificate, nil).English(),
 }
 
 func (a Advice) orDefault() Advice {
@@ -64,8 +66,8 @@ func refusedHandshake(err error) bool {
 
 func DescribeNetworkError(err error) string {
 	hint := networkHint(err)
-	if hint == "" {
+	if hint == nil {
 		return err.Error()
 	}
-	return hint + "\n\n" + err.Error()
+	return hint.WithDetail(err.Error()).String()
 }

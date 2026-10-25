@@ -34,7 +34,7 @@ function PaletteOption({ palette, isSelected, isTabStop }) {
       tabIndex={isTabStop ? 0 : -1}
       onClick={() => updatePreferences({ palette })}
       className={cn(
-        "flex min-w-0 flex-col gap-1.5 rounded-md border p-1.5 text-left",
+        "flex min-w-0 flex-col gap-1.5 rounded-md border p-1.5 text-start",
         isSelected ? "border-primary" : "border-border hover:bg-accent"
       )}
     >

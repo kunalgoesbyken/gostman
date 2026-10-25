@@ -1,0 +1,22 @@
+{
+  "body": {
+    "typeLabel": "Body-Typ",
+    "editorLabel": "Body der Anfrage",
+    "format": "Formatieren",
+    "formatTitle": "{{type}}-Body einrücken ({{chord}}). {{example}} bleiben unverändert.",
+    "cannotFormatAt": "{{type}} lässt sich nicht formatieren, Zeile {{line}}, Spalte {{column}}: {{message}}",
+    "cannotFormat": "{{type}} lässt sich nicht formatieren: {{message}}",
+    "goToLine": "Zu Zeile {{line}}",
+    "noBody": "Kein Body",
+    "noBodyDescription": "Diese Anfrage wird ohne Body gesendet.",
+    "multipartOnGet": "GET-Anfragen haben selten einen Body, und viele Server ignorieren ihn. Wechseln Sie die Methode zu POST oder PUT, wenn er hochgeladen werden soll.",
+    "replacedByGraphQL": "Die Methode ist GRAPHQL, daher wird der Body aus dem Tab „GraphQL“ erstellt und dieser hier nicht gesendet.",
+    "types": {
+      "none": "Keiner",
+      "text": "Text",
+      "form": "Formular (URL-kodiert)",
+      "multipart": "Multipart",
+      "file": "Datei"
+    }
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "command": {
+    "title": "Palette de commandes",
+    "heading": "Commandes",
+    "sections": {
+      "request": "Requêtes"
+    },
+    "searchCommands": "Rechercher des commandes",
+    "searchRequests": "Rechercher des requêtes",
+    "commandsPlaceholder": "Saisissez une commande ou le nom d’une requête",
+    "requestsPlaceholder": "Aller à une requête ou à une entrée de l’historique",
+    "results": "Résultats",
+    "nothingMatches": "Aucun résultat",
+    "sentEarlier": "Envoyée précédemment",
+    "switchEnvironment": "Changer d’environnement : {{name}}",
+    "switchEnvironmentDescription": "Utiliser les variables de cet environnement",
+    "settingsKeywords": "en-têtes authentification variables scripts vérifications",
+    "commands": {
+      "sendRequest": {
+        "label": "Envoyer la requête",
+        "description": "Envoie la requête de l’onglet actuel"
+      },
+      "newRequest": {
+        "description": "Ouvre un nouvel onglet vide"
+      },
+      "saveRequest": {
+        "label": "Enregistrer la requête",
+        "description": "Enregistre la requête de l’onglet actuel"
+      },
+      "duplicateRequest": {
+        "label": "Dupliquer la requête",
+        "description": "Enregistre une copie de la requête actuelle"
+      },
+      "copyRequest": {
+        "label": "Copier la requête",
+        "description": "Copie la requête enregistrée pour la coller dans un dossier"
+      },
+      "pasteRequest": {
+        "label": "Coller la requête",
+        "description": "Colle la requête ou le dossier copié à côté de la requête actuelle"
+      },
+      "generateCode": {
+        "description": "Affiche la requête actuelle sous forme de code"
+      },
+      "closeTab": {
+        "label": "Fermer l’onglet",
+        "description": "Ferme l’onglet actuel"
+      },
+      "closeOtherTabs": {
+        "description": "Ne garde que l’onglet actuel"
+      },
+      "closeSavedTabs": {
+        "description": "Ferme tous les onglets sans modifications non enregistrées"
+      },
+      "keepTab": {
+        "label": "Garder l’onglet d’aperçu ouvert",
+        "description": "Transforme l’onglet d’aperçu en onglet normal"
+      },
+      "reopenTab": {
+        "label": "Rouvrir l’onglet fermé",
+        "description": "Ramène le dernier onglet fermé"
+      },
+      "toggleSidebar": {
+        "description": "Affiche ou masque les collections et l’historique"
+      },
+      "shortcuts": {
+        "description": "Affiche tous les raccourcis"
+      },
+      "newFolder": {
+        "description": "Crée un dossier à la racine"
+      },
+      "runCollection": {
+        "description": "Exécute toute la collection ou un dossier, avec ses vérifications et ses scripts"
+      },
+      "collapseFolders": {
+        "keywords": "fermer replier arborescence"
+      },
+      "examples": {
+        "label": "Exemples de requête",
+        "description": "Affiche les réponses enregistrées de la requête actuelle"
+      },
+      "mockServer": {
+        "description": "Sert les exemples enregistrés sur un port local"
+      },
+      "capture": {
+        "label": "Capturer le trafic",
+        "description": "Transmet le trafic d’une application à son API et l’enregistre sous forme de requêtes"
+      },
+      "cookies": {
+        "label": "Gérer les cookies",
+        "description": "Affiche et supprime les cookies stockés"
+      },
+      "environments": {
+        "label": "Gérer les environnements",
+        "description": "Crée des environnements et modifie leurs variables, les variables de collection et les variables globales",
+        "keywords": "variables globales"
+      },
+      "scanSecrets": {
+        "keywords": "identifiants jetons mots de passe fuite"
+      },
+      "network": {
+        "label": "Paramètres réseau",
+        "description": "Proxy et certificats"
+      },
+      "import": {
+        "label": "Importer des données",
+        "description": "Importe des fichiers Postman, Insomnia, Bruno, OpenAPI, HAR et autres"
+      },
+      "lintSpec": {
+        "description": "Vérifie la spécification OpenAPI importée à la recherche de problèmes",
+        "keywords": "openapi swagger valider gouvernance"
+      },
+      "loadTest": {
+        "keywords": "performance stress charge"
+      },
+      "export": {
+        "label": "Exporter les données",
+        "description": "Exporte les collections et les environnements"
+      },
+      "share": {
+        "label": "Partager la collection",
+        "description": "Crée un lien ou un fichier chiffré, sans compte"
+      },
+      "clearHistory": {
+        "description": "Supprime toutes les entrées de l’historique"
+      }
+    }
+  }
+}

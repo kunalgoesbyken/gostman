@@ -1,0 +1,26 @@
+{
+  "app": {
+    "loading": "Chargement",
+    "loadingEditor": "Chargement de l’éditeur",
+    "backToLanding": "Retour à la page d’accueil",
+    "requestSection": "Requête",
+    "window": {
+      "minimize": "Réduire",
+      "maximize": "Agrandir",
+      "restore": "Restaurer"
+    },
+    "crash": {
+      "title": "Gostman a rencontré une erreur",
+      "description": "Vos requêtes enregistrées ne sont pas affectées. Rechargez pour continuer. Si le problème se reproduit, signalez-le avec ce message :\n\n{{error}}",
+      "reload": "Recharger"
+    },
+    "loadFailure": {
+      "title": "Impossible de charger les données enregistrées",
+      "description": "Rien n’a été modifié ni écrasé. {{reason}}",
+      "retry": "Réessayer",
+      "unreadable": "Les données enregistrées étaient illisibles",
+      "ok": "OK"
+    },
+    "labelled": "{{label}} : {{name}}"
+  }
+}

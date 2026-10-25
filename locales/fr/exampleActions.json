@@ -1,0 +1,12 @@
+{
+  "exampleActions": {
+    "saveFailure": "Impossible d’enregistrer l’exemple",
+    "changeFailure": "Impossible de modifier l’exemple",
+    "saved": "L’exemple « {{example}} » a été enregistré avec « {{request}} ».",
+    "saveTitle": "Enregistrer comme exemple",
+    "nameLabel": "Nom de l’exemple",
+    "renameTitle": "Renommer l’exemple",
+    "deleteTitle": "Supprimer l’exemple",
+    "deleteMessage": "Supprimer l’exemple « {{name}} » ? Cette action est irréversible."
+  }
+}

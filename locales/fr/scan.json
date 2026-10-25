@@ -1,0 +1,32 @@
+{
+  "scan": {
+    "title": "Rechercher des secrets",
+    "commandDescription": "Trouve les identifiants saisis dans les requêtes avant que vous ne les partagiez ou ne les commitiez",
+    "intro": "Recherche les formats de jetons connus, les valeurs d’apparence aléatoire dans les champs d’identifiants et les mots de passe saisis dans les paramètres d’authentification. Les valeurs écrites sous la forme {{example}} ne posent pas de problème. Rien ne quitte cette fenêtre hormis la vérification elle-même, et seuls quelques caractères d’une valeur sont affichés.",
+    "includeExamples": "Inclure les exemples de réponse enregistrés",
+    "scanning": "Analyse en cours",
+    "clean": "Aucun secret trouvé",
+    "cleanDescription": "Aucun format de jeton, valeur d’identifiant d’apparence aléatoire ni mot de passe saisi n’a été trouvé.",
+    "failed": "La vérification n’a pas pu s’exécuter : {{message}}",
+    "goToRequest": "Aller à la requête",
+    "findings": "Constats",
+    "showFindings": "Afficher les constats",
+    "hideFindings": "Masquer les constats",
+    "shareAnyway": "Partager quand même",
+    "found_one": "{{count}} secret possible trouvé",
+    "found_other": "{{count}} secrets possibles trouvés",
+    "found_many": "{{count}} de secrets possibles trouvés",
+    "foundShare": "Ils restent dans le lien ou le fichier que vous créez. Remplacez-les d’abord par {{example}}, ou partagez quand même.",
+    "foundExport": "Ils sont écrits dans l’export. Remplacez-les d’abord par {{example}} si le fichier sera partagé ou commité.",
+    "severity": {
+      "high": "Élevée",
+      "medium": "Moyenne"
+    },
+    "kinds": {
+      "request": "Requête",
+      "folder": "Dossier",
+      "environment": "Environnement",
+      "collection": "Collection"
+    }
+  }
+}

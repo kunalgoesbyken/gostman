@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const (
@@ -35,7 +36,7 @@ func (c *collector) readOpenTree(doc document, root string) {
 		ids, translation := runTargets(paths)
 		ctx := treeContext{root: root, dialect: translation, ids: ids}
 		since := c.mark()
-		rootID := c.addScopedFolder(name, "", c.collectionScope(c.openScope(ctx, data, fmt.Sprintf(labelCollection, name))))
+		rootID := c.addScopedFolder(name, "", c.collectionScope(c.openScope(ctx, data, placeLabel(labelCollection, name))))
 		c.openItems(ctx, list(data["items"]), rootID, "", 0)
 		var drafts []environmentDraft
 		for _, environment := range objects(data["environments"]) {
@@ -81,7 +82,7 @@ func (c *collector) openItems(ctx treeContext, items []any, folderID, prefix str
 		info := object(item["info"])
 		name := cleanName(text(info["name"]), untitledRequest)
 		if text(info["type"]) == itemFolder {
-			id := c.addScopedFolder(text(info["name"]), folderID, c.openScope(ctx, item, fmt.Sprintf(labelFolder, name)))
+			id := c.addScopedFolder(text(info["name"]), folderID, c.openScope(ctx, item, placeLabel(labelFolder, name)))
 			c.openItems(ctx, list(item["items"]), id, path.Join(prefix, name), depth+1)
 			continue
 		}
@@ -89,7 +90,7 @@ func (c *collector) openItems(ctx treeContext, items []any, folderID, prefix str
 	}
 }
 
-func (c *collector) openScope(ctx treeContext, item map[string]any, label string) scope {
+func (c *collector) openScope(ctx treeContext, item map[string]any, label locales.Message) scope {
 	inherited := scope{description: describedText(item["docs"])}
 	described := object(item["request"])
 	inherited.headers = openRows(described["headers"])
@@ -122,7 +123,7 @@ func runtimeScripts(item map[string]any) []map[string]any {
 	return objects(object(item["runtime"])["scripts"])
 }
 
-func (c *collector) openScripts(d *dialect, entries []map[string]any, label string) (string, string) {
+func (c *collector) openScripts(d *dialect, entries []map[string]any, label locales.Message) (string, string) {
 	var pre, post, hooks []string
 	for _, entry := range entries {
 		code := text(entry["code"])
@@ -153,7 +154,7 @@ func (c *collector) openRequest(ctx treeContext, name, location string, item map
 		tags:        texts(info["tags"]),
 		vars:        openRows(runtime["variables"]),
 	}
-	label := fmt.Sprintf(labelRequest, name)
+	label := placeLabel(labelRequest, name)
 	request.preScript, request.postScript = c.openScripts(ctx.dialect, runtimeScripts(item), label)
 	rows, tests := c.brunoChecks(ctx.dialect, label, openAssertChecks(runtime["assertions"]))
 	request.postScript = joinScripts([]string{request.postScript, tests})
@@ -174,7 +175,7 @@ func (c *collector) openRequest(ctx treeContext, name, location string, item map
 		socketParts(text(described["url"]), openSocketMessages(described["message"]), &request)
 		request.headers = openRows(described["headers"])
 	default:
-		c.skip(messageOpenItemType, name, kind)
+		c.skip(locales.ImporterOpenItemType, locales.Params{"name": name, "type": kind})
 		return
 	}
 	if auth := described["auth"]; text(auth) != authInherit {
@@ -285,7 +286,7 @@ func (c *collector) openExtractors(name string, actions any) string {
 		expression := text(object(action["selector"])["expression"])
 		rule, ok := responseExtractor(variable, expression, !flag(action["disabled"]))
 		if !ok {
-			c.skip(messagePostResponseVariable, name, variable, expression)
+			c.skip(locales.ImporterPostResponseVariable, locales.Params{"name": name, "variable": variable, "expression": expression})
 			continue
 		}
 		extractors = append(extractors, rule)

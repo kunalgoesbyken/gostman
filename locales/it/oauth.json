@@ -1,0 +1,61 @@
+{
+  "oauth": {
+    "grants": {
+      "clientCredentials": "Client credentials",
+      "password": "Password",
+      "authorizationCode": "Authorization code",
+      "deviceCode": "Device code"
+    },
+    "fields": {
+      "grant": "Tipo di grant",
+      "issuer": "Issuer",
+      "authUrl": "URL di autorizzazione",
+      "deviceUrl": "URL di autorizzazione del dispositivo",
+      "callbackUrl": "URL di callback",
+      "callbackTitle": "Registra {{url}} come URI di reindirizzamento presso il provider",
+      "tokenUrl": "URL del token",
+      "clientId": "Client ID",
+      "clientSecret": "Client secret",
+      "username": "Nome utente",
+      "password": "Password",
+      "scope": "Scope",
+      "credentialsIn": "Invia le credenziali in",
+      "credentialsHeader": "Header Basic auth",
+      "credentialsBody": "Corpo della richiesta",
+      "pkce": "Usa PKCE",
+      "headerPrefix": "Prefisso dell'header",
+      "sendIdToken": "Invia l'ID token invece del token di accesso",
+      "accessToken": "Token di accesso",
+      "idToken": "ID token"
+    },
+    "discover": "Rileva",
+    "discoverTitle": "Compila gli endpoint da /.well-known/openid-configuration dell'issuer",
+    "discovered": "Endpoint compilati da {{issuer}}.",
+    "discovering": "Lettura del documento di discovery dell'issuer.",
+    "getToken": "Ottieni token",
+    "cancel": "Annulla",
+    "clearToken": "Cancella token",
+    "waitingForBrowser": "In attesa che l'accesso venga completato nel tuo browser.",
+    "requesting": "Richiesta di un token in corso.",
+    "waitingForDevice": "In attesa che tu inserisca il codice e acceda.",
+    "deviceCode": "Inserisci questo codice nella pagina di accesso:",
+    "openSignInPage": "Apri la pagina di accesso",
+    "noToken": "Ancora nessun token.",
+    "otherEnvironment": "Il token è stato ottenuto con un altro ambiente, quindi non viene inviato. Ottieni un token per questo ambiente.",
+    "noIdToken": "Il provider non ha restituito un ID token. Aggiungi openid allo scope e ottieni un nuovo token.",
+    "noExpiry": "Il provider non ha indicato una scadenza.",
+    "expires": "Scade {{expiry}}.",
+    "expired": "Scaduto {{expiry}}. Un nuovo token viene richiesto quando può essere rinnovato senza accedere.",
+    "signInNeeded": "Questa richiesta ha bisogno di un token OAuth 2. Apri la scheda Auth e scegli Ottieni token.",
+    "signInForEnvironment": "Il token OAuth 2 è stato ottenuto con un altro ambiente, quindi non viene inviato. Apri la scheda Auth e scegli Ottieni token per accedere per questo ambiente.",
+    "deviceExpired": "Il device code è scaduto prima che l'accesso fosse completato. Ottieni di nuovo un token.",
+    "cancelled": "L'accesso è stato annullato.",
+    "popup": {
+      "blocked": "La finestra di accesso è stata bloccata. Consenti i pop-up per questo sito e riprova.",
+      "timedOut": "Nessun accesso è arrivato entro cinque minuti.",
+      "noCode": "Il provider non ha restituito un authorization code.",
+      "refused": "Il provider ha rifiutato l'accesso: {{reason}}",
+      "wrongIssuer": "La risposta di accesso indica l'issuer \"{{received}}\" invece di \"{{expected}}\", quindi è stata scartata."
+    }
+  }
+}

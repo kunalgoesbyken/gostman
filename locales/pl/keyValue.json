@@ -1,0 +1,18 @@
+{
+  "keyValue": {
+    "key": "Klucz",
+    "value": "Wartość",
+    "type": "Typ",
+    "sendRow": "Wyślij ten wiersz",
+    "fieldType": "Typ pola",
+    "text": "Tekst",
+    "file": "Plik",
+    "removeRow": "Usuń wiersz",
+    "bulkLabel": "Wiersze ({{keyLabel}}) jako tekst",
+    "bulkPlaceholder": "{{keyLabel}}: wartość",
+    "bulkHint": "Jeden wiersz na linię w formacie nazwa: wartość. Zacznij linię od // lub #, aby ją zachować bez wysyłania.",
+    "bulkUnavailable": "Wiersze z dwukropkiem w nazwie lub ze spacjami na początku lub końcu można edytować tylko w tabeli.",
+    "editAsTable": "Edytuj jako tabelę",
+    "bulkEdit": "Edycja zbiorcza"
+  }
+}

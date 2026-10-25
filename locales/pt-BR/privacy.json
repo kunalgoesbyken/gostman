@@ -1,0 +1,30 @@
+{
+  "privacy": {
+    "telemetryLabel": "Telemetria",
+    "telemetryHint": "O Gostman não tem telemetria, análises nem relatório de falhas. Ele só contata os hosts para os quais você envia requisições e os serviços que você mesmo configura.",
+    "docsLink": "Com o que o Gostman se conecta",
+    "updatesLabel": "Verificar novas versões",
+    "updatesHint": "Uma vez por dia, lê a última versão publicada no GitHub e a mostra na barra de status. Nada é baixado nem instalado.",
+    "updatesFailed": "A última verificação não alcançou o GitHub. Ela roda de novo amanhã.",
+    "updatesCurrent": "Esta é a última versão ({{version}}).",
+    "updateAvailable": "A versão {{version}} está disponível",
+    "updatesNewer": "A versão {{version}} está disponível no GitHub.",
+    "updateHint": "Abre as notas da versão e os downloads no GitHub",
+    "updateDismiss": "Ocultar até a próxima versão",
+    "relayLabel": "Enviar requisições por meio de",
+    "relayHint": "O relay hospedado não alcança localhost nem endereços privados. Um relay local envia as requisições deste computador, sem ninguém no meio.",
+    "relayModes": {
+      "hosted": "Relay hospedado",
+      "local": "Relay local neste computador"
+    },
+    "relayAddressLabel": "Endereço do relay local",
+    "relayAddressHint": "Inicie-o com gostman relay e informe o endereço que ele exibe.",
+    "relayAddressInvalid": "Informe um endereço como http://127.0.0.1:4030.",
+    "relayCheck": "Testar",
+    "relayChecking": "Testando…",
+    "relayReachable": "O relay local respondeu.",
+    "relayMissing": "Informe o endereço do relay local em Preferências, Privacidade, ou volte para o relay hospedado.",
+    "relayUnreachable": "O relay local em {{address}} não respondeu. Inicie-o com gostman relay ou volte para o relay hospedado em Preferências, Privacidade.",
+    "relayCheckUnreachable": "O relay local em {{address}} não respondeu. Verifique se gostman relay está em execução e se o endereço corresponde ao que ele exibiu."
+  }
+}

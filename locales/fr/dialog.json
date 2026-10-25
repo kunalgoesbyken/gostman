@@ -1,0 +1,15 @@
+{
+  "dialog": {
+    "moveWindow": "Déplacer la fenêtre",
+    "moveHint": "Faites glisser ou utilisez les flèches pour déplacer. Maj et les flèches redimensionnent. Double-cliquez sur la barre de titre ou appuyez sur Début pour rétablir la taille et la position par défaut.",
+    "close": "Fermer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "rename": "Renommer",
+    "create": "Créer",
+    "getDesktopApp": "Obtenir l’application de bureau",
+    "copy": "Copier",
+    "copied": "Copié",
+    "ok": "OK"
+  }
+}

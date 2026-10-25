@@ -1,19 +1,10 @@
 import { isLocalCommand, trimAsciiSpace } from './mcp'
 import { fillPlaceholders, parseVariableMap } from './placeholders'
 import { isSentRow, parseRows } from './rows'
+import { LOCAL_COMMAND_TEXT } from './localCommandsText'
 import { PROMPT_PREFIX, isPromptName } from './variableNames'
 
-export const LOCAL_COMMAND_TEXT = {
-  title: 'Run a program on this computer?',
-  message: ({ line, environment }) => [
-    'This request starts a local MCP server with your user account:',
-    { code: line },
-    ...(environment.length > 0 ? ['With these environment variables from the Headers tab:', { code: environment.join('\n') }] : []),
-    'Run it only if you know what this program does. Gostman asks again when the command or its environment changes, or the app restarts.',
-  ],
-  confirm: 'Run',
-  notApproved: 'This request starts a program on this computer. Send it once from its own tab and confirm the command, then run it again.',
-}
+export { LOCAL_COMMAND_TEXT }
 
 const approved = new Set()
 

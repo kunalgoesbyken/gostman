@@ -5,7 +5,7 @@ import { PreferenceGroup } from "./PreferenceRows"
 import { backupDate } from "../../lib/backupActions"
 import { KIND_BEFORE_RESTORE } from "../../lib/backupKinds"
 import { DATA_TEXT as TEXT } from "../../lib/dataText"
-import { formatSize } from "../../lib/dataUtils"
+import { formatBytes } from "../../lib/byteSize"
 
 const LOADING = "loading"
 const FAILED = "failed"
@@ -28,7 +28,7 @@ function useBackupList(list) {
 
 const detailsOf = (backup) => [
   TEXT.backupVersion(backup.version),
-  formatSize(backup.size),
+  formatBytes(backup.size),
   backup.kind === KIND_BEFORE_RESTORE && TEXT.beforeRestore,
 ].filter(Boolean).join(" · ")
 

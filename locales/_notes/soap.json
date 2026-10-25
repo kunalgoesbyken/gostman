@@ -1,0 +1,10 @@
+{
+  "soap.versionLabel": "Accessible label of the SOAP 1.1 and 1.2 switch.",
+  "soap.format": "Button that indents the XML envelope. Keep XML.",
+  "soap.fault": "Heading shown when the response is a SOAP fault, an error returned by a SOAP service.",
+  "soap.faultCode": "Label of the fault code.",
+  "soap.faultReason": "Label of the human-readable cause in a SOAP fault.",
+  "soap.faultActor": "Label of the party that raised the fault (the SOAP actor or role).",
+  "soap.faultDetail": "Label of the extra data of a SOAP fault.",
+  "soap.malformed": "{{message}} is a technical parser message."
+}

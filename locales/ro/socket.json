@@ -1,0 +1,48 @@
+{
+  "socket": {
+    "socketIoPath": "Cale",
+    "socketIoAuth": "Payload auth",
+    "socketIoAuthNote": "Un obiect JSON trimis cu handshake-ul namespace-ului, citit de server ca socket.handshake.auth.",
+    "invalidAuth": "Payload-ul auth Socket.IO trebuie să fie un obiect JSON.",
+    "statuses": {
+      "idle": "Deconectat",
+      "connecting": "Se conectează",
+      "open": "Conectat",
+      "waiting": "Se așteaptă reconectarea"
+    },
+    "entries": {
+      "sent": "Trimis",
+      "received": "Primit",
+      "info": "Info",
+      "warning": "Avertisment",
+      "error": "Eroare"
+    },
+    "protocol": "Protocol",
+    "graphql": "Abonament GraphQL",
+    "filter": "Filtru de topic, de exemplu sensors/#",
+    "subscribe": "Abonare",
+    "saved": "Mesaje salvate",
+    "savedPlaceholder": "Încărcați un mesaj salvat",
+    "noSaved": "Încă nu există mesaje salvate",
+    "save": "Salvare",
+    "saveTitle": "Salvare mesaj",
+    "saveMessage": "Numele acestui mesaj. Este salvat împreună cu cererea.",
+    "remove": "Ștergere mesaj salvat",
+    "binary_one": "Binar, {{count}} byte",
+    "binary_few": "Binar, {{count}} byte",
+    "binary_other": "Binar, {{count}} de byte",
+    "truncated": "Se afișează primele {{shown}} din {{total}} caractere",
+    "copy": "Copiere mesaj",
+    "dropped": "Intrări mai vechi eliminate: {{dropped}}. Jurnalul păstrează ultimele {{limit}}.",
+    "emptyTitle": "Încă nu există mesaje",
+    "emptyDescription": "Conectați-vă, apoi trimiteți un mesaj sau așteptați serverul.",
+    "log": "Mesaje",
+    "autoReconnect": "Reconectare automată",
+    "unsentHeaders": "Un browser poate seta doar Sec-WebSocket-Protocol pe un WebSocket. Netrimise de aici: {{names}}. Aplicația desktop trimite toate antetele.",
+    "composer": "Mesaj ({{shortcut}} pentru trimitere)",
+    "composerClosed": "Conectați-vă pentru a trimite mesaje",
+    "message": "Mesaj",
+    "send": "Trimite",
+    "clear": "Golire"
+  }
+}

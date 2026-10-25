@@ -7,15 +7,17 @@ import { createCaptureActions } from './captureSession'
 import { createLoadTestActions } from './loadTestSession'
 import { generateAllSnippets } from './codeGenerator'
 import { activeKindsOf, countActiveRequests, fileReadPathsOf, sanitizeImport, withoutActiveRequests } from './importExport'
-import { asSentence, pluralize } from './dataUtils'
+import { asSentence } from './dataUtils'
 import { createExampleActions } from './exampleActions'
 import { createImporterClient } from './importerClient'
 import { createScanClient } from './scanClient'
-import { RESTRICTED, RESTRICTED_ERROR, applyExtractors, createExecutor } from './execution'
+import { RESTRICTED_ERROR, applyExtractors, createExecutor } from './execution'
 import { introspectionRequest, readSchema } from './graphqlSchema'
 import { cancelSignIn, clearToken, discoverIssuer, obtainToken } from './oauth'
 import { OAUTH_TEXT } from './oauthText'
+import { EXECUTION_TEXT } from './executionText'
 import { DIALOG_TEXT } from './dialogText'
+import { WORKSPACE_ACTIONS_TEXT as TEXT } from './workspaceActionsText'
 import { isGrpcRequest, serializeProtoFiles } from './grpc'
 import { collectionSettingsTarget, withInheritance } from './inheritance'
 import { askToRun, needsApproval } from './localCommands'
@@ -65,9 +67,6 @@ const UNRECORDED_ERRORS = ['config', 'script', 'cancelled', RESTRICTED_ERROR]
 const EXPORT_TAB = 'export'
 const SHARE_TAB = 'share'
 const DESTRUCTIVE = 'destructive'
-const SAVE_FAILURE = 'Could not save the request'
-const NO_GRPC_CODE = 'Code generation covers HTTP requests. A gRPC call has no equivalent snippet yet.'
-const NO_MCP_CODE = 'Code generation covers HTTP requests. An MCP tool call has no equivalent snippet yet.'
 
 const store = () => useAppStore.getState()
 const activeTab = () => selectActiveTab(store())
@@ -76,8 +75,7 @@ const activeVariables = () => selectActiveVariables(store())
 const activeEnvironmentId = () => findActiveEnvironment(store())?.id || ''
 const messageOf = (error) => error?.message || String(error)
 const failureOf = (error) => asSentence(messageOf(error))
-const warn = (title, error) => store().showAlert(title, failureOf(error), 'OK', 'warning')
-const quoted = (name) => `"${name}"`
+const warn = (title, error) => store().showAlert(title, failureOf(error), DIALOG_TEXT.ok, 'warning')
 const idsOf = (items) => items.map((item) => item.id)
 
 const attempt = (failureTitle, run) => async (...args) => {
@@ -95,14 +93,12 @@ function promptForName(title, message, currentName, onName, confirmText = DIALOG
   }, confirmText)
 }
 
-function describeFolderContents(folder) {
+function folderDeletionMessage(folder) {
   const { requests, folders } = store()
   const requestCount = requests.filter((request) => request.folderId === folder.id).length
   const subfolderCount = folders.filter((candidate) => candidate.parentId === folder.id).length
-  if (requestCount + subfolderCount === 0) return 'It is empty.'
   const parent = folders.find((candidate) => candidate.id === folder.parentId)
-  const destination = parent ? quoted(parent.name) : 'the top level'
-  return `Its ${pluralize(requestCount, 'request')} and ${pluralize(subfolderCount, 'subfolder')} move to ${destination}.`
+  return TEXT.deleteFolderMessage(folder.name, requestCount, subfolderCount, parent ? parent.name : null)
 }
 
 const RUN_REPORT_FILE = 'gostman-report.html'
@@ -139,7 +135,7 @@ export function createWorkspaceActions(backend) {
     const tab = activeTab()
     const { auth, options } = tab.request
     if (store().isRestricted) {
-      store().patchTab(tab.id, { tokenRequest: { isPending: false, error: RESTRICTED } })
+      store().patchTab(tab.id, { tokenRequest: { isPending: false, error: EXECUTION_TEXT.restricted } })
       return
     }
     store().patchTab(tab.id, { tokenRequest: { isPending: true, error: '' } })
@@ -208,7 +204,7 @@ export function createWorkspaceActions(backend) {
   async function loadMcpCatalog() {
     const tab = activeTab()
     if (store().isRestricted && isLocalCommand(tab.request)) {
-      store().patchTab(tab.id, { mcpCatalog: { error: RESTRICTED } })
+      store().patchTab(tab.id, { mcpCatalog: { error: EXECUTION_TEXT.restricted } })
       return
     }
     if (!(await mayRunCommand(tab.request))) return
@@ -228,7 +224,7 @@ export function createWorkspaceActions(backend) {
       if (tabById(tabId)) store().patchTab(tabId, { mcpAuth: { steps, running } })
     }
     if (store().isRestricted) {
-      showSteps([{ step: 'probe', outcome: 'failed', detail: RESTRICTED }], false)
+      showSteps([{ step: 'probe', outcome: 'failed', detail: EXECUTION_TEXT.restricted }], false)
       return
     }
     showSteps([])
@@ -297,10 +293,10 @@ export function createWorkspaceActions(backend) {
     const saved = await backend.saveRequest(normalizeRequest(tabById(tabId).request))
     store().upsertRequest(saved)
     store().updateTabRequest(tabId, { id: saved.id })
-    store().showNotice(`${quoted(saved.name)} was saved.`)
+    store().showNotice(TEXT.saved(saved.name))
   }
 
-  const saveRequestTab = attempt(SAVE_FAILURE, () => saveTab(activeTab().id))
+  const saveRequestTab = attempt(TEXT.saveFailed, () => saveTab(activeTab().id))
 
   const save = () => (isFlowTab(activeTab()) ? flows.save(activeTab().id) : saveRequestTab())
 
@@ -310,17 +306,17 @@ export function createWorkspaceActions(backend) {
     store().patchOpenRequest(saved.id, changes)
   }
 
-  const duplicateRequest = attempt('Could not duplicate the request', async (request) => {
-    const copy = { ...request, id: '', timestamp: '', sortOrder: 0, name: `${request.name} copy` }
+  const duplicateRequest = attempt(TEXT.duplicateFailed, async (request) => {
+    const copy = { ...request, id: '', timestamp: '', sortOrder: 0, name: TEXT.copyName(request.name) }
     store().upsertRequest(await backend.saveRequest(normalizeRequest(copy)))
   })
 
-  const removeRequest = attempt('Could not delete the request', async (id) => {
+  const removeRequest = attempt(TEXT.deleteRequestFailed, async (id) => {
     await backend.deleteRequests([id])
     store().removeRequest(id)
   })
 
-  const removeFolder = attempt('Could not delete the folder', async (folder) => {
+  const removeFolder = attempt(TEXT.deleteFolderFailed, async (folder) => {
     const moved = store().requests
       .filter((request) => request.folderId === folder.id)
       .map((request) => ({ ...request, folderId: folder.parentId || '' }))
@@ -328,9 +324,9 @@ export function createWorkspaceActions(backend) {
     store().deleteFolder(folder.id)
   })
 
-  const generateCode = attempt('Cannot generate code', async () => {
-    if (isGrpcRequest(activeTab().request)) throw new Error(NO_GRPC_CODE)
-    if (isMcpRequest(activeTab().request)) throw new Error(NO_MCP_CODE)
+  const generateCode = attempt(TEXT.codeFailed, async () => {
+    if (isGrpcRequest(activeTab().request)) throw new Error(TEXT.noGrpcCode)
+    if (isMcpRequest(activeTab().request)) throw new Error(TEXT.noMcpCode)
     const prepared = await backend.prepare(withInheritance(store(), activeTab().request), activeVariables())
     store().openCodeDialog(generateAllSnippets(prepared))
   })
@@ -352,7 +348,7 @@ export function createWorkspaceActions(backend) {
     { text: CURL_FILES_TEXT.withoutThem, run: () => fillFromCurl(tabId, withoutActiveContent(parsed)) },
   )
 
-  const pasteCurl = attempt('Could not read the curl command', async (command) => {
+  const pasteCurl = attempt(TEXT.curlFailed, async (command) => {
     const tabId = activeTab().id
     const parsed = normalizeRequest(await backend.parseCurl(command))
     const paths = filePathsIn([parsed])
@@ -368,7 +364,7 @@ export function createWorkspaceActions(backend) {
     ]
   }
 
-  const addImported = attempt('Import failed', async (imported) => {
+  const addImported = attempt(TEXT.importFailed, async (imported) => {
     await tree.shareOrder()
     const workspacePath = store().workspaceStatus.path
     const data = scopedImport(placedAfterRoot(store(), withImportedSettings(imported, workspacePath)), workspacePath)
@@ -383,8 +379,8 @@ export function createWorkspaceActions(backend) {
     const skippedGlobals = globals.skipped
     const variablesMerged = store().mergeCollectionVariables(data.variables, data.variablesMeta)
     const warnings = [
-      ...(variablesMerged ? [] : ['Collection variables were skipped because the existing collection variables are not valid JSON.']),
-      ...[...skippedEnvironments, ...skippedGlobals].map((name) => `Environment ${quoted(name)} was skipped because its variables are not valid JSON.`),
+      ...(variablesMerged ? [] : [TEXT.skippedCollectionVariables]),
+      ...[...skippedEnvironments, ...skippedGlobals].map(TEXT.skippedEnvironment),
       ...[...environments.joined, ...globals.joined].map(IMPORT_RESULT_TEXT.joinedEnvironment),
       ...warningsIn(data.remarks),
     ]
@@ -395,8 +391,8 @@ export function createWorkspaceActions(backend) {
       globals: counts.globals - skippedGlobals.length,
       variables: variablesMerged ? counts.variables : ownedVariableCount(data.folders),
     }
-    const summary = `Imported ${describeCounts(merged)}.`
-    store().showAlert('Import complete', [summary, ...scopedNote(data), ...notesIn(data.remarks), ...warnings].join('\n'), 'OK', warnings.length > 0 ? 'warning' : 'success')
+    const summary = TEXT.imported(describeCounts(merged))
+    store().showAlert(TEXT.importComplete, [summary, ...scopedNote(data), ...notesIn(data.remarks), ...warnings].join('\n'), DIALOG_TEXT.ok, warnings.length > 0 ? 'warning' : 'success')
   })
 
   const leavingOutActive = (data, kinds) => ({
@@ -427,7 +423,7 @@ export function createWorkspaceActions(backend) {
     return true
   }
 
-  const importData = attempt('Import failed', (imported) => {
+  const importData = attempt(TEXT.importFailed, (imported) => {
     const existing = { requestIds: idsOf(store().requests), folderIds: idsOf(store().folders) }
     return addReviewed(sanitizeImport(imported, existing))
   })
@@ -438,14 +434,14 @@ export function createWorkspaceActions(backend) {
 
   const importer = createImporterClient(backend)
 
-  const download = attempt('Could not save the file', async () => {
+  const download = attempt(TEXT.saveFileFailed, async () => {
     const { response } = activeTab()
     await backend.saveFile(downloadName(response), bodyBase64(response), mimeType(response))
   })
 
-  const saveBase64File = attempt('Could not save the file', (name, base64, mime) => backend.saveFile(name, base64, mime))
+  const saveBase64File = attempt(TEXT.saveFileFailed, (name, base64, mime) => backend.saveFile(name, base64, mime))
 
-  const saveTextFile = attempt('Could not save the file', (name, text, mime) => (
+  const saveTextFile = attempt(TEXT.saveFileFailed, (name, text, mime) => (
     backend.saveFile(name, textToBase64(text), mime)
   ))
 
@@ -476,25 +472,25 @@ export function createWorkspaceActions(backend) {
   }
 
   function createFolder(parentId = '') {
-    const title = parentId ? 'New subfolder' : 'New folder'
-    promptForName(title, 'Folder name', '', (name) => store().addFolder(name, parentId), DIALOG_TEXT.create)
+    const title = parentId ? TEXT.newSubfolder : TEXT.newFolder
+    promptForName(title, TEXT.folderName, '', (name) => store().addFolder(name, parentId), DIALOG_TEXT.create)
   }
 
   function renameFolder(folder) {
-    promptForName('Rename folder', 'Folder name', folder.name, (name) => store().renameFolder(folder.id, name))
+    promptForName(TEXT.renameFolder, TEXT.folderName, folder.name, (name) => store().renameFolder(folder.id, name))
   }
 
-  const setRequestTags = attempt('Could not save the tags', (request, tags) => updateSavedRequest(request, { tags }))
+  const setRequestTags = attempt(TEXT.tagsFailed, (request, tags) => updateSavedRequest(request, { tags }))
 
   function renameRequest(request) {
-    const rename = attempt('Could not rename the request', (name) => updateSavedRequest(request, { name }))
-    promptForName('Rename request', 'Request name', request.name, rename)
+    const rename = attempt(TEXT.renameRequestFailed, (name) => updateSavedRequest(request, { name }))
+    promptForName(TEXT.renameRequest, TEXT.requestName, request.name, rename)
   }
 
   function deleteRequest(request) {
     store().showConfirm(
-      'Delete request',
-      `Delete ${quoted(request.name)}? This can't be undone.`,
+      TEXT.deleteRequest,
+      TEXT.deleteRequestMessage(request.name),
       () => removeRequest(request.id),
       null,
       DESTRUCTIVE,
@@ -503,8 +499,8 @@ export function createWorkspaceActions(backend) {
 
   function deleteFolder(folder) {
     store().showConfirm(
-      'Delete folder',
-      `Delete folder ${quoted(folder.name)}? ${describeFolderContents(folder)}`,
+      TEXT.deleteFolder,
+      folderDeletionMessage(folder),
       () => removeFolder(folder),
       null,
       DESTRUCTIVE,
@@ -543,14 +539,13 @@ export function createWorkspaceActions(backend) {
   function clearHistory() {
     const entryCount = store().requestHistory.length
     if (entryCount === 0) return
-    const subject = entryCount === 1 ? 'the only history entry' : `all ${entryCount} history entries`
     store().showConfirm(
-      'Clear history',
-      `Delete ${subject}? This can't be undone.`,
+      TEXT.clearHistory,
+      TEXT.clearHistoryMessage(entryCount),
       () => store().clearHistory(),
       null,
       DESTRUCTIVE,
-      'Clear',
+      TEXT.clear,
     )
   }
 
@@ -575,18 +570,18 @@ export function createWorkspaceActions(backend) {
       close()
       return
     }
-    const saveAndClose = attempt(SAVE_FAILURE, async () => {
+    const saveAndClose = attempt(TEXT.saveFailed, async () => {
       await saveTab(tabId)
       close()
     })
     store().showConfirm(
-      'Close tab',
-      `${quoted(tab.request.name)} has unsaved changes. Save them before closing?`,
+      TEXT.closeTab,
+      TEXT.closeTabMessage(tab.request.name),
       close,
       null,
       DESTRUCTIVE,
-      "Don't save",
-      { text: 'Save', run: saveAndClose },
+      TEXT.dontSave,
+      { text: DIALOG_TEXT.save, run: saveAndClose },
     )
   }
 

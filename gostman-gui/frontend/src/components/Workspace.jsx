@@ -18,6 +18,7 @@ import { WelcomePanel } from "./WelcomePanel"
 import { GettingStartedButton, useOnboardingCompletion } from "./GettingStarted"
 import { isFlowTab, resolvedVariablesFor, restoreTabDrafts, selectActiveVariables, selectIsDialogOpen, selectResolvedVariables, useActiveTab, useAppStore } from "../store/appStore"
 import { useAutoSave } from "../hooks/useAutoSave"
+import { useDocumentLanguage } from "../hooks/useDocumentLanguage"
 import { useRequestFieldHandlers } from "../hooks/useRequestFieldHandlers"
 import { useShortcuts } from "../hooks/useShortcuts"
 import { useSharedSecretConnections } from "../hooks/useSecretConnections"
@@ -505,6 +506,7 @@ function LoadedWorkspace({ backend, onBack }) {
 
 export function Workspace({ backend, onBack }) {
   const { isHydrated, failure, retry } = useStoredData(backend)
+  useDocumentLanguage()
   useEffect(() => whenIdle(loadCodeEditor), [])
   if (failure) return <LoadFailure reason={failure} onRetry={retry} />
   if (!isHydrated) return <AppSkeleton />

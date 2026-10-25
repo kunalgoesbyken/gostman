@@ -1,0 +1,8 @@
+{
+  "size": {
+    "bytes": "{{value}} o",
+    "kilobytes": "{{value}} Ko",
+    "megabytes": "{{value}} Mo",
+    "gigabytes": "{{value}} Go"
+  }
+}

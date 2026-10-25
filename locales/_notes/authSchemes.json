@@ -1,0 +1,16 @@
+{
+  "authSchemes.fields": "Labels of the fields of the less common authentication types (AWS Signature, OAuth 1.0, Akamai EdgeGrid, JWT Bearer, ASAP, Hawk). Technical names such as PEM, JSON and Hawk stay in English.",
+  "authSchemes.fields.nonce": "A nonce is a one-time random value used in request signatures.",
+  "authSchemes.fields.realm": "The realm of OAuth 1.0: a protection space name. Usually left empty.",
+  "authSchemes.fields.verifier": "The OAuth 1.0 verifier code returned after authorization.",
+  "authSchemes.fields.audience": "JWT audience claim: who the token is meant for.",
+  "authSchemes.fields.issuer": "JWT issuer claim: who created the token.",
+  "authSchemes.fields.subject": "JWT subject claim: who the token is about.",
+  "authSchemes.fields.delegation": "Hawk delegation (dlg) field.",
+  "authSchemes.hints.generated": "Placeholder shown when the field is left empty and Gostman generates the value.",
+  "authSchemes.hints.expiry": "Placeholder: a duration such as 1h, or a number of seconds.",
+  "authSchemes.options.queryParams": "Option: put the values in the query string of the URL.",
+  "authSchemes.options.doNotInclude": "Option: leave the payload hash out of the signature.",
+  "authSchemes.options.include": "Option: include the payload hash in the signature.",
+  "authSchemes.notes.jwt": "{{timestamp}} is a Gostman dynamic variable in double braces. Keep it as given."
+}

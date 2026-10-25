@@ -1,0 +1,77 @@
+{
+  "timeline": {
+    "proxied": "Duratele au fost măsurate de proxy-ul Gostman, de la proxy la țintă. Nu includ drumul de la browserul dvs. la proxy.",
+    "reused": "Conexiune reutilizată",
+    "newConnection": "Conexiune nouă",
+    "omitted_one": "Încă {{count}} cerere nu este afișată.",
+    "omitted_few": "Încă {{count}} cereri nu sunt afișate.",
+    "omitted_other": "Încă {{count}} de cereri nu sunt afișate.",
+    "failedBefore": "A eșuat înainte de conectare",
+    "failedAt": "A eșuat la: {{label}}",
+    "requestHeaders": "Antetele cererii",
+    "responseHeaders": "Antetele răspunsului",
+    "reveal": "Afișare valoare",
+    "hide": "Ascundere valoare",
+    "expanded": "Ascundere detalii",
+    "collapsed": "Afișare detalii",
+    "total": "Total",
+    "breakdown": "Defalcarea timpului",
+    "breakdownProxied": "Defalcarea timpului (măsurată de proxy-ul Gostman)",
+    "requests_one": "{{count}} cerere",
+    "requests_few": "{{count}} cereri",
+    "requests_other": "{{count}} de cereri",
+    "scripts_one": "{{count}} script",
+    "scripts_few": "{{count}} scripturi",
+    "scripts_other": "{{count}} de scripturi",
+    "consoleLines_one": "{{count}} linie de consolă",
+    "consoleLines_few": "{{count}} linii de consolă",
+    "consoleLines_other": "{{count}} de linii de consolă",
+    "passed": "Reușite: {{count}}",
+    "failed": "Eșuate: {{count}}",
+    "scriptFailed": "Eșuat",
+    "noOutput": "Nicio ieșire de consolă sau rezultat de verificare.",
+    "secrets": "Manageri de secrete",
+    "secretsRead_one": "{{count}} secret citit",
+    "secretsRead_few": "{{count}} secrete citite",
+    "secretsRead_other": "{{count}} de secrete citite",
+    "secretSkipped": "{{name}} este gol deoarece conexiunea „{{connection}}” este oprită",
+    "seconds": "{{value}} s",
+    "milliseconds": "{{value}} ms",
+    "phases": {
+      "dns": {
+        "label": "Căutare DNS",
+        "short": "DNS"
+      },
+      "connect": {
+        "label": "Conectare TCP",
+        "short": "Conectare"
+      },
+      "tls": {
+        "label": "Handshake TLS",
+        "short": "TLS"
+      },
+      "firstByte": {
+        "label": "Așteptare primul byte",
+        "short": "TTFB"
+      },
+      "download": {
+        "label": "Descărcare conținut",
+        "short": "Descărcare"
+      }
+    },
+    "facts": {
+      "remoteAddress": "Adresă la distanță",
+      "protocol": "Protocol",
+      "connection": "Conexiune",
+      "tls": "TLS",
+      "certificateSubject": "Subiectul certificatului",
+      "certificateIssuer": "Emitentul certificatului",
+      "requestBody": "Corpul cererii",
+      "redirectsTo": "Redirecționează către",
+      "cookiesSet": "Cookie-uri setate"
+    },
+    "tlsAlpn": "ALPN {{protocol}}",
+    "tlsExpires": "expiră {{date}}",
+    "tlsExpired": "expiră {{date}} (expirat)"
+  }
+}

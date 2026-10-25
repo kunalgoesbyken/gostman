@@ -1,5 +1,7 @@
 import { base64ByteLength } from './base64'
-import { formatSize, isPlainObject, parseJSON } from './dataUtils'
+import { isPlainObject, parseJSON } from './dataUtils'
+import { formatBytes } from './byteSize'
+import { EXAMPLES_TEXT } from './examplesText'
 
 const MAX_EXAMPLES = 20
 const MAX_BODY_BYTES = 2 * 1024 * 1024
@@ -56,7 +58,7 @@ export const servedByDefault = (examples) => examples.find((example) => example.
 function withinBodyLimit(example) {
   const size = exampleSize(example)
   if (size <= MAX_BODY_BYTES) return example
-  throw new Error(`This body is ${formatSize(size)}. An example keeps a body of up to ${formatSize(MAX_BODY_BYTES)}.`)
+  throw new Error(EXAMPLES_TEXT.bodyTooLarge(formatBytes(size), formatBytes(MAX_BODY_BYTES)))
 }
 
 export const cleanExampleName = (name, fallback) => asText(name).trim().slice(0, MAX_NAME_LENGTH) || fallback
@@ -76,7 +78,7 @@ export function exampleFromResponse(response, name) {
 
 export function withExample(examples, example) {
   if (examples.length >= MAX_EXAMPLES) {
-    throw new Error(`A request keeps up to ${MAX_EXAMPLES} examples. Delete one to save another.`)
+    throw new Error(EXAMPLES_TEXT.tooMany(MAX_EXAMPLES))
   }
   return [...examples, { ...example, isDefault: examples.length === 0 }]
 }

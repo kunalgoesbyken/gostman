@@ -1,0 +1,39 @@
+{
+  "codeEditor": {
+    "syntaxError": "Error de sintaxis",
+    "phrases": {
+      "foldLine": "Plegar línea",
+      "unfoldLine": "Desplegar línea",
+      "foldedLines": "Líneas plegadas",
+      "unfoldedLines": "Líneas desplegadas",
+      "foldedCode": "código plegado",
+      "unfold": "desplegar",
+      "completions": "Sugerencias",
+      "controlCharacter": "Carácter de control",
+      "diagnostics": "Diagnósticos",
+      "noDiagnostics": "Sin diagnósticos",
+      "goToLine": "Ir a la línea",
+      "go": "ir",
+      "close": "cerrar",
+      "find": "Buscar",
+      "replace": "Reemplazar",
+      "all": "todo",
+      "byWord": "por palabra",
+      "matchCase": "distinguir mayúsculas",
+      "next": "siguiente",
+      "previous": "anterior",
+      "regexp": "regexp",
+      "replaceAll": "reemplazar todo",
+      "currentMatch": "coincidencia actual",
+      "onLine": "en la línea",
+      "to": "a",
+      "selectionDeleted": "Selección eliminada",
+      "replacedMatches": "se reemplazaron {{count}} coincidencias",
+      "replacedMatchOnLine": "se reemplazó la coincidencia de la línea {{line}}",
+      "unchangedLines": "{{count}} líneas sin cambios",
+      "accept": "Aceptar",
+      "reject": "Rechazar",
+      "revertChunk": "Revertir este bloque"
+    }
+  }
+}

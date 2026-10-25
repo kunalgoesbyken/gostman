@@ -1,75 +1,40 @@
-export const SHORTCUT_TEXT = {
-  title: 'Keyboard shortcuts',
-  groups: { General: 'General', Request: 'Request', Tabs: 'Tabs', Navigation: 'Navigation' },
-  tabRange: (prefix) => `${prefix}1 to 9`,
-  tabRangeLabel: 'Go to tab 1 to 9 (9 is the last tab)',
-  unassigned: 'Not set',
-  change: 'Change',
-  clear: 'Remove',
-  reset: 'Restore default',
-  resetAll: 'Reset all',
-  replace: 'Replace',
-  cancel: 'Cancel',
-  capturing: 'Press the new shortcut',
-  captureHint: 'Escape cancels.',
-  customised: 'Changed',
-  changeFor: (label) => `Change the shortcut for ${label}`,
-  clearFor: (label) => `Remove the shortcut for ${label}`,
-  resetFor: (label) => `Restore the default shortcut for ${label}`,
-  conflict: (chord, label) => `${chord} is already used by ${label}.`,
-  moving: {
-    title: 'Moving around',
-    typing: 'Start typing',
-    labels: {
-      lists: 'Move through the collection tree, history and menus',
-      pages: 'In the collection tree, move a screen up or down',
-      tabs: 'Move between tabs and options',
-      folders: 'In the collection tree, collapse or expand a folder, or go to its parent',
-      open: 'Open the request in a tab, or open or close the folder',
-      preview: 'Preview the request',
-      jump: 'Jump to a request or folder by its name',
-      reorder: 'In the collection tree, move the request or folder up or down',
-      clipboard: 'In the collection tree, cut, copy or paste the request or folder',
-      duplicate: 'In the collection tree, duplicate the request or folder',
-      undoTree: 'In the collection tree, undo or redo the last move, paste or duplicate',
-      select: 'In the collection tree, select several items: toggle one, extend the selection, or select all. Esc clears it',
-      rename: 'Rename the request or folder',
-      remove: 'Delete the request or folder (or all selected items), close the tab or remove the history entry',
-      menu: 'Show the actions for the request or folder',
-      results: 'Move from a search field into its results',
-      close: 'Close a menu or dialog',
-      leaveEditor: 'Leave a code editor: press Esc, then Tab',
-    },
-  },
-  webNotice: 'In the browser, Alt replaces the shortcuts that browsers keep for themselves: Ctrl+W, Ctrl+Shift+T and Ctrl+Tab.',
-  errors: {
-    needsModifier: 'Add Ctrl, Alt or the command key. A function key can be used alone.',
-    needsDigit: 'Press a modifier together with a number key. The other tabs use the same modifier.',
-    altGraph: 'Ctrl and Alt together are what many keyboards send for AltGr, which types symbols. Choose another combination.',
-    metaUnsupported: 'The Windows or Super key cannot be used. Choose another combination.',
-    ambiguousModifiers: 'Command and Control together are not supported. Choose one of them.',
-    editing: 'This combination edits text in every field and cannot be reassigned.',
-    browser: 'Browsers keep this combination for themselves, so the page never receives it.',
-    system: 'The operating system keeps this combination for itself.',
-  },
-  keys: {
-    plain: { ctrl: 'Ctrl', alt: 'Alt', shift: 'Shift' },
-    apple: { ctrl: '⌃', meta: '⌘', alt: '⌥', shift: '⇧' },
-    names: {
-      enter: 'Enter',
-      tab: 'Tab',
-      space: 'Space',
-      escape: 'Esc',
-      home: 'Home',
-      end: 'End',
-      backspace: 'Backspace',
-      delete: 'Delete',
-      pageup: 'Page Up',
-      pagedown: 'Page Down',
-      arrowup: '↑',
-      arrowdown: '↓',
-      arrowleft: '←',
-      arrowright: '→',
-    },
+import english from '../../../../locales/en/shortcut.json'
+import { messages } from './i18n/core'
+
+const KEY_NAMES = {
+  plain: { ctrl: 'Ctrl', alt: 'Alt', shift: 'Shift' },
+  apple: { ctrl: '⌃', meta: '⌘', alt: '⌥', shift: '⇧' },
+  names: {
+    enter: 'Enter',
+    tab: 'Tab',
+    space: 'Space',
+    escape: 'Esc',
+    home: 'Home',
+    end: 'End',
+    backspace: 'Backspace',
+    delete: 'Delete',
+    pageup: 'Page Up',
+    pagedown: 'Page Down',
+    arrowup: '↑',
+    arrowdown: '↓',
+    arrowleft: '←',
+    arrowright: '→',
   },
 }
+
+const text = messages('shortcut', english, (t) => ({
+  shortcut: {
+    get groups() {
+      return {
+        General: t('shortcut.groups.general'),
+        Request: t('shortcut.groups.request'),
+        Tabs: t('shortcut.groups.tabs'),
+        Navigation: t('shortcut.groups.navigation'),
+      }
+    },
+    conflict: (chord, label) => t('shortcut.conflict', { chord, label }),
+    keys: KEY_NAMES,
+  },
+}))
+
+export const SHORTCUT_TEXT = text.shortcut

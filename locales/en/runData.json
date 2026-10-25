@@ -1,0 +1,9 @@
+{
+  "runData": {
+    "tooManyRows_one": "A data file can have at most {{count}} row.",
+    "tooManyRows_other": "A data file can have at most {{count}} rows.",
+    "empty": "The data file has no rows.",
+    "notArray": "A JSON data file must be an array of objects, one object per iteration.",
+    "unreadable": "The data file cannot be read."
+  }
+}

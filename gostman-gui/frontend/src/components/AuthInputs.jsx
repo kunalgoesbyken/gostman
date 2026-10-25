@@ -24,15 +24,15 @@ export function SecretInput({ value = "", onChange }) {
   const hasSecret = !holdsOnlyReferences(value)
 
   return (
-    <div className="relative min-w-0">
-      <TextInput value={value} onChange={onChange} masked={hasSecret && !revealed} className="pr-8 font-mono" />
+    <div dir="ltr" className="relative min-w-0">
+      <TextInput value={value} onChange={onChange} masked={hasSecret && !revealed} className="pe-8 font-mono" />
       {hasSecret && (
         <IconButton
           label={revealed ? AUTH_TEXT.hideValue : AUTH_TEXT.showValue}
           icon={revealed ? EyeOff : Eye}
           size="icon-xs"
           onClick={() => setRevealed(!revealed)}
-          className="absolute right-0.5 top-0.5"
+          className="absolute end-0.5 top-0.5"
         />
       )}
     </div>

@@ -1,0 +1,61 @@
+{
+  "oauth": {
+    "grants": {
+      "clientCredentials": "Poświadczenia klienta",
+      "password": "Hasło",
+      "authorizationCode": "Kod autoryzacji",
+      "deviceCode": "Kod urządzenia"
+    },
+    "fields": {
+      "grant": "Typ przyznania",
+      "issuer": "Wystawca",
+      "authUrl": "URL autoryzacji",
+      "deviceUrl": "URL autoryzacji urządzenia",
+      "callbackUrl": "Callback URL",
+      "callbackTitle": "Zarejestruj {{url}} jako redirect URI u dostawcy",
+      "tokenUrl": "URL tokenu",
+      "clientId": "ID klienta",
+      "clientSecret": "Sekret klienta",
+      "username": "Nazwa użytkownika",
+      "password": "Hasło",
+      "scope": "Zakres (scope)",
+      "credentialsIn": "Wyślij dane uwierzytelniające w",
+      "credentialsHeader": "Nagłówku Basic auth",
+      "credentialsBody": "Treści żądania",
+      "pkce": "Użyj PKCE",
+      "headerPrefix": "Prefiks nagłówka",
+      "sendIdToken": "Wyślij token ID zamiast tokenu dostępu",
+      "accessToken": "Token dostępu",
+      "idToken": "Token ID"
+    },
+    "discover": "Wykryj",
+    "discoverTitle": "Uzupełnij punkty końcowe z /.well-known/openid-configuration wystawcy",
+    "discovered": "Punkty końcowe uzupełniono z {{issuer}}.",
+    "discovering": "Odczyt dokumentu wykrywania wystawcy.",
+    "getToken": "Pobierz token",
+    "cancel": "Anuluj",
+    "clearToken": "Wyczyść token",
+    "waitingForBrowser": "Oczekiwanie na zakończenie logowania w przeglądarce.",
+    "requesting": "Żądanie tokenu.",
+    "waitingForDevice": "Oczekiwanie na wpisanie kodu i zalogowanie.",
+    "deviceCode": "Wpisz ten kod na stronie logowania:",
+    "openSignInPage": "Otwórz stronę logowania",
+    "noToken": "Brak tokenu.",
+    "otherEnvironment": "Token został pobrany w innym środowisku, więc nie jest wysyłany. Pobierz token dla tego środowiska.",
+    "noIdToken": "Dostawca nie zwrócił tokenu ID. Dodaj openid do zakresu i pobierz nowy token.",
+    "noExpiry": "Dostawca nie podał czasu wygaśnięcia.",
+    "expires": "Wygasa: {{expiry}}.",
+    "expired": "Wygasł: {{expiry}}. Nowy token jest pobierany, gdy można go odnowić bez logowania.",
+    "signInNeeded": "To żądanie wymaga tokenu OAuth 2. Otwórz kartę Auth i wybierz Pobierz token.",
+    "signInForEnvironment": "Token OAuth 2 został pobrany w innym środowisku, więc nie jest wysyłany. Otwórz kartę Auth i wybierz Pobierz token, aby zalogować się dla tego środowiska.",
+    "deviceExpired": "Kod urządzenia wygasł przed zakończeniem logowania. Pobierz token ponownie.",
+    "cancelled": "Logowanie zostało anulowane.",
+    "popup": {
+      "blocked": "Okno logowania zostało zablokowane. Zezwól na wyskakujące okna dla tej witryny i spróbuj ponownie.",
+      "timedOut": "W ciągu pięciu minut nie nadeszło żadne logowanie.",
+      "noCode": "Dostawca nie zwrócił kodu autoryzacji.",
+      "refused": "Dostawca odrzucił logowanie: {{reason}}",
+      "wrongIssuer": "Odpowiedź logowania wskazuje wystawcę „{{received}}” zamiast „{{expected}}”, więc została odrzucona."
+    }
+  }
+}

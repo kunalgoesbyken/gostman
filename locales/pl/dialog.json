@@ -1,0 +1,15 @@
+{
+  "dialog": {
+    "moveWindow": "Przesuń okno",
+    "moveHint": "Przeciągnij lub użyj klawiszy strzałek, aby przesunąć. Shift i strzałki zmieniają rozmiar. Kliknij dwukrotnie pasek tytułu lub naciśnij Home, aby przywrócić domyślny rozmiar i położenie.",
+    "close": "Zamknij",
+    "cancel": "Anuluj",
+    "save": "Zapisz",
+    "rename": "Zmień nazwę",
+    "create": "Utwórz",
+    "getDesktopApp": "Pobierz aplikację desktopową",
+    "copy": "Kopiuj",
+    "copied": "Skopiowano",
+    "ok": "OK"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "route": {
+    "graphqlNotServed": "Le richieste GraphQL non vengono servite.",
+    "grpcNotServed": "Le richieste gRPC non vengono servite.",
+    "mcpNotServed": "Le richieste MCP non vengono servite.",
+    "webSocketNotServed": "Le richieste WebSocket non vengono servite.",
+    "noExample": "Salva una risposta come esempio per servire questa route.",
+    "disabled": "Questa route è disattivata.",
+    "exampleBodyInvalid": "il corpo dell'esempio \"{{name}}\" non è un base64 valido",
+    "conflict": "{{method}} {{path}} è già servito da \"{{owner}}\"."
+  }
+}

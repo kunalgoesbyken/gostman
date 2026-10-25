@@ -68,6 +68,7 @@ import { toGrpcCall, toGrpcTarget } from '../grpc'
 import { toMcpCall, toMcpTarget } from '../mcp'
 import { withPreferredTimeout } from '../preferences'
 import { toEngineRequest } from '../request'
+import { WORKSPACE_TEXT } from '../workspaceText'
 import { failureResponse } from '../response'
 import { createStorageGate } from './storageGate'
 import { localRecords } from '../storage'
@@ -150,7 +151,7 @@ export const desktopBackend = {
   loadTest: desktopLoadTest,
   storage: {
     status: () => WorkspaceStatus(),
-    pickFolder: () => PickWorkspaceFolder(),
+    pickFolder: () => PickWorkspaceFolder(WORKSPACE_TEXT.pickFolderTitle),
     openFolder: (path) => OpenWorkspace(path),
     saveToFolder: (path) => SaveCollectionToFolder(path),
     reload: () => ReloadWorkspace(),

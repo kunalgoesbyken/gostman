@@ -1,0 +1,12 @@
+{
+  "exampleActions": {
+    "saveFailure": "例を保存できませんでした",
+    "changeFailure": "例を変更できませんでした",
+    "saved": "例「{{example}}」を「{{request}}」に保存しました。",
+    "saveTitle": "例として保存",
+    "nameLabel": "例の名前",
+    "renameTitle": "例の名前を変更",
+    "deleteTitle": "例を削除",
+    "deleteMessage": "例「{{name}}」を削除しますか？この操作は元に戻せません。"
+  }
+}

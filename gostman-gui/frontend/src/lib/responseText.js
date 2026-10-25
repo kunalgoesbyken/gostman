@@ -1,104 +1,15 @@
-export const CONSOLE_TEXT = {
-  all: 'All',
-  filter: 'Filter by level',
-  clear: 'Clear console',
-  emptyTitle: 'The console is empty',
-  emptyDescription: 'console.log() calls from pre-request and post-response scripts appear here, grouped by request.',
-  nothingMatches: 'No lines at this level',
-  nothingMatchesDescription: 'Choose another level to see the rest of the output.',
-}
+import english from '../../../../locales/en/response.json'
+import { messages } from './i18n/core'
 
-export const VISUALIZE_TEXT = {
-  frameTitle: 'Visualization',
-  note: 'Rendered from a script. Scripts, network access, forms and navigation are blocked inside this view.',
-}
+const text = messages('response', english, (t) => ({
+  response: {
+    matchPosition: (index, count, capped) => t(capped ? 'response.matchPositionCapped' : 'response.matchPosition', { position: index + 1, count }),
+    checksPassed: (passed, total) => t('response.checksPassed', { passed, total }),
+  },
+}))
 
-export const PREVIEW_TEXT = {
-  blocked: 'Images, styles and fonts from other addresses are blocked, so this page cannot reveal your IP address or reach devices on your network.',
-  loaded: 'Images, styles and fonts from other addresses are loaded for this response. Scripts and forms stay blocked.',
-  load: 'Load remote content',
-  block: 'Block again',
-}
-
-export const RESPONSE_TEXT = {
-  copyBaseUrl: 'Copy base URL',
-  bodyLabel: 'Response body',
-  largeBody: (size) => `This body is ${size}, so it is shown as plain text.`,
-  formatAnyway: 'Format anyway',
-  formatting: 'Formatting…',
-  formatFailed: (reason) => `The body could not be formatted: ${reason}`,
-  saveToFile: 'Save to file',
-  findInBody: 'Find in body',
-  noMatches: 'No results',
-  matchPosition: (index, count, capped) => `${index + 1} of ${count}${capped ? '+' : ''}`,
-  previousMatch: 'Previous match',
-  nextMatch: 'Next match',
-  closeSearch: 'Close search',
-  filterPlaceholder: 'Filter with JSONPath, e.g. $.data[0].id',
-  filterLabel: 'JSONPath filter',
-  clearFilter: 'Clear filter',
-  truncated: (size) => `This response was cut off at ${size}, the most this app keeps of one response, so the body shown and saved is incomplete.`,
-  panel: 'Response',
-  sections: 'Response sections',
-  more: 'More',
-  moreHint: 'More response sections',
-  tabs: {
-    body: 'Body',
-    headers: 'Headers',
-    cookies: 'Cookies',
-    timeline: 'Timeline',
-    tests: 'Checks',
-    console: 'Console',
-    visualize: 'Visualize',
-  },
-  views: { pretty: 'Pretty', raw: 'Raw', preview: 'Preview' },
-  bodyView: 'Body view',
-  checksPassed: (passed, total) => `${passed} of ${total} checks passed`,
-  history: {
-    menu: 'Earlier responses',
-    latest: 'Latest response',
-    showing: (time) => `Showing the response from ${time}.`,
-    compare: 'Compare with the latest',
-    back: 'Back to the latest',
-    compareTitle: 'Compare responses',
-    compareParts: 'Compare',
-    comparedWith: 'compared with',
-  },
-  columns: {
-    name: 'Name',
-    value: 'Value',
-    domain: 'Domain',
-    path: 'Path',
-    expires: 'Expires',
-    secure: 'Secure',
-    httpOnly: 'HttpOnly',
-  },
-  yes: 'Yes',
-  sessionCookie: 'Session',
-  copied: 'Copied',
-  copyBody: 'Copy body',
-  downloadBody: 'Download body',
-  saveExample: 'Save as example',
-  searchBody: (shortcut) => `Search body (${shortcut})`,
-  fullscreen: 'Fullscreen',
-  exitFullscreen: 'Exit fullscreen',
-  expand: 'Expand response',
-  collapse: 'Collapse response',
-  resize: 'Resize the response panel',
-  resizeHint: 'Drag or use the up and down arrow keys to resize. Double-click to reset.',
-  sending: 'Sending request',
-  noResponseTitle: 'No response yet',
-  noResponseDescription: 'Send a request to see the response here.',
-  noHeadersTitle: 'No headers',
-  noHeadersDescription: 'The server sent no headers.',
-  noCookiesTitle: 'No cookies',
-  noCookiesDescription: 'The server sent no cookies.',
-  emptyTitle: 'Empty response body',
-  emptyDescription: (status) => `The server answered ${status} without a body.`,
-  binaryTitle: (size) => `Binary response, ${size}`,
-  binaryDescription: (type) => `${type} cannot be shown as text. Download it to open it elsewhere.`,
-  previewTitle: 'Response preview',
-  treeTrimmed: (count) => `Showing the start of this tree. ${count} more values are hidden. Use Raw or the filter to see the rest.`,
-  requestFailed: 'Request failed',
-  error: 'Error',
-}
+export const CONSOLE_TEXT = text.console
+export const VISUALIZE_TEXT = text.visualize
+export const PREVIEW_TEXT = text.preview
+export const ERROR_TITLES_TEXT = text.errorTitles
+export const RESPONSE_TEXT = text.response

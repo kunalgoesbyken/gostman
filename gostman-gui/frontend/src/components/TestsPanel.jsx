@@ -24,7 +24,7 @@ const VIEW_ASSERTIONS = "assertions"
 const VIEW_PRE = "preScript"
 const VIEW_POST = "postScript"
 
-const VIEWS = [VIEW_ASSERTIONS, VIEW_PRE, VIEW_POST].map((value) => ({ value, label: TEXT.views[value] }))
+const viewOptions = () => [VIEW_ASSERTIONS, VIEW_PRE, VIEW_POST].map((value) => ({ value, label: TEXT.views[value] }))
 
 const hasScript = (script) => typeof script === "string" && script.trim() !== ""
 
@@ -165,8 +165,8 @@ export function TestsPanel({ request, editorPath, onUpdateRequest, EditorCompone
   return (
     <Panel>
       <Toolbar>
-        <SegmentedControl label={TEXT.sectionLabel} options={VIEWS} value={view} onChange={setView} />
-        <div className="ml-auto flex items-center gap-2">
+        <SegmentedControl label={TEXT.sectionLabel} options={viewOptions()} value={view} onChange={setView} />
+        <div className="ms-auto flex items-center gap-2">
           {view === VIEW_ASSERTIONS && <AddChecksAction />}
           {ai && (
             <AiButton label={view === VIEW_ASSERTIONS ? AI_TEXT.buttons.generateTests : AI_TEXT.buttons.generateScript} onClick={askAi}>

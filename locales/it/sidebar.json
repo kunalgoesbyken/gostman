@@ -1,0 +1,41 @@
+{
+  "sidebar": {
+    "views": "Vista della barra laterale",
+    "collections": "Raccolte",
+    "history": "Cronologia",
+    "runRequests": "Esegui richieste",
+    "newFolder": "Nuova cartella",
+    "newRequest": "Nuova richiesta",
+    "toggle": "Mostra o nascondi la barra laterale",
+    "close": "Chiudi barra laterale",
+    "resize": "Ridimensiona barra laterale"
+  },
+  "history": {
+    "search": "Cerca nella cronologia",
+    "emptyTitle": "Ancora nessuna cronologia",
+    "emptyDescription": "Le richieste inviate compaiono qui.",
+    "noMatches": "Nessuna richiesta inviata corrisponde.",
+    "remove": "Rimuovi dalla cronologia",
+    "clear": "Cancella cronologia",
+    "noResponse": "Nessuna risposta",
+    "sentAgo": {
+      "now": "ora",
+      "minutes": "{{count}} min",
+      "hours": "{{count}} h",
+      "days": "{{count}} g"
+    },
+    "sentAgoSpoken": {
+      "now": "inviata proprio ora",
+      "minutes_one": "inviata {{count}} minuto fa",
+      "minutes_many": "inviata {{count}} di minuti fa",
+      "minutes_other": "inviata {{count}} minuti fa",
+      "hours_one": "inviata {{count}} ora fa",
+      "hours_many": "inviata {{count}} di ore fa",
+      "hours_other": "inviata {{count}} ore fa",
+      "days_one": "inviata {{count}} giorno fa",
+      "days_many": "inviata {{count}} di giorni fa",
+      "days_other": "inviata {{count}} giorni fa",
+      "date": "inviata il {{date}}"
+    }
+  }
+}

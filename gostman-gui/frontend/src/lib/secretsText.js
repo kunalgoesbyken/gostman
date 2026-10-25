@@ -1,145 +1,47 @@
-import { pluralize } from './dataUtils'
+import english from '../../../../locales/en/secrets.json'
+import { messages } from './i18n/core'
 
-export const SECRETS_TEXT = {
-  title: "Secret managers",
-  intro: "A connection says where a secret manager or password manager is and how to sign in. It is kept on this computer, with credentials in the system keychain, and is never part of a collection. Variables refer to a connection by its name. A request reads only the secrets it uses. Turn a connection off while its service is unavailable; variables that use it are then empty.",
-  empty: "No connections yet. Add one to read secrets from Vault, AWS, Azure, Google Cloud, KeePassXC, 1Password, Bitwarden or Bitwarden Secrets Manager.",
-  add: "Add connection",
-  edit: "Edit connection",
-  remove: "Delete connection",
-  confirmRemove: (alias) => `Delete the connection "${alias}"? Variables that use it stop resolving.`,
-  turnedOn: "On",
-  turnedOff: "Off",
-  switchLabel: (alias) => `Read secrets from ${alias}`,
-  alias: "Name",
-  aliasPlaceholder: "production",
-  kind: "Service",
-  colour: "Colour",
-  colourNote: "Fields that read from this connection are tinted with its colour. Without a choice, one is picked from the name.",
-  save: "Save",
-  cancel: "Cancel",
-  close: "Close",
-  credentialStored: "Saved. Leave empty to keep it.",
-  testTitle: "Try a secret",
-  testHint: "Reads the secret with the saved connection and shows only whether it worked and how long the value is.",
-  desktopOnlyTitle: "Available in the desktop app and the CLI",
-  desktopOnly: "Secret managers are reached directly from your computer, so the web version cannot use them and never sends credentials to its relay. Use the desktop app, or run the collection with the gostman command line.",
-  webReferences: "This environment has variables that read from a secret manager. They only resolve in the desktop app and the command line.",
-  kinds: {
-    vault: "HashiCorp Vault",
-    aws: "AWS Secrets Manager",
-    azure: "Azure Key Vault",
-    gcp: "Google Cloud Secret Manager",
-    keepassxc: "KeePassXC",
-    onepassword: "1Password",
-    bitwarden: "Bitwarden",
-    "bitwarden-secrets": "Bitwarden Secrets Manager",
-  },
-  kindFields: {
-    onepassword: { token: "Service account token" },
-    "bitwarden-secrets": { token: "Access token", address: "Server address" },
-  },
-  kindHints: {
-    onepassword: "Reads items with the 1Password CLI (op). To approve access in the 1Password app, turn on Settings → Developer → Integrate with 1Password CLI and leave the token empty. For CI, use a service account token instead. Account is only needed when you are signed in to several accounts.",
-    bitwarden: "Reads items with the Bitwarden CLI (bw). Run bw login in a terminal once, then unlock here with your master password. bw keeps one session at a time, so unlocking here ends a session open in a terminal, and the other way round.",
-    "bitwarden-secrets": "Reads secrets with the Bitwarden Secrets Manager CLI (bws) and a machine account access token. Leave Server address empty for bitwarden.com; set it for the EU cloud or a self-hosted server.",
-    keepassxc: "Connects to KeePassXC the way its browser extension does, so your master password never reaches Gostman. In KeePassXC, turn on Enable browser integration under Settings → Browser Integration and unlock your database. KeePassXC 2.7 to 2.8 freezes when an app reads an entry without a URL, so give the entries you use a URL.",
-  },
-  fields: {
-    address: "Address",
-    namespace: "Namespace",
-    mount: "Secrets engine mount",
-    kv_version: "KV version",
-    role_id: "AppRole role ID",
-    secret_id: "AppRole secret ID",
-    token: "Token",
-    region: "Region",
-    access_key: "Access key ID",
-    secret_key: "Secret access key",
-    session_token: "Session token",
-    tenant_id: "Tenant ID",
-    client_id: "Client ID",
-    client_secret: "Client secret",
-    authority: "Sign-in address",
-    project: "Project",
-    account: "Account",
-    session_key: "Session key",
-    command: "Program",
-  },
-  placeholders: {
-    address: "https://",
-    mount: "secret",
-    kv_version: "2",
-    account: "my.1password.com",
-    command: "Found automatically",
-    session_key: "Filled in when you unlock, or paste one from bw unlock --raw",
-  },
-  pairing: {
-    keepassxc: {
-      label: "Connection",
-      connect: "Connect to KeePassXC",
-      reconnect: "Connect again",
-      waiting: "Waiting for KeePassXC",
-      prompt: "Switch to KeePassXC. Unlock the database if it asks, then name this connection and choose Save and allow access.",
-      unpaired: "Not connected yet.",
-      paired: (name) => `Connected. KeePassXC knows this connection as "${name}".`,
-    },
-  },
-  unlocking: {
-    bitwarden: {
-      label: "Master password",
-      unlock: "Unlock",
-      waiting: "Unlocking",
-      note: "Gostman passes it to bw unlock and keeps only the session key, in the system keychain.",
-      unlocked: "Unlocked. Select Save to keep the session.",
-    },
-  },
+const WIRE_NAMES = [
+  'bitwarden-secrets', 'kv_version', 'role_id', 'secret_id', 'access_key', 'secret_key',
+  'session_token', 'tenant_id', 'client_id', 'client_secret', 'session_key',
+]
+
+const camelKey = (name) => name.replace(/[-_]([a-z])/g, (whole, letter) => letter.toUpperCase())
+
+const WIRE_BY_KEY = new Map(WIRE_NAMES.map((name) => [camelKey(name), name]))
+
+const isGroup = (value) => value !== null && typeof value === 'object'
+
+function wireTable(t, path, tree) {
+  const table = {}
+  Object.keys(tree).forEach((key) => {
+    const id = `${path}.${key}`
+    const name = WIRE_BY_KEY.get(key) ?? key
+    if (isGroup(tree[key])) Object.defineProperty(table, name, { value: wireTable(t, id, tree[key]), enumerable: true, configurable: true })
+    else Object.defineProperty(table, name, { get: () => t(id), enumerable: true, configurable: true })
+  })
+  return table
 }
 
-export const REFERENCE_TEXT = {
-  offOption: (alias) => `${alias} (off)`,
-  missingConnection: (alias) => `There is no connection named "${alias}" on this computer. Add it under Secret managers.`,
-  connectionOff: (alias) => `The connection "${alias}" is off, so this variable is empty. Turn it on under Secret managers.`,
-  manager: "Secret manager",
-  useManager: "Read from a secret manager",
-  usePlain: "Type a value",
-  connection: "Connection",
-  noConnection: "Choose a connection",
-  path: "Secret path",
-  field: "JSON field",
-  fieldPlaceholder: "optional",
-  fieldNames: {
-    keepassxc: "Field",
-    onepassword: "Field",
-    bitwarden: "Field",
-    "bitwarden-secrets": "Field",
-  },
-  fieldPlaceholders: {
-    keepassxc: "password",
-    onepassword: "password",
-    bitwarden: "password",
-    "bitwarden-secrets": "value",
-  },
-  version: "Version",
-  test: "Test",
-  testing: "Testing",
-  worked: (length) => `Read the secret: ${pluralize(length, 'character')}`,
-  noConnections: "Add a connection first under Secret managers.",
-  unknownConnection: (alias) => `There is no connection named "${alias}" on this computer. Add it under Secret managers, or choose another.`,
-  paths: {
-    vault: "app/database",
-    aws: "prod/database",
-    azure: "database-password",
-    gcp: "database-password",
-    keepassxc: "Work/API keys/Stripe",
-    onepassword: "Private/Stripe",
-    bitwarden: "Stripe, or the item ID",
-    "bitwarden-secrets": "Secret ID",
-  },
-  versions: {
-    vault: "Version number",
-    aws: "Version stage",
-    azure: "Version id",
-    gcp: "Version number",
-  },
-}
+const text = messages('secrets', english, (t) => {
+  const tableAt = (group, name) => wireTable(t, `${group}.${name}`, english[group][name])
+
+  return {
+    secrets: {
+      kinds: tableAt('secrets', 'kinds'),
+      kindFields: tableAt('secrets', 'kindFields'),
+      kindHints: tableAt('secrets', 'kindHints'),
+      fields: tableAt('secrets', 'fields'),
+      placeholders: tableAt('secrets', 'placeholders'),
+    },
+    reference: {
+      fieldNames: tableAt('reference', 'fieldNames'),
+      fieldPlaceholders: tableAt('reference', 'fieldPlaceholders'),
+      paths: tableAt('reference', 'paths'),
+      versions: tableAt('reference', 'versions'),
+    },
+  }
+})
+
+export const SECRETS_TEXT = text.secrets
+export const REFERENCE_TEXT = text.reference

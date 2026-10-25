@@ -1,0 +1,39 @@
+{
+  "requestBar": {
+    "name": "Nazwa żądania",
+    "untitled": "Żądanie bez nazwy",
+    "method": "Metoda HTTP",
+    "url": "URL żądania",
+    "methodPlaceholders": {
+      "grpc": {
+        "full": "Wpisz adres serwera, na przykład localhost:50051",
+        "medium": "Adres serwera",
+        "short": "Adres"
+      },
+      "mcp": {
+        "full": "Wpisz adres URL serwera MCP",
+        "medium": "URL serwera MCP",
+        "short": "URL"
+      }
+    },
+    "send": "Wyślij",
+    "connect": "Połącz",
+    "disconnect": "Rozłącz",
+    "cancel": "Anuluj",
+    "save": "Zapisz",
+    "code": "Kod",
+    "codeHint": "Generuj kod",
+    "codeLanguage": "Język",
+    "urlPlaceholders": {
+      "full": "Wpisz adres URL lub wklej polecenie curl",
+      "medium": "URL lub polecenie curl",
+      "short": "URL"
+    }
+  },
+  "curlFiles": {
+    "title": "Wkleić odczyty plików?",
+    "message": "To polecenie curl odczytuje pliki z tego komputera i wysyła je z żądaniem, więc zachowaj je tylko wtedy, gdy źródło polecenia jest zaufane. Bez nich reszta polecenia nadal zostanie uzupełniona.",
+    "withThem": "Wklej z odczytami plików",
+    "withoutThem": "Wklej bez odczytów plików"
+  }
+}

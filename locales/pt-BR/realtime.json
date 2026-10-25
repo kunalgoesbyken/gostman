@@ -1,0 +1,41 @@
+{
+  "realtime": {
+    "targets": {
+      "topic": "Tópico",
+      "event": "Evento"
+    },
+    "browser": {
+      "closed": "Conexão encerrada (código {{code}})",
+      "closedWithReason": "Conexão encerrada (código {{code}}: {{reason}})",
+      "notConnected": "Não foi possível conectar (código {{code}})",
+      "notConnectedWithReason": "Não foi possível conectar (código {{code}}: {{reason}})"
+    },
+    "graphql": {
+      "subscribing": "Conexão confirmada. Assinando.",
+      "complete": "A assinatura foi concluída"
+    },
+    "socketIo": {
+      "joined": "Entrou no namespace {{namespace}}",
+      "left": "O servidor saiu do namespace",
+      "closed": "O servidor encerrou a sessão Socket.IO",
+      "refused": "O servidor recusou a conexão",
+      "binary": "Pacotes Socket.IO binários não são decodificados.",
+      "noEvent": "Informe o nome de um evento para emitir.",
+      "ack": "ack {{id}}"
+    },
+    "mqtt": {
+      "connected": "Conectado ao broker",
+      "refusedVersion": "O broker recusou a conexão: ele não é compatível com MQTT 3.1.1",
+      "refusedIdentifier": "O broker recusou a conexão: o client ID foi rejeitado",
+      "refusedUnavailable": "O broker recusou a conexão: o broker está indisponível",
+      "refusedCredentials": "O broker recusou a conexão: o nome de usuário ou a senha estão incorretos",
+      "refusedUnauthorized": "O broker recusou a conexão: o cliente não está autorizado",
+      "refusedOther": "O broker recusou a conexão: código {{code}}",
+      "subscribed": "Inscrito em {{filter}}",
+      "subscribeRefused": "O broker recusou a inscrição em {{filter}}",
+      "notBinary": "Eram esperados dados MQTT binários, mas chegou texto.",
+      "noTopic": "Informe um tópico para publicar.",
+      "noFilter": "Informe um filtro de tópico para se inscrever."
+    }
+  }
+}

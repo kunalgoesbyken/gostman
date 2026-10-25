@@ -1,0 +1,21 @@
+{
+  "sse.allTypes": "First option of the event type filter and its accessible label.",
+  "sse.pause": "Accessible label of the button that stops the list from following new events.",
+  "sse.resume": "Accessible label of the button that makes the list follow new events again.",
+  "sse.clear": "Accessible label of the button that empties the event list.",
+  "sse.copyAll": "Accessible label of the button that copies the events currently shown.",
+  "sse.copied": "Accessible label of the copy button right after copying.",
+  "sse.noEvents": "Title of the empty state of the event list.",
+  "sse.noMatches": "Title of the empty state when the filters hide every event.",
+  "sse.shown": "{{shown}} of {{total}} events pass the filter.",
+  "sse.received": "{{count}} is the total number of events received.",
+  "sse.dropped": "{{count}} is the number of events removed from the list.",
+  "sse.reconnecting": "{{seconds}} is a number of seconds, {{attempt}} the attempt number.",
+  "sseSettings.stream": "Checkbox label. Server-sent events (SSE) is a web standard for one-way streams.",
+  "sseSettings.maxEventsPlaceholder": "Placeholder showing the default limit, 10000 events.",
+  "sseSettings.maxSecondsPlaceholder": "Placeholder showing the default limit, 300 seconds.",
+  "status.open": "State of a stream that is connected and delivering events.",
+  "status.ended": "State of a stream that has finished.",
+  "streamEnd.hostedLimit": "{{seconds}} is a number of seconds. The web app is the version in the browser.",
+  "streamEnd.failedWith": "{{detail}} is a technical message."
+}

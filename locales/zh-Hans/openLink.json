@@ -1,0 +1,31 @@
+{
+  "openLink": {
+    "notAddress": "这不是 Gostman 能打开的网址。",
+    "tooLong": "此地址太长。",
+    "credentials": "不允许包含用户名或密码的地址。",
+    "scheme": "只允许 https 地址。",
+    "noHost": "此地址没有主机名。",
+    "reachFailure": "Gostman 无法连接提供此文件的服务器。请检查网络连接后重试。",
+    "title": "从链接打开",
+    "invalidTitle": "无法打开此链接",
+    "intro": "有一个链接要求 Gostman 下载集合或规范。在你选择“下载”之前不会下载或添加任何内容，在你选择“导入”之前不会导入任何内容。",
+    "trustNote": "只有在你信任发给你此链接的人时才继续。",
+    "hostLabel": "来自",
+    "addressLabel": "地址",
+    "cancel": "取消",
+    "download": "下载",
+    "downloading": "正在下载",
+    "import": "导入",
+    "detected": "检测到：{{format}}",
+    "downloadedFrom": "下载自 {{host}}",
+    "items_other": "{{count}} 项",
+    "activeNote": "{{items}}中含有脚本、OAuth 2.0 设置、本地 MCP 命令或文件读取。导入这些内容之前会先询问你，导入的文件夹在你信任之前会保持受限。",
+    "badgeAlt": "在 Gostman 中打开",
+    "builderTitle": "“在 Gostman 中打开”链接",
+    "builderHint": "粘贴在线发布的集合或规范的地址（Postman 集合、OpenAPI 文件、Insomnia、HAR 或 Gostman 导出文件）。下面的链接可让你 README 的读者在确认后用 Gostman 打开它。",
+    "builderLabel": "集合的公开地址",
+    "desktopLabel": "桌面应用链接",
+    "webLabel": "网页版链接",
+    "badgeLabel": "README 徽章（Markdown）"
+  }
+}

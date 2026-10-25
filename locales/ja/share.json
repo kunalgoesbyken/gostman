@@ -1,0 +1,75 @@
+{
+  "share": {
+    "protections": {
+      "key": "ランダムキー",
+      "passphrase": "パスフレーズ"
+    },
+    "deliveries": {
+      "link": "リンク",
+      "file": "暗号化ファイル"
+    },
+    "privacy": "このウィンドウ内で暗号化され、アップロードされません。OAuthトークン、Cookie、履歴、ネットワーク設定は含まれません。",
+    "summaryWithValues": "{{counts}}（値を含む）。",
+    "summaryNamesOnly": "{{counts}}（変数名のみ）。",
+    "tooLong": "この選択には{{size}}のリンクが必要です。チャットやメールのアプリは長いリンクを途中で切るため、リンクは{{limit}}までです。代わりに暗号化ファイルとして送信してください。",
+    "linkNotePassphrase": "パスフレーズはリンクに含まれません。別の方法で受信者に伝えてください。{{size}}。",
+    "linkNoteKey": "キーはリンクの # 記号以降に含まれるため、リンク全体を持つ人は誰でもコレクションを読み取れます。{{size}}。",
+    "linkLabel": "共有リンク",
+    "fileNotePassphrase": "受信者はあなたのパスフレーズでファイルを開きます。別の方法で伝えてください。",
+    "fileNoteKey": "ファイルは、下のキーがないと開けません。キーはファイルとは別の方法で送信してください。",
+    "saveFile": "ファイルを保存",
+    "keyLabel": "キー",
+    "scopeField": "共有",
+    "scopeLabel": "共有する内容",
+    "everything": "すべて",
+    "requestScope": "リクエスト：{{path}}",
+    "sharedVariablesNone": "ここでは環境変数を使用していないため、環境変数は共有されません。",
+    "sharedVariables": "ここで使用している環境変数だけが共有されます：{{names}}。",
+    "sharedCollectionVariables": "次のコレクション変数は、各コレクションとともに共有されます：{{names}}。",
+    "includeVariables": "変数の値を共有する（オフの場合は変数名のみ共有）",
+    "includeExamples": "保存済みの例のレスポンスを含める",
+    "protection": "保護",
+    "passphrasePlaceholder": "パスフレーズ（{{length}}文字以上）",
+    "passphraseLabel": "パスフレーズ",
+    "sendAs": "送信形式",
+    "literalCredentials_other": "{{count}}件のリクエストに、認証タブへ直接入力されたパスワード、トークン、キーがあります。これらはリクエストの一部として、リクエストとともに共有されます。",
+    "nothing": "ここには共有できるものがまだありません。"
+  },
+  "shareOpen": {
+    "title": "共有されたもの",
+    "dialogLabel": "共有されたコレクション",
+    "intro": "このリンクには暗号化されたコレクションが含まれています。このウィンドウ内で復号され、「インポート」を選択するまで何も追加されません。",
+    "credentials": {
+      "key": {
+        "label": "キー",
+        "hint": "このファイルはキーなしで送られました。送信者から受け取ったキーを貼り付けてください。"
+      },
+      "passphrase": {
+        "label": "パスフレーズ",
+        "hint": "この共有はパスフレーズでロックされています。送信者に確認してください。"
+      }
+    },
+    "open": "開く",
+    "cancel": "キャンセル",
+    "environmentNoValues_other": "{{name}}：変数{{count}}件（名前のみ、値なし）",
+    "environmentValues_other": "{{name}}：変数{{count}}件（うち{{values}}件に値あり）",
+    "folders": "フォルダー：{{names}}",
+    "keepValues": "すでにある変数は、現在の値が維持されます。",
+    "examples_other": "保存済みの例のレスポンス{{count}}件",
+    "activeContent_other": "{{count}}件の項目に{{kinds}}が含まれています。インポートの前に確認されます。",
+    "requestsLabel": "共有されたリクエスト",
+    "deriving": "キーを導出して復号しています",
+    "decrypting": "復号しています"
+  },
+  "shareErrors": {
+    "unavailable": "共有にはWeb Crypto APIが必要ですが、このウィンドウでは利用できません。",
+    "incomplete": "この共有は不完全です。リンク全体をコピーするか、ファイル全体を選択して、もう一度お試しください。",
+    "cannotDecompress": "この共有は圧縮されていますが、このブラウザーでは展開できません。最新のブラウザーまたはデスクトップアプリで開いてください。",
+    "tooLarge": "この共有はGostmanが一度にインポートできるサイズを超えて展開されるため、開きませんでした。",
+    "unreadable": "この共有は復号されましたが、内容が読み取れるテキストではありません。",
+    "failedLink": "この共有を復号できませんでした。リンクが途中で変更されたか、切り詰められています。",
+    "failedKey": "この共有を復号できませんでした。キーが正しくないか、ファイルが変更されています。",
+    "failedPassphrase": "この共有を復号できませんでした。パスフレーズが正しくないか、共有が変更されています。",
+    "unknownVersion": "この共有は形式「{{version}}」を使用していますが、このバージョンのGostmanでは開けません。Gostmanを更新して、もう一度お試しください。"
+  }
+}

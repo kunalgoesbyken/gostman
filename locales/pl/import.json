@@ -1,0 +1,202 @@
+{
+  "importFormats": {
+    "auto": "Wykryj automatycznie",
+    "http": "Pliki .http"
+  },
+  "formatLabels": {
+    "insomnia": "Eksport Insomnia",
+    "har": "Zapis HAR",
+    "wsdl": "Usługa WSDL",
+    "bruno": "Kolekcja Bruno",
+    "postman": "Plik Postman",
+    "openapi": "Specyfikacja OpenAPI",
+    "gostman": "Eksport Gostman",
+    "http": "Plik .http"
+  },
+  "import": {
+    "chooseFiles": "Wybierz pliki",
+    "importButton": "Importuj",
+    "chooseFolder": "Wybierz folder",
+    "dropHint": "Upuść tutaj pliki, folder lub plik .zip albo wklej zawartość poniżej. Obsługiwane: Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI i Swagger, pliki .http (REST Client, JetBrains HTTP Client), eksporty Gostman i linki do udostępniania.",
+    "formatLabel": "Format",
+    "pastePlaceholder": "Wklej kolekcję, specyfikację, zapis lub link do udostępniania",
+    "pasteLabel": "Zawartość do zaimportowania",
+    "pastedName": "wklejone",
+    "reading": "Odczyt zawartości",
+    "skipStatic": "Pomiń obrazy, czcionki, style i skrypty",
+    "skippedHeading": "Pominięte",
+    "binaryFailure": "Plik {{name}} nie jest plikiem tekstowym.",
+    "tooMany": "Plików jest więcej niż {{limit}}.",
+    "tooLarge": "Plik {{name}} ma {{size}}. Pliki są ograniczone do {{limit}}.",
+    "totalTooLarge": "Pliki razem są większe niż {{limit}}.",
+    "noFiles": "Nie znaleziono plików do zaimportowania.",
+    "filesSelected_one": "Wybrano {{count}} plik",
+    "filesSelected_few": "Wybrano {{count}} pliki",
+    "filesSelected_many": "Wybrano {{count}} plików",
+    "filesSelected_other": "Wybrano {{count}} pliku",
+    "clearFiles": "Wyczyść",
+    "sourceLine": "{{source}}: {{label}}, {{counts}}",
+    "totalLine": "Łącznie: {{counts}}"
+  },
+  "export": {
+    "includeSecrets": "Dołącz dane uwierzytelniające",
+    "secretsNote": "Hasła, tokeny oraz nagłówki i zmienne o nazwach sekretów są zastępowane symbolami zastępczymi {{placeholder}}.",
+    "secretsWarning": "Dane uwierzytelniające są zapisywane w pliku jako zwykły tekst.",
+    "variableSecretsNote": "Zmienne o nazwach przypominających hasło, token lub klucz są eksportowane bez wartości.",
+    "saveFile": "Zapisz plik",
+    "formatLabel": "Format eksportu",
+    "previewLabel": "Podgląd eksportu",
+    "summaryNamed": "{{description}}. „{{name}}”: {{counts}}.",
+    "summaryAll": "{{description}}. Razem: {{counts}}.",
+    "collectionField": "Kolekcja",
+    "formatField": "Format",
+    "allCollections": "Wszystkie kolekcje",
+    "failed": "Nie udało się zbudować eksportu: {{reason}}",
+    "adaptFailed": "Skrypty i sprawdzenia są eksportowane w oryginalnej postaci, ponieważ nie udało się ich dostosować: {{reason}}",
+    "reportLabel": "Co zmieniono dla narzędzia docelowego",
+    "checkHeading_one": "{{count}} rzecz do sprawdzenia przed użyciem w: {{tool}}",
+    "checkHeading_few": "{{count}} rzeczy do sprawdzenia przed użyciem w: {{tool}}",
+    "checkHeading_many": "{{count}} rzeczy do sprawdzenia przed użyciem w: {{tool}}",
+    "checkHeading_other": "{{count}} rzeczy do sprawdzenia przed użyciem w: {{tool}}",
+    "changedHeading": "Co zmieniono dla: {{tool}}",
+    "formats": {
+      "gostman": {
+        "label": "Gostman",
+        "description": "Pełna kopia zapasowa: żądania, foldery, wszystkie środowiska, zmienne globalne i zmienne kolekcji, bez wartości sekretów"
+      },
+      "postman": {
+        "label": "Postman",
+        "description": "Kolekcja v2.1, którą importuje także Insomnia. Skrypty i sprawdzenia są dostosowane do działania w obu, a używane zmienne, z wyjątkiem sekretnych, stają się zmiennymi kolekcji"
+      },
+      "openapiJson": {
+        "label": "OpenAPI JSON",
+        "description": "Opis żądań HTTP w OpenAPI 3.0"
+      },
+      "openapiYaml": {
+        "label": "OpenAPI YAML",
+        "description": "Opis żądań HTTP w OpenAPI 3.0"
+      },
+      "markdown": {
+        "label": "Markdown",
+        "description": "Czytelna dokumentacja API"
+      },
+      "html": {
+        "label": "Dokumentacja HTML",
+        "description": "Jedna samodzielna strona do opublikowania lub wydrukowania. Dane uwierzytelniające są pomijane, a zmienne pozostają jako {{example}}"
+      },
+      "bruno": {
+        "label": "Bruno",
+        "description": "Folder plików .bru ze środowiskami, zapisany jako .zip. Skrypty i sprawdzenia są dostosowane do działania w Bruno"
+      },
+      "curl": {
+        "label": "Skrypt curl",
+        "description": "Jedno polecenie curl na żądanie. Dane uwierzytelniające stają się symbolami zastępczymi zmiennych środowiskowych"
+      },
+      "har": {
+        "label": "HAR",
+        "description": "HTTP Archive 1.2 z żądaniami i bez odpowiedzi"
+      },
+      "http": {
+        "label": "Pliki .http",
+        "description": "Żądania dla VS Code REST Client i JetBrains HTTP Client, jeden plik na folder, ze środowiskami http-client.env.json"
+      }
+    },
+    "docs": {
+      "titlePlaceholder": "Tytuł (domyślnie: API documentation)",
+      "titleLabel": "Tytuł dokumentacji",
+      "includeExamples": "Dołącz przykładowe odpowiedzi",
+      "playground": "Dołącz panel Wypróbuj"
+    }
+  },
+  "transfer": {
+    "title": "Import i eksport",
+    "tabsLabel": "Import lub eksport",
+    "tabs": {
+      "import": "Import",
+      "export": "Eksport",
+      "share": "Udostępnij"
+    }
+  },
+  "importCount": {
+    "collection_one": "{{count}} kolekcja",
+    "collection_few": "{{count}} kolekcje",
+    "collection_many": "{{count}} kolekcji",
+    "collection_other": "{{count}} kolekcji",
+    "folder_one": "{{count}} folder",
+    "folder_few": "{{count}} foldery",
+    "folder_many": "{{count}} folderów",
+    "folder_other": "{{count}} folderu",
+    "request_one": "{{count}} żądanie",
+    "request_few": "{{count}} żądania",
+    "request_many": "{{count}} żądań",
+    "request_other": "{{count}} żądania",
+    "flow_one": "{{count}} przepływ",
+    "flow_few": "{{count}} przepływy",
+    "flow_many": "{{count}} przepływów",
+    "flow_other": "{{count}} przepływu",
+    "environment_one": "{{count}} środowisko",
+    "environment_few": "{{count}} środowiska",
+    "environment_many": "{{count}} środowisk",
+    "environment_other": "{{count}} środowiska",
+    "global_one": "{{count}} środowisko globalne",
+    "global_few": "{{count}} środowiska globalne",
+    "global_many": "{{count}} środowisk globalnych",
+    "global_other": "{{count}} środowiska globalnego",
+    "variable_one": "{{count}} zmienna kolekcji",
+    "variable_few": "{{count}} zmienne kolekcji",
+    "variable_many": "{{count}} zmiennych kolekcji",
+    "variable_other": "{{count}} zmiennej kolekcji",
+    "holding": "{{collections}}: {{inside}}",
+    "settingsFor": "ustawienia: {{owners}}"
+  },
+  "importResult": {
+    "quoted": "„{{name}}”",
+    "joinedEnvironment": "Środowisko o nazwie „{{name}}” już istniało, więc zaimportowane zmienne zostały do niego dodane. Zmienne, które już w nim były, zachowały swoje wartości.",
+    "scopedEnvironments_one": "Środowiska z kolekcji {{names}} dotyczą tylko jej żądań. Aby używać środowiska wszędzie, ustaw w sekcji Środowiska pole Dostępne w na Każda kolekcja.",
+    "scopedEnvironments_few": "Środowiska z kolekcji {{names}} dotyczą tylko ich żądań. Aby używać środowiska wszędzie, ustaw w sekcji Środowiska pole Dostępne w na Każda kolekcja.",
+    "scopedEnvironments_many": "Środowiska z kolekcji {{names}} dotyczą tylko ich żądań. Aby używać środowiska wszędzie, ustaw w sekcji Środowiska pole Dostępne w na Każda kolekcja.",
+    "scopedEnvironments_other": "Środowiska z kolekcji {{names}} dotyczą tylko ich żądań. Aby używać środowiska wszędzie, ustaw w sekcji Środowiska pole Dostępne w na Każda kolekcja.",
+    "scopedVariables_one": "Zmienne kolekcji {{names}} dotyczą tylko jej żądań; zmienna środowiska o tej samej nazwie nadal ma pierwszeństwo.",
+    "scopedVariables_few": "Zmienne kolekcji {{names}} dotyczą tylko ich żądań; zmienna środowiska o tej samej nazwie nadal ma pierwszeństwo.",
+    "scopedVariables_many": "Zmienne kolekcji {{names}} dotyczą tylko ich żądań; zmienna środowiska o tej samej nazwie nadal ma pierwszeństwo.",
+    "scopedVariables_other": "Zmienne kolekcji {{names}} dotyczą tylko ich żądań; zmienna środowiska o tej samej nazwie nadal ma pierwszeństwo.",
+    "importedCollectionName": "Zaimportowana kolekcja",
+    "settingsAttached_one": "Ustawienia dla wszystkich kolekcji z tego importu dodano do ustawień kolekcji {{names}}, więc dotyczą tylko jej żądań. Własne ustawienia dla wszystkich kolekcji nie zostały zmienione.",
+    "settingsAttached_few": "Ustawienia dla wszystkich kolekcji z tego importu dodano do ustawień kolekcji {{names}}, więc dotyczą tylko ich żądań. Własne ustawienia dla wszystkich kolekcji nie zostały zmienione.",
+    "settingsAttached_many": "Ustawienia dla wszystkich kolekcji z tego importu dodano do ustawień kolekcji {{names}}, więc dotyczą tylko ich żądań. Własne ustawienia dla wszystkich kolekcji nie zostały zmienione.",
+    "settingsAttached_other": "Ustawienia dla wszystkich kolekcji z tego importu dodano do ustawień kolekcji {{names}}, więc dotyczą tylko ich żądań. Własne ustawienia dla wszystkich kolekcji nie zostały zmienione.",
+    "settingsWrapped": "Ustawienia dla wszystkich kolekcji z tego importu umieszczono w nowej kolekcji „{{name}}”, która zawiera wszystko, co zaimportowano, więc dotyczą tylko tych żądań. Własne ustawienia dla wszystkich kolekcji nie zostały zmienione."
+  },
+  "fileReads": {
+    "heading_one": "Plik odczytywany z tego komputera:",
+    "heading_few": "Pliki odczytywane z tego komputera ({{count}}):",
+    "heading_many": "Pliki odczytywane z tego komputera ({{count}}):",
+    "heading_other": "Pliki odczytywane z tego komputera ({{count}}):",
+    "more": "i jeszcze {{count}}"
+  },
+  "activeImport": {
+    "kindLabels": {
+      "scripts": "skrypty",
+      "oauth": "ustawienia OAuth 2.0",
+      "commands": "polecenia uruchamiające lokalne serwery MCP",
+      "files": "odczyty plików wysyłające pliki z tego komputera"
+    },
+    "kindNouns": {
+      "scripts": "skrypty",
+      "oauth": "ustawienia OAuth",
+      "commands": "polecenia",
+      "files": "odczyty plików"
+    },
+    "titleOne": "Zaimportować: {{kind}}?",
+    "titleMany": "Przejrzyj przed importem",
+    "withOne": "Importuj z: {{kind}}",
+    "withMany": "Importuj wszystko",
+    "withoutOne": "Importuj bez: {{kind}}",
+    "withoutMany": "Importuj bez nich",
+    "leftOut": "Pominięto: {{kinds}}.",
+    "message_one": "{{count}} element tego importu zawiera: {{kinds}}. Są one uruchamiane przy wysyłaniu żądania i mogą odczytywać zmienne, więc importuj je tylko ze źródła zaufanego. Bez nich cała reszta nadal zostanie zaimportowana.",
+    "message_few": "{{count}} elementy tego importu zawierają: {{kinds}}. Są one uruchamiane przy wysyłaniu żądania i mogą odczytywać zmienne, więc importuj je tylko ze źródła zaufanego. Bez nich cała reszta nadal zostanie zaimportowana.",
+    "message_many": "{{count}} elementów tego importu zawiera: {{kinds}}. Są one uruchamiane przy wysyłaniu żądania i mogą odczytywać zmienne, więc importuj je tylko ze źródła zaufanego. Bez nich cała reszta nadal zostanie zaimportowana.",
+    "message_other": "{{count}} elementu tego importu zawiera: {{kinds}}. Są one uruchamiane przy wysyłaniu żądania i mogą odczytywać zmienne, więc importuj je tylko ze źródła zaufanego. Bez nich cała reszta nadal zostanie zaimportowana."
+  }
+}

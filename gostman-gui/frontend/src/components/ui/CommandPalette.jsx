@@ -26,9 +26,9 @@ const command = (id, text, action, extra = {}) => ({ id, label: text.label, desc
 
 const aiCommand = (id, text, action, extra = {}) => command(id, text, action, { icon: Bot, ...extra })
 
-const AI_SETTINGS_COMMAND = aiCommand("ai-settings", AI_TEXT.commands.settings, "aiSettings", { icon: Settings })
+const aiSettingsCommand = () => aiCommand("ai-settings", AI_TEXT.commands.settings, "aiSettings", { icon: Settings })
 
-const AI_COMMANDS = [
+const aiCommands = () => [
   aiCommand("ai-request", AI_TEXT.commands.request, "aiRequest", { shortcutId: "aiGenerate" }),
   aiCommand("ai-tests", AI_TEXT.commands.tests, "aiTests"),
   aiCommand("ai-script", AI_TEXT.commands.script, "aiScript"),
@@ -38,9 +38,7 @@ const AI_COMMANDS = [
   aiCommand("ai-schema", AI_TEXT.commands.schema, "aiSchema"),
 ]
 
-const SETTINGS_KEYWORDS = "headers auth variables scripts checks"
-
-const REQUEST_COMMANDS = [
+const requestCommands = () => [
   command("send-request", COMMAND_TEXT.commands.sendRequest, "sendRequest", { icon: Send, shortcutId: "sendRequest" }),
   command("new-request", COMMAND_TEXT.commands.newRequest, "newRequest", { icon: Plus, shortcutId: "newRequest" }),
   command("save-request", COMMAND_TEXT.commands.saveRequest, "saveRequest", { icon: Save, shortcutId: "saveRequest" }),
@@ -50,9 +48,11 @@ const REQUEST_COMMANDS = [
   command("generate-code", COMMAND_TEXT.commands.generateCode, "generateCode", { icon: Code }),
 ]
 
-const ALL_COLLECTIONS_COMMAND = command("all-collections-settings", COMMAND_TEXT.commands.allCollectionsSettings, "allCollectionsSettings", { icon: Settings2, keywords: SETTINGS_KEYWORDS })
+const allCollectionsCommands = (holdsCollections) => (
+  holdsCollections ? [command("all-collections-settings", COMMAND_TEXT.commands.allCollectionsSettings, "allCollectionsSettings", { icon: Settings2 })] : []
+)
 
-const APP_COMMANDS = [
+const appCommands = (holdsCollections) => [
   command("close-tab", COMMAND_TEXT.commands.closeTab, "closeTab", { icon: X, shortcutId: "closeTab" }),
   command("close-other-tabs", COMMAND_TEXT.commands.closeOtherTabs, "closeOtherTabs", { icon: X, shortcutId: "closeOtherTabs" }),
   command("close-saved-tabs", COMMAND_TEXT.commands.closeSavedTabs, "closeSavedTabs", { icon: X, shortcutId: "closeSavedTabs" }),
@@ -61,31 +61,33 @@ const APP_COMMANDS = [
   command("toggle-sidebar", COMMAND_TEXT.commands.toggleSidebar, "toggleSidebar", { icon: PanelLeft, shortcutId: "toggleSidebar" }),
   command("keyboard-shortcuts", COMMAND_TEXT.commands.shortcuts, "shortcuts", { icon: Keyboard, keywords: "?", shortcutId: "shortcutsHelp" }),
   command("new-folder", COMMAND_TEXT.commands.newFolder, "newFolder", { icon: FolderPlus }),
-  { id: "collapse-folders", label: TREE_TEXT.collapseAll, description: TREE_TEXT.collapseAllDescription, icon: ChevronsDownUp, keywords: "close fold tree", action: "collapseFolders" },
+  { id: "collapse-folders", label: TREE_TEXT.collapseAll, description: TREE_TEXT.collapseAllDescription, icon: ChevronsDownUp, keywords: COMMAND_TEXT.commands.collapseFolders.keywords, action: "collapseFolders" },
   command("run-collection", COMMAND_TEXT.commands.runCollection, "runCollection", { icon: ListChecks }),
-  command("collection-settings", COMMAND_TEXT.commands.collectionSettings, "collectionSettings", { icon: Settings2, keywords: SETTINGS_KEYWORDS }),
-  ALL_COLLECTIONS_COMMAND,
+  command("collection-settings", COMMAND_TEXT.commands.collectionSettings, "collectionSettings", { icon: Settings2 }),
+  ...allCollectionsCommands(holdsCollections),
   command("examples", COMMAND_TEXT.commands.examples, "examples", { icon: Bookmark }),
   command("mock-server", COMMAND_TEXT.commands.mockServer, "mockServer", { icon: Server }),
   command("capture", COMMAND_TEXT.commands.capture, "captureTraffic", { icon: Radio }),
-  command("environments", COMMAND_TEXT.commands.environments, "environments", { icon: Globe, keywords: "variables globals" }),
+  command("environments", COMMAND_TEXT.commands.environments, "environments", { icon: Globe }),
   command("cookies", COMMAND_TEXT.commands.cookies, "cookies", { icon: Cookie }),
-  { id: "scan-secrets", label: SCAN_TEXT.title, description: SCAN_TEXT.commandDescription, icon: ShieldAlert, keywords: "credentials tokens passwords leak", action: "scanSecrets" },
+  { id: "scan-secrets", label: SCAN_TEXT.title, description: SCAN_TEXT.commandDescription, icon: ShieldAlert, keywords: COMMAND_TEXT.commands.scanSecrets.keywords, action: "scanSecrets" },
   { id: "preferences", label: PREFERENCES_TEXT.title, description: PREFERENCES_TEXT.commandDescription, icon: SlidersHorizontal, action: "preferences" },
   command("network", COMMAND_TEXT.commands.network, "settings", { icon: Settings }),
   command("import", COMMAND_TEXT.commands.import, "import", { icon: Upload }),
-  command("lint-spec", COMMAND_TEXT.commands.lintSpec, "lintSpec", { icon: ShieldCheck, keywords: "openapi swagger validate governance" }),
+  command("lint-spec", COMMAND_TEXT.commands.lintSpec, "lintSpec", { icon: ShieldCheck }),
   command("export", COMMAND_TEXT.commands.export, "export", { icon: Download }),
   command("share", COMMAND_TEXT.commands.share, "share", { icon: Share2 }),
-  AI_SETTINGS_COMMAND,
+  aiSettingsCommand(),
   command("clear-history", COMMAND_TEXT.commands.clearHistory, "clearHistory", { icon: History }),
   { id: "welcome", label: WELCOME_TEXT.commandTitle, description: WELCOME_TEXT.commandDescription, icon: Hand, action: "showWelcome" },
   { id: "about", label: ABOUT_TEXT.commandTitle, description: ABOUT_TEXT.commandDescription, icon: Info, action: "about" },
 ]
 
-const RESET_COMMAND = { id: "reset", label: DATA_TEXT.commandTitle, description: DATA_TEXT.commandDescription, icon: Trash2, keywords: DATA_TEXT.commandKeywords, action: "reset", destructive: true }
+const resetCommand = () => ({ id: "reset", label: DATA_TEXT.commandTitle, description: DATA_TEXT.commandDescription, icon: Trash2, keywords: DATA_TEXT.commandKeywords, action: "reset", destructive: true })
 
-const LOAD_TEST_COMMAND = { id: "load-test", label: LOAD_TEST_TEXT.commandTitle, description: LOAD_TEST_TEXT.commandDescription, icon: Gauge, keywords: "performance stress", action: "loadTest" }
+const loadTestCommand = () => ({ id: "load-test", label: LOAD_TEST_TEXT.commandTitle, description: LOAD_TEST_TEXT.commandDescription, icon: Gauge, keywords: COMMAND_TEXT.commands.loadTest.keywords, action: "loadTest" })
+
+const installCommand = () => ({ id: "install-app", label: INSTALL_TEXT.label, description: INSTALL_TEXT.description, icon: MonitorDown, action: "installApp" })
 
 const workspaceCommands = (workspaces) => {
   if (!workspaces) return []
@@ -116,7 +118,7 @@ const NAME_MATCH_BONUS = 20
 const KIND_COMMAND = "command"
 const KIND_REQUEST = "request"
 const KIND_HISTORY = "history"
-const SECTION_TITLES = { [KIND_COMMAND]: COMMAND_TEXT.sections.command, [KIND_REQUEST]: COMMAND_TEXT.sections.request, [KIND_HISTORY]: COMMAND_TEXT.sections.history }
+const sectionTitles = () => ({ [KIND_COMMAND]: COMMAND_TEXT.sections.command, [KIND_REQUEST]: COMMAND_TEXT.sections.request, [KIND_HISTORY]: COMMAND_TEXT.sections.history })
 
 const environmentCommands = (environments, activeEnvironmentId) => environments
   .filter((environment) => environment.id !== activeEnvironmentId)
@@ -201,7 +203,7 @@ function paletteItems({ commands, requests, history, query, mode }) {
 }
 
 const rowClass = (isSelected, extra) => cn(
-  "flex h-10 w-full items-center gap-3 rounded-md px-3 text-left",
+  "flex h-10 w-full items-center gap-3 rounded-md px-3 text-start",
   extra,
   isSelected && "bg-accent"
 )
@@ -264,10 +266,8 @@ function RequestRow({ id, item, isSelected, onSelect, onHover }) {
 }
 
 function SectionTitle({ kind }) {
-  return <SectionLabel className="block px-3 pb-1 pt-2">{SECTION_TITLES[kind]}</SectionLabel>
+  return <SectionLabel className="block px-3 pb-1 pt-2">{sectionTitles()[kind]}</SectionLabel>
 }
-
-const INSTALL_COMMAND = { id: "install-app", label: INSTALL_TEXT.label, description: INSTALL_TEXT.description, icon: MonitorDown, action: "installApp" }
 
 function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspaces, hasLoadTest, isAiOn, holdsCollections, requests, folders, history, onClose, onCommand, onShowShortcuts }) {
   const [query, setQuery] = useState("")
@@ -281,14 +281,14 @@ function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspace
 
   const commands = useMemo(
     () => commandItems([
-      ...REQUEST_COMMANDS,
-      ...(hasLoadTest ? [LOAD_TEST_COMMAND] : []),
-      ...(isAiOn ? AI_COMMANDS : []),
-      ...APP_COMMANDS.filter((item) => holdsCollections || item !== ALL_COLLECTIONS_COMMAND),
+      ...requestCommands(),
+      ...(hasLoadTest ? [loadTestCommand()] : []),
+      ...(isAiOn ? aiCommands() : []),
+      ...appCommands(holdsCollections),
       ...workspaceCommands(workspaces),
       ...environmentCommands(environments, activeEnvironmentId),
-      ...(canInstall ? [INSTALL_COMMAND] : []),
-      RESET_COMMAND,
+      ...(canInstall ? [installCommand()] : []),
+      resetCommand(),
     ]),
     [environments, activeEnvironmentId, workspaces, hasLoadTest, isAiOn, holdsCollections, canInstall]
   )

@@ -1,17 +1,6 @@
-export const WELCOME_TEXT = {
-  title: 'Welcome to Gostman',
-  intro: 'No account needed. Nothing leaves this device until you send a request.',
-  dismiss: 'Dismiss the welcome',
-  commandTitle: 'Show welcome',
-  commandDescription: 'Getting started steps, imports and shortcuts',
-  otherTitle: 'Other ways to start',
-  importTitle: 'Import requests',
-  importHint: 'From Postman, Bruno, Insomnia, OpenAPI, HAR, .http files or curl.',
-  folderTitle: 'Open a folder',
-  folderHint: 'Keep requests as files next to your code and share them through git.',
-  collectionTitle: 'Create a folder',
-  collectionHint: 'Group related requests together in the sidebar.',
-  curlTitle: 'Paste a curl command',
-  curlHint: 'Paste it into the address bar and the request fills in.',
-  shortcutsTitle: 'Keyboard shortcuts',
-}
+import english from '../../../../locales/en/welcome.json'
+import { messages } from './i18n/core'
+
+const text = messages('welcome', english)
+
+export const WELCOME_TEXT = text.welcome

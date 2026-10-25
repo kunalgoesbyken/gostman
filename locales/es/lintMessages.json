@@ -1,0 +1,39 @@
+{
+  "components": {
+    "unused": "{{kind}}/{{name}} está definido pero nunca se referencia",
+    "invalidRef": "$ref no válido: {{detail}}"
+  },
+  "info": {
+    "fieldMissing": "info.{{field}} falta o está vacío",
+    "noServers": "no hay servidores listados, así que los clientes no saben dónde se sirve la API",
+    "noHost": "no se ha indicado ningún host, así que los clientes no saben dónde se sirve la API",
+    "serverNotHttps": "{{url}} no usa https",
+    "httpOnly": "la API se ofrece solo por http"
+  },
+  "operations": {
+    "noOperationId": "la operación no tiene operationId",
+    "duplicateOperationId": "el operationId «{{id}}» ya lo usa {{earlier}}",
+    "noSummary": "la operación no tiene summary ni description",
+    "undeclaredTag": "la etiqueta «{{tag}}» no está declarada en las tags de nivel superior",
+    "deprecatedWithoutDescription": "la operación está obsoleta pero no tiene una descripción que indique qué usar en su lugar",
+    "noSecurity": "la especificación define esquemas de seguridad pero esta operación no requiere ninguno"
+  },
+  "paths": {
+    "none": "el documento no define ninguna ruta",
+    "noLeadingSlash": "la ruta «{{path}}» no empieza por una barra",
+    "ambiguous": "{{path}} no se distingue de {{earlier}}",
+    "parameterUndeclared": "el parámetro de ruta «{{name}}» está en la ruta pero no está declarado",
+    "parameterUnused": "el parámetro de ruta «{{name}}» está declarado pero no aparece en la ruta"
+  },
+  "responses": {
+    "noSuccess": "la operación no declara ninguna respuesta 2xx",
+    "noError": "la operación no declara ni una respuesta default ni una 4xx",
+    "noSchema": "la respuesta {{status}} no tiene esquema",
+    "mediaWithoutSchema": "la respuesta {{status}} declara {{media}} sin esquema",
+    "bodyOnRead": "las operaciones {{method}} no deberían tener cuerpo de solicitud",
+    "noBodyExample": "el cuerpo de solicitud {{media}} no tiene ejemplo"
+  },
+  "security": {
+    "undefinedScheme": "el esquema de seguridad «{{name}}» se usa pero no está definido"
+  }
+}

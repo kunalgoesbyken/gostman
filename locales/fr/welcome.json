@@ -1,0 +1,20 @@
+{
+  "welcome": {
+    "title": "Bienvenue dans Gostman",
+    "intro": "Aucun compte nécessaire. Rien ne quitte cet appareil tant que vous n’envoyez pas de requête.",
+    "dismiss": "Fermer l’accueil",
+    "commandTitle": "Afficher l’accueil",
+    "commandDescription": "Étapes de prise en main, imports et raccourcis",
+    "otherTitle": "Autres façons de commencer",
+    "importTitle": "Importer des requêtes",
+    "importHint": "Depuis Postman, Bruno, Insomnia, OpenAPI, HAR, des fichiers .http ou curl.",
+    "folderTitle": "Ouvrir un dossier",
+    "folderHint": "Gardez les requêtes sous forme de fichiers à côté de votre code et partagez-les avec git.",
+    "collectionTitle": "Créer un dossier",
+    "collectionHint": "Regroupez des requêtes liées dans la barre latérale.",
+    "curlTitle": "Coller une commande curl",
+    "curlHint": "Collez-la dans la barre d’adresse et la requête se remplit.",
+    "shortcutsTitle": "Raccourcis clavier",
+    "sampleRequestName": "Requête d’exemple"
+  }
+}

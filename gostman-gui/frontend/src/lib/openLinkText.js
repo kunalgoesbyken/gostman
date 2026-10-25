@@ -1,29 +1,10 @@
-export const OPEN_LINK_TEXT = {
-  notAddress: 'This is not a web address Gostman can open.',
-  tooLong: 'This address is too long.',
-  credentials: 'Addresses that contain a user name or password are not allowed.',
-  scheme: 'Only https addresses are allowed.',
-  noHost: 'The address has no host name.',
-  reachFailure: 'Gostman could not reach the server that sends this file. Check your connection and try again.',
-  title: 'Open from a link',
-  invalidTitle: 'This link cannot be opened',
-  intro: 'A link asked Gostman to download a collection or a spec. Nothing is downloaded or added until you choose Download, and nothing is imported until you choose Import.',
-  trustNote: 'Only continue if you trust the person who sent you this link.',
-  hostLabel: 'From',
-  addressLabel: 'Address',
-  cancel: 'Cancel',
-  download: 'Download',
-  downloading: 'Downloading',
-  import: 'Import',
-  detected: (format) => `Detected: ${format}`,
-  downloadedFrom: (host) => `Downloaded from ${host}`,
-  activeNote: (count) => `Scripts, OAuth 2.0 settings, local MCP commands or file reads in ${count}. You are asked before those are imported, and imported folders stay restricted until you trust them.`,
-  badgeAlt: 'Open in Gostman',
-  builderTitle: 'Open in Gostman link',
-  builderHint: 'Paste the address of a collection or spec published online (a Postman collection, OpenAPI file, Insomnia, HAR or Gostman export). The links below let readers of your README open it in Gostman after a confirmation.',
-  builderPlaceholder: 'https://example.com/collection.json',
-  builderLabel: 'Public address of the collection',
-  desktopLabel: 'Desktop app link',
-  webLabel: 'Web app link',
-  badgeLabel: 'README badge (Markdown)',
-}
+import english from '../../../../locales/en/openLink.json'
+import { messages } from './i18n/core'
+
+const text = messages('openLink', english, () => ({
+  openLink: {
+    builderPlaceholder: 'https://example.com/collection.json',
+  },
+}))
+
+export const OPEN_LINK_TEXT = text.openLink

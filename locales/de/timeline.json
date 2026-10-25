@@ -1,0 +1,72 @@
+{
+  "timeline": {
+    "proxied": "Die Zeiten wurden vom Gostman-Proxy gemessen, vom Proxy bis zum Ziel. Der Weg von Ihrem Browser zum Proxy ist nicht enthalten.",
+    "reused": "Wiederverwendete Verbindung",
+    "newConnection": "Neue Verbindung",
+    "omitted_one": "{{count}} weitere Anfrage nicht angezeigt.",
+    "omitted_other": "{{count}} weitere Anfragen nicht angezeigt.",
+    "failedBefore": "Fehlgeschlagen vor dem Verbinden",
+    "failedAt": "Fehlgeschlagen bei: {{label}}",
+    "requestHeaders": "Header der Anfrage",
+    "responseHeaders": "Header der Antwort",
+    "reveal": "Wert anzeigen",
+    "hide": "Wert verbergen",
+    "expanded": "Details ausblenden",
+    "collapsed": "Details anzeigen",
+    "total": "Gesamt",
+    "breakdown": "Aufschlüsselung der Zeit",
+    "breakdownProxied": "Aufschlüsselung der Zeit (vom Gostman-Proxy gemessen)",
+    "requests_one": "{{count}} Anfrage",
+    "requests_other": "{{count}} Anfragen",
+    "scripts_one": "{{count}} Skript",
+    "scripts_other": "{{count}} Skripte",
+    "consoleLines_one": "{{count}} Konsolenzeile",
+    "consoleLines_other": "{{count}} Konsolenzeilen",
+    "passed": "{{count}} bestanden",
+    "failed": "{{count}} fehlgeschlagen",
+    "scriptFailed": "Fehlgeschlagen",
+    "noOutput": "Keine Konsolenausgabe oder Prüfergebnisse.",
+    "secrets": "Secret-Manager",
+    "secretsRead_one": "{{count}} Secret gelesen",
+    "secretsRead_other": "{{count}} Secrets gelesen",
+    "secretSkipped": "{{name}} ist leer, weil die Verbindung „{{connection}}“ aus ist",
+    "seconds": "{{value}} s",
+    "milliseconds": "{{value}} ms",
+    "phases": {
+      "dns": {
+        "label": "DNS-Abfrage",
+        "short": "DNS"
+      },
+      "connect": {
+        "label": "TCP-Verbindungsaufbau",
+        "short": "Verbinden"
+      },
+      "tls": {
+        "label": "TLS-Handshake",
+        "short": "TLS"
+      },
+      "firstByte": {
+        "label": "Warten auf das erste Byte",
+        "short": "TTFB"
+      },
+      "download": {
+        "label": "Download des Inhalts",
+        "short": "Download"
+      }
+    },
+    "facts": {
+      "remoteAddress": "Gegenstelle",
+      "protocol": "Protokoll",
+      "connection": "Verbindung",
+      "tls": "TLS",
+      "certificateSubject": "Zertifikatsinhaber",
+      "certificateIssuer": "Zertifikatsaussteller",
+      "requestBody": "Body der Anfrage",
+      "redirectsTo": "Leitet weiter an",
+      "cookiesSet": "Gesetzte Cookies"
+    },
+    "tlsAlpn": "ALPN {{protocol}}",
+    "tlsExpires": "läuft ab {{date}}",
+    "tlsExpired": "läuft ab {{date}} (abgelaufen)"
+  }
+}

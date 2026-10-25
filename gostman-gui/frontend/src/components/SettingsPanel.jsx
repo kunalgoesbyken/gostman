@@ -7,7 +7,7 @@ import { Field } from "./ui/field"
 import { Input } from "./ui/input"
 import { PanelBody } from "./ui/panel"
 import { TagsInput } from "./ui/tagsInput"
-import { SSE_SETTINGS_TEXT } from "../lib/sse"
+import { SSE_SETTINGS_TEXT } from "../lib/sseText"
 import { BUILT_IN_TIMEOUT_SECONDS, usePreferences } from "../lib/preferences"
 import { REQUEST_SETTINGS_TEXT as TEXT } from "../lib/requestSettingsText"
 import { SETTING_REDIRECTS, SETTING_SEND_COOKIES, SETTING_STORE_COOKIES, SETTING_STREAM, SETTING_TIMEOUT, SETTING_TLS } from "../lib/requestSections"
@@ -18,11 +18,11 @@ const defaultTimeoutMs = ({ requestTimeoutSeconds }) => (requestTimeoutSeconds |
 const CHECKBOX_CLASS = "h-7 justify-start self-start"
 
 const SWITCHES = [
-  { setting: SETTING_REDIRECTS, field: "noFollowRedirects", label: TEXT.followRedirects, inverted: true },
-  { setting: SETTING_TLS, field: "insecureTLS", label: TEXT.verifyTls, inverted: true },
-  { setting: SETTING_SEND_COOKIES, field: "skipCookies", label: TEXT.sendCookies, inverted: true },
-  { setting: SETTING_STORE_COOKIES, field: "discardCookies", label: TEXT.storeCookies, inverted: true },
-  { setting: SETTING_STREAM, field: "stream", label: SSE_SETTINGS_TEXT.stream, inverted: false },
+  { setting: SETTING_REDIRECTS, field: "noFollowRedirects", get label() { return TEXT.followRedirects }, inverted: true },
+  { setting: SETTING_TLS, field: "insecureTLS", get label() { return TEXT.verifyTls }, inverted: true },
+  { setting: SETTING_SEND_COOKIES, field: "skipCookies", get label() { return TEXT.sendCookies }, inverted: true },
+  { setting: SETTING_STORE_COOKIES, field: "discardCookies", get label() { return TEXT.storeCookies }, inverted: true },
+  { setting: SETTING_STREAM, field: "stream", get label() { return SSE_SETTINGS_TEXT.stream }, inverted: false },
 ]
 
 const toWholeNumber = (text) => Math.max(0, Math.trunc(Number(text)) || 0)
@@ -46,6 +46,7 @@ export function SettingsPanel({ options, settings, description, tags, onChange, 
               value={options.timeoutMs || ""}
               placeholder={TEXT.timeoutPlaceholder(defaultTimeoutMs(preferences))}
               onChange={(event) => update({ timeoutMs: toWholeNumber(event.target.value) })}
+              dir="ltr"
               className="max-w-48 font-mono"
             />
           </Field>
@@ -76,6 +77,7 @@ export function SettingsPanel({ options, settings, description, tags, onChange, 
                 value={options.streamMaxEvents || ""}
                 placeholder={SSE_SETTINGS_TEXT.maxEventsPlaceholder}
                 onChange={(event) => update({ streamMaxEvents: toWholeNumber(event.target.value) })}
+                dir="ltr"
                 className="max-w-48 font-mono"
               />
             </Field>
@@ -86,6 +88,7 @@ export function SettingsPanel({ options, settings, description, tags, onChange, 
                 value={options.streamMaxSeconds || ""}
                 placeholder={SSE_SETTINGS_TEXT.maxSecondsPlaceholder}
                 onChange={(event) => update({ streamMaxSeconds: toWholeNumber(event.target.value) })}
+                dir="ltr"
                 className="max-w-48 font-mono"
               />
             </Field>

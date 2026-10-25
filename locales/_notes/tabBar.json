@@ -1,0 +1,7 @@
+{
+  "tabBar.openRequests": "Accessible label of the row of open tabs.",
+  "tabBar.newRequest": "Tooltip of the plus button that opens an empty request tab.",
+  "tabBar.untitled": "Title of a tab whose request has no name.",
+  "tabBar.unsaved": "Tooltip of the dot on a tab with edits that are not saved yet.",
+  "tabBar.close": "{{title}} is the name of the request in the tab."
+}

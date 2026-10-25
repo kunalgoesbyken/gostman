@@ -1,0 +1,13 @@
+{
+  "app.loading": "Shown while the app starts. Short.",
+  "app.loadingEditor": "Shown while the code editor loads.",
+  "app.backToLanding": "Accessible label of the logo link that leads back to the product page.",
+  "app.requestSection": "Name of the main area where a request is edited. Used for screen readers.",
+  "app.window.minimize": "Title bar button of the desktop app window.",
+  "app.window.maximize": "Title bar button of the desktop app window.",
+  "app.window.restore": "Title bar button that returns a maximized window to its normal size.",
+  "app.crash.description": "{{error}} is the technical error text and stays as it is. The blank line before it is part of the message.",
+  "app.loadFailure.description": "{{reason}} is a sentence explaining what went wrong, already in the interface language.",
+  "app.loadFailure.ok": "Button that closes a message.",
+  "app.labelled": "Pattern for an accessible label: what the button does, a colon, then the name of the item it acts on. For example \"Pin: Local files\"."
+}

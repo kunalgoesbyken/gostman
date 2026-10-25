@@ -2,11 +2,11 @@ package importer
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const (
@@ -49,7 +49,7 @@ func (c *collector) grpcParts(root string, call grpcCall, request *parts) {
 	}
 	files, found := c.protoSet(root, call.protoPath)
 	if !found {
-		c.flag(messageProtoMissing, request.name)
+		c.flag(locales.ImporterProtoMissing, request.name)
 		return
 	}
 	request.grpcProtos = jsonList(files)
@@ -98,7 +98,7 @@ func (c *collector) settingsOptions(name string, settings requestSettings) engin
 	case settings.followRedirects == "false":
 		options.NoFollowRedirects = true
 	case settings.maxRedirects != "" && settings.maxRedirects != defaultMaxRedirects && settings.maxRedirects != authInherit:
-		c.flag(messageMaxRedirects, name)
+		c.flag(locales.ImporterMaxRedirects, name)
 	}
 	return options
 }
@@ -139,8 +139,8 @@ func applyPathParams(address string, params []row) string {
 	return rebuilt
 }
 
-func droppedScripts(label string, kinds []string) string {
-	return fmt.Sprintf(messageGrpcScripts, label, strings.Join(kinds, ", "))
+func droppedScripts(label locales.Message, kinds []string) locales.Message {
+	return locales.New(locales.ImporterGrpcScripts, locales.Params{"label": label, "kinds": strings.Join(kinds, ", ")})
 }
 
 type importMark struct {
@@ -158,6 +158,6 @@ func (c *collector) noteDotEnv(collection string, since importMark) {
 	}
 	encoded, err := json.Marshal([]any{c.Requests[since.requests:], c.Folders[since.folders:], c.Variables})
 	if err == nil && strings.Contains(string(encoded), processPrefix) {
-		c.Warnings = append(c.Warnings, fmt.Sprintf(messageDotEnv, collection))
+		c.lead(locales.New(locales.ImporterDotEnv, locales.Params{"name": collection, "example": "{{process.env.NAME}}"}))
 	}
 }

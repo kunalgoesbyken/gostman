@@ -1,0 +1,15 @@
+{
+  "examples.title": "Title of the window that lists the saved response examples of a request.",
+  "examples.servedByDefault": "Accessible label of a star that marks the example the mock server returns by default.",
+  "examples.serveByDefault": "Accessible label of the button that makes this example the default of the mock server.",
+  "examples.format": "Accessible label of the button that indents the example body.",
+  "examples.section": "Accessible label of the Body or Headers switch.",
+  "examples.body": "Tab of the example window: the body of the example.",
+  "examples.headersCount": "Tab with the number of headers. {{count}} is that number.",
+  "examples.noContentType": "Shown instead of the content type when the example has none.",
+  "examples.binaryTitle": "{{size}} is a file size.",
+  "examples.discard": "Button that throws away unsaved edits of the example body.",
+  "examples.saveBody": "Button that saves the edited example body.",
+  "examples.bodyTooLarge": "{{size}} and {{limit}} are sizes such as 2.50 MB.",
+  "examples.tooMany": "{{limit}} is a number."
+}

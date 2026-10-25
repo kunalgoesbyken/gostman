@@ -1,0 +1,12 @@
+{
+  "exampleActions": {
+    "saveFailure": "Could not save the example",
+    "changeFailure": "Could not change the example",
+    "saved": "Example \"{{example}}\" was saved with \"{{request}}\".",
+    "saveTitle": "Save as example",
+    "nameLabel": "Example name",
+    "renameTitle": "Rename example",
+    "deleteTitle": "Delete example",
+    "deleteMessage": "Delete example \"{{name}}\"? This can't be undone."
+  }
+}

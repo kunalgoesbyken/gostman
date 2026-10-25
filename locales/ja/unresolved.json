@@ -1,0 +1,11 @@
+{
+  "unresolved": {
+    "sentAsWritten_other": "次の変数は定義されていないため、書かれたとおりに送信されました：",
+    "notDefined_other": "次の変数は定義されていません：",
+    "openEnvironments": "環境を開く",
+    "extractedBy": "{{reference}}は「{{request}}」の抽出ルールで設定されるため、先にそのリクエストを送信してください。",
+    "extractedByOnly": "この変数は「{{request}}」の抽出ルールで設定されるため、先にそのリクエストを送信してください。",
+    "openSource": "「{{request}}」を開く",
+    "define": "{{reference}}をアクティブな環境に追加"
+  }
+}

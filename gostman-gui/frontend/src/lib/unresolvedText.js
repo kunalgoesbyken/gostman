@@ -1,11 +1,16 @@
-export const UNRESOLVED_TEXT = {
-  placeholder: (name) => `{{${name}}}`,
-  sentAsWritten: (count) => (count === 1
-    ? 'This variable is not defined, so it was sent as written:'
-    : 'These variables are not defined, so they were sent as written:'),
-  notDefined: (count) => (count === 1 ? 'This variable is not defined:' : 'These variables are not defined:'),
-  openEnvironments: 'Open Environments',
-  extractedBy: (name, request, isOnly) => `${isOnly ? 'It' : `{{${name}}}`} is set by an extract rule on "${request}", so send that request first.`,
-  openSource: (request) => `Open "${request}"`,
-  define: (name) => `Add {{${name}}} to the active environment`,
-}
+import english from '../../../../locales/en/unresolved.json'
+import { messages } from './i18n/core'
+
+const braced = (name) => `{{${name}}}`
+
+const text = messages('unresolved', english, (t) => ({
+  unresolved: {
+    placeholder: braced,
+    extractedBy: (name, request, isOnly) => (
+      isOnly ? t('unresolved.extractedByOnly', { request }) : t('unresolved.extractedBy', { reference: braced(name), request })
+    ),
+    define: (name) => t('unresolved.define', { reference: braced(name) }),
+  },
+}))
+
+export const UNRESOLVED_TEXT = text.unresolved

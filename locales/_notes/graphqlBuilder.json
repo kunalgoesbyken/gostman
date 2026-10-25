@@ -1,0 +1,19 @@
+{
+  "builder.rootLabel": "Accessible label of the Query, Mutation and Subscription switch.",
+  "builder.rootNames.query": "GraphQL operation type that reads data.",
+  "builder.rootNames.mutation": "GraphQL operation type that changes data.",
+  "builder.rootNames.subscription": "GraphQL operation type that streams data.",
+  "builder.title": "Button and heading of the pane that builds a query by ticking fields.",
+  "builder.paneLabel": "Accessible label of the builder pane.",
+  "builder.filterLabel": "Accessible label and placeholder of the field filter.",
+  "builder.expand": "Accessible label of a button that opens a tree node.",
+  "builder.collapse": "Accessible label of a button that closes a tree node.",
+  "builder.select": "{{name}} is the name of a GraphQL field. Accessible label of a checkbox.",
+  "builder.include": "{{name}} is the name of a GraphQL argument. Accessible label of a checkbox.",
+  "builder.viaFragment": "Tooltip of a disabled checkbox. A fragment is a reusable GraphQL snippet.",
+  "builder.fetch": "Button that downloads the GraphQL schema from the endpoint.",
+  "builder.refresh": "Button that downloads the GraphQL schema again.",
+  "builder.loading": "Accessible label shown while the schema downloads.",
+  "builder.syntaxError": "{{message}} is a technical parser message in English.",
+  "builder.subscription": "Stream as server-sent events is an interface label in Settings; use the same words as the translation of that label."
+}

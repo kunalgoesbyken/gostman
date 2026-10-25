@@ -32,8 +32,8 @@ const LINES = {
   [STEP_IF]: (step) => {
     const condition = firstAndMore(step.conditions)
     if (!condition) return [{ text: TEXT.noCondition, muted: true }]
-    const prefix = step.source === CONDITION_VARIABLES ? `${TEXT.ofVariables}: ` : ''
-    return [{ text: `${prefix}${TEXT.condition(condition.first, condition.more, step.match)}`, mono: true }]
+    const described = TEXT.condition(condition.first, condition.more, step.match)
+    return [{ text: step.source === CONDITION_VARIABLES ? TEXT.variablesCondition(described) : described, mono: true }]
   },
   [STEP_FOR_EACH]: (step, { index, requests }) => [{ text: TEXT.loop(step.path, step.step ? referenceTitle(index, step.step, requests) : '?'), mono: true }],
   [STEP_DELAY]: (step) => [{ text: TEXT.wait(step.ms) }],

@@ -38,6 +38,7 @@ function Mirror({ text, variables, innerRef, className }) {
   return (
     <div
       aria-hidden="true"
+      dir="ltr"
       className={cn(className, "pointer-events-none absolute inset-0 flex items-center overflow-hidden whitespace-pre !border-transparent !bg-transparent !text-transparent")}
     >
       <span ref={innerRef} className="inline-block">{parts}</span>
@@ -62,6 +63,7 @@ const steppedIndex = (active, step, count) => (active === NOTHING_ACTIVE ? (step
 function Suggestions({ id, names, detail, active, placement, listRef, onPick }) {
   return createPortal(
     <ul
+      dir="ltr"
       ref={listRef}
       id={id}
       role="listbox"
@@ -219,6 +221,7 @@ export const VariableInput = forwardRef(function VariableInput(
     <div className="relative min-w-0 flex-1">
       {!masked && <Mirror text={String(value)} variables={variables} innerRef={mirrorRef} className={look} />}
       <input
+        dir="ltr"
         {...props}
         {...fieldProps}
         ref={inputRef}
@@ -248,7 +251,7 @@ export const VariableTextarea = forwardRef(function VariableTextarea(
 
   return (
     <>
-      <Textarea {...props} {...fieldProps} ref={textareaRef} value={value} />
+      <Textarea dir="ltr" {...props} {...fieldProps} ref={textareaRef} value={value} />
       {list}
     </>
   )

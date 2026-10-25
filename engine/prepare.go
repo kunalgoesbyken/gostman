@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const (
@@ -67,7 +69,7 @@ func prepareWith(r Request, expansion *substitution, stream *bodyStream) (Prepar
 
 	headers, err := parsePairs(r.Headers)
 	if err != nil {
-		return Prepared{}, fmt.Errorf("headers are not valid: %w", err)
+		return Prepared{}, locales.Wrap(locales.EngineRequestHeadersInvalid, nil, err)
 	}
 	headers = substitutePairs(headers, substitute)
 
@@ -116,7 +118,7 @@ func buildURL(r Request, expansion *substitution) (*url.URL, error) {
 	substitute := expansion.apply
 	raw := strings.TrimSpace(substitute(r.URL))
 	if raw == "" {
-		return nil, fmt.Errorf("enter a URL to send the request to")
+		return nil, locales.Errorf(locales.EngineRequestUrlRequired, nil)
 	}
 	if !strings.Contains(raw, "://") {
 		raw = defaultScheme(raw) + "://" + raw
@@ -127,14 +129,14 @@ func buildURL(r Request, expansion *substitution) (*url.URL, error) {
 		return nil, invalidURL(raw, expansion.missing)
 	}
 	if target.Scheme != "http" && target.Scheme != "https" {
-		return nil, fmt.Errorf("unsupported URL scheme %q, use http or https", target.Scheme)
+		return nil, locales.Errorf(locales.EngineRequestUrlScheme, locales.Params{"scheme": target.Scheme})
 	}
 
 	target.RawQuery = escapeNonASCII(target.RawQuery)
 
 	params, err := parsePairs(r.QueryParams)
 	if err != nil {
-		return nil, fmt.Errorf("query params are not valid: %w", err)
+		return nil, locales.Wrap(locales.EngineRequestQueryInvalid, nil, err)
 	}
 	overrideQuery(target, substitutePairs(params, substitute))
 	return target, nil
@@ -142,9 +144,9 @@ func buildURL(r Request, expansion *substitution) (*url.URL, error) {
 
 func invalidURL(raw string, missing []string) error {
 	if len(missing) == 0 {
-		return fmt.Errorf("%q is not a valid URL", raw)
+		return locales.Errorf(locales.EngineRequestUrlInvalid, locales.Params{"url": raw})
 	}
-	return fmt.Errorf("%q is not a valid URL because %s", raw, NotDefined(missing))
+	return locales.Errorf(locales.EngineRequestUrlInvalidMissing, locales.Params{"url": raw, "reason": notDefinedMessage(missing)})
 }
 
 func escapeNonASCII(raw string) string {

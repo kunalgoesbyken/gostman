@@ -29,7 +29,7 @@ export function GitDiffView({ text, binary, summary }) {
           {summary.map((line) => <li key={line}>{line}</li>)}
         </ul>
       )}
-      <div aria-label={TEXT.diffLabel} className="min-h-0 flex-1 overflow-auto py-1 font-mono text-xs leading-5">
+      <div dir="ltr" aria-label={TEXT.diffLabel} className="min-h-0 flex-1 overflow-auto py-1 font-mono text-xs leading-5">
         {binary && <p className="px-3 text-muted-foreground">{TEXT.binaryDiff}</p>}
         {!binary && lines.length === 0 && <p className="px-3 text-muted-foreground">{TEXT.noTextChanges}</p>}
         {lines.map((line, index) => (

@@ -1,0 +1,69 @@
+{
+  "network": {
+    "hostNotFound": "The host {{host}} could not be found. Check the address for typos and that this computer is online.",
+    "untrustedAuthority": "The server's certificate is not signed by an authority this computer trusts. {{advice}}",
+    "handshakeCertificate": "The server ended the TLS handshake. Check that it accepts the client certificate set for this host.",
+    "handshake": "The server ended the TLS handshake. {{advice}}",
+    "hostMismatch": "The server's certificate is not valid for {{host}}. Check that the address is the one the certificate was issued for.",
+    "certificateExpired": "The server's certificate has expired or is not valid yet. Check the clock on this computer, or renew the certificate.",
+    "proxyConnect": "Could not connect to the proxy server. Check the proxy address in {{source}}.",
+    "proxyConnectSettings": "Could not connect to the proxy server. Check the proxy address in the network settings.",
+    "dial": "Could not connect to {{host}}. Check that the server is running and that the host and port are right.",
+    "dialServer": "Could not connect to the server. Check that the server is running and that the host and port are right."
+  },
+  "advice": {
+    "untrustedAuthority": "Trust its certificate authority, or turn off certificate verification for this request.",
+    "clientCertificate": "If the server requires a client certificate, add one for this host in the desktop app's network settings."
+  },
+  "failure": {
+    "timeout": "the request timed out",
+    "cancelled": "the request was cancelled"
+  },
+  "blocked": {
+    "address": "private and local addresses are blocked",
+    "addressResolved": "private and local addresses are blocked: {{host}} resolves to {{address}}",
+    "host": "this host is not on the list of hosts that may be called",
+    "hostNamed": "this host is not on the list of hosts that may be called: {{host}}"
+  },
+  "request": {
+    "urlRequired": "enter a URL to send the request to",
+    "urlScheme": "unsupported URL scheme \"{{scheme}}\", use http or https",
+    "urlInvalid": "\"{{url}}\" is not a valid URL",
+    "urlInvalidMissing": "\"{{url}}\" is not a valid URL because {{reason}}",
+    "notDefined_one": "{{names}} is not defined",
+    "notDefined_other": "{{names}} are not defined",
+    "headersInvalid": "headers are not valid: {{detail}}",
+    "queryInvalid": "query params are not valid: {{detail}}",
+    "variablesInvalid": "environment variables are not valid JSON: {{detail}}",
+    "bodyTooLarge": "request body is larger than 10 MB",
+    "tooLargeExpanded": "the request is larger than 10 MB once variables are filled in",
+    "variablesTooDeep": "the variables refer to each other too many times to fill in; simplify the variables that contain {{example}}",
+    "redirects": "stopped after {{count}} redirects",
+    "trailingJson": "unexpected text after the JSON value",
+    "expectedObject": "expected a JSON object",
+    "expectedRows": "expected a JSON object or a list of rows"
+  },
+  "files": {
+    "unavailable": "{{example}} reads files only in the desktop app, or in gostman run, send and load with --allow-files",
+    "relativePath": "open a workspace folder to use a relative path in {{example}}, or give an absolute path",
+    "httpOnly": "{{example}} reads files only in HTTP and GraphQL requests",
+    "outsideFolder": "\"{{path}}\" is outside the collection folder; a collection reads only files inside its folder",
+    "unreadable": "cannot read file \"{{path}}\": {{detail}}",
+    "isFolder": "\"{{path}}\" is a folder, not a file",
+    "tooLarge": "file \"{{path}}\" is larger than 10 MB",
+    "notFound": "file \"{{path}}\" was not found at {{resolved}}",
+    "pathMissing": "{{example}} needs a file path between the parentheses",
+    "networkPath": "\"{{path}}\" is a network or device path. Files are read only from this computer's drives, so your Windows sign-in is never sent to another computer. Copy the file to this computer or map the share to a drive letter"
+  },
+  "attachments": {
+    "unavailable": "files attached from disk are sent only by the desktop app",
+    "tooLarge": "the attached files are larger than {{size}} GB together",
+    "signed": "this authentication signs the whole body, so attached files are limited to {{size}} MB together with it",
+    "failed": "attached file \"{{name}}\": {{detail}}",
+    "notRegular": "\"{{path}}\" is not a regular file"
+  },
+  "proxy": {
+    "invalidAddress": "\"{{address}}\" is not a valid proxy address",
+    "unsupportedScheme": "unsupported proxy scheme \"{{scheme}}\", use http, https or socks5"
+  }
+}

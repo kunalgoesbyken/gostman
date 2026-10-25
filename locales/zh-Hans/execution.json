@@ -1,0 +1,13 @@
+{
+  "execution": {
+    "promptDeclined": "请求未发送，因为没有提供它所需要的值。",
+    "unusableAddress": "脚本无法使用该地址。",
+    "sendLimit": "脚本最多可调用 sendRequest {{limit}} 次。",
+    "hostNotPermitted": "此集合没有使用主机“{{host}}”，因此脚本不能调用它。",
+    "scriptFileReads": "脚本不能向请求添加 {{example}} 占位符或从磁盘附加的文件。请把它们放在请求本身中。",
+    "preRequest": "预请求脚本",
+    "postResponse": "响应后脚本",
+    "scopeLabel": "{{stage}}（{{name}}）",
+    "restricted": "此文件夹尚未受信任，因此其脚本、OAuth 2.0 设置、本地 MCP 命令和文件读取均已关闭。请打开标题栏中的文件夹菜单，选择“信任此文件夹”。"
+  }
+}

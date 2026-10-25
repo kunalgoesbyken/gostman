@@ -33,8 +33,8 @@ export function AppHeader({ storage, windowFrame, onImport, onOpenCommands, onTo
 
   return (
     <header className="relative flex h-12 shrink-0 items-center gap-3 border-b border-border bg-background px-3 max-sm:gap-2" style={drawsTitleBar ? DRAG : undefined} onDoubleClick={drawsTitleBar ? toggleMaximiseOnDragRegion : undefined}>
-      <IconButton label={hintWithShortcut(SIDEBAR_TEXT.toggle, sidebarShortcut)} icon={PanelLeft} size="icon" aria-expanded={isSidebarOpen} onClick={onToggleSidebar} style={drawsTitleBar ? NO_DRAG : undefined} />
-      {onBack && <IconButton label={APP_TEXT.backToLanding} icon={ArrowLeft} size="icon" onClick={onBack} />}
+      <IconButton label={hintWithShortcut(SIDEBAR_TEXT.toggle, sidebarShortcut)} icon={PanelLeft} mirrored size="icon" aria-expanded={isSidebarOpen} onClick={onToggleSidebar} style={drawsTitleBar ? NO_DRAG : undefined} />
+      {onBack && <IconButton label={APP_TEXT.backToLanding} icon={ArrowLeft} mirrored size="icon" onClick={onBack} />}
 
       {onBack || isDesktop ? (
         <div className="flex shrink-0 items-center gap-2">
@@ -49,7 +49,7 @@ export function AppHeader({ storage, windowFrame, onImport, onOpenCommands, onTo
         <StorageMenu storage={storage} />
       </div>
 
-      <div className="ml-auto flex min-w-0 items-center gap-3 max-sm:gap-2" style={drawsTitleBar ? NO_DRAG : undefined}>
+      <div className="ms-auto flex min-w-0 items-center gap-3 max-sm:gap-2" style={drawsTitleBar ? NO_DRAG : undefined}>
         <Button variant="ghost" onClick={onOpenCommands} className="hidden lg:inline-flex">
           <Search />
           {COMMAND_TEXT.heading}

@@ -1,0 +1,51 @@
+{
+  "command": {
+    "title": "Command palette",
+    "heading": "Commands",
+    "sections": {
+      "request": "Requests"
+    },
+    "searchCommands": "Search commands",
+    "searchRequests": "Search requests",
+    "commandsPlaceholder": "Type a command or a request name",
+    "requestsPlaceholder": "Go to a request or history entry",
+    "results": "Results",
+    "nothingMatches": "Nothing matches",
+    "sentEarlier": "Sent earlier",
+    "switchEnvironment": "Switch environment: {{name}}",
+    "switchEnvironmentDescription": "Use this environment's variables",
+    "settingsKeywords": "headers auth variables scripts checks",
+    "commands": {
+      "sendRequest": { "label": "Send request", "description": "Send the request in the current tab" },
+      "newRequest": { "description": "Open a new empty tab" },
+      "saveRequest": { "label": "Save request", "description": "Save the request in the current tab" },
+      "duplicateRequest": { "label": "Duplicate request", "description": "Save a copy of the current request" },
+      "copyRequest": { "label": "Copy request", "description": "Copy the saved request to paste it into a folder" },
+      "pasteRequest": { "label": "Paste request", "description": "Paste the copied request or folder next to the current request" },
+      "generateCode": { "description": "Show the current request as code" },
+      "closeTab": { "label": "Close tab", "description": "Close the current tab" },
+      "closeOtherTabs": { "description": "Keep only the current tab" },
+      "closeSavedTabs": { "description": "Close every tab without unsaved changes" },
+      "keepTab": { "label": "Keep preview tab open", "description": "Turn the preview tab into a regular tab" },
+      "reopenTab": { "label": "Reopen closed tab", "description": "Bring back the tab you closed last" },
+      "toggleSidebar": { "description": "Show or hide collections and history" },
+      "shortcuts": { "description": "See every shortcut" },
+      "newFolder": { "description": "Create a folder at the top level" },
+      "runCollection": { "description": "Run the whole collection or one folder, with its checks and scripts" },
+      "collapseFolders": { "keywords": "close fold tree" },
+      "examples": { "label": "Request examples", "description": "See the saved responses of the current request" },
+      "mockServer": { "description": "Serve saved examples on a local port" },
+      "capture": { "label": "Capture traffic", "description": "Forward an app's traffic to its API and save it as requests" },
+      "cookies": { "label": "Manage cookies", "description": "See and delete stored cookies" },
+      "environments": { "label": "Manage environments", "description": "Create environments and edit their variables, collection variables and globals", "keywords": "variables globals" },
+      "scanSecrets": { "keywords": "credentials tokens passwords leak" },
+      "network": { "label": "Network settings", "description": "Proxy and certificates" },
+      "import": { "label": "Import data", "description": "Import Postman, Insomnia, Bruno, OpenAPI, HAR and other files" },
+      "lintSpec": { "description": "Check the imported OpenAPI spec for problems", "keywords": "openapi swagger validate governance" },
+      "loadTest": { "keywords": "performance stress" },
+      "export": { "label": "Export data", "description": "Export collections and environments" },
+      "share": { "label": "Share collection", "description": "Create an encrypted link or file, no account needed" },
+      "clearHistory": { "description": "Delete every history entry" }
+    }
+  }
+}

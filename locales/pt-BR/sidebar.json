@@ -1,0 +1,41 @@
+{
+  "sidebar": {
+    "views": "Visualização da barra lateral",
+    "collections": "Coleções",
+    "history": "Histórico",
+    "runRequests": "Executar requisições",
+    "newFolder": "Nova pasta",
+    "newRequest": "Nova requisição",
+    "toggle": "Alternar barra lateral",
+    "close": "Fechar barra lateral",
+    "resize": "Redimensionar barra lateral"
+  },
+  "history": {
+    "search": "Buscar no histórico",
+    "emptyTitle": "Ainda não há histórico",
+    "emptyDescription": "As requisições enviadas aparecem aqui.",
+    "noMatches": "Nenhuma requisição enviada corresponde.",
+    "remove": "Remover do histórico",
+    "clear": "Limpar histórico",
+    "noResponse": "Sem resposta",
+    "sentAgo": {
+      "now": "agora",
+      "minutes": "{{count}} min",
+      "hours": "{{count}} h",
+      "days": "{{count}} d"
+    },
+    "sentAgoSpoken": {
+      "now": "enviada agora mesmo",
+      "minutes_one": "enviada há {{count}} minuto",
+      "minutes_many": "enviada há {{count}} de minutos",
+      "minutes_other": "enviada há {{count}} minutos",
+      "hours_one": "enviada há {{count}} hora",
+      "hours_many": "enviada há {{count}} de horas",
+      "hours_other": "enviada há {{count}} horas",
+      "days_one": "enviada há {{count}} dia",
+      "days_many": "enviada há {{count}} de dias",
+      "days_other": "enviada há {{count}} dias",
+      "date": "enviada em {{date}}"
+    }
+  }
+}

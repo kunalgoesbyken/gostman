@@ -8,6 +8,8 @@
     "build": "vite build",
     "dev:web": "vite --config vite.web.config.js",
     "build:web": "vite build --config vite.web.config.js",
+    "i18n:check": "node i18n/check.js",
+    "i18n:prune": "node i18n/prune.js",
     "build:cli": "esbuild src/cli/runtime.js --bundle --format=iife --global-name=gostman --platform=browser --target=es2020 --supported:arrow=false --minify --legal-comments=none --tsconfig=src/cli/tsconfig.json --log-level=warning --outfile=../../runner/sandbox/bundle.js",
     "preview": "vite preview"
   },
@@ -46,6 +48,7 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "@babel/parser": "^7.28.5",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "@vitejs/plugin-react": "^2.0.1",

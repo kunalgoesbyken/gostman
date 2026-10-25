@@ -1,4 +1,5 @@
 import { parseJSON } from './dataUtils'
+import { GRPC_TEXT } from './grpcText'
 
 export const GRPC_METHOD = 'GRPC'
 
@@ -39,10 +40,10 @@ export function findMethod(services, fullName) {
 }
 
 export function methodKind(method) {
-  if (method.clientStreaming && method.serverStreaming) return 'Bidirectional streaming'
-  if (method.clientStreaming) return 'Client streaming'
-  if (method.serverStreaming) return 'Server streaming'
-  return 'Unary'
+  if (method.clientStreaming && method.serverStreaming) return GRPC_TEXT.kinds.bidirectional
+  if (method.clientStreaming) return GRPC_TEXT.kinds.client
+  if (method.serverStreaming) return GRPC_TEXT.kinds.server
+  return GRPC_TEXT.kinds.unary
 }
 
 export const isBlankMessage = (message) => BLANK_MESSAGES.includes(message.trim())

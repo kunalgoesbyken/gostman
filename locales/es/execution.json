@@ -1,0 +1,13 @@
+{
+  "execution": {
+    "promptDeclined": "La solicitud no se envió porque no se indicaron los valores que pide.",
+    "unusableAddress": "Un script no puede usar esta dirección.",
+    "sendLimit": "Un script puede llamar a sendRequest {{limit}} veces.",
+    "hostNotPermitted": "Esta colección no usa el host «{{host}}», así que los scripts no pueden llamarlo.",
+    "scriptFileReads": "Un script no puede añadir a una solicitud marcadores {{example}} ni archivos adjuntos desde el disco. Ponlos en la propia solicitud.",
+    "preRequest": "Script previo a la solicitud",
+    "postResponse": "Script posterior a la respuesta",
+    "scopeLabel": "{{stage}} ({{name}})",
+    "restricted": "Aún no confías en esta carpeta, así que sus scripts, ajustes de OAuth 2.0, comandos MCP locales y lecturas de archivos están desactivados. Abre el menú de la carpeta en el encabezado y elige Confiar en esta carpeta."
+  }
+}

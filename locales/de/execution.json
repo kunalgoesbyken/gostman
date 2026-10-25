@@ -1,0 +1,13 @@
+{
+  "execution": {
+    "promptDeclined": "Die Anfrage wurde nicht gesendet, weil die abgefragten Werte nicht angegeben wurden.",
+    "unusableAddress": "Die Adresse kann von einem Skript nicht verwendet werden.",
+    "sendLimit": "Ein Skript darf sendRequest {{limit}}-mal aufrufen.",
+    "hostNotPermitted": "Der Host „{{host}}“ wird von dieser Sammlung nicht verwendet, daher dürfen Skripte ihn nicht aufrufen.",
+    "scriptFileReads": "Ein Skript kann einer Anfrage keine {{example}}-Platzhalter oder von der Festplatte angehängten Dateien hinzufügen. Setzen Sie sie in die Anfrage selbst.",
+    "preRequest": "Pre-Request-Skript",
+    "postResponse": "Post-Response-Skript",
+    "scopeLabel": "{{stage}} ({{name}})",
+    "restricted": "Diesem Ordner wird noch nicht vertraut, daher sind seine Skripte, OAuth-2.0-Einstellungen, lokalen MCP-Befehle und Dateizugriffe abgeschaltet. Öffnen Sie das Ordnermenü in der Kopfzeile und wählen Sie „Diesem Ordner vertrauen“."
+  }
+}

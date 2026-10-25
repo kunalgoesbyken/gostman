@@ -1,0 +1,9 @@
+{
+  "tabBar": {
+    "openRequests": "Cereri deschise",
+    "newRequest": "Cerere nouă",
+    "untitled": "Fără titlu",
+    "unsaved": "Modificări nesalvate",
+    "close": "Închidere {{title}}"
+  }
+}

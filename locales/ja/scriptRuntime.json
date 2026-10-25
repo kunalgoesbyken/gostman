@@ -1,0 +1,6 @@
+{
+  "scriptRuntime": {
+    "consoleTruncated": "コンソールの出力は途中で切り捨てられました。",
+    "notStarted": "スクリプトを起動できませんでした。"
+  }
+}

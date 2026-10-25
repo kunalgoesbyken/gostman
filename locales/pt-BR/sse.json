@@ -1,0 +1,48 @@
+{
+  "sse": {
+    "allTypes": "Todos os tipos de evento",
+    "searchLabel": "Buscar eventos",
+    "searchPlaceholder": "Buscar eventos",
+    "pause": "Pausar rolagem automática",
+    "resume": "Retomar rolagem automática",
+    "clear": "Limpar eventos",
+    "copyAll": "Copiar eventos mostrados",
+    "copied": "Copiado",
+    "copyEvent": "Copiar dados do evento",
+    "noEvents": "Ainda não há eventos",
+    "waiting": "Aguardando o servidor enviar um evento.",
+    "noMatches": "Nenhum evento corresponde",
+    "noMatchesHint": "Altere o filtro de tipo ou a busca para ver mais.",
+    "clipped": "Este evento era longo demais, então o restante foi deixado de fora.",
+    "shown": "{{shown}} de {{total}} mostrados",
+    "received": "{{count}} recebidos",
+    "dropped_one": "O evento mais antigo não está mais na lista. A resposta baixada ainda tem todos os eventos.",
+    "dropped_many": "Os {{count}} de eventos mais antigos não estão mais na lista. A resposta baixada ainda tem todos os eventos.",
+    "dropped_other": "Os {{count}} eventos mais antigos não estão mais na lista. A resposta baixada ainda tem todos os eventos.",
+    "reconnecting": "Reconectando em {{seconds}} s (tentativa {{attempt}})"
+  },
+  "sseSettings": {
+    "stream": "Transmitir como server-sent events",
+    "reconnect": "Reconectar quando o servidor encerrar o stream",
+    "maxEvents": "Máx. de eventos",
+    "maxEventsPlaceholder": "Padrão 10000",
+    "maxSeconds": "Máx. de segundos",
+    "maxSecondsPlaceholder": "Padrão 300"
+  },
+  "status": {
+    "connecting": "Conectando",
+    "open": "Transmitindo",
+    "reconnecting": "Reconectando",
+    "ended": "Encerrado"
+  },
+  "streamEnd": {
+    "closed": "O servidor encerrou o stream.",
+    "cancelled": "O stream foi interrompido.",
+    "maxEvents": "Interrompido no limite de eventos. Aumente-o em Ajustes.",
+    "maxBytes": "Interrompido no limite de tamanho.",
+    "maxDuration": "Interrompido no limite de tempo. Aumente-o em Ajustes.",
+    "failed": "O stream falhou.",
+    "failedWith": "O stream falhou. {{detail}}",
+    "hostedLimit": "Interrompido no limite de tempo. O app web transmite por no máximo {{seconds}} segundos; o app para desktop pode transmitir por mais tempo."
+  }
+}

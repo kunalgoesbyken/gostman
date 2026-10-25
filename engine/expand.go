@@ -9,6 +9,8 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const (
@@ -42,7 +44,7 @@ func (e *Expansion) Text(input string) string {
 func (e *Expansion) Headers(raw string, auth Auth) ([]HeaderEntry, error) {
 	pairs, err := parsePairs(raw)
 	if err != nil {
-		return nil, fmt.Errorf("headers are not valid: %w", err)
+		return nil, locales.Wrap(locales.EngineRequestHeadersInvalid, nil, err)
 	}
 	pairs, err = applyAuth(auth, e.Text, substitutePairs(pairs, e.Text), &url.URL{})
 	if err != nil {

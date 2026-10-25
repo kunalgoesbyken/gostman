@@ -1,0 +1,20 @@
+{
+  "welcome": {
+    "title": "Bem-vindo ao Gostman",
+    "intro": "Não precisa de conta. Nada sai deste dispositivo até você enviar uma requisição.",
+    "dismiss": "Dispensar as boas-vindas",
+    "commandTitle": "Mostrar boas-vindas",
+    "commandDescription": "Primeiros passos, importações e atalhos",
+    "otherTitle": "Outras formas de começar",
+    "importTitle": "Importar requisições",
+    "importHint": "Do Postman, Bruno, Insomnia, OpenAPI, HAR, arquivos .http ou curl.",
+    "folderTitle": "Abrir uma pasta",
+    "folderHint": "Mantenha as requisições como arquivos junto do seu código e compartilhe-as pelo git.",
+    "collectionTitle": "Criar uma pasta",
+    "collectionHint": "Agrupe requisições relacionadas na barra lateral.",
+    "curlTitle": "Colar um comando curl",
+    "curlHint": "Cole-o na barra de endereço e a requisição é preenchida.",
+    "shortcutsTitle": "Atalhos de teclado",
+    "sampleRequestName": "Requisição de exemplo"
+  }
+}

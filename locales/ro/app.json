@@ -1,0 +1,26 @@
+{
+  "app": {
+    "loading": "Se încarcă",
+    "loadingEditor": "Se încarcă editorul",
+    "backToLanding": "Înapoi la pagina de prezentare",
+    "requestSection": "Cerere",
+    "window": {
+      "minimize": "Minimizare",
+      "maximize": "Maximizare",
+      "restore": "Restaurare"
+    },
+    "crash": {
+      "title": "Gostman a întâmpinat o eroare",
+      "description": "Cererile salvate nu sunt afectate. Reîncărcați pentru a continua. Dacă se repetă, raportați-o împreună cu acest mesaj:\\n\\n{{error}}",
+      "reload": "Reîncărcare"
+    },
+    "loadFailure": {
+      "title": "Datele salvate nu au putut fi încărcate",
+      "description": "Nimic nu a fost modificat sau suprascris. {{reason}}",
+      "retry": "Încercați din nou",
+      "unreadable": "Datele salvate nu au putut fi citite",
+      "ok": "OK"
+    },
+    "labelled": "{{label}}: {{name}}"
+  }
+}

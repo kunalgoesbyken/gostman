@@ -1,0 +1,28 @@
+{
+  "requestTabs": {
+    "sections": "Sections de la requête",
+    "more": "Plus",
+    "moreHint": "Autres sections de la requête",
+    "loading": "Chargement",
+    "examples": "Exemples",
+    "examplesHint": "Exemples de réponse enregistrés",
+    "headerLabel": "En-tête",
+    "variableLabel": "Variable",
+    "paramLabel": "Paramètre",
+    "paramsNote": "Ces lignes reflètent la chaîne de requête de l’URL. Les lignes décochées sont conservées ici mais pas envoyées.",
+    "labels": {
+      "params": "Params",
+      "headers": "En-têtes",
+      "body": "Corps",
+      "auth": "Auth",
+      "graphql": "GraphQL",
+      "grpc": "gRPC",
+      "mcp": "MCP",
+      "websocket": "WebSocket",
+      "vars": "Vars",
+      "extract": "Extraire",
+      "tests": "Vérifications",
+      "settings": "Paramètres"
+    }
+  }
+}

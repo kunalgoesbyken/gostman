@@ -28,7 +28,9 @@ import { VisualizeTab } from "./VisualizeTab"
 import { TimelineTab } from "./TimelineTab"
 import { UnresolvedNotice } from "./UnresolvedNotice"
 import { useClipboardCopy } from "../hooks/useClipboardCopy"
-import { asSentence, formatSize, lookup } from "../lib/dataUtils"
+import { asSentence, lookup } from "../lib/dataUtils"
+import { errorBodyOf } from "../lib/responseError"
+import { formatBytes } from "../lib/byteSize"
 import { isFailedResponse } from "../lib/ai/tasks"
 import { MCP_PROTOCOL } from "../lib/mcp"
 import { shortcutLabel } from "../lib/platform"
@@ -79,8 +81,8 @@ const MEDIA_KINDS = [BODY_KINDS.IMAGE, BODY_KINDS.PDF, BODY_KINDS.AUDIO, BODY_KI
 const JSON_STYLE = {
   ...darkStyles,
   container: 'font-mono text-xs leading-relaxed whitespace-pre-wrap',
-  label: 'mr-1.5 text-syntax-key',
-  clickableLabel: 'mr-1.5 cursor-pointer text-syntax-key',
+  label: 'me-1.5 text-syntax-key',
+  clickableLabel: 'me-1.5 cursor-pointer text-syntax-key',
   stringValue: 'text-syntax-string',
   numberValue: 'text-syntax-number',
   booleanValue: 'text-syntax-boolean',
@@ -99,12 +101,12 @@ const testTone = (tests) => (tests.error || countPassed(tests.results) < tests.r
 
 const COLUMN_TEXT = RESPONSE_TEXT.columns
 
-const HEADER_COLUMNS = [
+const headerColumns = () => [
   { header: COLUMN_TEXT.name, key: 'key', width: 'w-1/3', cellClassName: 'text-foreground' },
   { header: COLUMN_TEXT.value, key: 'value' },
 ]
 
-const COOKIE_COLUMNS = [
+const cookieColumns = () => [
   { header: COLUMN_TEXT.name, key: 'name', cellClassName: 'text-foreground' },
   { header: COLUMN_TEXT.value, text: (cookie) => cookie.value || NO_VALUE },
   { header: COLUMN_TEXT.domain, text: (cookie) => cookie.domain || NO_VALUE },
@@ -146,7 +148,7 @@ function CopyButton({ text }) {
 function TextBody({ text, highlight }) {
   if (text.length > LARGE_BODY_CHARS) return <LargeText text={text} highlight={highlight} />
   return (
-    <pre className="whitespace-pre-wrap p-3 font-mono text-xs leading-relaxed text-foreground">
+    <pre dir="ltr" className="whitespace-pre-wrap p-3 font-mono text-xs leading-relaxed text-foreground">
       {highlight
         ? <HighlightedText text={text} matches={highlight.matches} length={highlight.length} activeIndex={highlight.index} />
         : text}
@@ -158,7 +160,7 @@ function BinaryBody({ response, onSave }) {
   return (
     <EmptyState
       icon={FileDigit}
-      title={RESPONSE_TEXT.binaryTitle(formatSize(response.size))}
+      title={RESPONSE_TEXT.binaryTitle(formatBytes(response.size))}
       description={RESPONSE_TEXT.binaryDescription(mimeType(response))}
       action={onSave && <Button size="sm" variant="outline" onClick={onSave}><Download />{RESPONSE_TEXT.saveToFile}</Button>}
     />
@@ -224,7 +226,7 @@ function JsonTree({ data, depth }) {
           {RESPONSE_TEXT.treeTrimmed(omitted)}
         </Notice>
       )}
-      <div className="p-3">
+      <div dir="ltr" className="p-3">
         <JsonView data={value} shouldExpandNode={(level) => level < depth} style={JSON_STYLE} />
       </div>
     </>
@@ -239,7 +241,7 @@ function HtmlPreview({ response }) {
     <div className="flex h-full min-h-0 flex-col">
       <Notice icon={ShieldCheck}>
         {remote ? PREVIEW_TEXT.loaded : PREVIEW_TEXT.blocked}
-        <button type="button" onClick={() => setLoadedFor(remote ? null : response)} className="ml-2 font-medium underline">
+        <button type="button" onClick={() => setLoadedFor(remote ? null : response)} className="ms-2 font-medium underline">
           {remote ? PREVIEW_TEXT.block : PREVIEW_TEXT.load}
         </button>
       </Notice>
@@ -272,7 +274,7 @@ function ErrorAction({ response, onExplain, onTrust }) {
 
 function ErrorBody({ response, onExplain, onTrust }) {
   const title = lookup(ERROR_TITLES, response.error) || RESPONSE_TEXT.requestFailed
-  return <EmptyState icon={AlertTriangle} title={title} description={asSentence(response.body)} className="whitespace-pre-line" action={<ErrorAction response={response} onExplain={onExplain} onTrust={onTrust} />} />
+  return <EmptyState icon={AlertTriangle} title={title} description={asSentence(errorBodyOf(response))} className="whitespace-pre-line" action={<ErrorAction response={response} onExplain={onExplain} onTrust={onTrust} />} />
 }
 
 function StatusSummary({ response }) {
@@ -280,7 +282,7 @@ function StatusSummary({ response }) {
     const label = response.error === RESTRICTED_ERROR ? RESPONSE_TEXT.error : lookup(ERROR_TITLES, response.error) || RESPONSE_TEXT.error
     return <Badge variant="outline">{label}</Badge>
   }
-  const timing = `${response.durationMs} ms · ${formatSize(response.size)}`
+  const timing = `${RESPONSE_TEXT.milliseconds(response.durationMs)} · ${formatBytes(response.size)}`
   const detail = [timing, breakdownTitle(response.timeline)].filter(Boolean).join('\n\n')
   return (
     <>
@@ -491,11 +493,11 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
     if (activeTab === TAB_VISUALIZE && tests?.visualization) return <VisualizeTab html={tests.visualization} />
     if (activeTab === TAB_HEADERS) {
       if (headers.length === 0) return <EmptyState icon={List} title={RESPONSE_TEXT.noHeadersTitle} description={RESPONSE_TEXT.noHeadersDescription} />
-      return <DataTable columns={HEADER_COLUMNS} rows={headers} />
+      return <div dir="ltr"><DataTable columns={headerColumns()} rows={headers} /></div>
     }
     if (activeTab === TAB_COOKIES) {
       if (cookies.length === 0) return <EmptyState icon={Cookie} title={RESPONSE_TEXT.noCookiesTitle} description={RESPONSE_TEXT.noCookiesDescription} />
-      return <DataTable columns={COOKIE_COLUMNS} rows={cookies} />
+      return <div dir="ltr"><DataTable columns={cookieColumns()} rows={cookies} /></div>
     }
     return (
       <ResponseBody
@@ -540,7 +542,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
         style={panelStyleFor(isFullscreen, isCollapsed, panelShare)}
       >
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
-          <Toolbar className={cn("h-auto min-h-10 flex-wrap gap-y-0 pl-1.5 pr-1.5", !isOpen && "border-b-0")}>
+          <Toolbar className={cn("h-auto min-h-10 flex-wrap gap-y-0 ps-1.5 pe-1.5", !isOpen && "border-b-0")}>
             {!isFullscreen && (
               <IconButton
                 label={isCollapsed ? RESPONSE_TEXT.expand : RESPONSE_TEXT.collapse}
@@ -554,13 +556,13 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
                 items={responseTabs({ hasResult, hasTimeline, showsTests, headers, cookies, tests })}
                 moreLabel={RESPONSE_TEXT.more}
                 moreHint={RESPONSE_TEXT.moreHint}
-                className={cn(TOOLBAR_ROW, "pl-1.5")}
+                className={cn(TOOLBAR_ROW, "ps-1.5")}
               />
             ) : (
-              <SectionLabel className="pl-1.5">{RESPONSE_TEXT.panel}</SectionLabel>
+              <SectionLabel className="ps-1.5">{RESPONSE_TEXT.panel}</SectionLabel>
             )}
 
-            <div className="ml-auto flex min-w-0 max-w-full items-center gap-2">
+            <div className="ms-auto flex min-w-0 max-w-full items-center gap-2">
               <div role="status" className={cn(TOOLBAR_ROW, "flex min-w-0 items-center gap-2")}>
                 {shown && <StatusSummary response={shown} />}
                 {showsTests && !past && tests.results.length > 0 && (
@@ -596,13 +598,13 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
           )}
 
           {isOpen && hasResult && shown.truncated && (
-            <Notice tone="warning" icon={Scissors}>{RESPONSE_TEXT.truncated(formatSize(shown.size))}</Notice>
+            <Notice tone="warning" icon={Scissors}>{RESPONSE_TEXT.truncated(formatBytes(shown.size))}</Notice>
           )}
 
           {isOpen && <UnresolvedNotice response={shown} />}
 
           {showsBody && isLarge && formatted.status !== FORMAT_DONE && (
-            <LargeBodyNotice size={formatSize(shown.size)} canFormat={canFormat} formatted={formatted} onFormat={format} />
+            <LargeBodyNotice size={formatBytes(shown.size)} canFormat={canFormat} formatted={formatted} onFormat={format} />
           )}
 
           {showsBody && views.length > 1 && (

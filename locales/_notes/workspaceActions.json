@@ -1,0 +1,21 @@
+{
+  "workspaceActions.saveFailed": "Title of an error dialog.",
+  "workspaceActions.noGrpcCode": "Explains why code snippets cannot be generated for a gRPC call.",
+  "workspaceActions.noMcpCode": "Explains why code snippets cannot be generated for an MCP tool call.",
+  "workspaceActions.codeFailed": "Title of an error dialog when code generation is not possible.",
+  "workspaceActions.saved": "{{name}} is a request name.",
+  "workspaceActions.copyName": "Name given to a duplicated request, where {{name}} is the original name. Saved as the request name.",
+  "workspaceActions.curlFailed": "Title of an error dialog. curl is a command line tool; keep the name.",
+  "workspaceActions.importFailed": "Title of an error dialog.",
+  "workspaceActions.importComplete": "Title of the summary dialog after an import.",
+  "workspaceActions.imported": "{{counts}} is a phrase such as 3 requests and 1 folder.",
+  "workspaceActions.skippedEnvironment": "{{name}} is an environment name.",
+  "workspaceActions.newFolder": "Title of the dialog that asks for a folder name.",
+  "workspaceActions.newSubfolder": "Title of the dialog that asks for the name of a folder inside another folder.",
+  "workspaceActions.deleteFolderEmpty": "{{name}} is a folder name.",
+  "workspaceActions.deleteFolderToTop": "{{name}} is a folder name, {{requests}} and {{subfolders}} are counted phrases such as 2 requests. The top level is the root of the collection list.",
+  "workspaceActions.deleteFolderToParent": "{{name}} is a folder name, {{requests}} and {{subfolders}} are counted phrases, {{parent}} is the name of the folder that contains it.",
+  "workspaceActions.clear": "Confirm button of the clear history dialog.",
+  "workspaceActions.closeTabMessage": "{{name}} is a request name.",
+  "workspaceActions.dontSave": "Button that closes the tab and drops the changes."
+}

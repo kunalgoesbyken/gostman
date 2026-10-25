@@ -1,0 +1,61 @@
+{
+  "oauth": {
+    "grants": {
+      "clientCredentials": "Client credentials",
+      "password": "Password",
+      "authorizationCode": "Authorization code",
+      "deviceCode": "Device code"
+    },
+    "fields": {
+      "grant": "Tipo de concessão",
+      "issuer": "Emissor",
+      "authUrl": "URL de autorização",
+      "deviceUrl": "URL de autorização do dispositivo",
+      "callbackUrl": "URL de retorno",
+      "callbackTitle": "Registre {{url}} como URI de redirecionamento no provedor",
+      "tokenUrl": "URL do token",
+      "clientId": "Client ID",
+      "clientSecret": "Client secret",
+      "username": "Nome de usuário",
+      "password": "Senha",
+      "scope": "Escopo",
+      "credentialsIn": "Enviar credenciais em",
+      "credentialsHeader": "Cabeçalho Basic auth",
+      "credentialsBody": "Corpo da requisição",
+      "pkce": "Usar PKCE",
+      "headerPrefix": "Prefixo do cabeçalho",
+      "sendIdToken": "Enviar o ID token em vez do token de acesso",
+      "accessToken": "Token de acesso",
+      "idToken": "ID token"
+    },
+    "discover": "Descobrir",
+    "discoverTitle": "Preenche os endpoints a partir de /.well-known/openid-configuration do emissor",
+    "discovered": "Endpoints preenchidos a partir de {{issuer}}.",
+    "discovering": "Lendo o documento de descoberta do emissor.",
+    "getToken": "Obter token",
+    "cancel": "Cancelar",
+    "clearToken": "Limpar token",
+    "waitingForBrowser": "Aguardando o login terminar no seu navegador.",
+    "requesting": "Solicitando um token.",
+    "waitingForDevice": "Aguardando você digitar o código e entrar.",
+    "deviceCode": "Digite este código na página de login:",
+    "openSignInPage": "Abrir a página de login",
+    "noToken": "Ainda não há token.",
+    "otherEnvironment": "O token foi obtido com outro ambiente, então não é enviado. Obtenha um token para este ambiente.",
+    "noIdToken": "O provedor não retornou um ID token. Adicione openid ao escopo e obtenha um novo token.",
+    "noExpiry": "O provedor não informou um prazo de expiração.",
+    "expires": "Expira {{expiry}}.",
+    "expired": "Expirou {{expiry}}. Um novo token é solicitado quando pode ser renovado sem fazer login.",
+    "signInNeeded": "Esta requisição precisa de um token OAuth 2. Abra a aba Auth e escolha Obter token.",
+    "signInForEnvironment": "O token OAuth 2 foi obtido com outro ambiente, então não é enviado. Abra a aba Auth e escolha Obter token para entrar neste ambiente.",
+    "deviceExpired": "O device code expirou antes de o login terminar. Obtenha um token novamente.",
+    "cancelled": "O login foi cancelado.",
+    "popup": {
+      "blocked": "A janela de login foi bloqueada. Permita pop-ups para este site e tente novamente.",
+      "timedOut": "Nenhum login chegou em cinco minutos.",
+      "noCode": "O provedor não retornou um código de autorização.",
+      "refused": "O provedor recusou o login: {{reason}}",
+      "wrongIssuer": "A resposta do login indica o emissor \"{{received}}\" em vez de \"{{expected}}\", então foi descartada."
+    }
+  }
+}

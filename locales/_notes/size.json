@@ -1,0 +1,6 @@
+{
+  "size.bytes": "Size in bytes. {{value}} is a whole number. Keep the unit abbreviation unless your language writes it differently.",
+  "size.kilobytes": "Size in kilobytes (1024 bytes). {{value}} is a number with one decimal.",
+  "size.megabytes": "Size in megabytes. {{value}} is a number with two decimals.",
+  "size.gigabytes": "Size in gigabytes. {{value}} is a number with one decimal."
+}

@@ -6,10 +6,12 @@ import { openExternal } from "../lib/about"
 import { WEB_APP_URL } from "../lib/constants"
 import { rememberWelcomeDismissed } from "../lib/welcome"
 import { onboardingProgress } from "../lib/onboarding"
+import { APP_TEXT } from "../lib/appText"
 import { ONBOARDING_TEXT as TEXT } from "../lib/onboardingText"
 import { cn } from "../lib/utils"
 import { docPath, docSlug } from "../docs/manifest"
 import { useAppStore } from "../store/appStore"
+import { alignInline, isRtl } from "../hooks/direction"
 import { usePopoverDismiss } from "../hooks/usePopoverDismiss"
 import { wrapTab } from "../hooks/useFocusTrap"
 import "./variables.css"
@@ -179,7 +181,7 @@ function Popover({ anchor, buttonRef, onClose, children }) {
     target?.focus()
   }, [])
   const width = Math.min(POPOVER_WIDTH, window.innerWidth - VIEWPORT_MARGIN * 2)
-  const left = Math.max(VIEWPORT_MARGIN, Math.min(anchor.right - width, window.innerWidth - width - VIEWPORT_MARGIN))
+  const left = Math.max(VIEWPORT_MARGIN, Math.min(alignInline(isRtl() ? anchor.left + width : anchor.right, width), window.innerWidth - width - VIEWPORT_MARGIN))
   const style = { top: anchor.bottom + VIEWPORT_MARGIN / 2, left, width }
   return createPortal(
     <div
@@ -222,14 +224,14 @@ export function GettingStartedButton({ onBegin }) {
         variant="outline"
         aria-haspopup="dialog"
         aria-expanded={Boolean(anchor)}
-        title={`${TEXT.next}: ${nextTitle}`}
+        title={APP_TEXT.labelled(TEXT.next, nextTitle)}
         onClick={toggle}
         className="min-w-0 shrink"
       >
         <ListChecks />
-        <span className="hidden truncate xl:inline">{TEXT.next}: {nextTitle}</span>
+        <span className="hidden truncate xl:inline">{APP_TEXT.labelled(TEXT.next, nextTitle)}</span>
         <span className="max-sm:sr-only xl:hidden">{TEXT.title}</span>
-        <span className="text-muted-foreground">{progress.doneCount}/{progress.steps.length}</span>
+        <span className="text-muted-foreground max-sm:hidden">{progress.doneCount}/{progress.steps.length}</span>
       </Button>
       {anchor && (
         <Popover anchor={anchor} buttonRef={buttonRef} onClose={close}>

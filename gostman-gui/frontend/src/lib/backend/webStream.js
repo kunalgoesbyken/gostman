@@ -1,4 +1,5 @@
 import { failureResponse } from '../response'
+import { WEB_BACKEND_TEXT } from '../webBackendText'
 import {
   END_CANCELLED, END_FAILED, MESSAGE_END, MESSAGE_OPEN, MESSAGE_RESPONSE, SSE_PROTOCOL,
 } from '../sse'
@@ -8,10 +9,6 @@ export const STREAM_CAP_SECONDS = 60
 const LINE_BREAK = '\n'
 const JSON_TYPE = 'application/json'
 const NETWORK_ERROR = 'network'
-const CANCELLED_TEXT = 'the request was cancelled'
-const CUT_OFF_TEXT = 'The connection to the proxy ended before the stream finished.'
-
-const proxyAnswer = (status) => `The proxy answered with HTTP ${status} instead of a result`
 
 function splitLines(text, pending) {
   const parts = (pending.text + text).split(LINE_BREAK)
@@ -38,7 +35,7 @@ function endOutcome(state, aborted, detail) {
   if (state.opened) {
     return { ended, response: { ...state.opened, protocol: SSE_PROTOCOL, durationMs: Date.now() - state.started } }
   }
-  return { ended, response: aborted ? failureResponse(END_CANCELLED, CANCELLED_TEXT) : failureResponse(NETWORK_ERROR, detail) }
+  return { ended, response: aborted ? failureResponse(END_CANCELLED, WEB_BACKEND_TEXT.cancelled) : failureResponse(NETWORK_ERROR, detail) }
 }
 
 export async function readStream(url, payload, onMessages, signal) {
@@ -55,7 +52,7 @@ export async function readStream(url, payload, onMessages, signal) {
       signal,
     })
     if ((answer.headers.get('content-type') || '').includes(JSON_TYPE)) return await answer.json()
-    if (!answer.ok) throw new Error(proxyAnswer(answer.status))
+    if (!answer.ok) throw new Error(WEB_BACKEND_TEXT.proxyAnswered(answer.status))
     await readMessages(answer.body, onMessages, track)
   } catch (error) {
     const outcome = endOutcome(state, signal.aborted, error.message)
@@ -63,7 +60,7 @@ export async function readStream(url, payload, onMessages, signal) {
     return outcome.response
   }
   if (state.final) return state.final
-  const outcome = endOutcome(state, false, CUT_OFF_TEXT)
+  const outcome = endOutcome(state, false, WEB_BACKEND_TEXT.streamCutOff)
   onMessages([outcome.ended])
   return outcome.response
 }

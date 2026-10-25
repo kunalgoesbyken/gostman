@@ -1,3 +1,5 @@
+import { compareText } from './i18n/format'
+
 const PROBE_FONT_SIZE = '32px'
 const PROBE_TEXT = 'mmmmmmmmmmlli10OQ@WwYy字あ한ب'
 const GENERIC_FAMILIES = ['monospace', 'serif', 'sans-serif']
@@ -32,4 +34,4 @@ const queryLocalFamilies = async () => (await window.queryLocalFonts()).map((fon
 
 export const browserFontLister = () => (typeof window.queryLocalFonts === 'function' ? queryLocalFamilies : null)
 
-export const sortedFamilies = (families) => [...new Set(families)].sort((first, second) => first.localeCompare(second))
+export const sortedFamilies = (families) => [...new Set(families)].sort((first, second) => compareText(first, second))

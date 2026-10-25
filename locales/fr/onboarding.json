@@ -1,0 +1,43 @@
+{
+  "onboarding": {
+    "title": "Premiers pas",
+    "progress": "{{done}} sur {{total}} terminées",
+    "next": "Suivant",
+    "completeTitle": "Tout est prêt",
+    "completeNotice": "Vous avez terminé la prise en main.",
+    "completeHint": "Vous avez essayé les principales parties de Gostman. Le tutoriel va plus loin avec l’enchaînement de requêtes, les scripts et l’exécution de vos vérifications en CI.",
+    "tutorial": "Lire le tutoriel",
+    "hide": "Masquer",
+    "hideLabel": "Masquer les étapes de prise en main",
+    "done": "Terminé",
+    "steps": {
+      "send": {
+        "title": "Envoyer une requête",
+        "hint": "Envoyez une requête d’exemple à un service d’écho public et lisez la réponse.",
+        "action": "Envoyer la requête d’exemple"
+      },
+      "save": {
+        "title": "L’enregistrer dans votre collection",
+        "hint": "Les requêtes enregistrées apparaissent dans la barre latérale et restent sur cet appareil.",
+        "action": "Enregistrer la requête"
+      },
+      "variable": {
+        "title": "Ajouter une variable",
+        "hint": "Définissez baseUrl une seule fois dans un environnement, puis écrivez {{example}} partout où vous en avez besoin.",
+        "action": "Ouvrir les environnements",
+        "defined": "définie",
+        "missing": "pas encore définie"
+      },
+      "check": {
+        "title": "Ajouter une vérification",
+        "hint": "Écrivez une assertion comme res.status est égal à 200, ou utilisez Ajouter des vérifications depuis cette réponse dans l’onglet Vérifications. Enregistrez ensuite la requête : chaque réponse affiche une réussite ou un échec.",
+        "action": "Ouvrir l’onglet Vérifications"
+      },
+      "run": {
+        "title": "Exécuter vos requêtes ensemble",
+        "hint": "L’exécuteur envoie chaque requête enregistrée dans l’ordre et indique quelles vérifications ont réussi.",
+        "action": "Ouvrir l’exécuteur"
+      }
+    }
+  }
+}

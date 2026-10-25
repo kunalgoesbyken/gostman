@@ -1,0 +1,14 @@
+{
+  "privacy.telemetryLabel": "Telemetry means automatic usage reports. Gostman sends none.",
+  "privacy.docsLink": "Link to the documentation page that lists every network connection.",
+  "privacy.updatesLabel": "Setting that lets the app look for a newer version on GitHub.",
+  "privacy.updatesCurrent": "{{version}} is a version number.",
+  "privacy.updateAvailable": "Status bar text. {{version}} is a version number.",
+  "privacy.updateHint": "Tooltip of the status bar item.",
+  "privacy.relayLabel": "Setting for how the web app sends requests: through the hosted relay server or a relay on the local computer.",
+  "privacy.relayModes.hosted": "Option: the relay run by the Gostman website.",
+  "privacy.relayModes.local": "Option: a relay started on this computer with the command gostman relay.",
+  "privacy.relayAddressHint": "Keep the command \"gostman relay\" as written.",
+  "privacy.relayCheck": "Button that tests whether the relay answers.",
+  "privacy.relayMissing": "Preferences, Privacy are names of the settings page and section."
+}

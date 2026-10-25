@@ -1,0 +1,64 @@
+source,target
+request,requête
+response,réponse
+collection,collection
+collection settings,paramètres de la collection
+settings for all collections,paramètres de toutes les collections
+folder,dossier
+workspace,espace de travail
+environment,environnement
+variable,variable
+secret,secret
+secret manager,gestionnaire de secrets
+header,en-tête
+body,corps
+query parameter,paramètre de requête
+path parameter,paramètre de chemin
+cookie,cookie
+cookie jar,stock de cookies
+auth,authentification (onglet : Auth)
+token,jeton
+pre-request script,script de pré-requête
+post-response script,script de post-réponse
+check,vérification
+assertion,assertion
+extract rule,règle d'extraction
+runner / run,exécuteur / exécuter
+iteration,itération
+flow,flux
+step,étape
+mock server,serveur fictif
+capture,capture
+example,exemple
+history,historique
+tab,onglet
+sidebar,barre latérale
+preferences,préférences
+theme,thème
+scan,analyse
+finding,constat
+load test,test de charge
+import,importer
+export,exporter
+share link,lien de partage
+trust (a folder),approuver
+restricted,restreint
+proxy,proxy
+certificate,certificat
+timeout,délai d'expiration
+send,envoyer
+passphrase,phrase secrète
+keychain,trousseau
+command palette,palette de commandes
+tag,tag
+stash,remisage
+fetch / pull / push,fetch / pull / push
+stage / unstage,indexer / désindexer
+commit,commit (verbe : valider)
+branch,branche
+remote,dépôt distant
+subscription (GraphQL / MQTT),subscription / abonnement
+broker,broker
+topic,topic
+data file,fichier de données
+iteration data row,ligne

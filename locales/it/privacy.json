@@ -1,0 +1,30 @@
+{
+  "privacy": {
+    "telemetryLabel": "Telemetria",
+    "telemetryHint": "Gostman non ha telemetria, analisi né segnalazione degli arresti anomali. Contatta solo gli host a cui invii richieste e i servizi che configuri tu stesso.",
+    "docsLink": "A cosa si connette Gostman",
+    "updatesLabel": "Cerca nuove versioni",
+    "updatesHint": "Una volta al giorno, legge l'ultima release da GitHub e la mostra nella barra di stato. Non viene scaricato né installato nulla.",
+    "updatesFailed": "L'ultimo controllo non ha raggiunto GitHub. Verrà eseguito di nuovo domani.",
+    "updatesCurrent": "Questa è l'ultima versione ({{version}}).",
+    "updateAvailable": "È disponibile la versione {{version}}",
+    "updatesNewer": "La versione {{version}} è disponibile su GitHub.",
+    "updateHint": "Apri le note di rilascio e i download su GitHub",
+    "updateDismiss": "Nascondi fino alla prossima versione",
+    "relayLabel": "Invia le richieste tramite",
+    "relayHint": "Il relay ospitato non può raggiungere localhost né gli indirizzi privati. Un relay locale invia le richieste da questo computer, senza nessuno in mezzo.",
+    "relayModes": {
+      "hosted": "Relay ospitato",
+      "local": "Relay locale su questo computer"
+    },
+    "relayAddressLabel": "Indirizzo del relay locale",
+    "relayAddressHint": "Avvialo con gostman relay e inserisci l'indirizzo che stampa.",
+    "relayAddressInvalid": "Inserisci un indirizzo come http://127.0.0.1:4030.",
+    "relayCheck": "Prova",
+    "relayChecking": "Verifica in corso…",
+    "relayReachable": "Il relay locale ha risposto.",
+    "relayMissing": "Inserisci l'indirizzo del relay locale in Preferenze, Privacy, oppure torna al relay ospitato.",
+    "relayUnreachable": "Il relay locale a {{address}} non ha risposto. Avvialo con gostman relay, oppure torna al relay ospitato in Preferenze, Privacy.",
+    "relayCheckUnreachable": "Il relay locale a {{address}} non ha risposto. Controlla che gostman relay sia in esecuzione e che l'indirizzo corrisponda a quello stampato."
+  }
+}

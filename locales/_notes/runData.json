@@ -1,0 +1,5 @@
+{
+  "runData.tooManyRows": "Shown when a data file for the runner has too many rows.",
+  "runData.notArray": "A JSON data file for the runner must be a list of objects.",
+  "runData.unreadable": "The file could not be parsed as CSV or JSON."
+}

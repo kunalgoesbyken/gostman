@@ -1,0 +1,27 @@
+{
+  "grpc": {
+    "services": "Usługi",
+    "messageLabel": "Komunikat żądania",
+    "reflection": "Server reflection",
+    "sendAsGrpc": "Wyślij jako gRPC",
+    "addProtos": "Dodaj pliki .proto",
+    "removeFiles": "Usuń pliki",
+    "load": "Wczytaj",
+    "reload": "Wczytaj ponownie",
+    "schemaHint": "Wczytaj usługi przez server reflection albo dodaj pliki .proto usługi. Używane są adres, nagłówki i uwierzytelnianie tego żądania.",
+    "noServices": "Nie znaleziono usług.",
+    "tooLarge": "Plik {{name}} ma {{size}}. Pliki są ograniczone do {{limit}}.",
+    "method": "Metoda",
+    "methodLabel": "Metoda gRPC",
+    "chooseMethod": "Wybierz metodę",
+    "useExample": "Użyj przykładu",
+    "useExampleTitle": "Zastąp komunikat przykładem danych wejściowych metody",
+    "streamHint": "Ta metoda odczytuje strumień. Wpisz tablicę JSON, aby wysłać kilka komunikatów.",
+    "kinds": {
+      "bidirectional": "Strumieniowanie dwukierunkowe",
+      "client": "Strumieniowanie klienta",
+      "server": "Strumieniowanie serwera",
+      "unary": "Unarne"
+    }
+  }
+}

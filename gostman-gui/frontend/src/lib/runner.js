@@ -8,9 +8,9 @@ import { withRunStreamBudget } from './runStream'
 import { isSocketAddress } from './socketSessions'
 import { matchesTags } from './tags'
 import { folderChain } from './variableScopes'
+import { RUNNER_TEXT } from './runnerText'
 import { useAppStore, variableTextFor } from '../store/appStore'
 
-export const SKIPPED_SOCKET = 'WebSocket requests are not part of a run.'
 const BODY_LIMIT = 64 * 1024
 const BASE64 = 'base64'
 const FOLDER_SEPARATOR = '/'
@@ -91,7 +91,7 @@ export function createRunner(backend, execute) {
   let lastRun = null
 
   async function runOne(run, request, iteration) {
-    if (isSocketAddress(request.url, variableTextFor(store(), request))) return skipped(request, SKIPPED_SOCKET)
+    if (isSocketAddress(request.url, variableTextFor(store(), request))) return skipped(request, RUNNER_TEXT.socketSkipped)
     sequence += 1
     const sendId = `run-${sequence}`
     run.sendIds.add(sendId)

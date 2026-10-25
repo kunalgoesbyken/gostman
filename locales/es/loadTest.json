@@ -1,0 +1,61 @@
+{
+  "loadTest": {
+    "title": "Prueba de carga",
+    "commandTitle": "Probar la carga de esta solicitud",
+    "commandDescription": "Envía la solicitud actual muchas veces a la vez y mide la latencia",
+    "barLabel": "Prueba de carga",
+    "barHint": "Probar la carga de esta solicitud",
+    "notice": "Prueba solo sistemas que sean tuyos o que tengas permiso para probar. Cada worker envía la solicitud tal como se muestra aquí, sin scripts ni cookies compartidas.",
+    "unsupported": "Solo se pueden probar con carga las solicitudes HTTP. No se admiten solicitudes gRPC, MCP, WebSocket ni de streaming.",
+    "noUrl": "Indica primero una URL para la solicitud.",
+    "concurrency": "Workers simultáneos",
+    "duration": "Duración (segundos)",
+    "rateLimit": "Tope de solicitudes por segundo",
+    "rateLimitHint": "Déjalo vacío para no poner tope",
+    "start": "Iniciar",
+    "stop": "Detener",
+    "running": "En ejecución",
+    "stopped": "Detenida antes de tiempo",
+    "progress": {
+      "elapsed": "Transcurrido",
+      "requests": "Solicitudes",
+      "rate": "Solicitudes/s",
+      "p95": "p95",
+      "failed": "Fallidas"
+    },
+    "summary": {
+      "total": "Solicitudes",
+      "succeeded": "Correctas",
+      "failed": "Fallidas",
+      "rate": "Solicitudes/s",
+      "received": "Recibido"
+    },
+    "failureBreakdown": "{{networkErrors}} de red, {{statusFailures}} con estado {{failureStatus}} o superior",
+    "percentilesLabel": "Latencia",
+    "percentileColumns": {
+      "name": "Medida",
+      "value": "Milisegundos"
+    },
+    "percentiles": {
+      "minMs": "mín.",
+      "meanMs": "media",
+      "p50Ms": "p50",
+      "p90Ms": "p90",
+      "p95Ms": "p95",
+      "p99Ms": "p99",
+      "maxMs": "máx."
+    },
+    "seconds": "{{value}} s",
+    "milliseconds": "{{value}} ms",
+    "statusCount": "{{code}} x {{count}}",
+    "statusLabel": "Códigos de estado",
+    "histogramLabel": "Distribución de la latencia",
+    "histogramBarLabel_one": "{{from}} a {{to}} ms: {{count}} solicitud",
+    "histogramBarLabel_many": "{{from}} a {{to}} ms: {{count}} de solicitudes",
+    "histogramBarLabel_other": "{{from}} a {{to}} ms: {{count}} solicitudes",
+    "errorsLabel": "Muestras de errores",
+    "accuracy": "Los percentiles tienen una precisión de {{percent}}%.",
+    "emptyTitle": "Aún no hay resultados",
+    "emptyHint": "Elige la carga y pulsa Iniciar."
+  }
+}

@@ -10,11 +10,11 @@ import { CONSOLE_TEXT as TEXT } from "../lib/responseText"
 import { cn } from "../lib/utils"
 
 const LEVEL_TONES = { warn: "text-warning", error: "text-destructive", debug: "text-muted-foreground" }
-const LEVEL_OPTIONS = [ALL_LEVELS, ...LEVELS].map((level) => ({ value: level, label: level === ALL_LEVELS ? TEXT.all : level }))
+const levelOptions = () => [ALL_LEVELS, ...LEVELS].map((level) => ({ value: level, label: level === ALL_LEVELS ? TEXT.all : level }))
 
 export function ConsoleLine({ line }) {
   return (
-    <li className="flex gap-2 py-0.5 font-mono text-xs leading-relaxed">
+    <li dir="ltr" className="flex gap-2 py-0.5 font-mono text-xs leading-relaxed">
       <time className="shrink-0 text-muted-foreground">{formatTime(line.at)}</time>
       <span className={cn("w-10 shrink-0 text-muted-foreground", LEVEL_TONES[line.level])}>{line.level}</span>
       <pre className={cn("min-w-0 flex-1 whitespace-pre-wrap", LEVEL_TONES[line.level] || "text-foreground")}>{line.text}</pre>
@@ -42,7 +42,7 @@ export function ConsolePanel() {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <Toolbar>
-        <SegmentedControl label={TEXT.filter} options={LEVEL_OPTIONS} value={level} onChange={setLevel} />
+        <SegmentedControl label={TEXT.filter} options={levelOptions()} value={level} onChange={setLevel} />
         <div className="flex-1" />
         <IconButton label={TEXT.clear} icon={Trash2} onClick={clearConsole} disabled={groups.length === 0} />
       </Toolbar>

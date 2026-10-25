@@ -1,0 +1,33 @@
+{
+  "openLink": {
+    "notAddress": "Questo non è un indirizzo web che Gostman possa aprire.",
+    "tooLong": "Questo indirizzo è troppo lungo.",
+    "credentials": "Gli indirizzi che contengono un nome utente o una password non sono consentiti.",
+    "scheme": "Sono consentiti solo indirizzi https.",
+    "noHost": "L'indirizzo non ha un nome host.",
+    "reachFailure": "Gostman non è riuscito a raggiungere il server che invia questo file. Controlla la connessione e riprova.",
+    "title": "Apri da un link",
+    "invalidTitle": "Questo link non può essere aperto",
+    "intro": "Un link ha chiesto a Gostman di scaricare una raccolta o una specifica. Non viene scaricato né aggiunto nulla finché non scegli Scarica, e non viene importato nulla finché non scegli Importa.",
+    "trustNote": "Continua solo se ti fidi della persona che ti ha inviato questo link.",
+    "hostLabel": "Da",
+    "addressLabel": "Indirizzo",
+    "cancel": "Annulla",
+    "download": "Scarica",
+    "downloading": "Download in corso",
+    "import": "Importa",
+    "detected": "Rilevato: {{format}}",
+    "downloadedFrom": "Scaricato da {{host}}",
+    "items_one": "{{count}} elemento",
+    "items_many": "{{count}} di elementi",
+    "items_other": "{{count}} elementi",
+    "activeNote": "Script, impostazioni OAuth 2.0, comandi MCP locali o letture di file in {{items}}. Ti verrà chiesto prima di importarli, e le cartelle importate restano limitate finché non le consideri attendibili.",
+    "badgeAlt": "Apri in Gostman",
+    "builderTitle": "Link Apri in Gostman",
+    "builderHint": "Incolla l'indirizzo di una raccolta o di una specifica pubblicata online (una raccolta Postman, un file OpenAPI, un export di Insomnia, HAR o Gostman). I link qui sotto permettono ai lettori del tuo README di aprirla in Gostman dopo una conferma.",
+    "builderLabel": "Indirizzo pubblico della raccolta",
+    "desktopLabel": "Link per l'app desktop",
+    "webLabel": "Link per l'app web",
+    "badgeLabel": "Badge per il README (Markdown)"
+  }
+}

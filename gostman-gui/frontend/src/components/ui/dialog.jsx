@@ -106,7 +106,7 @@ function WindowGrip({ frame }) {
         aria-label={DIALOG_TEXT.moveWindow}
         aria-describedby={hintId}
         title={DIALOG_TEXT.moveHint}
-        className="-ml-2 flex h-6 w-5 shrink-0 cursor-grab items-center justify-center rounded text-muted-foreground hover:text-foreground active:cursor-grabbing"
+        className="-ms-2 flex h-6 w-5 shrink-0 cursor-grab items-center justify-center rounded text-muted-foreground hover:text-foreground active:cursor-grabbing"
         {...frame.gripProps}
       >
         <GripVertical className="h-3.5 w-3.5" />
@@ -120,16 +120,16 @@ export function DialogHeader({ onClose, children }) {
   const frame = useContext(FloatingContext)
 
   return (
-    <div className={cn("flex h-10 shrink-0 items-center gap-2 border-b border-border pl-4 pr-2", frame && "touch-none select-none")} {...frame?.headerProps}>
+    <div className={cn("flex h-10 shrink-0 items-center gap-2 border-b border-border ps-4 pe-2 max-sm:h-auto max-sm:min-h-10 max-sm:py-1", frame && "touch-none select-none")} {...frame?.headerProps}>
       {frame && <WindowGrip frame={frame} />}
-      <div className="flex h-full min-w-0 flex-1 items-center gap-2">{children}</div>
+      <div className="flex h-full min-w-0 flex-1 items-center gap-2 max-sm:h-auto max-sm:flex-wrap">{children}</div>
       {onClose && <IconButton label={DIALOG_TEXT.close} icon={X} onClick={onClose} />}
     </div>
   )
 }
 
 export function DialogTitle({ children }) {
-  return <h2 className="truncate text-sm font-semibold" title={children}>{children}</h2>
+  return <h2 className="truncate text-sm font-semibold max-sm:basis-full" title={children}>{children}</h2>
 }
 
 export function DialogBody({ className, ...props }) {
@@ -137,5 +137,5 @@ export function DialogBody({ className, ...props }) {
 }
 
 export function DialogFooter({ children }) {
-  return <div className="flex shrink-0 justify-end gap-2 border-t border-border px-4 py-3">{children}</div>
+  return <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t border-border px-4 py-3">{children}</div>
 }

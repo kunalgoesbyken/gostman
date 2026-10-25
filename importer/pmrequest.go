@@ -6,6 +6,7 @@ import (
 
 	"github.com/dop251/goja/ast"
 	"github.com/dop251/goja/token"
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const sendRequestWrapper = "((callback, target) => sendRequest(target).then((response) => callback(null, response), callback))"
@@ -13,9 +14,9 @@ const sendRequestWrapper = "((callback, target) => sendRequest(target).then((res
 const postmanTargetAdapter = `((target) => typeof target === "string" ? { url: target } : { ...target, url: target.url?.raw ?? target.url, headers: Array.isArray(target.header) ? Object.fromEntries(target.header.map((row) => [row.key, row.value])) : target.header ?? target.headers, body: target.body?.raw ?? target.body })`
 
 func (t *translator) renderSendRequest(call *ast.CallExpression) string {
-	t.note(call, noteSendScope, messageScriptSendScope)
+	t.note(call, noteSendScope, locales.ImporterScriptSendScope)
 	if len(call.ArgumentList) == 0 {
-		t.fail(call, messageScriptUnsupported, "pm.sendRequest()")
+		t.fail(call, locales.ImporterScriptUnsupported, locales.Params{"name": "pm.sendRequest()"})
 		return t.text(call)
 	}
 	t.translated++
@@ -52,14 +53,14 @@ func (t *translator) awaited(at ast.Node, expression string) string {
 	if t.inAsync() {
 		return "await " + expression
 	}
-	t.note(at, "sendRequest-async", messageScriptSendAsync)
+	t.note(at, "sendRequest-async", locales.ImporterScriptSendAsync)
 	return expression
 }
 
 func (t *translator) renderCallback(callback ast.Expression) string {
 	name, literal := responseParameter(callback)
 	if !literal {
-		t.note(callback, "sendRequest-callback", messageScriptSendCallback)
+		t.note(callback, "sendRequest-callback", locales.ImporterScriptSendCallback)
 		return t.render(callback)
 	}
 	if name == "" {
@@ -107,7 +108,7 @@ func (t *translator) requestTarget(argument ast.Expression, field requestField) 
 	case *ast.ObjectLiteral:
 		return t.requestObject(current, field)
 	}
-	t.note(argument, "sendRequest-target", messageScriptSendTarget)
+	t.note(argument, "sendRequest-target", locales.ImporterScriptSendTarget)
 	return t.render(argument)
 }
 
@@ -125,7 +126,7 @@ func (t *translator) requestField(property ast.Property) (string, bool) {
 	keyed, ok := property.(*ast.PropertyKeyed)
 	name, named := propertyName(keyed)
 	if !ok || !named {
-		t.fail(property, messageScriptOption, "computed")
+		t.fail(property, locales.ImporterScriptOption, locales.Params{"name": "computed"})
 		return "", false
 	}
 	switch name {
@@ -138,7 +139,7 @@ func (t *translator) requestField(property ast.Property) (string, bool) {
 	case "body":
 		return t.requestBody(keyed.Value)
 	}
-	t.fail(property, messageScriptOption, name)
+	t.fail(property, locales.ImporterScriptOption, locales.Params{"name": name})
 	return "", false
 }
 
@@ -173,7 +174,7 @@ func (t *translator) requestURL(value ast.Expression) (string, bool) {
 	if raw := objectField(object, "raw"); raw != nil {
 		return "url: " + t.render(raw), true
 	}
-	t.fail(value, messageScriptOption, "url")
+	t.fail(value, locales.ImporterScriptOption, locales.Params{"name": "url"})
 	return "", false
 }
 
@@ -186,7 +187,7 @@ func (t *translator) requestHeaders(value ast.Expression) (string, bool) {
 	for _, element := range list.Value {
 		pair, ok := t.headerPair(element)
 		if !ok {
-			t.fail(element, messageScriptOption, "header")
+			t.fail(element, locales.ImporterScriptOption, locales.Params{"name": "header"})
 			continue
 		}
 		pairs = append(pairs, pair)
@@ -213,11 +214,11 @@ func (t *translator) requestBody(value ast.Expression) (string, bool) {
 	}
 	raw := objectField(object, "raw")
 	if raw == nil {
-		t.fail(value, messageScriptOption, "body")
+		t.fail(value, locales.ImporterScriptOption, locales.Params{"name": "body"})
 		return "", false
 	}
 	if mode, ok := objectField(object, "mode").(*ast.StringLiteral); ok && string(mode.Value) != "raw" {
-		t.fail(value, messageScriptOption, fmt.Sprintf("body mode %s", mode.Value))
+		t.fail(value, locales.ImporterScriptOption, locales.Params{"name": fmt.Sprintf("body mode %s", mode.Value)})
 		return "", false
 	}
 	return "body: " + t.render(raw), true
@@ -229,12 +230,12 @@ func (t *translator) checkRequire(call *ast.CallExpression) {
 	}
 	name, literal := call.ArgumentList[0].(*ast.StringLiteral)
 	if !literal {
-		t.fail(call, messageScriptModuleDynamic)
+		t.fail(call, locales.ImporterScriptModuleDynamic, nil)
 		return
 	}
 	module := string(name.Value)
 	if strings.HasPrefix(module, ".") || supportedModules[module] {
 		return
 	}
-	t.fail(call, messageScriptModule, module)
+	t.fail(call, locales.ImporterScriptModule, locales.Params{"name": module})
 }

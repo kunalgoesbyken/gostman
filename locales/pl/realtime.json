@@ -1,0 +1,41 @@
+{
+  "realtime": {
+    "targets": {
+      "topic": "Temat",
+      "event": "Zdarzenie"
+    },
+    "browser": {
+      "closed": "Połączenie zamknięte (kod {{code}})",
+      "closedWithReason": "Połączenie zamknięte (kod {{code}}: {{reason}})",
+      "notConnected": "Nie udało się połączyć (kod {{code}})",
+      "notConnectedWithReason": "Nie udało się połączyć (kod {{code}}: {{reason}})"
+    },
+    "graphql": {
+      "subscribing": "Połączenie potwierdzone. Subskrybowanie.",
+      "complete": "Subskrypcja zakończona"
+    },
+    "socketIo": {
+      "joined": "Dołączono do przestrzeni nazw {{namespace}}",
+      "left": "Serwer opuścił przestrzeń nazw",
+      "closed": "Serwer zamknął sesję Socket.IO",
+      "refused": "Serwer odmówił połączenia",
+      "binary": "Binarne pakiety Socket.IO nie są dekodowane.",
+      "noEvent": "Wpisz nazwę zdarzenia do wysłania.",
+      "ack": "ack {{id}}"
+    },
+    "mqtt": {
+      "connected": "Połączono z brokerem",
+      "refusedVersion": "Broker odmówił połączenia: broker nie obsługuje MQTT 3.1.1",
+      "refusedIdentifier": "Broker odmówił połączenia: ID klienta zostało odrzucone",
+      "refusedUnavailable": "Broker odmówił połączenia: broker jest niedostępny",
+      "refusedCredentials": "Broker odmówił połączenia: nazwa użytkownika lub hasło są nieprawidłowe",
+      "refusedUnauthorized": "Broker odmówił połączenia: klient nie ma uprawnień",
+      "refusedOther": "Broker odmówił połączenia: kod {{code}}",
+      "subscribed": "Subskrybowano: {{filter}}",
+      "subscribeRefused": "Broker odmówił subskrypcji: {{filter}}",
+      "notBinary": "Oczekiwano binarnych danych MQTT, otrzymano tekst.",
+      "noTopic": "Wpisz temat, do którego ma zostać opublikowana wiadomość.",
+      "noFilter": "Wpisz filtr tematów do subskrybowania."
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "examples": {
+    "title": "例",
+    "bodyLabel": "例のボディ",
+    "listLabel": "保存済みの例",
+    "emptyTitle": "例はまだありません",
+    "emptyHint": "リクエストを送信してから、レスポンスパネルの「例として保存」を選んでください。モックサーバーはこれらの例で応答します。",
+    "servedByDefault": "デフォルトで返す",
+    "serveByDefault": "デフォルトで返すよう設定",
+    "format": "ボディを整形",
+    "rename": "例の名前を変更",
+    "remove": "例を削除",
+    "section": "例のセクション",
+    "body": "ボディ",
+    "headersCount": "ヘッダー（{{count}}）",
+    "noContentType": "コンテンツタイプなし",
+    "binaryTitle": "バイナリボディ（{{size}}）",
+    "binaryHint": "テキストとして編集できず、保存されたとおりに返されます。",
+    "noHeadersHint": "この例はヘッダーなしで保存されました。",
+    "unsaved": "ボディに未保存の変更があります。",
+    "discard": "破棄",
+    "saveBody": "ボディを保存",
+    "bodyTooLarge": "このボディは{{size}}です。例に保存できるボディは{{limit}}までです。",
+    "tooMany": "1つのリクエストに保存できる例は{{limit}}件までです。ほかの例を保存するには、どれか1つを削除してください。"
+  }
+}

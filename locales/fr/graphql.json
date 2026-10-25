@@ -1,0 +1,29 @@
+{
+  "graphql": {
+    "query": "Requête",
+    "queryLabel": "Requête GraphQL",
+    "variables": "Variables (JSON)",
+    "variablesLabel": "Variables GraphQL",
+    "invalidJson": "JSON non valide : {{message}}",
+    "syntaxAt": "{{message}} (ligne {{line}}, colonne {{column}})",
+    "sendAsGraphql": "Envoyer en GraphQL",
+    "prettify": "Embellir",
+    "prettifyTitle": "Reformate la requête. Les commentaires sont supprimés.",
+    "cannotPrettify": "Impossible d’embellir : {{detail}}",
+    "notSent": "Non envoyé tant que la méthode est {{method}}.",
+    "schema": "Schéma",
+    "schemaDescription": "Récupérez-le pour parcourir les types et champs de ce point d’accès. La requête d’introspection utilise l’URL, les en-têtes et l’authentification de cette requête.",
+    "searchLabel": "Rechercher dans le schéma",
+    "searchPlaceholder_one": "Rechercher dans {{count}} type et ses champs",
+    "searchPlaceholder_other": "Rechercher dans {{count}} types et champs",
+    "searchPlaceholder_many": "Rechercher dans {{count}} de types et champs",
+    "noMatch": "Aucun résultat.",
+    "moreMatches_one": "{{count}} autre type correspond. Affinez la recherche pour le voir.",
+    "moreMatches_other": "{{count}} autres types correspondent. Affinez la recherche pour les voir.",
+    "moreMatches_many": "{{count}} d’autres types correspondent. Affinez la recherche pour les voir.",
+    "noFields": "Aucun champ.",
+    "schemaTooLarge": "Le schéma dépasse la taille maximale de réponse.",
+    "noJsonBody": "Le point d’accès a répondu {{status}} sans corps JSON.",
+    "noSchema": "Le point d’accès a répondu {{status}} sans schéma."
+  }
+}

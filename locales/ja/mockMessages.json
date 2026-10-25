@@ -1,0 +1,12 @@
+{
+  "route": {
+    "graphqlNotServed": "GraphQLリクエストは提供されません。",
+    "grpcNotServed": "gRPCリクエストは提供されません。",
+    "mcpNotServed": "MCPリクエストは提供されません。",
+    "webSocketNotServed": "WebSocketリクエストは提供されません。",
+    "noExample": "このルートを提供するには、レスポンスを例として保存してください。",
+    "disabled": "このルートはオフになっています。",
+    "exampleBodyInvalid": "例「{{name}}」のボディが有効なBase64ではありません",
+    "conflict": "{{method}} {{path}}はすでに「{{owner}}」で提供されています。"
+  }
+}

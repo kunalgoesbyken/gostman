@@ -1,0 +1,129 @@
+{
+  "command": {
+    "title": "Riquadro comandi",
+    "heading": "Comandi",
+    "sections": {
+      "request": "Richieste"
+    },
+    "searchCommands": "Cerca comandi",
+    "searchRequests": "Cerca richieste",
+    "commandsPlaceholder": "Digita un comando o il nome di una richiesta",
+    "requestsPlaceholder": "Vai a una richiesta o a una voce della cronologia",
+    "results": "Risultati",
+    "nothingMatches": "Nessuna corrispondenza",
+    "sentEarlier": "Inviata in precedenza",
+    "switchEnvironment": "Cambia ambiente: {{name}}",
+    "switchEnvironmentDescription": "Usa le variabili di questo ambiente",
+    "settingsKeywords": "header autenticazione variabili script controlli",
+    "commands": {
+      "sendRequest": {
+        "label": "Invia richiesta",
+        "description": "Invia la richiesta nella scheda corrente"
+      },
+      "newRequest": {
+        "description": "Apri una nuova scheda vuota"
+      },
+      "saveRequest": {
+        "label": "Salva richiesta",
+        "description": "Salva la richiesta nella scheda corrente"
+      },
+      "duplicateRequest": {
+        "label": "Duplica richiesta",
+        "description": "Salva una copia della richiesta corrente"
+      },
+      "copyRequest": {
+        "label": "Copia richiesta",
+        "description": "Copia la richiesta salvata per incollarla in una cartella"
+      },
+      "pasteRequest": {
+        "label": "Incolla richiesta",
+        "description": "Incolla la richiesta o la cartella copiata accanto alla richiesta corrente"
+      },
+      "generateCode": {
+        "description": "Mostra la richiesta corrente come codice"
+      },
+      "closeTab": {
+        "label": "Chiudi scheda",
+        "description": "Chiudi la scheda corrente"
+      },
+      "closeOtherTabs": {
+        "description": "Tieni solo la scheda corrente"
+      },
+      "closeSavedTabs": {
+        "description": "Chiudi ogni scheda senza modifiche non salvate"
+      },
+      "keepTab": {
+        "label": "Mantieni aperta la scheda anteprima",
+        "description": "Trasforma la scheda anteprima in una scheda normale"
+      },
+      "reopenTab": {
+        "label": "Riapri scheda chiusa",
+        "description": "Riporta la scheda chiusa per ultima"
+      },
+      "toggleSidebar": {
+        "description": "Mostra o nascondi raccolte e cronologia"
+      },
+      "shortcuts": {
+        "description": "Vedi tutte le scorciatoie"
+      },
+      "newFolder": {
+        "description": "Crea una cartella al livello principale"
+      },
+      "runCollection": {
+        "description": "Esegui l'intera raccolta o una cartella, con i suoi controlli e script"
+      },
+      "collapseFolders": {
+        "keywords": "chiudi comprimi albero"
+      },
+      "examples": {
+        "label": "Esempi della richiesta",
+        "description": "Vedi le risposte salvate della richiesta corrente"
+      },
+      "mockServer": {
+        "description": "Servi gli esempi salvati su una porta locale"
+      },
+      "capture": {
+        "label": "Cattura il traffico",
+        "description": "Inoltra il traffico di un'app alla sua API e salvalo come richieste"
+      },
+      "cookies": {
+        "label": "Gestisci i cookie",
+        "description": "Vedi ed elimina i cookie memorizzati"
+      },
+      "environments": {
+        "label": "Gestisci gli ambienti",
+        "description": "Crea ambienti e modifica le loro variabili, le variabili di raccolta e le globali",
+        "keywords": "variabili globali"
+      },
+      "scanSecrets": {
+        "keywords": "credenziali token password fuga"
+      },
+      "network": {
+        "label": "Impostazioni di rete",
+        "description": "Proxy e certificati"
+      },
+      "import": {
+        "label": "Importa dati",
+        "description": "Importa file di Postman, Insomnia, Bruno, OpenAPI, HAR e altri"
+      },
+      "lintSpec": {
+        "description": "Controlla se la specifica OpenAPI importata ha problemi",
+        "keywords": "openapi swagger convalida governance"
+      },
+      "loadTest": {
+        "keywords": "prestazioni stress"
+      },
+      "export": {
+        "label": "Esporta dati",
+        "description": "Esporta raccolte e ambienti"
+      },
+      "share": {
+        "label": "Condividi raccolta",
+        "description": "Crea un link o un file cifrato, senza bisogno di un account"
+      },
+      "clearHistory": {
+        "description": "Elimina ogni voce della cronologia"
+      }
+    }
+  }
+}

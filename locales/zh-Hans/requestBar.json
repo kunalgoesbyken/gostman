@@ -1,0 +1,39 @@
+{
+  "requestBar": {
+    "name": "请求名称",
+    "untitled": "未命名请求",
+    "method": "HTTP 方法",
+    "url": "请求 URL",
+    "methodPlaceholders": {
+      "grpc": {
+        "full": "输入服务器地址，例如 localhost:50051",
+        "medium": "服务器地址",
+        "short": "地址"
+      },
+      "mcp": {
+        "full": "输入 MCP 服务器 URL",
+        "medium": "MCP 服务器 URL",
+        "short": "URL"
+      }
+    },
+    "send": "发送",
+    "connect": "连接",
+    "disconnect": "断开连接",
+    "cancel": "取消",
+    "save": "保存",
+    "code": "代码",
+    "codeHint": "生成代码",
+    "codeLanguage": "语言",
+    "urlPlaceholders": {
+      "full": "输入 URL 或粘贴 curl 命令",
+      "medium": "URL 或 curl 命令",
+      "short": "URL"
+    }
+  },
+  "curlFiles": {
+    "title": "粘贴文件读取吗？",
+    "message": "此 curl 命令会读取这台电脑上的文件并随请求一起发送，因此只有在你信任命令来源时才保留它们。不保留时，命令的其余部分仍会被填入。",
+    "withThem": "连同文件读取一起粘贴",
+    "withoutThem": "不含文件读取粘贴"
+  }
+}

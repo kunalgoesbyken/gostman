@@ -6,11 +6,14 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { isOAuthCallback, relayOAuthCallback } from './lib/backend/oauthPopup'
 import { watchSharedLinks } from './lib/sharedLink'
 import { watchOpenLinks } from './lib/openLink'
+import { bootLanguage } from './lib/i18n/boot'
 import { watchPreferences } from './lib/preferences'
 import { watchInstallPrompt } from './lib/pwa'
 import { LANDING_ROUTE, normalize } from './hooks/useRoute'
 
-const isPrerenderedLanding = (root) => root.hasChildNodes() && normalize(window.location.pathname) === LANDING_ROUTE
+const isLandingRoute = () => normalize(window.location.pathname) === LANDING_ROUTE
+
+const isPrerenderedLanding = (root) => root.hasChildNodes() && isLandingRoute()
 
 function mount(root, app) {
   if (isPrerenderedLanding(root)) {
@@ -21,10 +24,12 @@ function mount(root, app) {
   createRoot(root).render(app)
 }
 
-function renderApp() {
+async function renderApp() {
   watchPreferences()
   watchSharedLinks()
   watchOpenLinks()
+  const language = bootLanguage()
+  if (!isLandingRoute()) await language
   mount(
     document.getElementById('root'),
     <React.StrictMode>

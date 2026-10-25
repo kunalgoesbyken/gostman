@@ -59,7 +59,7 @@ function FlowSettings({ flow, problems, index, requests, onChange, onSelectStep 
           <ul className="flex flex-col">
             {problems.map(({ step, message }, position) => (
               <li key={position}>
-                <button type="button" disabled={!step} onClick={() => onSelectStep(step)} className="w-full rounded px-1 py-0.5 text-left text-xs text-foreground hover:bg-accent disabled:hover:bg-transparent">
+                <button type="button" disabled={!step} onClick={() => onSelectStep(step)} className="w-full rounded px-1 py-0.5 text-start text-xs text-foreground hover:bg-accent disabled:hover:bg-transparent">
                   {step && index.get(step) ? `${stepTitle(index.get(step).step, requests)}: ` : ""}{message}
                 </button>
               </li>
@@ -83,9 +83,9 @@ function FlowToolbar({ flow, isDirty, isRunning, history, onRename, onSave, onRu
       <Workflow aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground" />
       <Input value={flow.name} aria-label={TEXT.nameLabel} onChange={(event) => onRename(event.target.value)} className="h-7 max-w-xs border-transparent text-sm font-medium hover:border-input focus:border-input" />
       {isDirty && <span aria-label={TEXT.unsaved} title={TEXT.unsaved} className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground" />}
-      <div className="ml-auto flex shrink-0 items-center gap-1">
-        <IconButton label={TEXT.undo} icon={Undo2} disabled={!history.canUndo} onClick={onUndo} />
-        <IconButton label={TEXT.redo} icon={Redo2} disabled={!history.canRedo} onClick={onRedo} className="max-sm:hidden" />
+      <div className="ms-auto flex shrink-0 items-center gap-1">
+        <IconButton label={TEXT.undo} icon={Undo2} mirrored disabled={!history.canUndo} onClick={onUndo} />
+        <IconButton label={TEXT.redo} icon={Redo2} mirrored disabled={!history.canRedo} onClick={onRedo} className="max-sm:hidden" />
         <Button variant="outline" size="sm" disabled={!isDirty} onClick={onSave} title={hintWithShortcut(TEXT.save, saveShortcut)}>
           <Save />
           <span className="max-sm:hidden">{TEXT.save}</span>
@@ -228,7 +228,7 @@ export function FlowView({ tab, actions, EditorComponent }) {
         onRedo={() => travel(redoChange)}
       />
       <div className={SPLIT_PANES}>
-        <div className="min-h-0 min-w-0 flex-1 overflow-auto bg-muted/20 max-sm:max-h-[55%]">
+        <div dir="ltr" className="min-h-0 min-w-0 flex-1 overflow-auto bg-muted/20 max-sm:max-h-[55%]">
           <FlowCanvas
             flow={flow}
             context={context}
@@ -242,7 +242,7 @@ export function FlowView({ tab, actions, EditorComponent }) {
             onMove={move}
           />
         </div>
-        <aside aria-label={TEXT.panelLabel} className="flex min-h-0 shrink-0 flex-col border-border max-sm:min-h-0 max-sm:flex-1 max-sm:border-t sm:w-[32rem] sm:max-w-[48%] sm:border-l">
+        <aside aria-label={TEXT.panelLabel} className="flex min-h-0 shrink-0 flex-col border-border max-sm:min-h-0 max-sm:flex-1 max-sm:border-t sm:w-[32rem] sm:max-w-[48%] sm:border-s">
           <Tabs value={panel} onValueChange={setPanel} className="flex min-h-0 flex-1 flex-col">
             <div className="flex h-10 shrink-0 items-center border-b border-border px-3">
               <TabsList label={TEXT.panelLabel}>

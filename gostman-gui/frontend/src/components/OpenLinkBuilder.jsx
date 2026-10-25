@@ -17,7 +17,7 @@ function buildFor(address, linkBase) {
 function OutputRow({ label, value }) {
   return (
     <div className="flex items-center gap-2">
-      <Input readOnly value={value} aria-label={label} className="font-mono" onFocus={(event) => event.target.select()} />
+      <Input readOnly value={value} aria-label={label} dir="ltr" className="font-mono" onFocus={(event) => event.target.select()} />
       <CopyTextButton text={value} />
     </div>
   )
@@ -38,7 +38,7 @@ export function OpenLinkBuilder({ linkBase }) {
           placeholder={OPEN_LINK_TEXT.builderPlaceholder}
           aria-label={OPEN_LINK_TEXT.builderLabel}
           spellCheck={false}
-          className="font-mono"
+          dir="ltr" className="font-mono"
         />
         {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
         {links && (

@@ -1,0 +1,14 @@
+{
+  "openLink.scheme": "Only addresses starting with https are accepted.",
+  "openLink.title": "Dialog title shown when the app was opened through a link that asks to import a collection or spec.",
+  "openLink.invalidTitle": "Title when the link cannot be used.",
+  "openLink.hostLabel": "Label of the website the file comes from.",
+  "openLink.addressLabel": "Label of the full address of the file.",
+  "openLink.detected": "{{format}} is the detected file format, for example OpenAPI.",
+  "openLink.items": "Noun phrase for a number of imported items. Used inside openLink.activeNote.",
+  "openLink.activeNote": "{{items}} is a counted phrase such as \"3 items\". Scripts and OAuth settings run code, which is why the user is warned.",
+  "openLink.badgeAlt": "Alternative text of the \"Open in Gostman\" badge image.",
+  "openLink.builderTitle": "Title of a small tool that builds links for a README.",
+  "openLink.badgeLabel": "Label of a Markdown snippet that shows a badge image.",
+  "openLink.import": "Button that imports the downloaded collection or spec. Verb."
+}

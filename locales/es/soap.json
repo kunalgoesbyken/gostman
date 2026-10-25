@@ -1,0 +1,13 @@
+{
+  "soap": {
+    "versionLabel": "Versión de SOAP",
+    "format": "Formatear XML",
+    "formatTitle": "Aplica sangría al envelope. Se conservan los comentarios y las secciones CDATA.",
+    "fault": "SOAP Fault",
+    "faultCode": "Código",
+    "faultReason": "Motivo",
+    "faultActor": "Actor",
+    "faultDetail": "Detalle",
+    "malformed": "No se puede formatear el XML: {{message}}"
+  }
+}

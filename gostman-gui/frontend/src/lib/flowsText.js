@@ -1,254 +1,83 @@
+import english from '../../../../locales/en/flows.json'
+import { messages } from './i18n/core'
+import { formatList } from './i18n/format'
 import { shellWord } from './shellWords'
 
-const quoted = (text) => `"${text}"`
-const plural = (count, one, many) => `${count} ${count === 1 ? one : many}`
-const listed = (names) => names.join(', ')
+const MS_PER_SECOND = 1000
 
-export const FLOW_KIND_TEXT = {
-  request: { label: 'Send request', description: 'Send a saved request, try it again until it passes, or take another path when it fails.' },
-  set: { label: 'Set variables', description: 'Keep values from a response or a template for the next steps.' },
-  if: { label: 'If', description: 'Check a response or variables and branch.' },
-  forEach: { label: 'For each', description: 'Repeat steps for every item of a list in a response.' },
-  delay: { label: 'Wait', description: 'Pause before the next step.' },
-  end: { label: 'End', description: 'Stop the flow as passed or failed.' },
-  unknown: { label: 'Unknown step', description: '' },
-}
+const braced = (name) => `{{${name}}}`
 
-export const FLOW_FIELD_TEXT = {
-  next: 'Then go to',
-  onFailure: 'When it fails, go to',
-  then: 'When true, go to',
-  else: 'When false, go to',
-}
+const text = messages('flows', english, (t) => {
+  const duration = (milliseconds) => (
+    milliseconds >= MS_PER_SECOND && milliseconds % MS_PER_SECOND === 0
+      ? t('flowCanvas.seconds', { value: milliseconds / MS_PER_SECOND })
+      : t('flowCanvas.milliseconds', { value: milliseconds })
+  )
+  const moreKey = (key, match) => (match === 'any' ? `${key}Or` : `${key}And`)
 
-export const FLOW_ENGINE_TEXT = {
-  noSteps: 'The flow has no steps. Add one to run it.',
-  unknownKind: (kind) => `${quoted(kind)} is not a kind of step. Use request, set, if, forEach, delay or end.`,
-  noRequest: 'Choose the saved request this step sends.',
-  missingRequest: (reference) => `No saved request matches ${quoted(reference)}. Choose it again.`,
-  unknownTarget: (field, target) => `${field} ${quoted(target)}, which is not a step of this flow.`,
-  intoLoop: (field, target) => `${field} ${quoted(target)}, a step inside a For each that this step is not part of. Go to the For each step instead.`,
-  noName: 'Every value needs a variable name.',
-  noValueStep: (name) => `Choose the Send request step that ${quoted(name)} comes from.`,
-  noSource: (name) => `Give the JSONPath of ${quoted(name)} in the response, for example $.token.`,
-  notRequestStep: (target) => `${quoted(target)} is not a Send request step of this flow.`,
-  noConditions: 'Add at least one condition.',
-  noList: 'Choose the Send request step whose response holds the list.',
-  noPath: 'Give the JSONPath of the list, for example $.items.',
-  emptyLoop: 'Add the steps to repeat inside For each.',
-  problem: (title, message) => `${title}: ${message}`,
-  cannotRun: (count) => `The flow cannot run until ${plural(count, 'problem is', 'problems are')} fixed.`,
-  notRunYet: (title) => `${title} has not sent its request yet, so its response cannot be used.`,
-  nothingFound: (path, title) => `Nothing was found at ${path} in the response of ${title}.`,
-  noHeader: (name, title) => `The response of ${title} has no ${name} header.`,
-  notAList: (path, title) => `${path} in the response of ${title} is not a list.`,
-  budget: (sends, cap) => `The flow sent ${sends} requests, its limit, and was stopped. Give loops a way to end, or raise the limit in the flow settings (at most ${cap}).`,
-  endless: (visits) => `The flow went through ${visits} steps without sending a request and was stopped. Check where its steps go next.`,
-  timedOut: (seconds) => `Choosing the next step took longer than ${seconds} s, so the flow was stopped.`,
-  passed: 'The flow reached its end.',
-  failedAt: (title) => `${title} failed and has no step to go to when it fails.`,
-  setFailed: (title) => `${title} could not set its values.`,
-  ended: (outcome) => (outcome === 'failed' ? 'An End step stopped the flow as failed.' : 'An End step stopped the flow.'),
-  attemptPassed: (attempt, attempts) => (attempts > 1 ? `Passed on attempt ${attempt} of ${attempts}.` : 'Passed.'),
-  attemptFailed: (attempt, attempts) => (attempts > 1 ? `Failed on the last attempt (${attempt} of ${attempts}).` : 'Failed.'),
-  retrying: (attempt, attempts) => `Attempt ${attempt} of ${attempts} failed; trying again.`,
-  rerouted: (target) => `Failed; going to ${target}.`,
-  branch: (branch, target) => `${branch}, going to ${target}.`,
-  branchNames: { then: 'True', else: 'False' },
-  endOfFlow: 'the end of the flow',
-  nextItem: 'the next item',
-  wrote: (names) => listed(names),
-  iteration: (index, count) => `Item ${index + 1} of ${count}.`,
-  emptyList: 'The list is empty, so its steps were skipped.',
-  waited: (milliseconds) => `Waited ${milliseconds} ms.`,
-  untilCheck: (name) => `until ${name}`,
-}
+  return {
+    flowKind: {
+      unknown: { description: '' },
+    },
+    flowEngine: {
+      unknownTarget: (field, target) => t('flowEngine.unknownTarget', { field, target }),
+      intoLoop: (field, target) => t('flowEngine.intoLoop', { field, target }),
+      problem: (title, message) => t('flowEngine.problem', { title, message }),
+      nothingFound: (path, title) => t('flowEngine.nothingFound', { path, title }),
+      noHeader: (name, title) => t('flowEngine.noHeader', { name, title }),
+      notAList: (path, title) => t('flowEngine.notAList', { path, title }),
+      budget: (sends, cap) => t('flowEngine.budget', { count: sends, cap }),
+      ended: (outcome) => t(outcome === 'failed' ? 'flowEngine.endedFailed' : 'flowEngine.ended'),
+      attemptPassed: (attempt, attempts) => (attempts > 1 ? t('flowEngine.attemptPassedOf', { attempt, attempts }) : t('flowEngine.attemptPassed')),
+      attemptFailed: (attempt, attempts) => (attempts > 1 ? t('flowEngine.attemptFailedOf', { attempt, attempts }) : t('flowEngine.attemptFailed')),
+      retrying: (attempt, attempts) => t('flowEngine.retrying', { attempt, attempts }),
+      branch: (branch, target) => t('flowEngine.branch', { branch, target }),
+      wrote: (names) => formatList(names, 'unit'),
+      iteration: (index, count) => t('flowEngine.iteration', { position: index + 1, count }),
+      waited: (milliseconds) => t('flowEngine.waited', { duration: t('flowEngine.milliseconds', { value: milliseconds }) }),
+    },
+    flowCanvas: {
+      stepLabel: (position, count, kind, title, state) => (
+        t(state ? 'flowCanvas.stepLabelWithState' : 'flowCanvas.stepLabel', { position, count, kind, title, state })
+      ),
+      retry: (times, delayMs) => (
+        delayMs > 0 ? t('flowCanvas.retryApart', { count: times, delay: duration(delayMs) }) : t('flowCanvas.retry', { count: times })
+      ),
+      until: (condition, more) => (more > 0 ? t('flowCanvas.untilMore', { condition, count: more }) : t('flowCanvas.until', { condition })),
+      sets: (name, source) => t('flowCanvas.sets', { name, source }),
+      fromTemplate: (template) => template || '""',
+      fromResponse: (source, path, title) => t(path ? 'flowCanvas.fromResponsePath' : 'flowCanvas.fromResponse', { source, path, title }),
+      condition: (condition, more, match) => (more > 0 ? t(moreKey('flowCanvas.condition', match), { condition, count: more }) : condition),
+      variablesCondition: (condition) => t('flowCanvas.variablesCondition', { condition }),
+      loop: (path, title) => t('flowCanvas.loop', { path: path || '$', title }),
+      wait: (milliseconds) => t('flowCanvas.wait', { duration: duration(milliseconds) }),
+      toEnd: (label) => t('flowCanvas.toEnd', { label }),
+      attempt: (attempt, attempts) => t('flowCanvas.attempt', { attempt, attempts }),
+    },
+    flowEditor: {
+      get variablesHint() {
+        return t('flowEditor.variablesHint', { variables: braced('variables'), example: braced('item.id') })
+      },
+      get templatePlaceholder() {
+        return t('flowEditor.templatePlaceholder', { example: braced('variable') })
+      },
+      loopHint: (item, index) => t('flowEditor.loopHint', { item: braced(item), field: braced(`${item}.field`), index: braced(index) }),
+    },
+    flowView: {
+      cli: (name) => `gostman flow run ${shellWord(name)}`,
+    },
+  }
+})
 
-export const FLOW_IMPORT_TEXT = {
-  missingRequests: (name) => `Steps of the flow "${name}" send requests that are not in the import; choose them again before running it.`,
-}
-
-export const FLOW_TEMPLATE_TEXT = {
-  description: 'Log in, wait until the order is ready and cancel it when it never gets there. Choose the request of each Send request step to make it yours.',
-  login: 'Log in',
-  keepToken: 'Keep the token',
-  waitForOrder: 'Wait until the order is ready',
-  done: 'Order is ready',
-  cancel: 'Cancel the order',
-  cancelled: 'Order cancelled',
-  cancelledMessage: 'The order never got ready, so it was cancelled.',
-}
-
-export const FLOW_TEXT = {
-  sidebarTab: 'Flows',
-  listLabel: 'Flows',
-  newFlow: 'New flow',
-  newName: 'New flow',
-  exampleName: 'Example flow',
-  example: 'Start from an example',
-  emptyTitle: 'Chain requests into a flow',
-  emptyDescription: 'A flow sends saved requests one after another, tries them again until they pass, takes another path when one fails and passes values along. Run it here or with gostman flow run.',
-  open: 'Open',
-  rename: 'Rename',
-  renameTitle: 'Rename flow',
-  nameLabel: 'Flow name',
-  duplicate: 'Duplicate',
-  copyName: (name) => `${name} copy`,
-  remove: 'Delete',
-  deleteTitle: 'Delete flow',
-  deleteMessage: (name) => `Delete the flow "${name}"? This can't be undone.`,
-  actions: (name) => `Actions for ${name}`,
-  saved: (name) => `"${name}" was saved.`,
-  saveFailed: 'Could not save the flow',
-  createFailed: 'Could not create the flow',
-  deleteFailed: 'Could not delete the flow',
-  closeTitle: 'Close flow',
-  closeMessage: (name) => `"${name}" has unsaved changes. Save them before closing?`,
-  dontSave: "Don't save",
-  save: 'Save',
-  steps: (count) => `${count} ${count === 1 ? 'step' : 'steps'}`,
-  count: (count) => `${count} ${count === 1 ? 'flow' : 'flows'}`,
-  tabLabel: (name) => `Flow ${name}`,
-  noCurl: 'A flow has no curl command. Open one of its requests to copy it.',
-  reportFailed: 'Could not save the report',
-}
-
-const seconds = (milliseconds) => (milliseconds >= 1000 && milliseconds % 1000 === 0 ? `${milliseconds / 1000} s` : `${milliseconds} ms`)
-
-export const FLOW_CANVAS_TEXT = {
-  canvasLabel: (name) => `Steps of ${name}`,
-  stepLabel: (position, count, kind, title, state) => `Step ${position} of ${count}: ${kind}, ${title}${state ? `, ${state}` : ''}`,
-  insert: 'Add a step here',
-  insertInto: (title) => `Add a step inside ${title}`,
-  addFirst: 'Add the first step',
-  chooseKind: 'Add a step',
-  chooseRequest: 'Choose a request',
-  noRequest: 'No request chosen',
-  retry: (times, delayMs) => `Tries up to ${times} times${delayMs > 0 ? `, ${seconds(delayMs)} apart` : ''}`,
-  retryShort: (times) => `retry ×${times}`,
-  until: (condition, more) => `until ${condition}${more > 0 ? ` and ${more} more` : ''}`,
-  sets: (name, source) => `${name} ← ${source}`,
-  fromTemplate: (template) => template || '""',
-  fromResponse: (source, path, title) => `${title} ${source}${path ? ` ${path}` : ''}`,
-  noValues: 'No values yet',
-  condition: (condition, more, match) => `${condition}${more > 0 ? ` ${match === 'any' ? 'or' : 'and'} ${more} more` : ''}`,
-  noCondition: 'No condition yet',
-  ofVariables: 'variables',
-  loop: (path, title) => `${path || '$'} of ${title}`,
-  loopBody: 'For each item',
-  emptyLoop: 'Add the steps to repeat',
-  nextItem: 'next item',
-  wait: (milliseconds) => `Waits ${seconds(milliseconds)}`,
-  outcomes: { passed: 'Passes the flow', failed: 'Fails the flow' },
-  edges: { next: 'go to', onFailure: 'fails', then: 'true', else: 'false' },
-  toEnd: (label) => `${label} → end`,
-  attempt: (attempt, attempts) => `${attempt}/${attempts}`,
-  visits: (count) => `×${count}`,
-  problem: 'Needs attention',
-  states: { running: 'running', passed: 'passed', failed: 'failed', handled: 'failed and handled' },
-  moveUp: 'Move up',
-  moveDown: 'Move down',
-  duplicate: 'Duplicate',
-  remove: 'Delete step',
-  removeTitle: 'Delete step',
-  removeMessage: (title) => `Delete the step "${title}"? Steps that went to it continue with the next step instead.`,
-  stepActions: (title) => `Actions for ${title}`,
-}
-
-export const FLOW_PICKER_TEXT = {
-  title: 'Choose a request',
-  search: 'Search saved requests',
-  noMatch: 'No saved request matches',
-  noRequests: 'No saved requests yet',
-  noRequestsHint: 'Save a request first; a flow sends saved requests.',
-}
-
-export const FLOW_EDITOR_TEXT = {
-  label: 'Label',
-  stepId: 'Step id',
-  request: 'Request',
-  variables: 'Variables for this send',
-  variablesHint: 'Set only while this step sends, above every other scope. Values can use {{variables}}, such as {{item.id}} inside For each.',
-  variableName: 'Name',
-  variableValue: 'Value',
-  removeRow: 'Remove',
-  retry: 'Try again',
-  attempts: 'Attempts',
-  retryDelay: 'Wait between (ms)',
-  until: 'Until',
-  untilHint: 'The step passes when a response arrives, its own checks pass and these checks pass. Otherwise it tries again, up to the number of attempts.',
-  paths: 'Where next',
-  whenPassed: 'Then go to',
-  whenFailed: 'When it fails, go to',
-  whenTrue: 'When true, go to',
-  whenFalse: 'When false, go to',
-  afterLoop: 'After the last item, go to',
-  nextStep: 'The next step',
-  failFlow: 'Stop and fail the flow',
-  endOfFlow: 'The end of the flow',
-  missingTarget: (id) => `Missing step "${id}"`,
-  check: 'Check',
-  conditionSources: { response: 'A response', variables: 'Variables' },
-  responseOf: 'Response of',
-  latestResponse: 'The latest response',
-  match: 'Match',
-  matches: { all: 'All must pass', any: 'Any can pass' },
-  responseConditionHint: 'Write expressions as res.status, res.body.field or res.headers.name.',
-  variablesConditionHint: 'Write the variable name in the first column, for example token.',
-  list: 'List',
-  jsonPath: 'JSONPath',
-  itemName: 'Item variable',
-  indexName: 'Index variable',
-  loopHint: (item, index) => `Inside, {{${item}}} is the item, {{${item}.field}} one of its fields and {{${index}}} its position from 0.`,
-  values: 'Values',
-  valuesHint: 'Values live in the session for the rest of the run, like Extract rules, and are never saved.',
-  valueSource: 'Source',
-  valueSources: { template: 'Text', body: 'Response body', header: 'Response header', status: 'Status code' },
-  templatePlaceholder: 'Text or {{variable}}',
-  chooseStep: 'Choose a step',
-  fromStep: 'From step',
-  pathPlaceholder: '$.token',
-  headerPlaceholder: 'Location',
-  headerName: 'Header name',
-  wait: 'Wait',
-  milliseconds: 'Milliseconds',
-  outcome: 'Outcome',
-  outcomes: { passed: 'Passed', failed: 'Failed' },
-  message: 'Message',
-  messagePlaceholder: 'Shown in the run summary',
-}
-
-export const FLOW_VIEW_TEXT = {
-  start: 'Start',
-  nameLabel: 'Flow name',
-  run: 'Run',
-  stop: 'Stop',
-  save: 'Save',
-  undo: 'Undo',
-  redo: 'Redo',
-  unsaved: 'Unsaved changes',
-  panelLabel: 'Flow details',
-  stepTab: 'Step',
-  runTab: 'Run',
-  settingsTitle: 'Flow',
-  description: 'Description',
-  descriptionPlaceholder: 'What this flow checks, for the next person who opens it',
-  maxSends: 'Request limit',
-  maxSendsHint: (cap) => `A run stops after this many requests, so a loop without an end cannot run forever (at most ${cap}).`,
-  selectHint: 'Select a step to edit it, or use + to add one. Steps run from top to bottom; branches are drawn on the right.',
-  problems: (count) => `${count} ${count === 1 ? 'thing needs' : 'things need'} attention before the flow can run`,
-  cli: (name) => `gostman flow run ${shellWord(name)}`,
-  cliHint: 'Run it from a terminal or CI in the workspace folder:',
-}
-
-export const FLOW_RUN_TEXT = {
-  idle: 'Not run yet',
-  run: 'Run',
-  idleHint: 'Run sends the steps with the active environment and shows each one here as it happens.',
-  status: { running: 'Running', passed: 'Passed', failed: 'Failed', stopped: 'Stopped' },
-  sent: (count) => `${count} ${count === 1 ? 'request' : 'requests'} sent`,
-  report: 'Report',
-  resultsLabel: 'Steps that ran',
-  wrote: 'Set',
-  hidden: 'hidden',
-}
+export const FLOW_KIND_TEXT = text.flowKind
+export const FLOW_FIELD_TEXT = text.flowField
+export const FLOW_ENGINE_TEXT = text.flowEngine
+export const FLOW_IMPORT_TEXT = text.flowImport
+export const FLOW_TEMPLATE_TEXT = text.flowTemplate
+export const FLOW_TEXT = text.flow
+export const FLOW_CANVAS_TEXT = text.flowCanvas
+export const FLOW_PICKER_TEXT = text.flowPicker
+export const FLOW_EDITOR_TEXT = text.flowEditor
+export const FLOW_VIEW_TEXT = text.flowView
+export const FLOW_RUN_TEXT = text.flowRun
+export const FLOW_SCRIPT_TEXT = text.flowScript

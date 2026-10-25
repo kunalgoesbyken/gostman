@@ -1,0 +1,62 @@
+{
+  "loadTest": {
+    "title": "Test obciążeniowy",
+    "commandTitle": "Test obciążeniowy tego żądania",
+    "commandDescription": "Wyślij bieżące żądanie wiele razy jednocześnie i zmierz opóźnienie",
+    "barLabel": "Test obciążeniowy",
+    "barHint": "Test obciążeniowy tego żądania",
+    "notice": "Testuj tylko systemy własne lub takie, co do których jest zgoda na testowanie. Każdy worker wysyła żądanie w takiej postaci, w jakiej jest tu pokazane, bez skryptów i wspólnych cookies.",
+    "unsupported": "Testom obciążeniowym można poddawać tylko żądania HTTP. Żądania gRPC, MCP, WebSocket i strumieniowe nie są obsługiwane.",
+    "noUrl": "Najpierw podaj adres URL żądania.",
+    "concurrency": "Równoległe workery",
+    "duration": "Czas trwania (sekundy)",
+    "rateLimit": "Limit żądań na sekundę",
+    "rateLimitHint": "Zostaw puste, aby nie ograniczać",
+    "start": "Start",
+    "stop": "Zatrzymaj",
+    "running": "W toku",
+    "stopped": "Zatrzymano wcześniej",
+    "progress": {
+      "elapsed": "Upłynęło",
+      "requests": "Żądania",
+      "rate": "Żądań/s",
+      "p95": "p95",
+      "failed": "Nieudane"
+    },
+    "summary": {
+      "total": "Żądania",
+      "succeeded": "Udane",
+      "failed": "Nieudane",
+      "rate": "Żądań/s",
+      "received": "Odebrano"
+    },
+    "failureBreakdown": "sieć: {{networkErrors}}, ze statusem {{failureStatus}} lub wyższym: {{statusFailures}}",
+    "percentilesLabel": "Opóźnienie",
+    "percentileColumns": {
+      "name": "Miara",
+      "value": "Milisekundy"
+    },
+    "percentiles": {
+      "minMs": "min",
+      "meanMs": "średnia",
+      "p50Ms": "p50",
+      "p90Ms": "p90",
+      "p95Ms": "p95",
+      "p99Ms": "p99",
+      "maxMs": "maks."
+    },
+    "seconds": "{{value}} s",
+    "milliseconds": "{{value}} ms",
+    "statusCount": "{{code}} x {{count}}",
+    "statusLabel": "Kody statusu",
+    "histogramLabel": "Rozkład opóźnień",
+    "histogramBarLabel_one": "{{from}} do {{to}} ms: {{count}} żądanie",
+    "histogramBarLabel_few": "{{from}} do {{to}} ms: {{count}} żądania",
+    "histogramBarLabel_many": "{{from}} do {{to}} ms: {{count}} żądań",
+    "histogramBarLabel_other": "{{from}} do {{to}} ms: {{count}} żądania",
+    "errorsLabel": "Przykłady błędów",
+    "accuracy": "Percentyle są dokładne z zakresem {{percent}}%.",
+    "emptyTitle": "Brak wyników",
+    "emptyHint": "Wybierz obciążenie i naciśnij Start."
+  }
+}

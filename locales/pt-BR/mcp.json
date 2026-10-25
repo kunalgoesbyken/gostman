@@ -1,0 +1,155 @@
+{
+  "mcp": {
+    "media": {
+      "heading": "Imagens e áudio no resultado",
+      "image": "Imagem {{number}} no resultado",
+      "audio": "Áudio {{number}} no resultado"
+    },
+    "server": "Servidor",
+    "argumentsLabel": "Argumentos",
+    "notLoaded": "Não carregado",
+    "load": "Carregar",
+    "reload": "Recarregar",
+    "signIn": "Entrar",
+    "signingIn": "Entrando…",
+    "signInHint": "Descubra como este servidor quer que você entre, registre o Gostman no servidor de autorização quando necessário, entre pelo navegador e guarde o token na aba Auth",
+    "serverProtocol": "MCP {{version}}",
+    "serverProtocolLegacy": "MCP {{version}} (handshake initialize)",
+    "instructions": "Instruções",
+    "instructionsHint": "Mostra as instruções que este servidor dá aos modelos que o usam",
+    "operation": "Operação",
+    "operations": {
+      "toolsCall": "Chamar ferramenta",
+      "toolsList": "Listar ferramentas",
+      "resourcesRead": "Ler recurso",
+      "resourcesList": "Listar recursos",
+      "resourceTemplatesList": "Listar modelos de recursos",
+      "promptsGet": "Obter prompt",
+      "promptsList": "Listar prompts"
+    },
+    "itemLabels": {
+      "tool": "Ferramenta MCP",
+      "resource": "URI do recurso",
+      "prompt": "Prompt MCP"
+    },
+    "choose": {
+      "tool": "Escolha uma ferramenta",
+      "prompt": "Escolha um prompt"
+    },
+    "noInput": "Esta operação não recebe entrada. Enviar lista tudo o que o servidor retorna, em todas as páginas.",
+    "readHint": "Enviar lê o recurso nesta URI. Escolha um recurso listado ou preencha um modelo.",
+    "schema": "Esquema",
+    "schemaHints": {
+      "tool": "Mostra o JSON Schema dos argumentos da ferramenta ao lado do editor",
+      "prompt": "Mostra os argumentos do prompt ao lado do editor"
+    },
+    "schemaTitles": {
+      "tool": "Esquema de entrada",
+      "prompt": "Argumentos do prompt"
+    },
+    "closeSchema": "Fechar",
+    "noArguments": "Este prompt não recebe argumentos.",
+    "example": "Usar exemplo",
+    "exampleHint": "Substitui os argumentos por um exemplo montado a partir do esquema",
+    "promptArgumentRequired": "{{name}} (obrigatório)",
+    "promptArgumentDescribed": "{{label}}: {{description}}",
+    "catalogHints": {
+      "remote": "Carregue as ferramentas, os recursos e os prompts do servidor MCP nesta URL. Os cabeçalhos e a autenticação desta requisição são enviados em cada chamada. No app para desktop, escreva stdio: e um comando na barra de endereço para iniciar um servidor local, por exemplo {{example}}.",
+      "local": "Carregar inicia este comando neste computador e lê o que ele oferece; cada chamada o inicia de novo. As linhas da aba Cabeçalhos são passadas a ele como variáveis de ambiente."
+    },
+    "empty": "Este servidor não lista ferramentas, recursos nem prompts.",
+    "checks": "Verificações",
+    "checksHint": "Problemas encontrados nas definições de ferramentas deste servidor",
+    "noFindings": "Nenhum problema encontrado nas definições de ferramentas.",
+    "findings": {
+      "missingDescription": "{{tool}}: sem descrição. Um modelo escolhe ferramentas pelas descrições, então dificilmente usará esta bem.",
+      "shortDescription": "{{tool}}: a descrição \"{{detail}}\" é muito curta. Diga o que a ferramenta faz, quando usá-la e o que ela retorna.",
+      "duplicateName": "{{tool}}: mais de uma ferramenta tem este nome, então as chamadas não conseguem diferenciá-las.",
+      "similarNames": "{{tool}}: é quase igual a {{detail}}, o que facilita um modelo escolher a errada.",
+      "invalidName": "{{tool}}: o nome deve ter de 1 a 128 caracteres e usar apenas letras, dígitos, _, - e .",
+      "invalidSchema": "{{tool}}: o esquema de entrada não é utilizável: {{detail}}.",
+      "undocumentedParameters": "{{tool}}: parâmetros sem descrição: {{detail}}.",
+      "unknownRequired": "{{tool}}: required lista parâmetros que o esquema não define: {{detail}}.",
+      "manyTools": "Este servidor lista {{count}} ferramentas. Listas grandes de ferramentas dificultam a escolha da certa por um modelo, e alguns clientes carregam só parte delas.",
+      "rejected": "{{tool}}: deixada de fora da lista de ferramentas, como a especificação exige, porque {{detail}}.",
+      "listFailed": "{{method}} falhou: {{detail}}"
+    },
+    "schemaProblems": {
+      "notObject": "não é um objeto JSON",
+      "rootType": "o tipo de nível superior deveria ser \"object\"",
+      "properties": "properties não é um objeto de esquemas",
+      "property": "o esquema de {{name}} não é um objeto",
+      "type": "{{name}} tem o tipo desconhecido \"{{type}}\"",
+      "required": "required não é uma lista de nomes"
+    },
+    "changes": {
+      "title": "As ferramentas deste servidor mudaram desde a última vez que você as aceitou.",
+      "added": "Novas: {{names}}.",
+      "removed": "Removidas: {{names}}.",
+      "descriptionChanged": "{{name}}: a descrição mudou.",
+      "schemaChanged": "{{name}}: o esquema de entrada mudou.",
+      "definitionChanged": "{{name}}: a descrição ou o esquema de entrada mudou.",
+      "before": "Antes",
+      "now": "Agora",
+      "noDescription": "(nenhuma)",
+      "advice": "Leia as mudanças antes de um agente usar estas ferramentas. Uma descrição alterada pode trazer instruções que o servidor não havia mostrado antes.",
+      "accept": "Aceitar mudanças",
+      "firstSeen": "Primeiro carregamento deste servidor: o Gostman memoriza as ferramentas dele neste dispositivo e avisa quando elas mudarem."
+    },
+    "auth": {
+      "title": "Login",
+      "close": "Fechar",
+      "retry": "Tentar novamente",
+      "steps": {
+        "probe": "Consultar o servidor",
+        "challenge": "Ler o desafio WWW-Authenticate",
+        "resource": "Encontrar os metadados do recurso protegido (RFC 9728)",
+        "server": "Encontrar os metadados do servidor de autorização (RFC 8414 ou OpenID Connect)",
+        "registration": "Obter um client ID",
+        "browser": "Entrar pelo navegador",
+        "issuer": "Verificar o emissor da resposta (RFC 9207)",
+        "token": "Trocar o código por um token",
+        "retry": "Chamar o servidor com o token"
+      },
+      "outcomes": {
+        "ok": "Concluído",
+        "warning": "Aviso",
+        "failed": "Falhou",
+        "stopped": "Interrompido",
+        "running": "Em andamento"
+      },
+      "explanations": {
+        "localCommand": "Servidores locais iniciados com stdio: leem credenciais do ambiente deles, não de OAuth. Coloque o token em uma linha da aba Cabeçalhos.",
+        "unreachable": "O Gostman não conseguiu acessar o servidor. Verifique a URL, a rede e as configurações de proxy.",
+        "noResourceMetadata": "O servidor pediu login sem um parâmetro resource_metadata, então o Gostman procura os metadados nos endereços well-known.",
+        "answered": "O servidor respondeu sem pedir login, por exemplo porque esta requisição já leva um token válido. O Gostman ainda procura metadados OAuth para você poder entrar de novo.",
+        "notProtected": "O servidor respondeu sem pedir login e não publica metadados OAuth, então não precisa de token.",
+        "resourceMetadataMissing": "Nenhum metadado de recurso protegido foi encontrado em nenhum dos endereços abaixo. Um servidor MCP que usa OAuth deve publicá-lo, seja no endereço resource_metadata da resposta 401 ou em /.well-known/oauth-protected-resource.",
+        "resourceMetadataInvalid": "Os metadados do recurso protegido não indicam nenhum servidor de autorização, então o Gostman não sabe onde fazer login.",
+        "resourceMismatch": "O recurso indicado nos metadados do recurso protegido não é a URL deste servidor. Tokens emitidos para esse recurso não seriam aceitos aqui (incompatibilidade de audiência), então o Gostman para. Defina resource nesse documento como a URL do servidor ou como uma URL pela qual a URL do servidor começa.",
+        "serverMetadataMissing": "Nenhum dos endereços well-known do servidor de autorização retornou metadados. O servidor de autorização deve publicar metadados de servidor de autorização OAuth 2.0 ou um documento de descoberta do OpenID Connect.",
+        "issuerMismatch": "O issuer nos metadados do servidor de autorização difere do endereço listado em authorization_servers nos metadados do recurso protegido. A especificação exige que sejam idênticos, caractere por caractere, então os metadados não são usados. Faça os dois valores coincidirem; uma barra final é uma causa comum.",
+        "serverMetadataIncomplete": "Os metadados do servidor de autorização não têm authorization_endpoint ou token_endpoint.",
+        "noPkce": "Os metadados do servidor de autorização não listam S256 em code_challenge_methods_supported, e clientes MCP não devem fazer login sem PKCE. Dê suporte a PKCE com S256 no servidor de autorização e adicione S256 a essa lista.",
+        "insecureEndpoint": "O endpoint de autorização ou de token usa HTTP simples em um host remoto. A especificação exige HTTPS para esses endpoints.",
+        "insufficientScope": "O token é válido, mas falta um escopo de que esta requisição precisa. Entrar de novo pede os escopos que você tinha mais os que o servidor indicou.",
+        "noRegistration": "O servidor de autorização não oferece registro dinâmico de cliente nem documentos de metadados de client ID. Registre você mesmo um cliente nele, informe o client ID na aba Auth (OAuth 2.0) e entre de novo.",
+        "registrationRefused": "O servidor de autorização recusou registrar o Gostman. Muitos provedores de identidade desativam o registro dinâmico de cliente: registre um cliente você mesmo e informe o client ID na aba Auth.",
+        "serverChanged": "O servidor de autorização não é aquele a que o client ID salvo pertence, então o Gostman se registrou de novo em vez de reutilizá-lo.",
+        "browserFailed": "O login no navegador não foi concluído.",
+        "issuerMissing": "Os metadados do servidor de autorização definem authorization_response_iss_parameter_supported, mas a resposta não tinha o parâmetro iss, então foi rejeitada para evitar um ataque de mix-up. Adicione iss ao redirecionamento de volta ao Gostman ou deixe de anunciar esse suporte.",
+        "issuerWrong": "O parâmetro iss da resposta não é o emissor do servidor de autorização com o qual o Gostman fez login, então a resposta foi descartada para evitar um ataque de mix-up. Envie o emissor exatamente como aparece nos metadados do servidor de autorização.",
+        "tokenFailed": "O endpoint de token não retornou um token de acesso. Verifique se o client ID, o endereço de redirecionamento e o parâmetro resource são aceitos.",
+        "stillRejected": "O servidor ainda recusa o token. Ele pode esperar outra audiência ou escopo: compare o resource e o scope abaixo com o que o servidor verifica."
+      },
+      "attempts": "Requisições"
+    },
+    "notifications": "Notificações ({{count}})",
+    "notificationTime": "{{milliseconds}} ms",
+    "progressOf": "{{progress}}/{{total}}",
+    "issuerDetail": "esperado \"{{expected}}\", recebido \"{{received}}\""
+  },
+  "mcpOutput": {
+    "name": "O resultado corresponde ao esquema de saída da ferramenta"
+  }
+}

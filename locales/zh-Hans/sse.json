@@ -1,0 +1,46 @@
+{
+  "sse": {
+    "allTypes": "所有事件类型",
+    "searchLabel": "搜索事件",
+    "searchPlaceholder": "搜索事件",
+    "pause": "暂停自动滚动",
+    "resume": "恢复自动滚动",
+    "clear": "清除事件",
+    "copyAll": "复制显示的事件",
+    "copied": "已复制",
+    "copyEvent": "复制事件数据",
+    "noEvents": "还没有事件",
+    "waiting": "正在等待服务器发送事件。",
+    "noMatches": "没有匹配的事件",
+    "noMatchesHint": "更改类型筛选或搜索内容以查看更多。",
+    "clipped": "此事件过长，其余部分已被省略。",
+    "shown": "已显示 {{shown}}/{{total}}",
+    "received": "已接收 {{count}} 个",
+    "dropped_other": "最早的 {{count}} 个事件不再列出。下载的响应仍包含所有事件。",
+    "reconnecting": "{{seconds}} s 后重新连接（第 {{attempt}} 次尝试）"
+  },
+  "sseSettings": {
+    "stream": "以服务器发送事件流式传输",
+    "reconnect": "服务器关闭流时重新连接",
+    "maxEvents": "事件数上限",
+    "maxEventsPlaceholder": "默认 10000",
+    "maxSeconds": "最长秒数",
+    "maxSecondsPlaceholder": "默认 300"
+  },
+  "status": {
+    "connecting": "正在连接",
+    "open": "流式传输中",
+    "reconnecting": "正在重新连接",
+    "ended": "已结束"
+  },
+  "streamEnd": {
+    "closed": "服务器关闭了流。",
+    "cancelled": "流已停止。",
+    "maxEvents": "已达到事件数上限而停止。可在“设置”中调高。",
+    "maxBytes": "已达到大小上限而停止。",
+    "maxDuration": "已达到时间上限而停止。可在“设置”中调高。",
+    "failed": "流失败。",
+    "failedWith": "流失败。{{detail}}",
+    "hostedLimit": "已达到时间上限而停止。网页版最多流式传输 {{seconds}} 秒；桌面应用可以持续更久。"
+  }
+}

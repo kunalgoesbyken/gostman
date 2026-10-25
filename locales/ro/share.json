@@ -1,0 +1,85 @@
+{
+  "share": {
+    "protections": {
+      "key": "Cheie aleatorie",
+      "passphrase": "Frază de acces"
+    },
+    "deliveries": {
+      "link": "Link",
+      "file": "Fișier criptat"
+    },
+    "privacy": "Criptat în această fereastră și niciodată încărcat. Tokenurile OAuth, cookie-urile, istoricul și setările de rețea nu sunt incluse niciodată.",
+    "summaryWithValues": "{{counts}} (cu valorile lor).",
+    "summaryNamesOnly": "{{counts}} (doar numele variabilelor).",
+    "tooLong": "Această selecție necesită un link de {{size}}. Linkurile se opresc la {{limit}}, deoarece aplicațiile de chat și de e-mail le taie pe cele mai lungi. Trimiteți-o în schimb ca fișier criptat.",
+    "linkNotePassphrase": "Fraza de acces nu este în link. Comunicați-o destinatarului pe alt canal. {{size}}.",
+    "linkNoteKey": "Cheia face parte din link, după semnul #, deci oricine are linkul întreg poate citi colecția. {{size}}.",
+    "linkLabel": "Link de partajare",
+    "fileNotePassphrase": "Destinatarul deschide fișierul cu fraza dvs. de acces. Comunicați-o pe alt canal.",
+    "fileNoteKey": "Fișierul nu poate fi deschis fără cheia de mai jos. Trimiteți cheia pe alt canal decât fișierul.",
+    "saveFile": "Salvare fișier",
+    "keyLabel": "Cheie",
+    "scopeField": "Partajare",
+    "scopeLabel": "Ce se partajează",
+    "everything": "Tot",
+    "requestScope": "Cerere: {{path}}",
+    "sharedVariablesNone": "Nu sunt partajate variabile de mediu, deoarece nimic de aici nu folosește vreuna.",
+    "sharedVariables": "Sunt partajate doar variabilele de mediu folosite aici: {{names}}.",
+    "sharedCollectionVariables": "Aceste variabile ale colecției sunt partajate împreună cu colecțiile lor: {{names}}.",
+    "includeVariables": "Partajare valori de variabile (dezactivat: se partajează doar numele variabilelor)",
+    "includeExamples": "Includere răspunsuri de exemplu salvate",
+    "protection": "Protecție",
+    "passphrasePlaceholder": "Frază de acces, cel puțin {{length}} caractere",
+    "passphraseLabel": "Frază de acces",
+    "sendAs": "Trimitere ca",
+    "literalCredentials_one": "{{count}} cerere conține o parolă, un token sau o cheie introdusă direct în fila Auth. Face parte din cerere și este partajată împreună cu ea.",
+    "literalCredentials_few": "{{count}} cereri conțin o parolă, un token sau o cheie introdusă direct în fila Auth. Acestea fac parte din cerere și sunt partajate împreună cu ea.",
+    "literalCredentials_other": "{{count}} de cereri conțin o parolă, un token sau o cheie introdusă direct în fila Auth. Acestea fac parte din cerere și sunt partajate împreună cu ea.",
+    "nothing": "Încă nu există nimic de partajat aici."
+  },
+  "shareOpen": {
+    "title": "Partajat cu dvs.",
+    "dialogLabel": "Colecție partajată",
+    "intro": "Acest link conține o colecție criptată. Este decriptată în această fereastră și nimic nu este adăugat până nu alegeți Import.",
+    "credentials": {
+      "key": {
+        "label": "Cheie",
+        "hint": "Acest fișier a fost trimis fără cheia sa. Lipiți cheia primită de la expeditor."
+      },
+      "passphrase": {
+        "label": "Frază de acces",
+        "hint": "Această partajare este blocată cu o frază de acces. Cereți-o expeditorului."
+      }
+    },
+    "open": "Deschidere",
+    "cancel": "Anulare",
+    "environmentNoValues_one": "{{name}}: {{count}} variabilă, doar numele, fără valori",
+    "environmentNoValues_few": "{{name}}: {{count}} variabile, doar numele, fără valori",
+    "environmentNoValues_other": "{{name}}: {{count}} de variabile, doar numele, fără valori",
+    "environmentValues_one": "{{name}}: {{count}} variabilă, {{values}} cu valoare",
+    "environmentValues_few": "{{name}}: {{count}} variabile, {{values}} cu valoare",
+    "environmentValues_other": "{{name}}: {{count}} de variabile, {{values}} cu valoare",
+    "folders": "Dosare: {{names}}",
+    "keepValues": "Variabilele pe care le aveți deja își păstrează valorile.",
+    "examples_one": "{{count}} răspuns de exemplu salvat",
+    "examples_few": "{{count}} răspunsuri de exemplu salvate",
+    "examples_other": "{{count}} de răspunsuri de exemplu salvate",
+    "activeContent_one": "{{count}} element conține: {{kinds}}. Veți fi întrebat înainte ca acestea să fie importate.",
+    "activeContent_few": "{{count}} elemente conțin: {{kinds}}. Veți fi întrebat înainte ca acestea să fie importate.",
+    "activeContent_other": "{{count}} de elemente conțin: {{kinds}}. Veți fi întrebat înainte ca acestea să fie importate.",
+    "requestsLabel": "Cereri partajate",
+    "deriving": "Se derivă cheia și se decriptează",
+    "decrypting": "Se decriptează"
+  },
+  "shareErrors": {
+    "unavailable": "Partajarea necesită Web Crypto API, care nu este disponibil în această fereastră.",
+    "incomplete": "Această partajare este incompletă. Copiați tot linkul sau alegeți tot fișierul și încercați din nou.",
+    "cannotDecompress": "Această partajare este comprimată, iar acest browser nu o poate decomprima. Deschideți-o într-un browser actual sau în aplicația desktop.",
+    "tooLarge": "Această partajare se despachetează la mai mult decât importă Gostman deodată, deci nu a fost deschisă.",
+    "unreadable": "Această partajare a fost decriptată, dar conținutul ei nu este text lizibil.",
+    "failedLink": "Această partajare nu a putut fi decriptată. Linkul a fost schimbat sau tăiat pe drum.",
+    "failedKey": "Această partajare nu a putut fi decriptată. Cheia este greșită sau fișierul a fost modificat.",
+    "failedPassphrase": "Această partajare nu a putut fi decriptată. Fraza de acces este greșită sau partajarea a fost modificată.",
+    "unknownVersion": "Această partajare folosește formatul „{{version}}”, pe care această versiune de Gostman nu îl poate deschide. Actualizați Gostman și încercați din nou."
+  }
+}

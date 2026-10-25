@@ -1,0 +1,39 @@
+{
+  "components": {
+    "unused": "{{kind}}/{{name}} è definito ma mai referenziato",
+    "invalidRef": "$ref non valido: {{detail}}"
+  },
+  "info": {
+    "fieldMissing": "info.{{field}} manca o è vuoto",
+    "noServers": "non è elencato alcun server, quindi i client non sanno dove viene servita l'API",
+    "noHost": "non è impostato alcun host, quindi i client non sanno dove viene servita l'API",
+    "serverNotHttps": "{{url}} non usa https",
+    "httpOnly": "l'API è offerta solo su http"
+  },
+  "operations": {
+    "noOperationId": "l'operazione non ha operationId",
+    "duplicateOperationId": "l'operationId \"{{id}}\" è già usato da {{earlier}}",
+    "noSummary": "l'operazione non ha né un summary né una description",
+    "undeclaredTag": "il tag \"{{tag}}\" non è dichiarato nei tag di primo livello",
+    "deprecatedWithoutDescription": "l'operazione è deprecata ma non ha una descrizione che dica cosa usare al suo posto",
+    "noSecurity": "la specifica definisce schemi di sicurezza ma questa operazione non ne richiede nessuno"
+  },
+  "paths": {
+    "none": "il documento non definisce alcun percorso",
+    "noLeadingSlash": "il percorso \"{{path}}\" non inizia con una barra",
+    "ambiguous": "{{path}} non è distinguibile da {{earlier}}",
+    "parameterUndeclared": "il parametro di percorso \"{{name}}\" è nel percorso ma non è dichiarato",
+    "parameterUnused": "il parametro di percorso \"{{name}}\" è dichiarato ma non è nel percorso"
+  },
+  "responses": {
+    "noSuccess": "l'operazione non dichiara alcuna risposta 2xx",
+    "noError": "l'operazione non dichiara né una risposta default né una 4xx",
+    "noSchema": "la risposta {{status}} non ha uno schema",
+    "mediaWithoutSchema": "la risposta {{status}} dichiara {{media}} senza uno schema",
+    "bodyOnRead": "le operazioni {{method}} non dovrebbero avere un corpo della richiesta",
+    "noBodyExample": "il corpo della richiesta {{media}} non ha un esempio"
+  },
+  "security": {
+    "undefinedScheme": "lo schema di sicurezza \"{{name}}\" è usato ma non definito"
+  }
+}

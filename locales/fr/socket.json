@@ -1,0 +1,48 @@
+{
+  "socket": {
+    "socketIoPath": "Chemin",
+    "socketIoAuth": "Charge utile d’auth",
+    "socketIoAuthNote": "Un objet JSON envoyé avec la négociation de l’espace de noms, lu par le serveur comme socket.handshake.auth.",
+    "invalidAuth": "La charge utile d’auth Socket.IO doit être un objet JSON.",
+    "statuses": {
+      "idle": "Déconnecté",
+      "connecting": "Connexion",
+      "open": "Connecté",
+      "waiting": "En attente de reconnexion"
+    },
+    "entries": {
+      "sent": "Envoyé",
+      "received": "Reçu",
+      "info": "Info",
+      "warning": "Avertissement",
+      "error": "Erreur"
+    },
+    "protocol": "Protocole",
+    "graphql": "Abonnement GraphQL",
+    "filter": "Filtre de topic, par exemple sensors/#",
+    "subscribe": "S’abonner",
+    "saved": "Messages enregistrés",
+    "savedPlaceholder": "Charger un message enregistré",
+    "noSaved": "Aucun message enregistré pour l’instant",
+    "save": "Enregistrer",
+    "saveTitle": "Enregistrer le message",
+    "saveMessage": "Nom de ce message. Il est enregistré avec la requête.",
+    "remove": "Supprimer le message enregistré",
+    "binary_one": "Binaire, {{count}} octet",
+    "binary_other": "Binaire, {{count}} octets",
+    "binary_many": "Binaire, {{count}} d’octets",
+    "truncated": "Affichage des {{shown}} premiers caractères sur {{total}}",
+    "copy": "Copier le message",
+    "dropped": "Entrées plus anciennes supprimées : {{dropped}}. Le journal conserve les {{limit}} dernières.",
+    "emptyTitle": "Aucun message pour l’instant",
+    "emptyDescription": "Connectez-vous, puis envoyez un message ou attendez le serveur.",
+    "log": "Messages",
+    "autoReconnect": "Reconnexion auto",
+    "unsentHeaders": "Un navigateur ne peut définir que Sec-WebSocket-Protocol sur un WebSocket. Non envoyés d’ici : {{names}}. L’application de bureau envoie tous les en-têtes.",
+    "composer": "Message ({{shortcut}} pour envoyer)",
+    "composerClosed": "Connectez-vous pour envoyer des messages",
+    "message": "Message",
+    "send": "Envoyer",
+    "clear": "Effacer"
+  }
+}

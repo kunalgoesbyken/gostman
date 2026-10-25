@@ -1,0 +1,15 @@
+{
+  "unresolved": {
+    "sentAsWritten_one": "Această variabilă nu este definită, deci a fost trimisă așa cum este scrisă:",
+    "sentAsWritten_few": "Aceste variabile nu sunt definite, deci au fost trimise așa cum sunt scrise:",
+    "sentAsWritten_other": "Aceste variabile nu sunt definite, deci au fost trimise așa cum sunt scrise:",
+    "notDefined_one": "Această variabilă nu este definită:",
+    "notDefined_few": "Aceste variabile nu sunt definite:",
+    "notDefined_other": "Aceste variabile nu sunt definite:",
+    "openEnvironments": "Deschidere Medii",
+    "extractedBy": "{{reference}} este setată de o regulă de extragere din „{{request}}”, deci trimiteți mai întâi acea cerere.",
+    "extractedByOnly": "Este setată de o regulă de extragere din „{{request}}”, deci trimiteți mai întâi acea cerere.",
+    "openSource": "Deschidere „{{request}}”",
+    "define": "Adăugare {{reference}} în mediul activ"
+  }
+}

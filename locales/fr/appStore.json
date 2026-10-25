@@ -1,0 +1,7 @@
+{
+  "appStore": {
+    "saveFailedTitle": "Les modifications n’ont pas pu être enregistrées",
+    "saveFailed": "Vos dernières modifications n’ont pas été enregistrées et seront perdues à la fermeture de l’application. Exportez vos données pour en garder une copie. ({{reason}})",
+    "delete": "Supprimer"
+  }
+}

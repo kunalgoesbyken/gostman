@@ -1,0 +1,28 @@
+{
+  "builder": {
+    "rootLabel": "Tipul operației",
+    "rootNames": {
+      "query": "Query",
+      "mutation": "Mutation",
+      "subscription": "Subscription"
+    },
+    "title": "Constructor",
+    "paneLabel": "Constructor de interogări",
+    "filterLabel": "Filtrare câmpuri",
+    "filterPlaceholder": "Filtrare câmpuri",
+    "expand": "Extindere",
+    "collapse": "Restrângere",
+    "select": "Selectare {{name}}",
+    "include": "Includerea argumentului {{name}}",
+    "viaFragment": "Selectat printr-un fragment din editor. Editați-l acolo.",
+    "noSchemaTitle": "Nicio schemă încărcată",
+    "noSchemaDescription": "Preluați-o pentru a construi o interogare din câmpurile endpointului. Interogarea de introspecție folosește URL-ul, antetele și autentificarea acestei cereri.",
+    "fetch": "Preluare schemă",
+    "refresh": "Reîmprospătare schemă",
+    "loading": "Se preia schema",
+    "syntaxError": "Constructorul este în pauză cât timp editorul are o eroare de sintaxă: {{message}}",
+    "subscription": "Subscription transmit rezultate printr-o conexiune de lungă durată. Activați Stream ca server-sent events în Setări pentru a le citi de la servere care livrează subscription în acest mod.",
+    "noRoot": "Această schemă nu are un tip rădăcină pentru această operație.",
+    "empty": "Nimic nu corespunde filtrului."
+  }
+}

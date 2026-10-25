@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/kunalgoesbyken/gostman/locales"
 	"github.com/kunalgoesbyken/gostman/openapi"
 )
 
@@ -32,7 +33,7 @@ func (c *collector) savedExamples(requestName string, drafts []exampleDraft) str
 	var examples []openapi.Example
 	for _, draft := range drafts {
 		if len(examples) == maxExamples {
-			c.flag(messageTooManyExamples, requestName)
+			c.flag(locales.ImporterTooManyExamples, requestName)
 			break
 		}
 		examples = append(examples, savedExample(draft, len(examples) == 0))

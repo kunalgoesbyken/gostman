@@ -1,0 +1,28 @@
+{
+  "builder": {
+    "rootLabel": "Typ operacji",
+    "rootNames": {
+      "query": "Query",
+      "mutation": "Mutation",
+      "subscription": "Subscription"
+    },
+    "title": "Kreator",
+    "paneLabel": "Kreator zapytań",
+    "filterLabel": "Filtruj pola",
+    "filterPlaceholder": "Filtruj pola",
+    "expand": "Rozwiń",
+    "collapse": "Zwiń",
+    "select": "Wybierz: {{name}}",
+    "include": "Uwzględnij argument: {{name}}",
+    "viaFragment": "Wybrane przez fragment w edytorze. Edytuj go tam.",
+    "noSchemaTitle": "Nie wczytano schematu",
+    "noSchemaDescription": "Pobierz go, aby zbudować zapytanie z pól punktu końcowego. Zapytanie introspekcyjne używa adresu URL, nagłówków i uwierzytelniania tego żądania.",
+    "fetch": "Pobierz schemat",
+    "refresh": "Odśwież schemat",
+    "loading": "Pobieranie schematu",
+    "syntaxError": "Kreator jest wstrzymany, dopóki edytor zawiera błąd składni: {{message}}",
+    "subscription": "Subskrypcje przesyłają wyniki strumieniowo przez długotrwałe połączenie. Włącz Strumień jako server-sent events w Ustawieniach, aby odczytywać je z serwerów, które dostarczają subskrypcje w ten sposób.",
+    "noRoot": "Ten schemat nie ma typu głównego dla tej operacji.",
+    "empty": "Nic nie pasuje do filtra."
+  }
+}

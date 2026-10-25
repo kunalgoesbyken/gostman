@@ -1,0 +1,20 @@
+{
+  "about": {
+    "title": "O programie Gostman",
+    "commandTitle": "O programie Gostman",
+    "commandDescription": "Wersja, linki i diagnostyka",
+    "tagline": "Klient API typu open source dla REST, GraphQL, gRPC i WebSocket. Bez konta; dane zostają na urządzeniu.",
+    "version": "Wersja {{version}}",
+    "links": {
+      "website": "Strona internetowa",
+      "source": "Kod źródłowy",
+      "releases": "Wydania",
+      "issues": "Zgłoś problem"
+    },
+    "diagnosticsHint": "Diagnostyka zawiera tylko wersję, platformę i liczniki. Nigdy nie obejmuje żądań, adresów URL, zmiennych, tokenów ani sekretów.",
+    "copyDiagnostics": "Kopiuj diagnostykę",
+    "copied": "Skopiowano",
+    "versionButton": "O programie Gostman",
+    "close": "Zamknij"
+  }
+}

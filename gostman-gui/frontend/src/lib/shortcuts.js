@@ -5,6 +5,7 @@ import { SHORTCUT_TEXT } from './shortcutText.js'
 
 const TAB_POSITIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 const FIRST_TAB_ID = 'tab1'
+const LAST_TAB_POSITION = 9
 
 export const SHORTCUT_GROUPS = ['General', 'Request', 'Tabs', 'Navigation']
 
@@ -47,39 +48,51 @@ export const MOVING_KEYS = [
   { id: 'leaveEditor', chords: [{ key: 'escape' }, { key: 'tab' }] },
 ]
 
+const labelled = (labelId, fields) => ({
+  id: labelId,
+  ...fields,
+  get label() {
+    return SHORTCUT_TEXT.labels[labelId]
+  },
+})
+
+const tabShortcut = (position) => ({
+  id: `tab${position}`,
+  group: 'Tabs',
+  get label() {
+    return position === LAST_TAB_POSITION ? SHORTCUT_TEXT.labels.goToLastTab : SHORTCUT_TEXT.labels.goToTab(position)
+  },
+  alt: true,
+  code: digitCode(position),
+  position,
+  listed: position === 1,
+})
+
 export const SHORTCUTS = [
-  { id: 'commandPalette', group: 'General', label: 'Command palette', mod: true, key: 'k' },
-  { id: 'findRequest', group: 'General', label: 'Go to request or history', mod: true, key: 'p' },
-  { id: 'shortcutsHelp', group: 'General', label: 'Keyboard shortcuts', mod: true, key: '/' },
-  { id: 'newRequest', group: 'Request', label: 'New request', mod: true, key: 'n', web: { alt: true, key: 'n' } },
-  { id: 'saveRequest', group: 'Request', label: 'Save request', mod: true, key: 's' },
-  { id: 'sendRequest', group: 'Request', label: 'Send request', mod: true, key: 'enter' },
-  { id: 'closeTab', group: 'Tabs', label: 'Close tab', mod: true, key: 'w', web: { alt: true, key: 'w' } },
-  { id: 'reopenTab', group: 'Tabs', label: 'Reopen closed tab', mod: true, shift: true, key: 't', web: { alt: true, shift: true, key: 't' } },
-  { id: 'closeOtherTabs', group: 'Tabs', label: 'Close other tabs', alt: true, shift: true, key: 'w' },
-  { id: 'closeSavedTabs', group: 'Tabs', label: 'Close saved tabs', alt: true, shift: true, key: 's' },
-  { id: 'keepTab', group: 'Tabs', label: 'Keep preview tab open', alt: true, shift: true, key: 'k' },
-  { id: 'nextTab', group: 'Tabs', label: 'Next tab', ctrl: true, key: 'tab', web: { alt: true, code: 'BracketRight' } },
-  { id: 'previousTab', group: 'Tabs', label: 'Previous tab', ctrl: true, shift: true, key: 'tab', web: { alt: true, code: 'BracketLeft' } },
-  ...TAB_POSITIONS.map((position) => ({
-    id: `tab${position}`,
-    group: 'Tabs',
-    label: position === 9 ? 'Go to last tab' : `Go to tab ${position}`,
-    alt: true,
-    code: digitCode(position),
-    position,
-    listed: position === 1,
-  })),
-  { id: 'aiGenerate', ai: true, group: 'General', label: 'AI: new request from a description', mod: true, shift: true, key: 'u', web: { alt: true, shift: true, key: 'u' } },
-  { id: 'aiExplain', ai: true, group: 'General', label: 'AI: explain the response', mod: true, shift: true, key: 'x', web: { alt: true, shift: true, key: 'x' } },
-  { id: 'toggleSidebar', group: 'Navigation', label: 'Toggle sidebar', mod: true, key: 'b' },
-  { id: 'focusSidebarSearch', group: 'Navigation', label: 'Search the sidebar', mod: true, shift: true, key: 'f' },
-  { id: 'nextPane', group: 'Navigation', label: 'Next pane', key: 'f6' },
-  { id: 'previousPane', group: 'Navigation', label: 'Previous pane', shift: true, key: 'f6' },
-  { id: 'focusAddress', group: 'Navigation', label: 'Go to the URL', mod: true, key: 'l' },
-  { id: 'workspaceSwitcher', group: 'Navigation', label: 'Switch workspace', mod: true, shift: true, key: 'o', web: false },
-  { id: 'nextWorkspace', group: 'Navigation', label: 'Next workspace', mod: true, shift: true, code: 'BracketRight', web: false },
-  { id: 'previousWorkspace', group: 'Navigation', label: 'Previous workspace', mod: true, shift: true, code: 'BracketLeft', web: false },
+  labelled('commandPalette', { group: 'General', mod: true, key: 'k' }),
+  labelled('findRequest', { group: 'General', mod: true, key: 'p' }),
+  labelled('shortcutsHelp', { group: 'General', mod: true, key: '/' }),
+  labelled('newRequest', { group: 'Request', mod: true, key: 'n', web: { alt: true, key: 'n' } }),
+  labelled('saveRequest', { group: 'Request', mod: true, key: 's' }),
+  labelled('sendRequest', { group: 'Request', mod: true, key: 'enter' }),
+  labelled('closeTab', { group: 'Tabs', mod: true, key: 'w', web: { alt: true, key: 'w' } }),
+  labelled('reopenTab', { group: 'Tabs', mod: true, shift: true, key: 't', web: { alt: true, shift: true, key: 't' } }),
+  labelled('closeOtherTabs', { group: 'Tabs', alt: true, shift: true, key: 'w' }),
+  labelled('closeSavedTabs', { group: 'Tabs', alt: true, shift: true, key: 's' }),
+  labelled('keepTab', { group: 'Tabs', alt: true, shift: true, key: 'k' }),
+  labelled('nextTab', { group: 'Tabs', ctrl: true, key: 'tab', web: { alt: true, code: 'BracketRight' } }),
+  labelled('previousTab', { group: 'Tabs', ctrl: true, shift: true, key: 'tab', web: { alt: true, code: 'BracketLeft' } }),
+  ...TAB_POSITIONS.map(tabShortcut),
+  labelled('aiGenerate', { ai: true, group: 'General', mod: true, shift: true, key: 'u', web: { alt: true, shift: true, key: 'u' } }),
+  labelled('aiExplain', { ai: true, group: 'General', mod: true, shift: true, key: 'x', web: { alt: true, shift: true, key: 'x' } }),
+  labelled('toggleSidebar', { group: 'Navigation', mod: true, key: 'b' }),
+  labelled('focusSidebarSearch', { group: 'Navigation', mod: true, shift: true, key: 'f' }),
+  labelled('nextPane', { group: 'Navigation', key: 'f6' }),
+  labelled('previousPane', { group: 'Navigation', shift: true, key: 'f6' }),
+  labelled('focusAddress', { group: 'Navigation', mod: true, key: 'l' }),
+  labelled('workspaceSwitcher', { group: 'Navigation', mod: true, shift: true, key: 'o', web: false }),
+  labelled('nextWorkspace', { group: 'Navigation', mod: true, shift: true, code: 'BracketRight', web: false }),
+  labelled('previousWorkspace', { group: 'Navigation', mod: true, shift: true, code: 'BracketLeft', web: false }),
 ]
 
 const byId = new Map(SHORTCUTS.map((shortcut) => [shortcut.id, shortcut]))

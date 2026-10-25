@@ -1,0 +1,21 @@
+{
+  "jsonFormat": {
+    "expectedValue": "Oczekiwano wartości",
+    "unexpectedEnd": "JSON kończy się zbyt wcześnie",
+    "unexpected": "Nieoczekiwane: {{character}}",
+    "endOfText": "koniec tekstu",
+    "expectedKey": "Oczekiwano nazwy właściwości w podwójnych cudzysłowach",
+    "expectedColon": "Oczekiwano ':' po nazwie właściwości",
+    "expectedObjectEnd": "Oczekiwano ',' lub '}' po wartości właściwości",
+    "expectedArrayEnd": "Oczekiwano ',' lub ']' po elemencie",
+    "trailingComma": "Usuń przecinek przed '{{closer}}'",
+    "unclosedString": "Ten ciąg znaków nie ma zamykającego cudzysłowu",
+    "lineBreakInString": "Podziały wierszy wewnątrz ciągu znaków należy zapisać jako \\n",
+    "controlInString": "Znaki sterujące wewnątrz ciągu znaków muszą być poprzedzone znakiem ucieczki",
+    "badEscape": "Nieznana sekwencja ucieczki w ciągu znaków",
+    "badNumber": "Ta liczba nie jest poprawnym JSON-em",
+    "unclosedReference": "Ten {{reference}} nie ma zamykającego {{closer}}",
+    "extraText": "Nieoczekiwany tekst po wartości JSON",
+    "tooDeep": "JSON jest zagnieżdżony zbyt głęboko, aby go sformatować"
+  }
+}

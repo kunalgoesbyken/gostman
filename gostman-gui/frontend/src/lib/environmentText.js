@@ -1,69 +1,15 @@
-export const ENVIRONMENT_TEXT = {
-  title: "Environments",
-  active: "Active environment",
-  noEnvironment: "No environment",
-  shared: "Shared",
-  availableIn: "Available in",
-  everyCollection: "Every collection",
-  inCollection: (name, collection) => `${name}, from ${collection}`,
-  followed: (name, collection) => (collection ? `Environment ${name} is in use for ${collection}` : `Environment ${name} is in use`),
-  otherCollection: (collection) => `Used by requests in ${collection}`,
-  scope: "Environment scope",
-  colour: "Colour",
-  environmentsTab: "Environments",
-  globalsTab: "Globals",
-  collectionVariables: "Collection variables",
-  dotEnv: ".env file",
-  newEnvironment: "New environment",
-  newGlobal: "New global environment",
-  duplicate: "Duplicate environment",
-  remove: "Delete environment",
-  name: "Environment name",
-  namePlaceholder: "Staging",
-  inherits: "Inherits from",
-  inheritsNone: "Nothing",
-  search: "Filter variables",
-  variable: "Variable",
-  value: "Value",
-  add: "Add variable",
-  enabled: "Use this variable",
-  secret: "Mark as secret",
-  notSecret: "Stored in plain text",
-  reveal: "Show value",
-  hide: "Hide value",
-  removeRow: "Delete variable",
-  nameRequired: "Name required",
-  unnamedRows: "A value without a variable name is not saved. Name the variable, or delete the row.",
-  hiddenValue: "••••••••",
-  makeActive: "Use this environment",
-  isActive: "In use",
-  stopUsing: "Stop using",
-  emptyGlobal: "Global environments are shared by every collection. Create one to define values once.",
-  dotEnvNote: "Read from the .env file next to gostman.yaml. Use these as process.env.NAME. They are never written back or exported.",
-  collectionNote: "Collection variables apply to every request. An environment variable with the same name wins.",
-  ownCollectionNote: (collection) => `Collection variables of ${collection}, used by its requests only. They win over shared collection variables; an environment variable with the same name wins over both.`,
-  sharedCollectionNote: "Shared collection variables apply to requests in every collection. A collection's own variables and environment variables with the same name win.",
-  sharedFolderNote: "Shared collection variables apply to every request. A top-level folder's own collection variables win over them, and an environment variable with the same name wins over both.",
-  precedence: "Precedence from lowest to highest: Globals, Collection variables (shared, then the collection's own), Environment (inherited ones first), Folder, Request, Session.",
-  secretNote: "Secret values are kept in the system keychain or an encrypted file on this computer, never in the collection folder or exports.",
-  secretNoteWeb: "Secret values stay in this browser and are left out of exports.",
-  confirmDelete: (name) => `Delete "${name}" and its variables? This can't be undone.`,
-  promptTitle: "Values needed",
-  promptMessage: "Enter a value for each prompted variable before the request is sent.",
-  promptRunMessage: "Enter a value for each prompted variable. These values are used for every request in this run.",
-  promptSend: "Send",
-  promptContinue: "Continue run",
-  promptCancel: "Cancel",
-  scriptGlobals: "Globals",
-  sessionValues: "Session values",
-  sessionNote: "Values kept for this session only: set by scripts with pm.variables.set, bru.setVar or env.session.set, and by Extract rules saved to the session. They are never written to disk and override every other scope. They are cleared when you clear them, open another collection or close the app.",
-  sessionEmpty: "No session values. Scripts and Extract rules add them when a request runs.",
-  clearSession: "Clear session values",
-}
+import english from '../../../../locales/en/environment.json'
+import { messages } from './i18n/core'
 
-export const COLOR_TEXT = {
-  names: { red: "Red", orange: "Orange", green: "Green", blue: "Blue", purple: "Purple", gray: "Grey" },
-  automatic: (name) => `${name}, picked automatically`,
-  custom: "Custom colour",
-  customValue: (hex) => `Custom colour ${hex}`,
-}
+const HIDDEN_VALUE = '••••••••'
+
+const text = messages('environment', english, (t) => ({
+  environment: {
+    followed: (name, collection) => (collection ? t('environment.followedFor', { name, collection }) : t('environment.followed', { name })),
+    inCollection: (name, collection) => t('environment.inCollection', { name, collection }),
+    hiddenValue: HIDDEN_VALUE,
+  },
+}))
+
+export const ENVIRONMENT_TEXT = text.environment
+export const COLOR_TEXT = text.color

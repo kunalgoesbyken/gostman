@@ -1,0 +1,204 @@
+{
+  "ai": {
+    "name": "AI",
+    "ok": "OK",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "back": "戻る",
+    "discard": "破棄",
+    "tryAgain": "やり直す",
+    "preview": "プレビュー",
+    "sendToAi": "AIに送信",
+    "continueBatch": "次のリクエストを作成",
+    "empty": "空",
+    "current": "現在",
+    "proposed": "提案",
+    "instructions": "指示",
+    "content": "内容",
+    "replyFormat": "返答の形式",
+    "scriptLabel": "スクリプト",
+    "preRequest": "リクエスト前",
+    "postResponse": "レスポンス後",
+    "providerLabel": "AI：{{label}}",
+    "waitingFor": "{{label}}の応答を待っています",
+    "readingSpec": "OpenAPIドキュメントを読み込んでいます",
+    "reviewNote": "AIが生成した内容です。承認する前に確認してください。あなたが決定するまで、送信、保存、実行は行われません。",
+    "previewNote": "{{host}}に送信される内容です：約{{size}}（{{tokens}}トークン）。シークレットはマスクされます。",
+    "previewNoteValues": "{{host}}に送信される内容です：約{{size}}（{{tokens}}トークン）。シークレットはマスクされます。レスポンスボディの値が含まれます（最大4 KB、機密性の高いキーはマスク済み）。",
+    "previewNoteStructure": "{{host}}に送信される内容です：約{{size}}（{{tokens}}トークン）。シークレットはマスクされます。レスポンスボディは構造のみで、値は含まれません。",
+    "skipPreview": "このアクションでは今後確認しない（このプレビューなしで送信されます）",
+    "includeValues": "実際のレスポンスの値を含める（オフの場合は構造のみ送信）",
+    "includeBodyValues": "ボディの値を含める（最大4 KB、機密性の高いキーはマスク済み）。オフにすると構造のみ送信します。",
+    "needsResponse": "先にリクエストを送信して、元になるレスポンスを用意してください。",
+    "needsTrust": "このフォルダーは制限付きです。AIが作成したスクリプトは確認するまで信頼されないため、スクリプトを生成する前にフォルダーを信頼してください。",
+    "badReply": "モデルが想定された形式で返答しませんでした。やり直すか、より高性能なモデルを選んでください。",
+    "cutOff": "長さの上限に達したため、返答が途中で切れました。内容を減らしてやり直すか、より短く返答するモデルを選んでください。",
+    "connected": "接続しました",
+    "cancelled": "キャンセルしました",
+    "tooLarge": "テキストは{{size}}で、上限は{{limit}}です。より小さい部分を貼り付けてください。サイズに関係なく、完全なOpenAPIまたはSwaggerドキュメントはデータのインポートで取り込めます。",
+    "searchLimited": "コレクションには{{total}}件のリクエストがあります。送信されるのは先頭の{{sent}}件のみのため、それ以降のリクエストは見つかりません。",
+    "tasks": {
+      "request": {
+        "label": "説明から新しいリクエストを作成",
+        "inputLabel": "リクエストを説明してください",
+        "placeholder": "名前とメールアドレスを指定して新しいユーザーをPOSTする",
+        "section": "新しいリクエスト（未保存のタブで開きます）",
+        "apply": "新しいタブで開く",
+        "untitled": "AIリクエスト"
+      },
+      "tests": {
+        "label": "レスポンスのチェック",
+        "assertions": "アサーション",
+        "script": "レスポンス後スクリプト（AIが生成。実行前に確認してください）",
+        "apply": "リクエストに追加"
+      },
+      "script": {
+        "label": "リクエスト前またはレスポンス後のスクリプト",
+        "inputLabel": "スクリプトにさせたいこと",
+        "placeholder": "レスポンスのトークンを環境に保存する",
+        "sectionPreScript": "新しいリクエスト前スクリプト（AIが生成。実行前に確認してください）",
+        "sectionPostScript": "新しいレスポンス後スクリプト（AIが生成。実行前に確認してください）",
+        "apply": "スクリプトを置き換え"
+      },
+      "explain": {
+        "label": "失敗したレスポンスを説明",
+        "happened": "発生したこと",
+        "causes": "考えられる原因",
+        "fixes": "修正の提案"
+      },
+      "docs": {
+        "label": "リクエストのドキュメントを作成",
+        "section": "説明",
+        "apply": "説明として使用"
+      },
+      "search": {
+        "label": "コレクションについて質問",
+        "inputLabel": "探しているもの",
+        "placeholder": "注文をキャンセルするエンドポイント"
+      },
+      "schema": {
+        "label": "API記述からリクエストを作成",
+        "inputLabel": "OpenAPIまたはSwaggerドキュメント、GraphQLスキーマ、APIドキュメントのテキストを貼り付けてください",
+        "placeholder": "openapi: 3.1.0 ...",
+        "folder": "新しいフォルダー「{{name}}」",
+        "defaultFolder": "AIリクエスト",
+        "apply_other": "フォルダーと{{count}}件のリクエストを追加",
+        "moreNote": "このAPIには1回の返答に収まらない数のエンドポイントがあります。「次のリクエストを作成」で続行してください。作成済みのリクエストの一覧とともに、同じテキストが再送信されます。",
+        "importerSection_other": "OpenAPIのインポート：{{count}}件のリクエスト",
+        "importerNote": "OpenAPIまたはSwaggerドキュメントのため、内蔵のインポーターがすべて読み込みます。AIには何も送信していません。アサーションを追加するには、リクエストを送信して「レスポンスのチェック」を使用してください。",
+        "importerWarnings": "インポーターからの注記",
+        "importApply_other": "{{count}}件のリクエストをインポート",
+        "moreLines_other": "ほか{{count}}件"
+      }
+    },
+    "buttons": {
+      "generate": "AIで生成",
+      "generateTests": "AIでチェックを生成",
+      "generateScript": "AIでこのスクリプトを生成",
+      "explain": "AIで説明",
+      "explainError": "AIでこのエラーを説明",
+      "document": "AIで作成",
+      "documentLabel": "AIで説明を作成"
+    },
+    "commands": {
+      "request": {
+        "label": "AI：説明から新しいリクエストを作成",
+        "description": "リクエストの下書きをプレビューで表示し、承認すると反映します",
+        "keywords": "生成 generate"
+      },
+      "tests": {
+        "label": "AI：チェックを生成",
+        "description": "直前のレスポンスに対するチェックを提案します"
+      },
+      "script": {
+        "label": "AI：スクリプトを作成",
+        "description": "リクエスト前またはレスポンス後のスクリプトを提案します"
+      },
+      "explain": {
+        "label": "AI：レスポンスを説明",
+        "description": "失敗の理由を説明し、修正を提案します"
+      },
+      "docs": {
+        "label": "AI：このリクエストのドキュメントを作成",
+        "description": "リクエストの説明を提案します"
+      },
+      "search": {
+        "label": "AI：コレクションについて質問",
+        "description": "説明からリクエストを探します",
+        "keywords": "検索 探す search find"
+      },
+      "schema": {
+        "label": "AI：API記述からリクエストを作成",
+        "description": "OpenAPIドキュメントは内蔵のインポーターを使用し、それ以外の記述はAIに送られます",
+        "keywords": "openapi swagger graphql schema スキーマ"
+      },
+      "settings": {
+        "label": "AI設定",
+        "description": "AIのオン／オフ、プロバイダー、モデル、キー",
+        "keywords": "無効 有効 設定 disable enable preferences"
+      }
+    },
+    "settings": {
+      "offNote": "AIはオフです。AIのボタン、コマンド、ショートカットは表示されず、AIプロバイダーには何も送信されません。",
+      "onNote": "AIはオンです。AIのボタンとコマンドが表示されますが、AIアクションを実行するまで何も送信されません。",
+      "needsSetup": "AIはオンです。AIアクションを実行するには、モデルを選び、プロバイダーが必要とする場合はAPIキーを保存してください。",
+      "previewNote": "各アクションでは、このマシンから何かが送信される前に、送信内容そのもののプレビューが表示されます。ただし、そのアクションで「今後確認しない」を選んだ場合は表示されません。",
+      "consent": "AIアクションを実行すると、プレビューされたリクエストまたはレスポンスの詳細が{{host}}に送信されること、および課金は私とプロバイダーとの間で行われることを理解しました。",
+      "enable": "AI機能をオンにする",
+      "enableAfterConsent": "AI機能をオンにする（先に上の項目にチェックを入れてください）",
+      "provider": "プロバイダー",
+      "baseUrl": "ベースURL",
+      "baseUrlPlaceholder": "https://host/v1",
+      "allowInsecure": "このアドレスへの暗号化されないhttpを許可する（ループバックアドレスは常に許可されます）",
+      "model": "モデルID",
+      "listModels": "モデルを一覧表示",
+      "modelsFound_other": "{{count}}件のモデルが見つかりました。選択するか、IDを入力してください。",
+      "noModels": "プロバイダーがモデルを返しませんでした。モデルIDを入力してください。",
+      "localNoModels": "サーバーは動作していますが、モデルがありません。モデルをダウンロードしてから、もう一度一覧表示してください。",
+      "apiKey": "APIキー",
+      "keySaved": "キーを保存しました",
+      "removeKey": "キーを削除",
+      "pasteKey": "APIキーを貼り付け",
+      "optionalKey": "任意",
+      "saveKey": "キーを保存",
+      "remember": "このデバイスに保存する（オフの場合はタブを閉じるまで）",
+      "test": "接続をテスト",
+      "skipped_other": "{{count}}件のアクションがプレビューなしで送信されます。",
+      "askAgain": "プレビューを再び表示",
+      "browserNote": "ブラウザーでは、呼び出しはこのページからプロバイダーに直接送られ、キーがGostmanのサーバーに届くことはありません。プロバイダーがクロスオリジンの呼び出しを許可している必要があります。ローカルのOllamaではOLLAMA_ORIGINSにこのサイトを設定する必要があり、LM Studioではサーバー設定でCORSをオンにする必要があります。プロバイダーがブラウザーをブロックする場合は、デスクトップアプリを使用してください。",
+      "desktopNote": "キーはOSのキーチェーンに保管され、デスクトップアプリがプロバイダーを直接呼び出します。ページがキーを読み戻すことはありません。",
+      "forget": "AIをオフにしてキーを削除",
+      "forgetWhileOff": "AIのキーと設定を削除"
+    },
+    "errors": {
+      "invalidBase": "ベースURLが有効なアドレスではありません",
+      "insecureBase": "httpsのベースURLを使用するか、AI設定でこのアドレスへのhttpを許可してください",
+      "enterModel": "モデルIDを入力してください",
+      "pasteKey": "このプロバイダーのAPIキーを貼り付けてください",
+      "keyMoved": "このキーは別のアドレス用に保存されています。このベースURLで保存し直してください。",
+      "tooLarge": "リクエストが大きすぎて送信できません。選択する内容を減らしてください",
+      "noAnswer": "プロバイダーから返答がありませんでした",
+      "notJson": "プロバイダーがJSON以外の内容を返しました。ベースURLを確認してください",
+      "timedOut": "プロバイダーが時間内に応答しませんでした",
+      "rejectedKey": "プロバイダーがキーを拒否したか、このアカウントではこのモデルを使用できない可能性があります",
+      "rateLimited": "プロバイダーがレート制限中か、利用枠を超えています。しばらく待ってからやり直してください",
+      "providerTimeout": "プロバイダーがタイムアウトしました",
+      "providerProblem": "プロバイダーで問題が発生しました。しばらくしてからやり直してください",
+      "refused": "プロバイダーがリクエストを拒否しました（{{status}}）",
+      "retryIn": "{{summary}}（{{seconds}}秒後に再試行）",
+      "withDetail": "{{summary}}：{{detail}}",
+      "unreachable": "{{host}}に接続できませんでした。アドレスが間違っているか、プロバイダーがWebページからの呼び出し（CORS）を許可していない可能性があります。{{advice}}",
+      "unreachableWithReason": "{{host}}に接続できませんでした（{{reason}}）。アドレスが間違っているか、プロバイダーがWebページからの呼び出し（CORS）を許可していない可能性があります。{{advice}}",
+      "ollamaAdvice": "OLLAMA_ORIGINS={{origin}}を指定してOllamaを起動し直すか、デスクトップアプリを使用してください。",
+      "lmStudioAdvice": "CORSをオンにしてLM Studioのサーバーを起動する（開発者設定、またはlms server start --cors）か、デスクトップアプリを使用してください。",
+      "customAdvice": "サーバーはOPTIONSプリフライトに応答し、AuthorizationヘッダーとContent-Typeヘッダーを伴う{{origin}}からのリクエストを許可する必要があります。デスクトップアプリにはこの制限はありません。",
+      "anthropicAdvice": "Anthropicはブラウザーからの呼び出しを、直接アクセス用ヘッダーを含むものに限って許可しており、Gostmanはそのヘッダーを送信しています。そのため、キーと接続も確認してください。デスクトップアプリにはこの制限はありません。",
+      "generalAdvice": "ベースURLと接続を確認してください。デスクトップアプリにはこの制限はありません。"
+    },
+    "providers": {
+      "local": "{{name}}（ローカル）",
+      "custom": "OpenAI互換URL",
+      "customModelHint": "モデルID"
+    }
+  }
+}

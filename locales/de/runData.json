@@ -1,0 +1,9 @@
+{
+  "runData": {
+    "tooManyRows_one": "Eine Datendatei darf höchstens {{count}} Zeile haben.",
+    "tooManyRows_other": "Eine Datendatei darf höchstens {{count}} Zeilen haben.",
+    "empty": "Die Datendatei hat keine Zeilen.",
+    "notArray": "Eine JSON-Datendatei muss ein Array von Objekten sein, ein Objekt pro Iteration.",
+    "unreadable": "Die Datendatei kann nicht gelesen werden."
+  }
+}

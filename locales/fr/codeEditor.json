@@ -1,0 +1,39 @@
+{
+  "codeEditor": {
+    "syntaxError": "Erreur de syntaxe",
+    "phrases": {
+      "foldLine": "Replier la ligne",
+      "unfoldLine": "Déplier la ligne",
+      "foldedLines": "Lignes repliées",
+      "unfoldedLines": "Lignes dépliées",
+      "foldedCode": "code replié",
+      "unfold": "déplier",
+      "completions": "Complétions",
+      "controlCharacter": "Caractère de contrôle",
+      "diagnostics": "Diagnostics",
+      "noDiagnostics": "Aucun diagnostic",
+      "goToLine": "Aller à la ligne",
+      "go": "aller",
+      "close": "fermer",
+      "find": "Rechercher",
+      "replace": "Remplacer",
+      "all": "tout",
+      "byWord": "mot entier",
+      "matchCase": "casse",
+      "next": "suivant",
+      "previous": "précédent",
+      "regexp": "regexp",
+      "replaceAll": "tout remplacer",
+      "currentMatch": "occurrence actuelle",
+      "onLine": "à la ligne",
+      "to": "à",
+      "selectionDeleted": "Sélection supprimée",
+      "replacedMatches": "{{count}} occurrences remplacées",
+      "replacedMatchOnLine": "occurrence remplacée à la ligne {{line}}",
+      "unchangedLines": "{{count}} lignes inchangées",
+      "accept": "Accepter",
+      "reject": "Refuser",
+      "revertChunk": "Annuler ce bloc"
+    }
+  }
+}

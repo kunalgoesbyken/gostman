@@ -1,0 +1,9 @@
+{
+  "welcome.dismiss": "Accessible label of the button that closes the welcome panel.",
+  "welcome.commandTitle": "Name of the command in the command palette that shows the welcome panel again.",
+  "welcome.importHint": "Keep the tool names and file formats as they are.",
+  "welcome.folderHint": "A folder of request files, kept in the same place as the code. \"git\" is the version control tool.",
+  "welcome.collectionTitle": "Creates a folder in the sidebar to group requests.",
+  "welcome.curlHint": "The address bar is the URL field at the top of a request.",
+  "welcome.sampleRequestName": "Name of the example request that is created from the welcome panel. It becomes saved data, so it is translated when created."
+}

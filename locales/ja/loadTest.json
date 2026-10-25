@@ -1,0 +1,59 @@
+{
+  "loadTest": {
+    "title": "負荷テスト",
+    "commandTitle": "このリクエストの負荷テスト",
+    "commandDescription": "現在のリクエストを同時に何度も送信し、レイテンシーを計測します",
+    "barLabel": "負荷テスト",
+    "barHint": "このリクエストの負荷テスト",
+    "notice": "ご自身が所有する、またはテストの許可を得ているシステムのみをテストしてください。各ワーカーは、ここに表示されているとおりにリクエストを送信します（スクリプトや共有Cookieは使用しません）。",
+    "unsupported": "負荷テストできるのはHTTPリクエストのみです。gRPC、MCP、WebSocket、ストリーミングのリクエストには対応していません。",
+    "noUrl": "先にリクエストのURLを指定してください。",
+    "concurrency": "同時ワーカー数",
+    "duration": "実行時間（秒）",
+    "rateLimit": "毎秒リクエスト数の上限",
+    "rateLimitHint": "空欄の場合は上限なし",
+    "start": "開始",
+    "stop": "停止",
+    "running": "実行中",
+    "stopped": "途中で停止",
+    "progress": {
+      "elapsed": "経過時間",
+      "requests": "リクエスト",
+      "rate": "リクエスト/秒",
+      "p95": "p95",
+      "failed": "失敗"
+    },
+    "summary": {
+      "total": "リクエスト",
+      "succeeded": "成功",
+      "failed": "失敗",
+      "rate": "リクエスト/秒",
+      "received": "受信量"
+    },
+    "failureBreakdown": "ネットワークエラー{{networkErrors}}件、ステータス{{failureStatus}}以上{{statusFailures}}件",
+    "percentilesLabel": "レイテンシー",
+    "percentileColumns": {
+      "name": "指標",
+      "value": "ミリ秒"
+    },
+    "percentiles": {
+      "minMs": "最小",
+      "meanMs": "平均",
+      "p50Ms": "p50",
+      "p90Ms": "p90",
+      "p95Ms": "p95",
+      "p99Ms": "p99",
+      "maxMs": "最大"
+    },
+    "seconds": "{{value}} s",
+    "milliseconds": "{{value}} ms",
+    "statusCount": "{{code}} x {{count}}",
+    "statusLabel": "ステータスコード",
+    "histogramLabel": "レイテンシーの分布",
+    "histogramBarLabel_other": "{{from}}～{{to}} ms：{{count}}件のリクエスト",
+    "errorsLabel": "エラーのサンプル",
+    "accuracy": "パーセンタイルの精度は{{percent}}%以内です。",
+    "emptyTitle": "まだ結果がありません",
+    "emptyHint": "負荷を選んで「開始」を押してください。"
+  }
+}

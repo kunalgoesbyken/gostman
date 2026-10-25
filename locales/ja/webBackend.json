@@ -1,0 +1,8 @@
+{
+  "webBackend": {
+    "unreadableData": "このブラウザーに保存されたデータを読み取れないため、何も変更しませんでした。",
+    "proxyAnswered": "プロキシが結果ではなくHTTP {{status}}を返しました",
+    "cancelled": "リクエストがキャンセルされました",
+    "streamCutOff": "ストリームが終了する前に、プロキシとの接続が切れました。"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "examples": {
+    "title": "示例",
+    "bodyLabel": "示例响应体",
+    "listLabel": "已保存的示例",
+    "emptyTitle": "还没有示例",
+    "emptyHint": "发送请求，然后在响应面板中选择“保存为示例”。模拟服务器会使用这些示例作答。",
+    "servedByDefault": "默认返回",
+    "serveByDefault": "设为默认返回",
+    "format": "格式化响应体",
+    "rename": "重命名示例",
+    "remove": "删除示例",
+    "section": "示例部分",
+    "body": "响应体",
+    "headersCount": "响应头（{{count}}）",
+    "noContentType": "无 Content type",
+    "binaryTitle": "二进制内容，{{size}}",
+    "binaryHint": "无法作为文本编辑，将按存储的原样返回。",
+    "noHeadersHint": "保存此示例时没有响应头。",
+    "unsaved": "响应体有未保存的更改。",
+    "discard": "放弃",
+    "saveBody": "保存响应体",
+    "bodyTooLarge": "此响应体为 {{size}}。示例最多可保留 {{limit}} 的响应体。",
+    "tooMany": "每个请求最多保留 {{limit}} 个示例。请先删除一个，再保存新的。"
+  }
+}

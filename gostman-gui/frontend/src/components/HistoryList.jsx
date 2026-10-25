@@ -8,6 +8,7 @@ import { SearchField } from "./SearchField"
 import { useAppStore } from "../store/appStore"
 import { PANE_SIDEBAR, focusPane } from "../lib/panes"
 import { ORIENTATION, isFocusLost, moveFocus, tabStopOf } from "../lib/rovingFocus"
+import { formatDate } from "../lib/i18n/format"
 import { statusVariant } from "../lib/response"
 import { isRemoveKey } from "../lib/shortcuts"
 import { HISTORY_TEXT, SIDEBAR_TEXT } from "../lib/sidebarText"
@@ -32,7 +33,10 @@ function relativeTime(isoString) {
   const elapsed = Date.now() - sentAt.getTime()
   if (elapsed < MINUTE_MS) return { short: HISTORY_TEXT.sentAgo.now, spoken: HISTORY_TEXT.sentAgoSpoken.now }
   const step = AGE_STEPS.find(({ below }) => elapsed < below)
-  if (!step) return { short: sentAt.toLocaleDateString(), spoken: HISTORY_TEXT.sentAgoSpoken.date(sentAt.toLocaleDateString()) }
+  if (!step) {
+    const date = formatDate(sentAt)
+    return { short: date, spoken: HISTORY_TEXT.sentAgoSpoken.date(date) }
+  }
   const count = Math.floor(elapsed / step.unit)
   return { short: HISTORY_TEXT.sentAgo[step.key](count), spoken: HISTORY_TEXT.sentAgoSpoken[step.key](count) }
 }
@@ -40,7 +44,7 @@ function relativeTime(isoString) {
 function SentAt({ timestamp }) {
   const { short, spoken } = relativeTime(timestamp)
   return (
-    <span className="shrink-0 pr-1 text-2xs group-focus-within:hidden group-hover:hidden">
+    <span className="shrink-0 pe-1 text-2xs group-focus-within:hidden group-hover:hidden">
       <span aria-hidden="true">{short}</span>
       <span className="sr-only">{spoken}</span>
     </span>
@@ -61,7 +65,7 @@ function HistoryRow({ entry, isTabStop, onOpen, onDelete, onFocus }) {
   }
 
   return (
-    <li className="group flex h-7 items-center pr-1.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground">
+    <li className="group flex h-7 items-center pe-1.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground">
       <button
         type="button"
         data-history-entry={entry.id}
@@ -71,7 +75,7 @@ function HistoryRow({ entry, isTabStop, onOpen, onDelete, onFocus }) {
         onFocus={() => onFocus(entry.id)}
         onKeyDown={removeOnKey}
         title={entry.url}
-        className="flex h-full min-w-0 flex-1 items-center gap-1.5 pl-3 text-left"
+        className="flex h-full min-w-0 flex-1 items-center gap-1.5 ps-3 text-start"
       >
         <MethodTag compact method={entry.method} className="w-10" />
         <span className="min-w-0 flex-1 truncate">{entry.url}</span>

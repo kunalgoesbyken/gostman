@@ -1,14 +1,13 @@
+import { FLOW_SCRIPT_TEXT } from '../flowsText'
+
 export const FLOW_NEXT = 'next'
 export const FLOW_SKIP = 'skip'
 export const FLOW_STOP = 'stop'
 export const FLOW_END = 'end'
 
-export const SKIPPED_BY_SCRIPT = 'Skipped by a script.'
-export const STOPPED_BY_SCRIPT = 'Not sent because a script stopped the run.'
-
 export const holdsBack = (flow) => flow.action === FLOW_SKIP || flow.action === FLOW_STOP
 
-export const reasonFor = (flow) => (flow.action === FLOW_STOP ? STOPPED_BY_SCRIPT : SKIPPED_BY_SCRIPT)
+export const reasonFor = (flow) => (flow.action === FLOW_STOP ? FLOW_SCRIPT_TEXT.stopped : FLOW_SCRIPT_TEXT.skipped)
 
 export function createFlow() {
   const state = { action: '', target: '' }

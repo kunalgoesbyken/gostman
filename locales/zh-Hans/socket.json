@@ -1,0 +1,46 @@
+{
+  "socket": {
+    "socketIoPath": "路径",
+    "socketIoAuth": "认证载荷",
+    "socketIoAuthNote": "随命名空间握手发送的 JSON 对象，服务器以 socket.handshake.auth 读取。",
+    "invalidAuth": "Socket.IO 认证载荷必须是 JSON 对象。",
+    "statuses": {
+      "idle": "已断开",
+      "connecting": "正在连接",
+      "open": "已连接",
+      "waiting": "等待重新连接"
+    },
+    "entries": {
+      "sent": "已发送",
+      "received": "已接收",
+      "info": "信息",
+      "warning": "警告",
+      "error": "错误"
+    },
+    "protocol": "协议",
+    "graphql": "GraphQL 订阅",
+    "filter": "主题过滤器，例如 sensors/#",
+    "subscribe": "订阅",
+    "saved": "已保存的消息",
+    "savedPlaceholder": "加载已保存的消息",
+    "noSaved": "还没有已保存的消息",
+    "save": "保存",
+    "saveTitle": "保存消息",
+    "saveMessage": "为这条消息命名。它会随请求一起保存。",
+    "remove": "删除已保存的消息",
+    "binary_other": "二进制，{{count}} 字节",
+    "truncated": "仅显示 {{total}} 个字符中的前 {{shown}} 个",
+    "copy": "复制消息",
+    "dropped": "已丢弃较早的 {{dropped}} 条记录。日志保留最近的 {{limit}} 条。",
+    "emptyTitle": "还没有消息",
+    "emptyDescription": "请先连接，然后发送消息或等待服务器发来消息。",
+    "log": "消息",
+    "autoReconnect": "自动重连",
+    "unsentHeaders": "浏览器只能为 WebSocket 设置 Sec-WebSocket-Protocol。这里没有发送：{{names}}。桌面应用会发送所有请求头。",
+    "composer": "消息（按 {{shortcut}} 发送）",
+    "composerClosed": "连接后才能发送消息",
+    "message": "消息",
+    "send": "发送",
+    "clear": "清除"
+  }
+}

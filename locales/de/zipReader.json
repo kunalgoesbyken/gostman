@@ -1,0 +1,8 @@
+{
+  "zip": {
+    "notZip": "Das Archiv konnte nicht als Zip-Datei gelesen werden.",
+    "unsupported": "Das Archiv verwendet Verschlüsselung, zip64 oder ein nicht unterstütztes Kompressionsverfahren.",
+    "tooMany": "Das Archiv enthält mehr als {{limit}} Dateien.",
+    "tooLarge": "Das Archiv wird zu mehr als {{limit}} Bytes entpackt."
+  }
+}

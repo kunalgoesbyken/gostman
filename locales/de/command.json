@@ -1,0 +1,129 @@
+{
+  "command": {
+    "title": "Befehlspalette",
+    "heading": "Befehle",
+    "sections": {
+      "request": "Anfragen"
+    },
+    "searchCommands": "Befehle suchen",
+    "searchRequests": "Anfragen suchen",
+    "commandsPlaceholder": "Befehl oder Anfragenamen eingeben",
+    "requestsPlaceholder": "Zu einer Anfrage oder einem Verlaufseintrag springen",
+    "results": "Ergebnisse",
+    "nothingMatches": "Keine Treffer",
+    "sentEarlier": "Früher gesendet",
+    "switchEnvironment": "Umgebung wechseln: {{name}}",
+    "switchEnvironmentDescription": "Die Variablen dieser Umgebung verwenden",
+    "settingsKeywords": "header auth variablen skripte prüfungen",
+    "commands": {
+      "sendRequest": {
+        "label": "Anfrage senden",
+        "description": "Die Anfrage im aktuellen Tab senden"
+      },
+      "newRequest": {
+        "description": "Einen neuen leeren Tab öffnen"
+      },
+      "saveRequest": {
+        "label": "Anfrage speichern",
+        "description": "Die Anfrage im aktuellen Tab speichern"
+      },
+      "duplicateRequest": {
+        "label": "Anfrage duplizieren",
+        "description": "Eine Kopie der aktuellen Anfrage speichern"
+      },
+      "copyRequest": {
+        "label": "Anfrage kopieren",
+        "description": "Die gespeicherte Anfrage kopieren, um sie in einen Ordner einzufügen"
+      },
+      "pasteRequest": {
+        "label": "Anfrage einfügen",
+        "description": "Die kopierte Anfrage oder den kopierten Ordner neben der aktuellen Anfrage einfügen"
+      },
+      "generateCode": {
+        "description": "Die aktuelle Anfrage als Code anzeigen"
+      },
+      "closeTab": {
+        "label": "Tab schließen",
+        "description": "Den aktuellen Tab schließen"
+      },
+      "closeOtherTabs": {
+        "description": "Nur den aktuellen Tab behalten"
+      },
+      "closeSavedTabs": {
+        "description": "Jeden Tab ohne ungespeicherte Änderungen schließen"
+      },
+      "keepTab": {
+        "label": "Vorschau-Tab offen halten",
+        "description": "Den Vorschau-Tab in einen regulären Tab umwandeln"
+      },
+      "reopenTab": {
+        "label": "Geschlossenen Tab wieder öffnen",
+        "description": "Den zuletzt geschlossenen Tab zurückholen"
+      },
+      "toggleSidebar": {
+        "description": "Sammlungen und Verlauf ein- oder ausblenden"
+      },
+      "shortcuts": {
+        "description": "Alle Tastenkürzel anzeigen"
+      },
+      "newFolder": {
+        "description": "Einen Ordner auf oberster Ebene erstellen"
+      },
+      "runCollection": {
+        "description": "Die ganze Sammlung oder einen Ordner mit Prüfungen und Skripten ausführen"
+      },
+      "collapseFolders": {
+        "keywords": "schließen zuklappen baum"
+      },
+      "examples": {
+        "label": "Beispiele der Anfrage",
+        "description": "Die gespeicherten Antworten der aktuellen Anfrage ansehen"
+      },
+      "mockServer": {
+        "description": "Gespeicherte Beispiele an einem lokalen Port bereitstellen"
+      },
+      "capture": {
+        "label": "Datenverkehr mitschneiden",
+        "description": "Den Datenverkehr einer App an deren API weiterleiten und als Anfragen speichern"
+      },
+      "cookies": {
+        "label": "Cookies verwalten",
+        "description": "Gespeicherte Cookies ansehen und löschen"
+      },
+      "environments": {
+        "label": "Umgebungen verwalten",
+        "description": "Umgebungen erstellen und ihre Variablen, Sammlungsvariablen und globalen Variablen bearbeiten",
+        "keywords": "variablen globale"
+      },
+      "scanSecrets": {
+        "keywords": "zugangsdaten tokens passwörter leck"
+      },
+      "network": {
+        "label": "Netzwerkeinstellungen",
+        "description": "Proxy und Zertifikate"
+      },
+      "import": {
+        "label": "Daten importieren",
+        "description": "Postman, Insomnia, Bruno, OpenAPI, HAR und weitere Dateien importieren"
+      },
+      "lintSpec": {
+        "description": "Die importierte OpenAPI-Spezifikation auf Probleme prüfen",
+        "keywords": "openapi swagger validieren governance"
+      },
+      "loadTest": {
+        "keywords": "leistung stresstest"
+      },
+      "export": {
+        "label": "Daten exportieren",
+        "description": "Sammlungen und Umgebungen exportieren"
+      },
+      "share": {
+        "label": "Sammlung teilen",
+        "description": "Einen verschlüsselten Link oder eine Datei erstellen, kein Konto nötig"
+      },
+      "clearHistory": {
+        "description": "Jeden Verlaufseintrag löschen"
+      }
+    }
+  }
+}

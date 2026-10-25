@@ -1,6 +1,10 @@
 package mock
 
-import "time"
+import (
+	"time"
+
+	"github.com/kunalgoesbyken/gostman/locales"
+)
 
 const DefaultPort = 4010
 
@@ -68,6 +72,8 @@ type Route struct {
 	Reason      string `json:"reason,omitempty"`
 	ExampleID   string `json:"exampleId,omitempty"`
 	ExampleName string `json:"exampleName,omitempty"`
+
+	Localized *locales.Message `json:"localized,omitempty"`
 }
 
 type Fault struct {

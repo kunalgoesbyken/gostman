@@ -12,7 +12,7 @@ import { Select } from "./ui/select"
 import { Textarea } from "./ui/textarea"
 import { useSecretScan } from "../hooks/useSecretScan"
 import { buildCollectionTree, listFolders, ROOT_ID } from "../lib/collectionTree"
-import { formatSize } from "../lib/dataUtils"
+import { formatBytes } from "../lib/byteSize"
 import { SCAN_TEXT } from "../lib/scanText"
 import { SHARE_TEXT } from "../lib/shareText"
 import {
@@ -33,12 +33,12 @@ const CHECKBOX_CLASS = "h-7 justify-start self-start"
 const NOTE_CLASS = "text-xs text-muted-foreground [overflow-wrap:anywhere]"
 const NOTHING = { share: null, error: "" }
 
-const PROTECTIONS = [
+const protections = () => [
   { value: PROTECT_KEY, label: SHARE_TEXT.protections.key },
   { value: PROTECT_PASSPHRASE, label: SHARE_TEXT.protections.passphrase },
 ]
 
-const DELIVERIES = [
+const deliveries = () => [
   { value: SEND_LINK, label: SHARE_TEXT.deliveries.link },
   { value: SEND_FILE, label: SHARE_TEXT.deliveries.file },
 ]
@@ -73,7 +73,7 @@ function LinkOutput({ share, linkBase, usesPassphrase }) {
   if (!fitsInLink(share)) {
     return (
       <p role="status" className="text-xs text-warning">
-        {SHARE_TEXT.tooLong(formatSize(fragmentLength(share)), formatSize(MAX_LINK_FRAGMENT_LENGTH))}
+        {SHARE_TEXT.tooLong(formatBytes(fragmentLength(share)), formatBytes(MAX_LINK_FRAGMENT_LENGTH))}
       </p>
     )
   }
@@ -82,7 +82,7 @@ function LinkOutput({ share, linkBase, usesPassphrase }) {
     <>
       <div className="flex shrink-0 items-center gap-2">
         <p className={`min-w-0 flex-1 ${NOTE_CLASS}`}>
-          {SHARE_TEXT.linkNote(usesPassphrase, formatSize(link.length))}
+          {SHARE_TEXT.linkNote(usesPassphrase, formatBytes(link.length))}
         </p>
         <CopyTextButton text={link} />
       </div>
@@ -164,7 +164,7 @@ export function ShareTab({ requests, folders, environments, collectionVariables,
           {SHARE_TEXT.includeExamples}
         </Checkbox>
         <div className="flex flex-wrap items-center gap-2">
-          <SegmentedControl label={SHARE_TEXT.protection} options={PROTECTIONS} value={protection} onChange={setProtection} />
+          <SegmentedControl label={SHARE_TEXT.protection} options={protections()} value={protection} onChange={setProtection} />
           {usesPassphrase && (
             <Input
               value={passphrase}
@@ -175,7 +175,7 @@ export function ShareTab({ requests, folders, environments, collectionVariables,
               className="min-w-48 flex-1 font-mono"
             />
           )}
-          <SegmentedControl label={SHARE_TEXT.sendAs} options={DELIVERIES} value={delivery} onChange={setDelivery} className="ml-auto" />
+          <SegmentedControl label={SHARE_TEXT.sendAs} options={deliveries()} value={delivery} onChange={setDelivery} className="ms-auto" />
         </div>
       </div>
 

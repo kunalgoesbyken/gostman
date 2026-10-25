@@ -1,0 +1,10 @@
+{
+  "runData": {
+    "tooManyRows_one": "Un fichier de données peut contenir au plus {{count}} ligne.",
+    "tooManyRows_other": "Un fichier de données peut contenir au plus {{count}} lignes.",
+    "tooManyRows_many": "Un fichier de données peut contenir au plus {{count}} de lignes.",
+    "empty": "Le fichier de données ne contient aucune ligne.",
+    "notArray": "Un fichier de données JSON doit être un tableau d’objets, un objet par itération.",
+    "unreadable": "Le fichier de données ne peut pas être lu."
+  }
+}

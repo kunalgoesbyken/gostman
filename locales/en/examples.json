@@ -1,0 +1,26 @@
+{
+  "examples": {
+    "title": "Examples",
+    "bodyLabel": "Example body",
+    "listLabel": "Saved examples",
+    "emptyTitle": "No examples yet",
+    "emptyHint": "Send the request, then choose Save as example in the response panel. The mock server answers with these.",
+    "servedByDefault": "Served by default",
+    "serveByDefault": "Serve by default",
+    "format": "Format the body",
+    "rename": "Rename example",
+    "remove": "Delete example",
+    "section": "Example section",
+    "body": "Body",
+    "headersCount": "Headers ({{count}})",
+    "noContentType": "No content type",
+    "binaryTitle": "Binary body, {{size}}",
+    "binaryHint": "It cannot be edited as text and is served exactly as stored.",
+    "noHeadersHint": "This example was saved without headers.",
+    "unsaved": "The body has unsaved changes.",
+    "discard": "Discard",
+    "saveBody": "Save body",
+    "bodyTooLarge": "This body is {{size}}. An example keeps a body of up to {{limit}}.",
+    "tooMany": "A request keeps up to {{limit}} examples. Delete one to save another."
+  }
+}

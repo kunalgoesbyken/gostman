@@ -1,0 +1,20 @@
+{
+  "about": {
+    "title": "Über Gostman",
+    "commandTitle": "Über Gostman",
+    "commandDescription": "Version, Links und Diagnose",
+    "tagline": "Ein quelloffener API-Client für REST, GraphQL, gRPC und WebSocket. Kein Konto nötig; Ihre Daten bleiben auf Ihrem Gerät.",
+    "version": "Version {{version}}",
+    "links": {
+      "website": "Website",
+      "source": "Quellcode",
+      "releases": "Releases",
+      "issues": "Problem melden"
+    },
+    "diagnosticsHint": "Die Diagnose enthält nur Version, Plattform und Anzahlen. Anfragen, URLs, Variablen, Tokens oder Secrets sind nie enthalten.",
+    "copyDiagnostics": "Diagnose kopieren",
+    "copied": "Kopiert",
+    "versionButton": "Über Gostman",
+    "close": "Schließen"
+  }
+}

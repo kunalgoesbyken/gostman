@@ -1,0 +1,13 @@
+{
+  "statusBar": {
+    "network": "Rețea",
+    "mockStopped": "Server mock",
+    "mockRunning": "Server mock (rulează)",
+    "mockRunningOn": "Server mock (rulează pe :{{port}})",
+    "captureStopped": "Captură",
+    "captureRunning": "Captură (rulează)",
+    "git": "Git",
+    "detached": "HEAD detașat",
+    "cookies": "Cookie-uri"
+  }
+}

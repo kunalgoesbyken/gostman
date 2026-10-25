@@ -1,0 +1,43 @@
+{
+  "onboarding": {
+    "title": "Primii pași",
+    "progress": "{{done}} din {{total}} finalizați",
+    "next": "Următorul",
+    "completeTitle": "Sunteți gata",
+    "completeNotice": "Ați terminat primii pași.",
+    "completeHint": "Ați încercat principalele părți din Gostman. Tutorialul merge mai departe cu înlănțuirea cererilor, scripturile și rularea verificărilor în CI.",
+    "tutorial": "Citiți tutorialul",
+    "hide": "Ascundere",
+    "hideLabel": "Ascundeți pașii de început",
+    "done": "Gata",
+    "steps": {
+      "send": {
+        "title": "Trimiteți o cerere",
+        "hint": "Trimiteți o cerere de probă către un serviciu echo public și citiți răspunsul.",
+        "action": "Trimitere cerere de probă"
+      },
+      "save": {
+        "title": "Salvați-o în colecție",
+        "hint": "Cererile salvate apar în bara laterală și rămân pe acest dispozitiv.",
+        "action": "Salvare cerere"
+      },
+      "variable": {
+        "title": "Adăugați o variabilă",
+        "hint": "Definiți baseUrl o singură dată într-un mediu, apoi scrieți {{example}} oriunde aveți nevoie de ea.",
+        "action": "Deschidere medii",
+        "defined": "definită",
+        "missing": "încă nedefinită"
+      },
+      "check": {
+        "title": "Adăugați o verificare",
+        "hint": "Scrieți o aserțiune precum res.status equals 200 sau folosiți Adăugare verificări din acest răspuns în fila Verificări. Apoi salvați cererea, iar fiecare răspuns arată reușită sau eșec.",
+        "action": "Deschidere fila Verificări"
+      },
+      "run": {
+        "title": "Rulați cererile împreună",
+        "hint": "Runnerul trimite fiecare cerere salvată în ordine și raportează ce verificări au trecut.",
+        "action": "Deschidere runner"
+      }
+    }
+  }
+}

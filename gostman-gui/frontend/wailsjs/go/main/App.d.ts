@@ -167,7 +167,7 @@ export function ParseCurl(arg1:string):Promise<engine.Request>;
 
 export function PickFile(arg1:string):Promise<string>;
 
-export function PickWorkspaceFolder():Promise<string>;
+export function PickWorkspaceFolder(arg1:string):Promise<string>;
 
 export function PinWorkspace(arg1:string,arg2:boolean):Promise<main.WorkspaceStatus>;
 

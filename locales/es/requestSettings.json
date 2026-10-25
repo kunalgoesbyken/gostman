@@ -1,0 +1,14 @@
+{
+  "requestSettings": {
+    "timeout": "Tiempo de espera (ms)",
+    "timeoutPlaceholder": "{{milliseconds}} (predeterminado)",
+    "followRedirects": "Seguir redirecciones",
+    "verifyTls": "Verificar certificados TLS",
+    "sendCookies": "Enviar cookies del almacén de cookies",
+    "storeCookies": "Guardar las cookies que establece la respuesta",
+    "tags": "Etiquetas",
+    "tagsPlaceholder": "humo, regresión",
+    "description": "Descripción",
+    "descriptionPlaceholder": "Qué hace esta solicitud (Markdown); aparece en la documentación generada"
+  }
+}

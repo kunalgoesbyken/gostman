@@ -1,0 +1,24 @@
+{
+  "chaining": {
+    "sources": {
+      "body": "JSON body",
+      "header": "Header",
+      "cookie": "Cookie",
+      "status": "Status code"
+    },
+    "binaryBody": "The response body is binary, not JSON",
+    "emptyBody": "The response body is empty",
+    "cutOff": "The response was cut off, so its body is not complete JSON",
+    "notJson": "The response body is not JSON",
+    "enterPath": "Enter a JSONPath such as {{example}}",
+    "invalidPath": "Invalid JSONPath: {{error}}",
+    "noMatch": "Nothing in the body matches this path",
+    "matchedNull": "The matched value is null",
+    "enterHeader": "Enter a header name",
+    "noHeader": "The response has no {{name}} header",
+    "enterCookie": "Enter a cookie name",
+    "noCookie": "The response has no {{name}} cookie",
+    "nameVariable": "Name the variable",
+    "badVariableName": "A variable name has no } and does not start or end with a space"
+  }
+}

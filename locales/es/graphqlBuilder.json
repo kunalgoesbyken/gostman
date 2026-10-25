@@ -1,0 +1,28 @@
+{
+  "builder": {
+    "rootLabel": "Tipo de operación",
+    "rootNames": {
+      "query": "Query",
+      "mutation": "Mutation",
+      "subscription": "Subscription"
+    },
+    "title": "Constructor",
+    "paneLabel": "Constructor de queries",
+    "filterLabel": "Filtrar campos",
+    "filterPlaceholder": "Filtrar campos",
+    "expand": "Expandir",
+    "collapse": "Contraer",
+    "select": "Seleccionar {{name}}",
+    "include": "Incluir el argumento {{name}}",
+    "viaFragment": "Seleccionado mediante un fragmento en el editor. Edítalo allí.",
+    "noSchemaTitle": "No hay ningún esquema cargado",
+    "noSchemaDescription": "Obtenlo para construir una query con los campos del endpoint. La query de introspección usa la URL, los encabezados y la autenticación de esta solicitud.",
+    "fetch": "Obtener esquema",
+    "refresh": "Actualizar esquema",
+    "loading": "Obteniendo el esquema",
+    "syntaxError": "El constructor está en pausa mientras el editor tenga un error de sintaxis: {{message}}",
+    "subscription": "Las subscriptions transmiten resultados por una conexión de larga duración. Activa Recibir como eventos enviados por el servidor en Ajustes para leerlas de servidores que las entregan así.",
+    "noRoot": "Este esquema no tiene un tipo raíz para esta operación.",
+    "empty": "Nada coincide con el filtro."
+  }
+}

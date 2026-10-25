@@ -1,0 +1,11 @@
+{
+  "attachment": {
+    "choose": "Wybierz plik",
+    "replace": "Zamień",
+    "none": "Nie wybrano pliku",
+    "pickTitle": "Wybierz plik do wysłania",
+    "fromDisk": "Odczyt z {{path}} podczas wysyłania żądania",
+    "tooLarge": "Plik {{name}} ma rozmiar {{size}}. Aplikacja internetowa wysyła pliki do {{limit}}, ponieważ jej serwer proxy przyjmuje żądania o rozmiarze najwyżej {{proxyLimit}}. Aplikacja desktopowa wysyła pliki do {{desktopLimit}} bezpośrednio z dysku.",
+    "proxyTooLarge": "Żądanie jest większe niż {{proxyLimit}}, które aplikacja internetowa może przekazać przez proxy. Duże treści i pliki wysyłaj z aplikacji desktopowej lub z CLI."
+  }
+}

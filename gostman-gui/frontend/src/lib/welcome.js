@@ -1,10 +1,13 @@
 import { readStored, writeStored } from './storage'
+import { WELCOME_TEXT } from './welcomeText'
 
 const STORAGE_KEY = 'gostman.welcome'
 const DISMISSED = 'dismissed'
 
 export const SAMPLE_REQUEST = {
-  name: 'Sample request',
+  get name() {
+    return WELCOME_TEXT.sampleRequestName
+  },
   method: 'GET',
   url: 'https://httpbin.org/anything?hello=world',
 }

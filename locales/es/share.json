@@ -1,0 +1,85 @@
+{
+  "share": {
+    "protections": {
+      "key": "Clave aleatoria",
+      "passphrase": "Frase de contraseña"
+    },
+    "deliveries": {
+      "link": "Enlace",
+      "file": "Archivo cifrado"
+    },
+    "privacy": "Se cifra en esta ventana y nunca se sube. Nunca se incluyen tokens de OAuth, cookies, historial ni ajustes de red.",
+    "summaryWithValues": "{{counts}} (con sus valores).",
+    "summaryNamesOnly": "{{counts}} (solo los nombres de las variables).",
+    "tooLong": "Esta selección necesita un enlace de {{size}}. Los enlaces se limitan a {{limit}} porque las apps de chat y de correo cortan los más largos. Envíala como archivo cifrado.",
+    "linkNotePassphrase": "La frase de contraseña no va en el enlace. Díselo a la persona destinataria por otro canal. {{size}}.",
+    "linkNoteKey": "La clave forma parte del enlace, después del signo #, así que cualquiera que tenga el enlace completo puede leer la colección. {{size}}.",
+    "linkLabel": "Enlace para compartir",
+    "fileNotePassphrase": "La persona destinataria abre el archivo con tu frase de contraseña. Díselo por otro canal.",
+    "fileNoteKey": "El archivo no se puede abrir sin la clave de abajo. Envía la clave por un canal distinto al del archivo.",
+    "saveFile": "Guardar archivo",
+    "keyLabel": "Clave",
+    "scopeField": "Compartir",
+    "scopeLabel": "Qué compartir",
+    "everything": "Todo",
+    "requestScope": "Solicitud: {{path}}",
+    "sharedVariablesNone": "No se comparten variables de entorno, porque nada de lo compartido usa ninguna.",
+    "sharedVariables": "Solo se comparten las variables de entorno que se usan aquí: {{names}}.",
+    "sharedCollectionVariables": "Estas variables de colección se comparten con sus colecciones: {{names}}.",
+    "includeVariables": "Compartir los valores de las variables (desactivado: solo se comparten los nombres)",
+    "includeExamples": "Incluir respuestas de ejemplo guardadas",
+    "protection": "Protección",
+    "passphrasePlaceholder": "Frase de contraseña, de al menos {{length}} caracteres",
+    "passphraseLabel": "Frase de contraseña",
+    "sendAs": "Enviar como",
+    "literalCredentials_one": "{{count}} solicitud contiene una contraseña, un token o una clave escritos directamente en la pestaña Auth. Forma parte de la solicitud y se comparte con ella.",
+    "literalCredentials_many": "{{count}} de solicitudes contienen una contraseña, un token o una clave escritos directamente en la pestaña Auth. Forman parte de la solicitud y se comparten con ella.",
+    "literalCredentials_other": "{{count}} solicitudes contienen una contraseña, un token o una clave escritos directamente en la pestaña Auth. Forman parte de la solicitud y se comparten con ella.",
+    "nothing": "Aún no hay nada que compartir aquí."
+  },
+  "shareOpen": {
+    "title": "Compartido contigo",
+    "dialogLabel": "Colección compartida",
+    "intro": "Este enlace contiene una colección cifrada. Se descifra en esta ventana y no se añade nada hasta que eliges Importar.",
+    "credentials": {
+      "key": {
+        "label": "Clave",
+        "hint": "Este archivo se envió sin su clave. Pega la clave que te dio quien lo envió."
+      },
+      "passphrase": {
+        "label": "Frase de contraseña",
+        "hint": "Este contenido compartido está protegido con una frase de contraseña. Pídesela a quien lo envió."
+      }
+    },
+    "open": "Abrir",
+    "cancel": "Cancelar",
+    "environmentNoValues_one": "{{name}}: {{count}} variable, solo nombres, sin valores",
+    "environmentNoValues_many": "{{name}}: {{count}} de variables, solo nombres, sin valores",
+    "environmentNoValues_other": "{{name}}: {{count}} variables, solo nombres, sin valores",
+    "environmentValues_one": "{{name}}: {{count}} variable, {{values}} con valor",
+    "environmentValues_many": "{{name}}: {{count}} de variables, {{values}} con valor",
+    "environmentValues_other": "{{name}}: {{count}} variables, {{values}} con valor",
+    "folders": "Carpetas: {{names}}",
+    "keepValues": "Las variables que ya tienes conservan tus valores.",
+    "examples_one": "{{count}} respuesta de ejemplo guardada",
+    "examples_many": "{{count}} de respuestas de ejemplo guardadas",
+    "examples_other": "{{count}} respuestas de ejemplo guardadas",
+    "activeContent_one": "{{count}} elemento incluye {{kinds}}. Se te preguntará antes de importarlos.",
+    "activeContent_many": "{{count}} de elementos incluyen {{kinds}}. Se te preguntará antes de importarlos.",
+    "activeContent_other": "{{count}} elementos incluyen {{kinds}}. Se te preguntará antes de importarlos.",
+    "requestsLabel": "Solicitudes compartidas",
+    "deriving": "Derivando la clave y descifrando",
+    "decrypting": "Descifrando"
+  },
+  "shareErrors": {
+    "unavailable": "Compartir requiere la Web Crypto API, que no está disponible en esta ventana.",
+    "incomplete": "Este contenido compartido está incompleto. Copia el enlace entero o elige el archivo completo e inténtalo de nuevo.",
+    "cannotDecompress": "Este contenido compartido está comprimido y este navegador no puede descomprimirlo. Ábrelo en un navegador actual o en la app de escritorio.",
+    "tooLarge": "Este contenido compartido ocupa al descomprimirse más de lo que Gostman importa de una vez, así que no se abrió.",
+    "unreadable": "Este contenido compartido se descifró, pero su contenido no es texto legible.",
+    "failedLink": "No se pudo descifrar este contenido compartido. El enlace se modificó o se cortó por el camino.",
+    "failedKey": "No se pudo descifrar este contenido compartido. La clave es incorrecta o el archivo se modificó.",
+    "failedPassphrase": "No se pudo descifrar este contenido compartido. La frase de contraseña es incorrecta o el contenido se modificó.",
+    "unknownVersion": "Este contenido compartido usa el formato «{{version}}», que esta versión de Gostman no puede abrir. Actualiza Gostman e inténtalo de nuevo."
+  }
+}

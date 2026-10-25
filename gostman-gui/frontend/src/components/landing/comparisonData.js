@@ -22,8 +22,8 @@ export const COMPARISON_ROWS = [
   {
     feature: "Git push, data files, vaults",
     gostman: { state: "included", text: "All free." },
-    postman: { state: "partial", text: "Data files and Vault on paid plans." },
-    bruno: { state: "partial", text: "On Pro or Ultimate." },
+    postman: { state: "partial", text: "Shared Vault from Solo; vault integrations on Enterprise." },
+    bruno: { state: "partial", text: "Git push and data files on Pro; secret managers on Ultimate." },
     insomnia: { state: "partial", text: "Git Sync free for up to 3 users; vaults on Enterprise." },
   },
   {
@@ -58,7 +58,7 @@ export const COMPARISON_ROWS = [
     feature: "CLI for CI",
     gostman: { state: "included", text: "One binary." },
     postman: { state: "included", text: "Postman CLI." },
-    bruno: { state: "included", text: "Needs Node.js." },
+    bruno: { state: "included", text: "Node.js package or Docker image." },
     insomnia: { state: "included", text: "Inso CLI." },
   },
   {

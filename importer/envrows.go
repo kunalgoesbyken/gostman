@@ -2,8 +2,8 @@ package importer
 
 import (
 	"encoding/json"
-	"fmt"
 
+	"github.com/kunalgoesbyken/gostman/locales"
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
@@ -60,18 +60,20 @@ func (c *collector) addDraftEnvironments(drafts []environmentDraft) {
 		ids[index] = newID()
 		named[draft.name] = ids[index]
 	}
-	var orphans []string
+	var orphans []locales.Message
 	for index, draft := range drafts {
 		parent := ""
 		if draft.extends != "" {
 			parent = named[draft.extends]
 		}
 		if draft.extends != "" && parent == "" {
-			orphans = append(orphans, fmt.Sprintf(messageEnvironmentExtends, draft.name, draft.extends))
+			orphans = append(orphans, locales.New(locales.ImporterEnvironmentExtends, locales.Params{"name": draft.name, "parent": draft.extends}))
 		}
 		c.addDraftEnvironment(draft, ids[index], parent)
 	}
-	c.Warnings = append(c.Warnings, orphans...)
+	for _, orphan := range orphans {
+		c.lead(orphan)
+	}
 }
 
 func (c *collector) addDraftEnvironment(draft environmentDraft, id, parent string) {
@@ -115,6 +117,6 @@ func (c *collector) noteReferences(environment string, variables []envVariable) 
 		byProvider[variable.ref.Provider] = append(byProvider[variable.ref.Provider], variable.name+" ("+variable.ref.place()+")")
 	}
 	for _, provider := range providers {
-		c.Warnings = append(c.Warnings, fmt.Sprintf(messageExternalSecrets, environment, listNames(byProvider[provider]), provider))
+		c.lead(locales.New(locales.ImporterExternalSecrets, locales.Params{"environment": environment, "names": listNames(byProvider[provider]), "provider": provider}))
 	}
 }

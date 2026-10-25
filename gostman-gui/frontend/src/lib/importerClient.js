@@ -1,5 +1,5 @@
 import { MAX_FILE_SIZE } from './importExport'
-import { formatSize } from './dataUtils'
+import { formatBytes } from './byteSize'
 import { IMPORT_TEXT } from './importText'
 import { readZip } from './zipReader'
 
@@ -74,7 +74,7 @@ async function expandArchives(entries) {
       expanded.push(entry)
       continue
     }
-    if (entry.file.size > MAX_FILE_SIZE) throw new Error(IMPORT_TEXT.tooLarge(entry.name, formatSize(entry.file.size), formatSize(MAX_FILE_SIZE)))
+    if (entry.file.size > MAX_FILE_SIZE) throw new Error(IMPORT_TEXT.tooLarge(entry.name, formatBytes(entry.file.size), formatBytes(MAX_FILE_SIZE)))
     expanded.push(...await readZip(await entry.file.arrayBuffer(), { files: MAX_FILES, bytes: MAX_FILE_SIZE }))
   }
   return expanded
@@ -91,8 +91,8 @@ export async function readImportFiles(given) {
   if (relevant.length === 0) return { error: IMPORT_TEXT.noFiles }
   if (relevant.length > MAX_FILES) return { error: IMPORT_TEXT.tooMany(MAX_FILES) }
   const oversized = relevant.find(({ file }) => file.size > MAX_FILE_SIZE)
-  if (oversized) return { error: IMPORT_TEXT.tooLarge(oversized.name, formatSize(oversized.file.size), formatSize(MAX_FILE_SIZE)) }
-  if (relevant.reduce((total, { file }) => total + file.size, 0) > MAX_FILE_SIZE) return { error: IMPORT_TEXT.totalTooLarge(formatSize(MAX_FILE_SIZE)) }
+  if (oversized) return { error: IMPORT_TEXT.tooLarge(oversized.name, formatBytes(oversized.file.size), formatBytes(MAX_FILE_SIZE)) }
+  if (relevant.reduce((total, { file }) => total + file.size, 0) > MAX_FILE_SIZE) return { error: IMPORT_TEXT.totalTooLarge(formatBytes(MAX_FILE_SIZE)) }
   try {
     return { files: await Promise.all(relevant.map(readText)) }
   } catch (error) {

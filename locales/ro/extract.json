@@ -1,0 +1,29 @@
+{
+  "extract": {
+    "noResponse": "Trimiteți cererea pentru a vedea o valoare",
+    "failedResponse": "Ultima cerere a eșuat",
+    "summary": "Rândurile bifate rulează după fiecare răspuns și își păstrează valoarea, gata de folosit ca {{example}}. Valorile de sesiune rămân în memorie până le ștergeți sau închideți aplicația; valorile de mediu sunt salvate cu mediul activ.",
+    "invalidEnvironment": "Nimic nu a fost salvat: variabilele mediului activ nu sunt JSON valid.",
+    "nothing": "Ultima rulare nu a produs nicio valoare.",
+    "savedTo": {
+      "session": "{{names}} păstrate ca valori de sesiune.",
+      "environment": "{{names}} salvate în mediul activ."
+    },
+    "scopes": {
+      "session": "Sesiune",
+      "environment": "Mediu"
+    },
+    "variable": "Variabilă",
+    "from": "Din",
+    "path": "Cale sau nume",
+    "value": "Valoare în ultimul răspuns",
+    "keepIn": "Păstrare în",
+    "run": "Rulează acest extractor",
+    "name": "Numele variabilei",
+    "namePlaceholder": "nume_variabila",
+    "source": "Sursa valorii",
+    "scope": "Unde este păstrată valoarea",
+    "remove": "Eliminare extractor",
+    "runNow": "Rulare acum"
+  }
+}

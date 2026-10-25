@@ -1,0 +1,18 @@
+{
+  "variables": {
+    "dynamic": "リクエストを送信するたびに生成",
+    "prompt": "リクエストの送信時に入力を求める",
+    "undefinedName": "はアクティブな環境で定義されていません",
+    "resolvesTo": "解決後の値",
+    "through": "経由：{{names}}",
+    "sources": {
+      "global": "グローバル",
+      "collection": "コレクション",
+      "environment": "環境",
+      "folder": "フォルダー",
+      "request": "リクエスト",
+      "process": ".envファイル",
+      "session": "セッション"
+    }
+  }
+}

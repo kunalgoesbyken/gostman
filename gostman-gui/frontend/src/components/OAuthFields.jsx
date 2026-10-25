@@ -6,6 +6,7 @@ import { FIELD_COLUMNS, Field } from "./ui/field"
 import { Select } from "./ui/select"
 import { SecretInput, TextInput } from "./AuthInputs"
 import { openExternal } from "../lib/about"
+import { formatDateTime } from "../lib/i18n/format"
 import { isWebAddress } from "../lib/webAddress"
 import {
   GRANTS,
@@ -39,7 +40,7 @@ function tokenSummary(config, tokenRequest, environmentId) {
   if (isOtherEnvironment(config, environmentId)) return TEXT.otherEnvironment
   if (sentToken(config) === "") return TEXT.noIdToken
   if (config.expiresAt === 0) return TEXT.noExpiry
-  const expiry = new Date(config.expiresAt).toLocaleString()
+  const expiry = formatDateTime(config.expiresAt)
   return isTokenFresh(config) ? TEXT.expires(expiry) : TEXT.expired(expiry)
 }
 

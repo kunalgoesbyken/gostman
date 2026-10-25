@@ -1,0 +1,8 @@
+{
+  "runData": {
+    "tooManyRows_other": "数据文件最多只能有 {{count}} 行。",
+    "empty": "数据文件没有行。",
+    "notArray": "JSON 数据文件必须是对象数组，每次迭代对应一个对象。",
+    "unreadable": "无法读取数据文件。"
+  }
+}

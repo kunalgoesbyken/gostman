@@ -289,21 +289,21 @@ const segmentText = (segment) => {
 const formatPath = (path) => (path.length === 0 ? SCHEMA_TEXT.root : `$${path.map(segmentText).join('')}`)
 
 const DESCRIPTIONS = {
-  type: ({ expected, actual }) => SCHEMA_TEXT.type(expected, actual),
-  enum: ({ allowed, actual }) => SCHEMA_TEXT.enum(allowed, actual),
-  const: ({ expected, actual }) => SCHEMA_TEXT.const(expected, actual),
-  pattern: ({ pattern, actual }) => SCHEMA_TEXT.pattern(pattern, actual),
-  format: ({ format, actual }) => SCHEMA_TEXT.format(format, actual),
-  uniqueItems: ({ first, second }) => SCHEMA_TEXT.uniqueItems(first, second),
-  dependentRequired: ({ present, needed }) => SCHEMA_TEXT.dependentRequired(present, needed),
-  propertyNames: ({ name }) => SCHEMA_TEXT.propertyNames(name),
-  oneOfMany: ({ count }) => SCHEMA_TEXT.oneOfMany(count),
+  type: (where, { expected, actual }) => SCHEMA_TEXT.type(where, expected, actual),
+  enum: (where, { allowed, actual }) => SCHEMA_TEXT.enum(where, allowed, actual),
+  const: (where, { expected, actual }) => SCHEMA_TEXT.const(where, expected, actual),
+  pattern: (where, { pattern, actual }) => SCHEMA_TEXT.pattern(where, pattern, actual),
+  format: (where, { format, actual }) => SCHEMA_TEXT.format(where, format, actual),
+  uniqueItems: (where, { first, second }) => SCHEMA_TEXT.uniqueItems(where, first, second),
+  dependentRequired: (where, { present, needed }) => SCHEMA_TEXT.dependentRequired(where, present, needed),
+  propertyNames: (where, { name }) => SCHEMA_TEXT.propertyNames(where, name),
+  oneOfMany: (where, { count }) => SCHEMA_TEXT.oneOfMany(where, count),
 }
 
+const describeLimit = (keyword) => (where, { limit, actual }) => SCHEMA_TEXT[keyword](where, limit, actual)
+
 function describeProblem({ path, keyword, params }) {
-  const text = SCHEMA_TEXT[keyword]
-  const sentence = DESCRIPTIONS[keyword]?.(params) ?? (typeof text === 'function' ? text(params.limit, params.actual) : text)
-  return SCHEMA_TEXT.line(formatPath(path), sentence)
+  return (DESCRIPTIONS[keyword] ?? describeLimit(keyword))(formatPath(path), params)
 }
 
 function describeSchemaErrors(errors) {

@@ -1,0 +1,204 @@
+{
+  "ai": {
+    "name": "AI",
+    "ok": "确定",
+    "cancel": "取消",
+    "close": "关闭",
+    "back": "返回",
+    "discard": "放弃",
+    "tryAgain": "重试",
+    "preview": "预览",
+    "sendToAi": "发送给 AI",
+    "continueBatch": "生成后续请求",
+    "empty": "空",
+    "current": "当前",
+    "proposed": "建议",
+    "instructions": "指令",
+    "content": "内容",
+    "replyFormat": "回复格式",
+    "scriptLabel": "脚本",
+    "preRequest": "预请求",
+    "postResponse": "响应后",
+    "providerLabel": "AI：{{label}}",
+    "waitingFor": "正在等待 {{label}}",
+    "readingSpec": "正在读取 OpenAPI 文档",
+    "reviewNote": "由 AI 生成，接受前请先检查。在你决定之前，不会发送、保存或运行任何内容。",
+    "previewNote": "以下内容将原样发送到 {{host}}：约 {{size}}（{{tokens}} 个 token）。机密已被遮盖。",
+    "previewNoteValues": "以下内容将原样发送到 {{host}}：约 {{size}}（{{tokens}} 个 token）。机密已被遮盖。包含响应体中的值（最多 4 KB，敏感键已遮盖）。",
+    "previewNoteStructure": "以下内容将原样发送到 {{host}}：约 {{size}}（{{tokens}} 个 token）。机密已被遮盖。只包含响应体的结构，不包含其中的值。",
+    "skipPreview": "此操作不再询问（之后将不经预览直接发送）",
+    "includeValues": "包含真实的响应值（否则只发送结构）",
+    "includeBodyValues": "包含请求体中的值（最多 4 KB，敏感键已遮盖）。取消勾选则只发送结构。",
+    "needsResponse": "请先发送请求，以便有响应可供参考。",
+    "needsTrust": "此文件夹受限。AI 生成的脚本在你检查之前都不可信，请先信任此文件夹再生成脚本。",
+    "badReply": "模型没有按预期格式回答。请重试，或选择能力更强的模型。",
+    "cutOff": "回答因达到长度上限而被截断。请减少内容后重试，或选择回答更简短的模型。",
+    "connected": "已连接",
+    "cancelled": "已取消",
+    "tooLarge": "文本大小为 {{size}}，上限为 {{limit}}。请粘贴较小的部分。任意大小的完整 OpenAPI 或 Swagger 文档都可以通过“导入数据”导入。",
+    "searchLimited": "你的集合中有 {{total}} 个请求。只发送前 {{sent}} 个，因此其后的请求无法被找到。",
+    "tasks": {
+      "request": {
+        "label": "根据描述创建请求",
+        "inputLabel": "描述这个请求",
+        "placeholder": "POST 新建用户，包含 name 和 email",
+        "section": "新请求（以未保存的标签页打开）",
+        "apply": "在新标签页中打开",
+        "untitled": "AI 请求"
+      },
+      "tests": {
+        "label": "为响应生成检查",
+        "assertions": "断言",
+        "script": "响应后脚本（由 AI 生成，运行前请检查）",
+        "apply": "添加到请求"
+      },
+      "script": {
+        "label": "预请求或响应后脚本",
+        "inputLabel": "脚本要做什么",
+        "placeholder": "把响应中的令牌保存到环境中",
+        "sectionPreScript": "新的预请求脚本（由 AI 生成，运行前请检查）",
+        "sectionPostScript": "新的响应后脚本（由 AI 生成，运行前请检查）",
+        "apply": "替换脚本"
+      },
+      "explain": {
+        "label": "解释失败的响应",
+        "happened": "发生了什么",
+        "causes": "可能的原因",
+        "fixes": "建议的修复方法"
+      },
+      "docs": {
+        "label": "为请求编写文档",
+        "section": "描述",
+        "apply": "用作描述"
+      },
+      "search": {
+        "label": "询问有关集合的问题",
+        "inputLabel": "你要找什么",
+        "placeholder": "取消订单的接口"
+      },
+      "schema": {
+        "label": "根据 API 描述创建请求",
+        "inputLabel": "粘贴 OpenAPI 或 Swagger 文档、GraphQL schema 或 API 文档文本",
+        "placeholder": "openapi: 3.1.0 ...",
+        "folder": "新文件夹“{{name}}”",
+        "defaultFolder": "AI 请求",
+        "apply_other": "添加文件夹和 {{count}} 个请求",
+        "moreNote": "此 API 的接口多于一次回答所能容纳的数量。请生成后续请求以继续；同样的文本会连同已生成的请求列表再次发送。",
+        "importerSection_other": "OpenAPI 导入：{{count}} 个请求",
+        "importerNote": "这是 OpenAPI 或 Swagger 文档，因此由内置导入器完整读取，没有任何内容发送给 AI。如需添加断言，请先发送请求，再使用“为响应生成检查”。",
+        "importerWarnings": "导入器提示",
+        "importApply_other": "导入 {{count}} 个请求",
+        "moreLines_other": "以及另外 {{count}} 项"
+      }
+    },
+    "buttons": {
+      "generate": "使用 AI 生成",
+      "generateTests": "使用 AI 生成检查",
+      "generateScript": "使用 AI 生成此脚本",
+      "explain": "使用 AI 解释",
+      "explainError": "使用 AI 解释此错误",
+      "document": "用 AI 编写",
+      "documentLabel": "使用 AI 编写描述"
+    },
+    "commands": {
+      "request": {
+        "label": "AI：根据描述创建请求",
+        "description": "起草一个请求，以预览形式供你接受",
+        "keywords": "生成 generate"
+      },
+      "tests": {
+        "label": "AI：生成检查",
+        "description": "为最近的响应提出检查建议"
+      },
+      "script": {
+        "label": "AI：编写脚本",
+        "description": "提出预请求或响应后脚本"
+      },
+      "explain": {
+        "label": "AI：解释响应",
+        "description": "解释失败原因并给出修复建议"
+      },
+      "docs": {
+        "label": "AI：为此请求编写文档",
+        "description": "为请求提出一段描述"
+      },
+      "search": {
+        "label": "AI：询问有关集合的问题",
+        "description": "通过描述来查找请求",
+        "keywords": "搜索 查找 search find"
+      },
+      "schema": {
+        "label": "AI：根据 API 描述创建请求",
+        "description": "OpenAPI 文档使用内置导入器，其他描述交给 AI",
+        "keywords": "openapi swagger graphql schema"
+      },
+      "settings": {
+        "label": "AI 设置",
+        "description": "开启或关闭 AI，设置提供商、模型和密钥",
+        "keywords": "禁用 启用 偏好设置 disable enable preferences"
+      }
+    },
+    "settings": {
+      "offNote": "AI 已关闭。不显示 AI 按钮、命令或快捷键，也不会向 AI 提供商发送任何内容。",
+      "onNote": "AI 已开启。显示 AI 按钮和命令；在你运行 AI 操作之前，不会发送任何内容。",
+      "needsSetup": "AI 已开启。运行 AI 操作前，请选择模型；如果提供商需要，还要保存 API 密钥。",
+      "previewNote": "每个操作在内容离开你的设备之前，都会预览将要发送的完整内容，除非你为该操作选择了“不再询问”。",
+      "consent": "我了解，运行 AI 操作时，预览中的请求或响应详情会发送到 {{host}}，费用由我与提供商结算。",
+      "enable": "开启 AI 功能",
+      "enableAfterConsent": "开启 AI 功能（请先勾选上一行）",
+      "provider": "提供商",
+      "baseUrl": "基础 URL",
+      "baseUrlPlaceholder": "https://host/v1",
+      "allowInsecure": "允许对此地址使用明文 http（回环地址始终允许）",
+      "model": "模型 ID",
+      "listModels": "列出模型",
+      "modelsFound_other": "找到 {{count}} 个模型。请选择一个，或输入 ID。",
+      "noModels": "提供商没有列出任何模型。请输入模型 ID。",
+      "localNoModels": "服务器正在运行，但没有任何模型。请先下载一个，再重新列出。",
+      "apiKey": "API 密钥",
+      "keySaved": "密钥已保存",
+      "removeKey": "移除密钥",
+      "pasteKey": "粘贴 API 密钥",
+      "optionalKey": "可选",
+      "saveKey": "保存密钥",
+      "remember": "记住在此设备上（否则仅在标签页关闭前有效）",
+      "test": "测试连接",
+      "skipped_other": "有 {{count}} 个操作不经预览直接发送。",
+      "askAgain": "重新显示预览",
+      "browserNote": "在浏览器中，调用会直接从此页面发往提供商，你的密钥不会经过 Gostman 服务器。提供商必须允许跨源调用。本地 Ollama 需要把 OLLAMA_ORIGINS 设为此站点，LM Studio 需要在其服务器设置中开启 CORS。如果提供商拒绝浏览器调用，请使用桌面应用。",
+      "desktopNote": "你的密钥保存在操作系统钥匙串中，由桌面应用自行调用提供商。页面不会读回密钥。",
+      "forget": "关闭 AI 并清除密钥",
+      "forgetWhileOff": "清除 AI 密钥和设置"
+    },
+    "errors": {
+      "invalidBase": "基础 URL 不是有效地址",
+      "insecureBase": "请使用 https 基础 URL，或在 AI 设置中为其允许明文 http",
+      "enterModel": "请输入模型 ID",
+      "pasteKey": "请粘贴此提供商的 API 密钥",
+      "keyMoved": "此密钥是为另一个地址保存的。请针对此基础 URL 重新保存。",
+      "tooLarge": "请求过大，无法发送。请选择更少的内容",
+      "noAnswer": "提供商没有返回任何回答",
+      "notJson": "提供商返回的不是 JSON。请检查基础 URL",
+      "timedOut": "提供商未在限定时间内回答",
+      "rejectedKey": "提供商拒绝了该密钥，或此账号无权使用该模型",
+      "rateLimited": "提供商正在限流或额度已用完。请稍候再试",
+      "providerTimeout": "提供商超时",
+      "providerProblem": "提供商出现问题。请稍后重试",
+      "refused": "提供商拒绝了请求（{{status}}）",
+      "retryIn": "{{summary}}（{{seconds}} 秒后重试）",
+      "withDetail": "{{summary}}：{{detail}}",
+      "unreachable": "无法连接 {{host}}。地址可能有误，或提供商不允许网页调用（CORS）。{{advice}}",
+      "unreachableWithReason": "无法连接 {{host}}（{{reason}}）。地址可能有误，或提供商不允许网页调用（CORS）。{{advice}}",
+      "ollamaAdvice": "请使用 OLLAMA_ORIGINS={{origin}} 启动 Ollama 并重启，或使用桌面应用。",
+      "lmStudioAdvice": "请在开启 CORS 的情况下启动 LM Studio 服务器（开发者设置，或 lms server start --cors），或使用桌面应用。",
+      "customAdvice": "服务器必须响应 OPTIONS 预检请求，并允许 {{origin}} 使用 Authorization 和 Content-Type 请求头。桌面应用不受此限制。",
+      "anthropicAdvice": "Anthropic 只允许带有其直接访问请求头的浏览器调用，Gostman 会发送该请求头，因此还请检查密钥和网络连接。桌面应用不受此限制。",
+      "generalAdvice": "请检查基础 URL 和网络连接。桌面应用不受此限制。"
+    },
+    "providers": {
+      "local": "{{name}}（本地）",
+      "custom": "兼容 OpenAI 的 URL",
+      "customModelHint": "模型 ID"
+    }
+  }
+}

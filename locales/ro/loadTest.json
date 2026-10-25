@@ -1,0 +1,61 @@
+{
+  "loadTest": {
+    "title": "Test de încărcare",
+    "commandTitle": "Test de încărcare pentru această cerere",
+    "commandDescription": "Trimite cererea curentă de multe ori simultan și măsoară latența",
+    "barLabel": "Test de încărcare",
+    "barHint": "Test de încărcare pentru această cerere",
+    "notice": "Testați doar sisteme proprii sau pentru care aveți permisiunea de a testa. Fiecare worker trimite cererea așa cum este afișată aici, fără scripturi sau cookie-uri partajate.",
+    "unsupported": "Doar cererile HTTP pot fi testate la încărcare. Cererile gRPC, MCP, WebSocket și de streaming nu sunt acceptate.",
+    "noUrl": "Dați mai întâi un URL cererii.",
+    "concurrency": "Workeri simultani",
+    "duration": "Durată (secunde)",
+    "rateLimit": "Plafon de cereri pe secundă",
+    "rateLimitHint": "Lăsați gol pentru fără plafon",
+    "start": "Pornire",
+    "stop": "Oprire",
+    "running": "Rulează",
+    "stopped": "Oprit devreme",
+    "progress": {
+      "elapsed": "Scurs",
+      "requests": "Cereri",
+      "rate": "Cereri/s",
+      "p95": "p95",
+      "failed": "Eșuate"
+    },
+    "summary": {
+      "total": "Cereri",
+      "succeeded": "Reușite",
+      "failed": "Eșuate",
+      "rate": "Cereri/s",
+      "received": "Primit"
+    },
+    "failureBreakdown": "{{networkErrors}} de rețea, {{statusFailures}} cu starea {{failureStatus}} sau mai mare",
+    "percentilesLabel": "Latență",
+    "percentileColumns": {
+      "name": "Măsură",
+      "value": "Milisecunde"
+    },
+    "percentiles": {
+      "minMs": "min",
+      "meanMs": "medie",
+      "p50Ms": "p50",
+      "p90Ms": "p90",
+      "p95Ms": "p95",
+      "p99Ms": "p99",
+      "maxMs": "max"
+    },
+    "seconds": "{{value}} s",
+    "milliseconds": "{{value}} ms",
+    "statusCount": "{{code}} x {{count}}",
+    "statusLabel": "Coduri de stare",
+    "histogramLabel": "Distribuția latenței",
+    "histogramBarLabel_one": "{{from}} până la {{to}} ms: {{count}} cerere",
+    "histogramBarLabel_few": "{{from}} până la {{to}} ms: {{count}} cereri",
+    "histogramBarLabel_other": "{{from}} până la {{to}} ms: {{count}} de cereri",
+    "errorsLabel": "Exemple de erori",
+    "accuracy": "Percentilele sunt precise cu o abatere de {{percent}}%.",
+    "emptyTitle": "Încă nu există rezultate",
+    "emptyHint": "Alegeți încărcarea și apăsați Pornire."
+  }
+}

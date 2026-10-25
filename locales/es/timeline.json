@@ -1,0 +1,77 @@
+{
+  "timeline": {
+    "proxied": "Los tiempos los midió el proxy de Gostman, desde el proxy hasta el destino. No incluyen el trayecto desde tu navegador hasta el proxy.",
+    "reused": "Conexión reutilizada",
+    "newConnection": "Conexión nueva",
+    "omitted_one": "{{count}} solicitud más no se muestra.",
+    "omitted_many": "{{count}} de solicitudes más no se muestran.",
+    "omitted_other": "{{count}} solicitudes más no se muestran.",
+    "failedBefore": "Falló antes de conectar",
+    "failedAt": "Falló en: {{label}}",
+    "requestHeaders": "Encabezados de la solicitud",
+    "responseHeaders": "Encabezados de la respuesta",
+    "reveal": "Mostrar valor",
+    "hide": "Ocultar valor",
+    "expanded": "Ocultar detalles",
+    "collapsed": "Mostrar detalles",
+    "total": "Total",
+    "breakdown": "Desglose del tiempo",
+    "breakdownProxied": "Desglose del tiempo (medido por el proxy de Gostman)",
+    "requests_one": "{{count}} solicitud",
+    "requests_many": "{{count}} de solicitudes",
+    "requests_other": "{{count}} solicitudes",
+    "scripts_one": "{{count}} script",
+    "scripts_many": "{{count}} de scripts",
+    "scripts_other": "{{count}} scripts",
+    "consoleLines_one": "{{count}} línea de consola",
+    "consoleLines_many": "{{count}} de líneas de consola",
+    "consoleLines_other": "{{count}} líneas de consola",
+    "passed": "{{count}} superadas",
+    "failed": "{{count}} fallidas",
+    "scriptFailed": "Fallido",
+    "noOutput": "No hay salida de consola ni resultados de pruebas.",
+    "secrets": "Gestores de secretos",
+    "secretsRead_one": "{{count}} secreto leído",
+    "secretsRead_many": "{{count}} de secretos leídos",
+    "secretsRead_other": "{{count}} secretos leídos",
+    "secretSkipped": "{{name}} está vacío porque la conexión «{{connection}}» está desactivada",
+    "seconds": "{{value}} s",
+    "milliseconds": "{{value}} ms",
+    "phases": {
+      "dns": {
+        "label": "Resolución DNS",
+        "short": "DNS"
+      },
+      "connect": {
+        "label": "Conexión TCP",
+        "short": "Conexión"
+      },
+      "tls": {
+        "label": "Handshake TLS",
+        "short": "TLS"
+      },
+      "firstByte": {
+        "label": "Esperando el primer byte",
+        "short": "TTFB"
+      },
+      "download": {
+        "label": "Descarga del contenido",
+        "short": "Descarga"
+      }
+    },
+    "facts": {
+      "remoteAddress": "Dirección remota",
+      "protocol": "Protocolo",
+      "connection": "Conexión",
+      "tls": "TLS",
+      "certificateSubject": "Sujeto del certificado",
+      "certificateIssuer": "Emisor del certificado",
+      "requestBody": "Cuerpo de la solicitud",
+      "redirectsTo": "Redirige a",
+      "cookiesSet": "Cookies establecidas"
+    },
+    "tlsAlpn": "ALPN {{protocol}}",
+    "tlsExpires": "caduca el {{date}}",
+    "tlsExpired": "caduca el {{date}} (caducado)"
+  }
+}

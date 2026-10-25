@@ -1,0 +1,165 @@
+{
+  "preferences": {
+    "title": "Preferenze",
+    "sectionsLabel": "Sezioni",
+    "sections": {
+      "appearance": "Aspetto",
+      "theme": "Tema",
+      "fonts": "Font",
+      "editor": "Editor",
+      "requests": "Richieste",
+      "language": "Lingua",
+      "ai": "AI",
+      "privacy": "Privacy",
+      "data": "Dati"
+    },
+    "fields": {
+      "theme": "Tema",
+      "contrast": "Contrasto",
+      "accent": "Colore d'accento",
+      "textScale": "Dimensione del testo",
+      "interfaceFont": "Font dell'interfaccia",
+      "codeFont": "Font del codice",
+      "density": "Densità",
+      "responseLayout": "Pannello della risposta",
+      "systemTitleBar": "Usa la barra del titolo di sistema",
+      "editorFontSize": "Dimensione del font dell'editor",
+      "wrapLines": "A capo automatico per le righe lunghe",
+      "requestTimeout": "Timeout predefinito",
+      "confirmCloseTab": "Chiedi prima di scartare le modifiche non salvate alla chiusura di una scheda",
+      "language": "Lingua"
+    },
+    "themes": {
+      "system": "Sistema",
+      "light": "Chiaro",
+      "dark": "Scuro"
+    },
+    "contrasts": {
+      "system": "Sistema",
+      "standard": "Standard",
+      "more": "Alto"
+    },
+    "accents": {
+      "cyan": "Ciano",
+      "blue": "Blu",
+      "violet": "Viola",
+      "pink": "Rosa",
+      "graphite": "Grafite"
+    },
+    "densities": {
+      "comfortable": "Comoda",
+      "compact": "Compatta"
+    },
+    "layouts": {
+      "below": "Sotto",
+      "right": "A destra"
+    },
+    "seconds": "secondi",
+    "pixels": "px",
+    "contrastHint": "Alto disegna bordi e testo secondario più marcati.",
+    "systemTitleBarHint": "Mostra la barra del titolo e i pulsanti della finestra del tuo desktop invece di quelli di Gostman. Si applica dopo un riavvio.",
+    "systemTitleBarRestart": "Riavvia Gostman per applicare questa modifica.",
+    "systemTitleBarFailed": "Non è stato possibile salvare l'impostazione.",
+    "defaultFont": "Predefinito",
+    "interfaceFontHint": "Qualsiasi font installato su questo dispositivo.",
+    "codeFontHint": "Editor, barra degli indirizzi e altro codice.",
+    "fontMissing": "Non trovato su questo dispositivo, quindi viene usato il font predefinito.",
+    "suggestFonts": "Suggerisci i font installati",
+    "fontsSuggested": "I font installati vengono suggeriti mentre digiti il nome di un font.",
+    "fontsDenied": "Non è stato possibile leggere i font installati.",
+    "shortcuts": "Scorciatoie da tastiera",
+    "reset": "Ripristina i valori predefiniti",
+    "close": "Fatto",
+    "statusLabel": "Preferenze",
+    "commandDescription": "Tema, colori, font, dimensione del testo, editor, layout e valori predefiniti",
+    "methods": {
+      "title": "Colori dei metodi",
+      "hint": "Il colore di ogni metodo di richiesta nella barra laterale, nelle schede e negli elenchi. Aggiungi uno sfondo per mostrare i metodi come badge.",
+      "method": "Metodo",
+      "resetMode": {
+        "light": "Ripristina i colori chiari dei metodi",
+        "dark": "Ripristina i colori scuri dei metodi"
+      }
+    },
+    "theme": {
+      "palette": "Palette",
+      "paletteHint": "Ogni palette ha una versione chiara e una scura. I tuoi colori vengono applicati sopra.",
+      "palettes": {
+        "default": "Predefinita",
+        "neutral": "Neutra",
+        "slate": "Ardesia",
+        "paper": "Carta",
+        "moss": "Muschio",
+        "dusk": "Crepuscolo",
+        "ocean": "Oceano",
+        "ink": "Inchiostro"
+      },
+      "colors": "Colori personalizzati",
+      "colorsHint": "Imposta il colore di sfondo e del testo di ogni parte della finestra. Vengono conservati solo i colori che cambi.",
+      "editing": "Colori per",
+      "previewHint": {
+        "light": "La finestra ora è scura. Imposta il tema su Chiaro per vedere questi colori applicati.",
+        "dark": "La finestra ora è chiara. Imposta il tema su Scuro per vedere questi colori applicati."
+      },
+      "columns": {
+        "surface": "Parte",
+        "background": "Sfondo",
+        "foreground": "Testo",
+        "contrast": "Contrasto",
+        "reset": "Ripristina"
+      },
+      "surfaces": {
+        "window": "Finestra",
+        "sidebar": "Barra laterale",
+        "tabs": "Schede e barra degli indirizzi",
+        "request": "Editor della richiesta",
+        "body": "Editor del corpo",
+        "script": "Editor degli script",
+        "response": "Risposta",
+        "dialog": "Finestre di dialogo",
+        "menu": "Menu e pop-up"
+      },
+      "surfaceHints": {
+        "window": "Barra del titolo, barra di stato e ogni parte non elencata qui.",
+        "body": "Anche messaggi gRPC, argomenti MCP ed esempi salvati.",
+        "script": "Script pre-richiesta e post-risposta.",
+        "menu": "Menu contestuali, elenchi e riquadro comandi."
+      },
+      "roles": {
+        "background": "sfondo",
+        "foreground": "testo"
+      },
+      "sample": "Aa",
+      "resetMode": {
+        "light": "Ripristina i colori chiari",
+        "dark": "Ripristina i colori scuri"
+      },
+      "share": "Condividi un tema",
+      "shareHint": "Un tema contiene la palette, il colore d'accento e i colori personalizzati delle parti e dei metodi per entrambe le modalità.",
+      "copy": "Copia tema",
+      "copied": "Tema copiato negli appunti.",
+      "copyFailed": "Non è stato possibile copiare il tema negli appunti.",
+      "import": "Importa tema",
+      "importLabel": "Tema da importare",
+      "importPlaceholder": "Incolla un tema copiato da Gostman",
+      "apply": "Applica",
+      "cancel": "Annulla",
+      "imported": "Tema applicato.",
+      "invalid": "Questo non è un tema di Gostman, oppure contiene parti sconosciute o colori non scritti come #rrggbb.",
+      "colorLabel": "Colore {{role}} di {{surface}}",
+      "hexLabel": "Valore esadecimale {{role}} di {{surface}}",
+      "ratio": "{{ratio}}:1",
+      "lowContrast": "Il testo potrebbe essere difficile da leggere. Punta ad almeno {{minimum}}:1.",
+      "resetRow": "Ripristina {{name}}"
+    },
+    "timeoutHint_one": "Si applica alle richieste che non impostano un timeout proprio. 0 usa il limite integrato di {{count}} secondo.",
+    "timeoutHint_many": "Si applica alle richieste che non impostano un timeout proprio. 0 usa il limite integrato di {{count}} di secondi.",
+    "timeoutHint_other": "Si applica alle richieste che non impostano un timeout proprio. 0 usa il limite integrato di {{count}} secondi.",
+    "languageSystem": "Come il sistema ({{language}})",
+    "languageSwitchHint": "Gostman si ricarica per mostrare la nuova lingua. Le schede aperte e le bozze non salvate vengono conservate; le risposte mostrate nelle schede vengono cancellate.",
+    "languageSwitch": "Cambia lingua",
+    "languageHelp": "Manca la tua lingua o hai trovato una traduzione sbagliata? {{link}}.",
+    "languageHelpLink": "Chiedi su GitHub",
+    "accentAdjusted": "Mostrato come {{light}} in modalità chiara e {{dark}} in modalità scura, così il testo di questo colore resta leggibile."
+  }
+}

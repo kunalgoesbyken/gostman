@@ -12,9 +12,14 @@ import { DataSection } from "./preferences/DataSection"
 import { PrivacySection } from "./preferences/PrivacySection"
 import { ChoiceRow, PreferenceRow, optionsOf } from "./preferences/PreferenceRows"
 import { ThemeSection } from "./preferences/ThemeSection"
+import { RichText } from "./ui/richText"
 import { useAppStore } from "../store/appStore"
 import { awaitsRestart, useWindowFrame } from "../hooks/useWindowFrame"
 import { isFontInstalled, sortedFamilies } from "../lib/fonts"
+import { formatPercent } from "../lib/i18n/format"
+import { SYSTEM_LANGUAGE, languageName, resolveLanguage } from "../lib/i18n/languages"
+import { switchLanguage } from "../lib/i18n/switchLanguage"
+import { openExternal } from "../lib/about"
 import { ORIENTATION, moveFocus } from "../lib/rovingFocus"
 import { scrollIntoStrip } from "../lib/scrollIntoStrip"
 import {
@@ -23,6 +28,7 @@ import {
 } from "../lib/preferences"
 import { SECTION_AI, selectPreferencesSection, usePreferencesSection } from "../lib/preferencesSection"
 import { PREFERENCES_TEXT } from "../lib/preferencesText"
+import { TRANSLATIONS_ISSUE_URL } from "../lib/siteLinks"
 import { cn } from "../lib/utils"
 
 const { fields, sections } = PREFERENCES_TEXT
@@ -110,7 +116,7 @@ function NumberRow({ label, hint, suffix, range, value, onCommit }) {
   )
 }
 
-const FLAG_CLASS = "h-auto min-h-6 justify-start py-0.5 text-left text-xs text-foreground"
+const FLAG_CLASS = "h-auto min-h-6 justify-start py-0.5 text-start text-xs text-foreground"
 
 function FlagRow({ label, name, preferences }) {
   return (
@@ -142,20 +148,17 @@ function SystemTitleBarRow({ windowFrame }) {
       <Checkbox checked={frame.systemTitleBar} onChange={change} aria-describedby={hintId} className={FLAG_CLASS}>
         {fields.systemTitleBar}
       </Checkbox>
-      <p id={hintId} role="status" className="pl-[1.375rem] text-2xs text-muted-foreground">{titleBarHint(frame, failed)}</p>
+      <p id={hintId} role="status" className="ps-[1.375rem] text-2xs text-muted-foreground">{titleBarHint(frame, failed)}</p>
     </div>
   )
 }
 
-const percentLabels = (language) => {
-  const format = new Intl.NumberFormat(language, { style: "percent" })
-  return TEXT_SCALES.map((scale) => ({ value: scale, label: format.format(scale / 100) }))
-}
+const percentLabels = () => TEXT_SCALES.map((scale) => ({ value: scale, label: formatPercent(scale / 100) }))
 
 function AppearanceSection({ preferences, windowFrame }) {
   return (
     <>
-      <ChoiceRow label={fields.textScale} name="textScale" options={percentLabels(preferences.language)} preferences={preferences} />
+      <ChoiceRow label={fields.textScale} name="textScale" options={percentLabels()} preferences={preferences} />
       <ChoiceRow label={fields.density} name="density" options={optionsOf(DENSITIES, PREFERENCES_TEXT.densities)} preferences={preferences} />
       <ChoiceRow label={fields.responseLayout} name="responseLayout" options={optionsOf(RESPONSE_LAYOUTS, PREFERENCES_TEXT.layouts)} preferences={preferences} />
       <SystemTitleBarRow windowFrame={windowFrame} />
@@ -207,30 +210,64 @@ function RequestsSection({ preferences }) {
   )
 }
 
+function LanguageHelp() {
+  const link = (
+    <a key="issue" href={TRANSLATIONS_ISSUE_URL} target="_blank" rel="noopener noreferrer" onClick={(event) => openExternal(event, TRANSLATIONS_ISSUE_URL)} className="text-primary underline-offset-2 hover:underline">
+      {PREFERENCES_TEXT.languageHelpLink}
+    </a>
+  )
+  return <p className="text-2xs text-muted-foreground"><RichText parts={PREFERENCES_TEXT.languageHelpParts(link)} /></p>
+}
+
 function LanguageSection({ preferences }) {
+  const [choice, setChoice] = useState(preferences.language)
+  const [isSwitching, setIsSwitching] = useState(false)
+  const systemName = languageName(resolveLanguage(SYSTEM_LANGUAGE))
+  const switching = () => {
+    setIsSwitching(true)
+    switchLanguage(choice).catch(() => setIsSwitching(false))
+  }
+
   return (
-    <PreferenceRow label={fields.language} hint={PREFERENCES_TEXT.languageHint}>
-      <div className="w-40 max-w-full">
-        <Select aria-label={fields.language} value={preferences.language} onChange={(event) => updatePreferences({ language: event.target.value })}>
-          {LANGUAGES.map((language) => (
-            <option key={language.value} value={language.value}>{PREFERENCES_TEXT.languages[language.value]}</option>
-          ))}
-        </Select>
-      </div>
-    </PreferenceRow>
+    <>
+      <PreferenceRow label={fields.language}>
+        <div className="w-56 max-w-full">
+          <Select aria-label={fields.language} value={choice} onChange={(event) => setChoice(event.target.value)}>
+            <option value={SYSTEM_LANGUAGE}>{PREFERENCES_TEXT.languageSystem({ language: systemName })}</option>
+            {LANGUAGES.map((language) => (
+              <option key={language.value} value={language.value} lang={language.value}>{languageName(language.value)}</option>
+            ))}
+          </Select>
+        </div>
+      </PreferenceRow>
+      {choice !== preferences.language && (
+        <PreferenceRow label={PREFERENCES_TEXT.languageSwitchHint}>
+          <Button disabled={isSwitching} onClick={switching}>{PREFERENCES_TEXT.languageSwitch}</Button>
+        </PreferenceRow>
+      )}
+      <LanguageHelp />
+    </>
   )
 }
 
+const section = (id, render) => ({
+  id,
+  get title() {
+    return sections[id]
+  },
+  render,
+})
+
 const SECTIONS = [
-  { id: "appearance", title: sections.appearance, render: (context) => <AppearanceSection {...context} /> },
-  { id: "theme", title: sections.theme, render: (context) => <ThemeSection {...context} /> },
-  { id: "fonts", title: sections.fonts, render: (context) => <FontsSection {...context} /> },
-  { id: "editor", title: sections.editor, render: (context) => <EditorSection {...context} /> },
-  { id: "requests", title: sections.requests, render: (context) => <RequestsSection {...context} /> },
-  { id: "language", title: sections.language, render: (context) => <LanguageSection {...context} /> },
-  { id: SECTION_AI, title: sections.ai, render: (context) => <AiSection actions={context.ai} /> },
-  { id: "privacy", title: sections.privacy, render: (context) => <PrivacySection {...context} /> },
-  { id: "data", title: sections.data, render: (context) => <DataSection {...context} /> },
+  section("appearance", (context) => <AppearanceSection {...context} />),
+  section("theme", (context) => <ThemeSection {...context} />),
+  section("fonts", (context) => <FontsSection {...context} />),
+  section("editor", (context) => <EditorSection {...context} />),
+  section("requests", (context) => <RequestsSection {...context} />),
+  section("language", (context) => <LanguageSection {...context} />),
+  section(SECTION_AI, (context) => <AiSection actions={context.ai} />),
+  section("privacy", (context) => <PrivacySection {...context} />),
+  section("data", (context) => <DataSection {...context} />),
 ]
 
 const sectionById = (id) => SECTIONS.find((section) => section.id === id) ?? SECTIONS[0]
@@ -253,7 +290,7 @@ function SectionTab({ section, isSelected, tabId, panelId, onSelect }) {
       tabIndex={isSelected ? 0 : -1}
       onClick={onSelect}
       className={cn(
-        "flex h-8 shrink-0 items-center whitespace-nowrap rounded-md px-2.5 text-left text-xs",
+        "flex h-8 shrink-0 items-center whitespace-nowrap rounded-md px-2.5 text-start text-xs",
         isSelected ? "bg-muted font-medium text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"
       )}
     >
@@ -307,7 +344,7 @@ export function PreferencesDialog({ listFonts, windowFrame, onCommand, backups, 
         </div>
       </div>
       <DialogFooter>
-        <Button variant="ghost" className="mr-auto" onClick={openShortcuts}>
+        <Button variant="ghost" className="me-auto" onClick={openShortcuts}>
           <Keyboard />
           <span className="max-sm:sr-only">{PREFERENCES_TEXT.shortcuts}</span>
         </Button>

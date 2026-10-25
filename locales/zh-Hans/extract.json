@@ -1,0 +1,29 @@
+{
+  "extract": {
+    "noResponse": "发送请求即可看到值",
+    "failedResponse": "上一次请求失败",
+    "summary": "勾选的行会在每次响应后运行并保留其值，可直接作为 {{example}} 使用。会话值保存在内存中，直到你清除它们或关闭应用；环境值会随当前环境一起保存。",
+    "invalidEnvironment": "没有保存任何内容：当前环境的变量不是有效的 JSON。",
+    "nothing": "上一次运行没有产生任何值。",
+    "savedTo": {
+      "session": "已将 {{names}} 保留为会话值。",
+      "environment": "已将 {{names}} 保存到当前环境。"
+    },
+    "scopes": {
+      "session": "会话",
+      "environment": "环境"
+    },
+    "variable": "变量",
+    "from": "来源",
+    "path": "路径或名称",
+    "value": "上次响应中的值",
+    "keepIn": "保存到",
+    "run": "运行此提取规则",
+    "name": "变量名",
+    "namePlaceholder": "variable_name",
+    "source": "值的来源",
+    "scope": "值的保存位置",
+    "remove": "移除提取规则",
+    "runNow": "立即运行"
+  }
+}

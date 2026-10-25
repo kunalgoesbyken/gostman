@@ -1,0 +1,12 @@
+{
+  "route": {
+    "graphqlNotServed": "Cererile GraphQL nu sunt servite.",
+    "grpcNotServed": "Cererile gRPC nu sunt servite.",
+    "mcpNotServed": "Cererile MCP nu sunt servite.",
+    "webSocketNotServed": "Cererile WebSocket nu sunt servite.",
+    "noExample": "Salvați un răspuns ca exemplu pentru a servi această rută.",
+    "disabled": "Această rută este dezactivată.",
+    "exampleBodyInvalid": "corpul exemplului „{{name}}” nu este base64 valid",
+    "conflict": "{{method}} {{path}} este deja servit de „{{owner}}”."
+  }
+}

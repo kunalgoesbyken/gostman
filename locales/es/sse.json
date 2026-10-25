@@ -1,0 +1,48 @@
+{
+  "sse": {
+    "allTypes": "Todos los tipos de evento",
+    "searchLabel": "Buscar eventos",
+    "searchPlaceholder": "Buscar eventos",
+    "pause": "Pausar desplazamiento automático",
+    "resume": "Reanudar desplazamiento automático",
+    "clear": "Borrar eventos",
+    "copyAll": "Copiar eventos mostrados",
+    "copied": "Copiado",
+    "copyEvent": "Copiar datos del evento",
+    "noEvents": "Aún no hay eventos",
+    "waiting": "Esperando a que el servidor envíe un evento.",
+    "noMatches": "Ningún evento coincide",
+    "noMatchesHint": "Cambia el filtro de tipo o la búsqueda para ver más.",
+    "clipped": "Este evento era demasiado largo, así que se omitió el resto.",
+    "shown": "{{shown}} de {{total}} mostrados",
+    "received": "{{count}} recibidos",
+    "dropped_one": "El evento más antiguo ya no aparece en la lista. La respuesta descargada sigue teniendo todos los eventos.",
+    "dropped_many": "Los {{count}} de eventos más antiguos ya no aparecen en la lista. La respuesta descargada sigue teniendo todos los eventos.",
+    "dropped_other": "Los {{count}} eventos más antiguos ya no aparecen en la lista. La respuesta descargada sigue teniendo todos los eventos.",
+    "reconnecting": "Reconectando en {{seconds}} s (intento {{attempt}})"
+  },
+  "sseSettings": {
+    "stream": "Recibir como eventos enviados por el servidor",
+    "reconnect": "Reconectar cuando el servidor cierre el flujo",
+    "maxEvents": "Máx. de eventos",
+    "maxEventsPlaceholder": "Por defecto 10000",
+    "maxSeconds": "Máx. de segundos",
+    "maxSecondsPlaceholder": "Por defecto 300"
+  },
+  "status": {
+    "connecting": "Conectando",
+    "open": "Recibiendo",
+    "reconnecting": "Reconectando",
+    "ended": "Finalizado"
+  },
+  "streamEnd": {
+    "closed": "El servidor cerró el flujo.",
+    "cancelled": "Se detuvo el flujo.",
+    "maxEvents": "Se detuvo al llegar al límite de eventos. Auméntalo en Ajustes.",
+    "maxBytes": "Se detuvo al llegar al límite de tamaño.",
+    "maxDuration": "Se detuvo al llegar al límite de tiempo. Auméntalo en Ajustes.",
+    "failed": "El flujo falló.",
+    "failedWith": "El flujo falló. {{detail}}",
+    "hostedLimit": "Se detuvo al llegar al límite de tiempo. La app web recibe el flujo durante {{seconds}} segundos como máximo; la app de escritorio puede hacerlo durante más tiempo."
+  }
+}

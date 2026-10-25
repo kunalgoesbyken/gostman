@@ -1,0 +1,82 @@
+{
+  "timeline": {
+    "proxied": "Czasy zmierzył serwer proxy Gostman, od proxy do celu. Nie obejmują drogi z przeglądarki do proxy.",
+    "reused": "Użyto ponownie połączenia",
+    "newConnection": "Nowe połączenie",
+    "omitted_one": "Nie pokazano jeszcze {{count}} żądania.",
+    "omitted_few": "Nie pokazano jeszcze {{count}} żądań.",
+    "omitted_many": "Nie pokazano jeszcze {{count}} żądań.",
+    "omitted_other": "Nie pokazano jeszcze {{count}} żądania.",
+    "failedBefore": "Niepowodzenie przed połączeniem",
+    "failedAt": "Niepowodzenie na etapie: {{label}}",
+    "requestHeaders": "Nagłówki żądania",
+    "responseHeaders": "Nagłówki odpowiedzi",
+    "reveal": "Pokaż wartość",
+    "hide": "Ukryj wartość",
+    "expanded": "Ukryj szczegóły",
+    "collapsed": "Pokaż szczegóły",
+    "total": "Razem",
+    "breakdown": "Podział czasu",
+    "breakdownProxied": "Podział czasu (zmierzony przez serwer proxy Gostman)",
+    "requests_one": "{{count}} żądanie",
+    "requests_few": "{{count}} żądania",
+    "requests_many": "{{count}} żądań",
+    "requests_other": "{{count}} żądania",
+    "scripts_one": "{{count}} skrypt",
+    "scripts_few": "{{count}} skrypty",
+    "scripts_many": "{{count}} skryptów",
+    "scripts_other": "{{count}} skryptu",
+    "consoleLines_one": "{{count}} wiersz konsoli",
+    "consoleLines_few": "{{count}} wiersze konsoli",
+    "consoleLines_many": "{{count}} wierszy konsoli",
+    "consoleLines_other": "{{count}} wiersza konsoli",
+    "passed": "Udane: {{count}}",
+    "failed": "Nieudane: {{count}}",
+    "scriptFailed": "Niepowodzenie",
+    "noOutput": "Brak danych wyjściowych konsoli ani wyników sprawdzeń.",
+    "secrets": "Menedżery sekretów",
+    "secretsRead_one": "Odczytano {{count}} sekret",
+    "secretsRead_few": "Odczytano {{count}} sekrety",
+    "secretsRead_many": "Odczytano {{count}} sekretów",
+    "secretsRead_other": "Odczytano {{count}} sekretu",
+    "secretSkipped": "{{name}} jest puste, ponieważ połączenie „{{connection}}” jest wyłączone",
+    "seconds": "{{value}} s",
+    "milliseconds": "{{value}} ms",
+    "phases": {
+      "dns": {
+        "label": "Wyszukiwanie DNS",
+        "short": "DNS"
+      },
+      "connect": {
+        "label": "Połączenie TCP",
+        "short": "Połączenie"
+      },
+      "tls": {
+        "label": "Uzgadnianie TLS",
+        "short": "TLS"
+      },
+      "firstByte": {
+        "label": "Oczekiwanie na pierwszy bajt",
+        "short": "TTFB"
+      },
+      "download": {
+        "label": "Pobieranie treści",
+        "short": "Pobieranie"
+      }
+    },
+    "facts": {
+      "remoteAddress": "Adres zdalny",
+      "protocol": "Protokół",
+      "connection": "Połączenie",
+      "tls": "TLS",
+      "certificateSubject": "Podmiot certyfikatu",
+      "certificateIssuer": "Wystawca certyfikatu",
+      "requestBody": "Treść żądania",
+      "redirectsTo": "Przekierowuje do",
+      "cookiesSet": "Ustawione cookies"
+    },
+    "tlsAlpn": "ALPN {{protocol}}",
+    "tlsExpires": "wygasa {{date}}",
+    "tlsExpired": "wygasa {{date}} (wygasł)"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "chaining": {
+    "sources": {
+      "body": "Corpo JSON",
+      "header": "Header",
+      "cookie": "Cookie",
+      "status": "Codice di stato"
+    },
+    "binaryBody": "Il corpo della risposta è binario, non JSON",
+    "emptyBody": "Il corpo della risposta è vuoto",
+    "cutOff": "La risposta è stata troncata, quindi il suo corpo non è un JSON completo",
+    "notJson": "Il corpo della risposta non è JSON",
+    "enterPath": "Inserisci un JSONPath come {{example}}",
+    "invalidPath": "JSONPath non valido: {{error}}",
+    "noMatch": "Nulla nel corpo corrisponde a questo percorso",
+    "matchedNull": "Il valore trovato è null",
+    "enterHeader": "Inserisci il nome di un header",
+    "noHeader": "La risposta non ha un header {{name}}",
+    "enterCookie": "Inserisci il nome di un cookie",
+    "noCookie": "La risposta non ha un cookie {{name}}",
+    "nameVariable": "Dai un nome alla variabile",
+    "badVariableName": "Il nome di una variabile non contiene } e non inizia né finisce con uno spazio"
+  }
+}

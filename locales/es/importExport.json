@@ -1,0 +1,19 @@
+{
+  "importExport": {
+    "untitledFolder": "Carpeta",
+    "untitledEnvironment": "Entorno",
+    "gostmanExport": "Exportación de Gostman",
+    "undetected": "No se pudo detectar el formato. Usa una colección de Postman, una especificación OpenAPI o Swagger, o una exportación de Gostman.",
+    "noRequests": "Este archivo ({{label}}) no contiene solicitudes ni carpetas.",
+    "unreadable": "No se pudo leer este archivo ({{label}}).",
+    "invalidYaml": "YAML no válido: {{reason}}",
+    "missingGostman": "Formato de exportación de Gostman no válido: falta el objeto gostman",
+    "requestsNotArray": "Formato de exportación de Gostman no válido: requests debe ser un array",
+    "foldersNotArray": "Formato de exportación de Gostman no válido: folders debe ser un array",
+    "namesMore": "{{names}} y {{count}} más",
+    "tlsKept": "La verificación TLS estaba desactivada en la colección para {{names}}; se mantuvo activada. Desactívala en la pestaña Ajustes de la solicitud si confías en esos hosts.",
+    "flattened_one": "{{count}} carpeta anidada en un bucle o a más de {{levels}} niveles de profundidad se movió al nivel superior.",
+    "flattened_many": "{{count}} de carpetas anidadas en un bucle o a más de {{levels}} niveles de profundidad se movieron al nivel superior.",
+    "flattened_other": "{{count}} carpetas anidadas en un bucle o a más de {{levels}} niveles de profundidad se movieron al nivel superior."
+  }
+}

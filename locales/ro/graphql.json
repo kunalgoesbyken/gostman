@@ -1,0 +1,29 @@
+{
+  "graphql": {
+    "query": "Interogare",
+    "queryLabel": "Interogare GraphQL",
+    "variables": "Variabile (JSON)",
+    "variablesLabel": "Variabile GraphQL",
+    "invalidJson": "JSON nevalid: {{message}}",
+    "syntaxAt": "{{message}} (linia {{line}}, coloana {{column}})",
+    "sendAsGraphql": "Trimitere ca GraphQL",
+    "prettify": "Formatare",
+    "prettifyTitle": "Reformatează interogarea. Comentariile sunt eliminate.",
+    "cannotPrettify": "Nu se poate formata: {{detail}}",
+    "notSent": "Nu este trimis cât timp metoda este {{method}}.",
+    "schema": "Schemă",
+    "schemaDescription": "Preluați-o pentru a parcurge tipurile și câmpurile acestui endpoint. Interogarea de introspecție folosește URL-ul, antetele și autentificarea acestei cereri.",
+    "searchLabel": "Căutare în schemă",
+    "searchPlaceholder_one": "Căutare în {{count}} tip și câmpurile sale",
+    "searchPlaceholder_few": "Căutare în {{count}} tipuri și câmpuri",
+    "searchPlaceholder_other": "Căutare în {{count}} de tipuri și câmpuri",
+    "noMatch": "Nu există rezultate.",
+    "moreMatches_one": "Încă {{count}} tip corespunde. Restrângeți căutarea pentru a-l vedea.",
+    "moreMatches_few": "Încă {{count}} tipuri corespund. Restrângeți căutarea pentru a le vedea.",
+    "moreMatches_other": "Încă {{count}} de tipuri corespund. Restrângeți căutarea pentru a le vedea.",
+    "noFields": "Fără câmpuri.",
+    "schemaTooLarge": "Schema depășește limita de dimensiune a răspunsului.",
+    "noJsonBody": "Endpointul a răspuns {{status}} fără corp JSON.",
+    "noSchema": "Endpointul a răspuns {{status}} fără o schemă."
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "preferences": {
+    "title": "Préférences",
+    "sectionsLabel": "Sections",
+    "sections": {
+      "appearance": "Apparence",
+      "theme": "Thème",
+      "fonts": "Polices",
+      "editor": "Éditeur",
+      "requests": "Requêtes",
+      "language": "Langue",
+      "ai": "IA",
+      "privacy": "Confidentialité",
+      "data": "Données"
+    },
+    "fields": {
+      "theme": "Thème",
+      "contrast": "Contraste",
+      "accent": "Couleur d’accent",
+      "textScale": "Taille du texte",
+      "interfaceFont": "Police de l’interface",
+      "codeFont": "Police du code",
+      "density": "Densité",
+      "responseLayout": "Panneau de réponse",
+      "systemTitleBar": "Utiliser la barre de titre du système",
+      "editorFontSize": "Taille de police de l’éditeur",
+      "wrapLines": "Retour à la ligne automatique",
+      "requestTimeout": "Délai d’expiration par défaut",
+      "confirmCloseTab": "Demander avant d’abandonner les modifications non enregistrées à la fermeture d’un onglet",
+      "language": "Langue"
+    },
+    "themes": {
+      "system": "Système",
+      "light": "Clair",
+      "dark": "Sombre"
+    },
+    "contrasts": {
+      "system": "Système",
+      "standard": "Standard",
+      "more": "Élevé"
+    },
+    "accents": {
+      "cyan": "Cyan",
+      "blue": "Bleu",
+      "violet": "Violet",
+      "pink": "Rose",
+      "graphite": "Graphite"
+    },
+    "densities": {
+      "comfortable": "Confortable",
+      "compact": "Compacte"
+    },
+    "layouts": {
+      "below": "En dessous",
+      "right": "À droite"
+    },
+    "seconds": "secondes",
+    "pixels": "px",
+    "contrastHint": "Élevé dessine des bordures et un texte secondaire plus marqués.",
+    "systemTitleBarHint": "Affiche la barre de titre et les boutons de fenêtre de votre bureau à la place de ceux de Gostman. S’applique après un redémarrage.",
+    "systemTitleBarRestart": "Redémarrez Gostman pour appliquer ce changement.",
+    "systemTitleBarFailed": "Le paramètre n’a pas pu être enregistré.",
+    "defaultFont": "Par défaut",
+    "interfaceFontHint": "N’importe quelle police installée sur cet appareil.",
+    "codeFontHint": "Éditeurs, barre d’adresse et autre code.",
+    "fontMissing": "Introuvable sur cet appareil : la police par défaut est utilisée.",
+    "suggestFonts": "Suggérer les polices installées",
+    "fontsSuggested": "Les polices installées sont suggérées pendant la saisie d’un nom de police.",
+    "fontsDenied": "Les polices installées n’ont pas pu être lues.",
+    "shortcuts": "Raccourcis clavier",
+    "reset": "Rétablir les valeurs par défaut",
+    "close": "Terminé",
+    "statusLabel": "Préférences",
+    "commandDescription": "Thème, couleurs, polices, taille du texte, éditeur, disposition et valeurs par défaut",
+    "methods": {
+      "title": "Couleurs des méthodes",
+      "hint": "La couleur de chaque méthode de requête dans la barre latérale, les onglets et les listes. Ajoutez un arrière-plan pour afficher les méthodes sous forme de badges.",
+      "method": "Méthode",
+      "resetMode": {
+        "light": "Réinitialiser les couleurs de méthode du mode clair",
+        "dark": "Réinitialiser les couleurs de méthode du mode sombre"
+      }
+    },
+    "theme": {
+      "palette": "Palette",
+      "paletteHint": "Chaque palette a une version claire et une version sombre. Vos propres couleurs s’appliquent par-dessus.",
+      "palettes": {
+        "default": "Par défaut",
+        "neutral": "Neutre",
+        "slate": "Ardoise",
+        "paper": "Papier",
+        "moss": "Mousse",
+        "dusk": "Crépuscule",
+        "ocean": "Océan",
+        "ink": "Encre"
+      },
+      "colors": "Couleurs personnalisées",
+      "colorsHint": "Définissez la couleur de fond et la couleur du texte de chaque partie de la fenêtre. Seules les couleurs que vous modifiez sont conservées.",
+      "editing": "Couleurs pour",
+      "previewHint": {
+        "light": "La fenêtre est sombre actuellement. Réglez le thème sur Clair pour voir ces couleurs en place.",
+        "dark": "La fenêtre est claire actuellement. Réglez le thème sur Sombre pour voir ces couleurs en place."
+      },
+      "columns": {
+        "surface": "Partie",
+        "background": "Arrière-plan",
+        "foreground": "Texte",
+        "contrast": "Contraste",
+        "reset": "Réinit."
+      },
+      "surfaces": {
+        "window": "Fenêtre",
+        "sidebar": "Barre latérale",
+        "tabs": "Onglets et barre d’adresse",
+        "request": "Éditeur de requête",
+        "body": "Éditeur de corps",
+        "script": "Éditeur de script",
+        "response": "Réponse",
+        "dialog": "Boîtes de dialogue",
+        "menu": "Menus et fenêtres contextuelles"
+      },
+      "surfaceHints": {
+        "window": "Barre de titre, barre d’état et toutes les parties non listées ici.",
+        "body": "Aussi les messages gRPC, les arguments MCP et les exemples enregistrés.",
+        "script": "Scripts de pré-requête et de post-réponse.",
+        "menu": "Menus contextuels, listes et palette de commandes."
+      },
+      "roles": {
+        "background": "arrière-plan",
+        "foreground": "texte"
+      },
+      "sample": "Aa",
+      "resetMode": {
+        "light": "Réinitialiser les couleurs claires",
+        "dark": "Réinitialiser les couleurs sombres"
+      },
+      "share": "Partager un thème",
+      "shareHint": "Un thème contient la palette, la couleur d’accent, et vos couleurs de parties et de méthodes personnalisées pour les deux modes.",
+      "copy": "Copier le thème",
+      "copied": "Thème copié dans le presse-papiers.",
+      "copyFailed": "Le thème n’a pas pu être copié dans le presse-papiers.",
+      "import": "Importer un thème",
+      "importLabel": "Thème à importer",
+      "importPlaceholder": "Collez un thème copié depuis Gostman",
+      "apply": "Appliquer",
+      "cancel": "Annuler",
+      "imported": "Thème appliqué.",
+      "invalid": "Ce n’est pas un thème Gostman, ou il contient des parties inconnues ou des couleurs qui ne sont pas écrites au format #rrggbb.",
+      "colorLabel": "Couleur de {{role}} : {{surface}}",
+      "hexLabel": "Valeur hexadécimale de {{role}} : {{surface}}",
+      "ratio": "{{ratio}}:1",
+      "lowContrast": "Le texte peut être difficile à lire. Visez au moins {{minimum}}:1.",
+      "resetRow": "Réinitialiser {{name}}"
+    },
+    "timeoutHint_one": "S’applique aux requêtes qui ne définissent pas leur propre délai. 0 utilise la limite intégrée de {{count}} seconde.",
+    "timeoutHint_other": "S’applique aux requêtes qui ne définissent pas leur propre délai. 0 utilise la limite intégrée de {{count}} secondes.",
+    "timeoutHint_many": "S’applique aux requêtes qui ne définissent pas leur propre délai. 0 utilise la limite intégrée de {{count}} de secondes.",
+    "languageSystem": "Identique au système ({{language}})",
+    "languageSwitchHint": "Gostman se recharge pour afficher la nouvelle langue. Les onglets ouverts et les brouillons non enregistrés sont conservés ; les réponses affichées dans les onglets sont effacées.",
+    "languageSwitch": "Changer de langue",
+    "languageHelp": "Votre langue manque, ou vous avez trouvé une mauvaise traduction ? {{link}}.",
+    "languageHelpLink": "Demandez sur GitHub",
+    "accentAdjusted": "Affichée en {{light}} en mode clair et en {{dark}} en mode sombre pour que le texte de cette couleur reste lisible."
+  }
+}

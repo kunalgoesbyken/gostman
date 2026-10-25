@@ -1,0 +1,49 @@
+source,target
+request,请求
+response,响应
+collection,集合
+collection settings,集合设置
+folder,文件夹
+workspace,工作区
+environment,环境
+variable,变量
+secret,机密
+secret manager,机密管理器
+header,请求头
+body,请求体
+query parameter,查询参数
+path parameter,路径参数
+cookie,Cookie
+auth,认证
+authentication,认证
+token,令牌
+pre-request script,预请求脚本
+post-response script,响应后脚本
+check,检查
+assertion,断言
+extract rule,提取规则
+runner,运行器
+run,运行
+iteration,迭代
+flow,流程
+step,步骤
+mock server,模拟服务器
+capture,捕获
+example,示例
+history,历史记录
+tab,标签页
+sidebar,侧边栏
+preferences,偏好设置
+theme,主题
+scan,扫描
+finding,发现项
+load test,负载测试
+import,导入
+export,导出
+share link,分享链接
+trust,信任
+restricted,受限
+proxy,代理
+certificate,证书
+timeout,超时
+send,发送

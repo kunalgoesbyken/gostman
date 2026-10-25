@@ -10,6 +10,7 @@ import { LabelDialog } from "./LabelDialog"
 import { SearchField } from "./SearchField"
 import { useAppStore } from "../store/appStore"
 import { isCollectionRoot } from "../lib/environmentScope"
+import { inlineStart, isRtl } from "../hooks/direction"
 import { usePointerDrag } from "../hooks/usePointerDrag"
 import { useTypeahead } from "../hooks/useTypeahead"
 import { buildCollectionTree, buildSearchIndex, findMatches, flattenCollection, ROOT_ID, ROW_EMPTY, ROW_FOLDER, siblingsIn } from "../lib/collectionTree"
@@ -80,7 +81,7 @@ const isToggleClick = (event, isPicking) => event.ctrlKey || event.metaKey || (i
 
 function SelectionBar({ count, onMove, onDelete, onClear }) {
   return (
-    <div role="toolbar" aria-label={TREE_TEXT.selectionBar} className="flex h-8 shrink-0 items-center gap-0.5 border-b border-border bg-accent/50 pl-3 pr-1">
+    <div role="toolbar" aria-label={TREE_TEXT.selectionBar} className="flex h-8 shrink-0 items-center gap-0.5 border-b border-border bg-accent/50 ps-3 pe-1">
       <span role="status" className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">{TREE_TEXT.selectedCount(count)}</span>
       <IconButton label={TREE_TEXT.moveSelection} icon={FolderInput} onClick={onMove} aria-haspopup="menu" />
       <IconButton label={TREE_TEXT.deleteSelection} icon={Trash2} onClick={onDelete} className="hover:text-destructive" />
@@ -261,14 +262,14 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
     setMenu({ row, owner, position, view: MENU_ACTIONS })
   }, [selected])
   const openSelectionMenu = useCallback((event, view) => {
-    const { left, bottom } = event.currentTarget.getBoundingClientRect()
-    setMenu({ row: null, owner: MENU_OWNER_SELECTION, position: { x: left, y: bottom }, view })
+    const rect = event.currentTarget.getBoundingClientRect()
+    setMenu({ row: null, owner: MENU_OWNER_SELECTION, position: { x: inlineStart(rect), y: rect.bottom }, view })
   }, [])
   const closeMenu = useCallback(() => setMenu(null), [])
   const closeLabels = useCallback(() => setLabelTarget(null), [])
   const openMenuBelow = useCallback((element, row) => {
-    const { left, bottom } = element.getBoundingClientRect()
-    openMenu(row, { x: left, y: bottom })
+    const rect = element.getBoundingClientRect()
+    openMenu(row, { x: inlineStart(rect), y: rect.bottom })
   }, [openMenu])
 
   const startDrag = useCallback((event, row) => {
@@ -353,8 +354,8 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
       End: () => focusRowAt(lastRow(rows)),
       PageDown: () => focusRowAt(pageFrom(rows, index, 1, pageSize)),
       PageUp: () => focusRowAt(pageFrom(rows, index, -1, pageSize)),
-      ArrowRight: () => (canToggle && !row.isOpen ? toggleFolder(row.folder.id) : focusRowAt(firstChildRow(rows, index))),
-      ArrowLeft: () => (canToggle && row.isOpen ? toggleFolder(row.folder.id) : focusRowAt(parentRow(rows, index))),
+      [isRtl() ? "ArrowLeft" : "ArrowRight"]: () => (canToggle && !row.isOpen ? toggleFolder(row.folder.id) : focusRowAt(firstChildRow(rows, index))),
+      [isRtl() ? "ArrowRight" : "ArrowLeft"]: () => (canToggle && row.isOpen ? toggleFolder(row.folder.id) : focusRowAt(parentRow(rows, index))),
       Enter: () => (isFolder ? toggleFolder(row.folder.id) : pinRow(row)),
       " ": () => activateRow(row),
       F2: () => (isFolder ? actions.renameFolder(row.folder) : actions.renameRequest(row.request)),
@@ -427,7 +428,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
 
   return (
     <>
-      <SearchField value={query} onChange={setQuery} onKeyDown={enterResultsOnArrow} placeholder={TREE_TEXT.searchPlaceholder} className="pr-1.5">
+      <SearchField value={query} onChange={setQuery} onKeyDown={enterResultsOnArrow} placeholder={TREE_TEXT.searchPlaceholder} className="pe-1.5">
         <IconButton label={TREE_TEXT.collapseAll} icon={ChevronsDownUp} className="shrink-0" disabled={isSearching || folders.length === 0} onClick={collapseFolders} />
       </SearchField>
 

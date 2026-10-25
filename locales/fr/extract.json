@@ -1,0 +1,29 @@
+{
+  "extract": {
+    "noResponse": "Envoyez la requête pour voir une valeur",
+    "failedResponse": "La dernière requête a échoué",
+    "summary": "Les lignes cochées s’exécutent après chaque réponse et conservent leur valeur, prête à servir comme {{example}}. Les valeurs de session restent en mémoire jusqu’à ce que vous les effaciez ou fermiez l’application ; les valeurs d’environnement sont enregistrées avec l’environnement actif.",
+    "invalidEnvironment": "Rien n’a été enregistré : les variables de l’environnement actif ne sont pas du JSON valide.",
+    "nothing": "La dernière exécution n’a produit aucune valeur.",
+    "savedTo": {
+      "session": "{{names}} conservé(s) comme valeurs de session.",
+      "environment": "{{names}} enregistré(s) dans l’environnement actif."
+    },
+    "scopes": {
+      "session": "Session",
+      "environment": "Environnement"
+    },
+    "variable": "Variable",
+    "from": "Depuis",
+    "path": "Chemin ou nom",
+    "value": "Valeur dans la dernière réponse",
+    "keepIn": "Conserver dans",
+    "run": "Exécuter cette règle d’extraction",
+    "name": "Nom de la variable",
+    "namePlaceholder": "nom_de_variable",
+    "source": "Source de la valeur",
+    "scope": "Où la valeur est conservée",
+    "remove": "Supprimer la règle d’extraction",
+    "runNow": "Exécuter"
+  }
+}

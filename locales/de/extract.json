@@ -1,0 +1,29 @@
+{
+  "extract": {
+    "noResponse": "Senden Sie die Anfrage, um einen Wert zu sehen",
+    "failedResponse": "Die letzte Anfrage ist fehlgeschlagen",
+    "summary": "Markierte Zeilen laufen nach jeder Antwort und behalten ihren Wert, bereit zur Verwendung als {{example}}. Sitzungswerte bleiben im Speicher, bis Sie sie löschen oder die App schließen; Umgebungswerte werden mit der aktiven Umgebung gespeichert.",
+    "invalidEnvironment": "Nichts wurde gespeichert: Die Variablen der aktiven Umgebung sind kein gültiges JSON.",
+    "nothing": "Der letzte Durchlauf hat keine Werte geliefert.",
+    "savedTo": {
+      "session": "{{names}} als Sitzungswerte behalten.",
+      "environment": "{{names}} in der aktiven Umgebung gespeichert."
+    },
+    "scopes": {
+      "session": "Sitzung",
+      "environment": "Umgebung"
+    },
+    "variable": "Variable",
+    "from": "Quelle",
+    "path": "Pfad oder Name",
+    "value": "Wert in letzter Antwort",
+    "keepIn": "Behalten in",
+    "run": "Diese Extraktion ausführen",
+    "name": "Variablenname",
+    "namePlaceholder": "variable_name",
+    "source": "Wertquelle",
+    "scope": "Wo der Wert gehalten wird",
+    "remove": "Extraktion entfernen",
+    "runNow": "Jetzt ausführen"
+  }
+}

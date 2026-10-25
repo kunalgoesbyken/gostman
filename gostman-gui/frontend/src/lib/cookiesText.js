@@ -1,13 +1,19 @@
+import english from '../../../../locales/en/cookies.json'
+import { messages } from './i18n/core'
 import { RESPONSE_TEXT } from './responseText'
 
-export const COOKIES_TEXT = {
-  title: RESPONSE_TEXT.tabs.cookies,
-  clearAll: 'Clear all',
-  filter: 'Filter by name or domain',
-  emptyTitle: 'No cookies stored',
-  emptyHint: 'Cookies set by responses are kept here and sent back to the same site on later requests.',
-  noMatches: 'No cookie name or domain matches.',
-  remove: (name) => `Delete cookie ${name}`,
-  columns: RESPONSE_TEXT.columns,
-  session: RESPONSE_TEXT.sessionCookie,
-}
+const text = messages('cookies', english, () => ({
+  cookies: {
+    get title() {
+      return RESPONSE_TEXT.tabs.cookies
+    },
+    get columns() {
+      return RESPONSE_TEXT.columns
+    },
+    get session() {
+      return RESPONSE_TEXT.sessionCookie
+    },
+  },
+}))
+
+export const COOKIES_TEXT = text.cookies

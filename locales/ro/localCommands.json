@@ -1,0 +1,10 @@
+{
+  "localCommand": {
+    "title": "Rulați un program pe acest computer?",
+    "intro": "Această cerere pornește un server MCP local cu contul dvs. de utilizator:",
+    "environmentIntro": "Cu aceste variabile de mediu din fila Antete:",
+    "warning": "Rulați-l doar dacă știți ce face acest program. Gostman întreabă din nou când comanda sau mediul ei se schimbă ori aplicația repornește.",
+    "confirm": "Rulare",
+    "notApproved": "Această cerere pornește un program pe acest computer. Trimiteți-o o dată din propria filă și confirmați comanda, apoi rulați-o din nou."
+  }
+}

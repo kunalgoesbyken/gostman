@@ -5,6 +5,7 @@ import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { createHash } from 'crypto'
 import { readFileSync, writeFileSync } from 'fs'
+import { localesPlugin, isLocaleChunk } from './i18n/plugin.js'
 import { DOCS_ENTRY, chunkClosure, siteDefine, siteMeta } from './site.config.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -105,7 +106,7 @@ function stampServiceWorker() {
       const docsOnly = docsOnlyChunks(bundle)
       assets = Object.values(bundle)
         .filter((item) => (item.type === 'chunk' || item.fileName.endsWith('.css')) && !item.fileName.startsWith(SANDBOX_WORKER_PREFIX))
-        .filter((item) => !docsOnly.has(item.fileName))
+        .filter((item) => !docsOnly.has(item.fileName) && !isLocaleChunk(item.fileName))
         .map((item) => `/${item.fileName}`)
         .sort()
     },
@@ -125,6 +126,7 @@ export default defineConfig({
   define: { __APP_VERSION__: JSON.stringify(appVersion), ...siteDefine },
   plugins: [
     react(),
+    localesPlugin(),
     nodePolyfills({
       globals: {
         Buffer: true,

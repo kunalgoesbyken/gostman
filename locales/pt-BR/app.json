@@ -1,0 +1,26 @@
+{
+  "app": {
+    "loading": "Carregando",
+    "loadingEditor": "Carregando o editor",
+    "backToLanding": "Voltar à página inicial",
+    "requestSection": "Requisição",
+    "window": {
+      "minimize": "Minimizar",
+      "maximize": "Maximizar",
+      "restore": "Restaurar"
+    },
+    "crash": {
+      "title": "O Gostman encontrou um erro",
+      "description": "Suas requisições salvas não foram afetadas. Recarregue para continuar. Se acontecer de novo, informe-o com esta mensagem:\n\n{{error}}",
+      "reload": "Recarregar"
+    },
+    "loadFailure": {
+      "title": "Não foi possível carregar os dados salvos",
+      "description": "Nada foi alterado ou sobrescrito. {{reason}}",
+      "retry": "Tentar novamente",
+      "unreadable": "Os dados salvos estavam ilegíveis",
+      "ok": "OK"
+    },
+    "labelled": "{{label}}: {{name}}"
+  }
+}
