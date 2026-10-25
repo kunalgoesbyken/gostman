@@ -288,6 +288,10 @@ async function saveFolders(folders) {
   await mutateData((data) => { data.folders = folders })
 }
 
+async function saveFlows(flows) {
+  await mutateData((data) => { data.flows = flows })
+}
+
 async function saveHistory(history) {
   await mutateData((data) => { data.history = history.map(compactRequest) })
 }
@@ -386,6 +390,7 @@ export const webBackend = {
   saveRequests,
   deleteRequests,
   saveFolders,
+  saveFlows,
   saveHistory,
   saveEnvironments,
   saveScopes,

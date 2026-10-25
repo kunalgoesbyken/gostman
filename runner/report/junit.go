@@ -70,6 +70,8 @@ func requestCase(result runner.Result, suite string) junitCase {
 	switch {
 	case result.IsSkipped():
 		described.Skipped = &junitProblem{Message: result.Skipped}
+	case result.Handled != "":
+		described.Skipped = &junitProblem{Message: result.Handled}
 	case result.Error != "":
 		described.Error = &junitProblem{Message: result.Error}
 	case result.Failed && result.PassedTests() == len(result.Tests):
@@ -85,12 +87,26 @@ func failureMessage(result runner.Result) string {
 	return result.Status + ": " + result.Failure
 }
 
-func checkCase(check runner.Check, suite string) junitCase {
+func checkCase(check runner.Check, suite string, handled bool) junitCase {
 	described := junitCase{Name: check.Name, ClassName: suite, Time: seconds(0)}
-	if !check.Passed {
+	switch {
+	case check.Passed:
+	case handled:
+		described.Skipped = &junitProblem{Message: check.Message}
+	default:
 		described.Failure = &junitProblem{Message: check.Message}
 	}
 	return described
+}
+
+func flowSuite(flow *runner.FlowReport, timestamp string, durationMs int64) junitSuite {
+	suite := junitSuite{Name: flow.Name, Time: seconds(durationMs), Timestamp: timestamp}
+	described := junitCase{Name: flow.Name, ClassName: flow.Name, Time: seconds(durationMs)}
+	if flow.Outcome != runner.FlowPassed {
+		described.Failure = &junitProblem{Message: flow.Message}
+	}
+	suite.add(described)
+	return suite
 }
 
 func suiteOutput(result runner.Result) string {
@@ -127,7 +143,7 @@ func suiteOf(result runner.Result, timestamp string) junitSuite {
 	}
 	suite.add(requestCase(result, suite.Name))
 	for _, check := range result.Tests {
-		suite.add(checkCase(check, suite.Name))
+		suite.add(checkCase(check, suite.Name, result.Handled != ""))
 	}
 	return suite
 }
@@ -135,8 +151,14 @@ func suiteOf(result runner.Result, timestamp string) junitSuite {
 func (r junitReporter) Finish(report runner.Report) error {
 	suites := junitSuites{Name: suitesName, Time: seconds(report.DurationMs)}
 	timestamp := report.StartedAt.Format(time.RFC3339)
+	all := make([]junitSuite, 0, len(report.Results)+1)
 	for _, result := range report.Results {
-		suite := suiteOf(result, timestamp)
+		all = append(all, suiteOf(result, timestamp))
+	}
+	if report.Flow != nil {
+		all = append(all, flowSuite(report.Flow, timestamp, report.DurationMs))
+	}
+	for _, suite := range all {
 		suites.Tests += suite.Tests
 		suites.Failures += suite.Failures
 		suites.Errors += suite.Errors

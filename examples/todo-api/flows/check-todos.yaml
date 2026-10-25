@@ -1,0 +1,46 @@
+name: Check todos
+description: Lists the todos of one user, opens the first three one by one and creates a todo. The list is tried again when the API is slow to answer, and the flow fails with a clear message when the list comes back empty.
+steps:
+  - id: list
+    kind: request
+    request: Todos/List todos
+    requestId: req-list-todos
+    retry:
+      times: 3
+      delayMs: 1000
+      until:
+        - expression: res.body
+          operator: isNotEmpty
+    onFailure: no-todos
+  - id: first-three
+    kind: forEach
+    label: Open the first three
+    step: list
+    path: $[0:3]
+    as: todo
+    steps:
+      - id: open
+        kind: request
+        request: Todos/Get one todo
+        requestId: req-get-todo
+        variables:
+          todo_id: "{{todo.id}}"
+  - id: create
+    kind: request
+    request: Todos/Create a todo
+    requestId: req-create-todo
+  - id: keep-id
+    kind: set
+    label: Keep the new id
+    values:
+      - name: created_id
+        step: create
+        path: $.id
+  - id: done
+    kind: end
+    outcome: passed
+    message: The todos of user 1 can be listed, opened and added to.
+  - id: no-todos
+    kind: end
+    outcome: failed
+    message: The list of todos stayed empty after three tries.

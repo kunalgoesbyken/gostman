@@ -23,6 +23,7 @@ type scanner struct {
 	requests     map[string]*requestEntry
 	folders      map[string]*folderEntry
 	environments map[string]*environmentEntry
+	flows        map[string]*flowEntry
 	implicit     []*folderEntry
 	problems     []Problem
 	ahead        *readAhead
@@ -34,6 +35,7 @@ func newScanner(storage disk) *scanner {
 		requests:     map[string]*requestEntry{},
 		folders:      map[string]*folderEntry{},
 		environments: map[string]*environmentEntry{},
+		flows:        map[string]*flowEntry{},
 	}
 }
 
@@ -86,6 +88,7 @@ func (s *scanner) run() error {
 	s.directory("", "", 0)
 	s.dropEmptyImplicitFolders()
 	s.environmentFiles()
+	s.flowFiles()
 	return nil
 }
 
@@ -98,10 +101,10 @@ const (
 	specialKind
 )
 
-func kindOf(directory string, entry fs.DirEntry) entryKind {
+func kindOf(directory string, entry fs.DirEntry, flowsReserved bool) entryKind {
 	name := entry.Name()
 	switch {
-	case isHidden(name) || isReservedName(directory, name):
+	case isHidden(name) || isReservedName(directory, name) || isFlowsDirectory(directory, name, flowsReserved):
 		return skippedEntry
 	case entry.Type() == fs.ModeDir:
 		return folderKind
@@ -123,7 +126,7 @@ func (s *scanner) directory(directory, folderId string, depth int) {
 	var requestFiles []string
 	for _, entry := range listed.entries {
 		relative := joinPath(directory, entry.Name())
-		switch kindOf(directory, entry) {
+		switch kindOf(directory, entry, s.ahead.flowsReserved) {
 		case folderKind:
 			folders = append(folders, s.readFolder(relative, folderId))
 		case requestKind:

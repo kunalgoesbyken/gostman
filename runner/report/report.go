@@ -22,6 +22,10 @@ type Reporter interface {
 	Finish(report runner.Report) error
 }
 
+type StepReporter interface {
+	Step(event runner.FlowEvent)
+}
+
 func New(format string, output io.Writer) (Reporter, error) {
 	switch format {
 	case FormatText:
@@ -48,6 +52,9 @@ func qualifiedName(result runner.Result) string {
 	}
 	if result.Iteration > 0 {
 		name = fmt.Sprintf("%s [iteration %d]", name, result.Iteration)
+	}
+	if result.Attempts > 1 {
+		name = fmt.Sprintf("%s [attempt %d of %d]", name, result.Attempt, result.Attempts)
 	}
 	return name
 }

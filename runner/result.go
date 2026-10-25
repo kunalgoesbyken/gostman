@@ -42,6 +42,10 @@ type Result struct {
 	Logs        []LogLine `json:"logs"`
 	Visual      string    `json:"visualization,omitempty"`
 	Iteration   int       `json:"iteration,omitempty"`
+	Step        string    `json:"step,omitempty"`
+	Attempt     int       `json:"attempt,omitempty"`
+	Attempts    int       `json:"attempts,omitempty"`
+	Handled     string    `json:"handled,omitempty"`
 	Exchange    *Capture  `json:"exchange,omitempty"`
 	flow        flow
 }
@@ -51,27 +55,32 @@ type Summary struct {
 	Passed      int `json:"passed"`
 	Failed      int `json:"failed"`
 	Skipped     int `json:"skipped"`
+	Handled     int `json:"handled,omitempty"`
 	NotRun      int `json:"notRun"`
 	Tests       int `json:"tests"`
 	FailedTests int `json:"failedTests"`
 }
 
 type Report struct {
-	Version     int       `json:"version"`
-	Collection  string    `json:"collection"`
-	Environment string    `json:"environment"`
-	StartedAt   time.Time `json:"startedAt"`
-	DurationMs  int64     `json:"durationMs"`
-	Iterations  int       `json:"iterations,omitempty"`
-	Parallel    int       `json:"parallel,omitempty"`
-	Summary     Summary   `json:"summary"`
-	Results     []Result  `json:"results"`
+	Version     int         `json:"version"`
+	Collection  string      `json:"collection"`
+	Environment string      `json:"environment"`
+	StartedAt   time.Time   `json:"startedAt"`
+	DurationMs  int64       `json:"durationMs"`
+	Iterations  int         `json:"iterations,omitempty"`
+	Parallel    int         `json:"parallel,omitempty"`
+	Flow        *FlowReport `json:"flow,omitempty"`
+	Summary     Summary     `json:"summary"`
+	Results     []Result    `json:"results"`
 }
 
 func (r Result) QualifiedName() string {
 	name := Listed{Folder: r.Folder, Request: Request{Name: r.Name}}.QualifiedName()
 	if r.Iteration > 0 {
 		return fmt.Sprintf("%s [iteration %d]", name, r.Iteration)
+	}
+	if r.Attempts > 1 {
+		return fmt.Sprintf("%s [attempt %d of %d]", name, r.Attempt, r.Attempts)
 	}
 	return name
 }
@@ -113,6 +122,8 @@ func summarize(results []Result, planned int) Summary {
 		switch {
 		case result.IsSkipped():
 			summary.Skipped++
+		case result.Handled != "":
+			summary.Handled++
 		case result.Failed:
 			summary.Failed++
 		default:
@@ -123,5 +134,8 @@ func summarize(results []Result, planned int) Summary {
 }
 
 func (r Report) HasFailed() bool {
+	if r.Flow != nil {
+		return r.Flow.Outcome != FlowPassed
+	}
 	return r.Summary.Failed > 0
 }

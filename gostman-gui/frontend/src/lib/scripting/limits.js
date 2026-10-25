@@ -1,4 +1,5 @@
 import { CHECK_RUN_TEXT, CONTRACT_TEXT, JSON_PATH_TEXT } from '../checksText'
+import { FLOW_ENGINE_TEXT } from '../flowsText'
 
 export const TIMEOUT_MS = 10_000
 export const MIN_TIMEOUT_MS = 1_000
@@ -35,3 +36,5 @@ export const pathAllowance = () => allowance(0, JSON_PATH_TEXT.pathTimedOut)
 export const filterAllowance = () => allowance(0, JSON_PATH_TEXT.filterTimedOut)
 
 export const contractAllowance = () => allowance(0, CONTRACT_TEXT.timedOut)
+
+export const flowAllowance = () => allowance(0, FLOW_ENGINE_TEXT.timedOut)

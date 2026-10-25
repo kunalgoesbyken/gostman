@@ -163,21 +163,18 @@ func (s *Session) Send(ctx context.Context, request Request, folder string, argu
 	return Outcome{Result: result, Response: exchanged.response}
 }
 
-func (s *Session) Run(ctx context.Context, stored Collection, options Options, observe func(Result)) (Report, error) {
-	if err := options.CheckIterations(); err != nil {
-		return Report{}, err
-	}
+func (s *Session) setUp(stored Collection, options Options) (plan, error) {
 	s.state.common.addMarked(options.Secrets)
 	planned, err := prepare(s.state.scripts, stored, options)
 	if err != nil {
-		return Report{}, err
+		return plan{}, err
 	}
 	folderID, err := s.folderID(stored.Folders, options.Folder)
 	if err != nil {
-		return Report{}, err
+		return plan{}, err
 	}
 	if err := s.LoadCollectionVariables(stored); err != nil {
-		return Report{}, err
+		return plan{}, err
 	}
 	s.state.values.focusOn(stored.lineages()(folderID))
 	s.state.modules = stored.Modules
@@ -189,7 +186,15 @@ func (s *Session) Run(ctx context.Context, stored Collection, options Options, o
 	for _, row := range options.Data {
 		s.state.vouch(anyOrigin, variables(row).plain())
 	}
-	if err := s.state.learn(planned.library); err != nil {
+	return planned, s.state.learn(planned.library)
+}
+
+func (s *Session) Run(ctx context.Context, stored Collection, options Options, observe func(Result)) (Report, error) {
+	if err := options.CheckIterations(); err != nil {
+		return Report{}, err
+	}
+	planned, err := s.setUp(stored, options)
+	if err != nil {
 		return Report{}, err
 	}
 	total := len(planned.requests) * options.iterationCount()

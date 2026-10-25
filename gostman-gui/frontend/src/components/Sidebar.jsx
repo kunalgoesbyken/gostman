@@ -5,6 +5,8 @@ import { Toolbar } from "./ui/panel"
 import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { CollectionTree } from "./CollectionTree"
 import { HistoryList } from "./HistoryList"
+import { FlowList } from "./flows/FlowList"
+import { FLOW_TEXT } from "../lib/flowsText"
 import { rootSettingsTitle } from "../lib/inheritance"
 import { SIDEBAR_TEXT } from "../lib/sidebarText"
 import { cn } from "../lib/utils"
@@ -15,6 +17,7 @@ import { useAppStore } from "../store/appStore"
 
 const VIEW_COLLECTIONS = "collections"
 const VIEW_HISTORY = "history"
+const VIEW_FLOWS = "flows"
 const VIEW_CLASS = "flex min-h-0 flex-1 flex-col"
 
 function SidebarResizer({ phase, separatorProps }) {
@@ -51,12 +54,13 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
         <Toolbar className="pr-1.5">
           <TabsList label={SIDEBAR_TEXT.views} className="flex-1">
             <TabsTrigger value={VIEW_COLLECTIONS}>{SIDEBAR_TEXT.collections}</TabsTrigger>
+            <TabsTrigger value={VIEW_FLOWS}>{FLOW_TEXT.sidebarTab}</TabsTrigger>
             <TabsTrigger value={VIEW_HISTORY}>
               {SIDEBAR_TEXT.history}
               {requestHistory.length > 0 && <TabCount>{requestHistory.length}</TabCount>}
             </TabsTrigger>
           </TabsList>
-          <div className="flex shrink-0 items-center gap-0">
+          <div className={cn("flex shrink-0 items-center gap-0", view === VIEW_FLOWS && "hidden")}>
             <IconButton label={SIDEBAR_TEXT.runRequests} icon={ListChecks} onClick={() => actions.openRunner()} />
             <IconButton label={settingsLabel} icon={Settings2} onClick={() => actions.openFolderSettings()} />
             <IconButton label={SIDEBAR_TEXT.newFolder} icon={FolderPlus} onClick={() => actions.createFolder()} />
@@ -66,6 +70,9 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
 
         <TabsContent value={VIEW_COLLECTIONS} className={VIEW_CLASS}>
           <CollectionTree folders={folders} requests={requests} activeRequestId={activeRequestId} actions={actions} />
+        </TabsContent>
+        <TabsContent value={VIEW_FLOWS} className={VIEW_CLASS}>
+          <FlowList actions={actions.flows} />
         </TabsContent>
         <TabsContent value={VIEW_HISTORY} className={VIEW_CLASS}>
           <HistoryList entries={requestHistory} actions={actions} />

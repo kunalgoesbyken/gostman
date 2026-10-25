@@ -20,11 +20,12 @@ type pending struct {
 }
 
 type readAhead struct {
-	disk     disk
-	slots    chan struct{}
-	mu       sync.Mutex
-	listings map[string]*pending
-	files    map[string]*pending
+	disk          disk
+	flowsReserved bool
+	slots         chan struct{}
+	mu            sync.Mutex
+	listings      map[string]*pending
+	files         map[string]*pending
 }
 
 func readers() int {
@@ -33,10 +34,11 @@ func readers() int {
 
 func startReadAhead(storage disk) *readAhead {
 	ahead := &readAhead{
-		disk:     storage,
-		slots:    make(chan struct{}, readers()),
-		listings: map[string]*pending{},
-		files:    map[string]*pending{},
+		disk:          storage,
+		flowsReserved: !flowsHoldRequests(storage),
+		slots:         make(chan struct{}, readers()),
+		listings:      map[string]*pending{},
+		files:         map[string]*pending{},
 	}
 	ahead.survey("", 0)
 	return ahead
@@ -60,7 +62,7 @@ func (a *readAhead) survey(directory string, depth int) {
 		job.entries, job.err = a.list(directory)
 		for _, entry := range job.entries {
 			relative := joinPath(directory, entry.Name())
-			switch kindOf(directory, entry) {
+			switch kindOf(directory, entry, a.flowsReserved) {
 			case requestKind:
 				a.readRequest(relative)
 			case folderKind:

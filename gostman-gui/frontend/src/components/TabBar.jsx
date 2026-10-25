@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
-import { Plus, X } from "lucide-react"
+import { Plus, Workflow, X } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
 import { TAB_KEYS } from "./ui/tabs"
@@ -14,6 +14,9 @@ import { shownMethod } from "../lib/methodLabel"
 import { TAB_BAR_TEXT as TEXT } from "../lib/tabBarText"
 import { tabMenuItems } from "../lib/tabMenu"
 import { cn } from "../lib/utils"
+import { FLOW_TEXT } from "../lib/flowsText"
+import { isFlowDirty } from "../lib/flows/edit"
+import { useAppStore } from "../store/appStore"
 
 const MIDDLE_MOUSE_BUTTON = 1
 const STEP_KEYS = { ArrowLeft: -1, ArrowRight: 1 }
@@ -21,9 +24,11 @@ const ACTIVE_TAB = "[role=tab][tabindex=\"0\"]"
 
 const Tab = memo(function Tab({ tab, saved, isActive, dropPlace, isDragged, onSelect, onClose, onCloseFromKeyboard, onPin, onOpenMenu, onPointerDown, onStep }) {
   const tabRef = useRef(null)
-  const { request } = tab
-  const isDirty = useMemo(() => isRequestDirty(request, saved), [request, saved])
-  const title = request.name || request.url || TEXT.untitled
+  const { request, flowDraft } = tab
+  const isFlow = Boolean(tab.flowId)
+  const isDirty = useMemo(() => (isFlow ? isFlowDirty(flowDraft, saved) : isRequestDirty(request, saved)), [isFlow, flowDraft, request, saved])
+  const title = (isFlow ? flowDraft.name : request.name || request.url) || TEXT.untitled
+  const hint = isFlow ? FLOW_TEXT.tabLabel(title) : request.url ? `${title}\n${request.url}` : title
 
   useEffect(() => {
     if (isActive) tabRef.current.scrollIntoView({ block: "nearest", inline: "nearest" })
@@ -55,7 +60,7 @@ const Tab = memo(function Tab({ tab, saved, isActive, dropPlace, isDragged, onSe
     <div
       ref={tabRef}
       data-tab-id={tab.id}
-      title={request.url ? `${title}\n${request.url}` : title}
+      title={hint}
       onMouseDown={preventAutoscroll}
       onAuxClick={closeOnMiddleClick}
       onContextMenu={openMenuAtPointer}
@@ -77,7 +82,7 @@ const Tab = memo(function Tab({ tab, saved, isActive, dropPlace, isDragged, onSe
         onKeyDown={handleKeyDown}
         className="flex h-full min-w-0 flex-1 items-center gap-1.5 pl-3 text-left"
       >
-        <MethodTag method={shownMethod(request)} />
+        {isFlow ? <Workflow aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : <MethodTag method={shownMethod(request)} />}
         <span className={cn("truncate", tab.isPreview && "italic")}>{title}</span>
         {isDirty && <span aria-label={TEXT.unsaved} className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground" />}
       </button>
@@ -96,6 +101,8 @@ function resolveTabDrop(element, point, source) {
 export const TabBar = memo(function TabBar({ tabs, activeTabId, requests, actions, onTabSelect, onTabClose, onNewTab }) {
   const newRequestShortcut = useShortcutLabel("newRequest")
   const savedById = useMemo(() => new Map(requests.map((request) => [request.id, request])), [requests])
+  const flows = useAppStore((s) => s.flows)
+  const flowsById = useMemo(() => new Map(flows.map((flow) => [flow.id, flow])), [flows])
   const [menu, setMenu] = useState(null)
   const listRef = useRef(null)
 
@@ -129,7 +136,7 @@ export const TabBar = memo(function TabBar({ tabs, activeTabId, requests, action
           <Tab
             key={tab.id}
             tab={tab}
-            saved={savedById.get(tab.request.id)}
+            saved={tab.flowId ? flowsById.get(tab.flowId) : savedById.get(tab.request.id)}
             isActive={tab.id === activeTabId}
             dropPlace={drag?.drop?.id === tab.id ? drag.drop.place : null}
             isDragged={drag?.source.id === tab.id}

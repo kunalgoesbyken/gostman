@@ -23,6 +23,7 @@ export function ImportExportDialog({
   variablesFor,
   settings,
   sharedOrder,
+  flows,
   onImport,
   onImportShared,
   openapi,
@@ -61,6 +62,7 @@ export function ImportExportDialog({
             variablesFor={variablesFor}
             settings={settings}
             sharedOrder={sharedOrder}
+            flows={flows}
             importer={importer}
             scan={scan}
             onGoToRequest={onGoToRequest}

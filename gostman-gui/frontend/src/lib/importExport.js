@@ -15,6 +15,8 @@ import { rootNumbering, sharedNumbering } from './treeMoves'
 import { cleanColorChoice } from './swatches'
 import { normalizeTags } from './tags'
 import { remark, remarksOf } from './importRemarks'
+import { FLOW_IMPORT_TEXT } from './flowsText'
+import { STEP_REQUEST, compactFlow, mapSteps, normalizeFlow } from './flows/model'
 import { AUTH_API_KEY, AUTH_BASIC, AUTH_BEARER, GRAPHQL_METHOD, UNTITLED_REQUEST, apiKeyLocation, asText, sentRows } from './exportFields'
 
 export { exportToPostman } from './postmanExport'
@@ -290,7 +292,7 @@ const markedOnly = (meta) => {
   return Object.keys(marks).length > 0 ? JSON.stringify(marks) : undefined
 }
 
-export function exportToGostman(requests, folders, environments, settings, collectionVariables = {}, sharedOrder = false, globals = []) {
+export function exportToGostman(requests, folders, environments, settings, collectionVariables = {}, sharedOrder = false, globals = [], flows = []) {
   return {
     version: GOSTMAN_FORMAT_VERSION,
     exportedAt: new Date().toISOString(),
@@ -303,6 +305,7 @@ export function exportToGostman(requests, folders, environments, settings, colle
       variablesMeta: markedOnly(collectionVariables.meta),
       settings: withoutScopeToken(settings),
       ...(sharedOrder && { sharedOrder: true }),
+      ...(flows.length > 0 && { flows: flows.map(compactFlow) }),
     },
   }
 }
@@ -325,6 +328,7 @@ function importGostman(data) {
     variablesMeta: stringOf(backup.variablesMeta),
     settings: backup.settings,
     sharedOrder: backup.sharedOrder === true,
+    flows: asArray(backup.flows),
   }
 }
 
@@ -584,6 +588,26 @@ function assignFreshIds(items, takenIds) {
   return { assigned, renamed }
 }
 
+function linkedFlow(raw, renamed) {
+  const flow = normalizeFlow(raw)
+  let isMissing = false
+  const steps = mapSteps(flow.steps, (step) => {
+    if (step.kind !== STEP_REQUEST || !step.requestId) return step
+    const requestId = renamed.get(step.requestId) || ''
+    isMissing = isMissing || (requestId === '' && step.request === '')
+    return { ...step, requestId }
+  })
+  return { flow: { ...flow, id: generateId(), steps }, isMissing }
+}
+
+function sanitizeFlows(rawFlows, renamed) {
+  const linked = asArray(rawFlows).filter(isPlainObject).map((raw) => linkedFlow(raw, renamed))
+  return {
+    flows: linked.map(({ flow }) => flow),
+    remarks: linked.filter(({ isMissing }) => isMissing).map(({ flow }) => remark(FLOW_IMPORT_TEXT.missingRequests(flow.name), true)),
+  }
+}
+
 function flattenDeepFolders(folders) {
   const parentOf = new Map(folders.map((folder) => [folder.id, folder.parentId]))
   const isTooDeep = (folder) => folderDepth(folder.id, parentOf) > MAX_FOLDER_DEPTH
@@ -606,6 +630,7 @@ export function sanitizeImport(data, existing) {
   const linkedRequests = requestIds.assigned.map((request) => ({ ...request, folderId: inImport(request.folderId), timestamp: '' }))
   const linked = { folders: flattenedFolders, requests: linkedRequests }
   const { folders, requests } = rootNumbering(data?.sharedOrder === true ? linked : sharedNumbering(linked))
+  const flows = sanitizeFlows(data?.flows, requestIds.renamed)
 
   return {
     requests,
@@ -615,8 +640,10 @@ export function sanitizeImport(data, existing) {
     variables: objectOf(data?.variables),
     variablesMeta: JSON.stringify(secretMarks(data?.variablesMeta)),
     settings: sanitizeScope(data?.settings),
+    flows: flows.flows,
     remarks: [
       ...remarksOf(data),
+      ...flows.remarks,
       ...(requestsWithoutTls.length > 0 ? [remark(tlsWarning(requestsWithoutTls), true)] : []),
       ...(flattenedCount > 0 ? [remark(`${pluralize(flattenedCount, 'folder')} nested in a loop or deeper than ${MAX_FOLDER_DEPTH} levels moved to the top level.`, true)] : []),
     ],

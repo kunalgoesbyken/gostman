@@ -110,6 +110,7 @@ export const IMPORT_COUNT_TEXT = {
   collection: 'collection',
   folder: 'folder',
   request: 'request',
+  flow: 'flow',
   environment: 'environment',
   global: 'global environment',
   variable: 'collection variable',

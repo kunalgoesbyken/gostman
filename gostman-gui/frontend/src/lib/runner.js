@@ -10,7 +10,7 @@ import { matchesTags } from './tags'
 import { folderChain } from './variableScopes'
 import { useAppStore, variableTextFor } from '../store/appStore'
 
-const SKIPPED_SOCKET = 'WebSocket requests are not part of a run.'
+export const SKIPPED_SOCKET = 'WebSocket requests are not part of a run.'
 const BODY_LIMIT = 64 * 1024
 const BASE64 = 'base64'
 const FOLDER_SEPARATOR = '/'
@@ -24,7 +24,7 @@ const identify = ({ id, name, method, url, folderId }) => ({ id, name, method, u
 
 const flagged = (result, problem) => ({ ...result, error: [result.error, problem].filter(Boolean).join('\n'), hasFailed: true })
 
-const skipped = (request, reason, flow = { action: '' }) => ({ ...identify(request), skipped: reason, tests: [], logs: [], flow, hasFailed: false })
+export const skipped = (request, reason, flow = { action: '' }) => ({ ...identify(request), skipped: reason, tests: [], logs: [], flow, hasFailed: false })
 
 function capture(request, response) {
   const isBinary = response.bodyEncoding === BASE64
@@ -41,7 +41,7 @@ function capture(request, response) {
   }
 }
 
-function summarize(request, { response, tests, resolvedUrl }, iteration) {
+export function runResult(request, { response, tests, resolvedUrl }, iteration = 0) {
   const failures = tests.results.filter((result) => !result.passed)
   return {
     ...identify(request),
@@ -76,7 +76,7 @@ export function requestsToRun(state, folderId, tagFilter) {
   return requestsInScope(state, folderId, tagFilter).filter((request) => !excluded.has(request.id))
 }
 
-function sessionGiver(before) {
+export function sessionGiver(before) {
   let given = {}
   return (next) => {
     const { restored, forgotten } = withdrawnValues(before, given, store().sessionVariables)
@@ -98,7 +98,7 @@ export function createRunner(backend, execute) {
     const outcome = await execute(withRunStreamBudget(request), sendId, run.prompts)
     run.sendIds.delete(sendId)
     if (outcome.skipped) return skipped(request, outcome.skipped, outcome.tests.flow)
-    return summarize(request, outcome, iteration)
+    return runResult(request, outcome, iteration)
   }
 
   async function runIteration(run, requests, iteration, options) {

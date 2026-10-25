@@ -77,6 +77,7 @@ func toFileCollection(data SavedData) workspace.Collection {
 		VariablesMeta: data.CollectionVariablesMeta,
 		Settings:      data.CollectionSettings,
 		SharedOrder:   data.SharedOrder,
+		Flows:         data.Flows,
 	}
 }
 
@@ -119,6 +120,7 @@ func (s folderStore) collection(data SavedData) (SavedData, error) {
 	data.CollectionVariablesMeta = loaded.VariablesMeta
 	data.CollectionSettings = loaded.Settings
 	data.SharedOrder = loaded.SharedOrder
+	data.Flows = loaded.Flows
 	data.DotEnv = s.folder.DotEnv()
 	data.Restricted = !memory.Trusted
 	return data, nil
@@ -178,6 +180,10 @@ func (s folderStore) saveVariables(text, meta string) error {
 
 func (s folderStore) saveSettings(settings workspace.Settings) error {
 	return s.write(func() error { return s.folder.SaveSettings(settings) })
+}
+
+func (s folderStore) saveFlows(flows []workspace.Flow) error {
+	return s.write(func() error { return s.folder.SaveFlows(flows) })
 }
 
 func (s folderStore) shareOrder() error {

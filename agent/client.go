@@ -10,6 +10,7 @@ import (
 	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/redact"
 	"github.com/kunalgoesbyken/gostman/runner"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 type Client struct {
@@ -120,4 +121,40 @@ func runRedacted(ctx context.Context, stored runner.Collection, options runner.O
 		return runner.Report{}, err
 	}
 	return client.Run(ctx, stored, options, observe)
+}
+
+func (c *Client) RunFlow(ctx context.Context, stored runner.Collection, flow workspace.Flow, options runner.Options, watch runner.FlowWatch) (runner.Report, error) {
+	report, err := c.session.RunFlow(ctx, stored, flow, options, runner.FlowWatch{
+		Result: func(result runner.Result) {
+			c.absorbShared()
+			if cleaned, err := redact.Clean(c.guard, result); err == nil && watch.Result != nil {
+				watch.Result(cleaned)
+			}
+		},
+		Step: func(event runner.FlowEvent) {
+			c.absorbShared()
+			if cleaned, err := redact.Clean(c.guard, event); err == nil && watch.Step != nil {
+				watch.Step(cleaned)
+			}
+		},
+	})
+	if err != nil {
+		return runner.Report{}, err
+	}
+	c.absorb()
+	return redact.Clean(c.guard, report)
+}
+
+func RedactingFlow(secrets map[string]bool) func(context.Context, runner.Collection, workspace.Flow, runner.Options, runner.FlowWatch) (runner.Report, error) {
+	return func(ctx context.Context, stored runner.Collection, flow workspace.Flow, options runner.Options, watch runner.FlowWatch) (runner.Report, error) {
+		client, err := NewScopedClient(engine.Policy{Network: options.Network, ReadFile: options.Files}, redact.SecretValues)
+		if err != nil {
+			return runner.Report{}, err
+		}
+		client.MarkSecret(secrets)
+		if err := client.EnterFolder(stored, "", options.Environment, options.Variables); err != nil {
+			return runner.Report{}, err
+		}
+		return client.RunFlow(ctx, stored, flow, options, watch)
+	}
 }

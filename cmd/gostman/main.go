@@ -21,6 +21,8 @@ const (
 	usageHint      = `Run "gostman help" to see the commands and flags.`
 	usage          = `Usage:
   gostman run <export.json | workspace folder | Bruno folder> [flags]
+  gostman flow run <name | flow.yaml> [--workspace <folder | export.json>] [flags]
+  gostman flow list [--workspace <folder | export.json>] [--json]
   gostman send [flags] <request>
   gostman send [flags] <METHOD> <url>
   gostman load <export.json | workspace folder> --request <name> [flags]
@@ -135,6 +137,29 @@ run
   --oauth-refresh-token-env <NAME>
                         exchange this refresh token for an access token for
                         those requests
+  --flow <name|file>    run this flow of the collection instead of every
+                        request (see flow)
+
+flow
+  Run a flow: saved requests chained one after another, tried again until they
+  pass, with another step to go to when one fails, conditions, loops over a
+  list in a response and values passed from one response to the next. Flows
+  are kept in flows/*.yaml of a workspace folder and in Gostman exports. The
+  exit status follows the flow: a failure the flow handles, by trying again or
+  by going to another step, does not fail it; an End step can fail it.
+
+  run <name|id|file>    the flow to run: its name or id, or a flow YAML file
+  list                  print the flows with their number of steps and ids
+  --workspace <path>    workspace folder or export file (default: the current
+                        folder, or the workspace that holds the flow file)
+  --env, --var, --var-from-env, --env-file, --secrets, --secrets-env-file,
+  --timeout, --insecure, --allow-files, --stream-timeout, --reporter, --output,
+  --redact, --contract  as for run
+  --cacert, --client-cert, --client-key, --client-cert-pass-env, --proxy,
+  --noproxy             as for run
+  --oauth-token-env, --oauth-refresh-token-env
+                        as for run
+  --json                with list: print the flows as JSON
 
 send
   Send one request through the same pipeline. Stdout gets only the response
@@ -336,7 +361,8 @@ export
                         placeholders and re-import as empty variables
 
 Exit codes:
-  0  every request and check passed (scan, lint, load: no threshold reached)
+  0  every request and check passed; for a flow, it reached its end (scan,
+     lint, load: no threshold reached)
   1  a check, a script or an MCP tool call failed, or the run was interrupted
      (scan, lint, load: a threshold was reached)
   2  the command or the input is wrong
@@ -419,6 +445,8 @@ func dispatch(arguments []string, stdout, stderr *os.File) int {
 		return runCommand(arguments[1:], stdout, stderr)
 	case "send":
 		return sendCommand(arguments[1:], stdout, stderr)
+	case "flow":
+		return flowCommand(arguments[1:], stdout, stderr)
 	case "load":
 		return loadCommand(arguments[1:], stdout, stderr)
 	case "mcp":

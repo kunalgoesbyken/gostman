@@ -28,6 +28,7 @@ Gostman is an API client for REST, GraphQL, gRPC and WebSocket that you, your CI
 
 - [Scripts and checks](scripting-and-settings.md): checks, scripts, network settings and the OAuth 2.0 callback.
 - [Running, load testing and scanning](runner-load-and-scan.md): the in-app runner and the dialogs for load tests and scans.
+- [Flows](flows.md): chain requests with retries, other paths on failure, conditions and loops, drawn in the app and run from the command line.
 - [Gostman in CI](ci.md): exit codes, reports, recipes for GitHub Actions, GitLab CI and Jenkins, and a run against the mock server.
 
 ## Collections and Git
@@ -45,7 +46,7 @@ Gostman is an API client for REST, GraphQL, gRPC and WebSocket that you, your CI
 
 ## Reference
 
-- [Command line](cli.md): `run`, `send`, `load`, `mock`, `capture`, `docs`, `relay`, `scan`, `lint`, `init`, `import` and `export`.
+- [Command line](cli.md): `run`, `flow`, `send`, `load`, `mock`, `capture`, `docs`, `relay`, `scan`, `lint`, `init`, `import` and `export`.
 - [Preferences, shortcuts and the command palette](preferences-and-shortcuts.md): the command palette, preferences and keyboard shortcuts.
 
 ## Help

@@ -15,6 +15,7 @@ type collectionStore interface {
 	saveEnvironments(environments []Environment, activeId string) error
 	saveVariables(text, meta string) error
 	saveSettings(settings workspace.Settings) error
+	saveFlows(flows []workspace.Flow) error
 	shareOrder() error
 }
 
@@ -81,6 +82,12 @@ func (appDataStore) saveVariables(text, meta string) error {
 func (appDataStore) saveSettings(settings workspace.Settings) error {
 	return mutateData(func(data *SavedData) {
 		data.CollectionSettings = settings
+	})
+}
+
+func (appDataStore) saveFlows(flows []workspace.Flow) error {
+	return mutateData(func(data *SavedData) {
+		data.Flows = flows
 	})
 }
 

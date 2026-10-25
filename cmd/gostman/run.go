@@ -33,6 +33,7 @@ func (o overrides) Set(pair string) error {
 
 type invocation struct {
 	path     string
+	flow     string
 	options  runner.Options
 	reports  []reporterSpec
 	redact   bool
@@ -41,6 +42,15 @@ type invocation struct {
 	files    fileAccess
 	contract string
 	network  *networkSettings
+}
+
+type runFlags struct {
+	parsed    invocation
+	delayMs   int
+	timeoutMs int
+	reporters reporterFlags
+	output    string
+	signIn    signInFlags
 }
 
 func parseInterspersed(flags *flag.FlagSet, arguments []string) ([]string, error) {
@@ -57,42 +67,46 @@ func parseInterspersed(flags *flag.FlagSet, arguments []string) ([]string, error
 	}
 }
 
-func parseInvocation(arguments []string) (invocation, error) {
-	parsed := invocation{options: runner.Options{Variables: map[string]string{}}}
-	var delayMs, timeoutMs int
-	var reporters reporterFlags
-	var output string
-
-	flags := flag.NewFlagSet("run", flag.ContinueOnError)
+func newRunFlags(name string) (*flag.FlagSet, *runFlags) {
+	state := &runFlags{parsed: invocation{options: runner.Options{Variables: map[string]string{}}}}
+	parsed := &state.parsed
+	flags := flag.NewFlagSet(name, flag.ContinueOnError)
 	flags.SetOutput(io.Discard)
 	flags.StringVar(&parsed.options.Environment, "env", "", "")
 	flags.StringVar(&parsed.options.Folder, "folder", "", "")
 	parsed.secrets = variableFlags(flags, parsed.options.Variables)
 	parsed.options.Secrets = parsed.secrets
 	flags.BoolVar(&parsed.options.Bail, "bail", false, "")
-	flags.IntVar(&delayMs, "delay", 0, "")
-	flags.IntVar(&timeoutMs, "timeout", 0, "")
+	flags.IntVar(&state.delayMs, "delay", 0, "")
+	flags.IntVar(&state.timeoutMs, "timeout", 0, "")
 	flags.BoolVar(&parsed.options.Insecure, "insecure", false, "")
 	parsed.files.register(flags)
-	flags.Var(&reporters, "reporter", "")
-	flags.StringVar(&output, "output", "", "")
+	flags.Var(&state.reporters, "reporter", "")
+	flags.StringVar(&state.output, "output", "", "")
 	flags.BoolVar(&parsed.redact, "redact", false, "")
 	flags.StringVar(&parsed.contract, "contract", "", "")
 	parsed.extras.register(flags, &parsed.options)
 	parsed.network = networkFlags(flags)
-	var signIn signInFlags
-	signIn.register(flags)
+	state.signIn.register(flags)
+	return flags, state
+}
 
-	positional, err := parseInterspersed(flags, arguments)
+func (r *runFlags) usesRunOnlyFlags() bool {
+	options := r.parsed.options
+	return options.Folder != "" || r.parsed.extras.dataFile != "" || options.Iterations > 0 || options.Parallel > 0 ||
+		len(options.Only) > 0 || len(options.Tags) > 0 || len(options.ExcludeTags) > 0 || options.Bail || r.delayMs > 0
+}
+
+func (r *runFlags) finish(path string) (invocation, error) {
+	parsed := r.parsed
+	var err error
 	switch {
-	case err != nil:
-		return parsed, err
-	case len(positional) != 1:
-		return parsed, errors.New("name exactly one export file or workspace folder to run")
-	case delayMs < 0 || timeoutMs < 0:
+	case r.delayMs < 0 || r.timeoutMs < 0:
 		return parsed, errors.New("--delay and --timeout take a number of milliseconds, zero or more")
+	case parsed.flow != "" && r.usesRunOnlyFlags():
+		return parsed, errors.New("--folder, --data, --iterations, --parallel, --only, --tags, --exclude-tags, --bail and --delay do not apply to a flow")
 	}
-	parsed.reports, err = reporters.resolve(output)
+	parsed.reports, err = r.reporters.resolve(r.output)
 	if err != nil {
 		return parsed, err
 	}
@@ -102,7 +116,7 @@ func parseInvocation(arguments []string) (invocation, error) {
 	if err := parsed.network.check(); err != nil {
 		return parsed, err
 	}
-	if parsed.options.SignIn, err = signIn.token(); err != nil {
+	if parsed.options.SignIn, err = r.signIn.token(); err != nil {
 		return parsed, err
 	}
 	if err := parsed.extras.apply(&parsed.options, capturesExchanges(parsed.reports), parsed.secrets); err != nil {
@@ -111,11 +125,24 @@ func parseInvocation(arguments []string) (invocation, error) {
 	if err := parsed.options.CheckIterations(); err != nil {
 		return parsed, err
 	}
-	parsed.path = positional[0]
+	parsed.path = path
 	parsed.options.Files = parsed.files.beside(parsed.path)
-	parsed.options.Delay = time.Duration(delayMs) * time.Millisecond
-	parsed.options.Timeout = time.Duration(timeoutMs) * time.Millisecond
+	parsed.options.Delay = time.Duration(r.delayMs) * time.Millisecond
+	parsed.options.Timeout = time.Duration(r.timeoutMs) * time.Millisecond
 	return parsed, nil
+}
+
+func parseInvocation(arguments []string) (invocation, error) {
+	flags, state := newRunFlags("run")
+	flags.StringVar(&state.parsed.flow, "flow", "", "")
+	positional, err := parseInterspersed(flags, arguments)
+	switch {
+	case err != nil:
+		return state.parsed, err
+	case len(positional) != 1:
+		return state.parsed, errors.New("name exactly one export file or workspace folder to run")
+	}
+	return state.finish(positional[0])
 }
 
 func complain(stderr io.Writer, err error) int {
@@ -132,21 +159,28 @@ func runCommand(arguments []string, stdout, stderr *os.File) int {
 	if err != nil {
 		return misuse(stderr, err.Error())
 	}
-	stored, err := runner.Load(parsed.path)
+	return parsed.launch(stdout, stderr)
+}
+
+func (i invocation) launch(stdout, stderr *os.File) int {
+	stored, err := runner.Load(i.path)
 	if err != nil {
 		return complain(stderr, err)
 	}
 	for _, warning := range stored.Warnings {
 		fmt.Fprintf(stderr, "warning: %s\n", warning)
 	}
-	warnShortData(stderr, parsed.options)
-	if parsed.options.Network, err = parsed.network.network(stored); err != nil {
+	warnShortData(stderr, i.options)
+	if i.options.Network, err = i.network.network(stored); err != nil {
 		return complain(stderr, err)
 	}
-	if parsed.options.Contract, err = loadContract(parsed.contract, parsed.options.Network); err != nil {
+	if i.options.Contract, err = loadContract(i.contract, i.options.Network); err != nil {
 		return complain(stderr, err)
 	}
-	return parsed.execute(stored, stdout, stderr)
+	if i.flow != "" {
+		return i.executeFlow(stored, stdout, stderr)
+	}
+	return i.execute(stored, stdout, stderr)
 }
 
 func (i invocation) pipeline() func(context.Context, runner.Collection, runner.Options, func(runner.Result)) (runner.Report, error) {
@@ -195,7 +229,7 @@ func reportCode(report runner.Report) int {
 		return exitPassed
 	}
 	for _, result := range report.Results {
-		if result.Status == engine.FailureStatus {
+		if result.Status == engine.FailureStatus && result.Handled == "" {
 			return exitUnsent
 		}
 	}

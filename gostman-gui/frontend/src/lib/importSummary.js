@@ -16,6 +16,7 @@ export function countImported(data) {
     requests: listOf(data.requests).length,
     environments: listOf(data.environments).length,
     globals: listOf(data.globals).length,
+    flows: listOf(data.flows).length,
     variables: (isPlainObject(data.variables) ? Object.keys(data.variables).length : 0) + ownedVariableCount(folders),
     collectionSettings: withSettings(collections),
     folderSettings: withSettings(inner),

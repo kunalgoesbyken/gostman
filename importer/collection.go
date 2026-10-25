@@ -9,7 +9,7 @@ import (
 )
 
 func (r Result) Collection() (workspace.Collection, error) {
-	collection := workspace.Collection{Requests: r.Requests, Folders: r.Folders, Environments: append(append([]workspace.Environment{}, r.Environments...), r.Globals...), VariablesMeta: r.VariablesMeta, SharedOrder: r.SharedOrder}
+	collection := workspace.Collection{Requests: r.Requests, Folders: r.Folders, Environments: append(append([]workspace.Environment{}, r.Environments...), r.Globals...), VariablesMeta: r.VariablesMeta, SharedOrder: r.SharedOrder, Flows: r.Flows}
 	if r.Settings != nil {
 		collection.Settings = *r.Settings
 	}

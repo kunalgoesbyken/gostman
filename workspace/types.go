@@ -81,6 +81,7 @@ type Collection struct {
 	VariablesMeta string        `json:"variablesMeta,omitempty"`
 	Settings      Settings      `json:"settings"`
 	SharedOrder   bool          `json:"sharedOrder,omitempty"`
+	Flows         []Flow        `json:"flows,omitempty"`
 }
 
 type Problem struct {

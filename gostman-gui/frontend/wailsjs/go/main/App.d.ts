@@ -199,6 +199,8 @@ export function SaveEnvironments(arg1:Array<main.Environment>,arg2:string):Promi
 
 export function SaveFile(arg1:string,arg2:string):Promise<boolean>;
 
+export function SaveFlows(arg1:Array<workspace.Flow>):Promise<void>;
+
 export function SaveFolders(arg1:Array<main.Folder>):Promise<void>;
 
 export function SaveHistory(arg1:Array<main.HistoryEntry>):Promise<void>;

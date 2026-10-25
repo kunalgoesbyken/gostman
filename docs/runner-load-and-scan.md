@@ -8,6 +8,8 @@ The Run requests dialog sends the requests of your collection one after another 
 
 Requests run in sidebar order, with their scripts, extraction rules and checks, each using the environment chosen for its collection (see [Environments per collection](variables.md#environments-per-collection)), from top to bottom: a folder's requests run where the folder sits, so a Login request above a Users folder runs before every request in it. `gostman run` and an agent's `run_folder` use the same order, and so do exports and imports where the other tool allows it; see [Order of requests and folders](collections-and-git.md#order-of-requests-and-folders). WebSocket requests are skipped.
 
+To chain requests whose order depends on the answers, such as polling until an order is ready or a clean-up that runs only after a failure, draw a [flow](flows.md) instead: it adds retries, other paths on failure, conditions and loops without scripts, and runs the same way from `gostman flow run`.
+
 Scripts can change the order with `setNextRequest`; see [Scripting](scripting-and-settings.md). A pass through the run may send at most 1000 more requests than it holds, so a loop that never ends, such as a retry on a 401 that always comes back, stops the run with a message that names the request that kept jumping, and that request counts as failed.
 
 ![The Run requests dialog after running the Orders folder: List orders, Create order, Upload receipt and Monthly report passed, and Export orders failed with a 500 status because the check res.status equals 200 did not hold. The footer reads Ran 5 of 5, 4 passed, 1 failed.](../gostman-gui/frontend/src/assets/landing/runner.webp)

@@ -29,6 +29,7 @@ func (w *Workspace) takenNames(directory string) (map[string]bool, error) {
 	if directory == "" {
 		taken[strings.ToLower(ManifestName)] = true
 		taken[strings.ToLower(EnvironmentsDirectory)] = true
+		taken[strings.ToLower(FlowsDirectory)] = true
 	}
 	for _, entry := range entries {
 		taken[strings.ToLower(entry.Name())] = true

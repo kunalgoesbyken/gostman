@@ -43,12 +43,14 @@ type Result struct {
 	Remarks       []Remark                `json:"remarks,omitempty"`
 	Skipped       []string                `json:"skipped"`
 	SharedOrder   bool                    `json:"sharedOrder"`
+	Flows         []workspace.Flow        `json:"flows,omitempty"`
 }
 
 const (
 	RemarkScripts = "scripts"
 	RemarkOAuth   = "oauth"
 	RemarkFiles   = "files"
+	RemarkFlows   = "flows"
 )
 
 type Remark struct {

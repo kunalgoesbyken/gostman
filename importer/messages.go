@@ -32,6 +32,7 @@ const (
 	messageDocumentRead           = "could not read the document: %v"
 	messageGostmanInvalid         = "%s: this is not a valid Gostman export"
 	messageGostmanItem            = "A %s in the Gostman export could not be read and was left out."
+	messageFlowRequests           = "Steps of the flow %s send requests that are not in the export; choose them again before running it."
 	messageUnsupportedTypeDetail  = "files of type %q cannot be imported"
 	messageHTTPVariables          = "The variables %s have no Gostman equivalent and were kept as written."
 	messageHTTPProcessEnv         = "$processEnv, $dotenv and $env variables in %s now read {{process.env.NAME}}, which comes from the workspace's .env file."

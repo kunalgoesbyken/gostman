@@ -14,6 +14,7 @@ const (
 	markPass = "PASS"
 	markFail = "FAIL"
 	markSkip = "SKIP"
+	markFlow = "FLOW"
 
 	logLevelError = "error"
 
@@ -24,6 +25,7 @@ const (
 	styleDim    = "\x1b[2m"
 
 	methodWidth  = 7
+	kindWidth    = 7
 	detailIndent = "      "
 	nestedIndent = "            "
 )
@@ -48,6 +50,8 @@ func (t *Text) mark(result runner.Result) string {
 	switch {
 	case result.IsSkipped():
 		return t.paint(styleYellow, markSkip)
+	case result.Handled != "":
+		return t.paint(styleYellow, markFail)
 	case result.Failed:
 		return t.paint(styleRed, markFail)
 	default:
@@ -80,6 +84,9 @@ func indented(text, indent string) string {
 }
 
 func (t *Text) printFailures(result runner.Result) {
+	if result.Handled != "" {
+		fmt.Fprintln(t.output, t.paint(styleYellow, indented(printable(result.Handled), detailIndent)))
+	}
 	for _, problem := range []string{result.Error, result.Failure} {
 		if problem != "" {
 			fmt.Fprintln(t.output, t.paint(styleRed, indented(problem, detailIndent)))
@@ -146,6 +153,19 @@ func (t *Text) Request(received runner.Result) {
 	t.printFailures(result)
 }
 
+func (t *Text) Step(event runner.FlowEvent) {
+	style := styleDim
+	if event.Status == runner.FlowFailed {
+		style = styleRed
+	}
+	fmt.Fprintf(t.output, "%s  %-*s  %s  %s\n", t.paint(style, markFlow), kindWidth, printable(event.Kind), printable(event.Title), t.paint(styleDim, printable(event.Summary)))
+	for _, check := range event.Checks {
+		if !check.Passed {
+			fmt.Fprintln(t.output, t.paint(styleDim, indented(printable(check.Name+": "+check.Message), detailIndent)))
+		}
+	}
+}
+
 func counts(entries ...string) string {
 	var kept []string
 	for _, entry := range entries {
@@ -168,6 +188,7 @@ func (t *Text) Finish(report runner.Report) error {
 	requests := counts(
 		fmt.Sprintf("%d passed", summary.Passed),
 		t.paint(styleRed, counted(summary.Failed, "failed")),
+		t.paint(styleYellow, counted(summary.Handled, "failed and handled by the flow")),
 		counted(summary.Skipped, "skipped"),
 		counted(summary.NotRun, "not run"),
 	)
@@ -176,8 +197,19 @@ func (t *Text) Finish(report runner.Report) error {
 		t.paint(styleRed, counted(summary.FailedTests, "failed")),
 	)
 	duration := (time.Duration(report.DurationMs) * time.Millisecond).String()
-	_, err := fmt.Fprintf(t.output, "\nRequests  %s\nChecks    %s\n%sDuration  %s\n", requests, tests, t.contractLine(report), duration)
+	_, err := fmt.Fprintf(t.output, "\n%sRequests  %s\nChecks    %s\n%sDuration  %s\n", t.flowLine(report), requests, tests, t.contractLine(report), duration)
 	return err
+}
+
+func (t *Text) flowLine(report runner.Report) string {
+	if report.Flow == nil {
+		return ""
+	}
+	outcome := t.paint(styleGreen, report.Flow.Outcome)
+	if report.Flow.Outcome != runner.FlowPassed {
+		outcome = t.paint(styleRed, report.Flow.Outcome)
+	}
+	return fmt.Sprintf("Flow      %s %s: %s\n", printable(report.Flow.Name), outcome, printable(report.Flow.Message))
 }
 
 func (t *Text) contractLine(report runner.Report) string {

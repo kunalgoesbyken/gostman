@@ -24,6 +24,9 @@ const toResult = (result) => ({
   logs: result.logs || [],
   visualization: result.visualization || '',
   iteration: result.iteration,
+  attempt: result.attempt || 0,
+  attempts: result.attempts || 0,
+  handled: result.handled || '',
   exchange: result.exchange,
 })
 
@@ -31,13 +34,15 @@ const reached = (results) => new Set(results.map((result) => `${result.id} ${res
 
 export function summarize(results, planned) {
   const skipped = results.filter((result) => result.skipped).length
-  const failed = results.filter((result) => !result.skipped && result.hasFailed).length
+  const handled = results.filter((result) => !result.skipped && result.handled).length
+  const failed = results.filter((result) => !result.skipped && !result.handled && result.hasFailed).length
   const tests = results.flatMap((result) => result.tests)
   return {
     requests: planned,
-    passed: results.length - skipped - failed,
+    passed: results.length - skipped - failed - handled,
     failed,
     skipped,
+    handled,
     notRun: Math.max(planned - reached(results), 0),
     tests: tests.length,
     failedTests: tests.filter((test) => !test.passed).length,
@@ -46,8 +51,9 @@ export function summarize(results, planned) {
 
 export const environmentsUsed = (results, environmentOf) => [...new Set(results.map(environmentOf).filter(Boolean))].join(', ')
 
-export function buildReportPage(results, run, environment) {
+export function buildReportPage(results, run, environment, flow = null) {
   const report = {
+    ...(flow && { flow, collection: flow.name }),
     environment,
     startedAt: run.startedAt.toISOString(),
     durationMs: run.finishedAt - run.startedAt,

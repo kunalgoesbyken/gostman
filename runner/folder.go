@@ -31,7 +31,8 @@ func loadWorkspace(root string) (Collection, error) {
 	if err != nil {
 		return Collection{}, fmt.Errorf("cannot read the workspace: %w", err)
 	}
-	if problems := files.Problems(); len(problems) > 0 {
+	problems, flowProblems := splitProblems(files.Problems())
+	if len(problems) > 0 {
 		return Collection{}, unreadableFiles(problems)
 	}
 	network, err := files.Network()
@@ -40,6 +41,9 @@ func loadWorkspace(root string) (Collection, error) {
 	}
 	collection, err := FromWorkspace(files.Collection())
 	collection.Network, collection.Root = network.Files(), root
+	for _, problem := range flowProblems {
+		collection.Warnings = append(collection.Warnings, "flow file skipped: "+problem.String())
+	}
 	return WithFolderFiles(collection, files), err
 }
 
@@ -47,6 +51,18 @@ func WithFolderFiles(collection Collection, files *workspace.Workspace) Collecti
 	collection.DotEnv = files.DotEnv()
 	collection.Modules = scriptModules(files.Root())
 	return collection
+}
+
+func splitProblems(all []workspace.Problem) ([]workspace.Problem, []workspace.Problem) {
+	var requests, flows []workspace.Problem
+	for _, problem := range all {
+		if workspace.IsFlowFile(problem.Path) {
+			flows = append(flows, problem)
+			continue
+		}
+		requests = append(requests, problem)
+	}
+	return requests, flows
 }
 
 func unreadableFiles(problems []workspace.Problem) error {

@@ -1,5 +1,5 @@
 import { memo, useMemo, useRef, useState } from "react"
-import { Check, ChevronDown, ChevronRight, Download, ListChecks, Minus, Play, Square, Upload, X } from "lucide-react"
+import { Check, ChevronDown, ChevronRight, Download, ListChecks, Minus, Play, RotateCw, Square, Upload, X } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
@@ -51,6 +51,7 @@ function TagFilterField({ label, ...props }) {
 
 function outcomeIcon(result) {
   if (result.skipped) return { Icon: Minus, tone: "text-muted-foreground", label: RUNNER_TEXT.outcomes.skipped }
+  if (result.handled) return { Icon: RotateCw, tone: "text-warning", label: RUNNER_TEXT.outcomes.handled }
   return result.hasFailed
     ? { Icon: X, tone: "text-destructive", label: RUNNER_TEXT.outcomes.failed }
     : { Icon: Check, tone: "text-success", label: RUNNER_TEXT.outcomes.passed }
@@ -100,7 +101,7 @@ function ExchangeDetail({ result }) {
   )
 }
 
-const ResultRow = memo(function ResultRow({ result }) {
+export const ResultRow = memo(function ResultRow({ result }) {
   const { Icon, tone, label } = outcomeIcon(result)
   const [isOpen, setIsOpen] = useState(false)
   const failures = result.tests.filter((test) => !test.passed)
@@ -122,11 +123,13 @@ const ResultRow = memo(function ResultRow({ result }) {
         <span className="sr-only">{label}</span>
         <MethodTag method={shownMethod(result)} className="w-12" />
         {result.iteration > 0 && <span className="shrink-0 font-mono text-2xs text-muted-foreground">#{result.iteration}</span>}
+        {result.attempts > 1 && <span className="shrink-0 font-mono text-2xs text-muted-foreground">{RUNNER_TEXT.attempt(result.attempt, result.attempts)}</span>}
         <span title={`${result.name}\n${result.url}`} className="min-w-0 flex-1 truncate text-xs text-foreground">{result.name}</span>
         <ResultSummary result={result} />
         {canExpand && <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
       </button>
       <div className="px-3">
+        {result.handled && <p className="pb-1.5 pl-[1.375rem] text-xs text-warning">{result.handled}</p>}
         {detail && <p className="whitespace-pre-line pb-1.5 pl-[1.375rem] text-xs text-muted-foreground">{detail}</p>}
         {hasUnresolved(result.unresolved) && (
           <p className="pb-1.5 pl-[1.375rem] text-xs text-warning">

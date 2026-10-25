@@ -13,6 +13,6 @@ export function tabMenuItems(tab, tabs, actions, closeTab) {
     { id: "move-left", label: TAB_TEXT.moveLeft, icon: ArrowLeft, disabled: index === 0, onSelect: () => actions.tabs.step(tab.id, -1) },
     { id: "move-right", label: TAB_TEXT.moveRight, icon: ArrowRight, disabled: index === tabs.length - 1, onSelect: () => actions.tabs.step(tab.id, 1) },
     { id: "reveal", label: TAB_TEXT.revealInTree, icon: FolderSearch, disabled: !actions.tabs.canReveal(tab), onSelect: () => actions.tabs.reveal(tab.id) },
-    { id: "curl", label: TAB_TEXT.copyAsCurl, icon: Copy, onSelect: () => actions.tabs.copyCurl(tab.id) },
+    ...(tab.flowId ? [] : [{ id: "curl", label: TAB_TEXT.copyAsCurl, icon: Copy, onSelect: () => actions.tabs.copyCurl(tab.id) }]),
   ]
 }

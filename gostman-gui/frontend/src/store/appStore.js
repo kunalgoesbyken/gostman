@@ -9,6 +9,8 @@ import { ENVIRONMENT_TEXT } from '../lib/environmentText'
 import { DEFAULT_SETTINGS, normalizeSettings } from '../lib/network'
 import { ROOT_SETTINGS_ID, isBlankScope, normalizeFolder, normalizeScopeSettings, updatedScope } from '../lib/inheritance'
 import { normalizeRequest } from '../lib/request'
+import { normalizeFlow } from '../lib/flows/model'
+import { isFlowDirty } from '../lib/flows/edit'
 import { isBlankRequest, isRequestDirty } from '../lib/requestChanges'
 import { rememberResponse } from '../lib/responseHistory'
 import { reconcileTabs } from '../lib/tabReconcile'
@@ -49,6 +51,19 @@ const asArray = (value) => (Array.isArray(value) ? value : [])
 
 const createTab = (id, request, isPreview = false) => ({ id, request: normalizeRequest(request), isPreview, pendingId: null, response: null, responses: [], bodyDrafts: {} })
 
+const createFlowTab = (id, flow) => ({ ...createTab(id), flowId: flow.id, flowDraft: normalizeFlow(flow) })
+
+export const isFlowTab = (tab) => Boolean(tab?.flowId)
+
+const isReusableTab = (tab) => !isFlowTab(tab) && isBlankRequest(tab.request) && tab.pendingId === null
+
+const flowWithId = (flows, id) => flows.find((flow) => flow.id === id)
+
+const refreshFlowTabs = (tabs, before, after) => tabs.map((tab) => {
+  const current = isFlowTab(tab) && flowWithId(after, tab.flowId)
+  return current && !isFlowDirty(tab.flowDraft, flowWithId(before, tab.flowId)) ? { ...tab, flowDraft: current } : tab
+})
+
 const FIRST_TAB = createTab(`${TAB_ID_PREFIX}1`)
 
 const savedLookups = new WeakMap()
@@ -60,13 +75,15 @@ const savedLookup = (requests) => {
 
 const persistableTab = (requests) => {
   const saved = savedLookup(requests)
-  return ({ id, request, isPreview, vanished }) => {
+  return ({ id, request, isPreview, vanished, flowId, flowDraft }) => {
+    if (flowId) return { id, flowId, flowDraft, request: {} }
     const baseline = (request.id && saved.get(request.id)) || vanished
     return { id, isPreview, isSaved: Boolean(baseline) && !isRequestDirty(request, baseline), request: { ...request, examples: '' } }
   }
 }
 
-const restoreTab = ({ id, request, isPreview, isSaved }) => {
+const restoreTab = ({ id, request, isPreview, isSaved, flowId, flowDraft }) => {
+  if (flowId) return createFlowTab(id, { ...flowDraft, id: flowId })
   const tab = createTab(id, request, isPreview === true)
   return isSaved === true ? { ...tab, vanished: tab.request } : tab
 }
@@ -96,6 +113,15 @@ const withSavedExamples = (tabs, requests) => {
 
 const appendTab = (state, request, isPreview = false) => {
   const tab = createTab(`${TAB_ID_PREFIX}${state.nextTabId}`, request, isPreview)
+  return { tabs: [...state.tabs, tab], activeTabId: tab.id, nextTabId: state.nextTabId + 1 }
+}
+
+const tabsWithFlow = (state, flow) => {
+  const holder = state.tabs.find((tab) => tab.flowId === flow.id)
+  if (holder) return { activeTabId: holder.id }
+  const active = selectActiveTab(state)
+  if (isReusableTab(active)) return mapTab(state, active.id, (tab) => createFlowTab(tab.id, flow))
+  const tab = createFlowTab(`${TAB_ID_PREFIX}${state.nextTabId}`, flow)
   return { tabs: [...state.tabs, tab], activeTabId: tab.id, nextTabId: state.nextTabId + 1 }
 }
 
@@ -211,8 +237,7 @@ const tabsWithOpened = (state, request, preview) => {
   const holder = request.id ? state.tabs.find((tab) => tab.request.id === request.id) : null
   if (holder) return { activeTabId: holder.id, ...(preview || !holder.isPreview ? {} : mapTab(state, holder.id, (tab) => ({ ...tab, isPreview: false }))) }
   const active = selectActiveTab(state)
-  const isReusable = isBlankRequest(active.request) && active.pendingId === null
-  if (isReusable) return mapTab(state, active.id, (tab) => createTab(tab.id, request, preview))
+  if (isReusableTab(active)) return mapTab(state, active.id, (tab) => createTab(tab.id, request, preview))
   const replaceable = preview && state.tabs.find(isReplaceable)
   if (!replaceable) return appendTab(state, request, preview)
   return { ...mapTab(state, replaceable.id, (tab) => createTab(tab.id, request, true)), activeTabId: replaceable.id }
@@ -221,7 +246,7 @@ const tabsWithOpened = (state, request, preview) => {
 const withoutTabs = (state, closing) => {
   const closingIds = new Set(closing.map((tab) => tab.id))
   const remaining = state.tabs.filter((tab) => !closingIds.has(tab.id))
-  const remembered = closing.filter((tab) => !isBlankRequest(tab.request)).map((tab) => tab.request)
+  const remembered = closing.filter((tab) => !isFlowTab(tab) && !isBlankRequest(tab.request)).map((tab) => tab.request)
   const closedTabs = [...remembered.reverse(), ...state.closedTabs].slice(0, MAX_CLOSED_TABS)
   if (remaining.length === 0) return { ...appendTab({ ...state, tabs: remaining }, {}), closedTabs }
   if (!closingIds.has(state.activeTabId)) return { tabs: remaining, closedTabs }
@@ -281,6 +306,7 @@ export const useAppStore = create(
         isRestricted: false,
         requests: [],
         folders: [],
+        flows: [],
         requestHistory: [],
         cookies: [],
         settings: DEFAULT_SETTINGS,
@@ -346,12 +372,15 @@ export const useAppStore = create(
           const requests = asArray(data.requests).map(normalizeRequest)
           const hasActive = environments.some((environment) => environment.id === data.activeEnvironmentId)
           const folders = asArray(data.folders).map(normalizeFolder)
+          const flows = asArray(data.flows).map(normalizeFlow)
+          const tabs = withSavedExamples(reconcileTabs(state.tabs, state.requests, requests, folders, state.isRestricted), requests)
           return {
             hydrated: true,
             isRestricted: Boolean(data.restricted),
             requests,
             folders,
-            tabs: withSavedExamples(reconcileTabs(state.tabs, state.requests, requests, folders, state.isRestricted), requests),
+            flows,
+            tabs: refreshFlowTabs(tabs, state.flows, flows),
             requestHistory: asArray(data.history).map(historyEntry),
             cookies: mergeCookies(asArray(data.cookies), []),
             settings: normalizeSettings(data.settings),
@@ -454,6 +483,12 @@ export const useAppStore = create(
             tabs: mapTabRequests(state.tabs, (request) => (removed.has(request.id) ? { ...request, id: '' } : request)),
           }
         }),
+        setFlows: (flows) => set({ flows }),
+        openFlowTab: (flow) => set((state) => ({ ...tabsWithFlow(state, flow), isSidebarOpen: state.isSidebarOpen && !isNarrowViewport() })),
+        updateFlowDraft: (tabId, flowDraft) => set((state) => mapTab(state, tabId, (tab) => ({ ...tab, flowDraft }))),
+        renameFlowTabs: (flowId, name) => set((state) => ({
+          tabs: state.tabs.map((tab) => (tab.flowId === flowId ? { ...tab, flowDraft: { ...tab.flowDraft, name } } : tab)),
+        })),
         setTreeClipboard: (treeClipboard) => set({ treeClipboard }),
         markSharedOrder: () => set({ sharedOrder: true }),
         showNotice: (message, undo = null) => set({ notice: { id: createId('notice'), message, undo } }),
@@ -510,8 +545,7 @@ export const useAppStore = create(
           if (state.closedTabs.length === 0) return state
           const [request, ...closedTabs] = state.closedTabs
           const active = selectActiveTab(state)
-          const isReusable = isBlankRequest(active.request) && active.pendingId === null
-          const opened = isReusable ? { ...mapTab(state, active.id, (tab) => createTab(tab.id, request)) } : appendTab(state, request)
+          const opened = isReusableTab(active) ? { ...mapTab(state, active.id, (tab) => createTab(tab.id, request)) } : appendTab(state, request)
           return { ...opened, closedTabs }
         }),
         cycleTab: (step) => set((state) => {

@@ -1,5 +1,6 @@
 import { evaluateExtractors } from '../chaining'
 import { contractChecks } from '../contract'
+import { flowTurn } from '../flows/engine'
 import { runJob } from './job'
 import { MESSAGE_REPLY, MESSAGE_RESULT, MESSAGE_SEND } from './messages'
 
@@ -19,6 +20,7 @@ BLOCKED_GLOBALS.forEach(removeGlobal)
 function run(job) {
   if (job.extractors) return { outcomes: evaluateExtractors(job.extractors, job.response) }
   if (job.contract) return { tests: contractChecks(job.contract.operation, job.contract.root, job.contract.response) }
+  if (job.flowTurn) return { turn: flowTurn(job.flowTurn) }
   return runJob(job)
 }
 

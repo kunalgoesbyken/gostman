@@ -6,7 +6,8 @@ import { getPreferences } from './preferences'
 import { isRequestDirty } from './requestChanges'
 import { tabsToClose } from './tabOrder'
 import { TAB_TEXT } from './treeText'
-import { useAppStore, variableTextFor } from '../store/appStore'
+import { FLOW_TEXT } from './flowsText'
+import { isFlowTab, useAppStore, variableTextFor } from '../store/appStore'
 
 const DESTRUCTIVE = 'destructive'
 
@@ -14,11 +15,12 @@ const store = () => useAppStore.getState()
 
 const savedFor = (tab) => store().requests.find((request) => request.id === tab.request.id)
 
-const isDirty = (tab) => isRequestDirty(tab.request, savedFor(tab))
+export function createTabActions(backend, attempt, cancelTab, flows) {
+  const isDirty = (tab) => (isFlowTab(tab) ? flows.isDirty(tab) : isRequestDirty(tab.request, savedFor(tab)))
 
-export function createTabActions(backend, attempt, cancelTab) {
   const closeAll = (tabs) => {
     tabs.forEach(cancelTab)
+    tabs.filter(isFlowTab).forEach((tab) => flows.discard(tab.id))
     store().closeTabs(tabs.map((tab) => tab.id))
   }
 
@@ -45,6 +47,7 @@ export function createTabActions(backend, attempt, cancelTab) {
 
   const copyCurl = attempt(TAB_TEXT.curlFailed, async (tabId) => {
     const tab = store().tabs.find((candidate) => candidate.id === tabId)
+    if (isFlowTab(tab)) throw new Error(FLOW_TEXT.noCurl)
     if (!tab || isGrpcRequest(tab.request) || isMcpRequest(tab.request)) throw new Error(TAB_TEXT.noCurl)
     if (!navigator.clipboard) throw new Error(TAB_TEXT.noClipboard)
     const prepared = await backend.prepare(withInheritance(store(), tab.request), variableTextFor(store(), tab.request))
@@ -67,6 +70,6 @@ export function createTabActions(backend, attempt, cancelTab) {
     reorder: (tabId, targetId, place) => store().moveTab(tabId, targetId, place),
     reveal,
     copyCurl,
-    canReveal: (tab) => Boolean(savedFor(tab)),
+    canReveal: (tab) => !isFlowTab(tab) && Boolean(savedFor(tab)),
   }
 }

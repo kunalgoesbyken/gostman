@@ -21,6 +21,7 @@ type gostmanBackup struct {
 	VariablesMeta string            `json:"variablesMeta"`
 	Settings      json.RawMessage   `json:"settings"`
 	SharedOrder   bool              `json:"sharedOrder"`
+	Flows         []json.RawMessage `json:"flows"`
 }
 
 type idMap map[string]string
@@ -48,10 +49,11 @@ func (c *collector) readGostman(doc document) {
 }
 
 func (c *collector) importGostman(backup *gostmanBackup, name string) {
-	folders := idMap{}
+	folders, requests := idMap{}, idMap{}
 	firstFolder, firstRequest := len(c.Folders), len(c.Requests)
 	c.gostmanFolders(backup.Folders, folders)
-	c.gostmanRequests(backup.Requests, folders)
+	c.gostmanRequests(backup.Requests, folders, requests)
+	c.gostmanFlows(backup.Flows, requests)
 	if !backup.SharedOrder {
 		workspace.ShareOrder(c.Folders[firstFolder:], c.Requests[firstRequest:])
 	}
@@ -161,14 +163,14 @@ func (c *collector) gostmanFolders(raw []json.RawMessage, ids idMap) {
 	}
 }
 
-func (c *collector) gostmanRequests(raw []json.RawMessage, folders idMap) {
+func (c *collector) gostmanRequests(raw []json.RawMessage, folders, requests idMap) {
 	for _, item := range raw {
 		var request workspace.Request
 		if err := json.Unmarshal(item, &request); err != nil {
 			c.skip(messageGostmanItem, "request")
 			continue
 		}
-		request.Id = newID()
+		request.Id = requests.fresh(request.Id)
 		request.Name = cleanName(request.Name, untitledRequest)
 		request.Method = cleanMethod(request.Method)
 		request.FolderId = folders.resolve(request.FolderId)

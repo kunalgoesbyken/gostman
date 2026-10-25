@@ -2320,6 +2320,7 @@ export namespace main {
 	    dotEnv?: Record<string, string>;
 	    collectionSettings: workspace.Settings;
 	    sharedOrder?: boolean;
+	    flows?: workspace.Flow[];
 	
 	    static createFrom(source: any = {}) {
 	        return new SavedData(source);
@@ -2343,6 +2344,7 @@ export namespace main {
 	        this.dotEnv = source["dotEnv"];
 	        this.collectionSettings = this.convertValues(source["collectionSettings"], workspace.Settings);
 	        this.sharedOrder = source["sharedOrder"];
+	        this.flows = this.convertValues(source["flows"], workspace.Flow);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -4389,6 +4391,190 @@ export namespace secrets {
 
 export namespace workspace {
 	
+	export class FlowValue {
+	    name: string;
+	    value?: string;
+	    step?: string;
+	    source?: string;
+	    path?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new FlowValue(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.value = source["value"];
+	        this.step = source["step"];
+	        this.source = source["source"];
+	        this.path = source["path"];
+	    }
+	}
+	export class FlowCheck {
+	    expression: string;
+	    operator?: string;
+	    value?: string;
+	    enabled?: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new FlowCheck(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.expression = source["expression"];
+	        this.operator = source["operator"];
+	        this.value = source["value"];
+	        this.enabled = source["enabled"];
+	    }
+	}
+	export class FlowRetry {
+	    times?: number;
+	    delayMs?: number;
+	    until?: FlowCheck[];
+	
+	    static createFrom(source: any = {}) {
+	        return new FlowRetry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.times = source["times"];
+	        this.delayMs = source["delayMs"];
+	        this.until = this.convertValues(source["until"], FlowCheck);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class FlowStep {
+	    id: string;
+	    kind: string;
+	    label?: string;
+	    request?: string;
+	    requestId?: string;
+	    variables?: Record<string, string>;
+	    retry?: FlowRetry;
+	    onFailure?: string;
+	    values?: FlowValue[];
+	    source?: string;
+	    step?: string;
+	    path?: string;
+	    as?: string;
+	    indexAs?: string;
+	    match?: string;
+	    conditions?: FlowCheck[];
+	    then?: string;
+	    else?: string;
+	    steps?: FlowStep[];
+	    ms?: number;
+	    outcome?: string;
+	    message?: string;
+	    next?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new FlowStep(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.kind = source["kind"];
+	        this.label = source["label"];
+	        this.request = source["request"];
+	        this.requestId = source["requestId"];
+	        this.variables = source["variables"];
+	        this.retry = this.convertValues(source["retry"], FlowRetry);
+	        this.onFailure = source["onFailure"];
+	        this.values = this.convertValues(source["values"], FlowValue);
+	        this.source = source["source"];
+	        this.step = source["step"];
+	        this.path = source["path"];
+	        this.as = source["as"];
+	        this.indexAs = source["indexAs"];
+	        this.match = source["match"];
+	        this.conditions = this.convertValues(source["conditions"], FlowCheck);
+	        this.then = source["then"];
+	        this.else = source["else"];
+	        this.steps = this.convertValues(source["steps"], FlowStep);
+	        this.ms = source["ms"];
+	        this.outcome = source["outcome"];
+	        this.message = source["message"];
+	        this.next = source["next"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Flow {
+	    id: string;
+	    name: string;
+	    description?: string;
+	    maxSends?: number;
+	    steps: FlowStep[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Flow(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.description = source["description"];
+	        this.maxSends = source["maxSends"];
+	        this.steps = this.convertValues(source["steps"], FlowStep);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class Settings {
 	    description: string;
 	    headers: string;
@@ -4613,6 +4799,7 @@ export namespace workspace {
 	    variablesMeta?: string;
 	    settings: Settings;
 	    sharedOrder?: boolean;
+	    flows?: Flow[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Collection(source);
@@ -4627,6 +4814,7 @@ export namespace workspace {
 	        this.variablesMeta = source["variablesMeta"];
 	        this.settings = this.convertValues(source["settings"], Settings);
 	        this.sharedOrder = source["sharedOrder"];
+	        this.flows = this.convertValues(source["flows"], Flow);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -4647,6 +4835,11 @@ export namespace workspace {
 		    return a;
 		}
 	}
+	
+	
+	
+	
+	
 	
 	
 	export class Problem {

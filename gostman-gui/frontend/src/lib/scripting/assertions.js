@@ -97,10 +97,11 @@ const toAssertion = (raw) => ({
   enabled: raw.enabled !== false,
 })
 
-export function parseAssertions(json) {
-  const parsed = parseJSON(json, [])
-  return Array.isArray(parsed) ? parsed.filter(isPlainObject).map(toAssertion) : []
-}
+export const normalizeAssertions = (list) => (Array.isArray(list) ? list.filter(isPlainObject).map(toAssertion) : [])
+
+export const parseAssertions = (json) => normalizeAssertions(parseJSON(json, []))
+
+export const isActiveAssertion = (assertion) => assertion.enabled && assertion.expression.trim() !== ''
 
 export const serializeAssertions = (assertions) => (assertions.length > 0 ? JSON.stringify(assertions) : '')
 
@@ -116,9 +117,7 @@ export const isKnownAssertion = (json, candidate) => parseAssertions(json).some(
 
 export const withAddedAssertions = (json, additions) => serializeAssertions([...parseAssertions(json), ...additions])
 
-export const countActiveAssertions = (json) => (
-  parseAssertions(json).filter((assertion) => assertion.enabled && assertion.expression.trim() !== '').length
-)
+export const countActiveAssertions = (json) => parseAssertions(json).filter(isActiveAssertion).length
 
 const describe = (value) => (value === undefined ? 'undefined' : JSON.stringify(value))
 
@@ -182,9 +181,9 @@ function evaluate(assertion, response, variables) {
   }
 }
 
-export function evaluateAssertions(json, response, variables = {}) {
+export function evaluateAssertionList(assertions, response, variables = {}) {
   const values = variableMap(variables)
-  return parseAssertions(json)
-    .filter((assertion) => assertion.enabled && assertion.expression.trim() !== '')
-    .map((assertion) => evaluate(assertion, response, values))
+  return normalizeAssertions(assertions).filter(isActiveAssertion).map((assertion) => evaluate(assertion, response, values))
 }
+
+export const evaluateAssertions = (json, response, variables = {}) => evaluateAssertionList(parseAssertions(json), response, variables)

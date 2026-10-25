@@ -45,7 +45,7 @@ const EXPORT_FORMATS = [
     ...EXPORT_TEXT.formats.gostman,
     extension: "json",
     mime: JSON_MIME,
-    build: ({ requests, folders, environments, settings, collectionVariables, sharedOrder, globals }) => toJSON(exportToGostman(requests, folders, environments, settings, collectionVariables, sharedOrder, globals)),
+    build: ({ requests, folders, environments, settings, collectionVariables, sharedOrder, globals, flows }) => toJSON(exportToGostman(requests, folders, environments, settings, collectionVariables, sharedOrder, globals, flows)),
   },
   {
     value: "postman",
@@ -209,7 +209,7 @@ function CollectionPicker({ collections, value, onChange }) {
   )
 }
 
-export function ExportTab({ requests, folders, environments, globals, collectionVariables, variables, variablesFor, settings, sharedOrder, importer, scan, onGoToRequest, onSaveFile, onSaveBase64 }) {
+export function ExportTab({ requests, folders, environments, globals, collectionVariables, variables, variablesFor, settings, sharedOrder, flows = [], importer, scan, onGoToRequest, onSaveFile, onSaveBase64 }) {
   const [formatId, setFormatId] = useState(EXPORT_FORMATS[0].value)
   const [collectionId, setCollectionId] = useState(ALL_COLLECTIONS)
   const collections = useMemo(() => collectionFolders(folders), [folders])
@@ -225,8 +225,8 @@ export function ExportTab({ requests, folders, environments, globals, collection
 
   const format = ALL_FORMATS.find((candidate) => candidate.value === formatId)
   const data = useMemo(
-    () => ({ ...scoped, globals, collectionVariables, variables: collectionId && variablesFor ? variablesFor(collectionId) : variables, settings, sharedOrder }),
-    [scoped, globals, collectionId, collectionVariables, variables, variablesFor, settings, sharedOrder]
+    () => ({ ...scoped, globals, collectionVariables, variables: collectionId && variablesFor ? variablesFor(collectionId) : variables, settings, sharedOrder, flows: collectionId ? [] : flows }),
+    [scoped, globals, collectionId, collectionVariables, variables, variablesFor, settings, sharedOrder, flows]
   )
   const scripts = useAdaptedScripts(format, data, importer)
   const source = format.adapt ? scripts.adapted : data

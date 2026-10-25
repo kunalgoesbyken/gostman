@@ -110,20 +110,26 @@ li small { display: block; color: var(--muted); margin-left: 42px; white-space: 
   }
 
   function markOf(result) {
-    if (result.skipped) return 'skip';
+    if (result.skipped || result.handled) return 'skip';
     return result.failed ? 'fail' : 'pass';
+  }
+
+  function markText(result, kind) {
+    if (result.handled) return 'HANDLED';
+    return kind === 'skip' ? 'SKIP' : kind === 'fail' ? 'FAIL' : 'PASS';
   }
 
   function render(result) {
     var kind = markOf(result);
     var row = el('details', 'row ' + kind);
     var head = el('summary');
-    head.appendChild(el('span', 'mark', kind === 'skip' ? 'SKIP' : kind === 'fail' ? 'FAIL' : 'PASS'));
+    head.appendChild(el('span', 'mark', markText(result, kind)));
     head.appendChild(el('span', 'method', result.method || ''));
     var name = el('span', 'name', result.name || '');
     var where = [];
     if (result.folder) where.push(result.folder);
     if (result.iteration) where.push('iteration ' + result.iteration);
+    if (result.attempts > 1) where.push('attempt ' + result.attempt + ' of ' + result.attempts);
     if (where.length) name.appendChild(el('small', '', '  ' + where.join(' / ')));
     head.appendChild(name);
     if (result.skipped) {
@@ -141,6 +147,7 @@ li small { display: block; color: var(--muted); margin-left: 42px; white-space: 
 
     var body = el('div', 'body');
     if (result.skipped) body.appendChild(el('div', '', result.skipped));
+    if (result.handled) body.appendChild(el('div', '', result.handled));
     if (result.resolvedUrl) body.appendChild(section('URL', el('pre', '', result.resolvedUrl)));
     if (result.url && result.url !== result.resolvedUrl) body.appendChild(section(result.resolvedUrl ? 'URL as written' : 'URL', el('pre', '', result.url)));
     if (result.error) body.appendChild(el('div', 'error', result.error));
@@ -175,7 +182,7 @@ li small { display: block; color: var(--muted); margin-left: 42px; white-space: 
   }
 
   function matches(result) {
-    if (onlyFailed && !result.failed) return false;
+    if (onlyFailed && (!result.failed || result.handled)) return false;
     if (!query) return true;
     var haystack = ((result.name || '') + ' ' + (result.url || '') + ' ' + (result.resolvedUrl || '') + ' ' + (result.folder || '')).toLowerCase();
     return haystack.indexOf(query) !== -1;
@@ -206,11 +213,19 @@ li small { display: block; color: var(--muted); margin-left: 42px; white-space: 
   document.getElementById('meta').textContent = meta.join('  |  ');
 
   var cards = document.getElementById('cards');
-  cards.appendChild(card(summary.requests, 'planned'));
+  var flow = report.flow;
+  if (flow) {
+    var outcome = el('div', 'card ' + (flow.outcome === 'passed' ? 'pass' : 'fail'));
+    outcome.appendChild(el('b', '', flow.outcome));
+    outcome.appendChild(el('span', '', flow.name + ': ' + flow.message));
+    cards.appendChild(outcome);
+  }
+  cards.appendChild(card(summary.requests, flow ? 'sent' : 'planned'));
   cards.appendChild(card(summary.passed, 'passed', 'pass'));
   cards.appendChild(card(summary.failed, 'failed', summary.failed ? 'fail' : ''));
+  if (summary.handled) cards.appendChild(card(summary.handled, 'handled by the flow'));
   cards.appendChild(card(summary.skipped, 'skipped'));
-  cards.appendChild(card(summary.notRun, 'not run'));
+  if (!flow) cards.appendChild(card(summary.notRun, 'not run'));
   cards.appendChild(card((summary.tests || 0) - (summary.failedTests || 0), 'checks passed', 'pass'));
   cards.appendChild(card(summary.failedTests, 'checks failed', summary.failedTests ? 'fail' : ''));
 

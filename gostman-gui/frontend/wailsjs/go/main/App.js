@@ -366,6 +366,10 @@ export function SaveFile(arg1, arg2) {
   return window['go']['main']['App']['SaveFile'](arg1, arg2);
 }
 
+export function SaveFlows(arg1) {
+  return window['go']['main']['App']['SaveFlows'](arg1);
+}
+
 export function SaveFolders(arg1) {
   return window['go']['main']['App']['SaveFolders'](arg1);
 }

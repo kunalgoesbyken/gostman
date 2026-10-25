@@ -11,7 +11,7 @@ function structure(counts) {
 }
 
 export function describeCounts(counts) {
-  const values = counted(counts, [['environments', TEXT.environment], ['globals', TEXT.global], ['variables', TEXT.variable]])
+  const values = counted(counts, [['flows', TEXT.flow], ['environments', TEXT.environment], ['globals', TEXT.global], ['variables', TEXT.variable]])
   const settings = counted(counts, [['collectionSettings', TEXT.collection], ['folderSettings', TEXT.folder]])
   return [structure(counts), values, settings && TEXT.settingsFor(settings)].filter(Boolean).join(TEXT.separator)
 }

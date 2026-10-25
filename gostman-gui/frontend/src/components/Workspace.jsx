@@ -16,7 +16,7 @@ import { DialogPending } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
 import { WelcomePanel } from "./WelcomePanel"
 import { GettingStartedButton, useOnboardingCompletion } from "./GettingStarted"
-import { resolvedVariablesFor, restoreTabDrafts, selectActiveVariables, selectIsDialogOpen, selectResolvedVariables, useActiveTab, useAppStore } from "../store/appStore"
+import { isFlowTab, resolvedVariablesFor, restoreTabDrafts, selectActiveVariables, selectIsDialogOpen, selectResolvedVariables, useActiveTab, useAppStore } from "../store/appStore"
 import { useAutoSave } from "../hooks/useAutoSave"
 import { useRequestFieldHandlers } from "../hooks/useRequestFieldHandlers"
 import { useShortcuts } from "../hooks/useShortcuts"
@@ -31,6 +31,7 @@ import { forgetSharedLink, pendingSharedLink, subscribeToSharedLink } from "../l
 import { currentOpenLink, dismissOpenLink, subscribeToOpenLink } from "../lib/openLink"
 import { exportableVariables, foldersWithoutSecrets, listWithoutSecrets, withoutSecretValues } from "../lib/variableScopes"
 import { createWorkspaceActions } from "../lib/workspaceActions"
+import { requestCatalog, withRequestPaths } from "../lib/flows/catalog"
 import { whenIdle } from "../lib/idle"
 import { PANE_ADDRESS, PANE_SIDEBAR, cyclePane, focusAddress, focusPane, watchPaneFocus } from "../lib/panes"
 import { SIDEBAR_TEXT } from "../lib/sidebarText"
@@ -57,6 +58,7 @@ const SpecSyncDialog = lazy(() => import("./SpecSyncDialog").then((module) => ({
 const FolderSettings = lazy(() => import("./FolderSettings").then((module) => ({ default: module.FolderSettings })))
 const RunnerDialog = lazy(() => import("./RunnerDialog").then((module) => ({ default: module.RunnerDialog })))
 const AiDialog = lazy(() => import("./AiDialog").then((module) => ({ default: module.AiDialog })))
+const FlowView = lazy(() => import("./flows/FlowView").then((module) => ({ default: module.FlowView })))
 const loadCodeEditor = () => import("./CodeEditor")
 const CodeEditor = lazy(() => loadCodeEditor().then((module) => ({ default: module.CodeEditor })))
 
@@ -222,6 +224,7 @@ function usePersistence(backend) {
 function LoadedWorkspace({ backend, onBack }) {
   const requests = useAppStore((s) => s.requests)
   const folders = useAppStore((s) => s.folders)
+  const flows = useAppStore((s) => s.flows)
   const requestHistory = useAppStore((s) => s.requestHistory)
   const environments = useAppStore((s) => s.environments)
   const tabs = useAppStore((s) => s.tabs)
@@ -279,7 +282,8 @@ function LoadedWorkspace({ backend, onBack }) {
   const isSocket = useMemo(() => isSocketAddress(activeRequest.url, variables), [activeRequest.url, variables])
   const socketStatus = useSocketStore((state) => selectSession(activeTab.id)(state).status)
   const isLoading = activeTab.pendingId !== null
-  const showsWelcome = welcomeVisible && isBlankRequest(activeRequest) && activeTab.response === null && !isLoading
+  const isFlow = isFlowTab(activeTab)
+  const showsWelcome = welcomeVisible && !isFlow && isBlankRequest(activeRequest) && activeTab.response === null && !isLoading
 
   useEffect(() => {
     if (welcomeVisible && !showsWelcome) closeWelcome()
@@ -298,6 +302,7 @@ function LoadedWorkspace({ backend, onBack }) {
     [globalEnvironments, activeGlobalEnvironmentId]
   )
   const shareableFolders = useMemo(() => foldersWithoutSecrets(folders), [folders])
+  const exportableFlows = useMemo(() => flows.map((flow) => withRequestPaths(flow, requestCatalog(requests, folders))), [flows, requests, folders])
   const shareableVariables = useMemo(
     () => ({ variables: listWithoutSecrets(sharedVariables, sharedVariablesMeta), meta: sharedVariablesMeta }),
     [sharedVariables, sharedVariablesMeta]
@@ -378,51 +383,59 @@ function LoadedWorkspace({ backend, onBack }) {
 
           <DiskChangeNotice />
 
-          <RequestBar
-            activeRequest={activeRequest}
-            {...fieldHandlers}
-            onSend={actions.send}
-            onCancel={actions.cancel}
-            onSave={actions.save}
-            onGenerateCode={actions.generateCode}
-            onLoadTest={actions.loadTest.isAvailable && isLoadTestable(activeRequest) ? actions.loadTest.open : null}
-            onPasteCurl={actions.pasteCurl}
-            onDisconnect={disconnectSocket}
-            socketStatus={isSocket ? socketStatus : null}
-            loading={isLoading}
-          />
-
-          {showsWelcome ? <WelcomePanel actions={actions} onDismiss={hideWelcome} /> : <div className="response-split flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
-            <section aria-label={APP_TEXT.requestSection} data-pane="request" className="flex min-h-0 flex-1 flex-col" style={REQUEST_AREA_STYLE}>
-              <RequestTabs
-                tabId={activeTab.id}
+          {isFlow ? (
+            <Suspense fallback={<AppSkeleton />}>
+              <FlowView tab={activeTab} actions={actions.flows} EditorComponent={CodeEditor} />
+            </Suspense>
+          ) : (
+            <>
+              <RequestBar
                 activeRequest={activeRequest}
-                bodyDrafts={activeTab.bodyDrafts}
-                onUpdateRequest={updateActiveRequest}
-                onBodyDraftsChange={setActiveBodyDrafts}
-                variables={variables}
-                response={activeTab.response}
-                extraction={activeTab.extraction}
-                tokenRequest={activeTab.tokenRequest}
-                schema={activeTab.schema}
-                grpcSchema={activeTab.grpcSchema}
-                mcpCatalog={activeTab.mcpCatalog}
-                actions={actions}
-                EditorComponent={CodeEditor}
+                {...fieldHandlers}
+                onSend={actions.send}
+                onCancel={actions.cancel}
+                onSave={actions.save}
+                onGenerateCode={actions.generateCode}
+                onLoadTest={actions.loadTest.isAvailable && isLoadTestable(activeRequest) ? actions.loadTest.open : null}
+                onPasteCurl={actions.pasteCurl}
+                onDisconnect={disconnectSocket}
+                socketStatus={isSocket ? socketStatus : null}
+                loading={isLoading}
               />
-            </section>
 
-            {!isSocketOnly(activeTab) && <ResponsePanel
-              response={activeTab.response}
-              history={activeTab.responses}
-              tests={activeTab.tests}
-              loading={isLoading}
-              onDownload={actions.download}
-              onSaveExample={actions.examples.saveResponse}
-              onExplain={isAiOn ? () => actions.ai.start(TASK_EXPLAIN) : null}
-              onTrust={actions.storage?.confirmTrust}
-            />}
-          </div>}
+              {showsWelcome ? <WelcomePanel actions={actions} onDismiss={hideWelcome} /> : <div className="response-split flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
+                <section aria-label={APP_TEXT.requestSection} data-pane="request" className="flex min-h-0 flex-1 flex-col" style={REQUEST_AREA_STYLE}>
+                  <RequestTabs
+                    tabId={activeTab.id}
+                    activeRequest={activeRequest}
+                    bodyDrafts={activeTab.bodyDrafts}
+                    onUpdateRequest={updateActiveRequest}
+                    onBodyDraftsChange={setActiveBodyDrafts}
+                    variables={variables}
+                    response={activeTab.response}
+                    extraction={activeTab.extraction}
+                    tokenRequest={activeTab.tokenRequest}
+                    schema={activeTab.schema}
+                    grpcSchema={activeTab.grpcSchema}
+                    mcpCatalog={activeTab.mcpCatalog}
+                    actions={actions}
+                    EditorComponent={CodeEditor}
+                  />
+                </section>
+
+                {!isSocketOnly(activeTab) && <ResponsePanel
+                  response={activeTab.response}
+                  history={activeTab.responses}
+                  tests={activeTab.tests}
+                  loading={isLoading}
+                  onDownload={actions.download}
+                  onSaveExample={actions.examples.saveResponse}
+                  onExplain={isAiOn ? () => actions.ai.start(TASK_EXPLAIN) : null}
+                  onTrust={actions.storage?.confirmTrust}
+                />}
+              </div>}
+            </>
+          )}
         </main>
       </div>
 
@@ -444,6 +457,7 @@ function LoadedWorkspace({ backend, onBack }) {
             variablesFor={variablesFor}
             settings={collectionSettings}
             sharedOrder={sharedOrder}
+            flows={exportableFlows}
             onImport={actions.importData}
             onImportShared={actions.importShared}
             openapi={actions.openapi}

@@ -63,6 +63,7 @@ type SavedData struct {
 	DotEnv                  map[string]string  `json:"dotEnv,omitempty"`
 	CollectionSettings      workspace.Settings `json:"collectionSettings"`
 	SharedOrder             bool               `json:"sharedOrder,omitempty"`
+	Flows                   []workspace.Flow   `json:"flows,omitempty"`
 }
 
 type Environment struct {
@@ -246,6 +247,9 @@ func (a *App) LoadData() (SavedData, error) {
 	if data.Cookies == nil {
 		data.Cookies = []engine.CookieInfo{}
 	}
+	if data.Flows == nil {
+		data.Flows = []workspace.Flow{}
+	}
 	if data.Settings.Certificates == nil {
 		data.Settings.Certificates = []CertificateFiles{}
 	}
@@ -279,6 +283,10 @@ func (a *App) SaveFolders(folders []Folder) error {
 		return err
 	}
 	return storage.current().saveFolders(stripped)
+}
+
+func (a *App) SaveFlows(flows []workspace.Flow) error {
+	return storage.current().saveFlows(flows)
 }
 
 func (a *App) ShareSiblingOrder() error {

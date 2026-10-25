@@ -21,6 +21,7 @@ type Collection struct {
 	VariablesMeta string              `json:"variablesMeta"`
 	Settings      workspace.Settings  `json:"settings"`
 	SharedOrder   bool                `json:"sharedOrder"`
+	Flows         []workspace.Flow    `json:"flows,omitempty"`
 	DotEnv        map[string]string   `json:"-"`
 	Modules       map[string]string   `json:"-"`
 	Warnings      []string            `json:"-"`

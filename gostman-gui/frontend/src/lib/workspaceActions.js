@@ -42,6 +42,7 @@ import { createStorageActions } from './storageActions'
 import { createBackupActions } from './backupActions'
 import { createTabActions } from './tabActions'
 import { createTreeActions } from './treeActions'
+import { createFlowActions } from './flowActions'
 import { placedAfterRoot } from './treeMoves'
 import { focusAddressSoon } from './panes'
 import { ROW_FOLDER, ROW_REQUEST, folderDepth } from './collectionTree'
@@ -57,7 +58,7 @@ import { filePathsIn, withoutActiveContent } from './activeContent'
 import { CURL_FILES_TEXT } from './requestBarText'
 import { countImported } from './importSummary'
 import { SCOPE_GLOBAL } from './variableScopes'
-import { environmentForFolder, findActiveEnvironment, selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
+import { environmentForFolder, findActiveEnvironment, isFlowTab, selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
 import { ownedVariableCount, scopedFolderNames, scopedImport } from './environmentScope'
 
 const UNRECORDED_ERRORS = ['config', 'script', 'cancelled', RESTRICTED_ERROR]
@@ -121,6 +122,7 @@ export function createWorkspaceActions(backend) {
   const mock = createMockActions(backend)
   const capture = createCaptureActions(backend)
   const loadTest = createLoadTestActions(backend)
+  const flows = createFlowActions(backend, { attempt, execute, promptForName })
 
   async function runExtractors(tabId) {
     const tab = tabById(tabId)
@@ -262,6 +264,10 @@ export function createWorkspaceActions(backend) {
 
   async function send() {
     const tab = activeTab()
+    if (isFlowTab(tab)) {
+      flows.run(tab.id)
+      return
+    }
     if (isSocketAddress(tab.request.url, activeVariables())) {
       sockets.openFromAddressBar(tab.id)
       return
@@ -294,7 +300,9 @@ export function createWorkspaceActions(backend) {
     store().showNotice(`${quoted(saved.name)} was saved.`)
   }
 
-  const save = attempt(SAVE_FAILURE, () => saveTab(activeTab().id))
+  const saveRequestTab = attempt(SAVE_FAILURE, () => saveTab(activeTab().id))
+
+  const save = () => (isFlowTab(activeTab()) ? flows.save(activeTab().id) : saveRequestTab())
 
   async function updateSavedRequest(request, changes) {
     const saved = await backend.saveRequest(normalizeRequest({ ...request, ...changes }))
@@ -367,6 +375,7 @@ export function createWorkspaceActions(backend) {
     const { requests, folders } = data
     if (requests.length > 0) store().upsertRequests(await backend.saveRequests(requests))
     store().mergeFolders(folders)
+    if (data.flows?.length > 0) await flows.addImported(data.flows)
     store().adoptCollectionSettings(data.settings)
     const environments = store().mergeEnvironments(data.environments)
     const globals = store().mergeEnvironments(data.globals, SCOPE_GLOBAL)
@@ -553,6 +562,14 @@ export function createWorkspaceActions(backend) {
       cancelTab(tab)
       store().closeTab(tabId)
     }
+    if (isFlowTab(tab)) {
+      if (getPreferences().confirmCloseTab) flows.close(tabId, close)
+      else {
+        flows.discard(tabId)
+        close()
+      }
+      return
+    }
     const saved = requests.find((request) => request.id === tab.request.id)
     if (!getPreferences().confirmCloseTab || !isRequestDirty(tab.request, saved)) {
       close()
@@ -577,7 +594,7 @@ export function createWorkspaceActions(backend) {
   ai.load()
   const storageActions = createStorageActions(backend)
   const tree = createTreeActions(backend, attempt)
-  const tabActions = createTabActions(backend, attempt, cancelTab)
+  const tabActions = createTabActions(backend, attempt, cancelTab, flows)
 
   const activeSavedSource = () => {
     const { id } = activeTab().request
@@ -679,6 +696,7 @@ export function createWorkspaceActions(backend) {
 
   return {
     ai,
+    flows,
     send,
     sockets,
     examples,

@@ -2,7 +2,7 @@
 
 ## Folders and Git (desktop)
 
-The control next to the logo shows where the collection lives. **Open folder** keeps it as files: `gostman.yaml`, one YAML file per request, one directory per folder and `environments/<name>.yaml`. When the folder you pick already holds other files, such as a repository root, the collection goes in a `gostman` folder inside it, the same place `gostman init` uses, and the workspace is listed under the name of the folder you picked.
+The control next to the logo shows where the collection lives. **Open folder** keeps it as files: `gostman.yaml`, one YAML file per request, one directory per folder, `environments/<name>.yaml` and `flows/<name>.yaml` for [flows](flows.md). A top-level `flows` folder is kept for flows; one made by an older version that holds requests (it has a `folder.yaml`) stays a folder of requests, and flows cannot be saved in that workspace until it is renamed. When the folder you pick already holds other files, such as a repository root, the collection goes in a `gostman` folder inside it, the same place `gostman init` uses, and the workspace is listed under the name of the folder you picked.
 
 - A YAML file is read as a request only when it has a `method` or `url` field, so other YAML files in the folder, such as Kubernetes manifests or CI workflows, are left out.
 - A directory without a `folder.yaml` that holds no requests, such as `docs/` or `assets/`, is not shown in the sidebar.

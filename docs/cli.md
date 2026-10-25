@@ -8,6 +8,7 @@ On macOS the binary is not notarized: run `xattr -d com.apple.quarantine gostman
 
 ```bash
 gostman run orders-api --env CI --var-from-env API_TOKEN --reporter junit --output report.xml
+gostman flow run Checkout --workspace orders-api --env CI
 gostman send --workspace orders-api "Create user" --select '$.id'
 gostman mock orders-api --port 4010
 gostman capture --upstream https://api.example.com --workspace orders-api
@@ -17,6 +18,7 @@ gostman export orders-api --format openapi --out openapi.json
 ```
 
 - `run` takes a workspace folder, a Gostman export or a Bruno collection folder (converted in memory, see [Coming from Bruno](coming-from-bruno.md#try-it-on-the-bruno-folder-first)) and sends every request in order with its scripts, extraction rules, cookies, OAuth 2.0 tokens and checks. It exits 0 when everything passed, 1 when a check failed, 2 when the command or input is wrong and 3 when a request got no response; see [Exit codes](#exit-codes). A 4xx or 5xx status alone is not a failure; add a check such as `res.status equals 200`. Under each request the text report prints the URL that was sent, with variables filled in and secrets shown as `{{name}}`: values of variables whose names look secret (such as `apiKey` or `password`), values read from secret managers, OAuth 2.0 tokens and query parameters with such names. The JSON report keeps the URL as written in `url` and adds the sent one as `resolvedUrl`; the HTML report shows both. Requests run in the order the sidebar shows, where requests and subfolders share one order in each folder, and a `setNextRequest` loop stops after a pass has sent 1000 requests more than it holds; see [Run requests](runner-load-and-scan.md#run-requests).
+- `flow run` runs a [flow](flows.md) of a workspace or export by its name, its id or its YAML file, and `flow list` prints the flows; see [Flows](#flows).
 - `send` sends one saved request, named by its id, its name or its full `Folder/Name` path, or an ad hoc one (`gostman send GET https://example.com -H 'Accept: application/json'`), and prints only the response body on standard output, or only the selected value with `--select`, so `gostman send "Users/Get user" --select '$.id' | xargs ...` works; the short JSON summary and any warnings go to standard error. With `--json` standard output gets a single JSON document instead, with the body in `body.text` and its encoding (`utf8`, or `base64` for binary bodies) in `body.encoding`, so the output can go straight into `jq`: `gostman send --json GET https://example.com | jq -r .body.text`. `-d` or `--data` gives an unsaved request a body, `--select '$.path'` prints only that part of a JSON body, `--max-body n` prints at most n bytes of the body (default 8192), and `--include-headers` adds the response headers to the summary. Secret values in the output are shown as `{{name}}`, the same ones `run --redact` hides (see [Variables](#variables)), including a secret that a script or extract rule of the request stored, such as a login token; other values, such as `base_url` in the resolved URL, stay readable. `--reveal` prints secrets as they are, so `TOKEN=$(gostman send Login --select '$.token' --reveal)` hands a token to the next command; anything that can read the output, such as a CI log, then sees the secret, so keep it out of logs and never give it to a coding agent.
 - `mock` serves the saved examples of a workspace on `127.0.0.1` (a request picks another example of its route with the `x-mock-response-name` or `x-mock-response-code` header, see [Examples and the mock server](workspaces-and-mock.md#examples-and-the-mock-server-desktop)); `--openapi spec.yaml|url` serves a spec's operations instead or as well, `--delay`, `--delay-max`, `--error-rate` and `--error-status` add latency and failures, and `--log` prints each request's headers and body with credentials masked. `--port` sets the port (default 4010) and `--env name` picks the environment for `{{variables}}` in URLs; a variable in the path matches any value. `--cors` answers browser pages served from `localhost`, and `--cors-origin https://app.example.com` (repeatable) allows another exact origin.
 - `capture` forwards everything sent to `127.0.0.1:4020` on to one API, prints each call, and with `--workspace` saves each new method and path as a request with its response as an example. `--port` changes the port and `--folder name` saves into that top-level folder of the workspace.
@@ -78,9 +80,22 @@ The authorization code and device code grants need a person in a browser, so `ru
 
 `--only "Folder/Name"` (name, id or path, repeatable), `--bail`, `--delay ms`, `--timeout ms`, `--env-file .env` (KEY=value lines, `--var` wins; also for `send`, `load` and `mcp`; its values count as secret for `--redact`), `--stream-timeout s` (time budget for each streaming (SSE) request, default 10 seconds) and `--insecure`, which is off unless you pass it.
 
+## Flows
+
+```bash
+gostman flow list --workspace orders-api
+gostman flow run Checkout --workspace orders-api --env CI --reporter junit:flow.xml
+gostman flow run orders-api/flows/checkout.yaml --env CI --var-from-env API_TOKEN
+gostman run orders-api --flow Checkout --env CI
+```
+
+`flow run` takes every flag of `run` except the ones that choose or repeat requests (`--folder`, `--data`, `--iterations`, `--parallel`, `--only`, `--tags`, `--exclude-tags`, `--bail` and `--delay`, which exit with status 2). `--workspace` names the workspace folder or export file; without it, the current folder is used, or the workspace that holds the flow file. `gostman run <workspace> --flow <name>` does the same. `flow list` prints each flow with its number of steps and id, and `--json` prints them as JSON.
+
+The text report adds a `FLOW` line for every step that sends no request, and a request that failed but that the flow handled, by trying again or going to another step, is printed in yellow with the reason. The exit status follows the outcome of the flow, see [Exit codes](#exit-codes); the JSON report adds a `flow` object with the outcome, its message and every step in order. See [Flows](flows.md) for the steps and the file format.
+
 ## Exit codes
 
-`run` and `send` exit with:
+`run`, `flow run` and `send` exit with:
 
 | Code | Meaning |
 | --- | --- |
@@ -89,7 +104,7 @@ The authorization code and device code grants need a person in a browser, so `ru
 | 2 | the command or the input is wrong |
 | 3 | a request got no response: it could not be sent, the connection failed or timed out |
 
-A run with both kinds of failure exits 3. Scripts that only test for a non-zero code keep working. `load`, `scan` and `lint` exit 1 when their threshold is reached and 2 on wrong input.
+For a flow, 0 means it reached its end or an End step marked passed, and a failure the flow handled does not count; 1 also covers an End step marked failed and a flow stopped by its request limit, and 3 means the request that failed the flow got no response. A run with both kinds of failure exits 3. Scripts that only test for a non-zero code keep working. `load`, `scan` and `lint` exit 1 when their threshold is reached and 2 on wrong input.
 
 
 

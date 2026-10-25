@@ -4,7 +4,7 @@ Each folder here is a Gostman workspace: plain YAML files you can open in the de
 
 | Folder | What it shows |
 | --- | --- |
-| [`todo-api`](todo-api) | Folder headers, two environments, chaining one response into the next request, assertions that compare against variables, a saved example on every request for the mock server, and a data file. Calls [JSONPlaceholder](https://jsonplaceholder.typicode.com), or the mock with the `Mock` environment. |
+| [`todo-api`](todo-api) | Folder headers, two environments, chaining one response into the next request, assertions that compare against variables, a saved example on every request for the mock server, a data file, and a flow that retries, loops over a list and fails with its own message. Calls [JSONPlaceholder](https://jsonplaceholder.typicode.com), or the mock with the `Mock` environment. |
 | [`auth-and-secrets`](auth-and-secrets) | Auth set once on a folder and inherited by its requests, a request with its own auth, a request that expects a 401, secrets passed at run time instead of stored in the files, and a post-response script that fails the run when a secret is missing. Calls [httpbin](https://httpbin.org). |
 
 ## Run them
@@ -14,6 +14,7 @@ Install the command line first (see [Getting started](../docs/getting-started.md
 ```bash
 gostman run examples/todo-api --env Public
 gostman run examples/todo-api --env Public --data examples/todo-api/todos.csv --only "Todos/Create a todo"
+gostman flow run "Check todos" --workspace examples/todo-api --env Public
 gostman mock examples/todo-api --port 4010
 gostman run examples/todo-api --env Mock    # in a second terminal, while the mock runs
 
@@ -41,6 +42,7 @@ todo-api/
   Todos/folder.yaml         folder settings: headers, auth, variables
   Todos/List todos.yaml     one file per request
   todos.csv                 a data file for gostman run --data
+  flows/check-todos.yaml    a flow: list, open the first three, create one
 ```
 
 The folder layout is described in [Folders, mock server and capture](../docs/workspaces-and-mock.md).
