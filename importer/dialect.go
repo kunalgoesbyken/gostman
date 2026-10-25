@@ -8,6 +8,8 @@ import (
 
 type special func(t *translator, call *ast.CallExpression) string
 
+type check func(t *translator, call *ast.CallExpression)
+
 type receiver struct {
 	fields   map[string]bool
 	methods  map[string]bool
@@ -23,10 +25,12 @@ type dialect struct {
 	objects    map[string]string
 	calls      map[string]callRule
 	specials   map[string]special
+	checks     map[string]check
 	retired    map[string]bool
 	implicit   map[string]string
 	receivers  map[string]receiver
 	native     map[string]map[string]bool
+	shared     map[string]bool
 }
 
 func (d *dialect) rebased(path chain) (string, int, bool) {

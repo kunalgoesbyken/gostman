@@ -2,13 +2,18 @@ import { buildCollectionTree, collectRequests, foldersIn, ROOT_ID } from './coll
 import { isSecretField, SCHEMES } from './authSchemes'
 import { isPlainObject, parseJSON } from './dataUtils'
 import { parseExamples } from './examples'
-import { countActiveRequests, exportToGostman, parseImport, sanitizeImport } from './importExport'
+import { activeKindsOf, countActiveRequests, exportToGostman, parseImport, sanitizeImport } from './importExport'
 import { ShareError } from './share'
+import { SCRIPT_FIELDS } from './activeContent'
+import { placeholderNames } from './placeholders'
+import { environmentChain, environmentEntries, usedVariableNames, withEntries } from './variableScopes'
+import { environmentsForShare, foldersForShare, isScoped, ownsCollectionVariables } from './environmentScope'
 
 const PLACEHOLDER_START = '{{'
 const AUTH_SECRET_FIELDS = ['password', 'token', 'value']
 const OAUTH_SECRET_FIELDS = ['clientSecret', 'password']
 const NOTHING_EXISTING = { requestIds: [], folderIds: [] }
+const QUOTES = ['"', "'", '`']
 
 const descendantsOf = (tree, folderId) => (
   foldersIn(tree, folderId).flatMap((folder) => [folder, ...descendantsOf(tree, folder.id)])
@@ -22,9 +27,18 @@ function folderSelection(requests, folders, folder) {
   }
 }
 
-function selectionOf(requests, folders, folderId) {
-  const folder = folders.find((candidate) => candidate.id === folderId)
-  return folder ? folderSelection(requests, folders, folder) : { requests, folders }
+function folderChain(folders, folderId) {
+  const byId = new Map(folders.map((folder) => [folder.id, folder]))
+  const chain = []
+  for (let folder = byId.get(folderId); folder && !chain.includes(folder); folder = byId.get(folder.parentId)) chain.push(folder)
+  return chain.reverse()
+}
+
+function selectionOf(requests, folders, scopeId) {
+  const folder = folders.find((candidate) => candidate.id === scopeId)
+  if (folder) return folderSelection(requests, folders, folder)
+  const request = requests.find((candidate) => candidate.id === scopeId)
+  return request ? { requests: [request], folders: folderChain(folders, request.folderId) } : { requests, folders }
 }
 
 function variableNames(environment) {
@@ -39,13 +53,60 @@ const withoutValues = (environment) => ({
 
 const withoutExamples = (request) => ({ ...request, examples: '' })
 
-export function buildSharedExport({ requests, folders, environments, settings }, { folderId, includeVariables, includeExamples }) {
+const withoutCollectionValues = (folder) => (ownsCollectionVariables(folder)
+  ? { ...folder, collectionVariables: withoutValues({ variables: folder.collectionVariables }).variables }
+  : folder)
+
+const scriptsOf = ({ requests, folders }) => [...requests, ...folders].flatMap((item) => SCRIPT_FIELDS.map((field) => item[field] || ''))
+
+const quotedIn = (scripts, name) => QUOTES.some((quote) => scripts.some((script) => script.includes(`${quote}${name}${quote}`)))
+
+function referencedNames(selected, entries) {
+  const scripts = scriptsOf(selected)
+  const names = usedVariableNames([selected.requests, selected.folders])
+  entries.filter(({ name }) => quotedIn(scripts, name)).forEach(({ name }) => names.add(name))
+  for (let size = 0; size !== names.size;) {
+    size = names.size
+    entries.filter(({ name }) => names.has(name)).flatMap(({ value }) => placeholderNames(String(value))).forEach((name) => names.add(name))
+  }
+  return names
+}
+
+function referencedEnvironments(selected, environments) {
+  const names = referencedNames(selected, environments.flatMap(environmentEntries))
+  const reduced = environments.map((environment) => withEntries(environment, environmentEntries(environment).filter(({ name }) => names.has(name))))
+  const used = reduced.filter((environment) => variableNames(environment).length > 0)
+  const kept = new Set(used.flatMap((environment) => environmentChain(reduced, environment)))
+  return reduced.filter((environment) => kept.has(environment))
+}
+
+const uniqueSorted = (names) => Array.from(new Set(names)).sort()
+
+export const sharedVariableNames = (exported) => uniqueSorted(exported.gostman.environments.flatMap(variableNames))
+
+export const sharedCollectionVariableNames = (exported) => uniqueSorted([
+  ...Object.keys(exported.gostman.variables),
+  ...exported.gostman.folders.filter(ownsCollectionVariables).flatMap((folder) => variableNames({ variables: folder.collectionVariables })),
+])
+
+function referencedValues(selected, list) {
+  const entries = environmentEntries(list)
+  const names = referencedNames(selected, entries)
+  return Object.fromEntries(entries.filter(({ name }) => names.has(name)).map(({ name, value }) => [name, value]))
+}
+
+export function buildSharedExport({ requests, folders, environments, collectionVariables = {}, settings, sharedOrder }, { folderId, includeVariables, includeExamples }) {
   const selected = selectionOf(requests, folders, folderId)
+  const shared = folderId ? referencedEnvironments(selected, environmentsForShare(environments, folders, selected.folders)) : environments
+  const sharedFolders = folderId ? foldersForShare(folders, selected.folders, referencedValues(selected, collectionVariables)) : selected.folders
+  const sharedList = folderId ? {} : collectionVariables
   return exportToGostman(
     includeExamples ? selected.requests : selected.requests.map(withoutExamples),
-    selected.folders,
-    includeVariables ? environments : environments.map(withoutValues),
-    folderId ? undefined : settings
+    includeVariables ? sharedFolders : sharedFolders.map(withoutCollectionValues),
+    includeVariables ? shared : shared.map(withoutValues),
+    folderId ? undefined : settings,
+    includeVariables ? sharedList : { ...sharedList, variables: withoutValues({ variables: sharedList.variables }).variables },
+    sharedOrder,
   )
 }
 
@@ -78,6 +139,7 @@ export function describeShared(imported) {
     folders: data.folders.map(({ id, name }) => ({ id, name })),
     environments: data.environments.map(describeEnvironment),
     activeCount: countActiveRequests(data),
+    activeKinds: activeKindsOf(data),
     exampleCount: exampleCount(data.requests),
     warnings: data.warnings,
   }
@@ -96,12 +158,13 @@ function unknownVariables(incoming, existing) {
   return { ...incoming, variables: JSON.stringify(Object.fromEntries(added)) }
 }
 
-export function keepingOwnVariables(imported, environments) {
-  const existingNamed = (name) => environments.find((environment) => environment.name === name)
+export function keepingOwnVariables(imported, environments, folders = []) {
   const data = sanitizeImport(imported, NOTHING_EXISTING)
+  const existingNamed = (incoming) => (incoming.folderId
+    ? undefined
+    : environments.find((environment) => environment.name === incoming.name && !isScoped(environment, folders)))
   return {
     ...data,
-    variables: {},
-    environments: data.environments.map((environment) => unknownVariables(environment, existingNamed(environment.name))),
+    environments: data.environments.map((environment) => unknownVariables(environment, existingNamed(environment))),
   }
 }

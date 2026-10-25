@@ -7,9 +7,13 @@ import { isDesktopShell, isDragRegion, windowControls } from "../lib/windowContr
 import { promptInstall, useInstallable } from "../lib/pwa"
 import { INSTALL_TEXT } from "../lib/installText"
 import { SIDEBAR_TEXT } from "../lib/sidebarText"
+import { APP_TEXT } from "../lib/appText"
+import { COMMAND_TEXT } from "../lib/commandText"
+import { IMPORT_TEXT } from "../lib/importText"
 import { hintWithShortcut } from "../lib/shortcuts"
 import { useShortcutLabel } from "../hooks/useShortcuts"
 import { useWindowFrame } from "../hooks/useWindowFrame"
+import { useAppStore } from "../store/appStore"
 import { Logo } from "./ui/logo"
 
 const DRAG = { "--wails-draggable": "drag" }
@@ -24,12 +28,13 @@ export function AppHeader({ storage, windowFrame, onImport, onOpenCommands, onTo
   const drawsTitleBar = Boolean(useWindowFrame(windowFrame)?.frameless)
   const paletteShortcut = useShortcutLabel("commandPalette")
   const sidebarShortcut = useShortcutLabel("toggleSidebar")
+  const isSidebarOpen = useAppStore((s) => s.isSidebarOpen)
   const canInstall = useInstallable()
 
   return (
     <header className="relative flex h-12 shrink-0 items-center gap-3 border-b border-border bg-background px-3 max-sm:gap-2" style={drawsTitleBar ? DRAG : undefined} onDoubleClick={drawsTitleBar ? toggleMaximiseOnDragRegion : undefined}>
-      <IconButton label={hintWithShortcut(SIDEBAR_TEXT.toggle, sidebarShortcut)} icon={PanelLeft} size="icon" onClick={onToggleSidebar} style={drawsTitleBar ? NO_DRAG : undefined} />
-      {onBack && <IconButton label="Back to the landing page" icon={ArrowLeft} size="icon" onClick={onBack} />}
+      <IconButton label={hintWithShortcut(SIDEBAR_TEXT.toggle, sidebarShortcut)} icon={PanelLeft} size="icon" aria-expanded={isSidebarOpen} onClick={onToggleSidebar} style={drawsTitleBar ? NO_DRAG : undefined} />
+      {onBack && <IconButton label={APP_TEXT.backToLanding} icon={ArrowLeft} size="icon" onClick={onBack} />}
 
       {onBack || isDesktop ? (
         <div className="flex shrink-0 items-center gap-2">
@@ -47,10 +52,10 @@ export function AppHeader({ storage, windowFrame, onImport, onOpenCommands, onTo
       <div className="ml-auto flex min-w-0 items-center gap-3 max-sm:gap-2" style={drawsTitleBar ? NO_DRAG : undefined}>
         <Button variant="ghost" onClick={onOpenCommands} className="hidden lg:inline-flex">
           <Search />
-          Commands
+          {COMMAND_TEXT.heading}
           {paletteShortcut && <kbd>{paletteShortcut}</kbd>}
         </Button>
-        <IconButton label="Commands" icon={Search} size="icon" onClick={onOpenCommands} className="lg:hidden" />
+        <IconButton label={COMMAND_TEXT.heading} icon={Search} size="icon" onClick={onOpenCommands} className="lg:hidden" />
         {gettingStarted}
         <EnvironmentSwitcher />
         {canInstall && (
@@ -61,7 +66,7 @@ export function AppHeader({ storage, windowFrame, onImport, onOpenCommands, onTo
         )}
         <Button variant="outline" onClick={onImport} className="max-sm:hidden">
           <Import />
-          Import
+          {IMPORT_TEXT.importButton}
         </Button>
       </div>
       {drawsTitleBar && <WindowControls />}

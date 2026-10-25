@@ -804,11 +804,32 @@ export namespace engine {
 	
 	
 	
+	export class PreparedPart {
+	    name: string;
+	    value?: string;
+	    file?: string;
+	    contentType?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new PreparedPart(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.value = source["value"];
+	        this.file = source["file"];
+	        this.contentType = source["contentType"];
+	    }
+	}
 	export class Prepared {
 	    method: string;
 	    url: string;
 	    headers: HeaderEntry[];
 	    body: string;
+	    parts?: PreparedPart[];
+	    file?: string;
+	    unresolved?: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Prepared(source);
@@ -820,6 +841,9 @@ export namespace engine {
 	        this.url = source["url"];
 	        this.headers = this.convertValues(source["headers"], HeaderEntry);
 	        this.body = source["body"];
+	        this.parts = this.convertValues(source["parts"], PreparedPart);
+	        this.file = source["file"];
+	        this.unresolved = source["unresolved"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -840,6 +864,7 @@ export namespace engine {
 		    return a;
 		}
 	}
+	
 	export class Request {
 	    method: string;
 	    url: string;
@@ -948,6 +973,7 @@ export namespace engine {
 	    timeline?: Timeline;
 	    failed?: boolean;
 	    notifications?: Notification[];
+	    unresolved?: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Response(source);
@@ -972,6 +998,7 @@ export namespace engine {
 	        this.timeline = this.convertValues(source["timeline"], Timeline);
 	        this.failed = source["failed"];
 	        this.notifications = this.convertValues(source["notifications"], Notification);
+	        this.unresolved = source["unresolved"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -1295,6 +1322,7 @@ export namespace importer {
 	    requests: number;
 	    folders: number;
 	    environments: number;
+	    globals: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Source(source);
@@ -1307,6 +1335,7 @@ export namespace importer {
 	        this.requests = source["requests"];
 	        this.folders = source["folders"];
 	        this.environments = source["environments"];
+	        this.globals = source["globals"];
 	    }
 	}
 	export class Reply {
@@ -1317,10 +1346,14 @@ export namespace importer {
 	    environments: workspace.Environment[];
 	    globals?: workspace.Environment[];
 	    variables: Record<string, string>;
+	    variablesMeta?: string;
 	    warnings: string[];
+	    notes?: string[];
 	    skipped: string[];
+	    sharedOrder: boolean;
 	    files?: File[];
 	    archive?: string;
+	    collection?: workspace.Collection;
 	
 	    static createFrom(source: any = {}) {
 	        return new Reply(source);
@@ -1335,10 +1368,14 @@ export namespace importer {
 	        this.environments = this.convertValues(source["environments"], workspace.Environment);
 	        this.globals = this.convertValues(source["globals"], workspace.Environment);
 	        this.variables = source["variables"];
+	        this.variablesMeta = source["variablesMeta"];
 	        this.warnings = source["warnings"];
+	        this.notes = source["notes"];
 	        this.skipped = source["skipped"];
+	        this.sharedOrder = source["sharedOrder"];
 	        this.files = this.convertValues(source["files"], File);
 	        this.archive = source["archive"];
+	        this.collection = this.convertValues(source["collection"], workspace.Collection);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -1811,6 +1848,7 @@ export namespace main {
 	    color: string;
 	    extends: string;
 	    meta: string;
+	    folderId?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Environment(source);
@@ -1824,6 +1862,7 @@ export namespace main {
 	        this.color = source["color"];
 	        this.extends = source["extends"];
 	        this.meta = source["meta"];
+	        this.folderId = source["folderId"];
 	    }
 	}
 	export class Folder {
@@ -1833,6 +1872,8 @@ export namespace main {
 	    parentId: string;
 	    sortOrder: number;
 	    variables: string;
+	    color?: string;
+	    tags?: string[];
 	    description: string;
 	    headers: string;
 	    auth: engine.Auth;
@@ -1840,6 +1881,8 @@ export namespace main {
 	    postScript: string;
 	    assertions: string;
 	    scriptTimeoutMs?: number;
+	    collectionVariables?: string;
+	    collectionVariablesMeta?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Folder(source);
@@ -1853,6 +1896,8 @@ export namespace main {
 	        this.parentId = source["parentId"];
 	        this.sortOrder = source["sortOrder"];
 	        this.variables = source["variables"];
+	        this.color = source["color"];
+	        this.tags = source["tags"];
 	        this.description = source["description"];
 	        this.headers = source["headers"];
 	        this.auth = this.convertValues(source["auth"], engine.Auth);
@@ -1860,6 +1905,8 @@ export namespace main {
 	        this.postScript = source["postScript"];
 	        this.assertions = source["assertions"];
 	        this.scriptTimeoutMs = source["scriptTimeoutMs"];
+	        this.collectionVariables = source["collectionVariables"];
+	        this.collectionVariablesMeta = source["collectionVariablesMeta"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -1888,6 +1935,7 @@ export namespace main {
 	    problem: string;
 	    restricted: boolean;
 	    root: string;
+	    scope: string;
 	    branch: string;
 	    detached: boolean;
 	    upstream: string;
@@ -1911,6 +1959,7 @@ export namespace main {
 	        this.problem = source["problem"];
 	        this.restricted = source["restricted"];
 	        this.root = source["root"];
+	        this.scope = source["scope"];
 	        this.branch = source["branch"];
 	        this.detached = source["detached"];
 	        this.upstream = source["upstream"];
@@ -1920,6 +1969,98 @@ export namespace main {
 	        this.hasCommits = source["hasCommits"];
 	        this.changes = this.convertValues(source["changes"], gitutil.Change);
 	        this.remotes = this.convertValues(source["remotes"], gitutil.Remote);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class HistoryEntry {
+	    id: string;
+	    name: string;
+	    description: string;
+	    tags?: string[];
+	    url: string;
+	    method: string;
+	    headers: string;
+	    body: string;
+	    bodyType: string;
+	    queryParams: string;
+	    folderId: string;
+	    graphqlQuery: string;
+	    graphqlVariables: string;
+	    auth: engine.Auth;
+	    options: engine.Options;
+	    extractors: string;
+	    assertions: string;
+	    examples: string;
+	    preScript: string;
+	    postScript: string;
+	    grpcMethod: string;
+	    grpcMessage: string;
+	    grpcProtos: string;
+	    mcpMethod: string;
+	    mcpTool: string;
+	    mcpArguments: string;
+	    socketProtocol: string;
+	    socketMessages: string;
+	    vars: string;
+	    timestamp: string;
+	    sortOrder: number;
+	    statusCode?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new HistoryEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.description = source["description"];
+	        this.tags = source["tags"];
+	        this.url = source["url"];
+	        this.method = source["method"];
+	        this.headers = source["headers"];
+	        this.body = source["body"];
+	        this.bodyType = source["bodyType"];
+	        this.queryParams = source["queryParams"];
+	        this.folderId = source["folderId"];
+	        this.graphqlQuery = source["graphqlQuery"];
+	        this.graphqlVariables = source["graphqlVariables"];
+	        this.auth = this.convertValues(source["auth"], engine.Auth);
+	        this.options = this.convertValues(source["options"], engine.Options);
+	        this.extractors = source["extractors"];
+	        this.assertions = source["assertions"];
+	        this.examples = source["examples"];
+	        this.preScript = source["preScript"];
+	        this.postScript = source["postScript"];
+	        this.grpcMethod = source["grpcMethod"];
+	        this.grpcMessage = source["grpcMessage"];
+	        this.grpcProtos = source["grpcProtos"];
+	        this.mcpMethod = source["mcpMethod"];
+	        this.mcpTool = source["mcpTool"];
+	        this.mcpArguments = source["mcpArguments"];
+	        this.socketProtocol = source["socketProtocol"];
+	        this.socketMessages = source["socketMessages"];
+	        this.vars = source["vars"];
+	        this.timestamp = source["timestamp"];
+	        this.sortOrder = source["sortOrder"];
+	        this.statusCode = source["statusCode"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -2142,15 +2283,17 @@ export namespace main {
 	    activeEnvironmentId: string;
 	    requests: Request[];
 	    folders: Folder[];
-	    history: Request[];
+	    history: HistoryEntry[];
 	    cookies: engine.CookieInfo[];
 	    settings: Settings;
 	    restricted?: boolean;
 	    globals?: Environment[];
 	    activeGlobalId?: string;
 	    collectionVariables?: string;
+	    collectionVariablesMeta?: string;
 	    dotEnv?: Record<string, string>;
 	    collectionSettings: workspace.Settings;
+	    sharedOrder?: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new SavedData(source);
@@ -2163,15 +2306,17 @@ export namespace main {
 	        this.activeEnvironmentId = source["activeEnvironmentId"];
 	        this.requests = this.convertValues(source["requests"], Request);
 	        this.folders = this.convertValues(source["folders"], Folder);
-	        this.history = this.convertValues(source["history"], Request);
+	        this.history = this.convertValues(source["history"], HistoryEntry);
 	        this.cookies = this.convertValues(source["cookies"], engine.CookieInfo);
 	        this.settings = this.convertValues(source["settings"], Settings);
 	        this.restricted = source["restricted"];
 	        this.globals = this.convertValues(source["globals"], Environment);
 	        this.activeGlobalId = source["activeGlobalId"];
 	        this.collectionVariables = source["collectionVariables"];
+	        this.collectionVariablesMeta = source["collectionVariablesMeta"];
 	        this.dotEnv = source["dotEnv"];
 	        this.collectionSettings = this.convertValues(source["collectionSettings"], workspace.Settings);
+	        this.sharedOrder = source["sharedOrder"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -3034,6 +3179,7 @@ export namespace mock {
 	    route: string;
 	    rule: string;
 	    fault: string;
+	    noExample?: boolean;
 	    status: number;
 	    durationMs: number;
 	
@@ -3053,6 +3199,7 @@ export namespace mock {
 	        this.route = source["route"];
 	        this.rule = source["rule"];
 	        this.fault = source["fault"];
+	        this.noExample = source["noExample"];
 	        this.status = source["status"];
 	        this.durationMs = source["durationMs"];
 	    }
@@ -3083,9 +3230,9 @@ export namespace mock {
 	    method: string;
 	    path: string;
 	    state: string;
-	    reason: string;
-	    exampleId: string;
-	    exampleName: string;
+	    reason?: string;
+	    exampleId?: string;
+	    exampleName?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Route(source);
@@ -3252,6 +3399,7 @@ export namespace openapi {
 	    folderId: string;
 	    auth: engine.Auth;
 	    examples: string;
+	    vars: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Request(source);
@@ -3272,6 +3420,7 @@ export namespace openapi {
 	        this.folderId = source["folderId"];
 	        this.auth = this.convertValues(source["auth"], engine.Auth);
 	        this.examples = source["examples"];
+	        this.vars = source["vars"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -4261,6 +4410,7 @@ export namespace workspace {
 	    color: string;
 	    extends: string;
 	    meta: string;
+	    folderId?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Environment(source);
@@ -4274,6 +4424,7 @@ export namespace workspace {
 	        this.color = source["color"];
 	        this.extends = source["extends"];
 	        this.meta = source["meta"];
+	        this.folderId = source["folderId"];
 	    }
 	}
 	export class Folder {
@@ -4282,6 +4433,8 @@ export namespace workspace {
 	    parentId: string;
 	    sortOrder: number;
 	    variables: string;
+	    color?: string;
+	    tags?: string[];
 	    description: string;
 	    headers: string;
 	    auth: engine.Auth;
@@ -4289,6 +4442,8 @@ export namespace workspace {
 	    postScript: string;
 	    assertions: string;
 	    scriptTimeoutMs?: number;
+	    collectionVariables?: string;
+	    collectionVariablesMeta?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Folder(source);
@@ -4301,6 +4456,8 @@ export namespace workspace {
 	        this.parentId = source["parentId"];
 	        this.sortOrder = source["sortOrder"];
 	        this.variables = source["variables"];
+	        this.color = source["color"];
+	        this.tags = source["tags"];
 	        this.description = source["description"];
 	        this.headers = source["headers"];
 	        this.auth = this.convertValues(source["auth"], engine.Auth);
@@ -4308,6 +4465,8 @@ export namespace workspace {
 	        this.postScript = source["postScript"];
 	        this.assertions = source["assertions"];
 	        this.scriptTimeoutMs = source["scriptTimeoutMs"];
+	        this.collectionVariables = source["collectionVariables"];
+	        this.collectionVariablesMeta = source["collectionVariablesMeta"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -4423,7 +4582,9 @@ export namespace workspace {
 	    folders: Folder[];
 	    environments: Environment[];
 	    variables?: string;
+	    variablesMeta?: string;
 	    settings: Settings;
+	    sharedOrder?: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Collection(source);
@@ -4435,7 +4596,9 @@ export namespace workspace {
 	        this.folders = this.convertValues(source["folders"], Folder);
 	        this.environments = this.convertValues(source["environments"], Environment);
 	        this.variables = source["variables"];
+	        this.variablesMeta = source["variablesMeta"];
 	        this.settings = this.convertValues(source["settings"], Settings);
+	        this.sharedOrder = source["sharedOrder"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

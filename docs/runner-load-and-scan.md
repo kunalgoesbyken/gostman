@@ -6,7 +6,9 @@ This page covers the Run requests dialog (the collection runner), the Load test 
 
 The Run requests dialog sends the requests of your collection one after another and shows the outcome of each. Open it with the **Run requests** command or the **Run requests** button at the top of the sidebar, or with **Run folder** in a folder's menu in the sidebar, which preselects that folder.
 
-Requests run in sidebar order, with their scripts, extraction rules and assertions, using the active environment. WebSocket requests are skipped.
+Requests run in sidebar order, with their scripts, extraction rules and assertions, using the active environment, from top to bottom: a folder's requests run where the folder sits, so a Login request above a Users folder runs before every request in it. `gostman run` and an agent's `run_folder` use the same order, and so do exports and imports where the other tool allows it; see [Order of requests and folders](collections-and-git.md#order-of-requests-and-folders). WebSocket requests are skipped.
+
+Scripts can change the order with `setNextRequest`; see [Scripting](scripting-and-settings.md). A pass through the run may send at most 1000 more requests than it holds, so a loop that never ends, such as a retry on a 401 that always comes back, stops the run with a message that names the request that kept jumping, and that request counts as failed.
 
 ![The Run requests dialog after running the Orders folder: List orders, Create order, Upload receipt and Monthly report passed, and Export orders failed with a 500 status because the check res.status equals 200 did not hold. The footer reads Ran 5 of 5, 4 passed, 1 failed.](../gostman-gui/frontend/src/assets/landing/runner.webp)
 
@@ -20,7 +22,7 @@ Requests run in sidebar order, with their scripts, extraction rules and assertio
 | **Data file (CSV or JSON)** | Loads a file with one row per iteration. See [Data files](#data-files). |
 | **Iterations** | Limits the number of iterations. Empty shows the number that will run: the row count of the data file, or 1. The highest value is 10000. |
 | **Parallel** | Sends up to this many requests at once. Empty means 1. |
-| **Only tags** and **Skip tags** | Shown when a request in the collection has tags. **Only tags** keeps the requests that have at least one of the tags you add; empty keeps every request. **Skip tags** leaves out requests that have any of them. Case is ignored. Both apply inside the chosen folder, and the footer counts what is left. Tags are set in a request's [Settings](requests-and-responses.md#settings) tab. |
+| **Only tags** and **Skip tags** | Shown when a request or folder in the collection has tags. **Only tags** keeps the requests that have at least one of the tags you add; empty keeps every request. **Skip tags** leaves out requests that have any of them. A folder's tags count for every request inside it. Case is ignored. Both apply inside the chosen folder, and the footer counts what is left. Set a request's tags in its [Settings](requests-and-responses.md#settings) tab or with **Tags…** in its menu in the sidebar, and a folder's with **Colour and tags…**. |
 | **Run** and **Stop** | Starts the run. While a run is going, **Stop** cancels the requests in flight and ends it. |
 
 All controls except **Stop** are disabled while a run is going. **Run** is disabled when no request is in scope.
@@ -32,7 +34,7 @@ A data file runs the whole selection once per row.
 - A CSV file needs a header row. Quoted fields may contain commas and line breaks, and every value is text.
 - A JSON file must be an array of objects, one object per iteration.
 - A data file can have at most 10000 rows, and it must have at least one.
-- A row's columns become variables for that iteration and take precedence over the environment's variables. `iteration` (starting at 1) and `iterationCount` are set as well, so you can write `{{iteration}}` in a request.
+- A row's columns become variables for that iteration and win over request, folder and environment variables with the same name, so a column `id` fills `{{id}}` even in a request whose **Vars** tab sets `id`. The dialog lists the columns a file sets. The values are kept as session values for the run and put back when it ends. `iteration` (starting at 1) and `iterationCount` are set as well, so you can write `{{iteration}}` in a request.
 - With a data file loaded, the dialog shows its name and row count. Select that button to remove the file.
 - If **Iterations** is set, only that many rows are used, up to the number of rows in the file. Without a data file, **Iterations** repeats the run that many times.
 
@@ -48,14 +50,16 @@ Each row of the results list shows:
 
 - an icon for the outcome: passed, failed or skipped;
 - the method and the request name, with `#` and the iteration number when the run has iterations;
-- the number of passed assertions out of the total, the duration in milliseconds and the status;
-- the message of any error, and each failed assertion with its detail.
+- the number of passed assertions out of the total, such as `3/4 checks`, the duration in milliseconds and the status;
+- the message of any error, any `{{variables}}` that no variable defined, and each failed assertion with its detail. Select an undefined name to open Environments with a new row for it in the active environment.
+
+A skipped row shows **Skipped** and the reason, for example that a script stopped the run or continued it with another request.
 
 Select a row to expand it. It then shows the address that was called, the assertions that passed and the response body, with JSON formatted. A run keeps the first 64 KB of each body; send the request on its own to see a longer one.
 
 The footer reads, for example, `Ran 5 of 5 · 4 passed · 1 failed`. Before a run it shows how many requests are in scope, and how many iterations when there is more than one.
 
-A 4xx or 5xx status does not fail a request by itself. Add an assertion such as `res.status equals 200`, as in the screenshot above. A request also counts as failed when it gets no response or when its script raises an error.
+A 4xx or 5xx status does not fail a request by itself. Add an assertion such as `res.status equals 200`, as in the screenshot above. A request also counts as failed when it gets no response, when its script raises an error, or when an MCP tool reports an error.
 
 Requests in a folder linked to an OpenAPI spec also get the spec's contract checks, which count like assertions; see [Contract checks](import-export-and-specs.md#contract-checks).
 
@@ -71,7 +75,7 @@ The Load test dialog sends the current request many times at once and measures h
 
 ![A finished load test with 20 workers for 5 seconds: every request succeeded, with a latency table from min to max](../screenshots/load-test.png)
 
-The button and the command appear only in the desktop app. In the web version neither the request bar nor the palette offers them.
+The button and the command appear only in the desktop app. In the web version neither the request bar nor the palette offers them. The button is also hidden for gRPC and MCP requests.
 
 Only test systems you own or have permission to test.
 
@@ -82,7 +86,7 @@ The dialog shows the request's method and URL, and a notice: each worker sends t
 The dialog refuses a request in these cases and shows the reason:
 
 - The request has no URL: `Give the request a URL first.`
-- The request is gRPC, MCP, WebSocket or streaming: `Only HTTP requests can be load tested.`
+- The request is gRPC, MCP, WebSocket or streaming: `Only HTTP requests can be load tested. gRPC, MCP, WebSocket and streaming requests are not supported.`
 
 ### Settings
 

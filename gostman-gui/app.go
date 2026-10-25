@@ -51,16 +51,18 @@ type SavedData struct {
 	ActiveEnvironmentId string              `json:"activeEnvironmentId"`
 	Requests            []Request           `json:"requests"`
 	Folders             []Folder            `json:"folders"`
-	History             []Request           `json:"history"`
+	History             []HistoryEntry      `json:"history"`
 	Cookies             []engine.CookieInfo `json:"cookies"`
 	Settings            Settings            `json:"settings"`
 	Restricted          bool                `json:"restricted,omitempty"`
 
-	Globals             []Environment      `json:"globals,omitempty"`
-	ActiveGlobalId      string             `json:"activeGlobalId,omitempty"`
-	CollectionVariables string             `json:"collectionVariables,omitempty"`
-	DotEnv              map[string]string  `json:"dotEnv,omitempty"`
-	CollectionSettings  workspace.Settings `json:"collectionSettings"`
+	Globals                 []Environment      `json:"globals,omitempty"`
+	ActiveGlobalId          string             `json:"activeGlobalId,omitempty"`
+	CollectionVariables     string             `json:"collectionVariables,omitempty"`
+	CollectionVariablesMeta string             `json:"collectionVariablesMeta,omitempty"`
+	DotEnv                  map[string]string  `json:"dotEnv,omitempty"`
+	CollectionSettings      workspace.Settings `json:"collectionSettings"`
+	SharedOrder             bool               `json:"sharedOrder,omitempty"`
 }
 
 type Environment struct {
@@ -70,6 +72,7 @@ type Environment struct {
 	Color     string `json:"color"`
 	Extends   string `json:"extends"`
 	Meta      string `json:"meta"`
+	FolderId  string `json:"folderId,omitempty"`
 }
 
 type Folder struct {
@@ -82,6 +85,8 @@ type Folder struct {
 	Color     string   `json:"color,omitempty"`
 	Tags      []string `json:"tags,omitempty"`
 	workspace.Settings
+	CollectionVariables     string `json:"collectionVariables,omitempty"`
+	CollectionVariablesMeta string `json:"collectionVariablesMeta,omitempty"`
 }
 
 type Request struct {
@@ -116,6 +121,11 @@ type Request struct {
 	Vars             string         `json:"vars"`
 	Timestamp        string         `json:"timestamp"`
 	SortOrder        int64          `json:"sortOrder"`
+}
+
+type HistoryEntry struct {
+	Request
+	StatusCode int `json:"statusCode,omitempty"`
 }
 
 var (
@@ -220,6 +230,8 @@ func (a *App) LoadData() (SavedData, error) {
 	if !data.Restricted {
 		data.Environments = vault.withSecrets(data.Environments, secretScope())
 		data.Globals = vault.withSecrets(data.Globals, globalSecretScope)
+		data.CollectionVariables = vault.withSharedSecrets(data.CollectionVariables, data.CollectionVariablesMeta)
+		data.Folders = vault.withFolderSecrets(data.Folders)
 	}
 	if data.Requests == nil {
 		data.Requests = []Request{}
@@ -228,7 +240,7 @@ func (a *App) LoadData() (SavedData, error) {
 		data.Folders = []Folder{}
 	}
 	if data.History == nil {
-		data.History = []Request{}
+		data.History = []HistoryEntry{}
 	}
 	if data.Cookies == nil {
 		data.Cookies = []engine.CookieInfo{}
@@ -261,10 +273,18 @@ func (a *App) DeleteRequest(id string) error {
 }
 
 func (a *App) SaveFolders(folders []Folder) error {
-	return storage.current().saveFolders(folders)
+	stripped, err := vault.withoutFolderSecrets(folders)
+	if err != nil {
+		return err
+	}
+	return storage.current().saveFolders(stripped)
 }
 
-func (a *App) SaveHistory(history []Request) error {
+func (a *App) ShareSiblingOrder() error {
+	return storage.current().shareOrder()
+}
+
+func (a *App) SaveHistory(history []HistoryEntry) error {
 	return mutateData(func(data *SavedData) {
 		data.History = history
 	})
@@ -281,6 +301,14 @@ func (a *App) SaveEnvironments(environments []Environment, activeId string) erro
 func (a *App) ResetData() error {
 	a.stopServers(a.ctx)
 	captureJournal.Clear()
+	if err := resetData(); err != nil {
+		return err
+	}
+	a.loadNetwork()
+	return nil
+}
+
+func resetData() error {
 	dataMutex.Lock()
 	defer dataMutex.Unlock()
 	if err := forgetWorkspaces(); err != nil {

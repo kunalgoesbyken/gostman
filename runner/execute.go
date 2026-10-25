@@ -16,12 +16,14 @@ const (
 	mcpMethod     = "MCP"
 	preRequest    = "Pre-request script"
 	postResponse  = "Post-response script"
+	checksOnly    = "Checks"
 	skippedSocket = "WebSocket requests are not part of a run."
 )
 
 type session struct {
 	scripts     *sandbox.Sandbox
 	policy      engine.Policy
+	collection  variables
 	variables   variables
 	session     variables
 	environment string
@@ -87,12 +89,16 @@ func (x *exchange) stop(message string) {
 }
 
 func (s *session) scoped(request Request) variables {
-	scopes := append([]variables{s.variables}, request.folderScopes()...)
+	scopes := append(append(append([]variables{s.collection}, request.collectionScopes()...), s.variables), request.folderScopes()...)
 	return layered(append(scopes, requestScope(request.Vars), s.session)...)
 }
 
+func (s *session) known() variables {
+	return layered(s.collection, s.variables)
+}
+
 func (s *session) current() variables {
-	return layered(s.variables, s.session)
+	return layered(s.collection, s.variables, s.session)
 }
 
 func (s *session) write(writes scopedWrites) {
@@ -112,12 +118,12 @@ func (s *session) runStage(ctx context.Context, stage string, work job, request 
 	if err := s.scripts.Call("scriptCookies", &work.Cookies, s.common.cookieList(), s.hosts); err != nil {
 		return stageRun{Error: stage + ": " + err.Error()}
 	}
-	allowance, err := s.scripts.Allowance(request.scriptTimeout())
+	allowance, err := s.scripts.Allowance(request.scriptTimeout(), hasText(work.Script))
 	if err != nil {
 		return stageRun{Error: stage + ": " + err.Error()}
 	}
 	var run stageRun
-	if err := s.scripts.Isolated(allowance, s.bridge(ctx), "runJob", &run, work); err != nil {
+	if err := s.runJob(ctx, allowance, work, &run); err != nil {
 		return stageRun{Error: stage + ": " + err.Error()}
 	}
 	if err := s.storeScriptCookies(run.Cookies); err != nil {
@@ -128,6 +134,13 @@ func (s *session) runStage(ctx context.Context, stage string, work job, request 
 		run.Error = stage + ": " + run.Error
 	}
 	return run
+}
+
+func (s *session) runJob(ctx context.Context, allowance sandbox.Allowance, work job, run *stageRun) error {
+	if hasText(work.Script) {
+		return s.scripts.Isolated(allowance, s.bridge(ctx), "runJob", run, work)
+	}
+	return s.scripts.Shared(allowance, "runJob", run, work)
 }
 
 func (s *session) subject(function string, source any) (json.RawMessage, error) {
@@ -248,8 +261,12 @@ func (s *session) extract(request Request, response engine.Response) error {
 	if !hasText(request.Extractors) {
 		return nil
 	}
+	allowance, err := s.scripts.ExtractAllowance(request.scriptTimeout())
+	if err != nil {
+		return err
+	}
 	var extracted scopedWrites
-	if err := s.scripts.Call("extractWrites", &extracted, request, response); err != nil {
+	if err := s.scripts.Shared(allowance, "extractWrites", &extracted, request, response); err != nil {
 		return err
 	}
 	s.write(extracted)
@@ -346,7 +363,7 @@ func (s *session) execute(ctx context.Context, request Request) (exchange, error
 		return outcome, nil
 	}
 	if err := s.extract(request, outcome.response); err != nil {
-		return outcome, err
+		outcome.errors = append(outcome.errors, err.Error())
 	}
 	if err := s.runPostResponse(ctx, request, &outcome); err != nil {
 		return outcome, err

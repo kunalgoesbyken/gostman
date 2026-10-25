@@ -23,6 +23,19 @@ type scriptTally struct {
 }
 
 func (c *collector) translateScript(d *dialect, label, stage, source string) string {
+	source, _ = withoutExportHeader(exportedTarget(d), source)
+	return c.translateStripped(d, label, stage, source)
+}
+
+func (c *collector) translateAfterScript(d *dialect, label, stage, source string) (string, []extractor, []assertion) {
+	target := exportedTarget(d)
+	source, _ = withoutExportHeader(target, source)
+	source, rules := withoutExtractLines(target, source)
+	source, rows := withoutCheckTests(target, source)
+	return c.translateStripped(d, label, stage, source), rules, rows
+}
+
+func (c *collector) translateStripped(d *dialect, label, stage, source string) string {
 	if strings.TrimSpace(source) == "" {
 		return source
 	}

@@ -81,7 +81,7 @@ export function createGitActions(backend) {
     const { selection, state } = git()
     const change = selection && state.changes.find((candidate) => candidate.path === selection.path)
     if (!change) return patch({ selection: null, diff: null, conflict: null })
-    await select(change, selection.staged && isStaged(change))
+    await select(change, isStaged(change) && (selection.staged || !hasWorktreeChange(change)))
   }
 
   const withReselect = (operation, options) => async (...args) => {

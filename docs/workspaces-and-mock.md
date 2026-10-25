@@ -6,6 +6,7 @@ The control next to the logo shows where the collection lives. **Open folder** k
 
 - A YAML file is read as a request only when it has a `method` or `url` field, so other YAML files in the folder, such as Kubernetes manifests or CI workflows, are left out.
 - A directory without a `folder.yaml` that holds no requests, such as `docs/` or `assets/`, is not shown in the sidebar.
+- `order` in a request file and in `folder.yaml` places the item among everything in the same directory. With `sharedOrder: true` in `gostman.yaml`, requests and folders share one numbering, so a request with `order: 1` sits above a folder with `order: 2`; new workspaces and `gostman import` write it. Without it, as in folders made by older versions, each directory shows its folders first, until the first move or import, in the app or by an agent, writes the numbers and the marker. A new request or folder goes last.
 - A request's tags are a list under `tags`, after `description`, for example `tags: [smoke, regression]`. Leading and trailing spaces are dropped, and a tag repeated with different case is kept once, in its first spelling. Files without `tags` load as before.
 - OAuth tokens, cookies, history, network settings and open tabs are never written to the folder.
 - Values typed into environments and auth fields are written as typed. Keep secrets in an environment file that Git ignores, or pass them at run time.
@@ -22,7 +23,7 @@ Save any response as a named example from the response panel (up to 20 per reque
 ![The mock server dialog running on port 4010, listing each route with the saved example it serves](../gostman-gui/frontend/src/assets/landing/mock.webp)
 
 - `{{base_url}}/users/42` is served at `/users/42`; a literal base path such as `/v1` is kept. A path segment written `:id` or holding a variable, such as `/users/{{user_id}}`, matches any value, whatever the variable holds, and its value is available as `{{request.params.user_id}}`. A variable that holds several path segments, such as `api/v1`, is treated as one segment, so write those segments out in the URL instead.
-- GraphQL, gRPC, MCP and WebSocket requests, and requests without an example, are not served.
+- GraphQL, gRPC, MCP and WebSocket requests, and requests without an example, are not served. A call to the route of a request without an example answers 404 with a message that names the request and says to save one of its responses as an example; the log shows the request with **no example**.
 - A route answers with the example chosen for it, or the default example. A request can ask for another example of the route with Postman's headers: `x-mock-response-name: Not found` picks the example with that name (case does not matter), `x-mock-response-code: 404` the first example with that status, and both together the example that matches both. When no example matches, the answer is a 404 that says so. Rules go first: a request that a rule matches gets the rule's answer.
 - Examples travel with exports and workspace folders, so they can contain whatever the response body held.
 - **From OpenAPI spec**: load a spec from an address or a file and every operation becomes a route (base path from `servers`, `{id}` segments typed by the spec, status codes, headers and example bodies from the spec). Operations without an example answer with an empty body.
@@ -37,6 +38,14 @@ Save any response as a named example from the response panel (up to 20 per reque
 Open **Capture** at the bottom of the window and start a capture with the address of your API, then point your app at `http://127.0.0.1:4020`. Gostman forwards each call, lists it, and lets you save any of them as a request with its response as an example.
 
 ![The capture dialog listing five forwarded calls with the response of one shown below](../gostman-gui/frontend/src/assets/landing/capture.webp)
+
+1. Type the API your app talks to in **API to forward to**, such as `https://api.example.com`.
+2. **Port** is the local port to listen on, 4020 unless you change it. Both fields are locked while the capture runs.
+3. Press **Start**. The header shows **Running** and the local address; **Stop** ends the capture.
+
+Each call appears as a row with its time, method, path, status, duration and size. Type in the filter to narrow the list by method, path or status. Select a row to see its request and response, body or headers, below the list; **Save as request** opens it in a new tab.
+
+To save several calls at once, tick their rows (the box in the header ticks every row shown), choose a folder in **Folder to save into** and press **Save selected to folder**. The first choice is a top-level folder named after the API's host, created when needed; you can also pick **Top level** or any existing folder. Each call becomes a request with its response as an example, and repeated calls to the same method and path are saved once. **Clear** empties the list.
 
 - It is a forwarding address for one API, not an intercepting proxy: there is no certificate to install, and an app whose base URL cannot be changed is not captured.
 - `Authorization`, `Cookie` and `Proxy-Authorization` request headers are never saved. Bodies are saved as captured, so check them for tokens before sharing.

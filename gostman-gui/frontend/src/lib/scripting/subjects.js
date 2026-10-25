@@ -3,6 +3,7 @@ import { isPlainObject, parseJSON } from '../dataUtils'
 import { normalizeRequest } from '../request'
 import { parseJsonBody, textBody } from '../response'
 import { isSentRow, parseRows, serializeRows } from '../rows'
+import { bodyText } from './exchange'
 import { SEND_TIMEOUT_MS } from './limits'
 
 const sentHeaders = (request) => (
@@ -18,6 +19,7 @@ export function requestSubject(request) {
     url: request.url,
     headers: sentHeaders(request),
     body: scriptBody(request),
+    rawBody: request.body,
     bodyType: request.bodyType,
     timeout: request.options?.timeoutMs ?? 0,
   }
@@ -51,7 +53,7 @@ function editedHeaders(request, headers) {
 function editedBody(request, body) {
   if (typeof body === 'string') return { body }
   const bodyType = request.bodyType === BODY_NONE ? BODY_JSON : request.bodyType
-  return { body: JSON.stringify(body, null, 2), bodyType }
+  return { body: bodyText(body), bodyType }
 }
 
 const milliseconds = (value) => Math.max(0, Math.trunc(Number(value)) || 0)

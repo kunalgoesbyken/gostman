@@ -1,11 +1,7 @@
 import { ShieldCheck } from "lucide-react"
 import { Notice } from "./ui/panel"
 import { frameDocument } from "../lib/visualizeFrame"
-
-const TEXT = {
-  frameTitle: "Visualization",
-  note: "Rendered from a script. Scripts, network access, forms and navigation are blocked inside this view.",
-}
+import { VISUALIZE_TEXT as TEXT } from "../lib/responseText"
 
 export function VisualizeTab({ html }) {
   return (

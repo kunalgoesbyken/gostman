@@ -29,6 +29,7 @@ type Settings struct {
 	Timeout      time.Duration
 	Insecure     bool
 	ExposeTags   []string
+	SignIn       engine.Token
 }
 
 type Desk struct {
@@ -99,6 +100,7 @@ func Open(settings Settings) (*Desk, error) {
 	if err := client.Enter(current.stored, settings.Environment, settings.Variables); err != nil {
 		return nil, err
 	}
+	client.SignIn(settings.SignIn)
 	desk.exposed, err = desk.expose(current, settings.ExposeTags)
 	return desk, err
 }
@@ -168,7 +170,9 @@ func answer[A, R any](d *Desk, ctx context.Context, kind access, arguments A, ha
 		return mcp.Result{}, err
 	}
 	if kind == withSession {
-		d.client.fillDefaults(current.stored)
+		if err := d.client.session.LoadCollectionVariables(current.stored); err != nil {
+			return mcp.Result{}, err
+		}
 	}
 	value, err := handle(d, ctx, current, arguments)
 	if err != nil {

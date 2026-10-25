@@ -2,6 +2,7 @@ import {
   canSaveAsExample, cleanExampleName, exampleFromResponse, parseExamples, renameExample, serializeExamples,
   withDefaultExample, withExample, withExampleBody, withoutExample,
 } from './examples'
+import { DIALOG_TEXT } from './dialogText'
 import { normalizeRequest } from './request'
 import { selectActiveTab, useAppStore } from '../store/appStore'
 
@@ -56,7 +57,7 @@ export function createExampleActions(backend) {
   function saveResponse() {
     const { id, response } = activeTab()
     if (!canSaveAsExample(response)) return
-    store().showPrompt('Save as example', 'Example name', response.status, '', (name) => add(id, response, name))
+    store().showPrompt('Save as example', 'Example name', response.status, '', (name) => add(id, response, name), DIALOG_TEXT.save)
   }
 
   const applyRename = attempt(CHANGE_FAILURE, (tabId, example, name) => (
@@ -68,7 +69,7 @@ export function createExampleActions(backend) {
     store().showPrompt('Rename example', 'Example name', example.name, '', (name) => {
       const cleaned = cleanExampleName(name, example.name)
       if (cleaned !== example.name) applyRename(id, example, cleaned)
-    })
+    }, DIALOG_TEXT.rename)
   }
 
   const applyRemove = attempt(CHANGE_FAILURE, (tabId, example) => (

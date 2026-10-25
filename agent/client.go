@@ -44,28 +44,32 @@ func sortedKeys(values map[string]string) []string {
 }
 
 func (c *Client) Enter(stored runner.Collection, environment string, overrides map[string]string) error {
-	if err := c.session.Enter(stored.Environments, environment, overrides); err != nil {
+	return c.EnterFolder(stored, "", environment, overrides)
+}
+
+func (c *Client) EnterFolder(stored runner.Collection, folder, environment string, overrides map[string]string) error {
+	if err := c.session.Enter(stored, folder, environment, overrides); err != nil {
 		return err
 	}
-	c.fillDefaults(stored)
 	c.absorb()
 	return c.Study(stored)
 }
 
-func (c *Client) fillDefaults(stored runner.Collection) {
-	defaults, _ := runner.Environment{Variables: stored.Variables}.Values()
-	defined := c.session.Variables()
-	missing := map[string]string{}
-	for name, value := range defaults {
-		if _, set := defined[name]; !set {
-			missing[name] = value
-		}
-	}
-	c.session.Set(missing)
-}
-
 func (c *Client) SetVariables(overrides map[string]string) {
 	c.session.Set(overrides)
+	c.absorb()
+}
+
+func (c *Client) SignIn(token engine.Token) {
+	c.session.SignIn(token)
+	signedIn := engine.OAuth2{AccessToken: token.AccessToken, RefreshToken: token.RefreshToken}
+	for _, field := range tokenFields(&signedIn) {
+		c.learnResolved(field.label, *field.value)
+	}
+}
+
+func (c *Client) Remember(values map[string]string) {
+	c.session.Remember(values)
 	c.absorb()
 }
 
@@ -97,7 +101,7 @@ func RunRedacted(ctx context.Context, stored runner.Collection, options runner.O
 	if err != nil {
 		return runner.Report{}, err
 	}
-	if err := client.Enter(stored, options.Environment, options.Variables); err != nil {
+	if err := client.EnterFolder(stored, options.Folder, options.Environment, options.Variables); err != nil {
 		return runner.Report{}, err
 	}
 	return client.Run(ctx, stored, options, observe)

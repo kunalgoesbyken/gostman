@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/dlclark/regexp2"
 	"github.com/dop251/goja"
 )
 
@@ -20,6 +21,8 @@ const (
 	exportsName   = "gostman"
 	messageField  = "message"
 	encodedAbsent = "null"
+
+	patternAllowance = time.Second
 )
 
 var (
@@ -29,6 +32,10 @@ var (
 )
 
 var promiseType = reflect.TypeOf((*goja.Promise)(nil))
+
+func init() {
+	regexp2.DefaultMatchTimeout = patternAllowance
+}
 
 var compiled = sync.OnceValues(func() (*goja.Program, error) {
 	return goja.Compile(bundleName, bundle, true)
@@ -42,7 +49,7 @@ type machine struct {
 	stringify goja.Callable
 }
 
-func boot(bridge Bridge) (*machine, error) {
+func boot() (*machine, error) {
 	program, err := compiled()
 	if err != nil {
 		return nil, fmt.Errorf("the script runtime does not compile: %w", err)
@@ -50,7 +57,7 @@ func boot(bridge Bridge) (*machine, error) {
 	vm := goja.New()
 	pending := &timers{}
 	pending.install(vm)
-	if err := installGlobals(vm, bridge); err != nil {
+	if err := installGlobals(vm); err != nil {
 		return nil, fmt.Errorf("the script runtime does not start: %w", err)
 	}
 	if _, err := vm.RunProgram(program); err != nil {

@@ -23,7 +23,7 @@ Keep secrets out of the collection. Map them to variables from the job environme
 gostman run api --env CI --var-from-env API_TOKEN --redact
 ```
 
-`--redact` replaces variable values and credentials in the report with `{{name}}`. HTML and JSON reports include response bodies, so redact before sharing them.
+`--redact` replaces variable values and credentials in the report with `{{name}}`. HTML reports include each request and response body, and so does a JSON report written in the same run as an HTML one, so redact before sharing them.
 
 ## Reports
 
@@ -31,7 +31,7 @@ gostman run api --env CI --var-from-env API_TOKEN --redact
 | --- | --- |
 | `--reporter text` | readable summary on stdout (default) |
 | `--reporter junit --output report.xml` | JUnit XML for test dashboards |
-| `--reporter json --output report.json` | machine-readable results |
+| `--reporter json --output report.json` | machine-readable results; each result has the URL as written (`url`) and as sent (`resolvedUrl`, secrets shown as `{{name}}`) |
 | `--reporter html --output report.html` | one self-contained page, with a filter for failures |
 
 With `--output`, the report goes to the file and the text summary is still printed.
@@ -52,7 +52,7 @@ At most one reporter can go without a file, and it prints to stdout. When every 
 gostman run api --env CI --contract openapi.yaml --reporter junit:report.xml
 ```
 
-Each check appears as a test in every report format. See [Contract checks](import-export-and-specs.md#contract-checks) for what is compared.
+Contract checks appear with the other checks in every report format; in JUnit XML each check is a test case. See [Contract checks](import-export-and-specs.md#contract-checks) for what is compared.
 
 ## Proxies and certificates
 

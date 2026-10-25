@@ -6,7 +6,7 @@ import { mapText, someText } from "./textValues.js"
 import { DYNAMIC_PREFIX, DYNAMIC_VARIABLES, FAKER_VARIABLES, SOURCE_LABELS, callsFile, describeDynamic, isDynamicName, isFakerQuery, isFileName, isPromptName } from "./variableNames.js"
 
 const TOKEN = /\{\{\s*([^{}]*?)\s*\}\}/gu
-const ENGINE_PLACEHOLDER = /\{\{([^}]+)\}\}/gu
+export const ENGINE_PLACEHOLDER = /\{\{([^}]+)\}\}/gu
 const OPEN_REFERENCE = /\{\{\s*([\p{L}\p{N}_.$?-]*)$/u
 const WORD_BEFORE_CARET = /[\p{L}\p{N}_.$]*$/u
 export const CLOSING_REFERENCE = /^\s*\}\}/
@@ -43,6 +43,8 @@ function parsedJSON(text) {
 }
 
 const callsFileDirectly = (text) => Array.from(text.matchAll(ENGINE_PLACEHOLDER), ([, inner]) => inner).some(callsFile)
+
+export const holdsOnlyReferences = (text) => text.replace(TOKEN, '').replace(OPEN_REFERENCE, '').trim() === ''
 
 export function hasFileReference(text) {
   if (callsFileDirectly(text)) return true

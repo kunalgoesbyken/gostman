@@ -18,6 +18,8 @@ const (
 	fileDivider   = `\`
 )
 
+var extractorSources = []string{"body", "header", "cookie", "status"}
+
 var assertionOperators = []string{
 	"eq", "neq", "gt", "gte", "lt", "lte", "contains", "notContains", "startsWith", "endsWith", "matches", "in", "length", "schema",
 	"isDefined", "isUndefined", "isNull", "isEmpty", "isNotEmpty", "isTrue", "isFalse",
@@ -31,16 +33,26 @@ type assertion struct {
 	Enabled    bool   `json:"enabled"`
 }
 
+type extractor struct {
+	Name       string `json:"name"`
+	Source     string `json:"source"`
+	Expression string `json:"expression"`
+	Enabled    bool   `json:"enabled"`
+}
+
 type saveArguments struct {
-	ID         string             `json:"id"`
-	Name       *string            `json:"name"`
-	Folder     *string            `json:"folder"`
-	Method     *string            `json:"method"`
-	URL        *string            `json:"url"`
-	Headers    *map[string]string `json:"headers"`
-	Body       *string            `json:"body"`
-	BodyType   *string            `json:"body_type"`
-	Assertions *[]assertion       `json:"assertions"`
+	ID          string             `json:"id"`
+	Name        *string            `json:"name"`
+	Description *string            `json:"description"`
+	Folder      *string            `json:"folder"`
+	Method      *string            `json:"method"`
+	URL         *string            `json:"url"`
+	Headers     *map[string]string `json:"headers"`
+	Body        *string            `json:"body"`
+	BodyType    *string            `json:"body_type"`
+	Tags        *[]string          `json:"tags"`
+	Assertions  *[]assertion       `json:"assertions"`
+	Extractors  *[]extractor       `json:"extractors"`
 }
 
 type saved struct {
@@ -85,6 +97,17 @@ func (d *Desk) startingPoint(a saveArguments, files workspace.Collection) (revis
 	return revision{request: blank, created: true}, err
 }
 
+const responseDescent = "$.."
+
+var responseRoots = []string{"res", "$.res", "$['res']", `$["res"]`}
+
+func readsResponse(expression string) bool {
+	trimmed := strings.TrimSpace(expression)
+	return strings.HasPrefix(trimmed, responseDescent) || slices.ContainsFunc(responseRoots, func(root string) bool {
+		return trimmed == root || strings.HasPrefix(trimmed, root+".") || strings.HasPrefix(trimmed, root+"[")
+	})
+}
+
 func checkAssertions(assertions []assertion) error {
 	for _, candidate := range assertions {
 		if !slices.Contains(assertionOperators, candidate.Operator) {
@@ -92,6 +115,9 @@ func checkAssertions(assertions []assertion) error {
 		}
 		if !hasText(candidate.Expression) {
 			return errors.New("Every assertion needs an expression such as res.status or res.body.id.")
+		}
+		if !readsResponse(candidate.Expression) {
+			return fmt.Errorf("%q does not start at the response. Start it with res, such as res.status, res.body.id or res.body[0].id, or search the whole response with $..id.", candidate.Expression)
 		}
 	}
 	return nil
@@ -131,8 +157,52 @@ func (r *revision) assertions(assertions *[]assertion) error {
 	return err
 }
 
+func checkExtractor(candidate extractor) error {
+	switch {
+	case !engine.IsVariableName(candidate.Name):
+		return fmt.Errorf("%q is not a variable name: a name is not empty, has no } and does not start or end with a space.", candidate.Name)
+	case !slices.Contains(extractorSources, candidate.Source):
+		return fmt.Errorf("%q is not an extractor source; use one of %s.", candidate.Source, strings.Join(extractorSources, ", "))
+	case candidate.Source != "status" && !hasText(candidate.Expression):
+		return fmt.Errorf("The extractor for %q needs an expression: a JSONPath such as $.token for body, or a header or cookie name.", candidate.Name)
+	}
+	return nil
+}
+
+func (r *revision) extractors(extractors *[]extractor) error {
+	if extractors == nil {
+		return nil
+	}
+	enabled := make([]extractor, 0, len(*extractors))
+	for _, candidate := range *extractors {
+		if err := checkExtractor(candidate); err != nil {
+			return err
+		}
+		candidate.Enabled = true
+		enabled = append(enabled, candidate)
+		r.supplied = append(r.supplied, candidate.Name, candidate.Expression)
+	}
+	r.request.Extractors = ""
+	if len(enabled) == 0 {
+		return nil
+	}
+	encoded, err := json.Marshal(enabled)
+	r.request.Extractors = string(encoded)
+	return err
+}
+
+func (r *revision) tags(tags *[]string) {
+	if tags == nil {
+		return
+	}
+	r.request.Tags = workspace.NormalizeTags(*tags)
+	r.supplied = append(r.supplied, r.request.Tags...)
+}
+
 func (r *revision) apply(arguments saveArguments) error {
 	r.text(&r.request.Name, arguments.Name)
+	r.text(&r.request.Description, arguments.Description)
+	r.tags(arguments.Tags)
 	r.text(&r.request.URL, arguments.URL)
 	r.text(&r.request.Body, arguments.Body)
 	if arguments.Method != nil {
@@ -145,6 +215,9 @@ func (r *revision) apply(arguments saveArguments) error {
 		r.request.Method = methodOrDefault("")
 	}
 	if err := r.headers(arguments.Headers); err != nil {
+		return err
+	}
+	if err := r.extractors(arguments.Extractors); err != nil {
 		return err
 	}
 	return r.assertions(arguments.Assertions)
@@ -255,7 +328,7 @@ func (d *Desk) place(current scene, change *revision, path *string) error {
 	if err != nil {
 		return err
 	}
-	change.request.FolderId = plan.parentID
+	change.request.FolderId, change.request.SortOrder = plan.parentID, 0
 	if !plan.grown {
 		return nil
 	}

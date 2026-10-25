@@ -214,12 +214,12 @@ func (d *Desk) checkImport(current scene, text string, result importer.Result) e
 func rehome(result *importer.Result, parentID string) {
 	for index := range result.Folders {
 		if result.Folders[index].ParentId == "" {
-			result.Folders[index].ParentId = parentID
+			result.Folders[index].ParentId, result.Folders[index].SortOrder = parentID, 0
 		}
 	}
 	for index := range result.Requests {
 		if result.Requests[index].FolderId == "" {
-			result.Requests[index].FolderId = parentID
+			result.Requests[index].FolderId, result.Requests[index].SortOrder = parentID, 0
 		}
 	}
 }
@@ -337,6 +337,10 @@ func (d *Desk) importRequests(ctx context.Context, current scene, arguments impo
 	if err := d.checkImport(current, text, result); err != nil {
 		return importReport{}, err
 	}
+	if err := d.files.ShareOrder(); err != nil {
+		return importReport{}, err
+	}
+	current.files = d.files.Collection()
 	folder, err := d.storeFolders(current, &result, arguments.Folder)
 	if err != nil {
 		return importReport{}, err

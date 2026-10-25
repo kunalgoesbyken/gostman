@@ -266,7 +266,7 @@ func (c *collector) importBrunoSet(set *brunoSet) {
 		}
 		c.importBrunoRequest(ctx, request, folderID)
 	}
-	c.importBrunoEnvironments(set.environments)
+	c.importBrunoEnvironments(set.environments, folders["."])
 	c.noteDotEnv(set.name, since)
 	c.summarizeScripts(brunoDialect, set.name)
 }
@@ -327,11 +327,18 @@ func (c *collector) brunoScope(ctx treeContext, file bruFile, label string) scop
 
 func (c *collector) brunoScripts(d *dialect, file bruFile, label string) (string, string) {
 	pre := c.translateScript(d, label, stagePre, file.text("script:pre-request"))
-	post := joinScripts([]string{
-		c.translateScript(d, label, stageAfter, file.text("script:post-response")),
-		c.translateScript(d, label, stagePost, file.text("tests")),
-	})
-	return pre, post
+	return pre, c.withTests(d, file, label, c.translateScript(d, label, stageAfter, file.text("script:post-response")))
+}
+
+func (c *collector) brunoRequestScripts(d *dialect, file bruFile, label string) (string, string, []extractor, []assertion) {
+	pre := c.translateScript(d, label, stagePre, file.text("script:pre-request"))
+	after, rules, _ := c.translateAfterScript(d, label, stageAfter, file.text("script:post-response"))
+	tests, _, rows := c.translateAfterScript(d, label, stagePost, file.text("tests"))
+	return pre, joinScripts([]string{after, tests}), rules, rows
+}
+
+func (c *collector) withTests(d *dialect, file bruFile, label, after string) string {
+	return joinScripts([]string{after, c.translateScript(d, label, stagePost, file.text("tests"))})
 }
 
 func bruRows(entries []bruEntry) []row {
@@ -401,8 +408,10 @@ func (c *collector) importBrunoRequest(ctx treeContext, file brunoFile, folderID
 		vars:        bruRows(bru.entries("vars:pre-request")),
 	}
 	label := fmt.Sprintf(labelRequest, name)
-	request.preScript, request.postScript = c.brunoScripts(ctx.dialect, bru, label)
-	request.assertions = c.brunoAssertions(bru.entries("assert"), name)
+	var peeled []extractor
+	var checks []assertion
+	request.preScript, request.postScript, peeled, checks = c.brunoRequestScripts(ctx.dialect, bru, label)
+	request.assertions = c.brunoAssertions(bru.entries("assert"), name, checks)
 	var block string
 	switch {
 	case bru.has(brunoGrpcBlock):
@@ -423,6 +432,9 @@ func (c *collector) importBrunoRequest(ctx treeContext, file brunoFile, folderID
 	if mode := bru.value(block, "auth"); mode != "" && mode != authInherit {
 		auth, supported := c.brunoAuth(bru, mode)
 		request.auth = c.checkedAuth(name, auth, supported)
+	}
+	if len(peeled) > 0 {
+		request.extractors = encodeExtractors(append(readExtractors(request.extractors), peeled...))
 	}
 	c.build(request, folderID)
 }
@@ -563,7 +575,7 @@ func fileReference(value string) (string, bool) {
 	return path.Base(target), true
 }
 
-func (c *collector) brunoAssertions(entries []bruEntry, name string) string {
+func (c *collector) brunoAssertions(entries []bruEntry, name string, restored []assertion) string {
 	var assertions []assertion
 	for _, entry := range entries {
 		operator, value, _ := strings.Cut(entry.Value, " ")
@@ -571,7 +583,7 @@ func (c *collector) brunoAssertions(entries []bruEntry, name string) string {
 			assertions = append(assertions, rule)
 		}
 	}
-	return jsonList(assertions)
+	return jsonList(append(assertions, restored...))
 }
 
 func (c *collector) assertionRule(name, expression, operator, value string, enabled bool) (assertion, bool) {
@@ -596,12 +608,12 @@ func (c *collector) brunoExtractors(file bruFile, name string) string {
 	return jsonList(extractors)
 }
 
-func (c *collector) importBrunoEnvironments(files []brunoFile) {
+func (c *collector) importBrunoEnvironments(files []brunoFile, folderID string) {
 	drafts := make([]environmentDraft, 0, len(files))
 	for _, file := range files {
 		drafts = append(drafts, brunoEnvironment(file))
 	}
-	c.addBrunoEnvironments(drafts)
+	c.addBrunoEnvironments(inFolder(drafts, folderID))
 }
 
 func (c *collector) addBrunoEnvironments(drafts []environmentDraft) {

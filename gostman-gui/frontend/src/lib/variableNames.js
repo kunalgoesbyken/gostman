@@ -1,6 +1,6 @@
 import catalogue from '../../../../engine/variables.json'
 
-export const PROCESS_PREFIX = 'process.env.'
+export { PROCESS_PREFIX } from './scripting/scopes'
 export const PROMPT_PREFIX = '?'
 export const DYNAMIC_PREFIX = '$'
 export const FAKER_PREFIX = 'faker.'

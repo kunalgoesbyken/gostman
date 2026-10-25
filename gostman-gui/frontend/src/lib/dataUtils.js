@@ -18,6 +18,8 @@ export const lookup = (table, key) => (Object.hasOwn(table, key) ? table[key] : 
 
 export const pluralize = (count, noun) => `${count} ${noun}${count === 1 ? '' : 's'}`
 
+export const asSentence = (text) => text.charAt(0).toUpperCase() + text.slice(1)
+
 export function formatSize(bytes) {
   if (bytes < KILOBYTE) return `${bytes} B`
   if (bytes < MEGABYTE) return `${(bytes / KILOBYTE).toFixed(1)} KB`

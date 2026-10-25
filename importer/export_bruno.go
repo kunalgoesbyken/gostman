@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path"
+	"sort"
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
@@ -20,37 +21,160 @@ func rowsToEntries(rows []row) []bruEntry {
 	return entries
 }
 
-func exportBruno(collection workspace.Collection) []File {
+type brunoTop struct {
+	name      string
+	id        string
+	settings  workspace.Settings
+	variables map[string]string
+}
+
+func exportBruno(collection workspace.Collection, tests map[string]string) []File {
 	tree := buildTree(collection)
-	config, _ := json.MarshalIndent(map[string]any{"version": brunoVersion, "name": exportName, "type": "collection", "ignore": []string{"node_modules", ".git"}}, "", "  ")
+	tree.tests = tests
+	root := brunoRootOf(collection, tree)
+	config, _ := json.MarshalIndent(map[string]any{"version": brunoVersion, "name": root.name, "type": "collection", "ignore": []string{"node_modules", ".git"}}, "", "  ")
 	files := []File{{Name: "bruno.json", Text: string(config) + "\n"}}
-	files = append(files, brunoFolder(tree, "", "", 0)...)
+	if text := brunoScopeText(nil, root.settings, authNone, root.variables, tests[root.id]); text != "" {
+		files = append(files, File{Name: brunoCollectionFile, Text: text})
+	}
+	files = append(files, brunoFolder(tree, root.id)...)
 	return append(files, brunoEnvironments(collection.Environments)...)
 }
 
-func brunoFolder(tree exportTree, id, directory string, depth int) []File {
-	var files []File
+func brunoRootOf(collection workspace.Collection, tree exportTree) brunoTop {
+	shared := variableValues(collection.Variables)
+	top := tree.folders[""]
+	if len(top) == 1 && len(tree.requests[""]) == 0 && blankSettings(collection.Settings) && strings.TrimSpace(tree.tests[""]) == "" {
+		return brunoTop{name: top[0].Name, id: top[0].Id, settings: top[0].Settings, variables: mergedValues(shared, variableValues(top[0].Variables))}
+	}
+	return brunoTop{name: exportName, settings: collection.Settings, variables: shared}
+}
+
+func blankSettings(settings workspace.Settings) bool {
+	for _, value := range []string{settings.Description, settings.PreScript, settings.PostScript} {
+		if strings.TrimSpace(value) != "" {
+			return false
+		}
+	}
+	return len(readRows(settings.Headers)) == 0 && len(readRows(settings.Assertions)) == 0 && inherits(settings.Auth)
+}
+
+func inherits(auth engine.Auth) bool {
+	return auth.Type == "" || auth.Type == authInherit
+}
+
+func brunoScopeText(meta []bruEntry, settings workspace.Settings, unset string, variables map[string]string, tests string) string {
+	w := &bruWriter{}
+	w.dict("meta", meta)
+	w.dict("headers", rowsToEntries(readRows(settings.Headers)))
+	mode := unset
+	if !inherits(settings.Auth) {
+		mode = brunoAuthMode(settings.Auth)
+	}
+	if meta != nil || mode != authNone {
+		w.dict("auth", []bruEntry{{Key: "mode", Value: mode, Enabled: true}})
+	}
+	writeBrunoAuth(w, settings.Auth, mode)
+	w.dict("vars:pre-request", stringRows(variables))
+	w.block("script:pre-request", settings.PreScript)
+	w.block("script:post-response", settings.PostScript)
+	w.block("tests", tests)
+	w.block("docs", settings.Description)
+	if w.out.Len() == 0 {
+		return ""
+	}
+	return w.String()
+}
+
+func stringRows(values map[string]string) []bruEntry {
+	keys := make([]string, 0, len(values))
+	for key := range values {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	entries := make([]bruEntry, len(keys))
+	for index, key := range keys {
+		entries[index] = bruEntry{Key: key, Value: values[key], Enabled: true}
+	}
+	return entries
+}
+
+type brunoItem struct {
+	folder   *workspace.Folder
+	request  *workspace.Request
+	location string
+	sequence int
+}
+
+func brunoItems(tree exportTree, id, directory string, depth int) []brunoItem {
+	var items []brunoItem
 	used := map[string]bool{}
-	sequence := 0
 	if depth < maxFolderDepth {
-		for _, folder := range tree.folders[id] {
-			sequence++
-			name := uniqueName(used, safeStem(folder.Name, folderFallback), "")
-			child := path.Join(directory, name)
-			meta := &bruWriter{}
-			meta.dict("meta", []bruEntry{{Key: "name", Value: oneLine(folder.Name), Enabled: true}, {Key: "seq", Value: fmt.Sprint(sequence), Enabled: true}})
-			files = append(files, File{Name: path.Join(child, brunoFolderFile), Text: meta.String()})
-			files = append(files, brunoFolder(tree, folder.Id, child, depth+1)...)
+		for index, folder := range tree.folders[id] {
+			child := path.Join(directory, uniqueName(used, safeStem(folder.Name, folderFallback), ""))
+			items = append(items, brunoItem{folder: &folder, location: child, sequence: index + 1})
+			items = append(items, brunoItems(tree, folder.Id, child, depth+1)...)
 		}
 	}
 	for index, request := range tree.requests[id] {
-		name := uniqueName(used, safeStem(request.Name, fallbackStem), brunoExtension)
-		files = append(files, File{Name: path.Join(directory, name), Text: brunoRequest(request, index+1)})
+		location := path.Join(directory, uniqueName(used, safeStem(request.Name, fallbackStem), brunoExtension))
+		items = append(items, brunoItem{request: &request, location: location, sequence: index + 1})
+	}
+	return items
+}
+
+func brunoFolder(tree exportTree, id string) []File {
+	var files []File
+	for _, item := range brunoItems(tree, id, "", 0) {
+		if folder := item.folder; folder != nil {
+			meta := []bruEntry{{Key: "name", Value: oneLine(folder.Name), Enabled: true}, {Key: "seq", Value: fmt.Sprint(item.sequence), Enabled: true}}
+			text := brunoScopeText(meta, folder.Settings, authInherit, variableValues(folder.Variables), tree.tests[folder.Id])
+			files = append(files, File{Name: path.Join(item.location, brunoFolderFile), Text: text})
+			continue
+		}
+		files = append(files, File{Name: item.location, Text: brunoRequest(*item.request, item.sequence, tree.tests[item.request.Id])})
 	}
 	return files
 }
 
-func brunoRequest(request workspace.Request, sequence int) string {
+func brunoOrderWarnings(collection workspace.Collection) []string {
+	names := requestsAboveFolders(buildTree(collection), "", 0)
+	return appendCounted(nil, messageExportBrunoOrder, len(names), listNames(names))
+}
+
+func requestsAboveFolders(tree exportTree, id string, depth int) []string {
+	var names, pending []string
+	for _, sibling := range tree.siblings[id] {
+		if sibling.Request != nil {
+			pending = append(pending, sibling.Request.Name)
+			continue
+		}
+		names, pending = append(names, pending...), nil
+		if depth < maxFolderDepth {
+			names = append(names, requestsAboveFolders(tree, sibling.Folder.Id, depth+1)...)
+		}
+	}
+	return names
+}
+
+func brunoRequestPaths(collection workspace.Collection, tests map[string]string) map[string]string {
+	tree := buildTree(collection)
+	tree.tests = tests
+	paths := map[string]string{}
+	for _, item := range brunoItems(tree, brunoRootOf(collection, tree).id, "", 0) {
+		if item.request != nil {
+			paths[item.request.Id] = strings.TrimSuffix(item.location, brunoExtension)
+		}
+	}
+	for _, request := range collection.Requests {
+		if _, named := paths[request.Name]; !named && paths[request.Id] != "" {
+			paths[request.Name] = paths[request.Id]
+		}
+	}
+	return paths
+}
+
+func brunoRequest(request workspace.Request, sequence int, tests string) string {
 	w := &bruWriter{}
 	kind := "http"
 	if request.Method == methodGraphQL {
@@ -82,6 +206,7 @@ func brunoRequest(request workspace.Request, sequence int) string {
 	w.dict("assert", assertionEntries(request.Assertions))
 	w.block("script:pre-request", request.PreScript)
 	w.block("script:post-response", request.PostScript)
+	w.block("tests", tests)
 	w.block("docs", request.Description)
 	return w.String()
 }
@@ -98,10 +223,10 @@ func disabledOnly(rows []row) []row {
 
 func brunoAuthMode(auth engine.Auth) string {
 	switch auth.Type {
-	case authBasic, authBearer, authDigest, authNTLM, authAWS, authAPIKey, authOAuth2:
+	case authBasic, authBearer, authDigest, authNTLM, authAWS, authAPIKey, authOAuth2, authInherit:
 		return auth.Type
 	}
-	return "none"
+	return authNone
 }
 
 func writeBrunoAuth(w *bruWriter, auth engine.Auth, mode string) {
@@ -185,15 +310,19 @@ func multipartEntries(rows []row) []bruEntry {
 	return entries
 }
 
-func extractorEntries(source string) []bruEntry {
-	var entries []bruEntry
+func readExtractors(source string) []extractor {
 	var rules []extractor
 	if json.Unmarshal([]byte(source), &rules) != nil {
 		return nil
 	}
-	for _, rule := range rules {
-		if expression, ok := strings.CutPrefix(rule.Expression, "$"); ok && rule.Source == "body" && rule.Name != "" {
-			entries = append(entries, bruEntry{Key: rule.Name, Value: "res.body" + expression, Enabled: rule.Enabled})
+	return rules
+}
+
+func extractorEntries(source string) []bruEntry {
+	var entries []bruEntry
+	for _, rule := range readExtractors(source) {
+		if value, ok := brunoExtract.value(rule); ok {
+			entries = append(entries, bruEntry{Key: rule.Name, Value: value, Enabled: rule.Enabled})
 		}
 	}
 	return entries

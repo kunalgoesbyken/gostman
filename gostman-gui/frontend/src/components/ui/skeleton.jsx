@@ -1,4 +1,5 @@
 import { cn } from "../../lib/utils"
+import { APP_TEXT } from "../../lib/appText"
 
 const LINE_WIDTHS = ["w-3/4", "w-1/2", "w-5/6", "w-2/3", "w-2/5", "w-3/5"]
 
@@ -15,5 +16,5 @@ export function SkeletonLines({ label, lines = 4, className }) {
 }
 
 export function EditorSkeleton() {
-  return <SkeletonLines label="Loading editor" lines={5} />
+  return <SkeletonLines label={APP_TEXT.loadingEditor} lines={5} />
 }

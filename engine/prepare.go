@@ -71,10 +71,11 @@ func prepareWith(r Request, expansion *substitution, stream *bodyStream) (Prepar
 	}
 	headers = substitutePairs(headers, substitute)
 
-	body, contentType, err := buildBody(r, isGraphQL, substitute, stream)
+	built, err := buildBody(r, isGraphQL, substitute, stream)
 	if err != nil {
 		return Prepared{}, err
 	}
+	body, contentType := built.data, built.contentType
 	streamed := stream.streamed()
 	if streamed && signsBody(r.Auth) {
 		streamed = false
@@ -98,7 +99,7 @@ func prepareWith(r Request, expansion *substitution, stream *bodyStream) (Prepar
 		return Prepared{}, err
 	}
 
-	prepared := Prepared{Method: method, URL: target.String(), body: body}
+	prepared := Prepared{Method: method, URL: target.String(), Parts: built.parts, File: built.file, body: body}
 	if streamed {
 		prepared.stream = stream
 	}

@@ -49,7 +49,13 @@ func parseServing(arguments []string) (serving, error) {
 	flags.BoolVar(&settings.Insecure, "insecure", false, "")
 	flags.IntVar(&parsed.listen, "listen", 0, "")
 	parsed.network = networkFlags(flags)
+	var signIn signInFlags
+	signIn.register(flags)
 	if err := flags.Parse(arguments); err != nil {
+		return parsed, err
+	}
+	var err error
+	if settings.SignIn, err = signIn.token(); err != nil {
 		return parsed, err
 	}
 	switch {

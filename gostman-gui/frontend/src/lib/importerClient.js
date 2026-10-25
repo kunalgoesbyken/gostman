@@ -118,5 +118,7 @@ export function createImporterClient(backend) {
 
   const build = (format, collection, options) => ask({ action: 'export', format, collection, options })
 
-  return { read, build }
+  const adapt = (target, collection) => ask({ action: 'adapt', format: target, collection })
+
+  return { read, build, adapt }
 }

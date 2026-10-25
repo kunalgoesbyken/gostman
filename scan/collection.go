@@ -10,15 +10,16 @@ import (
 )
 
 const (
-	pathSeparator    = "/"
-	collectionLabel  = "Collection"
-	unnamedLabel     = "Unnamed"
-	maxFolderDepth   = 64
-	variableLabel    = "variable"
-	graphqlVariables = "graphql variables"
-	grpcMessage      = "grpc message"
-	mcpArguments     = "mcp arguments"
-	socketMessages   = "saved messages"
+	pathSeparator           = "/"
+	collectionLabel         = "Collection"
+	unnamedLabel            = "Unnamed"
+	maxFolderDepth          = 64
+	variableLabel           = "variable"
+	collectionVariableLabel = "collection variable"
+	graphqlVariables        = "graphql variables"
+	grpcMessage             = "grpc message"
+	mcpArguments            = "mcp arguments"
+	socketMessages          = "saved messages"
 )
 
 func Scan(collection workspace.Collection, options Options) Report {
@@ -105,6 +106,7 @@ func (s *scanner) folder(path string, folder workspace.Folder) {
 	at := site{kind: KindFolder, path: path}
 	s.settings(at, folder.Settings)
 	s.variables(at, variableLabel, folder.Variables)
+	s.variables(at, collectionVariableLabel, folder.CollectionVariables)
 }
 
 func (s *scanner) request(at site, request workspace.Request) {

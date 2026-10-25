@@ -2,15 +2,21 @@ import { useState } from "react"
 import { CopyTextButton } from "./CopyTextButton"
 import { Dialog, DialogBody, DialogHeader } from "./ui/dialog"
 import { Select } from "./ui/select"
-import { SNIPPET_LANGUAGES } from "../lib/codeGenerator"
+import { SNIPPET_LANGUAGES, rememberLanguage, rememberedLanguage } from "../lib/codeGenerator"
+import { REQUEST_BAR_TEXT } from "../lib/requestBarText"
 
 export function CodeSnippetDialog({ snippets, onClose }) {
-  const [languageId, setLanguageId] = useState(SNIPPET_LANGUAGES[0].id)
+  const [languageId, setLanguageId] = useState(rememberedLanguage)
+
+  const chooseLanguage = (id) => {
+    setLanguageId(id)
+    rememberLanguage(id)
+  }
 
   return (
-    <Dialog label="Generate code" size="lg" onClose={onClose}>
+    <Dialog label={REQUEST_BAR_TEXT.codeHint} size="lg" onClose={onClose}>
       <DialogHeader onClose={onClose}>
-        <Select aria-label="Language" className="w-44" value={languageId} onChange={(event) => setLanguageId(event.target.value)}>
+        <Select aria-label={REQUEST_BAR_TEXT.codeLanguage} className="w-44" value={languageId} onChange={(event) => chooseLanguage(event.target.value)}>
           {SNIPPET_LANGUAGES.map((language) => (
             <option key={language.id} value={language.id}>{language.label}</option>
           ))}

@@ -61,11 +61,23 @@ type session struct {
 	notices   []engine.Notification
 }
 
-func open(ctx context.Context, target Target, policy engine.Policy) (*session, error) {
+func newExpansion(target Target) (*engine.Expansion, error) {
 	expansion, err := engine.NewExpansion(target.Variables)
 	if err != nil {
 		return nil, configError("%v", err)
 	}
+	return expansion, nil
+}
+
+func open(ctx context.Context, target Target, policy engine.Policy) (*session, error) {
+	expansion, err := newExpansion(target)
+	if err != nil {
+		return nil, err
+	}
+	return openWith(ctx, target, expansion, policy)
+}
+
+func openWith(ctx context.Context, target Target, expansion *engine.Expansion, policy engine.Policy) (*session, error) {
 	if command, ok := commandLine(target.URL); ok {
 		return openCommand(ctx, command, target, expansion, policy)
 	}
@@ -82,19 +94,34 @@ func open(ctx context.Context, target Target, policy engine.Policy) (*session, e
 	}, nil
 }
 
-func prepareHTTP(target Target) (engine.Prepared, error) {
-	prepared, err := engine.Prepare(engine.Request{
+func httpRequest(target Target) engine.Request {
+	return engine.Request{
 		Method:    http.MethodPost,
 		URL:       target.URL,
 		Headers:   target.Headers,
 		Auth:      target.Auth,
 		Inherited: target.Inherited,
 		Variables: target.Variables,
-	})
+	}
+}
+
+func prepareHTTP(target Target) (engine.Prepared, error) {
+	prepared, err := engine.Prepare(httpRequest(target))
 	if err != nil {
 		return engine.Prepared{}, configError("%v", err)
 	}
 	return prepared, nil
+}
+
+func endpointUnresolved(target Target) []string {
+	if _, isCommand := commandLine(target.URL); isCommand {
+		return nil
+	}
+	prepared, err := engine.Prepare(httpRequest(target))
+	if err != nil {
+		return engine.UnresolvedIn(err)
+	}
+	return prepared.Unresolved
 }
 
 func clientVersion() string {

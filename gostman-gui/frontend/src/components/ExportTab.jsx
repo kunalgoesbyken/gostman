@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useState } from "react"
-import { Download } from "lucide-react"
+import { Download, TriangleAlert } from "lucide-react"
 import { CopyTextButton } from "./CopyTextButton"
 import { DEFAULT_DOCS_OPTIONS, DocsOptions } from "./DocsOptions"
 import { ScanNotice } from "./ScanNotice"
 import { Button } from "./ui/button"
 import { SegmentedControl } from "./ui/segmented"
 import { useSecretScan } from "../hooks/useSecretScan"
-import { pluralize } from "../lib/dataUtils"
 import { SCAN_TEXT } from "../lib/scanText"
 import { buildDocs } from "../lib/docs"
 import { EXPORT_TEXT } from "../lib/importText"
 import { noteExport } from "../lib/exportReminder"
+import { cn } from "../lib/utils"
 import {
   exportToGostman,
   exportToMarkdown,
@@ -30,48 +30,43 @@ const toJSON = (value) => JSON.stringify(value, null, 2)
 const EXPORT_FORMATS = [
   {
     value: BACKUP_FORMAT,
-    label: "Gostman",
-    description: "Full backup: requests, folders and every environment",
+    ...EXPORT_TEXT.formats.gostman,
     extension: "json",
     mime: JSON_MIME,
-    build: ({ requests, folders, environments, settings }) => toJSON(exportToGostman(requests, folders, environments, settings)),
+    build: ({ requests, folders, environments, settings, collectionVariables, sharedOrder }) => toJSON(exportToGostman(requests, folders, environments, settings, collectionVariables, sharedOrder)),
   },
   {
     value: "postman",
-    label: "Postman",
-    description: "Collection v2.1. The variables in use, except secret ones, become collection variables",
+    ...EXPORT_TEXT.formats.postman,
     extension: "postman_collection.json",
     mime: JSON_MIME,
-    build: ({ requests, folders, variables, settings }) => toJSON(exportToPostman(requests, folders, { variables, settings })),
+    adapt: "postman",
+    build: ({ requests, folders, variables, settings, sharedOrder }) => toJSON(exportToPostman(requests, folders, { variables, settings, sharedOrder })),
   },
   {
     value: "openapi-json",
-    label: "OpenAPI JSON",
-    description: "OpenAPI 3.0 description of the HTTP requests",
+    ...EXPORT_TEXT.formats.openapiJson,
     extension: "openapi.json",
     mime: JSON_MIME,
     build: ({ requests }) => exportToOpenAPIJSON(requests),
   },
   {
     value: "openapi-yaml",
-    label: "OpenAPI YAML",
-    description: "OpenAPI 3.0 description of the HTTP requests",
+    ...EXPORT_TEXT.formats.openapiYaml,
     extension: "openapi.yaml",
     mime: "text/yaml",
     build: ({ requests }) => exportToOpenAPIYAML(requests),
   },
   {
     value: "markdown",
-    label: "Markdown",
-    description: "Readable API documentation",
+    ...EXPORT_TEXT.formats.markdown,
     extension: "md",
     mime: "text/markdown",
     build: ({ requests, folders }) => exportToMarkdown(requests, folders),
   },
   {
     value: "html",
-    label: "HTML docs",
-    description: "One self-contained page to publish or print. Credentials are left out and variables stay as {{name}}",
+    ...EXPORT_TEXT.formats.html,
     fileName: "api-docs.html",
     mime: "text/html",
     hasDocsOptions: true,
@@ -80,10 +75,10 @@ const EXPORT_FORMATS = [
 ]
 
 const BACKEND_FORMATS = [
-  { value: "bruno", label: "Bruno", description: "A folder of .bru files with environments, saved as a .zip", mime: ZIP_MIME, backend: "bruno" },
-  { value: "curl", label: "curl script", description: "One curl command per request. Credentials become environment variable placeholders", fileName: "requests.sh", mime: "text/x-shellscript", backend: "curl" },
-  { value: "har", label: "HAR", description: "HTTP Archive 1.2 with the requests and no responses", fileName: "requests.har", mime: JSON_MIME, backend: "har" },
-  { value: "http", label: ".http files", description: "Requests for VS Code REST Client and JetBrains HTTP Client, one file per folder, with http-client.env.json environments", fileName: "requests.http", mime: "text/plain", backend: "http" },
+  { value: "bruno", ...EXPORT_TEXT.formats.bruno, mime: ZIP_MIME, backend: "bruno" },
+  { value: "curl", ...EXPORT_TEXT.formats.curl, fileName: "requests.sh", mime: "text/x-shellscript", backend: "curl" },
+  { value: "har", ...EXPORT_TEXT.formats.har, fileName: "requests.har", mime: JSON_MIME, backend: "har" },
+  { value: "http", ...EXPORT_TEXT.formats.http, fileName: "requests.http", mime: "text/plain", backend: "http" },
 ]
 
 const NEWLINE = String.fromCharCode(10)
@@ -92,22 +87,87 @@ const previewOf = (files) => (
   files.length === 1 ? files[0].text : files.map((file) => [EXPORT_TEXT.fileHeading(file.name), file.text].join(NEWLINE)).join(NEWLINE + NEWLINE)
 )
 
+const toCollection = ({ requests, folders, environments, variables, settings, sharedOrder }) => (
+  { requests, folders, environments, settings, variables: JSON.stringify(variables || {}), sharedOrder }
+)
+
+const NOT_ADAPTED = { adapted: null, notes: [], warnings: [], isAdapting: false }
+
+function useAdaptedScripts(format, data, importer) {
+  const [state, setState] = useState(NOT_ADAPTED)
+
+  useEffect(() => {
+    if (!format.adapt) {
+      setState(NOT_ADAPTED)
+      return undefined
+    }
+    let isCurrent = true
+    setState((current) => ({ ...current, isAdapting: true }))
+    importer.adapt(format.adapt, toCollection(data))
+      .then(({ collection, notes, warnings }) => isCurrent && setState({
+        adapted: { ...data, requests: collection.requests, folders: collection.folders, settings: collection.settings },
+        notes: notes || [],
+        warnings: warnings || [],
+        isAdapting: false,
+      }))
+      .catch((error) => isCurrent && setState({ adapted: data, notes: [], warnings: [EXPORT_TEXT.adaptFailed(error.message)], isAdapting: false }))
+    return () => {
+      isCurrent = false
+    }
+  }, [format, data, importer])
+
+  return state
+}
+
+function ExportReport({ notes, warnings, tool }) {
+  if (notes.length === 0 && warnings.length === 0) return null
+  const hasWarnings = warnings.length > 0
+  return (
+    <section
+      role="status"
+      aria-label={EXPORT_TEXT.reportLabel}
+      className={cn(
+        "flex shrink-0 flex-col gap-2 rounded-md border p-3 text-xs [overflow-wrap:anywhere]",
+        hasWarnings ? "border-warning/40" : "border-border"
+      )}
+    >
+      {hasWarnings && (
+        <div className="flex flex-col gap-1.5">
+          <h3 className="flex items-center gap-1.5 font-medium text-foreground">
+            <TriangleAlert aria-hidden="true" className="size-3.5 shrink-0 text-warning" />
+            {EXPORT_TEXT.checkHeading(warnings.length, tool)}
+          </h3>
+          <ul className="flex list-disc flex-col gap-1 pl-5 text-foreground marker:text-warning">
+            {warnings.map((warning, index) => <li key={index}>{warning}</li>)}
+          </ul>
+        </div>
+      )}
+      {notes.length > 0 && (
+        <div className={cn("flex flex-col gap-1 text-muted-foreground", hasWarnings && "border-t border-border pt-2")}>
+          <h3 className="font-medium">{EXPORT_TEXT.changedHeading(tool)}</h3>
+          <ul className="flex flex-col gap-0.5">
+            {notes.map((note, index) => <li key={index}>{note}</li>)}
+          </ul>
+        </div>
+      )}
+    </section>
+  )
+}
+
 function useBackendExport(format, data, importer, includeSecrets) {
   const [state, setState] = useState({ reply: null, error: "", isBuilding: false })
-  const { requests, folders, environments, variables } = data
 
   useEffect(() => {
     if (!format.backend) return undefined
     let isCurrent = true
     setState((current) => ({ ...current, isBuilding: true }))
-    const collection = { requests, folders, environments, variables: JSON.stringify(variables || {}) }
-    importer.build(format.backend, collection, { includeSecrets })
+    importer.build(format.backend, toCollection(data), { includeSecrets })
       .then((reply) => isCurrent && setState({ reply, error: "", isBuilding: false }))
       .catch((error) => isCurrent && setState({ reply: null, error: error.message, isBuilding: false }))
     return () => {
       isCurrent = false
     }
-  }, [format, requests, folders, environments, variables, importer, includeSecrets])
+  }, [format, data, importer, includeSecrets])
 
   return state
 }
@@ -122,21 +182,31 @@ function buildExport(format, data) {
   }
 }
 
-export function ExportTab({ requests, folders, environments, variables, settings, importer, scan, onGoToRequest, onSaveFile, onSaveBase64 }) {
+export function ExportTab({ requests, folders, environments, collectionVariables, variables, settings, sharedOrder, importer, scan, onGoToRequest, onSaveFile, onSaveBase64 }) {
   const [formatId, setFormatId] = useState(EXPORT_FORMATS[0].value)
-  const scanned = useMemo(() => ({ requests, folders, environments, settings }), [requests, folders, environments, settings])
+  const scanned = useMemo(
+    () => ({ requests, folders, environments, variables: collectionVariables?.variables, settings }),
+    [requests, folders, environments, collectionVariables, settings]
+  )
   const scanState = useSecretScan(scan, scanned, false)
   const [docsOptions, setDocsOptions] = useState(DEFAULT_DOCS_OPTIONS)
   const [includeSecrets, setIncludeSecrets] = useState(false)
 
   const format = ALL_FORMATS.find((candidate) => candidate.value === formatId)
-  const local = useMemo(
-    () => (format.backend ? { content: "", error: "" } : buildExport(format, { requests, folders, environments, variables, settings, docsOptions })),
-    [format, requests, folders, environments, variables, settings, docsOptions]
+  const data = useMemo(
+    () => ({ requests, folders, environments, collectionVariables, variables, settings, sharedOrder }),
+    [requests, folders, environments, collectionVariables, variables, settings, sharedOrder]
   )
-  const remote = useBackendExport(format, { requests, folders, environments, variables }, importer, includeSecrets)
+  const scripts = useAdaptedScripts(format, data, importer)
+  const source = format.adapt ? scripts.adapted : data
+  const local = useMemo(
+    () => (format.backend || !source ? { content: "", error: "" } : buildExport(format, { ...source, docsOptions })),
+    [format, source, docsOptions]
+  )
+  const remote = useBackendExport(format, data, importer, includeSecrets)
   const content = format.backend ? (remote.reply ? previewOf(remote.reply.files) : "") : local.content
   const error = format.backend ? remote.error : local.error
+  const report = format.backend ? { notes: remote.reply?.notes || [], warnings: remote.reply?.warnings || [] } : scripts
   const save = () => {
     if (remote.reply?.archive) onSaveBase64("gostman-export.zip", remote.reply.archive, ZIP_MIME)
     else if (format.backend) onSaveFile(format.fileName, remote.reply.files[0].text, format.mime)
@@ -148,12 +218,12 @@ export function ExportTab({ requests, folders, environments, variables, settings
   return (
     <>
       <div className="flex shrink-0 flex-wrap items-center gap-2">
-        <SegmentedControl label="Export format" options={ALL_FORMATS} value={formatId} onChange={setFormatId} />
+        <SegmentedControl label={EXPORT_TEXT.formatLabel} options={ALL_FORMATS} value={formatId} onChange={setFormatId} />
         <div className="ml-auto flex shrink-0 items-center gap-2">
           <CopyTextButton text={content} />
-          <Button size="sm" onClick={save} disabled={!content || remote.isBuilding}>
+          <Button size="sm" onClick={save} disabled={!content || remote.isBuilding || scripts.isAdapting}>
             <Download />
-            Save file
+            {EXPORT_TEXT.saveFile}
           </Button>
         </div>
       </div>
@@ -169,17 +239,19 @@ export function ExportTab({ requests, folders, environments, variables, settings
       {format.hasDocsOptions && <DocsOptions options={docsOptions} onChange={setDocsOptions} />}
 
       <p className="shrink-0 text-xs text-muted-foreground">
-        {format.description}. This workspace has {pluralize(requests.length, "request")}, {pluralize(folders.length, "folder")} and {pluralize(environments.length, "environment")}.
+        {EXPORT_TEXT.summary(format.description, { requests, folders, environments })}
       </p>
+
+      <ExportReport notes={report.notes} warnings={report.warnings} tool={format.label} />
 
       <ScanNotice state={scanState} advice={SCAN_TEXT.foundExport} onGoToRequest={onGoToRequest} />
 
       {error ? (
-        <p role="alert" className="text-xs text-destructive [overflow-wrap:anywhere]">Could not build the export: {error}</p>
+        <p role="alert" className="text-xs text-destructive [overflow-wrap:anywhere]">{EXPORT_TEXT.failed(error)}</p>
       ) : (
         <pre
-          aria-label="Export preview"
-          className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden whitespace-pre-wrap rounded-md border border-border p-3 font-mono text-xs leading-relaxed text-foreground [overflow-wrap:anywhere]"
+          aria-label={EXPORT_TEXT.previewLabel}
+          className="min-h-48 flex-1 overflow-y-auto overflow-x-hidden whitespace-pre-wrap rounded-md border border-border p-3 font-mono text-xs leading-relaxed text-foreground [overflow-wrap:anywhere]"
         >
           {preview}
         </pre>

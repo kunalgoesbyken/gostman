@@ -57,3 +57,38 @@ export function requestSections(kind, filled) {
   const rest = SECTION_ORDER.filter((section) => !lead.includes(section) && (applies.has(section) || filled.has(section)))
   return [...lead, ...rest]
 }
+
+export const SETTING_TIMEOUT = 'timeout'
+export const SETTING_REDIRECTS = 'redirects'
+export const SETTING_TLS = 'tls'
+export const SETTING_SEND_COOKIES = 'sendCookies'
+export const SETTING_STORE_COOKIES = 'storeCookies'
+export const SETTING_STREAM = 'stream'
+
+const IS_CHANGED = {
+  [SETTING_TIMEOUT]: (options) => options.timeoutMs > 0,
+  [SETTING_REDIRECTS]: (options) => options.noFollowRedirects,
+  [SETTING_TLS]: (options) => options.insecureTLS,
+  [SETTING_SEND_COOKIES]: (options) => options.skipCookies,
+  [SETTING_STORE_COOKIES]: (options) => options.discardCookies,
+  [SETTING_STREAM]: (options) => options.stream,
+}
+
+const SETTING_ORDER = Object.keys(IS_CHANGED)
+const CONNECTION_SETTINGS = [SETTING_TIMEOUT, SETTING_TLS]
+
+const SETTINGS_BY_KIND = {
+  [KIND_HTTP]: SETTING_ORDER,
+  [KIND_GRAPHQL]: SETTING_ORDER,
+  [KIND_GRAPHQL_SOCKET]: [],
+  [KIND_SOCKET]: [],
+  [KIND_GRPC]: CONNECTION_SETTINGS,
+  [KIND_MCP]: CONNECTION_SETTINGS,
+  [KIND_MCP_COMMAND]: [SETTING_TIMEOUT],
+}
+
+export const hasChangedSettings = (options) => SETTING_ORDER.some((setting) => Boolean(IS_CHANGED[setting](options)))
+
+export const requestSettings = (kind, options) => new Set(
+  SETTING_ORDER.filter((setting) => SETTINGS_BY_KIND[kind].includes(setting) || IS_CHANGED[setting](options)),
+)

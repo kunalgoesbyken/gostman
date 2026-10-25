@@ -71,11 +71,27 @@ func secretVariables(meta string) map[string]bool {
 	return secret
 }
 
+func SecretNames(meta string) map[string]bool {
+	names := map[string]bool{}
+	for name, secret := range secretVariables(meta) {
+		if secret {
+			names[name] = true
+		}
+	}
+	return names
+}
+
 func WithoutSecretValues(environment Environment) (Environment, []string) {
-	secret := secretVariables(environment.Meta)
-	entries, err := ParseVariableEntries(environment.Variables)
+	var removed []string
+	environment.Variables, removed = WithoutSecretVariables(environment.Variables, environment.Meta)
+	return environment, removed
+}
+
+func WithoutSecretVariables(variables, meta string) (string, []string) {
+	secret := secretVariables(meta)
+	entries, err := ParseVariableEntries(variables)
 	if err != nil || len(secret) == 0 {
-		return environment, nil
+		return variables, nil
 	}
 	var removed []string
 	kept := make([]VariableEntry, 0, len(entries))
@@ -86,8 +102,94 @@ func WithoutSecretValues(environment Environment) (Environment, []string) {
 		}
 		kept = append(kept, entry)
 	}
-	if len(removed) > 0 {
-		environment.Variables = EncodeVariableEntries(kept)
+	if len(removed) == 0 {
+		return variables, nil
 	}
-	return environment, removed
+	return EncodeVariableEntries(kept), removed
+}
+
+type VariableList struct {
+	Name      string
+	Variables string
+	Meta      string
+}
+
+type DroppedVariable struct {
+	Name     string
+	From     string
+	KeptFrom string
+}
+
+func FoldVariableLists(variables, meta string, lists []VariableList) (string, string, []DroppedVariable) {
+	entries, err := ParseVariableEntries(variables)
+	if err != nil {
+		return variables, meta, nil
+	}
+	kept := map[string]json.RawMessage{}
+	owner := map[string]string{}
+	claimable := map[string]bool{}
+	for _, entry := range entries {
+		kept[entry.Name] = entry.Raw
+		claimable[entry.Name] = true
+	}
+	added := false
+	var dropped []DroppedVariable
+	for _, list := range lists {
+		owned, err := ParseVariableEntries(list.Variables)
+		if err != nil {
+			continue
+		}
+		secret := SecretNames(list.Meta)
+		for _, entry := range owned {
+			if current, taken := kept[entry.Name]; taken {
+				switch {
+				case sameValue(current, entry.Raw) && claimable[entry.Name]:
+					owner[entry.Name] = list.Name
+					claimable[entry.Name] = false
+				case !sameValue(current, entry.Raw):
+					dropped = append(dropped, DroppedVariable{Name: entry.Name, From: list.Name, KeptFrom: owner[entry.Name]})
+				}
+				continue
+			}
+			kept[entry.Name] = entry.Raw
+			owner[entry.Name] = list.Name
+			entries = append(entries, entry)
+			added = true
+			if secret[entry.Name] {
+				meta = MarkSecret(meta, entry.Name)
+			}
+		}
+	}
+	if !added {
+		return variables, meta, dropped
+	}
+	return EncodeVariableEntries(entries), meta, dropped
+}
+
+func sameValue(first, second json.RawMessage) bool {
+	return plainValue(first) == plainValue(second)
+}
+
+func plainValue(raw json.RawMessage) string {
+	var text string
+	if json.Unmarshal(raw, &text) == nil {
+		return text
+	}
+	return string(bytes.TrimSpace(raw))
+}
+
+func MarkSecret(meta string, names ...string) string {
+	if len(names) == 0 {
+		return meta
+	}
+	marks := map[string]map[string]any{}
+	json.Unmarshal([]byte(meta), &marks)
+	for _, name := range names {
+		if marks[name] == nil {
+			marks[name] = map[string]any{}
+		}
+		marks[name]["secret"] = true
+	}
+	encoded, _ := json.Marshal(marks)
+	return string(encoded)
 }

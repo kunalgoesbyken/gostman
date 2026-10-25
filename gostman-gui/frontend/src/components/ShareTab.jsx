@@ -12,13 +12,14 @@ import { Select } from "./ui/select"
 import { Textarea } from "./ui/textarea"
 import { useSecretScan } from "../hooks/useSecretScan"
 import { buildCollectionTree, listFolders, ROOT_ID } from "../lib/collectionTree"
-import { formatSize, pluralize } from "../lib/dataUtils"
+import { formatSize } from "../lib/dataUtils"
 import { SCAN_TEXT } from "../lib/scanText"
+import { SHARE_TEXT } from "../lib/shareText"
 import {
   MAX_LINK_FRAGMENT_LENGTH, MIN_PASSPHRASE_LENGTH, SHARE_FILE_EXTENSION,
   createShare, fitsInLink, fragmentLength, shareFileText, shareKey, shareLink,
 } from "../lib/share"
-import { buildSharedExport, countLiteralCredentials } from "../lib/shareContent"
+import { buildSharedExport, countLiteralCredentials, sharedCollectionVariableNames, sharedVariableNames } from "../lib/shareContent"
 
 const CREATE_DELAY_MS = 300
 const PATH_SEPARATOR = " / "
@@ -33,13 +34,13 @@ const NOTE_CLASS = "text-xs text-muted-foreground [overflow-wrap:anywhere]"
 const NOTHING = { share: null, error: "" }
 
 const PROTECTIONS = [
-  { value: PROTECT_KEY, label: "Random key" },
-  { value: PROTECT_PASSPHRASE, label: "Passphrase" },
+  { value: PROTECT_KEY, label: SHARE_TEXT.protections.key },
+  { value: PROTECT_PASSPHRASE, label: SHARE_TEXT.protections.passphrase },
 ]
 
 const DELIVERIES = [
-  { value: SEND_LINK, label: "Link" },
-  { value: SEND_FILE, label: "Encrypted file" },
+  { value: SEND_LINK, label: SHARE_TEXT.deliveries.link },
+  { value: SEND_FILE, label: SHARE_TEXT.deliveries.file },
 ]
 
 const messageOf = (error) => error?.message || String(error)
@@ -68,16 +69,11 @@ function useCreatedShare(text, passphrase, isReady) {
   return state
 }
 
-function describeSelection({ requests, folders, environments }, includeVariables) {
-  const variables = includeVariables ? "with their values" : "variable names only"
-  return `${pluralize(requests.length, "request")}, ${pluralize(folders.length, "folder")} and ${pluralize(environments.length, "environment")} (${variables}).`
-}
-
 function LinkOutput({ share, linkBase, usesPassphrase }) {
   if (!fitsInLink(share)) {
     return (
       <p role="status" className="text-xs text-warning">
-        This selection needs a link of {formatSize(fragmentLength(share))}. Links stop at {formatSize(MAX_LINK_FRAGMENT_LENGTH)} because chat and mail apps cut longer ones short. Send it as an encrypted file instead.
+        {SHARE_TEXT.tooLong(formatSize(fragmentLength(share)), formatSize(MAX_LINK_FRAGMENT_LENGTH))}
       </p>
     )
   }
@@ -86,14 +82,11 @@ function LinkOutput({ share, linkBase, usesPassphrase }) {
     <>
       <div className="flex shrink-0 items-center gap-2">
         <p className={`min-w-0 flex-1 ${NOTE_CLASS}`}>
-          {usesPassphrase
-            ? "The passphrase is not in the link. Tell the recipient through another channel."
-            : "The key is part of the link, after the # sign, so anyone who has the whole link can read the collection."}
-          {" "}{formatSize(link.length)}.
+          {SHARE_TEXT.linkNote(usesPassphrase, formatSize(link.length))}
         </p>
         <CopyTextButton text={link} />
       </div>
-      <Textarea readOnly value={link} aria-label="Share link" className="min-h-16 flex-1 break-all" onFocus={(event) => event.target.select()} />
+      <Textarea readOnly value={link} aria-label={SHARE_TEXT.linkLabel} className="min-h-16 flex-1 break-all" onFocus={(event) => event.target.select()} />
     </>
   )
 }
@@ -104,18 +97,16 @@ function FileOutput({ share, usesPassphrase, onSaveFile }) {
     <>
       <div className="flex shrink-0 items-center gap-2">
         <p className={`min-w-0 flex-1 ${NOTE_CLASS}`}>
-          {usesPassphrase
-            ? "The recipient opens the file with your passphrase. Tell them through another channel."
-            : "The file cannot be opened without the key below. Send the key through a different channel than the file."}
+          {SHARE_TEXT.fileNote(usesPassphrase)}
         </p>
         <Button size="sm" onClick={() => onSaveFile(FILE_NAME, shareFileText(share), FILE_MIME)}>
           <Download />
-          Save file
+          {SHARE_TEXT.saveFile}
         </Button>
       </div>
       {key && (
         <div className="flex shrink-0 items-center gap-2">
-          <Input readOnly value={key} aria-label="Key" className="font-mono" onFocus={(event) => event.target.select()} />
+          <Input readOnly value={key} aria-label={SHARE_TEXT.keyLabel} className="font-mono" onFocus={(event) => event.target.select()} />
           <CopyTextButton text={key} />
         </div>
       )}
@@ -123,7 +114,7 @@ function FileOutput({ share, usesPassphrase, onSaveFile }) {
   )
 }
 
-export function ShareTab({ requests, folders, environments, settings, initialFolderId, linkBase, scan, onGoToRequest, onSaveFile }) {
+export function ShareTab({ requests, folders, environments, collectionVariables, settings, sharedOrder, initialFolderId, linkBase, scan, onGoToRequest, onSaveFile }) {
   const [folderId, setFolderId] = useState(initialFolderId)
   const [includeVariables, setIncludeVariables] = useState(false)
   const [includeExamples, setIncludeExamples] = useState(false)
@@ -132,12 +123,16 @@ export function ShareTab({ requests, folders, environments, settings, initialFol
   const [delivery, setDelivery] = useState(SEND_LINK)
 
   const scopes = useMemo(() => listFolders(buildCollectionTree(folders, [])), [folders])
+  const sharedRequest = requests.find((request) => request.id === initialFolderId)
+  const requestPath = sharedRequest && [...(scopes.find(({ folder }) => folder.id === sharedRequest.folderId)?.path || []), sharedRequest.name]
   const exported = useMemo(
-    () => buildSharedExport({ requests, folders, environments, settings }, { folderId, includeVariables, includeExamples }),
-    [requests, folders, environments, settings, folderId, includeVariables, includeExamples]
+    () => buildSharedExport({ requests, folders, environments, collectionVariables, settings, sharedOrder }, { folderId, includeVariables, includeExamples }),
+    [requests, folders, environments, collectionVariables, settings, sharedOrder, folderId, includeVariables, includeExamples]
   )
   const selection = exported.gostman
   const text = useMemo(() => JSON.stringify(exported), [exported])
+  const variableNames = useMemo(() => sharedVariableNames(exported), [exported])
+  const collectionVariableNames = useMemo(() => sharedCollectionVariableNames(exported), [exported])
   const literalCount = useMemo(() => countLiteralCredentials([...selection.requests, ...selection.folders]), [selection])
 
   const scanState = useSecretScan(scan, selection, false)
@@ -153,42 +148,49 @@ export function ShareTab({ requests, folders, environments, settings, initialFol
   return (
     <>
       <div className="flex shrink-0 flex-col gap-2">
-        <Field label="Share">
-          <Select value={folderId} onChange={(event) => setFolderId(event.target.value)} aria-label="What to share">
-            <option value={ROOT_ID}>Everything</option>
+        <Field label={SHARE_TEXT.scopeField}>
+          <Select value={folderId} onChange={(event) => setFolderId(event.target.value)} aria-label={SHARE_TEXT.scopeLabel}>
+            <option value={ROOT_ID}>{SHARE_TEXT.everything}</option>
+            {sharedRequest && <option value={sharedRequest.id}>{SHARE_TEXT.requestScope(requestPath.join(PATH_SEPARATOR))}</option>}
             {scopes.map(({ folder, path }) => (
               <option key={folder.id} value={folder.id}>{path.join(PATH_SEPARATOR)}</option>
             ))}
           </Select>
         </Field>
         <Checkbox checked={includeVariables} onChange={(event) => setIncludeVariables(event.target.checked)} className={CHECKBOX_CLASS}>
-          Share variable values (off: only the variable names are shared)
+          {SHARE_TEXT.includeVariables}
         </Checkbox>
         <Checkbox checked={includeExamples} onChange={(event) => setIncludeExamples(event.target.checked)} className={CHECKBOX_CLASS}>
-          Include saved example responses
+          {SHARE_TEXT.includeExamples}
         </Checkbox>
         <div className="flex flex-wrap items-center gap-2">
-          <SegmentedControl label="Protection" options={PROTECTIONS} value={protection} onChange={setProtection} />
+          <SegmentedControl label={SHARE_TEXT.protection} options={PROTECTIONS} value={protection} onChange={setProtection} />
           {usesPassphrase && (
             <Input
               value={passphrase}
               onChange={(event) => setPassphrase(event.target.value)}
-              placeholder={`Passphrase, at least ${MIN_PASSPHRASE_LENGTH} characters`}
-              aria-label="Passphrase"
+              placeholder={SHARE_TEXT.passphrasePlaceholder(MIN_PASSPHRASE_LENGTH)}
+              aria-label={SHARE_TEXT.passphraseLabel}
               autoComplete="off"
               className="min-w-48 flex-1 font-mono"
             />
           )}
-          <SegmentedControl label="Send as" options={DELIVERIES} value={delivery} onChange={setDelivery} className="ml-auto" />
+          <SegmentedControl label={SHARE_TEXT.sendAs} options={DELIVERIES} value={delivery} onChange={setDelivery} className="ml-auto" />
         </div>
       </div>
 
       <p className={`shrink-0 ${NOTE_CLASS}`}>
-        {describeSelection(selection, includeVariables)} Encrypted in this window and never uploaded. OAuth tokens, cookies, history and network settings are never included.
+        {SHARE_TEXT.summary(selection, includeVariables)}
       </p>
+      {folderId && !isEmpty && (
+        <p className={`shrink-0 ${NOTE_CLASS}`}>{SHARE_TEXT.sharedVariables(variableNames)}</p>
+      )}
+      {collectionVariableNames.length > 0 && (
+        <p className={`shrink-0 ${NOTE_CLASS}`}>{SHARE_TEXT.sharedCollectionVariables(collectionVariableNames)}</p>
+      )}
       {literalCount > 0 && (
         <p className="shrink-0 text-xs text-warning">
-          {pluralize(literalCount, "request")} hold a password, token or key typed directly into the Auth tab. Those are part of the request and are shared with it.
+          {SHARE_TEXT.literalCredentials(literalCount)}
         </p>
       )}
 
@@ -197,7 +199,7 @@ export function ShareTab({ requests, folders, environments, settings, initialFol
           <Button size="sm" onClick={() => setReviewedReport(scanState.report)}>{SCAN_TEXT.shareAnyway}</Button>
         )}
       </ScanNotice>
-      {isEmpty && <p role="status" className={NOTE_CLASS}>There is nothing to share here yet.</p>}
+      {isEmpty && <p role="status" className={NOTE_CLASS}>{SHARE_TEXT.nothing}</p>}
       {error && <p role="alert" className="text-xs text-destructive [overflow-wrap:anywhere]">{error}</p>}
       {share && delivery === SEND_LINK && <LinkOutput share={share} linkBase={linkBase} usesPassphrase={usesPassphrase} />}
       {share && delivery === SEND_FILE && <FileOutput share={share} usesPassphrase={usesPassphrase} onSaveFile={onSaveFile} />}

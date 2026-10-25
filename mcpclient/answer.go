@@ -147,7 +147,7 @@ func (r *rejection) Error() string {
 	if len(shown) > shownRejection {
 		shown = shown[:shownRejection]
 	}
-	if len(shown) > 0 {
+	if len(shown) > 0 && !strings.HasSuffix(strings.ToLower(r.status), strings.ToLower(string(shown))) {
 		message += ": " + string(shown)
 	}
 	if r.code == http.StatusUnauthorized || r.code == http.StatusForbidden {

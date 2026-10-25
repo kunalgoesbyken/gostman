@@ -1,6 +1,6 @@
 # Preferences, shortcuts and the command palette
 
-This page covers the command palette and its commands, the Preferences window, the Keyboard shortcuts dialog and how to change a shortcut, moving around the app with the keyboard alone, the themes, colours and fonts, and the About dialog. Throughout, Ctrl means Command on macOS.
+This page covers the command palette and its commands, the Preferences window, the Keyboard shortcuts dialog and how to change a shortcut, moving around the app with the keyboard alone, the themes, colours and fonts, and the About dialog. Throughout, Ctrl means Command on macOS, except in Ctrl+Tab, Ctrl+Shift+Tab and Ctrl+Space, which use Control there too.
 
 ## Command palette
 
@@ -26,6 +26,13 @@ Open it with Ctrl+K, or with the **Commands** button in the header (shown on wid
 | **Copy request** | Copy the saved request to paste it into a folder | |
 | **Paste request** | Paste the copied request or folder next to the current request | |
 | **Generate code** | Show the current request as code | |
+| **AI: new request from a description** | Draft a request, shown as a preview you accept | Ctrl+Shift+U |
+| **AI: generate assertions and tests** | Propose checks for the last response | |
+| **AI: write a script** | Propose a pre-request or post-response script | |
+| **AI: explain the response** | Explain a failure and suggest a fix | Ctrl+Shift+X |
+| **AI: document this request** | Propose a description for the request | |
+| **AI: ask about the collection** | Find requests by describing them | |
+| **AI: requests from an API schema** | Turn an OpenAPI or GraphQL schema into requests | |
 | **Close tab** | Close the current tab | Ctrl+W (Alt+W on the web) |
 | **Close other tabs** | Keep only the current tab | Alt+Shift+W |
 | **Close saved tabs** | Close every tab without unsaved changes | Alt+Shift+S |
@@ -35,32 +42,28 @@ Open it with Ctrl+K, or with the **Commands** button in the header (shown on wid
 | **Keyboard shortcuts** | See every shortcut | Ctrl+/ |
 | **New folder** | Create a folder at the top level | |
 | **Collapse all folders** | Close every folder in the sidebar | |
-| **Run requests** | Run every request in a folder with its tests | |
+| **Run requests** | Run the whole collection or one folder, with its checks and scripts | |
+| **Collection settings** | Headers, auth, variables and scripts of the current request's collection; see [Folder and collection settings](folder-settings.md) | |
+| **Settings for all collections** | Headers, auth, variables and scripts that apply to every collection; only in the app's own storage | |
 | **Request examples** | See the saved responses of the current request | |
 | **Mock server** | Serve saved examples on a local port | |
 | **Capture traffic** | Forward an app's calls to its API and save them as requests | |
+| **Manage environments** | Create environments and edit their variables, collection variables and globals | |
 | **Manage cookies** | See and delete stored cookies | |
 | **Scan for secrets** | Find credentials typed into requests before you share or commit them | |
 | **Preferences** | Theme, colours, fonts, text size, editor, layout and defaults | |
 | **Network settings** | Proxy and certificates | |
-| **Import data** | Import Postman, OpenAPI or Gostman files | |
+| **Import data** | Import Postman, Insomnia, Bruno, OpenAPI, HAR and other files | |
 | **Lint API spec** | Check the imported OpenAPI spec for problems | |
 | **Export data** | Export collections and environments | |
 | **Share collection** | Create an encrypted link or file, no account needed | |
-| **AI: new request from a description** | Draft a request, shown as a preview you accept | Ctrl+Shift+U |
-| **AI: generate assertions and tests** | Propose checks for the last response | |
-| **AI: write a script** | Propose a pre-request or post-response script | |
-| **AI: explain the response** | Explain a failure and suggest a fix | Ctrl+Shift+X |
-| **AI: document this request** | Propose a description for the request | |
-| **AI: ask about the collection** | Find requests by describing them | |
-| **AI: requests from an API schema** | Turn an OpenAPI or GraphQL schema into requests | |
-| **AI settings** | Opens the AI section of Preferences: consent, provider, model and key | |
+| **AI settings** | Turn AI on or off, provider, model and key; opens the AI section of Preferences | |
 | **Clear history** | Delete every history entry | |
 | **Show welcome** | Getting started steps, imports and shortcuts | |
 | **About Gostman** | Version, links and diagnostics | |
 | **Delete all data** | See what is deleted and what is kept, then confirm; see [Data](#data) | |
 
-The shortcuts above are the defaults on the desktop app. The web version uses different keys for some of them; see [Default shortcuts](#default-shortcuts). The AI commands are described in [AI features](ai.md). **Run requests**, **Load test this request** and **Scan for secrets** are described in [Running, load testing and scanning](runner-load-and-scan.md). **Manage cookies** and **Network settings** are described in [Secrets and network settings](secrets-and-network.md).
+With no search text, the palette lists commands in this order: the request commands first, then **Load test this request** and the AI commands when they are available, the rest, the workspace and environment commands, and **Delete all data** last. The AI commands appear only while AI is on. The shortcuts above are the defaults on the desktop app. The web version uses different keys for some of them; see [Default shortcuts](#default-shortcuts). The AI commands are described in [AI features](ai.md). **Run requests**, **Load test this request** and **Scan for secrets** are described in [Running, load testing and scanning](runner-load-and-scan.md). **Manage cookies** and **Network settings** are described in [Secrets and network settings](secrets-and-network.md).
 
 Some commands appear only when they apply:
 
@@ -75,7 +78,7 @@ Open **Preferences** from the command palette or with **Preferences** in the sta
 
 ![The Preferences window open on its Theme section, with the theme, contrast, accent colour and the eight palettes, over the app](../screenshots/preferences.png)
 
-Preferences is a window you can move and resize inside the app. Pick a section on the left; the window remembers the last one.
+Preferences is a window you can move and resize inside the app. Its sections, in order, are Appearance, Theme, Fonts, Editor, Requests, Language, AI, Privacy and Data. Pick one on the left; Preferences opens on Appearance the first time and on the last section you used after that.
 
 ![Resizing the sidebar by dragging its edge, hiding and showing it from the header, then moving and resizing the Preferences window and trying a palette](../screenshots/window-tour.gif)
 
@@ -87,15 +90,15 @@ Preferences is a window you can move and resize inside the app. Pick a section o
 
 | Section | Setting | Options | Default |
 | --- | --- | --- | --- |
+| Appearance | **Text size** | 90%, 100%, 110%, 125% | 100% |
+| Appearance | **Density** | **Comfortable**, **Compact** | **Comfortable** |
+| Appearance | **Response panel** | **Below**, **Right** | **Below** |
 | Theme | **Theme** | **System**, **Light**, **Dark** | **System** |
 | Theme | **Contrast** | **System**, **Standard**, **More** | **System** |
 | Theme | **Accent colour** | **Cyan**, **Blue**, **Violet**, **Pink**, **Graphite** or a custom colour | **Cyan** |
 | Theme | **Palette** | **Default**, **Neutral**, **Slate**, **Paper**, **Moss**, **Dusk**, **Ocean**, **Ink** | **Default** |
 | Theme | **Custom colours** | A background and a text colour for each part of the window, for light and for dark | None |
 | Theme | **Method colours** | A text colour and an optional background for each request method, for light and for dark | None |
-| Appearance | **Text size** | 90%, 100%, 110%, 125% | 100% |
-| Appearance | **Density** | **Comfortable**, **Compact** | **Comfortable** |
-| Appearance | **Response panel** | **Below**, **Right** | **Below** |
 | Fonts | **Interface font** | The name of a font installed on this device | Empty, which uses the default |
 | Fonts | **Code font** | The name of a font installed on this device | Empty, which uses the default |
 | Editor | **Editor font size** | A whole number of pixels from 10 to 24 | 12 |
@@ -105,14 +108,14 @@ Preferences is a window you can move and resize inside the app. Pick a section o
 | Language | **Language** | **English** | **English** |
 | AI | **AI** | Consent, on or off, provider, base URL, API key and model; see [AI features](ai.md) | Off |
 
-- **Default timeout** applies to requests that set no timeout of their own. 0 uses the built-in limit of 30 seconds. See [Variables, scripts and settings](scripting-and-settings.md) for request settings.
+- **Default timeout** applies to requests that set no timeout of their own. 0 uses the built-in limit of 30 seconds. See [Settings](requests-and-responses.md#settings) for request settings.
 - A number field only takes effect while the value is a whole number inside the range. Otherwise the field is marked invalid, and it goes back to the saved value when you leave it.
 - **Language** lists English only. The dialog says more languages will appear when translations are available.
 - **Use the system title bar** appears in the desktop app on Windows and Linux, under Appearance. It replaces Gostman's own title bar and window buttons with your desktop's, and takes effect the next time Gostman starts. It is saved with the app's data rather than these preferences, so **Reset to defaults** leaves it unchanged. On macOS the system title bar is always used.
 
 At the bottom of the window:
 
-- **Keyboard shortcuts** closes Preferences and opens the Keyboard shortcuts dialog.
+- **Keyboard shortcuts** opens the Keyboard shortcuts dialog over Preferences; closing it returns to Preferences.
 - **Reset to defaults** restores every setting in the table, including the palette, custom colours and method colours. It keeps the shortcuts you changed (reset those in the Keyboard shortcuts dialog) and your tag colours.
 - **Done** closes the window.
 
@@ -305,7 +308,7 @@ Everything in the main window can be reached without a mouse.
 
 The window has five panes: the sidebar, the open tabs, the address bar, the request and the response. F6 moves to the next pane and Shift+F6 to the previous one; a pane that is hidden, such as a closed sidebar, is skipped. Each pane remembers where you were, so coming back puts you on the same field, row or tab. The first visit lands on the selected row, tab or the URL field.
 
-Ctrl+L goes straight to the URL field, and Ctrl+Shift+F to the sidebar search. These, too, can be changed in the Keyboard shortcuts dialog.
+Ctrl+L goes straight to the URL field, and Ctrl+Shift+F to the sidebar search. These, too, can be changed in the Keyboard shortcuts dialog. A new request, from the shortcut, the palette or a **+** button, opens with the focus in its URL field.
 
 ### Lists, tabs and options
 
@@ -329,7 +332,10 @@ Each list, row of tabs and set of options is one stop for the Tab key, so Tab mo
 | Down Arrow | Sidebar search fields | Move into the results |
 | Ctrl+Space | Address bar, tables and code editors | Suggest variables without typing `{{` first; the word before the caret filters the list |
 | Shift+Alt+F | JSON and XML body editor | Format the body, the same as the **Format** button |
-| Esc | Menus and dialogs | Close them and go back to where you were |
+| Tab, Shift+Tab | Code editors | Indent or outdent. To leave the editor, press Esc and then Tab or Shift+Tab. In a dialog, Esc inside an editor does not close the dialog |
+| Start typing | Drop-down lists such as the method | Pick the next option that starts with what you type |
+| Up Arrow, Down Arrow | The bar between the request and the response | Make the response taller or shorter |
+| Esc | Menus and dialogs | Close them and go back to where you were. Tab also closes a menu |
 
 Alt+Shift+Left Arrow and Alt+Shift+Right Arrow move the focused tab, and the tree keeps its keys for moving, copying and duplicating rows; see [Move, copy and duplicate](collections-and-git.md#move-copy-and-duplicate).
 
@@ -337,7 +343,7 @@ Closing a dialog or a menu puts you back on the item that opened it. After you d
 
 ## About
 
-Open **About Gostman** from the command palette. The dialog shows:
+Open **About Gostman** from the command palette, or select the version number at the right end of the status bar. The dialog shows:
 
 - the version number;
 - a short description: an open source API client for REST, GraphQL, gRPC and WebSocket, with no account and your data on your device;

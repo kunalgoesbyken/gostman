@@ -3,7 +3,7 @@ import { AlertTriangle, Check, ChevronRight, Info, Loader2, X } from "lucide-rea
 import { Button, IconButton } from "./ui/button"
 import { Combobox } from "./ui/combobox"
 import { Input } from "./ui/input"
-import { Notice, Panel, SIDE_PANE, SectionLabel, Toolbar } from "./ui/panel"
+import { Notice, Panel, SIDE_PANE, STACKED_TOOLBAR, SectionLabel, Toolbar, ToolbarSummary } from "./ui/panel"
 import { Select } from "./ui/select"
 import { EditorSkeleton } from "./ui/skeleton"
 import { isBlankMessage } from "../lib/grpc"
@@ -238,6 +238,7 @@ export function McpPanel({ tabId, request, catalog, editorPath, onUpdateRequest,
   const items = itemsFor(catalog, operation)
   const selected = useMemo(() => (items ? findTool(items, mcpTool) : undefined), [items, mcpTool])
   const findings = useMemo(() => (isLoaded ? checkCatalog(catalog) : []), [isLoaded, catalog])
+  const serverSummary = isLoaded ? MCP_TEXT.serverLabel(catalog) : MCP_TEXT.notLoaded
 
   const chooseOperation = (next) => {
     if (next === operation) return
@@ -254,24 +255,21 @@ export function McpPanel({ tabId, request, catalog, editorPath, onUpdateRequest,
 
   return (
     <Panel className="relative">
-      <Toolbar className="max-sm:h-auto max-sm:min-h-10 max-sm:flex-wrap max-sm:py-1.5">
-        <SectionLabel>{MCP_TEXT.server}</SectionLabel>
-        <span className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground max-sm:basis-3/5">
-          {isLoaded ? MCP_TEXT.serverLabel(catalog) : MCP_TEXT.notLoaded}
-        </span>
+      <Toolbar className={STACKED_TOOLBAR}>
+        <ToolbarSummary label={MCP_TEXT.server} title={serverSummary}>{serverSummary}</ToolbarSummary>
         {isLoaded && catalog.instructions && (
-          <Button variant="ghost" size="sm" aria-pressed={showsInstructions} title={MCP_TEXT.instructionsHint} onClick={() => setShowsInstructions(!showsInstructions)}>
+          <Button variant="outline" size="sm" aria-pressed={showsInstructions} title={MCP_TEXT.instructionsHint} onClick={() => setShowsInstructions(!showsInstructions)}>
             {MCP_TEXT.instructions}
           </Button>
         )}
         {isLoaded && (
-          <Button variant="ghost" size="sm" aria-pressed={showsChecks} title={MCP_TEXT.checksHint} onClick={() => setShowsChecks(!showsChecks)}>
+          <Button variant="outline" size="sm" aria-pressed={showsChecks} title={MCP_TEXT.checksHint} onClick={() => setShowsChecks(!showsChecks)}>
             {MCP_TEXT.checks}
             <span className={cn("ml-1 font-mono", findings.length > 0 ? "text-warning" : "text-muted-foreground")}>{findings.length}</span>
           </Button>
         )}
         {!isLocal && (
-          <Button variant="ghost" size="sm" disabled={Boolean(signIn?.running)} title={MCP_TEXT.signInHint} onClick={onSignIn}>
+          <Button variant="outline" size="sm" disabled={Boolean(signIn?.running)} title={MCP_TEXT.signInHint} onClick={onSignIn}>
             {signIn?.running ? MCP_TEXT.signingIn : MCP_TEXT.signIn}
           </Button>
         )}
@@ -279,7 +277,7 @@ export function McpPanel({ tabId, request, catalog, editorPath, onUpdateRequest,
           {isLoaded ? MCP_TEXT.reload : MCP_TEXT.load}
         </Button>
       </Toolbar>
-      <div className="max-h-[60%] shrink-0 overflow-y-auto">
+      <div className="max-h-[60%] min-h-0 overflow-y-auto">
         <CatalogNotice catalog={catalog} isLocal={isLocal} />
         {signIn && <SignInTimeline auth={signIn} onClose={onCloseSignIn} onRetry={onSignIn} />}
         {catalog?.changes && <ToolChanges changes={catalog.changes} onAccept={onAcceptTools} />}
@@ -298,7 +296,7 @@ export function McpPanel({ tabId, request, catalog, editorPath, onUpdateRequest,
         {takesArguments(operation) && (
           <>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               disabled={!selected}
               aria-pressed={showsSchema}
@@ -308,7 +306,7 @@ export function McpPanel({ tabId, request, catalog, editorPath, onUpdateRequest,
               {MCP_TEXT.schema}
             </Button>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               disabled={!selected}
               title={MCP_TEXT.exampleHint}
@@ -323,12 +321,13 @@ export function McpPanel({ tabId, request, catalog, editorPath, onUpdateRequest,
       {operation === MCP_READ_RESOURCE && <Notice>{MCP_TEXT.readHint}</Notice>}
       {!namesItem(operation) && <Notice>{MCP_TEXT.noInput}</Notice>}
       {takesArguments(operation) && (
-        <div className="flex min-h-0 flex-1">
+        <div className="flex min-h-24 flex-1">
           <div className="min-h-0 min-w-0 flex-1">
             <Suspense fallback={<EditorSkeleton />}>
               <EditorComponent
                 value={mcpArguments}
                 onChange={(event) => onUpdateRequest({ mcpArguments: event.target.value })}
+                label={MCP_TEXT.argumentsLabel}
                 language="json"
                 path={editorPath}
                 variables

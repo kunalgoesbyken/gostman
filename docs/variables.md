@@ -8,12 +8,14 @@ When a name is defined in more than one place, the most specific scope wins. Fro
 
 | Scope | Where it is edited | Notes |
 | --- | --- | --- |
-| Global | Environments, **Global** tab | Shared by every collection. One global environment is in use at a time. |
-| Collection | Environments, **Collection variables** | Applies to every request in the collection. Stored in `gostman.yaml` for folder workspaces. |
-| Environment | Environments, **Collection** tab | The environment selected in the header. If it inherits from another environment, the parent's variables come first and the child overrides them. |
+| Global | Environments, **Globals** tab | Shared by every collection. One global environment is in use at a time. |
+| Collection | Environments, **Collection variables**, or the **Vars** tab of the collection's settings | Applies to every request in the collection. Stored in `gostman.yaml` for folder workspaces. In the app's own storage a collection can keep its own, under **Collection settings**, **Vars** of its top-level folder, on top of the shared ones under **Settings for all collections** (see [Environments per collection](#environments-per-collection)). Rows can be marked secret. |
+| Environment | Environments, **Environments** tab | The environment selected in the header for the request's collection (see [Environments per collection](#environments-per-collection)). If it inherits from another environment, the parent's variables come first and the child overrides them. |
 | Folder | Folder settings, **Vars** tab | Outer folders first, the request's own folder last. See [Folder and collection settings](folder-settings.md). |
 | Request | **Vars** tab of a request | Rows can be switched off without deleting them. |
 | Session | Environments, **Session values** | Set by scripts and Extract rules for this session only. Never written to disk. |
+
+Values you give when you start a run or a send win over everything saved in the collection: `--var`, `--var-from-env` and `--env-file` in the CLI, each row of a data file (in the CLI and in the runner), and the `variables` of an agent's `send_request`. They are kept as session values, so a script or Extract rule that writes the same name later in the run replaces them, and each new data row replaces what the previous iteration left. In the runner they last for the run only: when it ends, the session values it set go back to what they were.
 
 ## Values set by scripts and Extract rules
 
@@ -21,9 +23,9 @@ Scripts choose where a value goes:
 
 | Call | Where the value goes |
 | --- | --- |
-| `env.set`, `pm.environment.set`, `bru.setEnvVar`, `insomnia.environment.set` | The active environment. It is saved with the environment, in its YAML file in a folder workspace, unless the variable is marked secret, which keeps the value in the keychain. |
-| `env.session.set`, `pm.variables.set`, `bru.setVar`, `insomnia.variables.set` | Session values. |
-| `env.collection.set`, `pm.collectionVariables.set`, `insomnia.collectionVariables.set`, `insomnia.baseEnvironment.set` | Collection variables, saved in `gostman.yaml` in a folder workspace. |
+| `env.set`, `pm.environment.set`, `bru.setEnvVar` with `{ persist: true }`, `insomnia.environment.set` | The active environment. It is saved with the environment, in its YAML file in a folder workspace, unless the variable is marked secret, which keeps the value in the keychain. |
+| `env.session.set`, `pm.variables.set`, `bru.setVar`, `bru.setEnvVar` without `persist`, `insomnia.variables.set` | Session values. |
+| `env.collection.set`, `pm.collectionVariables.set`, `insomnia.collectionVariables.set`, `insomnia.baseEnvironment.set` | Collection variables, saved in `gostman.yaml` in a folder workspace, or in the request's collection when it keeps its own. A collection variable marked secret stays secret, so a token written there keeps its value on this device only. |
 | `env.globals.set`, `pm.globals.set`, `bru.setGlobalEnvVar`, `insomnia.globals.set` | The global environment in use. When none is in use, a global environment named Globals is created and used. In the CLI there are no globals, so the value lasts for the run. |
 
 Session values sit above every other scope, the way Postman's local variables and Bruno's runtime variables do. They are kept in memory: closing the app, opening another collection or **Clear session values** in the Environments dialog removes them. They are treated as secret, so hover previews mask them, and they never go into exports, share links or AI prompts. Writing a name to the environment, the collection or the globals removes the session value with that name, so the newest value wins.
@@ -34,7 +36,7 @@ The Go engine, the desktop and web apps and the CLI resolve a name the same way,
 
 ## The environment table
 
-Each environment is a table of rows: a name, a value, an on/off switch and a lock.
+Each environment is a table of rows: a checkbox (Use this variable) that turns the row on or off, a name, a value and a lock. Pick an environment in the list on the left, or create one with **New environment**; **Use this environment** makes it the active one.
 
 ![The Environments dialog with the Local environment selected: a green colour label, its variables, and the secret ones masked](../screenshots/environments.png)
 
@@ -44,6 +46,17 @@ Each environment is a table of rows: a name, a value, an on/off switch and a loc
 - **Duplicate**, **Delete** and **Filter variables** (matches names and the values of non-secret rows).
 
 Names may contain letters of any script, digits, underscores, dots and hyphens. Values can be strings, numbers or booleans; a value of `null` is treated as undefined.
+
+## Environments per collection
+
+In the app's own storage (the desktop app without a folder open, and the web app), every top-level folder is a collection, and an environment either belongs to one collection or is shared by all of them. Environments you create yourself are shared, so with one collection, or when you never move an environment, there is a single list and a single choice, as in Postman.
+
+- **Imports**: environments that come with a Bruno or Insomnia collection belong to the folder the import creates, as they do in those tools, so two collections can each have their own `Local`. Postman environment files, Postman data dumps, globals and `.http` environment files are shared, as Postman's are.
+- **The picker** lists the environments of the active request's collection under its name, then the shared ones. Each collection remembers its own choice, so switching to a tab from another collection switches the environment with it; the picker's border flashes when that happens. A collection without environments of its own uses the shared choice.
+- **Available in**: in the Environments dialog, set an environment to **Every collection** to share it, or to one collection to keep it there. The control appears when there is more than one collection. **New environment** creates one in the active request's collection when that collection has environments of its own, and a shared one otherwise.
+- **Everywhere else** the request decides: a send, a run (each request uses its own collection's environment), values that scripts and Extract rules write, and OAuth 2.0 tokens. Sharing a folder includes the shared environments and the ones of its collection; a Gostman export keeps which folder each environment belongs to.
+- **Collection variables** follow the same idea. A collection imported from Postman, Bruno, Insomnia, an OpenAPI spec or a WSDL file keeps its own collection variables, so two collections can each have their own `baseUrl` or `apiVersion`; they apply to its requests, on top of the shared collection variables, and an environment still wins over both. Scripts (`pm.collectionVariables.set` and the like) and Extract rules saved to the collection write to the request's own collection variables when it has them, and to the shared ones otherwise. In the Environments dialog, **Collection variables** under the collection's name edits the list of the active request's collection, and the one under **Shared** edits the shared list, which is listed for a collection with its own list only when it has values. The same lists are in the **Vars** tab of the top-level folder's **Collection settings** (the collection's own) and of **Settings for all collections** (the shared one). Collections you create yourself and data saved before this change use the shared list until you add a variable to their own. Exports and shares carry each collection's list and, in a full export or a share of everything, the shared list; a folder share carries the shared variables its requests use onto the shared folder, and a share without values carries only the names. Collection variables have the same secret lock as environment variables; the secret check of **Export** and **Share**, and `gostman scan`, look at collection variables too, and never see the values of secret ones.
+- A folder workspace is one collection, so its environments are always shared, environment files carry no folder, and its collection variables are the ones in `gostman.yaml`.
 
 ## Using variables
 
@@ -57,10 +70,10 @@ Write `{{name}}` wherever the value should appear: URL, query parameters and hea
 
 ## Secret variables
 
-Mark a row as secret with its lock.
+Mark a row as secret with its lock. Environment variables, global variables and collection variables (shared and per collection) all have it.
 
 - **Desktop**: values live in the operating system keychain (Windows Credential Manager, macOS Keychain, the Secret Service on Linux). If no keychain is available they are kept in `secrets.enc` in the app data folder, encrypted with AES-256-GCM using a key file next to it. That fallback protects against casual reading and accidental sharing, not against someone who can read both files.
-- Only the name of a secret variable is written to the environment file (as `meta`), never its value. Copying a workspace folder to another computer therefore leaves the secret values behind.
+- Only the name of a secret variable is written to the environment file (as `meta`), or for collection variables to `gostman.yaml` (as `variablesMeta`), never its value. Copying a workspace folder to another computer therefore leaves the secret values behind.
 - **Web**: there is no keychain in a browser, so values stay in the browser's storage (IndexedDB) and are still left out of exports and share links.
 - **CLI**: provide the value yourself, for example `gostman run <collection> --var-from-env API_TOKEN` (the environment variable name becomes the variable name) or `--var token=value`.
 
@@ -131,7 +144,7 @@ Every generator also has a name in the style of the faker library, such as `{{$f
 
 `{{?name}}` asks for a value when the request is sent. A dialog lists every prompted name found in the request, pre-filled with a variable of the same name if one exists. Cancelling the dialog stops the send. The values are not saved.
 
-In the CLI, `--var name=value` (or `--var-from-env`) supplies the value; without one the placeholder is left as written. Runs from the runner dialog do not prompt.
+In the CLI, `--var name=value` (or `--var-from-env`) supplies the value; without one the placeholder is left as written. The runner asks once per run: each name is asked the first time a request uses it, and later requests and iterations reuse the answer. The dialog says so, and its button reads **Continue run**. Cancelling marks that request as failed, and every later request that needs a prompted value fails without asking again; the run goes on unless **Stop on failure** is checked.
 
 ## .env files
 
@@ -152,6 +165,8 @@ A rule saved with an explicit choice keeps it wherever the collection is opened.
 | Header | Header name, case-insensitive | `Location` |
 | Cookie | Cookie name | `session` |
 | Status code | none | `200` |
+
+Rules run in the background with the collection's script time limit (10 seconds unless you change it). Rules that run past it, usually because of a slow regular expression in a JSONPath filter, keep no values: the Extract tab and the Checks tab of the response say so, the runner and `gostman run` count the request as failed, and its checks and post-response script still run. The value column of the Extract tab is worked out the same way, so a slow rule shows that it was stopped instead of holding up the app.
 
 ## Where substitution happens
 

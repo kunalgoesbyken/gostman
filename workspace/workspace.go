@@ -178,10 +178,16 @@ func (w *Workspace) fill(collection Collection) error {
 	if err := w.SaveEnvironments(collection.Environments); err != nil {
 		return err
 	}
-	if err := w.SaveVariables(collection.Variables); err != nil {
+	if err := w.SaveMarkedVariables(collection.Variables, collection.VariablesMeta); err != nil {
 		return err
 	}
-	return w.SaveSettings(collection.Settings)
+	if err := w.SaveSettings(collection.Settings); err != nil {
+		return err
+	}
+	if !collection.SharedOrder {
+		return nil
+	}
+	return w.MarkSharedOrder()
 }
 
 func (w *Workspace) Root() string {
@@ -277,7 +283,7 @@ func (w *Workspace) orderedEnvironments() []*environmentEntry {
 func (w *Workspace) Collection() Collection {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	collection := Collection{Requests: []Request{}, Folders: []Folder{}, Environments: []Environment{}, Variables: w.manifestVariables(), Settings: w.manifestSettings()}
+	collection := Collection{Requests: []Request{}, Folders: []Folder{}, Environments: []Environment{}, Variables: w.manifestObject(variablesKey), VariablesMeta: w.manifestObject(variablesMetaKey), Settings: w.manifestSettings(), SharedOrder: w.sharedOrder()}
 	for _, entry := range w.orderedFolders() {
 		folder := entry.folder
 		folder.SortOrder = entry.order

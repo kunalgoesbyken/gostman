@@ -1,4 +1,5 @@
 import {
+  AttachmentSize,
   Authorize,
   CancelAuthorization,
   CancelRequest,
@@ -41,6 +42,7 @@ import {
   SaveRequests,
   SaveScopes,
   SaveSettings,
+  ShareSiblingOrder,
   ScanSecrets,
   ScriptModules,
   SendRequest,
@@ -94,7 +96,7 @@ const invokeMcp = answering((id, request, variables) => InvokeMcp(id, toMcpCall(
 
 const storageGate = createStorageGate()
 
-allowDiskAttachments((title) => PickFile(title))
+allowDiskAttachments({ pick: PickFile, measure: AttachmentSize })
 
 async function load() {
   await storageGate.settled()
@@ -128,8 +130,9 @@ export const desktopBackend = {
   saveFolders: (folders) => SaveFolders(folders),
   saveHistory: (history) => SaveHistory(history),
   saveEnvironments: (environments, activeId) => SaveEnvironments(environments, activeId),
-  saveScopes: (globals, activeGlobalId, collectionVariables) => SaveScopes(globals, activeGlobalId, collectionVariables),
+  saveScopes: (globals, activeGlobalId, collectionVariables, collectionVariablesMeta) => SaveScopes(globals, activeGlobalId, collectionVariables, collectionVariablesMeta),
   saveCollectionSettings: (settings) => SaveCollectionSettings(settings),
+  shareOrder: () => ShareSiblingOrder(),
   saveCookies: (cookies) => SaveCookies(cookies),
   tabDrafts: localRecords(window.localStorage),
   network: {

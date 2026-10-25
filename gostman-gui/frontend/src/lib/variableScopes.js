@@ -2,6 +2,7 @@ import { isPlainObject, parseJSON } from './dataUtils'
 import { placeholderNames } from './placeholders'
 import { parseRows } from './rows'
 import { connectionDirectory } from './secretOrigins'
+import { chosenEnvironment, variableHolders } from './environmentScope'
 import { PROCESS_PREFIX, PROMPT_PREFIX } from './variableNames'
 
 export { SCOPE_COLLECTION, SCOPE_GLOBAL } from './scripting/scopes'
@@ -49,6 +50,23 @@ export function environmentChain(environments, environment) {
   return chain
 }
 
+const secretNamesOf = (meta) => Object.entries(parseObject(meta)).filter(([, mark]) => mark?.secret === true).map(([name]) => name)
+
+export function withSecretMarks(meta, incoming, names) {
+  const marked = secretNamesOf(incoming).filter((name) => names.includes(name))
+  if (marked.length === 0) return meta
+  const current = parseObject(meta)
+  return JSON.stringify({ ...current, ...Object.fromEntries(marked.map((name) => [name, { ...current[name], secret: true }])) })
+}
+
+export const listWithoutSecrets = (variables, meta) => withoutSecretValues([{ variables, meta }])[0].variables
+
+export const foldersWithoutSecrets = (folders) => folders.map((folder) => (
+  typeof folder.collectionVariables === 'string' && folder.collectionVariablesMeta
+    ? { ...folder, collectionVariables: listWithoutSecrets(folder.collectionVariables, folder.collectionVariablesMeta) }
+    : folder
+))
+
 export function withoutSecretValues(environments) {
   return environments.map((environment) => {
     const secrets = environmentEntries(environment).filter((entry) => entry.secret).map((entry) => entry.name)
@@ -72,6 +90,11 @@ const environmentLayers = (source, environments, environment, referenced) => (
 const objectLayer = (source, text) => ({
   source,
   entries: Object.entries(parseObject(text)).filter(([, value]) => value !== null).map(([name, value]) => ({ name, value })),
+})
+
+const listLayer = (source, variables, meta) => ({
+  source,
+  entries: environmentEntries({ variables, meta }).filter((entry) => entry.enabled),
 })
 
 const rowsLayer = (text) => ({
@@ -105,11 +128,12 @@ function folderLayers(folders, folderId) {
 
 export function scopeLayers(state, request, referenced = {}) {
   const activeGlobal = state.isRestricted ? undefined : findById(state.globalEnvironments, state.activeGlobalEnvironmentId)
-  const activeEnvironment = findById(state.environments, state.activeEnvironmentId) || state.environments[0]
+  const activeEnvironment = chosenEnvironment(state, request?.folderId || '')
   return [
     dotEnvLayer(state.dotEnv),
     ...(activeGlobal ? environmentLayers('global', state.globalEnvironments, activeGlobal, referenced) : []),
-    objectLayer('collection', state.collectionVariables),
+    listLayer('collection', state.collectionVariables, state.collectionVariablesMeta),
+    ...variableHolders(state.folders, request?.folderId).map((folder) => listLayer('collection', folder.collectionVariables, folder.collectionVariablesMeta)),
     ...(activeEnvironment ? environmentLayers('environment', state.environments, activeEnvironment, referenced) : []),
     ...folderLayers(state.folders, request?.folderId),
     rowsLayer(request?.vars),

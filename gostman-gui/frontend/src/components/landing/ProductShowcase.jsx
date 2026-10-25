@@ -58,7 +58,7 @@ const panelId = (id) => `showcase-panel-${id}`
 
 function useCenteredInList(ref, isActive) {
   useEffect(() => {
-    if (isActive) scrollIntoStrip(ref.current, { center: true, behavior: "smooth" })
+    if (isActive) scrollIntoStrip(ref.current, { center: true, behavior: window.matchMedia(MOTION_OK).matches ? "smooth" : "auto" })
   }, [ref, isActive])
 }
 

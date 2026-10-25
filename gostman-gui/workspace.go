@@ -23,6 +23,9 @@ const (
 	noFolderChosen  = "choose a folder first"
 	fallbackNotice  = "The folder %s could not be opened: %v. The collection saved on this computer is shown instead."
 	untrustedFiles  = "this folder is not trusted yet, so its requests cannot read files; trust the folder first"
+
+	droppedVariableNotice = "%s from %q was not saved because %q also sets it. Set it in that folder's variables if you need both."
+	droppedSharedNotice   = "%s from %q was not saved because a shared collection variable also sets it. Set it in that folder's variables if you need both."
 )
 
 type WorkspaceStatus struct {
@@ -67,11 +70,13 @@ func toFileEnvironments(environments []Environment) []workspace.Environment {
 
 func toFileCollection(data SavedData) workspace.Collection {
 	return workspace.Collection{
-		Requests:     toFileRequests(data.Requests),
-		Folders:      toFileFolders(data.Folders),
-		Environments: toFileEnvironments(data.Environments),
-		Variables:    data.CollectionVariables,
-		Settings:     data.CollectionSettings,
+		Requests:      toFileRequests(data.Requests),
+		Folders:       toFileFolders(data.Folders),
+		Environments:  toFileEnvironments(data.Environments),
+		Variables:     data.CollectionVariables,
+		VariablesMeta: data.CollectionVariablesMeta,
+		Settings:      data.CollectionSettings,
+		SharedOrder:   data.SharedOrder,
 	}
 }
 
@@ -111,7 +116,9 @@ func (s folderStore) collection(data SavedData) (SavedData, error) {
 	data.Environments = fromFileEnvironments(loaded.Environments)
 	data.ActiveEnvironmentId = memory.ActiveEnvironmentId
 	data.CollectionVariables = loaded.Variables
+	data.CollectionVariablesMeta = loaded.VariablesMeta
 	data.CollectionSettings = loaded.Settings
+	data.SharedOrder = loaded.SharedOrder
 	data.DotEnv = s.folder.DotEnv()
 	data.Restricted = !memory.Trusted
 	return data, nil
@@ -160,12 +167,16 @@ func (s folderStore) saveEnvironments(environments []Environment, activeId strin
 	return s.write(func() error { return s.folder.SaveEnvironments(toFileEnvironments(environments)) })
 }
 
-func (s folderStore) saveVariables(text string) error {
-	return s.write(func() error { return s.folder.SaveVariables(text) })
+func (s folderStore) saveVariables(text, meta string) error {
+	return s.write(func() error { return s.folder.SaveMarkedVariables(text, meta) })
 }
 
 func (s folderStore) saveSettings(settings workspace.Settings) error {
 	return s.write(func() error { return s.folder.SaveSettings(settings) })
+}
+
+func (s folderStore) shareOrder() error {
+	return s.write(s.folder.MarkSharedOrder)
 }
 
 func openFolder() *workspace.Workspace {
@@ -203,7 +214,7 @@ func chosenFolder(path string) (string, error) {
 }
 
 func createTrusted(path string) (*workspace.Workspace, error) {
-	folder, err := workspace.Create(path, workspace.Collection{})
+	folder, err := workspace.Create(path, workspace.Collection{SharedOrder: true})
 	if err != nil {
 		return nil, err
 	}
@@ -312,6 +323,9 @@ func (a *App) SaveCollectionToFolder(path string) (WorkspaceStatus, error) {
 	}
 	stripped, secrets := splitSecrets(data.Environments)
 	data.Environments = stripped
+	var dropped []workspace.DroppedVariable
+	data.CollectionVariables, data.CollectionVariablesMeta, dropped = workspace.FoldVariableLists(data.CollectionVariables, data.CollectionVariablesMeta, folderLists(data.Folders))
+	_, sharedSecrets := splitSecrets(sharedVariablesList(data.CollectionVariables, data.CollectionVariablesMeta))
 	folder, err := workspace.Create(target, toFileCollection(data))
 	if errors.Is(err, workspace.ErrNotEmpty) {
 		return WorkspaceStatus{}, errors.New(occupiedFolder)
@@ -320,6 +334,9 @@ func (a *App) SaveCollectionToFolder(path string) (WorkspaceStatus, error) {
 		return WorkspaceStatus{}, err
 	}
 	if err := vault.keep(folder.Root(), secrets); err != nil {
+		return WorkspaceStatus{}, err
+	}
+	if err := vault.keep(folder.Root()+sharedVariablesScope, sharedSecrets); err != nil {
 		return WorkspaceStatus{}, err
 	}
 	store := folderStore{folder: folder}
@@ -333,7 +350,18 @@ func (a *App) SaveCollectionToFolder(path string) (WorkspaceStatus, error) {
 		return WorkspaceStatus{}, err
 	}
 	announcePlacement(chosen, target)
+	announceDropped(dropped)
 	return activate(folder)
+}
+
+func announceDropped(dropped []workspace.DroppedVariable) {
+	for _, variable := range dropped {
+		if variable.KeptFrom == "" {
+			storage.announce(fmt.Sprintf(droppedSharedNotice, variable.Name, variable.From))
+			continue
+		}
+		storage.announce(fmt.Sprintf(droppedVariableNotice, variable.Name, variable.From, variable.KeptFrom))
+	}
 }
 
 func workspaceFiles() engine.FileReader {
@@ -364,6 +392,22 @@ func workspaceAttachments() engine.FileOpener {
 		}
 		return open(path)
 	}
+}
+
+func (a *App) AttachmentSize(path string) (int64, error) {
+	file, err := workspaceAttachments()(path)
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
+	info, err := file.Stat()
+	if err != nil {
+		return 0, err
+	}
+	if !info.Mode().IsRegular() {
+		return 0, fmt.Errorf("%q is not a regular file", path)
+	}
+	return info.Size(), nil
 }
 
 func requireTrust(root string) error {

@@ -4,6 +4,7 @@ import { IconButton } from "./button"
 import { RESIZE_EDGES, useFloatingWindow } from "../../hooks/useFloatingWindow"
 import { useFocusTrap } from "../../hooks/useFocusTrap"
 import { DIALOG_TEXT } from "../../lib/dialogText"
+import { APP_TEXT } from "../../lib/appText"
 import { cn } from "../../lib/utils"
 
 const DIALOG_OVERLAY = "fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 max-sm:p-2"
@@ -34,6 +35,10 @@ const isTopmost = (ref) => openDialogs[openDialogs.length - 1] === ref
 
 const keepFocusInDialog = (event) => event.preventDefault()
 
+const CODE_EDITOR = ".cm-editor"
+
+const isHandledElsewhere = (event) => event.defaultPrevented || Boolean(event.target.closest?.(CODE_EDITOR))
+
 function ResizeHandles({ frame }) {
   return (
     <div aria-hidden="true" style={frame.style} className="pointer-events-none fixed select-none">
@@ -56,7 +61,7 @@ export function Dialog({ label, size = "sm", floating, onClose, className, child
 
   useEffect(() => {
     const closeOnEscape = (event) => {
-      if (event.key === "Escape" && isTopmost(dialogRef)) onClose()
+      if (event.key === "Escape" && isTopmost(dialogRef) && !isHandledElsewhere(event)) onClose()
     }
     window.addEventListener("keydown", closeOnEscape)
     return () => window.removeEventListener("keydown", closeOnEscape)
@@ -88,7 +93,7 @@ export function Dialog({ label, size = "sm", floating, onClose, className, child
 }
 
 export function DialogPending() {
-  return <div role="status" aria-label="Loading" className={DIALOG_OVERLAY} />
+  return <div role="status" aria-label={APP_TEXT.loading} className={DIALOG_OVERLAY} />
 }
 
 function WindowGrip({ frame }) {
@@ -118,7 +123,7 @@ export function DialogHeader({ onClose, children }) {
     <div className={cn("flex h-10 shrink-0 items-center gap-2 border-b border-border pl-4 pr-2", frame && "touch-none select-none")} {...frame?.headerProps}>
       {frame && <WindowGrip frame={frame} />}
       <div className="flex h-full min-w-0 flex-1 items-center gap-2">{children}</div>
-      {onClose && <IconButton label="Close" icon={X} onClick={onClose} />}
+      {onClose && <IconButton label={DIALOG_TEXT.close} icon={X} onClick={onClose} />}
     </div>
   )
 }

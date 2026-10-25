@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { AlertTriangle, FileDigit, FileText, Info, List, MonitorDown, Play, Radio, Square, X } from "lucide-react"
+import { AlertTriangle, FileDigit, FileText, Info, List, Play, Radio, Square, X } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button, IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
@@ -12,21 +12,20 @@ import { SegmentedControl } from "./ui/segmented"
 import { Select } from "./ui/select"
 import { TabCount } from "./ui/tabs"
 import { VirtualList } from "./ui/VirtualList"
+import { DesktopOnly } from "./DesktopOnly"
 import { LocalAddress } from "./LocalAddress"
 import { MethodTag } from "./MethodTag"
 import { isSavable, suggestedFolderName } from "../lib/captureConversion"
 import { NEW_FOLDER, useCaptureStore } from "../lib/captureSession"
+import { CAPTURE_TEXT } from "../lib/captureText"
 import { ROOT_ID, buildCollectionTree, listFolders } from "../lib/collectionTree"
 import { formatSize } from "../lib/dataUtils"
 import { parseJsonBody, statusVariant } from "../lib/response"
+import { RESPONSE_TEXT } from "../lib/responseText"
+import { TREE_TEXT } from "../lib/treeText"
 import { cn } from "../lib/utils"
 
 const PATH_SEPARATOR = " / "
-const WEB_NOTICE = "Capturing traffic needs the desktop app, which can listen on a local port and forward to your API."
-const LIMITATION = "Point your app at the local address instead of the API. An app whose base URL cannot be changed is not captured."
-const UPSTREAM_PLACEHOLDER = "API to forward to, for example https://api.example.com"
-const IDLE_HINT = "Enter the API your app talks to, then start the capture."
-const FAILED_LABEL = "ERR"
 const ENCODING_BASE64 = "base64"
 const ROW_HEIGHT_PX = 28
 const COLUMNS = "grid min-w-0 flex-1 grid-cols-[4.5rem_3.5rem_minmax(0,1fr)_2.75rem_4.5rem_4.5rem] items-center gap-2"
@@ -37,13 +36,13 @@ const PART_HEADERS = "headers"
 const PART_BODY = "body"
 
 const SIDES = [
-  { value: SIDE_REQUEST, label: "Request" },
-  { value: SIDE_RESPONSE, label: "Response" },
+  { value: SIDE_REQUEST, label: CAPTURE_TEXT.sides.request },
+  { value: SIDE_RESPONSE, label: CAPTURE_TEXT.sides.response },
 ]
 
 const HEADER_COLUMNS = [
-  { header: "Name", key: "key", width: "w-1/3", cellClassName: "text-foreground" },
-  { header: "Value", key: "value" },
+  { header: RESPONSE_TEXT.columns.name, key: "key", width: "w-1/3", cellClassName: "text-foreground" },
+  { header: RESPONSE_TEXT.columns.value, key: "value" },
 ]
 
 const titleOf = (exchange) => `${exchange.method} ${exchange.path}`
@@ -61,8 +60,8 @@ function CaptureControls({ capture, actions }) {
     <Toolbar>
       <Input
         value={upstream}
-        placeholder={UPSTREAM_PLACEHOLDER}
-        aria-label="API to forward to"
+        placeholder={CAPTURE_TEXT.upstreamPlaceholder}
+        aria-label={CAPTURE_TEXT.upstreamLabel}
         spellCheck={false}
         disabled={isRunning}
         onChange={(event) => actions.setUpstream(event.target.value)}
@@ -72,9 +71,9 @@ function CaptureControls({ capture, actions }) {
         type="number"
         min={1}
         value={port || ""}
-        placeholder="Port"
-        aria-label="Port"
-        title="Port on 127.0.0.1"
+        placeholder={CAPTURE_TEXT.port}
+        aria-label={CAPTURE_TEXT.port}
+        title={CAPTURE_TEXT.portTitle}
         disabled={isRunning}
         onChange={(event) => actions.setPort(event.target.value)}
         className="w-20 shrink-0 font-mono"
@@ -82,12 +81,12 @@ function CaptureControls({ capture, actions }) {
       {isRunning ? (
         <Button variant="destructive" size="sm" onClick={actions.stop}>
           <Square />
-          Stop
+          {CAPTURE_TEXT.stop}
         </Button>
       ) : (
         <Button size="sm" disabled={isStarting || upstream.trim() === ""} onClick={actions.start}>
           <Play />
-          Start
+          {CAPTURE_TEXT.start}
         </Button>
       )}
     </Toolbar>
@@ -101,7 +100,7 @@ function StatusBadge({ exchange }) {
       title={exchange.error || undefined}
       className="justify-self-start font-mono"
     >
-      {exchange.status || FAILED_LABEL}
+      {exchange.status || CAPTURE_TEXT.failed}
     </Badge>
   )
 }
@@ -109,13 +108,13 @@ function StatusBadge({ exchange }) {
 function ExchangeRow({ exchange, isChecked, isCurrent, onToggle, onInspect }) {
   return (
     <div className={cn("flex h-7 items-center gap-2 border-b border-border px-3", isCurrent && "bg-accent")}>
-      <Checkbox label={`Select ${titleOf(exchange)}`} checked={isChecked} onChange={() => onToggle(exchange.id)} />
+      <Checkbox label={CAPTURE_TEXT.selectExchange(titleOf(exchange))} checked={isChecked} onChange={() => onToggle(exchange.id)} />
       <button type="button" aria-current={isCurrent} onClick={() => onInspect(exchange.id)} className={cn(COLUMNS, "h-full text-left")}>
         <span className={`${CELL} text-muted-foreground`}>{new Date(exchange.time).toLocaleTimeString([], { hour12: false })}</span>
         <MethodTag method={exchange.method} />
         <span title={exchange.path} className={`${CELL} text-foreground`}>{exchange.path}</span>
         <StatusBadge exchange={exchange} />
-        <span className={`${CELL} text-right text-muted-foreground`}>{exchange.durationMs} ms</span>
+        <span className={`${CELL} text-right text-muted-foreground`}>{CAPTURE_TEXT.duration(exchange.durationMs)}</span>
         <span className={`${CELL} text-right text-muted-foreground`}>{formatSize(exchange.response.size)}</span>
       </button>
     </div>
@@ -125,14 +124,14 @@ function ExchangeRow({ exchange, isChecked, isCurrent, onToggle, onInspect }) {
 function ListHeader({ isAllChecked, onToggleAll }) {
   return (
     <div className="flex h-8 shrink-0 items-center gap-2 border-b border-border px-3">
-      <Checkbox label="Select every exchange shown" checked={isAllChecked} onChange={onToggleAll} />
+      <Checkbox label={CAPTURE_TEXT.selectAll} checked={isAllChecked} onChange={onToggleAll} />
       <div className={COLUMNS}>
-        <SectionLabel className="truncate">Time</SectionLabel>
-        <SectionLabel className="truncate">Method</SectionLabel>
-        <SectionLabel className="truncate">Path</SectionLabel>
-        <SectionLabel className="truncate">Status</SectionLabel>
-        <SectionLabel className="truncate text-right">Duration</SectionLabel>
-        <SectionLabel className="truncate text-right">Size</SectionLabel>
+        <SectionLabel className="truncate">{CAPTURE_TEXT.columns.time}</SectionLabel>
+        <SectionLabel className="truncate">{CAPTURE_TEXT.columns.method}</SectionLabel>
+        <SectionLabel className="truncate">{CAPTURE_TEXT.columns.path}</SectionLabel>
+        <SectionLabel className="truncate">{CAPTURE_TEXT.columns.status}</SectionLabel>
+        <SectionLabel className="truncate text-right">{CAPTURE_TEXT.columns.duration}</SectionLabel>
+        <SectionLabel className="truncate text-right">{CAPTURE_TEXT.columns.size}</SectionLabel>
       </div>
     </div>
   )
@@ -146,9 +145,9 @@ function Destination({ value, onChange, folders, requests, suggestedName }) {
   )
   return (
     <div className="w-48 shrink-0">
-      <Select value={value} onChange={(event) => onChange(event.target.value)} aria-label="Folder to save into">
-        <option value={NEW_FOLDER}>{existing ? suggestedName : `New folder ${suggestedName}`}</option>
-        <option value={ROOT_ID}>Top level</option>
+      <Select value={value} onChange={(event) => onChange(event.target.value)} aria-label={CAPTURE_TEXT.destinationLabel}>
+        <option value={NEW_FOLDER}>{existing ? suggestedName : CAPTURE_TEXT.newFolder(suggestedName)}</option>
+        <option value={ROOT_ID}>{TREE_TEXT.topLevel}</option>
         {others.map(({ folder, path }) => (
           <option key={folder.id} value={folder.id}>{path.join(PATH_SEPARATOR)}</option>
         ))}
@@ -158,15 +157,15 @@ function Destination({ value, onChange, folders, requests, suggestedName }) {
 }
 
 function MessageBody({ message }) {
-  if (!message.body) return <EmptyState icon={FileText} title="No body" />
+  if (!message.body) return <EmptyState icon={FileText} title={CAPTURE_TEXT.noBody} />
   if (message.bodyEncoding === ENCODING_BASE64) {
-    return <EmptyState icon={FileDigit} title={`Binary body, ${formatSize(message.size)}`} description={message.contentType} />
+    return <EmptyState icon={FileDigit} title={CAPTURE_TEXT.binaryBody(formatSize(message.size))} description={message.contentType} />
   }
   return <pre className="whitespace-pre-wrap p-3 font-mono text-xs text-foreground [overflow-wrap:anywhere]">{readable(message.body)}</pre>
 }
 
 function MessageHeaders({ headers }) {
-  if (headers.length === 0) return <EmptyState icon={List} title="No headers" />
+  if (headers.length === 0) return <EmptyState icon={List} title={RESPONSE_TEXT.noHeadersTitle} />
   return <DataTable columns={HEADER_COLUMNS} rows={headers} />
 }
 
@@ -175,25 +174,25 @@ function ExchangeDetail({ exchange, actions }) {
   const [part, setPart] = useState(PART_BODY)
   const message = exchange[side]
   const parts = [
-    { value: PART_BODY, label: "Body" },
-    { value: PART_HEADERS, label: `Headers (${message.headers.length})` },
+    { value: PART_BODY, label: CAPTURE_TEXT.body },
+    { value: PART_HEADERS, label: CAPTURE_TEXT.headersCount(message.headers.length) },
   ]
 
   return (
-    <section aria-label="Selected exchange" className="flex h-64 shrink-0 flex-col border-t border-border">
+    <section aria-label={CAPTURE_TEXT.selectedExchange} className="flex h-64 shrink-0 flex-col border-t border-border">
       <Toolbar>
-        <SegmentedControl label="Message" options={SIDES} value={side} onChange={setSide} />
-        <SegmentedControl label="Message section" options={parts} value={part} onChange={setPart} />
+        <SegmentedControl label={CAPTURE_TEXT.message} options={SIDES} value={side} onChange={setSide} />
+        <SegmentedControl label={CAPTURE_TEXT.messageSection} options={parts} value={part} onChange={setPart} />
         <span title={exchange.url} className={`${CELL} min-w-0 flex-1 text-right text-muted-foreground`}>{exchange.url}</span>
         <Button variant="outline" size="sm" disabled={!isSavable(exchange)} onClick={() => actions.openAsRequest(exchange)}>
-          Save as request
+          {CAPTURE_TEXT.saveAsRequest}
         </Button>
-        <IconButton label="Close details" icon={X} onClick={actions.closeDetail} />
+        <IconButton label={CAPTURE_TEXT.closeDetails} icon={X} onClick={actions.closeDetail} />
       </Toolbar>
       {exchange.error && <Notice tone="destructive" icon={AlertTriangle}>{exchange.error}</Notice>}
-      {exchange.upgraded && <Notice icon={Info}>This call switched to a WebSocket. Its frames are forwarded but not recorded.</Notice>}
-      {exchange.interrupted && <Notice tone="warning" icon={AlertTriangle}>The response ended before it was complete.</Notice>}
-      {message.truncated && <Notice tone="warning" icon={AlertTriangle}>This body was forwarded whole, but only its first 2 MB are kept here.</Notice>}
+      {exchange.upgraded && <Notice icon={Info}>{CAPTURE_TEXT.upgraded}</Notice>}
+      {exchange.interrupted && <Notice tone="warning" icon={AlertTriangle}>{CAPTURE_TEXT.interrupted}</Notice>}
+      {message.truncated && <Notice tone="warning" icon={AlertTriangle}>{CAPTURE_TEXT.truncated}</Notice>}
       <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
         {part === PART_BODY ? <MessageBody message={message} /> : <MessageHeaders headers={message.headers} />}
       </div>
@@ -229,16 +228,16 @@ function CapturePanel({ folders, requests, actions }) {
   return (
     <>
       <CaptureControls capture={capture} actions={actions} />
-      <Notice icon={Info}>{LIMITATION}</Notice>
+      <Notice icon={Info}>{CAPTURE_TEXT.limitation}</Notice>
       {failure && <Notice tone="destructive" icon={AlertTriangle} role="alert">{failure}</Notice>}
       <Toolbar>
-        <SectionLabel>Exchanges</SectionLabel>
+        <SectionLabel>{CAPTURE_TEXT.exchanges}</SectionLabel>
         <TabCount>{shown.length}</TabCount>
         <Input
           type="search"
           value={query}
-          placeholder="Filter by method, path or status"
-          aria-label="Filter exchanges"
+          placeholder={CAPTURE_TEXT.filterPlaceholder}
+          aria-label={CAPTURE_TEXT.filterLabel}
           spellCheck={false}
           onChange={(event) => setQuery(event.target.value)}
         />
@@ -250,23 +249,23 @@ function CapturePanel({ folders, requests, actions }) {
           suggestedName={suggestedFolderName(selected.length > 0 ? selected : log)}
         />
         <Button variant="outline" size="sm" disabled={selected.length === 0} onClick={() => actions.saveToFolder(selected.map((exchange) => exchange.id), target)}>
-          Save selected to folder
+          {CAPTURE_TEXT.saveSelected}
         </Button>
-        <Button variant="ghost" size="sm" disabled={log.length === 0} onClick={clear}>Clear</Button>
+        <Button variant="ghost" size="sm" disabled={log.length === 0} onClick={clear}>{CAPTURE_TEXT.clear}</Button>
       </Toolbar>
       {log.length === 0 ? (
         <div className="min-h-0 flex-1">
           <EmptyState
             icon={Radio}
-            title="No calls captured yet"
-            description={isRunning ? `Calls your app sends to ${address} appear here.` : IDLE_HINT}
+            title={CAPTURE_TEXT.emptyTitle}
+            description={isRunning ? CAPTURE_TEXT.listening(address) : CAPTURE_TEXT.idleHint}
           />
         </div>
       ) : (
         <>
           <ListHeader isAllChecked={isAllChecked} onToggleAll={toggleAll} />
           <VirtualList
-            aria-label="Captured exchanges"
+            aria-label={CAPTURE_TEXT.listLabel}
             items={shown}
             rowHeight={ROW_HEIGHT_PX}
             className="min-h-0 flex-1"
@@ -293,18 +292,16 @@ export function CaptureDialog({ folders, requests, actions }) {
   const address = useCaptureStore((state) => state.address)
 
   return (
-    <Dialog label="Capture traffic" size="lg" className="h-[40rem] max-w-4xl" onClose={actions.close}>
+    <Dialog label={CAPTURE_TEXT.title} size={actions.isAvailable ? "lg" : "sm"} className={actions.isAvailable ? "h-[40rem] max-w-4xl" : undefined} onClose={actions.close}>
       <DialogHeader onClose={actions.close}>
-        <DialogTitle>Capture traffic</DialogTitle>
-        {isRunning && <Badge variant="success">Running</Badge>}
+        <DialogTitle>{CAPTURE_TEXT.title}</DialogTitle>
+        {isRunning && <Badge variant="success">{CAPTURE_TEXT.running}</Badge>}
         {isRunning && <LocalAddress address={address} />}
       </DialogHeader>
       {actions.isAvailable ? (
         <CapturePanel folders={folders} requests={requests} actions={actions} />
       ) : (
-        <div className="min-h-0 flex-1">
-          <EmptyState icon={MonitorDown} title="Available in the desktop app" description={WEB_NOTICE} />
-        </div>
+        <DesktopOnly title={CAPTURE_TEXT.desktopOnly} description={CAPTURE_TEXT.webNotice} />
       )}
     </Dialog>
   )

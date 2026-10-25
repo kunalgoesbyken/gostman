@@ -132,7 +132,7 @@ li small { display: block; color: var(--muted); margin-left: 42px; white-space: 
       var tests = result.tests || [];
       if (tests.length) {
         var passed = tests.filter(function (test) { return test.passed; }).length;
-        head.appendChild(el('span', 'stat', passed + '/' + tests.length + ' tests'));
+        head.appendChild(el('span', 'stat', passed + '/' + tests.length + ' checks'));
       }
       head.appendChild(el('span', 'stat', result.status || ''));
       head.appendChild(el('span', 'stat', (result.durationMs || 0) + ' ms'));
@@ -141,7 +141,8 @@ li small { display: block; color: var(--muted); margin-left: 42px; white-space: 
 
     var body = el('div', 'body');
     if (result.skipped) body.appendChild(el('div', '', result.skipped));
-    if (result.url) body.appendChild(section('URL', el('pre', '', result.url)));
+    if (result.resolvedUrl) body.appendChild(section('URL', el('pre', '', result.resolvedUrl)));
+    if (result.url && result.url !== result.resolvedUrl) body.appendChild(section(result.resolvedUrl ? 'URL as written' : 'URL', el('pre', '', result.url)));
     if (result.error) body.appendChild(el('div', 'error', result.error));
     if ((result.tests || []).length) {
       var list = el('ul');
@@ -150,7 +151,7 @@ li small { display: block; color: var(--muted); margin-left: 42px; white-space: 
         if (test.message) item.appendChild(el('small', '', test.message));
         list.appendChild(item);
       });
-      body.appendChild(section('Assertions and tests', list));
+      body.appendChild(section('Checks', list));
     }
     if ((result.logs || []).length) {
       body.appendChild(section('Console', el('pre', '', result.logs.map(function (line) { return line.level + ': ' + line.text; }).join('\n'))));
@@ -176,7 +177,7 @@ li small { display: block; color: var(--muted); margin-left: 42px; white-space: 
   function matches(result) {
     if (onlyFailed && !result.failed) return false;
     if (!query) return true;
-    var haystack = ((result.name || '') + ' ' + (result.url || '') + ' ' + (result.folder || '')).toLowerCase();
+    var haystack = ((result.name || '') + ' ' + (result.url || '') + ' ' + (result.resolvedUrl || '') + ' ' + (result.folder || '')).toLowerCase();
     return haystack.indexOf(query) !== -1;
   }
 
@@ -210,8 +211,8 @@ li small { display: block; color: var(--muted); margin-left: 42px; white-space: 
   cards.appendChild(card(summary.failed, 'failed', summary.failed ? 'fail' : ''));
   cards.appendChild(card(summary.skipped, 'skipped'));
   cards.appendChild(card(summary.notRun, 'not run'));
-  cards.appendChild(card((summary.tests || 0) - (summary.failedTests || 0), 'tests passed', 'pass'));
-  cards.appendChild(card(summary.failedTests, 'tests failed', summary.failedTests ? 'fail' : ''));
+  cards.appendChild(card((summary.tests || 0) - (summary.failedTests || 0), 'checks passed', 'pass'));
+  cards.appendChild(card(summary.failedTests, 'checks failed', summary.failedTests ? 'fail' : ''));
 
   function setFilter(failed) {
     onlyFailed = failed;

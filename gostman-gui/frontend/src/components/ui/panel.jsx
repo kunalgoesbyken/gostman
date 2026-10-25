@@ -15,6 +15,17 @@ export function Toolbar({ className, ...props }) {
   return <div className={cn("flex h-10 shrink-0 items-center gap-2 border-b border-border px-3", className)} {...props} />
 }
 
+export const STACKED_TOOLBAR = "max-sm:h-auto max-sm:min-h-10 max-sm:flex-wrap max-sm:justify-end max-sm:py-1.5"
+
+export function ToolbarSummary({ label, title, children }) {
+  return (
+    <div className="flex min-w-0 flex-1 items-center gap-2 max-sm:basis-full">
+      <SectionLabel>{label}</SectionLabel>
+      <span title={title} className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground">{children}</span>
+    </div>
+  )
+}
+
 export function PanelBody({ className, ...props }) {
   return <div className={cn("min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-3 [overflow-wrap:anywhere]", className)} {...props} />
 }

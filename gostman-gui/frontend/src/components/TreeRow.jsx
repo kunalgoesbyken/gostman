@@ -85,14 +85,8 @@ export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop,
 
   return (
     <div
-      role="treeitem"
+      role="none"
       data-row-key={row.key}
-      aria-expanded={isFolder ? row.isOpen : undefined}
-      aria-selected={isActive}
-      aria-level={row.depth + 1}
-      aria-posinset={row.position}
-      aria-setsize={row.siblings}
-      aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown Control+C Control+V Control+D F2 Delete Shift+F10"
       onContextMenu={openMenuAtPointer}
       onKeyDown={(event) => onKeyDown(event, row)}
       onFocus={() => onFocus(row)}
@@ -108,6 +102,13 @@ export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop,
       <button
         ref={mainRef}
         type="button"
+        role="treeitem"
+        aria-expanded={isFolder ? row.isOpen : undefined}
+        aria-selected={isActive}
+        aria-level={row.depth + 1}
+        aria-posinset={row.position}
+        aria-setsize={row.siblings}
+        aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown Control+C Control+V Control+D F2 Delete Shift+F10"
         data-row-main
         data-pane-entry
         tabIndex={isTabStop ? 0 : -1}
@@ -124,7 +125,7 @@ export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop,
             <FolderIcon color={item.color} />
           </>
         ) : (
-          <MethodTag method={shownMethod(item)} className="w-10" />
+          <MethodTag compact method={shownMethod(item)} className="w-10" />
         )}
         <span className={cn("min-w-0 flex-1 truncate", isFolder && "font-medium text-foreground")}>
           {isFolder ? name : <MarkedRanges text={name} ranges={matchRanges(name, search)} />}

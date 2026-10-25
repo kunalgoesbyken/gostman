@@ -34,7 +34,7 @@ test("API_TOKEN was supplied at run time", () => {
 ```
 
 ```
-FAIL  GET      Protected/Check the token  200 OK  957 ms  2/3 tests
+FAIL  GET      Protected/Check the token  200 OK  957 ms  2/3 checks
       FAIL  API_TOKEN was supplied at run time
             expected undefined to be a string
 ```

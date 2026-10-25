@@ -4,15 +4,15 @@ This page covers how Gostman keeps secret variables, how to read values from a s
 
 ## Secret variables
 
-Each row of an environment has a lock button. Select it to mark the variable as secret (**Mark as secret**); select it again to return to **Stored in plain text**.
+Each row of an environment, and of a collection variables list, has a lock button. Select it to mark the variable as secret (**Mark as secret**); select it again to return to **Stored in plain text**.
 
 - A secret value is masked in the table. The eye button (**Show value** and **Hide value**) reveals it.
 - Secret values are kept in the system keychain or an encrypted file on this computer, never in the collection folder or in exports. On the web they stay in the browser and are left out of exports.
-- Only the name of a secret variable is written to the environment file, never its value. Copying a workspace folder to another computer leaves the secret values behind.
+- Only the name of a secret variable is written to the environment file (or, for collection variables, to `gostman.yaml`), never its value. Copying a workspace folder to another computer leaves the secret values behind.
 
-The Environments dialog states the same at the bottom: the desktop app names the keychain or encrypted file, and the web version says values stay in the browser.
+The Environments dialog states the same at the bottom: the desktop app says values are kept in the system keychain or an encrypted file on this computer, and the web version says they stay in the browser.
 
-The lock is available on environment variables. It is not offered for collection variables or for rows that read from a secret manager. [Variables](variables.md#secret-variables) lists the keychain used on each system and what to do in the command line.
+The lock is available on environment, global and collection variables. It is not offered for folder variables or for rows that read from a secret manager. [Variables](variables.md#secret-variables) lists the keychain used on each system and what to do in the command line.
 
 ## Secret managers
 
@@ -22,7 +22,7 @@ A variable can read its value from a secret manager or a password manager instea
 
 The collection stores only the reference: the connection name, the path, an optional JSON field and an optional version. The connection itself, with its address and sign-in details, is kept on this computer with credentials in the system keychain, and is never part of a collection. A collection you clone cannot point your credentials at its own server.
 
-Secret managers work in the desktop app and in the command line. In the web version the Secret managers dialog shows `Available in the desktop app and the CLI`, because the web version never sends credentials to its relay. Variables that use a reference only resolve in the desktop app and the command line. For the command line, see [Secret managers](cli.md) in the command line page.
+Secret managers work in the desktop app and in the command line. In the web version the Secret managers dialog shows `Available in the desktop app and the CLI`, because the web version never sends credentials to its relay. Variables that use a reference only resolve in the desktop app and the command line. For the command line, see the secret managers entry in [Command line](cli.md) and [Secrets](ci.md#secrets) in the CI page.
 
 ### Add a connection
 
@@ -175,7 +175,7 @@ Gostman runs the Secrets Manager CLI (`bws`) with the access token of a machine 
 
 ## Cookies
 
-Gostman keeps the cookies that responses set and sends them back to the same site on later requests. Open the **Manage cookies** command to see them in the **Cookies** dialog.
+Gostman keeps the cookies that responses set and sends them back to the same site on later requests. Run the **Manage cookies** command, or select **Cookies** in the status bar at the bottom of the window, to see them in the **Cookies** dialog.
 
 ![The Cookies dialog listing the session_id and locale cookies for localhost with their path and expiry](../screenshots/cookies.png)
 
@@ -189,7 +189,7 @@ Two switches in a request's **Settings** tab change this for one request: clear 
 
 ## Network settings
 
-Network settings sets the proxy and certificates used when the desktop app sends requests: HTTP, GraphQL, gRPC, WebSocket, server-sent events, MCP over HTTP and OAuth 2 token requests. Open the **Network settings** command from the command palette.
+Network settings sets the proxy and certificates used when the desktop app sends requests: HTTP, GraphQL, gRPC, WebSocket, server-sent events, MCP over HTTP and OAuth 2 token requests. Run the **Network settings** command from the command palette, or select **Network** in the status bar at the bottom of the window.
 
 ![The Network settings dialog with a custom proxy, hosts that bypass it and a CA certificate picker](../screenshots/network.png)
 

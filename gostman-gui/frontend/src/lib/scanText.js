@@ -8,6 +8,7 @@ export const SCAN_TEXT = {
   cleanDescription: 'No token formats, random-looking credential values or typed-in passwords were found.',
   failed: (message) => `The check could not run: ${message}`,
   goToRequest: 'Go to request',
+  findings: 'Findings',
   showFindings: 'Show findings',
   hideFindings: 'Hide findings',
   shareAnyway: 'Share anyway',

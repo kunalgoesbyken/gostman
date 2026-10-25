@@ -1,4 +1,4 @@
-import { MAX_FOLDER_DEPTH, ROOT_ID, ROW_FOLDER, ROW_REQUEST, buildCollectionTree, folderDepth, foldersIn, requestsIn } from './collectionTree.js'
+import { MAX_FOLDER_DEPTH, ROOT_ID, ROW_FOLDER, ROW_REQUEST, buildCollectionTree, folderDepth, foldersIn, requestsIn, siblingsIn } from './collectionTree.js'
 import { PLACE_AFTER, PLACE_BEFORE, PLACE_INSIDE } from './dropPlace.js'
 import { cleanOrder } from './sortOrder.js'
 
@@ -14,7 +14,11 @@ const PARENT_KEYS = { [ROW_FOLDER]: 'parentId', [ROW_REQUEST]: 'folderId' }
 
 const listerFor = (kind) => (kind === ROW_FOLDER ? foldersIn : requestsIn)
 
-const idsOf = (items) => items.map((item) => item.id)
+const entryOf = ({ kind, id }) => ({ kind, id })
+
+const sameEntry = (first, second) => first.kind === second.kind && first.id === second.id
+
+const siblingEntries = (tree, containerId) => siblingsIn(tree, containerId).map(({ kind, item }) => ({ kind, id: item.id }))
 
 function lookupsOf(folders, requests) {
   const parents = new Map(folders.map((folder) => [folder.id, folder.parentId || ROOT_ID]))
@@ -50,89 +54,101 @@ export function canDropFolder(folders, folderId, containerId) {
   return !isInside(containerId, folderId, parents)
 }
 
-function insertIds(ids, movedId, anchorId, place) {
-  const rest = ids.filter((id) => id !== movedId)
-  const anchorIndex = anchorId ? rest.indexOf(anchorId) : -1
-  if (anchorIndex < 0) return [...rest, movedId]
+function insertEntry(entries, moved, anchor, place) {
+  const rest = entries.filter((entry) => !sameEntry(entry, moved))
+  const anchorIndex = anchor ? rest.findIndex((entry) => sameEntry(entry, anchor)) : -1
+  if (anchorIndex < 0) return [...rest, moved]
   const at = place === PLACE_BEFORE ? anchorIndex : anchorIndex + 1
-  return [...rest.slice(0, at), movedId, ...rest.slice(at)]
+  return [...rest.slice(0, at), moved, ...rest.slice(at)]
 }
 
-function destinationOf(source, target, lookups) {
-  if (target.kind === TARGET_ROOT) return { containerId: ROOT_ID, anchorId: '', place: PLACE_AFTER }
-  if (target.kind === ROW_FOLDER) {
-    const folder = lookups.items[ROW_FOLDER].get(target.id)
-    if (!folder) return null
-    if (source.kind === ROW_REQUEST || target.place === PLACE_INSIDE) return { containerId: target.id, anchorId: '', place: PLACE_AFTER }
-    return { containerId: lookups.containerOf(folder.parentId || ROOT_ID), anchorId: target.id, place: target.place }
-  }
-  const request = lookups.items[ROW_REQUEST].get(target.id)
-  if (!request || source.kind !== ROW_REQUEST) return null
-  return { containerId: lookups.containerOf(request.folderId), anchorId: target.id, place: target.place }
+function destinationOf(target, lookups) {
+  if (target.kind === TARGET_ROOT) return { containerId: ROOT_ID, anchor: null, place: PLACE_AFTER }
+  const anchorItem = lookups.items[target.kind]?.get(target.id)
+  if (!anchorItem) return null
+  if (target.kind === ROW_FOLDER && target.place === PLACE_INSIDE) return { containerId: target.id, anchor: null, place: PLACE_AFTER }
+  const containerId = lookups.containerOf(anchorItem[PARENT_KEYS[target.kind]] || ROOT_ID)
+  return { containerId, anchor: entryOf(target), place: target.place }
 }
 
 const emptyPatches = () => ({ [ROW_FOLDER]: [], [ROW_REQUEST]: [] })
 
-function listPatches(lists, items) {
+function listPatches(containerId, entries, items) {
   const patches = emptyPatches()
-  for (const { kind, containerId, ids } of lists) {
+  entries.forEach(({ kind, id }, index) => {
     const parentKey = PARENT_KEYS[kind]
-    ids.forEach((id, index) => {
-      const current = items[kind].get(id)
-      const sortOrder = index + 1
-      if (current && (current[parentKey] || ROOT_ID) === containerId && cleanOrder(current.sortOrder) === sortOrder) return
-      patches[kind].push({ id, [parentKey]: containerId, sortOrder })
-    })
-  }
+    const current = items[kind].get(id)
+    const sortOrder = index + 1
+    if (current && (current[parentKey] || ROOT_ID) === containerId && cleanOrder(current.sortOrder) === sortOrder) return
+    patches[kind].push({ id, [parentKey]: containerId, sortOrder })
+  })
   return patches
 }
 
-function applyToLookups(items, patches) {
-  const applied = {}
+function restoringPatches(patches, items) {
+  const undo = emptyPatches()
   for (const kind of [ROW_FOLDER, ROW_REQUEST]) {
-    const byId = new Map(items[kind])
-    for (const patch of patches[kind]) byId.set(patch.id, { ...byId.get(patch.id), ...patch })
-    applied[kind] = byId
+    const parentKey = PARENT_KEYS[kind]
+    undo[kind] = patches[kind].map(({ id }) => {
+      const original = items[kind].get(id)
+      return { id, [parentKey]: original[parentKey] || ROOT_ID, sortOrder: cleanOrder(original.sortOrder) }
+    })
   }
-  return applied
+  return undo
 }
 
 const isEmpty = (patches) => patches[ROW_FOLDER].length === 0 && patches[ROW_REQUEST].length === 0
 
-function currentList(tree, kind, containerId) {
-  return { kind, containerId, ids: idsOf(listerFor(kind)(tree, containerId)) }
+function mergePatches(lists) {
+  const merged = emptyPatches()
+  for (const patches of lists) {
+    merged[ROW_FOLDER].push(...patches[ROW_FOLDER])
+    merged[ROW_REQUEST].push(...patches[ROW_REQUEST])
+  }
+  return merged
 }
 
-export function planMove({ folders, requests }, source, target) {
+export function sharingPatches({ folders, requests }) {
+  const lookups = lookupsOf(folders, requests)
+  const tree = buildCollectionTree(folders, requests)
+  return mergePatches([...tree.siblings.keys()].map((containerId) => listPatches(containerId, siblingEntries(tree, containerId), lookups.items)))
+}
+
+export function sharedNumbering(state) {
+  const patches = sharingPatches(state)
+  const patched = (items, kind) => {
+    const byId = new Map(patches[kind].map((patch) => [patch.id, patch]))
+    return items.map((item) => ({ ...item, ...byId.get(item.id) }))
+  }
+  return { folders: patched(state.folders, ROW_FOLDER), requests: patched(state.requests, ROW_REQUEST) }
+}
+
+export function planMove({ folders, requests, sharedOrder }, source, target) {
   const lookups = lookupsOf(folders, requests)
   const subject = lookups.items[source.kind].get(source.id)
-  const destination = subject && destinationOf(source, target, lookups)
-  if (!destination) return null
-  const tree = buildCollectionTree(folders, requests)
+  const destination = subject && destinationOf(target, lookups)
+  if (!destination || (destination.anchor && sameEntry(destination.anchor, source))) return null
+  const tree = buildCollectionTree(folders, requests, sharedOrder)
   const { containerId } = destination
   if (source.kind === ROW_FOLDER) {
     if (isInside(containerId, source.id, lookups.parents) || !fitsDepth(tree, lookups.parents, source.id, containerId)) return null
   }
-  const origin = lookups.containerOf(subject[PARENT_KEYS[source.kind]] || ROOT_ID)
-  const arrival = currentList(tree, source.kind, containerId)
-  const arranged = { ...arrival, ids: insertIds(arrival.ids, source.id, destination.anchorId, destination.place) }
-  const patches = listPatches([arranged], lookups.items)
+  const entries = insertEntry(siblingEntries(tree, containerId), entryOf(source), destination.anchor, destination.place)
+  const patches = listPatches(containerId, entries, lookups.items)
   if (isEmpty(patches)) return null
-  const before = origin === containerId ? [arrival] : [currentList(tree, source.kind, origin), arrival]
-  const undo = listPatches(before, applyToLookups(lookups.items, patches))
-  return { patches, undo, subject, containerId }
+  return { patches, undo: restoringPatches(patches, lookups.items), subject, containerId }
 }
 
 export function planStep(state, source, direction) {
   const lookups = lookupsOf(state.folders, state.requests)
   const subject = lookups.items[source.kind].get(source.id)
   if (!subject) return null
-  const tree = buildCollectionTree(state.folders, state.requests)
-  const containerId = lookups.containerOf(subject[PARENT_KEYS[source.kind]] || ROOT_ID)
-  const ids = currentList(tree, source.kind, containerId).ids
-  const neighbour = ids[ids.indexOf(source.id) + direction]
+  const tree = buildCollectionTree(state.folders, state.requests, state.sharedOrder)
+  const entries = siblingEntries(tree, lookups.containerOf(subject[PARENT_KEYS[source.kind]] || ROOT_ID))
+  const index = entries.findIndex((entry) => sameEntry(entry, source))
+  const neighbour = index < 0 ? null : entries[index + direction]
   if (!neighbour) return null
-  return planMove(state, source, { kind: source.kind, id: neighbour, place: direction === STEP_UP ? PLACE_BEFORE : PLACE_AFTER })
+  return planMove(state, source, { ...neighbour, place: direction === STEP_UP ? PLACE_BEFORE : PLACE_AFTER })
 }
 
 export function canStep(state, source, direction) {
@@ -170,21 +186,21 @@ function clonedItems(tree, source, subject, containerId, name, newId) {
   return created
 }
 
-export function planClone({ folders, requests }, source, destination, newId) {
+export function planClone({ folders, requests, sharedOrder }, source, destination, newId) {
   const lookups = lookupsOf(folders, requests)
   const subject = lookups.items[source.kind].get(source.id)
   if (!subject) return null
-  const tree = buildCollectionTree(folders, requests)
+  const tree = buildCollectionTree(folders, requests, sharedOrder)
   const containerId = lookups.containerOf(destination.containerId)
   if (source.kind === ROW_FOLDER && !fitsDepth(tree, lookups.parents, source.id, containerId)) return null
-  const siblings = listerFor(source.kind)(tree, containerId)
-  const name = uniqueName(subject.name, new Set(siblings.map((sibling) => sibling.name)))
+  const namesakes = listerFor(source.kind)(tree, containerId)
+  const name = uniqueName(subject.name, new Set(namesakes.map((sibling) => sibling.name)))
   const created = clonedItems(tree, source, subject, containerId, name, newId)
   const root = source.kind === ROW_FOLDER ? created.folders[0] : created.requests[0]
-  const ids = insertIds(idsOf(siblings), root.id, destination.anchorId || '', PLACE_AFTER)
-  const patches = listPatches([{ kind: source.kind, containerId, ids }], lookups.items)
+  const entries = insertEntry(siblingEntries(tree, containerId), { kind: source.kind, id: root.id }, destination.anchor, PLACE_AFTER)
+  const patches = listPatches(containerId, entries, lookups.items)
   const rootPatch = patches[source.kind].find((patch) => patch.id === root.id)
-  Object.assign(root, { [PARENT_KEYS[source.kind]]: containerId, sortOrder: rootPatch ? rootPatch.sortOrder : ids.indexOf(root.id) + 1 })
+  Object.assign(root, { [PARENT_KEYS[source.kind]]: containerId, sortOrder: rootPatch.sortOrder })
   patches[source.kind] = patches[source.kind].filter((patch) => patch.id !== root.id)
   return { created, patches, root }
 }
@@ -193,15 +209,14 @@ export function cloneDestination(state, source) {
   const lookups = lookupsOf(state.folders, state.requests)
   const subject = lookups.items[source.kind].get(source.id)
   if (!subject) return null
-  return { containerId: lookups.containerOf(subject[PARENT_KEYS[source.kind]] || ROOT_ID), anchorId: source.id }
+  return { containerId: lookups.containerOf(subject[PARENT_KEYS[source.kind]] || ROOT_ID), anchor: entryOf(source) }
 }
 
-export function pasteDestination(state, clip, row) {
+export function pasteDestination(state, row) {
   const lookups = lookupsOf(state.folders, state.requests)
-  if (!row) return { containerId: ROOT_ID, anchorId: '' }
-  if (row.kind === ROW_FOLDER) return { containerId: lookups.containerOf(row.id), anchorId: '' }
+  if (!row) return { containerId: ROOT_ID, anchor: null }
+  if (row.kind === ROW_FOLDER) return { containerId: lookups.containerOf(row.id), anchor: null }
   const request = lookups.items[ROW_REQUEST].get(row.id)
-  if (!request) return { containerId: ROOT_ID, anchorId: '' }
-  const containerId = lookups.containerOf(request.folderId)
-  return { containerId, anchorId: clip.kind === ROW_REQUEST ? request.id : '' }
+  if (!request) return { containerId: ROOT_ID, anchor: null }
+  return { containerId: lookups.containerOf(request.folderId), anchor: { kind: ROW_REQUEST, id: request.id } }
 }

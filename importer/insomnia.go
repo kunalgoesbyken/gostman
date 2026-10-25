@@ -397,6 +397,7 @@ type insomniaImport struct {
 	targets   map[string]string
 	names     map[string]string
 	built     map[string]int
+	root      string
 }
 
 func (c *collector) importInsomnia(ctx context.Context, config Config, name string, space insomniaSpace) {
@@ -408,6 +409,7 @@ func (c *collector) importInsomnia(ctx context.Context, config Config, name stri
 	switch {
 	case len(space.nodes) > 0 || len(space.mocks) > 0:
 		rootID := c.addScopedFolder(name, "", scope{description: session.specDescription(space.description)})
+		session.root = rootID
 		session.nodes(space.nodes, rootID, 0)
 		session.mocks(name, rootID)
 	case space.spec != "":
@@ -691,7 +693,7 @@ func (s *insomniaImport) mcpRequest(fields map[string]any, request *parts) {
 
 func (s *insomniaImport) auth(auth map[string]any, name string) *engine.Auth {
 	kind := text(auth["type"])
-	if auth == nil || kind == "" {
+	if auth == nil || kind == "" || kind == authInherit {
 		return nil
 	}
 	converted, supported := s.convertAuth(auth, kind, name)
@@ -829,7 +831,7 @@ func (s *insomniaImport) environments() {
 		}
 		drafts = append(drafts, draft)
 	}
-	s.c.addDraftEnvironments(drafts)
+	s.c.addDraftEnvironments(inFolder(drafts, s.root))
 }
 
 func (s *insomniaImport) environmentVariables(environment map[string]any, name string) []envVariable {

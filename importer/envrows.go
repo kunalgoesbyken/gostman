@@ -33,7 +33,15 @@ type environmentDraft struct {
 	color     string
 	extends   string
 	global    bool
+	folder    string
 	variables []envVariable
+}
+
+func inFolder(drafts []environmentDraft, folderID string) []environmentDraft {
+	for index := range drafts {
+		drafts[index].folder = folderID
+	}
+	return drafts
 }
 
 func (c *collector) addDraftEnvironments(drafts []environmentDraft) {
@@ -86,6 +94,7 @@ func (c *collector) addDraftEnvironment(draft environmentDraft, id, parent strin
 		c.Globals = append(c.Globals, environment)
 		return
 	}
+	environment.FolderId = draft.folder
 	c.Environments = append(c.Environments, environment)
 }
 

@@ -71,6 +71,7 @@ func (c *collector) readWSDL(doc document, supporting []document) {
 	c.read(name, FormatWSDL, func() {
 		schemas := c.schemaSets(root, supporting)
 		rootID := c.addFolder(name, "")
+		c.ownCollectionVariables(rootID, nil)
 		if root.XMLName.Space == wsdl2Namespace {
 			c.wsdl2(root, schemas, rootID)
 			return
@@ -194,7 +195,7 @@ func (c *collector) wsdl1(root *xmlNode, schemas []*schemaSet, rootID string) {
 				c.skip("%s: only SOAP bindings are imported", port.attr("name"))
 				continue
 			}
-			c.setEndpoint(endpoint, portAddress(port))
+			c.setEndpoint(rootID, endpoint, portAddress(port))
 			portType := portTypes[localName(binding.attr("type"))]
 			for _, operation := range wsdl1Operations(binding, portType, messages, declared, root.attr("targetNamespace")) {
 				key := binding.attr("type") + "/" + operation.name
@@ -208,10 +209,11 @@ func (c *collector) wsdl1(root *xmlNode, schemas []*schemaSet, rootID string) {
 	}
 }
 
-func (c *collector) setEndpoint(name, address string) {
+func (c *collector) setEndpoint(rootID, name, address string) {
 	if _, taken := c.Variables[name]; !taken {
 		c.Variables[name] = address
 	}
+	c.ownCollectionVariables(rootID, map[string]string{name: address})
 }
 
 func indexByName(nodes []*xmlNode) map[string]*xmlNode {
@@ -322,7 +324,7 @@ func (c *collector) wsdl2(root *xmlNode, schemas []*schemaSet, rootID string) {
 			if binding == nil {
 				continue
 			}
-			c.setEndpoint(endpoint, port.attr("address"))
+			c.setEndpoint(rootID, endpoint, port.attr("address"))
 			version := soap12
 			if binding.attrIn(wsoapNamespace, "version") == "1.1" {
 				version = soap11

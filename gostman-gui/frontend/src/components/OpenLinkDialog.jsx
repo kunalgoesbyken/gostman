@@ -75,9 +75,8 @@ function Review({ link, fetchLink, importer, onImport, onClose }) {
     setState(await download(link.url, fetchLink, importer))
   }
 
-  const confirm = () => {
-    onImport(state.result)
-    onClose()
+  const confirm = async () => {
+    if (await onImport(state.result)) onClose()
   }
 
   return (

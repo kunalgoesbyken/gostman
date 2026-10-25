@@ -1,17 +1,38 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Paperclip } from "lucide-react"
 import { Button } from "./ui/button"
-import { canAttachFromDisk, maxAttachmentBytes, pickAttachment, readAttachment } from "../lib/attachments"
+import { canAttachFromDisk, maxAttachmentBytes, measureAttachment, pickAttachment, readAttachment } from "../lib/attachments"
 import { ATTACHMENT_TEXT } from "../lib/attachmentText"
 import { base64ByteLength } from "../lib/base64"
 import { formatSize } from "../lib/dataUtils"
 
 const SUMMARY = "min-w-0 flex-1 truncate text-xs"
 
+const sized = (fileName, size) => (size === null ? fileName : `${fileName} (${formatSize(size)})`)
+
+function useDiskSize(path) {
+  const [measured, setMeasured] = useState(null)
+  useEffect(() => {
+    if (!path || !canAttachFromDisk()) return undefined
+    let isCurrent = true
+    const keep = (size) => isCurrent && setMeasured({ path, size })
+    measureAttachment(path).then(keep, () => keep(null))
+    return () => {
+      isCurrent = false
+    }
+  }, [path])
+  return measured?.path === path ? measured.size : null
+}
+
+function DiskSummary({ fileName, path }) {
+  const size = useDiskSize(path)
+  return <span title={ATTACHMENT_TEXT.fromDisk(path)} className={`${SUMMARY} font-mono text-foreground`}>{sized(fileName, size)}</span>
+}
+
 function FileSummary({ fileName, data, path }) {
   if (!fileName) return <span className={`${SUMMARY} text-muted-foreground`}>{ATTACHMENT_TEXT.none}</span>
-  if (path) return <span title={ATTACHMENT_TEXT.fromDisk(path)} className={`${SUMMARY} font-mono text-foreground`}>{fileName}</span>
-  const summary = `${fileName} (${formatSize(base64ByteLength(data))})`
+  if (path) return <DiskSummary fileName={fileName} path={path} />
+  const summary = sized(fileName, base64ByteLength(data))
   return <span title={summary} className={`${SUMMARY} font-mono text-foreground`}>{summary}</span>
 }
 

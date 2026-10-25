@@ -1,6 +1,7 @@
 import { Skeleton, SkeletonLines } from "./ui/skeleton"
 import { useAppStore } from "../store/appStore"
 import { rememberedSidebarWidth, sidebarWidthStyle } from "../lib/layout"
+import { APP_TEXT } from "../lib/appText"
 
 function SidebarSkeleton() {
   return (
@@ -39,7 +40,7 @@ function MainSkeleton() {
 export function AppSkeleton() {
   const isSidebarOpen = useAppStore((s) => s.isSidebarOpen)
   return (
-    <div role="status" aria-label="Loading" className="flex h-dvh flex-col overflow-hidden bg-background">
+    <div role="status" aria-label={APP_TEXT.loading} className="flex h-dvh flex-col overflow-hidden bg-background">
       <div className="flex h-12 shrink-0 items-center gap-3 border-b border-border px-3">
         <Skeleton className="h-6 w-6" />
         <Skeleton className="h-3 w-20" />

@@ -11,12 +11,14 @@ import { shortcutLabel } from "../lib/platform"
 import { PROTOCOL_OPTIONS, protocolOf, usesGraphQL } from "../lib/realtime/protocols"
 import { readSavedMessages, removeMessage, saveMessage } from "../lib/realtime/savedMessages"
 import { SOCKET_TEXT } from "../lib/socketText"
+import { DIALOG_TEXT } from "../lib/dialogText"
 import { useAppStore } from "../store/appStore"
 import {
   ENTRY_ERROR,
   ENTRY_INFO,
   ENTRY_RECEIVED,
   ENTRY_SENT,
+  ENTRY_WARNING,
   LOG_LIMIT,
   SOCKET_CONNECTING,
   SOCKET_IDLE,
@@ -44,6 +46,7 @@ const ENTRY_VIEWS = {
   [ENTRY_SENT]: { icon: ArrowUp, label: SOCKET_TEXT.entries.sent, tone: "text-info" },
   [ENTRY_RECEIVED]: { icon: ArrowDown, label: SOCKET_TEXT.entries.received, tone: "text-success" },
   [ENTRY_INFO]: { icon: Info, label: SOCKET_TEXT.entries.info, tone: "text-muted-foreground" },
+  [ENTRY_WARNING]: { icon: TriangleAlert, label: SOCKET_TEXT.entries.warning, tone: "text-warning" },
   [ENTRY_ERROR]: { icon: TriangleAlert, label: SOCKET_TEXT.entries.error, tone: "text-destructive" },
 }
 
@@ -187,7 +190,7 @@ function SavedMessages({ tabId, request, session, sockets, onUpdateRequest }) {
   const save = () => showPrompt(SOCKET_TEXT.saveTitle, SOCKET_TEXT.saveMessage, current?.name || "", "", (name) => {
     const trimmed = name?.trim()
     if (trimmed) onUpdateRequest({ socketMessages: saveMessage(request.socketMessages, { name: trimmed, body: session.draft, target: session.draftTarget }) })
-  })
+  }, DIALOG_TEXT.save)
 
   const remove = () => onUpdateRequest({ socketMessages: removeMessage(request.socketMessages, current.name) })
 
@@ -235,7 +238,7 @@ export function WebSocketPanel({ tabId, request, variables, sockets, onUpdateReq
           {status.label}
         </span>
         <ProtocolPicker request={request} disabled={!isIdle} onUpdateRequest={onUpdateRequest} />
-        <span className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground" title={target.url || target.error}>
+        <span className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground max-sm:order-last max-sm:basis-full" title={target.url || target.error}>
           {target.url || target.error}
         </span>
         <Checkbox
@@ -244,11 +247,6 @@ export function WebSocketPanel({ tabId, request, variables, sockets, onUpdateReq
         >
           {SOCKET_TEXT.autoReconnect}
         </Checkbox>
-        {isIdle ? (
-          <Button size="sm" disabled={Boolean(target.error)} onClick={() => sockets.connect(tabId)}>{SOCKET_TEXT.connect}</Button>
-        ) : (
-          <Button variant="outline" size="sm" onClick={() => sockets.disconnect(tabId)}>{SOCKET_TEXT.disconnect}</Button>
-        )}
       </Toolbar>
 
       {unsentHeaders.length > 0 && (

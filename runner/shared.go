@@ -14,6 +14,7 @@ type shared struct {
 	seen    map[string]string
 	witness func(engine.Request)
 	signIn  engine.Token
+	secrets map[string]string
 
 	witnessMu sync.Mutex
 	signInMu  sync.Mutex
@@ -37,6 +38,18 @@ func (c *shared) tokenList() []engine.OAuth2 {
 		tokens = append(tokens, token)
 	}
 	return tokens
+}
+
+func (c *shared) keepSecrets(values map[string]string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.secrets = maps.Clone(values)
+}
+
+func (c *shared) secretList() map[string]string {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return maps.Clone(c.secrets)
 }
 
 func (c *shared) publish(values map[string]string) {

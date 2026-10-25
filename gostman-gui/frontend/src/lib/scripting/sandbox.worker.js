@@ -1,3 +1,4 @@
+import { evaluateExtractors } from '../chaining'
 import { runJob } from './job'
 import { MESSAGE_REPLY, MESSAGE_RESULT, MESSAGE_SEND } from './messages'
 
@@ -13,6 +14,8 @@ function removeGlobal(name) {
 }
 
 BLOCKED_GLOBALS.forEach(removeGlobal)
+
+const run = (job) => (job.extractors ? { outcomes: evaluateExtractors(job.extractors, job.response) } : runJob(job))
 
 const pending = new Map()
 let sequence = 0
@@ -35,5 +38,5 @@ self.onmessage = async ({ data }) => {
     settle(data)
     return
   }
-  self.postMessage({ type: MESSAGE_RESULT, result: await runJob(data.job) })
+  self.postMessage({ type: MESSAGE_RESULT, result: await run(data.job) })
 }

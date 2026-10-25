@@ -4,6 +4,7 @@ export const SCOPE_ENVIRONMENT = 'environment'
 export const SCOPE_SESSION = 'session'
 export const SCOPE_COLLECTION = 'collection'
 export const SCOPE_GLOBAL = 'global'
+export const PROCESS_PREFIX = 'process.env.'
 
 const SCOPES = [SCOPE_ENVIRONMENT, SCOPE_SESSION, SCOPE_COLLECTION, SCOPE_GLOBAL]
 

@@ -15,7 +15,8 @@ import { reconcileTabs } from '../lib/tabReconcile'
 import { isNarrowViewport, rememberSidebarOpen, rememberedSidebarOpen } from '../lib/layout'
 import { reorderTabs, stepTab } from '../lib/tabOrder'
 import { SCOPE_COLLECTION, SCOPE_ENVIRONMENT, SCOPE_GLOBAL, SCOPE_SESSION } from '../lib/scripting/scopes'
-import { promptLayer, resolveLayers, scopeLayers, scriptValues, variableText } from '../lib/variableScopes'
+import { promptLayer, resolveLayers, scopeLayers, scriptValues, variableText, withSecretMarks } from '../lib/variableScopes'
+import { choiceFor, chosenEnvironment, isSameScope, isScoped, variableHolderFor } from '../lib/environmentScope'
 import { isWelcomeDismissed, rememberWelcomeDismissed } from '../lib/welcome'
 import { rememberSteps, rememberedSteps } from '../lib/onboarding'
 import { NO_WORKSPACE, enterWorkspace, leaveWorkspace, persistableSessions, restoreSessions } from './workspaceSessions'
@@ -36,8 +37,8 @@ const persistenceFailureMessage = (error) => (isStorageFull(error)
 const CLOSED_ALERT = { isOpen: false, title: '', message: '', confirmText: 'OK', variant: 'default' }
 const CLOSED_CONFIRM = { isOpen: false, title: '', message: '', confirmText: 'OK', variant: 'default', onConfirm: null, onCancel: null, alternative: null }
 const CLOSED_RUNNER = { isOpen: false, folderId: '', isRunning: false, results: [] }
-const CLOSED_VARIABLE_PROMPT = { isOpen: false, names: [], defaults: {}, resolve: null }
-const CLOSED_PROMPT = { isOpen: false, title: '', message: '', placeholder: '', defaultValue: '', confirmText: 'OK', onConfirm: null, onCancel: null }
+const CLOSED_VARIABLE_PROMPT = { isOpen: false, names: [], defaults: {}, isForRun: false, resolve: null }
+const CLOSED_PROMPT = { isOpen: false, title: '', message: '', placeholder: '', defaultValue: '', confirmText: 'OK', onConfirm: null }
 const CLOSED_DELETE_DATA = { isOpen: false, onDelete: null }
 
 const MAX_CLOSED_TABS = 10
@@ -80,8 +81,8 @@ const appendTab = (state, request, isPreview = false) => {
   return { tabs: [...state.tabs, tab], activeTabId: tab.id, nextTabId: state.nextTabId + 1 }
 }
 
-export const createEnvironment = (name, variables = EMPTY_VARIABLES) => ({
-  id: createId('env'), name, variables, color: '', extends: '', meta: EMPTY_VARIABLES,
+export const createEnvironment = (name, variables = EMPTY_VARIABLES, folderId = '') => ({
+  id: createId('env'), name, variables, color: '', extends: '', meta: EMPTY_VARIABLES, folderId,
 })
 
 const ENVIRONMENT_LISTS = {
@@ -102,9 +103,13 @@ const restoreEnvironments = (data) => {
     : [createEnvironment(DEFAULT_ENVIRONMENT_NAME, data.variables || EMPTY_VARIABLES)]
 }
 
-export const findActiveEnvironment = (state) => (
-  state.environments.find((environment) => environment.id === state.activeEnvironmentId) || state.environments[0]
-)
+const contextFolderId = (state, request) => (request || selectActiveTab(state)?.request)?.folderId || ''
+
+export const environmentFor = (state, request) => chosenEnvironment(state, contextFolderId(state, request))
+
+export const environmentForFolder = (state, folderId) => chosenEnvironment(state, folderId)
+
+export const findActiveEnvironment = (state) => environmentFor(state)
 
 const mapEnvironment = (state, id, update) => ({
   environments: state.environments.map((environment) => (environment.id === id ? update(environment) : environment)),
@@ -144,17 +149,29 @@ function withGlobalWrites(state, changes) {
   return { globalEnvironments: state.globalEnvironments.map((environment) => (environment.id === active.id ? updated : environment)) }
 }
 
-function withCollectionWrites(state, changes) {
-  const collectionVariables = mergedVariablesText(state.collectionVariables, changes)
-  return collectionVariables === null ? {} : { collectionVariables }
+function withCollectionWrites(state, changes, folderId = '') {
+  const holder = variableHolderFor(state.folders, folderId)
+  const collectionVariables = mergedVariablesText(holder ? holder.collectionVariables : state.collectionVariables, changes)
+  if (collectionVariables === null) return {}
+  if (!holder) return { collectionVariables }
+  return { folders: state.folders.map((folder) => (folder.id === holder.id ? { ...folder, collectionVariables } : folder)) }
 }
+
+const isBlankEnvironment = (environment) => {
+  const variables = environment ? parseVariables(environment.variables || EMPTY_VARIABLES) : {}
+  return isPlainObject(variables) && Object.keys(variables).length === 0
+}
+
+const missingFrom = (current, additions) => (
+  Object.fromEntries(Object.entries(additions).filter(([name]) => !Object.hasOwn(current, name)))
+)
 
 const mergeVariables = (existing, incoming) => {
   const current = parseVariables(existing)
   if (!isPlainObject(current)) return null
   if (Object.keys(current).length === 0) return incoming
   const additions = parseVariables(incoming)
-  return isPlainObject(additions) ? JSON.stringify({ ...current, ...additions }, null, 2) : null
+  return isPlainObject(additions) ? JSON.stringify({ ...current, ...missingFrom(current, additions) }, null, 2) : null
 }
 
 const withUnusedId = (environment, environments) => {
@@ -192,6 +209,10 @@ const withoutTabs = (state, closing) => {
   const next = survivors[survivors.length - 1] || remaining[0]
   return { tabs: remaining, closedTabs, activeTabId: next.id }
 }
+
+const historyStatus = (value) => (Number.isSafeInteger(value) && value > 0 ? value : 0)
+
+const historyEntry = (raw) => ({ ...normalizeRequest(raw), statusCode: historyStatus(raw?.statusCode) })
 
 const isSameCall = (first, second) => HISTORY_IDENTITY_FIELDS.every((field) => first[field] === second[field])
 
@@ -245,15 +266,19 @@ export const useAppStore = create(
         settings: DEFAULT_SETTINGS,
         environments: [],
         activeEnvironmentId: '',
+        environmentChoices: {},
         globalEnvironments: [],
         activeGlobalEnvironmentId: '',
         collectionVariables: EMPTY_VARIABLES,
+        collectionVariablesMeta: '',
         sessionVariables: {},
         collectionSettings: normalizeScopeSettings(),
         folderSettings: null,
         dotEnv: {},
+        sharedOrder: false,
         secretConnections: null,
         environmentDialogOpen: false,
+        pendingVariable: '',
         variablePrompt: CLOSED_VARIABLE_PROMPT,
         tabs: [FIRST_TAB],
         activeTabId: FIRST_TAB.id,
@@ -306,7 +331,7 @@ export const useAppStore = create(
             requests,
             folders,
             tabs: withSavedExamples(reconcileTabs(state.tabs, state.requests, requests, folders, state.isRestricted), requests),
-            requestHistory: asArray(data.history).map(normalizeRequest),
+            requestHistory: asArray(data.history).map(historyEntry),
             cookies: mergeCookies(asArray(data.cookies), []),
             settings: normalizeSettings(data.settings),
             environments,
@@ -314,8 +339,10 @@ export const useAppStore = create(
             globalEnvironments: asArray(data.globals).filter(isUsableEnvironment),
             activeGlobalEnvironmentId: data.activeGlobalId || '',
             collectionVariables: data.collectionVariables || EMPTY_VARIABLES,
+            collectionVariablesMeta: data.collectionVariablesMeta || '',
             collectionSettings: normalizeScopeSettings(data.collectionSettings),
             dotEnv: isPlainObject(data.dotEnv) ? data.dotEnv : {},
+            sharedOrder: data.sharedOrder === true,
           }
         }),
 
@@ -407,6 +434,7 @@ export const useAppStore = create(
           }
         }),
         setTreeClipboard: (treeClipboard) => set({ treeClipboard }),
+        markSharedOrder: () => set({ sharedOrder: true }),
         showNotice: (message, undo = null) => set({ notice: { id: createId('notice'), message, undo } }),
         dismissNotice: () => set({ notice: null }),
         revealRequest: (requestId) => set((state) => {
@@ -426,8 +454,8 @@ export const useAppStore = create(
           ? { folders: state.folders.map((folder) => (folder.isOpen ? { ...folder, isOpen: false } : folder)) }
           : state)),
 
-        addToHistory: (request) => set((state) => {
-          const entry = { ...normalizeRequest(request), examples: '', id: createId('hist'), timestamp: new Date().toISOString() }
+        addToHistory: (request, statusCode = 0) => set((state) => {
+          const entry = { ...historyEntry({ ...request, statusCode }), examples: '', id: createId('hist'), timestamp: new Date().toISOString() }
           const others = state.requestHistory.filter((existing) => !isSameCall(existing, entry))
           return { requestHistory: [entry, ...others].slice(0, HISTORY_LIMIT) }
         }),
@@ -492,61 +520,69 @@ export const useAppStore = create(
         patchTab: (tabId, patch) => set((state) => mapTab(state, tabId, (tab) => ({ ...tab, ...patch }))),
         setRequestPanel: (requestPanel) => set({ requestPanel }),
 
-        setActiveEnvironment: (id) => set({ activeEnvironmentId: id }),
+        setActiveEnvironment: (id) => set((state) => choiceFor(state, contextFolderId(state), id)),
         updateEnvironment: (scope, id, patch) => set((state) => {
           const { list } = ENVIRONMENT_LISTS[scope]
-          return { [list]: state[list].map((environment) => (environment.id === id ? { ...environment, ...patch } : environment)) }
+          const updated = state[list].map((environment) => (environment.id === id ? { ...environment, ...patch } : environment))
+          const inUse = scope === SCOPE_GLOBAL || !Object.hasOwn(patch, 'folderId') ? undefined : findActiveEnvironment(state)
+          return { [list]: updated, ...(inUse && choiceFor({ ...state, environments: updated }, contextFolderId(state), inUse.id)) }
         }),
         addEnvironmentTo: (scope, environment) => set((state) => {
           const { list, active } = ENVIRONMENT_LISTS[scope]
-          return { [list]: [...state[list], environment], [active]: environment.id }
+          const environments = [...state[list], environment]
+          if (scope === SCOPE_GLOBAL) return { [list]: environments, [active]: environment.id }
+          return { [list]: environments, ...choiceFor({ ...state, environments }, contextFolderId(state), environment.id) }
         }),
         removeEnvironmentFrom: (scope, id) => set((state) => {
           const { list, active } = ENVIRONMENT_LISTS[scope]
           const remaining = withoutExtending(state[list].filter((environment) => environment.id !== id), id)
           return { [list]: remaining, [active]: state[active] === id ? remaining[0]?.id || '' : state[active] }
         }),
-        setActiveEnvironmentIn: (scope, id) => set({ [ENVIRONMENT_LISTS[scope].active]: id }),
-        setCollectionVariables: (collectionVariables) => set({ collectionVariables }),
-        mergeCollectionVariables: (additions) => {
+        setActiveEnvironmentIn: (scope, id) => (scope === SCOPE_GLOBAL ? set({ activeGlobalEnvironmentId: id }) : get().setActiveEnvironment(id)),
+        setCollectionVariables: (collectionVariables, collectionVariablesMeta) => set({ collectionVariables, collectionVariablesMeta }),
+        mergeCollectionVariables: (additions, meta = '') => {
           if (!isPlainObject(additions) || Object.keys(additions).length === 0) return true
-          const merged = withCollectionWrites(get(), additions)
-          set(merged)
-          return Object.hasOwn(merged, 'collectionVariables')
+          const current = parseVariables(get().collectionVariables || EMPTY_VARIABLES)
+          const added = isPlainObject(current) ? missingFrom(current, additions) : additions
+          const merged = withCollectionWrites(get(), added)
+          if (!Object.hasOwn(merged, 'collectionVariables')) return false
+          set({ ...merged, collectionVariablesMeta: withSecretMarks(get().collectionVariablesMeta, meta, Object.keys(added)) })
+          return true
         },
         updateScopeSettings: (folderId, patch) => set((state) => updatedScope(state, folderId, patch)),
         openFolderSettings: (folderId = ROOT_SETTINGS_ID) => set({ folderSettings: { folderId } }),
         closeFolderSettings: () => set({ folderSettings: null }),
         adoptCollectionSettings: (incoming) => set((state) => (isBlankScope(state.collectionSettings) ? { collectionSettings: normalizeScopeSettings(incoming) } : state)),
-        openEnvironmentDialog: () => set({ environmentDialogOpen: true }),
-        closeEnvironmentDialog: () => set({ environmentDialogOpen: false }),
-        askVariables: (names, defaults) => new Promise((resolve) => set({
-          variablePrompt: { isOpen: true, names, defaults, resolve },
+        openEnvironmentDialog: () => set({ environmentDialogOpen: true, pendingVariable: '' }),
+        defineVariable: (name) => set({ environmentDialogOpen: true, pendingVariable: name }),
+        closeEnvironmentDialog: () => set({ environmentDialogOpen: false, pendingVariable: '' }),
+        askVariables: (names, defaults, isForRun = false) => new Promise((resolve) => set({
+          variablePrompt: { isOpen: true, names, defaults, isForRun, resolve },
         })),
         answerVariables: (answers) => {
           get().variablePrompt.resolve?.(answers)
           set({ variablePrompt: CLOSED_VARIABLE_PROMPT })
         },
-        setActiveVariables: (variables) => set((state) => (
-          mapEnvironment(state, findActiveEnvironment(state)?.id, (environment) => ({ ...environment, variables }))
+        setActiveVariables: (variables, request) => set((state) => (
+          mapEnvironment(state, environmentFor(state, request)?.id, (environment) => ({ ...environment, variables }))
         )),
-        mergeActiveVariables: (additions) => {
+        mergeActiveVariables: (additions, request) => {
           if (!isPlainObject(additions) || Object.keys(additions).length === 0) return true
-          const existing = parseVariables(findActiveEnvironment(get())?.variables ?? EMPTY_VARIABLES)
+          const existing = parseVariables(environmentFor(get(), request)?.variables ?? EMPTY_VARIABLES)
           if (!isPlainObject(existing)) return false
           const merged = Object.entries({ ...existing, ...additions }).filter(([, value]) => value !== null)
-          get().setActiveVariables(JSON.stringify(Object.fromEntries(merged), null, 2))
+          get().setActiveVariables(JSON.stringify(Object.fromEntries(merged), null, 2), request)
           return true
         },
         storeSessionVariables: (changes, forgotten = []) => set((state) => ({
           sessionVariables: mergedValues(withoutNames(state.sessionVariables, forgotten), changes),
         })),
         clearSessionVariables: () => set({ sessionVariables: {} }),
-        applyVariableWrites: (writes) => {
+        applyVariableWrites: (writes, request) => {
           const persistent = [SCOPE_ENVIRONMENT, SCOPE_COLLECTION, SCOPE_GLOBAL].filter((scope) => hasEntries(writes?.[scope]))
           if (persistent.length === 0 && !hasEntries(writes?.[SCOPE_SESSION])) return true
-          const saved = !persistent.includes(SCOPE_ENVIRONMENT) || get().mergeActiveVariables(writes[SCOPE_ENVIRONMENT])
-          if (persistent.includes(SCOPE_COLLECTION)) set((state) => withCollectionWrites(state, writes[SCOPE_COLLECTION]))
+          const saved = !persistent.includes(SCOPE_ENVIRONMENT) || get().mergeActiveVariables(writes[SCOPE_ENVIRONMENT], request)
+          if (persistent.includes(SCOPE_COLLECTION)) set((state) => withCollectionWrites(state, writes[SCOPE_COLLECTION], contextFolderId(state, request)))
           if (persistent.includes(SCOPE_GLOBAL)) set((state) => withGlobalWrites(state, writes[SCOPE_GLOBAL]))
           get().storeSessionVariables(writes[SCOPE_SESSION] || {}, persistent.flatMap((scope) => Object.keys(writes[scope])))
           return saved
@@ -555,25 +591,35 @@ export const useAppStore = create(
           const { list, active } = ENVIRONMENT_LISTS[scope]
           const environments = [...get()[list]]
           const skippedNames = []
+          const joinedNames = []
           const placed = new Map()
           const added = []
-          for (const { id, name, variables, color, meta, extends: parent } of asArray(incoming).filter(isEnvironment)) {
-            const index = environments.findIndex((environment) => environment.name === name)
+          const { folders } = get()
+          for (const candidate of asArray(incoming).filter(isEnvironment)) {
+            const { id, name, variables, color, meta, extends: parent } = candidate
+            const folderId = scope === SCOPE_GLOBAL || typeof candidate.folderId !== 'string' ? '' : candidate.folderId
+            const index = environments.findIndex((environment) => environment.name === name && isSameScope(environment, { folderId }, folders))
             const merged = index === -1 ? variables : mergeVariables(environments[index].variables, variables)
             if (merged === null) skippedNames.push(name)
             else if (index === -1) {
-              const environment = withUnusedId({ ...createEnvironment(name, variables), id, ...environmentExtras({ color, meta }) }, environments)
+              const environment = withUnusedId({ ...createEnvironment(name, variables, folderId), id, ...environmentExtras({ color, meta }) }, environments)
               environments.push(environment)
               added.push([environment, parent])
               placed.set(id, environment.id)
             } else {
-              environments[index] = { ...environments[index], variables: merged }
-              placed.set(id, environments[index].id)
+              const existing = environments[index]
+              const joinedMeta = mergeVariables(existing.meta || EMPTY_VARIABLES, environmentExtras({ meta }).meta)
+              environments[index] = { ...existing, variables: merged, meta: joinedMeta ?? existing.meta }
+              placed.set(id, existing.id)
+              if (!isBlankEnvironment(existing)) joinedNames.push(name)
             }
           }
           for (const [environment, parent] of added) environment.extends = placed.get(parent) || ''
-          set({ [list]: environments, [active]: get()[active] || environments[0]?.id || '' })
-          return skippedNames
+          const current = environments.find((environment) => environment.id === get()[active])
+          const firstShared = added.map(([environment]) => environment).find((environment) => !isScoped(environment, folders))
+          const activeId = isBlankEnvironment(current) && firstShared ? firstShared.id : get()[active] || environments[0]?.id || ''
+          set({ [list]: environments, [active]: activeId })
+          return { skipped: skippedNames, joined: joinedNames }
         },
 
         openCodeDialog: (snippets) => set({ codeDialogOpen: true, codeSnippets: snippets }),
@@ -629,8 +675,8 @@ export const useAppStore = create(
           },
         }),
         closeConfirm: () => set({ confirmDialog: CLOSED_CONFIRM }),
-        showPrompt: (title, message, defaultValue = '', placeholder = '', onConfirm, onCancel = null) => set({
-          promptDialog: { ...CLOSED_PROMPT, isOpen: true, title, message, placeholder, defaultValue, onConfirm, onCancel },
+        showPrompt: (title, message, defaultValue = '', placeholder = '', onConfirm, confirmText = CLOSED_PROMPT.confirmText) => set({
+          promptDialog: { ...CLOSED_PROMPT, isOpen: true, title, message, placeholder, defaultValue, onConfirm, confirmText },
         }),
         closePrompt: () => set({ promptDialog: CLOSED_PROMPT }),
         showDeleteData: (onDelete) => set({ deleteDataDialog: { isOpen: true, onDelete }, commandPaletteOpen: false }),
@@ -653,6 +699,7 @@ export const useAppStore = create(
           tabs: state.tabs.map(persistableTab),
           isRestricted: state.isRestricted,
           specLinks: state.specLinks,
+          environmentChoices: state.environmentChoices,
           activeTabId: state.activeTabId,
           nextTabId: state.nextTabId,
           workspaceSessions: persistableSessions(state.workspaceSessions, persistableTab),
@@ -665,6 +712,7 @@ export const useAppStore = create(
             tabs,
             isRestricted: Boolean(persisted?.isRestricted),
             specLinks: isPlainObject(persisted?.specLinks) ? persisted.specLinks : {},
+            environmentChoices: isPlainObject(persisted?.environmentChoices) ? persisted.environmentChoices : {},
             workspaceSessions: restoreSessions(persisted?.workspaceSessions, restoreTabs, nextIdAfter),
             activeTabId: hasActive ? persisted.activeTabId : tabs[0].id,
             nextTabId: Math.max(persisted?.nextTabId || 0, nextIdAfter(tabs)),
@@ -702,8 +750,8 @@ let lastResolved = null
 export function selectResolvedVariables(state) {
   const request = selectActiveTab(state)?.request
   const inputs = [
-    state.globalEnvironments, state.activeGlobalEnvironmentId, state.collectionVariables, state.environments,
-    state.activeEnvironmentId, state.folders, state.dotEnv, request?.folderId, request?.vars, state.sessionVariables,
+    state.globalEnvironments, state.activeGlobalEnvironmentId, state.collectionVariables, state.collectionVariablesMeta, state.environments,
+    state.activeEnvironmentId, state.environmentChoices, state.folders, state.dotEnv, request?.folderId, request?.vars, state.sessionVariables,
   ]
   if (sameInputs(lastInputs, inputs)) return lastResolved
   lastInputs = inputs

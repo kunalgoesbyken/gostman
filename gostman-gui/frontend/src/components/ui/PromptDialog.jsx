@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Button } from "./button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./dialog"
 import { Input } from "./input"
+import { DIALOG_TEXT } from "../../lib/dialogText"
 
 function OpenPromptDialog({ title, message, placeholder, defaultValue, confirmText, onConfirm, onCancel }) {
   const [value, setValue] = useState(defaultValue)
@@ -33,7 +34,7 @@ function OpenPromptDialog({ title, message, placeholder, defaultValue, confirmTe
           </label>
         </DialogBody>
         <DialogFooter>
-          <Button variant="outline" onClick={onCancel}>Cancel</Button>
+          <Button variant="outline" onClick={onCancel}>{DIALOG_TEXT.cancel}</Button>
           <Button type="submit">{confirmText}</Button>
         </DialogFooter>
       </form>

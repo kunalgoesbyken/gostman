@@ -3,6 +3,7 @@ import { X } from "lucide-react"
 import { CONTROL_BASE } from "./input"
 import { TagBadge } from "../TagBadge"
 import { normalizeTags, splitTags } from "../../lib/tags"
+import { LABEL_TEXT } from "../../lib/treeText"
 import { cn } from "../../lib/utils"
 
 const PICKED_SUGGESTION = "insertReplacementText"
@@ -14,7 +15,7 @@ function TagChip({ tag, disabled, onRemove }) {
       <button
         type="button"
         disabled={disabled}
-        aria-label={`Remove tag ${tag}`}
+        aria-label={LABEL_TEXT.removeTag(tag)}
         onClick={onRemove}
         className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-foreground disabled:pointer-events-none"
       >

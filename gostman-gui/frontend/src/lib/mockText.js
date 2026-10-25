@@ -8,6 +8,8 @@ export const MOCK_TEXT = {
   noRoutesTitle: 'No requests to serve',
   noRoutesHint: 'Save a request, then save one of its responses as an example, or import an OpenAPI spec.',
   noMatch: 'No route',
+  logNoExample: (name) => `${name}: no example`,
+  logNoExampleHint: (name) => `${name} has no saved example yet. Send it and choose Save as example to serve it.`,
   noExample: 'No example',
   scope: 'Requests to serve',
   allRequests: 'All requests',
@@ -74,6 +76,7 @@ export const MOCK_TEXT = {
   logMasked: 'Credential headers and query values are shown as ***.',
   logBody: (bytes) => `Body, ${bytes} bytes`,
   logHeaders: 'Headers',
+  logDuration: (milliseconds) => `${milliseconds} ms`,
   routeSummary: {
     served: (count) => `${count} served`,
     noExample: (count) => `${count} with no example`,

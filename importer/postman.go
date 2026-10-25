@@ -82,7 +82,11 @@ func (c *collector) postmanScope(node map[string]any, kind, name string) scope {
 			continue
 		}
 		value := text(entry["value"])
-		if text(entry["type"]) == postmanSecretType {
+		switch {
+		case text(entry["type"]) != postmanSecretType:
+		case kind == labelCollection:
+			settings.secrets = append(settings.secrets, key)
+		default:
 			value = ""
 			c.flag(messageSecretVariables, qualified)
 		}
@@ -123,10 +127,10 @@ func (c *collector) postmanRequest(item map[string]any, folderID string, behavio
 		description: describedText(source["description"]),
 		headers:     postmanRows(source["header"]),
 		preScript:   c.postmanScript(label, item, listenPreRequest),
-		postScript:  c.postmanScript(label, item, listenTest),
 		options:     c.postmanOptions(name, behavior),
 		examples:    c.postmanExamples(name, item["response"]),
 	}
+	request.postScript, request.extractors, request.assertions = c.postmanAfterScript(label, item)
 	request.url, request.params, request.vars = postmanURL(source["url"])
 	if auth, set := c.postmanAuth(object(source["auth"])); set {
 		request.auth = &auth
@@ -262,6 +266,23 @@ func joinParts(value any, separator string) string {
 }
 
 func (c *collector) postmanScript(label string, node map[string]any, listen string) string {
+	return joinScripts(postmanEvents(node, listen, func(code string) string {
+		return c.translateScript(postmanDialect, label, stageName(listen), code)
+	}))
+}
+
+func (c *collector) postmanAfterScript(label string, item map[string]any) (string, string, string) {
+	var rules []extractor
+	var rows []assertion
+	scripts := postmanEvents(item, listenTest, func(code string) string {
+		translated, found, checks := c.translateAfterScript(postmanDialect, label, stagePost, code)
+		rules, rows = append(rules, found...), append(rows, checks...)
+		return translated
+	})
+	return joinScripts(scripts), encodeExtractors(rules), encodeChecks(rows)
+}
+
+func postmanEvents(node map[string]any, listen string, translate func(string) string) []string {
 	var scripts []string
 	for _, event := range objects(node["event"]) {
 		if text(event["listen"]) != listen {
@@ -269,12 +290,12 @@ func (c *collector) postmanScript(label string, node map[string]any, listen stri
 		}
 		script := object(event["script"])
 		if lines := list(script["exec"]); lines != nil {
-			scripts = append(scripts, c.translateScript(postmanDialect, label, stageName(listen), joinLines(lines)))
+			scripts = append(scripts, translate(joinLines(lines)))
 		} else if code := text(script["exec"]); code != "" {
-			scripts = append(scripts, c.translateScript(postmanDialect, label, stageName(listen), code))
+			scripts = append(scripts, translate(code))
 		}
 	}
-	return joinScripts(scripts)
+	return scripts
 }
 
 func joinLines(lines []any) string {

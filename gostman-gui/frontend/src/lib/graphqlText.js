@@ -1,0 +1,25 @@
+import { FOLDER_SETTINGS_TEXT } from './folderSettingsText'
+
+export const GRAPHQL_TEXT = {
+  query: 'Query',
+  queryLabel: 'GraphQL query',
+  queryPlaceholder: 'query {\n  viewer {\n    id\n  }\n}',
+  variables: 'Variables (JSON)',
+  variablesLabel: 'GraphQL variables',
+  variablesPlaceholder: '{\n  "id": "1"\n}',
+  variablesNotObject: FOLDER_SETTINGS_TEXT.varsInvalid,
+  invalidJson: (message) => `Not valid JSON: ${message}`,
+  syntaxAt: (message, line, column) => `${message} (line ${line}, column ${column})`,
+  sendAsGraphql: 'Send as GraphQL',
+  prettify: 'Prettify',
+  prettifyTitle: 'Reformat the query. Comments are removed.',
+  cannotPrettify: (detail) => `Cannot prettify: ${detail}`,
+  notSent: (method) => `Not sent while the method is ${method}.`,
+  schema: 'Schema',
+  schemaDescription: "Fetch it to browse this endpoint's types and fields. The introspection query uses this request's URL, headers and auth.",
+  searchLabel: 'Search the schema',
+  searchPlaceholder: (count) => `Search ${count} types and fields`,
+  noMatch: 'Nothing matches.',
+  moreMatches: (count) => (count === 1 ? '1 more type matches. Narrow the search to see it.' : `${count} more types match. Narrow the search to see them.`),
+  noFields: 'No fields.',
+}

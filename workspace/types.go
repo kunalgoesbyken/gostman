@@ -59,6 +59,8 @@ type Folder struct {
 	Color     string   `json:"color,omitempty"`
 	Tags      []string `json:"tags,omitempty"`
 	Settings
+	CollectionVariables     string `json:"collectionVariables,omitempty"`
+	CollectionVariablesMeta string `json:"collectionVariablesMeta,omitempty"`
 }
 
 type Environment struct {
@@ -68,14 +70,17 @@ type Environment struct {
 	Color     string `json:"color"`
 	Extends   string `json:"extends"`
 	Meta      string `json:"meta"`
+	FolderId  string `json:"folderId,omitempty"`
 }
 
 type Collection struct {
-	Requests     []Request     `json:"requests"`
-	Folders      []Folder      `json:"folders"`
-	Environments []Environment `json:"environments"`
-	Variables    string        `json:"variables,omitempty"`
-	Settings     Settings      `json:"settings"`
+	Requests      []Request     `json:"requests"`
+	Folders       []Folder      `json:"folders"`
+	Environments  []Environment `json:"environments"`
+	Variables     string        `json:"variables,omitempty"`
+	VariablesMeta string        `json:"variablesMeta,omitempty"`
+	Settings      Settings      `json:"settings"`
+	SharedOrder   bool          `json:"sharedOrder,omitempty"`
 }
 
 type Problem struct {

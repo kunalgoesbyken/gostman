@@ -9,6 +9,8 @@ import { EnvironmentDialog } from "./EnvironmentDialog"
 import { VariablePromptDialog } from "./VariablePromptDialog"
 import { DeleteDataDialog } from "./DeleteDataDialog"
 import { useAppStore } from "../store/appStore"
+import { useEnvironmentChoice } from "../hooks/useEnvironmentChoice"
+import { holdsCollections } from "../lib/environmentScope"
 
 export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWorkspaces, hasLoadTest, isAiOn, ai, backups, relay, updates }) {
   const alertDialog = useAppStore((s) => s.alertDialog)
@@ -17,11 +19,11 @@ export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWork
   const deleteDataDialog = useAppStore((s) => s.deleteDataDialog)
   const closeDeleteData = useAppStore((s) => s.closeDeleteData)
   const commandPaletteOpen = useAppStore((s) => s.commandPaletteOpen)
-  const environments = useAppStore((s) => s.environments)
-  const activeEnvironmentId = useAppStore((s) => s.activeEnvironmentId)
+  const { offered: environments, active: activeEnvironment } = useEnvironmentChoice()
   const commandPaletteMode = useAppStore((s) => s.commandPaletteMode)
   const requests = useAppStore((s) => s.requests)
   const workspaces = useAppStore((s) => s.workspaceStatus.workspaces)
+  const isAppStorage = useAppStore((s) => holdsCollections(s.workspaceStatus.path))
   const folders = useAppStore((s) => s.folders)
   const requestHistory = useAppStore((s) => s.requestHistory)
   const aboutOpen = useAppStore((s) => s.aboutOpen)
@@ -52,14 +54,15 @@ export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWork
         workspaces={hasWorkspaces ? workspaces : null}
         hasLoadTest={hasLoadTest}
         isAiOn={isAiOn}
-        activeEnvironmentId={activeEnvironmentId}
+        holdsCollections={isAppStorage}
+        activeEnvironmentId={activeEnvironment?.id || ""}
         onClose={closeCommandPalette}
         onCommand={onCommand}
       />
 
       {aboutOpen && <AboutDialog onClose={closeAbout} />}
-      {shortcutsDialogOpen && <ShortcutsDialog onClose={closeShortcutsDialog} />}
       {preferencesDialogOpen && <PreferencesDialog listFonts={listFonts} windowFrame={windowFrame} onCommand={onCommand} backups={backups} relay={relay} updates={updates} ai={ai} onClose={closePreferencesDialog} />}
+      {shortcutsDialogOpen && <ShortcutsDialog onClose={closeShortcutsDialog} />}
       {environmentDialogOpen && <EnvironmentDialog secrets={secrets} onClose={closeEnvironmentDialog} />}
       <VariablePromptDialog />
       {deleteDataDialog.isOpen && (

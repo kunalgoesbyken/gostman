@@ -29,15 +29,17 @@ type Source struct {
 }
 
 type Result struct {
-	Sources      []Source                `json:"sources"`
-	Requests     []workspace.Request     `json:"requests"`
-	Folders      []workspace.Folder      `json:"folders"`
-	Environments []workspace.Environment `json:"environments"`
-	Globals      []workspace.Environment `json:"globals,omitempty"`
-	Variables    map[string]string       `json:"variables"`
-	Warnings     []string                `json:"warnings"`
-	Notes        []string                `json:"notes,omitempty"`
-	Skipped      []string                `json:"skipped"`
+	Sources       []Source                `json:"sources"`
+	Requests      []workspace.Request     `json:"requests"`
+	Folders       []workspace.Folder      `json:"folders"`
+	Environments  []workspace.Environment `json:"environments"`
+	Globals       []workspace.Environment `json:"globals,omitempty"`
+	Variables     map[string]string       `json:"variables"`
+	VariablesMeta string                  `json:"variablesMeta,omitempty"`
+	Warnings      []string                `json:"warnings"`
+	Notes         []string                `json:"notes,omitempty"`
+	Skipped       []string                `json:"skipped"`
+	SharedOrder   bool                    `json:"sharedOrder"`
 }
 
 type collector struct {
@@ -51,12 +53,28 @@ type collector struct {
 	visitedNodes map[*insomniaNode]bool
 	scoped       map[string]scopedFolder
 	protos       map[string]string
+	places       map[string]int64
 }
 
 var importOnlyNotes = setOf(messageScripts, messageBrunoSecrets)
 
+var singularMessages = map[string]string{
+	messageHTTPVariables:          "The variable %s has no Gostman equivalent and was kept as written.",
+	messageSecretVariables:        "The value of the secret variable %s was not imported. Set it again in an environment and mark it secret.",
+	messageDisabledScopeVariables: "The switched-off variable %s was left out.",
+	messageBrunoSecrets:           "The secret variable %s has no value, because Bruno keeps secret values outside the collection files. Fill it in under Environments, or pass it to gostman run with --var.",
+	messageInsomniaVault:          "The vault secret %s has no value, because Insomnia exports it encrypted. Fill it in under Environments, or pass it to gostman run with --var.",
+}
+
+func wordingFor(kind string, count int) string {
+	if singular, ok := singularMessages[kind]; ok && count == 1 {
+		return singular
+	}
+	return kind
+}
+
 func newCollector() *collector {
-	return &collector{Result: Result{Variables: map[string]string{}}, flags: map[string][]string{}, visitedNodes: map[*insomniaNode]bool{}, scoped: map[string]scopedFolder{}}
+	return &collector{Result: Result{Variables: map[string]string{}}, flags: map[string][]string{}, visitedNodes: map[*insomniaNode]bool{}, scoped: map[string]scopedFolder{}, places: map[string]int64{}}
 }
 
 func newID() string {
@@ -113,13 +131,23 @@ func newRequest(name, method, url string) workspace.Request {
 	return request
 }
 
+func (c *collector) nextPlace(parentID string) int64 {
+	c.places[parentID]++
+	return c.places[parentID]
+}
+
 func (c *collector) addFolder(name, parentID string) string {
-	folder := workspace.Folder{Id: newID(), Name: cleanName(name, untitledFolder), ParentId: parentID}
+	folder := workspace.Folder{Id: newID(), Name: cleanName(name, untitledFolder), ParentId: parentID, SortOrder: c.nextPlace(parentID)}
 	c.Folders = append(c.Folders, folder)
 	return folder.Id
 }
 
 func (c *collector) addRequest(request workspace.Request) {
+	request.SortOrder = c.nextPlace(request.FolderId)
+	c.keepRequest(request)
+}
+
+func (c *collector) keepRequest(request workspace.Request) {
 	if len(c.Requests) >= maxRequests {
 		c.full = true
 		return
@@ -170,12 +198,13 @@ func (c *collector) read(name, format string, run func()) {
 
 func (c *collector) result() Result {
 	result := c.Result
+	result.SharedOrder = true
 	result.Warnings = append([]string{}, c.Warnings...)
 	for _, kind := range c.flagOrder {
 		if c.inPlace && importOnlyNotes[kind] {
 			continue
 		}
-		result.Warnings = append(result.Warnings, fmt.Sprintf(kind, listNames(c.flags[kind])))
+		result.Warnings = append(result.Warnings, fmt.Sprintf(wordingFor(kind, len(c.flags[kind])), listNames(c.flags[kind])))
 	}
 	if c.full {
 		result.Warnings = append(result.Warnings, fmt.Sprintf(messageTooMany, maxRequests))

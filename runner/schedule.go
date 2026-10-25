@@ -37,7 +37,7 @@ func (s *session) spawn() (*session, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &session{scripts: scripts, policy: s.policy, variables: variables{}, session: variables{}, environment: s.environment, common: s.common, library: s.library, hosts: s.hosts, modules: s.modules, contract: s.contract}, nil
+	return &session{scripts: scripts, policy: s.policy, collection: s.collection, variables: variables{}, session: variables{}, environment: s.environment, common: s.common, library: s.library, hosts: s.hosts, modules: s.modules, contract: s.contract}, nil
 }
 
 func (s *session) crew(wanted int) []*session {
@@ -73,22 +73,23 @@ func (c *schedule) record(position int, result Result) {
 }
 
 func (c *schedule) work(ctx context.Context, worker *session, queue <-chan int) {
-	limit := worker.scripts.Limits().FlowSteps
+	repeats := worker.scripts.Limits().FlowSteps
 	for position := range queue {
 		if c.halted.Load() || ctx.Err() != nil {
 			continue
 		}
 		current := c.units[position]
 		worker.variables = startingFor(c.base, c.options, current.iteration, c.count)
-		worker.session = maps.Clone(c.session)
-		jumps := 0
+		worker.session = sessionFor(c.session, c.options.rowFor(current.iteration))
+		sent := 0
 		progress := newProgress(len(current.indexes))
 		for cursor := 0; cursor < len(current.indexes); {
 			request := c.planned.requests[current.indexes[cursor]]
 			result := worker.attempt(ctx, request, c.planned.folderNames[request.FolderID], c.options.Capture)
 			worker.common.publish(worker.current().plain())
 			result.Iteration = c.iterationNumber(current)
-			following, problem := c.follow(current, cursor, result.flow, &jumps, limit)
+			sent++
+			following, problem := c.follow(current, cursor, result.flow, flowStep{name: request.Name, sent: sent, repeats: repeats})
 			reason := result.flow.passedOver(request.Name)
 			if problem != "" {
 				result.flag(problem)

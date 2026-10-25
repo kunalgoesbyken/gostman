@@ -3,8 +3,10 @@ package importer
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
+	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/redact"
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
@@ -28,7 +30,7 @@ type curlScript struct {
 func exportCurl(collection workspace.Collection, options Options) []File {
 	script := &curlScript{redactor: newRedactor(collection), includeSecrets: options.IncludeSecrets, listed: map[string]bool{}}
 	var commands strings.Builder
-	for _, request := range orderedRequests(collection) {
+	for _, request := range inheritedRequests(collection) {
 		script.redactor.owner = request.Name
 		commands.WriteString(script.command(request))
 	}
@@ -44,13 +46,59 @@ func orderedRequests(collection workspace.Collection) []workspace.Request {
 	return collectRequests(tree, "", 0)
 }
 
-func collectRequests(tree exportTree, id string, depth int) []workspace.Request {
-	requests := append([]workspace.Request{}, tree.requests[id]...)
-	if depth >= maxFolderDepth {
-		return requests
+func inheritedRequests(collection workspace.Collection) []workspace.Request {
+	layersOf := folderLayers(collection)
+	requests := orderedRequests(collection)
+	for index, request := range requests {
+		requests[index] = withInherited(request, layersOf(request.FolderId))
 	}
-	for _, folder := range tree.folders[id] {
-		requests = append(requests, collectRequests(tree, folder.Id, depth+1)...)
+	return requests
+}
+
+func folderLayers(collection workspace.Collection) func(folderID string) []engine.Layer {
+	byID := make(map[string]workspace.Folder, len(collection.Folders))
+	for _, folder := range collection.Folders {
+		byID[folder.Id] = folder
+	}
+	return func(folderID string) []engine.Layer {
+		var chain []engine.Layer
+		visited := map[string]bool{}
+		for id := folderID; id != "" && !visited[id] && len(chain) < maxFolderDepth; {
+			folder, found := byID[id]
+			if !found {
+				break
+			}
+			visited[id] = true
+			chain = append(chain, settingsLayer(folder.Settings))
+			id = folder.ParentId
+		}
+		slices.Reverse(chain)
+		return append([]engine.Layer{settingsLayer(collection.Settings)}, chain...)
+	}
+}
+
+func settingsLayer(settings workspace.Settings) engine.Layer {
+	return engine.Layer{Headers: settings.Headers, Auth: settings.Auth}
+}
+
+func withInherited(request workspace.Request, layers []engine.Layer) workspace.Request {
+	headers, auth, err := engine.Inherit(request.Headers, request.Auth, layers)
+	request.Auth = auth
+	if err == nil {
+		request.Headers = headers
+	}
+	return request
+}
+
+func collectRequests(tree exportTree, id string, depth int) []workspace.Request {
+	var requests []workspace.Request
+	for _, sibling := range tree.siblings[id] {
+		switch {
+		case sibling.Request != nil:
+			requests = append(requests, *sibling.Request)
+		case depth < maxFolderDepth:
+			requests = append(requests, collectRequests(tree, sibling.Folder.Id, depth+1)...)
+		}
 	}
 	return requests
 }
@@ -132,7 +180,7 @@ func (s *curlScript) json(source string) string {
 func (s *curlScript) command(request workspace.Request) string {
 	arguments := []string{"curl"}
 	method := request.Method
-	body := s.body(request)
+	body, contentType := s.body(request)
 	hasBody := len(body) > 0
 	if method == methodGraphQL {
 		method = "POST"
@@ -149,13 +197,17 @@ func (s *curlScript) command(request workspace.Request) string {
 	if request.Options.TimeoutMs > 0 {
 		arguments = append(arguments, fmt.Sprintf("--max-time %d", (request.Options.TimeoutMs+999)/1000))
 	}
-	address, authArguments, headers := s.authorization(request)
+	address, authArguments, authHeaders := s.authorization(request)
 	arguments = append(arguments, authArguments...)
-	for _, header := range enabledRows(readRows(request.Headers)) {
+	headers := enabledRows(readRows(request.Headers))
+	for _, header := range headers {
 		arguments = append(arguments, s.headerArgument(header.Key, s.headerValue(header)))
 	}
-	for _, header := range headers {
+	for _, header := range authHeaders {
 		arguments = append(arguments, s.headerArgument(header.Key, header.Value))
+	}
+	if contentType != "" && !namesHeader(append(headers, authHeaders...), contentTypeHeader) {
+		arguments = append(arguments, s.headerArgument(contentTypeHeader, contentType))
 	}
 	arguments = append(arguments, body...)
 	arguments = append(arguments, "--url "+s.quote(address))
@@ -211,30 +263,34 @@ func (s *curlScript) headerValue(header row) string {
 	return s.secret(header.Key, header.Value)
 }
 
-func (s *curlScript) body(request workspace.Request) []string {
+func namesHeader(headers []row, name string) bool {
+	return slices.ContainsFunc(headers, func(header row) bool { return strings.EqualFold(header.Key, name) })
+}
+
+func (s *curlScript) body(request workspace.Request) ([]string, string) {
 	if request.Method == methodGraphQL {
 		payload := `{"query":` + quoteJSON(request.GraphqlQuery)
 		if strings.TrimSpace(request.GraphqlVariables) != "" {
 			payload += `,"variables":` + s.json(request.GraphqlVariables)
 		}
-		return []string{"-H 'Content-Type: application/json'", "--data-raw " + s.quote(payload+"}")}
+		return []string{"--data-raw " + s.quote(payload+"}")}, defaultContentTypes[bodyJSON]
 	}
 	switch request.BodyType {
 	case bodyJSON, bodyText, bodyXML:
 		if strings.TrimSpace(request.Body) == "" {
-			return nil
+			return nil, ""
 		}
 		text := request.Body
 		if request.BodyType == bodyJSON {
 			text = s.json(text)
 		}
-		return []string{"--data-raw " + s.quote(text)}
+		return []string{"--data-raw " + s.quote(text)}, defaultContentTypes[request.BodyType]
 	case bodyForm:
-		return s.formArguments("--data-urlencode", s.sensitiveRows(readRows(request.Body)))
+		return s.formArguments("--data-urlencode", s.sensitiveRows(readRows(request.Body))), ""
 	case bodyMultipart:
-		return s.multipartArguments(s.sensitiveRows(readRows(request.Body)))
+		return s.multipartArguments(s.sensitiveRows(readRows(request.Body))), ""
 	}
-	return nil
+	return nil, ""
 }
 
 func (s *curlScript) sensitiveRows(rows []row) []row {

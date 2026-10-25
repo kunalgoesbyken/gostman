@@ -44,10 +44,10 @@ Warnings and skipped items are printed after the counts. Secret values are never
 
 | In Postman | In Gostman |
 | --- | --- |
-| Requests and folders | The same tree and order, under a folder named after the collection |
+| Requests and folders | The same tree and order, under a folder named after the collection; a request above or between folders stays there and runs there |
 | Collection and folder auth, scripts and variables | [Folder settings](folder-settings.md) on that folder. Requests set to inherit auth stay on **Inherit**. A folder set to **No auth** keeps **No auth**, so the requests below it that inherit are sent without credentials, as in Postman |
-| Collection variables | Collection variables. With `gostman import` they are written to `gostman.yaml`; in the app they are listed under **Environments**, **Collection variables**. Collection and folder variables of type **secret** come across with an empty value and are listed, so their values are never written to a file; set them in an environment and mark them secret. Switched-off variables are left out and listed |
-| Environments | Environments with the same names. Variables of type **secret** are marked secret; in the desktop app their values move to the keychain. `gostman import` writes only their names; pass the values to `gostman run` with `--var`, `--var-from-env` or `--env-file`. Switched-off variables are left out and listed |
+| Collection variables | Collection variables. With `gostman import` they are written to `gostman.yaml`; in the app they belong to the collection's folder and are listed in its **Collection settings**, **Vars**, and under **Environments**, **Collection variables** under the collection's name while one of its requests is open. Collection variables of type **secret** are marked secret: in the app their values stay on this device (the system keychain in the desktop app) and out of exports, and `gostman import` writes only their names and lists them. Folder variables of type **secret** come across with an empty value and are listed; set them in an environment and mark them secret. Switched-off variables are left out and listed |
+| Environments | Environments with the same names, shared by every collection, as in a Postman workspace. Variables of type **secret** are marked secret; in the desktop app their values move to the keychain. `gostman import` writes only their names; pass the values to `gostman run` with `--var`, `--var-from-env` or `--env-file`. Switched-off variables are left out and listed |
 | Globals | A global environment in the app, with secret values marked secret. `gostman run` has no global scope, so `gostman import` adds the globals to the collection variables in `gostman.yaml`; a collection variable with the same name keeps its value, as it wins in Postman too. Secret globals come across with an empty value |
 | Saved examples | Examples with their name, status, headers and body. The first one is the default the mock server serves; Postman's `x-mock-response-name` and `x-mock-response-code` headers are not read. Up to 20 per request |
 | Path variables such as `/users/:id` | `/users/{{id}}` with `id` as a variable of the request, so the value stays editable and the mock server matches any id. A value that is itself a variable, such as `{{userId}}`, is put into the URL |
@@ -107,10 +107,13 @@ Postman's newer YAML collection format (v3, a folder of `*.request.yaml` files) 
 | `postman.setNextRequest`, `postman.getResponseHeader(name)` | `setNextRequest`, `res.getHeader(name)` |
 | `tests["name"] = condition` | `test("name", ...)` that expects the condition to be truthy |
 | `responseBody`, `responseCode.code`, `responseHeaders`, `responseTime` | The body as text, `res.status`, `res.headers`, `res.responseTime` |
+| `responseBody.has(text)` | Whether the body text contains `text` |
 | `tv4.validate(data, schema)` | The bundled `ajv` module validating `data` against `schema` |
 | `require("lodash")`, `crypto-js`, `moment`, `uuid`, `ajv`, `chai`, and the globals `_`, `CryptoJS`, `moment` | The bundled modules of the same names |
 
 `sendRequest` reaches only localhost and the hosts that requests in the collection already use.
+
+A name your script declares that Gostman scripts already have, such as `const res = pm.response.json()` or a helper `function test(name, fn)`, gets a number added, `res1` or `test1`, everywhere the script uses it, so it no longer hides Gostman's `res` or `test` and the rewritten calls still reach them. This applies to `req`, `res`, `env`, `test`, `expect`, `utils`, `sendRequest`, `setNextRequest`, `skipRequest`, `stopExecution`, `visualize`, `bru` and `insomnia`; the script behaves as it did in Postman.
 
 Kept as written and listed in the summary with their line, so you can rewrite them before running:
 
@@ -119,7 +122,7 @@ Kept as written and listed in the summary with their line, so you can rewrite th
 - `pm.cookies.jar()`. Use `bru.cookies.jar()`, whose methods are `setCookie`, `getCookie`, `getCookies`, `deleteCookie` and `deleteCookies`.
 - `pm.test.skip`, `xml2Json`, `cheerio` and `require` of other modules.
 
-`pm.variables.set` writes a session value, which is kept in memory and never saved, like Postman's local variables. Scripts run in an isolated worker with no network access of their own and stop after the time limit set on the Script tab of the [collection settings](folder-settings.md): 10 seconds unless you change it, up to 120. The script API is in [Variables, scripts and settings](scripting-and-settings.md#script-api).
+`pm.variables.set` writes a session value, which is kept in memory and never saved, like Postman's local variables. Scripts run in an isolated worker with no network access of their own and stop after the time limit set on the Script tab of [Settings for all collections](folder-settings.md) (**Collection settings** in a folder workspace): 10 seconds unless you change it, up to 120. The script API is in [Scripts and checks](scripting-and-settings.md#script-api).
 
 ## From newman run to gostman run
 
@@ -165,12 +168,15 @@ Mixed teams can go back and forth. The **Postman** format in the **Export** tab 
 
 - requests, folders, query parameters, headers, bodies and descriptions;
 - auth on requests, folders and the collection, including a folder's **No auth**, without OAuth 2.0 tokens;
-- pre-request and post-response scripts on requests, folders and the collection, as **prerequest** and **test** events;
+- pre-request and post-response scripts on requests, folders and the collection, as **prerequest** and **test** events, adapted to run in Postman;
+- assertion rows on requests, folders and the collection, as `pm.test` checks in the **test** event that compare as Gostman does, so `eq 200` also passes for `"200"`; rows that are turned off become skipped tests, and importing the file again gives the rows back;
 - saved examples, each with the request as its original request;
 - folder variables, and as collection variables the variables in use, except secret ones (the app), or the collection variables of `gostman.yaml` (`gostman export`);
 - request variables used as a whole path segment, such as `{{id}}`, as Postman path variables (`:id`).
 
-Scripts are exported as written in Gostman's API, so Postman will not run `env.set` or `res.body` until they are rewritten. Headers on folders and the collection, assertion rows, extraction rules and binary example bodies have no place in a Postman collection and are left out.
+Scripts keep the code you wrote. When one uses Gostman names such as `env`, `res`, `test` or `sendRequest`, a few lines at the top define them with `pm.*`, only for the parts the script uses, so `env.set("token", res.body.token)` runs in Postman and newman as it is. Scripts already written with `pm.*` are exported unchanged. The summary under the format, and the output of `gostman export`, lists what was adapted and every call Postman cannot run, such as `res("..id")` queries or `req.setTimeout`, with its place and line. Importing the file back into Gostman removes those lines again. See [Scripts and checks in Postman, Bruno and Insomnia](import-export-and-specs.md#scripts-and-checks-in-postman-bruno-and-insomnia).
+
+Extract rules become lines at the top of the post-response script, such as `pm.collectionVariables.set("token", pm.response.json().access_token);`, and come back as extract rules when you import the file again. Headers on folders and the collection and binary example bodies have no place in a Postman collection and are left out.
 
 ## What Postman has that Gostman does not
 

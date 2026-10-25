@@ -63,21 +63,32 @@ func (p filePart) contentType() string {
 	return p.ContentType
 }
 
-func buildBody(r Request, isGraphQL bool, substitute func(string) string, stream *bodyStream) ([]byte, string, error) {
+type builtBody struct {
+	data        []byte
+	contentType string
+	parts       []PreparedPart
+	file        string
+}
+
+func plainBody(data []byte, contentType string, err error) (builtBody, error) {
+	return builtBody{data: data, contentType: contentType}, err
+}
+
+func buildBody(r Request, isGraphQL bool, substitute func(string) string, stream *bodyStream) (builtBody, error) {
 	if isGraphQL {
-		return graphqlBody(r, substitute)
+		return plainBody(graphqlBody(r, substitute))
 	}
 	switch r.BodyType {
 	case BodyNone:
-		return nil, "", nil
+		return builtBody{}, nil
 	case BodyForm:
-		return formBody(r.Body, substitute)
+		return plainBody(formBody(r.Body, substitute))
 	case BodyMultipart:
 		return multipartBody(r.Body, substitute, stream)
 	case BodyBinary:
 		return binaryBody(r.Body, stream)
 	default:
-		return rawBody(r, substitute)
+		return plainBody(rawBody(r, substitute))
 	}
 }
 
@@ -131,72 +142,79 @@ func inline(stream *bodyStream) []byte {
 	return stream.bytes()
 }
 
-func multipartBody(raw string, substitute func(string) string, stream *bodyStream) ([]byte, string, error) {
+func multipartBody(raw string, substitute func(string) string, stream *bodyStream) (builtBody, error) {
 	var parts []filePart
 	if strings.TrimSpace(raw) != "" {
 		if err := json.Unmarshal([]byte(raw), &parts); err != nil {
-			return nil, "", fmt.Errorf("multipart body is not valid: %w", err)
+			return builtBody{}, fmt.Errorf("multipart body is not valid: %w", err)
 		}
 	}
 
 	writer := multipart.NewWriter(stream)
+	var written []PreparedPart
 	for _, part := range parts {
 		if part.disabled() || strings.TrimSpace(part.Key) == "" {
 			continue
 		}
-		if err := writePart(writer, part, substitute, stream); err != nil {
-			return nil, "", err
+		described, err := writePart(writer, part, substitute, stream)
+		if err != nil {
+			return builtBody{}, err
 		}
+		written = append(written, described)
 	}
 	if err := writer.Close(); err != nil {
-		return nil, "", err
+		return builtBody{}, err
 	}
-	return inline(stream), writer.FormDataContentType(), nil
+	return builtBody{data: inline(stream), contentType: writer.FormDataContentType(), parts: written}, nil
 }
 
-func writePart(writer *multipart.Writer, part filePart, substitute func(string) string, stream *bodyStream) error {
+func writePart(writer *multipart.Writer, part filePart, substitute func(string) string, stream *bodyStream) (PreparedPart, error) {
 	key := substitute(part.Key)
 	if !part.isFile() {
-		return writer.WriteField(key, substitute(part.Value))
+		value := substitute(part.Value)
+		return PreparedPart{Name: key, Value: value}, writer.WriteField(key, value)
 	}
 
 	header := textproto.MIMEHeader{}
 	header.Set("Content-Disposition", fmt.Sprintf(`form-data; name=%q; filename=%q`, key, part.FileName))
 	if part.isAttached() {
-		header.Set("Content-Type", attachedType(part.ContentType, part.Path))
+		described := PreparedPart{Name: key, File: part.FileName, ContentType: attachedType(part.ContentType, part.Path)}
+		header.Set("Content-Type", described.ContentType)
 		if _, err := writer.CreatePart(header); err != nil {
-			return err
+			return described, err
 		}
-		return stream.attach(part.FileName, part.Path)
+		return described, stream.attach(part.FileName, part.Path)
 	}
 
+	described := PreparedPart{Name: key, File: part.FileName, ContentType: part.contentType()}
 	data, err := part.bytes()
 	if err != nil {
-		return err
+		return described, err
 	}
-	header.Set("Content-Type", part.contentType())
+	header.Set("Content-Type", described.ContentType)
 	target, err := writer.CreatePart(header)
 	if err != nil {
-		return err
+		return described, err
 	}
 	_, err = target.Write(data)
-	return err
+	return described, err
 }
 
-func binaryBody(raw string, stream *bodyStream) ([]byte, string, error) {
+func binaryBody(raw string, stream *bodyStream) (builtBody, error) {
 	if strings.TrimSpace(raw) == "" {
-		return nil, "", nil
+		return builtBody{}, nil
 	}
 	var file filePart
 	if err := json.Unmarshal([]byte(raw), &file); err != nil {
-		return nil, "", fmt.Errorf("file body is not valid: %w", err)
+		return builtBody{}, fmt.Errorf("file body is not valid: %w", err)
 	}
 	if file.isAttached() {
-		return nil, attachedType(file.ContentType, file.Path), stream.attach(file.FileName, file.Path)
+		built := builtBody{contentType: attachedType(file.ContentType, file.Path), file: file.FileName}
+		return built, stream.attach(file.FileName, file.Path)
 	}
 	data, err := file.bytes()
 	if err != nil {
-		return nil, "", err
+		return builtBody{}, err
 	}
-	return data, file.contentType(), nil
+	return builtBody{data: data, contentType: file.contentType(), file: file.FileName}, nil
 }

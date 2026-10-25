@@ -14,21 +14,31 @@ export function reconcileTabs(tabs, previousRequests, requests, folders, wasRest
 
   const carried = (request) => (wasRestricted ? withoutActiveContent(request) : request)
 
-  const refresh = (request) => {
-    if (!request.id) return carried(request)
-    const current = saved.get(request.id)
-    if (!current) return carried({ ...request, id: '' })
-    const before = previous.get(request.id)
+  const lastSaved = ({ request, vanished }) => previous.get(request.id) || vanished
+
+  const refresh = (tab) => {
+    const { request } = tab
+    const current = request.id ? saved.get(request.id) : null
+    if (!current) return carried(request)
+    const before = lastSaved(tab)
     return before && !isRequestDirty(request, before) ? current : carried(request)
   }
 
-  const diskChangeOf = ({ request, diskChange }) => {
+  const vanishedOf = (tab) => (tab.request.id && !saved.has(tab.request.id) ? lastSaved(tab) || null : null)
+
+  const diskChangeOf = (tab) => {
+    const { request, diskChange } = tab
     const current = request.id ? saved.get(request.id) : null
     if (!current || !isRequestDirty(request, current)) return null
-    const before = previous.get(request.id)
+    const before = lastSaved(tab)
     const changedUnderDraft = Boolean(before) && isRequestDirty(request, before) && isRequestDirty(current, before)
     return changedUnderDraft || diskChange ? current : null
   }
 
-  return tabs.map((tab) => ({ ...tab, request: inKnownFolder(refresh(tab.request)), diskChange: diskChangeOf(tab) }))
+  return tabs.map((tab) => ({
+    ...tab,
+    request: inKnownFolder(refresh(tab)),
+    diskChange: diskChangeOf(tab),
+    vanished: vanishedOf(tab),
+  }))
 }

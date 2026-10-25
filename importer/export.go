@@ -31,17 +31,23 @@ var reservedStems = map[string]bool{"con": true, "prn": true, "aux": true, "nul"
 type exportTree struct {
 	folders  map[string][]workspace.Folder
 	requests map[string][]workspace.Request
+	siblings map[string][]workspace.Sibling
+	tests    map[string]string
 }
 
-func Export(format string, collection workspace.Collection, options Options) ([]File, string, error) {
+func Export(format string, collection workspace.Collection, options Options) ([]File, string, Report, error) {
 	if format != ExportCurl && !options.IncludeSecrets {
 		collection, _ = RedactSecrets(collection)
 	}
 	var files []File
+	var report Report
 	var err error
 	switch format {
 	case ExportBruno:
-		files = exportBruno(collection)
+		_, draft := adaptCollection(brunoTarget, collection)
+		adapted, scripts := adaptCollection(brunoTarget.withRequests(brunoRequestPaths(collection, draft.tests)), collection)
+		files, report = exportBruno(adapted, scripts.tests), scripts.report()
+		report.Warnings = append(report.Warnings, brunoOrderWarnings(adapted)...)
 	case ExportOpenAPI:
 		files, err = exportOpenAPI(collection)
 	case ExportCurl:
@@ -51,16 +57,16 @@ func Export(format string, collection workspace.Collection, options Options) ([]
 	case ExportHTTP:
 		files = exportHTTP(collection, options)
 	default:
-		return nil, "", fmt.Errorf("unknown export format %q", format)
+		return nil, "", report, fmt.Errorf("unknown export format %q; choose postman, bruno, openapi, curl, har or http", format)
 	}
 	if err != nil {
-		return nil, "", err
+		return nil, "", report, err
 	}
 	if len(files) <= 1 {
-		return files, "", nil
+		return files, "", report, nil
 	}
 	archive, err := zipFiles(files)
-	return files, archive, err
+	return files, archive, report, err
 }
 
 func zipFiles(files []File) (string, error) {
@@ -82,24 +88,16 @@ func zipFiles(files []File) (string, error) {
 }
 
 func buildTree(collection workspace.Collection) exportTree {
-	known := map[string]bool{}
-	for _, folder := range collection.Folders {
-		known[folder.Id] = true
-	}
 	tree := exportTree{folders: map[string][]workspace.Folder{}, requests: map[string][]workspace.Request{}}
-	for _, folder := range collection.Folders {
-		parent := folder.ParentId
-		if !known[parent] || parent == folder.Id {
-			parent = ""
+	tree.siblings = workspace.SiblingGroups(collection.Folders, collection.Requests, collection.SharedOrder)
+	for parent, siblings := range tree.siblings {
+		for _, sibling := range siblings {
+			if sibling.Folder != nil {
+				tree.folders[parent] = append(tree.folders[parent], *sibling.Folder)
+				continue
+			}
+			tree.requests[parent] = append(tree.requests[parent], *sibling.Request)
 		}
-		tree.folders[parent] = append(tree.folders[parent], folder)
-	}
-	for _, request := range collection.Requests {
-		parent := request.FolderId
-		if !known[parent] {
-			parent = ""
-		}
-		tree.requests[parent] = append(tree.requests[parent], request)
 	}
 	return tree
 }

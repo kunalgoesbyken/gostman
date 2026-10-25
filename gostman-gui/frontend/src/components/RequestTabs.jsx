@@ -6,6 +6,7 @@ import { OverflowTabsList, TabCount, Tabs, TabsContent } from "./ui/tabs"
 import { SkeletonLines } from "./ui/skeleton"
 import { AuthPanel } from "./AuthPanel"
 import { BodyPanel } from "./BodyPanel"
+import { InheritedHeaders } from "./InheritedHeaders"
 import { KeyValueEditor } from "./KeyValueEditor"
 import { ParamsPanel } from "./ParamsPanel"
 import { SettingsPanel } from "./SettingsPanel"
@@ -24,7 +25,7 @@ import { MCP_PANEL } from "../lib/mcp"
 import { readParamRows } from "../lib/queryString"
 import {
   AUTH_PANEL, BODY_PANEL, EXTRACT_PANEL, GRAPHQL_PANEL, HEADERS_PANEL, PARAMS_PANEL, SETTINGS_PANEL, TESTS_PANEL, VARS_PANEL,
-  hasProtocolPanel, leadSection, requestKind, requestSections,
+  hasChangedSettings, hasProtocolPanel, leadSection, requestKind, requestSections, requestSettings,
 } from "../lib/requestSections"
 import { REQUEST_TABS_TEXT as TEXT } from "../lib/requestTabsText"
 import { countActiveAssertions } from "../lib/scripting/assertions"
@@ -112,7 +113,6 @@ export const RequestTabs = memo(function RequestTabs({
   const socketStatus = useSocketStore((state) => selectSession(tabId)(state).status)
   const { url, queryParams, headers, body, bodyType, auth, options, method, extractors, assertions, examples, preScript, postScript, vars } = activeRequest
   const authSource = useAppStore((state) => inheritedAuthSource({ type: AUTH_INHERIT }, lineageOf(state, activeRequest.folderId))?.name ?? null)
-  const inheritedHeaders = useAppStore((state) => countInheritedHeaders(state, activeRequest.folderId))
   const isSocket = useMemo(() => isSocketAddress(url, variables), [url, variables])
   const kind = requestKind(activeRequest, isSocket)
   const isGraphQL = method === GRAPHQL_METHOD
@@ -120,6 +120,7 @@ export const RequestTabs = memo(function RequestTabs({
   useLeadOnKindChange(kind, setActivePanel)
 
   const headerRows = useMemo(() => parseRows(headers), [headers])
+  const inheritedHeaders = useAppStore((state) => countInheritedHeaders(state, activeRequest.folderId, headerRows))
   const variableRows = useMemo(() => parseRows(vars), [vars])
   const paramCount = useMemo(() => countSentRows(readParamRows(url, queryParams)), [url, queryParams])
   const bodyContent = useMemo(() => bodyBadge(body, bodyType), [body, bodyType])
@@ -127,7 +128,7 @@ export const RequestTabs = memo(function RequestTabs({
   const assertionCount = useMemo(() => countActiveAssertions(assertions), [assertions])
   const exampleCount = useMemo(() => parseExamples(examples).length, [examples])
   const hasScripts = preScript.trim() !== "" || postScript.trim() !== ""
-  const hasCustomOptions = options.timeoutMs > 0 || options.noFollowRedirects || options.insecureTLS || options.stream
+  const hasCustomOptions = hasChangedSettings(options)
   const hasOwnAuth = auth.type !== "" && auth.type !== AUTH_INHERIT
 
   const sections = requestSections(kind, filledSections({
@@ -192,7 +193,9 @@ export const RequestTabs = memo(function RequestTabs({
               rows={headerRows}
               onChange={(rows) => onUpdateRequest({ headers: serializeRows(rows) })}
               keyLabel={TEXT.headerLabel}
-            />
+            >
+              <InheritedHeaders folderId={activeRequest.folderId} ownRows={headerRows} />
+            </KeyValueEditor>
           </Panel>
         </TabsContent>
 
@@ -319,6 +322,7 @@ export const RequestTabs = memo(function RequestTabs({
         <TabsContent value={SETTINGS_PANEL} className={PANEL_CLASS}>
           <SettingsPanel
             options={options}
+            settings={requestSettings(kind, options)}
             description={activeRequest.description}
             tags={activeRequest.tags}
             onChange={(next) => onUpdateRequest({ options: next })}

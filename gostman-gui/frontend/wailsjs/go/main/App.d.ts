@@ -33,6 +33,8 @@ export function AiRemoveKey(arg1:string):Promise<void>;
 
 export function AiSaveKey(arg1:ai.Config,arg2:string):Promise<void>;
 
+export function AttachmentSize(arg1:string):Promise<number>;
+
 export function Authorize(arg1:engine.OAuth2,arg2:string):Promise<main.AuthorizationResult>;
 
 export function CancelAuthorization():Promise<void>;
@@ -199,7 +201,7 @@ export function SaveFile(arg1:string,arg2:string):Promise<boolean>;
 
 export function SaveFolders(arg1:Array<main.Folder>):Promise<void>;
 
-export function SaveHistory(arg1:Array<main.Request>):Promise<void>;
+export function SaveHistory(arg1:Array<main.HistoryEntry>):Promise<void>;
 
 export function SaveMockConfig(arg1:mock.Config):Promise<void>;
 
@@ -207,7 +209,7 @@ export function SaveRequest(arg1:main.Request):Promise<main.Request>;
 
 export function SaveRequests(arg1:Array<main.Request>):Promise<Array<main.Request>>;
 
-export function SaveScopes(arg1:Array<main.Environment>,arg2:string,arg3:string):Promise<void>;
+export function SaveScopes(arg1:Array<main.Environment>,arg2:string,arg3:string,arg4:string):Promise<void>;
 
 export function SaveSecretConnection(arg1:main.SecretConnection):Promise<void>;
 
@@ -228,6 +230,8 @@ export function SecretKinds():Promise<Array<secrets.KindInfo>>;
 export function SendRequest(arg1:string,arg2:engine.Request):Promise<engine.Response>;
 
 export function SetSecretConnectionEnabled(arg1:string,arg2:boolean):Promise<void>;
+
+export function ShareSiblingOrder():Promise<void>;
 
 export function StartCapture(arg1:capture.Settings):Promise<main.CaptureState>;
 

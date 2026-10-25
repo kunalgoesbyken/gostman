@@ -154,6 +154,11 @@ func (s *substitution) nested(name, value string) (string, bool) {
 	return filled, true
 }
 
+func IsVariableName(name string) bool {
+	placeholder := "{{" + name + "}}"
+	return name == strings.TrimSpace(name) && placeholderRe.FindString(placeholder) == placeholder
+}
+
 func nameOf(match string) string {
 	return strings.TrimSpace(match[2 : len(match)-2])
 }

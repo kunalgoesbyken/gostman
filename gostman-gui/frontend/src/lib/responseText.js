@@ -1,4 +1,20 @@
+export const CONSOLE_TEXT = {
+  all: 'All',
+  filter: 'Filter by level',
+  clear: 'Clear console',
+  emptyTitle: 'The console is empty',
+  emptyDescription: 'console.log() calls from pre-request and post-response scripts appear here, grouped by request.',
+  nothingMatches: 'No lines at this level',
+  nothingMatchesDescription: 'Choose another level to see the rest of the output.',
+}
+
+export const VISUALIZE_TEXT = {
+  frameTitle: 'Visualization',
+  note: 'Rendered from a script. Scripts, network access, forms and navigation are blocked inside this view.',
+}
+
 export const RESPONSE_TEXT = {
+  copyBaseUrl: 'Copy base URL',
   bodyLabel: 'Response body',
   largeBody: (size) => `This body is ${size}, so it is shown as plain text.`,
   formatAnyway: 'Format anyway',
@@ -24,7 +40,7 @@ export const RESPONSE_TEXT = {
     headers: 'Headers',
     cookies: 'Cookies',
     timeline: 'Timeline',
-    tests: 'Tests',
+    tests: 'Checks',
     console: 'Console',
     visualize: 'Visualize',
   },
@@ -36,6 +52,9 @@ export const RESPONSE_TEXT = {
     showing: (time) => `Showing the response from ${time}.`,
     compare: 'Compare with the latest',
     back: 'Back to the latest',
+    compareTitle: 'Compare responses',
+    compareParts: 'Compare',
+    comparedWith: 'compared with',
   },
   columns: {
     name: 'Name',
@@ -58,7 +77,7 @@ export const RESPONSE_TEXT = {
   expand: 'Expand response',
   collapse: 'Collapse response',
   resize: 'Resize the response panel',
-  resizeHint: 'Drag to resize. Double-click to reset.',
+  resizeHint: 'Drag or use the up and down arrow keys to resize. Double-click to reset.',
   sending: 'Sending request',
   noResponseTitle: 'No response yet',
   noResponseDescription: 'Send a request to see the response here.',

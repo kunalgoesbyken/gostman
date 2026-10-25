@@ -8,10 +8,12 @@ const findKey = (headers, name) => (
   Object.keys(headers).find((key) => key.toLowerCase() === String(name).toLowerCase())
 )
 
-const rawBody = (body) => (typeof body === 'string' || body === undefined ? body : JSON.stringify(body))
+export const bodyText = (body) => (typeof body === 'string' || body === undefined ? body : JSON.stringify(body, null, 2))
 
 export function createRequest(source, resolve) {
   const request = { ...source, headers: { ...source.headers } }
+  const untouched = JSON.stringify(source.body)
+  const rawText = () => (source.rawBody !== undefined && JSON.stringify(request.body) === untouched ? source.rawBody : bodyText(request.body))
   const setHeader = (name, value) => { request.headers[findKey(request.headers, name) || name] = String(value) }
   const deleteHeader = (name) => {
     const key = findKey(request.headers, name)
@@ -34,7 +36,7 @@ export function createRequest(source, resolve) {
     deleteHeader,
     deleteHeaders: (names) => names.forEach(deleteHeader),
     headerList: createEditableHeaderList(() => request.headers, { setHeader, deleteHeader }),
-    getBody: (options) => (options?.raw ? rawBody(request.body) : request.body),
+    getBody: (options) => (options?.raw ? rawText() : request.body),
     setBody: (body) => { request.body = body },
     getTimeout: () => request.timeout,
     setTimeout: (milliseconds) => { request.timeout = Number(milliseconds) },

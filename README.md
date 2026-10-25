@@ -23,7 +23,7 @@
 | | |
 | --- | --- |
 | ![Multipart body with auth](screenshots/request-body.png) | ![GraphQL query with the schema browser](screenshots/graphql.png) |
-| ![Assertions and test results](gostman-gui/frontend/src/assets/landing/tests.webp) | ![Collection runner](gostman-gui/frontend/src/assets/landing/runner.webp) |
+| ![Assertions and check results](gostman-gui/frontend/src/assets/landing/tests.webp) | ![Collection runner](gostman-gui/frontend/src/assets/landing/runner.webp) |
 
 Save a request once and use it three ways: send it from the app, check it on every pull request with `gostman run`, and let a coding agent call it through `gostman mcp` without seeing your secrets. Requests, collections and environments are plain files on your machine, and there is nothing to sign in to. New here? The [tutorial](docs/tutorial-first-collection.md) builds a tested collection step by step, and the [documentation](https://gostman.com/docs) covers every feature.
 
@@ -35,11 +35,11 @@ Both are good tools. Gostman is for people who want the paid-tier workflow witho
 
 - **Nothing to sign in to.** Collections are plain YAML files in a folder you can commit. The desktop app and the browser version both work without an account.
 - **No telemetry.** No analytics or crash reporting anywhere; the apps contact only the hosts you send to and the services you set up. [What Gostman connects to](docs/getting-started.md#what-gostman-connects-to) lists every network call.
-- **No tiers.** Data-driven runs, parallel runs, HTML reports, secret managers (Vault, AWS, Azure, Google Cloud, 1Password, Bitwarden, KeePassXC), the Git panel and any number of collections are all in the download. Bruno documents several of these under its [Pro and Ultimate plans](https://www.usebruno.com/pricing), and Postman lists custom data files in the Collection Runner on its [paid plans](https://www.postman.com/pricing/).
+- **No tiers.** Data-driven runs, parallel runs, HTML reports, secret managers (Vault, AWS, Azure, Google Cloud, 1Password, Bitwarden, Bitwarden Secrets Manager, KeePassXC), the Git panel and any number of collections are all in the download. Bruno documents several of these under its [Pro and Ultimate plans](https://www.usebruno.com/pricing), and Postman lists custom data files in the Collection Runner on its [paid plans](https://www.postman.com/pricing/).
 - **Sharing without Git.** Send a folder to a teammate as an encrypted link or file that is built on your machine and never uploaded.
 - **More in the same download.** Load testing, Socket.IO, MQTT, GraphQL subscriptions, MCP servers, HAR import, traffic capture, a secret scanner and a mock server, plus a command line that is one binary with no Node.js to install.
 
-Prices and plans change, so check their pages before you decide. Gostman has no accounts, so it has no hosted collaboration, SSO or cloud monitors, and it has no VS Code extension. A side-by-side table is on [gostman.com](https://gostman.com). Moving from Postman or Bruno? [Coming from Postman](docs/coming-from-postman.md) and [Coming from Bruno](docs/coming-from-bruno.md) cover importing a collection, its scripts and the `newman run` and `bru run` flags.
+Prices and plans change, so check their pages before you decide. Gostman has no accounts, so it has no hosted collaboration, SSO or cloud monitors, and it has no VS Code extension. [What is free in Gostman](docs/free-features.md) compares the paid features of Postman, Bruno and Insomnia with Gostman. Moving from Postman or Bruno? [Coming from Postman](docs/coming-from-postman.md) and [Coming from Bruno](docs/coming-from-bruno.md) cover importing a collection, its scripts and the `newman run` and `bru run` flags.
 
 ### Will Gostman add a paid tier?
 
@@ -67,12 +67,13 @@ gostman run examples/todo-api --env Public
 ```
 
 ```
-PASS  GET      Todos/List todos  200 OK  99 ms  3/3 tests
-PASS  GET      Todos/Get one todo  200 OK  13 ms  3/3 tests
-PASS  POST     Todos/Create a todo  201 Created  286 ms  3/3 tests
+PASS  GET      Todos/List todos  200 OK  99 ms  3/3 checks
+PASS  GET      Todos/Get one todo  200 OK  13 ms  3/3 checks
+PASS  POST     Todos/Create a todo  201 Created  286 ms  3/3 checks
 
 Requests  3 passed
-Tests     9 passed
+Checks    9 passed
+Duration  412ms
 ```
 
 Open the same folder in the desktop app with **Open folder** to see the requests, the checks and the variable passed from one request to the next.
@@ -82,7 +83,7 @@ Open the same folder in the desktop app with **Open folder** to see the requests
 - [Tutorial: test an API](docs/tutorial-first-collection.md) builds that collection step by step: variables, folders, assertions, chaining, scripts and a data-driven run.
 - [Tutorial: run your API tests in CI](docs/tutorial-ci.md) runs it on every pull request with secrets kept out of the files.
 - [Guides by task](docs/guides.md): migrate from Postman, mock a backend before it exists, record real traffic, load test, publish docs, let a coding agent call your API.
-- [Script reference and examples](docs/scripting-and-settings.md#tests-and-scripts): JSON Schema checks, request signing, fetching a token, polling.
+- [Script reference and examples](docs/scripting-and-settings.md#checks-and-scripts): JSON Schema checks, request signing, fetching a token, polling.
 - [Troubleshooting](docs/troubleshooting.md)
 
 ## Features
@@ -90,19 +91,19 @@ Open the same folder in the desktop app with **Open folder** to see the requests
 - **Protocols:** REST, GraphQL (schema browser), gRPC (reflection or `.proto`), WebSocket, Socket.IO, MQTT over WebSocket, GraphQL subscriptions, Server-Sent Events, SOAP and MCP servers, over HTTP or, on the desktop, as a local command (stdio).
 - **Auth:** Basic, Bearer, API key, OAuth 2.0 (with PKCE and automatic renewal), OAuth 1, Digest, AWS SigV4, NTLM, Akamai EdgeGrid, JWT Bearer, Atlassian ASAP and Hawk.
 - **Workflow:** collections with nested folders, environments and variables, extraction rules to chain requests, a cookie jar, history, earlier responses with a side-by-side compare, and a command palette.
-- **Tests:** assertions plus pre-request and post-response scripts with `test()` and `expect()` in a sandbox, and a collection runner with CSV or JSON data files, parallel runs and HTML, JUnit and JSON reports.
+- **Checks:** assertions plus pre-request and post-response scripts with `test()` and `expect()` in a sandbox, and a collection runner with CSV or JSON data files, parallel runs and HTML, JUnit and JSON reports.
 - **Local load testing** with `gostman load`: latency percentiles and pass or fail thresholds.
 - **Secret scanner:** `gostman scan` and an in-app check find credentials typed into a collection before you commit or share it.
 - **Collections as files:** plain YAML in a folder with a Git panel (diff, commit, push, branches, stash, conflicts) on the desktop.
 - **Mock server and capture:** serve saved examples or an OpenAPI spec locally, and record traffic from your own app.
 - **OpenAPI:** import, sync with a remote spec, and a spec viewer with a linter (`gostman lint`).
 - **Docs:** generate one HTML page with Markdown descriptions and an optional Try it panel.
-- **Secret managers:** HashiCorp Vault, AWS, Azure and Google Cloud; the password managers KeePassXC, 1Password and Bitwarden; and your OS keychain for stored values. Fields that read from a connection are tinted with its colour.
+- **Secret managers:** HashiCorp Vault, AWS, Azure and Google Cloud; the password managers KeePassXC, 1Password and Bitwarden, and Bitwarden Secrets Manager; and your OS keychain for stored values. Fields that read from a connection are tinted with its colour.
 - **Themes:** light and dark, eight palettes, accent colours, and your own background and text colour for each part of the window, with a contrast check.
 - **Sharing:** encrypted share links that never upload anything, and Open in Gostman links.
 - **For coding agents:** `gostman mcp` lets Claude Code, Codex and Cursor call your API through the collection without seeing your secrets.
-- **AI assistant** (optional, bring your own key): generate requests, tests and scripts, and explain errors.
-- **Import and export:** Postman, OpenAPI, Insomnia, HAR, WSDL, Bruno, .http files (VS Code REST Client, JetBrains HTTP Client) and curl in; Postman, OpenAPI, HAR, Bruno, .http files, Markdown and a Gostman backup out.
+- **AI assistant** (optional, bring your own key): generate requests, checks and scripts, and explain errors.
+- **Import and export:** Postman, OpenAPI, Insomnia, HAR, WSDL, Bruno, .http files (VS Code REST Client, JetBrains HTTP Client) and curl in; Postman, OpenAPI, HAR, Bruno, .http files, a curl script, Markdown, an HTML docs page and a Gostman backup out.
 - **Code generation** for cURL, JavaScript, Python, Go, Java, Kotlin, C#, PHP, Ruby, Swift, Rust, Dart and PowerShell.
 
 ## Install
@@ -128,10 +129,10 @@ Windows needs the WebView2 runtime, which ships with Windows 10 and 11; the inst
 
 ## Web version
 
-[gostman.com](https://gostman.com) runs the same interface in the browser. Browsers cannot call arbitrary APIs directly, so requests are relayed through a small proxy. Two consequences:
+[gostman.com](https://gostman.com) runs the same interface in the browser. Browsers cannot call arbitrary APIs directly, so requests are relayed through a small proxy. It differs from the desktop app in these ways:
 
 - The hosted proxy cannot reach `localhost` or private network addresses. Use the desktop app for local APIs, or run `gostman relay` and choose it under **Preferences**, **Privacy**.
-- Proxy, CA certificate and client certificate settings exist only in the desktop app.
+- The web app has no proxy, CA certificate or client certificate settings. Use the desktop app, or start `gostman relay` with `--proxy`, `--cacert` or `--client-cert`.
 - A gRPC stream is collected and shown when it ends; messages for a client stream are written up front as a JSON array.
 - Responses larger than 3 MB are truncated. The desktop app reads up to 50 MB.
 
@@ -141,15 +142,11 @@ Data in the web version is kept in the browser's IndexedDB.
 
 The same pages are published at [gostman.com/docs](https://gostman.com/docs). The tutorials and guides are listed under [Learn](#learn); the reference pages are:
 
-- [Getting started](docs/getting-started.md) and [what is free in Gostman](docs/free-features.md)
-- [Requests and responses](docs/requests-and-responses.md) and [protocols](docs/protocols.md)
-- [Command line](docs/cli.md): `run`, `send`, `load`, `scan`, `lint`, `docs`, `mock`, `capture`, secret managers, data files, reports
-- [CI recipes](docs/ci.md): GitHub Actions, GitLab CI, Jenkins, Docker
-- [Use from a coding agent](docs/agents.md)
-- [Folders, Git, mock server and capture](docs/workspaces-and-mock.md)
-- [Sharing, generated docs and Open in Gostman links](docs/sharing-and-docs.md)
-- [Variables, scripts and settings](docs/scripting-and-settings.md)
-- [AI assistant](docs/ai.md)
+- Start: [Getting started](docs/getting-started.md), [What is free in Gostman](docs/free-features.md), and coming from [Postman](docs/coming-from-postman.md), [Bruno](docs/coming-from-bruno.md) or [Insomnia](docs/coming-from-insomnia.md)
+- Send requests: [Requests and responses](docs/requests-and-responses.md), [Protocols](docs/protocols.md), [Variables](docs/variables.md), [Folder and collection settings](docs/folder-settings.md), [Scripts and checks](docs/scripting-and-settings.md)
+- Test and automate: [Running, load testing and scanning](docs/runner-load-and-scan.md), [Command line](docs/cli.md), [Gostman in CI](docs/ci.md), [Use from a coding agent](docs/agents.md)
+- Your data: [Collections, tabs and Git](docs/collections-and-git.md), [Folders, mock server and capture](docs/workspaces-and-mock.md), [Import, export and OpenAPI specs](docs/import-export-and-specs.md), [Sharing and documentation](docs/sharing-and-docs.md)
+- Settings and security: [Secrets and network settings](docs/secrets-and-network.md), [Preferences, shortcuts and the command palette](docs/preferences-and-shortcuts.md), [AI features](docs/ai.md)
 
 ## Contributing
 

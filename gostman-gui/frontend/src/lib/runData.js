@@ -72,9 +72,21 @@ export const iterationCount = (rows, iterations) => {
   return requested > 0 ? Math.min(requested, rows.length) : rows.length
 }
 
-export const iterationVariables = (base, rows, iteration, count) => ({
-  ...base,
+export const dataColumns = (rows) => [...new Set(rows.flatMap(Object.keys))]
+
+export const iterationVariables = (rows, iteration, count) => ({
   ...(rows[iteration] || {}),
   iteration: iteration + 1,
   iterationCount: count,
 })
+
+export function withdrawnValues(before, given, current) {
+  const restored = {}
+  const forgotten = []
+  for (const [name, value] of Object.entries(given)) {
+    if (current[name] !== value) continue
+    if (Object.hasOwn(before, name)) restored[name] = before[name]
+    else forgotten.push(name)
+  }
+  return { restored, forgotten }
+}

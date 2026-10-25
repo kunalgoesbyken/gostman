@@ -117,15 +117,36 @@ func (o Options) isIterating() bool {
 	return len(o.Data) > 0 || o.Iterations > 1
 }
 
+func (o Options) rowFor(iteration int) Row {
+	if iteration < len(o.Data) {
+		return o.Data[iteration]
+	}
+	return nil
+}
+
+func sessionFor(session variables, row Row) variables {
+	return layered(session, variables(row))
+}
+
+func (v variables) withdraw(rows []Row, before variables) {
+	for _, row := range rows {
+		for name, value := range row {
+			if current, found := v[name]; !found || !bytes.Equal(current, value) {
+				continue
+			}
+			if earlier, found := before[name]; found {
+				v[name] = earlier
+			} else {
+				delete(v, name)
+			}
+		}
+	}
+}
+
 func startingFor(base variables, options Options, iteration, count int) variables {
 	starting := make(variables, len(base))
 	for name, value := range base {
 		starting[name] = value
-	}
-	if iteration < len(options.Data) {
-		for name, value := range options.Data[iteration] {
-			starting[name] = value
-		}
 	}
 	if options.isIterating() {
 		starting["iteration"] = json.RawMessage(fmt.Sprint(iteration + 1))

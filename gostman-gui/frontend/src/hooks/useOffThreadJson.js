@@ -27,21 +27,21 @@ export function useOffThreadFormat(text) {
   return { formatted: formatted.source === text ? formatted : IDLE, format }
 }
 
-export function useOffThreadFilter(text, enabled, path) {
-  const [filter, setFilter] = useState(NO_FILTER)
+export function useOffThreadFilter(text, enabled, path, withValue) {
+  const [filter, setFilter] = useState({ text: null, result: NO_FILTER })
   const isActive = enabled && path.trim() !== ''
 
   useEffect(() => {
     if (!isActive) return undefined
     let isLive = true
-    filterJsonText(text, path).then(
-      (result) => isLive && setFilter(result),
-      (error) => isLive && setFilter({ active: true, error: failure(error) }),
+    filterJsonText(text, path, withValue).then(
+      (result) => isLive && setFilter({ text, result }),
+      (error) => isLive && setFilter({ text, result: { active: true, error: failure(error) } }),
     )
     return () => {
       isLive = false
     }
-  }, [isActive, text, path])
+  }, [isActive, text, path, withValue])
 
-  return isActive ? filter : NO_FILTER
+  return isActive && filter.text === text ? filter.result : NO_FILTER
 }

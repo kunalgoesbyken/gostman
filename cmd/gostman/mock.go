@@ -11,6 +11,7 @@ import (
 
 	"github.com/kunalgoesbyken/gostman/agent"
 	"github.com/kunalgoesbyken/gostman/mock"
+	"github.com/kunalgoesbyken/gostman/runner"
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
@@ -20,15 +21,12 @@ func variablesOf(collection workspace.Collection, name string) (string, error) {
 	if len(collection.Environments) == 0 {
 		return emptyVariables, nil
 	}
-	if name == "" {
-		return collection.Environments[0].Variables, nil
+	stored, err := runner.FromWorkspace(collection)
+	if err != nil {
+		return "", err
 	}
-	for _, environment := range collection.Environments {
-		if environment.Name == name {
-			return environment.Variables, nil
-		}
-	}
-	return "", fmt.Errorf("there is no environment named %q", name)
+	environment, err := stored.ChooseEnvironment("", name)
+	return environment.Variables, err
 }
 
 func printRoutes(stdout io.Writer, routes []mock.Route) {

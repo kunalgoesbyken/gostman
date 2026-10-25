@@ -62,7 +62,7 @@ func outcomeOf(result runner.Result) string {
 		parts = append(parts, "stream "+result.StreamEnd)
 	}
 	if total := len(result.Tests); total > 0 {
-		parts = append(parts, fmt.Sprintf("%d/%d tests", result.PassedTests(), total))
+		parts = append(parts, fmt.Sprintf("%d/%d checks", result.PassedTests(), total))
 	}
 	return strings.Join(parts, "  ")
 }
@@ -106,7 +106,7 @@ func printable(text string) string {
 func printableResult(result runner.Result) runner.Result {
 	result.Method, result.Name, result.Folder = printable(result.Method), printable(result.Name), printable(result.Folder)
 	result.Status, result.Skipped, result.Error = printable(result.Status), printable(result.Skipped), printable(result.Error)
-	result.Failure = printable(result.Failure)
+	result.Failure, result.ResolvedURL = printable(result.Failure), printable(result.ResolvedURL)
 	tests := make([]runner.Check, len(result.Tests))
 	for i, check := range result.Tests {
 		check.Name, check.Message = printable(check.Name), printable(check.Message)
@@ -124,6 +124,9 @@ func printableResult(result runner.Result) runner.Result {
 func (t *Text) Request(received runner.Result) {
 	result := printableResult(received)
 	fmt.Fprintf(t.output, "%s  %-*s  %s  %s\n", t.mark(result), methodWidth, result.Method, qualifiedName(result), t.paint(styleDim, outcomeOf(result)))
+	if result.ResolvedURL != "" {
+		fmt.Fprintln(t.output, t.paint(styleDim, detailIndent+result.ResolvedURL))
+	}
 	t.printLogs(result)
 	t.printFailures(result)
 }
@@ -158,7 +161,7 @@ func (t *Text) Finish(report runner.Report) error {
 		t.paint(styleRed, counted(summary.FailedTests, "failed")),
 	)
 	duration := (time.Duration(report.DurationMs) * time.Millisecond).String()
-	_, err := fmt.Fprintf(t.output, "\nRequests  %s\nTests     %s\n%sDuration  %s\n", requests, tests, t.contractLine(report), duration)
+	_, err := fmt.Fprintf(t.output, "\nRequests  %s\nChecks    %s\n%sDuration  %s\n", requests, tests, t.contractLine(report), duration)
 	return err
 }
 

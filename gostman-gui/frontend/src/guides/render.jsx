@@ -1,7 +1,9 @@
 import { renderToStaticMarkup, renderToString } from "react-dom/server"
-import { DocsPage } from "../components/DocsPage"
+import { DocsContent } from "../components/docs/DocsContent"
+import { DocsShell } from "../components/docs/DocsShell"
 import { GuidePage } from "../components/GuidePage"
 import { LandingPage } from "../components/LandingPage"
+import { SiteFooter } from "../components/landing/SiteFooter"
 import { docPath } from "../docs/manifest"
 
 const THEME_COLOR = "#050810"
@@ -10,7 +12,7 @@ const webSite = (siteUrl) => ({ "@type": "WebSite", name: "Gostman", url: `${sit
 
 const serialize = (data) => JSON.stringify(data).replace(/</g, "\\u003c")
 
-function PageDocument({ title, description, url, siteUrl, stylesheets, structuredData, children }) {
+function PageDocument({ title, description, url, siteUrl, stylesheets, scripts = [], structuredData, children }) {
   return (
     <html lang="en" className="dark">
       <head>
@@ -36,6 +38,13 @@ function PageDocument({ title, description, url, siteUrl, stylesheets, structure
         {stylesheets.map((href) => (
           <link key={href} rel="stylesheet" href={href} />
         ))}
+        {scripts.map((script) =>
+          script.preload ? (
+            <link key={script.src} rel="modulepreload" crossOrigin="" href={script.src} />
+          ) : (
+            <script key={script.src} type="module" crossOrigin="" src={script.src} />
+          ),
+        )}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serialize(structuredData) }} />
       </head>
       <body>{children}</body>
@@ -73,9 +82,15 @@ function docsBreadcrumbs(page, siteUrl, url) {
   return page.slug ? [...trail, breadcrumbItem(3, page.title, url)] : trail
 }
 
-export function renderDocsPage(page, { siteUrl, stylesheets, nav }) {
+const shellPage = (page) => ({ href: page.href, toc: page.toc })
+
+export function renderDocsPage(page, { siteUrl, stylesheets, scripts, nav, directory, searchUrl }) {
   const url = `${siteUrl}${docPath(page.slug)}`
   const title = page.slug ? `${page.title} | Gostman docs` : `${page.title} | Gostman`
+  const data = { nav, page: shellPage(page), searchUrl }
+  const content = renderToStaticMarkup(<DocsContent page={page} directory={directory} />)
+  const footer = renderToStaticMarkup(<SiteFooter />)
+  const shell = renderToString(<DocsShell {...data} content={content} footer={footer} />)
 
   return renderDocument({
     title,
@@ -83,6 +98,7 @@ export function renderDocsPage(page, { siteUrl, stylesheets, nav }) {
     url,
     siteUrl,
     stylesheets,
+    scripts,
     structuredData: {
       "@context": "https://schema.org",
       "@type": "TechArticle",
@@ -92,7 +108,12 @@ export function renderDocsPage(page, { siteUrl, stylesheets, nav }) {
       isPartOf: webSite(siteUrl),
       breadcrumb: { "@type": "BreadcrumbList", itemListElement: docsBreadcrumbs(page, siteUrl, url) },
     },
-    children: <DocsPage page={page} nav={nav} />,
+    children: (
+      <>
+        <div id="docs-root" dangerouslySetInnerHTML={{ __html: shell }} />
+        <script id="docs-data" type="application/json" dangerouslySetInnerHTML={{ __html: serialize(data) }} />
+      </>
+    ),
   })
 }
 

@@ -13,15 +13,15 @@ claude mcp add gostman -- gostman mcp --workspace /path/to/project/gostman --var
 
 | Tool | What it does |
 | --- | --- |
-| `list_requests` | Lists saved requests with their ids, folders, tags, and whether they have tests and examples. |
+| `list_requests` | Lists saved requests with their ids, folders, tags, and whether they have checks and examples. |
 | `get_request` | Shows one request in full, credentials masked; `options` lists only the settings changed from the defaults. |
-| `send_request` | Sends a saved request, or an ad hoc one, with scripts, assertions, cookies and tokens. Placeholders that no variable defines are listed under `unresolved`. |
-| `run_folder` | Runs a folder or the whole workspace; `tags` and `exclude_tags` pick a subset, `data` (one object per iteration) and `iterations` repeat it, at most 100 times. |
+| `send_request` | Sends a saved request, or an ad hoc one, with scripts, assertions, cookies and tokens. `variables` win over the environment and the request's own Vars for the rest of the session. Placeholders that no variable defines are listed under `unresolved`. |
+| `run_folder` | Runs a folder or the whole workspace; `tags` and `exclude_tags` pick a subset, `data` (one object per iteration; its fields win over the environment and the request's own Vars) and `iterations` repeat it, at most 100 times. Requests sent with undefined placeholders are listed under `unresolved`, even when they passed. |
 | `last_response` | Shows the last response a request got in this session and compares it with a saved example: status, content type and the JSON paths that differ. `shape_only` compares only structure and types. |
-| `save_request` | Creates a request, or changes one by id. |
+| `save_request` | Creates a request, or changes one by id: name, description, folder, method, URL, headers, body, tags, assertions and extraction rules. An extraction rule such as `{"name": "token", "source": "body", "expression": "$.token"}` on a login request keeps the token in the session, so later requests use `{{token}}` and the agent never sees its value. |
 | `import_requests` | Adds requests from an OpenAPI or Swagger spec, a Postman, Insomnia or Bruno collection, a HAR file, `.http` requests or a curl command, given as text or fetched from an address. |
 | `list_environments` | Lists environments and the names of their variables. |
-| `set_environment` | Switches the active environment for the session. |
+| `set_environment` | Switches the active environment for the session. Variables set by earlier requests are cleared; cookies and OAuth 2.0 tokens are kept. |
 | `set_variables` | Saves plain values such as `baseUrl` in an environment file; a new name creates the environment. The session uses them once that environment is active (`set_environment`). |
 | `lint_spec` | Checks an OpenAPI or Swagger document with the rules of `gostman lint`. |
 | `scan_secrets` | Looks for credentials typed into the workspace, as `gostman scan` does. |
@@ -32,7 +32,7 @@ Tools return JSON both as text and as structured content, describe themselves wi
 
 ### A collection as tools
 
-`--expose-tag <tag>` turns every request with that tag into a tool of its own, named after the request, with the request's description as the tool's description. Each `{{variable}}` in the request's address, headers and body becomes a parameter; variables the active environment does not define are required. Credential-named variables and credential headers are never parameters. Values given to a tool apply to that call only and must be plain: a value that holds `{{...}}`, reads a file or holds the value of a variable or credential is refused.
+`--expose-tag <tag>` turns every request with that tag into a tool of its own, named after the request, with the request's description as the tool's description. The description ends with the tool's arguments, so a parameter that the description lists but the tool does not take, such as one documented by an OpenAPI import, keeps its saved value. Each `{{variable}}` in the request's address, headers and body becomes a parameter; variables the active environment does not define are required. Credential-named variables and credential headers are never parameters. Values given to a tool apply to that call only and must be plain: a value that holds `{{...}}`, reads a file or holds the value of a variable or credential is refused.
 
 ```bash
 gostman mcp --workspace api --expose-tag agent
@@ -40,21 +40,21 @@ gostman mcp --workspace api --expose-tag agent
 
 ## Safety
 
-- **Secrets stay out of the conversation.** Requests reference `{{name}}`; values are filled in inside Gostman and replaced with their names in everything returned, including URL-encoded, base64 and JSON-escaped echoes. Variable values shorter than six characters are not treated as secrets; passwords, tokens and keys in a request's auth settings are, from three characters. This guards against accidental exposure; it is not a barrier against a value the server returns in a transformed form.
+- **Secrets stay out of the conversation.** Requests reference `{{name}}`; values are filled in inside Gostman and replaced with their names in everything returned, including URL-encoded, base64 and JSON-escaped echoes. Variable values shorter than six characters, with fewer than four different characters, or such as `true` and `null`, are not treated as secrets; passwords, tokens and keys in a request's auth settings are, from three characters. This guards against accidental exposure; it is not a barrier against a value the server returns in a transformed form.
 - **The agent can only call hosts your own requests use**, plus localhost. Add more with `--allow-host api.example.com`, or `--allow-host '*'` for any. `--block-private` also refuses private and loopback addresses. A refused request comes back with a hint telling the agent to ask you rather than reach the host another way. The same list applies to fetching a spec for `import_requests` or `lint_spec`, and to `load_test`.
 - **Agent work never widens that list.** Requests the agent creates or imports, and requests whose address the agent changes, do not count; editing another field of your request, such as adding an assertion, keeps it yours. Values the agent writes with `set_variables` or brings in with an import are ignored when the list is worked out, until you change them yourself. The ids and value fingerprints are kept in `.gostman/agent-requests.json` and `.gostman/agent-variables.json`.
 - **No literal credentials are written.** `save_request` refuses a value that matches any variable or credential; write `{{name}}` instead. `set_variables` and `import_requests` refuse the values of credentials and of credential-named or secret variables, literal `Authorization` and `Cookie` headers, and values that look like tokens to `gostman scan`. `set_variables` also refuses credential-named variables, and variables you marked secret or linked to a secret manager cannot be changed.
 - **Imports are inert.** Scripts, OAuth 2.0 settings and the values of secret variables are left out of what an agent imports, and imports that read local files with `{{$file(...)}}` or run local commands are refused. Import those yourself in the app or with `gostman import`.
 - **No local files or commands.** Agent sessions never read files with `{{$file(...)}}` and never run `stdio:` MCP commands.
 - **State carries across calls.** Cookies, OAuth 2.0 tokens and variables last for the session.
-- **Small answers.** Bodies are capped at 8 KB by default and can be narrowed with a JSONPath.
+- **Small answers.** Bodies are capped at 8 KB by default. The agent can narrow one with a JSONPath (`select`) or raise the cap up to 256 KB (`max_body_bytes`).
 - **Shared work.** Requests the agent saves are YAML files in the workspace, visible in the app and in Git.
 
-The OAuth 2.0 authorization code grant and WebSocket requests are not available to agents.
+The OAuth 2.0 authorization code and device code grants need a person to sign in in a browser, so an agent cannot start them; pass a token you already have with `--oauth-token-env NAME` or `--oauth-refresh-token-env NAME` and it is hidden from the agent like any credential. WebSocket requests are not available to agents.
 
 ## Server options
 
-`gostman mcp` takes `--workspace`, `--env`, `--var`, `--var-from-env`, `--env-file`, `--secrets`, `--secrets-env-file`, `--allow-host`, `--block-private` and `--expose-tag`, plus the network flags of `gostman run`: `--timeout`, `--insecure`, `--cacert`, `--client-cert`, `--client-key`, `--client-cert-pass-env`, `--proxy` and `--noproxy`. See [Command line](cli.md).
+`gostman mcp` takes `--workspace`, `--env`, `--var`, `--var-from-env`, `--env-file`, `--secrets`, `--secrets-env-file`, `--allow-host`, `--block-private`, `--expose-tag`, `--oauth-token-env` and `--oauth-refresh-token-env`, plus the network flags of `gostman run`: `--timeout`, `--insecure`, `--cacert`, `--client-cert`, `--client-key`, `--client-cert-pass-env`, `--proxy` and `--noproxy`. See [Command line](cli.md).
 
 ### Over HTTP
 

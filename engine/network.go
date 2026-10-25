@@ -64,7 +64,9 @@ type Network struct {
 	transports map[transportKey]*http.Transport
 }
 
-var defaultNetwork = &Network{proxy: http.ProxyFromEnvironment, transports: map[transportKey]*http.Transport{}}
+const environmentProxySource = "the HTTPS_PROXY and HTTP_PROXY environment variables"
+
+var defaultNetwork = &Network{proxy: http.ProxyFromEnvironment, proxySource: environmentProxySource, transports: map[transportKey]*http.Transport{}}
 
 func (c NetworkConfig) With(layer NetworkConfig) NetworkConfig {
 	if layer.ProxyMode != "" {
@@ -82,7 +84,7 @@ func NewNetwork(config NetworkConfig) (*Network, error) {
 	if err != nil {
 		return nil, err
 	}
-	network := &Network{proxy: proxy, proxySource: config.ProxySource, roots: rootsFor(config.Authorities), advice: config.Advice, transports: map[transportKey]*http.Transport{}}
+	network := &Network{proxy: proxy, proxySource: proxySourceFor(config), roots: rootsFor(config.Authorities), advice: config.Advice, transports: map[transportKey]*http.Transport{}}
 	for _, entry := range config.Certificates {
 		host := strings.ToLower(strings.TrimSpace(entry.Host))
 		if host == "" {
@@ -91,6 +93,13 @@ func NewNetwork(config NetworkConfig) (*Network, error) {
 		network.certificates = append(network.certificates, hostCertificate{host, entry.Certificate})
 	}
 	return network, nil
+}
+
+func proxySourceFor(config NetworkConfig) string {
+	if config.ProxySource == "" && config.ProxyMode != ProxyNone && config.ProxyMode != ProxyCustom {
+		return environmentProxySource
+	}
+	return config.ProxySource
 }
 
 func proxyFor(config NetworkConfig) (proxyFunc, error) {

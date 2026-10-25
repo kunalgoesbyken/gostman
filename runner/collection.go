@@ -1,7 +1,9 @@
 package runner
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/kunalgoesbyken/gostman/engine"
@@ -16,6 +18,7 @@ type Collection struct {
 	Environments []Environment       `json:"environments"`
 	Variables    string              `json:"variables"`
 	Settings     workspace.Settings  `json:"settings"`
+	SharedOrder  bool                `json:"sharedOrder"`
 	DotEnv       map[string]string   `json:"-"`
 	Modules      map[string]string   `json:"-"`
 	Warnings     []string            `json:"-"`
@@ -27,9 +30,11 @@ type Folder struct {
 	ID        string   `json:"id"`
 	Name      string   `json:"name"`
 	ParentID  string   `json:"parentId"`
+	SortOrder int64    `json:"sortOrder"`
 	Variables string   `json:"variables"`
 	Tags      []string `json:"tags"`
 	workspace.Settings
+	CollectionVariables string `json:"collectionVariables"`
 }
 
 type Environment struct {
@@ -38,6 +43,7 @@ type Environment struct {
 	Variables string `json:"variables"`
 	Extends   string `json:"extends"`
 	Meta      string `json:"meta"`
+	FolderID  string `json:"folderId"`
 }
 
 type Request struct {
@@ -51,6 +57,7 @@ type Request struct {
 	BodyType         string         `json:"bodyType"`
 	QueryParams      string         `json:"queryParams"`
 	FolderID         string         `json:"folderId"`
+	SortOrder        int64          `json:"sortOrder"`
 	GraphqlQuery     string         `json:"graphqlQuery"`
 	GraphqlVariables string         `json:"graphqlVariables"`
 	Auth             engine.Auth    `json:"auth"`
@@ -72,7 +79,12 @@ type Request struct {
 }
 
 type exportFile struct {
-	Gostman *Collection `json:"gostman"`
+	Gostman *exportedCollection `json:"gostman"`
+}
+
+type exportedCollection struct {
+	Collection
+	Variables json.RawMessage `json:"variables"`
 }
 
 func Load(path string) (Collection, error) {
@@ -93,5 +105,25 @@ func Load(path string) (Collection, error) {
 	if file.Gostman == nil {
 		return Collection{}, fmt.Errorf("%s is not a Gostman export: it has no \"gostman\" object", path)
 	}
-	return *file.Gostman, nil
+	collection := file.Gostman.Collection
+	collection.Variables, err = exportedVariables(file.Gostman.Variables)
+	if err != nil {
+		return Collection{}, fmt.Errorf("%s is not a Gostman export: %w", path, err)
+	}
+	return collection, nil
+}
+
+func exportedVariables(raw json.RawMessage) (string, error) {
+	var text string
+	if json.Unmarshal(raw, &text) == nil {
+		return text, nil
+	}
+	trimmed := bytes.TrimSpace(raw)
+	switch {
+	case len(trimmed) == 0, string(trimmed) == "null":
+		return "", nil
+	case trimmed[0] != '{':
+		return "", errors.New("\"variables\" must be an object")
+	}
+	return string(trimmed), nil
 }

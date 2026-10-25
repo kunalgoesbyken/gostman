@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ShieldAlert, ShieldCheck } from "lucide-react"
+import { ShieldCheck } from "lucide-react"
 import { ScanFindings } from "./ScanFindings"
 import { Checkbox } from "./ui/checkbox"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
@@ -25,11 +25,10 @@ export function ScanDialog({ scan, collection, onGoToRequest, onClose }) {
   return (
     <Dialog label={SCAN_TEXT.title} size="lg" onClose={onClose}>
       <DialogHeader onClose={onClose}>
-        <ShieldAlert className="h-4 w-4 text-muted-foreground" />
         <DialogTitle>{SCAN_TEXT.title}</DialogTitle>
         <TabCount>{count}</TabCount>
       </DialogHeader>
-      <div className="flex shrink-0 flex-col gap-2 px-4">
+      <div className="flex shrink-0 flex-col gap-2 border-b border-border px-4 pb-2 pt-3">
         <p className="text-xs text-muted-foreground">{SCAN_TEXT.intro}</p>
         <Checkbox checked={includeExamples} onChange={(event) => setIncludeExamples(event.target.checked)} className="h-7 justify-start self-start">
           {SCAN_TEXT.includeExamples}

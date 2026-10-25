@@ -1,4 +1,4 @@
-import { Check, Copy } from "lucide-react"
+import { Check, Copy, Globe } from "lucide-react"
 import { BrandIcon } from "./ui/brandIcon"
 import { Button } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
@@ -36,7 +36,7 @@ export function AboutDialog({ onClose }) {
           {ABOUT_LINKS.map((link) => (
             <li key={link.id}>
               <a href={link.url} target="_blank" rel="noopener noreferrer" onClick={(event) => openExternal(event, link.url)} className="inline-flex items-center gap-1 text-primary underline-offset-2 hover:underline">
-                <BrandIcon brand={codeHostOf(link.url)} />
+                <BrandIcon brand={codeHostOf(link.url)} fallback={Globe} />
                 {TEXT.links[link.id]}
               </a>
             </li>

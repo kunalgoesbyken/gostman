@@ -14,9 +14,10 @@ const (
 	exitUsage  = 2
 	exitUnsent = 3
 
-	programName = "gostman"
-	usageHint   = `Run "gostman help" to see the commands and flags.`
-	usage       = `Usage:
+	programName    = "gostman"
+	flagParseError = "parse error"
+	usageHint      = `Run "gostman help" to see the commands and flags.`
+	usage          = `Usage:
   gostman run <export.json | workspace folder | Bruno folder> [flags]
   gostman send [flags] <request>
   gostman send [flags] <METHOD> <url>
@@ -36,17 +37,21 @@ const (
 
 run
   Run every request of a Gostman export or workspace folder in order, with its
-  scripts, tests, extraction rules, cookies and OAuth 2 tokens. A Bruno
+  scripts, checks, extraction rules, cookies and OAuth 2 tokens. A Bruno
   collection folder (bruno.json or opencollection.yml) is converted in memory.
 
-  --env <name>          environment to use (default: the first one)
+  --env <name>          environment to use (default: the first one, or with
+                        --folder that collection's first); an environment
+                        kept with one collection can be named Collection/Name
   --folder <name|path>  run only this folder, for example auth or auth/tokens
-  --var <key=value>     set a variable, overriding the environment (repeatable)
+  --var <key=value>     set a variable; it wins over the environment, folder
+                        and request variables (repeatable)
   --var-from-env <NAME> set the variable NAME from the environment variable
                         NAME, so the value is not typed or stored (repeatable)
   --secrets             allow variables that reference a secret manager
                         (Vault, AWS, Azure, Google Cloud, 1Password,
-                        Bitwarden) to be read with the credentials
+                        Bitwarden, Bitwarden Secrets Manager) to be read
+                        with the credentials
                         in the process environment; off by default so that a
                         collection you did not write cannot use them
                         (also for send and mcp)
@@ -63,8 +68,9 @@ run
                         a collection you did not write cannot send your files
                         (also for send and load)
   --data <file>         run once per row of a CSV (header row) or JSON (array of
-                        objects) file; a row's values override the environment,
-                        and the variables iteration and iterationCount are set
+                        objects) file; a row's values win over --var and the
+                        environment, folder and request variables, and the
+                        variables iteration and iterationCount are set
   --iterations <n>      repeat the run n times, or use only the first n data rows
                         (at most 10000 iterations; more exits with status 2)
   --stream-timeout <s>  time budget for each streaming (SSE) request in a run
@@ -93,7 +99,7 @@ run
   --contract <spec>     check every HTTP response against this OpenAPI spec
                         (file or address): the status, the content type and
                         the body schema of the operation with the same method
-                        and path; each check is reported as a test
+                        and path; a mismatch fails the run like any check
   --cacert <file>       trust the PEM or DER certificates in this file as well
                         as the system's (repeatable)
   --client-cert <file> --client-key <file>
@@ -125,11 +131,13 @@ run
                         those requests
 
 send
-  Send one request through the same pipeline and print a JSON summary followed
-  by the response body. Variable values and credentials are always replaced
-  with {{name}} in what is printed.
+  Send one request through the same pipeline. Stdout gets only the response
+  body, or only the selected value with --select, so it can be piped; the JSON
+  summary and warnings go to stderr. With --json, stdout gets one JSON
+  document with the summary and the body. Variable values and credentials are
+  always replaced with {{name}} in what is printed.
 
-  <request>             id or name of a saved request
+  <request>             id, name or Folder/Name of a saved request
   <METHOD> <url>        a request that is not saved
   --workspace <path>    workspace folder or export file (default: the current
                         folder when it is a workspace)
@@ -137,6 +145,8 @@ send
   --allow-files         as for run
   --cacert, --client-cert, --client-key, --client-cert-pass-env, --proxy,
   --noproxy             as for run
+  --oauth-token-env, --oauth-refresh-token-env
+                        as for run
   -H, --header <name: value>  add a header to an unsaved request (repeatable)
   -d, --data <body>     body of an unsaved request
   --select <jsonpath>   print only this part of a JSON response body
@@ -171,7 +181,7 @@ load
   --max-p95 <time>      exit 1 when the 95th percentile latency is higher
   --max-error-rate <p>  exit 1 when more than p percent fail, for example 1%
                         Exit 1 also follows an interrupt and a run in which no
-                        request succeeded. Pre-request scripts and tests are
+                        request succeeded. Pre-request scripts and checks are
                         not part of a load test; cookies are not shared.
 
 mcp
@@ -183,6 +193,8 @@ mcp
   --timeout, --insecure as for run
   --cacert, --client-cert, --client-key, --client-cert-pass-env, --proxy,
   --noproxy             as for run
+  --oauth-token-env, --oauth-refresh-token-env
+                        as for run
   --allow-host <host>   let the agent call this host as well (repeatable; * for
                         any). Without it the agent reaches only localhost and
                         the hosts of requests a person wrote
@@ -287,12 +299,13 @@ init
                         .claude/skills/gostman/SKILL.md in the current folder
 
 import
-  Create a workspace from an Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI or
-  .http file or folder. Imports add data only; scripts and OAuth settings are
+  Create a workspace from an Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI,
+  Gostman export or .http file or folder. Imports add data only; scripts and OAuth settings are
   kept and reported, tokens and cookie values are never carried over.
 
-  --format <name>       auto, insomnia, har, wsdl, bruno, postman, openapi or
-                        http (default auto: detected from the content)
+  --format <name>       auto, insomnia, har, wsdl, bruno, postman, openapi,
+                        gostman or http (default auto: detected from the
+                        content)
   --out <folder>        workspace folder to create (required)
   --skip-static         HAR: leave out images, fonts, styles and scripts
 
@@ -310,8 +323,8 @@ export
                         placeholders and re-import as empty variables
 
 Exit codes:
-  0  every request and test passed (scan: nothing at or above --fail-on)
-  1  a test or a script failed (scan: a finding at or above --fail-on)
+  0  every request and check passed (scan, lint, load: no threshold reached)
+  1  a check or a script failed (scan, lint, load: a threshold was reached)
   2  the command or the input is wrong
   3  run and send: a request got no response (it could not be sent, the
      connection failed or timed out, or the host is not allowed)
@@ -333,8 +346,35 @@ func main() {
 }
 
 func misuse(stderr io.Writer, message string) int {
-	fmt.Fprintf(stderr, "%s: %s\n%s\n", programName, message, usageHint)
+	fmt.Fprintf(stderr, "%s: %s\n%s\n", programName, plainFlagMessage(message), usageHint)
 	return exitUsage
+}
+
+func plainFlagMessage(message string) string {
+	if name, found := strings.CutPrefix(message, "flag provided but not defined: -"); found {
+		return fmt.Sprintf("unknown flag %s", flagName(name))
+	}
+	if name, found := strings.CutPrefix(message, "flag needs an argument: -"); found {
+		return fmt.Sprintf("%s needs a value", flagName(name))
+	}
+	rest, found := strings.CutPrefix(message, "invalid value ")
+	value, flagPart, split := strings.Cut(rest, " for flag -")
+	name, reason, named := strings.Cut(flagPart, ":")
+	if !found || !split || !named {
+		return message
+	}
+	plain := fmt.Sprintf("%s is not a valid value for %s", value, flagName(name))
+	if reason = strings.TrimSpace(reason); reason == "" || reason == flagParseError {
+		return plain
+	}
+	return plain + ": " + reason
+}
+
+func flagName(name string) string {
+	if len(name) == 1 {
+		return "-" + name
+	}
+	return "--" + name
 }
 
 var helpFlags = map[string]bool{"-h": true, "-help": true, "--help": true}

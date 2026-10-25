@@ -106,7 +106,7 @@ func prepare(scripts *sandbox.Sandbox, stored Collection, options Options) (plan
 		return plan{}, err
 	}
 	var ordered []Request
-	if err := scripts.Call("requestsInFolder", &ordered, folders, requests, folderID); err != nil {
+	if err := scripts.Call("requestsInFolder", &ordered, folders, requests, folderID, stored.SharedOrder); err != nil {
 		return plan{}, err
 	}
 	planned := plan{library: requests, folderNames: map[string]string{}}

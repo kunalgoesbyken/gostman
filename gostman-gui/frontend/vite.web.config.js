@@ -5,7 +5,7 @@ import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { createHash } from 'crypto'
 import { readFileSync, writeFileSync } from 'fs'
-import { siteDefine, siteMeta } from './site.config.js'
+import { DOCS_ENTRY, siteDefine, siteMeta } from './site.config.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -63,7 +63,7 @@ function preloadedRoutePage(route, module) {
       const target = chunks.find((chunk) => chunk.isDynamicEntry && moduleId in chunk.modules)
       const page = bundle['index.html']
       if (!target || !page) return
-      const loaded = new Set(chunks.filter((chunk) => chunk.isEntry).flatMap((chunk) => [...chunkClosure(bundle, chunk.fileName)]))
+      const loaded = new Set(chunks.filter((chunk) => chunk.isEntry && chunk.name !== DOCS_ENTRY).flatMap((chunk) => [...chunkClosure(bundle, chunk.fileName)]))
       const files = [...chunkClosure(bundle, target.fileName)].filter((fileName) => !loaded.has(fileName))
       const styles = files.flatMap((fileName) => [...(bundle[fileName].viteMetadata?.importedCss ?? [])])
       const preloads = [
@@ -81,20 +81,44 @@ function preloadedRoutePage(route, module) {
 }
 
 const SANDBOX_WORKER_PREFIX = 'assets/sandbox.worker.'
+const SHARED_RUNTIME_MODULE = '/node_modules/react-dom/'
+
+const chunkFileName = (chunk) =>
+  Object.keys(chunk.modules).some((id) => id.includes(SHARED_RUNTIME_MODULE)) ? 'assets/react.[hash].js' : 'assets/[name].[hash].js'
+
+const linkedChunks = (bundle, fileName, seen = new Set()) => {
+  if (seen.has(fileName) || !bundle[fileName]) return seen
+  seen.add(fileName)
+  const { imports, dynamicImports } = bundle[fileName]
+  imports.concat(dynamicImports).forEach((linked) => linkedChunks(bundle, linked, seen))
+  return seen
+}
+
+function docsOnlyChunks(bundle) {
+  const entries = Object.values(bundle).filter((item) => item.type === 'chunk' && item.isEntry)
+  const reach = (list) => new Set(list.flatMap((entry) => [...linkedChunks(bundle, entry.fileName)]))
+  const app = reach(entries.filter((entry) => entry.name !== DOCS_ENTRY))
+  return new Set([...reach(entries.filter((entry) => entry.name === DOCS_ENTRY))].filter((fileName) => !app.has(fileName)))
+}
 
 function stampServiceWorker() {
   let assets = []
+  let outDir = ''
   return {
     name: 'stamp-service-worker',
     apply: 'build',
-    writeBundle(_options, bundle) {
+    writeBundle(options, bundle) {
+      outDir = options.dir
+      const docsOnly = docsOnlyChunks(bundle)
       assets = Object.values(bundle)
         .filter((item) => (item.type === 'chunk' || item.fileName.endsWith('.css')) && !item.fileName.startsWith(SANDBOX_WORKER_PREFIX))
+        .filter((item) => !docsOnly.has(item.fileName))
         .map((item) => `/${item.fileName}`)
         .sort()
     },
     closeBundle() {
-      const file = resolve(__dirname, 'dist-web/sw.js')
+      if (!outDir) return
+      const file = resolve(outDir, 'sw.js')
       const buildId = createHash('sha1').update(assets.join(',')).digest('hex').slice(0, 10)
       const source = readFileSync(file, 'utf8').replace('__BUILD_ID__', buildId).replace('__BUILD_ASSETS__', JSON.stringify(assets))
       writeFileSync(file, source)
@@ -128,9 +152,10 @@ export default defineConfig({
     target: 'es2022',
     assetsInlineLimit: 0,
     rollupOptions: {
-      input: resolve(__dirname, 'index-web.html'),
+      input: { index: resolve(__dirname, 'index-web.html'), [DOCS_ENTRY]: resolve(__dirname, 'src/docs-main.jsx') },
       output: {
-        entryFileNames: 'assets/index.[hash].js',
+        entryFileNames: (chunk) => (chunk.name === DOCS_ENTRY ? 'assets/docs.[hash].js' : 'assets/index.[hash].js'),
+        chunkFileNames: chunkFileName,
         assetFileNames: (assetInfo) =>
           assetInfo.name === 'index-web.css'
             ? 'assets/index.[hash][extname]'

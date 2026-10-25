@@ -6,6 +6,7 @@ import (
 	"math/rand/v2"
 	"net/url"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -54,6 +55,10 @@ func (e *Expansion) Headers(raw string, auth Auth) ([]HeaderEntry, error) {
 		entries = append(entries, HeaderEntry{Key: header.key, Value: header.value})
 	}
 	return entries, nil
+}
+
+func (e *Expansion) Missing() []string {
+	return slices.Clone(e.substitution.missing)
 }
 
 func (e *Expansion) Err() error {

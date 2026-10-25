@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react"
+import { forwardRef, useCallback, useId, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { CONTROL_BASE, CONTROL_SIZES } from "./ui/input"
 import { placeBelow, useDismiss } from "./ui/select"
@@ -56,10 +56,11 @@ function Tooltip({ info, anchor }) {
   )
 }
 
-function Suggestions({ names, variables, active, placement, listRef, onPick }) {
+function Suggestions({ id, names, variables, active, placement, listRef, onPick }) {
   return createPortal(
     <ul
       ref={listRef}
+      id={id}
       role="listbox"
       style={placement}
       className="fixed z-50 max-w-[min(32rem,calc(100vw-1rem))] overflow-auto rounded-md border border-border bg-card py-1 text-xs shadow-lg"
@@ -67,6 +68,7 @@ function Suggestions({ names, variables, active, placement, listRef, onPick }) {
       {names.map((name, index) => (
         <li
           key={name}
+          id={`${id}-${index}`}
           role="option"
           aria-selected={index === active}
           onMouseDown={(event) => {
@@ -87,6 +89,7 @@ function Suggestions({ names, variables, active, placement, listRef, onPick }) {
 function useCompletion(fieldRef, { fileReads, onChange, onKeyDown, onBlur, onCaretMove }) {
   const variables = useVariableMap()
   const listRef = useRef(null)
+  const listId = useId()
   const [open, setOpen] = useState(null)
   const [active, setActive] = useState(0)
   const close = useCallback(() => setOpen(null), [])
@@ -140,6 +143,9 @@ function useCompletion(fieldRef, { fileReads, onChange, onKeyDown, onBlur, onCar
   }
 
   const fieldProps = {
+    "aria-autocomplete": "list",
+    "aria-controls": showing ? listId : undefined,
+    "aria-activedescendant": showing ? `${listId}-${active}` : undefined,
     onChange: (event) => {
       onChange?.(event)
       refresh(event.target, Boolean(open?.explicit))
@@ -156,14 +162,14 @@ function useCompletion(fieldRef, { fileReads, onChange, onKeyDown, onBlur, onCar
   }
 
   const list = showing && (
-    <Suggestions names={names} variables={variables} active={active} placement={open.placement} listRef={listRef} onPick={pick} />
+    <Suggestions id={listId} names={names} variables={variables} active={active} placement={open.placement} listRef={listRef} onPick={pick} />
   )
 
   return { variables, showing, fieldProps, list }
 }
 
 export const VariableInput = forwardRef(function VariableInput(
-  { className, controlSize = "sm", value = "", fileReads = true, onChange, onKeyDown, onBlur, onScroll, ...props },
+  { className, controlSize = "sm", value = "", fileReads = true, masked = false, onChange, onKeyDown, onBlur, onScroll, ...props },
   ref,
 ) {
   const inputRef = useRef(null)
@@ -200,12 +206,12 @@ export const VariableInput = forwardRef(function VariableInput(
 
   return (
     <div className="relative min-w-0 flex-1">
-      <Mirror text={String(value)} variables={variables} innerRef={mirrorRef} className={look} />
+      {!masked && <Mirror text={String(value)} variables={variables} innerRef={mirrorRef} className={look} />}
       <input
         {...props}
         {...fieldProps}
         ref={inputRef}
-        type="text"
+        type={masked ? "password" : "text"}
         value={value}
         className={cn(look, "relative")}
         onScroll={(event) => {

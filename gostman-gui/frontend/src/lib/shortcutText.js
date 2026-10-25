@@ -33,6 +33,7 @@ export const SHORTCUT_TEXT = {
       menu: 'Show the actions for the request or folder',
       results: 'Move from a search field into its results',
       close: 'Close a menu or dialog',
+      leaveEditor: 'Leave a code editor: press Esc, then Tab',
     },
   },
   webNotice: 'In the browser, Alt replaces the shortcuts that browsers keep for themselves: Ctrl+W, Ctrl+Shift+T and Ctrl+Tab.',

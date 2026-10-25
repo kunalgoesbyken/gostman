@@ -11,7 +11,7 @@ import (
 const (
 	authOAuth2   = "oauth2"
 	expiryMargin = 30 * time.Second
-	signInNeeded = "This request uses an OAuth 2 grant that needs a sign-in in a browser. " +
+	SignInNeeded = "This request uses an OAuth 2 grant that needs a sign-in in a browser. " +
 		"Pass a token with --oauth-token-env or --oauth-refresh-token-env, or use the client credentials or password grant."
 )
 
@@ -62,7 +62,7 @@ func isTokenFresh(config engine.OAuth2, now time.Time) bool {
 func (s *session) exchange(ctx context.Context, config engine.OAuth2, options engine.Options, refresh bool) (engine.OAuth2, error) {
 	token := engine.FetchToken(ctx, engine.TokenExchange{
 		Config:    config,
-		Variables: s.variables.text(),
+		Variables: s.known().text(),
 		Options:   options,
 		Refresh:   refresh,
 	}, s.policy)
@@ -88,7 +88,7 @@ func (s *session) renewToken(ctx context.Context, config engine.OAuth2, options 
 		}
 	}
 	if browserOnly {
-		return config, errors.New(signInNeeded)
+		return config, errors.New(SignInNeeded)
 	}
 	return s.exchange(ctx, config, options, false)
 }

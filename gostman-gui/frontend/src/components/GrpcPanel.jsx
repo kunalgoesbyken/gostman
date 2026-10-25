@@ -2,7 +2,7 @@ import { Suspense, useMemo, useRef, useState } from "react"
 import { FilePlus } from "lucide-react"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
-import { Notice, Panel, SectionLabel, Toolbar } from "./ui/panel"
+import { Notice, Panel, STACKED_TOOLBAR, SectionLabel, Toolbar, ToolbarSummary } from "./ui/panel"
 import { Select } from "./ui/select"
 import { EditorSkeleton } from "./ui/skeleton"
 import { maxAttachmentBytes } from "../lib/attachments"
@@ -10,15 +10,9 @@ import { formatSize } from "../lib/dataUtils"
 import {
   GRPC_METHOD, findMethod, isBlankMessage, mergeProtoFiles, methodKind, parseProtoFiles, readProtoFile,
 } from "../lib/grpc"
+import { GRPC_TEXT as TEXT } from "../lib/grpcText"
 
-const METHOD_PLACEHOLDER = "package.Service/Method"
-const REFLECTION_SOURCE = "Server reflection"
-const SCHEMA_HINT = "Load the services through server reflection, or add the service's .proto files. The address, headers and auth of this request are used."
-const STREAM_HINT = "This method reads a stream. Write a JSON array to send several messages."
-
-const tooLargeMessage = (file) => (
-  `${file.name} is ${formatSize(file.size)}. Files are limited to ${formatSize(maxAttachmentBytes())}.`
-)
+const tooLargeMessage = (file) => TEXT.tooLarge(file.name, formatSize(file.size), formatSize(maxAttachmentBytes()))
 
 function ProtoFilePicker({ files, onChange, onError }) {
   const inputRef = useRef(null)
@@ -41,7 +35,7 @@ function ProtoFilePicker({ files, onChange, onError }) {
       <input ref={inputRef} type="file" accept=".proto" multiple className="hidden" onChange={handlePick} />
       <Button variant="outline" size="sm" onClick={() => inputRef.current.click()}>
         <FilePlus />
-        Add .proto files
+        {TEXT.addProtos}
       </Button>
     </>
   )
@@ -50,7 +44,7 @@ function ProtoFilePicker({ files, onChange, onError }) {
 function methodOptions({ services, method, isListed }) {
   return (
     <>
-      <option value="">Choose a method</option>
+      <option value="">{TEXT.chooseMethod}</option>
       {method && !isListed && <option value={method}>{method}</option>}
       {services.map((service) => (
         <optgroup key={service.name} label={service.name}>
@@ -69,15 +63,15 @@ function MethodField({ services, method, isListed, onChange }) {
       <Input
         value={method}
         onChange={(event) => onChange(event.target.value)}
-        placeholder={METHOD_PLACEHOLDER}
-        aria-label="gRPC method"
+        placeholder={TEXT.methodPlaceholder}
+        aria-label={TEXT.methodLabel}
         spellCheck={false}
         className="font-mono"
       />
     )
   }
   return (
-    <Select value={method} onChange={(event) => onChange(event.target.value)} aria-label="gRPC method" className="font-mono">
+    <Select value={method} onChange={(event) => onChange(event.target.value)} aria-label={TEXT.methodLabel} className="font-mono">
       {methodOptions({ services, method, isListed })}
     </Select>
   )
@@ -86,8 +80,8 @@ function MethodField({ services, method, isListed, onChange }) {
 function SchemaNotice({ schema, fileError }) {
   if (fileError) return <Notice tone="destructive" role="alert">{fileError}</Notice>
   if (schema?.error) return <Notice tone="destructive" role="alert">{schema.error}</Notice>
-  if (schema?.services?.length === 0) return <Notice tone="warning">No services were found.</Notice>
-  if (!schema) return <Notice>{SCHEMA_HINT}</Notice>
+  if (schema?.services?.length === 0) return <Notice tone="warning">{TEXT.noServices}</Notice>
+  if (!schema) return <Notice>{TEXT.schemaHint}</Notice>
   return null
 }
 
@@ -98,7 +92,7 @@ export function GrpcPanel({ request, schema, editorPath, onUpdateRequest, onProt
   const files = useMemo(() => parseProtoFiles(grpcProtos), [grpcProtos])
   const services = schema?.services
   const selected = useMemo(() => (services ? findMethod(services, grpcMethod) : undefined), [services, grpcMethod])
-  const source = files.length > 0 ? files.map((file) => file.name).join(", ") : REFLECTION_SOURCE
+  const source = files.length > 0 ? files.map((file) => file.name).join(", ") : TEXT.reflection
   const isGrpc = method === GRPC_METHOD
 
   const chooseMethod = (fullName) => {
@@ -114,41 +108,41 @@ export function GrpcPanel({ request, schema, editorPath, onUpdateRequest, onProt
 
   return (
     <Panel>
-      <Toolbar>
-        <SectionLabel>Services</SectionLabel>
-        <span title={source} className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground">{source}</span>
+      <Toolbar className={STACKED_TOOLBAR}>
+        <ToolbarSummary label={TEXT.services} title={source}>{source}</ToolbarSummary>
         {!isGrpc && (
-          <Button variant="outline" size="sm" onClick={() => onUpdateRequest({ method: GRPC_METHOD })}>Send as gRPC</Button>
+          <Button variant="outline" size="sm" onClick={() => onUpdateRequest({ method: GRPC_METHOD })}>{TEXT.sendAsGrpc}</Button>
         )}
         <ProtoFilePicker files={files} onChange={onProtosChange} onError={setFileError} />
-        {files.length > 0 && <Button variant="ghost" size="sm" onClick={removeFiles}>Remove files</Button>}
+        {files.length > 0 && <Button variant="outline" size="sm" onClick={removeFiles}>{TEXT.removeFiles}</Button>}
         <Button variant="outline" size="sm" disabled={Boolean(schema?.loading)} onClick={onLoadSchema}>
-          {services ? "Reload" : "Load"}
+          {services ? TEXT.reload : TEXT.load}
         </Button>
       </Toolbar>
       <SchemaNotice schema={schema} fileError={fileError} />
       <Toolbar>
-        <SectionLabel>Method</SectionLabel>
+        <SectionLabel>{TEXT.method}</SectionLabel>
         <div className="min-w-0 flex-1">
           <MethodField services={services} method={grpcMethod} isListed={Boolean(selected)} onChange={chooseMethod} />
         </div>
         {selected && <span className="shrink-0 text-xs text-muted-foreground">{methodKind(selected)}</span>}
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           disabled={!selected}
-          title="Replace the message with an example of the method's input"
+          title={TEXT.useExampleTitle}
           onClick={() => onUpdateRequest({ grpcMessage: selected.skeleton })}
         >
-          Use example
+          {TEXT.useExample}
         </Button>
       </Toolbar>
-      {selected?.clientStreaming && <Notice>{STREAM_HINT}</Notice>}
+      {selected?.clientStreaming && <Notice>{TEXT.streamHint}</Notice>}
       <div className="min-h-0 flex-1">
         <Suspense fallback={<EditorSkeleton />}>
           <EditorComponent
             value={grpcMessage}
             onChange={(event) => onUpdateRequest({ grpcMessage: event.target.value })}
+            label={TEXT.messageLabel}
             language="json"
             path={editorPath}
             variables

@@ -62,7 +62,7 @@ func parseInitialization(arguments []string) (initialization, error) {
 }
 
 func createWorkspace(root string, stdout io.Writer) error {
-	if _, err := workspace.Create(root, workspace.Collection{}); err != nil {
+	if _, err := workspace.Create(root, workspace.Collection{SharedOrder: true}); err != nil {
 		return err
 	}
 	fmt.Fprintf(stdout, "Created an empty Gostman workspace in %s.\n", root)

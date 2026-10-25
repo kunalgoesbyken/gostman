@@ -32,6 +32,12 @@ function EntryDetails({ entry }) {
   )
 }
 
+function RouteCell({ entry }) {
+  const label = entry.noExample ? MOCK_TEXT.logNoExample(entry.route) : entry.rule || entry.route || MOCK_TEXT.noMatch
+  const title = entry.noExample ? MOCK_TEXT.logNoExampleHint(entry.route) : entry.route || MOCK_TEXT.noMatch
+  return <span title={title} className="truncate text-xs text-muted-foreground">{label}</span>
+}
+
 function LogRow({ entry, isOpen, onToggle }) {
   return (
     <li>
@@ -39,9 +45,9 @@ function LogRow({ entry, isOpen, onToggle }) {
         <span className={`${CELL} text-muted-foreground`}>{new Date(entry.time).toLocaleTimeString([], { hour12: false })}</span>
         <MethodTag method={entry.method} />
         <span title={entry.path} className={`${CELL} text-foreground`}>{entry.path}</span>
-        <span title={entry.route || MOCK_TEXT.noMatch} className="truncate text-xs text-muted-foreground">{entry.rule || entry.route || MOCK_TEXT.noMatch}</span>
+        <RouteCell entry={entry} />
         <Badge variant={statusVariant({ statusCode: entry.status })} className="justify-self-start font-mono">{entry.status || entry.fault}</Badge>
-        <span className={`${CELL} text-right text-muted-foreground`}>{entry.durationMs} ms</span>
+        <span className={`${CELL} text-right text-muted-foreground`}>{MOCK_TEXT.logDuration(entry.durationMs)}</span>
       </button>
       {isOpen && <EntryDetails entry={entry} />}
     </li>

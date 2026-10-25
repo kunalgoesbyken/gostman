@@ -39,11 +39,19 @@ func NewSession(policy engine.Policy) (*Session, error) {
 	return &Session{state: state}, nil
 }
 
-func (s *Session) Enter(environments []Environment, name string, overrides map[string]string) error {
-	environment, err := selectEnvironment(environments, name)
+func (s *Session) Enter(stored Collection, folder, name string, overrides map[string]string) error {
+	folderID, err := s.folderID(stored.Folders, folder)
 	if err != nil {
 		return err
 	}
+	environment, err := stored.ChooseEnvironment(folderID, name)
+	if err != nil {
+		return err
+	}
+	if err := s.LoadCollectionVariables(stored); err != nil {
+		return err
+	}
+	environments := stored.Environments
 	starting, err := startingVariables(environments, environment, overrides)
 	if err != nil {
 		return err
@@ -54,8 +62,19 @@ func (s *Session) Enter(environments []Environment, name string, overrides map[s
 	}
 	starting.override(resolved)
 	s.state.variables = starting
+	s.state.session = variables{}
 	s.resolved = resolved
+	s.state.common.keepSecrets(resolved)
 	s.state.environment = environment.Name
+	return nil
+}
+
+func (s *Session) LoadCollectionVariables(stored Collection) error {
+	base, err := baseScopes(stored)
+	if err != nil {
+		return err
+	}
+	s.state.collection = layered(base...)
 	return nil
 }
 
@@ -65,6 +84,14 @@ func (s *Session) Environment() string {
 
 func (s *Session) Set(overrides map[string]string) {
 	s.state.variables.override(overrides)
+}
+
+func (s *Session) SignIn(token engine.Token) {
+	s.state.common.signIn = token
+}
+
+func (s *Session) Remember(values map[string]string) {
+	s.state.session.override(values)
 }
 
 func (s *Session) Watch(witness func(engine.Request)) {
@@ -105,7 +132,9 @@ func (s *Session) Send(ctx context.Context, request Request, folder string) Outc
 	if err != nil {
 		exchanged.stop(err.Error())
 	}
-	return Outcome{Result: describe(request, folder, exchanged), Response: exchanged.response}
+	result := describe(request, folder, exchanged)
+	result.ResolvedURL = s.state.shownURL(request, exchanged.response.URL)
+	return Outcome{Result: result, Response: exchanged.response}
 }
 
 func (s *Session) Run(ctx context.Context, stored Collection, options Options, observe func(Result)) (Report, error) {
@@ -120,10 +149,18 @@ func (s *Session) Run(ctx context.Context, stored Collection, options Options, o
 	if err != nil {
 		return Report{}, err
 	}
+	owned, err := s.collectionLayers(stored, options.Folder)
+	if err != nil {
+		return Report{}, err
+	}
+	base = append(base, owned...)
 	s.state.modules = stored.Modules
-	s.state.common.signIn = options.SignIn
+	if options.SignIn != (engine.Token{}) {
+		s.state.common.signIn = options.SignIn
+	}
 	s.state.contract = newContract(options.Contract)
-	s.state.variables = layered(append(base, s.state.variables)...)
+	s.state.collection = layered(base...)
+	s.state.session.override(options.Variables)
 	if err := s.state.learn(planned.library); err != nil {
 		return Report{}, err
 	}
@@ -132,7 +169,9 @@ func (s *Session) Run(ctx context.Context, stored Collection, options Options, o
 		options.OnPlanned(total)
 	}
 	started := time.Now()
+	before := layered(s.state.session)
 	results := s.state.runAll(ctx, planned, options, observe)
+	s.state.session.withdraw(options.Data, before)
 	report := Report{
 		Version:     ReportVersion,
 		Environment: s.state.environment,

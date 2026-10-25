@@ -123,6 +123,7 @@ type Entry struct {
 	Route      string    `json:"route"`
 	Rule       string    `json:"rule"`
 	Fault      string    `json:"fault"`
+	NoExample  bool      `json:"noExample,omitempty"`
 	Status     int       `json:"status"`
 	DurationMs int64     `json:"durationMs"`
 }

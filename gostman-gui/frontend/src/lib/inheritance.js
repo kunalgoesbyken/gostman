@@ -1,11 +1,12 @@
 import { NO_AUTH, NO_SCRIPTS, activeKinds, hasActiveContent, withoutFileContent } from './activeContent'
 import { FOLDER_SETTINGS_TEXT as TEXT } from './folderSettingsText'
 import { AUTH_OAUTH2, normalizeAuth } from './request'
-import { parseRows, countSentRows } from './rows'
+import { parseRows } from './rows'
 import { cleanOrder } from './sortOrder.js'
 import { cleanColorChoice } from './swatches.js'
 import { normalizeTags } from './tags.js'
 import { folderChain } from './variableScopes'
+import { collectionIdOf, holdsCollections, isCollectionRoot } from './environmentScope'
 
 export const AUTH_INHERIT = 'inherit'
 export const AUTH_NONE = 'none'
@@ -34,6 +35,8 @@ export const normalizeFolder = (raw) => ({
   color: cleanColorChoice(raw.color),
   tags: normalizeTags(raw.tags),
   ...normalizeScopeSettings(raw),
+  ...(typeof raw.collectionVariables === 'string' && { collectionVariables: raw.collectionVariables }),
+  ...(typeof raw.collectionVariablesMeta === 'string' && { collectionVariablesMeta: raw.collectionVariablesMeta }),
 })
 
 export function lineageOf(state, folderId) {
@@ -42,13 +45,48 @@ export function lineageOf(state, folderId) {
     name: folder.name,
     settings: normalizeScopeSettings(folder),
   }))
-  return [{ id: ROOT_SETTINGS_ID, name: TEXT.collectionName, settings: normalizeScopeSettings(state.collectionSettings) }, ...folders]
+  return [{ id: ROOT_SETTINGS_ID, name: rootSettingsName(state.workspaceStatus?.path), settings: normalizeScopeSettings(state.collectionSettings) }, ...folders]
 }
+
+const rootSettingsName = (workspacePath) => (holdsCollections(workspacePath) ? TEXT.allCollectionsName : TEXT.collectionName)
+
+export const rootSettingsTitle = (workspacePath) => (holdsCollections(workspacePath) ? TEXT.allCollectionsTitle : TEXT.collectionTitle)
+
+export function settingsTitle(state, folder) {
+  if (!folder) return rootSettingsTitle(state.workspaceStatus.path)
+  return isCollectionRoot(state.folders, folder.id, state.workspaceStatus.path) ? TEXT.collectionFolderTitle(folder.name) : TEXT.folderTitle(folder.name)
+}
+
+export const collectionSettingsTarget = (state, folderId) => (
+  holdsCollections(state.workspaceStatus.path) ? collectionIdOf(state.folders, folderId) : ROOT_SETTINGS_ID
+)
 
 export const layersOf = (lineage) => lineage.map(({ settings }) => ({ headers: settings.headers, auth: settings.auth }))
 
-export const countInheritedHeaders = (state, folderId) => (
-  lineageOf(state, folderId).reduce((total, { settings }) => total + countSentRows(parseRows(settings.headers)), 0)
+export const HEADER_SENT = 'sent'
+const HEADER_REPLACED = 'replaced'
+const HEADER_OFF = 'off'
+
+const lowerKey = (row) => row.key.trim().toLowerCase()
+
+const namedRows = (rows) => rows.filter((row) => lowerKey(row) !== '')
+
+function headerState(key, laterRows) {
+  const later = laterRows.filter((row) => lowerKey(row) === key)
+  if (later.length === 0) return HEADER_SENT
+  return later.some((row) => row.enabled) ? HEADER_REPLACED : HEADER_OFF
+}
+
+export function inheritedHeaderRows(lineage, ownRows) {
+  const layers = lineage.map(({ id, name, settings }) => ({ source: { id, name }, rows: namedRows(parseRows(settings.headers)) }))
+  return layers.flatMap(({ source, rows }, index) => {
+    const laterRows = [...layers.slice(index + 1).flatMap((layer) => layer.rows), ...namedRows(ownRows)]
+    return rows.filter((row) => row.enabled).map((row) => ({ key: row.key, value: row.value, source, state: headerState(lowerKey(row), laterRows) }))
+  })
+}
+
+export const countInheritedHeaders = (state, folderId, ownRows) => (
+  inheritedHeaderRows(lineageOf(state, folderId), ownRows).filter((row) => row.state === HEADER_SENT).length
 )
 
 export const withInheritance = (state, request) => ({ ...request, inherited: layersOf(lineageOf(state, request.folderId)) })

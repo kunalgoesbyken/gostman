@@ -1,5 +1,5 @@
 import { BODY_BINARY, BODY_FORM, BODY_MULTIPART, BODY_NONE } from './body'
-import { buildCollectionTree, foldersIn, requestsIn, ROOT_ID } from './collectionTree'
+import { buildCollectionTree, foldersIn, requestsIn, ROOT_ID, ROW_FOLDER, siblingsIn } from './collectionTree'
 import { isPlainObject, lookup, parseJSON } from './dataUtils'
 import { exampleLabel, isBinaryExample, parseExamples } from './examples'
 import { AUTH_API_KEY, AUTH_BASIC, AUTH_BEARER, AUTH_IN_HEADER, AUTH_IN_QUERY, GRAPHQL_METHOD, UNTITLED_REQUEST, apiKeyLocation, asText, hasKey, sentRows } from './exportFields'
@@ -216,12 +216,11 @@ function soleFolder(tree) {
 }
 
 export function exportToPostman(requests, folders = [], options = {}) {
-  const { defaultName = DEFAULT_COLLECTION_NAME, variables = {}, settings } = options
-  const tree = buildCollectionTree(folders, requests)
-  const itemsIn = (folderId) => [
-    ...foldersIn(tree, folderId).map((folder) => toPostmanFolder(folder, itemsIn(folder.id))),
-    ...requestsIn(tree, folderId).map((request) => toPostmanItem(normalizeRequest(request))),
-  ]
+  const { defaultName = DEFAULT_COLLECTION_NAME, variables = {}, settings, sharedOrder = false } = options
+  const tree = buildCollectionTree(folders, requests, sharedOrder)
+  const itemsIn = (folderId) => siblingsIn(tree, folderId).map(({ kind, item }) => (
+    kind === ROW_FOLDER ? toPostmanFolder(item, itemsIn(item.id)) : toPostmanItem(normalizeRequest(item))
+  ))
   const sole = soleFolder(tree)
   const collectionScope = toPostmanScope(settings)
   const root = sole && isEmpty(collectionScope) ? sole : null

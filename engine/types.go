@@ -93,12 +93,21 @@ type CookieInfo struct {
 	Expired  bool   `json:"expired"`
 }
 
+type PreparedPart struct {
+	Name        string `json:"name"`
+	Value       string `json:"value,omitempty"`
+	File        string `json:"file,omitempty"`
+	ContentType string `json:"contentType,omitempty"`
+}
+
 type Prepared struct {
-	Method     string        `json:"method"`
-	URL        string        `json:"url"`
-	Headers    []HeaderEntry `json:"headers"`
-	Body       string        `json:"body"`
-	Unresolved []string      `json:"unresolved,omitempty"`
+	Method     string         `json:"method"`
+	URL        string         `json:"url"`
+	Headers    []HeaderEntry  `json:"headers"`
+	Body       string         `json:"body"`
+	Parts      []PreparedPart `json:"parts,omitempty"`
+	File       string         `json:"file,omitempty"`
+	Unresolved []string       `json:"unresolved,omitempty"`
 
 	body   []byte
 	stream *bodyStream

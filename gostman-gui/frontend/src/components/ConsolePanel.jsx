@@ -6,18 +6,11 @@ import { SectionLabel, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { ALL_LEVELS, LEVELS, filterGroups, formatTime } from "../lib/consoleLog"
 import { useAppStore } from "../store/appStore"
+import { CONSOLE_TEXT as TEXT } from "../lib/responseText"
 import { cn } from "../lib/utils"
 
 const LEVEL_TONES = { warn: "text-warning", error: "text-destructive", debug: "text-muted-foreground" }
-const LEVEL_OPTIONS = [ALL_LEVELS, ...LEVELS].map((level) => ({ value: level, label: level === ALL_LEVELS ? "All" : level }))
-const TEXT = {
-  filter: "Filter by level",
-  clear: "Clear console",
-  emptyTitle: "The console is empty",
-  emptyDescription: "console.log() calls from pre-request and post-response scripts appear here, grouped by request.",
-  nothingMatches: "No lines at this level",
-  nothingMatchesDescription: "Choose another level to see the rest of the output.",
-}
+const LEVEL_OPTIONS = [ALL_LEVELS, ...LEVELS].map((level) => ({ value: level, label: level === ALL_LEVELS ? TEXT.all : level }))
 
 export function ConsoleLine({ line }) {
   return (

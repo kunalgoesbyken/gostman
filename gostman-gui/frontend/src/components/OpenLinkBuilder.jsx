@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react"
 import { CopyTextButton } from "./CopyTextButton"
+import { DisclosureSummary } from "./ui/disclosure"
 import { Input } from "./ui/input"
 import { OPEN_LINK_TEXT } from "../lib/openLinkText"
 import { buildOpenLinks } from "../lib/openSource"
@@ -27,8 +28,8 @@ export function OpenLinkBuilder({ linkBase }) {
   const { links, error } = useMemo(() => buildFor(address, linkBase), [address, linkBase])
 
   return (
-    <details className="shrink-0 rounded-md border border-border">
-      <summary className="cursor-pointer px-3 py-2 text-xs font-medium text-foreground">{OPEN_LINK_TEXT.builderTitle}</summary>
+    <details className="group shrink-0 rounded-md border border-border">
+      <DisclosureSummary className="px-3 py-2 text-xs font-medium text-foreground">{OPEN_LINK_TEXT.builderTitle}</DisclosureSummary>
       <div className="flex max-h-56 flex-col gap-2 overflow-y-auto border-t border-border p-3">
         <p className="text-xs text-muted-foreground">{OPEN_LINK_TEXT.builderHint}</p>
         <Input

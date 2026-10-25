@@ -1,4 +1,4 @@
-import { SCOPE_COLLECTION, SCOPE_ENVIRONMENT, SCOPE_GLOBAL, SCOPE_SESSION } from './scopes'
+import { PROCESS_PREFIX, SCOPE_COLLECTION, SCOPE_ENVIRONMENT, SCOPE_GLOBAL, SCOPE_SESSION } from './scopes'
 
 const VARIABLE_FAMILIES = { Var: SCOPE_SESSION, EnvVar: SCOPE_ENVIRONMENT, GlobalEnvVar: SCOPE_GLOBAL, CollectionVar: SCOPE_COLLECTION }
 const PATH_SEPARATOR = '/'
@@ -12,6 +12,10 @@ const brunoTarget = (options) => (
 )
 
 const savedName = (path) => String(path).split(PATH_SEPARATOR).pop()
+
+const processValue = (environment) => (name) => environment.get(PROCESS_PREFIX + name) ?? environment.get(name)
+
+const environmentWrite = (scopes) => (name, value, options) => scopes[options?.persist ? SCOPE_ENVIRONMENT : SCOPE_SESSION].set(name, value)
 
 const pause = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds))
 
@@ -36,9 +40,10 @@ export function createBruno({ scopes, environmentName, flow, request, cookies, s
   const send = (options, callback) => respond(sendRequest(brunoTarget(options)).then(brunoResponse), callback)
   return {
     ...variableCalls(scopes),
+    setEnvVar: environmentWrite(scopes),
     getFolderVar: environment.get,
     getRequestVar: environment.get,
-    getProcessEnv: environment.get,
+    getProcessEnv: processValue(environment),
     getEnvName: () => environmentName,
     getRequestName: () => request.name,
     interpolate: environment.interpolate,

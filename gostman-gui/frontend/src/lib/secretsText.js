@@ -1,7 +1,9 @@
+import { pluralize } from './dataUtils'
+
 export const SECRETS_TEXT = {
   title: "Secret managers",
   intro: "A connection says where a secret manager or password manager is and how to sign in. It is kept on this computer, with credentials in the system keychain, and is never part of a collection. Variables refer to a connection by its name. A request reads only the secrets it uses. Turn a connection off while its service is unavailable; variables that use it are then empty.",
-  empty: "No connections yet. Add one to read secrets from Vault, AWS, Azure, Google Cloud, 1Password, Bitwarden or KeePassXC.",
+  empty: "No connections yet. Add one to read secrets from Vault, AWS, Azure, Google Cloud, KeePassXC, 1Password, Bitwarden or Bitwarden Secrets Manager.",
   add: "Add connection",
   edit: "Edit connection",
   remove: "Delete connection",
@@ -122,7 +124,7 @@ export const REFERENCE_TEXT = {
   versionPlaceholder: "latest",
   test: "Test",
   testing: "Testing",
-  worked: (length) => `Read the secret: ${length} characters`,
+  worked: (length) => `Read the secret: ${pluralize(length, 'character')}`,
   noConnections: "Add a connection first under Secret managers.",
   unknownConnection: (alias) => `There is no connection named "${alias}" on this computer. Add it under Secret managers, or choose another.`,
   paths: {

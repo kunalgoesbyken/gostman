@@ -262,10 +262,12 @@ const backups = {
 
 async function saveRequests(requests) {
   const saved = requests.map((request) => ({ ...request, id: request.id || crypto.randomUUID() }))
-  const savedIds = new Set(saved.map((request) => request.id))
+  const byId = new Map(saved.map((request) => [request.id, request]))
   await mutateData((data) => {
-    const others = (data.requests || []).filter((existing) => !savedIds.has(existing.id))
-    data.requests = [...others, ...saved].map(compactRequest)
+    const existing = data.requests || []
+    const known = new Set(existing.map((request) => request.id))
+    const updated = existing.map((request) => byId.get(request.id) ?? request)
+    data.requests = [...updated, ...saved.filter((request) => !known.has(request.id))].map(compactRequest)
   })
   return saved
 }
@@ -297,16 +299,21 @@ async function saveEnvironments(environments, activeEnvironmentId) {
   })
 }
 
-async function saveScopes(globals, activeGlobalId, collectionVariables) {
+async function saveScopes(globals, activeGlobalId, collectionVariables, collectionVariablesMeta) {
   await mutateData((data) => {
     data.globals = globals
     data.activeGlobalId = activeGlobalId
     data.collectionVariables = collectionVariables
+    data.collectionVariablesMeta = collectionVariablesMeta
   })
 }
 
 async function saveCollectionSettings(settings) {
   await mutateData((data) => { data.collectionSettings = settings })
+}
+
+async function shareOrder() {
+  await mutateData((data) => { data.sharedOrder = true })
 }
 
 async function saveCookies(cookies) {
@@ -382,6 +389,7 @@ export const webBackend = {
   saveEnvironments,
   saveScopes,
   saveCollectionSettings,
+  shareOrder,
   saveCookies,
   tabDrafts,
   network: null,

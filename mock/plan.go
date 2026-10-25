@@ -27,6 +27,7 @@ const (
 	headerResponseName = "X-Mock-Response-Name"
 	headerResponseCode = "X-Mock-Response-Code"
 	reasonNoMatch      = "No saved example of %q matches the x-mock-response-name and x-mock-response-code headers."
+	reasonUnanswered   = "%s %s is the route of %q, which has no saved example yet. Send that request in Gostman and choose Save as example to serve it."
 )
 
 var socketSchemes = []string{"ws://", "wss://"}
@@ -48,11 +49,12 @@ type servedExample struct {
 }
 
 type table struct {
-	routes   []Route
-	served   []servedRoute
-	rules    []*compiledRule
-	owners   map[string]string
-	settings Settings
+	routes     []Route
+	served     []servedRoute
+	unanswered []servedRoute
+	rules      []*compiledRule
+	owners     map[string]string
+	settings   Settings
 }
 
 func Plan(sources []Source, variables string, config Config) ([]Route, error) {
@@ -118,6 +120,7 @@ func (t *table) admit(source Source, expand func(string) string) (Route, error) 
 	examples := parseExamples(source.Examples)
 	example, found := selectExample(examples, source.ExampleID)
 	if !found {
+		t.unanswered = append(t.unanswered, servedRoute{name: source.Name, method: route.Method, shape: shape})
 		return route.withState(StateNoExample, reasonNoExample), nil
 	}
 	route.ExampleID, route.ExampleName = example.ID, example.Name
@@ -160,7 +163,16 @@ func servedExamples(examples []Example) []servedExample {
 }
 
 func (t *table) find(method string, parts []string) (servedRoute, map[string]string, bool) {
-	for _, candidate := range t.served {
+	return matchRoute(t.served, method, parts)
+}
+
+func (t *table) unansweredRoute(e *exchange) (string, bool) {
+	route, _, found := matchRoute(t.unanswered, e.method, e.parts)
+	return route.name, found
+}
+
+func matchRoute(routes []servedRoute, method string, parts []string) (servedRoute, map[string]string, bool) {
+	for _, candidate := range routes {
 		if candidate.method != method {
 			continue
 		}

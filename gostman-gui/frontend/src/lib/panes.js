@@ -51,11 +51,17 @@ export function focusPane(name) {
   if (pane) focusEntry(pane)
 }
 
+export function focusAddress() {
+  paneElement(PANE_ADDRESS)?.querySelector('[data-pane-entry]')?.focus()
+}
+
+export const focusAddressSoon = () => requestAnimationFrame(focusAddress)
+
 export const focusOrigin = () => ({ element: document.activeElement, pane: document.activeElement?.closest?.('[data-pane]')?.dataset.pane })
 
 export function returnFocusTo({ element, pane }) {
   if (element instanceof HTMLElement && element.isConnected) element.focus()
-  else if (pane || lastPane) focusPane(pane || lastPane)
+  else focusPane(pane || lastPane || PANE_ADDRESS)
 }
 
 export function cyclePane(step) {

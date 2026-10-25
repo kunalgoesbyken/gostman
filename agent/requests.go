@@ -49,8 +49,8 @@ type definition struct {
 	Method           string               `json:"method"`
 	URL              string               `json:"url"`
 	Headers          []engine.HeaderEntry `json:"headers"`
-	BodyType         string               `json:"bodyType"`
-	Body             string               `json:"body"`
+	BodyType         string               `json:"bodyType,omitempty"`
+	Body             string               `json:"body,omitempty"`
 	GraphqlQuery     string               `json:"graphqlQuery,omitempty"`
 	GraphqlVariables any                  `json:"graphqlVariables,omitempty"`
 	GrpcMethod       string               `json:"grpcMethod,omitempty"`
@@ -58,7 +58,8 @@ type definition struct {
 	McpMethod        string               `json:"mcpMethod,omitempty"`
 	McpTool          string               `json:"mcpTool,omitempty"`
 	McpArguments     any                  `json:"mcpArguments,omitempty"`
-	Auth             *engine.Auth         `json:"auth,omitempty"`
+	Auth             map[string]any       `json:"auth,omitempty"`
+	Vars             map[string]string    `json:"vars,omitempty"`
 	Options          map[string]any       `json:"options,omitempty"`
 	Assertions       any                  `json:"assertions,omitempty"`
 	Extractors       any                  `json:"extractors,omitempty"`
@@ -147,6 +148,13 @@ func savedBody(request runner.Request) string {
 	return request.Body
 }
 
+func bodyTypeOf(request runner.Request) string {
+	if !hasText(request.Body) {
+		return ""
+	}
+	return request.BodyType
+}
+
 func graphqlVariables(request runner.Request) any {
 	if !hasText(request.GraphqlQuery) {
 		return nil
@@ -154,8 +162,26 @@ func graphqlVariables(request runner.Request) any {
 	return structured(request.GraphqlVariables)
 }
 
-func changedOptions(options engine.Options) map[string]any {
-	encoded, err := json.Marshal(options)
+func withoutEmpty(fields map[string]any) map[string]any {
+	for name, value := range fields {
+		if nested, isObject := value.(map[string]any); isObject {
+			value = withoutEmpty(nested)
+			fields[name] = value
+		}
+		if isEmptySetting(value) {
+			delete(fields, name)
+		}
+	}
+	return fields
+}
+
+func isEmptySetting(value any) bool {
+	nested, isObject := value.(map[string]any)
+	return value == false || value == float64(0) || value == "" || value == nil || (isObject && len(nested) == 0)
+}
+
+func setFields(value any) map[string]any {
+	encoded, err := json.Marshal(value)
 	if err != nil {
 		return nil
 	}
@@ -163,23 +189,32 @@ func changedOptions(options engine.Options) map[string]any {
 	if json.Unmarshal(encoded, &fields) != nil {
 		return nil
 	}
-	for name, value := range fields {
-		if value == false || value == float64(0) || value == "" {
-			delete(fields, name)
-		}
-	}
+	fields = withoutEmpty(fields)
 	if len(fields) == 0 {
 		return nil
 	}
 	return fields
 }
 
-func shownAuth(auth engine.Auth) *engine.Auth {
+func changedOptions(options engine.Options) map[string]any {
+	return setFields(options)
+}
+
+var authSections = map[string]string{
+	"oauth2": "oauth2", "awsv4": "aws", "oauth1": "oauth1", "edgegrid": "edgegrid", "jwt": "jwt", "asap": "asap", "hawk": "hawk",
+}
+
+func shownAuth(auth engine.Auth) map[string]any {
 	if auth.Type == "" {
 		return nil
 	}
-	masked := maskAuth(auth)
-	return &masked
+	fields := setFields(maskAuth(auth))
+	for _, section := range authSections {
+		if section != authSections[auth.Type] {
+			delete(fields, section)
+		}
+	}
+	return fields
 }
 
 func (d *Desk) find(stored runner.Collection, reference string) (runner.Listed, error) {
@@ -206,7 +241,7 @@ func (d *Desk) getRequest(_ context.Context, current scene, arguments getArgumen
 		Method:           request.Method,
 		URL:              request.URL,
 		Headers:          savedHeaders(request),
-		BodyType:         request.BodyType,
+		BodyType:         bodyTypeOf(request),
 		Body:             savedBody(request),
 		GraphqlQuery:     request.GraphqlQuery,
 		GraphqlVariables: graphqlVariables(request),
@@ -216,6 +251,7 @@ func (d *Desk) getRequest(_ context.Context, current scene, arguments getArgumen
 		McpTool:          request.McpTool,
 		McpArguments:     structured(request.McpArguments),
 		Auth:             shownAuth(request.Auth),
+		Vars:             request.OwnVariables(),
 		Options:          changedOptions(request.Options),
 		Assertions:       structured(request.Assertions),
 		Extractors:       structured(request.Extractors),

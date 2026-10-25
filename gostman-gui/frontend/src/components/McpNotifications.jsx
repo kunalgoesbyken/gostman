@@ -1,3 +1,4 @@
+import { DisclosureSummary } from "./ui/disclosure"
 import { isPlainObject, parseJSON } from "../lib/dataUtils"
 import { MCP_TEXT } from "../lib/mcpText"
 import { cn } from "../lib/utils"
@@ -38,8 +39,8 @@ function NotificationRow({ notification }) {
 
 export function McpNotifications({ notifications }) {
   return (
-    <details className="border-b border-border px-3 py-2 text-xs">
-      <summary className="cursor-pointer select-none text-muted-foreground">{MCP_TEXT.notifications(notifications.length)}</summary>
+    <details className="group border-b border-border px-3 py-2 text-xs">
+      <DisclosureSummary className="text-muted-foreground">{MCP_TEXT.notifications(notifications.length)}</DisclosureSummary>
       <ol className="mt-2 grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 gap-y-1 font-mono">
         {notifications.map((notification, index) => <NotificationRow key={index} notification={notification} />)}
       </ol>

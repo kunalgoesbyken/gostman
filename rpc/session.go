@@ -19,11 +19,23 @@ type session struct {
 	protos    []ProtoFile
 }
 
-func open(target Target, policy engine.Policy) (*session, error) {
+func newExpansion(target Target) (*engine.Expansion, error) {
 	expansion, err := engine.NewExpansion(target.Variables)
 	if err != nil {
 		return nil, configError("%v", err)
 	}
+	return expansion, nil
+}
+
+func open(target Target, policy engine.Policy) (*session, error) {
+	expansion, err := newExpansion(target)
+	if err != nil {
+		return nil, err
+	}
+	return openWith(target, expansion, policy)
+}
+
+func openWith(target Target, expansion *engine.Expansion, policy engine.Policy) (*session, error) {
 	address, err := parseEndpoint(expansion.Text(target.Address))
 	if err != nil {
 		return nil, err

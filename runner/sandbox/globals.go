@@ -47,7 +47,7 @@ type Bridge func(request string) (string, error)
 
 const hostSendName = "hostSend"
 
-func installGlobals(vm *goja.Runtime, bridge Bridge) error {
+func installGlobals(vm *goja.Runtime) error {
 	encode := func(text string) string {
 		return base64.StdEncoding.EncodeToString(latin1(vm, text))
 	}
@@ -63,19 +63,23 @@ func installGlobals(vm *goja.Runtime, bridge Bridge) error {
 		return err
 	}
 	globals := map[string]any{"btoa": encode, "atob": decode, "crypto": crypto}
-	if bridge != nil {
-		globals[hostSendName] = func(request string) string {
-			response, err := bridge(request)
-			if err != nil {
-				panic(vm.NewGoError(err))
-			}
-			return response
-		}
-	}
 	for name, value := range globals {
 		if err := vm.Set(name, value); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func connect(vm *goja.Runtime, bridge Bridge) error {
+	if bridge == nil {
+		return nil
+	}
+	return vm.Set(hostSendName, func(request string) string {
+		response, err := bridge(request)
+		if err != nil {
+			panic(vm.NewGoError(err))
+		}
+		return response
+	})
 }

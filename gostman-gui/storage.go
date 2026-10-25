@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"sync"
 
 	"github.com/kunalgoesbyken/gostman/workspace"
@@ -12,8 +13,9 @@ type collectionStore interface {
 	deleteRequest(id string) error
 	saveFolders(folders []Folder) error
 	saveEnvironments(environments []Environment, activeId string) error
-	saveVariables(text string) error
+	saveVariables(text, meta string) error
 	saveSettings(settings workspace.Settings) error
+	shareOrder() error
 }
 
 type appDataStore struct{}
@@ -65,15 +67,22 @@ func (appDataStore) saveEnvironments(environments []Environment, activeId string
 	})
 }
 
-func (appDataStore) saveVariables(text string) error {
+func (appDataStore) saveVariables(text, meta string) error {
 	return mutateData(func(data *SavedData) {
 		data.CollectionVariables = text
+		data.CollectionVariablesMeta = meta
 	})
 }
 
 func (appDataStore) saveSettings(settings workspace.Settings) error {
 	return mutateData(func(data *SavedData) {
 		data.CollectionSettings = settings
+	})
+}
+
+func (appDataStore) shareOrder() error {
+	return mutateData(func(data *SavedData) {
+		data.SharedOrder = true
 	})
 }
 
@@ -100,7 +109,7 @@ func (c *activeCollection) use(store collectionStore) {
 func (c *activeCollection) announce(notice string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.notice = notice
+	c.notice = strings.TrimSpace(c.notice + " " + notice)
 }
 
 func (c *activeCollection) takeNotice() string {

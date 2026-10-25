@@ -1,7 +1,7 @@
 package sandbox
 
 import (
-	"runtime"
+	"runtime/metrics"
 	"sync"
 	"time"
 
@@ -11,6 +11,8 @@ import (
 const (
 	memoryAllowance = 512 << 20
 	memoryInterval  = 50 * time.Millisecond
+
+	heapObjectsMetric = "/memory/classes/heap/objects:bytes"
 )
 
 type watchdog struct {
@@ -23,9 +25,9 @@ type watchdog struct {
 }
 
 func heapInUse() uint64 {
-	var stats runtime.MemStats
-	runtime.ReadMemStats(&stats)
-	return stats.HeapAlloc
+	sample := []metrics.Sample{{Name: heapObjectsMetric}}
+	metrics.Read(sample)
+	return sample[0].Value.Uint64()
 }
 
 func watch(vm *goja.Runtime, limit time.Duration) *watchdog {

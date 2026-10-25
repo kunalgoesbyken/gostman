@@ -5,7 +5,7 @@ import { Toolbar } from "./ui/panel"
 import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { CollectionTree } from "./CollectionTree"
 import { HistoryList } from "./HistoryList"
-import { FOLDER_SETTINGS_TEXT } from "../lib/folderSettingsText"
+import { rootSettingsTitle } from "../lib/inheritance"
 import { SIDEBAR_TEXT } from "../lib/sidebarText"
 import { cn } from "../lib/utils"
 import { useShortcutLabel } from "../hooks/useShortcuts"
@@ -34,6 +34,7 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
   const [view, setView] = useState(VIEW_COLLECTIONS)
   const newRequestShortcut = useShortcutLabel("newRequest")
   const closeSidebar = useAppStore((s) => s.closeSidebar)
+  const settingsLabel = useAppStore((s) => rootSettingsTitle(s.workspaceStatus.path))
   const { asideRef, style, phase, separatorProps } = useSidebarResize(closeSidebar)
 
   return (
@@ -57,7 +58,7 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
           </TabsList>
           <div className="flex shrink-0 items-center gap-0">
             <IconButton label={SIDEBAR_TEXT.runRequests} icon={ListChecks} onClick={() => actions.openRunner()} />
-            <IconButton label={FOLDER_SETTINGS_TEXT.collectionMenu} icon={Settings2} onClick={() => actions.openFolderSettings()} />
+            <IconButton label={settingsLabel} icon={Settings2} onClick={() => actions.openFolderSettings()} />
             <IconButton label={SIDEBAR_TEXT.newFolder} icon={FolderPlus} onClick={() => actions.createFolder()} />
             <IconButton label={hintWithShortcut(SIDEBAR_TEXT.newRequest, newRequestShortcut)} icon={Plus} onClick={() => actions.newRequest()} />
           </div>

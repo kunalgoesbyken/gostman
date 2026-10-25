@@ -1,4 +1,10 @@
 export const DIALOG_TEXT = {
   moveWindow: 'Move window',
   moveHint: 'Drag or use the arrow keys to move. Shift and the arrow keys resize. Double-click the title bar or press Home to restore the default size and position.',
+  close: 'Close',
+  cancel: 'Cancel',
+  save: 'Save',
+  rename: 'Rename',
+  create: 'Create',
+  getDesktopApp: 'Get the desktop app',
 }

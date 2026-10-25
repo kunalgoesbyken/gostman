@@ -25,15 +25,8 @@ const PERCENTILE_COLUMNS = [
 
 const fixed = (number) => number.toFixed(FRACTION_DIGITS)
 
-const percentileRows = (latency) => [
-  { name: "min", value: fixed(latency.minMs) },
-  { name: "mean", value: fixed(latency.meanMs) },
-  { name: "p50", value: fixed(latency.p50Ms) },
-  { name: "p90", value: fixed(latency.p90Ms) },
-  { name: "p95", value: fixed(latency.p95Ms) },
-  { name: "p99", value: fixed(latency.p99Ms) },
-  { name: "max", value: fixed(latency.maxMs) },
-]
+const percentileRows = (latency) => Object.entries(LOAD_TEST_TEXT.percentiles)
+  .map(([key, name]) => ({ name, value: fixed(latency[key]) }))
 
 function NumberField({ label, hint, value, max, disabled, onChange }) {
   return (
@@ -88,10 +81,10 @@ function Progress({ progress }) {
   const text = LOAD_TEST_TEXT.progress
   return (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-5" role="status">
-      <Figure label={text.elapsed} value={`${fixed(progress.elapsedMs / MS_PER_SECOND)} s`} />
+      <Figure label={text.elapsed} value={LOAD_TEST_TEXT.seconds(fixed(progress.elapsedMs / MS_PER_SECOND))} />
       <Figure label={text.requests} value={progress.total} />
       <Figure label={text.rate} value={Math.round(progress.requestsPerSecond)} />
-      <Figure label={text.p95} value={`${fixed(progress.p95Ms)} ms`} />
+      <Figure label={text.p95} value={LOAD_TEST_TEXT.milliseconds(fixed(progress.p95Ms))} />
       <Figure label={text.failed} value={progress.failed} />
     </div>
   )
@@ -115,8 +108,8 @@ function Histogram({ bins }) {
         ))}
       </div>
       <div className="flex justify-between font-mono text-2xs text-muted-foreground">
-        <span>{fixed(bins[0].fromMs)} ms</span>
-        <span>{fixed(bins[bins.length - 1].toMs)} ms</span>
+        <span>{LOAD_TEST_TEXT.milliseconds(fixed(bins[0].fromMs))}</span>
+        <span>{LOAD_TEST_TEXT.milliseconds(fixed(bins[bins.length - 1].toMs))}</span>
       </div>
     </div>
   )
@@ -129,7 +122,7 @@ function StatusCodes({ codes }) {
       <SectionLabel>{LOAD_TEST_TEXT.statusLabel}</SectionLabel>
       <div className="flex flex-wrap gap-1">
         {entries.map(([code, count]) => (
-          <Badge key={code} variant={statusVariant({ statusCode: Number(code) })}>{code} x {count}</Badge>
+          <Badge key={code} variant={statusVariant({ statusCode: Number(code) })}>{LOAD_TEST_TEXT.statusCount(code, count)}</Badge>
         ))}
       </div>
     </div>

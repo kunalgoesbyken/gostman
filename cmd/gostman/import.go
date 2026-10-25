@@ -10,6 +10,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -32,6 +33,20 @@ type transfer struct {
 	secret bool
 }
 
+var transferSubjects = map[string]string{"import": "file or folder to import", "export": "workspace folder to export"}
+
+var importFormats = []string{
+	importer.FormatAuto, importer.FormatInsomnia, importer.FormatHAR, importer.FormatWSDL, importer.FormatBruno,
+	importer.FormatPostman, importer.FormatOpenAPI, importer.FormatGostman, importer.FormatHTTP,
+}
+
+func checkImportFormat(format string) error {
+	if slices.Contains(importFormats, format) {
+		return nil
+	}
+	return fmt.Errorf("unknown import format %q; choose %s", format, strings.Join(importFormats, ", "))
+}
+
 func importFlags(flags *flag.FlagSet, parsed *transfer) {
 	flags.BoolVar(&parsed.skip, "skip-static", false, "")
 }
@@ -52,7 +67,7 @@ func parseTransfer(name string, arguments []string, defaultFormat string, regist
 		return parsed, err
 	}
 	if len(positional) != 1 {
-		return parsed, errors.New("name one input")
+		return parsed, fmt.Errorf("name the %s", transferSubjects[name])
 	}
 	if parsed.out == "" {
 		return parsed, errors.New("--out is required")
@@ -63,6 +78,9 @@ func parseTransfer(name string, arguments []string, defaultFormat string, regist
 
 func importCommand(arguments []string, stdout, stderr *os.File) int {
 	parsed, err := parseTransfer("import", arguments, importer.FormatAuto, importFlags)
+	if err == nil {
+		err = checkImportFormat(parsed.format)
+	}
 	if err != nil {
 		return misuse(stderr, err.Error())
 	}
@@ -75,10 +93,11 @@ func importCommand(arguments []string, stdout, stderr *os.File) int {
 	if err != nil {
 		return complain(stderr, err)
 	}
-	collection, err := result.GlobalsAsVariables().Collection()
+	collection, dropped, err := result.GlobalsAsVariables().Folded()
 	if err != nil {
 		return complain(stderr, err)
 	}
+	result.Warnings = append(result.Warnings, dropped...)
 	if _, err := workspace.Create(parsed.out, collection); err != nil {
 		return complain(stderr, importTargetProblem(parsed.out, err))
 	}
@@ -87,7 +106,7 @@ func importCommand(arguments []string, stdout, stderr *os.File) int {
 	}
 	reportImport(stdout, stderr, result, parsed.out)
 	reportGlobals(stderr, result.Globals)
-	reportSecrets(stderr, collection.Environments, result.Globals)
+	reportSecrets(stderr, append(collection.Environments, collectionVariables(collection)), result.Globals)
 	return exitPassed
 }
 
@@ -99,6 +118,10 @@ func reportGlobals(stderr io.Writer, globals []workspace.Environment) {
 	if len(names) > 0 {
 		fmt.Fprintf(stderr, "note: gostman run has no global scope, so the variables of the global environment %s were added to the collection variables in gostman.yaml; a collection variable with the same name keeps its value\n", strings.Join(names, ", "))
 	}
+}
+
+func collectionVariables(collection workspace.Collection) workspace.Environment {
+	return workspace.Environment{Name: workspace.ManifestName, Variables: collection.Variables, Meta: collection.VariablesMeta}
 }
 
 func importTargetProblem(out string, err error) error {
@@ -172,8 +195,16 @@ func importSummary(counts importer.Counts) string {
 	return strings.Join(parts[:len(parts)-1], ", ") + " and " + last
 }
 
+func writtenVariables(result importer.Result) int {
+	collection, _ := result.Collection()
+	entries, _ := workspace.ParseVariableEntries(collection.Variables)
+	return len(entries)
+}
+
 func reportImport(stdout, stderr io.Writer, result importer.Result, out string) {
-	fmt.Fprintf(stdout, "Imported %s into %s.\n", importSummary(result.Counts()), out)
+	counts := result.Counts()
+	counts.Variables = writtenVariables(result)
+	fmt.Fprintf(stdout, "Imported %s into %s.\n", importSummary(counts), out)
 	for _, note := range result.Notes {
 		fmt.Fprintf(stderr, "note: %s\n", note)
 	}
@@ -197,9 +228,15 @@ func exportCommand(arguments []string, stdout, stderr *os.File) int {
 	if parsed.secret {
 		fmt.Fprintln(stderr, "warning: --include-secrets writes credentials into the exported files")
 	}
-	files, err := exportFiles(parsed, opened.Collection())
+	files, report, err := exportFiles(parsed, opened.Collection())
 	if err != nil {
 		return complain(stderr, err)
+	}
+	for _, note := range report.Notes {
+		fmt.Fprintf(stderr, "note: %s\n", note)
+	}
+	for _, warning := range report.Warnings {
+		fmt.Fprintf(stderr, "warning: %s\n", warning)
 	}
 	if err := writeExport(files, parsed.out); err != nil {
 		return complain(stderr, err)
@@ -208,12 +245,12 @@ func exportCommand(arguments []string, stdout, stderr *os.File) int {
 	return exitPassed
 }
 
-func exportFiles(parsed transfer, collection workspace.Collection) ([]importer.File, error) {
+func exportFiles(parsed transfer, collection workspace.Collection) ([]importer.File, importer.Report, error) {
 	if parsed.format == exportPostman {
 		return exportPostmanCollection(parsed.source, collection, parsed.secret)
 	}
-	files, _, err := importer.Export(parsed.format, collection, importer.Options{IncludeSecrets: parsed.secret})
-	return files, err
+	files, _, report, err := importer.Export(parsed.format, collection, importer.Options{IncludeSecrets: parsed.secret})
+	return files, report, err
 }
 
 func writeExport(files []importer.File, out string) error {

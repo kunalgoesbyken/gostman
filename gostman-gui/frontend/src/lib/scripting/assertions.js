@@ -1,8 +1,9 @@
-import { JSONPath } from 'jsonpath-plus'
-import { SCHEMA_TEXT } from '../checksText'
+import { CHECK_RUN_TEXT, SCHEMA_TEXT } from '../checksText'
 import { isPlainObject, parseJSON } from '../dataUtils'
+import { queryJson } from '../jsonPath'
 import { schemaMismatches } from '../jsonSchema'
 import { substitutePlaceholders, variableMap } from '../placeholders'
+import { PATTERN_TIMEOUT_MS } from './limits'
 
 const isPrimitive = (value) => value === null || typeof value !== 'object'
 
@@ -22,6 +23,13 @@ const isEmpty = (value) => value === null || value === undefined || sizeOf(value
 
 const asList = (expected) => (Array.isArray(expected) ? expected : String(expected).split(',').map((item) => item.trim()))
 
+function matchesPattern(actual, expected) {
+  const started = Date.now()
+  const matched = new RegExp(String(expected)).test(String(actual))
+  if (Date.now() - started >= PATTERN_TIMEOUT_MS) throw new Error(CHECK_RUN_TEXT.patternTooSlow(PATTERN_TIMEOUT_MS / 1000))
+  return matched
+}
+
 const compare = (accepts) => (actual, expected) => (
   !Number.isNaN(Number(actual)) && !Number.isNaN(Number(expected)) && accepts(Number(actual), Number(expected))
 )
@@ -39,7 +47,7 @@ export const OPERATORS = [
   { value: 'notContains', label: 'does not contain', test: (actual, expected) => !includes(actual, expected) },
   { value: 'startsWith', label: 'starts with', test: (actual, expected) => String(actual).startsWith(String(expected)) },
   { value: 'endsWith', label: 'ends with', test: (actual, expected) => String(actual).endsWith(String(expected)) },
-  { value: 'matches', label: 'matches regex', test: (actual, expected) => new RegExp(String(expected)).test(String(actual)) },
+  { value: 'matches', label: 'matches regex', test: matchesPattern },
   { value: 'in', label: 'is one of', test: (actual, expected) => asList(expected).some((item) => sameValue(actual, item)) },
   { value: 'length', label: 'has length', test: (actual, expected) => sameValue(sizeOf(actual), expected) },
   { value: 'isDefined', label: 'is defined', unary: true, test: (actual) => actual !== undefined },
@@ -123,9 +131,38 @@ const verdict = (operator, actual, expected) => {
   return operator.test(actual, expected) ? '' : `The value was ${describe(actual)}`
 }
 
+const RESPONSE_ROOT = 'res'
+const RESPONSE_PATHS = ['res', '$.res', "$['res']", '$["res"]']
+const DESCENT = '$..'
+
+const pathOf = (expression) => (expression.startsWith('$') ? expression : `$.${expression}`)
+
+const startsAtResponse = (expression) => (
+  expression.startsWith(DESCENT) || RESPONSE_PATHS.some((root) => (
+    expression === root || expression.startsWith(`${root}.`) || expression.startsWith(`${root}[`)
+  ))
+)
+
+const BODY_FIELD = 'body'
+const RESPONSE_FIELDS = ['status', 'statusText', 'headers', BODY_FIELD, 'responseTime', 'size', 'url']
+const FIELD_END = /[.[]/
+
+const joinPath = (root, rest) => {
+  if (rest === '') return root
+  return rest.startsWith('[') ? `${root}${rest}` : `${root}.${rest}`
+}
+
+const isResponseField = (rest) => RESPONSE_FIELDS.includes(rest.split(FIELD_END, 1)[0])
+
+function responsePath(expression) {
+  const relative = expression.startsWith('$') ? expression.slice(1) : expression
+  const rest = relative.startsWith('.') ? relative.slice(1) : relative
+  return joinPath(RESPONSE_ROOT, isResponseField(rest) ? rest : joinPath(BODY_FIELD, rest))
+}
+
 function resolve(expression, response) {
-  const path = expression.startsWith('$') ? expression : `$.${expression}`
-  return JSONPath({ path, json: { res: response }, wrap: false })
+  if (!startsAtResponse(expression)) throw new Error(CHECK_RUN_TEXT.outsideResponse(expression, responsePath(expression)))
+  return queryJson(pathOf(expression), { [RESPONSE_ROOT]: response })
 }
 
 function evaluate(assertion, response, variables) {

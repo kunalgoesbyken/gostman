@@ -67,8 +67,8 @@ export const EMPTY_CUSTOM_COLORS = { light: {}, dark: {} }
 export const EMPTY_METHOD_COLORS = { light: {}, dark: {} }
 
 const MIXES = {
-  standard: { card: 0.025, muted: 0.06, accent: 0.085, border: 0.16, mutedForeground: 0.66 },
-  more: { card: 0.025, muted: 0.06, accent: 0.085, border: 0.42, mutedForeground: 0.82 },
+  standard: { card: 0.025, muted: 0.06, accent: 0.085, border: 0.16, input: 0.45, mutedForeground: 0.66 },
+  more: { card: 0.025, muted: 0.06, accent: 0.085, border: 0.42, input: 0.6, mutedForeground: 0.82 },
 }
 
 const DARK_SURFACE_MIXES = { muted: 0.1 }
@@ -126,7 +126,7 @@ function surfaceTokens({ background, foreground }, contrast) {
     accent: toward(mix.accent),
     'accent-foreground': text,
     border,
-    input: border,
+    input: toward(mix.input),
   }
 }
 

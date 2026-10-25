@@ -11,6 +11,7 @@ import { cn } from "../lib/utils"
 import { docPath, docSlug } from "../docs/manifest"
 import { useAppStore } from "../store/appStore"
 import { usePopoverDismiss } from "../hooks/usePopoverDismiss"
+import { wrapTab } from "../hooks/useFocusTrap"
 import "./variables.css"
 
 const TUTORIAL_URL = `${WEB_APP_URL}${docPath(docSlug("tutorial-first-collection.md"))}`
@@ -57,7 +58,7 @@ export function useOnboardingCompletion() {
 
 function ProgressBar({ done, total }) {
   return (
-    <div className="h-1 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done}>
+    <div className="h-1 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label={TEXT.title} aria-valuetext={TEXT.progress(done, total)} aria-valuemin={0} aria-valuemax={total} aria-valuenow={done}>
       <div className="h-full rounded-full bg-success transition-[width]" style={{ width: `${(done / total) * 100}%` }} />
     </div>
   )
@@ -186,6 +187,7 @@ function Popover({ anchor, buttonRef, onClose, children }) {
       role="dialog"
       aria-label={TEXT.title}
       data-surface="menu"
+      onKeyDown={(event) => event.key === "Tab" && wrapTab(event, popoverRef.current)}
       style={style}
       className="fixed z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto rounded-md border border-border bg-background p-3 shadow-lg"
     >

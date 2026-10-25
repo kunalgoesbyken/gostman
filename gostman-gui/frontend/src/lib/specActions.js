@@ -1,3 +1,4 @@
+import { CONTRACT_TEXT } from './checksText'
 import { checksContract } from './contractCheck'
 import { parseJSON } from './dataUtils'
 import { sanitizeImport } from './importExport'
@@ -15,6 +16,10 @@ function missingVariables(variables) {
   return Object.fromEntries(Object.entries(variables || {}).filter(([name]) => !(name in existing)))
 }
 
+const owningRoot = ({ folders, variables }) => (
+  folders.map((folder, index) => (index === 0 ? { ...folder, collectionVariables: JSON.stringify(variables || {}, null, 2) } : folder))
+)
+
 function folderForTag(tag, rootId, created) {
   if (tag === '') return rootId
   const known = [...store().folders, ...created].find((folder) => folder.name === tag && folder.parentId === rootId)
@@ -29,7 +34,7 @@ export function createSpecActions({ backend, attempt, addImported }) {
 
   const importSpec = attempt('Import failed', async (result) => {
     const existing = { requestIds: idsOf(store().requests), folderIds: idsOf(store().folders) }
-    const data = sanitizeImport({ ...result, variables: missingVariables(result.variables) }, existing)
+    const data = sanitizeImport({ ...result, folders: owningRoot(result), variables: missingVariables(result.variables) }, existing)
     await addImported(data)
     const { source, hash, operations } = result.spec
     if (!source) return
@@ -107,6 +112,19 @@ export function createSpecActions({ backend, attempt, addImported }) {
     }), 'OK', 'success')
   })
 
+  const sourceFor = (address) => (address.startsWith('http://') || address.startsWith('https://') ? { url: address } : { path: address })
+
+  const linkAddress = (folder) => attempt(CONTRACT_TEXT.linkTitle, async (input) => {
+    const address = input.trim()
+    if (address === '') return
+    const source = sourceFor(address)
+    const summary = await client.summary(source)
+    store().setSpecLink(folder.id, { ...createLink(source, summary.hash, []), sync: false })
+    store().showNotice(CONTRACT_TEXT.linked(folder.name))
+  })
+
+  const linkFolder = (folder) => store().showPrompt(CONTRACT_TEXT.linkTitle, CONTRACT_TEXT.linkMessage, '', SPEC_TEXT.addressPlaceholder, linkAddress(folder), CONTRACT_TEXT.linkConfirm)
+
   const toggleContract = (folderId) => {
     const link = store().specLinks[folderId]
     store().setSpecLink(folderId, { ...link, contract: !checksContract(link) })
@@ -143,6 +161,7 @@ export function createSpecActions({ backend, attempt, addImported }) {
     check,
     apply,
     toggleContract,
+    linkFolder,
     browse,
     browseFolder,
     sendToTab,

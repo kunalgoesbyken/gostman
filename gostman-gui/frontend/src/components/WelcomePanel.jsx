@@ -1,7 +1,7 @@
 import { ChevronRight, FolderOpen, FolderPlus, Import, Terminal, X } from "lucide-react"
 import { GettingStartedChecklist, useOnboardingProgress } from "./GettingStarted"
 import { IconButton } from "./ui/button"
-import { focusPane, PANE_ADDRESS } from "../lib/panes"
+import { focusAddress } from "../lib/panes"
 import { usePreferences } from "../lib/preferences"
 import { shortcutRows } from "../lib/shortcuts"
 import { cn } from "../lib/utils"
@@ -45,7 +45,7 @@ function OtherWays({ actions }) {
           <ActionRow icon={FolderOpen} title={TEXT.folderTitle} hint={TEXT.folderHint} onClick={actions.storage.openFolder} />
         )}
         <ActionRow icon={FolderPlus} title={TEXT.collectionTitle} hint={TEXT.collectionHint} onClick={() => actions.createFolder()} />
-        <ActionRow icon={Terminal} title={TEXT.curlTitle} hint={TEXT.curlHint} onClick={() => focusPane(PANE_ADDRESS)} />
+        <ActionRow icon={Terminal} title={TEXT.curlTitle} hint={TEXT.curlHint} onClick={focusAddress} />
       </ul>
     </Section>
   )

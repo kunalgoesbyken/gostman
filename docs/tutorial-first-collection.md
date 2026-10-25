@@ -34,7 +34,7 @@ Every request in the folder now sends that header without repeating it. Auth, va
 
 A request that returns the wrong data with a `200` status still looks like a success. Assertions catch that.
 
-1. On **List todos**, open the **Tests** tab and add three assertion rows:
+1. On **List todos**, open the **Checks** tab and add three assertion rows:
 
    | Expression | Check | Expected |
    | --- | --- | --- |
@@ -42,7 +42,7 @@ A request that returns the wrong data with a `200` status still looks like a suc
    | `res.body` | is an array | |
    | `res.body[0].userId` | equals | `1` |
 
-2. Send the request. The response panel's **Tests** tab lists each check as passed or failed.
+2. Send the request. The response panel's **Checks** tab lists each check as passed or failed.
 
 Change the expected `userId` to `2` and send again to see a failure, then change it back.
 
@@ -55,9 +55,9 @@ Real flows chain requests: log in, then use the token; create a record, then fet
 1. On **List todos**, open the **Extract** tab and add a rule: name `todo_id`, source **JSON body**, expression `$[0].id`.
 2. Send **List todos**. The rule copies the first todo's id into `todo_id` in the active environment.
 3. Create a second request in **Todos** named **Get one todo** with the URL `{{base_url}}/todos/{{todo_id}}` and send it. Hovering `todo_id` shows the value it will use.
-4. On its **Tests** tab, add `res.status` equals `200` and `res.body.id` equals `{{todo_id}}`. Expected values can use variables, so the check follows whatever **List todos** returned.
+4. On its **Checks** tab, add `res.status` equals `200` and `res.body.id` equals `{{todo_id}}`. Expected values can use variables, so the check follows whatever **List todos** returned.
 
-For checks that do not fit in one row, such as validating against a JSON Schema or comparing two fields, write a post-response script. [Variables, scripts and settings](scripting-and-settings.md#examples) has examples.
+For checks that do not fit in one row, such as validating against a JSON Schema or comparing two fields, write a post-response script. [Scripts and checks](scripting-and-settings.md#examples) has examples.
 
 ## 6. Send a body
 
@@ -87,12 +87,12 @@ gostman run path/to/folder --env Public
 ```
 
 ```
-PASS  GET      Todos/List todos  200 OK  99 ms  3/3 tests
-PASS  GET      Todos/Get one todo  200 OK  13 ms  2/2 tests
-PASS  POST     Todos/Create a todo  201 Created  286 ms  2/2 tests
+PASS  GET      Todos/List todos  200 OK  99 ms  3/3 checks
+PASS  GET      Todos/Get one todo  200 OK  13 ms  2/2 checks
+PASS  POST     Todos/Create a todo  201 Created  286 ms  2/2 checks
 
 Requests  3 passed
-Tests     7 passed
+Checks    7 passed
 Duration  412ms
 ```
 

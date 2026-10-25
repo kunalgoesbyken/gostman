@@ -15,9 +15,9 @@ function parse(text) {
 
 const TASKS = {
   format: ({ text }) => ({ text: JSON.stringify(parse(text), null, PRETTY_INDENT) }),
-  filter: ({ text, path }) => {
+  filter: ({ text, path, withValue }) => {
     const { value, ...result } = filterJson(parse(text), path)
-    return result
+    return withValue ? { ...result, value } : result
   },
 }
 

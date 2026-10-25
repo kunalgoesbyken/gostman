@@ -5,20 +5,24 @@ import { Notice, Panel, PanelBody, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { AuthPanel } from "./AuthPanel"
+import { CollectionVariablesTable } from "./CollectionVariablesTable"
 import { EnvironmentTable } from "./EnvironmentTable"
 import { KeyValueEditor } from "./KeyValueEditor"
 import { MarkdownField } from "./MarkdownField"
 import { AssertionEditor, ScriptEditor } from "./TestsPanel"
 import { isPlainObject, parseJSON } from "../lib/dataUtils"
+import { ENVIRONMENT_TEXT } from "../lib/environmentText"
+import { holdsCollections, isCollectionRoot } from "../lib/environmentScope"
 import { FOLDER_SETTINGS_TEXT as TEXT } from "../lib/folderSettingsText"
-import { AUTH_INHERIT, AUTH_NONE, ROOT_SETTINGS_ID, hasActiveSettings, inheritedAuthSource, lineageOf, normalizeScopeSettings } from "../lib/inheritance"
+import { AUTH_INHERIT, AUTH_NONE, ROOT_SETTINGS_ID, hasActiveSettings, inheritedAuthSource, lineageOf, normalizeScopeSettings, settingsTitle } from "../lib/inheritance"
 import { cancelSignIn, clearToken, discoverIssuer, obtainToken } from "../lib/oauth"
 import { OAUTH_TEXT } from "../lib/oauthText"
 import { parseRows, serializeRows } from "../lib/rows"
 import { RESTRICTED } from "../lib/execution"
+import { isDesktopShell } from "../lib/windowControls"
 import { MAX_TIMEOUT_MS, MIN_TIMEOUT_MS, TIMEOUT_MS } from "../lib/scripting/limits"
 import { environmentEntries, withEntries } from "../lib/variableScopes"
-import { findActiveEnvironment, useAppStore, variableTextFor } from "../store/appStore"
+import { environmentForFolder, useAppStore, variableTextFor } from "../store/appStore"
 
 const TAB_HEADERS = "headers"
 const TAB_AUTH = "auth"
@@ -34,9 +38,18 @@ const SCRIPT_VIEWS = [
   { value: VIEW_POST, label: TEXT.postScript },
 ]
 
+const VARS_COLLECTION = "collection"
+const VARS_FOLDER = "folder"
+const VARS_VIEWS = [
+  { value: VARS_COLLECTION, label: ENVIRONMENT_TEXT.collectionVariables },
+  { value: VARS_FOLDER, label: TEXT.folderVariables },
+]
+
 const isVariableObject = (text) => isPlainObject(parseJSON(text, null))
 
-function VariablesTab({ variables, onChange }) {
+const secretNote = () => (isDesktopShell() ? ENVIRONMENT_TEXT.secretNote : ENVIRONMENT_TEXT.secretNoteWeb)
+
+function FolderVariables({ variables, onChange }) {
   const [rows, setRows] = useState(() => environmentEntries({ variables }))
   const editRows = (next) => {
     setRows(next)
@@ -44,11 +57,42 @@ function VariablesTab({ variables, onChange }) {
   }
 
   return (
-    <Panel>
+    <>
       <Notice>{isVariableObject(variables) ? TEXT.varsNote : TEXT.varsInvalid}</Notice>
       <EnvironmentTable rows={rows} query="" features={VARIABLE_FEATURES} onChange={editRows} />
+    </>
+  )
+}
+
+function CollectionVariables({ holder, note }) {
+  return (
+    <>
+      <Notice>{note} {secretNote()}</Notice>
+      <CollectionVariablesTable key={holder?.id} holder={holder} />
+    </>
+  )
+}
+
+function CollectionVarsTab({ folder, onChange }) {
+  const [view, setView] = useState(VARS_COLLECTION)
+  return (
+    <Panel>
+      <Toolbar>
+        <SegmentedControl label={TEXT.varsKind} options={VARS_VIEWS} value={view} onChange={setView} />
+      </Toolbar>
+      {view === VARS_COLLECTION
+        ? <CollectionVariables holder={folder} note={ENVIRONMENT_TEXT.ownCollectionNote(folder.name)} />
+        : <FolderVariables variables={folder.variables} onChange={(variables) => onChange({ variables })} />}
     </Panel>
   )
+}
+
+function VarsTab({ folder, isCollection, holdsCollectionList, onChange }) {
+  if (!folder) {
+    return <Panel><CollectionVariables note={holdsCollectionList ? ENVIRONMENT_TEXT.sharedCollectionNote : ENVIRONMENT_TEXT.collectionNote} /></Panel>
+  }
+  if (isCollection) return <CollectionVarsTab folder={folder} onChange={onChange} />
+  return <Panel><FolderVariables variables={folder.variables} onChange={(variables) => onChange({ variables })} /></Panel>
 }
 
 const MS_PER_SECOND = 1000
@@ -87,6 +131,7 @@ function ScriptTab({ settings, path, isCollection, EditorComponent, onChange }) 
         key={view}
         value={settings[view]}
         path={`${path}/${view}`}
+        label={SCRIPT_VIEWS.find((option) => option.value === view).label}
         onChange={(script) => onChange({ [view]: script })}
         EditorComponent={EditorComponent}
       />
@@ -123,7 +168,7 @@ function useFolderAuthActions(backend, scopeId, auth, onChange) {
     }
     setTokenRequest({ isPending: true, error: "" })
     try {
-      const environmentId = findActiveEnvironment(useAppStore.getState())?.id || ""
+      const environmentId = environmentForFolder(useAppStore.getState(), scopeId)?.id || ""
       const onDevice = (device) => setTokenRequest({ isPending: true, error: "", device })
       const oauth2 = await obtainToken(backend, auth.oauth2, scopeVariables(), {}, { environmentId, onDevice })
       onChange({ auth: { ...auth, oauth2 } })
@@ -173,14 +218,17 @@ function useScope(scope) {
   const parentSource = useAppStore((state) => (
     folder ? inheritedAuthSource({ type: AUTH_INHERIT }, lineageOf(state, folder.parentId))?.name ?? null : null
   ))
+  const title = useAppStore((state) => settingsTitle(state, folder))
+  const isCollectionFolder = useAppStore((state) => isCollectionRoot(state.folders, scope.folderId, state.workspaceStatus.path))
+  const holdsCollectionList = useAppStore((state) => holdsCollections(state.workspaceStatus.path))
   const isCollection = scope.folderId === ROOT_SETTINGS_ID
   const source = isCollection ? collectionSettings : folder
-  return { source, folder, isCollection, parentSource }
+  return { source, folder, isCollection, isCollectionFolder, holdsCollectionList, parentSource, title }
 }
 
 export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
   const [tab, setTab] = useState(TAB_HEADERS)
-  const { source, folder, isCollection, parentSource } = useScope(scope)
+  const { source, folder, isCollection, isCollectionFolder, holdsCollectionList, parentSource, title } = useScope(scope)
   const isRestricted = useAppStore((state) => state.isRestricted)
   const update = useAppStore((state) => state.updateScopeSettings)
   const settings = useMemo(() => normalizeScopeSettings(source), [source])
@@ -191,7 +239,6 @@ export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
   }, [source, onClose])
 
   if (!source) return null
-  const title = isCollection ? TEXT.collectionTitle : TEXT.folderTitle(folder.name)
   const path = `settings/${scope.folderId || "collection"}`
 
   return (
@@ -228,7 +275,7 @@ export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
             />
           </TabsContent>
           <TabsContent value={TAB_VARS} className="h-full min-h-0">
-            {isCollection ? <CollectionVariables /> : <VariablesTab variables={folder.variables} onChange={(variables) => patch({ variables })} />}
+            <VarsTab folder={folder} isCollection={isCollectionFolder} holdsCollectionList={holdsCollectionList} onChange={patch} />
           </TabsContent>
           <TabsContent value={TAB_SCRIPT} className="h-full min-h-0">
             <ScriptTab settings={settings} path={path} isCollection={isCollection} EditorComponent={EditorComponent} onChange={patch} />
@@ -246,10 +293,4 @@ export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
       </Tabs>
     </Dialog>
   )
-}
-
-function CollectionVariables() {
-  const collectionVariables = useAppStore((state) => state.collectionVariables)
-  const setCollectionVariables = useAppStore((state) => state.setCollectionVariables)
-  return <VariablesTab variables={collectionVariables} onChange={setCollectionVariables} />
 }

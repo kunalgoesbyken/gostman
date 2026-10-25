@@ -1,8 +1,9 @@
 import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import { IconButton } from "./ui/button"
-import { Input } from "./ui/input"
 import { VariableInput } from "./VariableInput"
+import { AUTH_TEXT } from "../lib/authText"
+import { holdsOnlyReferences } from "../lib/variables"
 
 const FIELD_PROPS = { spellCheck: false, autoComplete: "off" }
 
@@ -18,25 +19,22 @@ export function TextInput({ value, onChange, ...props }) {
   )
 }
 
-export function SecretInput({ value, onChange }) {
+export function SecretInput({ value = "", onChange }) {
   const [revealed, setRevealed] = useState(false)
+  const hasSecret = !holdsOnlyReferences(value)
 
   return (
     <div className="relative min-w-0">
-      <Input
-        type={revealed ? "text" : "password"}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="pr-8 font-mono"
-        {...FIELD_PROPS}
-      />
-      <IconButton
-        label={revealed ? "Hide value" : "Show value"}
-        icon={revealed ? EyeOff : Eye}
-        size="icon-xs"
-        onClick={() => setRevealed(!revealed)}
-        className="absolute right-0.5 top-0.5"
-      />
+      <TextInput value={value} onChange={onChange} masked={hasSecret && !revealed} className="pr-8 font-mono" />
+      {hasSecret && (
+        <IconButton
+          label={revealed ? AUTH_TEXT.hideValue : AUTH_TEXT.showValue}
+          icon={revealed ? EyeOff : Eye}
+          size="icon-xs"
+          onClick={() => setRevealed(!revealed)}
+          className="absolute right-0.5 top-0.5"
+        />
+      )}
     </div>
   )
 }

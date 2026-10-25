@@ -2,14 +2,14 @@ import { useId, useState } from "react"
 import { X } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
-import { VariableInput } from "./VariableInput"
+import { VariableInput, VariableTextarea } from "./VariableInput"
 import { PanelBody, SectionLabel } from "./ui/panel"
 import { Select } from "./ui/select"
-import { Textarea } from "./ui/textarea"
 import { FileField } from "./FileField"
 import { EMPTY_ATTACHMENT } from "../lib/attachments"
 import { ROW_FILE, ROW_TEXT, isBlankRow, isFileRow } from "../lib/rows"
 import { bulkTextToRows, fitsBulkText, rowsToBulkText } from "../lib/bulkRows"
+import { KEY_VALUE_TEXT as TEXT } from "../lib/keyValueText"
 import { cn } from "../lib/utils"
 
 const PLAIN_COLUMNS = "grid-cols-[1.5rem_minmax(0,1fr)_minmax(0,1fr)_1.75rem]"
@@ -19,8 +19,6 @@ export const ROW_GRID = "grid items-center gap-x-2"
 export const ROW_STACK = "flex flex-col gap-1"
 
 const MIN_BULK_LINES = 6
-const BULK_HINT = "One row per line as name: value. Start a line with // to keep it without sending it."
-const BULK_UNAVAILABLE = "Rows with a colon in the name, or spaces at the start or end, can only be edited in the table."
 
 const draftRow = (typed) => ({ key: "", value: "", enabled: true, ...(typed && { type: ROW_TEXT }) })
 
@@ -32,7 +30,7 @@ function ColumnLabels({ columns, typed, keyLabel, valueLabel }) {
     <div className={cn(ROW_GRID, "h-6", columns)}>
       <span />
       <SectionLabel>{keyLabel}</SectionLabel>
-      {typed && <SectionLabel>Type</SectionLabel>}
+      {typed && <SectionLabel>{TEXT.type}</SectionLabel>}
       <SectionLabel>{valueLabel}</SectionLabel>
       <span />
     </div>
@@ -60,7 +58,7 @@ function Row({ row, columns, typed, isDraft, keyLabel, valueLabel, onChange, onR
   return (
     <div className={cn(ROW_GRID, columns, !row.enabled && "opacity-50")}>
       <Checkbox
-        label="Send this row"
+        label={TEXT.sendRow}
         checked={row.enabled}
         onChange={(event) => onChange({ enabled: event.target.checked })}
         className={cn(isDraft && "invisible")}
@@ -78,14 +76,14 @@ function Row({ row, columns, typed, isDraft, keyLabel, valueLabel, onChange, onR
         <Select
           value={row.type || ROW_TEXT}
           onChange={(event) => onReplace(event.target.value === ROW_FILE ? asFileRow(row) : asTextRow(row))}
-          aria-label="Field type"
+          aria-label={TEXT.fieldType}
         >
-          <option value={ROW_TEXT}>Text</option>
-          <option value={ROW_FILE}>File</option>
+          <option value={ROW_TEXT}>{TEXT.text}</option>
+          <option value={ROW_FILE}>{TEXT.file}</option>
         </Select>
       )}
       <ValueCell row={row} label={valueLabel} onChange={onChange} />
-      <IconButton label="Remove row" icon={X} onClick={onRemove} className={cn(isDraft && "invisible")} />
+      <IconButton label={TEXT.removeRow} icon={X} onClick={onRemove} className={cn(isDraft && "invisible")} />
     </div>
   )
 }
@@ -103,16 +101,17 @@ function BulkEditor({ rows, keyLabel, onChange }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <Textarea
+      <VariableTextarea
         autoFocus
         value={text}
         onChange={edit}
         rows={Math.max(MIN_BULK_LINES, rows.length + 1)}
-        aria-label={`${keyLabel} rows as text`}
+        aria-label={TEXT.bulkLabel(keyLabel)}
         aria-describedby={hintId}
-        placeholder={`${keyLabel}: value`}
+        placeholder={TEXT.bulkPlaceholder(keyLabel)}
+        spellCheck={false}
       />
-      <p id={hintId} className="text-2xs text-muted-foreground">{BULK_HINT}</p>
+      <p id={hintId} className="text-2xs text-muted-foreground">{TEXT.bulkHint}</p>
     </div>
   )
 }
@@ -152,19 +151,19 @@ function ModeSwitch({ rows, showsBulk, onSwitch }) {
   if (showsBulk) {
     return (
       <Button variant="ghost" size="sm" onClick={() => onSwitch(false)}>
-        Edit as table
+        {TEXT.editAsTable}
       </Button>
     )
   }
-  if (!fitsBulkText(rows)) return <p className="text-2xs text-muted-foreground">{BULK_UNAVAILABLE}</p>
+  if (!fitsBulkText(rows)) return <p className="text-2xs text-muted-foreground">{TEXT.bulkUnavailable}</p>
   return (
     <Button variant="ghost" size="sm" onClick={() => onSwitch(true)}>
-      Bulk edit
+      {TEXT.bulkEdit}
     </Button>
   )
 }
 
-export function KeyValueEditor({ rows, onChange, keyLabel = "Key", valueLabel = "Value", typed = false }) {
+export function KeyValueEditor({ rows, onChange, keyLabel = TEXT.key, valueLabel = TEXT.value, typed = false, children }) {
   const [isBulk, setIsBulk] = useState(false)
   const showsBulk = isBulk && !typed
 
@@ -180,6 +179,7 @@ export function KeyValueEditor({ rows, onChange, keyLabel = "Key", valueLabel = 
           <ModeSwitch rows={rows} showsBulk={showsBulk} onSwitch={setIsBulk} />
         </div>
       )}
+      {children}
     </PanelBody>
   )
 }

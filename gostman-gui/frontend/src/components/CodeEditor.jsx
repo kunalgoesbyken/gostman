@@ -13,14 +13,16 @@ const NO_EXTENSION = []
 
 const highlightedLanguage = (language, text) => (text.length > LARGE_BODY_CHARS ? null : language)
 
+const labelExtension = (label) => (label ? EditorView.contentAttributes.of({ 'aria-label': label }) : NO_EXTENSION)
+
 const isUserChange = (update) => update.docChanged && !update.transactions.some((transaction) => transaction.annotation(externalChange))
 
-function useEditorConfig(language, variables, fileReads, formatting = NO_EXTENSION) {
+function useEditorConfig(language, variables, fileReads, formatting = NO_EXTENSION, label = '') {
   const { wrapLines } = usePreferences()
   const variableMap = useVariableMap()
   return useMemo(
-    () => [languageExtension(language), wrapExtension(wrapLines), variables ? variableExtension(variableMap, { fileReads }) : [], formatting],
-    [language, wrapLines, variables, fileReads, variableMap, formatting],
+    () => [languageExtension(language), wrapExtension(wrapLines), variables ? variableExtension(variableMap, { fileReads }) : [], formatting, labelExtension(label)],
+    [language, wrapLines, variables, fileReads, variableMap, formatting, label],
   )
 }
 
@@ -43,7 +45,7 @@ function useFormatting(language, onFormat) {
 }
 
 export const CodeEditor = forwardRef(function CodeEditor(
-  { value = '', onChange, onFormat, language = 'json', path, height = '300px', variables = false, fileReads = true, surface },
+  { value = '', onChange, onFormat, language = 'json', path, height = '300px', variables = false, fileReads = true, surface, label },
   ref,
 ) {
   const hostRef = useRef(null)
@@ -53,7 +55,7 @@ export const CodeEditor = forwardRef(function CodeEditor(
   const compartment = useMemo(() => new Compartment(), [])
   const { editorFontSize } = usePreferences()
   const formatting = useFormatting(language, onFormat)
-  const config = useEditorConfig(highlightedLanguage(language, value), variables, fileReads, formatting.extension)
+  const config = useEditorConfig(highlightedLanguage(language, value), variables, fileReads, formatting.extension, label)
 
   useImperativeHandle(ref, () => ({
     format: () => viewRef.current && formatting.run(viewRef.current),

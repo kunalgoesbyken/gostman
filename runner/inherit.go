@@ -66,6 +66,16 @@ func (r Request) scriptTimeout() int64 {
 	return r.Lineage[0].ScriptTimeoutMs
 }
 
+func (r Request) collectionScopes() []variables {
+	var scopes []variables
+	for _, folder := range r.Lineage {
+		if scope, err := parseVariables(folder.CollectionVariables); err == nil && len(scope) > 0 {
+			scopes = append(scopes, scope)
+		}
+	}
+	return scopes
+}
+
 func (r Request) folderScopes() []variables {
 	scopes := make([]variables, 0, len(r.Lineage))
 	for _, folder := range r.Lineage {
@@ -89,10 +99,17 @@ func (r Request) preSteps() []step {
 	return appendScripted(steps, step{label: preRequest, script: r.PreScript})
 }
 
+func postLabel(script string) string {
+	if hasText(script) {
+		return postResponse
+	}
+	return checksOnly
+}
+
 func (r Request) postSteps() []step {
-	steps := appendScripted(nil, step{label: postResponse, script: r.PostScript, assertions: r.Assertions})
+	steps := appendScripted(nil, step{label: postLabel(r.PostScript), script: r.PostScript, assertions: r.Assertions})
 	for _, folder := range slices.Backward(r.Lineage) {
-		steps = appendScripted(steps, step{label: folder.label(postResponse), script: folder.PostScript, assertions: folder.Assertions})
+		steps = appendScripted(steps, step{label: folder.label(postLabel(folder.PostScript)), script: folder.PostScript, assertions: folder.Assertions})
 	}
 	return steps
 }

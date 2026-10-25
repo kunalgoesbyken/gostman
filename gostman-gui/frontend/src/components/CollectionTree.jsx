@@ -1,6 +1,6 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
-import { ChevronsDownUp, ClipboardPaste, FileJson, Plus, Search, Upload } from "lucide-react"
+import { ChevronsDownUp, ClipboardPaste, FileJson, FileWarning, Plus, Search, Upload } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
 import { EmptyState } from "./ui/emptyState"
@@ -9,10 +9,11 @@ import { EmptyRow, ROW_HEIGHT_PX, TreeRow } from "./TreeRow"
 import { LabelDialog } from "./LabelDialog"
 import { SearchField } from "./SearchField"
 import { useAppStore } from "../store/appStore"
+import { isCollectionRoot } from "../lib/environmentScope"
 import { usePointerDrag } from "../hooks/usePointerDrag"
 import { useTypeahead } from "../hooks/useTypeahead"
-import { buildCollectionTree, findMatches, flattenCollection, ROOT_ID, ROW_EMPTY, ROW_FOLDER } from "../lib/collectionTree"
-import { checksContract } from "../lib/contractCheck"
+import { buildCollectionTree, buildSearchIndex, findMatches, flattenCollection, ROOT_ID, ROW_EMPTY, ROW_FOLDER, siblingsIn } from "../lib/collectionTree"
+import { checksContract, syncsSpec } from "../lib/contractCheck"
 import { PLACE_AFTER, PLACE_BEFORE, PLACE_INSIDE } from "../lib/dropPlace"
 import { hasModifier, isFocusLost } from "../lib/rovingFocus"
 import { isRemoveKey, matchesBinding } from "../lib/shortcuts"
@@ -36,29 +37,34 @@ const sourceOf = (row) => (row.kind === ROW_FOLDER ? { kind: ROW_FOLDER, id: row
 
 const folderTarget = (id) => ({ kind: ROW_FOLDER, id, place: PLACE_INSIDE })
 
-function folderDrop(source, row, ratio, folders) {
+const fitsIn = (source, containerId, folders) => source.kind !== ROW_FOLDER || canDropFolder(folders, source.id, containerId)
+
+function firstChildDrop(source, folderId, tree, folders) {
+  const [first] = siblingsIn(tree, folderId)
+  if (!first) return folderTarget(folderId)
+  if (!fitsIn(source, folderId, folders) || (first.kind === source.kind && first.item.id === source.id)) return null
+  return { kind: first.kind, id: first.item.id, place: PLACE_BEFORE }
+}
+
+function folderDrop(source, row, ratio, tree, folders) {
   const { id, parentId } = row.folder
-  if (source.kind !== ROW_FOLDER) return folderTarget(id)
-  if (source.id === id) return null
+  if (source.kind === ROW_FOLDER && source.id === id) return null
   const place = ratio < FOLDER_EDGE_RATIO ? PLACE_BEFORE : ratio > 1 - FOLDER_EDGE_RATIO ? PLACE_AFTER : PLACE_INSIDE
-  const containerId = place === PLACE_INSIDE ? id : parentId || ROOT_ID
-  if (!canDropFolder(folders, source.id, containerId)) return null
+  if (place === PLACE_AFTER && row.isOpen) return firstChildDrop(source, id, tree, folders)
+  if (!fitsIn(source, place === PLACE_INSIDE ? id : parentId || ROOT_ID, folders)) return null
   return { kind: ROW_FOLDER, id, place }
 }
 
 function requestDrop(source, row, ratio, folders) {
   const { id, folderId } = row.request
-  if (source.kind === ROW_FOLDER) {
-    if (folderId && !canDropFolder(folders, source.id, folderId)) return null
-    return folderId ? folderTarget(folderId) : { kind: TARGET_ROOT }
-  }
-  if (source.id === id) return null
+  if (source.kind === row.kind && source.id === id) return null
+  if (!fitsIn(source, folderId || ROOT_ID, folders)) return null
   return { kind: row.kind, id, place: ratio < 0.5 ? PLACE_BEFORE : PLACE_AFTER }
 }
 
-function dropFor(source, row, ratio, folders) {
-  if (row.kind === ROW_EMPTY) return source.kind === ROW_FOLDER && !canDropFolder(folders, source.id, row.parentId) ? null : folderTarget(row.parentId)
-  if (row.kind === ROW_FOLDER) return folderDrop(source, row, ratio, folders)
+function dropFor(source, row, ratio, tree, folders) {
+  if (row.kind === ROW_EMPTY) return fitsIn(source, row.parentId, folders) ? folderTarget(row.parentId) : null
+  if (row.kind === ROW_FOLDER) return folderDrop(source, row, ratio, tree, folders)
   return requestDrop(source, row, ratio, folders)
 }
 
@@ -82,8 +88,21 @@ function DragChip({ drag, name }) {
   )
 }
 
+function UnreadableState({ problems, actions }) {
+  return (
+    <EmptyState
+      icon={FileWarning}
+      title={TREE_TEXT.unreadableTitle(problems.length)}
+      description={TREE_TEXT.unreadableDescription}
+      action={<Button size="sm" variant="outline" onClick={() => actions.storage?.showProblems(problems)}>{TREE_TEXT.unreadableAction}</Button>}
+    />
+  )
+}
+
 function TreeEmptyState({ isSearching, hasClipboard, actions }) {
+  const problems = useAppStore((s) => s.workspaceStatus.problems)
   if (isSearching) return <EmptyState icon={Search} title={TREE_TEXT.noResultsTitle} description={TREE_TEXT.noResultsDescription} />
+  if (problems.length > 0) return <UnreadableState problems={problems} actions={actions} />
   return (
     <EmptyState
       icon={FileJson}
@@ -139,12 +158,17 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
   const toggleFolder = useAppStore((s) => s.toggleFolder)
   const collapseFolders = useAppStore((s) => s.collapseFolders)
   const specLinks = useAppStore((s) => s.specLinks)
+  const workspacePath = useAppStore((s) => s.workspaceStatus.path)
   const treeClipboard = useAppStore((s) => s.treeClipboard)
+  const sharedOrder = useAppStore((s) => s.sharedOrder)
 
-  const tree = useMemo(() => buildCollectionTree(folders, requests), [folders, requests])
+  const shownQuery = useDeferredValue(query)
+  const isSearching = shownQuery.trim() !== ""
+  const tree = useMemo(() => buildCollectionTree(folders, requests, sharedOrder), [folders, requests, sharedOrder])
+  const searchIndex = useMemo(() => (isSearching ? buildSearchIndex(folders, requests) : null), [folders, requests, isSearching])
   const rows = useMemo(
-    () => flattenCollection(tree, findMatches(folders, requests, query)),
-    [tree, folders, requests, query]
+    () => flattenCollection(tree, searchIndex && findMatches(searchIndex, shownQuery)),
+    [tree, searchIndex, shownQuery]
   )
   const rowsByKey = useMemo(() => new Map(rows.map((row) => [row.key, row])), [rows])
   const focusedRowIndex = useMemo(() => rows.findIndex((row) => row.key === focusedKey), [rows, focusedKey])
@@ -159,8 +183,8 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
     const row = rowsByKey.get(rowElement.dataset.rowKey)
     if (!row) return null
     const { top, height } = rowElement.getBoundingClientRect()
-    return dropFor(source, row, (point.y - top) / height, folders)
-  }, [rowsByKey, folders])
+    return dropFor(source, row, (point.y - top) / height, tree, folders)
+  }, [rowsByKey, tree, folders])
 
   const { drag, begin } = usePointerDrag({
     resolveDrop,
@@ -168,8 +192,6 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
     scrollRef,
   })
   useExpandOnHover(drag, toggleFolder, folders)
-
-  const isSearching = query.trim() !== ""
 
   const activateRow = useCallback((row) => {
     if (row.kind === ROW_FOLDER) toggleFolder(row.folder.id)
@@ -276,10 +298,12 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
     const context = {
       actions, tree, state: { folders, requests }, showMoveTargets, hasClipboard, editLabels: setLabelTarget,
       isLinked: menu.row.kind === ROW_FOLDER && Boolean(specLinks[menu.row.folder.id]),
+      isCollection: menu.row.kind === ROW_FOLDER && isCollectionRoot(folders, menu.row.folder.id, workspacePath),
       checksContract: menu.row.kind === ROW_FOLDER && checksContract(specLinks[menu.row.folder.id]),
+      syncsSpec: menu.row.kind === ROW_FOLDER && syncsSpec(specLinks[menu.row.folder.id]),
     }
     return menuItemsFor(menu, context)
-  }, [menu, tree, folders, requests, actions, specLinks, hasClipboard])
+  }, [menu, tree, folders, requests, actions, specLinks, hasClipboard, workspacePath])
 
   const renderRow = (row) => {
     const dropPlace = dropPlaceFor(drag?.drop, row)
@@ -290,7 +314,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
       <TreeRow
         key={row.key}
         row={row}
-        search={query}
+        search={shownQuery}
         isActive={!isFolder && id === activeRequestId}
         isTabStop={row.key === tabStopKey}
         focusRequest={focusRequest?.key === row.key ? focusRequest.count : 0}

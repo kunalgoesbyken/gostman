@@ -29,12 +29,14 @@ import { MIN_REQUEST_HEIGHT_PX, isNarrowViewport } from "../lib/layout"
 import { isBlankRequest } from "../lib/requestChanges"
 import { forgetSharedLink, pendingSharedLink, subscribeToSharedLink } from "../lib/sharedLink"
 import { currentOpenLink, dismissOpenLink, subscribeToOpenLink } from "../lib/openLink"
-import { exportableVariables, withoutSecretValues } from "../lib/variableScopes"
+import { exportableVariables, foldersWithoutSecrets, listWithoutSecrets, withoutSecretValues } from "../lib/variableScopes"
 import { createWorkspaceActions } from "../lib/workspaceActions"
 import { whenIdle } from "../lib/idle"
-import { PANE_ADDRESS, PANE_SIDEBAR, cyclePane, focusPane, watchPaneFocus } from "../lib/panes"
+import { PANE_ADDRESS, PANE_SIDEBAR, cyclePane, focusAddress, focusPane, watchPaneFocus } from "../lib/panes"
 import { SIDEBAR_TEXT } from "../lib/sidebarText"
 import { DATA_TEXT } from "../lib/dataText"
+import { APP_TEXT } from "../lib/appText"
+import { WORKSPACE_TEXT } from "../lib/workspaceText"
 import { takeDataDeleted } from "../lib/storage"
 import { isWebSocketURL } from "../lib/socketUrl"
 import { isSocketAddress, selectSession, useSocketStore } from "../lib/socketSessions"
@@ -87,7 +89,7 @@ const createShortcutHandlers = (actions, isAiOn) => {
     commandPalette: () => store().openCommandPalette(),
     findRequest: () => store().openCommandPalette("requests"),
     shortcutsHelp: () => store().openShortcutsDialog(),
-    newRequest: () => store().newTab(),
+    newRequest: () => actions.newRequest(),
     saveRequest: actions.save,
     sendRequest: actions.send,
     closeTab: () => actions.closeTab(store().activeTabId),
@@ -101,7 +103,7 @@ const createShortcutHandlers = (actions, isAiOn) => {
     focusSidebarSearch,
     nextPane: () => cyclePane(1),
     previousPane: () => cyclePane(-1),
-    focusAddress: () => focusPane(PANE_ADDRESS),
+    focusAddress,
     ...(isAiOn && aiShortcutHandlers(actions)),
   }
   if (actions.storage) {
@@ -122,9 +124,9 @@ function LoadFailure({ reason, onRetry }) {
     <div className="h-dvh overflow-y-auto bg-background">
       <EmptyState
         icon={AlertTriangle}
-        title="Saved data could not be loaded"
-        description={`Nothing was changed or overwritten. ${reason}`}
-        action={<Button onClick={onRetry}>Try again</Button>}
+        title={APP_TEXT.loadFailure.title}
+        description={APP_TEXT.loadFailure.description(reason)}
+        action={<Button onClick={onRetry}>{APP_TEXT.loadFailure.retry}</Button>}
       />
     </div>
   )
@@ -143,7 +145,8 @@ function useStoredData(backend) {
     const adopt = (data) => {
       if (!isCurrent) return
       hydrate(data)
-      if (data.notice) showAlert("Saved data was unreadable", data.notice, "OK", "warning")
+      if (data.notice) showAlert(APP_TEXT.loadFailure.unreadable, data.notice, APP_TEXT.loadFailure.ok, "warning")
+      if (data.restricted) showNotice(WORKSPACE_TEXT.restrictedOpened)
       if (takeDataDeleted()) showNotice(DATA_TEXT.deleted)
     }
     const fail = (error) => {
@@ -169,6 +172,7 @@ function usePersistence(backend) {
   const globalEnvironments = useAppStore((s) => s.globalEnvironments)
   const activeGlobalEnvironmentId = useAppStore((s) => s.activeGlobalEnvironmentId)
   const collectionVariables = useAppStore((s) => s.collectionVariables)
+  const collectionVariablesMeta = useAppStore((s) => s.collectionVariablesMeta)
   const collectionSettings = useAppStore((s) => s.collectionSettings)
   const reportPersistenceFailure = useAppStore((s) => s.reportPersistenceFailure)
 
@@ -178,8 +182,8 @@ function usePersistence(backend) {
   )
 
   const scopeState = useMemo(
-    () => ({ globalEnvironments, activeGlobalEnvironmentId, collectionVariables }),
-    [globalEnvironments, activeGlobalEnvironmentId, collectionVariables]
+    () => ({ globalEnvironments, activeGlobalEnvironmentId, collectionVariables, collectionVariablesMeta }),
+    [globalEnvironments, activeGlobalEnvironmentId, collectionVariables, collectionVariablesMeta]
   )
 
   const persist = useCallback((write) => {
@@ -196,7 +200,7 @@ function usePersistence(backend) {
   )
 
   const saveScopes = useCallback(
-    (value) => persist(() => backend.saveScopes(value.globalEnvironments, value.activeGlobalEnvironmentId, value.collectionVariables)),
+    (value) => persist(() => backend.saveScopes(value.globalEnvironments, value.activeGlobalEnvironmentId, value.collectionVariables, value.collectionVariablesMeta)),
     [backend, persist]
   )
 
@@ -236,6 +240,9 @@ function LoadedWorkspace({ backend, onBack }) {
   const runner = useAppStore((s) => s.runner)
   const folderSettings = useAppStore((s) => s.folderSettings)
   const collectionSettings = useAppStore((s) => s.collectionSettings)
+  const sharedOrder = useAppStore((s) => s.sharedOrder)
+  const sharedVariables = useAppStore((s) => s.collectionVariables)
+  const sharedVariablesMeta = useAppStore((s) => s.collectionVariablesMeta)
   const closeFolderSettings = useAppStore((s) => s.closeFolderSettings)
   const captureDialogOpen = useCaptureStore((s) => s.isOpen)
   const loadTestDialogOpen = useLoadTestStore((s) => s.isOpen)
@@ -246,7 +253,6 @@ function LoadedWorkspace({ backend, onBack }) {
   const openLink = useSyncExternalStore(subscribeToOpenLink, currentOpenLink)
 
   const setActiveTab = useAppStore((s) => s.setActiveTab)
-  const newTab = useAppStore((s) => s.newTab)
   const updateActiveRequest = useAppStore((s) => s.updateActiveRequest)
   const setActiveBodyDrafts = useAppStore((s) => s.setActiveBodyDrafts)
   const closeCodeDialog = useAppStore((s) => s.closeCodeDialog)
@@ -279,11 +285,16 @@ function LoadedWorkspace({ backend, onBack }) {
   const resolvedVariables = useAppStore(selectResolvedVariables)
   const variablesMap = useMemo(() => exportableVariables(resolvedVariables), [resolvedVariables])
   const shareableEnvironments = useMemo(() => withoutSecretValues(environments), [environments])
-  const openNewTab = useCallback(() => newTab(), [newTab])
+  const shareableFolders = useMemo(() => foldersWithoutSecrets(folders), [folders])
+  const shareableVariables = useMemo(
+    () => ({ variables: listWithoutSecrets(sharedVariables, sharedVariablesMeta), meta: sharedVariablesMeta }),
+    [sharedVariables, sharedVariablesMeta]
+  )
+  const openNewTab = useCallback(() => actions.newRequest(), [actions])
   const disconnectSocket = useCallback(() => actions.sockets.disconnect(activeTab.id), [actions, activeTab.id])
   const scannedCollection = useMemo(
-    () => ({ requests, folders, environments: shareableEnvironments, settings: collectionSettings }),
-    [requests, folders, shareableEnvironments, collectionSettings]
+    () => ({ requests, folders: shareableFolders, environments: shareableEnvironments, variables: shareableVariables.variables, settings: collectionSettings }),
+    [requests, shareableFolders, shareableEnvironments, shareableVariables, collectionSettings]
   )
   const goToRequest = useCallback((requestId) => {
     closeScanDialog()
@@ -301,6 +312,10 @@ function LoadedWorkspace({ backend, onBack }) {
   useEffect(returnFocusFromClosedSidebar, [])
   usePersistence(backend)
   useEffect(() => actions.storage?.followDisk(), [actions])
+  useEffect(() => {
+    actions.mock.resume()
+    actions.capture.resume()
+  }, [actions])
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background text-foreground">
@@ -365,8 +380,8 @@ function LoadedWorkspace({ backend, onBack }) {
             loading={isLoading}
           />
 
-          {showsWelcome ? <WelcomePanel actions={actions} onDismiss={hideWelcome} /> : <div className="response-split flex min-h-0 flex-1 flex-col overflow-hidden">
-            <section aria-label="Request" data-pane="request" className="flex min-h-0 flex-1 flex-col" style={REQUEST_AREA_STYLE}>
+          {showsWelcome ? <WelcomePanel actions={actions} onDismiss={hideWelcome} /> : <div className="response-split flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
+            <section aria-label={APP_TEXT.requestSection} data-pane="request" className="flex min-h-0 flex-1 flex-col" style={REQUEST_AREA_STYLE}>
               <RequestTabs
                 tabId={activeTab.id}
                 activeRequest={activeRequest}
@@ -393,6 +408,7 @@ function LoadedWorkspace({ backend, onBack }) {
               onDownload={actions.download}
               onSaveExample={actions.examples.saveResponse}
               onExplain={isAiOn ? () => actions.ai.start(TASK_EXPLAIN) : null}
+              onTrust={actions.storage?.confirmTrust}
             />}
           </div>}
         </main>
@@ -408,10 +424,12 @@ function LoadedWorkspace({ backend, onBack }) {
             shareFolderId={importDialogFolderId}
             shareLinkBase={actions.shareLinkBase}
             requests={requests}
-            folders={folders}
+            folders={shareableFolders}
             environments={shareableEnvironments}
+            collectionVariables={shareableVariables}
             variables={variablesMap}
             settings={collectionSettings}
+            sharedOrder={sharedOrder}
             onImport={actions.importData}
             onImportShared={actions.importShared}
             openapi={actions.openapi}

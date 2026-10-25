@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { KeyRound, MonitorDown, Pencil, Plus, Trash2 } from "lucide-react"
+import { KeyRound, Pencil, Plus, Trash2 } from "lucide-react"
 import { BrandIcon } from "./ui/brandIcon"
 import { Button, IconButton } from "./ui/button"
 import { ColorPicker } from "./ui/colorPicker"
@@ -10,6 +10,7 @@ import { Input } from "./ui/input"
 import { Notice, SectionLabel } from "./ui/panel"
 import { Select } from "./ui/select"
 import { Switch } from "./ui/switch"
+import { DesktopOnly } from "./DesktopOnly"
 import { ConnectionMark } from "./ConnectionMark"
 import { BLANK_REFERENCE, ReferenceTarget } from "./SecretReferenceFields"
 import { useSecretConnections } from "../hooks/useSecretConnections"
@@ -243,13 +244,6 @@ function ConnectionForm({ draft, isNew, kinds, secrets, onChange, onFilled }) {
   )
 }
 
-function DesktopOnly() {
-  return (
-    <DialogBody>
-      <EmptyState icon={MonitorDown} title={TEXT.desktopOnlyTitle} description={TEXT.desktopOnly} />
-    </DialogBody>
-  )
-}
 
 function ConnectionManager({ secrets, onClose }) {
   const { connections, kinds, failure } = useSecretConnections(secrets)
@@ -332,11 +326,11 @@ function ConnectionManager({ secrets, onClose }) {
 
 export function SecretsDialog({ secrets, onClose }) {
   return (
-    <Dialog label={TEXT.title} size="lg" onClose={onClose}>
+    <Dialog label={TEXT.title} size={secrets ? "lg" : "sm"} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <DialogTitle>{TEXT.title}</DialogTitle>
       </DialogHeader>
-      {secrets ? <ConnectionManager secrets={secrets} onClose={onClose} /> : <DesktopOnly />}
+      {secrets ? <ConnectionManager secrets={secrets} onClose={onClose} /> : <DesktopOnly title={TEXT.desktopOnlyTitle} description={TEXT.desktopOnly} />}
     </Dialog>
   )
 }

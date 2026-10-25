@@ -9,6 +9,7 @@ import (
 const (
 	limitExport       = "TIMEOUT_MS"
 	allowanceExport   = "scriptAllowance"
+	extractExport     = "extractAllowance"
 	sendTimeoutExport = "SEND_TIMEOUT_MS"
 	sendsExport       = "MAX_SENDS"
 	stepsExport       = "MAX_FLOW_STEPS"
@@ -36,7 +37,7 @@ type Sandbox struct {
 }
 
 func New() (*Sandbox, error) {
-	shared, err := boot(nil)
+	shared, err := boot()
 	if err != nil {
 		return nil, err
 	}
@@ -49,13 +50,19 @@ func New() (*Sandbox, error) {
 			FlowSteps:   int(shared.exports.Get(stepsExport).ToInteger()),
 		},
 	}
-	sandbox.standard, err = sandbox.Allowance(sandbox.standard.Limit)
+	sandbox.standard, err = sandbox.Allowance(sandbox.standard.Limit, true)
 	return sandbox, err
 }
 
-func (s *Sandbox) Allowance(milliseconds int64) (Allowance, error) {
+func (s *Sandbox) Allowance(milliseconds int64, script bool) (Allowance, error) {
 	var allowance Allowance
-	err := s.Call(allowanceExport, &allowance, milliseconds)
+	err := s.Call(allowanceExport, &allowance, milliseconds, script)
+	return allowance, err
+}
+
+func (s *Sandbox) ExtractAllowance(milliseconds int64) (Allowance, error) {
+	var allowance Allowance
+	err := s.Call(extractExport, &allowance, milliseconds)
 	return allowance, err
 }
 
@@ -64,14 +71,18 @@ func (s *Sandbox) Limits() Limits {
 }
 
 func (s *Sandbox) Call(function string, result any, arguments ...any) error {
+	return s.Shared(s.standard, function, result, arguments...)
+}
+
+func (s *Sandbox) Shared(allowance Allowance, function string, result any, arguments ...any) error {
 	if s.shared == nil {
-		shared, err := boot(nil)
+		shared, err := boot()
 		if err != nil {
 			return err
 		}
 		s.shared = shared
 	}
-	err := s.run(s.shared, s.standard, function, result, arguments)
+	err := s.run(s.shared, allowance, function, result, arguments)
 	if err != nil {
 		s.shared = nil
 	}
@@ -79,8 +90,11 @@ func (s *Sandbox) Call(function string, result any, arguments ...any) error {
 }
 
 func (s *Sandbox) Isolated(allowance Allowance, bridge Bridge, function string, result any, arguments ...any) error {
-	isolated, err := boot(bridge)
+	isolated, err := spares.take()
 	if err != nil {
+		return err
+	}
+	if err := connect(isolated.vm, bridge); err != nil {
 		return err
 	}
 	return s.run(isolated, allowance, function, result, arguments)

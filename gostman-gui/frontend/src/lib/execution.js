@@ -1,5 +1,5 @@
 import { hasActiveContent } from './activeContent'
-import { defaultExtractScope, extractWrites, isUsableResponse, parseExtractors } from './chaining'
+import { defaultExtractScope, enabledExtractors, isUsableResponse, parseExtractors, writesFrom } from './chaining'
 import { isPlainObject, parseJSON } from './dataUtils'
 import { isGrpcRequest } from './grpc'
 import { inheritedAuthSource, lineageOf, withInheritance } from './inheritance'
@@ -10,22 +10,24 @@ import { failureResponse } from './response'
 import { isStreamRequest } from './sse'
 import { transmitStream } from './sseTransport'
 import { countActiveAssertions } from './scripting/assertions'
+import { CHECK_RUN_TEXT } from './checksText'
 import { consoleGroup } from './consoleLog'
 import { createContractChecker, linkFor } from './contractCheck'
 import { addressHost, collectionHostsBy, isPermittedHost } from './scripting/destinations'
 import { holdsBack, reasonFor } from './scripting/flow'
-import { MAX_SENDS, SEND_TIMEOUT_MS } from './scripting/limits'
-import { applyRequestEdits, requestSubject, responseSubject, runInSandbox } from './scripting/sandbox'
+import { MAX_SENDS, SEND_TIMEOUT_MS, extractAllowance } from './scripting/limits'
+import { errorLine } from './scripting/console'
+import { applyRequestEdits, extractInSandbox, requestSubject, responseSubject, runInSandbox } from './scripting/sandbox'
 import { acceptedCookies, scriptCookies } from './scripting/scriptCookies'
 import { scriptedRequest } from './scripting/subjects'
 import { SECRETS_TEXT } from './secretsText'
 import { ENTRY_KINDS, exchangeEntry, scriptEntry, secretsEntry, withActivity } from './timeline'
 import { promptNames, referenceTargets, usedVariableNames } from './variableScopes'
-import { findActiveEnvironment, scriptVariablesFor, useAppStore, variableTextFor } from '../store/appStore'
+import { environmentFor, scriptVariablesFor, useAppStore, variableTextFor } from '../store/appStore'
 
 const CONFIG_ERROR = 'config'
 const SCRIPT_ERROR = 'script'
-const RESTRICTED_ERROR = 'restricted'
+export const RESTRICTED_ERROR = 'restricted'
 const PROMPT_DECLINED = 'The request was not sent because the values it asks for were not provided.'
 const UNUSABLE_ADDRESS = 'The address cannot be used by a script.'
 const SEND_LIMIT = `A script may call sendRequest ${MAX_SENDS} times.`
@@ -61,19 +63,51 @@ async function runStage(stage, job, request, { send, trace, referenced, timeoutM
   const variables = scriptVariablesFor(store(), request, referenced)
   const hosts = scriptHosts()
   const cookies = scriptCookies(store().cookies, hosts)
-  const environment = findActiveEnvironment(store())?.name ?? ''
+  const environment = environmentFor(store(), request)?.name ?? ''
   const run = await trace.timed(scriptEntry(stage), () => runInSandbox({ ...job, variables, cookies, environment }, send, timeoutMs))
-  if (isPlainObject(run.writes)) store().applyVariableWrites(run.writes)
+  if (isPlainObject(run.writes)) store().applyVariableWrites(run.writes, request)
   const changed = acceptedCookies(run.cookies, hosts)
   if (changed.length > 0) store().storeCookies(changed)
   return { ...run, error: run.error ? `${stage}: ${run.error}` : '' }
 }
 
-async function askForValues(request, referenced) {
+const askNow = (request, referenced) => (names, isForRun) => {
+  const known = readVariables(request, referenced)
+  return store().askVariables(names, Object.fromEntries(names.map((name) => [name, known[name] ?? ''])), isForRun)
+}
+
+const askEveryTime = (names, ask) => ask(names, false)
+
+export function rememberPrompts() {
+  const values = {}
+  let isDeclined = false
+  let turn = Promise.resolve()
+
+  const answer = async (names, ask) => {
+    if (isDeclined) return null
+    const missing = names.filter((name) => !Object.hasOwn(values, name))
+    if (missing.length > 0) {
+      const given = await ask(missing, true)
+      if (given === null) {
+        isDeclined = true
+        return null
+      }
+      Object.assign(values, given)
+    }
+    return Object.fromEntries(names.map((name) => [name, values[name]]))
+  }
+
+  return (names, ask) => {
+    const next = turn.then(() => answer(names, ask))
+    turn = next.catch(() => undefined)
+    return next
+  }
+}
+
+async function askForValues(request, referenced, prompts) {
   const names = promptNames(request)
   if (names.length === 0) return {}
-  const known = readVariables(request, referenced)
-  return store().askVariables(names, Object.fromEntries(names.map((name) => [name, known[name] ?? ''])))
+  return prompts(names, askNow(request, referenced))
 }
 
 const NO_FLOW = { action: '', target: '' }
@@ -89,12 +123,21 @@ const report = (runs) => ({
   notes: runs.map((run) => run.note).filter(Boolean),
 })
 
-export function applyExtractors(request, response) {
+const scriptTimeoutOf = (request) => lineageOf(store(), request.folderId)[0]?.settings.scriptTimeoutMs
+
+const NO_OUTCOMES = { outcomes: [] }
+
+export async function applyExtractors(request, response) {
   const extractors = parseExtractors(request.extractors)
   if (extractors.length === 0 || !isUsableResponse(response)) return null
-  const writes = extractWrites(extractors, response, defaultExtractScope(store().workspaceStatus.path))
-  return { saved: store().applyVariableWrites(writes), written: Object.fromEntries(Object.entries(writes).map(([scope, values]) => [scope, Object.keys(values)])) }
+  const enabled = enabledExtractors(extractors)
+  const evaluated = enabled.length > 0 ? await extractInSandbox(enabled, response, extractAllowance(scriptTimeoutOf(request))) : NO_OUTCOMES
+  if (evaluated.error) return { error: evaluated.error }
+  const writes = writesFrom(enabled, evaluated.outcomes, defaultExtractScope(store().workspaceStatus.path))
+  return { saved: store().applyVariableWrites(writes, request), written: Object.fromEntries(Object.entries(writes).map(([scope, values]) => [scope, Object.keys(values)])) }
 }
+
+const extractionRun = (extraction) => ({ tests: [], logs: [errorLine(extraction.error)], error: extraction.error })
 
 const scopeLabel = (stage, name) => `${stage} (${name})`
 
@@ -103,10 +146,12 @@ const preSteps = (lineage, request) => [
   { label: PRE_REQUEST, script: request.preScript },
 ].filter((step) => hasText(step.script))
 
+const postLabel = (script) => (hasText(script) ? POST_RESPONSE : CHECK_RUN_TEXT.stage)
+
 const postSteps = (lineage, request) => [
-  { label: POST_RESPONSE, script: request.postScript, assertions: request.assertions },
+  { label: postLabel(request.postScript), script: request.postScript, assertions: request.assertions },
   ...[...lineage].reverse().map(({ name, settings }) => ({
-    label: scopeLabel(POST_RESPONSE, name),
+    label: scopeLabel(postLabel(settings.postScript), name),
     script: settings.postScript,
     assertions: settings.assertions,
   })),
@@ -147,7 +192,7 @@ function transportFor(backend, request) {
 
 async function renewAuth(backend, request, lineage, variables) {
   const source = inheritedAuthSource(request.auth, lineage)
-  const environmentId = findActiveEnvironment(store())?.id || ''
+  const environmentId = environmentFor(store(), request)?.id || ''
   if (!source) {
     const renewed = await withFreshToken(backend, request, variables, environmentId)
     return { request: renewed, outgoing: renewed }
@@ -186,7 +231,7 @@ function createScriptSender(backend, trace) {
 export function createExecutor(backend) {
   const checkContract = createContractChecker(backend)
 
-  const perform = async (original, sendId, runs, trace) => {
+  const perform = async (original, sendId, runs, trace, prompts) => {
     const stop = (request, message, kind = CONFIG_ERROR) => ({
       auth: request.auth,
       response: failureResponse(kind, message),
@@ -217,7 +262,7 @@ export function createExecutor(backend) {
       request = applyRequestEdits(request, pre.request)
     }
 
-    const answers = await askForValues(request, referenced)
+    const answers = await askForValues(request, referenced, prompts)
     if (answers === null) return stop(request, PROMPT_DECLINED)
 
     let renewal
@@ -234,7 +279,8 @@ export function createExecutor(backend) {
     const transmit = () => transportFor(backend, outgoing)(sendId, withInheritance(store(), outgoing), variablesOf(request, answers), store().cookies)
     const response = await trace.timed(exchangeEntry(ENTRY_KINDS.REQUEST, outgoing), transmit)
     if (!outgoing.options?.discardCookies) store().storeCookies(response.cookies || [])
-    const extraction = applyExtractors(request, response)
+    const extraction = await applyExtractors(request, response)
+    if (extraction?.error) runs.push(extractionRun(extraction))
 
     if (isUsableResponse(response)) {
       for (const step of postSteps(lineage, request)) {
@@ -251,10 +297,10 @@ export function createExecutor(backend) {
     return { auth: request.auth, response, tests: report(runs), extraction }
   }
 
-  return async function execute(original, sendId) {
+  return async function execute(original, sendId, prompts = askEveryTime) {
     const runs = []
     const trace = createTrace()
-    const outcome = await perform(original, sendId, runs, trace)
+    const outcome = await perform(original, sendId, runs, trace, prompts)
     const logs = runs.flatMap((run) => run.logs)
     if (logs.length > 0) store().appendConsole(consoleGroup(original, logs, ++consoleSequence))
     return { ...outcome, response: withActivity(outcome.response, trace.entries) }

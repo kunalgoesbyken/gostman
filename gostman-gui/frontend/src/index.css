@@ -101,7 +101,7 @@
     --accent-foreground: 224 40% 8%;
 
     --border: 220 13% 82%;
-    --input: 220 13% 82%;
+    --input: 220 9% 57%;
 
     --radius: 0.375rem;
     --scrollbar-size: 10px;
@@ -126,7 +126,7 @@
     --accent-foreground: 210 40% 98%;
 
     --border: 224 40% 15%;
-    --input: 224 40% 15%;
+    --input: 224 18% 42%;
   }
 
   :root,
@@ -298,6 +298,209 @@
     border-radius: calc(var(--radius) - 3px);
   }
 
+  .docs-lead {
+    @apply text-lg leading-relaxed text-muted-foreground;
+  }
+
+  .docs-lead a,
+  .docs-prose a {
+    @apply text-primary underline decoration-primary/30 underline-offset-4 transition-colors hover:decoration-primary;
+  }
+
+  .docs-lead code,
+  .docs-prose :not(pre) > code {
+    @apply rounded border border-border bg-muted/50 px-1 py-px font-mono text-[0.85em] text-foreground;
+  }
+
+  .docs-lead,
+  .docs-prose {
+    overflow-wrap: anywhere;
+  }
+
+  .docs-prose {
+    @apply leading-7 text-muted-foreground;
+  }
+
+  .docs-prose > :first-child {
+    @apply mt-0;
+  }
+
+  .docs-prose h2,
+  .docs-prose h3,
+  .docs-prose h4 {
+    @apply scroll-mt-4 font-semibold tracking-tight text-foreground;
+  }
+
+  .docs-prose h2 {
+    @apply mt-14 border-t border-border pt-8 text-2xl;
+  }
+
+  .docs-prose h3 {
+    @apply mt-10 text-lg;
+  }
+
+  .docs-prose h4 {
+    @apply mt-8 text-base;
+  }
+
+  .docs-prose .docs-anchor {
+    @apply relative text-inherit no-underline;
+  }
+
+  .docs-prose .docs-anchor::after {
+    content: "#";
+    @apply ml-2 font-normal text-muted-foreground opacity-0 transition-opacity;
+  }
+
+  .docs-prose .docs-anchor:hover::after,
+  .docs-prose .docs-anchor:focus-visible::after {
+    @apply opacity-100;
+  }
+
+  .docs-step {
+    @apply mr-3 inline-flex h-7 min-w-7 items-center justify-center rounded-full border border-border px-1.5 align-[0.15em] font-mono text-sm font-medium text-foreground;
+  }
+
+  .docs-prose p,
+  .docs-prose ul,
+  .docs-prose ol,
+  .docs-prose blockquote,
+  .docs-prose .docs-code,
+  .docs-prose .docs-table,
+  .docs-prose .docs-callout {
+    @apply mt-5;
+  }
+
+  .docs-prose ul {
+    @apply list-disc space-y-2 pl-6 marker:text-muted-foreground/60;
+  }
+
+  .docs-prose ol {
+    @apply list-decimal space-y-2 pl-6 marker:text-muted-foreground;
+  }
+
+  .docs-prose li > ul,
+  .docs-prose li > ol {
+    @apply mt-2;
+  }
+
+  .docs-prose strong {
+    @apply font-semibold text-foreground;
+  }
+
+  .docs-prose img {
+    @apply mt-6 h-auto w-full rounded-lg border border-border;
+  }
+
+  .docs-prose blockquote {
+    @apply border-l-2 border-border pl-4;
+  }
+
+  .docs-prose hr {
+    @apply my-10 border-border;
+  }
+
+  .docs-code {
+    @apply overflow-hidden rounded-lg border border-border bg-card;
+  }
+
+  .docs-code-bar {
+    @apply flex h-9 items-center justify-between gap-3 border-b border-border pl-4 pr-1.5 text-xs text-muted-foreground;
+  }
+
+  .docs-code pre {
+    @apply overflow-x-auto px-4 py-3.5 font-mono text-[0.8125rem] leading-6 text-foreground;
+  }
+
+  .docs-copy {
+    @apply flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground;
+  }
+
+  .docs-copy-done,
+  .docs-copy[data-copied] .docs-copy-idle {
+    @apply hidden;
+  }
+
+  .docs-copy[data-copied] .docs-copy-done {
+    @apply block text-success;
+  }
+
+  .docs-table {
+    @apply overflow-x-auto rounded-lg border border-border;
+    overflow-wrap: normal;
+  }
+
+  .docs-table table {
+    @apply w-full border-collapse text-sm;
+  }
+
+  .docs-table th {
+    @apply border-b border-border bg-muted/40 px-3 py-2 text-left font-medium text-foreground;
+  }
+
+  .docs-table td {
+    @apply border-b border-border/60 px-3 py-2 align-top;
+  }
+
+  .docs-table code {
+    @apply whitespace-nowrap;
+  }
+
+  .docs-table tr:last-child td {
+    @apply border-b-0;
+  }
+
+  .docs-callout {
+    @apply rounded-lg border px-4 py-3;
+    border-color: hsl(var(--callout) / 0.35);
+    background-color: hsl(var(--callout) / 0.06);
+  }
+
+  .dark .docs-callout {
+    background-color: hsl(var(--callout) / 0.1);
+  }
+
+  .docs-callout > :first-child {
+    @apply mt-0;
+  }
+
+  .docs-callout > .docs-callout-title + * {
+    @apply mt-1;
+  }
+
+  .docs-callout-title {
+    @apply flex items-center gap-2 text-sm font-semibold;
+    color: hsl(var(--callout));
+  }
+
+  .docs-callout-icon {
+    @apply h-4 w-4 shrink-0;
+  }
+
+  .docs-callout[data-kind="note"] {
+    --callout: var(--info);
+  }
+
+  .docs-callout[data-kind="tip"] {
+    --callout: var(--success);
+  }
+
+  .docs-callout[data-kind="important"] {
+    --callout: var(--primary);
+  }
+
+  .docs-callout[data-kind="warning"] {
+    --callout: var(--warning);
+  }
+
+  .docs-callout[data-kind="caution"] {
+    --callout: var(--destructive);
+  }
+
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
+
   kbd {
     @apply inline-flex shrink-0 items-center rounded border border-border px-1.5 py-0.5;
     @apply font-mono text-3xs font-medium text-muted-foreground;
@@ -326,6 +529,18 @@
 
 .skip-link:focus {
   top: 0;
+}
+
+@keyframes docs-drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .docs-drawer[open] {
+    animation: docs-drawer-in 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
 }
 
 @keyframes reveal {

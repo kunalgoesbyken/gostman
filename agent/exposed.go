@@ -24,6 +24,7 @@ const (
 	dynamicPrefix        = "$"
 	schemeSeparator      = "://"
 	pathStarts           = "/?#"
+	paragraphBreak       = "\n\n"
 )
 
 var (
@@ -140,15 +141,24 @@ func freeName(wanted string, taken map[string]bool) string {
 	return name
 }
 
-func describeExposed(request runner.Request, stored workspace.Request) string {
+func argumentsNote(parameters []string) string {
+	if len(parameters) == 0 {
+		return "Takes no arguments: any parameter named above keeps its saved value."
+	}
+	return "Arguments: " + strings.Join(parameters, ", ") + ". Any other parameter named above keeps its saved value."
+}
+
+func describeExposed(request runner.Request, stored workspace.Request, parameters []string) string {
 	description := strings.TrimSpace(stored.Description)
 	if description == "" {
 		description = fmt.Sprintf("Send %s %s from the Gostman workspace.", request.Method, request.URL)
 	}
-	if runes := []rune(description); len(runes) > toolDescriptionLimit {
-		description = string(runes[:toolDescriptionLimit])
+	note := argumentsNote(parameters)
+	room := max(0, toolDescriptionLimit-len([]rune(note))-len(paragraphBreak))
+	if runes := []rune(description); len(runes) > room {
+		description = string(runes[:room])
 	}
-	return description
+	return description + paragraphBreak + note
 }
 
 func (d *Desk) expose(current scene, tags []string) ([]exposure, error) {
@@ -167,12 +177,13 @@ func (d *Desk) expose(current scene, tags []string) ([]exposure, error) {
 		if !workspace.SharesTag(request.Tags, wanted) {
 			continue
 		}
+		parameters := parametersOf(request)
 		item := exposure{
 			requestID:   request.ID,
 			name:        request.Name,
 			method:      request.Method,
-			description: describeExposed(request, storedRequest(current.files, request.ID)),
-			parameters:  parametersOf(request),
+			description: describeExposed(request, storedRequest(current.files, request.ID), parameters),
+			parameters:  parameters,
 		}
 		for _, name := range item.parameters {
 			if _, defined := known[name]; !defined {

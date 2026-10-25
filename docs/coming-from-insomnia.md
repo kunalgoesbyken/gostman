@@ -40,7 +40,7 @@ gostman run store --env Local
 | WebSocket requests and their saved payloads | WebSocket requests, with each payload as a [saved message](protocols.md#saved-messages) |
 | Socket.IO requests and their saved payloads | WebSocket requests with the Socket.IO protocol and the request's custom path, if it has one. Each payload becomes a saved message with its event and first argument |
 | MCP client requests | MCP requests. A stdio client becomes a `stdio:` command whose environment rows become its headers, which Gostman passes to the command as its environment |
-| Base environment and sub environments | An environment named after the collection for the base environment, and environments with the names and colours of the sub environments. Each sub environment inherits from the base one, as in Insomnia |
+| Base environment and sub environments | An environment named after the collection for the base environment, and environments with the names and colours of the sub environments. Each sub environment inherits from the base one, as in Insomnia. In the app they belong to the collection's folder, so another collection's environments do not mix with them (see [Environments per collection](variables.md#environments-per-collection)) |
 | Secret rows, private environments and vault secrets | Variables marked secret. Vault secrets (`{{ _.vault.name }}`, the **Secret** rows of a private environment) come across as empty secret variables named `vault.name`, because Insomnia exports them encrypted or masked. JSON rows are split into dotted variables, so `{{ _.limits.page }}` keeps working |
 | Global environment files (`environment.insomnia.rest/5.0`, or a v4 workspace of the environment kind) | Global environments in the app. `gostman import` writes them as environments |
 | Unit test suites | A `test()` block in the post-response script of the request each test targets, named after the suite and the test |
@@ -94,9 +94,11 @@ Kept as text and listed: `{% now 'custom', ... %}`, `base64` and `hash` of a val
 
 `sendRequest` reaches only localhost and the hosts that requests in the collection already use. Insomnia's `setNextRequest` also takes a request id, which is copied as written; replace it with the request's name.
 
+A name your script declares that Gostman scripts already have, such as `const res = insomnia.response.json()` or a helper `function test(name, fn)`, gets a number added, `res1` or `test1`, everywhere the script uses it, so the rewritten calls still reach Gostman's `res` and `test`.
+
 Kept as written and listed in the summary with their line, so you can rewrite them before running: `insomnia.vault`, `insomnia.parentFolders`, `insomnia.cookies.jar()`, `insomnia.test.skip`, `insomnia.info.eventName`, the request editing calls such as `insomnia.request.addQueryParams`, and `require` of modules Gostman does not bundle, such as `cheerio`, `xml2js` and `csv-parse`. Gostman bundles `lodash`, `crypto-js`, `uuid`, `moment`, `dayjs`, `ajv` and `chai`.
 
-Scripts run in an isolated worker with no network access of their own and stop after the time limit set on the Script tab of the [collection settings](folder-settings.md): 10 seconds unless you change it, up to 120. The script API is in [Variables, scripts and settings](scripting-and-settings.md#script-api).
+Scripts run in an isolated worker with no network access of their own and stop after the time limit set on the Script tab of [Settings for all collections](folder-settings.md) (**Collection settings** in a folder workspace): 10 seconds unless you change it, up to 120. The script API is in [Scripts and checks](scripting-and-settings.md#script-api).
 
 ## What does not come across
 
@@ -129,6 +131,10 @@ Import the collection once and commit the folder. These `gostman run` flags matc
 Reports are written with `--reporter junit:report.xml`, also `text`, `json` and `html`, repeatable.
 
 The `gostman` binary has nothing else to install, so CI needs no Node.js. See [Gostman in CI](ci.md).
+
+## Back to Insomnia
+
+Gostman does not write Insomnia's format, but Insomnia imports Postman collections. Export with the **Postman** format in the **Export** tab of the app, or with `gostman export store --format postman --out store.json`, and import that file in Insomnia. What the file holds is listed in [Back to Postman](coming-from-postman.md#back-to-postman). Scripts and checks are adapted to Postman's `pm.*` API, which Insomnia runs in imported Postman collections, so they need no rewriting. Extract rules become lines at the top of the post-response script that set collection variables, which Insomnia keeps in its base environment. Insomnia has no global variables, so scripts that use `env.globals` need a change; the export summary lists the other calls that will not run. See [Scripts and checks in Postman, Bruno and Insomnia](import-export-and-specs.md#scripts-and-checks-in-postman-bruno-and-insomnia).
 
 ## What Insomnia has that Gostman does not
 

@@ -10,6 +10,9 @@ import { AUTH_INHERIT, AUTH_NONE, activeSettingsKinds, hasActiveSettings, normal
 import { clearToken } from './oauth'
 import { AUTH_OAUTH2, normalizeRequest } from './request'
 import { isFileRow, isSentRow } from './rows'
+import { cleanOrder, compareOrder } from './sortOrder'
+import { sharedNumbering } from './treeMoves'
+import { cleanColorChoice } from './swatches'
 import { normalizeTags } from './tags'
 import { AUTH_API_KEY, AUTH_BASIC, AUTH_BEARER, GRAPHQL_METHOD, UNTITLED_REQUEST, apiKeyLocation, asText, sentRows } from './exportFields'
 
@@ -274,11 +277,29 @@ const withoutToken = (request) => ({ ...request, auth: { ...request.auth, oauth2
 
 const withoutScopeToken = (scope) => (scope?.auth?.oauth2 ? { ...scope, auth: { ...scope.auth, oauth2: clearToken(scope.auth.oauth2) } } : scope)
 
-export function exportToGostman(requests, folders, environments, settings) {
+const objectOf = (value) => {
+  const parsed = typeof value === 'string' ? parseJSON(value, null) : value
+  return isPlainObject(parsed) ? parsed : {}
+}
+
+const markedOnly = (meta) => {
+  const marks = secretMarks(meta)
+  return Object.keys(marks).length > 0 ? JSON.stringify(marks) : undefined
+}
+
+export function exportToGostman(requests, folders, environments, settings, collectionVariables = {}, sharedOrder = false) {
   return {
     version: GOSTMAN_FORMAT_VERSION,
     exportedAt: new Date().toISOString(),
-    gostman: { requests: requests.map(withoutToken), folders: folders.map(withoutScopeToken), environments, settings: withoutScopeToken(settings) },
+    gostman: {
+      requests: requests.map(withoutToken),
+      folders: folders.map(withoutScopeToken),
+      environments,
+      variables: objectOf(collectionVariables.variables),
+      variablesMeta: markedOnly(collectionVariables.meta),
+      settings: withoutScopeToken(settings),
+      ...(sharedOrder && { sharedOrder: true }),
+    },
   }
 }
 
@@ -295,8 +316,10 @@ function importGostman(data) {
     requests: backup.requests,
     folders: backup.folders,
     environments: asArray(backup.environments),
-    variables: isPlainObject(backup.variables) ? backup.variables : {},
+    variables: objectOf(backup.variables),
+    variablesMeta: stringOf(backup.variablesMeta),
     settings: backup.settings,
+    sharedOrder: backup.sharedOrder === true,
   }
 }
 
@@ -496,6 +519,7 @@ function sanitizeRequest(raw) {
     ...pickStrings(raw, REQUEST_TEXT_FIELDS),
     name: cleanName(raw.name, UNTITLED_REQUEST),
     tags: normalizeTags(raw.tags),
+    sortOrder: cleanOrder(raw.sortOrder),
     method: cleanMethod(raw.method),
     bodyType: BODY_TYPE_VALUES.includes(raw.bodyType) ? raw.bodyType : '',
     examples: sanitizeExamples(stringOf(raw.examples)),
@@ -514,8 +538,13 @@ const sanitizeFolder = (raw) => ({
   name: cleanName(raw.name, UNTITLED_FOLDER),
   isOpen: raw.isOpen === true,
   parentId: stringOf(raw.parentId),
+  sortOrder: cleanOrder(raw.sortOrder),
   variables: stringOf(raw.variables) || '{}',
+  color: cleanColorChoice(raw.color),
+  tags: normalizeTags(raw.tags),
   ...sanitizeScope(raw),
+  ...(typeof raw.collectionVariables === 'string' && { collectionVariables: raw.collectionVariables }),
+  ...(typeof raw.collectionVariablesMeta === 'string' && { collectionVariablesMeta: JSON.stringify(secretMarks(raw.collectionVariablesMeta)) }),
 })
 
 const variableMark = (mark) => ({ ...(mark?.secret === true && { secret: true }), ...(mark?.enabled === false && { enabled: false }) })
@@ -533,6 +562,7 @@ const sanitizeEnvironment = (raw) => ({
   color: stringOf(raw.color),
   extends: stringOf(raw.extends),
   meta: JSON.stringify(secretMarks(raw.meta)),
+  folderId: stringOf(raw.folderId),
 })
 
 function assignFreshIds(items, takenIds) {
@@ -554,6 +584,10 @@ function flattenDeepFolders(folders) {
   return folders.map((folder) => (isTooDeep(folder) ? { ...folder, parentId: ROOT_ID } : folder))
 }
 
+function placedAfterExisting(items, parentOf) {
+  return [...items].sort(compareOrder).map((item) => (parentOf(item) === ROOT_ID ? { ...item, sortOrder: 0 } : item))
+}
+
 export function sanitizeImport(data, existing) {
   const rawRequests = asArray(data?.requests).filter(isPlainObject)
   const requestsWithoutTls = rawRequests
@@ -563,18 +597,23 @@ export function sanitizeImport(data, existing) {
   const folderIds = assignFreshIds(asArray(data?.folders).filter(isPlainObject).map(sanitizeFolder), existing.folderIds)
   const inImport = (id) => folderIds.renamed.get(id) || ROOT_ID
   const linkedFolders = folderIds.assigned.map((folder) => ({ ...folder, parentId: inImport(folder.parentId) }))
-  const folders = flattenDeepFolders(linkedFolders)
-  const flattenedCount = folders.filter((folder, index) => folder.parentId !== linkedFolders[index].parentId).length
+  const flattenedFolders = flattenDeepFolders(linkedFolders)
+  const flattenedCount = flattenedFolders.filter((folder, index) => folder.parentId !== linkedFolders[index].parentId).length
 
   const requestIds = assignFreshIds(rawRequests.map(sanitizeRequest), existing.requestIds)
-  const requests = requestIds.assigned.map((request) => ({ ...request, folderId: inImport(request.folderId), timestamp: '' }))
+  const linkedRequests = requestIds.assigned.map((request) => ({ ...request, folderId: inImport(request.folderId), timestamp: '' }))
+  const linked = { folders: flattenedFolders, requests: linkedRequests }
+  const ordered = data?.sharedOrder === true ? linked : sharedNumbering(linked)
+  const folders = placedAfterExisting(ordered.folders, (folder) => folder.parentId)
+  const requests = placedAfterExisting(ordered.requests, (request) => request.folderId)
 
   return {
     requests,
     folders,
-    environments: asArray(data?.environments).filter(isPlainObject).map(sanitizeEnvironment),
+    environments: asArray(data?.environments).filter(isPlainObject).map(sanitizeEnvironment).map((environment) => ({ ...environment, folderId: inImport(environment.folderId) })),
     globals: asArray(data?.globals).filter(isPlainObject).map(sanitizeEnvironment),
-    variables: isPlainObject(data?.variables) ? data.variables : {},
+    variables: objectOf(data?.variables),
+    variablesMeta: JSON.stringify(secretMarks(data?.variablesMeta)),
     settings: sanitizeScope(data?.settings),
     notes: asArray(data?.notes).filter((note) => typeof note === 'string'),
     warnings: [

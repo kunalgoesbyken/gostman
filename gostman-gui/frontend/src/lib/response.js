@@ -131,6 +131,8 @@ export function downloadName(response) {
   return `${name}.${extension}`
 }
 
+export const httpStatusOf = (response) => (response.protocol ? 0 : response.statusCode || 0)
+
 const grpcVariant = (statusCode) => (statusCode === GRPC_OK ? 'success' : 'clientError')
 const mcpVariant = (status) => (status === MCP_OK ? 'success' : 'clientError')
 

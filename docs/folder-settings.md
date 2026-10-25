@@ -1,6 +1,11 @@
 # Folder and collection settings
 
-Every folder and the collection itself can carry settings that the requests below it share. Open them from a folder's menu (**Settings**) or with the settings button above the collection tree (**Collection settings**).
+Every folder and every collection can carry settings that the requests below them share. Where you open them depends on where the collection lives:
+
+- **In the app's own storage** (the web app, and the desktop app without a folder open) each top-level folder is a collection. Open its settings from its menu with **Collection settings**; deeper folders have **Settings**. The settings button above the collection tree opens **Settings for all collections**: settings that apply to every request in every collection, and the shared collection variables.
+- **In a folder workspace** the folder is one collection. The settings button opens **Collection settings**, kept in `gostman.yaml`, and every folder's menu has **Settings**.
+
+The command palette has **Collection settings**, which opens the settings of the active request's collection (in the app's own storage, a request outside any folder gets **Settings for all collections**), and, in the app's own storage, **Settings for all collections**.
 
 ![Folder settings for the Auth folder on the Headers tab, with X-Client and X-User-Id headers sent with every request in the folder](../screenshots/folder-settings.png)
 
@@ -8,32 +13,32 @@ Every folder and the collection itself can carry settings that the requests belo
 | --- | --- |
 | Headers | Rows sent with every request below |
 | Auth | An auth scheme used by requests set to **Inherit** |
-| Vars | Variables for the requests below (the collection's own variables are the ones in Environments) |
-| Script | A pre-request and a post-response script; on the collection, also the time limit for every script |
+| Vars | Folder variables for the requests below. In the **Collection settings** of a top-level folder, **Collection variables** switches to the collection's own collection variables, which an environment overrides, and **Folder variables** back. **Settings for all collections**, and **Collection settings** in a folder workspace, edit the shared collection variables here. Collection variables have a secret lock; folder variables have no on/off checkbox or secret lock, so keep secrets in an environment or a collection variable marked secret |
+| Script | A script under **Before the request** and one under **After the response**; at the outermost level, also **Time limit (s)** for every script |
 | Tests | Assertions checked after every response |
 | Docs | A description shown in generated documentation |
 
-The collection is the outermost level. A request belongs to its folder, which may sit inside other folders.
+The outermost level is **Settings for all collections**, or **Collection settings** in a folder workspace. A request belongs to its folder, which may sit inside other folders; in the app's own storage the top-level one is its collection.
 
 ## How levels combine
 
-**Headers** merge from the outside in: collection, then each folder down to the request's own folder, then the request. A header with the same name (case-insensitive) replaces the outer one. A row that is switched off removes the outer header of that name instead of sending anything, so a request can drop a header a folder adds.
+**Headers** merge from the outside in: the outermost level, then each folder down to the request's own folder, then the request. A header with the same name (case-insensitive) replaces the outer one. A row that is switched off removes the outer header of that name instead of sending anything, so a request can drop a header a folder adds.
 
-**Auth** is chosen by the nearest level that sets one. A request whose Auth type is **Inherit** uses the auth of its folder, else its parent folder, and so on up to the collection. A folder or the collection whose type is left on **Inherit** passes the question outward. **No auth** on a folder stops the search: requests that inherit from it are sent without authentication. A request that sets its own type, including **No auth**, never inherits. New requests keep **No auth** until you choose Inherit.
+**Auth** is chosen by the nearest level that sets one. A request whose Auth type is **Inherit** uses the auth of its folder, else its parent folder, and so on up to the outermost level. A folder whose type is left on **Inherit**, the default for folders, passes the question outward. **No auth** on a folder stops the search: requests that inherit from it are sent without authentication. The outermost level has no **Inherit** choice; when it is left on **No auth**, a request that inherits and finds no auth on the way is sent without authentication. A request that sets its own type, including **No auth**, never inherits. New requests keep **No auth** until you choose Inherit.
 
-**Variables** follow [Variables](variables.md): environment, then each folder from the outermost to the request's folder, then the request's own Vars. A folder variable overrides an environment variable of the same name.
+**Variables** follow [Variables](variables.md): collection variables, then the environment, then each folder from the outermost to the request's folder, then the request's own Vars, with session values above them all. A folder variable overrides an environment variable of the same name.
 
-**Scripts** run outside in before the request is sent: the collection's, each folder's, then the request's. After the response they run inside out: the request's, each folder's from the innermost, then the collection's. Each one sees the variables as they stand when it starts. A script that fails stops the request.
+**Scripts** run outside in before the request is sent: the outermost level's, each folder's, then the request's. After the response they run inside out: the request's, each folder's from the innermost, then the outermost level's. Each one sees the variables as they stand when it starts. A script that fails stops the request.
 
-**Tests** accumulate: the request's assertions and every folder's and the collection's are all checked.
+**Checks** accumulate: the request's assertions, every folder's and the outermost level's are all checked.
 
-**Docs** are shown above the requests of that folder in the generated HTML page; the collection's description appears at the top. The text is rendered as Markdown; HTML in it is escaped, never rendered.
+**Docs** are shown above the requests of that folder in the generated HTML page; the outermost level's description appears at the top. The text is rendered as Markdown; HTML in it is escaped, never rendered.
 
 ## What is sent
 
 The Go engine merges headers and resolves auth when it prepares a request, so what is sent, the code snippets, the CLI and the agent tools all agree. Inherited headers and auth appear in generated code. gRPC metadata, MCP requests and WebSocket connections use the same merged headers and auth.
 
-OAuth 2.0 set on a folder or the collection works like OAuth 2.0 on a request: **Get token** in the settings dialog stores the token there, and it is renewed when it expires. In a folder workspace the token is not written to the YAML files.
+OAuth 2.0 set on a folder or the outermost level works like OAuth 2.0 on a request: **Get token** in the settings dialog stores the token there, and it is renewed when it expires. In a folder workspace the token is not written to the YAML files.
 
 ## Files
 
@@ -57,11 +62,11 @@ assertions:
 description: Endpoints owned by the payments team.
 ```
 
-Keys Gostman does not know are kept when it rewrites the file. Gostman exports and share links carry folder settings with each folder and the collection settings with a full export. Importing never overwrites existing settings: collection settings are adopted only when the open collection has none.
+Keys Gostman does not know are kept when it rewrites the file. Gostman exports and share links carry folder settings with each folder, and the outermost settings with a full export. Importing never overwrites existing settings: the outermost settings are adopted only when the open collection has none (in the app's own storage, when **Settings for all collections** is empty).
 
 ## Trust
 
-Imports are untrusted. Scripts, OAuth 2.0 settings and [file reads](variables.md#reading-files) on folders and on the collection are counted in the import prompt and dropped if you decline them. In a folder you have not trusted, a request is not sent when its folder or the collection carries a script, OAuth 2.0 settings or a file read, exactly as for a request that carries them.
+Imports are untrusted. Scripts, OAuth 2.0 settings and [file reads](variables.md#reading-files) on folders and at the outermost level are counted in the import prompt and dropped if you decline them. In a folder you have not trusted, a request is not sent when one of its folders or the outermost level carries a script, OAuth 2.0 settings or a file read, exactly as for a request that carries them.
 
 ## The CLI
 

@@ -9,12 +9,12 @@ import { FOLDER_SETTINGS_TEXT as TEXT } from "../lib/folderSettingsText"
 import { AUTH_INHERIT } from "../lib/inheritance"
 import { AUTH_OAUTH2 } from "../lib/request"
 import { FIELD_AREA, FIELD_SECRET, FIELD_SELECT, SCHEMES } from "../lib/authSchemes"
+import { AUTH_TEXT } from "../lib/authText"
 import { AUTH_API_KEY, AUTH_BASIC, AUTH_BEARER, AUTH_METHODS, AUTH_NONE } from "../lib/authTypes"
 
 const IN_HEADER = "header"
 const IN_QUERY = "query"
 
-const NO_AUTH_NOTE = "This request is sent without authentication."
 const INHERIT_TYPE = { value: AUTH_INHERIT, label: TEXT.inherit }
 
 const AUTH_TYPES = [{ value: AUTH_NONE, label: TEXT.noAuth }, ...AUTH_METHODS]
@@ -22,10 +22,10 @@ const AUTH_TYPES = [{ value: AUTH_NONE, label: TEXT.noAuth }, ...AUTH_METHODS]
 function BasicFields({ auth, onFieldChange }) {
   return (
     <>
-      <Field label="Username">
+      <Field label={AUTH_TEXT.username}>
         <TextInput value={auth.username} onChange={onFieldChange("username")} />
       </Field>
-      <Field label="Password">
+      <Field label={AUTH_TEXT.password}>
         <SecretInput value={auth.password} onChange={onFieldChange("password")} />
       </Field>
     </>
@@ -34,7 +34,7 @@ function BasicFields({ auth, onFieldChange }) {
 
 function BearerFields({ auth, onFieldChange }) {
   return (
-    <Field label="Token">
+    <Field label={AUTH_TEXT.token}>
       <SecretInput value={auth.token} onChange={onFieldChange("token")} />
     </Field>
   )
@@ -43,16 +43,16 @@ function BearerFields({ auth, onFieldChange }) {
 function ApiKeyFields({ auth, onFieldChange }) {
   return (
     <>
-      <Field label="Key">
-        <TextInput value={auth.key} onChange={onFieldChange("key")} placeholder="X-API-Key" />
+      <Field label={AUTH_TEXT.key}>
+        <TextInput value={auth.key} onChange={onFieldChange("key")} placeholder={AUTH_TEXT.keyPlaceholder} />
       </Field>
-      <Field label="Value">
+      <Field label={AUTH_TEXT.value}>
         <SecretInput value={auth.value} onChange={onFieldChange("value")} />
       </Field>
-      <Field label="Add to">
+      <Field label={AUTH_TEXT.addTo}>
         <Select value={auth.in || IN_HEADER} onChange={(event) => onFieldChange("in")(event.target.value)}>
-          <option value={IN_HEADER}>Header</option>
-          <option value={IN_QUERY}>Query params</option>
+          <option value={IN_HEADER}>{AUTH_TEXT.inHeader}</option>
+          <option value={IN_QUERY}>{AUTH_TEXT.inQuery}</option>
         </Select>
       </Field>
     </>
@@ -102,8 +102,8 @@ function typeOptions(inheritance) {
 
 function authNote(auth, inheritance, hasFields) {
   if (inheritance && auth.type === AUTH_INHERIT) return inheritance.source ? TEXT.inheritsFrom(inheritance.source) : TEXT.inheritsNothing
-  if (hasFields) return "Values can use {{variables}}. This overrides a header or parameter of the same name."
-  return inheritance?.noAuthNote || NO_AUTH_NOTE
+  if (hasFields) return AUTH_TEXT.fieldsNote
+  return inheritance?.noAuthNote || AUTH_TEXT.noAuthNote
 }
 
 export function AuthPanel({ auth, tokenRequest, actions, inheritance, onChange }) {
@@ -114,7 +114,7 @@ export function AuthPanel({ auth, tokenRequest, actions, inheritance, onChange }
   return (
     <PanelBody className="h-full">
       <div className="flex max-w-xl flex-col gap-2">
-        <Field label="Type">
+        <Field label={AUTH_TEXT.type}>
           <Select value={auth.type} onChange={(event) => onFieldChange("type")(event.target.value)}>
             {typeOptions(inheritance).map((type) => (
               <option key={type.value} value={type.value}>{type.label}</option>

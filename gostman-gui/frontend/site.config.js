@@ -15,6 +15,7 @@ const GUIDE_ENTRY = resolve('src/guides/render.jsx')
 const DOCS_DIR = resolve('../../docs')
 const EMPTY_ROOT = '<div id="root"></div>'
 const IMAGE_FILES = /\.(png|jpe?g|webp)$/
+export const DOCS_ENTRY = 'docs'
 
 export const siteUrl = (process.env.SITE_URL || DEFAULT_SITE_URL).replace(/\/+$/, '')
 
@@ -105,9 +106,23 @@ async function buildGuideRenderer(bundle) {
   return { renderGuidePage, renderDocsPage, renderLandingMarkup, assets }
 }
 
+const chunkClosure = (bundle, fileName, seen = new Set()) => {
+  if (seen.has(fileName)) return seen
+  seen.add(fileName)
+  bundle[fileName].imports.forEach((imported) => chunkClosure(bundle, imported, seen))
+  return seen
+}
+
+function docsScripts(bundle) {
+  const entry = Object.values(bundle).find((item) => item.type === 'chunk' && item.isEntry && item.name === DOCS_ENTRY)
+  if (!entry) return []
+  const imports = [...chunkClosure(bundle, entry.fileName)].filter((fileName) => fileName !== entry.fileName)
+  return [{ src: `/${entry.fileName}` }, ...imports.map((fileName) => ({ src: `/${fileName}`, preload: true }))]
+}
+
 const stylesheetsOf = (bundle) =>
   Object.values(bundle)
-    .filter((item) => item.type === 'chunk' && item.isEntry)
+    .filter((item) => item.type === 'chunk' && item.isEntry && item.name !== DOCS_ENTRY)
     .flatMap((chunk) => [...(chunk.viteMetadata?.importedCss ?? [])])
     .map((fileName) => `/${fileName}`)
 
@@ -129,9 +144,11 @@ export function siteMeta() {
       assets.forEach((asset) => emit(asset.fileName, asset.source))
       docs.images.forEach((image) => emit(image.fileName, image.source))
       guidePages.forEach((page) => emit(`${page.path}/index.html`, renderGuidePage(page, { siteUrl, stylesheets })))
-      docs.pages.forEach((page) =>
-        emit(docOutputFile(page.slug), renderDocsPage(page, { siteUrl, stylesheets, nav: docs.nav })),
-      )
+      const searchRef = this.emitFile({ type: 'asset', name: 'docs-search.json', source: JSON.stringify(docs.search) })
+      const searchUrl = `/${this.getFileName(searchRef)}`
+      const scripts = docsScripts(bundle)
+      const shared = { siteUrl, stylesheets, scripts, nav: docs.nav, directory: docs.directory, searchUrl }
+      docs.pages.forEach((page) => emit(docOutputFile(page.slug), renderDocsPage(page, shared)))
       const landing = bundle['index.html']
       if (!String(landing.source).includes(EMPTY_ROOT)) this.error('index.html has no empty root element to prerender into')
       landing.source = String(landing.source).replace(EMPTY_ROOT, `<div id="root">${renderLandingMarkup()}</div>`)

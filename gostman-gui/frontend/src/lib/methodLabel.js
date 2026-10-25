@@ -6,3 +6,7 @@ export const SOCKET_METHOD = 'WS'
 export const shownMethod = (request, isSocket = isWebSocketURL(request.url)) => (
   isSocket && request.method !== GRAPHQL_METHOD ? SOCKET_METHOD : request.method
 )
+
+const COMPACT_METHODS = { [GRAPHQL_METHOD]: 'GQL', OPTIONS: 'OPT' }
+
+export const compactMethod = (method) => COMPACT_METHODS[method] ?? method

@@ -7,7 +7,7 @@ import { createCaptureActions } from './captureSession'
 import { createLoadTestActions } from './loadTestSession'
 import { generateAllSnippets } from './codeGenerator'
 import { activeKindsOf, countActiveRequests, sanitizeImport, withoutActiveRequests } from './importExport'
-import { pluralize } from './dataUtils'
+import { asSentence, pluralize } from './dataUtils'
 import { createExampleActions } from './exampleActions'
 import { createImporterClient } from './importerClient'
 import { createScanClient } from './scanClient'
@@ -15,8 +15,9 @@ import { RESTRICTED, applyExtractors, createExecutor } from './execution'
 import { introspectionRequest, readSchema } from './graphqlSchema'
 import { cancelSignIn, clearToken, discoverIssuer, obtainToken } from './oauth'
 import { OAUTH_TEXT } from './oauthText'
+import { DIALOG_TEXT } from './dialogText'
 import { isGrpcRequest, serializeProtoFiles } from './grpc'
-import { withInheritance } from './inheritance'
+import { collectionSettingsTarget, withInheritance } from './inheritance'
 import { askToRun, needsApproval } from './localCommands'
 import { isLocalCommand, isMcpRequest } from './mcp'
 import { retryStep, signInToMcp } from './mcpAuth'
@@ -29,7 +30,7 @@ import { AUTH_OAUTH2, normalizeRequest } from './request'
 import { promptInstall } from './pwa'
 import { SAMPLE_REQUEST } from './welcome'
 import { isRequestDirty } from './requestChanges'
-import { bodyBase64, downloadName, mimeType } from './response'
+import { bodyBase64, downloadName, httpStatusOf, mimeType } from './response'
 import { keepingOwnVariables } from './shareContent'
 import { clientUrl } from './sharedLink'
 import { createRunner } from './runner'
@@ -41,14 +42,16 @@ import { createStorageActions } from './storageActions'
 import { createBackupActions } from './backupActions'
 import { createTabActions } from './tabActions'
 import { createTreeActions } from './treeActions'
+import { focusAddressSoon } from './panes'
 import { ROW_REQUEST } from './collectionTree'
 import { describeCounts } from './importCounts'
 import { DATA_TEXT } from './dataText'
 import { markDataDeleted } from './storage'
-import { ACTIVE_IMPORT_TEXT } from './importText'
+import { ACTIVE_IMPORT_TEXT, IMPORT_RESULT_TEXT } from './importText'
 import { countImported } from './importSummary'
 import { SCOPE_GLOBAL } from './variableScopes'
-import { findActiveEnvironment, selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
+import { environmentForFolder, findActiveEnvironment, selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
+import { scopedFolderNames, scopedImport } from './environmentScope'
 
 const UNRECORDED_ERRORS = ['config', 'script', 'cancelled']
 const EXPORT_TAB = 'export'
@@ -64,23 +67,24 @@ const tabById = (tabId) => store().tabs.find((candidate) => candidate.id === tab
 const activeVariables = () => selectActiveVariables(store())
 const activeEnvironmentId = () => findActiveEnvironment(store())?.id || ''
 const messageOf = (error) => error?.message || String(error)
-const warn = (title, error) => store().showAlert(title, messageOf(error), 'OK', 'warning')
+const failureOf = (error) => asSentence(messageOf(error))
+const warn = (title, error) => store().showAlert(title, failureOf(error), 'OK', 'warning')
 const quoted = (name) => `"${name}"`
 const idsOf = (items) => items.map((item) => item.id)
 
 const attempt = (failureTitle, run) => async (...args) => {
   try {
-    await run(...args)
+    return await run(...args)
   } catch (error) {
     warn(failureTitle, error)
   }
 }
 
-function promptForName(title, message, currentName, onName) {
+function promptForName(title, message, currentName, onName, confirmText = DIALOG_TEXT.rename) {
   store().showPrompt(title, message, currentName, '', (name) => {
     const trimmed = name?.trim()
     if (trimmed && trimmed !== currentName) onName(trimmed)
-  })
+  }, confirmText)
 }
 
 function describeFolderContents(folder) {
@@ -111,9 +115,9 @@ export function createWorkspaceActions(backend) {
   const capture = createCaptureActions(backend)
   const loadTest = createLoadTestActions(backend)
 
-  function runExtractors(tabId) {
+  async function runExtractors(tabId) {
     const tab = tabById(tabId)
-    const extraction = tab && applyExtractors(tab.request, tab.response)
+    const extraction = tab && await applyExtractors(tab.request, tab.response)
     if (extraction) store().patchTab(tabId, { extraction })
   }
 
@@ -135,7 +139,7 @@ export function createWorkspaceActions(backend) {
       setToken(tab.id, await obtainToken(backend, auth.oauth2, activeVariables(), options, { environmentId: activeEnvironmentId(), onDevice }))
       store().patchTab(tab.id, { tokenRequest: null })
     } catch (error) {
-      store().patchTab(tab.id, { tokenRequest: { isPending: false, error: messageOf(error) } })
+      store().patchTab(tab.id, { tokenRequest: { isPending: false, error: failureOf(error) } })
     }
   }
 
@@ -148,7 +152,7 @@ export function createWorkspaceActions(backend) {
       setToken(tab.id, oauth2)
       store().patchTab(tab.id, { tokenRequest: { isPending: false, error: '', notice: OAUTH_TEXT.discovered(oauth2.issuer) } })
     } catch (error) {
-      store().patchTab(tab.id, { tokenRequest: { isPending: false, error: messageOf(error) } })
+      store().patchTab(tab.id, { tokenRequest: { isPending: false, error: failureOf(error) } })
     }
   }
 
@@ -171,7 +175,7 @@ export function createWorkspaceActions(backend) {
     try {
       store().patchTab(tab.id, { grpcSchema: await backend.describeGrpc(withInheritance(store(), tab.request), activeVariables()) })
     } catch (error) {
-      store().patchTab(tab.id, { grpcSchema: { error: messageOf(error) } })
+      store().patchTab(tab.id, { grpcSchema: { error: failureOf(error) } })
     }
   }
 
@@ -188,7 +192,7 @@ export function createWorkspaceActions(backend) {
       if (!changes || changes.firstSeen) rememberTools(catalog)
       return { ...catalog, changes }
     } catch (error) {
-      return { error: messageOf(error) }
+      return { error: failureOf(error) }
     }
   }
 
@@ -262,7 +266,7 @@ export function createWorkspaceActions(backend) {
     const { auth, response, tests, extraction } = await execute(tab.request, pendingId)
     store().finishTabRequest(tab.id, pendingId, response, { tests, extraction })
     if (auth.oauth2 !== tab.request.auth.oauth2) setToken(tab.id, auth.oauth2)
-    if (!UNRECORDED_ERRORS.includes(response.error)) store().addToHistory(tab.request)
+    if (!UNRECORDED_ERRORS.includes(response.error)) store().addToHistory(tab.request, httpStatusOf(response))
   }
 
   const saveSettings = async (settings) => {
@@ -322,20 +326,33 @@ export function createWorkspaceActions(backend) {
     store().updateTabRequest(tab.id, { ...normalizeRequest(parsed), id, name, folderId, extractors, examples: kept })
   })
 
-  const addImported = attempt('Import failed', async (data) => {
+  const scopedNote = (data) => {
+    const names = scopedFolderNames(data)
+    return [
+      ...(names.environments.length > 0 ? [IMPORT_RESULT_TEXT.scopedEnvironments(names.environments)] : []),
+      ...(names.variables.length > 0 ? [IMPORT_RESULT_TEXT.scopedVariables(names.variables)] : []),
+    ]
+  }
+
+  const addImported = attempt('Import failed', async (imported) => {
+    await tree.shareOrder()
+    const data = scopedImport(imported, store().workspaceStatus.path)
     const { requests, folders } = data
     if (requests.length > 0) store().upsertRequests(await backend.saveRequests(requests))
     store().mergeFolders(folders)
     store().adoptCollectionSettings(data.settings)
-    const skippedEnvironments = store().mergeEnvironments(data.environments)
-    const skippedGlobals = store().mergeEnvironments(data.globals, SCOPE_GLOBAL)
-    const variablesMerged = store().mergeCollectionVariables(data.variables)
+    const environments = store().mergeEnvironments(data.environments)
+    const globals = store().mergeEnvironments(data.globals, SCOPE_GLOBAL)
+    const skippedEnvironments = environments.skipped
+    const skippedGlobals = globals.skipped
+    const variablesMerged = store().mergeCollectionVariables(data.variables, data.variablesMeta)
     const warnings = [
       ...(variablesMerged ? [] : ['Collection variables were skipped because the existing collection variables are not valid JSON.']),
       ...[...skippedEnvironments, ...skippedGlobals].map((name) => `Environment ${quoted(name)} was skipped because its variables are not valid JSON.`),
+      ...[...environments.joined, ...globals.joined].map(IMPORT_RESULT_TEXT.joinedEnvironment),
       ...data.warnings,
     ]
-    const counts = countImported(data)
+    const counts = countImported(imported)
     const merged = {
       ...counts,
       environments: counts.environments - skippedEnvironments.length,
@@ -343,26 +360,37 @@ export function createWorkspaceActions(backend) {
       variables: variablesMerged ? counts.variables : 0,
     }
     const summary = `Imported ${describeCounts(merged)}.`
-    store().showAlert('Import complete', [summary, ...data.notes, ...warnings].join('\n'), 'OK', warnings.length > 0 ? 'warning' : 'success')
+    store().showAlert('Import complete', [summary, ...scopedNote(data), ...data.notes, ...warnings].join('\n'), 'OK', warnings.length > 0 ? 'warning' : 'success')
   })
 
-  const importData = attempt('Import failed', (imported) => {
-    const existing = { requestIds: idsOf(store().requests), folderIds: idsOf(store().folders) }
-    const data = sanitizeImport(imported, existing)
-    const activeCount = countActiveRequests(data)
-    if (activeCount === 0) return addImported(data)
+  const leavingOutActive = (data, kinds) => ({ ...withoutActiveRequests(data), notes: [...data.notes, ACTIVE_IMPORT_TEXT.leftOut(kinds)] })
+
+  const askAboutActive = (data) => new Promise((resolve) => {
     const kinds = activeKindsOf(data)
-    return store().showConfirm(
+    const proceed = (chosen) => () => {
+      resolve(true)
+      return addImported(chosen)
+    }
+    store().showConfirm(
       ACTIVE_IMPORT_TEXT.title(kinds),
-      ACTIVE_IMPORT_TEXT.message(pluralize(activeCount, 'item'), kinds),
-      () => addImported(data),
-      () => addImported(withoutActiveRequests(data)),
-      'default',
-      ACTIVE_IMPORT_TEXT.confirm,
+      ACTIVE_IMPORT_TEXT.message(countActiveRequests(data), kinds),
+      proceed(data),
+      () => resolve(false),
+      'outline',
+      ACTIVE_IMPORT_TEXT.withThem(kinds),
+      { text: ACTIVE_IMPORT_TEXT.withoutThem(kinds), run: proceed(leavingOutActive(data, kinds)) },
     )
   })
 
-  const importShared = (imported) => importData(keepingOwnVariables(imported, store().environments))
+  const importData = attempt('Import failed', async (imported) => {
+    const existing = { requestIds: idsOf(store().requests), folderIds: idsOf(store().folders) }
+    const data = sanitizeImport(imported, existing)
+    if (countActiveRequests(data) > 0) return askAboutActive(data)
+    await addImported(data)
+    return true
+  })
+
+  const importShared = (imported) => importData(keepingOwnVariables(imported, store().environments, store().folders))
 
   const openapi = createSpecActions({ backend, attempt, addImported })
 
@@ -382,8 +410,8 @@ export function createWorkspaceActions(backend) {
   const downloadRunReport = () => {
     const run = runner.describeRun()
     if (!run) return undefined
-    const { environments, activeEnvironmentId, runner: state } = store()
-    const environment = (environments.find((candidate) => candidate.id === activeEnvironmentId) || environments[0])?.name || ''
+    const { runner: state } = store()
+    const environment = environmentForFolder(store(), state.folderId)?.name || ''
     return saveTextFile(RUN_REPORT_FILE, buildReportPage(state.results, run, environment), RUN_REPORT_TYPE)
   }
 
@@ -405,7 +433,7 @@ export function createWorkspaceActions(backend) {
 
   function createFolder(parentId = '') {
     const title = parentId ? 'New subfolder' : 'New folder'
-    promptForName(title, 'Folder name', '', (name) => store().addFolder(name, parentId))
+    promptForName(title, 'Folder name', '', (name) => store().addFolder(name, parentId), DIALOG_TEXT.create)
   }
 
   function renameFolder(folder) {
@@ -497,7 +525,7 @@ export function createWorkspaceActions(backend) {
     return send()
   }
 
-  const openHistoryEntry = (entry) => store().openRequestTab({ ...entry, id: '', timestamp: '' })
+  const openHistoryEntry = ({ statusCode, ...entry }) => store().openRequestTab({ ...entry, id: '', timestamp: '' })
 
   function saveLatestRequest() {
     const [latest] = store().requestHistory
@@ -520,8 +548,13 @@ export function createWorkspaceActions(backend) {
     [STEP_RUN]: () => store().openRunner(),
   }
 
+  const openNewRequest = (folderId) => {
+    store().newTab(folderId)
+    focusAddressSoon()
+  }
+
   const commands = {
-    newRequest: () => store().newTab(),
+    newRequest: () => openNewRequest(),
     saveRequest: save,
     sendRequest: send,
     generateCode,
@@ -554,7 +587,10 @@ export function createWorkspaceActions(backend) {
     export: openExport,
     share: () => store().openImportDialog(SHARE_TAB),
     runCollection: () => store().openRunner(),
+    collectionSettings: () => store().openFolderSettings(collectionSettingsTarget(store(), activeTab().request.folderId)),
+    allCollectionsSettings: () => store().openFolderSettings(),
     cookies: () => store().openCookiesDialog(),
+    environments: () => store().openEnvironmentDialog(),
     scanSecrets: () => store().openScanDialog(),
     examples: examples.open,
     mockServer: mock.open,
@@ -623,6 +659,7 @@ export function createWorkspaceActions(backend) {
       if (request) store().openRequestTab(request)
     },
     shareFolder: (folderId) => store().openImportDialog(SHARE_TAB, folderId),
+    shareRequest: (requestId) => store().openImportDialog(SHARE_TAB, requestId),
     shareLinkBase: clientUrl(backend.webAppUrl),
     download,
     saveTextFile,
@@ -643,7 +680,7 @@ export function createWorkspaceActions(backend) {
     openImport: () => store().openImportDialog(),
     beginOnboardingStep: (id) => onboardingSteps[id](),
     runCommand: (action, payload) => commands[action]?.(payload),
-    newRequest: (folderId) => store().newTab(folderId),
+    newRequest: openNewRequest,
     openRequest: (request) => store().openRequestTab(request),
     previewRequest: (request) => store().openRequestTab(request, { preview: true }),
     openHistoryEntry,

@@ -23,6 +23,7 @@ export const MOVING_KEYS = [
   { id: 'menu', chords: [{ shift: true, key: 'f10' }] },
   { id: 'results', chords: [{ key: 'arrowdown' }] },
   { id: 'close', chords: [{ key: 'escape' }] },
+  { id: 'leaveEditor', chords: [{ key: 'escape' }, { key: 'tab' }] },
 ]
 
 export const SHORTCUTS = [

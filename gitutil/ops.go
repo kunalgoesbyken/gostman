@@ -64,7 +64,7 @@ type Version struct {
 }
 
 func (r Repo) absolute(file string) (string, error) {
-	clean, err := ValidPath(file)
+	clean, err := r.path(file)
 	if err != nil {
 		return "", err
 	}
@@ -123,7 +123,7 @@ func addedDiff(file string, content []byte) Diff {
 }
 
 func (r Repo) Diff(file string, staged, untracked bool) (Diff, error) {
-	clean, err := ValidPath(file)
+	clean, err := r.path(file)
 	if err != nil {
 		return Diff{}, err
 	}
@@ -141,13 +141,13 @@ func (r Repo) Diff(file string, staged, untracked bool) (Diff, error) {
 	return Diff{Text: out, Binary: strings.Contains(out, "Binary files ")}, nil
 }
 
-func validPaths(files []string) ([]string, error) {
+func (r Repo) validPaths(files []string) ([]string, error) {
 	if len(files) == 0 {
 		return nil, errors.New("choose at least one file")
 	}
 	clean := make([]string, len(files))
 	for i, file := range files {
-		valid, err := ValidPath(file)
+		valid, err := r.path(file)
 		if err != nil {
 			return nil, err
 		}
@@ -157,7 +157,7 @@ func validPaths(files []string) ([]string, error) {
 }
 
 func (r Repo) Stage(files []string) error {
-	clean, err := validPaths(files)
+	clean, err := r.validPaths(files)
 	if err != nil {
 		return err
 	}
@@ -172,12 +172,12 @@ func (r Repo) StageAll() error {
 	if err := r.refuseUnresolved(); err != nil {
 		return err
 	}
-	_, err := r.runWrite("add", "-A")
+	_, err := r.runWrite(r.scoped("add", "-A")...)
 	return err
 }
 
 func (r Repo) Unstage(files []string) error {
-	clean, err := validPaths(files)
+	clean, err := r.validPaths(files)
 	if err != nil {
 		return err
 	}
@@ -190,7 +190,7 @@ func (r Repo) Unstage(files []string) error {
 }
 
 func (r Repo) Discard(file string, untracked bool) error {
-	clean, err := ValidPath(file)
+	clean, err := r.path(file)
 	if err != nil {
 		return err
 	}
@@ -226,7 +226,11 @@ func (r Repo) Fetch() (string, error) {
 }
 
 func (r Repo) Pull() (string, error) {
-	return r.runNetwork("pull", "--no-edit")
+	out, err := r.runNetwork("pull", "--no-edit")
+	if err != nil && r.merging() {
+		return out, nil
+	}
+	return out, err
 }
 
 func (r Repo) firstRemote() (string, error) {
@@ -352,6 +356,9 @@ func (r Repo) StashSave(message string) error {
 	if strings.TrimSpace(message) != "" {
 		args = append(args, "-m", message)
 	}
+	if r.Scope != "" {
+		args = append(args, "--", ":(literal)"+r.Scope)
+	}
 	before := r.stashTop()
 	if _, err := r.runWritePlain(args...); err != nil {
 		return err
@@ -376,11 +383,13 @@ func (r Repo) StashAction(action string, index int) error {
 func (r Repo) Log(file string) ([]Commit, error) {
 	args := []string{"log", "-n", logLimit, "--no-color", "--format=%H%x1f%h%x1f%an%x1f%aI%x1f%s"}
 	if file != "" {
-		clean, err := ValidPath(file)
+		clean, err := r.path(file)
 		if err != nil {
 			return nil, err
 		}
 		args = append(args, "--follow", "--", clean)
+	} else {
+		args = r.scoped(append(args, "--full-history")...)
 	}
 	out, err := r.run(args...)
 	if err != nil {
@@ -403,7 +412,7 @@ func (r Repo) Version(hash, file string) (Version, error) {
 	if err := ValidRevision(hash); err != nil {
 		return Version{}, err
 	}
-	clean, err := ValidPath(file)
+	clean, err := r.path(file)
 	if err != nil {
 		return Version{}, err
 	}
@@ -422,7 +431,7 @@ func (r Repo) RestoreVersion(hash, file string) error {
 	if err := ValidRevision(hash); err != nil {
 		return err
 	}
-	clean, err := ValidPath(file)
+	clean, err := r.path(file)
 	if err != nil {
 		return err
 	}
@@ -436,7 +445,7 @@ func (r Repo) stage(number, file string) (string, bool) {
 }
 
 func (r Repo) Conflict(file string) (Conflict, error) {
-	clean, err := ValidPath(file)
+	clean, err := r.path(file)
 	if err != nil {
 		return Conflict{}, err
 	}
@@ -469,7 +478,7 @@ func (r Repo) Resolve(file, content string) error {
 	if err != nil {
 		return err
 	}
-	clean, _ := ValidPath(file)
+	clean, _ := r.path(file)
 	if err := os.WriteFile(full, []byte(content), 0o644); err != nil {
 		return err
 	}

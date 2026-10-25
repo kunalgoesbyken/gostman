@@ -21,11 +21,11 @@ The request bar sits above the request tabs.
 | --- | --- |
 | Request name | A text field that shows "Untitled request" until you name the request. |
 | HTTP method | GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, GRAPHQL, GRPC or MCP. |
-| Request URL | Accepts `{{variables}}`. Pasting a command that starts with `curl ` fills the request from it. |
+| Request URL | Accepts `{{variables}}`. Pasting a command that starts with `curl ` fills the request from it. Press Enter to send. |
 | Send | Sends the request. While a request is running the button becomes Cancel. |
 | Save | Saves the request. |
 | Code | Opens the code generator. See [Code generation](#code-generation). |
-| Load test | Desktop app only. Opens the Load test dialog for this request. See [Load test](runner-load-and-scan.md#load-test). |
+| Load test | Desktop app only, and not shown for gRPC and MCP requests. Opens the Load test dialog for this request. See [Load test](runner-load-and-scan.md#load-test). |
 
 When the URL is a WebSocket address, the method list shows WS (or GRAPHQL for GraphQL subscriptions) and the Send button is labelled Connect; while the connection is open it becomes Disconnect. Send and Save show their keyboard shortcuts in their tooltips; see [Preferences, shortcuts and the command palette](preferences-and-shortcuts.md).
 
@@ -50,7 +50,7 @@ A tab that does not apply stays visible while it still holds something, for exam
 | Vars | Variables for this request |
 | Extract | Rules that copy response values into variables |
 | Tests | Assertions and scripts |
-| Settings | Timeout, redirects, TLS, streaming, tags and description |
+| Settings | Timeout, redirects, TLS, cookies, streaming, tags and description |
 
 The bookmark button at the right end of the tab row opens the saved [examples](#examples) of the request.
 
@@ -59,7 +59,7 @@ The bookmark button at the right end of the tab row opens the saved [examples](#
 Params and Headers use a table with a checkbox, a name and a value for each row. Clear the checkbox ("Send this row") to keep a row without sending it. The remove button deletes a row, and the empty row at the bottom adds a new one. Names and values accept `{{variables}}`.
 
 - The Params rows mirror the query string in the URL. Unchecked rows are kept in the table but not sent.
-- The Headers tab shows a count of headers inherited from folders or the collection. See [Folder and collection settings](folder-settings.md).
+- The Headers tab shows a count of headers inherited from folders or the collection, and lists them under **Inherited** below the table with the folder they come from. Click the folder name to open its settings. An inherited header that a row of the request replaces is marked **Replaced**, and one that an unchecked row with the same name stops is marked **Switched off**. See [Folder and collection settings](folder-settings.md).
 
 #### Bulk edit
 
@@ -76,6 +76,7 @@ Authorization: Bearer {{token}}
 - The name ends at the first colon, and spaces around the name and the value are dropped.
 - A line that starts with `//` is kept without being sent, like an unchecked row.
 - Blank lines are ignored. **Edit as table** switches back.
+- Typing `{{` suggests variable names, as in the table.
 
 Bulk edit works the same way for Vars, Form URL-encoded bodies and folder headers. It is not offered for Multipart bodies, because a file row cannot be written as text, and rows with a colon in the name or spaces at the start or end of a name or value can only be edited in the table.
 
@@ -97,7 +98,7 @@ Choose a body type with the buttons at the top of the Body tab.
 Details:
 
 - File attachments, in the File type and in Multipart file rows, work differently in the two apps:
-  - The desktop app keeps only the file's path and reads the file from disk while the request is sent, so the file is never loaded into memory or saved in the collection. The files of one request can be up to 1 GB together. A folder you have not trusted cannot send them, and the CLI does not send them. AWS Signature, Hawk, EdgeGrid and OAuth 1.0 sign the whole body, so with them the files are limited to 10 MB. A large upload can take longer than the default 30 second timeout; raise it under **Settings**.
+  - The desktop app keeps only the file's path and reads the file from disk while the request is sent, so the file is never loaded into memory or saved in the collection. The file row shows its current size on disk, and hovering it shows the path. The files of one request can be up to 1 GB together. A folder you have not trusted cannot send them, and the CLI does not send them. AWS Signature, Hawk, EdgeGrid and OAuth 1.0 sign the whole body, so with them the files are limited to 10 MB. A large upload can take longer than the default 30 second timeout; raise it under **Settings**.
   - The web app keeps the file's content in the request, and a file is limited to 3 MB, because the hosted proxy accepts requests of at most 4.5 MB. A larger file is refused with a message that says so.
 - Switching between raw types (JSON, Text, XML, SOAP) keeps the same text. Switching between the groups None, Form URL-encoded, Multipart, File and raw types keeps a separate draft for each group, so you can switch back without losing it.
 - For JSON and XML, **Format** at the right of the toolbar (or Shift+Alt+F in the editor) indents the body. `{{variables}}` are kept as written, also where JSON expects a value, and numbers, key order and duplicate keys are left exactly as they are. Undo (Ctrl+Z) restores the previous text. When the body is not valid, nothing is changed: a notice names the problem with its line and column, for example "The JSON cannot be formatted at line 3, column 3: Expected ',' or '}' after the property value", the cursor moves to that place, and **Go to line** takes you back to it later. The same message appears when you hover the underlined spot while typing.
@@ -112,8 +113,8 @@ Details:
 
 The Type list in the Auth tab holds these choices:
 
-- No auth. A request set to No auth is sent without authentication.
 - Inherit, which uses the auth of the folder or collection. See [Folder and collection settings](folder-settings.md).
+- No auth. A request set to No auth is sent without authentication. New requests start with No auth.
 - Basic: Username and Password.
 - Bearer token: Token.
 - API key: Key, Value and Add to (Header or Query params).
@@ -123,9 +124,11 @@ The Type list in the Auth tab holds these choices:
 - AWS Signature V4: Access key ID, Secret access key, Session token, Region and Service.
 - OAuth 1.0: consumer key and secret, access token and token secret, signature method (HMAC-SHA1, HMAC-SHA256, RSA-SHA1, RSA-SHA256 or PLAINTEXT), and optional realm, callback URL, verifier, nonce and timestamp. Send in chooses Authorization header, Query params or Form body.
 - Akamai EdgeGrid: Client token, Client secret and Access token are required. Headers to sign, Max body size, Nonce and Timestamp are optional.
+
+Password, token and secret fields accept `{{variables}}` like other fields, with the same suggestions and colours. A value made only of placeholders, such as `{{token}}`, stays readable; a value with typed text in it is masked, and the eye button shows it.
 - JWT Bearer: Gostman signs a token from Payload (JSON) for every request. HS256, HS384 and HS512 use a Secret, plain or Base64; the RS, PS and ES algorithms use a Private key (PEM). Extra header fields such as `kid` are optional. Add to puts the token in the Authorization header after Header prefix (default `Bearer`) or in a query parameter (default `token`). A payload that is not a JSON object stops the send with a message.
 - ASAP (Atlassian): Issuer, Audience, Key ID and Private key are required; Subject, Additional claims and Expires after (default `1h`) are optional. Each request gets a new token with `iat`, `exp` and `jti`, sent as a Bearer token.
-- Hawk: Hawk Auth ID and Hawk Auth Key, with SHA-256 or SHA-1. Payload hash adds a hash of the body. Extra data, App ID and Delegation are optional; Nonce and Timestamp are generated when empty.
+- Hawk: Hawk Auth ID and Hawk Auth Key, with the Algorithm `sha256` or `sha1`. Payload hash set to Include adds a hash of the body. Extra data, App ID and Delegation are optional; Nonce and Timestamp are generated when empty.
 
 JWT Bearer and ASAP also apply to WebSocket and gRPC connections, because they do not depend on the body.
 
@@ -147,7 +150,7 @@ OAuth 2.0 has these fields:
 - Send the ID token instead of the access token: sends the OpenID Connect ID token the provider returned, for APIs that expect it. The provider returns one when the scope includes `openid`.
 - Access token, or ID token when the option above is on.
 
-Get token requests a token and Clear token removes it. The panel shows whether a token exists and when it expires. For Authorization code, the panel waits for you to finish signing in in your browser, and Cancel stops the wait. In the web version the sign-in opens in a pop-up; closing the pop-up before you finish stops the wait with a message. For Device code, the panel shows a code and a link to the provider's sign-in page; open it on any device, enter the code, and the token arrives when you finish. Cancel stops the wait. For the callback address to register with your provider, see [Variables, scripts and settings](scripting-and-settings.md#oauth-20-callback).
+Get token requests a token and Clear token removes it. The panel shows whether a token exists and when it expires. For Authorization code, the panel waits for you to finish signing in in your browser, and Cancel stops the wait. In the web version the sign-in opens in a pop-up; closing the pop-up before you finish stops the wait with a message. For Device code, the panel shows a code and a link to the provider's sign-in page; open it on any device, enter the code, and the token arrives when you finish. Cancel stops the wait. For the callback address to register with your provider, see [Scripts and checks](scripting-and-settings.md#oauth-20-callback).
 
 A token belongs to the environment that was active when it was fetched or typed in. After you switch environments it is not sent: the panel says so, a client credentials or password token is fetched again for the new environment, and the other grants ask you to choose Get token. Tokens saved by an earlier version of Gostman have no environment, so they are treated the same way once.
 
@@ -160,33 +163,33 @@ The Vars tab holds variables that apply to this request only. They use the same 
 Extract rules copy a value from each response into a variable, so later requests can use it as `{{variable_name}}`. The **Keep in** column chooses where: a session value that is never written to disk, or the active environment. See [Variables](variables.md#setting-variables-from-a-response) for the default in each kind of collection. Each row has:
 
 - A checkbox that turns the rule on or off.
-- Variable: the name to save.
+- Variable: the name to save. Any name you can write between `{{` and `}}` works, dots included, such as `auth.token`; it cannot contain `}` or start or end with a space.
 - From: JSON body, Header, Cookie or Status code.
 - Path or name: a JSONPath such as `$.data.token` for JSON body, a header name, or a cookie name. It is disabled for Status code.
 - Value in last response: a preview of what the rule finds in the current response.
 
 Rules run after every response. Run now applies them to the last response, and a line below the table lists the variables that were saved. The same rules are described in [Variables](variables.md#setting-variables-from-a-response).
 
-### Tests
+### Checks
 
-The Tests tab has three views: Assertions, Pre-request script and Post-response script. The response panel shows the results in its Tests tab, whose count turns red when a check fails and green when all pass. For the script API and sandbox, see [Variables, scripts and settings](scripting-and-settings.md).
+The Checks tab has three views: Assertions, Pre-request script and Post-response script. The response panel shows the results in its Checks tab, whose count turns red when a check fails and green when all pass. For the script API and sandbox, see [Scripts and checks](scripting-and-settings.md).
 
-Each assertion row has an Expression, a Check and an Expected value. Expressions use `res.status`, `res.headers.name`, `res.body.path` or `res.responseTime`. The expected value can use `{{variables}}`, including values extracted from an earlier response and columns of a data file; a name that is not defined is compared as written. The Check list includes:
+Each assertion row has a checkbox that turns it on or off, an Expression, a Check and an Expected value. Expressions start at the response, `res`: `res.status`, `res.headers.name`, `res.body.path` or `res.responseTime`. An expression that does not, such as `status` or `$.data.id`, fails with a message that gives the fix (`Write res.status`, `Write res.body.data.id`), in the app and in `gostman run` alike. Checks share the collection's script time limit; when they run past it, the result names the checks rather than a script. A matches regex check whose pattern runs for more than 1 second fails with a message that the regular expression was too slow, rather than as a mismatch; in the app a pattern that never finishes stops the checks at the time limit. The expected value can use `{{variables}}`, including values extracted from an earlier response and columns of a data file; a name that is not defined is compared as written. The Check list includes:
 
 - Comparisons: equals, does not equal, is greater than, is at least, is less than, is at most.
 - Text and list checks: contains, does not contain, starts with, ends with, matches regex, is one of, has length.
 - Checks without an expected value: is defined, is undefined, is null, is empty, is not empty, is true, is false, is a number, is a string, is a boolean, is an array, is an object.
 - matches schema: the expected value is a JSON Schema, such as `{"type": "object", "required": ["id"]}`, or a `{{variable}}` that holds one. The button next to the field opens the schema in an editor. A failure lists each place that does not match and why, for example `$.items[2].price should be a number, but it is the text "12.5".` See [JSON Schema checks](scripting-and-settings.md#json-schema-checks).
 
-**Add checks from this response**, in the response toolbar and at the top of the **Tests** tab once a response has arrived, builds assertions from the response you just received: the status code, the content type, a JSON Schema of the body, and a response time budget. A dialog lists them with checkboxes, and the **Add** button appends the checked ones to the request's assertions. Checks the request already has are not offered again. The schema records each field's type and which fields were present; extra fields are allowed, numbers are not required to be whole, a field seen as both null and a value accepts both, and a field that was only ever null accepts any value. The response time budget is twice the time the response took, rounded up to 100 ms and at least 200 ms, and starts unchecked.
+**Add checks from this response**, in the response toolbar and at the top of the Assertions view once an HTTP response has arrived, builds assertions from the response you just received: the status code, the content type, a JSON Schema of the body, and a response time budget. A dialog lists them with checkboxes, and the **Add checks** button (for example **Add 3 checks**) appends the checked ones to the request's assertions. Checks the request already has are not offered again. The schema records each field's type and which fields were present; extra fields are allowed, numbers are not required to be whole, a field seen as both null and a value accepts both, and a field that was only ever null accepts any value. The response time budget is twice the time the response took, rounded up to 100 ms and at least 200 ms, and starts unchecked.
 
-![Assertions and test results](../gostman-gui/frontend/src/assets/landing/tests.webp)
+![Assertions and check results](../gostman-gui/frontend/src/assets/landing/tests.webp)
 
 ### Settings
 
 | Setting | Meaning |
 | --- | --- |
-| Timeout (ms) | Empty uses the default, shown as 30000. |
+| Timeout (ms) | Empty uses the **Default timeout** from Preferences, which is 30 seconds unless you change it. |
 | Follow redirects | On by default. |
 | Verify TLS certificates | On by default. Clear it to accept certificates that fail verification. |
 | Send cookies from the cookie jar | On by default. Clear it to send the request without stored cookies. |
@@ -195,13 +198,17 @@ Each assertion row has an Expression, a Check and an Expected value. Expressions
 | Tags | Labels such as `smoke` or `regression`. Type a tag and press Enter or a comma; Backspace in the empty field removes the last one. Tags already used in the collection are suggested. Case is ignored, so `Smoke` and `smoke` are one tag. The runner dialog and `gostman run --tags` use them to run a subset. |
 | Description | Markdown shown in generated documentation. |
 
-A dot on the Settings tab means a timeout, a disabled redirect or TLS check, or streaming is set.
+The tab shows only the settings that apply to the request: gRPC and remote MCP requests have Timeout (ms) and Verify TLS certificates, a local `stdio:` MCP server has Timeout (ms), and WebSocket requests have only Tags and Description. A setting you changed stays visible even when it does not apply.
+
+A dot on the Settings tab means one of the settings above the tags differs from its default: a timeout is set, redirects, TLS verification or one of the cookie options is turned off, or streaming is on.
 
 ## Variables in inputs
 
 URL, header, parameter and body fields recognise `{{name}}`. Defined names are underlined, and hovering one shows its value and where it comes from. Typing `{{` opens a list of names; use the arrow keys with Enter or Tab to pick one, and Escape to close the list. Ctrl+Space opens the same list without typing `{{`: the word before the caret filters it, and the name you pick is written with its braces. With nothing before the caret, it lists your variables first and then the dynamic ones.
 
 ![Ctrl+Space after typing "us" in a JSON body lists userEmail, userId and userToken with their values, the token masked](../screenshots/variable-suggestions.png) Secret values are masked in these hints.
+
+When a sent request used a name that nothing defines, the response panel says so and lists the names. Select a name, or **Open Environments**, to open the Environments dialog with a new row for that name in the active environment, ready for its value.
 
 A name written as `{{?name}}` is asked for when you send the request. A dialog titled "Values needed" lists each name with a field. Send continues with the values you entered and Cancel stops the send. See [Variables](variables.md#prompt-variables) for scopes, dynamic variables and secrets.
 
@@ -215,7 +222,7 @@ Before the first send the panel reads "No response yet". While a request runs it
 
 ### Summary and toolbar
 
-The toolbar shows the status and, for a completed request, the duration in milliseconds and the size. Hover the timing for a breakdown. A request that failed shows an error title instead: Invalid request, Network error, Request timed out, Request cancelled or Address blocked, with a message and an **Explain with AI** button.
+The toolbar shows the status and, for a completed request, the duration in milliseconds and the size. Hover the timing for a breakdown. A request that got no response shows an error title instead: Invalid request, Script failed, Network error, Request timed out, Request cancelled, Address blocked or Folder not trusted. The Body tab then shows the message with an **Explain with AI** button when [AI](ai.md) is turned on; for Folder not trusted it offers **Trust this folder** instead.
 
 The toolbar buttons are:
 
@@ -223,9 +230,9 @@ The toolbar buttons are:
 - Search body (Ctrl+F)
 - Copy body
 - Download body
+- Explain with AI, for a response with a failed status, when AI is turned on
 - Save as example
 - Add checks from this response, for an HTTP response
-- Explain with AI, for a failed status
 - Fullscreen
 
 Responses are limited to 50 MB in the desktop app and the CLI, and to 3 MB in the web app. A longer response is cut off at the limit, and the panel says so; the body shown, copied and saved is then only the first part.
@@ -235,7 +242,7 @@ Responses are limited to 50 MB in the desktop app and the CLI, and to 3 MB in th
 Each tab keeps its last 10 responses while the app is open. They are kept in memory only, like the current response, and responses with a body over 2 MB are not kept.
 
 1. Select **Earlier responses** in the toolbar and pick one. The list shows the time, the status, the duration and the size of each.
-2. The panel shows that response with its headers, cookies and timeline, under the notice "Showing the response from" and its time. Download body and Save as example are hidden while it is shown.
+2. The panel shows that response with its headers, cookies and timeline, under the notice "Showing the response from" and its time. Download body, Save as example and Add checks from this response are hidden while it is shown.
 3. Select **Compare with the latest** to open the two side by side. **Body** compares the bodies, with JSON formatted first so that only real changes stand out; **Headers** compares the headers sorted by name.
 4. Select **Back to the latest**, or send the request again, to return to the newest response.
 
@@ -274,9 +281,9 @@ The Body tab chooses a view from the response type.
 
 ### Filter and search
 
-For a JSON body, the filter field accepts a JSONPath such as `$.data[0].id` and shows only the matching value. An invalid path shows an error under the field, and the clear button removes the filter. Copy body copies the filtered text while a filter is active.
+For a JSON body, the filter field accepts a JSONPath such as `$.data[0].id` and shows only the matching value. Filter expressions such as `$.items[?(@.id == 2)]` work here, in checks and in Extract rules; they can read fields and call methods such as `startsWith`, but cannot use `constructor`, `prototype`, `call`, `apply`, `bind` or names that start with `__`. An invalid path shows an error under the field, and the clear button removes the filter. The filter runs in the background, so a slow one never holds up the app; one that runs for more than 10 seconds is stopped with a message under the field. Copy body copies the filtered text while a filter is active.
 
-Search works in the Pretty and Raw views, across the whole body, also for large bodies. For a large JSON body the filter runs in the background. Press Ctrl+F while the response panel has focus, or use the search button. Type in the "Find in body" field and the matches are highlighted.
+Search works in the Pretty and Raw views, across the whole body, also for large bodies. Press Ctrl+F while the response panel has focus, or use the search button. Type in the "Find in body" field and the matches are highlighted.
 
 - Enter goes to the next match and Shift+Enter to the previous one.
 - The counter reads "1 of 12". It shows a plus sign when the match limit of 2000 is reached.
@@ -314,10 +321,10 @@ The bar at the bottom of the window holds shortcuts to dialogs and shows state:
 
 ## History
 
-The History tab at the top of the sidebar lists sent requests, with the method, the URL and the time since sending (for example "5m" or "2d"). The tab shows a count.
+The History tab at the top of the sidebar lists sent requests, with the method, the URL, the HTTP status of the response, in the colours of the response panel, and the time since sending (for example "5m" or "2d"). Sends that got no response show no status. The tab shows a count.
 
 - Click an entry to open it as a request tab.
-- Search history filters by method and URL.
+- Search history filters by method, URL and status, so `404` finds the requests that got one.
 - The remove button, shown when you hover an entry, deletes it. Clear history deletes all entries.
 - The app keeps up to 50 entries.
 
@@ -330,12 +337,12 @@ Cookies set by responses are kept and sent back to the same site on later reques
 A response can be saved as a named example for its request.
 
 1. Send the request.
-2. Choose Save as example in the response toolbar.
+2. Choose Save as example in the response toolbar, and give the example a name. The status, such as `200 OK`, is offered as the name.
 3. Open the Examples dialog with the bookmark button in the request tabs.
 
 The Save as example button is not offered for failed requests or for gRPC, MCP and other protocol responses. In the dialog, each example has a Body and a Headers view. You can:
 
-- Edit the body, then choose Save body or Discard. Binary bodies cannot be edited.
+- Edit the body, then choose Save body or Discard. Binary bodies cannot be edited. A JSON or XML body can be formatted with the braces button or Shift+Alt+F.
 - Mark an example as Serve by default. The first example saved is the default.
 - Rename or delete an example.
 
@@ -360,6 +367,8 @@ Code opens the Generate code dialog. Pick a language from the list at the top:
 | Dart | the `http` package |
 | PowerShell | `Invoke-WebRequest`, for Windows PowerShell 5.1 and PowerShell 7 |
 
-Copy copies the snippet for the selected language. Text is escaped for each language, so quotes, `$`, backslashes, line breaks and non-ASCII characters arrive as typed. The snippets are built from the request as the engine prepares it, so variables, inherited headers and auth appear as they are sent.
+Copy copies the snippet for the selected language, and the dialog opens on the language you picked last. Text is escaped for each language, so quotes, `$`, backslashes, line breaks and non-ASCII characters arrive as typed. The snippets are built from the request as the engine prepares it, so variables, inherited headers and auth appear as they are sent.
+
+A File body and the file rows of a Multipart body are read from disk by the snippet, using the file name you attached: put the file next to the snippet or change the path. Multipart text rows are sent as form fields, and the snippet uses each language's own multipart support where it has one; Java, Kotlin and Swift build the multipart body themselves.
 
 ![The Generate code dialog with cURL selected, showing a POST with a JSON body and a bearer Authorization header](../screenshots/code.png)

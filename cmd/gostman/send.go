@@ -35,6 +35,7 @@ type requestFlags struct {
 
 type sending struct {
 	requestFlags
+	signIn     signInFlags
 	workspace  string
 	view       agent.View
 	asJSON     bool
@@ -92,7 +93,11 @@ func (r requestFlags) open(stored runner.Collection, fileRoot string) (*agent.Cl
 	if err != nil {
 		return nil, err
 	}
-	return client, client.Enter(stored, r.environment, r.variables)
+	if err := client.Enter(stored, r.environment, r.variables); err != nil {
+		return nil, err
+	}
+	client.Remember(r.variables)
+	return client, nil
 }
 
 func (r requestFlags) compose(client *agent.Client, method, address string) (runner.Listed, error) {
@@ -119,6 +124,7 @@ func parseSending(arguments []string) (sending, error) {
 	flags.IntVar(&parsed.view.MaxBodyBytes, "max-body", agent.DefaultBodyBytes, "")
 	flags.BoolVar(&parsed.view.IncludeHeaders, "include-headers", false, "")
 	flags.BoolVar(&parsed.asJSON, "json", false, "")
+	parsed.signIn.register(flags)
 
 	positional, err := parseInterspersed(flags, arguments)
 	switch {
@@ -148,9 +154,16 @@ func (s sending) collection() (runner.Collection, error) {
 		return runner.Load(currentFolder)
 	}
 	if namesSavedRequest(s.positional) {
-		return runner.Collection{}, errors.New("this folder is not a Gostman workspace; point --workspace at a workspace folder or an export file")
+		return runner.Collection{}, unsavedReferenceError(s.positional[0])
 	}
 	return runner.Collection{}, nil
+}
+
+func unsavedReferenceError(reference string) error {
+	if strings.Contains(reference, "://") {
+		return fmt.Errorf("give a method before the url, for example: gostman send GET %s", reference)
+	}
+	return errors.New("this folder is not a Gostman workspace; point --workspace at a workspace folder or an export file")
 }
 
 func (s sending) fileRoot() string {
@@ -176,6 +189,11 @@ func (s sending) prepare() (*agent.Client, runner.Listed, error) {
 	if err != nil {
 		return nil, runner.Listed{}, err
 	}
+	token, err := s.signIn.token()
+	if err != nil {
+		return nil, runner.Listed{}, err
+	}
+	client.SignIn(token)
 	target, err := s.target(client, stored)
 	return client, s.adjusted(target), err
 }
@@ -187,14 +205,14 @@ func writeJSON(out io.Writer, value any) error {
 	return encoder.Encode(value)
 }
 
-func printOutcome(stdout io.Writer, outcome agent.Outcome, asJSON bool) error {
+func printOutcome(stdout, stderr io.Writer, outcome agent.Outcome, asJSON bool) error {
 	if asJSON {
 		return writeJSON(stdout, outcome.Embed(outcome.Text))
 	}
-	if err := writeJSON(stdout, outcome); err != nil || outcome.Text == "" {
+	if err := writeJSON(stderr, outcome); err != nil || outcome.Text == "" {
 		return err
 	}
-	_, err := fmt.Fprintf(stdout, "\n%s\n", outcome.Text)
+	_, err := fmt.Fprintln(stdout, outcome.Text)
 	return err
 }
 
@@ -230,7 +248,7 @@ func sendCommand(arguments []string, stdout, stderr *os.File) int {
 	if err != nil {
 		return complain(stderr, errors.New(client.Text(err.Error())))
 	}
-	if err := printOutcome(stdout, outcome, parsed.asJSON); err != nil {
+	if err := printOutcome(stdout, stderr, outcome, parsed.asJSON); err != nil {
 		return complain(stderr, err)
 	}
 	warnUnresolved(stderr, "", outcome.Unresolved)

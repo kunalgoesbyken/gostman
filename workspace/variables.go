@@ -10,10 +10,11 @@ import (
 )
 
 const (
-	DotEnvName     = ".env"
-	variablesKey   = "variables"
-	exportPrefix   = "export "
-	maxDotEnvBytes = 1 << 20
+	DotEnvName       = ".env"
+	variablesKey     = "variables"
+	variablesMetaKey = "variablesMeta"
+	exportPrefix     = "export "
+	maxDotEnvBytes   = 1 << 20
 )
 
 func (w *Workspace) readManifest() (*yaml.Node, error) {
@@ -27,20 +28,26 @@ func (w *Workspace) readManifest() (*yaml.Node, error) {
 func (w *Workspace) Variables() string {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	return w.manifestVariables()
+	return w.manifestObject(variablesKey)
 }
 
-func (w *Workspace) manifestVariables() string {
+func (w *Workspace) VariablesMeta() string {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.manifestObject(variablesMetaKey)
+}
+
+func (w *Workspace) manifestObject(key string) string {
 	root, err := w.readManifest()
 	if err != nil {
 		return emptyObject
 	}
 	var failure error
-	fields := readFields(root, []string{variablesKey}, &failure)
-	if !fields.has(variablesKey) {
+	fields := readFields(root, []string{key}, &failure)
+	if !fields.has(key) {
 		return emptyObject
 	}
-	text := fields.jsonText(variablesKey, true, unchanged)
+	text := fields.jsonText(key, true, unchanged)
 	if failure != nil || text == "" {
 		return emptyObject
 	}
@@ -60,23 +67,45 @@ func withoutKey(mapping *yaml.Node, key string) {
 func (w *Workspace) SaveVariables(text string) error {
 	w.mu.Lock()
 	defer w.mu.Unlock()
+	return w.saveVariables(text, w.manifestObject(variablesMetaKey))
+}
+
+func (w *Workspace) SaveMarkedVariables(text, meta string) error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.saveVariables(text, meta)
+}
+
+func (w *Workspace) saveVariables(text, meta string) error {
 	root, err := w.readManifest()
 	if err != nil {
 		return err
 	}
-	withoutKey(root, variablesKey)
-	if strings.TrimSpace(text) != "" && strings.TrimSpace(text) != emptyObject {
-		node := nodeBuilder{}.jsonText(text)
-		if node == nil || !isContainer(node) {
-			return errors.New("collection variables must be a JSON object")
-		}
-		setField(root, variablesKey, node)
+	plain, _ := WithoutSecretVariables(text, meta)
+	if err := setObject(root, variablesKey, plain); err != nil {
+		return err
+	}
+	if err := setObject(root, variablesMetaKey, meta); err != nil {
+		return err
 	}
 	content, err := encodeDocument(root)
 	if err != nil {
 		return err
 	}
 	return w.disk.write(ManifestName, content)
+}
+
+func setObject(root *yaml.Node, key, text string) error {
+	withoutKey(root, key)
+	if strings.TrimSpace(text) == "" || strings.TrimSpace(text) == emptyObject {
+		return nil
+	}
+	node := nodeBuilder{}.jsonText(text)
+	if node == nil || !isContainer(node) {
+		return errors.New("collection variables must be a JSON object")
+	}
+	setField(root, key, node)
+	return nil
 }
 
 func (w *Workspace) DotEnv() map[string]string {

@@ -224,7 +224,7 @@ func (r Repo) Summaries(changes []Change) {
 		if change.Worktree != "D" && change.Index != "D" {
 			after = r.readWorktree(change.Path)
 		}
-		change.Summary = Summarize(change.Path, before, after)
+		change.Summary = Summarize(r.inScope(change.Path), before, after)
 	}
 }
 

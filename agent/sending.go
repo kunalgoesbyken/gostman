@@ -53,12 +53,19 @@ type failedRequest struct {
 	Logs        []runner.LogLine `json:"logs"`
 }
 
+type unresolvedRequest struct {
+	Request      string   `json:"request"`
+	Placeholders []string `json:"placeholders"`
+}
+
 type runDigest struct {
-	Environment string          `json:"environment"`
-	DurationMs  int64           `json:"durationMs"`
-	Iterations  int             `json:"iterations,omitempty"`
-	Summary     runner.Summary  `json:"summary"`
-	Failures    []failedRequest `json:"failures"`
+	Environment string              `json:"environment"`
+	DurationMs  int64               `json:"durationMs"`
+	Iterations  int                 `json:"iterations,omitempty"`
+	Summary     runner.Summary      `json:"summary"`
+	Failures    []failedRequest     `json:"failures"`
+	Unresolved  []unresolvedRequest `json:"unresolved,omitempty"`
+	Hint        string              `json:"hint,omitempty"`
 }
 
 func (o Outcome) Attachment() string {
@@ -119,6 +126,8 @@ func (d *Desk) deliver(ctx context.Context, target runner.Listed, view View) (Ou
 	switch {
 	case response.Error == engine.ErrorBlocked:
 		outcome.Hint = hintRefused
+	case strings.Contains(outcome.Error, runner.SignInNeeded):
+		outcome.Hint = hintSignIn
 	case len(outcome.Unresolved) > 0:
 		outcome.Hint = hintUndefined
 	}
@@ -133,7 +142,7 @@ func (d *Desk) sendRequest(ctx context.Context, current scene, arguments sendArg
 	if err != nil {
 		return Outcome{}, err
 	}
-	d.client.SetVariables(arguments.Variables)
+	d.client.Remember(arguments.Variables)
 	return d.deliver(ctx, target, View{
 		Select:         arguments.Select,
 		MaxBodyBytes:   arguments.MaxBodyBytes,
@@ -175,10 +184,18 @@ func digest(report runner.Report) runDigest {
 		Summary:     report.Summary,
 		Failures:    []failedRequest{},
 	}
+	undefined := false
 	for _, result := range report.Results {
-		if result.Failed {
+		undefined = undefined || len(result.Unresolved) > 0
+		switch {
+		case result.Failed:
 			summary.Failures = append(summary.Failures, describeFailure(result))
+		case len(result.Unresolved) > 0:
+			summary.Unresolved = append(summary.Unresolved, unresolvedRequest{Request: result.QualifiedName(), Placeholders: result.Unresolved})
 		}
+	}
+	if undefined {
+		summary.Hint = hintRunUndefined
 	}
 	return summary
 }

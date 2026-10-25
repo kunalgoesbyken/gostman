@@ -21,23 +21,28 @@ type postmanOptions struct {
 	DefaultName string             `json:"defaultName"`
 	Variables   map[string]any     `json:"variables"`
 	Settings    workspace.Settings `json:"settings"`
+	SharedOrder bool               `json:"sharedOrder"`
 }
 
-func exportPostmanCollection(source string, collection workspace.Collection, includeSecrets bool) ([]importer.File, error) {
+func exportPostmanCollection(source string, collection workspace.Collection, includeSecrets bool) ([]importer.File, importer.Report, error) {
 	var placeholders []string
 	if !includeSecrets {
 		collection, placeholders = importer.RedactSecrets(collection)
 	}
-	options := postmanOptions{DefaultName: workspaceName(source), Variables: postmanVariables(collection.Variables, placeholders), Settings: collection.Settings}
+	collection, report, err := importer.AdaptScripts(importer.TargetPostman, collection)
+	if err != nil {
+		return nil, report, err
+	}
+	options := postmanOptions{DefaultName: workspaceName(source), Variables: postmanVariables(collection.Variables, placeholders), Settings: collection.Settings, SharedOrder: collection.SharedOrder}
 	var exported json.RawMessage
 	if err := sandbox.Render(postmanBuilder, &exported, collection.Requests, collection.Folders, options); err != nil {
-		return nil, err
+		return nil, report, err
 	}
 	var indented bytes.Buffer
 	if err := json.Indent(&indented, exported, "", postmanIndent); err != nil {
-		return nil, err
+		return nil, report, err
 	}
-	return []importer.File{{Name: postmanFile, Text: indented.String() + "\n"}}, nil
+	return []importer.File{{Name: postmanFile, Text: indented.String() + "\n"}}, report, nil
 }
 
 func postmanVariables(source string, placeholders []string) map[string]any {

@@ -25,6 +25,13 @@ const VIEW_POST = "postScript"
 
 const VIEWS = [VIEW_ASSERTIONS, VIEW_PRE, VIEW_POST].map((value) => ({ value, label: TEXT.views[value] }))
 
+const hasScript = (script) => typeof script === "string" && script.trim() !== ""
+
+const firstFilledView = (request) => {
+  if (parseAssertions(request.assertions).length > 0) return VIEW_ASSERTIONS
+  return [VIEW_POST, VIEW_PRE].find((view) => hasScript(request[view])) ?? VIEW_ASSERTIONS
+}
+
 const COLUMNS = "grid-cols-[1.5rem_minmax(0,1.25fr)_9rem_minmax(0,1fr)_1.75rem]"
 
 function ColumnLabels() {
@@ -130,7 +137,7 @@ export function AssertionEditor({ assertions, onChange, EditorComponent }) {
   )
 }
 
-export function ScriptEditor({ value, path, onChange, EditorComponent }) {
+export function ScriptEditor({ value, path, label, onChange, EditorComponent }) {
   return (
     <div className="min-h-0 flex-1">
       <Suspense fallback={<EditorSkeleton />}>
@@ -141,6 +148,7 @@ export function ScriptEditor({ value, path, onChange, EditorComponent }) {
           path={path}
           height="100%"
           surface="script"
+          label={label}
         />
       </Suspense>
     </div>
@@ -148,7 +156,9 @@ export function ScriptEditor({ value, path, onChange, EditorComponent }) {
 }
 
 export function TestsPanel({ request, editorPath, onUpdateRequest, EditorComponent, ai }) {
-  const [view, setView] = useState(VIEW_ASSERTIONS)
+  const [choice, setChoice] = useState(() => ({ id: request.id, view: firstFilledView(request) }))
+  const view = choice.id === request.id ? choice.view : firstFilledView(request)
+  const setView = (next) => setChoice({ id: request.id, view: next })
   const askAi = () => (view === VIEW_ASSERTIONS ? ai.start(TASK_TESTS) : ai.start(TASK_SCRIPT, { scriptKind: view }))
 
   return (
@@ -172,6 +182,7 @@ export function TestsPanel({ request, editorPath, onUpdateRequest, EditorCompone
           key={view}
           value={request[view]}
           path={`${editorPath}/${view}`}
+          label={TEXT.views[view]}
           onChange={(script) => onUpdateRequest({ [view]: script })}
           EditorComponent={EditorComponent}
         />

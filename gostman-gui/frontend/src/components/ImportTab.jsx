@@ -61,13 +61,13 @@ function SourceLines({ result }) {
   )
 }
 
-function ImportSummary({ result, onImport, onBrowse }) {
+function ImportSummary({ result, grow, onImport, onBrowse }) {
   const warnings = result.warnings || []
   const skipped = result.skipped || []
   const isUnlinked = result.spec && !result.spec.source
   return (
-    <div role="status" className="flex shrink-0 items-start gap-3 rounded-md border border-border p-3">
-      <div className="max-h-40 min-w-0 flex-1 overflow-y-auto text-xs [overflow-wrap:anywhere]">
+    <div role="status" className={cn("flex items-start gap-3 rounded-md border border-border p-3", grow ? "min-h-0 flex-1" : "shrink-0")}>
+      <div className={cn("min-w-0 flex-1 overflow-y-auto text-xs [overflow-wrap:anywhere]", grow ? "self-stretch" : "max-h-40")}>
         {result.sources ? <SourceLines result={result} /> : (
           <p className="font-medium text-foreground">
             {result.label}: {describeCounts(countImported(result))}
@@ -131,7 +131,7 @@ function FormatRow({ format, onFormat, showStatic, skipStatic, onSkipStatic }) {
       <label className="flex items-center gap-2 text-muted-foreground">
         {IMPORT_TEXT.formatLabel}
         <Select value={format} onChange={(event) => onFormat(event.target.value)} aria-label={IMPORT_TEXT.formatLabel} className="w-48">
-          {IMPORT_FORMATS.map((option) => <option key={option.value} value={option.value} icon={<BrandIcon brand={option.value} />}>{option.label}</option>)}
+          {IMPORT_FORMATS.map((option) => <option key={option.value} value={option.value} icon={<BrandIcon brand={option.value} fallback={FileText} />}>{option.label}</option>)}
         </Select>
       </label>
       {showStatic && (
@@ -180,6 +180,7 @@ export function ImportTab({ openapi, importer, onPickSpecFile, onImport, onImpor
 
   const { result, isParsing } = useParsedImport(source, readSource, options)
   const shown = fileFailure || result
+  const fromFiles = files.length > 0 || fileName !== ""
   const showStatic = format === HAR_FORMAT || result?.sources?.some((entry) => entry.format === HAR_FORMAT)
 
   const reset = () => {
@@ -239,9 +240,9 @@ export function ImportTab({ openapi, importer, onPickSpecFile, onImport, onImpor
     setIsDragOver(true)
   }
 
-  const confirmImport = () => {
+  const confirmImport = async () => {
     if (result.spec) openapi.importSpec(result)
-    else onImport(result)
+    else if (!(await onImport(result))) return
     onClose()
   }
 
@@ -268,22 +269,26 @@ export function ImportTab({ openapi, importer, onPickSpecFile, onImport, onImpor
             {IMPORT_TEXT.chooseFolder}
           </Button>
         </div>
-        <p className="min-w-0 flex-1 text-xs text-muted-foreground">
-          {files.length > 0 ? IMPORT_TEXT.filesSelected(files.length) : IMPORT_TEXT.dropHint}
+        <p className="min-w-0 flex-1 text-xs text-muted-foreground [overflow-wrap:anywhere]">
+          {files.length > 0 ? IMPORT_TEXT.filesSelected(files.length) : fileName || IMPORT_TEXT.dropHint}
         </p>
+        {fromFiles && <Button variant="ghost" size="sm" onClick={() => updateText("")}>{IMPORT_TEXT.clearFiles}</Button>}
       </div>
 
       <FormatRow format={format} onFormat={setFormat} showStatic={showStatic} skipStatic={skipStatic} onSkipStatic={setSkipStatic} />
 
-      <AddressRow address={address} onChange={setAddress} onLoad={loadAddress} onPickFile={onPickSpecFile ? pickSpecFile : null} />
-
-      <Textarea
-        value={text}
-        onChange={(event) => updateText(event.target.value)}
-        placeholder={IMPORT_TEXT.pastePlaceholder}
-        aria-label={IMPORT_TEXT.pasteLabel}
-        className="min-h-24 flex-1"
-      />
+      {!fromFiles && (
+        <>
+          <AddressRow address={address} onChange={setAddress} onLoad={loadAddress} onPickFile={onPickSpecFile ? pickSpecFile : null} />
+          <Textarea
+            value={text}
+            onChange={(event) => updateText(event.target.value)}
+            placeholder={IMPORT_TEXT.pastePlaceholder}
+            aria-label={IMPORT_TEXT.pasteLabel}
+            className="min-h-24 flex-1"
+          />
+        </>
+      )}
 
       {sharedReference !== null && (
         <div className="shrink-0 rounded-md border border-border p-3">
@@ -299,7 +304,7 @@ export function ImportTab({ openapi, importer, onPickSpecFile, onImport, onImpor
       {isParsing && <p role="status" className="shrink-0 text-xs text-muted-foreground">{IMPORT_TEXT.reading}</p>}
       {!isParsing && shown && !shown.success && <ImportFailure error={shown.error} />}
       {!isParsing && shown?.success && (
-        <ImportSummary result={shown} onImport={confirmImport} onBrowse={() => openapi.browse(remote || { text })} />
+        <ImportSummary result={shown} grow={fromFiles} onImport={confirmImport} onBrowse={() => openapi.browse(remote || { text })} />
       )}
     </>
   )

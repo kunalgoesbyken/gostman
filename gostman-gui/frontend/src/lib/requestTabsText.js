@@ -7,6 +7,8 @@ export const REQUEST_TABS_TEXT = {
   examplesHint: 'Saved response examples',
   headerLabel: 'Header',
   variableLabel: 'Variable',
+  paramLabel: 'Parameter',
+  paramsNote: 'These rows mirror the query string in the URL. Unchecked rows are kept here but not sent.',
   labels: {
     params: 'Params',
     headers: 'Headers',
@@ -18,7 +20,7 @@ export const REQUEST_TABS_TEXT = {
     websocket: 'WebSocket',
     vars: 'Vars',
     extract: 'Extract',
-    tests: 'Tests',
+    tests: 'Checks',
     settings: 'Settings',
   },
 }

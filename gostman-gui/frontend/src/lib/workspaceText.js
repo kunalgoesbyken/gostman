@@ -6,6 +6,8 @@ export const WORKSPACE_TEXT = {
   browserLabel: 'This browser',
   browserHint: 'The collection is saved in this browser. Keeping it as files in a folder needs the desktop app.',
   restrictedHint: 'Scripts, OAuth 2.0 settings, local MCP commands and file reads in this folder are off until you trust it',
+  trusted: 'This folder is trusted now. Its scripts, OAuth 2.0 settings, local MCP commands and file reads are on.',
+  restrictedOpened: 'This folder is not trusted yet. Its scripts, OAuth 2.0 settings, local MCP commands and file reads stay off until you choose Trust this folder in the folder menu.',
   switcherLabel: 'Switch workspace',
   switcherCommand: 'Switch workspace',
   switcherDescription: 'Choose another folder, pinned or recent',

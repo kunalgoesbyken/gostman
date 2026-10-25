@@ -2,6 +2,7 @@ package engine
 
 import (
 	"errors"
+	"slices"
 	"strings"
 )
 
@@ -31,6 +32,18 @@ func UnresolvedIn(err error) []string {
 		return unresolved.names
 	}
 	return nil
+}
+
+func JoinUnresolved(lists ...[]string) []string {
+	var joined []string
+	for _, list := range lists {
+		for _, name := range list {
+			if !slices.Contains(joined, name) {
+				joined = append(joined, name)
+			}
+		}
+	}
+	return joined
 }
 
 func NotDefined(names []string) string {

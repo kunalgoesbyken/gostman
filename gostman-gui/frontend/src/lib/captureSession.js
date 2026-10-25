@@ -96,6 +96,10 @@ export function createCaptureActions(backend) {
 
   const refresh = report(sync)
 
+  const resume = report(async () => {
+    if (server) adopt(await server.status())
+  })
+
   async function open() {
     patch({ isOpen: true, failure: '' })
     if (server) await refresh()
@@ -159,6 +163,7 @@ export function createCaptureActions(backend) {
   return {
     isAvailable: Boolean(server),
     open,
+    resume,
     close,
     start,
     stop,

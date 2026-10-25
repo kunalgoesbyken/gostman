@@ -1,0 +1,16 @@
+export const AUTH_TEXT = {
+  type: 'Type',
+  username: 'Username',
+  password: 'Password',
+  token: 'Token',
+  key: 'Key',
+  keyPlaceholder: 'X-API-Key',
+  value: 'Value',
+  addTo: 'Add to',
+  inHeader: 'Header',
+  inQuery: 'Query params',
+  noAuthNote: 'This request is sent without authentication.',
+  fieldsNote: 'Values can use {{variables}}. This overrides a header or parameter of the same name.',
+  showValue: 'Show value',
+  hideValue: 'Hide value',
+}

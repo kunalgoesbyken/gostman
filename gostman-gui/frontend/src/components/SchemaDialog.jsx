@@ -24,7 +24,7 @@ export function SchemaDialog({ value, EditorComponent, onSave, onClose }) {
         <p className="shrink-0 text-xs text-muted-foreground">{SCHEMA_TEXT.editorHint}</p>
         <div className="min-h-0 flex-1 overflow-hidden rounded border border-border">
           <Suspense fallback={<EditorSkeleton />}>
-            <EditorComponent value={text} onChange={(event) => setText(event.target.value)} language="json" height="100%" />
+            <EditorComponent value={text} onChange={(event) => setText(event.target.value)} language="json" height="100%" label={SCHEMA_TEXT.editorTitle} />
           </Suspense>
         </div>
       </DialogBody>

@@ -12,10 +12,14 @@ const TRIGGER_CLASS = "inline-flex min-w-6 shrink-0 items-center justify-center 
 const IDLE_TRIGGER_CLASS = "border-transparent text-muted-foreground hover:text-foreground"
 const STRIP_GAP_PX = 16
 
-const TabsContext = React.createContext({ value: "", setValue: () => {} })
+const TabsContext = React.createContext({ value: "", setValue: () => {}, idOf: () => undefined })
 
 function Tabs({ value, onValueChange, children, className }) {
-  const context = React.useMemo(() => ({ value, setValue: onValueChange }), [value, onValueChange])
+  const baseId = React.useId()
+  const context = React.useMemo(
+    () => ({ value, setValue: onValueChange, idOf: (part, tab) => `${baseId}${part}-${tab}` }),
+    [value, onValueChange, baseId]
+  )
   return (
     <TabsContext.Provider value={context}>
       <div className={className}>{children}</div>
@@ -37,7 +41,7 @@ function TabsList({ className, label, children }) {
 }
 
 function TabsTrigger({ className, value, children }) {
-  const { value: currentValue, setValue } = React.useContext(TabsContext)
+  const { value: currentValue, setValue, idOf } = React.useContext(TabsContext)
   const triggerRef = React.useRef(null)
   const isActive = currentValue === value
 
@@ -50,7 +54,9 @@ function TabsTrigger({ className, value, children }) {
       ref={triggerRef}
       type="button"
       role="tab"
+      id={idOf("tab", value)}
       aria-selected={isActive}
+      aria-controls={isActive ? idOf("panel", value) : undefined}
       tabIndex={isActive ? 0 : -1}
       onClick={() => setValue(value)}
       className={cn(TRIGGER_CLASS, isActive ? "border-primary text-foreground" : IDLE_TRIGGER_CLASS, className)}
@@ -107,10 +113,24 @@ function useFittedIndexes(items, activeValue) {
   return { stripRef, measureRef, fullWidth: layout?.full, visible: shown.filter((index) => index < items.length) }
 }
 
+function useFocusAfterPick(idOf) {
+  const pickedRef = React.useRef("")
+
+  React.useEffect(() => {
+    const tab = pickedRef.current && document.getElementById(idOf("tab", pickedRef.current))
+    if (!tab) return
+    pickedRef.current = ""
+    tab.focus()
+  })
+
+  return pickedRef
+}
+
 function OverflowTabsList({ className, label, items, moreLabel, moreHint }) {
-  const { value, setValue } = React.useContext(TabsContext)
+  const { value, setValue, idOf } = React.useContext(TabsContext)
   const { stripRef, measureRef, fullWidth, visible } = useFittedIndexes(items, value)
   const [menu, setMenu] = React.useState(null)
+  const pickedRef = useFocusAfterPick(idOf)
   const closeMenu = React.useCallback(() => setMenu(null), [])
   const hidden = items.filter((_, index) => !visible.includes(index))
   const isMarked = hidden.some((item) => item.marked)
@@ -120,7 +140,12 @@ function OverflowTabsList({ className, label, items, moreLabel, moreHint }) {
     setMenu(menu ? null : { x: left, y: bottom })
   }
 
-  const menuItems = hidden.map((item) => ({ id: item.value, label: item.label, detail: item.detail, onSelect: () => setValue(item.value) }))
+  const pick = (tab) => {
+    pickedRef.current = tab
+    setValue(tab)
+  }
+
+  const menuItems = hidden.map((item) => ({ id: item.value, label: item.label, detail: item.detail, onSelect: () => pick(item.value) }))
 
   return (
     <div ref={stripRef} style={{ flexBasis: fullWidth }} className={cn("relative flex h-full min-w-0 shrink items-stretch gap-4", className)}>
@@ -150,9 +175,9 @@ function OverflowTabsList({ className, label, items, moreLabel, moreHint }) {
 }
 
 function TabsContent({ className, value, children }) {
-  const { value: currentValue } = React.useContext(TabsContext)
+  const { value: currentValue, idOf } = React.useContext(TabsContext)
   if (currentValue !== value) return null
-  return <div role="tabpanel" className={className}>{children}</div>
+  return <div role="tabpanel" id={idOf("panel", value)} aria-labelledby={idOf("tab", value)} className={className}>{children}</div>
 }
 
 const COUNT_TONES = {

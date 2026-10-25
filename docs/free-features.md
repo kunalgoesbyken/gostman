@@ -25,3 +25,5 @@ Gostman has no accounts, so it has no hosted collaboration, single sign-on or cl
 The rows for Postman, Bruno and Insomnia come from their public pricing and documentation pages, read in October 2026. Plans change, so check the current [Postman pricing](https://www.postman.com/pricing/), [Bruno pricing](https://www.usebruno.com/pricing) and [Insomnia pricing](https://insomnia.rest/pricing) before you decide. Moving a collection over is covered in [Coming from Postman](coming-from-postman.md), [Coming from Bruno](coming-from-bruno.md) and [Coming from Insomnia](coming-from-insomnia.md).
 
 ## Compare feature by feature
+
+The table is built from the same data as the comparison on the landing page, so it appears on [gostman.com/docs/free-features](https://gostman.com/docs/free-features#compare-feature-by-feature) but not in this file on GitHub.

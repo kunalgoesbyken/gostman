@@ -1,12 +1,13 @@
 import { buildCollectionTree, collectRequests, inheritedTags } from './collectionTree'
-import { isPlainObject, parseJSON } from './dataUtils'
+import { rememberPrompts } from './execution'
 import { STEP_RUN } from './onboarding'
-import { iterationCount, iterationVariables } from './runData'
+import { iterationCount, iterationVariables, withdrawnValues } from './runData'
 import { createFlowFollower } from './runFlow'
+import { sizeSandboxPool } from './scripting/sandbox'
 import { withRunStreamBudget } from './runStream'
 import { isSocketAddress } from './socketSessions'
 import { matchesTags } from './tags'
-import { selectActiveVariables, useAppStore } from '../store/appStore'
+import { useAppStore, variableTextFor } from '../store/appStore'
 
 const SKIPPED_SOCKET = 'WebSocket requests are not part of a run.'
 const BODY_LIMIT = 64 * 1024
@@ -48,6 +49,7 @@ function summarize(request, { response, tests }, iteration) {
     streamEnd: response.streamEnd,
     isAnswered: !response.error,
     error: response.error ? response.body : tests.error,
+    unresolved: response.unresolved || [],
     durationMs: response.durationMs,
     tests: tests.results,
     logs: tests.logs,
@@ -60,9 +62,18 @@ function summarize(request, { response, tests }, iteration) {
 
 const NO_TAG_FILTER = { include: [], exclude: [] }
 
-export function requestsInScope(folders, requests, folderId, tagFilter) {
+export function requestsInScope({ folders, requests, sharedOrder }, folderId, tagFilter) {
   const tagsOf = inheritedTags(folders)
-  return collectRequests(buildCollectionTree(folders, requests), folderId).filter((request) => matchesTags(tagsOf(request), tagFilter))
+  return collectRequests(buildCollectionTree(folders, requests, sharedOrder), folderId).filter((request) => matchesTags(tagsOf(request), tagFilter))
+}
+
+function sessionGiver(before) {
+  let given = {}
+  return (next) => {
+    const { restored, forgotten } = withdrawnValues(before, given, store().sessionVariables)
+    store().storeSessionVariables({ ...restored, ...next }, forgotten)
+    given = next
+  }
 }
 
 export function createRunner(backend, execute) {
@@ -71,11 +82,11 @@ export function createRunner(backend, execute) {
   let lastRun = null
 
   async function runOne(run, request, iteration) {
-    if (isSocketAddress(request.url, selectActiveVariables(store()))) return skipped(request, SKIPPED_SOCKET)
+    if (isSocketAddress(request.url, variableTextFor(store(), request))) return skipped(request, SKIPPED_SOCKET)
     sequence += 1
     const sendId = `run-${sequence}`
     run.sendIds.add(sendId)
-    const outcome = await execute(withRunStreamBudget(request), sendId)
+    const outcome = await execute(withRunStreamBudget(request), sendId, run.prompts)
     run.sendIds.delete(sendId)
     if (outcome.skipped) return skipped(request, outcome.skipped, outcome.tests.flow)
     return summarize(request, outcome, iteration)
@@ -107,24 +118,20 @@ export function createRunner(backend, execute) {
   }
 
   async function start({ folderId, delayMs, stopOnFailure, parallel = 1, rows = [], iterations = 0, tagFilter = NO_TAG_FILTER }) {
-    const run = { isStopped: false, isHalted: false, sendIds: new Set() }
+    const run = { isStopped: false, isHalted: false, sendIds: new Set(), prompts: rememberPrompts(), giveSession: sessionGiver(store().sessionVariables) }
     current = run
-    const { folders, requests: saved } = store()
-    const requests = requestsInScope(folders, saved, folderId, tagFilter)
+    const requests = requestsInScope(store(), folderId, tagFilter)
     const count = iterationCount(rows, iterations)
     const isIterating = rows.length > 0 || count > 1
-    const base = selectActiveVariables(store())
-    const parsed = parseJSON(base, {})
+    sizeSandboxPool(parallel)
     lastRun = { startedAt: new Date(), planned: requests.length * count, iterations: isIterating ? count : 0, parallel, finishedAt: null }
     store().startRun()
     store().completeOnboardingStep(STEP_RUN)
     for (let iteration = 0; iteration < count && !run.isStopped && !run.isHalted; iteration += 1) {
-      if (isIterating && isPlainObject(parsed)) {
-        store().setActiveVariables(JSON.stringify(iterationVariables(parsed, rows, iteration, count), null, 2))
-      }
+      if (isIterating) run.giveSession(iterationVariables(rows, iteration, count))
       await runIteration(run, requests, isIterating ? iteration + 1 : 0, { delayMs, stopOnFailure, parallel })
     }
-    if (isIterating && isPlainObject(parsed)) store().setActiveVariables(base)
+    if (isIterating) run.giveSession({})
     if (current !== run) return
     lastRun.finishedAt = new Date()
     store().finishRun()
@@ -133,6 +140,7 @@ export function createRunner(backend, execute) {
   function stop() {
     if (!current) return
     current.isStopped = true
+    current.giveSession({})
     current.sendIds.forEach((sendId) => backend.cancel(sendId))
     current = null
     store().finishRun()

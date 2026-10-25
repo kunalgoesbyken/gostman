@@ -40,26 +40,6 @@ func (v variables) override(overrides map[string]string) {
 	}
 }
 
-func selectEnvironment(environments []Environment, name string) (Environment, error) {
-	if name == "" {
-		if len(environments) == 0 {
-			return Environment{}, nil
-		}
-		return environments[0], nil
-	}
-	names := make([]string, 0, len(environments))
-	for _, environment := range environments {
-		if environment.Name == name {
-			return environment, nil
-		}
-		names = append(names, environment.Name)
-	}
-	if len(names) == 0 {
-		return Environment{}, fmt.Errorf("there is no environment named %q: the collection has no environments", name)
-	}
-	return Environment{}, fmt.Errorf("there is no environment named %q; the collection has %s", name, strings.Join(names, ", "))
-}
-
 func layered(scopes ...variables) variables {
 	merged := variables{}
 	for _, scope := range scopes {
@@ -133,6 +113,10 @@ type variableRow struct {
 	Key     string `json:"key"`
 	Value   any    `json:"value"`
 	Enabled *bool  `json:"enabled"`
+}
+
+func (r Request) OwnVariables() map[string]string {
+	return requestScope(r.Vars).plain()
 }
 
 func requestScope(text string) variables {

@@ -1,5 +1,6 @@
 export const MCP_TEXT = {
   server: 'Server',
+  argumentsLabel: 'Arguments',
   notLoaded: 'Not loaded',
   load: 'Load',
   reload: 'Reload',

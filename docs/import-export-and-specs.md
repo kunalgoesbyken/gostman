@@ -4,7 +4,7 @@ This page covers the Import and Export dialog, what an import does and does not 
 
 ## The Import and Export dialog
 
-Open the dialog with the **Import** button in the header or the **Import data** and **Export data** commands in the command palette. It has three tabs: **Import**, **Export** and **Share**. The Share tab is covered in [Sharing and documentation](sharing-and-docs.md).
+Open the dialog with the **Import** button in the header or the **Import data**, **Export data** and **Share collection** commands in the command palette. It has three tabs: **Import**, **Export** and **Share**. The Share tab is covered in [Sharing and documentation](sharing-and-docs.md).
 
 ![The Import tab with Choose files and Choose folder, the format list, an OpenAPI address field and a box to paste content](../screenshots/import.png)
 
@@ -86,7 +86,7 @@ Not imported, and listed in the summary: bodies read from files with `< path` (t
 
 The summary reads, for example, `name: Postman file, 12 requests, 3 folders and 2 environments`. It counts requests and folders, and environments, variables and folder settings when there are any. Below the counts it can show:
 
-- Warnings, in the warning color.
+- Warnings, in the warning colour.
 - A **Left out** list of what was skipped.
 - For an OpenAPI spec loaded from pasted text, a note that sync is available only for specs loaded from an address or an opened file.
 
@@ -102,14 +102,16 @@ Imports are untrusted input, as described in the project notes:
 - They never disable TLS verification. If a request in the file turned verification off, it is kept on and a warning names up to five such requests.
 - They never carry OAuth tokens.
 - Folders in a loop or nested deeper than 32 levels are moved to the top level, with a warning.
-- Collection variables from the file are merged into the collection variables (**Environments**, **Collection variables**). If those are not valid JSON, the variables are skipped with a note. An environment whose variables are not valid JSON is skipped by name.
-- Collection settings are adopted only when the open collection has none, see [Folder and collection settings](folder-settings.md).
+- In the app's own storage, the collection variables of a Postman, Bruno, Insomnia, OpenAPI or WSDL import belong to the folder the import creates (**Environments**, **Collection variables** under the collection's name while one of its requests is open), so they never mix with another collection's. Other collection variables, and all of them in a folder workspace, are added to the shared collection variables; a variable you already have keeps its value. If those are not valid JSON, the variables are skipped with a note. A Postman collection variable of type **secret** is marked secret, so its value stays on this device and out of exports; `gostman import` writes only its name.
+- Environments that come with a Bruno or Insomnia collection belong to the folder the import creates, so the `Local` of a second collection stays its own; the summary says which collections they belong to. Postman environments, globals and `.http` environments are shared by every collection. See [Environments per collection](variables.md#environments-per-collection). In a folder workspace every environment is shared.
+- A shared environment with the name of a shared one you already have is added to it: new variables are added and the ones it already has keep their values, and the summary names the environment. An environment whose variables are not valid JSON is skipped by name. When the shared environment in use has no variables, such as the empty **Default** of a new collection, the first imported shared environment is put in use.
+- The outermost settings (**Settings for all collections**, or **Collection settings** in a folder workspace) are adopted only when they are empty, see [Folder and collection settings](folder-settings.md).
 
 ### Scripts and OAuth 2.0
 
-Scripts, OAuth 2.0 settings, local MCP commands and file reads are kept when you import them, but you decide first. If the import contains any request, folder or collection setting that carries them, Gostman asks **Import scripts and sign-in settings?** with the number of items. Choose **Import them** to keep them. Cancel to import everything else without them.
+Scripts, OAuth 2.0 settings, local MCP commands and file reads are kept when you import them, but you decide first. If the import contains any request, folder or collection setting that carries them, Gostman asks before adding anything and says how many items carry what. When there is only one kind, the prompt is named after it, such as **Import the scripts?**, with **Import with scripts** and **Import without scripts**. With several kinds it reads **Review before importing**, with **Import everything** and **Import without them**. Choosing to import without them adds everything else and notes what was left out. **Cancel** imports nothing and returns to the import dialog with your content still in it.
 
-In a folder workspace, imported items that carry scripts, OAuth 2.0 settings, local MCP commands or file reads stay restricted until you trust the folder, see [Collections, tabs and Git](collections-and-git.md).
+In a folder you have not trusted yet, imported scripts, OAuth 2.0 settings, local MCP commands and file reads stay switched off until you trust it, see [Trust](collections-and-git.md#trust).
 
 ### Share links
 
@@ -117,26 +119,62 @@ Pasting a share link, or choosing a share file, shows a preview with the request
 
 ## Exporting
 
-The **Export** tab previews the content, shows how many requests, folders and environments the workspace has, and offers a copy button and **Save file**. A secret scan runs on the workspace and warns before you save when it finds credentials, see [Command line](cli.md#secret-scanner). The preview shows the first 20,000 characters; the saved file is complete.
+The **Export** tab previews the content, shows how many requests, folders and environments the collection has, and offers a copy button and **Save file**. A secret scan runs on the collection and shows a notice when it finds credentials; it does not block the export, see [Notices in Share and Export](runner-load-and-scan.md#notices-in-share-and-export). The preview shows the first 20,000 characters; the saved file is complete.
 
 ![The Export tab with the Gostman format selected, a warning that one possible secret is written into the export, and the export preview](../screenshots/export.png)
 
 | Format | What you get |
 | --- | --- |
-| Gostman | Full backup: requests, folders and every environment. OAuth tokens are removed |
-| Postman | Collection v2.1 with the variables in use, except secret ones, as collection variables, scripts, saved examples, and the auth, scripts and variables of folders and the collection |
+| Gostman | Full backup: requests, folders and every environment, with the collection each one belongs to, and the collection variables: the shared ones as the `variables` object and each collection's own with its folder. Values of variables marked secret and OAuth tokens are left out; the secret marks are kept. The app, `gostman run` and `gostman import` read this file, and also older exports that wrote `variables` as a JSON string |
+| Postman | Collection v2.1 with the variables in use, except secret ones, as collection variables, scripts and checks adapted to run in Postman, saved examples, and the auth, scripts and variables of folders and the collection. Insomnia imports this file too |
 | OpenAPI JSON | OpenAPI 3.0 description of the HTTP requests |
 | OpenAPI YAML | OpenAPI 3.0 description of the HTTP requests |
 | Markdown | Readable API documentation |
 | HTML docs | One self-contained page to publish or print. Credentials are left out and variables stay as `{{name}}` |
-| Bruno | A folder of `.bru` files with environments, saved as a `.zip` |
+| Bruno | A folder of `.bru` files with environments, saved as a `.zip`. Collection and folder headers, auth, variables, scripts, checks and docs go into `collection.bru` and `folder.bru`; a single top-level folder becomes the collection. Scripts and checks are adapted to run in Bruno |
 | curl script | One curl command per request. Credentials become environment variable placeholders, and the variables to set are listed at the top |
 | HAR | HTTP Archive 1.2 with the requests and no responses |
 | .http files | Requests for VS Code REST Client and JetBrains HTTP Client, one file per folder, with environments in `http-client.env.json` |
 
 Gostman, OpenAPI and Bruno exports keep request tags. Bruno only reads tags made of letters, digits, `_` and `-`, so other tags, such as ones with spaces, are left out of a Bruno export.
 
+Postman, curl script and HAR exports keep the order the sidebar shows, with requests above or between folders where you put them, and .http files list each folder's requests in that order. Bruno lists folders before requests, so the Bruno export keeps the order within each kind and the export summary names the requests that will run after a folder there. Imports keep the order of the source; see [Order of requests and folders](collections-and-git.md#order-of-requests-and-folders).
+
 For Bruno, curl script, HAR and .http exports, an **Include credentials** checkbox is off by default. Off, passwords, tokens and secret-named headers or variables are replaced with `{{NAME}}` placeholders. On, credentials are written into the file in plain text.
+
+### Scripts and checks in Postman, Bruno and Insomnia
+
+Postman and Bruno exports turn scripts and checks into something the other tool runs, so a team where some people use Gostman and others use Postman, Bruno or Insomnia keeps one set of tests.
+
+- **Scripts stay as you wrote them.** When a script uses a Gostman name the other tool does not have, such as `env`, `utils`, `sendRequest` or, for Postman, `req`, `res`, `test` and `expect`, a few lines at the top define that name with the tool's own API, holding only the parts the script uses:
+
+  ```js
+  const env = {
+    set: (name, value) => pm.environment.set(name, value),
+  };
+  const res = {
+    status: pm.response.code,
+  };
+
+  env.set("lastStatus", res.status)
+  ```
+
+  Bruno already has Gostman's `req`, `res`, `test` and `expect`, so a Bruno script usually needs only `env` defined. A script written in the tool's own API, such as `pm.*` for Postman, is exported unchanged. In a Postman export, a script that uses `await` outside a function is wrapped in an `async` function, because newman does not allow `await` there.
+- **Checks become the tool's own checks, and keep Gostman's meaning.** In Postman each assertion row becomes a `pm.test` named like the row, for example `res.status equals 200`; a row that is turned off becomes a skipped test. **equals** and **does not equal** compare as Gostman does: plain values as text, so `eq 200` passes when the API returns `200` or `"200"`, and objects and lists as JSON. In Bruno, rows whose check Bruno has (`eq`, `gt`, `contains`, `isNumber` and the like) stay rows in the `assert` block, except an **equals** or **does not equal** row that Bruno would compare differently, such as `eq 200` on a body field, because Bruno's `eq` also compares the type. Those rows, **is true**, **is an object**, **matches schema** and every folder and collection row become tests in the `tests` block. Rows that are turned off stay, turned off, in Bruno's `assert` block. `{{variables}}` in an expected value, including values from a data file, are filled in when the check runs.
+- **Extract rules keep filling variables.** Postman has no extract rules, so each rule becomes one line at the top of the post-response script, where it runs before your script as it does in Gostman. A rule without a scope sets a collection variable, which Postman keeps between sends; a **session** rule sets a run variable and an **environment** rule sets the active environment:
+
+  ```js
+  pm.collectionVariables.set("token", pm.response.json().access_token);
+  pm.variables.set("trace", pm.response.headers.get("X-Trace"));
+  pm.environment.set("sid", pm.cookies.get("sid"));
+  ```
+
+  In Bruno, rules become post-response vars, such as `token: res.body.access_token`, `trace: res.headers["x-trace"]`, `code: res.status` and `sid: bru.cookies.get("sid")`; turned-off rules stay turned off. Bruno's vars last for the run, so a rule that writes to the environment becomes a `bru.setEnvVar(..., { persist: true })` line at the top of the post-response script instead. A JSON body path must be a plain path such as `$.data.items[0].id`; a rule that searches or filters, such as `$..id`, cannot be written as code and is listed in the summary.
+- **Saved requests are found by their path in Bruno.** Bruno's `bru.runRequest` needs the request's path from the collection's root, such as `auth/Log in`, where Gostman's `sendRequest("Log in")` uses the name. The definition of `sendRequest` in a Bruno export holds the paths of the requests the script sends, so requests in folders and requests whose names are not valid file names are found. A name that matches no request in the collection is listed in the summary. Values from a data file are filled into the address and body of a request a script builds, as Gostman does.
+- **The summary under the format says what to check.** Its heading counts the things that will not work in the other tool, such as `res("..id")` queries in Postman, `req.setTimeout` in Postman, `visualize` in Bruno and `pm.*` calls in a Bruno export, each with its place, line and reason. Below it, **What changed** counts the scripts that needed no change, the names that were defined, the rows that became tests and the extract rules that became script lines or vars. `gostman export` prints the same lines, prefixed with `note:` and `warning:`.
+- **Importing the file again gives your scripts back.** The lines that define the Gostman names are recognised and removed, as long as nobody edited them, and the scripts read as they did in Gostman. The extract lines an export wrote come back as extract rules, with their scope; Bruno vars come back as session rules. Checks come back as assertion rows, whether they were exported as Bruno assertions or as tests, including turned-off rows exported as skipped Postman tests. Checks of folders and the collection come back as test code in the post-response script, which runs the same.
+
+Insomnia has no export format of its own here: it imports the Postman file and runs its `pm.*` scripts. Insomnia has no global variables, so scripts that use `env.globals` do not work there.
 
 ### .http export
 
@@ -169,7 +207,7 @@ What the page contains and how it redacts values is described in [Sharing and do
 
 ### Importing a spec
 
-Load a spec from an address, a file or pasted text, then choose **Import**. Each operation becomes a request. A spec loaded from an address or an opened file is linked to the folder that the import creates, so you can sync it later. Variables that the spec defines, such as `baseUrl`, are added to the collection variables (**Environments**, **Collection variables**) unless a variable with that name is already set. A path parameter becomes a `{{name}}` placeholder in the URL with a request variable that holds the example value, so `/users/{id}` is imported as `/users/{{id}}`.
+Load a spec from an address, a file or pasted text, then choose **Import**. Each operation becomes a request. A spec loaded from an address or an opened file is linked to the folder that the import creates, so you can sync it later. Variables that the spec defines, such as `baseUrl`, become the collection variables of that folder (**Environments**, **Collection variables** under its name); in a folder workspace they are added to the collection variables in `gostman.yaml` unless a variable with that name is already set. A path parameter becomes a `{{name}}` placeholder in the URL with a request variable that holds the example value, so `/users/{id}` is imported as `/users/{{id}}`.
 
 ### Spec viewer
 
@@ -191,15 +229,17 @@ Each item has a checkbox. Operations you edited in Gostman are marked **edited h
 
 ### Contract checks
 
-Every HTTP response to a request in a linked folder, or in one of its subfolders, is checked against the spec. The checks appear under **Contract** in the Tests tab of the response, count in its total, and fail a request in the runner like any other check:
+Every HTTP response to a request in a linked folder, or in one of its subfolders, is checked against the spec. The checks appear under **Contract** in the Checks tab of the response, count in its total, and fail a request in the runner like any other check:
 
 - **Status 200 is documented for GET /pets/{id}**: the spec lists this status for the operation, as the exact code, a range such as `2XX`, or `default`. When it does not, the message lists the documented statuses and the other checks are skipped.
 - **Content type application/json is documented**: the response's content type is one the spec lists for that status. `application/*` and `*/*` in the spec match too. This is checked only when the spec documents a body for the status.
 - **Body matches the documented schema**: the JSON body matches the response schema, with each problem listed by its place in the body; see [JSON Schema checks](scripting-and-settings.md#json-schema-checks). This is checked only for JSON content types with a schema.
 
-A request created from the spec is checked against its own operation. Other requests are matched by method and path: the path's last segments must fit the operation's template, such as `/pets/{id}`, and a path that starts with the base path of one of the spec's servers is preferred. When no operation matches, a note in the Tests tab says so and nothing is checked. Schemas may use `$ref` to the spec's components and to other files the spec refers to.
+A request created from the spec is checked against its own operation. Other requests are matched by method and path: the path's last segments must fit the operation's template, such as `/pets/{id}`, and a path that starts with the base path of one of the spec's servers is preferred. When no operation matches, a note in the Checks tab says so and nothing is checked. Schemas may use `$ref` to the spec's components and to other files the spec refers to.
 
-The spec is read again after each sync and once per app session. When it cannot be read, a note in the Tests tab says why. To switch the checks off for a folder, choose **Stop checking responses against the spec** in its menu; **Check responses against the spec** switches them back on.
+A folder that did not come from a spec, such as a collection imported from Postman, Bruno or Insomnia, can be checked too: choose **Check responses against a spec…** in its menu and enter the address of the spec, or a file path in the desktop app. Its requests are matched by method and path, and the folder menu then has **Browse API spec** and the switch below, but no **Check for spec updates**.
+
+The spec is read again after each sync and once per app session. When it cannot be read, a note in the Checks tab says why. To switch the checks off for a folder, choose **Stop checking responses against the spec** in its menu; **Check responses against the spec** switches them back on.
 
 `gostman run --contract spec.yaml` runs the same checks on the command line; see [Command line](cli.md).
 

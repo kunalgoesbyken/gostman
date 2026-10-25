@@ -2,7 +2,7 @@ import { useMemo } from "react"
 import { Button } from "./ui/button"
 import { ColorPicker } from "./ui/colorPicker"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
-import { Field } from "./ui/field"
+import { FIELD_COLUMNS, Field } from "./ui/field"
 import { TagsInput } from "./ui/tagsInput"
 import { TagBadge } from "./TagBadge"
 import { ROW_FOLDER } from "../lib/collectionTree"
@@ -11,6 +11,7 @@ import { automaticSwatch } from "../lib/swatches"
 import { chosenTagColor, tagKey, withTagColor } from "../lib/tagColors"
 import { collectTags, normalizeTags } from "../lib/tags"
 import { LABEL_TEXT as TEXT } from "../lib/treeText"
+import { cn } from "../lib/utils"
 import { useAppStore } from "../store/appStore"
 
 const NOTE = "text-2xs text-muted-foreground"
@@ -24,8 +25,8 @@ function TagColours({ tags }) {
       <h3 className="text-xs font-medium">{TEXT.tagColours}</h3>
       <ul className="flex flex-col gap-2">
         {tags.map((tag) => (
-          <li key={tag} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5">
-            <TagBadge tag={tag} className="px-1.5 py-0.5 text-2xs" />
+          <li key={tag} className={cn(FIELD_COLUMNS, "sm:items-center")}>
+            <TagBadge tag={tag} className="justify-self-start px-1.5 py-0.5 text-2xs" />
             <ColorPicker
               label={TEXT.tagColour(tag)}
               value={chosenTagColor(tagColors, tag)}

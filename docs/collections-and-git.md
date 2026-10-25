@@ -13,7 +13,7 @@ The buttons next to the view tabs are:
 | Button | What it does |
 | --- | --- |
 | Run requests | Opens the collection runner |
-| Collection settings | Opens the settings of the whole collection, see [Folder and collection settings](folder-settings.md) |
+| Settings for all collections | Opens the settings that apply to every request; in a folder workspace it is **Collection settings**. See [Folder and collection settings](folder-settings.md) |
 | New folder | Creates a folder |
 | New request | Creates a request; the tooltip shows its keyboard shortcut |
 
@@ -48,11 +48,17 @@ The tree is one stop for the Tab key. Inside it, the arrow keys move between row
 
 You can rearrange the tree in three ways:
 
-- **Drag and drop.** Drag a request or folder onto another row. Dropping on the upper or lower part of a row places the item before or after it. For a folder, dropping in the middle puts the item inside it, and a closed folder opens after you hold the item over it. Dropping in the empty area of the tree moves the item to the top level. A folder cannot be dropped into itself or into one of its own subfolders.
+- **Drag and drop.** Drag a request or folder onto another row. Dropping on the upper or lower part of a row places the item before or after it. For a folder, dropping in the middle puts the item inside it, the lower part of an open folder puts it first inside, and a closed folder opens after you hold the item over it. Dropping in the empty area of the tree moves the item to the top level. A folder cannot be dropped into itself or into one of its own subfolders.
 - **Keyboard.** With a row focused, press Alt+Up Arrow or Alt+Down Arrow to move it, Ctrl+C to copy, Ctrl+V to paste and Ctrl+D to duplicate. On macOS the Ctrl shortcuts use the Command key.
 - **Context menu.** Described below.
 
 After a move, paste or duplicate, a notice names the item and offers **Undo**.
+
+### Order of requests and folders
+
+Inside each folder, requests and subfolders share one order, as in Postman and Insomnia: a request can sit above, between or below folders, and Alt+Up Arrow or **Move up** steps past a folder the same way it steps past a request. The runner, `gostman run` and an agent's `run_folder` send requests in this order, and the Postman, curl script and HAR exports write it. Imports from Postman, Insomnia and single-file OpenCollection keep the order of the source. Bruno lists folders before requests, so Bruno imports show folders first, and a Bruno export warns about requests that will run later there.
+
+Collections from older versions show folders first, exactly as before, and nothing moves when you open them. The first time you move, copy, duplicate or import something, Gostman numbers every folder's contents in the order they already show, so nothing changes position, and from then on every folder keeps the order you give it. Exports carry this too: a Gostman export from an older version still runs folders first.
 
 ### Context menu
 
@@ -73,9 +79,9 @@ For a folder, the menu adds these entries before the move and copy entries:
 - **New request** and **New subfolder** inside the folder
 - **Run folder**
 - **Share folder**, which opens the Share tab, see [Sharing and documentation](sharing-and-docs.md)
-- **Settings**, the folder settings described in [Folder and collection settings](folder-settings.md)
+- **Check for spec updates**, **Browse API spec** and **Check responses against the spec** (or **Stop checking responses against the spec**), only for a folder linked to an OpenAPI spec, see [Import, export and OpenAPI specs](import-export-and-specs.md)
+- **Settings**, the folder settings described in [Folder and collection settings](folder-settings.md); on a top-level folder in the app's own storage it is **Collection settings**, because that folder is a collection
 - **Colour and tags…**, see [Folder colours and tags](#folder-colours-and-tags)
-- **Check for spec updates** and **Browse API spec**, only for a folder created from an OpenAPI spec that has a saved address or file, see [Import, export and OpenAPI specs](import-export-and-specs.md)
 
 A folder also has **Rename** and **Delete**.
 
@@ -115,7 +121,7 @@ The tab context menu contains:
 | Reveal in collection | Scrolls the tree to the saved request; disabled for a request that is not saved |
 | Copy as cURL | Copies the prepared request as a curl command; only HTTP requests can be copied |
 
-Closing one tab with unsaved changes asks whether to **Save** them first, close with **Don't save**, or **Cancel**. When several tabs with unsaved changes are about to close, a **Close tabs** prompt asks you to confirm with **Discard**. Both prompts depend on a preference in the app settings.
+Closing one tab with unsaved changes asks whether to **Save** them first, close with **Don't save**, or **Cancel**. When several tabs with unsaved changes are about to close, a **Close tabs** prompt asks you to confirm with **Discard**. To close without either prompt, clear **Ask before discarding unsaved changes when closing a tab** in the **Requests** section of Preferences.
 
 ## Welcome panel and getting started
 
@@ -126,19 +132,21 @@ A new, blank tab with no response shows the **Welcome to Gostman** panel. Its **
 | Send a request | **Send sample request**, a `GET` to `https://httpbin.org/anything?hello=world` | History has an entry |
 | Save it to your collection | **Save request** saves the open request, or the last one you sent | The collection has a request you saved |
 | Add a variable | **Open environments** | An environment, a global environment or the collection defines a variable |
-| Add a check | **Open the Tests tab** of the open or last saved request | A saved request has an assertion or a post-response script |
+| Add a check | **Open the Checks tab** of the open or last saved request | A saved request has an assertion or a post-response script |
 | Run your requests together | **Open the runner** | You have started a run |
 
 Steps are worked out from your data, so after an import the steps it covers are already ticked. While steps remain, a button in the header names the next one and shows your progress, for example **Next: Add a variable 2/5**; it opens the same list. **Hide** in that list, or the close button on the panel, puts both away. When every step is done the button disappears and the panel no longer opens by itself. The **Show welcome** command in the command palette brings the panel back at any time.
 
-Below the list, the panel offers:
+The **Add a variable** step also shows how variables look: a name in double braces is green when the active environment defines it and orange when it is missing. **Read the tutorial**, under the list, opens the [tutorial](tutorial-first-collection.md), which goes through the same steps in more depth.
 
-- **Import** for Postman, Bruno, Insomnia, OpenAPI, HAR, .http files or a curl command.
-- **Open folder**, only where folder storage is available (see below).
-- **New collection**, which creates a folder in the sidebar.
-- A hint to paste a curl command into the address bar to fill the request.
-- A list of keyboard shortcuts and a note on variables: a name in double braces is green when the active environment defines it and orange when it is missing.
-- A link to the [tutorial](tutorial-first-collection.md), which goes through the same steps in more depth.
+Below the list, **Other ways to start** offers:
+
+- **Import requests** from Postman, Bruno, Insomnia, OpenAPI, HAR, .http files or curl.
+- **Open a folder**, only where folder storage is available (see below).
+- **Create a folder**, which adds a folder at the top level of the sidebar.
+- **Paste a curl command**, which moves the cursor to the address bar; a curl command pasted there fills the request.
+
+On a wider window, **Keyboard shortcuts** lists the main shortcuts.
 
 ## Storage menu
 
@@ -147,7 +155,7 @@ The button in the header shows where the collection lives.
 - **Web app:** the button reads **This browser**. Selecting it explains that the collection is saved in the browser and that keeping it as files in a folder needs the desktop app.
 - **Desktop app:** the button reads **This computer** until you open a folder, then it shows the folder name. A warning icon marks a restricted folder and another marks unreadable files.
 
-Folder storage and the Git panel exist only in the desktop app. Both depend on `backend.storage`, which is `null` on the web.
+Folder storage and the Git panel exist only in the desktop app.
 
 ### The workspace menu
 
@@ -164,22 +172,24 @@ The footer of the menu has these actions:
 | --- | --- |
 | Trust this folder | Shown only for a restricted folder |
 | Open folder | Picks a folder to use as the collection. An empty folder becomes a new collection; a folder that already holds other files, such as a repository root, gets the collection in a `gostman` folder inside it |
-| Save collection to folder | Writes the current collection into a folder you pick, or into a new `gostman` folder inside it when it already holds other files |
+| Save collection to folder | Writes the current collection into a folder you pick, or into a new `gostman` folder inside it when it already holds other files. A folder is one collection, so each collection's own collection variables join the shared ones in `gostman.yaml`; a name already set keeps its value, and secret values stay in the keychain |
 | Clone repository | Asks for a repository address, then a folder to clone into |
 | Git | Opens the Git panel; needs an open folder |
 | Reload from disk | Rereads the folder at once; changes made outside the app are also picked up by themselves within a few seconds. Needs an open folder |
 | Show N unreadable files | Lists files that could not be read; shown only when there are some |
 | Close folder | Returns to app storage; needs an open folder |
 
-Files that cannot be read are skipped and left unchanged. Fix them, then choose **Reload from disk**.
+Files that cannot be read are skipped and left unchanged. Fix them, then choose **Reload from disk**. When no request can be shown because of them, for example while the only request file has a merge conflict, the sidebar says how many files could not be read and offers **Show files**.
 
 ### Trust
 
 A folder you did not create opens as restricted. In a restricted folder, scripts, OAuth 2.0 settings, local MCP commands and [file reads](variables.md#reading-files) are switched off and the Git panel is read-only. **Trust this folder** asks for confirmation, explains that requests can carry scripts, OAuth 2.0 settings, local MCP commands and file reads that run when a request is sent and can read your variables, and then lifts the restriction.
 
+Opening a restricted folder shows a notice that says so. A request that is stopped because the folder is restricted shows a **Trust this folder** button in the response pane.
+
 ## Git panel
 
-The **Git** panel is a desktop feature. It works on the open folder, so open or save the collection to a folder first, or clone a repository from the workspace menu. Open it with **Git** in the workspace menu, or with the branch name in the status bar at the bottom of the window. The panel refreshes when the app window regains focus.
+The **Git** panel is a desktop feature. It works on the open folder, so open or save the collection to a folder first, or clone a repository from the workspace menu. Open it with **Git** in the workspace menu, or with the branch name in the status bar at the bottom of the window (it reads **Git** when the folder is not a repository yet). The panel refreshes when the app window regains focus.
 
 ![The Git panel with one changed request file, its diff showing the URL change, and a commit message ready to commit](../screenshots/git-panel.png)
 
@@ -187,9 +197,10 @@ If the panel cannot work, it says why:
 
 - **Git is not installed**, with an install hint.
 - **Git works on folder workspaces**, when no folder is open.
+- **Git cannot use this folder**, with the reason Git gave.
 - **This folder is not a Git repository**, with an **Initialize repository** button.
 
-In a repository, the header shows the current branch (or **Detached HEAD**) and the buttons **Fetch**, **Pull** and **Push**. Pull and Push show how many commits you are behind or ahead. In a restricted folder, the panel shows a notice with a **Trust this folder** link and everything that changes the repository is disabled.
+In a repository, the header shows the current branch (or **Detached HEAD**) and the buttons **Fetch**, **Pull** and **Push**. Pull and Push show how many commits you are behind or ahead. When the collection is one folder of a larger repository, such as `gostman/` in your project, the header also shows that folder: only changes inside it are listed, and **Stage all**, **Commit all changes**, **Stash changes** and the whole-repository history leave other files alone, while branches, pull and push apply to the whole repository. In a restricted folder, the panel shows a notice with a **Trust this folder** link and everything that changes the repository is disabled.
 
 The panel has five sections: **Changes**, **Branches**, **Stashes**, **History** and **Remotes**. Output from a Git operation appears in a notice at the top.
 
@@ -197,11 +208,11 @@ The panel has five sections: **Changes**, **Branches**, **Stashes**, **History**
 
 The left side lists files in up to three groups: **Conflicts**, **Staged** and **Changes**. Each row shows a status letter (for example Modified, Added, Deleted or New) and a short summary of what changed in the request or folder.
 
-- Select a file to see its diff on the right. Added lines, removed lines and hunk headers are colored. A binary file shows **This file is binary, so there is no line diff.**
+- Select a file to see its diff on the right. Added lines, removed lines and hunk headers are coloured. A binary file shows **This file is binary, so there is no line diff.**
 - Use the plus and minus buttons to stage and unstage a file, or **Stage all**.
 - Use the discard button on an unstaged file to restore it. A prompt warns that this cannot be undone.
 - Use the history button on a row to open the History section for that file.
-- Type a **Commit message** and choose the commit button. With nothing staged, the button reads **Commit all changes**; otherwise it reads **Commit N staged files**. Committing is disabled while conflicts remain.
+- Type a **Commit message** and choose the commit button. With nothing staged, the button reads **Commit all changes**; otherwise it reads **Commit N staged files**. Committing is disabled while conflicts remain. When every conflict is resolved and nothing differs from the last commit, for example because you kept your side everywhere, the button reads **Commit the merge** and finishes it.
 
 ### Branches
 

@@ -8,18 +8,20 @@ export const EMPTY_ATTACHMENT = { fileName: '', contentType: '', data: '' }
 
 const PATH_SEPARATORS = /[\\/]/
 
-let pickPath = null
+let disk = null
 
-export const allowDiskAttachments = (picker) => {
-  pickPath = picker
+export const allowDiskAttachments = (bindings) => {
+  disk = bindings
 }
 
-export const canAttachFromDisk = () => pickPath !== null
+export const canAttachFromDisk = () => disk !== null
+
+export const measureAttachment = (path) => disk.measure(path)
 
 export const maxAttachmentBytes = () => (canAttachFromDisk() ? LOCAL_ATTACHMENT_BYTES : RELAYED_ATTACHMENT_BYTES)
 
 export async function pickAttachment(title) {
-  const path = await pickPath(title)
+  const path = await disk.pick(title)
   if (!path) return null
   return { ...EMPTY_ATTACHMENT, fileName: path.split(PATH_SEPARATORS).pop(), path }
 }

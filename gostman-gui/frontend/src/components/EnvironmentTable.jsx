@@ -19,6 +19,16 @@ const matches = (row, needle) => (
   row.name.toLowerCase().includes(needle) || (!row.secret && asText(row.value).toLowerCase().includes(needle))
 )
 
+const namedIndex = (rows, name) => (name ? rows.findIndex((row) => row.name === name) : -1)
+
+const draftFor = (rows, name) => (name && namedIndex(rows, name) < 0 ? { ...BLANK_ROW, name } : BLANK_ROW)
+
+function focusFor(rows, name) {
+  if (!name) return null
+  const index = namedIndex(rows, name)
+  return { index: index < 0 ? rows.length : index, field: "value" }
+}
+
 const isUnnamed = (row) => row.name.trim() === "" && (asText(row.value) !== "" || Boolean(row.ref))
 
 function ReadOnlyText({ text, label }) {
@@ -132,11 +142,12 @@ function Row(props) {
   )
 }
 
-export function EnvironmentTable({ rows, query, features, secrets, onChange }) {
+export function EnvironmentTable({ rows, query, features, secrets, draftName = "", onChange }) {
   const { connections, kinds, isLoaded } = useSecretConnections(secrets)
   const references = secrets && features.references ? { secrets, connections, kinds, isLoaded } : null
   const [revealed, setRevealed] = useState(() => new Set())
-  const [focus, setFocus] = useState(null)
+  const [draft, setDraft] = useState(() => draftFor(rows, draftName))
+  const [focus, setFocus] = useState(() => focusFor(rows, draftName))
   const needle = query.trim().toLowerCase()
   const visible = useMemo(
     () => rows.map((row, index) => ({ row, index })).filter(({ row }) => !needle || matches(row, needle)),
@@ -149,7 +160,8 @@ export function EnvironmentTable({ rows, query, features, secrets, onChange }) {
 
   const addRow = (patch) => {
     setFocus({ index: rows.length, field: Object.keys(patch)[0] })
-    onChange([...rows, { ...BLANK_ROW, ...patch }])
+    setDraft(BLANK_ROW)
+    onChange([...rows, { ...draft, ...patch }])
   }
 
   const edit = (index, patch) => onChange(rows.map((row, at) => (at === index ? { ...row, ...patch } : row)))
@@ -187,7 +199,8 @@ export function EnvironmentTable({ rows, query, features, secrets, onChange }) {
       {!features.readOnly && (
         <Row
           isDraft
-          row={BLANK_ROW}
+          row={draft}
+          focusField={focus?.index === rows.length ? focus.field : null}
           features={features}
           references={references}
           onChange={addRow}

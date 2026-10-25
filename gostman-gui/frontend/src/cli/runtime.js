@@ -13,12 +13,12 @@ export { countActiveAssertions } from '../lib/scripting/assertions'
 export { runJob } from '../lib/scripting/job'
 export { collectionHosts } from '../lib/scripting/destinations'
 export { acceptedCookies, scriptCookies } from '../lib/scripting/scriptCookies'
-export { MAX_FLOW_STEPS, MAX_SENDS, SEND_TIMEOUT_MS, TIMEOUT_MS, scriptAllowance } from '../lib/scripting/limits'
+export { MAX_FLOW_STEPS, MAX_SENDS, SEND_TIMEOUT_MS, TIMEOUT_MS, extractAllowance, scriptAllowance } from '../lib/scripting/limits'
 export { applyRequestEdits, requestSubject, responseSubject, scriptedRequest } from '../lib/scripting/subjects'
 export { isSocketAddress } from '../lib/socketUrl'
 
-export const requestsInFolder = (folders, requests, folderId) => (
-  collectRequests(buildCollectionTree(folders, requests), folderId)
+export const requestsInFolder = (folders, requests, folderId, sharedOrder) => (
+  collectRequests(buildCollectionTree(folders, requests, sharedOrder), folderId)
 )
 
 export const folderPaths = (folders) => (

@@ -11,6 +11,7 @@ const (
 	stoppedByScript = "Not sent because a script stopped the run."
 	passedByJump    = "Not run because a script in %q continued the run with %q."
 	passedByStop    = "Not run because a script in %q stopped the run."
+	endlessJumps    = "The script in %q kept continuing the run with %q, so the run was stopped after %d requests. A pass may send at most %d more requests than the %d it holds; give the loop a way to end, such as a retry count."
 )
 
 type flow struct {
@@ -39,6 +40,12 @@ func (f flow) passedOver(name string) string {
 	return ""
 }
 
+type flowStep struct {
+	name    string
+	sent    int
+	repeats int
+}
+
 func (r *Result) flag(message string) {
 	if r.Error != "" {
 		r.Error += "\n"
@@ -63,16 +70,16 @@ func (c *schedule) locate(current unit, target string) (int, error) {
 	return 0, fmt.Errorf("The script asked to continue with %q, but no request in this run has that name.", target)
 }
 
-func (c *schedule) follow(current unit, cursor int, outcome flow, jumps *int, limit int) (int, string) {
+func (c *schedule) follow(current unit, cursor int, outcome flow, step flowStep) (int, string) {
 	switch outcome.Action {
 	case flowStop:
 		c.halted.Store(true)
 		return len(current.indexes), ""
 	case flowNext:
-		*jumps++
-		if *jumps > limit {
+		planned := len(current.indexes)
+		if step.sent >= planned+step.repeats {
 			c.halted.Store(true)
-			return len(current.indexes), fmt.Sprintf("The script redirected the run more than %d times, so the run was stopped.", limit)
+			return planned, fmt.Sprintf(endlessJumps, step.name, outcome.Target, step.sent, step.repeats, planned)
 		}
 		target, err := c.locate(current, outcome.Target)
 		if err != nil {

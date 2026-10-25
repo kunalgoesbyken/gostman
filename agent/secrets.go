@@ -231,6 +231,7 @@ func (c *Client) Study(stored runner.Collection) error {
 		return err
 	}
 	for _, entry := range listed {
+		c.learnAll(entry.Request.OwnVariables())
 		c.learnCredentials(entry.Request.Headers, entry.Request.Auth, "")
 		c.learnQuery(entry.Request.URL, "")
 		c.learnBody(entry.Request.Body, "")

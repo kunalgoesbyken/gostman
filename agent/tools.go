@@ -21,6 +21,7 @@ const Instructions = "Gostman sends HTTP, GraphQL and gRPC requests from the API
 	"you can keep using {{name}} in later requests, but you cannot read the value. " +
 	"A {{name}} that no variable defines is sent as it is; list_environments shows the defined names, and set_environment chooses the environment. " +
 	"Requests reach only localhost, the hosts the person's own requests use and hosts the developer allowed with --allow-host; when a host is refused, ask the developer to allow it instead of reaching it another way. " +
+	"To log in, give the login request an extractor with save_request so its token is kept as {{token}} without appearing in a result. " +
 	"Start with list_requests; import_requests adds requests from a spec or curl command."
 
 var adHocMethods = []string{
@@ -61,7 +62,7 @@ var sendInput = object(map[string]schema{
 	"headers":         textMap("Ad hoc only: header names and values. Reference credentials as variables, for example {\"Authorization\": \"Bearer {{token}}\"}."),
 	"body":            text("Ad hoc only: the request body as text. For body_type form, a JSON object of field names and values."),
 	"body_type":       choice("Ad hoc only. Defaults to json when the body parses as JSON, otherwise text.", textBodyTypes),
-	"variables":       textMap("Variables to set before sending. They stay set for the rest of the session."),
+	"variables":       textMap("Variables to set before sending, such as {\"id\": \"42\"}. They win over the environment and the request's own variables, and stay set until set_environment."),
 	"select":          selectInput,
 	"max_body_bytes":  bodyLimitInput,
 	"include_headers": headersInput,
@@ -72,26 +73,35 @@ var runInput = object(map[string]schema{
 	"bail":         flag("Stop at the first failing request."),
 	"tags":         list("Run only requests with at least one of these tags, as list_requests shows them. Case does not matter.", text("A tag.")),
 	"exclude_tags": list("Skip requests with any of these tags.", text("A tag.")),
-	"data":         list("Run once per item; each item's fields become variables for that iteration, such as [{\"userId\": 1}, {\"userId\": 2}].", schema{"type": "object"}),
+	"data":         list("Run once per item; each item's fields become variables for that iteration, such as [{\"userId\": 1}, {\"userId\": 2}], and win over the environment and a request's own vars.", schema{"type": "object"}),
 	"iterations":   whole("Repeat the run this many times, or use only the first rows of data.", 1, highestIterations),
 })
 
 var assertionInput = object(map[string]schema{
-	"expression": text("What to check: res.status, res.body.id, res.headers.content-type, res.responseTime, or a JSONPath starting with $."),
+	"expression": text("What to check: res.status, res.body.id, res.body[0].id, res.headers.content-type or res.responseTime."),
 	"operator":   choice("How to compare. The operators from isDefined onwards take no value.", assertionOperators),
-	"value":      text("The expected value, as text. Leave out for operators that take no value."),
+	"value":      text("The expected value, as text or a {{variable}}; it is not evaluated as an expression. Leave out for operators that take no value."),
 }, "expression", "operator")
 
+var extractorInput = object(map[string]schema{
+	"name":       text("The variable to store the value in, such as token. Later requests use it as {{token}}."),
+	"source":     choice("Where the value comes from.", extractorSources),
+	"expression": text("For body, a JSONPath such as $.token or $.data.id; for header or cookie, its name. Leave out for status."),
+}, "name", "source")
+
 var saveInput = object(map[string]schema{
-	"id":         text("The id of the request to update. Leave out to create a new request."),
-	"name":       text("Required for a new request."),
-	"folder":     text("The folder path to keep the request in, such as auth/tokens. Missing folders are created. An empty string moves it to the top level."),
-	"method":     text("GET, POST and so on. Defaults to GET."),
-	"url":        text("Required for a new request. Use {{variables}} for hosts and credentials, for example {{baseUrl}}/users."),
-	"headers":    textMap("Replaces the request's headers. Credentials must be variable references."),
-	"body":       text("The request body as text."),
-	"body_type":  choice("How the body is sent.", textBodyTypes),
-	"assertions": list("Replaces the request's checks. They run every time the request is sent, here and in the app.", assertionInput),
+	"id":          text("The id of the request to update. Leave out to create a new request."),
+	"name":        text("Required for a new request."),
+	"description": text("What the request does, in a sentence. Shown in the app and used as the tool description with --expose-tag."),
+	"folder":      text("The folder path to keep the request in, such as auth/tokens. Missing folders are created. An empty string moves it to the top level."),
+	"method":      text("GET, POST and so on. Defaults to GET."),
+	"url":         text("Required for a new request. Use {{variables}} for hosts and credentials, for example {{baseUrl}}/users."),
+	"headers":     textMap("Replaces the request's headers. Credentials must be variable references."),
+	"body":        text("The request body as text."),
+	"body_type":   choice("How the body is sent.", textBodyTypes),
+	"tags":        list("Replaces the request's tags, such as smoke. run_folder runs a tagged subset.", text("A tag.")),
+	"assertions":  list("Replaces the request's checks. They run every time the request is sent, here and in the app.", assertionInput),
+	"extractors":  list("Replaces the request's extraction rules. After each response, every rule stores a value in a session variable, so a login can hand its token to later requests as {{token}} without the token appearing in a result.", extractorInput),
 })
 
 var importInput = object(map[string]schema{
@@ -146,7 +156,7 @@ func (d *Desk) Tools() []mcp.Tool {
 		tool(d, mcp.Tool{
 			Name:  "list_requests",
 			Title: "List requests",
-			Description: "List the API requests saved in this Gostman workspace: id, name, method, URL template, folder, tags, and whether each has tests and saved example responses. " +
+			Description: "List the API requests saved in this Gostman workspace: id, name, method, URL template, folder, tags, whether each has checks (hasTests) and whether it has saved example responses. " +
 				"Call this first to find a request to send instead of writing a curl command.",
 			InputSchema: listInput,
 			Hints:       readOnly,
@@ -154,7 +164,7 @@ func (d *Desk) Tools() []mcp.Tool {
 		tool(d, mcp.Tool{
 			Name:  "get_request",
 			Title: "Show request",
-			Description: "Show one saved request in full: URL, headers, body, auth settings, assertions, extraction rules, scripts and the names of its saved examples. " +
+			Description: "Show one saved request in full: URL, headers, body, auth settings, its own variables (vars), assertions, extraction rules, scripts and the names of its saved examples. " +
 				"Credentials are masked; variables appear as {{name}}. options lists only the settings that differ from the defaults.",
 			InputSchema: getInput,
 			Hints:       readOnly,
@@ -176,7 +186,7 @@ func (d *Desk) Tools() []mcp.Tool {
 			Title: "Run folder",
 			Description: "Send every request in a folder, or in the whole workspace, in order, with scripts and assertions, the way the collection runner does. " +
 				"tags and exclude_tags narrow the run to a subset such as smoke tests; data and iterations repeat it. " +
-				"Use it to check that an API still works after a change. Returns the counts and, for failed requests only, the error, the failed tests and the console output.",
+				"Use it to check that an API still works after a change. Returns the counts and, for failed requests only, the error, the failed checks (failedTests) and the console output.",
 			InputSchema: runInput,
 			Hints:       sending,
 		}, withSession, (*Desk).runFolder),

@@ -88,6 +88,7 @@ func (s *session) attempt(ctx context.Context, request Request, folder string, c
 		outcome.stop(err.Error())
 	}
 	result := describe(request, folder, outcome)
+	result.ResolvedURL = s.shownURL(request, outcome.response.URL)
 	if captured && !result.IsSkipped() {
 		result.Exchange = capture(request, outcome.response)
 	}
@@ -108,7 +109,7 @@ func Run(ctx context.Context, stored Collection, options Options, observe func(R
 	if err != nil {
 		return Report{}, err
 	}
-	if err := session.Enter(stored.Environments, options.Environment, options.Variables); err != nil {
+	if err := session.Enter(stored, options.Folder, options.Environment, options.Variables); err != nil {
 		return Report{}, err
 	}
 	return session.Run(ctx, stored, options, observe)

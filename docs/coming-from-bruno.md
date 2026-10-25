@@ -56,12 +56,12 @@ Both formats carry the same things across.
 | gRPC requests | gRPC requests with the method, metadata and message. Several messages of a client or bidirectional streaming method become one JSON array. The file in `protoPath` and the `.proto` files it imports are attached when they are inside the collection folder |
 | WebSocket requests | WebSocket requests with the headers. Each message becomes a [saved message](protocols.md#saved-messages) with its name |
 | Collection and folder headers, variables, auth, scripts and docs | [Folder settings](folder-settings.md) on the folder named after the collection and on each folder. Requests set to inherit auth stay on **Inherit**, and a folder set to **No auth** gives the requests below it that inherit **No auth** |
-| Collection variables | Collection variables. With `gostman import` they are written to `gostman.yaml` |
-| Environments in `environments/` | Environments with the same names, colours and `extends`. Switched-off variables stay switched off. Secret variables come across marked secret with empty values, because Bruno keeps their values outside the files |
+| Collection variables | Collection variables. With `gostman import` they are written to `gostman.yaml`; in the app they belong to the collection's folder |
+| Environments in `environments/` | Environments with the same names, colours and `extends`, kept with the collection's folder in the app, as in Bruno (see [Environments per collection](variables.md#environments-per-collection)); in a workspace folder they are the workspace's environments. Switched-off variables stay switched off. Secret variables come across marked secret with empty values, because Bruno keeps their values outside the files |
 | External secrets of an environment (`vars:externalsecrets:<provider>`, or `externalSecrets` in YAML) | With `gostman import` and `gostman run`, variables that read from a [secret manager](secrets-and-network.md#secret-managers): each one refers to a connection named after the Bruno provider, such as `hashicorp-vault-server`, so add a connection with that name and check the paths. The app's import leaves them as empty variables, because an imported file never chooses which secrets a connection reads; point them at a connection with the key button |
 | Global environments of a Bruno workspace | Global environments in the app. `gostman import` writes them as environments, because a workspace folder has no global scope |
 | `assert` rows, or `runtime.assertions` in YAML | Assertion rows with the same operators, such as `eq`, `contains`, `isNumber` and `matches` |
-| `vars:post-response`, or `set-variable` actions in YAML | Extraction rules: `res.body.data[0].id` becomes the JSONPath `$.data[0].id`, `res.headers['x-session']` and `res.getHeader(...)` read a header, and `res.status` reads the status code. Each rule keeps its value as a session value, like Bruno's runtime variables, so it is never saved into an environment |
+| `vars:post-response`, or `set-variable` actions in YAML | Extraction rules: `res.body.data[0].id` becomes the JSONPath `$.data[0].id`, `res.headers['x-session']` and `res.getHeader(...)` read a header, `bru.cookies.get("sid")` reads a cookie, and `res.status` reads the status code. Each rule keeps its value as a session value, like Bruno's runtime variables, so it is never saved into an environment |
 | `script:pre-request`, `script:post-response` and `tests` | Pre-request and post-response scripts, translated as described below |
 | `docs` | The request or folder description |
 | `tags` in `meta`, or `info.tags` in YAML | Request tags, for `gostman run --tags` and the tag filter of **Run requests** |
@@ -94,7 +94,10 @@ Not carried over, and not listed:
 
 | Bruno | Gostman |
 | --- | --- |
-| `bru.getEnvVar`, `bru.setEnvVar`, `bru.hasEnvVar`, `bru.deleteEnvVar` | `env.get`, `env.set`, `env.has`, `env.unset` |
+| `bru.getEnvVar`, `bru.hasEnvVar`, `bru.deleteEnvVar` | `env.get`, `env.has`, `env.unset` |
+| `bru.setEnvVar(name, value, { persist: true })` | `env.set(name, value)`, which saves the value into the active environment |
+| `bru.setEnvVar(name, value)` without `persist` | `env.session.set(name, value)`: a session value, kept in memory like Bruno's unsaved environment change |
+| `bru.getProcessEnv("NAME")` | `env.get("process.env.NAME") ?? env.get("NAME")`: the collection's `.env` file, or a value passed with `--var-from-env NAME` |
 | The same calls for `Var`, `CollectionVar` and `GlobalEnvVar` | The same calls on `env.session` (session values, never saved, like Bruno's runtime variables), `env.collection` (collection variables) and `env.globals` (the global environment) |
 | `bru.getFolderVar`, `bru.getRequestVar` | `env.get`, which returns the value the request would use |
 | `bru.getAllEnvVars`, `bru.getAllVars`, `bru.getAllCollectionVars`, `bru.getAllGlobalEnvVars` and the `deleteAll` versions | `all()` and `clear()` on the matching object |
@@ -106,9 +109,10 @@ Not carried over, and not listed:
 | `bru.runRequest("Folder/Name")` | `sendRequest("Name")` for the request at that path in the collection. When two requests share the name, the call names the request by its id instead |
 | `res.getStatusText()`, `res.getUrl()` | `res.statusText`, `res.url` |
 | `bru.interpolate(text)` | `env.interpolate(text)` |
-| `bru.getProcessEnv("NAME")` | `env.get("NAME")`. Pass the value with `--var-from-env NAME` |
 
 `sendRequest` and `bru.cookies.jar()` reach only localhost and the hosts that requests in the collection already use.
+
+A name your script declares that Gostman scripts have and Bruno's do not, such as `env`, `utils` or `sendRequest`, gets a number added, `env1` for example, everywhere the script uses it, so the rewritten calls still reach Gostman's own.
 
 Calls with no equivalent are kept as written and listed in the summary with their line, so you can rewrite them before running:
 
@@ -116,11 +120,17 @@ Calls with no equivalent are kept as written and listed in the summary with thei
 - `req.setMaxRedirects`, `req.onFail`, `req.getAuthMode`, `req.getTags`, `req.getPathParams`, `req.getExecutionMode` and `req.disableParsingResponseJson`.
 - `require` of anything other than the bundled `lodash`, `crypto-js`, `uuid`, `moment`, `dayjs`, `ajv` and `chai`. In a trusted folder on the desktop, `./` and `../` files inside the folder also load.
 
-Values set with `bru.setVar`, and post-response variables, are session values: they stay in memory and are never written to an environment or its file. `bru.setEnvVar` becomes `env.set`, which saves the value into the active environment, in a folder workspace into its YAML file, whether or not the Bruno call passed `{ persist: true }`. Bruno keeps such a value in memory unless `persist` is set, so change `bru.setEnvVar` to `bru.setVar` for tokens and other values that should not be saved.
+Values set with `bru.setVar`, `bru.setEnvVar` without `persist`, and post-response variables, are session values: they stay in memory and are never written to an environment or its file, so a token a login request sets is not committed to Git. Only `bru.setEnvVar` with `{ persist: true }` saves the value into the active environment, in a folder workspace into its YAML file.
+
+Gostman sends a JSON body exactly as written, while Bruno parses it and sends it without spaces. `req.getBody()` returns the parsed body in both, so a signing script that hashes `JSON.stringify(req.getBody())` signs different bytes from the ones Gostman sends. The import summary points out each script that does this. Change the one line to hash the text Gostman sends:
+
+```js
+const payload = bru.interpolate(req.getBody({ raw: true }));
+```
 
 For the iteration number, read `env.get("iteration")` (from 1) and `env.get("iterationCount")`, which `gostman run --data` and `--iterations` set.
 
-Scripts run in an isolated worker with no network access of their own and stop after the time limit set on the Script tab of the [collection settings](folder-settings.md): 10 seconds unless you change it, up to 120. There is no equivalent of Bruno's developer mode. The full script API is in [Variables, scripts and settings](scripting-and-settings.md#script-api).
+Scripts run in an isolated worker with no network access of their own and stop after the time limit set on the Script tab of [Settings for all collections](folder-settings.md) (**Collection settings** in a folder workspace): 10 seconds unless you change it, up to 120. There is no equivalent of Bruno's developer mode. The full script API is in [Scripts and checks](scripting-and-settings.md#script-api).
 
 ## From bru run to gostman run
 
@@ -154,7 +164,7 @@ The `gostman` binary has nothing else to install, so CI needs no Node.js. The Gi
 
 - **Git.** The imported folder is plain YAML, one file per request, and diffs read well in a pull request. The desktop app has a Git panel with commit, push, branches, stash and conflict resolution. See [Collections and Git](collections-and-git.md).
 - **Teammates without Git.** Send a folder as an encrypted link or file from the **Share** tab. It is encrypted in your window and never uploaded. See [Sharing and documentation](sharing-and-docs.md).
-- **Back to Bruno.** `gostman export shop --format bruno --out shop-bruno` writes `.bru` files again.
+- **Back to Bruno.** `gostman export shop --format bruno --out shop-bruno`, or the **Bruno** format in the **Export** tab of the app, writes `.bru` files again. When everything sits in one top-level folder, as after an import, that folder becomes the collection: its name goes into `bruno.json` and its settings into `collection.bru`. Folder headers, auth, variables, scripts and docs go into each `folder.bru`, and requests that inherit auth keep `auth: inherit`. Scripts keep the code you wrote: Bruno already has `req`, `res`, `test` and `expect`, and when a script uses `env`, `utils`, `sendRequest` or a run-order call, a few lines at the top define it with `bru.*`, so `env.set` becomes a call to `bru.setEnvVar` there without your code changing. `env.get`, `env.interpolate` and the address and body of a request a script sends also read the current row of a data file passed to `bru run` with `--csv-file-path` or `--json-file-path`. `sendRequest("Log in")` finds the request by its path from the collection root, such as `auth/Log in`, which `bru.runRequest` needs. Assertion rows whose check Bruno has stay in the `assert` block. An **equals** or **does not equal** row that Bruno would compare differently, such as `eq 200` on a body field (Bruno also compares the type, Gostman compares `200` and `"200"` as the same), becomes a test that compares as Gostman does, like the rest and folder and collection rows, in the `tests` block; importing the folder back gives the rows back. Extract rules become `vars:post-response` that read a JSON body path, a header, a cookie or the status; a rule that writes to the environment becomes a `bru.setEnvVar` line at the top of the post-response script. Bruno lists folders before requests, so a request you placed above a folder runs after it in Bruno, and the export summary names those requests. The export summary also lists anything Bruno cannot run, such as `visualize`, `pm.*` calls, a `sendRequest` name that matches no request, or an Extract rule that searches with `$..`, and importing the folder back removes the added lines and gives the extract rules back. See [Scripts and checks in Postman, Bruno and Insomnia](import-export-and-specs.md#scripts-and-checks-in-postman-bruno-and-insomnia).
 
 ## What Bruno has that Gostman does not
 

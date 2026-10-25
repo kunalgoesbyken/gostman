@@ -2,6 +2,7 @@ import React from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { Button } from './ui/button'
 import { EmptyState } from './ui/emptyState'
+import { APP_TEXT } from '../lib/appText'
 
 export class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -20,9 +21,10 @@ export class ErrorBoundary extends React.Component {
       <div className="h-dvh overflow-y-auto bg-background">
         <EmptyState
           icon={AlertTriangle}
-          title="Something went wrong"
-          description={String(this.state.error)}
-          action={<Button onClick={() => window.location.reload()}>Reload</Button>}
+          title={APP_TEXT.crash.title}
+          description={APP_TEXT.crash.description(String(this.state.error))}
+          className="whitespace-pre-line"
+          action={<Button onClick={() => window.location.reload()}>{APP_TEXT.crash.reload}</Button>}
         />
       </div>
     )

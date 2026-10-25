@@ -11,7 +11,7 @@ The method list in the request bar offers GET, POST, PUT, DELETE, PATCH, HEAD an
 - Type a URL in the bar, or paste a curl command into it to turn the command into a request.
 - Use `{{name}}` placeholders for variables from the active environment.
 - The Body tab offers None, JSON, Text, XML, SOAP, Form URL-encoded, Multipart and File.
-- The Settings tab has Timeout (ms), Follow redirects and Verify TLS certificates.
+- The Settings tab has Timeout (ms), Follow redirects, Verify TLS certificates, the cookie jar options, Stream as server-sent events, Tags and Description. See [Settings](requests-and-responses.md#settings).
 - The Code button generates a snippet for the request. The snippet comes from the same engine, so it matches what is sent.
 
 Limits that apply to every protocol on this page:
@@ -35,7 +35,7 @@ Choose GRAPHQL in the method list; the GraphQL tab opens. If a request keeps a G
 
 ### Schema browser
 
-Select Schema to open the schema pane, then Fetch. Gostman sends an introspection query with the URL, headers and auth of this request. The button changes to Refresh after the schema loads.
+Select Schema to open the schema pane, then Fetch schema. Gostman sends an introspection query with the URL, headers and auth of this request. The button changes to Refresh schema after the schema loads.
 
 - The search box, Search N types and fields, matches type names and field names.
 - Each type shows its kind and, when you expand it, the signatures and descriptions of its fields, input fields, enum values or possible types.
@@ -104,7 +104,7 @@ gRPC works in both apps. In the web app the call goes through the proxy, so it c
 
 ## WebSocket
 
-Enter a `ws://` or `wss://` URL. The Send button becomes Connect, and the WebSocket tab opens. Placeholders in the URL and in the headers are replaced with environment values. If the URL uses a variable the active environment does not define, the panel shows which ones are missing.
+Enter a `ws://` or `wss://` URL. The Send button becomes Connect, and the WebSocket tab opens. Placeholders in the URL and in the headers are replaced with environment values. If the URL uses a variable the active environment does not define, the WebSocket tab shows which ones are missing in place of the address, and Connect writes the same message to the log instead of connecting. A header that uses an undefined variable is sent as written, and a warning in the log names the variable.
 
 ![A WebSocket session connected to ws://localhost:4000/live: a hello message, a subscribe message that was sent and three order events received in the log](../gostman-gui/frontend/src/assets/landing/websocket.webp)
 
@@ -113,14 +113,14 @@ Enter a `ws://` or `wss://` URL. The Send button becomes Connect, and the WebSoc
 - The status next to the address is Disconnected, Connecting, Connected or Waiting to reconnect.
 - Connect opens the session and Disconnect closes it. Each tab keeps its own session, and closing the tab ends it.
 - Type in the Message box and select Send, or press Ctrl+Enter. On macOS the shortcut is shown with the Command key. The box is disabled until the session is connected.
-- Placeholders in the message and in its event or topic are filled in when you send it: environment variables, and dynamic values such as `{{$randomEmail}}` or `{{$faker.date.future}}`. Type `{{` or `faker.` to pick one. The log shows the message as it was sent. A message that cannot be filled in is not sent, and stays in the box.
+- Placeholders in the message and in its event or topic are filled in when you send it: environment variables, and dynamic values such as `{{$randomEmail}}` or `{{$faker.date.future}}`. Type `{{` or `faker.` to pick one. The log shows the message as it was sent. A variable that is not defined is sent as written, and a warning in the log names it. A message that cannot be filled in at all, for example one that uses `{{$file(...)}}`, is not sent, and goes back into the box.
 - Sent messages are text. Clear empties the log.
 
 ![The WebSocket tab: the log shows a sent message whose generated id and email were filled in, and the message box suggests faker.date names](../screenshots/websocket-variables.png)
 
 ### Message log
 
-- Each entry shows a time, an icon for Sent, Received, Info or Error, and the text. Hover an entry and use Copy message to copy it.
+- Each entry shows a time, an icon for Sent, Received, Info, Warning or Error, and the text. Hover an entry and use Copy message to copy it.
 - The log keeps the latest 1000 entries. A notice shows how many older entries were dropped.
 - A text message longer than 10,000 characters is shortened, and the entry says Showing the first N of M characters.
 - A binary message appears as hexadecimal bytes. The entry says Binary and the byte count, and shows the first 64 bytes.
@@ -297,7 +297,7 @@ List operations follow every page of the answer and return one body with all the
 
 ### Call a tool
 
-1. Pick a tool from the Tool list.
+1. Pick a tool from the list next to Operation, which reads Choose a tool until you pick one.
 2. The tool's description appears under the toolbar.
 3. Select Schema to show the JSON Schema of the tool's arguments, or the argument list of a prompt, next to the editor. On a phone it covers the panel until you close it.
 4. Select Use example to replace the arguments with an example built from that schema. Choosing a tool or a prompt fills the arguments with its example when they are empty, `{}`, or still the unedited example of the previous choice; arguments you edited are kept.

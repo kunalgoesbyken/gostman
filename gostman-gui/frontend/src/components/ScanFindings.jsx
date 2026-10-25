@@ -34,7 +34,7 @@ function Finding({ finding, onGoToRequest }) {
 
 export function ScanFindings({ findings, onGoToRequest, className }) {
   return (
-    <ul aria-label="Findings" className={className}>
+    <ul aria-label={SCAN_TEXT.findings} className={className}>
       {findings.map((finding) => (
         <Finding
           key={`${finding.location.kind}/${finding.location.path}/${finding.location.field}/${finding.rule}/${finding.fingerprint}`}

@@ -12,13 +12,13 @@ import {
   EXTRACTOR_SOURCES,
   SOURCE_STATUS,
   defaultExtractScope,
-  evaluateExtractor,
   isBlankExtractor,
   isUsableResponse,
   parseExtractors,
   serializeExtractors,
 } from "../lib/chaining"
 import { EXTRACT_TEXT as TEXT } from "../lib/extractText"
+import { useExtractPreview } from "../hooks/useExtractPreview"
 import { cn } from "../lib/utils"
 import { useAppStore } from "../store/appStore"
 
@@ -27,16 +27,17 @@ const COLUMNS = "grid-cols-[1.5rem_minmax(0,1fr)_6.5rem_minmax(0,1fr)_7rem_minma
 const hintFor = (source) => EXTRACTOR_SOURCES.find((candidate) => candidate.value === source).hint
 
 function describeRun(extraction) {
+  if (extraction?.error) return extraction.error
   if (!extraction?.written) return ""
   if (!extraction.saved) return TEXT.invalidEnvironment
   const lines = EXTRACTOR_SCOPES.filter((scope) => extraction.written[scope]?.length > 0).map((scope) => TEXT.savedTo[scope](extraction.written[scope]))
   return lines.length > 0 ? lines.join(" ") : TEXT.nothing
 }
 
-function outcomeFor(extractor, response) {
+function outcomeFor(extractor, response, preview) {
   if (!response) return { reason: TEXT.noResponse }
   if (!isUsableResponse(response)) return { reason: TEXT.failedResponse }
-  return evaluateExtractor(extractor, response)
+  return preview(extractor)
 }
 
 function Outcome({ outcome }) {
@@ -60,7 +61,7 @@ function ColumnLabels() {
   )
 }
 
-function ExtractorRow({ extractor, isDraft, response, fallbackScope, onChange, onRemove }) {
+function ExtractorRow({ extractor, isDraft, response, preview, fallbackScope, onChange, onRemove }) {
   const readsStatus = extractor.source === SOURCE_STATUS
   return (
     <div className={cn(ROW_GRID, COLUMNS, !extractor.enabled && "opacity-50")}>
@@ -99,7 +100,7 @@ function ExtractorRow({ extractor, isDraft, response, fallbackScope, onChange, o
           <option key={scope} value={scope}>{TEXT.scopes[scope]}</option>
         ))}
       </Select>
-      {isDraft ? <span /> : <Outcome outcome={outcomeFor(extractor, response)} />}
+      {isDraft ? <span /> : <Outcome outcome={outcomeFor(extractor, response, preview)} />}
       <IconButton label={TEXT.remove} icon={X} onClick={onRemove} className={cn(isDraft && "invisible")} />
     </div>
   )
@@ -109,6 +110,7 @@ export function ExtractPanel({ extractors, response, extraction, onChange, onRun
   const workspacePath = useAppStore((state) => state.workspaceStatus.path)
   const rows = useMemo(() => parseExtractors(extractors), [extractors])
   const shown = [...rows, BLANK_EXTRACTOR]
+  const preview = useExtractPreview(rows, response)
   const runSummary = describeRun(extraction)
   const fallbackScope = defaultExtractScope(workspacePath)
 
@@ -135,6 +137,7 @@ export function ExtractPanel({ extractors, response, extraction, onChange, onRun
                 extractor={row}
                 isDraft={index === rows.length}
                 response={response}
+                preview={preview}
                 fallbackScope={fallbackScope}
                 onChange={(patch) => patchRow(index, patch)}
                 onRemove={() => removeRow(index)}

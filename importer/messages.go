@@ -7,6 +7,8 @@ const (
 	messageAuthDropped            = "The authentication type of %s is not supported and was left out."
 	messageAuthType               = "The authentication type %s is not supported and was left out."
 	messageFiles                  = "Files are not part of an export. Attach them again in %s."
+	messageDroppedVariable        = "%s from %q was not written to gostman.yaml because %q also sets it. Set it in that folder's variables if you need both."
+	messageDroppedShared          = "%s from %q was not written to gostman.yaml because a shared collection variable also sets it. Set it in that folder's variables if you need both."
 	messageSecretVariables        = "The values of the secret variables %s were not imported. Set them again in an environment and mark them secret."
 	messageTLSKept                = "TLS verification was turned off in Postman for %s; it was kept on. Turn it off in the request's Settings tab if you trust these hosts."
 	messagePostmanBehavior        = "Postman settings of %q have no Gostman equivalent and were left out: %s."
@@ -20,8 +22,8 @@ const (
 	messageTooManyItems           = "Only the first %d items were read; the rest were left out."
 	messageAndMore                = "%s and %d more"
 	messageEmpty                  = "There is nothing to import: no requests, folders or environments were found."
-	messageNotFormat              = "%s is not a %s file."
-	messageNotRecognized          = "%s: format not recognized"
+	messageNotFormat              = "%s is not in the %s format."
+	messageNotRecognized          = "%s: not a format Gostman imports (OpenAPI or Swagger, Postman, Insomnia, Bruno, HAR, .http, WSDL or a Gostman export)"
 	messageUnresolved             = "%s refers to schema files that were not included: %s"
 	messageUnsafePath             = "%q is not a safe path inside the collection"
 	messageDepth                  = "Folders nested deeper than %d levels were skipped."
@@ -44,12 +46,12 @@ const (
 	messageEnvironmentExtends     = "Environment %q inherits from %q, which was not imported, so it inherits nothing."
 	messageExternalSecrets        = "Environment %q reads %s from the secret provider %q. Gostman keeps them as references to a connection with that name: add it under Secret managers and check each path."
 	messageBrunoSecrets           = "The secret variables %s have no value, because Bruno keeps secret values outside the collection files. Fill them in under Environments, or pass them to gostman run with --var."
-	messageDotEnv                 = "%q reads {{process.env.NAME}} from the collection's .env file, which is not imported. In a folder workspace, copy .env next to gostman.yaml and keep it out of Git; gostman run on the Bruno folder reads it where it is."
+	messageDotEnv                 = "%q reads {{process.env.NAME}} from the collection's .env file, which is not imported. Add each value to an environment as a secret variable named process.env.NAME, or, in a folder workspace, copy .env next to gostman.yaml and keep it out of Git; gostman run on the Bruno folder reads it where it is."
 	messageOpenItemType           = "%s: OpenCollection items of type %q are not imported"
 	messageUnmappedTag            = "The Insomnia template tag %q has no Gostman equivalent and was kept as text in %s."
 	messageLiquidFilters          = "Template filters such as {{ name | upcase }} have no Gostman equivalent and were kept as text in %s."
 	messageFileTags               = "File tags in %s now read {{$file(path)}}. A path must be inside the workspace folder, so copy the files there and fix the paths."
-	messageResponseTags           = "Response tags that read %s now use its extract rules. Send it first: Insomnia sent it for you when the value was missing or old, Gostman does not."
+	messageResponseTags           = "Response tags now read the values that extract rules on %s keep. Send the request a tag reads before the requests that use it: Insomnia sent it for you when the value was missing or old, Gostman does not."
 	messageInsomniaSpec           = "The API spec of %q is kept in the description of its folder. Save it as a file and import it to browse, lint, sync or mock it."
 	messageInsomniaSpecFile       = "The API spec of %q is the file %s, which is not part of the export. Import that file to get its requests."
 	messageInsomniaMock           = "The mock routes of %q became requests with a saved example each, which Gostman's mock server serves."
@@ -74,6 +76,7 @@ const (
 	messageScriptModuleDynamic = "require with a computed name cannot be checked and was left as is."
 	messageScriptRequestPath   = "The request path given to bru.runRequest is not a literal and was left as is."
 	messageScriptRunRequest    = "bru.runRequest(%q) now sends the saved request named %q."
+	messageScriptBodyText      = "JSON.stringify(req.getBody()) gives compact JSON, which is what Bruno sends, but Gostman sends the body as written. To sign or hash the exact text sent, use bru.interpolate(req.getBody({ raw: true }))."
 	messageScriptLine          = "%s %s, %s, line %d: %s"
 	messageScriptMore          = "%s %s, %s: %d more lines need attention."
 	messageScriptTotals        = "%s scripts in %q: %s of %s rewritten for Gostman, %d left to rewrite by hand."
@@ -82,4 +85,43 @@ const (
 	messageScriptTooLarge      = "The script is larger than %d KB and was kept unchanged."
 	messageScriptTooDeep       = "The script nests too deeply to translate and was kept unchanged."
 	messageScriptTooSlow       = "The script took too long to translate and was kept unchanged."
+)
+
+const (
+	messageExportTarget        = "scripts cannot be adapted for %q; choose postman or bruno"
+	messageExportMissing       = "%s has no %s equivalent: %s."
+	messageExportUnknown       = "%s has no %s equivalent and is kept as written."
+	messageExportMatchSchema   = "matchSchema is Gostman's name for this check. Write .jsonSchema(schema), which Postman and Gostman both run."
+	messageExportBrunoSchema   = "Bruno's expect has no JSON Schema check. Validate with require(\"ajv\") instead."
+	messageExportRunRequest    = "sendRequest(%q) names no request in this collection, so bru.runRequest will not find it"
+	messageExportSavedRequest  = "sendRequest(%q) sends a saved request by name, but Postman's sendRequest takes an address, so this call will fail there."
+	messageExportUnread        = "the script could not be read, so it is exported as written"
+	messageExportCheckOperator = "%q is not a check"
+	messageExportCheckPath     = "%s cannot be written as %s code; use a path such as res.body.items[0].id"
+	messageExportCheckLeft     = "the check %q was left out, because %s"
+	messageExportLine          = "In %s, %s, line %d: %s"
+	messageExportPlace         = "In %s, %s: %s."
+	messageExportForeign       = "%[1]s.* belongs to another tool's script API, which %[2]s does not run. Rewrite these calls with %[2]s's API."
+	messageExportExtractLeft   = "the extract rule %q was left out, because %s cannot be written as %s code; use a plain path such as $.data.token, or set the value in the post-response script"
+
+	reasonDates               = "format dates with require(\"moment\") instead"
+	reasonQueries             = "res(query) lookups are Gostman's own, so read the body with pm.response.json() instead"
+	reasonPostmanFinalURL     = "Postman does not give the address of the final response"
+	reasonPostmanResponseBody = "Postman scripts cannot change the response body"
+	reasonPostmanTimeout      = "Postman scripts cannot read or change a request's timeout"
+	reasonBrunoCollectionList = "Bruno cannot list collection variables"
+	reasonBrunoVisualize      = "bru.visualize takes finished HTML or a table definition, not a template"
+)
+
+var (
+	messageExportUnchanged      = countedText{"%d script needs no change for %s and is exported as written.", "%d scripts need no change for %s and are exported as written."}
+	messageExportAdapted        = countedText{"%d script got a few lines at the top that define %s with %s's API, so the rest runs as written.", "%d scripts got a few lines at the top that define %s with %s's API, so the rest runs as written."}
+	messageExportChecks         = countedText{"%d assertion row became a %s test.", "%d assertion rows became %s tests."}
+	messageExportKept           = countedText{"%d assertion row exported as a Bruno assertion.", "%d assertion rows exported as Bruno assertions."}
+	messageExportSkipped        = countedText{"%d assertion row turned off in Gostman was left out.", "%d assertion rows turned off in Gostman were left out."}
+	messageExportSkippedTests   = countedText{"%d assertion row turned off in Gostman became a skipped %s test.", "%d assertion rows turned off in Gostman became skipped %s tests."}
+	messageExportExtractLines   = countedText{"%d extract rule became a line at the top of a post-response script.", "%d extract rules became lines at the top of post-response scripts."}
+	messageExportExtractVars    = countedText{"%d extract rule became a Bruno post-response var.", "%d extract rules became Bruno post-response vars."}
+	messageExportExtractSkipped = countedText{"%d extract rule turned off in Gostman was left out.", "%d extract rules turned off in Gostman were left out."}
+	messageExportBrunoOrder     = countedText{"Bruno lists folders before requests, so %[2]s will run after the folders beside it in Bruno.", "Bruno lists folders before requests, so %[2]s will run after the folders beside them in Bruno."}
 )

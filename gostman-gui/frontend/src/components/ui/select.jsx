@@ -4,12 +4,15 @@ import { Check, ChevronDown } from "lucide-react"
 import { cn } from "../../lib/utils"
 import { CONTROL_BASE, CONTROL_SIZES } from "./input"
 import { SectionLabel } from "./panel"
+import { findByPrefix, isTypedCharacter } from "../../lib/typeahead"
+import { useTypeahead } from "../../hooks/useTypeahead"
 
 const VIEWPORT_MARGIN = 8
 const LIST_GAP = 4
 const MAX_LIST_HEIGHT = 320
 const STEPS = { ArrowDown: 1, ArrowUp: -1 }
 const CONFIRM_KEYS = ["Enter", " "]
+const EDGE_KEYS = ["Home", "End"]
 
 const textOf = (node) => React.Children.toArray(node).join("")
 
@@ -99,6 +102,8 @@ const Select = React.forwardRef(function Select(
   const anchorRef = React.useRef(null)
   const listRef = React.useRef(null)
   const listId = React.useId()
+  const typeahead = useTypeahead()
+  const optionId = (index) => `${listId}-${index}`
 
   const isOpen = placement !== null
   const selectedIndex = entries.findIndex((entry) => entry.value === String(value ?? ""))
@@ -118,17 +123,45 @@ const Select = React.forwardRef(function Select(
     if (entry.value !== String(value ?? "")) onChange?.({ target: { value: entry.value } })
   }
 
+  const enabledIndexes = () => entries.map((entry, index) => (entry.disabled ? -1 : index)).filter((index) => index !== -1)
+
   const moveActive = (step) => {
-    const enabled = entries.map((entry, index) => (entry.disabled ? -1 : index)).filter((index) => index !== -1)
+    const enabled = enabledIndexes()
     if (enabled.length === 0) return
     const position = enabled.indexOf(activeIndex)
     setActiveIndex(enabled[(position + step + enabled.length) % enabled.length])
   }
 
-  const handleKeyDown = (event) => {
-    if (event.key === "Escape" && isOpen) {
+  const jumpTo = (character) => {
+    const labels = entries.map((entry) => (entry.disabled ? null : entry.label))
+    const index = findByPrefix(labels, isOpen ? activeIndex : selectedIndex, typeahead.type(character))
+    if (index < 0) return
+    if (isOpen) setActiveIndex(index)
+    else choose(entries[index])
+  }
+
+  const handleOpenKey = (event) => {
+    if (event.key === "Escape") {
       event.stopPropagation()
       close()
+      return true
+    }
+    if (event.key === "Tab") {
+      close()
+      return true
+    }
+    if (!EDGE_KEYS.includes(event.key)) return false
+    event.preventDefault()
+    const enabled = enabledIndexes()
+    setActiveIndex(event.key === "Home" ? enabled[0] : enabled.at(-1))
+    return true
+  }
+
+  const handleKeyDown = (event) => {
+    if (isOpen && handleOpenKey(event)) return
+    if (isTypedCharacter(event, typeahead.isTyping())) {
+      event.preventDefault()
+      jumpTo(event.key)
       return
     }
     if (STEPS[event.key]) {
@@ -159,6 +192,7 @@ const Select = React.forwardRef(function Select(
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-controls={isOpen ? listId : undefined}
+        aria-activedescendant={isOpen && activeIndex >= 0 ? optionId(activeIndex) : undefined}
         title={title || selected?.label}
         onClick={() => (isOpen ? close() : open())}
         onKeyDown={handleKeyDown}
@@ -184,6 +218,7 @@ const Select = React.forwardRef(function Select(
                 <SectionLabel className="block truncate px-3 pb-1 pt-2">{entry.group}</SectionLabel>
               )}
               <OptionRow
+                id={optionId(index)}
                 entry={entry}
                 isSelected={index === selectedIndex}
                 isActive={index === activeIndex}

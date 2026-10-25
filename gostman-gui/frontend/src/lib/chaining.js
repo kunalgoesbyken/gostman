@@ -1,5 +1,5 @@
-import { JSONPath } from 'jsonpath-plus'
 import { isPlainObject, parseJSON } from './dataUtils'
+import { queryJson } from './jsonPath'
 import { findHeader, textBody } from './response'
 import { SCOPE_ENVIRONMENT, SCOPE_SESSION } from './scripting/scopes'
 import { isVariableName } from './validation'
@@ -67,7 +67,7 @@ function jsonBody(response) {
 
 export function evaluateJsonPath(json, path) {
   try {
-    return { value: JSONPath({ path, json, wrap: false }) }
+    return { value: queryJson(path, json) }
   } catch (error) {
     return { error: error.message }
   }
@@ -105,25 +105,37 @@ const READERS = {
 
 export const isUsableResponse = (response) => Boolean(response && !response.error)
 
+export const readsBodyPath = (extractor) => (
+  extractor.source === SOURCE_BODY && isVariableName(extractor.name) && extractor.expression.trim() !== ''
+)
+
 export function evaluateExtractor(extractor, response) {
   if (!isVariableName(extractor.name)) {
-    return missing(extractor.name === '' ? 'Name the variable' : 'Use letters, digits, _ and - in the name')
+    return missing(extractor.name === '' ? 'Name the variable' : 'A variable name has no } and does not start or end with a space')
   }
   return READERS[extractor.source](response, extractor.expression.trim())
 }
 
-export function extractWrites(extractors, response, fallbackScope) {
+export const enabledExtractors = (extractors) => extractors.filter((candidate) => candidate.enabled)
+
+export const evaluateExtractors = (extractors, response) => extractors.map((extractor) => evaluateExtractor(extractor, response))
+
+export function writesFrom(extractors, outcomes, fallbackScope) {
   const writes = Object.fromEntries(EXTRACTOR_SCOPES.map((scope) => [scope, {}]))
-  for (const extractor of extractors.filter((candidate) => candidate.enabled)) {
-    const result = evaluateExtractor(extractor, response)
-    if (!result.reason) writes[extractor.scope || fallbackScope][extractor.name] = result.value
-  }
+  extractors.forEach((extractor, index) => {
+    if (!outcomes[index].reason) writes[extractor.scope || fallbackScope][extractor.name] = outcomes[index].value
+  })
   return writes
+}
+
+export function extractWrites(extractors, response, fallbackScope) {
+  const enabled = enabledExtractors(extractors)
+  return writesFrom(enabled, evaluateExtractors(enabled, response), fallbackScope)
 }
 
 export function extractVariables(extractors, response) {
   const variables = {}
-  for (const extractor of extractors.filter((candidate) => candidate.enabled)) {
+  for (const extractor of enabledExtractors(extractors)) {
     const result = evaluateExtractor(extractor, response)
     if (!result.reason) variables[extractor.name] = result.value
   }

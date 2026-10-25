@@ -2,11 +2,11 @@ import { ROOT_ID, ROW_FOLDER, ROW_REQUEST } from './collectionTree'
 import { PLACE_INSIDE } from './dropPlace'
 import { normalizeRequest } from './request'
 import { TREE_TEXT } from './treeText'
-import { TARGET_ROOT, cloneDestination, pasteDestination, planClone, planMove, planStep } from './treeMoves'
+import { TARGET_ROOT, cloneDestination, pasteDestination, planClone, planMove, planStep, sharingPatches } from './treeMoves'
 import { useAppStore } from '../store/appStore'
 
 const store = () => useAppStore.getState()
-const snapshot = () => ({ folders: store().folders, requests: store().requests })
+const snapshot = () => ({ folders: store().folders, requests: store().requests, sharedOrder: store().sharedOrder })
 const newId = () => crypto.randomUUID()
 const newFolderId = () => `folder-${crypto.randomUUID()}`
 
@@ -27,6 +27,20 @@ export function createTreeActions(backend, attempt) {
     changed.forEach(({ id, folderId, sortOrder }) => store().patchOpenRequest(id, { folderId, sortOrder }))
   }
 
+  async function shareOrder() {
+    if (store().sharedOrder) return
+    await applyPatches(sharingPatches(snapshot()))
+    await backend.saveFolders(store().folders)
+    await backend.shareOrder()
+    store().markSharedOrder()
+  }
+
+  async function planShared(planner) {
+    if (!planner(snapshot())) return null
+    await shareOrder()
+    return planner(snapshot())
+  }
+
   const offerUndo = (message, revert) => {
     const undo = attempt(TREE_TEXT.undoFailed, async () => {
       await revert()
@@ -36,14 +50,14 @@ export function createTreeActions(backend, attempt) {
   }
 
   const moveItem = attempt(TREE_TEXT.moveFailed, async (source, target) => {
-    const plan = planMove(snapshot(), source, target)
+    const plan = await planShared((state) => planMove(state, source, target))
     if (!plan) return
     await applyPatches(plan.patches)
     offerUndo(TREE_TEXT.moved(plan.subject.name), () => applyPatches(plan.undo))
   })
 
   const stepItem = attempt(TREE_TEXT.moveFailed, async (source, direction) => {
-    const plan = planStep(snapshot(), source, direction)
+    const plan = await planShared((state) => planStep(state, source, direction))
     if (!plan) return
     await applyPatches(plan.patches)
     offerUndo(TREE_TEXT.moved(plan.subject.name), () => applyPatches(plan.undo))
@@ -68,7 +82,7 @@ export function createTreeActions(backend, attempt) {
   }
 
   async function cloneInto(source, destination, label) {
-    const plan = planClone(snapshot(), source, destination, idFactoryFor(source.kind))
+    const plan = await planShared((state) => planClone(state, source, destination, idFactoryFor(source.kind)))
     if (!plan) return
     await persistClone(plan)
     offerUndo(label(plan.root.name), () => discard(plan.created))
@@ -84,9 +98,9 @@ export function createTreeActions(backend, attempt) {
   const pasteItem = attempt(TREE_TEXT.cloneFailed, (row) => {
     const clip = store().treeClipboard
     if (!clip) return undefined
-    const destination = pasteDestination(snapshot(), clip, row)
+    const destination = pasteDestination(snapshot(), row)
     return cloneInto(clip, destination, TREE_TEXT.pasted)
   })
 
-  return { moveItem, stepItem, canStep, moveToFolder, duplicateItem, copyItem, pasteItem }
+  return { moveItem, stepItem, canStep, moveToFolder, duplicateItem, copyItem, pasteItem, shareOrder }
 }

@@ -1,4 +1,5 @@
 import { pluralize } from './dataUtils'
+import { DIALOG_TEXT } from './dialogText'
 import { createGitActions } from './gitSession'
 import { WORKSPACE_TEXT as TEXT } from './workspaceText'
 import { useAppStore } from '../store/appStore'
@@ -6,6 +7,7 @@ import { useAppStore } from '../store/appStore'
 const CLONE_TITLE = 'Clone repository'
 const CLONE_MESSAGE = 'Address of the repository to clone. Sign-in uses your git credential helper or SSH agent. Next, choose the folder to clone into.'
 const CLONE_PLACEHOLDER = 'https://github.com/owner/repository.git'
+const CLONE_CONFIRM = 'Choose folder'
 const TRUST_PROMPT = 'Requests in this folder can carry scripts, OAuth 2.0 settings, commands that start local MCP servers and {{$file(...)}} placeholders that send files from this computer. They run when a request is sent and can read your variables, so trust the folder only if you know where its files came from.'
 const SKIPPED_NOTE = 'These files were skipped and left unchanged. Fix them, then choose Reload from disk.'
 
@@ -63,13 +65,14 @@ export function createStorageActions(backend) {
 
   const promptClone = () => store().showPrompt(CLONE_TITLE, CLONE_MESSAGE, '', CLONE_PLACEHOLDER, (address) => {
     if (address?.trim()) clone(address)
-  })
+  }, CLONE_CONFIRM)
 
   const git = createGitActions(storage.git)
 
   const trust = attempt(TEXT.trustFailed, async () => {
     await storage.trust()
     store().liftRestriction()
+    store().showNotice(TEXT.trusted)
     await git.refreshState()
   })
 
@@ -94,6 +97,7 @@ export function createStorageActions(backend) {
     entry.name,
     '',
     (name) => rename(entry.path, name ?? ''),
+    DIALOG_TEXT.rename,
   )
 
   const confirmForget = (entry) => store().showConfirm(

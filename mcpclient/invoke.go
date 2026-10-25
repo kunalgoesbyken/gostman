@@ -30,10 +30,20 @@ func Invoke(ctx context.Context, call Call, policy engine.Policy) engine.Respons
 }
 
 func invoke(ctx context.Context, call Call, policy engine.Policy) engine.Response {
+	expansion, err := newExpansion(call.Target)
+	if err != nil {
+		return classify(ctx, err).response()
+	}
+	response := invokeWith(ctx, call, expansion, policy)
+	response.Unresolved = engine.JoinUnresolved(endpointUnresolved(call.Target), expansion.Missing())
+	return response
+}
+
+func invokeWith(ctx context.Context, call Call, expansion *engine.Expansion, policy engine.Policy) engine.Response {
 	ctx, cancel := context.WithTimeout(ctx, policy.Timeout(call.Target.Options))
 	defer cancel()
 
-	session, err := open(ctx, call.Target, policy)
+	session, err := openWith(ctx, call.Target, expansion, policy)
 	if err != nil {
 		return classify(ctx, err).response()
 	}

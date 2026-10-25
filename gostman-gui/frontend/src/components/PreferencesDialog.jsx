@@ -271,11 +271,6 @@ export function PreferencesDialog({ listFonts, windowFrame, onCommand, backups, 
   const tabIdOf = (section) => `${baseId}-${section.id}-tab`
   const panelId = `${baseId}-panel`
 
-  const showShortcuts = () => {
-    onClose()
-    openShortcuts()
-  }
-
   return (
     <Dialog label={PREFERENCES_TEXT.title} size="lg" floating={PREFERENCES_WINDOW} onClose={onClose}>
       <DialogHeader onClose={onClose}>
@@ -312,7 +307,7 @@ export function PreferencesDialog({ listFonts, windowFrame, onCommand, backups, 
         </div>
       </div>
       <DialogFooter>
-        <Button variant="ghost" className="mr-auto" onClick={showShortcuts}>
+        <Button variant="ghost" className="mr-auto" onClick={openShortcuts}>
           <Keyboard />
           <span className="max-sm:sr-only">{PREFERENCES_TEXT.shortcuts}</span>
         </Button>

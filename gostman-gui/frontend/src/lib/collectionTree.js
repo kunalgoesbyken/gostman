@@ -36,21 +36,43 @@ function sortedGroups(groups) {
   return groups
 }
 
-export function buildCollectionTree(folders, requests) {
+export function orderSiblings(folders, requests, shared) {
+  const siblings = []
+  let folderIndex = 0
+  let requestIndex = 0
+  while (folderIndex < folders.length || requestIndex < requests.length) {
+    const requestFirst = requestIndex < requests.length
+      && (folderIndex === folders.length || (shared && compareOrder(requests[requestIndex], folders[folderIndex]) < 0))
+    if (requestFirst) siblings.push({ kind: ROW_REQUEST, item: requests[requestIndex++] })
+    else siblings.push({ kind: ROW_FOLDER, item: folders[folderIndex++] })
+  }
+  return siblings
+}
+
+function siblingGroups(childFolders, folderRequests, shared) {
+  const groups = new Map()
+  for (const containerId of new Set([...childFolders.keys(), ...folderRequests.keys()])) {
+    groups.set(containerId, orderSiblings(childFolders.get(containerId) || NO_ITEMS, folderRequests.get(containerId) || NO_ITEMS, shared))
+  }
+  return groups
+}
+
+export function buildCollectionTree(folders, requests, sharedOrder = false) {
   const parentOf = new Map(folders.map((folder) => [folder.id, folder.parentId]))
   const containerOf = (id) => (parentOf.has(id) ? id : ROOT_ID)
   const parentFolderOf = (folder) => (
     folderDepth(folder.id, parentOf) > MAX_FOLDER_DEPTH ? ROOT_ID : containerOf(folder.parentId)
   )
-  return {
-    childFolders: sortedGroups(groupBy(folders, parentFolderOf)),
-    folderRequests: sortedGroups(groupBy(requests, (request) => containerOf(request.folderId))),
-  }
+  const childFolders = sortedGroups(groupBy(folders, parentFolderOf))
+  const folderRequests = sortedGroups(groupBy(requests, (request) => containerOf(request.folderId)))
+  return { childFolders, folderRequests, siblings: siblingGroups(childFolders, folderRequests, sharedOrder) }
 }
 
 export const foldersIn = (tree, folderId) => tree.childFolders.get(folderId) || NO_ITEMS
 
 export const requestsIn = (tree, folderId) => tree.folderRequests.get(folderId) || NO_ITEMS
+
+export const siblingsIn = (tree, folderId) => tree.siblings.get(folderId) || NO_ITEMS
 
 export function listFolders(tree) {
   const entries = []
@@ -66,8 +88,7 @@ export function listFolders(tree) {
 }
 
 export function collectRequests(tree, folderId) {
-  const nested = foldersIn(tree, folderId).flatMap((folder) => collectRequests(tree, folder.id))
-  return [...nested, ...requestsIn(tree, folderId)]
+  return siblingsIn(tree, folderId).flatMap(({ kind, item }) => (kind === ROW_FOLDER ? collectRequests(tree, item.id) : [item]))
 }
 
 export function inheritedTags(folders) {
@@ -83,16 +104,22 @@ export function inheritedTags(folders) {
   }
 }
 
-export function findMatches(folders, requests, query) {
+export function buildSearchIndex(folders, requests) {
+  const tagsOf = inheritedTags(folders)
+  return {
+    parentOf: new Map(folders.map((folder) => [folder.id, folder.parentId])),
+    entries: requests.map((request) => ({ request, text: foldCase([request.name, request.url, ...tagsOf(request)].join('\n')) })),
+  }
+}
+
+export function findMatches({ parentOf, entries }, query) {
   const needle = foldCase(query.trim())
   if (!needle) return null
 
-  const parentOf = new Map(folders.map((folder) => [folder.id, folder.parentId]))
-  const tagsOf = inheritedTags(folders)
   const requestIds = new Set()
   const folderIds = new Set()
-  for (const request of requests) {
-    if (!foldCase([request.name, request.url, ...tagsOf(request)].join('\n')).includes(needle)) continue
+  for (const { request, text } of entries) {
+    if (!text.includes(needle)) continue
     requestIds.add(request.id)
     let ancestorId = request.folderId
     while (parentOf.has(ancestorId) && !folderIds.has(ancestorId)) {
@@ -112,17 +139,18 @@ export function flattenCollection(tree, matches) {
   }
   const visit = (containerId, depth) => {
     const siblings = []
-    for (const folder of foldersIn(tree, containerId)) {
-      if (matches && !matches.folderIds.has(folder.id)) continue
-      const isOpen = Boolean(matches) || folder.isOpen
-      const row = { kind: ROW_FOLDER, key: `${ROW_FOLDER}:${folder.id}`, depth, folder, isOpen }
-      rows.push(row)
-      siblings.push(row)
-      if (isOpen) visitFolder(folder, depth)
-    }
-    for (const request of requestsIn(tree, containerId)) {
-      if (matches && !matches.requestIds.has(request.id)) continue
-      const row = { kind: ROW_REQUEST, key: `${ROW_REQUEST}:${request.id}`, depth, request }
+    for (const { kind, item } of siblingsIn(tree, containerId)) {
+      if (kind === ROW_FOLDER) {
+        if (matches && !matches.folderIds.has(item.id)) continue
+        const isOpen = Boolean(matches) || item.isOpen
+        const row = { kind, key: `${kind}:${item.id}`, depth, folder: item, isOpen }
+        rows.push(row)
+        siblings.push(row)
+        if (isOpen) visitFolder(item, depth)
+        continue
+      }
+      if (matches && !matches.requestIds.has(item.id)) continue
+      const row = { kind, key: `${kind}:${item.id}`, depth, request: item }
       rows.push(row)
       siblings.push(row)
     }

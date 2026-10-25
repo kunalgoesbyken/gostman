@@ -24,6 +24,7 @@ type GitState struct {
 	Problem     string           `json:"problem"`
 	Restricted  bool             `json:"restricted"`
 	Root        string           `json:"root"`
+	Scope       string           `json:"scope"`
 	Branch      string           `json:"branch"`
 	Detached    bool             `json:"detached"`
 	Upstream    string           `json:"upstream"`
@@ -55,11 +56,11 @@ func currentRepo() (gitutil.Repo, error) {
 	if !gitutil.Installed() {
 		return gitutil.Repo{}, gitutil.ErrNotInstalled
 	}
-	top, err := gitutil.Top(root)
-	if err != nil || !gitutil.SameFolder(top, root) {
+	repo, err := gitutil.Open(root, restricted)
+	if err != nil {
 		return gitutil.Repo{}, errors.New(notARepository)
 	}
-	return gitutil.Repo{Dir: root, Restricted: restricted}, nil
+	return repo, nil
 }
 
 func reloadFiles() error {
@@ -79,18 +80,14 @@ func (a *App) GitState() (GitState, error) {
 	if !state.Installed {
 		return state, nil
 	}
-	top, err := gitutil.Top(root)
+	repo, err := gitutil.Open(root, restricted)
 	if err != nil {
 		if gitutil.HasGitEntry(root) {
 			state.Problem = err.Error()
 		}
 		return state, nil
 	}
-	if !gitutil.SameFolder(top, root) {
-		state.Problem = fmt.Sprintf("this folder is inside the repository at %s. Open that folder, or turn this one into its own repository", top)
-		return state, nil
-	}
-	repo := gitutil.Repo{Dir: root, Restricted: restricted}
+	state.Scope = repo.Scope
 	status, err := repo.Status()
 	if err != nil {
 		state.Problem = err.Error()

@@ -9,14 +9,10 @@ import { Notice, SectionLabel } from "./ui/panel"
 import { GitDiffView } from "./GitDiffView"
 import { useAppStore } from "../store/appStore"
 import { codeHostOf, pullRequestRemote } from "../lib/codeHost"
+import { GIT_TEXT as TEXT } from "../lib/gitText"
 
 const ROW_CLASS = "flex min-h-9 items-center gap-2 border-b border-border px-3 text-xs"
 const FORM_CLASS = "flex shrink-0 items-center gap-2 border-b border-border px-3 py-2"
-const NO_BRANCHES = "This repository has no branches yet. Commit something first."
-const NO_STASHES = "Nothing is stashed. A stash sets your uncommitted changes aside so you can switch branches cleanly."
-const NO_COMMITS = "No commits yet."
-const NO_REMOTES = "No remotes. Add the address of a repository to fetch, pull and push."
-const READ_ONLY = "Trust this folder to change anything."
 const SHORT_DATE = { dateStyle: "medium", timeStyle: "short" }
 
 const formatDate = (iso) => new Date(iso).toLocaleString(undefined, SHORT_DATE)
@@ -45,25 +41,25 @@ export function BranchesTab({ branches, isReadOnly, actions }) {
   const remote = branches.filter((branch) => branch.remote)
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <AddForm label="Create branch" placeholder="New branch name, created from the current commit" icon={Plus} disabled={isReadOnly} onSubmit={actions.createBranch} />
+      <AddForm label={TEXT.createBranch} placeholder={TEXT.branchPlaceholder} icon={Plus} disabled={isReadOnly} onSubmit={actions.createBranch} />
       <div className="min-h-0 flex-1 overflow-y-auto">
-        {branches.length === 0 && <EmptyState icon={GitBranch} title={NO_BRANCHES} />}
+        {branches.length === 0 && <EmptyState icon={GitBranch} title={TEXT.noBranches} />}
         {local.map((branch) => (
           <div key={branch.name} className={ROW_CLASS}>
             <GitBranch className="size-3.5 shrink-0 text-muted-foreground" />
             <span className="min-w-0 flex-1 truncate font-medium" title={branch.subject}>{branch.name}</span>
-            {branch.current && <Badge variant="success">current</Badge>}
+            {branch.current && <Badge variant="success">{TEXT.currentBranch}</Badge>}
             {branch.upstream && <span className="truncate text-muted-foreground">{branch.upstream}</span>}
-            {!branch.current && <Button size="sm" variant="outline" disabled={isReadOnly} onClick={() => actions.switchBranch(branch.name, false)}>Switch</Button>}
-            {!branch.current && <IconButton label={`Delete ${branch.name}`} icon={Trash2} disabled={isReadOnly} onClick={() => actions.deleteBranch(branch.name)} />}
+            {!branch.current && <Button size="sm" variant="outline" disabled={isReadOnly} onClick={() => actions.switchBranch(branch.name, false)}>{TEXT.switchBranch}</Button>}
+            {!branch.current && <IconButton label={TEXT.deleteBranch(branch.name)} icon={Trash2} disabled={isReadOnly} onClick={() => actions.deleteBranch(branch.name)} />}
           </div>
         ))}
-        {remote.length > 0 && <div className="px-3 pb-1 pt-3"><SectionLabel>Remote branches</SectionLabel></div>}
+        {remote.length > 0 && <div className="px-3 pb-1 pt-3"><SectionLabel>{TEXT.remoteBranches}</SectionLabel></div>}
         {remote.map((branch) => (
           <div key={branch.name} className={ROW_CLASS}>
             <GitBranch className="size-3.5 shrink-0 text-muted-foreground" />
             <span className="min-w-0 flex-1 truncate" title={branch.subject}>{branch.name}</span>
-            <Button size="sm" variant="outline" disabled={isReadOnly} onClick={() => actions.switchBranch(branch.name, true)}>Check out</Button>
+            <Button size="sm" variant="outline" disabled={isReadOnly} onClick={() => actions.switchBranch(branch.name, true)}>{TEXT.checkOut}</Button>
           </div>
         ))}
       </div>
@@ -74,16 +70,16 @@ export function BranchesTab({ branches, isReadOnly, actions }) {
 export function StashesTab({ stashes, isReadOnly, actions }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <AddForm label="Stash changes" placeholder="Optional note" icon={Plus} disabled={isReadOnly} onSubmit={actions.saveStash} />
+      <AddForm label={TEXT.stashChanges} placeholder={TEXT.stashPlaceholder} icon={Plus} disabled={isReadOnly} onSubmit={actions.saveStash} />
       <div className="min-h-0 flex-1 overflow-y-auto">
-        {stashes.length === 0 && <EmptyState icon={History} title={NO_STASHES} />}
+        {stashes.length === 0 && <EmptyState icon={History} title={TEXT.noStashes} />}
         {stashes.map((stash) => (
           <div key={stash.index} className={ROW_CLASS}>
             <span className="min-w-0 flex-1 truncate" title={stash.message}>{stash.message}</span>
             <span className="shrink-0 text-muted-foreground">{formatDate(stash.date)}</span>
-            <Button size="sm" variant="outline" disabled={isReadOnly} onClick={() => actions.applyStash(stash.index)}>Apply</Button>
-            <Button size="sm" variant="outline" disabled={isReadOnly} onClick={() => actions.popStash(stash.index)}>Pop</Button>
-            <IconButton label="Drop stash" icon={Trash2} disabled={isReadOnly} onClick={() => actions.dropStash(stash.index)} />
+            <Button size="sm" variant="outline" disabled={isReadOnly} onClick={() => actions.applyStash(stash.index)}>{TEXT.applyStash}</Button>
+            <Button size="sm" variant="outline" disabled={isReadOnly} onClick={() => actions.popStash(stash.index)}>{TEXT.popStash}</Button>
+            <IconButton label={TEXT.dropStash} icon={Trash2} disabled={isReadOnly} onClick={() => actions.dropStash(stash.index)} />
           </div>
         ))}
       </div>
@@ -98,7 +94,7 @@ function VersionPane({ version, isReadOnly, onRestore }) {
         <span className="truncate text-xs text-muted-foreground">{version.commit.short} {version.commit.subject}</span>
         <Button size="sm" variant="outline" disabled={isReadOnly} onClick={() => onRestore(version.commit)}>
           <RotateCcw />
-          Restore this version
+          {TEXT.restoreVersion}
         </Button>
       </div>
       <GitDiffView text={version.diff} binary={false} summary={[]} />
@@ -115,12 +111,12 @@ export function HistoryTab({ history, isReadOnly, actions }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <form onSubmit={submit} className={FORM_CLASS}>
-        <Input aria-label="File path" placeholder="File path for a single file's history, empty for the whole repository" value={path} onChange={(event) => setPath(event.target.value)} />
-        <Button type="submit" size="sm" variant="outline">Show history</Button>
+        <Input aria-label={TEXT.filePath} placeholder={TEXT.filePathPlaceholder} value={path} onChange={(event) => setPath(event.target.value)} />
+        <Button type="submit" size="sm" variant="outline">{TEXT.showHistory}</Button>
       </form>
       <div className="flex min-h-0 flex-1">
         <div className="min-h-0 w-80 shrink-0 overflow-y-auto border-r border-border">
-          {history.commits.length === 0 && <EmptyState icon={History} title={NO_COMMITS} />}
+          {history.commits.length === 0 && <EmptyState icon={History} title={TEXT.noCommits} />}
           {history.commits.map((commit) => (
             <button
               key={commit.hash}
@@ -147,14 +143,14 @@ function RemoteRow({ remote, isReadOnly, onChange }) {
       <BrandIcon brand={codeHostOf(remote.url)} fallback={Server} className="text-muted-foreground" />
       <span className="shrink-0 font-medium">{remote.name}</span>
       <span className="min-w-0 flex-1 truncate font-mono text-muted-foreground" title={remote.url}>{remote.url}</span>
-      <Button size="sm" variant="outline" disabled={isReadOnly} onClick={() => showPrompt("Change remote address", `New address for ${remote.name}`, remote.url, "", (url) => url?.trim() && onChange(url.trim()))}>
-        Change
+      <Button size="sm" variant="outline" disabled={isReadOnly} onClick={() => showPrompt(TEXT.changeRemoteTitle, TEXT.changeRemoteMessage(remote.name), remote.url, "", (url) => url?.trim() && onChange(url.trim()), TEXT.changeRemoteConfirm)}>
+        {TEXT.changeRemote}
       </Button>
     </div>
   )
 }
 
-export function RemotesTab({ remotes, isReadOnly, actions }) {
+export function RemotesTab({ remotes, isReadOnly, isRestricted, actions }) {
   const [name, setName] = useState("origin")
   const [url, setUrl] = useState("")
   const submit = (event) => {
@@ -165,16 +161,16 @@ export function RemotesTab({ remotes, isReadOnly, actions }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <form onSubmit={submit} className={FORM_CLASS}>
-        <Input aria-label="Remote name" className="w-32 shrink-0" value={name} onChange={(event) => setName(event.target.value)} disabled={isReadOnly} />
-        <Input aria-label="Remote address" placeholder="https://github.com/owner/repository.git" value={url} onChange={(event) => setUrl(event.target.value)} disabled={isReadOnly} />
+        <Input aria-label={TEXT.remoteName} className="w-32 shrink-0" value={name} onChange={(event) => setName(event.target.value)} disabled={isReadOnly} />
+        <Input aria-label={TEXT.remoteAddress} placeholder={TEXT.remotePlaceholder} value={url} onChange={(event) => setUrl(event.target.value)} disabled={isReadOnly} />
         <Button type="submit" size="sm" disabled={isReadOnly || !name.trim() || !url.trim()}>
           <Plus />
-          Add remote
+          {TEXT.addRemote}
         </Button>
       </form>
-      {isReadOnly && <Notice tone="muted">{READ_ONLY}</Notice>}
+      {isRestricted && <Notice tone="muted">{TEXT.readOnly}</Notice>}
       <div className="min-h-0 flex-1 overflow-y-auto">
-        {remotes.length === 0 && <EmptyState icon={ExternalLink} title={NO_REMOTES} />}
+        {remotes.length === 0 && <EmptyState icon={ExternalLink} title={TEXT.noRemotes} />}
         {remotes.map((remote) => (
           <RemoteRow key={remote.name} remote={remote} isReadOnly={isReadOnly} onChange={(next) => actions.setRemoteUrl(remote.name, next)} />
         ))}
@@ -183,7 +179,7 @@ export function RemotesTab({ remotes, isReadOnly, actions }) {
         <div className="flex shrink-0 justify-end border-t border-border px-3 py-2">
           <Button size="sm" variant="outline" onClick={actions.openPullRequest}>
             <BrandIcon brand={codeHostOf(pullRequestRemote(remotes).url)} fallback={ExternalLink} />
-            Create pull request in browser
+            {TEXT.createPullRequest}
           </Button>
         </div>
       )}

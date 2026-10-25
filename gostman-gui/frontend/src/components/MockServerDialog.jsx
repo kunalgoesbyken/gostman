@@ -1,13 +1,13 @@
 import { useMemo } from "react"
-import { AlertTriangle, MonitorDown, Play, Square } from "lucide-react"
+import { AlertTriangle, Play, Square } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
-import { EmptyState } from "./ui/emptyState"
 import { Input } from "./ui/input"
 import { Notice, Toolbar } from "./ui/panel"
 import { Select } from "./ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger, TabCount } from "./ui/tabs"
+import { DesktopOnly } from "./DesktopOnly"
 import { LocalAddress } from "./LocalAddress"
 import { MockBehaviorTab } from "./MockBehaviorTab"
 import { MockLogTab } from "./MockLogTab"
@@ -140,7 +140,7 @@ export function MockServerDialog({ folders, requests, actions }) {
   const address = useMockStore((state) => state.address)
 
   return (
-    <Dialog label={MOCK_TEXT.title} size="lg" onClose={actions.close}>
+    <Dialog label={MOCK_TEXT.title} size={actions.isAvailable ? "lg" : "sm"} onClose={actions.close}>
       <DialogHeader onClose={actions.close}>
         <DialogTitle>{MOCK_TEXT.title}</DialogTitle>
         {isRunning && <Badge variant="success">{MOCK_TEXT.running}</Badge>}
@@ -149,9 +149,7 @@ export function MockServerDialog({ folders, requests, actions }) {
       {actions.isAvailable ? (
         <ServerPanel folders={folders} requests={requests} actions={actions} />
       ) : (
-        <div className="min-h-0 flex-1">
-          <EmptyState icon={MonitorDown} title={MOCK_TEXT.desktopOnly} description={MOCK_TEXT.webNotice} />
-        </div>
+        <DesktopOnly title={MOCK_TEXT.desktopOnly} description={MOCK_TEXT.webNotice} />
       )}
     </Dialog>
   )

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { focusableWithin } from "../lib/focusable"
 import { focusOrigin, returnFocusTo } from "../lib/panes"
 
-function wrapTab(event, container) {
+export function wrapTab(event, container) {
   const items = focusableWithin(container)
   if (items.length === 0) return event.preventDefault()
   const active = document.activeElement
@@ -21,12 +21,12 @@ export function useFocusTrap(ref) {
     const container = ref.current
     if (!container.contains(document.activeElement)) container.focus()
     const trap = (event) => {
-      if (event.key === "Tab") wrapTab(event, container)
+      if (event.key === "Tab" && !event.defaultPrevented) wrapTab(event, container)
     }
     container.addEventListener("keydown", trap)
     return () => {
       container.removeEventListener("keydown", trap)
-      returnFocusTo(origin)
+      if (!container.isConnected) returnFocusTo(origin)
     }
   }, [ref, origin])
 }

@@ -40,7 +40,7 @@ Every action shows a preview of the exact text before it is sent, with a byte an
 Response bodies:
 
 - "Explain a failed response" includes the response body values by default (up to 4 KB, sensitive keys masked), because the error message in the body is usually what explains the failure. Untick "Include the body values" to send only the structure. The preview says which one is sent.
-- "Assertions and tests" sends only the structure of the body (key names and types) unless you tick "Include real response values".
+- "Checks for a response" sends only the structure of the body (key names and types) unless you tick "Include real response values".
 
 "Don't ask again for this action" skips the preview for that action only: from then on it is sent as soon as you start it. The AI section of Preferences shows how many actions skip the preview, and "Show the preview again" brings it back for all of them.
 
@@ -54,5 +54,11 @@ If an answer reaches the length limit, Gostman shows "The answer was cut off" in
 
 Draft a request, assertions and tests, pre and post scripts, a failure explanation, request docs, a collection search, and requests from an API description. Results are proposals shown as a preview; nothing is sent, saved or run until you accept, and scripts run only when you press Send. In a restricted folder, script generation is disabled and accepted scripts stay inert until the folder is trusted.
 
+Besides the **AI:** commands in the command palette, three buttons appear in place once AI is on:
+
+- **Generate with AI** in the **Checks** tab of a request: on the Assertions view it proposes checks for the last response, and on the Pre-request script or Post-response script view it writes that script.
+- **Write with AI** next to the description in the request's **Settings** tab proposes a description.
+- **Explain with AI** appears in the response toolbar when a response has an error status, and under the message when a request could not be sent. It explains the response or the error and suggests a fix.
+
 - Collection search sends the first 300 requests of the collection. If it has more, the dialog says so before anything is sent.
-- Requests from an API description: when the pasted text is an OpenAPI or Swagger document, the built-in importer reads all of it, the same way Import data does, and nothing is sent to AI. Other descriptions, such as a GraphQL schema or API documentation text, go to AI, up to 64 KB of text. AI makes up to 15 requests per answer; when the API has more, "Make the next requests" sends the same text again with the list of requests already made, up to 200 requests in all. To add assertions to imported requests, send one and use "Assertions and tests", which works from the real response.
+- Requests from an API description: when the pasted text is an OpenAPI or Swagger document, the built-in importer reads all of it, the same way Import data does, and nothing is sent to AI. Other descriptions, such as a GraphQL schema or API documentation text, go to AI, up to 64 KB of text. AI makes up to 15 requests per answer; when the API has more, "Make the next requests" sends the same text again with the list of requests already made, up to 200 requests in all. To add assertions to imported requests, send one and use "Checks for a response", which works from the real response.

@@ -1,7 +1,9 @@
 import { FLOW_NEXT, FLOW_STOP } from './scripting/flow'
 import { MAX_FLOW_STEPS } from './scripting/limits'
 
-const TOO_MANY_JUMPS = `The script redirected the run more than ${MAX_FLOW_STEPS} times, so the run was stopped.`
+const ENDLESS_JUMPS = (name, target, sent, planned) => (
+  `The script in "${name}" kept continuing the run with "${target}", so the run was stopped after ${sent} requests. A pass may send at most ${MAX_FLOW_STEPS} more requests than the ${planned} it holds; give the loop a way to end, such as a retry count.`
+)
 const NOT_PARALLEL = (target) => `The script asked to continue with "${target}", but requests run in parallel so the order cannot be changed.`
 const UNKNOWN = (target) => `The script asked to continue with "${target}", but no request in this run has that name.`
 
@@ -11,7 +13,7 @@ const passedByStop = (name) => `Not run because a script in "${name}" stopped th
 const matches = (target) => (request) => request.name === target || request.id === target
 
 export function createFlowFollower(run, requests, queue, isParallel) {
-  let jumps = 0
+  let sent = 0
   const passedOver = new Map()
   const pass = (dropped, reason) => dropped.forEach((request) => passedOver.has(request) || passedOver.set(request, reason))
   const halt = (problem) => {
@@ -19,13 +21,13 @@ export function createFlowFollower(run, requests, queue, isParallel) {
     return problem
   }
   const follow = (flow, name) => {
+    sent += 1
     if (flow.action === FLOW_STOP) {
       pass(queue, passedByStop(name))
       return halt('')
     }
     if (flow.action !== FLOW_NEXT) return ''
-    jumps += 1
-    if (jumps > MAX_FLOW_STEPS) return halt(TOO_MANY_JUMPS)
+    if (sent >= requests.length + MAX_FLOW_STEPS) return halt(ENDLESS_JUMPS(name, flow.target, sent, requests.length))
     if (isParallel) return halt(NOT_PARALLEL(flow.target))
     const position = requests.findIndex(matches(flow.target))
     if (position < 0) return halt(UNKNOWN(flow.target))

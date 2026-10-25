@@ -13,10 +13,12 @@ type gostmanExportFile struct {
 }
 
 type gostmanBackup struct {
-	Requests     []json.RawMessage `json:"requests"`
-	Folders      []json.RawMessage `json:"folders"`
-	Environments []json.RawMessage `json:"environments"`
-	Variables    map[string]any    `json:"variables"`
+	Requests      []json.RawMessage `json:"requests"`
+	Folders       []json.RawMessage `json:"folders"`
+	Environments  []json.RawMessage `json:"environments"`
+	Variables     json.RawMessage   `json:"variables"`
+	VariablesMeta string            `json:"variablesMeta"`
+	SharedOrder   bool              `json:"sharedOrder"`
 }
 
 type idMap map[string]string
@@ -45,12 +47,29 @@ func (c *collector) readGostman(doc document) {
 
 func (c *collector) importGostman(backup *gostmanBackup) {
 	folders := idMap{}
+	firstFolder, firstRequest := len(c.Folders), len(c.Requests)
 	c.gostmanFolders(backup.Folders, folders)
 	c.gostmanRequests(backup.Requests, folders)
-	c.gostmanEnvironments(backup.Environments)
-	for key, value := range backup.Variables {
+	if !backup.SharedOrder {
+		workspace.ShareOrder(c.Folders[firstFolder:], c.Requests[firstRequest:])
+	}
+	c.gostmanEnvironments(backup.Environments, folders)
+	for key, value := range exportedVariables(backup.Variables) {
 		c.Variables[key] = text(value)
 	}
+	for name := range workspace.SecretNames(backup.VariablesMeta) {
+		c.VariablesMeta = workspace.MarkSecret(c.VariablesMeta, name)
+	}
+}
+
+func exportedVariables(raw json.RawMessage) map[string]any {
+	var values map[string]any
+	var encoded string
+	if json.Unmarshal(raw, &encoded) == nil {
+		raw = json.RawMessage(encoded)
+	}
+	_ = json.Unmarshal(raw, &values)
+	return values
 }
 
 func withoutTokens(auth engine.Auth) engine.Auth {
@@ -98,11 +117,11 @@ func (c *collector) gostmanRequests(raw []json.RawMessage, folders idMap) {
 		if request.Auth.Type == authOAuth2 {
 			c.flag(messageOAuth, request.Name)
 		}
-		c.addRequest(request)
+		c.keepRequest(request)
 	}
 }
 
-func (c *collector) gostmanEnvironments(raw []json.RawMessage) {
+func (c *collector) gostmanEnvironments(raw []json.RawMessage, folders idMap) {
 	decoded := make([]workspace.Environment, 0, len(raw))
 	for _, item := range raw {
 		var environment workspace.Environment
@@ -119,6 +138,7 @@ func (c *collector) gostmanEnvironments(raw []json.RawMessage) {
 	for _, environment := range decoded {
 		environment.Name = cleanName(environment.Name, untitledEnvironment)
 		environment.Extends = ids.resolve(environment.Extends)
+		environment.FolderId = folders.resolve(environment.FolderId)
 		c.Environments = append(c.Environments, environment)
 	}
 }

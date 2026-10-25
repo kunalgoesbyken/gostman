@@ -34,11 +34,12 @@ type Server struct {
 }
 
 type outcome struct {
-	body    []byte
-	route   string
-	rule    string
-	fault   string
-	dropped bool
+	body      []byte
+	route     string
+	rule      string
+	fault     string
+	dropped   bool
+	noExample bool
 }
 
 type statusRecorder struct {
@@ -145,6 +146,7 @@ func (s *Server) record(started time.Time, r *http.Request, status int, call *ou
 		Route:      call.route,
 		Rule:       call.rule,
 		Fault:      call.fault,
+		NoExample:  call.noExample,
 		Status:     status,
 		DurationMs: time.Since(started).Milliseconds(),
 	})
@@ -172,7 +174,7 @@ func (s *Server) respond(w http.ResponseWriter, r *http.Request, call *outcome) 
 	request := newExchange(r, body)
 	chosen, found := current.resolve(request)
 	if !found {
-		s.send(w, r, current, problem(http.StatusNotFound, fmt.Sprintf("No mock route matches %s %s.", r.Method, r.URL.Path)), 0)
+		s.send(w, r, current, unmatched(current, request, r, call), 0)
 		return
 	}
 	call.route, call.rule = chosen.route, chosen.rule
@@ -196,6 +198,15 @@ func (s *Server) respond(w http.ResponseWriter, r *http.Request, call *outcome) 
 		return
 	}
 	s.send(w, r, current, reply, behavior.slowBody())
+}
+
+func unmatched(current *table, request *exchange, r *http.Request, call *outcome) answer {
+	name, waiting := current.unansweredRoute(request)
+	if !waiting {
+		return problem(http.StatusNotFound, fmt.Sprintf("No mock route matches %s %s.", r.Method, r.URL.Path))
+	}
+	call.route, call.noExample = name, true
+	return problem(http.StatusNotFound, fmt.Sprintf(reasonUnanswered, r.Method, r.URL.Path, name))
 }
 
 func (s *Server) inject(w http.ResponseWriter, r *http.Request, current *table, fault Fault) bool {

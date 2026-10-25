@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { ImportTab } from "./ImportTab"
 import { ExportTab } from "./ExportTab"
 import { ShareTab } from "./ShareTab"
+import { TRANSFER_TEXT } from "../lib/importText"
 
 const TAB_CLASS = "flex min-h-0 flex-1 flex-col gap-3 p-4"
 
@@ -14,8 +15,10 @@ export function ImportExportDialog({
   requests,
   folders,
   environments,
+  collectionVariables,
   variables,
   settings,
+  sharedOrder,
   onImport,
   onImportShared,
   openapi,
@@ -30,26 +33,28 @@ export function ImportExportDialog({
   const [activeTab, setActiveTab] = useState(initialTab)
 
   return (
-    <Dialog label="Import and export" size="lg" onClose={onClose}>
+    <Dialog label={TRANSFER_TEXT.title} size="lg" onClose={onClose}>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
         <DialogHeader onClose={onClose}>
-          <TabsList label="Import or export">
-            <TabsTrigger value="import">Import</TabsTrigger>
-            <TabsTrigger value="export">Export</TabsTrigger>
-            <TabsTrigger value="share">Share</TabsTrigger>
+          <TabsList label={TRANSFER_TEXT.tabsLabel}>
+            <TabsTrigger value="import">{TRANSFER_TEXT.tabs.import}</TabsTrigger>
+            <TabsTrigger value="export">{TRANSFER_TEXT.tabs.export}</TabsTrigger>
+            <TabsTrigger value="share">{TRANSFER_TEXT.tabs.share}</TabsTrigger>
           </TabsList>
         </DialogHeader>
 
         <TabsContent value="import" className={TAB_CLASS}>
           <ImportTab openapi={openapi} importer={importer} onPickSpecFile={onPickSpecFile} onImport={onImport} onImportShared={onImportShared} onClose={onClose} />
         </TabsContent>
-        <TabsContent value="export" className={TAB_CLASS}>
+        <TabsContent value="export" className={`${TAB_CLASS} overflow-y-auto`}>
           <ExportTab
             requests={requests}
             folders={folders}
             environments={environments}
+            collectionVariables={collectionVariables}
             variables={variables}
             settings={settings}
+            sharedOrder={sharedOrder}
             importer={importer}
             scan={scan}
             onGoToRequest={onGoToRequest}
@@ -62,7 +67,9 @@ export function ImportExportDialog({
             requests={requests}
             folders={folders}
             environments={environments}
+            collectionVariables={collectionVariables}
             settings={settings}
+            sharedOrder={sharedOrder}
             initialFolderId={shareFolderId}
             linkBase={shareLinkBase}
             scan={scan}

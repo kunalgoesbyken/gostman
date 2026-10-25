@@ -46,6 +46,7 @@ type translator struct {
 	needs        map[string]bool
 	awaitedCalls map[ast.Expression]bool
 	noted        map[string]bool
+	renamed      map[string]string
 }
 
 func keptAsWritten(source, reason string) scriptTranslation {
@@ -85,13 +86,21 @@ func translateParsed(d *dialect, source string) scriptTranslation {
 	if exceedsDepth(body, maxTreeDepth) {
 		return scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: messageScriptTooDeep}}, failed: 1}
 	}
-	t := &translator{dialect: d, source: source, wrapped: scriptPrefix + source + scriptSuffix, async: []bool{true}, declared: map[string]bool{}, needs: map[string]bool{}, noted: map[string]bool{}, awaitedCalls: map[ast.Expression]bool{}}
-	t.collectDeclared(body)
-	text := t.splice(len(scriptPrefix), len(scriptPrefix)+len(source), childNodes(body))
+	candidates := renameCandidates(d, body)
+	t, text := translateBody(d, source, body, candidates)
+	if needed := neededRenames(body, text, candidates); len(needed) != len(candidates) {
+		t, text = translateBody(d, source, body, needed)
+	}
 	if t.truncated {
 		return scriptTranslation{text: source, notes: []scriptNote{{line: 1, text: messageScriptTooDeep}}, failed: 1}
 	}
 	return scriptTranslation{text: t.withRequires(text), notes: t.sortedNotes(), translated: t.translated, failed: t.failed}
+}
+
+func translateBody(d *dialect, source string, body *ast.BlockStatement, renamed map[string]string) (*translator, string) {
+	t := &translator{dialect: d, source: source, wrapped: scriptPrefix + source + scriptSuffix, async: []bool{true}, declared: map[string]bool{}, needs: map[string]bool{}, noted: map[string]bool{}, awaitedCalls: map[ast.Expression]bool{}, renamed: renamed}
+	t.collectDeclared(body)
+	return t, t.splice(len(scriptPrefix), len(scriptPrefix)+len(source), childNodes(body))
 }
 
 func scriptBody(program *ast.Program) *ast.BlockStatement {
@@ -196,6 +205,8 @@ func (t *translator) render(node ast.Node) string {
 		return t.inFunction(current, current.Async)
 	case *ast.PropertyKeyed:
 		return t.renderProperty(current)
+	case *ast.PropertyShort:
+		return t.renderShorthand(current)
 	case *ast.AwaitExpression:
 		t.awaitedCalls[current.Argument] = true
 	case *ast.AssignExpression:
@@ -235,7 +246,7 @@ func (t *translator) aliased(name string) bool {
 func (t *translator) renderIdentifier(identifier *ast.Identifier) string {
 	name := string(identifier.Name)
 	if t.declared[name] {
-		return name
+		return t.bindingName(name)
 	}
 	if t.dialect.roots[name] {
 		if replacement, ok := t.dialect.properties[name]; ok {
@@ -262,7 +273,7 @@ func (t *translator) noteFreeIdentifier(identifier *ast.Identifier, name string)
 func (t *translator) renderMember(node ast.Expression) string {
 	path, pure := chainOf(node)
 	if pure && t.aliased(path.root) {
-		if replacement, ok := responseProperty(path.root, path.path()); ok {
+		if replacement, ok := responseProperty(t.bindingName(path.root), path.path()); ok {
 			t.translated++
 			return replacement
 		}
@@ -334,6 +345,9 @@ func memberObject(node ast.Expression) ast.Expression {
 
 func (t *translator) renderCall(call *ast.CallExpression) string {
 	path, pure := chainOf(call.Callee)
+	if inspect, found := t.dialect.checks[path.text()]; pure && found {
+		inspect(t, call)
+	}
 	if pure && (t.rooted(path.root) || t.aliased(path.root)) {
 		return t.renderRooted(call, path)
 	}
@@ -374,11 +388,11 @@ func (t *translator) keepNative(node ast.Node, label string, supported bool, kep
 
 func (t *translator) renderAliasCall(call *ast.CallExpression, path chain) string {
 	args := t.renderArguments(call)
-	if replacement, ok := responseCall(path.root, path.path(), args); ok {
+	if replacement, ok := responseCall(t.bindingName(path.root), path.path(), args); ok {
 		t.translated++
 		return replacement
 	}
-	return t.text(call.Callee) + "(" + strings.Join(args, ", ") + ")"
+	return t.render(call.Callee) + "(" + strings.Join(args, ", ") + ")"
 }
 
 func (t *translator) callRule(call *ast.CallExpression, path chain, args []string) (string, bool) {

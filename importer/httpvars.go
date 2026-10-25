@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/kunalgoesbyken/gostman/engine"
 )
 
 const (
@@ -75,6 +77,9 @@ func (c *collector) httpPlaceholders(text, label string, prompts map[string]bool
 func (c *collector) systemVariable(inner, label string) (string, bool) {
 	if !strings.HasPrefix(inner, systemMark) {
 		return inner, !strings.HasPrefix(inner, encodedMark)
+	}
+	if engine.IsDynamicVariable(inner) {
+		return inner, true
 	}
 	fields := strings.Fields(inner)
 	if alias, found := systemAliases[strings.Join(fields, " ")]; found {

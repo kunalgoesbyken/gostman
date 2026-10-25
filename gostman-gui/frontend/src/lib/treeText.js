@@ -1,3 +1,5 @@
+import { pluralize } from './dataUtils'
+
 export const TREE_TEXT = {
   searchPlaceholder: 'Search name, URL or tag',
   treeLabel: 'Collections',
@@ -23,6 +25,9 @@ export const TREE_TEXT = {
   emptyDescription: 'Create a request, import a collection or paste one you copied.',
   emptyAction: 'New request',
   emptyImport: 'Import',
+  unreadableTitle: (count) => `${pluralize(count, 'file')} could not be read`,
+  unreadableDescription: 'Their requests are hidden until the files are fixed. A file with a merge conflict comes back once you resolve it in the Git panel.',
+  unreadableAction: 'Show files',
   noResultsTitle: 'No results',
   noResultsDescription: 'No request name, URL or tag matches.',
   emptyFolder: 'This folder is empty',
@@ -31,6 +36,7 @@ export const TREE_TEXT = {
   dropHere: 'Drop here to move to the top level',
   editLabels: 'Colour and tags…',
   editTags: 'Tags…',
+  shareRequest: 'Share request',
   moreTags: (count) => `+${count}`,
 }
 
@@ -46,6 +52,7 @@ export const LABEL_TEXT = {
   tagColours: 'Tag colours',
   tagColoursNote: 'A tag keeps its colour everywhere it is used. Without a choice, a colour is picked from the tag name. Tag colours are kept on this device.',
   tagColour: (tag) => `Colour of the ${tag} tag`,
+  removeTag: (tag) => `Remove tag ${tag}`,
   done: 'Done',
 }
 

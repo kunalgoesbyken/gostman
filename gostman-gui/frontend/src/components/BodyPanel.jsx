@@ -20,6 +20,7 @@ import {
   switchBodyType,
 } from "../lib/body"
 import { EMPTY_ATTACHMENT } from "../lib/attachments"
+import { BODY_TEXT } from "../lib/bodyText"
 import { chordLabel } from "../lib/chords"
 import { isPlainObject, lookup, parseJSON } from "../lib/dataUtils"
 import { isApplePlatform } from "../lib/platform"
@@ -30,14 +31,6 @@ const PLAIN_TEXT_LANGUAGE = "plaintext"
 const EDITOR_LANGUAGES = { [BODY_JSON]: "json", [BODY_XML]: "xml", [BODY_SOAP]: "xml" }
 const FORMATTED_TYPE_NAMES = { [BODY_JSON]: "JSON", [BODY_XML]: "XML" }
 const FORMAT_CHORD = { shift: true, alt: true, key: "f" }
-
-const BODY_TEXT = {
-  format: "Format",
-  formatTitle: (type, chord) => `Indent the ${type} body (${chord}). {{variables}} are kept as written.`,
-  cannotFormatAt: (type, { line, column, message }) => `The ${type} cannot be formatted at line ${line}, column ${column}: ${message}`,
-  cannotFormat: (type, { message }) => `The ${type} cannot be formatted: ${message}`,
-  goToLine: (line) => `Go to line ${line}`,
-}
 
 const isFormattedType = (bodyType) => Object.hasOwn(FORMATTED_TYPE_NAMES, bodyType)
 
@@ -90,6 +83,7 @@ function RawBody({ body, bodyType, editorPath, editorRef, onChange, onFormat, Ed
           variables
           height="100%"
           surface="body"
+          label={BODY_TEXT.editorLabel}
         />
       </Suspense>
     </div>
@@ -101,7 +95,7 @@ function BodyEditor({ request, editorPath, editorRef, onChange, onFormat, Editor
   if (bodyType === BODY_NONE) {
     return (
       <PanelBody>
-        <EmptyState icon={FileX} title="No body" description="This request is sent without a body." />
+        <EmptyState icon={FileX} title={BODY_TEXT.noBody} description={BODY_TEXT.noBodyDescription} />
       </PanelBody>
     )
   }
@@ -145,7 +139,7 @@ export function BodyPanel({ request, drafts, editorPath, replacedByGraphQL, onUp
   return (
     <Panel>
       <Toolbar>
-        <SegmentedControl label="Body type" options={BODY_TYPES} value={request.bodyType} onChange={handleTypeChange} />
+        <SegmentedControl label={BODY_TEXT.typeLabel} options={BODY_TYPES} value={request.bodyType} onChange={handleTypeChange} />
         {formatting.isFormatted && (
           <Button
             variant="ghost"
@@ -162,7 +156,7 @@ export function BodyPanel({ request, drafts, editorPath, replacedByGraphQL, onUp
       </Toolbar>
       {request.bodyType === BODY_SOAP && <SoapBar request={request} onUpdateRequest={onUpdateRequest} />}
       {replacedByGraphQL && (
-        <Notice>The method is GRAPHQL, so the body is built from the GraphQL tab and this one is not sent.</Notice>
+        <Notice>{BODY_TEXT.replacedByGraphQL}</Notice>
       )}
       {formatting.shownProblem && <FormatProblem bodyType={request.bodyType} error={formatting.shownProblem} onReveal={formatting.reveal} />}
       <BodyEditor

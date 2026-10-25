@@ -34,6 +34,10 @@ export function AiSaveKey(arg1, arg2) {
   return window['go']['main']['App']['AiSaveKey'](arg1, arg2);
 }
 
+export function AttachmentSize(arg1) {
+  return window['go']['main']['App']['AttachmentSize'](arg1);
+}
+
 export function Authorize(arg1, arg2) {
   return window['go']['main']['App']['Authorize'](arg1, arg2);
 }
@@ -382,8 +386,8 @@ export function SaveRequests(arg1) {
   return window['go']['main']['App']['SaveRequests'](arg1);
 }
 
-export function SaveScopes(arg1, arg2, arg3) {
-  return window['go']['main']['App']['SaveScopes'](arg1, arg2, arg3);
+export function SaveScopes(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['SaveScopes'](arg1, arg2, arg3, arg4);
 }
 
 export function SaveSecretConnection(arg1) {
@@ -424,6 +428,10 @@ export function SendRequest(arg1, arg2) {
 
 export function SetSecretConnectionEnabled(arg1, arg2) {
   return window['go']['main']['App']['SetSecretConnectionEnabled'](arg1, arg2);
+}
+
+export function ShareSiblingOrder() {
+  return window['go']['main']['App']['ShareSiblingOrder']();
 }
 
 export function StartCapture(arg1) {

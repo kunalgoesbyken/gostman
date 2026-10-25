@@ -12,6 +12,7 @@ import (
 const (
 	ActionImport = "import"
 	ActionExport = "export"
+	ActionAdapt  = "adapt"
 )
 
 type Config struct {
@@ -30,8 +31,9 @@ type Query struct {
 type Reply struct {
 	Error string `json:"error,omitempty"`
 	Result
-	Files   []File `json:"files,omitempty"`
-	Archive string `json:"archive,omitempty"`
+	Files      []File                `json:"files,omitempty"`
+	Archive    string                `json:"archive,omitempty"`
+	Collection *workspace.Collection `json:"collection,omitempty"`
 }
 
 func (c Config) limit() int64 {
@@ -53,11 +55,20 @@ func Handle(ctx context.Context, query Query, config Config) Reply {
 		if query.Collection == nil {
 			return Reply{Error: "give a collection to export"}
 		}
-		files, archive, err := Export(query.Format, *query.Collection, query.Options)
+		files, archive, report, err := Export(query.Format, *query.Collection, query.Options)
 		if err != nil {
 			return Reply{Error: err.Error()}
 		}
-		return Reply{Files: files, Archive: archive}
+		return Reply{Files: files, Archive: archive, Result: Result{Notes: report.Notes, Warnings: report.Warnings}}
+	case ActionAdapt:
+		if query.Collection == nil {
+			return Reply{Error: "give a collection to adapt"}
+		}
+		adapted, report, err := AdaptScripts(query.Format, *query.Collection)
+		if err != nil {
+			return Reply{Error: err.Error()}
+		}
+		return Reply{Collection: &adapted, Result: Result{Notes: report.Notes, Warnings: report.Warnings}}
 	}
 	return Reply{Error: fmt.Sprintf("unknown action %q", query.Action)}
 }

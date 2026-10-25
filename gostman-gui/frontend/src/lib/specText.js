@@ -37,7 +37,7 @@ export const SPEC_TEXT = {
   close: 'Close',
   lint: 'Lint',
   lintClean: 'No problems found.',
-  lintNoSpec: 'Import an OpenAPI spec from an address or a file first, then open it with Browse.',
+  lintNoSpec: 'No OpenAPI spec has been imported yet. Import one from a file or an address with Import data, then run Lint API spec again.',
   lintCount: {
     error: (count) => `${count} ${count === 1 ? 'error' : 'errors'}`,
     warning: (count) => `${count} ${count === 1 ? 'warning' : 'warnings'}`,

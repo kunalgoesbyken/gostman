@@ -79,13 +79,13 @@ func parseStatus(output string) Status {
 }
 
 func (r Repo) Status() (Status, error) {
-	out, err := r.run("status", "--porcelain=v2", "--branch", "-z", "--untracked-files=all")
+	out, err := r.run(r.scoped("status", "--porcelain=v2", "--branch", "-z", "--untracked-files=all")...)
 	if err != nil {
 		return Status{}, err
 	}
 	status := parseStatus(out)
 	for i := range status.Changes {
-		status.Changes[i].Kind = kindOf(status.Changes[i].Path)
+		status.Changes[i].Kind = kindOf(r.inScope(status.Changes[i].Path))
 	}
 	status.Merging = r.merging()
 	return status, nil

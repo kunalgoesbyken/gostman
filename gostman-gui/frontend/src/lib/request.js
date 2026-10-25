@@ -47,7 +47,7 @@ const DEFAULT_OPTIONS = {
 
 const DEFAULT_REQUEST = {
   id: '',
-  name: 'New Request',
+  name: 'New request',
   description: '',
   tags: [],
   method: 'GET',

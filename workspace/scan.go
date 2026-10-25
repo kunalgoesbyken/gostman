@@ -7,9 +7,7 @@ import (
 	"fmt"
 	"io/fs"
 	"path"
-	"runtime"
 	"sort"
-	"sync"
 )
 
 const (
@@ -27,6 +25,7 @@ type scanner struct {
 	environments map[string]*environmentEntry
 	implicit     []*folderEntry
 	problems     []Problem
+	ahead        *readAhead
 }
 
 func newScanner(storage disk) *scanner {
@@ -80,7 +79,8 @@ func unorderedLast(orderOf func(int) int64, nameOf func(int) string) func(int, i
 }
 
 func (s *scanner) run() error {
-	if _, err := s.disk.list(""); err != nil {
+	s.ahead = startReadAhead(s.disk)
+	if err := s.ahead.listing("").err; err != nil {
 		return err
 	}
 	s.directory("", "", 0)
@@ -89,24 +89,46 @@ func (s *scanner) run() error {
 	return nil
 }
 
+type entryKind int
+
+const (
+	skippedEntry entryKind = iota
+	folderKind
+	requestKind
+	specialKind
+)
+
+func kindOf(directory string, entry fs.DirEntry) entryKind {
+	name := entry.Name()
+	switch {
+	case isHidden(name) || isReservedName(directory, name):
+		return skippedEntry
+	case entry.Type() == fs.ModeDir:
+		return folderKind
+	case entry.Type().IsRegular() && isYAMLFile(name):
+		return requestKind
+	case !entry.Type().IsRegular():
+		return specialKind
+	}
+	return skippedEntry
+}
+
 func (s *scanner) directory(directory, folderId string, depth int) {
-	entries, err := s.disk.list(directory)
-	if err != nil {
-		s.report(directory, err)
+	listed := s.ahead.listing(directory)
+	if listed.err != nil {
+		s.report(directory, listed.err)
 		return
 	}
 	var folders []*folderEntry
 	var requestFiles []string
-	for _, entry := range entries {
-		name := entry.Name()
-		relative := joinPath(directory, name)
-		switch {
-		case isHidden(name) || isReservedName(directory, name):
-		case entry.Type() == fs.ModeDir:
+	for _, entry := range listed.entries {
+		relative := joinPath(directory, entry.Name())
+		switch kindOf(directory, entry) {
+		case folderKind:
 			folders = append(folders, s.readFolder(relative, folderId))
-		case entry.Type().IsRegular() && isYAMLFile(name):
+		case requestKind:
 			requestFiles = append(requestFiles, relative)
-		case !entry.Type().IsRegular():
+		case specialKind:
 			s.report(relative, errors.New("links and special files are not followed"))
 		}
 	}
@@ -119,32 +141,10 @@ type decodedRequest struct {
 	err      error
 }
 
-func (s *scanner) decodeRequests(files []string) []decodedRequest {
-	decoded := make([]decodedRequest, len(files))
-	next := make(chan int)
-	var group sync.WaitGroup
-	for range min(runtime.GOMAXPROCS(0), len(files)) {
-		group.Add(1)
-		go func() {
-			defer group.Done()
-			for index := range next {
-				content, err := s.disk.readListed(files[index])
-				decoded[index].document, decoded[index].err = decodeFile(content, err, readRequestFile)
-			}
-		}()
-	}
-	for index := range files {
-		next <- index
-	}
-	close(next)
-	group.Wait()
-	return decoded
-}
-
 func (s *scanner) readRequests(files []string, folderId string) []*requestEntry {
 	var requests []*requestEntry
-	for index, result := range s.decodeRequests(files) {
-		relative := files[index]
+	for _, relative := range files {
+		result := s.ahead.file(relative).request
 		if isForeign(result.err) {
 			continue
 		}
@@ -165,7 +165,8 @@ func (s *scanner) readRequests(files []string, folderId string) []*requestEntry 
 func (s *scanner) readFolder(directory, parentId string) *folderEntry {
 	entry := &folderEntry{dir: directory, folder: Folder{Name: path.Base(directory), ParentId: parentId}}
 	relative := joinPath(directory, FolderFileName)
-	content, err := s.disk.read(relative)
+	read := s.ahead.file(relative)
+	content, err := read.content, read.err
 	if errors.Is(err, fs.ErrNotExist) {
 		s.implicit = append(s.implicit, entry)
 		return entry

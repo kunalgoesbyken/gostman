@@ -8,71 +8,58 @@ import { Input } from "./ui/input"
 import { PanelBody } from "./ui/panel"
 import { TagsInput } from "./ui/tagsInput"
 import { SSE_SETTINGS_TEXT } from "../lib/sse"
-import { BUILT_IN_TIMEOUT_SECONDS } from "../lib/preferences"
+import { BUILT_IN_TIMEOUT_SECONDS, usePreferences } from "../lib/preferences"
 import { REQUEST_SETTINGS_TEXT as TEXT } from "../lib/requestSettingsText"
+import { SETTING_REDIRECTS, SETTING_SEND_COOKIES, SETTING_STORE_COOKIES, SETTING_STREAM, SETTING_TIMEOUT, SETTING_TLS } from "../lib/requestSections"
 import { collectTags } from "../lib/tags"
 import { useAppStore } from "../store/appStore"
 
-const DEFAULT_TIMEOUT_MS = BUILT_IN_TIMEOUT_SECONDS * 1000
+const defaultTimeoutMs = ({ requestTimeoutSeconds }) => (requestTimeoutSeconds || BUILT_IN_TIMEOUT_SECONDS) * 1000
 const CHECKBOX_CLASS = "h-7 justify-start self-start"
+
+const SWITCHES = [
+  { setting: SETTING_REDIRECTS, field: "noFollowRedirects", label: TEXT.followRedirects, inverted: true },
+  { setting: SETTING_TLS, field: "insecureTLS", label: TEXT.verifyTls, inverted: true },
+  { setting: SETTING_SEND_COOKIES, field: "skipCookies", label: TEXT.sendCookies, inverted: true },
+  { setting: SETTING_STORE_COOKIES, field: "discardCookies", label: TEXT.storeCookies, inverted: true },
+  { setting: SETTING_STREAM, field: "stream", label: SSE_SETTINGS_TEXT.stream, inverted: false },
+]
 
 const toWholeNumber = (text) => Math.max(0, Math.trunc(Number(text)) || 0)
 
-export function SettingsPanel({ options, description, tags, onChange, onDescriptionChange, onTagsChange, onDocument }) {
+export function SettingsPanel({ options, settings, description, tags, onChange, onDescriptionChange, onTagsChange, onDocument }) {
   const update = (patch) => onChange({ ...options, ...patch })
   const requests = useAppStore((state) => state.requests)
   const folders = useAppStore((state) => state.folders)
+  const preferences = usePreferences()
   const knownTags = useMemo(() => collectTags([...requests, ...folders]), [requests, folders])
 
   return (
     <PanelBody className="h-full">
       <div className="flex max-w-xl flex-col gap-2">
-        <Field label={TEXT.timeout}>
-          <Input
-            type="number"
-            min={0}
-            step={1000}
-            value={options.timeoutMs || ""}
-            placeholder={TEXT.timeoutPlaceholder(DEFAULT_TIMEOUT_MS)}
-            onChange={(event) => update({ timeoutMs: toWholeNumber(event.target.value) })}
-            className="max-w-48 font-mono"
-          />
-        </Field>
-        <Checkbox
-          checked={!options.noFollowRedirects}
-          onChange={(event) => update({ noFollowRedirects: !event.target.checked })}
-          className={CHECKBOX_CLASS}
-        >
-          {TEXT.followRedirects}
-        </Checkbox>
-        <Checkbox
-          checked={!options.insecureTLS}
-          onChange={(event) => update({ insecureTLS: !event.target.checked })}
-          className={CHECKBOX_CLASS}
-        >
-          {TEXT.verifyTls}
-        </Checkbox>
-        <Checkbox
-          checked={!options.skipCookies}
-          onChange={(event) => update({ skipCookies: !event.target.checked })}
-          className={CHECKBOX_CLASS}
-        >
-          {TEXT.sendCookies}
-        </Checkbox>
-        <Checkbox
-          checked={!options.discardCookies}
-          onChange={(event) => update({ discardCookies: !event.target.checked })}
-          className={CHECKBOX_CLASS}
-        >
-          {TEXT.storeCookies}
-        </Checkbox>
-        <Checkbox
-          checked={options.stream}
-          onChange={(event) => update({ stream: event.target.checked })}
-          className={CHECKBOX_CLASS}
-        >
-          {SSE_SETTINGS_TEXT.stream}
-        </Checkbox>
+        {settings.has(SETTING_TIMEOUT) && (
+          <Field label={TEXT.timeout}>
+            <Input
+              type="number"
+              min={0}
+              step={1000}
+              value={options.timeoutMs || ""}
+              placeholder={TEXT.timeoutPlaceholder(defaultTimeoutMs(preferences))}
+              onChange={(event) => update({ timeoutMs: toWholeNumber(event.target.value) })}
+              className="max-w-48 font-mono"
+            />
+          </Field>
+        )}
+        {SWITCHES.filter(({ setting }) => settings.has(setting)).map(({ setting, field, label, inverted }) => (
+          <Checkbox
+            key={setting}
+            checked={inverted ? !options[field] : Boolean(options[field])}
+            onChange={(event) => update({ [field]: inverted ? !event.target.checked : event.target.checked })}
+            className={CHECKBOX_CLASS}
+          >
+            {label}
+          </Checkbox>
+        ))}
         {options.stream && (
           <>
             <Checkbox

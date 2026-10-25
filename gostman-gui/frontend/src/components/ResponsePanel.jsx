@@ -12,7 +12,7 @@ import { HighlightedText } from "./HighlightedText"
 import { LargeText } from "./LargeText"
 import { useDebouncedValue } from "../hooks/useDebouncedValue"
 import { FORMAT_DONE, FORMAT_FAILED, FORMAT_WORKING, useOffThreadFilter, useOffThreadFormat } from "../hooks/useOffThreadJson"
-import { MAX_MATCHES, filterJson, findMatches, stepIndex } from "../lib/responseSearch"
+import { MAX_MATCHES, findMatches, stepIndex } from "../lib/responseSearch"
 import { Badge } from "./ui/badge"
 import { ContextMenu } from "./ui/ContextMenu"
 import { Button, IconButton } from "./ui/button"
@@ -28,7 +28,7 @@ import { VisualizeTab } from "./VisualizeTab"
 import { TimelineTab } from "./TimelineTab"
 import { UnresolvedNotice } from "./UnresolvedNotice"
 import { useClipboardCopy } from "../hooks/useClipboardCopy"
-import { formatSize, lookup } from "../lib/dataUtils"
+import { asSentence, formatSize, lookup } from "../lib/dataUtils"
 import { isFailedResponse } from "../lib/ai/tasks"
 import { MCP_PROTOCOL } from "../lib/mcp"
 import { shortcutLabel } from "../lib/platform"
@@ -42,6 +42,8 @@ import { breakdownTitle } from "../lib/timeline"
 import { canProposeChecks } from "../lib/responseChecks"
 import { describeResponse, formatTime } from "../lib/responseHistory"
 import { cn } from "../lib/utils"
+import { RESTRICTED_ERROR } from "../lib/execution"
+import { WORKSPACE_TEXT } from "../lib/workspaceText"
 import {
   DEFAULT_RESPONSE_SHARE, MIN_REQUEST_HEIGHT_PX, MIN_RESPONSE_HEIGHT_PX, rememberResponseShare, rememberedResponseShare,
 } from "../lib/layout"
@@ -243,9 +245,14 @@ function ResponseBody({ response, kind, view, json, formatted, filtered, highlig
   return <MediaPreview response={response} kind={kind} />
 }
 
-function ErrorBody({ response, onExplain }) {
+function ErrorAction({ response, onExplain, onTrust }) {
+  if (response.error === RESTRICTED_ERROR && onTrust) return <Button size="sm" variant="outline" onClick={onTrust}>{WORKSPACE_TEXT.trust}</Button>
+  return onExplain && <AiButton label={AI_TEXT.buttons.explainError} onClick={onExplain}>{AI_TEXT.buttons.explain}</AiButton>
+}
+
+function ErrorBody({ response, onExplain, onTrust }) {
   const title = lookup(ERROR_TITLES, response.error) || RESPONSE_TEXT.requestFailed
-  return <EmptyState icon={AlertTriangle} title={title} description={response.body} className="whitespace-pre-line" action={onExplain && <AiButton label={AI_TEXT.buttons.explainError} onClick={onExplain}>{AI_TEXT.buttons.explain}</AiButton>} />
+  return <EmptyState icon={AlertTriangle} title={title} description={asSentence(response.body)} className="whitespace-pre-line" action={<ErrorAction response={response} onExplain={onExplain} onTrust={onTrust} />} />
 }
 
 function StatusSummary({ response }) {
@@ -256,7 +263,7 @@ function StatusSummary({ response }) {
   const detail = [timing, breakdownTitle(response.timeline)].filter(Boolean).join('\n\n')
   return (
     <>
-      <Badge variant={statusVariant(response)} title={response.status} className="max-w-[9rem] font-mono">
+      <Badge variant={statusVariant(response)} title={response.status} className="min-w-0 shrink font-mono">
         <span className="truncate">{response.status}</span>
       </Badge>
       <span title={detail} className="min-w-0 truncate font-mono text-2xs text-muted-foreground max-md:hidden">{timing}</span>
@@ -287,6 +294,8 @@ function responseTabs({ hasResult, hasTimeline, showsTests, headers, cookies, te
 }
 
 const clamp = (value, lowest, highest) => Math.max(lowest, Math.min(highest, value))
+
+const KEY_SHARE_STEPS = { ArrowUp: 5, ArrowDown: -5 }
 
 function usePanelResize() {
   const [panelShare, setPanelShare] = useState(rememberedResponseShare)
@@ -324,7 +333,19 @@ function usePanelResize() {
     rememberResponseShare(DEFAULT_RESPONSE_SHARE)
   }, [])
 
-  return { containerRef, panelShare, isDragging, startDrag, resetHeight }
+  const nudgeHeight = (event) => {
+    const step = KEY_SHARE_STEPS[event.key]
+    if (!step) return
+    event.preventDefault()
+    const available = containerRef.current.parentElement.getBoundingClientRect().height
+    const lowest = (MIN_RESPONSE_HEIGHT_PX / available) * 100
+    const highest = Math.max(lowest, ((available - MIN_REQUEST_HEIGHT_PX) / available) * 100)
+    const next = clamp(panelShare + step, lowest, highest)
+    setPanelShare(next)
+    rememberResponseShare(next)
+  }
+
+  return { containerRef, panelShare, isDragging, startDrag, resetHeight, nudgeHeight }
 }
 
 function panelStyleFor(isFullscreen, isCollapsed, panelShare) {
@@ -353,7 +374,7 @@ function PastResponseNotice({ past, canCompare, onCompare, onBack }) {
   )
 }
 
-export const ResponsePanel = memo(function ResponsePanel({ response, history = NO_HISTORY, tests, loading, onDownload, onSaveExample, onExplain }) {
+export const ResponsePanel = memo(function ResponsePanel({ response, history = NO_HISTORY, tests, loading, onDownload, onSaveExample, onExplain, onTrust }) {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [activeTab, setActiveTab] = useState(TAB_BODY)
@@ -362,7 +383,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
   const [historyMenu, setHistoryMenu] = useState(null)
   const [isComparing, setIsComparing] = useState(false)
   const [isAddingChecks, setIsAddingChecks] = useState(false)
-  const { containerRef, panelShare, isDragging, startDrag, resetHeight } = usePanelResize()
+  const { containerRef, panelShare, isDragging, startDrag, resetHeight, nudgeHeight } = usePanelResize()
 
   const earlier = useMemo(() => history.filter((entry) => entry.response !== response), [history, response])
   const latestEntry = history.find((entry) => entry.response === response)
@@ -393,8 +414,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
   const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS)
   const debouncedPath = useDebouncedValue(filterPath, SEARCH_DEBOUNCE_MS)
 
-  const largeFilter = useOffThreadFilter(text, canFormat, debouncedPath)
-  const filter = useMemo(() => (json === null ? largeFilter : filterJson(json, debouncedPath)), [json, debouncedPath, largeFilter])
+  const filter = useOffThreadFilter(text, json !== null || canFormat, debouncedPath, json !== null)
   const filtered = filter.active && !filter.error ? filter : null
   const canSearch = showsBody && hasBody && (view === 'pretty' || view === 'raw')
   const searching = searchOpen && canSearch && debouncedQuery !== ''
@@ -444,7 +464,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
     if (loading) return <SkeletonLines label={RESPONSE_TEXT.sending} lines={6} />
     if (!shown) return <EmptyState icon={FileText} title={RESPONSE_TEXT.noResponseTitle} description={RESPONSE_TEXT.noResponseDescription} />
     if (activeTab === TAB_TIMELINE && hasTimeline) return <TimelineTab timeline={shown.timeline} />
-    if (shown.error) return <ErrorBody response={shown} onExplain={onExplain} />
+    if (shown.error) return <ErrorBody response={shown} onExplain={onExplain} onTrust={onTrust} />
     if (activeTab === TAB_TESTS && showsTests) return <TestResults tests={tests} />
     if (activeTab === TAB_CONSOLE) return <ConsolePanel />
     if (activeTab === TAB_VISUALIZE && tests?.visualization) return <VisualizeTab html={tests.visualization} />
@@ -475,10 +495,15 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
       {isOpen && !isFullscreen && (
         <div
           role="separator"
+          tabIndex={0}
           aria-orientation="horizontal"
           aria-label={RESPONSE_TEXT.resize}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(panelShare)}
           title={RESPONSE_TEXT.resizeHint}
           onMouseDown={startDrag}
+          onKeyDown={nudgeHeight}
           onDoubleClick={resetHeight}
           className={`h-1 shrink-0 cursor-row-resize border-t border-border ${isDragging ? 'bg-border' : 'hover:bg-border'}`}
         />
@@ -514,29 +539,31 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
               <SectionLabel className="pl-1.5">{RESPONSE_TEXT.panel}</SectionLabel>
             )}
 
-            <div className={cn(TOOLBAR_ROW, "ml-auto flex shrink-0 items-center gap-2")}>
-              {shown && <StatusSummary response={shown} />}
-            </div>
+            <div className="ml-auto flex min-w-0 max-w-full items-center gap-2">
+              <div role="status" className={cn(TOOLBAR_ROW, "flex min-w-0 items-center gap-2")}>
+                {shown && <StatusSummary response={shown} />}
+              </div>
 
-            <div className={cn(TOOLBAR_ROW, "flex shrink-0 items-center gap-1")}>
-              {earlier.length > 0 && <IconButton label={HISTORY_TEXT.menu} icon={History} onClick={openHistory} />}
-              {canSearch && (
+              <div className={cn(TOOLBAR_ROW, "flex shrink-0 items-center gap-1")}>
+                {earlier.length > 0 && <IconButton label={HISTORY_TEXT.menu} icon={History} onClick={openHistory} />}
+                {canSearch && (
+                  <IconButton
+                    label={searchOpen ? RESPONSE_TEXT.closeSearch : RESPONSE_TEXT.searchBody(shortcutLabel("F"))}
+                    icon={Search}
+                    onClick={() => (searchOpen ? closeSearch() : setSearchOpen(true))}
+                  />
+                )}
+                {showsBody && copyText && <CopyButton text={copyText} />}
+                {hasBody && !past && <IconButton label={RESPONSE_TEXT.downloadBody} icon={Download} onClick={onDownload} />}
+                {onExplain && isFailedResponse(shown) && !shown.error && <IconButton label={AI_TEXT.buttons.explain} icon={MessageCircleQuestion} onClick={onExplain} />}
+                {canSaveAsExample(shown) && !past && <IconButton label={RESPONSE_TEXT.saveExample} icon={BookmarkPlus} onClick={onSaveExample} />}
+                {canProposeChecks(shown) && !past && <IconButton label={RESPONSE_CHECKS_TEXT.button} icon={ListPlus} onClick={() => setIsAddingChecks(true)} />}
                 <IconButton
-                  label={searchOpen ? RESPONSE_TEXT.closeSearch : RESPONSE_TEXT.searchBody(shortcutLabel("F"))}
-                  icon={Search}
-                  onClick={() => (searchOpen ? closeSearch() : setSearchOpen(true))}
+                  label={isFullscreen ? RESPONSE_TEXT.exitFullscreen : RESPONSE_TEXT.fullscreen}
+                  icon={isFullscreen ? Minimize2 : Maximize2}
+                  onClick={toggleFullscreen}
                 />
-              )}
-              {showsBody && copyText && <CopyButton text={copyText} />}
-              {hasBody && !past && <IconButton label={RESPONSE_TEXT.downloadBody} icon={Download} onClick={onDownload} />}
-              {onExplain && isFailedResponse(shown) && !shown.error && <IconButton label={AI_TEXT.buttons.explain} icon={MessageCircleQuestion} onClick={onExplain} />}
-              {canSaveAsExample(shown) && !past && <IconButton label={RESPONSE_TEXT.saveExample} icon={BookmarkPlus} onClick={onSaveExample} />}
-              {canProposeChecks(shown) && !past && <IconButton label={RESPONSE_CHECKS_TEXT.button} icon={ListPlus} onClick={() => setIsAddingChecks(true)} />}
-              <IconButton
-                label={isFullscreen ? RESPONSE_TEXT.exitFullscreen : RESPONSE_TEXT.fullscreen}
-                icon={isFullscreen ? Minimize2 : Maximize2}
-                onClick={toggleFullscreen}
-              />
+              </div>
             </div>
           </Toolbar>
 

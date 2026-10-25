@@ -12,7 +12,7 @@ export function scrollIndexIntoView(container, index, rowHeight) {
 export function VirtualList({ items, rowHeight, renderRow, className, scrollRef, pinnedIndex = -1, ...props }) {
   const ownRef = useRef(null)
   const containerRef = scrollRef || ownRef
-  const [scrollTop, setScrollTop] = useState(0)
+  const [scrolledRows, setScrolledRows] = useState(0)
   const [viewportHeight, setViewportHeight] = useState(0)
 
   useLayoutEffect(() => {
@@ -25,7 +25,7 @@ export function VirtualList({ items, rowHeight, renderRow, className, scrollRef,
   }, [])
 
   const totalHeight = items.length * rowHeight
-  const currentScrollTop = containerRef.current?.scrollTop ?? scrollTop
+  const currentScrollTop = containerRef.current?.scrollTop ?? scrolledRows * rowHeight
   const visibleTop = Math.min(currentScrollTop, Math.max(0, totalHeight - viewportHeight))
   const first = Math.max(0, Math.floor(visibleTop / rowHeight) - OVERSCAN_ROWS)
   const last = Math.min(items.length, Math.ceil((visibleTop + viewportHeight) / rowHeight) + OVERSCAN_ROWS)
@@ -34,7 +34,7 @@ export function VirtualList({ items, rowHeight, renderRow, className, scrollRef,
   return (
     <div
       ref={containerRef}
-      onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
+      onScroll={(event) => setScrolledRows(Math.floor(event.currentTarget.scrollTop / rowHeight))}
       className={cn("overflow-y-auto", className)}
       {...props}
     >

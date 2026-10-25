@@ -48,7 +48,7 @@ export const AI_TEXT = {
       untitled: 'AI request',
     },
     tests: {
-      label: 'Assertions and tests for a response',
+      label: 'Checks for a response',
       assertions: 'Assertions',
       script: 'Post-response script (AI-generated, review before running)',
       apply: 'Add to request',
@@ -86,7 +86,7 @@ export const AI_TEXT = {
       apply: (amount) => `Add folder and ${count(amount, 'request', 'requests')}`,
       moreNote: 'The API has more endpoints than fit in one answer. Make the next requests to continue; the same text is sent again with the list of requests already made.',
       importerSection: (amount) => `OpenAPI import: ${count(amount, 'request', 'requests')}`,
-      importerNote: 'This is an OpenAPI or Swagger document, so the built-in importer reads all of it. Nothing was sent to AI. To add assertions, send a request and use "Assertions and tests".',
+      importerNote: 'This is an OpenAPI or Swagger document, so the built-in importer reads all of it. Nothing was sent to AI. To add assertions, send a request and use "Checks for a response".',
       importerWarnings: 'Importer notes',
       importApply: (amount) => `Import ${count(amount, 'request', 'requests')}`,
       moreLines: (amount) => `and ${amount} more`,
@@ -94,7 +94,7 @@ export const AI_TEXT = {
   },
   buttons: {
     generate: 'Generate with AI',
-    generateTests: 'Generate assertions and tests with AI',
+    generateTests: 'Generate checks with AI',
     generateScript: 'Generate this script with AI',
     explain: 'Explain with AI',
     explainError: 'Explain this error with AI',
@@ -103,7 +103,7 @@ export const AI_TEXT = {
   },
   commands: {
     request: { label: 'AI: new request from a description', description: 'Draft a request, shown as a preview you accept', keywords: 'generate' },
-    tests: { label: 'AI: generate assertions and tests', description: 'Propose checks for the last response' },
+    tests: { label: 'AI: generate checks', description: 'Propose checks for the last response' },
     script: { label: 'AI: write a script', description: 'Propose a pre-request or post-response script' },
     explain: { label: 'AI: explain the response', description: 'Explain a failure and suggest a fix' },
     docs: { label: 'AI: document this request', description: 'Propose a description for the request' },

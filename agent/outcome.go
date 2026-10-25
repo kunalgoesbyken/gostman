@@ -13,11 +13,13 @@ const (
 	DefaultBodyBytes = 8 << 10
 	HighestBodyBytes = 256 << 10
 
-	noteBinary    = "The body is binary and is not shown."
-	noteNoMatch   = "The select path matched nothing; the body is not shown. Check the path, or send again without select."
-	noteCutAtEdge = "The response was larger than Gostman reads, so the body is incomplete."
-	hintUndefined = "Placeholders listed in unresolved have no value, so they were left as written. Pass values in variables, or ask the developer to define them in the environment."
-	hintRefused   = "Gostman refused the address before sending: this server reaches only localhost, the hosts of the developer's own requests and hosts allowed with --allow-host, and no private address when started with --block-private. Ask the developer to allow the host; do not reach it another way."
+	noteBinary       = "The body is binary and is not shown."
+	noteNoMatch      = "The select path matched nothing; the body is not shown. Check the path, or send again without select."
+	noteCutAtEdge    = "The response was larger than Gostman reads, so the body is incomplete."
+	hintUndefined    = "Placeholders listed in unresolved have no value, so they were left as written. Pass values in variables, or ask the developer to define them in the environment."
+	hintRunUndefined = "Some requests were sent with placeholders that have no value, left as written; they are listed under unresolved, here or in failures. Give values in data, or ask the developer to define them in the environment."
+	hintSignIn       = "This request needs an OAuth 2.0 sign-in in a browser, which an agent cannot do. Ask the developer to restart gostman mcp with --oauth-token-env NAME or --oauth-refresh-token-env NAME."
+	hintRefused      = "Gostman refused the address before sending: this server reaches only localhost, the hosts of the developer's own requests and hosts allowed with --allow-host, and no private address when started with --block-private. Ask the developer to allow the host; do not reach it another way."
 )
 
 type View struct {

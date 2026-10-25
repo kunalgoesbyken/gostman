@@ -19,8 +19,10 @@ var brunoDialect = &dialect{
 	name:     "Bruno",
 	api:      "bru.*",
 	roots:    map[string]bool{brunoRoot: true},
+	shared:   setOf(requestReceiver, responseRoot, "test", "expect"),
 	calls:    buildBrunoRules(),
-	specials: map[string]special{"bru.sendRequest": (*translator).renderBrunoSend, "bru.runRequest": func(t *translator, call *ast.CallExpression) string { return t.renderRunRequest(call, nil) }},
+	checks:   map[string]check{"JSON.stringify": (*translator).noteStringifiedBody},
+	specials: map[string]special{"bru.sendRequest": (*translator).renderBrunoSend, "bru.setEnvVar": (*translator).renderEnvironmentWrite, "bru.runRequest": func(t *translator, call *ast.CallExpression) string { return t.renderRunRequest(call, nil) }},
 	native: map[string]map[string]bool{
 		"bru.cookies": setOf("get", "has", "one", "all", "count", "idx", "indexOf", "toObject", "toString", "each", "find", "filter", "map", "reduce", "add", "upsert", "remove", "delete", "clear", "jar"),
 	},
@@ -46,7 +48,7 @@ func buildBrunoRules() map[string]callRule {
 	rules := map[string]callRule{
 		"bru.getFolderVar":                   rename("env.get"),
 		"bru.getRequestVar":                  rename("env.get"),
-		"bru.getProcessEnv":                  rename("env.get"),
+		"bru.getProcessEnv":                  processValue,
 		"bru.getEnvName":                     withoutArguments("env.name"),
 		"bru.getRequestName":                 withoutArguments("req.name"),
 		"bru.interpolate":                    rename("env.interpolate"),
@@ -72,11 +74,34 @@ func buildBrunoRules() map[string]callRule {
 	return rules
 }
 
+func (t *translator) noteStringifiedBody(call *ast.CallExpression) {
+	if len(call.ArgumentList) != 1 {
+		return
+	}
+	inner, isCall := call.ArgumentList[0].(*ast.CallExpression)
+	if !isCall || len(inner.ArgumentList) != 0 {
+		return
+	}
+	if path, pure := chainOf(inner.Callee); pure && path.text() == requestReceiver+".getBody" {
+		t.note(call, "stringified-body", messageScriptBodyText)
+	}
+}
+
 func iterationValue(args []string) (string, bool) {
 	if len(args) == 0 {
 		return "env.all()", true
 	}
 	return rename("env.get")(args)
+}
+
+func processValue(args []string) (string, bool) {
+	if len(args) != 1 {
+		return "", false
+	}
+	if name, err := strconv.Unquote(args[0]); err == nil {
+		return fmt.Sprintf("(env.get(%q) ?? env.get(%q))", processPrefix+name, name), true
+	}
+	return fmt.Sprintf("((name) => env.get(%q + name) ?? env.get(name))(%s)", processPrefix, args[0]), true
 }
 
 func pause(args []string) (string, bool) {
@@ -133,6 +158,35 @@ func (t *translator) renderBrunoSend(call *ast.CallExpression) string {
 	return t.awaited(call, expression)
 }
 
+func (t *translator) renderEnvironmentWrite(call *ast.CallExpression) string {
+	args := call.ArgumentList
+	if len(args) < 2 || len(args) > 3 {
+		t.fail(call, messageScriptUnsupported, "bru.setEnvVar()")
+		return t.text(call)
+	}
+	access := sessionAccess
+	if len(args) == 3 && !optionOff(args[2], "persist") {
+		access = environmentAccess
+	}
+	t.translated++
+	return access + ".set(" + t.render(args[0]) + ", " + t.render(args[1]) + ")"
+}
+
+func optionOff(options ast.Expression, name string) bool {
+	object, ok := options.(*ast.ObjectLiteral)
+	if !ok {
+		return false
+	}
+	for _, property := range object.Value {
+		keyed, _ := property.(*ast.PropertyKeyed)
+		if key, named := propertyName(keyed); named && key == name {
+			value, literal := keyed.Value.(*ast.BooleanLiteral)
+			return literal && !value.Value
+		}
+	}
+	return true
+}
+
 func (t *translator) brunoRequestField(property ast.Property) (string, bool) {
 	keyed, ok := property.(*ast.PropertyKeyed)
 	name, named := propertyName(keyed)
@@ -178,6 +232,7 @@ func runTargets(paths []requestPath) (map[string]string, *dialect) {
 	resolving := *brunoDialect
 	resolving.specials = map[string]special{
 		"bru.sendRequest": (*translator).renderBrunoSend,
+		"bru.setEnvVar":   (*translator).renderEnvironmentWrite,
 		"bru.runRequest":  func(t *translator, call *ast.CallExpression) string { return t.renderRunRequest(call, targets) },
 	}
 	return ids, &resolving

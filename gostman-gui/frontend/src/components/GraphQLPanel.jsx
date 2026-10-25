@@ -9,12 +9,12 @@ import { Textarea } from "./ui/textarea"
 import { SkeletonLines } from "./ui/skeleton"
 import { GraphQLBuilder } from "./GraphQLBuilder"
 import { isPlainObject } from "../lib/dataUtils"
+import { BUILDER_TEXT } from "../lib/graphqlBuilder"
 import { GRAPHQL_METHOD } from "../lib/graphqlSchema"
+import { GRAPHQL_TEXT as TEXT } from "../lib/graphqlText"
 import { parseVariableMap, substitutePlaceholders } from "../lib/placeholders"
 import { cn } from "../lib/utils"
 
-const QUERY_PLACEHOLDER = "query {\n  viewer {\n    id\n  }\n}"
-const VARIABLES_PLACEHOLDER = '{\n  "id": "1"\n}'
 const EMPTY_VARIABLES = ["", "{}"]
 const SHOWN_TYPE_LIMIT = 100
 const NO_VARIABLES = new Map()
@@ -24,7 +24,7 @@ const PANE_BUILDER = "builder"
 
 function describeSyntaxError(error) {
   const location = error.locations?.[0]
-  return location ? `${error.message} (line ${location.line}, column ${location.column})` : error.message
+  return location ? TEXT.syntaxAt(error.message, location.line, location.column) : error.message
 }
 
 function querySyntaxError(query) {
@@ -40,9 +40,9 @@ function querySyntaxError(query) {
 function variablesProblem(variables) {
   if (variables.trim() === "") return ""
   try {
-    return isPlainObject(JSON.parse(variables)) ? "" : "Variables must be a JSON object."
+    return isPlainObject(JSON.parse(variables)) ? "" : TEXT.variablesNotObject
   } catch (error) {
-    return `Not valid JSON: ${error.message}`
+    return TEXT.invalidJson(error.message)
   }
 }
 
@@ -61,7 +61,7 @@ function ErrorLine({ children }) {
 }
 
 function SchemaMembers({ members }) {
-  if (members.length === 0) return <p className="pb-2 pl-5 text-xs text-muted-foreground">No fields.</p>
+  if (members.length === 0) return <p className="pb-2 pl-5 text-xs text-muted-foreground">{TEXT.noFields}</p>
   return (
     <ul className="flex flex-col gap-1.5 pb-2 pl-5">
       {members.map((member) => (
@@ -108,8 +108,8 @@ function SchemaTypes({ types }) {
           type="search"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder={`Search ${types.length} types and fields`}
-          aria-label="Search the schema"
+          placeholder={TEXT.searchPlaceholder(types.length)}
+          aria-label={TEXT.searchLabel}
           spellCheck={false}
         />
       </Toolbar>
@@ -123,11 +123,9 @@ function SchemaTypes({ types }) {
             onToggle={() => setOpenName(openName === type.name ? "" : type.name)}
           />
         ))}
-        {matches.length === 0 && <li className="p-1 text-xs text-muted-foreground">Nothing matches.</li>}
+        {matches.length === 0 && <li className="p-1 text-xs text-muted-foreground">{TEXT.noMatch}</li>}
         {matches.length > shown.length && (
-          <li className="p-1 text-xs text-muted-foreground">
-            {matches.length - shown.length} more types match. Narrow the search to see them.
-          </li>
+          <li className="p-1 text-xs text-muted-foreground">{TEXT.moreMatches(matches.length - shown.length)}</li>
         )}
       </ul>
     </>
@@ -136,26 +134,22 @@ function SchemaTypes({ types }) {
 
 function SchemaContent({ schema }) {
   if (schema?.types) return <SchemaTypes types={schema.types} />
-  if (schema?.loading) return <SkeletonLines label="Fetching the schema" lines={6} />
+  if (schema?.loading) return <SkeletonLines label={BUILDER_TEXT.loading} lines={6} />
   if (schema?.error) return <Notice tone="destructive">{schema.error}</Notice>
   return (
     <PanelBody>
-      <EmptyState
-        icon={Network}
-        title="No schema loaded"
-        description="Fetch it to browse this endpoint's types and fields. The introspection query uses this request's URL, headers and auth."
-      />
+      <EmptyState icon={Network} title={BUILDER_TEXT.noSchemaTitle} description={TEXT.schemaDescription} />
     </PanelBody>
   )
 }
 
 function SchemaPane({ schema, onLoad }) {
   return (
-    <aside aria-label="Schema" className={cn(SIDE_PANE, "w-2/5 min-w-52 max-w-80")}>
+    <aside aria-label={TEXT.schema} className={cn(SIDE_PANE, "w-2/5 min-w-52 max-w-80")}>
       <Toolbar>
-        <SectionLabel className="flex-1">Schema</SectionLabel>
+        <SectionLabel className="flex-1">{TEXT.schema}</SectionLabel>
         <Button variant="outline" size="sm" disabled={Boolean(schema?.loading)} onClick={onLoad}>
-          {schema?.types ? "Refresh" : "Fetch"}
+          {schema?.types ? BUILDER_TEXT.refresh : BUILDER_TEXT.fetch}
         </Button>
       </Toolbar>
       <SchemaContent schema={schema} />
@@ -176,7 +170,7 @@ function VariablesSection({ variables, problem, onChange }) {
         className="flex h-10 shrink-0 items-center gap-1.5 border-t border-border px-3 text-left"
       >
         <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-        <SectionLabel>Variables (JSON)</SectionLabel>
+        <SectionLabel>{TEXT.variables}</SectionLabel>
         {problem && <span className="min-w-0 truncate pl-2 text-xs text-destructive" title={problem}>{problem}</span>}
       </button>
       {isOpen && (
@@ -184,8 +178,8 @@ function VariablesSection({ variables, problem, onChange }) {
           <Textarea
             value={variables}
             onChange={(event) => onChange(event.target.value)}
-            placeholder={VARIABLES_PLACEHOLDER}
-            aria-label="GraphQL variables"
+            placeholder={TEXT.variablesPlaceholder}
+            aria-label={TEXT.variablesLabel}
             aria-invalid={problem !== ""}
             className={cn("h-full", problem && INVALID_FIELD)}
           />
@@ -221,7 +215,7 @@ export function GraphQLPanel({ query, variables, environment, schema, method, on
     try {
       handleQueryChange(print(parse(query)))
     } catch (error) {
-      setPrettifyError(`Cannot prettify: ${describeSyntaxError(error)}`)
+      setPrettifyError(TEXT.cannotPrettify(describeSyntaxError(error)))
     }
   }
 
@@ -229,47 +223,47 @@ export function GraphQLPanel({ query, variables, environment, schema, method, on
     <div className="relative flex h-full min-h-0">
       <Panel className="flex-1">
         <Toolbar>
-          <SectionLabel className="flex-1">Query</SectionLabel>
-          {!isGraphQL && <Button variant="outline" size="sm" onClick={onUseGraphQL}>Send as GraphQL</Button>}
+          <SectionLabel className="flex-1">{TEXT.query}</SectionLabel>
+          {!isGraphQL && <Button variant="outline" size="sm" onClick={onUseGraphQL}>{TEXT.sendAsGraphql}</Button>}
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             disabled={query.trim() === ""}
-            title="Reformat the query. Comments are removed."
+            title={TEXT.prettifyTitle}
             onClick={prettify}
           >
-            Prettify
+            {TEXT.prettify}
           </Button>
           <Button
-            variant={pane === PANE_BUILDER ? "secondary" : "ghost"}
+            variant="outline"
             size="sm"
             aria-pressed={pane === PANE_BUILDER}
             onClick={() => togglePane(PANE_BUILDER)}
           >
-            Builder
+            {BUILDER_TEXT.title}
           </Button>
           <Button
-            variant={pane === PANE_SCHEMA ? "secondary" : "ghost"}
+            variant="outline"
             size="sm"
             aria-pressed={pane === PANE_SCHEMA}
             onClick={() => togglePane(PANE_SCHEMA)}
           >
-            Schema
+            {TEXT.schema}
           </Button>
         </Toolbar>
         <div className="flex min-h-[4.25rem] flex-[2] flex-col gap-1 p-3">
           <Textarea
             value={query}
             onChange={(event) => handleQueryChange(event.target.value)}
-            placeholder={QUERY_PLACEHOLDER}
-            aria-label="GraphQL query"
+            placeholder={TEXT.queryPlaceholder}
+            aria-label={TEXT.queryLabel}
             aria-invalid={queryError !== ""}
             className={cn("min-h-0 flex-1", queryError && INVALID_FIELD)}
           />
           {queryError && <ErrorLine>{queryError}</ErrorLine>}
           {!isGraphQL && !queryError && (
-            <p className="shrink-0 truncate text-xs text-muted-foreground" title={`Not sent while the method is ${method}.`}>
-              Not sent while the method is {method}.
+            <p className="shrink-0 truncate text-xs text-muted-foreground" title={TEXT.notSent(method)}>
+              {TEXT.notSent(method)}
             </p>
           )}
         </div>

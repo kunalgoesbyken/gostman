@@ -43,6 +43,7 @@ var (
 
 type Repo struct {
 	Dir        string
+	Scope      string
 	Restricted bool
 }
 
@@ -186,24 +187,40 @@ func (r Repo) runWriteInput(stdin []byte, args ...string) (string, error) {
 	return r.exec(context.Background(), localTimeout, stdin, append(r.hardening(), args...)...)
 }
 
-func Top(dir string) (string, error) {
-	out, err := Repo{Dir: dir}.run("rev-parse", "--show-toplevel")
+func Open(dir string, restricted bool) (Repo, error) {
+	out, err := Repo{Dir: dir}.run("rev-parse", "--show-toplevel", "--show-prefix")
 	if err != nil {
-		return "", err
+		return Repo{}, err
 	}
-	return filepath.Clean(strings.TrimSpace(out)), nil
+	lines := strings.Split(out, "\n")
+	if len(lines) < 2 {
+		return Repo{}, &Error{Message: "git did not report where the repository starts"}
+	}
+	top := filepath.Clean(strings.TrimSpace(lines[0]))
+	scope := strings.TrimSuffix(strings.TrimRight(lines[1], "\r"), "/")
+	return Repo{Dir: top, Scope: scope, Restricted: restricted}, nil
 }
 
-func SameFolder(a, b string) bool {
-	first, err := os.Stat(a)
-	if err != nil {
-		return false
+func (r Repo) scoped(args ...string) []string {
+	if r.Scope == "" {
+		return args
 	}
-	second, err := os.Stat(b)
-	if err != nil {
-		return false
+	return append(args, "--", r.Scope)
+}
+
+func (r Repo) path(file string) (string, error) {
+	clean, err := ValidPath(file)
+	if err != nil || r.Scope == "" || clean == r.Scope || strings.HasPrefix(clean, r.Scope+"/") {
+		return clean, err
 	}
-	return os.SameFile(first, second)
+	return "", fmt.Errorf("%q is outside the collection folder %s", file, r.Scope)
+}
+
+func (r Repo) inScope(file string) string {
+	if r.Scope == "" {
+		return file
+	}
+	return strings.TrimPrefix(file, r.Scope+"/")
 }
 
 func ValidRef(name string) error {

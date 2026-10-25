@@ -81,7 +81,7 @@ export const RequestBar = memo(function RequestBar({
   const isSocket = socketStatus !== null
   const method = shownMethod(activeRequest, isSocket)
   const urlRef = useRef(null)
-  const urlPlaceholder = useFittingText(urlRef, TEXT.urlPlaceholders)
+  const urlPlaceholder = useFittingText(urlRef, TEXT.methodPlaceholders[method] || TEXT.urlPlaceholders)
   const sendShortcut = useShortcutLabel("sendRequest")
   const saveShortcut = useShortcutLabel("saveRequest")
 

@@ -3,6 +3,7 @@ import { Pencil, RotateCcw, X } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button, IconButton } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { SectionLabel } from "./ui/panel"
 import { useChordCapture } from "../hooks/useChordCapture"
 import { chordLabel, modifiersPrefix } from "../lib/chords"
 import { isApplePlatform, isDesktopApp } from "../lib/platform"
@@ -15,7 +16,7 @@ const CAPTURE_PLACEHOLDER = "…"
 const { moving: MOVING_TEXT } = SHORTCUT_TEXT
 
 function GroupHeading({ children }) {
-  return <h3 className="mb-1 text-2xs font-semibold uppercase tracking-wide text-muted-foreground">{children}</h3>
+  return <h3 className="mb-1"><SectionLabel>{children}</SectionLabel></h3>
 }
 
 function MovingKeys({ isApple }) {

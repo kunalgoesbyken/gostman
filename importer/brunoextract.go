@@ -26,6 +26,10 @@ func brunoResponseReference(expression string) (string, string, bool) {
 	if header, ok := headerReference(expression); ok {
 		return sourceHeader, header, true
 	}
+	if inner, ok := enclosed(expression, "bru.cookies.get(", ")"); ok {
+		name, quoted := quotedText(inner)
+		return sourceCookie, name, quoted
+	}
 	return "", "", false
 }
 

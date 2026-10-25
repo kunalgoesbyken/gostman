@@ -11,6 +11,14 @@ const BASE_PADDING_PX = 12
 const MAX_INDENT_LEVELS = 8
 
 const FOCUS_STEPS = { ArrowDown: 1, ArrowUp: -1 }
+const CLOSING_KEYS = ["Escape", "Tab"]
+
+function targetIndex(key, current, count) {
+  if (key === "Home") return 0
+  if (key === "End") return count - 1
+  const step = FOCUS_STEPS[key]
+  return step ? (current + step + count) % count : -1
+}
 
 const clampToViewport = (start, size, viewportSize) => (
   Math.max(VIEWPORT_MARGIN, Math.min(start, viewportSize - size - VIEWPORT_MARGIN))
@@ -26,6 +34,7 @@ function MenuItem({ item, onClose }) {
     <button
       type="button"
       role="menuitem"
+      tabIndex={-1}
       disabled={item.disabled}
       onClick={handleClick}
       title={item.label}
@@ -77,16 +86,17 @@ export function ContextMenu({ position, title, items, onClose }) {
   }, [onClose])
 
   const handleKeyDown = (event) => {
-    if (event.key === "Escape") {
+    if (CLOSING_KEYS.includes(event.key)) {
+      event.preventDefault()
+      event.stopPropagation()
       onClose()
       return
     }
-    const step = FOCUS_STEPS[event.key]
-    if (!step) return
-    event.preventDefault()
     const buttons = Array.from(menuRef.current.querySelectorAll("button:not(:disabled)"))
-    const current = buttons.indexOf(document.activeElement)
-    buttons[(current + step + buttons.length) % buttons.length]?.focus()
+    const next = targetIndex(event.key, buttons.indexOf(document.activeElement), buttons.length)
+    if (next < 0) return
+    event.preventDefault()
+    buttons[next]?.focus()
   }
 
   return createPortal(
@@ -96,7 +106,7 @@ export function ContextMenu({ position, title, items, onClose }) {
       data-surface="menu"
       onKeyDown={handleKeyDown}
       style={placement || { left: 0, top: 0, visibility: "hidden" }}
-      className="fixed z-50 max-h-72 w-56 overflow-y-auto rounded-md border border-border bg-background py-1 shadow-lg"
+      className="fixed z-50 max-h-[calc(100dvh-1rem)] w-56 overflow-y-auto rounded-md border border-border bg-background py-1 shadow-lg"
     >
       {title && <SectionLabel className="block truncate px-3 py-1" title={title}>{title}</SectionLabel>}
       {items.map((item) => <MenuItem key={item.id} item={item} onClose={onClose} />)}

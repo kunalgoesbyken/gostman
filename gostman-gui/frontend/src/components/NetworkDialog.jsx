@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react"
-import { FolderOpen, MonitorDown, Plus, X } from "lucide-react"
+import { FolderOpen, Plus, X } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
-import { EmptyState } from "./ui/emptyState"
 import { Field } from "./ui/field"
 import { Input } from "./ui/input"
 import { SectionLabel } from "./ui/panel"
 import { Select } from "./ui/select"
+import { DesktopOnly } from "./DesktopOnly"
 import { BLANK_CERTIFICATE, PROXY_CUSTOM, PROXY_MODES, PROXY_NONE, hasCollectionNetwork } from "../lib/network"
 import { NETWORK_TEXT as TEXT } from "../lib/networkText"
 
@@ -239,16 +239,14 @@ export function NetworkDialog({ settings, actions, onClose }) {
       <DialogHeader onClose={onClose}>
         <DialogTitle>{TEXT.title}</DialogTitle>
       </DialogHeader>
-      <DialogBody>
-        {actions.canConfigureNetwork ? (
-          <>
-            <SettingsForm draft={draft} onChange={edit} onPick={actions.pickFile} />
-            <CollectionSection actions={actions} />
-          </>
-        ) : (
-          <EmptyState icon={MonitorDown} title={TEXT.webNoticeTitle} description={TEXT.webNotice} />
-        )}
-      </DialogBody>
+      {actions.canConfigureNetwork ? (
+        <DialogBody>
+          <SettingsForm draft={draft} onChange={edit} onPick={actions.pickFile} />
+          <CollectionSection actions={actions} />
+        </DialogBody>
+      ) : (
+        <DesktopOnly title={TEXT.webNoticeTitle} description={TEXT.webNotice} />
+      )}
       {actions.canConfigureNetwork && (
         <DialogFooter>
           {failure && <p role="alert" className="mr-auto min-w-0 self-center text-xs text-destructive">{failure}</p>}

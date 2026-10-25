@@ -1,0 +1,16 @@
+export const KEY_VALUE_TEXT = {
+  key: 'Key',
+  value: 'Value',
+  type: 'Type',
+  sendRow: 'Send this row',
+  fieldType: 'Field type',
+  text: 'Text',
+  file: 'File',
+  removeRow: 'Remove row',
+  bulkLabel: (keyLabel) => `${keyLabel} rows as text`,
+  bulkPlaceholder: (keyLabel) => `${keyLabel}: value`,
+  bulkHint: 'One row per line as name: value. Start a line with // to keep it without sending it.',
+  bulkUnavailable: 'Rows with a colon in the name, or spaces at the start or end, can only be edited in the table.',
+  editAsTable: 'Edit as table',
+  bulkEdit: 'Bulk edit',
+}

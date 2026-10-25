@@ -6,6 +6,8 @@ const NO_CHECKS = { tests: [], logs: [], error: '', note: '' }
 
 export const checksContract = (link) => Boolean(link?.source) && link.contract !== false
 
+export const syncsSpec = (link) => Boolean(link?.source) && link.sync !== false
+
 export const linkFor = (specLinks, lineage) => (
   [...lineage].reverse().map(({ id }) => specLinks[id]).find(checksContract) ?? null
 )

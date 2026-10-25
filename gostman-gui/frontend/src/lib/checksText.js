@@ -84,26 +84,31 @@ export const CONTRACT_TEXT = {
   unreadable: (message) => `The spec could not be read, so this response was not checked against it: ${message}`,
   start: 'Check responses against the spec',
   stop: 'Stop checking responses against the spec',
+  link: 'Check responses against a spec…',
+  linkTitle: 'Check responses against an OpenAPI spec',
+  linkConfirm: 'Link spec',
+  linkMessage: 'Enter the address of the spec. Every response to a request in this folder is then checked for a documented status, content type and body schema.',
+  linked: (name) => `Responses in "${name}" are now checked against the spec.`,
 }
 
 export const RESPONSE_CHECKS_TEXT = {
   button: 'Add checks from this response',
   title: 'Add checks from this response',
-  intro: 'These checks are built from the response you just received. Tick the ones you want, then add them to the Tests tab.',
+  intro: 'These checks are built from the response you just received. Tick the ones you want, then add them to the Checks tab.',
   kinds: {
     status: 'Status code',
     contentType: 'Content type',
     schema: 'Body shape, as a JSON Schema: field types, the fields that were present, and null where null was seen. A field that was null accepts any value.',
     responseTime: (budget) => `Response time budget of ${budget} ms, twice what this response took, rounded up.`,
   },
-  nothingNew: 'The Tests tab already has these checks.',
+  nothingNew: 'The Checks tab already has these checks.',
   add: (count) => (count === 0 ? 'Add checks' : `Add ${plural(count, 'check', 'checks')}`),
   cancel: 'Cancel',
-  added: (count, name) => `Added ${plural(count, 'check', 'checks')} to the Tests tab of "${name}".`,
+  added: (count, name) => `Added ${plural(count, 'check', 'checks')} to the Checks tab of "${name}".`,
 }
 
 export const TESTS_TEXT = {
-  sectionLabel: 'Tests section',
+  sectionLabel: 'Checks section',
   views: {
     assertions: 'Assertions',
     preScript: 'Pre-request script',
@@ -122,5 +127,20 @@ export const TESTS_TEXT = {
   schemaPlaceholder: '{"type": "object"}',
   verify: 'Verify this assertion',
   remove: 'Remove assertion',
-  results: 'Test results',
+  results: 'Check results',
+}
+
+export const CHECK_RUN_TEXT = {
+  stage: 'Checks',
+  scriptTimedOut: (seconds) => `The script ran for more than ${plural(seconds, 'second', 'seconds')} and was stopped.`,
+  checksTimedOut: (seconds) => `The checks ran for more than ${plural(seconds, 'second', 'seconds')} and were stopped.`,
+  outsideResponse: (expression, suggestion) => `"${expression}" does not start at the response, so it finds nothing. Write ${suggestion}.`,
+  patternTooSlow: (seconds) => `The regular expression ran for more than ${plural(seconds, 'second', 'seconds')} and was stopped. Simplify the pattern, for example by removing nested repeats such as (a+)+.`,
+}
+
+export const JSON_PATH_TEXT = {
+  blocked: (name) => (name ? `A JSONPath filter cannot use ${name}.` : 'A JSONPath filter can look up a field only by a written name or number, such as @.id or @["id"].'),
+  extractTimedOut: (seconds) => `The Extract rules ran for more than ${plural(seconds, 'second', 'seconds')} and were stopped, so no values were kept. Check their JSONPath filters for a slow regular expression.`,
+  pathTimedOut: (seconds) => `This path ran for more than ${plural(seconds, 'second', 'seconds')} and was stopped. Check its filter for a slow regular expression.`,
+  filterTimedOut: (seconds) => `The filter ran for more than ${plural(seconds, 'second', 'seconds')} and was stopped. Check it for a slow regular expression.`,
 }

@@ -11,10 +11,11 @@ import { Select } from "./ui/select"
 import { MethodTag } from "./MethodTag"
 import { TestRow, countPassed } from "./TestResults"
 import { TagsInput } from "./ui/tagsInput"
+import { UnresolvedNames, hasUnresolved } from "./UnresolvedNotice"
 import { ROOT_ID, buildCollectionTree, listFolders } from "../lib/collectionTree"
-import { pluralize } from "../lib/dataUtils"
-import { DATA_FILE_ERROR, iterationCount, MAX_ITERATIONS, parseDataFile } from "../lib/runData"
+import { DATA_FILE_ERROR, dataColumns, iterationCount, MAX_ITERATIONS, parseDataFile } from "../lib/runData"
 import { parseJsonBody, statusVariant } from "../lib/response"
+import { shownMethod } from "../lib/methodLabel"
 import { requestsInScope } from "../lib/runner"
 import { RUNNER_TEXT } from "../lib/runnerText"
 import { summarize } from "../lib/runReport"
@@ -24,21 +25,6 @@ import { cn } from "../lib/utils"
 
 const PATH_SEPARATOR = " / "
 
-const LABELS = {
-  delay: "Delay (ms)",
-  iterations: "Iterations",
-  parallel: "Parallel",
-  dataFile: "Data file (CSV or JSON)",
-  clearData: "Remove the data file",
-  report: "Download HTML report",
-  includeTags: "Only tags",
-  excludeTags: "Skip tags",
-  anyTag: "Any",
-  noTag: "None",
-  emptyBody: "The response had no body.",
-  truncated: "Only the start of a long body is kept in a run. Send the request on its own to see all of it.",
-  idle: "Requests run in sidebar order with their scripts, extraction rules and assertions, using the active environment. A data file runs everything once per row. With parallel above 1, requests are sent together and do not see each other's extracted variables.",
-}
 const DATA_ACCEPT = ".csv,.json,text/csv,application/json"
 
 const toCount = (text) => Math.max(0, Math.trunc(Number(text)) || 0)
@@ -67,16 +53,16 @@ function outcomeIcon(result) {
 }
 
 function ResultSummary({ result }) {
-  if (result.skipped) return <span className="truncate text-xs text-muted-foreground">Skipped</span>
+  if (result.skipped) return <span className="truncate text-xs text-muted-foreground">{RUNNER_TEXT.skipped}</span>
   return (
     <>
       {result.tests.length > 0 && (
         <span className="shrink-0 font-mono text-2xs text-muted-foreground">
-          {countPassed(result.tests)}/{result.tests.length} tests
+          {RUNNER_TEXT.tests(countPassed(result.tests), result.tests.length)}
         </span>
       )}
-      <span className="shrink-0 font-mono text-2xs text-muted-foreground">{result.durationMs} ms</span>
-      <Badge variant={result.isAnswered ? statusVariant(result) : "serverError"} className="max-w-[9rem] font-mono">
+      <span className="shrink-0 font-mono text-2xs text-muted-foreground">{RUNNER_TEXT.duration(result.durationMs)}</span>
+      <Badge variant={result.isAnswered ? statusVariant(result) : "serverError"} className="min-w-0 max-w-[40%] shrink font-mono">
         <span className="truncate">{result.status}</span>
       </Badge>
     </>
@@ -103,9 +89,9 @@ function ExchangeDetail({ result }) {
       {response.body ? (
         <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-md border border-border bg-muted/40 p-2 font-mono text-2xs text-foreground">{readableBody(response)}</pre>
       ) : (
-        <p className="text-xs text-muted-foreground">{LABELS.emptyBody}</p>
+        <p className="text-xs text-muted-foreground">{RUNNER_TEXT.emptyBody}</p>
       )}
-      {response.truncated && <p className="text-xs text-muted-foreground">{LABELS.truncated}</p>}
+      {response.truncated && <p className="text-xs text-muted-foreground">{RUNNER_TEXT.truncated}</p>}
     </div>
   )
 }
@@ -129,7 +115,7 @@ function ResultRow({ result }) {
         className="flex h-9 w-full items-center gap-2 px-3 text-left hover:bg-accent disabled:cursor-default disabled:hover:bg-transparent"
       >
         <Icon className={cn("h-3.5 w-3.5 shrink-0", tone)} />
-        <MethodTag method={result.method} className="w-12" />
+        <MethodTag method={shownMethod(result)} className="w-12" />
         {result.iteration > 0 && <span className="shrink-0 font-mono text-2xs text-muted-foreground">#{result.iteration}</span>}
         <span title={`${result.name}\n${result.url}`} className="min-w-0 flex-1 truncate text-xs text-foreground">{result.name}</span>
         <ResultSummary result={result} />
@@ -137,6 +123,11 @@ function ResultRow({ result }) {
       </button>
       <div className="px-3">
         {detail && <p className="whitespace-pre-line pb-1.5 pl-[1.375rem] text-xs text-muted-foreground">{detail}</p>}
+        {hasUnresolved(result.unresolved) && (
+          <p className="pb-1.5 pl-[1.375rem] text-xs text-warning">
+            <UnresolvedNames names={result.unresolved} isFailed={!result.isAnswered} />
+          </p>
+        )}
         {streamNote && <p className="pb-1.5 pl-[1.375rem] text-xs text-muted-foreground">{streamNote}</p>}
         {failures.length > 0 && (
           <ul className="pb-1.5 pl-[1.375rem]">
@@ -149,8 +140,14 @@ function ResultRow({ result }) {
   )
 }
 
-function describeRun(results, total, isRunning, iterations) {
-  if (results.length === 0) return RUNNER_TEXT.inScope(total, iterations)
+function idleTitle(isRunning, total) {
+  if (isRunning) return RUNNER_TEXT.running
+  return total === 0 ? RUNNER_TEXT.nothingToRun : RUNNER_TEXT.nothingRun
+}
+
+function describeRun(results, requestCount, isRunning, iterations) {
+  const total = requestCount * iterations
+  if (results.length === 0) return RUNNER_TEXT.inScope(requestCount, iterations)
   const { passed, failed, skipped } = summarize(results, total)
   return RUNNER_TEXT.progress({ isRunning, done: results.length, total, passed, failed, skipped })
 }
@@ -171,9 +168,10 @@ export function RunnerDialog({ runner, folders, requests, actions }) {
   const scopes = useMemo(() => listFolders(buildCollectionTree(folders, [])), [folders])
   const knownTags = useMemo(() => collectTags([...requests, ...folders]), [requests, folders])
   const tagFilter = useMemo(() => ({ include: includeTags, exclude: excludeTags }), [includeTags, excludeTags])
-  const requestCount = useMemo(() => requestsInScope(folders, requests, folderId, tagFilter).length, [folders, requests, folderId, tagFilter])
+  const requestCount = useMemo(() => requestsInScope({ folders, requests }, folderId, tagFilter).length, [folders, requests, folderId, tagFilter])
   const { isRunning, results } = runner
   const iterations = iterationCount(rows, iterationLimit)
+  const columns = useMemo(() => dataColumns(rows), [rows])
   const total = requestCount * iterations
 
   async function chooseData(event) {
@@ -196,21 +194,21 @@ export function RunnerDialog({ runner, folders, requests, actions }) {
   }
 
   return (
-    <Dialog label="Run requests" size="lg" onClose={actions.closeRunner}>
+    <Dialog label={RUNNER_TEXT.title} size="lg" onClose={actions.closeRunner}>
       <DialogHeader onClose={actions.closeRunner}>
-        <DialogTitle>Run requests</DialogTitle>
+        <DialogTitle>{RUNNER_TEXT.title}</DialogTitle>
       </DialogHeader>
       <Toolbar className="h-auto flex-wrap py-1.5">
         <div className="w-48 shrink-0">
-          <Select value={folderId} disabled={isRunning} onChange={(event) => setFolderId(event.target.value)} aria-label="Requests to run">
-            <option value={ROOT_ID}>All requests</option>
+          <Select value={folderId} disabled={isRunning} onChange={(event) => setFolderId(event.target.value)} aria-label={RUNNER_TEXT.scope}>
+            <option value={ROOT_ID}>{RUNNER_TEXT.allRequests}</option>
             {scopes.map(({ folder, path }) => (
               <option key={folder.id} value={folder.id}>{path.join(PATH_SEPARATOR)}</option>
             ))}
           </Select>
         </div>
         <NumberField
-          label={LABELS.delay}
+          label={RUNNER_TEXT.delay}
           min={0}
           step={100}
           value={delayMs || ""}
@@ -219,18 +217,18 @@ export function RunnerDialog({ runner, folders, requests, actions }) {
           onChange={(event) => setDelayMs(toCount(event.target.value))}
         />
         <Checkbox checked={stopOnFailure} disabled={isRunning} onChange={(event) => setStopOnFailure(event.target.checked)}>
-          Stop on failure
+          {RUNNER_TEXT.stopOnFailure}
         </Checkbox>
         <div className="ml-auto">
           {isRunning ? (
             <Button variant="destructive" size="sm" onClick={actions.stopRun}>
               <Square />
-              Stop
+              {RUNNER_TEXT.stop}
             </Button>
           ) : (
             <Button size="sm" disabled={total === 0} onClick={() => actions.startRun({ folderId, delayMs, stopOnFailure, parallel, rows, iterations: iterationLimit, tagFilter })}>
               <Play />
-              Run
+              {RUNNER_TEXT.run}
             </Button>
           )}
         </div>
@@ -239,16 +237,16 @@ export function RunnerDialog({ runner, folders, requests, actions }) {
         <input ref={fileInput} type="file" accept={DATA_ACCEPT} hidden onChange={chooseData} />
         <Button variant="ghost" size="sm" disabled={isRunning} onClick={() => fileInput.current.click()}>
           <Upload />
-          {LABELS.dataFile}
+          {RUNNER_TEXT.dataFile}
         </Button>
         {dataName && (
-          <Button variant="ghost" size="sm" disabled={isRunning} onClick={clearData} aria-label={LABELS.clearData}>
+          <Button variant="ghost" size="sm" disabled={isRunning} onClick={clearData} aria-label={RUNNER_TEXT.clearData}>
             <X />
-            {dataName} · {pluralize(rows.length, "row")}
+            {dataName} · {RUNNER_TEXT.rows(rows.length)}
           </Button>
         )}
         <NumberField
-          label={LABELS.iterations}
+          label={RUNNER_TEXT.iterations}
           min={0}
           max={MAX_ITERATIONS}
           value={iterationLimit || ""}
@@ -257,7 +255,7 @@ export function RunnerDialog({ runner, folders, requests, actions }) {
           onChange={(event) => setIterationLimit(Math.min(MAX_ITERATIONS, toCount(event.target.value)))}
         />
         <NumberField
-          label={LABELS.parallel}
+          label={RUNNER_TEXT.parallel}
           min={1}
           value={parallel > 1 ? parallel : ""}
           placeholder="1"
@@ -267,31 +265,32 @@ export function RunnerDialog({ runner, folders, requests, actions }) {
       </Toolbar>
       {knownTags.length > 0 && (
         <Toolbar className="h-auto flex-wrap py-1.5">
-          <TagFilterField label={LABELS.includeTags} placeholder={LABELS.anyTag} value={includeTags} onChange={setIncludeTags} suggestions={knownTags} disabled={isRunning} />
-          <TagFilterField label={LABELS.excludeTags} placeholder={LABELS.noTag} value={excludeTags} onChange={setExcludeTags} suggestions={knownTags} disabled={isRunning} />
+          <TagFilterField label={RUNNER_TEXT.includeTags} placeholder={RUNNER_TEXT.anyTag} value={includeTags} onChange={setIncludeTags} suggestions={knownTags} disabled={isRunning} />
+          <TagFilterField label={RUNNER_TEXT.excludeTags} placeholder={RUNNER_TEXT.noTag} value={excludeTags} onChange={setExcludeTags} suggestions={knownTags} disabled={isRunning} />
         </Toolbar>
       )}
       {dataError && <p role="alert" className="shrink-0 px-4 py-1 text-xs text-destructive">{dataError}</p>}
+      {!dataError && columns.length > 0 && <p className="shrink-0 px-4 py-1 text-xs text-muted-foreground">{RUNNER_TEXT.dataOverrides(columns)}</p>}
       <div className="min-h-0 flex-1 overflow-y-auto [overflow-wrap:anywhere]">
         {results.length === 0 ? (
           <EmptyState
             icon={ListChecks}
-            title={isRunning ? "Running" : "Nothing run yet"}
-            description={LABELS.idle}
+            title={idleTitle(isRunning, total)}
+            description={total === 0 && !isRunning ? RUNNER_TEXT.nothingToRunHint : RUNNER_TEXT.idle}
           />
         ) : (
-          <ul aria-label="Run results">
+          <ul aria-label={RUNNER_TEXT.results}>
             {results.map((result, index) => <ResultRow key={index} result={result} />)}
           </ul>
         )}
       </div>
       <div className="flex shrink-0 items-center gap-2 border-t border-border py-1 pl-4 pr-2">
         <p role="status" className="min-w-0 flex-1 text-xs text-muted-foreground">
-          {describeRun(results, total, isRunning, iterations)}
+          {describeRun(results, requestCount, isRunning, iterations)}
         </p>
         <Button variant="ghost" size="sm" disabled={isRunning || results.length === 0} onClick={actions.downloadRunReport}>
           <Download />
-          {LABELS.report}
+          {RUNNER_TEXT.report}
         </Button>
       </div>
     </Dialog>

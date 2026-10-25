@@ -45,6 +45,8 @@ On macOS the binary is not notarized. Run `xattr -d com.apple.quarantine gostman
 2. Read the response below the request: **Body** in Pretty or Raw, **Headers** and **Cookies**, with the status, time and size beside them.
 3. Press **Save** to keep the request in your collection, or **Code** to copy it as code in one of 13 languages, from cURL and Python to C#, Swift and PowerShell.
 
+Next, the [tutorial](tutorial-first-collection.md) takes about fifteen minutes to turn one request into a tested collection with an environment, chained requests and a run from the command line.
+
 ![Gostman sending a POST request with a JSON body and showing the pretty-printed response](../gostman-gui/frontend/src/assets/landing/rest.webp)
 
 The first time you open Gostman, the start page lists five **Get started** steps: send a sample request, save it, add a variable in an environment, add a check and run your requests together. Each step has a button that takes you to the right place. Until you finish them, a **Get started** button in the header shows the next step.

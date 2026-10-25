@@ -1,5 +1,6 @@
-const UNICODE_NAME = /^[\p{L}_][\p{L}\p{N}_-]*$/u
-const PLAIN_NAME = /^[A-Za-z_ª-￿][\wª-￿-]*$/
-const VARIABLE_NAME = UNICODE_NAME.test('a') ? UNICODE_NAME : PLAIN_NAME
+import { ENGINE_PLACEHOLDER } from './variables'
 
-export const isVariableName = (name) => VARIABLE_NAME.test(name)
+export function isVariableName(name) {
+  const placeholder = `{{${name}}}`
+  return name === name.trim() && placeholder.match(ENGINE_PLACEHOLDER)?.[0] === placeholder
+}

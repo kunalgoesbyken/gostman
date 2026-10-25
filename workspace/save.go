@@ -60,21 +60,16 @@ func (w *Workspace) directoryOf(folderId string) string {
 	return ""
 }
 
-func (w *Workspace) nextRequestOrder(directory string) int64 {
+func (w *Workspace) nextOrder(directory string) int64 {
 	var highest int64
 	for _, entry := range w.requests {
-		if parentOf(entry.path) == directory && entry.order > highest {
-			highest = entry.order
+		if parentOf(entry.path) == directory {
+			highest = max(highest, entry.order)
 		}
 	}
-	return highest + 1
-}
-
-func (w *Workspace) nextFolderOrder(directory string) int64 {
-	var highest int64
 	for _, entry := range w.folders {
-		if parentOf(entry.dir) == directory && entry.order > highest {
-			highest = entry.order
+		if parentOf(entry.dir) == directory {
+			highest = max(highest, entry.order)
 		}
 	}
 	return highest + 1
@@ -95,7 +90,7 @@ func (w *Workspace) requestOrder(entry *requestEntry, request Request, directory
 		return request.SortOrder
 	}
 	if entry.path == "" || parentOf(entry.path) != directory {
-		return w.nextRequestOrder(directory)
+		return w.nextOrder(directory)
 	}
 	return entry.order
 }
@@ -219,7 +214,7 @@ func (w *Workspace) createFolder(folder Folder, parent string) (*folderEntry, er
 	if err := w.disk.makeDirectory(directory); err != nil {
 		return nil, err
 	}
-	entry := &folderEntry{folder: Folder{Id: folder.Id}, dir: directory, order: w.nextFolderOrder(parent)}
+	entry := &folderEntry{folder: Folder{Id: folder.Id}, dir: directory, order: w.nextOrder(parent)}
 	w.folders[folder.Id] = entry
 	return entry, nil
 }
@@ -229,7 +224,7 @@ func (w *Workspace) moveFolder(entry *folderEntry, folder Folder, parent string)
 	if isInPlace && sameStem(entry.folder.Name, folder.Name, folderFallbackStem) {
 		return nil
 	}
-	current, order := "", w.nextFolderOrder(parent)
+	current, order := "", w.nextOrder(parent)
 	if isInPlace {
 		current, order = entry.dir, entry.order
 	}

@@ -6,7 +6,7 @@ export const ONBOARDING_TEXT = {
   next: 'Next',
   completeTitle: 'You are set up',
   completeNotice: 'You finished getting started.',
-  completeHint: 'You have tried the main parts of Gostman. The tutorial goes further with chaining requests, scripts and running your tests in CI.',
+  completeHint: 'You have tried the main parts of Gostman. The tutorial goes further with chaining requests, scripts and running your checks in CI.',
   tutorial: 'Read the tutorial',
   hide: 'Hide',
   hideLabel: 'Hide the getting started steps',
@@ -33,8 +33,8 @@ export const ONBOARDING_TEXT = {
     },
     [STEP_CHECK]: {
       title: 'Add a check',
-      hint: 'Write an assertion such as res.status equals 200, or use Add checks from this response in the Tests tab. Then save the request, and each response shows a pass or a fail.',
-      action: 'Open the Tests tab',
+      hint: 'Write an assertion such as res.status equals 200, or use Add checks from this response in the Checks tab. Then save the request, and each response shows a pass or a fail.',
+      action: 'Open the Checks tab',
     },
     [STEP_RUN]: {
       title: 'Run your requests together',

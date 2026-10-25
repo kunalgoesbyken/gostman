@@ -128,8 +128,8 @@ export const textToHeaders = (text) => text.split('\n').flatMap((line) => {
 })
 
 function requestsInScope() {
-  const { folders, requests } = app()
-  return collectRequests(buildCollectionTree(folders, requests), mock().folderId)
+  const { folders, requests, sharedOrder } = app()
+  return collectRequests(buildCollectionTree(folders, requests, sharedOrder), mock().folderId)
 }
 
 const toSource = ({ id, name, method, url, examples }) => ({ id, name, method, url, examples })
@@ -247,6 +247,19 @@ export function createMockActions(backend) {
     await refresh()
   }
 
+  async function resume() {
+    if (!server) return
+    try {
+      const state = await server.status()
+      if (!state.running) return
+      patch({ config: normalizeConfig(await server.loadConfig()) })
+      adopt(state)
+      watch()
+    } catch (error) {
+      patch({ failure: messageOf(error) })
+    }
+  }
+
   async function close() {
     app().closeMockDialog()
     stopWatchingWhenIdle()
@@ -313,6 +326,7 @@ export function createMockActions(backend) {
   return {
     isAvailable: Boolean(server),
     open,
+    resume,
     close,
     start,
     stop,

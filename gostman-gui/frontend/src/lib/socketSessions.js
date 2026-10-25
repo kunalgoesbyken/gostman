@@ -4,6 +4,7 @@ import { isSentRow, parseRows } from './rows'
 import { withInheritance } from './inheritance'
 import { toHttpURL, toSocketURL } from './socketUrl'
 import { protocolOf } from './realtime/protocols'
+import { UNRESOLVED_TEXT } from './unresolvedText'
 import { selectActiveVariables, useAppStore } from '../store/appStore'
 
 export { isSocketAddress } from './socketUrl'
@@ -17,6 +18,7 @@ export const ENTRY_SENT = 'sent'
 export const ENTRY_RECEIVED = 'received'
 export const ENTRY_INFO = 'info'
 export const ENTRY_ERROR = 'error'
+export const ENTRY_WARNING = 'warning'
 
 export const LOG_LIMIT = 1000
 export const SOCKET_PANEL = 'websocket'
@@ -31,6 +33,7 @@ const INVALID_VARIABLES = "The active environment's variables are not valid JSON
 const INVALID_ADDRESS = 'Enter a ws:// or wss:// URL in the address bar.'
 const NOT_CONNECTED = 'Not sent: the connection closed before the message went out.'
 const SUBPROTOCOL_HEADER = 'Sec-WebSocket-Protocol'
+const DYNAMIC_PREFIX = '$'
 
 const IDLE_SESSION = { status: SOCKET_IDLE, entries: [], dropped: 0, autoReconnect: false, draft: '', draftTarget: '', filter: '' }
 
@@ -96,6 +99,14 @@ function binaryEntry(bytes) {
   return { kind: ENTRY_RECEIVED, text: preview.join(' '), byteCount: bytes.length }
 }
 
+const unresolvedEntry = (names) => ({
+  kind: ENTRY_WARNING,
+  text: `${UNRESOLVED_TEXT.sentAsWritten(names.length)} ${names.map(UNRESOLVED_TEXT.placeholder).join(', ')}`,
+})
+
+const leftoverNames = (texts) => [...new Set(texts.flatMap(placeholderNames))]
+  .filter((name) => !name.startsWith(DYNAMIC_PREFIX))
+
 const frameEntry = (frame) => (frame.bytes ? binaryEntry(frame.bytes) : textEntry(ENTRY_RECEIVED, frame.text))
 
 export function resolveSocketTarget(request, variablesJSON) {
@@ -139,6 +150,17 @@ useAppStore.subscribe((state, previous) => {
     .filter((tabId) => !openTabIds.has(tabId))
     .forEach(dispose)
 })
+
+function warnUnresolved(tabId, names) {
+  if (names.length > 0) log(tabId, unresolvedEntry(names))
+}
+
+function unresolvedInSent(setup, unsentHeaderNames) {
+  const unsent = new Set(unsentHeaderNames)
+  const sentTexts = setup.headers.filter(([name]) => !unsent.has(name)).flat()
+  const sentNames = new Set([setup.url, ...sentTexts].flatMap(placeholderNames))
+  return (setup.context.prepared.unresolved || []).filter((name) => sentNames.has(name))
+}
 
 export function createSocketActions(backend) {
   function handleLoss(tabId, entry) {
@@ -211,6 +233,7 @@ export function createSocketActions(backend) {
     links.set(tabId, link)
     try {
       const setup = await prepareSession(request, target)
+      warnUnresolved(tabId, unresolvedInSent(setup, backend.unsentSocketHeaders(setup.headers)))
       link.session = setup.protocol.createSession(createChannel(tabId, link, isCurrent), setup.context)
       const transport = await backend.openSocket(setup.url, setup.headers, handlers)
       if (!isCurrent()) {
@@ -274,6 +297,7 @@ export function createSocketActions(backend) {
       if (!session) throw new Error(NOT_CONNECTED)
       const sent = session.compose({ body, target })
       log(tabId, { ...textEntry(ENTRY_SENT, sent.text), label: sent.label })
+      warnUnresolved(tabId, leftoverNames([body, target]))
     } catch (error) {
       log(tabId, { kind: ENTRY_ERROR, text: messageOf(error) })
       patchSession(tabId, (session) => (session.draft === '' ? { draft: message.body } : {}))

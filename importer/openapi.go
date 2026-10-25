@@ -30,6 +30,9 @@ func (c *collector) addGenerated(generated openapi.Collection) {
 			c.Variables[name] = value
 		}
 	}
+	if len(generated.Folders) > 0 {
+		c.ownCollectionVariables(folderIDs[generated.Folders[0].ID], generated.Variables)
+	}
 	c.Warnings = append(c.Warnings, generated.Warnings...)
 }
 

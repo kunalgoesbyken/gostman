@@ -41,7 +41,7 @@ func (c *collector) readOpenTree(doc document, root string) {
 		for _, environment := range objects(data["environments"]) {
 			drafts = append(drafts, openEnvironment(environment, text(environment["name"])))
 		}
-		c.addBrunoEnvironments(drafts)
+		c.addBrunoEnvironments(inFolder(drafts, rootID))
 		c.noteDotEnv(name, since)
 		c.summarizeScripts(brunoDialect, name)
 	})
