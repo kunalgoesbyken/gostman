@@ -264,3 +264,28 @@ jobs:
           tags: |
             ghcr.io/kunalgoesbyken/gostman:${{ needs.plan.outputs.version }}
             ghcr.io/kunalgoesbyken/gostman:latest
+
+  packages:
+    needs: [plan, release]
+    if: needs.plan.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    env:
+      PACKAGE_REPOS_TOKEN: ${{ secrets.PACKAGE_REPOS_TOKEN }}
+
+    steps:
+      - name: Checkout code
+        if: env.PACKAGE_REPOS_TOKEN != ''
+        uses: actions/checkout@v4
+
+      - name: Update the Homebrew tap and Scoop bucket
+        if: env.PACKAGE_REPOS_TOKEN != ''
+        continue-on-error: true
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER}"
+          git clone "https://x-access-token:${PACKAGE_REPOS_TOKEN}@github.com/$owner/homebrew-tap.git" "$RUNNER_TEMP/tap"
+          git clone "https://x-access-token:${PACKAGE_REPOS_TOKEN}@github.com/$owner/scoop-gostman.git" "$RUNNER_TEMP/scoop"
+          scripts/update-package-repos.sh "${{ needs.plan.outputs.version }}" "$RUNNER_TEMP/tap" "$RUNNER_TEMP/scoop"
+
+      - name: Skip package repositories
+        if: env.PACKAGE_REPOS_TOKEN == ''
+        run: echo "PACKAGE_REPOS_TOKEN is not set, skipping the Homebrew tap and Scoop bucket update."
