@@ -1,6 +1,6 @@
 const GLYPHS = "{}[]<>/:"
 
-export const GLYPH_TONES = ["text-primary", "text-success", "text-info", "text-warning", "text-foreground"]
+const GLYPH_TONES = ["text-primary", "text-success", "text-info", "text-warning", "text-foreground"]
 
 export function cellHash(row, column) {
   let hash = Math.imul(row + 1, 73856093) ^ Math.imul(column + 1, 19349663)

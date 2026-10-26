@@ -29,7 +29,6 @@ import { SplitHeading } from "./landing/SplitHeading"
 import { EverythingSection } from "./landing/EverythingSection"
 import { ComparisonSection } from "./landing/ComparisonSection"
 import { FaqSection } from "./landing/FaqSection"
-import { AnnouncementBar } from "./landing/AnnouncementBar"
 import { SectionLabel } from "./landing/SectionLabel"
 import { ImportSources } from "./landing/ImportSources"
 import { StackSection } from "./landing/StackSection"
@@ -257,7 +256,7 @@ export function LandingPage({ onGetStarted }) {
         Skip to main content
       </a>
       <div className="dark min-h-screen bg-background text-foreground overflow-x-clip" id="main-content">
-        <NavBar banner={<AnnouncementBar />}>
+        <NavBar>
           <Brand />
           <div className="flex items-center gap-1 sm:gap-2">
             {SECTION_LINKS.map((link) => (
@@ -281,7 +280,7 @@ export function LandingPage({ onGetStarted }) {
 
         <div className="relative overflow-hidden">
           <div className="landing-stripes pointer-events-none absolute inset-x-0 top-0 h-[760px]" aria-hidden="true" />
-          <section className="relative pt-44 pb-16 px-6">
+          <section className="relative pt-36 pb-16 px-6">
             <div className="relative max-w-4xl mx-auto">
               <div className="text-center space-y-6">
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.1] [text-wrap:balance]">

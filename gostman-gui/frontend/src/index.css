@@ -566,19 +566,6 @@
   }
 }
 
-@keyframes glyph-twinkle {
-  50% {
-    opacity: 0.15;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .glyph-twinkle {
-    animation: glyph-twinkle 3.6s ease-in-out infinite;
-    animation-delay: calc(var(--glyph-step, 0) * -0.3s);
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .intro {
     animation: reveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
