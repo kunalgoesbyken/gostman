@@ -16,6 +16,7 @@ import moon from "@iconify-icons/solar/moon-linear"
 import monitor from "@iconify-icons/solar/monitor-linear"
 import pen from "@iconify-icons/solar/pen-new-square-linear"
 import list from "@iconify-icons/solar/list-linear"
+import maximize from "@iconify-icons/solar/maximize-linear"
 
 const solar = (data) =>
   function SolarIcon({ className }) {
@@ -39,3 +40,4 @@ export const Moon = solar(moon)
 export const Monitor = solar(monitor)
 export const Pen = solar(pen)
 export const List = solar(list)
+export const Maximize = solar(maximize)

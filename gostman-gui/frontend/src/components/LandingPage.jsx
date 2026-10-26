@@ -33,6 +33,7 @@ import { SectionLabel } from "./landing/SectionLabel"
 import { ImportSources } from "./landing/ImportSources"
 import { StackSection } from "./landing/StackSection"
 import { GlyphWordmark } from "./landing/GlyphWordmark"
+import { ImageZoom } from "./landing/ImageZoom"
 
 const loadMotionFeatures = () => import("../lib/motionFeatures").then((module) => module.default)
 
@@ -221,15 +222,17 @@ function Spotlight({ spotlight, isReversed }) {
         {spotlight.capture ? (
           <TerminalBlock {...spotlight.capture} />
         ) : (
-          <img
-            src={spotlight.image}
-            alt={spotlight.alt}
-            width={spotlight.width}
-            height={spotlight.height}
-            loading="lazy"
-            decoding="async"
-            className="h-auto w-full rounded-lg border border-border/60"
-          />
+          <ImageZoom src={spotlight.image} alt={spotlight.alt}>
+            <img
+              src={spotlight.image}
+              alt={spotlight.alt}
+              width={spotlight.width}
+              height={spotlight.height}
+              loading="lazy"
+              decoding="async"
+              className="h-auto w-full rounded-lg border border-border/60"
+            />
+          </ImageZoom>
         )}
       </div>
     </div>

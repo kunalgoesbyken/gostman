@@ -4,6 +4,7 @@ import { easeSmooth, springLayout } from "../../lib/motion"
 import { cn } from "../../lib/utils"
 import { whenIdle } from "../../lib/idle"
 import { scrollIntoStrip } from "../../lib/scrollIntoStrip"
+import { ImageZoom } from "./ImageZoom"
 import graphqlShot from "../../assets/landing/graphql.webp"
 import grpcShot from "../../assets/landing/grpc.webp"
 import mcpShot from "../../assets/landing/mcp.webp"
@@ -150,20 +151,22 @@ export function ProductShowcase() {
         aria-labelledby={tabId(active.id)}
         className="mt-6 rounded-xl border border-border/50 bg-card/40 p-1.5 shadow-[0_30px_80px_-24px_hsl(var(--primary)/0.4)] sm:p-2"
       >
-        <div className="aspect-[8/5] overflow-hidden rounded-lg border border-primary/25 bg-background">
-          <AnimatePresence mode="wait" initial={false}>
-            <m.img
-              key={active.id}
-              src={active.image}
-              alt={active.alt}
-              className="h-full w-full object-cover object-left-top"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2, ease: easeSmooth }}
-            />
-          </AnimatePresence>
-        </div>
+        <ImageZoom src={active.image} alt={active.alt} onOpen={() => setHasInteracted(true)}>
+          <div className="aspect-[8/5] overflow-hidden rounded-lg border border-primary/25 bg-background">
+            <AnimatePresence mode="wait" initial={false}>
+              <m.img
+                key={active.id}
+                src={active.image}
+                alt={active.alt}
+                className="h-full w-full object-cover object-left-top"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2, ease: easeSmooth }}
+              />
+            </AnimatePresence>
+          </div>
+        </ImageZoom>
       </div>
     </div>
   )
