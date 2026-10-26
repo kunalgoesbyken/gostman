@@ -34,7 +34,7 @@ Gostman is a native desktop application built with Go and [Wails](https://wails.
 Both are good tools. Gostman is for people who want the paid-tier workflow without a paid tier or an account.
 
 - **Nothing to sign in to.** Collections are plain YAML files in a folder you can commit. The desktop app and the browser version both work without an account.
-- **No telemetry.** No analytics or crash reporting anywhere; the apps contact only the hosts you send to and the services you set up. [What Gostman connects to](docs/getting-started.md#what-gostman-connects-to) lists every network call.
+- **No telemetry.** No analytics or crash reporting in the apps or the command line; they contact only the hosts you send to and the services you set up. Only the home page at gostman.com counts visits, without cookies. [What Gostman connects to](docs/getting-started.md#what-gostman-connects-to) lists every network call.
 - **No tiers.** Data-driven runs, parallel runs, HTML reports, secret managers (Vault, AWS, Azure, Google Cloud, 1Password, Bitwarden, Bitwarden Secrets Manager, KeePassXC), the Git panel and any number of collections are all in the download. Bruno documents several of these under its [Pro and Ultimate plans](https://www.usebruno.com/pricing), and Postman lists custom data files in the Collection Runner on its [paid plans](https://www.postman.com/pricing/).
 - **Sharing without Git.** Send a folder to a teammate as an encrypted link or file that is built on your machine and never uploaded.
 - **More in the same download.** Load testing, Socket.IO, MQTT, GraphQL subscriptions, MCP servers, HAR import, traffic capture, a secret scanner and a mock server, plus a command line that is one binary with no Node.js to install.

@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect } from "react"
 import { Analytics } from "@vercel/analytics/react"
 import { LandingPage } from "./components/LandingPage"
-import { useRoute } from "./hooks/useRoute"
+import { LANDING_ROUTE, normalize, useRoute } from "./hooks/useRoute"
 import { bootLanguage } from "./lib/i18n/boot"
 import { registerServiceWorker } from "./lib/pwa"
 import { preventInputZoom } from "./lib/viewport"
@@ -11,6 +11,13 @@ const WebWorkspace = lazy(async () => {
   const [{ Workspace }, { webBackend }] = await Promise.all([import("./components/Workspace"), import("./lib/backend/web")])
   return { default: (props) => <Workspace backend={webBackend} {...props} /> }
 })
+
+function landingVisit(event) {
+  const url = new URL(event.url)
+  if (normalize(url.pathname) !== LANDING_ROUTE) return null
+  url.hash = ""
+  return { ...event, url: url.href }
+}
 
 function WebApp() {
   const { route, navigate } = useRoute()
@@ -28,18 +35,15 @@ function WebApp() {
     return (
       <>
         <LandingPage onGetStarted={openClient} />
-        <Analytics />
+        <Analytics beforeSend={landingVisit} />
       </>
     )
   }
 
   return (
-    <>
-      <Suspense fallback={null}>
-        <WebWorkspace onBack={openLanding} />
-      </Suspense>
-      <Analytics />
-    </>
+    <Suspense fallback={null}>
+      <WebWorkspace onBack={openLanding} />
+    </Suspense>
   )
 }
 

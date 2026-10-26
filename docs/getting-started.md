@@ -72,14 +72,14 @@ Both make an automatic copy of your data at most once a day and when a new versi
 
 ## What Gostman connects to
 
-Gostman has no telemetry, analytics or crash reporting, in the apps, the command line or the website. Nothing about what you do is sent to the project. Each surface makes these network calls and no others:
+Gostman has no telemetry, analytics or crash reporting in the desktop app, the web app or the command line. Nothing about what you do is sent to the project. Each surface makes these network calls and no others:
 
 | Surface | Network calls |
 | --- | --- |
 | Desktop app | The hosts you send requests to, including OAuth 2.0 servers and addresses you import from. Git remotes when you use the Git panel. The secret managers you set up. Your AI provider, only while AI is switched on and you use it. `api.github.com` once a day, only if you switch on **Check for new versions**. |
 | Command line | The hosts in the collection or on the command line, and the spec addresses you pass to `lint`, `mock --openapi` and `run --contract`. Secret managers only with `--secrets` or `--secrets-env-file`. It never checks for updates. |
 | Web app | Requests go through a relay, because browsers cannot call most APIs directly: the hosted relay at `gostman.com/api/proxy` by default, or [a relay on your own computer](cli.md#local-relay-for-the-web-app). WebSocket connections and AI providers are called straight from your browser. |
-| Website | The home page shows the project's GitHub star count, read from GitHub through `gostman.com/api/stars`, or from `api.github.com` in your browser when that fails. |
+| Website | The home page shows the project's GitHub star count, read from GitHub through `gostman.com/api/stars`, or from `api.github.com` in your browser when that fails. It counts visits with Vercel Web Analytics, which sets no cookies; the address is reported without the part after `#`, and visits to the web app, the guides and the docs are not counted. |
 
 The hosted relay sends your request and returns the answer. It stores neither, and its only log line is written when sending the answer back fails, with that error's text. Vercel, which hosts the site, keeps its standard request logs for the relay, such as the time, the path (for example `/api/proxy?prepare=1`), the status code and the client IP address. The request you send travels in the body of the call, which is not logged. If you would rather nothing went through a third party, use the desktop app, the command line or a local relay.
 
