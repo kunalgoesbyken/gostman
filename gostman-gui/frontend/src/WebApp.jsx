@@ -1,4 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect } from "react"
+import { Analytics } from "@vercel/analytics/react"
 import { LandingPage } from "./components/LandingPage"
 import { useRoute } from "./hooks/useRoute"
 import { bootLanguage } from "./lib/i18n/boot"
@@ -24,13 +25,21 @@ function WebApp() {
   }, [isLanding])
 
   if (isLanding) {
-    return <LandingPage onGetStarted={openClient} />
+    return (
+      <>
+        <LandingPage onGetStarted={openClient} />
+        <Analytics />
+      </>
+    )
   }
 
   return (
-    <Suspense fallback={null}>
-      <WebWorkspace onBack={openLanding} />
-    </Suspense>
+    <>
+      <Suspense fallback={null}>
+        <WebWorkspace onBack={openLanding} />
+      </Suspense>
+      <Analytics />
+    </>
   )
 }
 
