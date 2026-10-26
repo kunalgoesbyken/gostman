@@ -9,9 +9,11 @@ import { docFiles, docOutputFile, docPath, docSlug } from './src/docs/manifest.j
 import { loadDocs } from './site-docs.js'
 import { CLIENT_METADATA_PATH, clientMetadata } from './src/lib/mcpClientMetadata.js'
 import { REPOSITORY } from './src/lib/siteLinks.js'
+import { FAQ } from './src/components/landing/faq.js'
 
 const DEFAULT_SITE_URL = 'https://gostman.com'
 const SITE_URL_TOKEN = '__SITE_URL__'
+const APP_VERSION_TOKEN = '__APP_VERSION__'
 const GUIDE_ENTRY = resolve('src/guides/render.jsx')
 const DOCS_DIR = resolve('../../docs')
 const EMPTY_ROOT = '<div id="root"></div>'
@@ -58,8 +60,21 @@ function llmsTxt(url, docs) {
     '## Docs',
     ...docs.nav.flatMap((section) => ['', `### ${section.title}`, ...section.items.map((item) => docLink(item.href))]),
     '',
+    '## Optional',
+    llmsLink(url, '/llms-full.txt', 'Full documentation', 'every docs page in one Markdown file'),
+    '',
   ].join('\n')
 }
+
+const llmsFullTxt = () => docFiles.map((file) => readFileSync(join(DOCS_DIR, file), 'utf8').trim()).join('\n\n---\n\n') + '\n'
+
+const faqJsonLd = () => JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQ.map(({ question, answer }) => ({ '@type': 'Question', name: question, acceptedAnswer: { '@type': 'Answer', text: answer } })),
+})
+
+const withHeadScript = (html, json) => html.replace('</head>', `<script type="application/ld+json">${json}</script>\n</head>`)
 
 const notFoundHtml = (url, stylesheets) => `<!DOCTYPE html>
 <html lang="en" class="dark">
@@ -170,7 +185,7 @@ export function siteMeta() {
   return {
     name: 'site-meta',
     enforce: 'post',
-    transformIndexHtml: { enforce: 'pre', transform: (html) => html.replaceAll(SITE_URL_TOKEN, siteUrl) },
+    transformIndexHtml: { enforce: 'pre', transform: (html) => html.replaceAll(SITE_URL_TOKEN, siteUrl).replaceAll(APP_VERSION_TOKEN, appVersion) },
     async generateBundle(_options, bundle) {
       this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: sitemapXml(siteUrl) })
       this.emitFile({ type: 'asset', fileName: 'robots.txt', source: robotsTxt(siteUrl) })
@@ -181,6 +196,7 @@ export function siteMeta() {
       const stylesheets = stylesheetsOf(bundle)
       const emit = (fileName, source) => this.emitFile({ type: 'asset', fileName, source })
       emit('llms.txt', llmsTxt(siteUrl, docs))
+      emit('llms-full.txt', llmsFullTxt())
       emit('404.html', notFoundHtml(siteUrl, stylesheets))
       assets.forEach((asset) => emit(asset.fileName, asset.source))
       docs.images.forEach((image) => emit(image.fileName, image.source))
@@ -192,7 +208,7 @@ export function siteMeta() {
       docs.pages.forEach((page) => emit(docOutputFile(page.slug), renderDocsPage(page, shared)))
       const landing = bundle['index.html']
       if (!String(landing.source).includes(EMPTY_ROOT)) this.error('index.html has no empty root element to prerender into')
-      landing.source = String(landing.source).replace(EMPTY_ROOT, `<div id="root">${renderLandingMarkup()}</div>`)
+      landing.source = withHeadScript(String(landing.source).replace(EMPTY_ROOT, `<div id="root">${renderLandingMarkup()}</div>`), faqJsonLd())
     },
   }
 }
