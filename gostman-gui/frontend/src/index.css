@@ -271,6 +271,18 @@
       0 -24px 80px -16px hsl(var(--primary) / 0.45);
   }
 
+  .stack-fade {
+    mask-image: radial-gradient(ellipse 60% 75% at 50% 50%, black 50%, transparent 100%);
+  }
+
+  .glyph-wordmark {
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
+
+  .glyph-wordmark pre {
+    font-size: min(0.75rem, calc(72vw / (var(--glyph-columns) * 0.6)));
+  }
+
   .render-when-visible {
     content-visibility: auto;
     contain-intrinsic-size: auto 60rem;
@@ -551,6 +563,19 @@
   from {
     opacity: 0;
     transform: translateY(1.5rem);
+  }
+}
+
+@keyframes glyph-twinkle {
+  50% {
+    opacity: 0.15;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .glyph-twinkle {
+    animation: glyph-twinkle 3.6s ease-in-out infinite;
+    animation-delay: calc(var(--glyph-step, 0) * -0.3s);
   }
 }
 

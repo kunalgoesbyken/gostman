@@ -125,10 +125,8 @@ function stampServiceWorker() {
   }
 }
 
-const appVersion = JSON.parse(readFileSync(resolve(__dirname, '../wails.json'), 'utf8')).info.productVersion
-
 export default defineConfig({
-  define: { __APP_VERSION__: JSON.stringify(appVersion), ...siteDefine },
+  define: siteDefine,
   plugins: [
     react(),
     localesPlugin(),

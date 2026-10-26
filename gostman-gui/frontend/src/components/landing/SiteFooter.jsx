@@ -1,4 +1,6 @@
 import { BrandIcon } from "../ui/brandIcon"
+import { WEB_APP_URL } from "../../lib/constants"
+import { LICENSE_URL } from "../../lib/siteLinks"
 import { Brand } from "./Brand"
 import { FOOTER_COLUMNS } from "./footerLinks"
 
@@ -11,6 +13,34 @@ function FooterLink({ link }) {
       <BrandIcon brand={link.brand} className="h-4 w-4" />
       {link.label}
     </a>
+  )
+}
+
+const AI_QUESTION = encodeURIComponent(`What is Gostman (${WEB_APP_URL})? Summarise what it does and how it compares with Postman, Insomnia and Bruno.`)
+
+const ASSISTANTS = [
+  { name: "ChatGPT", brand: "openai", href: `https://chatgpt.com/?q=${AI_QUESTION}` },
+  { name: "Claude", brand: "claude", href: `https://claude.ai/new?q=${AI_QUESTION}` },
+]
+
+function AskAssistants() {
+  return (
+    <div className="flex items-center gap-3">
+      <span>Ask an AI about Gostman</span>
+      {ASSISTANTS.map((assistant) => (
+        <a
+          key={assistant.name}
+          href={assistant.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Ask ${assistant.name} about Gostman`}
+          title={assistant.name}
+          className="rounded-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <BrandIcon brand={assistant.brand} className="h-4 w-4" />
+        </a>
+      ))}
+    </div>
   )
 }
 
@@ -42,6 +72,15 @@ export function SiteFooter() {
             <FooterColumn key={column.title} column={column} />
           ))}
         </div>
+      </div>
+      <div className="mx-auto mt-14 flex max-w-6xl flex-col gap-4 border-t border-border/40 pt-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <AskAssistants />
+        <p>
+          Free software under the{" "}
+          <a href={LICENSE_URL} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-foreground">
+            MIT licence
+          </a>
+        </p>
       </div>
     </footer>
   )

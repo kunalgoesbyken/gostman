@@ -21,6 +21,8 @@ export const DOCS_ENTRY = 'docs'
 
 export const siteUrl = (process.env.SITE_URL || DEFAULT_SITE_URL).replace(/\/+$/, '')
 
+const appVersion = JSON.parse(readFileSync(resolve('../wails.json'), 'utf8')).info.productVersion
+
 const sitemapPaths = ['', ...guidePages.map((page) => page.path), ...docFiles.map((file) => docPath(docSlug(file)).slice(1))]
 
 const sitemapEntry = (url, path) => `  <url>
@@ -128,7 +130,7 @@ async function buildGuideRenderer(bundle) {
     assetNames: 'assets/[name]-[hash]',
     loader: { '.jpg': 'file', '.png': 'file', '.webp': 'file' },
     plugins: [bundledImageUrls(bundle)],
-    define: { 'process.env.NODE_ENV': '"production"', __GITHUB_STARS__: siteDefine.__GITHUB_STARS__ },
+    define: { 'process.env.NODE_ENV': '"production"', ...siteDefine },
     logLevel: 'silent',
   })
 
@@ -210,4 +212,4 @@ async function fetchGitHubStars() {
 
 const githubStars = await fetchGitHubStars()
 
-export const siteDefine = { __SITE_URL__: JSON.stringify(siteUrl), __GITHUB_STARS__: JSON.stringify(githubStars) }
+export const siteDefine = { __SITE_URL__: JSON.stringify(siteUrl), __GITHUB_STARS__: JSON.stringify(githubStars), __APP_VERSION__: JSON.stringify(appVersion) }

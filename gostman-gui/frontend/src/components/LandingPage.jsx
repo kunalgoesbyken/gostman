@@ -29,6 +29,11 @@ import { SplitHeading } from "./landing/SplitHeading"
 import { EverythingSection } from "./landing/EverythingSection"
 import { ComparisonSection } from "./landing/ComparisonSection"
 import { FaqSection } from "./landing/FaqSection"
+import { AnnouncementBar } from "./landing/AnnouncementBar"
+import { SectionLabel } from "./landing/SectionLabel"
+import { ImportSources } from "./landing/ImportSources"
+import { StackSection } from "./landing/StackSection"
+import { GlyphWordmark } from "./landing/GlyphWordmark"
 
 const loadMotionFeatures = () => import("../lib/motionFeatures").then((module) => module.default)
 
@@ -232,6 +237,15 @@ function Spotlight({ spotlight, isReversed }) {
   )
 }
 
+function BlueprintRails({ children }) {
+  return (
+    <div className="relative">
+      <div className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-full max-w-[75rem] -translate-x-1/2 border-x border-dashed border-border/40 lg:block" aria-hidden="true" />
+      {children}
+    </div>
+  )
+}
+
 export function LandingPage({ onGetStarted }) {
   const stars = useGitHubStars()
 
@@ -243,7 +257,7 @@ export function LandingPage({ onGetStarted }) {
         Skip to main content
       </a>
       <div className="dark min-h-screen bg-background text-foreground overflow-x-clip" id="main-content">
-        <NavBar>
+        <NavBar banner={<AnnouncementBar />}>
           <Brand />
           <div className="flex items-center gap-1 sm:gap-2">
             {SECTION_LINKS.map((link) => (
@@ -267,7 +281,7 @@ export function LandingPage({ onGetStarted }) {
 
         <div className="relative overflow-hidden">
           <div className="landing-stripes pointer-events-none absolute inset-x-0 top-0 h-[760px]" aria-hidden="true" />
-          <section className="relative pt-36 pb-16 px-6">
+          <section className="relative pt-44 pb-16 px-6">
             <div className="relative max-w-4xl mx-auto">
               <div className="text-center space-y-6">
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.1] [text-wrap:balance]">
@@ -298,39 +312,41 @@ export function LandingPage({ onGetStarted }) {
             <div className="landing-horizon pointer-events-none absolute left-1/2 top-[30%] hidden h-[160%] w-[150%] -translate-x-1/2 md:block" aria-hidden="true" />
             <div className="relative max-w-5xl mx-auto">
               <ProductShowcase />
+              <ImportSources className="mt-20" />
             </div>
           </section>
         </div>
 
-        <section id="features" className="render-when-visible relative py-20 px-6" aria-labelledby="workflow-heading">
-          <div className="mx-auto max-w-6xl">
-            <div className="mb-12 max-w-2xl">
-              <SplitHeading
-                id="workflow-heading"
-                text="One collection, from the first request to CI"
-                className="text-3xl font-semibold tracking-tight md:text-5xl [text-wrap:balance]"
-              />
-              <p className="mt-5 leading-relaxed text-muted-foreground">
-                Tests, the command line, Git, mocks, captured traffic, sharing and your coding agent all work from the same files.
-              </p>
+        <BlueprintRails>
+          <section id="features" className="render-when-visible relative py-20 px-6" aria-labelledby="workflow-heading">
+            <div className="mx-auto max-w-6xl">
+              <div className="mb-12 max-w-2xl">
+                <SectionLabel number="001" label="Workflow" />
+                <SplitHeading
+                  id="workflow-heading"
+                  text="One collection, from the first request to CI"
+                  className="text-3xl font-semibold tracking-tight md:text-5xl [text-wrap:balance]"
+                />
+                <p className="mt-5 leading-relaxed text-muted-foreground">
+                  Tests, the command line, Git, mocks, captured traffic, sharing and your coding agent all work from the same files.
+                </p>
+              </div>
+              <div className="divide-y divide-border/60 rounded-2xl border border-border/60 bg-card/40 lg:-mx-6 lg:rounded-none lg:border-x-0 lg:bg-transparent">
+                {SPOTLIGHTS.map((spotlight, index) => (
+                  <Spotlight key={spotlight.title} spotlight={spotlight} isReversed={index % 2 === 1} />
+                ))}
+              </div>
             </div>
-            <div className="divide-y divide-border/60 rounded-2xl border border-border/60 bg-card/40">
-              {SPOTLIGHTS.map((spotlight, index) => (
-                <Spotlight key={spotlight.title} spotlight={spotlight} isReversed={index % 2 === 1} />
-              ))}
-            </div>
-          </div>
-        </section>
+          </section>
 
-        <EverythingSection onGetStarted={onGetStarted} />
-        <ComparisonSection />
-        <FaqSection />
+          <EverythingSection onGetStarted={onGetStarted} />
+          <ComparisonSection />
+          <FaqSection />
+          <StackSection />
+        </BlueprintRails>
 
-        <section className="render-when-visible relative px-6 pb-24">
-          <div className="relative mx-auto max-w-6xl rounded-2xl border border-border/60 bg-card px-6 py-16 text-center md:py-20">
-            <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl" aria-hidden="true">
-              <div className="landing-glow absolute inset-x-0 top-1/3 h-full opacity-70" />
-            </div>
+        <section className="render-when-visible relative pt-24 text-center">
+          <div className="mx-auto max-w-6xl px-6">
             <SplitHeading
               text="Send your first request in a minute"
               className="text-3xl md:text-5xl font-semibold tracking-tight [text-wrap:balance]"
@@ -342,6 +358,7 @@ export function LandingPage({ onGetStarted }) {
             <p className="mt-6 text-sm text-muted-foreground">Free and open source · {PLATFORMS} · No account</p>
             <InstallCommands className="relative mx-auto mt-10 max-w-2xl text-left" />
           </div>
+          <GlyphWordmark className="mt-20" />
         </section>
 
         <SiteFooter />

@@ -148,20 +148,22 @@ export function ProductShowcase() {
         role="tabpanel"
         id={panelId(active.id)}
         aria-labelledby={tabId(active.id)}
-        className="mt-6 aspect-[8/5] overflow-hidden rounded-lg border border-primary/25 bg-background shadow-[0_30px_80px_-24px_hsl(var(--primary)/0.4)]"
+        className="mt-6 rounded-xl border border-border/50 bg-card/40 p-1.5 shadow-[0_30px_80px_-24px_hsl(var(--primary)/0.4)] sm:p-2"
       >
-        <AnimatePresence mode="wait" initial={false}>
-          <m.img
-            key={active.id}
-            src={active.image}
-            alt={active.alt}
-            className="h-full w-full object-cover object-left-top"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: easeSmooth }}
-          />
-        </AnimatePresence>
+        <div className="aspect-[8/5] overflow-hidden rounded-lg border border-primary/25 bg-background">
+          <AnimatePresence mode="wait" initial={false}>
+            <m.img
+              key={active.id}
+              src={active.image}
+              alt={active.alt}
+              className="h-full w-full object-cover object-left-top"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease: easeSmooth }}
+            />
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   )
