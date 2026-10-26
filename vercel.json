@@ -43,7 +43,7 @@
             "destination": "/api/$1"
         },
         {
-            "source": "/((?!api/|assets/).*)",
+            "source": "/oauth-callback",
             "destination": "/index.html"
         }
     ]

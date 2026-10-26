@@ -59,6 +59,42 @@ function llmsTxt(url, docs) {
   ].join('\n')
 }
 
+const notFoundHtml = (url, stylesheets) => `<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="/theme-boot.js"></script>
+<title>Page not found | Gostman</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="any">
+${stylesheets.map((href) => `<link rel="stylesheet" href="${href}">`).join('')}
+<style>
+.nf{min-height:100dvh;display:grid;align-items:center;padding:clamp(1.5rem,6vw,5rem)}
+.nf main{width:100%;max-width:42rem;margin:0 auto}
+.nf .code{margin:0;font-size:clamp(5rem,22vw,11rem);font-weight:700;letter-spacing:-.06em;line-height:.9;color:hsl(var(--border))}
+.nf h1{margin:1.5rem 0 .5rem;font-size:1.5rem;font-weight:600;letter-spacing:-.02em}
+.nf p{margin:0 0 2rem;max-width:36ch;line-height:1.6;color:hsl(var(--muted-foreground))}
+.nf nav{display:flex;flex-wrap:wrap;gap:.75rem}
+.nf a{display:inline-flex;align-items:center;height:2.5rem;padding:0 1rem;border:1px solid hsl(var(--border));border-radius:.5rem;font-size:.875rem;font-weight:500;color:inherit;text-decoration:none;transition:background-color .15s,transform .15s}
+.nf a:first-child{background:hsl(var(--primary));border-color:hsl(var(--primary));color:hsl(var(--primary-foreground))}
+.nf a:hover{background:hsl(var(--muted))}
+.nf a:first-child:hover{background:hsl(var(--primary));opacity:.9}
+.nf a:active{transform:translateY(1px)}
+.nf a:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px}
+</style>
+</head>
+<body class="nf">
+<main>
+<div class="code" aria-hidden="true">404</div>
+<h1>Page not found</h1>
+<p>There is no page at this address. It may have moved, or the link may be mistyped.</p>
+<nav><a href="${url}/">Home</a><a href="${url}/docs">Docs</a><a href="${url}/web">Web app</a></nav>
+</main>
+</body>
+</html>
+`
+
 const contentHash = (source) => createHash('sha256').update(source).digest('hex')
 
 function bundledImageUrls(bundle) {
@@ -143,6 +179,7 @@ export function siteMeta() {
       const stylesheets = stylesheetsOf(bundle)
       const emit = (fileName, source) => this.emitFile({ type: 'asset', fileName, source })
       emit('llms.txt', llmsTxt(siteUrl, docs))
+      emit('404.html', notFoundHtml(siteUrl, stylesheets))
       assets.forEach((asset) => emit(asset.fileName, asset.source))
       docs.images.forEach((image) => emit(image.fileName, image.source))
       guidePages.forEach((page) => emit(`${page.path}/index.html`, renderGuidePage(page, { siteUrl, stylesheets })))

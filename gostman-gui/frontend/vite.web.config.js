@@ -44,6 +44,11 @@ function serveWebEntryInDev(entry) {
   }
 }
 
+const noindexed = (html) =>
+  String(html)
+    .replace(/<meta name="robots"[^>]*>/, '<meta name="robots" content="noindex, follow" />')
+    .replace(/<link rel="canonical"[^>]*>\s*/, '')
+
 const withLinks = (html, links) => String(html).replace('</head>', `${links.join('\n')}\n</head>`)
 
 function preloadedRoutePage(route, module) {
@@ -68,7 +73,7 @@ function preloadedRoutePage(route, module) {
         ...styles.map((fileName) => `<link rel="prefetch" as="style" href="/${fileName}">`),
         ...files.map((fileName) => `<link rel="prefetch" as="script" crossorigin href="/${fileName}">`),
       ]
-      this.emitFile({ type: 'asset', fileName: `${route}/index.html`, source: withLinks(page.source, preloads) })
+      this.emitFile({ type: 'asset', fileName: `${route}/index.html`, source: withLinks(noindexed(page.source), preloads) })
       page.source = withLinks(page.source, prefetches)
     },
   }
