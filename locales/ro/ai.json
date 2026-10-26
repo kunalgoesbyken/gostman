@@ -17,7 +17,7 @@
     "content": "Conținut",
     "replyFormat": "Formatul răspunsului",
     "scriptLabel": "Script",
-    "preRequest": "Pre-cerere",
+    "preRequest": "Înainte de apel",
     "postResponse": "Post-răspuns",
     "providerLabel": "AI: {{label}}",
     "waitingFor": "Se așteaptă {{label}}",

@@ -54,7 +54,7 @@
       "error_one": "Erori ({{count}})",
       "error_few": "Erori ({{count}})",
       "error_other": "Erori ({{count}})",
-      "warning_one": "Avertismente ({{count}})",
+      "warning_one": "Avertisment ({{count}})",
       "warning_few": "Avertismente ({{count}})",
       "warning_other": "Avertismente ({{count}})",
       "info_one": "Info ({{count}})",
