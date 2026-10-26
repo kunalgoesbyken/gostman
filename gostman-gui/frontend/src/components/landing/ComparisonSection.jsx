@@ -4,6 +4,29 @@ import { ComparisonTable } from "./ComparisonTable"
 import { SectionLabel } from "./SectionLabel"
 import { SplitHeading } from "./SplitHeading"
 import { StatusGlyph } from "./StatusGlyph"
+import { SITE_LANGUAGE } from "./content"
+
+const MIGRATION_GUIDES = [
+  { slug: "coming-from-postman", label: "Coming from Postman" },
+  { slug: "coming-from-bruno", label: "Coming from Bruno" },
+  { slug: "coming-from-insomnia", label: "Coming from Insomnia" },
+]
+
+const GUIDE_LINK = "text-foreground underline underline-offset-4 hover:text-primary"
+
+const guideLabelled = (label) => MIGRATION_GUIDES.find((guide) => guide.label === label)
+
+function MigrationLinks() {
+  const parts = new Intl.ListFormat(SITE_LANGUAGE, { type: "disjunction" }).formatToParts(MIGRATION_GUIDES.map((guide) => guide.label))
+  return parts.map((part, index) => {
+    if (part.type !== "element") return part.value
+    return (
+      <a key={index} href={docPath(guideLabelled(part.value).slug)} className={GUIDE_LINK}>
+        {part.value}
+      </a>
+    )
+  })
+}
 
 function Legend() {
   return (
@@ -30,15 +53,7 @@ export function ComparisonSection() {
             className="text-3xl font-semibold tracking-tight md:text-5xl [text-wrap:balance]"
           />
           <p className="mt-5 leading-relaxed text-muted-foreground">
-            From their public pricing and docs, October 2026. Moving from Bruno or Insomnia? Read{" "}
-            <a href={docPath("coming-from-bruno")} className="text-foreground underline underline-offset-4 hover:text-primary">
-              Coming from Bruno
-            </a>
-            {" "}or{" "}
-            <a href={docPath("coming-from-insomnia")} className="text-foreground underline underline-offset-4 hover:text-primary">
-              Coming from Insomnia
-            </a>
-            .
+            From their public pricing and docs, October 2026. Moving from another client? Read <MigrationLinks />.
           </p>
         </div>
 

@@ -33,7 +33,7 @@ export const guidePages = [
         items: [
           "No hosted collaboration, single sign-on or cloud monitors, because there are no accounts",
           "Builds are not code-signed yet, so Windows and macOS ask for confirmation the first time",
-          "The browser version relays requests through a small proxy and cannot reach localhost; use the desktop app for local APIs",
+          "The browser version relays requests through a hosted proxy that cannot reach localhost; for local APIs, run gostman relay on your computer or use the desktop app",
         ],
       },
       {

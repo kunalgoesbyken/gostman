@@ -57,4 +57,5 @@ Gostman is an API client for REST, GraphQL, gRPC and WebSocket that you, your CI
 - [Guides by task](guides.md): migrate from Postman, mock a backend, record traffic, load test, publish docs and more.
 - [Troubleshooting](troubleshooting.md): common problems and their fixes.
 - [Translating Gostman](translating.md): request a language, help translate, and how the translation files work.
+- [About the project](project.md): who maintains Gostman, how releases work, what happens to your collections if development stops, and how to report a security problem.
 - [Example collections](../examples/README.md): ready-to-run workspaces you can open or run.

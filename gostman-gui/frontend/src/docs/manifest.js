@@ -66,7 +66,7 @@ export const docSections = [
   },
   {
     title: "Help",
-    docs: [{ file: "guides.md" }, { file: "troubleshooting.md", aliases: { "tests-and-runs": "checks-and-runs" }, keywords: ["localhost", "error", "problem"] }, { file: "translating.md", label: "Translating", keywords: ["language", "translation", "localization", "i18n", "weblate"] }],
+    docs: [{ file: "guides.md" }, { file: "troubleshooting.md", aliases: { "tests-and-runs": "checks-and-runs" }, keywords: ["localhost", "error", "problem"] }, { file: "translating.md", label: "Translating", keywords: ["language", "translation", "localization", "i18n", "weblate"] }, { file: "project.md", label: "About the project", keywords: ["maintainer", "license", "licence", "releases", "security", "vulnerability", "fork", "roadmap"] }],
   },
 ]
 
