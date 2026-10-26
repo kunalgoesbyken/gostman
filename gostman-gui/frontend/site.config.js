@@ -222,11 +222,18 @@ export function siteMeta() {
   }
 }
 
+const GITHUB_HEADERS = { Accept: 'application/vnd.github+json', 'User-Agent': 'Gostman-Site-Build' }
+
+const fetchRepository = (token) =>
+  fetch(`https://api.github.com/repos/${REPOSITORY}`, {
+    headers: token ? { ...GITHUB_HEADERS, Authorization: `Bearer ${token}` } : GITHUB_HEADERS,
+    signal: AbortSignal.timeout(STARS_TIMEOUT_MS),
+  })
+
 async function fetchGitHubStars() {
-  const headers = { Accept: 'application/vnd.github+json', 'User-Agent': 'Gostman-Site-Build' }
-  if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`
   try {
-    const response = await fetch(`https://api.github.com/repos/${REPOSITORY}`, { headers, signal: AbortSignal.timeout(STARS_TIMEOUT_MS) })
+    const authorized = await fetchRepository(process.env.GITHUB_TOKEN)
+    const response = authorized.status === 401 ? await fetchRepository() : authorized
     if (!response.ok) return null
     const { stargazers_count: stars } = await response.json()
     return Number.isFinite(stars) ? stars : null
