@@ -1,4 +1,6 @@
-import { DOCS_URL } from "../lib/siteLinks"
+import { docPath } from "../docs/manifest.js"
+
+const POSTMAN_SCRIPTS_ON_IMPORT = "Common pm.* script calls are rewritten to Gostman's script API on import, and the import summary lists the lines that need rewriting by hand."
 
 export const guidePages = [
   {
@@ -23,7 +25,7 @@ export const guidePages = [
         brands: ["postman", "openapi", "insomnia", "bruno"],
         paragraphs: [
           "Import a Postman collection, or OpenAPI, Insomnia, HAR, WSDL, Bruno, .http files and curl. Collections export back to Postman, OpenAPI, HAR, Bruno, .http files and Markdown.",
-          "Imported scripts are kept and listed in the import summary. Gostman scripts use test() and expect() rather than the Postman pm API, so review them after importing.",
+          POSTMAN_SCRIPTS_ON_IMPORT,
         ],
       },
       {
@@ -44,6 +46,7 @@ export const guidePages = [
         ],
       },
     ],
+    links: [{ label: "Coming from Postman", href: docPath("coming-from-postman") }, { label: "Gostman and Postman compared", href: docPath("gostman-vs-postman") }],
   },
   {
     path: "api-tests-in-ci",
@@ -66,10 +69,10 @@ export const guidePages = [
       },
       {
         heading: "Starting from a Postman collection",
-        paragraphs: ["Import the collection in the app, save it to a folder, and point gostman run at that folder. Imported scripts are kept and flagged in the import summary, and Gostman scripts use test() and expect()."],
+        paragraphs: ["Import the collection in the app, save it to a folder, and point gostman run at that folder.", POSTMAN_SCRIPTS_ON_IMPORT],
       },
     ],
-    links: [{ label: "CI recipes", href: `${DOCS_URL}/ci.md` }, { label: "Command line reference", href: `${DOCS_URL}/cli.md` }],
+    links: [{ label: "CI recipes", href: docPath("ci") }, { label: "Command line reference", href: docPath("cli") }],
   },
   {
     path: "api-client-mcp-server",
@@ -94,6 +97,6 @@ export const guidePages = [
         paragraphs: ["This guards against accidental leaks. It does not protect against a server that echoes a secret back in a transformed form."],
       },
     ],
-    links: [{ label: "Use Gostman from a coding agent", href: `${DOCS_URL}/agents.md` }],
+    links: [{ label: "Use Gostman from a coding agent", href: docPath("agents") }],
   },
 ]

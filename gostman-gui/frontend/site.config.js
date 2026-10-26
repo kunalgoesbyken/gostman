@@ -112,6 +112,13 @@ ${stylesheets.map((href) => `<link rel="stylesheet" href="${href}">`).join('')}
 </html>
 `
 
+const docPaths = new Set(docFiles.map((file) => docPath(docSlug(file))))
+
+const guideLinks = (page) => [...(page.links ?? []), ...page.sections.flatMap((section) => section.links ?? [])]
+
+const missingGuideDocs = () =>
+  guidePages.flatMap(guideLinks).map((link) => link.href).filter((href) => href.startsWith(docPath('')) && !docPaths.has(href))
+
 const contentHash = (source) => createHash('sha256').update(source).digest('hex')
 
 function bundledImageUrls(bundle) {
@@ -187,6 +194,8 @@ export function siteMeta() {
     enforce: 'post',
     transformIndexHtml: { enforce: 'pre', transform: (html) => html.replaceAll(SITE_URL_TOKEN, siteUrl).replaceAll(APP_VERSION_TOKEN, appVersion) },
     async generateBundle(_options, bundle) {
+      const missingDocs = missingGuideDocs()
+      if (missingDocs.length) this.error(`Guide pages link to docs that do not exist: ${missingDocs.join(', ')}`)
       this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: sitemapXml(siteUrl) })
       this.emitFile({ type: 'asset', fileName: 'robots.txt', source: robotsTxt(siteUrl) })
       this.emitFile({ type: 'asset', fileName: CLIENT_METADATA_PATH.slice(1), source: JSON.stringify(clientMetadata(siteUrl), null, 2) })
