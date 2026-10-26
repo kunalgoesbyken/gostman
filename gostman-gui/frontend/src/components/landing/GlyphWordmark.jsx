@@ -43,7 +43,7 @@ const LINES = Array.from({ length: ROWS }, (_, row) => joinRuns(Array.from({ len
 
 export function GlyphWordmark({ className }) {
   return (
-    <div aria-hidden="true" className={cn("glyph-wordmark flex justify-center overflow-hidden border-t border-border/40 py-8", className)}>
+    <div aria-hidden="true" className={cn("glyph-wordmark flex justify-center overflow-hidden py-8", className)}>
       <pre className="reveal-on-scroll m-0 shrink-0 font-mono font-bold leading-none" style={{ "--glyph-columns": WORD_WIDTH }}>
         {LINES.map((runs, row) => (
           <div key={row}>

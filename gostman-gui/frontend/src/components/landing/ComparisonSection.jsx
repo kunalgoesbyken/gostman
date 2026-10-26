@@ -20,7 +20,7 @@ function Legend() {
 
 export function ComparisonSection() {
   return (
-    <section id="compare" className="render-when-visible relative border-y border-border/60 bg-card/40 px-6 py-24" aria-labelledby="comparison-heading">
+    <section id="compare" className="render-when-visible relative px-6 py-24" aria-labelledby="comparison-heading">
       <div className="mx-auto max-w-6xl">
         <div className="mb-12 max-w-2xl">
           <SectionLabel number="003" label="Compare" />

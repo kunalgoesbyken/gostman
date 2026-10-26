@@ -210,7 +210,7 @@ function CallToActions({ onGetStarted, className, style }) {
 
 function Spotlight({ spotlight, isReversed }) {
   return (
-    <div className="grid items-center gap-8 p-6 md:p-10 lg:grid-cols-12 lg:gap-12 lg:p-12">
+    <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-12">
       <div className={cn("min-w-0 lg:col-span-5", isReversed && "lg:order-2")}>
         <SplitHeading as="h3" text={spotlight.title} className="text-2xl md:text-3xl font-semibold tracking-tight [text-wrap:balance]" />
         <p className="mt-4 leading-relaxed text-muted-foreground">{spotlight.description}</p>
@@ -232,15 +232,6 @@ function Spotlight({ spotlight, isReversed }) {
           />
         )}
       </div>
-    </div>
-  )
-}
-
-function BlueprintRails({ children }) {
-  return (
-    <div className="relative">
-      <div className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-full max-w-[75rem] -translate-x-1/2 border-x border-dashed border-border/40 lg:block" aria-hidden="true" />
-      {children}
     </div>
   )
 }
@@ -316,33 +307,31 @@ export function LandingPage({ onGetStarted }) {
           </section>
         </div>
 
-        <BlueprintRails>
-          <section id="features" className="render-when-visible relative py-20 px-6" aria-labelledby="workflow-heading">
-            <div className="mx-auto max-w-6xl">
-              <div className="mb-12 max-w-2xl">
-                <SectionLabel number="001" label="Workflow" />
-                <SplitHeading
-                  id="workflow-heading"
-                  text="One collection, from the first request to CI"
-                  className="text-3xl font-semibold tracking-tight md:text-5xl [text-wrap:balance]"
-                />
-                <p className="mt-5 leading-relaxed text-muted-foreground">
-                  Tests, the command line, Git, mocks, captured traffic, sharing and your coding agent all work from the same files.
-                </p>
-              </div>
-              <div className="divide-y divide-border/60 rounded-2xl border border-border/60 bg-card/40 lg:-mx-6 lg:rounded-none lg:border-x-0 lg:bg-transparent">
-                {SPOTLIGHTS.map((spotlight, index) => (
-                  <Spotlight key={spotlight.title} spotlight={spotlight} isReversed={index % 2 === 1} />
-                ))}
-              </div>
+        <section id="features" className="render-when-visible relative py-20 px-6" aria-labelledby="workflow-heading">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-12 max-w-2xl">
+              <SectionLabel number="001" label="Workflow" />
+              <SplitHeading
+                id="workflow-heading"
+                text="One collection, from the first request to CI"
+                className="text-3xl font-semibold tracking-tight md:text-5xl [text-wrap:balance]"
+              />
+              <p className="mt-5 leading-relaxed text-muted-foreground">
+                Tests, the command line, Git, mocks, captured traffic, sharing and your coding agent all work from the same files.
+              </p>
             </div>
-          </section>
+            <div className="space-y-20 lg:space-y-28">
+              {SPOTLIGHTS.map((spotlight, index) => (
+                <Spotlight key={spotlight.title} spotlight={spotlight} isReversed={index % 2 === 1} />
+              ))}
+            </div>
+          </div>
+        </section>
 
-          <EverythingSection onGetStarted={onGetStarted} />
-          <ComparisonSection />
-          <FaqSection />
-          <StackSection />
-        </BlueprintRails>
+        <EverythingSection onGetStarted={onGetStarted} />
+        <ComparisonSection />
+        <FaqSection />
+        <StackSection />
 
         <section className="render-when-visible relative pt-24 text-center">
           <div className="mx-auto max-w-6xl px-6">
