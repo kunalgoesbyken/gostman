@@ -79,6 +79,8 @@ Mark a row as secret with its lock. Environment variables, global variables and 
 - Only the name of a secret variable is written to the environment file (as `meta`), or for collection variables to `gostman.yaml` (as `variablesMeta`) or to the top-level folder's `folder.yaml` (as `collectionVariablesMeta`), never its value. Copying a workspace folder to another computer therefore leaves the secret values behind.
 - **Web**: there is no keychain in a browser, so values stay in the browser's storage (IndexedDB) and are still left out of exports and share links.
 - **CLI**: provide the value yourself, for example `gostman run <collection> --var-from-env API_TOKEN` (the environment variable name becomes the variable name) or `--var token=value`.
+- **A variable you do not mark is saved as plain text.** When the value of an unmarked variable looks like a credential (a known token format such as a GitHub or AWS key, a JSON Web Token, a private key, or a random-looking value under a name such as `token` or `api_key`), the row shows a warning with a **Mark as secret** button. The check runs in your window and never sends the value anywhere. Short passwords are not recognised, so mark those yourself.
+- **`.gitignore`**: a new workspace folder gets a `.gitignore` that keeps `.env`, `.env.*` (except `.env.example`) and the `.gostman-*.tmp` leftovers of an interrupted save out of Git. An existing `.gitignore` is never changed, and workspaces created by earlier versions get the file when you run `gostman init` on them.
 
 ## Secret managers
 

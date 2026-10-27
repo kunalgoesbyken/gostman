@@ -166,6 +166,9 @@ func Create(root string, collection Collection) (*Workspace, error) {
 	if err := (disk{root: absolute}).write(ManifestName, manifest); err != nil {
 		return nil, err
 	}
+	if _, err := WriteGitignore(absolute); err != nil {
+		return nil, err
+	}
 	workspace, err := Open(absolute)
 	if err != nil {
 		return nil, err

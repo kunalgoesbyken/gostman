@@ -7,7 +7,7 @@ gostman init
 claude mcp add gostman -- gostman mcp --workspace /path/to/project/gostman --var-from-env API_TOKEN
 ```
 
-`gostman init` creates the workspace in the current folder, or in a `gostman` folder inside it when the current folder already holds other files, such as a repository root. It never overwrites a file, and it prints the registration command with the workspace's absolute path, because MCP clients start the server from their own folder. For other clients, register the command `gostman` with the arguments `mcp --workspace <path>`.
+`gostman init` creates the workspace in the current folder, or in a `gostman` folder inside it when the current folder already holds other files, such as a repository root. It never overwrites a file, adds a `.gitignore` for `.env` files when the workspace has none, and it prints the registration command with the workspace's absolute path, because MCP clients start the server from their own folder. For other clients, register the command `gostman` with the arguments `mcp --workspace <path>`.
 
 Add your requests before the agent needs them, in the app or with `gostman import openapi.yaml --out <path>`: the agent gets the value of `API_TOKEN`, or of any other secret, only for addresses where one of your own requests sends `{{API_TOKEN}}` (see [Safety](#safety)).
 

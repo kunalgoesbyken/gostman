@@ -18,6 +18,7 @@
   "environment.enabled": "Accessible label of a checkbox that switches one variable on or off.",
   "environment.secret": "Accessible label of a button that marks a variable value as secret (hidden, kept apart from files).",
   "environment.notSecret": "Accessible label of a button that shows the value is not secret.",
+  "environment.looksLikeCredential": "Warning under a variable whose value resembles a password, token or key. A button next to it marks the variable as secret.",
   "environment.reveal": "Accessible label of a button that shows a hidden value.",
   "environment.hide": "Accessible label of a button that hides a value.",
   "environment.nameRequired": "Short validation message under a variable name field.",

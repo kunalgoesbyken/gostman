@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Eye, EyeOff, KeyRound, Lock, LockOpen, X } from "lucide-react"
-import { IconButton } from "./ui/button"
+import { Button, IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Input } from "./ui/input"
 import { Notice, SectionLabel } from "./ui/panel"
 import { BLANK_REFERENCE, ReferenceFields } from "./SecretReferenceFields"
 import { useSecretConnections } from "../hooks/useSecretConnections"
+import { looksLikeCredential } from "../lib/credentialLook"
 import { ENVIRONMENT_TEXT as TEXT } from "../lib/environmentText"
 import { REFERENCE_TEXT } from "../lib/secretsText"
 import { asText } from "../lib/variableScopes"
@@ -141,11 +142,25 @@ function RowCells({ row, isDraft, isRevealed, focusField, features, references, 
   )
 }
 
+const isUnmarkedCredential = (row, isDraft, features) => (
+  features.secret && !features.readOnly && !isDraft && row.enabled && !row.secret && !row.ref && looksLikeCredential(row.name, row.value)
+)
+
+function CredentialHint({ onMarkSecret }) {
+  return (
+    <div role="status" className="flex items-center gap-2 px-3 pb-2 text-xs text-warning">
+      <span className="min-w-0 flex-1">{TEXT.looksLikeCredential}</span>
+      <Button variant="outline" size="sm" onClick={onMarkSecret}>{TEXT.secret}</Button>
+    </div>
+  )
+}
+
 function Row(props) {
-  const { row, references, onChange } = props
+  const { row, isDraft, features, references, onChange } = props
   return (
     <div className={cn("border-b border-border", !row.enabled && "opacity-50")}>
       <RowCells {...props} />
+      {isUnmarkedCredential(row, isDraft, features) && <CredentialHint onMarkSecret={() => onChange({ secret: true })} />}
       {row.ref && references && <ReferenceFields reference={row.ref} {...references} onChange={(ref) => onChange({ ref })} />}
     </div>
   )

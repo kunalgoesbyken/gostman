@@ -32,6 +32,7 @@
     "enabled": "Use this variable",
     "secret": "Mark as secret",
     "notSecret": "Stored in plain text",
+    "looksLikeCredential": "This looks like a credential. A value that is not marked secret is saved as plain text, in the folder's files and in exports.",
     "reveal": "Show value",
     "hide": "Hide value",
     "removeRow": "Delete variable",

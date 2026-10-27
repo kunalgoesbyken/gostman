@@ -77,6 +77,14 @@ func createWorkspace(root string, stdout io.Writer) error {
 	return nil
 }
 
+func addGitignore(root string, stdout io.Writer) error {
+	created, err := workspace.WriteGitignore(root)
+	if created {
+		fmt.Fprintf(stdout, "Added %s so .env files and save leftovers stay out of Git.\n", workspace.GitignoreName)
+	}
+	return err
+}
+
 func prepareWorkspace(root string, stdout io.Writer) (string, error) {
 	state, err := workspace.Inspect(root)
 	if err != nil {
@@ -85,7 +93,7 @@ func prepareWorkspace(root string, stdout io.Writer) (string, error) {
 	switch state {
 	case workspace.Existing:
 		fmt.Fprintf(stdout, "%s is already a Gostman workspace.\n", root)
-		return root, nil
+		return root, addGitignore(root, stdout)
 	case workspace.Foreign:
 		return nestWorkspace(root, stdout)
 	}
@@ -101,7 +109,7 @@ func nestWorkspace(root string, stdout io.Writer) (string, error) {
 	switch state {
 	case workspace.Existing:
 		fmt.Fprintf(stdout, "%s is already a Gostman workspace.\n", nested)
-		return nested, nil
+		return nested, addGitignore(nested, stdout)
 	case workspace.Foreign:
 		return "", fmt.Errorf("%s and %s already contain other files; name an empty folder, for example \"gostman init api\"", root, nested)
 	}

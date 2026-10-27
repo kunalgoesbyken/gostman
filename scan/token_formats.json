@@ -1,0 +1,12 @@
+[
+  { "id": "aws-access-key-id", "prefixes": ["AKIA", "ASIA", "ABIA", "ACCA"], "minBody": 16, "maxBody": 16, "charset": ["upper", "digit"] },
+  { "id": "github-token", "prefixes": ["ghp_", "gho_", "ghu_", "ghs_", "ghr_"], "minBody": 36, "maxBody": 36, "charset": ["upper", "lower", "digit"] },
+  { "id": "github-fine-grained-token", "prefixes": ["github_pat_"], "minBody": 82, "maxBody": 82, "charset": ["upper", "lower", "digit", "underscore"] },
+  { "id": "gitlab-token", "prefixes": ["glpat-"], "minBody": 20, "maxBody": 40, "charset": ["upper", "lower", "digit", "dash", "underscore"] },
+  { "id": "slack-token", "prefixes": ["xoxb-", "xoxp-", "xoxa-", "xoxr-", "xoxs-", "xapp-"], "minBody": 20, "maxBody": 200, "charset": ["upper", "lower", "digit", "dash"] },
+  { "id": "stripe-live-key", "prefixes": ["sk_live_", "rk_live_"], "minBody": 24, "maxBody": 99, "charset": ["upper", "lower", "digit"] },
+  { "id": "google-api-key", "prefixes": ["AIza"], "minBody": 35, "maxBody": 35, "charset": ["upper", "lower", "digit", "dash", "underscore"] },
+  { "id": "npm-token", "prefixes": ["npm_"], "minBody": 36, "maxBody": 36, "charset": ["upper", "lower", "digit"] },
+  { "id": "pypi-token", "prefixes": ["pypi-AgEI"], "minBody": 50, "maxBody": 400, "charset": ["upper", "lower", "digit", "dash", "underscore"] },
+  { "id": "jwt", "prefixes": ["eyJ"], "minBody": 30, "maxBody": 8192, "charset": ["upper", "lower", "digit", "dash", "underscore", "dot"], "segments": 3 }
+]

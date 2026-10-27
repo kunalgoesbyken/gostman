@@ -21,7 +21,7 @@ export const FAQ = [
   },
   {
     question: "Where do my secrets and tokens go?",
-    answer: "Mark a variable as secret and its value is kept in your operating system keychain on desktop, or in the browser's storage on the web. Only its name is written to the YAML file, so the value is never committed, exported or put in a share link. A variable you do not mark is saved as plain text in the environment file, so mark every token. OAuth tokens, cookies and history are never written to the folder, and Scan for secrets (also gostman scan) flags a credential typed into a variable before you commit or share.",
+    answer: "Mark a variable as secret and its value is kept in your operating system keychain on desktop, or in the browser's storage on the web. Only its name is written to the YAML file, so the value is never committed, exported or put in a share link. A variable you do not mark is saved as plain text in the environment file, so mark every token; a value that looks like a credential gets a warning with a one-click Mark as secret. A new workspace folder also gets a .gitignore that keeps .env files out of Git. OAuth tokens, cookies and history are never written to the folder, and Scan for secrets (also gostman scan) flags a credential typed into a variable before you commit or share.",
   },
   {
     question: "Does the web version send my requests through a server?",

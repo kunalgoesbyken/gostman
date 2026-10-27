@@ -1,6 +1,8 @@
 package scan
 
 import (
+	_ "embed"
+	"encoding/json"
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/locales"
@@ -54,17 +56,51 @@ type scheme struct {
 	MinLen int
 }
 
-var formats = []format{
-	{rule: rule{"aws-access-key-id", High, said(locales.ScanAwsAccessKeyId)}, Prefixes: []string{"AKIA", "ASIA", "ABIA", "ACCA"}, MinBody: 16, MaxBody: 16, Charset: upper | digit},
-	{rule: rule{"github-token", High, said(locales.ScanGithubToken)}, Prefixes: []string{"ghp_", "gho_", "ghu_", "ghs_", "ghr_"}, MinBody: 36, MaxBody: 36, Charset: alphanumeric},
-	{rule: rule{"github-fine-grained-token", High, said(locales.ScanGithubFineGrainedToken)}, Prefixes: []string{"github_pat_"}, MinBody: 82, MaxBody: 82, Charset: alphanumeric | underscore},
-	{rule: rule{"gitlab-token", High, said(locales.ScanGitlabToken)}, Prefixes: []string{"glpat-"}, MinBody: 20, MaxBody: 40, Charset: urlSafe},
-	{rule: rule{"slack-token", High, said(locales.ScanSlackToken)}, Prefixes: []string{"xoxb-", "xoxp-", "xoxa-", "xoxr-", "xoxs-", "xapp-"}, MinBody: 20, MaxBody: 200, Charset: alphanumeric | dash},
-	{rule: rule{"stripe-live-key", High, said(locales.ScanStripeLiveKey)}, Prefixes: []string{"sk_live_", "rk_live_"}, MinBody: 24, MaxBody: 99, Charset: alphanumeric},
-	{rule: rule{"google-api-key", Medium, said(locales.ScanGoogleApiKey)}, Prefixes: []string{"AIza"}, MinBody: 35, MaxBody: 35, Charset: urlSafe},
-	{rule: rule{"npm-token", High, said(locales.ScanNpmToken)}, Prefixes: []string{"npm_"}, MinBody: 36, MaxBody: 36, Charset: alphanumeric},
-	{rule: rule{"pypi-token", High, said(locales.ScanPypiToken)}, Prefixes: []string{"pypi-AgEI"}, MinBody: 50, MaxBody: 400, Charset: urlSafe},
-	{rule: rule{"jwt", Medium, said(locales.ScanJwt)}, Prefixes: []string{"eyJ"}, MinBody: 30, MaxBody: 8192, Charset: urlSafe | dot, Segments: 3},
+//go:embed token_formats.json
+var tokenFormatsJSON []byte
+
+type tokenFormat struct {
+	ID       string   `json:"id"`
+	Prefixes []string `json:"prefixes"`
+	MinBody  int      `json:"minBody"`
+	MaxBody  int      `json:"maxBody"`
+	Charset  []string `json:"charset"`
+	Segments int      `json:"segments"`
+}
+
+var charsets = map[string]charset{"upper": upper, "lower": lower, "digit": digit, "dash": dash, "underscore": underscore, "dot": dot}
+
+var formatRules = map[string]rule{
+	"aws-access-key-id":         {Severity: High, Reason: said(locales.ScanAwsAccessKeyId)},
+	"github-token":              {Severity: High, Reason: said(locales.ScanGithubToken)},
+	"github-fine-grained-token": {Severity: High, Reason: said(locales.ScanGithubFineGrainedToken)},
+	"gitlab-token":              {Severity: High, Reason: said(locales.ScanGitlabToken)},
+	"slack-token":               {Severity: High, Reason: said(locales.ScanSlackToken)},
+	"stripe-live-key":           {Severity: High, Reason: said(locales.ScanStripeLiveKey)},
+	"google-api-key":            {Severity: Medium, Reason: said(locales.ScanGoogleApiKey)},
+	"npm-token":                 {Severity: High, Reason: said(locales.ScanNpmToken)},
+	"pypi-token":                {Severity: High, Reason: said(locales.ScanPypiToken)},
+	"jwt":                       {Severity: Medium, Reason: said(locales.ScanJwt)},
+}
+
+var formats = loadFormats()
+
+func loadFormats() []format {
+	var entries []tokenFormat
+	if err := json.Unmarshal(tokenFormatsJSON, &entries); err != nil {
+		panic("scan: token_formats.json is invalid: " + err.Error())
+	}
+	loaded := make([]format, 0, len(entries))
+	for _, entry := range entries {
+		var allowed charset
+		for _, name := range entry.Charset {
+			allowed |= charsets[name]
+		}
+		found := formatRules[entry.ID]
+		found.ID = entry.ID
+		loaded = append(loaded, format{rule: found, Prefixes: entry.Prefixes, MinBody: entry.MinBody, MaxBody: entry.MaxBody, Charset: allowed, Segments: entry.Segments})
+	}
+	return loaded
 }
 
 var blocks = []block{
