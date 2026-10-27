@@ -45,7 +45,7 @@ const BUILD_STARS = typeof __GITHUB_STARS__ === "number" ? __GITHUB_STARS__ : nu
 
 const STAR_FORMAT = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 })
 
-const HIGHLIGHTS = ["Open source, MIT licence", "Collections stay on your machine", "Share through Git or a link"]
+const HIGHLIGHTS = ["Collections are YAML files in Git", "Secret variables stay out of the folder", "Open source, MIT licence"]
 
 const SECTION_LINKS = [
   { href: "#features", label: "Features" },
@@ -60,6 +60,18 @@ const introStep = (step) => ({ "--intro-step": step })
 const NAV_LINK = cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-2 text-sm hover:bg-muted/50")
 
 const SPOTLIGHTS = [
+  {
+    title: "A collection you can read in a pull request",
+    description: "Open a folder and every request becomes a small YAML file: one file per request, one directory per folder. Commit it next to the code it tests and review changes line by line. Mark a variable secret and its value stays in your operating system keychain, so only its name is written to the file.",
+    points: [
+      "Values of variables marked secret are never written to the folder",
+      "Tokens, cookies and history never reach the folder either",
+      "Scan for secrets flags a credential typed into a variable before you commit or share",
+      "A cloned folder runs no scripts until you trust it",
+      "The app, the command line and your agent all read the same files",
+    ],
+    capture: REQUEST_FILE,
+  },
   {
     title: "Tests that run every time you press Send",
     description: "Add checks as plain rows, or write a script with test() and expect(). The results sit beside the response, so a broken contract shows up on the request that broke it.",
@@ -83,16 +95,6 @@ const SPOTLIGHTS = [
     ],
     capture: CLI_RUN,
     brands: ["linux", "macos", "windows"],
-  },
-  {
-    title: "A collection you can read in a pull request",
-    description: "Open a folder and every request becomes a small YAML file: one file per request, one directory per folder. Commit it next to the code it tests and review changes line by line.",
-    points: [
-      "Tokens, cookies and history never reach the folder",
-      "A cloned folder runs no scripts until you trust it",
-      "The app, the command line and your agent all read the same files",
-    ],
-    capture: REQUEST_FILE,
   },
   {
     title: "A mock server from the responses you saved",
@@ -283,7 +285,7 @@ export function LandingPage({ onGetStarted }) {
                 </h1>
 
                 <p className="intro text-lg md:text-xl text-muted-foreground/90 max-w-2xl mx-auto leading-relaxed" style={introStep(2)}>
-                  Gostman is an open source client for REST, GraphQL, gRPC and WebSocket that keeps your collections as files on your machine. Tests, a command line for CI, a mock server and sharing with your team are all in the free download.
+                  Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. Your collections are plain YAML files you commit with your code, and secret values stay out of them. Tests, a command line for CI, a mock server and sharing with your team are all in the free download.
                 </p>
 
                 <CallToActions onGetStarted={onGetStarted} className="intro pt-6" style={introStep(3)} />

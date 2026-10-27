@@ -20,8 +20,12 @@ export const FAQ = [
     answer: "On your machine. The desktop app keeps them in its data folder or in a folder of YAML files you choose, and the web version keeps them in your browser's storage. Nothing is synced to a Gostman server.",
   },
   {
+    question: "Where do my secrets and tokens go?",
+    answer: "Mark a variable as secret and its value is kept in your operating system keychain on desktop, or in the browser's storage on the web. Only its name is written to the YAML file, so the value is never committed, exported or put in a share link. A variable you do not mark is saved as plain text in the environment file, so mark every token. OAuth tokens, cookies and history are never written to the folder, and Scan for secrets (also gostman scan) flags a credential typed into a variable before you commit or share.",
+  },
+  {
     question: "Does the web version send my requests through a server?",
-    answer: "By default, yes. Browsers cannot call most APIs directly, so the web version relays each request through a small hosted proxy that stores neither the request nor the response and cannot reach localhost or private addresses. To reach those, run gostman relay on your computer and choose it in the web app's preferences, or use the desktop app, which sends requests from your own machine.",
+    answer: "By default, yes, and that includes any API token in the request. Browsers cannot call most APIs directly, so the web version relays each request through a small hosted proxy. Its code is open source in api/proxy.go and does not store the request or the response. It cannot reach localhost or private addresses. If you would rather your tokens never pass through a server you do not run, start gostman relay on your computer and choose it in the web app's preferences, or use the desktop app, which sends requests from your own machine.",
   },
   {
     question: "Can I bring my Postman or Bruno collections?",
