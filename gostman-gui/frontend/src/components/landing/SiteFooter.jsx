@@ -1,6 +1,6 @@
 import { BrandIcon } from "../ui/brandIcon"
 import { WEB_APP_URL } from "../../lib/constants"
-import { LICENSE_URL } from "../../lib/siteLinks"
+import { ALTERNATIVETO_BADGE_URL, ALTERNATIVETO_URL, LICENSE_URL } from "../../lib/siteLinks"
 import { Brand } from "./Brand"
 import { FOOTER_COLUMNS } from "./footerLinks"
 
@@ -44,6 +44,14 @@ function AskAssistants() {
   )
 }
 
+function AlternativeToBadge() {
+  return (
+    <a href={ALTERNATIVETO_URL} target="_blank" rel="noopener noreferrer" className="inline-block">
+      <img src={ALTERNATIVETO_BADGE_URL} alt="Gostman | AlternativeTo" width="284" height="54" loading="lazy" className="h-[54px] w-[284px] max-w-full" />
+    </a>
+  )
+}
+
 function FooterColumn({ column }) {
   return (
     <nav aria-label={column.title}>
@@ -66,6 +74,7 @@ export function SiteFooter() {
         <div className="space-y-4">
           <Brand tagline="API client for REST, GraphQL, gRPC and WebSocket" />
           <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">Free and open source. No account, and your collections stay on your machine.</p>
+          <AlternativeToBadge />
         </div>
         <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
           {FOOTER_COLUMNS.map((column) => (
