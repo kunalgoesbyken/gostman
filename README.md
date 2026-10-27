@@ -47,7 +47,7 @@ Gostman has no paid tier, no account and no licence key, and every feature is in
 
 ## Quick start
 
-- **Browser:** open [gostman.com/web](https://gostman.com/web), paste a URL and press Send.
+- **Browser:** open [gostman.com/web](https://gostman.com/web), paste a URL and press Send. Requests go through a hosted proxy; run [`gostman relay`](#web-version) to use your own.
 - **Desktop:** download the installer from [Install](#install) and open it.
 - **Command line:** send a request, or run a collection you saved to a folder in the app.
 
@@ -127,9 +127,21 @@ The builds are not code-signed yet, so the operating system asks for confirmatio
 
 Windows needs the WebView2 runtime, which ships with Windows 10 and 11; the installer fetches it when it is missing.
 
+## Secrets and Git
+
+A folder workspace is meant to be committed. What goes where:
+
+- **Safe to commit:** `gostman.yaml`, `folder.yaml`, the request files, `environments/` and `flows/`. They hold names, URLs, bodies and the values of variables you did not mark secret, so read a diff before you push.
+- **Marked secret:** the value lives in the OS keychain on desktop (IndexedDB in the browser). Only the variable name is written to the YAML, so a token never lands in the folder. Mark every token: a variable you do not mark is plain text in the environment file, and the app warns when an unmarked value looks like a credential.
+- **Never written to the folder:** OAuth tokens, cookies, request history and secret values.
+- **Keep out of Git:** a `.env` file next to `gostman.yaml` is read as `{{process.env.NAME}}` and never written back. A new workspace gets a `.gitignore` for `.env`, `.env.*` and the `.gostman-*.tmp` leftovers of an interrupted save; `gostman init` adds it to an older workspace, and an existing `.gitignore` is never changed.
+- **Check before you share:** `gostman scan <folder>` and the **Scan for secrets** command flag credentials typed into requests and variables.
+
+See [Variables](docs/variables.md#secret-variables) for the details.
+
 ## Web version
 
-[gostman.com](https://gostman.com) runs the same interface in the browser. Browsers cannot call arbitrary APIs directly, so requests are relayed through a small proxy. It differs from the desktop app in these ways:
+[gostman.com](https://gostman.com) runs the same interface in the browser. Browsers cannot call arbitrary APIs directly, so requests are relayed through a small proxy, and that includes any API token in the request. The proxy's code is open source in [`api/proxy.go`](api/proxy.go) and does not store requests or responses; this repository cannot speak for the logs of the host it runs on. To keep tokens off a server you do not run, start `gostman relay` on your computer and choose it under **Preferences**, **Privacy**, or use the desktop app. It differs from the desktop app in these ways:
 
 - The hosted proxy cannot reach `localhost` or private network addresses. Use the desktop app for local APIs, or run `gostman relay` and choose it under **Preferences**, **Privacy**.
 - The web app has no proxy, CA certificate or client certificate settings. Use the desktop app, or start `gostman relay` with `--proxy`, `--cacert` or `--client-cert`.

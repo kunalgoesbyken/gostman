@@ -290,6 +290,12 @@ export function LandingPage({ onGetStarted }) {
 
                 <CallToActions onGetStarted={onGetStarted} className="intro pt-6" style={introStep(3)} />
 
+                <p className="intro text-sm text-muted-foreground" style={introStep(3)}>
+                  The web version sends requests through a hosted proxy.{" "}
+                  <a href={`${docPath("cli")}#local-relay-for-the-web-app`} className="underline underline-offset-4 hover:text-foreground">Run your own relay</a>
+                  {" "}or use the desktop app to keep tokens on your machine.
+                </p>
+
                 <div className="intro flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-6 text-sm text-muted-foreground" style={introStep(4)}>
                   {HIGHLIGHTS.map((text) => (
                     <div key={text} className="flex items-center gap-2">
