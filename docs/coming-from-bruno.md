@@ -4,7 +4,7 @@ Gostman reads Bruno collections in both of Bruno's formats, rewrites the common 
 
 Gostman has no paid tier, no account and no licence key. CSV and JSON data files, parallel runs, secret managers, commit and push in the Git panel and any number of collections are in the free download. See [What is free in Gostman](free-features.md).
 
-For how the two tools differ and where Bruno is stronger, see [Gostman and Bruno compared](gostman-vs-bruno.md).
+For how the two tools differ and where Bruno is stronger, see [Gostman vs Bruno](gostman-vs-bruno.md).
 
 ## Try it on the Bruno folder first
 

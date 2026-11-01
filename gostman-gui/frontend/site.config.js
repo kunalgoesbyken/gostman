@@ -2,6 +2,7 @@ import { build } from 'esbuild'
 import { createRequire } from 'module'
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs'
 import { createHash } from 'crypto'
+import { execFileSync } from 'child_process'
 import { tmpdir } from 'os'
 import { join, relative, resolve, sep } from 'path'
 import { guidePages } from './src/guides/pages.js'
@@ -25,15 +26,34 @@ export const siteUrl = (process.env.SITE_URL || DEFAULT_SITE_URL).replace(/\/+$/
 
 const appVersion = JSON.parse(readFileSync(resolve('../wails.json'), 'utf8')).info.productVersion
 
-const sitemapPaths = ['', ...guidePages.map((page) => page.path), ...docFiles.map((file) => docPath(docSlug(file)).slice(1))]
+const LANDING_SOURCE = resolve('src/components/LandingPage.jsx')
+const GUIDES_SOURCE = resolve('src/guides/pages.js')
 
-const sitemapEntry = (url, path) => `  <url>
-    <loc>${url}/${path}</loc>
+const lastCommitDate = (file) => {
+  try {
+    return execFileSync('git', ['log', '-1', '--format=%cs', '--', file], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
+  } catch {
+    return ''
+  }
+}
+
+const sitemapPages = () => [
+  { path: '', source: LANDING_SOURCE },
+  ...guidePages.map((page) => ({ path: page.path, source: GUIDES_SOURCE })),
+  ...docFiles.map((file) => ({ path: docPath(docSlug(file)).slice(1), source: join(DOCS_DIR, file) })),
+]
+
+const sitemapEntry = (url, { path, source }) => {
+  const modified = lastCommitDate(source)
+  const lastmod = modified ? `\n    <lastmod>${modified}</lastmod>` : ''
+  return `  <url>
+    <loc>${url}/${path}</loc>${lastmod}
   </url>`
+}
 
 const sitemapXml = (url) => `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${sitemapPaths.map((path) => sitemapEntry(url, path)).join('\n')}
+${sitemapPages().map((page) => sitemapEntry(url, page)).join('\n')}
 </urlset>
 `
 

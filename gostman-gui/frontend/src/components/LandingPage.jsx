@@ -280,12 +280,12 @@ export function LandingPage({ onGetStarted }) {
             <div className="relative max-w-4xl mx-auto">
               <div className="text-center space-y-6">
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.1] [text-wrap:balance]">
-                  <span className="intro block">Test any API.</span>
+                  <span className="intro block">The open source API client.</span>
                   <span className="intro block mt-2 text-muted-foreground" style={introStep(1)}>No account. No paid tier.</span>
                 </h1>
 
                 <p className="intro text-lg md:text-xl text-muted-foreground/90 max-w-2xl mx-auto leading-relaxed" style={introStep(2)}>
-                  Gostman is an open source client for REST, GraphQL, gRPC and WebSocket. Your collections are plain YAML files you commit with your code, and secret values stay out of them. Tests, a command line for CI, a mock server and sharing with your team are all in the free download.
+                  Gostman is a free Postman alternative for REST, GraphQL, gRPC and WebSocket, in your browser, on the desktop and in CI. Your collections are plain YAML files you commit with your code, and secret values stay out of them. Tests, a command line for CI, a mock server and sharing with your team are all in the free download.
                 </p>
 
                 <CallToActions onGetStarted={onGetStarted} className="intro pt-6" style={introStep(3)} />

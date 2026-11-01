@@ -1,4 +1,4 @@
-# Gostman and Bruno compared
+# Gostman vs Bruno: features, pricing and differences
 
 Bruno and Gostman share an idea: a collection is a folder of plain files that you commit with your code, and neither needs an account to use. They differ in format, in which features sit behind a paid plan, in protocols and in the command line. This page lists the differences, including those that favour Bruno, so you can decide which fits. To move a collection, see [Coming from Bruno](coming-from-bruno.md).
 

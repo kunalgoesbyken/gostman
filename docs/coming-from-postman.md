@@ -4,7 +4,7 @@ Gostman reads Postman collections, environments and globals, rewrites the common
 
 Gostman has no paid tier, no account and no licence key. Collection runs of any size, mock servers, secret managers, CSV and JSON data files and any number of collections are in the free download. See [What is free in Gostman](free-features.md).
 
-For how the two tools differ and where Postman is stronger, see [Gostman and Postman compared](gostman-vs-postman.md).
+For how the two tools differ and where Postman is stronger, see [Gostman vs Postman](gostman-vs-postman.md).
 
 ## Concepts
 

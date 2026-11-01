@@ -1,4 +1,4 @@
-# Gostman and Insomnia compared
+# Gostman vs Insomnia: features, pricing and differences
 
 Insomnia and Gostman are both API clients for REST, GraphQL, gRPC and WebSocket that can keep collections in Git. Insomnia is open source, made by Kong, and offers local, Git and cloud storage with an optional account. Gostman has no accounts and keeps collections as files you choose where to store. This page lists the differences, including those that favour Insomnia, so you can decide which fits. To move a collection, see [Coming from Insomnia](coming-from-insomnia.md).
 

@@ -1,4 +1,4 @@
-# Gostman and Postman compared
+# Gostman vs Postman: features, pricing and differences
 
 Postman and Gostman are both API clients with a runner, scripts, mock servers and a command line. They differ in where your work lives: Postman keeps collections in cloud workspaces tied to an account, with Git as an option; Gostman keeps them on your computer as plain files, with Git as the way to share. This page lists the differences, including the ones that favour Postman, so you can decide which fits. To move a collection, see [Coming from Postman](coming-from-postman.md).
 
