@@ -7,6 +7,7 @@ import { SectionLabel } from "../ui/panel"
 import { SegmentedControl } from "../ui/segmented"
 import { Select } from "../ui/select"
 import { MethodTag } from "../MethodTag"
+import { ScopeMark } from "../ScopeMark"
 import { AssertionEditor } from "../TestsPanel"
 import { VariableInput } from "../VariableInput"
 import { iconOf } from "./FlowNode"
@@ -15,7 +16,9 @@ import {
   CONDITION_RESPONSE, CONDITION_VARIABLES, END_TARGET, MATCH_ALL, MATCH_ANY, MAX_ATTEMPTS, MAX_DELAY_MS, OUTCOME_FAILED, OUTCOME_PASSED,
   SOURCE_BODY, SOURCE_HEADER, SOURCE_STATUS, STEP_DELAY, STEP_END, STEP_FOR_EACH, STEP_IF, STEP_REQUEST, STEP_SET, loopsAround,
 } from "../../lib/flows/model"
+import { SOURCE_LOOP, SOURCE_SEND } from "../../lib/flows/outputs"
 import { kindText, resolveRequest, stepTitle } from "../../lib/flows/validate"
+import { SCOPE_SESSION } from "../../lib/scripting/scopes"
 import { parseAssertions, serializeAssertions } from "../../lib/scripting/assertions"
 import { cn } from "../../lib/utils"
 
@@ -30,6 +33,15 @@ function Section({ title, children }) {
       {title && <SectionLabel>{title}</SectionLabel>}
       {children}
     </section>
+  )
+}
+
+function ScopeNote({ source, children }) {
+  return (
+    <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-2xs text-muted-foreground">
+      <ScopeMark source={source} label="" />
+      {children}
+    </p>
   )
 }
 
@@ -181,6 +193,7 @@ function RequestFields({ step, requests, onPatch, onPickRequest, EditorComponent
           <span className={cn("min-w-0 truncate", !request && "text-muted-foreground")}>{request ? request.path : step.request || FLOW_CANVAS_TEXT.chooseRequest}</span>
         </Button>
         <SectionLabel className="pt-1">{TEXT.variables}</SectionLabel>
+        <ScopeNote source={SOURCE_SEND}>{TEXT.sendScope}</ScopeNote>
         <VariableRows variables={step.variables} onChange={(variables) => onPatch({ variables })} />
         <Hint>{TEXT.variablesHint}</Hint>
       </Section>
@@ -243,6 +256,7 @@ function ForEachFields({ step, index, requests, onPatch, targets }) {
         <Field label={TEXT.indexName}>
           <Input value={step.indexAs} spellCheck={false} onChange={(event) => onPatch({ indexAs: event.target.value })} className="font-mono" />
         </Field>
+        <ScopeNote source={SOURCE_LOOP}>{TEXT.loopScope}</ScopeNote>
         <Hint>{TEXT.loopHint(step.as || "item", step.indexAs || "index")}</Hint>
       </Section>
       <Section title={TEXT.paths}>{targets("next", TEXT.afterLoop, TEXT.nextStep)}</Section>
@@ -254,6 +268,7 @@ function SetFields({ step, index, requests, onPatch, targets }) {
   return (
     <>
       <Section title={TEXT.values}>
+        <ScopeNote source={SCOPE_SESSION}>{TEXT.sessionScope}</ScopeNote>
         <ValueRows values={step.values} index={index} requests={requests} onChange={(values) => onPatch({ values })} />
         <Hint>{TEXT.valuesHint}</Hint>
       </Section>

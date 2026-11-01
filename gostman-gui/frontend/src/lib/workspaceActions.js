@@ -601,7 +601,7 @@ export function createWorkspaceActions(backend) {
     return send()
   }
 
-  const openHistoryEntry = ({ statusCode, ...entry }) => store().openRequestTab({ ...entry, id: '', timestamp: '' })
+  const openHistoryEntry = ({ statusCode, ...entry }) => store().openRequestTab({ ...entry, id: '', timestamp: '' }, { historyId: entry.id })
 
   function saveLatestRequest() {
     const [latest] = store().requestHistory

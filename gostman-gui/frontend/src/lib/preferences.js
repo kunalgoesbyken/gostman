@@ -29,6 +29,7 @@ export const TEXT_SCALES = [90, 100, 110, 125]
 export const FONT_NAME_LENGTH = 100
 export const DENSITIES = ['comfortable', 'compact']
 export const RESPONSE_LAYOUTS = ['below', 'right']
+export const TAB_PLACEMENTS = ['bar', 'sidebar']
 export { LANGUAGES }
 export const EDITOR_FONT_SIZES = { min: 10, max: 24 }
 export const REQUEST_TIMEOUT_SECONDS = { min: 0, max: 3600 }
@@ -48,6 +49,7 @@ export const DEFAULT_PREFERENCES = {
   codeFont: '',
   density: 'comfortable',
   responseLayout: 'below',
+  tabPlacement: 'bar',
   editorFontSize: 12,
   wrapLines: true,
   requestTimeoutSeconds: 0,
@@ -73,6 +75,7 @@ const VALIDATORS = {
   codeFont: isFontName,
   density: oneOf(DENSITIES),
   responseLayout: oneOf(RESPONSE_LAYOUTS),
+  tabPlacement: oneOf(TAB_PLACEMENTS),
   editorFontSize: integerWithin(EDITOR_FONT_SIZES),
   wrapLines: isFlag,
   requestTimeoutSeconds: integerWithin(REQUEST_TIMEOUT_SECONDS),

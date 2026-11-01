@@ -3,6 +3,7 @@ import { isPlainObject } from './dataUtils.js'
 export const VIEW_COLLECTIONS = 'collections'
 export const VIEW_FLOWS = 'flows'
 export const VIEW_HISTORY = 'history'
+export const VIEW_TABS = 'openTabs'
 export const SIDEBAR_VIEWS = [VIEW_COLLECTIONS, VIEW_FLOWS, VIEW_HISTORY]
 export const DEFAULT_SIDEBAR_VIEWS = SIDEBAR_VIEWS.map((id) => ({ id, visible: true }))
 

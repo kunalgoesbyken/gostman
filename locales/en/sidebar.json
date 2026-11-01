@@ -2,6 +2,7 @@
   "sidebar": {
     "views": "Sidebar view",
     "collections": "Collections",
+    "openTabs": "Open tabs",
     "history": "History",
     "runRequests": "Run requests",
     "newFolder": "New folder",
@@ -10,6 +11,8 @@
     "close": "Close sidebar",
     "resize": "Resize sidebar",
     "viewsMenu": "Sidebar tabs",
+    "more": "More",
+    "moreHint": "Show the other sidebar views",
     "resetViews": "Show all tabs in the default order"
   },
   "history": {

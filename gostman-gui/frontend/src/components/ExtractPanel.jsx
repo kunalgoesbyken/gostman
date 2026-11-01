@@ -2,10 +2,12 @@ import { useMemo } from "react"
 import { Play, X } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
+import { Combobox } from "./ui/combobox"
 import { Input } from "./ui/input"
 import { Panel, PanelBody, SectionLabel, Toolbar } from "./ui/panel"
 import { Select } from "./ui/select"
 import { ROW_GRID, ROW_STACK } from "./KeyValueEditor"
+import { ScopeMark } from "./ScopeMark"
 import {
   BLANK_EXTRACTOR,
   EXTRACTOR_SCOPES,
@@ -19,10 +21,14 @@ import {
 } from "../lib/chaining"
 import { EXTRACT_TEXT as TEXT } from "../lib/extractText"
 import { useExtractPreview } from "../hooks/useExtractPreview"
+import { useVariableMap } from "../hooks/useVariableMap"
+import { chosenEnvironment } from "../lib/environmentScope"
+import { SCOPE_ENVIRONMENT } from "../lib/scripting/scopes"
+import { VARIABLE_TEXT } from "../lib/variablesText"
 import { cn } from "../lib/utils"
-import { useAppStore } from "../store/appStore"
+import { selectActiveTab, useAppStore } from "../store/appStore"
 
-const COLUMNS = "grid-cols-[1.5rem_minmax(0,1fr)_6.5rem_minmax(0,1fr)_7rem_minmax(0,1.25fr)_1.75rem]"
+const COLUMNS = "grid-cols-[1.5rem_minmax(0,1fr)_6.5rem_minmax(0,1fr)_9rem_minmax(0,1.25fr)_1.75rem]"
 
 const hintFor = (source) => EXTRACTOR_SOURCES.find((candidate) => candidate.value === source).hint
 
@@ -61,8 +67,15 @@ function ColumnLabels() {
   )
 }
 
-function ExtractorRow({ extractor, isDraft, response, preview, fallbackScope, onChange, onRemove }) {
+const existingSource = (variables, name) => (variables.has(name) ? variables.details?.get(name) : undefined)
+
+const sourceLabel = (detail) => [VARIABLE_TEXT.sources[detail.source], detail.owner].filter(Boolean).join(": ")
+
+function ExtractorRow({ extractor, isDraft, response, preview, fallbackScope, variables, suggestions, environmentName, onChange, onRemove }) {
   const readsStatus = extractor.source === SOURCE_STATUS
+  const scope = extractor.scope || fallbackScope
+  const existing = existingSource(variables, extractor.name)
+  const scopeTitle = scope === SCOPE_ENVIRONMENT && environmentName ? TEXT.environmentNamed(environmentName) : TEXT.scopes[scope]
   return (
     <div className={cn(ROW_GRID, COLUMNS, !extractor.enabled && "opacity-50")}>
       <Checkbox
@@ -71,16 +84,20 @@ function ExtractorRow({ extractor, isDraft, response, preview, fallbackScope, on
         onChange={(event) => onChange({ enabled: event.target.checked })}
         className={cn(isDraft && "invisible")}
       />
-      <Input
-        dir="ltr"
-        value={extractor.name}
-        title={extractor.name}
-        placeholder={TEXT.namePlaceholder}
-        aria-label={TEXT.name}
-        spellCheck={false}
-        onChange={(event) => onChange({ name: event.target.value })}
-        className="font-mono"
-      />
+      <div className="flex min-w-0 items-center gap-1.5">
+        <Combobox
+          dir="ltr"
+          value={extractor.name}
+          suggestions={suggestions}
+          title={existing ? TEXT.alreadyDefined(sourceLabel(existing)) : extractor.name}
+          placeholder={TEXT.namePlaceholder}
+          aria-label={TEXT.name}
+          spellCheck={false}
+          onChange={(event) => onChange({ name: event.target.value })}
+          className="font-mono"
+        />
+        {existing && <ScopeMark source={existing.source} />}
+      </div>
       <Select value={extractor.source} onChange={(event) => onChange({ source: event.target.value })} aria-label={TEXT.source}>
         {EXTRACTOR_SOURCES.map((source) => (
           <option key={source.value} value={source.value}>{source.label}</option>
@@ -97,11 +114,14 @@ function ExtractorRow({ extractor, isDraft, response, preview, fallbackScope, on
         onChange={(event) => onChange({ expression: event.target.value })}
         className="font-mono"
       />
-      <Select value={extractor.scope || fallbackScope} onChange={(event) => onChange({ scope: event.target.value })} aria-label={TEXT.scope}>
-        {EXTRACTOR_SCOPES.map((scope) => (
-          <option key={scope} value={scope}>{TEXT.scopes[scope]}</option>
-        ))}
-      </Select>
+      <div className="flex min-w-0 items-center gap-1.5" title={scopeTitle}>
+        <ScopeMark source={scope} />
+        <Select value={scope} onChange={(event) => onChange({ scope: event.target.value })} aria-label={TEXT.scope}>
+          {EXTRACTOR_SCOPES.map((option) => (
+            <option key={option} value={option}>{TEXT.scopes[option]}</option>
+          ))}
+        </Select>
+      </div>
       {isDraft ? <span /> : <Outcome outcome={outcomeFor(extractor, response, preview)} />}
       <IconButton label={TEXT.remove} icon={X} onClick={onRemove} className={cn(isDraft && "invisible")} />
     </div>
@@ -115,6 +135,9 @@ export function ExtractPanel({ extractors, response, extraction, onChange, onRun
   const preview = useExtractPreview(rows, response)
   const runSummary = describeRun(extraction)
   const fallbackScope = defaultExtractScope(workspacePath)
+  const variables = useVariableMap()
+  const suggestions = useMemo(() => Array.from(variables.keys()), [variables])
+  const environmentName = useAppStore((state) => chosenEnvironment(state, selectActiveTab(state)?.request?.folderId || "")?.name)
 
   const commit = (next) => onChange(serializeExtractors(next.filter((row) => !isBlankExtractor(row))))
   const patchRow = (index, patch) => commit(shown.map((row, at) => (at === index ? { ...row, ...patch } : row)))
@@ -130,7 +153,7 @@ export function ExtractPanel({ extractors, response, extraction, onChange, onRun
         </Button>
       </Toolbar>
       <PanelBody className="overflow-x-auto">
-        <div className="min-w-[42rem]">
+        <div className="min-w-[45rem]">
           <ColumnLabels />
           <div className={ROW_STACK}>
             {shown.map((row, index) => (
@@ -141,6 +164,9 @@ export function ExtractPanel({ extractors, response, extraction, onChange, onRun
                 response={response}
                 preview={preview}
                 fallbackScope={fallbackScope}
+                variables={variables}
+                suggestions={suggestions}
+                environmentName={environmentName}
                 onChange={(patch) => patchRow(index, patch)}
                 onRemove={() => removeRow(index)}
               />

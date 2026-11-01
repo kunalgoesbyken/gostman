@@ -1,9 +1,12 @@
 {
   "tabBar": {
     "openRequests": "Open requests",
+    "scrollStart": "Scroll tabs towards the start",
+    "scrollEnd": "Scroll tabs towards the end",
     "newRequest": "New request",
     "untitled": "Untitled",
     "unsaved": "Unsaved changes",
+    "fromHistory": "Opened from history",
     "close": "Close {{title}}"
   }
 }

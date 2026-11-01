@@ -89,14 +89,15 @@ export function describeReference(name, variables) {
   const source = detail ? [VARIABLE_TEXT.sources[detail.source], detail.owner].filter(Boolean).join(": ") : ""
   const origin = secretOrigin(detail?.ref, variables.connections)
   const composed = defined && !secret ? composition(value, variables) : NOT_COMPOSED
-  return { name, defined, value, shown: secret ? MASKED_VALUE : value, secret, kind: null, source, origin, ...composed }
+  return { name, defined, value, shown: secret ? MASKED_VALUE : value, secret, kind: null, source, scope: detail?.source, origin, ...composed }
 }
 
 export function referenceLook(name, variables) {
   const origin = secretOrigin(variables.details?.get(name)?.ref, variables.connections)
   if (origin?.state === ORIGIN_UNKNOWN) return { className: "gm-var-missing" }
   if (origin) return { className: "gm-var-secret", attributes: { "data-secret-state": origin.state }, tint: colorTriplet(origin.color) }
-  return { className: isDefined(name, variables) ? "gm-var-ok" : "gm-var-missing" }
+  const scope = variables.details?.get(name)?.source
+  return { className: isDefined(name, variables) ? "gm-var-ok" : "gm-var-missing", ...(scope && variables.has(name) && { attributes: { "data-scope": scope } }) }
 }
 
 const wordBefore = (text, caret) => WORD_BEFORE_CARET.exec(text.slice(0, caret))[0]

@@ -27,7 +27,7 @@ import { ORIENTATION, moveFocus } from "../lib/rovingFocus"
 import { scrollIntoStrip } from "../lib/scrollIntoStrip"
 import {
   BUILT_IN_TIMEOUT_SECONDS, DENSITIES, EDITOR_FONT_SIZES, FONT_NAME_LENGTH, LANGUAGES, REQUEST_TIMEOUT_SECONDS,
-  RESPONSE_LAYOUTS, TEXT_SCALES, resetPreferences, updatePreferences, usePreferences,
+  RESPONSE_LAYOUTS, TAB_PLACEMENTS, TEXT_SCALES, resetPreferences, updatePreferences, usePreferences,
 } from "../lib/preferences"
 import { SECTION_AI, selectPreferencesSection, usePreferencesSection } from "../lib/preferencesSection"
 import { PREFERENCES_TEXT } from "../lib/preferencesText"
@@ -164,6 +164,7 @@ function AppearanceSection({ preferences, windowFrame }) {
       <ChoiceRow label={fields.textScale} name="textScale" options={percentLabels()} preferences={preferences} />
       <ChoiceRow label={fields.density} name="density" options={optionsOf(DENSITIES, PREFERENCES_TEXT.densities)} preferences={preferences} />
       <ChoiceRow label={fields.responseLayout} name="responseLayout" options={optionsOf(RESPONSE_LAYOUTS, PREFERENCES_TEXT.layouts)} preferences={preferences} />
+      <ChoiceRow label={fields.tabPlacement} hint={PREFERENCES_TEXT.tabPlacementHint} name="tabPlacement" options={optionsOf(TAB_PLACEMENTS, PREFERENCES_TEXT.tabPlacements)} preferences={preferences} />
       <SystemTitleBarRow windowFrame={windowFrame} />
       <SidebarViewsGroup preferences={preferences} />
     </>

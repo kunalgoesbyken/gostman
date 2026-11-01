@@ -12,7 +12,9 @@
       "folder": "Folder",
       "request": "Request",
       "process": ".env file",
-      "session": "Session"
+      "session": "Session",
+      "flowLoop": "Loop item",
+      "flowSend": "This send only"
     }
   }
 }

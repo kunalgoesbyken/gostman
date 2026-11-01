@@ -1,6 +1,7 @@
 import { memo } from "react"
 import { AlertTriangle, Check, Flag, GitBranch, LoaderCircle, Repeat, RotateCw, Send, Timer, Variable, X } from "lucide-react"
 import { MethodTag } from "../MethodTag"
+import { ScopeMark } from "../ScopeMark"
 import { FLOW_CANVAS_TEXT as TEXT } from "../../lib/flowsText"
 import { jumpsOf, stepLines } from "../../lib/flows/describe"
 import { EVENT_FAILED, EVENT_HANDLED, EVENT_PASSED } from "../../lib/flows/engine"
@@ -52,6 +53,7 @@ function Line({ line }) {
   return (
     <p className={cn("flex min-w-0 items-center gap-1.5 text-2xs", line.muted ? "text-muted-foreground" : "text-foreground/80")}>
       {line.method && <MethodTag method={line.method} compact className="shrink-0" />}
+      {line.scope && <ScopeMark source={line.scope} />}
       <span className={cn("truncate", line.mono && "font-mono")} title={line.text}>{line.text}</span>
     </p>
   )

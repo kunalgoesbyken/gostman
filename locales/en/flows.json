@@ -269,7 +269,10 @@
       "failed": "Failed"
     },
     "message": "Message",
-    "messagePlaceholder": "Shown in the run summary"
+    "messagePlaceholder": "Shown in the run summary",
+    "sendScope": "Used by this send only, then removed.",
+    "sessionScope": "Kept for the rest of the run.",
+    "loopScope": "Available to the steps inside this loop."
   },
   "flowView": {
     "start": "Start",

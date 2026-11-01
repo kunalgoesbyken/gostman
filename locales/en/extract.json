@@ -24,6 +24,8 @@
     "source": "Value source",
     "scope": "Where the value is kept",
     "remove": "Remove extractor",
-    "runNow": "Run now"
+    "runNow": "Run now",
+    "environmentNamed": "Environment: {{name}}",
+    "alreadyDefined": "Already defined ({{source}}); the extracted value is kept in the scope chosen on this row."
   }
 }

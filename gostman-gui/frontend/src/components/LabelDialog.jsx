@@ -1,5 +1,6 @@
 import { useMemo } from "react"
-import { Button } from "./ui/button"
+import { ChevronDown, ChevronUp } from "lucide-react"
+import { Button, IconButton } from "./ui/button"
 import { ColorPicker } from "./ui/colorPicker"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { FIELD_COLUMNS, Field } from "./ui/field"
@@ -9,14 +10,14 @@ import { ROW_FOLDER } from "../lib/collectionTree"
 import { updatePreferences, usePreferences } from "../lib/preferences"
 import { automaticSwatch } from "../lib/swatches"
 import { chosenTagColor, tagKey, withTagColor } from "../lib/tagColors"
-import { collectTags, normalizeTags } from "../lib/tags"
+import { collectTags, moveTag, normalizeTags } from "../lib/tags"
 import { LABEL_TEXT as TEXT } from "../lib/treeText"
 import { cn } from "../lib/utils"
 import { useAppStore } from "../store/appStore"
 
 const NOTE = "text-2xs text-muted-foreground"
 
-function TagColours({ tags }) {
+function TagColours({ tags, onReorder }) {
   const { tagColors } = usePreferences()
   if (tags.length === 0) return null
 
@@ -24,15 +25,21 @@ function TagColours({ tags }) {
     <section className="flex flex-col gap-2">
       <h3 className="text-xs font-medium">{TEXT.tagColours}</h3>
       <ul className="flex flex-col gap-2">
-        {tags.map((tag) => (
+        {tags.map((tag, index) => (
           <li key={tag} className={cn(FIELD_COLUMNS, "sm:items-center")}>
             <TagBadge tag={tag} className="justify-self-start px-1.5 py-0.5 text-2xs" />
-            <ColorPicker
-              label={TEXT.tagColour(tag)}
-              value={chosenTagColor(tagColors, tag)}
-              automatic={automaticSwatch(tagKey(tag))}
-              onChange={(color) => updatePreferences({ tagColors: withTagColor(tagColors, tag, color) })}
-            />
+            <div className="flex min-w-0 items-center gap-1">
+              <div className="min-w-0 flex-1">
+                <ColorPicker
+                  label={TEXT.tagColour(tag)}
+                  value={chosenTagColor(tagColors, tag)}
+                  automatic={automaticSwatch(tagKey(tag))}
+                  onChange={(color) => updatePreferences({ tagColors: withTagColor(tagColors, tag, color) })}
+                />
+              </div>
+              <IconButton label={TEXT.moveTagUp(tag)} icon={ChevronUp} size="icon-xs" disabled={index === 0} onClick={() => onReorder(moveTag(tags, tag, -1))} />
+              <IconButton label={TEXT.moveTagDown(tag)} icon={ChevronDown} size="icon-xs" disabled={index === tags.length - 1} onClick={() => onReorder(moveTag(tags, tag, 1))} />
+            </div>
           </li>
         ))}
       </ul>
@@ -79,7 +86,7 @@ export function LabelDialog({ target, actions, onClose }) {
           </Field>
           <p className={NOTE}>{isFolder ? TEXT.folderTagsNote : TEXT.requestTagsNote}</p>
         </div>
-        <TagColours tags={tags} />
+        <TagColours tags={tags} onReorder={setTags} />
       </DialogBody>
       <DialogFooter>
         <Button onClick={onClose}>{TEXT.done}</Button>

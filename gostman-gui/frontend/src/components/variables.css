@@ -51,3 +51,45 @@
 .gm-var-secret.gm-var-code[data-secret-state="off"] * {
   color: hsl(var(--muted-foreground));
 }
+
+.gm-var-ok[data-scope] {
+  box-shadow: none;
+  background: hsl(var(--gm-scope) / 0.16);
+  text-decoration: underline hsl(var(--gm-scope));
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.gm-var-ok[data-scope="environment"] {
+  --gm-scope: var(--info);
+}
+
+.gm-var-ok[data-scope="session"],
+.gm-var-ok[data-scope="flowLoop"] {
+  --gm-scope: var(--primary);
+  text-decoration-style: dotted;
+}
+
+.gm-var-ok[data-scope="flowSend"] {
+  --gm-scope: var(--info);
+  text-decoration-style: wavy;
+}
+
+.gm-var-ok[data-scope="collection"] {
+  --gm-scope: var(--success);
+  text-decoration-style: double;
+}
+
+.gm-var-ok[data-scope="global"] {
+  --gm-scope: var(--muted-foreground);
+}
+
+[data-contrast="more"] .gm-var-ok[data-scope] {
+  background: hsl(var(--gm-scope) / 0.28);
+  text-decoration-thickness: 3px;
+}
+
+.gm-var-ok[data-scope].gm-var-code,
+.gm-var-ok[data-scope].gm-var-code * {
+  color: hsl(var(--foreground));
+}

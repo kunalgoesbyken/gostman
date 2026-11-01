@@ -34,5 +34,12 @@
   "color.automatic": "{{name}} is a colour name.",
   "color.customValue": "{{hex}} is a colour code such as #aabbcc. Keep it unchanged.",
   "environment.defaultName": "Name given to the first environment created automatically when none exists. Saved as the environment name.",
-  "environment.value": "Column heading: the value of a variable."
+  "environment.value": "Column heading: the value of a variable.",
+  "environment.viewLabel": "Accessible label of the switch between editing variables as a table and as text.",
+  "environment.viewTable": "Switch option: edit variables as table rows.",
+  "environment.viewText": "Switch option: edit variables as plain text, one per line.",
+  "environment.textLabel": "Accessible label of the text box that holds all variables, one per line.",
+  "environment.textPlaceholder": "Placeholder showing the line format. Keep NAME and the equals sign.",
+  "environment.textNote": "Explains the text format. NAME=value is literal syntax.",
+  "environment.heldRows": "Notice below the text box. {{count}} is the number of variables the text box cannot show."
 }

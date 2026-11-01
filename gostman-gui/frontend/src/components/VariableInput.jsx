@@ -3,6 +3,7 @@ import { createPortal } from "react-dom"
 import { CONTROL_BASE, CONTROL_SIZES } from "./ui/input"
 import { placeBelow, useDismiss } from "./ui/select"
 import { Textarea } from "./ui/textarea"
+import { ScopeMark } from "./ScopeMark"
 import { VariableCard } from "./VariableCard"
 import { useVariableMap } from "../hooks/useVariableMap"
 import { SECRET_TINT, applyCompletion, describeReference, findReferences, referenceAtCaret, referenceLook, suggestNames } from "../lib/variables"
@@ -60,7 +61,7 @@ function Tooltip({ info, anchor }) {
 
 const steppedIndex = (active, step, count) => (active === NOTHING_ACTIVE ? (step > 0 ? 0 : count - 1) : (active + step + count) % count)
 
-function Suggestions({ id, names, detail, active, placement, listRef, onPick }) {
+function Suggestions({ id, names, detail, scopeOf, active, placement, listRef, onPick }) {
   return createPortal(
     <ul
       dir="ltr"
@@ -82,7 +83,10 @@ function Suggestions({ id, names, detail, active, placement, listRef, onPick }) 
           }}
           className={cn("flex cursor-pointer items-center justify-between gap-3 px-2 py-1 font-mono", index === active && "bg-accent")}
         >
-          <span className="text-foreground">{name}</span>
+          <span className="flex min-w-0 items-center gap-1.5 text-foreground">
+            <ScopeMark source={scopeOf(name)} />
+            {name}
+          </span>
           <span className="truncate text-muted-foreground">{detail(name)}</span>
         </li>
       ))}
@@ -175,7 +179,7 @@ function useCompletion(fieldRef, { value, suggest, fileReads, onChange, onKeyDow
   }
 
   const list = showing && (
-    <Suggestions id={listId} names={names} detail={(name) => (open.whole ? "" : describeReference(name, variables).shown)} active={active} placement={open.placement} listRef={listRef} onPick={pick} />
+    <Suggestions id={listId} names={names} detail={(name) => (open.whole ? "" : describeReference(name, variables).shown)} scopeOf={(name) => (open.whole ? undefined : variables.details?.get(name)?.source)} active={active} placement={open.placement} listRef={listRef} onPick={pick} />
   )
 
   return { variables, showing, fieldProps, list }

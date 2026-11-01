@@ -73,10 +73,12 @@
     "tagsPlaceholder": "Add a tag, then press Enter",
     "folderTagsNote": "Folder tags apply to every request inside it, also in the sidebar search and the runner's tag filters.",
     "requestTagsNote": "Tags group requests across folders. Filter by them in the sidebar search and the runner.",
-    "tagColours": "Tag colours",
+    "tagColours": "Tag order and colours",
     "tagColoursNote": "A tag keeps its colour everywhere it is used. Without a choice, a colour is picked from the tag name. Tag colours are kept on this device.",
     "tagColour": "Colour of the {{tag}} tag",
     "removeTag": "Remove tag {{tag}}",
+    "moveTagUp": "Move tag {{tag}} up",
+    "moveTagDown": "Move tag {{tag}} down",
     "done": "Done"
   },
   "tab": {

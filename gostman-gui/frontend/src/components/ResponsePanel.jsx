@@ -397,10 +397,10 @@ function PastResponseNotice({ past, canCompare, onCompare, onBack }) {
   )
 }
 
-export const ResponsePanel = memo(function ResponsePanel({ response, history = NO_HISTORY, tests, loading, onDownload, onSaveExample, onExplain, onTrust }) {
+export const ResponsePanel = memo(function ResponsePanel({ tabId, response, history = NO_HISTORY, tests, loading, onDownload, onSaveExample, onExplain, onTrust }) {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const [activeTab, setActiveTab] = useState(TAB_BODY)
+  const [chosenTab, setActiveTab] = useState(TAB_BODY)
   const [selectedView, setSelectedView] = useState(null)
   const [pastAt, setPastAt] = useState(null)
   const [historyMenu, setHistoryMenu] = useState(null)
@@ -426,8 +426,10 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
   const showsTests = hasTestOutput(tests)
   const hasBody = hasResult && kind !== BODY_KINDS.EMPTY
   const isOpen = isFullscreen || !isCollapsed
-  const showsBody = isOpen && activeTab === TAB_BODY
   const hasTimeline = Boolean(shown?.timeline)
+  const tabItems = responseTabs({ hasResult, hasTimeline, showsTests, headers, cookies, tests })
+  const activeTab = tabItems.some((item) => item.value === chosenTab) ? chosenTab : TAB_BODY
+  const showsBody = isOpen && activeTab === TAB_BODY
   const showsTabs = isOpen && (hasResult || hasTimeline)
 
   const [searchOpen, setSearchOpen] = useState(false)
@@ -452,8 +454,9 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
   const highlight = searching ? { matches, length: debouncedQuery.length, index: activeMatch } : null
   const copyText = filtered ? filtered.text : text
 
+  useEffect(() => setActiveTab(TAB_BODY), [tabId])
+
   useEffect(() => {
-    setActiveTab(TAB_BODY)
     setSelectedView(null)
     setSearchOpen(false)
     setQuery('')
@@ -553,7 +556,7 @@ export const ResponsePanel = memo(function ResponsePanel({ response, history = N
             {showsTabs ? (
               <OverflowTabsList
                 label={RESPONSE_TEXT.sections}
-                items={responseTabs({ hasResult, hasTimeline, showsTests, headers, cookies, tests })}
+                items={tabItems}
                 moreLabel={RESPONSE_TEXT.more}
                 moreHint={RESPONSE_TEXT.moreHint}
                 className={cn(TOOLBAR_ROW, "ps-1.5")}

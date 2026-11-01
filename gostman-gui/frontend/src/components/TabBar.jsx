@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
-import { Plus, Workflow, X } from "lucide-react"
+import { ChevronLeft, ChevronRight, History, Plus, Workflow, X } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
 import { TAB_KEYS } from "./ui/tabs"
@@ -7,16 +7,15 @@ import { MethodTag } from "./MethodTag"
 import { isRtl } from "../hooks/direction"
 import { usePointerDrag } from "../hooks/usePointerDrag"
 import { useShortcutLabel } from "../hooks/useShortcuts"
+import { useStripEdges } from "../hooks/useStripEdges"
 import { PLACE_AFTER, PLACE_BEFORE } from "../lib/dropPlace"
 import { isFocusLost, moveFocus } from "../lib/rovingFocus"
 import { hintWithShortcut, isRemoveKey } from "../lib/shortcuts"
-import { isRequestDirty } from "../lib/requestChanges"
 import { shownMethod } from "../lib/methodLabel"
 import { TAB_BAR_TEXT as TEXT } from "../lib/tabBarText"
 import { tabMenuItems } from "../lib/tabMenu"
 import { cn } from "../lib/utils"
-import { FLOW_TEXT } from "../lib/flowsText"
-import { isFlowDirty } from "../lib/flows/edit"
+import { isTabDirty, savedForTab, tabHint, tabTitle } from "../lib/tabDisplay"
 import { useAppStore } from "../store/appStore"
 
 const MIDDLE_MOUSE_BUTTON = 1
@@ -27,9 +26,10 @@ const Tab = memo(function Tab({ tab, saved, isActive, dropPlace, isDragged, onSe
   const tabRef = useRef(null)
   const { request, flowDraft } = tab
   const isFlow = Boolean(tab.flowId)
-  const isDirty = useMemo(() => (isFlow ? isFlowDirty(flowDraft, saved) : isRequestDirty(request, saved)), [isFlow, flowDraft, request, saved])
-  const title = (isFlow ? flowDraft.name : request.name || request.url) || TEXT.untitled
-  const hint = isFlow ? FLOW_TEXT.tabLabel(title) : request.url ? `${title}\n${request.url}` : title
+  const isDirty = useMemo(() => isTabDirty({ flowId: tab.flowId, flowDraft, request }, saved), [tab.flowId, flowDraft, request, saved])
+  const title = tabTitle(tab)
+  const fromHistory = Boolean(tab.historyId) && !request.id
+  const hint = tabHint(tab)
 
   useEffect(() => {
     if (isActive) tabRef.current.scrollIntoView({ block: "nearest", inline: "nearest" })
@@ -84,6 +84,7 @@ const Tab = memo(function Tab({ tab, saved, isActive, dropPlace, isDragged, onSe
         className="flex h-full min-w-0 flex-1 items-center gap-1.5 ps-3 text-start"
       >
         {isFlow ? <Workflow aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : <MethodTag method={shownMethod(request)} />}
+        {fromHistory && <History aria-label={TEXT.fromHistory} className="h-3 w-3 shrink-0 text-muted-foreground" />}
         <span className={cn("truncate", tab.isPreview && "italic")}>{title}</span>
         {isDirty && <span aria-label={TEXT.unsaved} className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground" />}
       </button>
@@ -91,6 +92,14 @@ const Tab = memo(function Tab({ tab, saved, isActive, dropPlace, isDragged, onSe
     </div>
   )
 })
+
+function ScrollButton({ label, icon, onClick }) {
+  return (
+    <div className="flex shrink-0 items-center px-0.5">
+      <IconButton label={label} icon={icon} size="icon-xs" tabIndex={-1} onClick={onClick} className="rtl:rotate-180" />
+    </div>
+  )
+}
 
 function resolveTabDrop(element, point, source) {
   const tabElement = element.closest("[data-tab-id]")
@@ -106,6 +115,7 @@ export const TabBar = memo(function TabBar({ tabs, activeTabId, requests, action
   const flowsById = useMemo(() => new Map(flows.map((flow) => [flow.id, flow])), [flows])
   const [menu, setMenu] = useState(null)
   const listRef = useRef(null)
+  const { edges, page, scrollWithWheel } = useStripEdges(listRef, tabs.length)
 
   const reorder = useCallback((source, drop) => actions.tabs.reorder(source.id, drop.id, drop.place), [actions])
   const { drag, begin } = usePointerDrag({ resolveDrop: resolveTabDrop, onDrop: reorder, scrollRef: listRef, axis: "x" })
@@ -132,12 +142,13 @@ export const TabBar = memo(function TabBar({ tabs, activeTabId, requests, action
 
   return (
     <div data-pane="tabs" className="flex h-10 shrink-0 items-stretch border-b border-border">
-      <div ref={listRef} role="tablist" aria-label={TEXT.openRequests} onKeyDown={(event) => moveFocus(event, TAB_KEYS)} className="flex min-w-0 items-stretch overflow-x-auto scrollbar-none">
+      {edges.start && <ScrollButton label={TEXT.scrollStart} icon={ChevronLeft} onClick={() => page(-1)} />}
+      <div ref={listRef} role="tablist" aria-label={TEXT.openRequests} onWheel={scrollWithWheel} onKeyDown={(event) => moveFocus(event, TAB_KEYS)} className="flex min-w-0 items-stretch overflow-x-auto scrollbar-none">
         {tabs.map((tab) => (
           <Tab
             key={tab.id}
             tab={tab}
-            saved={tab.flowId ? flowsById.get(tab.flowId) : savedById.get(tab.request.id)}
+            saved={savedForTab(tab, savedById, flowsById)}
             isActive={tab.id === activeTabId}
             dropPlace={drag?.drop?.id === tab.id ? drag.drop.place : null}
             isDragged={drag?.source.id === tab.id}
@@ -151,6 +162,7 @@ export const TabBar = memo(function TabBar({ tabs, activeTabId, requests, action
           />
         ))}
       </div>
+      {edges.end && <ScrollButton label={TEXT.scrollEnd} icon={ChevronRight} onClick={() => page(1)} />}
       <div className="flex shrink-0 items-center px-1.5">
         <IconButton label={hintWithShortcut(TEXT.newRequest, newRequestShortcut)} icon={Plus} onClick={onNewTab} />
       </div>

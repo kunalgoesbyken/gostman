@@ -30,6 +30,8 @@
   "label.requestTitle": "Dialog title. {{name}} is the request.",
   "label.tagColour": "Accessible label of a colour swatch. {{tag}} is the tag text.",
   "label.removeTag": "Accessible label of the button that removes a tag. {{tag}} is the tag text.",
+  "label.moveTagUp": "Accessible label of the button that moves a tag earlier in the list. {{tag}} is the tag text.",
+  "label.moveTagDown": "Accessible label of the button that moves a tag later in the list. {{tag}} is the tag text.",
   "tab.close": "Context menu item that closes one tab.",
   "tab.keepOpen": "A preview tab is replaced by the next request you open. This turns it into a normal tab.",
   "tab.revealInTree": "Context menu item that scrolls the sidebar to the request of this tab.",

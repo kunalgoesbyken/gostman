@@ -22,6 +22,7 @@
       "codeFont": "Code font",
       "density": "Density",
       "responseLayout": "Response panel",
+      "tabPlacement": "Open tabs",
       "systemTitleBar": "Use the system title bar",
       "editorFontSize": "Editor font size",
       "wrapLines": "Wrap long lines",
@@ -55,6 +56,11 @@
       "below": "Below",
       "right": "Right"
     },
+    "tabPlacements": {
+      "bar": "Tab bar",
+      "sidebar": "Sidebar"
+    },
+    "tabPlacementHint": "Sidebar hides the tab bar and lists the open tabs in the sidebar, which suits small screens.",
     "seconds": "seconds",
     "pixels": "px",
     "contrastHint": "More draws stronger borders and secondary text.",

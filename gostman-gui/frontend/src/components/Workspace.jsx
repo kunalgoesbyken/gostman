@@ -23,6 +23,7 @@ import { useRequestFieldHandlers } from "../hooks/useRequestFieldHandlers"
 import { useShortcuts } from "../hooks/useShortcuts"
 import { useSharedSecretConnections } from "../hooks/useSecretConnections"
 import { useCaptureStore } from "../lib/captureSession"
+import { usePreferences } from "../lib/preferences"
 import { isLoadTestable, useLoadTestStore } from "../lib/loadTestSession"
 import { useAiEnabled, useAiStore } from "../lib/ai/session"
 import { TASK_EXPLAIN, TASK_REQUEST } from "../lib/ai/tasks"
@@ -274,6 +275,7 @@ function LoadedWorkspace({ backend, onBack }) {
   const closeSettingsDialog = useAppStore((s) => s.closeSettingsDialog)
   const openCommandPalette = useAppStore((s) => s.openCommandPalette)
   const isSidebarOpen = useAppStore((s) => s.isSidebarOpen)
+  const tabPlacement = usePreferences().tabPlacement
   const welcomeVisible = useAppStore((s) => s.welcomeVisible)
   const hideWelcome = useAppStore((s) => s.hideWelcome)
   const closeWelcome = useAppStore((s) => s.closeWelcome)
@@ -367,20 +369,26 @@ function LoadedWorkspace({ backend, onBack }) {
               requestHistory={requestHistory}
               activeRequestId={activeRequest.id}
               actions={actions}
+              tabs={tabs}
+              activeTabId={activeTabId}
+              onTabSelect={setActiveTab}
+              onTabClose={actions.closeTab}
             />
           </>
         )}
 
         <main className="flex min-w-0 flex-1 flex-col">
-          <TabBar
-            tabs={tabs}
-            activeTabId={activeTabId}
-            requests={requests}
-            actions={actions}
-            onTabSelect={setActiveTab}
-            onTabClose={actions.closeTab}
-            onNewTab={openNewTab}
-          />
+          {tabPlacement === "bar" && (
+            <TabBar
+              tabs={tabs}
+              activeTabId={activeTabId}
+              requests={requests}
+              actions={actions}
+              onTabSelect={setActiveTab}
+              onTabClose={actions.closeTab}
+              onNewTab={openNewTab}
+            />
+          )}
 
           <DiskChangeNotice />
 
@@ -425,6 +433,7 @@ function LoadedWorkspace({ backend, onBack }) {
                 </section>
 
                 {!isSocketOnly(activeTab) && <ResponsePanel
+                  tabId={activeTab.id}
                   response={activeTab.response}
                   history={activeTab.responses}
                   tests={activeTab.tests}

@@ -49,7 +49,7 @@ const createId = (prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random
 
 const asArray = (value) => (Array.isArray(value) ? value : [])
 
-const createTab = (id, request, isPreview = false) => ({ id, request: normalizeRequest(request), isPreview, pendingId: null, response: null, responses: [], bodyDrafts: {} })
+const createTab = (id, request, isPreview = false, historyId = '') => ({ id, request: normalizeRequest(request), isPreview, historyId, pendingId: null, response: null, responses: [], bodyDrafts: {} })
 
 const createFlowTab = (id, flow) => ({ ...createTab(id), flowId: flow.id, flowDraft: normalizeFlow(flow) })
 
@@ -75,16 +75,16 @@ const savedLookup = (requests) => {
 
 const persistableTab = (requests) => {
   const saved = savedLookup(requests)
-  return ({ id, request, isPreview, vanished, flowId, flowDraft }) => {
+  return ({ id, request, isPreview, historyId, vanished, flowId, flowDraft }) => {
     if (flowId) return { id, flowId, flowDraft, request: {} }
     const baseline = (request.id && saved.get(request.id)) || vanished
-    return { id, isPreview, isSaved: Boolean(baseline) && !isRequestDirty(request, baseline), request: { ...request, examples: '' } }
+    return { id, isPreview, historyId, isSaved: Boolean(baseline) && !isRequestDirty(request, baseline), request: { ...request, examples: '' } }
   }
 }
 
-const restoreTab = ({ id, request, isPreview, isSaved, flowId, flowDraft }) => {
+const restoreTab = ({ id, request, isPreview, historyId, isSaved, flowId, flowDraft }) => {
   if (flowId) return createFlowTab(id, { ...flowDraft, id: flowId })
-  const tab = createTab(id, request, isPreview === true)
+  const tab = createTab(id, request, isPreview === true, typeof historyId === 'string' ? historyId : '')
   return isSaved === true ? { ...tab, vanished: tab.request } : tab
 }
 
@@ -111,8 +111,8 @@ const withSavedExamples = (tabs, requests) => {
   ))
 }
 
-const appendTab = (state, request, isPreview = false) => {
-  const tab = createTab(`${TAB_ID_PREFIX}${state.nextTabId}`, request, isPreview)
+const appendTab = (state, request, isPreview = false, historyId = '') => {
+  const tab = createTab(`${TAB_ID_PREFIX}${state.nextTabId}`, request, isPreview, historyId)
   return { tabs: [...state.tabs, tab], activeTabId: tab.id, nextTabId: state.nextTabId + 1 }
 }
 
@@ -233,14 +233,18 @@ const withoutRequestId = (id) => (request) => (request.id === id ? { ...request,
 
 const isReplaceable = (tab) => tab.pendingId === null && tab.isPreview
 
-const tabsWithOpened = (state, request, preview) => {
-  const holder = request.id ? state.tabs.find((tab) => tab.request.id === request.id) : null
+const openedFromHistory = (tab, historyId) => tab.historyId === historyId && !tab.request.id
+
+const tabsWithOpened = (state, request, preview, historyId) => {
+  const holder = request.id
+    ? state.tabs.find((tab) => tab.request.id === request.id)
+    : historyId && state.tabs.find((tab) => openedFromHistory(tab, historyId))
   if (holder) return { activeTabId: holder.id, ...(preview || !holder.isPreview ? {} : mapTab(state, holder.id, (tab) => ({ ...tab, isPreview: false }))) }
   const active = selectActiveTab(state)
-  if (isReusableTab(active)) return mapTab(state, active.id, (tab) => createTab(tab.id, request, preview))
+  if (isReusableTab(active)) return mapTab(state, active.id, (tab) => createTab(tab.id, request, preview, historyId))
   const replaceable = preview && state.tabs.find(isReplaceable)
-  if (!replaceable) return appendTab(state, request, preview)
-  return { ...mapTab(state, replaceable.id, (tab) => createTab(tab.id, request, true)), activeTabId: replaceable.id }
+  if (!replaceable) return appendTab(state, request, preview, historyId)
+  return { ...mapTab(state, replaceable.id, (tab) => createTab(tab.id, request, true, historyId)), activeTabId: replaceable.id }
 }
 
 const withoutTabs = (state, closing) => {
@@ -514,7 +518,9 @@ export const useAppStore = create(
         addToHistory: (request, statusCode = 0, noResponse = false) => set((state) => {
           const entry = { ...historyEntry({ ...request, statusCode, noResponse }), examples: '', id: createId('hist'), timestamp: new Date().toISOString() }
           const others = state.requestHistory.filter((existing) => !isSameCall(existing, entry))
-          return { requestHistory: [entry, ...others].slice(0, HISTORY_LIMIT) }
+          const replaced = new Set(state.requestHistory.filter((existing) => isSameCall(existing, entry)).map((existing) => existing.id))
+          const tabs = replaced.size === 0 ? state.tabs : state.tabs.map((tab) => (replaced.has(tab.historyId) ? { ...tab, historyId: entry.id } : tab))
+          return { requestHistory: [entry, ...others].slice(0, HISTORY_LIMIT), tabs }
         }),
         deleteHistoryItem: (id) => set((state) => ({
           requestHistory: state.requestHistory.filter((entry) => entry.id !== id),
@@ -530,8 +536,8 @@ export const useAppStore = create(
 
         setActiveTab: (tabId) => set({ activeTabId: tabId }),
         newTab: (folderId = '') => set((state) => appendTab(state, { folderId })),
-        openRequestTab: (request, { preview = false } = {}) => set((state) => ({
-          ...tabsWithOpened(state, request, preview),
+        openRequestTab: (request, { preview = false, historyId = '' } = {}) => set((state) => ({
+          ...tabsWithOpened(state, request, preview, historyId),
           isSidebarOpen: state.isSidebarOpen && !isNarrowViewport(),
         })),
         pinTab: (tabId) => set((state) => mapTab(state, tabId, (tab) => (tab.isPreview ? { ...tab, isPreview: false } : tab))),

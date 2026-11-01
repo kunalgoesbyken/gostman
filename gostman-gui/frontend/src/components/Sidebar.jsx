@@ -3,14 +3,15 @@ import { Check, FolderPlus, ListChecks, Plus, RotateCcw, Settings2 } from "lucid
 import { IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
 import { ResizablePane, Toolbar } from "./ui/panel"
-import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
+import { OverflowTabsList, TabCount, Tabs, TabsContent } from "./ui/tabs"
 import { CollectionTree } from "./CollectionTree"
 import { HistoryList } from "./HistoryList"
+import { OpenTabsList } from "./OpenTabsList"
 import { FlowList } from "./flows/FlowList"
 import { rootSettingsTitle } from "../lib/inheritance"
-import { SIDEBAR_PANE } from "../lib/layout"
+import { SIDEBAR_PANE, isNarrowViewport } from "../lib/layout"
 import { SIDEBAR_TEXT, sidebarViewName } from "../lib/sidebarText"
-import { DEFAULT_SIDEBAR_VIEWS, VIEW_COLLECTIONS, VIEW_FLOWS, VIEW_HISTORY, canHideView, visibleViews, withViewVisible } from "../lib/sidebarViews"
+import { DEFAULT_SIDEBAR_VIEWS, VIEW_COLLECTIONS, VIEW_FLOWS, VIEW_HISTORY, VIEW_TABS, canHideView, visibleViews, withViewVisible } from "../lib/sidebarViews"
 import { updatePreferences, usePreferences } from "../lib/preferences"
 import { cn } from "../lib/utils"
 import { useShortcutLabel } from "../hooks/useShortcuts"
@@ -33,14 +34,32 @@ function viewMenuItems(views) {
   return [...toggles, { label: SIDEBAR_TEXT.resetViews, icon: RotateCcw, onSelect: () => updatePreferences({ sidebarViews: DEFAULT_SIDEBAR_VIEWS }) }]
 }
 
-export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory, activeRequestId, actions }) {
-  const views = usePreferences().sidebarViews
-  const shown = visibleViews(views)
+const viewCount = (id, tabCount, historyCount) => {
+  if (id === VIEW_TABS) return tabCount
+  return id === VIEW_HISTORY ? historyCount : 0
+}
+
+function viewItems(shown, tabCount, historyCount) {
+  return shown.map((id) => {
+    const count = viewCount(id, tabCount, historyCount)
+    const name = sidebarViewName(id)
+    return { value: id, label: name, detail: count > 0 ? count : undefined, content: <>{name}{count > 0 && <TabCount>{count}</TabCount>}</> }
+  })
+}
+
+export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory, activeRequestId, actions, tabs, activeTabId, onTabSelect, onTabClose }) {
+  const { sidebarViews: views, tabPlacement } = usePreferences()
+  const listsTabs = tabPlacement === "sidebar"
+  const shown = listsTabs ? [VIEW_TABS, ...visibleViews(views)] : visibleViews(views)
   const [chosen, setView] = useState(VIEW_COLLECTIONS)
   const view = shown.includes(chosen) ? chosen : shown[0]
   const [menuPosition, setMenuPosition] = useState(null)
   const newRequestShortcut = useShortcutLabel("newRequest")
   const closeSidebar = useAppStore((s) => s.closeSidebar)
+  const selectTab = (tabId) => {
+    onTabSelect(tabId)
+    if (isNarrowViewport()) closeSidebar()
+  }
   const settingsLabel = useAppStore((s) => rootSettingsTitle(s.workspaceStatus.path))
 
   return (
@@ -56,21 +75,15 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
     >
       <Tabs value={view} onValueChange={setView} className="flex min-h-0 flex-1 flex-col">
         <Toolbar className="ps-2 pe-1">
-          <TabsList
-            label={SIDEBAR_TEXT.views}
-            className="flex-1 gap-2"
+          <div
+            className="flex min-w-0 flex-1"
             onContextMenu={(event) => {
               event.preventDefault()
               setMenuPosition({ x: event.clientX, y: event.clientY })
             }}
           >
-            {shown.map((id) => (
-              <TabsTrigger key={id} value={id}>
-                {sidebarViewName(id)}
-                {id === VIEW_HISTORY && requestHistory.length > 0 && <TabCount>{requestHistory.length}</TabCount>}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+            <OverflowTabsList label={SIDEBAR_TEXT.views} items={viewItems(shown, tabs.length, requestHistory.length)} moreLabel={SIDEBAR_TEXT.more} moreHint={SIDEBAR_TEXT.moreHint} />
+          </div>
           <div className={cn("flex shrink-0 items-center gap-0", view === VIEW_FLOWS && "hidden")}>
             <IconButton label={SIDEBAR_TEXT.runRequests} icon={ListChecks} onClick={() => actions.openRunner()} />
             <IconButton label={settingsLabel} icon={Settings2} onClick={() => actions.openFolderSettings()} />
@@ -79,6 +92,9 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
           </div>
         </Toolbar>
 
+        <TabsContent value={VIEW_TABS} className={VIEW_CLASS}>
+          <OpenTabsList tabs={tabs} activeTabId={activeTabId} requests={requests} actions={actions} onSelect={selectTab} onClose={onTabClose} />
+        </TabsContent>
         <TabsContent value={VIEW_COLLECTIONS} className={VIEW_CLASS}>
           <CollectionTree folders={folders} requests={requests} activeRequestId={activeRequestId} actions={actions} />
         </TabsContent>

@@ -15,6 +15,16 @@ export function normalizeTags(raw) {
   return tags
 }
 
+export function moveTag(tags, tag, offset) {
+  const from = tags.indexOf(tag)
+  const to = from + offset
+  if (from < 0 || to < 0 || to >= tags.length) return tags
+  const moved = [...tags]
+  moved.splice(from, 1)
+  moved.splice(to, 0, tag)
+  return moved
+}
+
 export const splitTags = (text) => normalizeTags(text.split(TAG_SEPARATOR))
 
 export const sameTags = (first, second) => {

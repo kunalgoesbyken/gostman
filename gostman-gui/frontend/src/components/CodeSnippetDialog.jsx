@@ -5,6 +5,8 @@ import { Select } from "./ui/select"
 import { SNIPPET_LANGUAGES, rememberLanguage, rememberedLanguage } from "../lib/codeGenerator"
 import { REQUEST_BAR_TEXT } from "../lib/requestBarText"
 
+const CODE_WINDOW = { id: "code", width: 768, height: 576, minWidth: 480, minHeight: 320 }
+
 export function CodeSnippetDialog({ snippets, onClose }) {
   const [languageId, setLanguageId] = useState(rememberedLanguage)
 
@@ -14,7 +16,7 @@ export function CodeSnippetDialog({ snippets, onClose }) {
   }
 
   return (
-    <Dialog label={REQUEST_BAR_TEXT.codeHint} size="lg" onClose={onClose}>
+    <Dialog label={REQUEST_BAR_TEXT.codeHint} size="lg" floating={CODE_WINDOW} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <Select aria-label={REQUEST_BAR_TEXT.codeLanguage} className="w-44" value={languageId} onChange={(event) => chooseLanguage(event.target.value)}>
           {SNIPPET_LANGUAGES.map((language) => (

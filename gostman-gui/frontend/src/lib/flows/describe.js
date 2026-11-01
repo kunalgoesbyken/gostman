@@ -3,7 +3,9 @@ import { isActiveAssertion, titleOf } from '../scripting/assertions'
 import {
   CONDITION_VARIABLES, END_TARGET, STEP_DELAY, STEP_END, STEP_FOR_EACH, STEP_IF, STEP_REQUEST, STEP_SET, TARGET_FIELDS,
 } from './model'
+import { SOURCE_LOOP } from './outputs'
 import { resolveRequest, stepTitle } from './validate'
+import { SCOPE_SESSION } from '../scripting/scopes'
 
 const firstAndMore = (conditions) => {
   const active = conditions.filter(isActiveAssertion)
@@ -27,6 +29,7 @@ const LINES = {
     return step.values.map((value) => ({
       text: TEXT.sets(value.name, value.step ? TEXT.fromResponse(value.source, value.path, referenceTitle(index, value.step, requests)) : TEXT.fromTemplate(value.value)),
       mono: true,
+      scope: SCOPE_SESSION,
     }))
   },
   [STEP_IF]: (step) => {
@@ -35,7 +38,7 @@ const LINES = {
     const described = TEXT.condition(condition.first, condition.more, step.match)
     return [{ text: step.source === CONDITION_VARIABLES ? TEXT.variablesCondition(described) : described, mono: true }]
   },
-  [STEP_FOR_EACH]: (step, { index, requests }) => [{ text: TEXT.loop(step.path, step.step ? referenceTitle(index, step.step, requests) : '?'), mono: true }],
+  [STEP_FOR_EACH]: (step, { index, requests }) => [{ text: TEXT.loop(step.path, step.step ? referenceTitle(index, step.step, requests) : '?'), mono: true, scope: SOURCE_LOOP }],
   [STEP_DELAY]: (step) => [{ text: TEXT.wait(step.ms) }],
   [STEP_END]: (step) => [{ text: TEXT.outcomes[step.outcome] }, ...(step.message ? [{ text: step.message, muted: true }] : [])],
 }

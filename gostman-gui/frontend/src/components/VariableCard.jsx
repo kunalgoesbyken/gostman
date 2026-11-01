@@ -2,6 +2,7 @@ import { Fragment } from "react"
 import { flushSync } from "react-dom"
 import { createRoot } from "react-dom/client"
 import { ConnectionMark } from "./ConnectionMark"
+import { ScopeMark, hasScopeMark } from "./ScopeMark"
 import { ORIGIN_OFF, ORIGIN_UNKNOWN } from "../lib/secretOrigins"
 import { REFERENCE_TEXT, SECRETS_TEXT } from "../lib/secretsText"
 import { VARIABLE_TEXT } from "../lib/variablesText"
@@ -12,7 +13,13 @@ function ValueLine({ info }) {
       <span dir="ltr" className="text-muted-foreground">{info.name}</span>
       <span className="text-muted-foreground"> = </span>
       {info.defined ? <span dir="ltr">{info.shown}</span> : <span className="text-warning">{VARIABLE_TEXT.undefinedName}</span>}
-      {info.source && <span className="text-muted-foreground"> ({info.source})</span>}
+      {info.source && (
+        <span className="text-muted-foreground">
+          {" ("}
+          {hasScopeMark(info.scope) ? <ScopeMark source={info.scope} label={info.source} className="align-text-bottom" /> : info.source}
+          {")"}
+        </span>
+      )}
     </p>
   )
 }

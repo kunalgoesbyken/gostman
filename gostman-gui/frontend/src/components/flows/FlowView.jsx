@@ -13,11 +13,13 @@ import { FlowRunPanel } from "./FlowRunPanel"
 import { RequestPicker } from "./RequestPicker"
 import { StepEditor } from "./StepEditor"
 import { useShortcutLabel } from "../../hooks/useShortcuts"
+import { ExtraVariablesProvider } from "../../hooks/useVariableMap"
 import { FLOW_CANVAS_TEXT, FLOW_VIEW_TEXT as TEXT } from "../../lib/flowsText"
 import { requestCatalog } from "../../lib/flows/catalog"
 import { duplicateStep, insertStep, isFlowDirty, moveStep, newStep, removeStep, renameStep, updateStep } from "../../lib/flows/edit"
 import { RUN_RUNNING, useFlowRunStore } from "../../lib/flows/flowRunner"
 import { canRedo, canUndo, recordChange, redoChange, undoChange } from "../../lib/flows/history"
+import { flowVariables } from "../../lib/flows/outputs"
 import { MAX_SENDS_CAP, STEP_REQUEST, indexSteps, normalizeFlow } from "../../lib/flows/model"
 import { stepTitle, validateFlow } from "../../lib/flows/validate"
 import { hintWithShortcut } from "../../lib/shortcuts"
@@ -134,6 +136,7 @@ export function FlowView({ tab, actions, EditorComponent }) {
   const [picker, setPicker] = useState(null)
   const [, setVersion] = useState(0)
   const selectedStep = context.index.get(selected)?.step
+  const stepVariables = useMemo(() => flowVariables(flow.steps, catalog, selectedStep), [flow.steps, catalog, selectedStep])
 
   useEffect(() => {
     if (isRunning) setPanel(PANEL_RUN)
@@ -256,20 +259,22 @@ export function FlowView({ tab, actions, EditorComponent }) {
             </div>
             <TabsContent value={PANEL_STEP} className={cn("flex min-h-0 flex-1 flex-col")}>
               {selectedStep ? (
-                <StepEditor
-                  key={selectedStep.id}
-                  step={selectedStep}
-                  index={context.index}
-                  requests={catalog}
-                  problems={problemsByStep.get(selectedStep.id) || []}
-                  onPatch={(patch) => change(updateStep(flow, selectedStep.id, patch), `${selectedStep.id}:${Object.keys(patch).join()}`)}
-                  onRename={(wanted) => rename(selectedStep.id, wanted)}
-                  onMove={(offset) => move(selectedStep.id, offset)}
-                  onDuplicate={() => duplicate(selectedStep.id)}
-                  onRemove={() => remove(selectedStep.id)}
-                  onPickRequest={() => setPicker({ stepId: selectedStep.id })}
-                  EditorComponent={EditorComponent}
-                />
+                <ExtraVariablesProvider value={stepVariables}>
+                  <StepEditor
+                    key={selectedStep.id}
+                    step={selectedStep}
+                    index={context.index}
+                    requests={catalog}
+                    problems={problemsByStep.get(selectedStep.id) || []}
+                    onPatch={(patch) => change(updateStep(flow, selectedStep.id, patch), `${selectedStep.id}:${Object.keys(patch).join()}`)}
+                    onRename={(wanted) => rename(selectedStep.id, wanted)}
+                    onMove={(offset) => move(selectedStep.id, offset)}
+                    onDuplicate={() => duplicate(selectedStep.id)}
+                    onRemove={() => remove(selectedStep.id)}
+                    onPickRequest={() => setPicker({ stepId: selectedStep.id })}
+                    EditorComponent={EditorComponent}
+                  />
+                </ExtraVariablesProvider>
               ) : (
                 <FlowSettings flow={flow} problems={problems} index={context.index} requests={catalog} onChange={change} onSelectStep={setSelected} />
               )}

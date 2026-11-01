@@ -9,6 +9,8 @@ const text = messages('extract', english, (t) => ({
     get summary() {
       return t('extract.summary', { example: VARIABLE_EXAMPLE })
     },
+    environmentNamed: (name) => t('extract.environmentNamed', { name }),
+    alreadyDefined: (source) => t('extract.alreadyDefined', { source }),
     savedTo: {
       session: (names) => t('extract.savedTo.session', { names: formatList(names, 'unit') }),
       environment: (names) => t('extract.savedTo.environment', { names: formatList(names, 'unit') }),
