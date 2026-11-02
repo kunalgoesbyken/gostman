@@ -60,6 +60,7 @@ func jwtFields(config *engine.JWTAuth) []textField {
 		{"in", &config.In},
 		{"prefix", &config.Prefix},
 		{"queryKey", &config.QueryKey},
+		{"expiry", &config.Expiry},
 	}
 }
 

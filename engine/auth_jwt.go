@@ -47,6 +47,7 @@ type JWTAuth struct {
 	In             string `json:"in"`
 	Prefix         string `json:"prefix"`
 	QueryKey       string `json:"queryKey"`
+	Expiry         string `json:"expiry"`
 }
 
 type ASAPAuth struct {
@@ -91,7 +92,7 @@ var jwtAlgorithms = map[string]jwtAlgorithm{
 
 func applyJWT(config JWTAuth, substitute func(string) string, headers []pair, target *url.URL) ([]pair, error) {
 	name := algorithmName(substitute(config.Algorithm), jwtDefaultHMAC)
-	claims, err := jsonObjectText(substitute(config.Payload), "the payload")
+	claims, err := jwtClaims(substitute(config.Payload), substitute(config.Expiry))
 	if err != nil {
 		return headers, err
 	}
@@ -103,7 +104,13 @@ func applyJWT(config JWTAuth, substitute func(string) string, headers []pair, ta
 	if err != nil {
 		return headers, err
 	}
-	token, err := signJWT(name, extra, claims, secret, substitute(config.PrivateKey))
+	privateKey := substitute(config.PrivateKey)
+	if keyID := jwkKeyID(privateKey); keyID != "" {
+		if _, set := extra["kid"]; !set {
+			extra["kid"] = keyID
+		}
+	}
+	token, err := signJWT(name, extra, claims, secret, privateKey)
 	if err != nil {
 		return headers, err
 	}
@@ -296,6 +303,9 @@ func fixedBytes(value *big.Int, size int) []byte {
 }
 
 func parsePrivateKey(text string) (crypto.Signer, error) {
+	if strings.HasPrefix(strings.TrimSpace(text), "{") {
+		return parseJWK(text)
+	}
 	block, _ := pem.Decode([]byte(strings.TrimSpace(text)))
 	if block == nil {
 		return nil, fmt.Errorf("the private key is not PEM encoded")

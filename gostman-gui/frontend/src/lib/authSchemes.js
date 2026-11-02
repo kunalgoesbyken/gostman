@@ -114,6 +114,7 @@ export const SCHEMES = {
     field('privateKey', 'privateKey', FIELD_AREA, { secret: true, when: (config) => !usesSecret(config) }),
     field('payload', 'payload', FIELD_AREA, { placeholder: '{"sub": "{{user_id}}", "iat": {{$timestamp}}}' }),
     field('extraHeaderFields', 'header', FIELD_AREA, { placeholder: '{"kid": "key-1"}' }),
+    field('expiresAfter', 'expiry', FIELD_TEXT, { hint: 'jwtExpiry' }),
     field('addTo', 'in', FIELD_SELECT, { options: TOKEN_PLACEMENTS, fallback: IN_HEADER }),
     field('headerPrefix', 'prefix', FIELD_TEXT, { placeholder: 'Bearer', when: (config) => !inQuery(config) }),
     field('queryParamName', 'queryKey', FIELD_TEXT, { placeholder: 'token', when: inQuery }),
