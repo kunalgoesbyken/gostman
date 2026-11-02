@@ -188,7 +188,9 @@ function useBackendExport(format, data, importer, includeSecrets) {
   return state
 }
 
-const allFormats = () => [...exportFormats(), ...backendFormats()]
+const FORMAT_BRANDS = { postman: "postman", "openapi-json": "openapi", "openapi-yaml": "openapi", bruno: "bruno", curl: "curl" }
+
+const allFormats = () => [...exportFormats(), ...backendFormats()].map((format) => ({ ...format, brand: FORMAT_BRANDS[format.value] }))
 
 function buildExport(format, data) {
   try {

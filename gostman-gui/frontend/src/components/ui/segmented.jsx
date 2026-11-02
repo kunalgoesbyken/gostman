@@ -1,12 +1,15 @@
 import { useLayoutEffect, useRef, useState } from "react"
 import { ORIENTATION, moveFocus, tabStopOf } from "../../lib/rovingFocus"
 import { cn } from "../../lib/utils"
+import { BrandIcon } from "./brandIcon"
 import { Select } from "./select"
 
 export const RADIO_KEYS = { selector: "[role=radio]", orientation: ORIENTATION.both, activate: true }
 
 const GROUP_CLASS = "flex h-7 min-w-0 items-stretch divide-x divide-border rounded-md border border-border"
-const OPTION_CLASS = "shrink-0 whitespace-nowrap px-2.5 text-xs font-medium"
+const OPTION_CLASS = "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 text-xs font-medium"
+
+const Mark = ({ option }) => (option.brand ? <BrandIcon brand={option.brand} /> : null)
 
 const widthOf = (element) => element.getBoundingClientRect().width
 
@@ -54,6 +57,7 @@ function Segments({ label, options, value, onChange }) {
           onClick={() => onChange(option.value)}
           className={cn(OPTION_CLASS, option.value === value ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground")}
         >
+          <Mark option={option} />
           {option.label}
         </button>
       ))}
@@ -67,7 +71,7 @@ function CompactChoice({ label, options, value, onChange }) {
   return (
     <div className="min-w-0 flex-1">
       <Select aria-label={label} value={value} onChange={choose}>
-        {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+        {options.map((option) => <option key={option.value} value={option.value} icon={option.brand ? <Mark option={option} /> : undefined}>{option.label}</option>)}
       </Select>
     </div>
   )
@@ -84,7 +88,7 @@ export function SegmentedControl({ label, options, value, onChange, className })
       {canCompact && (
         <div aria-hidden="true" className="pointer-events-none invisible absolute left-0 top-0 h-0 w-0 overflow-hidden">
           <div ref={measureRef} className={cn(GROUP_CLASS, "w-max")}>
-            {options.map((option) => <span key={option.value} className={cn(OPTION_CLASS, "flex items-center")}>{option.label}</span>)}
+            {options.map((option) => <span key={option.value} className={OPTION_CLASS}><Mark option={option} />{option.label}</span>)}
           </div>
         </div>
       )}

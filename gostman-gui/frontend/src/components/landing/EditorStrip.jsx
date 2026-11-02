@@ -1,9 +1,8 @@
 import { useState } from "react"
 import { docPath } from "../../docs/manifest"
-import vscode from "@iconify-icons/simple-icons/visualstudiocode"
 import { VSCODE_MARKETPLACE_URL } from "../../lib/siteLinks"
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs"
-import { SvgIcon } from "../ui/svgIcon"
+import { BrandIcon } from "../ui/brandIcon"
 import { MCP_CLIENTS, MCP_NEEDS_CLI, MCP_TITLE, VSCODE_BUTTON } from "./content"
 import { ArrowUpRight } from "./icons"
 import { TerminalBlock } from "./TerminalBlock"
@@ -22,7 +21,10 @@ export function EditorStrip({ className, style }) {
       <TabsList label="MCP client">
         {MCP_CLIENTS.map((client) => (
           <TabsTrigger key={client.id} value={client.id}>
-            {client.label}
+            <span className="inline-flex items-center gap-1.5">
+              <BrandIcon brand={client.id} />
+              {client.label}
+            </span>
           </TabsTrigger>
         ))}
       </TabsList>
@@ -35,7 +37,7 @@ export function EditorStrip({ className, style }) {
         href={VSCODE_MARKETPLACE_URL}
         className="inline-flex h-10 items-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted/40"
       >
-        <SvgIcon icon={vscode} className="h-4 w-4" />
+        <BrandIcon brand="vscode" className="h-4 w-4" />
         {VSCODE_BUTTON}
       </a>
       <div className="w-full">

@@ -7,6 +7,7 @@ import bitbucket from "@iconify-icons/simple-icons/bitbucket"
 import bitwarden from "@iconify-icons/simple-icons/bitwarden"
 import bruno from "@iconify-icons/simple-icons/bruno"
 import claude from "@iconify-icons/simple-icons/claude"
+import curl from "@iconify-icons/simple-icons/curl"
 import cursor from "@iconify-icons/simple-icons/cursor"
 import docker from "@iconify-icons/simple-icons/docker"
 import github from "@iconify-icons/simple-icons/github"
@@ -14,6 +15,8 @@ import githubActions from "@iconify-icons/simple-icons/githubactions"
 import gitlab from "@iconify-icons/simple-icons/gitlab"
 import googleCloud from "@iconify-icons/simple-icons/googlecloud"
 import googleGemini from "@iconify-icons/simple-icons/googlegemini"
+import hoppscotch from "@iconify-icons/simple-icons/hoppscotch"
+import httpie from "@iconify-icons/simple-icons/httpie"
 import insomnia from "@iconify-icons/simple-icons/insomnia"
 import keepassxc from "@iconify-icons/simple-icons/keepassxc"
 import linux from "@iconify-icons/simple-icons/linux"
@@ -24,6 +27,7 @@ import openapi from "@iconify-icons/simple-icons/openapiinitiative"
 import openrouter from "@iconify-icons/simple-icons/openrouter"
 import postman from "@iconify-icons/simple-icons/postman"
 import vault from "@iconify-icons/simple-icons/vault"
+import visualStudioCode from "@iconify-icons/simple-icons/visualstudiocode"
 import windows from "@iconify-icons/simple-icons/windows"
 import { lookup } from "../../lib/dataUtils"
 import { cn } from "../../lib/utils"
@@ -48,6 +52,11 @@ const BRAND_ICONS = {
   openrouter,
   ollama,
   cursor,
+  vscode: visualStudioCode,
+  codex: openai,
+  curl,
+  hoppscotch,
+  httpie,
   postman,
   insomnia,
   bruno,

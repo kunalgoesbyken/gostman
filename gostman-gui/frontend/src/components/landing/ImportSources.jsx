@@ -6,7 +6,9 @@ const SOURCES = [
   { name: "Insomnia", brand: "insomnia" },
   { name: "Bruno", brand: "bruno" },
   { name: "OpenAPI", brand: "openapi" },
-  { name: "curl" },
+  { name: "curl", brand: "curl" },
+  { name: "Hoppscotch", brand: "hoppscotch" },
+  { name: "HTTPie", brand: "httpie" },
   { name: "HAR" },
   { name: ".http" },
 ]
