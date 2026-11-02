@@ -3,11 +3,27 @@ import { docPath } from "../../docs/manifest"
 import { VSCODE_MARKETPLACE_URL } from "../../lib/siteLinks"
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs"
 import { BrandIcon } from "../ui/brandIcon"
-import { AGENT_PROMPT, AGENT_PROMPT_NOTE, AGENT_SETUP_TITLE, AGENT_SKILL_COMMAND, AGENT_SKILL_NOTE, MCP_CLIENTS, MCP_NEEDS_CLI, MCP_TITLE, VSCODE_BUTTON } from "./content"
-import { ArrowUpRight } from "./icons"
+import { AGENT_PROMPT, AGENT_PROMPT_BUTTON, AGENT_PROMPT_NOTE, AGENT_SETUP_TITLE, AGENT_SKILL_COMMAND, MCP_CLIENTS, MCP_NEEDS_CLI, MCP_TITLE, VSCODE_BUTTON } from "./content"
+import { useClipboardCopy } from "../../hooks/useClipboardCopy"
+import { ArrowUpRight, Check, Copy } from "./icons"
 import { TerminalBlock } from "./TerminalBlock"
 
 const textLines = (text) => text.split("\n").map((line) => ({ text: line, tone: "command" }))
+
+function CopyPromptButton() {
+  const { copied, copy } = useClipboardCopy(AGENT_PROMPT)
+  const Icon = copied ? Check : Copy
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground transition-colors hover:bg-muted/40"
+    >
+      <Icon className={copied ? "h-3.5 w-3.5 text-success" : "h-3.5 w-3.5"} aria-hidden="true" />
+      {copied ? "Copied" : AGENT_PROMPT_BUTTON}
+    </button>
+  )
+}
 
 const snippetLines = (client) => (client.file ? textLines(client.snippet) : [{ copy: client.snippet }])
 
@@ -61,10 +77,11 @@ export function EditorStrip({ className, style }) {
       </div>
       <div className="w-full">
         <p className="mb-2 text-sm font-medium text-foreground">{AGENT_SETUP_TITLE}</p>
-        <TerminalBlock title="Skill" lines={[{ copy: AGENT_SKILL_COMMAND }]} label="Install the Gostman Agent Skill" />
-        <p className="mt-2 text-xs text-muted-foreground">{AGENT_SKILL_NOTE}</p>
-        <p className="mb-2 mt-5 text-xs text-muted-foreground">{AGENT_PROMPT_NOTE}</p>
-        <TerminalBlock title="Prompt" lines={textLines(AGENT_PROMPT)} label="Prompt that sets up Gostman in a coding agent" copyText={AGENT_PROMPT} />
+        <TerminalBlock lines={[{ copy: AGENT_SKILL_COMMAND }]} label="Install the Gostman Agent Skill" />
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+          <CopyPromptButton />
+          <p className="text-xs text-muted-foreground">{AGENT_PROMPT_NOTE}</p>
+        </div>
       </div>
     </div>
   )
