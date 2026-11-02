@@ -165,7 +165,6 @@ export const RequestBar = memo(function RequestBar({
               ref={urlRef}
               placeholder={urlPlaceholder}
               value={activeRequest.url}
-              title={activeRequest.url}
               onChange={(event) => onUrlChange(event.target.value)}
               onPaste={handlePaste}
               onKeyDown={handleUrlKeyDown}
