@@ -11,6 +11,7 @@ import { AppHeader } from "./AppHeader"
 import { NoticeToast } from "./NoticeToast"
 import { TourCard } from "./TourCard"
 import { StatusBar } from "./StatusBar"
+import { WindowEdges, useFramelessWindow } from "./WindowResize"
 import { TabBar } from "./TabBar"
 import { RequestTabs } from "./RequestTabs"
 import { AppSkeleton } from "./AppSkeleton"
@@ -307,6 +308,7 @@ function LoadedWorkspace({ backend, onBack }) {
 
   useOnboardingCompletion()
 
+  const isResizable = useFramelessWindow(backend.windowFrame)
   const actions = useMemo(() => createWorkspaceActions(backend), [backend])
   useEffect(() => {
     installFeatureAccess(actions.features)
@@ -524,7 +526,9 @@ function LoadedWorkspace({ backend, onBack }) {
         {isDependencyGraphOpen && <DependencyGraphDialog folders={folders} requests={requests} actions={actions} />}
       </Suspense>
 
+      {isResizable && <WindowEdges />}
       <StatusBar
+        isResizable={isResizable}
         onOpenMock={actions.mock.open}
         onOpenCapture={actions.capture.open}
         onOpenMonitors={() => actions.monitors.open()}

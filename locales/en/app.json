@@ -7,7 +7,8 @@
     "window": {
       "minimize": "Minimize",
       "maximize": "Maximize",
-      "restore": "Restore"
+      "restore": "Restore",
+      "resize": "Resize window"
     },
     "crash": {
       "title": "Gostman ran into an error",

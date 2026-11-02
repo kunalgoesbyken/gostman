@@ -9,4 +9,6 @@ export const windowControls = {
   close: Quit,
 }
 
+export const resizeWindowFrom = (edge) => window.WailsInvoke?.(`resize:${edge}`)
+
 export const isDragRegion = (element) => getComputedStyle(element).getPropertyValue("--wails-draggable").trim() === "drag"

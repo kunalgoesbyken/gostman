@@ -13,6 +13,7 @@ import { PREFERENCES_TEXT } from "../lib/preferencesText"
 import { STATUS_BAR_TEXT as TEXT } from "../lib/statusBarText"
 import { useAppStore } from "../store/appStore"
 import { DataNotices } from "./DataNotices"
+import { ResizeGrip } from "./WindowResize"
 import { STATUS_ITEM_CLASS, StatusItem } from "./StatusItem"
 
 const gitLabel = (git) => (git.detached ? TEXT.detached : git.branch) + (git.changes.length > 0 ? ` (${git.changes.length})` : "")
@@ -25,7 +26,7 @@ const portOf = (address) => {
   }
 }
 
-export function StatusBar({ onOpenMock, onOpenCapture, onOpenMonitors, updates, remindsExport, onExport }) {
+export function StatusBar({ isResizable, onOpenMock, onOpenCapture, onOpenMonitors, updates, remindsExport, onExport }) {
   const openCookies = useAppStore((s) => s.openCookiesDialog)
   const openSettings = useAppStore((s) => s.openSettingsDialog)
   const openPreferences = useAppStore((s) => s.openPreferencesDialog)
@@ -53,6 +54,7 @@ export function StatusBar({ onOpenMock, onOpenCapture, onOpenMonitors, updates, 
         <StatusItem icon={Cookie} label={TEXT.cookies} onClick={openCookies} />
         <StatusItem icon={SlidersHorizontal} label={PREFERENCES_TEXT.statusLabel} onClick={openPreferences} />
         <button type="button" title={ABOUT_TEXT.versionButton} onClick={openAbout} className={cn(STATUS_ITEM_CLASS, "font-mono text-3xs")}>v{__APP_VERSION__}<span className="sr-only"> {ABOUT_TEXT.versionButton}</span></button>
+        {isResizable && <ResizeGrip />}
       </div>
     </footer>
   )

@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react"
 import { Copy, Minus, Square, X } from "lucide-react"
 import { cn } from "../lib/utils"
+import { useIsMaximised } from "../hooks/useIsMaximised"
 import { windowControls } from "../lib/windowControls"
 import { APP_TEXT } from "../lib/appText"
 import { DIALOG_TEXT } from "../lib/dialogText"
@@ -9,17 +9,7 @@ const BUTTON_CLASS = "inline-flex h-full w-11 items-center justify-center text-m
 const NO_DRAG = { "--wails-draggable": "no-drag" }
 
 export function WindowControls() {
-  const [isMaximised, setIsMaximised] = useState(false)
-
-  const refresh = useCallback(() => {
-    Promise.resolve(windowControls.isMaximised()).then(setIsMaximised).catch(() => {})
-  }, [])
-
-  useEffect(() => {
-    refresh()
-    window.addEventListener("resize", refresh)
-    return () => window.removeEventListener("resize", refresh)
-  }, [refresh])
+  const isMaximised = useIsMaximised()
 
   const maximiseLabel = isMaximised ? APP_TEXT.window.restore : APP_TEXT.window.maximize
 
