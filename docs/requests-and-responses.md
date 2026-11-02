@@ -113,6 +113,7 @@ Details:
   - The desktop app keeps only the file's path and reads the file from disk while the request is sent, so the file is never loaded into memory or saved in the collection. The file row shows its current size on disk, and hovering it shows the path. The files of one request can be up to 1 GB together. A folder you have not trusted cannot send them, and the CLI does not send them. Files on network shares (`\\server\share\...` or `//server/share/...`) and device paths are refused, so Windows never sends your sign-in to another computer; copy the file to this computer or map the share to a drive letter. AWS Signature, Hawk, EdgeGrid and OAuth 1.0 sign the whole body, so with them the files are limited to 10 MB. A large upload can take longer than the default 30 second timeout; raise it under **Settings**.
   - The web app keeps the file's content in the request, and a file is limited to 3 MB, because the hosted proxy accepts requests of at most 4.5 MB. A larger file is refused with a message that says so.
 - Gostman adds a `Content-Type` for the body type (`application/json`, `text/plain`, `application/xml`, a multipart boundary and so on) only when the request has no `Content-Type` header of its own. For a custom media type such as `application/vnd.acme.event+json`, choose **Text** (or JSON or XML) and add a `Content-Type` header with that value in the Headers tab; the header is sent as you wrote it, and **Code** shows it. A row that is switched off does not count. Do not set `Content-Type` yourself for Form URL-encoded and Multipart bodies, because a multipart body needs the boundary Gostman writes into it.
+- Under the File type, **Encode JSON as a binary format** turns JSON you type into MessagePack or CBOR bytes and attaches them as the file (`body.msgpack` or `body.cbor`, with the matching `Content-Type`). The JSON is encoded when you press **Encode and attach**, so `{{variables}}` in it are not replaced at send time.
 - Switching between raw types (JSON, Text, XML, SOAP) keeps the same text. Switching between the groups None, Form URL-encoded, Multipart, File and raw types keeps a separate draft for each group, so you can switch back without losing it.
 - For JSON and XML, **Format** at the right of the toolbar (or Shift+Alt+F in the editor) indents the body. `{{variables}}` are kept as written, also where JSON expects a value, and numbers, key order and duplicate keys are left exactly as they are. Undo (Ctrl+Z) restores the previous text. When the body is not valid, nothing is changed: a notice names the problem with its line and column, for example "The JSON cannot be formatted at line 3, column 3: Expected ',' or '}' after the property value", the cursor moves to that place, and **Go to line** takes you back to it later. The same message appears when you hover the underlined spot while typing.
 
@@ -281,13 +282,15 @@ The Body tab chooses a view from the response type.
 
 | Response | Views |
 | --- | --- |
-| JSON | Pretty and Raw |
-| HTML | Raw and Preview |
-| Other text | Raw |
-| Image, PDF, audio, video | Preview, plus Raw when the content is text such as SVG |
-| Binary | A notice with the type and size, and **Save to file**. |
+| JSON | Pretty, Raw and Hex |
+| HTML | Raw, Preview and Hex |
+| Other text | Raw and Hex |
+| Image, PDF, audio, video | Preview, plus Raw when the content is text such as SVG, and Hex |
+| Binary | Summary (the type and size, and **Save to file**), Hex, MessagePack and CBOR. A `Content-Type` that names MessagePack or CBOR opens that view first. |
 | No body | "Empty response body" with the status. |
 
+- Hex lists the body as offset, sixteen bytes in hexadecimal and the same bytes as text, with `.` for bytes that are not printable. Only the rows on screen are drawn, so a body of many megabytes scrolls smoothly.
+- MessagePack and CBOR decode the bytes to JSON text, which you can search and copy like Raw. Binary strings show as `{"$binary": "<base64>"}`, MessagePack extension values as `{"$extension": type, "data": "<base64>"}`, CBOR tags other than dates and big numbers as `{"$tag": n, "value": ...}`, and integers beyond 2^53 as strings. A body over 16 MB is not decoded; a body that is not valid shows the reason.
 - Pretty shows a collapsible tree. The first two levels are expanded. Very large trees are trimmed, and a notice tells you how many values are hidden.
 - The HTML preview runs in a sandboxed frame without scripts, forms or navigation. Images, styles and fonts from other addresses are blocked, so a page cannot reveal your IP address or make the desktop app reach devices on your network; images and fonts written into the page as `data:` addresses still show. **Load remote content** in the notice above the preview loads them for that response only, and **Block again** switches them off. The next response starts blocked again.
 - A body over 500,000 characters is shown whole as plain text, without the tree or colours, so the window stays responsive. Only the lines on screen are drawn, and long lines are wrapped to the width of the panel. For JSON, **Format anyway** in the notice above the body pretty-prints it in the background and then offers Pretty and Raw; the rest of the app keeps working while it formats.

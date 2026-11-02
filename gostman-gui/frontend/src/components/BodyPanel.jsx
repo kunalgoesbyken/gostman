@@ -5,6 +5,7 @@ import { EmptyState } from "./ui/emptyState"
 import { Notice, Panel, PanelBody, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { EditorSkeleton } from "./ui/skeleton"
+import { BinaryEncoder } from "./BinaryEncoder"
 import { FileField } from "./FileField"
 import { SoapBar } from "./SoapBar"
 import { KeyValueEditor } from "./KeyValueEditor"
@@ -59,14 +60,11 @@ function RowsBody({ body, typed, onChange }) {
 function BinaryBody({ body, onChange }) {
   const stored = useMemo(() => parseJSON(body, EMPTY_ATTACHMENT), [body])
   const file = isPlainObject(stored) ? { ...EMPTY_ATTACHMENT, ...stored } : EMPTY_ATTACHMENT
+  const attach = (attachment) => onChange(JSON.stringify(attachment))
   return (
     <PanelBody>
-      <FileField
-        fileName={file.fileName}
-        data={file.data}
-        path={file.path}
-        onChange={(attachment) => onChange(JSON.stringify(attachment))}
-      />
+      <FileField fileName={file.fileName} data={file.data} path={file.path} onChange={attach} />
+      <BinaryEncoder onAttach={attach} />
     </PanelBody>
   )
 }

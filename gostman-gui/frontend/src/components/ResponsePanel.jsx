@@ -9,7 +9,10 @@ import { ConsolePanel } from "./ConsolePanel"
 import { AiButton } from "./AiButton"
 import { FilterBar, SearchBar } from "./ResponseSearchBar"
 import { HighlightedText } from "./HighlightedText"
+import { HexView } from "./HexView"
 import { LargeText } from "./LargeText"
+import { BINARY_DONE, BINARY_FAILED, BINARY_TOO_LARGE, useBinaryBody } from "../hooks/useBinaryBody"
+import { FORMAT_NAMES, formatForContentType, isFormat } from "../lib/binary/formats"
 import { useDebouncedValue } from "../hooks/useDebouncedValue"
 import { FORMAT_DONE, FORMAT_FAILED, FORMAT_WORKING, useOffThreadFilter, useOffThreadFormat } from "../hooks/useOffThreadJson"
 import { MAX_MATCHES, findMatches, stepIndex } from "../lib/responseSearch"
@@ -38,6 +41,7 @@ import { AI_TEXT } from "../lib/aiText"
 import { RESPONSE_CHECKS_TEXT } from "../lib/checksText"
 import { canSaveAsExample } from "../lib/examples"
 import { trimTree } from "../lib/jsonTree"
+import { MAX_DECODE_BYTES } from "../lib/binary/limits"
 import { LARGE_BODY_CHARS } from "../lib/largeText"
 import { PREVIEW_TEXT, RESPONSE_TEXT } from "../lib/responseText"
 import { previewDocument } from "../lib/visualizeFrame"
@@ -116,13 +120,27 @@ const cookieColumns = () => [
   { header: COLUMN_TEXT.httpOnly, width: 'w-24', text: (cookie) => flagText(cookie.httpOnly) },
 ]
 
-function viewsFor(kind, isText, isJson) {
+function binaryViews(response) {
+  const preferred = formatForContentType(response.contentType)
+  const others = FORMAT_NAMES.filter((name) => name !== preferred)
+  return preferred ? [preferred, 'info', 'hex', ...others] : ['info', 'hex', ...others]
+}
+
+function textViews(kind, isText, isJson) {
   if (isJson) return ['pretty', 'raw']
   if (kind === BODY_KINDS.HTML) return ['raw', 'preview']
   if (kind === BODY_KINDS.TEXT) return ['raw']
   if (!MEDIA_KINDS.includes(kind)) return []
   return isText ? ['preview', 'raw'] : ['preview']
 }
+
+function viewsFor(kind, isText, isJson, response) {
+  if (kind === BODY_KINDS.EMPTY) return []
+  if (kind === BODY_KINDS.BINARY) return binaryViews(response)
+  return [...textViews(kind, isText, isJson), 'hex']
+}
+
+const isTextView = (view) => view === 'pretty' || view === 'raw' || isFormat(view)
 
 function useObjectUrl(response) {
   const [url, setUrl] = useState(null)
@@ -250,7 +268,23 @@ function HtmlPreview({ response }) {
   )
 }
 
-function ResponseBody({ response, kind, view, json, formatted, filtered, highlight, onSave }) {
+function BinaryProblem({ binary, view, response }) {
+  if (binary.status === BINARY_FAILED) {
+    return <EmptyState icon={AlertTriangle} title={RESPONSE_TEXT.decode.failed({ format: RESPONSE_TEXT.views[view], reason: binary.reason })} />
+  }
+  if (binary.status === BINARY_TOO_LARGE) {
+    return <EmptyState icon={FileDigit} title={RESPONSE_TEXT.decode.tooLarge({ size: formatBytes(response.size), limit: formatBytes(MAX_DECODE_BYTES) })} />
+  }
+  return <SkeletonLines label={RESPONSE_TEXT.decode.working} lines={4} />
+}
+
+function BinaryViews({ response, view, binary, highlight }) {
+  if (binary.status !== BINARY_DONE) return <BinaryProblem binary={binary} view={view} response={response} />
+  if (view === 'hex') return <HexView bytes={binary.bytes} />
+  return <TextBody text={binary.text} highlight={highlight} />
+}
+
+function ResponseBody({ response, kind, view, json, formatted, filtered, highlight, binary, onSave }) {
   if (kind === BODY_KINDS.EMPTY) {
     return (
       <EmptyState
@@ -260,6 +294,7 @@ function ResponseBody({ response, kind, view, json, formatted, filtered, highlig
       />
     )
   }
+  if (view === 'hex' || isFormat(view)) return <BinaryViews response={response} view={view} binary={binary} highlight={highlight} />
   if (kind === BODY_KINDS.BINARY) return <BinaryBody response={response} onSave={onSave} />
   if (view === 'pretty') return <PrettyBody json={json} formatted={formatted} filtered={filtered} highlight={highlight} depth={treeDepth(response)} />
   if (view === 'raw') return <TextBody text={filtered ? filtered.text : response.body} highlight={highlight} />
@@ -419,8 +454,9 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
   const canFormat = isLarge && looksLikeJson(text)
   const json = useMemo(() => (kind === BODY_KINDS.TEXT && !isLarge ? parseJsonBody(text) : null), [kind, isLarge, text])
   const { formatted, format } = useOffThreadFormat(text)
-  const views = viewsFor(kind, text !== '', json !== null || formatted.text !== null)
+  const views = viewsFor(kind, text !== '', json !== null || formatted.text !== null, shown)
   const view = views.includes(selectedView) ? selectedView : views[0]
+  const binary = useBinaryBody(hasResult ? shown : null, view)
   const headers = shown?.headers || []
   const cookies = shown?.cookies || []
   const showsTests = hasTestOutput(tests)
@@ -441,18 +477,19 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
 
   const filter = useOffThreadFilter(text, json !== null || canFormat, debouncedPath, json !== null)
   const filtered = filter.active && !filter.error ? filter : null
-  const canSearch = showsBody && hasBody && (view === 'pretty' || view === 'raw')
+  const canSearch = showsBody && hasBody && isTextView(view) && (!isFormat(view) || binary.status === BINARY_DONE)
   const searching = searchOpen && canSearch && debouncedQuery !== ''
   const searchText = useMemo(() => {
     if (!searching) return ''
     if (filtered) return filtered.text
+    if (isFormat(view)) return binary.text ?? ''
     if (view === 'pretty') return formatted.text ?? JSON.stringify(json, null, 2)
     return text
-  }, [searching, view, filtered, json, text, formatted.text])
+  }, [searching, view, filtered, json, text, formatted.text, binary.text])
   const matches = useMemo(() => findMatches(searchText, debouncedQuery), [searchText, debouncedQuery])
   const activeMatch = Math.min(matchIndex, Math.max(matches.length - 1, 0))
   const highlight = searching ? { matches, length: debouncedQuery.length, index: activeMatch } : null
-  const copyText = filtered ? filtered.text : text
+  const copyText = isFormat(view) ? binary.text ?? '' : filtered ? filtered.text : text
 
   useEffect(() => setActiveTab(TAB_BODY), [tabId])
 
@@ -511,6 +548,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
         formatted={formatted.text}
         filtered={filtered}
         highlight={highlight}
+        binary={binary}
         onSave={past ? undefined : onDownload}
       />
     )

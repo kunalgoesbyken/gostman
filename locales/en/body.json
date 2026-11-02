@@ -11,6 +11,16 @@
     "noBodyDescription": "This request is sent without a body.",
     "multipartOnGet": "GET requests rarely carry a body, and many servers ignore it. Switch the method to POST or PUT if this should be uploaded.",
     "replacedByGraphQL": "The method is GRAPHQL, so the body is built from the GraphQL tab and this one is not sent.",
+    "encoder": {
+      "title": "Encode JSON as a binary format",
+      "description": "Writes the JSON below as MessagePack or CBOR and attaches the result as the file body. The JSON is encoded now, so {{variables}} are not replaced when the request is sent.",
+      "format": "Binary format",
+      "encode": "Encode and attach",
+      "sourceLabel": "JSON to encode",
+      "placeholder": "{\"id\": 1, \"tags\": [\"a\", \"b\"]}",
+      "attached": "Attached {{size}}.",
+      "failed": "The JSON could not be encoded: {{message}}"
+    },
     "types": {
       "none": "None",
       "text": "Text",

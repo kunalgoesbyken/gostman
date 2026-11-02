@@ -62,7 +62,21 @@
     "views": {
       "pretty": "Pretty",
       "raw": "Raw",
-      "preview": "Preview"
+      "preview": "Preview",
+      "info": "Summary",
+      "hex": "Hex",
+      "msgpack": "MessagePack",
+      "cbor": "CBOR"
+    },
+    "hex": {
+      "label": "Hexadecimal view of the body",
+      "offset": "Offset",
+      "text": "Text"
+    },
+    "decode": {
+      "working": "Decoding…",
+      "failed": "The body could not be read as {{format}}: {{reason}}",
+      "tooLarge": "This body is {{size}}. Gostman decodes up to {{limit}}, so use Hex or save it to a file."
     },
     "bodyView": "Body view",
     "checksPassed": "{{passed}} of {{total}} checks passed",
