@@ -1,0 +1,28 @@
+{
+  "tour": {
+    "label": "Quick tour",
+    "replay": "Show tour",
+    "progress": "Step {{current}} of {{total}}",
+    "next": "Next",
+    "done": "Done",
+    "skip": "Skip tour",
+    "steps": {
+      "send": {
+        "title": "Send a request",
+        "body": "Type a URL in the address bar and press Send. The response opens below it."
+      },
+      "variables": {
+        "title": "Use variables",
+        "body": "Write a value as {{example}} and set it in an environment, so one request works for local, staging and production."
+      },
+      "tools": {
+        "title": "Find every tool",
+        "body": "The Tools menu in the header groups what you can do with requests: run, mock, scan, monitor and share."
+      },
+      "explore": {
+        "title": "Search anything",
+        "body": "Press {{shortcut}} for the command palette, or open Help and choose Explore features."
+      }
+    }
+  }
+}

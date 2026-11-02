@@ -1,5 +1,5 @@
 import { useRef, useState } from "react"
-import { ArrowLeft, CircleHelp, Compass, Download, Hand, Import, Info, Keyboard, PanelLeft, Search, Sparkles } from "lucide-react"
+import { ArrowLeft, CircleHelp, Compass, Download, Hand, Import, Info, Keyboard, Route, PanelLeft, Search, Sparkles } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { EnvironmentSwitcher } from "./EnvironmentSwitcher"
 import { StorageMenu } from "./StorageMenu"
@@ -22,6 +22,8 @@ import { useShortcutLabel } from "../hooks/useShortcuts"
 import { useWindowFrame } from "../hooks/useWindowFrame"
 import { useAppStore } from "../store/appStore"
 import { Logo } from "./ui/logo"
+import { TOUR_TEXT } from "../lib/tourText"
+import { startTourReplay } from "../lib/tour"
 
 const DRAG = { "--wails-draggable": "drag" }
 const NO_DRAG = { "--wails-draggable": "no-drag" }
@@ -38,6 +40,7 @@ function HelpMenu({ style }) {
     { id: "explore", label: FEATURES_TEXT.title, icon: Compass, onSelect: () => state().openExplore() },
     { id: "whats-new", label: FEATURES_TEXT.whatsNewTitle, icon: Sparkles, onSelect: () => state().openWhatsNew() },
     { id: "welcome", label: WELCOME_TEXT.commandTitle, icon: Hand, onSelect: () => state().showWelcome() },
+    { id: "tour", label: TOUR_TEXT.replay, icon: Route, onSelect: startTourReplay },
     { id: "shortcuts", label: SHORTCUT_TEXT.title, icon: Keyboard, onSelect: () => state().openShortcutsDialog() },
     { id: "about", label: ABOUT_TEXT.commandTitle, icon: Info, onSelect: () => state().openAbout() },
   ]

@@ -1,0 +1,6 @@
+{
+  "tour.label": "Accessible name of the small card that walks a new user through the app.",
+  "tour.replay": "Menu item in Help that starts the tour again.",
+  "tour.steps.variables.body": "{{example}} stands for a literal variable such as double braces around a name. Keep it as a placeholder.",
+  "tour.steps.explore.body": "{{shortcut}} is the keyboard shortcut for the command palette, for example Ctrl+K."
+}

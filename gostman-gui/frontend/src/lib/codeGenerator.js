@@ -1,4 +1,4 @@
-import { shellQuote, shellWord } from './shellWords'
+import { powershellQuote, shellQuote, shellWord } from './shellWords'
 import { UNSAFE_REQUEST_SNIPPET, isSafeRequest, readsFromFile } from './snippetSafety'
 import { readStored, writeStored } from './storage'
 import { DEFAULT_PART_TYPE, formContentType, formSegments, isContentType, uploadOf } from './uploadParts'
@@ -12,10 +12,6 @@ const C_ESCAPES = { '"': '\\"', '\\': '\\\\', '\n': '\\n', '\r': '\\r', '\t': '\
 const quote = (text) => JSON.stringify(text)
 
 const singleQuote = (text) => `'${text.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`
-
-const POWERSHELL_QUOTES = new Set(["'", '‘', '’', '‚', '‛'])
-
-const powershellQuote = (text) => `'${Array.from(text, (character) => (POWERSHELL_QUOTES.has(character) ? character + character : character)).join('')}'`
 
 const fourDigitEscape = (code) => `\\u${code.toString(16).padStart(4, '0')}`
 

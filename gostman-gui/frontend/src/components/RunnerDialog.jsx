@@ -20,7 +20,7 @@ import { DATA_ACCEPT, DATA_FILE_ERROR, dataColumns, iterationCount, MAX_ITERATIO
 import { parseJsonBody, statusVariant } from "../lib/response"
 import { shownMethod } from "../lib/methodLabel"
 import { requestsInScope } from "../lib/runner"
-import { runCommandLine } from "../lib/runCommand"
+import { runCommandLines } from "../lib/runCommand"
 import { REPORT_FORMAT_IDS } from "../lib/runReportFormats"
 import { isDesktopApp } from "../lib/platform"
 import { folderChain } from "../lib/variableScopes"
@@ -268,9 +268,10 @@ export function RunnerDialog({ folders, requests, actions }) {
   const iterations = iterationCount(rows, iterationLimit)
   const columns = useMemo(() => dataColumns(rows), [rows])
   const total = requestCount * iterations
-  const terminalCommand = !isDesktopApp() && results.length > 0 && !isRunning
-    ? runCommandLine({ folderName: scopes.find((scope) => scope.folder.id === folderId)?.folder.name ?? ROOT_ID, dataName, iterations: iterationLimit, parallel, format: reportFormat })
-    : ""
+  const showsTerminal = !isDesktopApp() && results.length > 0 && !isRunning
+  const terminalCommands = showsTerminal
+    ? runCommandLines({ folderName: scopes.find((scope) => scope.folder.id === folderId)?.folder.name ?? ROOT_ID, dataName, iterations: iterationLimit, parallel, format: reportFormat })
+    : null
   const isChoosing = scoped.length > 0 && !isRunning && (results.length === 0 || showChoices)
 
   async function chooseData(event) {
@@ -413,11 +414,18 @@ export function RunnerDialog({ folders, requests, actions }) {
           {RUNNER_TEXT.report}
         </Button>
       </div>
-      {terminalCommand && (
-        <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-border py-1.5 ps-4 pe-2 text-xs text-muted-foreground">
+      {showsTerminal && (
+        <div className="flex max-h-40 shrink-0 flex-col gap-1.5 overflow-y-auto border-t border-border py-1.5 ps-4 pe-2 text-xs text-muted-foreground">
           <span>{RUNNER_TEXT.cliLine}</span>
-          <code dir="ltr" className="min-w-0 flex-1 truncate font-mono" title={terminalCommand}>{terminalCommand}</code>
-          <CopyTextButton text={terminalCommand} />
+          {terminalCommands === null ? (
+            <p>{RUNNER_TEXT.cliUnsafe}</p>
+          ) : terminalCommands.map(({ shell, command }) => (
+            <div key={shell} className="flex items-start gap-2">
+              <span className="w-28 shrink-0">{RUNNER_TEXT.shells[shell]}</span>
+              <code dir="ltr" className="min-w-0 flex-1 whitespace-pre-wrap break-all font-mono">{command}</code>
+              <CopyTextButton text={command} />
+            </div>
+          ))}
         </div>
       )}
     </Dialog>

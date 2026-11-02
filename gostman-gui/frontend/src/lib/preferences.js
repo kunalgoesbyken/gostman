@@ -14,6 +14,7 @@ import {
   parseTheme, serializeTheme, themeStyleSheet, windowProperties, windowTone,
 } from './themes.js'
 import { reportWindowTheme } from './windowTheme.js'
+import { TOUR_FINISHED } from './tour.js'
 
 const STORAGE_KEY = 'gostman.preferences'
 const THEME_STYLE_ID = 'gostman-theme'
@@ -59,6 +60,7 @@ export const DEFAULT_PREFERENCES = {
   authorName: '',
   shortcuts: {},
   sidebarViews: DEFAULT_SIDEBAR_VIEWS,
+  tourStep: 0,
 }
 
 const oneOf = (allowed) => (value) => allowed.includes(value)
@@ -86,6 +88,7 @@ const VALIDATORS = {
   confirmCloseTab: isFlag,
   language: oneOf(LANGUAGE_VALUES),
   authorName: isAuthorName,
+  tourStep: integerWithin({ min: 0, max: TOUR_FINISHED }),
 }
 
 const withUsableAccent = (preferences) => (

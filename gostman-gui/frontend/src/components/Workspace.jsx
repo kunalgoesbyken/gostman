@@ -9,6 +9,7 @@ import { ResponsePanel } from "./ResponsePanel"
 import { AppDialogs } from "./AppDialogs"
 import { AppHeader } from "./AppHeader"
 import { NoticeToast } from "./NoticeToast"
+import { TourCard } from "./TourCard"
 import { StatusBar } from "./StatusBar"
 import { TabBar } from "./TabBar"
 import { RequestTabs } from "./RequestTabs"
@@ -533,6 +534,7 @@ function LoadedWorkspace({ backend, onBack }) {
       />
 
       <NoticeToast />
+      <TourCard />
 
       <AppDialogs onCommand={actions.runCommand} secrets={actions.secrets} listFonts={backend.listInstalledFonts} windowFrame={backend.windowFrame} hasWorkspaces={Boolean(actions.storage)} isAiOn={isAiOn} ai={actions.ai} trash={actions.trash} backups={actions.backups} relay={backend.relay} updates={backend.updates} />
     </div>
