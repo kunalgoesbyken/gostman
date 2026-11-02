@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, Eye, EyeOff, FileCode, Info, KeyRound } from 'lucide-react'
+import { ChevronDown, ChevronRight, Eye, EyeOff, FileCode, KeyRound } from 'lucide-react'
 import { CertificateChain } from './CertificateChain'
 import { ConsoleLine } from './ConsolePanel'
 import { TestRow, countPassed } from './TestResults'
 import { Badge } from './ui/badge'
 import { IconButton } from './ui/button'
+import { InfoTip } from './ui/infoTip'
 import { Notice, SectionLabel } from './ui/panel'
 import { cn } from '../lib/utils'
 import { redirectSteps } from '../lib/certificates'
@@ -280,12 +281,12 @@ export function TimelineTab({ timeline }) {
   const scripts = rows.filter((row) => row.entry.kind === ENTRY_KINDS.SCRIPT).length
   return (
     <div className="flex flex-col">
-      {timeline.proxied && <Notice icon={Info}>{TIMELINE_TEXT.proxied}</Notice>}
       <div className="flex flex-wrap items-baseline gap-x-3 px-3 pt-2 text-xs">
         <SectionLabel>{TIMELINE_TEXT.total}</SectionLabel>
         <span className="font-mono text-foreground">{formatMs(timelineTotalMs(timeline))}</span>
         <span className="text-muted-foreground">{TIMELINE_TEXT.requests(requests)}</span>
         {scripts > 0 && <span className="text-muted-foreground">{TIMELINE_TEXT.scripts(scripts)}</span>}
+        {timeline.proxied && <InfoTip text={TIMELINE_TEXT.proxied} />}
       </div>
       {hops.length > 0 && <Legend hops={hops} />}
       <RedirectChain hops={hops} />

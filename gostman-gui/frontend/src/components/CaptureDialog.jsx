@@ -9,6 +9,7 @@ import { Dialog } from "./ui/dialog"
 import { ToolDialogHeader } from "./ToolDialogHeader"
 import { EmptyState } from "./ui/emptyState"
 import { FeatureEmpty } from "./FeatureEmpty"
+import { InfoTip } from "./ui/infoTip"
 import { Input } from "./ui/input"
 import { Notice, SectionLabel, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
@@ -317,10 +318,10 @@ function CapturePanel({ folders, requests, onTrust, actions }) {
   return (
     <>
       <CaptureControls capture={capture} actions={actions} />
-      <Notice icon={Info}>{CAPTURE_TEXT.limitation}</Notice>
       {failure && <Notice tone="destructive" icon={AlertTriangle} role="alert">{failure}</Notice>}
       <Toolbar>
         <SegmentedControl label={CAPTURE_TEXT.viewLabel} options={views} value={view} onChange={actions.setView} />
+        <InfoTip text={CAPTURE_TEXT.limitation} />
       </Toolbar>
       {view === VIEW_CALLS && <CallsView folders={folders} requests={requests} actions={actions} />}
       {view === VIEW_RULES && <CaptureRulesTab config={config} onTrust={onTrust} actions={actions} />}

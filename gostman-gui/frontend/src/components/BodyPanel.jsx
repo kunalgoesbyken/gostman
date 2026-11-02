@@ -2,6 +2,7 @@ import { Suspense, useMemo, useRef, useState } from "react"
 import { Braces, FileX } from "lucide-react"
 import { Button } from "./ui/button"
 import { EmptyState } from "./ui/emptyState"
+import { InfoTip } from "./ui/infoTip"
 import { Notice, Panel, PanelBody, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { EditorSkeleton } from "./ui/skeleton"
@@ -153,6 +154,7 @@ export function BodyPanel({ request: stored, drafts, editorPath, replacedByGraph
     <Panel>
       <Toolbar>
         <SegmentedControl label={BODY_TEXT.typeLabel} options={bodyTypesFor(request.method)} value={request.bodyType} onChange={handleTypeChange} />
+        {RAW_SOCKET_METHODS.includes(request.method) && <InfoTip text={request.method === 'NATS' ? BODY_TEXT.natsSocket : BODY_TEXT.rawSocket} />}
         {request.bodyType === BODY_JSON && <JsonRpcButton body={request.body} onChange={(body) => onUpdateRequest({ body })} />}
         {formatting.isFormatted && (
           <Button
@@ -172,7 +174,6 @@ export function BodyPanel({ request: stored, drafts, editorPath, replacedByGraph
       {replacedByGraphQL && (
         <Notice>{BODY_TEXT.replacedByGraphQL}</Notice>
       )}
-      {RAW_SOCKET_METHODS.includes(request.method) && <Notice>{request.method === 'NATS' ? BODY_TEXT.natsSocket : BODY_TEXT.rawSocket}</Notice>}
       {request.bodyType === BODY_MULTIPART && BODILESS_METHODS.includes(request.method) && <Notice>{BODY_TEXT.multipartOnGet}</Notice>}
       {formatting.shownProblem && <FormatProblem bodyType={request.bodyType} error={formatting.shownProblem} onReveal={formatting.reveal} />}
       <BodyEditor

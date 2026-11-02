@@ -2,6 +2,7 @@ import { Suspense, useEffect, useMemo, useRef, useState } from "react"
 import { AlertTriangle, Check, ChevronRight, Info, Loader2, X } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { Combobox } from "./ui/combobox"
+import { InfoTip } from "./ui/infoTip"
 import { Input } from "./ui/input"
 import { Notice, Panel, ResizablePane, SIDE_PANE, STACKED_TOOLBAR, SectionLabel, Toolbar, ToolbarSummary } from "./ui/panel"
 import { EDGE_START } from "../hooks/usePaneResize"
@@ -240,6 +241,7 @@ export function McpPanel({ tabId, request, catalog, editorPath, onUpdateRequest,
   const items = itemsFor(catalog, operation)
   const selected = useMemo(() => (items ? findTool(items, mcpTool) : undefined), [items, mcpTool])
   const findings = useMemo(() => (isLoaded ? checkCatalog(catalog) : []), [isLoaded, catalog])
+  const operationHint = operation === MCP_READ_RESOURCE ? MCP_TEXT.readHint : !namesItem(operation) && MCP_TEXT.noInput
   const serverSummary = isLoaded ? MCP_TEXT.serverLabel(catalog) : MCP_TEXT.notLoaded
 
   const chooseOperation = (next) => {
@@ -318,10 +320,9 @@ export function McpPanel({ tabId, request, catalog, editorPath, onUpdateRequest,
             </Button>
           </>
         )}
+        {operationHint && <InfoTip text={operationHint} />}
       </Toolbar>
       {selected?.description && <Notice className="max-h-24 overflow-y-auto whitespace-pre-wrap">{selected.description}</Notice>}
-      {operation === MCP_READ_RESOURCE && <Notice>{MCP_TEXT.readHint}</Notice>}
-      {!namesItem(operation) && <Notice>{MCP_TEXT.noInput}</Notice>}
       {takesArguments(operation) && (
         <div className="flex min-h-24 flex-1">
           <div dir="ltr" className="min-h-0 min-w-0 flex-1">

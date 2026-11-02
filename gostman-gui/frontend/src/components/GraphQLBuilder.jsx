@@ -2,6 +2,7 @@ import { memo, useMemo, useRef, useState } from "react"
 import { ChevronDown, ChevronRight, Network } from "lucide-react"
 import { Button } from "./ui/button"
 import { EmptyState } from "./ui/emptyState"
+import { InfoTip } from "./ui/infoTip"
 import { Input } from "./ui/input"
 import { Notice, PanelBody, ResizablePane, SIDE_PANE, SectionLabel, Toolbar } from "./ui/panel"
 import { EDGE_START } from "../hooks/usePaneResize"
@@ -128,6 +129,7 @@ const GraphQLBuilderTree = memo(function GraphQLBuilderTree({ index, query, vari
           value={builder.root}
           onChange={builder.chooseRoot}
         />
+        {builder.root === SUBSCRIPTION && <InfoTip text={BUILDER_TEXT.subscription} />}
       </Toolbar>
       <Toolbar>
         <Input
@@ -140,7 +142,6 @@ const GraphQLBuilderTree = memo(function GraphQLBuilderTree({ index, query, vari
         />
       </Toolbar>
       {builder.error && <Notice tone="warning">{BUILDER_TEXT.syntaxError(builder.error.message)}</Notice>}
-      {builder.root === SUBSCRIPTION && <Notice>{BUILDER_TEXT.subscription}</Notice>}
       {hasRoot && rows.length > 0 && <VirtualList items={rows} rowHeight={ROW_HEIGHT_PX} renderRow={renderRow} className="min-h-0 flex-1 py-1" />}
       {hasRoot && rows.length === 0 && <p className="p-3 text-xs text-muted-foreground">{BUILDER_TEXT.empty}</p>}
       {!hasRoot && <p className="p-3 text-xs text-muted-foreground">{BUILDER_TEXT.noRoot}</p>}

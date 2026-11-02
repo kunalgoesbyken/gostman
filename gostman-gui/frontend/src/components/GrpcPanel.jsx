@@ -1,6 +1,7 @@
 import { Suspense, useMemo, useRef, useState } from "react"
 import { FilePlus } from "lucide-react"
 import { Button } from "./ui/button"
+import { InfoTip } from "./ui/infoTip"
 import { Input } from "./ui/input"
 import { Notice, Panel, STACKED_TOOLBAR, SectionLabel, Toolbar, ToolbarSummary } from "./ui/panel"
 import { Select } from "./ui/select"
@@ -127,6 +128,7 @@ export function GrpcPanel({ request, schema, editorPath, onUpdateRequest, onProt
           <MethodField services={services} method={grpcMethod} isListed={Boolean(selected)} onChange={chooseMethod} />
         </div>
         {selected && <span className="shrink-0 text-xs text-muted-foreground">{methodKind(selected)}</span>}
+        {selected?.clientStreaming && <InfoTip text={TEXT.streamHint} />}
         <Button
           variant="outline"
           size="sm"
@@ -137,7 +139,6 @@ export function GrpcPanel({ request, schema, editorPath, onUpdateRequest, onProt
           {TEXT.useExample}
         </Button>
       </Toolbar>
-      {selected?.clientStreaming && <Notice>{TEXT.streamHint}</Notice>}
       <div dir="ltr" className="min-h-0 flex-1">
         <Suspense fallback={<EditorSkeleton />}>
           <EditorComponent

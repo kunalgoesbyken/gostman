@@ -4,6 +4,10 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Changed
+
+- Static explanations in settings, environments, secrets, trash, monitors, capture, gRPC, MCP, GraphQL and body panels are now an info icon beside the section they explain instead of a full row; warnings, errors, empty states and trust banners stay as rows.
+
 ## [1.10.2] - 2026-11-02
 
 ### Fixed
