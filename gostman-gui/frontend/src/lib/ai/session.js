@@ -43,6 +43,8 @@ export const useAiStore = create(() => INITIAL_STATE)
 
 export const useAiEnabled = () => useAiStore((current) => isAiEnabled(current.settings))
 
+export const isAiEnabledNow = () => isAiEnabled(useAiStore.getState().settings)
+
 const state = () => useAiStore.getState()
 const patch = (changes) => useAiStore.setState(changes)
 const patchDialog = (changes) => useAiStore.setState((current) => (current.dialog ? { dialog: { ...current.dialog, ...changes } } : current))

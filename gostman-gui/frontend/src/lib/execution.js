@@ -27,6 +27,8 @@ import { SECRETS_TEXT } from './secretsText'
 import { ENTRY_KINDS, exchangeEntry, scriptEntry, secretsEntry, withActivity } from './timeline'
 import { promptNames, referenceTargets, resolveLayers, scopeLayers, usedVariableNames } from './variableScopes'
 import { shownUrl } from './shownUrl'
+import { sampleTransport } from './sampleResponses'
+import { isSampleRequest } from './samples'
 import { environmentFor, scriptLayersFor, useAppStore, variableTextFor } from '../store/appStore'
 
 const CONFIG_ERROR = 'config'
@@ -188,6 +190,7 @@ async function loadModules(backend, steps) {
 }
 
 function transportFor(backend, request) {
+  if (isSampleRequest(request)) return sampleTransport
   if (isGrpcRequest(request)) return backend.invokeGrpc
   if (isMcpRequest(request)) return backend.invokeMcp
   if (isStreamRequest(request)) return transmitStream(backend)

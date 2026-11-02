@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { parse } from '@babel/parser'
 import { ACTIONS, FEATURES, GROUPS, PLATFORMS, SURFACES } from '../src/lib/featureCatalog.js'
 import { RELEASES } from '../src/lib/releaseNotes.js'
 import { isValidVersion } from '../src/lib/versions.js'
@@ -10,6 +11,37 @@ const repository = path.resolve(here, '../../..')
 const docsRoot = path.join(repository, 'docs')
 const words = JSON.parse(fs.readFileSync(path.join(repository, 'locales/en/features.json'), 'utf8'))
 const siteFeatures = JSON.parse(fs.readFileSync(path.join(here, '../src/components/landing/siteFeatures.json'), 'utf8'))
+
+const HANDLER_FILE = path.join(here, '../src/lib/featureActions.js')
+const HANDLER_TABLE = 'handlers'
+
+const keyName = (property) => property.key.name ?? property.key.value
+
+function objectLiterals(program) {
+  const tables = new Map()
+  const visit = (node) => {
+    if (!node || typeof node.type !== 'string') return
+    if (node.type === 'VariableDeclarator' && node.id.type === 'Identifier' && node.init?.type === 'ObjectExpression') tables.set(node.id.name, node.init)
+    for (const value of Object.values(node)) {
+      if (Array.isArray(value)) value.forEach(visit)
+      else if (value && typeof value === 'object') visit(value)
+    }
+  }
+  visit(program)
+  return tables
+}
+
+function implementedActions() {
+  const program = parse(fs.readFileSync(HANDLER_FILE, 'utf8'), { sourceType: 'module' }).program
+  const tables = objectLiterals(program)
+  const registry = tables.get(HANDLER_TABLE)
+  const implemented = {}
+  for (const property of registry?.properties ?? []) {
+    const table = tables.get(property.value.name)
+    implemented[keyName(property)] = (table?.properties ?? []).map(keyName)
+  }
+  return implemented
+}
 
 const problems = []
 const report = (message) => problems.push(message)
@@ -30,6 +62,15 @@ const anchorsOf = (page) => {
   }
   return anchors
 }
+
+const implemented = implementedActions()
+for (const [type, ids] of Object.entries(ACTIONS)) {
+  for (const id of ids) if (!implemented[type]?.includes(id)) report(`ACTIONS lists ${type}:${id} but featureActions.js has no handler for it`)
+  for (const id of implemented[type] ?? []) if (!ids.includes(id)) report(`featureActions.js handles ${type}:${id} but ACTIONS does not list it`)
+}
+for (const type of Object.keys(implemented)) if (!ACTIONS[type]) report(`featureActions.js handles the action type "${type}" that ACTIONS does not list`)
+
+for (const group of GROUPS) if (!FEATURES.some((feature) => feature.group === group && !feature.hidden)) report(`group "${group}" has no feature`)
 
 const seen = new Set()
 const surfaces = new Map()

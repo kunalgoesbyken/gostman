@@ -4,11 +4,11 @@ export const RELEASES = [
   {
     version: '1.9.0',
     ids: [
-      'hex-view', 'msgpack-cbor', 'certificate-viewer', 'jwt-signing', 'http-version', 'dns-override', 'graphql-upload', 'ws-security',
-      'grpc-web', 'signalr', 'tcp-udp', 'breakpoints', 'throttling', 'spec-importers', 'versioned-docs', 'notes', 'recently-deleted',
-      'global-search', 'split-view', 'dependency-graph', 'snapshot-checks', 'negative-tests', 'coverage', 'pm-packages', 'openapi-diff',
-      'load-thresholds', 'monitors', 'pre-commit', 'capture-rules', 'capture-har', 'git-field-diff', 'git-commit-graph', 'repo-create',
-      'ai-mock', 'ai-commit',
+      'hex-view', 'msgpack-cbor', 'certificate-viewer', 'jwt-signing', 'http-version', 'dns-override',
+      'graphql-upload', 'breakpoints', 'spec-importers', 'versioned-docs', 'snapshot-checks', 'negative-tests',
+      'coverage', 'pm-packages', 'load-thresholds', 'monitors', 'capture-rules', 'capture-har',
+      'git-field-diff', 'git-commit-graph', 'repo-create', 'ai-mock', 'ai-commit', 'xlsx-data',
+      'scheduled-runs',
     ],
   },
   { version: '1.8.3', ids: ['open-tabs'] },

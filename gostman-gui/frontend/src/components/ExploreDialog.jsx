@@ -12,15 +12,15 @@ import { FEATURES_TEXT as TEXT } from "../lib/featuresText"
 import { GROUPS } from "../lib/featureCatalog"
 import { isDesktopApp } from "../lib/platform"
 import { RELEASES_URL } from "../lib/siteLinks"
+import { formatList } from "../lib/i18n/format"
 import { cn } from "../lib/utils"
 import { useAppStore } from "../store/appStore"
 
 const EXPLORE_WINDOW = { id: "explore", width: 820, height: 640, minWidth: 420, minHeight: 360 }
 
 const platformLabel = (feature) => {
-  if (!feature.platforms) return ""
-  if (feature.platforms.includes("cli")) return TEXT.platformCli
-  return feature.platforms.includes("desktop") ? TEXT.platformDesktop : TEXT.platformWeb
+  const labels = { desktop: TEXT.platformDesktop, web: TEXT.platformWeb, cli: TEXT.platformCli }
+  return formatList((feature.platforms ?? []).map((platform) => labels[platform]))
 }
 
 function GroupTabs({ group, onChange }) {

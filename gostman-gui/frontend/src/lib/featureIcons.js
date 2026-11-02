@@ -1,5 +1,5 @@
 import {
-  Newspaper, Braces, Waypoints, Radio, Plug, Terminal, Code, FileSearch, Bookmark, KeyRound, Cookie, Settings2, Binary, ShieldCheck, Globe, Upload, Cable, Pause, Gauge, PanelLeft, History, FolderPlus, FolderOpen, Download, Share2, FileText, NotebookPen, Undo2, Archive, Search, Columns2, Network, Layers, Lock, Vault, Crosshair, Wifi, ListChecks, FileCode, FileCheck, Camera, Bug, Percent, Package, RefreshCw, GitCompare, Workflow, ShieldAlert, Activity, CircleCheck, Bot, Server, SlidersHorizontal, FileDown, GitBranch, GitFork, GitMerge, GitBranchPlus, Command, Keyboard, Palette, Languages, MonitorDown, Banknote,
+  Newspaper, Braces, Waypoints, Radio, Plug, Terminal, Code, FileSearch, Bookmark, KeyRound, Cookie, Settings2, Binary, ShieldCheck, Globe, Upload, Pause, PanelLeft, History, FolderPlus, FolderOpen, Download, Share2, FileText, Archive, Layers, Lock, Vault, Crosshair, Wifi, ListChecks, FileCode, FileCheck, Camera, Bug, Percent, Package, RefreshCw, Workflow, Gauge, ShieldAlert, Activity, Bot, Server, SlidersHorizontal, FileDown, GitBranch, GitCompare, GitFork, GitMerge, GitBranchPlus, Command, Keyboard, Palette, Languages, MonitorDown, Banknote, FileSpreadsheet, Timer,
   Sparkles,
 } from "lucide-react"
 
@@ -20,9 +20,7 @@ const ICONS = {
   'shield-check': ShieldCheck,
   globe: Globe,
   upload: Upload,
-  cable: Cable,
   pause: Pause,
-  gauge: Gauge,
   'panel-left': PanelLeft,
   history: History,
   'folder-plus': FolderPlus,
@@ -30,12 +28,7 @@ const ICONS = {
   download: Download,
   'share-2': Share2,
   'file-text': FileText,
-  'notebook-pen': NotebookPen,
-  'undo-2': Undo2,
   archive: Archive,
-  search: Search,
-  'columns-2': Columns2,
-  network: Network,
   layers: Layers,
   lock: Lock,
   vault: Vault,
@@ -49,16 +42,16 @@ const ICONS = {
   percent: Percent,
   package: Package,
   'refresh-cw': RefreshCw,
-  'git-compare': GitCompare,
   workflow: Workflow,
+  gauge: Gauge,
   'shield-alert': ShieldAlert,
   activity: Activity,
-  'circle-check': CircleCheck,
   bot: Bot,
   server: Server,
   'sliders-horizontal': SlidersHorizontal,
   'file-down': FileDown,
   'git-branch': GitBranch,
+  'git-compare': GitCompare,
   'git-fork': GitFork,
   'git-merge': GitMerge,
   'git-branch-plus': GitBranchPlus,
@@ -68,6 +61,8 @@ const ICONS = {
   languages: Languages,
   'monitor-down': MonitorDown,
   banknote: Banknote,
+  'file-spreadsheet': FileSpreadsheet,
+  timer: Timer,
 }
 
 export const featureIcon = (feature) => ICONS[feature.icon] || Sparkles

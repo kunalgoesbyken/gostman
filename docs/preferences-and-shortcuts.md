@@ -357,7 +357,7 @@ Closing a dialog or a menu puts you back on the item that opened it. After you d
 **Explore features** is a searchable list of what Gostman can do. Open it from the **Explore** item at the left of the status bar, from the **Help** menu (the question mark in the header), from **Explore features** in the command palette or from the welcome panel. It is also the sixth step of **Get started**.
 
 - Type in the search box to find a feature by name, by what it does or by the name another tool gives it, for example `snapshot`, `mock`, `newman` or `oasdiff`. The group buttons under the box narrow the list.
-- **Try it** opens the feature, or adds a small sample so you can use it at once. The sample collection (three requests with saved examples, pointing at `{{baseUrl}}`) needs no network access; serve it with the mock server on the desktop app. A feature with no **Try it** button has no place in the app to open, or needs the desktop app.
+- **Try it** opens the feature, or adds a small sample so you can use it at once. The sample collection (four requests to `sample.gostman.test`, one of them with a CBOR response) needs no network access: the app answers those requests from their saved examples. A feature with no **Try it** button has nothing in the app to open (it is a command line feature, for example), or needs the desktop app.
 - **Learn more** opens the matching page of these docs.
 - Empty panels, such as the runner before any request is saved, an empty history or the response area before the first send, show the same **Try it** and **Learn more** buttons. Above the Vars, Extract, Checks and Settings sections of a request, a one-line hint says what the section is for; the **x** hides it for good.
 

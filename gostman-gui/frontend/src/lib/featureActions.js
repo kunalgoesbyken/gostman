@@ -1,15 +1,15 @@
+import { isAiEnabledNow } from './ai/session'
 import { featureById, isMissingHere } from './featureIndex'
 import { FEATURES_TEXT } from './featuresText'
 import { openGit, useGitStore } from './gitSession'
 import { focusAddressSoon } from './panes'
 import { isDesktopApp } from './platform'
 import { AUTH_PANEL, EXTRACT_PANEL, SETTINGS_PANEL, TESTS_PANEL, VARS_PANEL } from './requestSections'
-import { SAMPLE_FOLDER_ID, protocolRequest, sampleCollection, sampleFlow, sampleScanRequest } from './samples'
-import { VIEW_FLOWS, VIEW_HISTORY, VIEW_TABS } from './sidebarViews'
+import { SAMPLE_FOLDER_ID, protocolRequest, sampleBinaryRequest, sampleCollection, sampleFlow, sampleScanRequest } from './samples'
+import { VIEW_HISTORY, VIEW_TABS } from './sidebarViews'
 import { useAppStore } from '../store/appStore'
 
-const PANELS = { auth: AUTH_PANEL, vars: VARS_PANEL, extract: EXTRACT_PANEL, tests: TESTS_PANEL, settings: SETTINGS_PANEL }
-const SIDEBAR_VIEWS = { history: VIEW_HISTORY, openTabs: VIEW_TABS, flows: VIEW_FLOWS }
+const CLI_INIT = 'gostman init'
 
 const store = () => useAppStore.getState()
 
@@ -27,9 +27,27 @@ export function createFeatureActions({ backend, commands, monitors, mock, captur
     store().upsertRequests(await saveRequests([sampleScanRequest()]))
   }
 
+  async function sendBinarySample() {
+    await ensureSampleCollection()
+    const request = sampleBinaryRequest()
+    store().openRequestTab(request)
+    await commands.sendRequest()
+  }
+
+  async function copyCommand(command) {
+    try {
+      await navigator.clipboard.writeText(command)
+      store().showNotice(FEATURES_TEXT.copied(command))
+    } catch {
+      store().showNotice(FEATURES_TEXT.copyFailed(command))
+    }
+  }
+
   const openProtocolTab = (kind) => store().openRequestTab(protocolRequest(kind))
 
-  const gitAvailable = () => useGitStore.getState().state.hasFolder
+  const showPanel = (panel) => ({ run: () => store().setRequestPanel(panel) })
+
+  const showSidebarView = (view) => ({ run: () => store().requestSidebarView(view) })
 
   const dialogs = {
     monitors: { run: () => monitors.open() },
@@ -48,7 +66,7 @@ export function createFeatureActions({ backend, commands, monitors, mock, captur
     shortcuts: { run: () => store().openShortcutsDialog() },
     examples: { run: examples.open },
     folderSettings: { run: () => commands.collectionSettings() },
-    git: { run: openGit, isAvailable: gitAvailable },
+    git: { run: openGit, isAvailable: () => useGitStore.getState().state.hasFolder },
   }
 
   const commandHandlers = {
@@ -61,6 +79,7 @@ export function createFeatureActions({ backend, commands, monitors, mock, captur
     commandPalette: { run: () => store().openCommandPalette() },
     workspaceSwitcher: { run: () => commands.workspaceSwitcher(), isAvailable: () => hasStorage },
     aiSettings: { run: () => commands.aiSettings() },
+    aiMock: { run: () => commands.aiMock(), isAvailable: isAiEnabledNow },
   }
 
   const samples = {
@@ -74,22 +93,36 @@ export function createFeatureActions({ backend, commands, monitors, mock, captur
       await ensureSampleCollection()
       await flows.addSample(sampleFlow())
     } },
+    binary: { run: sendBinarySample },
     graphql: { run: () => openProtocolTab('graphql') },
     grpc: { run: () => openProtocolTab('grpc') },
     websocket: { run: () => openProtocolTab('websocket') },
     mcp: { run: () => openProtocolTab('mcp') },
+    jwt: { run: () => {
+      openProtocolTab('jwt')
+      store().setRequestPanel(AUTH_PANEL)
+    } },
     curl: { run: () => {
       store().newTab('')
       focusAddressSoon()
     } },
   }
 
-  const tabs = Object.fromEntries([
-    ...Object.entries(PANELS).map(([id, panel]) => [id, { run: () => store().setRequestPanel(panel) }]),
-    ...Object.entries(SIDEBAR_VIEWS).map(([id, view]) => [id, { run: () => store().requestSidebarView(view) }]),
-  ])
+  const tabs = {
+    auth: showPanel(AUTH_PANEL),
+    vars: showPanel(VARS_PANEL),
+    extract: showPanel(EXTRACT_PANEL),
+    tests: showPanel(TESTS_PANEL),
+    settings: showPanel(SETTINGS_PANEL),
+    history: showSidebarView(VIEW_HISTORY),
+    openTabs: showSidebarView(VIEW_TABS),
+  }
 
-  const handlers = { dialog: dialogs, command: commandHandlers, sample: samples, tab: tabs }
+  const copies = {
+    cliInit: { run: () => copyCommand(CLI_INIT) },
+  }
+
+  const handlers = { dialog: dialogs, command: commandHandlers, sample: samples, tab: tabs, copy: copies }
 
   const actionOf = (feature, preferSample) => {
     if (!preferSample) return feature?.action
@@ -118,8 +151,5 @@ export function createFeatureActions({ backend, commands, monitors, mock, captur
     await handlerOf(featureById(id), preferSample).run()
   }
 
-  return {
-    canTry,
-    open,
-  }
+  return { canTry, open }
 }

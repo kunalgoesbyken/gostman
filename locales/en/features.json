@@ -49,7 +49,9 @@
     "samplesAdded": "Added the sample collection.",
     "helpMenu": "Help",
     "exploreHint_one": "Search the {{count}} feature in Gostman, try it with a sample and read how it works.",
-    "exploreHint_other": "Search the {{count}} features in Gostman, try them with a sample and read how they work."
+    "exploreHint_other": "Search the {{count}} features in Gostman, try them with a sample and read how they work.",
+    "copied": "Copied {{command}}",
+    "copyFailed": "Could not copy {{command}}"
   },
   "featureWords": {
     "rest": {
@@ -84,7 +86,7 @@
     },
     "codegen": {
       "title": "Code snippets",
-      "blurb": "Copy the request that is sent as cURL, Python, Go, JavaScript and other languages.",
+      "blurb": "Copy the request that is sent as cURL, Python, Go, JavaScript, Java, C# and more, including axios, httpx, OkHttp, RestSharp, Guzzle, HTTPie and wget.",
       "synonyms": "code snippet generate curl python javascript fetch go java"
     },
     "responseViewer": {
@@ -114,68 +116,43 @@
     },
     "hexView": {
       "title": "Hex view",
-      "blurb": "Inspect a binary body byte by byte.",
+      "blurb": "Read a response body as offsets, hexadecimal bytes and text.",
       "synonyms": "hex binary bytes dump"
     },
     "msgpackCbor": {
       "title": "MessagePack and CBOR",
-      "blurb": "Decode MessagePack and CBOR responses into readable JSON.",
+      "blurb": "Decode MessagePack and CBOR responses to JSON text you can search and copy.",
       "synonyms": "msgpack messagepack cbor binary decode"
     },
     "certificateViewer": {
-      "title": "Certificate viewer",
-      "blurb": "Read the server certificate chain behind a response.",
-      "synonyms": "certificate tls ssl chain x509 https"
+      "title": "Certificate chain and redirects",
+      "blurb": "The Timeline tab lists the certificate chain a server presented, with validity dates, names and fingerprints, and a table of redirect hops.",
+      "synonyms": "certificate tls ssl chain x509 https redirect hops timeline expiry"
     },
     "jwtSigning": {
       "title": "JWT signing",
-      "blurb": "Sign a JWT with an HMAC or RSA key as the request is sent.",
-      "synonyms": "jwt sign hs256 rs256 token"
+      "blurb": "Sign a JWT in the Auth tab with a JWK private key and set when it expires.",
+      "synonyms": "jwt sign jwk token expiry bearer hs256 rs256"
     },
     "httpVersion": {
       "title": "HTTP version",
-      "blurb": "Choose HTTP/1.1 or HTTP/2 for a request and see which one was used.",
-      "synonyms": "http2 http/2 http1 protocol version alpn"
+      "blurb": "Choose Automatic, HTTP/1.1 or HTTP/2 for a request. The Timeline shows the protocol that was used.",
+      "synonyms": "http2 http/2 http1 protocol version alpn prior knowledge"
     },
     "dnsOverride": {
-      "title": "DNS override",
-      "blurb": "Resolve a host to a chosen address for one request.",
-      "synonyms": "dns resolve host hosts override ip"
+      "title": "Host overrides",
+      "blurb": "Send a host to a fixed address, as curl --resolve does, and limit connections to IPv4 or IPv6.",
+      "synonyms": "dns resolve host hosts override ip ipv4 ipv6 curl"
     },
     "graphqlUpload": {
       "title": "GraphQL file upload",
-      "blurb": "Send files in a GraphQL mutation with the multipart request spec.",
-      "synonyms": "graphql upload multipart file"
-    },
-    "wsSecurity": {
-      "title": "SOAP WS-Security",
-      "blurb": "Add WS-Security headers to a SOAP request.",
-      "synonyms": "soap wsse ws-security wsdl xml"
-    },
-    "grpcWeb": {
-      "title": "gRPC-Web",
-      "blurb": "Call gRPC services from the browser through gRPC-Web.",
-      "synonyms": "grpc-web grpcweb browser"
-    },
-    "signalr": {
-      "title": "SignalR",
-      "blurb": "Connect to a SignalR hub and invoke its methods.",
-      "synonyms": "signalr hub aspnet realtime"
-    },
-    "tcpUdp": {
-      "title": "TCP and UDP",
-      "blurb": "Send raw bytes over TCP or UDP and read the reply.",
-      "synonyms": "tcp udp socket raw bytes"
+      "blurb": "Send files in a GraphQL request with the multipart request spec from the Files tab.",
+      "synonyms": "graphql upload multipart file files mutation"
     },
     "breakpoints": {
-      "title": "Breakpoints",
-      "blurb": "Pause a request before it is sent and edit it.",
-      "synonyms": "breakpoint pause intercept edit debug"
-    },
-    "throttling": {
-      "title": "Throttling",
-      "blurb": "Slow a request down to test a poor connection.",
-      "synonyms": "throttle slow network latency bandwidth"
+      "title": "Held calls",
+      "blurb": "Hold a captured request or response with a rule, edit it, then release it or drop it.",
+      "synonyms": "breakpoint breakpoints pause hold intercept edit release drop debug"
     },
     "openTabs": {
       "title": "Open tabs list",
@@ -209,8 +186,8 @@
     },
     "specImporters": {
       "title": "More import formats",
-      "blurb": "Import Hoppscotch, Thunder Client, Paw, Hurl and RAML.",
-      "synonyms": "hoppscotch thunder paw hurl raml import migrate"
+      "blurb": "Import Hoppscotch, Thunder Client, HTTPie, Hurl, RAML and API Blueprint files. Hurl is also an export format.",
+      "synonyms": "hoppscotch thunder paw hurl raml blueprint httpie import migrate"
     },
     "export": {
       "title": "Export",
@@ -224,38 +201,13 @@
     },
     "versionedDocs": {
       "title": "Versioned documentation",
-      "blurb": "Generate HTML documentation for a collection and keep a copy for each version.",
-      "synonyms": "docs documentation html publish version"
-    },
-    "notes": {
-      "title": "Notes",
-      "blurb": "Attach Markdown notes to requests and folders.",
-      "synonyms": "notes markdown description comments"
-    },
-    "recentlyDeleted": {
-      "title": "Recently deleted",
-      "blurb": "Bring back requests and folders you deleted.",
-      "synonyms": "trash deleted restore undo recover"
+      "blurb": "gostman docs --versions builds documentation for each Git tag, and --logo and --accent style the page.",
+      "synonyms": "docs documentation html publish version tags logo accent"
     },
     "backups": {
       "title": "Backups",
       "blurb": "Daily and per-version backups of your data, with restore.",
       "synonyms": "backup restore snapshot recover"
-    },
-    "globalSearch": {
-      "title": "Global search",
-      "blurb": "Search requests, bodies, headers and variables across a collection.",
-      "synonyms": "search find global grep"
-    },
-    "splitView": {
-      "title": "Split view",
-      "blurb": "Show two requests side by side.",
-      "synonyms": "split side by side compare panes"
-    },
-    "dependencyGraph": {
-      "title": "Dependency graph",
-      "blurb": "See which requests set and use each variable.",
-      "synonyms": "dependency graph variables chain map"
     },
     "environments": {
       "title": "Environments",
@@ -304,23 +256,23 @@
     },
     "snapshotChecks": {
       "title": "Snapshot checks",
-      "blurb": "Compare a response with a saved snapshot and review changes.",
-      "synonyms": "snapshot golden diff regression"
+      "blurb": "Compare a response value with a stored snapshot, leave out paths that change and refresh it from the last response.",
+      "synonyms": "snapshot golden diff regression matches ignore"
     },
     "negativeTests": {
       "title": "Negative tests",
-      "blurb": "Generate invalid inputs for a request and check how the API refuses them.",
-      "synonyms": "negative fuzz fuzzing invalid inputs boundary"
+      "blurb": "gostman negative sends altered copies of saved requests and flags a 2xx for bad input, a 5xx, a stack trace or a reflected payload.",
+      "synonyms": "negative fuzz fuzzing invalid inputs boundary injection security"
     },
     "coverage": {
-      "title": "Spec coverage",
-      "blurb": "See which operations of an OpenAPI spec your collection covers.",
-      "synonyms": "coverage openapi operations untested"
+      "title": "OpenAPI coverage",
+      "blurb": "See which operations of a linked OpenAPI spec a run called and which documented statuses never came back.",
+      "synonyms": "coverage openapi operations untested spec min-coverage"
     },
     "pmPackages": {
-      "title": "Script packages",
-      "blurb": "Use packages in scripts imported from Postman.",
-      "synonyms": "pm packages require library postman"
+      "title": "Packages and pm.vault",
+      "blurb": "Load shared code with require or pm.require from the packages folder of a workspace, and read secrets with pm.vault.",
+      "synonyms": "pm packages require library postman vault shared code"
     },
     "specLint": {
       "title": "OpenAPI linter",
@@ -332,15 +284,10 @@
       "blurb": "Keep a collection in step with a remote OpenAPI spec.",
       "synonyms": "sync openapi spec update remote"
     },
-    "openapiDiff": {
-      "title": "OpenAPI diff",
-      "blurb": "Compare two versions of a spec and list breaking changes.",
-      "synonyms": "openapi diff oasdiff breaking changes compare spec"
-    },
     "runner": {
       "title": "Collection runner",
-      "blurb": "Run a folder in order with data files, parallel runs and HTML or JUnit reports.",
-      "synonyms": "runner run collection postman collection runner newman data csv iteration"
+      "blurb": "Run a folder in order with CSV, JSON or XLSX data files, parallel runs and HTML or JUnit reports.",
+      "synonyms": "runner run collection postman collection runner newman data csv json xlsx iteration"
     },
     "flows": {
       "title": "Flows",
@@ -354,8 +301,8 @@
     },
     "loadThresholds": {
       "title": "Load thresholds",
-      "blurb": "Fail a load test when latency or errors pass a limit.",
-      "synonyms": "threshold slo limit fail load"
+      "blurb": "Write thresholds such as p95<300 or errors<1% and read pass or fail in the load test.",
+      "synonyms": "threshold slo limit fail load stages ramp"
     },
     "scan": {
       "title": "Secret scanner",
@@ -374,13 +321,8 @@
     },
     "monitors": {
       "title": "Monitors",
-      "blurb": "Run a collection on a schedule and report failures.",
-      "synonyms": "monitor postman monitor schedule cron uptime"
-    },
-    "preCommit": {
-      "title": "Pre-commit hook",
-      "blurb": "Run checks and the secret scanner before a commit.",
-      "synonyms": "pre-commit hook husky commit lint"
+      "blurb": "Run a folder or a flow on a timer while the app is open, and keep pass rates, history and notifications.",
+      "synonyms": "monitor monitors postman monitor schedule cron uptime interval notify"
     },
     "agents": {
       "title": "Coding agents",
@@ -404,12 +346,12 @@
     },
     "captureRules": {
       "title": "Capture rules",
-      "blurb": "Rewrite or block captured traffic with rules.",
-      "synonyms": "capture rules rewrite block map local"
+      "blurb": "Edit headers and bodies, answer locally, inject failures or throttle the calls that match a rule.",
+      "synonyms": "capture rules rewrite block map local throttle slow latency fault"
     },
     "captureHar": {
       "title": "Capture to HAR",
-      "blurb": "Save a capture as a HAR file.",
+      "blurb": "Export captured calls as a HAR 1.2 file that other tools read.",
       "synonyms": "har capture export archive"
     },
     "gitPanel": {
@@ -419,13 +361,13 @@
     },
     "gitFieldDiff": {
       "title": "Field-level diffs",
-      "blurb": "See which request fields changed instead of raw YAML.",
-      "synonyms": "git diff field changes yaml review"
+      "blurb": "See which fields of a request changed, such as URL, headers, auth, body and checks, and compare two versions of a file.",
+      "synonyms": "git diff field changes yaml review compare versions"
     },
     "gitCommitGraph": {
       "title": "Commit graph",
-      "blurb": "See branches and merges as a graph.",
-      "synonyms": "git graph commits branches log"
+      "blurb": "Read the history with a lane graph of branches, merges and tags.",
+      "synonyms": "git graph commits branches log history tags merge"
     },
     "conflicts": {
       "title": "Conflict resolution",
@@ -433,9 +375,9 @@
       "synonyms": "merge conflict resolve git"
     },
     "repoCreate": {
-      "title": "Create a repository",
-      "blurb": "Create a Git repository for a workspace and publish it.",
-      "synonyms": "git init repository github publish remote"
+      "title": "Create a GitHub repository",
+      "blurb": "Create a GitHub repository from the Remotes tab and push to it.",
+      "synonyms": "git init repository github publish remote create push"
     },
     "ai": {
       "title": "AI assistant",
@@ -443,14 +385,14 @@
       "synonyms": "ai llm openai anthropic claude generate explain postbot"
     },
     "aiMock": {
-      "title": "AI mock data",
-      "blurb": "Generate realistic mock responses from a schema.",
-      "synonyms": "ai mock generate data fake"
+      "title": "AI mock examples",
+      "blurb": "Generate a mock response example for a request with AI, shown as a preview you accept.",
+      "synonyms": "ai mock generate data fake example response"
     },
     "aiCommit": {
       "title": "AI commit messages",
-      "blurb": "Draft a commit message from your changes.",
-      "synonyms": "ai commit message git draft"
+      "blurb": "Draft a commit message from the staged changes with Suggest message with AI in the Git panel.",
+      "synonyms": "ai commit message git draft suggest"
     },
     "palette": {
       "title": "Command palette",
@@ -491,11 +433,20 @@
       "title": "VS Code extension",
       "blurb": "There is no VS Code extension.",
       "synonyms": "vscode extension editor"
+    },
+    "xlsxData": {
+      "title": "Data files",
+      "blurb": "Run a folder once for each row of a CSV, JSON or XLSX file, in the app or with gostman run --data.",
+      "synonyms": "data csv json xlsx excel spreadsheet iteration rows data-driven"
+    },
+    "scheduledRuns": {
+      "title": "Scheduled runs",
+      "blurb": "gostman run --every repeats a run on an interval, keeps a local history and can notify a webhook.",
+      "synonyms": "schedule cron every interval repeat history webhook notify"
     }
   },
   "featureSamples": {
     "collection": "Sample collection",
-    "baseUrl": "http://127.0.0.1:4010",
     "listUsers": "List users",
     "getUser": "Get a user",
     "createUser": "Create a user",
@@ -508,6 +459,8 @@
     "grpcRequest": "gRPC request",
     "mcpRequest": "MCP request",
     "flowDescription": "Lists the users, then reads one of them. Both requests come from the sample collection.",
-    "flowDone": "Done"
+    "flowDone": "Done",
+    "binaryRequest": "Binary response",
+    "jwtRequest": "JWT request"
   }
 }
