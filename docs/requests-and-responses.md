@@ -304,10 +304,11 @@ Search works in the Pretty and Raw views, across the whole body, also for large 
 
 ### Timeline
 
-The Timeline tab shows the total time and the number of requests, then a legend with DNS, Connect, TLS, TTFB and Download times. Each request in the chain, including redirects, has a row with its method, URL, status, total time and a bar for its phases. Open a row to see:
+The Timeline tab shows the total time and the number of requests, then a legend with DNS, Connect, TLS, TTFB and Download times. When the send followed redirects, a **Redirect chain** table lists each hop with its step number, status, URL and time. Each request in the chain, including redirects, has a row with its method, URL, status, total time and a bar for its phases. Open a row to see:
 
 - Remote address, Protocol and whether the connection was new or reused.
 - TLS version and cipher, and the certificate subject and issuer.
+- The **Certificate chain** the server presented: for each certificate the subject, issuer, validity dates, the names it covers (DNS names and IP addresses), serial number, SHA-256 fingerprint, key and signature algorithms. An expired certificate, or one that expires within 30 days, is flagged.
 - Request headers and Response headers. A masked header has a button to reveal its value.
 
 When the request has scripts, the timeline lists everything the send did, in order: the pre-request script, each request a script sent with `sendRequest` (indented below its script, with the same bar and details), the request itself, and the post-response script. A script row shows how long it ran, its number of console lines, and how many tests and assertions passed or failed; open it to read its console lines and test results. The total then covers the scripts and the requests. The Console tab keeps showing the same lines.

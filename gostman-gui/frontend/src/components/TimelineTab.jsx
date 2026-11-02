@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronRight, Eye, EyeOff, FileCode, Info, KeyRound } from 'lucide-react'
+import { CertificateChain } from './CertificateChain'
 import { ConsoleLine } from './ConsolePanel'
 import { TestRow, countPassed } from './TestResults'
 import { Badge } from './ui/badge'
 import { IconButton } from './ui/button'
 import { Notice, SectionLabel } from './ui/panel'
 import { cn } from '../lib/utils'
+import { redirectSteps } from '../lib/certificates'
 import { statusVariant } from '../lib/response'
 import {
   ENTRY_KINDS, failureLabel, formatMs, hopFacts, hopSegments, phaseTotals, timelineHops, timelineRows,
@@ -24,6 +26,40 @@ function Legend({ hops }) {
         </li>
       ))}
     </ul>
+  )
+}
+
+function RedirectChain({ hops }) {
+  if (hops.length < 2) return null
+  const heading = 'py-0.5 pe-2 text-start font-normal'
+  return (
+    <section className="border-b border-border px-3 py-2">
+      <SectionLabel>{TIMELINE_TEXT.redirects.title}</SectionLabel>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[28rem] text-2xs">
+          <thead>
+            <tr className="text-muted-foreground">
+              <th className={heading}>{TIMELINE_TEXT.redirects.step}</th>
+              <th className={heading}>{TIMELINE_TEXT.redirects.status}</th>
+              <th className={heading}>{TIMELINE_TEXT.redirects.url}</th>
+              <th className={heading}>{TIMELINE_TEXT.redirects.time}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {redirectSteps(hops).map((step) => (
+              <tr key={step.number} className="align-top">
+                <td className="py-0.5 pe-2 font-mono text-muted-foreground">{step.number}</td>
+                <td className="py-0.5 pe-2">
+                  {step.status ? <Badge variant={statusVariant({ statusCode: step.status })} className="font-mono">{step.status}</Badge> : null}
+                </td>
+                <td dir="auto" className="break-all py-0.5 pe-2 font-mono text-foreground">{step.url}</td>
+                <td className="whitespace-nowrap py-0.5 font-mono text-foreground">{formatMs(step.ms)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   )
 }
 
@@ -86,6 +122,7 @@ function HopDetails({ hop }) {
           </div>
         ))}
       </dl>
+      <CertificateChain chain={hop.tls?.chain} />
       <HeaderList title={TIMELINE_TEXT.requestHeaders} headers={hop.sent} />
       <HeaderList title={TIMELINE_TEXT.responseHeaders} headers={hop.received} />
     </div>
@@ -251,6 +288,7 @@ export function TimelineTab({ timeline }) {
         {scripts > 0 && <span className="text-muted-foreground">{TIMELINE_TEXT.scripts(scripts)}</span>}
       </div>
       {hops.length > 0 && <Legend hops={hops} />}
+      <RedirectChain hops={hops} />
       <ol>
         {rows.map((row) => <TimelineRow key={row.key} row={row} scale={scale} />)}
       </ol>

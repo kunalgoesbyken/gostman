@@ -1,7 +1,10 @@
 package engine
 
 import (
+	"crypto/sha256"
 	"crypto/tls"
+	"crypto/x509"
+	"encoding/hex"
 	"io"
 	"net"
 	"net/http"
@@ -39,12 +42,26 @@ type TimelineHeader struct {
 }
 
 type TLSInfo struct {
-	Version  string `json:"version"`
-	Cipher   string `json:"cipher"`
-	Protocol string `json:"protocol,omitempty"`
-	Subject  string `json:"subject,omitempty"`
-	Issuer   string `json:"issuer,omitempty"`
-	NotAfter string `json:"notAfter,omitempty"`
+	Version  string        `json:"version"`
+	Cipher   string        `json:"cipher"`
+	Protocol string        `json:"protocol,omitempty"`
+	Subject  string        `json:"subject,omitempty"`
+	Issuer   string        `json:"issuer,omitempty"`
+	NotAfter string        `json:"notAfter,omitempty"`
+	Chain    []Certificate `json:"chain,omitempty"`
+}
+
+type Certificate struct {
+	Subject     string   `json:"subject"`
+	Issuer      string   `json:"issuer"`
+	NotBefore   string   `json:"notBefore"`
+	NotAfter    string   `json:"notAfter"`
+	Names       []string `json:"names,omitempty"`
+	Serial      string   `json:"serial,omitempty"`
+	Fingerprint string   `json:"fingerprint"`
+	KeyType     string   `json:"keyType,omitempty"`
+	Signature   string   `json:"signature,omitempty"`
+	CA          bool     `json:"ca,omitempty"`
 }
 
 type Phases struct {
@@ -315,7 +332,30 @@ func describeTLS(state tls.ConnectionState) *TLSInfo {
 	leaf := state.PeerCertificates[0]
 	info.Subject, info.Issuer = leaf.Subject.String(), leaf.Issuer.String()
 	info.NotAfter = leaf.NotAfter.UTC().Format(time.RFC3339)
+	for _, cert := range state.PeerCertificates {
+		info.Chain = append(info.Chain, describeCertificate(cert))
+	}
 	return info
+}
+
+func describeCertificate(cert *x509.Certificate) Certificate {
+	digest := sha256.Sum256(cert.Raw)
+	names := append([]string{}, cert.DNSNames...)
+	for _, address := range cert.IPAddresses {
+		names = append(names, address.String())
+	}
+	return Certificate{
+		Subject:     cert.Subject.String(),
+		Issuer:      cert.Issuer.String(),
+		NotBefore:   cert.NotBefore.UTC().Format(time.RFC3339),
+		NotAfter:    cert.NotAfter.UTC().Format(time.RFC3339),
+		Names:       names,
+		Serial:      cert.SerialNumber.Text(16),
+		Fingerprint: strings.ToUpper(hex.EncodeToString(digest[:])),
+		KeyType:     cert.PublicKeyAlgorithm.String(),
+		Signature:   cert.SignatureAlgorithm.String(),
+		CA:          cert.IsCA,
+	}
 }
 
 func displayURL(target *url.URL) string {
