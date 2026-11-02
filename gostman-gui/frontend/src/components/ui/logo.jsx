@@ -1,4 +1,4 @@
-import mark from "../../assets/mark.png"
+import mark from "../../assets/mark.svg"
 
 const markMask = `url(${mark}) center / contain no-repeat`
 
