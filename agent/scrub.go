@@ -2,6 +2,8 @@ package agent
 
 import (
 	"context"
+	"errors"
+	"sync/atomic"
 
 	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/redact"
@@ -12,14 +14,13 @@ import (
 type Recorded struct {
 	client  *Client
 	display bool
+	unclean atomic.Bool
 }
 
+var errUncleaned = errors.New("the output could not be cleaned of secret values, so it was withheld")
+
 func NewRecorded(stored runner.Collection, folder string, options runner.Options, hideInReport bool) (*Recorded, error) {
-	scope := redact.AllValues
-	if hideInReport {
-		scope = redact.SecretValues
-	}
-	client, err := NewScopedClient(engine.Policy{Network: options.Network, ReadFile: options.Files}, scope)
+	client, err := NewScopedClient(engine.Policy{Network: options.Network, ReadFile: options.Files}, redact.AllValues)
 	if err != nil {
 		return nil, err
 	}
@@ -42,48 +43,59 @@ func (r *Recorded) shown(report runner.Report) (runner.Report, error) {
 	if !r.display {
 		return report, nil
 	}
-	return redact.Clean(r.client.guard, report)
+	cleaned, err := redact.Clean(r.client.guard, report)
+	if err != nil {
+		return runner.Report{}, errUncleaned
+	}
+	return cleaned, nil
+}
+
+func clean[T any](r *Recorded, value T) (T, bool) {
+	if !r.display {
+		return value, true
+	}
+	cleaned, err := redact.Clean(r.client.guard, value)
+	if err != nil {
+		r.unclean.Store(true)
+		var none T
+		return none, false
+	}
+	return cleaned, true
+}
+
+func (r *Recorded) finish(report runner.Report) (runner.Report, error) {
+	if r.unclean.Load() {
+		return runner.Report{}, errUncleaned
+	}
+	return r.shown(report)
 }
 
 func (r *Recorded) Run(ctx context.Context, stored runner.Collection, options runner.Options, observe func(runner.Result)) (runner.Report, error) {
 	report, err := r.client.session.Run(ctx, stored, options, func(result runner.Result) {
 		r.client.absorbShared()
-		if r.display {
-			if cleaned, err := redact.Clean(r.client.guard, result); err == nil {
-				result = cleaned
-			}
+		if shown, ok := clean(r, result); ok {
+			observe(shown)
 		}
-		observe(result)
 	})
 	if err != nil {
 		return runner.Report{}, err
 	}
 	r.client.absorb()
-	return r.shown(report)
+	return r.finish(report)
 }
 
 func (r *Recorded) RunFlow(ctx context.Context, stored runner.Collection, flow workspace.Flow, options runner.Options, watch runner.FlowWatch) (runner.Report, error) {
 	report, err := r.client.session.RunFlow(ctx, stored, flow, options, runner.FlowWatch{
 		Result: func(result runner.Result) {
 			r.client.absorb()
-			if r.display {
-				if cleaned, err := redact.Clean(r.client.guard, result); err == nil {
-					result = cleaned
-				}
-			}
-			if watch.Result != nil {
-				watch.Result(result)
+			if shown, ok := clean(r, result); ok && watch.Result != nil {
+				watch.Result(shown)
 			}
 		},
 		Step: func(event runner.FlowEvent) {
 			r.client.absorb()
-			if r.display {
-				if cleaned, err := redact.Clean(r.client.guard, event); err == nil {
-					event = cleaned
-				}
-			}
-			if watch.Step != nil {
-				watch.Step(event)
+			if shown, ok := clean(r, event); ok && watch.Step != nil {
+				watch.Step(shown)
 			}
 		},
 	})
@@ -91,5 +103,5 @@ func (r *Recorded) RunFlow(ctx context.Context, stored runner.Collection, flow w
 		return runner.Report{}, err
 	}
 	r.client.absorb()
-	return r.shown(report)
+	return r.finish(report)
 }
