@@ -387,9 +387,10 @@ function panelStyleFor(isFullscreen, isCollapsed, panelShare) {
   return { flex: `0 1 ${panelShare}%`, minHeight: MIN_RESPONSE_HEIGHT_PX }
 }
 
-function historyMenuItems(earlier, past, select) {
+function historyMenuItems(earlier, past, select, exportHar) {
   const latest = past ? [{ id: 'latest', label: HISTORY_TEXT.latest, onSelect: () => select(null) }] : []
-  return [...latest, ...earlier.map((entry) => ({ id: String(entry.at), label: describeResponse(entry), onSelect: () => select(entry.at) }))]
+  const entries = earlier.map((entry) => ({ id: String(entry.at), label: describeResponse(entry), onSelect: () => select(entry.at) }))
+  return [...latest, ...entries, { id: 'har', label: HISTORY_TEXT.exportHar, onSelect: exportHar }]
 }
 
 function PastResponseNotice({ past, canCompare, onCompare, onBack }) {
@@ -407,7 +408,7 @@ function PastResponseNotice({ past, canCompare, onCompare, onBack }) {
   )
 }
 
-export const ResponsePanel = memo(function ResponsePanel({ tabId, response, history = NO_HISTORY, tests, loading, onDownload, onSaveExample, onExplain, onTrust }) {
+export const ResponsePanel = memo(function ResponsePanel({ tabId, response, history = NO_HISTORY, tests, loading, onDownload, onExportHar, onSaveExample, onExplain, onTrust }) {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [chosenTab, setActiveTab] = useState(TAB_BODY)
@@ -667,7 +668,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
         </Tabs>
       </section>
       {historyMenu && (
-        <ContextMenu position={historyMenu} title={HISTORY_TEXT.menu} items={historyMenuItems(earlier, past, setPastAt)} onClose={() => setHistoryMenu(null)} />
+        <ContextMenu position={historyMenu} title={HISTORY_TEXT.menu} items={historyMenuItems(earlier, past, setPastAt, () => onExportHar(history))} onClose={() => setHistoryMenu(null)} />
       )}
       {isComparing && past && latestEntry && (
         <Suspense fallback={null}>

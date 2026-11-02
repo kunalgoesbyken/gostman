@@ -1,4 +1,3 @@
-const HEADER_SEPARATOR = ':'
 const SKIPPED_ANSWER_HEADERS = ['content-length', 'transfer-encoding', 'content-encoding', 'connection', 'date', 'set-cookie']
 const QUERY_MARK = '?'
 
@@ -70,14 +69,6 @@ export const bodyEditForMode = (mode, change) => ({
   path: mode === BODY_MODE_JSON ? change.path || '$.' : '',
 })
 
-export const headersToText = (headers) => headers.map(({ key, value }) => `${key}${HEADER_SEPARATOR} ${value}`).join('\n')
-
-export const textToHeaders = (text) => text.split('\n').flatMap((line) => {
-  const at = line.indexOf(HEADER_SEPARATOR)
-  const key = at < 0 ? '' : line.slice(0, at).trim()
-  return key ? [{ key, value: line.slice(at + HEADER_SEPARATOR.length).trim() }] : []
-})
-
 export const namesToText = (names) => names.join(', ')
 
 export const textToNames = (text) => text.split(',').map((name) => name.trim()).filter(Boolean)
@@ -105,3 +96,12 @@ export function answerRuleFrom(exchange) {
 export const canAnswerWith = (exchange) => (
   !exchange.error && !exchange.upgraded && !exchange.interrupted && !exchange.response.truncated
 )
+
+const isCompleteBodyEdit = (change) => Boolean(change.find || change.path)
+
+const withoutDraftBodyEdits = (edit) => ({ ...edit, body: edit.body.filter(isCompleteBodyEdit) })
+
+export const withoutDraftEdits = (config) => ({
+  ...config,
+  rules: config.rules.map((rule) => ({ ...rule, request: withoutDraftBodyEdits(rule.request), response: withoutDraftBodyEdits(rule.response) })),
+})

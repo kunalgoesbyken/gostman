@@ -5,8 +5,7 @@ import { EmptyState } from "./ui/emptyState"
 import { Input } from "./ui/input"
 import { Notice, SectionLabel, Toolbar } from "./ui/panel"
 import { Textarea } from "./ui/textarea"
-import { MethodTag } from "./MethodTag"
-import { headersToText, textToHeaders } from "../lib/captureRules"
+import { headersToText, textToHeaders } from "../lib/mockServer"
 import { CAPTURE_HELD_TEXT as TEXT } from "../lib/captureText"
 import { formatTime } from "../lib/i18n/format"
 
@@ -46,7 +45,6 @@ function HeldEditor({ held, actions }) {
         <Input type="number" value={status} aria-label={TEXT.status} placeholder={TEXT.status} onChange={(event) => setStatus(event.target.value)} className="w-28 font-mono" />
       ) : (
         <div className="flex items-center gap-2">
-          <MethodTag method={method} />
           <Input value={method} aria-label={TEXT.method} onChange={(event) => setMethod(event.target.value)} className="w-28 font-mono" />
           <Input value={url} aria-label={TEXT.url} spellCheck={false} onChange={(event) => setUrl(event.target.value)} className="min-w-0 flex-1 font-mono" />
         </div>

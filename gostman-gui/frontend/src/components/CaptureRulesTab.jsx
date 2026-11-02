@@ -12,12 +12,12 @@ import { NumberInput } from "./MockBehaviorFields"
 import {
   BREAK_BOTH, BREAK_NONE, BREAK_REQUEST, BREAK_RESPONSE,
   BODY_MODE_JSON, BODY_MODE_REGEX, BODY_MODE_TEXT,
-  bodyEditForMode, bodyModeOf, emptyAnswer, emptyBodyEdit, headersToText, namesToText, textToHeaders, textToNames,
+  bodyEditForMode, bodyModeOf, emptyAnswer, emptyBodyEdit, namesToText, textToNames,
 } from "../lib/captureRules"
 import { CAPTURE_RULES_TEXT as TEXT } from "../lib/captureText"
 import {
   FAULT_EMPTY, FAULT_RESET, FAULT_STATUS, FIELD_HEADER, FIELD_QUERY, OP_CONTAINS, OP_EQUALS, OP_EXISTS,
-  emptyCondition, toDelayMs, toPercent, toStatus,
+  emptyCondition, headersToText, textToHeaders, toDelayMs, toPercent, toStatus,
 } from "../lib/mockServer"
 
 const CONDITION_FIELDS = [FIELD_QUERY, FIELD_HEADER]
@@ -250,14 +250,14 @@ function RuleRow({ rule, position, isLast, isLocked, actions }) {
   )
 }
 
-export function CaptureRulesTab({ config, actions }) {
+export function CaptureRulesTab({ config, onTrust, actions }) {
   const fileInput = useRef(null)
   const isLocked = config.restricted
   const { rules } = config
   return (
     <>
       <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-border px-3 py-2">
-        <p className="min-w-0 flex-1 text-xs text-muted-foreground">{TEXT.hint}</p>
+        <p className="min-w-0 flex-1 text-xs text-muted-foreground max-sm:basis-full">{TEXT.hint}</p>
         <label className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
           {TEXT.breakTimeout}
           <Input type="number" min={1} value={config.breakSeconds || ""} placeholder="60" disabled={isLocked} onChange={(event) => actions.setBreakSeconds(Math.max(0, Math.trunc(Number(event.target.value)) || 0))} className="w-16 font-mono" />
@@ -281,6 +281,11 @@ export function CaptureRulesTab({ config, actions }) {
         </Button>
       </div>
       {isLocked && <Notice tone="warning">{TEXT.restricted}</Notice>}
+      {isLocked && onTrust && (
+        <div className="flex shrink-0 border-b border-border px-3 py-2">
+          <Button variant="outline" size="sm" onClick={onTrust}>{TEXT.trust}</Button>
+        </div>
+      )}
       {rules.length === 0 ? (
         <Notice>{TEXT.none}</Notice>
       ) : (

@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -21,8 +20,6 @@ const (
 	injectedMessage = "Gostman capture injected this failure."
 	textMediaType   = "text/plain; charset=utf-8"
 )
-
-var methodToken = regexp.MustCompile(`^[A-Za-z]{1,32}$`)
 
 func (s *Server) prepare(w http.ResponseWriter, r *http.Request, take *recording) bool {
 	p := take.plan
@@ -42,19 +39,19 @@ func (s *Server) prepare(w http.ResponseWriter, r *http.Request, take *recording
 	}
 	applyHeaders(r.Header, p.requestEdits)
 	take.target = p.remote
-	if p.editsRequest() || p.breakRequest != "" {
+	if editsBody(p.requestEdits) || p.breakRequest != "" {
 		return s.reworkRequest(r, take)
 	}
 	return true
 }
 
 func (s *Server) fail(w http.ResponseWriter, r *http.Request, take *recording, fault mock.Fault) {
-	take.exchange.URL = s.destination(r, take).String()
 	if fault.Mode() == mock.FaultStatus {
 		header := http.Header{"Content-Type": {textMediaType}}
 		s.serveLocal(w, r, take, fault.Code(), header, []byte(injectedMessage))
 		return
 	}
+	take.exchange.URL = s.destination(r, take).String()
 	take.failed(0, "connection closed by a capture rule")
 	mock.Drop(w, fault.Mode() == mock.FaultReset)
 }
@@ -175,7 +172,7 @@ func (s *Server) reworkRequest(r *http.Request, take *recording) bool {
 		take.note("request too large to hold or edit")
 		return true
 	}
-	if r.Header.Get(headerContentEncoding) == "" && p.editsRequest() {
+	if r.Header.Get(headerContentEncoding) == "" && editsBody(p.requestEdits) {
 		body = applyBody(body, p.requestEdits)
 	}
 	replacedBody(r, body)
@@ -242,7 +239,7 @@ func (s *Server) reshape(response *http.Response, take *recording) error {
 		return nil
 	}
 	applyHeaders(response.Header, p.responseEdits)
-	if (p.editsResponse() || p.breakResponse != "") && hasResponseBody(response) {
+	if (editsBody(p.responseEdits) || p.breakResponse != "") && hasResponseBody(response) {
 		if err := s.reworkResponse(response, take); err != nil {
 			return err
 		}

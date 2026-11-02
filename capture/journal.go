@@ -65,6 +65,12 @@ func (j *Journal) Find(ids []int64) []Exchange {
 	return found
 }
 
+func (j *Journal) All() []Exchange {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+	return slices.Clone(j.exchanges)
+}
+
 func (j *Journal) Clear() {
 	j.mu.Lock()
 	defer j.mu.Unlock()

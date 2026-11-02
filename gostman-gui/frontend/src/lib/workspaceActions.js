@@ -25,6 +25,7 @@ import { askToRun, needsApproval } from './localCommands'
 import { isLocalCommand, isMcpRequest } from './mcp'
 import { retryStep, signInToMcp } from './mcpAuth'
 import { compareTools, rememberTools } from './mcpChecks'
+import { HAR_FILE_NAME, HAR_MEDIA_TYPE, historyToHar } from './harExport'
 import { createMockActions } from './mockServer'
 import { withoutPassphrases } from './network'
 import { STEP_CHECK, STEP_EXPLORE, STEP_RUN, STEP_SAVE, STEP_SEND, STEP_VARIABLE } from './onboarding'
@@ -780,6 +781,7 @@ export function createWorkspaceActions(backend) {
     shareLinkBase: clientUrl(backend.webAppUrl),
     download,
     saveTextFile,
+    exportHistoryHar: (history) => saveTextFile(HAR_FILE_NAME, JSON.stringify(historyToHar(history, __APP_VERSION__), null, 2), HAR_MEDIA_TYPE),
     saveBase64File,
     createFolder,
     renameFolder,

@@ -34,17 +34,8 @@ func (p *plan) isEmpty() bool {
 	return len(p.fired) == 0
 }
 
-func (p *plan) editsRequest() bool {
-	for _, edit := range p.requestEdits {
-		if len(edit.Body) > 0 {
-			return true
-		}
-	}
-	return false
-}
-
-func (p *plan) editsResponse() bool {
-	for _, edit := range p.responseEdits {
+func editsBody(edits []Edit) bool {
+	for _, edit := range edits {
 		if len(edit.Body) > 0 {
 			return true
 		}
@@ -115,7 +106,7 @@ func (s *Ruleset) plan(call callInfo, dice *mock.Dice) *plan {
 }
 
 func (p *plan) absorb(rule *compiledRule, dice *mock.Dice) {
-	p.fired = append(p.fired, rule.label())
+	p.fired = append(p.fired, rule.Name)
 	p.requestEdits = append(p.requestEdits, rule.Request)
 	p.responseEdits = append(p.responseEdits, rule.Response)
 	if rule.remote != nil {
@@ -131,10 +122,10 @@ func (p *plan) absorb(rule *compiledRule, dice *mock.Dice) {
 	p.throttle.DownloadKBps = firstNonZero(p.throttle.DownloadKBps, rule.Throttle.DownloadKBps)
 	p.throttle.UploadKBps = firstNonZero(p.throttle.UploadKBps, rule.Throttle.UploadKBps)
 	if rule.Break == PhaseRequest || rule.Break == PhaseBoth {
-		p.breakRequest = firstText(p.breakRequest, rule.label())
+		p.breakRequest = firstText(p.breakRequest, rule.Name)
 	}
 	if rule.Break == PhaseResponse || rule.Break == PhaseBoth {
-		p.breakResponse = firstText(p.breakResponse, rule.label())
+		p.breakResponse = firstText(p.breakResponse, rule.Name)
 	}
 }
 

@@ -195,9 +195,3 @@ func HAR(exchanges []Exchange, version string) ([]byte, error) {
 		Entries: entries,
 	}}, "", "  ")
 }
-
-func (j *Journal) All() []Exchange {
-	j.mu.Lock()
-	defer j.mu.Unlock()
-	return append([]Exchange{}, j.exchanges...)
-}

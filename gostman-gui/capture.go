@@ -156,31 +156,35 @@ func (a *App) CapturedMockRule(id int64) (mock.Rule, error) {
 	return mock.Rule{}, fmt.Errorf("the exchange is no longer kept")
 }
 
-func (a *App) HeldExchanges() []capture.Held {
+func runningCapture() (*capture.Server, error) {
 	captureMutex.Lock()
 	defer captureMutex.Unlock()
 	if captureServer == nil {
+		return nil, fmt.Errorf("the capture is not running")
+	}
+	return captureServer, nil
+}
+
+func (a *App) HeldExchanges() []capture.Held {
+	server, err := runningCapture()
+	if err != nil {
 		return []capture.Held{}
 	}
-	return captureServer.Held()
+	return server.Held()
 }
 
 func (a *App) ReleaseHeld(id int64, decision capture.Decision) error {
-	captureMutex.Lock()
-	server := captureServer
-	captureMutex.Unlock()
-	if server == nil {
-		return fmt.Errorf("the capture is not running")
+	server, err := runningCapture()
+	if err != nil {
+		return err
 	}
 	return server.Release(id, decision)
 }
 
 func (a *App) DropHeld(id int64) error {
-	captureMutex.Lock()
-	server := captureServer
-	captureMutex.Unlock()
-	if server == nil {
-		return fmt.Errorf("the capture is not running")
+	server, err := runningCapture()
+	if err != nil {
+		return err
 	}
 	return server.DropHeld(id)
 }

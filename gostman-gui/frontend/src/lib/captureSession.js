@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { draftRequests, isSavable, suggestedFolderName } from './captureConversion'
 import { textToBase64 } from './base64'
-import { answerRuleFrom, canAnswerWith, emptyCaptureRule, normalizeCaptureConfig, normalizeCaptureRule } from './captureRules'
+import { answerRuleFrom, canAnswerWith, emptyCaptureRule, normalizeCaptureConfig, normalizeCaptureRule, withoutDraftEdits } from './captureRules'
 import { ROOT_ID } from './collectionTree'
 import { CAPTURE_ACTION_TEXT } from './captureText'
 import { DIALOG_TEXT } from './dialogText'
@@ -112,7 +112,7 @@ export function createCaptureActions(backend, mockActions) {
     clearTimeout(saveTimer)
     saveTimer = null
     try {
-      await server.saveConfig(capture().config)
+      await server.saveConfig(withoutDraftEdits(capture().config))
     } catch (error) {
       patch({ failure: messageOf(error) })
     }
@@ -161,6 +161,12 @@ export function createCaptureActions(backend, mockActions) {
     adopt(await server.status())
     if (capture().isRunning) await loadWorkbench()
   })
+
+  if (server) {
+    useAppStore.subscribe((state, previous) => {
+      if (previous.isRestricted && !state.isRestricted && capture().isOpen) report(loadWorkbench)()
+    })
+  }
 
   async function open() {
     patch({ isOpen: true, failure: '' })

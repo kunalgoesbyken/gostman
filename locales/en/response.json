@@ -91,7 +91,8 @@
       "compareParts": "Compare",
       "comparedWith": "compared with",
       "bodyPart": "Body",
-      "headersPart": "Headers"
+      "headersPart": "Headers",
+      "exportHar": "Export as HAR"
     },
     "columns": {
       "name": "Name",

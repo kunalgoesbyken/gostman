@@ -1,5 +1,5 @@
 import { Suspense, lazy, useMemo, useState } from "react"
-import { AlertTriangle, Download, FileDigit, FileText, Info, List, Play, Radio, Square, X } from "lucide-react"
+import { AlertTriangle, Download, FileDigit, GitCompare, FileText, Info, List, Play, Radio, Square, X } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button, IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
@@ -265,13 +265,8 @@ function CallsView({ folders, requests, actions }) {
         <Button variant="outline" size="sm" disabled={selected.length === 0} onClick={() => actions.saveToFolder(selected.map((exchange) => exchange.id), target)}>
           {CAPTURE_TEXT.saveSelected}
         </Button>
-        <Button variant="outline" size="sm" title={CAPTURE_TEXT.compareTitle} disabled={selected.length !== 2} onClick={() => actions.compare(selected.map((exchange) => exchange.id))}>
-          {CAPTURE_TEXT.compare}
-        </Button>
-        <Button variant="outline" size="sm" title={CAPTURE_TEXT.exportHarTitle} disabled={shown.length === 0} onClick={() => actions.exportHar(selected.length > 0 ? selected.map((exchange) => exchange.id) : shown.map((exchange) => exchange.id))}>
-          <Download />
-          {CAPTURE_TEXT.exportHar}
-        </Button>
+        <IconButton label={CAPTURE_TEXT.compare} title={CAPTURE_TEXT.compareTitle} icon={GitCompare} disabled={selected.length !== 2} onClick={() => actions.compare(selected.map((exchange) => exchange.id))} />
+        <IconButton label={CAPTURE_TEXT.exportHar} title={CAPTURE_TEXT.exportHarTitle} icon={Download} disabled={shown.length === 0} onClick={() => actions.exportHar((selected.length > 0 ? selected : shown).map((exchange) => exchange.id))} />
         <Button variant="ghost" size="sm" disabled={log.length === 0} onClick={clear}>{CAPTURE_TEXT.clear}</Button>
       </Toolbar>
       {log.length === 0 ? (
@@ -309,7 +304,7 @@ function CallsView({ folders, requests, actions }) {
   )
 }
 
-function CapturePanel({ folders, requests, actions }) {
+function CapturePanel({ folders, requests, onTrust, actions }) {
   const capture = useCaptureStore()
   const { view, config, held, comparison, failure } = capture
   const views = [
@@ -326,7 +321,7 @@ function CapturePanel({ folders, requests, actions }) {
         <SegmentedControl label={CAPTURE_TEXT.viewLabel} options={views} value={view} onChange={actions.setView} />
       </Toolbar>
       {view === VIEW_CALLS && <CallsView folders={folders} requests={requests} actions={actions} />}
-      {view === VIEW_RULES && <CaptureRulesTab config={config} actions={actions} />}
+      {view === VIEW_RULES && <CaptureRulesTab config={config} onTrust={onTrust} actions={actions} />}
       {view === VIEW_HELD && <CaptureHeldTab held={held} actions={actions} />}
       {comparison && (
         <Suspense fallback={null}>
@@ -339,7 +334,7 @@ function CapturePanel({ folders, requests, actions }) {
 
 const CAPTURE_WINDOW = { id: "capture", width: 896, height: 640, minWidth: 560, minHeight: 400 }
 
-export function CaptureDialog({ folders, requests, actions }) {
+export function CaptureDialog({ folders, requests, onTrust, actions }) {
   const isRunning = useCaptureStore((state) => state.isRunning)
   const address = useCaptureStore((state) => state.address)
 
@@ -351,7 +346,7 @@ export function CaptureDialog({ folders, requests, actions }) {
         {isRunning && <LocalAddress address={address} />}
       </DialogHeader>
       {actions.isAvailable ? (
-        <CapturePanel folders={folders} requests={requests} actions={actions} />
+        <CapturePanel folders={folders} requests={requests} onTrust={onTrust} actions={actions} />
       ) : (
         <DesktopOnly title={CAPTURE_TEXT.desktopOnly} description={CAPTURE_TEXT.webNotice} />
       )}

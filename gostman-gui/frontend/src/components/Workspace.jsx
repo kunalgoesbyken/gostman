@@ -452,6 +452,7 @@ function LoadedWorkspace({ backend, onBack }) {
                   tests={activeTab.tests}
                   loading={isLoading}
                   onDownload={actions.download}
+                  onExportHar={actions.exportHistoryHar}
                   onSaveExample={actions.examples.saveResponse}
                   onExplain={isAiOn ? () => actions.ai.start(TASK_EXPLAIN) : null}
                   onTrust={actions.storage?.confirmTrust}
@@ -503,7 +504,7 @@ function LoadedWorkspace({ backend, onBack }) {
         {settingsDialogOpen && <NetworkDialog settings={settings} actions={actions} onClose={closeSettingsDialog} />}
         {examplesDialogOpen && <ExamplesDialog request={activeRequest} actions={actions.examples} EditorComponent={CodeEditor} />}
         {mockDialogOpen && <MockServerDialog folders={folders} requests={requests} actions={actions.mock} />}
-        {captureDialogOpen && <CaptureDialog folders={folders} requests={requests} actions={actions.capture} />}
+        {captureDialogOpen && <CaptureDialog folders={folders} requests={requests} onTrust={actions.storage?.confirmTrust} actions={actions.capture} />}
         {loadTestDialogOpen && <LoadTestDialog actions={actions.loadTest} />}
         {monitorsDialogOpen && <MonitorsDialog actions={actions.monitors} />}
         {specDialog?.mode === "view" && <SpecViewer dialog={specDialog} actions={actions.openapi} onClose={closeSpecDialog} />}

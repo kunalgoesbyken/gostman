@@ -69,7 +69,7 @@ const normalizeBehavior = (raw) => ({
   fault: { ...emptyBehavior().fault, ...raw?.fault },
 })
 
-const normalizeRule = (raw) => ({
+export const normalizeRule = (raw) => ({
   ...emptyRule(),
   ...raw,
   conditions: raw.conditions || [],
@@ -328,7 +328,7 @@ export function createMockActions(backend) {
 
   async function addRules(rules) {
     const loaded = normalizeConfig(await server.loadConfig())
-    patch({ config: { ...loaded, rules: [...loaded.rules, ...rules.map((rule) => normalizeConfig({ rules: [rule] }).rules[0])] } })
+    patch({ config: { ...loaded, rules: [...loaded.rules, ...rules.map(normalizeRule)] } })
     await save()
     if (mock().isRunning) await refresh()
   }
@@ -341,7 +341,7 @@ export function createMockActions(backend) {
   async function importRules(file) {
     try {
       const imported = await server.importRules(await file.text())
-      change((config) => ({ ...config, rules: [...config.rules, ...imported.map((rule) => normalizeConfig({ rules: [rule] }).rules[0])] }))
+      change((config) => ({ ...config, rules: [...config.rules, ...imported.map(normalizeRule)] }))
       app().showAlert(MOCK_TEXT.importRules, MOCK_TEXT.rulesImported(imported.length), DIALOG_TEXT.ok, 'success')
     } catch (error) {
       patch({ failure: messageOf(error) })

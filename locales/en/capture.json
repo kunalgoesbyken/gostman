@@ -182,7 +182,8 @@
       "response": "Hold the response",
       "both": "Hold both"
     },
-    "restricted": "This folder is not trusted, so its capture rules are switched off and cannot be changed. Choose Trust this folder in the folder menu to use them."
+    "restricted": "This folder is not trusted, so its capture rules are switched off and cannot be changed until you trust it.",
+    "trust": "Trust this folder"
   },
   "captureHeld": {
     "emptyTitle": "Nothing is held",

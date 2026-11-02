@@ -17,12 +17,12 @@ type rulesFile struct {
 }
 
 func ExportRules(rules []Rule) ([]byte, error) {
-	return toYAML(rulesFile{Kind: RulesKind, Version: rulesVersion, Rules: rules})
+	return ToYAML(rulesFile{Kind: RulesKind, Version: rulesVersion, Rules: rules})
 }
 
 func ImportRules(data []byte) ([]Rule, error) {
 	var imported rulesFile
-	if err := fromYAML(data, &imported); err != nil {
+	if err := FromYAML(data, &imported); err != nil {
 		return nil, fmt.Errorf("the file is not valid: %w", err)
 	}
 	if imported.Kind != RulesKind {

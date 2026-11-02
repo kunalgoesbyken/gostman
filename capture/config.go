@@ -2,15 +2,13 @@ package capture
 
 import (
 	"crypto/rand"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"io/fs"
 	"os"
-	"path/filepath"
 
-	"gopkg.in/yaml.v3"
+	"github.com/kunalgoesbyken/gostman/mock"
 )
 
 const (
@@ -63,7 +61,7 @@ func LoadConfig(path string) (Config, error) {
 	if len(data) > maxConfigBytes {
 		return config, fmt.Errorf("the capture rules are larger than %d MB", maxConfigBytes>>20)
 	}
-	if err := fromYAML(data, &config); err != nil {
+	if err := mock.FromYAML(data, &config); err != nil {
 		return DefaultConfig(), fmt.Errorf("the capture rules are not valid: %w", err)
 	}
 	if config.Rules == nil {
@@ -74,39 +72,23 @@ func LoadConfig(path string) (Config, error) {
 
 func SaveConfig(path string, config Config) error {
 	config.Restricted = false
-	data, err := toYAML(config)
+	data, err := mock.ToYAML(config)
 	if err != nil {
 		return err
 	}
 	if len(data) > maxConfigBytes {
 		return fmt.Errorf("the capture rules are larger than %d MB", maxConfigBytes>>20)
 	}
-	directory := filepath.Dir(path)
-	if err := os.MkdirAll(directory, 0o755); err != nil {
-		return err
-	}
-	staging, err := os.CreateTemp(directory, "capture-*.tmp")
-	if err != nil {
-		return err
-	}
-	defer os.Remove(staging.Name())
-	if _, err := staging.Write(data); err != nil {
-		staging.Close()
-		return err
-	}
-	if err := staging.Close(); err != nil {
-		return err
-	}
-	return os.Rename(staging.Name(), path)
+	return mock.WriteAtomic(path, data, "capture-*.tmp")
 }
 
 func ExportRules(rules []Rule) ([]byte, error) {
-	return toYAML(rulesFile{Kind: RulesKind, Version: rulesVersion, Rules: rules})
+	return mock.ToYAML(rulesFile{Kind: RulesKind, Version: rulesVersion, Rules: rules})
 }
 
 func ImportRules(data []byte, files bool) ([]Rule, error) {
 	var imported rulesFile
-	if err := fromYAML(data, &imported); err != nil {
+	if err := mock.FromYAML(data, &imported); err != nil {
 		return nil, fmt.Errorf("the file is not valid: %w", err)
 	}
 	if imported.Kind != RulesKind {
@@ -120,28 +102,4 @@ func ImportRules(data []byte, files bool) ([]Rule, error) {
 		imported.Rules[i].Disabled = true
 	}
 	return imported.Rules, nil
-}
-
-func toYAML(value any) ([]byte, error) {
-	encoded, err := json.Marshal(value)
-	if err != nil {
-		return nil, err
-	}
-	var generic any
-	if err := json.Unmarshal(encoded, &generic); err != nil {
-		return nil, err
-	}
-	return yaml.Marshal(generic)
-}
-
-func fromYAML(data []byte, target any) error {
-	var generic any
-	if err := yaml.Unmarshal(data, &generic); err != nil {
-		return err
-	}
-	encoded, err := json.Marshal(generic)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(encoded, target)
 }

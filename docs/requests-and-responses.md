@@ -259,6 +259,7 @@ Each tab keeps its last 10 responses while the app is open. They are kept in mem
 2. The panel shows that response with its headers, cookies and timeline, under the notice "Showing the response from" and its time. Download body, Save as example and Add checks from this response are hidden while it is shown.
 3. Select **Compare with the latest** to open the two side by side. **Body** compares the bodies, with JSON formatted first so that only real changes stand out; **Headers** compares the headers sorted by name.
 4. Select **Back to the latest**, or send the request again, to return to the newest response.
+5. **Export as HAR**, at the end of the same list, saves the kept responses as a HAR 1.2 file with the request line and headers that were sent. `Authorization`, `Cookie`, `Proxy-Authorization` and `Set-Cookie` values and secret values show as `***`. Responses that failed without an answer are left out.
 
 ![The response panel showing an earlier response under the notice Showing the response from, with Compare with the latest and Back to the latest](../screenshots/response-history.png)
 

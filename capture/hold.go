@@ -6,8 +6,10 @@ import (
 	"encoding/base64"
 	"fmt"
 	"slices"
+	"strings"
 	"sync"
 	"time"
+	"unicode"
 
 	"github.com/kunalgoesbyken/gostman/engine"
 )
@@ -16,6 +18,7 @@ const (
 	DefaultBreakSeconds = 60
 	longestBreakSeconds = 3600
 	maxHeld             = 25
+	maxMethodLength     = 32
 )
 
 type Held struct {
@@ -45,8 +48,7 @@ type Decision struct {
 type verdict int
 
 const (
-	verdictPassed verdict = iota
-	verdictEdited
+	verdictEdited verdict = iota
 	verdictTimedOut
 	verdictDropped
 	verdictSkipped
@@ -128,6 +130,10 @@ func (h *holds) settle(id int64, decision Decision) error {
 	}
 }
 
+func isMethodToken(method string) bool {
+	return len(method) <= maxMethodLength && !strings.ContainsFunc(method, func(r rune) bool { return !unicode.IsLetter(r) || r > unicode.MaxASCII })
+}
+
 func (d Decision) check(phase string) error {
 	if d.Drop {
 		return nil
@@ -141,7 +147,7 @@ func (d Decision) check(phase string) error {
 		}
 		return nil
 	}
-	if d.Method != "" && !methodToken.MatchString(d.Method) {
+	if d.Method != "" && !isMethodToken(d.Method) {
 		return fmt.Errorf("%q is not a valid method", d.Method)
 	}
 	if d.URL != "" {
@@ -153,7 +159,7 @@ func (d Decision) check(phase string) error {
 }
 
 func (s *Server) breakTimeout() time.Duration {
-	seconds := s.breakSeconds
+	seconds := int(s.breakSeconds.Load())
 	if seconds <= 0 {
 		seconds = DefaultBreakSeconds
 	}

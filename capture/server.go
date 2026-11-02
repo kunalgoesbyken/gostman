@@ -51,7 +51,7 @@ type Server struct {
 	root         string
 	dice         *mock.Dice
 	holds        holds
-	breakSeconds int
+	breakSeconds atomic.Int32
 }
 
 type steadyWriter struct {
@@ -112,10 +112,10 @@ func Start(settings Settings, transport http.RoundTripper, hooks Hooks) (*Server
 		hooks:        hooks,
 		cancel:       cancel,
 		root:         settings.FilesRoot,
-		breakSeconds: settings.BreakSeconds,
 		dice:         mock.NewDice(uint64(time.Now().UnixNano()), uint64(settings.Port)),
 	}
 	started.rules.Store(rules)
+	started.breakSeconds.Store(int32(settings.BreakSeconds))
 	started.proxy = &httputil.ReverseProxy{
 		Rewrite:        started.forward,
 		Transport:      transport,
@@ -140,7 +140,7 @@ func (s *Server) UpdateRules(rules []Rule, breakSeconds int) error {
 		return err
 	}
 	s.rules.Store(compiled)
-	s.breakSeconds = breakSeconds
+	s.breakSeconds.Store(int32(breakSeconds))
 	return nil
 }
 

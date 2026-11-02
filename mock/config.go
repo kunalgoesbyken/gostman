@@ -81,25 +81,29 @@ func LoadConfig(path string) (Config, error) {
 	if len(data) > maxConfigBytes {
 		return config, fmt.Errorf("the mock configuration is larger than %d MB", maxConfigBytes>>20)
 	}
-	if err := fromYAML(data, &config); err != nil {
+	if err := FromYAML(data, &config); err != nil {
 		return DefaultConfig(), fmt.Errorf("the mock configuration is not valid: %w", err)
 	}
 	return config, nil
 }
 
 func SaveConfig(path string, config Config) error {
-	data, err := toYAML(config)
+	data, err := ToYAML(config)
 	if err != nil {
 		return err
 	}
 	if len(data) > maxConfigBytes {
 		return fmt.Errorf("the mock configuration is larger than %d MB", maxConfigBytes>>20)
 	}
+	return WriteAtomic(path, data, "mock-*.tmp")
+}
+
+func WriteAtomic(path string, data []byte, stagingPattern string) error {
 	directory := filepath.Dir(path)
 	if err := os.MkdirAll(directory, 0o755); err != nil {
 		return err
 	}
-	staging, err := os.CreateTemp(directory, "mock-*.tmp")
+	staging, err := os.CreateTemp(directory, stagingPattern)
 	if err != nil {
 		return err
 	}
@@ -114,7 +118,7 @@ func SaveConfig(path string, config Config) error {
 	return os.Rename(staging.Name(), path)
 }
 
-func toYAML(config any) ([]byte, error) {
+func ToYAML(config any) ([]byte, error) {
 	encoded, err := json.Marshal(config)
 	if err != nil {
 		return nil, err
@@ -126,7 +130,7 @@ func toYAML(config any) ([]byte, error) {
 	return yaml.Marshal(generic)
 }
 
-func fromYAML(data []byte, config any) error {
+func FromYAML(data []byte, config any) error {
 	var generic any
 	if err := yaml.Unmarshal(data, &generic); err != nil {
 		return err

@@ -91,13 +91,6 @@ type Ruleset struct {
 	rules []*compiledRule
 }
 
-func (r Rule) label() string {
-	if strings.TrimSpace(r.Name) != "" {
-		return r.Name
-	}
-	return r.ID
-}
-
 func globPattern(glob string) (*regexp.Regexp, error) {
 	if len(glob) > maxPatternBytes {
 		return nil, fmt.Errorf("a pattern is limited to %d bytes", maxPatternBytes)
@@ -263,13 +256,16 @@ func Compile(rules []Rule, files bool) (*Ruleset, error) {
 		return nil, fmt.Errorf("the capture takes at most %d rules, but %d were given", maxRules, len(rules))
 	}
 	set := &Ruleset{}
-	for _, rule := range rules {
+	for position, rule := range rules {
 		if rule.Disabled {
 			continue
 		}
+		if strings.TrimSpace(rule.Name) == "" {
+			rule.Name = fmt.Sprintf("Rule %d", position+1)
+		}
 		compiled, err := compileRule(rule, files)
 		if err != nil {
-			return nil, fmt.Errorf("rule %q: %w", rule.label(), err)
+			return nil, fmt.Errorf("rule %q: %w", rule.Name, err)
 		}
 		set.rules = append(set.rules, compiled)
 	}
