@@ -1,0 +1,30 @@
+{
+  "trash": {
+    "title": "Recently deleted",
+    "command": "Recently deleted",
+    "commandDescription": "Restore a request, folder or environment you deleted",
+    "commandKeywords": "trash bin restore undo recover",
+    "empty": "Nothing was deleted recently.",
+    "note_one": "Deleted items are kept for {{count}} day. Secret values are not kept; restored secret variables come back empty.",
+    "note_other": "Deleted items are kept for {{count}} days. Secret values are not kept; restored secret variables come back empty.",
+    "listLabel": "Deleted items",
+    "kinds": {
+      "request": "Request",
+      "folder": "Folder",
+      "environment": "Environment"
+    },
+    "daysLeft_one": "{{count}} day left",
+    "daysLeft_other": "{{count}} days left",
+    "restore": "Restore",
+    "restored": "Restored {{name}}.",
+    "deleteForever": "Delete permanently",
+    "emptyBin": "Empty bin",
+    "emptyBinTitle": "Empty the bin?",
+    "emptyBinMessage": "Everything in the bin is deleted for good.",
+    "emptyBinConfirm": "Empty bin",
+    "readFailed": "The bin could not be read: {{detail}}",
+    "saveFailed": "The deleted item could not be kept in the bin: {{detail}}",
+    "restoreFailed": "The item could not be restored: {{detail}}",
+    "unnamed": "Unnamed"
+  }
+}

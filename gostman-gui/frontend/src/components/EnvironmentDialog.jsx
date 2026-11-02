@@ -20,6 +20,7 @@ import { SCOPE_COLLECTION, SCOPE_GLOBAL, dotEnvEntries, environmentChain, enviro
 import { cn } from "../lib/utils"
 import { collectionFolders, environmentGroups, holdsCollections, scopeForNew, variableHolderFor } from "../lib/environmentScope"
 import { useEnvironmentChoice } from "../hooks/useEnvironmentChoice"
+import { keepEnvironment } from "../lib/trashSession"
 import { createEnvironment, useAppStore } from "../store/appStore"
 
 const COLLECTION_VARIABLES_ID = "collection-variables"
@@ -134,7 +135,10 @@ function EnvironmentEditor({ scope, environment, environments, isActive, scoping
   const remove = () => showConfirm(
     TEXT.remove,
     TEXT.confirmDelete(environment.name),
-    () => removeEnvironmentFrom(scope, environment.id),
+    async () => {
+      await keepEnvironment(scope, environment)
+      removeEnvironmentFrom(scope, environment.id)
+    },
     null,
     "destructive"
   )

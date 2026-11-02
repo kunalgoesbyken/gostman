@@ -29,6 +29,7 @@
       "requestTimeout": "Default timeout",
       "confirmCloseTab": "Ask before discarding unsaved changes when closing a tab",
       "language": "Language",
+      "authorName": "Your name on notes",
       "sidebarViews": "Sidebar tabs"
     },
     "themes": {
@@ -159,6 +160,7 @@
       "lowContrast": "Text may be hard to read. Aim for at least {{minimum}}:1.",
       "resetRow": "Reset {{name}}"
     },
+    "authorNameHint": "Shown on the notes you add to requests and folders.",
     "timeoutHint_one": "Applies to requests that set no timeout of their own. 0 uses the built-in limit of {{count}} second.",
     "timeoutHint_other": "Applies to requests that set no timeout of their own. 0 uses the built-in limit of {{count}} seconds.",
     "languageSystem": "Same as the system ({{language}})",

@@ -264,6 +264,12 @@ Select a file under **Conflicts** to open the conflict editor:
 - If the result still contains conflict markers, a warning appears and **Mark resolved** stays disabled.
 - **Mark resolved** saves the result for that file.
 
+## Recently deleted
+
+Deleting a request, a folder or an environment keeps a copy in **Recently deleted**, opened from the command palette. Each row shows what it was, when it was deleted and how many days are left; **Restore** puts it back (a request goes back into its folder if that folder still exists, a folder takes back the requests and subfolders it held when they are still where it left them) and the trash button removes it for good. **Empty bin** removes everything. Items are purged 30 days after deletion, the next time the bin is read or written.
+
+The bin belongs to the storage you are using: the app data folder, a folder workspace (kept in `.gostman/trash/`, which has its own `.gitignore` so it never reaches Git) or the browser. Secret values are never copied into it; a restored secret variable keeps its secret mark and comes back empty. Deleting everything with **Delete all data** also clears the bin.
+
 ## What is desktop-only
 
 - Opening folders, saving to a folder, cloning, workspace switching and the Git panel need folder storage, which exists only in the desktop app.

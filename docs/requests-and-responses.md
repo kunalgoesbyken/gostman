@@ -216,6 +216,12 @@ The tab shows only the settings that apply to the request: gRPC and remote MCP r
 
 A dot on the Settings tab means one of the settings above the tags differs from its default: a timeout is set, redirects, TLS verification or one of the cookie options is turned off, or streaming is on.
 
+### Notes
+
+The **Notes** tab keeps a thread of comments on the request: who wrote each one, when, and whether it is resolved. **Resolve** greys a note out and **Reopen** brings it back; the tab badge counts the open ones. Notes are saved in the request's file under `notes:`, so a teammate sees them in the Git diff and reviews them like any other change. Set the name shown on your notes under **Preferences**, **Requests**, **Your name on notes**; without one they show as Unknown. Folders and collections have the same tab in their settings.
+
+Notes are plain text shared with everyone who has the workspace. Do not paste secrets: the box warns when the text looks like a credential, but the check is a hint, not a guarantee. Notes are kept in a Gostman export and are not written to OpenAPI, Postman, Bruno, Insomnia or other exports.
+
 ## Variables in inputs
 
 URL, header, parameter and body fields recognise `{{name}}`. Defined names are underlined, and hovering one shows its value and where it comes from. Typing `{{` opens a list of names; use the arrow keys with Enter or Tab to pick one, and Escape to close the list. Ctrl+Space opens the same list without typing `{{`: the word before the caret filters it, and the name you pick is written with its braces. With nothing before the caret, it lists your variables first and then the dynamic ones.

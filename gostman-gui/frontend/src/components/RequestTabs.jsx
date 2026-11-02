@@ -7,6 +7,7 @@ import { SkeletonLines } from "./ui/skeleton"
 import { AuthPanel } from "./AuthPanel"
 import { BodyPanel } from "./BodyPanel"
 import { FeatureHint } from "./FeatureHint"
+import { NotesPanel } from "./NotesPanel"
 import { InheritedHeaders } from "./InheritedHeaders"
 import { KeyValueEditor } from "./KeyValueEditor"
 import { HEADER_SUGGESTIONS } from "../lib/httpHeaders"
@@ -19,6 +20,7 @@ import { TASK_DOCS } from "../lib/ai/tasks"
 import { BODY_FORM, BODY_MULTIPART, BODY_NONE } from "../lib/body"
 import { parseExtractors } from "../lib/chaining"
 import { parseExamples } from "../lib/examples"
+import { openNoteCount, parseNotes } from "../lib/notes"
 import { FOLDER_SETTINGS_TEXT as INHERIT_TEXT } from "../lib/folderSettingsText"
 import { GRAPHQL_METHOD } from "../lib/graphqlSchema"
 import { GRPC_PANEL, isBlankMessage } from "../lib/grpc"
@@ -26,7 +28,7 @@ import { AUTH_INHERIT, countInheritedHeaders, inheritedAuthLayer } from "../lib/
 import { MCP_PANEL } from "../lib/mcp"
 import { readParamRows } from "../lib/queryString"
 import {
-  AUTH_PANEL, BODY_PANEL, EXTRACT_PANEL, FILES_PANEL, GRAPHQL_PANEL, HEADERS_PANEL, PARAMS_PANEL, SETTINGS_PANEL, TESTS_PANEL, VARS_PANEL,
+  AUTH_PANEL, BODY_PANEL, EXTRACT_PANEL, FILES_PANEL, GRAPHQL_PANEL, HEADERS_PANEL, NOTES_PANEL, PARAMS_PANEL, SETTINGS_PANEL, TESTS_PANEL, VARS_PANEL,
   hasChangedSettings, hasProtocolPanel, leadSection, requestKind, requestSections, requestSettings,
 } from "../lib/requestSections"
 import { REQUEST_TABS_TEXT as TEXT } from "../lib/requestTabsText"
@@ -118,7 +120,7 @@ export const RequestTabs = memo(function RequestTabs({
   const setActivePanel = useAppStore((state) => state.setRequestPanel)
   const isAiOn = useAiEnabled()
   const socketStatus = useSocketStore((state) => selectSession(tabId)(state).status)
-  const { url, queryParams, headers, body, bodyType, auth, options, method, extractors, assertions, examples, preScript, postScript, vars } = activeRequest
+  const { url, queryParams, headers, body, bodyType, auth, options, method, extractors, assertions, examples, preScript, postScript, vars, notes } = activeRequest
   const authSource = useAppStore((state) => inheritedAuthLayer(state, activeRequest.folderId)?.name ?? null)
   const authSourceType = useAppStore((state) => inheritedAuthLayer(state, activeRequest.folderId)?.settings.auth.type ?? null)
   const isSocket = useMemo(() => isSocketAddress(url, variables), [url, variables])
@@ -136,6 +138,8 @@ export const RequestTabs = memo(function RequestTabs({
   const extractorCount = useMemo(() => parseExtractors(extractors).filter((extractor) => extractor.enabled).length, [extractors])
   const assertionCount = useMemo(() => countActiveAssertions(assertions), [assertions])
   const exampleCount = useMemo(() => parseExamples(examples).length, [examples])
+  const noteCount = useMemo(() => openNoteCount(notes), [notes])
+  const hasNotes = useMemo(() => parseNotes(notes).length > 0, [notes])
   const hasScripts = preScript.trim() !== "" || postScript.trim() !== ""
   const hasCustomOptions = hasChangedSettings(options)
   const hasOwnAuth = auth.type !== "" && auth.type !== AUTH_INHERIT
@@ -150,6 +154,7 @@ export const RequestTabs = memo(function RequestTabs({
     [SOCKET_PANEL]: socketStatus !== SOCKET_IDLE,
     [EXTRACT_PANEL]: extractorCount > 0,
     [TESTS_PANEL]: assertionCount > 0 || hasScripts,
+    [NOTES_PANEL]: hasNotes,
   }))
   const shownPanel = sections.includes(activePanel) ? activePanel : leadSection(kind)
 
@@ -163,6 +168,7 @@ export const RequestTabs = memo(function RequestTabs({
     [VARS_PANEL]: countSentRows(variableRows),
     [EXTRACT_PANEL]: extractorCount,
     [TESTS_PANEL]: assertionCount || hasScripts,
+    [NOTES_PANEL]: noteCount,
     [SETTINGS_PANEL]: hasCustomOptions,
   }
   const marks = {
@@ -336,6 +342,10 @@ export const RequestTabs = memo(function RequestTabs({
             response={response}
             ai={isAiOn ? actions.ai : null}
           />
+        </TabsContent>
+
+        <TabsContent value={NOTES_PANEL} className={PANEL_CLASS}>
+          <NotesPanel key={tabId} notes={notes} onChange={(next) => onUpdateRequest({ notes: next })} />
         </TabsContent>
 
         <TabsContent value={SETTINGS_PANEL} className={PANEL_CLASS}>

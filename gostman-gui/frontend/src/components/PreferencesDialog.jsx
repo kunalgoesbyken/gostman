@@ -30,6 +30,7 @@ import {
   RESPONSE_LAYOUTS, TAB_PLACEMENTS, TEXT_SCALES, resetPreferences, updatePreferences, usePreferences,
 } from "../lib/preferences"
 import { SECTION_AI, selectPreferencesSection, usePreferencesSection } from "../lib/preferencesSection"
+import { AUTHOR_LIMIT } from "../lib/notes"
 import { PREFERENCES_TEXT } from "../lib/preferencesText"
 import { TRANSLATE_URL, TRANSLATIONS_ISSUE_URL } from "../lib/siteLinks"
 import { cn } from "../lib/utils"
@@ -199,9 +200,18 @@ function EditorSection({ preferences }) {
   )
 }
 
+function AuthorRow({ value }) {
+  return (
+    <PreferenceRow label={fields.authorName} hint={PREFERENCES_TEXT.authorNameHint}>
+      <Input aria-label={fields.authorName} value={value} maxLength={AUTHOR_LIMIT} onChange={(event) => updatePreferences({ authorName: event.target.value.trimStart() })} className="w-56" />
+    </PreferenceRow>
+  )
+}
+
 function RequestsSection({ preferences }) {
   return (
     <>
+      <AuthorRow value={preferences.authorName} />
       <NumberRow
         label={fields.requestTimeout}
         hint={PREFERENCES_TEXT.timeoutHint(BUILT_IN_TIMEOUT_SECONDS)}

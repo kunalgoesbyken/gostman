@@ -23,6 +23,7 @@
       "vars": "Vars",
       "extract": "Extract",
       "tests": "Checks",
+      "notes": "Notes",
       "settings": "Settings"
     }
   }

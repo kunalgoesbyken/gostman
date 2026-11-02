@@ -15,7 +15,7 @@ var (
 	requestKeys = []string{
 		"id", "name", "description", "tags", "order", "method", "url", "queryParams", "headers", "auth", "bodyType", "body",
 		"graphqlQuery", "graphqlVariables", "grpcMethod", "grpcMessage", "grpcProtos", "mcpMethod", "mcpTool", "mcpArguments", "socketProtocol", "socketMessages", "vars", "options",
-		"extractors", "assertions", "preScript", "postScript", "examples", "timestamp",
+		"extractors", "assertions", "preScript", "postScript", "examples", "notes", "timestamp",
 	}
 	requestMarkers = []string{"method", "url"}
 	authKeys       = []string{"type", "username", "password", "token", "key", "value", "in", "oauth2", "domain", "aws", "oauth1", "edgegrid", "jwt", "asap", "hawk"}
@@ -182,6 +182,7 @@ func (b nodeBuilder) request(document requestDocument) *yaml.Node {
 	setField(root, "preScript", b.text(request.PreScript))
 	setField(root, "postScript", b.text(request.PostScript))
 	setField(root, "examples", b.jsonText(request.Examples))
+	setField(root, "notes", b.jsonText(request.Notes))
 	setField(root, "timestamp", b.text(request.Timestamp))
 	root.Content = append(root.Content, document.extras.request...)
 	return root
@@ -312,6 +313,7 @@ func readRequest(root *yaml.Node) (requestDocument, error) {
 		SocketMessages:   fields.jsonText("socketMessages", false, unchanged),
 		Vars:             fields.pairs("vars"),
 		Examples:         fields.jsonText("examples", false, unchanged),
+		Notes:            fields.jsonText("notes", false, unchanged),
 		Timestamp:        fields.text("timestamp"),
 	}
 	return document, failure

@@ -5,6 +5,7 @@ import { isHexColor } from './color.js'
 import { isPlainObject, parseJSON } from './dataUtils.js'
 import { FONT_SLOTS, applyFont } from './fonts.js'
 import { LANGUAGES, LANGUAGE_VALUES, SYSTEM_LANGUAGE } from './i18n/languages.js'
+import { AUTHOR_LIMIT } from './notes.js'
 import { readStored, writeStored } from './storage.js'
 import { normalizeTagColors } from './tagColors.js'
 import { DEFAULT_SIDEBAR_VIEWS, normalizeSidebarViews } from './sidebarViews.js'
@@ -55,6 +56,7 @@ export const DEFAULT_PREFERENCES = {
   requestTimeoutSeconds: 0,
   confirmCloseTab: true,
   language: SYSTEM_LANGUAGE,
+  authorName: '',
   shortcuts: {},
   sidebarViews: DEFAULT_SIDEBAR_VIEWS,
 }
@@ -64,6 +66,8 @@ const integerWithin = ({ min, max }) => (value) => Number.isInteger(value) && va
 const isFlag = (value) => typeof value === 'boolean'
 const isPrintable = (text) => [...text].every((character) => character >= ' ' && character !== '\u007f')
 const isFontName = (value) => typeof value === 'string' && value === value.trim() && value.length <= FONT_NAME_LENGTH && isPrintable(value)
+
+const isAuthorName = (value) => typeof value === 'string' && value.length <= AUTHOR_LIMIT && isPrintable(value)
 
 const VALIDATORS = {
   theme: oneOf(THEMES),
@@ -81,6 +85,7 @@ const VALIDATORS = {
   requestTimeoutSeconds: integerWithin(REQUEST_TIMEOUT_SECONDS),
   confirmCloseTab: isFlag,
   language: oneOf(LANGUAGE_VALUES),
+  authorName: isAuthorName,
 }
 
 const withUsableAccent = (preferences) => (

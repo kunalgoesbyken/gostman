@@ -204,6 +204,16 @@
       "blurb": "gostman docs --versions builds documentation for each Git tag, and --logo and --accent style the page.",
       "synonyms": "docs documentation html publish version tags logo accent"
     },
+    "notes": {
+      "title": "Notes",
+      "blurb": "Keep a thread of notes on a request or folder, saved in its file so teammates review it in Git.",
+      "synonyms": "notes comments review thread resolve"
+    },
+    "recentlyDeleted": {
+      "title": "Recently deleted",
+      "blurb": "Restore deleted requests, folders and environments for 30 days.",
+      "synonyms": "trash bin deleted restore undo recover"
+    },
     "backups": {
       "title": "Backups",
       "blurb": "Daily and per-version backups of your data, with restore.",

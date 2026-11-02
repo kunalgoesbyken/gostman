@@ -5,7 +5,7 @@ import { sameTags } from './tags'
 const TEXT_FIELDS = [
   'name', 'description', 'method', 'url', 'body', 'bodyType', 'folderId', 'graphqlQuery', 'graphqlVariables',
   'extractors', 'assertions', 'examples', 'preScript', 'postScript', 'grpcMethod', 'grpcMessage', 'grpcProtos',
-  'mcpMethod', 'mcpTool', 'mcpArguments', 'socketProtocol', 'socketMessages',
+  'mcpMethod', 'mcpTool', 'mcpArguments', 'socketProtocol', 'socketMessages', 'notes',
 ]
 const PAIR_FIELDS = ['headers', 'queryParams', 'vars']
 const EMPTY_PAIRS = ['', '{}', '[]']

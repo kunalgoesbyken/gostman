@@ -534,7 +534,7 @@ function LoadedWorkspace({ backend, onBack }) {
 
       <NoticeToast />
 
-      <AppDialogs onCommand={actions.runCommand} secrets={actions.secrets} listFonts={backend.listInstalledFonts} windowFrame={backend.windowFrame} hasWorkspaces={Boolean(actions.storage)} isAiOn={isAiOn} ai={actions.ai} backups={actions.backups} relay={backend.relay} updates={backend.updates} />
+      <AppDialogs onCommand={actions.runCommand} secrets={actions.secrets} listFonts={backend.listInstalledFonts} windowFrame={backend.windowFrame} hasWorkspaces={Boolean(actions.storage)} isAiOn={isAiOn} ai={actions.ai} trash={actions.trash} backups={actions.backups} relay={backend.relay} updates={backend.updates} />
     </div>
   )
 }

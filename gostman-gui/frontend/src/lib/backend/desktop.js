@@ -35,6 +35,7 @@ import {
   SaveCollectionPassphrase,
   SaveCollectionSettings,
   SaveCollectionToFolder,
+  ReadTrash,
   SaveCookies,
   SaveEnvironments,
   SaveFile,
@@ -51,6 +52,7 @@ import {
   StartDeviceAuthorization,
   TrustWorkspace,
   WorkspaceStatus,
+  WriteTrash,
 } from '../../../wailsjs/go/main/App'
 import { EventsOn } from '../../../wailsjs/runtime/runtime'
 import { WEB_APP_URL } from '../constants'
@@ -141,6 +143,7 @@ export const desktopBackend = {
   shareOrder: () => ShareSiblingOrder(),
   saveCookies: (cookies) => SaveCookies(cookies),
   tabDrafts: localRecords(window.localStorage),
+  trash: { read: () => ReadTrash(), write: (text) => WriteTrash(text) },
   network: {
     saveSettings: (settings) => SaveSettings(settings),
     pickFile: (title) => PickFile(title),

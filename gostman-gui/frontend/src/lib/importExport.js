@@ -464,8 +464,8 @@ const AUTH_TYPES = [AUTH_INHERIT, AUTH_BASIC, AUTH_BEARER, AUTH_API_KEY, AUTH_OA
 const OAUTH_TEXT_FIELDS = ['grant', 'authUrl', 'tokenUrl', 'clientId', 'clientSecret', 'scope', 'username', 'password', 'callbackUrl', 'credentialsIn', 'headerPrefix', 'resource', 'issuer', 'deviceUrl']
 const AUTH_TEXT_FIELDS = ['username', 'password', 'token', 'key', 'value', 'domain']
 const SCHEME_SECTIONS = Object.values(SCHEMES).filter((scheme) => scheme.section)
-const REQUEST_TEXT_FIELDS = ['id', 'description', 'url', 'headers', 'body', 'queryParams', 'folderId', 'graphqlQuery', 'graphqlVariables', 'extractors', 'assertions', ...SCRIPT_FIELDS, 'grpcMethod', 'grpcMessage', 'grpcProtos', 'mcpMethod', 'mcpTool', 'mcpArguments', 'socketProtocol', 'socketMessages', 'vars']
-const SCOPE_TEXT_FIELDS = ['description', 'headers', 'assertions', ...SCRIPT_FIELDS]
+const REQUEST_TEXT_FIELDS = ['id', 'description', 'url', 'headers', 'body', 'queryParams', 'folderId', 'graphqlQuery', 'graphqlVariables', 'extractors', 'assertions', ...SCRIPT_FIELDS, 'grpcMethod', 'grpcMessage', 'grpcProtos', 'mcpMethod', 'mcpTool', 'mcpArguments', 'socketProtocol', 'socketMessages', 'vars', 'notes']
+const SCOPE_TEXT_FIELDS = ['description', 'headers', 'assertions', 'notes', ...SCRIPT_FIELDS]
 const BODY_TYPE_VALUES = BODY_TYPES.map((type) => type.value)
 
 const stringOf = (value) => (typeof value === 'string' ? value : '')

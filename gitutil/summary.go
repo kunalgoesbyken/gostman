@@ -46,10 +46,11 @@ var requestLabels = map[string]string{
 	"preScript":        "pre-request script",
 	"postScript":       "post-response script",
 	"examples":         "examples",
+	"notes":            "notes",
 	"order":            "position",
 }
 
-var requestOrder = []string{"name", "method", "url", "queryParams", "headers", "auth", "bodyType", "body", "graphqlQuery", "graphqlVariables", "grpcMethod", "grpcMessage", "grpcProtos", "mcpMethod", "mcpTool", "mcpArguments", "socketProtocol", "socketMessages", "options", "extractors", "assertions", "preScript", "postScript", "examples", "description", "tags", "order"}
+var requestOrder = []string{"name", "method", "url", "queryParams", "headers", "auth", "bodyType", "body", "graphqlQuery", "graphqlVariables", "grpcMethod", "grpcMessage", "grpcProtos", "mcpMethod", "mcpTool", "mcpArguments", "socketProtocol", "socketMessages", "options", "extractors", "assertions", "preScript", "postScript", "examples", "notes", "description", "tags", "order"}
 
 var showsValues = map[string]bool{"url": true, "method": true}
 

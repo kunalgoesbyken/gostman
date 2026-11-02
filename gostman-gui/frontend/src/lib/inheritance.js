@@ -22,6 +22,7 @@ export const normalizeScopeSettings = (raw) => ({
   preScript: textOf(raw?.preScript),
   postScript: textOf(raw?.postScript),
   assertions: textOf(raw?.assertions),
+  notes: textOf(raw?.notes),
   scriptTimeoutMs: Math.max(0, Math.trunc(Number(raw?.scriptTimeoutMs)) || 0),
 })
 

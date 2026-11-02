@@ -197,8 +197,8 @@ function CreateRepositoryForm({ root, hasCli, isReadOnly, onCreate }) {
   }
   return (
     <form onSubmit={submit} className="shrink-0 space-y-2 border-b border-border px-3 py-2">
-      <div className="flex items-center gap-2">
-        <Input aria-label={TEXT.createRepositoryName} value={name} onChange={(event) => setName(event.target.value)} disabled={isReadOnly} />
+      <div className="flex flex-wrap items-center gap-2">
+        <Input aria-label={TEXT.createRepositoryName} className="min-w-40 flex-1" value={name} onChange={(event) => setName(event.target.value)} disabled={isReadOnly} />
         <Select aria-label={TEXT.createRepositoryVisibility} className="w-32 shrink-0" value={isPrivate ? "private" : "public"} onChange={(event) => setIsPrivate(event.target.value === "private")} disabled={isReadOnly}>
           <option value="private">{TEXT.visibilityPrivate}</option>
           <option value="public">{TEXT.visibilityPublic}</option>

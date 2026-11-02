@@ -65,6 +65,7 @@ import { filePathsIn, withoutActiveContent } from './activeContent'
 import { CURL_FILES_TEXT } from './requestBarText'
 import { countImported } from './importSummary'
 import { SCOPE_GLOBAL } from './variableScopes'
+import { createTrashActions, keepFolder, keepRequest } from './trashSession'
 import { environmentForFolder, findActiveEnvironment, isFlowTab, selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
 import { ownedVariableCount, scopedFolderNames, scopedImport } from './environmentScope'
 
@@ -320,11 +321,14 @@ export function createWorkspaceActions(backend) {
   })
 
   const removeRequest = attempt(TEXT.deleteRequestFailed, async (id) => {
+    const request = store().requests.find((candidate) => candidate.id === id)
+    if (request) await keepRequest(request)
     await backend.deleteRequests([id])
     store().removeRequest(id)
   })
 
   const removeFolder = attempt(TEXT.deleteFolderFailed, async (folder) => {
+    await keepFolder(folder)
     const moved = store().requests
       .filter((request) => request.folderId === folder.id)
       .map((request) => ({ ...request, folderId: folder.parentId || '' }))
@@ -521,6 +525,7 @@ export function createWorkspaceActions(backend) {
   const removeItems = attempt(TREE_TEXT.deleteManyFailed, async (entries) => {
     const requestIds = entries.filter((entry) => entry.kind === ROW_REQUEST).map((entry) => entry.id)
     if (requestIds.length > 0) {
+      await Promise.all(store().requests.filter((request) => requestIds.includes(request.id)).map(keepRequest))
       await backend.deleteRequests(requestIds)
       store().removeRequests(requestIds)
     }
@@ -598,6 +603,8 @@ export function createWorkspaceActions(backend) {
 
   const ai = createAiActions(backend, { importData, openapi })
   ai.load()
+  const trash = createTrashActions(backend)
+  trash.purgeExpired()
   const storageActions = createStorageActions(backend)
   const tree = createTreeActions(backend, attempt)
   const tabActions = createTabActions(backend, attempt, cancelTab, flows)
@@ -696,6 +703,7 @@ export function createWorkspaceActions(backend) {
     aiDocs: () => ai.start(TASK_DOCS),
     aiSearch: () => ai.start(TASK_SEARCH),
     aiSchema: () => ai.start(TASK_SCHEMA),
+    recentlyDeleted: trash.open,
     aiMock: () => ai.start(TASK_MOCK),
     aiSettings: ai.openSettings,
     sendSample,
@@ -731,6 +739,7 @@ export function createWorkspaceActions(backend) {
     loadTest,
     monitors,
     secrets: backend.secrets,
+    trash,
     storage: storageActions && {
       ...storageActions,
       git: { ...storageActions.git, suggestMessage: async () => ai.start(TASK_COMMIT, { diff: await storageActions.git.stagedDiffText() }) },

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
 import { Notice, Panel, PanelBody, Toolbar } from "./ui/panel"
+import { NotesPanel } from "./NotesPanel"
 import { SegmentedControl } from "./ui/segmented"
 import { OverflowTabsList, Tabs, TabsContent } from "./ui/tabs"
 import { AuthPanel } from "./AuthPanel"
@@ -31,6 +32,7 @@ const TAB_VARS = "vars"
 const TAB_SCRIPT = "script"
 const TAB_TESTS = "tests"
 const TAB_DOCS = "docs"
+const TAB_NOTES = "notes"
 const VIEW_PRE = "preScript"
 const VIEW_POST = "postScript"
 const tabItems = () => Object.entries(TEXT.tabs).map(([value, label]) => ({ value, label, content: label }))
@@ -292,6 +294,9 @@ export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
           </TabsContent>
           <TabsContent value={TAB_DOCS} className="h-full min-h-0">
             <DocsTab description={settings.description} onChange={patch} />
+          </TabsContent>
+          <TabsContent value={TAB_NOTES} className="h-full min-h-0">
+            <NotesPanel notes={settings.notes} onChange={(notes) => patch({ notes })} />
           </TabsContent>
         </div>
       </Tabs>

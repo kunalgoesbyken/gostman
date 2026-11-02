@@ -227,6 +227,8 @@ export function SaveCollectionSettings(arg1:workspace.Settings):Promise<void>;
 
 export function SaveCollectionToFolder(arg1:string):Promise<main.WorkspaceStatus>;
 
+export function ReadTrash():Promise<string>;
+
 export function SaveCookies(arg1:Array<engine.CookieInfo>):Promise<void>;
 
 export function SaveEnvironments(arg1:Array<main.Environment>,arg2:string):Promise<void>;
@@ -308,3 +310,5 @@ export function WSSendBinary(arg1:string,arg2:string):Promise<void>;
 export function WindowFrame():Promise<main.WindowFrame>;
 
 export function WorkspaceStatus():Promise<main.WorkspaceStatus>;
+
+export function WriteTrash(arg1:string):Promise<void>;

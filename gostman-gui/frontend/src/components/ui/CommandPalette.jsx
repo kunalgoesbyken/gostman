@@ -21,6 +21,7 @@ import { TREE_TEXT } from "../../lib/treeText"
 import { COMMAND_TEXT } from "../../lib/commandText"
 import { DEPENDENCIES_TEXT } from "../../lib/dependenciesText"
 import { SEARCH_TEXT } from "../../lib/searchText"
+import { TRASH_TEXT } from "../../lib/trashText"
 import { useShortcutLabel } from "../../hooks/useShortcuts"
 import { cn } from "../../lib/utils"
 
@@ -71,6 +72,7 @@ const appCommands = (holdsCollections) => [
   ...allCollectionsCommands(holdsCollections),
   { id: "preferences", label: PREFERENCES_TEXT.title, description: PREFERENCES_TEXT.commandDescription, icon: SlidersHorizontal, action: "preferences" },
   aiSettingsCommand(),
+  { id: "recently-deleted", label: TRASH_TEXT.command, description: TRASH_TEXT.commandDescription, keywords: TRASH_TEXT.commandKeywords, icon: Undo2, action: "recentlyDeleted" },
   command("clear-history", COMMAND_TEXT.commands.clearHistory, "clearHistory", { icon: History }),
   { id: "welcome", label: WELCOME_TEXT.commandTitle, description: WELCOME_TEXT.commandDescription, icon: Hand, action: "showWelcome" },
   { id: "about", label: ABOUT_TEXT.commandTitle, description: ABOUT_TEXT.commandDescription, icon: Info, action: "about" },

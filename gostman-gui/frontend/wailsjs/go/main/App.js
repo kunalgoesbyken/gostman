@@ -418,6 +418,10 @@ export function SaveCollectionToFolder(arg1) {
   return window['go']['main']['App']['SaveCollectionToFolder'](arg1);
 }
 
+export function ReadTrash() {
+  return window['go']['main']['App']['ReadTrash']();
+}
+
 export function SaveCookies(arg1) {
   return window['go']['main']['App']['SaveCookies'](arg1);
 }
@@ -580,4 +584,8 @@ export function WindowFrame() {
 
 export function WorkspaceStatus() {
   return window['go']['main']['App']['WorkspaceStatus']();
+}
+
+export function WriteTrash(arg1) {
+  return window['go']['main']['App']['WriteTrash'](arg1);
 }

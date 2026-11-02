@@ -4,7 +4,7 @@ import { FEATURES_TEXT } from './featuresText'
 import { openGit, useGitStore } from './gitSession'
 import { focusAddressSoon } from './panes'
 import { isDesktopApp } from './platform'
-import { AUTH_PANEL, EXTRACT_PANEL, SETTINGS_PANEL, TESTS_PANEL, VARS_PANEL } from './requestSections'
+import { AUTH_PANEL, EXTRACT_PANEL, NOTES_PANEL, SETTINGS_PANEL, TESTS_PANEL, VARS_PANEL } from './requestSections'
 import { SAMPLE_FOLDER_ID, protocolRequest, sampleBinaryRequest, sampleCollection, sampleFlow, sampleScanRequest } from './samples'
 import { VIEW_HISTORY, VIEW_TABS } from './sidebarViews'
 import { useAppStore } from '../store/appStore'
@@ -69,6 +69,7 @@ export function createFeatureActions({ backend, commands, monitors, mock, captur
     examples: { run: examples.open },
     folderSettings: { run: () => commands.collectionSettings() },
     git: { run: openGit, isAvailable: () => useGitStore.getState().state.hasFolder },
+    trash: { run: () => commands.recentlyDeleted() },
   }
 
   const commandHandlers = {
@@ -116,6 +117,7 @@ export function createFeatureActions({ backend, commands, monitors, mock, captur
     extract: showPanel(EXTRACT_PANEL),
     tests: showPanel(TESTS_PANEL),
     settings: showPanel(SETTINGS_PANEL),
+    notes: showPanel(NOTES_PANEL),
     history: showSidebarView(VIEW_HISTORY),
     openTabs: showSidebarView(VIEW_TABS),
   }

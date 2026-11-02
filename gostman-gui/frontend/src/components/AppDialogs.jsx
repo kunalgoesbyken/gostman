@@ -10,11 +10,14 @@ import { ShortcutsDialog } from "./ShortcutsDialog"
 import { EnvironmentDialog } from "./EnvironmentDialog"
 import { VariablePromptDialog } from "./VariablePromptDialog"
 import { DeleteDataDialog } from "./DeleteDataDialog"
+import { TrashDialog } from "./TrashDialog"
+import { useTrashStore } from "../lib/trashSession"
 import { useAppStore } from "../store/appStore"
 import { useEnvironmentChoice } from "../hooks/useEnvironmentChoice"
 import { holdsCollections } from "../lib/environmentScope"
 
-export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWorkspaces, isAiOn, ai, backups, relay, updates }) {
+export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWorkspaces, isAiOn, ai, trash, backups, relay, updates }) {
+  const isTrashOpen = useTrashStore((s) => s.isOpen)
   const alertDialog = useAppStore((s) => s.alertDialog)
   const confirmDialog = useAppStore((s) => s.confirmDialog)
   const promptDialog = useAppStore((s) => s.promptDialog)
@@ -73,6 +76,7 @@ export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWork
       {preferencesDialogOpen && <PreferencesDialog listFonts={listFonts} windowFrame={windowFrame} onCommand={onCommand} backups={backups} relay={relay} updates={updates} ai={ai} onClose={closePreferencesDialog} />}
       {shortcutsDialogOpen && <ShortcutsDialog onClose={closeShortcutsDialog} />}
       {environmentDialogOpen && <EnvironmentDialog secrets={secrets} onClose={closeEnvironmentDialog} />}
+      {isTrashOpen && <TrashDialog actions={trash} />}
       <VariablePromptDialog />
       {deleteDataDialog.isOpen && (
         <DeleteDataDialog

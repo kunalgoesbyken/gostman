@@ -32,6 +32,8 @@ The outermost level is **Settings for all collections**, or **Collection setting
 
 **Checks** accumulate: the request's assertions, every folder's and the outermost level's are all checked.
 
+**Notes** keeps a thread of comments on the folder or collection, saved in its `folder.yaml` or `gostman.yaml`; see [Notes](requests-and-responses.md#notes).
+
 **Docs** are shown above the requests of that folder in the generated HTML page; the outermost level's description appears at the top. The text is rendered as Markdown; HTML in it is escaped, never rendered.
 
 ## What is sent

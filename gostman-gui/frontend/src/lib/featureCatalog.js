@@ -3,10 +3,10 @@ export const GROUPS = ['requests', 'data', 'variables', 'testing', 'automation',
 export const PLATFORMS = ['desktop', 'web', 'cli']
 
 export const ACTIONS = {
-  dialog: ['monitors', 'environments', 'cookies', 'network', 'mock', 'capture', 'loadTest', 'runner', 'scan', 'negative', 'import', 'export', 'share', 'preferences', 'shortcuts', 'examples', 'folderSettings', 'git'],
+  dialog: ['monitors', 'environments', 'cookies', 'network', 'mock', 'capture', 'loadTest', 'runner', 'scan', 'negative', 'import', 'export', 'share', 'preferences', 'shortcuts', 'examples', 'folderSettings', 'git', 'trash'],
   command: ['newRequest', 'newFolder', 'generateCode', 'sendSample', 'lintSpec', 'diffSpecs', 'commandPalette', 'workspaceSwitcher', 'aiSettings', 'aiMock'],
   sample: ['collection', 'flow', 'send', 'scan', 'graphql', 'grpc', 'websocket', 'mcp', 'curl', 'binary', 'jwt'],
-  tab: ['auth', 'vars', 'extract', 'tests', 'settings', 'history', 'openTabs'],
+  tab: ['auth', 'vars', 'extract', 'tests', 'settings', 'notes', 'history', 'openTabs'],
   copy: ['cliInit', 'ciInit'],
 }
 
@@ -43,6 +43,8 @@ export const FEATURES = [
   { id: 'export', group: 'data', docs: 'import-export-and-specs#exporting', action: { type: 'dialog', id: 'export' }, icon: 'download', palette: true },
   { id: 'share', group: 'data', docs: 'sharing-and-docs', action: { type: 'dialog', id: 'share' }, icon: 'share-2', palette: true, compare: 3 },
   { id: 'versioned-docs', group: 'data', since: '1.9.0', platforms: ['cli'], docs: 'cli#generated-documentation', icon: 'file-text' },
+  { id: 'notes', group: 'data', since: '1.9.0', docs: 'requests-and-responses#notes', action: { type: 'tab', id: 'notes' }, icon: 'notebook-pen' },
+  { id: 'recently-deleted', group: 'data', since: '1.9.0', docs: 'collections-and-git#recently-deleted', action: { type: 'dialog', id: 'trash' }, icon: 'undo-2', palette: true },
   { id: 'backups', group: 'data', docs: 'preferences-and-shortcuts#backups', action: { type: 'dialog', id: 'preferences' }, icon: 'archive' },
   { id: 'environments', group: 'variables', docs: 'variables#the-environment-table', action: { type: 'dialog', id: 'environments' }, icon: 'globe', palette: true },
   { id: 'scopes', group: 'variables', docs: 'variables#scopes-and-precedence', action: { type: 'tab', id: 'vars' }, icon: 'layers', empty: ['tab:vars'], landing: { group: 'variables', order: 1 } },

@@ -417,7 +417,7 @@ const mockTask = {
     replyLanguageRule(),
     fence('request', describeRequest(source.request)),
     fence('notes', input.text),
-    fence('captured-response', describeResponse(source.response, input.includeValues)),
+    ...(source.response ? [fence('captured-response', describeResponse(source.response, input.includeValues))] : []),
   ),
   parse: (text, source) => {
     const proposed = objectsIn(parseModelObject(text).examples, MOCK_EXAMPLE_LIMIT).map(mockExample).filter(Boolean)

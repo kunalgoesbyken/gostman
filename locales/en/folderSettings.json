@@ -14,7 +14,8 @@
       "vars": "Vars",
       "script": "Script",
       "tests": "Checks",
-      "docs": "Docs"
+      "docs": "Docs",
+      "notes": "Notes"
     },
     "more": "More",
     "moreHint": "More settings",

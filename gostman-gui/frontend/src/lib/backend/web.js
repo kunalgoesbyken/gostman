@@ -30,6 +30,7 @@ const EXPAND = 'expand=1'
 const OPENAPI_PAGE_SIZE = 200
 const HTTP_PAYLOAD_TOO_LARGE = 413
 const DATA_KEY = 'gostman-data'
+const TRASH_KEY = 'gostman-trash'
 const DAMAGED_DATA_PREFIX = 'gostman-data-damaged-'
 const LEGACY_KEYS = {
   requests: 'gostman_requests',
@@ -59,7 +60,7 @@ function openStorage() {
 
 const storage = openStorage()
 const storageGate = createStorageGate()
-const records = webRecords(storage, [DATA_KEY, TAB_DRAFTS_KEY])
+const records = webRecords(storage, [DATA_KEY, TAB_DRAFTS_KEY, TRASH_KEY])
 const dataChannel = typeof BroadcastChannel === 'function' ? new BroadcastChannel(DATA_KEY) : null
 let damageNotice = ''
 let cachedDocument = null
@@ -332,7 +333,7 @@ async function authorize(config, variables) {
   return { code, issuer, codeVerifier: started.codeVerifier, redirectUri: started.redirectUri }
 }
 
-const isStoredData = (key) => key === DATA_KEY || key === TAB_DRAFTS_KEY || key.startsWith(DAMAGED_DATA_PREFIX)
+const isStoredData = (key) => key === DATA_KEY || key === TAB_DRAFTS_KEY || key === TRASH_KEY || key.startsWith(DAMAGED_DATA_PREFIX)
 
 async function clearStoredData() {
   cachedDocument = null
@@ -354,6 +355,11 @@ const tabDrafts = {
   read: readText,
   write: (key, text) => records().then((target) => target.write(key, text)),
   remove: (key) => records().then((target) => target.remove(key)),
+}
+
+const trash = {
+  read: () => readText(TRASH_KEY),
+  write: (text) => writeText(TRASH_KEY, text),
 }
 
 async function saveFile(name, base64, mime) {
@@ -400,6 +406,7 @@ export const webBackend = {
   shareOrder,
   saveCookies,
   tabDrafts,
+  trash,
   network: null,
   ai: webAi,
   mock: null,

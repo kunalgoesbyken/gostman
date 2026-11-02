@@ -80,6 +80,7 @@ const DEFAULT_REQUEST = {
   socketProtocol: '',
   socketMessages: '',
   vars: '{}',
+  notes: '',
   timestamp: '',
   sortOrder: 0,
 }

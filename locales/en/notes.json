@@ -1,0 +1,16 @@
+{
+  "notes": {
+    "empty": "No notes yet.",
+    "secretHint": "Notes are saved in plain text and shared with the workspace. Do not paste secrets.",
+    "looksLikeCredential": "This looks like a credential. Notes are saved as plain text, in the folder's files and in exports.",
+    "inputLabel": "New note",
+    "inputPlaceholder": "Write a note for your team",
+    "add": "Add note",
+    "anonymous": "Unknown",
+    "resolve": "Resolve",
+    "reopen": "Reopen",
+    "resolved": "Resolved",
+    "delete": "Delete note",
+    "listLabel": "Notes"
+  }
+}

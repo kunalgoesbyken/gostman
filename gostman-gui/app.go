@@ -120,6 +120,7 @@ type Request struct {
 	SocketProtocol   string         `json:"socketProtocol"`
 	SocketMessages   string         `json:"socketMessages"`
 	Vars             string         `json:"vars"`
+	Notes            string         `json:"notes"`
 	Timestamp        string         `json:"timestamp"`
 	SortOrder        int64          `json:"sortOrder"`
 }
@@ -329,7 +330,7 @@ func resetData() error {
 	if err := forgetBackups(); err != nil {
 		return err
 	}
-	if err := removeIfPresent(filepath.Join(appFolder, mockAppDataFile), filepath.Join(appFolder, captureAppDataFile)); err != nil {
+	if err := removeIfPresent(filepath.Join(appFolder, mockAppDataFile), filepath.Join(appFolder, captureAppDataFile), trashAppDataPath()); err != nil {
 		return err
 	}
 	return writeData(SavedData{})

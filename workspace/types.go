@@ -36,6 +36,7 @@ type Request struct {
 	SocketProtocol   string         `json:"socketProtocol"`
 	SocketMessages   string         `json:"socketMessages"`
 	Vars             string         `json:"vars"`
+	Notes            string         `json:"notes"`
 	Timestamp        string         `json:"timestamp"`
 	SortOrder        int64          `json:"sortOrder"`
 }
@@ -48,6 +49,7 @@ type Settings struct {
 	PostScript      string      `json:"postScript"`
 	Assertions      string      `json:"assertions"`
 	ScriptTimeoutMs int64       `json:"scriptTimeoutMs,omitempty"`
+	Notes           string      `json:"notes,omitempty"`
 }
 
 type Folder struct {
