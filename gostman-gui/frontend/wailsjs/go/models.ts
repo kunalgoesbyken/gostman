@@ -55,6 +55,283 @@ export namespace ai {
 
 export namespace capture {
 	
+	export class Answer {
+	    status?: number;
+	    headers?: mock.Header[];
+	    body?: string;
+	    bodyEncoding?: string;
+	    contentType?: string;
+	    file?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Answer(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.status = source["status"];
+	        this.headers = this.convertValues(source["headers"], mock.Header);
+	        this.body = source["body"];
+	        this.bodyEncoding = source["bodyEncoding"];
+	        this.contentType = source["contentType"];
+	        this.file = source["file"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class BodyEdit {
+	    find?: string;
+	    replace?: string;
+	    regex?: boolean;
+	    path?: string;
+	    value?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new BodyEdit(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.find = source["find"];
+	        this.replace = source["replace"];
+	        this.regex = source["regex"];
+	        this.path = source["path"];
+	        this.value = source["value"];
+	    }
+	}
+	export class Throttle {
+	    latencyMs?: number;
+	    downloadKBps?: number;
+	    uploadKBps?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Throttle(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.latencyMs = source["latencyMs"];
+	        this.downloadKBps = source["downloadKBps"];
+	        this.uploadKBps = source["uploadKBps"];
+	    }
+	}
+	export class Edit {
+	    setHeaders?: mock.Header[];
+	    removeHeaders?: string[];
+	    body?: BodyEdit[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Edit(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.setHeaders = this.convertValues(source["setHeaders"], mock.Header);
+	        this.removeHeaders = source["removeHeaders"];
+	        this.body = this.convertValues(source["body"], BodyEdit);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Match {
+	    method?: string;
+	    host?: string;
+	    path?: string;
+	    pathRegex?: string;
+	    conditions?: mock.Condition[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Match(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.method = source["method"];
+	        this.host = source["host"];
+	        this.path = source["path"];
+	        this.pathRegex = source["pathRegex"];
+	        this.conditions = this.convertValues(source["conditions"], mock.Condition);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Rule {
+	    id: string;
+	    name?: string;
+	    disabled?: boolean;
+	    match: Match;
+	    request: Edit;
+	    response: Edit;
+	    mapRemote?: string;
+	    answer?: Answer;
+	    delayMs?: number;
+	    delayMaxMs?: number;
+	    fault: mock.Fault;
+	    throttle: Throttle;
+	    break?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Rule(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.disabled = source["disabled"];
+	        this.match = this.convertValues(source["match"], Match);
+	        this.request = this.convertValues(source["request"], Edit);
+	        this.response = this.convertValues(source["response"], Edit);
+	        this.mapRemote = source["mapRemote"];
+	        this.answer = this.convertValues(source["answer"], Answer);
+	        this.delayMs = source["delayMs"];
+	        this.delayMaxMs = source["delayMaxMs"];
+	        this.fault = this.convertValues(source["fault"], mock.Fault);
+	        this.throttle = this.convertValues(source["throttle"], Throttle);
+	        this.break = source["break"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Config {
+	    rules: Rule[];
+	    breakSeconds?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Config(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.rules = this.convertValues(source["rules"], Rule);
+	        this.breakSeconds = source["breakSeconds"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Decision {
+	    drop: boolean;
+	    method: string;
+	    url: string;
+	    status: number;
+	    headers: engine.HeaderEntry[];
+	    body: string;
+	    bodyEncoding: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Decision(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.drop = source["drop"];
+	        this.method = source["method"];
+	        this.url = source["url"];
+	        this.status = source["status"];
+	        this.headers = this.convertValues(source["headers"], engine.HeaderEntry);
+	        this.body = source["body"];
+	        this.bodyEncoding = source["bodyEncoding"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
 	export class Message {
 	    headers: engine.HeaderEntry[];
 	    body: string;
@@ -109,6 +386,8 @@ export namespace capture {
 	    upgraded: boolean;
 	    interrupted: boolean;
 	    error: string;
+	    rules?: string[];
+	    breakpoint?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Exchange(source);
@@ -128,6 +407,60 @@ export namespace capture {
 	        this.upgraded = source["upgraded"];
 	        this.interrupted = source["interrupted"];
 	        this.error = source["error"];
+	        this.rules = source["rules"];
+	        this.breakpoint = source["breakpoint"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Held {
+	    id: number;
+	    phase: string;
+	    // Go type: time
+	    time: any;
+	    rule: string;
+	    // Go type: time
+	    expiresAt: any;
+	    method: string;
+	    url: string;
+	    status: number;
+	    headers: engine.HeaderEntry[];
+	    body: string;
+	    bodyEncoding: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Held(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.phase = source["phase"];
+	        this.time = this.convertValues(source["time"], null);
+	        this.rule = source["rule"];
+	        this.expiresAt = this.convertValues(source["expiresAt"], null);
+	        this.method = source["method"];
+	        this.url = source["url"];
+	        this.status = source["status"];
+	        this.headers = this.convertValues(source["headers"], engine.HeaderEntry);
+	        this.body = source["body"];
+	        this.bodyEncoding = source["bodyEncoding"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -149,9 +482,13 @@ export namespace capture {
 		}
 	}
 	
+	
+	
 	export class Settings {
 	    upstream: string;
 	    port: number;
+	    rules: Rule[];
+	    breakSeconds: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Settings(source);
@@ -161,7 +498,27 @@ export namespace capture {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.upstream = source["upstream"];
 	        this.port = source["port"];
+	        this.rules = this.convertValues(source["rules"], Rule);
+	        this.breakSeconds = source["breakSeconds"];
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 
 }

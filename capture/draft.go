@@ -183,3 +183,23 @@ func (e Exchange) Draft() (Draft, error) {
 		Incomplete: e.Request.Truncated,
 	}, nil
 }
+
+func (e Exchange) MockRule() (mock.Rule, bool) {
+	if !e.hasWholeResponse() || e.Response.BodyEncoding == engine.EncodingBase64 {
+		return mock.Rule{}, false
+	}
+	headers := []mock.Header{}
+	for _, header := range e.Response.keptHeaders(slices.Concat(privateHeaders, derivedHeaders, []string{"content-length", "date", "server", "transfer-encoding"})) {
+		headers = append(headers, mock.Header(header))
+	}
+	path := withoutQuery(e.Path)
+	return mock.Rule{
+		ID:      rand.Text(),
+		Name:    e.Method + " " + path,
+		Method:  e.Method,
+		Path:    path,
+		Status:  e.Status,
+		Headers: headers,
+		Body:    e.Response.Body,
+	}, true
+}

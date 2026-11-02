@@ -9,8 +9,11 @@ import (
 const DefaultPort = 4020
 
 type Settings struct {
-	Upstream string `json:"upstream"`
-	Port     int    `json:"port"`
+	Upstream     string `json:"upstream"`
+	Port         int    `json:"port"`
+	Rules        []Rule `json:"rules"`
+	BreakSeconds int    `json:"breakSeconds"`
+	FilesRoot    string `json:"-"`
 }
 
 type Message struct {
@@ -35,6 +38,8 @@ type Exchange struct {
 	Upgraded    bool      `json:"upgraded"`
 	Interrupted bool      `json:"interrupted"`
 	Error       string    `json:"error"`
+	Rules       []string  `json:"rules,omitempty"`
+	Breakpoint  string    `json:"breakpoint,omitempty"`
 }
 
 func (e Exchange) Summary() Exchange {

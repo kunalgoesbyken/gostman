@@ -340,6 +340,15 @@ capture
   --folder <name>       top-level workspace folder to save into
                         Authorization, Cookie and Proxy-Authorization request
                         headers are never saved
+  --rules <file>        apply capture rules from a YAML file: rewrite headers
+                        and bodies, send a path to another host, answer from a
+                        file, add delay, errors or resets, limit bandwidth
+                        (default: .gostman/capture.yaml of --workspace). Files
+                        an answer reads must sit next to the rules file
+  --har <file>          on exit, write the captured exchanges as a HAR 1.2 file;
+                        Authorization, Cookie and Set-Cookie values show as ***
+
+  Rules with breakpoints need the desktop app and are refused here.
 
 relay
   Let the Gostman web app send its requests from this computer instead of the

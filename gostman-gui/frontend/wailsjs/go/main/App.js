@@ -50,6 +50,10 @@ export function CancelRequest(arg1) {
   return window['go']['main']['App']['CancelRequest'](arg1);
 }
 
+export function CaptureConfig() {
+  return window['go']['main']['App']['CaptureConfig']();
+}
+
 export function CaptureStatus() {
   return window['go']['main']['App']['CaptureStatus']();
 }
@@ -60,6 +64,14 @@ export function CapturedDetails(arg1) {
 
 export function CapturedExchanges() {
   return window['go']['main']['App']['CapturedExchanges']();
+}
+
+export function CapturedHAR(arg1) {
+  return window['go']['main']['App']['CapturedHAR'](arg1);
+}
+
+export function CapturedMockRule(arg1) {
+  return window['go']['main']['App']['CapturedMockRule'](arg1);
 }
 
 export function ClearCaptured() {
@@ -102,8 +114,20 @@ export function DiscoverMcpAuthorization(arg1) {
   return window['go']['main']['App']['DiscoverMcpAuthorization'](arg1);
 }
 
+export function DropHeld(arg1) {
+  return window['go']['main']['App']['DropHeld'](arg1);
+}
+
 export function ExpandTexts(arg1, arg2) {
   return window['go']['main']['App']['ExpandTexts'](arg1, arg2);
+}
+
+export function ExportCaptureRules(arg1) {
+  return window['go']['main']['App']['ExportCaptureRules'](arg1);
+}
+
+export function ExportMockRules(arg1) {
+  return window['go']['main']['App']['ExportMockRules'](arg1);
 }
 
 export function FetchLink(arg1) {
@@ -230,8 +254,20 @@ export function GitVersion(arg1, arg2) {
   return window['go']['main']['App']['GitVersion'](arg1, arg2);
 }
 
+export function HeldExchanges() {
+  return window['go']['main']['App']['HeldExchanges']();
+}
+
 export function Import(arg1) {
   return window['go']['main']['App']['Import'](arg1);
+}
+
+export function ImportCaptureRules(arg1) {
+  return window['go']['main']['App']['ImportCaptureRules'](arg1);
+}
+
+export function ImportMockRules(arg1) {
+  return window['go']['main']['App']['ImportMockRules'](arg1);
 }
 
 export function InstalledFonts() {
@@ -314,6 +350,10 @@ export function PrepareRequest(arg1) {
   return window['go']['main']['App']['PrepareRequest'](arg1);
 }
 
+export function ReleaseHeld(arg1, arg2) {
+  return window['go']['main']['App']['ReleaseHeld'](arg1, arg2);
+}
+
 export function ReloadWorkspace() {
   return window['go']['main']['App']['ReloadWorkspace']();
 }
@@ -340,6 +380,10 @@ export function RevealWorkspace(arg1) {
 
 export function RunLoadTest(arg1, arg2) {
   return window['go']['main']['App']['RunLoadTest'](arg1, arg2);
+}
+
+export function SaveCaptureConfig(arg1) {
+  return window['go']['main']['App']['SaveCaptureConfig'](arg1);
 }
 
 export function SaveCollectionPassphrase(arg1, arg2, arg3) {

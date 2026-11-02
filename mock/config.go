@@ -114,7 +114,7 @@ func SaveConfig(path string, config Config) error {
 	return os.Rename(staging.Name(), path)
 }
 
-func toYAML(config Config) ([]byte, error) {
+func toYAML(config any) ([]byte, error) {
 	encoded, err := json.Marshal(config)
 	if err != nil {
 		return nil, err
@@ -126,7 +126,7 @@ func toYAML(config Config) ([]byte, error) {
 	return yaml.Marshal(generic)
 }
 
-func fromYAML(data []byte, config *Config) error {
+func fromYAML(data []byte, config any) error {
 	var generic any
 	if err := yaml.Unmarshal(data, &generic); err != nil {
 		return err

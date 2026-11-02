@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"sync"
 
@@ -24,6 +25,7 @@ type collector struct {
 	seen     map[string]bool
 	captured int
 	saved    int
+	journal  capture.Journal
 }
 
 func topLevelFolder(files *workspace.Workspace, name string) (string, error) {
@@ -103,13 +105,21 @@ func (c *collector) keep(exchange capture.Exchange) string {
 	return savedNote(draft)
 }
 
+func firedNote(exchange capture.Exchange) string {
+	if len(exchange.Rules) == 0 {
+		return ""
+	}
+	return "  [rules: " + strings.Join(exchange.Rules, ", ") + "]"
+}
+
 func (c *collector) record(exchange capture.Exchange) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.captured++
+	c.journal.Add(exchange)
 	fmt.Fprintf(c.stdout, "%s  %-7s %-28s %3d  %d ms  %d B  %s\n",
 		exchange.Time.Format("15:04:05"), exchange.Method, exchange.Path, exchange.Status,
-		exchange.DurationMs, exchange.Response.Size, c.keep(exchange))
+		exchange.DurationMs, exchange.Response.Size, c.keep(exchange)+firedNote(exchange))
 }
 
 func (c *collector) summary() string {
@@ -121,19 +131,59 @@ func (c *collector) summary() string {
 	return fmt.Sprintf("Captured %d exchanges, saved %d new requests to %s. Bodies are saved as captured: check them for tokens before sharing.", c.captured, c.saved, c.files.Root())
 }
 
-func serveCapture(settings capture.Settings, collecting *collector, stdout io.Writer) error {
-	server, err := capture.Start(settings, engine.Policy{}.Transport(false), collecting.record)
+func (c *collector) writeHAR(path string) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	data, err := capture.HAR(c.journal.All(), currentVersion())
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(stdout, "Forwarding %s to %s. Point your app at the first address. Press Ctrl+C to stop.\n\n", server.Address(), server.Upstream())
+	return os.WriteFile(path, data, 0o644)
+}
+
+func serveCapture(settings capture.Settings, collecting *collector, harPath string, stdout io.Writer) error {
+	server, err := capture.Start(settings, engine.Policy{}.Transport(false), capture.Hooks{Exchange: collecting.record})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(stdout, "Forwarding %s to %s. Point your app at the first address. Press Ctrl+C to stop.\n", server.Address(), server.Upstream())
+	if len(settings.Rules) > 0 {
+		fmt.Fprintf(stdout, "%d capture rules loaded.\n", len(settings.Rules))
+	}
+	fmt.Fprintln(stdout)
 
 	interrupted, release := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer release()
 	<-interrupted.Done()
 	err = server.Stop()
 	fmt.Fprintf(stdout, "\n%s\n", collecting.summary())
+	if harPath != "" && err == nil {
+		if err = collecting.writeHAR(harPath); err == nil {
+			fmt.Fprintf(stdout, "Wrote %s.\n", harPath)
+		}
+	}
 	return err
+}
+
+func rulesFor(rulesPath, root string) ([]capture.Rule, string, error) {
+	switch {
+	case rulesPath != "":
+		config, err := capture.LoadConfig(rulesPath)
+		return config.Rules, filepath.Dir(rulesPath), err
+	case root != "":
+		config, err := capture.LoadConfig(filepath.Join(root, capture.ConfigFileName))
+		return config.Rules, root, err
+	}
+	return nil, "", nil
+}
+
+func breaksAnywhere(rules []capture.Rule) bool {
+	for _, rule := range rules {
+		if !rule.Disabled && rule.Break != "" {
+			return true
+		}
+	}
+	return false
 }
 
 func captureCommand(arguments []string, stdout, stderr *os.File) int {
@@ -143,6 +193,8 @@ func captureCommand(arguments []string, stdout, stderr *os.File) int {
 	port := flags.Int("port", capture.DefaultPort, "")
 	root := flags.String("workspace", "", "")
 	folder := flags.String("folder", "", "")
+	rulesPath := flags.String("rules", "", "")
+	harPath := flags.String("har", "", "")
 	positional, err := parseInterspersed(flags, arguments)
 	switch {
 	case err != nil:
@@ -158,7 +210,15 @@ func captureCommand(arguments []string, stdout, stderr *os.File) int {
 	if err != nil {
 		return complain(stderr, err)
 	}
-	if err := serveCapture(capture.Settings{Upstream: *upstream, Port: *port}, collecting, stdout); err != nil {
+	rules, filesRoot, err := rulesFor(*rulesPath, *root)
+	switch {
+	case err != nil:
+		return complain(stderr, err)
+	case breaksAnywhere(rules):
+		return misuse(stderr, "breakpoints hold an exchange until you release it in the desktop app; turn them off to capture from the command line")
+	}
+	settings := capture.Settings{Upstream: *upstream, Port: *port, Rules: rules, FilesRoot: filesRoot}
+	if err := serveCapture(settings, collecting, *harPath, stdout); err != nil {
 		return complain(stderr, err)
 	}
 	return exitPassed

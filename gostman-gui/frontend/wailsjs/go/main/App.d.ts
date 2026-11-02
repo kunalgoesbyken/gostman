@@ -4,13 +4,13 @@ import {ai} from '../models';
 import {main} from '../models';
 import {engine} from '../models';
 import {capture} from '../models';
+import {mock} from '../models';
 import {rpc} from '../models';
 import {mcpclient} from '../models';
 import {deeplink} from '../models';
 import {gitutil} from '../models';
 import {importer} from '../models';
 import {lint} from '../models';
-import {mock} from '../models';
 import {openapi} from '../models';
 import {secrets} from '../models';
 import {loadtest} from '../models';
@@ -41,11 +41,17 @@ export function CancelAuthorization():Promise<void>;
 
 export function CancelRequest(arg1:string):Promise<void>;
 
+export function CaptureConfig():Promise<capture.Config>;
+
 export function CaptureStatus():Promise<main.CaptureState>;
 
 export function CapturedDetails(arg1:Array<number>):Promise<Array<capture.Exchange>>;
 
 export function CapturedExchanges():Promise<Array<capture.Exchange>>;
+
+export function CapturedHAR(arg1:Array<number>):Promise<string>;
+
+export function CapturedMockRule(arg1:number):Promise<mock.Rule>;
 
 export function ClearCaptured():Promise<void>;
 
@@ -67,7 +73,13 @@ export function DiscoverIssuer(arg1:engine.DiscoveryQuery):Promise<engine.Discov
 
 export function DiscoverMcpAuthorization(arg1:mcpclient.AuthQuery):Promise<mcpclient.AuthPlan>;
 
+export function DropHeld(arg1:number):Promise<void>;
+
 export function ExpandTexts(arg1:Array<string>,arg2:string):Promise<Array<string>>;
+
+export function ExportCaptureRules(arg1:Array<capture.Rule>):Promise<string>;
+
+export function ExportMockRules(arg1:Array<mock.Rule>):Promise<string>;
 
 export function FetchLink(arg1:string):Promise<deeplink.Reply>;
 
@@ -131,7 +143,13 @@ export function GitUnstage(arg1:Array<string>):Promise<void>;
 
 export function GitVersion(arg1:string,arg2:string):Promise<gitutil.Version>;
 
+export function HeldExchanges():Promise<Array<capture.Held>>;
+
 export function Import(arg1:importer.Query):Promise<importer.Reply>;
+
+export function ImportCaptureRules(arg1:string):Promise<Array<capture.Rule>>;
+
+export function ImportMockRules(arg1:string):Promise<Array<mock.Rule>>;
 
 export function InstalledFonts():Promise<Array<string>>;
 
@@ -173,6 +191,8 @@ export function PinWorkspace(arg1:string,arg2:boolean):Promise<main.WorkspaceSta
 
 export function PrepareRequest(arg1:engine.Request):Promise<engine.Prepared>;
 
+export function ReleaseHeld(arg1:number,arg2:capture.Decision):Promise<void>;
+
 export function ReloadWorkspace():Promise<main.WorkspaceStatus>;
 
 export function RenameWorkspace(arg1:string,arg2:string):Promise<main.WorkspaceStatus>;
@@ -186,6 +206,8 @@ export function RestoreBackup(arg1:string):Promise<void>;
 export function RevealWorkspace(arg1:string):Promise<void>;
 
 export function RunLoadTest(arg1:engine.Request,arg2:loadtest.Config):Promise<loadtest.Report>;
+
+export function SaveCaptureConfig(arg1:capture.Config):Promise<void>;
 
 export function SaveCollectionPassphrase(arg1:string,arg2:string,arg3:string):Promise<void>;
 

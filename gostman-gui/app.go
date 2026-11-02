@@ -329,7 +329,7 @@ func resetData() error {
 	if err := forgetBackups(); err != nil {
 		return err
 	}
-	if err := removeIfPresent(filepath.Join(appFolder, mockAppDataFile)); err != nil {
+	if err := removeIfPresent(filepath.Join(appFolder, mockAppDataFile), filepath.Join(appFolder, captureAppDataFile)); err != nil {
 		return err
 	}
 	return writeData(SavedData{})

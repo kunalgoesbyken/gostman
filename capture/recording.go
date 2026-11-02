@@ -3,6 +3,7 @@ package capture
 import (
 	"context"
 	"net/http"
+	"net/url"
 	"sync"
 	"time"
 )
@@ -18,6 +19,9 @@ type recording struct {
 	received keptBody
 	deliver  func(Exchange)
 	once     sync.Once
+	plan     *plan
+	target   *url.URL
+	override *url.URL
 }
 
 func newRecording(r *http.Request, deliver func(Exchange)) *recording {
@@ -27,6 +31,18 @@ func newRecording(r *http.Request, deliver func(Exchange)) *recording {
 		asked:    r.Header.Clone(),
 		deliver:  deliver,
 	}
+}
+
+func (r *recording) reseed(request *http.Request) {
+	r.asked = request.Header.Clone()
+	r.exchange.Method = request.Method
+}
+
+func (r *recording) note(breakpoint string) {
+	if r.exchange.Breakpoint != "" {
+		breakpoint = r.exchange.Breakpoint + "; " + breakpoint
+	}
+	r.exchange.Breakpoint = breakpoint
 }
 
 func (r *recording) attach(ctx context.Context) context.Context {

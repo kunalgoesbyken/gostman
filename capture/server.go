@@ -12,9 +12,11 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/kunalgoesbyken/gostman/loopback"
+	"github.com/kunalgoesbyken/gostman/mock"
 )
 
 const (
@@ -25,17 +27,31 @@ const (
 
 	refusedHost     = "Gostman capture only answers requests addressed to localhost."
 	cancelledReason = "the exchange was cancelled before the upstream answered"
+	droppedReason   = "dropped at a breakpoint"
 )
 
 var upstreamSchemes = map[string]bool{"http": true, "https": true}
 
+var errDropped = errors.New(droppedReason)
+
+type Hooks struct {
+	Exchange func(Exchange)
+	Held     func(Held)
+	Settled  func(int64)
+}
+
 type Server struct {
-	listener   net.Listener
-	server     *http.Server
-	proxy      *httputil.ReverseProxy
-	upstream   *url.URL
-	onExchange func(Exchange)
-	cancel     context.CancelFunc
+	listener     net.Listener
+	server       *http.Server
+	proxy        *httputil.ReverseProxy
+	upstream     *url.URL
+	hooks        Hooks
+	cancel       context.CancelFunc
+	rules        atomic.Pointer[Ruleset]
+	root         string
+	dice         *mock.Dice
+	holds        holds
+	breakSeconds int
 }
 
 type steadyWriter struct {
@@ -74,8 +90,12 @@ func (s Settings) target() (*url.URL, error) {
 	return upstream, nil
 }
 
-func Start(settings Settings, transport http.RoundTripper, onExchange func(Exchange)) (*Server, error) {
+func Start(settings Settings, transport http.RoundTripper, hooks Hooks) (*Server, error) {
 	upstream, err := settings.target()
+	if err != nil {
+		return nil, err
+	}
+	rules, err := Compile(settings.Rules, settings.FilesRoot != "")
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +106,16 @@ func Start(settings Settings, transport http.RoundTripper, onExchange func(Excha
 
 	lifetime, cancel := context.WithCancel(context.Background())
 	silent := log.New(io.Discard, "", 0)
-	started := &Server{listener: listener, upstream: upstream, onExchange: onExchange, cancel: cancel}
+	started := &Server{
+		listener:     listener,
+		upstream:     upstream,
+		hooks:        hooks,
+		cancel:       cancel,
+		root:         settings.FilesRoot,
+		breakSeconds: settings.BreakSeconds,
+		dice:         mock.NewDice(uint64(time.Now().UnixNano()), uint64(settings.Port)),
+	}
+	started.rules.Store(rules)
 	started.proxy = &httputil.ReverseProxy{
 		Rewrite:        started.forward,
 		Transport:      transport,
@@ -103,6 +132,16 @@ func Start(settings Settings, transport http.RoundTripper, onExchange func(Excha
 	}
 	go started.server.Serve(listener)
 	return started, nil
+}
+
+func (s *Server) UpdateRules(rules []Rule, breakSeconds int) error {
+	compiled, err := Compile(rules, s.root != "")
+	if err != nil {
+		return err
+	}
+	s.rules.Store(compiled)
+	s.breakSeconds = breakSeconds
+	return nil
 }
 
 func (s *Server) Address() string {
@@ -135,6 +174,10 @@ func isLocalOrigin(origin string) bool {
 	return err == nil && parsed.Host != "" && loopback.IsHost(parsed.Host)
 }
 
+func (s *Server) describe(r *http.Request) callInfo {
+	return callInfo{method: r.Method, host: s.upstream.Host, path: r.URL.Path, query: r.URL.Query(), header: r.Header}
+}
+
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !loopback.IsHost(r.Host) {
 		http.Error(w, refusedHost, http.StatusForbidden)
@@ -145,21 +188,50 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	control := http.NewResponseController(w)
-	take := newRecording(r, s.onExchange)
+	steady := steadyWriter{w, control}
+	take := newRecording(r, s.hooks.Exchange)
 	defer take.finish()
 	defer control.SetWriteDeadline(time.Time{})
-	r.Body = observedBody{r.Body, &take.sent}
-	s.proxy.ServeHTTP(steadyWriter{w, control}, r.WithContext(take.attach(r.Context())))
+	r = r.WithContext(take.attach(r.Context()))
+	take.plan = s.rules.Load().plan(s.describe(r), s.dice)
+	take.exchange.Rules = take.plan.fired
+	if !s.prepare(steady, r, take) {
+		return
+	}
+	take.reseed(r)
+	r.Body = observedBody{slowed(r.Context(), r.Body, take.plan.throttle.UploadKBps), &take.sent}
+	s.proxy.ServeHTTP(steady, r)
+}
+
+func (s *Server) destination(in *http.Request, take *recording) *url.URL {
+	if take.override != nil {
+		return take.override
+	}
+	base := s.upstream
+	if take.target != nil {
+		base = take.target
+	}
+	probe := &httputil.ProxyRequest{In: in, Out: in.Clone(in.Context())}
+	probe.SetURL(base)
+	probe.Out.URL.RawQuery = in.URL.RawQuery
+	return probe.Out.URL
 }
 
 func (s *Server) forward(call *httputil.ProxyRequest) {
-	call.Out.URL.RawQuery = call.In.URL.RawQuery
-	call.SetURL(s.upstream)
-	recordingOf(call.In.Context()).exchange.URL = call.Out.URL.String()
+	take := recordingOf(call.In.Context())
+	target := s.destination(call.In, take)
+	call.Out.URL = target
+	call.Out.Host = ""
+	take.exchange.URL = target.String()
 }
 
 func (s *Server) observe(response *http.Response) error {
 	take := recordingOf(response.Request.Context())
+	if response.StatusCode != http.StatusSwitchingProtocols {
+		if err := s.reshape(response, take); err != nil {
+			return err
+		}
+	}
 	take.answered(response)
 	s.localize(response.Header, take.host)
 	return nil
@@ -167,10 +239,24 @@ func (s *Server) observe(response *http.Response) error {
 
 func (s *Server) refuse(w http.ResponseWriter, r *http.Request, err error) {
 	take := recordingOf(r.Context())
+	if errors.Is(err, errDropped) {
+		take.failed(0, droppedReason)
+		panic(http.ErrAbortHandler)
+	}
 	if errors.Is(r.Context().Err(), context.Canceled) {
 		take.failed(0, cancelledReason)
 		return
 	}
 	take.failed(http.StatusBadGateway, err.Error())
-	http.Error(w, fmt.Sprintf("Gostman capture could not reach %s: %v", s.upstream.Host, err), http.StatusBadGateway)
+	http.Error(w, fmt.Sprintf("Gostman capture could not reach %s: %v", s.destinationHost(take), err), http.StatusBadGateway)
+}
+
+func (s *Server) destinationHost(take *recording) string {
+	if take.override != nil {
+		return take.override.Host
+	}
+	if take.target != nil {
+		return take.target.Host
+	}
+	return s.upstream.Host
 }

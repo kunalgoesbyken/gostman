@@ -43,6 +43,15 @@ func (a *App) SaveMockConfig(config mock.Config) error {
 	return mock.SaveConfig(mockConfigPath(), config)
 }
 
+func (a *App) ExportMockRules(rules []mock.Rule) (string, error) {
+	data, err := mock.ExportRules(rules)
+	return string(data), err
+}
+
+func (a *App) ImportMockRules(text string) ([]mock.Rule, error) {
+	return mock.ImportRules([]byte(text))
+}
+
 func (a *App) MockFromSpec(source openapi.Source) (mock.Spec, error) {
 	return mock.FromSpec(a.ctx, source, openapi.Options{Policy: a.policy(), AllowFiles: true})
 }

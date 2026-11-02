@@ -48,6 +48,47 @@ Each call appears as a row with its time, method, path, status, duration and siz
 
 To save several calls at once, tick their rows (the box in the header ticks every row shown), choose a folder in **Folder to save into** and press **Save selected to folder**. The first choice is a top-level folder named after the API's host, created when needed; you can also pick **Top level** or any existing folder. Each call becomes a request with its response as an example, and repeated calls to the same method and path are saved once. **Clear** empties the list.
 
+## Capture rules
+
+Rules change what the capture does with a call. Every enabled rule whose match fits applies, in the order listed. The first rule that answers locally or injects a failure decides the answer; the others add their header and body edits only when the call is forwarded. The journal lists the names of the rules that fired in each row.
+
+A rule is written in `.gostman/capture.yaml` of a workspace folder, or `capture.yaml` in the app data folder otherwise, and `gostman capture --rules rules.yaml` reads any file with a `rules` list (an export from the app works too). Up to 200 rules.
+
+```yaml
+rules:
+  - id: add-flag
+    name: Turn on the beta flag
+    match:
+      method: GET,POST
+      path: /users/*
+      conditions:
+        - {field: header, name: X-Env, op: equals, value: staging}
+    request:
+      setHeaders: [{key: X-Beta, value: "1"}]
+      removeHeaders: [If-None-Match]
+    response:
+      setHeaders: [{key: Cache-Control, value: no-store}]
+      body:
+        - {path: "$.user.plan", value: '"pro"'}
+        - {find: "http://old.example.com", replace: "https://api.example.com"}
+  - id: stub
+    name: Stub the health check
+    match: {path: /health}
+    answer: {status: 200, body: '{"ok":true}', contentType: application/json}
+  - id: slow-search
+    match: {path: /search*}
+    delayMs: 800
+    throttle: {downloadKBps: 20}
+```
+
+- **Match**: `method` (a comma-separated list), `host` (the upstream host and port; `*` matches any text), `path` (the request path without the query; `*` matches any text), `pathRegex` (a Go regular expression, matched anywhere in the path) and `conditions` on query parameters and headers (`equals`, `contains` or `exists`). A field left out matches everything.
+- **Edit the request or the response**: `setHeaders`, `removeHeaders` and `body` changes, applied in order. A body change is `find` and `replace` (plain text, or a regular expression with `regex: true`, where `$1` in `replace` inserts a group), or `path` and `value` for JSON. A `path` looks like `$.user.name`, `$.items[0].id` or `$.items[*].id`; `value` is read as JSON when it parses (`'"pro"'`, `9`, `true`) and used as text otherwise. A JSON body that is rewritten keeps its values, but its keys come out in alphabetical order. Response bodies are decoded from gzip first; bodies over 2 MB and request bodies with a `Content-Encoding` are left alone.
+- **Map Remote**: `mapRemote: https://staging.example.com` sends the matching call there instead of to the upstream, keeping the path and query.
+- **Map Local**: `answer` replies without contacting the upstream, with a `status`, `headers`, a `body` (`bodyEncoding: base64` for binary) and a `contentType`, or with `file: stubs/users.json`, read from inside the workspace folder (or the folder of the `--rules` file) and refused outside it. Up to 10 MB.
+- **Delay, failure and bandwidth**: `delayMs` (and `delayMaxMs` for a random time in between), `fault` with `percent`, `kind` (`status`, `reset` or `empty`) and `status`, the same as in the [mock server](#examples-and-the-mock-server-desktop), and `throttle` with `latencyMs`, `downloadKBps` and `uploadKBps`.
+- **Breakpoints**: `break: request`, `response` or `both` holds the call in the desktop app. `gostman capture` refuses rules that break, because nothing could release them.
+- Rules from an imported rules file arrive switched off.
+
 - It is a forwarding address for one API, not an intercepting proxy: there is no certificate to install, and an app whose base URL cannot be changed is not captured.
 - `Authorization`, `Cookie` and `Proxy-Authorization` request headers are never saved. Bodies are saved as captured, so check them for tokens before sharing.
 - Only requests from localhost pages are forwarded. On an Android emulator use `adb reverse tcp:4020 tcp:4020`.
