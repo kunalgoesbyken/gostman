@@ -3,6 +3,7 @@ import { ArrowDown, Bot, ArrowUp, CloudDownload, Folder, GitBranch, GitMerge, Hi
 import { Badge } from "./ui/badge"
 import { Button, IconButton } from "./ui/button"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
 import { EmptyState } from "./ui/emptyState"
 import { Notice, PANE_WIDTH, ResizablePane, SectionLabel } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
@@ -18,6 +19,8 @@ import { EDGE_END } from "../hooks/usePaneResize"
 import { GIT_CHANGES_PANE } from "../lib/layout"
 import { cn } from "../lib/utils"
 import { WORKSPACE_TEXT } from "../lib/workspaceText"
+
+const GIT_WINDOW = toolWindow("git", "wide")
 
 const tabOptions = () => [
   { value: TAB_CHANGES, label: TEXT.tabs.changes },
@@ -200,7 +203,7 @@ export function GitPanel({ actions, onTrust }) {
   if (!isOpen) return null
 
   return (
-    <Dialog label={TEXT.title} size="lg" onClose={actions.close} className="h-[42rem] max-w-5xl">
+    <Dialog label={TEXT.title} size="lg" floating={GIT_WINDOW} onClose={actions.close}>
       <DialogHeader onClose={actions.close}>
         <DialogTitle>{TEXT.title}</DialogTitle>
         {state.isRepo && (

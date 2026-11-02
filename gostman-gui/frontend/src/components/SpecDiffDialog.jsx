@@ -2,10 +2,13 @@ import { useRef, useState } from "react"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
 import { Field } from "./ui/field"
 import { Input } from "./ui/input"
 import { localizedText } from "../lib/localized"
 import { SPEC_TEXT } from "../lib/specText"
+
+const SPEC_DIFF_WINDOW = toolWindow("spec-diff", "wide")
 
 const SEVERITIES = [
   { key: "breaking", countKey: "breaking", variant: "serverError" },
@@ -92,7 +95,7 @@ export function SpecDiffDialog({ dialog, actions, onClose }) {
   }
 
   return (
-    <Dialog label={SPEC_TEXT.diffTitle} size="lg" onClose={onClose}>
+    <Dialog label={SPEC_TEXT.diffTitle} size="lg" floating={SPEC_DIFF_WINDOW} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <DialogTitle>{SPEC_TEXT.diffTitle}</DialogTitle>
       </DialogHeader>

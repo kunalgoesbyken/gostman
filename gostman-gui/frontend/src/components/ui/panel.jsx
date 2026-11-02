@@ -1,4 +1,5 @@
 import { RESIZE_CLOSING, RESIZE_IDLE, usePaneResize } from "../../hooks/usePaneResize"
+import { BLOCK_AXIS } from "../../lib/layout"
 import { DIALOG_TEXT } from "../../lib/dialogText"
 import { cn } from "../../lib/utils"
 
@@ -56,17 +57,20 @@ export const SPLIT_LIST = `flex shrink-0 flex-col border-border max-sm:max-h-[40
 
 export const SIDE_PANE = "flex shrink-0 flex-col border-s border-border bg-background max-sm:absolute max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-10 max-sm:z-10 max-sm:w-full max-sm:max-w-none max-sm:border-s-0 max-sm:border-t sm:relative sm:w-[var(--pane-width)]"
 
-const HANDLE_EDGES = { start: "-start-1", end: "-end-1" }
+const INLINE_HANDLE = { box: "inset-y-0 w-2 cursor-col-resize justify-center", line: "h-full w-0.5", edges: { start: "-start-1", end: "-end-1" } }
 
-function PaneResizer({ edge, label, phase, separatorProps, className }) {
+const BLOCK_HANDLE = { box: "inset-x-0 h-2 cursor-row-resize items-center", line: "h-0.5 w-full", edges: { start: "-top-1", end: "-bottom-1" } }
+
+function PaneResizer({ axis, edge, label, phase, separatorProps, className }) {
+  const handle = axis === BLOCK_AXIS ? BLOCK_HANDLE : INLINE_HANDLE
   return (
     <div
       {...separatorProps}
       aria-label={label}
       data-active={phase !== RESIZE_IDLE || undefined}
-      className={cn("group absolute inset-y-0 z-10 flex w-2 cursor-col-resize touch-none justify-center outline-none", HANDLE_EDGES[edge], className)}
+      className={cn("group absolute z-10 flex touch-none outline-none", handle.box, handle.edges[edge], className)}
     >
-      <span className="h-full w-0.5 transition-colors group-hover:bg-ring group-hover:delay-150 group-focus-visible:bg-ring group-data-[active]:bg-ring" />
+      <span className={cn("transition-colors group-hover:bg-ring group-hover:delay-150 group-focus-visible:bg-ring group-data-[active]:bg-ring", handle.line)} />
     </div>
   )
 }
@@ -76,7 +80,7 @@ export function ResizablePane({ as: Tag = "div", pane, edge, label = DIALOG_TEXT
   return (
     <Tag ref={paneRef} data-closing={phase === RESIZE_CLOSING || undefined} style={{ ...style, ...widthStyle }} className={cn("transition-opacity data-[closing]:opacity-50", className)} {...props}>
       {children}
-      <PaneResizer edge={edge} label={label} phase={phase} separatorProps={separatorProps} className={handleClassName} />
+      <PaneResizer axis={pane.axis} edge={edge} label={label} phase={phase} separatorProps={separatorProps} className={handleClassName} />
     </Tag>
   )
 }

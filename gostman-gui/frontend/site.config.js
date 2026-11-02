@@ -104,6 +104,7 @@ const notFoundHtml = (url, stylesheets) => `<!DOCTYPE html>
 <script src="/theme-boot.js"></script>
 <title>Page not found | Gostman</title>
 <meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="icon" href="/favicon.ico" sizes="any">
 ${stylesheets.map((href) => `<link rel="stylesheet" href="${href}">`).join('')}
 <style>

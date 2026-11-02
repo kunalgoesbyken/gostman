@@ -1,9 +1,12 @@
 import { Suspense, useState } from "react"
 import { Button } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
 import { EditorSkeleton } from "./ui/skeleton"
 import { SCHEMA_TEXT } from "../lib/checksText"
 import { schemaText } from "../lib/jsonSchema"
+
+const SCHEMA_WINDOW = toolWindow("schema")
 
 const PRETTY_INDENT = 2
 
@@ -16,7 +19,7 @@ export function SchemaDialog({ value, EditorComponent, onSave, onClose, text: wo
   }
 
   return (
-    <Dialog label={wording.editorTitle} size="lg" onClose={onClose}>
+    <Dialog label={wording.editorTitle} size="lg" floating={SCHEMA_WINDOW} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <DialogTitle>{wording.editorTitle}</DialogTitle>
       </DialogHeader>

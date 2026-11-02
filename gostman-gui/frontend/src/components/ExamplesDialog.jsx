@@ -4,6 +4,7 @@ import { Badge } from "./ui/badge"
 import { Button, IconButton } from "./ui/button"
 import { DataTable } from "./ui/dataTable"
 import { Dialog, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
 import { EmptyState } from "./ui/emptyState"
 import { ResizablePane, SPLIT_LIST, SPLIT_PANES, Toolbar } from "./ui/panel"
 import { EDGE_END } from "../hooks/usePaneResize"
@@ -18,6 +19,8 @@ import { EXAMPLES_TEXT } from "../lib/examplesText"
 import { statusVariant } from "../lib/response"
 import { RESPONSE_TEXT } from "../lib/responseText"
 import { cn } from "../lib/utils"
+
+const EXAMPLES_WINDOW = toolWindow("examples")
 
 const VIEW_BODY = "body"
 const VIEW_HEADERS = "headers"
@@ -150,7 +153,7 @@ export function ExamplesDialog({ request, actions, EditorComponent }) {
   const defaultId = servedByDefault(examples)?.id
 
   return (
-    <Dialog label={EXAMPLES_TEXT.title} size="lg" onClose={actions.close}>
+    <Dialog label={EXAMPLES_TEXT.title} size="lg" floating={EXAMPLES_WINDOW} onClose={actions.close}>
       <DialogHeader onClose={actions.close}>
         <DialogTitle>{EXAMPLES_TEXT.title}</DialogTitle>
         <TabCount>{examples.length}</TabCount>

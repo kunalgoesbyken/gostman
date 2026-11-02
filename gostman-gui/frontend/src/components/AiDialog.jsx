@@ -4,6 +4,7 @@ import { BrandIcon } from "./ui/brandIcon"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
 import { Notice, SectionLabel } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { Textarea } from "./ui/textarea"
@@ -16,6 +17,8 @@ import {
 } from "../lib/ai/session"
 import { SCRIPT_POST, SCRIPT_PRE, taskById } from "../lib/ai/tasks"
 import { cn } from "../lib/utils"
+
+const AI_WINDOW = toolWindow("ai")
 
 const SCRIPT_KINDS = [
   { value: SCRIPT_PRE, get label() { return AI_TEXT.preRequest } },
@@ -207,7 +210,7 @@ export function AiDialog({ actions }) {
   const provider = providerById(settings.provider)
 
   return (
-    <Dialog label={task.text.label} size="lg" onClose={actions.cancel}>
+    <Dialog label={task.text.label} size="lg" floating={AI_WINDOW} onClose={actions.cancel}>
       <DialogHeader onClose={actions.cancel}>
         <DialogTitle>{task.text.label}</DialogTitle>
         <span className="ms-auto me-2 flex shrink-0 items-center gap-1 text-xs max-sm:hidden text-muted-foreground">

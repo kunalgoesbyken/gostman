@@ -6,11 +6,16 @@ import { CopyTextButton } from "./CopyTextButton"
 import { LearnMore } from "./LearnMore"
 import { featureBlurb, featureById, featureToolLabel, webAlternative } from "../lib/featureIndex"
 import { FEATURES_TEXT as TEXT } from "../lib/featuresText"
+import { downloadFor, downloadUrl } from "./landing/downloads"
+import { useBrowserOs } from "../hooks/useBrowserOs"
 import { RELEASES_URL } from "../lib/siteLinks"
 
 function DownloadLink() {
+  const os = useBrowserOs()
+  const download = downloadFor(os)
+  const link = download ? { href: downloadUrl(download) } : { href: RELEASES_URL, target: "_blank", rel: "noopener noreferrer" }
   return (
-    <a href={RELEASES_URL} target="_blank" rel="noopener noreferrer" className={buttonVariants({ size: "sm" })}>
+    <a {...link} className={buttonVariants({ size: "sm" })}>
       <MonitorDown />
       {TEXT.getDesktop}
     </a>

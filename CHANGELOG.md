@@ -4,6 +4,19 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.11.3] - 2026-11-03
+
+### Added
+
+- The Problems panel under the spec editor can be resized by dragging its top edge or with the arrow keys; double-click resets it.
+- The spec viewer, spec diff, Git, response compare, AI, examples, schema, secrets and other large dialogs can be moved and resized like Preferences, with a grab cursor on the title bar.
+
+### Fixed
+
+- **Get the desktop app** downloads the installer for your system directly instead of opening GitHub.
+- The browser tab icon is a vector, so it stays sharp on high-DPI screens.
+- Opening and closing the sidebar no longer re-renders the whole workspace, and expanding folders no longer rewrites the stored workspace on every click.
+
 ## [1.11.2] - 2026-11-03
 
 ### Fixed

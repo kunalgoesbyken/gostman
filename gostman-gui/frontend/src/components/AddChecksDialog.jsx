@@ -2,11 +2,14 @@ import { useMemo, useState } from "react"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
 import { selectActiveTab, useAppStore } from "../store/appStore"
 import { RESPONSE_CHECKS_TEXT } from "../lib/checksText"
 import { schemaText } from "../lib/jsonSchema"
 import { activeAssertions, addChecks, exampleProposals, newProposals, proposeChecks } from "../lib/responseChecks"
 import { SCHEMA_OPERATOR, titleOf } from "../lib/scripting/assertions"
+
+const ADD_CHECKS_WINDOW = toolWindow("add-checks")
 
 const PRETTY_INDENT = 2
 
@@ -49,7 +52,7 @@ export function AddChecksDialog({ response, onClose }) {
   }
 
   return (
-    <Dialog label={RESPONSE_CHECKS_TEXT.title} size="lg" className="h-auto sm:max-h-[36rem]" onClose={onClose}>
+    <Dialog label={RESPONSE_CHECKS_TEXT.title} size="lg" floating={ADD_CHECKS_WINDOW} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <DialogTitle>{RESPONSE_CHECKS_TEXT.title}</DialogTitle>
       </DialogHeader>

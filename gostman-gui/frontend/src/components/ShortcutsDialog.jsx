@@ -3,6 +3,7 @@ import { Pencil, RotateCcw, X } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button, IconButton } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
 import { SectionLabel } from "./ui/panel"
 import { useChordCapture } from "../hooks/useChordCapture"
 import { chordLabel, modifiersPrefix } from "../lib/chords"
@@ -11,6 +12,8 @@ import { updatePreferences, usePreferences } from "../lib/preferences"
 import { MOVING_KEYS, SHORTCUT_GROUPS, checkChord, shortcutRows, withChord, withoutChord } from "../lib/shortcuts"
 import { useAiEnabled } from "../lib/ai/session"
 import { SHORTCUT_TEXT } from "../lib/shortcutText"
+
+const SHORTCUTS_WINDOW = toolWindow("shortcuts", "compact")
 
 const CAPTURE_PLACEHOLDER = "…"
 const { moving: MOVING_TEXT } = SHORTCUT_TEXT
@@ -126,7 +129,7 @@ export function ShortcutsDialog({ onClose }) {
   }
 
   return (
-    <Dialog label={SHORTCUT_TEXT.title} className="max-w-xl" onClose={onClose}>
+    <Dialog label={SHORTCUT_TEXT.title} floating={SHORTCUTS_WINDOW} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <DialogTitle>{SHORTCUT_TEXT.title}</DialogTitle>
       </DialogHeader>

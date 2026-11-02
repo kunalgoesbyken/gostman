@@ -1,11 +1,14 @@
 import { Button } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
 import { useFeatureAccess } from "../lib/featureAccess"
 import { featureBlurb, featureById, featureTitle } from "../lib/featureIndex"
 import { FEATURES_TEXT as TEXT } from "../lib/featuresText"
 import { latestRelease, releasesBetween } from "../lib/releaseNotes"
 import { APP_VERSION } from "../lib/appVersion"
 import { useAppStore } from "../store/appStore"
+
+const WHATS_NEW_WINDOW = toolWindow("whats-new", "compact")
 
 function Release({ release, canTry, onTry }) {
   const features = release.ids.map(featureById).filter(Boolean)
@@ -49,7 +52,7 @@ export function WhatsNewDialog({ onClose }) {
   }
 
   return (
-    <Dialog label={TEXT.whatsNewTitle} onClose={onClose}>
+    <Dialog label={TEXT.whatsNewTitle} floating={WHATS_NEW_WINDOW} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <DialogTitle>{TEXT.whatsNewTitle}</DialogTitle>
       </DialogHeader>

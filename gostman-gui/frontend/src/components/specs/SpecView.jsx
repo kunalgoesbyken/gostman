@@ -11,7 +11,7 @@ import { EDGE_START } from "../../hooks/usePaneResize"
 import { useDebouncedValue } from "../../hooks/useDebouncedValue"
 import { useShortcutLabel } from "../../hooks/useShortcuts"
 import { useSpecLint } from "../../hooks/useSpecLint"
-import { SPEC_EDITOR_PANE } from "../../lib/layout"
+import { SPEC_EDITOR_PANE, SPEC_PROBLEMS_PANE } from "../../lib/layout"
 import { isSpecDirty, specSource } from "../../lib/specDocument"
 import { specDiagnostics, findingOffset } from "../../lib/specDiagnostics"
 import { SPEC_VIEW_TEXT as TEXT } from "../../lib/specEditorText"
@@ -71,14 +71,14 @@ function problemsHeading(lint) {
 
 function Problems({ lint, onSelect }) {
   return (
-    <section aria-label={TEXT.problemsLabel} className="flex h-44 shrink-0 flex-col border-t border-border">
+    <ResizablePane pane={SPEC_PROBLEMS_PANE} edge={EDGE_START} as="section" aria-label={TEXT.problemsLabel} className="relative flex h-[var(--pane-height)] shrink-0 flex-col border-t border-border">
       <h3 className="flex h-8 shrink-0 items-center gap-1.5 border-b border-border px-3 text-xs font-medium">
         <AlertTriangle aria-hidden="true" className="h-3.5 w-3.5 text-muted-foreground" />
         {problemsHeading(lint)}
       </h3>
       {lint.error && <p role="alert" className="overflow-y-auto p-3 text-xs text-destructive [overflow-wrap:anywhere]">{lint.error}</p>}
       {lint.report && <SpecLint report={lint.report} onSelectFinding={onSelect} />}
-    </section>
+    </ResizablePane>
   )
 }
 

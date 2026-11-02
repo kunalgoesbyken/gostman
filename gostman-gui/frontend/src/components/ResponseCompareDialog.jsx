@@ -1,10 +1,13 @@
 import { useState } from "react"
 import { ArrowRight } from "lucide-react"
 import { Dialog, DialogBody, DialogHeader } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
 import { SegmentedControl } from "./ui/segmented"
 import { CodeDiff } from "./CodeEditor"
 import { COMPARE_PARTS, describeResponse } from "../lib/responseHistory"
 import { RESPONSE_TEXT } from "../lib/responseText"
+
+const COMPARE_WINDOW = toolWindow("response-compare", "wide")
 
 const TEXT = RESPONSE_TEXT.history
 
@@ -17,7 +20,7 @@ export function ResponseCompareDialog({ earlier, latest, onClose }) {
   const part = COMPARE_PARTS[partName]
 
   return (
-    <Dialog label={TEXT.compareTitle} size="lg" className="max-w-6xl" onClose={onClose}>
+    <Dialog label={TEXT.compareTitle} size="lg" floating={COMPARE_WINDOW} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <SegmentedControl label={TEXT.compareParts} options={partOptions()} value={partName} onChange={setPartName} />
         <span className="flex min-w-0 flex-1 items-center gap-2 truncate font-mono text-xs text-muted-foreground">

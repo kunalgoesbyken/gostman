@@ -4,6 +4,7 @@ import { BrandIcon } from "./ui/brandIcon"
 import { Button, IconButton } from "./ui/button"
 import { ColorPicker } from "./ui/colorPicker"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
 import { EmptyState } from "./ui/emptyState"
 import { FIELD_COLUMNS, Field } from "./ui/field"
 import { Input } from "./ui/input"
@@ -20,6 +21,8 @@ import { automaticSwatch } from "../lib/swatches"
 import { SECRETS_TEXT as TEXT } from "../lib/secretsText"
 import { useAppStore } from "../store/appStore"
 import { cn } from "../lib/utils"
+
+const SECRETS_WINDOW = toolWindow("secrets")
 
 const NEW_CONNECTION = { alias: "", kind: "", color: "", values: {}, stored: [], isSaved: false }
 
@@ -329,7 +332,7 @@ function ConnectionManager({ secrets, onClose }) {
 
 export function SecretsDialog({ secrets, onClose }) {
   return (
-    <Dialog label={TEXT.title} size={secrets ? "lg" : "sm"} onClose={onClose}>
+    <Dialog label={TEXT.title} size={secrets ? "lg" : "sm"} floating={secrets ? SECRETS_WINDOW : undefined} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <DialogTitle>{TEXT.title}</DialogTitle>
         {secrets && <InfoTip text={TEXT.intro} />}

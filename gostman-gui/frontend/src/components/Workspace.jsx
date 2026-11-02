@@ -75,7 +75,7 @@ const SpecView = lazy(() => import("./specs/SpecView").then((module) => ({ defau
 const loadCodeEditor = () => import("./CodeEditor")
 const CodeEditor = lazy(() => loadCodeEditor().then((module) => ({ default: module.CodeEditor })))
 
-const ENVIRONMENT_SAVE_DELAY_MS = 400
+const DATA_SAVE_DELAY_MS = 400
 
 const activeFirst = (environments, activeId) => [
   ...environments.filter((environment) => environment.id === activeId),
@@ -84,6 +84,23 @@ const activeFirst = (environments, activeId) => [
 const REQUEST_AREA_STYLE = { minHeight: MIN_REQUEST_HEIGHT_PX }
 
 const store = () => useAppStore.getState()
+
+function SidebarSlot(props) {
+  const isSidebarOpen = useAppStore((s) => s.isSidebarOpen)
+  if (!isSidebarOpen) return null
+  return (
+    <>
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-label={SIDEBAR_TEXT.close}
+        onClick={() => props.actions.runCommand("toggleSidebar")}
+        className="absolute inset-0 z-20 bg-black/40 md:hidden"
+      />
+      <Sidebar {...props} />
+    </>
+  )
+}
 
 function focusSidebarSearch() {
   if (!store().isSidebarOpen) store().toggleSidebar()
@@ -226,12 +243,12 @@ function usePersistence(backend) {
 
   const saveCollectionSettings = useCallback((value) => persist(() => backend.saveCollectionSettings(value)), [backend, persist])
 
-  useAutoSave(folders, saveFolders)
-  useAutoSave(requestHistory, saveHistory)
-  useAutoSave(cookies, saveCookies)
-  useAutoSave(environmentState, saveEnvironments, ENVIRONMENT_SAVE_DELAY_MS)
-  useAutoSave(scopeState, saveScopes, ENVIRONMENT_SAVE_DELAY_MS)
-  useAutoSave(collectionSettings, saveCollectionSettings, ENVIRONMENT_SAVE_DELAY_MS)
+  useAutoSave(folders, saveFolders, DATA_SAVE_DELAY_MS)
+  useAutoSave(requestHistory, saveHistory, DATA_SAVE_DELAY_MS)
+  useAutoSave(cookies, saveCookies, DATA_SAVE_DELAY_MS)
+  useAutoSave(environmentState, saveEnvironments, DATA_SAVE_DELAY_MS)
+  useAutoSave(scopeState, saveScopes, DATA_SAVE_DELAY_MS)
+  useAutoSave(collectionSettings, saveCollectionSettings, DATA_SAVE_DELAY_MS)
 }
 
 function LoadedWorkspace({ backend, onBack }) {
@@ -288,7 +305,6 @@ function LoadedWorkspace({ backend, onBack }) {
   const openSettingsDialog = useAppStore((s) => s.openSettingsDialog)
   const closeSettingsDialog = useAppStore((s) => s.closeSettingsDialog)
   const openCommandPalette = useAppStore((s) => s.openCommandPalette)
-  const isSidebarOpen = useAppStore((s) => s.isSidebarOpen)
   const tabPlacement = usePreferences().tabPlacement
   const welcomeVisible = useAppStore((s) => s.welcomeVisible)
   const hideWelcome = useAppStore((s) => s.hideWelcome)
@@ -378,28 +394,17 @@ function LoadedWorkspace({ backend, onBack }) {
       />
 
       <div className="relative flex min-h-0 flex-1">
-        {isSidebarOpen && (
-          <>
-            <button
-              type="button"
-              tabIndex={-1}
-              aria-label={SIDEBAR_TEXT.close}
-              onClick={() => actions.runCommand("toggleSidebar")}
-              className="absolute inset-0 z-20 bg-black/40 md:hidden"
-            />
-            <Sidebar
-              folders={folders}
-              requests={requests}
-              requestHistory={requestHistory}
-              activeRequestId={activeRequest.id}
-              actions={actions}
-              tabs={tabs}
-              activeTabId={activeTabId}
-              onTabSelect={setActiveTab}
-              onTabClose={actions.closeTab}
-            />
-          </>
-        )}
+        <SidebarSlot
+          folders={folders}
+          requests={requests}
+          requestHistory={requestHistory}
+          activeRequestId={activeRequest.id}
+          actions={actions}
+          tabs={tabs}
+          activeTabId={activeTabId}
+          onTabSelect={setActiveTab}
+          onTabClose={actions.closeTab}
+        />
 
         <main className="flex min-w-0 flex-1 flex-col">
           {tabPlacement === "bar" && (

@@ -23,6 +23,7 @@ function PageDocument({ title, description, url, siteUrl, stylesheets, scripts =
         <meta name="description" content={description} />
         <link rel="canonical" href={url} />
         <meta name="robots" content="index, follow, max-image-preview:large" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
         <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />

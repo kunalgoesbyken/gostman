@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Button } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
 import { SkeletonLines } from "./ui/skeleton"
 import { CodeText } from "./ui/ConfirmDialog"
 import { describeCounts } from "../lib/importCounts"
@@ -8,6 +9,8 @@ import { FILE_READS_TEXT, FORMAT_LABELS } from "../lib/importText"
 import { notesIn, remarksOf, skippedOf, warningsIn } from "../lib/importRemarks"
 import { OPEN_LINK_TEXT } from "../lib/openLinkText"
 import { describeShared } from "../lib/shareContent"
+
+const OPEN_LINK_WINDOW = toolWindow("open-link", "compact")
 
 const ASK = { status: "ask" }
 const FETCHING = { status: "fetching" }
@@ -118,7 +121,7 @@ function Invalid({ error, onClose }) {
 
 export function OpenLinkDialog({ link, fetchLink, importer, onImport, onClose }) {
   return (
-    <Dialog label={OPEN_LINK_TEXT.title} className="max-w-xl" onClose={onClose}>
+    <Dialog label={OPEN_LINK_TEXT.title} floating={OPEN_LINK_WINDOW} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <DialogTitle>{link.error ? OPEN_LINK_TEXT.invalidTitle : OPEN_LINK_TEXT.title}</DialogTitle>
       </DialogHeader>

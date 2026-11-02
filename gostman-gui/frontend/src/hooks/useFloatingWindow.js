@@ -12,6 +12,8 @@ const COMPACT_QUERY = "(max-width: 639px)"
 const MOVE = "move"
 const START = "start"
 const END = "end"
+const GRAB = "grab"
+const GRABBING = "grabbing"
 const RECT_KEYS = ["x", "y", "width", "height"]
 const CONTROLS = "a, button, input, select, textarea, label, [role=radio], [role=tab], [contenteditable=true]"
 const ARROWS = { ArrowLeft: { x: -1, y: 0 }, ArrowRight: { x: 1, y: 0 }, ArrowUp: { x: 0, y: -1 }, ArrowDown: { x: 0, y: 1 } }
@@ -88,6 +90,10 @@ function resized(rect, edge, delta, viewport, limits) {
 
 const startsOnControl = (event) => Boolean(event.target.closest(CONTROLS))
 
+const setCursor = (event, cursor) => {
+  event.currentTarget.style.cursor = cursor
+}
+
 export function useFloatingWindow(options) {
   const isRequested = Boolean(options)
   const compact = useSyncExternalStore(isRequested ? subscribeToCompact : ignoreChanges, isCompact, compactOnServer)
@@ -157,7 +163,17 @@ export function useFloatingWindow(options) {
     headerProps: {
       ...moveProps,
       onPointerDown: (event) => {
-        if (!startsOnControl(event)) moveProps.onPointerDown(event)
+        if (startsOnControl(event)) return
+        moveProps.onPointerDown(event)
+        setCursor(event, GRABBING)
+      },
+      onPointerMove: (event) => {
+        moveProps.onPointerMove(event)
+        setCursor(event, gesture.current ? GRABBING : startsOnControl(event) ? "" : GRAB)
+      },
+      onLostPointerCapture: (event) => {
+        moveProps.onLostPointerCapture(event)
+        setCursor(event, GRAB)
       },
       onDoubleClick: (event) => {
         if (!startsOnControl(event)) restore()

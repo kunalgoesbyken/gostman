@@ -30,11 +30,15 @@ export function rememberSidebarOpen(isOpen) {
 
 const PANE_WIDTH_VAR = "--pane-width"
 
-const paneSpec = (storageKey, min, fallback, max, minMain, widthVar = PANE_WIDTH_VAR) => ({ storageKey, min, fallback, max, minMain, widthVar })
+export const INLINE_AXIS = "inline"
+export const BLOCK_AXIS = "block"
+
+const paneSpec = (storageKey, min, fallback, max, minMain, widthVar = PANE_WIDTH_VAR, axis = INLINE_AXIS) => ({ storageKey, min, fallback, max, minMain, widthVar, axis })
 
 export const SIDEBAR_PANE = paneSpec("gostman.sidebarWidth", 224, 312, 480, 480, "--sidebar-width")
 export const FLOW_PANE = paneSpec("gostman.flowPaneWidth", 320, 512, 800, 360)
 export const SPEC_EDITOR_PANE = paneSpec("gostman.specEditorPreviewWidth", 360, 640, 1100, 360)
+export const SPEC_PROBLEMS_PANE = paneSpec("gostman.specProblemsHeight", 72, 176, 640, 160, "--pane-height", BLOCK_AXIS)
 export const GRAPHQL_SCHEMA_PANE = paneSpec("gostman.graphqlSchemaWidth", 208, 320, 560, 280)
 export const GRAPHQL_BUILDER_PANE = paneSpec("gostman.graphqlBuilderWidth", 256, 448, 720, 280)
 export const MCP_SCHEMA_PANE = paneSpec("gostman.mcpSchemaWidth", 208, 448, 720, 280)
@@ -49,9 +53,9 @@ export const rememberedPaneWidth = (pane) => storedNumber(pane.storageKey, pane.
 
 export const rememberPaneWidth = (pane, width) => writeStored(pane.storageKey, String(Math.round(width)))
 
-export const widestPaneFor = (pane, containerWidth) => clamp(containerWidth - pane.minMain, pane.min, pane.max)
+export const widestPaneFor = (pane, containerSize) => clamp(containerSize - pane.minMain, pane.min, pane.max)
 
-export const paneWidthValue = (pane, width) => `min(${width}px, 100% - ${pane.minMain}px)`
+export const paneWidthValue = (pane, size) => (pane.axis === BLOCK_AXIS ? `${size}px` : `min(${size}px, 100% - ${pane.minMain}px)`)
 
 export const paneWidthStyle = (pane, width) => ({ [pane.widthVar]: paneWidthValue(pane, width) })
 

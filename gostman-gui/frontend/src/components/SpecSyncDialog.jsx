@@ -2,12 +2,15 @@ import { useState } from "react"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
 import { MethodTag } from "./MethodTag"
 import { formatDateTime } from "../lib/i18n/format"
 import { sourceLabel } from "../lib/openapiSpec"
 import { defaultSelection, isEmptyPlan } from "../lib/specSync"
 import { localizedText } from "../lib/localized"
 import { SPEC_TEXT } from "../lib/specText"
+
+const SPEC_SYNC_WINDOW = toolWindow("spec-sync")
 
 function Change({ id, label, method, detail, edited, checked, onToggle }) {
   return (
@@ -71,7 +74,7 @@ export function SpecSyncDialog({ dialog, link, actions, onClose }) {
   })
 
   return (
-    <Dialog label={SPEC_TEXT.syncTitle} size="lg" onClose={onClose}>
+    <Dialog label={SPEC_TEXT.syncTitle} size="lg" floating={SPEC_SYNC_WINDOW} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <DialogTitle>{SPEC_TEXT.syncTitle}</DialogTitle>
       </DialogHeader>
