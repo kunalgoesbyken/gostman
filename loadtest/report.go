@@ -42,6 +42,7 @@ type Report struct {
 	ErrorSamples      []string      `json:"errorSamples"`
 	Distribution      []Bin         `json:"distribution"`
 	Stopped           bool          `json:"stopped"`
+	Checks            []Check       `json:"checks,omitempty"`
 }
 
 type Snapshot struct {
@@ -50,6 +51,7 @@ type Snapshot struct {
 	Failed            int64   `json:"failed"`
 	RequestsPerSecond float64 `json:"requestsPerSecond"`
 	P95Ms             float64 `json:"p95Ms"`
+	ActiveWorkers     int     `json:"activeWorkers,omitempty"`
 }
 
 type Thresholds struct {

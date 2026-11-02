@@ -19,6 +19,8 @@ const INITIAL_STATE = {
   concurrency: DEFAULT_LOAD.concurrency,
   durationSeconds: DEFAULT_LOAD.durationSeconds,
   rateLimit: 0,
+  stages: '',
+  thresholds: '',
   progress: null,
   report: null,
   failure: '',
@@ -44,13 +46,17 @@ function unsupportedReason(request, variables) {
   return isOtherProtocol ? LOAD_TEST_TEXT.unsupported : ''
 }
 
-const toConfig = ({ concurrency, durationSeconds, rateLimit }) => ({
+const splitThresholds = (text) => text.split(',').map((entry) => entry.trim()).filter(Boolean)
+
+const toConfig = ({ concurrency, durationSeconds, rateLimit, stages, thresholds }) => ({
   concurrency,
   durationMs: durationSeconds * MS_PER_SECOND,
   requests: 0,
   ratePerSecond: rateLimit,
   rampMs: 0,
   failureStatus: 0,
+  stages: stages.trim(),
+  thresholds: splitThresholds(thresholds),
 })
 
 export function createLoadTestActions(backend) {
@@ -95,5 +101,7 @@ export function createLoadTestActions(backend) {
     setConcurrency: (text) => patch({ concurrency: toBoundedCount(text, LOAD_LIMITS.concurrency) }),
     setDuration: (text) => patch({ durationSeconds: toBoundedCount(text, LOAD_LIMITS.durationSeconds) }),
     setRateLimit: (text) => patch({ rateLimit: toBoundedCount(text, Number.MAX_SAFE_INTEGER) }),
+    setStages: (stages) => patch({ stages }),
+    setThresholds: (thresholds) => patch({ thresholds }),
   }
 }

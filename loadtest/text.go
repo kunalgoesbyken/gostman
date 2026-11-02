@@ -24,6 +24,9 @@ func WriteText(out io.Writer, report Report) error {
 	for _, sample := range report.ErrorSamples {
 		lines = append(lines, "error sample  "+sample)
 	}
+	for _, check := range report.Checks {
+		lines = append(lines, "threshold     "+checkLine(check))
+	}
 	_, err := fmt.Fprintln(out, strings.Join(lines, "\n"))
 	return err
 }
@@ -31,6 +34,14 @@ func WriteText(out io.Writer, report Report) error {
 func WriteProgress(out io.Writer, snapshot Snapshot) {
 	fmt.Fprintf(out, "%6.1fs  %d requests  %.0f/s  p95 %.1f ms  %d failed\n",
 		float64(snapshot.ElapsedMs)/1000, snapshot.Total, snapshot.RequestsPerSecond, snapshot.P95Ms, snapshot.Failed)
+}
+
+func checkLine(check Check) string {
+	verdict := "passed"
+	if !check.Passed {
+		verdict = "FAILED"
+	}
+	return fmt.Sprintf("%-6s %s (observed %s)", verdict, check.Expression, formatMeasure(check.Observed, check.Unit))
 }
 
 func stoppedNote(report Report) string {

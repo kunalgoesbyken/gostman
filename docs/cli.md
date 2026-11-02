@@ -164,6 +164,8 @@ gostman load --concurrency 50 --requests 5000 GET https://example.com/health
 
 - `--concurrency n` (default 10, at most 500), `--duration 30s` (default 10s unless `--requests` is set; at most 10m) or `--requests n` (at most 1,000,000), `--rps n` to cap the rate and `--ramp 5s` to start workers gradually.
 - `--fail-status 400` counts that status and above as failed (default 500), and `--reporter json` prints the result as JSON instead of text.
+- `--threshold 'p95<300'` and `--threshold 'errors<1%'` (repeatable) set k6-style pass or fail thresholds on `min`, `avg`, `med`, `p50`, `p90`, `p95`, `p99`, `max`, `errors`, `failed` and `rps`, with `<`, `<=`, `>` or `>=`; each result is printed and is in the JSON report as `checks`. See [Threshold expressions](runner-load-and-scan.md#threshold-expressions).
+- `--stages 10s:5,30s:20,10s:0` changes the number of workers over time. Each pair is a duration and the number of workers to reach, moving in a straight line from the previous target (zero at the start). It replaces `--concurrency`, `--duration` and `--ramp`, which are refused with it.
 - `--max-p95 500ms` and `--max-error-rate 1%` set pass or fail thresholds: the command exits 1 when one is breached. Exit 1 also follows an interrupt and a run in which no request succeeded; 2 means bad input.
 - Dynamic variables such as `{{$guid}}` are generated again for every request. Pre-request scripts and checks are not part of a load test, and cookies are not shared between workers.
 - Load testing is not available in the web version, so the hosted proxy cannot be used to generate load.

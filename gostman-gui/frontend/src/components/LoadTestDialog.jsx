@@ -51,11 +51,12 @@ function NumberField({ label, hint, value, max, disabled, onChange }) {
 }
 
 function Controls({ load, actions }) {
-  const { isRunning, blocked, concurrency, durationSeconds, rateLimit } = load
+  const { isRunning, blocked, concurrency, durationSeconds, rateLimit, stages } = load
+  const staged = stages.trim() !== ""
   return (
     <div className="flex flex-wrap items-end gap-3">
-      <NumberField label={LOAD_TEST_TEXT.concurrency} max={LOAD_LIMITS.concurrency} value={concurrency} disabled={isRunning} onChange={actions.setConcurrency} />
-      <NumberField label={LOAD_TEST_TEXT.duration} max={LOAD_LIMITS.durationSeconds} value={durationSeconds} disabled={isRunning} onChange={actions.setDuration} />
+      <NumberField label={LOAD_TEST_TEXT.concurrency} max={LOAD_LIMITS.concurrency} value={concurrency} disabled={isRunning || staged} onChange={actions.setConcurrency} />
+      <NumberField label={LOAD_TEST_TEXT.duration} max={LOAD_LIMITS.durationSeconds} value={durationSeconds} disabled={isRunning || staged} onChange={actions.setDuration} />
       <NumberField label={LOAD_TEST_TEXT.rateLimit} hint={LOAD_TEST_TEXT.rateLimitHint} value={rateLimit} disabled={isRunning} onChange={actions.setRateLimit} />
       {isRunning ? (
         <Button variant="destructive" onClick={actions.stop}>
@@ -63,11 +64,59 @@ function Controls({ load, actions }) {
           {LOAD_TEST_TEXT.stop}
         </Button>
       ) : (
-        <Button disabled={Boolean(blocked) || concurrency < 1 || durationSeconds < 1} onClick={actions.start}>
+        <Button disabled={Boolean(blocked) || (!staged && (concurrency < 1 || durationSeconds < 1))} onClick={actions.start}>
           <Play />
           {LOAD_TEST_TEXT.start}
         </Button>
       )}
+    </div>
+  )
+}
+
+function TextField({ label, hint, note, value, disabled, onChange }) {
+  return (
+    <label className="flex min-w-0 flex-1 flex-col gap-1">
+      <SectionLabel>{label}</SectionLabel>
+      <Input
+        value={value}
+        placeholder={hint}
+        disabled={disabled}
+        spellCheck={false}
+        onChange={(event) => onChange(event.target.value)}
+        dir="ltr"
+        className="font-mono"
+      />
+      <span className="text-2xs text-muted-foreground">{note}</span>
+    </label>
+  )
+}
+
+function Plan({ load, actions }) {
+  return (
+    <div className="flex flex-col gap-3 sm:flex-row">
+      <TextField label={LOAD_TEST_TEXT.stages} hint={LOAD_TEST_TEXT.stagesHint} note={LOAD_TEST_TEXT.stagesNote} value={load.stages} disabled={load.isRunning} onChange={actions.setStages} />
+      <TextField label={LOAD_TEST_TEXT.thresholds} hint={LOAD_TEST_TEXT.thresholdsHint} note={LOAD_TEST_TEXT.thresholdsNote} value={load.thresholds} disabled={load.isRunning} onChange={actions.setThresholds} />
+    </div>
+  )
+}
+
+function Thresholds({ checks }) {
+  const failed = checks.filter((check) => !check.passed).length
+  return (
+    <div className="flex flex-col gap-1">
+      <SectionLabel>{LOAD_TEST_TEXT.thresholdsResult}</SectionLabel>
+      <p role="status" className={`text-xs ${failed > 0 ? "text-destructive" : "text-muted-foreground"}`}>
+        {failed > 0 ? LOAD_TEST_TEXT.thresholdsFailed(failed) : LOAD_TEST_TEXT.thresholdsPassed}
+      </p>
+      <ul className="flex flex-col gap-1">
+        {checks.map((check) => (
+          <li key={check.expression} className="flex min-w-0 items-center gap-2">
+            <Badge variant={check.passed ? "success" : "serverError"}>{check.passed ? LOAD_TEST_TEXT.thresholdPassed : LOAD_TEST_TEXT.thresholdFailed}</Badge>
+            <span className="font-mono text-xs text-foreground">{check.expression}</span>
+            <span className="truncate font-mono text-xs text-muted-foreground">{LOAD_TEST_TEXT.thresholdObserved(formatNumber(check.observed))}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
@@ -84,12 +133,13 @@ function Figure({ label, value, title }) {
 function Progress({ progress }) {
   const text = LOAD_TEST_TEXT.progress
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-5" role="status">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-6" role="status">
       <Figure label={text.elapsed} value={LOAD_TEST_TEXT.seconds(fixed(progress.elapsedMs / MS_PER_SECOND))} />
       <Figure label={text.requests} value={formatNumber(progress.total)} />
       <Figure label={text.rate} value={formatNumber(Math.round(progress.requestsPerSecond))} />
       <Figure label={text.p95} value={LOAD_TEST_TEXT.milliseconds(fixed(progress.p95Ms))} />
       <Figure label={text.failed} value={formatNumber(progress.failed)} />
+      {progress.activeWorkers > 0 && <Figure label={text.workers} value={formatNumber(progress.activeWorkers)} />}
     </div>
   )
 }
@@ -159,6 +209,7 @@ function Results({ report }) {
         <Figure label={text.rate} value={formatNumber(report.requestsPerSecond)} />
         <Figure label={text.received} value={formatBytes(report.bytesReceived)} />
       </div>
+      {report.checks?.length > 0 && <Thresholds checks={report.checks} />}
       {report.stopped && <Badge className="self-start" variant="clientError">{LOAD_TEST_TEXT.stopped}</Badge>}
       {report.total > 0 && (
         <>
@@ -198,6 +249,7 @@ export function LoadTestDialog({ actions }) {
       {(blocked || failure) && <Notice tone="destructive" role="alert">{blocked || failure}</Notice>}
       <DialogBody className="flex flex-col gap-4">
         <Controls load={load} actions={actions} />
+        <Plan load={load} actions={actions} />
         <Outcome load={load} />
       </DialogBody>
     </Dialog>

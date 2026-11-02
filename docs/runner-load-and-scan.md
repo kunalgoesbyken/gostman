@@ -110,11 +110,11 @@ The dialog refuses a request in these cases and shows the reason:
 | **Duration (seconds)** | How long the test runs. Starts at 10, at most 600. |
 | **Requests per second cap** | Limits the overall rate. Leave it empty for no cap. |
 
-**Start** is disabled until workers and duration are at least 1. While the test runs, the badge **Running** is shown and **Stop** ends it early; the result is then labelled **Stopped early**. Closing the dialog also stops a running test.
+**Start** is disabled until workers and duration are at least 1 (not needed when stages are set). While the test runs, the badge **Running** is shown and **Stop** ends it early; the result is then labelled **Stopped early**. Closing the dialog also stops a running test.
 
 ### Results
 
-While the test runs, the dialog shows **Elapsed**, **Requests**, **Requests/s**, **p95** and **Failed**.
+While the test runs, the dialog shows **Elapsed**, **Requests**, **Requests/s**, **p95** and **Failed**. With stages it also shows **Workers**, the current number of active workers.
 
 When it ends, it shows:
 
@@ -123,6 +123,10 @@ When it ends, it shows:
 - **Latency distribution**, a histogram of response times.
 - **Status codes**, with a count per code.
 - **Error samples**, when some requests failed.
+
+### Threshold expressions
+
+A threshold is a metric, a comparison and a limit: `p95<300`, `avg<=120ms`, `errors<1%`, `rps>200`. The metrics are `min`, `avg`, `med`, `p50`, `p90`, `p95`, `p99` and `max` (milliseconds; `300`, `300ms` and `1.5s` are accepted), `errors` (the percentage of requests that failed), `failed` (a count) and `rps` (requests per second). The comparisons are `<`, `<=`, `>` and `>=`. A threshold with no completed request fails.
 
 For thresholds that fail a pipeline, a fixed request count or a ramp-up, use `gostman load`; see [Load testing](cli.md#load-testing) in the command line page.
 

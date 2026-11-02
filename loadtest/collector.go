@@ -98,5 +98,6 @@ func (c *collector) report(config Config, elapsed time.Duration, stopped bool) R
 	if elapsed > 0 {
 		report.RequestsPerSecond = math.Round(float64(total)/elapsed.Seconds()*100) / 100
 	}
+	report.Checks = EvaluateThresholds(config.Thresholds, report)
 	return report
 }

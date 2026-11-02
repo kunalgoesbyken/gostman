@@ -20,12 +20,14 @@ const (
 )
 
 type Config struct {
-	Concurrency   int `json:"concurrency"`
-	DurationMs    int `json:"durationMs"`
-	Requests      int `json:"requests"`
-	RatePerSecond int `json:"ratePerSecond"`
-	RampMs        int `json:"rampMs"`
-	FailureStatus int `json:"failureStatus"`
+	Concurrency   int      `json:"concurrency"`
+	DurationMs    int      `json:"durationMs"`
+	Requests      int      `json:"requests"`
+	RatePerSecond int      `json:"ratePerSecond"`
+	RampMs        int      `json:"rampMs"`
+	FailureStatus int      `json:"failureStatus"`
+	Stages        string   `json:"stages,omitempty"`
+	Thresholds    []string `json:"thresholds,omitempty"`
 }
 
 func (c Config) Duration() time.Duration {
@@ -37,6 +39,10 @@ func (c Config) Ramp() time.Duration {
 }
 
 func (c Config) Normalized() Config {
+	if stages := c.stages(); len(stages) > 0 {
+		c.Concurrency = highestTarget(stages)
+		c.DurationMs = int(stagesLength(stages) / time.Millisecond)
+	}
 	if c.Concurrency == 0 {
 		c.Concurrency = DefaultConcurrency
 	}
@@ -50,6 +56,12 @@ func (c Config) Normalized() Config {
 }
 
 func (c Config) Validate() error {
+	if err := c.validateStages(); err != nil {
+		return err
+	}
+	if err := ValidateThresholds(c.Thresholds); err != nil {
+		return err
+	}
 	switch {
 	case c.Concurrency < 1 || c.Concurrency > MaxConcurrency:
 		return fmt.Errorf("concurrency must be between 1 and %d", MaxConcurrency)

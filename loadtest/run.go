@@ -89,10 +89,27 @@ func (r *run) rampDelay(worker int) time.Duration {
 }
 
 func (r *run) work(worker int) {
+	if stages := r.plan.Config.stages(); len(stages) > 0 {
+		r.workStaged(worker, stages)
+		return
+	}
 	if !pause(r.issuing, r.rampDelay(worker)) {
 		return
 	}
 	for r.claim() {
+		r.send()
+	}
+}
+
+func (r *run) workStaged(worker int, stages []Stage) {
+	for r.issuing.Err() == nil {
+		if worker >= targetAt(stages, time.Since(r.started)) {
+			pause(r.issuing, stagePoll)
+			continue
+		}
+		if !r.claim() {
+			return
+		}
 		r.send()
 	}
 }
@@ -114,6 +131,14 @@ func (r *run) send() {
 	r.collected.record(sample{latency: time.Since(begun), outcome: outcome})
 }
 
+func (r *run) activeWorkers(now time.Time) int {
+	stages := r.plan.Config.stages()
+	if len(stages) == 0 {
+		return 0
+	}
+	return targetAt(stages, now.Sub(r.started))
+}
+
 func (r *run) report(finished <-chan struct{}, observe func(Snapshot)) {
 	ticker := time.NewTicker(ProgressInterval)
 	defer ticker.Stop()
@@ -130,6 +155,7 @@ func (r *run) report(finished <-chan struct{}, observe func(Snapshot)) {
 				Failed:            failed,
 				RequestsPerSecond: float64(total-previousTotal) / now.Sub(previousAt).Seconds(),
 				P95Ms:             toMs(p95),
+				ActiveWorkers:     r.activeWorkers(now),
 			})
 			previousAt, previousTotal = now, total
 		}

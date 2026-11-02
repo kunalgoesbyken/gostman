@@ -33,8 +33,11 @@ type loading struct {
 	duration   time.Duration
 	ramp       time.Duration
 	maxErrors  string
+	stages     string
+	thresholds stringList
 	config     loadtest.Config
 	limits     loadtest.Thresholds
+	given      map[string]bool
 	positional []string
 }
 
@@ -54,12 +57,16 @@ func parseLoading(arguments []string) (loading, error) {
 	flags.StringVar(&parsed.reporter, "reporter", report.FormatText, "")
 	flags.DurationVar(&parsed.limits.MaxP95, "max-p95", 0, "")
 	flags.StringVar(&parsed.maxErrors, "max-error-rate", "", "")
+	flags.StringVar(&parsed.stages, "stages", "", "")
+	flags.Var(&parsed.thresholds, "threshold", "")
 
 	positional, err := parseInterspersed(flags, arguments)
 	if err != nil {
 		return parsed, err
 	}
 	parsed.positional = positional
+	parsed.given = map[string]bool{}
+	flags.Visit(func(set *flag.Flag) { parsed.given[set.Name] = true })
 	return parsed, parsed.validate()
 }
 
@@ -76,9 +83,26 @@ func (l *loading) validate() error {
 	if err := l.parseErrorRate(); err != nil {
 		return err
 	}
+	if err := l.applyStages(); err != nil {
+		return err
+	}
 	l.config.DurationMs = int(l.duration / time.Millisecond)
+	l.config.Thresholds = l.thresholds
 	l.config.RampMs = int(l.ramp / time.Millisecond)
 	return l.config.Normalized().Validate()
+}
+
+func (l *loading) applyStages() error {
+	if l.stages == "" {
+		return nil
+	}
+	for _, name := range []string{"concurrency", "duration", "ramp"} {
+		if l.given[name] {
+			return fmt.Errorf("--stages sets the workers and the duration; do not combine it with --%s", name)
+		}
+	}
+	l.config.Stages = l.stages
+	return nil
 }
 
 func (l *loading) checkTarget() error {
@@ -157,6 +181,9 @@ func printLoad(stdout io.Writer, reporter string, outcome loadtest.Report) error
 
 func (l loading) verdict(stderr io.Writer, outcome loadtest.Report, interrupted bool) int {
 	breaches := outcome.Breaches(l.limits)
+	for _, check := range loadtest.FailedChecks(outcome.Checks) {
+		breaches = append(breaches, check.Describe())
+	}
 	for _, breach := range breaches {
 		fmt.Fprintf(stderr, "%s: threshold breached: %s\n", programName, breach)
 	}

@@ -1997,6 +1997,28 @@ export namespace loadtest {
 	        this.count = source["count"];
 	    }
 	}
+	export class Check {
+	    expression: string;
+	    metric: string;
+	    observed: number;
+	    limit: number;
+	    unit: string;
+	    passed: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Check(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.expression = source["expression"];
+	        this.metric = source["metric"];
+	        this.observed = source["observed"];
+	        this.limit = source["limit"];
+	        this.unit = source["unit"];
+	        this.passed = source["passed"];
+	    }
+	}
 	export class Config {
 	    concurrency: number;
 	    durationMs: number;
@@ -2004,6 +2026,8 @@ export namespace loadtest {
 	    ratePerSecond: number;
 	    rampMs: number;
 	    failureStatus: number;
+	    stages?: string;
+	    thresholds?: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -2017,6 +2041,8 @@ export namespace loadtest {
 	        this.ratePerSecond = source["ratePerSecond"];
 	        this.rampMs = source["rampMs"];
 	        this.failureStatus = source["failureStatus"];
+	        this.stages = source["stages"];
+	        this.thresholds = source["thresholds"];
 	    }
 	}
 	export class Latency {
@@ -2058,6 +2084,7 @@ export namespace loadtest {
 	    errorSamples: string[];
 	    distribution: Bin[];
 	    stopped: boolean;
+	    checks?: Check[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Report(source);
@@ -2079,6 +2106,7 @@ export namespace loadtest {
 	        this.errorSamples = source["errorSamples"];
 	        this.distribution = this.convertValues(source["distribution"], Bin);
 	        this.stopped = source["stopped"];
+	        this.checks = this.convertValues(source["checks"], Check);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
