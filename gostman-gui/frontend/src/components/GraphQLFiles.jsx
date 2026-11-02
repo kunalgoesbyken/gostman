@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 import { KeyValueEditor } from "./KeyValueEditor"
-import { Notice, Panel } from "./ui/panel"
+import { Panel } from "./ui/panel"
 import { BODY_MULTIPART, BODY_NONE } from "../lib/body"
 import { GRAPHQL_TEXT as TEXT } from "../lib/graphqlText"
 import { isFileRow, parseRows, serializeRows } from "../lib/rows"
@@ -13,8 +13,7 @@ export function GraphQLFiles({ request, onUpdateRequest }) {
 
   return (
     <Panel>
-      <Notice>{TEXT.filesNote}</Notice>
-      <KeyValueEditor rows={rows} fileRows keyLabel={TEXT.filesVariable} valueLabel={TEXT.filesFile} onChange={change} />
+      <KeyValueEditor rows={rows} fileRows keyLabel={TEXT.filesVariable} valueLabel={TEXT.filesFile} note={TEXT.filesNote} onChange={change} />
     </Panel>
   )
 }

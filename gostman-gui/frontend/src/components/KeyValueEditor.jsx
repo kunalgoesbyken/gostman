@@ -169,7 +169,8 @@ function ModeSwitch({ rows, showsBulk, onSwitch }) {
 
 export function KeyValueEditor({ rows, onChange, keyLabel = TEXT.key, valueLabel = TEXT.value, typed = false, fileRows = false, suggestions, note, children }) {
   const [isBulk, setIsBulk] = useState(false)
-  const showsBulk = isBulk && !typed && !fileRows
+  const hasModeSwitch = !typed && !fileRows
+  const showsBulk = isBulk && hasModeSwitch
 
   return (
     <PanelBody>
@@ -178,10 +179,10 @@ export function KeyValueEditor({ rows, onChange, keyLabel = TEXT.key, valueLabel
       ) : (
         <TableEditor rows={rows} typed={typed} fileRows={fileRows} keyLabel={keyLabel} valueLabel={valueLabel} suggestions={suggestions} onChange={onChange} />
       )}
-      {!typed && !fileRows && (
+      {(hasModeSwitch || note) && (
         <div className="mt-2 flex items-center justify-between gap-2">
           {note ? <InfoTip text={note} /> : <span />}
-          <ModeSwitch rows={rows} showsBulk={showsBulk} onSwitch={setIsBulk} />
+          {hasModeSwitch && <ModeSwitch rows={rows} showsBulk={showsBulk} onSwitch={setIsBulk} />}
         </div>
       )}
       {children}
