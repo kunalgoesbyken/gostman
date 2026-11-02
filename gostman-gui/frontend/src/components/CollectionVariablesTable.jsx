@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { EnvironmentTable } from "./EnvironmentTable"
 import { Notice, Toolbar } from "./ui/panel"
+import { InfoTip } from "./ui/infoTip"
 import { SegmentedControl } from "./ui/segmented"
 import { Textarea } from "./ui/textarea"
 import { ENVIRONMENT_TEXT as TEXT } from "../lib/environmentText"
@@ -19,7 +20,7 @@ const listOf = (holder, state) => (holder
   ? { variables: holder.collectionVariables, meta: holder.collectionVariablesMeta }
   : { variables: state.collectionVariables, meta: state.collectionVariablesMeta })
 
-export function CollectionVariablesTable({ holder, query = "" }) {
+export function CollectionVariablesTable({ holder, query = "", note }) {
   const setCollectionVariables = useAppStore((s) => s.setCollectionVariables)
   const patchFolders = useAppStore((s) => s.patchFolders)
   const [rows, setRows] = useState(() => environmentEntries(listOf(holder, useAppStore.getState())))
@@ -45,15 +46,16 @@ export function CollectionVariablesTable({ holder, query = "" }) {
   }
 
   const held = heldRows(rows).length
+  const tip = [note, view === VIEW_TEXT && TEXT.textNote].filter(Boolean).join(" ")
 
   return (
     <>
       <Toolbar>
         <SegmentedControl label={TEXT.viewLabel} options={VIEWS} value={view} onChange={chooseView} />
+        {tip && <InfoTip text={tip} />}
       </Toolbar>
       {view === VIEW_TEXT ? (
         <>
-          <Notice>{TEXT.textNote}</Notice>
           <Textarea
             value={text}
             aria-label={TEXT.textLabel}

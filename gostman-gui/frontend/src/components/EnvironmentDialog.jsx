@@ -5,6 +5,7 @@ import { ColorDot, ColorPicker } from "./ui/colorPicker"
 import { toolWindow } from "../lib/dialogWindows"
 import { Dialog } from "./ui/dialog"
 import { ToolDialogHeader } from "./ToolDialogHeader"
+import { InfoTip } from "./ui/infoTip"
 import { Input } from "./ui/input"
 import { Notice, ResizablePane, SectionLabel, SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
 import { EDGE_END } from "../hooks/usePaneResize"
@@ -181,9 +182,8 @@ function CollectionVariablesEditor({ holder, isShared }) {
   const sharedNote = useAppStore((s) => (holdsCollections(s.workspaceStatus.path) ? TEXT.sharedCollectionNote : TEXT.sharedFolderNote))
   return (
     <>
-      <Notice edge="border-b">{holder ? TEXT.ownCollectionNote(holder.name) : isShared ? sharedNote : TEXT.collectionNote}</Notice>
       <SearchField value={query} onChange={setQuery} placeholder={TEXT.search} />
-      <CollectionVariablesTable holder={holder} query={query} />
+      <CollectionVariablesTable holder={holder} query={query} note={holder ? TEXT.ownCollectionNote(holder.name) : isShared ? sharedNote : TEXT.collectionNote} />
     </>
   )
 }
@@ -194,9 +194,8 @@ function DotEnvViewer() {
   const [query, setQuery] = useState("")
   return (
     <>
-      <Notice edge="border-b">{TEXT.dotEnvNote}</Notice>
       <SearchField value={query} onChange={setQuery} placeholder={TEXT.search} />
-      <EnvironmentTable rows={rows} query={query} features={DOT_ENV_FEATURES} />
+      <EnvironmentTable rows={rows} query={query} features={DOT_ENV_FEATURES} note={TEXT.dotEnvNote} />
     </>
   )
 }
@@ -208,8 +207,8 @@ function SessionValuesViewer() {
   const [query, setQuery] = useState("")
   return (
     <>
-      <Notice edge="border-b">{TEXT.sessionNote}</Notice>
-      <div className="flex items-center justify-end border-b border-border px-3 py-2">
+      <div className="flex items-center justify-between border-b border-border px-3 py-2">
+        <InfoTip text={TEXT.sessionNote} />
         <Button variant="outline" size="sm" disabled={rows.length === 0} onClick={clearSessionVariables}>
           <Trash2 />
           {TEXT.clearSession}
@@ -335,6 +334,7 @@ export function EnvironmentDialog({ secrets, onClose }) {
             <KeyRound />
             <span className="max-sm:sr-only">{SECRETS_TEXT.title}</span>
           </Button>
+          <InfoTip text={`${TEXT.precedence} ${isDesktopShell() ? TEXT.secretNote : TEXT.secretNoteWeb}`} />
         </ToolDialogHeader>
         <div className={SPLIT_PANES}>
           <ResizablePane as="nav" pane={ENVIRONMENT_PANE} edge={EDGE_END} aria-label={TEXT.title} className={SPLIT_LIST}>
@@ -368,7 +368,6 @@ export function EnvironmentDialog({ secrets, onClose }) {
             <Editor scope={scope} selectedId={resolvedSelection} environments={list} activeId={activeId} scoping={scoping} holder={holder} secrets={secrets} pendingVariable={pendingVariable} />
           </section>
         </div>
-        <Notice edge="border-t">{TEXT.precedence} {isDesktopShell() ? TEXT.secretNote : TEXT.secretNoteWeb}</Notice>
       </Dialog>
       {isManagingSecrets && <SecretsDialog secrets={secrets} onClose={() => setIsManagingSecrets(false)} />}
     </>

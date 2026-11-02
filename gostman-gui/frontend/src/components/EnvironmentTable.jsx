@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { Eye, EyeOff, KeyRound, Lock, LockOpen, X } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
+import { InfoTip } from "./ui/infoTip"
 import { Input } from "./ui/input"
 import { Notice, SectionLabel } from "./ui/panel"
 import { BLANK_REFERENCE, ReferenceFields } from "./SecretReferenceFields"
@@ -166,7 +167,7 @@ function Row(props) {
   )
 }
 
-export function EnvironmentTable({ rows, query, features, secrets, draftName = "", onChange }) {
+export function EnvironmentTable({ rows, query, features, secrets, draftName = "", note, onChange }) {
   const { connections, kinds, isLoaded } = useSecretConnections(secrets)
   const references = secrets && features.references ? { secrets, connections, kinds, isLoaded } : null
   const [revealed, setRevealed] = useState(() => new Set())
@@ -200,7 +201,10 @@ export function EnvironmentTable({ rows, query, features, secrets, draftName = "
       {!features.readOnly && rows.some(isUnnamed) && <Notice tone="warning" role="status">{TEXT.unnamedRows}</Notice>}
       <div className={cn(references ? REFERENCE_COLUMNS : COLUMNS, "h-7 border-b border-border")}>
         <span />
-        <SectionLabel>{TEXT.variable}</SectionLabel>
+        <span className="flex min-w-0 items-center gap-1">
+          <SectionLabel>{TEXT.variable}</SectionLabel>
+          {note && <InfoTip text={note} />}
+        </span>
         <SectionLabel>{TEXT.value}</SectionLabel>
         <span />
         <span />

@@ -7,7 +7,8 @@ import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./u
 import { EmptyState } from "./ui/emptyState"
 import { FIELD_COLUMNS, Field } from "./ui/field"
 import { Input } from "./ui/input"
-import { Notice, SectionLabel } from "./ui/panel"
+import { InfoTip } from "./ui/infoTip"
+import { SectionLabel } from "./ui/panel"
 import { Select } from "./ui/select"
 import { Switch } from "./ui/switch"
 import { DesktopOnly } from "./DesktopOnly"
@@ -72,7 +73,6 @@ function ConnectionList({ connections, onAdd, onSwitch, onEdit, onRemove }) {
   )
   return (
     <>
-      <Notice edge="border-b">{TEXT.intro}</Notice>
       {connections.length === 0 ? (
         <EmptyState icon={KeyRound} title={TEXT.empty} action={addButton} className="min-h-60" />
       ) : (
@@ -332,6 +332,7 @@ export function SecretsDialog({ secrets, onClose }) {
     <Dialog label={TEXT.title} size={secrets ? "lg" : "sm"} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <DialogTitle>{TEXT.title}</DialogTitle>
+        {secrets && <InfoTip text={TEXT.intro} />}
       </DialogHeader>
       {secrets ? <ConnectionManager secrets={secrets} onClose={onClose} /> : <DesktopOnly title={TEXT.desktopOnlyTitle} description={TEXT.desktopOnly} />}
     </Dialog>

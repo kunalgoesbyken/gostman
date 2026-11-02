@@ -4,7 +4,7 @@ import { Button, IconButton } from "./ui/button"
 import { toolWindow } from "../lib/dialogWindows"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
-import { Notice } from "./ui/panel"
+import { InfoTip } from "./ui/infoTip"
 import { formatDateTime } from "../lib/i18n/format"
 import { KIND_ENVIRONMENT, KIND_FOLDER, KIND_REQUEST, TRASH_DAYS, daysLeft } from "../lib/trash"
 import { TRASH_TEXT as TEXT } from "../lib/trashText"
@@ -41,9 +41,9 @@ export function TrashDialog({ actions }) {
     <Dialog label={TEXT.title} size="lg" floating={TRASH_WINDOW} onClose={actions.close}>
       <DialogHeader onClose={actions.close}>
         <DialogTitle>{TEXT.title}</DialogTitle>
-        <Button size="sm" variant="outline" className="ms-auto" disabled={entries.length === 0} onClick={actions.empty}>{TEXT.emptyBin}</Button>
+        <InfoTip text={TEXT.note(TRASH_DAYS)} className="ms-auto" />
+        <Button size="sm" variant="outline" disabled={entries.length === 0} onClick={actions.empty}>{TEXT.emptyBin}</Button>
       </DialogHeader>
-      <Notice>{TEXT.note(TRASH_DAYS)}</Notice>
       <ul aria-label={TEXT.listLabel} className="min-h-0 flex-1 overflow-y-auto">
         {entries.length === 0 && <EmptyState icon={Trash2} title={TEXT.empty} />}
         {[...entries].reverse().map((entry) => (

@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react"
-import { Activity, ChevronDown, ChevronRight, Pause, Pencil, Play, Plus, Timer, Trash2 } from "lucide-react"
+import { Activity, ChevronDown, ChevronRight, Pause, Pencil, Play, Plus, Trash2 } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { toolWindow } from "../lib/dialogWindows"
 import { Dialog } from "./ui/dialog"
 import { ToolDialogHeader } from "./ToolDialogHeader"
 import { EmptyState } from "./ui/emptyState"
+import { InfoTip } from "./ui/infoTip"
 import { Notice, PanelBody, SPLIT_LIST, SPLIT_PANES, Toolbar } from "./ui/panel"
 import { MonitorChart } from "./MonitorChart"
 import { MonitorForm } from "./MonitorForm"
@@ -148,8 +149,8 @@ export function MonitorsDialog({ actions }) {
   return (
     <Dialog label={TEXT.title} size="lg" floating={WINDOW} onClose={actions.close}>
       <ToolDialogHeader featureId="monitors" onClose={actions.close}>
+        <InfoTip text={note} className="ms-auto" />
       </ToolDialogHeader>
-      <Notice tone="muted" icon={Timer}>{note}</Notice>
       {monitors.length === 0 && !editing ? (
         <div className="min-h-0 flex-1 overflow-y-auto">
           <EmptyState icon={Activity} title={TEXT.emptyTitle} description={TEXT.emptyDescription} action={create} />

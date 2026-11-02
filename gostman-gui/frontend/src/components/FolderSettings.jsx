@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { toolWindow } from "../lib/dialogWindows"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
+import { InfoTip } from "./ui/infoTip"
 import { Input } from "./ui/input"
 import { Notice, Panel, PanelBody, Toolbar } from "./ui/panel"
 import { NotesPanel } from "./NotesPanel"
@@ -63,8 +64,8 @@ function FolderVariables({ variables, onChange }) {
 
   return (
     <>
-      <Notice>{isVariableObject(variables) ? TEXT.varsNote : TEXT.varsInvalid}</Notice>
-      <EnvironmentTable rows={rows} query="" features={VARIABLE_FEATURES} onChange={editRows} />
+      {!isVariableObject(variables) && <Notice>{TEXT.varsInvalid}</Notice>}
+      <EnvironmentTable rows={rows} query="" features={VARIABLE_FEATURES} note={TEXT.varsNote} onChange={editRows} />
     </>
   )
 }
@@ -72,8 +73,7 @@ function FolderVariables({ variables, onChange }) {
 function CollectionVariables({ holder, note }) {
   return (
     <>
-      <Notice>{note} {secretNote()}</Notice>
-      <CollectionVariablesTable key={holder?.id} holder={holder} />
+      <CollectionVariablesTable key={holder?.id} holder={holder} note={`${note} ${secretNote()}`} />
     </>
   )
 }
@@ -134,7 +134,6 @@ function ScriptTab({ settings, path, isCollection, EditorComponent, onChange }) 
         <SegmentedControl label={TEXT.tabs.script} options={SCRIPT_VIEWS} value={view} onChange={setView} />
         {isCollection && <TimeLimitField value={settings.scriptTimeoutMs} onChange={onChange} />}
       </Toolbar>
-      <Notice>{TEXT.scriptNote}</Notice>
       <ScriptEditor
         key={view}
         value={settings[view]}
@@ -150,7 +149,6 @@ function ScriptTab({ settings, path, isCollection, EditorComponent, onChange }) 
 function DocsTab({ description, onChange }) {
   return (
     <Panel>
-      <Notice>{TEXT.docsNote}</Notice>
       <PanelBody>
         <MarkdownField
           value={description}
@@ -214,7 +212,6 @@ function AuthTab({ backend, scopeId, auth, source, sourceType, isCollection, onC
 
   return (
     <Panel>
-      <Notice>{TEXT.authNote}</Notice>
       <AuthPanel auth={shown} tokenRequest={tokenRequest} actions={actions} inheritance={inheritance} onChange={(next) => onChange({ auth: next })} />
     </Panel>
   )
@@ -231,6 +228,15 @@ function useScope(scope) {
   const isCollection = scope.folderId === ROOT_SETTINGS_ID
   const source = isCollection ? collectionSettings : folder
   return { source, folder, isCollection, ownsCollectionList, rootNote, parentSource, parentSourceType, title }
+}
+
+function tabNote(tab) {
+  if (tab === TAB_HEADERS) return TEXT.headersNote
+  if (tab === TAB_AUTH) return TEXT.authNote
+  if (tab === TAB_SCRIPT) return TEXT.scriptNote
+  if (tab === TAB_TESTS) return TEXT.testsNote
+  if (tab === TAB_DOCS) return TEXT.docsNote
+  return ""
 }
 
 const SETTINGS_WINDOW = toolWindow("folder-settings")
@@ -255,13 +261,13 @@ export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
       <Tabs value={tab} onValueChange={setTab} className="flex min-h-0 flex-1 flex-col">
         <DialogHeader onClose={onClose}>
           <DialogTitle>{title}</DialogTitle>
+          {tabNote(tab) && <InfoTip text={tabNote(tab)} />}
           <OverflowTabsList label={title} items={tabItems()} moreLabel={TEXT.more} moreHint={TEXT.moreHint} className="ms-4 max-sm:ms-0" />
         </DialogHeader>
         {isRestricted && hasActiveSettings(settings) && <Notice tone="warning">{TEXT.restrictedNote}</Notice>}
         <div className="min-h-0 flex-1 overflow-hidden">
           <TabsContent value={TAB_HEADERS} className="h-full min-h-0">
             <Panel>
-              <Notice>{TEXT.headersNote}</Notice>
               <KeyValueEditor
                 rows={parseRows(settings.headers)}
                 onChange={(rows) => patch({ headers: serializeRows(rows) })}
@@ -289,7 +295,6 @@ export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
           </TabsContent>
           <TabsContent value={TAB_TESTS} className="h-full min-h-0">
             <Panel>
-              <Notice>{TEXT.testsNote}</Notice>
               <AssertionEditor assertions={settings.assertions} onChange={(assertions) => patch({ assertions })} EditorComponent={EditorComponent} />
             </Panel>
           </TabsContent>

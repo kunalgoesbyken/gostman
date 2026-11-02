@@ -3,6 +3,7 @@ import { Check, NotebookPen, RotateCcw, Trash2 } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button, IconButton } from "./ui/button"
 import { EmptyState } from "./ui/emptyState"
+import { InfoTip } from "./ui/infoTip"
 import { Notice, Panel } from "./ui/panel"
 import { Textarea } from "./ui/textarea"
 import { looksLikeCredential } from "../lib/credentialLook"
@@ -58,7 +59,10 @@ function NoteForm({ onAdd }) {
         onChange={(event) => setText(event.target.value)}
       />
       {looksLikeCredential("", text) && <Notice tone="warning">{TEXT.looksLikeCredential}</Notice>}
-      <Button type="submit" size="sm" disabled={!text.trim()}>{TEXT.add}</Button>
+      <div className="flex items-center justify-between gap-2">
+        <Button type="submit" size="sm" disabled={!text.trim()}>{TEXT.add}</Button>
+        <InfoTip text={TEXT.secretHint} />
+      </div>
     </form>
   )
 }
@@ -71,7 +75,6 @@ export function NotesPanel({ notes, onChange }) {
 
   return (
     <Panel>
-      <Notice>{TEXT.secretHint}</Notice>
       <div className="min-h-0 flex-1 overflow-y-auto">
         <NoteForm onAdd={add} />
         <ul aria-label={TEXT.listLabel}>
