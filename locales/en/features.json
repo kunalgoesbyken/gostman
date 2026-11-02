@@ -443,6 +443,11 @@
       "title": "Scheduled runs",
       "blurb": "gostman run --every repeats a run on an interval, keeps a local history and can notify a webhook.",
       "synonyms": "schedule cron every interval repeat history webhook notify"
+    },
+    "openapiDiff": {
+      "title": "OpenAPI diff",
+      "blurb": "Compare two versions of a spec and list breaking changes.",
+      "synonyms": "openapi diff oasdiff breaking changes compare spec"
     }
   },
   "featureSamples": {

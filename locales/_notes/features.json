@@ -175,5 +175,7 @@
   "featureWords.xlsxData.synonyms": "Words people may type to find this feature, separated by spaces. Add the words your users know, including names of other tools. Product names stay as they are.",
   "featureWords.scheduledRuns.title": "Name of the feature \"Scheduled runs\" in the feature list and the command palette.",
   "featureWords.scheduledRuns.synonyms": "Words people may type to find this feature, separated by spaces. Add the words your users know, including names of other tools. Product names stay as they are.",
-  "features.copied": "Shown after a command line was copied to the clipboard. {{command}} is the command and stays as it is."
+  "features.copied": "Shown after a command line was copied to the clipboard. {{command}} is the command and stays as it is.",
+  "featureWords.openapiDiff.title": "Name of the feature \"OpenAPI diff\" in the feature list and the command palette.",
+  "featureWords.openapiDiff.synonyms": "Words people may type to find this feature, separated by spaces. Add the words your users know, including names of other tools. Product names stay as they are."
 }
