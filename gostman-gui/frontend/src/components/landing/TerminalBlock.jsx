@@ -40,7 +40,7 @@ function CommandLine({ line }) {
 }
 
 function OutputLine({ line }) {
-  return <span className={cn("block min-h-[1.25em] whitespace-pre-wrap", LINE_TONES[line.tone])}>{line.text}</span>
+  return <span className={cn("block min-h-[1.25em] whitespace-pre-wrap break-words", LINE_TONES[line.tone])}>{line.text}</span>
 }
 
 export function TerminalBlock({ title, header, lines, label, copyText }) {

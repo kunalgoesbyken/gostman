@@ -80,4 +80,26 @@ The server speaks MCP 2025-11-25 and earlier, which start with `initialize`, and
 
 ## Agent Skill
 
-`skills/gostman/SKILL.md` in the repository is an [Agent Skill](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview) that teaches coding agents to use Gostman's MCP tools and command line. `gostman init --skill` writes it to `.claude/skills/gostman/SKILL.md` in the current folder, where Claude Code finds it; an existing file is left as it is. For other agents, copy the file to the folder they read skills from.
+`skills/gostman/SKILL.md` in the repository is an [Agent Skill](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview) that teaches coding agents to use Gostman's MCP tools and command line. `gostman init --skill` writes it to `.claude/skills/gostman/SKILL.md` in the current folder, where Claude Code finds it; an existing file is left as it is. For other agents, copy the file to the folder they read skills from, or use the [skills CLI](https://vercel.com/docs/agent-resources/skills) as shown below.
+
+## Set up with your coding agent
+
+Install the Gostman Agent Skill for the coding agents on your machine:
+
+```bash
+npx skills add kunalgoesbyken/gostman --skill gostman
+```
+
+Or copy this prompt into your coding agent, from your project:
+
+```text
+Set up Gostman in this project so you can call and test its APIs without curl.
+
+1. If `gostman version` fails, install the gostman command with `go install github.com/kunalgoesbyken/gostman/cmd/gostman@latest`, or download the gostman-cli archive for this platform from https://github.com/kunalgoesbyken/gostman/releases/latest.
+2. Run `gostman init --skill` in the project root. Note the workspace folder and the `mcp` registration command it prints.
+3. Register that command with your MCP client, using the absolute workspace path.
+4. If the project has an OpenAPI spec, run `gostman import <spec> --out <workspace>`. Otherwise ask me which API to call.
+5. Send one request with the gostman tools, run the workspace with `gostman run <workspace>`, and tell me what passed.
+
+Never pass --reveal. Keep credentials in {{variables}}, and ask me before calling a host that my saved requests do not already use.
+```

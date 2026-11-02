@@ -3,14 +3,13 @@ import { docPath } from "../../docs/manifest"
 import { VSCODE_MARKETPLACE_URL } from "../../lib/siteLinks"
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs"
 import { BrandIcon } from "../ui/brandIcon"
-import { MCP_CLIENTS, MCP_NEEDS_CLI, MCP_TITLE, VSCODE_BUTTON } from "./content"
+import { AGENT_PROMPT, AGENT_PROMPT_NOTE, AGENT_SETUP_TITLE, AGENT_SKILL_COMMAND, AGENT_SKILL_NOTE, MCP_CLIENTS, MCP_NEEDS_CLI, MCP_TITLE, VSCODE_BUTTON } from "./content"
 import { ArrowUpRight } from "./icons"
 import { TerminalBlock } from "./TerminalBlock"
 
-const snippetLines = (client) =>
-  client.file
-    ? client.snippet.split("\n").map((text) => ({ text, tone: "command" }))
-    : [{ copy: client.snippet }]
+const textLines = (text) => text.split("\n").map((line) => ({ text: line, tone: "command" }))
+
+const snippetLines = (client) => (client.file ? textLines(client.snippet) : [{ copy: client.snippet }])
 
 export function EditorStrip({ className, style }) {
   const [chosenId, setChosenId] = useState(MCP_CLIENTS[0].id)
@@ -59,6 +58,13 @@ export function EditorStrip({ className, style }) {
             MCP docs
           </a>
         </p>
+      </div>
+      <div className="w-full">
+        <p className="mb-2 text-sm font-medium text-foreground">{AGENT_SETUP_TITLE}</p>
+        <TerminalBlock title="Skill" lines={[{ copy: AGENT_SKILL_COMMAND }]} label="Install the Gostman Agent Skill" />
+        <p className="mt-2 text-xs text-muted-foreground">{AGENT_SKILL_NOTE}</p>
+        <p className="mb-2 mt-5 text-xs text-muted-foreground">{AGENT_PROMPT_NOTE}</p>
+        <TerminalBlock title="Prompt" lines={textLines(AGENT_PROMPT)} label="Prompt that sets up Gostman in a coding agent" copyText={AGENT_PROMPT} />
       </div>
     </div>
   )

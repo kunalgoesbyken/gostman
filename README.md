@@ -136,6 +136,28 @@ Windows needs the WebView2 runtime, which ships with Windows 10 and 11; the inst
 - **VS Code:** install [Gostman from the Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Gostman.gostman). It calls the `gostman` command, so install the command line too. See [VS Code extension](docs/vscode.md).
 - **Coding agents:** `gostman mcp <workspace>` serves a workspace over MCP, and `gostman init --skill` writes the Agent Skill. See [Use from a coding agent](docs/agents.md).
 
+#### Set up with your coding agent
+
+Install the Gostman Agent Skill for the coding agents on your machine:
+
+```bash
+npx skills add kunalgoesbyken/gostman --skill gostman
+```
+
+Or copy this prompt into your coding agent, from your project:
+
+```text
+Set up Gostman in this project so you can call and test its APIs without curl.
+
+1. If `gostman version` fails, install the gostman command with `go install github.com/kunalgoesbyken/gostman/cmd/gostman@latest`, or download the gostman-cli archive for this platform from https://github.com/kunalgoesbyken/gostman/releases/latest.
+2. Run `gostman init --skill` in the project root. Note the workspace folder and the `mcp` registration command it prints.
+3. Register that command with your MCP client, using the absolute workspace path.
+4. If the project has an OpenAPI spec, run `gostman import <spec> --out <workspace>`. Otherwise ask me which API to call.
+5. Send one request with the gostman tools, run the workspace with `gostman run <workspace>`, and tell me what passed.
+
+Never pass --reveal. Keep credentials in {{variables}}, and ask me before calling a host that my saved requests do not already use.
+```
+
 ## Secrets and Git
 
 A folder workspace is meant to be committed. What goes where:
