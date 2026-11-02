@@ -4,6 +4,13 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.11.2] - 2026-11-03
+
+### Fixed
+
+- Hovering a {{variable}} in the URL bar no longer shows the browser tooltip over the variable info box.
+- The header logo is drawn as a vector, so its ring stays crisp on Linux.
+
 ## [1.11.1] - 2026-11-02
 
 ### Added
