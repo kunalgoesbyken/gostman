@@ -65,6 +65,7 @@ async function runStage(stage, job, request, { send, trace, referenced, timeoutM
   const environment = environmentFor(store(), request)?.name ?? ''
   const run = await trace.timed(scriptEntry(stage), () => runInSandbox({ ...job, layers, cookies, environment }, send, timeoutMs))
   if (isPlainObject(run.writes)) store().applyVariableWrites(run.writes, request)
+  if (Array.isArray(run.vaultNames) && run.vaultNames.length > 0) store().markVaultSecrets(run.vaultNames, request)
   const changed = acceptedCookies(run.cookies, hosts)
   if (changed.length > 0) store().storeCookies(changed)
   return { ...run, error: run.error ? `${stage}: ${run.error}` : '' }

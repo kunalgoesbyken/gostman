@@ -649,6 +649,10 @@ export const useAppStore = create(
           get().storeSessionVariables(writes[SCOPE_SESSION] || {}, persistent.flatMap((scope) => namesWithValues(writes[scope])))
           return saved
         },
+        markVaultSecrets: (names, request) => set((state) => mapEnvironment(state, environmentFor(state, request)?.id, (environment) => ({
+          ...environment,
+          meta: withSecretMarks(environment.meta || EMPTY_VARIABLES, JSON.stringify(Object.fromEntries(names.map((name) => [name, { secret: true }]))), names),
+        }))),
         mergeEnvironments: (incoming, scope = 'collection') => {
           const { list, active } = ENVIRONMENT_LISTS[scope]
           const environments = [...get()[list]]

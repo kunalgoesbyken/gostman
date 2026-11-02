@@ -24,7 +24,7 @@ Scripts are JavaScript. They run in an isolated worker with no network access of
 | `setNextRequest(name)`, `skipRequest()`, `stopExecution()` | Change the order of a run: jump to a request by name or `Folder/Name` path, skip this one, or stop. `setNextRequest(null)` ends the current iteration, as in Postman and Bruno; with a data file or several iterations, the next one still runs. Requests that a jump or a stop passed over are reported as skipped, with the request whose script moved the run. A pass through a run may send at most 1000 more requests than it holds; a loop that goes past that, such as a retry that never succeeds, stops the run and fails the request whose script kept jumping. |
 | `utils` | `uuid()`, `md5`, `sha1`, `sha256`, `sha512` (`hex` or `base64` output), `hmac(algorithm, key, text)`, `base64`, `hex` and `url` with `encode` and `decode`, `date` (`now`, `timestamp`, `unix`, `format`, `add`) and `random` (`int`, `string`, `pick`). |
 | `visualize(template, data)`, `visualize.table(rows)` | Renders an HTML view of the response in its **Visualize** tab. Templates use `{{field}}`, `{{#each list}}` and `{{#if value}}`; values are escaped. |
-| `require(name)` | The bundled modules `lodash`, `crypto-js`, `uuid`, `moment`, `dayjs`, `ajv` and `chai`. In a trusted folder on the desktop, also `./` and `../` files inside the folder. |
+| `require(name)` | The bundled modules `lodash`, `crypto-js`, `uuid`, `moment`, `dayjs`, `ajv` and `chai`. In a trusted folder on the desktop, also `./` and `../` files inside the folder and packages from the `packages/` folder (see [Packages and the vault](#packages-and-the-vault)). |
 | `pm` | Postman's script API, so scripts pasted from Postman run as they are; see [Postman and Insomnia scripts](#postman-and-insomnia-scripts). |
 | `insomnia` | Insomnia's script API, the same as `pm` plus `insomnia.baseEnvironment`. |
 | `bru` | Bruno's script API, so scripts pasted from Bruno run as they are; see [Scripts from Postman and Bruno](#scripts-from-postman-and-bruno). `bru.cookies` reads and changes the cookies sent to this request's URL; `bru.cookies.jar()` reaches only the cookies of localhost and of hosts the collection's requests use, the same hosts `sendRequest` may call. |
@@ -86,6 +86,12 @@ test("matches the schema", () => {
 ```
 
 Scripts that use Ajv, `const validate = new (require("ajv"))().compile(schema)`, keep working; `validate.errors` has Ajv's fields.
+
+## Packages and the vault
+
+In a trusted workspace folder, `require("@team/utils")` and `pm.require("@team/utils")` load `packages/@team/utils` from the workspace: the file named by `main` in its `package.json`, else `index.js` or `index.json`. A name without a scope, such as `require("helpers")`, loads `packages/helpers`. Files inside a package can `require` each other with `./` paths and can require other packages by name. The bundled modules win over a package of the same name, and a name cannot contain `..`. The `packages/` folder is committed with the rest of the workspace, so the team shares it through Git. Postman's hosted package library is not reachable; copy the package source into the folder.
+
+`await pm.vault.get("name")` returns the value of the variable `name`, and `await pm.vault.set("name", value)` writes it to the active environment and marks it secret, so its value is not written to workspace files or exports. `pm.vault.unset("name")` removes it. The names in a Postman vault are not imported; create the variables as secret variables in an environment.
 
 Sign a request in a pre-request script:
 

@@ -8,6 +8,8 @@ import { createUuid } from './uuid'
 
 const PlainFunction = (() => {}).constructor
 const LOCAL_EXTENSIONS = ['', '.js', '.json']
+const PACKAGES_DIRECTORY = 'packages'
+const PACKAGE_NAME = /^(?:@[A-Za-z0-9_.-]+\/)?[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)*$/
 
 const BUNDLED = {
   lodash: createLodash,
@@ -25,7 +27,7 @@ const BUNDLED = {
 
 export const MODULE_NAMES = Object.keys(BUNDLED)
 
-const missing = (specifier) => new Error(`Cannot find module "${specifier}". Available modules: ${MODULE_NAMES.join(', ')}. Local files need a trusted folder in the desktop app.`)
+const missing = (specifier) => new Error(`Cannot find module "${specifier}". Available modules: ${MODULE_NAMES.join(', ')}. Local files and the packages folder need a trusted workspace folder.`)
 
 const escapes = (specifier) => new Error(`"${specifier}" is outside the collection folder.`)
 
@@ -64,6 +66,22 @@ export function createRequire(files = {}) {
 
   const findFile = (base) => LOCAL_EXTENSIONS.flatMap((extension) => [base + extension, `${base}/index${extension}`]).find((candidate) => Object.hasOwn(files, candidate))
 
+  const packageMain = (base) => {
+    if (!Object.hasOwn(files, `${base}/package.json`)) return undefined
+    try {
+      const { main } = JSON.parse(files[`${base}/package.json`])
+      return typeof main === 'string' ? findFile(resolvePath(base, main)) : undefined
+    } catch {
+      return undefined
+    }
+  }
+
+  const findPackage = (specifier) => {
+    if (!PACKAGE_NAME.test(specifier) || specifier.split('/').some((part) => part === '.' || part === '..')) return undefined
+    const base = `${PACKAGES_DIRECTORY}/${specifier}`
+    return packageMain(base) ?? findFile(base)
+  }
+
   function execute(path, depth) {
     if (loaded.has(path)) return loaded.get(path).exports
     if (depth > MAX_MODULE_DEPTH) throw new Error('Local modules require each other too deeply.')
@@ -81,12 +99,11 @@ export function createRequire(files = {}) {
   const requireFrom = (directory, depth) => (specifier) => {
     if (typeof specifier !== 'string') throw new TypeError('require needs a module name.')
     if (Object.hasOwn(BUNDLED, specifier)) return bundledModule(specifier)
-    if (!isLocal(specifier)) throw missing(specifier)
-    if (!checked) {
+    if (!checked && Object.keys(files).length > 0) {
       checkBudget(files)
       checked = true
     }
-    const path = findFile(resolvePath(directory, specifier))
+    const path = isLocal(specifier) ? findFile(resolvePath(directory, specifier)) : findPackage(specifier)
     if (path === undefined) throw missing(specifier)
     return execute(path, depth)
   }

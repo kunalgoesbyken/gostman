@@ -170,9 +170,27 @@ function infoOf(layered, request, response) {
   }
 }
 
-export function createPostman({ scopes, environmentName, request, response, cookies, flow, test, sendRequest, respond, visualize }) {
+function createVault(scopes, remember) {
+  const environment = scopes[SCOPE_ENVIRONMENT]
+  return {
+    get: (key) => Promise.resolve(scopes.layered.get(String(key))),
+    set: (key, value) => {
+      environment.set(String(key), value)
+      remember(String(key))
+      return Promise.resolve()
+    },
+    unset: (key) => {
+      environment.unset(String(key))
+      return Promise.resolve()
+    },
+  }
+}
+
+export function createPostman({ scopes, environmentName, request, response, cookies, flow, test, sendRequest, respond, visualize, require, vaultKeys = () => {} }) {
   const { layered } = scopes
   return {
+    require,
+    vault: createVault(scopes, vaultKeys),
     environment: { ...variableScope(scopes[SCOPE_ENVIRONMENT]), name: environmentName },
     variables: variableScope({ ...scopes[SCOPE_SESSION], ...layered }),
     collectionVariables: variableScope(scopes[SCOPE_COLLECTION]),

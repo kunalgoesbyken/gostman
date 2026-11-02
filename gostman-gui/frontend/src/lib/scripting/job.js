@@ -86,8 +86,10 @@ export async function runJob({ script, assertions, request, response, layers, mo
   let visualization = ''
   const visualize = createVisualizer((html) => { visualization = html })
   const res = createResponse(response)
+  const requireModule = createRequire(modules)
+  const vaultNames = new Set()
   const adapters = { scopes, environmentName: name, flow: flow.api, request: scriptRequest, cookies: jar.api, sendRequest, respond: tracker.respond }
-  const pm = createPostman({ ...adapters, response: res, test: runner.test, visualize })
+  const pm = createPostman({ ...adapters, response: res, test: runner.test, visualize, require: requireModule, vaultKeys: (name) => vaultNames.add(name) })
   const api = {
     req: scriptRequest,
     res,
@@ -101,7 +103,7 @@ export async function runJob({ script, assertions, request, response, layers, mo
     sendRequest,
     visualize,
     utils: createUtils(),
-    require: createRequire(modules),
+    require: requireModule,
     ...flow.api,
   }
 
@@ -122,6 +124,7 @@ export async function runJob({ script, assertions, request, response, layers, mo
     logs,
     error,
     writes: scopes.writes,
+    vaultNames: [...vaultNames],
     request: editedRequest(scriptRequest),
     flow: flow.state,
     visualization,

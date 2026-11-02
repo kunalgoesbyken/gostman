@@ -119,7 +119,7 @@ A name your script declares that Gostman scripts already have, such as `const re
 
 Kept as written and listed in the summary with their line, so you can rewrite them before running:
 
-- `pm.vault`, `pm.require("@team/package")`, `pm.execution.runRequest`, `pm.execution.location` and `pm.info.eventName`.
+- `pm.execution.runRequest`, `pm.execution.location` and `pm.info.eventName`.
 - `pm.iterationData.set` and `unset`, `pm.request.url.query.add` and the other URL editing calls, and `pm.request.body.update` with an object.
 - `pm.cookies.jar()`. Use `bru.cookies.jar()`, whose methods are `setCookie`, `getCookie`, `getCookies`, `deleteCookie` and `deleteCookies`.
 - `pm.test.skip`, `xml2Json`, `cheerio` and `require` of other modules.
@@ -195,5 +195,5 @@ Extract rules become lines at the top of the post-response script, such as `pm.c
 
 - Cloud workspaces with live sync, roles, comments and an activity feed. Gostman shares through Git or encrypted links. See [Sharing and documentation](sharing-and-docs.md).
 - Hosted monitors and hosted mock servers. Gostman runs both where you run it, so a check from several regions, or one that runs while your computer is off, needs a server or CI schedule you provide.
-- The public API network, and a package library for `pm.require`.
+- The public API network, and a hosted package library. `pm.require("@team/package")` and `require("@team/package")` read packages from a `packages/` folder in the workspace instead; see [Packages and the vault](scripting-and-settings.md#packages-and-the-vault).
 - A larger community and a longer history. Gostman is a smaller project; report problems on [GitHub](https://github.com/kunalgoesbyken/gostman/issues).
