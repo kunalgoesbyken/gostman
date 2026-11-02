@@ -1,5 +1,5 @@
-import { memo, useEffect, useState } from "react"
-import { Check, FolderPlus, ListChecks, Plus, RotateCcw, Settings2 } from "lucide-react"
+import { memo, useEffect, useRef, useState } from "react"
+import { Check, FolderPlus, Import, Plus, RotateCcw } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
 import { ResizablePane, Toolbar } from "./ui/panel"
@@ -9,7 +9,7 @@ import { GlobalSearch } from "./GlobalSearch"
 import { HistoryList } from "./HistoryList"
 import { OpenTabsList } from "./OpenTabsList"
 import { FlowList } from "./flows/FlowList"
-import { rootSettingsTitle } from "../lib/inheritance"
+import { IMPORT_TEXT } from "../lib/importText"
 import { SIDEBAR_PANE, isNarrowViewport } from "../lib/layout"
 import { SIDEBAR_TEXT, sidebarViewName } from "../lib/sidebarText"
 import { DEFAULT_SIDEBAR_VIEWS, VIEW_COLLECTIONS, VIEW_FLOWS, VIEW_HISTORY, VIEW_SEARCH, VIEW_TABS, canHideView, visibleViews, withViewVisible } from "../lib/sidebarViews"
@@ -59,6 +59,12 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
   }, [viewRequest])
   const view = shown.includes(chosen) ? chosen : shown[0]
   const [menuPosition, setMenuPosition] = useState(null)
+  const [addPosition, setAddPosition] = useState(null)
+  const addRef = useRef(null)
+  const toggleAddMenu = () => {
+    const rect = addRef.current.getBoundingClientRect()
+    setAddPosition(addPosition ? null : { x: rect.right, y: rect.bottom })
+  }
   const newRequestShortcut = useShortcutLabel("newRequest")
   const closeSidebar = useAppStore((s) => s.closeSidebar)
   const searchNonce = useAppStore((s) => s.globalSearch.nonce)
@@ -71,7 +77,12 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
     onTabSelect(tabId)
     if (isNarrowViewport()) closeSidebar()
   }
-  const settingsLabel = useAppStore((s) => rootSettingsTitle(s.workspaceStatus.path))
+  const openImportDialog = useAppStore((s) => s.openImportDialog)
+  const addItems = [
+    { id: "new-request", label: SIDEBAR_TEXT.newRequest, icon: Plus, shortcut: newRequestShortcut, onSelect: () => actions.newRequest() },
+    { id: "new-folder", label: SIDEBAR_TEXT.newFolder, icon: FolderPlus, onSelect: () => actions.createFolder() },
+    { id: "import", label: IMPORT_TEXT.importButton, icon: Import, onSelect: openImportDialog },
+  ]
 
   return (
     <ResizablePane
@@ -96,10 +107,7 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
             <OverflowTabsList label={SIDEBAR_TEXT.views} items={viewItems(shown, tabs.length, requestHistory.length)} moreLabel={SIDEBAR_TEXT.more} moreHint={SIDEBAR_TEXT.moreHint} />
           </div>
           <div className={cn("flex shrink-0 items-center gap-0", view === VIEW_FLOWS && "hidden")}>
-            <IconButton label={SIDEBAR_TEXT.runRequests} icon={ListChecks} onClick={() => actions.openRunner()} />
-            <IconButton label={settingsLabel} icon={Settings2} onClick={() => actions.openFolderSettings()} />
-            <IconButton label={SIDEBAR_TEXT.newFolder} icon={FolderPlus} onClick={() => actions.createFolder()} />
-            <IconButton label={hintWithShortcut(SIDEBAR_TEXT.newRequest, newRequestShortcut)} icon={Plus} onClick={() => actions.newRequest()} />
+            <IconButton ref={addRef} label={hintWithShortcut(SIDEBAR_TEXT.add, newRequestShortcut)} icon={Plus} aria-haspopup="menu" aria-expanded={Boolean(addPosition)} onClick={toggleAddMenu} />
           </div>
         </Toolbar>
 
@@ -119,6 +127,7 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
           <HistoryList entries={requestHistory} actions={actions} />
         </TabsContent>
       </Tabs>
+      {addPosition && <ContextMenu position={addPosition} title={SIDEBAR_TEXT.add} items={addItems} onClose={() => setAddPosition(null)} />}
       {menuPosition && <ContextMenu position={menuPosition} title={SIDEBAR_TEXT.viewsMenu} items={viewMenuItems(views)} onClose={() => setMenuPosition(null)} />}
     </ResizablePane>
   )

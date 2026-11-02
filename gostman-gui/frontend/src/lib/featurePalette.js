@@ -15,6 +15,6 @@ export function featureCommands(seenVersion) {
     payload: feature.id,
     tag: isMissingHere(feature, isDesktop) ? FEATURES_TEXT.platformDesktop : '',
     isNew: isNewFeature(feature, seenVersion),
-    onlyWhenSearching: !feature.palette,
+    onlyWhenSearching: !(feature.palette || feature.tool),
   }))
 }

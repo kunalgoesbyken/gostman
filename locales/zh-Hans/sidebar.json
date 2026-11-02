@@ -3,7 +3,6 @@
     "views": "侧边栏视图",
     "collections": "集合",
     "history": "历史记录",
-    "runRequests": "运行请求",
     "newFolder": "新建文件夹",
     "newRequest": "新建请求",
     "toggle": "切换侧边栏",

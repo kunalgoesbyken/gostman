@@ -1,4 +1,4 @@
-import { Activity, ArrowDown, ArrowUp, Bug, CheckSquare, ClipboardPaste, Copy, FileCheck, FileSearch, Folder, FolderInput, FolderPlus, ListChecks, Palette, Pencil, Plus, RefreshCw, Scissors, Settings2, Share2, Tag, Trash2, Workflow, X } from "lucide-react"
+import { Activity, ArrowDown, ArrowUp, Bug, CheckSquare, ClipboardPaste, Copy, FileCheck, FileSearch, Folder, FolderInput, FolderPlus, ListChecks, MoreHorizontal, Palette, Pencil, Plus, RefreshCw, Scissors, Settings2, Share2, Tag, Trash2, Workflow, X } from "lucide-react"
 import { CONTRACT_TEXT } from "./checksText"
 import { DEPENDENCIES_TEXT } from "./dependenciesText"
 import { DIALOG_TEXT } from "./dialogText"
@@ -43,18 +43,25 @@ function folderMenuItems(folder, context) {
   const source = { kind: ROW_FOLDER, id: folder.id }
   return [
     { id: "new-request", label: TREE_TEXT.newRequest, icon: Plus, onSelect: () => actions.newRequest(folder.id) },
-    { id: "new-subfolder", label: TREE_TEXT.newSubfolder, icon: FolderPlus, onSelect: () => actions.createFolder(folder.id) },
     { id: "run", label: TREE_TEXT.runFolder, icon: ListChecks, onSelect: () => actions.openRunner(folder.id) },
-    { id: "dependencies", label: DEPENDENCIES_TEXT.menuFolder, icon: Workflow, onSelect: () => actions.openDependencyGraph(folder.id) },
-    { id: "negative", label: TREE_TEXT.negativeFolder, icon: Bug, onSelect: () => actions.openNegative(folder.id) },
     { id: "monitor", label: MONITORS_TEXT.menuFolder, icon: Activity, onSelect: () => actions.monitorFolder(folder.id) },
     { id: "share", label: TREE_TEXT.shareFolder, icon: Share2, onSelect: () => actions.shareFolder(folder.id) },
-    ...(isLinked ? specMenuItems(folder, actions, context) : [{ id: "spec-link", label: CONTRACT_TEXT.link, icon: FileCheck, onSelect: () => actions.openapi.linkFolder(folder) }]),
     { id: "settings", label: isCollection ? FOLDER_SETTINGS_TEXT.collectionMenu : FOLDER_SETTINGS_TEXT.menuSettings, icon: Settings2, onSelect: () => actions.openFolderSettings(folder.id) },
-    { id: "labels", label: TREE_TEXT.editLabels, icon: Palette, onSelect: () => editLabels(source) },
-    ...arrangeItems(source, { ...context, pasteRow: source }),
-    { id: "rename", label: DIALOG_TEXT.rename, icon: Pencil, onSelect: () => actions.renameFolder(folder) },
-    { id: "delete", label: TREE_TEXT.delete, icon: Trash2, destructive: true, onSelect: () => actions.deleteFolder(folder) },
+    {
+      id: "more",
+      label: TREE_TEXT.more,
+      icon: MoreHorizontal,
+      items: [
+        { id: "new-subfolder", label: TREE_TEXT.newSubfolder, icon: FolderPlus, onSelect: () => actions.createFolder(folder.id) },
+        { id: "dependencies", label: DEPENDENCIES_TEXT.menuFolder, icon: Workflow, onSelect: () => actions.openDependencyGraph(folder.id) },
+        { id: "negative", label: TREE_TEXT.negativeFolder, icon: Bug, onSelect: () => actions.openNegative(folder.id) },
+        ...(isLinked ? specMenuItems(folder, actions, context) : [{ id: "spec-link", label: CONTRACT_TEXT.link, icon: FileCheck, onSelect: () => actions.openapi.linkFolder(folder) }]),
+        { id: "labels", label: TREE_TEXT.editLabels, icon: Palette, onSelect: () => editLabels(source) },
+        ...arrangeItems(source, { ...context, pasteRow: source }),
+        { id: "rename", label: DIALOG_TEXT.rename, icon: Pencil, onSelect: () => actions.renameFolder(folder) },
+        { id: "delete", label: TREE_TEXT.delete, icon: Trash2, destructive: true, onSelect: () => actions.deleteFolder(folder) },
+      ],
+    },
   ]
 }
 

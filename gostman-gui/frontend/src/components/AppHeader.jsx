@@ -3,6 +3,7 @@ import { ArrowLeft, CircleHelp, Compass, Download, Hand, Import, Info, Keyboard,
 import { Button, IconButton } from "./ui/button"
 import { EnvironmentSwitcher } from "./EnvironmentSwitcher"
 import { StorageMenu } from "./StorageMenu"
+import { ToolsMenu } from "./ToolsMenu"
 import { ContextMenu } from "./ui/ContextMenu"
 import { WindowControls } from "./WindowControls"
 import { isDesktopShell, isDragRegion, windowControls } from "../lib/windowControls"
@@ -85,6 +86,7 @@ export function AppHeader({ storage, windowFrame, onImport, onOpenCommands, onTo
           {paletteShortcut && <kbd>{paletteShortcut}</kbd>}
         </Button>
         <IconButton label={COMMAND_TEXT.heading} icon={Search} size="icon" onClick={onOpenCommands} className="lg:hidden" />
+        <ToolsMenu style={drawsTitleBar ? NO_DRAG : undefined} />
         {gettingStarted}
         <HelpMenu style={drawsTitleBar ? NO_DRAG : undefined} />
         <EnvironmentSwitcher />

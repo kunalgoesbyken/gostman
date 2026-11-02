@@ -3,7 +3,6 @@
     "views": "Affichage de la barre latérale",
     "collections": "Collections",
     "history": "Historique",
-    "runRequests": "Exécuter les requêtes",
     "newFolder": "Nouveau dossier",
     "newRequest": "Nouvelle requête",
     "toggle": "Afficher ou masquer la barre latérale",

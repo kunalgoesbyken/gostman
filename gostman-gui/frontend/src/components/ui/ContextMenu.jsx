@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { SectionLabel } from "./panel"
@@ -27,30 +28,46 @@ const clampToViewport = (start, size, viewportSize) => (
 
 function MenuItem({ item, onClose }) {
   const Icon = item.icon
+  const [isExpanded, setIsExpanded] = useState(false)
+  const hasChildren = Boolean(item.items)
   const handleClick = () => {
+    if (hasChildren) {
+      setIsExpanded(!isExpanded)
+      return
+    }
     item.onSelect()
     if (!item.keepOpen) onClose()
   }
   return (
-    <button
-      type="button"
-      role="menuitem"
-      tabIndex={-1}
-      disabled={item.disabled}
-      onClick={handleClick}
-      title={item.label}
-      style={{ paddingLeft: BASE_PADDING_PX + Math.min(item.indent || 0, MAX_INDENT_LEVELS) * INDENT_STEP_PX }}
-      className={cn(
-        "flex h-7 w-full items-center gap-2 pe-3 text-start text-xs hover:bg-accent disabled:pointer-events-none disabled:opacity-40",
-        item.destructive && "text-destructive"
-      )}
-    >
-      {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
-      <span className="truncate">{item.label}</span>
-      {item.detail && <span className="ms-auto shrink-0">{item.detail}</span>}
-      {item.shortcut && <kbd className="ms-auto">{item.shortcut}</kbd>}
-    </button>
+    <>
+      <button
+        type="button"
+        role="menuitem"
+        tabIndex={-1}
+        disabled={item.disabled}
+        aria-haspopup={hasChildren ? "menu" : undefined}
+        aria-expanded={hasChildren ? isExpanded : undefined}
+        onClick={handleClick}
+        title={item.label}
+        style={{ paddingLeft: BASE_PADDING_PX + Math.min(item.indent || 0, MAX_INDENT_LEVELS) * INDENT_STEP_PX }}
+        className={cn(
+          "flex h-7 w-full items-center gap-2 pe-3 text-start text-xs hover:bg-accent disabled:pointer-events-none disabled:opacity-40",
+          item.destructive && "text-destructive"
+        )}
+      >
+        {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
+        <span className="truncate">{item.label}</span>
+        {item.detail && <span className="ms-auto shrink-0 text-muted-foreground">{item.detail}</span>}
+        {item.shortcut && <kbd className="ms-auto">{item.shortcut}</kbd>}
+        {hasChildren && <ChevronDown className={cn("ms-auto h-3.5 w-3.5 shrink-0", isExpanded && "rotate-180")} />}
+      </button>
+      {hasChildren && isExpanded && item.items.map((child) => <MenuItem key={child.id} item={{ ...child, indent: (item.indent || 0) + 1 }} onClose={onClose} />)}
+    </>
   )
+}
+
+function MenuHeading({ item }) {
+  return <SectionLabel role="presentation" className="block truncate px-3 pb-1 pt-2" title={item.label}>{item.label}</SectionLabel>
 }
 
 export function ContextMenu({ position, title, items, onClose }) {
@@ -111,7 +128,7 @@ export function ContextMenu({ position, title, items, onClose }) {
       className="fixed z-50 max-h-[calc(100dvh-1rem)] w-max min-w-56 max-w-[min(24rem,calc(100vw-1rem))] overflow-y-auto rounded-md border border-border bg-background py-1 shadow-lg"
     >
       {title && <SectionLabel className="block truncate px-3 py-1" title={title}>{title}</SectionLabel>}
-      {items.map((item) => <MenuItem key={item.id} item={item} onClose={onClose} />)}
+      {items.map((item) => (item.heading ? <MenuHeading key={item.id} item={item} /> : <MenuItem key={item.id} item={item} onClose={onClose} />))}
     </div>,
     document.body
   )

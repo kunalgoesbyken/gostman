@@ -51,13 +51,23 @@
     "exploreHint_one": "Search the {{count}} feature in Gostman, try it with a sample and read how it works.",
     "exploreHint_other": "Search the {{count}} features in Gostman, try them with a sample and read how they work.",
     "copied": "Copied {{command}}",
-    "copyFailed": "Could not copy {{command}}"
+    "copyFailed": "Could not copy {{command}}",
+    "toolsMenu": "Tools",
+    "toolsMenuHint": "Everything Gostman can do with your requests, by job",
+    "toolGroups": {
+      "build": "Build",
+      "test": "Test",
+      "automate": "Automate",
+      "mockCapture": "Mock and capture",
+      "shareGit": "Share and Git"
+    }
   },
   "featureWords": {
     "rest": {
       "title": "REST and HTTP requests",
       "blurb": "Send any method with params, headers, a body and auth, and read the status, timing and size.",
-      "synonyms": "http api get post put delete patch rest request"
+      "synonyms": "http api get post put delete patch rest request",
+      "tool": "New request"
     },
     "graphql": {
       "title": "GraphQL",
@@ -87,7 +97,8 @@
     "codegen": {
       "title": "Code snippets",
       "blurb": "Copy the request that is sent as cURL, Python, Go, JavaScript, Java, C# and more, including axios, httpx, OkHttp, RestSharp, Guzzle, HTTPie and wget.",
-      "synonyms": "code snippet generate curl python javascript fetch go java"
+      "synonyms": "code snippet generate curl python javascript fetch go java",
+      "tool": "Code"
     },
     "responseViewer": {
       "title": "Response viewer",
@@ -107,7 +118,8 @@
     "cookies": {
       "title": "Cookie jar",
       "blurb": "See, edit and clear the cookies kept for each domain.",
-      "synonyms": "cookie cookies jar session"
+      "synonyms": "cookie cookies jar session",
+      "tool": "Cookies"
     },
     "requestSettings": {
       "title": "Request settings",
@@ -172,12 +184,14 @@
     "folderWorkspace": {
       "title": "Folder workspaces",
       "blurb": "Keep a collection as plain YAML files next to your code and share it through Git.",
-      "synonyms": "folder workspace yaml files git bruno opencollection"
+      "synonyms": "folder workspace yaml files git bruno opencollection",
+      "tool": "Workspace"
     },
     "folderSettings": {
       "title": "Folder settings",
       "blurb": "Set headers, auth, variables, scripts and checks once for every request in a folder.",
-      "synonyms": "folder collection settings inherit headers auth scripts"
+      "synonyms": "folder collection settings inherit headers auth scripts",
+      "tool": "Collection settings"
     },
     "import": {
       "title": "Import",
@@ -197,7 +211,8 @@
     "share": {
       "title": "Share links",
       "blurb": "Send a collection as an encrypted link or file, with no account.",
-      "synonyms": "share link encrypted send team collaborate"
+      "synonyms": "share link encrypted send team collaborate",
+      "tool": "Share"
     },
     "versionedDocs": {
       "title": "Versioned documentation",
@@ -287,7 +302,8 @@
     "specLint": {
       "title": "OpenAPI linter",
       "blurb": "Check a spec for missing descriptions, examples and security.",
-      "synonyms": "lint openapi spectral swagger"
+      "synonyms": "lint openapi spectral swagger",
+      "tool": "Spec lint"
     },
     "specSync": {
       "title": "Spec sync",
@@ -297,7 +313,8 @@
     "runner": {
       "title": "Collection runner",
       "blurb": "Run a folder in order with CSV, JSON or XLSX data files, parallel runs and HTML or JUnit reports.",
-      "synonyms": "runner run collection postman collection runner newman data csv json xlsx iteration"
+      "synonyms": "runner run collection postman collection runner newman data csv json xlsx iteration",
+      "tool": "Run"
     },
     "flows": {
       "title": "Flows",
@@ -317,7 +334,8 @@
     "scan": {
       "title": "Secret scanner",
       "blurb": "Find tokens and passwords in a collection before you share it.",
-      "synonyms": "scan secrets leak token password credential gitleaks"
+      "synonyms": "scan secrets leak token password credential gitleaks",
+      "tool": "Scan secrets"
     },
     "cli": {
       "title": "Command line",
@@ -347,7 +365,8 @@
     "mock": {
       "title": "Mock server",
       "blurb": "Serve saved examples or an OpenAPI spec locally, with a live request log.",
-      "synonyms": "mock server stub fake wiremock prism examples"
+      "synonyms": "mock server stub fake wiremock prism examples",
+      "tool": "Mock server"
     },
     "mockRules": {
       "title": "Mock rules",
@@ -357,7 +376,8 @@
     "capture": {
       "title": "Capture proxy",
       "blurb": "Forward traffic to an upstream, record it and turn it into requests.",
-      "synonyms": "capture proxy record traffic intercept charles fiddler mitm"
+      "synonyms": "capture proxy record traffic intercept charles fiddler mitm",
+      "tool": "Capture proxy"
     },
     "captureRules": {
       "title": "Capture rules",
@@ -372,7 +392,8 @@
     "gitPanel": {
       "title": "Git panel",
       "blurb": "Diff, commit, push, branches, stash and history in the app.",
-      "synonyms": "git commit push pull branch stash diff version control"
+      "synonyms": "git commit push pull branch stash diff version control",
+      "tool": "Git"
     },
     "gitFieldDiff": {
       "title": "Field-level diffs",

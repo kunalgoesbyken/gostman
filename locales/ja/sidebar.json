@@ -3,7 +3,6 @@
     "views": "サイドバーの表示",
     "collections": "コレクション",
     "history": "履歴",
-    "runRequests": "リクエストを実行",
     "newFolder": "新しいフォルダー",
     "newRequest": "新しいリクエスト",
     "toggle": "サイドバーの表示を切り替え",

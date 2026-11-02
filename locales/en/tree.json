@@ -63,7 +63,8 @@
     "deleteManyMessage": "Delete {{subject}}? This can't be undone.",
     "deleteManyMessageFolders": "Delete {{subject}}? Anything inside a deleted folder that you did not select moves up one level. This can't be undone.",
     "deleteManyFailed": "Could not delete the selected items",
-    "moreTags": "+{{count}}"
+    "moreTags": "+{{count}}",
+    "more": "More"
   },
   "label": {
     "folderTitle": "Colour and tags: {{name}}",

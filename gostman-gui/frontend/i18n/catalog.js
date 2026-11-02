@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parse } from '@babel/parser'
-import { ACTIONS, FEATURES, GROUPS, PLATFORMS, SURFACES } from '../src/lib/featureCatalog.js'
+import { ACTIONS, FEATURES, GROUPS, PLATFORMS, SURFACES, TOOL_GROUPS } from '../src/lib/featureCatalog.js'
 import { RELEASES } from '../src/lib/releaseNotes.js'
 import { isValidVersion } from '../src/lib/versions.js'
 
@@ -74,6 +74,8 @@ for (const group of GROUPS) if (!FEATURES.some((feature) => feature.group === gr
 
 const seen = new Set()
 const surfaces = new Map()
+const toolSlots = new Map()
+for (const group of TOOL_GROUPS) if (!words.features?.toolGroups?.[group]) report(`features.toolGroups.${group} is missing in locales/en/features.json`)
 
 for (const feature of FEATURES) {
   const where = `feature ${feature.id}`
@@ -83,6 +85,13 @@ for (const feature of FEATURES) {
   if (!GROUPS.includes(feature.group)) report(`${where}: unknown group "${feature.group}"`)
   for (const platform of feature.platforms ?? []) if (!PLATFORMS.includes(platform)) report(`${where}: unknown platform "${platform}"`)
   if (feature.platforms && feature.platforms.length === 0) report(`${where}: platforms is empty; leave it out for both`)
+  if (feature.tool) {
+    const slot = `${feature.tool.group}:${feature.tool.order}`
+    if (!TOOL_GROUPS.includes(feature.tool.group)) report(`${where}: unknown tool group "${feature.tool.group}"`)
+    if (!Number.isInteger(feature.tool.order)) report(`${where}: tool.order must be a whole number`)
+    if (toolSlots.has(slot)) report(`${where}: tool slot ${slot} is already used by ${toolSlots.get(slot)}`)
+    toolSlots.set(slot, feature.id)
+  }
   if (feature.since !== undefined && !isValidVersion(feature.since)) report(`${where}: since "${feature.since}" is not a version`)
 
   const text = words.featureWords?.[camelId(feature.id)]
