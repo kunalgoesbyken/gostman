@@ -28,7 +28,14 @@ gostman run api --tags smoke --reporter json
 gostman import openapi.yaml --out api
 gostman lint openapi.yaml
 gostman scan api
+gostman diff old.yaml openapi.yaml --fail-on breaking
+gostman negative api --env Staging --allow-host staging.example.com
+gostman fuzz openapi.yaml --base-url http://localhost:8080 --seed 7
+gostman run api --every 5m --times 12
+gostman history api
 ```
+
+`diff` lists breaking changes between two OpenAPI specs. `negative` and `fuzz` send altered or schema-derived requests for real, so point them at a test or staging server; only localhost and `--allow-host` hosts are contacted, and the developer must ask for them. `run --every <duration>` repeats a run (with `--times`, `--until-fail`, `--notify`), and `history` shows the saved runs. Other `run` flags: `--contract spec.yaml --coverage --min-coverage 80` (OpenAPI coverage), `--update-snapshots` (rewrites stored snapshot checks; only when asked), `--data` with CSV, JSON or XLSX, `--redact`.
 
 Flows (`flows/*.yaml` in a workspace) chain saved requests with retries, other steps on failure, conditions and loops. `gostman flow list --workspace api` lists them and `gostman flow run Checkout --workspace api --env Local` runs one with the same flags, reports and exit codes as `gostman run`; a failure the flow handles does not fail it. Conditions in a flow are request checks (`res.body.state` `eq` `ready`), never JavaScript.
 

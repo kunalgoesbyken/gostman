@@ -39,11 +39,15 @@ go install github.com/kunalgoesbyken/gostman/cmd/gostman@latest
 
 On macOS the binary is not notarized. Run `xattr -d com.apple.quarantine gostman` once. The [command line reference](cli.md) lists every command.
 
+## Use it from an editor or a coding agent
+
+The [VS Code extension](vscode.md) runs collections and flows, sends a saved request, lints an OpenAPI spec and scans for secrets from the editor; install it from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Gostman.gostman) after the command line. `gostman mcp` serves a workspace to Claude Code, Codex and Cursor; see [Use from a coding agent](agents.md).
+
 ## Send your first request
 
 1. Choose a method, type a URL and press **Send**.
 2. Read the response below the request: **Body** in Pretty or Raw, **Headers** and **Cookies**, with the status, time and size beside them.
-3. Press **Save** to keep the request in your collection, or **Code** to copy it as code in one of 13 languages, from cURL and Python to C#, Swift and PowerShell.
+3. Press **Save** to keep the request in your collection, or **Code** to copy it as code in one of 21 targets, from cURL and Python to C#, Swift, PowerShell and wget.
 
 Next, the [tutorial](tutorial-first-collection.md) takes about fifteen minutes to turn one request into a tested collection with an environment, chained requests and a run from the command line.
 

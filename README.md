@@ -37,9 +37,9 @@ Both are good tools. Gostman is for people who want the paid-tier workflow witho
 - **No telemetry.** No analytics or crash reporting in the apps or the command line; they contact only the hosts you send to and the services you set up. Only the home page at gostman.com counts visits, without cookies. [What Gostman connects to](docs/getting-started.md#what-gostman-connects-to) lists every network call.
 - **No tiers.** Data-driven runs, parallel runs, HTML reports, secret managers (Vault, AWS, Azure, Google Cloud, 1Password, Bitwarden, Bitwarden Secrets Manager, KeePassXC), the Git panel and any number of collections are all in the download. Bruno documents several of these under its [Pro and Ultimate plans](https://www.usebruno.com/pricing), and Postman lists custom data files in the Collection Runner on its [paid plans](https://www.postman.com/pricing/).
 - **Sharing without Git.** Send a folder to a teammate as an encrypted link or file that is built on your machine and never uploaded.
-- **More in the same download.** Load testing, Socket.IO, MQTT, SignalR, GraphQL subscriptions, MCP servers, raw TCP and UDP, importers for Postman, Bruno, Insomnia, Hoppscotch, Thunder Client, HTTPie and Hurl, scheduled runs with a history, snapshot and negative tests, OpenAPI coverage and spec diff, traffic capture with rules and held calls, a secret scanner and a mock server, plus a command line that is one binary with no Node.js to install.
+- **More in the same download.** Load testing, Socket.IO, MQTT, SignalR, GraphQL subscriptions, MCP servers, raw TCP and UDP, NATS, importers for Postman, Bruno, Insomnia, Hoppscotch, Thunder Client, HTTPie, Hurl and Firecamp, scheduled runs with a history, snapshot and negative tests, OpenAPI coverage, spec diff and fuzzing, traffic capture with rules and held calls, a secret scanner and a mock server, a VS Code extension, plus a command line that is one binary with no Node.js to install.
 
-Prices and plans change, so check their pages before you decide. Gostman has no accounts, so it has no hosted collaboration, SSO or cloud monitors, and it has no VS Code extension. [What is free in Gostman](docs/free-features.md) compares the paid features of Postman, Bruno and Insomnia with Gostman. Moving from Postman, Bruno or Insomnia? [Coming from Postman](docs/coming-from-postman.md), [Coming from Bruno](docs/coming-from-bruno.md) and [Coming from Insomnia](docs/coming-from-insomnia.md) cover importing a collection, its scripts and the matching `gostman run` flags.
+Prices and plans change, so check their pages before you decide. Gostman has no accounts, so it has no hosted collaboration, SSO or cloud monitors. [What is free in Gostman](docs/free-features.md) compares the paid features of Postman, Bruno and Insomnia with Gostman. Moving from Postman, Bruno or Insomnia? [Coming from Postman](docs/coming-from-postman.md), [Coming from Bruno](docs/coming-from-bruno.md) and [Coming from Insomnia](docs/coming-from-insomnia.md) cover importing a collection, its scripts and the matching `gostman run` flags.
 
 ### Will Gostman add a paid tier?
 
@@ -88,11 +88,13 @@ Open the same folder in the desktop app with **Open folder** to see the requests
 
 ## Features
 
-- **Protocols:** REST, GraphQL (schema browser), gRPC (reflection or `.proto`), WebSocket, Socket.IO, MQTT over WebSocket, SignalR, GraphQL subscriptions, Server-Sent Events, SOAP, MCP servers and raw TCP and UDP (desktop), over HTTP or, on the desktop, as a local command (stdio).
+- **Protocols:** REST, GraphQL (schema browser), gRPC (reflection or `.proto`), WebSocket, Socket.IO, MQTT over WebSocket, SignalR, GraphQL subscriptions, Server-Sent Events, SOAP, MCP servers, and raw TCP and UDP and NATS (desktop), over HTTP or, on the desktop, as a local command (stdio).
 - **Auth:** Basic, Bearer, API key, OAuth 2.0 (with PKCE and automatic renewal), OAuth 1, Digest, AWS SigV4, NTLM, Akamai EdgeGrid, JWT Bearer, Atlassian ASAP and Hawk.
 - **Workflow:** collections with nested folders, environments and variables, extraction rules to chain requests, a cookie jar, history, earlier responses with a side-by-side compare, and a command palette.
-- **Checks:** assertions plus pre-request and post-response scripts with `test()` and `expect()` in a sandbox, and a collection runner with CSV or JSON data files, parallel runs and HTML, JUnit and JSON reports.
-- **Local load testing** with `gostman load`: latency percentiles and pass or fail thresholds.
+- **Checks:** assertions plus pre-request and post-response scripts with `test()` and `expect()` in a sandbox, and snapshot checks, and a collection runner with CSV, JSON or XLSX data files, parallel runs and HTML, JUnit and JSON reports.
+- **Scheduled runs:** `gostman run --every` and the Monitors dialog repeat a run, keep a history (`gostman history`) and post to a webhook when it starts failing.
+- **Local load testing** with `gostman load`: latency percentiles, thresholds and staged ramps.
+- **API testing from a spec:** `gostman negative` sends altered copies of saved requests, `gostman fuzz` sends schema-derived inputs for every operation of an OpenAPI document, `gostman diff` lists breaking changes between two specs, and `gostman run --contract --coverage` lists operations a run did not reach.
 - **Secret scanner:** `gostman scan` and an in-app check find credentials typed into a collection before you commit or share it.
 - **Collections as files:** plain YAML in a folder with a Git panel (diff, commit, push, branches, stash, conflicts) on the desktop.
 - **Mock server and capture:** serve saved examples or an OpenAPI spec locally, and record traffic from your own app.
@@ -102,9 +104,10 @@ Open the same folder in the desktop app with **Open folder** to see the requests
 - **Themes:** light and dark, eight palettes, accent colours, and your own background and text colour for each part of the window, with a contrast check.
 - **Sharing:** encrypted share links that never upload anything, and Open in Gostman links.
 - **For coding agents:** `gostman mcp` lets Claude Code, Codex and Cursor call your API through the collection without seeing your secrets.
+- **VS Code extension:** run collections, folders and flows, send a saved request, lint an OpenAPI spec and scan for secrets from the editor, through the Gostman CLI.
 - **AI assistant** (optional, bring your own key): generate requests, checks and scripts, and explain errors.
-- **Import and export:** Postman, OpenAPI, Insomnia, HAR, WSDL, Bruno, Hoppscotch, Thunder Client, HTTPie, Hurl, RAML, API Blueprint, .http files (VS Code REST Client, JetBrains HTTP Client) and curl in; Postman, OpenAPI, HAR, Bruno, .http files, Hurl files, a curl script, Markdown, an HTML docs page and a Gostman backup out.
-- **Code generation** for cURL, JavaScript, Python, Go, Java, Kotlin, C#, PHP, Ruby, Swift, Rust, Dart and PowerShell.
+- **Import and export:** Postman, OpenAPI, Insomnia, HAR, WSDL, Bruno, Hoppscotch, Thunder Client, HTTPie, Hurl, Firecamp, RAML, API Blueprint, .http files (VS Code REST Client, JetBrains HTTP Client) and curl in; Postman, OpenAPI, HAR, Bruno, .http files, Hurl files, a curl script, Markdown, an HTML docs page and a Gostman backup out.
+- **Code generation** for cURL, JavaScript, Python, Go, Java, Kotlin, C#, PHP, Ruby, Swift, Rust, Dart and PowerShell, plus axios, Node http, httpx, OkHttp, RestSharp, Guzzle, HTTPie and wget (21 targets).
 
 ## Install
 
@@ -126,6 +129,11 @@ The builds are not code-signed yet, so the operating system asks for confirmatio
 - **macOS**: right-click Gostman in Applications and choose **Open**, then confirm.
 
 Windows needs the WebView2 runtime, which ships with Windows 10 and 11; the installer fetches it when it is missing.
+
+### VS Code extension and MCP server
+
+- **VS Code:** install [Gostman from the Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Gostman.gostman). It calls the `gostman` command, so install the command line too. See [VS Code extension](docs/vscode.md).
+- **Coding agents:** `gostman mcp <workspace>` serves a workspace over MCP, and `gostman init --skill` writes the Agent Skill. See [Use from a coding agent](docs/agents.md).
 
 ## Secrets and Git
 
@@ -159,7 +167,7 @@ The same pages are published at [gostman.com/docs](https://gostman.com/docs). Th
 - Variables and secrets: [Variables](docs/variables.md), [Secrets and network settings](docs/secrets-and-network.md)
 - Testing and automation: [Scripts and checks](docs/scripting-and-settings.md), [Running, load testing and scanning](docs/runner-load-and-scan.md), [Gostman in CI](docs/ci.md)
 - Collections and Git: [Collections, tabs and Git](docs/collections-and-git.md), [Folder and collection settings](docs/folder-settings.md), [Folders, mock server and capture](docs/workspaces-and-mock.md), [Import, export and OpenAPI specs](docs/import-export-and-specs.md), [Sharing and documentation](docs/sharing-and-docs.md)
-- Agents and AI: [Use from a coding agent](docs/agents.md), [AI features](docs/ai.md)
+- Agents and AI: [Use from a coding agent](docs/agents.md), [VS Code extension](docs/vscode.md), [AI features](docs/ai.md)
 - Reference: [Command line](docs/cli.md), [Preferences, shortcuts and the command palette](docs/preferences-and-shortcuts.md)
 
 ## Translations

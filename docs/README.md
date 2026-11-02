@@ -20,7 +20,7 @@ Gostman is an API client for REST, GraphQL, gRPC and WebSocket that you, your CI
 ## Requests
 
 - [Requests and responses](requests-and-responses.md): the request editor, every body and auth type, and the response viewer.
-- [Protocols](protocols.md): REST, GraphQL, gRPC, WebSocket, Socket.IO, MQTT, Server-Sent Events, SOAP, MCP servers, SignalR, JSON-RPC and raw TCP and UDP.
+- [Protocols](protocols.md): REST, GraphQL, gRPC, WebSocket, Socket.IO, MQTT, Server-Sent Events, SOAP, MCP servers, SignalR, JSON-RPC and raw TCP and UDP, and NATS.
 
 ## Variables and secrets
 
@@ -50,7 +50,7 @@ Gostman is an API client for REST, GraphQL, gRPC and WebSocket that you, your CI
 
 ## Reference
 
-- [Command line](cli.md): `run`, `flow`, `send`, `load`, `mock`, `capture`, `docs`, `relay`, `scan`, `lint`, `init`, `import` and `export`.
+- [Command line](cli.md): `run`, `flow`, `send`, `history`, `load`, `negative`, `fuzz`, `diff`, `mock`, `capture`, `docs`, `relay`, `scan`, `lint`, `mcp`, `init`, `import` and `export`.
 - [Preferences, shortcuts and the command palette](preferences-and-shortcuts.md): the command palette, preferences and keyboard shortcuts.
 
 ## Help

@@ -3,7 +3,7 @@
     "rest": {
       "term": "Every protocol",
       "page": "protocols",
-      "text": "REST, GraphQL with a schema browser, gRPC through reflection or .proto files, WebSocket, Socket.IO, MQTT, SignalR, Server-Sent Events, SOAP and MCP in one window."
+      "text": "REST, GraphQL with a schema browser, gRPC through reflection or .proto files, WebSocket, Socket.IO, MQTT, SignalR, Server-Sent Events, SOAP, MCP, and on the desktop raw TCP, UDP and NATS, in one window."
     },
     "oauth": {
       "term": "Auth for real APIs",
@@ -18,7 +18,7 @@
     "response-viewer": {
       "term": "Responses",
       "page": "requests-and-responses",
-      "text": "JSON tree, HTML, image and PDF previews, headers, cookies, size and timing. Download any body, including binary, or copy it as code in 13 languages, including cURL, Python, Go, Java, C#, Swift and Rust."
+      "text": "JSON tree, HTML, image and PDF previews, headers, cookies, size and timing. Download any body, including binary, or copy it as code in 21 targets, including cURL, Python, Go, Java, C#, Swift, Rust and wget."
     },
     "scopes": {
       "term": "Variables done properly",
@@ -42,7 +42,7 @@
     "runner": {
       "term": "A runner built for CI",
       "page": "runner-load-and-scan",
-      "text": "CSV and JSON data, parallel runs, HTML and JUnit reports, and a CLI that exits non-zero on failure."
+      "text": "CSV, JSON and XLSX data, snapshot checks, scheduled runs, parallel runs, HTML and JUnit reports, and a CLI that exits non-zero on failure."
     },
     "mock": {
       "term": "Mock server",
@@ -62,7 +62,7 @@
     "import": {
       "term": "Import and export",
       "page": "import-export-and-specs",
-      "text": "Import Postman, OpenAPI, Insomnia, HAR, WSDL, Bruno collections, .http files and curl commands. Export to Postman, OpenAPI, Markdown, .http files or a backup.",
+      "text": "Import Postman, OpenAPI, Insomnia, HAR, WSDL, Bruno, Hoppscotch, Thunder Client, HTTPie, Hurl, Firecamp, RAML, API Blueprint, .http files and curl commands. Export to Postman, OpenAPI, Markdown, .http files or a backup.",
       "brands": [
         "postman",
         "openapi",
