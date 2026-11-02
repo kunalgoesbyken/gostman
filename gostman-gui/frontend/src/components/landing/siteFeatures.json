@@ -213,8 +213,8 @@
     "vscode": {
       "feature": "VS Code extension",
       "gostman": {
-        "state": "excluded",
-        "text": "No."
+        "state": "included",
+        "text": "Yes, runs collections through the CLI."
       },
       "postman": {
         "state": "included",

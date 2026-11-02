@@ -11,6 +11,8 @@ claude mcp add gostman -- gostman mcp --workspace /path/to/project/gostman --var
 
 Add your requests before the agent needs them, in the app or with `gostman import openapi.yaml --out <path>`: the agent gets the value of `API_TOKEN`, or of any other secret, only for addresses where one of your own requests sends `{{API_TOKEN}}` (see [Safety](#safety)).
 
+In VS Code, the [VS Code extension](vscode.md) runs collections and flows from the editor.
+
 ## Tools
 
 | Tool | What it does |

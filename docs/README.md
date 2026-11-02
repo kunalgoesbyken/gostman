@@ -45,6 +45,7 @@ Gostman is an API client for REST, GraphQL, gRPC and WebSocket that you, your CI
 ## Agents and AI
 
 - [Use from a coding agent](agents.md): the MCP server for Claude Code, Codex and Cursor.
+- [VS Code extension](vscode.md): run collections, flows, lint and scan from the editor.
 - [AI features](ai.md): the optional assistant, which uses your own key.
 
 ## Reference

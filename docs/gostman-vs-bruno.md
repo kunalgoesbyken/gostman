@@ -37,7 +37,7 @@ Checked on 26 October 2026. Plans and limits change often, so read the current [
 
 ## Where Bruno is stronger
 
-- **A VS Code extension.** It opens and edits `.bru` files and sends requests from the editor. Gostman has no editor extension.
+- **A VS Code extension.** It opens and edits `.bru` files and sends requests from the editor. Gostman's [VS Code extension](vscode.md) runs collections, flows, lints and scans through the CLI, but does not edit requests.
 - **Scripts with more reach.** In developer mode, Bruno scripts can read files, run commands and use npm packages. Gostman scripts always run in an isolated worker with a fixed set of bundled modules.
 - **Support and administration.** The pricing page lists a 48-hour support response on Pro and 24 hours on Ultimate, with SSO, SCIM, audit logs and licence management for organizations. Gostman's support is its [GitHub issues](https://github.com/kunalgoesbyken/gostman/issues).
 - **Documentation and reach.** Bruno's documentation covers a wide range of topics, including HTML documentation with a playground, OpenAPI sync and importers for Postman, Insomnia, OpenAPI and WSDL. Gostman is a smaller project with fewer users, and its desktop builds are not code-signed yet.

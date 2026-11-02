@@ -521,8 +521,13 @@
     },
     "vscode": {
       "title": "VS Code extension",
-      "blurb": "There is no VS Code extension.",
+      "blurb": "A VS Code extension runs collections, flows, lint and scan through the CLI.",
       "synonyms": "vscode extension editor"
+    },
+    "vscodeExtension": {
+      "title": "VS Code extension",
+      "blurb": "Run a collection, a folder or a flow, lint a spec and scan for secrets from the editor. It calls the Gostman command line, so a run matches CI.",
+      "synonyms": "vscode visual studio code extension editor ide marketplace"
     },
     "xlsxData": {
       "title": "Data files",

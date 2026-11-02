@@ -105,6 +105,7 @@ export const FEATURES = [
   { id: 'web-app', group: 'app', docs: 'getting-started', icon: 'globe', compare: 6 },
   { id: 'pricing', group: 'app', docs: 'free-features', icon: 'banknote', hidden: true, compare: 1 },
   { id: 'vscode', group: 'app', docs: 'free-features', icon: 'code', hidden: true, compare: 8 },
+  { id: 'vscode-extension', group: 'app', since: '1.10.0', platforms: ['desktop', 'web'], docs: 'vscode', icon: 'code' },
   { id: 'xlsx-data', group: 'automation', since: '1.9.0', docs: 'runner-load-and-scan#data-files', action: { type: 'dialog', id: 'runner' }, icon: 'file-spreadsheet' },
   { id: 'scheduled-runs', group: 'automation', since: '1.9.0', platforms: ['cli'], docs: 'cli#scheduled-runs', icon: 'timer' },
 ]

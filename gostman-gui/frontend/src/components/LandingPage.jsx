@@ -23,6 +23,7 @@ import { InstallCommands } from "./landing/InstallCommands"
 import { formatList } from "./landing/content"
 import { Brand } from "./landing/Brand"
 import { NavBar } from "./landing/NavBar"
+import { EditorStrip } from "./landing/EditorStrip"
 import { PointList } from "./landing/PointList"
 import { SiteFooter } from "./landing/SiteFooter"
 import { SplitHeading } from "./landing/SplitHeading"
@@ -304,6 +305,8 @@ export function LandingPage({ onGetStarted }) {
                     </div>
                   ))}
                 </div>
+
+                <EditorStrip className="intro mx-auto max-w-3xl pt-6" style={introStep(4)} />
               </div>
             </div>
           </section>

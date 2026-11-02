@@ -2,6 +2,8 @@
 
 `gostman run` sends every request of a workspace folder or export with its scripts, checks, extraction rules, cookies and OAuth 2 tokens. It needs no runtime, only the single binary.
 
+The [VS Code extension](vscode.md) runs the same command from the editor, so a local run matches CI.
+
 ## Exit codes
 
 | Code | Meaning |

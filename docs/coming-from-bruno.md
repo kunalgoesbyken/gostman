@@ -170,6 +170,6 @@ The `gostman` binary has nothing else to install, so CI needs no Node.js. The Gi
 
 ## What Bruno has that Gostman does not
 
-- A VS Code extension. Gostman has the desktop app, the web app and the command line.
+- A VS Code extension that opens and edits `.bru` files. Gostman's [VS Code extension](vscode.md) runs and sends from the editor but does not edit requests.
 - A redirect limit per request, and per-request switches for URL encoding and omitted headers.
 - A larger community and a longer history. Gostman is a smaller project; report problems on [GitHub](https://github.com/kunalgoesbyken/gostman/issues).

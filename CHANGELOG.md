@@ -2,6 +2,12 @@
 
 All notable changes to Gostman are listed here, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Earlier versions are on [GitHub Releases](https://github.com/kunalgoesbyken/gostman/releases).
 
+## [Unreleased]
+
+### Added
+
+- A [VS Code extension](docs/vscode.md) that runs collections, folders and flows, sends a saved request, lints an OpenAPI spec and scans for secrets through the Gostman CLI. The landing page now shows it next to the MCP server for coding agents.
+
 ## [1.9.0] - 2026-11-02
 
 ### Added

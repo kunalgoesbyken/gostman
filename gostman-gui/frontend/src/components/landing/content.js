@@ -9,3 +9,20 @@ export const AI_FEATURE = {
 export const SITE_LANGUAGE = "en"
 
 export const formatList = (items) => new Intl.ListFormat(SITE_LANGUAGE, { type: "conjunction" }).format(items)
+
+export const EDITOR_ENTRIES = [
+  {
+    key: "vscode",
+    title: "VS Code extension",
+    text: "Run collections, folders and flows, lint specs and scan for secrets from the editor, through the same CLI as CI.",
+    link: "Install extension",
+    docs: "vscode",
+  },
+  {
+    key: "mcp",
+    title: "MCP server for coding agents",
+    text: "gostman mcp lets Claude Code, Codex and Cursor call your APIs through your saved requests, with secrets kept out of reach.",
+    link: "MCP docs",
+    docs: "agents",
+  },
+]

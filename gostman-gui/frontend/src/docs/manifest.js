@@ -55,7 +55,7 @@ export const docSections = [
   },
   {
     title: "Agents and AI",
-    docs: [{ file: "agents.md", label: "Coding agents (MCP)" }, { file: "ai.md", label: "AI features" }],
+    docs: [{ file: "agents.md", label: "Coding agents (MCP)" }, { file: "vscode.md", label: "VS Code extension" }, { file: "ai.md", label: "AI features" }],
   },
   {
     title: "Reference",
