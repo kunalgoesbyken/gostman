@@ -1,20 +1,19 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react"
 import {
-  Activity, Bookmark, ChevronsDownUp, ClipboardPaste, Gauge, Clock, MonitorDown, Info, Hand, Folder, FolderOpen, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Pin, Plus, Radio, Save, Search, Send,
-  Bot, Server, Settings, Settings2, Share2, ShieldAlert, ShieldCheck, SlidersHorizontal, Trash2, Undo2, Upload, X,
+  ChevronsDownUp, ClipboardPaste, Clock, Compass, MonitorDown, Info, Hand, Folder, FolderOpen, Code, Copy, FileText, FolderPlus, Globe, History, Keyboard, PanelLeft, Pin, Plus, Save, Search, Send,
+  Bot, Settings, Settings2, ShieldCheck, SlidersHorizontal, Sparkles, Trash2, Undo2, X,
 } from "lucide-react"
 import { MethodTag } from "../MethodTag"
 import { SectionLabel } from "./panel"
 import { useFocusTrap } from "../../hooks/useFocusTrap"
 import { fuzzyScore } from "../../lib/fuzzy"
 import { PREFERENCES_TEXT } from "../../lib/preferencesText"
+import { featureCommands } from "../../lib/featurePalette"
+import { FEATURES_TEXT } from "../../lib/featuresText"
 import { ABOUT_TEXT } from "../../lib/aboutText"
 import { DATA_TEXT } from "../../lib/dataText"
 import { INSTALL_TEXT } from "../../lib/installText"
-import { SCAN_TEXT } from "../../lib/scanText"
 import { useInstallable } from "../../lib/pwa"
-import { LOAD_TEST_TEXT } from "../../lib/loadTestText"
-import { MONITORS_TEXT } from "../../lib/monitorsText"
 import { WELCOME_TEXT } from "../../lib/welcomeText"
 import { AI_TEXT } from "../../lib/aiText"
 import { WORKSPACE_TEXT } from "../../lib/workspaceText"
@@ -64,21 +63,9 @@ const appCommands = (holdsCollections) => [
   command("keyboard-shortcuts", COMMAND_TEXT.commands.shortcuts, "shortcuts", { icon: Keyboard, keywords: "?", shortcutId: "shortcutsHelp" }),
   command("new-folder", COMMAND_TEXT.commands.newFolder, "newFolder", { icon: FolderPlus }),
   { id: "collapse-folders", label: TREE_TEXT.collapseAll, description: TREE_TEXT.collapseAllDescription, icon: ChevronsDownUp, keywords: COMMAND_TEXT.commands.collapseFolders.keywords, action: "collapseFolders" },
-  command("run-collection", COMMAND_TEXT.commands.runCollection, "runCollection", { icon: ListChecks }),
   command("collection-settings", COMMAND_TEXT.commands.collectionSettings, "collectionSettings", { icon: Settings2 }),
   ...allCollectionsCommands(holdsCollections),
-  command("examples", COMMAND_TEXT.commands.examples, "examples", { icon: Bookmark }),
-  command("mock-server", COMMAND_TEXT.commands.mockServer, "mockServer", { icon: Server }),
-  command("capture", COMMAND_TEXT.commands.capture, "captureTraffic", { icon: Radio }),
-  command("environments", COMMAND_TEXT.commands.environments, "environments", { icon: Globe }),
-  command("cookies", COMMAND_TEXT.commands.cookies, "cookies", { icon: Cookie }),
-  { id: "scan-secrets", label: SCAN_TEXT.title, description: SCAN_TEXT.commandDescription, icon: ShieldAlert, keywords: COMMAND_TEXT.commands.scanSecrets.keywords, action: "scanSecrets" },
   { id: "preferences", label: PREFERENCES_TEXT.title, description: PREFERENCES_TEXT.commandDescription, icon: SlidersHorizontal, action: "preferences" },
-  command("network", COMMAND_TEXT.commands.network, "settings", { icon: Settings }),
-  command("import", COMMAND_TEXT.commands.import, "import", { icon: Upload }),
-  command("lint-spec", COMMAND_TEXT.commands.lintSpec, "lintSpec", { icon: ShieldCheck }),
-  command("export", COMMAND_TEXT.commands.export, "export", { icon: Download }),
-  command("share", COMMAND_TEXT.commands.share, "share", { icon: Share2 }),
   aiSettingsCommand(),
   command("clear-history", COMMAND_TEXT.commands.clearHistory, "clearHistory", { icon: History }),
   { id: "welcome", label: WELCOME_TEXT.commandTitle, description: WELCOME_TEXT.commandDescription, icon: Hand, action: "showWelcome" },
@@ -87,9 +74,10 @@ const appCommands = (holdsCollections) => [
 
 const resetCommand = () => ({ id: "reset", label: DATA_TEXT.commandTitle, description: DATA_TEXT.commandDescription, icon: Trash2, keywords: DATA_TEXT.commandKeywords, action: "reset", destructive: true })
 
-const monitorsCommand = () => ({ id: "monitors", label: MONITORS_TEXT.title, description: MONITORS_TEXT.commandDescription, icon: Activity, keywords: MONITORS_TEXT.commandKeywords, action: "monitors" })
-
-const loadTestCommand = () => ({ id: "load-test", label: LOAD_TEST_TEXT.commandTitle, description: LOAD_TEST_TEXT.commandDescription, icon: Gauge, keywords: COMMAND_TEXT.commands.loadTest.keywords, action: "loadTest" })
+const exploreCommands = () => [
+  { id: "explore", label: FEATURES_TEXT.commandTitle, description: FEATURES_TEXT.commandDescription, keywords: FEATURES_TEXT.commandKeywords, icon: Compass, action: "explore" },
+  { id: "whats-new", label: FEATURES_TEXT.whatsNewCommandTitle, description: FEATURES_TEXT.whatsNewCommandDescription, keywords: FEATURES_TEXT.whatsNewKeywords, icon: Sparkles, action: "whatsNew" },
+]
 
 const installCommand = () => ({ id: "install-app", label: INSTALL_TEXT.label, description: INSTALL_TEXT.description, icon: MonitorDown, action: "installApp" })
 
@@ -173,12 +161,22 @@ const historyItems = (history) => history.map((entry) => ({
 
 const commandItems = (commands) => commands.map((command) => ({ ...command, kind: KIND_COMMAND }))
 
-const itemScore = (item, needle) => {
-  if (item.kind === KIND_COMMAND) {
-    const label = fuzzyScore(item.label, needle)
-    if (label !== null) return label
-    return `${item.description} ${item.keywords || ""}`.toLowerCase().includes(needle) ? 1 : null
+const KEYWORD_MATCH = 1
+
+function commandScore(item, needle) {
+  const details = `${item.description} ${item.keywords || ""}`.toLowerCase()
+  let total = 0
+  for (const word of needle.split(/\s+/).filter(Boolean)) {
+    const label = fuzzyScore(item.label, word)
+    if (label !== null) total += label
+    else if (details.includes(word)) total += KEYWORD_MATCH
+    else return null
   }
+  return total
+}
+
+const itemScore = (item, needle) => {
+  if (item.kind === KIND_COMMAND) return commandScore(item, needle)
   const title = fuzzyScore(item.title, needle)
   if (title !== null) return title + NAME_MATCH_BONUS
   return fuzzyScore(`${item.path} ${item.method} ${item.url}`, needle)
@@ -196,7 +194,7 @@ function paletteItems({ commands, requests, history, query, mode }) {
   const showCommands = mode !== "requests"
   if (!needle) {
     return showCommands
-      ? commands
+      ? commands.filter((command) => !command.onlyWhenSearching)
       : [...requests.slice(0, MAX_RECENT_REQUESTS), ...history.slice(0, MAX_HISTORY_RESULTS)]
   }
   return [
@@ -218,6 +216,7 @@ const scrollWhenSelected = (isSelected) => (element) => {
 
 function CommandRow({ id, command, isSelected, onSelect, onHover }) {
   const Icon = command.icon
+  const tag = command.tag
   const shortcut = useShortcutLabel(command.shortcutId)
   return (
     <button
@@ -237,6 +236,8 @@ function CommandRow({ id, command, isSelected, onSelect, onHover }) {
         <span className="block truncate text-xs font-medium">{command.label}</span>
         <span className="block truncate text-2xs text-muted-foreground">{command.description}</span>
       </span>
+      {tag && <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-2xs text-muted-foreground">{tag}</span>}
+      {command.isNew && <span className="shrink-0 rounded bg-success/10 px-1.5 py-0.5 text-2xs text-success">{FEATURES_TEXT.newBadge}</span>}
       {shortcut && <kbd>{shortcut}</kbd>}
     </button>
   )
@@ -273,7 +274,7 @@ function SectionTitle({ kind }) {
   return <SectionLabel className="block px-3 pb-1 pt-2">{sectionTitles()[kind]}</SectionLabel>
 }
 
-function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspaces, hasLoadTest, isAiOn, holdsCollections, requests, folders, history, onClose, onCommand, onShowShortcuts }) {
+function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspaces, isAiOn, holdsCollections, seenVersion, requests, folders, history, onClose, onCommand, onShowShortcuts }) {
   const [query, setQuery] = useState("")
   const [selectedIndex, setSelectedIndex] = useState(0)
   const inputRef = useRef(null)
@@ -286,8 +287,8 @@ function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspace
   const commands = useMemo(
     () => commandItems([
       ...requestCommands(),
-      ...(hasLoadTest ? [loadTestCommand()] : []),
-      monitorsCommand(),
+      ...featureCommands(seenVersion),
+      ...exploreCommands(),
       ...(isAiOn ? aiCommands() : []),
       ...appCommands(holdsCollections),
       ...workspaceCommands(workspaces),
@@ -295,7 +296,7 @@ function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspace
       ...(canInstall ? [installCommand()] : []),
       resetCommand(),
     ]),
-    [environments, activeEnvironmentId, workspaces, hasLoadTest, isAiOn, holdsCollections, canInstall]
+    [environments, activeEnvironmentId, workspaces, isAiOn, holdsCollections, canInstall, seenVersion]
   )
   const requestRows = useMemo(() => requestItems(requests, folders), [requests, folders])
   const historyRows = useMemo(() => historyItems(history), [history])

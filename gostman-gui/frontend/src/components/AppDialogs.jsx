@@ -3,6 +3,8 @@ import { ConfirmDialog } from "./ui/ConfirmDialog"
 import { PromptDialog } from "./ui/PromptDialog"
 import { CommandPalette } from "./ui/CommandPalette"
 import { AboutDialog } from "./AboutDialog"
+import { ExploreDialog } from "./ExploreDialog"
+import { WhatsNewDialog } from "./WhatsNewDialog"
 import { PreferencesDialog } from "./PreferencesDialog"
 import { ShortcutsDialog } from "./ShortcutsDialog"
 import { EnvironmentDialog } from "./EnvironmentDialog"
@@ -12,7 +14,7 @@ import { useAppStore } from "../store/appStore"
 import { useEnvironmentChoice } from "../hooks/useEnvironmentChoice"
 import { holdsCollections } from "../lib/environmentScope"
 
-export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWorkspaces, hasLoadTest, isAiOn, ai, backups, relay, updates }) {
+export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWorkspaces, isAiOn, ai, backups, relay, updates }) {
   const alertDialog = useAppStore((s) => s.alertDialog)
   const confirmDialog = useAppStore((s) => s.confirmDialog)
   const promptDialog = useAppStore((s) => s.promptDialog)
@@ -27,6 +29,11 @@ export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWork
   const folders = useAppStore((s) => s.folders)
   const requestHistory = useAppStore((s) => s.requestHistory)
   const aboutOpen = useAppStore((s) => s.aboutOpen)
+  const seenVersion = useAppStore((s) => s.seenVersion)
+  const exploreOpen = useAppStore((s) => s.exploreOpen)
+  const closeExplore = useAppStore((s) => s.closeExplore)
+  const whatsNewOpen = useAppStore((s) => s.whatsNewOpen)
+  const closeWhatsNew = useAppStore((s) => s.closeWhatsNew)
   const closeAbout = useAppStore((s) => s.closeAbout)
   const shortcutsDialogOpen = useAppStore((s) => s.shortcutsDialogOpen)
   const preferencesDialogOpen = useAppStore((s) => s.preferencesDialogOpen)
@@ -52,7 +59,7 @@ export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWork
         onShowShortcuts={openShortcutsDialog}
         environments={environments}
         workspaces={hasWorkspaces ? workspaces : null}
-        hasLoadTest={hasLoadTest}
+        seenVersion={seenVersion}
         isAiOn={isAiOn}
         holdsCollections={isAppStorage}
         activeEnvironmentId={activeEnvironment?.id || ""}
@@ -61,6 +68,8 @@ export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWork
       />
 
       {aboutOpen && <AboutDialog onClose={closeAbout} />}
+      {exploreOpen && <ExploreDialog onClose={closeExplore} />}
+      {whatsNewOpen && <WhatsNewDialog onClose={closeWhatsNew} />}
       {preferencesDialogOpen && <PreferencesDialog listFonts={listFonts} windowFrame={windowFrame} onCommand={onCommand} backups={backups} relay={relay} updates={updates} ai={ai} onClose={closePreferencesDialog} />}
       {shortcutsDialogOpen && <ShortcutsDialog onClose={closeShortcutsDialog} />}
       {environmentDialogOpen && <EnvironmentDialog secrets={secrets} onClose={closeEnvironmentDialog} />}

@@ -9,5 +9,6 @@
   "onboarding.steps.variable.defined": "Legend entry for a variable that has a value (shown in a normal colour).",
   "onboarding.steps.variable.missing": "Legend entry for a variable without a value (shown in a warning colour).",
   "onboarding.steps.check.hint": "res.status is script code and stays as it is. Add checks is a button name in the Checks tab.",
-  "onboarding.done": "Button that finishes the guided tour. Verb."
+  "onboarding.done": "Button that finishes the guided tour. Verb.",
+  "onboarding.steps.explore.title": "Last step of the getting started list. It opens the feature list."
 }

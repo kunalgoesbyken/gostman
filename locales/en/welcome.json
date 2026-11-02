@@ -15,6 +15,7 @@
     "curlTitle": "Paste a curl command",
     "curlHint": "Paste it into the address bar and the request fills in.",
     "shortcutsTitle": "Keyboard shortcuts",
-    "sampleRequestName": "Sample request"
+    "sampleRequestName": "Sample request",
+    "exploreTitle": "Explore features"
   }
 }

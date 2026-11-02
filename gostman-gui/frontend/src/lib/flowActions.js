@@ -34,6 +34,11 @@ export function createFlowActions(backend, { attempt, execute, promptForName }) 
     store().openFlowTab(flow)
   })
 
+  const addSample = attempt(FLOW_TEXT.createFailed, async (flow) => {
+    if (!flowById(flow.id)) await persist([...store().flows, flow])
+    store().openFlowTab(flowById(flow.id))
+  })
+
   const open = (flowId) => {
     const flow = flowById(flowId)
     if (flow) store().openFlowTab(flow)
@@ -122,6 +127,7 @@ export function createFlowActions(backend, { attempt, execute, promptForName }) 
 
   return {
     create,
+    addSample,
     open,
     rename,
     duplicate,

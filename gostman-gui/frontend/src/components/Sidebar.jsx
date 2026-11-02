@@ -1,4 +1,4 @@
-import { memo, useState } from "react"
+import { memo, useEffect, useState } from "react"
 import { Check, FolderPlus, ListChecks, Plus, RotateCcw, Settings2 } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
@@ -52,6 +52,10 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
   const listsTabs = tabPlacement === "sidebar"
   const shown = listsTabs ? [VIEW_TABS, ...visibleViews(views)] : visibleViews(views)
   const [chosen, setView] = useState(VIEW_COLLECTIONS)
+  const viewRequest = useAppStore((s) => s.sidebarViewRequest)
+  useEffect(() => {
+    if (viewRequest) setView(viewRequest.view)
+  }, [viewRequest])
   const view = shown.includes(chosen) ? chosen : shown[0]
   const [menuPosition, setMenuPosition] = useState(null)
   const newRequestShortcut = useShortcutLabel("newRequest")

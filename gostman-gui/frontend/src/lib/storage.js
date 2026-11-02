@@ -90,3 +90,9 @@ export function createStoredState(key, normalize) {
     },
   }))
 }
+
+const SEEN_VERSION_KEY = 'gostman.seenVersion'
+
+export const readSeenVersion = () => readStored(SEEN_VERSION_KEY) || ''
+
+export const writeSeenVersion = (version) => writeStored(SEEN_VERSION_KEY, version)

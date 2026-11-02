@@ -4,6 +4,7 @@ import { Button } from "./ui/button"
 import { DataTable } from "./ui/dataTable"
 import { Dialog, DialogBody, DialogHeader, DialogTitle } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
+import { FeatureEmpty } from "./FeatureEmpty"
 import { Input } from "./ui/input"
 import { Notice, SectionLabel } from "./ui/panel"
 import { MethodTag } from "./MethodTag"
@@ -230,7 +231,7 @@ function Results({ report }) {
 function Outcome({ load }) {
   if (load.report) return <Results report={load.report} />
   if (load.progress) return <Progress progress={load.progress} />
-  return <EmptyState icon={Gauge} title={LOAD_TEST_TEXT.emptyTitle} description={LOAD_TEST_TEXT.emptyHint} />
+  return <FeatureEmpty surface="load" icon={Gauge} title={LOAD_TEST_TEXT.emptyTitle} description={LOAD_TEST_TEXT.emptyHint} />
 }
 
 export function LoadTestDialog({ actions }) {

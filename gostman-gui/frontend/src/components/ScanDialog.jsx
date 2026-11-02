@@ -4,6 +4,7 @@ import { ScanFindings } from "./ScanFindings"
 import { Checkbox } from "./ui/checkbox"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
+import { FeatureEmpty } from "./FeatureEmpty"
 import { TabCount } from "./ui/tabs"
 import { useSecretScan } from "../hooks/useSecretScan"
 import { SCAN_TEXT } from "../lib/scanText"
@@ -14,7 +15,7 @@ function ScanResult({ state, onGoToRequest }) {
   if (state.isScanning) return <p role="status" className="p-4 text-xs text-muted-foreground">{SCAN_TEXT.scanning}</p>
   if (state.error) return <p role="alert" className="p-4 text-xs text-destructive [overflow-wrap:anywhere]">{SCAN_TEXT.failed(state.error)}</p>
   if (state.report.findings.length === 0) {
-    return <EmptyState icon={ShieldCheck} title={SCAN_TEXT.clean} description={SCAN_TEXT.cleanDescription} />
+    return <FeatureEmpty surface="scan" icon={ShieldCheck} title={SCAN_TEXT.clean} description={SCAN_TEXT.cleanDescription} />
   }
   return <ScanFindings findings={state.report.findings} onGoToRequest={onGoToRequest} />
 }

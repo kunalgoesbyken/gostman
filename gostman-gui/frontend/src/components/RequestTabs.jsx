@@ -6,6 +6,7 @@ import { OverflowTabsList, TabCount, Tabs, TabsContent } from "./ui/tabs"
 import { SkeletonLines } from "./ui/skeleton"
 import { AuthPanel } from "./AuthPanel"
 import { BodyPanel } from "./BodyPanel"
+import { FeatureHint } from "./FeatureHint"
 import { InheritedHeaders } from "./InheritedHeaders"
 import { KeyValueEditor } from "./KeyValueEditor"
 import { HEADER_SUGGESTIONS } from "../lib/httpHeaders"
@@ -190,6 +191,8 @@ export const RequestTabs = memo(function RequestTabs({
           <TabBadge value={exampleCount} />
         </Button>
       </Toolbar>
+
+      <FeatureHint panel={shownPanel} />
 
       <div className="min-h-0 flex-1 overflow-hidden">
         <TabsContent value={PARAMS_PANEL} className={PANEL_CLASS}>

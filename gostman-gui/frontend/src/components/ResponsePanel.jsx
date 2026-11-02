@@ -21,6 +21,7 @@ import { ContextMenu } from "./ui/ContextMenu"
 import { Button, IconButton } from "./ui/button"
 import { DataTable } from "./ui/dataTable"
 import { EmptyState } from "./ui/emptyState"
+import { FeatureEmpty } from "./FeatureEmpty"
 import { Notice, SectionLabel, Toolbar } from "./ui/panel"
 import { ProtocolBody } from "./ProtocolBody"
 import { SegmentedControl } from "./ui/segmented"
@@ -529,7 +530,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
 
   const renderContent = () => {
     if (loading) return <SkeletonLines label={RESPONSE_TEXT.sending} lines={6} />
-    if (!shown) return <EmptyState icon={FileText} title={RESPONSE_TEXT.noResponseTitle} description={RESPONSE_TEXT.noResponseDescription} />
+    if (!shown) return <FeatureEmpty surface="response" icon={FileText} title={RESPONSE_TEXT.noResponseTitle} description={RESPONSE_TEXT.noResponseDescription} />
     if (activeTab === TAB_TIMELINE && hasTimeline) return <TimelineTab timeline={shown.timeline} />
     if (shown.error) return <ErrorBody response={shown} onExplain={onExplain} onTrust={onTrust} />
     if (activeTab === TAB_TESTS && showsTests) return <TestResults tests={tests} />

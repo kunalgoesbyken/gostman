@@ -37,6 +37,11 @@
         "title": "Run your requests together",
         "hint": "The runner sends every saved request in order and reports which checks passed.",
         "action": "Open the runner"
+      },
+      "explore": {
+        "title": "Explore features",
+        "hint": "Search every feature, try it with a sample and read how it works.",
+        "action": "Explore features"
       }
     }
   }

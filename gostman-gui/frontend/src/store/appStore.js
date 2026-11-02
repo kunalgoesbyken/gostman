@@ -6,7 +6,8 @@ import { isPlainObject, parseJSON } from '../lib/dataUtils'
 import { DATA_TEXT } from '../lib/dataText'
 import { APP_STORE_TEXT } from '../lib/appStoreText'
 import { DIALOG_TEXT } from '../lib/dialogText'
-import { TAB_DRAFTS_KEY, isStorageFull } from '../lib/storage'
+import { TAB_DRAFTS_KEY, isStorageFull, readSeenVersion, writeSeenVersion } from '../lib/storage'
+import { APP_VERSION } from '../lib/appVersion'
 import { ENVIRONMENT_TEXT } from '../lib/environmentText'
 import { DEFAULT_SETTINGS, normalizeSettings } from '../lib/network'
 import { ROOT_SETTINGS_ID, isBlankScope, normalizeFolder, normalizeScopeSettings, updatedScope } from '../lib/inheritance'
@@ -44,6 +45,13 @@ const CLOSED_PROMPT = { isOpen: false, title: '', message: '', placeholder: '', 
 const CLOSED_DELETE_DATA = { isOpen: false, onDelete: null }
 
 const MAX_CLOSED_TABS = 10
+
+function initialSeenVersion() {
+  const stored = readSeenVersion()
+  if (stored) return stored
+  writeSeenVersion(APP_VERSION)
+  return APP_VERSION
+}
 
 const createId = (prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 
@@ -342,6 +350,12 @@ export const useAppStore = create(
         welcomeDismissed: isWelcomeDismissed(),
         onboardingSteps: rememberedSteps(),
         aboutOpen: false,
+        exploreOpen: false,
+        exploreFocus: '',
+        exploreQuery: '',
+        whatsNewOpen: false,
+        seenVersion: initialSeenVersion(),
+        sidebarViewRequest: null,
         requestPanel: DEFAULT_REQUEST_PANEL,
         codeDialogOpen: false,
         codeSnippets: null,
@@ -419,6 +433,14 @@ export const useAppStore = create(
           set({ onboardingSteps: updated })
         },
         openAbout: () => set({ aboutOpen: true, commandPaletteOpen: false }),
+        openExplore: (focusId = '', query = '') => set({ exploreOpen: true, exploreFocus: focusId, exploreQuery: query, commandPaletteOpen: false }),
+        closeExplore: () => set({ exploreOpen: false, exploreFocus: '', exploreQuery: '' }),
+        openWhatsNew: () => set({ whatsNewOpen: true, commandPaletteOpen: false }),
+        closeWhatsNew: () => {
+          writeSeenVersion(APP_VERSION)
+          set({ whatsNewOpen: false, seenVersion: APP_VERSION })
+        },
+        requestSidebarView: (view) => set({ sidebarViewRequest: { view, nonce: Date.now() }, isSidebarOpen: true }),
         closeAbout: () => set({ aboutOpen: false }),
         adoptWorkspaceStatus: (status) => set({ workspaceStatus: status }),
         leaveWorkspace: (path) => set((state) => leaveWorkspace(state, path)),
@@ -842,6 +864,8 @@ export const selectIsDialogOpen = (state) => (
   || state.commandPaletteOpen
   || state.workspaceMenuOpen
   || state.aboutOpen
+  || state.exploreOpen
+  || state.whatsNewOpen
   || state.shortcutsDialogOpen
   || state.preferencesDialogOpen
   || state.cookiesDialogOpen

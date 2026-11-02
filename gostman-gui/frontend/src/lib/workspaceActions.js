@@ -27,7 +27,7 @@ import { retryStep, signInToMcp } from './mcpAuth'
 import { compareTools, rememberTools } from './mcpChecks'
 import { createMockActions } from './mockServer'
 import { withoutPassphrases } from './network'
-import { STEP_CHECK, STEP_RUN, STEP_SAVE, STEP_SEND, STEP_VARIABLE } from './onboarding'
+import { STEP_CHECK, STEP_EXPLORE, STEP_RUN, STEP_SAVE, STEP_SEND, STEP_VARIABLE } from './onboarding'
 import { getPreferences } from './preferences'
 import { AUTH_OAUTH2, isUntouchedRequest, normalizeRequest } from './request'
 import { promptInstall } from './pwa'
@@ -47,6 +47,7 @@ import { createBackupActions } from './backupActions'
 import { createTabActions } from './tabActions'
 import { createTreeActions } from './treeActions'
 import { createFlowActions } from './flowActions'
+import { createFeatureActions } from './featureActions'
 import { placedAfterRoot } from './treeMoves'
 import { focusAddressSoon } from './panes'
 import { ROW_FOLDER, ROW_REQUEST, folderDepth } from './collectionTree'
@@ -629,6 +630,10 @@ export function createWorkspaceActions(backend) {
     [STEP_VARIABLE]: () => store().openEnvironmentDialog(),
     [STEP_CHECK]: openTests,
     [STEP_RUN]: () => store().openRunner(),
+    [STEP_EXPLORE]: () => {
+      store().completeOnboardingStep(STEP_EXPLORE)
+      store().openExplore()
+    },
   }
 
   const openNewRequest = (folderId = '') => {
@@ -671,22 +676,11 @@ export function createWorkspaceActions(backend) {
     switchWorkspace: (path) => storageActions?.reopen(path),
     export: openExport,
     share: () => store().openImportDialog(SHARE_TAB),
-    runCollection: () => store().openRunner(),
     collectionSettings: () => store().openFolderSettings(collectionSettingsTarget(store(), activeTab().request.folderId)),
     allCollectionsSettings: () => store().openFolderSettings(),
-    cookies: () => store().openCookiesDialog(),
-    environments: () => store().openEnvironmentDialog(),
-    scanSecrets: () => store().openScanDialog(),
-    examples: examples.open,
-    mockServer: mock.open,
-    captureTraffic: capture.open,
-    loadTest: loadTest.open,
-    monitors: () => monitors.open(),
     monitorFolder: (folderId) => monitors.open({ kind: 'folder', id: folderId }),
     monitorFlow: (flowId) => monitors.open({ kind: 'flow', id: flowId }),
-    settings: () => store().openSettingsDialog(),
     preferences: () => store().openPreferencesDialog(),
-    import: () => store().openImportDialog(),
     lintSpec: openapi.lintLatest,
     reset: confirmDeleteAllData,
     aiRequest: () => ai.start(TASK_REQUEST),
@@ -698,10 +692,30 @@ export function createWorkspaceActions(backend) {
     aiSchema: () => ai.start(TASK_SCHEMA),
     aiMock: () => ai.start(TASK_MOCK),
     aiSettings: ai.openSettings,
+    sendSample,
+    commandPalette: () => store().openCommandPalette(),
+    openFeature: (id) => features.open(id),
+    explore: () => store().openExplore(),
+    whatsNew: () => store().openWhatsNew(),
   }
+
+  const features = createFeatureActions({
+    backend,
+    commands,
+    monitors,
+    mock,
+    capture,
+    loadTest,
+    examples,
+    flows,
+    hasStorage: Boolean(storageActions),
+    openExport,
+    saveRequests: (requests) => backend.saveRequests(requests),
+  })
 
   return {
     ai,
+    features,
     flows,
     send,
     sockets,

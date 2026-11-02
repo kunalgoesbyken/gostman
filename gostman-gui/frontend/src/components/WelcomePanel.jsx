@@ -1,4 +1,4 @@
-import { ChevronRight, FolderOpen, FolderPlus, Import, Terminal, X } from "lucide-react"
+import { ChevronRight, Compass, FolderOpen, FolderPlus, Import, Terminal, X } from "lucide-react"
 import { GettingStartedChecklist, useOnboardingProgress } from "./GettingStarted"
 import { IconButton } from "./ui/button"
 import { focusAddress } from "../lib/panes"
@@ -7,6 +7,9 @@ import { shortcutRows } from "../lib/shortcuts"
 import { cn } from "../lib/utils"
 import { SHORTCUT_IDS } from "../lib/welcome"
 import { WELCOME_TEXT as TEXT } from "../lib/welcomeText"
+import { shownFeatures } from "../lib/featureIndex"
+import { FEATURES_TEXT } from "../lib/featuresText"
+import { useAppStore } from "../store/appStore"
 
 const BOX = "rounded-md border border-border p-3"
 
@@ -37,9 +40,11 @@ function ActionRow({ icon: Icon, title, hint, onClick }) {
 }
 
 function OtherWays({ actions }) {
+  const openExplore = useAppStore((s) => s.openExplore)
   return (
     <Section title={TEXT.otherTitle}>
       <ul className="-mx-2 flex flex-col">
+        <ActionRow icon={Compass} title={TEXT.exploreTitle} hint={FEATURES_TEXT.exploreHint(shownFeatures().length)} onClick={() => openExplore()} />
         <ActionRow icon={Import} title={TEXT.importTitle} hint={TEXT.importHint} onClick={actions.openImport} />
         {actions.storage && (
           <ActionRow icon={FolderOpen} title={TEXT.folderTitle} hint={TEXT.folderHint} onClick={actions.storage.openFolder} />

@@ -1,0 +1,518 @@
+{
+  "features": {
+    "title": "Explore features",
+    "intro": "Search what Gostman can do, try a feature in place and read how it works.",
+    "searchLabel": "Search features",
+    "searchPlaceholder": "Search features, for example snapshot, mock or git",
+    "groupsLabel": "Feature groups",
+    "allGroups": "All",
+    "groups": {
+      "requests": "Requests",
+      "data": "Collections and data",
+      "variables": "Variables and secrets",
+      "testing": "Checks and specs",
+      "automation": "Automation",
+      "mocking": "Mock and capture",
+      "git": "Git",
+      "ai": "AI",
+      "app": "App"
+    },
+    "tryIt": "Try it",
+    "tryItLabel": "Try {{title}}",
+    "learnMore": "Learn more",
+    "learnMoreLabel": "Learn more about {{title}}",
+    "newBadge": "New",
+    "platformDesktop": "Desktop app",
+    "platformCli": "Command line",
+    "platformWeb": "Web app",
+    "desktopOnlyTitle": "{{title}} needs the desktop app",
+    "desktopOnlyBody": "The browser cannot reach local files, ports or system settings, so this feature is only in the desktop app. The page below explains how it works.",
+    "getDesktop": "Get the desktop app",
+    "nothingMatches": "No feature matches \"{{query}}\".",
+    "results_one": "{{count}} feature",
+    "results_other": "{{count}} features",
+    "close": "Close",
+    "backToList": "Back to the list",
+    "commandTitle": "Explore features",
+    "commandDescription": "Search every feature, try it and read how it works",
+    "commandKeywords": "features index capabilities discover what can gostman do help",
+    "statusLabel": "Explore",
+    "statusTitle": "Explore features",
+    "helpHide": "Hide this hint",
+    "helpHideLabel": "Hide the hint about {{title}}",
+    "whatsNewTitle": "What's new",
+    "whatsNewIntro": "New in version {{version}}",
+    "whatsNewNothing": "There is nothing new to list for this version.",
+    "whatsNewCommandTitle": "What's new",
+    "whatsNewCommandDescription": "Features added in the latest version",
+    "whatsNewKeywords": "release notes changelog updates version",
+    "whatsNewDot": "What's new in version {{version}}",
+    "whatsNewOpen": "Show what is new",
+    "exploreAll": "Explore all features",
+    "emptyFallbackLabel": "Open the feature list",
+    "samplesAdded": "Added the sample collection.",
+    "samplesExisting": "The sample collection is already in your sidebar.",
+    "helpMenu": "Help",
+    "exploreHint_one": "Search the {{count}} feature in Gostman, try it with a sample and read how it works.",
+    "exploreHint_other": "Search the {{count}} features in Gostman, try them with a sample and read how they work."
+  },
+  "featureWords": {
+    "rest": {
+      "title": "REST and HTTP requests",
+      "blurb": "Send any method with params, headers, a body and auth, and read the status, timing and size.",
+      "synonyms": "http api get post put delete patch rest request"
+    },
+    "graphql": {
+      "title": "GraphQL",
+      "blurb": "Write queries with a schema browser, a query builder and variables. Subscriptions run over WebSocket.",
+      "synonyms": "graphql query mutation schema introspection subscription apollo"
+    },
+    "grpc": {
+      "title": "gRPC",
+      "blurb": "Load services through reflection or .proto files and call unary and streaming methods.",
+      "synonyms": "grpc protobuf proto reflection stream bloomrpc grpcurl"
+    },
+    "websocket": {
+      "title": "WebSocket, Socket.IO and MQTT",
+      "blurb": "Connect, send saved messages and read a message log over WebSocket, Socket.IO or MQTT.",
+      "synonyms": "websocket socket.io socketio mqtt realtime ws sse events"
+    },
+    "mcp": {
+      "title": "MCP servers",
+      "blurb": "Call the tools, resources and prompts of an MCP server and check what it returns.",
+      "synonyms": "mcp model context protocol tools agent server inspector"
+    },
+    "curl": {
+      "title": "Paste a curl command",
+      "blurb": "Paste a curl command into the address bar and the request fills in.",
+      "synonyms": "curl paste command line import clipboard"
+    },
+    "codegen": {
+      "title": "Code snippets",
+      "blurb": "Copy the request that is sent as cURL, Python, Go, JavaScript and other languages.",
+      "synonyms": "code snippet generate curl python javascript fetch go java"
+    },
+    "responseViewer": {
+      "title": "Response viewer",
+      "blurb": "Read JSON as a tree, preview HTML, images and PDF, filter with JSONPath and search the body.",
+      "synonyms": "response body json preview filter search jsonpath timeline console visualize"
+    },
+    "examples": {
+      "title": "Saved examples",
+      "blurb": "Keep responses as named examples that document a request and feed the mock server.",
+      "synonyms": "example saved response sample documentation"
+    },
+    "oauth": {
+      "title": "Auth and OAuth 2",
+      "blurb": "Basic, bearer, API key, OAuth 1 and 2, Digest, AWS SigV4, NTLM, JWT and more, with token renewal.",
+      "synonyms": "auth authentication oauth oauth2 bearer token basic digest sigv4 ntlm hawk apikey"
+    },
+    "cookies": {
+      "title": "Cookie jar",
+      "blurb": "See, edit and clear the cookies kept for each domain.",
+      "synonyms": "cookie cookies jar session"
+    },
+    "requestSettings": {
+      "title": "Request settings",
+      "blurb": "Set the timeout, redirects and TLS verification for a single request.",
+      "synonyms": "settings timeout redirect tls verify ssl follow"
+    },
+    "hexView": {
+      "title": "Hex view",
+      "blurb": "Inspect a binary body byte by byte.",
+      "synonyms": "hex binary bytes dump"
+    },
+    "msgpackCbor": {
+      "title": "MessagePack and CBOR",
+      "blurb": "Decode MessagePack and CBOR responses into readable JSON.",
+      "synonyms": "msgpack messagepack cbor binary decode"
+    },
+    "certificateViewer": {
+      "title": "Certificate viewer",
+      "blurb": "Read the server certificate chain behind a response.",
+      "synonyms": "certificate tls ssl chain x509 https"
+    },
+    "jwtSigning": {
+      "title": "JWT signing",
+      "blurb": "Sign a JWT with an HMAC or RSA key as the request is sent.",
+      "synonyms": "jwt sign hs256 rs256 token"
+    },
+    "httpVersion": {
+      "title": "HTTP version",
+      "blurb": "Choose HTTP/1.1 or HTTP/2 for a request and see which one was used.",
+      "synonyms": "http2 http/2 http1 protocol version alpn"
+    },
+    "dnsOverride": {
+      "title": "DNS override",
+      "blurb": "Resolve a host to a chosen address for one request.",
+      "synonyms": "dns resolve host hosts override ip"
+    },
+    "graphqlUpload": {
+      "title": "GraphQL file upload",
+      "blurb": "Send files in a GraphQL mutation with the multipart request spec.",
+      "synonyms": "graphql upload multipart file"
+    },
+    "wsSecurity": {
+      "title": "SOAP WS-Security",
+      "blurb": "Add WS-Security headers to a SOAP request.",
+      "synonyms": "soap wsse ws-security wsdl xml"
+    },
+    "grpcWeb": {
+      "title": "gRPC-Web",
+      "blurb": "Call gRPC services from the browser through gRPC-Web.",
+      "synonyms": "grpc-web grpcweb browser"
+    },
+    "signalr": {
+      "title": "SignalR",
+      "blurb": "Connect to a SignalR hub and invoke its methods.",
+      "synonyms": "signalr hub aspnet realtime"
+    },
+    "tcpUdp": {
+      "title": "TCP and UDP",
+      "blurb": "Send raw bytes over TCP or UDP and read the reply.",
+      "synonyms": "tcp udp socket raw bytes"
+    },
+    "breakpoints": {
+      "title": "Breakpoints",
+      "blurb": "Pause a request before it is sent and edit it.",
+      "synonyms": "breakpoint pause intercept edit debug"
+    },
+    "throttling": {
+      "title": "Throttling",
+      "blurb": "Slow a request down to test a poor connection.",
+      "synonyms": "throttle slow network latency bandwidth"
+    },
+    "openTabs": {
+      "title": "Open tabs list",
+      "blurb": "Show the open tabs as a list in the sidebar and jump between them.",
+      "synonyms": "tabs open list sidebar switch"
+    },
+    "history": {
+      "title": "History",
+      "blurb": "Every request you send is kept, with its response status, so you can open it again.",
+      "synonyms": "history recent sent previous"
+    },
+    "collections": {
+      "title": "Collections and folders",
+      "blurb": "Group requests in nested folders, drag them into place, search, tag and colour them.",
+      "synonyms": "collection folder tree sidebar organize tag postman collections"
+    },
+    "folderWorkspace": {
+      "title": "Folder workspaces",
+      "blurb": "Keep a collection as plain YAML files next to your code and share it through Git.",
+      "synonyms": "folder workspace yaml files git bruno opencollection"
+    },
+    "folderSettings": {
+      "title": "Folder settings",
+      "blurb": "Set headers, auth, variables, scripts and checks once for every request in a folder.",
+      "synonyms": "folder collection settings inherit headers auth scripts"
+    },
+    "import": {
+      "title": "Import",
+      "blurb": "Bring in Postman, Bruno, Insomnia, OpenAPI, HAR, WSDL, .http files and curl commands.",
+      "synonyms": "import postman bruno insomnia openapi swagger har wsdl http curl migrate"
+    },
+    "specImporters": {
+      "title": "More import formats",
+      "blurb": "Import Hoppscotch, Thunder Client, Paw, Hurl and RAML.",
+      "synonyms": "hoppscotch thunder paw hurl raml import migrate"
+    },
+    "export": {
+      "title": "Export",
+      "blurb": "Write a collection to Postman, OpenAPI, Markdown, .http files or a backup.",
+      "synonyms": "export postman openapi markdown backup http"
+    },
+    "share": {
+      "title": "Share links",
+      "blurb": "Send a collection as an encrypted link or file, with no account.",
+      "synonyms": "share link encrypted send team collaborate"
+    },
+    "versionedDocs": {
+      "title": "Versioned documentation",
+      "blurb": "Generate HTML documentation for a collection and keep a copy for each version.",
+      "synonyms": "docs documentation html publish version"
+    },
+    "notes": {
+      "title": "Notes",
+      "blurb": "Attach Markdown notes to requests and folders.",
+      "synonyms": "notes markdown description comments"
+    },
+    "recentlyDeleted": {
+      "title": "Recently deleted",
+      "blurb": "Bring back requests and folders you deleted.",
+      "synonyms": "trash deleted restore undo recover"
+    },
+    "backups": {
+      "title": "Backups",
+      "blurb": "Daily and per-version backups of your data, with restore.",
+      "synonyms": "backup restore snapshot recover"
+    },
+    "globalSearch": {
+      "title": "Global search",
+      "blurb": "Search requests, bodies, headers and variables across a collection.",
+      "synonyms": "search find global grep"
+    },
+    "splitView": {
+      "title": "Split view",
+      "blurb": "Show two requests side by side.",
+      "synonyms": "split side by side compare panes"
+    },
+    "dependencyGraph": {
+      "title": "Dependency graph",
+      "blurb": "See which requests set and use each variable.",
+      "synonyms": "dependency graph variables chain map"
+    },
+    "environments": {
+      "title": "Environments",
+      "blurb": "Switch between sets of variables for local, staging and production.",
+      "synonyms": "environment variables dev staging prod env"
+    },
+    "scopes": {
+      "title": "Variable scopes",
+      "blurb": "Global, collection, folder, environment, session and request variables, with a clear order of precedence.",
+      "synonyms": "variables scopes precedence global collection folder request vars"
+    },
+    "secrets": {
+      "title": "Secret variables",
+      "blurb": "Keep secret values in your OS keychain and out of files and exports.",
+      "synonyms": "secret keychain password token vault"
+    },
+    "secretManagers": {
+      "title": "Secret managers",
+      "blurb": "Read values from Vault, AWS, Azure, Google Cloud, 1Password, Bitwarden or KeePassXC at send time.",
+      "synonyms": "vault aws azure gcp 1password bitwarden keepassxc secret manager"
+    },
+    "extract": {
+      "title": "Extract rules",
+      "blurb": "Pull a value out of a response into a variable for the next request.",
+      "synonyms": "extract capture chain variable response jsonpath"
+    },
+    "network": {
+      "title": "Proxy and certificates",
+      "blurb": "Use a proxy, client certificates and custom CA certificates.",
+      "synonyms": "proxy certificate mtls ca tls network"
+    },
+    "checks": {
+      "title": "Checks",
+      "blurb": "Assert on status, headers, body and timing without writing code.",
+      "synonyms": "checks tests assertions assert postman tests chai"
+    },
+    "scripts": {
+      "title": "Scripts",
+      "blurb": "Run JavaScript before and after a request with pm, bru and insomnia compatible APIs.",
+      "synonyms": "script pre-request post-response javascript pm bru insomnia"
+    },
+    "contract": {
+      "title": "Contract checks",
+      "blurb": "Check responses against an OpenAPI spec in the runner and in CI.",
+      "synonyms": "contract openapi schema validate conformance dredd"
+    },
+    "snapshotChecks": {
+      "title": "Snapshot checks",
+      "blurb": "Compare a response with a saved snapshot and review changes.",
+      "synonyms": "snapshot golden diff regression"
+    },
+    "negativeTests": {
+      "title": "Negative tests",
+      "blurb": "Generate invalid inputs for a request and check how the API refuses them.",
+      "synonyms": "negative fuzz fuzzing invalid inputs boundary"
+    },
+    "coverage": {
+      "title": "Spec coverage",
+      "blurb": "See which operations of an OpenAPI spec your collection covers.",
+      "synonyms": "coverage openapi operations untested"
+    },
+    "pmPackages": {
+      "title": "Script packages",
+      "blurb": "Use packages in scripts imported from Postman.",
+      "synonyms": "pm packages require library postman"
+    },
+    "specLint": {
+      "title": "OpenAPI linter",
+      "blurb": "Check a spec for missing descriptions, examples and security.",
+      "synonyms": "lint openapi spectral swagger"
+    },
+    "specSync": {
+      "title": "Spec sync",
+      "blurb": "Keep a collection in step with a remote OpenAPI spec.",
+      "synonyms": "sync openapi spec update remote"
+    },
+    "openapiDiff": {
+      "title": "OpenAPI diff",
+      "blurb": "Compare two versions of a spec and list breaking changes.",
+      "synonyms": "openapi diff oasdiff breaking changes compare spec"
+    },
+    "runner": {
+      "title": "Collection runner",
+      "blurb": "Run a folder in order with data files, parallel runs and HTML or JUnit reports.",
+      "synonyms": "runner run collection postman collection runner newman data csv iteration"
+    },
+    "flows": {
+      "title": "Flows",
+      "blurb": "Draw a sequence of requests with branches, retries and loops.",
+      "synonyms": "flow workflow chain retry branch loop scenario"
+    },
+    "loadTest": {
+      "title": "Load test",
+      "blurb": "Send many requests at once and read latency percentiles and errors.",
+      "synonyms": "load performance stress k6 benchmark latency"
+    },
+    "loadThresholds": {
+      "title": "Load thresholds",
+      "blurb": "Fail a load test when latency or errors pass a limit.",
+      "synonyms": "threshold slo limit fail load"
+    },
+    "scan": {
+      "title": "Secret scanner",
+      "blurb": "Find tokens and passwords in a collection before you share it.",
+      "synonyms": "scan secrets leak token password credential gitleaks"
+    },
+    "cli": {
+      "title": "Command line",
+      "blurb": "Run, send, load test, scan and lint from one binary, with exit codes for CI.",
+      "synonyms": "cli command line terminal newman bruno cli inso"
+    },
+    "ci": {
+      "title": "CI integration",
+      "blurb": "A GitHub Action, a Docker image and reports for GitHub, GitLab and Jenkins.",
+      "synonyms": "ci github actions gitlab jenkins docker pipeline junit"
+    },
+    "monitors": {
+      "title": "Monitors",
+      "blurb": "Run a collection on a schedule and report failures.",
+      "synonyms": "monitor postman monitor schedule cron uptime"
+    },
+    "preCommit": {
+      "title": "Pre-commit hook",
+      "blurb": "Run checks and the secret scanner before a commit.",
+      "synonyms": "pre-commit hook husky commit lint"
+    },
+    "agents": {
+      "title": "Coding agents",
+      "blurb": "An MCP server that lets coding agents send requests, with secret redaction and a host allowlist.",
+      "synonyms": "agent mcp claude cursor ai coding skill"
+    },
+    "mock": {
+      "title": "Mock server",
+      "blurb": "Serve saved examples or an OpenAPI spec locally, with a live request log.",
+      "synonyms": "mock server stub fake wiremock prism examples"
+    },
+    "mockRules": {
+      "title": "Mock rules",
+      "blurb": "Pick a response by query, header or body, add delays and inject faults.",
+      "synonyms": "mock rules conditions delay fault latency"
+    },
+    "capture": {
+      "title": "Capture proxy",
+      "blurb": "Forward traffic to an upstream, record it and turn it into requests.",
+      "synonyms": "capture proxy record traffic intercept charles fiddler mitm"
+    },
+    "captureRules": {
+      "title": "Capture rules",
+      "blurb": "Rewrite or block captured traffic with rules.",
+      "synonyms": "capture rules rewrite block map local"
+    },
+    "captureHar": {
+      "title": "Capture to HAR",
+      "blurb": "Save a capture as a HAR file.",
+      "synonyms": "har capture export archive"
+    },
+    "gitPanel": {
+      "title": "Git panel",
+      "blurb": "Diff, commit, push, branches, stash and history in the app.",
+      "synonyms": "git commit push pull branch stash diff version control"
+    },
+    "gitFieldDiff": {
+      "title": "Field-level diffs",
+      "blurb": "See which request fields changed instead of raw YAML.",
+      "synonyms": "git diff field changes yaml review"
+    },
+    "gitCommitGraph": {
+      "title": "Commit graph",
+      "blurb": "See branches and merges as a graph.",
+      "synonyms": "git graph commits branches log"
+    },
+    "conflicts": {
+      "title": "Conflict resolution",
+      "blurb": "Resolve merge conflicts in a request file with a side by side editor.",
+      "synonyms": "merge conflict resolve git"
+    },
+    "repoCreate": {
+      "title": "Create a repository",
+      "blurb": "Create a Git repository for a workspace and publish it.",
+      "synonyms": "git init repository github publish remote"
+    },
+    "ai": {
+      "title": "AI assistant",
+      "blurb": "Generate requests, checks and scripts and explain responses, with your own key.",
+      "synonyms": "ai llm openai anthropic claude generate explain postbot"
+    },
+    "aiMock": {
+      "title": "AI mock data",
+      "blurb": "Generate realistic mock responses from a schema.",
+      "synonyms": "ai mock generate data fake"
+    },
+    "aiCommit": {
+      "title": "AI commit messages",
+      "blurb": "Draft a commit message from your changes.",
+      "synonyms": "ai commit message git draft"
+    },
+    "palette": {
+      "title": "Command palette",
+      "blurb": "Find any command, request or feature by name.",
+      "synonyms": "palette command search quick open ctrl k"
+    },
+    "shortcuts": {
+      "title": "Keyboard shortcuts",
+      "blurb": "See every shortcut and change the ones you want.",
+      "synonyms": "keyboard shortcuts keys hotkeys chords bindings"
+    },
+    "themes": {
+      "title": "Themes and colours",
+      "blurb": "Light, dark and custom colours for each part of the window.",
+      "synonyms": "theme dark light color colour appearance accent font"
+    },
+    "languages": {
+      "title": "Languages",
+      "blurb": "Use the app in another language, including right-to-left layouts.",
+      "synonyms": "language translation locale i18n localization arabic"
+    },
+    "desktop": {
+      "title": "Desktop app",
+      "blurb": "Folders, Git, the mock server, capture, proxies and certificates need the desktop app.",
+      "synonyms": "desktop download install app windows mac linux"
+    },
+    "webApp": {
+      "title": "Web app",
+      "blurb": "Use Gostman in the browser with no account and nothing to install.",
+      "synonyms": "web browser online no install pwa"
+    },
+    "pricing": {
+      "title": "Price",
+      "blurb": "Free and MIT licensed.",
+      "synonyms": "price free license"
+    },
+    "vscode": {
+      "title": "VS Code extension",
+      "blurb": "There is no VS Code extension.",
+      "synonyms": "vscode extension editor"
+    }
+  },
+  "featureSamples": {
+    "collection": "Sample collection",
+    "baseUrl": "http://127.0.0.1:4010",
+    "listUsers": "List users",
+    "getUser": "Get a user",
+    "createUser": "Create a user",
+    "okExample": "200 OK",
+    "createdExample": "201 Created",
+    "flowName": "Sample flow",
+    "scanRequest": "Request with a fake token",
+    "graphqlRequest": "GraphQL request",
+    "websocketRequest": "WebSocket request",
+    "grpcRequest": "gRPC request",
+    "mcpRequest": "MCP request",
+    "flowDescription": "Lists the users, then reads one of them. Both requests come from the sample collection.",
+    "flowDone": "Done"
+  }
+}

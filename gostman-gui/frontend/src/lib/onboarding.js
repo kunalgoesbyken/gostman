@@ -9,6 +9,7 @@ export const STEP_SAVE = 'save'
 export const STEP_VARIABLE = 'variable'
 export const STEP_CHECK = 'check'
 export const STEP_RUN = 'run'
+export const STEP_EXPLORE = 'explore'
 
 const RETIRED_SAMPLE_REQUEST_ID = '1'
 
@@ -30,6 +31,7 @@ const COMPLETION = {
   ),
   [STEP_CHECK]: (state) => state.requests.some(hasCheck),
   [STEP_RUN]: (state) => state.onboardingSteps.includes(STEP_RUN),
+  [STEP_EXPLORE]: (state) => state.onboardingSteps.includes(STEP_EXPLORE),
 }
 
 export const STEP_IDS = Object.keys(COMPLETION)

@@ -3,6 +3,7 @@ import { Activity, Copy, LayoutTemplate, MoreHorizontal, Pencil, Plus, Trash2, W
 import { Button, IconButton } from "../ui/button"
 import { ContextMenu } from "../ui/ContextMenu"
 import { EmptyState } from "../ui/emptyState"
+import { FeatureEmpty } from "../FeatureEmpty"
 import { Toolbar } from "../ui/panel"
 import { FLOW_TEXT } from "../../lib/flowsText"
 import { MONITORS_TEXT } from "../../lib/monitorsText"
@@ -67,11 +68,13 @@ export const FlowList = memo(function FlowList({ actions, onMonitor }) {
 
   if (flows.length === 0) {
     return (
-      <EmptyState
+      <FeatureEmpty
+        surface="flows"
+        hideTry
         icon={Workflow}
         title={FLOW_TEXT.emptyTitle}
         description={FLOW_TEXT.emptyDescription}
-        action={(
+        before={(
           <div className="flex flex-col items-center gap-1.5">
             <Button size="sm" onClick={() => actions.create(false)}>
               <Plus />

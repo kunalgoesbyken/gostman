@@ -1,4 +1,4 @@
-import { Check, Copy, Globe } from "lucide-react"
+import { Check, Copy, Globe, Sparkles } from "lucide-react"
 import { BrandIcon } from "./ui/brandIcon"
 import { Button } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
@@ -6,6 +6,7 @@ import { useClipboardCopy } from "../hooks/useClipboardCopy"
 import { ABOUT_LINKS, buildDiagnostics, openExternal } from "../lib/about"
 import { codeHostOf } from "../lib/codeHost"
 import { ABOUT_TEXT as TEXT } from "../lib/aboutText"
+import { FEATURES_TEXT } from "../lib/featuresText"
 import { usePreferences } from "../lib/preferences"
 import { useAppStore } from "../store/appStore"
 import { Logo } from "./ui/logo"
@@ -13,6 +14,7 @@ import { Logo } from "./ui/logo"
 export function AboutDialog({ onClose }) {
   const requests = useAppStore((s) => s.requests)
   const folders = useAppStore((s) => s.folders)
+  const openWhatsNew = useAppStore((s) => s.openWhatsNew)
   const environments = useAppStore((s) => s.environments)
   const { theme } = usePreferences()
   const diagnostics = buildDiagnostics({ version: __APP_VERSION__, requests, folders, environments, theme })
@@ -45,6 +47,10 @@ export function AboutDialog({ onClose }) {
         <p className="text-xs text-muted-foreground">{TEXT.diagnosticsHint}</p>
       </DialogBody>
       <DialogFooter>
+        <Button variant="outline" onClick={openWhatsNew}>
+          <Sparkles />
+          {FEATURES_TEXT.whatsNewTitle}
+        </Button>
         <Button variant="outline" onClick={copy}>
           {copied ? <Check /> : <Copy />}
           {copied ? TEXT.copied : TEXT.copyDiagnostics}

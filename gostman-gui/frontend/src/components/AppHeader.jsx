@@ -1,7 +1,9 @@
-import { ArrowLeft, Download, Import, PanelLeft, Search } from "lucide-react"
+import { useRef, useState } from "react"
+import { ArrowLeft, CircleHelp, Compass, Download, Hand, Import, Info, Keyboard, PanelLeft, Search, Sparkles } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { EnvironmentSwitcher } from "./EnvironmentSwitcher"
 import { StorageMenu } from "./StorageMenu"
+import { ContextMenu } from "./ui/ContextMenu"
 import { WindowControls } from "./WindowControls"
 import { isDesktopShell, isDragRegion, windowControls } from "../lib/windowControls"
 import { promptInstall, useInstallable } from "../lib/pwa"
@@ -9,6 +11,10 @@ import { INSTALL_TEXT } from "../lib/installText"
 import { SIDEBAR_TEXT } from "../lib/sidebarText"
 import { APP_TEXT } from "../lib/appText"
 import { COMMAND_TEXT } from "../lib/commandText"
+import { ABOUT_TEXT } from "../lib/aboutText"
+import { FEATURES_TEXT } from "../lib/featuresText"
+import { SHORTCUT_TEXT } from "../lib/shortcutText"
+import { WELCOME_TEXT } from "../lib/welcomeText"
 import { IMPORT_TEXT } from "../lib/importText"
 import { hintWithShortcut } from "../lib/shortcuts"
 import { useShortcutLabel } from "../hooks/useShortcuts"
@@ -21,6 +27,29 @@ const NO_DRAG = { "--wails-draggable": "no-drag" }
 
 const toggleMaximiseOnDragRegion = (event) => {
   if (isDragRegion(event.target)) windowControls.toggleMaximise()
+}
+
+function HelpMenu({ style }) {
+  const [anchor, setAnchor] = useState(null)
+  const buttonRef = useRef(null)
+  const state = useAppStore.getState
+  const items = [
+    { id: "explore", label: FEATURES_TEXT.title, icon: Compass, onSelect: () => state().openExplore() },
+    { id: "whats-new", label: FEATURES_TEXT.whatsNewTitle, icon: Sparkles, onSelect: () => state().openWhatsNew() },
+    { id: "welcome", label: WELCOME_TEXT.commandTitle, icon: Hand, onSelect: () => state().showWelcome() },
+    { id: "shortcuts", label: SHORTCUT_TEXT.title, icon: Keyboard, onSelect: () => state().openShortcutsDialog() },
+    { id: "about", label: ABOUT_TEXT.commandTitle, icon: Info, onSelect: () => state().openAbout() },
+  ]
+  const toggle = () => {
+    const rect = buttonRef.current.getBoundingClientRect()
+    setAnchor(anchor ? null : { x: rect.left, y: rect.bottom })
+  }
+  return (
+    <>
+      <IconButton ref={buttonRef} label={FEATURES_TEXT.helpMenu} icon={CircleHelp} size="icon" aria-haspopup="menu" aria-expanded={Boolean(anchor)} onClick={toggle} style={style} />
+      {anchor && <ContextMenu position={anchor} title={FEATURES_TEXT.helpMenu} items={items} onClose={() => setAnchor(null)} />}
+    </>
+  )
 }
 
 export function AppHeader({ storage, windowFrame, onImport, onOpenCommands, onToggleSidebar, onBack, gettingStarted }) {
@@ -57,6 +86,7 @@ export function AppHeader({ storage, windowFrame, onImport, onOpenCommands, onTo
         </Button>
         <IconButton label={COMMAND_TEXT.heading} icon={Search} size="icon" onClick={onOpenCommands} className="lg:hidden" />
         {gettingStarted}
+        <HelpMenu style={drawsTitleBar ? NO_DRAG : undefined} />
         <EnvironmentSwitcher />
         {canInstall && (
           <Button variant="ghost" onClick={promptInstall} title={INSTALL_TEXT.description}>

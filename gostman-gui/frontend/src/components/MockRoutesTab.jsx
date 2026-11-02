@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Server, SlidersHorizontal } from "lucide-react"
 import { Checkbox } from "./ui/checkbox"
 import { EmptyState } from "./ui/emptyState"
+import { FeatureEmpty } from "./FeatureEmpty"
 import { IconButton } from "./ui/button"
 import { SectionLabel } from "./ui/panel"
 import { Select } from "./ui/select"
@@ -102,7 +103,7 @@ export function MockRoutesTab({ mock, examplesOf, actions }) {
       />
       {mock.routes.length === 0 ? (
         <div className="min-h-0 flex-1">
-          <EmptyState icon={Server} title={MOCK_TEXT.noRoutesTitle} description={MOCK_TEXT.noRoutesHint} />
+          <FeatureEmpty surface="mock" icon={Server} title={MOCK_TEXT.noRoutesTitle} description={MOCK_TEXT.noRoutesHint} />
         </div>
       ) : (
         <RouteTable routes={mock.routes} examplesOf={examplesOf} config={mock.config} actions={actions} />

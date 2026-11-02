@@ -6,6 +6,7 @@ import { Checkbox } from "./ui/checkbox"
 import { DataTable } from "./ui/dataTable"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
+import { FeatureEmpty } from "./FeatureEmpty"
 import { Input } from "./ui/input"
 import { Notice, SectionLabel, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
@@ -275,7 +276,8 @@ function CallsView({ folders, requests, actions }) {
       </Toolbar>
       {log.length === 0 ? (
         <div className="min-h-0 flex-1">
-          <EmptyState
+          <FeatureEmpty
+            surface="capture"
             icon={Radio}
             title={CAPTURE_TEXT.emptyTitle}
             description={isRunning ? CAPTURE_TEXT.listening(address) : CAPTURE_TEXT.idleHint}

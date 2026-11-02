@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, lazy, Suspense } from "react"
 import { AlertTriangle } from "lucide-react"
+import { installFeatureAccess, releaseFeatureAccess } from "../lib/featureAccess"
 import { Sidebar } from "./Sidebar"
 import { RequestBar } from "./RequestBar"
 import { DiskChangeNotice } from "./DiskChangeNotice"
@@ -298,6 +299,10 @@ function LoadedWorkspace({ backend, onBack }) {
   useOnboardingCompletion()
 
   const actions = useMemo(() => createWorkspaceActions(backend), [backend])
+  useEffect(() => {
+    installFeatureAccess(actions.features)
+    return releaseFeatureAccess
+  }, [actions])
   useSharedSecretConnections(actions.secrets)
   const resolvedVariables = useAppStore(selectResolvedVariables)
   const variablesMap = useMemo(() => exportableVariables(resolvedVariables), [resolvedVariables])
@@ -513,7 +518,7 @@ function LoadedWorkspace({ backend, onBack }) {
 
       <NoticeToast />
 
-      <AppDialogs onCommand={actions.runCommand} secrets={actions.secrets} listFonts={backend.listInstalledFonts} windowFrame={backend.windowFrame} hasWorkspaces={Boolean(actions.storage)} hasLoadTest={actions.loadTest.isAvailable} isAiOn={isAiOn} ai={actions.ai} backups={actions.backups} relay={backend.relay} updates={backend.updates} />
+      <AppDialogs onCommand={actions.runCommand} secrets={actions.secrets} listFonts={backend.listInstalledFonts} windowFrame={backend.windowFrame} hasWorkspaces={Boolean(actions.storage)} isAiOn={isAiOn} ai={actions.ai} backups={actions.backups} relay={backend.relay} updates={backend.updates} />
     </div>
   )
 }
