@@ -20,14 +20,15 @@ The request bar sits above the request tabs.
 | Control | What it does |
 | --- | --- |
 | Request name | A text field that shows "Untitled request" until you name the request. |
-| HTTP method | GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, GRAPHQL, GRPC or MCP. |
+| Protocol | HTTP, GraphQL, gRPC, WebSocket, Server-Sent Events, Socket.IO, MQTT, SOAP, MCP, SignalR, TCP or UDP. Choosing one rewrites the request for it, for example the address scheme and the method. A "Detected" chip appears when the protocol changes because of what you typed or pasted rather than your choice. TCP and UDP can be chosen in the web app, which explains that only the desktop app sends them. |
+| HTTP method | Shown for HTTP, Server-Sent Events and SOAP: GET, POST, PUT, DELETE, PATCH, HEAD or OPTIONS. |
 | Request URL | Accepts `{{variables}}`. Pasting a command that starts with `curl ` fills the request from it, see [Pasting curl commands](#pasting-curl-commands). Press Enter to send. |
 | Send | Sends the request. While a request is running the button becomes Cancel. |
 | Save | Saves the request. |
 | Code | Opens the code generator. See [Code generation](#code-generation). |
 | Load test | Desktop app only, and not shown for gRPC and MCP requests. Opens the Load test dialog for this request. See [Load test](runner-load-and-scan.md#load-test). |
 
-When the URL is a WebSocket address, the method list shows WS (or GRAPHQL for GraphQL subscriptions) and the Send button is labelled Connect; while the connection is open it becomes Disconnect. Send and Save show their keyboard shortcuts in their tooltips; see [Preferences, shortcuts and the command palette](preferences-and-shortcuts.md).
+When the URL is a WebSocket address, the protocol list shows WebSocket (or GraphQL for GraphQL subscriptions) and the Send button is labelled Connect; while the connection is open it becomes Disconnect. Send and Save show their keyboard shortcuts in their tooltips; see [Preferences, shortcuts and the command palette](preferences-and-shortcuts.md).
 
 ### Pasting curl commands
 

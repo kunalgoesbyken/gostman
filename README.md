@@ -37,7 +37,7 @@ Both are good tools. Gostman is for people who want the paid-tier workflow witho
 - **No telemetry.** No analytics or crash reporting in the apps or the command line; they contact only the hosts you send to and the services you set up. Only the home page at gostman.com counts visits, without cookies. [What Gostman connects to](docs/getting-started.md#what-gostman-connects-to) lists every network call.
 - **No tiers.** Data-driven runs, parallel runs, HTML reports, secret managers (Vault, AWS, Azure, Google Cloud, 1Password, Bitwarden, Bitwarden Secrets Manager, KeePassXC), the Git panel and any number of collections are all in the download. Bruno documents several of these under its [Pro and Ultimate plans](https://www.usebruno.com/pricing), and Postman lists custom data files in the Collection Runner on its [paid plans](https://www.postman.com/pricing/).
 - **Sharing without Git.** Send a folder to a teammate as an encrypted link or file that is built on your machine and never uploaded.
-- **More in the same download.** Load testing, Socket.IO, MQTT, GraphQL subscriptions, MCP servers, HAR import, traffic capture, a secret scanner and a mock server, plus a command line that is one binary with no Node.js to install.
+- **More in the same download.** Load testing, Socket.IO, MQTT, SignalR, GraphQL subscriptions, MCP servers, raw TCP and UDP, importers for Postman, Bruno, Insomnia, Hoppscotch, Thunder Client, HTTPie and Hurl, scheduled runs with a history, snapshot and negative tests, OpenAPI coverage and spec diff, traffic capture with rules and held calls, a secret scanner and a mock server, plus a command line that is one binary with no Node.js to install.
 
 Prices and plans change, so check their pages before you decide. Gostman has no accounts, so it has no hosted collaboration, SSO or cloud monitors, and it has no VS Code extension. [What is free in Gostman](docs/free-features.md) compares the paid features of Postman, Bruno and Insomnia with Gostman. Moving from Postman, Bruno or Insomnia? [Coming from Postman](docs/coming-from-postman.md), [Coming from Bruno](docs/coming-from-bruno.md) and [Coming from Insomnia](docs/coming-from-insomnia.md) cover importing a collection, its scripts and the matching `gostman run` flags.
 
@@ -88,7 +88,7 @@ Open the same folder in the desktop app with **Open folder** to see the requests
 
 ## Features
 
-- **Protocols:** REST, GraphQL (schema browser), gRPC (reflection or `.proto`), WebSocket, Socket.IO, MQTT over WebSocket, GraphQL subscriptions, Server-Sent Events, SOAP and MCP servers, over HTTP or, on the desktop, as a local command (stdio).
+- **Protocols:** REST, GraphQL (schema browser), gRPC (reflection or `.proto`), WebSocket, Socket.IO, MQTT over WebSocket, SignalR, GraphQL subscriptions, Server-Sent Events, SOAP, MCP servers and raw TCP and UDP (desktop), over HTTP or, on the desktop, as a local command (stdio).
 - **Auth:** Basic, Bearer, API key, OAuth 2.0 (with PKCE and automatic renewal), OAuth 1, Digest, AWS SigV4, NTLM, Akamai EdgeGrid, JWT Bearer, Atlassian ASAP and Hawk.
 - **Workflow:** collections with nested folders, environments and variables, extraction rules to chain requests, a cookie jar, history, earlier responses with a side-by-side compare, and a command palette.
 - **Checks:** assertions plus pre-request and post-response scripts with `test()` and `expect()` in a sandbox, and a collection runner with CSV or JSON data files, parallel runs and HTML, JUnit and JSON reports.

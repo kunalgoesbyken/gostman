@@ -20,7 +20,7 @@ Gostman is an API client for REST, GraphQL, gRPC and WebSocket that you, your CI
 ## Requests
 
 - [Requests and responses](requests-and-responses.md): the request editor, every body and auth type, and the response viewer.
-- [Protocols](protocols.md): REST, GraphQL, gRPC, WebSocket, Socket.IO, MQTT, Server-Sent Events, SOAP and MCP servers.
+- [Protocols](protocols.md): REST, GraphQL, gRPC, WebSocket, Socket.IO, MQTT, Server-Sent Events, SOAP, MCP servers, SignalR, JSON-RPC and raw TCP and UDP.
 
 ## Variables and secrets
 
@@ -30,13 +30,13 @@ Gostman is an API client for REST, GraphQL, gRPC and WebSocket that you, your CI
 ## Testing and automation
 
 - [Scripts and checks](scripting-and-settings.md): checks, scripts, network settings and the OAuth 2.0 callback.
-- [Running, load testing and scanning](runner-load-and-scan.md): the in-app runner and the dialogs for load tests and scans.
+- [Running, load testing and scanning](runner-load-and-scan.md): the in-app runner, monitors, OpenAPI coverage, negative tests, and the dialogs for load tests and scans.
 - [Flows](flows.md): chain requests with retries, other paths on failure, conditions and loops, drawn in the app and run from the command line.
-- [Gostman in CI](ci.md): exit codes, reports, recipes for GitHub Actions, GitLab CI and Jenkins, and a run against the mock server.
+- [Gostman in CI](ci.md): exit codes, reports, recipes and starter pipelines for several CI systems, scheduled runs, and a run against the mock server.
 
 ## Collections and Git
 
-- [Collections, tabs and Git](collections-and-git.md): the sidebar, tabs, storage and the Git panel.
+- [Collections, tabs and Git](collections-and-git.md): the sidebar, tabs, notes, recently deleted items, storage and the Git panel.
 - [Folder and collection settings](folder-settings.md): headers, auth, variables and scripts shared by a folder.
 - [Folders, mock server and capture](workspaces-and-mock.md): collections as files, saved examples and recorded traffic.
 - [Import, export and OpenAPI specs](import-export-and-specs.md): supported formats, OpenAPI tools and Open in Gostman links.

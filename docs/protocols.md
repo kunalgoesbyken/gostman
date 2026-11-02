@@ -1,12 +1,12 @@
 # Protocols
 
-This page covers every protocol you can test from Gostman: REST and other HTTP requests, GraphQL, gRPC, WebSocket, Socket.IO, MQTT, Server-Sent Events, SOAP and MCP servers. It describes what each protocol's panel does and where the desktop app and the web app differ. To let a coding agent call your APIs through Gostman instead, see [Use from a coding agent](agents.md).
+This page covers every protocol you can test from Gostman: REST and other HTTP requests, GraphQL, gRPC, WebSocket, Socket.IO, MQTT, SignalR, Server-Sent Events, SOAP, MCP servers and raw TCP and UDP. It describes what each protocol's panel does and where the desktop app and the web app differ. To let a coding agent call your APIs through Gostman instead, see [Use from a coding agent](agents.md).
 
 Every protocol uses the same request bar, variables, environments, auth and saved collections. Requests are prepared and sent by the Go engine in both the desktop app and the web app, so a request behaves the same in both unless this page says otherwise.
 
 ## REST and HTTP
 
-The method list in the request bar offers GET, POST, PUT, DELETE, PATCH, HEAD and OPTIONS. It also offers GRAPHQL, GRPC and MCP, which switch the request to those protocols. A request that arrives with another method, for example from an import, keeps that method in the list.
+The protocol list in the request bar, left of the address, picks the protocol: HTTP, GraphQL, gRPC, WebSocket, Server-Sent Events, Socket.IO, MQTT, SOAP, MCP, SignalR, TCP or UDP. For HTTP, Server-Sent Events and SOAP the method list next to it offers GET, POST, PUT, DELETE, PATCH, HEAD and OPTIONS. A request that arrives with another method, for example from an import, keeps that method in the list.
 
 - Type a URL in the bar, or paste a curl command into it to turn the command into a request.
 - Use `{{name}}` placeholders for variables from the active environment.
@@ -26,7 +26,7 @@ With the **JSON** body type, **JSON-RPC call** adds a JSON-RPC 2.0 call (`jsonrp
 
 ## GraphQL
 
-Choose GRAPHQL in the method list; the GraphQL tab opens. If a request keeps a GraphQL query under another method, its GraphQL tab stays visible with Send as GraphQL, and typing in the query also switches the method to GRAPHQL. The engine sends a POST request with a JSON body that holds `query` and, when you provide them, `variables`. If the query editor is empty, the engine falls back to the request body.
+Choose GraphQL in the protocol list; the GraphQL tab opens. If a request keeps a GraphQL query under another method, its GraphQL tab stays visible with Send as GraphQL, and typing in the query also switches the method to GRAPHQL. The engine sends a POST request with a JSON body that holds `query` and, when you provide them, `variables`. If the query editor is empty, the engine falls back to the request body.
 
 ![A GraphQL request named Countries by continent with a query, a Variables (JSON) section, the schema browser and a 200 OK response that shows the countries](../gostman-gui/frontend/src/assets/landing/graphql.webp)
 
@@ -65,7 +65,7 @@ With an `http` or `https` URL, Gostman sends GraphQL as a normal HTTP request. T
 
 ## gRPC
 
-Choose GRPC in the method list. The address is a `grpc://host:port` URL for plaintext or `grpcs://host:port` for TLS; `http://` and `https://` mean the same. A bare `host:port` is plaintext, except on port 443, which uses TLS. The default port is 80 for `grpc://` and 443 for `grpcs://`. TLS certificates are verified unless you turn off Verify TLS certificates in Settings.
+Choose gRPC in the protocol list. The address is a `grpc://host:port` URL for plaintext or `grpcs://host:port` for TLS; `http://` and `https://` mean the same. A bare `host:port` is plaintext, except on port 443, which uses TLS. The default port is 80 for `grpc://` and 443 for `grpcs://`. TLS certificates are verified unless you turn off Verify TLS certificates in Settings.
 
 ![A gRPC request with the source set to Server reflection, the method storefront.v1.Catalog/GetProduct, a JSON message and a JSON response](../gostman-gui/frontend/src/assets/landing/grpc.webp)
 
@@ -143,7 +143,7 @@ Save keeps the message box, and the event or topic, under a name. The saved mess
 
 ### Socket.IO
 
-Choose Socket.IO in the Protocol list next to the status. Gostman speaks Socket.IO 3 and 4 (Engine.IO 4) over WebSocket.
+Choose Socket.IO in the protocol list. Gostman speaks Socket.IO 3 and 4 (Engine.IO 4) over WebSocket.
 
 ![A Socket.IO session that joined the / namespace, received a welcome event, emitted question with a JSON argument and received question:ack back](../screenshots/socketio.png)
 
@@ -157,7 +157,7 @@ Choose Socket.IO in the Protocol list next to the status. Gostman speaks Socket.
 
 ### MQTT
 
-Choose MQTT in the Protocol list to talk to a broker over MQTT 3.1.1 on WebSocket, for example `ws://localhost:8080/mqtt`. The `mqtt` subprotocol is sent for you.
+Choose MQTT in the protocol list to talk to a broker over MQTT 3.1.1 on WebSocket, for example `ws://localhost:8080/mqtt`. The `mqtt` subprotocol is sent for you.
 
 ![An MQTT session subscribed to sensors/#, receiving readings on sensors/warehouse and sensors/cold-store](../screenshots/mqtt.png)
 
@@ -168,7 +168,7 @@ Choose MQTT in the Protocol list to talk to a broker over MQTT 3.1.1 on WebSocke
 
 ### SignalR
 
-Choose **SignalR** as the protocol of a `ws://` or `wss://` request, with the hub address (for example `wss://host/chat`). Gostman posts to `/negotiate?negotiateVersion=1` with the request's headers and auth, connects with the returned connection token and completes the JSON protocol handshake. Type the hub **Method** in the target field and the arguments in the message: a JSON array is the argument list, any other JSON value is one argument. Incoming invocations are logged under their method name, and completions, stream items and errors under the invocation id. Pings are answered every 15 seconds. The MessagePack protocol is not supported. If the address already has an `id` query parameter, negotiation is skipped.
+Choose **SignalR** in the protocol list, with the hub address (for example `wss://host/chat`). Gostman posts to `/negotiate?negotiateVersion=1` with the request's headers and auth, connects with the returned connection token and completes the JSON protocol handshake. Type the hub **Method** in the target field and the arguments in the message: a JSON array is the argument list, any other JSON value is one argument. Incoming invocations are logged under their method name, and completions, stream items and errors under the invocation id. Pings are answered every 15 seconds. The MessagePack protocol is not supported. If the address already has an `id` query parameter, negotiation is skipped.
 
 ### GraphQL subscriptions
 
@@ -201,7 +201,7 @@ WebSocket requests are not available to agents. See [Use from a coding agent](ag
 
 ## TCP and UDP
 
-`TCP` and `UDP` are request methods for talking to a plain socket. The address is `host:port` or `tcp://host:port`. The **Text** body is sent as written and the **Hex** body is decoded from hex digits (spaces are ignored). The reply is read until the server closes the connection, the response size limit is reached or the **Timeout** passes; reaching the timeout after some bytes arrived is not an error. UDP sends one datagram and reads one datagram. The response shows the bytes as text, or as Base64 when they are not text.
+`TCP` and `UDP` are protocols in the protocol list, for talking to a plain socket. The address is `host:port` or `tcp://host:port`. The **Text** body is sent as written and the **Hex** body is decoded from hex digits (spaces are ignored). The reply is read until the server closes the connection, the response size limit is reached or the **Timeout** passes; reaching the timeout after some bytes arrived is not an error. UDP sends one datagram and reads one datagram. The response shows the bytes as text, or as Base64 when they are not text.
 
 Only the desktop app sends them, and only from a folder you trust: the web app, the hosted proxy, the command line and agent sessions refuse them with an explanation, and an import that carries them asks first, like scripts and local MCP commands. Proxies are not used, but the host overrides and IP version from Network settings apply.
 
@@ -274,7 +274,7 @@ Use Import and choose WSDL as the format, or leave Detect automatically on. The 
 
 This section is about testing an MCP server from Gostman. To expose Gostman to an agent, see [Use from a coding agent](agents.md).
 
-Choose MCP in the method list and enter the server's URL. An MCP tab appears. Gostman reaches remote servers over Streamable HTTP, and in the desktop app it can also start a local server that talks over stdio. The headers and auth of the request are sent with every call to a remote server, and placeholders work in the URL, the tool name and the arguments.
+Choose MCP in the protocol list and enter the server's URL. An MCP tab appears. Gostman reaches remote servers over Streamable HTTP, and in the desktop app it can also start a local server that talks over stdio. The headers and auth of the request are sent with every call to a remote server, and placeholders work in the URL, the tool name and the arguments.
 
 ### Local servers (stdio)
 

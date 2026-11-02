@@ -3,7 +3,7 @@
     "rest": {
       "term": "Every protocol",
       "page": "protocols",
-      "text": "REST, GraphQL with a schema browser, gRPC through reflection or .proto files, WebSocket, Socket.IO, MQTT, Server-Sent Events, SOAP and MCP in one window."
+      "text": "REST, GraphQL with a schema browser, gRPC through reflection or .proto files, WebSocket, Socket.IO, MQTT, SignalR, Server-Sent Events, SOAP and MCP in one window."
     },
     "oauth": {
       "term": "Auth for real APIs",

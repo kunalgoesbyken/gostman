@@ -151,7 +151,7 @@ Scripts pasted from Bruno without importing run too: `bru` has the same calls, w
 
 `insomnia` has the same members: `insomnia.environment`, `insomnia.baseEnvironment` and `insomnia.collectionVariables` (both collection variables), `insomnia.variables` (reads every scope, writes session values), `insomnia.globals`, `insomnia.request`, `insomnia.response`, `insomnia.sendRequest`, `insomnia.test`, `insomnia.expect` and `insomnia.execution`.
 
-Not available: `pm.vault`, `pm.require` and the legacy `postman.*` and `tests[...]` globals. A script that declares one of the names of the script API, such as `pm`, `insomnia`, `req`, `res` or `env`, with `const` or `let` fails to start; rename the variable.
+Not available: the legacy `postman.*` and `tests[...]` globals. A script that declares one of the names of the script API, such as `pm`, `insomnia`, `req`, `res` or `env`, with `const` or `let` fails to start; rename the variable.
 
 ## Variables
 

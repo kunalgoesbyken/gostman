@@ -8,7 +8,7 @@ Gostman is written and maintained by one developer, the owner of the [kunalgoesb
 
 ## Releases
 
-Every release is published on [GitHub Releases](https://github.com/kunalgoesbyken/gostman/releases) with installers for Windows, macOS and Linux, the `gostman` command line and release notes. The web version at gostman.com is updated with each push, so it is always current.
+Every release is published on [GitHub Releases](https://github.com/kunalgoesbyken/gostman/releases) with installers for Windows, macOS and Linux, the `gostman` command line and release notes. The [changelog](https://github.com/kunalgoesbyken/gostman/blob/main/CHANGELOG.md) lists what each version added, changed and fixed for security. The web version at gostman.com is updated with each push, so it is always current.
 
 The desktop app never updates itself. Switch on **Check for new versions** under **Preferences**, **Privacy** to see a new release in the status bar; see [Privacy](preferences-and-shortcuts.md#privacy). Before a new version first touches your data, Gostman makes a backup you can restore under **Preferences**, **Data**; see [Backups](preferences-and-shortcuts.md#backups).
 
