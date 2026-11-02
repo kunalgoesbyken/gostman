@@ -46,11 +46,11 @@ function OutputLine({ line }) {
 export function TerminalBlock({ title, header, lines, label, copyText }) {
   return (
     <figure aria-label={label} className="overflow-hidden rounded-lg border border-border/60 bg-background">
-      {(header || title) && <figcaption className="flex h-10 items-center justify-between border-b border-border/60 pl-4 pr-1.5 font-mono text-xs text-muted-foreground">
+      {(header || title) && <figcaption className="flex h-9 items-center justify-between sm:h-10 border-b border-border/60 pl-4 pr-1.5 font-mono text-xs text-muted-foreground">
         {header ?? <span className="truncate">{title}</span>}
         {copyText && <CopyControl text={copyText} label="Copy file" />}
       </figcaption>}
-      <pre className="overflow-x-auto p-4 font-mono text-[0.8125rem] leading-relaxed text-muted-foreground">
+      <pre className="overflow-x-auto p-2.5 font-mono sm:p-4 text-xs leading-relaxed text-muted-foreground sm:text-[0.8125rem]">
         {lines.map((line, index) => (
           line.copy ? <CommandLine key={index} line={line} /> : <OutputLine key={index} line={line} />
         ))}
