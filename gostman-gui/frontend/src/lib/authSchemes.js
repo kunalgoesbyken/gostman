@@ -8,6 +8,7 @@ export const AUTH_EDGEGRID = 'edgegrid'
 export const AUTH_JWT = 'jwt'
 export const AUTH_ASAP = 'asap'
 export const AUTH_HAWK = 'hawk'
+export const AUTH_WS_SECURITY = 'wssecurity'
 
 export const FIELD_TEXT = 'text'
 export const FIELD_SECRET = 'secret'
@@ -53,6 +54,7 @@ const inQuery = (config) => config.in === IN_QUERY
 const SECRET_ENCODINGS = [option('text', 'plainText'), { value: 'base64', label: 'Base64' }]
 const HAWK_ALGORITHMS = asOptions(['sha256', 'sha1'])
 const HAWK_PAYLOAD = [option('skip', 'doNotInclude'), option('include', 'include')]
+const WSSE_PASSWORD_TYPES = [option('text', 'plainText'), option('digest', 'passwordDigest')]
 
 const credentials = [
   field('username', 'username', FIELD_TEXT),
@@ -140,4 +142,10 @@ export const SCHEMES = {
     field('nonce', 'nonce', FIELD_TEXT, { hint: 'generated' }),
     field('timestamp', 'timestamp', FIELD_TEXT, { hint: 'generated' }),
   ], 'hawk'),
+  [AUTH_WS_SECURITY]: scheme('WS-Security', 'wssecurity', [
+    field('username', 'username', FIELD_TEXT),
+    field('password', 'password', FIELD_SECRET),
+    field('passwordType', 'passwordType', FIELD_SELECT, { options: WSSE_PASSWORD_TYPES, fallback: WSSE_PASSWORD_TYPES[0].value }),
+    field('timestampLifetime', 'timestamp', FIELD_TEXT, { hint: 'wsseTimestamp' }),
+  ], 'wssecurity'),
 }

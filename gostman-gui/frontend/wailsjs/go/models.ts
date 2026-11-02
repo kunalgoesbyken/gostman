@@ -761,6 +761,24 @@ export namespace engine {
 	        this.service = source["service"];
 	    }
 	}
+	export class WSSecurityAuth {
+	    username: string;
+	    password: string;
+	    passwordType: string;
+	    timestamp: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new WSSecurityAuth(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.username = source["username"];
+	        this.password = source["password"];
+	        this.passwordType = source["passwordType"];
+	        this.timestamp = source["timestamp"];
+	    }
+	}
 	export class HawkAuth {
 	    id: string;
 	    key: string;
@@ -945,6 +963,7 @@ export namespace engine {
 	    jwt: JWTAuth;
 	    asap: ASAPAuth;
 	    hawk: HawkAuth;
+	    wssecurity: WSSecurityAuth;
 	
 	    static createFrom(source: any = {}) {
 	        return new Auth(source);
@@ -967,6 +986,7 @@ export namespace engine {
 	        this.jwt = this.convertValues(source["jwt"], JWTAuth);
 	        this.asap = this.convertValues(source["asap"], ASAPAuth);
 	        this.hawk = this.convertValues(source["hawk"], HawkAuth);
+	        this.wssecurity = this.convertValues(source["wssecurity"], WSSecurityAuth);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

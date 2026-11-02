@@ -14,7 +14,7 @@ export function GraphQLFiles({ request, onUpdateRequest }) {
   return (
     <Panel>
       <Notice>{TEXT.filesNote}</Notice>
-      <KeyValueEditor rows={rows} typed keyLabel={TEXT.filesVariable} onChange={change} />
+      <KeyValueEditor rows={rows} fileRows keyLabel={TEXT.filesVariable} valueLabel={TEXT.filesFile} onChange={change} />
     </Panel>
   )
 }

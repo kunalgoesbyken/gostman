@@ -161,6 +161,26 @@
       "blurb": "Send files in a GraphQL request with the multipart request spec from the Files tab.",
       "synonyms": "graphql upload multipart file files mutation"
     },
+    "wsSecurity": {
+      "title": "SOAP WS-Security",
+      "blurb": "Add a WS-Security UsernameToken (plain or digest) and Timestamp to a SOAP request from the Auth tab.",
+      "synonyms": "soap wsse ws-security wsdl xml usernametoken digest"
+    },
+    "grpcWeb": {
+      "title": "gRPC-Web and Connect",
+      "blurb": "Call gRPC services over gRPC-Web or Connect, which also works from the web app.",
+      "synonyms": "grpc-web grpcweb connect browser transport"
+    },
+    "signalr": {
+      "title": "SignalR",
+      "blurb": "Negotiate with a SignalR hub, connect over WebSocket and invoke its methods.",
+      "synonyms": "signalr hub aspnet realtime websocket"
+    },
+    "tcpUdp": {
+      "title": "TCP and UDP",
+      "blurb": "Send text or hex over TCP or UDP and read the reply. Desktop app, trusted folders only.",
+      "synonyms": "tcp udp socket raw bytes hex"
+    },
     "breakpoints": {
       "title": "Held calls",
       "blurb": "Hold a captured request or response with a rule, edit it, then release it or drop it.",

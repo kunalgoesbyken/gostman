@@ -18,7 +18,7 @@ var (
 		"extractors", "assertions", "preScript", "postScript", "examples", "notes", "timestamp",
 	}
 	requestMarkers = []string{"method", "url"}
-	authKeys       = []string{"type", "username", "password", "token", "key", "value", "in", "oauth2", "domain", "aws", "oauth1", "edgegrid", "jwt", "asap", "hawk"}
+	authKeys       = []string{"type", "username", "password", "token", "key", "value", "in", "oauth2", "domain", "aws", "oauth1", "edgegrid", "jwt", "asap", "hawk", "wssecurity"}
 	oauth2Keys     = []string{
 		"grant", "authUrl", "tokenUrl", "clientId", "clientSecret", "scope", "username", "password",
 		"callbackUrl", "credentialsIn", "pkce", "headerPrefix", "accessToken", "refreshToken", "expiresAt", "resource", "issuer", "deviceUrl", "sendIdToken",
@@ -127,6 +127,7 @@ func (b nodeBuilder) auth(auth engine.Auth, extras requestExtras) *yaml.Node {
 	setField(node, "jwt", b.section(jwtFields(&auth.JWT)))
 	setField(node, "asap", b.section(asapFields(&auth.ASAP)))
 	setField(node, "hawk", b.section(hawkFields(&auth.Hawk)))
+	setField(node, "wssecurity", b.section(wsSecurityFields(&auth.WSSecurity)))
 	node.Content = append(node.Content, extras.auth...)
 	return filledMapping(node)
 }
@@ -144,8 +145,8 @@ func (b nodeBuilder) options(options engine.Options, extras []*yaml.Node) *yaml.
 	setField(node, "discardCookies", setFlagNode(options.DiscardCookies))
 	setField(node, "socketIoPath", b.text(options.SocketIOPath))
 	setField(node, "socketIoAuth", b.text(options.SocketIOAuth))
-	setField(node, "httpVersion", b.text(options.HTTPVersion))
-	setField(node, "rpcTransport", b.text(options.RPCTransport))
+	setField(node, "httpVersion", b.text(string(options.HTTPVersion)))
+	setField(node, "rpcTransport", b.text(string(options.RPCTransport)))
 	node.Content = append(node.Content, extras...)
 	return filledMapping(node)
 }
@@ -254,6 +255,7 @@ func readAuth(node *yaml.Node, extras *requestExtras, failure *error) engine.Aut
 	readSection(fields.fields["jwt"], jwtFields(&auth.JWT), failure)
 	readSection(fields.fields["asap"], asapFields(&auth.ASAP), failure)
 	readSection(fields.fields["hawk"], hawkFields(&auth.Hawk), failure)
+	readSection(fields.fields["wssecurity"], wsSecurityFields(&auth.WSSecurity), failure)
 	auth.OAuth2, extras.oauth2 = readOAuth2(fields.fields["oauth2"], failure)
 	return auth
 }
@@ -261,7 +263,7 @@ func readAuth(node *yaml.Node, extras *requestExtras, failure *error) engine.Aut
 func readOptions(node *yaml.Node, extras *requestExtras, failure *error) engine.Options {
 	fields := readFields(node, optionKeys, failure)
 	extras.options = fields.extras
-	return engine.Options{
+	options := engine.Options{
 		TimeoutMs:         int(fields.integer("timeoutMs")),
 		NoFollowRedirects: fields.flag("noFollowRedirects", false),
 		InsecureTLS:       fields.flag("insecureTLS", false),
@@ -273,9 +275,15 @@ func readOptions(node *yaml.Node, extras *requestExtras, failure *error) engine.
 		DiscardCookies:    fields.flag("discardCookies", false),
 		SocketIOPath:      fields.text("socketIoPath"),
 		SocketIOAuth:      fields.text("socketIoAuth"),
-		HTTPVersion:       fields.text("httpVersion"),
-		RPCTransport:      fields.text("rpcTransport"),
 	}
+	var err error
+	if options.HTTPVersion, err = engine.ParseHTTPVersion(fields.text("httpVersion")); err != nil {
+		*failure = err
+	}
+	if options.RPCTransport, err = engine.ParseRPCTransport(fields.text("rpcTransport")); err != nil {
+		*failure = err
+	}
+	return options
 }
 
 func readRequest(root *yaml.Node) (requestDocument, error) {

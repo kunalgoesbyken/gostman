@@ -2,7 +2,8 @@
   "realtime": {
     "targets": {
       "topic": "Topic",
-      "event": "Event"
+      "event": "Event",
+      "method": "Method"
     },
     "browser": {
       "closed": "Connection closed (code {{code}})",
@@ -22,6 +23,17 @@
       "binary": "Binary Socket.IO packets are not decoded.",
       "noEvent": "Enter an event name to emit.",
       "ack": "ack {{id}}"
+    },
+    "signalR": {
+      "badNegotiate": "The negotiate response has no connection token.",
+      "negotiateFailed": "The SignalR negotiate request failed: {{reason}}",
+      "handshake": "SignalR handshake complete (JSON protocol)",
+      "handshakeRefused": "The hub refused the handshake: {{reason}}",
+      "streamItem": "stream {{id}}",
+      "completion": "result {{id}}",
+      "closed": "The hub closed the connection",
+      "closedWith": "The hub closed the connection: {{reason}}",
+      "noTarget": "Enter the hub method to invoke."
     },
     "mqtt": {
       "connected": "Connected to the broker",

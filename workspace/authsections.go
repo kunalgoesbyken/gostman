@@ -64,6 +64,15 @@ func jwtFields(config *engine.JWTAuth) []textField {
 	}
 }
 
+func wsSecurityFields(config *engine.WSSecurityAuth) []textField {
+	return []textField{
+		{"username", &config.Username},
+		{"password", &config.Password},
+		{"passwordType", &config.PasswordType},
+		{"timestamp", &config.Timestamp},
+	}
+}
+
 func asapFields(config *engine.ASAPAuth) []textField {
 	return []textField{
 		{"algorithm", &config.Algorithm},

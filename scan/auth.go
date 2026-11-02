@@ -28,6 +28,7 @@ var authFields = []authField{
 	{"auth.jwt.privateKey", func(a engine.Auth) string { return a.JWT.PrivateKey }},
 	{"auth.asap.privateKey", func(a engine.Auth) string { return a.ASAP.PrivateKey }},
 	{"auth.hawk.key", func(a engine.Auth) string { return a.Hawk.Key }},
+	{"auth.wssecurity.password", func(a engine.Auth) string { return a.WSSecurity.Password }},
 }
 
 func (s *scanner) auth(at site, auth engine.Auth) {

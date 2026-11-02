@@ -12,13 +12,14 @@ type Auth struct {
 	In       string `json:"in"`
 	OAuth2   OAuth2 `json:"oauth2"`
 
-	Domain   string       `json:"domain"`
-	AWS      AWSAuth      `json:"aws"`
-	OAuth1   OAuth1Auth   `json:"oauth1"`
-	EdgeGrid EdgeGridAuth `json:"edgegrid"`
-	JWT      JWTAuth      `json:"jwt"`
-	ASAP     ASAPAuth     `json:"asap"`
-	Hawk     HawkAuth     `json:"hawk"`
+	Domain     string         `json:"domain"`
+	AWS        AWSAuth        `json:"aws"`
+	OAuth1     OAuth1Auth     `json:"oauth1"`
+	EdgeGrid   EdgeGridAuth   `json:"edgegrid"`
+	JWT        JWTAuth        `json:"jwt"`
+	ASAP       ASAPAuth       `json:"asap"`
+	Hawk       HawkAuth       `json:"hawk"`
+	WSSecurity WSSecurityAuth `json:"wssecurity"`
 }
 
 type OAuth2 struct {
@@ -58,8 +59,8 @@ type Options struct {
 	SkipCookies    bool `json:"skipCookies"`
 	DiscardCookies bool `json:"discardCookies"`
 
-	HTTPVersion  string `json:"httpVersion"`
-	RPCTransport string `json:"rpcTransport"`
+	HTTPVersion  HTTPVersion  `json:"httpVersion"`
+	RPCTransport RPCTransport `json:"rpcTransport"`
 
 	SocketIOPath string `json:"socketIoPath"`
 	SocketIOAuth string `json:"socketIoAuth"`

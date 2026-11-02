@@ -37,6 +37,7 @@ type Policy struct {
 	RunCommands       bool
 	ReadFile          FileReader
 	OpenFile          FileOpener
+	RawSockets        bool
 }
 
 func (p Policy) fileOpener() FileOpener {
@@ -75,6 +76,9 @@ func send(ctx context.Context, r Request, policy Policy) Response {
 }
 
 func exchange(ctx context.Context, r Request, policy Policy, timeline *recorder) Response {
+	if IsRawMethod(r.Method) {
+		return sendRaw(ctx, r, policy)
+	}
 	ctx, cancel := context.WithTimeout(ctx, policy.Timeout(r.Options))
 	defer cancel()
 

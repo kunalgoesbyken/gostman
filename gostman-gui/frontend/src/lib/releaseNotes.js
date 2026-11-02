@@ -5,7 +5,7 @@ export const RELEASES = [
     version: '1.9.0',
     ids: [
       'hex-view', 'msgpack-cbor', 'certificate-viewer', 'jwt-signing', 'http-version', 'dns-override',
-      'graphql-upload', 'breakpoints', 'spec-importers', 'versioned-docs', 'notes', 'recently-deleted', 'snapshot-checks', 'negative-tests',
+      'graphql-upload', 'ws-security', 'grpc-web', 'signalr', 'tcp-udp', 'breakpoints', 'spec-importers', 'versioned-docs', 'notes', 'recently-deleted', 'snapshot-checks', 'negative-tests',
       'coverage', 'pm-packages', 'load-thresholds', 'monitors', 'capture-rules', 'capture-har',
       'git-field-diff', 'git-commit-graph', 'repo-create', 'ai-mock', 'ai-commit', 'xlsx-data',
       'scheduled-runs', 'openapi-diff', 'ci-starters',

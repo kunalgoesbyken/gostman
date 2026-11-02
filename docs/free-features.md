@@ -15,7 +15,8 @@ Gostman has no paid tier, no account and no licence key, so every feature in the
 - **Mock server:** serve saved examples or an OpenAPI spec locally, with rules, delays and a live request log. See [Folders, mock server and capture](workspaces-and-mock.md).
 - **Capture proxy:** forward one API through a local address and rewrite headers and bodies, send a path to another host, answer from a file or a saved response, add delay, errors, resets or bandwidth limits, hold calls at a breakpoint to edit them, and export the journal as HAR. It is a forwarding proxy and does not decrypt HTTPS traffic. See [Folders, mock server and capture](workspaces-and-mock.md#capture-rules).
 - **Command line for CI:** `gostman run` exits non-zero when a request or a check fails, and a GitHub Action and a Docker image are available. See [Gostman in CI](ci.md).
-- **Load testing and secret scanning:** `gostman load` and `gostman scan` ship in the same binary. See [Command line](cli.md).
+- **Load testing and secret scanning:** `gostman load` and `gostman scan` ship in the same binary, with k6-style thresholds and staged ramps. See [Command line](cli.md).
+- **Protocols:** HTTP version choice, host overrides and IPv4 or IPv6 only, GraphQL file uploads, JWT signing with PEM or JWK keys, SOAP WS-Security, gRPC-Web and Connect, SignalR, JSON-RPC batches and raw TCP and UDP (desktop). See [Protocols](protocols.md).
 - **OpenAPI tools:** import, sync with a remote spec, view it, lint it and check responses against it. See [Import, export and specs](import-export-and-specs.md).
 - **MCP server testing:** tools, resources and prompts in collections and CI runs, an OAuth sign-in that shows each discovery step, tool definition checks and warnings when a server's tools change. See [MCP servers](protocols.md#mcp-servers).
 - **An MCP server for coding agents,** with secret redaction and a host allowlist. See [Use from a coding agent](agents.md).

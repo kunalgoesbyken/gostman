@@ -6,7 +6,7 @@ const SHOWN_PATHS = 10
 const COUNT_SEPARATOR = '; '
 const HTML_EXAMPLE = '{{name}}'
 const SECRET_EXAMPLE = '{{NAME}}'
-const ACTIVE_KINDS = ['scripts', 'oauth', 'commands', 'files']
+const ACTIVE_KINDS = ['scripts', 'oauth', 'commands', 'sockets', 'files']
 
 const text = messages('import', english, (t) => {
   const quoted = (names) => names.map((name) => t('importResult.quoted', { name }))

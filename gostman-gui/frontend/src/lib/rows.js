@@ -27,6 +27,8 @@ export const isFileRow = (row) => row.type === ROW_FILE
 
 export const isBlankRow = (row) => row.key === '' && row.value === '' && !isFileRow(row)
 
+export const isBlankFileRow = (row) => row.key === '' && !row.fileName && !row.path && !row.data
+
 export const isSentRow = (row) => row.enabled && row.key.trim() !== ''
 
 export const countSentRows = (rows) => rows.filter(isSentRow).length

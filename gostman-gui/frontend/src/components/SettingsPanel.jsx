@@ -64,7 +64,7 @@ export function SettingsPanel({ options, settings, description, tags, onChange, 
         )}
         {settings.has(SETTING_RPC_TRANSPORT) && (
           <Field label={TEXT.rpcTransport}>
-            <Select value={options.rpcTransport || ""} onChange={(event) => update({ rpcTransport: event.target.value })} className="max-w-64">
+            <Select value={options.rpcTransport || ""} onChange={(event) => update({ rpcTransport: event.target.value })} className="max-w-48">
               {RPC_TRANSPORT_CHOICES.map((choice) => (
                 <option key={choice.value} value={choice.value}>{choice.label}</option>
               ))}

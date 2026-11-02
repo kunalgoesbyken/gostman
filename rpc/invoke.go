@@ -70,7 +70,7 @@ func invokeWith(ctx context.Context, call Call, expansion *engine.Expansion, pol
 }
 
 func (s *session) call(ctx context.Context, call Call, limit int64) (*exchange, error) {
-	if call.Target.Options.RPCTransport != "" {
+	if call.Target.Options.RPCTransport != engine.TransportGRPC {
 		return s.callOverHTTP(ctx, call, limit)
 	}
 	ctx, err := s.connect(ctx)

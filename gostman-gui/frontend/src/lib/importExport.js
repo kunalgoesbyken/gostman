@@ -1,5 +1,5 @@
 import YAML from 'js-yaml'
-import { BODY_BINARY, BODY_FORM, BODY_JSON, BODY_MULTIPART, BODY_NONE, BODY_TEXT, BODY_TYPES, BODY_XML } from './body'
+import { BODY_BINARY, BODY_FORM, BODY_JSON, BODY_MULTIPART, BODY_NONE, BODY_TEXT, BODY_TYPES, BODY_XML, RAW_SOCKET_BODY_TYPES } from './body'
 import { buildCollectionTree, folderDepth, listFolders, MAX_FOLDER_DEPTH, requestsIn, ROOT_ID } from './collectionTree'
 import { SCRIPT_FIELDS, activeKinds, filePathsIn, hasActiveContent, withoutActiveContent } from './activeContent'
 import { isPlainObject, lookup, parseJSON } from './dataUtils'
@@ -466,7 +466,7 @@ const AUTH_TEXT_FIELDS = ['username', 'password', 'token', 'key', 'value', 'doma
 const SCHEME_SECTIONS = Object.values(SCHEMES).filter((scheme) => scheme.section)
 const REQUEST_TEXT_FIELDS = ['id', 'description', 'url', 'headers', 'body', 'queryParams', 'folderId', 'graphqlQuery', 'graphqlVariables', 'extractors', 'assertions', ...SCRIPT_FIELDS, 'grpcMethod', 'grpcMessage', 'grpcProtos', 'mcpMethod', 'mcpTool', 'mcpArguments', 'socketProtocol', 'socketMessages', 'vars', 'notes']
 const SCOPE_TEXT_FIELDS = ['description', 'headers', 'assertions', 'notes', ...SCRIPT_FIELDS]
-const BODY_TYPE_VALUES = BODY_TYPES.map((type) => type.value)
+const BODY_TYPE_VALUES = [...BODY_TYPES, ...RAW_SOCKET_BODY_TYPES].map((type) => type.value)
 
 const stringOf = (value) => (typeof value === 'string' ? value : '')
 

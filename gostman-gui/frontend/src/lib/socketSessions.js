@@ -190,6 +190,11 @@ export function createSocketActions(backend) {
     }
   }
 
+  const socketAddress = async (protocol, target, request, effective, variables) => {
+    if (protocol.resolveAddress) return protocol.resolveAddress(target.url, { request: effective, variables, send: backend.send })
+    return protocol.address ? protocol.address(target.url, request, target.substitute) : target.url
+  }
+
   async function prepareSession(request, target) {
     const state = useAppStore.getState()
     const effective = withInheritance(state, { ...request, url: toHttpURL(target.url) })
@@ -199,7 +204,7 @@ export function createSocketActions(backend) {
     const headers = preparedHeaders.map(({ key, value }) => [key, value])
     return {
       protocol,
-      url: protocol.address ? protocol.address(target.url, request, target.substitute) : target.url,
+      url: await socketAddress(protocol, target, request, effective, selectActiveVariables(state)),
       headers: protocol.subprotocol ? [...headers, [SUBPROTOCOL_HEADER, protocol.subprotocol]] : headers,
       context: { url: target.url, request: effective, prepared: { ...prepared, headers: preparedHeaders }, substitute: target.substitute },
     }

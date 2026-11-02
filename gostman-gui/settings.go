@@ -236,6 +236,7 @@ func (a *App) sendPolicy() engine.Policy {
 	policy := a.policy()
 	policy.ReadFile = workspaceFiles()
 	policy.OpenFile = workspaceAttachments()
+	policy.RawSockets = isTrustedHere()
 	return policy
 }
 

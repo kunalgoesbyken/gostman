@@ -1,5 +1,6 @@
 import { attachedPaths, attachesFile, withoutAttachedFiles } from './attachments'
 import { isLocalCommand } from './mcp'
+import { RAW_SOCKET_METHODS } from './body'
 import { AUTH_OAUTH2, normalizeRequest } from './request'
 import { someText, mapText, textsIn } from './textValues'
 import { fileReferencesIn, hasFileReference, withoutFileReferences } from './variables'
@@ -27,10 +28,13 @@ const readPathsOf = (value) => [...textsIn(value).flatMap(fileReferencesIn).map(
 
 export const filePathsIn = (values) => [...new Set(values.filter(Boolean).flatMap(readPathsOf).filter(Boolean))]
 
+const isRawSocket = (request) => RAW_SOCKET_METHODS.includes(request.method)
+
 const ACTIVE_CHECKS = {
   scripts: hasScript,
   oauth: (request) => request.auth.type === AUTH_OAUTH2,
   commands: isLocalCommand,
+  sockets: isRawSocket,
   files: readsFiles,
 }
 
@@ -45,6 +49,6 @@ export function withoutActiveContent(request) {
     ...NO_SCRIPTS,
     body: withoutAttachedFiles(stripped.body),
     auth: stripped.auth.type === AUTH_OAUTH2 ? NO_AUTH : stripped.auth,
-    url: isLocalCommand(stripped) ? '' : stripped.url,
+    url: isLocalCommand(stripped) || isRawSocket(stripped) ? '' : stripped.url,
   })
 }

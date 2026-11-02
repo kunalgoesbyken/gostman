@@ -168,12 +168,14 @@
       "scripts": "scripts",
       "oauth": "OAuth 2.0 settings",
       "commands": "commands that start local MCP servers",
+      "sockets": "raw TCP and UDP requests",
       "files": "file reads that send files from this computer"
     },
     "titleOne": {
       "scripts": "Import the scripts?",
       "oauth": "Import the OAuth settings?",
       "commands": "Import the commands?",
+      "sockets": "Import the TCP and UDP requests?",
       "files": "Import the file reads?"
     },
     "titleMany": "Review before importing",
@@ -181,6 +183,7 @@
       "scripts": "Import with scripts",
       "oauth": "Import with OAuth settings",
       "commands": "Import with commands",
+      "sockets": "Import with TCP and UDP requests",
       "files": "Import with file reads"
     },
     "withMany": "Import everything",
@@ -188,6 +191,7 @@
       "scripts": "Import without scripts",
       "oauth": "Import without OAuth settings",
       "commands": "Import without commands",
+      "sockets": "Import without TCP and UDP request addresses",
       "files": "Import without file reads"
     },
     "withoutMany": "Import without them",
@@ -195,6 +199,7 @@
       "scripts": "The scripts were left out.",
       "oauth": "The OAuth 2.0 settings were left out.",
       "commands": "The commands that start local MCP servers were left out.",
+      "sockets": "The addresses of raw TCP and UDP requests were left out.",
       "files": "The file reads that send files from this computer were left out."
     },
     "leftOut": "The {{kinds}} were left out.",

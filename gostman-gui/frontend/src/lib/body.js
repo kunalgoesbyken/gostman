@@ -8,6 +8,9 @@ export const BODY_FORM = 'form'
 export const BODY_MULTIPART = 'multipart'
 export const BODY_BINARY = 'binary'
 export const BODY_SOAP = 'soap'
+export const BODY_HEX = 'hex'
+
+export const RAW_SOCKET_METHODS = ['TCP', 'UDP']
 
 export const BODY_TYPES = [
   { value: BODY_NONE, get label() { return LABEL_TEXT.types.none } },
@@ -19,6 +22,18 @@ export const BODY_TYPES = [
   { value: BODY_MULTIPART, get label() { return LABEL_TEXT.types.multipart } },
   { value: BODY_BINARY, get label() { return LABEL_TEXT.types.file } },
 ]
+
+export const RAW_SOCKET_BODY_TYPES = [
+  { value: BODY_TEXT, get label() { return LABEL_TEXT.types.text } },
+  { value: BODY_HEX, get label() { return LABEL_TEXT.types.hex } },
+]
+
+export const bodyTypesFor = (method) => (RAW_SOCKET_METHODS.includes(method) ? RAW_SOCKET_BODY_TYPES : BODY_TYPES)
+
+export const withBodyTypeFor = (request) => {
+  const isListed = bodyTypesFor(request.method).some((type) => type.value === request.bodyType)
+  return RAW_SOCKET_METHODS.includes(request.method) && !isListed ? { ...request, bodyType: BODY_TEXT } : request
+}
 
 const RAW_KIND = 'raw'
 const STRUCTURED_TYPES = [BODY_NONE, BODY_FORM, BODY_MULTIPART, BODY_BINARY]

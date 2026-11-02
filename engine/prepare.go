@@ -51,9 +51,6 @@ func prepare(r Request, files FileReader, open FileOpener) (Prepared, error) {
 }
 
 func prepareWith(r Request, expansion *substitution, stream *bodyStream) (Prepared, error) {
-	if err := r.Options.checkHTTPVersion(); err != nil {
-		return Prepared{}, err
-	}
 	substitute := expansion.apply
 
 	method := strings.ToUpper(strings.TrimSpace(r.Method))
@@ -99,12 +96,15 @@ func prepareWith(r Request, expansion *substitution, stream *bodyStream) (Prepar
 	if err != nil {
 		return Prepared{}, err
 	}
+	if body, err = applyBodyAuth(r.Auth, substitute, body); err != nil {
+		return Prepared{}, err
+	}
 	headers, body = signRequest(r.Auth, substitute, method, target, headers, body)
 	if err := expansion.failure(); err != nil {
 		return Prepared{}, err
 	}
 
-	prepared := Prepared{Method: method, URL: target.String(), Parts: built.parts, File: built.file, HTTPVersion: r.Options.HTTPVersion, body: body}
+	prepared := Prepared{Method: method, URL: target.String(), Parts: built.parts, File: built.file, HTTPVersion: string(r.Options.HTTPVersion), body: body}
 	if streamed {
 		prepared.stream = stream
 	}
@@ -222,6 +222,13 @@ func applyAuth(auth Auth, substitute func(string) string, headers []pair, target
 	default:
 		return headers, nil
 	}
+}
+
+func applyBodyAuth(auth Auth, substitute func(string) string, body []byte) ([]byte, error) {
+	if auth.Type != authWSSecurity || len(body) == 0 {
+		return body, nil
+	}
+	return applyWSSecurity(auth, substitute, body)
 }
 
 func hasHeader(headers []pair, name string) bool {

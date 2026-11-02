@@ -65,6 +65,7 @@ func authFields(auth *engine.Auth) []secretField {
 		{hiddenPrefix + "jwt.privateKey", &auth.JWT.PrivateKey},
 		{hiddenPrefix + "asap.privateKey", &auth.ASAP.PrivateKey},
 		{hiddenPrefix + "hawk.key", &auth.Hawk.Key},
+		{hiddenPrefix + "wssecurity.password", &auth.WSSecurity.Password},
 	}, tokenFields(&auth.OAuth2)...)
 }
 

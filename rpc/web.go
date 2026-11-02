@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"github.com/kunalgoesbyken/gostman/engine"
 	"io"
 	"net/http"
 	"net/url"
@@ -24,11 +25,6 @@ import (
 )
 
 const (
-	TransportGRPC        = ""
-	TransportGRPCWeb     = "grpc-web"
-	TransportGRPCWebText = "grpc-web-text"
-	TransportConnect     = "connect"
-
 	contentGRPCWeb     = "application/grpc-web+proto"
 	contentGRPCWebText = "application/grpc-web-text+proto"
 	contentConnectJSON = "application/json"
@@ -74,7 +70,7 @@ var httpCodes = map[int]codes.Code{
 }
 
 type webCall struct {
-	transport  string
+	transport  engine.RPCTransport
 	url        string
 	descriptor protoreflect.MethodDescriptor
 	format     format
@@ -107,9 +103,6 @@ func (s *session) callOverHTTP(ctx context.Context, call Call, limit int64) (*ex
 
 func (s *session) prepareWeb(ctx context.Context, call Call, limit int64) (*webCall, error) {
 	transport := call.Target.Options.RPCTransport
-	if transport != TransportGRPCWeb && transport != TransportGRPCWebText && transport != TransportConnect {
-		return nil, configError("unknown transport %q; use grpc-web, grpc-web-text or connect", transport)
-	}
 	service, method, found := strings.Cut(strings.TrimPrefix(strings.TrimSpace(call.Method), "/"), "/")
 	if !found || service == "" || method == "" {
 		return nil, configError("choose a method to call, such as package.Service/Method")
@@ -142,7 +135,7 @@ func (s *session) methodURL(service, method string) string {
 }
 
 func (w *webCall) withoutSchema(message string) error {
-	if w.transport != TransportConnect {
+	if w.transport != engine.TransportConnect {
 		return configError("%s sends protobuf, so it needs the .proto files; add them in the gRPC tab", w.transport)
 	}
 	text := strings.TrimSpace(message)
@@ -165,8 +158,8 @@ func (w *webCall) withSchema(descriptor protoreflect.MethodDescriptor, files *pr
 		return err
 	}
 	w.messages = requests
-	w.enveloped = w.transport == TransportConnect && (descriptor.IsStreamingServer() || descriptor.IsStreamingClient())
-	if w.transport != TransportConnect {
+	w.enveloped = w.transport == engine.TransportConnect && (descriptor.IsStreamingServer() || descriptor.IsStreamingClient())
+	if w.transport != engine.TransportConnect {
 		return nil
 	}
 	for _, request := range requests {
@@ -188,7 +181,7 @@ func frame(flag byte, payload []byte) []byte {
 
 func (w *webCall) body() ([]byte, error) {
 	var out bytes.Buffer
-	if w.transport == TransportConnect {
+	if w.transport == engine.TransportConnect {
 		if !w.enveloped {
 			return w.documents[0], nil
 		}
@@ -204,7 +197,7 @@ func (w *webCall) body() ([]byte, error) {
 		}
 		out.Write(frame(0, encoded))
 	}
-	if w.transport == TransportGRPCWebText {
+	if w.transport == engine.TransportGRPCWebText {
 		return []byte(base64.StdEncoding.EncodeToString(out.Bytes())), nil
 	}
 	return out.Bytes(), nil
@@ -212,9 +205,9 @@ func (w *webCall) body() ([]byte, error) {
 
 func (w *webCall) contentType() string {
 	switch {
-	case w.transport == TransportGRPCWeb:
+	case w.transport == engine.TransportGRPCWeb:
 		return contentGRPCWeb
-	case w.transport == TransportGRPCWebText:
+	case w.transport == engine.TransportGRPCWebText:
 		return contentGRPCWebText
 	case w.enveloped:
 		return contentConnectEnv
@@ -237,7 +230,7 @@ func (w *webCall) request(ctx context.Context, outgoing metadata.MD) (*http.Requ
 		}
 	}
 	request.Header.Set("Content-Type", w.contentType())
-	if w.transport == TransportConnect {
+	if w.transport == engine.TransportConnect {
 		request.Header.Set(headerConnectVersion, "1")
 		if deadline, ok := ctx.Deadline(); ok {
 			request.Header.Set(headerConnectTimeout, strconv.FormatInt(max(1, time.Until(deadline).Milliseconds()), 10))
@@ -262,7 +255,7 @@ func (w *webCall) read(response *http.Response) (*exchange, error) {
 	if w.descriptor != nil {
 		result.serverStream = w.descriptor.IsStreamingServer()
 	}
-	if w.transport == TransportConnect {
+	if w.transport == engine.TransportConnect {
 		return result, w.readConnect(response, raw, result)
 	}
 	return result, w.readGRPCWeb(response, raw, result)
@@ -277,7 +270,7 @@ func toMD(header http.Header) metadata.MD {
 }
 
 func (w *webCall) readGRPCWeb(response *http.Response, raw []byte, result *exchange) error {
-	if w.transport == TransportGRPCWebText || strings.Contains(response.Header.Get("Content-Type"), "grpc-web-text") {
+	if w.transport == engine.TransportGRPCWebText || strings.Contains(response.Header.Get("Content-Type"), "grpc-web-text") {
 		decoded, err := decodeBase64Chunks(string(raw))
 		if err != nil {
 			return fmt.Errorf("the response is not valid base64: %w", err)

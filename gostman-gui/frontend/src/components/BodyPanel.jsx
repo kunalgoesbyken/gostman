@@ -16,7 +16,9 @@ import {
   BODY_MULTIPART,
   BODY_NONE,
   BODY_SOAP,
-  BODY_TYPES,
+  RAW_SOCKET_METHODS,
+  bodyTypesFor,
+  withBodyTypeFor,
   BODY_XML,
   switchBodyType,
 } from "../lib/body"
@@ -24,6 +26,7 @@ import { EMPTY_ATTACHMENT } from "../lib/attachments"
 import { BODY_TEXT } from "../lib/bodyText"
 import { chordLabel } from "../lib/chords"
 import { isPlainObject, lookup, parseJSON } from "../lib/dataUtils"
+import { addJsonRpcCall } from "../lib/jsonRpc"
 import { isApplePlatform } from "../lib/platform"
 import { parseRows, serializeRows } from "../lib/rows"
 import { SOAP_11, soapTemplate } from "../lib/soap"
@@ -115,6 +118,15 @@ function BodyEditor({ request, editorPath, editorRef, onChange, onFormat, Editor
   )
 }
 
+function JsonRpcButton({ body, onChange }) {
+  const extended = addJsonRpcCall(body)
+  return (
+    <Button variant="outline" size="sm" title={BODY_TEXT.jsonRpcTitle} disabled={extended === null} onClick={() => onChange(extended)}>
+      {BODY_TEXT.jsonRpc}
+    </Button>
+  )
+}
+
 function useBodyFormatting(request) {
   const editorRef = useRef(null)
   const [problem, setProblem] = useState(null)
@@ -127,7 +139,8 @@ function useBodyFormatting(request) {
   return { editorRef, isFormatted, shownProblem, onFormat, format, reveal }
 }
 
-export function BodyPanel({ request, drafts, editorPath, replacedByGraphQL, onUpdateRequest, onDraftsChange, EditorComponent }) {
+export function BodyPanel({ request: stored, drafts, editorPath, replacedByGraphQL, onUpdateRequest, onDraftsChange, EditorComponent }) {
+  const request = withBodyTypeFor(stored)
   const formatting = useBodyFormatting(request)
   const handleTypeChange = (bodyType) => {
     const next = switchBodyType(request, drafts, bodyType)
@@ -139,7 +152,8 @@ export function BodyPanel({ request, drafts, editorPath, replacedByGraphQL, onUp
   return (
     <Panel>
       <Toolbar>
-        <SegmentedControl label={BODY_TEXT.typeLabel} options={BODY_TYPES} value={request.bodyType} onChange={handleTypeChange} />
+        <SegmentedControl label={BODY_TEXT.typeLabel} options={bodyTypesFor(request.method)} value={request.bodyType} onChange={handleTypeChange} />
+        {request.bodyType === BODY_JSON && <JsonRpcButton body={request.body} onChange={(body) => onUpdateRequest({ body })} />}
         {formatting.isFormatted && (
           <Button
             variant="ghost"
@@ -158,6 +172,7 @@ export function BodyPanel({ request, drafts, editorPath, replacedByGraphQL, onUp
       {replacedByGraphQL && (
         <Notice>{BODY_TEXT.replacedByGraphQL}</Notice>
       )}
+      {RAW_SOCKET_METHODS.includes(request.method) && <Notice>{BODY_TEXT.rawSocket}</Notice>}
       {request.bodyType === BODY_MULTIPART && BODILESS_METHODS.includes(request.method) && <Notice>{BODY_TEXT.multipartOnGet}</Notice>}
       {formatting.shownProblem && <FormatProblem bodyType={request.bodyType} error={formatting.shownProblem} onReveal={formatting.reveal} />}
       <BodyEditor

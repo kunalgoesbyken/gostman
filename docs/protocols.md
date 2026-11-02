@@ -20,6 +20,10 @@ Limits that apply to every protocol on this page:
 - Proxy, CA certificate and client certificate settings exist only in the desktop app; the local relay takes them as flags.
 - Through the hosted proxy the web app truncates responses larger than 3 MB. The desktop app and the local relay read up to 50 MB.
 
+### JSON-RPC
+
+With the **JSON** body type, **JSON-RPC call** adds a JSON-RPC 2.0 call (`jsonrpc`, `method`, `params`, `id`) with the next free numeric id. Pressing it again turns the body into a batch, an array with one call for each id; the server answers a batch with an array whose items carry the same ids. Fill in the methods and params and send as a POST.
+
 ## GraphQL
 
 Choose GRAPHQL in the method list; the GraphQL tab opens. If a request keeps a GraphQL query under another method, its GraphQL tab stays visible with Send as GraphQL, and typing in the query also switches the method to GRAPHQL. The engine sends a POST request with a JSON body that holds `query` and, when you provide them, `variables`. If the query editor is empty, the engine falls back to the request body.
@@ -162,6 +166,10 @@ Choose MQTT in the Protocol list to talk to a broker over MQTT 3.1.1 on WebSocke
 - Type a topic in Topic and the payload in the message box to publish at QoS 0. Received messages show their topic above the payload; a payload that is not UTF-8 is shown as hexadecimal bytes.
 - Brokers that only listen on TCP port 1883, without WebSocket, cannot be reached.
 
+### SignalR
+
+Choose **SignalR** as the protocol of a `ws://` or `wss://` request, with the hub address (for example `wss://host/chat`). Gostman posts to `/negotiate?negotiateVersion=1` with the request's headers and auth, connects with the returned connection token and completes the JSON protocol handshake. Type the hub **Method** in the target field and the arguments in the message: a JSON array is the argument list, any other JSON value is one argument. Incoming invocations are logged under their method name, and completions, stream items and errors under the invocation id. Pings are answered every 15 seconds. The MessagePack protocol is not supported. If the address already has an `id` query parameter, negotiation is skipped.
+
 ### GraphQL subscriptions
 
 A GRAPHQL request with a `ws://` or `wss://` URL connects with the `graphql-transport-ws` protocol, which the `graphql-ws` library, Apollo Server and most current servers use.
@@ -190,6 +198,12 @@ The enabled headers on the Headers tab, together with inherited headers, are use
 In the web app, the panel lists the headers that are not sent, with this notice: a browser can only set Sec-WebSocket-Protocol on a WebSocket, and the desktop app sends every header.
 
 WebSocket requests are not available to agents. See [Use from a coding agent](agents.md).
+
+## TCP and UDP
+
+`TCP` and `UDP` are request methods for talking to a plain socket. The address is `host:port` or `tcp://host:port`. The **Text** body is sent as written and the **Hex** body is decoded from hex digits (spaces are ignored). The reply is read until the server closes the connection, the response size limit is reached or the **Timeout** passes; reaching the timeout after some bytes arrived is not an error. UDP sends one datagram and reads one datagram. The response shows the bytes as text, or as Base64 when they are not text.
+
+Only the desktop app sends them, and only from a folder you trust: the web app, the hosted proxy, the command line and agent sessions refuse them with an explanation, and an import that carries them asks first, like scripts and local MCP commands. Proxies are not used, but the host overrides and IP version from Network settings apply.
 
 ## Server-Sent Events
 
@@ -237,6 +251,10 @@ Choose SOAP as the body type on the Body tab. If the body is empty, Gostman inse
 
 - SOAP 1.1: content type `text/xml; charset=utf-8`. If no `SOAPAction` header is set, Gostman sends an empty one.
 - SOAP 1.2, detected from the 1.2 envelope namespace in the body: content type `application/soap+xml; charset=utf-8`. A `SOAPAction` value moves into an `action` parameter of the content type and the separate header is dropped.
+
+### WS-Security
+
+Choose **WS-Security** in the Auth tab to add a `wsse:Security` header to the SOAP envelope. It needs a username, a timestamp lifetime or both. **Password type** is Plain text or Digest; a digest is `Base64(SHA-1(nonce + created + password))`, sent with a fresh nonce and the created time, as in the OASIS UsernameToken profile 1.0. **Timestamp lifetime** (seconds, or a duration such as `5m`) adds a `wsu:Timestamp` that expires after that time. The header is added to an existing `Header` element or creates one, keeps the envelope's own prefix and carries `mustUnderstand="1"`. Variables work in every field, so the password can be a secret. The auth applies to the SOAP body type only.
 
 ### Responses and faults
 

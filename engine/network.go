@@ -55,7 +55,7 @@ type transportKey struct {
 	blockPrivate bool
 	insecureTLS  bool
 	certificate  int
-	version      string
+	version      HTTPVersion
 }
 
 type Network struct {
@@ -241,7 +241,7 @@ type route struct {
 	network      *Network
 	blockPrivate bool
 	insecureTLS  bool
-	httpVersion  string
+	httpVersion  HTTPVersion
 	refusal      func(host string) error
 }
 
@@ -294,21 +294,7 @@ func (p Policy) TLSConfig(host string, insecureTLS bool) *tls.Config {
 	return network.tlsConfig(transportKey{p.BlockPrivate, insecureTLS, network.certificateFor(host), ""})
 }
 
-const (
-	HTTPVersionAuto = ""
-	HTTPVersion1    = "1.1"
-	HTTPVersion2    = "2"
-)
-
-func (o Options) checkHTTPVersion() error {
-	switch o.HTTPVersion {
-	case HTTPVersionAuto, HTTPVersion1, HTTPVersion2:
-		return nil
-	}
-	return fmt.Errorf("the HTTP version %q is not supported; use %q or %q", o.HTTPVersion, HTTPVersion1, HTTPVersion2)
-}
-
-func protocolsFor(version string, transport *http.Transport) {
+func protocolsFor(version HTTPVersion, transport *http.Transport) {
 	var protocols http.Protocols
 	switch version {
 	case HTTPVersion1:

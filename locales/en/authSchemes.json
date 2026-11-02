@@ -44,6 +44,8 @@
       "payloadHash": "Payload hash",
       "extraData": "Extra data",
       "appId": "App ID",
+      "passwordType": "Password type",
+      "timestampLifetime": "Timestamp lifetime",
       "delegation": "Delegation"
     },
     "hints": {
@@ -51,7 +53,8 @@
       "commaSeparated": "Comma separated, optional",
       "optional": "Optional",
       "expiry": "1h, or seconds",
-      "jwtExpiry": "Optional: adds iat and exp, for example 1h or 900"
+      "jwtExpiry": "Optional: adds iat and exp, for example 1h or 900",
+      "wsseTimestamp": "Optional: adds a Timestamp valid for 5m, or seconds"
     },
     "options": {
       "authorizationHeader": "Authorization header",
@@ -59,6 +62,7 @@
       "formBody": "Form body",
       "plainText": "Plain text",
       "doNotInclude": "Do not include",
+      "passwordDigest": "Digest (SHA-1 with nonce and created time)",
       "include": "Include"
     },
     "notes": {
@@ -69,7 +73,8 @@
       "edgegrid": "Client token, client secret and access token are required to sign the request.",
       "jwt": "The token is signed again for every request, so {{timestamp}} in the payload stays current. Expires after adds iat and exp.",
       "asap": "Issuer, audience, key ID and private key are required. A new token with its own iat, exp and jti is sent as a Bearer token with every request.",
-      "hawk": "Auth ID and key are required to sign the request."
+      "hawk": "Auth ID and key are required to sign the request.",
+      "wssecurity": "Inserts a wsse:Security header into the SOAP envelope of the SOAP body type. Give a username, a timestamp lifetime or both."
     }
   }
 }

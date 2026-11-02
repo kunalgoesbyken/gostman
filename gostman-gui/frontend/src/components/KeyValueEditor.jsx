@@ -7,7 +7,7 @@ import { PanelBody, SectionLabel } from "./ui/panel"
 import { Select } from "./ui/select"
 import { FileField } from "./FileField"
 import { EMPTY_ATTACHMENT } from "../lib/attachments"
-import { ROW_FILE, ROW_TEXT, isBlankRow, isFileRow } from "../lib/rows"
+import { ROW_FILE, ROW_TEXT, isBlankFileRow, isBlankRow, isFileRow } from "../lib/rows"
 import { bulkTextToRows, fitsBulkText, rowsToBulkText } from "../lib/bulkRows"
 import { KEY_VALUE_TEXT as TEXT } from "../lib/keyValueText"
 import { cn } from "../lib/utils"
@@ -20,7 +20,7 @@ export const ROW_STACK = "flex flex-col gap-1"
 
 const MIN_BULK_LINES = 6
 
-const draftRow = (typed) => ({ key: "", value: "", enabled: true, ...(typed && { type: ROW_TEXT }) })
+const draftRow = (typed, fileRows) => (fileRows ? asFileRow({ key: "", enabled: true }) : { key: "", value: "", enabled: true, ...(typed && { type: ROW_TEXT }) })
 
 const asTextRow = ({ key, enabled }) => ({ key, value: "", enabled, type: ROW_TEXT })
 const asFileRow = ({ key, enabled }) => ({ key, value: "", enabled, type: ROW_FILE, ...EMPTY_ATTACHMENT })
@@ -118,11 +118,11 @@ function BulkEditor({ rows, keyLabel, onChange }) {
   )
 }
 
-function TableEditor({ rows, typed, keyLabel, valueLabel, suggestions, onChange }) {
+function TableEditor({ rows, typed, fileRows, keyLabel, valueLabel, suggestions, onChange }) {
   const columns = typed ? TYPED_COLUMNS : PLAIN_COLUMNS
-  const shown = [...rows, draftRow(typed)]
+  const shown = [...rows, draftRow(typed, fileRows)]
 
-  const commit = (next) => onChange(next.filter((row) => !isBlankRow(row)))
+  const commit = (next) => onChange(next.filter((row) => !(fileRows ? isBlankFileRow(row) : isBlankRow(row))))
   const replaceRow = (index, replacement) => commit(shown.map((row, at) => (at === index ? replacement : row)))
   const removeRow = (index) => commit(shown.filter((_, at) => at !== index))
 
@@ -166,18 +166,18 @@ function ModeSwitch({ rows, showsBulk, onSwitch }) {
   )
 }
 
-export function KeyValueEditor({ rows, onChange, keyLabel = TEXT.key, valueLabel = TEXT.value, typed = false, suggestions, children }) {
+export function KeyValueEditor({ rows, onChange, keyLabel = TEXT.key, valueLabel = TEXT.value, typed = false, fileRows = false, suggestions, children }) {
   const [isBulk, setIsBulk] = useState(false)
-  const showsBulk = isBulk && !typed
+  const showsBulk = isBulk && !typed && !fileRows
 
   return (
     <PanelBody>
       {showsBulk ? (
         <BulkEditor rows={rows} keyLabel={keyLabel} onChange={onChange} />
       ) : (
-        <TableEditor rows={rows} typed={typed} keyLabel={keyLabel} valueLabel={valueLabel} suggestions={suggestions} onChange={onChange} />
+        <TableEditor rows={rows} typed={typed} fileRows={fileRows} keyLabel={keyLabel} valueLabel={valueLabel} suggestions={suggestions} onChange={onChange} />
       )}
-      {!typed && (
+      {!typed && !fileRows && (
         <div className="mt-2 flex justify-end">
           <ModeSwitch rows={rows} showsBulk={showsBulk} onSwitch={setIsBulk} />
         </div>
