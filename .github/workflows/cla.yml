@@ -15,7 +15,7 @@ permissions:
 jobs:
   cla:
     runs-on: ubuntu-latest
-    if: (github.event.comment.body == 'recheck' || github.event.comment.body == 'I have read the CLA Document and I hereby sign the CLA') || github.event_name == 'pull_request_target'
+    if: github.event_name == 'pull_request_target' || github.event.comment.body == 'recheck' || contains(github.event.comment.body, 'I have read the CLA Document and I hereby sign the CLA')
     steps:
       - uses: contributor-assistant/github-action@ca4a40a7d1004f18d9960b404b97e5f30a505a08
         env:
@@ -26,3 +26,5 @@ jobs:
           branch: cla-signatures
           allowlist: kunalgoesbyken,krockxz,weblate,dependabot[bot],github-actions[bot],vercel[bot]
           lock-pullrequest-aftermerge: false
+          custom-notsigned-prcomment: >-
+            Thank you for your contribution. Before it can be merged, please read the [Contributor License Agreement](https://github.com/kunalgoesbyken/gostman/blob/main/CLA.md). To sign it, post a new comment on this pull request containing only the sentence below. Do not use the Reply button, which quotes the previous comment and the signature is not recognised.

@@ -44,7 +44,7 @@ go generate ./locales && git diff --exit-code -- locales     # repository root
 
 ## Contributor License Agreement
 
-Every contributor signs the [CLA](CLA.md) once. When you open your first pull request, a bot comments with the sentence to reply with; the check passes after you do. You keep the copyright in your work.
+Every contributor signs the [CLA](CLA.md) once. When you open your first pull request, a bot comments with the sentence to post as a new comment; the check passes after you do. You keep the copyright in your work.
 
 ## Translations
 

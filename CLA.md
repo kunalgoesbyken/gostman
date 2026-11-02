@@ -39,7 +39,7 @@ You agree to notify Gostman of any facts or circumstances of which you become aw
 
 ---
 
-**How to sign:** when you open a pull request, a bot checks whether you have signed. If you have not, it comments. Reply to that comment with:
+**How to sign:** when you open a pull request, a bot checks whether you have signed. If you have not, it comments. Post a new comment on the pull request (not a quoted reply) containing only:
 
 ```
 I have read the CLA Document and I hereby sign the CLA
