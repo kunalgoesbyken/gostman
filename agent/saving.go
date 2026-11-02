@@ -264,6 +264,13 @@ func refuseCommands(request workspace.Request, arguments saveArguments) error {
 	return nil
 }
 
+func refuseRawSockets(request workspace.Request, arguments saveArguments) error {
+	if engine.IsRawMethod(request.Method) && (arguments.Method != nil || arguments.URL != nil || arguments.Body != nil || arguments.BodyType != nil) {
+		return errors.New("Not saved: TCP and UDP requests open raw sockets on this computer, so only a person sets them, in the Gostman app.")
+	}
+	return nil
+}
+
 func (d *Desk) refuseSecrets(supplied []string) error {
 	for _, text := range supplied {
 		if label, found := d.client.guard.Find(text); found {
@@ -399,6 +406,9 @@ func (d *Desk) saveRequest(_ context.Context, current scene, arguments saveArgum
 		return saved{}, err
 	}
 	if err := refuseCommands(change.request, arguments); err != nil {
+		return saved{}, err
+	}
+	if err := refuseRawSockets(change.request, arguments); err != nil {
 		return saved{}, err
 	}
 	if err := d.refuseSecrets(change.supplied); err != nil {

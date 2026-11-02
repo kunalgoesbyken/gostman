@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"slices"
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
@@ -139,6 +140,10 @@ func runsCommands(requests []workspace.Request) bool {
 	return false
 }
 
+func opensRawSockets(requests []workspace.Request) bool {
+	return slices.ContainsFunc(requests, func(request workspace.Request) bool { return engine.IsRawMethod(request.Method) })
+}
+
 func disarm(pre, post *string, auth *engine.Auth, label string) []string {
 	var removed []string
 	if hasText(*pre) || hasText(*post) {
@@ -213,6 +218,8 @@ func (d *Desk) checkImport(current scene, text string, result importer.Result) e
 	switch {
 	case readsFilesAnywhere(result):
 		return errors.New("Not imported: it uses {{$file(...)}}, which reads files on this computer, so only the developer can import it, in the app or with gostman import.")
+	case opensRawSockets(result.Requests):
+		return errors.New("Not imported: it holds TCP or UDP requests, which open raw sockets on this computer, so only the developer can import it, in the app or with gostman import.")
 	case runsCommands(result.Requests):
 		return errors.New("Not imported: it holds requests that run local commands (stdio: addresses), so only the developer can import it, in the app or with gostman import.")
 	}

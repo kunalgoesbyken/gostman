@@ -277,10 +277,10 @@ func readOptions(node *yaml.Node, extras *requestExtras, failure *error) engine.
 		SocketIOAuth:      fields.text("socketIoAuth"),
 	}
 	var err error
-	if options.HTTPVersion, err = engine.ParseHTTPVersion(fields.text("httpVersion")); err != nil {
+	if options.HTTPVersion, err = engine.ParseHTTPVersion(fields.text("httpVersion")); err != nil && *failure == nil {
 		*failure = err
 	}
-	if options.RPCTransport, err = engine.ParseRPCTransport(fields.text("rpcTransport")); err != nil {
+	if options.RPCTransport, err = engine.ParseRPCTransport(fields.text("rpcTransport")); err != nil && *failure == nil {
 		*failure = err
 	}
 	return options
