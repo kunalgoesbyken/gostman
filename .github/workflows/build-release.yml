@@ -165,6 +165,15 @@ jobs:
 
       # The bundle is ad-hoc signed so it launches on Apple Silicon. It is not
       # notarized, so the first launch still needs right-click > Open.
+      - name: Free disk space (macOS)
+        if: matrix.name == 'macos'
+        run: |
+          df -h /
+          sudo rm -rf "$HOME/Library/Android" /Library/Android "$HOME/Library/Developer/Xcode/iOS DeviceSupport"
+          sudo rm -rf /Library/Developer/CoreSimulator/Volumes /Library/Developer/CoreSimulator/Images /Library/Developer/CoreSimulator/Caches
+          sudo rm -rf "$HOME/.dotnet" /usr/local/share/dotnet
+          df -h /
+
       - name: Build and package (macOS)
         if: matrix.name == 'macos'
         run: |
