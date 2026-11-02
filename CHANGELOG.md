@@ -4,7 +4,7 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
-## [1.11.0] - 2026-11-03
+## [1.11.0] - 2026-11-02
 
 ### Added
 
