@@ -1,5 +1,5 @@
 import { Suspense, useMemo, useState } from "react"
-import { Braces, X } from "lucide-react"
+import { Braces, RefreshCw, X } from "lucide-react"
 import { AddChecksAction } from "./AddChecksAction"
 import { AiButton } from "./AiButton"
 import { AI_TEXT } from "../lib/aiText"
@@ -14,9 +14,11 @@ import { ROW_GRID, ROW_STACK } from "./KeyValueEditor"
 import { SchemaDialog } from "./SchemaDialog"
 import { VariableInput } from "./VariableInput"
 import {
-  BLANK_ASSERTION, OPERATORS, SCHEMA_OPERATOR, isBlankAssertion, operatorOf, parseAssertions, serializeAssertions,
+  BLANK_ASSERTION, OPERATORS, SCHEMA_OPERATOR, SNAPSHOT_OPERATOR, isBlankAssertion, operatorOf, parseAssertions, serializeAssertions, valueAt,
 } from "../lib/scripting/assertions"
-import { SCHEMA_TEXT, TESTS_TEXT as TEXT } from "../lib/checksText"
+import { SCHEMA_TEXT, SNAPSHOT_TEXT, TESTS_TEXT as TEXT } from "../lib/checksText"
+import { refreshedSnapshot } from "../lib/snapshot"
+import { responseSubject } from "../lib/scripting/subjects"
 import { TASK_SCRIPT, TASK_TESTS } from "../lib/ai/tasks"
 import { cn } from "../lib/utils"
 
@@ -62,9 +64,10 @@ function ExpectedInput({ assertion, isUnary, placeholder = TEXT.expectedPlacehol
   )
 }
 
-function AssertionRow({ assertion, isDraft, onChange, onRemove, onEditSchema }) {
+function AssertionRow({ assertion, isDraft, onChange, onRemove, onEditSchema, onRefresh }) {
   const isUnary = Boolean(operatorOf(assertion).unary)
-  const isSchema = assertion.operator === SCHEMA_OPERATOR && onEditSchema
+  const isSnapshot = assertion.operator === SNAPSHOT_OPERATOR && onEditSchema
+  const isSchema = (assertion.operator === SCHEMA_OPERATOR && onEditSchema) || isSnapshot
   return (
     <div className={cn(ROW_GRID, COLUMNS, !assertion.enabled && "opacity-50")}>
       <Checkbox
@@ -90,7 +93,8 @@ function AssertionRow({ assertion, isDraft, onChange, onRemove, onEditSchema }) 
       {isSchema ? (
         <div className="flex min-w-0 items-center gap-1">
           <ExpectedInput assertion={assertion} isUnary={false} placeholder={TEXT.schemaPlaceholder} onChange={onChange} className="min-w-0 flex-1" />
-          <IconButton label={SCHEMA_TEXT.edit} icon={Braces} onClick={onEditSchema} />
+          <IconButton label={isSnapshot ? SNAPSHOT_TEXT.edit : SCHEMA_TEXT.edit} icon={Braces} onClick={onEditSchema} />
+          {isSnapshot && onRefresh && <IconButton label={SNAPSHOT_TEXT.update} icon={RefreshCw} onClick={onRefresh} />}
         </div>
       ) : (
         <ExpectedInput assertion={assertion} isUnary={isUnary} onChange={onChange} />
@@ -100,13 +104,21 @@ function AssertionRow({ assertion, isDraft, onChange, onRemove, onEditSchema }) 
   )
 }
 
-export function AssertionEditor({ assertions, onChange, EditorComponent }) {
+export function AssertionEditor({ assertions, onChange, EditorComponent, response = null }) {
   const rows = useMemo(() => parseAssertions(assertions), [assertions])
   const shown = [...rows, BLANK_ASSERTION]
   const [editing, setEditing] = useState(null)
 
   const commit = (next) => onChange(serializeAssertions(next.filter((row) => !isBlankAssertion(row))))
   const patchRow = (index, patch) => commit(shown.map((row, at) => (at === index ? { ...row, ...patch } : row)))
+  const refreshRow = (index) => {
+    const row = shown[index]
+    try {
+      patchRow(index, { value: refreshedSnapshot(valueAt(row.expression, responseSubject(response)), row.value) })
+    } catch {
+      return
+    }
+  }
   const removeRow = (index) => commit(shown.filter((_, at) => at !== index))
 
   return (
@@ -122,6 +134,7 @@ export function AssertionEditor({ assertions, onChange, EditorComponent }) {
               onChange={(patch) => patchRow(index, patch)}
               onRemove={() => removeRow(index)}
               onEditSchema={EditorComponent && (() => setEditing(index))}
+              onRefresh={response ? () => refreshRow(index) : undefined}
             />
           ))}
         </div>
@@ -129,6 +142,7 @@ export function AssertionEditor({ assertions, onChange, EditorComponent }) {
       {editing !== null && (
         <SchemaDialog
           value={shown[editing].value}
+          text={shown[editing].operator === SNAPSHOT_OPERATOR ? SNAPSHOT_TEXT : SCHEMA_TEXT}
           EditorComponent={EditorComponent}
           onSave={(value) => patchRow(editing, { value })}
           onClose={() => setEditing(null)}
@@ -156,7 +170,7 @@ export function ScriptEditor({ value, path, label, onChange, EditorComponent }) 
   )
 }
 
-export function TestsPanel({ request, editorPath, onUpdateRequest, EditorComponent, ai }) {
+export function TestsPanel({ request, editorPath, onUpdateRequest, EditorComponent, ai, response = null }) {
   const [choice, setChoice] = useState(() => ({ id: request.id, view: firstFilledView(request) }))
   const view = choice.id === request.id ? choice.view : firstFilledView(request)
   const setView = (next) => setChoice({ id: request.id, view: next })
@@ -177,7 +191,7 @@ export function TestsPanel({ request, editorPath, onUpdateRequest, EditorCompone
       </Toolbar>
       <p className="shrink-0 border-b border-border px-3 py-2 text-xs text-muted-foreground">{TEXT.hints[view]}</p>
       {view === VIEW_ASSERTIONS ? (
-        <AssertionEditor assertions={request.assertions} onChange={(assertions) => onUpdateRequest({ assertions })} EditorComponent={EditorComponent} />
+        <AssertionEditor assertions={request.assertions} onChange={(assertions) => onUpdateRequest({ assertions })} EditorComponent={EditorComponent} response={response} />
       ) : (
         <ScriptEditor
           key={view}

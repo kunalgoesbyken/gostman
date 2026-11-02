@@ -1,7 +1,8 @@
-import { CHECK_RUN_TEXT, OPERATOR_TEXT, SCHEMA_TEXT } from '../checksText'
+import { CHECK_RUN_TEXT, OPERATOR_TEXT, SCHEMA_TEXT, SNAPSHOT_TEXT } from '../checksText'
 import { isPlainObject, parseJSON } from '../dataUtils'
 import { queryJson } from '../jsonPath'
 import { schemaMismatches } from '../jsonSchema'
+import { SNAPSHOT_OPERATOR, refreshedSnapshot, snapshotMismatches } from '../snapshot'
 import { substitutePlaceholders, variableMap } from '../placeholders'
 import { PATTERN_TIMEOUT_MS } from './limits'
 
@@ -35,6 +36,7 @@ const compare = (accepts) => (actual, expected) => (
 )
 
 export const SCHEMA_OPERATOR = 'schema'
+export { SNAPSHOT_OPERATOR }
 
 export const OPERATORS = [
   { value: 'eq', get label() { return OPERATOR_TEXT.eq }, test: sameValue },
@@ -63,6 +65,7 @@ export const OPERATORS = [
   { value: 'isArray', get label() { return OPERATOR_TEXT.isArray }, unary: true, test: Array.isArray },
   { value: 'isObject', get label() { return OPERATOR_TEXT.isObject }, unary: true, test: isPlainObject },
   { value: SCHEMA_OPERATOR, get label() { return SCHEMA_TEXT.operator }, hidesValue: true, verify: (actual, expected) => schemaMismatches(expected, actual).join('\n') },
+  { value: SNAPSHOT_OPERATOR, get label() { return SNAPSHOT_TEXT.operator }, hidesValue: true, verify: snapshotMismatches },
 ]
 
 const DEFAULT_OPERATOR = OPERATORS[0]
@@ -168,6 +171,8 @@ const resolvedTitle = (assertion, operator, expected) => (
   expected === assertion.value ? {} : { resolvedName: titleOf({ ...assertion, value: CHECK_RUN_TEXT.resolvedValue(expected, assertion.value) }, operator) }
 )
 
+export const valueAt = (expression, response) => resolve(expression.trim(), response)
+
 function evaluate(assertion, response, variables) {
   const operator = operatorOf(assertion)
   const name = titleOf(assertion, operator)
@@ -187,3 +192,28 @@ export function evaluateAssertionList(assertions, response, variables = {}) {
 }
 
 export const evaluateAssertions = (json, response, variables = {}) => evaluateAssertionList(parseAssertions(json), response, variables)
+
+function refreshOf(assertion, response, variables) {
+  const actual = resolve(assertion.expression.trim(), response)
+  const expected = substitutePlaceholders(assertion.value, variables)
+  return {
+    name: titleOf(assertion),
+    expression: assertion.expression,
+    value: assertion.value,
+    replacement: refreshedSnapshot(actual, assertion.value),
+    changed: snapshotMismatches(actual, parseJSON(expected, expected)) !== '',
+  }
+}
+
+export function snapshotRefreshes(json, response, variables = {}) {
+  const values = variableMap(variables)
+  return parseAssertions(json)
+    .filter((assertion) => isActiveAssertion(assertion) && assertion.operator === SNAPSHOT_OPERATOR)
+    .flatMap((assertion) => {
+      try {
+        return [refreshOf(assertion, response, values)]
+      } catch {
+        return []
+      }
+    })
+}

@@ -182,6 +182,7 @@ func (s *Session) setUp(stored Collection, options Options) (plan, error) {
 		s.state.common.signIn = options.SignIn
 	}
 	s.state.contract = newContract(options.Contract)
+	s.state.updateSnapshots = options.UpdateSnapshots
 	s.state.values.remember(options.Variables)
 	for _, row := range options.Data {
 		s.state.vouch(anyOrigin, variables(row).plain())

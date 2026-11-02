@@ -321,6 +321,7 @@ export const RequestTabs = memo(function RequestTabs({
             editorPath={tabId}
             onUpdateRequest={onUpdateRequest}
             EditorComponent={EditorComponent}
+            response={response}
             ai={isAiOn ? actions.ai : null}
           />
         </TabsContent>

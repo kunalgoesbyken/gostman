@@ -42,6 +42,14 @@ const LIBRARY_PREFIX = 'jsonPath: '
 
 const withoutLibraryPrefix = (message) => (message.startsWith(LIBRARY_PREFIX) ? message.slice(LIBRARY_PREFIX.length) : message)
 
+export function queryPointers(path, json) {
+  try {
+    return JSONPath({ path, json, wrap: true, resultType: 'pointer', eval: GuardedScript })
+  } catch (error) {
+    throw new Error(withoutLibraryPrefix(String(error?.message ?? error)))
+  }
+}
+
 export function queryJson(path, json) {
   try {
     return JSONPath({ path, json, wrap: false, eval: GuardedScript })

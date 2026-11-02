@@ -110,6 +110,10 @@ run
                         (file or address): the status, the content type and
                         the body schema of the operation with the same method
                         and path; a mismatch fails the run like any check
+  --update-snapshots    rewrite the stored value of every "matches snapshot"
+                        check that failed with the response it got (ignored
+                        paths are kept, secret-looking fields are not stored);
+                        the run passes those checks. Workspace folders only
   --coverage            with --contract: list the operations and documented
                         responses of the spec the run did not exercise
   --min-coverage <n>    with --contract: fail the run (exit 1) when fewer than

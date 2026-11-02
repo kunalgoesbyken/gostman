@@ -90,6 +90,7 @@ const text = messages('checks', english, (t) => {
 })
 
 export const SCHEMA_TEXT = text.schema
+export const SNAPSHOT_TEXT = text.snapshot
 export const CONTRACT_TEXT = text.contract
 export const RESPONSE_CHECKS_TEXT = text.responseChecks
 export const TESTS_TEXT = text.tests

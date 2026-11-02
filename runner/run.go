@@ -11,27 +11,28 @@ import (
 )
 
 type Options struct {
-	Environment   string
-	Folder        string
-	Variables     map[string]string
-	Secrets       map[string]bool
-	Bail          bool
-	Delay         time.Duration
-	Timeout       time.Duration
-	Insecure      bool
-	Data          []Row
-	Iterations    int
-	Parallel      int
-	Only          []string
-	Tags          []string
-	ExcludeTags   []string
-	Capture       bool
-	StreamTimeout time.Duration
-	Network       *engine.Network
-	SignIn        engine.Token
-	Files         engine.FileReader
-	Contract      *openapi.Contract
-	OnPlanned     func(requests int)
+	Environment     string
+	Folder          string
+	Variables       map[string]string
+	Secrets         map[string]bool
+	Bail            bool
+	Delay           time.Duration
+	Timeout         time.Duration
+	Insecure        bool
+	UpdateSnapshots bool
+	Data            []Row
+	Iterations      int
+	Parallel        int
+	Only            []string
+	Tags            []string
+	ExcludeTags     []string
+	Capture         bool
+	StreamTimeout   time.Duration
+	Network         *engine.Network
+	SignIn          engine.Token
+	Files           engine.FileReader
+	Contract        *openapi.Contract
+	OnPlanned       func(requests int)
 }
 
 func identify(request Request, folder string) Result {
@@ -74,6 +75,7 @@ func describe(request Request, folder string, outcome exchange) Result {
 	result.Logs = append(result.Logs, outcome.logs...)
 	result.Visual = outcome.visual
 	result.Operation = outcome.operation
+	result.Snapshots = outcome.snapshots
 	result.Error = strings.Join(outcome.errors, "\n")
 	if response.Error != "" {
 		result.Error = response.Body

@@ -106,6 +106,8 @@
       "status": "Status code",
       "contentType": "Content type",
       "schema": "Body shape, as a JSON Schema: field types, the fields that were present, and null where null was seen. A field that was null accepts any value.",
+      "snapshot": "Snapshot of the body: the check fails when the body differs from this response. Values of fields with secret-looking names, dates and ids that look generated are ignored and not stored. Edit the ignored paths in the check.",
+      "headersSnapshot": "Snapshot of the headers, without cookies and credentials. Headers that change on every response, such as date and etag, are ignored.",
       "responseTime": "Response time budget of {{budget}} ms, twice what this response took, rounded up."
     },
     "nothingNew": "The Checks tab already has these checks.",
@@ -159,6 +161,19 @@
     "pathTimedOut_other": "This path ran for more than {{count}} seconds and was stopped. Check its filter for a slow regular expression.",
     "filterTimedOut_one": "The filter ran for more than {{count}} second and was stopped. Check it for a slow regular expression.",
     "filterTimedOut_other": "The filter ran for more than {{count}} seconds and was stopped. Check it for a slow regular expression."
+  },
+  "snapshot": {
+    "operator": "matches snapshot",
+    "edit": "Edit snapshot",
+    "editorTitle": "Edit snapshot",
+    "editorHint": "A JSON object. expected is the stored value, ignore lists JSONPaths that are not compared (such as $.id or $.items[*].createdAt), and ignoreOrder true compares arrays without regard to the order of their items.",
+    "update": "Update snapshot from the last response",
+    "invalid": "The snapshot is not valid: it must be a JSON object with an expected value.",
+    "changed": "{{path}}: expected {{expected}}, got {{actual}}",
+    "missing": "{{path}}: expected {{expected}}, but it is missing",
+    "extra": "{{path}}: not in the snapshot, got {{actual}}",
+    "more_one": "…and {{count}} more difference.",
+    "more_other": "…and {{count}} more differences."
   },
   "operators": {
     "eq": "equals",

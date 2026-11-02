@@ -1,7 +1,8 @@
 import { RESPONSE_CHECKS_TEXT } from './checksText'
 import { isUsableResponse } from './chaining'
 import { inferSchema } from './schemaInference'
-import { BLANK_ASSERTION, SCHEMA_OPERATOR, isKnownAssertion, withAddedAssertions } from './scripting/assertions'
+import { bodySnapshot, headersSnapshot } from './snapshot'
+import { BLANK_ASSERTION, SCHEMA_OPERATOR, SNAPSHOT_OPERATOR, isKnownAssertion, withAddedAssertions } from './scripting/assertions'
 import { responseSubject } from './scripting/subjects'
 import { selectActiveTab, useAppStore } from '../store/appStore'
 
@@ -28,6 +29,8 @@ export function proposeChecks(response) {
     { id: 'status', description: RESPONSE_CHECKS_TEXT.kinds.status, assertion: assertion('res.status', 'eq', subject.status), isSuggested: true },
     contentType && { id: 'contentType', description: RESPONSE_CHECKS_TEXT.kinds.contentType, assertion: assertion(`res.headers.${CONTENT_TYPE}`, 'contains', contentType), isSuggested: true },
     isJsonValue(subject.body) && { id: 'schema', description: RESPONSE_CHECKS_TEXT.kinds.schema, assertion: assertion('res.body', SCHEMA_OPERATOR, JSON.stringify(inferSchema(subject.body))), isSuggested: true },
+    isJsonValue(subject.body) && { id: 'snapshot', description: RESPONSE_CHECKS_TEXT.kinds.snapshot, assertion: assertion('res.body', SNAPSHOT_OPERATOR, bodySnapshot(subject.body)), isSuggested: false },
+    { id: 'headersSnapshot', description: RESPONSE_CHECKS_TEXT.kinds.headersSnapshot, assertion: assertion('res.headers', SNAPSHOT_OPERATOR, headersSnapshot(subject.headers)), isSuggested: false },
     { id: 'responseTime', description: RESPONSE_CHECKS_TEXT.kinds.responseTime(budget), assertion: assertion('res.responseTime', 'lt', budget), isSuggested: false },
   ].filter(Boolean)
 }

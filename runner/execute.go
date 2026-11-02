@@ -32,6 +32,8 @@ type session struct {
 	modules  map[string]string
 	contract *contract
 	confine  Confinement
+
+	updateSnapshots bool
 }
 
 type job struct {
@@ -67,6 +69,7 @@ type exchange struct {
 	withheld  []string
 	possible  []string
 	operation string
+	snapshots []SnapshotUpdate
 }
 
 func hasText(text string) bool {
@@ -305,7 +308,7 @@ func (s *session) runPostResponse(ctx context.Context, request Request, outcome 
 			Response:   received,
 		}, request))
 	}
-	return nil
+	return s.refreshSnapshots(request, received, outcome)
 }
 
 func (s *session) isSocket(request Request) (bool, error) {

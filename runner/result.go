@@ -21,33 +21,34 @@ type LogLine struct {
 }
 
 type Result struct {
-	ID          string    `json:"id"`
-	Name        string    `json:"name"`
-	Folder      string    `json:"folder"`
-	Method      string    `json:"method"`
-	URL         string    `json:"url"`
-	ResolvedURL string    `json:"resolvedUrl,omitempty"`
-	Skipped     string    `json:"skipped"`
-	Status      string    `json:"status"`
-	StatusCode  int       `json:"statusCode"`
-	Protocol    string    `json:"protocol"`
-	StreamEnd   string    `json:"streamEnd,omitempty"`
-	DurationMs  int64     `json:"durationMs"`
-	Error       string    `json:"error"`
-	Failure     string    `json:"failure,omitempty"`
-	Unresolved  []string  `json:"unresolved,omitempty"`
-	Withheld    []string  `json:"withheld,omitempty"`
-	Failed      bool      `json:"failed"`
-	Tests       []Check   `json:"tests"`
-	Logs        []LogLine `json:"logs"`
-	Visual      string    `json:"visualization,omitempty"`
-	Iteration   int       `json:"iteration,omitempty"`
-	Step        string    `json:"step,omitempty"`
-	Attempt     int       `json:"attempt,omitempty"`
-	Attempts    int       `json:"attempts,omitempty"`
-	Handled     string    `json:"handled,omitempty"`
-	Exchange    *Capture  `json:"exchange,omitempty"`
-	Operation   string    `json:"operation,omitempty"`
+	ID          string           `json:"id"`
+	Name        string           `json:"name"`
+	Folder      string           `json:"folder"`
+	Method      string           `json:"method"`
+	URL         string           `json:"url"`
+	ResolvedURL string           `json:"resolvedUrl,omitempty"`
+	Skipped     string           `json:"skipped"`
+	Status      string           `json:"status"`
+	StatusCode  int              `json:"statusCode"`
+	Protocol    string           `json:"protocol"`
+	StreamEnd   string           `json:"streamEnd,omitempty"`
+	DurationMs  int64            `json:"durationMs"`
+	Error       string           `json:"error"`
+	Failure     string           `json:"failure,omitempty"`
+	Unresolved  []string         `json:"unresolved,omitempty"`
+	Withheld    []string         `json:"withheld,omitempty"`
+	Failed      bool             `json:"failed"`
+	Tests       []Check          `json:"tests"`
+	Logs        []LogLine        `json:"logs"`
+	Visual      string           `json:"visualization,omitempty"`
+	Iteration   int              `json:"iteration,omitempty"`
+	Step        string           `json:"step,omitempty"`
+	Attempt     int              `json:"attempt,omitempty"`
+	Attempts    int              `json:"attempts,omitempty"`
+	Handled     string           `json:"handled,omitempty"`
+	Exchange    *Capture         `json:"exchange,omitempty"`
+	Operation   string           `json:"operation,omitempty"`
+	Snapshots   []SnapshotUpdate `json:"-"`
 	flow        flow
 }
 

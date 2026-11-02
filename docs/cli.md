@@ -69,6 +69,10 @@ An environment variable can read its value from HashiCorp Vault (KV 1 and 2), AW
 
 `--contract openapi.yaml` (a file or an `http(s)` address) checks every HTTP response of the run against the spec: the status is documented for the operation with the same method and path, the content type is documented for that status, and a JSON body matches the response schema. Each check is reported like any other check, named like `Status 200 is documented for GET /pets/{id}`, with `"kind": "contract"` in the JSON report, so a mismatch fails the run; the text summary adds a Contract line. A response whose path matches no operation gets a warning line instead of checks. Without the flag, runs are unchanged. The app runs the same checks for folders linked to a spec; see [Contract checks](import-export-and-specs.md#contract-checks).
 
+### Snapshot checks
+
+A request with a **matches snapshot** check (see [Checks](requests-and-responses.md#checks)) compares the response with the stored copy on every run, in the app's Runner and in `gostman run`. `gostman run shop --update-snapshots` replaces the stored value of each snapshot check that failed with what the response returned, writes the request files of the workspace folder, and passes those checks in that run; it prints `updated 2 snapshots in shop` to stderr. Ignored paths and the ignore-order setting are kept, and fields with credential-like names are not written. Review the change with `git diff` before committing. The flag needs a workspace folder; it exits with status 2 for an export file or a flow.
+
 ### OpenAPI coverage
 
 With `--contract`, the report also says how much of the spec the run exercised. An operation counts as covered when at least one response came back for a request that matches it, and each status the spec documents for it counts as covered when a response with that status came back (a `2XX` or `default` entry is matched the same way as in the contract checks). The text summary gets a line such as `Coverage  7 of 12 operations (58.3%), 10 of 25 documented responses (40.0%)`.

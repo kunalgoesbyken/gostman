@@ -90,6 +90,7 @@ func newRunFlags(name string) (*flag.FlagSet, *runFlags) {
 	flags.StringVar(&state.output, "output", "", "")
 	flags.BoolVar(&parsed.redact, "redact", false, "")
 	flags.StringVar(&parsed.contract, "contract", "", "")
+	flags.BoolVar(&parsed.options.UpdateSnapshots, "update-snapshots", false, "")
 	flags.BoolVar(&parsed.coverage, "coverage", false, "")
 	flags.Float64Var(&parsed.minCoverage, "min-coverage", 0, "")
 	parsed.extras.register(flags, &parsed.options)
@@ -115,6 +116,10 @@ func (r *runFlags) finish(path string) (invocation, error) {
 		return parsed, errors.New("--folder, --data, --iterations, --parallel, --only, --tags, --exclude-tags, --bail and --delay do not apply to a flow")
 	case (parsed.coverage || parsed.minCoverage != 0) && parsed.contract == "":
 		return parsed, errors.New("--coverage and --min-coverage need --contract <spec>, the OpenAPI spec whose operations are counted")
+	case parsed.options.UpdateSnapshots && !isFolder(path):
+		return parsed, errors.New("--update-snapshots rewrites request files, so it needs a workspace folder to run, not an export file")
+	case parsed.options.UpdateSnapshots && parsed.flow != "":
+		return parsed, errors.New("--update-snapshots does not apply to a flow")
 	case parsed.minCoverage < 0 || parsed.minCoverage > 100:
 		return parsed, errors.New("--min-coverage takes a percentage from 0 to 100")
 	case parsed.flow != "" && (parsed.coverage || parsed.minCoverage != 0):
@@ -287,6 +292,13 @@ func (i invocation) cycle(ctx context.Context, stored runner.Collection, warned 
 			return runner.Report{}, nil, err
 		}
 	}
+	if i.options.UpdateSnapshots {
+		updated, err := runner.UpdateSnapshotFiles(i.path, outcome.Results)
+		if err != nil {
+			return runner.Report{}, nil, err
+		}
+		fmt.Fprintf(stderr, "updated %s in %s\n", plural(updated, "snapshot"), i.path)
+	}
 	if recorded == nil {
 		return outcome, nil, nil
 	}
@@ -314,4 +326,9 @@ func reportCode(report runner.Report) int {
 		}
 	}
 	return exitFailed
+}
+
+func isFolder(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.IsDir()
 }
