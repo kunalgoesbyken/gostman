@@ -4,12 +4,15 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-11-03
+
 ### Added
 
 - API design: write an OpenAPI spec in Gostman before the backend exists. The **Specs** tab of the sidebar lists your specs; each opens with a YAML or JSON editor beside the documentation. The editor suggests OpenAPI keywords, values and `$ref` targets, marks lint findings and syntax errors on their lines, lists them in a Problems panel, and moves between the editor and the operations and models of the documentation. Start from a template, a file or an address. A spec is the file `specs/<name>.yaml` or `.json` in a workspace folder, and is kept with your other data in the app and the browser. The toolbar generates and updates requests, starts the mock server (desktop), checks responses against the spec and compares versions, and the same file works with `gostman lint`, `mock --openapi`, `run --contract`, `fuzz` and `diff`.
 
 ### Changed
 
+- The website footer and the About dialog have a heart icon that links to GitHub Sponsors, and the docs say sponsorship goes toward code-signing certificates.
 - Static explanations in settings, environments, secrets, trash, monitors, capture, gRPC, MCP, GraphQL and body panels are now an info icon beside the section they explain instead of a full row; warnings, errors, empty states and trust banners stay as rows.
 
 ## [1.10.2] - 2026-11-02
