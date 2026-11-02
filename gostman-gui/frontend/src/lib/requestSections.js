@@ -66,6 +66,7 @@ export const SETTING_SEND_COOKIES = 'sendCookies'
 export const SETTING_STORE_COOKIES = 'storeCookies'
 export const SETTING_STREAM = 'stream'
 export const SETTING_HTTP_VERSION = 'httpVersion'
+export const SETTING_RPC_TRANSPORT = 'rpcTransport'
 
 const IS_CHANGED = {
   [SETTING_TIMEOUT]: (options) => options.timeoutMs > 0,
@@ -75,6 +76,7 @@ const IS_CHANGED = {
   [SETTING_STORE_COOKIES]: (options) => options.discardCookies,
   [SETTING_STREAM]: (options) => options.stream,
   [SETTING_HTTP_VERSION]: (options) => Boolean(options.httpVersion),
+  [SETTING_RPC_TRANSPORT]: (options) => Boolean(options.rpcTransport),
 }
 
 const SETTING_ORDER = Object.keys(IS_CHANGED)
@@ -85,7 +87,7 @@ const SETTINGS_BY_KIND = {
   [KIND_GRAPHQL]: SETTING_ORDER,
   [KIND_GRAPHQL_SOCKET]: [],
   [KIND_SOCKET]: [],
-  [KIND_GRPC]: CONNECTION_SETTINGS,
+  [KIND_GRPC]: [...CONNECTION_SETTINGS, SETTING_RPC_TRANSPORT],
   [KIND_MCP]: CONNECTION_SETTINGS,
   [KIND_MCP_COMMAND]: [SETTING_TIMEOUT],
 }

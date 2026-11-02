@@ -11,7 +11,8 @@ import { TagsInput } from "./ui/tagsInput"
 import { SSE_SETTINGS_TEXT } from "../lib/sseText"
 import { BUILT_IN_TIMEOUT_SECONDS, usePreferences } from "../lib/preferences"
 import { REQUEST_SETTINGS_TEXT as TEXT } from "../lib/requestSettingsText"
-import { SETTING_HTTP_VERSION, SETTING_REDIRECTS, SETTING_SEND_COOKIES, SETTING_STORE_COOKIES, SETTING_STREAM, SETTING_TIMEOUT, SETTING_TLS } from "../lib/requestSections"
+import { HTTP_VERSION_CHOICES, RPC_TRANSPORT_CHOICES } from "../lib/requestTransports"
+import { SETTING_HTTP_VERSION, SETTING_REDIRECTS, SETTING_RPC_TRANSPORT, SETTING_SEND_COOKIES, SETTING_STORE_COOKIES, SETTING_STREAM, SETTING_TIMEOUT, SETTING_TLS } from "../lib/requestSections"
 import { collectTags } from "../lib/tags"
 import { useAppStore } from "../store/appStore"
 
@@ -24,12 +25,6 @@ const SWITCHES = [
   { setting: SETTING_SEND_COOKIES, field: "skipCookies", get label() { return TEXT.sendCookies }, inverted: true },
   { setting: SETTING_STORE_COOKIES, field: "discardCookies", get label() { return TEXT.storeCookies }, inverted: true },
   { setting: SETTING_STREAM, field: "stream", get label() { return SSE_SETTINGS_TEXT.stream }, inverted: false },
-]
-
-const HTTP_VERSION_CHOICES = [
-  { value: "", get label() { return TEXT.httpVersions.auto } },
-  { value: "1.1", get label() { return TEXT.httpVersions.http11 } },
-  { value: "2", get label() { return TEXT.httpVersions.http2 } },
 ]
 
 const toWholeNumber = (text) => Math.max(0, Math.trunc(Number(text)) || 0)
@@ -62,6 +57,15 @@ export function SettingsPanel({ options, settings, description, tags, onChange, 
           <Field label={TEXT.httpVersion}>
             <Select value={options.httpVersion || ""} onChange={(event) => update({ httpVersion: event.target.value })} className="max-w-48">
               {HTTP_VERSION_CHOICES.map((choice) => (
+                <option key={choice.value} value={choice.value}>{choice.label}</option>
+              ))}
+            </Select>
+          </Field>
+        )}
+        {settings.has(SETTING_RPC_TRANSPORT) && (
+          <Field label={TEXT.rpcTransport}>
+            <Select value={options.rpcTransport || ""} onChange={(event) => update({ rpcTransport: event.target.value })} className="max-w-64">
+              {RPC_TRANSPORT_CHOICES.map((choice) => (
                 <option key={choice.value} value={choice.value}>{choice.label}</option>
               ))}
             </Select>

@@ -86,6 +86,10 @@ If the server reports no services, the panel shows No services were found.
 
 Messages are written as JSON and converted with the protobuf JSON mapping.
 
+### Transports
+
+By default a gRPC request speaks gRPC over HTTP/2. The **gRPC transport** setting in the request's Settings tab switches it to **gRPC-Web** (binary frames), **gRPC-Web, base64 text** (`application/grpc-web-text`) or **Connect**. These are plain HTTP POST requests to `/package.Service/Method`, so they work through the web app's proxy and through HTTP proxies, and they take the request's Headers and Auth as HTTP headers. gRPC-Web needs the `.proto` files in the gRPC tab because it cannot use server reflection. Connect sends JSON: without `.proto` files the message is sent as written and the call is treated as unary; with them, server-streaming methods use Connect's enveloped streaming. Compressed messages are not supported. In the request file the setting is `options.rpcTransport` (`grpc-web`, `grpc-web-text` or `connect`).
+
 ### Streams
 
 Gostman does not run interactive streams. It collects them.

@@ -45,6 +45,7 @@ const DEFAULT_OPTIONS = {
   socketIoPath: '',
   socketIoAuth: '',
   httpVersion: '',
+  rpcTransport: '',
 }
 
 const DEFAULT_REQUEST = {

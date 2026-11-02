@@ -58,7 +58,8 @@ type Options struct {
 	SkipCookies    bool `json:"skipCookies"`
 	DiscardCookies bool `json:"discardCookies"`
 
-	HTTPVersion string `json:"httpVersion"`
+	HTTPVersion  string `json:"httpVersion"`
+	RPCTransport string `json:"rpcTransport"`
 
 	SocketIOPath string `json:"socketIoPath"`
 	SocketIOAuth string `json:"socketIoAuth"`

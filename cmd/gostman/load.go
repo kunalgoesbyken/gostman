@@ -8,8 +8,7 @@ import (
 	"io"
 	"os"
 	"os/signal"
-	"strconv"
-	"strings"
+	"slices"
 	"time"
 
 	"github.com/kunalgoesbyken/gostman/agent"
@@ -19,7 +18,6 @@ import (
 )
 
 const (
-	percentSign       = "%"
 	progressEvery     = 4
 	adHocArguments    = 2
 	workspaceArgument = 1
@@ -32,11 +30,11 @@ type loading struct {
 	reporter   string
 	duration   time.Duration
 	ramp       time.Duration
+	maxP95     time.Duration
 	maxErrors  string
 	stages     string
 	thresholds stringList
 	config     loadtest.Config
-	limits     loadtest.Thresholds
 	given      map[string]bool
 	positional []string
 }
@@ -55,7 +53,7 @@ func parseLoading(arguments []string) (loading, error) {
 	flags.DurationVar(&parsed.ramp, "ramp", 0, "")
 	flags.IntVar(&parsed.config.FailureStatus, "fail-status", loadtest.DefaultFailureFrom, "")
 	flags.StringVar(&parsed.reporter, "reporter", report.FormatText, "")
-	flags.DurationVar(&parsed.limits.MaxP95, "max-p95", 0, "")
+	flags.DurationVar(&parsed.maxP95, "max-p95", 0, "")
 	flags.StringVar(&parsed.maxErrors, "max-error-rate", "", "")
 	flags.StringVar(&parsed.stages, "stages", "", "")
 	flags.Var(&parsed.thresholds, "threshold", "")
@@ -80,14 +78,11 @@ func (l *loading) validate() error {
 	if err := l.finish(); err != nil {
 		return err
 	}
-	if err := l.parseErrorRate(); err != nil {
-		return err
-	}
 	if err := l.applyStages(); err != nil {
 		return err
 	}
 	l.config.DurationMs = int(l.duration / time.Millisecond)
-	l.config.Thresholds = l.thresholds
+	l.config.Thresholds = l.allThresholds()
 	l.config.RampMs = int(l.ramp / time.Millisecond)
 	return l.config.Normalized().Validate()
 }
@@ -121,17 +116,15 @@ func (l *loading) checkTarget() error {
 	return nil
 }
 
-func (l *loading) parseErrorRate() error {
-	if l.maxErrors == "" {
-		return nil
+func (l loading) allThresholds() []string {
+	all := slices.Clone(l.thresholds)
+	if l.maxP95 > 0 {
+		all = append(all, "p95<="+l.maxP95.String())
 	}
-	rate, err := strconv.ParseFloat(strings.TrimSuffix(l.maxErrors, percentSign), 64)
-	if err != nil || rate < 0 || rate > 100 {
-		return errors.New("--max-error-rate takes a percentage between 0 and 100, for example 1%")
+	if l.maxErrors != "" {
+		all = append(all, "errors<="+l.maxErrors)
 	}
-	l.limits.MaxErrorRatePercent = rate
-	l.limits.ErrorRateSet = true
-	return nil
+	return all
 }
 
 func (l loading) isAdHoc() bool {
@@ -179,13 +172,10 @@ func printLoad(stdout io.Writer, reporter string, outcome loadtest.Report) error
 	return writeJSON(stdout, outcome)
 }
 
-func (l loading) verdict(stderr io.Writer, outcome loadtest.Report, interrupted bool) int {
-	breaches := outcome.Breaches(l.limits)
-	for _, check := range loadtest.FailedChecks(outcome.Checks) {
-		breaches = append(breaches, check.Describe())
-	}
+func (loading) verdict(stderr io.Writer, outcome loadtest.Report, interrupted bool) int {
+	breaches := loadtest.FailedChecks(outcome.Checks)
 	for _, breach := range breaches {
-		fmt.Fprintf(stderr, "%s: threshold breached: %s\n", programName, breach)
+		fmt.Fprintf(stderr, "%s: threshold breached: %s\n", programName, breach.Describe())
 	}
 	if outcome.NothingSucceeded() {
 		fmt.Fprintf(stderr, "%s: no request succeeded; the report shows sample errors\n", programName)

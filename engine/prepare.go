@@ -51,6 +51,9 @@ func prepare(r Request, files FileReader, open FileOpener) (Prepared, error) {
 }
 
 func prepareWith(r Request, expansion *substitution, stream *bodyStream) (Prepared, error) {
+	if err := r.Options.checkHTTPVersion(); err != nil {
+		return Prepared{}, err
+	}
 	substitute := expansion.apply
 
 	method := strings.ToUpper(strings.TrimSpace(r.Method))

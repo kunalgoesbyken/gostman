@@ -58,13 +58,9 @@ func ParseResolutions(entries []string) ([]HostResolution, error) {
 }
 
 func NormalizeIPFamily(value string) (string, error) {
-	switch strings.TrimPrefix(strings.ToLower(strings.TrimSpace(value)), "ipv") {
-	case "", "auto", "0":
-		return IPAuto, nil
-	case "4":
-		return IPv4, nil
-	case "6":
-		return IPv6, nil
+	switch family := strings.TrimSpace(value); family {
+	case IPAuto, IPv4, IPv6:
+		return family, nil
 	}
 	return "", fmt.Errorf("choose 4, 6 or leave it empty, not %q", value)
 }

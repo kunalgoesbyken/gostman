@@ -19,6 +19,7 @@ import { FLOW_IMPORT_TEXT } from './flowsText'
 import { IMPORT_EXPORT_TEXT } from './importExportText'
 import { STEP_REQUEST, compactFlow, mapSteps, normalizeFlow } from './flows/model'
 import { AUTH_API_KEY, AUTH_BASIC, AUTH_BEARER, GRAPHQL_METHOD, UNTITLED_REQUEST, apiKeyLocation, asText, sentRows } from './exportFields'
+import { HTTP_VERSION_CHOICES, RPC_TRANSPORT_CHOICES, isChoice } from './requestTransports'
 
 export { exportToPostman } from './postmanExport'
 
@@ -500,7 +501,6 @@ function sanitizeAuth(raw, types = AUTH_TYPES) {
 const OPTION_COUNTS = ['timeoutMs', 'streamMaxEvents', 'streamMaxSeconds']
 const OPTION_FLAGS = ['noFollowRedirects', 'stream', 'streamReconnect', 'skipCookies', 'discardCookies']
 const OPTION_TEXTS = ['socketIoPath', 'socketIoAuth']
-const HTTP_VERSIONS = ['', '1.1', '2']
 
 function positiveCount(value) {
   const count = Math.trunc(Number(value))
@@ -513,7 +513,8 @@ function sanitizeOptions(raw) {
     ...Object.fromEntries(OPTION_COUNTS.map((key) => [key, positiveCount(options[key])])),
     ...Object.fromEntries(OPTION_FLAGS.map((key) => [key, options[key] === true])),
     ...pickStrings(options, OPTION_TEXTS),
-    httpVersion: HTTP_VERSIONS.includes(options.httpVersion) ? options.httpVersion : '',
+    httpVersion: isChoice(HTTP_VERSION_CHOICES, options.httpVersion) ? options.httpVersion : '',
+    rpcTransport: isChoice(RPC_TRANSPORT_CHOICES, options.rpcTransport) ? options.rpcTransport : '',
     insecureTLS: false,
   }
 }

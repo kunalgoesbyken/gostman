@@ -17,6 +17,8 @@ type session struct {
 	expansion *engine.Expansion
 	metadata  metadata.MD
 	protos    []ProtoFile
+	policy    engine.Policy
+	address   endpoint
 }
 
 func newExpansion(target Target) (*engine.Expansion, error) {
@@ -59,7 +61,7 @@ func openWith(target Target, expansion *engine.Expansion, policy engine.Policy) 
 	if err != nil {
 		return nil, err
 	}
-	return &session{conn: conn, expansion: expansion, metadata: outgoing, protos: target.Protos}, nil
+	return &session{conn: conn, expansion: expansion, metadata: outgoing, protos: target.Protos, policy: policy, address: address}, nil
 }
 
 func (s *session) close() {

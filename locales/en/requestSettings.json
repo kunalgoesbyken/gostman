@@ -5,6 +5,13 @@
     "followRedirects": "Follow redirects",
     "verifyTls": "Verify TLS certificates",
     "httpVersion": "HTTP version",
+    "rpcTransport": "gRPC transport",
+    "rpcTransports": {
+      "grpc": "gRPC (HTTP/2)",
+      "grpcWeb": "gRPC-Web",
+      "grpcWebText": "gRPC-Web, base64 text",
+      "connect": "Connect"
+    },
     "httpVersions": {
       "auto": "Automatic",
       "http11": "HTTP/1.1",

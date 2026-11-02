@@ -23,7 +23,7 @@ var (
 		"grant", "authUrl", "tokenUrl", "clientId", "clientSecret", "scope", "username", "password",
 		"callbackUrl", "credentialsIn", "pkce", "headerPrefix", "accessToken", "refreshToken", "expiresAt", "resource", "issuer", "deviceUrl", "sendIdToken",
 	}
-	optionKeys = []string{"timeoutMs", "noFollowRedirects", "insecureTLS", "stream", "streamReconnect", "streamMaxEvents", "streamMaxSeconds", "skipCookies", "discardCookies", "socketIoPath", "socketIoAuth", "httpVersion"}
+	optionKeys = []string{"timeoutMs", "noFollowRedirects", "insecureTLS", "stream", "streamReconnect", "streamMaxEvents", "streamMaxSeconds", "skipCookies", "discardCookies", "socketIoPath", "socketIoAuth", "httpVersion", "rpcTransport"}
 )
 
 type requestExtras struct {
@@ -145,6 +145,7 @@ func (b nodeBuilder) options(options engine.Options, extras []*yaml.Node) *yaml.
 	setField(node, "socketIoPath", b.text(options.SocketIOPath))
 	setField(node, "socketIoAuth", b.text(options.SocketIOAuth))
 	setField(node, "httpVersion", b.text(options.HTTPVersion))
+	setField(node, "rpcTransport", b.text(options.RPCTransport))
 	node.Content = append(node.Content, extras...)
 	return filledMapping(node)
 }
@@ -272,6 +273,7 @@ func readOptions(node *yaml.Node, extras *requestExtras, failure *error) engine.
 		SocketIOPath:      fields.text("socketIoPath"),
 		SocketIOAuth:      fields.text("socketIoAuth"),
 		HTTPVersion:       fields.text("httpVersion"),
+		RPCTransport:      fields.text("rpcTransport"),
 	}
 }
 

@@ -951,6 +951,7 @@ export namespace engine {
 	    skipCookies: boolean;
 	    discardCookies: boolean;
 	    httpVersion: string;
+	    rpcTransport: string;
 	    socketIoPath: string;
 	    socketIoAuth: string;
 	
@@ -970,6 +971,7 @@ export namespace engine {
 	        this.skipCookies = source["skipCookies"];
 	        this.discardCookies = source["discardCookies"];
 	        this.httpVersion = source["httpVersion"];
+	        this.rpcTransport = source["rpcTransport"];
 	        this.socketIoPath = source["socketIoPath"];
 	        this.socketIoAuth = source["socketIoAuth"];
 	    }

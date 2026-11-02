@@ -300,6 +300,14 @@ const (
 	HTTPVersion2    = "2"
 )
 
+func (o Options) checkHTTPVersion() error {
+	switch o.HTTPVersion {
+	case HTTPVersionAuto, HTTPVersion1, HTTPVersion2:
+		return nil
+	}
+	return fmt.Errorf("the HTTP version %q is not supported; use %q or %q", o.HTTPVersion, HTTPVersion1, HTTPVersion2)
+}
+
 func protocolsFor(version string, transport *http.Transport) {
 	var protocols http.Protocols
 	switch version {

@@ -70,6 +70,9 @@ func invokeWith(ctx context.Context, call Call, expansion *engine.Expansion, pol
 }
 
 func (s *session) call(ctx context.Context, call Call, limit int64) (*exchange, error) {
+	if call.Target.Options.RPCTransport != "" {
+		return s.callOverHTTP(ctx, call, limit)
+	}
 	ctx, err := s.connect(ctx)
 	if err != nil {
 		return nil, err
@@ -103,7 +106,7 @@ func (s *session) call(ctx context.Context, call Call, limit int64) (*exchange, 
 		stream.CloseSend()
 	}()
 
-	result := &exchange{method: method, status: status.New(codes.OK, "")}
+	result := &exchange{serverStream: method.IsStreamingServer(), status: status.New(codes.OK, "")}
 	for {
 		reply := dynamicpb.NewMessage(method.Output())
 		if err := stream.RecvMsg(reply); err != nil {
@@ -187,13 +190,13 @@ func (f format) encode(message proto.Message) ([]byte, error) {
 }
 
 type exchange struct {
-	method    protoreflect.MethodDescriptor
-	messages  [][]byte
-	size      int64
-	truncated bool
-	header    metadata.MD
-	trailer   metadata.MD
-	status    *status.Status
+	serverStream bool
+	messages     [][]byte
+	size         int64
+	truncated    bool
+	header       metadata.MD
+	trailer      metadata.MD
+	status       *status.Status
 }
 
 func (e *exchange) interrupted(ctx context.Context) bool {
@@ -203,7 +206,7 @@ func (e *exchange) interrupted(ctx context.Context) bool {
 	if errors.Is(ctx.Err(), context.Canceled) {
 		return true
 	}
-	return !e.method.IsStreamingServer() || len(e.messages) == 0
+	return !e.serverStream || len(e.messages) == 0
 }
 
 func (e *exchange) response(address string) engine.Response {
@@ -228,7 +231,7 @@ func (e *exchange) body() []byte {
 		failed, _ := json.Marshal(map[string]string{"code": codeName(e.status.Code()), "message": e.status.Message()})
 		return failed
 	}
-	if !e.method.IsStreamingServer() {
+	if !e.serverStream {
 		return bytes.Join(e.messages, nil)
 	}
 	return append(append([]byte("["), bytes.Join(e.messages, []byte(","))...), ']')

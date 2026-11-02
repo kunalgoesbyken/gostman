@@ -1,7 +1,6 @@
 package loadtest
 
 import (
-	"fmt"
 	"math"
 	"time"
 )
@@ -54,12 +53,6 @@ type Snapshot struct {
 	ActiveWorkers     int     `json:"activeWorkers,omitempty"`
 }
 
-type Thresholds struct {
-	MaxP95              time.Duration
-	MaxErrorRatePercent float64
-	ErrorRateSet        bool
-}
-
 func toMs(duration time.Duration) float64 {
 	return math.Round(float64(duration)/millisecond*1000) / 1000
 }
@@ -73,25 +66,4 @@ func (r Report) ErrorRatePercent() float64 {
 
 func (r Report) NothingSucceeded() bool {
 	return r.Total > 0 && r.Succeeded == 0
-}
-
-func (t Thresholds) Active() bool {
-	return t.MaxP95 > 0 || t.ErrorRateSet
-}
-
-func (r Report) Breaches(limits Thresholds) []string {
-	if !limits.Active() {
-		return nil
-	}
-	if r.Total == 0 {
-		return []string{"no request completed, so the thresholds cannot be checked"}
-	}
-	var breaches []string
-	if limits.MaxP95 > 0 && r.Latency.P95Ms > toMs(limits.MaxP95) {
-		breaches = append(breaches, fmt.Sprintf("p95 %.2f ms is above the limit of %.2f ms", r.Latency.P95Ms, toMs(limits.MaxP95)))
-	}
-	if limits.ErrorRateSet && r.ErrorRatePercent() > limits.MaxErrorRatePercent {
-		breaches = append(breaches, fmt.Sprintf("error rate %.2f%% is above the limit of %.2f%%", r.ErrorRatePercent(), limits.MaxErrorRatePercent))
-	}
-	return breaches
 }

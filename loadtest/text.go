@@ -41,7 +41,7 @@ func checkLine(check Check) string {
 	if !check.Passed {
 		verdict = "FAILED"
 	}
-	return fmt.Sprintf("%-6s %s (observed %s)", verdict, check.Expression, formatMeasure(check.Observed, check.Unit))
+	return fmt.Sprintf("%-6s %s", verdict, check.Describe())
 }
 
 func stoppedNote(report Report) string {
