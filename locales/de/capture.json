@@ -2,8 +2,6 @@
   "capture": {
     "title": "Datenverkehr mitschneiden",
     "running": "Läuft",
-    "desktopOnly": "In der Desktop-App verfügbar",
-    "webNotice": "Für den Mitschnitt braucht es die Desktop-App, die an einem lokalen Port lauschen und an Ihre API weiterleiten kann.",
     "limitation": "Richten Sie Ihre App auf die lokale Adresse statt auf die API. Eine App, deren Basis-URL sich nicht ändern lässt, wird nicht mitgeschnitten.",
     "upstreamPlaceholder": "API zum Weiterleiten, z. B. https://api.example.com",
     "upstreamLabel": "API zum Weiterleiten",

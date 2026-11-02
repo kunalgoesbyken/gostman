@@ -2,8 +2,6 @@
   "mock": {
     "title": "Server mock",
     "running": "In esecuzione",
-    "webNotice": "Il server mock richiede l'app desktop. Gli esempi che salvi qui vengono conservati con le tue richieste e inclusi negli export.",
-    "desktopOnly": "Disponibile nell'app desktop",
     "noRoutesTitle": "Nessuna richiesta da servire",
     "noRoutesHint": "Salva una richiesta, poi salva una delle sue risposte come esempio, oppure importa una specifica OpenAPI.",
     "noMatch": "Nessuna route",

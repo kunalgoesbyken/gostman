@@ -2,8 +2,6 @@
   "capture": {
     "title": "Cattura il traffico",
     "running": "In esecuzione",
-    "desktopOnly": "Disponibile nell'app desktop",
-    "webNotice": "Per catturare il traffico serve l'app desktop, che può restare in ascolto su una porta locale e inoltrare le richieste alla tua API.",
     "limitation": "Punta la tua app all'indirizzo locale invece che all'API. Un'app il cui URL di base non può essere cambiato non viene catturata.",
     "upstreamPlaceholder": "API a cui inoltrare, ad esempio https://api.example.com",
     "upstreamLabel": "API a cui inoltrare",

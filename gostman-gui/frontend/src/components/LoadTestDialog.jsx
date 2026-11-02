@@ -2,7 +2,9 @@ import { Gauge, Play, Square } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { DataTable } from "./ui/dataTable"
-import { Dialog, DialogBody, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
+import { Dialog, DialogBody } from "./ui/dialog"
+import { ToolDialogHeader } from "./ToolDialogHeader"
 import { FeatureEmpty } from "./FeatureEmpty"
 import { Input } from "./ui/input"
 import { Notice, SectionLabel } from "./ui/panel"
@@ -25,7 +27,7 @@ const percentileColumns = () => [
   { header: LOAD_TEST_TEXT.percentileColumns.value, key: "value" },
 ]
 
-const LOAD_TEST_WINDOW = { id: "load-test", width: 768, height: 640, minWidth: 480, minHeight: 360 }
+const LOAD_TEST_WINDOW = toolWindow("load-test")
 
 const fixed = (number) => formatNumber(number, { minimumFractionDigits: FRACTION_DIGITS, maximumFractionDigits: FRACTION_DIGITS })
 
@@ -239,12 +241,11 @@ export function LoadTestDialog({ actions }) {
 
   return (
     <Dialog label={LOAD_TEST_TEXT.title} size="lg" floating={LOAD_TEST_WINDOW} onClose={actions.close}>
-      <DialogHeader onClose={actions.close}>
-        <DialogTitle>{LOAD_TEST_TEXT.title}</DialogTitle>
+      <ToolDialogHeader featureId="load-test" onClose={actions.close}>
         {isRunning && <Badge variant="success">{LOAD_TEST_TEXT.running}</Badge>}
         <MethodTag method={request.method} />
         <span className="min-w-0 truncate font-mono text-xs text-muted-foreground" title={request.url}>{request.url}</span>
-      </DialogHeader>
+      </ToolDialogHeader>
       <Notice tone="warning">{LOAD_TEST_TEXT.notice}</Notice>
       {(blocked || failure) && <Notice tone="destructive" role="alert">{blocked || failure}</Notice>}
       <DialogBody className="flex flex-col gap-4">

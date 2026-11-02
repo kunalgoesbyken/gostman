@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
+import { toolWindow } from "../lib/dialogWindows"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
 import { Notice, Panel, PanelBody, Toolbar } from "./ui/panel"
@@ -232,7 +233,7 @@ function useScope(scope) {
   return { source, folder, isCollection, ownsCollectionList, rootNote, parentSource, parentSourceType, title }
 }
 
-const SETTINGS_WINDOW = { id: "folder-settings", width: 768, height: 576, minWidth: 480, minHeight: 360 }
+const SETTINGS_WINDOW = toolWindow("folder-settings")
 
 export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
   const [tab, setTab] = useState(TAB_HEADERS)

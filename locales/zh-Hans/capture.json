@@ -2,8 +2,6 @@
   "capture": {
     "title": "捕获流量",
     "running": "运行中",
-    "desktopOnly": "仅桌面应用可用",
-    "webNotice": "捕获流量需要桌面应用，它可以监听本地端口并转发到你的 API。",
     "limitation": "请让你的应用指向本地地址，而不是 API。无法更改基础 URL 的应用不会被捕获。",
     "upstreamPlaceholder": "要转发到的 API，例如 https://api.example.com",
     "upstreamLabel": "要转发到的 API",

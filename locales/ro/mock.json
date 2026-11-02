@@ -2,8 +2,6 @@
   "mock": {
     "title": "Server mock",
     "running": "Rulează",
-    "webNotice": "Serverul mock necesită aplicația desktop. Exemplele pe care le salvați aici sunt păstrate împreună cu cererile și incluse în exporturi.",
-    "desktopOnly": "Disponibil în aplicația desktop",
     "noRoutesTitle": "Nicio cerere de servit",
     "noRoutesHint": "Salvați o cerere, apoi salvați unul dintre răspunsurile ei ca exemplu sau importați o specificație OpenAPI.",
     "noMatch": "Nicio rută",

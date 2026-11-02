@@ -2,8 +2,6 @@
   "capture": {
     "title": "Capturer le trafic",
     "running": "En cours",
-    "desktopOnly": "Disponible dans l’application de bureau",
-    "webNotice": "La capture du trafic nécessite l’application de bureau, qui peut écouter sur un port local et transmettre à votre API.",
     "limitation": "Faites pointer votre application vers l’adresse locale au lieu de l’API. Une application dont l’URL de base ne peut pas être modifiée n’est pas capturée.",
     "upstreamPlaceholder": "API vers laquelle transmettre, par exemple https://api.example.com",
     "upstreamLabel": "API vers laquelle transmettre",

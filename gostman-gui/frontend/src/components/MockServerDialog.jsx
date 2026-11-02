@@ -2,7 +2,9 @@ import { useMemo } from "react"
 import { AlertTriangle, Play, Square } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
-import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
+import { Dialog } from "./ui/dialog"
+import { ToolDialogHeader } from "./ToolDialogHeader"
 import { Input } from "./ui/input"
 import { Notice, Toolbar } from "./ui/panel"
 import { Select } from "./ui/select"
@@ -135,7 +137,7 @@ function ServerPanel({ folders, requests, actions }) {
   )
 }
 
-const MOCK_WINDOW = { id: "mock", width: 768, height: 576, minWidth: 480, minHeight: 360 }
+const MOCK_WINDOW = toolWindow("mock")
 
 export function MockServerDialog({ folders, requests, actions }) {
   const isRunning = useMockStore((state) => state.isRunning)
@@ -143,15 +145,14 @@ export function MockServerDialog({ folders, requests, actions }) {
 
   return (
     <Dialog label={MOCK_TEXT.title} size={actions.isAvailable ? "lg" : "sm"} floating={actions.isAvailable ? MOCK_WINDOW : undefined} onClose={actions.close}>
-      <DialogHeader onClose={actions.close}>
-        <DialogTitle>{MOCK_TEXT.title}</DialogTitle>
+      <ToolDialogHeader featureId="mock" onClose={actions.close}>
         {isRunning && <Badge variant="success">{MOCK_TEXT.running}</Badge>}
         {isRunning && <LocalAddress address={address} />}
-      </DialogHeader>
+      </ToolDialogHeader>
       {actions.isAvailable ? (
         <ServerPanel folders={folders} requests={requests} actions={actions} />
       ) : (
-        <DesktopOnly title={MOCK_TEXT.desktopOnly} description={MOCK_TEXT.webNotice} />
+        <DesktopOnly featureId="mock" />
       )}
     </Dialog>
   )

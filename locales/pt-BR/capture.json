@@ -2,8 +2,6 @@
   "capture": {
     "title": "Capturar tráfego",
     "running": "Em execução",
-    "desktopOnly": "Disponível no app para desktop",
-    "webNotice": "Capturar tráfego exige o app para desktop, que pode escutar em uma porta local e encaminhar para a sua API.",
     "limitation": "Aponte seu app para o endereço local em vez da API. Um app cuja URL base não pode ser alterada não é capturado.",
     "upstreamPlaceholder": "API para encaminhar, por exemplo https://api.example.com",
     "upstreamLabel": "API para encaminhar",

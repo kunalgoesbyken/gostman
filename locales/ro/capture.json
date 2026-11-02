@@ -2,8 +2,6 @@
   "capture": {
     "title": "Captură trafic",
     "running": "Rulează",
-    "desktopOnly": "Disponibil în aplicația desktop",
-    "webNotice": "Captura traficului necesită aplicația desktop, care poate asculta pe un port local și poate redirecționa către API-ul dvs.",
     "limitation": "Îndreptați aplicația către adresa locală în loc de API. O aplicație al cărei URL de bază nu poate fi schimbat nu este capturată.",
     "upstreamPlaceholder": "API către care se redirecționează, de exemplu https://api.example.com",
     "upstreamLabel": "API către care se redirecționează",

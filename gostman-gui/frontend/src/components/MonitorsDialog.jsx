@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react"
 import { Activity, ChevronDown, ChevronRight, Pause, Pencil, Play, Plus, Timer, Trash2 } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
-import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
+import { Dialog } from "./ui/dialog"
+import { ToolDialogHeader } from "./ToolDialogHeader"
 import { EmptyState } from "./ui/emptyState"
 import { Notice, PanelBody, SPLIT_LIST, SPLIT_PANES, Toolbar } from "./ui/panel"
 import { MonitorChart } from "./MonitorChart"
@@ -14,7 +16,7 @@ import { formatDateTime, formatPercent, formatTime } from "../lib/i18n/format"
 import { cn } from "../lib/utils"
 import { useAppStore } from "../store/appStore"
 
-const WINDOW = { id: "monitors", width: 800, height: 580, minWidth: 480, minHeight: 360 }
+const WINDOW = toolWindow("monitors")
 const SHOWN_RUNS = 30
 
 function StatusDot({ monitor, isRunning, lastPassed }) {
@@ -145,9 +147,8 @@ export function MonitorsDialog({ actions }) {
 
   return (
     <Dialog label={TEXT.title} size="lg" floating={WINDOW} onClose={actions.close}>
-      <DialogHeader onClose={actions.close}>
-        <DialogTitle>{TEXT.title}</DialogTitle>
-      </DialogHeader>
+      <ToolDialogHeader featureId="monitors" onClose={actions.close}>
+      </ToolDialogHeader>
       <Notice tone="muted" icon={Timer}>{note}</Notice>
       {monitors.length === 0 && !editing ? (
         <div className="min-h-0 flex-1 overflow-y-auto">

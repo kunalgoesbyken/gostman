@@ -3,6 +3,7 @@ import { Keyboard } from "lucide-react"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Combobox } from "./ui/combobox"
+import { toolWindow } from "../lib/dialogWindows"
 import { Dialog, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
 import { ResizablePane, SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
@@ -37,7 +38,7 @@ import { cn } from "../lib/utils"
 
 const { fields, sections } = PREFERENCES_TEXT
 
-const PREFERENCES_WINDOW = { id: "preferences", width: 760, height: 560, minWidth: 560, minHeight: 360 }
+const PREFERENCES_WINDOW = toolWindow("preferences")
 const SECTION_KEYS = { selector: "[role=tab]", orientation: ORIENTATION.both, activate: true }
 
 function FontRow({ label, hint, name, isCode, suggestions, preferences }) {

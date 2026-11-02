@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useId, useRef } from "react"
 import { GripVertical, X } from "lucide-react"
 import { IconButton } from "./button"
+import { Skeleton, SkeletonLines } from "./skeleton"
 import { RESIZE_EDGES, useFloatingWindow } from "../../hooks/useFloatingWindow"
 import { useFocusTrap } from "../../hooks/useFocusTrap"
 import { DIALOG_TEXT } from "../../lib/dialogText"
@@ -93,7 +94,16 @@ export function Dialog({ label, size = "sm", floating, onClose, className, child
 }
 
 export function DialogPending() {
-  return <div role="status" aria-label={APP_TEXT.loading} className={DIALOG_OVERLAY} />
+  return (
+    <div className={DIALOG_OVERLAY}>
+      <div role="status" aria-label={APP_TEXT.loading} className={cn("flex w-full flex-col overflow-hidden rounded-lg border border-border bg-background shadow-lg", DIALOG_SIZES.lg)}>
+        <div className="flex h-10 shrink-0 items-center border-b border-border px-4">
+          <Skeleton className="h-3 w-32" />
+        </div>
+        <SkeletonLines lines={6} className="p-4" />
+      </div>
+    </div>
+  )
 }
 
 function WindowGrip({ frame }) {

@@ -1,4 +1,5 @@
 import { FEATURES } from './featureCatalog'
+import { formatList } from './i18n/format'
 import { FEATURES_TEXT, FEATURE_WORDS_TEXT } from './featuresText'
 import { docsUrl } from './siteLinks'
 import { isNewerVersion } from './versions'
@@ -20,6 +21,13 @@ export const featureById = (id) => FEATURES.find((feature) => feature.id === id)
 export const featureForSurface = (surface) => FEATURES.find((feature) => feature.empty?.includes(surface)) ?? null
 
 export const featureTitle = (feature) => wordsOf(feature).title
+
+export const featureToolLabel = (feature) => wordsOf(feature).tool ?? featureTitle(feature)
+
+export function platformLabel(feature) {
+  const labels = { desktop: FEATURES_TEXT.platformDesktop, web: FEATURES_TEXT.platformWeb, cli: FEATURES_TEXT.platformCli }
+  return formatList((feature.platforms ?? []).map((platform) => labels[platform]))
+}
 
 export const featureBlurb = (feature) => wordsOf(feature).blurb
 
@@ -66,3 +74,5 @@ export function searchFeatures(query, group = '') {
     .sort((first, second) => second.score - first.score)
     .map((entry) => entry.feature)
 }
+
+export const webAlternative = (feature) => wordsOf(feature).webInstead

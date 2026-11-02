@@ -1,6 +1,6 @@
 {
   "runner": {
-    "title": "Run requests",
+    "title": "Run",
     "scope": "Requests to run",
     "allRequests": "All requests",
     "delay": "Delay (ms)",

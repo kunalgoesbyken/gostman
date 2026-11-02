@@ -2,8 +2,6 @@
   "mock": {
     "title": "模拟服务器",
     "running": "运行中",
-    "webNotice": "模拟服务器需要桌面应用。你在这里保存的示例会随请求一起保存，并包含在导出内容中。",
-    "desktopOnly": "仅桌面应用可用",
     "noRoutesTitle": "没有可提供的请求",
     "noRoutesHint": "保存一个请求，再把它的某个响应保存为示例，或导入 OpenAPI 规范。",
     "noMatch": "无路由",

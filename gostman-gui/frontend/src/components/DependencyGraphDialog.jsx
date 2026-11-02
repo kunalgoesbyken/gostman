@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { Workflow } from "lucide-react"
 import { DependencyGraph } from "./DependencyGraph"
 import { Checkbox } from "./ui/checkbox"
+import { toolWindow } from "../lib/dialogWindows"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
 import { Notice, SectionLabel } from "./ui/panel"
@@ -14,7 +15,7 @@ import { NO_TAG_FILTER, requestsInScope } from "../lib/runner"
 import { useAppStore } from "../store/appStore"
 
 const REFERENCE_EXAMPLE = "{{name}}"
-const GRAPH_WINDOW = { id: "dependencies", width: 960, height: 600, minWidth: 560, minHeight: 360 }
+const GRAPH_WINDOW = toolWindow("dependencies", "wide")
 
 function useDependencyGraph(folders, requests, folderId, showInputs) {
   const environments = useAppStore((s) => s.environments)

@@ -2,8 +2,6 @@
   "capture": {
     "title": "Capturar tráfico",
     "running": "Activa",
-    "desktopOnly": "Disponible en la app de escritorio",
-    "webNotice": "Capturar tráfico requiere la app de escritorio, que puede escuchar en un puerto local y reenviar a tu API.",
     "limitation": "Apunta tu app a la dirección local en lugar de a la API. No se captura una app cuya URL base no se pueda cambiar.",
     "upstreamPlaceholder": "API a la que reenviar, por ejemplo https://api.example.com",
     "upstreamLabel": "API a la que reenviar",

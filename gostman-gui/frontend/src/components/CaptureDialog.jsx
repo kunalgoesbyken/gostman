@@ -4,7 +4,9 @@ import { Badge } from "./ui/badge"
 import { Button, IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { DataTable } from "./ui/dataTable"
-import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
+import { Dialog } from "./ui/dialog"
+import { ToolDialogHeader } from "./ToolDialogHeader"
 import { EmptyState } from "./ui/emptyState"
 import { FeatureEmpty } from "./FeatureEmpty"
 import { Input } from "./ui/input"
@@ -332,7 +334,7 @@ function CapturePanel({ folders, requests, onTrust, actions }) {
   )
 }
 
-const CAPTURE_WINDOW = { id: "capture", width: 896, height: 640, minWidth: 560, minHeight: 400 }
+const CAPTURE_WINDOW = toolWindow("capture", "wide")
 
 export function CaptureDialog({ folders, requests, onTrust, actions }) {
   const isRunning = useCaptureStore((state) => state.isRunning)
@@ -340,15 +342,14 @@ export function CaptureDialog({ folders, requests, onTrust, actions }) {
 
   return (
     <Dialog label={CAPTURE_TEXT.title} size={actions.isAvailable ? "lg" : "sm"} className={actions.isAvailable ? "h-[40rem] max-w-4xl" : undefined} floating={actions.isAvailable ? CAPTURE_WINDOW : undefined} onClose={actions.close}>
-      <DialogHeader onClose={actions.close}>
-        <DialogTitle>{CAPTURE_TEXT.title}</DialogTitle>
+      <ToolDialogHeader featureId="capture" onClose={actions.close}>
         {isRunning && <Badge variant="success">{CAPTURE_TEXT.running}</Badge>}
         {isRunning && <LocalAddress address={address} />}
-      </DialogHeader>
+      </ToolDialogHeader>
       {actions.isAvailable ? (
         <CapturePanel folders={folders} requests={requests} onTrust={onTrust} actions={actions} />
       ) : (
-        <DesktopOnly title={CAPTURE_TEXT.desktopOnly} description={CAPTURE_TEXT.webNotice} />
+        <DesktopOnly featureId="capture" />
       )}
     </Dialog>
   )

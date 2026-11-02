@@ -2,8 +2,6 @@
   "capture": {
     "title": "通信をキャプチャ",
     "running": "実行中",
-    "desktopOnly": "デスクトップアプリで利用できます",
-    "webNotice": "通信のキャプチャには、ローカルポートで待ち受けてAPIに転送できるデスクトップアプリが必要です。",
     "limitation": "アプリの接続先をAPIではなくローカルアドレスに向けてください。ベースURLを変更できないアプリはキャプチャされません。",
     "upstreamPlaceholder": "転送先のAPI（例：https://api.example.com）",
     "upstreamLabel": "転送先のAPI",

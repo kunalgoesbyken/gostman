@@ -2,7 +2,9 @@ import { Fragment, useMemo, useState } from "react"
 import { Braces, Check, Copy, FileText, KeyRound, Plus, Timer, Trash2 } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { ColorDot, ColorPicker } from "./ui/colorPicker"
-import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
+import { Dialog } from "./ui/dialog"
+import { ToolDialogHeader } from "./ToolDialogHeader"
 import { Input } from "./ui/input"
 import { Notice, ResizablePane, SectionLabel, SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
 import { EDGE_END } from "../hooks/usePaneResize"
@@ -34,7 +36,7 @@ const SCOPE_OPTIONS = [
 const ENVIRONMENT_FEATURES = { enabled: true, secret: true, references: true, readOnly: false }
 const DOT_ENV_FEATURES = { enabled: false, secret: false, readOnly: true }
 
-const ENVIRONMENTS_WINDOW = { id: "environments", width: 1024, height: 640, minWidth: 640, minHeight: 400 }
+const ENVIRONMENTS_WINDOW = toolWindow("environments", "wide")
 
 const groupName = (group) => (group.id ? group.name : TEXT.shared)
 
@@ -327,14 +329,13 @@ export function EnvironmentDialog({ secrets, onClose }) {
   return (
     <>
       <Dialog label={TEXT.title} size="lg" floating={ENVIRONMENTS_WINDOW} onClose={closeUnlessCovered} className="max-w-5xl">
-        <DialogHeader onClose={onClose}>
-          <DialogTitle>{TEXT.title}</DialogTitle>
+        <ToolDialogHeader featureId="environments" onClose={onClose}>
           <SegmentedControl label={TEXT.scope} options={SCOPE_OPTIONS} value={scope} onChange={changeScope} className="ms-2" />
           <Button variant="ghost" size="sm" className="ms-auto" onClick={() => setIsManagingSecrets(true)}>
             <KeyRound />
             <span className="max-sm:sr-only">{SECRETS_TEXT.title}</span>
           </Button>
-        </DialogHeader>
+        </ToolDialogHeader>
         <div className={SPLIT_PANES}>
           <ResizablePane as="nav" pane={ENVIRONMENT_PANE} edge={EDGE_END} aria-label={TEXT.title} className={SPLIT_LIST}>
             <div className="min-h-0 flex-1 overflow-y-auto py-1 max-sm:hidden">

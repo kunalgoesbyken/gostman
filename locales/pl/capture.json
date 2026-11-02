@@ -2,8 +2,6 @@
   "capture": {
     "title": "Przechwytywanie ruchu",
     "running": "Działa",
-    "desktopOnly": "Dostępne w aplikacji desktopowej",
-    "webNotice": "Przechwytywanie ruchu wymaga aplikacji desktopowej, która może nasłuchiwać na lokalnym porcie i przekazywać ruch do wskazanego API.",
     "limitation": "Skieruj aplikację na adres lokalny zamiast na API. Aplikacja, w której nie można zmienić bazowego adresu URL, nie zostanie przechwycona.",
     "upstreamPlaceholder": "API docelowe, na przykład https://api.example.com",
     "upstreamLabel": "API docelowe",

@@ -1,11 +1,12 @@
 import { useState } from "react"
 import { CopyTextButton } from "./CopyTextButton"
+import { toolWindow } from "../lib/dialogWindows"
 import { Dialog, DialogBody, DialogHeader } from "./ui/dialog"
 import { Select } from "./ui/select"
 import { SNIPPET_LANGUAGES, rememberLanguage, rememberedLanguage } from "../lib/codeGenerator"
 import { REQUEST_BAR_TEXT } from "../lib/requestBarText"
 
-const CODE_WINDOW = { id: "code", width: 768, height: 576, minWidth: 480, minHeight: 320 }
+const CODE_WINDOW = toolWindow("code")
 
 export function CodeSnippetDialog({ snippets, onClose }) {
   const [languageId, setLanguageId] = useState(rememberedLanguage)

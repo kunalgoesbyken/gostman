@@ -2,7 +2,9 @@ import { useMemo, useRef, useState } from "react"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
-import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
+import { Dialog } from "./ui/dialog"
+import { ToolDialogHeader } from "./ToolDialogHeader"
 import { FeatureEmpty } from "./FeatureEmpty"
 import { Input } from "./ui/input"
 import { MethodTag } from "./MethodTag"
@@ -13,7 +15,7 @@ import { DEFAULT_LIMIT, DEFAULT_RATE, hostsOfPlan, planNegative, variantCount } 
 import { NEGATIVE_TEXT as TEXT } from "../lib/negativeText"
 import { useAppStore } from "../store/appStore"
 
-const NEGATIVE_WINDOW = { id: "negative", width: 768, height: 576, minWidth: 480, minHeight: 360 }
+const NEGATIVE_WINDOW = toolWindow("negative")
 const PATH_SEPARATOR = " / "
 const SEVERITY_VARIANTS = { high: "destructive", medium: "warning", low: "secondary" }
 
@@ -124,9 +126,8 @@ export function NegativeDialog({ folders, actions, initialFolderId }) {
 
   return (
     <Dialog label={TEXT.title} size="lg" floating={NEGATIVE_WINDOW} onClose={actions.negative.close}>
-      <DialogHeader onClose={actions.negative.close}>
-        <DialogTitle>{TEXT.title}</DialogTitle>
-      </DialogHeader>
+      <ToolDialogHeader featureId="negative-tests" onClose={actions.negative.close}>
+      </ToolDialogHeader>
       <p className="shrink-0 border-b border-border px-4 py-2 text-xs text-muted-foreground">{TEXT.intro}</p>
       <Toolbar className="h-auto flex-wrap py-1.5">
         <div className="w-48 shrink-0">

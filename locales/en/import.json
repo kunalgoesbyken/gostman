@@ -120,7 +120,7 @@
     }
   },
   "transfer": {
-    "title": "Import and export",
+    "title": "Import and share",
     "tabsLabel": "Import or export",
     "tabs": {
       "import": "Import",

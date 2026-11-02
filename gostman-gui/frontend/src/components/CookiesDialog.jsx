@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react"
 import { Cookie, Search, X } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
-import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
+import { Dialog } from "./ui/dialog"
+import { ToolDialogHeader } from "./ToolDialogHeader"
 import { EmptyState } from "./ui/emptyState"
 import { SectionLabel } from "./ui/panel"
 import { TabCount } from "./ui/tabs"
@@ -30,7 +32,7 @@ function CookieRow({ cookie, onRemove }) {
   )
 }
 
-const COOKIES_WINDOW = { id: "cookies", width: 768, height: 576, minWidth: 480, minHeight: 320 }
+const COOKIES_WINDOW = toolWindow("cookies")
 
 export function CookiesDialog({ onClose }) {
   const cookies = useAppStore((s) => s.cookies)
@@ -45,13 +47,12 @@ export function CookiesDialog({ onClose }) {
 
   return (
     <Dialog label={TEXT.title} size="lg" floating={COOKIES_WINDOW} onClose={onClose}>
-      <DialogHeader onClose={onClose}>
-        <DialogTitle>{TEXT.title}</DialogTitle>
+      <ToolDialogHeader featureId="cookies" onClose={onClose}>
         <TabCount>{cookies.length}</TabCount>
         <Button variant="outline" size="sm" className="ms-auto" disabled={cookies.length === 0} onClick={clearCookies}>
           {TEXT.clearAll}
         </Button>
-      </DialogHeader>
+      </ToolDialogHeader>
       <SearchField value={query} onChange={setQuery} placeholder={TEXT.filter} />
       {shown.length === 0 ? (
         <div className="min-h-0 flex-1">

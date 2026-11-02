@@ -2,8 +2,6 @@
   "mock": {
     "title": "Serveur fictif",
     "running": "En cours",
-    "webNotice": "Le serveur fictif nécessite l’application de bureau. Les exemples que vous enregistrez ici sont conservés avec vos requêtes et inclus dans les exports.",
-    "desktopOnly": "Disponible dans l’application de bureau",
     "noRoutesTitle": "Aucune requête à servir",
     "noRoutesHint": "Enregistrez une requête, puis enregistrez l’une de ses réponses comme exemple, ou importez une spécification OpenAPI.",
     "noMatch": "Aucune route",

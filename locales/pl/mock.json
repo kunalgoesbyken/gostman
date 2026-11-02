@@ -2,8 +2,6 @@
   "mock": {
     "title": "Serwer mock",
     "running": "Działa",
-    "webNotice": "Serwer mock wymaga aplikacji desktopowej. Przykłady zapisane tutaj są przechowywane razem z żądaniami i dołączane do eksportów.",
-    "desktopOnly": "Dostępne w aplikacji desktopowej",
     "noRoutesTitle": "Brak żądań do udostępnienia",
     "noRoutesHint": "Zapisz żądanie, a potem zapisz jedną z jego odpowiedzi jako przykład, albo zaimportuj specyfikację OpenAPI.",
     "noMatch": "Brak trasy",

@@ -1,6 +1,6 @@
 {
   "scan": {
-    "title": "Scan for secrets",
+    "title": "Scan secrets",
     "intro": "Looks for well-known token formats, random-looking values in credential fields and passwords typed into auth settings. Values written as {{example}} are fine. Nothing leaves this window except the check itself, and only a few characters of a value are ever shown.",
     "includeExamples": "Include saved example responses",
     "scanning": "Scanning",

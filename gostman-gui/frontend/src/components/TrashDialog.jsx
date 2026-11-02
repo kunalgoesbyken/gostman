@@ -1,6 +1,7 @@
 import { Folder, Globe, Send, Trash2, Undo2 } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button, IconButton } from "./ui/button"
+import { toolWindow } from "../lib/dialogWindows"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
 import { Notice } from "./ui/panel"
@@ -9,7 +10,7 @@ import { KIND_ENVIRONMENT, KIND_FOLDER, KIND_REQUEST, TRASH_DAYS, daysLeft } fro
 import { TRASH_TEXT as TEXT } from "../lib/trashText"
 import { useTrashStore } from "../lib/trashSession"
 
-const TRASH_WINDOW = { id: "trash", width: 640, height: 480, minWidth: 360, minHeight: 280 }
+const TRASH_WINDOW = toolWindow("trash", "compact")
 const DELETED_AT = { dateStyle: "medium", timeStyle: "short" }
 const KIND_ICONS = { [KIND_REQUEST]: Send, [KIND_FOLDER]: Folder, [KIND_ENVIRONMENT]: Globe }
 

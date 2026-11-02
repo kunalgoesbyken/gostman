@@ -3,7 +3,9 @@ import { Check, ChevronDown, ChevronRight, Download, ListChecks, Minus, Play, Ro
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
-import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
+import { Dialog } from "./ui/dialog"
+import { ToolDialogHeader } from "./ToolDialogHeader"
 import { FeatureEmpty } from "./FeatureEmpty"
 import { Input } from "./ui/input"
 import { Toolbar } from "./ui/panel"
@@ -222,7 +224,7 @@ function CoverageSection({ coverage }) {
   )
 }
 
-const RUNNER_WINDOW = { id: "runner", width: 768, height: 576, minWidth: 480, minHeight: 360 }
+const RUNNER_WINDOW = toolWindow("runner")
 
 export function RunnerDialog({ folders, requests, actions }) {
   const runner = useAppStore((s) => s.runner)
@@ -284,9 +286,8 @@ export function RunnerDialog({ folders, requests, actions }) {
 
   return (
     <Dialog label={RUNNER_TEXT.title} size="lg" floating={RUNNER_WINDOW} onClose={actions.closeRunner}>
-      <DialogHeader onClose={actions.closeRunner}>
-        <DialogTitle>{RUNNER_TEXT.title}</DialogTitle>
-      </DialogHeader>
+      <ToolDialogHeader featureId="runner" onClose={actions.closeRunner}>
+      </ToolDialogHeader>
       <Toolbar className="h-auto flex-wrap py-1.5">
         <div className="w-48 shrink-0">
           <Select value={folderId} disabled={isRunning} onChange={(event) => setFolderId(event.target.value)} aria-label={RUNNER_TEXT.scope}>

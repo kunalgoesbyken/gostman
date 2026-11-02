@@ -85,6 +85,7 @@ for (const feature of FEATURES) {
   if (!GROUPS.includes(feature.group)) report(`${where}: unknown group "${feature.group}"`)
   for (const platform of feature.platforms ?? []) if (!PLATFORMS.includes(platform)) report(`${where}: unknown platform "${platform}"`)
   if (feature.platforms && feature.platforms.length === 0) report(`${where}: platforms is empty; leave it out for both`)
+  if (feature.command !== undefined && !feature.command.startsWith('gostman ')) report(`${where}: command must be a gostman command line`)
   if (feature.tool) {
     const slot = `${feature.tool.group}:${feature.tool.order}`
     if (!TOOL_GROUPS.includes(feature.tool.group)) report(`${where}: unknown tool group "${feature.tool.group}"`)

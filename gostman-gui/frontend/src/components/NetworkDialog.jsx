@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react"
 import { FolderOpen, Plus, X } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
-import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { toolWindow } from "../lib/dialogWindows"
+import { Dialog, DialogBody, DialogFooter } from "./ui/dialog"
+import { ToolDialogHeader } from "./ToolDialogHeader"
 import { Field } from "./ui/field"
 import { Input } from "./ui/input"
 import { Textarea } from "./ui/textarea"
@@ -242,7 +244,7 @@ function CollectionSection({ actions }) {
   )
 }
 
-const NETWORK_WINDOW = { id: "network", width: 768, height: 576, minWidth: 480, minHeight: 320 }
+const NETWORK_WINDOW = toolWindow("network")
 
 export function NetworkDialog({ settings, actions, onClose }) {
   const [draft, setDraft] = useState(settings)
@@ -264,9 +266,8 @@ export function NetworkDialog({ settings, actions, onClose }) {
 
   return (
     <Dialog label={TEXT.title} size={actions.canConfigureNetwork ? "lg" : "sm"} floating={actions.canConfigureNetwork ? NETWORK_WINDOW : undefined} onClose={onClose}>
-      <DialogHeader onClose={onClose}>
-        <DialogTitle>{TEXT.title}</DialogTitle>
-      </DialogHeader>
+      <ToolDialogHeader featureId="network" onClose={onClose}>
+      </ToolDialogHeader>
       {actions.canConfigureNetwork ? (
         <DialogBody>
           <SettingsForm draft={draft} onChange={edit} onPick={actions.pickFile} />

@@ -2,8 +2,6 @@
   "mock": {
     "title": "Servidor simulado",
     "running": "Activo",
-    "webNotice": "El servidor simulado requiere la app de escritorio. Los ejemplos que guardes aquí se conservan con tus solicitudes y se incluyen en las exportaciones.",
-    "desktopOnly": "Disponible en la app de escritorio",
     "noRoutesTitle": "No hay solicitudes que servir",
     "noRoutesHint": "Guarda una solicitud, guarda una de sus respuestas como ejemplo o importa una especificación OpenAPI.",
     "noMatch": "Sin ruta",

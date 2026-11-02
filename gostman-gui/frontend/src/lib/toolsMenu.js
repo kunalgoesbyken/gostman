@@ -1,12 +1,8 @@
 import { FEATURES, TOOL_GROUPS } from './featureCatalog'
 import { featureIcon } from './featureIcons'
-import { FEATURES_TEXT, FEATURE_WORDS_TEXT } from './featuresText'
-import { featureTitle, isMissingHere } from './featureIndex'
+import { FEATURES_TEXT } from './featuresText'
+import { featureToolLabel, isMissingHere } from './featureIndex'
 import { isDesktopApp } from './platform'
-
-const camelId = (id) => id.replace(/-([a-z0-9])/g, (match, letter) => letter.toUpperCase())
-
-const toolLabel = (feature) => FEATURE_WORDS_TEXT[camelId(feature.id)].tool ?? featureTitle(feature)
 
 const toolsIn = (group) => FEATURES
   .filter((feature) => feature.tool?.group === group)
@@ -23,7 +19,7 @@ export function toolMenuItems(open) {
     { id: `heading-${group}`, heading: true, label: FEATURES_TEXT.toolGroups[group] },
     ...toolsIn(group).map((feature) => ({
       id: feature.id,
-      label: toolLabel(feature),
+      label: featureToolLabel(feature),
       icon: featureIcon(feature),
       detail: platformTag(feature, isDesktop),
       onSelect: () => open(feature.id),

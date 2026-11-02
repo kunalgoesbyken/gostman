@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { ExternalLink, MonitorDown, Sparkles } from "lucide-react"
+import { Sparkles } from "lucide-react"
 import { Badge } from "./ui/badge"
-import { Button, buttonVariants } from "./ui/button"
+import { Button } from "./ui/button"
+import { toolWindow } from "../lib/dialogWindows"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { DesktopOnlyDetails } from "./DesktopOnly"
+import { LearnMore } from "./LearnMore"
 import { SearchField } from "./SearchField"
 import { openExternal } from "../lib/about"
 import { useFeatureAccess } from "../lib/featureAccess"
-import { featureBlurb, featureDocsUrl, featureTitle, groupTitle, isMissingHere, isNewFeature, searchFeatures, shownFeatures } from "../lib/featureIndex"
+import { featureBlurb, featureTitle, groupTitle, isMissingHere, isNewFeature, platformLabel, searchFeatures, shownFeatures } from "../lib/featureIndex"
 import { featureIcon } from "../lib/featureIcons"
 import { FEATURES_TEXT as TEXT } from "../lib/featuresText"
 import { GROUPS } from "../lib/featureCatalog"
@@ -16,40 +19,18 @@ import { formatList } from "../lib/i18n/format"
 import { cn } from "../lib/utils"
 import { useAppStore } from "../store/appStore"
 
-const EXPLORE_WINDOW = { id: "explore", width: 820, height: 640, minWidth: 420, minHeight: 360 }
-
-const platformLabel = (feature) => {
-  const labels = { desktop: TEXT.platformDesktop, web: TEXT.platformWeb, cli: TEXT.platformCli }
-  return formatList((feature.platforms ?? []).map((platform) => labels[platform]))
-}
+const EXPLORE_WINDOW = toolWindow("explore")
 
 function GroupTabs({ group, onChange }) {
   const choices = ["", ...GROUPS]
   return (
-    <div role="group" aria-label={TEXT.groupsLabel} className="flex shrink-0 gap-1 overflow-x-auto border-b border-border px-2 py-1.5">
+    <div role="tablist" aria-label={TEXT.groupsLabel} className="flex shrink-0 flex-wrap gap-1 border-b border-border px-2 py-1.5">
       {choices.map((choice) => (
-        <Button key={choice || "all"} size="sm" variant={choice === group ? "secondary" : "ghost"} aria-pressed={choice === group} onClick={() => onChange(choice)} className="shrink-0">
+        <Button key={choice || "all"} size="sm" variant={choice === group ? "secondary" : "ghost"} role="tab" aria-selected={choice === group} onClick={() => onChange(choice)} className="shrink-0">
           {choice ? groupTitle(choice) : TEXT.allGroups}
         </Button>
       ))}
     </div>
-  )
-}
-
-function LearnMore({ feature }) {
-  const url = featureDocsUrl(feature)
-  return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={TEXT.learnMoreLabel(featureTitle(feature))}
-      onClick={(event) => openExternal(event, url)}
-      className={buttonVariants({ variant: "ghost", size: "sm" })}
-    >
-      {TEXT.learnMore}
-      <ExternalLink />
-    </a>
   )
 }
 
@@ -68,7 +49,7 @@ function FeatureRow({ feature, isFocused, scrollsToFocus, seenVersion, canTry, o
         <div className="min-w-0 flex-1 basis-60">
           <p className="flex flex-wrap items-center gap-1.5 text-xs font-medium">
             {title}
-            {isNewFeature(feature, seenVersion) && <Badge variant="success">{TEXT.newBadge}</Badge>}
+            {canTry && isNewFeature(feature, seenVersion) && <Badge variant="success">{TEXT.newBadge}</Badge>}
             {tag && <Badge>{tag}</Badge>}
           </p>
           <p className="mt-0.5 text-xs text-muted-foreground">{featureBlurb(feature)}</p>
@@ -79,22 +60,6 @@ function FeatureRow({ feature, isFocused, scrollsToFocus, seenVersion, canTry, o
         </div>
       </div>
     </li>
-  )
-}
-
-function DesktopOnlyNotice({ feature }) {
-  return (
-    <div role="status" className="mb-3 flex flex-col gap-2 rounded-md border border-border p-3">
-      <p className="text-xs font-medium">{TEXT.desktopOnlyTitle(featureTitle(feature))}</p>
-      <p className="text-xs text-muted-foreground">{TEXT.desktopOnlyBody}</p>
-      <div className="flex flex-wrap gap-2">
-        <a href={RELEASES_URL} target="_blank" rel="noopener noreferrer" className={buttonVariants({ size: "sm" })}>
-          <MonitorDown />
-          {TEXT.getDesktop}
-        </a>
-        <LearnMore feature={feature} />
-      </div>
-    </div>
   )
 }
 
@@ -120,7 +85,7 @@ export function ExploreDialog({ onClose }) {
       <SearchField value={query} onChange={setQuery} placeholder={TEXT.searchPlaceholder} />
       <GroupTabs group={group} onChange={setGroup} />
       <DialogBody>
-        {showsNotice && <DesktopOnlyNotice feature={focused} />}
+        {showsNotice && <div className="mb-3 rounded-md border border-border p-3"><DesktopOnlyDetails featureId={focused.id} showsPurpose /></div>}
         {!showsNotice && query === "" && !focused && <p className="mb-3 text-xs text-muted-foreground">{TEXT.intro}</p>}
         {features.length === 0 ? (
           <p className="py-6 text-center text-xs text-muted-foreground">{TEXT.nothingMatches(query)}</p>

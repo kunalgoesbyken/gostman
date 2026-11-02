@@ -26,7 +26,7 @@
     "platformCli": "Command line",
     "platformWeb": "Web app",
     "desktopOnlyTitle": "{{title}} needs the desktop app",
-    "desktopOnlyBody": "The browser cannot reach local files, ports or system settings, so this feature is only in the desktop app. The page below explains how it works.",
+    "desktopOnlyBody": "The browser cannot reach local files, ports or system settings, so this is only in the desktop app.",
     "getDesktop": "Get the desktop app",
     "nothingMatches": "No feature matches \"{{query}}\".",
     "results_one": "{{count}} feature",
@@ -60,7 +60,8 @@
       "automate": "Automate",
       "mockCapture": "Mock and capture",
       "shareGit": "Share and Git"
-    }
+    },
+    "cliLine": "In a terminal"
   },
   "featureWords": {
     "rest": {
@@ -205,7 +206,8 @@
       "title": "Folder workspaces",
       "blurb": "Keep a collection as plain YAML files next to your code and share it through Git.",
       "synonyms": "folder workspace yaml files git bruno opencollection",
-      "tool": "Workspace"
+      "tool": "Workspace",
+      "webInstead": "On the web, your collections are kept in this browser. Export them to share or back them up."
     },
     "folderSettings": {
       "title": "Folder settings",
@@ -331,10 +333,9 @@
       "synonyms": "sync openapi spec update remote"
     },
     "runner": {
-      "title": "Collection runner",
+      "title": "Run",
       "blurb": "Run a folder in order with CSV, JSON or XLSX data files, parallel runs and HTML or JUnit reports.",
-      "synonyms": "runner run collection postman collection runner newman data csv json xlsx iteration",
-      "tool": "Run"
+      "synonyms": "runner run collection postman collection runner newman data csv json xlsx iteration"
     },
     "flows": {
       "title": "Flows",
@@ -344,7 +345,8 @@
     "loadTest": {
       "title": "Load test",
       "blurb": "Send many requests at once and read latency percentiles and errors.",
-      "synonyms": "load performance stress k6 benchmark latency"
+      "synonyms": "load performance stress k6 benchmark latency",
+      "webInstead": "On the web, run the collection with a data file and read the timings of each request in the runner."
     },
     "loadThresholds": {
       "title": "Load thresholds",
@@ -352,10 +354,9 @@
       "synonyms": "threshold slo limit fail load stages ramp"
     },
     "scan": {
-      "title": "Secret scanner",
+      "title": "Scan secrets",
       "blurb": "Find tokens and passwords in a collection before you share it.",
-      "synonyms": "scan secrets leak token password credential gitleaks",
-      "tool": "Scan secrets"
+      "synonyms": "scan secrets leak token password credential gitleaks"
     },
     "cli": {
       "title": "Command line",
@@ -386,7 +387,8 @@
       "title": "Mock server",
       "blurb": "Serve saved examples or an OpenAPI spec locally, with a live request log.",
       "synonyms": "mock server stub fake wiremock prism examples",
-      "tool": "Mock server"
+      "tool": "Mock server",
+      "webInstead": "On the web, save examples on your requests; they are kept with the collection and included in exports. To serve them over HTTP, run the mock server from the CLI or the desktop app."
     },
     "mockRules": {
       "title": "Mock rules",
@@ -397,7 +399,8 @@
       "title": "Capture proxy",
       "blurb": "Forward traffic to an upstream, record it and turn it into requests.",
       "synonyms": "capture proxy record traffic intercept charles fiddler mitm",
-      "tool": "Capture proxy"
+      "tool": "Capture proxy",
+      "webInstead": "On the web, paste a curl command or import a HAR file to build requests from traffic you recorded elsewhere."
     },
     "captureRules": {
       "title": "Capture rules",
@@ -413,7 +416,8 @@
       "title": "Git panel",
       "blurb": "Diff, commit, push, branches, stash and history in the app.",
       "synonyms": "git commit push pull branch stash diff version control",
-      "tool": "Git"
+      "tool": "Git",
+      "webInstead": "On the web, use Share or Export to move a collection. For version control, keep a folder workspace in the desktop app or the CLI."
     },
     "gitFieldDiff": {
       "title": "Field-level diffs",

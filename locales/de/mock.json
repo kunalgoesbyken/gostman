@@ -2,8 +2,6 @@
   "mock": {
     "title": "Mock-Server",
     "running": "Läuft",
-    "webNotice": "Der Mock-Server braucht die Desktop-App. Beispiele, die Sie hier speichern, bleiben bei Ihren Anfragen erhalten und sind in Exporten enthalten.",
-    "desktopOnly": "In der Desktop-App verfügbar",
     "noRoutesTitle": "Keine Anfragen zum Ausliefern",
     "noRoutesHint": "Speichern Sie eine Anfrage und dann eine ihrer Antworten als Beispiel, oder importieren Sie eine OpenAPI-Spezifikation.",
     "noMatch": "Keine Route",

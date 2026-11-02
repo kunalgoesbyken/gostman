@@ -2,8 +2,6 @@
   "capture": {
     "title": "Capture traffic",
     "running": "Running",
-    "desktopOnly": "Available in the desktop app",
-    "webNotice": "Capturing traffic needs the desktop app, which can listen on a local port and forward to your API.",
     "limitation": "Point your app at the local address instead of the API. An app whose base URL cannot be changed is not captured.",
     "upstreamPlaceholder": "API to forward to, for example https://api.example.com",
     "upstreamLabel": "API to forward to",
