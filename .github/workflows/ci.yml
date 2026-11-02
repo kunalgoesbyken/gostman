@@ -99,6 +99,10 @@ jobs:
         working-directory: ./gostman-gui/frontend
         run: npm run i18n:check
 
+      - name: Check feature catalog
+        working-directory: ./gostman-gui/frontend
+        run: npm run catalog:check
+
       # Desktop target: index.html -> src/main.jsx -> App.jsx (Wails bindings).
       - name: Build desktop frontend (dist/)
         working-directory: ./gostman-gui/frontend
