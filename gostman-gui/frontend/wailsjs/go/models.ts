@@ -2493,6 +2493,7 @@ export namespace main {
 	    hasCommits: boolean;
 	    changes: gitutil.Change[];
 	    remotes: gitutil.Remote[];
+	    githubCli: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new GitState(source);
@@ -2517,6 +2518,7 @@ export namespace main {
 	        this.hasCommits = source["hasCommits"];
 	        this.changes = this.convertValues(source["changes"], gitutil.Change);
 	        this.remotes = this.convertValues(source["remotes"], gitutil.Remote);
+	        this.githubCli = source["githubCli"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

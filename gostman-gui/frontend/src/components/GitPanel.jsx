@@ -184,7 +184,7 @@ function TabBody({ tab, store, actions }) {
   if (tab === TAB_BRANCHES) return <BranchesTab branches={store.branches} isReadOnly={isReadOnly} actions={actions} />
   if (tab === TAB_STASHES) return <StashesTab stashes={store.stashes} isReadOnly={isReadOnly} actions={actions} />
   if (tab === TAB_HISTORY) return <HistoryTab key={store.history.path} history={store.history} isReadOnly={isReadOnly} actions={actions} />
-  if (tab === TAB_REMOTES) return <RemotesTab remotes={state.remotes} isReadOnly={isReadOnly} isRestricted={state.restricted} actions={actions} />
+  if (tab === TAB_REMOTES) return <RemotesTab remotes={state.remotes} isReadOnly={isReadOnly} isRestricted={state.restricted} actions={actions} root={state.root} hasCli={state.githubCli} />
   return <ChangesTab state={state} selection={store.selection} diff={store.diff} conflict={store.conflict} isBusy={isBusy} actions={actions} commitMessage={store.commitMessage} />
 }
 

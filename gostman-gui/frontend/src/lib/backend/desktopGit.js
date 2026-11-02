@@ -6,6 +6,7 @@ import {
   GitCommit,
   GitConflict,
   GitCreateBranch,
+  GitCreateRepository,
   GitDeleteBranch,
   GitDiff,
   GitDiscard,
@@ -58,4 +59,5 @@ export const desktopGit = {
   addRemote: (name, url) => GitAddRemote(name, url),
   setRemoteUrl: (name, url) => GitSetRemoteURL(name, url),
   openPullRequest: () => GitOpenPullRequest(),
+  createRepository: (name, isPrivate) => GitCreateRepository(name, isPrivate),
 }

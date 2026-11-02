@@ -106,6 +106,8 @@ export function GitConflict(arg1:string):Promise<gitutil.Conflict>;
 
 export function GitCreateBranch(arg1:string):Promise<void>;
 
+export function GitCreateRepository(arg1:string,arg2:boolean):Promise<string>;
+
 export function GitDeleteBranch(arg1:string,arg2:boolean):Promise<void>;
 
 export function GitDiff(arg1:string,arg2:boolean,arg3:boolean):Promise<gitutil.Diff>;

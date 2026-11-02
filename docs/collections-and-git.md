@@ -247,6 +247,8 @@ With no file path, each commit has a graph on its left: one lane per line of dev
 
 ### Remotes
 
+While the repository has no remote, **Create GitHub repository** sits above the list: it takes a repository name (the folder name by default, or `owner/name`) and **Private** or **Public**. When the GitHub command line `gh` is installed and signed in, Gostman runs `gh repo create` for you without a shell and adds the new repository as `origin`; otherwise it opens `github.com/new` in your browser with the name and visibility filled in, and you add the address with **Add remote** afterwards. Gostman never asks for or stores a GitHub token; sign-in stays with `gh` or your browser. Push once the remote exists.
+
 **Add remote** takes a name (default `origin`) and an address. Each remote has a **Change** button for its address. **Create pull request in browser** appears once a remote exists.
 
 ### Merges and conflict resolution

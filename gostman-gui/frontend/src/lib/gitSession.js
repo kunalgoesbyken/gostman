@@ -198,5 +198,6 @@ export function createGitActions(backend) {
     addRemote: (name, url) => perform(() => backend.addRemote(name, url)),
     setRemoteUrl: (name, url) => perform(() => backend.setRemoteUrl(name, url)),
     openPullRequest: () => perform(() => backend.openPullRequest()),
+    createRepository: (name, isPrivate) => perform(async () => (await backend.createRepository(name, isPrivate)) || GIT_TEXT.createRepositoryOpened),
   }
 }

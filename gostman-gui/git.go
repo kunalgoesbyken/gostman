@@ -34,6 +34,7 @@ type GitState struct {
 	HasCommits  bool             `json:"hasCommits"`
 	Changes     []gitutil.Change `json:"changes"`
 	Remotes     []gitutil.Remote `json:"remotes"`
+	GitHubCLI   bool             `json:"githubCli"`
 }
 
 func gitRoot() (string, bool, error) {
@@ -71,7 +72,7 @@ func reloadFiles() error {
 }
 
 func (a *App) GitState() (GitState, error) {
-	state := GitState{Installed: gitutil.Installed(), InstallHint: gitutil.ErrNotInstalled.Error(), Changes: []gitutil.Change{}, Remotes: []gitutil.Remote{}}
+	state := GitState{GitHubCLI: gitutil.GitHubCLIInstalled(), Installed: gitutil.Installed(), InstallHint: gitutil.ErrNotInstalled.Error(), Changes: []gitutil.Change{}, Remotes: []gitutil.Remote{}}
 	root, restricted, err := gitRoot()
 	if err != nil {
 		return state, nil
@@ -356,6 +357,22 @@ func (a *App) GitSetRemoteURL(name string, url string) error {
 		return err
 	}
 	return repo.SetRemoteURL(name, url)
+}
+
+func (a *App) GitCreateRepository(name string, private bool) (string, error) {
+	repo, err := currentRepo()
+	if err != nil {
+		return "", err
+	}
+	name = strings.TrimSpace(name)
+	if err := gitutil.ValidRepositoryName(name); err != nil {
+		return "", err
+	}
+	if gitutil.GitHubCLIInstalled() {
+		return repo.CreateGitHubRepository(name, private)
+	}
+	wailsruntime.BrowserOpenURL(a.ctx, gitutil.NewRepositoryURL(name, private))
+	return "", nil
 }
 
 func (a *App) GitOpenPullRequest() error {

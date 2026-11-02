@@ -174,6 +174,10 @@ export function GitConflict(arg1) {
   return window['go']['main']['App']['GitConflict'](arg1);
 }
 
+export function GitCreateRepository(arg1, arg2) {
+  return window['go']['main']['App']['GitCreateRepository'](arg1, arg2);
+}
+
 export function GitCreateBranch(arg1) {
   return window['go']['main']['App']['GitCreateBranch'](arg1);
 }

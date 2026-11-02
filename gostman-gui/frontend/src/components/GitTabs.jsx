@@ -188,7 +188,32 @@ function RemoteRow({ remote, isReadOnly, onChange }) {
   )
 }
 
-export function RemotesTab({ remotes, isReadOnly, isRestricted, actions }) {
+function CreateRepositoryForm({ root, hasCli, isReadOnly, onCreate }) {
+  const [name, setName] = useState(() => root.split(/[\\/]/).filter(Boolean).pop() ?? "")
+  const [isPrivate, setIsPrivate] = useState(true)
+  const submit = (event) => {
+    event.preventDefault()
+    onCreate(name.trim(), isPrivate)
+  }
+  return (
+    <form onSubmit={submit} className="shrink-0 space-y-2 border-b border-border px-3 py-2">
+      <div className="flex items-center gap-2">
+        <Input aria-label={TEXT.createRepositoryName} value={name} onChange={(event) => setName(event.target.value)} disabled={isReadOnly} />
+        <Select aria-label={TEXT.createRepositoryVisibility} className="w-32 shrink-0" value={isPrivate ? "private" : "public"} onChange={(event) => setIsPrivate(event.target.value === "private")} disabled={isReadOnly}>
+          <option value="private">{TEXT.visibilityPrivate}</option>
+          <option value="public">{TEXT.visibilityPublic}</option>
+        </Select>
+        <Button type="submit" size="sm" disabled={isReadOnly || !name.trim()}>
+          <BrandIcon brand="github" fallback={Plus} />
+          {TEXT.createRepository}
+        </Button>
+      </div>
+      <p className="text-xs text-muted-foreground">{hasCli ? TEXT.createRepositoryWithCli : TEXT.createRepositoryInBrowser}</p>
+    </form>
+  )
+}
+
+export function RemotesTab({ remotes, isReadOnly, isRestricted, actions, root, hasCli }) {
   const [name, setName] = useState("origin")
   const [url, setUrl] = useState("")
   const submit = (event) => {
@@ -207,6 +232,7 @@ export function RemotesTab({ remotes, isReadOnly, isRestricted, actions }) {
         </Button>
       </form>
       {isRestricted && <Notice tone="muted">{TEXT.readOnly}</Notice>}
+      {remotes.length === 0 && <CreateRepositoryForm root={root} hasCli={hasCli} isReadOnly={isReadOnly} onCreate={actions.createRepository} />}
       <div className="min-h-0 flex-1 overflow-y-auto">
         {remotes.length === 0 && <EmptyState icon={ExternalLink} title={TEXT.noRemotes} />}
         {remotes.map((remote) => (
