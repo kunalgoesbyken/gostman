@@ -4,6 +4,8 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.10.2] - 2026-11-02
+
 ### Fixed
 
 - The status-bar resize grip also shows when the window uses the system title bar (Windows and Linux), so there is always a visible place to resize from.
