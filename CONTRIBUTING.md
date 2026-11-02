@@ -42,6 +42,10 @@ cd gostman-gui/frontend && npm run i18n:check && npm run build && npm run build:
 go generate ./locales && git diff --exit-code -- locales     # repository root
 ```
 
+## Contributor License Agreement
+
+Every contributor signs the [CLA](CLA.md) once. When you open your first pull request, a bot comments with the sentence to reply with; the check passes after you do. You keep the copyright in your work.
+
 ## Translations
 
 Interface text lives in `locales/en/` and is translated in `locales/<language>/`. Do not hard-code English in components: add it to the text module and its JSON file. Run `npm run i18n:check` in `gostman-gui/frontend` after editing any file in `locales/`, and `go generate ./locales` after changing a Go message. To request a language or report a translation, use [issue #15](https://github.com/kunalgoesbyken/gostman/issues/15). [docs/translating.md](docs/translating.md) has the details.
