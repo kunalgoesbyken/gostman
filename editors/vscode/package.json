@@ -40,7 +40,7 @@
           "type": "string",
           "default": "gostman",
           "markdownDescription": "Command that starts the Gostman CLI. Use a full path when `gostman` is not on the PATH.",
-          "scope": "machine-overridable"
+          "scope": "machine"
         },
         "gostman.environment": {
           "type": "string",
