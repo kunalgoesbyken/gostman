@@ -21,55 +21,71 @@ const (
 	FormatGostman  = "gostman"
 	FormatHTTP     = "http"
 
-	kindInsomnia            = "insomnia"
-	kindHAR                 = "har"
-	kindWSDL                = "wsdl"
-	kindSchema              = "schema"
-	kindPostmanCollection   = "postman-collection"
-	kindPostmanEnvironment  = "postman-environment"
-	kindPostmanDump         = "postman-dump"
-	kindOpenAPI             = "openapi"
-	kindBruno               = "bruno"
-	kindBrunoConfig         = "bruno-config"
-	kindOpenCollection      = "opencollection"
-	kindOpenItem            = "opencollection-item"
-	kindOpenEnvironment     = "opencollection-environment"
-	kindBrunoEnvironment    = "bruno-environment"
-	kindGostman             = "gostman"
-	kindHTTP                = "http"
-	kindHTTPEnvironment     = "http-environment"
-	kindUnknown             = ""
-	postmanSchemaMarker     = "getpostman.com/json/collection"
-	insomniaExportType      = "export"
-	wsdlNamespace           = "http://schemas.xmlsoap.org/wsdl/"
-	wsdl2Namespace          = "http://www.w3.org/ns/wsdl"
-	schemaNamespace         = "http://www.w3.org/2001/XMLSchema"
-	brunoCollectionFile     = "collection.bru"
-	brunoFolderFile         = "folder.bru"
-	brunoEnvironmentsFolder = "environments"
-	brunoExtension          = ".bru"
+	kindInsomnia              = "insomnia"
+	kindHAR                   = "har"
+	kindWSDL                  = "wsdl"
+	kindSchema                = "schema"
+	kindPostmanCollection     = "postman-collection"
+	kindPostmanEnvironment    = "postman-environment"
+	kindPostmanDump           = "postman-dump"
+	kindOpenAPI               = "openapi"
+	kindBruno                 = "bruno"
+	kindBrunoConfig           = "bruno-config"
+	kindOpenCollection        = "opencollection"
+	kindOpenItem              = "opencollection-item"
+	kindOpenEnvironment       = "opencollection-environment"
+	kindBrunoEnvironment      = "bruno-environment"
+	kindGostman               = "gostman"
+	kindHTTP                  = "http"
+	kindHTTPEnvironment       = "http-environment"
+	kindHoppscotch            = "hoppscotch"
+	kindHoppscotchEnvironment = "hoppscotch-environment"
+	kindThunder               = "thunder"
+	kindThunderEnvironment    = "thunder-environment"
+	kindHTTPie                = "httpie"
+	kindHurl                  = "hurl"
+	kindRAML                  = "raml"
+	kindBlueprint             = "blueprint"
+	kindUnknown               = ""
+	postmanSchemaMarker       = "getpostman.com/json/collection"
+	insomniaExportType        = "export"
+	wsdlNamespace             = "http://schemas.xmlsoap.org/wsdl/"
+	wsdl2Namespace            = "http://www.w3.org/ns/wsdl"
+	schemaNamespace           = "http://www.w3.org/2001/XMLSchema"
+	brunoCollectionFile       = "collection.bru"
+	brunoFolderFile           = "folder.bru"
+	brunoEnvironmentsFolder   = "environments"
+	brunoExtension            = ".bru"
 )
 
-var importableExtensions = map[string]bool{".json": true, ".yml": true, ".yaml": true, ".xml": true, ".wsdl": true, ".xsd": true, ".har": true, ".txt": true, httpExtension: true, restExtension: true}
+var importableExtensions = map[string]bool{hurlExtension: true, ".raml": true, ".apib": true, ".md": true, ".json": true, ".yml": true, ".yaml": true, ".xml": true, ".wsdl": true, ".xsd": true, ".har": true, ".txt": true, httpExtension: true, restExtension: true}
 
 var kindFormats = map[string]string{
-	kindInsomnia:           FormatInsomnia,
-	kindHAR:                FormatHAR,
-	kindWSDL:               FormatWSDL,
-	kindSchema:             FormatWSDL,
-	kindPostmanCollection:  FormatPostman,
-	kindPostmanEnvironment: FormatPostman,
-	kindPostmanDump:        FormatPostman,
-	kindOpenAPI:            FormatOpenAPI,
-	kindBruno:              FormatBruno,
-	kindBrunoConfig:        FormatBruno,
-	kindOpenCollection:     FormatBruno,
-	kindOpenItem:           FormatBruno,
-	kindOpenEnvironment:    FormatBruno,
-	kindBrunoEnvironment:   FormatBruno,
-	kindGostman:            FormatGostman,
-	kindHTTP:               FormatHTTP,
-	kindHTTPEnvironment:    FormatHTTP,
+	kindInsomnia:              FormatInsomnia,
+	kindHAR:                   FormatHAR,
+	kindWSDL:                  FormatWSDL,
+	kindSchema:                FormatWSDL,
+	kindPostmanCollection:     FormatPostman,
+	kindPostmanEnvironment:    FormatPostman,
+	kindPostmanDump:           FormatPostman,
+	kindOpenAPI:               FormatOpenAPI,
+	kindBruno:                 FormatBruno,
+	kindBrunoConfig:           FormatBruno,
+	kindOpenCollection:        FormatBruno,
+	kindOpenItem:              FormatBruno,
+	kindOpenEnvironment:       FormatBruno,
+	kindBrunoEnvironment:      FormatBruno,
+	kindGostman:               FormatGostman,
+	kindHTTP:                  FormatHTTP,
+	kindHTTPEnvironment:       FormatHTTP,
+	kindHoppscotch:            FormatHoppscotch,
+	kindHoppscotchEnvironment: FormatHoppscotch,
+	kindThunder:               FormatThunder,
+	kindThunderEnvironment:    FormatThunder,
+	kindHTTPie:                FormatHTTPie,
+	kindHurl:                  FormatHurl,
+	kindRAML:                  FormatRAML,
+	kindBlueprint:             FormatBlueprint,
 }
 
 type document struct {
@@ -110,6 +126,12 @@ func classify(file File) document {
 		doc.err = errEmpty
 	case isHTTPFileName(file.Name):
 		doc.kind = kindHTTP
+	case path.Ext(strings.ToLower(file.Name)) == hurlExtension:
+		doc.kind = kindHurl
+	case looksLikeRAML(trimmed):
+		doc.kind = kindRAML
+	case looksLikeBlueprint(file.Name, trimmed):
+		doc.kind = kindBlueprint
 	case strings.HasPrefix(trimmed, "<"):
 		doc.kind = classifyXML(trimmed)
 	case path.Ext(strings.ToLower(file.Name)) == brunoExtension || looksLikeBru(trimmed):

@@ -37,7 +37,8 @@ var transferSubjects = map[string]string{"import": "file or folder to import", "
 
 var importFormats = []string{
 	importer.FormatAuto, importer.FormatInsomnia, importer.FormatHAR, importer.FormatWSDL, importer.FormatBruno,
-	importer.FormatPostman, importer.FormatOpenAPI, importer.FormatGostman, importer.FormatHTTP,
+	importer.FormatPostman, importer.FormatOpenAPI, importer.FormatGostman, importer.FormatHTTP, importer.FormatHoppscotch,
+	importer.FormatThunder, importer.FormatHTTPie, importer.FormatHurl, importer.FormatRAML, importer.FormatBlueprint,
 }
 
 func checkImportFormat(format string) error {

@@ -118,11 +118,13 @@ func (c *collector) accept(files []File, format string) []document {
 }
 
 func (c *collector) importDocuments(ctx context.Context, docs []document, options Options, config Config) {
-	var bruno, open, supporting, httpDocs []document
+	var bruno, open, supporting, httpDocs, hurlDocs []document
 	for _, doc := range docs {
 		switch {
 		case doc.kind == kindBruno || doc.kind == kindBrunoConfig:
 			bruno = append(bruno, doc)
+		case doc.kind == kindHurl:
+			hurlDocs = append(hurlDocs, doc)
 		case doc.kind == kindHTTP || doc.kind == kindHTTPEnvironment:
 			httpDocs = append(httpDocs, doc)
 		case doc.kind == kindOpenItem || doc.kind == kindOpenEnvironment || doc.kind == kindOpenCollection && !bundled(doc):
@@ -143,6 +145,20 @@ func (c *collector) importDocuments(ctx context.Context, docs []document, option
 			c.readHAR(doc, options)
 		case kindWSDL:
 			c.readWSDL(doc, supporting)
+		case kindHoppscotch:
+			c.readHoppscotch(doc)
+		case kindHoppscotchEnvironment:
+			c.readHoppscotchEnvironments(doc)
+		case kindThunder:
+			c.readThunder(doc)
+		case kindThunderEnvironment:
+			c.readThunderEnvironment(doc)
+		case kindHTTPie:
+			c.readHTTPie(doc)
+		case kindRAML:
+			c.readRAML(doc)
+		case kindBlueprint:
+			c.readBlueprint(doc)
 		case kindPostmanCollection:
 			c.readPostmanCollection(doc)
 		case kindPostmanEnvironment:
@@ -166,5 +182,8 @@ func (c *collector) importDocuments(ctx context.Context, docs []document, option
 	}
 	if len(httpDocs) > 0 {
 		c.readHTTP(httpDocs)
+	}
+	if len(hurlDocs) > 0 {
+		c.readHurl(hurlDocs)
 	}
 }

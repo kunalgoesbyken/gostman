@@ -178,7 +178,7 @@ func (c *collector) flagScripts(name, pre, post string) {
 	}
 }
 
-var foreignRoots = setOf(postmanRoot, brunoRoot, insomniaRoot)
+var foreignRoots = setOf(postmanRoot, brunoRoot, insomniaRoot, "pw")
 
 func callsForeignAPI(script string) bool {
 	read, ok := readScript(script)

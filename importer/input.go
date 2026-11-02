@@ -28,7 +28,7 @@ var (
 	errBinary     = errors.New("the content is binary, not text")
 	errEmpty      = errors.New("the content is empty")
 
-	folderExtensions = map[string]bool{".bru": true, ".json": true, ".yml": true, ".yaml": true, ".xml": true, ".wsdl": true, ".xsd": true, ".har": true, httpExtension: true, restExtension: true, protoExtension: true}
+	folderExtensions = map[string]bool{".bru": true, ".json": true, ".yml": true, ".yaml": true, ".xml": true, ".wsdl": true, ".xsd": true, ".har": true, httpExtension: true, restExtension: true, protoExtension: true, hurlExtension: true, ".raml": true, ".apib": true}
 )
 
 type File struct {

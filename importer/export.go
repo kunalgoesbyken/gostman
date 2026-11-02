@@ -56,8 +56,10 @@ func Export(format string, collection workspace.Collection, options Options) ([]
 		files, err = exportHAR(collection)
 	case ExportHTTP:
 		files = exportHTTP(collection, options)
+	case ExportHurl:
+		files = exportHurl(collection)
 	default:
-		return nil, "", report, fmt.Errorf("unknown export format %q; choose postman, bruno, openapi, curl, har or http", format)
+		return nil, "", report, fmt.Errorf("unknown export format %q; choose postman, bruno, openapi, curl, har, http or hurl", format)
 	}
 	if err != nil {
 		return nil, "", report, err

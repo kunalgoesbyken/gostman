@@ -11,13 +11,19 @@
     "postman": "Postman file",
     "openapi": "OpenAPI spec",
     "gostman": "Gostman export",
-    "http": ".http file"
+    "http": ".http file",
+    "hoppscotch": "Hoppscotch collection",
+    "thunder": "Thunder Client collection",
+    "httpie": "HTTPie collection",
+    "hurl": "Hurl file",
+    "raml": "RAML spec",
+    "blueprint": "API Blueprint"
   },
   "import": {
     "chooseFiles": "Choose files",
     "importButton": "Import",
     "chooseFolder": "Choose folder",
-    "dropHint": "Drop files, a folder or a .zip here, or paste content below. Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI and Swagger, .http files (REST Client, JetBrains HTTP Client), Gostman exports and share links.",
+    "dropHint": "Drop files, a folder or a .zip here, or paste content below. Insomnia, HAR, WSDL, Bruno, Postman, Hoppscotch, Thunder Client, HTTPie, OpenAPI and Swagger, RAML, API Blueprint, .http files (REST Client, JetBrains HTTP Client), Hurl files, Gostman exports and share links.",
     "formatLabel": "Format",
     "pastePlaceholder": "Paste a collection, a spec, a capture or a share link",
     "pasteLabel": "Content to import",
@@ -95,6 +101,10 @@
       "http": {
         "label": ".http files",
         "description": "Requests for VS Code REST Client and JetBrains HTTP Client, one file per folder, with http-client.env.json environments"
+      },
+      "hurl": {
+        "label": "Hurl files",
+        "description": "One .hurl file per folder, with checks as [Asserts] and extract rules as [Captures]"
       }
     },
     "docs": {

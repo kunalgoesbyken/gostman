@@ -103,7 +103,7 @@ Open the same folder in the desktop app with **Open folder** to see the requests
 - **Sharing:** encrypted share links that never upload anything, and Open in Gostman links.
 - **For coding agents:** `gostman mcp` lets Claude Code, Codex and Cursor call your API through the collection without seeing your secrets.
 - **AI assistant** (optional, bring your own key): generate requests, checks and scripts, and explain errors.
-- **Import and export:** Postman, OpenAPI, Insomnia, HAR, WSDL, Bruno, .http files (VS Code REST Client, JetBrains HTTP Client) and curl in; Postman, OpenAPI, HAR, Bruno, .http files, a curl script, Markdown, an HTML docs page and a Gostman backup out.
+- **Import and export:** Postman, OpenAPI, Insomnia, HAR, WSDL, Bruno, Hoppscotch, Thunder Client, HTTPie, Hurl, RAML, API Blueprint, .http files (VS Code REST Client, JetBrains HTTP Client) and curl in; Postman, OpenAPI, HAR, Bruno, .http files, Hurl files, a curl script, Markdown, an HTML docs page and a Gostman backup out.
 - **Code generation** for cURL, JavaScript, Python, Go, Java, Kotlin, C#, PHP, Ruby, Swift, Rust, Dart and PowerShell.
 
 ## Install

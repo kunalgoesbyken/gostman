@@ -406,13 +406,14 @@ init
 
 import
   Create a workspace from an Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI,
-  Gostman export or .http file or folder. Imports add data only; scripts and
+  Hoppscotch, Thunder Client, HTTPie, Hurl, RAML, API Blueprint, Gostman
+  export or .http file or folder. Imports add data only; scripts and
   OAuth settings are kept and reported, tokens and cookie values are never
   carried over.
 
   --format <name>       auto, insomnia, har, wsdl, bruno, postman, openapi,
-                        gostman or http (default auto: detected from the
-                        content)
+                        gostman, http, hoppscotch, thunder, httpie, hurl, raml
+                        or blueprint (default auto: detected from the content)
   --out <folder>        workspace folder to create (required)
   --skip-static         HAR: leave out images, fonts, styles and scripts
 
@@ -420,9 +421,10 @@ export
   Write a workspace as postman (a Collection v2.1 file with the collection
   variables), bruno (a folder of .bru files), openapi, curl (a shell script;
   credentials become environment variable placeholders, listed at the top),
-  har or http (.http files for VS Code REST Client and JetBrains HTTP Client).
+  har, http (.http files for VS Code REST Client and JetBrains HTTP Client)
+  or hurl (one .hurl file per folder).
 
-  --format <name>       postman, bruno, openapi, curl, har or http
+  --format <name>       postman, bruno, openapi, curl, har, http or hurl
   --out <path>          file, or folder when the export has several files
                         (required)
   --include-secrets     write literal credentials; by default passwords, tokens

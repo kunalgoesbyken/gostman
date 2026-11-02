@@ -94,6 +94,7 @@ const backendFormats = () => [
   { value: "curl", ...EXPORT_TEXT.formats.curl, fileName: "requests.sh", mime: "text/x-shellscript", backend: "curl" },
   { value: "har", ...EXPORT_TEXT.formats.har, fileName: "requests.har", mime: JSON_MIME, backend: "har" },
   { value: "http", ...EXPORT_TEXT.formats.http, fileName: "requests.http", mime: "text/plain", backend: "http" },
+  { value: "hurl", ...EXPORT_TEXT.formats.hurl, fileName: "requests.hurl", mime: "text/plain", backend: "hurl" },
 ]
 
 const NEWLINE = String.fromCharCode(10)

@@ -21,7 +21,7 @@ const PARSE_DELAY_MS = 300
 const AUTO_FORMAT = "auto"
 const SPEC_FORMAT = "openapi"
 const HAR_FORMAT = "har"
-const ACCEPTED_FILES = `.zip,.json,.yaml,.yml,.xml,.wsdl,.xsd,.har,.bru,.http,.rest,.${SHARE_FILE_EXTENSION}`
+const ACCEPTED_FILES = `.zip,.json,.yaml,.yml,.xml,.wsdl,.xsd,.har,.bru,.http,.rest,.hurl,.raml,.apib,.md,.${SHARE_FILE_EXTENSION}`
 
 function useParsedImport(source, readSource, options) {
   const [state, setState] = useState({ result: null, isParsing: false })

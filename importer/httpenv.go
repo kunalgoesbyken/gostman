@@ -26,6 +26,17 @@ func classifyNamed(name string, data any) string {
 	if isHTTPClientEnvironment(name, data) {
 		return kindHTTPEnvironment
 	}
+	if kind := hoppscotchKind(data); kind != kindUnknown {
+		return kind
+	}
+	if root := object(data); root != nil {
+		if kind := thunderKind(root); kind != kindUnknown {
+			return kind
+		}
+		if httpieKind(root) {
+			return kindHTTPie
+		}
+	}
 	return classifyStructured(data)
 }
 

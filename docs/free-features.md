@@ -22,7 +22,7 @@ Gostman has no accounts, so it has no hosted collaboration, single sign-on or cl
 
 ## How the comparison was made
 
-The rows for Postman, Bruno and Insomnia come from their public pricing and documentation pages, read in October 2026. Plans change, so check the current [Postman pricing](https://www.postman.com/pricing/), [Bruno pricing](https://www.usebruno.com/pricing) and [Insomnia pricing](https://insomnia.rest/pricing) before you decide. Moving a collection over is covered in [Coming from Postman](coming-from-postman.md), [Coming from Bruno](coming-from-bruno.md) and [Coming from Insomnia](coming-from-insomnia.md).
+The rows for Postman, Bruno and Insomnia come from their public pricing and documentation pages, read in October 2026. Plans change, so check the current [Postman pricing](https://www.postman.com/pricing/), [Bruno pricing](https://www.usebruno.com/pricing) and [Insomnia pricing](https://insomnia.rest/pricing) before you decide. Hoppscotch, Thunder Client, HTTPie, Hurl, RAML and API Blueprint files import too; see [Other tools](import-export-and-specs.md#other-tools). Moving a collection over is covered in [Coming from Postman](coming-from-postman.md), [Coming from Bruno](coming-from-bruno.md) and [Coming from Insomnia](coming-from-insomnia.md).
 
 ## Compare feature by feature
 

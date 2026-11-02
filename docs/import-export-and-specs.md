@@ -30,6 +30,12 @@ Gostman reads the content after a short pause and shows a summary before anythin
 | WSDL | WSDL services |
 | Bruno | Bruno collections in `.bru` or YAML (OpenCollection), as a folder, a `.zip` or one exported file |
 | .http files | VS Code REST Client and JetBrains HTTP Client `.http` and `.rest` files, with their environments. See [.http files](#http-files) |
+| Hoppscotch | Collections (a JSON array of collections, nested folders) and environments. `<<name>>` becomes `{{name}}`. See [Other tools](#other-tools) |
+| Thunder Client | Collection and environment exports (`thunder-collection_*.json`) |
+| HTTPie | HTTPie for Web collection exports |
+| Hurl | `.hurl` files: one folder per file, `[Asserts]` become assertion rows and `[Captures]` become extract rules |
+| RAML | RAML 1.0 files, built from the resources and their methods |
+| API Blueprint | `.apib` files and Markdown with `FORMAT: 1A`, built from the actions |
 | Gostman | Gostman exports and share links |
 
 Request tags are carried over from Bruno (`tags` in a `.bru` file's `meta` block, or `info.tags` in OpenCollection YAML) and from the `tags` of an OpenAPI operation, which also still pick the folder. Postman, Insomnia, HAR and WSDL files have no request tags.
@@ -40,11 +46,23 @@ When you pick HAR, or the files you read include a HAR capture, a **Leave out im
 
 ### Files and folders
 
-- The file picker accepts `.zip`, `.json`, `.yaml`, `.yml`, `.xml`, `.wsdl`, `.xsd`, `.har`, `.bru`, `.http`, `.rest` and Gostman share files.
+- The file picker accepts `.zip`, `.json`, `.yaml`, `.yml`, `.xml`, `.wsdl`, `.xsd`, `.har`, `.bru`, `.http`, `.rest`, `.hurl`, `.raml`, `.apib`, `.md` and Gostman share files.
 - A folder or archive is searched for importable files with those extensions. Hidden paths (any segment starting with a dot) and `node_modules` are ignored.
 - Up to 5,000 files are read. Each file and the files together are limited to 10 MB, and the dialog reports the limit when you go over it.
 - Files must be text. A binary file is refused with a message naming it.
 - With several files, the summary lists each file with its detected format and a total line.
+
+### Other tools
+
+These importers read the file as it is and report what they leave out in the import summary. Like every import they add data only: auth tokens are never carried over, TLS verification is never turned off, and scripts are kept and reported.
+
+- **Hoppscotch:** `pw.*` scripts are kept as written and need rewriting; collection headers and auth become folder settings, and `inherit` auth is inherited. GraphQL collections and file bodies are not imported.
+- **Thunder Client:** the tests `res-code`, `res-body`, `res-header` and `json-query` become assertion rows; other test types are left out and named. OAuth 2 and other unsupported auth types are named in a warning.
+- **HTTPie:** requests, nested collections, basic, digest, bearer and API key auth, JSON, text, form and GraphQL bodies.
+- **Hurl:** `status`, `header`, `jsonpath`, `body`, `duration` and `url` queries with the common predicates (`==`, `!=`, `<`, `>`, `contains`, `startsWith`, `endsWith`, `matches`, `exists`, `isEmpty`, `count`) become assertion rows, and the `HTTP 200` line becomes a status check. `jsonpath`, `header`, `cookie` and `status` captures become extract rules with the session scope. `xpath`, `regex`, `bytes`, `sha256` and other filters are left out and named. Requests keep Hurl's rule of not following redirects unless `[Options]` has `location: true`; `insecure` and other options are not imported. `{{newUuid}}` becomes `{{$guid}}`.
+- **RAML 1.0** and **API Blueprint:** the base URI or `HOST` becomes the `baseUrl` collection variable. Query parameters, headers, example bodies and basic auth are kept. Types, traits, resource types, response definitions and `!include` files are not imported.
+
+Paw files and RapidAPI for Mac are not read directly; export them to Postman, HAR or curl first. A Restfox export in Insomnia v4 form is read as Insomnia.
 
 ### .http files
 
@@ -136,6 +154,7 @@ The **Export** tab previews the content, shows how many requests, folders and en
 | curl script | One curl command per request. Credentials become environment variable placeholders, and the variables to set are listed at the top. A command whose address has `[`, `]`, `{` or `}` outside `{{variables}}`, such as `?ids[0]=1`, gets `--globoff` so curl sends it as written |
 | HAR | HTTP Archive 1.2 with the requests and no responses |
 | .http files | Requests for VS Code REST Client and JetBrains HTTP Client, one file per folder, with environments in `http-client.env.json` |
+| Hurl files | One `.hurl` file per folder. Assertion rows become `[Asserts]` after `HTTP *`, extract rules become `[Captures]`, forms and multipart bodies use `[Form]` and `[MultipartFormData]`, and a request that follows redirects gets `location: true`. Scripts, environments and rows Hurl cannot express are left out, with a comment for each left-out row |
 
 Gostman, OpenAPI and Bruno exports keep request tags. Bruno only reads tags made of letters, digits, `_` and `-`, so other tags, such as ones with spaces, are left out of a Bruno export.
 

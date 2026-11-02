@@ -85,6 +85,12 @@ export const IMPORT_FORMATS = [
   { value: 'bruno', label: 'Bruno' },
   { value: 'har', label: 'HAR' },
   { value: 'http', get label() { return text.importFormats.http } },
+  { value: 'hoppscotch', label: 'Hoppscotch' },
+  { value: 'thunder', label: 'Thunder Client' },
+  { value: 'httpie', label: 'HTTPie' },
+  { value: 'hurl', label: 'Hurl' },
+  { value: 'raml', label: 'RAML' },
+  { value: 'blueprint', label: 'API Blueprint' },
   { value: 'wsdl', label: 'WSDL' },
   { value: 'gostman', label: 'Gostman' },
 ]
