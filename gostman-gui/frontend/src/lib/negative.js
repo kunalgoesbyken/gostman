@@ -1,9 +1,11 @@
 import { isPlainObject, parseJSON } from './dataUtils'
+import { NEGATIVE_TEXT } from './negativeText'
 
 const AUTH_NONE = 'none'
 const MAX_VARIANTS_PER_REQUEST = 40
 const OVERSIZED_BYTES = 1024 * 1024
 const LONG_TEXT = 10000
+const DEFAULT_SEVERITY = 'medium'
 const REJECT = 'reject'
 const SURVIVE = 'survive'
 const GARBAGE_CREDENTIAL = 'gostman-invalid-credential'
@@ -72,8 +74,8 @@ function authVariants(request, inherited) {
     ? withRows({ ...request }, rows.map((row) => (isAuthRow(row) ? { ...row, value: `Bearer ${GARBAGE_CREDENTIAL}` } : row)))
     : { ...request, auth: { ...request.auth, token: GARBAGE_CREDENTIAL, password: GARBAGE_CREDENTIAL, value: GARBAGE_CREDENTIAL } }
   return [
-    { kind: 'auth-missing', label: 'no credentials', expect: REJECT, request: unauthenticated },
-    { kind: 'auth-invalid', label: 'invalid credentials', expect: REJECT, request: garbled },
+    { kind: 'auth-missing', label: NEGATIVE_TEXT.variant.credentialsMissing, expect: REJECT, request: unauthenticated },
+    { kind: 'auth-invalid', label: NEGATIVE_TEXT.variant.credentialsInvalid, expect: REJECT, request: garbled },
   ]
 }
 
@@ -86,20 +88,20 @@ function bodyVariants(request) {
   const parsed = parseJSON(request.body, undefined)
   if (!isPlainObject(parsed)) return []
   const withBody = (body) => ({ ...request, body: typeof body === 'string' ? body : JSON.stringify(body) })
-  const variants = [{ kind: 'body-malformed', label: 'truncated JSON', expect: REJECT, request: withBody(request.body.slice(0, Math.max(1, Math.floor(request.body.length / 2)))) }]
+  const variants = [{ kind: 'body-malformed', label: NEGATIVE_TEXT.variant.bodyTruncated, expect: REJECT, request: withBody(request.body.slice(0, Math.max(1, Math.floor(request.body.length / 2)))) }]
   for (const [key, value] of Object.entries(parsed)) {
     const replace = (replacement) => withBody({ ...parsed, [key]: replacement })
     const rest = Object.fromEntries(Object.entries(parsed).filter(([other]) => other !== key))
-    variants.push({ kind: 'body-missing-field', label: `field ${key} removed`, expect: REJECT, request: withBody(rest) })
-    if (value !== null && typeof value !== 'object') variants.push({ kind: 'body-wrong-type', label: `field ${key} with the wrong type`, expect: REJECT, request: replace(wrongType(value)) })
-    if (typeof value === 'number') BOUNDARY_NUMBERS.forEach((number) => variants.push({ kind: 'boundary', label: `field ${key} = ${number}`, expect: SURVIVE, request: replace(number) }))
+    variants.push({ kind: 'body-missing-field', label: NEGATIVE_TEXT.variant.fieldRemoved({ name: key }), expect: REJECT, request: withBody(rest) })
+    if (value !== null && typeof value !== 'object') variants.push({ kind: 'body-wrong-type', label: NEGATIVE_TEXT.variant.fieldWrongType({ name: key }), expect: REJECT, request: replace(wrongType(value)) })
+    if (typeof value === 'number') BOUNDARY_NUMBERS.forEach((number) => variants.push({ kind: 'boundary', label: NEGATIVE_TEXT.variant.fieldValue({ name: key, value: String(number) }), expect: SURVIVE, request: replace(number) }))
     if (typeof value === 'string') {
-      variants.push({ kind: 'boundary', label: `field ${key} empty`, expect: SURVIVE, request: replace('') })
-      variants.push({ kind: 'boundary', label: `field ${key} with ${LONG_TEXT} characters`, expect: SURVIVE, request: replace('A'.repeat(LONG_TEXT)) })
-      INJECTIONS.forEach(({ id, payload }) => variants.push({ kind: `injection-${id}`, label: `field ${key} with a ${id} payload`, expect: SURVIVE, payload, request: replace(payload) }))
+      variants.push({ kind: 'boundary', label: NEGATIVE_TEXT.variant.fieldEmpty({ name: key }), expect: SURVIVE, request: replace('') })
+      variants.push({ kind: 'boundary', label: NEGATIVE_TEXT.variant.fieldLong({ name: key, count: LONG_TEXT }), expect: SURVIVE, request: replace('A'.repeat(LONG_TEXT)) })
+      INJECTIONS.forEach(({ id, payload }) => variants.push({ kind: `injection-${id}`, label: NEGATIVE_TEXT.variant.injectionField({ name: key, injection: NEGATIVE_TEXT.injection[id] }), expect: SURVIVE, payload, request: replace(payload) }))
     }
   }
-  variants.push({ kind: 'body-oversized', label: 'a 1 MB body', expect: REJECT, request: withBody({ ...parsed, gostman: 'A'.repeat(OVERSIZED_BYTES) }) })
+  variants.push({ kind: 'body-oversized', label: NEGATIVE_TEXT.variant.bodyLarge, expect: REJECT, request: withBody({ ...parsed, gostman: 'A'.repeat(OVERSIZED_BYTES) }) })
   return variants
 }
 
@@ -123,7 +125,7 @@ function queryVariants(request) {
     if (name.includes('{{')) return
     INJECTIONS.forEach(({ id, payload }) => {
       const pairs = parts.pairs.map((other, at) => (at === index ? `${name}=${encodeURIComponent(payload)}` : other))
-      variants.push({ kind: `injection-${id}`, label: `parameter ${name} with a ${id} payload`, expect: SURVIVE, payload, request: { ...request, url: `${parts.path}?${pairs.join('&')}${parts.fragment}` } })
+      variants.push({ kind: `injection-${id}`, label: NEGATIVE_TEXT.variant.injectionParameter({ name, injection: NEGATIVE_TEXT.injection[id] }), expect: SURVIVE, payload, request: { ...request, url: `${parts.path}?${pairs.join('&')}${parts.fragment}` } })
     })
   })
   return variants
@@ -132,7 +134,7 @@ function queryVariants(request) {
 export function negativeVariants(request, inherited = false) {
   return [...authVariants(request, inherited), ...bodyVariants(request), ...queryVariants(request)]
     .slice(0, MAX_VARIANTS_PER_REQUEST)
-    .map((variant, index) => ({ ...variant, id: `${request.id}:${index}` }))
+    .map((variant, index) => ({ ...variant, id: `${request.id}:${index}`, severity: SEVERITY_BY_KIND[variant.kind] || DEFAULT_SEVERITY }))
 }
 
 const firstMatch = (patterns, text) => patterns.find((pattern) => pattern.test(text))
@@ -143,14 +145,14 @@ export function negativeFindings(variant, response) {
   const found = []
   const status = response.statusCode
   const body = String(response.body || '')
+  const label = variant.label
+  const text = NEGATIVE_TEXT.finding
   if (variant.expect === REJECT && status >= 200 && status < 400) {
-    found.push(finding('accepted', SEVERITY_BY_KIND[variant.kind] || 'medium', `${variant.label}: the server answered ${status}, a rejection (4xx) was expected`))
+    found.push(finding('accepted', variant.severity, text.accepted({ label, status })))
   }
-  if (status >= 500) found.push(finding('server-error', 'medium', `${variant.label}: the server answered ${status}`))
-  if (firstMatch(STACK_TRACES, body)) found.push(finding('stack-trace', 'high', `${variant.label}: the response body shows a stack trace`))
-  if (firstMatch(SQL_ERRORS, body)) found.push(finding('sql-error', 'high', `${variant.label}: the response body shows a database error`))
-  if (variant.payload && body.includes(variant.payload)) {
-    found.push(finding('reflected', 'medium', `${variant.label}: the payload is returned unchanged in the response body`))
-  }
+  if (status >= 500) found.push(finding('server-error', 'medium', text.serverError({ label, status })))
+  if (firstMatch(STACK_TRACES, body)) found.push(finding('stack-trace', 'high', text.stackTrace({ label })))
+  if (firstMatch(SQL_ERRORS, body)) found.push(finding('sql-error', 'high', text.sqlError({ label })))
+  if (variant.payload && body.includes(variant.payload)) found.push(finding('reflected', 'medium', text.reflected({ label })))
   return found
 }

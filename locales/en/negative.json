@@ -1,0 +1,57 @@
+{
+  "negative": {
+    "title": "Negative tests",
+    "intro": "Sends altered copies of your saved requests: missing or invalid credentials, bad bodies, boundary values and injection strings. This is a basic checker, not a penetration testing tool. Run it against a test or staging environment.",
+    "scope": "Requests to test",
+    "allRequests": "All requests",
+    "hostsTitle": "Hosts that will receive requests",
+    "noHosts": "The addresses of these requests could not be resolved to a host. Check the environment variables they use.",
+    "confirm": "I may send altered requests to these hosts",
+    "rate": "Requests per second",
+    "limit": "Stop after (requests)",
+    "start": "Start",
+    "stop": "Stop",
+    "plan_one": "{{count}} altered copy of your requests will be sent.",
+    "plan_other": "{{count}} altered copies of your requests will be sent.",
+    "variantsTitle": "Altered copies",
+    "progress": "Sent {{sent}} of {{total}}",
+    "done_one": "Sent {{sent}} requests, {{count}} finding.",
+    "done_other": "Sent {{sent}} requests, {{count}} findings.",
+    "noFindings": "No suspicious answers were found.",
+    "noFindingsHint": "This does not show the API is secure. It only checks a few common mistakes.",
+    "emptyAction": "Add a sample collection",
+    "severity": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "variant": {
+      "credentialsMissing": "no credentials",
+      "credentialsInvalid": "invalid credentials",
+      "bodyTruncated": "truncated JSON",
+      "fieldRemoved": "field {{name}} removed",
+      "fieldWrongType": "field {{name}} with the wrong type",
+      "fieldValue": "field {{name}} = {{value}}",
+      "fieldEmpty": "field {{name}} empty",
+      "fieldLong_one": "field {{name}} with {{count}} character",
+      "fieldLong_other": "field {{name}} with {{count}} characters",
+      "bodyLarge": "a 1 MB body",
+      "injectionField": "field {{name}} with a {{injection}} payload",
+      "injectionParameter": "parameter {{name}} with a {{injection}} payload"
+    },
+    "injection": {
+      "sql": "SQL injection",
+      "xss": "script",
+      "traversal": "path traversal",
+      "header": "header injection",
+      "expression": "expression"
+    },
+    "finding": {
+      "accepted": "{{label}}: the server answered {{status}}, a rejection (4xx) was expected",
+      "serverError": "{{label}}: the server answered {{status}}",
+      "stackTrace": "{{label}}: the response body shows a stack trace",
+      "sqlError": "{{label}}: the response body shows a database error",
+      "reflected": "{{label}}: the payload is returned unchanged in the response body"
+    }
+  }
+}

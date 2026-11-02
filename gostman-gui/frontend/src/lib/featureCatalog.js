@@ -3,14 +3,14 @@ export const GROUPS = ['requests', 'data', 'variables', 'testing', 'automation',
 export const PLATFORMS = ['desktop', 'web', 'cli']
 
 export const ACTIONS = {
-  dialog: ['monitors', 'environments', 'cookies', 'network', 'mock', 'capture', 'loadTest', 'runner', 'scan', 'import', 'export', 'share', 'preferences', 'shortcuts', 'examples', 'folderSettings', 'git'],
+  dialog: ['monitors', 'environments', 'cookies', 'network', 'mock', 'capture', 'loadTest', 'runner', 'scan', 'negative', 'import', 'export', 'share', 'preferences', 'shortcuts', 'examples', 'folderSettings', 'git'],
   command: ['newRequest', 'newFolder', 'generateCode', 'sendSample', 'lintSpec', 'diffSpecs', 'commandPalette', 'workspaceSwitcher', 'aiSettings', 'aiMock'],
   sample: ['collection', 'flow', 'send', 'scan', 'graphql', 'grpc', 'websocket', 'mcp', 'curl', 'binary', 'jwt'],
   tab: ['auth', 'vars', 'extract', 'tests', 'settings', 'history', 'openTabs'],
   copy: ['cliInit'],
 }
 
-export const SURFACES = ['response', 'runner', 'mock', 'scan', 'load', 'history', 'flows', 'capture', 'tab:vars', 'tab:extract', 'tab:tests', 'tab:settings']
+export const SURFACES = ['response', 'runner', 'mock', 'scan', 'negative', 'load', 'history', 'flows', 'capture', 'tab:vars', 'tab:extract', 'tab:tests', 'tab:settings']
 
 export const FEATURES = [
   { id: 'rest', group: 'requests', docs: 'protocols#rest-and-http', action: { type: 'command', id: 'newRequest' }, icon: 'newspaper', landing: { group: 'send', order: 1 } },
@@ -54,7 +54,7 @@ export const FEATURES = [
   { id: 'scripts', group: 'testing', docs: 'scripting-and-settings#script-api', action: { type: 'tab', id: 'tests' }, icon: 'file-code' },
   { id: 'contract', group: 'testing', docs: 'import-export-and-specs#contract-checks', action: { type: 'dialog', id: 'runner' }, icon: 'file-check' },
   { id: 'snapshot-checks', group: 'testing', since: '1.9.0', docs: 'requests-and-responses#checks', action: { type: 'tab', id: 'tests' }, icon: 'camera' },
-  { id: 'negative-tests', group: 'testing', since: '1.9.0', platforms: ['cli'], docs: 'cli#negative-tests', icon: 'bug' },
+  { id: 'negative-tests', group: 'testing', since: '1.9.0', docs: 'cli#negative-tests', action: { type: 'dialog', id: 'negative' }, icon: 'bug', palette: true, empty: ['negative'], sample: 'collection' },
   { id: 'coverage', group: 'testing', since: '1.9.0', docs: 'runner-load-and-scan#openapi-coverage', action: { type: 'dialog', id: 'runner' }, icon: 'percent' },
   { id: 'pm-packages', group: 'testing', since: '1.9.0', platforms: ['desktop', 'cli'], docs: 'scripting-and-settings#packages-and-the-vault', icon: 'package' },
   { id: 'spec-lint', group: 'testing', docs: 'import-export-and-specs#linter', action: { type: 'command', id: 'lintSpec' }, icon: 'shield-check', palette: true },

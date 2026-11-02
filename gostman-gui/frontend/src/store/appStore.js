@@ -373,6 +373,7 @@ export const useAppStore = create(
         closedTabs: [],
         cookiesDialogOpen: false,
         scanDialogOpen: false,
+        negativeDialog: null,
         settingsDialogOpen: false,
         examplesDialogOpen: false,
         mockDialogOpen: false,
@@ -732,6 +733,8 @@ export const useAppStore = create(
         closeCookiesDialog: () => set({ cookiesDialogOpen: false }),
         openScanDialog: () => set({ scanDialogOpen: true, commandPaletteOpen: false }),
         closeScanDialog: () => set({ scanDialogOpen: false }),
+        openNegativeDialog: (folderId = '') => set({ negativeDialog: { folderId }, commandPaletteOpen: false }),
+        closeNegativeDialog: () => set({ negativeDialog: null }),
         openSettingsDialog: () => set({ settingsDialogOpen: true }),
         closeSettingsDialog: () => set({ settingsDialogOpen: false }),
         openExamplesDialog: () => set({ examplesDialogOpen: true }),
@@ -878,6 +881,7 @@ export const selectIsDialogOpen = (state) => (
   || state.preferencesDialogOpen
   || state.cookiesDialogOpen
   || state.scanDialogOpen
+  || state.negativeDialog !== null
   || state.settingsDialogOpen
   || state.examplesDialogOpen
   || state.mockDialogOpen

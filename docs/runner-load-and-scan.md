@@ -167,7 +167,13 @@ To fix a finding, move the value into a variable and refer to it as `{{name}}`. 
 
 ## Negative tests
 
-The command line has a basic negative-test checker, `gostman negative`, that sends altered copies of the saved requests (no or invalid credentials, bad bodies, boundary values, injection strings) and flags answers such as a 2xx where a 4xx was expected, a 5xx, a stack trace, a database error or a reflected payload. It is not part of the app. See [Negative tests](cli.md#negative-tests).
+**Negative tests** (search for it in the command palette, or choose **Run negative tests** in a folder's menu) is a basic checker that sends altered copies of your saved HTTP requests: no or invalid credentials, bad bodies, boundary values and injection strings. It flags answers such as a 2xx where a 4xx was expected, a 5xx, a stack trace, a database error or a reflected payload. It is not a penetration testing tool.
+
+1. Choose **All requests** or a folder.
+2. The dialog lists the hosts that will receive requests and the altered copies, each with a severity. Tick **I may send altered requests to these hosts**; **Start** stays disabled until you do.
+3. Set **Requests per second** (default 5) and **Stop after (requests)** (default 300), then select **Start**. **Stop** ends the run.
+
+Findings are grouped by request, with the severity of each. The requests are sent like any other request, so the web app can only reach the hosts its proxy permits. The same checks run on the command line as `gostman negative`; see [Negative tests](cli.md#negative-tests). Agent sessions have no tool for it.
 
 ## Notices in Share and Export
 

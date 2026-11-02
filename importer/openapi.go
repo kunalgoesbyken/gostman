@@ -16,6 +16,13 @@ func (c *collector) readOpenAPI(ctx context.Context, doc document, config Config
 	}
 	generated := loaded.Generate(openapi.Selection{})
 	c.read(generated.Title, FormatOpenAPI, func() { c.addGenerated(generated) })
+	for _, key := range loaded.IgnoredResponseKeys() {
+		c.flagUnique(locales.ImporterOpenapiResponseKeys, key)
+	}
+}
+
+func IgnoredResponseKeysRemark(keys []string) locales.Message {
+	return flagged(locales.ImporterOpenapiResponseKeys, keys)
 }
 
 func (c *collector) addGenerated(generated openapi.Collection) {

@@ -76,6 +76,8 @@ A request with a **matches snapshot** check (see [Checks](requests-and-responses
 
 ### OpenAPI coverage
 
+A response key of the spec that is not a three-digit code, `1XX` to `5XX` or `default` is left out of the contract and of the coverage, and a warning names it.
+
 With `--contract`, the report also says how much of the spec the run exercised. An operation counts as covered when at least one response came back for a request that matches it, and each status the spec documents for it counts as covered when a response with that status came back (a `2XX` or `default` entry is matched the same way as in the contract checks). The text summary gets a line such as `Coverage  7 of 12 operations (58.3%), 10 of 25 documented responses (40.0%)`.
 
 - `--coverage` also lists the operations that were not called and the documented statuses that never came back.
@@ -204,7 +206,7 @@ For each request it sends:
 
 Findings: `accepted` (a 2xx or 3xx where a rejection was expected; high for credentials, medium for wrong types, malformed and oversized bodies, low for a removed field, which may be optional), `server-error` (5xx), `stack-trace` and `sql-error` (the body shows one), and `reflected` (an injected string comes back unchanged). Findings are hints to review, and an API can accept an input on purpose.
 
-Requests are sent for real, so run it against a test or staging environment. Only `localhost` and loopback addresses and the hosts named with `--allow-host` (repeatable) are contacted; a request to any other host gets no response and is counted as not sent. The default rate is 5 requests a second (`--rate`) and a run stops after 300 requests (`--max-requests`). `--only` and `--folder` limit it to some requests. Agent sessions (`gostman mcp`) have no tool for it. `--reporter json` prints the findings as JSON. The command exits 1 when a finding has the severity of `--fail-on` (`low`, `medium` by default, `high` or `none`) or higher, 2 for wrong input, 0 otherwise. Variants are built from the saved requests, so requests created from an OpenAPI spec are covered through their saved bodies and parameters.
+Requests are sent for real, so run it against a test or staging environment. Only `localhost` and loopback addresses and the hosts named with `--allow-host` (repeatable) are contacted; a request to any other host gets no response and is counted as not sent. The default rate is 5 requests a second (`--rate`) and a run stops after 300 requests (`--max-requests`). `--only` and `--folder` limit it to some requests. The app has the same checks in **Negative tests**; see [Negative tests](runner-load-and-scan.md#negative-tests). Agent sessions (`gostman mcp`) have no tool for it. `--reporter json` prints the findings as JSON. The command exits 1 when a finding has the severity of `--fail-on` (`low`, `medium` by default, `high` or `none`) or higher, 2 for wrong input, 0 otherwise. Variants are built from the saved requests, so requests created from an OpenAPI spec are covered through their saved bodies and parameters.
 
 ## Linting an OpenAPI spec
 

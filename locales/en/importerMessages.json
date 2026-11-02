@@ -1,4 +1,5 @@
 {
+  "openapiResponseKeys": "These response keys are not a status code (three digits, 1XX to 5XX or default) and were left out: {{names}}.",
   "scripts": "Scripts were kept in {{names}}. Read them before you run them.",
   "foreignCalls": "Scripts in {{names}} still call pm.*, bru.*, pw.* or insomnia.* functions that Gostman cannot translate. Rewrite them before running.",
   "oauth": "OAuth 2 settings were imported for {{names}} without tokens. Authorize again before sending.",

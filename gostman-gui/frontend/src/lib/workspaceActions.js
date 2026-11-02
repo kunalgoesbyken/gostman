@@ -37,6 +37,7 @@ import { bodyBase64, downloadName, httpStatusOf, mimeType } from './response'
 import { keepingOwnVariables } from './shareContent'
 import { clientUrl } from './sharedLink'
 import { createRunner } from './runner'
+import { createNegativeRunner } from './negativeRun'
 import { buildReportPage, environmentsUsed } from './runReport'
 import { coverageOfRun } from './runCoverage'
 import { createSocketActions, isSocketAddress } from './socketSessions'
@@ -117,6 +118,7 @@ export function createWorkspaceActions(backend) {
   const sockets = createSocketActions(backend)
   const execute = createExecutor(backend)
   const runner = createRunner(backend, execute)
+  const negativeRunner = createNegativeRunner(execute)
   const examples = createExampleActions(backend)
   const mock = createMockActions(backend)
   const capture = createCaptureActions(backend, mock)
@@ -746,6 +748,8 @@ export function createWorkspaceActions(backend) {
     saveCollectionPassphrase: (host, certFile, passphrase) => backend.network.saveCollectionPassphrase(host, certFile, passphrase),
     openRunner: (folderId) => store().openRunner(folderId),
     openDependencyGraph: (folderId) => store().openDependencyGraph(folderId),
+    openNegative: (folderId) => store().openNegativeDialog(folderId),
+    negative: { run: negativeRunner, close: () => store().closeNegativeDialog() },
     openFolderSettings: (folderId) => store().openFolderSettings(folderId),
     closeRunner,
     startRun: runner.start,

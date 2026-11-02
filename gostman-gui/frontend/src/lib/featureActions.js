@@ -59,6 +59,7 @@ export function createFeatureActions({ backend, commands, monitors, mock, captur
     loadTest: { run: loadTest.open, isAvailable: () => loadTest.isAvailable },
     runner: { run: () => store().openRunner() },
     scan: { run: () => store().openScanDialog() },
+    negative: { run: () => store().openNegativeDialog() },
     import: { run: () => store().openImportDialog() },
     export: { run: openExport },
     share: { run: () => commands.share() },

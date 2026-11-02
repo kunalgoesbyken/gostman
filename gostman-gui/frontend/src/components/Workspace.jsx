@@ -50,6 +50,7 @@ const CodeSnippetDialog = lazy(() => import("./CodeSnippetDialog").then((module)
 const ImportExportDialog = lazy(() => import("./ImportExportDialog").then((module) => ({ default: module.ImportExportDialog })))
 const IncomingShareDialog = lazy(() => import("./IncomingShareDialog").then((module) => ({ default: module.IncomingShareDialog })))
 const ScanDialog = lazy(() => import("./ScanDialog").then((module) => ({ default: module.ScanDialog })))
+const NegativeDialog = lazy(() => import("./NegativeDialog").then((module) => ({ default: module.NegativeDialog })))
 const OpenLinkDialog = lazy(() => import("./OpenLinkDialog").then((module) => ({ default: module.OpenLinkDialog })))
 const CookiesDialog = lazy(() => import("./CookiesDialog").then((module) => ({ default: module.CookiesDialog })))
 const NetworkDialog = lazy(() => import("./NetworkDialog").then((module) => ({ default: module.NetworkDialog })))
@@ -245,6 +246,7 @@ function LoadedWorkspace({ backend, onBack }) {
   const cookiesDialogOpen = useAppStore((s) => s.cookiesDialogOpen)
   const scanDialogOpen = useAppStore((s) => s.scanDialogOpen)
   const closeScanDialog = useAppStore((s) => s.closeScanDialog)
+  const negativeDialog = useAppStore((s) => s.negativeDialog)
   const settingsDialogOpen = useAppStore((s) => s.settingsDialogOpen)
   const examplesDialogOpen = useAppStore((s) => s.examplesDialogOpen)
   const mockDialogOpen = useAppStore((s) => s.mockDialogOpen)
@@ -496,6 +498,7 @@ function LoadedWorkspace({ backend, onBack }) {
           <OpenLinkDialog link={openLink} fetchLink={backend.fetchLink} importer={actions.importer} onImport={actions.importShared} onClose={dismissOpenLink} />
         )}
         {cookiesDialogOpen && <CookiesDialog onClose={closeCookiesDialog} />}
+        {negativeDialog && <NegativeDialog folders={folders} actions={actions} initialFolderId={negativeDialog.folderId} />}
         {scanDialogOpen && <ScanDialog scan={actions.scan} collection={scannedCollection} onGoToRequest={goToRequest} onClose={closeScanDialog} />}
         {settingsDialogOpen && <NetworkDialog settings={settings} actions={actions} onClose={closeSettingsDialog} />}
         {examplesDialogOpen && <ExamplesDialog request={activeRequest} actions={actions.examples} EditorComponent={CodeEditor} />}

@@ -108,6 +108,7 @@
       "schema": "Body shape, as a JSON Schema: field types, the fields that were present, and null where null was seen. A field that was null accepts any value.",
       "snapshot": "Snapshot of the body: the check fails when the body differs from this response. Values of fields with secret-looking names, tokens, dates and ids that look generated are ignored and not stored. Edit the ignored paths in the check.",
       "headersSnapshot": "Snapshot of the headers, without cookies and credentials. Headers that change on every response, such as date and etag, are ignored.",
+      "exampleSnapshot": "Snapshot of the saved example \"{{name}}\": the check fails when the body differs from that example. Secret-looking fields, tokens, dates and generated ids are ignored and not stored.",
       "responseTime": "Response time budget of {{budget}} ms, twice what this response took, rounded up."
     },
     "nothingNew": "The Checks tab already has these checks.",

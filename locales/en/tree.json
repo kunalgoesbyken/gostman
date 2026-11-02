@@ -29,6 +29,7 @@
     "newRequest": "New request",
     "newSubfolder": "New subfolder",
     "runFolder": "Run folder",
+    "negativeFolder": "Run negative tests",
     "shareFolder": "Share folder",
     "delete": "Delete",
     "emptyImport": "Import",

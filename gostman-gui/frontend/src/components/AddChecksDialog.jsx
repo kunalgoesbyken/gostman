@@ -2,10 +2,10 @@ import { useMemo, useState } from "react"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
-import { useAppStore } from "../store/appStore"
+import { selectActiveTab, useAppStore } from "../store/appStore"
 import { RESPONSE_CHECKS_TEXT } from "../lib/checksText"
 import { schemaText } from "../lib/jsonSchema"
-import { activeAssertions, addChecks, newProposals, proposeChecks } from "../lib/responseChecks"
+import { activeAssertions, addChecks, exampleProposals, newProposals, proposeChecks } from "../lib/responseChecks"
 import { SCHEMA_OPERATOR, titleOf } from "../lib/scripting/assertions"
 
 const PRETTY_INDENT = 2
@@ -31,7 +31,8 @@ function Proposal({ proposal, checked, onToggle }) {
 
 export function AddChecksDialog({ response, onClose }) {
   const assertions = useAppStore(activeAssertions)
-  const proposals = useMemo(() => newProposals(proposeChecks(response), assertions), [response, assertions])
+  const examples = useAppStore((s) => selectActiveTab(s)?.request.examples ?? "")
+  const proposals = useMemo(() => newProposals([...proposeChecks(response), ...exampleProposals(examples)], assertions), [response, examples, assertions])
   const [selected, setSelected] = useState(() => new Set(proposals.filter((proposal) => proposal.isSuggested).map((proposal) => proposal.id)))
   const chosen = proposals.filter((proposal) => selected.has(proposal.id))
 

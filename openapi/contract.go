@@ -2,6 +2,7 @@ package openapi
 
 import (
 	"net/url"
+	"slices"
 	"strings"
 )
 
@@ -84,6 +85,19 @@ func (d *Document) contractResponses(o *Operation, b *bundler) map[string]Contra
 		}
 	}
 	return out
+}
+
+func (d *Document) IgnoredResponseKeys() []string {
+	var ignored []string
+	for _, op := range d.ops {
+		for code := range asMap(asMap(op.op.v)["responses"]) {
+			if !strings.HasPrefix(code, extensionMark) && !validResponseKey(code) {
+				ignored = append(ignored, op.Method+" "+op.Path+": "+code)
+			}
+		}
+	}
+	slices.Sort(ignored)
+	return ignored
 }
 
 func validResponseKey(code string) bool {

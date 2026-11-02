@@ -261,8 +261,8 @@
     },
     "negativeTests": {
       "title": "Negative tests",
-      "blurb": "gostman negative sends altered copies of saved requests and flags a 2xx for bad input, a 5xx, a stack trace or a reflected payload.",
-      "synonyms": "negative fuzz fuzzing invalid inputs boundary injection security"
+      "blurb": "Send altered copies of saved requests and flag a 2xx for bad input, a 5xx, a stack trace or a reflected payload.",
+      "synonyms": "negative fuzz fuzzing security injection invalid inputs boundary schemathesis owasp"
     },
     "coverage": {
       "title": "OpenAPI coverage",

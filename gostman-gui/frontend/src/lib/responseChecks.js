@@ -1,6 +1,8 @@
 import { RESPONSE_CHECKS_TEXT } from './checksText'
 import { isUsableResponse } from './chaining'
 import { inferSchema } from './schemaInference'
+import { parseJSON } from './dataUtils'
+import { isBinaryExample, parseExamples, servedByDefault } from './examples'
 import { bodySnapshot, headersSnapshot } from './snapshot'
 import { BLANK_ASSERTION, SCHEMA_OPERATOR, SNAPSHOT_OPERATOR, isKnownAssertion, withAddedAssertions } from './scripting/assertions'
 import { responseSubject } from './scripting/subjects'
@@ -33,6 +35,13 @@ export function proposeChecks(response) {
     { id: 'headersSnapshot', description: RESPONSE_CHECKS_TEXT.kinds.headersSnapshot, assertion: assertion('res.headers', SNAPSHOT_OPERATOR, headersSnapshot(subject.headers)), isSuggested: false },
     { id: 'responseTime', description: RESPONSE_CHECKS_TEXT.kinds.responseTime(budget), assertion: assertion('res.responseTime', 'lt', budget), isSuggested: false },
   ].filter(Boolean)
+}
+
+export function exampleProposals(examplesJson) {
+  const example = servedByDefault(parseExamples(examplesJson))
+  const body = example && !isBinaryExample(example) ? parseJSON(example.body, null) : null
+  if (!isJsonValue(body)) return []
+  return [{ id: 'exampleSnapshot', description: RESPONSE_CHECKS_TEXT.kinds.exampleSnapshot(example.name), assertion: assertion('res.body', SNAPSHOT_OPERATOR, bodySnapshot(body)), isSuggested: false }]
 }
 
 export const activeAssertions = (state) => selectActiveTab(state)?.request.assertions ?? ''

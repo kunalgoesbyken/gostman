@@ -57,6 +57,7 @@ const (
 	ImporterOauthGrant                   Code = "importerMessages.oauthGrant"
 	ImporterOauthNoGrant                 Code = "importerMessages.oauthNoGrant"
 	ImporterOpenItemType                 Code = "importerMessages.openItemType"
+	ImporterOpenapiResponseKeys          Code = "importerMessages.openapiResponseKeys"
 	ImporterPartContentType              Code = "importerMessages.partContentType"
 	ImporterPlaceCollection              Code = "importerMessages.place.collection"
 	ImporterPlaceFolder                  Code = "importerMessages.place.folder"
