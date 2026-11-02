@@ -226,7 +226,7 @@ The left side lists files in up to three groups: **Conflicts**, **Staged** and *
 - Use the plus and minus buttons to stage and unstage a file, or **Stage all**.
 - Use the discard button on an unstaged file to restore it. A prompt warns that this cannot be undone.
 - Use the history button on a row to open the History section for that file.
-- Type a **Commit message** and choose the commit button. With nothing staged, the button reads **Commit all changes**; otherwise it reads **Commit N staged files**. Committing is disabled while conflicts remain. When every conflict is resolved and nothing differs from the last commit, for example because you kept your side everywhere, the button reads **Commit the merge** and finishes it.
+- Type a **Commit message**, or with AI turned on choose **Suggest message with AI** to draft one from the changes after a preview of what is sent (see [AI features](ai.md#what-ai-can-do)), then choose the commit button. With nothing staged, the button reads **Commit all changes**; otherwise it reads **Commit N staged files**. Committing is disabled while conflicts remain. When every conflict is resolved and nothing differs from the last commit, for example because you kept your side everywhere, the button reads **Commit the merge** and finishes it.
 
 ### Branches
 

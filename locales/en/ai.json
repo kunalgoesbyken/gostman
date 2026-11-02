@@ -76,6 +76,19 @@
         "inputLabel": "What are you looking for",
         "placeholder": "the endpoint that cancels an order"
       },
+      "commit": {
+        "label": "Commit message from the changes",
+        "section": "Commit message",
+        "apply": "Use as commit message",
+        "nothing": "There are no changes to describe."
+      },
+      "mock": {
+        "label": "Mock examples for this request",
+        "inputLabel": "Describe the responses, or paste an OpenAPI document",
+        "placeholder": "A list of orders, an empty list, and a 404 for an unknown order",
+        "section": "Examples served by the mock server",
+        "apply": "Add to examples"
+      },
       "schema": {
         "label": "Requests from an API description",
         "inputLabel": "Paste an OpenAPI or Swagger document, a GraphQL schema or API documentation text",
@@ -102,7 +115,8 @@
       "explain": "Explain with AI",
       "explainError": "Explain this error with AI",
       "document": "Write with AI",
-      "documentLabel": "Write the description with AI"
+      "documentLabel": "Write the description with AI",
+      "commitMessage": "Suggest message with AI"
     },
     "commands": {
       "request": {
@@ -130,6 +144,11 @@
         "label": "AI: ask about the collection",
         "description": "Find requests by describing them",
         "keywords": "search find"
+      },
+      "mock": {
+        "label": "AI: mock examples for this request",
+        "description": "Propose example responses for the mock server from a description, an OpenAPI document or the last response",
+        "keywords": "mock examples responses"
       },
       "schema": {
         "label": "AI: requests from an API description",

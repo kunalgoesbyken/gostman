@@ -58,6 +58,8 @@ Besides the **AI:** commands in the command palette, three buttons appear in pla
 
 - **Generate with AI** in the **Checks** tab of a request: on the Assertions view it proposes checks for the last response, and on the Pre-request script or Post-response script view it writes that script.
 - **Write with AI** next to the description in the request's **Settings** tab proposes a description.
+- **Suggest message with AI** in the commit box of the [Git panel](collections-and-git.md#changes) drafts a commit message from the staged changes (or from all changes when nothing is staged). The diff goes through the same preview and scrubber as every other request, so you see exactly what is sent; binary files are left out and the diff is cut at 24,000 characters. Accepting puts the text in the commit box, where you edit it before committing.
+- **AI: mock examples for this request** in the command palette proposes example responses for the mock server from a description, a pasted OpenAPI document or the request's last response (structure only unless you tick the box to include real values). They are added to the request's examples; the first becomes the default one only when the request had none.
 - **Explain with AI** appears in the response toolbar when a response has an error status, and under the message when a request could not be sent. It explains the response or the error and suggests a fix.
 
 - Collection search sends the first 300 requests of the collection. If it has more, the dialog says so before anything is sent.

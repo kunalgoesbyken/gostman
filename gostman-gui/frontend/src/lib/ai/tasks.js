@@ -2,6 +2,7 @@ import { OPERATORS, operatorOf, parseAssertions, serializeAssertions } from '../
 import { formatBytes } from '../byteSize'
 import { mayBeSpec } from '../openapiSpec'
 import { normalizeRequest } from '../request'
+import { MAX_EXAMPLES, parseExamples, serializeExamples } from '../examples'
 import { serializeRows } from '../rows'
 import { AI_TEXT } from '../aiText'
 import { describeRequest, describeResponse, maskedUrl } from './context'
@@ -16,6 +17,8 @@ export const TASK_EXPLAIN = 'explain'
 export const TASK_DOCS = 'docs'
 export const TASK_SEARCH = 'search'
 export const TASK_SCHEMA = 'schema'
+export const TASK_COMMIT = 'commit'
+export const TASK_MOCK = 'mock'
 
 export const SCRIPT_PRE = 'preScript'
 export const SCRIPT_POST = 'postScript'
@@ -345,7 +348,89 @@ const schemaTask = {
   },
 }
 
-export const TASKS = [requestTask, testsTask, scriptTask, explainTask, docsTask, searchTask, schemaTask]
+const COMMIT_DIFF_LIMIT = 24000
+const COMMIT_MESSAGE_LIMIT = 2000
+const MOCK_EXAMPLE_LIMIT = 5
+const MOCK_SOURCE_LIMIT = 64000
+const MOCK_NAME_LIMIT = 80
+const MOCK_BODY_LIMIT = 20000
+const STATUS_MIN = 100
+const STATUS_MAX = 599
+
+const commitTask = {
+  id: TASK_COMMIT,
+  get text() {
+    return AI_TEXT.tasks.commit
+  },
+  schema: SCHEMAS.commit,
+  refuse: (input) => (input.diff ? '' : AI_TEXT.tasks.commit.nothing),
+  build: (_source, input) => prompt(
+    'Write a Git commit message for this change to an API workspace. The files are YAML: requests, folders and environments. Use an imperative first line of at most 72 characters, then, only if it helps, a blank line and a short body. Reply with {"message": string}.',
+    fence('staged-diff', input.diff.slice(0, COMMIT_DIFF_LIMIT)),
+  ),
+  parse: (text) => {
+    const message = textField(parseModelObject(text).message, COMMIT_MESSAGE_LIMIT).trim()
+    requireContent(message)
+    return {
+      sections: [{ label: AI_TEXT.tasks.commit.section, before: '', after: message }],
+      applyLabel: AI_TEXT.tasks.commit.apply,
+      apply: (host) => host.setCommitMessage(message),
+    }
+  },
+}
+
+const statusOf = (value) => (Number.isInteger(value) && value >= STATUS_MIN && value <= STATUS_MAX ? value : 0)
+
+function mockExample(raw) {
+  const status = statusOf(raw.status)
+  if (!status) return null
+  const headers = headerRows(raw.headers).map(({ key, value }) => ({ key, value }))
+  return {
+    id: crypto.randomUUID(),
+    name: textField(raw.name, MOCK_NAME_LIMIT).trim() || String(status),
+    status,
+    headers,
+    body: textField(raw.body, MOCK_BODY_LIMIT),
+    bodyEncoding: 'utf8',
+    contentType: textField(raw.contentType, HEADER_TEXT_LIMIT).trim(),
+    isDefault: false,
+  }
+}
+
+const exampleLines = (examples) => examples.map((example) => `${example.status} ${example.name}`).join('\n')
+
+const mockTask = {
+  id: TASK_MOCK,
+  get text() {
+    return AI_TEXT.tasks.mock
+  },
+  needsText: true,
+  longText: true,
+  offersValues: true,
+  schema: SCHEMAS.mock,
+  refuse: (input) => (
+    input.text.length > MOCK_SOURCE_LIMIT ? AI_TEXT.tooLarge(formatBytes(input.text.length), formatBytes(MOCK_SOURCE_LIMIT)) : ''
+  ),
+  build: (source, input) => prompt(
+    `Write up to ${MOCK_EXAMPLE_LIMIT} example responses that a mock server can return for this request, covering the success case and the likely errors. Base them on the notes below, which may be a description or an OpenAPI document, and on the captured response when one is given. Reply with {"examples": [{"name": string, "status": number, "contentType": string, "headers": [{"key": string, "value": string}], "body": string}]}.`,
+    fence('request', describeRequest(source.request)),
+    fence('notes', input.text),
+    fence('captured-response', describeResponse(source.response, input.includeValues)),
+  ),
+  parse: (text, source) => {
+    const proposed = objectsIn(parseModelObject(text).examples, MOCK_EXAMPLE_LIMIT).map(mockExample).filter(Boolean)
+    requireContent(proposed)
+    const existing = parseExamples(source.request.examples)
+    const merged = [...existing, ...proposed].slice(0, MAX_EXAMPLES).map((example, index) => ({ ...example, isDefault: index === 0 ? example.isDefault || existing.length === 0 : example.isDefault }))
+    return {
+      sections: [{ label: AI_TEXT.tasks.mock.section, before: exampleLines(existing), after: exampleLines(merged) }],
+      applyLabel: AI_TEXT.tasks.mock.apply,
+      apply: (host) => host.updateRequest({ examples: serializeExamples(merged) }),
+    }
+  },
+}
+
+export const TASKS = [requestTask, testsTask, scriptTask, explainTask, docsTask, searchTask, schemaTask, commitTask, mockTask]
 
 export const taskById = (id) => TASKS.find((task) => task.id === id)
 

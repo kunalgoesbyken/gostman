@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { selectActiveTab, selectResolvedVariables, useAppStore } from '../../store/appStore'
 import { AI_TEXT } from '../aiText'
 import { lineageOf } from '../inheritance'
+import { useGitStore } from '../gitSession'
 import { resolvedSecretValues } from '../resolvedSecrets'
 import { requestSecrets, variableNames, variableSecrets } from './context'
 import { KIND_CANCELED, errorMessage } from './errors'
@@ -75,6 +76,7 @@ export function createAiActions(backend, { importData, openapi }) {
     openRequest: (request) => app().openRequestTab(request),
     importDraft: (data) => importData(data),
     importSpec: (result) => openapi.importSpec(result),
+    setCommitMessage: (message) => useGitStore.setState({ commitMessage: message }),
   }
 
   const tools = { readSpec: (source) => openapi.read(source) }

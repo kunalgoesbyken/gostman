@@ -9,6 +9,8 @@ export const TAB_STASHES = 'stashes'
 export const TAB_HISTORY = 'history'
 export const TAB_REMOTES = 'remotes'
 
+const DIFF_FILE_LIMIT = 40
+
 const NO_STATE = { installed: true, installHint: '', hasFolder: false, isRepo: false, problem: '', restricted: false, branch: '', ahead: 0, behind: 0, changes: [], remotes: [] }
 
 const INITIAL_STATE = {
@@ -23,6 +25,7 @@ const INITIAL_STATE = {
   stashes: [],
   history: { path: '', commits: [], version: null },
   output: '',
+  commitMessage: '',
 }
 
 export const useGitStore = create(() => INITIAL_STATE)
@@ -71,6 +74,18 @@ export function createGitActions(backend) {
     }
   }
 
+  async function stagedDiffText() {
+    const { changes } = git().state
+    const staged = changes.filter(isStaged)
+    const chosen = staged.length > 0 ? staged : changes.filter((change) => !change.conflict)
+    const parts = []
+    for (const change of chosen.slice(0, DIFF_FILE_LIMIT)) {
+      const diff = await backend.diff(change.path, staged.length > 0, change.untracked)
+      if (!diff.binary) parts.push(`# ${change.path}\n${diff.text}`)
+    }
+    return parts.join('\n')
+  }
+
   const confirmThen = (title, message, run, confirmText) => app().showConfirm(title, message, run, null, 'destructive', confirmText)
 
   async function select(change, staged) {
@@ -96,6 +111,8 @@ export function createGitActions(backend) {
   }
 
   return {
+    stagedDiffText,
+    setCommitMessage: (message) => patch({ commitMessage: message }),
     refresh: () => refresh().catch((error) => alertFailure(error)),
     close: () => patch({ isOpen: false, selection: null, diff: null, conflict: null }),
     refreshState,

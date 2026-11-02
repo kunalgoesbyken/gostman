@@ -36,6 +36,7 @@ const aiCommands = () => [
   aiCommand("ai-docs", AI_TEXT.commands.docs, "aiDocs"),
   aiCommand("ai-search", AI_TEXT.commands.search, "aiSearch"),
   aiCommand("ai-schema", AI_TEXT.commands.schema, "aiSchema"),
+  aiCommand("ai-mock", AI_TEXT.commands.mock, "aiMock"),
 ]
 
 const requestCommands = () => [

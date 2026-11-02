@@ -1,7 +1,7 @@
 import { textToBase64 } from './base64'
 import { createAiActions } from './ai/session'
 import {
-  TASK_DOCS, TASK_EXPLAIN, TASK_REQUEST, TASK_SCHEMA, TASK_SCRIPT, TASK_SEARCH, TASK_TESTS,
+  TASK_COMMIT, TASK_DOCS, TASK_EXPLAIN, TASK_MOCK, TASK_REQUEST, TASK_SCHEMA, TASK_SCRIPT, TASK_SEARCH, TASK_TESTS,
 } from './ai/tasks'
 import { createCaptureActions } from './captureSession'
 import { createLoadTestActions } from './loadTestSession'
@@ -690,6 +690,7 @@ export function createWorkspaceActions(backend) {
     aiDocs: () => ai.start(TASK_DOCS),
     aiSearch: () => ai.start(TASK_SEARCH),
     aiSchema: () => ai.start(TASK_SCHEMA),
+    aiMock: () => ai.start(TASK_MOCK),
     aiSettings: ai.openSettings,
   }
 
@@ -703,7 +704,10 @@ export function createWorkspaceActions(backend) {
     capture,
     loadTest,
     secrets: backend.secrets,
-    storage: storageActions,
+    storage: storageActions && {
+      ...storageActions,
+      git: { ...storageActions.git, suggestMessage: async () => ai.start(TASK_COMMIT, { diff: await storageActions.git.stagedDiffText() }) },
+    },
     backups: createBackupActions(backend),
     runExtractors,
     getToken,

@@ -3,7 +3,7 @@ import { isPlainObject, parseJSON } from './dataUtils'
 import { formatBytes } from './byteSize'
 import { EXAMPLES_TEXT } from './examplesText'
 
-const MAX_EXAMPLES = 20
+export const MAX_EXAMPLES = 20
 const MAX_BODY_BYTES = 2 * 1024 * 1024
 const MAX_NAME_LENGTH = 120
 const ENCODING_BASE64 = 'base64'

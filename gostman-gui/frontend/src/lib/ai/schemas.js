@@ -15,6 +15,7 @@ export const object = (properties) => ({
   additionalProperties: false,
 })
 
+const integer = { type: 'integer' }
 const header = object({ key: text, value: text })
 const assertion = object({ expression: text, operator: choice(OPERATORS.map((operator) => operator.value)), value: text })
 
@@ -34,5 +35,7 @@ export const SCHEMAS = {
   explain: object({ explanation: text, causes: list(text), fixes: list(text) }),
   docs: object({ description: text }),
   search: object({ matches: list(object({ id: text, reason: text })) }),
+  commit: object({ message: text }),
+  mock: object({ examples: list(object({ name: text, status: integer, contentType: text, headers: list(header), body: text })) }),
   schema: object({ folderName: text, requests: list(object({ ...requestFields, assertions: list(assertion) })), more: flag }),
 }

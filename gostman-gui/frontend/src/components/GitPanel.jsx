@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { ArrowDown, ArrowUp, CloudDownload, Folder, GitBranch, GitMerge, History, Minus, Plus, ShieldAlert, Undo2 } from "lucide-react"
+import { ArrowDown, Bot, ArrowUp, CloudDownload, Folder, GitBranch, GitMerge, History, Minus, Plus, ShieldAlert, Undo2 } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button, IconButton } from "./ui/button"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
@@ -10,6 +10,8 @@ import { Textarea } from "./ui/textarea"
 import { ConflictEditor } from "./ConflictEditor"
 import { GitDiffView } from "./GitDiffView"
 import { BranchesTab, HistoryTab, RemotesTab, StashesTab } from "./GitTabs"
+import { useAiEnabled } from "../lib/ai/session"
+import { AI_TEXT } from "../lib/aiText"
 import { TAB_BRANCHES, TAB_CHANGES, TAB_HISTORY, TAB_REMOTES, TAB_STASHES, hasWorktreeChange, isStaged, useGitStore } from "../lib/gitSession"
 import { GIT_TEXT as TEXT } from "../lib/gitText"
 import { EDGE_END } from "../hooks/usePaneResize"
@@ -75,8 +77,7 @@ function commitLabel(stagedCount, hasChanges, isMerging) {
   return stagedCount === 0 ? TEXT.commitAll : TEXT.commitStaged(stagedCount)
 }
 
-function CommitBox({ stagedCount, hasChanges, hasConflicts, isMerging, isDisabled, onCommit }) {
-  const [message, setMessage] = useState("")
+function CommitBox({ stagedCount, hasChanges, hasConflicts, isMerging, isDisabled, onCommit, message, setMessage, onSuggest }) {
   const commitAll = stagedCount === 0
   const canCommit = !isDisabled && !hasConflicts && (hasChanges || isMerging) && message.trim() !== ""
   const commit = async () => {
@@ -85,6 +86,12 @@ function CommitBox({ stagedCount, hasChanges, hasConflicts, isMerging, isDisable
   }
   return (
     <div className="shrink-0 space-y-2 border-t border-border p-3">
+      {onSuggest && (
+        <Button size="sm" variant="outline" disabled={isDisabled || !hasChanges} onClick={onSuggest}>
+          <Bot />
+          {AI_TEXT.buttons.commitMessage}
+        </Button>
+      )}
       <Textarea aria-label={TEXT.commitMessage} placeholder={TEXT.commitMessage} rows={3} value={message} onChange={(event) => setMessage(event.target.value)} />
       <Button className="w-full" disabled={!canCommit} onClick={commit}>
         {commitLabel(stagedCount, hasChanges, isMerging)}
@@ -93,7 +100,8 @@ function CommitBox({ stagedCount, hasChanges, hasConflicts, isMerging, isDisable
   )
 }
 
-function ChangesTab({ state, selection, diff, conflict, isBusy, actions }) {
+function ChangesTab({ state, selection, diff, conflict, isBusy, actions, commitMessage }) {
+  const isAiOn = useAiEnabled()
   const isReadOnly = state.restricted || isBusy
   const conflicts = useMemo(() => state.changes.filter((change) => change.conflict), [state.changes])
   const staged = useMemo(() => state.changes.filter(isStaged), [state.changes])
@@ -123,6 +131,9 @@ function ChangesTab({ state, selection, diff, conflict, isBusy, actions }) {
           isMerging={state.merging}
           isDisabled={isReadOnly}
           onCommit={actions.commit}
+          message={commitMessage}
+          setMessage={actions.setCommitMessage}
+          onSuggest={isAiOn ? actions.suggestMessage : null}
         />
       </ResizablePane>
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -174,7 +185,7 @@ function TabBody({ tab, store, actions }) {
   if (tab === TAB_STASHES) return <StashesTab stashes={store.stashes} isReadOnly={isReadOnly} actions={actions} />
   if (tab === TAB_HISTORY) return <HistoryTab key={store.history.path} history={store.history} isReadOnly={isReadOnly} actions={actions} />
   if (tab === TAB_REMOTES) return <RemotesTab remotes={state.remotes} isReadOnly={isReadOnly} isRestricted={state.restricted} actions={actions} />
-  return <ChangesTab state={state} selection={store.selection} diff={store.diff} conflict={store.conflict} isBusy={isBusy} actions={actions} />
+  return <ChangesTab state={state} selection={store.selection} diff={store.diff} conflict={store.conflict} isBusy={isBusy} actions={actions} commitMessage={store.commitMessage} />
 }
 
 export function GitPanel({ actions, onTrust }) {
