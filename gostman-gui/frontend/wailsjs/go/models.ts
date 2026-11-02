@@ -623,6 +623,7 @@ export namespace diff {
 	    breaking: number;
 	    nonBreaking: number;
 	    informational: number;
+	    truncated: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Report(source);
@@ -634,6 +635,7 @@ export namespace diff {
 	        this.breaking = source["breaking"];
 	        this.nonBreaking = source["nonBreaking"];
 	        this.informational = source["informational"];
+	        this.truncated = source["truncated"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	maxSchemaDepth = 16
+	maxSchemaDepth = 32
 	maxVisits      = 20000
 	checkEvery     = 256
 )
@@ -31,11 +31,18 @@ type budget struct {
 	ctx       context.Context
 	visits    int
 	exhausted bool
-	compared  map[string]bool
+	cut       bool
+	compared  map[compareKey]int
+}
+
+type compareKey struct {
+	oldRef string
+	newRef string
+	way    direction
 }
 
 func newBudget(ctx context.Context) *budget {
-	return &budget{ctx: ctx, compared: map[string]bool{}}
+	return &budget{ctx: ctx, compared: map[compareKey]int{}}
 }
 
 func (b *budget) spend() bool {
@@ -49,16 +56,28 @@ func (b *budget) spend() bool {
 	return !b.exhausted
 }
 
-func (b *budget) firstVisit(oldSchema, newSchema any, way direction) bool {
+func (b *budget) incomplete() bool {
+	return b.exhausted || b.cut
+}
+
+func (b *budget) tooDeep(depth int) bool {
+	if depth <= maxSchemaDepth {
+		return false
+	}
+	b.cut = true
+	return true
+}
+
+func (b *budget) firstVisit(oldSchema, newSchema any, way direction, depth int) bool {
 	oldRef, newRef := textOf(objectOf(oldSchema)["$ref"]), textOf(objectOf(newSchema)["$ref"])
 	if oldRef == "" || newRef == "" {
 		return true
 	}
-	key := fmt.Sprintf("%s|%s|%d", oldRef, newRef, way)
-	if b.compared[key] {
+	key := compareKey{oldRef, newRef, way}
+	if earlier, seen := b.compared[key]; seen && earlier <= depth {
 		return false
 	}
-	b.compared[key] = true
+	b.compared[key] = depth
 	return true
 }
 
@@ -158,7 +177,7 @@ func (r resolver) collect(root map[string]any, schema any, view *schemaView, dep
 		view.merged[reference] = true
 	}
 	object := objectOf(resolve(root, schema))
-	if object == nil || depth > maxSchemaDepth || !r.budget.spend() {
+	if object == nil || r.budget.tooDeep(depth) || !r.budget.spend() {
 		return
 	}
 	switch typed := object["type"].(type) {
@@ -231,7 +250,7 @@ func (r resolver) schemas(oldSchema, newSchema any, way direction, where string,
 }
 
 func (r resolver) compareSchemas(oldSchema, newSchema any, way direction, where string, report reporter, depth int) {
-	if depth > maxSchemaDepth || !r.budget.spend() || !r.budget.firstVisit(oldSchema, newSchema, way) {
+	if r.budget.tooDeep(depth) || !r.budget.spend() || !r.budget.firstVisit(oldSchema, newSchema, way, depth) {
 		return
 	}
 	before := r.view(r.old, oldSchema, 0)

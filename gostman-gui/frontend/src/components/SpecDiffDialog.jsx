@@ -52,9 +52,10 @@ function SourceField({ label, side, onChange }) {
 }
 
 function Result({ report }) {
-  if (report.changes.length === 0) return <p className="pt-3 text-xs text-muted-foreground">{SPEC_TEXT.diffClean}</p>
+  if (report.changes.length === 0 && !report.truncated) return <p className="pt-3 text-xs text-muted-foreground">{SPEC_TEXT.diffClean}</p>
   return (
     <div className="pt-3">
+      {report.truncated && <p role="alert" className="pb-2 text-xs text-warning">{SPEC_TEXT.diffTruncated}</p>}
       <div className="flex flex-wrap gap-2 pb-2">
         {SEVERITIES.map(({ key, countKey, variant }) => (
           <Badge key={key} variant={variant}>{SPEC_TEXT.diffCount[countKey](report[countKey])}</Badge>

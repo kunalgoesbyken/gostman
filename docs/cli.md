@@ -230,6 +230,7 @@ git show main:openapi.yaml > old.yaml && gostman diff old.yaml openapi.yaml --js
 - Breaking: a removed path or operation, a removed 2xx response, a new required parameter, request body or request property, a parameter or property whose type changed or whose limits or enum values narrowed for requests, a response property that was removed or is no longer always present, a content type that is no longer accepted or returned, a removed or changed security scheme, and authentication that is now required or has changed.
 - Non-breaking: an added operation, an optional parameter or property, a looser limit, a removed optional request property.
 - Informational: a new version number or server address, a deprecated operation, an added response or security scheme.
+- Very large, deeply nested or heavily linked specs are compared within a work limit. When it is reached the report says it is incomplete, and `--fail-on breaking` and `--fail-on any` exit 1 whatever was found. `--timeout` (default 1 minute) stops a slow comparison with an error.
 - Only local `#/...` references are followed. `--json` prints the report as JSON, `--fail-on breaking|any|none` (default `none`) sets when the exit status is 1. The spec viewer's sync dialog and the **Compare API specs** command show the same list in the apps.
 
 ## Generated documentation

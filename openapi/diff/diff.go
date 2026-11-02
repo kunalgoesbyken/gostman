@@ -24,8 +24,6 @@ const (
 	maxChanges = 5000
 )
 
-const truncatedMessage = "the comparison was cut short because the specs are very large or deeply linked, so the list is incomplete"
-
 var methods = []string{"get", "put", "post", "delete", "options", "head", "patch", "trace"}
 
 type Change struct {
@@ -41,6 +39,7 @@ type Report struct {
 	Breaking      int      `json:"breaking"`
 	NonBreaking   int      `json:"nonBreaking"`
 	Informational int      `json:"informational"`
+	Truncated     bool     `json:"truncated"`
 }
 
 type Query struct {
@@ -54,6 +53,9 @@ type Reply struct {
 }
 
 func (r Report) Reaches(failOn string) bool {
+	if r.Truncated && failOn != FailNone {
+		return true
+	}
 	switch failOn {
 	case FailBreaking:
 		return r.Breaking > 0
@@ -102,18 +104,15 @@ func checkSpec(root map[string]any) error {
 
 type comparison struct {
 	resolver
-	report    Report
-	truncated bool
-	method    string
-	path      string
+	report Report
+	method string
+	path   string
 }
 
 func (c *comparison) add(severity Severity, where, message string) {
-	if len(c.report.Changes) >= maxChanges {
-		c.truncated = true
-		return
+	if len(c.report.Changes) < maxChanges {
+		c.report.Changes = append(c.report.Changes, Change{Severity: severity, Method: c.method, Path: c.path, Where: where, Message: message})
 	}
-	c.report.Changes = append(c.report.Changes, Change{Severity: severity, Method: c.method, Path: c.path, Where: where, Message: message})
 	switch severity {
 	case Breaking:
 		c.report.Breaking++
@@ -130,10 +129,7 @@ func Compare(ctx context.Context, oldRoot, newRoot map[string]any) Report {
 	c.comparePaths()
 	c.compareSecuritySchemes()
 	c.sortChanges()
-	if c.truncated || c.budget.exhausted {
-		c.report.Changes = append(c.report.Changes, Change{Severity: Informational, Message: truncatedMessage})
-		c.report.Informational++
-	}
+	c.report.Truncated = c.budget.incomplete() || c.report.Breaking+c.report.NonBreaking+c.report.Informational > len(c.report.Changes)
 	return c.report
 }
 
