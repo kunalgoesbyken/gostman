@@ -3,7 +3,7 @@
   "displayName": "Gostman",
   "description": "Run, send, lint and scan Gostman API collections from VS Code.",
   "version": "0.1.0",
-  "publisher": "gostman",
+  "publisher": "Gostman",
   "license": "MIT",
   "icon": "media/icon.png",
   "repository": { "type": "git", "url": "https://github.com/kunalgoesbyken/gostman.git", "directory": "editors/vscode" },
