@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -18,6 +19,7 @@ const (
 	hurlJSONRoot       = "$"
 	hurlBodyRoot       = "res.body"
 	hurlHeaderPrefix   = "res.headers"
+	hurlNoteBody       = "left out, the body has a ``` line that Hurl files cannot hold"
 	hurlNoteAssertLeft = "left out, no Hurl form: %s %s %s"
 	hurlNoteCapture    = "left out, no Hurl form: capture %s"
 )
@@ -80,22 +82,40 @@ func hurlLine(text string) string {
 	return mapPlaceholders(singleLine(text), hurlPlaceholder)
 }
 
+func hurlComment(text string) string {
+	return hurlCommentMark + oneLine(text)
+}
+
+func hurlQuotedArg(text string) string {
+	return `"` + strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(singleLine(text)) + `"`
+}
+
+var hurlHeaderToken = regexp.MustCompile(`^[A-Za-z0-9!#$%&'*+.^_|~-]+$`)
+
+var hurlCaptureName = regexp.MustCompile(`^[A-Za-z0-9_-]+$`)
+
 func hurlEntryText(request workspace.Request) string {
-	lines := []string{hurlCommentMark + oneLine(request.Name)}
+	lines := []string{hurlComment(request.Name)}
 	if protocol := unwrittenProtocol(request); protocol != "" {
-		return strings.Join(append(lines, hurlCommentMark+fmt.Sprintf(noteLeftOut, protocol)), "\n") + "\n"
+		return strings.Join(append(lines, hurlComment(fmt.Sprintf(noteLeftOut, protocol))), "\n") + "\n"
 	}
 	method, address, headers, _, note := httpRequestText(request)
 	if note != "" {
-		lines = append(lines, hurlCommentMark+note)
+		lines = append(lines, hurlComment(note))
 	}
-	body := hurlBody(request)
+	body, bodyNote := hurlBody(request)
+	if bodyNote != "" {
+		lines = append(lines, hurlComment(bodyNote))
+	}
 	if request.BodyType == bodyMultipart || request.BodyType == bodyForm {
 		headers = withoutContentType(headers)
 	}
 	lines = append(lines, method+" "+hurlLine(address))
 	for _, header := range headers {
-		lines = append(lines, hurlLine(header.Key)+": "+hurlLine(header.Value))
+		if !hurlHeaderToken.MatchString(header.Key) {
+			continue
+		}
+		lines = append(lines, header.Key+": "+hurlLine(header.Value))
 	}
 	lines = append(lines, hurlOptionLines(request)...)
 	lines = append(lines, body.sections...)
@@ -116,7 +136,7 @@ func hurlEntryText(request workspace.Request) string {
 		lines = append(lines, captures...)
 	}
 	for _, comment := range append(left, skipped...) {
-		lines = append(lines, hurlCommentMark+comment)
+		lines = append(lines, hurlComment(comment))
 	}
 	return strings.Join(lines, "\n") + "\n"
 }
@@ -140,28 +160,35 @@ type hurlBodyParts struct {
 	text     string
 }
 
-func hurlBody(request workspace.Request) hurlBodyParts {
+func hurlBody(request workspace.Request) (hurlBodyParts, string) {
 	switch request.BodyType {
 	case bodyForm:
-		return hurlBodyParts{sections: hurlPairLines("[Form]", enabledRows(readRows(request.Body)), false)}
+		return hurlBodyParts{sections: hurlPairLines("[Form]", enabledRows(readRows(request.Body)), false)}, ""
 	case bodyMultipart:
-		return hurlBodyParts{sections: hurlPairLines("[MultipartFormData]", enabledRows(readRows(request.Body)), true)}
+		return hurlBodyParts{sections: hurlPairLines("[MultipartFormData]", enabledRows(readRows(request.Body)), true)}, ""
 	case bodyJSON, bodyText, bodyXML:
 		text := strings.TrimSpace(normalizeNewlines(request.Body))
 		if text == "" {
-			return hurlBodyParts{}
+			return hurlBodyParts{}, ""
 		}
-		return hurlBodyParts{text: hurlBodyText(text, request.BodyType)}
+		written, ok := hurlBodyText(text, request.BodyType)
+		if !ok {
+			return hurlBodyParts{}, hurlNoteBody
+		}
+		return hurlBodyParts{text: written}, ""
 	}
-	return hurlBodyParts{}
+	return hurlBodyParts{}, ""
 }
 
-func hurlBodyText(text, bodyType string) string {
+func hurlBodyText(text, bodyType string) (string, bool) {
 	text = mapPlaceholders(text, hurlPlaceholder)
-	if bodyType == bodyJSON && (strings.HasPrefix(text, "{") || strings.HasPrefix(text, "[")) && !strings.Contains(text, "```") {
-		return text
+	if bodyType == bodyJSON && json.Valid([]byte(text)) && (strings.HasPrefix(text, "{") || strings.HasPrefix(text, "[")) {
+		return text, true
 	}
-	return "```\n" + text + "\n```"
+	if strings.Contains(text, "```") {
+		return "", false
+	}
+	return "```\n" + text + "\n```", true
 }
 
 func hurlPairLines(section string, rows []row, files bool) []string {
@@ -172,7 +199,9 @@ func hurlPairLines(section string, rows []row, files bool) []string {
 	for _, candidate := range rows {
 		value := hurlLine(candidate.Value)
 		if files && candidate.Type == rowTypeFile {
-			value = "file," + attachedName(candidate.FileName) + ";"
+			value = "file," + hurlLine(attachedName(candidate.FileName)) + ";"
+		} else if strings.HasPrefix(strings.TrimSpace(value), "file,") || strings.HasPrefix(strings.TrimSpace(value), "base64,") {
+			continue
 		}
 		lines = append(lines, hurlLine(candidate.Key)+": "+value)
 	}
@@ -213,7 +242,7 @@ func hurlQueryOf(expression string) (string, bool, bool) {
 	case strings.HasPrefix(expression, hurlHeaderPrefix):
 		return hurlHeaderQuery(strings.TrimPrefix(expression, hurlHeaderPrefix))
 	case strings.HasPrefix(expression, hurlBodyRoot+".") || strings.HasPrefix(expression, hurlBodyRoot+"["):
-		return `jsonpath "` + hurlJSONRoot + strings.TrimPrefix(expression, hurlBodyRoot) + `"`, false, true
+		return "jsonpath " + hurlQuotedArg(hurlJSONRoot+strings.TrimPrefix(expression, hurlBodyRoot)), false, true
 	}
 	return "", false, false
 }
@@ -228,7 +257,7 @@ func hurlHeaderQuery(rest string) (string, bool, bool) {
 	case strings.HasPrefix(rest, "."):
 		name = rest[1:]
 	}
-	return `header "` + name + `"`, false, name != ""
+	return "header " + hurlQuotedArg(name), false, name != ""
 }
 
 func hurlAssertLine(candidate assertion) (string, bool) {
@@ -258,11 +287,13 @@ func hurlLiteral(value string, bare bool) string {
 	if bare && (trimmed == "true" || trimmed == "false" || trimmed == "null") {
 		return trimmed
 	}
-	encoded, err := json.Marshal(mapPlaceholders(value, hurlPlaceholder))
-	if err != nil {
+	var out strings.Builder
+	encoder := json.NewEncoder(&out)
+	encoder.SetEscapeHTML(false)
+	if encoder.Encode(mapPlaceholders(singleLine(value), hurlPlaceholder)) != nil {
 		return `""`
 	}
-	return string(encoded)
+	return strings.TrimSpace(out.String())
 }
 
 func hurlCaptureLines(source string) ([]string, []string) {
@@ -272,17 +303,17 @@ func hurlCaptureLines(source string) ([]string, []string) {
 	}
 	var lines, skipped []string
 	for _, rule := range rules {
-		if !rule.Enabled || rule.Name == "" {
+		if !rule.Enabled || !hurlCaptureName.MatchString(rule.Name) {
 			continue
 		}
 		var query string
 		switch {
 		case rule.Source == sourceBody && strings.HasPrefix(rule.Expression, hurlJSONRoot):
-			query = `jsonpath "` + rule.Expression + `"`
+			query = "jsonpath " + hurlQuotedArg(rule.Expression)
 		case rule.Source == sourceHeader && rule.Expression != "":
-			query = `header "` + rule.Expression + `"`
+			query = "header " + hurlQuotedArg(rule.Expression)
 		case rule.Source == sourceCookie && rule.Expression != "":
-			query = `cookie "` + rule.Expression + `"`
+			query = "cookie " + hurlQuotedArg(rule.Expression)
 		case rule.Source == sourceStatus:
 			query = "status"
 		default:

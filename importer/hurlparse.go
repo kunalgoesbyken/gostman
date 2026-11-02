@@ -126,7 +126,7 @@ func (r *hurlReader) pairs() []hurlPair {
 	var pairs []hurlPair
 	for !r.done() {
 		line := r.line()
-		if strings.TrimSpace(line) == "" || hurlSectionLine.MatchString(line) || hurlResponseLine.MatchString(line) {
+		if strings.TrimSpace(line) == "" || hurlSectionLine.MatchString(line) || hurlResponseLine.MatchString(line) || startsHurlBody(line) {
 			return pairs
 		}
 		r.at++
@@ -290,4 +290,9 @@ func (r *hurlReader) responseBodyAfter(entry *hurlEntry) {
 		r.untilBlank()
 	}
 	entry.responseBody = true
+}
+
+func startsHurlBody(line string) bool {
+	trimmed := strings.TrimSpace(line)
+	return strings.HasPrefix(trimmed, "{") || strings.HasPrefix(trimmed, "[") || strings.HasPrefix(trimmed, "`") || strings.HasPrefix(trimmed, "<")
 }
