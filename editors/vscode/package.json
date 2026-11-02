@@ -1,0 +1,58 @@
+{
+  "name": "gostman",
+  "displayName": "Gostman",
+  "description": "Run, send, lint and scan Gostman API collections from VS Code.",
+  "version": "0.1.0",
+  "publisher": "gostman",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "repository": { "type": "git", "url": "https://github.com/kunalgoesbyken/gostman.git", "directory": "editors/vscode" },
+  "homepage": "https://gostman.com",
+  "bugs": { "url": "https://github.com/kunalgoesbyken/gostman/issues" },
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Testing", "Other"],
+  "keywords": ["api", "rest", "graphql", "grpc", "websocket", "http client", "postman", "bruno", "mcp"],
+  "main": "./extension.js",
+  "activationEvents": ["workspaceContains:gostman.yaml"],
+  "capabilities": {
+    "untrustedWorkspaces": { "supported": false, "description": "Running a collection sends requests and runs its scripts." }
+  },
+  "contributes": {
+    "commands": [
+      { "command": "gostman.run", "title": "Gostman: Run collection" },
+      { "command": "gostman.runFolder", "title": "Gostman: Run a folder of the collection" },
+      { "command": "gostman.send", "title": "Gostman: Send a saved request" },
+      { "command": "gostman.flow", "title": "Gostman: Run a flow" },
+      { "command": "gostman.lint", "title": "Gostman: Lint an OpenAPI spec" },
+      { "command": "gostman.scan", "title": "Gostman: Scan the collection for leaked secrets" },
+      { "command": "gostman.init", "title": "Gostman: Create a collection in this folder" },
+      { "command": "gostman.docs", "title": "Gostman: Open the documentation" }
+    ],
+    "menus": {
+      "explorer/context": [
+        { "command": "gostman.lint", "when": "resourceExtname =~ /\\.(ya?ml|json)$/", "group": "gostman" }
+      ]
+    },
+    "configuration": {
+      "title": "Gostman",
+      "properties": {
+        "gostman.path": {
+          "type": "string",
+          "default": "gostman",
+          "markdownDescription": "Command that starts the Gostman CLI. Use a full path when `gostman` is not on the PATH.",
+          "scope": "machine-overridable"
+        },
+        "gostman.environment": {
+          "type": "string",
+          "default": "",
+          "description": "Environment name passed as --env. Empty uses the first environment of the collection."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "package": "vsce package --no-dependencies",
+    "publish": "vsce publish --no-dependencies"
+  },
+  "devDependencies": { "@vscode/vsce": "^3.0.0" }
+}
