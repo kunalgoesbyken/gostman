@@ -1,4 +1,4 @@
-import { Activity, Cookie, GitBranch, Radio, Server, Settings, SlidersHorizontal, Sparkles } from "lucide-react"
+import { Activity, Cookie, GitBranch, Radio, Server, Settings, SlidersHorizontal, Newspaper } from "lucide-react"
 import { cn } from "../lib/utils"
 import { useCaptureStore } from "../lib/captureSession"
 import { openGit, useGitStore } from "../lib/gitSession"
@@ -48,7 +48,7 @@ export function StatusBar({ onOpenMock, onOpenCapture, onOpenMonitors, updates, 
         {git.hasFolder && <StatusItem icon={GitBranch} label={git.isRepo ? gitLabel(git) : TEXT.git} onClick={openGit} />}
       </div>
       <div className="flex h-full items-center">
-        {hasUnseenRelease && <StatusItem icon={Sparkles} label={FEATURES_TEXT.whatsNewTitle} title={FEATURES_TEXT.whatsNewDot(APP_VERSION)} className="text-primary" onClick={openWhatsNew} />}
+        {hasUnseenRelease && <StatusItem icon={Newspaper} label={FEATURES_TEXT.whatsNewTitle} title={FEATURES_TEXT.whatsNewDot(APP_VERSION)} className="text-primary" onClick={openWhatsNew} />}
         <DataNotices updates={updates} remindsExport={remindsExport} onExport={onExport} />
         <StatusItem icon={Cookie} label={TEXT.cookies} onClick={openCookies} />
         <StatusItem icon={SlidersHorizontal} label={PREFERENCES_TEXT.statusLabel} onClick={openPreferences} />

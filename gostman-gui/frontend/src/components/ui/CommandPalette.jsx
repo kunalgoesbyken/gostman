@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react"
 import {
   ChevronsDownUp, ClipboardPaste, Clock, Compass, MonitorDown, Info, Hand, Folder, FolderOpen, Code, Copy, FileText, FolderPlus, Globe, History, Keyboard, PanelLeft, Pin, Plus, Save, Search, Send,
-  Bot, Settings, Settings2, SlidersHorizontal, Sparkles, Trash2, Undo2, Workflow, X,
+  Bot, Settings, Settings2, SlidersHorizontal, Newspaper, Trash2, Undo2, Workflow, X,
 } from "lucide-react"
 import { MethodTag } from "../MethodTag"
 import { SectionLabel } from "./panel"
@@ -82,7 +82,7 @@ const resetCommand = () => ({ id: "reset", label: DATA_TEXT.commandTitle, descri
 
 const exploreCommands = () => [
   { id: "explore", label: FEATURES_TEXT.commandTitle, description: FEATURES_TEXT.commandDescription, keywords: FEATURES_TEXT.commandKeywords, icon: Compass, action: "explore" },
-  { id: "whats-new", label: FEATURES_TEXT.whatsNewCommandTitle, description: FEATURES_TEXT.whatsNewCommandDescription, keywords: FEATURES_TEXT.whatsNewKeywords, icon: Sparkles, action: "whatsNew" },
+  { id: "whats-new", label: FEATURES_TEXT.whatsNewCommandTitle, description: FEATURES_TEXT.whatsNewCommandDescription, keywords: FEATURES_TEXT.whatsNewKeywords, icon: Newspaper, action: "whatsNew" },
 ]
 
 const installCommand = () => ({ id: "install-app", label: INSTALL_TEXT.label, description: INSTALL_TEXT.description, icon: MonitorDown, action: "installApp" })

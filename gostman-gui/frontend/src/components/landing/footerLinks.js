@@ -13,6 +13,7 @@ export const FOOTER_COLUMNS = [
       external("Download", RELEASES_URL),
       internal("Command line", docPath("cli")),
       internal("Coding agents", docPath("agents")),
+      internal("VS Code extension", docPath("vscode")),
     ],
   },
   {
@@ -22,18 +23,17 @@ export const FOOTER_COLUMNS = [
       internal("First collection", docPath("tutorial-first-collection")),
       internal("Tests in CI", docPath("tutorial-ci")),
       internal("Variables", docPath("variables")),
-      internal("Scripts and checks", docPath("scripting-and-settings")),
-      internal("Flows", docPath("flows")),
-      internal("Collections and Git", docPath("collections-and-git")),
-      internal("Import and export", docPath("import-export-and-specs")),
       internal("Troubleshooting", docPath("troubleshooting")),
       internal("All documentation", docPath("")),
     ],
   },
   {
     title: "Guides",
+    links: guidePages.map((page) => internal(page.heading, `/${page.path}`)),
+  },
+  {
+    title: "Compare",
     links: [
-      ...guidePages.map((page) => internal(page.heading, `/${page.path}`)),
       internal("Gostman vs Postman", docPath("gostman-vs-postman")),
       internal("Gostman vs Bruno", docPath("gostman-vs-bruno")),
       internal("Gostman vs Insomnia", docPath("gostman-vs-insomnia")),

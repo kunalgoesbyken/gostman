@@ -1,5 +1,5 @@
 import { useRef, useState } from "react"
-import { ArrowLeft, CircleHelp, Compass, Download, Hand, Import, Info, Keyboard, Route, PanelLeft, Search, Sparkles } from "lucide-react"
+import { ArrowLeft, CircleHelp, Compass, Download, Hand, Import, Info, Keyboard, Route, PanelLeft, Search, Newspaper } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { EnvironmentSwitcher } from "./EnvironmentSwitcher"
 import { StorageMenu } from "./StorageMenu"
@@ -38,7 +38,7 @@ function HelpMenu({ style }) {
   const state = useAppStore.getState
   const items = [
     { id: "explore", label: FEATURES_TEXT.title, icon: Compass, onSelect: () => state().openExplore() },
-    { id: "whats-new", label: FEATURES_TEXT.whatsNewTitle, icon: Sparkles, onSelect: () => state().openWhatsNew() },
+    { id: "whats-new", label: FEATURES_TEXT.whatsNewTitle, icon: Newspaper, onSelect: () => state().openWhatsNew() },
     { id: "welcome", label: WELCOME_TEXT.commandTitle, icon: Hand, onSelect: () => state().showWelcome() },
     { id: "tour", label: TOUR_TEXT.replay, icon: Route, onSelect: startTourReplay },
     { id: "shortcuts", label: SHORTCUT_TEXT.title, icon: Keyboard, onSelect: () => state().openShortcutsDialog() },

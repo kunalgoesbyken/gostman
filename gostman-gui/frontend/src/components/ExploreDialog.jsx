@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Sparkles } from "lucide-react"
+import { Newspaper } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { toolWindow } from "../lib/dialogWindows"
@@ -100,7 +100,7 @@ export function ExploreDialog({ onClose }) {
       <DialogFooter>
         <span className="me-auto self-center text-xs text-muted-foreground">{TEXT.results(features.length)}</span>
         <Button variant="outline" onClick={openWhatsNew}>
-          <Sparkles />
+          <Newspaper />
           {TEXT.whatsNewTitle}
         </Button>
         <Button onClick={onClose}>{TEXT.close}</Button>

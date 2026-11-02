@@ -1,4 +1,4 @@
-import { Check, Copy, Globe, Sparkles } from "lucide-react"
+import { Check, Copy, Globe, Newspaper } from "lucide-react"
 import { BrandIcon } from "./ui/brandIcon"
 import { Button } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
@@ -48,7 +48,7 @@ export function AboutDialog({ onClose }) {
       </DialogBody>
       <DialogFooter>
         <Button variant="outline" onClick={openWhatsNew}>
-          <Sparkles />
+          <Newspaper />
           {FEATURES_TEXT.whatsNewTitle}
         </Button>
         <Button variant="outline" onClick={copy}>

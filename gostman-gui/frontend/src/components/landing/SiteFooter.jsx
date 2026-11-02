@@ -56,7 +56,7 @@ function FooterColumn({ column }) {
   return (
     <nav aria-label={column.title}>
       <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{column.title}</h2>
-      <ul className="mt-4 space-y-3">
+      <ul className="mt-3 space-y-2">
         {column.links.map((link) => (
           <li key={link.href}>
             <FooterLink link={link} />
@@ -69,20 +69,20 @@ function FooterColumn({ column }) {
 
 export function SiteFooter() {
   return (
-    <footer className="render-when-visible border-t border-border/40 bg-muted/10 px-6 py-16">
-      <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
-        <div className="space-y-4">
+    <footer className="render-when-visible border-t border-border/40 bg-muted/10 px-6 py-10">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-2">
           <Brand tagline="API client for REST, GraphQL, gRPC and WebSocket" />
-          <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">Free and open source. No account, and your collections stay on your machine.</p>
-          <AlternativeToBadge />
+          <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">Free and open source. No account, and your collections stay on your machine.</p>
         </div>
-        <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
-          {FOOTER_COLUMNS.map((column) => (
-            <FooterColumn key={column.title} column={column} />
-          ))}
-        </div>
+        <AlternativeToBadge />
       </div>
-      <div className="mx-auto mt-14 flex max-w-6xl flex-col gap-4 border-t border-border/40 pt-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+      <div className="mx-auto mt-8 grid max-w-6xl grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
+        {FOOTER_COLUMNS.map((column) => (
+          <FooterColumn key={column.title} column={column} />
+        ))}
+      </div>
+      <div className="mx-auto mt-8 flex max-w-6xl flex-col gap-4 border-t border-border/40 pt-5 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <AskAssistants />
         <p>
           Free software under the{" "}
