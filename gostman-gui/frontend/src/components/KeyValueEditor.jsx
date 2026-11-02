@@ -4,6 +4,7 @@ import { Button, IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { VariableInput, VariableTextarea } from "./VariableInput"
 import { PanelBody, SectionLabel } from "./ui/panel"
+import { InfoTip } from "./ui/infoTip"
 import { Select } from "./ui/select"
 import { FileField } from "./FileField"
 import { EMPTY_ATTACHMENT } from "../lib/attachments"
@@ -166,7 +167,7 @@ function ModeSwitch({ rows, showsBulk, onSwitch }) {
   )
 }
 
-export function KeyValueEditor({ rows, onChange, keyLabel = TEXT.key, valueLabel = TEXT.value, typed = false, fileRows = false, suggestions, children }) {
+export function KeyValueEditor({ rows, onChange, keyLabel = TEXT.key, valueLabel = TEXT.value, typed = false, fileRows = false, suggestions, note, children }) {
   const [isBulk, setIsBulk] = useState(false)
   const showsBulk = isBulk && !typed && !fileRows
 
@@ -178,7 +179,8 @@ export function KeyValueEditor({ rows, onChange, keyLabel = TEXT.key, valueLabel
         <TableEditor rows={rows} typed={typed} fileRows={fileRows} keyLabel={keyLabel} valueLabel={valueLabel} suggestions={suggestions} onChange={onChange} />
       )}
       {!typed && !fileRows && (
-        <div className="mt-2 flex justify-end">
+        <div className="mt-2 flex items-center justify-between gap-2">
+          {note ? <InfoTip text={note} /> : <span />}
           <ModeSwitch rows={rows} showsBulk={showsBulk} onSwitch={setIsBulk} />
         </div>
       )}
