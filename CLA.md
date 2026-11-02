@@ -1,37 +1,48 @@
 # Contributor License Agreement
 
-This agreement is between you and the Gostman maintainers ("we", "us"). It applies to every contribution you submit to the Gostman repository: code, documentation, translations, images and anything else, in a pull request or any other way ("Your Contribution").
+Thank you for your interest in contributing to Gostman.
 
-The agreement exists so that Gostman can keep shipping under its open source licence (currently the [MIT licence](LICENSE)) and so that we can change that licence later if we need to, without asking every contributor again. You keep the copyright in what you wrote.
+## Individual Contributor License Agreement ("Agreement")
 
-## 1. What you confirm
+By signing this Agreement, you accept and agree to the following terms and conditions for your present and future contributions submitted to Gostman. In return, Gostman shall not use your contributions in a way that is contrary to the public benefit or inconsistent with its mission.
 
-- You wrote Your Contribution, or you have the right to submit it under this agreement.
-- If your employer or anyone else has rights in it, you have their permission to submit it.
-- To your knowledge it does not infringe anyone's copyright, patent or other rights, and it carries no code or data you are not allowed to share.
-- You are legally able to enter this agreement. If you are under the age of majority where you live, a parent or guardian agrees on your behalf.
+### 1. Definitions
 
-## 2. Copyright licence
+**"You"** (or **"Your"**) shall mean the copyright owner or legal entity authorized by the copyright owner that is making this Agreement with Gostman. For legal entities, the entity making a contribution and all other entities that control, are controlled by, or are under common control with that entity are considered to be a single contributor.
 
-You grant us, and everyone who receives Gostman from us, a perpetual, worldwide, non-exclusive, royalty-free, irrevocable licence to use, copy, modify, publish, distribute, sublicense and prepare derivative works of Your Contribution, in source and binary form, under the Gostman licence or any other licence we choose, including a proprietary one.
+**"Contribution"** shall mean any original work of authorship, including any modifications or additions to an existing work, that is intentionally submitted by you to Gostman for inclusion in, or documentation of, any of the products owned or managed by Gostman (the **"Work"**). For the purposes of this definition, "submitted" means any form of electronic, verbal, or written communication sent to Gostman or its representatives, including but not limited to communication on electronic mailing lists, source code control systems, and issue tracking systems that are managed by, or on behalf of, Gostman for the purpose of discussing and improving the Work.
 
-## 3. Patent licence
+### 2. Grant of Copyright License
 
-You grant us, and everyone who receives Gostman from us, a perpetual, worldwide, non-exclusive, royalty-free, irrevocable patent licence to make, use, sell, offer to sell, import and otherwise transfer Your Contribution, for the patent claims you can license that are necessarily infringed by Your Contribution alone or together with Gostman. If you start patent litigation claiming that Your Contribution or Gostman infringes a patent, the patent licences you granted end on the date you start it.
+Subject to the terms and conditions of this Agreement, you hereby grant to Gostman and to recipients of software distributed by Gostman a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable copyright license to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of your contributions, and to permit persons to whom the software is furnished to do so.
 
-## 4. What stays the same
+### 3. Grant of Patent License
 
-- You keep the copyright in Your Contribution.
-- You may use Your Contribution in other projects.
-- We are not required to use or keep Your Contribution.
-- Your Contribution is provided as it is, without warranty of any kind.
+Subject to the terms and conditions of this Agreement, you hereby grant to Gostman and to recipients of software distributed by Gostman a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable (except as stated in this section) patent license to make, have made, use, offer to sell, sell, import, and otherwise transfer your contributions, where such license applies only to those patent claims licensable by you that are necessarily infringed by your contribution(s) alone or by combination of your contribution(s) with the Work to which such contribution(s) was submitted. If any entity institutes patent litigation against you or any other entity (including a cross-claim or counterclaim in a lawsuit) alleging that your contribution, or the Work to which you have contributed, constitutes direct or contributory patent infringement, then any patent licenses granted to that entity under this Agreement for that contribution or Work shall terminate as of the date such litigation is filed.
 
-## 5. How to sign
+### 4. Representations
 
-When you open a pull request, a bot checks whether you have signed. If you have not, it posts a comment. Reply to that comment with exactly this sentence:
+You represent that:
 
-> I have read the CLA Document and I hereby sign the CLA
+1. You are legally entitled to grant the above license.
+2. If your employer(s) has rights to intellectual property that you create that includes your contributions, you represent that you have received permission to make contributions on behalf of that employer, that your employer has waived such rights for your contributions to Gostman, or that your employer has executed a separate Corporate CLA with Gostman.
+3. Each of your contributions is your original creation.
+4. Your contribution submissions include complete details of any third-party license or other restriction (including, but not limited to, related patents and trademarks) of which you are personally aware and which are associated with any part of your contributions.
 
-You sign once. The bot records your GitHub username and the date on the `cla-signatures` branch and the check passes on this and later pull requests.
+### 5. Support
 
-If you contribute on behalf of a company, ask us before submitting.
+You are not expected to provide support for your contributions, except to the extent you desire to provide support. You may provide support for free, for a fee, or not at all. Unless required by applicable law or agreed to in writing, you provide your contributions on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied, including, without limitation, any warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE.
+
+### 6. Notification
+
+You agree to notify Gostman of any facts or circumstances of which you become aware that would make these representations inaccurate in any respect.
+
+---
+
+**How to sign:** when you open a pull request, a bot checks whether you have signed. If you have not, it comments. Reply to that comment with:
+
+```
+I have read the CLA Document and I hereby sign the CLA
+```
+
+You sign once. The bot records your GitHub username and the date on the `cla-signatures` branch.
