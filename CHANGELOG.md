@@ -4,6 +4,8 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.11.1] - 2026-11-02
+
 ### Added
 
 - Watch a linked spec: the folder menu has **Watch this spec**. When the spec file changes on disk (desktop), or the spec at an address has changed when you return to the window (at most every 10 minutes, also on the web), a notice offers **Review**, which opens **Spec updates**. Nothing is applied until you choose it.
