@@ -351,8 +351,9 @@ capture
   --rules <file>        apply capture rules from a YAML file: rewrite headers
                         and bodies, send a path to another host, answer from a
                         file, add delay, errors or resets, limit bandwidth
-                        (default: .gostman/capture.yaml of --workspace). Files
-                        an answer reads must sit next to the rules file
+                        (never read from a workspace on its own: a cloned
+                        repository could send traffic elsewhere). Files an
+                        answer reads must sit inside the rules file folder
   --har <file>          on exit, write the captured exchanges as a HAR 1.2 file;
                         Authorization, Cookie and Set-Cookie values show as ***
 

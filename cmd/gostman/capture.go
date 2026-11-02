@@ -165,16 +165,26 @@ func serveCapture(settings capture.Settings, collecting *collector, harPath stri
 	return err
 }
 
-func rulesFor(rulesPath, root string) ([]capture.Rule, string, error) {
-	switch {
-	case rulesPath != "":
-		config, err := capture.LoadConfig(rulesPath)
-		return config.Rules, filepath.Dir(rulesPath), err
-	case root != "":
-		config, err := capture.LoadConfig(filepath.Join(root, capture.ConfigFileName))
-		return config.Rules, root, err
+func rulesFor(rulesPath string) ([]capture.Rule, string, error) {
+	if rulesPath == "" {
+		return nil, "", nil
 	}
-	return nil, "", nil
+	config, err := capture.LoadConfig(rulesPath)
+	return config.Rules, filepath.Dir(rulesPath), err
+}
+
+func describeRules(rules []capture.Rule, stdout io.Writer) {
+	for _, rule := range rules {
+		if rule.Disabled {
+			continue
+		}
+		if rule.MapRemote != "" {
+			fmt.Fprintln(stdout, "  "+rule.Name+": sends matching calls to "+rule.MapRemote)
+		}
+		if rule.Answer != nil && rule.Answer.File != "" {
+			fmt.Fprintln(stdout, "  "+rule.Name+": answers from the file "+rule.Answer.File)
+		}
+	}
 }
 
 func breaksAnywhere(rules []capture.Rule) bool {
@@ -210,7 +220,7 @@ func captureCommand(arguments []string, stdout, stderr *os.File) int {
 	if err != nil {
 		return complain(stderr, err)
 	}
-	rules, filesRoot, err := rulesFor(*rulesPath, *root)
+	rules, filesRoot, err := rulesFor(*rulesPath)
 	switch {
 	case err != nil:
 		return complain(stderr, err)

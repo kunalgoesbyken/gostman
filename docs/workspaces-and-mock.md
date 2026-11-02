@@ -88,6 +88,7 @@ rules:
 - **Delay, failure and bandwidth**: `delayMs` (and `delayMaxMs` for a random time in between), `fault` with `percent`, `kind` (`status`, `reset` or `empty`) and `status`, the same as in the [mock server](#examples-and-the-mock-server-desktop), and `throttle` with `latencyMs`, `downloadKBps` and `uploadKBps`.
 - **Breakpoints**: `break: request`, `response` or `both` holds the call in the desktop app. `gostman capture` refuses rules that break, because nothing could release them.
 - Rules from an imported rules file arrive switched off.
+- **Trust**: rules can send traffic to another host and read files, so they count as active content. A folder you did not create loads its `.gostman/capture.yaml` with every rule switched off and the Rules tab cannot change it until you choose **Trust this folder**. `gostman capture` never reads rules from a workspace on its own; pass `--rules file.yaml`, and it prints each Map Remote destination and answer file at start. An answer file is read only from inside the workspace folder (or the folder of the `--rules` file); absolute paths and `..` are refused. Capture rules are not available to coding agents.
 
 - It is a forwarding address for one API, not an intercepting proxy: there is no certificate to install, and an app whose base URL cannot be changed is not captured.
 - `Authorization`, `Cookie` and `Proxy-Authorization` request headers are never saved. Bodies are saved as captured, so check them for tokens before sharing.

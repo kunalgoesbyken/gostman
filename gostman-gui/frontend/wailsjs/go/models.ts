@@ -260,6 +260,7 @@ export namespace capture {
 	export class Config {
 	    rules: Rule[];
 	    breakSeconds?: number;
+	    restricted?: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -269,6 +270,7 @@ export namespace capture {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.rules = this.convertValues(source["rules"], Rule);
 	        this.breakSeconds = source["breakSeconds"];
+	        this.restricted = source["restricted"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -916,6 +918,7 @@ export namespace engine {
 	    streamMaxSeconds: number;
 	    skipCookies: boolean;
 	    discardCookies: boolean;
+	    httpVersion: string;
 	    socketIoPath: string;
 	    socketIoAuth: string;
 	
@@ -934,6 +937,7 @@ export namespace engine {
 	        this.streamMaxSeconds = source["streamMaxSeconds"];
 	        this.skipCookies = source["skipCookies"];
 	        this.discardCookies = source["discardCookies"];
+	        this.httpVersion = source["httpVersion"];
 	        this.socketIoPath = source["socketIoPath"];
 	        this.socketIoAuth = source["socketIoAuth"];
 	    }
@@ -1186,6 +1190,7 @@ export namespace engine {
 	    body: string;
 	    parts?: PreparedPart[];
 	    file?: string;
+	    httpVersion?: string;
 	    unresolved?: string[];
 	
 	    static createFrom(source: any = {}) {
@@ -1200,6 +1205,7 @@ export namespace engine {
 	        this.body = source["body"];
 	        this.parts = this.convertValues(source["parts"], PreparedPart);
 	        this.file = source["file"];
+	        this.httpVersion = source["httpVersion"];
 	        this.unresolved = source["unresolved"];
 	    }
 	
@@ -1510,6 +1516,8 @@ export namespace gitutil {
 	    author: string;
 	    date: string;
 	    subject: string;
+	    parents: string[];
+	    refs: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Commit(source);
@@ -1522,6 +1530,8 @@ export namespace gitutil {
 	        this.author = source["author"];
 	        this.date = source["date"];
 	        this.subject = source["subject"];
+	        this.parents = source["parents"];
+	        this.refs = source["refs"];
 	    }
 	}
 	export class Conflict {
@@ -1551,6 +1561,8 @@ export namespace gitutil {
 	export class Diff {
 	    text: string;
 	    binary: boolean;
+	    before: string;
+	    after: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Diff(source);
@@ -1560,6 +1572,8 @@ export namespace gitutil {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.text = source["text"];
 	        this.binary = source["binary"];
+	        this.before = source["before"];
+	        this.after = source["after"];
 	    }
 	}
 	export class Remote {
@@ -1595,6 +1609,7 @@ export namespace gitutil {
 	export class Version {
 	    content: string;
 	    diff: string;
+	    before: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Version(source);
@@ -1604,6 +1619,7 @@ export namespace gitutil {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.content = source["content"];
 	        this.diff = source["diff"];
+	        this.before = source["before"];
 	    }
 	}
 
@@ -2251,6 +2267,8 @@ export namespace main {
 	    proxy: string;
 	    noProxy: string;
 	    ca: string;
+	    resolve: string[];
+	    ipVersion: string;
 	    certificates: CertificateFiles[];
 	    active: boolean;
 	    restricted: boolean;
@@ -2265,6 +2283,8 @@ export namespace main {
 	        this.proxy = source["proxy"];
 	        this.noProxy = source["noProxy"];
 	        this.ca = source["ca"];
+	        this.resolve = source["resolve"];
+	        this.ipVersion = source["ipVersion"];
 	        this.certificates = this.convertValues(source["certificates"], CertificateFiles);
 	        this.active = source["active"];
 	        this.restricted = source["restricted"];
@@ -2695,6 +2715,8 @@ export namespace main {
 	    proxyBypass: string;
 	    certificates: CertificateFiles[];
 	    caFile: string;
+	    resolve: string[];
+	    ipFamily: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Settings(source);
@@ -2707,6 +2729,8 @@ export namespace main {
 	        this.proxyBypass = source["proxyBypass"];
 	        this.certificates = this.convertValues(source["certificates"], CertificateFiles);
 	        this.caFile = source["caFile"];
+	        this.resolve = source["resolve"];
+	        this.ipFamily = source["ipFamily"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

@@ -54,8 +54,9 @@ func (a *App) StartCapture(settings capture.Settings) (CaptureState, error) {
 	if err != nil {
 		return CaptureState{}, err
 	}
+	config = trustedCaptureConfig(config)
 	settings.Rules, settings.BreakSeconds = config.Rules, config.BreakSeconds
-	if folder := openFolder(); folder != nil {
+	if folder := openFolder(); folder != nil && !config.Restricted {
 		settings.FilesRoot = folder.Root()
 	}
 	server, err := capture.Start(settings, networkTransport{a}, capture.Hooks{
@@ -95,13 +96,24 @@ func captureConfigPath() string {
 	return filepath.Join(appFolder, captureAppDataFile)
 }
 
+func trustedCaptureConfig(config capture.Config) capture.Config {
+	if isTrustedHere() {
+		return config
+	}
+	return config.Withheld()
+}
+
 func (a *App) CaptureConfig() (capture.Config, error) {
-	return capture.LoadConfig(captureConfigPath())
+	config, err := capture.LoadConfig(captureConfigPath())
+	return trustedCaptureConfig(config), err
 }
 
 func (a *App) SaveCaptureConfig(config capture.Config) error {
 	captureMutex.Lock()
 	defer captureMutex.Unlock()
+	if !isTrustedHere() {
+		return fmt.Errorf("trust this folder to change its capture rules")
+	}
 	files := openFolder() != nil
 	if err := capture.Validate(config.Rules, files); err != nil {
 		return err
@@ -110,6 +122,7 @@ func (a *App) SaveCaptureConfig(config capture.Config) error {
 		return err
 	}
 	if captureServer != nil {
+		config = trustedCaptureConfig(config)
 		return captureServer.UpdateRules(config.Rules, config.BreakSeconds)
 	}
 	return nil
@@ -121,7 +134,7 @@ func (a *App) ExportCaptureRules(rules []capture.Rule) (string, error) {
 }
 
 func (a *App) ImportCaptureRules(text string) ([]capture.Rule, error) {
-	return capture.ImportRules([]byte(text), openFolder() != nil)
+	return capture.ImportRules([]byte(text), openFolder() != nil && isTrustedHere())
 }
 
 func (a *App) CapturedHAR(ids []int64) (string, error) {

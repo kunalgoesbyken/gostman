@@ -23,6 +23,7 @@ const (
 type Config struct {
 	Rules        []Rule `json:"rules"`
 	BreakSeconds int    `json:"breakSeconds,omitempty"`
+	Restricted   bool   `json:"restricted,omitempty"`
 }
 
 type rulesFile struct {
@@ -33,6 +34,16 @@ type rulesFile struct {
 
 func DefaultConfig() Config {
 	return Config{Rules: []Rule{}}
+}
+
+func (c Config) Withheld() Config {
+	withheld := make([]Rule, len(c.Rules))
+	for i, rule := range c.Rules {
+		rule.Disabled = true
+		withheld[i] = rule
+	}
+	c.Rules, c.Restricted = withheld, true
+	return c
 }
 
 func LoadConfig(path string) (Config, error) {
@@ -62,6 +73,7 @@ func LoadConfig(path string) (Config, error) {
 }
 
 func SaveConfig(path string, config Config) error {
+	config.Restricted = false
 	data, err := toYAML(config)
 	if err != nil {
 		return err
