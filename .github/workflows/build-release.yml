@@ -213,18 +213,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          merge-multiple: true
-
       - name: Check out the changelog
         uses: actions/checkout@v4
         with:
           sparse-checkout: CHANGELOG.md
           sparse-checkout-cone-mode: false
-          clean: false
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
 
       - name: Take the notes of this version from the changelog
         env:
