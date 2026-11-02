@@ -90,6 +90,8 @@
     "keepOpen": "Keep tab open",
     "revealInTree": "Reveal in collection",
     "copyAsCurl": "Copy as cURL",
+    "showBeside": "Show response beside",
+    "hideBeside": "Stop showing response beside",
     "moveLeft": "Move left",
     "moveRight": "Move right",
     "previewHint": "Preview tab. Edit or double-click to keep it open.",

@@ -381,6 +381,7 @@ export const useAppStore = create(
         specDialog: null,
         runner: CLOSED_RUNNER,
         dependencyGraph: CLOSED_DEPENDENCY_GRAPH,
+        besideTabId: '',
         consoleGroups: [],
         persistenceFailureReported: false,
         treeClipboard: null,
@@ -562,6 +563,7 @@ export const useAppStore = create(
         setSettings: (settings) => set({ settings }),
 
         setActiveTab: (tabId) => set({ activeTabId: tabId }),
+        setBesideTab: (tabId) => set({ besideTabId: tabId }),
         newTab: (folderId = '') => set((state) => appendTab(state, { folderId })),
         openRequestTab: (request, { preview = false, historyId = '' } = {}) => set((state) => ({
           ...tabsWithOpened(state, request, preview, historyId),

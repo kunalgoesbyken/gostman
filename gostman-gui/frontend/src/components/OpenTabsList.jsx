@@ -45,6 +45,7 @@ function OpenTabRow({ tab, saved, isActive, onSelect, onClose, onOpenMenu }) {
 
 export const OpenTabsList = memo(function OpenTabsList({ tabs, activeTabId, requests, actions, onSelect, onClose }) {
   const flows = useAppStore((s) => s.flows)
+  const besideTabId = useAppStore((s) => s.besideTabId)
   const requestsById = useMemo(() => new Map(requests.map((request) => [request.id, request])), [requests])
   const flowsById = useMemo(() => new Map(flows.map((flow) => [flow.id, flow])), [flows])
   const [menu, setMenu] = useState(null)
@@ -65,7 +66,7 @@ export const OpenTabsList = memo(function OpenTabsList({ tabs, activeTabId, requ
           />
         ))}
       </ul>
-      {menuTab && <ContextMenu position={menu.position} title="" items={tabMenuItems(menuTab, tabs, actions, onClose)} onClose={() => setMenu(null)} />}
+      {menuTab && <ContextMenu position={menu.position} title="" items={tabMenuItems(menuTab, tabs, actions, onClose, besideTabId)} onClose={() => setMenu(null)} />}
     </>
   )
 })

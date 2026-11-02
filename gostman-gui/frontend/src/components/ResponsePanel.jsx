@@ -381,8 +381,9 @@ function usePanelResize() {
   return { containerRef, panelShare, isDragging, startDrag, resetHeight, nudgeHeight }
 }
 
-function panelStyleFor(isFullscreen, isCollapsed, panelShare) {
+function panelStyleFor(isFullscreen, isCollapsed, panelShare, docked) {
   if (isFullscreen) return { position: 'fixed', inset: 0, zIndex: 40 }
+  if (docked) return { flex: '1 1 auto', minHeight: 0 }
   if (isCollapsed) return { flex: '0 0 auto' }
   return { flex: `0 1 ${panelShare}%`, minHeight: MIN_RESPONSE_HEIGHT_PX }
 }
@@ -390,7 +391,8 @@ function panelStyleFor(isFullscreen, isCollapsed, panelShare) {
 function historyMenuItems(earlier, past, select, exportHar) {
   const latest = past ? [{ id: 'latest', label: HISTORY_TEXT.latest, onSelect: () => select(null) }] : []
   const entries = earlier.map((entry) => ({ id: String(entry.at), label: describeResponse(entry), onSelect: () => select(entry.at) }))
-  return [...latest, ...entries, { id: 'har', label: HISTORY_TEXT.exportHar, onSelect: exportHar }]
+  const har = exportHar ? [{ id: 'har', label: HISTORY_TEXT.exportHar, onSelect: exportHar }] : []
+  return [...latest, ...entries, ...har]
 }
 
 function PastResponseNotice({ past, canCompare, onCompare, onBack }) {
@@ -408,7 +410,7 @@ function PastResponseNotice({ past, canCompare, onCompare, onBack }) {
   )
 }
 
-export const ResponsePanel = memo(function ResponsePanel({ tabId, response, history = NO_HISTORY, tests, loading, onDownload, onExportHar, onSaveExample, onExplain, onTrust }) {
+export const ResponsePanel = memo(function ResponsePanel({ tabId, response, history = NO_HISTORY, tests, loading, docked = false, onDownload, onExportHar, onSaveExample, onExplain, onTrust }) {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [chosenTab, setActiveTab] = useState(TAB_BODY)
@@ -539,7 +541,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
 
   return (
     <>
-      {isOpen && !isFullscreen && (
+      {isOpen && !isFullscreen && !docked && (
         <div
           role="separator"
           tabIndex={0}
@@ -563,11 +565,11 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
         tabIndex={-1}
         onKeyDown={handleKeyDown}
         className={`flex min-h-0 flex-col bg-background outline-none ${isOpen && !isFullscreen ? '' : 'border-t border-border'}`}
-        style={panelStyleFor(isFullscreen, isCollapsed, panelShare)}
+        style={panelStyleFor(isFullscreen, isCollapsed, panelShare, docked)}
       >
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
           <Toolbar className={cn("h-auto min-h-10 flex-wrap gap-y-0 ps-1.5 pe-1.5", !isOpen && "border-b-0")}>
-            {!isFullscreen && (
+            {!isFullscreen && !docked && (
               <IconButton
                 label={isCollapsed ? RESPONSE_TEXT.expand : RESPONSE_TEXT.collapse}
                 icon={isCollapsed ? ChevronUp : ChevronDown}
@@ -604,10 +606,10 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
                   />
                 )}
                 {showsBody && copyText && <CopyButton text={copyText} />}
-                {hasBody && !past && <IconButton label={RESPONSE_TEXT.downloadBody} icon={Download} onClick={onDownload} />}
+                {hasBody && !past && onDownload && <IconButton label={RESPONSE_TEXT.downloadBody} icon={Download} onClick={onDownload} />}
                 {onExplain && isFailedResponse(shown) && !shown.error && <IconButton label={AI_TEXT.buttons.explain} icon={MessageCircleQuestion} onClick={onExplain} />}
-                {canSaveAsExample(shown) && !past && <IconButton label={RESPONSE_TEXT.saveExample} icon={BookmarkPlus} onClick={onSaveExample} />}
-                {canProposeChecks(shown) && !past && <IconButton label={RESPONSE_CHECKS_TEXT.button} icon={ListPlus} onClick={() => setIsAddingChecks(true)} />}
+                {canSaveAsExample(shown) && !past && onSaveExample && <IconButton label={RESPONSE_TEXT.saveExample} icon={BookmarkPlus} onClick={onSaveExample} />}
+                {canProposeChecks(shown) && !past && !docked && <IconButton label={RESPONSE_CHECKS_TEXT.button} icon={ListPlus} onClick={() => setIsAddingChecks(true)} />}
                 <IconButton
                   label={isFullscreen ? RESPONSE_TEXT.exitFullscreen : RESPONSE_TEXT.fullscreen}
                   icon={isFullscreen ? Minimize2 : Maximize2}
@@ -668,7 +670,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
         </Tabs>
       </section>
       {historyMenu && (
-        <ContextMenu position={historyMenu} title={HISTORY_TEXT.menu} items={historyMenuItems(earlier, past, setPastAt, () => onExportHar(history))} onClose={() => setHistoryMenu(null)} />
+        <ContextMenu position={historyMenu} title={HISTORY_TEXT.menu} items={historyMenuItems(earlier, past, setPastAt, onExportHar && (() => onExportHar(history)))} onClose={() => setHistoryMenu(null)} />
       )}
       {isComparing && past && latestEntry && (
         <Suspense fallback={null}>

@@ -4,6 +4,7 @@ import { installFeatureAccess, releaseFeatureAccess } from "../lib/featureAccess
 import { Sidebar } from "./Sidebar"
 import { RequestBar } from "./RequestBar"
 import { DiskChangeNotice } from "./DiskChangeNotice"
+import { BesideResponse } from "./BesideResponse"
 import { ResponsePanel } from "./ResponsePanel"
 import { AppDialogs } from "./AppDialogs"
 import { AppHeader } from "./AppHeader"
@@ -295,6 +296,8 @@ function LoadedWorkspace({ backend, onBack }) {
   const socketStatus = useSocketStore((state) => selectSession(activeTab.id)(state).status)
   const isLoading = activeTab.pendingId !== null
   const isFlow = isFlowTab(activeTab)
+  const besideTab = useAppStore((s) => s.tabs.find((tab) => tab.id === s.besideTabId && tab.id !== s.activeTabId))
+  const setBesideTab = useAppStore((s) => s.setBesideTab)
   const showsWelcome = welcomeVisible && !isFlow && isBlankRequest(activeRequest) && activeTab.response === null && !isLoading
 
   useEffect(() => {
@@ -426,38 +429,41 @@ function LoadedWorkspace({ backend, onBack }) {
                 loading={isLoading}
               />
 
-              {showsWelcome ? <WelcomePanel actions={actions} onDismiss={hideWelcome} /> : <div className="response-split flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
-                <section aria-label={APP_TEXT.requestSection} data-pane="request" className="flex min-h-0 flex-1 flex-col" style={REQUEST_AREA_STYLE}>
-                  <RequestTabs
-                    tabId={activeTab.id}
-                    activeRequest={activeRequest}
-                    bodyDrafts={activeTab.bodyDrafts}
-                    onUpdateRequest={updateActiveRequest}
-                    onBodyDraftsChange={setActiveBodyDrafts}
-                    variables={variables}
-                    response={activeTab.response}
-                    extraction={activeTab.extraction}
-                    tokenRequest={activeTab.tokenRequest}
-                    schema={activeTab.schema}
-                    grpcSchema={activeTab.grpcSchema}
-                    mcpCatalog={activeTab.mcpCatalog}
-                    actions={actions}
-                    EditorComponent={CodeEditor}
-                  />
-                </section>
+              {showsWelcome ? <WelcomePanel actions={actions} onDismiss={hideWelcome} /> : <div className="flex min-h-0 flex-1">
+                <div className="response-split flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
+                  <section aria-label={APP_TEXT.requestSection} data-pane="request" className="flex min-h-0 flex-1 flex-col" style={REQUEST_AREA_STYLE}>
+                    <RequestTabs
+                      tabId={activeTab.id}
+                      activeRequest={activeRequest}
+                      bodyDrafts={activeTab.bodyDrafts}
+                      onUpdateRequest={updateActiveRequest}
+                      onBodyDraftsChange={setActiveBodyDrafts}
+                      variables={variables}
+                      response={activeTab.response}
+                      extraction={activeTab.extraction}
+                      tokenRequest={activeTab.tokenRequest}
+                      schema={activeTab.schema}
+                      grpcSchema={activeTab.grpcSchema}
+                      mcpCatalog={activeTab.mcpCatalog}
+                      actions={actions}
+                      EditorComponent={CodeEditor}
+                    />
+                  </section>
 
-                {!isSocketOnly(activeTab) && <ResponsePanel
-                  tabId={activeTab.id}
-                  response={activeTab.response}
-                  history={activeTab.responses}
-                  tests={activeTab.tests}
-                  loading={isLoading}
-                  onDownload={actions.download}
-                  onExportHar={actions.exportHistoryHar}
-                  onSaveExample={actions.examples.saveResponse}
-                  onExplain={isAiOn ? () => actions.ai.start(TASK_EXPLAIN) : null}
-                  onTrust={actions.storage?.confirmTrust}
-                />}
+                  {!isSocketOnly(activeTab) && <ResponsePanel
+                    tabId={activeTab.id}
+                    response={activeTab.response}
+                    history={activeTab.responses}
+                    tests={activeTab.tests}
+                    loading={isLoading}
+                    onDownload={actions.download}
+                    onExportHar={actions.exportHistoryHar}
+                    onSaveExample={actions.examples.saveResponse}
+                    onExplain={isAiOn ? () => actions.ai.start(TASK_EXPLAIN) : null}
+                    onTrust={actions.storage?.confirmTrust}
+                  />}
+                </div>
+                {besideTab && <BesideResponse tab={besideTab} onClose={() => setBesideTab('')} />}
               </div>}
             </>
           )}

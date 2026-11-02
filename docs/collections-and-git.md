@@ -134,6 +134,7 @@ The tab context menu contains:
 | Move left, Move right | Reorders the tab |
 | Reveal in collection | Scrolls the tree to the saved request; disabled for a request that is not saved |
 | Copy as cURL | Copies the prepared request as a curl command; only HTTP requests can be copied |
+| Show response beside | Shows the latest response of that tab in a second pane to the right of the open tab, with its own Body, Headers, Cookies, Timeline and Console views and search, so two responses can be read side by side. Choose it again, or the close button in the pane, to stop. The pane is read-only and hidden on phones; it is not a second editor. |
 
 Closing one tab with unsaved changes asks whether to **Save** them first, close with **Don't save**, or **Cancel**. When several tabs with unsaved changes are about to close, a **Close tabs** prompt asks you to confirm with **Discard**. To close without either prompt, clear **Ask before discarding unsaved changes when closing a tab** in the **Requests** section of Preferences.
 

@@ -135,10 +135,12 @@ export const TabBar = memo(function TabBar({ tabs, activeTabId, requests, action
   const openMenu = useCallback((tabId, position) => setMenu({ tabId, position }), [])
   const closeMenu = useCallback(() => setMenu(null), [])
 
+  const besideTabId = useAppStore((s) => s.besideTabId)
+
   const menuItems = useMemo(() => {
     const tab = menu && tabs.find((candidate) => candidate.id === menu.tabId)
-    return tab ? tabMenuItems(tab, tabs, actions, onTabClose) : []
-  }, [menu, tabs, actions, onTabClose])
+    return tab ? tabMenuItems(tab, tabs, actions, onTabClose, besideTabId) : []
+  }, [menu, tabs, actions, onTabClose, besideTabId])
 
   return (
     <div data-pane="tabs" className="flex h-10 shrink-0 items-stretch border-b border-border">

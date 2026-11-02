@@ -66,6 +66,7 @@ export function createTabActions(backend, attempt, cancelTab, flows) {
     closeSaved: () => closeGroup(store().activeTabId, 'saved'),
     pin: (tabId) => store().pinTab(tabId),
     pinActive: () => store().pinTab(store().activeTabId),
+    toggleBeside: (tabId) => store().setBesideTab(store().besideTabId === tabId ? '' : tabId),
     step: (tabId, step) => store().stepTab(tabId, step),
     reorder: (tabId, targetId, place) => store().moveTab(tabId, targetId, place),
     reveal,
