@@ -47,7 +47,7 @@ export function EditorStrip({ className, style }) {
   )
 
   return (
-    <div className={`mx-auto flex w-full max-w-xl flex-col items-center gap-6 text-left ${className}`} style={style}>
+    <div className={`mx-auto flex w-full max-w-4xl flex-col items-center gap-6 text-left ${className}`} style={style}>
       <a
         href={VSCODE_MARKETPLACE_URL}
         className="inline-flex h-10 items-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted/40"
@@ -55,32 +55,34 @@ export function EditorStrip({ className, style }) {
         <BrandIcon brand="vscode" className="h-4 w-4" />
         {VSCODE_BUTTON}
       </a>
-      <div className="w-full">
-        <p className="mb-2 text-sm font-medium text-foreground">{MCP_TITLE}</p>
-        <TerminalBlock
-          header={header}
-          lines={snippetLines(active)}
-          label={`Add the Gostman MCP server to ${active.label}`}
-          copyText={active.file ? active.snippet : undefined}
-        />
-        <p className="mt-2 text-xs text-muted-foreground">
-          {MCP_NEEDS_CLI}{" "}
-          <a href={`${docPath("getting-started")}#install-the-command-line`} className="inline-flex items-center gap-0.5 text-foreground underline underline-offset-4">
-            Install the CLI
-            <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
-          </a>
-          {" · "}
-          <a href={docPath("agents")} className="text-foreground underline underline-offset-4">
-            MCP docs
-          </a>
-        </p>
-      </div>
-      <div className="w-full">
-        <p className="mb-2 text-sm font-medium text-foreground">{AGENT_SETUP_TITLE}</p>
-        <TerminalBlock lines={[{ copy: AGENT_SKILL_COMMAND }]} label="Install the Gostman Agent Skill" />
-        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
-          <CopyPromptButton />
-          <p className="text-xs text-muted-foreground">{AGENT_PROMPT_NOTE}</p>
+      <div className="grid w-full items-start gap-x-6 gap-y-8 md:grid-cols-2">
+        <div className="min-w-0">
+          <p className="mb-2 text-sm font-medium text-foreground">{MCP_TITLE}</p>
+          <TerminalBlock
+            header={header}
+            lines={snippetLines(active)}
+            label={`Add the Gostman MCP server to ${active.label}`}
+            copyText={active.file ? active.snippet : undefined}
+          />
+          <p className="mt-2 text-xs text-muted-foreground">
+            {MCP_NEEDS_CLI}{" "}
+            <a href={`${docPath("getting-started")}#install-the-command-line`} className="inline-flex items-center gap-0.5 text-foreground underline underline-offset-4">
+              Install the CLI
+              <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+            </a>
+            {" · "}
+            <a href={docPath("agents")} className="text-foreground underline underline-offset-4">
+              MCP docs
+            </a>
+          </p>
+        </div>
+        <div className="min-w-0">
+          <p className="mb-2 text-sm font-medium text-foreground">{AGENT_SETUP_TITLE}</p>
+          <TerminalBlock lines={[{ copy: AGENT_SKILL_COMMAND }]} label="Install the Gostman Agent Skill" />
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <CopyPromptButton />
+            <p className="text-xs text-muted-foreground">{AGENT_PROMPT_NOTE}</p>
+          </div>
         </div>
       </div>
     </div>
