@@ -161,7 +161,7 @@ gostman run orders-api --env Production --every 15m --notify-env SLACK_WEBHOOK
 gostman history orders-api
 ```
 
-`--every` repeats the run in one process, prints a line per run, keeps a local history of times, pass and fail counts, and each request's status and duration (no response bodies, no secret values), and posts to a Slack, Microsoft Teams or other webhook when a run fails and when it passes again. `gostman history` prints the pass rate and the p50 and p95 duration of each request. The desktop app has a **Monitors** dialog that does the same for a folder or flow while the app is open, with a chart of the history.
+`--every` repeats the run in one process, prints a line per run, keeps a local history of times, pass and fail counts, and each request's status and duration (no response bodies, no secret values), and posts to a Slack, Microsoft Teams or other webhook when a run fails and when it passes again. `gostman history` prints the pass rate and the p50 and p95 duration of each request. The monitor runs from the command line; the apps have no scheduler yet.
 
 Or add a `schedule` trigger to the workflow from [Gostman in CI](ci.md):
 
