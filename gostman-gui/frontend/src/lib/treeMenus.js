@@ -1,5 +1,6 @@
-import { Activity, ArrowDown, ArrowUp, CheckSquare, ClipboardPaste, Copy, FileCheck, FileSearch, Folder, FolderInput, FolderPlus, ListChecks, Palette, Pencil, Plus, RefreshCw, Scissors, Settings2, Share2, Tag, Trash2, X } from "lucide-react"
+import { Activity, ArrowDown, ArrowUp, CheckSquare, ClipboardPaste, Copy, FileCheck, FileSearch, Folder, FolderInput, FolderPlus, ListChecks, Palette, Pencil, Plus, RefreshCw, Scissors, Settings2, Share2, Tag, Trash2, Workflow, X } from "lucide-react"
 import { CONTRACT_TEXT } from "./checksText"
+import { DEPENDENCIES_TEXT } from "./dependenciesText"
 import { DIALOG_TEXT } from "./dialogText"
 import { ROOT_ID, ROW_FOLDER, ROW_REQUEST, listFolders } from "./collectionTree"
 import { FOLDER_SETTINGS_TEXT } from "./folderSettingsText"
@@ -44,6 +45,7 @@ function folderMenuItems(folder, context) {
     { id: "new-request", label: TREE_TEXT.newRequest, icon: Plus, onSelect: () => actions.newRequest(folder.id) },
     { id: "new-subfolder", label: TREE_TEXT.newSubfolder, icon: FolderPlus, onSelect: () => actions.createFolder(folder.id) },
     { id: "run", label: TREE_TEXT.runFolder, icon: ListChecks, onSelect: () => actions.openRunner(folder.id) },
+    { id: "dependencies", label: DEPENDENCIES_TEXT.menuFolder, icon: Workflow, onSelect: () => actions.openDependencyGraph(folder.id) },
     { id: "monitor", label: MONITORS_TEXT.menuFolder, icon: Activity, onSelect: () => actions.monitorFolder(folder.id) },
     { id: "share", label: TREE_TEXT.shareFolder, icon: Share2, onSelect: () => actions.shareFolder(folder.id) },
     ...(isLinked ? specMenuItems(folder, actions, context) : [{ id: "spec-link", label: CONTRACT_TEXT.link, icon: FileCheck, onSelect: () => actions.openapi.linkFolder(folder) }]),

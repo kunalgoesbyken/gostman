@@ -8,10 +8,9 @@ import {
 import { ConsolePanel } from "./ConsolePanel"
 import { AiButton } from "./AiButton"
 import { FilterBar, SearchBar } from "./ResponseSearchBar"
-import { HighlightedText } from "./HighlightedText"
-import { HexView } from "./HexView"
-import { LargeText } from "./LargeText"
-import { BINARY_DONE, BINARY_FAILED, BINARY_TIMED_OUT, BINARY_TOO_LARGE, useBinaryBody } from "../hooks/useBinaryBody"
+import { BinaryViews } from "./BinaryViews"
+import { TextBody } from "./TextBody"
+import { BINARY_DONE, useBinaryBody } from "../hooks/useBinaryBody"
 import { FORMAT_NAMES, formatForContentType, isFormat } from "../lib/binary/formats"
 import { useResponseJump } from "../hooks/useResponseJump"
 import { useDebouncedValue } from "../hooks/useDebouncedValue"
@@ -43,7 +42,7 @@ import { AI_TEXT } from "../lib/aiText"
 import { RESPONSE_CHECKS_TEXT } from "../lib/checksText"
 import { canSaveAsExample } from "../lib/examples"
 import { trimTree } from "../lib/jsonTree"
-import { AUTO_DECODE_BYTES, MAX_DECODE_BYTES } from "../lib/binary/limits"
+import { AUTO_DECODE_BYTES } from "../lib/binary/limits"
 import { LARGE_BODY_CHARS } from "../lib/largeText"
 import { PREVIEW_TEXT, RESPONSE_TEXT } from "../lib/responseText"
 import { previewDocument } from "../lib/visualizeFrame"
@@ -166,17 +165,6 @@ function CopyButton({ text }) {
   return <IconButton label={copied ? RESPONSE_TEXT.copied : RESPONSE_TEXT.copyBody} icon={copied ? Check : Copy} onClick={copy} />
 }
 
-function TextBody({ text, highlight }) {
-  if (text.length > LARGE_BODY_CHARS) return <LargeText text={text} highlight={highlight} />
-  return (
-    <pre dir="ltr" className="whitespace-pre-wrap p-3 font-mono text-xs leading-relaxed text-foreground">
-      {highlight
-        ? <HighlightedText text={text} matches={highlight.matches} length={highlight.length} activeIndex={highlight.index} />
-        : text}
-    </pre>
-  )
-}
-
 function BinaryBody({ response, onSave }) {
   return (
     <EmptyState
@@ -269,25 +257,6 @@ function HtmlPreview({ response }) {
       <iframe srcDoc={srcDoc} title={RESPONSE_TEXT.previewTitle} sandbox="" referrerPolicy="no-referrer" className="block min-h-0 w-full flex-1 border-none bg-white" />
     </div>
   )
-}
-
-function BinaryProblem({ binary, view, response }) {
-  if (binary.status === BINARY_FAILED) {
-    return <EmptyState icon={AlertTriangle} title={RESPONSE_TEXT.decode.failed({ format: RESPONSE_TEXT.views[view], reason: binary.reason })} />
-  }
-  if (binary.status === BINARY_TIMED_OUT) {
-    return <EmptyState icon={AlertTriangle} title={RESPONSE_TEXT.decode.timedOut({ format: RESPONSE_TEXT.views[view], seconds: binary.seconds })} />
-  }
-  if (binary.status === BINARY_TOO_LARGE) {
-    return <EmptyState icon={FileDigit} title={RESPONSE_TEXT.decode.tooLarge({ size: formatBytes(response.size), limit: formatBytes(MAX_DECODE_BYTES) })} />
-  }
-  return <SkeletonLines label={RESPONSE_TEXT.decode.working} lines={4} />
-}
-
-function BinaryViews({ response, view, binary, highlight }) {
-  if (binary.status !== BINARY_DONE) return <BinaryProblem binary={binary} view={view} response={response} />
-  if (view === 'hex') return <HexView bytes={binary.bytes} />
-  return <TextBody text={binary.text} highlight={highlight} />
 }
 
 function ResponseBody({ response, kind, view, json, formatted, filtered, highlight, binary, onSave }) {

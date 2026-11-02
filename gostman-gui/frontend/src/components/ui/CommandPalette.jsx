@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react"
 import {
   ChevronsDownUp, ClipboardPaste, Clock, Compass, MonitorDown, Info, Hand, Folder, FolderOpen, Code, Copy, FileText, FolderPlus, Globe, History, Keyboard, PanelLeft, Pin, Plus, Save, Search, Send,
-  Bot, Settings, Settings2, SlidersHorizontal, Sparkles, Trash2, Undo2, X,
+  Bot, Settings, Settings2, SlidersHorizontal, Sparkles, Trash2, Undo2, Workflow, X,
 } from "lucide-react"
 import { MethodTag } from "../MethodTag"
 import { SectionLabel } from "./panel"
@@ -19,6 +19,7 @@ import { AI_TEXT } from "../../lib/aiText"
 import { WORKSPACE_TEXT } from "../../lib/workspaceText"
 import { TREE_TEXT } from "../../lib/treeText"
 import { COMMAND_TEXT } from "../../lib/commandText"
+import { DEPENDENCIES_TEXT } from "../../lib/dependenciesText"
 import { SEARCH_TEXT } from "../../lib/searchText"
 import { useShortcutLabel } from "../../hooks/useShortcuts"
 import { cn } from "../../lib/utils"
@@ -63,6 +64,7 @@ const appCommands = (holdsCollections) => [
   command("toggle-sidebar", COMMAND_TEXT.commands.toggleSidebar, "toggleSidebar", { icon: PanelLeft, shortcutId: "toggleSidebar" }),
   command("keyboard-shortcuts", COMMAND_TEXT.commands.shortcuts, "shortcuts", { icon: Keyboard, keywords: "?", shortcutId: "shortcutsHelp" }),
   command("global-search", SEARCH_TEXT.command, "globalSearch", { icon: Search }),
+  command("dependency-graph", DEPENDENCIES_TEXT.command, "dependencyGraph", { icon: Workflow }),
   command("new-folder", COMMAND_TEXT.commands.newFolder, "newFolder", { icon: FolderPlus }),
   { id: "collapse-folders", label: TREE_TEXT.collapseAll, description: TREE_TEXT.collapseAllDescription, icon: ChevronsDownUp, keywords: COMMAND_TEXT.commands.collapseFolders.keywords, action: "collapseFolders" },
   command("collection-settings", COMMAND_TEXT.commands.collectionSettings, "collectionSettings", { icon: Settings2 }),

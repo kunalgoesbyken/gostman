@@ -1,0 +1,28 @@
+{
+  "dependencies": {
+    "title": "Variable dependencies",
+    "menuFolder": "Variable dependencies",
+    "scopeAll": "All requests",
+    "scopeFolder": "Folder: {{name}}",
+    "intro": "Each variable sits between the requests that set it and the requests that read it. A request sets a variable with an Extract rule or a script, and reads it with {{reference}} in its address, headers, body or auth, or with a script call.",
+    "showInputs": "Show variables that only come from environments",
+    "producers": "Sets",
+    "variables": "Variable",
+    "consumers": "Reads",
+    "missingTitle": "Read but never set",
+    "missingDetail": "These variables are read by a request, but no request sets them and no environment, collection or global list defines them: {{names}}.",
+    "missingMark": "never set",
+    "none": "No variable links between requests",
+    "noneDescription": "No request in this scope sets a variable through an Extract rule or a script that another request reads.",
+    "summary_one": "{{count}} variable",
+    "summary_other": "{{count}} variables",
+    "graphLabel": "Dependency graph of variables",
+    "openRequest": "Open {{name}}",
+    "untitled": "Untitled request",
+    "command": {
+      "label": "Show variable dependencies",
+      "description": "Draw which requests set and read each variable",
+      "keywords": "graph chain extract flow produce consume"
+    }
+  }
+}

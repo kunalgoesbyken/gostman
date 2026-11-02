@@ -40,6 +40,7 @@ const persistenceFailureMessage = (error) => (isStorageFull(error)
 const CLOSED_ALERT = { isOpen: false, title: '', message: '', confirmText: '', variant: 'default' }
 const CLOSED_CONFIRM = { isOpen: false, title: '', message: '', confirmText: '', variant: 'default', onConfirm: null, onCancel: null, alternative: null }
 const CLOSED_RUNNER = { isOpen: false, folderId: '', isRunning: false, results: [] }
+const CLOSED_DEPENDENCY_GRAPH = { isOpen: false, folderId: '' }
 const CLOSED_VARIABLE_PROMPT = { isOpen: false, names: [], defaults: {}, isForRun: false, resolve: null }
 const CLOSED_PROMPT = { isOpen: false, title: '', message: '', placeholder: '', defaultValue: '', confirmText: '', onConfirm: null }
 const CLOSED_DELETE_DATA = { isOpen: false, onDelete: null }
@@ -378,6 +379,7 @@ export const useAppStore = create(
         specLinks: {},
         specDialog: null,
         runner: CLOSED_RUNNER,
+        dependencyGraph: CLOSED_DEPENDENCY_GRAPH,
         consoleGroups: [],
         persistenceFailureReported: false,
         treeClipboard: null,
@@ -742,6 +744,8 @@ export const useAppStore = create(
 
         openRunner: (folderId = '') => set({ runner: { ...CLOSED_RUNNER, isOpen: true, folderId } }),
         closeRunner: () => set({ runner: CLOSED_RUNNER }),
+        openDependencyGraph: (folderId = '') => set({ dependencyGraph: { isOpen: true, folderId }, commandPaletteOpen: false }),
+        closeDependencyGraph: () => set({ dependencyGraph: CLOSED_DEPENDENCY_GRAPH }),
         setRunExclusions: (folderId, ids) => set((state) => ({ runExclusions: { ...state.runExclusions, [folderId]: ids } })),
         startRun: () => set((state) => ({ runner: { ...state.runner, isRunning: true, results: [] } })),
         addRunResult: (result) => set((state) => ({
@@ -882,6 +886,7 @@ export const selectIsDialogOpen = (state) => (
   || state.variablePrompt.isOpen
   || state.specDialog !== null
   || state.runner.isOpen
+  || state.dependencyGraph.isOpen
   || state.alertDialog.isOpen
   || state.confirmDialog.isOpen
   || state.promptDialog.isOpen

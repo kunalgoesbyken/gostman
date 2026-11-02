@@ -346,6 +346,16 @@ The Search tab in the sidebar, or the **Search everywhere** command in the comma
 - The search runs in the background. It looks at the first 2 MB of each field, shows at most 200 results, and stops after 3 seconds, with a notice when the list is cut short.
 - Bodies of Multipart and File requests are not searched, and responses are kept in memory only, so closing a tab or reloading removes them from the search.
 
+## Variable dependencies
+
+**Variable dependencies** draws which requests set a variable and which read it. Open it from the folder menu (for that folder), from the **Show variable dependencies** command in the command palette (Ctrl+K), or from the graph button at the top of the Flows tab (for every request). Each variable is a box in the middle column, with the requests that set it on the left and the requests that read it on the right. Click a request to open it.
+
+- A request sets a variable with an enabled Extract rule, or with a script call whose first argument is a literal name: `env.set`, `env.session.set`, `env.collection.set`, `env.globals.set`, `pm.environment.set`, `pm.variables.set`, `pm.collectionVariables.set`, `pm.globals.set`, the same on `insomnia`, and `bru.setVar`, `bru.setEnvVar`, `bru.setGlobalEnvVar` and `bru.setCollectionVar`.
+- A request reads a variable with `{{name}}` in its address, query, headers, body, GraphQL query and variables, gRPC message, MCP arguments, socket messages or auth, or with the matching `get` and `has` script calls. A name built at run time, such as `env.set(prefix + 'id', value)`, cannot be seen. Dynamic names (`{{$guid}}`), prompts and `process.env` names are left out, and so are names the request lists under **Vars**.
+- A variable that no request sets and that no environment, global list or collection list defines is drawn with a dashed border, marked **never set**, and listed in a warning at the top.
+- Variables that only come from environments are hidden until you tick **Show variables that only come from environments**.
+- The graph covers saved requests and does not follow the order in which requests run, folder-level scripts or flows.
+
 ## History
 
 The History tab at the top of the sidebar lists sent requests, with the method, the URL, the HTTP status of the response, in the colours of the response panel, and the time since sending (for example "5m" or "2d"). Sends that got no response are marked **No response**. Screen readers read the time in full, for example "sent 5 minutes ago". The tab shows a count.

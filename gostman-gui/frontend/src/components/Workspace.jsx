@@ -62,6 +62,7 @@ const SpecViewer = lazy(() => import("./SpecViewer").then((module) => ({ default
 const SpecDiffDialog = lazy(() => import("./SpecDiffDialog").then((module) => ({ default: module.SpecDiffDialog })))
 const SpecSyncDialog = lazy(() => import("./SpecSyncDialog").then((module) => ({ default: module.SpecSyncDialog })))
 const FolderSettings = lazy(() => import("./FolderSettings").then((module) => ({ default: module.FolderSettings })))
+const DependencyGraphDialog = lazy(() => import("./DependencyGraphDialog").then((module) => ({ default: module.DependencyGraphDialog })))
 const RunnerDialog = lazy(() => import("./RunnerDialog").then((module) => ({ default: module.RunnerDialog })))
 const AiDialog = lazy(() => import("./AiDialog").then((module) => ({ default: module.AiDialog })))
 const FlowView = lazy(() => import("./flows/FlowView").then((module) => ({ default: module.FlowView })))
@@ -252,6 +253,7 @@ function LoadedWorkspace({ backend, onBack }) {
   const closeSpecDialog = useAppStore((s) => s.closeSpecDialog)
   const settings = useAppStore((s) => s.settings)
   const isRunnerOpen = useAppStore((s) => s.runner.isOpen)
+  const isDependencyGraphOpen = useAppStore((s) => s.dependencyGraph.isOpen)
   const folderSettings = useAppStore((s) => s.folderSettings)
   const collectionSettings = useAppStore((s) => s.collectionSettings)
   const sharedOrder = useAppStore((s) => s.sharedOrder)
@@ -507,6 +509,7 @@ function LoadedWorkspace({ backend, onBack }) {
         {folderSettings && <FolderSettings backend={backend} scope={folderSettings} EditorComponent={CodeEditor} onClose={closeFolderSettings} />}
         {aiDialog && <AiDialog actions={actions.ai} />}
         {isRunnerOpen && <RunnerDialog folders={folders} requests={requests} actions={actions} />}
+        {isDependencyGraphOpen && <DependencyGraphDialog folders={folders} requests={requests} actions={actions} />}
       </Suspense>
 
       <StatusBar

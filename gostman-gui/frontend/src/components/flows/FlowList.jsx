@@ -1,9 +1,10 @@
 import { memo, useState } from "react"
-import { Activity, Copy, LayoutTemplate, MoreHorizontal, Pencil, Plus, Trash2, Workflow } from "lucide-react"
+import { Activity, Copy, GitFork, LayoutTemplate, MoreHorizontal, Pencil, Plus, Trash2, Workflow } from "lucide-react"
 import { Button, IconButton } from "../ui/button"
 import { ContextMenu } from "../ui/ContextMenu"
 import { FeatureEmpty } from "../FeatureEmpty"
 import { Toolbar } from "../ui/panel"
+import { DEPENDENCIES_TEXT } from "../../lib/dependenciesText"
 import { FLOW_TEXT } from "../../lib/flowsText"
 import { MONITORS_TEXT } from "../../lib/monitorsText"
 import { allStepIds } from "../../lib/flows/model"
@@ -62,6 +63,7 @@ const menuItems = (flowId, actions, onMonitor) => [
 
 export const FlowList = memo(function FlowList({ actions, onMonitor }) {
   const flows = useAppStore((s) => s.flows)
+  const openDependencyGraph = useAppStore((s) => s.openDependencyGraph)
   const activeFlowId = useAppStore((s) => selectActiveTab(s).flowId)
   const [menu, setMenu] = useState(null)
 
@@ -94,6 +96,7 @@ export const FlowList = memo(function FlowList({ actions, onMonitor }) {
       <Toolbar className="justify-between pe-1.5">
         <span className="text-xs text-muted-foreground">{FLOW_TEXT.count(flows.length)}</span>
         <div className="flex items-center">
+          <IconButton label={DEPENDENCIES_TEXT.title} icon={GitFork} onClick={() => openDependencyGraph()} />
           <IconButton label={FLOW_TEXT.example} icon={LayoutTemplate} onClick={() => actions.create(true)} />
           <IconButton label={FLOW_TEXT.newFlow} icon={Plus} onClick={() => actions.create(false)} />
         </div>

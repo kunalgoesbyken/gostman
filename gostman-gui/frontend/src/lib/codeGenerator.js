@@ -139,33 +139,38 @@ const pythonPart = (part) => (part.file === undefined
   ? `    (${quote(part.name)}, (None, ${quote(part.value)})),`
   : `    (${quote(part.name)}, (${quote(part.file)}, open(${quote(part.file)}, "rb"), ${quote(part.contentType)})),`)
 
-function generatePython({ method, url, headers, body, file, parts }) {
-  const lines = ['import requests', '', `url = ${quote(url)}`]
+const headerObject = (headers, indent) => mergeRepeatedHeaders(headers).map(({ key, value }) => `${indent}${quote(key)}: ${quote(value)},`)
+
+function pythonSnippet({ method, url, headers, body, file, parts }, { module, bodyName }) {
+  const lines = [`import ${module}`, '', `url = ${quote(url)}`]
   const call = [quote(method), 'url']
   if (headers.length > 0) {
-    const entries = mergeRepeatedHeaders(headers).map(({ key, value }) => `    ${quote(key)}: ${quote(value)},`)
-    lines.push('headers = {', ...entries, '}')
+    lines.push('headers = {', ...headerObject(headers, '    '), '}')
     call.push('headers=headers')
   }
   if (parts) {
     lines.push('files = [', ...parts.map(pythonPart), ']')
     call.push('files=files')
   } else if (file) {
-    lines.push(`data = open(${quote(file)}, "rb")`)
-    call.push('data=data')
+    lines.push(`${bodyName} = open(${quote(file)}, "rb")`)
+    call.push(`${bodyName}=${bodyName}`)
   } else if (body) {
-    lines.push(`data = ${quote(body)}.encode("utf-8")`)
-    call.push('data=data')
+    lines.push(`${bodyName} = ${quote(body)}.encode("utf-8")`)
+    call.push(`${bodyName}=${bodyName}`)
   }
   return [
     ...lines,
     '',
-    `response = requests.request(${call.join(', ')})`,
+    `response = ${module}.request(${call.join(', ')})`,
     '',
     'print(response.status_code)',
     'print(response.text)',
   ].join('\n')
 }
+
+const generatePython = (request) => pythonSnippet(request, { module: 'requests', bodyName: 'data' })
+
+const generateHttpx = (request) => pythonSnippet(request, { module: 'httpx', bodyName: 'content' })
 
 const GO_PANIC = ['\tif err != nil {', '\t\tpanic(err)', '\t}']
 
@@ -562,8 +567,6 @@ function generatePowerShell(request) {
   ].join('\n')
 }
 
-const headerObject = (headers, indent) => mergeRepeatedHeaders(headers).map(({ key, value }) => `${indent}${quote(key)}: ${quote(value)},`)
-
 const contentTypeOf = (headers) => headers.find(isContentType)?.value
 
 const withoutContentType = (headers) => headers.filter((header) => !isContentType(header))
@@ -624,26 +627,6 @@ function generateNode(request) {
     'request.on("error", (error) => console.error(error))',
     ...nodeEnding(request),
   ].join('\n')
-}
-
-function generateHttpx({ method, url, headers, body, file, parts }) {
-  const lines = ['import httpx', '', `url = ${quote(url)}`]
-  const call = [quote(method), 'url']
-  if (headers.length > 0) {
-    lines.push('headers = {', ...headerObject(headers, '    '), '}')
-    call.push('headers=headers')
-  }
-  if (parts) {
-    lines.push('files = [', ...parts.map(pythonPart), ']')
-    call.push('files=files')
-  } else if (file) {
-    lines.push(`content = open(${quote(file)}, "rb")`)
-    call.push('content=content')
-  } else if (body) {
-    lines.push(`content = ${quote(body)}.encode("utf-8")`)
-    call.push('content=content')
-  }
-  return [...lines, '', `response = httpx.request(${call.join(', ')})`, '', 'print(response.status_code)', 'print(response.text)'].join('\n')
 }
 
 const OKHTTP_BODY_REQUIRED = ['POST', 'PUT', 'PATCH', 'PROPPATCH', 'REPORT']

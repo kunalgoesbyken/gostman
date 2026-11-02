@@ -66,7 +66,7 @@ export function runResult(request, { response, tests, resolvedUrl, operation = '
   }
 }
 
-const NO_TAG_FILTER = { include: [], exclude: [] }
+export const NO_TAG_FILTER = { include: [], exclude: [] }
 
 export function requestsInScope({ folders, requests, sharedOrder }, folderId, tagFilter) {
   const tagsOf = inheritedTags(folders)
