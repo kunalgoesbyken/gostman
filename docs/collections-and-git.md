@@ -139,7 +139,7 @@ Closing one tab with unsaved changes asks whether to **Save** them first, close 
 
 ## Welcome panel and getting started
 
-A new, blank tab with no response shows the **Welcome to Gostman** panel. Its **Get started** list walks through five steps, each with a button that does it for you:
+A new, blank tab with no response shows the **Welcome to Gostman** panel. Its **Get started** list walks through six steps, each with a button that does it for you. To see the panel again, choose **Show welcome** in the **Help** menu or the command palette:
 
 | Step | Button | Done when |
 | --- | --- | --- |
@@ -148,8 +148,9 @@ A new, blank tab with no response shows the **Welcome to Gostman** panel. Its **
 | Add a variable | **Open environments** | An environment, a global environment or the collection defines a variable |
 | Add a check | **Open the Checks tab** of the open or last saved request | A saved request has an assertion or a post-response script |
 | Run your requests together | **Open the runner** | You have started a run |
+| Explore features | **Explore features** opens the [feature list](preferences-and-shortcuts.md#explore-features) | You have opened it from this step |
 
-Steps are worked out from your data, so after an import the steps it covers are already ticked. While steps remain, a button in the header names the next one and shows your progress, for example **Next: Add a variable 2/5**; it opens the same list. **Hide** in that list, or the close button on the panel, puts both away. When every step is done the button disappears and the panel no longer opens by itself. The **Show welcome** command in the command palette brings the panel back at any time.
+Steps are worked out from your data, so after an import the steps it covers are already ticked. While steps remain, a button in the header names the next one and shows your progress, for example **Next: Add a variable 2/6**; it opens the same list. **Hide** in that list, or the close button on the panel, puts both away. When every step is done the button disappears and the panel no longer opens by itself. The **Show welcome** command in the command palette brings the panel back at any time.
 
 The **Add a variable** step also shows how variables look: a name in double braces is green when the active environment defines it and orange when it is missing. **Read the tutorial**, under the list, opens the [tutorial](tutorial-first-collection.md), which goes through the same steps in more depth.
 

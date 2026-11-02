@@ -10,7 +10,8 @@ The command palette runs most actions in Gostman from the keyboard.
 
 Open it with Ctrl+K, or with the **Commands** button in the header (shown on wide windows). Type to filter, use the up and down arrows to move, press Enter to run the highlighted row and Esc to close it. The **?** button in the palette opens the Keyboard shortcuts dialog.
 
-- Typing searches command names first, then their descriptions and keywords. It also finds saved requests by name, folder, method or URL, and history entries.
+- Typing searches command names first, then their descriptions and keywords, word by word, so `postman monitor` or `snapshot` finds the feature that does it. It also finds saved requests by name, folder, method or URL, and history entries.
+- Every feature in the [feature list](#explore-features) is also a palette entry. Features that only exist in the desktop app carry a **Desktop app** tag in the web app, and choosing one opens an explanation instead of doing nothing. A **New** tag marks features added since you last opened **What's new**.
 - Once you type, results are grouped under **Commands**, **Requests** and **History**. Selecting a request or a history entry opens it in a tab.
 - Ctrl+P (**Go to request or history**) opens the palette in a mode that lists requests and history only, with the search box reading `Go to a request or history entry`.
 - The palette shows the current shortcut next to a command that has one, including any you changed.
@@ -351,9 +352,24 @@ Alt+Shift+Left Arrow and Alt+Shift+Right Arrow move the focused tab, and the tre
 
 Closing a dialog or a menu puts you back on the item that opened it. After you delete a row, close a tab or remove a history entry, the focus moves to the next one.
 
+## Explore features
+
+**Explore features** is a searchable list of what Gostman can do. Open it from the **Explore** item at the left of the status bar, from the **Help** menu (the question mark in the header), from **Explore features** in the command palette or from the welcome panel. It is also the sixth step of **Get started**.
+
+- Type in the search box to find a feature by name, by what it does or by the name another tool gives it, for example `snapshot`, `mock`, `newman` or `oasdiff`. The group buttons under the box narrow the list.
+- **Try it** opens the feature, or adds a small sample so you can use it at once. The sample collection (three requests with saved examples, pointing at `{{baseUrl}}`) needs no network access; serve it with the mock server on the desktop app. A feature with no **Try it** button has no place in the app to open, or needs the desktop app.
+- **Learn more** opens the matching page of these docs.
+- Empty panels, such as the runner before any request is saved, an empty history or the response area before the first send, show the same **Try it** and **Learn more** buttons. Above the Vars, Extract, Checks and Settings sections of a request, a one-line hint says what the section is for; the **x** hides it for good.
+
+The list, the command palette, the landing page and the comparison table all read one catalogue, so a feature added there shows up in each of them.
+
+## What's new
+
+After an update, the status bar shows **What's new** next to the version number. It opens a list of the features added since the last version you looked at, each with a **Try it** button. **What's new** is also in the **Help** menu, in the command palette, in **About Gostman** and at the bottom of **Explore features**. Closing it clears the **New** tags and the status bar item until the next release. It never opens by itself.
+
 ## About
 
-Open **About Gostman** from the command palette, or select the version number at the right end of the status bar. The dialog shows:
+Open **About Gostman** from the command palette, the **Help** menu, or by selecting the version number at the right end of the status bar. The dialog shows:
 
 - the version number;
 - a short description: an open source API client for REST, GraphQL, gRPC and WebSocket, with no account and your data on your device;
