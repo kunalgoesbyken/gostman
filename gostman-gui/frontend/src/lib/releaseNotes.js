@@ -8,7 +8,7 @@ export const RELEASES = [
       'graphql-upload', 'ws-security', 'grpc-web', 'signalr', 'tcp-udp', 'breakpoints', 'spec-importers', 'versioned-docs', 'notes', 'recently-deleted', 'snapshot-checks', 'negative-tests',
       'coverage', 'pm-packages', 'load-thresholds', 'monitors', 'capture-rules', 'capture-har',
       'git-field-diff', 'git-commit-graph', 'repo-create', 'ai-mock', 'ai-commit', 'xlsx-data',
-      'scheduled-runs', 'openapi-diff', 'ci-starters',
+      'scheduled-runs', 'openapi-diff', 'ci-starters', 'json-rpc', 'response-compare', 'response-har', 'split-view', 'global-search', 'dependency-graph',
     ],
   },
   { version: '1.8.3', ids: ['open-tabs'] },

@@ -13,7 +13,10 @@
       "socketio": "Socket.IO",
       "mqtt": "MQTT",
       "soap": "SOAP",
-      "mcp": "MCP"
+      "mcp": "MCP",
+      "signalr": "SignalR",
+      "tcp": "TCP",
+      "udp": "UDP"
     },
     "detected": "Detected {{protocol}}",
     "url": "Request URL",

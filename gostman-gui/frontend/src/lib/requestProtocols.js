@@ -1,4 +1,4 @@
-import { BODY_SOAP } from './body'
+import { BODY_SOAP, RAW_SOCKET_METHODS } from './body'
 import { HTTP_METHODS } from './constants'
 import { GRAPHQL_METHOD } from './graphqlSchema'
 import { GRPC_METHOD } from './grpc'
@@ -15,12 +15,17 @@ export const PROTOCOL_MQTT = 'mqtt'
 export const PROTOCOL_SSE = 'sse'
 export const PROTOCOL_SOAP = 'soap'
 export const PROTOCOL_MCP = 'mcp'
+export const PROTOCOL_SIGNALR = 'signalr'
+export const PROTOCOL_TCP = 'tcp'
+export const PROTOCOL_UDP = 'udp'
 
 const SECURE_SOCKET = 'wss://'
 const SOCKET_SCHEMES = { 'http://': 'ws://', 'https://': 'wss://' }
 const HTTP_SCHEMES = { 'ws://': 'http://', 'wss://': 'https://' }
 
-const PROTOCOL_METHODS = [GRAPHQL_METHOD, GRPC_METHOD, MCP_METHOD]
+const [TCP_METHOD, UDP_METHOD] = RAW_SOCKET_METHODS
+
+const PROTOCOL_METHODS = [GRAPHQL_METHOD, GRPC_METHOD, MCP_METHOD, ...RAW_SOCKET_METHODS]
 
 export const PLAIN_METHODS = HTTP_METHODS.filter((method) => !PROTOCOL_METHODS.includes(method))
 
@@ -67,10 +72,13 @@ export const REQUEST_PROTOCOLS = [
   { id: PROTOCOL_MQTT, apply: socket('mqtt') },
   { id: PROTOCOL_SOAP, apply: (request) => ({ ...asHttp(request), method: SOAP_METHOD, bodyType: BODY_SOAP }) },
   { id: PROTOCOL_MCP, apply: named(MCP_METHOD) },
+  { id: PROTOCOL_SIGNALR, apply: socket('signalr') },
+  { id: PROTOCOL_TCP, apply: named(TCP_METHOD) },
+  { id: PROTOCOL_UDP, apply: named(UDP_METHOD) },
 ]
 
-const BY_METHOD = { [GRAPHQL_METHOD]: PROTOCOL_GRAPHQL, [GRPC_METHOD]: PROTOCOL_GRPC, [MCP_METHOD]: PROTOCOL_MCP }
-const BY_SOCKET_PROTOCOL = { socketio: PROTOCOL_SOCKET_IO, mqtt: PROTOCOL_MQTT }
+const BY_METHOD = { [GRAPHQL_METHOD]: PROTOCOL_GRAPHQL, [GRPC_METHOD]: PROTOCOL_GRPC, [MCP_METHOD]: PROTOCOL_MCP, [TCP_METHOD]: PROTOCOL_TCP, [UDP_METHOD]: PROTOCOL_UDP }
+const BY_SOCKET_PROTOCOL = { socketio: PROTOCOL_SOCKET_IO, mqtt: PROTOCOL_MQTT, signalr: PROTOCOL_SIGNALR }
 
 export function protocolIdOf(request, isSocket) {
   if (BY_METHOD[request.method]) return BY_METHOD[request.method]

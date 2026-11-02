@@ -6,7 +6,7 @@ export const PLATFORMS = ['desktop', 'web', 'cli']
 
 export const ACTIONS = {
   dialog: ['monitors', 'environments', 'cookies', 'network', 'mock', 'capture', 'loadTest', 'runner', 'scan', 'negative', 'import', 'export', 'share', 'preferences', 'shortcuts', 'examples', 'folderSettings', 'git', 'trash'],
-  command: ['newRequest', 'newFolder', 'generateCode', 'sendSample', 'lintSpec', 'diffSpecs', 'commandPalette', 'workspaceSwitcher', 'aiSettings', 'aiMock'],
+  command: ['newRequest', 'newFolder', 'generateCode', 'sendSample', 'lintSpec', 'diffSpecs', 'commandPalette', 'globalSearch', 'dependencyGraph', 'workspaceSwitcher', 'aiSettings', 'aiMock'],
   sample: ['collection', 'flow', 'send', 'scan', 'graphql', 'grpc', 'websocket', 'mcp', 'curl', 'binary', 'jwt'],
   tab: ['auth', 'vars', 'extract', 'tests', 'settings', 'notes', 'history', 'openTabs'],
   copy: ['cliInit', 'ciInit'],
@@ -39,6 +39,12 @@ export const FEATURES = [
   { id: 'signalr', group: 'requests', since: '1.9.0', docs: 'protocols#signalr', icon: 'radio' },
   { id: 'tcp-udp', group: 'requests', since: '1.9.0', platforms: ['desktop'], docs: 'protocols#tcp-and-udp', icon: 'cable' },
   { id: 'breakpoints', group: 'requests', since: '1.9.0', platforms: ['desktop'], docs: 'workspaces-and-mock#calls-rules-and-held-calls', action: { type: 'dialog', id: 'capture' }, icon: 'pause' },
+  { id: 'json-rpc', group: 'requests', since: '1.9.0', docs: 'protocols#json-rpc', icon: 'braces' },
+  { id: 'response-compare', group: 'requests', since: '1.9.0', docs: 'requests-and-responses#earlier-responses-and-comparing', action: { type: 'command', id: 'sendSample' }, icon: 'git-compare' },
+  { id: 'response-har', group: 'requests', since: '1.9.0', docs: 'requests-and-responses#earlier-responses-and-comparing', action: { type: 'command', id: 'sendSample' }, icon: 'file-down' },
+  { id: 'split-view', group: 'requests', since: '1.9.0', docs: 'collections-and-git#context-menu', icon: 'columns-2' },
+  { id: 'global-search', group: 'requests', since: '1.9.0', docs: 'requests-and-responses#search-everywhere', action: { type: 'command', id: 'globalSearch' }, icon: 'search', palette: true, tool: { group: 'build', order: 7 } },
+  { id: 'dependency-graph', group: 'variables', since: '1.9.0', docs: 'requests-and-responses#variable-dependencies', action: { type: 'command', id: 'dependencyGraph' }, icon: 'workflow', palette: true, tool: { group: 'build', order: 8 } },
   { id: 'open-tabs', group: 'data', since: '1.8.3', docs: 'collections-and-git#tabs', action: { type: 'tab', id: 'openTabs' }, icon: 'panel-left' },
   { id: 'history', group: 'data', docs: 'requests-and-responses#history', action: { type: 'tab', id: 'history' }, icon: 'history', empty: ['history'], sample: 'send' },
   { id: 'collections', group: 'data', docs: 'collections-and-git#collection-tree', action: { type: 'command', id: 'newFolder' }, icon: 'folder-plus' },

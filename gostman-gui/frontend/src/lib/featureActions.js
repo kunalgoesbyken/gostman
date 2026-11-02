@@ -80,6 +80,8 @@ export function createFeatureActions({ backend, commands, monitors, mock, captur
     lintSpec: { run: () => commands.lintSpec() },
     diffSpecs: { run: () => commands.diffSpecs() },
     commandPalette: { run: () => store().openCommandPalette() },
+    globalSearch: { run: () => store().openGlobalSearch() },
+    dependencyGraph: { run: () => store().openDependencyGraph() },
     workspaceSwitcher: { run: () => commands.workspaceSwitcher(), isAvailable: () => hasStorage },
     aiSettings: { run: () => commands.aiSettings() },
     aiMock: { run: () => commands.aiMock(), isAvailable: isAiEnabledNow },

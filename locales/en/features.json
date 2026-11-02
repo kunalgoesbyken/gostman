@@ -187,6 +187,36 @@
       "blurb": "Hold a captured request or response with a rule, edit it, then release it or drop it.",
       "synonyms": "breakpoint breakpoints pause hold intercept edit release drop debug"
     },
+    "jsonRpc": {
+      "title": "JSON-RPC calls",
+      "blurb": "Add a JSON-RPC 2.0 call or a batch to a JSON body with one button.",
+      "synonyms": "json-rpc jsonrpc rpc batch method params id"
+    },
+    "responseCompare": {
+      "title": "Earlier responses",
+      "blurb": "Each tab keeps its last 10 responses; open one or compare it with the latest.",
+      "synonyms": "earlier previous responses compare diff history response"
+    },
+    "responseHar": {
+      "title": "Export responses as HAR",
+      "blurb": "Save a tab's kept responses as a HAR file with credentials masked.",
+      "synonyms": "har export responses archive"
+    },
+    "splitView": {
+      "title": "Response beside the tab",
+      "blurb": "Show another tab's latest response in a pane beside the open tab, from the request menu in the sidebar.",
+      "synonyms": "split side by side beside pane response compare"
+    },
+    "globalSearch": {
+      "title": "Search everywhere",
+      "blurb": "Search saved requests, history and open responses in one place.",
+      "synonyms": "search find global everywhere requests history responses"
+    },
+    "dependencyGraph": {
+      "title": "Variable dependencies",
+      "blurb": "See which requests set a variable and which read it.",
+      "synonyms": "dependency dependencies graph variables extract set read"
+    },
     "openTabs": {
       "title": "Open tabs list",
       "blurb": "Show the open tabs as a list in the sidebar and jump between them.",
