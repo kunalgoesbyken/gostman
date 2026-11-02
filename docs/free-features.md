@@ -6,6 +6,7 @@ Gostman has no paid tier, no account and no licence key, so every feature in the
 
 - **Snapshot checks:** a check that compares a response body or headers with a stored copy, with ignored JSONPaths and order-insensitive arrays, in the app, the Runner and `gostman run --update-snapshots`. See [Checks](requests-and-responses.md#checks).
 - **OpenAPI coverage:** which operations and documented responses of a spec a run exercised, with `gostman run --contract spec.yaml --coverage --min-coverage 80`. See [Command line](cli.md#openapi-coverage).
+- **Negative tests:** `gostman negative` sends invalid, missing-credential, boundary and injection variants of the saved requests and flags suspicious answers. A basic checker, not a penetration test. See [Negative tests](cli.md#negative-tests).
 - **Data-driven runs:** run a collection once per row of a CSV, JSON or XLSX file, in the app or with `gostman run --data`. See [Command line](cli.md) and [Runner, load testing and secret scanning](runner-load-and-scan.md).
 - **Parallel runs and reports:** run requests side by side and write text, JSON, JUnit or HTML reports. See [Gostman in CI](ci.md).
 - **Secret managers:** read values from HashiCorp Vault, AWS Secrets Manager, Azure Key Vault, Google Cloud Secret Manager, KeePassXC, 1Password, Bitwarden or Bitwarden Secrets Manager at send time. See [Secrets and network](secrets-and-network.md).

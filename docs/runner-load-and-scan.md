@@ -165,6 +165,10 @@ By default the scan includes saved example responses. Clear **Include saved exam
 
 To fix a finding, move the value into a variable and refer to it as `{{name}}`. Mark the variable as secret so it stays out of the collection files; see [Variables](variables.md#secret-variables).
 
+## Negative tests
+
+The command line has a basic negative-test checker, `gostman negative`, that sends altered copies of the saved requests (no or invalid credentials, bad bodies, boundary values, injection strings) and flags answers such as a 2xx where a 4xx was expected, a 5xx, a stack trace, a database error or a reflected payload. It is not part of the app. See [Negative tests](cli.md#negative-tests).
+
 ## Notices in Share and Export
 
 The Share and Export tabs run the same scan on what you are about to hand over. When something is found, a notice reads `N possible secrets found` with advice and a **Show findings** button, which lists them the same way as the dialog.

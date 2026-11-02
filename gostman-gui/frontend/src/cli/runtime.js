@@ -5,6 +5,7 @@ import { SCOPE_SESSION } from '../lib/scripting/scopes'
 
 export { contractChecks, operationKey } from '../lib/contract'
 export { contractCoverage } from '../lib/coverage'
+export { negativeFindings, negativeVariants } from '../lib/negative'
 export { mergeCookies } from '../lib/cookies'
 export { buildDocs } from '../lib/docs'
 export { toGrpcCall } from '../lib/grpc'

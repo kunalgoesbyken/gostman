@@ -22,6 +22,7 @@ gostman export orders-api --format openapi --out openapi.json
 - `send` sends one saved request, named by its id, its name or its full `Folder/Name` path, or an ad hoc one (`gostman send GET https://example.com -H 'Accept: application/json'`), and prints only the response body on standard output, or only the selected value with `--select`, so `gostman send "Users/Get user" --select '$.id' | xargs ...` works; the short JSON summary and any warnings go to standard error. With `--json` standard output gets a single JSON document instead, with the body in `body.text` and its encoding (`utf8`, or `base64` for binary bodies) in `body.encoding`, so the output can go straight into `jq`: `gostman send --json GET https://example.com | jq -r .body.text`. `-d` or `--data` gives an unsaved request a body, `--select '$.path'` prints only that part of a JSON body, `--max-body n` prints at most n bytes of the body (default 8192), and `--include-headers` adds the response headers to the summary. Secret values in the output are shown as `{{name}}`, the same ones `run --redact` hides (see [Variables](#variables)), including a secret that a script or extract rule of the request stored, such as a login token; other values, such as `base_url` in the resolved URL, stay readable. `--reveal` prints secrets as they are, so `TOKEN=$(gostman send Login --select '$.token' --reveal)` hands a token to the next command; anything that can read the output, such as a CI log, then sees the secret, so keep it out of logs and never give it to a coding agent.
 - `mock` serves the saved examples of a workspace on `127.0.0.1` (a request picks another example of its route with the `x-mock-response-name` or `x-mock-response-code` header, see [Examples and the mock server](workspaces-and-mock.md#examples-and-the-mock-server-desktop)); `--openapi spec.yaml|url` serves a spec's operations instead or as well, `--delay`, `--delay-max`, `--error-rate` and `--error-status` add latency and failures, and `--log` prints each request's headers and body with credentials masked. `--port` sets the port (default 4010) and `--env name` picks the environment for `{{variables}}` in URLs; a variable in the path matches any value. `--cors` answers browser pages served from `localhost`, and `--cors-origin https://app.example.com` (repeatable) allows another exact origin.
 - `capture` forwards everything sent to `127.0.0.1:4020` on to one API, prints each call, and with `--workspace` saves each new method and path as a request with its response as an example. `--port` changes the port and `--folder name` saves into that top-level folder of the workspace. `--rules file.yaml` applies [capture rules](workspaces-and-mock.md#capture-rules) (only from the file you name; a workspace's own `.gostman/capture.yaml` is never read, since rules can send traffic to another host), and `--har out.har` writes the captured calls as a HAR 1.2 file when you press Ctrl+C; `Authorization`, `Cookie` and `Set-Cookie` values show as `***` in it.
+- `negative` sends altered copies of the saved requests and reports answers that look wrong; see [Negative tests](#negative-tests).
 - `docs` writes the collection as one self-contained HTML page, to stdout or to `--output file`. `--title` sets the page title (default `API documentation`), `--no-examples` leaves out saved example responses and `--playground` adds a **Try it** panel, `--logo` and `--accent` brand the page, and `--versions` or `--all-tags` build one page per Git version; see [Generated documentation](#generated-documentation).
 - `relay` lets the web app send its requests from your computer; see [Local relay for the web app](#local-relay-for-the-web-app).
 - `import` and `export` convert a workspace from and to other tools' formats; see [Import and export](#import-and-export).
@@ -186,6 +187,24 @@ gostman scan orders-api --fail-on high
 - `--reporter text|json`, `--fail-on high|medium|none` (default `medium`; exit 1 when a finding is at or above it) and `--skip-examples`.
 - It is a heuristic. It can miss a token glued to other characters, a human-chosen password that does not look random, and files outside the collection such as `.env`. A clean scan is not proof that nothing is exposed.
 - The desktop and web apps have a **Scan for secrets** command, the Share tab warns before you create a link or file when something is found, and the Export tab shows a notice.
+
+## Negative tests
+
+`gostman negative <workspace | export.json>` sends altered copies of the saved HTTP requests and reports answers that look wrong. It is a basic checker that catches common mistakes, not a penetration testing tool, and it does not replace one.
+
+```bash
+gostman negative orders-api --env Staging --allow-host staging.example.com --rate 2
+```
+
+For each request it sends:
+
+- no credentials, and invalid credentials, when the request or one of its folders uses auth or the request has an Authorization header;
+- for a JSON body: truncated JSON, each top-level field removed, each field with the wrong type, numbers set to 0, -1, 2147483648 and 1e308, text fields that are empty or 10000 characters long, and a body of 1 MB;
+- SQL injection, script, path traversal, header injection and expression strings in each text field of a JSON body and in each query parameter.
+
+Findings: `accepted` (a 2xx or 3xx where a rejection was expected; high for credentials, medium for wrong types, malformed and oversized bodies, low for a removed field, which may be optional), `server-error` (5xx), `stack-trace` and `sql-error` (the body shows one), and `reflected` (an injected string comes back unchanged). Findings are hints to review, and an API can accept an input on purpose.
+
+Requests are sent for real, so run it against a test or staging environment. Only `localhost` and loopback addresses and the hosts named with `--allow-host` (repeatable) are contacted; a request to any other host gets no response and is counted as not sent. The default rate is 5 requests a second (`--rate`) and a run stops after 300 requests (`--max-requests`). `--only` and `--folder` limit it to some requests. Agent sessions (`gostman mcp`) have no tool for it. `--reporter json` prints the findings as JSON. The command exits 1 when a finding has the severity of `--fail-on` (`low`, `medium` by default, `high` or `none`) or higher, 2 for wrong input, 0 otherwise. Variants are built from the saved requests, so requests created from an OpenAPI spec are covered through their saved bodies and parameters.
 
 ## Linting an OpenAPI spec
 

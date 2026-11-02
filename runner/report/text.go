@@ -91,7 +91,7 @@ func indented(text, indent string) string {
 
 func (t *Text) printFailures(result runner.Result) {
 	if result.Handled != "" {
-		fmt.Fprintln(t.output, t.paint(styleYellow, indented(printable(result.Handled), detailIndent)))
+		fmt.Fprintln(t.output, t.paint(styleYellow, indented(Printable(result.Handled), detailIndent)))
 	}
 	for _, problem := range []string{result.Error, result.Failure} {
 		if problem != "" {
@@ -122,7 +122,7 @@ func (t *Text) printLogs(result runner.Result) {
 	}
 }
 
-func printable(text string) string {
+func Printable(text string) string {
 	return strings.Map(func(character rune) rune {
 		if character == '\n' || character == '\t' || !unicode.IsControl(character) {
 			return character
@@ -132,17 +132,17 @@ func printable(text string) string {
 }
 
 func printableResult(result runner.Result) runner.Result {
-	result.Method, result.Name, result.Folder = printable(result.Method), printable(result.Name), printable(result.Folder)
-	result.Status, result.Skipped, result.Error = printable(result.Status), printable(result.Skipped), printable(result.Error)
-	result.Failure, result.ResolvedURL = printable(result.Failure), printable(result.ResolvedURL)
+	result.Method, result.Name, result.Folder = Printable(result.Method), Printable(result.Name), Printable(result.Folder)
+	result.Status, result.Skipped, result.Error = Printable(result.Status), Printable(result.Skipped), Printable(result.Error)
+	result.Failure, result.ResolvedURL = Printable(result.Failure), Printable(result.ResolvedURL)
 	tests := make([]runner.Check, len(result.Tests))
 	for i, check := range result.Tests {
-		check.Name, check.Message = printable(check.Name), printable(check.Message)
+		check.Name, check.Message = Printable(check.Name), Printable(check.Message)
 		tests[i] = check
 	}
 	logs := make([]runner.LogLine, len(result.Logs))
 	for i, line := range result.Logs {
-		line.Level, line.Text = printable(line.Level), printable(line.Text)
+		line.Level, line.Text = Printable(line.Level), Printable(line.Text)
 		logs[i] = line
 	}
 	result.Tests, result.Logs = tests, logs
@@ -164,10 +164,10 @@ func (t *Text) Step(event runner.FlowEvent) {
 	if event.Status == runner.FlowFailed {
 		style = styleRed
 	}
-	fmt.Fprintf(t.output, "%s  %-*s  %s  %s\n", t.paint(style, markFlow), kindWidth, printable(event.Kind), printable(event.Title), t.paint(styleDim, printable(event.Summary)))
+	fmt.Fprintf(t.output, "%s  %-*s  %s  %s\n", t.paint(style, markFlow), kindWidth, Printable(event.Kind), Printable(event.Title), t.paint(styleDim, Printable(event.Summary)))
 	for _, check := range event.Checks {
 		if !check.Passed {
-			fmt.Fprintln(t.output, t.paint(styleDim, indented(printable(check.Name+": "+check.Message), detailIndent)))
+			fmt.Fprintln(t.output, t.paint(styleDim, indented(Printable(check.Name+": "+check.Message), detailIndent)))
 		}
 	}
 }
@@ -215,7 +215,7 @@ func (t *Text) flowLine(report runner.Report) string {
 	if report.Flow.Outcome != runner.FlowPassed {
 		outcome = t.paint(styleRed, report.Flow.Outcome)
 	}
-	return fmt.Sprintf("Flow      %s %s: %s\n", printable(report.Flow.Name), outcome, printable(report.Flow.Message))
+	return fmt.Sprintf("Flow      %s %s: %s\n", Printable(report.Flow.Name), outcome, Printable(report.Flow.Message))
 }
 
 func (t *Text) contractLine(report runner.Report) string {
@@ -257,16 +257,16 @@ func (t *Text) coverageLines(report runner.Report) string {
 
 func (t *Text) uncoveredLine(item runner.CoverageOperation) string {
 	if !item.Covered {
-		return fmt.Sprintf("          %s %s  %s\n", t.paint(styleRed, "not called"), printable(item.Method), printable(item.Path))
+		return fmt.Sprintf("          %s %s  %s\n", t.paint(styleRed, "not called"), Printable(item.Method), Printable(item.Path))
 	}
 	var missing []string
 	for _, response := range item.Responses {
 		if !response.Covered {
-			missing = append(missing, printable(response.Code))
+			missing = append(missing, Printable(response.Code))
 		}
 	}
 	if len(missing) == 0 {
 		return ""
 	}
-	return fmt.Sprintf("          %s %s  %s: %s\n", t.paint(styleDim, "no response"), printable(item.Method), printable(item.Path), strings.Join(missing, ", "))
+	return fmt.Sprintf("          %s %s  %s: %s\n", t.paint(styleDim, "no response"), Printable(item.Method), Printable(item.Path), strings.Join(missing, ", "))
 }

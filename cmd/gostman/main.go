@@ -34,6 +34,7 @@ const (
   gostman capture --upstream <url> [flags]
   gostman relay [flags]
   gostman scan <workspace folder | export.json> [flags]
+  gostman negative <workspace folder | export.json> [flags]
   gostman lint <spec file | address> [flags]
   gostman init [folder] [--skill]
   gostman import <file | folder> --out <workspace folder> [flags]
@@ -389,6 +390,27 @@ scan
   --skip-examples       leave out saved example responses, which are scanned
                         by default because they can hold real tokens
 
+negative
+  Sends altered copies of the saved HTTP requests and reports answers that
+  look wrong. It is a basic checker, not a penetration test. Each request
+  gets: no credentials and invalid credentials (when it uses auth); a JSON
+  body that is truncated, has a field removed, has a field of the wrong type,
+  has boundary numbers and long or empty text, or is 1 MB; and SQL, XSS, path
+  traversal, header and expression strings in text fields and query
+  parameters. Findings: a 2xx where a rejection was expected, a 5xx, a stack
+  trace or database error in the body, and a payload returned unchanged.
+  Only localhost and the hosts named with --allow-host are contacted.
+  --allow-host <host>   also send to this host (repeatable)
+  --rate <n>            requests per second (default 5)
+  --max-requests <n>    stop after n requests (default 300)
+  --only <request>      limit to this request name or id (repeatable)
+  --folder <name>       limit to a folder
+  --env, --var, --var-from-env, --cacert, --client-cert, --client-key, --proxy
+                        as for run
+  --reporter text|json  how to print the result (default text)
+  --fail-on <level>     exit 1 for findings of this severity or higher: low,
+                        medium (default), high or none
+
 lint
   Check an OpenAPI 3.x or Swagger 2.0 document (JSON or YAML, a file or an
   http(s) address) against the built-in rules and print the findings.
@@ -538,6 +560,8 @@ func dispatch(arguments []string, stdout, stderr *os.File) int {
 		return relayCommand(arguments[1:], stdout, stderr)
 	case "scan":
 		return scanCommand(arguments[1:], stdout, stderr)
+	case "negative":
+		return negativeCommand(arguments[1:], stdout, stderr)
 	case "lint":
 		return lintCommand(arguments[1:], stdout, stderr)
 	case "import":
