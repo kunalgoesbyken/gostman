@@ -1,9 +1,11 @@
 import { isPlainObject } from './dataUtils.js'
 import { RUN_DATA_TEXT } from './runDataText'
+import { readWorkbookRows, WorkbookError } from './xlsx.js'
 
 const BYTE_ORDER_MARK = '﻿'
 const QUOTE = '"'
 const JSON_EXTENSION = /\.json$/i
+const WORKBOOK_EXTENSION = /\.xlsx$/i
 
 export const MAX_ITERATIONS = 10000
 
@@ -67,12 +69,25 @@ function parseJsonRows(text) {
   return parsed
 }
 
-export function parseDataFile(name, content) {
-  const text = content.startsWith(BYTE_ORDER_MARK) ? content.slice(1) : content
-  const rows = JSON_EXTENSION.test(name) ? parseJsonRows(text) : parseCsv(text)
+function checkedRows(rows) {
   if (rows.length === 0) throw new Error(DATA_FILE_ERROR.empty)
   if (rows.length > MAX_ITERATIONS) throw new Error(DATA_FILE_ERROR.tooManyRows)
   return rows
+}
+
+export function parseDataFile(name, content) {
+  const text = content.startsWith(BYTE_ORDER_MARK) ? content.slice(1) : content
+  return checkedRows(JSON_EXTENSION.test(name) ? parseJsonRows(text) : parseCsv(text))
+}
+
+export async function readDataFile(file) {
+  if (!WORKBOOK_EXTENSION.test(file.name)) return parseDataFile(file.name, await file.text())
+  try {
+    return checkedRows(await readWorkbookRows(await file.arrayBuffer()))
+  } catch (error) {
+    if (error instanceof WorkbookError) throw new Error(DATA_FILE_ERROR.unreadable)
+    throw error
+  }
 }
 
 export const iterationCount = (rows, iterations) => {

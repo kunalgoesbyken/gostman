@@ -21,7 +21,7 @@ Scripts can change the order with `setNextRequest`; see [Scripting](scripting-an
 | **Requests to run** | Chooses **All requests** or one folder. Folders are listed by their full path, separated by ` / `. |
 | **Delay (ms)** | Waits this many milliseconds after each request before the next one. Empty means no delay. |
 | **Stop on failure** | Stops the run after the first request that fails. |
-| **Data file (CSV or JSON)** | Loads a file with one row per iteration. See [Data files](#data-files). |
+| **Data file (CSV, JSON or XLSX)** | Loads a file with one row per iteration. See [Data files](#data-files). |
 | **Iterations** | Limits the number of iterations. Empty shows the number that will run: the row count of the data file, or 1. The highest value is 10000. |
 | **Parallel** | Sends up to this many requests at once. Empty means 1. |
 | **Only tags** and **Skip tags** | Shown when a request or folder in the collection has tags. **Only tags** keeps the requests that have at least one of the tags you add; empty keeps every request. **Skip tags** leaves out requests that have any of them. A folder's tags count for every request inside it. Case is ignored. Both apply inside the chosen folder, and the footer counts what is left. Set a request's tags in its [Settings](requests-and-responses.md#settings) tab or with **Tags…** in its menu in the sidebar, and a folder's with **Colour and tags…**. |
@@ -38,6 +38,7 @@ A data file runs the whole selection once per row.
 
 - A CSV file needs a header row. Quoted fields may contain commas and line breaks, and every value is text.
 - A JSON file must be an array of objects, one object per iteration.
+- An XLSX workbook uses its first sheet. The first row holds the column names, blank rows are skipped, and every value is read as the text stored in the cell, so a date shows as its serial number and a formula as its last saved result.
 - A data file can have at most 10000 rows, and it must have at least one.
 - A row's columns become variables for that iteration and win over request, folder and environment variables with the same name, so a column `id` fills `{{id}}` even in a request whose **Vars** tab sets `id`. The dialog lists the columns a file sets. The values are kept as session values for the run and put back when it ends. `iteration` (starting at 1) and `iterationCount` are set as well, so you can write `{{iteration}}` in a request.
 - With a data file loaded, the dialog shows its name and row count. Select that button to remove the file.

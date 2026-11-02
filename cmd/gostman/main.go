@@ -72,7 +72,8 @@ run
                         the folder of the export file; off by default so that
                         a collection you did not write cannot send your files
                         (also for send and load)
-  --data <file>         run once per row of a CSV (header row) or JSON (array of
+  --data <file>         run once per row of a CSV (header row), XLSX (first sheet,
+                        header row) or JSON (array of
                         objects) file; a row's values win over --var and the
                         environment, folder and request variables, and the
                         variables iteration and iterationCount are set

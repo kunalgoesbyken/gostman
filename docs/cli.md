@@ -50,7 +50,7 @@ An environment variable can read its value from HashiCorp Vault (KV 1 and 2), AW
 
 ### Data-driven runs
 
-`--data users.csv` (header row, UTF-8, quoted fields may hold commas and line breaks) or `--data users.json` (an array of objects) runs the whole collection once per row. A row's columns become variables that win over request, folder and environment variables and over `--var`; every value from a CSV is text. `iteration` (from 1) and `iterationCount` are set for scripts and `{{iteration}}` in requests. `--iterations n` repeats a run n times, or uses only the first n rows. Values that scripts and Extract rules write carry over to the next iteration, as in the app and in Postman; only the row's own columns change from one iteration to the next.
+`--data users.csv` (header row, UTF-8, quoted fields may hold commas and line breaks) or `--data users.json` (an array of objects) or `--data users.xlsx` (first sheet, header row) runs the whole collection once per row. A row's columns become variables that win over request, folder and environment variables and over `--var`; every value from a CSV is text. `iteration` (from 1) and `iterationCount` are set for scripts and `{{iteration}}` in requests. `--iterations n` repeats a run n times, or uses only the first n rows. Values that scripts and Extract rules write carry over to the next iteration, as in the app and in Postman; only the row's own columns change from one iteration to the next.
 
 ### Parallel runs
 

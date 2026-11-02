@@ -13,7 +13,7 @@ import { TestRow, countPassed } from "./TestResults"
 import { TagsInput } from "./ui/tagsInput"
 import { UnresolvedNames, hasUnresolved } from "./UnresolvedNotice"
 import { ROOT_ID, buildCollectionTree, listFolders } from "../lib/collectionTree"
-import { DATA_FILE_ERROR, dataColumns, iterationCount, MAX_ITERATIONS, parseDataFile } from "../lib/runData"
+import { DATA_FILE_ERROR, dataColumns, iterationCount, MAX_ITERATIONS, readDataFile } from "../lib/runData"
 import { parseJsonBody, statusVariant } from "../lib/response"
 import { shownMethod } from "../lib/methodLabel"
 import { requestsInScope } from "../lib/runner"
@@ -27,7 +27,7 @@ import { useAppStore } from "../store/appStore"
 
 const PATH_SEPARATOR = " / "
 
-const DATA_ACCEPT = ".csv,.json,text/csv,application/json"
+const DATA_ACCEPT = ".csv,.json,.xlsx,text/csv,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 const toCount = (text) => Math.max(0, Math.trunc(Number(text)) || 0)
 
@@ -233,7 +233,7 @@ export function RunnerDialog({ folders, requests, actions }) {
     event.target.value = ""
     if (!file) return
     try {
-      setRows(parseDataFile(file.name, await file.text()))
+      setRows(await readDataFile(file))
       setDataName(file.name)
       setDataError("")
     } catch (error) {

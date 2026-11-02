@@ -2,7 +2,7 @@
 
 Gostman reads Bruno collections in both of Bruno's formats, rewrites the common `bru.*` script calls to its own script API, and runs the result from the app or from a single `gostman` binary. `gostman run` also takes a Bruno folder as it is, so a CI job can try Gostman before anyone converts anything. This page covers moving a collection across, what changes on the way, and the `gostman run` flags that match `bru run`.
 
-Gostman has no paid tier, no account and no licence key. CSV and JSON data files, parallel runs, secret managers, commit and push in the Git panel and any number of collections are in the free download. See [What is free in Gostman](free-features.md).
+Gostman has no paid tier, no account and no licence key. CSV, JSON and XLSX data files, parallel runs, secret managers, commit and push in the Git panel and any number of collections are in the free download. See [What is free in Gostman](free-features.md).
 
 For how the two tools differ and where Bruno is stronger, see [Gostman vs Bruno](gostman-vs-bruno.md).
 

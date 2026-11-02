@@ -9,7 +9,7 @@
     "stop": "Stop",
     "iterations": "Iterations",
     "parallel": "Parallel",
-    "dataFile": "Data file (CSV or JSON)",
+    "dataFile": "Data file (CSV, JSON or XLSX)",
     "clearData": "Remove the data file",
     "report": "Download HTML report",
     "includeTags": "Only tags",

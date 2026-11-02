@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"maps"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -30,16 +31,31 @@ func (o Options) DataValues() map[string]string {
 }
 
 func LoadData(path string) ([]Row, error) {
+	var rows []Row
+	var err error
+	extension := strings.ToLower(filepath.Ext(path))
+	if extension == ".xlsx" {
+		var workbook []byte
+		workbook, err = os.ReadFile(path)
+		if err != nil {
+			return nil, fmt.Errorf("cannot read the data file: %w", err)
+		}
+		rows, err = parseXLSXRows(workbook)
+		return finishRows(path, rows, err)
+	}
 	content, err := ReadText(path)
 	if err != nil {
 		return nil, fmt.Errorf("cannot read the data file: %w", err)
 	}
-	var rows []Row
-	if strings.EqualFold(filepath.Ext(path), ".json") {
+	if extension == ".json" {
 		rows, err = parseJSONRows(content)
 	} else {
 		rows, err = parseCSVRows(content)
 	}
+	return finishRows(path, rows, err)
+}
+
+func finishRows(path string, rows []Row, err error) ([]Row, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
