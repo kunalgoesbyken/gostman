@@ -4,7 +4,7 @@ import { EditorView } from '@codemirror/view'
 import { MergeView } from '@codemirror/merge'
 import { useVariableMap } from '../hooks/useVariableMap'
 import { usePreferences } from '../lib/preferences'
-import { baseExtensions, canFormat, formatDocument, formatKeymap, languageExtension, phraseExtension, revealOffset, variableExtension, wrapExtension } from '../lib/codeEditor'
+import { baseExtensions, canFormat, diagnosticsExtension, formatDocument, formatKeymap, languageExtension, phraseExtension, refreshDiagnostics, revealOffset, variableExtension, wrapExtension } from '../lib/codeEditor'
 import { ghostText } from '../lib/ghostText'
 import { LARGE_BODY_CHARS } from '../lib/largeText'
 import './variables.css'
@@ -57,7 +57,7 @@ function useFormatting(language, onFormat) {
 }
 
 export const CodeEditor = forwardRef(function CodeEditor(
-  { value = '', onChange, onFormat, language = 'json', path, height = '300px', variables = false, fileReads = true, surface, label, completer },
+  { value = '', onChange, onFormat, language = 'json', path, height = '300px', variables = false, fileReads = true, surface, label, completer, extensions = NO_EXTENSION, diagnostics },
   ref,
 ) {
   const hostRef = useRef(null)
@@ -68,7 +68,10 @@ export const CodeEditor = forwardRef(function CodeEditor(
   const { editorFontSize } = usePreferences()
   const formatting = useFormatting(language, onFormat)
   const completion = useCompletion(completer)
-  const extras = useMemo(() => [formatting.extension, completion], [formatting.extension, completion])
+  const diagnosticsRef = useRef(diagnostics)
+  const hasDiagnostics = Boolean(diagnostics)
+  const lintExtension = useMemo(() => (hasDiagnostics ? diagnosticsExtension(() => diagnosticsRef.current) : NO_EXTENSION), [hasDiagnostics])
+  const extras = useMemo(() => [formatting.extension, completion, lintExtension, extensions], [formatting.extension, completion, lintExtension, extensions])
   const config = useEditorConfig(highlightedLanguage(language, value), variables, fileReads, extras, label)
 
   useImperativeHandle(ref, () => ({
@@ -79,6 +82,11 @@ export const CodeEditor = forwardRef(function CodeEditor(
   useEffect(() => {
     onChangeRef.current = onChange
   }, [onChange])
+
+  useEffect(() => {
+    diagnosticsRef.current = diagnostics
+    if (viewRef.current && diagnostics) refreshDiagnostics(viewRef.current)
+  }, [diagnostics])
 
   useEffect(() => {
     const view = new EditorView({

@@ -33,7 +33,7 @@ function FindingBody({ finding }) {
   )
 }
 
-function FindingRow({ row, onOpenOperation }) {
+function FindingRow({ row, onOpenOperation, onSelectFinding }) {
   if (row.kind === "heading") {
     return (
       <div style={{ height: ROW_HEIGHT_PX }} className="flex items-end px-4 pb-1 text-xs font-semibold text-foreground">
@@ -44,17 +44,18 @@ function FindingRow({ row, onOpenOperation }) {
   const { finding } = row
   const className = "block w-full px-4 py-1.5 text-start"
   const style = { height: ROW_HEIGHT_PX }
-  if (!finding.operation) {
+  const select = onSelectFinding ? () => onSelectFinding(finding) : finding.operation && (() => onOpenOperation(finding.operation))
+  if (!select) {
     return <div style={style} title={finding.path} className={className}><FindingBody finding={finding} /></div>
   }
   return (
-    <button type="button" style={style} title={finding.path} onClick={() => onOpenOperation(finding.operation)} className={cn(className, "hover:bg-accent")}>
+    <button type="button" style={style} title={finding.path} onClick={select} className={cn(className, "hover:bg-accent")}>
       <FindingBody finding={finding} />
     </button>
   )
 }
 
-export function SpecLint({ report, onOpenOperation }) {
+export function SpecLint({ report, onOpenOperation, onSelectFinding }) {
   const [hidden, setHidden] = useState(() => new Set())
   const rows = useMemo(() => groupFindings(report.findings, hidden), [report, hidden])
 
@@ -76,7 +77,7 @@ export function SpecLint({ report, onOpenOperation }) {
       <VirtualList
         items={rows}
         rowHeight={ROW_HEIGHT_PX}
-        renderRow={(row) => <FindingRow key={row.key} row={row} onOpenOperation={onOpenOperation} />}
+        renderRow={(row) => <FindingRow key={row.key} row={row} onOpenOperation={onOpenOperation} onSelectFinding={onSelectFinding} />}
         className="min-h-0 flex-1 py-1"
       />
     </div>

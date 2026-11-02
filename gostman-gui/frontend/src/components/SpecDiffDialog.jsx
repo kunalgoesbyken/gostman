@@ -79,7 +79,7 @@ function Result({ report }) {
 
 export function SpecDiffDialog({ dialog, actions, onClose }) {
   const [oldSide, setOldSide] = useState({ address: "", text: "", fileName: "" })
-  const [newSide, setNewSide] = useState({ address: sourceAddress(dialog.newSource), text: "", fileName: "" })
+  const [newSide, setNewSide] = useState(() => initialSide(dialog.newSource, dialog.newName))
   const [state, setState] = useState({ running: false, report: null, error: "" })
 
   const run = async () => {
@@ -113,6 +113,6 @@ export function SpecDiffDialog({ dialog, actions, onClose }) {
   )
 }
 
-function sourceAddress(source) {
-  return source?.url || source?.path || ""
+function initialSide(source, name) {
+  return { address: source?.url || source?.path || "", text: source?.text || "", fileName: name || "" }
 }

@@ -51,6 +51,7 @@ import { createBackupActions } from './backupActions'
 import { createTabActions } from './tabActions'
 import { createTreeActions } from './treeActions'
 import { createFlowActions } from './flowActions'
+import { createSpecEditorActions } from './specEditorActions'
 import { createFeatureActions } from './featureActions'
 import { placedAfterRoot } from './treeMoves'
 import { focusAddressSoon } from './panes'
@@ -68,7 +69,7 @@ import { CURL_FILES_TEXT } from './requestBarText'
 import { countImported } from './importSummary'
 import { SCOPE_GLOBAL } from './variableScopes'
 import { createTrashActions, keepFolder, keepRequest } from './trashSession'
-import { environmentForFolder, findActiveEnvironment, isFlowTab, selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
+import { environmentForFolder, findActiveEnvironment, isFlowTab, isSpecTab, selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
 import { ownedVariableCount, scopedFolderNames, scopedImport } from './environmentScope'
 
 const UNRECORDED_ERRORS = ['config', 'script', 'cancelled', RESTRICTED_ERROR]
@@ -273,6 +274,7 @@ export function createWorkspaceActions(backend) {
       flows.run(tab.id)
       return
     }
+    if (isSpecTab(tab)) return
     if (isSocketAddress(tab.request.url, activeVariables())) {
       sockets.openFromAddressBar(tab.id)
       return
@@ -307,7 +309,12 @@ export function createWorkspaceActions(backend) {
 
   const saveRequestTab = attempt(TEXT.saveFailed, () => saveTab(activeTab().id))
 
-  const save = () => (isFlowTab(activeTab()) ? flows.save(activeTab().id) : saveRequestTab())
+  function save() {
+    const tab = activeTab()
+    if (isFlowTab(tab)) return flows.save(tab.id)
+    if (isSpecTab(tab)) return specs.save(tab.id)
+    return saveRequestTab()
+  }
 
   async function updateSavedRequest(request, changes) {
     const saved = await backend.saveRequest(normalizeRequest({ ...request, ...changes }))
@@ -449,6 +456,7 @@ export function createWorkspaceActions(backend) {
   const importShared = (imported) => importData(keepingOwnVariables(imported, store().environments, store().folders))
 
   const openapi = createSpecActions({ backend, attempt, addImported: addReviewed })
+  const specs = createSpecEditorActions(backend, { attempt, promptForName, openapi, mock })
 
   const importer = createImporterClient(backend)
 
@@ -589,6 +597,11 @@ export function createWorkspaceActions(backend) {
       }
       return
     }
+    if (isSpecTab(tab)) {
+      if (getPreferences().confirmCloseTab) specs.close(tabId, close)
+      else close()
+      return
+    }
     const saved = requests.find((request) => request.id === tab.request.id)
     if (!getPreferences().confirmCloseTab || !isRequestDirty(tab.request, saved)) {
       close()
@@ -615,7 +628,7 @@ export function createWorkspaceActions(backend) {
   trash.purgeExpired()
   const storageActions = createStorageActions(backend)
   const tree = createTreeActions(backend, attempt)
-  const tabActions = createTabActions(backend, attempt, cancelTab, flows)
+  const tabActions = createTabActions(backend, attempt, cancelTab, flows, specs)
 
   const activeSavedSource = () => {
     const { id } = activeTab().request
@@ -685,6 +698,7 @@ export function createWorkspaceActions(backend) {
     globalSearch: () => store().openGlobalSearch(),
     dependencyGraph: () => store().openDependencyGraph(),
     newFolder: () => createFolder(),
+    newSpec: () => specs.create(),
     collapseFolders: () => store().collapseFolders(),
     clearHistory,
     showWelcome: () => store().showWelcome(),
@@ -739,6 +753,7 @@ export function createWorkspaceActions(backend) {
     ai,
     features,
     flows,
+    specs,
     send,
     sockets,
     examples,

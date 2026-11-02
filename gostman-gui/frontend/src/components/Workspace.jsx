@@ -20,7 +20,7 @@ import { DialogPending } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
 import { WelcomePanel } from "./WelcomePanel"
 import { GettingStartedButton, useOnboardingCompletion } from "./GettingStarted"
-import { isFlowTab, resolvedVariablesFor, restoreTabDrafts, selectActiveVariables, selectIsDialogOpen, selectResolvedVariables, useActiveTab, useAppStore } from "../store/appStore"
+import { isDocumentTab, isFlowTab, isSpecTab, resolvedVariablesFor, restoreTabDrafts, selectActiveVariables, selectIsDialogOpen, selectResolvedVariables, useActiveTab, useAppStore } from "../store/appStore"
 import { useAutoSave } from "../hooks/useAutoSave"
 import { useDocumentLanguage } from "../hooks/useDocumentLanguage"
 import { useRequestFieldHandlers } from "../hooks/useRequestFieldHandlers"
@@ -70,6 +70,7 @@ const DependencyGraphDialog = lazy(() => import("./DependencyGraphDialog").then(
 const RunnerDialog = lazy(() => import("./RunnerDialog").then((module) => ({ default: module.RunnerDialog })))
 const AiDialog = lazy(() => import("./AiDialog").then((module) => ({ default: module.AiDialog })))
 const FlowView = lazy(() => import("./flows/FlowView").then((module) => ({ default: module.FlowView })))
+const SpecView = lazy(() => import("./specs/SpecView").then((module) => ({ default: module.SpecView })))
 const loadCodeEditor = () => import("./CodeEditor")
 const CodeEditor = lazy(() => loadCodeEditor().then((module) => ({ default: module.CodeEditor })))
 
@@ -298,9 +299,10 @@ function LoadedWorkspace({ backend, onBack }) {
   const socketStatus = useSocketStore((state) => selectSession(activeTab.id)(state).status)
   const isLoading = activeTab.pendingId !== null
   const isFlow = isFlowTab(activeTab)
+  const isSpec = isSpecTab(activeTab)
   const besideTab = useAppStore((s) => s.tabs.find((tab) => tab.id === s.besideTabId && tab.id !== s.activeTabId))
   const setBesideTab = useAppStore((s) => s.setBesideTab)
-  const showsWelcome = welcomeVisible && !isFlow && isBlankRequest(activeRequest) && activeTab.response === null && !isLoading
+  const showsWelcome = welcomeVisible && !isDocumentTab(activeTab) && isBlankRequest(activeRequest) && activeTab.response === null && !isLoading
 
   useEffect(() => {
     if (welcomeVisible && !showsWelcome) closeWelcome()
@@ -412,11 +414,17 @@ function LoadedWorkspace({ backend, onBack }) {
 
           <DiskChangeNotice />
 
-          {isFlow ? (
+          {isSpec && (
+            <Suspense fallback={<AppSkeleton />}>
+              <SpecView tab={activeTab} actions={actions.specs} />
+            </Suspense>
+          )}
+          {isFlow && (
             <Suspense fallback={<AppSkeleton />}>
               <FlowView tab={activeTab} actions={actions.flows} EditorComponent={CodeEditor} />
             </Suspense>
-          ) : (
+          )}
+          {!isFlow && !isSpec && (
             <>
               <RequestBar
                 activeRequest={activeRequest}

@@ -21,7 +21,7 @@ type pending struct {
 
 type readAhead struct {
 	disk          disk
-	flowsReserved bool
+	reserved      map[string]bool
 	slots         chan struct{}
 	mu            sync.Mutex
 	listings      map[string]*pending
@@ -35,7 +35,7 @@ func readers() int {
 func startReadAhead(storage disk) *readAhead {
 	ahead := &readAhead{
 		disk:          storage,
-		flowsReserved: !flowsHoldRequests(storage),
+		reserved:      freeReservedDirectories(storage),
 		slots:         make(chan struct{}, readers()),
 		listings:      map[string]*pending{},
 		files:         map[string]*pending{},
@@ -62,7 +62,7 @@ func (a *readAhead) survey(directory string, depth int) {
 		job.entries, job.err = a.list(directory)
 		for _, entry := range job.entries {
 			relative := joinPath(directory, entry.Name())
-			switch kindOf(directory, entry, a.flowsReserved) {
+			switch kindOf(directory, entry, a.reserved) {
 			case requestKind:
 				a.readRequest(relative)
 			case folderKind:

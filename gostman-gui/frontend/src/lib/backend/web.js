@@ -294,6 +294,11 @@ async function saveFlows(flows) {
   await mutateData((data) => { data.flows = flows })
 }
 
+async function saveSpecs(specs) {
+  await mutateData((data) => { data.specs = specs })
+  return specs
+}
+
 async function saveHistory(history) {
   await mutateData((data) => { data.history = history.map(compactRequest) })
 }
@@ -399,6 +404,7 @@ export const webBackend = {
   deleteRequests,
   saveFolders,
   saveFlows,
+  saveSpecs,
   saveHistory,
   saveEnvironments,
   saveScopes,

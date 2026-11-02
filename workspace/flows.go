@@ -86,20 +86,20 @@ func IsFlowFile(relative string) bool {
 	return strings.HasPrefix(strings.ToLower(relative), FlowsDirectory+"/")
 }
 
-func flowsHoldRequests(storage disk) bool {
-	entries, err := storage.list(FlowsDirectory)
+func directoryHoldsRequests(storage disk, directory string) bool {
+	entries, err := storage.list(directory)
 	if err != nil {
 		return false
 	}
 	for _, entry := range entries {
-		if holdsRequests(storage, entry) {
+		if holdsRequests(storage, directory, entry) {
 			return true
 		}
 	}
 	return false
 }
 
-func holdsRequests(storage disk, entry fs.DirEntry) bool {
+func holdsRequests(storage disk, directory string, entry fs.DirEntry) bool {
 	name := entry.Name()
 	switch {
 	case isHidden(name):
@@ -109,7 +109,7 @@ func holdsRequests(storage disk, entry fs.DirEntry) bool {
 	case !entry.Type().IsRegular() || !isYAMLFile(name):
 		return false
 	}
-	content, err := storage.read(joinPath(FlowsDirectory, name))
+	content, err := storage.read(joinPath(directory, name))
 	if err != nil {
 		return false
 	}
@@ -124,10 +124,6 @@ func hasStepsKey(root *yaml.Node) bool {
 		}
 	}
 	return false
-}
-
-func isFlowsDirectory(directory, name string, reserved bool) bool {
-	return reserved && directory == "" && strings.EqualFold(name, FlowsDirectory)
 }
 
 func readFlow(root *yaml.Node) (flowEntry, error) {
@@ -156,7 +152,7 @@ func encodeFlow(entry flowEntry) ([]byte, error) {
 }
 
 func (s *scanner) flowFiles() {
-	if !s.ahead.flowsReserved {
+	if !s.ahead.reserved[FlowsDirectory] {
 		return
 	}
 	entries, err := s.disk.list(FlowsDirectory)
@@ -267,7 +263,7 @@ func (w *Workspace) dropFlows(kept map[string]bool) error {
 func (w *Workspace) SaveFlows(flows []Flow) error {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	if flowsHoldRequests(w.disk) {
+	if directoryHoldsRequests(w.disk, FlowsDirectory) {
 		return errors.New("the flows folder of this workspace holds requests, so flows cannot be saved there; rename that folder first")
 	}
 	if len(flows) > 0 {

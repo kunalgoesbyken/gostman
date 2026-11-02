@@ -7,7 +7,7 @@ import { isRequestDirty } from './requestChanges'
 import { tabsToClose } from './tabOrder'
 import { TAB_TEXT } from './treeText'
 import { FLOW_TEXT } from './flowsText'
-import { isFlowTab, useAppStore, variableTextFor } from '../store/appStore'
+import { isDocumentTab, isFlowTab, isSpecTab, useAppStore, variableTextFor } from '../store/appStore'
 
 const DESTRUCTIVE = 'destructive'
 
@@ -15,8 +15,12 @@ const store = () => useAppStore.getState()
 
 const savedFor = (tab) => store().requests.find((request) => request.id === tab.request.id)
 
-export function createTabActions(backend, attempt, cancelTab, flows) {
-  const isDirty = (tab) => (isFlowTab(tab) ? flows.isDirty(tab) : isRequestDirty(tab.request, savedFor(tab)))
+export function createTabActions(backend, attempt, cancelTab, flows, specs) {
+  function isDirty(tab) {
+    if (isFlowTab(tab)) return flows.isDirty(tab)
+    if (isSpecTab(tab)) return specs.isDirty(tab)
+    return isRequestDirty(tab.request, savedFor(tab))
+  }
 
   const closeAll = (tabs) => {
     tabs.forEach(cancelTab)
@@ -48,6 +52,7 @@ export function createTabActions(backend, attempt, cancelTab, flows) {
   const copyCurl = attempt(TAB_TEXT.curlFailed, async (tabId) => {
     const tab = store().tabs.find((candidate) => candidate.id === tabId)
     if (isFlowTab(tab)) throw new Error(FLOW_TEXT.noCurl)
+    if (isSpecTab(tab)) throw new Error(TAB_TEXT.noCurl)
     if (!tab || isGrpcRequest(tab.request) || isMcpRequest(tab.request)) throw new Error(TAB_TEXT.noCurl)
     if (!navigator.clipboard) throw new Error(TAB_TEXT.noClipboard)
     const prepared = await backend.prepare(withInheritance(store(), tab.request), variableTextFor(store(), tab.request))
@@ -71,6 +76,6 @@ export function createTabActions(backend, attempt, cancelTab, flows) {
     reorder: (tabId, targetId, place) => store().moveTab(tabId, targetId, place),
     reveal,
     copyCurl,
-    canReveal: (tab) => !isFlowTab(tab) && Boolean(savedFor(tab)),
+    canReveal: (tab) => !isDocumentTab(tab) && Boolean(savedFor(tab)),
   }
 }

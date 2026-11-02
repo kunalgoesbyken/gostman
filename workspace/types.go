@@ -84,6 +84,7 @@ type Collection struct {
 	Settings      Settings      `json:"settings"`
 	SharedOrder   bool          `json:"sharedOrder,omitempty"`
 	Flows         []Flow        `json:"flows,omitempty"`
+	Specs         []Spec        `json:"specs,omitempty"`
 }
 
 type Problem struct {

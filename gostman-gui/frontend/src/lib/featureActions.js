@@ -75,6 +75,7 @@ export function createFeatureActions({ backend, commands, monitors, mock, captur
   const commandHandlers = {
     newRequest: { run: () => commands.newRequest() },
     newFolder: { run: () => commands.newFolder() },
+    newSpec: { run: () => commands.newSpec() },
     generateCode: { run: () => commands.generateCode() },
     sendSample: { run: () => commands.sendSample() },
     lintSpec: { run: () => commands.lintSpec() },

@@ -16,6 +16,7 @@ type collectionStore interface {
 	saveVariables(text, meta string) error
 	saveSettings(settings workspace.Settings) error
 	saveFlows(flows []workspace.Flow) error
+	saveSpecs(specs []workspace.Spec) ([]workspace.Spec, error)
 	shareOrder() error
 }
 
@@ -88,6 +89,12 @@ func (appDataStore) saveSettings(settings workspace.Settings) error {
 func (appDataStore) saveFlows(flows []workspace.Flow) error {
 	return mutateData(func(data *SavedData) {
 		data.Flows = flows
+	})
+}
+
+func (appDataStore) saveSpecs(specs []workspace.Spec) ([]workspace.Spec, error) {
+	return specs, mutateData(func(data *SavedData) {
+		data.Specs = specs
 	})
 }
 

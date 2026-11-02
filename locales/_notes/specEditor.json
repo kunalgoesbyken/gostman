@@ -1,0 +1,6 @@
+{
+  "specEditor": "Messages for the OpenAPI spec editor (design-first workflow). OpenAPI, YAML, JSON, mock and Swagger are names and stay as written.",
+  "specEditor.templates": "Names of the starter specs offered by New API spec.",
+  "specList": "Sidebar list of API specs and its menus.",
+  "specView": "Toolbar and panels of the spec editor tab. The buttons hand the open spec to existing features: documentation, requests, mock server, response checks and comparison."
+}

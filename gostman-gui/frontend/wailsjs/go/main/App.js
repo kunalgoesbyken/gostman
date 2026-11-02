@@ -370,6 +370,10 @@ export function PrepareRequest(arg1) {
   return window['go']['main']['App']['PrepareRequest'](arg1);
 }
 
+export function ReadTrash() {
+  return window['go']['main']['App']['ReadTrash']();
+}
+
 export function ReleaseHeld(arg1, arg2) {
   return window['go']['main']['App']['ReleaseHeld'](arg1, arg2);
 }
@@ -416,10 +420,6 @@ export function SaveCollectionSettings(arg1) {
 
 export function SaveCollectionToFolder(arg1) {
   return window['go']['main']['App']['SaveCollectionToFolder'](arg1);
-}
-
-export function ReadTrash() {
-  return window['go']['main']['App']['ReadTrash']();
 }
 
 export function SaveCookies(arg1) {
@@ -476,6 +476,10 @@ export function SaveSecretConnection(arg1) {
 
 export function SaveSettings(arg1) {
   return window['go']['main']['App']['SaveSettings'](arg1);
+}
+
+export function SaveSpecs(arg1) {
+  return window['go']['main']['App']['SaveSpecs'](arg1);
 }
 
 export function SaveSystemTitleBar(arg1) {

@@ -1,10 +1,9 @@
 import { memo, useMemo, useState } from "react"
-import { Workflow, X } from "lucide-react"
+import { X } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
-import { MethodTag } from "./MethodTag"
 import { ORIENTATION, moveFocus } from "../lib/rovingFocus"
-import { shownMethod } from "../lib/methodLabel"
+import { TabMark } from "./TabMark"
 import { isTabDirty, savedForTab, tabHint, tabTitle } from "../lib/tabDisplay"
 import { TAB_BAR_TEXT as TEXT } from "../lib/tabBarText"
 import { tabMenuItems } from "../lib/tabMenu"
@@ -34,7 +33,7 @@ function OpenTabRow({ tab, saved, isActive, onSelect, onClose, onOpenMenu }) {
         onClick={() => onSelect(tab.id)}
         className="flex h-8 min-w-0 flex-1 items-center gap-1.5 ps-3 text-start"
       >
-        {tab.flowId ? <Workflow aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> : <MethodTag method={shownMethod(tab.request)} />}
+        <TabMark tab={tab} />
         <span className={cn("truncate", tab.isPreview && "italic")}>{title}</span>
         {isDirty && <span aria-label={TEXT.unsaved} className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground" />}
       </button>
@@ -48,6 +47,8 @@ export const OpenTabsList = memo(function OpenTabsList({ tabs, activeTabId, requ
   const besideTabId = useAppStore((s) => s.besideTabId)
   const requestsById = useMemo(() => new Map(requests.map((request) => [request.id, request])), [requests])
   const flowsById = useMemo(() => new Map(flows.map((flow) => [flow.id, flow])), [flows])
+  const specs = useAppStore((s) => s.specs)
+  const saved = useMemo(() => ({ requests: requestsById, flows: flowsById, specs: new Map(specs.map((spec) => [spec.id, spec])) }), [requestsById, flowsById, specs])
   const [menu, setMenu] = useState(null)
   const menuTab = menu && tabs.find((candidate) => candidate.id === menu.tabId)
 
@@ -58,7 +59,7 @@ export const OpenTabsList = memo(function OpenTabsList({ tabs, activeTabId, requ
           <OpenTabRow
             key={tab.id}
             tab={tab}
-            saved={savedForTab(tab, requestsById, flowsById)}
+            saved={savedForTab(tab, saved)}
             isActive={tab.id === activeTabId}
             onSelect={onSelect}
             onClose={onClose}

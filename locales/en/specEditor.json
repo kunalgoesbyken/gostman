@@ -1,0 +1,86 @@
+{
+  "specEditor": {
+    "createFailed": "Could not create the API spec",
+    "saveFailed": "Could not save the API spec",
+    "deleteFailed": "Could not delete the API spec",
+    "importFailed": "Could not import the API spec",
+    "convertFailed": "Could not convert the API spec",
+    "mockFailed": "Could not start the mock server",
+    "generateFailed": "Could not generate requests",
+    "saved": "\"{{name}}\" was saved.",
+    "renameTitle": "Rename API spec",
+    "nameLabel": "Name",
+    "deleteTitle": "Delete API spec",
+    "deleteMessage": "Delete the API spec \"{{name}}\"? This can't be undone.",
+    "closeTitle": "Close API spec",
+    "closeMessage": "\"{{name}}\" has unsaved changes. Save them before closing?",
+    "dontSave": "Don't save",
+    "save": "Save",
+    "copyName": "{{name}} copy",
+    "importedName": "Imported API",
+    "importAddressTitle": "Import an API spec",
+    "importAddressMessage": "Enter the address of an OpenAPI or Swagger spec.",
+    "importAddressPlaceholder": "https://example.com/openapi.json",
+    "importAddressConfirm": "Import",
+    "checkResponsesTitle": "Check responses",
+    "generateFirst": "Generate requests from this spec first. Their responses are then checked against it.",
+    "checkingResponses": "Responses in \"{{name}}\" are checked against this spec.",
+    "tabLabel": "API spec {{name}}",
+    "templates": {
+      "strategies": {
+        "name": "Strategies API"
+      },
+      "resource": {
+        "name": "Items API"
+      },
+      "blank": {
+        "name": "New API"
+      }
+    }
+  },
+  "specList": {
+    "listLabel": "API specs",
+    "emptyTitle": "Design an API before it exists",
+    "emptyDescription": "Write an OpenAPI spec here, with checks as you type. Then generate requests, start a mock server and check real responses against it.",
+    "count_one": "{{count}} API spec",
+    "count_other": "{{count}} API specs",
+    "newSpec": "New API spec",
+    "importSpec": "Import a spec",
+    "importFile": "Import from a file",
+    "importAddress": "Import from an address",
+    "actions": "Actions for {{name}}",
+    "rename": "Rename",
+    "duplicate": "Duplicate",
+    "remove": "Delete",
+    "sidebarTab": "Specs"
+  },
+  "specView": {
+    "nameLabel": "API spec name",
+    "unsaved": "Unsaved changes",
+    "save": "Save",
+    "formatLabel": "File format",
+    "formatYaml": "YAML",
+    "formatJson": "JSON",
+    "editorLabel": "OpenAPI spec",
+    "previewLabel": "Documentation preview",
+    "showPreview": "Show documentation preview",
+    "hidePreview": "Hide documentation preview",
+    "viewDocs": "View docs",
+    "viewDocsHint": "Open the documentation in a larger window.",
+    "generate": "Generate requests",
+    "generateHint": "Create requests from this spec, with a link that keeps them in step with it.",
+    "update": "Update requests",
+    "updateHint": "Compare this spec with the requests generated from it and apply the changes you choose.",
+    "mock": "Start mock",
+    "mockHint": "Serve this spec's examples from a local mock server.",
+    "check": "Check responses",
+    "checkHint": "Check the responses of the generated requests against this spec.",
+    "compare": "Compare",
+    "compareHint": "Compare this spec with another version and list the breaking changes.",
+    "problems_one": "{{count}} problem",
+    "problems_other": "{{count}} problems",
+    "problemsLabel": "Problems",
+    "checking": "Checking the spec",
+    "cannotRead": "The spec cannot be read"
+  }
+}

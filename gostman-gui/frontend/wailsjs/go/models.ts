@@ -2600,6 +2600,7 @@ export namespace main {
 	    postScript: string;
 	    assertions: string;
 	    scriptTimeoutMs?: number;
+	    notes?: string;
 	    collectionVariables?: string;
 	    collectionVariablesMeta?: string;
 	
@@ -2624,6 +2625,7 @@ export namespace main {
 	        this.postScript = source["postScript"];
 	        this.assertions = source["assertions"];
 	        this.scriptTimeoutMs = source["scriptTimeoutMs"];
+	        this.notes = source["notes"];
 	        this.collectionVariables = source["collectionVariables"];
 	        this.collectionVariablesMeta = source["collectionVariablesMeta"];
 	    }
@@ -2740,6 +2742,7 @@ export namespace main {
 	    socketProtocol: string;
 	    socketMessages: string;
 	    vars: string;
+	    notes: string;
 	    timestamp: string;
 	    sortOrder: number;
 	    statusCode?: number;
@@ -2780,6 +2783,7 @@ export namespace main {
 	        this.socketProtocol = source["socketProtocol"];
 	        this.socketMessages = source["socketMessages"];
 	        this.vars = source["vars"];
+	        this.notes = source["notes"];
 	        this.timestamp = source["timestamp"];
 	        this.sortOrder = source["sortOrder"];
 	        this.statusCode = source["statusCode"];
@@ -2902,6 +2906,7 @@ export namespace main {
 	    socketProtocol: string;
 	    socketMessages: string;
 	    vars: string;
+	    notes: string;
 	    timestamp: string;
 	    sortOrder: number;
 	
@@ -2940,6 +2945,7 @@ export namespace main {
 	        this.socketProtocol = source["socketProtocol"];
 	        this.socketMessages = source["socketMessages"];
 	        this.vars = source["vars"];
+	        this.notes = source["notes"];
 	        this.timestamp = source["timestamp"];
 	        this.sortOrder = source["sortOrder"];
 	    }
@@ -3022,6 +3028,7 @@ export namespace main {
 	    collectionSettings: workspace.Settings;
 	    sharedOrder?: boolean;
 	    flows?: workspace.Flow[];
+	    specs?: workspace.Spec[];
 	
 	    static createFrom(source: any = {}) {
 	        return new SavedData(source);
@@ -3046,6 +3053,7 @@ export namespace main {
 	        this.collectionSettings = this.convertValues(source["collectionSettings"], workspace.Settings);
 	        this.sharedOrder = source["sharedOrder"];
 	        this.flows = this.convertValues(source["flows"], workspace.Flow);
+	        this.specs = this.convertValues(source["specs"], workspace.Spec);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -3700,6 +3708,24 @@ export namespace mock {
 		    return a;
 		}
 	}
+	export class DataLookup {
+	    file: string;
+	    field: string;
+	    name: string;
+	    column: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DataLookup(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.file = source["file"];
+	        this.field = source["field"];
+	        this.name = source["name"];
+	        this.column = source["column"];
+	    }
+	}
 	export class Header {
 	    key: string;
 	    value: string;
@@ -3727,6 +3753,7 @@ export namespace mock {
 	    headers: Header[];
 	    body: string;
 	    behavior: Behavior;
+	    data?: DataLookup;
 	
 	    static createFrom(source: any = {}) {
 	        return new Rule(source);
@@ -3746,6 +3773,7 @@ export namespace mock {
 	        this.headers = this.convertValues(source["headers"], Header);
 	        this.body = source["body"];
 	        this.behavior = this.convertValues(source["behavior"], Behavior);
+	        this.data = this.convertValues(source["data"], DataLookup);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -3898,6 +3926,7 @@ export namespace mock {
 		    return a;
 		}
 	}
+	
 	export class Entry {
 	    id: number;
 	    // Go type: time
@@ -5336,6 +5365,24 @@ export namespace secrets {
 
 export namespace workspace {
 	
+	export class Spec {
+	    id: string;
+	    name: string;
+	    format: string;
+	    text: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Spec(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.format = source["format"];
+	        this.text = source["text"];
+	    }
+	}
 	export class FlowValue {
 	    name: string;
 	    value?: string;
@@ -5528,6 +5575,7 @@ export namespace workspace {
 	    postScript: string;
 	    assertions: string;
 	    scriptTimeoutMs?: number;
+	    notes?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Settings(source);
@@ -5542,6 +5590,7 @@ export namespace workspace {
 	        this.postScript = source["postScript"];
 	        this.assertions = source["assertions"];
 	        this.scriptTimeoutMs = source["scriptTimeoutMs"];
+	        this.notes = source["notes"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -5601,6 +5650,7 @@ export namespace workspace {
 	    postScript: string;
 	    assertions: string;
 	    scriptTimeoutMs?: number;
+	    notes?: string;
 	    collectionVariables?: string;
 	    collectionVariablesMeta?: string;
 	
@@ -5624,6 +5674,7 @@ export namespace workspace {
 	        this.postScript = source["postScript"];
 	        this.assertions = source["assertions"];
 	        this.scriptTimeoutMs = source["scriptTimeoutMs"];
+	        this.notes = source["notes"];
 	        this.collectionVariables = source["collectionVariables"];
 	        this.collectionVariablesMeta = source["collectionVariablesMeta"];
 	    }
@@ -5676,6 +5727,7 @@ export namespace workspace {
 	    socketProtocol: string;
 	    socketMessages: string;
 	    vars: string;
+	    notes: string;
 	    timestamp: string;
 	    sortOrder: number;
 	
@@ -5714,6 +5766,7 @@ export namespace workspace {
 	        this.socketProtocol = source["socketProtocol"];
 	        this.socketMessages = source["socketMessages"];
 	        this.vars = source["vars"];
+	        this.notes = source["notes"];
 	        this.timestamp = source["timestamp"];
 	        this.sortOrder = source["sortOrder"];
 	    }
@@ -5745,6 +5798,7 @@ export namespace workspace {
 	    settings: Settings;
 	    sharedOrder?: boolean;
 	    flows?: Flow[];
+	    specs?: Spec[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Collection(source);
@@ -5760,6 +5814,7 @@ export namespace workspace {
 	        this.settings = this.convertValues(source["settings"], Settings);
 	        this.sharedOrder = source["sharedOrder"];
 	        this.flows = this.convertValues(source["flows"], Flow);
+	        this.specs = this.convertValues(source["specs"], Spec);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -5803,6 +5858,7 @@ export namespace workspace {
 	        this.message = source["message"];
 	    }
 	}
+	
 	
 
 }

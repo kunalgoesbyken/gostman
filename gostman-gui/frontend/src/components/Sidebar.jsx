@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef, useState } from "react"
-import { Check, FolderPlus, Import, Plus, RotateCcw } from "lucide-react"
+import { Check, FileCode, FolderPlus, Import, Plus, RotateCcw } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
 import { ResizablePane, Toolbar } from "./ui/panel"
@@ -9,10 +9,12 @@ import { GlobalSearch } from "./GlobalSearch"
 import { HistoryList } from "./HistoryList"
 import { OpenTabsList } from "./OpenTabsList"
 import { FlowList } from "./flows/FlowList"
+import { SpecList } from "./specs/SpecList"
 import { IMPORT_TEXT } from "../lib/importText"
 import { SIDEBAR_PANE, isNarrowViewport } from "../lib/layout"
+import { SPEC_LIST_TEXT } from "../lib/specEditorText"
 import { SIDEBAR_TEXT, sidebarViewName } from "../lib/sidebarText"
-import { DEFAULT_SIDEBAR_VIEWS, VIEW_COLLECTIONS, VIEW_FLOWS, VIEW_HISTORY, VIEW_SEARCH, VIEW_TABS, canHideView, visibleViews, withViewVisible } from "../lib/sidebarViews"
+import { DEFAULT_SIDEBAR_VIEWS, VIEW_COLLECTIONS, VIEW_FLOWS, VIEW_HISTORY, VIEW_SEARCH, VIEW_SPECS, VIEW_TABS, canHideView, visibleViews, withViewVisible } from "../lib/sidebarViews"
 import { updatePreferences, usePreferences } from "../lib/preferences"
 import { cn } from "../lib/utils"
 import { useShortcutLabel } from "../hooks/useShortcuts"
@@ -20,6 +22,7 @@ import { EDGE_END } from "../hooks/usePaneResize"
 import { hintWithShortcut } from "../lib/shortcuts"
 import { useAppStore } from "../store/appStore"
 
+const LIST_OWNS_ADD = [VIEW_FLOWS, VIEW_SPECS]
 const VIEW_CLASS = "flex min-h-0 flex-1 flex-col"
 
 const Unchecked = ({ className }) => <span aria-hidden="true" className={className} />
@@ -81,6 +84,7 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
   const addItems = [
     { id: "new-request", label: SIDEBAR_TEXT.newRequest, icon: Plus, shortcut: newRequestShortcut, onSelect: () => actions.newRequest() },
     { id: "new-folder", label: SIDEBAR_TEXT.newFolder, icon: FolderPlus, onSelect: () => actions.createFolder() },
+    { id: "new-spec", label: SPEC_LIST_TEXT.newSpec, icon: FileCode, onSelect: () => actions.specs.create() },
     { id: "import", label: IMPORT_TEXT.importButton, icon: Import, onSelect: openImportDialog },
   ]
 
@@ -106,7 +110,7 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
           >
             <OverflowTabsList label={SIDEBAR_TEXT.views} items={viewItems(shown, tabs.length, requestHistory.length)} moreLabel={SIDEBAR_TEXT.more} moreHint={SIDEBAR_TEXT.moreHint} />
           </div>
-          <div className={cn("flex shrink-0 items-center gap-0", view === VIEW_FLOWS && "hidden")}>
+          <div className={cn("flex shrink-0 items-center gap-0", LIST_OWNS_ADD.includes(view) && "hidden")}>
             <IconButton ref={addRef} label={hintWithShortcut(SIDEBAR_TEXT.add, newRequestShortcut)} icon={Plus} aria-haspopup="menu" aria-expanded={Boolean(addPosition)} onClick={toggleAddMenu} />
           </div>
         </Toolbar>
@@ -119,6 +123,9 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
         </TabsContent>
         <TabsContent value={VIEW_FLOWS} className={VIEW_CLASS}>
           <FlowList actions={actions.flows} onMonitor={actions.monitorFlow} />
+        </TabsContent>
+        <TabsContent value={VIEW_SPECS} className={VIEW_CLASS}>
+          <SpecList actions={actions.specs} />
         </TabsContent>
         <TabsContent value={VIEW_SEARCH} className={VIEW_CLASS}>
           <GlobalSearch requests={requests} history={requestHistory} tabs={tabs} actions={actions} />

@@ -232,6 +232,43 @@ What the page contains and how it redacts values is described in [Sharing and do
 
 ## OpenAPI specs
 
+### Designing an API
+
+The **Specs** tab of the sidebar lists the OpenAPI specs you write in Gostman, so a contract can exist before the backend does. The plus button of the list offers three starters: **Strategies API**, a `POST` with a request body schema, `201` and `400` responses and a `GET` by id; **Items API**, a list, create, read and delete set; and **New API**, only the OpenAPI header. **New API spec** in the sidebar **Add** menu and in the command palette creates **Strategies API** at once. A spec opens in its own tab with the code on the left and the documentation on the right:
+
+- The editor reads YAML and JSON. The **YAML** and **JSON** switch converts the text; converting JSON to YAML keeps the order of the keys, and comments in YAML are lost when you convert to JSON.
+- Typing suggests the OpenAPI keywords that fit the place you are in, the values of `type`, `format`, `in` and `openapi`, and the components of the spec after `$ref:`. Press `Ctrl+Space` to ask for suggestions.
+- The linter runs half a second after you stop typing. A finding puts an icon in the gutter and underlines its line; a YAML or JSON syntax error is marked the same way. The **Problems** panel under the editor lists the findings by severity, as the **Lint** tab does, and selecting one moves the caret to its line.
+- The right side is the [spec viewer](#spec-viewer) with the **Operations** and **Models** tabs. It follows what you type. Selecting an operation or a model there moves the editor to its place in the text. The request and response bodies it shows are examples taken from the spec, or built from the schemas when the spec has none. **Send to request tab** opens the operation as a request. The button in the toolbar hides the pane.
+
+**Save** writes the spec. In a workspace folder it is the file `specs/<name>.yaml` or `specs/<name>.json`, named after the spec, so it is committed with the rest of the workspace and edits made in another editor or by `git pull` show up within a few seconds. A `specs` folder that holds requests, made by an earlier version, stays a folder of requests, and specs cannot be saved in that workspace until it is renamed. In app storage and in the browser, specs are kept with the rest of your data. They are not part of a Gostman export.
+
+To start from an existing spec, use the plus button of the **Specs** list: **Import from a file** reads a `.yaml`, `.yml` or `.json` file, and **Import from an address** fetches one. The spec is checked first, so a file that is not an OpenAPI or Swagger spec is refused. The list menu of each spec has **Rename**, **Duplicate** and **Delete**.
+
+The toolbar hands the open spec to the features described below:
+
+| Button | What it does |
+| --- | --- |
+| **View docs** | Opens the [spec viewer](#spec-viewer) in a larger window, with the **Lint** tab. |
+| **Generate requests** | Creates a collection with a request for each operation, linked to the spec as in [Importing a spec](#importing-a-spec). Once it exists the button reads **Update requests**: it points the link at the text you have now and opens [spec sync](#spec-sync), so you choose which requests to add, change or remove. |
+| **Start mock** | Desktop app only. Opens the [mock server](workspaces-and-mock.md#examples-and-the-mock-server-desktop) with the operations of this spec. |
+| **Check responses** | Points the contract link of the generated collection at the text you have now and keeps [contract checks](#contract-checks) on. It asks you to generate requests first when there are none. |
+| **Compare** | Opens [Comparing specs](#comparing-specs) with this spec as the new version, so you pick the earlier one and read the breaking changes. |
+
+A design-first run goes like this. Write the spec and fix what the **Problems** panel reports. Choose **Generate requests**, then **Start mock** and send the requests at the mock while the client is built. When the backend exists, send the requests to it: every response is checked against the spec. When the spec changes, edit it, choose **Update requests** and read the breaking changes with **Compare**.
+
+The same file works on the command line, in CI and for coding agents, because a spec is an ordinary file:
+
+```bash
+gostman lint specs/payments.yaml --fail-on warning
+gostman mock --openapi specs/payments.yaml --port 4010
+gostman run my-api --contract specs/payments.yaml --coverage
+gostman fuzz specs/payments.yaml --base-url http://localhost:8080
+gostman diff old/payments.yaml specs/payments.yaml --fail-on breaking
+```
+
+See [Command line](cli.md) for the flags of each command.
+
 ### Importing a spec
 
 Load a spec from an address, a file or pasted text, then choose **Import**. Each operation becomes a request. A spec loaded from an address or an opened file is linked to the folder that the import creates, so you can sync it later. Variables that the spec defines, such as `baseUrl`, become the collection variables of that folder (**Environments**, **Collection variables** under its name), kept in its `folder.yaml` in a folder workspace. A path parameter becomes a `{{name}}` placeholder in the URL with a request variable that holds the example value, so `/users/{id}` is imported as `/users/{{id}}`.

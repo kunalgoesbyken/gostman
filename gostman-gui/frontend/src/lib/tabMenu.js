@@ -1,6 +1,7 @@
 import { ArrowLeft, ArrowRight, Columns2, Copy, FolderSearch, Pin, X } from "lucide-react"
 import { TAB_TEXT } from "./treeText"
 import { isRtl } from "../hooks/direction"
+import { isDocumentTab } from "../store/appStore"
 
 export function tabMenuItems(tab, tabs, actions, closeTab, besideTabId) {
   const index = tabs.findIndex((candidate) => candidate.id === tab.id)
@@ -18,7 +19,7 @@ export function tabMenuItems(tab, tabs, actions, closeTab, besideTabId) {
     { id: "move-left", label: TAB_TEXT.moveLeft, icon: ArrowLeft, disabled: !canMoveLeft, onSelect: () => actions.tabs.step(tab.id, toLeft) },
     { id: "move-right", label: TAB_TEXT.moveRight, icon: ArrowRight, disabled: !canMoveRight, onSelect: () => actions.tabs.step(tab.id, -toLeft) },
     { id: "reveal", label: TAB_TEXT.revealInTree, icon: FolderSearch, disabled: !actions.tabs.canReveal(tab), onSelect: () => actions.tabs.reveal(tab.id) },
-    ...(tab.flowId ? [] : [{ id: "beside", label: tab.id === besideTabId ? TAB_TEXT.hideBeside : TAB_TEXT.showBeside, icon: Columns2, onSelect: () => actions.tabs.toggleBeside(tab.id) }]),
-    ...(tab.flowId ? [] : [{ id: "curl", label: TAB_TEXT.copyAsCurl, icon: Copy, onSelect: () => actions.tabs.copyCurl(tab.id) }]),
+    ...(isDocumentTab(tab) ? [] : [{ id: "beside", label: tab.id === besideTabId ? TAB_TEXT.hideBeside : TAB_TEXT.showBeside, icon: Columns2, onSelect: () => actions.tabs.toggleBeside(tab.id) }]),
+    ...(isDocumentTab(tab) ? [] : [{ id: "curl", label: TAB_TEXT.copyAsCurl, icon: Copy, onSelect: () => actions.tabs.copyCurl(tab.id) }]),
   ]
 }

@@ -34,6 +34,7 @@ const paneSpec = (storageKey, min, fallback, max, minMain, widthVar = PANE_WIDTH
 
 export const SIDEBAR_PANE = paneSpec("gostman.sidebarWidth", 224, 312, 480, 480, "--sidebar-width")
 export const FLOW_PANE = paneSpec("gostman.flowPaneWidth", 320, 512, 800, 360)
+export const SPEC_EDITOR_PANE = paneSpec("gostman.specEditorPreviewWidth", 360, 640, 1100, 360)
 export const GRAPHQL_SCHEMA_PANE = paneSpec("gostman.graphqlSchemaWidth", 208, 320, 560, 280)
 export const GRAPHQL_BUILDER_PANE = paneSpec("gostman.graphqlBuilderWidth", 256, 448, 720, 280)
 export const MCP_SCHEMA_PANE = paneSpec("gostman.mcpSchemaWidth", 208, 448, 720, 280)

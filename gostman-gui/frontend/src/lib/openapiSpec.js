@@ -10,6 +10,7 @@ export const mayBeSpec = (text) => {
 }
 
 const sourceOf = (input) => {
+  if (input.text) return { text: input.text }
   if (input.url) return { url: input.url }
   if (input.path) return { path: input.path }
   return null

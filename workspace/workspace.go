@@ -68,6 +68,7 @@ type Workspace struct {
 	folders      map[string]*folderEntry
 	environments map[string]*environmentEntry
 	flows        map[string]*flowEntry
+	specs        map[string]Spec
 	problems     []Problem
 }
 
@@ -205,7 +206,7 @@ func blankSettings() Settings {
 
 func (w *Workspace) isBlank() bool {
 	held := w.Collection()
-	return len(held.Requests)+len(held.Folders)+len(held.Environments)+len(held.Flows) == 0 &&
+	return len(held.Requests)+len(held.Folders)+len(held.Environments)+len(held.Flows)+len(held.Specs) == 0 &&
 		held.Variables == emptyObject && held.VariablesMeta == emptyObject &&
 		reflect.DeepEqual(held.Settings, blankSettings())
 }
@@ -227,6 +228,9 @@ func (w *Workspace) fill(collection Collection) error {
 		return err
 	}
 	if err := w.SaveFlows(collection.Flows); err != nil {
+		return err
+	}
+	if _, err := w.SaveSpecs(collection.Specs); err != nil {
 		return err
 	}
 	if !collection.SharedOrder {
@@ -252,7 +256,7 @@ func (w *Workspace) Reload() error {
 	if err := scan.run(); err != nil {
 		return err
 	}
-	w.requests, w.folders, w.environments, w.flows, w.problems = scan.requests, scan.folders, scan.environments, scan.flows, scan.problems
+	w.requests, w.folders, w.environments, w.flows, w.specs, w.problems = scan.requests, scan.folders, scan.environments, scan.flows, scan.specs, scan.problems
 	return nil
 }
 
@@ -343,5 +347,6 @@ func (w *Workspace) Collection() Collection {
 		collection.Environments = append(collection.Environments, entry.environment)
 	}
 	collection.Flows = w.orderedFlows()
+	collection.Specs = w.orderedSpecs()
 	return collection
 }

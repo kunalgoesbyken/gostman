@@ -568,6 +568,11 @@
       "title": "OpenAPI diff",
       "blurb": "Compare two versions of an OpenAPI spec and list breaking changes in the app, or with gostman diff in CI.",
       "synonyms": "openapi diff oasdiff breaking changes compare spec"
+    },
+    "apiDesign": {
+      "title": "API design",
+      "blurb": "Write an OpenAPI spec before the backend exists, with checks as you type, then generate requests, a mock and response checks from it.",
+      "synonyms": "openapi swagger design first contract editor stoplight api spec yaml schema"
     }
   },
   "featureSamples": {

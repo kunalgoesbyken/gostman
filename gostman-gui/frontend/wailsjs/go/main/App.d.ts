@@ -203,6 +203,8 @@ export function PinWorkspace(arg1:string,arg2:boolean):Promise<main.WorkspaceSta
 
 export function PrepareRequest(arg1:engine.Request):Promise<engine.Prepared>;
 
+export function ReadTrash():Promise<string>;
+
 export function ReleaseHeld(arg1:number,arg2:capture.Decision):Promise<void>;
 
 export function ReloadWorkspace():Promise<main.WorkspaceStatus>;
@@ -226,8 +228,6 @@ export function SaveCollectionPassphrase(arg1:string,arg2:string,arg3:string):Pr
 export function SaveCollectionSettings(arg1:workspace.Settings):Promise<void>;
 
 export function SaveCollectionToFolder(arg1:string):Promise<main.WorkspaceStatus>;
-
-export function ReadTrash():Promise<string>;
 
 export function SaveCookies(arg1:Array<engine.CookieInfo>):Promise<void>;
 
@@ -256,6 +256,8 @@ export function SaveScopes(arg1:Array<main.Environment>,arg2:string,arg3:string,
 export function SaveSecretConnection(arg1:main.SecretConnection):Promise<void>;
 
 export function SaveSettings(arg1:main.Settings):Promise<void>;
+
+export function SaveSpecs(arg1:Array<workspace.Spec>):Promise<Array<workspace.Spec>>;
 
 export function SaveSystemTitleBar(arg1:boolean):Promise<main.WindowFrame>;
 

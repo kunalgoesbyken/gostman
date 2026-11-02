@@ -1,0 +1,96 @@
+openapi: 3.1.0
+info:
+  title: Items API
+  version: 0.1.0
+servers:
+  - url: http://localhost:4010
+tags:
+  - name: items
+paths:
+  /items:
+    get:
+      tags: [items]
+      operationId: listItems
+      summary: List items
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: A page of items.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+    post:
+      tags: [items]
+      operationId: createItem
+      summary: Create an item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewItem'
+      responses:
+        '201':
+          description: The item was created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '400':
+          description: The request is not valid.
+  /items/{itemId}:
+    parameters:
+      - name: itemId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [items]
+      operationId: getItem
+      summary: Get an item
+      responses:
+        '200':
+          description: The item.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '404':
+          description: There is no such item.
+    delete:
+      tags: [items]
+      operationId: deleteItem
+      summary: Delete an item
+      responses:
+        '204':
+          description: The item was deleted.
+        '404':
+          description: There is no such item.
+components:
+  schemas:
+    NewItem:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          example: Notebook
+    Item:
+      allOf:
+        - $ref: '#/components/schemas/NewItem'
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: string
+              format: uuid

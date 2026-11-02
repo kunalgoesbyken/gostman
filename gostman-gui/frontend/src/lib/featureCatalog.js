@@ -6,13 +6,13 @@ export const PLATFORMS = ['desktop', 'web', 'cli']
 
 export const ACTIONS = {
   dialog: ['monitors', 'environments', 'cookies', 'network', 'mock', 'capture', 'loadTest', 'runner', 'scan', 'negative', 'import', 'export', 'share', 'preferences', 'shortcuts', 'examples', 'folderSettings', 'git', 'trash'],
-  command: ['newRequest', 'newFolder', 'generateCode', 'sendSample', 'lintSpec', 'diffSpecs', 'commandPalette', 'globalSearch', 'dependencyGraph', 'workspaceSwitcher', 'aiSettings', 'aiMock'],
+  command: ['newRequest', 'newFolder', 'newSpec', 'generateCode', 'sendSample', 'lintSpec', 'diffSpecs', 'commandPalette', 'globalSearch', 'dependencyGraph', 'workspaceSwitcher', 'aiSettings', 'aiMock'],
   sample: ['collection', 'flow', 'send', 'scan', 'graphql', 'grpc', 'websocket', 'mcp', 'curl', 'binary', 'jwt'],
   tab: ['auth', 'vars', 'extract', 'tests', 'settings', 'notes', 'history', 'openTabs'],
   copy: ['cliInit', 'ciInit'],
 }
 
-export const SURFACES = ['response', 'runner', 'mock', 'scan', 'negative', 'load', 'history', 'flows', 'capture', 'tab:vars', 'tab:extract', 'tab:tests', 'tab:settings']
+export const SURFACES = ['response', 'runner', 'mock', 'scan', 'negative', 'load', 'history', 'flows', 'specs', 'capture', 'tab:vars', 'tab:extract', 'tab:tests', 'tab:settings']
 
 export const FEATURES = [
   { id: 'rest', group: 'requests', docs: 'protocols#rest-and-http', action: { type: 'command', id: 'newRequest' }, icon: 'newspaper', landing: { group: 'send', order: 1 }, tool: { group: 'build', order: 1 } },
@@ -74,6 +74,7 @@ export const FEATURES = [
   { id: 'negative-tests', group: 'testing', since: '1.9.0', docs: 'cli#negative-tests', action: { type: 'dialog', id: 'negative' }, icon: 'bug', palette: true, empty: ['negative'], sample: 'collection', tool: { group: 'test', order: 5 } },
   { id: 'coverage', group: 'testing', since: '1.9.0', docs: 'runner-load-and-scan#openapi-coverage', action: { type: 'dialog', id: 'runner' }, icon: 'percent' },
   { id: 'pm-packages', group: 'testing', since: '1.9.0', platforms: ['desktop', 'cli'], docs: 'scripting-and-settings#packages-and-the-vault', icon: 'package' },
+  { id: 'api-design', group: 'testing', since: '1.11.0', docs: 'import-export-and-specs#designing-an-api', action: { type: 'command', id: 'newSpec' }, icon: 'file-code', palette: true, empty: ['specs'], tool: { group: 'build', order: 9 } },
   { id: 'spec-lint', group: 'testing', docs: 'import-export-and-specs#linter', action: { type: 'command', id: 'lintSpec' }, icon: 'shield-check', palette: true, tool: { group: 'test', order: 3 } },
   { id: 'spec-sync', group: 'testing', docs: 'import-export-and-specs#spec-sync', icon: 'refresh-cw' },
   { id: 'openapi-diff', group: 'testing', since: '1.9.0', docs: 'import-export-and-specs#comparing-specs', action: { type: 'command', id: 'diffSpecs' }, icon: 'git-compare', palette: true },

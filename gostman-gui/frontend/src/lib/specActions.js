@@ -41,7 +41,7 @@ export function createSpecActions({ backend, attempt, addImported }) {
     const existing = { requestIds: idsOf(store().requests), folderIds: idsOf(store().folders) }
     const data = sanitizeImport({ ...result, folders: owningRoot(result), variables: sharedVariables(result) }, existing)
     const imported = await addImported(data)
-    const { source, hash, operations } = result.spec
+    const { source, hash, operations, specId } = result.spec
     if (!imported || !source) return
     const present = new Set(idsOf(store().requests))
     const entries = data.requests
@@ -49,7 +49,7 @@ export function createSpecActions({ backend, attempt, addImported }) {
       .filter(([, request]) => present.has(request.id))
       .map(([operation, request]) => [operation.key, linkEntry(request.id, operation.hash, request, operation.operationId)])
     const folderId = data.folders[0].id
-    store().setSpecLink(folderId, createLink(source, hash, entries))
+    store().setSpecLink(folderId, { ...createLink(source, hash, entries), ...(specId && { specId }) })
     await rememberSnapshot(folderId, source)
   })
 
@@ -180,7 +180,8 @@ export function createSpecActions({ backend, attempt, addImported }) {
     schema: client.schema,
     lint: client.lint,
     diff: client.diff,
-    openDiff: (newSource) => store().openSpecDialog({ mode: 'diff', newSource }),
+    text: client.text,
+    openDiff: (newSource, newName) => store().openSpecDialog({ mode: 'diff', newSource, newName }),
     lintLatest,
     importSpec,
     check,

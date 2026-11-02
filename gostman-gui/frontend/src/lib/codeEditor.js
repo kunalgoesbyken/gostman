@@ -1,9 +1,10 @@
-import { EditorState } from '@codemirror/state'
+import { EditorState, StateEffect } from '@codemirror/state'
 import { Decoration, EditorView, ViewPlugin, hoverTooltip, keymap, tooltips } from '@codemirror/view'
 import { HighlightStyle, indentUnit, syntaxHighlighting, syntaxTree } from '@codemirror/language'
 import { indentWithTab } from '@codemirror/commands'
-import { linter } from '@codemirror/lint'
+import { lintGutter, linter } from '@codemirror/lint'
 import { json } from '@codemirror/lang-json'
+import { yaml } from '@codemirror/lang-yaml'
 import { xml, xmlLanguage } from '@codemirror/lang-xml'
 import { html } from '@codemirror/lang-html'
 import { javascript } from '@codemirror/lang-javascript'
@@ -189,6 +190,7 @@ function jsonErrors(view) {
 
 const LANGUAGES = {
   json: () => [json(), linter(jsonErrors)],
+  yaml: () => yaml(),
   xml: () => xml(),
   html: () => html(),
   javascript: () => [javascript(), linter(syntaxErrors)],
@@ -239,6 +241,20 @@ export function formatDocument(view, language) {
 }
 
 export const formatKeymap = (run) => keymap.of([{ key: 'Shift-Alt-f', preventDefault: true, run }])
+
+const diagnosticsChanged = StateEffect.define()
+
+const isDiagnosticsChange = (update) => update.transactions.some((transaction) => transaction.effects.some((effect) => effect.is(diagnosticsChanged)))
+
+export const diagnosticsExtension = (read) => [
+  linter((view) => {
+    const { text, items } = read()
+    return view.state.doc.toString() === text ? items : []
+  }, { delay: 0, needsRefresh: isDiagnosticsChange }),
+  lintGutter(),
+]
+
+export const refreshDiagnostics = (view) => view.dispatch({ effects: diagnosticsChanged.of(null) })
 
 export const wrapExtension = (wrapLines) => (wrapLines ? EditorView.lineWrapping : [])
 

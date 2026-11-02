@@ -64,6 +64,7 @@ type SavedData struct {
 	CollectionSettings      workspace.Settings `json:"collectionSettings"`
 	SharedOrder             bool               `json:"sharedOrder,omitempty"`
 	Flows                   []workspace.Flow   `json:"flows,omitempty"`
+	Specs                   []workspace.Spec   `json:"specs,omitempty"`
 }
 
 type Environment struct {
@@ -251,6 +252,9 @@ func (a *App) LoadData() (SavedData, error) {
 	if data.Flows == nil {
 		data.Flows = []workspace.Flow{}
 	}
+	if data.Specs == nil {
+		data.Specs = []workspace.Spec{}
+	}
 	if data.Settings.Certificates == nil {
 		data.Settings.Certificates = []CertificateFiles{}
 	}
@@ -288,6 +292,10 @@ func (a *App) SaveFolders(folders []Folder) error {
 
 func (a *App) SaveFlows(flows []workspace.Flow) error {
 	return storage.current().saveFlows(flows)
+}
+
+func (a *App) SaveSpecs(specs []workspace.Spec) ([]workspace.Spec, error) {
+	return storage.current().saveSpecs(specs)
 }
 
 func (a *App) ShareSiblingOrder() error {

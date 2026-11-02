@@ -1,9 +1,8 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
-import { ChevronLeft, ChevronRight, History, Plus, Workflow, X } from "lucide-react"
+import { ChevronLeft, ChevronRight, History, Plus, X } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
 import { TAB_KEYS } from "./ui/tabs"
-import { MethodTag } from "./MethodTag"
 import { isRtl } from "../hooks/direction"
 import { usePointerDrag } from "../hooks/usePointerDrag"
 import { useShortcutLabel } from "../hooks/useShortcuts"
@@ -11,7 +10,7 @@ import { useStripEdges } from "../hooks/useStripEdges"
 import { PLACE_AFTER, PLACE_BEFORE } from "../lib/dropPlace"
 import { isFocusLost, moveFocus } from "../lib/rovingFocus"
 import { hintWithShortcut, isRemoveKey } from "../lib/shortcuts"
-import { shownMethod } from "../lib/methodLabel"
+import { TabMark } from "./TabMark"
 import { TAB_BAR_TEXT as TEXT } from "../lib/tabBarText"
 import { tabMenuItems } from "../lib/tabMenu"
 import { cn } from "../lib/utils"
@@ -24,9 +23,8 @@ const ACTIVE_TAB = "[role=tab][tabindex=\"0\"]"
 
 const Tab = memo(function Tab({ tab, saved, isActive, dropPlace, isDragged, onSelect, onClose, onCloseFromKeyboard, onPin, onOpenMenu, onPointerDown, onStep }) {
   const tabRef = useRef(null)
-  const { request, flowDraft } = tab
-  const isFlow = Boolean(tab.flowId)
-  const isDirty = useMemo(() => isTabDirty({ flowId: tab.flowId, flowDraft, request }, saved), [tab.flowId, flowDraft, request, saved])
+  const { request, flowDraft, specDraft } = tab
+  const isDirty = useMemo(() => isTabDirty({ flowId: tab.flowId, flowDraft, specId: tab.specId, specDraft, request }, saved), [tab.flowId, flowDraft, tab.specId, specDraft, request, saved])
   const title = tabTitle(tab)
   const fromHistory = Boolean(tab.historyId) && !request.id
   const hint = tabHint(tab)
@@ -84,7 +82,7 @@ const Tab = memo(function Tab({ tab, saved, isActive, dropPlace, isDragged, onSe
         onKeyDown={handleKeyDown}
         className="flex h-full min-w-0 flex-1 items-center gap-1.5 ps-3 text-start"
       >
-        {isFlow ? <Workflow aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : <MethodTag method={shownMethod(request)} />}
+        <TabMark tab={tab} className="text-muted-foreground" />
         {fromHistory && <History aria-label={TEXT.fromHistory} className="h-3 w-3 shrink-0 text-muted-foreground" />}
         <span className={cn("truncate", tab.isPreview && "italic")}>{title}</span>
         {isDirty && <span aria-label={TEXT.unsaved} className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground" />}
@@ -114,6 +112,8 @@ export const TabBar = memo(function TabBar({ tabs, activeTabId, requests, action
   const savedById = useMemo(() => new Map(requests.map((request) => [request.id, request])), [requests])
   const flows = useAppStore((s) => s.flows)
   const flowsById = useMemo(() => new Map(flows.map((flow) => [flow.id, flow])), [flows])
+  const specs = useAppStore((s) => s.specs)
+  const saved = useMemo(() => ({ requests: savedById, flows: flowsById, specs: new Map(specs.map((spec) => [spec.id, spec])) }), [savedById, flowsById, specs])
   const [menu, setMenu] = useState(null)
   const listRef = useRef(null)
   const { edges, page, scrollWithWheel } = useStripEdges(listRef, tabs.length)
@@ -151,7 +151,7 @@ export const TabBar = memo(function TabBar({ tabs, activeTabId, requests, action
           <Tab
             key={tab.id}
             tab={tab}
-            saved={savedForTab(tab, savedById, flowsById)}
+            saved={savedForTab(tab, saved)}
             isActive={tab.id === activeTabId}
             dropPlace={drag?.drop?.id === tab.id ? drag.drop.place : null}
             isDragged={drag?.source.id === tab.id}
