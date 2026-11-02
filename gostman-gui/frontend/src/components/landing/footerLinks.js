@@ -1,8 +1,8 @@
 import { docPath } from "../../docs/manifest"
-import { guidePages } from "../../guides/pages"
 import { ISSUES_URL, LICENSE_URL, RELEASES_URL, REPOSITORY_URL } from "../../lib/siteLinks"
 
 const internal = (label, href) => ({ label, href })
+const guide = (path, label) => internal(label, `/${path}`)
 const external = (label, href, brand) => ({ label, href, brand, external: true })
 
 export const FOOTER_COLUMNS = [
@@ -29,14 +29,21 @@ export const FOOTER_COLUMNS = [
   },
   {
     title: "Guides",
-    links: guidePages.map((page) => internal(page.heading, `/${page.path}`)),
+    links: [
+      guide("api-tests-in-ci", "API tests in CI"),
+      guide("api-client-mcp-server", "MCP server for agents"),
+      guide("online-api-tester", "Test an API online"),
+      guide("grpc-client", "gRPC client"),
+      guide("websocket-client", "WebSocket client"),
+      guide("graphql-client", "GraphQL client"),
+    ],
   },
   {
-    title: "Compare",
+    title: "Alternatives",
     links: [
-      internal("Gostman vs Postman", docPath("gostman-vs-postman")),
-      internal("Gostman vs Bruno", docPath("gostman-vs-bruno")),
-      internal("Gostman vs Insomnia", docPath("gostman-vs-insomnia")),
+      guide("postman-alternative", "Postman alternative"),
+      guide("bruno-alternative", "Bruno alternative"),
+      guide("insomnia-alternative", "Insomnia alternative"),
       internal("Coming from Postman", docPath("coming-from-postman")),
       internal("Coming from Bruno", docPath("coming-from-bruno")),
       internal("Coming from Insomnia", docPath("coming-from-insomnia")),
