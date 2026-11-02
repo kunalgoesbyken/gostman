@@ -1,4 +1,4 @@
-import { Check, Copy, Globe, Newspaper } from "lucide-react"
+import { Check, Copy, Globe, Heart, Newspaper } from "lucide-react"
 import { BrandIcon } from "./ui/brandIcon"
 import { Button } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
@@ -8,6 +8,7 @@ import { codeHostOf } from "../lib/codeHost"
 import { ABOUT_TEXT as TEXT } from "../lib/aboutText"
 import { FEATURES_TEXT } from "../lib/featuresText"
 import { usePreferences } from "../lib/preferences"
+import { SPONSOR_URL } from "../lib/siteLinks"
 import { useAppStore } from "../store/appStore"
 import { Logo } from "./ui/logo"
 
@@ -47,6 +48,17 @@ export function AboutDialog({ onClose }) {
         <p className="text-xs text-muted-foreground">{TEXT.diagnosticsHint}</p>
       </DialogBody>
       <DialogFooter>
+        <a
+          href={SPONSOR_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(event) => openExternal(event, SPONSOR_URL)}
+          aria-label={TEXT.links.sponsor}
+          title={TEXT.links.sponsor}
+          className="me-auto rounded-sm p-1 text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <Heart className="h-4 w-4" />
+        </a>
         <Button variant="outline" onClick={openWhatsNew}>
           <Newspaper />
           {FEATURES_TEXT.whatsNewTitle}
