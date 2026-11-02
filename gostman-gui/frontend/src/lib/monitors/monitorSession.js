@@ -257,7 +257,7 @@ export function createMonitorActions(backend, { execute }) {
     const monitors = state().monitors
     patch({
       isOpen: true,
-      editing: target ? blankMonitor(target.kind, target.id) : null,
+      editing: target ? { ...blankMonitor(target.kind, target.id), dataName: target.data?.name ?? '', rows: target.data?.rows } : null,
       selectedId: state().selectedId || monitors[0]?.id || '',
     })
   }

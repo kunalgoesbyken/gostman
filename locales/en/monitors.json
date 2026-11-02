@@ -58,7 +58,6 @@
       "dataHint": "Rows are kept in memory only, so choose the file again after restarting.",
       "notifications": "Notifications",
       "notify": "Tell me when a run fails",
-      "browserNotify": "Show a notification",
       "browserBlocked": "Notifications are blocked for this site in your browser settings.",
       "webhook": "Webhook address",
       "webhookPlaceholder": "Slack, Teams, Discord or any URL",

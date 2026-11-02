@@ -45,7 +45,7 @@ export function MonitorForm({ draft: initial, hasWebhooks, onSave, onCancel }) {
   const environments = useAppStore((s) => s.environments)
   const [draft, setDraft] = useState(initial)
   const [webhook, setWebhook] = useState("")
-  const [rows, setRows] = useState(undefined)
+  const [rows, setRows] = useState(initial.rows)
   const [error, setError] = useState("")
   const [isCustom, setIsCustom] = useState(!INTERVALS.some(({ minutes }) => minutes === initial.intervalMinutes))
   const fileInput = useRef(null)
@@ -78,6 +78,11 @@ export function MonitorForm({ draft: initial, hasWebhooks, onSave, onCancel }) {
     }
     setError("")
     change({ browserNotify: checked })
+  }
+
+  async function chooseNotify(checked) {
+    change({ notify: checked })
+    if (canNotifyInBrowser) await toggleBrowserNotify(checked)
   }
 
   async function submit(event) {
@@ -157,10 +162,7 @@ export function MonitorForm({ draft: initial, hasWebhooks, onSave, onCancel }) {
         )}
         <Field label={TEXT.form.notifications} grouped>
           <div className="flex min-w-0 flex-col gap-2">
-            <Checkbox className="justify-start" checked={draft.notify} onChange={(event) => change({ notify: event.target.checked })}>{TEXT.form.notify}</Checkbox>
-            {draft.notify && canNotifyInBrowser && (
-              <Checkbox className="justify-start" checked={draft.browserNotify} onChange={(event) => toggleBrowserNotify(event.target.checked)}>{TEXT.form.browserNotify}</Checkbox>
-            )}
+            <Checkbox className="justify-start" checked={draft.notify} onChange={(event) => chooseNotify(event.target.checked)}>{TEXT.form.notify}</Checkbox>
             {draft.notify && hasWebhooks && (
               <div className="flex flex-col gap-1">
                 <Input

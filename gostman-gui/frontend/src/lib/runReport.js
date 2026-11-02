@@ -52,8 +52,8 @@ export function summarize(results, planned) {
 
 export const environmentsUsed = (results, environmentOf) => [...new Set(results.map(environmentOf).filter(Boolean))].join(', ')
 
-export function buildReportPage(results, run, environment, flow = null, coverage = null) {
-  const report = {
+export function reportOf(results, run, environment, flow = null, coverage = null) {
+  return {
     ...(coverage && { coverage }),
     ...(flow && { flow, collection: flow.name }),
     environment,
@@ -64,5 +64,6 @@ export function buildReportPage(results, run, environment, flow = null, coverage
     summary: summarize(results, run.planned),
     results: results.map(toResult),
   }
-  return template.replace(PLACEHOLDER, () => embeddable(JSON.stringify(report)))
 }
+
+export const buildReportPage = (...args) => template.replace(PLACEHOLDER, () => embeddable(JSON.stringify(reportOf(...args))))

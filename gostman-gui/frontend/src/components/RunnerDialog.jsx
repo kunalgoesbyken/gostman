@@ -1,8 +1,9 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react"
-import { Check, ChevronDown, ChevronRight, Download, ListChecks, Minus, Play, RotateCw, Square, Upload, X } from "lucide-react"
+import { CalendarClock, Check, ChevronDown, ChevronRight, Download, ListChecks, Minus, Play, RotateCw, Square, Upload, X } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
+import { CopyTextButton } from "./CopyTextButton"
 import { toolWindow } from "../lib/dialogWindows"
 import { Dialog } from "./ui/dialog"
 import { ToolDialogHeader } from "./ToolDialogHeader"
@@ -19,6 +20,9 @@ import { DATA_ACCEPT, DATA_FILE_ERROR, dataColumns, iterationCount, MAX_ITERATIO
 import { parseJsonBody, statusVariant } from "../lib/response"
 import { shownMethod } from "../lib/methodLabel"
 import { requestsInScope } from "../lib/runner"
+import { runCommandLine } from "../lib/runCommand"
+import { REPORT_FORMAT_IDS } from "../lib/runReportFormats"
+import { isDesktopApp } from "../lib/platform"
 import { folderChain } from "../lib/variableScopes"
 import { RUNNER_TEXT } from "../lib/runnerText"
 import { summarize } from "../lib/runReport"
@@ -247,6 +251,7 @@ export function RunnerDialog({ folders, requests, actions }) {
   const excludedIds = useAppStore((s) => s.runExclusions[folderId])
   const setRunExclusions = useAppStore((s) => s.setRunExclusions)
   const [showChoices, setShowChoices] = useState(true)
+  const [reportFormat, setReportFormat] = useState(REPORT_FORMAT_IDS[0])
   const scoped = useMemo(() => requestsInScope({ folders, requests, sharedOrder }, folderId, tagFilter), [folders, requests, sharedOrder, folderId, tagFilter])
   const excluded = useMemo(() => new Set(excludedIds), [excludedIds])
   const requestCount = useMemo(() => scoped.filter((request) => !excluded.has(request.id)).length, [scoped, excluded])
@@ -263,6 +268,9 @@ export function RunnerDialog({ folders, requests, actions }) {
   const iterations = iterationCount(rows, iterationLimit)
   const columns = useMemo(() => dataColumns(rows), [rows])
   const total = requestCount * iterations
+  const terminalCommand = !isDesktopApp() && results.length > 0 && !isRunning
+    ? runCommandLine({ folderName: scopes.find((scope) => scope.folder.id === folderId)?.folder.name ?? ROOT_ID, dataName, iterations: iterationLimit, parallel, format: reportFormat })
+    : ""
   const isChoosing = scoped.length > 0 && !isRunning && (results.length === 0 || showChoices)
 
   async function chooseData(event) {
@@ -391,11 +399,27 @@ export function RunnerDialog({ folders, requests, actions }) {
             {showChoices ? RUNNER_TEXT.showResults : RUNNER_TEXT.chooseRequests}
           </Button>
         )}
-        <Button variant="ghost" size="sm" disabled={isRunning || results.length === 0} onClick={actions.downloadRunReport}>
+        <Button variant="ghost" size="sm" onClick={() => actions.scheduleRun(folderId, { name: dataName, rows: dataName ? rows : undefined })}>
+          <CalendarClock />
+          {RUNNER_TEXT.schedule}
+        </Button>
+        <div className="w-24 shrink-0">
+          <Select value={reportFormat} aria-label={RUNNER_TEXT.reportFormat} onChange={(event) => setReportFormat(event.target.value)}>
+            {REPORT_FORMAT_IDS.map((id) => <option key={id} value={id}>{RUNNER_TEXT.formats[id]}</option>)}
+          </Select>
+        </div>
+        <Button variant="ghost" size="sm" disabled={isRunning || results.length === 0} onClick={() => actions.downloadRunReport(reportFormat)}>
           <Download />
           {RUNNER_TEXT.report}
         </Button>
       </div>
+      {terminalCommand && (
+        <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-border py-1.5 ps-4 pe-2 text-xs text-muted-foreground">
+          <span>{RUNNER_TEXT.cliLine}</span>
+          <code dir="ltr" className="min-w-0 flex-1 truncate font-mono" title={terminalCommand}>{terminalCommand}</code>
+          <CopyTextButton text={terminalCommand} />
+        </div>
+      )}
     </Dialog>
   )
 }

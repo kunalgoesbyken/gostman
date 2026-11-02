@@ -39,7 +39,8 @@ import { keepingOwnVariables } from './shareContent'
 import { clientUrl } from './sharedLink'
 import { createRunner } from './runner'
 import { createNegativeRunner } from './negativeRun'
-import { buildReportPage, environmentsUsed } from './runReport'
+import { environmentsUsed } from './runReport'
+import { REPORT_FORMATS } from './runReportFormats'
 import { coverageOfRun } from './runCoverage'
 import { createSocketActions, isSocketAddress } from './socketSessions'
 import { TESTS_PANEL } from './requestSections'
@@ -107,8 +108,6 @@ function folderDeletionMessage(folder) {
   return TEXT.deleteFolderMessage(folder.name, requestCount, subfolderCount, parent ? parent.name : null)
 }
 
-const RUN_REPORT_FILE = 'gostman-report.html'
-const RUN_REPORT_TYPE = 'text/html'
 
 let sendSequence = 0
 
@@ -465,7 +464,7 @@ export function createWorkspaceActions(backend) {
 
   const runCoverage = (results) => coverageOfRun(backend, results)
 
-  const downloadRunReport = async () => {
+  const downloadRunReport = async (format = 'html') => {
     const run = runner.describeRun()
     if (!run) return undefined
     const { runner: state } = store()
@@ -473,7 +472,8 @@ export function createWorkspaceActions(backend) {
     const environmentOf = (folderId) => environmentForFolder(store(), folderId)?.name
     const environment = environmentsUsed(state.results, (result) => environmentOf(requests.get(result.id)?.folderId)) || environmentOf(state.folderId) || ''
     const coverage = await runCoverage(state.results)
-    return saveTextFile(RUN_REPORT_FILE, buildReportPage(state.results, run, environment, null, coverage), RUN_REPORT_TYPE)
+    const { file, type, build } = REPORT_FORMATS[format]
+    return saveTextFile(file, build(state.results, run, environment, null, coverage), type)
   }
 
   const deleteAllData = attempt(DATA_TEXT.failed, async () => {
@@ -771,6 +771,10 @@ export function createWorkspaceActions(backend) {
     startRun: runner.start,
     stopRun: runner.stop,
     downloadRunReport,
+    scheduleRun: (folderId, data) => {
+      store().closeRunner()
+      monitors.open({ kind: 'folder', id: folderId, data })
+    },
     runCoverage,
     loadSchema,
     loadGrpcSchema,

@@ -11,7 +11,15 @@
     "parallel": "Parallel",
     "dataFile": "Data file (CSV, JSON or XLSX)",
     "clearData": "Remove the data file",
-    "report": "Download HTML report",
+    "report": "Download report",
+    "reportFormat": "Report format",
+    "formats": {
+      "html": "HTML",
+      "junit": "JUnit",
+      "json": "JSON"
+    },
+    "schedule": "Schedule this run",
+    "cliLine": "The same run in a terminal",
     "includeTags": "Only tags",
     "excludeTags": "Skip tags",
     "anyTag": "Any",
