@@ -18,7 +18,7 @@ const APP_VERSION_TOKEN = '__APP_VERSION__'
 const GUIDE_ENTRY = resolve('src/guides/render.jsx')
 const DOCS_DIR = resolve('../../docs')
 const EMPTY_ROOT = '<div id="root"></div>'
-const IMAGE_FILES = /\.(png|jpe?g|webp|mp4)$/
+const IMAGE_FILES = /\.(png|jpe?g|webp|svg|mp4)$/
 const STARS_TIMEOUT_MS = 4000
 export const DOCS_ENTRY = 'docs'
 
@@ -170,7 +170,7 @@ async function buildGuideRenderer(bundle) {
     jsx: 'automatic',
     publicPath: '/',
     assetNames: 'assets/[name]-[hash]',
-    loader: { '.jpg': 'file', '.png': 'file', '.webp': 'file', '.mp4': 'file' },
+    loader: { '.jpg': 'file', '.png': 'file', '.webp': 'file', '.svg': 'file', '.mp4': 'file' },
     plugins: [bundledImageUrls(bundle)],
     define: { 'process.env.NODE_ENV': '"production"', ...siteDefine },
     logLevel: 'silent',
