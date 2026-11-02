@@ -73,6 +73,11 @@ export function createSpecClient(backend) {
     summary: async (source) => (await ask({ action: 'summary', source })).summary,
     operation: async (source, key) => (await ask({ action: 'operation', source, key })).detail,
     schema: async (source, name) => (await ask({ action: 'schema', source, name })).schema,
+    diff: async (oldSource, newSource) => {
+      const reply = await backend.diff({ old: oldSource, new: newSource })
+      if (reply.error) throw new Error(reply.error)
+      return reply.report
+    },
     lint: async (source) => {
       const reply = await backend.lint({ source, config: '' })
       if (reply.error) throw new Error(reply.error)

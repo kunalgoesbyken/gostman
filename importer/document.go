@@ -119,6 +119,7 @@ func decodeStructured(source string) (any, error) {
 func classify(file File) document {
 	doc := document{file: file}
 	trimmed := strings.TrimSpace(file.Text)
+	foreignTextKind := classifyForeignText(file.Name, trimmed)
 	switch {
 	case !importableName(file.Name):
 		doc.err = unsupportedType(file.Name)
@@ -126,12 +127,8 @@ func classify(file File) document {
 		doc.err = errEmpty
 	case isHTTPFileName(file.Name):
 		doc.kind = kindHTTP
-	case path.Ext(strings.ToLower(file.Name)) == hurlExtension:
-		doc.kind = kindHurl
-	case looksLikeRAML(trimmed):
-		doc.kind = kindRAML
-	case looksLikeBlueprint(file.Name, trimmed):
-		doc.kind = kindBlueprint
+	case foreignTextKind != kindUnknown:
+		doc.kind = foreignTextKind
 	case strings.HasPrefix(trimmed, "<"):
 		doc.kind = classifyXML(trimmed)
 	case path.Ext(strings.ToLower(file.Name)) == brunoExtension || looksLikeBru(trimmed):

@@ -57,6 +57,7 @@ export function createFeatureActions({ backend, commands, monitors, mock, captur
     generateCode: { run: () => commands.generateCode() },
     sendSample: { run: () => commands.sendSample() },
     lintSpec: { run: () => commands.lintSpec() },
+    diffSpecs: { run: () => commands.diffSpecs() },
     commandPalette: { run: () => store().openCommandPalette() },
     workspaceSwitcher: { run: () => commands.workspaceSwitcher(), isAvailable: () => hasStorage },
     aiSettings: { run: () => commands.aiSettings() },

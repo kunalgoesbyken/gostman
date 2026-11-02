@@ -71,11 +71,11 @@ func (c *collector) hoppscotchFolder(entry map[string]any, parentID string, dept
 }
 
 func hoppscotchRows(value any) []row {
-	var rows []row
-	for _, item := range objects(value) {
-		rows = append(rows, row{Key: hoppscotchText(text(item["key"])), Value: hoppscotchText(text(item["value"])), Enabled: item["active"] != false})
+	rows := fieldRows(value, "key", "value", func(item map[string]any) bool { return item["active"] != false })
+	for index := range rows {
+		rows[index].Key, rows[index].Value = hoppscotchText(rows[index].Key), hoppscotchText(rows[index].Value)
 	}
-	return keyedRows(rows)
+	return rows
 }
 
 func (c *collector) hoppscotchRequest(source map[string]any, folderID string) {
@@ -172,19 +172,10 @@ func (c *collector) readHoppscotchEnvironments(doc document) {
 		c.read(name, FormatHoppscotch, func() {
 			draft := environmentDraft{name: name}
 			for _, item := range objects(entry["variables"]) {
-				value := firstValue(item["value"], item["currentValue"], item["initialValue"])
+				value := firstText(item, "value", "currentValue", "initialValue")
 				draft.variables = append(draft.variables, envVariable{name: text(item["key"]), value: hoppscotchText(value), enabled: true, secret: item["secret"] == true})
 			}
 			c.addDraftEnvironments([]environmentDraft{draft})
 		})
 	}
-}
-
-func firstValue(values ...any) string {
-	for _, value := range values {
-		if found := text(value); found != "" {
-			return found
-		}
-	}
-	return ""
 }

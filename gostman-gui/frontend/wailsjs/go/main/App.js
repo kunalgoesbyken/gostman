@@ -110,6 +110,10 @@ export function DescribeMcp(arg1) {
   return window['go']['main']['App']['DescribeMcp'](arg1);
 }
 
+export function DiffSpecs(arg1) {
+  return window['go']['main']['App']['DiffSpecs'](arg1);
+}
+
 export function DiscoverIssuer(arg1) {
   return window['go']['main']['App']['DiscoverIssuer'](arg1);
 }

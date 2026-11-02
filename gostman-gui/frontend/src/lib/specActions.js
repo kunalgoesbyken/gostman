@@ -163,6 +163,8 @@ export function createSpecActions({ backend, attempt, addImported }) {
     operation: client.operation,
     schema: client.schema,
     lint: client.lint,
+    diff: client.diff,
+    openDiff: (newSource) => store().openSpecDialog({ mode: 'diff', newSource }),
     lintLatest,
     importSpec,
     check,

@@ -374,6 +374,7 @@ export const webBackend = {
   parseCurl: (command) => postForResult('curl=1', { command }, 'request'),
   openapi: (query) => postJSON('openapi=1', query),
   lint: (query) => postJSON('lint=1', query),
+  diff: (query) => postJSON('diff=1', query),
   openapiPageSize: OPENAPI_PAGE_SIZE,
   importer: (query) => postJSON('import=1', query),
   scan: (query) => postJSON('scan=1', query),

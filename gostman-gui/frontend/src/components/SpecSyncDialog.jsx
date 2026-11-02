@@ -102,6 +102,7 @@ export function SpecSyncDialog({ dialog, link, actions, onClose }) {
         {hasEdits && <p className="text-xs text-muted-foreground">{SPEC_TEXT.keepEditsNote}</p>}
       </DialogBody>
       <DialogFooter>
+        <Button variant="outline" onClick={() => actions.openDiff(link.source)}>{SPEC_TEXT.diffWithOlder}</Button>
         <Button variant="outline" onClick={onClose}>{SPEC_TEXT.close}</Button>
         <Button disabled={selected.size === 0} onClick={() => actions.apply(folderId, plan, selected)}>{SPEC_TEXT.apply}</Button>
       </DialogFooter>

@@ -4,7 +4,7 @@ export const PLATFORMS = ['desktop', 'web', 'cli']
 
 export const ACTIONS = {
   dialog: ['monitors', 'environments', 'cookies', 'network', 'mock', 'capture', 'loadTest', 'runner', 'scan', 'import', 'export', 'share', 'preferences', 'shortcuts', 'examples', 'folderSettings', 'git'],
-  command: ['newRequest', 'newFolder', 'generateCode', 'sendSample', 'lintSpec', 'commandPalette', 'workspaceSwitcher', 'aiSettings'],
+  command: ['newRequest', 'newFolder', 'generateCode', 'sendSample', 'lintSpec', 'diffSpecs', 'commandPalette', 'workspaceSwitcher', 'aiSettings'],
   sample: ['collection', 'flow', 'send', 'scan', 'graphql', 'grpc', 'websocket', 'mcp', 'curl'],
   tab: ['auth', 'vars', 'extract', 'tests', 'settings', 'history', 'openTabs'],
 }
@@ -68,7 +68,7 @@ export const FEATURES = [
   { id: 'pm-packages', group: 'testing', since: '1.9.0', docs: 'scripting-and-settings#postman-and-insomnia-scripts', icon: 'package' },
   { id: 'spec-lint', group: 'testing', docs: 'import-export-and-specs#linter', action: { type: 'command', id: 'lintSpec' }, icon: 'shield-check', palette: true },
   { id: 'spec-sync', group: 'testing', docs: 'import-export-and-specs#spec-sync', icon: 'refresh-cw' },
-  { id: 'openapi-diff', group: 'testing', since: '1.9.0', docs: 'import-export-and-specs#openapi-specs', icon: 'git-compare' },
+  { id: 'openapi-diff', group: 'testing', since: '1.9.0', docs: 'import-export-and-specs#comparing-specs', action: { type: 'command', id: 'diffSpecs' }, icon: 'git-compare', palette: true },
   { id: 'runner', group: 'automation', docs: 'runner-load-and-scan#run-requests', action: { type: 'dialog', id: 'runner' }, icon: 'list-checks', palette: true, empty: ['runner'], landing: { group: 'automate', order: 1 }, sample: 'collection' },
   { id: 'flows', group: 'automation', docs: 'flows', action: { type: 'sample', id: 'flow' }, icon: 'workflow', palette: true, empty: ['flows'], sample: 'flow' },
   { id: 'load-test', group: 'automation', platforms: ['desktop'], docs: 'runner-load-and-scan#load-test', action: { type: 'dialog', id: 'loadTest' }, icon: 'gauge', palette: true, empty: ['load'], compare: 4, sample: 'collection' },

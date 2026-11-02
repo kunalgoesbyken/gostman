@@ -134,6 +134,10 @@ func (c *collector) importDocuments(ctx context.Context, docs []document, option
 		}
 	}
 	for _, doc := range docs {
+		if read, found := documentReaders[doc.kind]; found {
+			read(c, doc)
+			continue
+		}
 		switch doc.kind {
 		case kindGostman:
 			c.readGostman(doc)
@@ -145,20 +149,6 @@ func (c *collector) importDocuments(ctx context.Context, docs []document, option
 			c.readHAR(doc, options)
 		case kindWSDL:
 			c.readWSDL(doc, supporting)
-		case kindHoppscotch:
-			c.readHoppscotch(doc)
-		case kindHoppscotchEnvironment:
-			c.readHoppscotchEnvironments(doc)
-		case kindThunder:
-			c.readThunder(doc)
-		case kindThunderEnvironment:
-			c.readThunderEnvironment(doc)
-		case kindHTTPie:
-			c.readHTTPie(doc)
-		case kindRAML:
-			c.readRAML(doc)
-		case kindBlueprint:
-			c.readBlueprint(doc)
 		case kindPostmanCollection:
 			c.readPostmanCollection(doc)
 		case kindPostmanEnvironment:

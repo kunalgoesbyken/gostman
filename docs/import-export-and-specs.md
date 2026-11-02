@@ -267,6 +267,10 @@ The spec is read again after each sync and once per app session. When it cannot 
 
 After a run in the Runner that sent requests of a linked folder, an **OpenAPI coverage** section at the top of the results shows how many of the spec's operations and documented responses the run exercised, with the operations that were not called and the statuses that never came back. The same section is in the downloaded HTML report. `gostman run --contract spec.yaml --coverage --min-coverage 80` prints it on the command line and fails the run below the threshold; see [OpenAPI coverage](cli.md#openapi-coverage).
 
+### Comparing specs
+
+**Compare API specs** in the command palette opens a dialog with an old and a new spec, each an address, or on the desktop a file path, or a file you choose. It lists the breaking, non-breaking and informational changes, the same list `gostman diff` prints; see [Comparing two OpenAPI specs](cli.md#comparing-two-openapi-specs) for what counts as breaking. In the Spec updates dialog, **Compare with older spec** opens it with the linked spec as the new one, so you can choose the previous version and read the breaking changes before you apply the update.
+
 ### Linter
 
 The **Lint** tab checks the spec and lists findings in three severities: errors, warnings and info. The buttons at the top show the count for each severity and toggle whether it is listed. A finding shows its message, the rule and the operation or path. Selecting a finding that belongs to an operation opens that operation in the **Operations** tab. A clean spec shows **No problems found.**

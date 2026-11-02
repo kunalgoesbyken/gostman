@@ -59,6 +59,7 @@ const CaptureDialog = lazy(() => import("./CaptureDialog").then((module) => ({ d
 const MonitorsDialog = lazy(() => import("./MonitorsDialog").then((module) => ({ default: module.MonitorsDialog })))
 const LoadTestDialog = lazy(() => import("./LoadTestDialog").then((module) => ({ default: module.LoadTestDialog })))
 const SpecViewer = lazy(() => import("./SpecViewer").then((module) => ({ default: module.SpecViewer })))
+const SpecDiffDialog = lazy(() => import("./SpecDiffDialog").then((module) => ({ default: module.SpecDiffDialog })))
 const SpecSyncDialog = lazy(() => import("./SpecSyncDialog").then((module) => ({ default: module.SpecSyncDialog })))
 const FolderSettings = lazy(() => import("./FolderSettings").then((module) => ({ default: module.FolderSettings })))
 const RunnerDialog = lazy(() => import("./RunnerDialog").then((module) => ({ default: module.RunnerDialog })))
@@ -501,6 +502,7 @@ function LoadedWorkspace({ backend, onBack }) {
         {loadTestDialogOpen && <LoadTestDialog actions={actions.loadTest} />}
         {monitorsDialogOpen && <MonitorsDialog actions={actions.monitors} />}
         {specDialog?.mode === "view" && <SpecViewer dialog={specDialog} actions={actions.openapi} onClose={closeSpecDialog} />}
+        {specDialog?.mode === "diff" && <SpecDiffDialog dialog={specDialog} actions={actions.openapi} onClose={closeSpecDialog} />}
         {specDialog?.mode === "sync" && <SpecSyncDialog dialog={specDialog} link={specLinks[specDialog.folderId]} actions={actions.openapi} onClose={closeSpecDialog} />}
         {folderSettings && <FolderSettings backend={backend} scope={folderSettings} EditorComponent={CodeEditor} onClose={closeFolderSettings} />}
         {aiDialog && <AiDialog actions={actions.ai} />}

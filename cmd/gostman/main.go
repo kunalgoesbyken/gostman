@@ -36,6 +36,7 @@ const (
   gostman scan <workspace folder | export.json> [flags]
   gostman negative <workspace folder | export.json> [flags]
   gostman lint <spec file | address> [flags]
+  gostman diff <old spec> <new spec> [flags]
   gostman init [folder] [--skill]
   gostman import <file | folder> --out <workspace folder> [flags]
   gostman export <workspace folder> --format <format> --out <path>
@@ -422,6 +423,16 @@ lint
                         current folder is used when it exists. Under "rules:"
                         give a rule id and error, warning, info or off
 
+diff
+  Compare two OpenAPI 3.x or Swagger 2.0 documents (files or http(s)
+  addresses) and list the changes as breaking, non-breaking or informational:
+  removed paths and operations, new required parameters or properties, type
+  and enum changes, response changes and authentication changes.
+
+  --json                print the report as JSON
+  --fail-on <level>     breaking, any or none (default none): exit 1 when a
+                        breaking change, or any change, was found
+
 init
   Create an empty workspace in the folder (default: the current folder), or in
   a gostman folder inside it when it already holds other files, and print how
@@ -567,6 +578,8 @@ func dispatch(arguments []string, stdout, stderr *os.File) int {
 		return negativeCommand(arguments[1:], stdout, stderr)
 	case "lint":
 		return lintCommand(arguments[1:], stdout, stderr)
+	case "diff":
+		return diffCommand(arguments[1:], stdout, stderr)
 	case "import":
 		return importCommand(arguments[1:], stdout, stderr)
 	case "export":

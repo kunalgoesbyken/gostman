@@ -183,6 +183,17 @@ api-tests:
 
 Set `API_TOKEN` as a masked CI/CD variable.
 
+## Catching breaking API changes
+
+`gostman diff` exits 1 on a breaking change when `--fail-on breaking` is set, so a pull request check can compare the spec against the one on the main branch:
+
+```bash
+git show origin/main:openapi.yaml > old.yaml
+gostman diff old.yaml openapi.yaml --fail-on breaking
+```
+
+See [Comparing two OpenAPI specs](cli.md#comparing-two-openapi-specs).
+
 ## Azure Pipelines
 
 ```yaml

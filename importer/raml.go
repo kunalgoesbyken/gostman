@@ -123,7 +123,7 @@ func ramlParameters(node *yaml.Node, defaults bool) []row {
 	var rows []row
 	for _, pair := range ramlPairs(node) {
 		details := pair.value
-		example := firstValue(ramlValue(ramlField(details, "example")), ramlValue(ramlField(details, "default")))
+		example := firstOf(ramlText(ramlField(details, "example")), ramlText(ramlField(details, "default")))
 		required := ramlText(ramlField(details, "required")) == "true"
 		rows = append(rows, row{Key: strings.TrimSuffix(pair.key, "?"), Value: example, Enabled: required || example != "" || defaults})
 	}

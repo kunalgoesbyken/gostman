@@ -218,6 +218,20 @@ gostman lint openapi.yaml --reporter junit --fail-on warning
 - `--config file` or a `.gostman/lint.yaml` in the current folder turns rules off or changes their severity under `rules:`.
 - The spec viewer has a **Lint** tab in the desktop and web apps.
 
+## Comparing two OpenAPI specs
+
+`gostman diff <old> <new>` compares two OpenAPI 3.x or Swagger 2.0 documents, each a file or an `http(s)` address, and lists the changes as breaking, non-breaking or informational.
+
+```bash
+gostman diff openapi-v1.yaml openapi-v2.yaml --fail-on breaking
+git show main:openapi.yaml > old.yaml && gostman diff old.yaml openapi.yaml --json
+```
+
+- Breaking: a removed path or operation, a removed 2xx response, a new required parameter, request body or request property, a parameter or property whose type changed or whose limits or enum values narrowed for requests, a response property that was removed or is no longer always present, a content type that is no longer accepted or returned, a removed or changed security scheme, and authentication that is now required or has changed.
+- Non-breaking: an added operation, an optional parameter or property, a looser limit, a removed optional request property.
+- Informational: a new version number or server address, a deprecated operation, an added response or security scheme.
+- Only local `#/...` references are followed. `--json` prints the report as JSON, `--fail-on breaking|any|none` (default `none`) sets when the exit status is 1. The spec viewer's sync dialog and the **Compare API specs** command show the same list in the apps.
+
 ## Generated documentation
 
 `gostman docs` writes one self-contained HTML page. Descriptions on requests, folders and collections are rendered as Markdown (headings, lists, code, tables, links to http, https and mailto; raw HTML is always escaped). `--playground` adds a **Try it** panel to each request that sends it from the reader's own browser; secrets are left empty for the reader, and the API must allow cross-origin calls from the page.

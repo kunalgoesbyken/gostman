@@ -35,11 +35,7 @@ func (c *collector) httpieCollection(entry map[string]any, parentID string, dept
 }
 
 func httpieRows(value any) []row {
-	var rows []row
-	for _, item := range objects(value) {
-		rows = append(rows, row{Key: text(item["name"]), Value: text(item["value"]), Enabled: item["enabled"] != false})
-	}
-	return keyedRows(rows)
+	return fieldRows(value, "name", "value", func(item map[string]any) bool { return item["enabled"] != false })
 }
 
 func (c *collector) httpieRequest(source map[string]any, folderID string) {
@@ -72,7 +68,7 @@ func (c *collector) httpieAuth(source map[string]any, name string) *engine.Auth 
 		auth := bearerAuth(text(credentials["token"]))
 		return &auth
 	case kind == "apikey":
-		auth := apiKeyAuth(firstValue(credentials["name"], credentials["key"]), text(credentials["value"]), strings.EqualFold(firstValue(credentials["in"], credentials["type"]), "query"))
+		auth := apiKeyAuth(firstText(credentials, "name", "key"), text(credentials["value"]), strings.EqualFold(firstText(credentials, "in", "type"), "query"))
 		return &auth
 	}
 	c.flagUnique(locales.ImporterAuthDropped, name)

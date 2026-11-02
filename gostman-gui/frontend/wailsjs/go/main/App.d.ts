@@ -7,6 +7,7 @@ import {capture} from '../models';
 import {mock} from '../models';
 import {rpc} from '../models';
 import {mcpclient} from '../models';
+import {diff} from '../models';
 import {deeplink} from '../models';
 import {gitutil} from '../models';
 import {importer} from '../models';
@@ -71,6 +72,8 @@ export function DeleteSecretConnection(arg1:string):Promise<void>;
 export function DescribeGrpc(arg1:rpc.Target):Promise<rpc.Schema>;
 
 export function DescribeMcp(arg1:mcpclient.Target):Promise<mcpclient.Catalog>;
+
+export function DiffSpecs(arg1:diff.Query):Promise<diff.Reply>;
 
 export function DiscoverIssuer(arg1:engine.DiscoveryQuery):Promise<engine.Discovery>;
 

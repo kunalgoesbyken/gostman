@@ -13,6 +13,7 @@ import (
 	"github.com/kunalgoesbyken/gostman/importer"
 	"github.com/kunalgoesbyken/gostman/mcpclient"
 	"github.com/kunalgoesbyken/gostman/openapi"
+	"github.com/kunalgoesbyken/gostman/openapi/diff"
 	"github.com/kunalgoesbyken/gostman/openapi/lint"
 	"github.com/kunalgoesbyken/gostman/rpc"
 	"github.com/kunalgoesbyken/gostman/scan"
@@ -117,6 +118,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, fetchLink(r))
 	case query.Has("lint"):
 		writeJSON(w, lintSpec(r))
+	case query.Has("diff"):
+		writeJSON(w, diffSpecs(r))
 	case query.Has("import"):
 		writeJSON(w, runImport(r))
 	case query.Has("scan"):
@@ -268,6 +271,20 @@ func lintSpec(r *http.Request) lint.Reply {
 	reply := lint.Handle(r.Context(), query, openapi.Options{Policy: Policy, MaxBytes: maxOpenAPIBytes})
 	if encoded, err := json.Marshal(reply); err == nil && len(encoded) > maxOpenAPIReplyBytes {
 		return lint.Reply{Error: "the findings are too many to show in the web app"}
+	}
+	return reply
+}
+
+func diffSpecs(r *http.Request) diff.Reply {
+	var query diff.Query
+	if err := json.NewDecoder(r.Body).Decode(&query); err != nil {
+		return diff.Reply{Error: err.Error()}
+	}
+	query.Old = openapi.Source{Text: query.Old.Text, URL: query.Old.URL}
+	query.New = openapi.Source{Text: query.New.Text, URL: query.New.URL}
+	reply := diff.Handle(r.Context(), query, openapi.Options{Policy: Policy, MaxBytes: maxOpenAPIBytes})
+	if encoded, err := json.Marshal(reply); err == nil && len(encoded) > maxOpenAPIReplyBytes {
+		return diff.Reply{Error: "the changes are too many to show in the web app"}
 	}
 	return reply
 }

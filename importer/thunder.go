@@ -78,14 +78,7 @@ func (c *collector) readThunder(doc document) {
 }
 
 func thunderRows(value any, pathRows bool) []row {
-	var rows []row
-	for _, item := range objects(value) {
-		if pathRows && item["isPath"] == true {
-			continue
-		}
-		rows = append(rows, row{Key: text(item["name"]), Value: text(item["value"]), Enabled: item["isDisabled"] != true})
-	}
-	return keyedRows(rows)
+	return fieldRows(value, "name", "value", func(item map[string]any) bool { return item["isDisabled"] != true && !(pathRows && item["isPath"] == true) })
 }
 
 func (c *collector) thunderRequest(source map[string]any, folderID string) {

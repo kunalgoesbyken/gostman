@@ -683,6 +683,7 @@ export function createWorkspaceActions(backend) {
     monitorFlow: (flowId) => monitors.open({ kind: 'flow', id: flowId }),
     preferences: () => store().openPreferencesDialog(),
     lintSpec: openapi.lintLatest,
+    diffSpecs: () => openapi.openDiff(),
     reset: confirmDeleteAllData,
     aiRequest: () => ai.start(TASK_REQUEST),
     aiTests: () => ai.start(TASK_TESTS),
