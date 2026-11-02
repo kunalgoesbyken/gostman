@@ -7,17 +7,21 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 
 	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/openapi"
 	"github.com/kunalgoesbyken/gostman/openapi/diff"
 )
 
+const diffTimeout = time.Minute
+
 type comparing struct {
 	oldLocation string
 	newLocation string
 	asJSON      bool
 	failOn      string
+	timeout     time.Duration
 }
 
 func parseComparing(arguments []string) (comparing, error) {
@@ -26,6 +30,7 @@ func parseComparing(arguments []string) (comparing, error) {
 	flags.SetOutput(io.Discard)
 	flags.BoolVar(&parsed.asJSON, "json", false, "")
 	flags.StringVar(&parsed.failOn, "fail-on", diff.FailNone, "")
+	flags.DurationVar(&parsed.timeout, "timeout", diffTimeout, "")
 	positional, err := parseInterspersed(flags, arguments)
 	if err != nil {
 		return parsed, err
@@ -47,7 +52,9 @@ func diffCommand(arguments []string, stdout, stderr *os.File) int {
 		return misuse(stderr, err.Error())
 	}
 	options := openapi.Options{Policy: engine.Policy{}, AllowFiles: true}
-	report, err := diff.Run(context.Background(), specSourceOf(parsed.oldLocation), specSourceOf(parsed.newLocation), options)
+	ctx, cancel := context.WithTimeout(context.Background(), parsed.timeout)
+	defer cancel()
+	report, err := diff.Run(ctx, specSourceOf(parsed.oldLocation), specSourceOf(parsed.newLocation), options)
 	if err != nil {
 		return complain(stderr, err)
 	}

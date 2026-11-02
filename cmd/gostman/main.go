@@ -432,6 +432,7 @@ diff
   --json                print the report as JSON
   --fail-on <level>     breaking, any or none (default none): exit 1 when a
                         breaking change, or any change, was found
+  --timeout <duration>  stop the comparison after this long (default 1m0s)
 
 init
   Create an empty workspace in the folder (default: the current folder), or in

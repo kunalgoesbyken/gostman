@@ -1,13 +1,18 @@
 package diff
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"sort"
 	"strings"
 )
 
-const maxSchemaDepth = 16
+const (
+	maxSchemaDepth = 16
+	maxVisits      = 20000
+	checkEvery     = 256
+)
 
 type direction int
 
@@ -17,8 +22,44 @@ const (
 )
 
 type resolver struct {
-	old map[string]any
-	new map[string]any
+	old    map[string]any
+	new    map[string]any
+	budget *budget
+}
+
+type budget struct {
+	ctx       context.Context
+	visits    int
+	exhausted bool
+	compared  map[string]bool
+}
+
+func newBudget(ctx context.Context) *budget {
+	return &budget{ctx: ctx, compared: map[string]bool{}}
+}
+
+func (b *budget) spend() bool {
+	if b.exhausted {
+		return false
+	}
+	b.visits++
+	if b.visits > maxVisits || b.visits%checkEvery == 0 && b.ctx.Err() != nil {
+		b.exhausted = true
+	}
+	return !b.exhausted
+}
+
+func (b *budget) firstVisit(oldSchema, newSchema any, way direction) bool {
+	oldRef, newRef := textOf(objectOf(oldSchema)["$ref"]), textOf(objectOf(newSchema)["$ref"])
+	if oldRef == "" || newRef == "" {
+		return true
+	}
+	key := fmt.Sprintf("%s|%s|%d", oldRef, newRef, way)
+	if b.compared[key] {
+		return false
+	}
+	b.compared[key] = true
+	return true
 }
 
 func objectOf(value any) map[string]any {
@@ -97,20 +138,27 @@ type schemaView struct {
 	format     string
 	pattern    string
 	composed   map[string]int
+	merged     map[string]bool
 }
 
 var numericLimits = []string{"minimum", "maximum", "minLength", "maxLength", "minItems", "maxItems", "minProperties", "maxProperties"}
 
 func (r resolver) view(root map[string]any, schema any, depth int) schemaView {
-	view := schemaView{properties: map[string]any{}, required: map[string]bool{}, numbers: map[string]float64{}, composed: map[string]int{}}
+	view := schemaView{properties: map[string]any{}, required: map[string]bool{}, numbers: map[string]float64{}, composed: map[string]int{}, merged: map[string]bool{}}
 	r.collect(root, schema, &view, depth)
 	slices.Sort(view.types)
 	return view
 }
 
 func (r resolver) collect(root map[string]any, schema any, view *schemaView, depth int) {
+	if reference := textOf(objectOf(schema)["$ref"]); reference != "" {
+		if view.merged[reference] {
+			return
+		}
+		view.merged[reference] = true
+	}
 	object := objectOf(resolve(root, schema))
-	if object == nil || depth > maxSchemaDepth {
+	if object == nil || depth > maxSchemaDepth || !r.budget.spend() {
 		return
 	}
 	switch typed := object["type"].(type) {
@@ -179,19 +227,12 @@ func appendOnce(items []string, item string) []string {
 type reporter func(severity Severity, where, message string)
 
 func (r resolver) schemas(oldSchema, newSchema any, way direction, where string, report reporter) {
-	r.compareSchemas(oldSchema, newSchema, way, where, report, 0, map[string]bool{})
+	r.compareSchemas(oldSchema, newSchema, way, where, report, 0)
 }
 
-func (r resolver) compareSchemas(oldSchema, newSchema any, way direction, where string, report reporter, depth int, seen map[string]bool) {
-	if depth > maxSchemaDepth {
+func (r resolver) compareSchemas(oldSchema, newSchema any, way direction, where string, report reporter, depth int) {
+	if depth > maxSchemaDepth || !r.budget.spend() || !r.budget.firstVisit(oldSchema, newSchema, way) {
 		return
-	}
-	if reference := textOf(objectOf(oldSchema)["$ref"]); reference != "" && reference == textOf(objectOf(newSchema)["$ref"]) {
-		if seen[reference] {
-			return
-		}
-		seen[reference] = true
-		defer delete(seen, reference)
 	}
 	before := r.view(r.old, oldSchema, 0)
 	after := r.view(r.new, newSchema, 0)
@@ -209,9 +250,9 @@ func (r resolver) compareSchemas(oldSchema, newSchema any, way direction, where 
 			report(Informational, where, fmt.Sprintf("%s has %d options, was %d", keyword, after.composed[keyword], before.composed[keyword]))
 		}
 	}
-	r.compareProperties(before, after, oldSchema, newSchema, way, where, report, depth, seen)
+	r.compareProperties(before, after, oldSchema, newSchema, way, where, report, depth)
 	if before.items != nil && after.items != nil {
-		r.compareSchemas(before.items, after.items, way, where+"[]", report, depth+1, seen)
+		r.compareSchemas(before.items, after.items, way, where+"[]", report, depth+1)
 	}
 }
 
@@ -317,7 +358,7 @@ func limitText(value float64, present bool) string {
 	return fmt.Sprint(value)
 }
 
-func (r resolver) compareProperties(before, after schemaView, oldSchema, newSchema any, way direction, where string, report reporter, depth int, seen map[string]bool) {
+func (r resolver) compareProperties(before, after schemaView, oldSchema, newSchema any, way direction, where string, report reporter, depth int) {
 	names := make([]string, 0, len(before.properties))
 	for name := range before.properties {
 		names = append(names, name)
@@ -332,7 +373,7 @@ func (r resolver) compareProperties(before, after schemaView, oldSchema, newSche
 		case !kept:
 			report(NonBreaking, place, "property removed")
 		default:
-			r.compareSchemas(before.properties[name], next, way, place, report, depth+1, seen)
+			r.compareSchemas(before.properties[name], next, way, place, report, depth+1)
 		}
 		wasRequired, isRequired := before.required[name], after.required[name]
 		switch {

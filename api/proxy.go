@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"mime"
@@ -275,6 +276,8 @@ func lintSpec(r *http.Request) lint.Reply {
 	return reply
 }
 
+const diffTimeLimit = 20 * time.Second
+
 func diffSpecs(r *http.Request) diff.Reply {
 	var query diff.Query
 	if err := json.NewDecoder(r.Body).Decode(&query); err != nil {
@@ -282,7 +285,9 @@ func diffSpecs(r *http.Request) diff.Reply {
 	}
 	query.Old = openapi.Source{Text: query.Old.Text, URL: query.Old.URL}
 	query.New = openapi.Source{Text: query.New.Text, URL: query.New.URL}
-	reply := diff.Handle(r.Context(), query, openapi.Options{Policy: Policy, MaxBytes: maxOpenAPIBytes})
+	ctx, cancel := context.WithTimeout(r.Context(), diffTimeLimit)
+	defer cancel()
+	reply := diff.Handle(ctx, query, openapi.Options{Policy: Policy, MaxBytes: maxOpenAPIBytes})
 	if encoded, err := json.Marshal(reply); err == nil && len(encoded) > maxOpenAPIReplyBytes {
 		return diff.Reply{Error: "the changes are too many to show in the web app"}
 	}

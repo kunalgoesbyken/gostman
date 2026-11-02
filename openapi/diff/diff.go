@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/kunalgoesbyken/gostman/openapi"
 )
@@ -22,8 +21,10 @@ const (
 	FailAny      = "any"
 	FailNone     = "none"
 
-	timeLimit = 60 * time.Second
+	maxChanges = 5000
 )
+
+const truncatedMessage = "the comparison was cut short because the specs are very large or deeply linked, so the list is incomplete"
 
 var methods = []string{"get", "put", "post", "delete", "options", "head", "patch", "trace"}
 
@@ -63,8 +64,6 @@ func (r Report) Reaches(failOn string) bool {
 }
 
 func Run(ctx context.Context, oldSource, newSource openapi.Source, opt openapi.Options) (Report, error) {
-	ctx, cancel := context.WithTimeout(ctx, timeLimit)
-	defer cancel()
 	oldRoot, err := openapi.ReadRoot(ctx, oldSource, opt)
 	if err != nil {
 		return Report{}, fmt.Errorf("old spec: %w", err)
@@ -79,7 +78,11 @@ func Run(ctx context.Context, oldSource, newSource openapi.Source, opt openapi.O
 	if err := checkSpec(newRoot); err != nil {
 		return Report{}, fmt.Errorf("new spec: %w", err)
 	}
-	return Compare(oldRoot, newRoot), nil
+	report := Compare(ctx, oldRoot, newRoot)
+	if ctx.Err() != nil {
+		return Report{}, errors.New("the comparison took too long and was stopped")
+	}
+	return report, nil
 }
 
 func Handle(ctx context.Context, query Query, opt openapi.Options) Reply {
@@ -99,12 +102,17 @@ func checkSpec(root map[string]any) error {
 
 type comparison struct {
 	resolver
-	report Report
-	method string
-	path   string
+	report    Report
+	truncated bool
+	method    string
+	path      string
 }
 
 func (c *comparison) add(severity Severity, where, message string) {
+	if len(c.report.Changes) >= maxChanges {
+		c.truncated = true
+		return
+	}
 	c.report.Changes = append(c.report.Changes, Change{Severity: severity, Method: c.method, Path: c.path, Where: where, Message: message})
 	switch severity {
 	case Breaking:
@@ -116,12 +124,16 @@ func (c *comparison) add(severity Severity, where, message string) {
 	}
 }
 
-func Compare(oldRoot, newRoot map[string]any) Report {
-	c := &comparison{resolver: resolver{old: oldRoot, new: newRoot}, report: Report{Changes: []Change{}}}
+func Compare(ctx context.Context, oldRoot, newRoot map[string]any) Report {
+	c := &comparison{resolver: resolver{old: oldRoot, new: newRoot, budget: newBudget(ctx)}, report: Report{Changes: []Change{}}}
 	c.compareInfo()
 	c.comparePaths()
 	c.compareSecuritySchemes()
 	c.sortChanges()
+	if c.truncated || c.budget.exhausted {
+		c.report.Changes = append(c.report.Changes, Change{Severity: Informational, Message: truncatedMessage})
+		c.report.Informational++
+	}
 	return c.report
 }
 

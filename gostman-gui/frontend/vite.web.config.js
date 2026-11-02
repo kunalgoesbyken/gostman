@@ -170,7 +170,7 @@ export default defineConfig({
     port: 5173,
     open: false,
     proxy: {
-      '/api/proxy': { target: 'http://localhost:8787', xfwd: true }
+      '/api/proxy': { target: process.env.GOSTMAN_PROXY_TARGET || 'http://localhost:8787', xfwd: true }
     }
   }
 })
