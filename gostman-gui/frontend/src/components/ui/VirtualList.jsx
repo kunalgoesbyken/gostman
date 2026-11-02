@@ -38,10 +38,10 @@ export function VirtualList({ items, rowHeight, renderRow, className, scrollRef,
       className={cn("overflow-y-auto", className)}
       {...props}
     >
-      <div className="relative" style={{ height: totalHeight, paddingTop: first * rowHeight }}>
+      <div role="presentation" className="relative" style={{ height: totalHeight, paddingTop: first * rowHeight }}>
         {items.slice(first, last).map(renderRow)}
         {isPinnedHidden && (
-          <div className="absolute inset-x-0" style={{ top: pinnedIndex * rowHeight }}>
+          <div role="presentation" className="absolute inset-x-0" style={{ top: pinnedIndex * rowHeight }}>
             {renderRow(items[pinnedIndex])}
           </div>
         )}

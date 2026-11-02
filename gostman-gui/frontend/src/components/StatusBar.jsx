@@ -52,7 +52,7 @@ export function StatusBar({ onOpenMock, onOpenCapture, onOpenMonitors, updates, 
         <DataNotices updates={updates} remindsExport={remindsExport} onExport={onExport} />
         <StatusItem icon={Cookie} label={TEXT.cookies} onClick={openCookies} />
         <StatusItem icon={SlidersHorizontal} label={PREFERENCES_TEXT.statusLabel} onClick={openPreferences} />
-        <button type="button" title={ABOUT_TEXT.versionButton} aria-label={ABOUT_TEXT.versionButton} onClick={openAbout} className={cn(STATUS_ITEM_CLASS, "font-mono text-3xs")}>v{__APP_VERSION__}</button>
+        <button type="button" title={ABOUT_TEXT.versionButton} onClick={openAbout} className={cn(STATUS_ITEM_CLASS, "font-mono text-3xs")}>v{__APP_VERSION__}<span className="sr-only"> {ABOUT_TEXT.versionButton}</span></button>
       </div>
     </footer>
   )

@@ -524,7 +524,7 @@ export const useAppStore = create(
         })),
         setTreeClipboard: (treeClipboard) => set({ treeClipboard }),
         markSharedOrder: () => set({ sharedOrder: true }),
-        showNotice: (message, undo = null) => set({ notice: { id: createId('notice'), message, undo } }),
+        showNotice: (message, undo = null, action = null) => set({ notice: { id: createId('notice'), message, undo, action } }),
         dismissNotice: () => set({ notice: null }),
         revealRequest: (requestId) => set((state) => {
           const parents = new Map(state.folders.map((folder) => [folder.id, folder.parentId]))

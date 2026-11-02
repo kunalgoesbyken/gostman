@@ -404,7 +404,13 @@ export function createWorkspaceActions(backend) {
       variables: variablesMerged ? counts.variables : ownedVariableCount(data.folders),
     }
     const summary = TEXT.imported(describeCounts(merged))
-    store().showAlert(TEXT.importComplete, [summary, ...scopedNote(data), ...notesIn(data.remarks), ...warnings].join('\n'), DIALOG_TEXT.ok, warnings.length > 0 ? 'warning' : 'success')
+    const notes = [...scopedNote(data), ...notesIn(data.remarks), ...warnings]
+    const first = requests[0]
+    if (notes.length === 0 && first) {
+      store().showNotice(summary, null, { label: TEXT.openFirstRequest, run: () => store().openRequestTab(first) })
+      return
+    }
+    store().showAlert(TEXT.importComplete, [summary, ...notes].join('\n'), DIALOG_TEXT.ok, warnings.length > 0 ? 'warning' : 'success')
   })
 
   const leavingOutActive = (data, kinds) => ({

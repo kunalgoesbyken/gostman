@@ -4,7 +4,7 @@ export const STATUS_ITEM_CLASS = "inline-flex h-full items-center gap-1.5 px-2 t
 
 export function StatusItem({ icon: Icon, label, active, className, ...props }) {
   return (
-    <button type="button" className={cn(STATUS_ITEM_CLASS, active && "text-success", className)} {...props}>
+    <button type="button" title={props.title ?? label} className={cn(STATUS_ITEM_CLASS, active && "text-success", className)} {...props}>
       <Icon aria-hidden="true" />
       <span className="max-sm:sr-only">{label}</span>
     </button>

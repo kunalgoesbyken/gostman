@@ -40,6 +40,7 @@
     "clear": "Clear",
     "closeTab": "Close tab",
     "closeTabMessage": "\"{{name}}\" has unsaved changes. Save them before closing?",
-    "dontSave": "Don't save"
+    "dontSave": "Don't save",
+    "openFirstRequest": "Open first request"
   }
 }

@@ -60,6 +60,7 @@ const Tab = memo(function Tab({ tab, saved, isActive, dropPlace, isDragged, onSe
   return (
     <div
       ref={tabRef}
+      role="presentation"
       data-tab-id={tab.id}
       title={hint}
       onMouseDown={preventAutoscroll}

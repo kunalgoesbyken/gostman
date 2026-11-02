@@ -46,10 +46,16 @@ function TabsTrigger({ className, value, children }) {
   const { value: currentValue, setValue, idOf } = React.useContext(TabsContext)
   const triggerRef = React.useRef(null)
   const isActive = currentValue === value
+  const panelId = idOf("panel", value)
+  const [controlsPanel, setControlsPanel] = React.useState(false)
 
   React.useEffect(() => {
     if (isActive) scrollIntoStrip(triggerRef.current)
   }, [isActive])
+
+  React.useEffect(() => {
+    setControlsPanel(isActive && document.getElementById(panelId) !== null)
+  })
 
   return (
     <button
@@ -58,7 +64,7 @@ function TabsTrigger({ className, value, children }) {
       role="tab"
       id={idOf("tab", value)}
       aria-selected={isActive}
-      aria-controls={isActive ? idOf("panel", value) : undefined}
+      aria-controls={controlsPanel ? panelId : undefined}
       tabIndex={isActive ? 0 : -1}
       onClick={() => setValue(value)}
       className={cn(TRIGGER_CLASS, isActive ? "border-primary text-foreground" : IDLE_TRIGGER_CLASS, className)}
