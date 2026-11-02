@@ -203,12 +203,12 @@ func (i invocation) execute(stored runner.Collection, stdout, stderr *os.File) i
 	if i.monitor.repeating() {
 		return i.monitored(ctx, stored, warned, stdout, stderr)
 	}
-	outcome, err := i.cycle(ctx, stored, warned, stdout, stderr)
+	outcome, scrub, err := i.cycle(ctx, stored, warned, stdout, stderr)
 	if err != nil {
 		return complain(stderr, err)
 	}
 	code := reportCode(outcome)
-	record := i.record(stored, outcome, code, stderr)
+	record := i.record(outcome, code, scrub, stderr)
 	i.announce(ctx, record, false, stderr)
 	if ctx.Err() != nil {
 		return exitFailed
@@ -216,17 +216,17 @@ func (i invocation) execute(stored runner.Collection, stdout, stderr *os.File) i
 	return code
 }
 
-func (i invocation) cycle(ctx context.Context, stored runner.Collection, warned map[string]bool, stdout, stderr *os.File) (runner.Report, error) {
+func (i invocation) cycle(ctx context.Context, stored runner.Collection, warned map[string]bool, stdout, stderr *os.File) (runner.Report, func(string) string, error) {
 	var flow workspace.Flow
 	if i.flow != "" {
 		var err error
 		if flow, err = chooseFlow(stored, i.flow); err != nil {
-			return runner.Report{}, err
+			return runner.Report{}, nil, err
 		}
 	}
 	opened, err := openReports(i.reports, stdout, i.monitor.repeating())
 	if err != nil {
-		return runner.Report{}, err
+		return runner.Report{}, nil, err
 	}
 	defer opened.close()
 	reporters := opened.reporters
@@ -238,6 +238,16 @@ func (i invocation) cycle(ctx context.Context, stored runner.Collection, warned 
 		}
 		warnUnresolved(stderr, result.QualifiedName(), firstMentions(warned, result.Unresolved))
 	}
+	var recorded *agent.Recorded
+	if i.monitor.keepsText() {
+		folder := i.options.Folder
+		if i.flow != "" {
+			folder = ""
+		}
+		if recorded, err = agent.NewRecorded(stored, folder, i.options, i.redact); err != nil {
+			return runner.Report{}, nil, err
+		}
+	}
 	var outcome runner.Report
 	if i.flow != "" {
 		watch := runner.FlowWatch{Result: onResult, Step: func(event runner.FlowEvent) {
@@ -245,20 +255,31 @@ func (i invocation) cycle(ctx context.Context, stored runner.Collection, warned 
 				reporter.Step(event)
 			}
 		}}
-		outcome, err = i.flowPipeline()(ctx, stored, flow, i.options, watch)
+		if recorded != nil {
+			outcome, err = recorded.RunFlow(ctx, stored, flow, i.options, watch)
+		} else {
+			outcome, err = i.flowPipeline()(ctx, stored, flow, i.options, watch)
+		}
 	} else {
-		outcome, err = i.pipeline()(ctx, stored, i.options, onResult)
+		if recorded != nil {
+			outcome, err = recorded.Run(ctx, stored, i.options, onResult)
+		} else {
+			outcome, err = i.pipeline()(ctx, stored, i.options, onResult)
+		}
 	}
 	if err != nil {
-		return runner.Report{}, err
+		return runner.Report{}, nil, err
 	}
 	outcome.Collection = i.path
 	for _, reporter := range reporters {
 		if err := reporter.Finish(outcome); err != nil {
-			return runner.Report{}, err
+			return runner.Report{}, nil, err
 		}
 	}
-	return outcome, nil
+	if recorded == nil {
+		return outcome, nil, nil
+	}
+	return outcome, recorded.Text, nil
 }
 
 func reportCode(report runner.Report) int {

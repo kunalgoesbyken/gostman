@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kunalgoesbyken/gostman/agent"
 	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/monitor"
 	"github.com/kunalgoesbyken/gostman/runner"
@@ -48,6 +47,10 @@ func (m *monitorFlags) register(flags *flag.FlagSet) {
 
 func (m monitorFlags) repeating() bool {
 	return m.every > 0
+}
+
+func (m monitorFlags) keepsText() bool {
+	return m.recording() || m.notifyHook != ""
 }
 
 func (m monitorFlags) recording() bool {
@@ -124,18 +127,9 @@ func collectionName(path string) string {
 	return strings.TrimSuffix(base, filepath.Ext(base))
 }
 
-func (i invocation) scrubber(stored runner.Collection, stderr *os.File) func(string) string {
-	scrub, err := agent.Scrubber(stored, i.options)
-	if err != nil {
-		fmt.Fprintf(stderr, "warning: secret values could not be looked up for the run history: %s\n", err)
-		return nil
-	}
-	return scrub
-}
-
-func (i invocation) record(stored runner.Collection, outcome runner.Report, code int, stderr *os.File) monitor.Record {
+func (i invocation) record(outcome runner.Report, code int, scrub func(string) string, stderr *os.File) monitor.Record {
 	kind, target := i.targetOf(outcome)
-	record := monitor.Source{Kind: kind, Target: target, ExitCode: code, Scrub: i.scrubber(stored, stderr)}.Record(outcome)
+	record := monitor.Source{Kind: kind, Target: target, ExitCode: code, Scrub: scrub}.Record(outcome)
 	if !i.monitor.recording() {
 		return record
 	}
@@ -205,7 +199,7 @@ func (i invocation) monitored(ctx context.Context, stored runner.Collection, war
 				fmt.Fprintf(stderr, "warning: the collection was not reloaded, the previous copy is used: %s\n", err)
 			}
 		}
-		outcome, err := i.cycle(ctx, stored, warned, stdout, stderr)
+		outcome, scrub, err := i.cycle(ctx, stored, warned, stdout, stderr)
 		if ctx.Err() != nil {
 			break
 		}
@@ -217,7 +211,7 @@ func (i invocation) monitored(ctx context.Context, stored runner.Collection, war
 			fmt.Fprintf(stderr, "%s: %s\n", programName, err)
 		} else {
 			code = reportCode(outcome)
-			record := i.record(stored, outcome, code, stderr)
+			record := i.record(outcome, code, scrub, stderr)
 			fmt.Fprintln(stdout, i.summaryLine(number, record))
 			i.announce(ctx, record, previousFailed, stderr)
 			previousFailed = !record.Passed

@@ -20,6 +20,7 @@ const (
 	runsDir      = "runs"
 	userDirName  = "Gostman"
 	recordSuffix = ".json"
+	ignoreFile   = ".gitignore"
 	folderPerm   = 0o755
 	filePerm     = 0o644
 	hashLength   = 8
@@ -102,6 +103,9 @@ func (s Store) Save(record Record) error {
 	if err := os.MkdirAll(s.Dir, folderPerm); err != nil {
 		return err
 	}
+	if err := s.keepOutOfGit(); err != nil {
+		return err
+	}
 	data, err := json.MarshalIndent(record, "", "  ")
 	if err != nil {
 		return err
@@ -120,6 +124,14 @@ func (s Store) Save(record Record) error {
 		return err
 	}
 	return s.prune()
+}
+
+func (s Store) keepOutOfGit() error {
+	path := filepath.Join(s.Dir, ignoreFile)
+	if _, err := os.Stat(path); err == nil {
+		return nil
+	}
+	return os.WriteFile(path, []byte("*\n"), filePerm)
 }
 
 func (s Store) prune() error {
