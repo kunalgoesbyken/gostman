@@ -10,7 +10,10 @@ export const SHELL_POWERSHELL = 'powershell'
 
 const QUOTES = { [SHELL_POSIX]: shellQuote, [SHELL_POWERSHELL]: powershellQuote }
 
-const isPastable = (text) => [...text].every((character) => {
+const BACKSLASH = '\\'
+const DOUBLE_QUOTE = '"'
+
+const isPastable = (text) => !text.includes(DOUBLE_QUOTE) && !text.endsWith(BACKSLASH) && [...text].every((character) => {
   const code = character.charCodeAt(0)
   return code >= FIRST_PRINTABLE && code !== ASCII_DELETE
 })

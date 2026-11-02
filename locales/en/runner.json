@@ -24,7 +24,7 @@
       "posix": "macOS and Linux",
       "powershell": "PowerShell"
     },
-    "cliUnsafe": "A folder or data file name has a line break or another control character, so no command is shown. Rename it to get one.",
+    "cliUnsafe": "A folder or data file name has a line break, a double quote, a trailing backslash or another character that cannot be passed safely on every shell, so no command is shown. Rename it to get one.",
     "includeTags": "Only tags",
     "excludeTags": "Skip tags",
     "anyTag": "Any",
