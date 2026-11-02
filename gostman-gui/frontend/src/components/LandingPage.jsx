@@ -5,7 +5,7 @@ import { cn } from "../lib/utils"
 import { REPOSITORY, REPOSITORY_URL } from "../lib/siteLinks"
 import { docPath } from "../docs/manifest"
 import { useSmoothScroll } from "../lib/landingMotion"
-import { ArrowRight, Check, Download, Globe } from "./landing/icons"
+import { ArrowRight, Download, Globe } from "./landing/icons"
 import { BrandIcon, BrandStrip } from "./ui/brandIcon"
 
 import captureShot from "../assets/landing/capture.webp"
@@ -23,7 +23,7 @@ import { InstallCommands } from "./landing/InstallCommands"
 import { formatList } from "./landing/content"
 import { Brand } from "./landing/Brand"
 import { NavBar } from "./landing/NavBar"
-import { EditorStrip } from "./landing/EditorStrip"
+import { EditorSection } from "./landing/EditorSection"
 import { PointList } from "./landing/PointList"
 import { SiteFooter } from "./landing/SiteFooter"
 import { SplitHeading } from "./landing/SplitHeading"
@@ -46,15 +46,15 @@ const BUILD_STARS = typeof __GITHUB_STARS__ === "number" ? __GITHUB_STARS__ : nu
 
 const STAR_FORMAT = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 })
 
-const HIGHLIGHTS = ["Collections are YAML files in Git", "Secret variables stay out of the folder", "Open source, MIT licence"]
-
 const SECTION_LINKS = [
   { href: "#features", label: "Features" },
   { href: "#compare", label: "Compare" },
   { href: "#faq", label: "FAQ" },
 ]
 
-const PLATFORMS = formatList(groupByOs(DOWNLOADS).map((group) => group.name))
+const PLATFORMS = [...groupByOs(DOWNLOADS).map((group) => group.name), "the web"]
+
+const AVAILABILITY = `Open source under the MIT licence · ${formatList(PLATFORMS)}`
 
 const introStep = (step) => ({ "--intro-step": step })
 
@@ -285,28 +285,13 @@ export function LandingPage({ onGetStarted }) {
                   <span className="intro block mt-2 text-muted-foreground" style={introStep(1)}>No account. No paid tier.</span>
                 </h1>
 
-                <p className="intro text-lg md:text-xl text-muted-foreground/90 max-w-2xl mx-auto leading-relaxed" style={introStep(2)}>
-                  Gostman is a free Postman alternative for REST, GraphQL, gRPC and WebSocket, in your browser, on the desktop and in CI. Your collections are plain YAML files you commit with your code, and secret values stay out of them. Tests, a command line for CI, a mock server and sharing with your team are all in the free download.
+                <p className="intro text-lg md:text-xl text-muted-foreground/90 max-w-3xl mx-auto leading-relaxed [text-wrap:balance]" style={introStep(2)}>
+                  Gostman is a free Postman alternative for REST, GraphQL, gRPC and WebSocket. Collections are YAML files in Git, and secret values stay out of them.
                 </p>
 
-                <CallToActions onGetStarted={onGetStarted} className="intro pt-6" style={introStep(3)} />
+                <CallToActions onGetStarted={onGetStarted} className="intro pt-4" style={introStep(3)} />
 
-                <p className="intro text-sm text-muted-foreground" style={introStep(3)}>
-                  The web version sends requests through a hosted proxy.{" "}
-                  <a href={`${docPath("cli")}#local-relay-for-the-web-app`} className="underline underline-offset-4 hover:text-foreground">Run your own relay</a>
-                  {" "}or use the desktop app to keep tokens on your machine.
-                </p>
-
-                <div className="intro flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-6 text-sm text-muted-foreground" style={introStep(4)}>
-                  {HIGHLIGHTS.map((text) => (
-                    <div key={text} className="flex items-center gap-2">
-                      <Check className="h-3.5 w-3.5 text-success/70" />
-                      <span>{text}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <EditorStrip className="intro mx-auto max-w-3xl pt-6" style={introStep(4)} />
+                <p className="intro text-sm text-muted-foreground [text-wrap:balance]" style={introStep(3)}>{AVAILABILITY}</p>
               </div>
             </div>
           </section>
@@ -321,7 +306,7 @@ export function LandingPage({ onGetStarted }) {
           </section>
         </div>
 
-        <section id="features" className="render-when-visible relative py-20 px-6" aria-labelledby="workflow-heading">
+        <section id="features" className="render-when-visible relative py-24 px-6" aria-labelledby="workflow-heading">
           <div className="mx-auto max-w-6xl">
             <div className="mb-12 max-w-2xl">
               <SectionLabel number="001" label="Workflow" />
@@ -342,6 +327,7 @@ export function LandingPage({ onGetStarted }) {
           </div>
         </section>
 
+        <EditorSection />
         <EverythingSection onGetStarted={onGetStarted} />
         <ComparisonSection />
         <FaqSection />
@@ -357,7 +343,7 @@ export function LandingPage({ onGetStarted }) {
               Download the desktop app for Windows, macOS or Linux, or open the web version now. There is nothing to sign up for.
             </p>
             <CallToActions onGetStarted={onGetStarted} className="mt-8" />
-            <p className="mt-6 text-sm text-muted-foreground">Free and open source · {PLATFORMS} · No account</p>
+            <p className="mt-6 text-sm text-muted-foreground">{AVAILABILITY}</p>
             <InstallCommands className="relative mx-auto mt-10 max-w-2xl text-left" />
           </div>
           <GlyphWordmark className="mt-20" />

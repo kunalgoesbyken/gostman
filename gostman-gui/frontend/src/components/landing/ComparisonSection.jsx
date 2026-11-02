@@ -1,6 +1,7 @@
 import { docPath } from "../../docs/manifest"
 import { STATES } from "./comparisonData"
 import { ComparisonTable } from "./ComparisonTable"
+import { InlineLink } from "./InlineLink"
 import { SectionLabel } from "./SectionLabel"
 import { SplitHeading } from "./SplitHeading"
 import { StatusGlyph } from "./StatusGlyph"
@@ -12,8 +13,6 @@ const MIGRATION_GUIDES = [
   { slug: "coming-from-insomnia", label: "Coming from Insomnia" },
 ]
 
-const GUIDE_LINK = "text-foreground underline underline-offset-4 hover:text-primary"
-
 const guideLabelled = (label) => MIGRATION_GUIDES.find((guide) => guide.label === label)
 
 function MigrationLinks() {
@@ -21,9 +20,9 @@ function MigrationLinks() {
   return parts.map((part, index) => {
     if (part.type !== "element") return part.value
     return (
-      <a key={index} href={docPath(guideLabelled(part.value).slug)} className={GUIDE_LINK}>
+      <InlineLink key={index} href={docPath(guideLabelled(part.value).slug)}>
         {part.value}
-      </a>
+      </InlineLink>
     )
   })
 }
@@ -46,7 +45,7 @@ export function ComparisonSection() {
     <section id="compare" className="render-when-visible relative px-6 py-24" aria-labelledby="comparison-heading">
       <div className="mx-auto max-w-6xl">
         <div className="mb-12 max-w-2xl">
-          <SectionLabel number="003" label="Compare" />
+          <SectionLabel number="004" label="Compare" />
           <SplitHeading
             id="comparison-heading"
             text="How Gostman compares"

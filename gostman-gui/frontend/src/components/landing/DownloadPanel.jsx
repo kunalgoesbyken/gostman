@@ -1,8 +1,10 @@
 import { Button, buttonVariants } from "../ui/button"
 import { cn } from "../../lib/utils"
+import { docPath } from "../../docs/manifest"
 import { BrandIcon } from "../ui/brandIcon"
 import { useBrowserOs } from "../../hooks/useBrowserOs"
 import { Globe } from "./icons"
+import { InlineLink } from "./InlineLink"
 import { DOWNLOADS, downloadFor, downloadUrl, groupByOs, isExternal } from "./downloads"
 
 const NAME_COLUMN = "w-20 shrink-0 font-medium"
@@ -84,6 +86,12 @@ export function DownloadPanel({ onGetStarted }) {
           <Globe className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
         </button>
       ) : null}
+
+      <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+        The web version sends requests through a hosted proxy.{" "}
+        <InlineLink href={`${docPath("cli")}#local-relay-for-the-web-app`}>Run your own relay</InlineLink>
+        {" "}or use the desktop app to keep tokens on your machine.
+      </p>
     </aside>
   )
 }

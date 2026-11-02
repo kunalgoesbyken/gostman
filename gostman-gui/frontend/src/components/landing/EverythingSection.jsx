@@ -8,7 +8,7 @@ export function EverythingSection({ onGetStarted }) {
     <section id="download" className="render-when-visible relative px-6 py-24" aria-labelledby="included-heading">
       <div className="mx-auto max-w-6xl">
         <div className="mb-14 max-w-2xl">
-          <SectionLabel number="002" label="Download" />
+          <SectionLabel number="003" label="Download" />
           <SplitHeading
             id="included-heading"
             text="Everything is in the download"

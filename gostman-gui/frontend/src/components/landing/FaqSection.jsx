@@ -1,6 +1,7 @@
 import { BrandIcon, BrandStrip } from "../ui/brandIcon"
 import { FAQ } from "./faq"
 import { ChevronDown } from "./icons"
+import { InlineLink } from "./InlineLink"
 import { SectionLabel } from "./SectionLabel"
 import { SplitHeading } from "./SplitHeading"
 import { ISSUES_URL } from "../../lib/siteLinks"
@@ -10,7 +11,7 @@ export function FaqSection() {
     <section id="faq" className="render-when-visible relative px-6 py-24" aria-labelledby="faq-heading">
       <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-16">
         <div>
-          <SectionLabel number="004" label="Questions" />
+          <SectionLabel number="005" label="Questions" />
           <SplitHeading
             id="faq-heading"
             text="Questions before you switch"
@@ -18,10 +19,10 @@ export function FaqSection() {
           />
           <p className="mt-5 leading-relaxed text-muted-foreground">
             Something else?{" "}
-            <a href={ISSUES_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-foreground underline underline-offset-4 hover:text-primary">
+            <InlineLink href={ISSUES_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5">
               <BrandIcon brand="github" className="h-4 w-4" />
               Ask on GitHub
-            </a>
+            </InlineLink>
             .
           </p>
         </div>

@@ -15,8 +15,8 @@ const SOURCES = [
 
 function Source({ source }) {
   return (
-    <li className={cn("flex items-center gap-2.5 text-xl font-semibold tracking-tight text-muted-foreground/80", !source.brand && "font-mono font-medium")}>
-      <BrandIcon brand={source.brand} className="h-6 w-6" />
+    <li className={cn("flex items-center gap-2 text-base font-semibold tracking-tight sm:text-lg text-muted-foreground/80", !source.brand && "font-mono font-medium")}>
+      <BrandIcon brand={source.brand} className="h-5 w-5" />
       {source.name}
     </li>
   )
@@ -25,8 +25,8 @@ function Source({ source }) {
 export function ImportSources({ className }) {
   return (
     <div className={cn("text-center", className)}>
-      <p className="text-sm text-muted-foreground">Imports collections and specs from</p>
-      <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
+      <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">Imports collections and specs from</p>
+      <ul className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-4 sm:gap-x-9">
         {SOURCES.map((source) => (
           <Source key={source.name} source={source} />
         ))}
