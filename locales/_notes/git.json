@@ -43,5 +43,13 @@
   "git.createPullRequest": "Opens the pull request page on the code host in the web browser.",
   "gitSession.discardMessage": "{{path}} is a file name.",
   "gitSession.restoreMessage": "{{commit}} is a short commit id.",
-  "gitSession.dropStashConfirm": "Confirm button of the stash deletion dialog."
+  "gitSession.dropStashConfirm": "Confirm button of the stash deletion dialog.",
+  "git.diffViewLabel": "Accessible name of the switch between the field view and the line view of a change.",
+  "git.viewFields": "Option that shows a change as a list of request fields (method, URL, headers).",
+  "git.viewLines": "Option that shows a change as a line by line text diff.",
+  "git.fields.url": "Name of a request field, shown above the lines that changed in it.",
+  "git.compareWith": "Label of the list used to choose which older version a version is compared with.",
+  "git.compareParent": "Option meaning the version just before the selected one.",
+  "git.compareFieldsOn": "Button in the merge conflict editor that lists the request fields that differ between the two sides.",
+  "git.compareSidesOn": "Button that goes back to showing the two sides of a conflict as text."
 }

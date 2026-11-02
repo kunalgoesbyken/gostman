@@ -3,6 +3,7 @@ import { Check } from "lucide-react"
 import { Button } from "./ui/button"
 import { Textarea } from "./ui/textarea"
 import { SectionLabel } from "./ui/panel"
+import { FieldDiff, useFieldChanges } from "./FieldDiff"
 import { GIT_TEXT as TEXT } from "../lib/gitText"
 
 const joinBoth = (ours, theirs) => (ours === "" || ours.endsWith("\n") ? ours : `${ours}\n`) + theirs
@@ -25,10 +26,19 @@ function Side({ label, content, isGone, onAccept, acceptLabel }) {
 
 export function ConflictEditor({ conflict, isBusy, onResolve }) {
   const [result, setResult] = useState(conflict.working)
+  const [showFields, setShowFields] = useState(false)
+  const changes = useFieldChanges(conflict.oursGone ? "" : conflict.ours, conflict.theirGone ? "" : conflict.theirs)
+  const canCompare = changes !== null && /\.ya?ml$/i.test(conflict.path)
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-44 shrink-0 border-b border-border">
+      {canCompare && (
+        <div className="flex h-8 shrink-0 items-center justify-end border-b border-border px-3">
+          <Button size="sm" variant="outline" onClick={() => setShowFields(!showFields)}>{showFields ? TEXT.compareSidesOn : TEXT.compareFieldsOn}</Button>
+        </div>
+      )}
+      {canCompare && showFields && <div className="h-44 shrink-0 overflow-auto border-b border-border"><FieldDiff changes={changes} /></div>}
+      <div className={showFields && canCompare ? "hidden" : "flex h-44 shrink-0 border-b border-border"}>
         <Side label={TEXT.ours} content={conflict.ours} isGone={conflict.oursGone} acceptLabel={TEXT.acceptOurs} onAccept={() => setResult(conflict.ours)} />
         <Side label={TEXT.theirs} content={conflict.theirs} isGone={conflict.theirsGone} acceptLabel={TEXT.acceptTheirs} onAccept={() => setResult(conflict.theirs)} />
       </div>

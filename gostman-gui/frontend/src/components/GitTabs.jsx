@@ -1,14 +1,17 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { ExternalLink, GitBranch, History, Plus, RotateCcw, Server, Trash2 } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { BrandIcon } from "./ui/brandIcon"
 import { Button, IconButton } from "./ui/button"
 import { EmptyState } from "./ui/emptyState"
 import { Input } from "./ui/input"
+import { Select } from "./ui/select"
 import { Notice, PANE_WIDTH, ResizablePane, SectionLabel } from "./ui/panel"
 import { EDGE_END } from "../hooks/usePaneResize"
 import { GIT_HISTORY_PANE } from "../lib/layout"
+import { ROW_HEIGHT, layoutGraph } from "../lib/commitGraph"
 import { cn } from "../lib/utils"
+import { CommitGraphCell } from "./CommitGraphCell"
 import { GitDiffView } from "./GitDiffView"
 import { useAppStore } from "../store/appStore"
 import { codeHostOf, pullRequestRemote } from "../lib/codeHost"
@@ -91,23 +94,45 @@ export function StashesTab({ stashes, isReadOnly, actions }) {
   )
 }
 
-function VersionPane({ version, isReadOnly, onRestore }) {
+function VersionPane({ version, commits, path, isReadOnly, actions }) {
+  const others = commits.filter((commit) => commit.hash !== version.commit.hash)
+  const compared = Boolean(version.compare)
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <div className="flex h-9 shrink-0 items-center justify-between gap-2 border-b border-border px-3">
         <span className="truncate text-xs text-muted-foreground">{version.commit.short} {version.commit.subject}</span>
-        <Button size="sm" variant="outline" disabled={isReadOnly} onClick={() => onRestore(version.commit)}>
-          <RotateCcw />
-          {TEXT.restoreVersion}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Select
+            aria-label={TEXT.compareWith}
+            className="w-44"
+            value={version.compare?.commit.hash ?? ""}
+            onChange={(event) => actions.compareVersion(others.find((commit) => commit.hash === event.target.value) ?? null)}
+          >
+            <option value="">{TEXT.compareParent}</option>
+            {others.map((commit) => <option key={commit.hash} value={commit.hash}>{commit.short} {commit.subject}</option>)}
+          </Select>
+          <Button size="sm" variant="outline" disabled={isReadOnly} onClick={() => actions.restoreVersion(version.commit)}>
+            <RotateCcw />
+            {TEXT.restoreVersion}
+          </Button>
+        </div>
       </div>
-      <GitDiffView text={version.diff} binary={false} summary={[]} />
+      <GitDiffView
+        text={version.diff}
+        binary={false}
+        summary={[]}
+        path={path}
+        before={compared ? version.compare.content : version.before}
+        after={version.content}
+        compared={compared}
+      />
     </div>
   )
 }
 
 export function HistoryTab({ history, isReadOnly, actions }) {
   const [path, setPath] = useState(history.path)
+  const graph = useMemo(() => (history.path ? null : layoutGraph(history.commits)), [history.path, history.commits])
   const submit = (event) => {
     event.preventDefault()
     actions.showHistory(path.trim())
@@ -122,21 +147,28 @@ export function HistoryTab({ history, isReadOnly, actions }) {
         <ResizablePane pane={GIT_HISTORY_PANE} edge={EDGE_END} className={cn(PANE_WIDTH, "flex min-h-0 w-80 shrink-0 flex-col border-e border-border")}>
           <div className="min-h-0 flex-1 overflow-y-auto">
           {history.commits.length === 0 && <EmptyState icon={History} title={TEXT.noCommits} />}
-          {history.commits.map((commit) => (
+          {history.commits.map((commit, index) => (
             <button
               key={commit.hash}
               type="button"
               disabled={!history.path}
               onClick={() => actions.showVersion(commit)}
-              className="block w-full border-b border-border px-3 py-2 text-start text-xs enabled:hover:bg-accent"
+              style={{ height: ROW_HEIGHT }}
+              className="flex w-full items-center gap-2 border-b border-border pe-3 text-start text-xs enabled:hover:bg-accent"
             >
-              <span className="block truncate font-medium">{commit.subject}</span>
-              <span className="block truncate text-muted-foreground">{commit.short} · {commit.author} · {formatDate(commit.date)}</span>
+              {graph && <CommitGraphCell row={graph.rows[index]} width={graph.width} />}
+              <span className={cn("min-w-0 flex-1", !graph && "px-3")}>
+                <span className="flex min-w-0 items-center gap-1.5">
+                  <span className="truncate font-medium">{commit.subject}</span>
+                  {commit.refs.slice(0, 3).map((name) => <Badge key={name} variant="outline" className="shrink-0">{name}</Badge>)}
+                </span>
+                <span className="block truncate text-muted-foreground">{commit.short} · {commit.author} · {formatDate(commit.date)}</span>
+              </span>
             </button>
           ))}
           </div>
         </ResizablePane>
-        {history.version && <VersionPane version={history.version} isReadOnly={isReadOnly} onRestore={actions.restoreVersion} />}
+        {history.version && <VersionPane version={history.version} commits={history.commits} path={history.path} isReadOnly={isReadOnly} actions={actions} />}
       </div>
     </div>
   )

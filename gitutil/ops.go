@@ -13,20 +13,25 @@ const (
 	conflictStart     = "<<<<<<< "
 	conflictEnd       = ">>>>>>> "
 	logLimit          = "100"
+	sideLimit         = 1 << 20
 	stagedOutsideHint = "Git cannot merge while files outside the collection folder are staged: %s. Commit or unstage them in your usual Git tool, then pull again."
 )
 
 type Diff struct {
 	Text   string `json:"text"`
 	Binary bool   `json:"binary"`
+	Before string `json:"before"`
+	After  string `json:"after"`
 }
 
 type Commit struct {
-	Hash    string `json:"hash"`
-	Short   string `json:"short"`
-	Author  string `json:"author"`
-	Date    string `json:"date"`
-	Subject string `json:"subject"`
+	Hash    string   `json:"hash"`
+	Short   string   `json:"short"`
+	Author  string   `json:"author"`
+	Date    string   `json:"date"`
+	Subject string   `json:"subject"`
+	Parents []string `json:"parents"`
+	Refs    []string `json:"refs"`
 }
 
 type Branch struct {
@@ -62,6 +67,7 @@ type Conflict struct {
 type Version struct {
 	Content string `json:"content"`
 	Diff    string `json:"diff"`
+	Before  string `json:"before"`
 }
 
 func (r Repo) absolute(file string) (string, error) {
@@ -129,7 +135,10 @@ func (r Repo) Diff(file string, staged, untracked bool) (Diff, error) {
 		return Diff{}, err
 	}
 	if untracked {
-		return addedDiff(clean, r.readWorktree(clean)), nil
+		added := r.readWorktree(clean)
+		diff := addedDiff(clean, added)
+		diff.After = sideText(string(added))
+		return diff, nil
 	}
 	args := []string{"diff", "--no-ext-diff", "--no-textconv", "--no-color", "-U4"}
 	if staged {
@@ -139,7 +148,28 @@ func (r Repo) Diff(file string, staged, untracked bool) (Diff, error) {
 	if err != nil {
 		return Diff{}, err
 	}
-	return Diff{Text: out, Binary: strings.Contains(out, "Binary files ")}, nil
+	diff := Diff{Text: out, Binary: strings.Contains(out, "Binary files ")}
+	if !diff.Binary {
+		diff.Before, diff.After = r.sides(clean, staged)
+	}
+	return diff, nil
+}
+
+func sideText(content string) string {
+	if len(content) > sideLimit || strings.ContainsRune(content, 0) {
+		return ""
+	}
+	return content
+}
+
+func (r Repo) sides(file string, staged bool) (string, string) {
+	if staged {
+		before, _ := r.run("show", "HEAD:"+file)
+		after, _ := r.run("show", ":"+file)
+		return sideText(before), sideText(after)
+	}
+	before, _ := r.run("show", ":"+file)
+	return sideText(before), sideText(string(r.readWorktree(file)))
 }
 
 func (r Repo) validPaths(files []string) ([]string, error) {
@@ -445,7 +475,7 @@ func (r Repo) StashAction(action string, index int) error {
 }
 
 func (r Repo) Log(file string) ([]Commit, error) {
-	args := []string{"log", "-n", logLimit, "--no-color", "--format=%H%x1f%h%x1f%an%x1f%aI%x1f%s"}
+	args := []string{"log", "-n", logLimit, "--no-color", "--format=%H%x1f%h%x1f%an%x1f%aI%x1f%s%x1f%P%x1f%D"}
 	if file != "" {
 		clean, err := r.path(file)
 		if err != nil {
@@ -453,7 +483,7 @@ func (r Repo) Log(file string) ([]Commit, error) {
 		}
 		args = append(args, "--follow", "--", clean)
 	} else {
-		args = r.scoped(append(args, "--full-history")...)
+		args = r.scoped(append(args, "--branches", "--remotes", "--tags", "--topo-order", "--parents", "--full-history")...)
 	}
 	out, err := r.run(args...)
 	if err != nil {
@@ -465,11 +495,23 @@ func (r Repo) Log(file string) ([]Commit, error) {
 	commits := []Commit{}
 	for _, line := range strings.Split(out, "\n") {
 		fields := strings.Split(line, "\x1f")
-		if len(fields) == 5 {
-			commits = append(commits, Commit{Hash: fields[0], Short: fields[1], Author: fields[2], Date: fields[3], Subject: fields[4]})
+		if len(fields) == 7 {
+			commits = append(commits, Commit{Hash: fields[0], Short: fields[1], Author: fields[2], Date: fields[3], Subject: fields[4], Parents: strings.Fields(fields[5]), Refs: refNames(fields[6])})
 		}
 	}
 	return commits, nil
+}
+
+func refNames(decoration string) []string {
+	names := []string{}
+	for _, part := range strings.Split(decoration, ", ") {
+		name := strings.TrimSpace(strings.TrimPrefix(part, "HEAD -> "))
+		if name == "" || name == "HEAD" {
+			continue
+		}
+		names = append(names, name)
+	}
+	return names
 }
 
 func (r Repo) Version(hash, file string) (Version, error) {
@@ -488,7 +530,8 @@ func (r Repo) Version(hash, file string) (Version, error) {
 	if contentErr != nil {
 		content = ""
 	}
-	return Version{Content: content, Diff: diff}, nil
+	before, _ := r.run("show", hash+"^:"+clean)
+	return Version{Content: sideText(content), Diff: diff, Before: sideText(before)}, nil
 }
 
 func (r Repo) RestoreVersion(hash, file string) error {

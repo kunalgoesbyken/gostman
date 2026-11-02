@@ -128,7 +128,7 @@ function ChangesTab({ state, selection, diff, conflict, isBusy, actions }) {
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         {!selected && <EmptyState icon={GitBranch} title={TEXT.pickFile} />}
         {selected && conflict && <ConflictEditor key={conflict.path} conflict={conflict} isBusy={isReadOnly} onResolve={actions.resolve} />}
-        {selected && diff && <GitDiffView text={diff.text} binary={diff.binary} summary={selected.summary} />}
+        {selected && diff && <GitDiffView key={`${selection.path}:${selection.staged}`} text={diff.text} binary={diff.binary} summary={selected.summary} path={selected.path} before={diff.before} after={diff.after} />}
       </div>
     </div>
   )

@@ -152,6 +152,16 @@ export function createGitActions(backend) {
         alertFailure(error)
       }
     },
+    compareVersion: async (commit) => {
+      const { path, version } = git().history
+      if (!version) return
+      try {
+        const compare = commit ? { commit, content: (await backend.version(commit.hash, path)).content } : null
+        patch({ history: { ...git().history, version: { ...git().history.version, compare } } })
+      } catch (error) {
+        alertFailure(error)
+      }
+    },
     restoreVersion: (commit) => {
       const { path } = git().history
       confirmThen(

@@ -222,7 +222,7 @@ The panel has five sections: **Changes**, **Branches**, **Stashes**, **History**
 
 The left side lists files in up to three groups: **Conflicts**, **Staged** and **Changes**. Each row shows a status letter (for example Modified, Added, Deleted or New) and a short summary of what changed in the request or folder.
 
-- Select a file to see its diff on the right. Added lines, removed lines and hunk headers are coloured. A binary file shows **This file is binary, so there is no line diff.**
+- Select a file to see its diff on the right. For a request, folder or environment file (`.yaml`) the **Fields** view lists what changed by field: method, URL, query parameters, headers, authentication, body, scripts, checks and the rest, with removed and added values under each name. Header and parameter rows are matched by name, so a changed value shows as one removed and one added row. The **Lines** view is the plain line diff, with added lines, removed lines and hunk headers coloured. A binary file shows **This file is binary, so there is no line diff.**
 - Use the plus and minus buttons to stage and unstage a file, or **Stage all**.
 - Use the discard button on an unstaged file to restore it. A prompt warns that this cannot be undone.
 - Use the history button on a row to open the History section for that file.
@@ -240,7 +240,9 @@ A stash sets uncommitted changes aside. **Stash changes** takes an optional note
 
 ### History
 
-Enter a file path to see the history of one file, or leave it empty for the whole repository, and choose **Show history**. Selecting a commit of a single file shows its diff, and **Restore this version** replaces the file with that commit's content after a confirmation.
+Enter a file path to see the history of one file, or leave it empty for the whole repository, and choose **Show history**. Selecting a commit of a single file shows its diff against the previous version, in the same **Fields** and **Lines** views. **Compare with** chooses another commit of that file to compare against instead, so you can see how a request differs between any two versions. **Restore this version** replaces the file with that commit's content after a confirmation.
+
+With no file path, each commit has a graph on its left: one lane per line of development, a dot per commit, merge commits drawn as a hollow dot, and branch and tag names next to the subject. The list covers local branches, remote branches and tags, not only the current branch.
 
 ### Remotes
 
@@ -253,6 +255,7 @@ When a merge is in progress, a notice says to resolve each conflicted file and c
 Select a file under **Conflicts** to open the conflict editor:
 
 - **Ours** and **Theirs** show each side, with **Accept ours** and **Accept theirs** buttons. A side whose file was removed shows **Deleted on this side**.
+- **Compare fields** (for `.yaml` files) replaces the two text sides with a list of the fields that differ between ours and theirs, such as method, URL or one header. **Show sides** goes back.
 - **Result** is an editable text area. **Accept both** puts the two sides together, and **Reset** restores the working file.
 - If the result still contains conflict markers, a warning appears and **Mark resolved** stays disabled.
 - **Mark resolved** saves the result for that file.
