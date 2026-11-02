@@ -373,19 +373,27 @@ Code opens the Generate code dialog. Pick a language from the list at the top:
 | --- | --- |
 | cURL | `curl` |
 | JavaScript | `fetch` |
+| JavaScript (axios) | `axios` in an ES module |
+| Node.js (http) | `node:http` or `node:https` |
 | Python | `requests` |
+| Python (httpx) | `httpx` |
 | Go | `net/http` |
 | Java and Kotlin | `java.net.http.HttpClient` |
+| Java (OkHttp) | `okhttp3` |
 | C# | `HttpClient` |
+| C# (RestSharp) | `RestSharp` |
 | PHP | the cURL extension |
+| PHP (Guzzle) | `guzzlehttp/guzzle` |
 | Ruby | `Net::HTTP` |
 | Swift | `URLSession` with `async`/`await` |
 | Rust | `reqwest` with the `blocking` feature |
 | Dart | the `http` package |
 | PowerShell | `Invoke-WebRequest`, for Windows PowerShell 5.1 and PowerShell 7 |
+| HTTPie | `http` |
+| wget | `wget` 1.19.2 or later |
 
 Copy copies the snippet for the selected language, and the dialog opens on the language you picked last. Text is escaped for each language, so quotes, `$`, backslashes, line breaks and non-ASCII characters arrive as typed. The snippets are built from the request as the engine prepares it, so variables, inherited headers and auth appear as they are sent.
 
-A File body and the file rows of a Multipart body are read from disk by the snippet, using the file name you attached: put the file next to the snippet or change the path. Multipart text rows are sent as form fields, and the snippet uses each language's own multipart support where it has one; Java, Kotlin and Swift build the multipart body themselves.
+A File body and the file rows of a Multipart body are read from disk by the snippet, using the file name you attached: put the file next to the snippet or change the path. Multipart text rows are sent as form fields, and the snippet uses each language's own multipart support where it has one; Java, Kotlin, Swift and Node.js (http) build the multipart body themselves, and wget, which has no multipart option, writes the body to `form-body.tmp` first.
 
 ![The Generate code dialog with cURL selected, showing a POST with a JSON body and a bearer Authorization header](../screenshots/code.png)

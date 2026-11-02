@@ -561,20 +561,262 @@ function generatePowerShell(request) {
   ].join('\n')
 }
 
+const headerObject = (headers, indent) => mergeRepeatedHeaders(headers).map(({ key, value }) => `${indent}${quote(key)}: ${quote(value)},`)
+
+const contentTypeOf = (headers) => headers.find(isContentType)?.value
+
+const withoutContentType = (headers) => headers.filter((header) => !isContentType(header))
+
+function generateAxios(request) {
+  const { method, url, headers, body, file, parts } = request
+  const options = [`  method: ${quote(method)},`, `  url: ${quote(url)},`]
+  if (headers.length > 0) options.push('  headers: {', ...headerObject(headers, '    '), '  },')
+  if (parts) options.push('  data: form,')
+  else if (file) options.push(`  data: createReadStream(${quote(file)}),`)
+  else if (body) options.push(`  data: ${quote(body)},`)
+  options.push('  validateStatus: () => true,')
+  return [
+    'import axios from "axios"',
+    ...(file || hasFilePart(parts) ? ['import { createReadStream, openAsBlob } from "node:fs"'] : []),
+    '',
+    ...(parts ? [...javaScriptForm(parts)] : []),
+    'const response = await axios.request({',
+    ...options,
+    '})',
+    '',
+    'console.log(response.status)',
+    'console.log(response.data)',
+  ].join('\n')
+}
+
+const nodeWrite = (segment) => (typeof segment === 'string'
+  ? `request.write(${quote(segment)})`
+  : `request.write(readFileSync(${quote(segment.file)}))`)
+
+function nodeEnding({ body, file, parts }) {
+  if (parts) return [...formSegments(parts).map(nodeWrite), 'request.end()']
+  if (file) return [`createReadStream(${quote(file)}).pipe(request)`]
+  return [body ? `request.end(${quote(body)})` : 'request.end()']
+}
+
+function generateNode(request) {
+  const { method, url, parts } = request
+  const headers = parts ? withFormType(request.headers) : request.headers
+  const module = url.startsWith('https:') ? 'https' : 'http'
+  const fsImports = [...(request.file ? ['createReadStream'] : []), ...(hasFilePart(parts) ? ['readFileSync'] : [])]
+  return [
+    `import ${module} from "node:${module}"`,
+    ...(fsImports.length > 0 ? [`import { ${fsImports.join(', ')} } from "node:fs"`] : []),
+    '',
+    `const request = ${module}.request(${quote(url)}, {`,
+    `  method: ${quote(method)},`,
+    ...(headers.length > 0 ? ['  headers: {', ...headerObject(headers, '    '), '  },'] : []),
+    '}, (response) => {',
+    '  const chunks = []',
+    '  response.on("data", (chunk) => chunks.push(chunk))',
+    '  response.on("end", () => {',
+    '    console.log(response.statusCode)',
+    '    console.log(Buffer.concat(chunks).toString())',
+    '  })',
+    '})',
+    '',
+    'request.on("error", (error) => console.error(error))',
+    ...nodeEnding(request),
+  ].join('\n')
+}
+
+function generateHttpx({ method, url, headers, body, file, parts }) {
+  const lines = ['import httpx', '', `url = ${quote(url)}`]
+  const call = [quote(method), 'url']
+  if (headers.length > 0) {
+    lines.push('headers = {', ...headerObject(headers, '    '), '}')
+    call.push('headers=headers')
+  }
+  if (parts) {
+    lines.push('files = [', ...parts.map(pythonPart), ']')
+    call.push('files=files')
+  } else if (file) {
+    lines.push(`content = open(${quote(file)}, "rb")`)
+    call.push('content=content')
+  } else if (body) {
+    lines.push(`content = ${quote(body)}.encode("utf-8")`)
+    call.push('content=content')
+  }
+  return [...lines, '', `response = httpx.request(${call.join(', ')})`, '', 'print(response.status_code)', 'print(response.text)'].join('\n')
+}
+
+const OKHTTP_BODY_REQUIRED = ['POST', 'PUT', 'PATCH', 'PROPPATCH', 'REPORT']
+
+const okhttpMediaType = (headers) => {
+  const type = contentTypeOf(headers)
+  return type ? `MediaType.parse(${quote(type)})` : 'null'
+}
+
+const okhttpPart = (part) => (part.file === undefined
+  ? `            .addFormDataPart(${quote(part.name)}, ${quote(part.value)})`
+  : `            .addFormDataPart(${quote(part.name)}, ${quote(part.file)}, RequestBody.create(new File(${quote(part.file)}), MediaType.parse(${quote(part.contentType)})))`)
+
+function okhttpBody({ method, headers, body, file, parts }) {
+  if (parts) return ['        RequestBody body = new MultipartBody.Builder()', '            .setType(MultipartBody.FORM)', ...parts.map(okhttpPart), '            .build();']
+  if (file) return [`        RequestBody body = RequestBody.create(new File(${quote(file)}), ${okhttpMediaType(headers)});`]
+  if (body) return [`        RequestBody body = RequestBody.create(${quote(body)}, ${okhttpMediaType(headers)});`]
+  if (OKHTTP_BODY_REQUIRED.includes(method.toUpperCase())) return ['        RequestBody body = RequestBody.create(new byte[0], null);']
+  return ['        RequestBody body = null;']
+}
+
+function generateOkHttp(request) {
+  const { method, url, parts } = request
+  const sendsContent = sendsBody(request)
+  const headers = sendsContent && !parts ? withoutContentType(request.headers) : request.headers
+  return [
+    ...(readsFiles(request) ? ['import java.io.File;'] : []),
+    'import java.io.IOException;',
+    'import okhttp3.*;',
+    '',
+    'public class Main {',
+    '    public static void main(String[] args) throws IOException {',
+    '        OkHttpClient client = new OkHttpClient();',
+    '',
+    ...okhttpBody(request),
+    '        Request request = new Request.Builder()',
+    `            .url(${quote(url)})`,
+    ...headers.map(({ key, value }) => `            .header(${quote(key)}, ${quote(value)})`),
+    `            .method(${quote(method)}, body)`,
+    '            .build();',
+    '',
+    '        try (Response response = client.newCall(request).execute()) {',
+    '            System.out.println(response.code());',
+    '            System.out.println(response.body().string());',
+    '        }',
+    '    }',
+    '}',
+  ].join('\n')
+}
+
+const restSharpPart = (part) => (part.file === undefined
+  ? `request.AddParameter(${csharpQuote(part.name)}, ${csharpQuote(part.value)});`
+  : `request.AddFile(${csharpQuote(part.name)}, ${csharpQuote(part.file)}, ${csharpQuote(part.contentType)});`)
+
+const capitalized = (text) => text.charAt(0).toUpperCase() + text.slice(1).toLowerCase()
+
+function restSharpBody({ headers, body, file, parts }) {
+  const type = contentTypeOf(headers)
+  if (parts) return ['request.AlwaysMultipartFormData = true;', ...parts.map(restSharpPart)]
+  if (file) return [`request.AddParameter(${csharpQuote(type || DEFAULT_PART_TYPE)}, File.ReadAllBytes(${csharpQuote(file)}), ParameterType.RequestBody);`]
+  if (body) return [`request.AddStringBody(${csharpQuote(body)}, ${csharpQuote(type || 'text/plain')});`]
+  return []
+}
+
+function generateRestSharp(request) {
+  const { method, url, parts } = request
+  const headers = sendsBody(request) && !parts ? withoutContentType(request.headers) : request.headers
+  return [
+    'using RestSharp;',
+    '',
+    'using var client = new RestClient();',
+    `var request = new RestRequest(${csharpQuote(url)}, Method.${capitalized(method)});`,
+    ...headers.map(({ key, value }) => `request.AddHeader(${csharpQuote(key)}, ${csharpQuote(value)});`),
+    ...restSharpBody(request),
+    '',
+    'var response = await client.ExecuteAsync(request);',
+    'Console.WriteLine((int)response.StatusCode);',
+    'Console.WriteLine(response.Content);',
+  ].join('\n')
+}
+
+const guzzlePart = (part) => (part.file === undefined
+  ? `        ['name' => ${singleQuote(part.name)}, 'contents' => ${singleQuote(part.value)}],`
+  : `        ['name' => ${singleQuote(part.name)}, 'contents' => fopen(${singleQuote(part.file)}, 'r'), 'filename' => ${singleQuote(part.file)}, 'headers' => ['Content-Type' => ${singleQuote(part.contentType)}]],`)
+
+function guzzleOptions({ headers, body, file, parts }) {
+  const options = []
+  if (headers.length > 0) {
+    options.push("    'headers' => [", ...mergeRepeatedHeaders(headers).map(({ key, value }) => `        ${singleQuote(key)} => ${singleQuote(value)},`), '    ],')
+  }
+  if (parts) options.push("    'multipart' => [", ...parts.map(guzzlePart), '    ],')
+  else if (file) options.push(`    'body' => fopen(${singleQuote(file)}, 'r'),`)
+  else if (body) options.push(`    'body' => ${singleQuote(body)},`)
+  return options
+}
+
+function generateGuzzle(request) {
+  return [
+    '<?php',
+    '',
+    "require 'vendor/autoload.php';",
+    '',
+    "$client = new GuzzleHttp\\Client(['http_errors' => false]);",
+    '',
+    `$response = $client->request(${singleQuote(request.method)}, ${singleQuote(request.url)}, [`,
+    ...guzzleOptions(request),
+    ']);',
+    '',
+    'echo $response->getStatusCode() . PHP_EOL;',
+    'echo $response->getBody() . PHP_EOL;',
+  ].join('\n')
+}
+
+const httpieHeader = ({ key, value }) => shellQuote(value === '' ? `${key};` : `${key}:${value}`)
+
+const httpiePart = (part) => (part.file === undefined
+  ? shellQuote(`${part.name}=${part.value}`)
+  : shellQuote(`${part.name}@${part.file};type=${part.contentType}`))
+
+function generateHttpie(request) {
+  const { method, url, headers, body, file, parts } = request
+  const command = ['http', ...(file ? [] : ['--ignore-stdin']), ...(parts ? ['--multipart'] : []), ...(body ? ['--raw', shellQuote(body)] : []), shellWord(method), shellQuote(url)]
+  const items = [...headers.map(httpieHeader), ...(parts ? parts.map(httpiePart) : [])]
+  const lines = [command.join(' '), ...items]
+  if (file) lines.push(`< ${shellQuote(file)}`)
+  return lines.join(' \\\n  ')
+}
+
+const printfText = (text) => shellQuote(text.replaceAll('\\', '\\\\').replaceAll('\r', '\\r').replaceAll('\n', '\\n'))
+
+const wgetSegment = (segment) => (typeof segment === 'string'
+  ? `  printf '%b' ${printfText(segment)}`
+  : `  cat ${shellQuote(segment.file)}`)
+
+const wgetFormFile = (parts) => ['{', ...formSegments(parts).map(wgetSegment), '} > form-body.tmp']
+
+function generateWget(request) {
+  const { method, url, body, file, parts } = request
+  const headers = parts ? withFormType(request.headers) : request.headers
+  const flags = ['--server-response', '--content-on-error', '--max-redirect=0', `--method=${shellWord(method)}`]
+  const options = [
+    ...flags,
+    ...headers.map(({ key, value }) => `--header=${shellQuote(`${key}: ${value}`)}`),
+    ...(parts ? ['--body-file=form-body.tmp'] : []),
+    ...(file ? [`--body-file=${shellQuote(file)}`] : []),
+    ...(body ? [`--body-data=${shellQuote(body)}`] : []),
+    '-O -',
+    shellQuote(url),
+  ]
+  return [...(parts ? wgetFormFile(parts) : []), `wget ${options.join(' \\\n  ')}`].join('\n')
+}
+
 export const SNIPPET_LANGUAGES = [
   { id: 'curl', label: 'cURL', generate: generateCurl },
   { id: 'javascript', label: 'JavaScript', generate: generateJavaScript },
+  { id: 'axios', label: 'JavaScript (axios)', generate: generateAxios },
+  { id: 'node', label: 'Node.js (http)', generate: generateNode },
   { id: 'python', label: 'Python', generate: generatePython },
+  { id: 'httpx', label: 'Python (httpx)', generate: generateHttpx },
   { id: 'go', label: 'Go', generate: generateGo },
   { id: 'java', label: 'Java', generate: generateJava },
+  { id: 'okhttp', label: 'Java (OkHttp)', generate: generateOkHttp },
   { id: 'kotlin', label: 'Kotlin', generate: generateKotlin },
   { id: 'csharp', label: 'C#', generate: generateCSharp },
+  { id: 'restsharp', label: 'C# (RestSharp)', generate: generateRestSharp },
   { id: 'php', label: 'PHP', generate: generatePhp },
+  { id: 'guzzle', label: 'PHP (Guzzle)', generate: generateGuzzle },
   { id: 'ruby', label: 'Ruby', generate: generateRuby },
   { id: 'swift', label: 'Swift', generate: generateSwift },
   { id: 'rust', label: 'Rust', generate: generateRust },
   { id: 'dart', label: 'Dart', generate: generateDart },
   { id: 'powershell', label: 'PowerShell', generate: generatePowerShell },
+  { id: 'httpie', label: 'HTTPie', generate: generateHttpie },
+  { id: 'wget', label: 'wget', generate: generateWget },
 ]
 
 const LANGUAGE_KEY = 'gostman.codeLanguage'
