@@ -30,6 +30,16 @@
         "full": "Enter the MCP server URL",
         "medium": "MCP server URL",
         "short": "URL"
+      },
+      "tcp": {
+        "full": "Enter host:port, for example localhost:9000",
+        "medium": "host:port",
+        "short": "host:port"
+      },
+      "udp": {
+        "full": "Enter host:port, for example localhost:9000",
+        "medium": "host:port",
+        "short": "host:port"
       }
     },
     "send": "Send",
