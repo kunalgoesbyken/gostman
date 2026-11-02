@@ -2,11 +2,11 @@ import { OPERATORS, operatorOf, parseAssertions, serializeAssertions } from '../
 import { formatBytes } from '../byteSize'
 import { mayBeSpec } from '../openapiSpec'
 import { normalizeRequest } from '../request'
-import { MAX_EXAMPLES, parseExamples, serializeExamples } from '../examples'
+import { ENCODING_UTF8, MAX_EXAMPLES, parseExamples, serializeExamples } from '../examples'
 import { serializeRows } from '../rows'
 import { AI_TEXT } from '../aiText'
 import { describeRequest, describeResponse, maskedUrl } from './context'
-import { SCRIPT_API, SHAPES, fence, prompt } from './prompts'
+import { SCRIPT_API, SHAPES, fence, prompt, replyLanguageRule } from './prompts'
 import { ReplyError, objectsIn, parseModelObject, requireContent, stringsIn, textField } from './reply'
 import { BODY_TYPES, METHODS, SCHEMAS } from './schemas'
 
@@ -366,6 +366,7 @@ const commitTask = {
   refuse: (input) => (input.diff ? '' : AI_TEXT.tasks.commit.nothing),
   build: (_source, input) => prompt(
     'Write a Git commit message for this change to an API workspace. The files are YAML: requests, folders and environments. Use an imperative first line of at most 72 characters, then, only if it helps, a blank line and a short body. Reply with {"message": string}.',
+    replyLanguageRule(),
     fence('staged-diff', input.diff.slice(0, COMMIT_DIFF_LIMIT)),
   ),
   parse: (text) => {
@@ -391,7 +392,7 @@ function mockExample(raw) {
     status,
     headers,
     body: textField(raw.body, MOCK_BODY_LIMIT),
-    bodyEncoding: 'utf8',
+    bodyEncoding: ENCODING_UTF8,
     contentType: textField(raw.contentType, HEADER_TEXT_LIMIT).trim(),
     isDefault: false,
   }
@@ -413,6 +414,7 @@ const mockTask = {
   ),
   build: (source, input) => prompt(
     `Write up to ${MOCK_EXAMPLE_LIMIT} example responses that a mock server can return for this request, covering the success case and the likely errors. Base them on the notes below, which may be a description or an OpenAPI document, and on the captured response when one is given. Reply with {"examples": [{"name": string, "status": number, "contentType": string, "headers": [{"key": string, "value": string}], "body": string}]}.`,
+    replyLanguageRule(),
     fence('request', describeRequest(source.request)),
     fence('notes', input.text),
     fence('captured-response', describeResponse(source.response, input.includeValues)),

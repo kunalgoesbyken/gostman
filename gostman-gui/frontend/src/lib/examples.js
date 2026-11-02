@@ -7,7 +7,7 @@ export const MAX_EXAMPLES = 20
 const MAX_BODY_BYTES = 2 * 1024 * 1024
 const MAX_NAME_LENGTH = 120
 const ENCODING_BASE64 = 'base64'
-const ENCODING_UTF8 = 'utf8'
+export const ENCODING_UTF8 = 'utf8'
 const DEFAULT_STATUS = 200
 const UNSAVED_HEADERS = ['set-cookie', 'authorization', 'proxy-authenticate', 'www-authenticate']
 

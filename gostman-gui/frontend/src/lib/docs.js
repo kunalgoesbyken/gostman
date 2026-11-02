@@ -295,7 +295,7 @@ function summaryOf(requestCount, folderCount) {
 
 const ACCENT_PATTERN = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
 const LOGO_PATTERN = /^data:image\/(?:png|jpeg|gif|webp|svg\+xml);base64,[A-Za-z0-9+/]+={0,2}$/
-const VERSION_HREF_PATTERN = /^[A-Za-z0-9._/-]+$/
+const VERSION_HREF_PATTERN = /^[A-Za-z0-9._%/-]+$/
 const LOGO_LIMIT = 400000
 const VERSION_LIMIT = 200
 

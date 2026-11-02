@@ -1,3 +1,5 @@
+import { activeLanguage } from '../i18n/core'
+
 const FENCE_CLOSE = '</data'
 const FENCE_ESCAPED = '<\\/data'
 
@@ -13,6 +15,8 @@ export const fence = (name, content) => {
   const text = typeof content === 'string' ? content : JSON.stringify(content, null, 2)
   return `<data name="${name}">\n${text.split(FENCE_CLOSE).join(FENCE_ESCAPED)}\n</data>`
 }
+
+export const replyLanguageRule = () => `Write the text you author, such as names, messages and descriptions, in the language with the code "${activeLanguage()}". Keep identifiers, header names, JSON keys and API content as the API would send them.`
 
 export const prompt = (task, ...blocks) => ({ system: SYSTEM_RULES, user: [task, ...blocks].join('\n\n') })
 

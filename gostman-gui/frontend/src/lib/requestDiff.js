@@ -1,7 +1,7 @@
 import YAML from 'js-yaml'
 import { diffLines, withContext } from './lineDiff'
 
-export const STATUS = { added: 'added', removed: 'removed', changed: 'changed' }
+const STATUS = { added: 'added', removed: 'removed', changed: 'changed' }
 
 const ORDER = [
   'name', 'method', 'url', 'queryParams', 'headers', 'auth', 'bodyType', 'body', 'graphqlQuery', 'graphqlVariables',

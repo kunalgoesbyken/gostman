@@ -8,8 +8,10 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"net/url"
 	"regexp"
 	"strings"
+	"unicode"
 
 	"github.com/kunalgoesbyken/gostman/gitutil"
 	"github.com/kunalgoesbyken/gostman/runner"
@@ -25,7 +27,6 @@ const (
 
 var (
 	docsAccent    = regexp.MustCompile(`^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$`)
-	docsUnsafeRef = regexp.MustCompile(`[^A-Za-z0-9._-]+`)
 	logoTypes     = map[string]string{".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif", ".webp": "image/webp", ".svg": "image/svg+xml"}
 )
 
@@ -122,7 +123,13 @@ func (d documenting) versioned() bool {
 }
 
 func versionDirectory(ref string) string {
-	return strings.Trim(docsUnsafeRef.ReplaceAllString(ref, "-"), ".-")
+	safe := strings.Map(func(character rune) rune {
+		if unicode.IsLetter(character) || unicode.IsDigit(character) || strings.ContainsRune("._-", character) {
+			return character
+		}
+		return '-'
+	}, ref)
+	return strings.Trim(safe, ".-")
 }
 
 func (d documenting) resolveRefs() ([]string, error) {
@@ -147,7 +154,7 @@ func (d documenting) versionLinks(refs []string, current string) []docsVersion {
 	links := make([]docsVersion, len(refs))
 	for i, ref := range refs {
 		directory := versionDirectory(ref)
-		links[i] = docsVersion{Label: ref, Href: "../" + directory + "/" + docsPage, Current: directory == current}
+		links[i] = docsVersion{Label: ref, Href: "../" + url.PathEscape(directory) + "/" + docsPage, Current: directory == current}
 	}
 	return links
 }
@@ -200,7 +207,7 @@ func (d documenting) buildVersions(stdout io.Writer) error {
 		}
 		fmt.Fprintf(stdout, "Wrote %s (%d bytes).\n", filepath.Join(target, docsPage), len(page))
 	}
-	latest := versionDirectory(refs[len(refs)-1]) + "/" + docsPage
+	latest := url.PathEscape(versionDirectory(refs[len(refs)-1])) + "/" + docsPage
 	return os.WriteFile(filepath.Join(d.output, docsPage), []byte(fmt.Sprintf(redirectPage, latest)), docsPermissions)
 }
 

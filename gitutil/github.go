@@ -6,13 +6,13 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"regexp"
 	"strings"
+	"unicode"
 
 	"github.com/kunalgoesbyken/gostman/childproc"
 )
 
-var repositoryName = regexp.MustCompile(`^(?:[A-Za-z0-9][A-Za-z0-9-]{0,38}/)?[A-Za-z0-9._-]{1,100}$`)
+const repositoryNameLimit = 140
 
 func GitHubCLIInstalled() bool {
 	_, err := exec.LookPath("gh")
@@ -20,8 +20,11 @@ func GitHubCLIInstalled() bool {
 }
 
 func ValidRepositoryName(name string) error {
-	if !repositoryName.MatchString(name) || strings.HasSuffix(name, ".git") || name == "." || name == ".." {
-		return errors.New("a repository name uses letters, digits, dots, dashes and underscores, optionally after an owner and a slash")
+	if name == "" || len(name) > repositoryNameLimit || strings.HasPrefix(name, "-") || strings.Count(name, "/") > 1 {
+		return errors.New("a repository name is one name, optionally after an owner and a slash, and does not start with a dash")
+	}
+	if strings.IndexFunc(name, func(character rune) bool { return !unicode.IsPrint(character) || unicode.IsSpace(character) }) >= 0 {
+		return errors.New("a repository name cannot contain spaces or control characters")
 	}
 	return nil
 }

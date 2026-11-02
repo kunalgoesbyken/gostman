@@ -1,7 +1,7 @@
 export const LANE_WIDTH = 14
 export const ROW_HEIGHT = 44
 export const NODE_RADIUS = 4
-export const LANE_COLORS = [
+const LANE_COLORS = [
   'hsl(var(--primary))',
   'hsl(var(--success))',
   'hsl(var(--warning))',
@@ -15,10 +15,6 @@ const firstFree = (lanes) => {
   return free < 0 ? lanes.length : free
 }
 
-const place = (lanes, index, hash) => {
-  lanes[index] = hash
-}
-
 function trimTail(lanes) {
   while (lanes.length > 0 && lanes[lanes.length - 1] === null) lanes.pop()
 }
@@ -30,26 +26,26 @@ export function layoutGraph(commits) {
     let node = lanes.indexOf(commit.hash)
     if (node < 0) {
       node = firstFree(lanes)
-      place(lanes, node, commit.hash)
+      lanes[node] = commit.hash
     }
     const merging = []
     lanes.forEach((hash, index) => {
       if (hash === commit.hash && index !== node) merging.push(index)
     })
-    merging.forEach((index) => place(lanes, index, null))
+    merging.forEach((index) => { lanes[index] = null })
 
     const parents = commit.parents ?? []
     const parentLanes = []
     if (parents.length === 0) {
-      place(lanes, node, null)
+      lanes[node] = null
     } else {
-      place(lanes, node, parents[0])
+      lanes[node] = parents[0]
       parentLanes.push(node)
       parents.slice(1).forEach((parent) => {
         let index = lanes.indexOf(parent)
         if (index < 0) {
           index = firstFree(lanes)
-          place(lanes, index, parent)
+          lanes[index] = parent
         }
         parentLanes.push(index)
       })
