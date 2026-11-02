@@ -17,9 +17,15 @@ export const PROXY_MODES = [
   proxyMode(PROXY_CUSTOM, 'custom'),
 ]
 
+export const IP_FAMILIES = [
+  { value: '', get label() { return NETWORK_TEXT.ipFamilies.auto } },
+  { value: '4', get label() { return NETWORK_TEXT.ipFamilies.v4 } },
+  { value: '6', get label() { return NETWORK_TEXT.ipFamilies.v6 } },
+]
+
 export const BLANK_CERTIFICATE = { host: '', certFile: '', keyFile: '', passphrase: '', passphraseSaved: false }
 
-export const DEFAULT_SETTINGS = { proxyMode: PROXY_SYSTEM, proxyUrl: '', proxyBypass: '', certificates: [], caFile: '' }
+export const DEFAULT_SETTINGS = { proxyMode: PROXY_SYSTEM, proxyUrl: '', proxyBypass: '', certificates: [], caFile: '', resolve: [], ipFamily: '' }
 
 const asText = (value) => (typeof value === 'string' ? value : '')
 
@@ -38,6 +44,8 @@ export function normalizeSettings(raw) {
     proxyBypass: asText(raw?.proxyBypass),
     certificates: Array.isArray(raw?.certificates) ? raw.certificates.map(toCertificate) : [],
     caFile: asText(raw?.caFile),
+    resolve: Array.isArray(raw?.resolve) ? raw.resolve.filter((line) => typeof line === 'string') : [],
+    ipFamily: IP_FAMILIES.some((family) => family.value === raw?.ipFamily) ? raw.ipFamily : '',
   }
 }
 
@@ -45,4 +53,4 @@ const savedCertificate = (certificate) => ({ ...certificate, passphrase: '', pas
 
 export const withoutPassphrases = (settings) => ({ ...settings, certificates: settings.certificates.map(savedCertificate) })
 
-export const hasCollectionNetwork = (status) => Boolean(status && (status.proxy || status.noProxy || status.ca || status.certificates?.length || status.error))
+export const hasCollectionNetwork = (status) => Boolean(status && (status.proxy || status.noProxy || status.ca || status.resolve?.length || status.ipVersion || status.certificates?.length || status.error))

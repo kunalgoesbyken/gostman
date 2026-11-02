@@ -39,6 +39,20 @@ func (f *fileList) Set(path string) error {
 	return nil
 }
 
+type stringList []string
+
+func (l *stringList) String() string {
+	return strings.Join(*l, ",")
+}
+
+func (l *stringList) Set(value string) error {
+	if strings.TrimSpace(value) == "" {
+		return errors.New("give a value")
+	}
+	*l = append(*l, value)
+	return nil
+}
+
 type certificateFiles struct {
 	host string
 	cert string
@@ -85,6 +99,9 @@ type networkSettings struct {
 	passphraseEnv string
 	proxy         string
 	bypass        string
+	resolve       stringList
+	onlyIPv4      bool
+	onlyIPv6      bool
 	advice        engine.Advice
 }
 
@@ -96,6 +113,9 @@ func networkFlags(flags *flag.FlagSet) *networkSettings {
 	flags.StringVar(&settings.passphraseEnv, "client-cert-pass-env", "", "")
 	flags.StringVar(&settings.proxy, "proxy", "", "")
 	flags.StringVar(&settings.bypass, "noproxy", "", "")
+	flags.Var(&settings.resolve, "resolve", "")
+	flags.BoolVar(&settings.onlyIPv4, "4", false, "")
+	flags.BoolVar(&settings.onlyIPv6, "6", false, "")
 	return settings
 }
 
@@ -103,6 +123,8 @@ func (s *networkSettings) check() error {
 	switch {
 	case s.certificates.unscoped == "" && s.key != "":
 		return errors.New("--client-key <file> belongs to --client-cert <file>")
+	case s.onlyIPv4 && s.onlyIPv6:
+		return errors.New("-4 and -6 cannot be combined")
 	case s.bypass != "" && s.proxy == "":
 		return errors.New("--noproxy lists hosts that skip --proxy; with the HTTPS_PROXY environment variable, use NO_PROXY")
 	}
@@ -121,7 +143,13 @@ func (s *networkSettings) passphrase() (string, error) {
 }
 
 func (s *networkSettings) files() engine.NetworkFiles {
-	files := engine.NetworkFiles{CAFiles: s.authorities}
+	files := engine.NetworkFiles{CAFiles: s.authorities, Resolve: s.resolve}
+	switch {
+	case s.onlyIPv4:
+		files.IPFamily = engine.IPv4
+	case s.onlyIPv6:
+		files.IPFamily = engine.IPv6
+	}
 	if s.proxy != "" {
 		files.ProxyMode, files.ProxyURL, files.ProxyBypass, files.ProxySource = engine.ProxyCustom, s.proxy, s.bypass, "the --proxy flag"
 	}

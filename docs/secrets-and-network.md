@@ -232,6 +232,12 @@ A client certificate is presented only to its host; use `*.example.com` to cover
 
 Use **Remove certificate** to delete a row.
 
+### Name resolution
+
+**Host overrides** in Network settings send a host to a fixed address without touching DNS or the hosts file, as `curl --resolve` does. Write one per line as `host:port:address`, for example `api.example.com:443:203.0.113.10`; `*` as the port matches any port, and an IPv6 address may be written in brackets. The request keeps its original URL and `Host` header, and TLS still verifies the certificate against the host name. Later lines win over earlier ones. **IP version** limits connections to IPv4 or IPv6; with a host that has no address of that kind, the request fails with a connection error.
+
+The overrides apply to direct connections. With a proxy, the connection to the proxy is what they affect. The web app cannot use them: its relay refuses private addresses and has no per-user settings.
+
 ### Network settings for a collection
 
 A workspace folder can carry its own proxy and certificates in the `network` section of `gostman.yaml`, so everyone who opens the collection gets them. Paths are relative to the folder and cannot leave it. Write the section by hand:
@@ -247,6 +253,9 @@ network:
     - host: "*.mtls.example.com"
       cert: certs/client.pem
       key: certs/client-key.pem
+  resolve:
+    - api.example.com:443:203.0.113.10
+  ipVersion: 4
 ```
 
 | Field | Effect |
@@ -255,6 +264,8 @@ network:
 | `noProxy` | hosts that skip the proxy, added to the ones in Network settings |
 | `ca` | a PEM or DER file trusted in addition to the system's and Network settings' |
 | `certificates` | client certificates by host, in the same formats as above; they are tried before the ones in Network settings |
+| `resolve` | host overrides as `host:port:address`, added to the ones in Network settings; see [Name resolution](#name-resolution) |
+| `ipVersion` | `4` or `6` to connect over that IP version only |
 
 Never put a passphrase in `gostman.yaml`. In the desktop app, **Network settings** lists the collection's section under **This collection (gostman.yaml)**, with a **Passphrase** field for each certificate that keeps the passphrase in the system keychain for this folder. In the command line, pass `--client-cert-pass-env`.
 
@@ -262,4 +273,4 @@ A folder you did not create opens as restricted, and its `network` section is no
 
 ### In the command line
 
-The command line does not read the desktop settings. `gostman run`, `send`, `load` and `mcp` take the same proxy and certificates as flags: `--cacert`, `--client-cert` with `--client-key`, as `host=cert,key` or `host=file.p12`, `--client-cert-pass-env NAME` for passphrases, `--proxy` and `--noproxy`. Without `--proxy` they use the `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY` environment variables. A workspace folder's `network` section is applied as well, and the flags win over it. See [Proxies and certificates](ci.md#proxies-and-certificates).
+The command line does not read the desktop settings. `gostman run`, `send`, `load` and `mcp` take the same proxy and certificates as flags: `--cacert`, `--client-cert` with `--client-key`, as `host=cert,key` or `host=file.p12`, `--client-cert-pass-env NAME` for passphrases, `--proxy` and `--noproxy`, `--resolve host:port:address` (repeatable) and `-4` or `-6`. Without `--proxy` they use the `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY` environment variables. A workspace folder's `network` section is applied as well, and the flags win over it. See [Proxies and certificates](ci.md#proxies-and-certificates).

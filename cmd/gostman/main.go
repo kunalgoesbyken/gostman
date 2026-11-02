@@ -128,6 +128,9 @@ run
                         which are used otherwise
   --noproxy <hosts>     comma-separated hosts that skip --proxy; *.example.com
                         matches subdomains
+  --resolve <h:p:ip>   connect host:port to this address instead of resolving
+                        it, like curl --resolve (repeatable; * for any port)
+  -4, -6                connect over IPv4 only or IPv6 only
                         These also apply to gRPC, OAuth 2 token requests and
                         sendRequest in scripts. A workspace folder's
                         gostman.yaml network section is applied first; these

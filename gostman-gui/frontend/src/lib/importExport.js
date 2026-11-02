@@ -500,6 +500,7 @@ function sanitizeAuth(raw, types = AUTH_TYPES) {
 const OPTION_COUNTS = ['timeoutMs', 'streamMaxEvents', 'streamMaxSeconds']
 const OPTION_FLAGS = ['noFollowRedirects', 'stream', 'streamReconnect', 'skipCookies', 'discardCookies']
 const OPTION_TEXTS = ['socketIoPath', 'socketIoAuth']
+const HTTP_VERSIONS = ['', '1.1', '2']
 
 function positiveCount(value) {
   const count = Math.trunc(Number(value))
@@ -512,6 +513,7 @@ function sanitizeOptions(raw) {
     ...Object.fromEntries(OPTION_COUNTS.map((key) => [key, positiveCount(options[key])])),
     ...Object.fromEntries(OPTION_FLAGS.map((key) => [key, options[key] === true])),
     ...pickStrings(options, OPTION_TEXTS),
+    httpVersion: HTTP_VERSIONS.includes(options.httpVersion) ? options.httpVersion : '',
     insecureTLS: false,
   }
 }

@@ -44,6 +44,7 @@ const DEFAULT_OPTIONS = {
   discardCookies: false,
   socketIoPath: '',
   socketIoAuth: '',
+  httpVersion: '',
 }
 
 const DEFAULT_REQUEST = {

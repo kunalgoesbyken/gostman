@@ -20,14 +20,25 @@ type NetworkFiles struct {
 	ProxySource  string
 	CAFiles      []string
 	Certificates []CertificateFiles
+	Resolve      []string
+	IPFamily     string
 }
 
 func (f NetworkFiles) IsEmpty() bool {
-	return f.ProxyMode == "" && strings.TrimSpace(f.ProxyBypass) == "" && len(f.CAFiles) == 0 && len(f.Certificates) == 0
+	return f.ProxyMode == "" && strings.TrimSpace(f.ProxyBypass) == "" && len(f.CAFiles) == 0 && len(f.Certificates) == 0 && len(f.Resolve) == 0 && f.IPFamily == ""
 }
 
 func (f NetworkFiles) Read(read FileReader) (NetworkConfig, error) {
 	config := NetworkConfig{ProxyMode: f.ProxyMode, ProxyURL: f.ProxyURL, ProxyBypass: f.ProxyBypass, ProxySource: f.ProxySource}
+	resolutions, err := ParseResolutions(f.Resolve)
+	if err != nil {
+		return NetworkConfig{}, err
+	}
+	family, err := NormalizeIPFamily(f.IPFamily)
+	if err != nil {
+		return NetworkConfig{}, err
+	}
+	config.Resolve, config.IPFamily = resolutions, family
 	for _, path := range f.CAFiles {
 		authorities, err := readAuthorityFile(read, path)
 		if err != nil {

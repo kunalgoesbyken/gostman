@@ -72,11 +72,17 @@ function curlBody({ body, file, parts }) {
   return body ? [`--data-raw ${shellQuote(body)}`] : []
 }
 
+function curlVersionFlag(httpVersion, url) {
+  if (httpVersion === '1.1') return ' --http1.1'
+  if (httpVersion !== '2') return ''
+  return url.startsWith('http://') ? ' --http2-prior-knowledge' : ' --http2'
+}
+
 function generateCurl(request) {
   const { method, url, headers, body } = request
   const methodFlag = method === 'HEAD' ? '--head' : `-X ${shellWord(method)}`
   return [
-    `curl ${methodFlag}${CURL_GLOB_CHARACTERS.test(url) ? ' --globoff' : ''} ${shellQuote(url)}`,
+    `curl ${methodFlag}${CURL_GLOB_CHARACTERS.test(url) ? ' --globoff' : ''}${curlVersionFlag(request.httpVersion, url)} ${shellQuote(url)}`,
     ...curlHeaderLines(headers, body).map((line) => `-H ${shellQuote(line)}`),
     ...curlBody(request),
   ].join(' \\\n  ')
@@ -586,6 +592,7 @@ export function generateAllSnippets(prepared) {
   const request = {
     method: prepared.method,
     url: prepared.url,
+    httpVersion: prepared.httpVersion,
     headers: upload.parts ? headers.filter((header) => !isContentType(header)) : headers,
     body: upload.file || upload.parts ? '' : prepared.body || '',
     ...upload,

@@ -32,12 +32,16 @@ type Settings struct {
 	ProxyBypass  string             `json:"proxyBypass"`
 	Certificates []CertificateFiles `json:"certificates"`
 	CAFile       string             `json:"caFile"`
+	Resolve      []string           `json:"resolve"`
+	IPFamily     string             `json:"ipFamily"`
 }
 
 type CollectionNetwork struct {
 	Proxy        string             `json:"proxy"`
 	NoProxy      string             `json:"noProxy"`
 	CA           string             `json:"ca"`
+	Resolve      []string           `json:"resolve"`
+	IPVersion    string             `json:"ipVersion"`
 	Certificates []CertificateFiles `json:"certificates"`
 	Active       bool               `json:"active"`
 	Restricted   bool               `json:"restricted"`
@@ -113,6 +117,8 @@ func globalConfig(settings Settings) (engine.NetworkConfig, error) {
 		ProxyURL:     settings.ProxyURL,
 		ProxyBypass:  settings.ProxyBypass,
 		Certificates: certificateFiles(settings.Certificates),
+		Resolve:      settings.Resolve,
+		IPFamily:     settings.IPFamily,
 	}
 	if settings.CAFile != "" {
 		files.CAFiles = []string{settings.CAFile}
@@ -143,7 +149,7 @@ func describeCollection(folder *workspace.Workspace) (string, CollectionNetwork,
 	}
 	network, err := folder.Network()
 	memory, _ := recallWorkspace(folder.Root())
-	status := CollectionNetwork{Proxy: network.Proxy, NoProxy: network.NoProxy, CA: network.CA, Restricted: !memory.Trusted}
+	status := CollectionNetwork{Proxy: network.Proxy, NoProxy: network.NoProxy, CA: network.CA, Resolve: network.Resolve, IPVersion: network.IPVersion, Restricted: !memory.Trusted}
 	if err != nil {
 		status.Error = err.Error()
 	}

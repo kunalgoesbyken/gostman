@@ -42,6 +42,8 @@ type NetworkConfig struct {
 	Authorities  []*x509.Certificate
 	Certificates []ClientCertificate
 	Advice       Advice
+	Resolve      []HostResolution
+	IPFamily     string
 }
 
 type hostCertificate struct {
@@ -53,6 +55,7 @@ type transportKey struct {
 	blockPrivate bool
 	insecureTLS  bool
 	certificate  int
+	version      string
 }
 
 type Network struct {
@@ -61,6 +64,8 @@ type Network struct {
 	certificates []hostCertificate
 	roots        *x509.CertPool
 	advice       Advice
+	resolutions  []HostResolution
+	family       string
 
 	mu         sync.Mutex
 	transports map[transportKey]*http.Transport
@@ -78,6 +83,10 @@ func (c NetworkConfig) With(layer NetworkConfig) NetworkConfig {
 	}
 	c.Authorities = append(slices.Clip(c.Authorities), layer.Authorities...)
 	c.Certificates = append(slices.Clip(layer.Certificates), c.Certificates...)
+	c.Resolve = append(slices.Clip(c.Resolve), layer.Resolve...)
+	if layer.IPFamily != "" {
+		c.IPFamily = layer.IPFamily
+	}
 	return c
 }
 
@@ -86,7 +95,12 @@ func NewNetwork(config NetworkConfig) (*Network, error) {
 	if err != nil {
 		return nil, err
 	}
-	network := &Network{proxy: proxy, proxySource: proxySourceFor(config), roots: rootsFor(config.Authorities), advice: config.Advice, transports: map[transportKey]*http.Transport{}}
+	network := &Network{proxy: proxy, proxySource: proxySourceFor(config), roots: rootsFor(config.Authorities), advice: config.Advice, resolutions: config.Resolve, transports: map[transportKey]*http.Transport{}}
+	family, err := NormalizeIPFamily(config.IPFamily)
+	if err != nil {
+		return nil, err
+	}
+	network.family = family
 	for _, entry := range config.Certificates {
 		host := strings.ToLower(strings.TrimSpace(entry.Host))
 		if host == "" {
@@ -207,8 +221,7 @@ func (n *Network) transport(key transportKey) *http.Transport {
 	}
 	transport := &http.Transport{
 		Proxy:                 n.proxy,
-		DialContext:           dialer.DialContext,
-		ForceAttemptHTTP2:     true,
+		DialContext:           n.dialFunc(key.blockPrivate),
 		MaxIdleConns:          idleConnections,
 		MaxIdleConnsPerHost:   idleConnectionsPerHost,
 		IdleConnTimeout:       90 * time.Second,
@@ -216,9 +229,9 @@ func (n *Network) transport(key transportKey) *http.Transport {
 		ExpectContinueTimeout: time.Second,
 		TLSClientConfig:       n.tlsConfig(key),
 	}
+	protocolsFor(key.version, transport)
 	if key.blockPrivate {
 		transport.Proxy = nil
-		transport.DialContext = guardedDial
 	}
 	n.transports[key] = transport
 	return transport
@@ -228,6 +241,7 @@ type route struct {
 	network      *Network
 	blockPrivate bool
 	insecureTLS  bool
+	httpVersion  string
 	refusal      func(host string) error
 }
 
@@ -235,7 +249,7 @@ func (r route) RoundTrip(request *http.Request) (*http.Response, error) {
 	if err := r.refusal(request.URL.Hostname()); err != nil {
 		return nil, err
 	}
-	key := transportKey{r.blockPrivate, r.insecureTLS, r.network.certificateFor(request.URL.Hostname())}
+	key := transportKey{r.blockPrivate, r.insecureTLS, r.network.certificateFor(request.URL.Hostname()), r.httpVersion}
 	response, err := r.network.transport(key).RoundTrip(request)
 	if err == nil {
 		return response, nil
@@ -267,15 +281,36 @@ func (p Policy) network() *Network {
 	return p.Network
 }
 
-func (p Policy) route(insecureTLS bool) route {
-	return route{p.network(), p.BlockPrivate, insecureTLS, p.refusal}
+func (p Policy) route(options Options) route {
+	return route{p.network(), p.BlockPrivate, options.InsecureTLS, options.HTTPVersion, p.refusal}
 }
 
 func (p Policy) Transport(insecureTLS bool) http.RoundTripper {
-	return p.route(insecureTLS)
+	return p.route(Options{InsecureTLS: insecureTLS})
 }
 
 func (p Policy) TLSConfig(host string, insecureTLS bool) *tls.Config {
 	network := p.network()
-	return network.tlsConfig(transportKey{p.BlockPrivate, insecureTLS, network.certificateFor(host)})
+	return network.tlsConfig(transportKey{p.BlockPrivate, insecureTLS, network.certificateFor(host), ""})
+}
+
+const (
+	HTTPVersionAuto = ""
+	HTTPVersion1    = "1.1"
+	HTTPVersion2    = "2"
+)
+
+func protocolsFor(version string, transport *http.Transport) {
+	var protocols http.Protocols
+	switch version {
+	case HTTPVersion1:
+		protocols.SetHTTP1(true)
+	case HTTPVersion2:
+		protocols.SetHTTP2(true)
+		protocols.SetUnencryptedHTTP2(true)
+	default:
+		protocols.SetHTTP1(true)
+		protocols.SetHTTP2(true)
+	}
+	transport.Protocols = &protocols
 }

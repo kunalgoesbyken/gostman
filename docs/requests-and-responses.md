@@ -202,6 +202,7 @@ Each assertion row has a checkbox that turns it on or off, an Expression, a Chec
 | --- | --- |
 | Timeout (ms) | Empty uses the **Default timeout** from Preferences, which is 30 seconds unless you change it. |
 | Follow redirects | On by default. |
+| HTTP version | Automatic by default: HTTP/2 when an HTTPS server offers it, HTTP/1.1 otherwise. **HTTP/1.1** never uses HTTP/2. **HTTP/2** sends HTTP/2 only: an HTTPS server that does not offer it fails the request, and a plain `http://` URL uses HTTP/2 with prior knowledge (cURL's `--http2-prior-knowledge`). The Timeline shows the protocol that was used. |
 | Verify TLS certificates | On by default. Clear it to accept certificates that fail verification. |
 | Send cookies from the cookie jar | On by default. Clear it to send the request without stored cookies. |
 | Store cookies the response sets | On by default. Clear it to leave the cookie jar unchanged. |

@@ -4,15 +4,17 @@ import { Button, IconButton } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Field } from "./ui/field"
 import { Input } from "./ui/input"
+import { Textarea } from "./ui/textarea"
 import { SectionLabel } from "./ui/panel"
 import { Select } from "./ui/select"
 import { DesktopOnly } from "./DesktopOnly"
-import { BLANK_CERTIFICATE, PROXY_CUSTOM, PROXY_MODES, PROXY_NONE, hasCollectionNetwork } from "../lib/network"
+import { BLANK_CERTIFICATE, IP_FAMILIES, PROXY_CUSTOM, PROXY_MODES, PROXY_NONE, hasCollectionNetwork } from "../lib/network"
 import { NETWORK_TEXT as TEXT } from "../lib/networkText"
 
 const CERTIFICATE_COLUMNS = "grid grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)_minmax(0,1.25fr)_minmax(0,1fr)_1.75rem] items-center gap-2"
 const COLLECTION_COLUMNS = "grid grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)_minmax(0,1fr)_auto] items-center gap-2"
 
+const LINE_BREAK = "\n"
 const messageOf = (error) => error?.message || String(error)
 
 function PathField({ label, path, onPick, onClear }) {
@@ -124,6 +126,27 @@ function SettingsForm({ draft, onChange, onPick }) {
         </Field>
       )}
 
+      <SectionLabel className="pt-3">{TEXT.resolution}</SectionLabel>
+      <Field label={TEXT.resolve}>
+        <Textarea
+          value={draft.resolve.join(LINE_BREAK)}
+          rows={3}
+          placeholder={TEXT.resolvePlaceholder}
+          spellCheck={false}
+          onChange={(event) => update({ resolve: event.target.value.split(LINE_BREAK) })}
+          dir="ltr"
+          className="font-mono"
+        />
+      </Field>
+      <p className="text-xs text-muted-foreground">{TEXT.resolveNote}</p>
+      <Field label={TEXT.ipFamily}>
+        <Select value={draft.ipFamily} onChange={(event) => update({ ipFamily: event.target.value })}>
+          {IP_FAMILIES.map((family) => (
+            <option key={family.value} value={family.value}>{family.label}</option>
+          ))}
+        </Select>
+      </Field>
+
       <SectionLabel className="pt-3">{TEXT.certificates}</SectionLabel>
       <Field label={TEXT.caCertificate}>
         <PathField label={TEXT.caCertificate} path={draft.caFile} onPick={pickCA} onClear={() => update({ caFile: "" })} />
@@ -201,7 +224,7 @@ function CollectionSection({ actions }) {
     }
   }
   const state = status ? collectionState(status) : { text: "", className: "" }
-  const rows = status ? [[TEXT.collectionProxy, status.proxy], [TEXT.collectionBypass, status.noProxy], [TEXT.collectionCA, status.ca]].filter(([, value]) => value) : []
+  const rows = status ? [[TEXT.collectionProxy, status.proxy], [TEXT.collectionBypass, status.noProxy], [TEXT.collectionCA, status.ca], [TEXT.collectionResolve, status.resolve?.join(", ")], [TEXT.collectionIpFamily, status.ipVersion]].filter(([, value]) => value) : []
 
   return (
     <div className="flex flex-col gap-2 pt-3">

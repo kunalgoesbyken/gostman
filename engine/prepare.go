@@ -101,7 +101,7 @@ func prepareWith(r Request, expansion *substitution, stream *bodyStream) (Prepar
 		return Prepared{}, err
 	}
 
-	prepared := Prepared{Method: method, URL: target.String(), Parts: built.parts, File: built.file, body: body}
+	prepared := Prepared{Method: method, URL: target.String(), Parts: built.parts, File: built.file, HTTPVersion: r.Options.HTTPVersion, body: body}
 	if streamed {
 		prepared.stream = stream
 	}

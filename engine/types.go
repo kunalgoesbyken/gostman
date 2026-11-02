@@ -58,6 +58,8 @@ type Options struct {
 	SkipCookies    bool `json:"skipCookies"`
 	DiscardCookies bool `json:"discardCookies"`
 
+	HTTPVersion string `json:"httpVersion"`
+
 	SocketIOPath string `json:"socketIoPath"`
 	SocketIOAuth string `json:"socketIoAuth"`
 }
@@ -103,13 +105,14 @@ type PreparedPart struct {
 }
 
 type Prepared struct {
-	Method     string         `json:"method"`
-	URL        string         `json:"url"`
-	Headers    []HeaderEntry  `json:"headers"`
-	Body       string         `json:"body"`
-	Parts      []PreparedPart `json:"parts,omitempty"`
-	File       string         `json:"file,omitempty"`
-	Unresolved []string       `json:"unresolved,omitempty"`
+	Method      string         `json:"method"`
+	URL         string         `json:"url"`
+	Headers     []HeaderEntry  `json:"headers"`
+	Body        string         `json:"body"`
+	Parts       []PreparedPart `json:"parts,omitempty"`
+	File        string         `json:"file,omitempty"`
+	HTTPVersion string         `json:"httpVersion,omitempty"`
+	Unresolved  []string       `json:"unresolved,omitempty"`
 
 	body   []byte
 	stream *bodyStream

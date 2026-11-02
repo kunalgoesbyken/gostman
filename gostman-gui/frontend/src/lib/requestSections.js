@@ -64,6 +64,7 @@ export const SETTING_TLS = 'tls'
 export const SETTING_SEND_COOKIES = 'sendCookies'
 export const SETTING_STORE_COOKIES = 'storeCookies'
 export const SETTING_STREAM = 'stream'
+export const SETTING_HTTP_VERSION = 'httpVersion'
 
 const IS_CHANGED = {
   [SETTING_TIMEOUT]: (options) => options.timeoutMs > 0,
@@ -72,6 +73,7 @@ const IS_CHANGED = {
   [SETTING_SEND_COOKIES]: (options) => options.skipCookies,
   [SETTING_STORE_COOKIES]: (options) => options.discardCookies,
   [SETTING_STREAM]: (options) => options.stream,
+  [SETTING_HTTP_VERSION]: (options) => Boolean(options.httpVersion),
 }
 
 const SETTING_ORDER = Object.keys(IS_CHANGED)

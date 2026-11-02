@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"context"
 	"errors"
 	"net"
@@ -69,7 +70,7 @@ func IsBlockedAddress(err error) bool {
 	return errors.Is(err, errBlockedAddress) || errors.Is(err, errHostNotPermitted)
 }
 
-func guardedDial(ctx context.Context, network, address string) (net.Conn, error) {
+func guardedDial(ctx context.Context, network, address, family string) (net.Conn, error) {
 	host, port, err := net.SplitHostPort(address)
 	if err != nil {
 		return nil, err
@@ -86,11 +87,17 @@ func guardedDial(ctx context.Context, network, address string) (net.Conn, error)
 
 	var lastErr error
 	for _, candidate := range addresses {
+		if !matchesFamily(candidate.IP, family) {
+			continue
+		}
 		conn, err := dialer.DialContext(ctx, network, net.JoinHostPort(candidate.IP.String(), port))
 		if err == nil {
 			return conn, nil
 		}
 		lastErr = err
+	}
+	if lastErr == nil {
+		return nil, fmt.Errorf("%s has no IPv%s address", host, family)
 	}
 	return nil, lastErr
 }

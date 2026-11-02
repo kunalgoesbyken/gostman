@@ -50,6 +50,7 @@ var curlValueFlags = map[string]string{
 var curlSwitches = map[string]string{
 	"-G": "get", "--get": "get",
 	"-I": "head", "--head": "head",
+	"--http1.1": "http1", "--http2": "http2", "--http2-prior-knowledge": "http2",
 }
 
 type curlCommand struct {
@@ -154,6 +155,10 @@ func (c *curlCommand) applySwitch(kind string) {
 		c.asQuery = true
 	case "head":
 		c.request.Method = http.MethodHead
+	case "http1":
+		c.request.Options.HTTPVersion = HTTPVersion1
+	case "http2":
+		c.request.Options.HTTPVersion = HTTPVersion2
 	}
 }
 

@@ -14,6 +14,18 @@
     "proxyAddressPlaceholder": "http://user:password@proxy.example.com:8080",
     "bypass": "Bypass for hosts",
     "bypassPlaceholder": "localhost, *.internal.example.com",
+    "resolution": "Name resolution",
+    "resolve": "Host overrides",
+    "resolvePlaceholder": "api.example.com:443:203.0.113.10",
+    "resolveNote": "One override per line as host:port:address, like curl --resolve. Use * for any port. The request still carries the original host name.",
+    "ipFamily": "IP version",
+    "ipFamilies": {
+      "auto": "Automatic",
+      "v4": "IPv4 only",
+      "v6": "IPv6 only"
+    },
+    "collectionResolve": "Host overrides",
+    "collectionIpFamily": "IP version",
     "certificates": "Certificates",
     "caCertificate": "CA certificate",
     "chooseCA": "Choose the CA certificate (PEM or DER)",

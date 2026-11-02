@@ -161,7 +161,7 @@ func newExchange(ctx context.Context, r Request, policy Policy, timeline *record
 	cookies := &cookieLog{now: time.Now()}
 	client := &http.Client{
 		Jar:       newJar(sentCookies(r), cookies.now),
-		Transport: authRoute(r, outgoing.URL, timeline.wrap(policy.route(r.Options.InsecureTLS))),
+		Transport: authRoute(r, outgoing.URL, timeline.wrap(policy.route(r.Options))),
 		CheckRedirect: func(next *http.Request, via []*http.Request) error {
 			if r.Options.NoFollowRedirects {
 				return http.ErrUseLastResponse

@@ -43,14 +43,14 @@ func (p Policy) Dialer(secure bool) func(ctx context.Context, address string) (n
 			return nil, err
 		}
 		if p.BlockPrivate {
-			return guardedDial(ctx, "tcp", address)
+			return p.network().dialFunc(true)(ctx, "tcp", address)
 		}
 		via, err := p.network().proxyAddress(scheme, address)
 		if err != nil {
 			return nil, err
 		}
 		if via == nil {
-			return dialer.DialContext(ctx, "tcp", address)
+			return p.network().dialFunc(false)(ctx, "tcp", address)
 		}
 		return p.network().tunnel(ctx, via, address)
 	}

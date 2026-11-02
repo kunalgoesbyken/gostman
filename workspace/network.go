@@ -23,6 +23,8 @@ type Network struct {
 	NoProxy      string               `yaml:"noProxy" json:"noProxy"`
 	CA           string               `yaml:"ca" json:"ca"`
 	Certificates []NetworkCertificate `yaml:"certificates" json:"certificates"`
+	Resolve      []string             `yaml:"resolve,omitempty" json:"resolve,omitempty"`
+	IPVersion    string               `yaml:"ipVersion,omitempty" json:"ipVersion,omitempty"`
 }
 
 func (w *Workspace) Network() (Network, error) {
@@ -45,7 +47,7 @@ func (w *Workspace) Network() (Network, error) {
 }
 
 func (n Network) Files() engine.NetworkFiles {
-	files := engine.NetworkFiles{ProxyBypass: n.NoProxy, ProxySource: networkSource}
+	files := engine.NetworkFiles{ProxyBypass: n.NoProxy, ProxySource: networkSource, Resolve: n.Resolve, IPFamily: n.IPVersion}
 	switch proxy := strings.TrimSpace(n.Proxy); proxy {
 	case "":
 	case engine.ProxyNone, engine.ProxySystem:
