@@ -8,6 +8,7 @@
 
   [![CI](https://github.com/kunalgoesbyken/gostman/actions/workflows/ci.yml/badge.svg)](https://github.com/kunalgoesbyken/gostman/actions/workflows/ci.yml)
   [![Release](https://img.shields.io/github/v/release/kunalgoesbyken/gostman)](https://github.com/kunalgoesbyken/gostman/releases/latest)
+  [![Sponsor](https://img.shields.io/github/sponsors/kunalgoesbyken)](https://github.com/sponsors/kunalgoesbyken)
 
   <p>
     <a href="https://gostman.com/web"><strong>Open the web app</strong></a> ·

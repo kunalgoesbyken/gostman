@@ -1,11 +1,13 @@
 import { isDesktopApp } from './platform'
 import { WEB_APP_URL } from './constants'
+import { SPONSOR_URL } from './siteLinks'
 
 export const ABOUT_LINKS = [
   { id: 'website', url: WEB_APP_URL },
   { id: 'source', url: 'https://github.com/kunalgoesbyken/gostman' },
   { id: 'releases', url: 'https://github.com/kunalgoesbyken/gostman/releases' },
   { id: 'issues', url: 'https://github.com/kunalgoesbyken/gostman/issues' },
+  { id: 'sponsor', url: SPONSOR_URL },
 ]
 
 const platformOf = () => navigator.userAgentData?.platform || navigator.platform || ''

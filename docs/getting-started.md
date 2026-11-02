@@ -22,7 +22,7 @@ Download the latest build from the [releases page](https://github.com/kunalgoesb
 | Linux | `Gostman-linux-amd64.tar.gz` | Other distributions. Requires GTK 3 and WebKitGTK 4.1. |
 | Arch Linux | [`gostman-bin`](https://aur.archlinux.org/packages/gostman-bin) | Community package in the AUR. Install it with an AUR helper, for example `yay -S gostman-bin`. |
 
-The builds are not code-signed yet, so the operating system asks for confirmation the first time:
+The builds are not code-signed yet, because signing certificates cost money each year. Sponsorship through [GitHub Sponsors](https://github.com/sponsors/kunalgoesbyken) goes toward them. Until then, the operating system asks for confirmation the first time:
 
 - **Windows:** SmartScreen shows "Windows protected your PC". Choose **More info**, then **Run anyway**.
 - **macOS:** right-click Gostman in Applications, choose **Open**, then confirm.

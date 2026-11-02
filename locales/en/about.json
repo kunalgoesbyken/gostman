@@ -9,7 +9,8 @@
       "website": "Website",
       "source": "Source code",
       "releases": "Releases",
-      "issues": "Report an issue"
+      "issues": "Report an issue",
+      "sponsor": "Sponsor"
     },
     "diagnosticsHint": "Diagnostics list the version, platform and counts only. They never include requests, URLs, variables, tokens or secrets.",
     "copyDiagnostics": "Copy diagnostics",
