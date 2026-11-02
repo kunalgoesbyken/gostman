@@ -124,7 +124,7 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
           <GlobalSearch requests={requests} history={requestHistory} tabs={tabs} actions={actions} />
         </TabsContent>
         <TabsContent value={VIEW_HISTORY} className={VIEW_CLASS}>
-          <HistoryList entries={requestHistory} actions={actions} />
+          <HistoryList entries={requestHistory} folders={folders} actions={actions} />
         </TabsContent>
       </Tabs>
       {addPosition && <ContextMenu position={addPosition} title={SIDEBAR_TEXT.add} items={addItems} onClose={() => setAddPosition(null)} />}

@@ -38,6 +38,25 @@
       "days_one": "sent {{count}} day ago",
       "days_other": "sent {{count}} days ago",
       "date": "sent on {{date}}"
+    },
+    "range": "Date range",
+    "folder": "Folder",
+    "tag": "Tag",
+    "allFolders": "All folders",
+    "allTags": "All tags",
+    "groupByDate": "Group by date",
+    "ranges": {
+      "any": "Any time",
+      "today": "Today",
+      "week": "Last 7 days",
+      "month": "Last 30 days"
+    },
+    "groups": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "week": "Earlier this week",
+      "month": "Earlier this month",
+      "older": "Older"
     }
   }
 }

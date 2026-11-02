@@ -1,13 +1,17 @@
-import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react"
-import { Clock, Search, X } from "lucide-react"
+import { Fragment, memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react"
+import { CalendarDays, Clock, Search, X } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button, IconButton } from "./ui/button"
+import { Select } from "./ui/select"
 import { FeatureEmpty } from "./FeatureEmpty"
 import { MethodTag } from "./MethodTag"
 import { SearchField } from "./SearchField"
 import { useAppStore } from "../store/appStore"
 import { PANE_SIDEBAR, focusPane } from "../lib/panes"
 import { ORIENTATION, isFocusLost, moveFocus, tabStopOf } from "../lib/rovingFocus"
+import { ALL_FOLDERS, ALL_TAGS, RANGES, RANGE_ANY, filterHistory, groupByDate } from "../lib/historyFilter"
+import { buildCollectionTree, listFolders } from "../lib/collectionTree"
+import { collectTags } from "../lib/tags"
 import { formatDate } from "../lib/i18n/format"
 import { statusVariant } from "../lib/response"
 import { isRemoveKey } from "../lib/shortcuts"
@@ -94,20 +98,53 @@ function HistoryRow({ entry, isTabStop, onOpen, onDelete, onFocus }) {
   )
 }
 
-export const HistoryList = memo(function HistoryList({ entries, actions }) {
+const NO_FILTERS = { range: RANGE_ANY, folderId: ALL_FOLDERS, tag: ALL_TAGS }
+
+function HistoryFilters({ filters, onChange, folderOptions, tags, isGrouped, onGroupedChange }) {
+  const choose = (name) => (event) => onChange({ ...filters, [name]: event.target.value })
+  return (
+    <div className="flex flex-col gap-1 px-2 pb-1">
+      <div className="flex gap-1">
+        <div className="min-w-0 flex-1">
+          <Select value={filters.range} onChange={choose("range")} aria-label={HISTORY_TEXT.range}>
+            {RANGES.map((range) => <option key={range} value={range}>{HISTORY_TEXT.ranges[range]}</option>)}
+          </Select>
+        </div>
+        <IconButton label={HISTORY_TEXT.groupByDate} icon={CalendarDays} variant="outline" aria-pressed={isGrouped} onClick={() => onGroupedChange(!isGrouped)} className="h-7 w-7 shrink-0" />
+      </div>
+      <div className="grid grid-cols-2 gap-1 empty:hidden">
+        {folderOptions.length > 0 && (
+          <Select value={filters.folderId} onChange={choose("folderId")} aria-label={HISTORY_TEXT.folder}>
+            <option value={ALL_FOLDERS}>{HISTORY_TEXT.allFolders}</option>
+            {folderOptions.map(({ folder, path }) => <option key={folder.id} value={folder.id}>{path.join(" / ")}</option>)}
+          </Select>
+        )}
+        {tags.length > 0 && (
+          <Select value={filters.tag} onChange={choose("tag")} aria-label={HISTORY_TEXT.tag}>
+            <option value={ALL_TAGS}>{HISTORY_TEXT.allTags}</option>
+            {tags.map((tag) => <option key={tag} value={tag}>{tag}</option>)}
+          </Select>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export const HistoryList = memo(function HistoryList({ entries, folders, actions }) {
   const [query, setQuery] = useState("")
+  const [filters, setFilters] = useState(NO_FILTERS)
+  const [isGrouped, setIsGrouped] = useState(true)
   const [focusedId, setFocusedId] = useState(null)
   const listRef = useRef(null)
   const pendingFocusId = useRef(null)
   const deleteHistoryItem = useAppStore((s) => s.deleteHistoryItem)
 
-  const shown = useMemo(() => {
-    const needle = query.trim().toLowerCase()
-    if (!needle) return entries
-    return entries.filter((entry) => `${entry.method} ${entry.url} ${entry.statusCode || ""}`.toLowerCase().includes(needle))
-  }, [entries, query])
+  const shown = useMemo(() => filterHistory(entries, { query, ...filters }, folders, Date.now()), [entries, folders, query, filters])
+  const groups = useMemo(() => (isGrouped ? groupByDate(shown, Date.now()) : [{ key: "", entries: shown }]), [shown, isGrouped])
+  const folderOptions = useMemo(() => listFolders(buildCollectionTree(folders, [])), [folders])
+  const tags = useMemo(() => collectTags(entries), [entries])
 
-  const isSearching = query.trim() !== ""
+  const isSearching = query.trim() !== "" || Object.entries(NO_FILTERS).some(([name, none]) => filters[name] !== none)
   const tabStop = tabStopOf(shown.map((entry) => entry.id), focusedId)
 
   const removeEntry = useCallback((id) => {
@@ -135,6 +172,9 @@ export const HistoryList = memo(function HistoryList({ entries, actions }) {
   return (
     <>
       <SearchField value={query} onChange={setQuery} onKeyDown={enterResultsOnArrow} placeholder={HISTORY_TEXT.search} />
+      {entries.length > 0 && (
+        <HistoryFilters filters={filters} onChange={setFilters} folderOptions={folderOptions} tags={tags} isGrouped={isGrouped} onGroupedChange={setIsGrouped} />
+      )}
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {shown.length === 0 ? (
@@ -146,15 +186,20 @@ export const HistoryList = memo(function HistoryList({ entries, actions }) {
           />
         ) : (
           <ul ref={listRef} aria-label={SIDEBAR_TEXT.history} onKeyDown={(event) => moveFocus(event, ENTRY_KEYS)} className="py-1">
-            {shown.map((entry) => (
-              <HistoryRow
-                key={entry.id}
-                entry={entry}
-                isTabStop={entry.id === tabStop}
-                onOpen={actions.openHistoryEntry}
-                onDelete={removeEntry}
-                onFocus={setFocusedId}
-              />
+            {groups.map((group) => (
+              <Fragment key={group.key}>
+                {group.key && <li className="px-3 pb-0.5 pt-2 text-2xs font-medium text-muted-foreground">{HISTORY_TEXT.groups[group.key]}</li>}
+                {group.entries.map((entry) => (
+                  <HistoryRow
+                    key={entry.id}
+                    entry={entry}
+                    isTabStop={entry.id === tabStop}
+                    onOpen={actions.openHistoryEntry}
+                    onDelete={removeEntry}
+                    onFocus={setFocusedId}
+                  />
+                ))}
+              </Fragment>
             ))}
           </ul>
         )}
