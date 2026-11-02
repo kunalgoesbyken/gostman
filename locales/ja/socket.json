@@ -17,8 +17,6 @@
       "warning": "警告",
       "error": "エラー"
     },
-    "protocol": "プロトコル",
-    "graphql": "GraphQLサブスクリプション",
     "filter": "トピックフィルター（例：sensors/#）",
     "subscribe": "購読",
     "saved": "保存済みメッセージ",

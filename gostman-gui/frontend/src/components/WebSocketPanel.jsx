@@ -9,7 +9,7 @@ import { Select } from "./ui/select"
 import { VariableInput, VariableTextarea } from "./VariableInput"
 import { formatTime } from "../lib/i18n/format"
 import { shortcutLabel } from "../lib/platform"
-import { PROTOCOL_OPTIONS, protocolOf, usesGraphQL } from "../lib/realtime/protocols"
+import { protocolOf } from "../lib/realtime/protocols"
 import { readSavedMessages, removeMessage, saveMessage } from "../lib/realtime/savedMessages"
 import { SOCKET_TEXT } from "../lib/socketText"
 import { DIALOG_TEXT } from "../lib/dialogText"
@@ -110,21 +110,6 @@ function MessageLog({ entries, dropped }) {
         {entries.map((entry) => <LogEntry key={entry.id} entry={entry} />)}
       </ul>
     </div>
-  )
-}
-
-function ProtocolPicker({ request, disabled, onUpdateRequest }) {
-  if (usesGraphQL(request)) return <span className="shrink-0 text-xs text-muted-foreground">{SOCKET_TEXT.graphql}</span>
-  return (
-    <Select
-      aria-label={SOCKET_TEXT.protocol}
-      className="w-28 shrink-0"
-      value={request.socketProtocol || ""}
-      disabled={disabled}
-      onChange={(event) => onUpdateRequest({ socketProtocol: event.target.value })}
-    >
-      {PROTOCOL_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-    </Select>
   )
 }
 
@@ -238,7 +223,6 @@ export function WebSocketPanel({ tabId, request, variables, sockets, onUpdateReq
           <span aria-hidden="true" className={cn("h-2 w-2 rounded-full", status.dot)} />
           {status.label}
         </span>
-        <ProtocolPicker request={request} disabled={!isIdle} onUpdateRequest={onUpdateRequest} />
         <span className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground max-sm:order-last max-sm:basis-full" title={target.url || target.error}>
           {target.url || target.error}
         </span>

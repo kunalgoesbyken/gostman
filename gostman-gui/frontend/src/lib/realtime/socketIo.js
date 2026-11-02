@@ -119,7 +119,6 @@ function createSession(channel, { url, request, substitute }) {
 }
 
 export const socketIoProtocol = {
-  label: 'Socket.IO',
   get targetLabel() {
     return REALTIME_TEXT.targets.event
   },

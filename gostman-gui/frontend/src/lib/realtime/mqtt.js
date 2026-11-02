@@ -191,7 +191,6 @@ function createSession(channel, { request, substitute }) {
 }
 
 export const mqttProtocol = {
-  label: 'MQTT',
   get targetLabel() {
     return REALTIME_TEXT.targets.topic
   },

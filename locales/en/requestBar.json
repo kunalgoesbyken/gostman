@@ -3,6 +3,19 @@
     "name": "Request name",
     "untitled": "Untitled request",
     "method": "HTTP method",
+    "protocol": "Protocol",
+    "protocols": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "grpc": "gRPC",
+      "websocket": "WebSocket",
+      "sse": "Server-Sent Events",
+      "socketio": "Socket.IO",
+      "mqtt": "MQTT",
+      "soap": "SOAP",
+      "mcp": "MCP"
+    },
+    "detected": "Detected {{protocol}}",
     "url": "Request URL",
     "methodPlaceholders": {
       "grpc": {

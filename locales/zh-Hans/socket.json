@@ -17,8 +17,6 @@
       "warning": "警告",
       "error": "错误"
     },
-    "protocol": "协议",
-    "graphql": "GraphQL 订阅",
     "filter": "主题过滤器，例如 sensors/#",
     "subscribe": "订阅",
     "saved": "已保存的消息",

@@ -414,6 +414,7 @@ function LoadedWorkspace({ backend, onBack }) {
               <RequestBar
                 activeRequest={activeRequest}
                 {...fieldHandlers}
+                onUpdateRequest={updateActiveRequest}
                 onSend={actions.send}
                 onCancel={actions.cancel}
                 onSave={actions.save}

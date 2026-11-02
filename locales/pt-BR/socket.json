@@ -17,8 +17,6 @@
       "warning": "Aviso",
       "error": "Erro"
     },
-    "protocol": "Protocolo",
-    "graphql": "Assinatura GraphQL",
     "filter": "Filtro de tópico, por exemplo sensors/#",
     "subscribe": "Inscrever-se",
     "saved": "Mensagens salvas",

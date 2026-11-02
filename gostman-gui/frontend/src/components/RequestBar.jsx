@@ -1,16 +1,16 @@
-import { memo, useRef } from "react"
+import { memo, useEffect, useRef, useState } from "react"
 import { Code, Gauge, Plug, Save, Send, Unplug, X } from "lucide-react"
+import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Select } from "./ui/select"
 import { VariableInput } from "./VariableInput"
-import { HTTP_METHODS } from "../lib/constants"
 import { methodStyle } from "../lib/methodColors"
 import { useFittingText } from "../hooks/useFittingText"
 import { useShortcutLabel } from "../hooks/useShortcuts"
 import { LOAD_TEST_TEXT } from "../lib/loadTestText"
-import { GRAPHQL_METHOD } from "../lib/graphqlSchema"
-import { SOCKET_METHOD, shownMethod } from "../lib/methodLabel"
+import { shownMethod } from "../lib/methodLabel"
+import { PLAIN_METHODS, REQUEST_PROTOCOLS, hasMethodChoice, protocolIdOf, protocolUpdates } from "../lib/requestProtocols"
 import { REQUEST_BAR_TEXT as TEXT } from "../lib/requestBarText"
 import { hintWithShortcut } from "../lib/shortcuts"
 import { SOCKET_IDLE } from "../lib/socketSessions"
@@ -19,13 +19,22 @@ const CURL_PREFIX = "curl "
 
 const isCurlCommand = (text) => text.trimStart().toLowerCase().startsWith(CURL_PREFIX)
 
-const [DEFAULT_METHOD] = HTTP_METHODS
-
 const asOption = (method) => ({ value: method, label: method })
 
-function methodOptions(current, isSocket) {
-  if (isSocket) return [{ value: current === GRAPHQL_METHOD ? DEFAULT_METHOD : current, label: SOCKET_METHOD }, asOption(GRAPHQL_METHOD)]
-  return (HTTP_METHODS.includes(current) ? HTTP_METHODS : [...HTTP_METHODS, current]).map(asOption)
+const methodOptions = (current) => (PLAIN_METHODS.includes(current) ? PLAIN_METHODS : [...PLAIN_METHODS, current]).map(asOption)
+
+function useDetectedProtocol(requestId, protocolId) {
+  const previous = useRef({ requestId, protocolId })
+  const [detected, setDetected] = useState("")
+  const pickedRef = useRef(false)
+  useEffect(() => {
+    const before = previous.current
+    previous.current = { requestId, protocolId }
+    if (before.requestId !== requestId) setDetected("")
+    else if (before.protocolId !== protocolId) setDetected(pickedRef.current ? "" : protocolId)
+    pickedRef.current = false
+  }, [requestId, protocolId])
+  return [detected, () => { pickedRef.current = true }]
 }
 
 function SendButton({ loading, socketStatus, hint, onSend, onCancel, onDisconnect }) {
@@ -66,6 +75,7 @@ function ActionButton({ icon: Icon, label, hint, ...props }) {
 export const RequestBar = memo(function RequestBar({
   activeRequest,
   onMethodChange,
+  onUpdateRequest,
   onUrlChange,
   onNameChange,
   onSend,
@@ -80,6 +90,12 @@ export const RequestBar = memo(function RequestBar({
 }) {
   const isSocket = socketStatus !== null
   const method = shownMethod(activeRequest, isSocket)
+  const protocolId = protocolIdOf(activeRequest, isSocket)
+  const [detected, markPicked] = useDetectedProtocol(activeRequest.id, protocolId)
+  const chooseProtocol = (id) => {
+    markPicked()
+    onUpdateRequest(protocolUpdates(id, activeRequest))
+  }
   const urlRef = useRef(null)
   const urlPlaceholder = useFittingText(urlRef, TEXT.methodPlaceholders[method] || TEXT.urlPlaceholders)
   const sendShortcut = useShortcutLabel("sendRequest")
@@ -101,30 +117,48 @@ export const RequestBar = memo(function RequestBar({
 
   return (
     <div data-pane="address" className="flex shrink-0 flex-col gap-2 border-b border-border px-3 py-2">
-      <Input
-        placeholder={TEXT.untitled}
-        value={activeRequest.name}
-        title={activeRequest.name}
-        onChange={(event) => onNameChange(event.target.value)}
-        aria-label={TEXT.name}
-        className="border-transparent text-sm font-medium hover:border-border focus:border-border"
-      />
+      <div className="flex items-center gap-2">
+        <Input
+          placeholder={TEXT.untitled}
+          value={activeRequest.name}
+          title={activeRequest.name}
+          onChange={(event) => onNameChange(event.target.value)}
+          aria-label={TEXT.name}
+          className="border-transparent text-sm font-medium hover:border-border focus:border-border"
+        />
+        {detected && <Badge role="status" className="shrink-0">{TEXT.detected(TEXT.protocols[detected])}</Badge>}
+      </div>
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex w-full items-center gap-2 sm:contents">
           <Select
-            value={activeRequest.method}
-            onChange={(event) => onMethodChange(event.target.value)}
-            aria-label={TEXT.method}
+            value={protocolId}
+            onChange={(event) => chooseProtocol(event.target.value)}
+            aria-label={TEXT.protocol}
+            disabled={socketStatus !== null && socketStatus !== SOCKET_IDLE}
             controlSize="md"
-            dir="ltr"
-            style={methodStyle(method)}
-            className="w-28 font-mono font-semibold"
+            className="w-36 max-sm:w-32"
           >
-            {methodOptions(activeRequest.method, isSocket).map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
+            {REQUEST_PROTOCOLS.map((protocol) => (
+              <option key={protocol.id} value={protocol.id}>{TEXT.protocols[protocol.id]}</option>
             ))}
           </Select>
+
+          {hasMethodChoice(protocolId) && (
+            <Select
+              value={activeRequest.method}
+              onChange={(event) => onMethodChange(event.target.value)}
+              aria-label={TEXT.method}
+              controlSize="md"
+              dir="ltr"
+              style={methodStyle(method)}
+              className="w-28 font-mono font-semibold max-sm:w-24"
+            >
+              {methodOptions(activeRequest.method).map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </Select>
+          )}
 
           <div className="min-w-0 flex-1 sm:min-w-40">
             <VariableInput

@@ -46,7 +46,6 @@ function createSession(channel, { prepared }) {
 }
 
 export const graphqlProtocol = {
-  label: 'GraphQL',
   subprotocol: SUBPROTOCOL,
   createSession,
 }
