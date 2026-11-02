@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { bodyBytes } from '../lib/response'
-import { MAX_DECODE_BYTES } from '../lib/binary/limits'
+import { DECODE_TIMEOUT_MS, MAX_DECODE_BYTES } from '../lib/binary/limits'
 import { isFormat } from '../lib/binary/formats'
 
 export const BINARY_IDLE = 'idle'
@@ -19,7 +19,7 @@ async function read(response, view) {
   const bytes = bodyBytes(response)
   if (view === 'hex') return { status: BINARY_DONE, bytes }
   if (bytes.length > MAX_DECODE_BYTES) return { status: BINARY_TOO_LARGE, bytes }
-  const { DECODE_TIMEOUT_MS, TIMED_OUT, decodeInWorker } = await import('../lib/binary/decodeTask')
+  const { TIMED_OUT, decodeInWorker } = await import('../lib/binary/decodeTask')
   try {
     return { status: BINARY_DONE, bytes, text: await decodeInWorker(view, bytes) }
   } catch (error) {

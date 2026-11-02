@@ -1,6 +1,5 @@
 import DecodeWorker from './decode.worker.js?worker'
-
-export const DECODE_TIMEOUT_MS = 5_000
+import { DECODE_TIMEOUT_MS } from './limits'
 
 export const TIMED_OUT = 'timedOut'
 

@@ -13,6 +13,7 @@ import { HexView } from "./HexView"
 import { LargeText } from "./LargeText"
 import { BINARY_DONE, BINARY_FAILED, BINARY_TIMED_OUT, BINARY_TOO_LARGE, useBinaryBody } from "../hooks/useBinaryBody"
 import { FORMAT_NAMES, formatForContentType, isFormat } from "../lib/binary/formats"
+import { useResponseJump } from "../hooks/useResponseJump"
 import { useDebouncedValue } from "../hooks/useDebouncedValue"
 import { FORMAT_DONE, FORMAT_FAILED, FORMAT_WORKING, useOffThreadFilter, useOffThreadFormat } from "../hooks/useOffThreadJson"
 import { MAX_MATCHES, findMatches, stepIndex } from "../lib/responseSearch"
@@ -505,6 +506,13 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
     setFilterPath('')
     setPastAt(null)
   }, [response])
+
+  const revealSearch = useCallback((text) => {
+    setActiveTab(TAB_BODY)
+    setSearchOpen(true)
+    setQuery(text)
+  }, [])
+  useResponseJump(tabId, revealSearch)
 
   useEffect(() => setMatchIndex(0), [debouncedQuery, view, filtered])
 

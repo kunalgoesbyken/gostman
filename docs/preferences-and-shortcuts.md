@@ -146,7 +146,7 @@ The last swatch, marked with a plus, picks a custom accent. Gostman keeps your c
 | Part | Covers |
 | --- | --- |
 | **Window** | The title bar, the status bar and every part not listed below |
-| **Sidebar** | Collections and history |
+| **Sidebar** | Collections, flows, history and search |
 | **Tabs and address bar** | The tab strip and the method, URL and Send row |
 | **Request editor** | The request tabs: params, headers, auth and the rest |
 | **Body editor** | Request bodies, gRPC messages, MCP arguments and saved examples |

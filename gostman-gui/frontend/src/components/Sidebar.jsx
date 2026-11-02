@@ -5,13 +5,14 @@ import { ContextMenu } from "./ui/ContextMenu"
 import { ResizablePane, Toolbar } from "./ui/panel"
 import { OverflowTabsList, TabCount, Tabs, TabsContent } from "./ui/tabs"
 import { CollectionTree } from "./CollectionTree"
+import { GlobalSearch } from "./GlobalSearch"
 import { HistoryList } from "./HistoryList"
 import { OpenTabsList } from "./OpenTabsList"
 import { FlowList } from "./flows/FlowList"
 import { rootSettingsTitle } from "../lib/inheritance"
 import { SIDEBAR_PANE, isNarrowViewport } from "../lib/layout"
 import { SIDEBAR_TEXT, sidebarViewName } from "../lib/sidebarText"
-import { DEFAULT_SIDEBAR_VIEWS, VIEW_COLLECTIONS, VIEW_FLOWS, VIEW_HISTORY, VIEW_TABS, canHideView, visibleViews, withViewVisible } from "../lib/sidebarViews"
+import { DEFAULT_SIDEBAR_VIEWS, VIEW_COLLECTIONS, VIEW_FLOWS, VIEW_HISTORY, VIEW_SEARCH, VIEW_TABS, canHideView, visibleViews, withViewVisible } from "../lib/sidebarViews"
 import { updatePreferences, usePreferences } from "../lib/preferences"
 import { cn } from "../lib/utils"
 import { useShortcutLabel } from "../hooks/useShortcuts"
@@ -60,6 +61,12 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
   const [menuPosition, setMenuPosition] = useState(null)
   const newRequestShortcut = useShortcutLabel("newRequest")
   const closeSidebar = useAppStore((s) => s.closeSidebar)
+  const searchNonce = useAppStore((s) => s.globalSearch.nonce)
+  useEffect(() => {
+    if (searchNonce === 0) return
+    if (!visibleViews(views).includes(VIEW_SEARCH)) updatePreferences({ sidebarViews: withViewVisible(views, VIEW_SEARCH, true) })
+    setView(VIEW_SEARCH)
+  }, [searchNonce])
   const selectTab = (tabId) => {
     onTabSelect(tabId)
     if (isNarrowViewport()) closeSidebar()
@@ -104,6 +111,9 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
         </TabsContent>
         <TabsContent value={VIEW_FLOWS} className={VIEW_CLASS}>
           <FlowList actions={actions.flows} onMonitor={actions.monitorFlow} />
+        </TabsContent>
+        <TabsContent value={VIEW_SEARCH} className={VIEW_CLASS}>
+          <GlobalSearch requests={requests} history={requestHistory} tabs={tabs} actions={actions} />
         </TabsContent>
         <TabsContent value={VIEW_HISTORY} className={VIEW_CLASS}>
           <HistoryList entries={requestHistory} actions={actions} />

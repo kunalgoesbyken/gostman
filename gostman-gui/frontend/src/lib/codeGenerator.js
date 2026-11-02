@@ -1,4 +1,5 @@
 import { shellQuote, shellWord } from './shellWords'
+import { UNSAFE_REQUEST_SNIPPET, isSafeRequest, readsFromFile } from './snippetSafety'
 import { readStored, writeStored } from './storage'
 import { DEFAULT_PART_TYPE, formContentType, formSegments, isContentType, uploadOf } from './uploadParts'
 
@@ -762,9 +763,19 @@ const httpiePart = (part) => (part.file === undefined
   ? shellQuote(`${part.name}=${part.value}`)
   : shellQuote(`${part.name}@${part.file};type=${part.contentType}`))
 
+const HTTPIE_CANNOT_WRITE = '# HTTPie reads a file when a value starts with @ or <, or when a file name contains ;, so this request cannot be written as an HTTPie command.'
+
+const textPartValues = (parts = []) => parts.filter((part) => part.file === undefined).map((part) => part.value)
+
+const httpieReadsFile = ({ headers, parts = [] }) => (
+  [...headers.map(({ value }) => value), ...textPartValues(parts)].some(readsFromFile) || parts.some((part) => part.file?.includes(';'))
+)
+
 function generateHttpie(request) {
+  if (httpieReadsFile(request)) return HTTPIE_CANNOT_WRITE
   const { method, url, headers, body, file, parts } = request
-  const command = ['http', ...(file ? [] : ['--ignore-stdin']), ...(parts ? ['--multipart'] : []), ...(body ? ['--raw', shellQuote(body)] : []), shellWord(method), shellQuote(url)]
+  const options = ['http', ...(file ? [] : ['--ignore-stdin']), ...(parts ? ['--multipart'] : []), ...(body ? [`--raw=${shellQuote(body)}`] : [])]
+  const command = [...options, '--', shellWord(method), shellQuote(url)]
   const items = [...headers.map(httpieHeader), ...(parts ? parts.map(httpiePart) : [])]
   const lines = [command.join(' '), ...items]
   if (file) lines.push(`< ${shellQuote(file)}`)
@@ -775,7 +786,7 @@ const printfText = (text) => shellQuote(text.replaceAll('\\', '\\\\').replaceAll
 
 const wgetSegment = (segment) => (typeof segment === 'string'
   ? `  printf '%b' ${printfText(segment)}`
-  : `  cat ${shellQuote(segment.file)}`)
+  : `  cat -- ${shellQuote(segment.file)}`)
 
 const wgetFormFile = (parts) => ['{', ...formSegments(parts).map(wgetSegment), '} > form-body.tmp']
 
@@ -839,5 +850,5 @@ export function generateAllSnippets(prepared) {
     body: upload.file || upload.parts ? '' : prepared.body || '',
     ...upload,
   }
-  return Object.fromEntries(SNIPPET_LANGUAGES.map(({ id, generate }) => [id, generate(request)]))
+  return Object.fromEntries(SNIPPET_LANGUAGES.map(({ id, generate }) => [id, isSafeRequest(request) ? generate(request) : UNSAFE_REQUEST_SNIPPET]))
 }

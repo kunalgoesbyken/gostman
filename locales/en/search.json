@@ -1,0 +1,35 @@
+{
+  "search": {
+    "sidebarTab": "Search",
+    "placeholder": "Search requests, history and responses",
+    "label": "Search everything",
+    "hint": "Searches request names, URLs, headers, bodies and descriptions, the history, and the latest response of each open tab.",
+    "searching": "Searching…",
+    "none": "Nothing matches \"{{query}}\"",
+    "truncated": "Showing the first results only. Narrow the search to see more.",
+    "timedOut": "The search took too long and was stopped. Try a longer or more specific query.",
+    "failed": "The search failed: {{reason}}",
+    "results_one": "{{count}} result",
+    "results_other": "{{count}} results",
+    "command": {
+      "label": "Search everywhere",
+      "description": "Search request names, URLs, bodies, history and open responses",
+      "keywords": "find global search responses history"
+    },
+    "kinds": {
+      "request": "Request",
+      "history": "History",
+      "response": "Response"
+    },
+    "fields": {
+      "name": "Name",
+      "url": "URL",
+      "body": "Body",
+      "headers": "Headers",
+      "description": "Description",
+      "tags": "Tags",
+      "responseBody": "Response body",
+      "responseHeaders": "Response headers"
+    }
+  }
+}

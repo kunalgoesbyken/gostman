@@ -19,6 +19,7 @@ import { AI_TEXT } from "../../lib/aiText"
 import { WORKSPACE_TEXT } from "../../lib/workspaceText"
 import { TREE_TEXT } from "../../lib/treeText"
 import { COMMAND_TEXT } from "../../lib/commandText"
+import { SEARCH_TEXT } from "../../lib/searchText"
 import { useShortcutLabel } from "../../hooks/useShortcuts"
 import { cn } from "../../lib/utils"
 
@@ -61,6 +62,7 @@ const appCommands = (holdsCollections) => [
   command("reopen-tab", COMMAND_TEXT.commands.reopenTab, "reopenTab", { icon: Undo2, shortcutId: "reopenTab" }),
   command("toggle-sidebar", COMMAND_TEXT.commands.toggleSidebar, "toggleSidebar", { icon: PanelLeft, shortcutId: "toggleSidebar" }),
   command("keyboard-shortcuts", COMMAND_TEXT.commands.shortcuts, "shortcuts", { icon: Keyboard, keywords: "?", shortcutId: "shortcutsHelp" }),
+  command("global-search", SEARCH_TEXT.command, "globalSearch", { icon: Search }),
   command("new-folder", COMMAND_TEXT.commands.newFolder, "newFolder", { icon: FolderPlus }),
   { id: "collapse-folders", label: TREE_TEXT.collapseAll, description: TREE_TEXT.collapseAllDescription, icon: ChevronsDownUp, keywords: COMMAND_TEXT.commands.collapseFolders.keywords, action: "collapseFolders" },
   command("collection-settings", COMMAND_TEXT.commands.collectionSettings, "collectionSettings", { icon: Settings2 }),

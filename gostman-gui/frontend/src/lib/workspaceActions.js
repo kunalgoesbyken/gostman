@@ -664,6 +664,7 @@ export function createWorkspaceActions(backend) {
     toggleSidebar: () => store().toggleSidebar(),
     shortcuts: () => store().openShortcutsDialog(),
     findRequest: () => store().openCommandPalette('requests'),
+    globalSearch: () => store().openGlobalSearch(),
     newFolder: () => createFolder(),
     collapseFolders: () => store().collapseFolders(),
     clearHistory,

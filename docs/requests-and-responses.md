@@ -336,6 +336,16 @@ The bar at the bottom of the window holds shortcuts to dialogs and shows state:
 - Cookies, which opens the [cookie jar](#cookie-jar).
 - Preferences and the app version.
 
+## Search everywhere
+
+The Search tab in the sidebar, or the **Search everywhere** command in the command palette (Ctrl+K), searches in one place: the name, URL, headers, body, description and tags of saved requests, the same fields of the history entries, and the body and headers of the latest response in each open tab. Type a word to start; results appear after a short pause.
+
+- Matching ignores case and accents, so `cafe` finds `Café`, and it works for any script. It is a plain text match, not a pattern, so no query can make the search slow.
+- Each result shows its kind (Request, History or Response), the method or status, the name, and up to three matches with the match highlighted.
+- Click a request to open it, a history entry to open it as a request tab, and a response to switch to its tab with the query already entered in the body search.
+- The search runs in the background. It looks at the first 2 MB of each field, shows at most 200 results, and stops after 3 seconds, with a notice when the list is cut short.
+- Bodies of Multipart and File requests are not searched, and responses are kept in memory only, so closing a tab or reloading removes them from the search.
+
 ## History
 
 The History tab at the top of the sidebar lists sent requests, with the method, the URL, the HTTP status of the response, in the colours of the response panel, and the time since sending (for example "5m" or "2d"). Sends that got no response are marked **No response**. Screen readers read the time in full, for example "sent 5 minutes ago". The tab shows a count.

@@ -1,7 +1,8 @@
 import english from '../../../../locales/en/sidebar.json'
 import { messages } from './i18n/core'
 import { FLOW_TEXT } from './flowsText'
-import { VIEW_COLLECTIONS, VIEW_FLOWS, VIEW_HISTORY, VIEW_TABS } from './sidebarViews.js'
+import { SEARCH_TEXT } from './searchText'
+import { VIEW_COLLECTIONS, VIEW_FLOWS, VIEW_HISTORY, VIEW_SEARCH, VIEW_TABS } from './sidebarViews.js'
 
 const text = messages('sidebar', english)
 
@@ -13,6 +14,7 @@ const VIEW_NAMES = {
   [VIEW_FLOWS]: () => FLOW_TEXT.sidebarTab,
   [VIEW_HISTORY]: () => SIDEBAR_TEXT.history,
   [VIEW_TABS]: () => SIDEBAR_TEXT.openTabs,
+  [VIEW_SEARCH]: () => SEARCH_TEXT.sidebarTab,
 }
 
 export const sidebarViewName = (id) => VIEW_NAMES[id]()
