@@ -11,7 +11,7 @@ import { FilterBar, SearchBar } from "./ResponseSearchBar"
 import { HighlightedText } from "./HighlightedText"
 import { HexView } from "./HexView"
 import { LargeText } from "./LargeText"
-import { BINARY_DONE, BINARY_FAILED, BINARY_TOO_LARGE, useBinaryBody } from "../hooks/useBinaryBody"
+import { BINARY_DONE, BINARY_FAILED, BINARY_TIMED_OUT, BINARY_TOO_LARGE, useBinaryBody } from "../hooks/useBinaryBody"
 import { FORMAT_NAMES, formatForContentType, isFormat } from "../lib/binary/formats"
 import { useDebouncedValue } from "../hooks/useDebouncedValue"
 import { FORMAT_DONE, FORMAT_FAILED, FORMAT_WORKING, useOffThreadFilter, useOffThreadFormat } from "../hooks/useOffThreadJson"
@@ -41,7 +41,7 @@ import { AI_TEXT } from "../lib/aiText"
 import { RESPONSE_CHECKS_TEXT } from "../lib/checksText"
 import { canSaveAsExample } from "../lib/examples"
 import { trimTree } from "../lib/jsonTree"
-import { MAX_DECODE_BYTES } from "../lib/binary/limits"
+import { AUTO_DECODE_BYTES, MAX_DECODE_BYTES } from "../lib/binary/limits"
 import { LARGE_BODY_CHARS } from "../lib/largeText"
 import { PREVIEW_TEXT, RESPONSE_TEXT } from "../lib/responseText"
 import { previewDocument } from "../lib/visualizeFrame"
@@ -121,7 +121,8 @@ const cookieColumns = () => [
 ]
 
 function binaryViews(response) {
-  const preferred = formatForContentType(response.contentType)
+  const named = formatForContentType(response.contentType)
+  const preferred = response.size <= AUTO_DECODE_BYTES ? named : null
   const others = FORMAT_NAMES.filter((name) => name !== preferred)
   return preferred ? [preferred, 'info', 'hex', ...others] : ['info', 'hex', ...others]
 }
@@ -271,6 +272,9 @@ function HtmlPreview({ response }) {
 function BinaryProblem({ binary, view, response }) {
   if (binary.status === BINARY_FAILED) {
     return <EmptyState icon={AlertTriangle} title={RESPONSE_TEXT.decode.failed({ format: RESPONSE_TEXT.views[view], reason: binary.reason })} />
+  }
+  if (binary.status === BINARY_TIMED_OUT) {
+    return <EmptyState icon={AlertTriangle} title={RESPONSE_TEXT.decode.timedOut({ format: RESPONSE_TEXT.views[view], seconds: binary.seconds })} />
   }
   if (binary.status === BINARY_TOO_LARGE) {
     return <EmptyState icon={FileDigit} title={RESPONSE_TEXT.decode.tooLarge({ size: formatBytes(response.size), limit: formatBytes(MAX_DECODE_BYTES) })} />

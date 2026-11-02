@@ -1,5 +1,12 @@
 import { bytesToBase64 } from '../base64'
 
+export const MAX_DEPTH = 64
+export const MAX_BIGNUM_BYTES = 64
+
+export function checkCount(count, remaining, minimumBytes) {
+  if (BigInt(count) * BigInt(minimumBytes) > BigInt(remaining)) throw new RangeError('A length in the data is larger than the data itself')
+}
+
 export class BinaryValue {
   constructor(bytes) {
     this.bytes = bytes

@@ -1,6 +1,5 @@
-import { BinaryValue, ExtensionValue, readBigInt } from './values'
+import { BinaryValue, ExtensionValue, MAX_DEPTH, checkCount, readBigInt } from './values'
 
-const MAX_DEPTH = 200
 const TIMESTAMP_EXTENSION = -1
 const MS_PER_SECOND = 1000
 const NANOS_PER_MS = 1000000
@@ -59,12 +58,14 @@ function timestamp(data) {
 
 function readArray(reader, count, depth) {
   const items = []
+  checkCount(count, reader.bytes.length - reader.at, 1)
   for (let index = 0; index < count; index += 1) items.push(readValue(reader, depth + 1))
   return items
 }
 
 function readMap(reader, count, depth) {
   const entries = {}
+  checkCount(count, reader.bytes.length - reader.at, 2)
   for (let index = 0; index < count; index += 1) {
     const key = readValue(reader, depth + 1)
     entries[typeof key === 'string' ? key : String(key)] = readValue(reader, depth + 1)

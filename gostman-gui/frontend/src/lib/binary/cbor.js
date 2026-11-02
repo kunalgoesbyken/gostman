@@ -1,6 +1,5 @@
-import { BinaryValue, TaggedValue } from './values'
+import { BinaryValue, MAX_BIGNUM_BYTES, MAX_DEPTH, TaggedValue, checkCount } from './values'
 
-const MAX_DEPTH = 200
 const BREAK = Symbol('break')
 const TAG_DATE_TEXT = 0
 const TAG_DATE_EPOCH = 1
@@ -80,6 +79,7 @@ function joinChunks(reader, major, depth) {
 
 function readArray(reader, count, depth) {
   const items = []
+  if (count !== null) checkCount(count, reader.bytes.length - reader.at, 1)
   if (count === null) {
     for (;;) {
       const item = readItem(reader, depth + 1)
@@ -93,6 +93,7 @@ function readArray(reader, count, depth) {
 
 function readMap(reader, count, depth) {
   const result = {}
+  if (count !== null) checkCount(count, reader.bytes.length - reader.at, 2)
   const store = (key, value) => {
     result[typeof key === 'string' ? key : String(key)] = value
   }
@@ -111,8 +112,8 @@ function readMap(reader, count, depth) {
 }
 
 function bignum(bytes, negative) {
-  let value = 0n
-  for (const byte of bytes) value = (value << 8n) | BigInt(byte)
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
+  const value = hex === '' ? 0n : BigInt(`0x${hex}`)
   const result = negative ? -1n - value : value
   return Number.isSafeInteger(Number(result)) && BigInt(Number(result)) === result ? Number(result) : result
 }
@@ -121,8 +122,9 @@ function tagged(tag, value) {
   if (tag === TAG_SELF_DESCRIBE) return value
   if (tag === TAG_DATE_TEXT && typeof value === 'string') return value
   if (tag === TAG_DATE_EPOCH && typeof value === 'number') return new Date(value * MS_PER_SECOND).toISOString()
-  if (tag === TAG_POSITIVE_BIGNUM && value instanceof BinaryValue) return bignum(value.bytes, false)
-  if (tag === TAG_NEGATIVE_BIGNUM && value instanceof BinaryValue) return bignum(value.bytes, true)
+  const small = value instanceof BinaryValue && value.bytes.length <= MAX_BIGNUM_BYTES
+  if (tag === TAG_POSITIVE_BIGNUM && small) return bignum(value.bytes, false)
+  if (tag === TAG_NEGATIVE_BIGNUM && small) return bignum(value.bytes, true)
   return new TaggedValue(tag, value)
 }
 

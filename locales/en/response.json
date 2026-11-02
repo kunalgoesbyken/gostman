@@ -76,6 +76,7 @@
     "decode": {
       "working": "Decoding…",
       "failed": "The body could not be read as {{format}}: {{reason}}",
+      "timedOut": "Reading the body as {{format}} took longer than {{seconds}} seconds, so it was stopped. Use Hex or save it to a file.",
       "tooLarge": "This body is {{size}}. Gostman decodes up to {{limit}}, so use Hex or save it to a file."
     },
     "bodyView": "Body view",
