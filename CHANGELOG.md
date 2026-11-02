@@ -4,6 +4,8 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.10.1] - 2026-11-02
+
 ### Fixed
 
 - On Windows the frameless window shows resize cursors on every edge and corner again and can be resized from them. The desktop status bar also has a resize grip in its right corner.
@@ -18,6 +20,7 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 ### Added
 
 - History can be filtered by date range, folder and tag, and grouped by day.
+- The Export format picker and the import list show the logos of the tools they name, and What's new uses a newspaper icon.
 
 ## [1.10.0] - 2026-11-02
 
