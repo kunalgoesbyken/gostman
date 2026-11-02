@@ -86,6 +86,13 @@ func Event(passed, previousFailed bool) string {
 	return EventPassed
 }
 
+func Wanted(notifyOn, event string, previousFailed bool) bool {
+	if notifyOn == NotifyOnAlways {
+		return true
+	}
+	return event == EventRecovered || (event == EventFailed && !previousFailed)
+}
+
 func ShapeOf(address string) string {
 	parsed, err := url.Parse(address)
 	if err != nil {

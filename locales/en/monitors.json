@@ -37,7 +37,6 @@
     "noRuns": "No runs yet. Press Run now to start one.",
     "runLine": "{{passed}} passed, {{failed}} failed",
     "failedChecks": "Failed checks",
-    "chartTitle": "Trend",
     "chartPassRate": "Pass rate (last 10 runs)",
     "chartDuration": "p95 request duration",
     "chartLabel": "Pass rate and p95 duration over the last {{count}} runs",

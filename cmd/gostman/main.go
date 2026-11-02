@@ -170,7 +170,7 @@ run
                         each request's status and duration, failed check
                         messages; never response bodies, and secret values
                         and URL queries are removed. In a workspace folder it
-                        is .gostman/runs/ (kept out of Git by .gitignore),
+                        is .gostman/runs/ (kept out of Git),
                         otherwise a folder in the user configuration directory
   --no-record           with --every, do not save a history
   --keep <n>            keep the last n recorded runs (default 200)

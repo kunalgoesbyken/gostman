@@ -19,7 +19,6 @@ type Trend struct {
 	Passed   int            `json:"passed"`
 	Failed   int            `json:"failed"`
 	PassRate float64        `json:"passRate"`
-	Last     *Record        `json:"last,omitempty"`
 	Requests []RequestTrend `json:"requests"`
 }
 
@@ -78,8 +77,6 @@ func Summarize(records []Record) Trend {
 	trend.Failed = trend.Runs - trend.Passed
 	if trend.Runs > 0 {
 		trend.PassRate = float64(trend.Passed) / float64(trend.Runs)
-		last := records[len(records)-1]
-		trend.Last = &last
 	}
 	for name, seen := range tallies {
 		slices.Sort(seen.durations)

@@ -23,7 +23,16 @@ import {
 export const MIN_INTERVAL_MINUTES = 1
 export const MAX_INTERVAL_MINUTES = 1440
 export const DEFAULT_INTERVAL_MINUTES = 15
-export const INTERVAL_PRESETS = [1, 5, 15, 30, 60, 360, 720, 1440]
+export const INTERVALS = [
+  { minutes: 1, key: 'm1' },
+  { minutes: 5, key: 'm5' },
+  { minutes: 15, key: 'm15' },
+  { minutes: 30, key: 'm30' },
+  { minutes: 60, key: 'h1' },
+  { minutes: 360, key: 'h6' },
+  { minutes: 720, key: 'h12' },
+  { minutes: 1440, key: 'h24' },
+]
 export const RETENTION = 200
 
 const MS_PER_MINUTE = 60000
@@ -37,7 +46,6 @@ export const useMonitorStore = create(() => ({
   histories: {},
   running: {},
   nextRuns: {},
-  withheld: {},
   hasData: {},
   failures: {},
   editing: null,
@@ -159,29 +167,25 @@ export function createMonitorActions(backend, { execute }) {
 
   async function execution(monitor) {
     const rows = rowsFor.get(monitor.id) || []
-    const folderId = monitor.kind === KIND_FOLDER ? monitor.targetId : ROOT_ID
     const startedAt = new Date()
-    const restore = useEnvironment(monitor.environmentId, folderId)
-    let ran
+    const restore = useEnvironment(monitor.environmentId, monitor.kind === KIND_FOLDER ? monitor.targetId : ROOT_ID)
     try {
-      ran = monitor.kind === KIND_FLOW ? await runFlow(monitor) : await runFolder(monitor, rows)
+      const ran = monitor.kind === KIND_FLOW ? await runFlow(monitor) : await runFolder(monitor, rows)
+      const appState = app()
+      const inScope = monitor.kind === KIND_FLOW ? appState.requests : requestsToRun(appState, monitor.targetId, NO_TAGS)
+      const environmentId = monitor.environmentId || appState.activeEnvironmentId
+      return buildRecord({
+        monitor,
+        target: nameOfTarget(monitor, appState) || monitor.name,
+        environment: appState.environments.find((candidate) => candidate.id === environmentId)?.name || '',
+        startedAt,
+        finishedAt: new Date(),
+        ...ran,
+        clean: cleanerFor(hiddenValues(appState, inScope, rows)),
+      })
     } finally {
       restore()
     }
-    const appState = app()
-    const hidden = hiddenValues(appState, monitor.kind === KIND_FLOW ? appState.requests : requestsToRun(appState, monitor.targetId, NO_TAGS), rows)
-    const environment = appState.environments.find((candidate) => candidate.id === (monitor.environmentId || appState.activeEnvironmentId))?.name || ''
-    return buildRecord({
-      monitor,
-      target: nameOfTarget(monitor, appState) || monitor.name,
-      environment,
-      startedAt,
-      finishedAt: new Date(),
-      results: ran.results,
-      planned: ran.planned,
-      outcome: ran.outcome,
-      clean: cleanerFor(hidden),
-    })
   }
 
   async function perform(id) {
@@ -191,13 +195,13 @@ export function createMonitorActions(backend, { execute }) {
       patch({ hasData: withKey(state().hasData, id, false) })
       return
     }
-    patch({ running: withKey(state().running, id, true), failures: without(state().failures, id), withheld: without(state().withheld, id) })
+    patch({ running: withKey(state().running, id, true), failures: without(state().failures, id) })
     try {
       let record
       try {
         record = { ...(await execution(monitor)), monitor: id }
       } catch (error) {
-        patch({ withheld: withKey(state().withheld, id, true), failures: withKey(state().failures, id, error?.message || MONITORS_TEXT.runFailed) })
+        patch({ failures: withKey(state().failures, id, error?.message || MONITORS_TEXT.runFailed) })
         return
       }
       const previous = state().histories[id]?.at(-1)

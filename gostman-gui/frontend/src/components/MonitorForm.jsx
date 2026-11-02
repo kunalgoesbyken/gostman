@@ -7,15 +7,14 @@ import { Select } from "./ui/select"
 import { PanelBody } from "./ui/panel"
 import { ROOT_ID, buildCollectionTree, listFolders } from "../lib/collectionTree"
 import { KIND_FLOW, KIND_FOLDER } from "../lib/monitors/monitorRecord"
-import { INTERVAL_PRESETS, MAX_INTERVAL_MINUTES, MIN_INTERVAL_MINUTES } from "../lib/monitors/monitorSession"
+import { INTERVALS, MAX_INTERVAL_MINUTES, MIN_INTERVAL_MINUTES } from "../lib/monitors/monitorSession"
 import { MONITORS_TEXT as TEXT } from "../lib/monitorsText"
-import { DATA_FILE_ERROR, readDataFile } from "../lib/runData"
+import { DATA_ACCEPT, DATA_FILE_ERROR, readDataFile } from "../lib/runData"
 import { useAppStore } from "../store/appStore"
 
 const CUSTOM = "custom"
 const PATH_SEPARATOR = " / "
-const DATA_ACCEPT = ".csv,.json,.xlsx,text/csv,application/json"
-const INTERVAL_LABELS = { 1: "m1", 5: "m5", 15: "m15", 30: "m30", 60: "h1", 360: "h6", 720: "h12", 1440: "h24" }
+const WEB_PROTOCOLS = new Set(["http:", "https:"])
 
 const targetValue = (draft) => `${draft.kind}:${draft.targetId}`
 
@@ -28,15 +27,17 @@ function targetOptions(folders, flows) {
   ]
 }
 
-function validate(draft, webhook, hasWebhooks) {
+const isWebAddress = (text) => URL.canParse(text) && WEB_PROTOCOLS.has(new URL(text).protocol)
+
+const isKnownInterval = (minutes) => minutes >= MIN_INTERVAL_MINUTES && minutes <= MAX_INTERVAL_MINUTES
+
+function validate(draft, webhook) {
   if (!draft.name.trim()) return TEXT.form.nameRequired
-  if (!targetOptionsKnown(draft)) return TEXT.form.targetRequired
-  if (!(draft.intervalMinutes >= MIN_INTERVAL_MINUTES && draft.intervalMinutes <= MAX_INTERVAL_MINUTES)) return TEXT.form.intervalInvalid
-  if (hasWebhooks && webhook.trim() && !/^https?:\/\/\S+$/i.test(webhook.trim())) return TEXT.form.webhookInvalid
+  if (draft.kind === KIND_FLOW && draft.targetId === "") return TEXT.form.targetRequired
+  if (!isKnownInterval(draft.intervalMinutes)) return TEXT.form.intervalInvalid
+  if (webhook.trim() && !isWebAddress(webhook.trim())) return TEXT.form.webhookInvalid
   return ""
 }
-
-const targetOptionsKnown = (draft) => draft.kind === KIND_FOLDER || draft.targetId !== ""
 
 export function MonitorForm({ draft: initial, hasWebhooks, onSave, onCancel }) {
   const folders = useAppStore((s) => s.folders)
@@ -46,7 +47,7 @@ export function MonitorForm({ draft: initial, hasWebhooks, onSave, onCancel }) {
   const [webhook, setWebhook] = useState("")
   const [rows, setRows] = useState(undefined)
   const [error, setError] = useState("")
-  const [isCustom, setIsCustom] = useState(!INTERVAL_PRESETS.includes(initial.intervalMinutes))
+  const [isCustom, setIsCustom] = useState(!INTERVALS.some(({ minutes }) => minutes === initial.intervalMinutes))
   const fileInput = useRef(null)
   const change = (changes) => setDraft((current) => ({ ...current, ...changes }))
   const canNotifyInBrowser = typeof Notification !== "undefined"
@@ -81,7 +82,7 @@ export function MonitorForm({ draft: initial, hasWebhooks, onSave, onCancel }) {
 
   async function submit(event) {
     event.preventDefault()
-    const problem = validate(draft, webhook, hasWebhooks)
+    const problem = validate(draft, webhook)
     setError(problem)
     if (!problem) {
       try {
@@ -121,7 +122,7 @@ export function MonitorForm({ draft: initial, hasWebhooks, onSave, onCancel }) {
                   if (!custom) change({ intervalMinutes: Number(event.target.value) })
                 }}
               >
-                {INTERVAL_PRESETS.map((minutes) => <option key={minutes} value={String(minutes)}>{TEXT.intervals[INTERVAL_LABELS[minutes]]}</option>)}
+                {INTERVALS.map(({ minutes, key }) => <option key={key} value={String(minutes)}>{TEXT.intervals[key]}</option>)}
                 <option value={CUSTOM}>{TEXT.form.custom}</option>
               </Select>
             </div>

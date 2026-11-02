@@ -9,6 +9,8 @@ const WORKBOOK_EXTENSION = /\.xlsx$/i
 
 export const MAX_ITERATIONS = 10000
 
+export const DATA_ACCEPT = '.csv,.json,.xlsx,text/csv,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
 export const DATA_FILE_ERROR = {
   get tooManyRows() {
     return RUN_DATA_TEXT.tooManyRows(MAX_ITERATIONS)

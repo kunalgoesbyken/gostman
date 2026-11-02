@@ -9,14 +9,13 @@ import { MonitorForm } from "./MonitorForm"
 import { trendOf } from "../lib/monitors/monitorRecord"
 import { nameOfTarget, useMonitorStore } from "../lib/monitors/monitorSession"
 import { MONITORS_TEXT as TEXT } from "../lib/monitorsText"
+import { RUNNER_TEXT } from "../lib/runnerText"
 import { formatDateTime, formatPercent, formatTime } from "../lib/i18n/format"
 import { cn } from "../lib/utils"
 import { useAppStore } from "../store/appStore"
 
 const WINDOW = { id: "monitors", width: 800, height: 580, minWidth: 480, minHeight: 360 }
 const SHOWN_RUNS = 30
-
-const duration = (milliseconds) => (milliseconds >= 1000 ? `${(milliseconds / 1000).toFixed(1)} s` : `${milliseconds} ms`)
 
 function StatusDot({ monitor, isRunning, lastPassed }) {
   const tone = monitor.paused || lastPassed === undefined ? "bg-muted-foreground/40" : lastPassed ? "bg-success" : "bg-destructive"
@@ -51,7 +50,7 @@ function RunRow({ record }) {
         <span className={cn("w-12 shrink-0 text-2xs font-medium uppercase", record.passed ? "text-success" : "text-destructive")}>{record.passed ? TEXT.passed : TEXT.failed}</span>
         <span className="shrink-0 font-mono text-2xs text-muted-foreground">{formatDateTime(new Date(record.startedAt))}</span>
         <span className="min-w-0 flex-1 truncate text-xs text-foreground">{TEXT.runLine({ passed: record.summary.passed, failed: record.summary.failed })}</span>
-        <span className="shrink-0 font-mono text-2xs text-muted-foreground">{duration(record.durationMs)}</span>
+        <span className="shrink-0 font-mono text-2xs text-muted-foreground">{RUNNER_TEXT.duration(record.durationMs)}</span>
         {failures.length > 0 && <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground rtl:-scale-x-100" />}
       </button>
       {isOpen && (
@@ -78,7 +77,7 @@ function Stat({ label, value }) {
   )
 }
 
-function MonitorDetail({ monitor, history, isRunning, nextRun, needsData, withheld, failure, actions }) {
+function MonitorDetail({ monitor, history, isRunning, nextRun, needsData, failure, actions }) {
   const trend = useMemo(() => trendOf(history), [history])
   const target = nameOfTarget(monitor, useAppStore.getState())
   const schedule = monitor.paused ? TEXT.paused : nextRun ? TEXT.nextRun(formatTime(new Date(nextRun))) : ""
@@ -98,13 +97,12 @@ function MonitorDetail({ monitor, history, isRunning, nextRun, needsData, withhe
         <IconButton label={TEXT.delete} icon={Trash2} onClick={() => actions.confirmRemove(monitor.id)} />
       </Toolbar>
       {needsData && <Notice tone="warning">{TEXT.needsData}</Notice>}
-      {withheld && <Notice tone="destructive" role="alert">{TEXT.withheld}</Notice>}
-      {failure && !withheld && <Notice tone="destructive" role="alert">{failure}</Notice>}
+      {failure && <Notice tone="destructive" role="alert">{failure}</Notice>}
       <PanelBody className="p-0">
         <div className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-4">
           <Stat label={TEXT.passRate} value={trend.runs > 0 ? formatPercent(trend.passRate) : "-"} />
           <Stat label={TEXT.lastRun} value={trend.last ? (trend.last.passed ? TEXT.passed : TEXT.failed) : TEXT.neverRun} />
-          <Stat label={TEXT.p95} value={trend.runs > 0 ? duration(trend.p95Ms) : "-"} />
+          <Stat label={TEXT.p95} value={trend.runs > 0 ? RUNNER_TEXT.duration(trend.p95Ms) : "-"} />
           <Stat label={TEXT.history} value={TEXT.runsCount(trend.runs)} />
         </div>
         {trend.runs > 0 && (
@@ -131,7 +129,6 @@ export function MonitorsDialog({ actions }) {
   const histories = useMonitorStore((s) => s.histories)
   const running = useMonitorStore((s) => s.running)
   const nextRuns = useMonitorStore((s) => s.nextRuns)
-  const withheld = useMonitorStore((s) => s.withheld)
   const failures = useMonitorStore((s) => s.failures)
   const hasData = useMonitorStore((s) => s.hasData)
   const editing = useMonitorStore((s) => s.editing)
@@ -184,7 +181,6 @@ export function MonitorsDialog({ actions }) {
                 isRunning={Boolean(running[selected.id])}
                 nextRun={nextRuns[selected.id]}
                 needsData={Boolean(selected.dataName) && hasData[selected.id] !== true}
-                withheld={Boolean(withheld[selected.id])}
                 failure={failures[selected.id]}
                 actions={actions}
               />

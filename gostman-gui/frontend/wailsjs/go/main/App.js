@@ -146,10 +146,6 @@ export function FetchToken(arg1) {
   return window['go']['main']['App']['FetchToken'](arg1);
 }
 
-export function ForgetMonitorRuns(arg1) {
-  return window['go']['main']['App']['ForgetMonitorRuns'](arg1);
-}
-
 export function ForgetWorkspace(arg1) {
   return window['go']['main']['App']['ForgetWorkspace'](arg1);
 }
@@ -268,10 +264,6 @@ export function GitUnstage(arg1) {
 
 export function GitVersion(arg1, arg2) {
   return window['go']['main']['App']['GitVersion'](arg1, arg2);
-}
-
-export function HasMonitorWebhook(arg1) {
-  return window['go']['main']['App']['HasMonitorWebhook'](arg1);
 }
 
 export function HeldExchanges() {

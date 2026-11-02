@@ -14,8 +14,5 @@ export const webMonitors = {
       store.put(kept, keyOf(scope))
     })
   },
-  forget: (scope) => withRuns(READ_WRITE, (store) => {
-    store.delete(keyOf(scope))
-  }),
   webhook: null,
 }

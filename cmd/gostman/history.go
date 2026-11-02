@@ -49,7 +49,6 @@ func historyCommand(arguments []string, stdout, stderr *os.File) int {
 	}
 	records = monitor.Targeting(records, *target)
 	report := historyReport{Directory: store.Dir, Trend: monitor.Summarize(records), Runs: records}
-	report.Trend.Last = nil
 	if *asJSON {
 		if err := writeJSON(stdout, report); err != nil {
 			return complain(stderr, err)

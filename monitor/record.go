@@ -1,7 +1,7 @@
 package monitor
 
 import (
-	"regexp"
+	"net/url"
 	"strings"
 	"time"
 
@@ -13,9 +13,8 @@ const (
 	KindRun       = "run"
 	KindFlow      = "flow"
 	maxText       = 300
+	edgeSymbols   = "\"'()<>,;"
 )
-
-var queryPattern = regexp.MustCompile(`(https?://[^\s"'?#]+)\?[^\s"'#]*`)
 
 type FailedCheck struct {
 	Name    string `json:"name"`
@@ -74,8 +73,28 @@ func clip(text string) string {
 	return text[:cut] + "..."
 }
 
+func plainAddress(piece string) (string, string, bool) {
+	core := strings.Trim(piece, edgeSymbols)
+	address, err := url.Parse(core)
+	if err != nil || address.Host == "" || (address.Scheme != "http" && address.Scheme != "https") {
+		return "", "", false
+	}
+	address.RawQuery, address.Fragment, address.User, address.ForceQuery = "", "", nil, false
+	return core, address.String(), true
+}
+
+func withoutAddressDetails(text string) string {
+	var swaps []string
+	for _, piece := range strings.Fields(text) {
+		if core, plain, ok := plainAddress(piece); ok && core != plain {
+			swaps = append(swaps, core, plain)
+		}
+	}
+	return strings.NewReplacer(swaps...).Replace(text)
+}
+
 func (s Source) clean(text string) string {
-	text = strings.TrimSpace(queryPattern.ReplaceAllString(text, "$1"))
+	text = strings.TrimSpace(withoutAddressDetails(text))
 	if s.Scrub != nil {
 		text = s.Scrub(text)
 	}

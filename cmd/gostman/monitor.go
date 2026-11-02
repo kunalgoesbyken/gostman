@@ -149,8 +149,7 @@ func (i invocation) announce(ctx context.Context, record monitor.Record, previou
 		return
 	}
 	event := monitor.Event(record.Passed, previousFailed)
-	wanted := i.monitor.notifyOn == monitor.NotifyOnAlways || event != monitor.EventPassed
-	if !wanted || (event == monitor.EventFailed && previousFailed && i.monitor.notifyOn == monitor.NotifyOnFail) {
+	if !monitor.Wanted(i.monitor.notifyOn, event, previousFailed) {
 		return
 	}
 	if err := notifier.Post(ctx, monitor.NoticeFor(record, event)); err != nil {

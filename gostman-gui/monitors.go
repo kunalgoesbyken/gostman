@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"os"
 
 	"github.com/kunalgoesbyken/gostman/monitor"
 )
@@ -35,24 +34,11 @@ func (a *App) SaveMonitorRun(scope string, record monitor.Record, keep int) erro
 	return store.Save(record)
 }
 
-func (a *App) ForgetMonitorRuns(scope string) error {
-	store, err := monitorStore(scope, monitor.DefaultKeep)
-	if err != nil {
-		return err
-	}
-	return os.RemoveAll(store.Dir)
-}
-
 func (a *App) SaveMonitorWebhook(id, address string) error {
 	if err := (monitor.Notifier{Address: address}).Validate(); err != nil {
 		return err
 	}
 	return vault.set(monitorWebhookPrefix+id, address)
-}
-
-func (a *App) HasMonitorWebhook(id string) bool {
-	_, found := vault.get(monitorWebhookPrefix + id)
-	return found
 }
 
 func (a *App) DeleteMonitorWebhook(id string) error {

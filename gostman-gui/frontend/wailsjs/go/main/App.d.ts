@@ -91,8 +91,6 @@ export function FetchLink(arg1:string):Promise<deeplink.Reply>;
 
 export function FetchToken(arg1:engine.TokenExchange):Promise<engine.Token>;
 
-export function ForgetMonitorRuns(arg1:string):Promise<void>;
-
 export function ForgetWorkspace(arg1:string):Promise<main.WorkspaceStatus>;
 
 export function GitAbortMerge():Promise<void>;
@@ -152,8 +150,6 @@ export function GitSwitchBranch(arg1:string,arg2:boolean):Promise<void>;
 export function GitUnstage(arg1:Array<string>):Promise<void>;
 
 export function GitVersion(arg1:string,arg2:string):Promise<gitutil.Version>;
-
-export function HasMonitorWebhook(arg1:string):Promise<boolean>;
 
 export function HeldExchanges():Promise<Array<capture.Held>>;
 
