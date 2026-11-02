@@ -297,7 +297,7 @@ jobs:
           owner="${GITHUB_REPOSITORY_OWNER}"
           git clone "https://x-access-token:${PACKAGE_REPOS_TOKEN}@github.com/$owner/homebrew-tap.git" "$RUNNER_TEMP/tap"
           git clone "https://x-access-token:${PACKAGE_REPOS_TOKEN}@github.com/$owner/scoop-gostman.git" "$RUNNER_TEMP/scoop"
-          scripts/update-package-repos.sh "${{ needs.plan.outputs.version }}" "$RUNNER_TEMP/tap" "$RUNNER_TEMP/scoop"
+          bash scripts/update-package-repos.sh "${{ needs.plan.outputs.version }}" "$RUNNER_TEMP/tap" "$RUNNER_TEMP/scoop"
 
       - name: Skip package repositories
         if: env.PACKAGE_REPOS_TOKEN == ''
