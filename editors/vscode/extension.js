@@ -22,12 +22,7 @@ function execute(args) {
     vscode.window.showErrorMessage("Gostman: the value contains control characters.");
     return;
   }
-  const strong = (value) => ({ value, quoting: vscode.ShellQuoting.Strong });
-  const execution = new vscode.ShellExecution(
-    strong(settings().get("path", "gostman")),
-    parts.map(strong),
-    { cwd: rootFolder() },
-  );
+  const execution = new vscode.ProcessExecution(settings().get("path", "gostman"), parts, { cwd: rootFolder() });
   const task = new vscode.Task({ type: "gostman" }, vscode.TaskScope.Workspace, "Gostman", "gostman", execution);
   task.presentationOptions = { reveal: vscode.TaskRevealKind.Always, clear: true };
   vscode.tasks.executeTask(task);
