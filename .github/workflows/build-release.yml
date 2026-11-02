@@ -224,6 +224,7 @@ jobs:
         with:
           sparse-checkout: CHANGELOG.md
           sparse-checkout-cone-mode: false
+          clean: false
 
       - name: Take the notes of this version from the changelog
         env:
