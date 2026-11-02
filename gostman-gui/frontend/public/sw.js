@@ -60,7 +60,7 @@ async function navigation(request) {
 
 self.addEventListener('fetch', (event) => {
   const { request } = event
-  if (request.method !== 'GET') return
+  if (request.method !== 'GET' || request.headers.has('range')) return
   const url = new URL(request.url)
   if (!isCacheable(url)) return
   if (request.mode === 'navigate') {
