@@ -9,6 +9,7 @@ import (
 
 	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/locales"
+	"github.com/kunalgoesbyken/gostman/runner"
 )
 
 const (
@@ -71,7 +72,7 @@ func buildTable(sources []Source, variables string, config Config) (*table, erro
 	if err != nil {
 		return nil, err
 	}
-	rules, err := compileRules(config.Rules)
+	rules, err := compileRules(config.Rules, config.Files)
 	if err != nil {
 		return nil, err
 	}
@@ -182,20 +183,18 @@ type decision struct {
 	rule     string
 	answer   answer
 	params   map[string]string
+	row      runner.Row
 	behavior Behavior
 }
 
 func (t *table) resolve(e *exchange) (decision, bool) {
 	route, params, routed := t.find(e.method, e.parts)
 	for _, rule := range t.rules {
-		ruleParams, matched := rule.matches(e)
+		hit, matched := rule.matches(e, params)
 		if !matched {
 			continue
 		}
-		if rule.hasPath {
-			params = ruleParams
-		}
-		return rule.decide(route, routed, params), true
+		return rule.decide(route, routed, hit), true
 	}
 	if !routed {
 		return decision{}, false
@@ -226,8 +225,8 @@ func (r servedRoute) requested(header http.Header) answer {
 	return problem(http.StatusNotFound, fmt.Sprintf(reasonNoMatch, r.name))
 }
 
-func (r *compiledRule) decide(route servedRoute, routed bool, params map[string]string) decision {
-	chosen := decision{route: r.Name, rule: r.Name, params: params, behavior: r.Behavior}
+func (r *compiledRule) decide(route servedRoute, routed bool, hit ruleHit) decision {
+	chosen := decision{route: r.Name, rule: r.Name, params: hit.params, row: hit.row, behavior: r.Behavior}
 	base := answer{status: http.StatusOK}
 	if routed {
 		base = route.answerFor(r.ExampleID)
@@ -236,7 +235,7 @@ func (r *compiledRule) decide(route servedRoute, routed bool, params map[string]
 			chosen.behavior = route.behavior
 		}
 	}
-	chosen.answer = r.overlay(base)
+	chosen.answer = r.overlay(base, hit.row)
 	return chosen
 }
 

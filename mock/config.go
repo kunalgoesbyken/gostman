@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/kunalgoesbyken/gostman/engine"
 	"gopkg.in/yaml.v3"
 )
 
@@ -33,6 +34,7 @@ type Config struct {
 	Rules      []Rule                  `json:"rules"`
 	Routes     map[string]RouteOptions `json:"routes"`
 	Selections map[string]string       `json:"selections"`
+	Files      engine.FileReader       `json:"-"`
 }
 
 func DefaultConfig() Config {

@@ -35,6 +35,7 @@ const (
   gostman relay [flags]
   gostman scan <workspace folder | export.json> [flags]
   gostman negative <workspace folder | export.json> [flags]
+  gostman fuzz <spec file | address> --base-url <url> [flags]
   gostman lint <spec file | address> [flags]
   gostman diff <old spec> <new spec> [flags]
   gostman init [folder] [--skill]
@@ -412,6 +413,26 @@ negative
   --fail-on <level>     exit 1 for findings of this severity or higher: low,
                         medium (default), high or none
 
+fuzz
+  Reads an OpenAPI 3.x or Swagger 2.0 document, builds inputs for each
+  operation from its schemas (valid values, boundary values at minimum,
+  maximum, length and item limits, and invalid ones: wrong types, values
+  outside an enum, malformed formats, missing required fields), sends them
+  and reports 5xx answers, timeouts and responses that break the document's
+  response schemas. The same --seed gives the same requests. JSON bodies,
+  path, query and header parameters are fuzzed. Only localhost and the hosts
+  named with --allow-host are contacted.
+  --base-url <url>      server to send to (default: the document's first server)
+  --seed <n>            random seed (default 1)
+  --max <n>             stop after n requests (default 200)
+  --per-operation <n>   inputs per operation, the valid one included (default 25)
+  --only <operation>    limit to an operation such as "GET /pets/{id}" (repeatable)
+  --timeout <duration>  per request (default 10s)
+  --allow-host <host>   also send to this host (repeatable)
+  --rate <n>            requests per second (default 5)
+  --reporter text|json, --fail-on <level>, --var, --var-from-env, --cacert,
+  --client-cert, --client-key, --proxy as for negative
+
 lint
   Check an OpenAPI 3.x or Swagger 2.0 document (JSON or YAML, a file or an
   http(s) address) against the built-in rules and print the findings.
@@ -576,6 +597,8 @@ func dispatch(arguments []string, stdout, stderr *os.File) int {
 		return relayCommand(arguments[1:], stdout, stderr)
 	case "scan":
 		return scanCommand(arguments[1:], stdout, stderr)
+	case "fuzz":
+		return fuzzCommand(arguments[1:], stdout, stderr)
 	case "negative":
 		return negativeCommand(arguments[1:], stdout, stderr)
 	case "lint":

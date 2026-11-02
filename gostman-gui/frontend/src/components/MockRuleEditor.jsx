@@ -9,11 +9,12 @@ import { Select } from "./ui/select"
 import { Textarea } from "./ui/textarea"
 import { MethodTag } from "./MethodTag"
 import { MockBehaviorFields, NumberInput } from "./MockBehaviorFields"
-import { FIELD_BODY, FIELD_HEADER, FIELD_QUERY, OP_CONTAINS, OP_EQUALS, OP_EXISTS, emptyCondition, headersToText, textToHeaders, toCount, toStatus } from "../lib/mockServer"
+import { FIELD_BODY, FIELD_HEADER, FIELD_PARAM, FIELD_QUERY, OP_CONTAINS, OP_EQUALS, OP_EXISTS, emptyCondition, emptyDataLookup, headersToText, keepData, textToHeaders, toCount, toStatus } from "../lib/mockServer"
 import { MOCK_TEXT } from "../lib/mockText"
 
 const RULE_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]
 const FIELDS = [FIELD_QUERY, FIELD_HEADER, FIELD_BODY]
+const DATA_FIELDS = [FIELD_PARAM, FIELD_QUERY, FIELD_HEADER, FIELD_BODY]
 const OPS = [OP_EQUALS, OP_CONTAINS, OP_EXISTS]
 
 function ConditionRow({ condition, onChange, onRemove }) {
@@ -68,6 +69,25 @@ function Conditions({ conditions, onChange }) {
   )
 }
 
+function DataFields({ data, onChange }) {
+  const lookup = data || emptyDataLookup()
+  const set = (changes) => onChange(keepData({ ...lookup, ...changes }))
+  return (
+    <div className="flex flex-col gap-2">
+      <SectionLabel>{MOCK_TEXT.dataTitle}</SectionLabel>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1.5fr)_8rem_minmax(0,1fr)_minmax(0,1fr)]">
+        <Input value={lookup.file} onChange={(event) => set({ file: event.target.value })} placeholder={MOCK_TEXT.dataFile} aria-label={MOCK_TEXT.dataFile} className="font-mono" />
+        <Select value={lookup.field} onChange={(event) => set({ field: event.target.value })} aria-label={MOCK_TEXT.dataField}>
+          {DATA_FIELDS.map((field) => <option key={field} value={field}>{MOCK_TEXT.fields[field]}</option>)}
+        </Select>
+        <Input value={lookup.name} onChange={(event) => set({ name: event.target.value })} placeholder={MOCK_TEXT.dataName} aria-label={MOCK_TEXT.dataName} className="font-mono" />
+        <Input value={lookup.column} onChange={(event) => set({ column: event.target.value })} placeholder={MOCK_TEXT.dataColumn} aria-label={MOCK_TEXT.dataColumn} className="font-mono" />
+      </div>
+      <p className="text-xs text-muted-foreground">{MOCK_TEXT.dataHint}</p>
+    </div>
+  )
+}
+
 function HeadersField({ headers, onCommit }) {
   const [text, setText] = useState(headersToText(headers))
   return (
@@ -93,6 +113,7 @@ function RuleForm({ rule, onChange }) {
         <Input value={rule.path} onChange={(event) => onChange({ path: event.target.value })} placeholder={MOCK_TEXT.pathPlaceholder} aria-label={MOCK_TEXT.pathLabel} className="font-mono" />
       </div>
       <Conditions conditions={rule.conditions} onChange={(conditions) => onChange({ conditions })} />
+      <DataFields data={rule.data} onChange={(data) => onChange({ data })} />
       <SectionLabel>{MOCK_TEXT.respond}</SectionLabel>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <Field label={MOCK_TEXT.status}>

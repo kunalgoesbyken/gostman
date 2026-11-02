@@ -67,6 +67,10 @@ func parseNegating(arguments []string) (negating, error) {
 }
 
 func (n negating) permits(host string) bool {
+	return permitsHost(n.allowHosts, host)
+}
+
+func permitsHost(allowHosts listFlag, host string) bool {
 	name := strings.ToLower(host)
 	if stripped, _, err := net.SplitHostPort(name); err == nil {
 		name = stripped
@@ -75,7 +79,7 @@ func (n negating) permits(host string) bool {
 	if name == "localhost" || net.ParseIP(name).IsLoopback() {
 		return true
 	}
-	for _, allowed := range n.allowHosts {
+	for _, allowed := range allowHosts {
 		if strings.EqualFold(strings.TrimSpace(allowed), name) {
 			return true
 		}

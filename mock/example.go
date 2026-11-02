@@ -125,7 +125,7 @@ func problem(status int, message string) answer {
 	body, _ := json.Marshal(map[string]string{"error": message})
 	return answer{
 		status:  status,
-		headers: []Header{{Key: headerContentType, Value: "application/json"}},
+		headers: []Header{{Key: headerContentType, Value: contentTypeJSON}},
 		body:    body,
 	}
 }

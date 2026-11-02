@@ -10,6 +10,8 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 - Inline AI suggestions in the pre-request and post-response script editors: opt-in in the AI settings, sent only after a pause, with variable names but never values, and accepted with Tab; see [Inline suggestions](docs/ai.md#inline-suggestions).
 - NATS requests: request and reply, publish, or wait for one message on a subject, over the plain text protocol, in the desktop app; see [NATS](docs/protocols.md#nats).
 - The importers read Firecamp collection exports; see [Other tools](docs/import-export-and-specs.md#other-tools).
+- `gostman fuzz <spec> --base-url <url>` sends schema-derived valid, boundary and invalid inputs for every operation of an OpenAPI or Swagger document, with `--seed`, `--max` and `--per-operation`, and reports 5xx answers, timeouts and contract violations; see [Fuzzing from an OpenAPI spec](docs/cli.md#fuzzing-from-an-openapi-spec).
+- A mock rule can answer with the row of a CSV, JSON or XLSX data file that matches a path parameter, query value, header or body field, with `{{row.column}}` in the body; see [Data file rules](docs/workspaces-and-mock.md#data-file-rules).
 
 ## [1.9.0] - 2026-11-02
 

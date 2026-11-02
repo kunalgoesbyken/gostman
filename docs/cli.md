@@ -27,6 +27,7 @@ gostman export orders-api --format openapi --out openapi.json
 - `lint` checks an OpenAPI spec for problems; see [Linting an OpenAPI spec](#linting-an-openapi-spec).
 - `diff` compares two OpenAPI specs and lists breaking changes; see [Comparing two OpenAPI specs](#comparing-two-openapi-specs).
 - `negative` sends altered copies of the saved requests and reports answers that look wrong; see [Negative tests](#negative-tests).
+- `fuzz` sends inputs derived from the schemas of an OpenAPI spec and reports 5xx answers, timeouts and contract violations; see [Fuzzing from an OpenAPI spec](#fuzzing-from-an-openapi-spec).
 - `docs` writes the collection as one self-contained HTML page, to stdout or to `--output file`. `--title` sets the page title (default `API documentation`), `--no-examples` leaves out saved example responses and `--playground` adds a **Try it** panel, `--logo` and `--accent` brand the page, and `--versions` or `--all-tags` build one page per Git version; see [Generated documentation](#generated-documentation).
 - `relay` lets the web app send its requests from your computer; see [Local relay for the web app](#local-relay-for-the-web-app).
 - `import` and `export` convert a workspace from and to other tools' formats; see [Import and export](#import-and-export).
@@ -211,6 +212,18 @@ For each request it sends:
 Findings: `accepted` (a 2xx or 3xx where a rejection was expected; high for credentials, medium for wrong types, malformed and oversized bodies, low for a removed field, which may be optional), `server-error` (5xx), `stack-trace` and `sql-error` (the body shows one), and `reflected` (an injected string comes back unchanged). Findings are hints to review, and an API can accept an input on purpose.
 
 Requests are sent for real, so run it against a test or staging environment. Only `localhost` and loopback addresses and the hosts named with `--allow-host` (repeatable) are contacted; a request to any other host gets no response and is counted as not sent. The default rate is 5 requests a second (`--rate`) and a run stops after 300 requests (`--max-requests`). `--only` and `--folder` limit it to some requests. The app has the same checks in **Negative tests**; see [Negative tests](runner-load-and-scan.md#negative-tests). Agent sessions (`gostman mcp`) have no tool for it. `--reporter json` prints the findings as JSON. The command exits 1 when a finding has the severity of `--fail-on` (`low`, `medium` by default, `high` or `none`) or higher, 2 for wrong input, 0 otherwise. Variants are built from the saved requests, so requests created from an OpenAPI spec are covered through their saved bodies and parameters.
+
+## Fuzzing from an OpenAPI spec
+
+```bash
+gostman fuzz openapi.yaml --base-url http://localhost:8080 --seed 7 --max 300
+```
+
+`gostman fuzz <spec file | address>` reads an OpenAPI 3.x or Swagger 2.0 document and builds inputs from its schemas for every operation: one valid input, boundary values (the minimum and maximum, lengths and item counts at their limits, empty and very long text, 32-bit and 64-bit integer limits) and invalid ones (a wrong type, `null`, a value outside an enum, a malformed `date-time`, `email` or `uuid`, a number past a limit, a missing required parameter or property, an unexpected property when `additionalProperties` is false). Path, query and header parameters and JSON request bodies are covered; other body types are not.
+
+Each input is sent to `--base-url` (default: the first server in the document). Findings: `server-error` (a 5xx, high), `timeout` (no answer within `--timeout`, default 10 seconds, medium) and `contract` (the answer breaks the response schemas or documented status codes of the document, medium). The same `--seed` (default 1) gives the same requests, so a finding can be reproduced; `--per-operation` (default 25) bounds the inputs for each operation and `--max` (default 200) the whole run. `--only "GET /pets/{id}"` limits the run to operations (repeatable). Variables the document's security schemes need, such as `{{token}}`, come from `--var` and `--var-from-env`; their values are masked in the output.
+
+Like [Negative tests](#negative-tests), requests are sent for real, only `localhost` and the hosts named with `--allow-host` are contacted, the rate is 5 requests a second (`--rate`), `--reporter json` prints JSON and `--fail-on` (`low`, `medium` by default, `high` or `none`) sets the severity that exits 1. Agent sessions have no tool for it.
 
 ## Linting an OpenAPI spec
 

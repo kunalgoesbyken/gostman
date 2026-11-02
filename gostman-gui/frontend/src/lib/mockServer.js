@@ -23,6 +23,7 @@ export const FAULT_EMPTY = 'empty'
 export const FIELD_QUERY = 'query'
 export const FIELD_HEADER = 'header'
 export const FIELD_BODY = 'body'
+export const FIELD_PARAM = 'param'
 
 export const OP_EQUALS = 'equals'
 export const OP_CONTAINS = 'contains'
@@ -59,9 +60,14 @@ export const emptyRule = () => ({
   headers: [],
   body: '',
   behavior: emptyBehavior(),
+  data: null,
 })
 
 export const emptyCondition = () => ({ field: FIELD_QUERY, name: '', op: OP_EQUALS, value: '' })
+
+export const emptyDataLookup = () => ({ file: '', field: FIELD_PARAM, name: '', column: '' })
+
+export const keepData = (lookup) => (lookup.file || lookup.name || lookup.column ? lookup : null)
 
 const normalizeBehavior = (raw) => ({
   ...emptyBehavior(),

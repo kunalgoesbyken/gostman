@@ -346,6 +346,11 @@
       "blurb": "Compare a response value with a stored snapshot, leave out paths that change and refresh it from the last response.",
       "synonyms": "snapshot golden diff regression matches ignore"
     },
+    "openapiFuzz": {
+      "title": "OpenAPI fuzzing",
+      "blurb": "Send schema-derived valid, boundary and invalid inputs for every operation of a spec and report 5xx answers, timeouts and contract violations.",
+      "synonyms": "openapi fuzz fuzzing schemathesis property based boundary invalid inputs swagger"
+    },
     "negativeTests": {
       "title": "Negative tests",
       "blurb": "Send altered copies of saved requests and flag a 2xx for bad input, a 5xx, a stack trace or a reflected payload.",
@@ -429,6 +434,11 @@
       "synonyms": "mock server stub fake wiremock prism examples",
       "tool": "Mock server",
       "webInstead": "On the web, save examples on your requests; they are kept with the collection and included in exports. To serve them over HTTP, run the mock server from the CLI or the desktop app."
+    },
+    "mockDataRows": {
+      "title": "Mock responses from a data file",
+      "blurb": "Answer with the row of a CSV, JSON or XLSX file that matches a path parameter, query value, header or body field.",
+      "synonyms": "mock data file csv xlsx json rows lookup fixture wiremock"
     },
     "mockRules": {
       "title": "Mock rules",

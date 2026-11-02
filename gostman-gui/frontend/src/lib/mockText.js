@@ -6,6 +6,9 @@ const BODY_PLACEHOLDERS = ['request.params.id', 'request.query.x', 'request.head
 const text = messages('mock', english, (t) => ({
   mock: {
     specLoaded: (title, count) => t('mock.specLoaded', { title: title || t('mock.specUntitled'), count }),
+    get dataHint() {
+      return t('mock.dataHint', { example: '{{row.column}}' })
+    },
     get bodyHint() {
       return t('mock.bodyHint', { placeholders: BODY_PLACEHOLDERS.map((name) => `{{${name}}}`).join(', ') })
     },

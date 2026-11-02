@@ -17,6 +17,10 @@ func ReadText(path string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	return DecodeText(content)
+}
+
+func DecodeText(content []byte) ([]byte, error) {
 	if bytes.HasPrefix(content, utf16LittleEndianMark) || bytes.HasPrefix(content, utf16BigEndianMark) {
 		return unicode.UTF16(unicode.LittleEndian, unicode.UseBOM).NewDecoder().Bytes(content)
 	}

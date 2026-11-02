@@ -28,7 +28,7 @@ func ImportRules(data []byte) ([]Rule, error) {
 	if imported.Kind != RulesKind {
 		return nil, fmt.Errorf("the file is not a Gostman mock rules file")
 	}
-	if _, err := compileRules(imported.Rules); err != nil {
+	if err := checkRules(imported.Rules); err != nil {
 		return nil, err
 	}
 	for i := range imported.Rules {

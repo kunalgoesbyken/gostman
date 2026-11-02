@@ -31,19 +31,22 @@ func (o Options) DataValues() map[string]string {
 }
 
 func LoadData(path string) ([]Row, error) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("cannot read the data file: %w", err)
+	}
+	return ParseData(path, content)
+}
+
+func ParseData(path string, content []byte) ([]Row, error) {
 	var rows []Row
 	var err error
 	extension := strings.ToLower(filepath.Ext(path))
 	if extension == ".xlsx" {
-		var workbook []byte
-		workbook, err = os.ReadFile(path)
-		if err != nil {
-			return nil, fmt.Errorf("cannot read the data file: %w", err)
-		}
-		rows, err = parseXLSXRows(workbook)
+		rows, err = parseXLSXRows(content)
 		return finishRows(path, rows, err)
 	}
-	content, err := ReadText(path)
+	content, err = DecodeText(content)
 	if err != nil {
 		return nil, fmt.Errorf("cannot read the data file: %w", err)
 	}

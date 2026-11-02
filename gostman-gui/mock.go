@@ -57,6 +57,7 @@ func (a *App) MockFromSpec(source openapi.Source) (mock.Spec, error) {
 }
 
 func (a *App) MockRoutes(sources []mock.Source, variables string, config mock.Config) ([]mock.Route, error) {
+	config.Files = workspaceFiles()
 	return mock.Plan(sources, variables, config)
 }
 
@@ -70,6 +71,7 @@ func (a *App) StartMock(sources []mock.Source, variables string, config mock.Con
 	if config.Settings.Port == 0 {
 		config.Settings.Port = mock.DefaultPort
 	}
+	config.Files = workspaceFiles()
 	server, err := mock.Start(sources, variables, config, a.emitMockRequest)
 	if err != nil {
 		return MockState{}, err
@@ -85,6 +87,7 @@ func (a *App) UpdateMock(sources []mock.Source, variables string, config mock.Co
 	if mockServer == nil {
 		return MockState{}, fmt.Errorf("the mock server is not running")
 	}
+	config.Files = workspaceFiles()
 	if _, err := mockServer.Update(sources, variables, config); err != nil {
 		return MockState{}, err
 	}

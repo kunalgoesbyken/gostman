@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/runner"
 )
 
 const (
@@ -19,12 +20,13 @@ var errResponseTooLarge = fmt.Errorf("the response is larger than %d MB once the
 
 type renderer struct {
 	exchange  *exchange
+	row       runner.Row
 	expansion *engine.Expansion
 	written   int
 }
 
-func (a answer) render(e *exchange) (answer, error) {
-	filler := &renderer{exchange: e}
+func (a answer) render(e *exchange, row runner.Row) (answer, error) {
+	filler := &renderer{exchange: e, row: row}
 	headers := make([]Header, len(a.headers))
 	for i, header := range a.headers {
 		value, err := filler.fill(header.Value, nil)
@@ -75,11 +77,10 @@ func (r *renderer) fill(text string, escape func(string) string) (string, error)
 func (r *renderer) resolve(placeholder string, escape func(string) string) (string, error) {
 	name := strings.TrimSpace(placeholder[len(placeholderOpen) : len(placeholder)-len(placeholderOpen)])
 	if requested, ok := strings.CutPrefix(name, requestScope); ok {
-		value := r.exchange.lookup(requested)
-		if escape != nil {
-			return escape(value), nil
-		}
-		return value, nil
+		return escaped(r.exchange.lookup(requested), escape), nil
+	}
+	if column, ok := strings.CutPrefix(name, rowScope); ok {
+		return escaped(rowText(r.row[column]), escape), nil
 	}
 	if r.expansion == nil {
 		expansion, err := engine.NewExpansion(noVariables)
@@ -90,6 +91,13 @@ func (r *renderer) resolve(placeholder string, escape func(string) string) (stri
 	}
 	value := r.expansion.Text(placeholder)
 	return value, r.expansion.Err()
+}
+
+func escaped(value string, escape func(string) string) string {
+	if escape == nil {
+		return value
+	}
+	return escape(value)
 }
 
 func escaperFor(headers []Header) func(string) string {

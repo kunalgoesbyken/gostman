@@ -116,6 +116,7 @@ type Rule struct {
 	Headers    []Header    `json:"headers"`
 	Body       string      `json:"body"`
 	Behavior   Behavior    `json:"behavior"`
+	Data       *DataLookup `json:"data,omitempty"`
 }
 
 type Entry struct {

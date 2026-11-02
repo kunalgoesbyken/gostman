@@ -29,11 +29,28 @@ Save any response as a named example from the response panel (up to 20 per reque
 - Examples travel with exports and workspace folders, so they can contain whatever the response body held.
 - **From OpenAPI spec**: load a spec from an address or a file and every operation becomes a route (base path from `servers`, `{id}` segments typed by the spec, status codes, headers and example bodies from the spec). Operations without an example answer with an empty body.
 - **Rules** run before the routes, in the order listed; the first match wins. A rule can match the method, a path template, query parameters, headers and JSON body values (`$.user.name`) and then override the status, headers and body, or only answer its Nth match.
+- **Data file rules** (see [Data file rules](#data-file-rules)): a rule can pick its response from a row of a CSV, JSON or XLSX file.
 - **Templating**: response bodies and headers can use `{{request.params.id}}`, `{{request.query.x}}`, `{{request.header.x}}`, `{{request.body.json.path}}` and the dynamic variables `{{$guid}}`, `{{$timestamp}}`, `{{$randomInt}}`. Missing values render empty, and values are escaped inside JSON responses.
 - **Behavior**, for the whole server or one route or rule: a fixed or ranged delay, a slow body, and failures (an error status, a connection reset or an empty reply) at a chosen rate. CORS is off by default; when on, only localhost origins (any port, `127.0.0.1`, `[::1]`) are answered, and the CLI's repeatable `--cors-origin https://app.example.com` adds exact extra origins. Other origins get no CORS headers.
 - **Rules file**: **Export rules** and **Import rules** on the Rules tab save and read the rules as a separate YAML file (`kind: gostman-mock-rules`), so a set of rules can move between workspaces. Imported rules arrive switched off.
 - **Log**: the last 500 requests with headers and body (up to 4 KB). Credential-like header names and query parameters show as `***`.
-- Rules, per-route options and an imported spec are saved in `.gostman/mock.yaml` of a workspace folder, or in the app data folder otherwise. The server binds to `127.0.0.1` only, refuses other `Host` headers, never reads files, and caps request bodies at 10 MB, responses at 10 MB, routes at 10,000 and rules at 200.
+- Rules, per-route options and an imported spec are saved in `.gostman/mock.yaml` of a workspace folder, or in the app data folder otherwise. The server binds to `127.0.0.1` only, refuses other `Host` headers, reads files only for [data file rules](#data-file-rules), and caps request bodies at 10 MB, responses at 10 MB, routes at 10,000 and rules at 200.
+
+## Data file rules
+
+A rule can answer from a data file, in the same formats as the runner's [data files](runner-load-and-scan.md#data-files) (CSV, JSON array of objects, or the first sheet of an XLSX workbook, the first row naming the columns). In the **Data file** part of a rule, name the file, what to match in the request (a path parameter such as `id`, a query value, a header, or a JSON body path such as `$.user.id`) and the column to compare it with. In `.gostman/mock.yaml`:
+
+```yaml
+rules:
+  - name: user by id
+    method: GET
+    path: /users/{id}
+    data: { file: users.csv, field: param, name: id, column: id }
+```
+
+A request whose value equals a cell of the column gets that row as a JSON object; with a rule body, the body is used instead and `{{row.name}}` fills in a column of the row. When two rows share a value the first wins, and a request with no matching row (or an empty value) does not match the rule, so later rules and the routes answer it. The rule's status, headers and behavior apply as usual.
+
+The file is read when the server starts or the rules change, from the open workspace folder only (a path outside it is refused), up to 100,000 rows. An untrusted folder cannot read files until you trust it, the web app has no mock server, and rules imported from a rules file or run by an agent session never read files.
 
 ## Capture (desktop and CLI)
 

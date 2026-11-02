@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/openapi"
 	"github.com/kunalgoesbyken/gostman/runner/sandbox"
 )
 
@@ -96,6 +97,10 @@ func (s *Session) LoadCollectionVariables(stored Collection) error {
 	}
 	s.state.values.load(process, globals, collection)
 	return nil
+}
+
+func (s *Session) UseContract(spec *openapi.Contract) {
+	s.state.contract = newContract(spec)
 }
 
 func (s *Session) Environment() string {

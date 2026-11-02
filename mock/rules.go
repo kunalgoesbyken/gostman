@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"strings"
 	"sync/atomic"
+
+	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/runner"
 )
 
 const (
@@ -16,19 +19,32 @@ type compiledRule struct {
 	Rule
 	shape   pattern
 	hasPath bool
+	data    *dataset
 	calls   atomic.Int64
 }
 
-func compileRules(rules []Rule) ([]*compiledRule, error) {
+func checkRules(rules []Rule) error {
 	if len(rules) > maxRules {
-		return nil, fmt.Errorf("the mock server takes at most %d rules, but %d were given", maxRules, len(rules))
+		return fmt.Errorf("the mock server takes at most %d rules, but %d were given", maxRules, len(rules))
+	}
+	for _, rule := range rules {
+		if err := rule.validate(); err != nil {
+			return fmt.Errorf("rule %q: %w", rule.Name, err)
+		}
+	}
+	return nil
+}
+
+func compileRules(rules []Rule, files engine.FileReader) ([]*compiledRule, error) {
+	if err := checkRules(rules); err != nil {
+		return nil, err
 	}
 	compiled := make([]*compiledRule, 0, len(rules))
 	for _, rule := range rules {
 		if rule.Disabled {
 			continue
 		}
-		next, err := compileRule(rule)
+		next, err := compileRule(rule, files)
 		if err != nil {
 			return nil, fmt.Errorf("rule %q: %w", rule.Name, err)
 		}
@@ -37,11 +53,15 @@ func compileRules(rules []Rule) ([]*compiledRule, error) {
 	return compiled, nil
 }
 
-func compileRule(rule Rule) (*compiledRule, error) {
-	if err := rule.validate(); err != nil {
-		return nil, err
-	}
+func compileRule(rule Rule, files engine.FileReader) (*compiledRule, error) {
 	compiled := &compiledRule{Rule: rule}
+	if rule.Data != nil {
+		data, err := rule.Data.load(files)
+		if err != nil {
+			return nil, err
+		}
+		compiled.data = data
+	}
 	compiled.Method = strings.ToUpper(strings.TrimSpace(rule.Method))
 	compiled.Headers = servedHeaders(rule.Headers)
 	if strings.TrimSpace(rule.Path) != "" {
@@ -62,6 +82,11 @@ func (r Rule) validate() error {
 	}
 	for _, condition := range r.Conditions {
 		if err := condition.validate(); err != nil {
+			return err
+		}
+	}
+	if r.Data != nil {
+		if err := r.Data.validate(); err != nil {
 			return err
 		}
 	}
@@ -89,27 +114,39 @@ func (c Condition) validate() error {
 	return nil
 }
 
-func (r *compiledRule) matches(e *exchange) (map[string]string, bool) {
+type ruleHit struct {
+	params map[string]string
+	row    runner.Row
+}
+
+func (r *compiledRule) matches(e *exchange, routeParams map[string]string) (ruleHit, bool) {
 	if r.Method != "" && r.Method != e.method {
-		return nil, false
+		return ruleHit{}, false
 	}
-	var params map[string]string
+	hit := ruleHit{params: routeParams}
 	if r.hasPath {
 		matched, ok := r.shape.match(e.parts)
 		if !ok {
-			return nil, false
+			return ruleHit{}, false
 		}
-		params = matched
+		hit.params = matched
 	}
 	for _, condition := range r.Conditions {
 		if !condition.holds(e) {
-			return nil, false
+			return ruleHit{}, false
 		}
 	}
-	if r.Nth > 0 && r.calls.Add(1) != int64(r.Nth) {
-		return nil, false
+	if r.data != nil {
+		row, ok := r.data.pick(e, hit.params)
+		if !ok {
+			return ruleHit{}, false
+		}
+		hit.row = row
 	}
-	return params, true
+	if r.Nth > 0 && r.calls.Add(1) != int64(r.Nth) {
+		return ruleHit{}, false
+	}
+	return hit, true
 }
 
 func (c Condition) holds(e *exchange) bool {
@@ -148,9 +185,13 @@ func (c Condition) observed(e *exchange) ([]string, bool) {
 	return []string{textOf(value)}, present
 }
 
-func (r *compiledRule) overlay(base answer) answer {
+func (r *compiledRule) overlay(base answer, row runner.Row) answer {
 	if r.Status != 0 {
 		base.status = r.Status
+	}
+	if r.Body == "" && row != nil {
+		base.body, base.binary = rowJSON(row), false
+		base.headers = withHeaders(base.headers, []Header{{Key: headerContentType, Value: contentTypeJSON}})
 	}
 	base.headers = withHeaders(base.headers, r.Headers)
 	if r.Body != "" {

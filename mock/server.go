@@ -192,7 +192,7 @@ func (s *Server) respond(w http.ResponseWriter, r *http.Request, call *outcome) 
 		call.dropped = s.inject(w, r, current, behavior.Fault)
 		return
 	}
-	reply, err := chosen.answer.render(request)
+	reply, err := chosen.answer.render(request, chosen.row)
 	if err != nil {
 		s.send(w, r, current, problem(http.StatusInternalServerError, err.Error()), 0)
 		return

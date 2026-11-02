@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/kunalgoesbyken/gostman/agent"
+	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/mock"
 	"github.com/kunalgoesbyken/gostman/runner"
 	"github.com/kunalgoesbyken/gostman/workspace"
@@ -88,6 +89,7 @@ func workspaceInputs(root, environment string) (mockInputs, error) {
 	if err != nil {
 		return mockInputs{}, err
 	}
+	config.Files = engine.FolderFiles(folder.Root())
 	return mockInputs{sources: agent.MockSources(collection), variables: variables, config: config}, nil
 }
 
