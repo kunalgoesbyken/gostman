@@ -4,7 +4,6 @@ import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
-import { EmptyState } from "./ui/emptyState"
 import { FeatureEmpty } from "./FeatureEmpty"
 import { Input } from "./ui/input"
 import { Toolbar } from "./ui/panel"
@@ -370,7 +369,7 @@ export function RunnerDialog({ folders, requests, actions }) {
           <RequestChoices scoped={scoped} folders={folders} excluded={excluded} onChange={(ids) => setRunExclusions(folderId, ids)} />
         ) : results.length === 0 ? (
           <FeatureEmpty
-            surface={total === 0 && !isRunning ? "runner" : ""}
+            surface={total === 0 && !isRunning ? "runner" : undefined}
             icon={ListChecks}
             title={idleTitle(isRunning, total)}
             description={total === 0 && !isRunning ? RUNNER_TEXT.nothingToRunHint : RUNNER_TEXT.idle}

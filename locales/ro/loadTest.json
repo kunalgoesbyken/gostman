@@ -1,8 +1,6 @@
 {
   "loadTest": {
     "title": "Test de încărcare",
-    "commandTitle": "Test de încărcare pentru această cerere",
-    "commandDescription": "Trimite cererea curentă de multe ori simultan și măsoară latența",
     "barLabel": "Test de încărcare",
     "barHint": "Test de încărcare pentru această cerere",
     "notice": "Testați doar sisteme proprii sau pentru care aveți permisiunea de a testa. Fiecare worker trimite cererea așa cum este afișată aici, fără scripturi sau cookie-uri partajate.",

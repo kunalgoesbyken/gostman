@@ -120,6 +120,5 @@ export function createFeatureActions({ backend, commands, monitors, mock, captur
   return {
     canTry,
     open,
-    explore: (query = '') => store().openExplore('', query),
   }
 }

@@ -11,7 +11,6 @@
   "features.results": "Number of features found by a search.",
   "features.whatsNewTitle": "Title of the dialog that lists the features added in a version.",
   "features.whatsNewIntro": "{{version}} is a version number such as 1.9.0.",
-  "features.helpHide": "Button that hides a one-line hint above a request section.",
   "featureSamples.collection": "Name of a folder that is created in the user's sidebar. It becomes saved data, so it is translated when created.",
   "featureSamples.baseUrl": "Address of the local mock server that serves the sample requests. Keep it as it is.",
   "featureSamples.okExample": "Name of a saved response example.",

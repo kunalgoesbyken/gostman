@@ -69,57 +69,8 @@
       "newFolder": {
         "description": "在顶层创建文件夹"
       },
-      "runCollection": {
-        "description": "运行整个集合或某个文件夹，包括其检查和脚本"
-      },
       "collapseFolders": {
         "keywords": "关闭 折叠 树 close fold tree"
-      },
-      "examples": {
-        "label": "请求示例",
-        "description": "查看当前请求已保存的响应"
-      },
-      "mockServer": {
-        "description": "在本地端口提供已保存的示例"
-      },
-      "capture": {
-        "label": "捕获流量",
-        "description": "将应用的流量转发到其 API 并保存为请求"
-      },
-      "cookies": {
-        "label": "管理 Cookie",
-        "description": "查看并删除已存储的 Cookie"
-      },
-      "environments": {
-        "label": "管理环境",
-        "description": "创建环境并编辑其变量、集合变量和全局变量",
-        "keywords": "变量 全局变量 variables globals"
-      },
-      "scanSecrets": {
-        "keywords": "凭据 令牌 密码 泄露 credentials tokens passwords leak"
-      },
-      "network": {
-        "label": "网络设置",
-        "description": "代理和证书"
-      },
-      "import": {
-        "label": "导入数据",
-        "description": "导入 Postman、Insomnia、Bruno、OpenAPI、HAR 等文件"
-      },
-      "lintSpec": {
-        "description": "检查已导入的 OpenAPI 规范是否有问题",
-        "keywords": "验证 规范 openapi swagger validate governance"
-      },
-      "loadTest": {
-        "keywords": "性能 压力 performance stress"
-      },
-      "export": {
-        "label": "导出数据",
-        "description": "导出集合和环境"
-      },
-      "share": {
-        "label": "分享集合",
-        "description": "创建加密链接或文件，无需账号"
       },
       "clearHistory": {
         "description": "删除所有历史记录"

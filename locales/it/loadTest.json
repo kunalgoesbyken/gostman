@@ -1,8 +1,6 @@
 {
   "loadTest": {
     "title": "Test di carico",
-    "commandTitle": "Esegui un test di carico su questa richiesta",
-    "commandDescription": "Invia la richiesta corrente molte volte insieme e misura la latenza",
     "barLabel": "Test di carico",
     "barHint": "Esegui un test di carico su questa richiesta",
     "notice": "Testa solo sistemi di tua proprietà o per i quali hai il permesso di farlo. Ogni worker invia la richiesta così come è mostrata qui, senza script né cookie condivisi.",

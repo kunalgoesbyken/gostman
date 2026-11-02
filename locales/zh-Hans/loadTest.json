@@ -1,8 +1,6 @@
 {
   "loadTest": {
     "title": "负载测试",
-    "commandTitle": "对此请求做负载测试",
-    "commandDescription": "同时多次发送当前请求并测量延迟",
     "barLabel": "负载测试",
     "barHint": "对此请求做负载测试",
     "notice": "只测试你自己拥有或获准测试的系统。每个并发进程都会按这里显示的内容发送请求，不运行脚本，也不共享 Cookie。",

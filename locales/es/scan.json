@@ -1,7 +1,6 @@
 {
   "scan": {
     "title": "Buscar secretos",
-    "commandDescription": "Encuentra credenciales escritas en las solicitudes antes de compartirlas o subirlas",
     "intro": "Busca formatos de token conocidos, valores de aspecto aleatorio en campos de credenciales y contraseñas escritas en los ajustes de autenticación. Los valores escritos como {{example}} no suponen problema. Nada sale de esta ventana salvo la propia comprobación, y solo se muestran unos pocos caracteres de cada valor.",
     "includeExamples": "Incluir respuestas de ejemplo guardadas",
     "scanning": "Analizando",

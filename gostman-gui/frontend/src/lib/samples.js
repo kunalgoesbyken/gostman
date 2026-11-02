@@ -4,7 +4,7 @@ import { normalizeRequest } from './request'
 import { normalizeFlow } from './flows/model'
 
 export const SAMPLE_FOLDER_ID = 'folder-sample-collection'
-export const SAMPLE_SCAN_REQUEST_ID = 'request-sample-fake-token'
+const SAMPLE_SCAN_REQUEST_ID = 'request-sample-fake-token'
 
 const FAKE_TOKEN = 'ghp_aB3dE5gH7jK9mN1pQ3rS5tU7vW9xY1zA3bC5'
 const JSON_HEADERS = [{ key: 'Content-Type', value: 'application/json' }]
@@ -60,7 +60,7 @@ export function sampleCollection() {
   return { folder, requests }
 }
 
-export const SAMPLE_FLOW_ID = 'flow-sample-users'
+const SAMPLE_FLOW_ID = 'flow-sample-users'
 
 export const sampleFlow = () => normalizeFlow({
   id: SAMPLE_FLOW_ID,

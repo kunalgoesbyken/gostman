@@ -69,57 +69,8 @@
       "newFolder": {
         "description": "Crea una cartella al livello principale"
       },
-      "runCollection": {
-        "description": "Esegui l'intera raccolta o una cartella, con i suoi controlli e script"
-      },
       "collapseFolders": {
         "keywords": "chiudi comprimi albero"
-      },
-      "examples": {
-        "label": "Esempi della richiesta",
-        "description": "Vedi le risposte salvate della richiesta corrente"
-      },
-      "mockServer": {
-        "description": "Servi gli esempi salvati su una porta locale"
-      },
-      "capture": {
-        "label": "Cattura il traffico",
-        "description": "Inoltra il traffico di un'app alla sua API e salvalo come richieste"
-      },
-      "cookies": {
-        "label": "Gestisci i cookie",
-        "description": "Vedi ed elimina i cookie memorizzati"
-      },
-      "environments": {
-        "label": "Gestisci gli ambienti",
-        "description": "Crea ambienti e modifica le loro variabili, le variabili di raccolta e le globali",
-        "keywords": "variabili globali"
-      },
-      "scanSecrets": {
-        "keywords": "credenziali token password fuga"
-      },
-      "network": {
-        "label": "Impostazioni di rete",
-        "description": "Proxy e certificati"
-      },
-      "import": {
-        "label": "Importa dati",
-        "description": "Importa file di Postman, Insomnia, Bruno, OpenAPI, HAR e altri"
-      },
-      "lintSpec": {
-        "description": "Controlla se la specifica OpenAPI importata ha problemi",
-        "keywords": "openapi swagger convalida governance"
-      },
-      "loadTest": {
-        "keywords": "prestazioni stress"
-      },
-      "export": {
-        "label": "Esporta dati",
-        "description": "Esporta raccolte e ambienti"
-      },
-      "share": {
-        "label": "Condividi raccolta",
-        "description": "Crea un link o un file cifrato, senza bisogno di un account"
       },
       "clearHistory": {
         "description": "Elimina ogni voce della cronologia"

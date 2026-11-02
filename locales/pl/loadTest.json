@@ -1,8 +1,6 @@
 {
   "loadTest": {
     "title": "Test obciążeniowy",
-    "commandTitle": "Test obciążeniowy tego żądania",
-    "commandDescription": "Wyślij bieżące żądanie wiele razy jednocześnie i zmierz opóźnienie",
     "barLabel": "Test obciążeniowy",
     "barHint": "Test obciążeniowy tego żądania",
     "notice": "Testuj tylko systemy własne lub takie, co do których jest zgoda na testowanie. Każdy worker wysyła żądanie w takiej postaci, w jakiej jest tu pokazane, bez skryptów i wspólnych cookies.",

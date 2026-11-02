@@ -69,57 +69,8 @@
       "newFolder": {
         "description": "最上位にフォルダーを作成します"
       },
-      "runCollection": {
-        "description": "コレクション全体または1つのフォルダーを、チェックとスクリプトを含めて実行します"
-      },
       "collapseFolders": {
         "keywords": "閉じる 折りたたむ ツリー close fold tree"
-      },
-      "examples": {
-        "label": "リクエストの例",
-        "description": "現在のリクエストの保存済みレスポンスを表示します"
-      },
-      "mockServer": {
-        "description": "保存済みの例をローカルポートで提供します"
-      },
-      "capture": {
-        "label": "通信をキャプチャ",
-        "description": "アプリの通信をAPIに転送し、リクエストとして保存します"
-      },
-      "cookies": {
-        "label": "Cookieを管理",
-        "description": "保存されているCookieを表示・削除します"
-      },
-      "environments": {
-        "label": "環境を管理",
-        "description": "環境を作成し、その変数、コレクション変数、グローバル変数を編集します",
-        "keywords": "変数 グローバル variables globals"
-      },
-      "scanSecrets": {
-        "keywords": "認証情報 トークン パスワード 漏洩 credentials tokens passwords leak"
-      },
-      "network": {
-        "label": "ネットワーク設定",
-        "description": "プロキシと証明書"
-      },
-      "import": {
-        "label": "データをインポート",
-        "description": "Postman、Insomnia、Bruno、OpenAPI、HARなどのファイルをインポートします"
-      },
-      "lintSpec": {
-        "description": "インポートしたOpenAPI仕様に問題がないか確認します",
-        "keywords": "openapi swagger validate governance 検証"
-      },
-      "loadTest": {
-        "keywords": "パフォーマンス ストレス performance stress"
-      },
-      "export": {
-        "label": "データをエクスポート",
-        "description": "コレクションと環境をエクスポートします"
-      },
-      "share": {
-        "label": "コレクションを共有",
-        "description": "暗号化されたリンクまたはファイルを作成します（アカウント不要）"
       },
       "clearHistory": {
         "description": "履歴の項目をすべて削除します"

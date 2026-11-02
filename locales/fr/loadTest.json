@@ -1,8 +1,6 @@
 {
   "loadTest": {
     "title": "Test de charge",
-    "commandTitle": "Tester la charge de cette requête",
-    "commandDescription": "Envoie la requête actuelle de nombreuses fois simultanément et mesure la latence",
     "barLabel": "Test de charge",
     "barHint": "Tester la charge de cette requête",
     "notice": "Ne testez que des systèmes qui vous appartiennent ou que vous avez l’autorisation de tester. Chaque travailleur envoie la requête telle qu’elle est affichée ici, sans scripts ni cookies partagés.",

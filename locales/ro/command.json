@@ -69,57 +69,8 @@
       "newFolder": {
         "description": "Creează un dosar la nivelul superior"
       },
-      "runCollection": {
-        "description": "Rulează toată colecția sau un singur dosar, cu verificările și scripturile sale"
-      },
       "collapseFolders": {
         "keywords": "închidere restrângere arbore"
-      },
-      "examples": {
-        "label": "Exemple de cerere",
-        "description": "Afișează răspunsurile salvate ale cererii curente"
-      },
-      "mockServer": {
-        "description": "Servește exemplele salvate pe un port local"
-      },
-      "capture": {
-        "label": "Captură trafic",
-        "description": "Redirecționează traficul unei aplicații către API-ul ei și îl salvează ca cereri"
-      },
-      "cookies": {
-        "label": "Gestionare cookie-uri",
-        "description": "Vedeți și ștergeți cookie-urile stocate"
-      },
-      "environments": {
-        "label": "Gestionare medii",
-        "description": "Creați medii și editați variabilele lor, variabilele colecției și cele globale",
-        "keywords": "variabile globale"
-      },
-      "scanSecrets": {
-        "keywords": "credențiale tokenuri parole scurgere"
-      },
-      "network": {
-        "label": "Setări de rețea",
-        "description": "Proxy și certificate"
-      },
-      "import": {
-        "label": "Importare date",
-        "description": "Importă fișiere Postman, Insomnia, Bruno, OpenAPI, HAR și altele"
-      },
-      "lintSpec": {
-        "description": "Verifică specificația OpenAPI importată pentru probleme",
-        "keywords": "openapi swagger validare guvernanță"
-      },
-      "loadTest": {
-        "keywords": "performanță stres"
-      },
-      "export": {
-        "label": "Exportare date",
-        "description": "Exportă colecții și medii"
-      },
-      "share": {
-        "label": "Partajare colecție",
-        "description": "Creează un link sau un fișier criptat, fără cont"
       },
       "clearHistory": {
         "description": "Șterge fiecare intrare din istoric"

@@ -1,6 +1,5 @@
 {
   "loadTest.title": "Title of the dialog.",
-  "loadTest.commandTitle": "Entry in the command palette.",
   "loadTest.barLabel": "Accessible name of the button next to the request bar.",
   "loadTest.notice": "Legal and practical warning shown at the top of the dialog.",
   "loadTest.concurrency": "Number of workers that send requests at the same time.",

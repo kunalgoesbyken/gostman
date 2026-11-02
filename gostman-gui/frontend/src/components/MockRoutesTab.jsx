@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { Server, SlidersHorizontal } from "lucide-react"
 import { Checkbox } from "./ui/checkbox"
-import { EmptyState } from "./ui/emptyState"
 import { FeatureEmpty } from "./FeatureEmpty"
 import { IconButton } from "./ui/button"
 import { SectionLabel } from "./ui/panel"

@@ -1,8 +1,6 @@
 {
   "loadTest": {
     "title": "Load test",
-    "commandTitle": "Load test this request",
-    "commandDescription": "Send the current request many times at once and measure latency",
     "barLabel": "Load test",
     "barHint": "Load test this request",
     "notice": "Only test systems you own or have permission to test. Each worker sends the request as it is shown here, without scripts or shared cookies.",

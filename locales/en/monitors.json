@@ -1,8 +1,6 @@
 {
   "monitors": {
     "title": "Monitors",
-    "commandDescription": "Run a folder or flow on a schedule while the app is open",
-    "commandKeywords": "monitor schedule cron postman monitor uptime interval",
     "statusLabel": "Monitors",
     "statusLabelRunning_one": "{{count}} monitor",
     "statusLabelRunning_other": "{{count}} monitors",

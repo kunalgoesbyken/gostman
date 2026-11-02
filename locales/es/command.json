@@ -69,57 +69,8 @@
       "newFolder": {
         "description": "Crea una carpeta en el nivel superior"
       },
-      "runCollection": {
-        "description": "Ejecuta toda la colección o una carpeta, con sus pruebas y scripts"
-      },
       "collapseFolders": {
         "keywords": "cerrar plegar árbol"
-      },
-      "examples": {
-        "label": "Ejemplos de la solicitud",
-        "description": "Ver las respuestas guardadas de la solicitud actual"
-      },
-      "mockServer": {
-        "description": "Sirve los ejemplos guardados en un puerto local"
-      },
-      "capture": {
-        "label": "Capturar tráfico",
-        "description": "Reenvía el tráfico de una app a su API y lo guarda como solicitudes"
-      },
-      "cookies": {
-        "label": "Gestionar cookies",
-        "description": "Ver y eliminar las cookies guardadas"
-      },
-      "environments": {
-        "label": "Gestionar entornos",
-        "description": "Crea entornos y edita sus variables, las variables de colección y las globales",
-        "keywords": "variables globales"
-      },
-      "scanSecrets": {
-        "keywords": "credenciales tokens contraseñas filtración"
-      },
-      "network": {
-        "label": "Ajustes de red",
-        "description": "Proxy y certificados"
-      },
-      "import": {
-        "label": "Importar datos",
-        "description": "Importa archivos de Postman, Insomnia, Bruno, OpenAPI, HAR y otros"
-      },
-      "lintSpec": {
-        "description": "Comprueba si la especificación OpenAPI importada tiene problemas",
-        "keywords": "openapi swagger validar gobernanza"
-      },
-      "loadTest": {
-        "keywords": "rendimiento estrés carga"
-      },
-      "export": {
-        "label": "Exportar datos",
-        "description": "Exporta colecciones y entornos"
-      },
-      "share": {
-        "label": "Compartir colección",
-        "description": "Crea un enlace o archivo cifrado, sin necesidad de cuenta"
       },
       "clearHistory": {
         "description": "Elimina todas las entradas del historial"

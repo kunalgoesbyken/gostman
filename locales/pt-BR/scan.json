@@ -1,7 +1,6 @@
 {
   "scan": {
     "title": "Procurar segredos",
-    "commandDescription": "Encontre credenciais digitadas em requisições antes de compartilhá-las ou fazer commit",
     "intro": "Procura formatos conhecidos de token, valores de aparência aleatória em campos de credenciais e senhas digitadas nas configurações de autenticação. Valores escritos como {{example}} estão certos. Nada sai desta janela além da própria verificação, e apenas alguns caracteres de um valor são mostrados.",
     "includeExamples": "Incluir respostas de exemplo salvas",
     "scanning": "Analisando",

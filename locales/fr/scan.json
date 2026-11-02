@@ -1,7 +1,6 @@
 {
   "scan": {
     "title": "Rechercher des secrets",
-    "commandDescription": "Trouve les identifiants saisis dans les requêtes avant que vous ne les partagiez ou ne les commitiez",
     "intro": "Recherche les formats de jetons connus, les valeurs d’apparence aléatoire dans les champs d’identifiants et les mots de passe saisis dans les paramètres d’authentification. Les valeurs écrites sous la forme {{example}} ne posent pas de problème. Rien ne quitte cette fenêtre hormis la vérification elle-même, et seuls quelques caractères d’une valeur sont affichés.",
     "includeExamples": "Inclure les exemples de réponse enregistrés",
     "scanning": "Analyse en cours",

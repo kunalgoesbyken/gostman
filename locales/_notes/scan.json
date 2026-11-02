@@ -1,6 +1,5 @@
 {
   "scan.title": "Title of the dialog. The scan looks for credentials typed into requests.",
-  "scan.commandDescription": "Description in the command palette.",
   "scan.intro": "{{example}} is a variable placeholder with double braces; keep the parameter.",
   "scan.clean": "Title of the result when nothing was found.",
   "scan.failed": "{{message}} is the technical reason.",

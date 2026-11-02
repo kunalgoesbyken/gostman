@@ -1,8 +1,6 @@
 {
   "loadTest": {
     "title": "Lasttest",
-    "commandTitle": "Diese Anfrage per Lasttest prüfen",
-    "commandDescription": "Die aktuelle Anfrage vielfach gleichzeitig senden und die Latenz messen",
     "barLabel": "Lasttest",
     "barHint": "Diese Anfrage per Lasttest prüfen",
     "notice": "Testen Sie nur Systeme, die Ihnen gehören oder für die Sie eine Erlaubnis haben. Jeder Worker sendet die Anfrage so, wie sie hier angezeigt wird, ohne Skripte oder geteilte Cookies.",

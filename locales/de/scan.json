@@ -1,7 +1,6 @@
 {
   "scan": {
     "title": "Nach Secrets suchen",
-    "commandDescription": "In Anfragen eingetippte Zugangsdaten finden, bevor Sie sie teilen oder committen",
     "intro": "Sucht nach bekannten Token-Formaten, zufällig wirkenden Werten in Feldern für Zugangsdaten und in die Auth-Einstellungen eingetippten Passwörtern. Werte, die als {{example}} geschrieben sind, sind unbedenklich. Außer der Prüfung selbst verlässt nichts dieses Fenster, und von einem Wert werden nie mehr als ein paar Zeichen angezeigt.",
     "includeExamples": "Gespeicherte Beispielantworten einbeziehen",
     "scanning": "Suche läuft",

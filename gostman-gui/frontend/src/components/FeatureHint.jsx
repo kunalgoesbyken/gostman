@@ -6,14 +6,10 @@ import { featureBlurb, featureDocsUrl, featureForSurface, featureTitle } from ".
 import { FEATURES_TEXT as TEXT } from "../lib/featuresText"
 import { hiddenHints, hideHint } from "../lib/helperHints"
 
-const HINT_SURFACES = { vars: "tab:vars", extract: "tab:extract", tests: "tab:tests", settings: "tab:settings" }
-
-export const hintSurfaceFor = (panel) => HINT_SURFACES[panel] ?? ""
-
 export function FeatureHint({ panel }) {
-  const surface = hintSurfaceFor(panel)
+  const surface = `tab:${panel}`
   const [hidden, setHidden] = useState(hiddenHints)
-  const feature = surface ? featureForSurface(surface) : null
+  const feature = featureForSurface(surface)
   if (!feature || hidden.includes(surface)) return null
   const url = featureDocsUrl(feature)
   const hide = () => {

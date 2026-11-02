@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react"
 import {
   ChevronsDownUp, ClipboardPaste, Clock, Compass, MonitorDown, Info, Hand, Folder, FolderOpen, Code, Copy, FileText, FolderPlus, Globe, History, Keyboard, PanelLeft, Pin, Plus, Save, Search, Send,
-  Bot, Settings, Settings2, ShieldCheck, SlidersHorizontal, Sparkles, Trash2, Undo2, X,
+  Bot, Settings, Settings2, SlidersHorizontal, Sparkles, Trash2, Undo2, X,
 } from "lucide-react"
 import { MethodTag } from "../MethodTag"
 import { SectionLabel } from "./panel"

@@ -2,7 +2,6 @@ import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from "r
 import { Clock, Search, X } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button, IconButton } from "./ui/button"
-import { EmptyState } from "./ui/emptyState"
 import { FeatureEmpty } from "./FeatureEmpty"
 import { MethodTag } from "./MethodTag"
 import { SearchField } from "./SearchField"
@@ -140,7 +139,7 @@ export const HistoryList = memo(function HistoryList({ entries, actions }) {
       <div className="min-h-0 flex-1 overflow-y-auto">
         {shown.length === 0 ? (
           <FeatureEmpty
-            surface={isSearching ? "" : "history"}
+            surface={isSearching ? undefined : "history"}
             icon={isSearching ? Search : Clock}
             title={isSearching ? TREE_TEXT.noResultsTitle : HISTORY_TEXT.emptyTitle}
             description={isSearching ? HISTORY_TEXT.noMatches : HISTORY_TEXT.emptyDescription}

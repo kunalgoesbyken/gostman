@@ -1,7 +1,6 @@
 {
   "scan": {
     "title": "Scanare după secrete",
-    "commandDescription": "Găsiți credențialele introduse în cereri înainte de a le partaja sau a face commit",
     "intro": "Caută formate cunoscute de tokenuri, valori cu aspect aleatoriu în câmpuri de credențiale și parole introduse în setările de autentificare. Valorile scrise ca {{example}} sunt în regulă. Nimic nu părăsește această fereastră în afară de verificarea însăși și sunt afișate doar câteva caractere dintr-o valoare.",
     "includeExamples": "Includere răspunsuri de exemplu salvate",
     "scanning": "Se scanează",

@@ -7,12 +7,12 @@ import { featureBlurb, featureDocsUrl, featureForSurface, featureTitle } from ".
 import { featureIcon } from "../lib/featureIcons"
 import { FEATURES_TEXT as TEXT } from "../lib/featuresText"
 
-export function FeatureActions({ feature, className, hideTry }) {
+function FeatureActions({ feature, hideTry }) {
   const canTry = useFeatureAccess((s) => s.canTry(feature.id, true))
   const open = useFeatureAccess((s) => s.open)
   const url = featureDocsUrl(feature)
   return (
-    <div className={className ?? "flex flex-wrap justify-center gap-2"}>
+    <div className="flex flex-wrap justify-center gap-2">
       {canTry && !hideTry && <Button size="sm" aria-label={TEXT.tryItLabel(featureTitle(feature))} onClick={() => open(feature.id, true)}>{TEXT.tryIt}</Button>}
       <a
         href={url}

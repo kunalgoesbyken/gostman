@@ -1,7 +1,6 @@
 {
   "scan": {
     "title": "Cerca segreti",
-    "commandDescription": "Trova le credenziali scritte nelle richieste prima di condividerle o di farne il commit",
     "intro": "Cerca formati di token noti, valori dall'aspetto casuale nei campi delle credenziali e password scritte nelle impostazioni di autenticazione. I valori scritti come {{example}} vanno bene. Nulla lascia questa finestra tranne il controllo stesso, e di un valore vengono mostrati al massimo pochi caratteri.",
     "includeExamples": "Includi le risposte di esempio salvate",
     "scanning": "Scansione in corso",

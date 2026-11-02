@@ -29,7 +29,7 @@ export const featureKeywords = (feature) => `${wordsOf(feature).synonyms} ${grou
 
 export const featureDocsUrl = (feature) => docsUrl(feature.docs ?? '')
 
-export const isDesktopOnly = (feature) => Boolean(feature.platforms) && !feature.platforms.includes('web')
+const isDesktopOnly = (feature) => Boolean(feature.platforms) && !feature.platforms.includes('web')
 
 export const isMissingHere = (feature, isDesktop) => isDesktopOnly(feature) && feature.platforms.includes('desktop') && !isDesktop
 
@@ -65,8 +65,4 @@ export function searchFeatures(query, group = '') {
     .filter((entry) => entry.score !== null)
     .sort((first, second) => second.score - first.score)
     .map((entry) => entry.feature)
-}
-
-export function groupsWithCounts() {
-  return FEATURES.filter((feature) => !feature.hidden).reduce((counts, feature) => ({ ...counts, [feature.group]: (counts[feature.group] ?? 0) + 1 }), {})
 }

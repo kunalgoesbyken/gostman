@@ -1,8 +1,6 @@
 {
   "loadTest": {
     "title": "Teste de carga",
-    "commandTitle": "Fazer teste de carga desta requisição",
-    "commandDescription": "Envia a requisição atual muitas vezes ao mesmo tempo e mede a latência",
     "barLabel": "Teste de carga",
     "barHint": "Fazer teste de carga desta requisição",
     "notice": "Teste apenas sistemas que são seus ou que você tem permissão para testar. Cada worker envia a requisição como ela é mostrada aqui, sem scripts nem cookies compartilhados.",

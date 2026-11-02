@@ -1,8 +1,6 @@
 {
   "loadTest": {
     "title": "Prueba de carga",
-    "commandTitle": "Probar la carga de esta solicitud",
-    "commandDescription": "Envía la solicitud actual muchas veces a la vez y mide la latencia",
     "barLabel": "Prueba de carga",
     "barHint": "Probar la carga de esta solicitud",
     "notice": "Prueba solo sistemas que sean tuyos o que tengas permiso para probar. Cada worker envía la solicitud tal como se muestra aquí, sin scripts ni cookies compartidas.",
