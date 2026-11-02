@@ -7,7 +7,7 @@ import { compareText } from './i18n/format'
 import { sanitizeImport } from './importExport'
 import { createSpecClient } from './openapiSpec'
 import { normalizeRequest } from './request'
-import { createLink, diffSpec, linkEntry, selectedChanges, specPatch, upgradedLink } from './specSync'
+import { createLink, diffSpec, keptSnapshot, linkEntry, selectedChanges, specPatch, upgradedLink } from './specSync'
 import { SPEC_ALERTS, SPEC_TEXT } from './specText'
 import { selectActiveVariables, useAppStore } from '../store/appStore'
 
@@ -48,8 +48,23 @@ export function createSpecActions({ backend, attempt, addImported }) {
       .map((request, index) => [operations[index], request])
       .filter(([, request]) => present.has(request.id))
       .map(([operation, request]) => [operation.key, linkEntry(request.id, operation.hash, request, operation.operationId)])
-    store().setSpecLink(data.folders[0].id, createLink(source, hash, entries))
+    const folderId = data.folders[0].id
+    store().setSpecLink(folderId, createLink(source, hash, entries))
+    await rememberSnapshot(folderId, source)
   })
+
+  const fetchSnapshot = async (source) => keptSnapshot(await client.text(source).catch(() => undefined))
+
+  async function rememberSnapshot(folderId, source) {
+    const snapshot = await fetchSnapshot(source)
+    const link = store().specLinks[folderId]
+    if (snapshot && link) store().setSpecLink(folderId, { ...link, snapshot })
+  }
+
+  const changesSince = async (link, snapshot) => {
+    if (!link.snapshot || !snapshot) return null
+    return client.diff({ text: link.snapshot }, { text: snapshot }).catch(() => null)
+  }
 
   const check = attempt(SPEC_ALERTS.syncTitle, async (folderId) => {
     const saved = store().specLinks[folderId]
@@ -57,7 +72,8 @@ export function createSpecActions({ backend, attempt, addImported }) {
     const link = upgradedLink(saved, store().requests)
     store().setSpecLink(folderId, link)
     const summary = await client.summary(link.source)
-    const plan = { ...diffSpec(link, summary.operations, store().requests), hash: summary.hash }
+    const snapshot = await fetchSnapshot(link.source)
+    const plan = { ...diffSpec(link, summary.operations, store().requests), hash: summary.hash, snapshot, changes: await changesSince(link, snapshot) }
     store().openSpecDialog({ mode: 'sync', folderId, plan })
   })
 
@@ -110,7 +126,7 @@ export function createSpecActions({ backend, attempt, addImported }) {
     await removeRequests(picks.removed, ops)
     await updateRequests(picks.changed, generated, ops)
     await addRequests(picks.added, generated, folderId, ops)
-    store().setSpecLink(folderId, { ...link, hash: plan.hash, syncedAt: new Date().toISOString(), ops })
+    store().setSpecLink(folderId, { ...link, hash: plan.hash, syncedAt: new Date().toISOString(), ops, snapshot: plan.snapshot || link.snapshot })
     store().closeSpecDialog()
     store().showAlert(SPEC_ALERTS.appliedTitle, SPEC_ALERTS.applied({
       added: picks.added.length,

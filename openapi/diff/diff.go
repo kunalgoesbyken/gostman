@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/kunalgoesbyken/gostman/locales"
 	"sort"
 	"strings"
 
@@ -32,6 +33,8 @@ type Change struct {
 	Path     string   `json:"path,omitempty"`
 	Where    string   `json:"where,omitempty"`
 	Message  string   `json:"message"`
+
+	Localized *locales.Message `json:"localized,omitempty"`
 }
 
 type Report struct {
@@ -50,6 +53,7 @@ type Query struct {
 type Reply struct {
 	Error  string  `json:"error,omitempty"`
 	Report *Report `json:"report,omitempty"`
+	Text   string  `json:"text,omitempty"`
 }
 
 func (r Report) Reaches(failOn string) bool {
@@ -88,6 +92,13 @@ func Run(ctx context.Context, oldSource, newSource openapi.Source, opt openapi.O
 }
 
 func Handle(ctx context.Context, query Query, opt openapi.Options) Reply {
+	if query.Old == (openapi.Source{}) {
+		text, err := openapi.ReadText(ctx, query.New, opt)
+		if err != nil {
+			return Reply{Error: err.Error()}
+		}
+		return Reply{Text: text}
+	}
 	report, err := Run(ctx, query.Old, query.New, opt)
 	if err != nil {
 		return Reply{Error: err.Error()}
@@ -109,9 +120,9 @@ type comparison struct {
 	path   string
 }
 
-func (c *comparison) add(severity Severity, where, message string) {
+func (c *comparison) add(severity Severity, where string, said locales.Message) {
 	if len(c.report.Changes) < maxChanges {
-		c.report.Changes = append(c.report.Changes, Change{Severity: severity, Method: c.method, Path: c.path, Where: where, Message: message})
+		c.report.Changes = append(c.report.Changes, Change{Severity: severity, Method: c.method, Path: c.path, Where: where, Message: said.String(), Localized: &said})
 	}
 	switch severity {
 	case Breaking:
@@ -133,19 +144,19 @@ func Compare(ctx context.Context, oldRoot, newRoot map[string]any) Report {
 	return c.report
 }
 
-func (c *comparison) general(severity Severity, where, message string) {
+func (c *comparison) general(severity Severity, where string, said locales.Message) {
 	c.method, c.path = "", ""
-	c.add(severity, where, message)
+	c.add(severity, where, said)
 }
 
 func (c *comparison) compareInfo() {
 	oldVersion := textOf(objectOf(c.old["info"])["version"])
 	newVersion := textOf(objectOf(c.new["info"])["version"])
 	if oldVersion != newVersion {
-		c.general(Informational, "info.version", fmt.Sprintf("version changed from %s to %s", oldVersion, newVersion))
+		c.general(Informational, "info.version", locales.New(locales.LintDiffVersionChanged, locales.Params{"old": oldVersion, "new": newVersion}))
 	}
 	if serversText(c.old) != serversText(c.new) {
-		c.general(Informational, "servers", "server addresses changed")
+		c.general(Informational, "servers", locales.New(locales.LintDiffServersChanged, nil))
 	}
 }
 
@@ -178,7 +189,7 @@ func (c *comparison) comparePaths() {
 		for _, method := range methods {
 			if objectOf(resolve(c.new, newPaths[path]))[method] != nil {
 				c.method, c.path = strings.ToUpper(method), path
-				c.add(NonBreaking, "", "operation added")
+				c.add(NonBreaking, "", locales.New(locales.LintDiffOperationAdded, nil))
 			}
 		}
 	}
@@ -190,12 +201,12 @@ func (c *comparison) removedPath(path string, item any) {
 		if objectOf(resolve(c.old, item))[method] != nil {
 			found = true
 			c.method, c.path = strings.ToUpper(method), path
-			c.add(Breaking, "", "operation removed")
+			c.add(Breaking, "", locales.New(locales.LintDiffOperationRemoved, nil))
 		}
 	}
 	if !found {
 		c.method, c.path = "", path
-		c.add(Breaking, "", "path removed")
+		c.add(Breaking, "", locales.New(locales.LintDiffPathRemoved, nil))
 	}
 }
 
@@ -216,9 +227,9 @@ func (c *comparison) comparePath(path string, oldItem, newItem map[string]any) {
 		case before == nil && after == nil:
 			continue
 		case after == nil:
-			c.add(Breaking, "", "operation removed")
+			c.add(Breaking, "", locales.New(locales.LintDiffOperationRemoved, nil))
 		case before == nil:
-			c.add(NonBreaking, "", "operation added")
+			c.add(NonBreaking, "", locales.New(locales.LintDiffOperationAdded, nil))
 		default:
 			c.compareOperation(oldItem, newItem, before, after)
 		}
@@ -227,7 +238,7 @@ func (c *comparison) comparePath(path string, oldItem, newItem map[string]any) {
 
 func (c *comparison) compareOperation(oldItem, newItem, before, after map[string]any) {
 	if after["deprecated"] == true && before["deprecated"] != true {
-		c.add(Informational, "", "operation deprecated")
+		c.add(Informational, "", locales.New(locales.LintDiffOperationDeprecated, nil))
 	}
 	oldParams := c.parameters(c.old, oldItem, before)
 	newParams := c.parameters(c.new, newItem, after)
@@ -254,26 +265,26 @@ func (c *comparison) compareParameters(before, after map[string]map[string]any) 
 	for _, key := range sortedParameterKeys(before) {
 		now, kept := after[key]
 		if !kept {
-			c.add(NonBreaking, "parameter "+key, "parameter removed")
+			c.add(NonBreaking, parameterPlace(key), locales.New(locales.LintDiffParameterRemoved, nil))
 			continue
 		}
 		was := before[key]
 		switch {
 		case now["required"] == true && was["required"] != true:
-			c.add(Breaking, "parameter "+key, "parameter is now required")
+			c.add(Breaking, parameterPlace(key), locales.New(locales.LintDiffParameterNowRequired, nil))
 		case now["required"] != true && was["required"] == true:
-			c.add(NonBreaking, "parameter "+key, "parameter is no longer required")
+			c.add(NonBreaking, parameterPlace(key), locales.New(locales.LintDiffParameterNoLongerRequired, nil))
 		}
-		c.schemas(parameterSchema(was), parameterSchema(now), asRequest, "parameter "+key, c.add)
+		c.schemas(parameterSchema(was), parameterSchema(now), asRequest, parameterPlace(key), c.add)
 	}
 	for _, key := range sortedParameterKeys(after) {
 		if _, existed := before[key]; existed {
 			continue
 		}
 		if after[key]["required"] == true {
-			c.add(Breaking, "parameter "+key, "required parameter added")
+			c.add(Breaking, parameterPlace(key), locales.New(locales.LintDiffRequiredParameterAdded, nil))
 		} else {
-			c.add(NonBreaking, "parameter "+key, "optional parameter added")
+			c.add(NonBreaking, parameterPlace(key), locales.New(locales.LintDiffOptionalParameterAdded, nil))
 		}
 	}
 }
@@ -315,28 +326,28 @@ func (c *comparison) compareBody(before, after map[string]any) {
 	case !hadOld && !hasNew:
 		return
 	case !hadOld && newRequired:
-		c.add(Breaking, "request body", "required request body added")
+		c.add(Breaking, bodyPlace, locales.New(locales.LintDiffRequiredBodyAdded, nil))
 		return
 	case !hadOld:
-		c.add(NonBreaking, "request body", "optional request body added")
+		c.add(NonBreaking, bodyPlace, locales.New(locales.LintDiffOptionalBodyAdded, nil))
 		return
 	case !hasNew:
-		c.add(NonBreaking, "request body", "request body removed")
+		c.add(NonBreaking, bodyPlace, locales.New(locales.LintDiffBodyRemoved, nil))
 		return
 	case newRequired && !oldRequired:
-		c.add(Breaking, "request body", "request body is now required")
+		c.add(Breaking, bodyPlace, locales.New(locales.LintDiffBodyNowRequired, nil))
 	}
 	for _, media := range sortedKeys(oldContent) {
 		next, kept := newContent[media]
 		if !kept {
-			c.add(Breaking, "request body "+media, "content type no longer accepted")
+			c.add(Breaking, bodyPlace+"."+media, locales.New(locales.LintDiffContentTypeNotAccepted, nil))
 			continue
 		}
-		c.schemas(objectOf(oldContent[media])["schema"], objectOf(next)["schema"], asRequest, "request body", c.add)
+		c.schemas(objectOf(oldContent[media])["schema"], objectOf(next)["schema"], asRequest, bodyPlace, c.add)
 	}
 	for _, media := range sortedKeys(newContent) {
 		if _, existed := oldContent[media]; !existed {
-			c.add(NonBreaking, "request body "+media, "content type added")
+			c.add(NonBreaking, bodyPlace+"."+media, locales.New(locales.LintDiffContentTypeAdded, nil))
 		}
 	}
 }
@@ -354,20 +365,20 @@ func (c *comparison) compareResponses(before, after map[string]any) {
 	oldResponses, newResponses := objectOf(before["responses"]), objectOf(after["responses"])
 	for _, code := range sortedKeys(oldResponses) {
 		next, kept := newResponses[code]
-		where := "response " + code
+		where := "responses." + code
 		if !kept {
 			severity := NonBreaking
 			if strings.HasPrefix(code, "2") {
 				severity = Breaking
 			}
-			c.add(severity, where, "response removed")
+			c.add(severity, where, locales.New(locales.LintDiffResponseRemoved, nil))
 			continue
 		}
 		oldContent, newContent := c.responseContent(c.old, oldResponses[code]), c.responseContent(c.new, next)
 		for _, media := range sortedKeys(oldContent) {
 			nextMedia, present := newContent[media]
 			if !present {
-				c.add(Breaking, where+" "+media, "content type no longer returned")
+				c.add(Breaking, where+"."+media, locales.New(locales.LintDiffContentTypeNotReturned, nil))
 				continue
 			}
 			c.schemas(objectOf(oldContent[media])["schema"], objectOf(nextMedia)["schema"], asResponse, where, c.add)
@@ -375,7 +386,7 @@ func (c *comparison) compareResponses(before, after map[string]any) {
 	}
 	for _, code := range sortedKeys(newResponses) {
 		if _, existed := oldResponses[code]; !existed {
-			c.add(Informational, "response "+code, "response added")
+			c.add(Informational, "responses."+code, locales.New(locales.LintDiffResponseAdded, nil))
 		}
 	}
 }
@@ -400,13 +411,13 @@ func (c *comparison) compareSecurity(before, after map[string]any) {
 	case strings.Join(oldSets, "|") == strings.Join(newSets, "|"):
 		return
 	case len(newSets) == 0:
-		c.add(NonBreaking, "security", "authentication is no longer required")
+		c.add(NonBreaking, "security", locales.New(locales.LintDiffAuthNotRequired, nil))
 	case len(oldSets) == 0:
-		c.add(Breaking, "security", "authentication is now required: "+strings.Join(newSets, " or "))
+		c.add(Breaking, "security", locales.New(locales.LintDiffAuthRequired, locales.Params{"alternatives": locales.Either(newSets)}))
 	case containsAll(newSets, oldSets):
-		c.add(NonBreaking, "security", "authentication alternative added: "+strings.Join(missing(newSets, oldSets), " or "))
+		c.add(NonBreaking, "security", locales.New(locales.LintDiffAuthAlternativeAdded, locales.Params{"alternatives": locales.Either(missing(newSets, oldSets))}))
 	default:
-		c.add(Breaking, "security", fmt.Sprintf("authentication changed from %s to %s", strings.Join(oldSets, " or "), strings.Join(newSets, " or ")))
+		c.add(Breaking, "security", locales.New(locales.LintDiffAuthChanged, locales.Params{"old": locales.Either(oldSets), "new": locales.Either(newSets)}))
 	}
 }
 
@@ -441,14 +452,14 @@ func (c *comparison) compareSecuritySchemes() {
 		next, kept := newSchemes[name]
 		switch {
 		case !kept:
-			c.general(Breaking, "security scheme "+name, "security scheme removed")
+			c.general(Breaking, "securitySchemes."+name, locales.New(locales.LintDiffSchemeRemoved, nil))
 		case textOf(objectOf(oldSchemes[name])["type"]) != textOf(objectOf(next)["type"]):
-			c.general(Breaking, "security scheme "+name, "security scheme type changed")
+			c.general(Breaking, "securitySchemes."+name, locales.New(locales.LintDiffSchemeTypeChanged, nil))
 		}
 	}
 	for _, name := range sortedKeys(newSchemes) {
 		if _, existed := oldSchemes[name]; !existed {
-			c.general(Informational, "security scheme "+name, "security scheme added")
+			c.general(Informational, "securitySchemes."+name, locales.New(locales.LintDiffSchemeAdded, nil))
 		}
 	}
 }
@@ -466,4 +477,10 @@ func (c *comparison) sortChanges() {
 		}
 		return a.Method < b.Method
 	})
+}
+
+const bodyPlace = "requestBody"
+
+func parameterPlace(key string) string {
+	return "parameters." + strings.ReplaceAll(key, " ", ".")
 }

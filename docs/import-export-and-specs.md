@@ -62,7 +62,13 @@ These importers read the file as it is and report what they leave out in the imp
 - **Hurl:** `status`, `header`, `jsonpath`, `body`, `duration` and `url` queries with the common predicates (`==`, `!=`, `<`, `>`, `contains`, `startsWith`, `endsWith`, `matches`, `exists`, `isEmpty`, `count`) become assertion rows, and the `HTTP 200` line becomes a status check. `jsonpath`, `header`, `cookie` and `status` captures become extract rules with the session scope. `xpath`, `regex`, `bytes`, `sha256` and other filters are left out and named. Requests keep Hurl's rule of not following redirects unless `[Options]` has `location: true`; `insecure` and other options are not imported. `{{newUuid}}` becomes `{{$guid}}`.
 - **RAML 1.0** and **API Blueprint:** the base URI or `HOST` becomes the `baseUrl` collection variable. Query parameters, headers, example bodies and basic auth are kept. Types, traits, resource types, response definitions and `!include` files are not imported.
 
-Paw files and RapidAPI for Mac are not read directly; export them to Postman, HAR or curl first. A Restfox export in Insomnia v4 form is read as Insomnia.
+To move over from one of these tools, export the collection and its environments to a file from the tool, then import the files together; environments come across as Gostman environments and `{{name}}` placeholders replace the tool's own variable syntax where it has one (Hoppscotch `<<name>>`). For Hurl, import the folder that holds the `.hurl` files: each file becomes a folder. Importing a folder reads `.hurl`, `.raml` and `.apib` files; a Markdown API Blueprint has to be picked as a file.
+
+Not read, and what to do instead:
+
+- **Paw and RapidAPI for Mac:** the `.paw` file is a binary project. Use the tool's export to Postman, HAR or curl and import that.
+- **Firecamp:** there is no importer. Export to Postman or OpenAPI from Firecamp if it offers it, and import that.
+- **Restfox:** there is no importer of its own. An export in the Insomnia v4 shape (`_type: export` with `resources`) is read as an Insomnia export, and a Postman or OpenAPI export from Restfox works too.
 
 ### .http files
 

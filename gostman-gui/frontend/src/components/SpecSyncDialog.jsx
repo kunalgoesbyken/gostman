@@ -6,6 +6,7 @@ import { MethodTag } from "./MethodTag"
 import { formatDateTime } from "../lib/i18n/format"
 import { sourceLabel } from "../lib/openapiSpec"
 import { defaultSelection, isEmptyPlan } from "../lib/specSync"
+import { localizedText } from "../lib/localized"
 import { SPEC_TEXT } from "../lib/specText"
 
 function Change({ id, label, method, detail, edited, checked, onToggle }) {
@@ -25,6 +26,25 @@ function Group({ title, count, children }) {
     <section className="pb-4">
       <h3 className="pb-1 text-xs font-semibold text-foreground">{title} ({count})</h3>
       <ul>{children}</ul>
+    </section>
+  )
+}
+
+function BreakingChanges({ report }) {
+  const breaking = report.changes.filter((change) => change.severity === "breaking")
+  return (
+    <section className="pb-4">
+      <h3 className="pb-1 text-xs font-semibold text-foreground">{SPEC_TEXT.syncBreaking(report.breaking)}</h3>
+      {report.truncated && <p role="alert" className="pb-1 text-xs text-warning">{SPEC_TEXT.diffTruncated}</p>}
+      {breaking.length === 0 && !report.truncated && <p className="text-xs text-muted-foreground">{SPEC_TEXT.syncNoBreaking}</p>}
+      <ul>
+        {breaking.map((change, index) => (
+          <li key={index} className="py-0.5 text-xs break-words">
+            <bdi dir="ltr" className="font-mono text-2xs text-muted-foreground">{[change.method, change.path, change.where].filter(Boolean).join(" ")}: </bdi>
+            <bdi dir="auto">{localizedText(change.localized, change.message)}</bdi>
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }
@@ -58,6 +78,7 @@ export function SpecSyncDialog({ dialog, link, actions, onClose }) {
       <DialogBody>
         <Summary link={link} plan={plan} />
         {isEmptyPlan(plan) && <p className="text-xs text-muted-foreground">{SPEC_TEXT.upToDate}</p>}
+        {plan.changes && <BreakingChanges report={plan.changes} />}
         <Group title={SPEC_TEXT.added} count={plan.added.length}>
           {plan.added.map((operation) => (
             <Change

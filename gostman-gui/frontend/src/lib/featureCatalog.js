@@ -7,7 +7,7 @@ export const ACTIONS = {
   command: ['newRequest', 'newFolder', 'generateCode', 'sendSample', 'lintSpec', 'diffSpecs', 'commandPalette', 'workspaceSwitcher', 'aiSettings', 'aiMock'],
   sample: ['collection', 'flow', 'send', 'scan', 'graphql', 'grpc', 'websocket', 'mcp', 'curl', 'binary', 'jwt'],
   tab: ['auth', 'vars', 'extract', 'tests', 'settings', 'history', 'openTabs'],
-  copy: ['cliInit'],
+  copy: ['cliInit', 'ciInit'],
 }
 
 export const SURFACES = ['response', 'runner', 'mock', 'scan', 'negative', 'load', 'history', 'flows', 'capture', 'tab:vars', 'tab:extract', 'tab:tests', 'tab:settings']
@@ -67,6 +67,7 @@ export const FEATURES = [
   { id: 'scan', group: 'automation', docs: 'runner-load-and-scan#scan-for-secrets', action: { type: 'dialog', id: 'scan' }, icon: 'shield-alert', palette: true, empty: ['scan'], sample: 'scan' },
   { id: 'cli', group: 'automation', docs: 'cli', action: { type: 'copy', id: 'cliInit' }, icon: 'terminal', compare: 7 },
   { id: 'ci', group: 'automation', docs: 'ci', icon: 'workflow' },
+  { id: 'ci-starters', group: 'automation', since: '1.9.0', platforms: ['cli'], docs: 'ci#starter-pipelines-and-pre-commit', action: { type: 'copy', id: 'ciInit' }, icon: 'workflow' },
   { id: 'monitors', group: 'automation', since: '1.9.0', docs: 'runner-load-and-scan#monitors', action: { type: 'dialog', id: 'monitors' }, icon: 'activity', palette: true },
   { id: 'agents', group: 'automation', docs: 'agents', icon: 'bot', landing: { group: 'data', order: 4 } },
   { id: 'mock', group: 'mocking', platforms: ['desktop'], docs: 'workspaces-and-mock#examples-and-the-mock-server-desktop', action: { type: 'dialog', id: 'mock' }, icon: 'server', palette: true, empty: ['mock'], sample: 'collection', landing: { group: 'automate', order: 2 } },

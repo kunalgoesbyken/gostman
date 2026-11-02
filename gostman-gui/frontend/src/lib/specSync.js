@@ -45,6 +45,10 @@ export function upgradedLink(link, requests) {
   return { ...link, ops: Object.fromEntries(Object.entries(link.ops).map(([key, entry]) => [key, upgradedEntry(entry, requestsById)])) }
 }
 
+export const SNAPSHOT_LIMIT = 1 << 20
+
+export const keptSnapshot = (text) => (typeof text === 'string' && text.length <= SNAPSHOT_LIMIT ? text : undefined)
+
 export function createLink(source, hash, entries) {
   return { source, hash, syncedAt: new Date().toISOString(), ops: Object.fromEntries(entries) }
 }

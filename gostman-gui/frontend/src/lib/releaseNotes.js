@@ -8,7 +8,7 @@ export const RELEASES = [
       'graphql-upload', 'breakpoints', 'spec-importers', 'versioned-docs', 'snapshot-checks', 'negative-tests',
       'coverage', 'pm-packages', 'load-thresholds', 'monitors', 'capture-rules', 'capture-har',
       'git-field-diff', 'git-commit-graph', 'repo-create', 'ai-mock', 'ai-commit', 'xlsx-data',
-      'scheduled-runs', 'openapi-diff',
+      'scheduled-runs', 'openapi-diff', 'ci-starters',
     ],
   },
   { version: '1.8.3', ids: ['open-tabs'] },

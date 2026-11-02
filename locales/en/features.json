@@ -186,8 +186,8 @@
     },
     "specImporters": {
       "title": "More import formats",
-      "blurb": "Import Hoppscotch, Thunder Client, HTTPie, Hurl, RAML and API Blueprint files. Hurl is also an export format.",
-      "synonyms": "hoppscotch thunder paw hurl raml blueprint httpie import migrate"
+      "blurb": "Import Hoppscotch, Thunder Client, HTTPie, Hurl, RAML and API Blueprint files. Hurl is also an export format. Paw and Firecamp files are not read.",
+      "synonyms": "hoppscotch thunder client hurl raml blueprint httpie restfox import migrate"
     },
     "export": {
       "title": "Export",
@@ -316,8 +316,13 @@
     },
     "ci": {
       "title": "CI integration",
-      "blurb": "A GitHub Action, a Docker image and reports for GitHub, GitLab and Jenkins.",
-      "synonyms": "ci github actions gitlab jenkins docker pipeline junit"
+      "blurb": "A GitHub Action, a Docker image, recipes for GitLab, Azure Pipelines, CircleCI, Bitbucket and Jenkins, and JUnit and HTML reports.",
+      "synonyms": "ci github actions gitlab azure circleci bitbucket jenkins docker pipeline junit"
+    },
+    "ciStarters": {
+      "title": "CI starters and pre-commit",
+      "blurb": "gostman init --ci writes a starter pipeline for GitHub, GitLab, Azure, CircleCI or Bitbucket. Pre-commit hooks run lint, scan and run.",
+      "synonyms": "ci pipeline starter template pre-commit hook makefile azure circleci bitbucket"
     },
     "monitors": {
       "title": "Monitors",
@@ -446,7 +451,7 @@
     },
     "openapiDiff": {
       "title": "OpenAPI diff",
-      "blurb": "Compare two versions of a spec and list breaking changes.",
+      "blurb": "Compare two versions of an OpenAPI spec and list breaking changes in the app, or with gostman diff in CI.",
       "synonyms": "openapi diff oasdiff breaking changes compare spec"
     }
   },

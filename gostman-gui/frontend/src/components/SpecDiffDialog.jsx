@@ -4,6 +4,7 @@ import { Button } from "./ui/button"
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Field } from "./ui/field"
 import { Input } from "./ui/input"
+import { localizedText } from "../lib/localized"
 import { SPEC_TEXT } from "../lib/specText"
 
 const SEVERITIES = [
@@ -67,7 +68,7 @@ function Result({ report }) {
             <span className="w-24 shrink-0 text-2xs text-muted-foreground">{change.severity === "breaking" ? SPEC_TEXT.diffBreaking : change.severity === "non-breaking" ? SPEC_TEXT.diffNonBreaking : SPEC_TEXT.diffInformational}</span>
             <span className="min-w-0 flex-1 break-words">
               {placeOf(change) && <bdi dir="ltr" className="font-mono text-2xs text-muted-foreground">{placeOf(change)}: </bdi>}
-              <bdi dir="auto">{change.message}</bdi>
+              <bdi dir="auto">{localizedText(change.localized, change.message)}</bdi>
             </span>
           </li>
         ))}

@@ -3,6 +3,7 @@ package diff
 import (
 	"context"
 	"fmt"
+	"github.com/kunalgoesbyken/gostman/locales"
 	"slices"
 	"sort"
 	"strings"
@@ -243,7 +244,7 @@ func appendOnce(items []string, item string) []string {
 	return append(items, item)
 }
 
-type reporter func(severity Severity, where, message string)
+type reporter func(severity Severity, where string, said locales.Message)
 
 func (r resolver) schemas(oldSchema, newSchema any, way direction, where string, report reporter) {
 	r.compareSchemas(oldSchema, newSchema, way, where, report, 0)
@@ -259,14 +260,14 @@ func (r resolver) compareSchemas(oldSchema, newSchema any, way direction, where 
 	r.compareEnums(before, after, way, where, report)
 	r.compareLimits(before, after, way, where, report)
 	if before.format != after.format && before.format != "" {
-		report(Breaking, where, fmt.Sprintf("format changed from %s to %s", before.format, valueOrNone(after.format)))
+		report(Breaking, where, locales.New(locales.LintDiffFormatChanged, locales.Params{"old": before.format, "new": valueOrNone(after.format)}))
 	}
 	if before.pattern != after.pattern && (before.pattern != "" || after.pattern != "") {
-		report(Informational, where, "pattern changed")
+		report(Informational, where, locales.New(locales.LintDiffPatternChanged, nil))
 	}
 	for _, keyword := range []string{"oneOf", "anyOf"} {
 		if before.composed[keyword] != after.composed[keyword] {
-			report(Informational, where, fmt.Sprintf("%s has %d options, was %d", keyword, after.composed[keyword], before.composed[keyword]))
+			report(Informational, where, locales.New(locales.LintDiffCompositionChanged, locales.Params{"keyword": keyword, "count": after.composed[keyword], "was": before.composed[keyword]}))
 		}
 	}
 	r.compareProperties(before, after, oldSchema, newSchema, way, where, report, depth)
@@ -277,7 +278,7 @@ func (r resolver) compareSchemas(oldSchema, newSchema any, way direction, where 
 
 func valueOrNone(value string) string {
 	if value == "" {
-		return "none"
+		return "-"
 	}
 	return value
 }
@@ -289,20 +290,20 @@ func (r resolver) compareTypes(before, after schemaView, way direction, where st
 		narrowed := len(added) == 0
 		switch {
 		case way == asRequest && widened:
-			report(NonBreaking, where, "type widened to "+strings.Join(after.types, ", "))
+			report(NonBreaking, where, locales.New(locales.LintDiffTypeWidened, locales.Params{"types": locales.Unit(after.types)}))
 		case way == asResponse && narrowed:
-			report(NonBreaking, where, "type narrowed to "+strings.Join(after.types, ", "))
+			report(NonBreaking, where, locales.New(locales.LintDiffTypeNarrowed, locales.Params{"types": locales.Unit(after.types)}))
 		default:
-			report(Breaking, where, fmt.Sprintf("type changed from %s to %s", strings.Join(before.types, ", "), strings.Join(after.types, ", ")))
+			report(Breaking, where, locales.New(locales.LintDiffTypeChanged, locales.Params{"old": locales.Unit(before.types), "new": locales.Unit(after.types)}))
 		}
 	}
 	switch {
 	case before.nullable && !after.nullable && way == asRequest:
-		report(Breaking, where, "null is no longer accepted")
+		report(Breaking, where, locales.New(locales.LintDiffNullRejected, nil))
 	case !before.nullable && after.nullable && way == asResponse:
-		report(Breaking, where, "value can now be null")
+		report(Breaking, where, locales.New(locales.LintDiffNullReturned, nil))
 	case before.nullable != after.nullable:
-		report(NonBreaking, where, "nullability changed")
+		report(NonBreaking, where, locales.New(locales.LintDiffNullabilityChanged, nil))
 	}
 }
 
@@ -323,14 +324,14 @@ func (r resolver) compareEnums(before, after schemaView, way direction, where st
 		if way == asResponse {
 			severity = NonBreaking
 		}
-		report(severity, where, "value is now limited to an enum")
+		report(severity, where, locales.New(locales.LintDiffEnumLimited, nil))
 		return
 	case before.hasEnum && !after.hasEnum:
 		severity := NonBreaking
 		if way == asResponse {
 			severity = Breaking
 		}
-		report(severity, where, "enum limit removed")
+		report(severity, where, locales.New(locales.LintDiffEnumLimitRemoved, nil))
 		return
 	}
 	removed, added := difference(before.enum, after.enum), difference(after.enum, before.enum)
@@ -339,14 +340,14 @@ func (r resolver) compareEnums(before, after schemaView, way direction, where st
 		if way == asResponse {
 			severity = NonBreaking
 		}
-		report(severity, where, "enum values removed: "+strings.Join(removed, ", "))
+		report(severity, where, locales.New(locales.LintDiffEnumRemoved, locales.Params{"values": locales.Unit(removed)}))
 	}
 	if len(added) > 0 {
 		severity := NonBreaking
 		if way == asResponse {
 			severity = Informational
 		}
-		report(severity, where, "enum values added: "+strings.Join(added, ", "))
+		report(severity, where, locales.New(locales.LintDiffEnumAdded, locales.Params{"values": locales.Unit(added)}))
 	}
 }
 
@@ -360,7 +361,7 @@ func (r resolver) compareLimits(before, after schemaView, way direction, where s
 		}
 		tighter := hasNew && (!hadOld || lower[limit] && newValue > oldValue || !lower[limit] && newValue < oldValue)
 		looser := hadOld && (!hasNew || lower[limit] && newValue < oldValue || !lower[limit] && newValue > oldValue)
-		message := fmt.Sprintf("%s changed from %s to %s", limit, limitText(oldValue, hadOld), limitText(newValue, hasNew))
+		message := locales.New(locales.LintDiffLimitChanged, locales.Params{"limit": limit, "old": limitText(oldValue, hadOld), "new": limitText(newValue, hasNew)})
 		switch {
 		case tighter && way == asRequest, looser && way == asResponse:
 			report(Breaking, where, message)
@@ -372,7 +373,7 @@ func (r resolver) compareLimits(before, after schemaView, way direction, where s
 
 func limitText(value float64, present bool) string {
 	if !present {
-		return "none"
+		return "-"
 	}
 	return fmt.Sprint(value)
 }
@@ -388,20 +389,20 @@ func (r resolver) compareProperties(before, after schemaView, oldSchema, newSche
 		next, kept := after.properties[name]
 		switch {
 		case !kept && way == asResponse:
-			report(Breaking, place, "property removed")
+			report(Breaking, place, locales.New(locales.LintDiffPropertyRemoved, nil))
 		case !kept:
-			report(NonBreaking, place, "property removed")
+			report(NonBreaking, place, locales.New(locales.LintDiffPropertyRemoved, nil))
 		default:
 			r.compareSchemas(before.properties[name], next, way, place, report, depth+1)
 		}
 		wasRequired, isRequired := before.required[name], after.required[name]
 		switch {
 		case kept && !wasRequired && isRequired && way == asRequest:
-			report(Breaking, place, "property is now required")
+			report(Breaking, place, locales.New(locales.LintDiffPropertyNowRequired, nil))
 		case kept && wasRequired && !isRequired && way == asResponse:
-			report(Breaking, place, "property is no longer always present")
+			report(Breaking, place, locales.New(locales.LintDiffPropertyNotAlwaysPresent, nil))
 		case kept && wasRequired != isRequired:
-			report(NonBreaking, place, "required changed")
+			report(NonBreaking, place, locales.New(locales.LintDiffRequiredChanged, nil))
 		}
 	}
 	added := make([]string, 0)
@@ -415,9 +416,9 @@ func (r resolver) compareProperties(before, after schemaView, oldSchema, newSche
 		place := where + "." + name
 		switch {
 		case way == asRequest && after.required[name]:
-			report(Breaking, place, "required property added")
+			report(Breaking, place, locales.New(locales.LintDiffRequiredPropertyAdded, nil))
 		default:
-			report(NonBreaking, place, "property added")
+			report(NonBreaking, place, locales.New(locales.LintDiffPropertyAdded, nil))
 		}
 	}
 }

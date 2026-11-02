@@ -10,6 +10,7 @@ import { VIEW_HISTORY, VIEW_TABS } from './sidebarViews'
 import { useAppStore } from '../store/appStore'
 
 const CLI_INIT = 'gostman init'
+const CI_INIT = 'gostman init --ci github'
 
 const store = () => useAppStore.getState()
 
@@ -121,6 +122,7 @@ export function createFeatureActions({ backend, commands, monitors, mock, captur
 
   const copies = {
     cliInit: { run: () => copyCommand(CLI_INIT) },
+    ciInit: { run: () => copyCommand(CI_INIT) },
   }
 
   const handlers = { dialog: dialogs, command: commandHandlers, sample: samples, tab: tabs, copy: copies }

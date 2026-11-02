@@ -1,30 +1,95 @@
 package importer
 
 import (
-	"regexp"
 	"strings"
+	"unicode"
 
 	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 const (
-	blueprintFormat  = "FORMAT:"
-	blueprintHost    = "HOST:"
-	blueprintMethods = "GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS|TRACE|CONNECT"
+	blueprintFormat = "FORMAT:"
+	blueprintHost   = "HOST:"
 )
 
-var (
-	blueprintActionWithURI = regexp.MustCompile(`^#+\s*(.*?)\s*\[(` + blueprintMethods + `)\s+(/\S*)\]\s*$`)
-	blueprintResource      = regexp.MustCompile(`^#+\s*(.*?)\s*\[(/\S*)\]\s*$`)
-	blueprintActionHeading = regexp.MustCompile(`^#+\s*(.*?)\s*\[(` + blueprintMethods + `)\]\s*$`)
-	blueprintShorthand     = regexp.MustCompile(`^#+\s*(` + blueprintMethods + `)\s+(/\S*)\s*$`)
-	blueprintBareResource  = regexp.MustCompile(`^#+\s*(/\S*)\s*$`)
-	blueprintGroup         = regexp.MustCompile(`^#+\s*Group\s+(.+?)\s*$`)
-	blueprintHeading       = regexp.MustCompile(`^#+\s*(.+?)\s*$`)
-	blueprintItem          = regexp.MustCompile(`^(\s*)[+*-]\s+(\w+)\b\s*(.*)$`)
-	blueprintQuery         = regexp.MustCompile(`\{\?([^}]*)\}`)
-	blueprintTypeOf        = regexp.MustCompile(`\(([^)]*)\)`)
+const blueprintGroupWord = "Group"
+
+var blueprintMethodSet = setOf("GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS", "TRACE", "CONNECT")
+
+type blueprintHeadingKind int
+
+const (
+	headingTitle blueprintHeadingKind = iota
+	headingGroup
+	headingResource
+	headingAction
+	headingActionWithPath
 )
+
+type blueprintHeadingParts struct {
+	kind   blueprintHeadingKind
+	name   string
+	method string
+	path   string
+}
+
+func parseBlueprintHeading(line string) blueprintHeadingParts {
+	text := strings.TrimSpace(strings.TrimLeft(line, "#"))
+	if group, found := strings.CutPrefix(text, blueprintGroupWord+" "); found {
+		return blueprintHeadingParts{kind: headingGroup, name: strings.TrimSpace(group)}
+	}
+	name, bracket := text, ""
+	if open := strings.LastIndex(text, "["); open >= 0 && strings.HasSuffix(text, "]") {
+		name, bracket = strings.TrimSpace(text[:open]), text[open+1:len(text)-1]
+	}
+	fields := strings.Fields(firstOf(bracket, name))
+	return classifyBlueprintHeading(text, name, bracket != "", fields)
+}
+
+func classifyBlueprintHeading(text, name string, bracketed bool, fields []string) blueprintHeadingParts {
+	switch {
+	case len(fields) == 2 && blueprintMethodSet[fields[0]] && strings.HasPrefix(fields[1], "/"):
+		heading := blueprintHeadingParts{kind: headingActionWithPath, method: fields[0], path: fields[1]}
+		if bracketed {
+			heading.name = name
+		}
+		return heading
+	case len(fields) == 1 && bracketed && blueprintMethodSet[fields[0]]:
+		return blueprintHeadingParts{kind: headingAction, name: name, method: fields[0]}
+	case len(fields) == 1 && strings.HasPrefix(fields[0], "/"):
+		heading := blueprintHeadingParts{kind: headingResource, path: fields[0]}
+		if bracketed {
+			heading.name = name
+		}
+		return heading
+	}
+	return blueprintHeadingParts{kind: headingTitle, name: text}
+}
+
+func readBlueprintItem(line string) []string {
+	trimmed := strings.TrimLeft(line, " \t")
+	if len(trimmed) < 3 || !strings.ContainsRune("+*-", rune(trimmed[0])) || trimmed[1] != ' ' {
+		return nil
+	}
+	rest := strings.TrimSpace(trimmed[2:])
+	end := strings.IndexFunc(rest, func(char rune) bool { return !unicode.IsLetter(char) })
+	if end < 0 {
+		end = len(rest)
+	}
+	if end == 0 {
+		return nil
+	}
+	return []string{line, line[:len(line)-len(trimmed)], rest[:end], strings.TrimSpace(rest[end:])}
+}
+
+func contentTypeOf(label string) (string, string) {
+	open := strings.Index(label, "(")
+	closing := strings.Index(label, ")")
+	if open < 0 || closing < open {
+		return strings.TrimSpace(label), ""
+	}
+	return strings.TrimSpace(label[:open] + label[closing+1:]), strings.TrimSpace(label[open+1 : closing])
+}
 
 type blueprintRequest struct {
 	name        string
@@ -103,28 +168,26 @@ func parseBlueprint(source string) (string, string, []blueprintGroupItem) {
 		case strings.HasPrefix(trimmed, blueprintHost):
 			host = strings.TrimSpace(strings.TrimPrefix(trimmed, blueprintHost))
 		case strings.HasPrefix(trimmed, "#") && !strings.HasPrefix(line, " "):
-			if match := blueprintGroup.FindStringSubmatch(trimmed); match != nil {
+			heading := parseBlueprintHeading(trimmed)
+			switch heading.kind {
+			case headingGroup:
 				finish()
-				groups = append(groups, blueprintGroupItem{name: match[1]})
+				groups = append(groups, blueprintGroupItem{name: heading.name})
 				resourcePath = ""
-				continue
-			}
-			if match := blueprintActionWithURI.FindStringSubmatch(trimmed); match != nil {
-				resourcePath = match[3]
-				begin(match[1], match[2], match[3])
-			} else if match := blueprintResource.FindStringSubmatch(trimmed); match != nil {
+			case headingActionWithPath:
+				resourcePath = heading.path
+				begin(heading.name, heading.method, heading.path)
+			case headingResource:
 				finish()
-				resourcePath = match[2]
-			} else if match := blueprintActionHeading.FindStringSubmatch(trimmed); match != nil && resourcePath != "" {
-				begin(match[1], match[2], resourcePath)
-			} else if match := blueprintShorthand.FindStringSubmatch(trimmed); match != nil {
-				resourcePath = match[2]
-				begin("", match[1], match[2])
-			} else if match := blueprintBareResource.FindStringSubmatch(trimmed); match != nil {
-				finish()
-				resourcePath = match[1]
-			} else if match := blueprintHeading.FindStringSubmatch(trimmed); match != nil && title == "" && len(groups) == 1 && len(groups[0].actions) == 0 {
-				title = match[1]
+				resourcePath = heading.path
+			case headingAction:
+				if resourcePath != "" {
+					begin(heading.name, heading.method, resourcePath)
+				}
+			case headingTitle:
+				if title == "" && len(groups) == 1 && len(groups[0].actions) == 0 {
+					title = heading.name
+				}
 			}
 		case current != nil:
 			index = readBlueprintItems(lines, index, current)
@@ -135,16 +198,12 @@ func parseBlueprint(source string) (string, string, []blueprintGroupItem) {
 }
 
 func readBlueprintItems(lines []string, at int, action *blueprintAction) int {
-	item := blueprintItem.FindStringSubmatch(lines[at])
+	item := readBlueprintItem(lines[at])
 	if item == nil || item[2] != "Request" {
 		return at
 	}
 	request := blueprintRequest{}
-	label := strings.TrimSpace(blueprintTypeOf.ReplaceAllStringFunc(item[3], func(found string) string {
-		request.contentType = strings.Trim(found, "()")
-		return ""
-	}))
-	request.name = label
+	request.name, request.contentType = contentTypeOf(item[3])
 	indent := len(item[1])
 	next := at
 	var section string
@@ -156,7 +215,7 @@ func readBlueprintItems(lines []string, at int, action *blueprintAction) int {
 			break
 		}
 		next++
-		sub := blueprintItem.FindStringSubmatch(line)
+		sub := readBlueprintItem(line)
 		switch {
 		case sub != nil && (sub[2] == "Headers" || sub[2] == "Body"):
 			section, sectionIndent = sub[2], len(sub[1])
@@ -192,12 +251,14 @@ func leadingSpaces(line string) int {
 
 func blueprintAddress(address string) (string, []row) {
 	var params []row
-	if match := blueprintQuery.FindStringSubmatch(address); match != nil {
-		for _, name := range strings.Split(match[1], ",") {
-			params = append(params, row{Key: strings.TrimSuffix(strings.TrimSpace(name), "*"), Enabled: false})
+	if open := strings.Index(address, "{?"); open >= 0 {
+		if closing := strings.Index(address[open:], "}"); closing >= 0 {
+			for _, name := range strings.Split(address[open+2:open+closing], ",") {
+				params = append(params, row{Key: strings.TrimSuffix(strings.TrimSpace(name), "*"), Enabled: false})
+			}
+			address = address[:open] + address[open+closing+1:]
 		}
 	}
-	address = blueprintQuery.ReplaceAllString(address, "")
 	address = strings.NewReplacer("{", "{{", "}", "}}").Replace(address)
 	return "{{" + ramlBaseURL + "}}" + address, keyedRows(params)
 }
