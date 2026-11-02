@@ -20,7 +20,7 @@ import { RichText } from "./ui/richText"
 import { useAppStore } from "../store/appStore"
 import { awaitsRestart, useWindowFrame } from "../hooks/useWindowFrame"
 import { isFontInstalled, sortedFamilies } from "../lib/fonts"
-import { formatPercent } from "../lib/i18n/format"
+import { formatNumber, formatPercent } from "../lib/i18n/format"
 import { SYSTEM_LANGUAGE, languageName, resolveLanguage } from "../lib/i18n/languages"
 import { switchLanguage } from "../lib/i18n/switchLanguage"
 import { openExternal } from "../lib/about"
@@ -88,28 +88,32 @@ function useInstalledFonts(listFonts) {
 
 const isWithin = ({ min, max }, number) => Number.isInteger(number) && number >= min && number <= max
 
+const digitsOnly = (text) => {
+  const digits = text.replace(/\D/g, "")
+  return digits === "" ? "" : String(Number(digits))
+}
+
 function NumberRow({ label, hint, suffix, range, value, onCommit }) {
   const [draft, setDraft] = useState(String(value))
-  const isValid = draft.trim() !== "" && isWithin(range, Number(draft))
+  const isValid = draft !== "" && isWithin(range, Number(draft))
 
   useEffect(() => setDraft(String(value)), [value])
 
   const change = (event) => {
-    setDraft(event.target.value)
-    const number = Number(event.target.value)
-    if (event.target.value.trim() !== "" && isWithin(range, number)) onCommit(number)
+    const digits = digitsOnly(event.target.value)
+    setDraft(digits)
+    if (digits !== "" && isWithin(range, Number(digits))) onCommit(Number(digits))
   }
 
   return (
     <PreferenceRow label={label} hint={hint}>
       <span className="flex items-center gap-2">
         <Input
-          type="number"
           inputMode="numeric"
+          autoComplete="off"
           aria-label={label}
           aria-invalid={!isValid}
-          min={range.min}
-          max={range.max}
+          maxLength={String(range.max).length}
           value={draft}
           onChange={change}
           onBlur={() => setDraft(String(value))}
@@ -160,10 +164,17 @@ function SystemTitleBarRow({ windowFrame }) {
 
 const percentLabels = () => TEXT_SCALES.map((scale) => ({ value: scale, label: formatPercent(scale / 100) }))
 
+const BASE_FONT_PX = 16
+const ZOOM_EXAMPLE = 1.25
+
+const textScaleHint = (scale) => {
+  const size = (BASE_FONT_PX * scale) / 100
+  return PREFERENCES_TEXT.textScaleHint({ size: formatNumber(size), zoomed: formatNumber(size * ZOOM_EXAMPLE) })
+}
+
 function AppearanceSection({ preferences, windowFrame }) {
   return (
     <>
-      <ChoiceRow label={fields.textScale} name="textScale" options={percentLabels()} preferences={preferences} />
       <ChoiceRow label={fields.density} name="density" options={optionsOf(DENSITIES, PREFERENCES_TEXT.densities)} preferences={preferences} />
       <ChoiceRow label={fields.responseLayout} name="responseLayout" options={optionsOf(RESPONSE_LAYOUTS, PREFERENCES_TEXT.layouts)} preferences={preferences} />
       <ChoiceRow label={fields.tabPlacement} hint={PREFERENCES_TEXT.tabPlacementHint} name="tabPlacement" options={optionsOf(TAB_PLACEMENTS, PREFERENCES_TEXT.tabPlacements)} preferences={preferences} />
@@ -176,21 +187,16 @@ function AppearanceSection({ preferences, windowFrame }) {
 function FontsSection({ preferences, installedFonts }) {
   return (
     <>
+      <ChoiceRow label={fields.textScale} hint={textScaleHint(preferences.textScale)} name="textScale" options={percentLabels()} preferences={preferences} />
       <FontRow label={fields.interfaceFont} hint={PREFERENCES_TEXT.interfaceFontHint} name="interfaceFont" suggestions={installedFonts.fonts} preferences={preferences} />
       <FontRow label={fields.codeFont} hint={PREFERENCES_TEXT.codeFontHint} name="codeFont" isCode suggestions={installedFonts.fonts} preferences={preferences} />
       {installedFonts.load && installedFonts.fonts.length === 0 && (
         <Button variant="outline" size="sm" onClick={installedFonts.load}>{PREFERENCES_TEXT.suggestFonts}</Button>
       )}
       {installedFonts.status && <p role="status" className="text-2xs text-muted-foreground">{installedFonts.status}</p>}
-    </>
-  )
-}
-
-function EditorSection({ preferences }) {
-  return (
-    <>
       <NumberRow
         label={fields.editorFontSize}
+        hint={PREFERENCES_TEXT.editorFontSizeHint}
         suffix={PREFERENCES_TEXT.pixels}
         range={EDITOR_FONT_SIZES}
         value={preferences.editorFontSize}
@@ -287,7 +293,6 @@ const SECTIONS = [
   section("appearance", (context) => <AppearanceSection {...context} />),
   section("theme", (context) => <ThemeSection {...context} />),
   section("fonts", (context) => <FontsSection {...context} />),
-  section("editor", (context) => <EditorSection {...context} />),
   section("requests", (context) => <RequestsSection {...context} />),
   section("language", (context) => <LanguageSection {...context} />),
   section(SECTION_AI, (context) => <AiSection actions={context.ai} />),

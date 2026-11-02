@@ -6,7 +6,6 @@
       "appearance": "Appearance",
       "theme": "Theme",
       "fonts": "Fonts",
-      "editor": "Editor",
       "requests": "Requests",
       "language": "Language",
       "ai": "AI",
@@ -173,6 +172,8 @@
     "accentAdjusted": "Shown as {{light}} in light mode and {{dark}} in dark mode so text in this colour stays readable.",
     "sidebarViewsHint": "Choose which tabs the sidebar shows and in what order. Right-click the tabs in the sidebar to show or hide them there.",
     "moveViewUp": "Move {{name}} up",
-    "moveViewDown": "Move {{name}} down"
+    "moveViewDown": "Move {{name}} down",
+    "textScaleHint": "Scales the interface and its input fields. The window zoom is applied on top of this size: a base of {{size}} px shows as {{zoomed}} px at 125% zoom.",
+    "editorFontSizeHint": "Code editors, in pixels. It does not follow Text size, and the window zoom is applied on top of it."
   }
 }
