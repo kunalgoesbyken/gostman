@@ -16,6 +16,7 @@ import { normalizeFlow } from '../lib/flows/model'
 import { isFlowDirty } from '../lib/flows/edit'
 import { isBlankRequest, isRequestDirty } from '../lib/requestChanges'
 import { rememberResponse } from '../lib/responseHistory'
+import { forgetLastResponses, keepLastResponse, lastResponseOf } from '../lib/lastResponses'
 import { reconcileTabs } from '../lib/tabReconcile'
 import { isNarrowViewport, rememberSidebarOpen, rememberedSidebarOpen } from '../lib/layout'
 import { reorderTabs, stepTab } from '../lib/tabOrder'
@@ -58,7 +59,11 @@ const createId = (prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random
 
 const asArray = (value) => (Array.isArray(value) ? value : [])
 
-const createTab = (id, request, isPreview = false, historyId = '') => ({ id, request: normalizeRequest(request), isPreview, historyId, pendingId: null, response: null, responses: [], bodyDrafts: {} })
+function createTab(id, request, isPreview = false, historyId = '') {
+  const normalized = normalizeRequest(request)
+  const last = lastResponseOf(normalized.id)
+  return { id, request: normalized, isPreview, historyId, pendingId: null, response: last?.response ?? null, responses: last ? [last] : [], bodyDrafts: {} }
+}
 
 const createFlowTab = (id, flow) => ({ ...createTab(id), flowId: flow.id, flowDraft: normalizeFlow(flow) })
 
@@ -449,7 +454,10 @@ export const useAppStore = create(
         requestSidebarView: (view) => set({ sidebarViewRequest: { view, nonce: Date.now() }, isSidebarOpen: true }),
         closeAbout: () => set({ aboutOpen: false }),
         adoptWorkspaceStatus: (status) => set({ workspaceStatus: status }),
-        leaveWorkspace: (path) => set((state) => leaveWorkspace(state, path)),
+        leaveWorkspace: (path) => {
+          forgetLastResponses()
+          set((state) => leaveWorkspace(state, path))
+        },
         setWorkspaceMenuOpen: (workspaceMenuOpen) => set({ workspaceMenuOpen, commandPaletteOpen: false }),
         liftRestriction: () => set({ isRestricted: false }),
         setSecretConnections: (secretConnections) => set({ secretConnections }),
@@ -604,9 +612,12 @@ export const useAppStore = create(
           mapTab(state, tabId, (tab) => ({ ...tab, pendingId }))
         )),
         finishTabRequest: (tabId, pendingId, response, outcome = {}) => set((state) => (
-          mapTab(state, tabId, (tab) => (tab.pendingId === pendingId
-            ? { ...tab, ...outcome, pendingId: null, response, responses: rememberResponse(tab.responses, response, Date.now()) }
-            : tab))
+          mapTab(state, tabId, (tab) => {
+            if (tab.pendingId !== pendingId) return tab
+            const responses = rememberResponse(tab.responses, response, Date.now())
+            if (responses[0]?.response === response) keepLastResponse(tab.request.id, responses[0])
+            return { ...tab, ...outcome, pendingId: null, response, responses }
+          })
         )),
         patchTab: (tabId, patch) => set((state) => mapTab(state, tabId, (tab) => ({ ...tab, ...patch }))),
         setRequestPanel: (requestPanel) => set({ requestPanel }),

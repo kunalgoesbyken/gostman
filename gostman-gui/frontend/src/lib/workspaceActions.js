@@ -29,6 +29,7 @@ import { HAR_FILE_NAME, HAR_MEDIA_TYPE, historyToHar } from './harExport'
 import { createMockActions } from './mockServer'
 import { withoutPassphrases } from './network'
 import { STEP_CHECK, STEP_EXPLORE, STEP_RUN, STEP_SAVE, STEP_SEND, STEP_VARIABLE } from './onboarding'
+import { forgetLastResponses } from './lastResponses'
 import { getPreferences } from './preferences'
 import { AUTH_OAUTH2, isUntouchedRequest, normalizeRequest } from './request'
 import { promptInstall } from './pwa'
@@ -480,6 +481,7 @@ export function createWorkspaceActions(backend) {
     store().suspendPersistence()
     await ai.forgetEverything()
     await backend.reset()
+    forgetLastResponses()
     useAppStore.persist.clearStorage()
     markDataDeleted()
     window.location.reload()
