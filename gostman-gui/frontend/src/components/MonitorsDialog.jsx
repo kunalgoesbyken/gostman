@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { Activity, ChevronDown, ChevronRight, Pause, Pencil, Play, Plus, Trash2 } from "lucide-react"
+import { Activity, Check, ChevronDown, ChevronRight, Pause, Pencil, Play, Plus, Trash2, X } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { toolWindow } from "../lib/dialogWindows"
 import { Dialog } from "./ui/dialog"
@@ -20,9 +20,11 @@ import { useAppStore } from "../store/appStore"
 const WINDOW = toolWindow("monitors")
 const SHOWN_RUNS = 30
 
-function StatusDot({ monitor, isRunning, lastPassed }) {
-  const tone = monitor.paused || lastPassed === undefined ? "bg-muted-foreground/40" : lastPassed ? "bg-success" : "bg-destructive"
-  return <span aria-hidden="true" className={cn("h-2 w-2 shrink-0 rounded-full", tone, isRunning && "animate-pulse")} />
+function LastOutcome({ monitor, isRunning, lastPassed }) {
+  const className = cn("h-3.5 w-3.5 shrink-0", isRunning && "animate-pulse")
+  if (monitor.paused || lastPassed === undefined) return <Activity aria-hidden="true" className={cn(className, "text-muted-foreground/40")} />
+  if (lastPassed) return <Check aria-hidden="true" className={cn(className, "text-success")} />
+  return <X aria-hidden="true" className={cn(className, "text-destructive")} />
 }
 
 function MonitorRow({ monitor, isSelected, isRunning, history, onSelect }) {
@@ -35,7 +37,7 @@ function MonitorRow({ monitor, isSelected, isRunning, history, onSelect }) {
         onClick={onSelect}
         className={cn("flex min-h-9 w-full items-center gap-2 border-b border-border px-3 py-1.5 text-start hover:bg-accent", isSelected && "bg-accent")}
       >
-        <StatusDot monitor={monitor} isRunning={isRunning} lastPassed={last?.passed} />
+        <LastOutcome monitor={monitor} isRunning={isRunning} lastPassed={last?.passed} />
         <span className="min-w-0 flex-1 truncate text-xs text-foreground">{monitor.name}</span>
         {monitor.paused && <span className="shrink-0 text-2xs text-muted-foreground">{TEXT.paused}</span>}
       </button>

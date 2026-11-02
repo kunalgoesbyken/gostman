@@ -1,3 +1,4 @@
+import { memo } from "react"
 import { Activity, Cookie, GitBranch, Radio, Server, Settings, SlidersHorizontal, Newspaper } from "lucide-react"
 import { cn } from "../lib/utils"
 import { useCaptureStore } from "../lib/captureSession"
@@ -26,7 +27,7 @@ const portOf = (address) => {
   }
 }
 
-export function StatusBar({ showsResizeGrip, onOpenMock, onOpenCapture, onOpenMonitors, updates, remindsExport, onExport }) {
+export const StatusBar = memo(function StatusBar({ showsResizeGrip, onOpenMock, onOpenCapture, onOpenMonitors, updates, remindsExport, onExport }) {
   const openCookies = useAppStore((s) => s.openCookiesDialog)
   const openSettings = useAppStore((s) => s.openSettingsDialog)
   const openPreferences = useAppStore((s) => s.openPreferencesDialog)
@@ -58,4 +59,4 @@ export function StatusBar({ showsResizeGrip, onOpenMock, onOpenCapture, onOpenMo
       </div>
     </footer>
   )
-}
+})

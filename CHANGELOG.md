@@ -4,6 +4,16 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.11.4] - 2026-11-03
+
+### Changed
+
+- The green status dots are gone: the WebSocket toolbar shows its state as text, and monitors show a check or cross for the last run.
+
+### Fixed
+
+- Typing no longer re-renders the header, status bar and notices.
+
 ## [1.11.3] - 2026-11-03
 
 ### Added

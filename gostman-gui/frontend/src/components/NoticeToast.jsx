@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { memo, useEffect, useState } from "react"
 import { X } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { useAppStore } from "../store/appStore"
@@ -6,7 +6,7 @@ import { TREE_TEXT } from "../lib/treeText"
 
 const NOTICE_MS = 8000
 
-export function NoticeToast() {
+export const NoticeToast = memo(function NoticeToast() {
   const notice = useAppStore((s) => s.notice)
   const dismiss = useAppStore((s) => s.dismissNotice)
   const [heldId, setHeldId] = useState(null)
@@ -33,4 +33,4 @@ export function NoticeToast() {
       )}
     </div>
   )
-}
+})

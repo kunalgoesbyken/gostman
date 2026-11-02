@@ -37,10 +37,10 @@ const HANDSHAKE_LABEL = "shrink-0 text-xs text-muted-foreground"
 const TIME_FORMAT = { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }
 
 const STATUS_VIEWS = {
-  [SOCKET_IDLE]: { get label() { return SOCKET_TEXT.statuses.idle }, dot: "bg-muted-foreground" },
-  [SOCKET_CONNECTING]: { get label() { return SOCKET_TEXT.statuses.connecting }, dot: "bg-warning" },
-  [SOCKET_OPEN]: { get label() { return SOCKET_TEXT.statuses.open }, dot: "bg-success" },
-  [SOCKET_WAITING]: { get label() { return SOCKET_TEXT.statuses.waiting }, dot: "bg-warning" },
+  [SOCKET_IDLE]: { get label() { return SOCKET_TEXT.statuses.idle } },
+  [SOCKET_CONNECTING]: { get label() { return SOCKET_TEXT.statuses.connecting } },
+  [SOCKET_OPEN]: { get label() { return SOCKET_TEXT.statuses.open } },
+  [SOCKET_WAITING]: { get label() { return SOCKET_TEXT.statuses.waiting } },
 }
 
 const ENTRY_VIEWS = {
@@ -220,7 +220,6 @@ export function WebSocketPanel({ tabId, request, variables, sockets, onUpdateReq
     <Panel>
       <Toolbar className="max-sm:h-auto max-sm:min-h-10 max-sm:flex-wrap max-sm:py-1.5">
         <span className="flex shrink-0 items-center gap-2 text-xs text-foreground">
-          <span aria-hidden="true" className={cn("h-2 w-2 rounded-full", status.dot)} />
           {status.label}
         </span>
         <span className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground max-sm:order-last max-sm:basis-full" title={target.url || target.error}>

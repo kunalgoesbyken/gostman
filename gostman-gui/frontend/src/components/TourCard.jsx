@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { memo, useEffect, useState } from "react"
 import { Button } from "./ui/button"
 import { TOUR_FINISHED, TOUR_STEP_IDS, endTourReplay, useTourStore } from "../lib/tour"
 import { TOUR_TEXT as TEXT } from "../lib/tourText"
@@ -16,7 +16,7 @@ function useTourTrigger() {
   return hydrated && !isWelcomeDismissed && (hasHistory || hasRequests)
 }
 
-export function TourCard() {
+export const TourCard = memo(function TourCard() {
   const { tourStep } = usePreferences()
   const isReplaying = useTourStore((s) => s.isReplaying)
   const isTriggered = useTourTrigger()
@@ -61,4 +61,4 @@ export function TourCard() {
       </div>
     </section>
   )
-}
+})

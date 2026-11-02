@@ -330,6 +330,10 @@ function LoadedWorkspace({ backend, onBack }) {
   const isFrameless = useFramelessWindow(backend.windowFrame)
   const showsResizeGrip = useAdjustableWindow(backend.windowFrame)
   const actions = useMemo(() => createWorkspaceActions(backend), [backend])
+  const toggleSidebar = useCallback(() => actions.runCommand("toggleSidebar"), [actions])
+  const openMonitors = useCallback(() => actions.monitors.open(), [actions])
+  const exportWorkspace = useCallback(() => actions.runCommand("export"), [actions])
+  const gettingStarted = useMemo(() => (showsWelcome ? null : <GettingStartedButton onBegin={actions.beginOnboardingStep} />), [showsWelcome, actions])
   useEffect(() => {
     installFeatureAccess(actions.features)
     return releaseFeatureAccess
@@ -384,13 +388,13 @@ function LoadedWorkspace({ backend, onBack }) {
         windowFrame={backend.windowFrame}
         onImport={actions.openImport}
         onOpenCommands={openCommandPalette}
-        onToggleSidebar={() => actions.runCommand("toggleSidebar")}
+        onToggleSidebar={toggleSidebar}
         onOpenCookies={openCookiesDialog}
         onOpenSettings={openSettingsDialog}
         onOpenMock={actions.mock.open}
         onOpenCapture={actions.capture.open}
         onBack={onBack}
-        gettingStarted={showsWelcome ? null : <GettingStartedButton onBegin={actions.beginOnboardingStep} />}
+        gettingStarted={gettingStarted}
       />
 
       <div className="relative flex min-h-0 flex-1">
@@ -547,10 +551,10 @@ function LoadedWorkspace({ backend, onBack }) {
         showsResizeGrip={showsResizeGrip}
         onOpenMock={actions.mock.open}
         onOpenCapture={actions.capture.open}
-        onOpenMonitors={() => actions.monitors.open()}
+        onOpenMonitors={openMonitors}
         updates={backend.updates}
         remindsExport={actions.backups?.remindsExport}
-        onExport={() => actions.runCommand("export")}
+        onExport={exportWorkspace}
       />
 
       <NoticeToast />

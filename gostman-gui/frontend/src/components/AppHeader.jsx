@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { memo, useRef, useState } from "react"
 import { ArrowLeft, CircleHelp, Compass, Download, Hand, Import, Info, Keyboard, Route, PanelLeft, Search, Newspaper } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { EnvironmentSwitcher } from "./EnvironmentSwitcher"
@@ -56,7 +56,7 @@ function HelpMenu({ style }) {
   )
 }
 
-export function AppHeader({ storage, windowFrame, onImport, onOpenCommands, onToggleSidebar, onBack, gettingStarted }) {
+export const AppHeader = memo(function AppHeader({ storage, windowFrame, onImport, onOpenCommands, onToggleSidebar, onBack, gettingStarted }) {
   const isDesktop = isDesktopShell()
   const drawsTitleBar = Boolean(useWindowFrame(windowFrame)?.frameless)
   const paletteShortcut = useShortcutLabel("commandPalette")
@@ -107,4 +107,4 @@ export function AppHeader({ storage, windowFrame, onImport, onOpenCommands, onTo
       {drawsTitleBar && <WindowControls />}
     </header>
   )
-}
+})
