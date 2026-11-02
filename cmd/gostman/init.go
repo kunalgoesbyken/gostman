@@ -50,6 +50,7 @@ addresses where one of your own requests sends it.
 type initialization struct {
 	folder string
 	skill  bool
+	ci     string
 }
 
 func parseInitialization(arguments []string) (initialization, error) {
@@ -57,7 +58,11 @@ func parseInitialization(arguments []string) (initialization, error) {
 	flags := flag.NewFlagSet("init", flag.ContinueOnError)
 	flags.SetOutput(io.Discard)
 	flags.BoolVar(&parsed.skill, "skill", false, "")
+	flags.StringVar(&parsed.ci, "ci", "", "")
 	positional, err := parseInterspersed(flags, arguments)
+	if err == nil {
+		err = checkCI(parsed.ci)
+	}
 	switch {
 	case err != nil:
 		return parsed, err
@@ -158,6 +163,11 @@ func initCommand(arguments []string, stdout, stderr *os.File) int {
 	}
 	if parsed.skill {
 		if err := installSkill(stdout); err != nil {
+			return complain(stderr, err)
+		}
+	}
+	if parsed.ci != "" {
+		if err := writeCI(parsed.ci, root, stdout); err != nil {
 			return complain(stderr, err)
 		}
 	}

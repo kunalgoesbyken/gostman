@@ -183,6 +183,118 @@ api-tests:
 
 Set `API_TOKEN` as a masked CI/CD variable.
 
+## Azure Pipelines
+
+```yaml
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - script: |
+      curl -fsSL -o gostman.tar.gz https://github.com/kunalgoesbyken/gostman/releases/latest/download/gostman-cli-linux-amd64.tar.gz
+      tar -xzf gostman.tar.gz
+    displayName: Install Gostman
+  - script: ./gostman run api --env CI --var-from-env API_TOKEN --reporter junit --output report.xml
+    displayName: Run collection
+    env:
+      API_TOKEN: $(API_TOKEN)
+  - task: PublishTestResults@2
+    condition: always()
+    inputs:
+      testResultsFormat: JUnit
+      testResultsFiles: report.xml
+```
+
+Define `API_TOKEN` as a secret pipeline variable and map it in `env`, since Azure does not expose secret variables to scripts otherwise.
+
+## CircleCI
+
+```yaml
+version: 2.1
+
+jobs:
+  gostman:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - run:
+          name: Install Gostman
+          command: |
+            curl -fsSL -o gostman.tar.gz https://github.com/kunalgoesbyken/gostman/releases/latest/download/gostman-cli-linux-amd64.tar.gz
+            tar -xzf gostman.tar.gz
+      - run:
+          name: Run collection
+          command: ./gostman run api --env CI --var-from-env API_TOKEN --reporter junit --output test-results/gostman/report.xml
+      - store_test_results:
+          path: test-results
+
+workflows:
+  api:
+    jobs:
+      - gostman
+```
+
+Add `API_TOKEN` to the project's environment variables.
+
+## Bitbucket Pipelines
+
+```yaml
+image: alpine:3.20
+
+pipelines:
+  default:
+    - step:
+        name: Gostman
+        script:
+          - apk add --no-cache curl
+          - curl -fsSL -o gostman.tar.gz https://github.com/kunalgoesbyken/gostman/releases/latest/download/gostman-cli-linux-amd64.tar.gz
+          - tar -xzf gostman.tar.gz
+          - ./gostman run api --env CI --var-from-env API_TOKEN --reporter junit --output test-results/report.xml
+```
+
+Add `API_TOKEN` as a secured repository variable. Bitbucket reads JUnit files under `test-results` as test reports.
+
+## Makefile
+
+```make
+GOSTMAN ?= ./gostman
+
+gostman:
+	curl -fsSL -o gostman.tar.gz https://github.com/kunalgoesbyken/gostman/releases/latest/download/gostman-cli-linux-amd64.tar.gz
+	tar -xzf gostman.tar.gz
+
+api-test: gostman
+	$(GOSTMAN) run api --env CI --var-from-env API_TOKEN --reporter junit --output report.xml
+
+api-lint:
+	$(GOSTMAN) lint openapi.yaml
+
+api-scan:
+	$(GOSTMAN) scan api
+```
+
+## Starter pipelines and pre-commit
+
+`gostman init api --ci github|gitlab|azure|circleci|bitbucket` creates the workspace (as `gostman init` does) and writes a starter pipeline for that service in the current folder, running the workspace with a JUnit report. The files are `.github/workflows/gostman.yml`, `.gitlab-ci.yml`, `azure-pipelines.yml`, `.circleci/config.yml` and `bitbucket-pipelines.yml`. A file that already exists is left as it is and the command says so.
+
+The repository root has a [pre-commit](https://pre-commit.com) configuration for the hooks `gostman-lint`, `gostman-scan` and `gostman-run`. They call the `gostman` binary on your `PATH`, so install the CLI first.
+
+```yaml
+repos:
+  - repo: https://github.com/kunalgoesbyken/gostman
+    rev: main
+    hooks:
+      - id: gostman-lint
+      - id: gostman-scan
+        args: [api]
+```
+
+Pin `rev` to a release tag. `gostman-lint` runs on files named like `openapi.yaml` or `swagger.json`, `gostman-scan` and `gostman-run` take the workspace folder in `args`, and `gostman-run` sends real requests, so use it on a `pre-push` stage rather than at every commit.
+
 ## Jenkins
 
 ```groovy

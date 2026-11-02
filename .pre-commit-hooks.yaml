@@ -1,0 +1,23 @@
+- id: gostman-lint
+  name: Gostman OpenAPI lint
+  description: Lint an OpenAPI or Swagger spec with gostman lint. Needs the gostman binary on PATH.
+  entry: gostman lint
+  language: system
+  files: (^|/)(openapi|swagger)[^/]*\.(ya?ml|json)$
+  pass_filenames: true
+- id: gostman-scan
+  name: Gostman secret scan
+  description: Scan a Gostman workspace for secrets with gostman scan. Needs the gostman binary on PATH.
+  entry: gostman scan
+  language: system
+  files: \.(ya?ml|json|bru|http|hurl)$
+  pass_filenames: false
+  args: [.]
+- id: gostman-run
+  name: Gostman run
+  description: Run a Gostman workspace with gostman run. Set args to the workspace folder. Needs the gostman binary on PATH.
+  entry: gostman run
+  language: system
+  files: \.(ya?ml|json)$
+  pass_filenames: false
+  args: [.]

@@ -429,6 +429,9 @@ init
 
   --skill               also write the Gostman skill for coding agents to
                         .claude/skills/gostman/SKILL.md in the current folder
+  --ci <provider>       also write a starter pipeline in the current folder:
+                        github, gitlab, azure, circleci or bitbucket; an
+                        existing file is never overwritten
 
 import
   Create a workspace from an Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI,
