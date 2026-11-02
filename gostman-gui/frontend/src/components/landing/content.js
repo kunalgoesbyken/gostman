@@ -10,19 +10,18 @@ export const SITE_LANGUAGE = "en"
 
 export const formatList = (items) => new Intl.ListFormat(SITE_LANGUAGE, { type: "conjunction" }).format(items)
 
-export const EDITOR_ENTRIES = [
-  {
-    key: "vscode",
-    title: "VS Code extension",
-    text: "Run collections, folders and flows, lint specs and scan for secrets from the editor, through the same CLI as CI.",
-    link: "Install extension",
-    docs: "vscode",
-  },
-  {
-    key: "mcp",
-    title: "MCP server for coding agents",
-    text: "gostman mcp lets Claude Code, Codex and Cursor call your APIs through your saved requests, with secrets kept out of reach.",
-    link: "MCP docs",
-    docs: "agents",
-  },
+const WORKSPACE_PATH = "/path/to/project/gostman"
+const SERVER_ARGS = ["mcp", "--workspace", WORKSPACE_PATH]
+const json = (value) => JSON.stringify(value, null, 2)
+
+export const VSCODE_BUTTON = "Install in VS Code"
+
+export const MCP_CLIENTS = [
+  { id: "claude", label: "Claude Code", file: null, snippet: `claude mcp add gostman -- gostman ${SERVER_ARGS.join(" ")}` },
+  { id: "codex", label: "Codex", file: null, snippet: `codex mcp add gostman -- gostman ${SERVER_ARGS.join(" ")}` },
+  { id: "cursor", label: "Cursor", file: ".cursor/mcp.json", snippet: json({ mcpServers: { gostman: { command: "gostman", args: SERVER_ARGS } } }) },
+  { id: "vscode", label: "VS Code", file: ".vscode/mcp.json", snippet: json({ servers: { gostman: { type: "stdio", command: "gostman", args: SERVER_ARGS } } }) },
 ]
+
+export const MCP_NEEDS_CLI = "Needs the gostman CLI installed."
+export const MCP_TITLE = "MCP server for coding agents"
