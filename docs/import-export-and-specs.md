@@ -291,6 +291,8 @@ For a folder linked to a spec, the folder menu has **Check for spec updates**. I
 
 Each item has a checkbox. Operations you edited in Gostman are marked **edited here** and start unchecked, because checking one replaces your edits to its URL, parameters, path variables, body and authentication. Choose **Apply selected** to add, update and remove the checked requests. When nothing differs, the dialog says **The collection already matches the spec.** A folder without a saved address shows **This collection has no saved spec address.**
 
+Choose **Watch this spec** in the folder menu to be told when the spec changes. For a spec opened from a file, the desktop app checks the file every few seconds; for a spec loaded from an address, it checks when the window gets focus, at most every 10 minutes, and the web app does the same. When the spec differs from the last sync and the operations differ from your requests, a notice offers **Review**, which opens **Spec updates**. Nothing is applied until you choose **Apply selected**, so requests you edited are protected as described above. **Stop watching this spec** turns it off.
+
 ### Contract checks
 
 Every HTTP response to a request in a linked folder, or in one of its subfolders, is checked against the spec. The checks appear under **Contract** in the Checks tab of the response, count in its total, and fail a request in the runner like any other check:

@@ -1,6 +1,6 @@
 import { withoutActiveContent } from './activeContent'
 import { CONTRACT_TEXT } from './checksText'
-import { checksContract } from './contractCheck'
+import { checksContract, watchesSpec } from './contractCheck'
 import { parseJSON } from './dataUtils'
 import { DIALOG_TEXT } from './dialogText'
 import { compareText } from './i18n/format'
@@ -66,15 +66,18 @@ export function createSpecActions({ backend, attempt, addImported }) {
     return client.diff({ text: link.snapshot }, { text: snapshot }).catch(() => null)
   }
 
-  const check = attempt(SPEC_ALERTS.syncTitle, async (folderId) => {
+  async function planUpdates(folderId) {
     const saved = store().specLinks[folderId]
     if (!saved?.source) throw new Error(SPEC_TEXT.sourceMissing)
     const link = upgradedLink(saved, store().requests)
     store().setSpecLink(folderId, link)
     const summary = await client.summary(link.source)
     const snapshot = await fetchSnapshot(link.source)
-    const plan = { ...diffSpec(link, summary.operations, store().requests), hash: summary.hash, snapshot, changes: await changesSince(link, snapshot) }
-    store().openSpecDialog({ mode: 'sync', folderId, plan })
+    return { ...diffSpec(link, summary.operations, store().requests), hash: summary.hash, snapshot, changes: await changesSince(link, snapshot) }
+  }
+
+  const check = attempt(SPEC_ALERTS.syncTitle, async (folderId) => {
+    store().openSpecDialog({ mode: 'sync', folderId, plan: await planUpdates(folderId) })
   })
 
   async function removeRequests(items, ops) {
@@ -153,6 +156,11 @@ export function createSpecActions({ backend, attempt, addImported }) {
     store().setSpecLink(folderId, { ...link, contract: !checksContract(link) })
   }
 
+  const toggleWatch = (folderId) => {
+    const link = store().specLinks[folderId]
+    store().setSpecLink(folderId, { ...link, watch: !watchesSpec(link) })
+  }
+
   const browse = (source) => store().openSpecDialog({ mode: 'view', source })
 
   const browseFolder = (folderId) => browse(store().specLinks[folderId].source)
@@ -185,8 +193,11 @@ export function createSpecActions({ backend, attempt, addImported }) {
     lintLatest,
     importSpec,
     check,
+    planUpdates,
+    hash: client.hash,
     apply,
     toggleContract,
+    toggleWatch,
     linkFolder,
     browse,
     browseFolder,

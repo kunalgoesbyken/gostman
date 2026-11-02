@@ -37,6 +37,7 @@ import { isBlankRequest } from "../lib/requestChanges"
 import { forgetSharedLink, pendingSharedLink, subscribeToSharedLink } from "../lib/sharedLink"
 import { currentOpenLink, dismissOpenLink, subscribeToOpenLink } from "../lib/openLink"
 import { exportableVariables, foldersWithoutSecrets, listWithoutSecrets, withoutSecretValues } from "../lib/variableScopes"
+import { startSpecWatch } from "../lib/specWatch"
 import { createWorkspaceActions } from "../lib/workspaceActions"
 import { requestCatalog, withRequestPaths } from "../lib/flows/catalog"
 import { whenIdle } from "../lib/idle"
@@ -354,6 +355,7 @@ function LoadedWorkspace({ backend, onBack }) {
   useEffect(returnFocusFromClosedSidebar, [])
   usePersistence(backend)
   useEffect(() => actions.storage?.followDisk(), [actions])
+  useEffect(() => startSpecWatch(actions.openapi), [actions])
   useEffect(() => {
     actions.mock.resume()
     actions.capture.resume()

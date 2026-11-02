@@ -12,6 +12,7 @@ const (
 	ActionOperation  = "operation"
 	ActionSchema     = "schema"
 	ActionContract   = "contract"
+	ActionHash       = "hash"
 )
 
 type Query struct {
@@ -39,7 +40,8 @@ type Summary struct {
 
 type Reply struct {
 	Error      string      `json:"error,omitempty"`
-	Summary    *Summary    `json:"summary,omitempty"`
+	Hash       string      `json:"hash,omitempty"`
+	Summary   *Summary    `json:"summary,omitempty"`
 	Collection *Collection `json:"collection,omitempty"`
 	Detail     *Detail     `json:"detail,omitempty"`
 	Schema     *SchemaNode `json:"schema,omitempty"`
@@ -67,6 +69,13 @@ func (d *Document) Summary() Summary {
 }
 
 func Handle(ctx context.Context, query Query, opt Options) Reply {
+	if query.Action == ActionHash {
+		hash, err := Fingerprint(ctx, query.Source, opt)
+		if err != nil {
+			return Reply{Error: err.Error()}
+		}
+		return Reply{Hash: hash}
+	}
 	doc, err := Load(ctx, query.Source, opt)
 	if err != nil {
 		return Reply{Error: err.Error()}

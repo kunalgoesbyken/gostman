@@ -72,6 +72,7 @@ export function createSpecClient(backend) {
     read,
     requestsFor,
     summary: async (source) => (await ask({ action: 'summary', source })).summary,
+    hash: async (source) => (await ask({ action: 'hash', source })).hash,
     operation: async (source, key) => (await ask({ action: 'operation', source, key })).detail,
     schema: async (source, name) => (await ask({ action: 'schema', source, name })).schema,
     text: async (source) => {

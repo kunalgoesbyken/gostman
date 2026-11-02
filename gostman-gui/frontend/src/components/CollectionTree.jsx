@@ -14,7 +14,7 @@ import { inlineStart, isRtl } from "../hooks/direction"
 import { usePointerDrag } from "../hooks/usePointerDrag"
 import { useTypeahead } from "../hooks/useTypeahead"
 import { buildCollectionTree, buildSearchIndex, findMatches, flattenCollection, ROOT_ID, ROW_EMPTY, ROW_FOLDER, siblingsIn } from "../lib/collectionTree"
-import { checksContract, syncsSpec } from "../lib/contractCheck"
+import { checksContract, syncsSpec, watchesSpec } from "../lib/contractCheck"
 import { PLACE_AFTER, PLACE_BEFORE, PLACE_INSIDE } from "../lib/dropPlace"
 import { hasModifier, isFocusLost } from "../lib/rovingFocus"
 import { TREE_CHORDS, isRemoveKey, matchesBinding } from "../lib/shortcuts"
@@ -386,6 +386,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
       isCollection: Boolean(folder) && isCollectionRoot(folders, folder.id, workspacePath),
       checksContract: Boolean(folder) && checksContract(specLinks[folder.id]),
       syncsSpec: Boolean(folder) && syncsSpec(specLinks[folder.id]),
+      watchesSpec: Boolean(folder) && watchesSpec(specLinks[folder.id]),
     }
     return menuItemsFor(menu, context)
   }, [menu, tree, folders, requests, actions, specLinks, hasClipboard, workspacePath, selectedEntries, clearSelection, selectRow])

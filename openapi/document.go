@@ -2,8 +2,6 @@ package openapi
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/url"
@@ -71,8 +69,7 @@ func Load(ctx context.Context, source Source, opt Options) (*Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	digest := sha256.Sum256(data)
-	return build(ctx, opt, root, base, hex.EncodeToString(digest[:]))
+	return build(ctx, opt, root, base, digest(data))
 }
 
 func build(ctx context.Context, opt Options, root map[string]any, base, hash string) (*Document, error) {

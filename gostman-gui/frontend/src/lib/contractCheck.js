@@ -10,6 +10,8 @@ export const checksContract = (link) => Boolean(link?.source) && link.contract !
 
 export const syncsSpec = (link) => Boolean(link?.source) && link.sync !== false
 
+export const watchesSpec = (link) => syncsSpec(link) && link.watch === true
+
 export const linkFor = (specLinks, lineage) => (
   [...lineage].reverse().map(({ id }) => specLinks[id]).find(checksContract) ?? null
 )

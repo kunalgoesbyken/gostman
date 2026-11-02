@@ -1,4 +1,4 @@
-import { Activity, ArrowDown, ArrowUp, Bug, CheckSquare, ClipboardPaste, Copy, FileCheck, FileSearch, Folder, FolderInput, FolderPlus, ListChecks, MoreHorizontal, Palette, Pencil, Plus, RefreshCw, Scissors, Settings2, Share2, Tag, Trash2, Workflow, X } from "lucide-react"
+import { Activity, ArrowDown, ArrowUp, Bug, CheckSquare, ClipboardPaste, Copy, Eye, FileCheck, FileSearch, Folder, FolderInput, FolderPlus, ListChecks, MoreHorizontal, Palette, Pencil, Plus, RefreshCw, Scissors, Settings2, Share2, Tag, Trash2, Workflow, X } from "lucide-react"
 import { CONTRACT_TEXT } from "./checksText"
 import { DEPENDENCIES_TEXT } from "./dependenciesText"
 import { DIALOG_TEXT } from "./dialogText"
@@ -16,9 +16,16 @@ export const MENU_MOVE = "move"
 
 export const MENU_OWNER_SELECTION = "selection"
 
-function specMenuItems(folder, actions, { checksContract, syncsSpec }) {
+function specSyncItems(folder, actions, watchesSpec) {
   return [
-    ...(syncsSpec ? [{ id: "spec-sync", label: SPEC_TEXT.checkForUpdates, icon: RefreshCw, onSelect: () => actions.openapi.check(folder.id) }] : []),
+    { id: "spec-sync", label: SPEC_TEXT.checkForUpdates, icon: RefreshCw, onSelect: () => actions.openapi.check(folder.id) },
+    { id: "spec-watch", label: watchesSpec ? SPEC_TEXT.watchStop : SPEC_TEXT.watchStart, icon: Eye, onSelect: () => actions.openapi.toggleWatch(folder.id) },
+  ]
+}
+
+function specMenuItems(folder, actions, { checksContract, syncsSpec, watchesSpec }) {
+  return [
+    ...(syncsSpec ? specSyncItems(folder, actions, watchesSpec) : []),
     { id: "spec-browse", label: SPEC_TEXT.browseSpec, icon: FileSearch, onSelect: () => actions.openapi.browseFolder(folder.id) },
     { id: "spec-contract", label: checksContract ? CONTRACT_TEXT.stop : CONTRACT_TEXT.start, icon: FileCheck, onSelect: () => actions.openapi.toggleContract(folder.id) },
   ]
