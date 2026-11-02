@@ -26,7 +26,7 @@ const portOf = (address) => {
   }
 }
 
-export function StatusBar({ isResizable, onOpenMock, onOpenCapture, onOpenMonitors, updates, remindsExport, onExport }) {
+export function StatusBar({ showsResizeGrip, onOpenMock, onOpenCapture, onOpenMonitors, updates, remindsExport, onExport }) {
   const openCookies = useAppStore((s) => s.openCookiesDialog)
   const openSettings = useAppStore((s) => s.openSettingsDialog)
   const openPreferences = useAppStore((s) => s.openPreferencesDialog)
@@ -54,7 +54,7 @@ export function StatusBar({ isResizable, onOpenMock, onOpenCapture, onOpenMonito
         <StatusItem icon={Cookie} label={TEXT.cookies} onClick={openCookies} />
         <StatusItem icon={SlidersHorizontal} label={PREFERENCES_TEXT.statusLabel} onClick={openPreferences} />
         <button type="button" title={ABOUT_TEXT.versionButton} onClick={openAbout} className={cn(STATUS_ITEM_CLASS, "font-mono text-3xs")}>v{__APP_VERSION__}<span className="sr-only"> {ABOUT_TEXT.versionButton}</span></button>
-        {isResizable && <ResizeGrip />}
+        {showsResizeGrip && <ResizeGrip />}
       </div>
     </footer>
   )

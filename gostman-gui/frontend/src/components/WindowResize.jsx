@@ -24,6 +24,8 @@ const startResize = (edge) => (event) => {
 
 export const useFramelessWindow = (windowFrame) => Boolean(useWindowFrame(windowFrame)?.frameless)
 
+export const useAdjustableWindow = (windowFrame) => Boolean(useWindowFrame(windowFrame)?.adjustable)
+
 export function WindowEdges() {
   if (useIsMaximised()) return null
   return EDGES.map(({ edge, className }) => (
