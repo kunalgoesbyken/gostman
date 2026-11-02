@@ -76,6 +76,13 @@ func plainBody(data []byte, contentType string, err error) (builtBody, error) {
 
 func buildBody(r Request, isGraphQL bool, substitute func(string) string, stream *bodyStream) (builtBody, error) {
 	if isGraphQL {
+		files, err := graphqlFileParts(r)
+		if err != nil {
+			return builtBody{}, err
+		}
+		if len(files) > 0 {
+			return graphqlUploadBody(r, files, substitute, stream)
+		}
 		return plainBody(graphqlBody(r, substitute))
 	}
 	switch r.BodyType {

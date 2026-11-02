@@ -16,6 +16,7 @@
       "body": "Body",
       "auth": "Auth",
       "graphql": "GraphQL",
+      "files": "Files",
       "grpc": "gRPC",
       "mcp": "MCP",
       "websocket": "WebSocket",

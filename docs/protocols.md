@@ -33,6 +33,10 @@ Choose GRAPHQL in the method list; the GraphQL tab opens. If a request keeps a G
 - Variables (JSON) holds the variables. It must be a JSON object, and Gostman marks it when it is not valid JSON.
 - If the method is not GRAPHQL, the tab shows that the query is not sent while the method is something else.
 
+### File uploads
+
+The **Files** tab sends files with the GraphQL multipart request spec. Add a row for each file: the **Variable** names where the file belongs in the variables (`file`, `input.avatar`, `files.0`), the type stays **File**, and you choose the file or attach it from disk (desktop only, as for multipart bodies). Gostman sends `operations` (the query and variables, with each file variable set to `null`), `map` and one part for each file, as `multipart/form-data`. Variables must be a JSON object. A list such as `files.0` needs the list to exist in the variables, for example `{"files": [null]}`; the code generator and cURL export show the parts that are sent. Files embedded in the request work in the web app within its 3 MB limit and in `gostman run` and `send`; files attached from disk need the desktop app.
+
 ### Schema browser
 
 Select Schema to open the schema pane, then Fetch schema. Gostman sends an introspection query with the URL, headers and auth of this request. The button changes to Refresh schema after the schema loads.

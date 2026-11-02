@@ -25,7 +25,7 @@ import { AUTH_INHERIT, countInheritedHeaders, inheritedAuthLayer } from "../lib/
 import { MCP_PANEL } from "../lib/mcp"
 import { readParamRows } from "../lib/queryString"
 import {
-  AUTH_PANEL, BODY_PANEL, EXTRACT_PANEL, GRAPHQL_PANEL, HEADERS_PANEL, PARAMS_PANEL, SETTINGS_PANEL, TESTS_PANEL, VARS_PANEL,
+  AUTH_PANEL, BODY_PANEL, EXTRACT_PANEL, FILES_PANEL, GRAPHQL_PANEL, HEADERS_PANEL, PARAMS_PANEL, SETTINGS_PANEL, TESTS_PANEL, VARS_PANEL,
   hasChangedSettings, hasProtocolPanel, leadSection, requestKind, requestSections, requestSettings,
 } from "../lib/requestSections"
 import { REQUEST_TABS_TEXT as TEXT } from "../lib/requestTabsText"
@@ -33,6 +33,8 @@ import { countActiveAssertions } from "../lib/scripting/assertions"
 import { countSentRows, parseRows, serializeRows } from "../lib/rows"
 import { SOCKET_IDLE, SOCKET_OPEN, SOCKET_PANEL, isSocketAddress, selectSession, useSocketStore } from "../lib/socketSessions"
 import { useAppStore } from "../store/appStore"
+
+import { GraphQLFiles, countGraphQLFiles } from "./GraphQLFiles"
 
 const GraphQLPanel = lazy(() => import("./GraphQLPanel").then((module) => ({ default: module.GraphQLPanel })))
 const GrpcPanel = lazy(() => import("./GrpcPanel").then((module) => ({ default: module.GrpcPanel })))
@@ -128,6 +130,7 @@ export const RequestTabs = memo(function RequestTabs({
   const inheritedHeaders = useAppStore((state) => countInheritedHeaders(state, activeRequest.folderId, headerRows))
   const variableRows = useMemo(() => parseRows(vars), [vars])
   const paramCount = useMemo(() => countSentRows(readParamRows(url, queryParams)), [url, queryParams])
+  const graphqlFileCount = useMemo(() => (isGraphQL ? countGraphQLFiles(body, bodyType) : 0), [isGraphQL, body, bodyType])
   const bodyContent = useMemo(() => bodyBadge(body, bodyType), [body, bodyType])
   const extractorCount = useMemo(() => parseExtractors(extractors).filter((extractor) => extractor.enabled).length, [extractors])
   const assertionCount = useMemo(() => countActiveAssertions(assertions), [assertions])
@@ -141,6 +144,7 @@ export const RequestTabs = memo(function RequestTabs({
     [BODY_PANEL]: Boolean(bodyContent),
     [AUTH_PANEL]: hasOwnAuth,
     [GRAPHQL_PANEL]: activeRequest.graphqlQuery.trim() !== "",
+    [FILES_PANEL]: graphqlFileCount > 0,
     [GRPC_PANEL]: holdsGrpcCall(activeRequest),
     [SOCKET_PANEL]: socketStatus !== SOCKET_IDLE,
     [EXTRACT_PANEL]: extractorCount > 0,
@@ -152,6 +156,7 @@ export const RequestTabs = memo(function RequestTabs({
     [PARAMS_PANEL]: paramCount,
     [HEADERS_PANEL]: countSentRows(headerRows),
     [BODY_PANEL]: !isGraphQL && bodyContent,
+    [FILES_PANEL]: graphqlFileCount,
     [AUTH_PANEL]: hasOwnAuth,
     [SOCKET_PANEL]: socketStatus === SOCKET_OPEN,
     [VARS_PANEL]: countSentRows(variableRows),
@@ -216,6 +221,10 @@ export const RequestTabs = memo(function RequestTabs({
             onDraftsChange={onBodyDraftsChange}
             EditorComponent={EditorComponent}
           />
+        </TabsContent>
+
+        <TabsContent value={FILES_PANEL} className={PANEL_CLASS}>
+          <GraphQLFiles key={tabId} request={activeRequest} onUpdateRequest={onUpdateRequest} />
         </TabsContent>
 
         <TabsContent value={AUTH_PANEL} className={PANEL_CLASS}>

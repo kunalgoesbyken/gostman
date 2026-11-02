@@ -3,6 +3,8 @@
     "query": "Query",
     "queryLabel": "GraphQL query",
     "variables": "Variables (JSON)",
+    "filesVariable": "Variable",
+    "filesNote": "Files are sent with the GraphQL multipart request spec. Name the variable that holds each file, for example file, input.avatar or files.0; it is set to null in the operation and the file travels as its own part. Leave the type on File.",
     "variablesLabel": "GraphQL variables",
     "invalidJson": "Not valid JSON: {{message}}",
     "syntaxAt": "{{message}} (line {{line}}, column {{column}})",
