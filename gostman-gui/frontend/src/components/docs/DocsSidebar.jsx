@@ -5,8 +5,9 @@ import { classes, keepVisible } from "../../docs/classes"
 import { parseNavState, readNavState, serverNavState, subscribeNavState, toggleNavEntry } from "../../docs/navState"
 
 const ROW = "flex min-w-0 flex-1 items-center rounded-md px-3 py-1.5 text-sm transition-colors"
-const IDLE = "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-const CURRENT = "bg-muted font-medium text-foreground"
+const IDLE = "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+const CURRENT = "bg-muted/50 font-medium text-foreground"
+const OUTLINE_LINK = "block py-1 pl-3 pr-2 text-[0.8125rem] leading-snug text-muted-foreground transition-colors hover:text-foreground"
 
 function useNavState() {
   const text = useSyncExternalStore(subscribeNavState, readNavState, serverNavState)
@@ -15,10 +16,10 @@ function useNavState() {
 
 function Outline({ id, items, hidden }) {
   return (
-    <ul id={id} hidden={hidden} className="mb-1 ml-5 mt-0.5 space-y-0.5 border-l border-border pl-2">
+    <ul id={id} hidden={hidden} className="mb-1 ml-4 mt-0.5 border-l border-border">
       {items.map((child) => (
         <li key={child.href}>
-          <a href={child.href} className={classes("block rounded-md px-2 py-1 text-[0.8125rem] leading-snug", IDLE)}>
+          <a href={child.href} className={OUTLINE_LINK}>
             {child.text}
           </a>
         </li>
@@ -45,7 +46,7 @@ function PageItem({ item, currentHref, state, id }) {
             aria-controls={outlineId}
             aria-label={DOCS_TEXT.showSections(item.label)}
             onClick={() => toggleNavEntry("pages", item.href, !open)}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
           >
             <ChevronRight className={classes("h-3.5 w-3.5 transition-transform", open && "rotate-90")} />
           </button>
