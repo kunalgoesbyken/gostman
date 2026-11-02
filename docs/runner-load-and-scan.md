@@ -75,6 +75,10 @@ Requests in a folder linked to an OpenAPI spec also get the spec's contract chec
 
 Each request shows its folder path and the URL it was sent to, with secret values in the URL replaced by `{{name}}`: variables marked secret or with a sensitive name such as `token` or `api_key`, values from a secret manager or a `.env` file, and OAuth 2 tokens. The rest of the report, such as request and response bodies, is not redacted for you. Review it before you share it.
 
+### Repeat a run on a schedule
+
+`gostman run --every 5m` and `gostman flow run --every 5m` repeat a run until it is stopped, save each run to a local history, and post to a Slack, Teams, Discord or plain webhook when it fails. `gostman history` shows the pass rate and the p50 and p95 duration of each request. See [Scheduled runs](cli.md#scheduled-runs).
+
 ## Load test
 
 The Load test dialog sends the current request many times at once and measures how the server responds. Open it with the **Load test** button next to **Code** in the request bar, or with the **Load test this request** command while the request you want to test is the active tab.

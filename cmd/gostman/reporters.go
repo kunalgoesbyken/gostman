@@ -101,9 +101,9 @@ func onStdout(format string, stdout *os.File) report.Reporter {
 	return chosen
 }
 
-func openReports(specs []reporterSpec, stdout *os.File) (openedReports, error) {
+func openReports(specs []reporterSpec, stdout *os.File, quiet bool) (openedReports, error) {
 	var opened openedReports
-	if !slices.ContainsFunc(specs, reporterSpec.toStdout) {
+	if !quiet && !slices.ContainsFunc(specs, reporterSpec.toStdout) {
 		opened.reporters = append(opened.reporters, onStdout(report.FormatText, stdout))
 	}
 	for _, spec := range specs {

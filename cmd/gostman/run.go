@@ -14,6 +14,7 @@ import (
 	"github.com/kunalgoesbyken/gostman/agent"
 	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/runner"
+	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
 type overrides map[string]string
@@ -42,6 +43,7 @@ type invocation struct {
 	files    fileAccess
 	contract string
 	network  *networkSettings
+	monitor  monitorFlags
 }
 
 type runFlags struct {
@@ -88,6 +90,7 @@ func newRunFlags(name string) (*flag.FlagSet, *runFlags) {
 	parsed.extras.register(flags, &parsed.options)
 	parsed.network = networkFlags(flags)
 	state.signIn.register(flags)
+	parsed.monitor.register(flags)
 	return flags, state
 }
 
@@ -106,9 +109,13 @@ func (r *runFlags) finish(path string) (invocation, error) {
 	case parsed.flow != "" && r.usesRunOnlyFlags():
 		return parsed, errors.New("--folder, --data, --iterations, --parallel, --only, --tags, --exclude-tags, --bail and --delay do not apply to a flow")
 	}
-	parsed.reports, err = r.reporters.resolve(r.output)
-	if err != nil {
+	if err := parsed.monitor.validate(); err != nil {
 		return parsed, err
+	}
+	if !parsed.monitor.repeating() || len(r.reporters) > 0 || r.output != "" {
+		if parsed.reports, err = r.reporters.resolve(r.output); err != nil {
+			return parsed, err
+		}
 	}
 	if err := parsed.extras.validate(parsed.options); err != nil {
 		return parsed, err
@@ -177,9 +184,6 @@ func (i invocation) launch(stdout, stderr *os.File) int {
 	if i.options.Contract, err = loadContract(i.contract, i.options.Network); err != nil {
 		return complain(stderr, err)
 	}
-	if i.flow != "" {
-		return i.executeFlow(stored, stdout, stderr)
-	}
 	return i.execute(stored, stdout, stderr)
 }
 
@@ -191,37 +195,70 @@ func (i invocation) pipeline() func(context.Context, runner.Collection, runner.O
 }
 
 func (i invocation) execute(stored runner.Collection, stdout, stderr *os.File) int {
-	opened, err := openReports(i.reports, stdout)
-	if err != nil {
-		return complain(stderr, err)
-	}
-	defer opened.close()
-	reporters := opened.reporters
-
 	ctx, release := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer release()
 	context.AfterFunc(ctx, release)
 
 	warned := map[string]bool{}
-	outcome, err := i.pipeline()(ctx, stored, i.options, func(result runner.Result) {
+	if i.monitor.repeating() {
+		return i.monitored(ctx, stored, warned, stdout, stderr)
+	}
+	outcome, err := i.cycle(ctx, stored, warned, stdout, stderr)
+	if err != nil {
+		return complain(stderr, err)
+	}
+	code := reportCode(outcome)
+	record := i.record(stored, outcome, code, stderr)
+	i.announce(ctx, record, false, stderr)
+	if ctx.Err() != nil {
+		return exitFailed
+	}
+	return code
+}
+
+func (i invocation) cycle(ctx context.Context, stored runner.Collection, warned map[string]bool, stdout, stderr *os.File) (runner.Report, error) {
+	var flow workspace.Flow
+	if i.flow != "" {
+		var err error
+		if flow, err = chooseFlow(stored, i.flow); err != nil {
+			return runner.Report{}, err
+		}
+	}
+	opened, err := openReports(i.reports, stdout, i.monitor.repeating())
+	if err != nil {
+		return runner.Report{}, err
+	}
+	defer opened.close()
+	reporters := opened.reporters
+	stepping := stepReporters(reporters)
+
+	onResult := func(result runner.Result) {
 		for _, reporter := range reporters {
 			reporter.Request(result)
 		}
 		warnUnresolved(stderr, result.QualifiedName(), firstMentions(warned, result.Unresolved))
-	})
+	}
+	var outcome runner.Report
+	if i.flow != "" {
+		watch := runner.FlowWatch{Result: onResult, Step: func(event runner.FlowEvent) {
+			for _, reporter := range stepping {
+				reporter.Step(event)
+			}
+		}}
+		outcome, err = i.flowPipeline()(ctx, stored, flow, i.options, watch)
+	} else {
+		outcome, err = i.pipeline()(ctx, stored, i.options, onResult)
+	}
 	if err != nil {
-		return complain(stderr, err)
+		return runner.Report{}, err
 	}
 	outcome.Collection = i.path
 	for _, reporter := range reporters {
 		if err := reporter.Finish(outcome); err != nil {
-			return complain(stderr, err)
+			return runner.Report{}, err
 		}
 	}
-	if ctx.Err() != nil {
-		return exitFailed
-	}
-	return reportCode(outcome)
+	return outcome, nil
 }
 
 func reportCode(report runner.Report) int {

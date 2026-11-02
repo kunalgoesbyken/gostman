@@ -149,6 +149,19 @@ To run the collection without reaching the real API, serve its saved examples wi
 
 An example can echo what the request sent, as `Create a todo` does with `{{request.body.json.title}}`, so checks that compare against variables and runs with `--data` pass against the mock too. A run against the mock tests the collection, its scripts and its checks, not the API. To test your own service without its dependencies, mock the API it calls, start the service pointed at the mock, then run the collection against the service. Templating and the other mock options are in [Folders, mock server and capture](workspaces-and-mock.md#examples-and-the-mock-server-desktop).
 
+## Scheduled runs and cron
+
+A monitor is a run that repeats, and there are two ways to schedule it.
+
+- **A CI schedule or cron** starts a new `gostman run` each time: a `schedule` trigger in GitHub Actions, a scheduled pipeline in GitLab, or a crontab line. Each run is a clean process, the CI system keeps the logs and shows failures, and nothing has to stay running. This suits checks every 5 to 60 minutes and anything that must run when your own machine is off.
+- **`--every`** keeps one process running and repeats the run, with a one-line result each time, a [run history](cli.md#scheduled-runs) and an optional webhook message. It suits a server, a container or a terminal on a machine that stays on, and intervals down to a second.
+
+```bash
+gostman run orders-api --env Production --every 5m --notify-env SLACK_WEBHOOK
+```
+
+Run it under whatever restarts it, such as a systemd unit or `docker run --restart unless-stopped`. For cron, a crontab line such as `*/15 * * * * gostman run /srv/orders-api --env Production --var-from-env API_TOKEN --record --notify-env SLACK_WEBHOOK` runs it every fifteen minutes and saves each run to the history; with cron, `--notify` sends a message for every failing run, because each run is a new process that does not know the last result. In a CI job, `--record` writes into the checkout of that job, which is discarded unless you upload `.gostman/runs/`.
+
 ## GitLab CI
 
 ```yaml

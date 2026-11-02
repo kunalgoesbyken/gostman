@@ -23,6 +23,7 @@ const (
   gostman run <export.json | workspace folder | Bruno folder> [flags]
   gostman flow run <name | flow.yaml> [--workspace <folder | export.json>] [flags]
   gostman flow list [--workspace <folder | export.json>] [--json]
+  gostman history [workspace folder | export.json] [flags]
   gostman send [flags] <request>
   gostman send [flags] <METHOD> <url>
   gostman load <export.json | workspace folder> --request <name> [flags]
@@ -140,6 +141,36 @@ run
                         those requests
   --flow <name|file>    run this flow of the collection instead of every
                         request (see flow)
+  --every <duration>    run again on this interval (1s or more, for example 30s,
+                        5m, 1h) until interrupted, and print one line per run
+                        instead of the full report; reports given with
+                        --reporter file:path are rewritten each time with the
+                        latest run. The next run starts when the interval has
+                        passed since the last one started. The exit status is
+                        the worst of the runs: 3 if any request got no
+                        response, else 1 if any run failed, else 0; Ctrl+C
+                        stops the loop and drops the run in progress
+  --times <n>           with --every, stop after n runs
+  --until-fail          with --every, stop at the first run that fails
+  --record              save each run's summary to the run history (--every
+                        does this unless --no-record is given): times, counts,
+                        each request's status and duration, failed check
+                        messages; never response bodies, and secret values
+                        and URL queries are removed. In a workspace folder it
+                        is .gostman/runs/ (kept out of Git by .gitignore),
+                        otherwise a folder in the user configuration directory
+  --no-record           with --every, do not save a history
+  --keep <n>            keep the last n recorded runs (default 200)
+  --notify <url>        post a JSON summary to this address when a run fails.
+                        Slack, Microsoft Teams (webhook and Workflows),
+                        and Discord webhook addresses get the message shape
+                        they expect; others get the JSON summary. The address
+                        is a secret and is never printed. With --every, one
+                        message is sent when a run starts failing and one when
+                        it passes again, not one per failing run
+  --notify-env <NAME>   read the --notify address from this environment
+                        variable
+  --notify-on <when>    fail (default) or always: also post passing runs
 
 flow
   Run a flow: saved requests chained one after another, tried again until they
@@ -156,11 +187,23 @@ flow
   --env, --var, --var-from-env, --env-file, --secrets, --secrets-env-file,
   --timeout, --insecure, --allow-files, --stream-timeout, --reporter, --output,
   --redact, --contract  as for run
+  --every, --times, --until-fail, --record, --no-record, --keep, --notify,
+  --notify-env, --notify-on
+                        as for run
   --cacert, --client-cert, --client-key, --client-cert-pass-env, --proxy,
   --noproxy             as for run
   --oauth-token-env, --oauth-refresh-token-env
                         as for run
   --json                with list: print the flows as JSON
+
+history
+  Show the runs saved by --every and --record for a workspace folder (default:
+  the current folder) or export file: the latest runs, the pass rate, and for
+  each request how often it failed and its 50th and 95th percentile duration.
+
+  --target <name>       only runs of this flow or --folder
+  --limit <n>           only the last n runs (default: every saved run)
+  --json                print the trend and the saved runs as JSON
 
 send
   Send one request through the same pipeline. Stdout gets only the response
@@ -448,6 +491,8 @@ func dispatch(arguments []string, stdout, stderr *os.File) int {
 		return sendCommand(arguments[1:], stdout, stderr)
 	case "flow":
 		return flowCommand(arguments[1:], stdout, stderr)
+	case "history":
+		return historyCommand(arguments[1:], stdout, stderr)
 	case "load":
 		return loadCommand(arguments[1:], stdout, stderr)
 	case "mcp":

@@ -21,7 +21,7 @@ For how the two tools differ and where Postman is stronger, see [Gostman vs Post
 | Saved examples | Examples on the request, served by the mock server |
 | Mock servers | `gostman mock`, or **Mock server** in the desktop app. It runs on your machine. See [Folders, mock server and capture](workspaces-and-mock.md#examples-and-the-mock-server-desktop) |
 | Collection Runner and Newman | **Run requests** in the app, and `gostman run` on the command line |
-| Monitors | A scheduled CI job that runs `gostman run`, see [Monitors](#monitors) |
+| Monitors | `gostman run --every` on a machine that stays on, or a scheduled CI job; see [Monitors](#monitors) |
 | Interceptor and proxy capture | `gostman capture`, which records traffic to one upstream as requests with examples |
 | API definitions | OpenAPI import, spec viewer, sync, linter and contract checks. See [Import, export and specs](import-export-and-specs.md) |
 | Forks, pull requests and comments | Git branches and pull requests on the YAML files |
@@ -154,7 +154,16 @@ The `gostman` binary has nothing else to install, so CI needs no Node.js. The Gi
 
 ## Monitors
 
-A monitor is a run on a schedule. In GitHub Actions, add a `schedule` trigger to the workflow from [Gostman in CI](ci.md):
+A monitor is a run on a schedule. Gostman runs it where you run it, in one of two ways:
+
+```bash
+gostman run orders-api --env Production --every 15m --notify-env SLACK_WEBHOOK
+gostman history orders-api
+```
+
+`--every` repeats the run in one process, prints a line per run, keeps a local history of times, pass and fail counts, and each request's status and duration (no response bodies, no secret values), and posts to a Slack, Microsoft Teams or other webhook when a run fails and when it passes again. `gostman history` prints the pass rate and the p50 and p95 duration of each request. The desktop app has a **Monitors** dialog that does the same for a folder or flow while the app is open, with a chart of the history.
+
+Or add a `schedule` trigger to the workflow from [Gostman in CI](ci.md):
 
 ```yaml
 on:
@@ -162,7 +171,9 @@ on:
     - cron: "*/30 * * * *"
 ```
 
-The run happens on the CI runner, so it reaches what the runner can reach, and failures arrive the way the CI system reports them.
+The run happens on the CI runner, so it reaches what the runner can reach, and failures arrive the way the CI system reports them. [Scheduled runs and cron](ci.md#scheduled-runs-and-cron) compares the two.
+
+The difference from Postman's monitors: a Gostman monitor runs on your machine, server or CI, not from Postman's cloud regions, and it does not run while that machine is off.
 
 ## Back to Postman
 
@@ -183,6 +194,6 @@ Extract rules become lines at the top of the post-response script, such as `pm.c
 ## What Postman has that Gostman does not
 
 - Cloud workspaces with live sync, roles, comments and an activity feed. Gostman shares through Git or encrypted links. See [Sharing and documentation](sharing-and-docs.md).
-- Hosted monitors and hosted mock servers. Gostman runs both where you run it.
+- Hosted monitors and hosted mock servers. Gostman runs both where you run it, so a check from several regions, or one that runs while your computer is off, needs a server or CI schedule you provide.
 - The public API network, and a package library for `pm.require`.
 - A larger community and a longer history. Gostman is a smaller project; report problems on [GitHub](https://github.com/kunalgoesbyken/gostman/issues).

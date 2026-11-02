@@ -27,6 +27,7 @@ gostman export orders-api --format openapi --out openapi.json
 - `import` and `export` convert a workspace from and to other tools' formats; see [Import and export](#import-and-export).
 - `init [folder]` creates an empty workspace and prints how to import a collection into it and run it, and how to register `gostman mcp` with a coding agent, using the workspace's absolute path. `gostman import <file> --out <folder>` accepts a workspace that `init` has just created. When the folder already holds other files, such as a repository root, the workspace goes in a `gostman` folder inside it; nothing is overwritten. `--skill` also writes the Gostman [Agent Skill](agents.md#agent-skill) to `.claude/skills/gostman/SKILL.md`.
 - `mcp` serves a workspace to a coding agent; see [Use from a coding agent](agents.md).
+- `history` lists the runs saved by `--every` and `--record`, with the pass rate and each request's failures and 50th and 95th percentile duration; see [Scheduled runs](#scheduled-runs).
 
 ## Flags for run and send
 
@@ -92,6 +93,40 @@ gostman run orders-api --flow Checkout --env CI
 `flow run` takes every flag of `run` except the ones that choose or repeat requests (`--folder`, `--data`, `--iterations`, `--parallel`, `--only`, `--tags`, `--exclude-tags`, `--bail` and `--delay`, which exit with status 2). `--workspace` names the workspace folder or export file; without it, the current folder is used, or the workspace that holds the flow file. `gostman run <workspace> --flow <name>` does the same. `flow list` prints each flow with its number of steps and id, and `--json` prints them as JSON.
 
 The text report adds a `FLOW` line for every step that sends no request, and a request that failed but that the flow handled, by trying again or going to another step, is printed in yellow with the reason. The exit status follows the outcome of the flow, see [Exit codes](#exit-codes); the JSON report adds a `flow` object with the outcome, its message and every step in order. See [Flows](flows.md) for the steps and the file format.
+
+## Scheduled runs
+
+```bash
+gostman run orders-api --env Staging --every 5m --notify-env SLACK_WEBHOOK
+gostman flow run Checkout --workspace orders-api --every 1h --times 24 --reporter json:latest.json
+gostman history orders-api
+gostman history orders-api --target Checkout --json
+```
+
+`--every <duration>` makes `run` and `flow run` repeat on an interval of one second or more (`30s`, `5m`, `1h`) until you press Ctrl+C. Each run prints one line instead of the full report: the time, the number of the run, `PASS` or `FAIL`, and the counts. A `--reporter` with a file, such as `json:latest.json`, is written again after every run, so the file always holds the latest one; a reporter without a file prints its whole report each time. The next run starts when the interval has passed since the last one started, or at once when a run took longer. The collection is read again before every run, so edits to the files are picked up. `--times <n>` stops after n runs and `--until-fail` stops at the first run that fails.
+
+The exit status is the worst of the runs: 3 when a request in any run got no response, else 1 when any run failed, else 0. Ctrl+C ends the loop, drops the run in progress and exits with that status, so a monitor that was stopped after passing runs exits 0. Wrong flags exit 2 before anything is sent.
+
+**History.** With `--every`, every run is saved to a history unless you pass `--no-record`; `--record` does the same for a single run. A run's file holds its time, target, counts, duration, and for each request its status, duration, error and the messages of failed checks. It holds no response bodies, query strings are cut from URLs in messages, and the values of secret variables are replaced with `{{name}}`. In a workspace folder the files are in `.gostman/runs/`, which `gostman init` and new workspaces list in `.gitignore` (an existing `.gitignore` is never changed, so add the line yourself); for an export file or a Bruno folder they are in a `Gostman/runs` folder of your user configuration directory. `--keep <n>` keeps the last n runs (default 200). `gostman history [workspace]` prints the latest runs, the pass rate and a table of every request with its runs, failures, p50 and p95 duration; `--target` limits it to one flow or `--folder`, `--limit n` to the last n runs, and `--json` prints the trend with the saved runs.
+
+**Notifications.** `--notify <url>` posts a JSON summary when a run fails, and `--notify-env NAME` reads the address from an environment variable, which keeps it out of the shell history and the process list. The address is a secret: it is never printed, and an error about delivery does not repeat it. Slack incoming webhooks (`hooks.slack.com`), Microsoft Teams (`*.webhook.office.com`, and the Workflows addresses under `logic.azure.com`) and Discord webhooks get the message shape their service expects; any other address gets the plain JSON below. With `--every`, one message is sent when a run starts failing and one when it passes again, not one for every failing run; `--notify-on always` also sends passing runs. The post is made once, with a ten second limit, redirects are not followed, and the `--proxy` and certificate flags apply. A message that could not be delivered is a warning and does not change the exit status.
+
+```json
+{
+  "event": "run.failed",
+  "target": "orders-api",
+  "kind": "run",
+  "startedAt": "2026-11-02T04:13:40Z",
+  "durationMs": 20,
+  "passed": false,
+  "requests": 2,
+  "failedRequests": 1,
+  "failedChecks": 1,
+  "failures": [{ "request": "Flaky", "checks": ["is 200: expected response to have status 200 but got 500"] }]
+}
+```
+
+`event` is `run.failed`, `run.passed` or `run.recovered`. For when to use this and when to use cron or a CI schedule, see [Scheduled runs and cron](ci.md#scheduled-runs-and-cron).
 
 ## Exit codes
 

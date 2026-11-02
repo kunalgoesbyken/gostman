@@ -18,7 +18,7 @@ Gostman has no paid tier, no account and no licence key, so every feature in the
 
 ## What Gostman does not include
 
-Gostman has no accounts, so it has no hosted collaboration, single sign-on or cloud monitors. Teams share a collection through Git or an encrypted link. See [Sharing and documentation](sharing-and-docs.md). The builds are not code-signed yet.
+Gostman has no accounts, so it has no hosted collaboration, single sign-on or cloud monitors. Scheduled runs with a history and webhook notifications (`gostman run --every`, and the Monitors dialog in the app) are free and run on your machine. Teams share a collection through Git or an encrypted link. See [Sharing and documentation](sharing-and-docs.md). The builds are not code-signed yet.
 
 ## How the comparison was made
 

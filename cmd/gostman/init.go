@@ -80,7 +80,7 @@ func createWorkspace(root string, stdout io.Writer) error {
 func addGitignore(root string, stdout io.Writer) error {
 	created, err := workspace.WriteGitignore(root)
 	if created {
-		fmt.Fprintf(stdout, "Added %s so .env files and save leftovers stay out of Git.\n", workspace.GitignoreName)
+		fmt.Fprintf(stdout, "Added %s so .env files, save leftovers and run history stay out of Git.\n", workspace.GitignoreName)
 	}
 	return err
 }

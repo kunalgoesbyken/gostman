@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/signal"
 	"path/filepath"
 	"strings"
 	"text/tabwriter"
@@ -115,53 +114,6 @@ func stepReporters(reporters []report.Reporter) []report.StepReporter {
 		}
 	}
 	return stepping
-}
-
-func (i invocation) executeFlow(stored runner.Collection, stdout, stderr *os.File) int {
-	flow, err := chooseFlow(stored, i.flow)
-	if err != nil {
-		return complain(stderr, err)
-	}
-	opened, err := openReports(i.reports, stdout)
-	if err != nil {
-		return complain(stderr, err)
-	}
-	defer opened.close()
-	reporters := opened.reporters
-	stepping := stepReporters(reporters)
-
-	ctx, release := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer release()
-	context.AfterFunc(ctx, release)
-
-	warned := map[string]bool{}
-	watch := runner.FlowWatch{
-		Result: func(result runner.Result) {
-			for _, reporter := range reporters {
-				reporter.Request(result)
-			}
-			warnUnresolved(stderr, result.QualifiedName(), firstMentions(warned, result.Unresolved))
-		},
-		Step: func(event runner.FlowEvent) {
-			for _, reporter := range stepping {
-				reporter.Step(event)
-			}
-		},
-	}
-	outcome, err := i.flowPipeline()(ctx, stored, flow, i.options, watch)
-	if err != nil {
-		return complain(stderr, err)
-	}
-	outcome.Collection = i.path
-	for _, reporter := range reporters {
-		if err := reporter.Finish(outcome); err != nil {
-			return complain(stderr, err)
-		}
-	}
-	if ctx.Err() != nil {
-		return exitFailed
-	}
-	return reportCode(outcome)
 }
 
 func flowListCommand(arguments []string, stdout, stderr *os.File) int {
