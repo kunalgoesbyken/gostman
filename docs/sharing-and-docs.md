@@ -35,6 +35,8 @@ An encrypted file is opened like any other import: drop it on the **Import** tab
 
 ![A generated documentation page with a sidebar of requests and the details of one](../gostman-gui/frontend/src/assets/landing/docs.webp)
 
+The export dialog and `gostman docs` take a title. `gostman docs` also takes `--logo` (an image shown above the title) and `--accent` (the colour of links), and can publish **versioned docs**: `--versions v1,v2` or `--all-tags` reads the workspace from each Git tag, branch or commit without touching your working tree and writes one page per version into a folder, each with a version switcher and an `index.html` that opens the last one. See [Generated documentation](cli.md#generated-documentation).
+
 ## Open in Gostman links
 
 A link can ask Gostman to download a Postman, OpenAPI, Insomnia, HAR, Bruno or Gostman file and import it, for example from a README button:

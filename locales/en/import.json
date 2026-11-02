@@ -101,7 +101,12 @@
       "titlePlaceholder": "Title (default: API documentation)",
       "titleLabel": "Documentation title",
       "includeExamples": "Include example responses",
-      "playground": "Include a Try it panel"
+      "playground": "Include a Try it panel",
+      "accentLabel": "Link colour",
+      "accentPlaceholder": "Link colour, such as #0b6bcb",
+      "logoChoose": "Choose logo",
+      "logoRemove": "Remove logo",
+      "logoTooLarge": "The logo must be smaller than 300 KB."
     }
   },
   "transfer": {

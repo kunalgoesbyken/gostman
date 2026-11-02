@@ -52,6 +52,9 @@ a:hover { text-decoration: underline; }
 .layout { display: grid; grid-template-columns: 18rem minmax(0, 1fr); }
 .contents { position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 1.5rem 1rem 3rem; border-right: 1px solid var(--line); font-size: 0.875rem; line-height: 1.4; }
 .contents-title { margin: 0 0 1rem; font-weight: 650; font-size: 1rem; overflow-wrap: anywhere; }
+.logo { display: block; max-width: 100%; max-height: 3.5rem; margin: 0 0 0.75rem; }
+.versions { display: flex; flex-wrap: wrap; gap: 0.25rem 0.625rem; align-items: baseline; margin: 0 0 1rem; font-size: 0.8125rem; }
+.versions span { color: var(--soft); }
 .filter { display: block; width: 100%; margin: 0 0 1rem; padding: 0.4rem 0.6rem; border: 1px solid var(--line); border-radius: 6px; background: var(--page); color: var(--ink); font: inherit; }
 .contents ul { list-style: none; margin: 0; padding: 0; }
 .contents ul ul { margin-left: 0.5rem; padding-left: 0.5rem; border-left: 1px solid var(--line); }

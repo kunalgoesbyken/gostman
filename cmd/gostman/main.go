@@ -327,6 +327,14 @@ docs
   --no-examples         leave out the saved example responses
   --playground          add a "Try it" panel to each request that sends it from the
                         reader's browser; secrets are left empty for the reader
+  --logo <file>         show a png, jpg, gif, webp or svg logo (up to 300 KB) above the title
+  --accent <#hex>       colour of links and focus rings
+  --versions v1,v2      build one page per Git tag, branch or commit of the workspace
+                        repository, read with git archive so the working tree is not
+                        touched; --output names a folder that gets one folder per
+                        version, a version switcher on every page and an index.html
+                        that opens the last one
+  --all-tags            build one page per tag, oldest first
 
 capture
   Forward every request sent to 127.0.0.1 on to one API and print each

@@ -293,12 +293,63 @@ function summaryOf(requestCount, folderCount) {
   return `${pluralize(requestCount, 'request')}${scope}. Credentials are left out: literal secrets appear as ${REDACTED}.`
 }
 
+const ACCENT_PATTERN = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
+const LOGO_PATTERN = /^data:image\/(?:png|jpeg|gif|webp|svg\+xml);base64,[A-Za-z0-9+/]+={0,2}$/
+const VERSION_HREF_PATTERN = /^[A-Za-z0-9._/-]+$/
+const LOGO_LIMIT = 400000
+const VERSION_LIMIT = 200
+
+function readAccent(value) {
+  const accent = textOf(value).trim()
+  return ACCENT_PATTERN.test(accent) ? accent : ''
+}
+
+function readLogo(value) {
+  const logo = textOf(value).trim()
+  return logo.length <= LOGO_LIMIT && LOGO_PATTERN.test(logo) ? logo : ''
+}
+
+function readVersions(value) {
+  if (!Array.isArray(value)) return []
+  return value
+    .map((version) => ({ label: textOf(version?.label).trim(), href: textOf(version?.href).trim(), current: version?.current === true }))
+    .filter((version) => version.label !== '' && VERSION_HREF_PATTERN.test(version.href))
+    .slice(0, VERSION_LIMIT)
+}
+
 function readSettings(options) {
   return {
     title: textOf(options?.title).trim() || DEFAULT_TITLE,
     includeExamples: options?.includeExamples !== false,
     playground: options?.playground === true,
+    accent: readAccent(options?.accent),
+    logo: readLogo(options?.logo),
+    versions: readVersions(options?.versions),
   }
+}
+
+function policyOf(settings) {
+  const policy = settings.playground ? PLAYGROUND_POLICY : CONTENT_POLICY
+  return settings.logo ? `${policy}; img-src data:` : policy
+}
+
+function accentStyle(accent) {
+  if (accent === '') return ''
+  return `:root { --link: ${accent}; }
+@media (prefers-color-scheme: dark) { :root { --link: ${accent}; } }
+@media print { :root { --link: #000000; } }
+`
+}
+
+function brandBlock(settings) {
+  return html`${settings.logo ? html`<img class="logo" src="${trusted(settings.logo)}" alt="">` : ''}<p class="contents-title" dir="auto">${settings.title}</p>`
+}
+
+function versionsBlock(versions) {
+  if (versions.length === 0) return ''
+  return html`<nav class="versions" aria-label="Versions"><span>Version</span>${versions.map((version) => (version.current
+    ? html`<strong aria-current="page">${version.label}</strong>`
+    : html`<a href="${version.href}">${version.label}</a>`))}</nav>`
 }
 
 export function buildDocs(collection, options) {
@@ -310,17 +361,17 @@ export function buildDocs(collection, options) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="${settings.playground ? PLAYGROUND_POLICY : CONTENT_POLICY}">
+<meta http-equiv="Content-Security-Policy" content="${policyOf(settings)}">
 <meta name="generator" content="Gostman">
 <title>${settings.title}</title>
-<style>${trusted(STYLE)}${settings.playground ? trusted(PLAYGROUND_STYLE) : ''}</style>
+<style>${trusted(STYLE)}${trusted(accentStyle(settings.accent))}${settings.playground ? trusted(PLAYGROUND_STYLE) : ''}</style>
 </head>
 <body>
 <a class="skip" href="#${CONTENT_ID}">Skip to content</a>
 <div class="layout">
 <nav class="contents" aria-label="Contents">
-<p class="contents-title" dir="auto">${settings.title}</p>
-<input id="${FILTER_ID}" class="filter" type="search" placeholder="Filter requests" aria-label="Filter requests" hidden>
+${brandBlock(settings)}
+${versionsBlock(settings.versions)}<input id="${FILTER_ID}" class="filter" type="search" placeholder="Filter requests" aria-label="Filter requests" hidden>
 <ul>
 ${root.entries.map(contentsEntry)}${groups.map(contentsGroup)}</ul>
 </nav>
