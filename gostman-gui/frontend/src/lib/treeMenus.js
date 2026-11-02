@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, CheckSquare, ClipboardPaste, Copy, FileCheck, FileSearch, Folder, FolderInput, FolderPlus, ListChecks, Palette, Pencil, Plus, RefreshCw, Scissors, Settings2, Share2, Tag, Trash2, X } from "lucide-react"
+import { Activity, ArrowDown, ArrowUp, CheckSquare, ClipboardPaste, Copy, FileCheck, FileSearch, Folder, FolderInput, FolderPlus, ListChecks, Palette, Pencil, Plus, RefreshCw, Scissors, Settings2, Share2, Tag, Trash2, X } from "lucide-react"
 import { CONTRACT_TEXT } from "./checksText"
 import { DIALOG_TEXT } from "./dialogText"
 import { ROOT_ID, ROW_FOLDER, ROW_REQUEST, listFolders } from "./collectionTree"
@@ -8,6 +8,7 @@ import { TREE_CHORDS, bindingLabel } from "./shortcuts"
 import { STEP_DOWN, STEP_UP, canDropFolder } from "./treeMoves"
 import { outermostEntries } from "./treeSelection"
 import { TREE_TEXT } from "./treeText"
+import { MONITORS_TEXT } from "./monitorsText"
 
 export const MENU_ACTIONS = "actions"
 export const MENU_MOVE = "move"
@@ -43,6 +44,7 @@ function folderMenuItems(folder, context) {
     { id: "new-request", label: TREE_TEXT.newRequest, icon: Plus, onSelect: () => actions.newRequest(folder.id) },
     { id: "new-subfolder", label: TREE_TEXT.newSubfolder, icon: FolderPlus, onSelect: () => actions.createFolder(folder.id) },
     { id: "run", label: TREE_TEXT.runFolder, icon: ListChecks, onSelect: () => actions.openRunner(folder.id) },
+    { id: "monitor", label: MONITORS_TEXT.menuFolder, icon: Activity, onSelect: () => actions.monitorFolder(folder.id) },
     { id: "share", label: TREE_TEXT.shareFolder, icon: Share2, onSelect: () => actions.shareFolder(folder.id) },
     ...(isLinked ? specMenuItems(folder, actions, context) : [{ id: "spec-link", label: CONTRACT_TEXT.link, icon: FileCheck, onSelect: () => actions.openapi.linkFolder(folder) }]),
     { id: "settings", label: isCollection ? FOLDER_SETTINGS_TEXT.collectionMenu : FOLDER_SETTINGS_TEXT.menuSettings, icon: Settings2, onSelect: () => actions.openFolderSettings(folder.id) },

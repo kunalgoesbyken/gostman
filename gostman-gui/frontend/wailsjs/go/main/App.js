@@ -90,6 +90,10 @@ export function CollectionNetwork() {
   return window['go']['main']['App']['CollectionNetwork']();
 }
 
+export function DeleteMonitorWebhook(arg1) {
+  return window['go']['main']['App']['DeleteMonitorWebhook'](arg1);
+}
+
 export function DeleteRequests(arg1) {
   return window['go']['main']['App']['DeleteRequests'](arg1);
 }
@@ -136,6 +140,10 @@ export function FetchLink(arg1) {
 
 export function FetchToken(arg1) {
   return window['go']['main']['App']['FetchToken'](arg1);
+}
+
+export function ForgetMonitorRuns(arg1) {
+  return window['go']['main']['App']['ForgetMonitorRuns'](arg1);
 }
 
 export function ForgetWorkspace(arg1) {
@@ -254,6 +262,10 @@ export function GitVersion(arg1, arg2) {
   return window['go']['main']['App']['GitVersion'](arg1, arg2);
 }
 
+export function HasMonitorWebhook(arg1) {
+  return window['go']['main']['App']['HasMonitorWebhook'](arg1);
+}
+
 export function HeldExchanges() {
   return window['go']['main']['App']['HeldExchanges']();
 }
@@ -312,6 +324,14 @@ export function MockRoutes(arg1, arg2, arg3) {
 
 export function MockStatus() {
   return window['go']['main']['App']['MockStatus']();
+}
+
+export function MonitorRuns(arg1) {
+  return window['go']['main']['App']['MonitorRuns'](arg1);
+}
+
+export function NotifyMonitor(arg1, arg2) {
+  return window['go']['main']['App']['NotifyMonitor'](arg1, arg2);
 }
 
 export function OpenAPI(arg1) {
@@ -424,6 +444,14 @@ export function SaveHistory(arg1) {
 
 export function SaveMockConfig(arg1) {
   return window['go']['main']['App']['SaveMockConfig'](arg1);
+}
+
+export function SaveMonitorRun(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SaveMonitorRun'](arg1, arg2, arg3);
+}
+
+export function SaveMonitorWebhook(arg1, arg2) {
+  return window['go']['main']['App']['SaveMonitorWebhook'](arg1, arg2);
 }
 
 export function SaveRequest(arg1) {

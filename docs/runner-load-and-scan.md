@@ -79,6 +79,15 @@ When requests of a folder linked to an OpenAPI spec took part in the run, the re
 
 Each request shows its folder path and the URL it was sent to, with secret values in the URL replaced by `{{name}}`: variables marked secret or with a sensitive name such as `token` or `api_key`, values from a secret manager or a `.env` file, and OAuth 2 tokens. The rest of the report, such as request and response bodies, is not redacted for you. Review it before you share it.
 
+### Monitors
+
+The **Monitors** dialog (the status bar, the command palette, **Monitor this folder** in a folder's menu and **Monitor this flow** in a flow's menu) runs a folder or a flow on a timer and keeps the results. A monitor has a name, what to run (all requests, a folder or a flow), an environment (the one in use, or a named one that is switched on only for the run), an interval from 1 minute to 24 hours, an optional data file for a folder, and notification settings.
+
+- **While it runs.** Monitors run only while the app is open. In the web app they run only while the browser tab is open, and the dialog says so. Nothing runs when the app is closed, so use `gostman run --every` or a CI schedule for that; see [Scheduled runs](cli.md#scheduled-runs).
+- **Runs.** The run uses the same pipeline as **Run requests**: scripts, extract rules, cookies, tokens and checks. Pressing **Run now** starts one at once, and **Pause** stops the timer. Runs go one at a time, and a data file is kept in memory only, so choose it again after restarting.
+- **History.** Each monitor shows its pass rate, the last result, the p95 request duration, a chart of the rolling pass rate and the p95 duration over time, and a list of runs where a failed run opens to its failed checks. A run keeps its time, counts, each request's status and duration, and the messages of failed checks, never a response body. Values of variables, data rows and tokens are replaced with `{{name}}` before anything is saved or sent, and if that cannot be done the run is shown as withheld and nothing is saved. The desktop app saves history in the workspace's `.gostman/runs/` folder (kept out of Git) or, without a folder, in the user data directory, so `gostman history` reads the same runs of a folder workspace; the web app keeps up to 200 runs in the browser's IndexedDB. Retention is 200 runs per workspace.
+- **Notifications.** A monitor can show a browser or system notification when a run starts failing and when it passes again. The desktop app can also post to a webhook address (Slack, Microsoft Teams, Discord or any URL). The address is kept in the system keychain, is never shown again after saving, and is sent through the network settings of the app. The web app has no webhook option, because the browser cannot post to those services.
+
 ### Repeat a run on a schedule
 
 `gostman run --every 5m` and `gostman flow run --every 5m` repeat a run until it is stopped, save each run to a local history, and post to a Slack, Teams, Discord or plain webhook when it fails. `gostman history` shows the pass rate and the p50 and p95 duration of each request. See [Scheduled runs](cli.md#scheduled-runs).

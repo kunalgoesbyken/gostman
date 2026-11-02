@@ -87,7 +87,13 @@ export function sessionGiver(before) {
   }
 }
 
-export function createRunner(backend, execute) {
+const STORE_SINK = {
+  start: () => store().startRun(),
+  add: (result) => store().addRunResult(result),
+  finish: () => store().finishRun(),
+}
+
+export function createRunner(backend, execute, sink = STORE_SINK) {
   let current = null
   let sequence = 0
   let lastRun = null
@@ -116,7 +122,7 @@ export function createRunner(backend, execute) {
         if (run.isStopped) return
         const problem = follow(outcome.flow, request)
         const result = problem ? flagged(outcome, problem) : outcome
-        store().addRunResult(result)
+        sink.add(result)
         if (options.stopOnFailure && result.hasFailed) run.isHalted = true
         if (options.delayMs > 0 && !run.isHalted) await pause(options.delayMs)
       }
@@ -124,7 +130,7 @@ export function createRunner(backend, execute) {
     await Promise.all(lanes)
     if (run.isStopped) return
     passedOver.forEach((reason, request) => {
-      if (!attempted.has(request)) store().addRunResult({ ...skipped(request, reason), iteration })
+      if (!attempted.has(request)) sink.add({ ...skipped(request, reason), iteration })
     })
   }
 
@@ -136,7 +142,7 @@ export function createRunner(backend, execute) {
     const isIterating = rows.length > 0 || count > 1
     sizeSandboxPool(parallel)
     lastRun = { startedAt: new Date(), planned: requests.length * count, iterations: isIterating ? count : 0, parallel, finishedAt: null }
-    store().startRun()
+    sink.start()
     store().completeOnboardingStep(STEP_RUN)
     for (let iteration = 0; iteration < count && !run.isStopped && !run.isHalted; iteration += 1) {
       if (isIterating) run.giveSession(iterationVariables(rows, iteration, count))
@@ -145,7 +151,7 @@ export function createRunner(backend, execute) {
     if (isIterating) run.giveSession({})
     if (current !== run) return
     lastRun.finishedAt = new Date()
-    store().finishRun()
+    sink.finish()
   }
 
   function stop() {
@@ -154,7 +160,7 @@ export function createRunner(backend, execute) {
     current.giveSession({})
     current.sendIds.forEach((sendId) => backend.cancel(sendId))
     current = null
-    store().finishRun()
+    sink.finish()
   }
 
   const describeRun = () => lastRun && { ...lastRun, finishedAt: lastRun.finishedAt || new Date() }

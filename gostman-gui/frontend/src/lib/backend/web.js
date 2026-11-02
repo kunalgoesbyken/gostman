@@ -1,3 +1,4 @@
+import { webMonitors } from './webMonitors'
 import { webAi } from '../ai/webAi'
 import { ATTACHMENT_TEXT } from '../attachmentText'
 import { base64ToBytes } from '../base64'
@@ -404,6 +405,7 @@ export const webBackend = {
   secrets: null,
   capture: null,
   loadTest: null,
+  monitors: webMonitors,
   storage: null,
   backups,
   relay: { check: () => postForResult(EXPAND, { texts: [], variables: '{}' }, 'texts') },

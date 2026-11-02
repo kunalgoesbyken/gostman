@@ -160,6 +160,8 @@ A monitor is a run that repeats, and there are two ways to schedule it.
 gostman run orders-api --env Production --every 5m --notify-env SLACK_WEBHOOK
 ```
 
+The desktop and web apps have a [Monitors dialog](runner-load-and-scan.md#monitors) that does the same while the app or tab is open, with a chart of the history; it is meant for watching a collection during the day, not for checks that must run when your computer is off.
+
 Run it under whatever restarts it, such as a systemd unit or `docker run --restart unless-stopped`. For cron, a crontab line such as `*/15 * * * * gostman run /srv/orders-api --env Production --var-from-env API_TOKEN --record --notify-env SLACK_WEBHOOK` runs it every fifteen minutes and saves each run to the history; with cron, `--notify` sends a message for every failing run, because each run is a new process that does not know the last result. In a CI job, `--record` writes into the checkout of that job, which is discarded unless you upload `.gostman/runs/`.
 
 ## GitLab CI

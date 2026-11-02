@@ -58,6 +58,7 @@ import { createDesktopBackups, desktopUpdates } from './desktopBackups'
 import { desktopCapture } from './desktopCapture'
 import { desktopGit } from './desktopGit'
 import { desktopLoadTest } from './desktopLoadTest'
+import { desktopMonitors } from './desktopMonitors'
 import { desktopMock } from './desktopMock'
 import { desktopSecrets } from './desktopSecrets'
 import { openDesktopSocket } from './desktopSocket'
@@ -149,6 +150,7 @@ export const desktopBackend = {
   secrets: desktopSecrets,
   capture: desktopCapture,
   loadTest: desktopLoadTest,
+  monitors: desktopMonitors,
   storage: {
     status: () => WorkspaceStatus(),
     pickFolder: () => PickWorkspaceFolder(WORKSPACE_TEXT.pickFolderTitle),

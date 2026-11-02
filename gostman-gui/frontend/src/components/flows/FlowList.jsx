@@ -1,10 +1,11 @@
 import { memo, useState } from "react"
-import { Copy, LayoutTemplate, MoreHorizontal, Pencil, Plus, Trash2, Workflow } from "lucide-react"
+import { Activity, Copy, LayoutTemplate, MoreHorizontal, Pencil, Plus, Trash2, Workflow } from "lucide-react"
 import { Button, IconButton } from "../ui/button"
 import { ContextMenu } from "../ui/ContextMenu"
 import { EmptyState } from "../ui/emptyState"
 import { Toolbar } from "../ui/panel"
 import { FLOW_TEXT } from "../../lib/flowsText"
+import { MONITORS_TEXT } from "../../lib/monitorsText"
 import { allStepIds } from "../../lib/flows/model"
 import { ORIENTATION, moveFocus } from "../../lib/rovingFocus"
 import { isRemoveKey } from "../../lib/shortcuts"
@@ -52,13 +53,14 @@ function FlowRow({ flow, isActive, actions, onMenu }) {
   )
 }
 
-const menuItems = (flowId, actions) => [
+const menuItems = (flowId, actions, onMonitor) => [
   { id: "rename", label: FLOW_TEXT.rename, icon: Pencil, onSelect: () => actions.rename(flowId) },
   { id: "duplicate", label: FLOW_TEXT.duplicate, icon: Copy, onSelect: () => actions.duplicate(flowId) },
+  { id: "monitor", label: MONITORS_TEXT.menuFlow, icon: Activity, onSelect: () => onMonitor(flowId) },
   { id: "delete", label: FLOW_TEXT.remove, icon: Trash2, destructive: true, onSelect: () => actions.remove(flowId) },
 ]
 
-export const FlowList = memo(function FlowList({ actions }) {
+export const FlowList = memo(function FlowList({ actions, onMonitor }) {
   const flows = useAppStore((s) => s.flows)
   const activeFlowId = useAppStore((s) => selectActiveTab(s).flowId)
   const [menu, setMenu] = useState(null)
@@ -99,7 +101,7 @@ export const FlowList = memo(function FlowList({ actions }) {
           <FlowRow key={flow.id} flow={flow} isActive={flow.id === activeFlowId} actions={actions} onMenu={(flowId, position) => setMenu({ flowId, position })} />
         ))}
       </ul>
-      {menu && <ContextMenu position={menu.position} title="" items={menuItems(menu.flowId, actions)} onClose={() => setMenu(null)} />}
+      {menu && <ContextMenu position={menu.position} title="" items={menuItems(menu.flowId, actions, onMonitor)} onClose={() => setMenu(null)} />}
     </div>
   )
 })

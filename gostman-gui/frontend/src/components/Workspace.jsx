@@ -25,6 +25,7 @@ import { useSharedSecretConnections } from "../hooks/useSecretConnections"
 import { useCaptureStore } from "../lib/captureSession"
 import { usePreferences } from "../lib/preferences"
 import { isLoadTestable, useLoadTestStore } from "../lib/loadTestSession"
+import { useMonitorStore } from "../lib/monitors/monitorSession"
 import { useAiEnabled, useAiStore } from "../lib/ai/session"
 import { TASK_EXPLAIN, TASK_REQUEST } from "../lib/ai/tasks"
 import { MIN_REQUEST_HEIGHT_PX, isNarrowViewport } from "../lib/layout"
@@ -54,6 +55,7 @@ const NetworkDialog = lazy(() => import("./NetworkDialog").then((module) => ({ d
 const ExamplesDialog = lazy(() => import("./ExamplesDialog").then((module) => ({ default: module.ExamplesDialog })))
 const MockServerDialog = lazy(() => import("./MockServerDialog").then((module) => ({ default: module.MockServerDialog })))
 const CaptureDialog = lazy(() => import("./CaptureDialog").then((module) => ({ default: module.CaptureDialog })))
+const MonitorsDialog = lazy(() => import("./MonitorsDialog").then((module) => ({ default: module.MonitorsDialog })))
 const LoadTestDialog = lazy(() => import("./LoadTestDialog").then((module) => ({ default: module.LoadTestDialog })))
 const SpecViewer = lazy(() => import("./SpecViewer").then((module) => ({ default: module.SpecViewer })))
 const SpecSyncDialog = lazy(() => import("./SpecSyncDialog").then((module) => ({ default: module.SpecSyncDialog })))
@@ -258,9 +260,10 @@ function LoadedWorkspace({ backend, onBack }) {
   const closeFolderSettings = useAppStore((s) => s.closeFolderSettings)
   const captureDialogOpen = useCaptureStore((s) => s.isOpen)
   const loadTestDialogOpen = useLoadTestStore((s) => s.isOpen)
+  const monitorsDialogOpen = useMonitorStore((s) => s.isOpen)
   const aiDialog = useAiStore((s) => s.dialog !== null)
   const isAiOn = useAiEnabled()
-  const isDialogOpen = useAppStore(selectIsDialogOpen) || captureDialogOpen || loadTestDialogOpen || aiDialog
+  const isDialogOpen = useAppStore(selectIsDialogOpen) || captureDialogOpen || loadTestDialogOpen || monitorsDialogOpen || aiDialog
   const sharedLink = useSyncExternalStore(subscribeToSharedLink, pendingSharedLink)
   const openLink = useSyncExternalStore(subscribeToOpenLink, currentOpenLink)
 
@@ -491,6 +494,7 @@ function LoadedWorkspace({ backend, onBack }) {
         {mockDialogOpen && <MockServerDialog folders={folders} requests={requests} actions={actions.mock} />}
         {captureDialogOpen && <CaptureDialog folders={folders} requests={requests} actions={actions.capture} />}
         {loadTestDialogOpen && <LoadTestDialog actions={actions.loadTest} />}
+        {monitorsDialogOpen && <MonitorsDialog actions={actions.monitors} />}
         {specDialog?.mode === "view" && <SpecViewer dialog={specDialog} actions={actions.openapi} onClose={closeSpecDialog} />}
         {specDialog?.mode === "sync" && <SpecSyncDialog dialog={specDialog} link={specLinks[specDialog.folderId]} actions={actions.openapi} onClose={closeSpecDialog} />}
         {folderSettings && <FolderSettings backend={backend} scope={folderSettings} EditorComponent={CodeEditor} onClose={closeFolderSettings} />}
@@ -501,6 +505,7 @@ function LoadedWorkspace({ backend, onBack }) {
       <StatusBar
         onOpenMock={actions.mock.open}
         onOpenCapture={actions.capture.open}
+        onOpenMonitors={() => actions.monitors.open()}
         updates={backend.updates}
         remindsExport={actions.backups?.remindsExport}
         onExport={() => actions.runCommand("export")}

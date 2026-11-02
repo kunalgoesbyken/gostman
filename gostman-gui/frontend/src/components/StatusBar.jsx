@@ -1,8 +1,10 @@
-import { Cookie, GitBranch, Radio, Server, Settings, SlidersHorizontal } from "lucide-react"
+import { Activity, Cookie, GitBranch, Radio, Server, Settings, SlidersHorizontal } from "lucide-react"
 import { cn } from "../lib/utils"
 import { useCaptureStore } from "../lib/captureSession"
 import { openGit, useGitStore } from "../lib/gitSession"
 import { useMockStore } from "../lib/mockServer"
+import { useMonitorStore } from "../lib/monitors/monitorSession"
+import { MONITORS_TEXT } from "../lib/monitorsText"
 import { ABOUT_TEXT } from "../lib/aboutText"
 import { PREFERENCES_TEXT } from "../lib/preferencesText"
 import { STATUS_BAR_TEXT as TEXT } from "../lib/statusBarText"
@@ -20,7 +22,7 @@ const portOf = (address) => {
   }
 }
 
-export function StatusBar({ onOpenMock, onOpenCapture, updates, remindsExport, onExport }) {
+export function StatusBar({ onOpenMock, onOpenCapture, onOpenMonitors, updates, remindsExport, onExport }) {
   const openCookies = useAppStore((s) => s.openCookiesDialog)
   const openSettings = useAppStore((s) => s.openSettingsDialog)
   const openPreferences = useAppStore((s) => s.openPreferencesDialog)
@@ -29,6 +31,7 @@ export function StatusBar({ onOpenMock, onOpenCapture, updates, remindsExport, o
   const mockPort = useMockStore((s) => portOf(s.address))
   const isCapturing = useCaptureStore((s) => s.isRunning)
   const git = useGitStore((s) => s.state)
+  const activeMonitors = useMonitorStore((s) => s.monitors.filter((monitor) => !monitor.paused).length)
 
   return (
     <footer className="flex h-6 max-sm:h-10 shrink-0 items-center justify-between overflow-hidden border-t border-border bg-background px-1 text-2xs text-muted-foreground">
@@ -36,6 +39,7 @@ export function StatusBar({ onOpenMock, onOpenCapture, updates, remindsExport, o
         <StatusItem icon={Settings} label={TEXT.network} onClick={openSettings} />
         <StatusItem icon={Server} label={TEXT.mock(isMockRunning, mockPort)} active={isMockRunning} onClick={onOpenMock} />
         <StatusItem icon={Radio} label={TEXT.capture(isCapturing)} active={isCapturing} onClick={onOpenCapture} />
+        <StatusItem icon={Activity} label={activeMonitors > 0 ? MONITORS_TEXT.statusLabelRunning(activeMonitors) : MONITORS_TEXT.statusLabel} active={activeMonitors > 0} onClick={onOpenMonitors} />
         {git.hasFolder && <StatusItem icon={GitBranch} label={git.isRepo ? gitLabel(git) : TEXT.git} onClick={openGit} />}
       </div>
       <div className="flex h-full items-center">

@@ -39,6 +39,7 @@ type Entry struct {
 type Record struct {
 	Version     int            `json:"version"`
 	ID          string         `json:"id"`
+	Monitor     string         `json:"monitor,omitempty"`
 	StartedAt   time.Time      `json:"startedAt"`
 	Kind        string         `json:"kind"`
 	Target      string         `json:"target"`

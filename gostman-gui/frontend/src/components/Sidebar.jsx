@@ -99,7 +99,7 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
           <CollectionTree folders={folders} requests={requests} activeRequestId={activeRequestId} actions={actions} />
         </TabsContent>
         <TabsContent value={VIEW_FLOWS} className={VIEW_CLASS}>
-          <FlowList actions={actions.flows} />
+          <FlowList actions={actions.flows} onMonitor={actions.monitorFlow} />
         </TabsContent>
         <TabsContent value={VIEW_HISTORY} className={VIEW_CLASS}>
           <HistoryList entries={requestHistory} actions={actions} />

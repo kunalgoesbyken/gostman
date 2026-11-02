@@ -12,6 +12,7 @@ import {gitutil} from '../models';
 import {importer} from '../models';
 import {lint} from '../models';
 import {openapi} from '../models';
+import {monitor} from '../models';
 import {secrets} from '../models';
 import {loadtest} from '../models';
 import {workspace} from '../models';
@@ -61,6 +62,8 @@ export function CloseWorkspace():Promise<main.WorkspaceStatus>;
 
 export function CollectionNetwork():Promise<main.CollectionNetwork>;
 
+export function DeleteMonitorWebhook(arg1:string):Promise<void>;
+
 export function DeleteRequests(arg1:Array<string>):Promise<void>;
 
 export function DeleteSecretConnection(arg1:string):Promise<void>;
@@ -84,6 +87,8 @@ export function ExportMockRules(arg1:Array<mock.Rule>):Promise<string>;
 export function FetchLink(arg1:string):Promise<deeplink.Reply>;
 
 export function FetchToken(arg1:engine.TokenExchange):Promise<engine.Token>;
+
+export function ForgetMonitorRuns(arg1:string):Promise<void>;
 
 export function ForgetWorkspace(arg1:string):Promise<main.WorkspaceStatus>;
 
@@ -143,6 +148,8 @@ export function GitUnstage(arg1:Array<string>):Promise<void>;
 
 export function GitVersion(arg1:string,arg2:string):Promise<gitutil.Version>;
 
+export function HasMonitorWebhook(arg1:string):Promise<boolean>;
+
 export function HeldExchanges():Promise<Array<capture.Held>>;
 
 export function Import(arg1:importer.Query):Promise<importer.Reply>;
@@ -172,6 +179,10 @@ export function MockFromSpec(arg1:openapi.Source):Promise<mock.Spec>;
 export function MockRoutes(arg1:Array<mock.Source>,arg2:string,arg3:mock.Config):Promise<Array<mock.Route>>;
 
 export function MockStatus():Promise<main.MockState>;
+
+export function MonitorRuns(arg1:string):Promise<Array<monitor.Record>>;
+
+export function NotifyMonitor(arg1:string,arg2:monitor.Notice):Promise<void>;
 
 export function OpenAPI(arg1:openapi.Query):Promise<openapi.Reply>;
 
@@ -228,6 +239,10 @@ export function SaveFolders(arg1:Array<main.Folder>):Promise<void>;
 export function SaveHistory(arg1:Array<main.HistoryEntry>):Promise<void>;
 
 export function SaveMockConfig(arg1:mock.Config):Promise<void>;
+
+export function SaveMonitorRun(arg1:string,arg2:monitor.Record,arg3:number):Promise<void>;
+
+export function SaveMonitorWebhook(arg1:string,arg2:string):Promise<void>;
 
 export function SaveRequest(arg1:main.Request):Promise<main.Request>;
 

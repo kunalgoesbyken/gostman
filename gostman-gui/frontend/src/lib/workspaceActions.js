@@ -5,6 +5,7 @@ import {
 } from './ai/tasks'
 import { createCaptureActions } from './captureSession'
 import { createLoadTestActions } from './loadTestSession'
+import { createMonitorActions } from './monitors/monitorSession'
 import { generateAllSnippets } from './codeGenerator'
 import { activeKindsOf, countActiveRequests, fileReadPathsOf, sanitizeImport, withoutActiveRequests } from './importExport'
 import { asSentence } from './dataUtils'
@@ -119,6 +120,8 @@ export function createWorkspaceActions(backend) {
   const mock = createMockActions(backend)
   const capture = createCaptureActions(backend, mock)
   const loadTest = createLoadTestActions(backend)
+  const monitors = createMonitorActions(backend, { execute })
+  monitors.start()
   const flows = createFlowActions(backend, { attempt, execute, promptForName })
 
   async function runExtractors(tabId) {
@@ -678,6 +681,9 @@ export function createWorkspaceActions(backend) {
     mockServer: mock.open,
     captureTraffic: capture.open,
     loadTest: loadTest.open,
+    monitors: () => monitors.open(),
+    monitorFolder: (folderId) => monitors.open({ kind: 'folder', id: folderId }),
+    monitorFlow: (flowId) => monitors.open({ kind: 'flow', id: flowId }),
     settings: () => store().openSettingsDialog(),
     preferences: () => store().openPreferencesDialog(),
     import: () => store().openImportDialog(),
@@ -703,6 +709,7 @@ export function createWorkspaceActions(backend) {
     mock,
     capture,
     loadTest,
+    monitors,
     secrets: backend.secrets,
     storage: storageActions && {
       ...storageActions,

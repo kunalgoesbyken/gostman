@@ -36,7 +36,7 @@ Checked on 26 October 2026. Plans and limits change often, so read the current [
 ## Where Postman is stronger
 
 - **Team features.** Shared cloud workspaces with roles, SSO and SCIM, and audit logs. Gostman has no accounts, so it has none of these.
-- **Hosted services.** Mock servers that run in Postman's cloud, and monitors that run on a schedule from there. Gostman runs both on your machine or your CI: `gostman run --every` repeats a run with a local history and webhook notifications, but a public mock, or a check that must run while your computer is off, needs a server or CI schedule you run.
+- **Hosted services.** Mock servers that run in Postman's cloud, and monitors that run on a schedule from there. Gostman runs both on your machine or your CI: `gostman run --every` and the Monitors dialog repeat a run on a timer with a local history and notifications, but a public mock, or a check that must run while your computer is off, needs a server or CI schedule you run.
 - **A wider platform.** Spec Hub, an API network, an API catalog and SDK generation sit on the same account. Gostman has an OpenAPI viewer, linter and contract checks, but no hosted catalog or SDK generator.
 - **A VS Code extension.** Gostman has no editor extension.
 - **Cloud load testing.** Postman can run performance tests from its cloud for a per-hour fee. Gostman's load test runs from the machine that starts it.

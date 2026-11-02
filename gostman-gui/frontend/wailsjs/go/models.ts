@@ -650,6 +650,7 @@ export namespace engine {
 	    in: string;
 	    prefix: string;
 	    queryKey: string;
+	    expiry: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new JWTAuth(source);
@@ -666,6 +667,7 @@ export namespace engine {
 	        this.in = source["in"];
 	        this.prefix = source["prefix"];
 	        this.queryKey = source["queryKey"];
+	        this.expiry = source["expiry"];
 	    }
 	}
 	export class EdgeGridAuth {
@@ -835,6 +837,36 @@ export namespace engine {
 		    }
 		    return a;
 		}
+	}
+	export class Certificate {
+	    subject: string;
+	    issuer: string;
+	    notBefore: string;
+	    notAfter: string;
+	    names?: string[];
+	    serial?: string;
+	    fingerprint: string;
+	    keyType?: string;
+	    signature?: string;
+	    ca?: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Certificate(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.subject = source["subject"];
+	        this.issuer = source["issuer"];
+	        this.notBefore = source["notBefore"];
+	        this.notAfter = source["notAfter"];
+	        this.names = source["names"];
+	        this.serial = source["serial"];
+	        this.fingerprint = source["fingerprint"];
+	        this.keyType = source["keyType"];
+	        this.signature = source["signature"];
+	        this.ca = source["ca"];
+	    }
 	}
 	export class CookieInfo {
 	    name: string;
@@ -1019,6 +1051,7 @@ export namespace engine {
 	    subject?: string;
 	    issuer?: string;
 	    notAfter?: string;
+	    chain?: Certificate[];
 	
 	    static createFrom(source: any = {}) {
 	        return new TLSInfo(source);
@@ -1032,7 +1065,26 @@ export namespace engine {
 	        this.subject = source["subject"];
 	        this.issuer = source["issuer"];
 	        this.notAfter = source["notAfter"];
+	        this.chain = this.convertValues(source["chain"], Certificate);
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class TimelineHeader {
 	    key: string;
@@ -3783,6 +3835,197 @@ export namespace mock {
 
 }
 
+export namespace monitor {
+	
+	export class FailedCheck {
+	    name: string;
+	    message?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new FailedCheck(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.message = source["message"];
+	    }
+	}
+	export class Entry {
+	    name: string;
+	    method?: string;
+	    status?: string;
+	    statusCode?: number;
+	    durationMs: number;
+	    skipped?: boolean;
+	    failed?: boolean;
+	    handled?: boolean;
+	    error?: string;
+	    checks?: number;
+	    failedChecks?: FailedCheck[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Entry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.method = source["method"];
+	        this.status = source["status"];
+	        this.statusCode = source["statusCode"];
+	        this.durationMs = source["durationMs"];
+	        this.skipped = source["skipped"];
+	        this.failed = source["failed"];
+	        this.handled = source["handled"];
+	        this.error = source["error"];
+	        this.checks = source["checks"];
+	        this.failedChecks = this.convertValues(source["failedChecks"], FailedCheck);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class Failure {
+	    request: string;
+	    error?: string;
+	    checks?: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Failure(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.request = source["request"];
+	        this.error = source["error"];
+	        this.checks = source["checks"];
+	    }
+	}
+	export class Notice {
+	    event: string;
+	    target: string;
+	    kind: string;
+	    environment?: string;
+	    startedAt: string;
+	    durationMs: number;
+	    passed: boolean;
+	    requests: number;
+	    failedRequests: number;
+	    failedChecks: number;
+	    failures?: Failure[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Notice(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.event = source["event"];
+	        this.target = source["target"];
+	        this.kind = source["kind"];
+	        this.environment = source["environment"];
+	        this.startedAt = source["startedAt"];
+	        this.durationMs = source["durationMs"];
+	        this.passed = source["passed"];
+	        this.requests = source["requests"];
+	        this.failedRequests = source["failedRequests"];
+	        this.failedChecks = source["failedChecks"];
+	        this.failures = this.convertValues(source["failures"], Failure);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Record {
+	    version: number;
+	    id: string;
+	    monitor?: string;
+	    // Go type: time
+	    startedAt: any;
+	    kind: string;
+	    target: string;
+	    environment?: string;
+	    durationMs: number;
+	    passed: boolean;
+	    exitCode: number;
+	    outcome?: string;
+	    summary: runner.Summary;
+	    requests: Entry[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Record(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.id = source["id"];
+	        this.monitor = source["monitor"];
+	        this.startedAt = this.convertValues(source["startedAt"], null);
+	        this.kind = source["kind"];
+	        this.target = source["target"];
+	        this.environment = source["environment"];
+	        this.durationMs = source["durationMs"];
+	        this.passed = source["passed"];
+	        this.exitCode = source["exitCode"];
+	        this.outcome = source["outcome"];
+	        this.summary = this.convertValues(source["summary"], runner.Summary);
+	        this.requests = this.convertValues(source["requests"], Entry);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace openapi {
 	
 	export class SchemaNode {
@@ -4644,6 +4887,37 @@ export namespace rpc {
 		}
 	}
 	
+
+}
+
+export namespace runner {
+	
+	export class Summary {
+	    requests: number;
+	    passed: number;
+	    failed: number;
+	    skipped: number;
+	    handled?: number;
+	    notRun: number;
+	    tests: number;
+	    failedTests: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Summary(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.requests = source["requests"];
+	        this.passed = source["passed"];
+	        this.failed = source["failed"];
+	        this.skipped = source["skipped"];
+	        this.handled = source["handled"];
+	        this.notRun = source["notRun"];
+	        this.tests = source["tests"];
+	        this.failedTests = source["failedTests"];
+	    }
+	}
 
 }
 

@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react"
 import {
-  Bookmark, ChevronsDownUp, ClipboardPaste, Gauge, Clock, MonitorDown, Info, Hand, Folder, FolderOpen, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Pin, Plus, Radio, Save, Search, Send,
+  Activity, Bookmark, ChevronsDownUp, ClipboardPaste, Gauge, Clock, MonitorDown, Info, Hand, Folder, FolderOpen, Code, Cookie, Copy, Download, FileText, FolderPlus, Globe, History, Keyboard, ListChecks, PanelLeft, Pin, Plus, Radio, Save, Search, Send,
   Bot, Server, Settings, Settings2, Share2, ShieldAlert, ShieldCheck, SlidersHorizontal, Trash2, Undo2, Upload, X,
 } from "lucide-react"
 import { MethodTag } from "../MethodTag"
@@ -14,6 +14,7 @@ import { INSTALL_TEXT } from "../../lib/installText"
 import { SCAN_TEXT } from "../../lib/scanText"
 import { useInstallable } from "../../lib/pwa"
 import { LOAD_TEST_TEXT } from "../../lib/loadTestText"
+import { MONITORS_TEXT } from "../../lib/monitorsText"
 import { WELCOME_TEXT } from "../../lib/welcomeText"
 import { AI_TEXT } from "../../lib/aiText"
 import { WORKSPACE_TEXT } from "../../lib/workspaceText"
@@ -85,6 +86,8 @@ const appCommands = (holdsCollections) => [
 ]
 
 const resetCommand = () => ({ id: "reset", label: DATA_TEXT.commandTitle, description: DATA_TEXT.commandDescription, icon: Trash2, keywords: DATA_TEXT.commandKeywords, action: "reset", destructive: true })
+
+const monitorsCommand = () => ({ id: "monitors", label: MONITORS_TEXT.title, description: MONITORS_TEXT.commandDescription, icon: Activity, keywords: MONITORS_TEXT.commandKeywords, action: "monitors" })
 
 const loadTestCommand = () => ({ id: "load-test", label: LOAD_TEST_TEXT.commandTitle, description: LOAD_TEST_TEXT.commandDescription, icon: Gauge, keywords: COMMAND_TEXT.commands.loadTest.keywords, action: "loadTest" })
 
@@ -284,6 +287,7 @@ function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspace
     () => commandItems([
       ...requestCommands(),
       ...(hasLoadTest ? [loadTestCommand()] : []),
+      monitorsCommand(),
       ...(isAiOn ? aiCommands() : []),
       ...appCommands(holdsCollections),
       ...workspaceCommands(workspaces),
