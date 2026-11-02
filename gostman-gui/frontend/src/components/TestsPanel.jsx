@@ -19,6 +19,7 @@ import {
 import { SCHEMA_TEXT, SNAPSHOT_TEXT, TESTS_TEXT as TEXT } from "../lib/checksText"
 import { refreshedSnapshot } from "../lib/snapshot"
 import { responseSubject } from "../lib/scripting/subjects"
+import { useInlineCompletion } from "../lib/ai/session"
 import { TASK_SCRIPT, TASK_TESTS } from "../lib/ai/tasks"
 import { cn } from "../lib/utils"
 
@@ -152,7 +153,7 @@ export function AssertionEditor({ assertions, onChange, EditorComponent, respons
   )
 }
 
-export function ScriptEditor({ value, path, label, onChange, EditorComponent }) {
+export function ScriptEditor({ value, path, label, onChange, EditorComponent, completer }) {
   return (
     <div className="min-h-0 flex-1">
       <Suspense fallback={<EditorSkeleton />}>
@@ -164,6 +165,7 @@ export function ScriptEditor({ value, path, label, onChange, EditorComponent }) 
           height="100%"
           surface="script"
           label={label}
+          completer={completer}
         />
       </Suspense>
     </div>
@@ -174,6 +176,7 @@ export function TestsPanel({ request, editorPath, onUpdateRequest, EditorCompone
   const [choice, setChoice] = useState(() => ({ id: request.id, view: firstFilledView(request) }))
   const view = choice.id === request.id ? choice.view : firstFilledView(request)
   const setView = (next) => setChoice({ id: request.id, view: next })
+  const inlineOn = useInlineCompletion() && Boolean(ai)
   const askAi = () => (view === VIEW_ASSERTIONS ? ai.start(TASK_TESTS) : ai.start(TASK_SCRIPT, { scriptKind: view }))
 
   return (
@@ -200,6 +203,7 @@ export function TestsPanel({ request, editorPath, onUpdateRequest, EditorCompone
           label={TEXT.views[view]}
           onChange={(script) => onUpdateRequest({ [view]: script })}
           EditorComponent={EditorComponent}
+          completer={inlineOn ? (before, after, signal) => ai.completeScript(view, before, after, signal) : undefined}
         />
       )}
     </Panel>

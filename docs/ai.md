@@ -50,6 +50,12 @@ Gostman asks for a JSON reply in a fixed shape. Where the provider supports it, 
 
 If an answer reaches the length limit, Gostman shows "The answer was cut off" instead of a partial result. Try again with less content, or pick a model that writes shorter answers.
 
+## Inline suggestions
+
+Off by default. Tick "Suggest code as I type in script editors" in the AI section of Preferences (it needs AI turned on and a model chosen) to get grey suggestions in the pre-request and post-response script editors. When you stop typing at the end of a line, Gostman asks the provider to continue the script; Tab accepts the suggestion and Esc or any other key dismisses it. A request still waiting is cancelled as soon as you type again.
+
+Unlike the other actions, there is no preview: up to 4,000 characters before the cursor and 1,000 after it are sent, together with the names of your variables and never their values. Secret values and the other masked values (see above) are removed from the text first. Nothing is sent in a restricted folder, or when no model or key is set up.
+
 ## What AI can do
 
 Draft a request, checks, pre-request and post-response scripts, a failure explanation, request docs, a collection search, and requests from an API description. Results are proposals shown as a preview; nothing is sent, saved or run until you accept, and scripts run only when you press Send. In a restricted folder, script generation is disabled and accepted scripts stay inert until the folder is trusted.

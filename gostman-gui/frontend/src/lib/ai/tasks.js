@@ -175,7 +175,7 @@ const testsTask = {
   },
 }
 
-const SCRIPT_PROMPT_KINDS = { preScript: 'pre-request', postScript: 'post-response' }
+export const SCRIPT_PROMPT_KINDS = { preScript: 'pre-request', postScript: 'post-response' }
 
 const scriptTask = {
   id: TASK_SCRIPT,

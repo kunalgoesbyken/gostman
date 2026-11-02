@@ -169,6 +169,7 @@
       "consent": "I understand that when I run an AI action, the previewed request or response details are sent to {{host}}, and billing is between me and the provider.",
       "enable": "Turn on AI features",
       "enableAfterConsent": "Turn on AI features (tick the line above first)",
+      "inlineCompletion": "Suggest code as I type in script editors. After a short pause, the script around the cursor and the names of your variables, never their values, are sent to {{host}} with no preview. Press Tab to accept a suggestion.",
       "provider": "Provider",
       "baseUrl": "Base URL",
       "baseUrlPlaceholder": "https://host/v1",

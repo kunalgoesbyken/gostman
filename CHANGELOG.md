@@ -7,6 +7,7 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 ### Added
 
 - A [VS Code extension](docs/vscode.md) that runs collections, folders and flows, sends a saved request, lints an OpenAPI spec and scans for secrets through the Gostman CLI. The landing page now shows it next to the MCP server for coding agents.
+- Inline AI suggestions in the pre-request and post-response script editors: opt-in in the AI settings, sent only after a pause, with variable names but never values, and accepted with Tab; see [Inline suggestions](docs/ai.md#inline-suggestions).
 
 ## [1.9.0] - 2026-11-02
 

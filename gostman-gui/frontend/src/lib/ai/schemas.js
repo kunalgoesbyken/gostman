@@ -32,6 +32,7 @@ export const SCHEMAS = {
   request: object({ ...requestFields, description: text }),
   tests: object({ assertions: list(assertion), script: text }),
   script: object({ script: text }),
+  completion: object({ completion: text }),
   explain: object({ explanation: text, causes: list(text), fixes: list(text) }),
   docs: object({ description: text }),
   search: object({ matches: list(object({ id: text, reason: text })) }),

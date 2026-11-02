@@ -484,6 +484,11 @@
       "blurb": "Draft a commit message from the staged changes with Suggest message with AI in the Git panel.",
       "synonyms": "ai commit message git draft suggest"
     },
+    "aiInline": {
+      "title": "Inline script suggestions",
+      "blurb": "Ghost-text code suggestions in script editors, off until you turn them on in the AI settings. Press Tab to accept.",
+      "synonyms": "ai autocomplete completion copilot ghost text script suggest"
+    },
     "palette": {
       "title": "Command palette",
       "blurb": "Find any command, request or feature by name.",

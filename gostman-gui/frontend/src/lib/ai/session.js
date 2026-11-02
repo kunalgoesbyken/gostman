@@ -4,12 +4,13 @@ import { AI_TEXT } from '../aiText'
 import { lineageOf } from '../inheritance'
 import { useGitStore } from '../gitSession'
 import { resolvedSecretValues } from '../resolvedSecrets'
+import { COMPLETION_TOKENS, completionPrompt, parseCompletion } from './completion'
 import { requestSecrets, variableNames, variableSecrets } from './context'
 import { KIND_CANCELED, errorMessage } from './errors'
 import { PROVIDERS, providerById } from './providers'
 import { ReplyError } from './reply'
 import {
-  DEFAULT_AI_SETTINGS, forgetAiSettings, isAiEnabled, isConfigured, loadAiSettings, providerConfig, saveAiSettings,
+  DEFAULT_AI_SETTINGS, forgetAiSettings, isAiEnabled, isConfigured, isInlineCompletionOn, loadAiSettings, providerConfig, saveAiSettings,
 } from './settings'
 import { SECTION_AI, selectPreferencesSection } from '../preferencesSection'
 import { SCRIPT_POST, taskById } from './tasks'
@@ -42,6 +43,8 @@ const INITIAL_STATE = {
 export const useAiStore = create(() => INITIAL_STATE)
 
 export const useAiEnabled = () => useAiStore((current) => isAiEnabled(current.settings))
+
+export const useInlineCompletion = () => useAiStore((current) => isInlineCompletionOn(current.settings))
 
 export const isAiEnabledNow = () => isAiEnabled(useAiStore.getState().settings)
 
@@ -198,6 +201,18 @@ export function createAiActions(backend, { importData, openapi }) {
     if (!needsInput(task)) await submit()
   }
 
+  const completeScript = async (scriptKind, before, after, signal) => {
+    if (!isInlineCompletionOn(state().settings) || !isUsable()) return ''
+    const source = gatherSource()
+    if (source.isRestricted) return ''
+    const id = newId()
+    const cancelRequest = () => ai.cancel(id)
+    signal.addEventListener('abort', cancelRequest, { once: true })
+    const reply = await ai.complete(id, providerConfig(state().settings), completionPrompt(scriptKind, before, after, source.variableNames), source.secrets, COMPLETION_TOKENS)
+    signal.removeEventListener('abort', cancelRequest)
+    return signal.aborted || reply.error ? '' : parseCompletion(reply.text)
+  }
+
   const cancel = async () => {
     const id = state().dialog?.requestId
     patch({ dialog: null })
@@ -284,6 +299,7 @@ export function createAiActions(backend, { importData, openapi }) {
     confirmPreview,
     continueProposal,
     cancel,
+    completeScript,
     accept,
     openLink,
     saveSettings,

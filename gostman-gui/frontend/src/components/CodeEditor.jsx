@@ -5,6 +5,7 @@ import { MergeView } from '@codemirror/merge'
 import { useVariableMap } from '../hooks/useVariableMap'
 import { usePreferences } from '../lib/preferences'
 import { baseExtensions, canFormat, formatDocument, formatKeymap, languageExtension, phraseExtension, revealOffset, variableExtension, wrapExtension } from '../lib/codeEditor'
+import { ghostText } from '../lib/ghostText'
 import { LARGE_BODY_CHARS } from '../lib/largeText'
 import './variables.css'
 
@@ -26,6 +27,17 @@ function useEditorConfig(language, variables, fileReads, formatting = NO_EXTENSI
   )
 }
 
+function useCompletion(completer) {
+  const completerRef = useRef(completer)
+  const isOn = Boolean(completer)
+
+  useEffect(() => {
+    completerRef.current = completer
+  }, [completer])
+
+  return useMemo(() => (isOn ? ghostText((before, after, signal) => completerRef.current(before, after, signal)) : NO_EXTENSION), [isOn])
+}
+
 function useFormatting(language, onFormat) {
   const onFormatRef = useRef(onFormat)
   const isFormattable = Boolean(onFormat) && canFormat(language)
@@ -45,7 +57,7 @@ function useFormatting(language, onFormat) {
 }
 
 export const CodeEditor = forwardRef(function CodeEditor(
-  { value = '', onChange, onFormat, language = 'json', path, height = '300px', variables = false, fileReads = true, surface, label },
+  { value = '', onChange, onFormat, language = 'json', path, height = '300px', variables = false, fileReads = true, surface, label, completer },
   ref,
 ) {
   const hostRef = useRef(null)
@@ -55,7 +67,9 @@ export const CodeEditor = forwardRef(function CodeEditor(
   const compartment = useMemo(() => new Compartment(), [])
   const { editorFontSize } = usePreferences()
   const formatting = useFormatting(language, onFormat)
-  const config = useEditorConfig(highlightedLanguage(language, value), variables, fileReads, formatting.extension, label)
+  const completion = useCompletion(completer)
+  const extras = useMemo(() => [formatting.extension, completion], [formatting.extension, completion])
+  const config = useEditorConfig(highlightedLanguage(language, value), variables, fileReads, extras, label)
 
   useImperativeHandle(ref, () => ({
     format: () => viewRef.current && formatting.run(viewRef.current),

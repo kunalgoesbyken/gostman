@@ -55,6 +55,7 @@
   "ai.settings.consent": "{{host}} is the name of the AI provider's server.",
   "ai.settings.enable": "Label of the main switch.",
   "ai.settings.enableAfterConsent": "Label of the switch while the checkbox above is not ticked.",
+  "ai.settings.inlineCompletion": "Label of the checkbox for ghost-text suggestions in script editors; it states what is sent and that there is no preview.",
   "ai.settings.baseUrl": "Label of the field for the address of the AI service.",
   "ai.settings.allowInsecure": "Checkbox. Plain http is not encrypted.",
   "ai.settings.model": "Label of the field for the identifier of the AI model.",

@@ -11,6 +11,7 @@ export const DEFAULT_AI_SETTINGS = {
   baseUrl: '',
   model: '',
   allowInsecure: false,
+  inlineCompletion: false,
   skipPreview: {},
 }
 
@@ -29,3 +30,5 @@ export const providerConfig = ({ provider, baseUrl, model, allowInsecure }) => (
 export const isAiEnabled = (settings) => settings.enabled && settings.consented
 
 export const isConfigured = (settings) => isAiEnabled(settings) && settings.model.trim() !== ''
+
+export const isInlineCompletionOn = (settings) => isConfigured(settings) && settings.inlineCompletion

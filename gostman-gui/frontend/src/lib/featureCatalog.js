@@ -97,6 +97,7 @@ export const FEATURES = [
   { id: 'ai', group: 'ai', docs: 'ai', action: { type: 'command', id: 'aiSettings' }, icon: 'bot' },
   { id: 'ai-mock', group: 'ai', since: '1.9.0', docs: 'ai#what-ai-can-do', action: { type: 'command', id: 'aiMock' }, icon: 'bot' },
   { id: 'ai-commit', group: 'ai', since: '1.9.0', platforms: ['desktop'], docs: 'ai#what-ai-can-do', action: { type: 'dialog', id: 'git' }, icon: 'bot' },
+  { id: 'ai-inline', group: 'ai', since: '1.10.0', docs: 'ai#inline-suggestions', action: { type: 'dialog', id: 'preferences' }, icon: 'bot' },
   { id: 'palette', group: 'app', docs: 'preferences-and-shortcuts#command-palette', action: { type: 'command', id: 'commandPalette' }, icon: 'command' },
   { id: 'shortcuts', group: 'app', docs: 'preferences-and-shortcuts#keyboard-shortcuts', action: { type: 'dialog', id: 'shortcuts' }, icon: 'keyboard' },
   { id: 'themes', group: 'app', docs: 'preferences-and-shortcuts#themes-and-colours', action: { type: 'dialog', id: 'preferences' }, icon: 'palette' },

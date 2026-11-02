@@ -161,6 +161,14 @@ export function AiSection({ actions }) {
         >
           {settings.consented ? TEXT.enable : TEXT.enableAfterConsent}
         </Checkbox>
+        <Checkbox
+          checked={settings.inlineCompletion}
+          disabled={!isAiEnabled(settings)}
+          onChange={(event) => actions.saveSettings({ inlineCompletion: event.target.checked })}
+          className={CHECKBOX_CLASS}
+        >
+          {TEXT.inlineCompletion(hostOf(settings))}
+        </Checkbox>
       </div>
       <Field label={TEXT.provider}>
         <Select value={settings.provider} onChange={(event) => actions.selectProvider(event.target.value)} aria-label={TEXT.provider}>
