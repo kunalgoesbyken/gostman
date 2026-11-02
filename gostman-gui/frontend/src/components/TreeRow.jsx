@@ -6,7 +6,7 @@ import { MethodTag } from "./MethodTag"
 import { TagBadge } from "./TagBadge"
 import { MarkedRanges } from "./HighlightedText"
 import { ROW_FOLDER } from "../lib/collectionTree"
-import { matchRanges } from "../lib/textMatch"
+import { matchRanges, matchingFirst } from "../lib/textMatch"
 import { shownMethod } from "../lib/methodLabel"
 import { PLACE_AFTER, PLACE_BEFORE, PLACE_INSIDE } from "../lib/dropPlace"
 import { normalizeTags } from "../lib/tags"
@@ -28,13 +28,13 @@ function DropLine({ place }) {
   return <span aria-hidden className={cn("pointer-events-none absolute inset-x-0 h-0.5 bg-primary", place === PLACE_BEFORE ? "top-0" : "bottom-0")} />
 }
 
-function RowTags({ tags }) {
+function RowTags({ tags, search }) {
   if (tags.length === 0) return null
   const hidden = tags.length - SHOWN_TAGS
 
   return (
     <span className="flex min-w-0 max-w-[50%] shrink items-center gap-1 ps-1">
-      {tags.slice(0, SHOWN_TAGS).map((tag) => <TagBadge key={tag} tag={tag} className="px-1 text-3xs leading-4" />)}
+      {tags.slice(0, SHOWN_TAGS).map((tag) => <TagBadge key={tag} tag={tag} search={search} className="px-1 text-3xs leading-4" />)}
       {hidden > 0 && (
         <>
           <span aria-hidden="true" className="shrink-0 text-3xs text-muted-foreground">{TREE_TEXT.moreTags(hidden)}</span>
@@ -67,7 +67,7 @@ export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop,
   const isFolder = row.kind === ROW_FOLDER
   const item = isFolder ? row.folder : row.request
   const name = item.name || TREE_TEXT.untitled
-  const tags = normalizeTags(item.tags)
+  const tags = matchingFirst(normalizeTags(item.tags), search)
   const Chevron = row.isOpen ? ChevronDown : ChevronRight
   const mainRef = useRef(null)
 
@@ -131,7 +131,7 @@ export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop,
         <span className={cn("min-w-0 flex-1 truncate", isFolder && "font-medium text-foreground")}>
           {isFolder ? name : <MarkedRanges text={name} ranges={matchRanges(name, search)} />}
         </span>
-        <RowTags tags={tags} />
+        <RowTags tags={tags} search={search} />
       </button>
       <IconButton
         label={TREE_TEXT.actionsFor(name)}

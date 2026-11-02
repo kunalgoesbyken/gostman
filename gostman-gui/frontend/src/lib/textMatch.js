@@ -24,3 +24,8 @@ export function matchRanges(text, query) {
   }
   return ranges
 }
+
+export function matchingFirst(texts, query) {
+  const matches = (text) => matchRanges(text, query).length > 0
+  return [...texts.filter(matches), ...texts.filter((text) => !matches(text))]
+}
