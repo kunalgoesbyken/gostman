@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"fmt"
 	"maps"
 	"slices"
 	"sort"
@@ -102,7 +103,28 @@ func (c *Client) Run(ctx context.Context, stored runner.Collection, options runn
 		return runner.Report{}, err
 	}
 	c.absorb()
-	return redact.Clean(c.guard, report)
+	if err := c.vetSnapshots(report); err != nil {
+		return runner.Report{}, err
+	}
+	cleaned, err := redact.Clean(c.guard, report)
+	if err != nil {
+		return runner.Report{}, err
+	}
+	for index := range cleaned.Results {
+		cleaned.Results[index].Snapshots = report.Results[index].Snapshots
+	}
+	return cleaned, nil
+}
+
+func (c *Client) vetSnapshots(report runner.Report) error {
+	for _, result := range report.Results {
+		for _, update := range result.Snapshots {
+			if label, found := c.guard.Find(update.Replacement); found {
+				return fmt.Errorf("refusing to write the snapshot of %q: it contains the value of %s", result.QualifiedName(), label)
+			}
+		}
+	}
+	return nil
 }
 
 func Redacting(secrets map[string]bool) func(context.Context, runner.Collection, runner.Options, func(runner.Result)) (runner.Report, error) {

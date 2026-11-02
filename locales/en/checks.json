@@ -106,7 +106,7 @@
       "status": "Status code",
       "contentType": "Content type",
       "schema": "Body shape, as a JSON Schema: field types, the fields that were present, and null where null was seen. A field that was null accepts any value.",
-      "snapshot": "Snapshot of the body: the check fails when the body differs from this response. Values of fields with secret-looking names, dates and ids that look generated are ignored and not stored. Edit the ignored paths in the check.",
+      "snapshot": "Snapshot of the body: the check fails when the body differs from this response. Values of fields with secret-looking names, tokens, dates and ids that look generated are ignored and not stored. Edit the ignored paths in the check.",
       "headersSnapshot": "Snapshot of the headers, without cookies and credentials. Headers that change on every response, such as date and etag, are ignored.",
       "responseTime": "Response time budget of {{budget}} ms, twice what this response took, rounded up."
     },
@@ -168,6 +168,7 @@
     "editorTitle": "Edit snapshot",
     "editorHint": "A JSON object. expected is the stored value, ignore lists JSONPaths that are not compared (such as $.id or $.items[*].createdAt), and ignoreOrder true compares arrays without regard to the order of their items.",
     "update": "Update snapshot from the last response",
+    "notice": "Snapshots are plain text in the request, and in a workspace folder they go into Git. Review them before you commit. Fields with credential-like names (including everything under them), values that look like tokens, JWTs or API keys, dates and generated ids, and the values of ignored paths are replaced by (ignored) and are not stored.",
     "invalid": "The snapshot is not valid: it must be a JSON object with an expected value.",
     "changed": "{{path}}: expected {{expected}}, got {{actual}}",
     "missing": "{{path}}: expected {{expected}}, but it is missing",

@@ -1,6 +1,7 @@
 import { SNAPSHOT_TEXT } from './checksText'
 import { isPlainObject, parseJSON } from './dataUtils'
 import { queryPointers } from './jsonPath'
+import { looksLikeCredential } from './credentialLook'
 import { isSensitiveName } from './sensitiveNames'
 
 export const SNAPSHOT_OPERATOR = 'snapshot'
@@ -103,9 +104,9 @@ export function snapshotValue(expected, { ignore = [], ignoreOrder = false } = {
 
 const VOLATILE_VALUE = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$)/i
 
-function keepSafe(value, path, ignore) {
-  if (Array.isArray(value)) return value.map((item, index) => keepSafe(item, `${path}[${index}]`, ignore))
-  if (typeof value === 'string' && VOLATILE_VALUE.test(value)) {
+function keepSafe(value, path, ignore, name = '') {
+  if (Array.isArray(value)) return value.map((item, index) => keepSafe(item, `${path}[${index}]`, ignore, name))
+  if (typeof value === 'string' && (VOLATILE_VALUE.test(value) || looksLikeCredential(name, value))) {
     ignore.push(path)
     return IGNORED
   }
@@ -113,11 +114,11 @@ function keepSafe(value, path, ignore) {
   const kept = {}
   for (const [key, item] of Object.entries(value)) {
     const place = childPath(path, key)
-    if (isSensitiveName(key) && (item === null || typeof item !== 'object')) {
+    if (isSensitiveName(key)) {
       ignore.push(place)
       kept[key] = IGNORED
     } else {
-      kept[key] = keepSafe(item, place, ignore)
+      kept[key] = keepSafe(item, place, ignore, key)
     }
   }
   return kept
@@ -134,6 +135,7 @@ export function headersSnapshot(headers) {
   const ignore = []
   for (const [name, value] of Object.entries(headers)) {
     if (isSensitiveName(name)) continue
+    if (looksLikeCredential(name, String(value))) continue
     expected[name] = value
     if (VOLATILE_HEADERS.includes(name.toLowerCase())) ignore.push(childPath(ROOT, name))
   }
@@ -144,6 +146,6 @@ export function refreshedSnapshot(actual, current) {
   const document = parseJSON(current, {})
   const ignore = Array.isArray(document.ignore) ? document.ignore.map(String) : []
   const found = []
-  const expected = keepSafe(comparable(actual), ROOT, found)
+  const expected = keepSafe(withoutIgnored(comparable(actual), ignore), ROOT, found)
   return snapshotValue(expected, { ignore: [...new Set([...ignore, ...found])], ignoreOrder: document.ignoreOrder === true })
 }

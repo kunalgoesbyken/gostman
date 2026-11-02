@@ -204,7 +204,7 @@ func (i invocation) launch(stdout, stderr *os.File) int {
 }
 
 func (i invocation) pipeline() func(context.Context, runner.Collection, runner.Options, func(runner.Result)) (runner.Report, error) {
-	if i.redact {
+	if i.redact || i.options.UpdateSnapshots {
 		return agent.Redacting(i.secrets)
 	}
 	return runner.Run

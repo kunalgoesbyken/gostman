@@ -22,6 +22,7 @@ export function SchemaDialog({ value, EditorComponent, onSave, onClose, text: wo
       </DialogHeader>
       <DialogBody className="flex flex-col gap-2 overflow-hidden">
         <p className="shrink-0 text-xs text-muted-foreground">{wording.editorHint}</p>
+        {wording.notice && <p className="shrink-0 text-xs text-muted-foreground">{wording.notice}</p>}
         <div className="min-h-0 flex-1 overflow-hidden rounded border border-border">
           <Suspense fallback={<EditorSkeleton />}>
             <EditorComponent value={text} onChange={(event) => setText(event.target.value)} language="json" height="100%" label={wording.editorTitle} />
