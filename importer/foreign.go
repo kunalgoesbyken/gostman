@@ -19,6 +19,7 @@ const (
 var documentReaders = map[string]func(*collector, document){
 	kindHoppscotch:            (*collector).readHoppscotch,
 	kindHoppscotchEnvironment: (*collector).readHoppscotchEnvironments,
+	kindFirecamp:              (*collector).readFirecamp,
 	kindThunder:               (*collector).readThunder,
 	kindThunderEnvironment:    (*collector).readThunderEnvironment,
 	kindHTTPie:                (*collector).readHTTPie,
@@ -34,6 +35,8 @@ func classifyForeign(data any) string {
 	switch {
 	case root == nil:
 		return kindUnknown
+	case firecampKind(root):
+		return kindFirecamp
 	case httpieKind(root):
 		return kindHTTPie
 	}

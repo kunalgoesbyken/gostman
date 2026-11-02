@@ -31,6 +31,7 @@ Gostman reads the content after a short pause and shows a summary before anythin
 | Bruno | Bruno collections in `.bru` or YAML (OpenCollection), as a folder, a `.zip` or one exported file |
 | .http files | VS Code REST Client and JetBrains HTTP Client `.http` and `.rest` files, with their environments. See [.http files](#http-files) |
 | Hoppscotch | Collections (a JSON array of collections, nested folders) and environments. `<<name>>` becomes `{{name}}`. See [Other tools](#other-tools) |
+| Firecamp | Collection exports (`*.firecamp_collection.json`). See [Other tools](#other-tools) |
 | Thunder Client | Collection and environment exports (`thunder-collection_*.json`) |
 | HTTPie | HTTPie for Web collection exports |
 | Hurl | `.hurl` files: one folder per file, `[Asserts]` become assertion rows and `[Captures]` become extract rules |
@@ -58,6 +59,7 @@ These importers read the file as it is and report what they leave out in the imp
 
 - **Hoppscotch:** `pw.*` scripts are kept as written and need rewriting; collection headers and auth become folder settings, and `inherit` auth is inherited. GraphQL collections and file bodies are not imported.
 - **Thunder Client:** the tests `res-code`, `res-body`, `res-header` and `json-query` become assertion rows; other test types are left out and named. OAuth 2 and other unsupported auth types are named in a warning.
+- **Firecamp:** the `collection`, `folders` and `requests` of an export become nested folders and REST requests, in Firecamp's order, with URL (query included), method, headers, JSON, XML and text bodies, and scripts kept as written (they call `fc.*` and need rewriting). Auth, form and file bodies and WebSocket, GraphQL and Socket.IO requests are left out and named in the summary. Only the REST shape was checked against a real export.
 - **HTTPie:** requests, nested collections, basic, digest, bearer and API key auth, JSON, text, form and GraphQL bodies.
 - **Hurl:** `status`, `header`, `jsonpath`, `body`, `duration` and `url` queries with the common predicates (`==`, `!=`, `<`, `>`, `contains`, `startsWith`, `endsWith`, `matches`, `exists`, `isEmpty`, `count`) become assertion rows, and the `HTTP 200` line becomes a status check. `jsonpath`, `header`, `cookie` and `status` captures become extract rules with the session scope. `xpath`, `regex`, `bytes`, `sha256` and other filters are left out and named. Requests keep Hurl's rule of not following redirects unless `[Options]` has `location: true`; `insecure` and other options are not imported. `{{newUuid}}` becomes `{{$guid}}`.
 - **RAML 1.0** and **API Blueprint:** the base URI or `HOST` becomes the `baseUrl` collection variable. Query parameters, headers, example bodies and basic auth are kept. Types, traits, resource types, response definitions and `!include` files are not imported.
@@ -66,8 +68,7 @@ To move over from one of these tools, export the collection and its environments
 
 Not read, and what to do instead:
 
-- **Paw and RapidAPI for Mac:** the `.paw` file is a binary project. Use the tool's export to Postman, HAR or curl and import that.
-- **Firecamp:** there is no importer. Export to Postman or OpenAPI from Firecamp if it offers it, and import that.
+- **Paw and RapidAPI for Mac:** the `.paw` file is an undocumented binary project, so it is not read. Use the tool's export to Postman, HAR or curl and import that.
 - **Restfox:** there is no importer of its own. An export in the Insomnia v4 shape (`_type: export` with `resources`) is read as an Insomnia export, and a Postman or OpenAPI export from Restfox works too.
 
 ### .http files

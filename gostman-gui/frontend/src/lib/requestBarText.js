@@ -10,7 +10,7 @@ const text = messages('requestBar', english, (t) => {
         return placeholders('requestBar.urlPlaceholders')
       },
       get methodPlaceholders() {
-        return { GRPC: placeholders('requestBar.methodPlaceholders.grpc'), MCP: placeholders('requestBar.methodPlaceholders.mcp'), TCP: placeholders('requestBar.methodPlaceholders.tcp'), UDP: placeholders('requestBar.methodPlaceholders.udp') }
+        return { GRPC: placeholders('requestBar.methodPlaceholders.grpc'), MCP: placeholders('requestBar.methodPlaceholders.mcp'), TCP: placeholders('requestBar.methodPlaceholders.tcp'), UDP: placeholders('requestBar.methodPlaceholders.udp'), NATS: placeholders('requestBar.methodPlaceholders.nats') }
       },
     },
   }

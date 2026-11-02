@@ -8,6 +8,8 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 - A [VS Code extension](docs/vscode.md) that runs collections, folders and flows, sends a saved request, lints an OpenAPI spec and scans for secrets through the Gostman CLI. The landing page now shows it next to the MCP server for coding agents.
 - Inline AI suggestions in the pre-request and post-response script editors: opt-in in the AI settings, sent only after a pause, with variable names but never values, and accepted with Tab; see [Inline suggestions](docs/ai.md#inline-suggestions).
+- NATS requests: request and reply, publish, or wait for one message on a subject, over the plain text protocol, in the desktop app; see [NATS](docs/protocols.md#nats).
+- The importers read Firecamp collection exports; see [Other tools](docs/import-export-and-specs.md#other-tools).
 
 ## [1.9.0] - 2026-11-02
 

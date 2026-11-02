@@ -16,7 +16,8 @@
       "mcp": "MCP",
       "signalr": "SignalR",
       "tcp": "TCP",
-      "udp": "UDP"
+      "udp": "UDP",
+      "nats": "NATS"
     },
     "detected": "Detected {{protocol}}",
     "url": "Request URL",
@@ -40,6 +41,11 @@
         "full": "Enter host:port, for example localhost:9000",
         "medium": "host:port",
         "short": "host:port"
+      },
+      "nats": {
+        "full": "Enter nats://host:4222/subject, add ?mode=publish or ?mode=subscribe",
+        "medium": "nats://host:4222/subject",
+        "short": "nats://host/subject"
       }
     },
     "send": "Send",

@@ -1,6 +1,6 @@
 # Protocols
 
-This page covers every protocol you can test from Gostman: REST and other HTTP requests, GraphQL, gRPC, WebSocket, Socket.IO, MQTT, SignalR, Server-Sent Events, SOAP, MCP servers and raw TCP and UDP. It describes what each protocol's panel does and where the desktop app and the web app differ. To let a coding agent call your APIs through Gostman instead, see [Use from a coding agent](agents.md).
+This page covers every protocol you can test from Gostman: REST and other HTTP requests, GraphQL, gRPC, WebSocket, Socket.IO, MQTT, SignalR, Server-Sent Events, SOAP, MCP servers, raw TCP and UDP, and NATS. It describes what each protocol's panel does and where the desktop app and the web app differ. To let a coding agent call your APIs through Gostman instead, see [Use from a coding agent](agents.md).
 
 Every protocol uses the same request bar, variables, environments, auth and saved collections. Requests are prepared and sent by the Go engine in both the desktop app and the web app, so a request behaves the same in both unless this page says otherwise.
 
@@ -204,6 +204,22 @@ WebSocket requests are not available to agents. See [Use from a coding agent](ag
 `TCP` and `UDP` are protocols in the protocol list, for talking to a plain socket. The address is `host:port` or `tcp://host:port`. The **Text** body is sent as written and the **Hex** body is decoded from hex digits (spaces are ignored). The reply is read until the server closes the connection, the response size limit is reached or the **Timeout** passes; reaching the timeout after some bytes arrived is not an error. UDP sends one datagram and reads one datagram. The response shows the bytes as text, or as Base64 when they are not text.
 
 Only the desktop app sends them, and only from a folder you trust: the web app, the hosted proxy, the command line and agent sessions refuse them with an explanation, and an import that carries them asks first, like scripts and local MCP commands. Proxies are not used, but the host overrides and IP version from Network settings apply.
+
+## NATS
+
+`NATS` is a protocol in the protocol list. The address is `nats://host:4222/subject`; the port defaults to 4222, and the subject is the path (wildcards such as `orders.*` and `orders.>` work when subscribing). The body is the payload, as **Text** or **Hex**. A token goes before the host (`nats://token@host/subject`) and a user and password as `user:password@host`.
+
+The mode comes from the `mode` query parameter:
+
+| Mode | What happens |
+| --- | --- |
+| `request` (default) | Publishes the payload with a private reply subject and shows the first reply. |
+| `publish` | Publishes the payload and waits for the server to confirm it. |
+| `subscribe` | Subscribes to the subject and shows the first message that arrives, until the **Timeout** passes. |
+
+Gostman speaks NATS's plain text protocol over TCP, so TLS (`tls_required`), JetStream, headers and the other client features are not supported. A request to a subject nobody answers ends at the timeout. Subjects with spaces or control characters are refused.
+
+Only the desktop app sends NATS requests, and only from a folder you trust: the web app, the hosted proxy, the command line and agent sessions refuse them, and an import that carries them asks first. Proxies are not used, but the host overrides and IP version from Network settings apply.
 
 ## Server-Sent Events
 

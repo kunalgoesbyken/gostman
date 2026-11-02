@@ -266,7 +266,7 @@ func refuseCommands(request workspace.Request, arguments saveArguments) error {
 
 func refuseRawSockets(request workspace.Request, arguments saveArguments) error {
 	if engine.IsRawMethod(request.Method) && (arguments.Method != nil || arguments.URL != nil || arguments.Body != nil || arguments.BodyType != nil) {
-		return errors.New("Not saved: TCP and UDP requests open raw sockets on this computer, so only a person sets them, in the Gostman app.")
+		return errors.New("Not saved: TCP, UDP and NATS requests open network connections on this computer, so only a person sets them, in the Gostman app.")
 	}
 	return nil
 }

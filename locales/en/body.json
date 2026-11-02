@@ -11,6 +11,7 @@
     "goToLine": "Go to line {{line}}",
     "noBody": "No body",
     "noBodyDescription": "This request is sent without a body.",
+    "natsSocket": "A NATS request sends the body to the subject in the address and shows the first reply. Add ?mode=publish to send without waiting for a reply, or ?mode=subscribe to wait for the first message on the subject. Put a token or user:password before the host. Only the desktop app sends them.",
     "rawSocket": "TCP and UDP requests send the body as bytes: text as written, or hex digits such as 48 65 6c 6c 6f. The reply is read until the server closes the connection or the timeout passes; UDP waits for one datagram. Only the desktop app sends them.",
     "multipartOnGet": "GET requests rarely carry a body, and many servers ignore it. Switch the method to POST or PUT if this should be uploaded.",
     "replacedByGraphQL": "The method is GRAPHQL, so the body is built from the GraphQL tab and this one is not sent.",

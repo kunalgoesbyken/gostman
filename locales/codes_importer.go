@@ -18,6 +18,7 @@ const (
 	ImporterExternalSecrets              Code = "importerMessages.externalSecrets"
 	ImporterFileTags                     Code = "importerMessages.fileTags"
 	ImporterFiles                        Code = "importerMessages.files"
+	ImporterFirecampType                 Code = "importerMessages.firecampType"
 	ImporterFlowRequests                 Code = "importerMessages.flowRequests"
 	ImporterForeignBodies                Code = "importerMessages.foreignBodies"
 	ImporterForeignCalls                 Code = "importerMessages.foreignCalls"

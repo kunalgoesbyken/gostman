@@ -42,6 +42,7 @@ const (
 	kindHoppscotchEnvironment = "hoppscotch-environment"
 	kindThunder               = "thunder"
 	kindThunderEnvironment    = "thunder-environment"
+	kindFirecamp              = "firecamp"
 	kindHTTPie                = "httpie"
 	kindHurl                  = "hurl"
 	kindRAML                  = "raml"
@@ -82,6 +83,7 @@ var kindFormats = map[string]string{
 	kindHoppscotchEnvironment: FormatHoppscotch,
 	kindThunder:               FormatThunder,
 	kindThunderEnvironment:    FormatThunder,
+	kindFirecamp:              FormatFirecamp,
 	kindHTTPie:                FormatHTTPie,
 	kindHurl:                  FormatHurl,
 	kindRAML:                  FormatRAML,

@@ -1,7 +1,7 @@
 import { compareVersions } from './versions.js'
 
 export const RELEASES = [
-  { version: '1.10.0', ids: ['vscode-extension', 'ai-inline'] },
+  { version: '1.10.0', ids: ['vscode-extension', 'ai-inline', 'nats', 'firecamp-import'] },
   {
     version: '1.9.0',
     ids: [

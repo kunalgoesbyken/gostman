@@ -10,7 +10,7 @@ export const BODY_BINARY = 'binary'
 export const BODY_SOAP = 'soap'
 export const BODY_HEX = 'hex'
 
-export const RAW_SOCKET_METHODS = ['TCP', 'UDP']
+export const RAW_SOCKET_METHODS = ['TCP', 'UDP', 'NATS']
 
 export const BODY_TYPES = [
   { value: BODY_NONE, get label() { return LABEL_TEXT.types.none } },

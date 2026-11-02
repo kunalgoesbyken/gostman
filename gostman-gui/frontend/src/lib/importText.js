@@ -87,6 +87,7 @@ export const IMPORT_FORMATS = [
   { value: 'http', get label() { return text.importFormats.http } },
   { value: 'hoppscotch', label: 'Hoppscotch' },
   { value: 'thunder', label: 'Thunder Client' },
+  { value: 'firecamp', label: 'Firecamp' },
   { value: 'httpie', label: 'HTTPie' },
   { value: 'hurl', label: 'Hurl' },
   { value: 'raml', label: 'RAML' },

@@ -21,11 +21,11 @@ const (
 	rawOKStatus       = 200
 )
 
-var errRawSocketsRefused = errors.New("raw TCP and UDP requests are only sent by the desktop app, in a folder you trust")
+var errRawSocketsRefused = errors.New("raw TCP, UDP and NATS requests are only sent by the desktop app, in a folder you trust")
 
 func IsRawMethod(method string) bool {
 	method = strings.ToUpper(strings.TrimSpace(method))
-	return method == MethodTCP || method == MethodUDP
+	return method == MethodTCP || method == MethodUDP || method == MethodNATS
 }
 
 type rawTarget struct {
@@ -40,22 +40,32 @@ func sendRaw(ctx context.Context, r Request, policy Policy) Response {
 	}
 	ctx, cancel := context.WithTimeout(ctx, policy.Timeout(r.Options))
 	defer cancel()
+	if strings.EqualFold(strings.TrimSpace(r.Method), MethodNATS) {
+		return sendNATS(ctx, r, policy)
+	}
 	target, err := newRawTarget(r)
 	if err != nil {
 		return Failure(ErrorConfig, err.Error())
 	}
-	host, _, _ := net.SplitHostPort(target.address)
-	if err := policy.refusal(host); err != nil {
-		return classify(ctx, err)
-	}
-	conn, err := policy.network().dialFunc(policy.BlockPrivate)(ctx, target.network, target.address)
+	conn, release, err := openRaw(ctx, target.network, target.address, policy)
 	if err != nil {
 		return classify(ctx, err)
 	}
-	defer conn.Close()
-	stop := context.AfterFunc(ctx, func() { conn.Close() })
-	defer stop()
+	defer release()
 	return exchangeRaw(ctx, conn, target, policy.ResponseLimit())
+}
+
+func openRaw(ctx context.Context, network, address string, policy Policy) (net.Conn, func(), error) {
+	host, _, _ := net.SplitHostPort(address)
+	if err := policy.refusal(host); err != nil {
+		return nil, nil, err
+	}
+	conn, err := policy.network().dialFunc(policy.BlockPrivate)(ctx, network, address)
+	if err != nil {
+		return nil, nil, err
+	}
+	stop := context.AfterFunc(ctx, func() { conn.Close() })
+	return conn, func() { stop(); conn.Close() }, nil
 }
 
 func newRawTarget(r Request) (rawTarget, error) {
@@ -113,10 +123,14 @@ func exchangeRaw(ctx context.Context, conn net.Conn, target rawTarget, limit int
 	if err != nil && ctx.Err() == nil {
 		return classify(ctx, err)
 	}
+	return receivedResponse(rawStatusReceived, strings.ToLower(target.network)+"://"+target.address, received, truncated)
+}
+
+func receivedResponse(status, address string, received []byte, truncated bool) Response {
 	response := Response{
-		Status:     fmt.Sprintf("%s %d bytes", rawStatusReceived, len(received)),
+		Status:     fmt.Sprintf("%s %d bytes", status, len(received)),
 		StatusCode: rawOKStatus,
-		URL:        strings.ToLower(target.network) + "://" + target.address,
+		URL:        address,
 		Size:       int64(len(received)),
 		Truncated:  truncated,
 	}

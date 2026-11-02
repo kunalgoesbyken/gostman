@@ -219,7 +219,7 @@ func (d *Desk) checkImport(current scene, text string, result importer.Result) e
 	case readsFilesAnywhere(result):
 		return errors.New("Not imported: it uses {{$file(...)}}, which reads files on this computer, so only the developer can import it, in the app or with gostman import.")
 	case opensRawSockets(result.Requests):
-		return errors.New("Not imported: it holds TCP or UDP requests, which open raw sockets on this computer, so only the developer can import it, in the app or with gostman import.")
+		return errors.New("Not imported: it holds TCP, UDP or NATS requests, which open network connections from this computer, so only the developer can import it, in the app or with gostman import.")
 	case runsCommands(result.Requests):
 		return errors.New("Not imported: it holds requests that run local commands (stdio: addresses), so only the developer can import it, in the app or with gostman import.")
 	}

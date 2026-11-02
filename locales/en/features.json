@@ -182,6 +182,11 @@
       "blurb": "Send text or hex over TCP or UDP and read the reply. Desktop app, trusted folders only.",
       "synonyms": "tcp udp socket raw bytes hex"
     },
+    "nats": {
+      "title": "NATS",
+      "blurb": "Request and reply, publish or wait for one message on a NATS subject. Desktop app, trusted folders only.",
+      "synonyms": "nats subject publish subscribe request reply messaging broker"
+    },
     "breakpoints": {
       "title": "Held calls",
       "blurb": "Hold a captured request or response with a rule, edit it, then release it or drop it.",
@@ -250,9 +255,14 @@
       "blurb": "Bring in Postman, Bruno, Insomnia, OpenAPI, HAR, WSDL, .http files and curl commands.",
       "synonyms": "import postman bruno insomnia openapi swagger har wsdl http curl migrate"
     },
+    "firecampImport": {
+      "title": "Firecamp import",
+      "blurb": "Import Firecamp collection exports: folders, REST requests, headers and scripts.",
+      "synonyms": "firecamp import migrate collection"
+    },
     "specImporters": {
       "title": "More import formats",
-      "blurb": "Import Hoppscotch, Thunder Client, HTTPie, Hurl, RAML and API Blueprint files. Hurl is also an export format. Paw and Firecamp files are not read.",
+      "blurb": "Import Hoppscotch, Thunder Client, HTTPie, Hurl, RAML and API Blueprint files. Hurl is also an export format. Paw files are not read.",
       "synonyms": "hoppscotch thunder client hurl raml blueprint httpie restfox import migrate"
     },
     "export": {

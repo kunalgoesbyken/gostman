@@ -18,12 +18,13 @@ export const PROTOCOL_MCP = 'mcp'
 export const PROTOCOL_SIGNALR = 'signalr'
 export const PROTOCOL_TCP = 'tcp'
 export const PROTOCOL_UDP = 'udp'
+export const PROTOCOL_NATS = 'nats'
 
 const SECURE_SOCKET = 'wss://'
 const SOCKET_SCHEMES = { 'http://': 'ws://', 'https://': 'wss://' }
 const HTTP_SCHEMES = { 'ws://': 'http://', 'wss://': 'https://' }
 
-const [TCP_METHOD, UDP_METHOD] = RAW_SOCKET_METHODS
+const [TCP_METHOD, UDP_METHOD, NATS_METHOD] = RAW_SOCKET_METHODS
 
 const PROTOCOL_METHODS = [GRAPHQL_METHOD, GRPC_METHOD, MCP_METHOD, ...RAW_SOCKET_METHODS]
 
@@ -75,9 +76,10 @@ export const REQUEST_PROTOCOLS = [
   { id: PROTOCOL_SIGNALR, apply: socket('signalr') },
   { id: PROTOCOL_TCP, apply: named(TCP_METHOD) },
   { id: PROTOCOL_UDP, apply: named(UDP_METHOD) },
+  { id: PROTOCOL_NATS, apply: named(NATS_METHOD) },
 ]
 
-const BY_METHOD = { [GRAPHQL_METHOD]: PROTOCOL_GRAPHQL, [GRPC_METHOD]: PROTOCOL_GRPC, [MCP_METHOD]: PROTOCOL_MCP, [TCP_METHOD]: PROTOCOL_TCP, [UDP_METHOD]: PROTOCOL_UDP }
+const BY_METHOD = { [GRAPHQL_METHOD]: PROTOCOL_GRAPHQL, [GRPC_METHOD]: PROTOCOL_GRPC, [MCP_METHOD]: PROTOCOL_MCP, [TCP_METHOD]: PROTOCOL_TCP, [UDP_METHOD]: PROTOCOL_UDP, [NATS_METHOD]: PROTOCOL_NATS }
 const BY_SOCKET_PROTOCOL = { socketio: PROTOCOL_SOCKET_IO, mqtt: PROTOCOL_MQTT, signalr: PROTOCOL_SIGNALR }
 
 export function protocolIdOf(request, isSocket) {

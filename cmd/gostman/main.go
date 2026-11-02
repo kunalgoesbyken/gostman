@@ -447,13 +447,14 @@ init
 
 import
   Create a workspace from an Insomnia, HAR, WSDL, Bruno, Postman, OpenAPI,
-  Hoppscotch, Thunder Client, HTTPie, Hurl, RAML, API Blueprint, Gostman
+  Hoppscotch, Thunder Client, Firecamp, HTTPie, Hurl, RAML, API Blueprint,
+  Gostman
   export or .http file or folder. Imports add data only; scripts and
   OAuth settings are kept and reported, tokens and cookie values are never
   carried over.
 
   --format <name>       auto, insomnia, har, wsdl, bruno, postman, openapi,
-                        gostman, http, hoppscotch, thunder, httpie, hurl, raml
+                        gostman, http, hoppscotch, thunder, firecamp, httpie, hurl, raml
                         or blueprint (default auto: detected from the content)
   --out <folder>        workspace folder to create (required)
   --skip-static         HAR: leave out images, fonts, styles and scripts

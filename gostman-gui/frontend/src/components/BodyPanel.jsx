@@ -172,7 +172,7 @@ export function BodyPanel({ request: stored, drafts, editorPath, replacedByGraph
       {replacedByGraphQL && (
         <Notice>{BODY_TEXT.replacedByGraphQL}</Notice>
       )}
-      {RAW_SOCKET_METHODS.includes(request.method) && <Notice>{BODY_TEXT.rawSocket}</Notice>}
+      {RAW_SOCKET_METHODS.includes(request.method) && <Notice>{request.method === 'NATS' ? BODY_TEXT.natsSocket : BODY_TEXT.rawSocket}</Notice>}
       {request.bodyType === BODY_MULTIPART && BODILESS_METHODS.includes(request.method) && <Notice>{BODY_TEXT.multipartOnGet}</Notice>}
       {formatting.shownProblem && <FormatProblem bodyType={request.bodyType} error={formatting.shownProblem} onReveal={formatting.reveal} />}
       <BodyEditor
