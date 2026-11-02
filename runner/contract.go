@@ -43,6 +43,7 @@ func (s *session) checkContract(request Request, outcome *exchange) error {
 	if !found {
 		return nil
 	}
+	outcome.operation = operation.Key
 	var checks []Check
 	if err := s.scripts.Call("contractChecks", &checks, operation, root, outcome.response); err != nil {
 		return err

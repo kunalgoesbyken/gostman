@@ -44,6 +44,9 @@ type invocation struct {
 	contract string
 	network  *networkSettings
 	monitor  monitorFlags
+
+	coverage    bool
+	minCoverage float64
 }
 
 type runFlags struct {
@@ -87,6 +90,8 @@ func newRunFlags(name string) (*flag.FlagSet, *runFlags) {
 	flags.StringVar(&state.output, "output", "", "")
 	flags.BoolVar(&parsed.redact, "redact", false, "")
 	flags.StringVar(&parsed.contract, "contract", "", "")
+	flags.BoolVar(&parsed.coverage, "coverage", false, "")
+	flags.Float64Var(&parsed.minCoverage, "min-coverage", 0, "")
 	parsed.extras.register(flags, &parsed.options)
 	parsed.network = networkFlags(flags)
 	state.signIn.register(flags)
@@ -108,6 +113,12 @@ func (r *runFlags) finish(path string) (invocation, error) {
 		return parsed, errors.New("--delay and --timeout take a number of milliseconds, zero or more")
 	case parsed.flow != "" && r.usesRunOnlyFlags():
 		return parsed, errors.New("--folder, --data, --iterations, --parallel, --only, --tags, --exclude-tags, --bail and --delay do not apply to a flow")
+	case (parsed.coverage || parsed.minCoverage != 0) && parsed.contract == "":
+		return parsed, errors.New("--coverage and --min-coverage need --contract <spec>, the OpenAPI spec whose operations are counted")
+	case parsed.minCoverage < 0 || parsed.minCoverage > 100:
+		return parsed, errors.New("--min-coverage takes a percentage from 0 to 100")
+	case parsed.flow != "" && (parsed.coverage || parsed.minCoverage != 0):
+		return parsed, errors.New("--coverage and --min-coverage do not apply to a flow")
 	}
 	if err := parsed.monitor.validate(); err != nil {
 		return parsed, err
@@ -207,7 +218,7 @@ func (i invocation) execute(stored runner.Collection, stdout, stderr *os.File) i
 	if err != nil {
 		return complain(stderr, err)
 	}
-	code := reportCode(outcome)
+	code := i.codeOf(outcome, stderr)
 	record := i.record(outcome, code, scrub, stderr)
 	i.announce(ctx, record, false, stderr)
 	if ctx.Err() != nil {
@@ -224,7 +235,7 @@ func (i invocation) cycle(ctx context.Context, stored runner.Collection, warned 
 			return runner.Report{}, nil, err
 		}
 	}
-	opened, err := openReports(i.reports, stdout, i.monitor.repeating())
+	opened, err := openReports(i.reports, stdout, i.monitor.repeating(), i.coverage)
 	if err != nil {
 		return runner.Report{}, nil, err
 	}
@@ -280,6 +291,17 @@ func (i invocation) cycle(ctx context.Context, stored runner.Collection, warned 
 		return outcome, nil, nil
 	}
 	return outcome, recorded.Text, nil
+}
+
+func (i invocation) codeOf(outcome runner.Report, stderr io.Writer) int {
+	code := reportCode(outcome)
+	if i.minCoverage > 0 && outcome.Coverage != nil && !outcome.Coverage.Meets(i.minCoverage) {
+		fmt.Fprintf(stderr, "%s: %s\n", programName, outcome.Coverage.Shortfall(i.minCoverage))
+		if code == exitPassed {
+			return exitFailed
+		}
+	}
+	return code
 }
 
 func reportCode(report runner.Report) int {

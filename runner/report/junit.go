@@ -27,15 +27,21 @@ type junitSuites struct {
 }
 
 type junitSuite struct {
-	Name      string      `xml:"name,attr"`
-	Tests     int         `xml:"tests,attr"`
-	Failures  int         `xml:"failures,attr"`
-	Errors    int         `xml:"errors,attr"`
-	Skipped   int         `xml:"skipped,attr"`
-	Time      string      `xml:"time,attr"`
-	Timestamp string      `xml:"timestamp,attr"`
-	Cases     []junitCase `xml:"testcase"`
-	Output    string      `xml:"system-out,omitempty"`
+	Name      string          `xml:"name,attr"`
+	Tests     int             `xml:"tests,attr"`
+	Failures  int             `xml:"failures,attr"`
+	Errors    int             `xml:"errors,attr"`
+	Skipped   int             `xml:"skipped,attr"`
+	Time      string          `xml:"time,attr"`
+	Timestamp string          `xml:"timestamp,attr"`
+	Props     []junitProperty `xml:"properties>property,omitempty"`
+	Cases     []junitCase     `xml:"testcase"`
+	Output    string          `xml:"system-out,omitempty"`
+}
+
+type junitProperty struct {
+	Name  string `xml:"name,attr"`
+	Value string `xml:"value,attr"`
 }
 
 type junitCase struct {
@@ -148,6 +154,18 @@ func suiteOf(result runner.Result, timestamp string) junitSuite {
 	return suite
 }
 
+func coverageProperties(coverage runner.Coverage) []junitProperty {
+	percent := func(value float64) string { return strconv.FormatFloat(value, 'f', 1, 64) }
+	return []junitProperty{
+		{Name: "openapi.operations.total", Value: strconv.Itoa(coverage.Operations.Total)},
+		{Name: "openapi.operations.covered", Value: strconv.Itoa(coverage.Operations.Covered)},
+		{Name: "openapi.operations.percent", Value: percent(coverage.Operations.Percent)},
+		{Name: "openapi.responses.total", Value: strconv.Itoa(coverage.Responses.Total)},
+		{Name: "openapi.responses.covered", Value: strconv.Itoa(coverage.Responses.Covered)},
+		{Name: "openapi.responses.percent", Value: percent(coverage.Responses.Percent)},
+	}
+}
+
 func (r junitReporter) Finish(report runner.Report) error {
 	suites := junitSuites{Name: suitesName, Time: seconds(report.DurationMs)}
 	timestamp := report.StartedAt.Format(time.RFC3339)
@@ -157,6 +175,9 @@ func (r junitReporter) Finish(report runner.Report) error {
 	}
 	if report.Flow != nil {
 		all = append(all, flowSuite(report.Flow, timestamp, report.DurationMs))
+	}
+	if report.Coverage != nil && len(all) > 0 {
+		all[0].Props = coverageProperties(*report.Coverage)
 	}
 	for _, suite := range all {
 		suites.Tests += suite.Tests

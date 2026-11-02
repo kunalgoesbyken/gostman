@@ -110,6 +110,10 @@ run
                         (file or address): the status, the content type and
                         the body schema of the operation with the same method
                         and path; a mismatch fails the run like any check
+  --coverage            with --contract: list the operations and documented
+                        responses of the spec the run did not exercise
+  --min-coverage <n>    with --contract: fail the run (exit 1) when fewer than
+                        n percent of the spec's operations were called
   --cacert <file>       trust the PEM or DER certificates in this file as well
                         as the system's (repeatable)
   --client-cert <file> --client-key <file>

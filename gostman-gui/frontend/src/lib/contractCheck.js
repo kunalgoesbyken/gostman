@@ -4,7 +4,7 @@ import { contractAllowance } from './scripting/limits'
 import { checkContractInSandbox } from './scripting/sandbox'
 
 const ACTION_CONTRACT = 'contract'
-const NO_CHECKS = { tests: [], logs: [], error: '', note: '' }
+const NO_CHECKS = { tests: [], logs: [], error: '', note: '', operation: '', spec: '' }
 
 export const checksContract = (link) => Boolean(link?.source) && link.contract !== false
 
@@ -14,7 +14,7 @@ export const linkFor = (specLinks, lineage) => (
   [...lineage].reverse().map(({ id }) => specLinks[id]).find(checksContract) ?? null
 )
 
-async function fetchContract(backend, source) {
+export async function fetchContract(backend, source) {
   const reply = await backend.openapi({ action: ACTION_CONTRACT, source })
   if (reply.error) throw new Error(reply.error)
   return reply.contract
@@ -51,6 +51,6 @@ export function createContractChecker(backend) {
     const { operation, note } = linked ? { operation: linked, note: '' } : findOperation(contract, request.method, response.url)
     if (!operation) return { ...NO_CHECKS, note }
     const checked = await checkContractInSandbox({ operation, root: contract.root, response }, contractAllowance())
-    return { ...NO_CHECKS, tests: checked.tests, note: checked.error || '' }
+    return { ...NO_CHECKS, tests: checked.tests, note: checked.error || '', operation: operation.key, spec: link.source }
   }
 }

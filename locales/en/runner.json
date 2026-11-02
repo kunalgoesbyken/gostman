@@ -60,6 +60,12 @@
     "progressPassed": "{{count}} passed",
     "progressFailed": "{{count}} failed",
     "progressSkipped": "{{count}} skipped",
-    "socketSkipped": "WebSocket requests are not part of a run."
+    "socketSkipped": "WebSocket requests are not part of a run.",
+    "coverageTitle": "OpenAPI coverage",
+    "coverageOperations": "{{covered}} of {{total}} operations ({{percent}}%)",
+    "coverageResponses": "{{covered}} of {{total}} documented responses ({{percent}}%)",
+    "coverageNotCalled": "not called",
+    "coverageMissing": "no response: {{codes}}",
+    "coverageUndocumented": "undocumented status: {{codes}}"
   }
 }

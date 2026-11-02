@@ -57,15 +57,16 @@ type stageRun struct {
 }
 
 type exchange struct {
-	skipped  string
-	response engine.Response
-	tests    []Check
-	logs     []LogLine
-	errors   []string
-	flow     flow
-	visual   string
-	withheld []string
-	possible []string
+	skipped   string
+	response  engine.Response
+	tests     []Check
+	logs      []LogLine
+	errors    []string
+	flow      flow
+	visual    string
+	withheld  []string
+	possible  []string
+	operation string
 }
 
 func hasText(text string) bool {

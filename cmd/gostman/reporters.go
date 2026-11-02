@@ -93,22 +93,26 @@ func (o openedReports) close() {
 	}
 }
 
-func onStdout(format string, stdout *os.File) report.Reporter {
+func onStdout(format string, stdout *os.File, listUncovered bool) report.Reporter {
 	if format == report.FormatText {
-		return report.NewText(stdout, report.SupportsColor(stdout))
+		text := report.NewText(stdout, report.SupportsColor(stdout))
+		if listUncovered {
+			text.ListUncovered()
+		}
+		return text
 	}
 	chosen, _ := report.New(format, stdout)
 	return chosen
 }
 
-func openReports(specs []reporterSpec, stdout *os.File, quiet bool) (openedReports, error) {
+func openReports(specs []reporterSpec, stdout *os.File, quiet, listUncovered bool) (openedReports, error) {
 	var opened openedReports
 	if !quiet && !slices.ContainsFunc(specs, reporterSpec.toStdout) {
-		opened.reporters = append(opened.reporters, onStdout(report.FormatText, stdout))
+		opened.reporters = append(opened.reporters, onStdout(report.FormatText, stdout, listUncovered))
 	}
 	for _, spec := range specs {
 		if spec.toStdout() {
-			opened.reporters = append(opened.reporters, onStdout(spec.format, stdout))
+			opened.reporters = append(opened.reporters, onStdout(spec.format, stdout, listUncovered))
 			continue
 		}
 		file, err := os.Create(spec.path)

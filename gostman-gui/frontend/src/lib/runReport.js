@@ -27,6 +27,7 @@ const toResult = (result) => ({
   attempt: result.attempt || 0,
   attempts: result.attempts || 0,
   handled: result.handled || '',
+  operation: result.operation || '',
   exchange: result.exchange,
 })
 
@@ -51,8 +52,9 @@ export function summarize(results, planned) {
 
 export const environmentsUsed = (results, environmentOf) => [...new Set(results.map(environmentOf).filter(Boolean))].join(', ')
 
-export function buildReportPage(results, run, environment, flow = null) {
+export function buildReportPage(results, run, environment, flow = null, coverage = null) {
   const report = {
+    ...(coverage && { coverage }),
     ...(flow && { flow, collection: flow.name }),
     environment,
     startedAt: run.startedAt.toISOString(),

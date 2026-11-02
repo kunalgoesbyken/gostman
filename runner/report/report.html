@@ -49,6 +49,9 @@ li.ok::before { content: "PASS  "; color: var(--pass); font: 600 11px ui-monospa
 li.bad::before { content: "FAIL  "; color: var(--fail); font: 600 11px ui-monospace, Consolas, monospace; }
 li small { display: block; color: var(--muted); margin-left: 42px; white-space: pre-wrap; }
 .error { color: var(--fail); white-space: pre-wrap; }
+.coverage li.ok::before { content: "HIT   "; }
+.coverage li.bad::before { content: "MISS  "; }
+.coverage code { font: 12px ui-monospace, Consolas, monospace; }
 .empty { color: var(--muted); padding: 24px 0; text-align: center; }
 </style>
 </head>
@@ -57,6 +60,7 @@ li small { display: block; color: var(--muted); margin-left: 42px; white-space: 
 <h1>Gostman run report</h1>
 <div class="meta" id="meta"></div>
 <div class="cards" id="cards"></div>
+<div id="coverage"></div>
 <div class="bar">
   <button type="button" id="all" aria-pressed="true">All</button>
   <button type="button" id="failed" aria-pressed="false">Failed</button>
@@ -228,6 +232,35 @@ li small { display: block; color: var(--muted); margin-left: 42px; white-space: 
   if (!flow) cards.appendChild(card(summary.notRun, 'not run'));
   cards.appendChild(card((summary.tests || 0) - (summary.failedTests || 0), 'checks passed', 'pass'));
   cards.appendChild(card(summary.failedTests, 'checks failed', summary.failedTests ? 'fail' : ''));
+
+  function coverageLine(item) {
+    var line = el('li', item.covered ? 'ok' : 'bad');
+    line.appendChild(el('code', '', item.method + ' ' + item.path));
+    var missing = item.responses.filter(function (response) { return !response.covered; }).map(function (response) { return response.code; });
+    var note = [];
+    if (item.covered && missing.length) note.push('no response: ' + missing.join(', '));
+    if (!item.covered) note.push('not called');
+    if (item.undocumented && item.undocumented.length) note.push('undocumented status: ' + item.undocumented.join(', '));
+    if (note.length) line.appendChild(el('small', '', note.join('\n')));
+    return line;
+  }
+
+  function drawCoverage(coverage) {
+    var host = document.getElementById('coverage');
+    var node = el('details', 'row coverage');
+    var head = el('summary');
+    head.appendChild(el('span', 'name', 'OpenAPI coverage'));
+    head.appendChild(el('span', 'stat', coverage.operations.covered + ' of ' + coverage.operations.total + ' operations (' + coverage.operations.percent + '%), ' + coverage.responses.covered + ' of ' + coverage.responses.total + ' documented responses (' + coverage.responses.percent + '%)'));
+    node.appendChild(head);
+    var body = el('div', 'body');
+    var list = el('ul');
+    coverage.items.forEach(function (item) { list.appendChild(coverageLine(item)); });
+    body.appendChild(list);
+    node.appendChild(body);
+    host.appendChild(node);
+    host.style.marginBottom = '16px';
+  }
+  if (report.coverage) drawCoverage(report.coverage);
 
   function setFilter(failed) {
     onlyFailed = failed;

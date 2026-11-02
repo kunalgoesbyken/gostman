@@ -244,6 +244,10 @@ The spec is read again after each sync and once per app session. When it cannot 
 
 `gostman run --contract spec.yaml` runs the same checks on the command line; see [Command line](cli.md).
 
+### Coverage of the spec
+
+After a run in the Runner that sent requests of a linked folder, an **OpenAPI coverage** section at the top of the results shows how many of the spec's operations and documented responses the run exercised, with the operations that were not called and the statuses that never came back. The same section is in the downloaded HTML report. `gostman run --contract spec.yaml --coverage --min-coverage 80` prints it on the command line and fails the run below the threshold; see [OpenAPI coverage](cli.md#openapi-coverage).
+
 ### Linter
 
 The **Lint** tab checks the spec and lists findings in three severities: errors, warnings and info. The buttons at the top show the count for each severity and toggle whether it is listed. A finding shows its message, the rule and the operation or path. Selecting a finding that belongs to an operation opens that operation in the **Operations** tab. A clean spec shows **No problems found.**

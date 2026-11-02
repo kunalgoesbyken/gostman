@@ -41,7 +41,7 @@ function capture(request, response) {
   }
 }
 
-export function runResult(request, { response, tests, resolvedUrl }, iteration = 0) {
+export function runResult(request, { response, tests, resolvedUrl, operation = '', spec = '' }, iteration = 0) {
   const failures = tests.results.filter((result) => !result.passed)
   return {
     ...identify(request),
@@ -59,6 +59,8 @@ export function runResult(request, { response, tests, resolvedUrl }, iteration =
     logs: tests.logs,
     visualization: tests.visualization,
     flow: tests.flow,
+    operation,
+    spec,
     hasFailed: Boolean(response.error) || Boolean(response.failed) || tests.error !== '' || failures.length > 0,
     exchange: capture(request, response),
   }

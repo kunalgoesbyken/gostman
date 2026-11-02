@@ -211,6 +211,9 @@ func (s *Session) Run(ctx context.Context, stored Collection, options Options, o
 		Summary:     summarize(results, total),
 		Results:     results,
 	}
+	if report.Coverage, err = s.state.coverageOf(results); err != nil {
+		return Report{}, err
+	}
 	if options.isIterating() {
 		report.Iterations = options.iterationCount()
 	}

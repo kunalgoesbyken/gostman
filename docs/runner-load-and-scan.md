@@ -69,6 +69,10 @@ A 4xx or 5xx status does not fail a request by itself. Add an assertion such as 
 
 Requests in a folder linked to an OpenAPI spec also get the spec's contract checks, which count like assertions; see [Contract checks](import-export-and-specs.md#contract-checks).
 
+### OpenAPI coverage
+
+When requests of a folder linked to an OpenAPI spec took part in the run, the results start with an **OpenAPI coverage** section. Its summary gives the operations that were called, such as `7 of 12 operations (58.3%)`, and the documented responses that came back. Expand it to see each operation with a mark, and which documented statuses never came back. See [Coverage of the spec](import-export-and-specs.md#coverage-of-the-spec).
+
 ### Download HTML report
 
 **Download HTML report**, at the bottom of the dialog, saves the results of the last run as `gostman-report.html`. It is disabled while a run is going and when there are no results. The command line produces the same report with `--reporter html`; see [Command line](cli.md) and [Gostman in CI](ci.md).

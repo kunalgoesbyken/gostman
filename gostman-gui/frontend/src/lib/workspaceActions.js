@@ -37,6 +37,7 @@ import { keepingOwnVariables } from './shareContent'
 import { clientUrl } from './sharedLink'
 import { createRunner } from './runner'
 import { buildReportPage, environmentsUsed } from './runReport'
+import { coverageOfRun } from './runCoverage'
 import { createSocketActions, isSocketAddress } from './socketSessions'
 import { TESTS_PANEL } from './requestSections'
 import { createSpecActions } from './specActions'
@@ -445,14 +446,17 @@ export function createWorkspaceActions(backend) {
     backend.saveFile(name, textToBase64(text), mime)
   ))
 
-  const downloadRunReport = () => {
+  const runCoverage = (results) => coverageOfRun(backend, results)
+
+  const downloadRunReport = async () => {
     const run = runner.describeRun()
     if (!run) return undefined
     const { runner: state } = store()
     const requests = new Map(store().requests.map((request) => [request.id, request]))
     const environmentOf = (folderId) => environmentForFolder(store(), folderId)?.name
     const environment = environmentsUsed(state.results, (result) => environmentOf(requests.get(result.id)?.folderId)) || environmentOf(state.folderId) || ''
-    return saveTextFile(RUN_REPORT_FILE, buildReportPage(state.results, run, environment), RUN_REPORT_TYPE)
+    const coverage = await runCoverage(state.results)
+    return saveTextFile(RUN_REPORT_FILE, buildReportPage(state.results, run, environment, null, coverage), RUN_REPORT_TYPE)
   }
 
   const deleteAllData = attempt(DATA_TEXT.failed, async () => {
@@ -718,6 +722,7 @@ export function createWorkspaceActions(backend) {
     startRun: runner.start,
     stopRun: runner.stop,
     downloadRunReport,
+    runCoverage,
     loadSchema,
     loadGrpcSchema,
     loadMcpCatalog,

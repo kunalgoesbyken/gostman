@@ -47,6 +47,7 @@ type Result struct {
 	Attempts    int       `json:"attempts,omitempty"`
 	Handled     string    `json:"handled,omitempty"`
 	Exchange    *Capture  `json:"exchange,omitempty"`
+	Operation   string    `json:"operation,omitempty"`
 	flow        flow
 }
 
@@ -70,6 +71,7 @@ type Report struct {
 	Iterations  int         `json:"iterations,omitempty"`
 	Parallel    int         `json:"parallel,omitempty"`
 	Flow        *FlowReport `json:"flow,omitempty"`
+	Coverage    *Coverage   `json:"coverage,omitempty"`
 	Summary     Summary     `json:"summary"`
 	Results     []Result    `json:"results"`
 }

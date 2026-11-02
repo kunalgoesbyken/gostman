@@ -83,12 +83,15 @@ const bareType = (value) => String(value || '').split(';')[0].trim().toLowerCase
 
 const isJsonType = (type) => type === JSON_TYPE || type.endsWith(JSON_SUFFIX)
 
-function documentedResponse(responses, status) {
-  const codes = Object.keys(responses)
+export function documentedCode(codes, status) {
   const family = `${Math.floor(status / 100)}xx`
-  const code = codes.find((candidate) => candidate === String(status))
+  return codes.find((candidate) => candidate === String(status))
     ?? codes.find((candidate) => candidate.toLowerCase() === family)
     ?? codes.find((candidate) => candidate === DEFAULT_RESPONSE)
+}
+
+function documentedResponse(responses, status) {
+  const code = documentedCode(Object.keys(responses), status)
   return code === undefined ? null : responses[code]
 }
 

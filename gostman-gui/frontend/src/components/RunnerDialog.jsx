@@ -1,4 +1,4 @@
-import { memo, useMemo, useRef, useState } from "react"
+import { memo, useEffect, useMemo, useRef, useState } from "react"
 import { Check, ChevronDown, ChevronRight, Download, ListChecks, Minus, Play, RotateCw, Square, Upload, X } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
@@ -196,6 +196,34 @@ function RequestChoices({ scoped, folders, excluded, onChange }) {
   )
 }
 
+function CoverageSection({ coverage }) {
+  const note = (item) => [
+    !item.covered && RUNNER_TEXT.coverageNotCalled,
+    item.covered && item.responses.some((response) => !response.covered) && RUNNER_TEXT.coverageMissing({ codes: item.responses.filter((response) => !response.covered).map((response) => response.code).join(", ") }),
+    item.undocumented.length > 0 && RUNNER_TEXT.coverageUndocumented({ codes: item.undocumented.join(", ") }),
+  ].filter(Boolean).join(" · ")
+
+  return (
+    <details className="border-b border-border">
+      <summary className="flex min-h-9 cursor-pointer flex-wrap items-center gap-x-3 px-3 py-1 text-xs hover:bg-accent">
+        <span className="font-medium text-foreground">{RUNNER_TEXT.coverageTitle}</span>
+        <span className="text-muted-foreground">{RUNNER_TEXT.coverageOperations({ covered: coverage.operations.covered, total: coverage.operations.total, percent: coverage.operations.percent })}</span>
+        <span className="text-muted-foreground">{RUNNER_TEXT.coverageResponses({ covered: coverage.responses.covered, total: coverage.responses.total, percent: coverage.responses.percent })}</span>
+      </summary>
+      <ul className="pb-1.5">
+        {coverage.items.map((item) => (
+          <li key={`${item.method} ${item.path}`} className="flex flex-wrap items-center gap-x-2 px-3 py-0.5 text-xs">
+            {item.covered ? <Check aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-success" /> : <X aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-destructive" />}
+            <MethodTag method={item.method} className="w-12" />
+            <span className="min-w-0 truncate font-mono text-foreground">{item.path}</span>
+            <span className="text-muted-foreground">{note(item)}</span>
+          </li>
+        ))}
+      </ul>
+    </details>
+  )
+}
+
 const RUNNER_WINDOW = { id: "runner", width: 768, height: 576, minWidth: 480, minHeight: 360 }
 
 export function RunnerDialog({ folders, requests, actions }) {
@@ -223,6 +251,15 @@ export function RunnerDialog({ folders, requests, actions }) {
   const excluded = useMemo(() => new Set(excludedIds), [excludedIds])
   const requestCount = useMemo(() => scoped.filter((request) => !excluded.has(request.id)).length, [scoped, excluded])
   const { isRunning, results } = runner
+  const [coverage, setCoverage] = useState(null)
+  const hasOperations = !isRunning && results.some((result) => result.operation)
+
+  useEffect(() => {
+    let isCurrent = true
+    setCoverage(null)
+    if (hasOperations) actions.runCoverage(results).then((found) => isCurrent && setCoverage(found))
+    return () => { isCurrent = false }
+  }, [hasOperations, results])
   const iterations = iterationCount(rows, iterationLimit)
   const columns = useMemo(() => dataColumns(rows), [rows])
   const total = requestCount * iterations
@@ -337,9 +374,12 @@ export function RunnerDialog({ folders, requests, actions }) {
             description={total === 0 && !isRunning ? RUNNER_TEXT.nothingToRunHint : RUNNER_TEXT.idle}
           />
         ) : (
-          <ul aria-label={RUNNER_TEXT.results}>
-            {results.map((result, index) => <ResultRow key={index} result={result} />)}
-          </ul>
+          <>
+            {coverage && <CoverageSection coverage={coverage} />}
+            <ul aria-label={RUNNER_TEXT.results}>
+              {results.map((result, index) => <ResultRow key={index} result={result} />)}
+            </ul>
+          </>
         )}
       </div>
       <div className="flex shrink-0 items-center gap-2 border-t border-border py-1 ps-4 pe-2">

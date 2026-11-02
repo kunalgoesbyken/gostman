@@ -244,6 +244,18 @@ func (c Contract) Index() Contract {
 	return Contract{BasePaths: c.BasePaths, Operations: operations}
 }
 
+func (c Contract) Outline() Contract {
+	operations := make([]ContractOperation, len(c.Operations))
+	for index, op := range c.Operations {
+		responses := make(map[string]ContractResponse, len(op.Responses))
+		for code := range op.Responses {
+			responses[code] = ContractResponse{}
+		}
+		operations[index] = ContractOperation{Key: op.Key, Method: op.Method, Path: op.Path, Responses: responses}
+	}
+	return Contract{BasePaths: c.BasePaths, Operations: operations}
+}
+
 type referenceCopier struct {
 	source map[string]any
 	root   map[string]any

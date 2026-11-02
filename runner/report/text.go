@@ -31,8 +31,14 @@ const (
 )
 
 type Text struct {
-	output  io.Writer
-	colored bool
+	output   io.Writer
+	colored  bool
+	untested bool
+}
+
+func (t *Text) ListUncovered() *Text {
+	t.untested = true
+	return t
 }
 
 func NewText(output io.Writer, colored bool) *Text {
@@ -197,7 +203,7 @@ func (t *Text) Finish(report runner.Report) error {
 		t.paint(styleRed, counted(summary.FailedTests, "failed")),
 	)
 	duration := (time.Duration(report.DurationMs) * time.Millisecond).String()
-	_, err := fmt.Fprintf(t.output, "\n%sRequests  %s\nChecks    %s\n%sDuration  %s\n", t.flowLine(report), requests, tests, t.contractLine(report), duration)
+	_, err := fmt.Fprintf(t.output, "\n%sRequests  %s\nChecks    %s\n%s%sDuration  %s\n", t.flowLine(report), requests, tests, t.contractLine(report), t.coverageLines(report), duration)
 	return err
 }
 
@@ -229,4 +235,38 @@ func (t *Text) contractLine(report runner.Report) string {
 		return ""
 	}
 	return fmt.Sprintf("Contract  %s\n", counts(fmt.Sprintf("%d passed", total-failed), t.paint(styleRed, counted(failed, "failed"))))
+}
+
+func (t *Text) coverageLines(report runner.Report) string {
+	coverage := report.Coverage
+	if coverage == nil {
+		return ""
+	}
+	var lines strings.Builder
+	fmt.Fprintf(&lines, "Coverage  %d of %d operations (%.1f%%), %d of %d documented responses (%.1f%%)\n",
+		coverage.Operations.Covered, coverage.Operations.Total, coverage.Operations.Percent,
+		coverage.Responses.Covered, coverage.Responses.Total, coverage.Responses.Percent)
+	if !t.untested {
+		return lines.String()
+	}
+	for _, item := range coverage.Items {
+		lines.WriteString(t.uncoveredLine(item))
+	}
+	return lines.String()
+}
+
+func (t *Text) uncoveredLine(item runner.CoverageOperation) string {
+	if !item.Covered {
+		return fmt.Sprintf("          %s %s  %s\n", t.paint(styleRed, "not called"), printable(item.Method), printable(item.Path))
+	}
+	var missing []string
+	for _, response := range item.Responses {
+		if !response.Covered {
+			missing = append(missing, response.Code)
+		}
+	}
+	if len(missing) == 0 {
+		return ""
+	}
+	return fmt.Sprintf("          %s %s  %s: %s\n", t.paint(styleDim, "no response"), printable(item.Method), printable(item.Path), strings.Join(missing, ", "))
 }

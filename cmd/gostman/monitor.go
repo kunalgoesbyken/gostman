@@ -210,7 +210,7 @@ func (i invocation) monitored(ctx context.Context, stored runner.Collection, war
 			}
 			fmt.Fprintf(stderr, "%s: %s\n", programName, err)
 		} else {
-			code = reportCode(outcome)
+			code = i.codeOf(outcome, stderr)
 			record := i.record(outcome, code, scrub, stderr)
 			fmt.Fprintln(stdout, i.summaryLine(number, record))
 			i.announce(ctx, record, previousFailed, stderr)

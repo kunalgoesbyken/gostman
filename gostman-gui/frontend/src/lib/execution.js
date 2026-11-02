@@ -284,6 +284,7 @@ export function createExecutor(backend) {
 
     const transmit = () => transportFor(backend, outgoing)(sendId, withInheritance(store(), outgoing), variablesOf(request, answers), store().cookies)
     const response = await trace.timed(exchangeEntry(ENTRY_KINDS.REQUEST, outgoing), transmit)
+    let contractRun = null
     if (!outgoing.options?.discardCookies) store().storeCookies(response.cookies || [])
     const extraction = await applyExtractors(request, response)
     if (extraction?.error) runs.push(extractionRun(extraction))
@@ -298,11 +299,12 @@ export function createExecutor(backend) {
           modules,
         }, request, context))
       }
-      runs.push(await checkContract(linkFor(store().specLinks, lineage), request, response))
+      contractRun = await checkContract(linkFor(store().specLinks, lineage), request, response)
+      runs.push(contractRun)
       runs.push(outputRun(response))
     }
     const resolvedUrl = shownUrl(response.url, resolveLayers(scopeLayers(store(), request, referenced)), outgoing.auth)
-    return { auth: request.auth, response, tests: report(runs), extraction, resolvedUrl }
+    return { auth: request.auth, response, tests: report(runs), extraction, resolvedUrl, operation: contractRun?.operation || '', spec: contractRun?.spec || '' }
   }
 
   return async function execute(original, sendId, prompts = askEveryTime) {

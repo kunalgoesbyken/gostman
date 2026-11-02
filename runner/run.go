@@ -73,6 +73,7 @@ func describe(request Request, folder string, outcome exchange) Result {
 	result.Tests = append(result.Tests, outcome.tests...)
 	result.Logs = append(result.Logs, outcome.logs...)
 	result.Visual = outcome.visual
+	result.Operation = outcome.operation
 	result.Error = strings.Join(outcome.errors, "\n")
 	if response.Error != "" {
 		result.Error = response.Body
