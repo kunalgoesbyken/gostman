@@ -1,5 +1,7 @@
 import {
   ClearMockLog,
+  ExportMockRules,
+  ImportMockRules,
   MockConfig,
   MockFromSpec,
   MockRoutes,
@@ -20,6 +22,8 @@ export const desktopMock = {
   stop: () => StopMock(),
   status: () => MockStatus(),
   clearLog: () => ClearMockLog(),
+  exportRules: (rules) => ExportMockRules(rules),
+  importRules: (text) => ImportMockRules(text),
   loadConfig: () => MockConfig(),
   saveConfig: (config) => SaveMockConfig(config),
   fromSpec: (source) => MockFromSpec(source),

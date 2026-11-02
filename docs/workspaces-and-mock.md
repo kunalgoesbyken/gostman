@@ -31,6 +31,7 @@ Save any response as a named example from the response panel (up to 20 per reque
 - **Rules** run before the routes, in the order listed; the first match wins. A rule can match the method, a path template, query parameters, headers and JSON body values (`$.user.name`) and then override the status, headers and body, or only answer its Nth match.
 - **Templating**: response bodies and headers can use `{{request.params.id}}`, `{{request.query.x}}`, `{{request.header.x}}`, `{{request.body.json.path}}` and the dynamic variables `{{$guid}}`, `{{$timestamp}}`, `{{$randomInt}}`. Missing values render empty, and values are escaped inside JSON responses.
 - **Behavior**, for the whole server or one route or rule: a fixed or ranged delay, a slow body, and failures (an error status, a connection reset or an empty reply) at a chosen rate. CORS is off by default; when on, only localhost origins (any port, `127.0.0.1`, `[::1]`) are answered, and the CLI's repeatable `--cors-origin https://app.example.com` adds exact extra origins. Other origins get no CORS headers.
+- **Rules file**: **Export rules** and **Import rules** on the Rules tab save and read the rules as a separate YAML file (`kind: gostman-mock-rules`), so a set of rules can move between workspaces. Imported rules arrive switched off.
 - **Log**: the last 500 requests with headers and body (up to 4 KB). Credential-like header names and query parameters show as `***`.
 - Rules, per-route options and an imported spec are saved in `.gostman/mock.yaml` of a workspace folder, or in the app data folder otherwise. The server binds to `127.0.0.1` only, refuses other `Host` headers, never reads files, and caps request bodies at 10 MB, responses at 10 MB, routes at 10,000 and rules at 200.
 
@@ -47,6 +48,16 @@ Open **Capture** at the bottom of the window and start a capture with the addres
 Each call appears as a row with its time, method, path, status, duration and size. Type in the filter to narrow the list by method, path or status. Select a row to see its request and response, body or headers, below the list; **Save as request** opens it in a new tab.
 
 To save several calls at once, tick their rows (the box in the header ticks every row shown), choose a folder in **Folder to save into** and press **Save selected to folder**. The first choice is a top-level folder named after the API's host, created when needed; you can also pick **Top level** or any existing folder. Each call becomes a request with its response as an example, and repeated calls to the same method and path are saved once. **Clear** empties the list.
+
+## Calls, rules and held calls
+
+The capture dialog has three views. **Calls** is the list above. **Rules** edits the [capture rules](#capture-rules) below: add, reorder and switch them off, import and export them as a YAML file (imported rules arrive switched off), and set how long a held call waits. Rules take effect on the running capture as soon as they are saved. **Held** lists the calls that a rule with a breakpoint is holding.
+
+- **Breakpoints**: a rule with **Hold the request** stops a matching call before it goes to the API, and **Hold the response** stops the answer before it goes back to your app. The Held view shows the method, URL, headers and body of a held request, or the status, headers and body of a held response, and you can edit them. **Release** sends the edited call on, **Drop** closes the connection without an answer. A held call that nobody releases within the timeout (60 seconds unless you change it, at most an hour) goes on unchanged. At most 25 calls are held at once; further matching calls pass through. A body over 2 MB is not held. Held calls are shown only in the app and are not written to logs.
+- **Export HAR** saves the exchanges you ticked, or all shown, as a HAR 1.2 file that other tools and Gostman's HAR import read. `Authorization`, `Cookie`, `Proxy-Authorization` and `Set-Cookie` values show as `***`. Exchanges that were closed before a URL was known are left out.
+- **Make mock rule** adds a [mock server](#examples-and-the-mock-server-desktop) rule that answers the call's method and path with the captured status, headers and body (complete text responses only). **Answer with this** adds a capture rule that does the same inside the capture.
+- **Compare responses** opens the body or headers of two ticked exchanges side by side.
+- A row's detail lists the rules that fired and what happened at a breakpoint.
 
 ## Capture rules
 

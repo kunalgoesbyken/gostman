@@ -117,7 +117,7 @@ export function createWorkspaceActions(backend) {
   const runner = createRunner(backend, execute)
   const examples = createExampleActions(backend)
   const mock = createMockActions(backend)
-  const capture = createCaptureActions(backend)
+  const capture = createCaptureActions(backend, mock)
   const loadTest = createLoadTestActions(backend)
   const flows = createFlowActions(backend, { attempt, execute, promptForName })
 

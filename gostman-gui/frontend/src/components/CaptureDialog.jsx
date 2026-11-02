@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react"
-import { AlertTriangle, FileDigit, FileText, Info, List, Play, Radio, Square, X } from "lucide-react"
+import { Suspense, lazy, useMemo, useState } from "react"
+import { AlertTriangle, Download, FileDigit, FileText, Info, List, Play, Radio, Square, X } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button, IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
@@ -13,10 +13,12 @@ import { Select } from "./ui/select"
 import { TabCount } from "./ui/tabs"
 import { VirtualList } from "./ui/VirtualList"
 import { DesktopOnly } from "./DesktopOnly"
+import { CaptureHeldTab } from "./CaptureHeldTab"
+import { CaptureRulesTab } from "./CaptureRulesTab"
 import { LocalAddress } from "./LocalAddress"
 import { MethodTag } from "./MethodTag"
 import { isSavable, suggestedFolderName } from "../lib/captureConversion"
-import { NEW_FOLDER, useCaptureStore } from "../lib/captureSession"
+import { NEW_FOLDER, VIEW_CALLS, VIEW_HELD, VIEW_RULES, useCaptureStore } from "../lib/captureSession"
 import { CAPTURE_TEXT } from "../lib/captureText"
 import { ROOT_ID, buildCollectionTree, listFolders } from "../lib/collectionTree"
 import { formatBytes } from "../lib/byteSize"
@@ -25,6 +27,8 @@ import { parseJsonBody, statusVariant } from "../lib/response"
 import { RESPONSE_TEXT } from "../lib/responseText"
 import { TREE_TEXT } from "../lib/treeText"
 import { cn } from "../lib/utils"
+
+const ResponseCompareDialog = lazy(() => import("./ResponseCompareDialog").then((module) => ({ default: module.ResponseCompareDialog })))
 
 const PATH_SEPARATOR = " / "
 const ENCODING_BASE64 = "base64"
@@ -191,8 +195,16 @@ function ExchangeDetail({ exchange, actions }) {
         <Button variant="outline" size="sm" disabled={!isSavable(exchange)} onClick={() => actions.openAsRequest(exchange)}>
           {CAPTURE_TEXT.saveAsRequest}
         </Button>
+        <Button variant="outline" size="sm" title={CAPTURE_TEXT.makeMockRuleTitle} disabled={!isSavable(exchange)} onClick={() => actions.makeMockRule(exchange)}>
+          {CAPTURE_TEXT.makeMockRule}
+        </Button>
+        <Button variant="outline" size="sm" title={CAPTURE_TEXT.answerWithTitle} disabled={!isSavable(exchange)} onClick={() => actions.answerWith(exchange)}>
+          {CAPTURE_TEXT.answerWith}
+        </Button>
         <IconButton label={CAPTURE_TEXT.closeDetails} icon={X} onClick={actions.closeDetail} />
       </Toolbar>
+      {exchange.rules?.length > 0 && <Notice icon={Info}>{CAPTURE_TEXT.firedRules({ names: exchange.rules.join(", ") })}</Notice>}
+      {exchange.breakpoint && <Notice icon={Info}>{CAPTURE_TEXT.breakpointNote({ outcome: exchange.breakpoint })}</Notice>}
       {exchange.error && <Notice tone="destructive" icon={AlertTriangle}>{exchange.error}</Notice>}
       {exchange.upgraded && <Notice icon={Info}>{CAPTURE_TEXT.upgraded}</Notice>}
       {exchange.interrupted && <Notice tone="warning" icon={AlertTriangle}>{CAPTURE_TEXT.interrupted}</Notice>}
@@ -204,7 +216,7 @@ function ExchangeDetail({ exchange, actions }) {
   )
 }
 
-function CapturePanel({ folders, requests, actions }) {
+function CallsView({ folders, requests, actions }) {
   const capture = useCaptureStore()
   const [query, setQuery] = useState("")
   const [checked, setChecked] = useState(() => new Set())
@@ -231,9 +243,6 @@ function CapturePanel({ folders, requests, actions }) {
 
   return (
     <>
-      <CaptureControls capture={capture} actions={actions} />
-      <Notice icon={Info}>{CAPTURE_TEXT.limitation}</Notice>
-      {failure && <Notice tone="destructive" icon={AlertTriangle} role="alert">{failure}</Notice>}
       <Toolbar>
         <SectionLabel>{CAPTURE_TEXT.exchanges}</SectionLabel>
         <TabCount>{shown.length}</TabCount>
@@ -254,6 +263,13 @@ function CapturePanel({ folders, requests, actions }) {
         />
         <Button variant="outline" size="sm" disabled={selected.length === 0} onClick={() => actions.saveToFolder(selected.map((exchange) => exchange.id), target)}>
           {CAPTURE_TEXT.saveSelected}
+        </Button>
+        <Button variant="outline" size="sm" title={CAPTURE_TEXT.compareTitle} disabled={selected.length !== 2} onClick={() => actions.compare(selected.map((exchange) => exchange.id))}>
+          {CAPTURE_TEXT.compare}
+        </Button>
+        <Button variant="outline" size="sm" title={CAPTURE_TEXT.exportHarTitle} disabled={shown.length === 0} onClick={() => actions.exportHar(selected.length > 0 ? selected.map((exchange) => exchange.id) : shown.map((exchange) => exchange.id))}>
+          <Download />
+          {CAPTURE_TEXT.exportHar}
         </Button>
         <Button variant="ghost" size="sm" disabled={log.length === 0} onClick={clear}>{CAPTURE_TEXT.clear}</Button>
       </Toolbar>
@@ -287,6 +303,34 @@ function CapturePanel({ folders, requests, actions }) {
         </>
       )}
       {detail && <ExchangeDetail key={detail.id} exchange={detail} actions={actions} />}
+    </>
+  )
+}
+
+function CapturePanel({ folders, requests, actions }) {
+  const capture = useCaptureStore()
+  const { view, config, held, comparison, failure } = capture
+  const views = [
+    { value: VIEW_CALLS, label: CAPTURE_TEXT.views.calls },
+    { value: VIEW_RULES, label: `${CAPTURE_TEXT.views.rules} (${config.rules.length})` },
+    { value: VIEW_HELD, label: `${CAPTURE_TEXT.views.held} (${held.length})` },
+  ]
+  return (
+    <>
+      <CaptureControls capture={capture} actions={actions} />
+      <Notice icon={Info}>{CAPTURE_TEXT.limitation}</Notice>
+      {failure && <Notice tone="destructive" icon={AlertTriangle} role="alert">{failure}</Notice>}
+      <Toolbar>
+        <SegmentedControl label={CAPTURE_TEXT.viewLabel} options={views} value={view} onChange={actions.setView} />
+      </Toolbar>
+      {view === VIEW_CALLS && <CallsView folders={folders} requests={requests} actions={actions} />}
+      {view === VIEW_RULES && <CaptureRulesTab config={config} actions={actions} />}
+      {view === VIEW_HELD && <CaptureHeldTab held={held} actions={actions} />}
+      {comparison && (
+        <Suspense fallback={null}>
+          <ResponseCompareDialog earlier={comparison.earlier} latest={comparison.latest} onClose={actions.closeComparison} />
+        </Suspense>
+      )}
     </>
   )
 }

@@ -107,6 +107,11 @@
       "conflicts": "{{count}} in conflict",
       "off": "{{count}} switched off",
       "skipped": "{{count}} not served"
-    }
+    },
+    "importRules": "Import rules",
+    "exportRules": "Export rules",
+    "rulesName": "gostman-mock-rules.yaml",
+    "rulesImported_one": "Imported {{count}} rule, switched off until you turn it on.",
+    "rulesImported_other": "Imported {{count}} rules, switched off until you turn them on."
   }
 }

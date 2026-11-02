@@ -1,4 +1,7 @@
 import { create } from 'zustand'
+import { textToBase64 } from './base64'
+import { DIALOG_TEXT } from './dialogText'
+import { MOCK_TEXT } from './mockText'
 import { ROOT_ID, buildCollectionTree, collectRequests } from './collectionTree'
 import { selectActiveVariables, useAppStore } from '../store/appStore'
 import { isWebAddress } from './webAddress'
@@ -323,8 +326,33 @@ export function createMockActions(backend) {
     })
   }
 
+  async function addRules(rules) {
+    const loaded = normalizeConfig(await server.loadConfig())
+    patch({ config: { ...loaded, rules: [...loaded.rules, ...rules.map((rule) => normalizeConfig({ rules: [rule] }).rules[0])] } })
+    await save()
+    if (mock().isRunning) await refresh()
+  }
+
+  const exportRules = async () => {
+    const text = await server.exportRules(mock().config.rules)
+    await backend.saveFile(MOCK_TEXT.rulesName, textToBase64(text), 'application/yaml')
+  }
+
+  async function importRules(file) {
+    try {
+      const imported = await server.importRules(await file.text())
+      change((config) => ({ ...config, rules: [...config.rules, ...imported.map((rule) => normalizeConfig({ rules: [rule] }).rules[0])] }))
+      app().showAlert(MOCK_TEXT.importRules, MOCK_TEXT.rulesImported(imported.length), DIALOG_TEXT.ok, 'success')
+    } catch (error) {
+      patch({ failure: messageOf(error) })
+    }
+  }
+
   return {
     isAvailable: Boolean(server),
+    addRules,
+    exportRules,
+    importRules,
     open,
     resume,
     close,

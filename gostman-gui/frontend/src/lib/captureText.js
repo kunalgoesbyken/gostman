@@ -10,3 +10,5 @@ const text = messages('capture', english, (t) => ({
 
 export const CAPTURE_TEXT = text.capture
 export const CAPTURE_ACTION_TEXT = text.captureAction
+export const CAPTURE_RULES_TEXT = text.captureRules
+export const CAPTURE_HELD_TEXT = text.captureHeld
