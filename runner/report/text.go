@@ -262,7 +262,7 @@ func (t *Text) uncoveredLine(item runner.CoverageOperation) string {
 	var missing []string
 	for _, response := range item.Responses {
 		if !response.Covered {
-			missing = append(missing, response.Code)
+			missing = append(missing, printable(response.Code))
 		}
 	}
 	if len(missing) == 0 {

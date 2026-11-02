@@ -73,7 +73,7 @@ func (d *Document) contractResponses(o *Operation, b *bundler) map[string]Contra
 	responses := asMap(asMap(o.op.v)["responses"])
 	out := make(map[string]ContractResponse, len(responses))
 	for code, raw := range responses {
-		if strings.HasPrefix(code, extensionMark) {
+		if strings.HasPrefix(code, extensionMark) || !validResponseKey(code) {
 			continue
 		}
 		response, doc, _ := d.l.resolved(node{v: raw, d: o.op.d})
@@ -84,6 +84,18 @@ func (d *Document) contractResponses(o *Operation, b *bundler) map[string]Contra
 		}
 	}
 	return out
+}
+
+func validResponseKey(code string) bool {
+	if code == "default" {
+		return true
+	}
+	if len(code) != 3 || code[0] < '1' || code[0] > '5' {
+		return false
+	}
+	isDigit := func(c byte) bool { return c >= '0' && c <= '9' }
+	isWild := func(c byte) bool { return c == 'X' || c == 'x' }
+	return (isDigit(code[1]) && isDigit(code[2])) || (isWild(code[1]) && isWild(code[2]))
 }
 
 func (d *Document) contractContent(response map[string]any, doc *docCtx, b *bundler) map[string]any {
