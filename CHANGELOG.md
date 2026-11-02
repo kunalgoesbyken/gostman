@@ -4,6 +4,21 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Fixed
+
+- On Windows the frameless window shows resize cursors on every edge and corner again and can be resized from them. The desktop status bar also has a resize grip in its right corner.
+- Searching the sidebar highlights the matching text in request tags, and tags that match are listed first on the row.
+- Opening a request again, after closing its tab or from the sidebar, shows its latest response until a new one replaces it. The responses are kept in memory only, up to 50 requests, and are dropped when you leave a workspace or delete all data.
+- The default timeout in Preferences accepts input from the numeric keypad and drops anything that is not a digit.
+
+### Changed
+
+- Preferences: text size, the interface and code fonts, the editor font size and line wrapping are on one page, Fonts. Text size says how it combines with the window zoom.
+
+### Added
+
+- History can be filtered by date range, folder and tag, and grouped by day.
+
 ## [1.10.0] - 2026-11-02
 
 ### Added
