@@ -89,7 +89,7 @@ const placeOf = (scope) => ({ depth: scope.depth, root: scope.root })
 const sentBytes = (response) => (response?.timeline ? timelineHops(response.timeline).reduce((total, hop) => total + (hop.requestBytes || 0), 0) : 0)
 
 const withDurations = (nodes, steps) => Object.fromEntries(Object.entries(nodes).map(([id, node]) => (
-  steps[id] ? [id, { ...node, durationMs: steps[id].totalMs, lastMs: steps[id].lastMs }] : [id, node]
+  steps[id] ? [id, { ...node, durationMs: steps[id].totalMs }] : [id, node]
 )))
 
 const withoutNames = (values, names) => Object.fromEntries(Object.entries(values).filter(([name]) => !names.includes(name)))
@@ -123,7 +123,8 @@ export function createFlowRunner(execute, cancel) {
   }
 
   function publish(tabId, run) {
-    patchRun(tabId, (current) => ({ metrics: finishMeter(run.meter, Date.now() - run.began), nodes: withDurations(current.nodes, run.meter.steps) }))
+    const metrics = finishMeter(run.meter, Date.now() - run.began)
+    patchRun(tabId, (current) => ({ metrics, nodes: withDurations(current.nodes, metrics.steps) }))
   }
 
   function measure(tabId, run, scope, timing) {

@@ -5,8 +5,8 @@ export const emptyMeter = () => ({ sends: 0, bytesSent: 0, bytesReceived: 0, ste
 function tally(steps, id, ms) {
   const known = steps[id]
   const counted = known
-    ? { count: known.count + 1, totalMs: known.totalMs + ms, minMs: Math.min(known.minMs, ms), maxMs: Math.max(known.maxMs, ms), lastMs: ms }
-    : { count: 1, totalMs: ms, minMs: ms, maxMs: ms, lastMs: ms }
+    ? { count: known.count + 1, totalMs: known.totalMs + ms, minMs: Math.min(known.minMs, ms), maxMs: Math.max(known.maxMs, ms) }
+    : { count: 1, totalMs: ms, minMs: ms, maxMs: ms }
   return { ...steps, [id]: counted }
 }
 
