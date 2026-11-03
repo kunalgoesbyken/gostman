@@ -25,24 +25,33 @@ func (c *collector) gostmanFlows(raw []json.RawMessage, requests idMap) {
 	}
 	for _, flow := range flows {
 		flow.Name = cleanName(flow.Name, untitledFlow)
-		missing := false
+		var missing unlinked
 		flow.Steps = namedSteps(linkedSteps(flow.Steps, requests, renamed, &missing), paths)
-		if missing {
+		if missing.requests {
 			c.warn(RemarkFlows, locales.New(locales.ImporterFlowRequests, locales.Params{"name": flow.Name}))
+		}
+		if missing.flows {
+			c.warn(RemarkFlows, locales.New(locales.ImporterFlowFlows, locales.Params{"name": flow.Name}))
 		}
 		c.Flows = append(c.Flows, flow)
 	}
 }
 
-func linkedSteps(steps []workspace.FlowStep, requests, flows idMap, missing *bool) []workspace.FlowStep {
+type unlinked struct {
+	requests bool
+	flows    bool
+}
+
+func linkedSteps(steps []workspace.FlowStep, requests, flows idMap, missing *unlinked) []workspace.FlowStep {
 	linked := make([]workspace.FlowStep, len(steps))
 	for index, step := range steps {
 		if step.RequestId != "" {
 			step.RequestId = requests.resolve(step.RequestId)
-			*missing = *missing || (step.RequestId == "" && step.Request == "")
+			missing.requests = missing.requests || (step.RequestId == "" && step.Request == "")
 		}
 		if step.FlowId != "" {
 			step.FlowId = flows.resolve(step.FlowId)
+			missing.flows = missing.flows || (step.FlowId == "" && step.Flow == "")
 		}
 		step.Steps = linkedSteps(step.Steps, requests, flows, missing)
 		linked[index] = step

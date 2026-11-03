@@ -3,7 +3,7 @@ import { BLANK_ASSERTION } from '../scripting/assertions'
 import {
   CONDITION_RESPONSE, CONTAINER_KINDS, DEFAULT_DELAY_MS, DEFAULT_INDEX_NAME, DEFAULT_ITEM_NAME, DEFAULT_MAX_SENDS, DEFAULT_PASSES, END_TARGET,
   MATCH_ALL, OUTCOME_FAILED, OUTCOME_PASSED, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_REPEAT, STEP_REQUEST, STEP_SET,
-  STEP_SWITCH, allStepIds, compactFlow, indexSteps, innerSteps, mapSteps, normalizeFlow, retargeted, slugOf, uniqueId,
+  STEP_SWITCH, allStepIds, compactFlow, indexSteps, innerSteps, mapSteps, normalizeFlow, retargeted, rewiredReads, slugOf, uniqueId,
 } from './model'
 
 const ROOT = ''
@@ -80,20 +80,16 @@ export function duplicateStep(flow, id) {
   return { flow: insertStep(flow, { parent: entry.parent, position: entry.position + 1 }, copy), id: copy.id }
 }
 
-const renamedField = (value, from, to) => (value === from ? to : value)
-
-function renamedReferences(step, from, to) {
-  const renamed = retargeted(step, (target) => renamedField(target, from, to))
-  if (typeof renamed.step === 'string') renamed.step = renamedField(renamed.step, from, to)
-  if (Array.isArray(renamed.values)) renamed.values = renamed.values.map((value) => (value.step === from ? { ...value, step: to } : value))
-  return renamed
+const renamedReferences = (from, to) => {
+  const renamed = (id) => (id === from ? to : id)
+  return (step) => rewiredReads(retargeted({ ...step, id: renamed(step.id) }, renamed), renamed)
 }
 
 export function renameStep(flow, from, wanted) {
   const taken = new Set(allStepIds(flow.steps).filter((id) => id !== from))
   const to = uniqueId(slugOf(wanted, from), taken)
   if (to === from) return { flow, id: from }
-  const steps = mapSteps(flow.steps, (step) => renamedReferences(step.id === from ? { ...step, id: to } : step, from, to))
+  const steps = mapSteps(flow.steps, renamedReferences(from, to))
   return { flow: { ...flow, steps }, id: to }
 }
 

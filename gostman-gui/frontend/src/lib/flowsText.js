@@ -27,6 +27,7 @@ const text = messages('flows', english, (t) => {
       noHeader: (name, title) => t('flowEngine.noHeader', { name, title }),
       notAList: (path, title) => t('flowEngine.notAList', { path, title }),
       budget: (sends, cap) => t('flowEngine.budget', { count: sends, cap }),
+      budgetOf: (name, sends, cap) => t('flowEngine.budgetOf', { name, count: sends, cap }),
       ended: (outcome) => t(outcome === 'failed' ? 'flowEngine.endedFailed' : 'flowEngine.ended'),
       attemptPassed: (attempt, attempts) => (attempts > 1 ? t('flowEngine.attemptPassedOf', { attempt, attempts }) : t('flowEngine.attemptPassed')),
       attemptFailed: (attempt, attempts) => (attempts > 1 ? t('flowEngine.attemptFailedOf', { attempt, attempts }) : t('flowEngine.attemptFailed')),

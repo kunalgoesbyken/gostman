@@ -66,7 +66,7 @@ function groupProblems(problems) {
   return byStep
 }
 
-function FlowSettings({ flow, problems, index, requests, onChange, onSelectStep }) {
+function FlowSettings({ flow, problems, index, requests, flows, onChange, onSelectStep }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3 [overflow-wrap:anywhere]">
       <SectionLabel>{TEXT.settingsTitle}</SectionLabel>
@@ -88,7 +88,7 @@ function FlowSettings({ flow, problems, index, requests, onChange, onSelectStep 
             {problems.map(({ step, message }, position) => (
               <li key={position}>
                 <button type="button" disabled={!step} onClick={() => onSelectStep(step)} className="flex w-full items-center gap-1 rounded px-1 py-0.5 text-start text-xs text-foreground enabled:cursor-pointer enabled:hover:bg-accent enabled:hover:underline">
-                  <span className="min-w-0 flex-1">{step && index.get(step) ? `${stepTitle(index.get(step).step, requests)}: ` : ""}{message}</span>
+                  <span className="min-w-0 flex-1">{step && index.get(step) ? `${stepTitle(index.get(step).step, requests, flows)}: ` : ""}{message}</span>
                   {step && <ChevronRight aria-hidden="true" className="h-3 w-3 shrink-0 text-muted-foreground rtl:rotate-180" />}
                 </button>
               </li>
@@ -197,8 +197,9 @@ export function FlowView({ tab, actions, EditorComponent }) {
   const saved = useAppStore((s) => s.flows.find((candidate) => candidate.id === tab.flowId))
   const run = useFlowRunStore((s) => s.runs[tab.id])
   const catalog = useMemo(() => requestCatalog(requests, folders), [requests, folders])
-  const context = useMemo(() => ({ requests: catalog, index: indexSteps(flow.steps) }), [catalog, flow.steps])
-  const problems = useMemo(() => validateFlow(normalizeFlow(flow), catalog, flows), [flow, catalog, flows])
+  const context = useMemo(() => ({ requests: catalog, flows, index: indexSteps(flow.steps) }), [catalog, flows, flow.steps])
+  const shown = useMemo(() => normalizeFlow(flow), [flow])
+  const problems = useMemo(() => validateFlow(shown, catalog, flows), [shown, catalog, flows])
   const otherFlows = useMemo(() => flows.filter((candidate) => candidate.id !== tab.flowId), [flows, tab.flowId])
   const problemsByStep = useMemo(() => groupProblems(problems), [problems])
   const isDirty = useMemo(() => isFlowDirty(flow, saved), [flow, saved])
@@ -292,11 +293,11 @@ export function FlowView({ tab, actions, EditorComponent }) {
   const remove = useCallback((id) => {
     const entry = context.index.get(id)
     if (!entry) return
-    store().showConfirm(FLOW_CANVAS_TEXT.removeTitle, FLOW_CANVAS_TEXT.removeMessage(stepTitle(entry.step, catalog)), () => {
+    store().showConfirm(FLOW_CANVAS_TEXT.removeTitle, FLOW_CANVAS_TEXT.removeMessage(stepTitle(entry.step, catalog, flows)), () => {
       change(removeStep(store().tabs.find((candidate) => candidate.id === tab.id).flowDraft, id))
       setSelected((current) => (current === id ? "" : current))
     }, null, "destructive", FLOW_CANVAS_TEXT.remove)
-  }, [catalog, change, context.index, tab.id])
+  }, [catalog, change, context.index, flows, tab.id])
 
   const move = useCallback((id, offset) => {
     change(moveStep(flow, id, offset))
@@ -354,7 +355,7 @@ export function FlowView({ tab, actions, EditorComponent }) {
             />
           </ExtraVariablesProvider>
         ) : (
-          <FlowSettings flow={flow} problems={problems} index={context.index} requests={catalog} onChange={change} onSelectStep={setSelected} />
+          <FlowSettings flow={flow} problems={problems} index={context.index} requests={catalog} flows={flows} onChange={change} onSelectStep={setSelected} />
         )}
       </TabsContent>
       <TabsContent value={PANEL_RUN} className="flex min-h-0 flex-1 flex-col">
@@ -382,7 +383,7 @@ export function FlowView({ tab, actions, EditorComponent }) {
       <div className={SPLIT_PANES}>
         <FlowCanvas
           key={tab.id}
-          flow={flow}
+          flow={shown}
           viewKey={tab.id}
           context={context}
           run={run}

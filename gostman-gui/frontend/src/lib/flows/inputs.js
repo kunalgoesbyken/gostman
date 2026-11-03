@@ -47,7 +47,7 @@ const sameHeader = (first, second) => first.toLowerCase() === second.toLowerCase
 
 const isNamed = (row, name, matches) => row.enabled && !isFileRow(row) && matches(row.key, name)
 
-export function placeRow(rows, name, value, matches) {
+function placeRow(rows, name, value, matches) {
   const at = rows.findIndex((row) => isNamed(row, name, matches))
   if (at === -1) return [...rows.filter((row) => !isBlankRow(row)), { key: name, value, enabled: true }]
   return rows.flatMap((row, position) => {

@@ -15,14 +15,15 @@ import { ACTION_DONE, ACTION_FLOW, ACTION_WAIT, EVENT_HANDLED } from './engine'
 import { forgetHistory } from './history'
 import { applyInputs } from './inputs'
 import { emptyMeter, finishMeter, meterEvents, meterTiming, stepIndexOf } from './metrics'
-import { OUTCOME_FAILED, STEP_REQUEST } from './model'
+import { OUTCOME_FAILED, STEP_FLOW, STEP_REQUEST } from './model'
 
 export const RUN_RUNNING = 'running'
 export const RUN_STOPPED = 'stopped'
 export const NODE_RUNNING = 'running'
 
 const ROOT_SCOPE = { folderId: '', vars: '' }
-const TOP_LEVEL = { depth: 0, given: {}, root: '' }
+
+const topLevel = () => ({ depth: 0, given: {}, root: '' })
 
 export const useFlowRunStore = create(() => ({ runs: {} }))
 
@@ -38,6 +39,19 @@ const markNode = (tabId, step, node) => patchRun(tabId, (run) => ({
 }))
 
 const addEntry = (tabId, entry) => patchRun(tabId, (run) => ({ entries: [...run.entries, { ...entry, key: run.entries.length }] }))
+
+const isOpenFor = (entry) => (candidate) => candidate.isOpen && candidate.step === entry.step && candidate.depth === entry.depth
+
+const closeEntry = (tabId, entry) => patchRun(tabId, (run) => {
+  const at = run.entries.findLastIndex(isOpenFor(entry))
+  if (at === -1) return { entries: [...run.entries, { ...entry, key: run.entries.length }] }
+  return { entries: run.entries.map((candidate, position) => (position === at ? { ...entry, key: candidate.key } : candidate)) }
+})
+
+const openEntry = (action, place) => ({
+  type: STEP_FLOW, step: action.step, title: action.title, isOpen: true, ...place,
+  event: { step: action.step, kind: STEP_FLOW, title: action.title, status: NODE_RUNNING, summary: '' },
+})
 
 const context = (scope) => {
   const state = store()
@@ -63,13 +77,22 @@ const settledResult = (pending, event) => ({
   hasFailed: pending.hasFailed || (event.checks || []).some((check) => !check.passed),
 })
 
+function withPending(run, entry) {
+  if (entry.type !== STEP_REQUEST || run.pending?.step !== entry.step) return entry
+  const result = settledResult(run.pending, entry.event)
+  run.pending = null
+  return { ...entry, result }
+}
+
+const placeOf = (scope) => ({ depth: scope.depth, root: scope.root })
+
 const sentBytes = (response) => (response?.timeline ? timelineHops(response.timeline).reduce((total, hop) => total + (hop.requestBytes || 0), 0) : 0)
 
 const withDurations = (nodes, steps) => Object.fromEntries(Object.entries(nodes).map(([id, node]) => (
   steps[id] ? [id, { ...node, durationMs: steps[id].totalMs, lastMs: steps[id].lastMs }] : [id, node]
 )))
 
-const notFilled = (request, message) => ({ ...skipped(request, ''), error: message, hasFailed: true })
+const withoutNames = (values, names) => Object.fromEntries(Object.entries(values).filter(([name]) => !names.includes(name)))
 
 let sendSequence = 0
 
@@ -104,21 +127,18 @@ export function createFlowRunner(execute, cancel) {
   }
 
   function measure(tabId, run, scope, timing) {
-    run.meter = meterTiming(run.meter, run.index, { ...timing, step: scope.root || timing.step })
+    run.meter = meterTiming(run.meter, run.index, { ...timing, step: scope.depth > 0 ? '' : timing.step })
     publish(tabId, run)
   }
 
   function absorb(tabId, run, events, scope) {
-    const place = { depth: scope.depth, root: scope.root }
+    const place = placeOf(scope)
     if (scope.depth === 0) run.meter = meterEvents(run.meter, run.index, events)
     events.forEach((event) => {
       if (scope.depth === 0) markNode(tabId, event.step, { state: event.status, attempt: event.attempt, attempts: event.attempts, summary: event.summary })
-      if (event.kind === STEP_REQUEST && run.pending?.step === event.step) {
-        addEntry(tabId, { type: STEP_REQUEST, step: event.step, title: event.title, event, result: settledResult(run.pending, event), ...place })
-        run.pending = null
-        return
-      }
-      addEntry(tabId, { type: event.kind, step: event.step, title: event.title, event, ...place })
+      const entry = { type: event.kind, step: event.step, title: event.title, event, ...place }
+      if (event.kind === STEP_FLOW) closeEntry(tabId, entry)
+      else addEntry(tabId, withPending(run, entry))
     })
   }
 
@@ -131,17 +151,13 @@ export function createFlowRunner(execute, cancel) {
     if (action.delayMs > 0) await pause(run, action.delayMs)
     if (run.isStopped) return {}
     const request = store().requests.find((candidate) => candidate.id === action.requestId)
+    const filled = applyInputs(request, action.inputs)
+    if (!filled.ok) return { unfilled: filled.message }
     markRunning(tabId, scope, action.step, { attempt: action.attempt, attempts: action.attempts })
     sendSequence += 1
     run.sends += 1
     const sendId = `flow-${sendSequence}`
     run.sendIds.add(sendId)
-    const filled = applyInputs(request, action.inputs)
-    if (!filled.ok) {
-      run.sendIds.delete(sendId)
-      run.pending = { ...notFilled(request, filled.message), step: action.step, attempt: action.attempt, attempts: action.attempts }
-      return { failed: true }
-    }
     run.giveSession({ ...scope.given, ...action.variables })
     const began = Date.now()
     const outcome = isSocketAddress(filled.request.url, variableTextFor(store(), request))
@@ -159,9 +175,12 @@ export function createFlowRunner(execute, cancel) {
     markRunning(tabId, scope, action.step)
     const called = store().flows.find((candidate) => candidate.id === action.flowId)
     if (!called) return { outcome: OUTCOME_FAILED, message: FLOW_ENGINE_TEXT.missingFlow(action.flowId), sends: 0 }
+    addEntry(tabId, openEntry(action, placeOf(scope)))
     const sendsBefore = run.sends
+    const began = Date.now()
     const done = await drive(tabId, run, called, nestedScope(scope, action))
-    return done ? { outcome: done.outcome, message: done.message, sends: run.sends - sendsBefore } : {}
+    measure(tabId, run, scope, { step: action.step, ms: Date.now() - began })
+    return done ? { outcome: done.outcome, message: done.message, budget: done.budget, sends: run.sends - sendsBefore } : {}
   }
 
   async function perform(tabId, run, action, scope) {
@@ -175,11 +194,13 @@ export function createFlowRunner(execute, cancel) {
   }
 
   function adopt(tabId, run, turn, scope) {
-    if (Object.keys(turn.writes).length > 0) store().storeSessionVariables(turn.writes)
+    const written = Object.keys(turn.writes)
+    if (written.length > 0) store().storeSessionVariables(turn.writes)
+    scope.given = withoutNames(scope.given, written)
     absorb(tabId, run, turn.events, scope)
   }
 
-  async function drive(tabId, run, flow, scope = TOP_LEVEL) {
+  async function drive(tabId, run, flow, scope) {
     let turn = await decide({ flow, context: context(scope) })
     while (!run.isStopped) {
       adopt(tabId, run, turn, scope)
@@ -203,7 +224,7 @@ export function createFlowRunner(execute, cancel) {
       runs: { ...state.runs, [tabId]: { status: RUN_RUNNING, flowName: flow.name, startedAt: new Date(), finishedAt: null, message: '', nodes: {}, entries: [], metrics: null } },
     }))
     try {
-      const done = await drive(tabId, run, flow)
+      const done = await drive(tabId, run, flow, topLevel())
       if (done) patchRun(tabId, () => ({ status: done.outcome, message: done.message, finishedAt: new Date() }))
     } catch (error) {
       if (!run.isStopped) patchRun(tabId, () => ({ status: 'failed', message: error?.message || String(error), finishedAt: new Date() }))
