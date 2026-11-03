@@ -57,13 +57,16 @@ const sameHeights = (current, measured) => (
 
 export function useMeasuredHeights(layerRef) {
   const [heights, setHeights] = useState({})
+  const latest = useRef(heights)
   useLayoutEffect(() => {
     const layer = layerRef.current
     if (!layer) return undefined
     const elements = [...layer.querySelectorAll(NODE_SELECTOR)]
     const read = () => {
       const measured = Object.fromEntries(elements.map((element) => [element.dataset.stepNode, element.offsetHeight]))
-      setHeights((current) => (sameHeights(current, measured) ? current : measured))
+      if (sameHeights(latest.current, measured)) return
+      latest.current = measured
+      setHeights(measured)
     }
     read()
     const observer = new ResizeObserver(read)
