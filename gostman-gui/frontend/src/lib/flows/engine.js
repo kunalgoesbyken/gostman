@@ -2,7 +2,7 @@ import { FLOW_ENGINE_TEXT as TEXT } from '../flowsText'
 import { isActiveAssertion } from '../scripting/assertions'
 import {
   END_TARGET, MAX_SENDS_CAP, OUTCOME_FAILED, OUTCOME_PASSED, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_REPEAT,
-  STEP_REQUEST, STEP_SET, STEP_SWITCH, indexSteps, loopsAround, normalizeFlow,
+  STEP_REQUEST, STEP_SET, STEP_SWITCH, caseField, indexSteps, loopsAround, normalizeFlow,
 } from './model'
 import { resolveInputs } from './inputs'
 import { caseLabel, describeProblems, resolveFlow, resolveRequest, stepTitle, validateFlow } from './validate'
@@ -34,6 +34,7 @@ function createTurn(flow, state, context) {
     index: indexSteps(flow.steps),
     requests: context.requests || [],
     flows: context.flows || [],
+    isNested: Number.isFinite(context.sendsLeft),
     sendsLeft: Number.isFinite(context.sendsLeft) ? context.sendsLeft : MAX_SENDS_CAP,
     given: context.variables || {},
     writes: {},
@@ -54,9 +55,9 @@ function record(turn, step, status, details = {}) {
   turn.events.push({ step: step.id, kind: step.kind, title: titleOfStep(turn, step), status, summary: '', ...details })
 }
 
-function finish(turn, outcome, message) {
+function finish(turn, outcome, message, reason = {}) {
   turn.state.at = ''
-  turn.action = { kind: ACTION_DONE, outcome, message }
+  turn.action = { kind: ACTION_DONE, outcome, message, ...reason }
 }
 
 function write(turn, values) {
@@ -165,7 +166,15 @@ const sendLimit = (turn) => Math.min(turn.flow.maxSends, turn.sendsLeft)
 
 const isOverBudget = (turn) => turn.state.sends >= sendLimit(turn)
 
-const stopForBudget = (turn) => finish(turn, OUTCOME_FAILED, TEXT.budget(turn.state.sends, MAX_SENDS_CAP))
+const ownsLimit = (turn) => turn.flow.maxSends <= turn.sendsLeft
+
+function budgetMessage(turn) {
+  if (!ownsLimit(turn)) return ''
+  if (turn.isNested) return TEXT.budgetOf(turn.flow.name, turn.state.sends, MAX_SENDS_CAP)
+  return TEXT.budget(turn.state.sends, MAX_SENDS_CAP)
+}
+
+const stopForBudget = (turn, message = budgetMessage(turn)) => finish(turn, OUTCOME_FAILED, message, { budget: true })
 
 function inputsFailed(turn, step, message) {
   if (step.onFailure) {
@@ -173,7 +182,7 @@ function inputsFailed(turn, step, message) {
     return goTo(turn, step, step.onFailure)
   }
   record(turn, step, EVENT_FAILED, { summary: message })
-  return finish(turn, OUTCOME_FAILED, `${TEXT.inputsFailed(stepTitle(step, turn.requests))} ${message}`)
+  return finish(turn, OUTCOME_FAILED, `${TEXT.inputsFailed(titleOfStep(turn, step))} ${message}`)
 }
 
 const readInput = (turn) => (input) => readResponse(turn.state.responses[input.step], input, titleOf(turn, input.step))
@@ -184,7 +193,6 @@ function sendAction(turn, step) {
   if (!filled.ok) return inputsFailed(turn, step, filled.message)
   if (isOverBudget(turn)) return stopForBudget(turn)
   turn.state.sends += 1
-  turn.state.quiet = 0
   const request = resolveRequest(step, turn.requests)
   turn.action = {
     kind: ACTION_SEND,
@@ -249,7 +257,7 @@ function runSwitch(turn, step) {
     const result = evaluateConditions({ source: step.source, match: kase.match, conditions: kase.conditions }, subject, variables)
     checks.push(...caseChecks(result.checks, label))
     if (result.passed) {
-      record(turn, step, EVENT_PASSED, { branch: position, checks, summary: TEXT.branch(label, nextTitle(turn, step, kase.target || step.next)) })
+      record(turn, step, EVENT_PASSED, { branch: caseField(position), checks, summary: TEXT.branch(label, nextTitle(turn, step, kase.target || step.next)) })
       return continueAfter(turn, step, kase.target)
     }
   }
@@ -338,7 +346,14 @@ function judgeAttempt(turn, step, input) {
   return { checks, passed, attempt: turn.state.attempt, attempts: step.retry.times }
 }
 
+function notFilled(turn, step, message) {
+  turn.state.sends -= 1
+  return inputsFailed(turn, step, message)
+}
+
 function afterSend(turn, step, input) {
+  if (typeof input.unfilled === 'string') return notFilled(turn, step, input.unfilled)
+  turn.state.quiet = 0
   const { checks, passed, attempt, attempts } = judgeAttempt(turn, step, input)
   const details = { checks, attempt, attempts }
   if (passed) {
@@ -369,6 +384,12 @@ function afterPause(turn, loop) {
   return beginPass(turn, loop, frame)
 }
 
+function flowOverBudget(turn, step, message, sends) {
+  const stated = message || budgetMessage(turn)
+  record(turn, step, EVENT_FAILED, { summary: stated || TEXT.budgetAbove, sends })
+  return stopForBudget(turn, stated)
+}
+
 const sendsOf = (input) => Math.max(0, Math.trunc(Number(input.sends)) || 0)
 
 function afterFlow(turn, step, input) {
@@ -377,6 +398,7 @@ function afterFlow(turn, step, input) {
   if (sends > 0) turn.state.quiet = 0
   const title = titleOfStep(turn, step)
   const message = typeof input.message === 'string' ? input.message : ''
+  if (input.budget === true) return flowOverBudget(turn, step, message, sends)
   if (input.outcome === OUTCOME_PASSED) {
     record(turn, step, EVENT_PASSED, { summary: TEXT.flowPassed(sends), sends })
     return continueAfter(turn, step)

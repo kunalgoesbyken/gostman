@@ -53,15 +53,15 @@ function Hint({ children }) {
   return <p className="text-2xs text-muted-foreground">{children}</p>
 }
 
-function reachableTargets(step, index, requests) {
+function reachableTargets(step, index, requests, flows) {
   const around = loopsAround(index, step.id)
   return [...index.values()]
     .filter(({ step: candidate }) => candidate.id !== step.id && loopsAround(index, candidate.id).every((loop) => around.includes(loop)))
-    .map(({ step: candidate }) => ({ id: candidate.id, label: `${DEPTH_INDENT.repeat(loopsAround(index, candidate.id).length)}${stepTitle(candidate, requests)}` }))
+    .map(({ step: candidate }) => ({ id: candidate.id, label: `${DEPTH_INDENT.repeat(loopsAround(index, candidate.id).length)}${stepTitle(candidate, requests, flows)}` }))
 }
 
-function TargetSelect({ label, value, emptyLabel, step, index, requests, onChange }) {
-  const targets = reachableTargets(step, index, requests)
+function TargetSelect({ label, value, emptyLabel, step, index, requests, flows, onChange }) {
+  const targets = reachableTargets(step, index, requests, flows)
   const isKnown = value === "" || value === END_TARGET || targets.some((target) => target.id === value)
   return (
     <Field label={label}>
@@ -224,7 +224,7 @@ const moved = (list, from, to) => {
   return [...kept.slice(0, to), list[from], ...kept.slice(to)]
 }
 
-function CaseCard({ step, kase, position, count, index, requests, EditorComponent, onChange, onMove, onRemove }) {
+function CaseCard({ step, kase, position, count, index, requests, flows, EditorComponent, onChange, onMove, onRemove }) {
   const title = caseLabel(kase, position)
   return (
     <div className="flex flex-col gap-2 rounded-md border border-border p-2">
@@ -236,12 +236,12 @@ function CaseCard({ step, kase, position, count, index, requests, EditorComponen
       </div>
       <MatchControl value={kase.match} onChange={(match) => onChange({ ...kase, match })} />
       <ChecksEditor conditions={kase.conditions} onChange={(conditions) => onChange({ ...kase, conditions })} EditorComponent={EditorComponent} />
-      <TargetSelect label={TEXT.whenMatched} value={kase.target} emptyLabel={TEXT.nextStep} step={step} index={index} requests={requests} onChange={(target) => onChange({ ...kase, target })} />
+      <TargetSelect label={TEXT.whenMatched} value={kase.target} emptyLabel={TEXT.nextStep} step={step} index={index} requests={requests} flows={flows} onChange={(target) => onChange({ ...kase, target })} />
     </div>
   )
 }
 
-function SwitchFields({ step, index, requests, onPatch, EditorComponent, targets }) {
+function SwitchFields({ step, index, requests, flows, onPatch, EditorComponent, targets }) {
   const setCases = (cases) => onPatch({ cases })
   return (
     <>
@@ -259,6 +259,7 @@ function SwitchFields({ step, index, requests, onPatch, EditorComponent, targets
             count={step.cases.length}
             index={index}
             requests={requests}
+            flows={flows}
             EditorComponent={EditorComponent}
             onChange={(next) => setCases(step.cases.map((current, at) => (at === position ? next : current)))}
             onMove={(to) => setCases(moved(step.cases, position, to))}
@@ -432,7 +433,7 @@ export function StepEditor({ step, index, requests, flows, problems, onPatch, on
   const Icon = iconOf(step.kind)
   const Fields = KIND_FIELDS[step.kind]
   const targets = (field, label, emptyLabel) => (
-    <TargetSelect label={label} value={step[field] || ""} emptyLabel={emptyLabel} step={step} index={index} requests={requests} onChange={(value) => onPatch({ [field]: value })} />
+    <TargetSelect label={label} value={step[field] || ""} emptyLabel={emptyLabel} step={step} index={index} requests={requests} flows={flows} onChange={(value) => onPatch({ [field]: value })} />
   )
   return (
     <div data-flow-editor className="flex min-h-0 flex-1 flex-col overflow-y-auto [overflow-wrap:anywhere]">
@@ -451,12 +452,11 @@ export function StepEditor({ step, index, requests, flows, problems, onPatch, on
       )}
       <Section>
         <Field label={TEXT.label}>
-          <Input value={step.label} placeholder={stepTitle({ ...step, label: "" }, requests)} onChange={(event) => onPatch({ label: event.target.value })} />
+          <Input value={step.label} placeholder={stepTitle({ ...step, label: "" }, requests, flows)} onChange={(event) => onPatch({ label: event.target.value })} />
         </Field>
         <StepIdField id={step.id} onRename={onRename} />
         <SectionLabel className="pt-1">{TEXT.note}</SectionLabel>
         <MarkdownField value={step.note} onChange={(note) => onPatch({ note })} placeholder={TEXT.notePlaceholder} rows={3} label={TEXT.note} />
-
       </Section>
       {Fields && (
         <Fields

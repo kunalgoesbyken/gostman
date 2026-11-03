@@ -101,7 +101,7 @@ function Lines({ step, context }) {
 
 export const FlowNode = memo(function FlowNode({ step, box, position, count, context, node, problem, endNotes, isSelected, describedBy, onSelect, onOpen, onKeyDown, onFocus, onHint }) {
   const Icon = iconOf(step.kind)
-  const title = stepTitle(step, context.requests)
+  const title = stepTitle(step, context.requests, context.flows)
   const look = node && STATE_LOOKS[node.state]
   const stateText = node ? TEXT.states[node.state] : ""
   const noted = hasNote(step)

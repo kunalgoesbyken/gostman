@@ -79,6 +79,9 @@
     "notAList": "{{path}} in the response of {{title}} is not a list.",
     "budget_one": "The flow sent {{count}} request, its limit, and was stopped. Give loops a way to end, or raise the limit in the flow settings (at most {{cap}}).",
     "budget_other": "The flow sent {{count}} requests, its limit, and was stopped. Give loops a way to end, or raise the limit in the flow settings (at most {{cap}}).",
+    "budgetOf_one": "The flow \"{{name}}\" sent {{count}} request, its limit, so the run was stopped. Give its loops a way to end, or raise the limit in the settings of \"{{name}}\" (at most {{cap}}).",
+    "budgetOf_other": "The flow \"{{name}}\" sent {{count}} requests, its limit, so the run was stopped. Give its loops a way to end, or raise the limit in the settings of \"{{name}}\" (at most {{cap}}).",
+    "budgetAbove": "The run reached the request limit of a flow that runs this one, so it was stopped.",
     "endless_one": "The flow went through {{count}} step without sending a request and was stopped. Check where its steps go next.",
     "endless_other": "The flow went through {{count}} steps without sending a request and was stopped. Check where its steps go next.",
     "timedOut": "Choosing the next step took longer than {{seconds}} s, so the flow was stopped.",
@@ -132,7 +135,8 @@
     "inputPastEnd_other": "\"{{name}}\" points past the end of a list of {{count}} items."
   },
   "flowImport": {
-    "missingRequests": "Steps of the flow \"{{name}}\" send requests that are not in the import; choose them again before running it."
+    "missingRequests": "Steps of the flow \"{{name}}\" send requests that are not in the import; choose them again before running it.",
+    "missingFlows": "Steps of the flow \"{{name}}\" run flows that are not in the import; choose them again before running it."
   },
   "flowTemplate": {
     "description": "Log in, wait until the order is ready and cancel it when it never gets there. Choose the request of each Send request step to make it yours.",

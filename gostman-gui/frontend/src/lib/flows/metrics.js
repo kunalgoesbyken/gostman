@@ -35,6 +35,8 @@ function addToPasses(passes, index, id, ms) {
   return open.reduce((current, loop) => ({ ...current, [loop]: current[loop] + ms }), passes)
 }
 
+const isTimedStep = (index, id) => index.has(id) && !isContainer(index, id)
+
 export function meterTiming(meter, index, { step, ms, sent = 0, received = 0, send = false }) {
   const measured = Math.max(Math.round(ms), 0)
   return {
@@ -42,7 +44,7 @@ export function meterTiming(meter, index, { step, ms, sent = 0, received = 0, se
     sends: meter.sends + (send ? 1 : 0),
     bytesSent: meter.bytesSent + sent,
     bytesReceived: meter.bytesReceived + received,
-    steps: tally(meter.steps, step, measured),
+    steps: isTimedStep(index, step) ? tally(meter.steps, step, measured) : meter.steps,
     passes: addToPasses(meter.passes, index, step, measured),
   }
 }

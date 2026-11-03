@@ -1,5 +1,5 @@
 import { isPlainObject } from '../dataUtils'
-import { normalizeAssertions } from '../scripting/assertions'
+import { isActiveAssertion, normalizeAssertions } from '../scripting/assertions'
 
 export const STEP_REQUEST = 'request'
 export const STEP_SET = 'set'
@@ -127,17 +127,20 @@ const FIELDS = {
     cases: listOf(raw.cases).map(caseOf),
     else: trimmed(raw.else),
   }),
-  [STEP_REPEAT]: (raw, depth) => ({
-    times: whole(raw.times, 1, MAX_PASSES, DEFAULT_PASSES),
-    delayMs: whole(raw.delayMs, 0, MAX_DELAY_MS, 0),
-    indexAs: trimmed(raw.indexAs) || DEFAULT_INDEX_NAME,
-    source: oneOf(raw.source, CONDITION_SOURCES, CONDITION_RESPONSE),
-    step: trimmed(raw.step),
-    match: oneOf(raw.match, MATCHES, MATCH_ALL),
-    until: normalizeAssertions(raw.until),
-    onFailure: trimmed(raw.onFailure),
-    steps: innerList(raw, depth),
-  }),
+  [STEP_REPEAT]: (raw, depth) => {
+    const until = normalizeAssertions(raw.until)
+    return {
+      times: whole(raw.times, 1, MAX_PASSES, DEFAULT_PASSES),
+      delayMs: whole(raw.delayMs, 0, MAX_DELAY_MS, 0),
+      indexAs: trimmed(raw.indexAs) || DEFAULT_INDEX_NAME,
+      source: oneOf(raw.source, CONDITION_SOURCES, CONDITION_RESPONSE),
+      step: trimmed(raw.step),
+      match: oneOf(raw.match, MATCHES, MATCH_ALL),
+      until,
+      onFailure: until.some(isActiveAssertion) ? trimmed(raw.onFailure) : '',
+      steps: innerList(raw, depth),
+    }
+  },
   [STEP_FLOW]: (raw) => ({
     flow: trimmed(raw.flow),
     flowId: trimmed(raw.flowId),
@@ -247,7 +250,7 @@ export function loopsAround(index, id) {
   return loops
 }
 
-const caseField = (position) => `${CASE_FIELD}${position}`
+export const caseField = (position) => `${CASE_FIELD}${position}`
 
 export const isCaseField = (field) => field.startsWith(CASE_FIELD)
 
@@ -265,4 +268,14 @@ export function retargeted(step, change) {
   const fields = Object.fromEntries(fieldTargets(step).map(([field, target]) => [field, change(target)]))
   const cases = caseTargets(step).length > 0 ? { cases: step.cases.map((kase) => ({ ...kase, target: change(kase.target) })) } : {}
   return { ...step, ...fields, ...cases }
+}
+
+const VALUE_LISTS = ['values', 'inputs']
+
+const rewiredSource = (source, change) => (source.step ? { ...source, step: change(source.step) } : source)
+
+export function rewiredReads(step, change) {
+  const lists = VALUE_LISTS.filter((list) => Array.isArray(step[list])).map((list) => [list, step[list].map((source) => rewiredSource(source, change))])
+  const read = typeof step.step === 'string' && step.step !== '' ? { step: change(step.step) } : {}
+  return { ...step, ...Object.fromEntries(lists), ...read }
 }

@@ -43,6 +43,7 @@
     "environment": "An environment in the Gostman export could not be read and was left out."
   },
   "flowRequests": "Steps of the flow {{name}} send requests that are not in the export; choose them again before running it.",
+  "flowFlows": "Steps of the flow {{name}} run flows that are not in the export; choose them again before running it.",
   "unsupportedType": "files of type \"{{type}}\" cannot be imported",
   "httpVariables_one": "The variable {{names}} has no Gostman equivalent and was kept as written.",
   "httpVariables_other": "The variables {{names}} have no Gostman equivalent and were kept as written.",

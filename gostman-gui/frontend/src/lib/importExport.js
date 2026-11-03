@@ -584,17 +584,27 @@ function assignFreshIds(items, takenIds) {
   return { assigned, renamed }
 }
 
-function linkedFlow(flow, id, renamed, renamedFlows) {
-  let isMissing = false
-  const steps = mapSteps(flow.steps, (step) => {
-    if (step.kind === STEP_FLOW && step.flowId) return { ...step, flowId: renamedFlows.get(step.flowId) || '' }
-    if (step.kind !== STEP_REQUEST || !step.requestId) return step
-    const requestId = renamed.get(step.requestId) || ''
-    isMissing = isMissing || (requestId === '' && step.request === '')
-    return { ...step, requestId }
-  })
-  return { flow: { ...flow, id, steps }, isMissing }
+const LINKS = {
+  [STEP_REQUEST]: { id: 'requestId', name: 'request', missing: 'requests' },
+  [STEP_FLOW]: { id: 'flowId', name: 'flow', missing: 'flows' },
 }
+
+function linkedFlow(flow, id, renamedBy) {
+  const missing = { requests: false, flows: false }
+  const steps = mapSteps(flow.steps, (step) => {
+    const link = LINKS[step.kind]
+    if (!link || !step[link.id]) return step
+    const linked = renamedBy[link.missing].get(step[link.id]) || ''
+    missing[link.missing] = missing[link.missing] || (linked === '' && step[link.name] === '')
+    return { ...step, [link.id]: linked }
+  })
+  return { flow: { ...flow, id, steps }, missing }
+}
+
+const flowRemarks = ({ flow, missing }) => [
+  ...(missing.requests ? [remark(FLOW_IMPORT_TEXT.missingRequests(flow.name), true)] : []),
+  ...(missing.flows ? [remark(FLOW_IMPORT_TEXT.missingFlows(flow.name), true)] : []),
+]
 
 function sanitizeFlows(rawFlows, renamed) {
   const flows = asArray(rawFlows).filter(isPlainObject).map(normalizeFlow)
@@ -603,10 +613,10 @@ function sanitizeFlows(rawFlows, renamed) {
   flows.forEach((flow, position) => {
     if (flow.id !== '' && !renamedFlows.has(flow.id)) renamedFlows.set(flow.id, ids[position])
   })
-  const linked = flows.map((flow, position) => linkedFlow(flow, ids[position], renamed, renamedFlows))
+  const linked = flows.map((flow, position) => linkedFlow(flow, ids[position], { requests: renamed, flows: renamedFlows }))
   return {
     flows: linked.map(({ flow }) => flow),
-    remarks: linked.filter(({ isMissing }) => isMissing).map(({ flow }) => remark(FLOW_IMPORT_TEXT.missingRequests(flow.name), true)),
+    remarks: linked.flatMap(flowRemarks),
   }
 }
 
