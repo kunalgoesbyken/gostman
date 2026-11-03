@@ -17,6 +17,7 @@ const text = messages('import', english, (t) => {
     t('importCount.request', { count: counts.requests.length }),
     t('importCount.folder', { count: counts.folders.length }),
     ...(counts.environments ? [t('importCount.environment', { count: counts.environments.length })] : []),
+    ...(counts.flows?.length > 0 ? [t('importCount.flow', { count: counts.flows.length })] : []),
   ]
   const collectionSummary = (collection) => formatList(countedItems(collection))
 
