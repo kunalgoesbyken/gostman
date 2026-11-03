@@ -128,7 +128,7 @@ func addNestedFlows(suite *junitSuite, path string, events []runner.FlowEvent) {
 }
 
 func nestedFlowCase(event runner.FlowEvent, name, className string) junitCase {
-	described := junitCase{Name: name, ClassName: className, Time: seconds(0)}
+	described := junitCase{Name: name, ClassName: className, Time: seconds(event.DurationMs)}
 	switch event.Status {
 	case runner.FlowFailed:
 		described.Failure = &junitProblem{Message: event.Summary}

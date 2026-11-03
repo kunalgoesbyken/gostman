@@ -30,20 +30,21 @@ const (
 )
 
 type FlowEvent struct {
-	Step      string            `json:"step"`
-	Kind      string            `json:"kind"`
-	Title     string            `json:"title"`
-	Status    string            `json:"status"`
-	Summary   string            `json:"summary"`
-	Branch    string            `json:"branch,omitempty"`
-	Attempt   int               `json:"attempt,omitempty"`
-	Attempts  int               `json:"attempts,omitempty"`
-	HandledBy string            `json:"handledBy,omitempty"`
-	Checks    []Check           `json:"checks,omitempty"`
-	Writes    map[string]string `json:"writes,omitempty"`
-	Depth     int               `json:"depth,omitempty"`
-	Steps     []FlowEvent       `json:"steps,omitempty"`
-	Index     *int              `json:"index,omitempty"`
+	Step       string            `json:"step"`
+	Kind       string            `json:"kind"`
+	Title      string            `json:"title"`
+	Status     string            `json:"status"`
+	Summary    string            `json:"summary"`
+	Branch     string            `json:"branch,omitempty"`
+	Attempt    int               `json:"attempt,omitempty"`
+	Attempts   int               `json:"attempts,omitempty"`
+	HandledBy  string            `json:"handledBy,omitempty"`
+	Checks     []Check           `json:"checks,omitempty"`
+	Writes     map[string]string `json:"writes,omitempty"`
+	Depth      int               `json:"depth,omitempty"`
+	Steps      []FlowEvent       `json:"steps,omitempty"`
+	Index      *int              `json:"index,omitempty"`
+	DurationMs int64             `json:"durationMs,omitempty"`
 }
 
 type FlowReport struct {
@@ -344,7 +345,7 @@ func (r *flowRun) runNested(ctx context.Context, action flowAction) flowInput {
 	first, err := child.call("flowBegin", child.flow, child.context())
 	done := child.drive(ctx, first, err)
 	r.measure(flowMoment{Step: action.Step}, began)
-	r.nested = &FlowEvent{Step: action.Step, Kind: flowStepFlow, Title: action.Title, Depth: r.depth, Steps: child.steps}
+	r.nested = &FlowEvent{Step: action.Step, Kind: flowStepFlow, Title: action.Title, Depth: r.depth, Steps: child.steps, DurationMs: time.Since(began).Milliseconds()}
 	r.sends += child.sends
 	return flowInput{Outcome: done.Outcome, Message: done.Message, Budget: done.Budget, Sends: child.sends}
 }
@@ -405,7 +406,7 @@ func (r *flowRun) absorb(events []FlowEvent) {
 	for _, event := range events {
 		event.Depth = r.depth
 		if event.Kind == flowStepFlow && r.nested != nil && event.Step == r.nested.Step {
-			event.Steps, r.nested = r.nested.Steps, nil
+			event.Steps, event.DurationMs, r.nested = r.nested.Steps, r.nested.DurationMs, nil
 		}
 		r.steps = append(r.steps, event)
 		if event.Kind == flowStepRequest && r.pending != nil && r.pending.Step == event.Step {
