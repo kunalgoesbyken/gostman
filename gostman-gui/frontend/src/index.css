@@ -573,6 +573,18 @@
   }
 }
 
+@keyframes hint-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hint-pop {
+    animation: hint-in 0.12s ease-out both;
+  }
+}
+
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
     .reveal-on-scroll {
