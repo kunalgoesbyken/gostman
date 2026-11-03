@@ -46,14 +46,24 @@ function ZoomButton({ label, onClick, className, children }) {
   )
 }
 
-export function ZoomBar({ scale, step, onZoom, onFit, onReset }) {
+function FitButton({ hidden, onFit }) {
+  if (hidden === 0) return <ZoomButton label={TEXT.fit} onClick={onFit}><Maximize aria-hidden="true" className="h-3.5 w-3.5" /></ZoomButton>
+  return (
+    <button type="button" title={TEXT.fit} onClick={onFit} className={cn(CONTROL, "gap-1.5 text-xs text-foreground")}>
+      <Maximize aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+      {TEXT.showHidden(hidden)}
+    </button>
+  )
+}
+
+export function ZoomBar({ scale, step, hidden, onZoom, onFit, onReset }) {
   return (
     <div role="toolbar" aria-label={TEXT.zoomControls} data-canvas-control className="absolute bottom-3 right-3 flex items-center gap-0.5 rounded-md border border-border bg-background p-0.5">
       <ZoomButton label={TEXT.zoomOut} onClick={() => onZoom(1 / step)}><Minus aria-hidden="true" className="h-3.5 w-3.5" /></ZoomButton>
       <ZoomButton label={TEXT.actualSize} onClick={onReset} className="w-12 font-mono text-2xs tabular-nums">{formatPercent(scale)}</ZoomButton>
       <ZoomButton label={TEXT.zoomIn} onClick={() => onZoom(step)}><Plus aria-hidden="true" className="h-3.5 w-3.5" /></ZoomButton>
       <span aria-hidden="true" className="mx-0.5 h-4 border-s border-border" />
-      <ZoomButton label={TEXT.fit} onClick={onFit}><Maximize aria-hidden="true" className="h-3.5 w-3.5" /></ZoomButton>
+      <FitButton hidden={hidden} onFit={onFit} />
     </div>
   )
 }

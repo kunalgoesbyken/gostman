@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 
 const MIN_ZOOM = 0.25
 const FIRST_ZOOM = 0.8
+const READABLE_ZOOM = 0.6
 const MAX_ZOOM = 2
 const WHEEL_ZOOM = 0.0015
 const VIEW_MARGIN = 24
@@ -23,10 +24,15 @@ function fitView(layout, viewport) {
   return { x: (viewport.width - layout.width * scale) / 2, y: Math.max(VIEW_MARGIN / 2, (viewport.height - layout.height * scale) / 2), scale }
 }
 
-function firstView(layout, viewport) {
+function startView(layout, viewport) {
   const scale = clamp((viewport.width - VIEW_MARGIN) / layout.width, FIRST_ZOOM, 1)
   const start = layout.terminals.find((terminal) => terminal.start)
   return { x: viewport.width / 2 - (start.x + start.width / 2) * scale, y: 0, scale }
+}
+
+function firstView(layout, viewport) {
+  const fitted = fitView(layout, viewport)
+  return fitted.scale >= READABLE_ZOOM ? fitted : startView(layout, viewport)
 }
 
 function keptInView(view, layout, viewport) {
@@ -38,6 +44,14 @@ function keptInView(view, layout, viewport) {
     y: clamp(view.y, KEEP_VISIBLE - height, viewport.height - KEEP_VISIBLE),
   }
 }
+
+function isOutOfView(box, view, viewport) {
+  const left = view.x + box.x * view.scale
+  const top = view.y + box.y * view.scale
+  return left + box.width * view.scale <= 0 || left >= viewport.width || top + box.height * view.scale <= 0 || top >= viewport.height
+}
+
+const countOutOfView = (layout, view, viewport) => layout.nodes.filter((box) => isOutOfView(box, view, viewport)).length
 
 function zoomedAt(view, point, factor) {
   const scale = clamp(view.scale * factor, MIN_ZOOM, MAX_ZOOM)
@@ -209,5 +223,6 @@ export function useCanvasView(viewportRef, viewKey, layout, onBackground) {
   }
 
   const shown = view && viewport ? keptInView(view, layout, viewport) : null
-  return { view: shown, isGliding, zoomBy, fit, resetZoom, reveal, handlers: { ...pointerHandlers, onScroll } }
+  const hidden = shown ? countOutOfView(layout, shown, viewport) : 0
+  return { view: shown, hidden, isGliding, zoomBy, fit, resetZoom, reveal, handlers: { ...pointerHandlers, onScroll } }
 }

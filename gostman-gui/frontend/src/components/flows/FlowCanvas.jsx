@@ -17,6 +17,7 @@ const SIDE_KEYS = { ArrowLeft: -1, ArrowRight: 1 }
 const EDGE_KEYS = { Home: 0, End: -1 }
 const ZOOM_KEYS = { "+": ZOOM_STEP, "=": ZOOM_STEP, "-": 1 / ZOOM_STEP }
 const RESET_KEY = "0"
+const DISMISS_KEY = "Escape"
 const NOTE_DELAY_MS = 400
 const NOTE_LEAVE_MS = 150
 const BASE_HEIGHT = 58
@@ -128,7 +129,7 @@ export function FlowCanvas({ flow, viewKey, context, run, problems, selected, on
   const pairs = useMemo(() => travelled(flow.steps, run?.entries || [], Boolean(run) && run.status !== RUN_RUNNING), [flow.steps, run])
   const endNotes = useMemo(() => groupNotes(layout.endNotes), [layout])
   const boxes = useMemo(() => new Map(layout.nodes.map((box) => [box.id, box])), [layout])
-  const { view, isGliding, zoomBy, fit, resetZoom, reveal, handlers } = useCanvasView(viewportRef, viewKey, layout, onBackground)
+  const { view, hidden, isGliding, zoomBy, fit, resetZoom, reveal, handlers } = useCanvasView(viewportRef, viewKey, layout, onBackground)
   const onKeyDown = useNodeKeys({ order, boxes: layout.nodes, layerRef, onRemove, onMove, onOpen })
 
   const runningId = Object.keys(nodes).find((id) => nodes[id].state === NODE_RUNNING)
@@ -150,6 +151,11 @@ export function FlowCanvas({ flow, viewKey, context, run, problems, selected, on
 
   const onViewportKeyDown = (event) => {
     if (event.ctrlKey || event.metaKey || event.altKey || event.target.closest(`input, textarea, ${OVERLAYS}`)) return
+    if (event.key === DISMISS_KEY && !hint) {
+      event.preventDefault()
+      onBackground()
+      return
+    }
     if (ZOOM_KEYS[event.key]) {
       event.preventDefault()
       zoomBy(ZOOM_KEYS[event.key])
@@ -166,11 +172,12 @@ export function FlowCanvas({ flow, viewKey, context, run, problems, selected, on
     <div
       ref={viewportRef}
       role="group"
+      tabIndex={-1}
       dir="ltr"
       aria-label={TEXT.canvasLabel(flow.name)}
       onKeyDown={onViewportKeyDown}
       {...handlers}
-      className="relative min-h-0 min-w-0 flex-1 touch-none select-none overflow-hidden bg-muted/20 max-sm:max-h-[55%] max-sm:min-h-[45%]"
+      className="relative min-h-0 min-w-0 flex-1 touch-none select-none overflow-hidden bg-muted/20 outline-none max-sm:max-h-[55%] max-sm:min-h-[45%]"
     >
       {view && (
         <div
@@ -207,7 +214,7 @@ export function FlowCanvas({ flow, viewKey, context, run, problems, selected, on
           ))}
         </div>
       )}
-      {view && <ZoomBar scale={view.scale} step={ZOOM_STEP} onZoom={zoomBy} onFit={fit} onReset={resetZoom} />}
+      {view && <ZoomBar scale={view.scale} step={ZOOM_STEP} hidden={hidden} onZoom={zoomBy} onFit={fit} onReset={resetZoom} />}
       {hintNote && hint.anchor && <NoteHint id={noteId} note={hintNote} anchor={hint.anchor} onEnter={keepHint} onLeave={() => showHint(null)} />}
       {menu && (
         <ContextMenu

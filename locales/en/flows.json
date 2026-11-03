@@ -279,6 +279,8 @@
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
     "fit": "Fit the flow in view",
+    "showHidden_one": "Show {{count}} hidden step",
+    "showHidden_other": "Show {{count}} hidden steps",
     "actualSize": "Zoom to 100%"
   },
   "flowPicker": {
