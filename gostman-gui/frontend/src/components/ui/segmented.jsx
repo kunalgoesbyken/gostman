@@ -83,7 +83,7 @@ export function SegmentedControl({ label, options, value, onChange, className })
   const Choice = fits ? Segments : CompactChoice
 
   return (
-    <div ref={rowRef} style={{ flexBasis: fullWidth }} className={cn("relative flex min-w-0 shrink", className)}>
+    <div ref={rowRef} style={{ flexBasis: fullWidth }} className={cn("relative flex max-h-max min-w-0 shrink", className)}>
       <Choice label={label} options={options} value={value} onChange={onChange} />
       {canCompact && (
         <div aria-hidden="true" className="pointer-events-none invisible absolute left-0 top-0 h-0 w-0 overflow-hidden">
