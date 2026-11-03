@@ -18,7 +18,7 @@ export const EVENT_PASSED = 'passed'
 export const EVENT_FAILED = 'failed'
 export const EVENT_HANDLED = 'handled'
 
-export const BRANCH_ELSE = 'else'
+const BRANCH_ELSE = 'else'
 
 const MAX_QUIET_STEPS = 10000
 
@@ -267,16 +267,10 @@ const filledVariables = (turn, variables) => Object.fromEntries(Object.entries(v
 
 function runFlow(turn, step) {
   if (isOverBudget(turn)) return stopForBudget(turn)
-  const called = resolveFlow(step, turn.flows)
-  if (!called) {
-    const message = TEXT.missingFlow(step.flow || step.flowId)
-    record(turn, step, EVENT_FAILED, { summary: message })
-    return finish(turn, OUTCOME_FAILED, message)
-  }
   turn.action = {
     kind: ACTION_FLOW,
     step: step.id,
-    flowId: called.id,
+    flowId: resolveFlow(step, turn.flows)?.id || '',
     title: titleOfStep(turn, step),
     variables: filledVariables(turn, step.variables),
     sendsLeft: sendLimit(turn) - turn.state.sends,

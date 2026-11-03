@@ -44,7 +44,7 @@ export const DEFAULT_INDEX_NAME = 'index'
 export const DEFAULT_PASSES = 3
 export const MAX_PASSES = 1000
 export const MAX_FLOW_DEPTH = 8
-export const CASE_FIELD = 'case:'
+const CASE_FIELD = 'case:'
 const MAX_NESTING = 8
 
 const text = (value) => {
@@ -244,7 +244,7 @@ export function loopsAround(index, id) {
   return loops
 }
 
-export const caseField = (position) => `${CASE_FIELD}${position}`
+const caseField = (position) => `${CASE_FIELD}${position}`
 
 export const isCaseField = (field) => field.startsWith(CASE_FIELD)
 
@@ -254,9 +254,7 @@ const fieldTargets = (step) => TARGET_FIELDS.filter((field) => typeof step[field
 
 const caseTargets = (step) => (step.kind === STEP_SWITCH && Array.isArray(step.cases) ? step.cases.map((kase, position) => [caseField(position), kase.target]) : [])
 
-export const allTargetsOf = (step) => [...caseTargets(step), ...fieldTargets(step)]
-
-export const targetsOf = (step) => allTargetsOf(step).filter(([, target]) => typeof target === 'string' && target !== '')
+export const targetsOf = (step) => [...caseTargets(step), ...fieldTargets(step)].filter(([, target]) => typeof target === 'string' && target !== '')
 
 export function retargeted(step, change) {
   const fields = Object.fromEntries(fieldTargets(step).map(([field, target]) => [field, change(target)]))
