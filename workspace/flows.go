@@ -56,6 +56,10 @@ type FlowStep struct {
 	Note       string            `json:"note,omitempty" yaml:"note,omitempty"`
 	Request    string            `json:"request,omitempty" yaml:"request,omitempty"`
 	RequestId  string            `json:"requestId,omitempty" yaml:"requestId,omitempty"`
+	Flow       string            `json:"flow,omitempty" yaml:"flow,omitempty"`
+	FlowId     string            `json:"flowId,omitempty" yaml:"flowId,omitempty"`
+	Times      int               `json:"times,omitempty" yaml:"times,omitempty"`
+	DelayMs    int64             `json:"delayMs,omitempty" yaml:"delayMs,omitempty"`
 	Variables  map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
 	Retry      *FlowRetry        `json:"retry,omitempty" yaml:"retry,omitempty"`
 	OnFailure  string            `json:"onFailure,omitempty" yaml:"onFailure,omitempty"`
@@ -67,14 +71,10 @@ type FlowStep struct {
 	IndexAs    string            `json:"indexAs,omitempty" yaml:"indexAs,omitempty"`
 	Match      string            `json:"match,omitempty" yaml:"match,omitempty"`
 	Conditions []FlowCheck       `json:"conditions,omitempty" yaml:"conditions,omitempty"`
+	Until      []FlowCheck       `json:"until,omitempty" yaml:"until,omitempty"`
+	Cases      []FlowCase        `json:"cases,omitempty" yaml:"cases,omitempty"`
 	Then       string            `json:"then,omitempty" yaml:"then,omitempty"`
 	Else       string            `json:"else,omitempty" yaml:"else,omitempty"`
-	Cases      []FlowCase        `json:"cases,omitempty" yaml:"cases,omitempty"`
-	Times      int               `json:"times,omitempty" yaml:"times,omitempty"`
-	DelayMs    int64             `json:"delayMs,omitempty" yaml:"delayMs,omitempty"`
-	Until      []FlowCheck       `json:"until,omitempty" yaml:"until,omitempty"`
-	Flow       string            `json:"flow,omitempty" yaml:"flow,omitempty"`
-	FlowId     string            `json:"flowId,omitempty" yaml:"flowId,omitempty"`
 	Steps      []FlowStep        `json:"steps,omitempty" yaml:"steps,omitempty"`
 	Ms         *int64            `json:"ms,omitempty" yaml:"ms,omitempty"`
 	Outcome    string            `json:"outcome,omitempty" yaml:"outcome,omitempty"`

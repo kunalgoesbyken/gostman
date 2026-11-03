@@ -1,25 +1,28 @@
 import { useEffect, useState } from "react"
-import { ArrowDown, ArrowUp, Copy, Trash2, X } from "lucide-react"
+import { ArrowDown, ArrowUp, Copy, ExternalLink, Plus, Trash2, Workflow, X } from "lucide-react"
 import { Button, IconButton } from "../ui/button"
 import { Field } from "../ui/field"
 import { Input } from "../ui/input"
 import { SectionLabel } from "../ui/panel"
 import { SegmentedControl } from "../ui/segmented"
 import { Select } from "../ui/select"
+import { MarkdownField } from "../MarkdownField"
 import { MethodTag } from "../MethodTag"
 import { ScopeMark } from "../ScopeMark"
 import { AssertionEditor } from "../TestsPanel"
 import { VariableInput } from "../VariableInput"
 import { iconOf } from "./FlowNode"
 import { FLOW_CANVAS_TEXT, FLOW_EDITOR_TEXT as TEXT } from "../../lib/flowsText"
+import { blankCase } from "../../lib/flows/edit"
 import {
-  CONDITION_RESPONSE, CONDITION_VARIABLES, END_TARGET, MATCH_ALL, MATCH_ANY, MAX_ATTEMPTS, MAX_DELAY_MS, OUTCOME_FAILED, OUTCOME_PASSED,
-  SOURCE_BODY, SOURCE_HEADER, SOURCE_STATUS, STEP_DELAY, STEP_END, STEP_FOR_EACH, STEP_IF, STEP_REQUEST, STEP_SET, loopsAround,
+  CONDITION_RESPONSE, CONDITION_VARIABLES, END_TARGET, MATCH_ALL, MATCH_ANY, MAX_ATTEMPTS, MAX_DELAY_MS, MAX_PASSES, OUTCOME_FAILED,
+  OUTCOME_PASSED, SOURCE_BODY, SOURCE_HEADER, SOURCE_STATUS, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_REPEAT,
+  STEP_REQUEST, STEP_SET, STEP_SWITCH, loopsAround,
 } from "../../lib/flows/model"
 import { SOURCE_LOOP, SOURCE_SEND } from "../../lib/flows/outputs"
-import { kindText, resolveRequest, stepTitle } from "../../lib/flows/validate"
+import { caseLabel, kindText, resolveFlow, resolveRequest, stepTitle } from "../../lib/flows/validate"
 import { SCOPE_SESSION } from "../../lib/scripting/scopes"
-import { parseAssertions, serializeAssertions } from "../../lib/scripting/assertions"
+import { isActiveAssertion, parseAssertions, serializeAssertions } from "../../lib/scripting/assertions"
 import { cn } from "../../lib/utils"
 
 const SOURCE_TEMPLATE = "template"
@@ -216,25 +219,153 @@ function RequestFields({ step, requests, onPatch, onPickRequest, EditorComponent
   )
 }
 
-function IfFields({ step, index, requests, onPatch, EditorComponent, targets }) {
+function ConditionSource({ step, index, requests, onPatch }) {
   const sources = [CONDITION_RESPONSE, CONDITION_VARIABLES].map((value) => ({ value, label: TEXT.conditionSources[value] }))
-  const matches = [MATCH_ALL, MATCH_ANY].map((value) => ({ value, label: TEXT.matches[value] }))
+  return (
+    <>
+      <SegmentedControl label={TEXT.check} options={sources} value={step.source} onChange={(source) => onPatch({ source })} />
+      {step.source === CONDITION_RESPONSE && (
+        <Field label={TEXT.responseOf}>
+          <RequestSteps value={step.step} emptyLabel={TEXT.latestResponse} index={index} requests={requests} label={TEXT.responseOf} onChange={(value) => onPatch({ step: value })} />
+        </Field>
+      )}
+    </>
+  )
+}
+
+function MatchControl({ value, onChange }) {
+  const matches = [MATCH_ALL, MATCH_ANY].map((match) => ({ value: match, label: TEXT.matches[match] }))
+  return <SegmentedControl label={TEXT.match} options={matches} value={value} onChange={onChange} />
+}
+
+const ConditionHint = ({ source }) => <Hint>{source === CONDITION_VARIABLES ? TEXT.variablesConditionHint : TEXT.responseConditionHint}</Hint>
+
+function IfFields({ step, index, requests, onPatch, EditorComponent, targets }) {
   return (
     <>
       <Section title={TEXT.check}>
-        <SegmentedControl label={TEXT.check} options={sources} value={step.source} onChange={(source) => onPatch({ source })} />
-        {step.source === CONDITION_RESPONSE && (
-          <Field label={TEXT.responseOf}>
-            <RequestSteps value={step.step} emptyLabel={TEXT.latestResponse} index={index} requests={requests} label={TEXT.responseOf} onChange={(value) => onPatch({ step: value })} />
-          </Field>
-        )}
-        <SegmentedControl label={TEXT.match} options={matches} value={step.match} onChange={(match) => onPatch({ match })} />
+        <ConditionSource step={step} index={index} requests={requests} onPatch={onPatch} />
+        <MatchControl value={step.match} onChange={(match) => onPatch({ match })} />
         <ChecksEditor conditions={step.conditions} onChange={(conditions) => onPatch({ conditions })} EditorComponent={EditorComponent} />
-        <Hint>{step.source === CONDITION_VARIABLES ? TEXT.variablesConditionHint : TEXT.responseConditionHint}</Hint>
+        <ConditionHint source={step.source} />
       </Section>
       <Section title={TEXT.paths}>
         {targets("then", TEXT.whenTrue, TEXT.nextStep)}
         {targets("else", TEXT.whenFalse, TEXT.nextStep)}
+      </Section>
+    </>
+  )
+}
+
+const moved = (list, from, to) => {
+  const kept = list.filter((_, position) => position !== from)
+  return [...kept.slice(0, to), list[from], ...kept.slice(to)]
+}
+
+function CaseCard({ step, kase, position, count, index, requests, EditorComponent, onChange, onMove, onRemove }) {
+  const title = caseLabel(kase, position)
+  return (
+    <div className="flex flex-col gap-2 rounded-md border border-border p-2">
+      <div className="flex items-center gap-1">
+        <Input value={kase.label} placeholder={title} aria-label={TEXT.caseLabel} onChange={(event) => onChange({ ...kase, label: event.target.value })} className="min-w-0 flex-1" />
+        <IconButton label={TEXT.moveCaseUp} icon={ArrowUp} disabled={position === 0} onClick={() => onMove(position - 1)} />
+        <IconButton label={TEXT.moveCaseDown} icon={ArrowDown} disabled={position === count - 1} onClick={() => onMove(position + 1)} />
+        <IconButton label={TEXT.removeCase} icon={X} onClick={onRemove} />
+      </div>
+      <MatchControl value={kase.match} onChange={(match) => onChange({ ...kase, match })} />
+      <ChecksEditor conditions={kase.conditions} onChange={(conditions) => onChange({ ...kase, conditions })} EditorComponent={EditorComponent} />
+      <TargetSelect label={TEXT.whenMatched} value={kase.target} emptyLabel={TEXT.nextStep} step={step} index={index} requests={requests} onChange={(target) => onChange({ ...kase, target })} />
+    </div>
+  )
+}
+
+function SwitchFields({ step, index, requests, onPatch, EditorComponent, targets }) {
+  const setCases = (cases) => onPatch({ cases })
+  return (
+    <>
+      <Section title={TEXT.check}>
+        <ConditionSource step={step} index={index} requests={requests} onPatch={onPatch} />
+        <ConditionHint source={step.source} />
+      </Section>
+      <Section title={TEXT.cases}>
+        {step.cases.map((kase, position) => (
+          <CaseCard
+            key={position}
+            step={step}
+            kase={kase}
+            position={position}
+            count={step.cases.length}
+            index={index}
+            requests={requests}
+            EditorComponent={EditorComponent}
+            onChange={(next) => setCases(step.cases.map((current, at) => (at === position ? next : current)))}
+            onMove={(to) => setCases(moved(step.cases, position, to))}
+            onRemove={() => setCases(step.cases.filter((_, at) => at !== position))}
+          />
+        ))}
+        <Button variant="outline" size="sm" onClick={() => setCases([...step.cases, blankCase()])} className="self-start">
+          <Plus />
+          {TEXT.addCase}
+        </Button>
+        <Hint>{TEXT.casesHint}</Hint>
+      </Section>
+      <Section title={TEXT.paths}>{targets("else", TEXT.whenNoCase, TEXT.nextStep)}</Section>
+    </>
+  )
+}
+
+function RepeatFields({ step, index, requests, onPatch, EditorComponent, targets }) {
+  const hasUntil = step.until.some(isActiveAssertion)
+  return (
+    <>
+      <Section title={TEXT.passes}>
+        <Field label={TEXT.passes}>
+          <NumberInput value={step.times} lowest={1} highest={MAX_PASSES} label={TEXT.passes} onChange={(times) => onPatch({ times })} />
+        </Field>
+        <Field label={TEXT.passDelay}>
+          <NumberInput value={step.delayMs} lowest={0} highest={MAX_DELAY_MS} label={TEXT.passDelay} onChange={(delayMs) => onPatch({ delayMs })} />
+        </Field>
+        <Field label={TEXT.passName}>
+          <Input value={step.indexAs} spellCheck={false} onChange={(event) => onPatch({ indexAs: event.target.value })} className="font-mono" />
+        </Field>
+        <ScopeNote source={SOURCE_LOOP}>{TEXT.loopScope}</ScopeNote>
+        <Hint>{TEXT.repeatHint(step.indexAs || "index")}</Hint>
+      </Section>
+      <Section title={TEXT.until}>
+        <ConditionSource step={step} index={index} requests={requests} onPatch={onPatch} />
+        <MatchControl value={step.match} onChange={(match) => onPatch({ match })} />
+        <ChecksEditor conditions={step.until} onChange={(until) => onPatch({ until })} EditorComponent={EditorComponent} />
+        <Hint>{TEXT.repeatUntilHint}</Hint>
+      </Section>
+      <Section title={TEXT.paths}>
+        {targets("next", TEXT.afterRepeat, TEXT.nextStep)}
+        {hasUntil && targets("onFailure", TEXT.whenNeverMet, TEXT.failFlow)}
+      </Section>
+    </>
+  )
+}
+
+function FlowFields({ step, flows, onPatch, onPickFlow, onOpenFlow, targets }) {
+  const called = resolveFlow(step, flows)
+  return (
+    <>
+      <Section title={TEXT.flow}>
+        <Button variant="outline" onClick={onPickFlow} className="h-auto min-h-8 w-full justify-start py-1.5">
+          <Workflow aria-hidden="true" className="text-muted-foreground" />
+          <span className={cn("min-w-0 truncate", !called && "text-muted-foreground")}>{called ? called.name : step.flow || FLOW_CANVAS_TEXT.noFlow}</span>
+        </Button>
+        <Button variant="ghost" size="sm" disabled={!called} onClick={() => onOpenFlow(called.id)} className="self-start">
+          <ExternalLink />
+          {TEXT.openFlow}
+        </Button>
+        <SectionLabel className="pt-1">{TEXT.flowVariables}</SectionLabel>
+        <ScopeNote source={SOURCE_SEND}>{TEXT.flowScope}</ScopeNote>
+        <VariableRows variables={step.variables} onChange={(variables) => onPatch({ variables })} />
+        <Hint>{TEXT.flowVariablesHint}</Hint>
+      </Section>
+      <Section title={TEXT.paths}>
+        {targets("next", TEXT.whenPassed, TEXT.nextStep)}
+        {targets("onFailure", TEXT.whenFailed, TEXT.failFlow)}
       </Section>
     </>
   )
@@ -306,7 +437,10 @@ const KIND_FIELDS = {
   [STEP_REQUEST]: RequestFields,
   [STEP_SET]: SetFields,
   [STEP_IF]: IfFields,
+  [STEP_SWITCH]: SwitchFields,
   [STEP_FOR_EACH]: ForEachFields,
+  [STEP_REPEAT]: RepeatFields,
+  [STEP_FLOW]: FlowFields,
   [STEP_DELAY]: DelayFields,
   [STEP_END]: EndFields,
 }
@@ -332,7 +466,7 @@ function StepIdField({ id, onRename }) {
   )
 }
 
-export function StepEditor({ step, index, requests, problems, onPatch, onRename, onMove, onDuplicate, onRemove, onPickRequest, EditorComponent }) {
+export function StepEditor({ step, index, requests, flows, problems, onPatch, onRename, onMove, onDuplicate, onRemove, onPickRequest, onPickFlow, onOpenFlow, EditorComponent }) {
   const Icon = iconOf(step.kind)
   const Fields = KIND_FIELDS[step.kind]
   const targets = (field, label, emptyLabel) => (
@@ -358,8 +492,24 @@ export function StepEditor({ step, index, requests, problems, onPatch, onRename,
           <Input value={step.label} placeholder={stepTitle({ ...step, label: "" }, requests)} onChange={(event) => onPatch({ label: event.target.value })} />
         </Field>
         <StepIdField id={step.id} onRename={onRename} />
+        <SectionLabel className="pt-1">{TEXT.note}</SectionLabel>
+        <MarkdownField value={step.note} onChange={(note) => onPatch({ note })} placeholder={TEXT.notePlaceholder} rows={3} label={TEXT.note} />
+
       </Section>
-      {Fields && <Fields step={step} index={index} requests={requests} onPatch={onPatch} onPickRequest={onPickRequest} EditorComponent={EditorComponent} targets={targets} />}
+      {Fields && (
+        <Fields
+          step={step}
+          index={index}
+          requests={requests}
+          flows={flows}
+          onPatch={onPatch}
+          onPickRequest={onPickRequest}
+          onPickFlow={onPickFlow}
+          onOpenFlow={onOpenFlow}
+          EditorComponent={EditorComponent}
+          targets={targets}
+        />
+      )}
     </div>
   )
 }

@@ -43,12 +43,14 @@ function createTurn(flow, state, context) {
 
 const variablesOf = (turn) => ({ ...turn.given, ...turn.writes })
 
-const titleOf = (turn, id) => stepTitle(turn.index.get(id).step, turn.requests)
+const titleOfStep = (turn, step) => stepTitle(step, turn.requests, turn.flows)
+
+const titleOf = (turn, id) => titleOfStep(turn, turn.index.get(id).step)
 
 const targetTitle = (turn, target) => (target === END_TARGET ? TEXT.endOfFlow : titleOf(turn, target))
 
 function record(turn, step, status, details = {}) {
-  turn.events.push({ step: step.id, kind: step.kind, title: stepTitle(step, turn.requests), status, summary: '', ...details })
+  turn.events.push({ step: step.id, kind: step.kind, title: titleOfStep(turn, step), status, summary: '', ...details })
 }
 
 function finish(turn, outcome, message) {
@@ -103,7 +105,7 @@ function repeatExhausted(turn, loop, checks) {
     return goTo(turn, loop, loop.onFailure)
   }
   record(turn, loop, EVENT_FAILED, { checks, summary: TEXT.untilNever(loop.times) })
-  return finish(turn, OUTCOME_FAILED, TEXT.repeatFailed(stepTitle(loop, turn.requests), loop.times))
+  return finish(turn, OUTCOME_FAILED, TEXT.repeatFailed(titleOfStep(turn, loop), loop.times))
 }
 
 function nextPass(turn, loop, frame) {
@@ -194,7 +196,7 @@ function runSet(turn, step) {
     const read = setValue(turn, value)
     if (!read.ok) {
       record(turn, step, EVENT_FAILED, { summary: read.message })
-      return finish(turn, OUTCOME_FAILED, `${TEXT.setFailed(stepTitle(step, turn.requests))} ${read.message}`)
+      return finish(turn, OUTCOME_FAILED, `${TEXT.setFailed(titleOfStep(turn, step))} ${read.message}`)
     }
     values[value.name] = asText(read.value)
     write(turn, { [value.name]: values[value.name] })
@@ -275,7 +277,7 @@ function runFlow(turn, step) {
     kind: ACTION_FLOW,
     step: step.id,
     flowId: called.id,
-    title: stepTitle(step, turn.requests),
+    title: titleOfStep(turn, step),
     variables: filledVariables(turn, step.variables),
     sendsLeft: sendLimit(turn) - turn.state.sends,
   }
@@ -344,7 +346,7 @@ function afterSend(turn, step, input) {
     return goTo(turn, step, step.onFailure)
   }
   record(turn, step, EVENT_FAILED, { ...details, summary: TEXT.attemptFailed(attempt, attempts) })
-  return finish(turn, OUTCOME_FAILED, TEXT.failedAt(stepTitle(step, turn.requests)))
+  return finish(turn, OUTCOME_FAILED, TEXT.failedAt(titleOfStep(turn, step)))
 }
 
 function afterWait(turn, step) {
@@ -364,7 +366,7 @@ function afterFlow(turn, step, input) {
   const sends = sendsOf(input)
   turn.state.sends += sends
   if (sends > 0) turn.state.quiet = 0
-  const title = stepTitle(step, turn.requests)
+  const title = titleOfStep(turn, step)
   const message = typeof input.message === 'string' ? input.message : ''
   if (input.outcome === OUTCOME_PASSED) {
     record(turn, step, EVENT_PASSED, { summary: TEXT.flowPassed(sends), sends })
@@ -389,7 +391,7 @@ export function flowBegin(raw, context = {}) {
   const problems = validateFlow(flow, context.requests || [], context.flows || [])
   const turn = createTurn(flow, freshState(), context)
   if (problems.length > 0) {
-    finish(turn, OUTCOME_FAILED, describeProblems(flow, problems, turn.requests))
+    finish(turn, OUTCOME_FAILED, describeProblems(flow, problems, turn.requests, turn.flows))
     return { ...proceed(turn), problems }
   }
   enter(turn, flow.steps[0].id)

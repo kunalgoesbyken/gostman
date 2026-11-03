@@ -5,7 +5,7 @@ import { FlowNode, iconOf } from "./FlowNode"
 import { FLOW_CANVAS_TEXT as TEXT, FLOW_KIND_TEXT, FLOW_VIEW_TEXT } from "../../lib/flowsText"
 import { fallsThrough, jumpsOf } from "../../lib/flows/describe"
 import { NODE_RUNNING } from "../../lib/flows/flowRunner"
-import { STEP_FOR_EACH, STEP_KINDS, STEP_REQUEST, indexSteps } from "../../lib/flows/model"
+import { CONTAINER_KINDS, STEP_KINDS, STEP_REPEAT, STEP_REQUEST, indexSteps } from "../../lib/flows/model"
 import { stepTitle } from "../../lib/flows/validate"
 import { ORIENTATION, moveFocus } from "../../lib/rovingFocus"
 import { isRemoveKey } from "../../lib/shortcuts"
@@ -18,10 +18,9 @@ const LANE_START = 22
 const CORNER = 6
 const MUTED_EDGE = { stroke: "stroke-muted-foreground", fill: "fill-muted-foreground" }
 const EDGE_TONES = {
-  onFailure: { stroke: "stroke-destructive", fill: "fill-destructive" },
-  then: { stroke: "stroke-success", fill: "fill-success" },
-  else: MUTED_EDGE,
-  next: MUTED_EDGE,
+  failure: { stroke: "stroke-destructive", fill: "fill-destructive" },
+  success: { stroke: "stroke-success", fill: "fill-success" },
+  muted: MUTED_EDGE,
 }
 const BASE_PAD_START = 80
 const RETRY_LABEL_GAP = 28
@@ -66,7 +65,7 @@ function assignLanes(jumps, boxes) {
       const source = boxes.nodes[jump.from]
       const target = boxes.nodes[jump.to]
       if (!source || !target) return null
-      const sourceY = source.top + source.height * SOURCE_SHARE[jump.field]
+      const sourceY = source.top + source.height * (SOURCE_SHARE[jump.field] ?? SOURCE_SHARE.next)
       const targetY = target.top + 14
       return { ...jump, sourceY, targetY, sourceX: source.right, targetX: target.right, low: Math.min(sourceY, targetY), high: Math.max(sourceY, targetY) }
     })
@@ -98,7 +97,7 @@ const arrowRight = (x, y) => `${x},${y} ${x - 6},${y - 3.5} ${x - 6},${y + 3.5}`
 const LABEL_STYLE = { paintOrder: "stroke", stroke: "hsl(var(--background))", strokeWidth: 3, fontSize: 10 }
 
 function Jump({ jump }) {
-  const tone = EDGE_TONES[jump.field]
+  const tone = EDGE_TONES[jump.tone]
   return (
     <g className={tone.stroke}>
       <path d={jumpPath(jump)} fill="none" strokeWidth={1.25} />
@@ -193,9 +192,9 @@ function StepList({ steps, parent, parentTitle, view }) {
             onOpen={view.onOpen}
             onKeyDown={view.onKeyDown}
           />
-          {step.kind === STEP_FOR_EACH && (
+          {CONTAINER_KINDS.includes(step.kind) && (
             <div data-loop-body={step.id} className="ml-6 mt-1 flex flex-col items-start rounded-md border border-dashed border-border px-3 pb-2 pt-1">
-              <span className="text-2xs uppercase tracking-wide text-muted-foreground">{TEXT.loopBody}</span>
+              <span className="text-2xs uppercase tracking-wide text-muted-foreground">{step.kind === STEP_REPEAT ? TEXT.repeatBody : TEXT.loopBody}</span>
               <StepList steps={step.steps} parent={step.id} parentTitle={stepTitle(step, view.context.requests)} view={view} />
             </div>
           )}

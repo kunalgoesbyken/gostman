@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
 import { Textarea } from "../ui/textarea"
 import { FlowCanvas } from "./FlowCanvas"
 import { FlowRunPanel } from "./FlowRunPanel"
-import { RequestPicker } from "./RequestPicker"
+import { FlowPicker, RequestPicker } from "./RequestPicker"
 import { StepEditor } from "./StepEditor"
 import { useShortcutLabel } from "../../hooks/useShortcuts"
 import { ExtraVariablesProvider } from "../../hooks/useVariableMap"
@@ -20,7 +20,7 @@ import { duplicateStep, insertStep, isFlowDirty, moveStep, newStep, removeStep, 
 import { RUN_RUNNING, useFlowRunStore } from "../../lib/flows/flowRunner"
 import { canRedo, canUndo, recordChange, redoChange, undoChange } from "../../lib/flows/history"
 import { flowVariables } from "../../lib/flows/outputs"
-import { MAX_SENDS_CAP, STEP_REQUEST, indexSteps, normalizeFlow } from "../../lib/flows/model"
+import { MAX_SENDS_CAP, STEP_FLOW, STEP_REQUEST, indexSteps, normalizeFlow } from "../../lib/flows/model"
 import { stepTitle, validateFlow } from "../../lib/flows/validate"
 import { hintWithShortcut } from "../../lib/shortcuts"
 import { cn } from "../../lib/utils"
@@ -28,6 +28,8 @@ import { useAppStore } from "../../store/appStore"
 
 const PANEL_STEP = "step"
 const PANEL_RUN = "run"
+const PICK_REQUEST = "request"
+const PICK_FLOW = "flow"
 const UNDO_KEY = "z"
 const REDO_KEY = "y"
 const EDITING_TAGS = ["INPUT", "TEXTAREA", "SELECT"]
@@ -123,11 +125,13 @@ export function FlowView({ tab, actions, EditorComponent }) {
   const flow = tab.flowDraft
   const requests = useAppStore((s) => s.requests)
   const folders = useAppStore((s) => s.folders)
+  const flows = useAppStore((s) => s.flows)
   const saved = useAppStore((s) => s.flows.find((candidate) => candidate.id === tab.flowId))
   const run = useFlowRunStore((s) => s.runs[tab.id])
   const catalog = useMemo(() => requestCatalog(requests, folders), [requests, folders])
   const context = useMemo(() => ({ requests: catalog, index: indexSteps(flow.steps) }), [catalog, flow.steps])
-  const problems = useMemo(() => validateFlow(normalizeFlow(flow), catalog), [flow, catalog])
+  const problems = useMemo(() => validateFlow(normalizeFlow(flow), catalog, flows), [flow, catalog, flows])
+  const otherFlows = useMemo(() => flows.filter((candidate) => candidate.id !== tab.flowId), [flows, tab.flowId])
   const problemsByStep = useMemo(() => groupProblems(problems), [problems])
   const isDirty = useMemo(() => isFlowDirty(flow, saved), [flow, saved])
   const isRunning = run?.status === RUN_RUNNING
@@ -173,16 +177,20 @@ export function FlowView({ tab, actions, EditorComponent }) {
   }, [change, flow, select])
 
   const chooseKind = useCallback((place, kind) => {
-    if (kind === STEP_REQUEST) setPicker({ place })
+    if (kind === STEP_REQUEST) setPicker({ kind: PICK_REQUEST, place })
+    else if (kind === STEP_FLOW) setPicker({ kind: PICK_FLOW, place })
     else insert(place, kind)
   }, [insert])
 
-  const chooseRequest = (request) => {
-    const fields = { request: request.path, requestId: request.id }
+  const choose = (kind, fields, name) => {
     if (picker.stepId) change(updateStep(flow, picker.stepId, fields))
-    else insert(picker.place, STEP_REQUEST, fields, request.name)
+    else insert(picker.place, kind, fields, name)
     setPicker(null)
   }
+
+  const chooseRequest = (request) => choose(STEP_REQUEST, { request: request.path, requestId: request.id }, request.name)
+
+  const chooseFlow = (called) => choose(STEP_FLOW, { flow: called.name, flowId: called.id }, called.name)
 
   const remove = useCallback((id) => {
     const entry = context.index.get(id)
@@ -271,7 +279,10 @@ export function FlowView({ tab, actions, EditorComponent }) {
                     onMove={(offset) => move(selectedStep.id, offset)}
                     onDuplicate={() => duplicate(selectedStep.id)}
                     onRemove={() => remove(selectedStep.id)}
-                    onPickRequest={() => setPicker({ stepId: selectedStep.id })}
+                    onPickRequest={() => setPicker({ kind: PICK_REQUEST, stepId: selectedStep.id })}
+                    flows={otherFlows}
+                    onPickFlow={() => setPicker({ kind: PICK_FLOW, stepId: selectedStep.id })}
+                    onOpenFlow={actions.open}
                     EditorComponent={EditorComponent}
                   />
                 </ExtraVariablesProvider>
@@ -285,7 +296,8 @@ export function FlowView({ tab, actions, EditorComponent }) {
           </Tabs>
         </ResizablePane>
       </div>
-      {picker && <RequestPicker catalog={catalog} onChoose={chooseRequest} onClose={() => setPicker(null)} />}
+      {picker?.kind === PICK_REQUEST && <RequestPicker catalog={catalog} onChoose={chooseRequest} onClose={() => setPicker(null)} />}
+      {picker?.kind === PICK_FLOW && <FlowPicker flows={otherFlows} onChoose={chooseFlow} onClose={() => setPicker(null)} />}
     </div>
   )
 }

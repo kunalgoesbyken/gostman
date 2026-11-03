@@ -40,9 +40,9 @@ export const kindText = (kind) => FLOW_KIND_TEXT[kind] || FLOW_KIND_TEXT.unknown
 
 export const caseLabel = (kase, position) => kase.label.trim() || TEXT.caseName(position)
 
-export function stepTitle(step, requests = []) {
+export function stepTitle(step, requests = [], flows = []) {
   if (step.label.trim() !== '') return step.label.trim()
-  if (step.kind === STEP_FLOW) return step.flow || kindText(step.kind).label
+  if (step.kind === STEP_FLOW) return resolveFlow(step, flows)?.name || step.flow || kindText(step.kind).label
   if (step.kind !== STEP_REQUEST) return kindText(step.kind).label
   const request = resolveRequest(step, requests)
   if (request) return request.name
@@ -161,8 +161,8 @@ export function validateFlow(flow, requests, flows = []) {
   return problems
 }
 
-export function describeProblems(flow, problems, requests) {
+export function describeProblems(flow, problems, requests, flows) {
   const index = indexSteps(flow.steps)
-  const lines = problems.map(({ step, message }) => (step ? TEXT.problem(stepTitle(index.get(step).step, requests), message) : message))
+  const lines = problems.map(({ step, message }) => (step ? TEXT.problem(stepTitle(index.get(step).step, requests, flows), message) : message))
   return [TEXT.cannotRun(problems.length), ...lines].join('\n')
 }

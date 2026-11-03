@@ -26,12 +26,23 @@ function Writes({ writes }) {
   )
 }
 
+const NEST_INDENT_REM = 0.75
+
+function Nested({ depth, children }) {
+  if (!depth) return children
+  return (
+    <li style={{ paddingInlineStart: `${depth * NEST_INDENT_REM}rem` }}>
+      <ul className="border-s border-border">{children}</ul>
+    </li>
+  )
+}
+
 const StepEntry = memo(function StepEntry({ entry, onSelectStep }) {
   const Icon = iconOf(entry.event.kind)
   const isFailed = entry.event.status === EVENT_FAILED
   return (
     <li className="border-b border-border">
-      <button type="button" onClick={() => onSelectStep(entry.step)} className="flex min-h-9 w-full items-center gap-2 px-3 py-1.5 text-start hover:bg-accent">
+      <button type="button" onClick={() => onSelectStep(entry.root || entry.step)} className="flex min-h-9 w-full items-center gap-2 px-3 py-1.5 text-start hover:bg-accent">
         <Icon aria-hidden="true" className={cn("h-3.5 w-3.5 shrink-0", isFailed ? "text-destructive" : "text-muted-foreground")} />
         <span className="shrink-0 text-xs text-foreground">{entry.title}</span>
         <span className={cn("min-w-0 flex-1 truncate text-2xs", isFailed ? "text-destructive" : "text-muted-foreground")} title={entry.event.summary}>{entry.event.summary}</span>
@@ -68,9 +79,11 @@ export function FlowRunPanel({ run, canRun, onRun, onReport, onSelectStep }) {
         </Button>
       </div>
       <ul aria-label={TEXT.resultsLabel} className="min-h-0 flex-1 overflow-y-auto [overflow-wrap:anywhere]">
-        {run.entries.map((entry) => (entry.type === STEP_REQUEST
-          ? <ResultRow key={entry.key} result={entry.result} />
-          : <StepEntry key={entry.key} entry={entry} onSelectStep={onSelectStep} />))}
+        {run.entries.map((entry) => (
+          <Nested key={entry.key} depth={entry.depth}>
+            {entry.type === STEP_REQUEST ? <ResultRow result={entry.result} /> : <StepEntry entry={entry} onSelectStep={onSelectStep} />}
+          </Nested>
+        ))}
       </ul>
     </div>
   )

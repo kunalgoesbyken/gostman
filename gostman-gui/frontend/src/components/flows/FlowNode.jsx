@@ -1,12 +1,12 @@
 import { memo } from "react"
-import { AlertTriangle, Check, Flag, GitBranch, LoaderCircle, Repeat, RotateCw, Send, Timer, Variable, X } from "lucide-react"
+import { AlertTriangle, Check, Flag, GitBranch, LoaderCircle, Repeat, Repeat2, RotateCw, Send, Split, Timer, Variable, Workflow, X } from "lucide-react"
 import { MethodTag } from "../MethodTag"
 import { ScopeMark } from "../ScopeMark"
 import { FLOW_CANVAS_TEXT as TEXT } from "../../lib/flowsText"
 import { jumpsOf, stepLines } from "../../lib/flows/describe"
 import { EVENT_FAILED, EVENT_HANDLED, EVENT_PASSED } from "../../lib/flows/engine"
 import { NODE_RUNNING } from "../../lib/flows/flowRunner"
-import { OUTCOME_FAILED, STEP_DELAY, STEP_END, STEP_FOR_EACH, STEP_IF, STEP_REQUEST, STEP_SET } from "../../lib/flows/model"
+import { OUTCOME_FAILED, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_REPEAT, STEP_REQUEST, STEP_SET, STEP_SWITCH } from "../../lib/flows/model"
 import { kindText, stepTitle } from "../../lib/flows/validate"
 import { cn } from "../../lib/utils"
 
@@ -14,7 +14,10 @@ export const KIND_ICONS = {
   [STEP_REQUEST]: Send,
   [STEP_SET]: Variable,
   [STEP_IF]: GitBranch,
+  [STEP_SWITCH]: Split,
   [STEP_FOR_EACH]: Repeat,
+  [STEP_REPEAT]: Repeat2,
+  [STEP_FLOW]: Workflow,
   [STEP_DELAY]: Timer,
   [STEP_END]: Flag,
 }
@@ -28,7 +31,7 @@ const STATE_LOOKS = {
   [EVENT_HANDLED]: { border: "border-warning", icon: RotateCw, tone: "text-warning" },
 }
 
-const TOLD_KINDS = [STEP_IF, STEP_FOR_EACH]
+const TOLD_KINDS = [STEP_IF, STEP_SWITCH, STEP_FOR_EACH, STEP_REPEAT, STEP_FLOW]
 
 const isWorthTelling = (step, node) => (
   node?.summary && node.state !== NODE_RUNNING && (node.state !== EVENT_PASSED || node.attempts > 1 || TOLD_KINDS.includes(step.kind))
