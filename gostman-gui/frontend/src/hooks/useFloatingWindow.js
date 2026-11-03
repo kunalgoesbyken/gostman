@@ -66,8 +66,8 @@ function fitted(rect, viewport, limits) {
   }
 }
 
-const centred = ({ width, height }, viewport, limits) =>
-  fitted({ width, height, x: (viewport.width - width) / 2, y: (viewport.height - height) / 2 }, viewport, limits)
+const centred = ({ width, height, x, y }, viewport, limits) =>
+  fitted({ width, height, x: x ?? (viewport.width - width) / 2, y: y ?? (viewport.height - height) / 2 }, viewport, limits)
 
 const moved = (rect, delta, viewport, limits) => fitted({ ...rect, x: rect.x + delta.x, y: rect.y + delta.y }, viewport, limits)
 

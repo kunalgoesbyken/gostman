@@ -40,7 +40,7 @@ const CODE_EDITOR = ".cm-editor"
 
 const isHandledElsewhere = (event) => event.defaultPrevented || Boolean(event.target.closest?.(CODE_EDITOR))
 
-function ResizeHandles({ frame }) {
+export function ResizeHandles({ frame }) {
   return (
     <div aria-hidden="true" style={frame.style} className="pointer-events-none fixed select-none">
       {RESIZE_EDGES.map((edge) => (
@@ -106,7 +106,7 @@ export function DialogPending() {
   )
 }
 
-function WindowGrip({ frame }) {
+export function WindowGrip({ frame }) {
   const hintId = useId()
 
   return (
