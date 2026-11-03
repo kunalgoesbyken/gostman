@@ -593,6 +593,36 @@
       "title": "API design",
       "blurb": "Write an OpenAPI spec before the backend exists, with checks as you type, then generate requests, a mock and response checks from it.",
       "synonyms": "openapi swagger design first contract editor stoplight api spec yaml schema"
+    },
+    "flowCanvas": {
+      "title": "Flow canvas",
+      "blurb": "See a flow top to bottom with branches side by side, loops framed, zoom and pan, and the path a run took.",
+      "synonyms": "flow diagram canvas graph workflow designer zoom pan branches join"
+    },
+    "flowSwitch": {
+      "title": "Switch steps",
+      "blurb": "Send a flow down one of several paths, each with its own set of checks.",
+      "synonyms": "switch case condition branch truth table decision router"
+    },
+    "flowRepeat": {
+      "title": "Repeat steps",
+      "blurb": "Repeat several steps until a check passes or a number of passes is reached.",
+      "synonyms": "repeat loop while until poll iterate"
+    },
+    "nestedFlows": {
+      "title": "Flows inside flows",
+      "blurb": "Run a saved flow as one step of another, with its own values and its own path when it fails.",
+      "synonyms": "sub-flow subflow nested flow of flows reuse call"
+    },
+    "flowInputs": {
+      "title": "Values into a request",
+      "blurb": "Put a value from an earlier response into the next request's headers, query, JSON body, form fields or variables.",
+      "synonyms": "chain response mapping data mapping header body form field extract pass value"
+    },
+    "flowMetrics": {
+      "title": "Flow run metrics",
+      "blurb": "Time per step, loop pass and flow, and the bytes sent and received, in the app, reports and the CLI.",
+      "synonyms": "metrics timing duration bytes performance stats"
     }
   },
   "featureSamples": {
@@ -608,8 +638,14 @@
     "websocketRequest": "WebSocket request",
     "grpcRequest": "gRPC request",
     "mcpRequest": "MCP request",
-    "flowDescription": "Lists the users, then reads one of them. Both requests come from the sample collection.",
+    "flowDescription": "Takes a path by the status code, passes a name into a request and repeats a step until a check passes. Every request answers from a saved example, so it runs offline.",
     "flowDone": "Done",
+    "flowListNote": "Answers with its saved **200 OK** example, so nothing leaves this device.",
+    "flowCheckStatus": "Check the status",
+    "flowCreateNote": "Its `name` comes from the second user of the list, put into the JSON body just before it is sent.",
+    "flowWaitForUser": "Read until it is Ada",
+    "flowStopped": "Stopped",
+    "flowStoppedMessage": "The list of users did not answer 200 OK.",
     "binaryRequest": "Binary response",
     "jwtRequest": "JWT request"
   }

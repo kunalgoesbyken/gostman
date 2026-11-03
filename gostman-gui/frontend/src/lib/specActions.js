@@ -38,7 +38,7 @@ export function createSpecActions({ backend, attempt, addImported }) {
   const client = createSpecClient(backend)
 
   const importSpec = attempt(SPEC_ALERTS.importFailed, async (result) => {
-    const existing = { requestIds: idsOf(store().requests), folderIds: idsOf(store().folders) }
+    const existing = { requestIds: idsOf(store().requests), folderIds: idsOf(store().folders), flows: store().flows }
     const data = sanitizeImport({ ...result, folders: owningRoot(result), variables: sharedVariables(result) }, existing)
     const imported = await addImported(data)
     const { source, hash, operations, specId } = result.spec

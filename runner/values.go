@@ -214,6 +214,14 @@ func (v *values) remember(overrides map[string]string) {
 	v.session.override(overrides)
 }
 
+func (v *values) forgetSession(names []string) {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	for _, name := range names {
+		delete(v.session, name)
+	}
+}
+
 func (v *values) primaryName() string {
 	v.mu.Lock()
 	defer v.mu.Unlock()

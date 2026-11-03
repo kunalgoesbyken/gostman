@@ -1,6 +1,7 @@
 package report
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"strings"
@@ -28,6 +29,7 @@ const (
 	kindWidth    = 7
 	detailIndent = "      "
 	nestedIndent = "            "
+	flowIndent   = "    "
 )
 
 type Text struct {
@@ -149,7 +151,38 @@ func printableResult(result runner.Result) runner.Result {
 	return result
 }
 
+type prefixedWriter struct {
+	output  io.Writer
+	prefix  string
+	midLine bool
+}
+
+func (w *prefixedWriter) Write(content []byte) (int, error) {
+	var buffer bytes.Buffer
+	for _, character := range content {
+		if !w.midLine {
+			buffer.WriteString(w.prefix)
+		}
+		buffer.WriteByte(character)
+		w.midLine = character != '\n'
+	}
+	if _, err := w.output.Write(buffer.Bytes()); err != nil {
+		return 0, err
+	}
+	return len(content), nil
+}
+
+func (t *Text) nest(depth int) func() {
+	if depth == 0 {
+		return func() {}
+	}
+	output := t.output
+	t.output = &prefixedWriter{output: output, prefix: strings.Repeat(flowIndent, depth)}
+	return func() { t.output = output }
+}
+
 func (t *Text) Request(received runner.Result) {
+	defer t.nest(received.Depth)()
 	result := printableResult(received)
 	fmt.Fprintf(t.output, "%s  %-*s  %s  %s\n", t.mark(result), methodWidth, result.Method, qualifiedName(result), t.paint(styleDim, outcomeOf(result)))
 	if result.ResolvedURL != "" {
@@ -160,6 +193,7 @@ func (t *Text) Request(received runner.Result) {
 }
 
 func (t *Text) Step(event runner.FlowEvent) {
+	defer t.nest(event.Depth)()
 	style := styleDim
 	if event.Status == runner.FlowFailed {
 		style = styleRed
@@ -215,7 +249,39 @@ func (t *Text) flowLine(report runner.Report) string {
 	if report.Flow.Outcome != runner.FlowPassed {
 		outcome = t.paint(styleRed, report.Flow.Outcome)
 	}
-	return fmt.Sprintf("Flow      %s %s: %s\n", Printable(report.Flow.Name), outcome, Printable(report.Flow.Message))
+	return fmt.Sprintf("Flow      %s %s: %s\n%s", Printable(report.Flow.Name), outcome, Printable(report.Flow.Message), metricsLine(report.Flow.Metrics))
+}
+
+func metricsLine(metrics *runner.FlowMetrics) string {
+	if metrics == nil {
+		return ""
+	}
+	return fmt.Sprintf("Metrics   %s, %s, %s sent, %s received\n", plural(metrics.Sends, "request"), spoken(metrics.TotalMs), sized(metrics.BytesSent), sized(metrics.BytesReceived))
+}
+
+func plural(count int, noun string) string {
+	if count == 1 {
+		return fmt.Sprintf("%d %s", count, noun)
+	}
+	return fmt.Sprintf("%d %ss", count, noun)
+}
+
+func spoken(milliseconds int64) string {
+	if milliseconds < 1000 {
+		return fmt.Sprintf("%d ms", milliseconds)
+	}
+	return fmt.Sprintf("%.1f s", float64(milliseconds)/1000)
+}
+
+func sized(bytes int64) string {
+	switch {
+	case bytes < 1<<10:
+		return fmt.Sprintf("%d B", bytes)
+	case bytes < 1<<20:
+		return fmt.Sprintf("%.1f KB", float64(bytes)/(1<<10))
+	default:
+		return fmt.Sprintf("%.2f MB", float64(bytes)/(1<<20))
+	}
 }
 
 func (t *Text) contractLine(report runner.Report) string {

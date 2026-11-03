@@ -17,7 +17,8 @@ import { normalizeTags } from './tags'
 import { remark, remarksOf } from './importRemarks'
 import { FLOW_IMPORT_TEXT } from './flowsText'
 import { IMPORT_EXPORT_TEXT } from './importExportText'
-import { STEP_REQUEST, compactFlow, mapSteps, normalizeFlow } from './flows/model'
+import { STEP_FLOW, STEP_REQUEST, compactFlow, mapSteps, normalizeFlow } from './flows/model'
+import { resolveFlow } from './flows/validate'
 import { AUTH_API_KEY, AUTH_BASIC, AUTH_BEARER, GRAPHQL_METHOD, UNTITLED_REQUEST, apiKeyLocation, asText, sentRows } from './exportFields'
 import { HTTP_VERSION_CHOICES, RPC_TRANSPORT_CHOICES, isChoice } from './requestTransports'
 
@@ -584,23 +585,47 @@ function assignFreshIds(items, takenIds) {
   return { assigned, renamed }
 }
 
-function linkedFlow(raw, renamed) {
-  const flow = normalizeFlow(raw)
-  let isMissing = false
-  const steps = mapSteps(flow.steps, (step) => {
-    if (step.kind !== STEP_REQUEST || !step.requestId) return step
-    const requestId = renamed.get(step.requestId) || ''
-    isMissing = isMissing || (requestId === '' && step.request === '')
-    return { ...step, requestId }
-  })
-  return { flow: { ...flow, id: generateId(), steps }, isMissing }
+const LINKS = {
+  [STEP_REQUEST]: { id: 'requestId', name: 'request', missing: 'requests', reaches: (step) => step.requestId !== '' || step.request !== '' },
+  [STEP_FLOW]: { id: 'flowId', name: 'flow', missing: 'flows', reaches: (step, known) => resolveFlow(step, known) !== null },
 }
 
-function sanitizeFlows(rawFlows, renamed) {
-  const linked = asArray(rawFlows).filter(isPlainObject).map((raw) => linkedFlow(raw, renamed))
+function linkedFlow(flow, id, renamedBy, known) {
+  const missing = { requests: [], flows: [] }
+  const steps = mapSteps(flow.steps, (step) => {
+    const link = LINKS[step.kind]
+    if (!link || (!step[link.id] && !step[link.name])) return step
+    const linked = { ...step, [link.id]: renamedBy[link.missing].get(step[link.id]) || '' }
+    if (!link.reaches(linked, known)) missing[link.missing].push(step[link.name])
+    return linked
+  })
+  return { flow: { ...flow, id, steps }, missing }
+}
+
+const uniqueNames = (names) => [...new Set(names.filter(Boolean))]
+
+function missingFlowsRemark(flow, references) {
+  const names = uniqueNames(references)
+  return names.length > 0 ? FLOW_IMPORT_TEXT.missingFlowsNamed(flow.name, names) : FLOW_IMPORT_TEXT.missingFlows(flow.name)
+}
+
+const flowRemarks = ({ flow, missing }) => [
+  ...(missing.requests.length > 0 ? [remark(FLOW_IMPORT_TEXT.missingRequests(flow.name), true)] : []),
+  ...(missing.flows.length > 0 ? [remark(missingFlowsRemark(flow, missing.flows), true)] : []),
+]
+
+function sanitizeFlows(rawFlows, renamed, existingFlows) {
+  const flows = asArray(rawFlows).filter(isPlainObject).map(normalizeFlow)
+  const ids = flows.map(() => generateId())
+  const renamedFlows = new Map()
+  flows.forEach((flow, position) => {
+    if (flow.id !== '' && !renamedFlows.has(flow.id)) renamedFlows.set(flow.id, ids[position])
+  })
+  const known = [...flows.map((flow, position) => ({ ...flow, id: ids[position] })), ...existingFlows]
+  const linked = flows.map((flow, position) => linkedFlow(flow, ids[position], { requests: renamed, flows: renamedFlows }, known))
   return {
     flows: linked.map(({ flow }) => flow),
-    remarks: linked.filter(({ isMissing }) => isMissing).map(({ flow }) => remark(FLOW_IMPORT_TEXT.missingRequests(flow.name), true)),
+    remarks: linked.flatMap(flowRemarks),
   }
 }
 
@@ -626,7 +651,7 @@ export function sanitizeImport(data, existing) {
   const linkedRequests = requestIds.assigned.map((request) => ({ ...request, folderId: inImport(request.folderId), timestamp: '' }))
   const linked = { folders: flattenedFolders, requests: linkedRequests }
   const { folders, requests } = rootNumbering(data?.sharedOrder === true ? linked : sharedNumbering(linked))
-  const flows = sanitizeFlows(data?.flows, requestIds.renamed)
+  const flows = sanitizeFlows(data?.flows, requestIds.renamed, existing.flows)
 
   return {
     requests,

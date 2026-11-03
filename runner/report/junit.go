@@ -112,7 +112,30 @@ func flowSuite(flow *runner.FlowReport, timestamp string, durationMs int64) juni
 		described.Failure = &junitProblem{Message: flow.Message}
 	}
 	suite.add(described)
+	addNestedFlows(&suite, flow.Name, flow.Steps)
 	return suite
+}
+
+func addNestedFlows(suite *junitSuite, path string, events []runner.FlowEvent) {
+	for _, event := range events {
+		if event.Steps == nil {
+			continue
+		}
+		name := path + " > " + event.Title
+		suite.add(nestedFlowCase(event, name, suite.Name))
+		addNestedFlows(suite, name, event.Steps)
+	}
+}
+
+func nestedFlowCase(event runner.FlowEvent, name, className string) junitCase {
+	described := junitCase{Name: name, ClassName: className, Time: seconds(event.DurationMs)}
+	switch event.Status {
+	case runner.FlowFailed:
+		described.Failure = &junitProblem{Message: event.Summary}
+	case runner.FlowHandled:
+		described.Skipped = &junitProblem{Message: event.Summary}
+	}
+	return described
 }
 
 func suiteOutput(result runner.Result) string {

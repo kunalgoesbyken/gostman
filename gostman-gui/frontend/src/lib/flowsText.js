@@ -27,6 +27,7 @@ const text = messages('flows', english, (t) => {
       noHeader: (name, title) => t('flowEngine.noHeader', { name, title }),
       notAList: (path, title) => t('flowEngine.notAList', { path, title }),
       budget: (sends, cap) => t('flowEngine.budget', { count: sends, cap }),
+      budgetOf: (name, sends, cap) => t('flowEngine.budgetOf', { name, count: sends, cap }),
       ended: (outcome) => t(outcome === 'failed' ? 'flowEngine.endedFailed' : 'flowEngine.ended'),
       attemptPassed: (attempt, attempts) => (attempts > 1 ? t('flowEngine.attemptPassedOf', { attempt, attempts }) : t('flowEngine.attemptPassed')),
       attemptFailed: (attempt, attempts) => (attempts > 1 ? t('flowEngine.attemptFailedOf', { attempt, attempts }) : t('flowEngine.attemptFailed')),
@@ -34,7 +35,14 @@ const text = messages('flows', english, (t) => {
       branch: (branch, target) => t('flowEngine.branch', { branch, target }),
       wrote: (names) => formatList(names, 'unit'),
       iteration: (index, count) => t('flowEngine.iteration', { position: index + 1, count }),
+      pass: (index, count) => t('flowEngine.pass', { position: index + 1, count }),
+      untilNeverRerouted: (times, target) => t('flowEngine.untilNeverRerouted', { count: times, target }),
+      repeatFailed: (title, times) => t('flowEngine.repeatFailed', { title, count: times }),
+      caseName: (position) => t('flowEngine.caseName', { position: position + 1 }),
+      caseCheck: (label, name) => t('flowEngine.caseCheck', { label, name }),
       waited: (milliseconds) => t('flowEngine.waited', { duration: t('flowEngine.milliseconds', { value: milliseconds }) }),
+      inputBodyNotJson: (name) => t('flowEngine.inputBodyNotJson', { name, example: braced('variables') }),
+      inputPastEnd: (name, count) => t('flowEngine.inputPastEnd', { name, count }),
     },
     flowCanvas: {
       stepLabel: (position, count, kind, title, state) => (
@@ -50,6 +58,10 @@ const text = messages('flows', english, (t) => {
       condition: (condition, more, match) => (more > 0 ? t(moreKey('flowCanvas.condition', match), { condition, count: more }) : condition),
       variablesCondition: (condition) => t('flowCanvas.variablesCondition', { condition }),
       loop: (path, title) => t('flowCanvas.loop', { path: path || '$', title }),
+      caseLine: (label, condition) => t('flowCanvas.caseLine', { label, condition }),
+      passes: (times, delayMs) => (
+        delayMs > 0 ? t('flowCanvas.passesApart', { count: times, delay: duration(delayMs) }) : t('flowCanvas.passes', { count: times })
+      ),
       wait: (milliseconds) => t('flowCanvas.wait', { duration: duration(milliseconds) }),
       toEnd: (label) => t('flowCanvas.toEnd', { label }),
       attempt: (attempt, attempts) => t('flowCanvas.attempt', { attempt, attempts }),
@@ -58,10 +70,20 @@ const text = messages('flows', english, (t) => {
       get variablesHint() {
         return t('flowEditor.variablesHint', { variables: braced('variables'), example: braced('item.id') })
       },
+      get inputsHint() {
+        return t('flowEditor.inputsHint', { variables: braced('variables') })
+      },
       get templatePlaceholder() {
         return t('flowEditor.templatePlaceholder', { example: braced('variable') })
       },
       loopHint: (item, index) => t('flowEditor.loopHint', { item: braced(item), field: braced(`${item}.field`), index: braced(index) }),
+      repeatHint: (index) => t('flowEditor.repeatHint', { index: braced(index) }),
+      get flowVariablesHint() {
+        return t('flowEditor.flowVariablesHint', { variables: braced('variables') })
+      },
+    },
+    flowImport: {
+      missingFlowsNamed: (name, flows) => t('flowImport.missingFlowsNamed', { name, flows: formatList(flows.map((flow) => `"${flow}"`)), count: flows.length }),
     },
     flowView: {
       cli: (name) => `gostman flow run ${shellWord(name)}`,
@@ -80,4 +102,5 @@ export const FLOW_PICKER_TEXT = text.flowPicker
 export const FLOW_EDITOR_TEXT = text.flowEditor
 export const FLOW_VIEW_TEXT = text.flowView
 export const FLOW_RUN_TEXT = text.flowRun
+export const FLOW_METRICS_TEXT = text.flowMetrics
 export const FLOW_SCRIPT_TEXT = text.flowScript

@@ -217,8 +217,6 @@
     "label": "Rótulo",
     "stepId": "ID da etapa",
     "request": "Requisição",
-    "variables": "Variáveis deste envio",
-    "variablesHint": "Definidas só enquanto esta etapa envia, acima de todos os outros escopos. Os valores podem usar {{variables}}, como {{example}} dentro de Para cada.",
     "variableName": "Nome",
     "variableValue": "Valor",
     "removeRow": "Remover",

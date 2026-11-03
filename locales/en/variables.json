@@ -14,7 +14,8 @@
       "process": ".env file",
       "session": "Session",
       "flowLoop": "Loop item",
-      "flowSend": "This send only"
+      "flowSend": "This send only",
+      "flowCall": "Given to the called flow"
     }
   }
 }

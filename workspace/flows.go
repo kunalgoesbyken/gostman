@@ -42,13 +42,35 @@ type FlowValue struct {
 	Path   string `json:"path,omitempty" yaml:"path,omitempty"`
 }
 
+type FlowCase struct {
+	Label      string      `json:"label,omitempty" yaml:"label,omitempty"`
+	Match      string      `json:"match,omitempty" yaml:"match,omitempty"`
+	Conditions []FlowCheck `json:"conditions,omitempty" yaml:"conditions,omitempty"`
+	Target     string      `json:"target,omitempty" yaml:"target,omitempty"`
+}
+
+type FlowInput struct {
+	Target string `json:"target" yaml:"target"`
+	Name   string `json:"name" yaml:"name"`
+	Value  string `json:"value,omitempty" yaml:"value,omitempty"`
+	Step   string `json:"step,omitempty" yaml:"step,omitempty"`
+	Source string `json:"source,omitempty" yaml:"source,omitempty"`
+	Path   string `json:"path,omitempty" yaml:"path,omitempty"`
+}
+
 type FlowStep struct {
 	Id         string            `json:"id" yaml:"id"`
 	Kind       string            `json:"kind" yaml:"kind"`
 	Label      string            `json:"label,omitempty" yaml:"label,omitempty"`
+	Note       string            `json:"note,omitempty" yaml:"note,omitempty"`
 	Request    string            `json:"request,omitempty" yaml:"request,omitempty"`
 	RequestId  string            `json:"requestId,omitempty" yaml:"requestId,omitempty"`
+	Flow       string            `json:"flow,omitempty" yaml:"flow,omitempty"`
+	FlowId     string            `json:"flowId,omitempty" yaml:"flowId,omitempty"`
+	Times      int               `json:"times,omitempty" yaml:"times,omitempty"`
+	DelayMs    int64             `json:"delayMs,omitempty" yaml:"delayMs,omitempty"`
 	Variables  map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Inputs     []FlowInput       `json:"inputs,omitempty" yaml:"inputs,omitempty"`
 	Retry      *FlowRetry        `json:"retry,omitempty" yaml:"retry,omitempty"`
 	OnFailure  string            `json:"onFailure,omitempty" yaml:"onFailure,omitempty"`
 	Values     []FlowValue       `json:"values,omitempty" yaml:"values,omitempty"`
@@ -59,6 +81,8 @@ type FlowStep struct {
 	IndexAs    string            `json:"indexAs,omitempty" yaml:"indexAs,omitempty"`
 	Match      string            `json:"match,omitempty" yaml:"match,omitempty"`
 	Conditions []FlowCheck       `json:"conditions,omitempty" yaml:"conditions,omitempty"`
+	Until      []FlowCheck       `json:"until,omitempty" yaml:"until,omitempty"`
+	Cases      []FlowCase        `json:"cases,omitempty" yaml:"cases,omitempty"`
 	Then       string            `json:"then,omitempty" yaml:"then,omitempty"`
 	Else       string            `json:"else,omitempty" yaml:"else,omitempty"`
 	Steps      []FlowStep        `json:"steps,omitempty" yaml:"steps,omitempty"`

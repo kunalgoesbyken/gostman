@@ -64,7 +64,7 @@
     "formats": {
       "gostman": {
         "label": "Gostman",
-        "description": "Full backup: requests, folders, every environment, the global variables and the collection variables, without secret values"
+        "description": "Full backup: requests, folders, flows, every environment, the global variables and the collection variables, without secret values"
       },
       "postman": {
         "label": "Postman",

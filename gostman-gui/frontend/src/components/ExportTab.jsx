@@ -277,7 +277,7 @@ export function ExportTab({ requests, folders, environments, globals, collection
       {format.hasDocsOptions && <DocsOptions options={docsOptions} onChange={setDocsOptions} />}
 
       <p className="shrink-0 text-xs text-muted-foreground">
-        {EXPORT_TEXT.summary(format.description, { ...scoped, environments: ENVIRONMENT_FORMATS.includes(format.value) ? scoped.environments : null }, collection?.name)}
+        {EXPORT_TEXT.summary(format.description, { ...scoped, environments: ENVIRONMENT_FORMATS.includes(format.value) ? scoped.environments : null, flows: format.value === BACKUP_FORMAT ? data.flows : null }, collection?.name)}
       </p>
 
       <ExportReport notes={report.notes} warnings={report.warnings} tool={format.label} />

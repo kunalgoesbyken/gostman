@@ -1,6 +1,7 @@
 {
   "scripts": "{{names}} is a list of quoted request or folder names. This and the next messages are shown after importing a collection.",
   "andMore": "{{names}} is a list of quoted names; {{count}} is the number of names that are not shown.",
+  "flowFlowsNamed": "Shown after importing a flow whose Run flow steps name flows that are not in the export. {{names}} is a list of quoted flow names; {{count}} is how many there are.",
   "place": "Where a script note applies. Used as {{label}} in the script messages, for example: Postman request \"Login\", pre-request script, line 3: ...",
   "stage": "The script that a note applies to. Used as {{stage}} in the script messages.",
   "script": "Notes about scripts translated from another tool. {{tool}} is the name of that tool, {{api}} the name of its script object, for example pm.*.",

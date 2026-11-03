@@ -13,6 +13,8 @@ export const asText = (value) => {
   return typeof value === 'string' ? value : JSON.stringify(value)
 }
 
+export const withoutNames = (values, names) => Object.fromEntries(Object.entries(values).filter(([name]) => !names.includes(name)))
+
 export const subjectOf = (response) => (isPlainObject(response) ? responseSubject({ headers: [], body: '', ...response }) : {})
 
 const failure = (message) => ({ ok: false, message })

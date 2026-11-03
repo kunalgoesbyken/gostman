@@ -114,7 +114,7 @@ gostman run orders-api --flow Checkout --env CI
 
 `flow run` takes every flag of `run` except the ones that choose or repeat requests (`--folder`, `--data`, `--iterations`, `--parallel`, `--only`, `--tags`, `--exclude-tags`, `--bail` and `--delay`, which exit with status 2). `--workspace` names the workspace folder or export file; without it, the current folder is used, or the workspace that holds the flow file. `gostman run <workspace> --flow <name>` does the same. `flow list` prints each flow with its number of steps and id, and `--json` prints them as JSON.
 
-The text report adds a `FLOW` line for every step that sends no request, and a request that failed but that the flow handled, by trying again or going to another step, is printed in yellow with the reason. The exit status follows the outcome of the flow, see [Exit codes](#exit-codes); the JSON report adds a `flow` object with the outcome, its message and every step in order. See [Flows](flows.md) for the steps and the file format.
+The text report adds a `FLOW` line for every step that sends no request, and a request that failed but that the flow handled, by trying again or going to another step, is printed in yellow with the reason. The steps of a flow run by a **Run flow** step are indented under it. The exit status follows the outcome of the flow, see [Exit codes](#exit-codes); the JSON report adds a `flow` object with the outcome, its message and every step in order, with the steps of a nested flow under the step that ran it. See [Flows](flows.md) for the steps and the file format.
 
 ## Scheduled runs
 

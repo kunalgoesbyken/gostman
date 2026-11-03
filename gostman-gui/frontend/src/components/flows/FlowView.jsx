@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { AlertTriangle, ChevronRight, Play, Redo2, Save, Square, Undo2, Workflow } from "lucide-react"
+import { AlertTriangle, ChevronRight, PanelRight, PictureInPicture2, Play, Redo2, Save, Settings2, Square, Undo2, Workflow, X } from "lucide-react"
 import { Button, IconButton } from "../ui/button"
+import { ResizeHandles, WindowGrip } from "../ui/dialog"
 import { Field } from "../ui/field"
 import { Input } from "../ui/input"
 import { PANE_WIDTH, ResizablePane, SPLIT_PANES, SectionLabel } from "../ui/panel"
@@ -10,8 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
 import { Textarea } from "../ui/textarea"
 import { FlowCanvas } from "./FlowCanvas"
 import { FlowRunPanel } from "./FlowRunPanel"
-import { RequestPicker } from "./RequestPicker"
+import { FlowPicker, RequestPicker } from "./RequestPicker"
 import { StepEditor } from "./StepEditor"
+import { useFloatingWindow } from "../../hooks/useFloatingWindow"
 import { useShortcutLabel } from "../../hooks/useShortcuts"
 import { ExtraVariablesProvider } from "../../hooks/useVariableMap"
 import { FLOW_CANVAS_TEXT, FLOW_VIEW_TEXT as TEXT } from "../../lib/flowsText"
@@ -20,17 +22,39 @@ import { duplicateStep, insertStep, isFlowDirty, moveStep, newStep, removeStep, 
 import { RUN_RUNNING, useFlowRunStore } from "../../lib/flows/flowRunner"
 import { canRedo, canUndo, recordChange, redoChange, undoChange } from "../../lib/flows/history"
 import { flowVariables } from "../../lib/flows/outputs"
-import { MAX_SENDS_CAP, STEP_REQUEST, indexSteps, normalizeFlow } from "../../lib/flows/model"
+import { MAX_SENDS_CAP, STEP_FLOW, STEP_REQUEST, indexSteps, normalizeFlow } from "../../lib/flows/model"
 import { stepTitle, validateFlow } from "../../lib/flows/validate"
 import { hintWithShortcut } from "../../lib/shortcuts"
+import { readStored, writeStored } from "../../lib/storage"
 import { cn } from "../../lib/utils"
 import { useAppStore } from "../../store/appStore"
 
 const PANEL_STEP = "step"
 const PANEL_RUN = "run"
+const PICK_REQUEST = "request"
+const PICK_FLOW = "flow"
 const UNDO_KEY = "z"
 const REDO_KEY = "y"
 const EDITING_TAGS = ["INPUT", "TEXTAREA", "SELECT"]
+const PANEL_MODE_KEY = "gostman.flowPanel"
+const DOCKED = "docked"
+const FLOATING = "floating"
+const FLOATING_WIDTH = 400
+const FLOATING_HEIGHT = 560
+const FLOATING_INSET = 16
+const FLOATING_TOP = 120
+
+const readPanelMode = () => (readStored(PANEL_MODE_KEY) === FLOATING ? FLOATING : DOCKED)
+
+const floatingPanel = () => ({
+  id: "flow-panel",
+  width: FLOATING_WIDTH,
+  height: FLOATING_HEIGHT,
+  minWidth: 320,
+  minHeight: 280,
+  x: window.innerWidth - FLOATING_WIDTH - FLOATING_INSET,
+  y: FLOATING_TOP,
+})
 
 const isEditingText = (element) => EDITING_TAGS.includes(element?.tagName) || element?.isContentEditable
 
@@ -42,7 +66,7 @@ function groupProblems(problems) {
   return byStep
 }
 
-function FlowSettings({ flow, problems, index, requests, onChange, onSelectStep }) {
+function FlowSettings({ flow, problems, index, requests, flows, onChange, onSelectStep }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3 [overflow-wrap:anywhere]">
       <SectionLabel>{TEXT.settingsTitle}</SectionLabel>
@@ -64,7 +88,7 @@ function FlowSettings({ flow, problems, index, requests, onChange, onSelectStep 
             {problems.map(({ step, message }, position) => (
               <li key={position}>
                 <button type="button" disabled={!step} onClick={() => onSelectStep(step)} className="flex w-full items-center gap-1 rounded px-1 py-0.5 text-start text-xs text-foreground enabled:cursor-pointer enabled:hover:bg-accent enabled:hover:underline">
-                  <span className="min-w-0 flex-1">{step && index.get(step) ? `${stepTitle(index.get(step).step, requests)}: ` : ""}{message}</span>
+                  <span className="min-w-0 flex-1">{step && index.get(step) ? `${stepTitle(index.get(step).step, requests, flows)}: ` : ""}{message}</span>
                   {step && <ChevronRight aria-hidden="true" className="h-3 w-3 shrink-0 text-muted-foreground rtl:rotate-180" />}
                 </button>
               </li>
@@ -80,7 +104,22 @@ function FlowSettings({ flow, problems, index, requests, onChange, onSelectStep 
   )
 }
 
-function FlowToolbar({ flow, problemCount, isDirty, isRunning, history, onRename, onSave, onRun, onStop, onUndo, onRedo }) {
+function PanelControls({ mode, isFloating, onToggle, onSettings }) {
+  return (
+    <>
+      {isFloating && <IconButton label={TEXT.showSettings} icon={Settings2} onClick={onSettings} />}
+      <IconButton
+        label={mode === FLOATING ? TEXT.dockPanel : TEXT.floatPanel}
+        icon={mode === FLOATING ? PanelRight : PictureInPicture2}
+        aria-pressed={mode === FLOATING}
+        onClick={onToggle}
+        className="max-sm:hidden"
+      />
+    </>
+  )
+}
+
+function FlowToolbar({ flow, problemCount, isDirty, isRunning, history, panel, onRename, onSave, onRun, onStop, onUndo, onRedo }) {
   const saveShortcut = useShortcutLabel("saveRequest")
   const runShortcut = useShortcutLabel("sendRequest")
   return (
@@ -89,6 +128,8 @@ function FlowToolbar({ flow, problemCount, isDirty, isRunning, history, onRename
       <Input value={flow.name} aria-label={TEXT.nameLabel} onChange={(event) => onRename(event.target.value)} className="h-7 max-w-xs border-transparent text-sm font-medium hover:border-input focus:border-input" />
       {isDirty && <span aria-label={TEXT.unsaved} title={TEXT.unsaved} className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground" />}
       <div className="ms-auto flex shrink-0 items-center gap-1">
+        <PanelControls {...panel} />
+        <span aria-hidden="true" className="mx-0.5 h-4 border-s border-border max-sm:hidden" />
         <IconButton label={TEXT.undo} icon={Undo2} mirrored disabled={!history.canUndo} onClick={onUndo} />
         <IconButton label={TEXT.redo} icon={Redo2} mirrored disabled={!history.canRedo} onClick={onRedo} />
         <Button variant="outline" size="sm" disabled={!isDirty} onClick={onSave} title={hintWithShortcut(TEXT.save, saveShortcut)}>
@@ -111,36 +152,97 @@ function FlowToolbar({ flow, problemCount, isDirty, isRunning, history, onRename
   )
 }
 
+function FloatingPanel({ frame, onClose, children }) {
+  const closeOnEscape = (event) => {
+    if (event.key !== "Escape" || event.defaultPrevented) return
+    event.preventDefault()
+    onClose()
+  }
+  return (
+    <div className="pointer-events-none fixed inset-0 z-40">
+      <section
+        role="dialog"
+        aria-modal="false"
+        aria-label={TEXT.panelTitle}
+        data-surface="dialog"
+        style={frame.style}
+        onKeyDown={closeOnEscape}
+        className="pointer-events-auto fixed flex flex-col overflow-hidden rounded-lg border border-border bg-background shadow-lg"
+      >
+        <div className="flex h-8 shrink-0 touch-none select-none items-center gap-2 border-b border-border ps-3 pe-1" {...frame.headerProps}>
+          <WindowGrip frame={frame} />
+          <span className="min-w-0 flex-1 truncate text-xs font-medium text-muted-foreground">{TEXT.panelTitle}</span>
+          <IconButton label={TEXT.closePanel} icon={X} onClick={onClose} />
+        </div>
+        {children}
+      </section>
+      <ResizeHandles frame={frame} />
+    </div>
+  )
+}
+
 function focusEditor() {
   requestAnimationFrame(() => document.querySelector("[data-flow-editor] input, [data-flow-editor] button")?.focus())
 }
 
 function focusNode(id) {
-  requestAnimationFrame(() => document.querySelector(`[data-step-node="${CSS.escape(id)}"]`)?.focus())
+  requestAnimationFrame(() => document.querySelector(`[data-step-node="${CSS.escape(id)}"]`)?.focus({ preventScroll: true }))
 }
 
 export function FlowView({ tab, actions, EditorComponent }) {
   const flow = tab.flowDraft
   const requests = useAppStore((s) => s.requests)
   const folders = useAppStore((s) => s.folders)
+  const flows = useAppStore((s) => s.flows)
   const saved = useAppStore((s) => s.flows.find((candidate) => candidate.id === tab.flowId))
   const run = useFlowRunStore((s) => s.runs[tab.id])
   const catalog = useMemo(() => requestCatalog(requests, folders), [requests, folders])
-  const context = useMemo(() => ({ requests: catalog, index: indexSteps(flow.steps) }), [catalog, flow.steps])
-  const problems = useMemo(() => validateFlow(normalizeFlow(flow), catalog), [flow, catalog])
+  const context = useMemo(() => ({ requests: catalog, flows, index: indexSteps(flow.steps) }), [catalog, flows, flow.steps])
+  const shown = useMemo(() => normalizeFlow(flow), [flow])
+  const problems = useMemo(() => validateFlow(shown, catalog, flows), [shown, catalog, flows])
+  const otherFlows = useMemo(() => flows.filter((candidate) => candidate.id !== tab.flowId), [flows, tab.flowId])
   const problemsByStep = useMemo(() => groupProblems(problems), [problems])
   const isDirty = useMemo(() => isFlowDirty(flow, saved), [flow, saved])
   const isRunning = run?.status === RUN_RUNNING
   const [selected, setSelected] = useState("")
   const [panel, setPanel] = useState(PANEL_STEP)
+  const [panelMode, setPanelMode] = useState(readPanelMode)
+  const [isPanelOpen, setPanelOpen] = useState(false)
+  const frame = useFloatingWindow(panelMode === FLOATING ? floatingPanel() : null)
   const [picker, setPicker] = useState(null)
   const [, setVersion] = useState(0)
   const selectedStep = context.index.get(selected)?.step
   const stepVariables = useMemo(() => flowVariables(flow.steps, catalog, selectedStep), [flow.steps, catalog, selectedStep])
 
   useEffect(() => {
-    if (isRunning) setPanel(PANEL_RUN)
+    if (!isRunning) return
+    setPanel(PANEL_RUN)
+    setPanelOpen(true)
   }, [isRunning])
+
+  const togglePanelMode = () => {
+    const next = panelMode === FLOATING ? DOCKED : FLOATING
+    writeStored(PANEL_MODE_KEY, next)
+    setPanelMode(next)
+  }
+
+  const showSettings = () => {
+    setSelected("")
+    setPanel(PANEL_STEP)
+    setPanelOpen(true)
+  }
+
+  const clearSelection = useCallback(() => {
+    setSelected("")
+    setPanelOpen(false)
+  }, [])
+
+  const closePanel = () => {
+    const was = selected
+    setSelected("")
+    setPanelOpen(false)
+    if (was) focusNode(was)
+  }
 
   const change = useCallback((next, group = "") => {
     recordChange(tab.id, store().tabs.find((candidate) => candidate.id === tab.id)?.flowDraft ?? flow, group)
@@ -173,25 +275,29 @@ export function FlowView({ tab, actions, EditorComponent }) {
   }, [change, flow, select])
 
   const chooseKind = useCallback((place, kind) => {
-    if (kind === STEP_REQUEST) setPicker({ place })
+    if (kind === STEP_REQUEST) setPicker({ kind: PICK_REQUEST, place })
+    else if (kind === STEP_FLOW) setPicker({ kind: PICK_FLOW, place })
     else insert(place, kind)
   }, [insert])
 
-  const chooseRequest = (request) => {
-    const fields = { request: request.path, requestId: request.id }
+  const choose = (kind, fields, name) => {
     if (picker.stepId) change(updateStep(flow, picker.stepId, fields))
-    else insert(picker.place, STEP_REQUEST, fields, request.name)
+    else insert(picker.place, kind, fields, name)
     setPicker(null)
   }
+
+  const chooseRequest = (request) => choose(STEP_REQUEST, { request: request.path, requestId: request.id }, request.name)
+
+  const chooseFlow = (called) => choose(STEP_FLOW, { flow: called.name, flowId: called.id }, called.name)
 
   const remove = useCallback((id) => {
     const entry = context.index.get(id)
     if (!entry) return
-    store().showConfirm(FLOW_CANVAS_TEXT.removeTitle, FLOW_CANVAS_TEXT.removeMessage(stepTitle(entry.step, catalog)), () => {
+    store().showConfirm(FLOW_CANVAS_TEXT.removeTitle, FLOW_CANVAS_TEXT.removeMessage(stepTitle(entry.step, catalog, flows)), () => {
       change(removeStep(store().tabs.find((candidate) => candidate.id === tab.id).flowDraft, id))
       setSelected((current) => (current === id ? "" : current))
     }, null, "destructive", FLOW_CANVAS_TEXT.remove)
-  }, [catalog, change, context.index, tab.id])
+  }, [catalog, change, context.index, flows, tab.id])
 
   const move = useCallback((id, offset) => {
     change(moveStep(flow, id, offset))
@@ -219,6 +325,45 @@ export function FlowView({ tab, actions, EditorComponent }) {
     travel(wantsRedo ? redoChange : undoChange)
   }
 
+  const details = (
+    <Tabs value={panel} onValueChange={setPanel} className="flex min-h-0 flex-1 flex-col">
+      <div className="flex h-10 shrink-0 items-center border-b border-border px-3">
+        <TabsList label={TEXT.panelLabel}>
+          <TabsTrigger value={PANEL_STEP}>{TEXT.stepTab}</TabsTrigger>
+          <TabsTrigger value={PANEL_RUN}>{TEXT.runTab}</TabsTrigger>
+        </TabsList>
+      </div>
+      <TabsContent value={PANEL_STEP} className="flex min-h-0 flex-1 flex-col">
+        {selectedStep ? (
+          <ExtraVariablesProvider value={stepVariables}>
+            <StepEditor
+              key={selectedStep.id}
+              step={selectedStep}
+              index={context.index}
+              requests={catalog}
+              problems={problemsByStep.get(selectedStep.id) || []}
+              onPatch={(patch) => change(updateStep(flow, selectedStep.id, patch), `${selectedStep.id}:${Object.keys(patch).join()}`)}
+              onRename={(wanted) => rename(selectedStep.id, wanted)}
+              onMove={(offset) => move(selectedStep.id, offset)}
+              onDuplicate={() => duplicate(selectedStep.id)}
+              onRemove={() => remove(selectedStep.id)}
+              onPickRequest={() => setPicker({ kind: PICK_REQUEST, stepId: selectedStep.id })}
+              flows={otherFlows}
+              onPickFlow={() => setPicker({ kind: PICK_FLOW, stepId: selectedStep.id })}
+              onOpenFlow={actions.open}
+              EditorComponent={EditorComponent}
+            />
+          </ExtraVariablesProvider>
+        ) : (
+          <FlowSettings flow={flow} problems={problems} index={context.index} requests={catalog} flows={flows} onChange={change} onSelectStep={setSelected} />
+        )}
+      </TabsContent>
+      <TabsContent value={PANEL_RUN} className="flex min-h-0 flex-1 flex-col">
+        <FlowRunPanel run={run} canRun={flow.steps.length > 0 && problems.length === 0} onRun={() => actions.run(tab.id)} onReport={() => actions.downloadReport(tab.id)} onSelectStep={select} />
+      </TabsContent>
+    </Tabs>
+  )
+
   return (
     <div data-pane="request" onKeyDown={handleKeyDown} className="flex min-h-0 flex-1 flex-col">
       <FlowToolbar
@@ -227,6 +372,7 @@ export function FlowView({ tab, actions, EditorComponent }) {
         isDirty={isDirty}
         isRunning={isRunning}
         history={{ canUndo: canUndo(tab.id), canRedo: canRedo(tab.id) }}
+        panel={{ mode: panelMode, isFloating: Boolean(frame), onToggle: togglePanelMode, onSettings: showSettings }}
         onRename={(name) => change({ ...flow, name }, "name")}
         onSave={() => actions.save(tab.id)}
         onRun={() => actions.run(tab.id)}
@@ -235,57 +381,30 @@ export function FlowView({ tab, actions, EditorComponent }) {
         onRedo={() => travel(redoChange)}
       />
       <div className={SPLIT_PANES}>
-        <div dir="ltr" className="min-h-0 min-w-0 flex-1 overflow-auto bg-muted/20 max-sm:max-h-[55%]">
-          <FlowCanvas
-            flow={flow}
-            context={context}
-            nodes={run?.nodes || {}}
-            problems={problemsByStep}
-            selected={selected}
-            onSelect={select}
-            onOpen={open}
-            onInsert={chooseKind}
-            onRemove={remove}
-            onMove={move}
-          />
-        </div>
-        <ResizablePane as="aside" pane={FLOW_PANE} edge={EDGE_START} className={cn(PANE_WIDTH, "flex min-h-0 shrink-0 flex-col border-border max-sm:min-h-0 max-sm:flex-1 max-sm:border-t sm:border-s")}>
-          <Tabs value={panel} onValueChange={setPanel} className="flex min-h-0 flex-1 flex-col">
-            <div className="flex h-10 shrink-0 items-center border-b border-border px-3">
-              <TabsList label={TEXT.panelLabel}>
-                <TabsTrigger value={PANEL_STEP}>{TEXT.stepTab}</TabsTrigger>
-                <TabsTrigger value={PANEL_RUN}>{TEXT.runTab}</TabsTrigger>
-              </TabsList>
-            </div>
-            <TabsContent value={PANEL_STEP} className={cn("flex min-h-0 flex-1 flex-col")}>
-              {selectedStep ? (
-                <ExtraVariablesProvider value={stepVariables}>
-                  <StepEditor
-                    key={selectedStep.id}
-                    step={selectedStep}
-                    index={context.index}
-                    requests={catalog}
-                    problems={problemsByStep.get(selectedStep.id) || []}
-                    onPatch={(patch) => change(updateStep(flow, selectedStep.id, patch), `${selectedStep.id}:${Object.keys(patch).join()}`)}
-                    onRename={(wanted) => rename(selectedStep.id, wanted)}
-                    onMove={(offset) => move(selectedStep.id, offset)}
-                    onDuplicate={() => duplicate(selectedStep.id)}
-                    onRemove={() => remove(selectedStep.id)}
-                    onPickRequest={() => setPicker({ stepId: selectedStep.id })}
-                    EditorComponent={EditorComponent}
-                  />
-                </ExtraVariablesProvider>
-              ) : (
-                <FlowSettings flow={flow} problems={problems} index={context.index} requests={catalog} onChange={change} onSelectStep={setSelected} />
-              )}
-            </TabsContent>
-            <TabsContent value={PANEL_RUN} className="flex min-h-0 flex-1 flex-col">
-              <FlowRunPanel run={run} canRun={flow.steps.length > 0 && problems.length === 0} onRun={() => actions.run(tab.id)} onReport={() => actions.downloadReport(tab.id)} onSelectStep={select} />
-            </TabsContent>
-          </Tabs>
-        </ResizablePane>
+        <FlowCanvas
+          key={tab.id}
+          flow={shown}
+          viewKey={tab.id}
+          context={context}
+          run={run}
+          problems={problemsByStep}
+          selected={selected}
+          onSelect={select}
+          onOpen={open}
+          onInsert={chooseKind}
+          onRemove={remove}
+          onMove={move}
+          onBackground={clearSelection}
+        />
+        {!frame && (
+          <ResizablePane as="aside" pane={FLOW_PANE} edge={EDGE_START} className={cn(PANE_WIDTH, "flex min-h-0 shrink-0 flex-col border-border max-sm:min-h-0 max-sm:flex-1 max-sm:border-t sm:border-s")}>
+            {details}
+          </ResizablePane>
+        )}
       </div>
-      {picker && <RequestPicker catalog={catalog} onChoose={chooseRequest} onClose={() => setPicker(null)} />}
+      {frame && (selectedStep || isPanelOpen) && <FloatingPanel frame={frame} onClose={closePanel}>{details}</FloatingPanel>}
+      {picker?.kind === PICK_REQUEST && <RequestPicker catalog={catalog} onChoose={chooseRequest} onClose={() => setPicker(null)} />}
+      {picker?.kind === PICK_FLOW && <FlowPicker flows={otherFlows} onChoose={chooseFlow} onClose={() => setPicker(null)} />}
     </div>
   )
 }

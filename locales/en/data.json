@@ -39,7 +39,7 @@
     "exportReminderHint": "Your collection lives only in this browser. Export it to keep a copy somewhere else.",
     "exportReminderDismiss": "Hide this reminder",
     "exportLabel": "Export",
-    "exportHint": "Save your collection and environments to a file you can import later.",
+    "exportHint": "Save your collection, flows and environments to a file you can import later.",
     "exportAction": "Export data…",
     "deleteLabel": "Delete",
     "deleteHint": "Shows what is deleted and what is kept, then asks you to confirm.",

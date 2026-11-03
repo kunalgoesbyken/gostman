@@ -53,6 +53,10 @@ li small { display: block; color: var(--muted); margin-left: 42px; white-space: 
 .coverage li.bad::before { content: "MISS  "; }
 .coverage code { font: 12px ui-monospace, Consolas, monospace; }
 .empty { color: var(--muted); padding: 24px 0; text-align: center; }
+.metrics table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.metrics th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 500; }
+.metrics th, .metrics td { padding: 3px 8px; border-bottom: 1px solid var(--line); }
+.metrics td + td { font: 12px ui-monospace, Consolas, monospace; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -60,6 +64,7 @@ li small { display: block; color: var(--muted); margin-left: 42px; white-space: 
 <h1>Gostman run report</h1>
 <div class="meta" id="meta"></div>
 <div class="cards" id="cards"></div>
+<div id="metrics"></div>
 <div id="coverage"></div>
 <div class="bar">
   <button type="button" id="all" aria-pressed="true">All</button>
@@ -261,6 +266,48 @@ li small { display: block; color: var(--muted); margin-left: 42px; white-space: 
     host.style.marginBottom = '16px';
   }
   if (report.coverage) drawCoverage(report.coverage);
+
+  function bytes(value) {
+    var size = value || 0;
+    if (size < 1024) return size + ' B';
+    if (size < 1048576) return (size / 1024).toFixed(1) + ' KB';
+    return (size / 1048576).toFixed(2) + ' MB';
+  }
+
+  function duration(ms) {
+    return ms >= 1000 ? (ms / 1000).toFixed(2) + ' s' : Math.round(ms || 0) + ' ms';
+  }
+
+  function metricsRow(cells, tag) {
+    var row = el('tr');
+    cells.forEach(function (cell) { row.appendChild(el(tag, '', cell)); });
+    return row;
+  }
+
+  function drawMetrics(metrics) {
+    var host = document.getElementById('metrics');
+    var node = el('details', 'row metrics');
+    node.open = true;
+    var head = el('summary');
+    head.appendChild(el('span', 'name', 'Flow metrics'));
+    head.appendChild(el('span', 'stat', metrics.sends + ' requests, ' + duration(metrics.totalMs) + ', ' + bytes(metrics.bytesSent) + ' sent, ' + bytes(metrics.bytesReceived) + ' received'));
+    node.appendChild(head);
+    var steps = Object.keys(metrics.steps || {}).map(function (id) { return Object.assign({ id: id }, metrics.steps[id]); });
+    if (steps.length) {
+      steps.sort(function (first, second) { return second.totalMs - first.totalMs; });
+      var table = el('table');
+      table.appendChild(metricsRow(['Step', 'Runs', 'Total', 'Min', 'Max', 'Average'], 'th'));
+      steps.forEach(function (step) {
+        table.appendChild(metricsRow([step.title || step.id, String(step.count), duration(step.totalMs), duration(step.minMs), duration(step.maxMs), duration(step.totalMs / step.count)], 'td'));
+      });
+      var body = el('div', 'body');
+      body.appendChild(table);
+      node.appendChild(body);
+    }
+    host.appendChild(node);
+    host.style.marginBottom = '16px';
+  }
+  if (flow && flow.metrics) drawMetrics(flow.metrics);
 
   function setFilter(failed) {
     onlyFailed = failed;

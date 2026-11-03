@@ -43,7 +43,7 @@ import { currentOpenLink, dismissOpenLink, subscribeToOpenLink } from "../lib/op
 import { exportableVariables, foldersWithoutSecrets, listWithoutSecrets, withoutSecretValues } from "../lib/variableScopes"
 import { startSpecWatch } from "../lib/specWatch"
 import { createWorkspaceActions } from "../lib/workspaceActions"
-import { requestCatalog, withRequestPaths } from "../lib/flows/catalog"
+import { requestCatalog, withReferenceNames } from "../lib/flows/catalog"
 import { whenIdle } from "../lib/idle"
 import { PANE_ADDRESS, PANE_SIDEBAR, cyclePane, focusAddress, focusPane, watchPaneFocus } from "../lib/panes"
 import { SIDEBAR_TEXT } from "../lib/sidebarText"
@@ -352,7 +352,7 @@ function LoadedWorkspace({ backend, onBack }) {
     [globalEnvironments, activeGlobalEnvironmentId]
   )
   const shareableFolders = useMemo(() => foldersWithoutSecrets(folders), [folders])
-  const exportableFlows = useMemo(() => flows.map((flow) => withRequestPaths(flow, requestCatalog(requests, folders))), [flows, requests, folders])
+  const exportableFlows = useMemo(() => flows.map((flow) => withReferenceNames(flow, requestCatalog(requests, folders), flows)), [flows, requests, folders])
   const shareableVariables = useMemo(
     () => ({ variables: listWithoutSecrets(sharedVariables, sharedVariablesMeta), meta: sharedVariablesMeta }),
     [sharedVariables, sharedVariablesMeta]

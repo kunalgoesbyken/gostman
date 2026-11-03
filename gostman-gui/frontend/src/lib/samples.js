@@ -1,7 +1,7 @@
 import { serializeExamples } from './examples'
 import { FEATURE_SAMPLES_TEXT as TEXT } from './featuresText'
 import { normalizeRequest } from './request'
-import { normalizeFlow } from './flows/model'
+import { OUTCOME_FAILED, OUTCOME_PASSED, STEP_END, STEP_REPEAT, STEP_REQUEST, STEP_SWITCH, normalizeFlow } from './flows/model'
 
 export const SAMPLE_HOST = 'sample.gostman.test'
 export const SAMPLE_FOLDER_ID = 'folder-sample-collection'
@@ -85,9 +85,34 @@ export const sampleFlow = () => normalizeFlow({
   name: TEXT.flowName,
   description: TEXT.flowDescription,
   steps: [
-    { id: 'list-users', kind: 'request', label: TEXT.listUsers, requestId: 'request-sample-list-users' },
-    { id: 'get-user', kind: 'request', label: TEXT.getUser, requestId: 'request-sample-get-user' },
-    { id: 'done', kind: 'end', label: TEXT.flowDone, outcome: 'passed' },
+    { id: 'list-users', kind: STEP_REQUEST, label: TEXT.listUsers, requestId: 'request-sample-list-users', note: TEXT.flowListNote },
+    {
+      id: 'check-status',
+      kind: STEP_SWITCH,
+      label: TEXT.flowCheckStatus,
+      step: 'list-users',
+      cases: [{ label: TEXT.okExample, conditions: [{ expression: 'res.status', operator: 'eq', value: '200' }] }],
+      else: 'stopped',
+    },
+    {
+      id: 'create-user',
+      kind: STEP_REQUEST,
+      label: TEXT.createUser,
+      requestId: 'request-sample-create-user',
+      note: TEXT.flowCreateNote,
+      inputs: [{ target: 'body', name: '$.name', step: 'list-users', source: 'body', path: '$[1].name' }],
+    },
+    {
+      id: 'wait-for-user',
+      kind: STEP_REPEAT,
+      label: TEXT.flowWaitForUser,
+      times: 3,
+      delayMs: 500,
+      until: [{ expression: 'res.body.name', operator: 'eq', value: 'Ada' }],
+      steps: [{ id: 'get-user', kind: STEP_REQUEST, label: TEXT.getUser, requestId: 'request-sample-get-user' }],
+    },
+    { id: 'done', kind: STEP_END, label: TEXT.flowDone, outcome: OUTCOME_PASSED },
+    { id: 'stopped', kind: STEP_END, label: TEXT.flowStopped, outcome: OUTCOME_FAILED, message: TEXT.flowStoppedMessage },
   ],
 })
 

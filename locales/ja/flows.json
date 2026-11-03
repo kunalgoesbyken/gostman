@@ -197,8 +197,6 @@
     "label": "ラベル",
     "stepId": "ステップID",
     "request": "リクエスト",
-    "variables": "この送信用の変数",
-    "variablesHint": "このステップの送信中だけ、他のどのスコープよりも優先して設定されます。値には {{variables}} を使えます。繰り返しの中では {{example}} のように指定します。",
     "variableName": "名前",
     "variableValue": "値",
     "removeRow": "削除",
