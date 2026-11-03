@@ -186,7 +186,7 @@ const Select = React.forwardRef(function Select(
   }
 
   return (
-    <div dir={dir} className="relative min-w-0">
+    <div dir={dir} className="min-w-0">
       <button
         type="button"
         role="combobox"
@@ -199,13 +199,13 @@ const Select = React.forwardRef(function Select(
         title={title || selected?.label}
         onClick={() => (isOpen ? close() : open())}
         onKeyDown={handleKeyDown}
-        className={cn(CONTROL_BASE, CONTROL_SIZES[controlSize], "flex max-w-full items-center gap-2 pe-7 text-start", className)}
+        className={cn(CONTROL_BASE, CONTROL_SIZES[controlSize], "relative flex max-w-full items-center gap-2 pe-7 text-start", className)}
         {...props}
       >
         {selected?.icon && <OptionIcon icon={selected.icon} />}
         <span className="truncate" lang={selected?.lang}>{selected ? selected.label : String(value ?? "")}</span>
+        <ChevronDown className="pointer-events-none absolute end-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
       </button>
-      <ChevronDown className="pointer-events-none absolute end-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
       {isOpen && createPortal(
         <div
           ref={listRef}
