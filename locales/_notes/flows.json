@@ -32,6 +32,7 @@
   "flowEngine.untilCheck": "Prefix of the name of a retry condition in the check results, for example until res.status equals 200.",
   "flowImport.missingRequests": "Shown after importing a flow whose steps point at requests that are not part of the import.",
   "flowImport.missingFlows": "Shown after importing a flow whose Run flow steps point at flows that are not part of the import.",
+  "flowImport.missingFlowsNamed": "Shown after importing a flow whose Run flow steps name flows that are neither in the import nor already saved. {{flows}} is a list of quoted flow names; {{count}} is how many there are.",
   "flowTemplate": "Text of the example flow created from Start from an example. Users edit it afterwards.",
   "flowTemplate.waitForOrder": "Label of a step that sends a request again until the order status is ready.",
   "flow.sidebarTab": "Tab of the sidebar that lists flows.",

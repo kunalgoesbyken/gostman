@@ -20,6 +20,7 @@ const (
 	ImporterFiles                        Code = "importerMessages.files"
 	ImporterFirecampType                 Code = "importerMessages.firecampType"
 	ImporterFlowFlows                    Code = "importerMessages.flowFlows"
+	ImporterFlowFlowsNamed               Code = "importerMessages.flowFlowsNamed"
 	ImporterFlowRequests                 Code = "importerMessages.flowRequests"
 	ImporterForeignBodies                Code = "importerMessages.foreignBodies"
 	ImporterForeignCalls                 Code = "importerMessages.foreignCalls"

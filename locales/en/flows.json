@@ -136,7 +136,9 @@
   },
   "flowImport": {
     "missingRequests": "Steps of the flow \"{{name}}\" send requests that are not in the import; choose them again before running it.",
-    "missingFlows": "Steps of the flow \"{{name}}\" run flows that are not in the import; choose them again before running it."
+    "missingFlows": "Steps of the flow \"{{name}}\" run flows that are not in the import; choose them again before running it.",
+    "missingFlowsNamed_one": "The flow \"{{name}}\" runs the flow {{flows}}, which is not in the import. Import that flow too, or choose another one in its Run flow step, before running \"{{name}}\".",
+    "missingFlowsNamed_other": "The flow \"{{name}}\" runs the flows {{flows}}, which are not in the import. Import those flows too, or choose others in its Run flow steps, before running \"{{name}}\"."
   },
   "flowTemplate": {
     "description": "Log in, wait until the order is ready and cancel it when it never gets there. Choose the request of each Send request step to make it yours.",

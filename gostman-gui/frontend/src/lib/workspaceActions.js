@@ -449,7 +449,7 @@ export function createWorkspaceActions(backend) {
   }
 
   const importData = attempt(TEXT.importFailed, (imported) => {
-    const existing = { requestIds: idsOf(store().requests), folderIds: idsOf(store().folders) }
+    const existing = { requestIds: idsOf(store().requests), folderIds: idsOf(store().folders), flows: store().flows }
     return addReviewed(sanitizeImport(imported, existing))
   })
 

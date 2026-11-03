@@ -13,7 +13,7 @@ import { environmentsForShare, foldersForShare, isScoped, ownsCollectionVariable
 const PLACEHOLDER_START = '{{'
 const AUTH_SECRET_FIELDS = ['password', 'token', 'value']
 const OAUTH_SECRET_FIELDS = ['clientSecret', 'password']
-const NOTHING_EXISTING = { requestIds: [], folderIds: [] }
+const NOTHING_EXISTING = { requestIds: [], folderIds: [], flows: [] }
 const QUOTES = ['"', "'", '`']
 
 const descendantsOf = (tree, folderId) => (

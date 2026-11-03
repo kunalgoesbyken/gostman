@@ -82,6 +82,9 @@ const text = messages('flows', english, (t) => {
         return t('flowEditor.flowVariablesHint', { variables: braced('variables') })
       },
     },
+    flowImport: {
+      missingFlowsNamed: (name, flows) => t('flowImport.missingFlowsNamed', { name, flows: formatList(flows.map((flow) => `"${flow}"`)), count: flows.length }),
+    },
     flowView: {
       cli: (name) => `gostman flow run ${shellWord(name)}`,
     },
