@@ -638,8 +638,14 @@
     "websocketRequest": "WebSocket request",
     "grpcRequest": "gRPC request",
     "mcpRequest": "MCP request",
-    "flowDescription": "Lists the users, then reads one of them. Both requests come from the sample collection.",
+    "flowDescription": "Takes a path by the status code, passes a name into a request and repeats a step until a check passes. Every request answers from a saved example, so it runs offline.",
     "flowDone": "Done",
+    "flowListNote": "Answers with its saved **200 OK** example, so nothing leaves this device.",
+    "flowCheckStatus": "Check the status",
+    "flowCreateNote": "Its `name` comes from the second user of the list, put into the JSON body just before it is sent.",
+    "flowWaitForUser": "Read until it is Ada",
+    "flowStopped": "Stopped",
+    "flowStoppedMessage": "The list of users did not answer 200 OK.",
     "binaryRequest": "Binary response",
     "jwtRequest": "JWT request"
   }
