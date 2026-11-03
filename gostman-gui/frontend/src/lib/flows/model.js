@@ -7,7 +7,12 @@ export const STEP_IF = 'if'
 export const STEP_FOR_EACH = 'forEach'
 export const STEP_DELAY = 'delay'
 export const STEP_END = 'end'
+export const STEP_SWITCH = 'switch'
+export const STEP_REPEAT = 'repeat'
+export const STEP_FLOW = 'flow'
 export const STEP_KINDS = [STEP_REQUEST, STEP_SET, STEP_IF, STEP_FOR_EACH, STEP_DELAY, STEP_END]
+export const CONTAINER_KINDS = [STEP_FOR_EACH, STEP_REPEAT]
+export const innerSteps = (step) => (CONTAINER_KINDS.includes(step.kind) ? step.steps : [])
 
 export const END_TARGET = 'end'
 export const OUTCOME_PASSED = 'passed'

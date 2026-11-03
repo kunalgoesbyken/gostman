@@ -194,7 +194,36 @@
     "remove": "Delete step",
     "removeTitle": "Delete step",
     "removeMessage": "Delete the step \"{{title}}\"? Steps that went to it continue with the next step instead.",
-    "stepActions": "Actions for {{title}}"
+    "stepActions": "Actions for {{title}}",
+    "tags": {
+      "request": "Request",
+      "set": "Set",
+      "if": "If",
+      "switch": "Switch",
+      "forEach": "For each",
+      "repeat": "Repeat",
+      "flow": "Flow",
+      "delay": "Wait",
+      "end": "End"
+    },
+    "branches": {
+      "next": "passes",
+      "onFailure": "fails",
+      "then": "true",
+      "else": "false",
+      "otherwise": "else"
+    },
+    "caseNumber": "case {{number}}",
+    "repeatBody": "Repeat these steps",
+    "endPill": "End",
+    "moreLines_one": "{{count}} more",
+    "moreLines_other": "{{count}} more",
+    "note": "Note",
+    "zoomControls": "Zoom",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "fit": "Fit the flow in view",
+    "actualSize": "Zoom to 100%"
   },
   "flowPicker": {
     "title": "Choose a request",
@@ -291,10 +320,15 @@
     "descriptionPlaceholder": "What this flow checks, for the next person who opens it",
     "maxSends": "Request limit",
     "maxSendsHint": "A run stops after this many requests, so a loop without an end cannot run forever (at most {{cap}}).",
-    "selectHint": "Select a step to edit it, or use + to add one. Steps run from top to bottom; branches are drawn on the right.",
+    "selectHint": "Select a step to edit it, or use + to add one. Steps run from top to bottom; a branch splits into columns side by side that meet again where they continue. Jumps back and other jumps are drawn on the side.",
     "problems_one": "{{count}} thing needs attention before the flow can run",
     "problems_other": "{{count}} things need attention before the flow can run",
-    "cliHint": "Run it from a terminal or CI in the workspace folder:"
+    "cliHint": "Run it from a terminal or CI in the workspace folder:",
+    "floatPanel": "Float the panel",
+    "dockPanel": "Dock the panel",
+    "showSettings": "Flow settings",
+    "closePanel": "Close the panel",
+    "panelTitle": "Step and run"
   },
   "flowRun": {
     "idle": "Not run yet",
