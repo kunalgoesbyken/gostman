@@ -14,6 +14,8 @@ const isContainer = (index, id) => Array.isArray(index.get(id)?.step.steps)
 
 const isPass = (index, event) => Number.isInteger(event.index) && isContainer(index, event.step)
 
+export const isVisit = (index, event) => !isContainer(index, event.step) || isPass(index, event)
+
 function closePass(meter, id) {
   if (!Object.hasOwn(meter.passes, id)) return meter
   const passes = { ...meter.passes }

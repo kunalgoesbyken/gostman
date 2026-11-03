@@ -14,7 +14,7 @@ import { requestCatalog } from './catalog'
 import { ACTION_DONE, ACTION_FLOW, ACTION_WAIT, EVENT_HANDLED } from './engine'
 import { forgetHistory } from './history'
 import { applyInputs } from './inputs'
-import { emptyMeter, finishMeter, meterEvents, meterTiming, stepIndexOf } from './metrics'
+import { emptyMeter, finishMeter, isVisit, meterEvents, meterTiming, stepIndexOf } from './metrics'
 import { OUTCOME_FAILED, STEP_FLOW, STEP_REQUEST } from './model'
 import { withoutNames } from './values'
 
@@ -35,8 +35,8 @@ const patchRun = (tabId, change) => useFlowRunStore.setState((state) => {
   return current ? { runs: { ...state.runs, [tabId]: { ...current, ...change(current) } } } : state
 })
 
-const markNode = (tabId, step, node) => patchRun(tabId, (run) => ({
-  nodes: { ...run.nodes, [step]: { ...run.nodes[step], ...node, visits: (run.nodes[step]?.visits || 0) + (node.state === NODE_RUNNING ? 0 : 1) } },
+const markNode = (tabId, step, node, visits = 0) => patchRun(tabId, (run) => ({
+  nodes: { ...run.nodes, [step]: { ...run.nodes[step], ...node, visits: (run.nodes[step]?.visits || 0) + visits } },
 }))
 
 const addEntry = (tabId, entry) => patchRun(tabId, (run) => ({ entries: [...run.entries, { ...entry, key: run.entries.length }] }))
@@ -135,7 +135,7 @@ export function createFlowRunner(execute, cancel) {
     const place = placeOf(scope)
     if (scope.depth === 0) run.meter = meterEvents(run.meter, run.index, events)
     events.forEach((event) => {
-      if (scope.depth === 0) markNode(tabId, event.step, { state: event.status, attempt: event.attempt, attempts: event.attempts, summary: event.summary })
+      if (scope.depth === 0) markNode(tabId, event.step, { state: event.status, attempt: event.attempt, attempts: event.attempts, summary: event.summary }, isVisit(run.index, event) ? 1 : 0)
       const entry = { type: event.kind, step: event.step, title: event.title, event, ...place }
       if (event.kind === STEP_FLOW) closeEntry(tabId, entry)
       else addEntry(tabId, withPending(run, entry))
