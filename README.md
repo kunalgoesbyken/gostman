@@ -105,7 +105,7 @@ Open the same folder in the desktop app with **Open folder** to see the requests
 - **Themes:** light and dark, eight palettes, accent colours, and your own background and text colour for each part of the window, with a contrast check.
 - **Sharing:** encrypted share links that never upload anything, and Open in Gostman links.
 - **For coding agents:** `gostman mcp` lets Claude Code, Codex and Cursor call your API through the collection without seeing your secrets.
-- **VS Code extension:** run collections, folders and flows, send a saved request, lint an OpenAPI spec and scan for secrets from the editor, through the Gostman CLI.
+- **VS Code extension:** send a request from a lens above its file, run requests and folders in the Test Explorer, pick the environment from the status bar, run flows, lint an OpenAPI spec and scan for secrets, through the Gostman CLI.
 - **AI assistant** (optional, bring your own key): generate requests, checks and scripts, and explain errors.
 - **Import and export:** Postman, OpenAPI, Insomnia, HAR, WSDL, Bruno, Hoppscotch, Thunder Client, HTTPie, Hurl, Firecamp, RAML, API Blueprint, .http files (VS Code REST Client, JetBrains HTTP Client) and curl in; Postman, OpenAPI, HAR, Bruno, .http files, Hurl files, a curl script, Markdown, an HTML docs page and a Gostman backup out.
 - **Code generation** for cURL, JavaScript, Python, Go, Java, Kotlin, C#, PHP, Ruby, Swift, Rust, Dart and PowerShell, plus axios, Node http, httpx, OkHttp, RestSharp, Guzzle, HTTPie and wget (21 targets).

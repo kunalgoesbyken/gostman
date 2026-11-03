@@ -41,7 +41,7 @@ On macOS the binary is not notarized. Run `xattr -d com.apple.quarantine gostman
 
 ## Use it from an editor or a coding agent
 
-The [VS Code extension](vscode.md) runs collections and flows, sends a saved request, lints an OpenAPI spec and scans for secrets from the editor; install it from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Gostman.gostman) after the command line. `gostman mcp` serves a workspace to Claude Code, Codex and Cursor; see [Use from a coding agent](agents.md).
+The [VS Code extension](vscode.md) sends a request from its file, runs the collection in the Test Explorer, picks the environment from the status bar, runs flows, lints an OpenAPI spec and scans for secrets from the editor; install it from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Gostman.gostman) after the command line. `gostman mcp` serves a workspace to Claude Code, Codex and Cursor; see [Use from a coding agent](agents.md).
 
 ## Send your first request
 

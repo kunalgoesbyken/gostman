@@ -1,8 +1,8 @@
 {
   "name": "gostman",
   "displayName": "Gostman",
-  "description": "Run, send, lint and scan Gostman API collections from VS Code.",
-  "version": "0.1.0",
+  "description": "%description%",
+  "version": "0.2.0",
   "publisher": "Gostman",
   "license": "MIT",
   "icon": "media/icon.png",
@@ -13,22 +13,29 @@
   "categories": ["Testing", "Other"],
   "keywords": ["api", "rest", "graphql", "grpc", "websocket", "http client", "postman", "bruno", "mcp"],
   "main": "./extension.js",
+  "l10n": "./l10n",
   "activationEvents": ["workspaceContains:gostman.yaml"],
   "capabilities": {
-    "untrustedWorkspaces": { "supported": false, "description": "Running a collection sends requests and runs its scripts." }
+    "untrustedWorkspaces": { "supported": false, "description": "%capabilities.untrustedWorkspaces%" },
+    "virtualWorkspaces": { "supported": false, "description": "%capabilities.virtualWorkspaces%" }
   },
   "contributes": {
     "commands": [
-      { "command": "gostman.run", "title": "Gostman: Run collection" },
-      { "command": "gostman.runFolder", "title": "Gostman: Run a folder of the collection" },
-      { "command": "gostman.send", "title": "Gostman: Send a saved request" },
-      { "command": "gostman.flow", "title": "Gostman: Run a flow" },
-      { "command": "gostman.lint", "title": "Gostman: Lint an OpenAPI spec" },
-      { "command": "gostman.scan", "title": "Gostman: Scan the collection for leaked secrets" },
-      { "command": "gostman.init", "title": "Gostman: Create a collection in this folder" },
-      { "command": "gostman.docs", "title": "Gostman: Open the documentation" }
+      { "command": "gostman.run", "title": "%command.run%" },
+      { "command": "gostman.runFolder", "title": "%command.runFolder%" },
+      { "command": "gostman.send", "title": "%command.send%" },
+      { "command": "gostman.sendFile", "title": "%command.sendFile%" },
+      { "command": "gostman.selectEnvironment", "title": "%command.selectEnvironment%" },
+      { "command": "gostman.flow", "title": "%command.flow%" },
+      { "command": "gostman.lint", "title": "%command.lint%" },
+      { "command": "gostman.scan", "title": "%command.scan%" },
+      { "command": "gostman.init", "title": "%command.init%" },
+      { "command": "gostman.docs", "title": "%command.docs%" }
     ],
     "menus": {
+      "commandPalette": [
+        { "command": "gostman.sendFile", "when": "resourceExtname =~ /\\.ya?ml$/" }
+      ],
       "explorer/context": [
         { "command": "gostman.lint", "when": "resourceExtname =~ /\\.(ya?ml|json)$/", "group": "gostman" }
       ]
@@ -39,20 +46,21 @@
         "gostman.path": {
           "type": "string",
           "default": "gostman",
-          "markdownDescription": "Command that starts the Gostman CLI. Use a full path when `gostman` is not on the PATH.",
+          "markdownDescription": "%config.path%",
           "scope": "machine"
         },
         "gostman.environment": {
           "type": "string",
           "default": "",
-          "description": "Environment name passed as --env. Empty uses the first environment of the collection."
+          "markdownDescription": "%config.environment%"
         }
       }
     }
   },
   "scripts": {
+    "l10n:export": "vscode-l10n-dev export --outDir l10n \"*.js\"",
     "package": "vsce package --no-dependencies",
     "publish": "vsce publish --no-dependencies"
   },
-  "devDependencies": { "@vscode/vsce": "^3.0.0" }
+  "devDependencies": { "@vscode/l10n-dev": "^0.0.35", "@vscode/vsce": "^3.0.0" }
 }
