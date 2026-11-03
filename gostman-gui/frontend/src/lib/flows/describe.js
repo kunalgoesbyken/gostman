@@ -1,8 +1,8 @@
 import { FLOW_CANVAS_TEXT as TEXT } from '../flowsText'
 import { isActiveAssertion, titleOf } from '../scripting/assertions'
 import {
-  CONDITION_VARIABLES, END_TARGET, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_REPEAT, STEP_REQUEST, STEP_SET,
-  STEP_SWITCH, casePosition, isCaseField, targetsOf,
+  CONDITION_VARIABLES, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_REPEAT, STEP_REQUEST, STEP_SET,
+  STEP_SWITCH, casePosition, isCaseField,
 } from './model'
 import { SOURCE_LOOP, SOURCE_SEND } from './outputs'
 import { caseLabel, resolveRequest, stepTitle } from './validate'
@@ -77,16 +77,6 @@ const LINES = {
 
 export const stepLines = (step, context) => LINES[step.kind]?.(step, context) ?? []
 
-const BRANCHING = {
-  [STEP_IF]: (step) => !step.then || !step.else,
-  [STEP_SWITCH]: (step) => !step.else || step.cases.some((kase) => !kase.target),
-}
-
-export function fallsThrough(step) {
-  if (step.kind === STEP_END || step.next) return false
-  return BRANCHING[step.kind]?.(step) ?? true
-}
-
 function edgeWord(step, field) {
   if (field === 'next' && step.onFailure) return 'passes'
   if (field === 'else' && step.kind === STEP_SWITCH) return 'otherwise'
@@ -99,7 +89,3 @@ export function jumpLabel(step, field) {
 }
 
 export const jumpTone = (field) => FIELD_TONES[field] || (isCaseField(field) ? TONE_SUCCESS : TONE_MUTED)
-
-export function jumpsOf(step) {
-  return targetsOf(step).map(([field, to]) => ({ from: step.id, to, field, label: jumpLabel(step, field), toEnd: to === END_TARGET, tone: jumpTone(field) }))
-}
