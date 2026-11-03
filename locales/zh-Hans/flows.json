@@ -197,8 +197,6 @@
     "label": "标签",
     "stepId": "步骤 ID",
     "request": "请求",
-    "variables": "本次发送的变量",
-    "variablesHint": "仅在此步骤发送期间设置，优先于其他所有范围。值中可以使用 {{variables}}，例如在“遍历”内使用 {{example}}。",
     "variableName": "名称",
     "variableValue": "值",
     "removeRow": "移除",

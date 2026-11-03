@@ -207,8 +207,6 @@
     "label": "Bezeichnung",
     "stepId": "Schritt-ID",
     "request": "Anfrage",
-    "variables": "Variablen für dieses Senden",
-    "variablesHint": "Nur gesetzt, solange dieser Schritt sendet, und vor jedem anderen Bereich. Werte können {{variables}} enthalten, etwa {{example}} innerhalb von „Für jedes“.",
     "variableName": "Name",
     "variableValue": "Wert",
     "removeRow": "Entfernen",

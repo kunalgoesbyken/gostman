@@ -158,11 +158,9 @@ function RequestFields({ step, index, requests, onPatch, onPickRequest, EditorCo
           {request ? <MethodTag method={request.method} className="w-12" /> : null}
           <span className={cn("min-w-0 truncate", !request && "text-muted-foreground")}>{request ? request.path : step.request || FLOW_CANVAS_TEXT.chooseRequest}</span>
         </Button>
-        <SectionLabel className="pt-1">{TEXT.variables}</SectionLabel>
+        <SectionLabel className="pt-1">{TEXT.inputs}</SectionLabel>
         <ScopeNote source={SOURCE_SEND}>{TEXT.sendScope}</ScopeNote>
-        <VariableRows variables={step.variables} onChange={(variables) => onPatch({ variables })} />
-        <Hint>{TEXT.variablesHint}</Hint>
-        <StepInputs inputs={step.inputs || []} index={index} requests={requests} onChange={(inputs) => onPatch({ inputs })} />
+        <StepInputs variables={step.variables} inputs={step.inputs || []} index={index} requests={requests} onChange={onPatch} />
       </Section>
       <Section title={TEXT.retry}>
         <Field label={TEXT.attempts}>

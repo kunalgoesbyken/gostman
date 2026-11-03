@@ -227,8 +227,6 @@
     "label": "Etykieta",
     "stepId": "ID kroku",
     "request": "Żądanie",
-    "variables": "Zmienne dla tego wysłania",
-    "variablesHint": "Ustawiane tylko podczas wysyłania w tym kroku, ponad każdym innym zakresem. Wartości mogą używać {{variables}}, na przykład {{example}} wewnątrz kroku Dla każdego.",
     "variableName": "Nazwa",
     "variableValue": "Wartość",
     "removeRow": "Usuń",

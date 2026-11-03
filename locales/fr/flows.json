@@ -217,8 +217,6 @@
     "label": "Libellé",
     "stepId": "ID de l’étape",
     "request": "Requête",
-    "variables": "Variables pour cet envoi",
-    "variablesHint": "Définies uniquement pendant l’envoi de cette étape, au-dessus de toutes les autres portées. Les valeurs peuvent utiliser {{variables}}, comme {{example}} dans Pour chaque.",
     "variableName": "Nom",
     "variableValue": "Valeur",
     "removeRow": "Supprimer",

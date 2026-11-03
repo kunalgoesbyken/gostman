@@ -137,6 +137,19 @@ export function resolveInputs(inputs, read) {
     if (!found.ok) return found
     resolved.push({ target: input.target, name: input.name, value: resolvedValue(input, found.value) })
   }
-  const variables = Object.fromEntries(resolved.filter((input) => input.target === INPUT_VARIABLE).map((input) => [input.name, input.value]))
-  return { ok: true, inputs: resolved, variables }
+  const isVariable = (input) => input.target === INPUT_VARIABLE
+  const variables = Object.fromEntries(resolved.filter(isVariable).map((input) => [input.name, input.value]))
+  return { ok: true, inputs: resolved.filter((input) => !isVariable(input)), variables }
 }
+
+const keepsAsVariable = (row) => row.target === INPUT_VARIABLE && !row.step && !row.source
+
+export const sendRows = (variables, inputs) => [
+  ...Object.entries(variables).map(([name, value]) => ({ target: INPUT_VARIABLE, name, value })),
+  ...inputs,
+]
+
+export const splitSendRows = (rows) => ({
+  variables: Object.fromEntries(rows.filter(keepsAsVariable).map((row) => [row.name, row.value || ''])),
+  inputs: rows.filter((row) => !keepsAsVariable(row)),
+})

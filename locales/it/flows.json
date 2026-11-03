@@ -217,8 +217,6 @@
     "label": "Etichetta",
     "stepId": "ID del passaggio",
     "request": "Richiesta",
-    "variables": "Variabili per questo invio",
-    "variablesHint": "Impostate solo mentre questo passaggio invia, sopra ogni altro ambito. I valori possono usare {{variables}}, come {{example}} dentro Per ogni.",
     "variableName": "Nome",
     "variableValue": "Valore",
     "removeRow": "Rimuovi",

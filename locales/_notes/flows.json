@@ -68,7 +68,6 @@
   "flowPicker": "Dialog that picks the saved request a step sends.",
   "flowEditor": "Fields of the step editor.",
   "flowEditor.stepId": "Technical identifier of a step; other steps refer to it.",
-  "flowEditor.variablesHint": "{{variables}} is the literal text of a variable placeholder with double braces and {{example}} an example of a loop variable; keep both parameters.",
   "flowEditor.retryDelay": "Pause between attempts, in milliseconds.",
   "flowEditor.until": "Heading of the conditions that decide whether a retrying step passed.",
   "flowEditor.paths": "Heading of the section that chooses the next steps.",

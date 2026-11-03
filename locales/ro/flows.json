@@ -217,8 +217,6 @@
     "label": "Etichetă",
     "stepId": "ID pas",
     "request": "Cerere",
-    "variables": "Variabile pentru această trimitere",
-    "variablesHint": "Setate doar cât timp acest pas trimite, deasupra oricărui alt domeniu. Valorile pot folosi {{variables}}, precum {{example}} în Pentru fiecare.",
     "variableName": "Nume",
     "variableValue": "Valoare",
     "removeRow": "Eliminare",

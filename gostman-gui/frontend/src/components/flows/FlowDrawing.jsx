@@ -4,7 +4,7 @@ import { FLOW_CANVAS_TEXT as TEXT, FLOW_VIEW_TEXT } from "../../lib/flowsText"
 import { jumpsOf } from "../../lib/flows/describe"
 import { END_NODE, START_NODE, pairKey, roundedPath } from "../../lib/flows/layout"
 import { STEP_SWITCH } from "../../lib/flows/model"
-import { stepTitle } from "../../lib/flows/validate"
+import { caseLabel, stepTitle } from "../../lib/flows/validate"
 import { cn } from "../../lib/utils"
 
 const CASE_PREFIX = "case:"
@@ -29,9 +29,9 @@ const toneOf = (step, field) => TONES[jumpOf(step, field)?.tone || FIELD_TONES[f
 function branchLabel(step, field) {
   if (field.startsWith(CASE_PREFIX)) {
     const position = Number(field.slice(CASE_PREFIX.length))
-    return step.cases?.[position]?.label || TEXT.caseNumber(position + 1)
+    return caseLabel(step.cases[position], position)
   }
-  if (field === "else" && step.kind === STEP_SWITCH) return TEXT.branches.otherwise
+  if (field === "else" && step.kind === STEP_SWITCH) return TEXT.edges.otherwise
   return TEXT.branches[field] || jumpOf(step, field)?.label || field
 }
 

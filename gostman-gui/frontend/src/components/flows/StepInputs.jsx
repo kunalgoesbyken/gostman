@@ -1,11 +1,10 @@
 import { X } from "lucide-react"
 import { IconButton } from "../ui/button"
 import { Input } from "../ui/input"
-import { SectionLabel } from "../ui/panel"
 import { Select } from "../ui/select"
 import { SourceSelect, SourceValue } from "./ValueSource"
 import { FLOW_EDITOR_TEXT as TEXT } from "../../lib/flowsText"
-import { INPUT_HEADER, INPUT_TARGETS } from "../../lib/flows/inputs"
+import { INPUT_HEADER, INPUT_TARGETS, sendRows, splitSendRows } from "../../lib/flows/inputs"
 import { cn } from "../../lib/utils"
 
 const BLANK_INPUT = { target: INPUT_HEADER, name: "", value: "" }
@@ -35,18 +34,18 @@ function InputRow({ input, isDraft, index, requests, onChange, onRemove }) {
   )
 }
 
-export function StepInputs({ inputs, index, requests, onChange }) {
-  const rows = [...inputs, BLANK_INPUT]
-  const commit = (next) => onChange(next.filter(isFilled))
+export function StepInputs({ variables, inputs, index, requests, onChange }) {
+  const filled = sendRows(variables, inputs)
+  const rows = [...filled, BLANK_INPUT]
+  const commit = (next) => onChange(splitSendRows(next.filter(isFilled)))
   return (
     <>
-      <SectionLabel className="pt-1">{TEXT.inputs}</SectionLabel>
       <div className="flex flex-col gap-1.5">
         {rows.map((input, position) => (
           <InputRow
             key={position}
             input={input}
-            isDraft={position === inputs.length}
+            isDraft={position === filled.length}
             index={index}
             requests={requests}
             onChange={(next) => commit(rows.map((row, at) => (at === position ? next : row)))}
