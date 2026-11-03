@@ -71,8 +71,7 @@ export function createSpecActions({ backend, attempt, addImported }) {
     if (!saved?.source) throw new Error(SPEC_TEXT.sourceMissing)
     const link = upgradedLink(saved, store().requests)
     store().setSpecLink(folderId, link)
-    const summary = await client.summary(link.source)
-    const snapshot = await fetchSnapshot(link.source)
+    const [summary, snapshot] = await Promise.all([client.summary(link.source), fetchSnapshot(link.source)])
     return { ...diffSpec(link, summary.operations, store().requests), hash: summary.hash, snapshot, changes: await changesSince(link, snapshot) }
   }
 

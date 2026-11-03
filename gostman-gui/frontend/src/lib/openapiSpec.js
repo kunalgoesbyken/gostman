@@ -76,6 +76,7 @@ export function createSpecClient(backend) {
     operation: async (source, key) => (await ask({ action: 'operation', source, key })).detail,
     schema: async (source, name) => (await ask({ action: 'schema', source, name })).schema,
     text: async (source) => {
+      if (typeof source?.text === 'string') return source.text
       const reply = await backend.diff({ old: {}, new: source })
       if (reply.error) throw new Error(reply.error)
       return reply.text
