@@ -51,14 +51,16 @@ const towards = (removed, continuation) => (step) => retargeted(step, (target) =
 
 const idsWithin = (step) => [step.id, ...allStepIds(innerSteps(step))]
 
-const continuationOf = (step, removed) => (removed.has(step.next) ? '' : step.next)
+const successorOf = (entry) => entry.list[entry.position + 1]?.id || (entry.parent === ROOT ? END_TARGET : '')
+
+const continuationOf = (entry, removed) => (entry.step.next && !removed.has(entry.step.next) ? entry.step.next : successorOf(entry))
 
 export function removeStep(flow, id) {
   const entry = indexSteps(flow.steps).get(id)
   if (!entry) return flow
   const removed = new Set(idsWithin(entry.step))
   const shortened = changeList(flow, entry.parent, (list) => list.filter((step) => step.id !== id))
-  return { ...shortened, steps: mapSteps(shortened.steps, towards(removed, continuationOf(entry.step, removed))) }
+  return { ...shortened, steps: mapSteps(shortened.steps, towards(removed, continuationOf(entry, removed))) }
 }
 
 export function moveStep(flow, id, offset) {
