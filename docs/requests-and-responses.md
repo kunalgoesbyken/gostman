@@ -233,7 +233,7 @@ Each assertion row has a checkbox that turns it on or off, an Expression, a Chec
 
 The tab shows only the settings that apply to the request: gRPC and remote MCP requests have Timeout (ms) and Verify TLS certificates, a local `stdio:` MCP server has Timeout (ms), and WebSocket requests have only Tags and Description. A setting you changed stays visible even when it does not apply.
 
-A dot on the Settings tab means one of the settings above the tags differs from its default: a timeout is set, redirects, TLS verification or one of the cookie options is turned off, or streaming is on.
+A dot on the Settings tab means one of the connection settings differs from its default: a timeout is set, redirects, TLS verification or one of the cookie options is turned off, or streaming is on. Opens in, Expand JSON responses, Tags and Description do not light it.
 
 ### Notes
 

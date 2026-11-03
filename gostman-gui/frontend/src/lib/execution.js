@@ -253,7 +253,7 @@ export function createExecutor(backend) {
     let request = original
     if (store().isRestricted && (hasActiveContent(request) || hasActiveInheritance(lineage))) return stop(request, EXECUTION_TEXT.restricted, RESTRICTED_ERROR)
 
-    const problems = variableProblems(parseRows(request.vars))
+    const problems = variableProblems(parseRows(request.vars), Object.keys(store().sessionVariables))
     if (problems.length > 0) return stop(request, blockedMessage(problems))
 
     let referenced

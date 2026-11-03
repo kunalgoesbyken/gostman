@@ -124,14 +124,16 @@ export function SettingsPanel({ options, settings, description, tags, defaultVie
             </Select>
           </Field>
         )}
-        <Field label={TEXT.jsonDepth}>
-          <Select value={jsonDepth || ""} onChange={(event) => onJsonDepthChange(event.target.value)} className="max-w-48">
-            <option value="">{TEXT.jsonDepthDefault}</option>
-            {DEPTH_SETTINGS.map((setting) => (
-              <option key={setting} value={setting}>{depthLabel(setting)}</option>
-            ))}
-          </Select>
-        </Field>
+        {showsViews && (
+          <Field label={TEXT.jsonDepth}>
+            <Select value={jsonDepth || ""} onChange={(event) => onJsonDepthChange(event.target.value)} className="max-w-48">
+              <option value="">{TEXT.jsonDepthDefault}</option>
+              {DEPTH_SETTINGS.map((setting) => (
+                <option key={setting} value={setting}>{depthLabel(setting)}</option>
+              ))}
+            </Select>
+          </Field>
+        )}
         <Field label={TEXT.tags} grouped>
           <TagsInput
             value={tags}

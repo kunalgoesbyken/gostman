@@ -29,6 +29,13 @@ func (s *Session) OutgoingWithheld(ctx context.Context, request Request) (engine
 	if socket {
 		return engine.Request{}, nil, errNotHTTP
 	}
+	request, message, err := s.state.withTypedVariables(request)
+	if err != nil {
+		return engine.Request{}, nil, err
+	}
+	if message != "" {
+		return engine.Request{}, nil, errors.New(message)
+	}
 	request, dropped := s.state.vetted(request)
 	request, err = s.state.withFreshToken(ctx, request)
 	if err != nil {

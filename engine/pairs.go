@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"regexp"
@@ -50,6 +51,17 @@ func scalarString(v any) string {
 	}
 }
 
+func variableText(value any, raw json.RawMessage) string {
+	switch value.(type) {
+	case map[string]any, []any:
+		var compact bytes.Buffer
+		if json.Compact(&compact, raw) == nil {
+			return compact.String()
+		}
+	}
+	return scalarString(value)
+}
+
 func parseVariables(raw string) (map[string]string, error) {
 	if strings.TrimSpace(raw) == "" {
 		return nil, nil
@@ -62,10 +74,12 @@ func parseVariables(raw string) (map[string]string, error) {
 	if !ok {
 		return nil, locales.Errorf(locales.EngineRequestExpectedObject, nil)
 	}
+	var raws map[string]json.RawMessage
+	_ = json.Unmarshal([]byte(raw), &raws)
 	variables := make(map[string]string, len(object))
 	for key, value := range object {
 		if value != nil {
-			variables[key] = scalarString(value)
+			variables[key] = variableText(value, raws[key])
 		}
 	}
 	return variables, nil

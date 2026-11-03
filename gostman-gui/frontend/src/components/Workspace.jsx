@@ -36,7 +36,7 @@ import { TASK_EXPLAIN, TASK_REQUEST } from "../lib/ai/tasks"
 import { MIN_REQUEST_HEIGHT_PX, isNarrowViewport } from "../lib/layout"
 import { isBlankRequest } from "../lib/requestChanges"
 import { VIEW_FULL, VIEW_VARIABLES, defaultViewOf } from "../lib/requestView"
-import { variableProblems } from "../lib/requestVariables"
+import { isShownInForm, variableProblems } from "../lib/requestVariables"
 import { parseRows } from "../lib/rows"
 import { forgetSharedLink, pendingSharedLink, subscribeToSharedLink } from "../lib/sharedLink"
 import { currentOpenLink, dismissOpenLink, subscribeToOpenLink } from "../lib/openLink"
@@ -377,7 +377,7 @@ function LoadedWorkspace({ backend, onBack }) {
   const changeView = useCallback((next) => setViewChoices((current) => ({ ...current, [viewKey]: next })), [viewKey])
   const openFullEditor = useCallback(() => changeView(VIEW_FULL), [changeView])
   const sendFromVariablesView = useCallback(() => {
-    if (variableProblems(parseRows(activeRequest.vars)).length === 0) {
+    if (variableProblems(parseRows(activeRequest.vars).filter(isShownInForm)).length === 0) {
       actions.send()
       return
     }

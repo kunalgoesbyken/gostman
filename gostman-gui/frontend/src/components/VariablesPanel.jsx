@@ -13,7 +13,7 @@ import { PanelBody, SectionLabel } from "./ui/panel"
 import { Select } from "./ui/select"
 import { isBlankRow } from "../lib/rows"
 import { updatePreferences, usePreferences } from "../lib/preferences"
-import { PROBLEM_REQUIRED, TYPE_BOOLEAN, TYPE_ENUM, VARIABLE_TYPES, keepRowSettings, problemOf, problemText, typeOf } from "../lib/requestVariables"
+import { PROBLEM_REQUIRED, TYPE_BOOLEAN, TYPE_ENUM, TYPE_NONE, VARIABLE_TYPES, keepRowSettings, problemOf, problemText, typeOf } from "../lib/requestVariables"
 import { KEY_VALUE_TEXT } from "../lib/keyValueText"
 import { REQUEST_TABS_TEXT } from "../lib/requestTabsText"
 import { REQUEST_VARIABLES_TEXT } from "../lib/requestVariablesText"
@@ -32,6 +32,8 @@ const draftRow = () => ({ key: "", value: "", enabled: true })
 const typeName = (type) => REQUEST_VARIABLES_TEXT.types[type || "none"]
 
 const hasFieldSettings = (row) => Boolean(row.label || row.help || row.placeholder || row.choices || row.required || row.hidden)
+
+const isEmptyRow = (row) => isBlankRow(row) && !hasFieldSettings(row) && typeOf(row) === TYPE_NONE
 
 function ColumnLabels() {
   return (
@@ -119,7 +121,7 @@ function VariableRow({ row, isDraft, isOpen, onChange, onRemove, onToggleOptions
 function Table({ rows, onChange }) {
   const [openAt, setOpenAt] = useState(NONE_OPEN)
   const shown = [...rows, draftRow()]
-  const commit = (next) => onChange(next.filter((row) => !isBlankRow(row)))
+  const commit = (next) => onChange(next.filter((row) => !isEmptyRow(row)))
   const replaceRow = (index, patch) => commit(shown.map((row, at) => (at === index ? { ...row, ...patch } : row)))
   const removeRow = (index) => {
     setOpenAt(NONE_OPEN)

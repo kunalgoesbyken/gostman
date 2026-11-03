@@ -23,8 +23,11 @@ func parseVariables(text string) (variables, error) {
 }
 
 func (v variables) text() string {
-	encoded, _ := json.Marshal(v)
-	return string(encoded)
+	var encoded strings.Builder
+	encoder := json.NewEncoder(&encoded)
+	encoder.SetEscapeHTML(false)
+	_ = encoder.Encode(v)
+	return strings.TrimSuffix(encoded.String(), "\n")
 }
 
 func (v variables) merge(additions variables) {
@@ -118,9 +121,16 @@ func startingSlot(environments []Environment, environment Environment, overrides
 }
 
 type variableRow struct {
-	Key     string `json:"key"`
-	Value   any    `json:"value"`
-	Enabled *bool  `json:"enabled"`
+	Key     string          `json:"key"`
+	Value   json.RawMessage `json:"value"`
+	Enabled *bool           `json:"enabled"`
+}
+
+func (r variableRow) encoded() json.RawMessage {
+	if len(r.Value) == 0 {
+		return json.RawMessage("null")
+	}
+	return r.Value
 }
 
 func (r Request) OwnVariables() map[string]string {
@@ -137,8 +147,7 @@ func requestScope(text string) variables {
 		if strings.TrimSpace(row.Key) == "" || (row.Enabled != nil && !*row.Enabled) {
 			continue
 		}
-		encoded, _ := json.Marshal(row.Value)
-		scope[row.Key] = encoded
+		scope[row.Key] = row.encoded()
 	}
 	return scope
 }

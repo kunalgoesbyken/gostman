@@ -1,4 +1,5 @@
 import { formatList } from './i18n/format'
+import { placeholderNames } from './placeholders'
 import { REQUEST_VARIABLES_TEXT as TEXT } from './requestVariablesText'
 import { isSentRow, parseRows, serializeRows } from './rows'
 
@@ -55,12 +56,16 @@ function readChoice(text, choices) {
   return choices.length === 0 || choices.includes(chosen) ? accepted(chosen) : rejected(TYPE_ENUM)
 }
 
+const holdsPlaceholder = (text) => placeholderNames(text).length > 0
+
 export function readTyped(row) {
   const type = typeOf(row)
   const text = String(row.value ?? '')
   if (type === TYPE_NONE || type === TYPE_STRING) return accepted(text)
-  if (type === TYPE_BOOLEAN) return text.trim() === '' ? accepted(false) : readBoolean(text)
-  if (text.trim() === '') return accepted(text)
+  const isEmpty = text.trim() === ''
+  if (type === TYPE_BOOLEAN && isEmpty) return accepted(false)
+  if (isEmpty || holdsPlaceholder(text)) return accepted(text)
+  if (type === TYPE_BOOLEAN) return readBoolean(text)
   if (type === TYPE_NUMBER) return readNumber(text, false)
   if (type === TYPE_INTEGER) return readNumber(text, true)
   if (type === TYPE_JSON) return readJson(text)
@@ -91,8 +96,8 @@ export function problemText(row, problem) {
   return TEXT.problems[problem](name)
 }
 
-export function variableProblems(rows) {
-  return rows.filter(isSentRow).flatMap((row) => {
+export function variableProblems(rows, overridden = []) {
+  return rows.filter((row) => isSentRow(row) && !overridden.includes(row.key)).flatMap((row) => {
     const problem = problemOf(row)
     return problem === '' ? [] : [{ key: row.key, problem, message: problemText(row, problem) }]
   })
@@ -102,20 +107,28 @@ export function blockedMessage(problems) {
   return TEXT.blocked(problems.map((problem) => problem.message).join(BLOCKED_LINE_SEPARATOR))
 }
 
-export function requestVariables(text) {
+export function requestVariables(text, overridden = []) {
   const rows = parseRows(text)
-  const problems = variableProblems(rows)
+  const problems = variableProblems(rows, overridden)
   const typed = rows.map((row) => (isSentRow(row) ? { ...row, value: typedValue(row) } : row))
   return { vars: serializeRows(typed), message: problems.length > 0 ? blockedMessage(problems) : '' }
 }
 
+const settingsOf = (row) => Object.fromEntries(Object.entries(row).filter(([name]) => !ROW_BASICS.includes(name)))
+
 export function keepRowSettings(previous, next) {
+  const nextKeys = new Set(next.map((row) => row.key))
   const unused = [...previous]
-  return next.map((row) => {
-    const at = unused.findIndex((candidate) => candidate.key === row.key)
-    if (at < 0) return row
-    const [match] = unused.splice(at, 1)
-    const settings = Object.entries(match).filter(([name]) => !ROW_BASICS.includes(name))
-    return { ...Object.fromEntries(settings), ...row }
+  const matchFor = (row, index) => {
+    const sameKey = unused.find((candidate) => candidate.key === row.key)
+    if (sameKey) return sameKey
+    const renamed = previous[index]
+    return renamed && !nextKeys.has(renamed.key) && unused.includes(renamed) ? renamed : undefined
+  }
+  return next.map((row, index) => {
+    const match = matchFor(row, index)
+    if (!match) return row
+    unused.splice(unused.indexOf(match), 1)
+    return { ...settingsOf(match), ...row }
   })
 }

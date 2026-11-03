@@ -120,6 +120,19 @@ func (v *values) scriptLayers(request Request, once variables) []scriptLayer {
 	}
 }
 
+func (v *values) overriding(once variables) []string {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	names := make([]string, 0, len(v.session)+len(once))
+	for name := range v.session {
+		names = append(names, name)
+	}
+	for name := range once {
+		names = append(names, name)
+	}
+	return names
+}
+
 func (v *values) known() variables {
 	v.mu.Lock()
 	defer v.mu.Unlock()

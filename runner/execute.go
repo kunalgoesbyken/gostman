@@ -327,27 +327,27 @@ func hasVariableRows(text string) bool {
 	return trimmed != "" && trimmed != "{}" && trimmed != "[]"
 }
 
-func (s *session) withTypedVariables(request Request, outcome *exchange) (Request, bool, error) {
+func (s *session) withTypedVariables(request Request) (Request, string, error) {
 	if !hasVariableRows(request.Vars) {
-		return request, true, nil
+		return request, "", nil
 	}
 	var typed typedVariables
-	if err := s.scripts.Call("requestVariables", &typed, request.Vars); err != nil {
-		return request, false, err
+	if err := s.scripts.Call("requestVariables", &typed, request.Vars, s.values.overriding(s.once)); err != nil {
+		return request, "", err
 	}
 	request.Vars = typed.Vars
-	if typed.Message != "" {
-		outcome.stop(typed.Message)
-		return request, false, nil
-	}
-	return request, true, nil
+	return request, typed.Message, nil
 }
 
 func (s *session) execute(ctx context.Context, request Request) (exchange, error) {
 	var outcome exchange
-	request, proceed, err := s.withTypedVariables(request, &outcome)
-	if err != nil || !proceed {
+	request, message, err := s.withTypedVariables(request)
+	if err != nil {
 		return outcome, err
+	}
+	if message != "" {
+		outcome.stop(message)
+		return outcome, nil
 	}
 	socket, err := s.isSocket(request)
 	if err != nil {
@@ -358,7 +358,7 @@ func (s *session) execute(ctx context.Context, request Request) (exchange, error
 		return outcome, nil
 	}
 
-	request, proceed, err = s.runPreRequests(ctx, request, &outcome)
+	request, proceed, err := s.runPreRequests(ctx, request, &outcome)
 	if err != nil || !proceed {
 		return outcome, err
 	}
