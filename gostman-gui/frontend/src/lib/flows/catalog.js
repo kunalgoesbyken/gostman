@@ -1,6 +1,6 @@
 import { folderChain } from '../variableScopes'
-import { STEP_REQUEST, mapSteps } from './model'
-import { resolveRequest } from './validate'
+import { STEP_FLOW, STEP_REQUEST, mapSteps } from './model'
+import { resolveFlow, resolveRequest } from './validate'
 
 const PATH_SEPARATOR = '/'
 
@@ -24,11 +24,20 @@ export function requestCatalog(requests, folders) {
   return lastCatalog
 }
 
-export function withRequestPaths(flow, catalog) {
+function namedRequest(step, catalog) {
+  const request = resolveRequest(step, catalog)
+  return request ? { ...step, request: request.path, requestId: request.id } : step
+}
+
+function namedFlow(step, flows) {
+  const called = resolveFlow(step, flows)
+  return called ? { ...step, flow: called.name, flowId: called.id } : step
+}
+
+export function withReferenceNames(flow, catalog, flows) {
   const named = (step) => {
-    if (step.kind !== STEP_REQUEST) return step
-    const request = resolveRequest(step, catalog)
-    return request ? { ...step, request: request.path, requestId: request.id } : step
+    if (step.kind === STEP_REQUEST) return namedRequest(step, catalog)
+    return step.kind === STEP_FLOW ? namedFlow(step, flows) : step
   }
   return { ...flow, steps: mapSteps(flow.steps, named) }
 }

@@ -1,7 +1,7 @@
 import { textToBase64 } from './base64'
 import { DIALOG_TEXT } from './dialogText'
 import { FLOW_TEXT } from './flowsText'
-import { requestCatalog, withRequestPaths } from './flows/catalog'
+import { requestCatalog, withReferenceNames } from './flows/catalog'
 import { blankFlow, copiedFlow, exampleFlow, isFlowDirty, uniqueFlowName } from './flows/edit'
 import { createFlowRunner, runResults, useFlowRunStore } from './flows/flowRunner'
 import { compactFlow, normalizeFlow, slugOf } from './flows/model'
@@ -20,7 +20,7 @@ const reportName = (name) => `${slugOf(name, 'flow')}-report.html`
 export function createFlowActions(backend, { attempt, execute, promptForName }) {
   const runner = createFlowRunner(execute, (sendId) => backend.cancel(sendId))
   const catalog = () => requestCatalog(store().requests, store().folders)
-  const named = (flow) => withRequestPaths(normalizeFlow(flow), catalog())
+  const named = (flow) => withReferenceNames(normalizeFlow(flow), catalog(), store().flows)
 
   async function persist(flows) {
     store().setFlows(flows)

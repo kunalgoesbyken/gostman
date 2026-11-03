@@ -1,9 +1,10 @@
 import { FLOW_ENGINE_TEXT as TEXT } from '../flowsText'
+import { isActiveAssertion } from '../scripting/assertions'
 import {
-  END_TARGET, MAX_SENDS_CAP, OUTCOME_FAILED, OUTCOME_PASSED, STEP_DELAY, STEP_END, STEP_FOR_EACH, STEP_IF, STEP_REQUEST, STEP_SET,
-  indexSteps, loopsAround, normalizeFlow,
+  END_TARGET, MAX_SENDS_CAP, OUTCOME_FAILED, OUTCOME_PASSED, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_REPEAT,
+  STEP_REQUEST, STEP_SET, STEP_SWITCH, indexSteps, loopsAround, normalizeFlow,
 } from './model'
-import { describeProblems, resolveRequest, stepTitle, validateFlow } from './validate'
+import { caseLabel, describeProblems, resolveFlow, resolveRequest, stepTitle, validateFlow } from './validate'
 import {
   asText, evaluateConditions, evaluateUntil, fillTemplate, itemValues, listItems, readResponse, subjectOf,
 } from './values'
@@ -11,10 +12,13 @@ import {
 export const ACTION_SEND = 'send'
 export const ACTION_WAIT = 'wait'
 export const ACTION_DONE = 'done'
+export const ACTION_FLOW = 'flow'
 
 export const EVENT_PASSED = 'passed'
 export const EVENT_FAILED = 'failed'
 export const EVENT_HANDLED = 'handled'
+
+export const BRANCH_ELSE = 'else'
 
 const MAX_QUIET_STEPS = 10000
 
@@ -28,6 +32,8 @@ function createTurn(flow, state, context) {
     state,
     index: indexSteps(flow.steps),
     requests: context.requests || [],
+    flows: context.flows || [],
+    sendsLeft: Number.isFinite(context.sendsLeft) ? context.sendsLeft : MAX_SENDS_CAP,
     given: context.variables || {},
     writes: {},
     events: [],
@@ -62,24 +68,79 @@ function enter(turn, id) {
   turn.state.attempt = 1
 }
 
+function startPass(turn, loop) {
+  turn.state.at = loop.steps[0].id
+  turn.state.attempt = 1
+}
+
 function bindItem(turn, loop, frame) {
   write(turn, itemValues(frame.items[frame.index], frame.index, loop))
   record(turn, loop, EVENT_PASSED, { summary: TEXT.iteration(frame.index, frame.items.length), index: frame.index, count: frame.items.length })
+  startPass(turn, loop)
+}
+
+function beginPass(turn, loop, frame) {
+  write(turn, { [loop.indexAs]: String(frame.index) })
+  record(turn, loop, EVENT_PASSED, { summary: TEXT.pass(frame.index, frame.count), index: frame.index, count: frame.count })
+  startPass(turn, loop)
+}
+
+function endOfItem(turn, loop, frame) {
+  frame.index += 1
+  if (frame.index < frame.items.length) return bindItem(turn, loop, frame)
+  turn.state.frames.pop()
+  return continueAfter(turn, loop)
+}
+
+const untilOf = (loop) => ({ source: loop.source, step: loop.step, match: loop.match, conditions: loop.until })
+
+const untilChecks = (checks) => checks.map((check) => ({ ...check, name: TEXT.untilCheck(check.name) }))
+
+function repeatExhausted(turn, loop, checks) {
+  turn.state.frames.pop()
+  if (loop.onFailure) {
+    record(turn, loop, EVENT_HANDLED, { checks, summary: TEXT.untilNeverRerouted(loop.times, targetTitle(turn, loop.onFailure)), handledBy: 'failure' })
+    return goTo(turn, loop, loop.onFailure)
+  }
+  record(turn, loop, EVENT_FAILED, { checks, summary: TEXT.untilNever(loop.times) })
+  return finish(turn, OUTCOME_FAILED, TEXT.repeatFailed(stepTitle(loop, turn.requests), loop.times))
+}
+
+function nextPass(turn, loop, frame) {
+  frame.index += 1
+  if (loop.delayMs === 0) return beginPass(turn, loop, frame)
+  turn.state.at = loop.id
+  turn.action = { kind: ACTION_WAIT, step: loop.id, ms: loop.delayMs }
+  return undefined
+}
+
+function endOfPass(turn, loop, frame) {
+  const isLast = frame.index + 1 >= frame.count
+  if (!loop.until.some(isActiveAssertion)) {
+    if (!isLast) return nextPass(turn, loop, frame)
+    turn.state.frames.pop()
+    return continueAfter(turn, loop)
+  }
+  const result = evaluateConditions(untilOf(loop), conditionSubject(turn, loop), variablesOf(turn))
+  const checks = untilChecks(result.checks)
+  if (result.passed) {
+    turn.state.frames.pop()
+    record(turn, loop, EVENT_PASSED, { checks, summary: TEXT.untilMet(frame.index + 1) })
+    return continueAfter(turn, loop)
+  }
+  return isLast ? repeatExhausted(turn, loop, checks) : nextPass(turn, loop, frame)
+}
+
+const LOOP_ENDS = {
+  [STEP_FOR_EACH]: endOfItem,
+  [STEP_REPEAT]: endOfPass,
 }
 
 function nextInLoop(turn, loopId) {
   const loop = turn.index.get(loopId).step
   const frame = turn.state.frames[turn.state.frames.length - 1]
   if (!frame || frame.step !== loopId) return following(turn, loopId)
-  frame.index += 1
-  if (frame.index < frame.items.length) {
-    bindItem(turn, loop, frame)
-    turn.state.at = loop.steps[0].id
-    turn.state.attempt = 1
-    return undefined
-  }
-  turn.state.frames.pop()
-  return following(turn, loopId)
+  return LOOP_ENDS[loop.kind](turn, loop, frame)
 }
 
 function following(turn, id) {
@@ -97,11 +158,15 @@ function goTo(turn, from, target) {
 
 const continueAfter = (turn, step, target = '') => goTo(turn, step, target || step.next)
 
+const sendLimit = (turn) => Math.min(turn.flow.maxSends, turn.sendsLeft)
+
+const isOverBudget = (turn) => turn.state.sends >= sendLimit(turn)
+
+const stopForBudget = (turn) => finish(turn, OUTCOME_FAILED, TEXT.budget(turn.state.sends, MAX_SENDS_CAP))
+
 function sendAction(turn, step) {
   const retry = step.retry
-  if (turn.state.sends >= turn.flow.maxSends) {
-    return finish(turn, OUTCOME_FAILED, TEXT.budget(turn.state.sends, MAX_SENDS_CAP))
-  }
+  if (isOverBudget(turn)) return stopForBudget(turn)
   turn.state.sends += 1
   turn.state.quiet = 0
   const request = resolveRequest(step, turn.requests)
@@ -144,7 +209,8 @@ function nextTitle(turn, step, target) {
   if (target) return targetTitle(turn, target)
   const { list, position, parent } = turn.index.get(step.id)
   if (position + 1 < list.length) return titleOf(turn, list[position + 1].id)
-  return parent ? TEXT.nextItem : TEXT.endOfFlow
+  if (!parent) return TEXT.endOfFlow
+  return turn.index.get(parent).step.kind === STEP_REPEAT ? TEXT.nextPass : TEXT.nextItem
 }
 
 function runIf(turn, step) {
@@ -153,6 +219,25 @@ function runIf(turn, step) {
   const summary = TEXT.branch(TEXT.branchNames[branch], nextTitle(turn, step, step[branch] || step.next))
   record(turn, step, EVENT_PASSED, { branch, checks, summary })
   return continueAfter(turn, step, step[branch])
+}
+
+const caseChecks = (checks, label) => checks.map((check) => ({ ...check, name: TEXT.caseCheck(label, check.name) }))
+
+function runSwitch(turn, step) {
+  const subject = conditionSubject(turn, step)
+  const variables = variablesOf(turn)
+  const checks = []
+  for (const [position, kase] of step.cases.entries()) {
+    const label = caseLabel(kase, position)
+    const result = evaluateConditions({ source: step.source, match: kase.match, conditions: kase.conditions }, subject, variables)
+    checks.push(...caseChecks(result.checks, label))
+    if (result.passed) {
+      record(turn, step, EVENT_PASSED, { branch: position, checks, summary: TEXT.branch(label, nextTitle(turn, step, kase.target || step.next)) })
+      return continueAfter(turn, step, kase.target)
+    }
+  }
+  record(turn, step, EVENT_PASSED, { branch: BRANCH_ELSE, checks, summary: TEXT.branch(TEXT.noCaseMatched, nextTitle(turn, step, step.else || step.next)) })
+  return continueAfter(turn, step, step.else)
 }
 
 function runForEach(turn, step) {
@@ -167,9 +252,33 @@ function runForEach(turn, step) {
   }
   const frame = { step: step.id, items: items.value, index: 0 }
   turn.state.frames.push(frame)
-  bindItem(turn, step, frame)
-  turn.state.at = step.steps[0].id
-  turn.state.attempt = 1
+  return bindItem(turn, step, frame)
+}
+
+function runRepeat(turn, step) {
+  const frame = { step: step.id, index: 0, count: step.times }
+  turn.state.frames.push(frame)
+  return beginPass(turn, step, frame)
+}
+
+const filledVariables = (turn, variables) => Object.fromEntries(Object.entries(variables).map(([name, value]) => [name, fillTemplate(value, variablesOf(turn))]))
+
+function runFlow(turn, step) {
+  if (isOverBudget(turn)) return stopForBudget(turn)
+  const called = resolveFlow(step, turn.flows)
+  if (!called) {
+    const message = TEXT.missingFlow(step.flow || step.flowId)
+    record(turn, step, EVENT_FAILED, { summary: message })
+    return finish(turn, OUTCOME_FAILED, message)
+  }
+  turn.action = {
+    kind: ACTION_FLOW,
+    step: step.id,
+    flowId: called.id,
+    title: stepTitle(step, turn.requests),
+    variables: filledVariables(turn, step.variables),
+    sendsLeft: sendLimit(turn) - turn.state.sends,
+  }
   return undefined
 }
 
@@ -187,7 +296,10 @@ const HANDLERS = {
   [STEP_REQUEST]: sendAction,
   [STEP_SET]: runSet,
   [STEP_IF]: runIf,
+  [STEP_SWITCH]: runSwitch,
   [STEP_FOR_EACH]: runForEach,
+  [STEP_REPEAT]: runRepeat,
+  [STEP_FLOW]: runFlow,
   [STEP_DELAY]: runDelay,
   [STEP_END]: runEnd,
 }
@@ -210,7 +322,7 @@ function judgeAttempt(turn, step, input) {
   turn.state.responses[step.id] = subject
   turn.state.last = step.id
   const arrived = Boolean(input.response) && !input.response.error
-  const checks = arrived ? evaluateUntil(step.retry.until, subject, variablesOf(turn)).map((check) => ({ ...check, name: TEXT.untilCheck(check.name) })) : []
+  const checks = arrived ? untilChecks(evaluateUntil(step.retry.until, subject, variablesOf(turn))) : []
   const passed = arrived && !input.failed && checks.every((check) => check.passed)
   return { checks, passed, attempt: turn.state.attempt, attempts: step.retry.times }
 }
@@ -240,9 +352,41 @@ function afterWait(turn, step) {
   return continueAfter(turn, step)
 }
 
+function afterPause(turn, loop) {
+  const frame = turn.state.frames[turn.state.frames.length - 1]
+  if (!frame || frame.step !== loop.id) return continueAfter(turn, loop)
+  return beginPass(turn, loop, frame)
+}
+
+const sendsOf = (input) => Math.max(0, Math.trunc(Number(input.sends)) || 0)
+
+function afterFlow(turn, step, input) {
+  const sends = sendsOf(input)
+  turn.state.sends += sends
+  if (sends > 0) turn.state.quiet = 0
+  const title = stepTitle(step, turn.requests)
+  const message = typeof input.message === 'string' ? input.message : ''
+  if (input.outcome === OUTCOME_PASSED) {
+    record(turn, step, EVENT_PASSED, { summary: TEXT.flowPassed(sends), sends })
+    return continueAfter(turn, step)
+  }
+  if (step.onFailure) {
+    record(turn, step, EVENT_HANDLED, { summary: TEXT.rerouted(targetTitle(turn, step.onFailure)), sends, handledBy: 'failure' })
+    return goTo(turn, step, step.onFailure)
+  }
+  record(turn, step, EVENT_FAILED, { summary: message || TEXT.failedAt(title), sends })
+  return finish(turn, OUTCOME_FAILED, TEXT.failedAt(title))
+}
+
+const AFTER_ACTION = {
+  [STEP_REQUEST]: afterSend,
+  [STEP_FLOW]: afterFlow,
+  [STEP_REPEAT]: afterPause,
+}
+
 export function flowBegin(raw, context = {}) {
   const flow = normalizeFlow(raw)
-  const problems = validateFlow(flow, context.requests || [])
+  const problems = validateFlow(flow, context.requests || [], context.flows || [])
   const turn = createTurn(flow, freshState(), context)
   if (problems.length > 0) {
     finish(turn, OUTCOME_FAILED, describeProblems(flow, problems, turn.requests))
@@ -262,7 +406,7 @@ export function flowAdvance(raw, state, input = {}, context = {}) {
     finish(turn, OUTCOME_PASSED, TEXT.passed)
     return proceed(turn)
   }
-  if (entry.step.kind === STEP_REQUEST) afterSend(turn, entry.step, input)
-  else afterWait(turn, entry.step)
+  const after = AFTER_ACTION[entry.step.kind] || afterWait
+  after(turn, entry.step, input)
   return proceed(turn)
 }

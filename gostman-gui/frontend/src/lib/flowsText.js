@@ -34,6 +34,11 @@ const text = messages('flows', english, (t) => {
       branch: (branch, target) => t('flowEngine.branch', { branch, target }),
       wrote: (names) => formatList(names, 'unit'),
       iteration: (index, count) => t('flowEngine.iteration', { position: index + 1, count }),
+      pass: (index, count) => t('flowEngine.pass', { position: index + 1, count }),
+      untilNeverRerouted: (times, target) => t('flowEngine.untilNeverRerouted', { count: times, target }),
+      repeatFailed: (title, times) => t('flowEngine.repeatFailed', { title, count: times }),
+      caseName: (position) => t('flowEngine.caseName', { position: position + 1 }),
+      caseCheck: (label, name) => t('flowEngine.caseCheck', { label, name }),
       waited: (milliseconds) => t('flowEngine.waited', { duration: t('flowEngine.milliseconds', { value: milliseconds }) }),
     },
     flowCanvas: {
@@ -50,6 +55,10 @@ const text = messages('flows', english, (t) => {
       condition: (condition, more, match) => (more > 0 ? t(moreKey('flowCanvas.condition', match), { condition, count: more }) : condition),
       variablesCondition: (condition) => t('flowCanvas.variablesCondition', { condition }),
       loop: (path, title) => t('flowCanvas.loop', { path: path || '$', title }),
+      caseLine: (label, condition) => t('flowCanvas.caseLine', { label, condition }),
+      passes: (times, delayMs) => (
+        delayMs > 0 ? t('flowCanvas.passesApart', { count: times, delay: duration(delayMs) }) : t('flowCanvas.passes', { count: times })
+      ),
       wait: (milliseconds) => t('flowCanvas.wait', { duration: duration(milliseconds) }),
       toEnd: (label) => t('flowCanvas.toEnd', { label }),
       attempt: (attempt, attempts) => t('flowCanvas.attempt', { attempt, attempts }),
@@ -62,6 +71,10 @@ const text = messages('flows', english, (t) => {
         return t('flowEditor.templatePlaceholder', { example: braced('variable') })
       },
       loopHint: (item, index) => t('flowEditor.loopHint', { item: braced(item), field: braced(`${item}.field`), index: braced(index) }),
+      repeatHint: (index) => t('flowEditor.repeatHint', { index: braced(index) }),
+      get flowVariablesHint() {
+        return t('flowEditor.flowVariablesHint', { variables: braced('variables') })
+      },
     },
     flowView: {
       cli: (name) => `gostman flow run ${shellWord(name)}`,

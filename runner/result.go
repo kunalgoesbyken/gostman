@@ -46,6 +46,8 @@ type Result struct {
 	Attempt     int              `json:"attempt,omitempty"`
 	Attempts    int              `json:"attempts,omitempty"`
 	Handled     string           `json:"handled,omitempty"`
+	InFlow      string           `json:"inFlow,omitempty"`
+	Depth       int              `json:"depth,omitempty"`
 	Exchange    *Capture         `json:"exchange,omitempty"`
 	Operation   string           `json:"operation,omitempty"`
 	Snapshots   []SnapshotUpdate `json:"-"`

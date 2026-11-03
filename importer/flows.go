@@ -12,16 +12,21 @@ const untitledFlow = "Untitled flow"
 
 func (c *collector) gostmanFlows(raw []json.RawMessage, requests idMap) {
 	paths := requestPaths(c.Folders, c.Requests)
+	var flows []workspace.Flow
+	renamed := idMap{}
 	for _, item := range raw {
 		var flow workspace.Flow
 		if err := json.Unmarshal(item, &flow); err != nil {
 			c.skip(locales.ImporterGostmanItemFlow, nil)
 			continue
 		}
-		flow.Id = newID()
+		flow.Id = renamed.fresh(flow.Id)
+		flows = append(flows, flow)
+	}
+	for _, flow := range flows {
 		flow.Name = cleanName(flow.Name, untitledFlow)
 		missing := false
-		flow.Steps = namedSteps(linkedSteps(flow.Steps, requests, &missing), paths)
+		flow.Steps = namedSteps(linkedSteps(flow.Steps, requests, renamed, &missing), paths)
 		if missing {
 			c.warn(RemarkFlows, locales.New(locales.ImporterFlowRequests, locales.Params{"name": flow.Name}))
 		}
@@ -29,14 +34,17 @@ func (c *collector) gostmanFlows(raw []json.RawMessage, requests idMap) {
 	}
 }
 
-func linkedSteps(steps []workspace.FlowStep, requests idMap, missing *bool) []workspace.FlowStep {
+func linkedSteps(steps []workspace.FlowStep, requests, flows idMap, missing *bool) []workspace.FlowStep {
 	linked := make([]workspace.FlowStep, len(steps))
 	for index, step := range steps {
 		if step.RequestId != "" {
 			step.RequestId = requests.resolve(step.RequestId)
 			*missing = *missing || (step.RequestId == "" && step.Request == "")
 		}
-		step.Steps = linkedSteps(step.Steps, requests, missing)
+		if step.FlowId != "" {
+			step.FlowId = flows.resolve(step.FlowId)
+		}
+		step.Steps = linkedSteps(step.Steps, requests, flows, missing)
 		linked[index] = step
 	}
 	return linked

@@ -15,14 +15,17 @@ import (
 )
 
 const (
-	FlowPassed = "passed"
-	FlowFailed = "failed"
+	FlowPassed  = "passed"
+	FlowFailed  = "failed"
+	FlowHandled = "handled"
 
 	flowSend         = "send"
 	flowWait         = "wait"
 	flowDone         = "done"
+	flowNested       = "flow"
 	flowStepRequest  = "request"
-	flowEventHandled = "handled"
+	flowStepFlow     = "flow"
+	flowEventRunning = "running"
 	flowStopped      = "The flow was stopped before it reached its end."
 )
 
@@ -32,12 +35,14 @@ type FlowEvent struct {
 	Title     string            `json:"title"`
 	Status    string            `json:"status"`
 	Summary   string            `json:"summary"`
-	Branch    string            `json:"branch,omitempty"`
+	Branch    any               `json:"branch,omitempty"`
 	Attempt   int               `json:"attempt,omitempty"`
 	Attempts  int               `json:"attempts,omitempty"`
 	HandledBy string            `json:"handledBy,omitempty"`
 	Checks    []Check           `json:"checks,omitempty"`
 	Writes    map[string]string `json:"writes,omitempty"`
+	Depth     int               `json:"depth,omitempty"`
+	Steps     []FlowEvent       `json:"steps,omitempty"`
 }
 
 type FlowReport struct {
@@ -56,6 +61,9 @@ type flowAction struct {
 	Kind      string            `json:"kind"`
 	Step      string            `json:"step"`
 	RequestID string            `json:"requestId"`
+	FlowID    string            `json:"flowId"`
+	Title     string            `json:"title"`
+	SendsLeft int               `json:"sendsLeft"`
 	Attempt   int               `json:"attempt"`
 	Attempts  int               `json:"attempts"`
 	DelayMs   int64             `json:"delayMs"`
@@ -81,26 +89,41 @@ type flowRequest struct {
 
 type flowContext struct {
 	Requests  []flowRequest     `json:"requests"`
+	Flows     []workspace.Flow  `json:"flows"`
 	Variables map[string]string `json:"variables"`
+	SendsLeft *int              `json:"sendsLeft,omitempty"`
 }
 
 type flowInput struct {
 	Response *engine.Response `json:"response,omitempty"`
 	Failed   bool             `json:"failed"`
+	Outcome  string           `json:"outcome,omitempty"`
+	Message  string           `json:"message,omitempty"`
+	Sends    int              `json:"sends,omitempty"`
+}
+
+type flowShared struct {
+	session *session
+	options Options
+	watch   FlowWatch
+	library map[string]Request
+	folders map[string]string
+	catalog []flowRequest
+	flows   []workspace.Flow
+	results []Result
 }
 
 type flowRun struct {
-	session  *session
-	flow     workspace.Flow
-	options  Options
-	watch    FlowWatch
-	library  map[string]Request
-	folders  map[string]string
-	catalog  []flowRequest
-	results  []Result
-	steps    []FlowEvent
-	pending  *Result
-	finished bool
+	*flowShared
+	flow       workspace.Flow
+	depth      int
+	given      map[string]string
+	sendsLeft  *int
+	sends      int
+	steps      []FlowEvent
+	nested     []FlowEvent
+	nestedStep string
+	pending    *Result
 }
 
 func (s *Session) RunFlow(ctx context.Context, stored Collection, flow workspace.Flow, options Options, watch FlowWatch) (Report, error) {
@@ -108,7 +131,7 @@ func (s *Session) RunFlow(ctx context.Context, stored Collection, flow workspace
 	if err != nil {
 		return Report{}, err
 	}
-	run := newFlowRun(s.state, flow, planned, options, watch)
+	run := newFlowRun(s.state, stored.Flows, flow, planned, options, watch)
 	started := time.Now()
 	first, err := run.call("flowBegin", run.flow, run.context())
 	if err == nil && len(first.Problems) > 0 {
@@ -133,18 +156,20 @@ func flowSummary(results []Result) Summary {
 	return summary
 }
 
-func newFlowRun(state *session, flow workspace.Flow, planned plan, options Options, watch FlowWatch) *flowRun {
-	run := &flowRun{session: state, flow: flow, options: options, watch: watch, library: map[string]Request{}, folders: planned.folderNames}
+func newFlowRun(state *session, flows []workspace.Flow, flow workspace.Flow, planned plan, options Options, watch FlowWatch) *flowRun {
+	shared := &flowShared{session: state, options: options, watch: watch, library: map[string]Request{}, folders: planned.folderNames, flows: flows}
 	for _, request := range planned.requests {
-		run.library[request.ID] = request
+		shared.library[request.ID] = request
 		listed := Listed{Request: request, Folder: planned.folderNames[request.FolderID]}
-		run.catalog = append(run.catalog, flowRequest{ID: request.ID, Path: listed.QualifiedName(), Name: request.Name})
+		shared.catalog = append(shared.catalog, flowRequest{ID: request.ID, Path: listed.QualifiedName(), Name: request.Name})
 	}
-	return run
+	return &flowRun{flowShared: shared, flow: flow}
 }
 
 func (r *flowRun) context() flowContext {
-	return flowContext{Requests: r.catalog, Variables: r.session.values.current().plain()}
+	variables := r.session.values.current().plain()
+	maps.Copy(variables, r.given)
+	return flowContext{Requests: r.catalog, Flows: r.flows, Variables: variables, SendsLeft: r.sendsLeft}
 }
 
 func (r *flowRun) call(function string, arguments ...any) (flowTurn, error) {
@@ -174,6 +199,9 @@ func (r *flowRun) drive(ctx context.Context, turn flowTurn, err error) (string, 
 }
 
 func (r *flowRun) perform(ctx context.Context, action flowAction) flowInput {
+	if action.Kind == flowNested {
+		return r.runNested(ctx, action)
+	}
 	if action.Kind == flowWait {
 		pause(ctx, time.Duration(action.Ms)*time.Millisecond)
 		return flowInput{}
@@ -192,10 +220,43 @@ func (r *flowRun) perform(ctx context.Context, action flowAction) flowInput {
 	return flowInput{Response: &response, Failed: result.Failed}
 }
 
+func (r *flowRun) findFlow(id string) (workspace.Flow, bool) {
+	for _, flow := range r.flows {
+		if flow.Id == id {
+			return flow, true
+		}
+	}
+	return workspace.Flow{}, false
+}
+
+func (r *flowRun) runNested(ctx context.Context, action flowAction) flowInput {
+	called, found := r.findFlow(action.FlowID)
+	if !found {
+		return flowInput{Outcome: FlowFailed, Message: fmt.Sprintf("there is no flow with the id %q", action.FlowID)}
+	}
+	given := maps.Clone(r.given)
+	if given == nil {
+		given = map[string]string{}
+	}
+	maps.Copy(given, action.Variables)
+	left := action.SendsLeft
+	child := &flowRun{flowShared: r.flowShared, flow: called, depth: r.depth + 1, given: given, sendsLeft: &left}
+	if r.watch.Step != nil {
+		r.watch.Step(FlowEvent{Step: action.Step, Kind: flowStepFlow, Title: action.Title, Status: flowEventRunning, Summary: fmt.Sprintf("Runs the flow %q.", called.Name), Depth: r.depth})
+	}
+	first, err := child.call("flowBegin", child.flow, child.context())
+	outcome, message := child.drive(ctx, first, err)
+	r.nested, r.nestedStep = child.steps, action.Step
+	r.sends += child.sends
+	return flowInput{Outcome: outcome, Message: message, Sends: child.sends}
+}
+
 func (r *flowRun) send(ctx context.Context, action flowAction) (Result, engine.Response) {
 	request := r.options.applyTo(r.library[action.RequestID])
 	folder := r.folders[request.FolderID]
+	r.sends++
 	r.session.once = variables{}
+	r.session.once.override(r.given)
 	r.session.once.override(action.Variables)
 	exchanged, err := r.session.execute(ctx, request)
 	r.session.once = nil
@@ -209,11 +270,18 @@ func (r *flowRun) send(ctx context.Context, action flowAction) (Result, engine.R
 		result.Exchange = capture(request, exchanged.response)
 	}
 	result.Step, result.Attempt, result.Attempts = action.Step, action.Attempt, action.Attempts
+	if r.depth > 0 {
+		result.Depth, result.InFlow = r.depth, r.flow.Name
+	}
 	return result, exchanged.response
 }
 
 func (r *flowRun) absorb(events []FlowEvent) {
 	for _, event := range events {
+		event.Depth = r.depth
+		if event.Kind == flowStepFlow && event.Step == r.nestedStep {
+			event.Steps, r.nested, r.nestedStep = r.nested, nil, ""
+		}
 		r.steps = append(r.steps, event)
 		if event.Kind == flowStepRequest && r.pending != nil && r.pending.Step == event.Step {
 			r.settle(event)
@@ -228,7 +296,7 @@ func (r *flowRun) absorb(events []FlowEvent) {
 func (r *flowRun) settle(event FlowEvent) {
 	result := *r.pending
 	r.pending = nil
-	if event.Status == flowEventHandled {
+	if event.Status == FlowHandled {
 		result.Handled = event.Summary
 	}
 	for _, check := range event.Checks {

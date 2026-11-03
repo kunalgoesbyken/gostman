@@ -7,17 +7,19 @@ import { flowAllowance } from '../scripting/limits'
 import { flowTurnInSandbox, sizeSandboxPool } from '../scripting/sandbox'
 import { isSocketAddress } from '../socketSessions'
 import { RUNNER_TEXT } from '../runnerText'
+import { FLOW_ENGINE_TEXT } from '../flowsText'
 import { useAppStore, variableTextFor } from '../../store/appStore'
 import { requestCatalog } from './catalog'
-import { ACTION_DONE, ACTION_WAIT, EVENT_HANDLED } from './engine'
+import { ACTION_DONE, ACTION_FLOW, ACTION_WAIT, EVENT_HANDLED } from './engine'
 import { forgetHistory } from './history'
-import { STEP_REQUEST } from './model'
+import { OUTCOME_FAILED, STEP_REQUEST } from './model'
 
 export const RUN_RUNNING = 'running'
 export const RUN_STOPPED = 'stopped'
 export const NODE_RUNNING = 'running'
 
 const ROOT_SCOPE = { folderId: '', vars: '' }
+const TOP_LEVEL = { depth: 0, given: {}, root: '' }
 
 export const useFlowRunStore = create(() => ({ runs: {} }))
 
@@ -34,10 +36,22 @@ const markNode = (tabId, step, node) => patchRun(tabId, (run) => ({
 
 const addEntry = (tabId, entry) => patchRun(tabId, (run) => ({ entries: [...run.entries, { ...entry, key: run.entries.length }] }))
 
-const context = () => {
+const context = (scope) => {
   const state = store()
-  return { requests: requestCatalog(state.requests, state.folders), variables: parseJSON(variableTextFor(state, ROOT_SCOPE), {}) }
+  return {
+    requests: requestCatalog(state.requests, state.folders),
+    flows: state.flows,
+    variables: { ...parseJSON(variableTextFor(state, ROOT_SCOPE), {}), ...scope.given },
+    ...(scope.depth > 0 && { sendsLeft: scope.sendsLeft }),
+  }
 }
+
+const nestedScope = (scope, action) => ({
+  depth: scope.depth + 1,
+  given: { ...scope.given, ...action.variables },
+  sendsLeft: action.sendsLeft,
+  root: scope.root || action.step,
+})
 
 const settledResult = (pending, event) => ({
   ...pending,
@@ -74,27 +88,34 @@ export function createFlowRunner(execute, cancel) {
     })
   }
 
-  function absorb(tabId, run, events) {
+  function absorb(tabId, run, events, scope) {
+    const place = { depth: scope.depth, root: scope.root }
     events.forEach((event) => {
-      markNode(tabId, event.step, { state: event.status, attempt: event.attempt, attempts: event.attempts, summary: event.summary })
+      if (scope.depth === 0) markNode(tabId, event.step, { state: event.status, attempt: event.attempt, attempts: event.attempts, summary: event.summary })
       if (event.kind === STEP_REQUEST && run.pending?.step === event.step) {
-        addEntry(tabId, { type: STEP_REQUEST, step: event.step, title: event.title, event, result: settledResult(run.pending, event) })
+        addEntry(tabId, { type: STEP_REQUEST, step: event.step, title: event.title, event, result: settledResult(run.pending, event), ...place })
         run.pending = null
         return
       }
-      addEntry(tabId, { type: event.kind, step: event.step, title: event.title, event })
+      addEntry(tabId, { type: event.kind, step: event.step, title: event.title, event, ...place })
     })
   }
 
-  async function send(tabId, run, action) {
+  function markRunning(tabId, scope, step, progress = {}) {
+    if (scope.depth > 0) return markNode(tabId, scope.root, { state: NODE_RUNNING })
+    return markNode(tabId, step, { state: NODE_RUNNING, ...progress })
+  }
+
+  async function send(tabId, run, action, scope) {
     if (action.delayMs > 0) await pause(run, action.delayMs)
     if (run.isStopped) return {}
     const request = store().requests.find((candidate) => candidate.id === action.requestId)
-    markNode(tabId, action.step, { state: NODE_RUNNING, attempt: action.attempt, attempts: action.attempts })
+    markRunning(tabId, scope, action.step, { attempt: action.attempt, attempts: action.attempts })
     sendSequence += 1
+    run.sends += 1
     const sendId = `flow-${sendSequence}`
     run.sendIds.add(sendId)
-    run.giveSession(action.variables || {})
+    run.giveSession({ ...scope.given, ...action.variables })
     const outcome = isSocketAddress(request.url, variableTextFor(store(), request))
       ? { skipped: RUNNER_TEXT.socketSkipped }
       : await execute(withRunStreamBudget(request), sendId, run.prompts)
@@ -105,33 +126,43 @@ export function createFlowRunner(execute, cancel) {
     return { response: outcome.skipped ? undefined : outcome.response, failed: result.hasFailed }
   }
 
-  async function perform(tabId, run, action) {
-    if (action.kind !== ACTION_WAIT) return send(tabId, run, action)
-    markNode(tabId, action.step, { state: NODE_RUNNING })
+  async function runNested(tabId, run, action, scope) {
+    markRunning(tabId, scope, action.step)
+    const called = store().flows.find((candidate) => candidate.id === action.flowId)
+    if (!called) return { outcome: OUTCOME_FAILED, message: FLOW_ENGINE_TEXT.missingFlow(action.flowId), sends: 0 }
+    const sendsBefore = run.sends
+    const done = await drive(tabId, run, called, nestedScope(scope, action))
+    return done ? { outcome: done.outcome, message: done.message, sends: run.sends - sendsBefore } : {}
+  }
+
+  async function perform(tabId, run, action, scope) {
+    if (action.kind === ACTION_FLOW) return runNested(tabId, run, action, scope)
+    if (action.kind !== ACTION_WAIT) return send(tabId, run, action, scope)
+    markRunning(tabId, scope, action.step)
     await pause(run, action.ms)
     return {}
   }
 
-  function adopt(tabId, run, turn) {
+  function adopt(tabId, run, turn, scope) {
     if (Object.keys(turn.writes).length > 0) store().storeSessionVariables(turn.writes)
-    absorb(tabId, run, turn.events)
+    absorb(tabId, run, turn.events, scope)
   }
 
-  async function drive(tabId, run, flow) {
-    let turn = await decide({ flow, context: context() })
+  async function drive(tabId, run, flow, scope = TOP_LEVEL) {
+    let turn = await decide({ flow, context: context(scope) })
     while (!run.isStopped) {
-      adopt(tabId, run, turn)
+      adopt(tabId, run, turn, scope)
       if (turn.action.kind === ACTION_DONE) return turn.action
-      const input = await perform(tabId, run, turn.action)
+      const input = await perform(tabId, run, turn.action, scope)
       if (run.isStopped) return null
-      turn = await decide({ flow, state: turn.state, input, context: context() })
+      turn = await decide({ flow, state: turn.state, input, context: context(scope) })
     }
     return null
   }
 
   async function start(tabId, flow) {
     if (active.has(tabId)) return
-    const run = { isStopped: false, sendIds: new Set(), prompts: rememberPrompts(), giveSession: sessionGiver(store().sessionVariables), pending: null, wake: () => {} }
+    const run = { isStopped: false, sendIds: new Set(), prompts: rememberPrompts(), giveSession: sessionGiver(store().sessionVariables), pending: null, sends: 0, wake: () => {} }
     active.set(tabId, run)
     sizeSandboxPool(1)
     useFlowRunStore.setState((state) => ({

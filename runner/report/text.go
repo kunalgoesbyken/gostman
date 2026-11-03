@@ -1,6 +1,7 @@
 package report
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"strings"
@@ -28,6 +29,7 @@ const (
 	kindWidth    = 7
 	detailIndent = "      "
 	nestedIndent = "            "
+	flowIndent   = "    "
 )
 
 type Text struct {
@@ -149,7 +151,38 @@ func printableResult(result runner.Result) runner.Result {
 	return result
 }
 
+type prefixedWriter struct {
+	output  io.Writer
+	prefix  string
+	midLine bool
+}
+
+func (w *prefixedWriter) Write(content []byte) (int, error) {
+	var buffer bytes.Buffer
+	for _, character := range content {
+		if !w.midLine {
+			buffer.WriteString(w.prefix)
+		}
+		buffer.WriteByte(character)
+		w.midLine = character != '\n'
+	}
+	if _, err := w.output.Write(buffer.Bytes()); err != nil {
+		return 0, err
+	}
+	return len(content), nil
+}
+
+func (t *Text) nest(depth int) func() {
+	if depth == 0 {
+		return func() {}
+	}
+	output := t.output
+	t.output = &prefixedWriter{output: output, prefix: strings.Repeat(flowIndent, depth)}
+	return func() { t.output = output }
+}
+
 func (t *Text) Request(received runner.Result) {
+	defer t.nest(received.Depth)()
 	result := printableResult(received)
 	fmt.Fprintf(t.output, "%s  %-*s  %s  %s\n", t.mark(result), methodWidth, result.Method, qualifiedName(result), t.paint(styleDim, outcomeOf(result)))
 	if result.ResolvedURL != "" {
@@ -160,6 +193,7 @@ func (t *Text) Request(received runner.Result) {
 }
 
 func (t *Text) Step(event runner.FlowEvent) {
+	defer t.nest(event.Depth)()
 	style := styleDim
 	if event.Status == runner.FlowFailed {
 		style = styleRed

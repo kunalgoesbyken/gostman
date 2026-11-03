@@ -17,7 +17,7 @@ import { normalizeTags } from './tags'
 import { remark, remarksOf } from './importRemarks'
 import { FLOW_IMPORT_TEXT } from './flowsText'
 import { IMPORT_EXPORT_TEXT } from './importExportText'
-import { STEP_REQUEST, compactFlow, mapSteps, normalizeFlow } from './flows/model'
+import { STEP_FLOW, STEP_REQUEST, compactFlow, mapSteps, normalizeFlow } from './flows/model'
 import { AUTH_API_KEY, AUTH_BASIC, AUTH_BEARER, GRAPHQL_METHOD, UNTITLED_REQUEST, apiKeyLocation, asText, sentRows } from './exportFields'
 import { HTTP_VERSION_CHOICES, RPC_TRANSPORT_CHOICES, isChoice } from './requestTransports'
 
@@ -584,20 +584,26 @@ function assignFreshIds(items, takenIds) {
   return { assigned, renamed }
 }
 
-function linkedFlow(raw, renamed) {
-  const flow = normalizeFlow(raw)
+function linkedFlow(flow, id, renamed, renamedFlows) {
   let isMissing = false
   const steps = mapSteps(flow.steps, (step) => {
+    if (step.kind === STEP_FLOW && step.flowId) return { ...step, flowId: renamedFlows.get(step.flowId) || '' }
     if (step.kind !== STEP_REQUEST || !step.requestId) return step
     const requestId = renamed.get(step.requestId) || ''
     isMissing = isMissing || (requestId === '' && step.request === '')
     return { ...step, requestId }
   })
-  return { flow: { ...flow, id: generateId(), steps }, isMissing }
+  return { flow: { ...flow, id, steps }, isMissing }
 }
 
 function sanitizeFlows(rawFlows, renamed) {
-  const linked = asArray(rawFlows).filter(isPlainObject).map((raw) => linkedFlow(raw, renamed))
+  const flows = asArray(rawFlows).filter(isPlainObject).map(normalizeFlow)
+  const ids = flows.map(() => generateId())
+  const renamedFlows = new Map()
+  flows.forEach((flow, position) => {
+    if (flow.id !== '' && !renamedFlows.has(flow.id)) renamedFlows.set(flow.id, ids[position])
+  })
+  const linked = flows.map((flow, position) => linkedFlow(flow, ids[position], renamed, renamedFlows))
   return {
     flows: linked.map(({ flow }) => flow),
     remarks: linked.filter(({ isMissing }) => isMissing).map(({ flow }) => remark(FLOW_IMPORT_TEXT.missingRequests(flow.name), true)),
