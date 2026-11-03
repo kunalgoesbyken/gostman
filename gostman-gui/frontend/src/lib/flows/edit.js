@@ -47,16 +47,18 @@ export const insertStep = (flow, { parent = ROOT, position }, step) => changeLis
 
 export const updateStep = (flow, id, patch) => ({ ...flow, steps: mapSteps(flow.steps, (step) => (step.id === id ? { ...step, ...patch } : step)) })
 
-const withoutTarget = (removed) => (step) => retargeted(step, (target) => (removed.has(target) ? '' : target))
+const towards = (removed, continuation) => (step) => retargeted(step, (target) => (removed.has(target) ? continuation : target))
 
 const idsWithin = (step) => [step.id, ...allStepIds(innerSteps(step))]
+
+const continuationOf = (step, removed) => (removed.has(step.next) ? '' : step.next)
 
 export function removeStep(flow, id) {
   const entry = indexSteps(flow.steps).get(id)
   if (!entry) return flow
   const removed = new Set(idsWithin(entry.step))
   const shortened = changeList(flow, entry.parent, (list) => list.filter((step) => step.id !== id))
-  return { ...shortened, steps: mapSteps(shortened.steps, withoutTarget(removed)) }
+  return { ...shortened, steps: mapSteps(shortened.steps, towards(removed, continuationOf(entry.step, removed))) }
 }
 
 export function moveStep(flow, id, offset) {
