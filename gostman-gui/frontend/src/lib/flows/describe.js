@@ -4,6 +4,7 @@ import {
   CONDITION_VARIABLES, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_REPEAT, STEP_REQUEST, STEP_SET,
   STEP_SWITCH, casePosition, isCaseField,
 } from './model'
+import { sendRows } from './inputs'
 import { SOURCE_CALL, SOURCE_LOOP } from './outputs'
 import { caseLabel, resolveRequest, stepTitle } from './validate'
 import { SCOPE_SESSION } from '../scripting/scopes'
@@ -47,10 +48,11 @@ const LINES = {
   [STEP_REQUEST]: (step, { requests }) => {
     const request = resolveRequest(step, requests)
     const until = firstAndMore(step.retry.until)
+    const sent = sendRows(step).length
     return [
       request ? { method: request.method, text: request.path } : { text: step.request || TEXT.noRequest, muted: true },
       ...(step.retry.times > 1 ? [{ text: TEXT.retry(step.retry.times, step.retry.delayMs) }] : []),
-      ...(step.inputs?.length > 0 ? [{ text: TEXT.inputs(step.inputs.length) }] : []),
+      ...(sent > 0 ? [{ text: TEXT.inputs(sent) }] : []),
       ...(until ? [{ text: TEXT.until(until.first, until.more), mono: true }] : []),
     ]
   },
