@@ -1,0 +1,35 @@
+{
+  "variablesPanel": {
+    "type": "Type",
+    "typeLabel": "Variable type",
+    "value": "Value",
+    "valueChoice": "Choose a value",
+    "fieldOptions": "Field options",
+    "label": "Label",
+    "labelPlaceholder": "Name shown in the Variables view",
+    "help": "Help text",
+    "helpPlaceholder": "Shown under the field in the Variables view",
+    "placeholder": "Placeholder",
+    "placeholderPlaceholder": "Shown while the field is empty",
+    "choices": "Choices",
+    "choicesPlaceholder": "red, green, blue",
+    "required": "Required",
+    "inForm": "Show in the Variables view",
+    "showInherited": "Show inherited variables",
+    "inheritedTitle": "Inherited",
+    "inheritedHint": "Read only. These come from scopes above this request. A variable with the same name above wins here.",
+    "inheritedNone": "No variables are inherited.",
+    "hiddenValue": "Hidden",
+    "typeNote": "A typed variable reaches scripts as that type. Inside a URL, header or body it is still written as text."
+  },
+  "variablesView": {
+    "switchLabel": "Request view",
+    "fullEditor": "Full editor",
+    "variables": "Variables",
+    "formLabel": "Request variables",
+    "emptyTitle": "No variables to fill in",
+    "emptyDescription": "Variables added in the Vars tab of the full editor appear here as input fields.",
+    "openEditor": "Open the full editor",
+    "required": "Required"
+  }
+}

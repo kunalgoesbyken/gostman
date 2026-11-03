@@ -91,7 +91,7 @@ function Row({ row, columns, typed, isDraft, keyLabel, valueLabel, suggestions, 
   )
 }
 
-function BulkEditor({ rows, keyLabel, onChange }) {
+export function BulkEditor({ rows, keyLabel, onChange }) {
   const hintId = useId()
   const [draft, setDraft] = useState(() => rowsToBulkText(rows))
   const current = rowsToBulkText(rows)
@@ -151,7 +151,7 @@ function TableEditor({ rows, typed, fileRows, keyLabel, valueLabel, suggestions,
   )
 }
 
-function ModeSwitch({ rows, showsBulk, onSwitch }) {
+export function ModeSwitch({ rows, showsBulk, onSwitch }) {
   if (showsBulk) {
     return (
       <Button variant="ghost" size="sm" onClick={() => onSwitch(false)}>

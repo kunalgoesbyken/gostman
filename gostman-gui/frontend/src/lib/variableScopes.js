@@ -1,5 +1,6 @@
 import { isPlainObject, parseJSON } from './dataUtils'
 import { placeholderNames } from './placeholders'
+import { typedValue } from './requestVariables'
 import { parseRows } from './rows'
 import { connectionDirectory } from './secretOrigins'
 import { chosenEnvironment, variableHolders } from './environmentScope'
@@ -103,7 +104,7 @@ const listLayer = (source, variables, meta) => ({
 
 const rowsLayer = (text) => ({
   source: 'request',
-  entries: parseRows(text).filter((row) => row.enabled && row.key.trim() !== '').map((row) => ({ name: row.key, value: row.value })),
+  entries: parseRows(text).filter((row) => row.enabled && row.key.trim() !== '').map((row) => ({ name: row.key, value: typedValue(row) })),
 })
 
 export const dotEnvEntries = (dotEnv) => (

@@ -17,6 +17,27 @@ When a name is defined in more than one place, the most specific scope wins. Fro
 
 Values you give when you start a run or a send win over everything saved in the collection: `--var`, `--var-from-env` and `--env-file` in the CLI, each row of a data file (in the CLI and in the runner), and the `variables` of an agent's `send_request`. They are kept as session values, so a script or Extract rule that writes the same name later in the run replaces them, and each new data row replaces what the previous iteration left. In the runner they last for the run only: when it ends, the session values it set go back to what they were.
 
+### Typed request variables
+
+Every variable is text unless you give it a type. In the **Vars** tab of a request, the **Type** column offers:
+
+| Type | Value in scripts | Accepted text |
+| --- | --- | --- |
+| Any (default) and Text | text | anything |
+| Number | a number | a finite decimal number, such as `42`, `-1.5` or `2e3` |
+| Whole number | a number | a number without a fraction |
+| True or false | `true` or `false` | `true` or `false`, in any case; an empty value is `false` |
+| JSON | the parsed object, array or value | valid JSON |
+| One of a list | text | one of the comma-separated choices of the row |
+
+![The Vars tab with a whole number, a true or false and a one of a list variable](../screenshots/variables-typed.png)
+
+`env.get("count")`, `pm.variables.get("count")` and `bru.getVar("count")` return the typed value, in the apps and in the CLI. Where a variable is filled into a URL, header or body with `{{count}}`, it is still written as text, as a number or a boolean is written by JavaScript, and a JSON value as compact JSON. An empty value of any type except True or false stays an empty string, so an optional field does not break a script; mark a row **Required** under **Field options** to ask for a value.
+
+A value that does not match its type, or an empty required value, stops the send before any script runs. The request is not sent, the response says which variable is wrong, and the CLI counts it as a request without a response. Rows that are switched off are not checked. Only request variables have types; environment, collection and global values keep the JSON type they were saved with.
+
+See [Variables view](requests-and-responses.md#variables-view) to turn a request into a short form of its typed variables.
+
 ## Values set by scripts and Extract rules
 
 Scripts choose where a value goes:

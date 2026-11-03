@@ -122,6 +122,8 @@ type Request struct {
 	SocketMessages   string         `json:"socketMessages"`
 	Vars             string         `json:"vars"`
 	Notes            string         `json:"notes"`
+	JsonDepth        string         `json:"jsonDepth"`
+	DefaultView      string         `json:"defaultView"`
 	Timestamp        string         `json:"timestamp"`
 	SortOrder        int64          `json:"sortOrder"`
 }

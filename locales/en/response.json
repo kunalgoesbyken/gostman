@@ -130,6 +130,15 @@
     "previewTitle": "Response preview",
     "treeTrimmed_one": "Showing the start of this tree. {{count}} more value is hidden. Use Raw or the filter to see the rest.",
     "treeTrimmed_other": "Showing the start of this tree. {{count}} more values are hidden. Use Raw or the filter to see the rest.",
+    "tree": {
+      "expandAll": "Expand all",
+      "collapseAll": "Collapse all",
+      "depth": "Expansion depth",
+      "level": "Level {{count}}",
+      "allLevels": "All levels",
+      "remember": "Open this request at this depth every time",
+      "remembered": "This request already opens at this depth"
+    },
     "requestFailed": "Request failed",
     "error": "Error",
     "milliseconds": "{{value}} ms",

@@ -6,7 +6,7 @@ const STATUS = { added: 'added', removed: 'removed', changed: 'changed' }
 const ORDER = [
   'name', 'method', 'url', 'queryParams', 'headers', 'auth', 'bodyType', 'body', 'graphqlQuery', 'graphqlVariables',
   'grpcMethod', 'grpcMessage', 'grpcProtos', 'mcpMethod', 'mcpTool', 'mcpArguments', 'socketProtocol', 'socketMessages',
-  'vars', 'options', 'extractors', 'assertions', 'preScript', 'postScript', 'examples', 'description', 'tags', 'order',
+  'vars', 'options', 'extractors', 'assertions', 'preScript', 'postScript', 'examples', 'description', 'tags', 'order', 'jsonDepth', 'defaultView',
 ]
 const IGNORED = new Set(['timestamp'])
 const TEXT_CONTEXT = 2

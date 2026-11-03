@@ -13,6 +13,7 @@ import { KeyValueEditor } from "./KeyValueEditor"
 import { HEADER_SUGGESTIONS } from "../lib/httpHeaders"
 import { ParamsPanel } from "./ParamsPanel"
 import { SettingsPanel } from "./SettingsPanel"
+import { VariablesPanel } from "./VariablesPanel"
 import { ExtractPanel } from "./ExtractPanel"
 import { TestsPanel } from "./TestsPanel"
 import { useAiEnabled } from "../lib/ai/session"
@@ -312,12 +313,7 @@ export const RequestTabs = memo(function RequestTabs({
 
         <TabsContent value={VARS_PANEL} className={PANEL_CLASS}>
           <Panel>
-            <KeyValueEditor
-              key={tabId}
-              rows={variableRows}
-              onChange={(rows) => onUpdateRequest({ vars: serializeRows(rows) })}
-              keyLabel={TEXT.variableLabel}
-            />
+            <VariablesPanel key={tabId} rows={variableRows} onChange={(rows) => onUpdateRequest({ vars: serializeRows(rows) })} />
           </Panel>
         </TabsContent>
 
@@ -354,7 +350,12 @@ export const RequestTabs = memo(function RequestTabs({
             settings={requestSettings(kind, options)}
             description={activeRequest.description}
             tags={activeRequest.tags}
+            defaultView={activeRequest.defaultView}
+            jsonDepth={activeRequest.jsonDepth}
+            showsViews={!isSocket}
             onChange={(next) => onUpdateRequest({ options: next })}
+            onDefaultViewChange={(defaultView) => onUpdateRequest({ defaultView })}
+            onJsonDepthChange={(jsonDepth) => onUpdateRequest({ jsonDepth })}
             onDescriptionChange={(description) => onUpdateRequest({ description })}
             onTagsChange={(tags) => onUpdateRequest({ tags })}
             onDocument={isAiOn ? () => actions.ai.start(TASK_DOCS) : null}

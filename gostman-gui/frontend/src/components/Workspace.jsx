@@ -14,6 +14,7 @@ import { StatusBar } from "./StatusBar"
 import { WindowEdges, useAdjustableWindow, useFramelessWindow } from "./WindowResize"
 import { TabBar } from "./TabBar"
 import { RequestTabs } from "./RequestTabs"
+import { VariablesView, focusFirstProblem } from "./VariablesView"
 import { AppSkeleton } from "./AppSkeleton"
 import { Button } from "./ui/button"
 import { DialogPending } from "./ui/dialog"
@@ -34,6 +35,9 @@ import { useAiEnabled, useAiStore } from "../lib/ai/session"
 import { TASK_EXPLAIN, TASK_REQUEST } from "../lib/ai/tasks"
 import { MIN_REQUEST_HEIGHT_PX, isNarrowViewport } from "../lib/layout"
 import { isBlankRequest } from "../lib/requestChanges"
+import { VIEW_FULL, VIEW_VARIABLES, defaultViewOf } from "../lib/requestView"
+import { variableProblems } from "../lib/requestVariables"
+import { parseRows } from "../lib/rows"
 import { forgetSharedLink, pendingSharedLink, subscribeToSharedLink } from "../lib/sharedLink"
 import { currentOpenLink, dismissOpenLink, subscribeToOpenLink } from "../lib/openLink"
 import { exportableVariables, foldersWithoutSecrets, listWithoutSecrets, withoutSecretValues } from "../lib/variableScopes"
@@ -365,6 +369,23 @@ function LoadedWorkspace({ backend, onBack }) {
     actions.goToRequest(requestId)
   }, [actions, closeScanDialog, closeImportDialog])
 
+  const viewKey = `${activeTab.id}:${activeRequest.id}`
+  const [viewChoices, setViewChoices] = useState({})
+  const [revealedKey, setRevealedKey] = useState("")
+  const canSwitchView = !isSocket
+  const view = canSwitchView ? viewChoices[viewKey] ?? defaultViewOf(activeRequest) : VIEW_FULL
+  const changeView = useCallback((next) => setViewChoices((current) => ({ ...current, [viewKey]: next })), [viewKey])
+  const openFullEditor = useCallback(() => changeView(VIEW_FULL), [changeView])
+  const sendFromVariablesView = useCallback(() => {
+    if (variableProblems(parseRows(activeRequest.vars)).length === 0) {
+      actions.send()
+      return
+    }
+    setRevealedKey(viewKey)
+    requestAnimationFrame(focusFirstProblem)
+  }, [actions, activeRequest.vars, viewKey])
+
+  const setJsonDepth = useCallback((jsonDepth) => updateActiveRequest({ jsonDepth }), [updateActiveRequest])
   const updateField = useCallback((field, value) => updateActiveRequest({ [field]: value }), [updateActiveRequest])
   const fieldHandlers = useRequestFieldHandlers(updateField)
 
@@ -441,7 +462,9 @@ function LoadedWorkspace({ backend, onBack }) {
                 activeRequest={activeRequest}
                 {...fieldHandlers}
                 onUpdateRequest={updateActiveRequest}
-                onSend={actions.send}
+                onSend={view === VIEW_VARIABLES ? sendFromVariablesView : actions.send}
+                view={view}
+                onViewChange={canSwitchView ? changeView : null}
                 onCancel={actions.cancel}
                 onSave={actions.save}
                 onGenerateCode={actions.generateCode}
@@ -455,7 +478,9 @@ function LoadedWorkspace({ backend, onBack }) {
               {showsWelcome ? <WelcomePanel actions={actions} onDismiss={hideWelcome} /> : <div className="flex min-h-0 flex-1">
                 <div className="response-split flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
                   <section aria-label={APP_TEXT.requestSection} data-pane="request" className="flex min-h-0 flex-1 flex-col" style={REQUEST_AREA_STYLE}>
-                    <RequestTabs
+                    {view === VIEW_VARIABLES ? (
+                      <VariablesView request={activeRequest} isRevealed={revealedKey === viewKey} onUpdateRequest={updateActiveRequest} onOpenEditor={openFullEditor} />
+                    ) : <RequestTabs
                       tabId={activeTab.id}
                       activeRequest={activeRequest}
                       bodyDrafts={activeTab.bodyDrafts}
@@ -470,7 +495,7 @@ function LoadedWorkspace({ backend, onBack }) {
                       mcpCatalog={activeTab.mcpCatalog}
                       actions={actions}
                       EditorComponent={CodeEditor}
-                    />
+                    />}
                   </section>
 
                   {!isSocketOnly(activeTab) && <ResponsePanel
@@ -479,6 +504,8 @@ function LoadedWorkspace({ backend, onBack }) {
                     history={activeTab.responses}
                     tests={activeTab.tests}
                     loading={isLoading}
+                    jsonDepth={activeRequest.jsonDepth}
+                    onJsonDepthChange={setJsonDepth}
                     onDownload={actions.download}
                     onExportHar={actions.exportHistoryHar}
                     onSaveExample={actions.examples.saveResponse}

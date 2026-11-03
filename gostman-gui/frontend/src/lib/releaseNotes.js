@@ -1,6 +1,7 @@
 import { compareVersions } from './versions.js'
 
 export const RELEASES = [
+  { version: '1.12.0', ids: ['json-tree-depth', 'typed-variables', 'variables-view', 'inherited-variables'] },
   { version: '1.11.0', ids: ['api-design'] },
   { version: '1.10.0', ids: ['vscode-extension', 'ai-inline', 'nats', 'firecamp-import', 'openapi-fuzz', 'mock-data-rows'] },
   {

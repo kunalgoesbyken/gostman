@@ -23,6 +23,8 @@ import { applyRequestEdits, extractInSandbox, requestSubject, responseSubject, r
 import { acceptedCookies, scriptCookies } from './scripting/scriptCookies'
 import { scriptedRequest } from './scripting/subjects'
 import { rememberResolved } from './resolvedSecrets'
+import { blockedMessage, variableProblems } from './requestVariables'
+import { parseRows } from './rows'
 import { SECRETS_TEXT } from './secretsText'
 import { ENTRY_KINDS, exchangeEntry, scriptEntry, secretsEntry, withActivity } from './timeline'
 import { promptNames, referenceTargets, resolveLayers, scopeLayers, usedVariableNames } from './variableScopes'
@@ -250,6 +252,9 @@ export function createExecutor(backend) {
     const lineage = lineageOf(store(), original.folderId)
     let request = original
     if (store().isRestricted && (hasActiveContent(request) || hasActiveInheritance(lineage))) return stop(request, EXECUTION_TEXT.restricted, RESTRICTED_ERROR)
+
+    const problems = variableProblems(parseRows(request.vars))
+    if (problems.length > 0) return stop(request, blockedMessage(problems))
 
     let referenced
     try {

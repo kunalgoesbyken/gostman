@@ -81,6 +81,8 @@ const DEFAULT_REQUEST = {
   socketMessages: '',
   vars: '{}',
   notes: '',
+  jsonDepth: '',
+  defaultView: '',
   timestamp: '',
   sortOrder: 0,
 }

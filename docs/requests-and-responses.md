@@ -170,7 +170,22 @@ A token belongs to the environment that was active when it was fetched or typed 
 
 ### Vars
 
-The Vars tab holds variables that apply to this request only. They use the same row table as Headers. See [Variables](variables.md) for scopes and precedence.
+The Vars tab holds variables that apply to this request only. See [Variables](variables.md) for scopes and precedence, and [Typed request variables](variables.md#typed-request-variables) for the Type column. Each row has a checkbox, a name, a type, a value, a **Field options** button and a remove button. Bulk edit keeps the type and field options of rows whose names stay the same.
+
+![The Vars tab with typed variables and the inherited list switched on](../screenshots/variables-inherited.png)
+
+By default the tab lists only this request's variables. Turn on **Show inherited variables** under the table to list the variables the request picks up from the global, collection, environment, folder and session scopes, with the scope each comes from. Secret values are shown hidden, and a variable with the same name here is left out because it wins. The choice is remembered for every request.
+
+### Variables view
+
+The switch at the right of the request name, **Full editor** and **Variables**, changes how a request is shown. The Variables view keeps the request name, the variable fields, Send and the response, and hides the address, the other tabs, Save and Code. It is meant for requests that other people only have to fill in, often together with a pre-request script that builds the real request from the values.
+
+![A request opened in the Variables view with a response below](../screenshots/variables-view.png)
+
+- Each enabled variable of the Vars tab is a field. Open **Field options** on a row to set a label, help text shown under the field, a placeholder, whether a value is required, and whether the variable appears in the Variables view. Choices for the **One of a list** type are written separated by commas.
+- A typed variable gets a matching control: a checkbox for **True or false**, a number box for **Number** and **Whole number**, a drop-down for **One of a list** and a taller box for **JSON**.
+- Send checks the fields first. A required field that is empty or a value that does not match its type is marked, the first one gets focus, and nothing is sent. The same check runs when a request is sent from the full editor, the runner or the CLI, where the response reads "The request was not sent because of its variables".
+- The choice is kept per tab while the app is open. **Opens in** under Settings sets the view a request opens in, so the author of a request can make it open in the Variables view. It is saved with the request. A WebSocket, Socket.IO or MQTT request has no Variables view.
 
 ### Extract
 
@@ -212,6 +227,8 @@ Each assertion row has a checkbox that turns it on or off, an Expression, a Chec
 | Store cookies the response sets | On by default. Clear it to leave the cookie jar unchanged. |
 | Stream as server-sent events | Streams the response as events. Adds Reconnect when the server closes the stream, Max events (default 10000) and Max seconds (default 300). |
 | Tags | Labels such as `smoke` or `regression`. Type a tag and press Enter or a comma; Backspace in the empty field removes the last one. Tags already used in the collection are suggested. Case is ignored, so `Smoke` and `smoke` are one tag. The runner dialog and `gostman run --tags` use them to run a subset. |
+| Opens in | **Full editor** by default. **Variables view** opens the request showing only its variables, Send and the response. See [Variables view](#variables-view). |
+| Expand JSON responses | How many levels of a JSON response are open when it arrives: **App default** (two levels, three for MCP), Level 1 to Level 4, or All levels. See [Expanding the JSON tree](#expanding-the-json-tree). |
 | Description | Markdown shown in generated documentation. |
 
 The tab shows only the settings that apply to the request: gRPC and remote MCP requests have Timeout (ms) and Verify TLS certificates, a local `stdio:` MCP server has Timeout (ms), and WebSocket requests have only Tags and Description. A setting you changed stays visible even when it does not apply.
@@ -300,9 +317,21 @@ The Body tab chooses a view from the response type.
 
 - Hex lists the body as offset, sixteen bytes in hexadecimal and the same bytes as text, with `.` for bytes that are not printable. Only the rows on screen are drawn, so a body of many megabytes scrolls smoothly.
 - MessagePack and CBOR decode the bytes to JSON text, which you can search and copy like Raw. Binary strings show as `{"$binary": "<base64>"}`, MessagePack extension values as `{"$extension": type, "data": "<base64>"}`, CBOR tags other than dates and big numbers as `{"$tag": n, "value": ...}`, and integers beyond 2^53 as strings. Decoding runs in a background worker and is stopped after 5 seconds. A body over 16 MB is not decoded, nesting deeper than 64 levels and lengths larger than the data are refused, and a `Content-Type` that names MessagePack or CBOR opens the decoded view first only for bodies up to 256 KB; for larger ones, choose the view yourself. A body that is not valid shows the reason.
-- Pretty shows a collapsible tree. The first two levels are expanded. Very large trees are trimmed, and a notice tells you how many values are hidden.
+- Pretty shows a collapsible tree. The first two levels are expanded, unless the request sets another depth. Very large trees are trimmed, and a notice tells you how many values are hidden. See [Expanding the JSON tree](#expanding-the-json-tree).
 - The HTML preview runs in a sandboxed frame without scripts, forms or navigation. Images, styles and fonts from other addresses are blocked, so a page cannot reveal your IP address or make the desktop app reach devices on your network; images and fonts written into the page as `data:` addresses still show. **Load remote content** in the notice above the preview loads them for that response only, and **Block again** switches them off. The next response starts blocked again.
 - A body over 500,000 characters is shown whole as plain text, without the tree or colours, so the window stays responsive. Only the lines on screen are drawn, and long lines are wrapped to the width of the panel. For JSON, **Format anyway** in the notice above the body pretty-prints it in the background and then offers Pretty and Raw; the rest of the app keeps working while it formats.
+
+### Expanding the JSON tree
+
+While the Pretty view shows a tree, the row of the Body view switch has three controls on the right:
+
+- **Expand all** opens every level; the same button then reads **Collapse all** and closes everything below the first level.
+- The depth list opens the tree to Level 1, 2, 3 or 4, or to All levels. Level 1 shows the top-level keys only.
+- **Open this request at this depth every time** saves the chosen depth with the request. It is the same setting as **Expand JSON responses** under Settings. The button is off when the request already opens at that depth.
+
+![The response toolbar with the expand button, the depth list and the remember button](../screenshots/json-tree-depth.png)
+
+A depth chosen in the toolbar lasts until the next response arrives, and then the request's own depth applies again. A request without one uses two levels (three for an MCP response). The controls are not shown for responses that are not a JSON tree, such as a body that is searched, shown as text or larger than 500,000 characters.
 
 ### Filter and search
 

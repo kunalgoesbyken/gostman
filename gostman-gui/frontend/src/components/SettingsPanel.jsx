@@ -14,6 +14,8 @@ import { REQUEST_SETTINGS_TEXT as TEXT } from "../lib/requestSettingsText"
 import { HTTP_VERSION_CHOICES, RPC_TRANSPORT_CHOICES } from "../lib/requestTransports"
 import { SETTING_HTTP_VERSION, SETTING_REDIRECTS, SETTING_RPC_TRANSPORT, SETTING_SEND_COOKIES, SETTING_STORE_COOKIES, SETTING_STREAM, SETTING_TIMEOUT, SETTING_TLS } from "../lib/requestSections"
 import { collectTags } from "../lib/tags"
+import { DEPTH_SETTINGS, depthLabel } from "../lib/jsonDepth"
+import { VIEW_FULL, VIEW_VARIABLES } from "../lib/requestView"
 import { useAppStore } from "../store/appStore"
 
 const defaultTimeoutMs = ({ requestTimeoutSeconds }) => (requestTimeoutSeconds || BUILT_IN_TIMEOUT_SECONDS) * 1000
@@ -29,7 +31,7 @@ const SWITCHES = [
 
 const toWholeNumber = (text) => Math.max(0, Math.trunc(Number(text)) || 0)
 
-export function SettingsPanel({ options, settings, description, tags, onChange, onDescriptionChange, onTagsChange, onDocument }) {
+export function SettingsPanel({ options, settings, description, tags, defaultView, jsonDepth, showsViews, onChange, onDescriptionChange, onTagsChange, onDefaultViewChange, onJsonDepthChange, onDocument }) {
   const update = (patch) => onChange({ ...options, ...patch })
   const requests = useAppStore((state) => state.requests)
   const folders = useAppStore((state) => state.folders)
@@ -114,6 +116,22 @@ export function SettingsPanel({ options, settings, description, tags, onChange, 
             </Field>
           </>
         )}
+        {showsViews && (
+          <Field label={TEXT.opensIn}>
+            <Select value={defaultView || VIEW_FULL} onChange={(event) => onDefaultViewChange(event.target.value === VIEW_FULL ? "" : event.target.value)} className="max-w-48">
+              <option value={VIEW_FULL}>{TEXT.opensInFull}</option>
+              <option value={VIEW_VARIABLES}>{TEXT.opensInVariables}</option>
+            </Select>
+          </Field>
+        )}
+        <Field label={TEXT.jsonDepth}>
+          <Select value={jsonDepth || ""} onChange={(event) => onJsonDepthChange(event.target.value)} className="max-w-48">
+            <option value="">{TEXT.jsonDepthDefault}</option>
+            {DEPTH_SETTINGS.map((setting) => (
+              <option key={setting} value={setting}>{depthLabel(setting)}</option>
+            ))}
+          </Select>
+        </Field>
         <Field label={TEXT.tags} grouped>
           <TagsInput
             value={tags}

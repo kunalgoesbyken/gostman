@@ -1,0 +1,22 @@
+{
+  "requestVariables": {
+    "types": {
+      "none": "Any",
+      "string": "Text",
+      "number": "Number",
+      "integer": "Whole number",
+      "boolean": "True or false",
+      "json": "JSON",
+      "enum": "One of a list"
+    },
+    "problems": {
+      "required": "{{name}} needs a value.",
+      "number": "{{name}} must be a number.",
+      "integer": "{{name}} must be a whole number.",
+      "boolean": "{{name}} must be true or false.",
+      "json": "{{name}} must be valid JSON.",
+      "enum": "{{name}} must be one of {{choices}}."
+    },
+    "blocked": "The request was not sent because of its variables.\n{{problems}}"
+  }
+}

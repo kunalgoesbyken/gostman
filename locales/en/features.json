@@ -306,6 +306,26 @@
       "blurb": "Global, collection, folder, environment, session and request variables, with a clear order of precedence.",
       "synonyms": "variables scopes precedence global collection folder request vars"
     },
+    "jsonTreeDepth": {
+      "title": "JSON tree depth",
+      "blurb": "Expand or collapse a JSON response to any level, and let each request open at the depth you prefer.",
+      "synonyms": "json expand collapse tree depth level fold unfold response viewer"
+    },
+    "typedVariables": {
+      "title": "Typed variables",
+      "blurb": "Give request variables a type, so scripts receive numbers, booleans and JSON instead of text, and bad values are caught before sending.",
+      "synonyms": "typed variables type number boolean integer json enum validation required"
+    },
+    "variablesView": {
+      "title": "Variables view",
+      "blurb": "Show a request as a short form of its variables with Send and the response, for people who only fill in values.",
+      "synonyms": "variables view form simple input fields occasional users template"
+    },
+    "inheritedVariables": {
+      "title": "Inherited variables",
+      "blurb": "See which global, collection, environment, folder and session variables a request picks up, next to its own.",
+      "synonyms": "inherited variables scope list show hide request only"
+    },
     "secrets": {
       "title": "Secret variables",
       "blurb": "Keep secret values in your OS keychain and out of files and exports.",

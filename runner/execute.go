@@ -317,8 +317,38 @@ func (s *session) isSocket(request Request) (bool, error) {
 	return socket, err
 }
 
+type typedVariables struct {
+	Vars    string `json:"vars"`
+	Message string `json:"message"`
+}
+
+func hasVariableRows(text string) bool {
+	trimmed := strings.TrimSpace(text)
+	return trimmed != "" && trimmed != "{}" && trimmed != "[]"
+}
+
+func (s *session) withTypedVariables(request Request, outcome *exchange) (Request, bool, error) {
+	if !hasVariableRows(request.Vars) {
+		return request, true, nil
+	}
+	var typed typedVariables
+	if err := s.scripts.Call("requestVariables", &typed, request.Vars); err != nil {
+		return request, false, err
+	}
+	request.Vars = typed.Vars
+	if typed.Message != "" {
+		outcome.stop(typed.Message)
+		return request, false, nil
+	}
+	return request, true, nil
+}
+
 func (s *session) execute(ctx context.Context, request Request) (exchange, error) {
 	var outcome exchange
+	request, proceed, err := s.withTypedVariables(request, &outcome)
+	if err != nil || !proceed {
+		return outcome, err
+	}
 	socket, err := s.isSocket(request)
 	if err != nil {
 		return outcome, err
@@ -328,7 +358,7 @@ func (s *session) execute(ctx context.Context, request Request) (exchange, error
 		return outcome, nil
 	}
 
-	request, proceed, err := s.runPreRequests(ctx, request, &outcome)
+	request, proceed, err = s.runPreRequests(ctx, request, &outcome)
 	if err != nil || !proceed {
 		return outcome, err
 	}

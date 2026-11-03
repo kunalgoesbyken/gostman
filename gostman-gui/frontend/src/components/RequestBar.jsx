@@ -4,6 +4,7 @@ import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Select } from "./ui/select"
+import { SegmentedControl } from "./ui/segmented"
 import { VariableInput } from "./VariableInput"
 import { methodStyle } from "../lib/methodColors"
 import { useFittingText } from "../hooks/useFittingText"
@@ -14,6 +15,8 @@ import { PLAIN_METHODS, REQUEST_PROTOCOLS, hasMethodChoice, protocolIdOf, protoc
 import { REQUEST_BAR_TEXT as TEXT } from "../lib/requestBarText"
 import { hintWithShortcut } from "../lib/shortcuts"
 import { SOCKET_IDLE } from "../lib/socketSessions"
+import { VIEW_FULL, VIEW_VARIABLES } from "../lib/requestView"
+import { VARIABLES_VIEW_TEXT } from "../lib/variablesPanelText"
 
 const CURL_PREFIX = "curl "
 
@@ -72,6 +75,14 @@ function ActionButton({ icon: Icon, label, hint, ...props }) {
   )
 }
 
+function ViewSwitch({ view, onChange }) {
+  const options = [
+    { value: VIEW_FULL, label: VARIABLES_VIEW_TEXT.fullEditor },
+    { value: VIEW_VARIABLES, label: VARIABLES_VIEW_TEXT.variables },
+  ]
+  return <SegmentedControl label={VARIABLES_VIEW_TEXT.switchLabel} options={options} value={view} onChange={onChange} className="shrink-0 flex-none" />
+}
+
 export const RequestBar = memo(function RequestBar({
   activeRequest,
   onMethodChange,
@@ -87,6 +98,8 @@ export const RequestBar = memo(function RequestBar({
   onDisconnect,
   socketStatus,
   loading,
+  view,
+  onViewChange,
 }) {
   const isSocket = socketStatus !== null
   const method = shownMethod(activeRequest, isSocket)
@@ -115,6 +128,27 @@ export const RequestBar = memo(function RequestBar({
     if (!loading) onSend()
   }
 
+  const sendButton = (
+    <SendButton
+      loading={loading}
+      socketStatus={socketStatus}
+      hint={(label) => hintWithShortcut(label, sendShortcut)}
+      onSend={onSend}
+      onCancel={onCancel}
+      onDisconnect={onDisconnect}
+    />
+  )
+
+  if (view === VIEW_VARIABLES) {
+    return (
+      <div data-pane="address" className="flex shrink-0 items-center gap-2 border-b border-border px-3 py-2">
+        <h2 title={activeRequest.name} className="min-w-0 flex-1 truncate px-2 text-sm font-medium">{activeRequest.name || TEXT.untitled}</h2>
+        <ViewSwitch view={view} onChange={onViewChange} />
+        {sendButton}
+      </div>
+    )
+  }
+
   return (
     <div data-pane="address" className="flex shrink-0 flex-col gap-2 border-b border-border px-3 py-2">
       <div className="flex items-center gap-2">
@@ -127,6 +161,7 @@ export const RequestBar = memo(function RequestBar({
           className="border-transparent text-sm font-medium hover:border-border focus:border-border"
         />
         {detected && <Badge role="status" className="shrink-0">{TEXT.detected(TEXT.protocols[detected])}</Badge>}
+        {onViewChange && <ViewSwitch view={view} onChange={onViewChange} />}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -178,14 +213,7 @@ export const RequestBar = memo(function RequestBar({
         </div>
 
         <div className="flex w-full items-center gap-2 sm:contents">
-          <SendButton
-            loading={loading}
-            socketStatus={socketStatus}
-            hint={(label) => hintWithShortcut(label, sendShortcut)}
-            onSend={onSend}
-            onCancel={onCancel}
-            onDisconnect={onDisconnect}
-          />
+          {sendButton}
           <ActionButton icon={Save} label={TEXT.save} hint={hintWithShortcut(TEXT.save, saveShortcut)} variant="secondary" onClick={onSave} />
           <ActionButton icon={Code} label={TEXT.code} hint={TEXT.codeHint} variant="outline" onClick={onGenerateCode} />
           {onLoadTest && <ActionButton icon={Gauge} label={LOAD_TEST_TEXT.barLabel} hint={LOAD_TEST_TEXT.barHint} variant="outline" onClick={onLoadTest} />}
