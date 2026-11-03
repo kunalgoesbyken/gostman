@@ -3,11 +3,11 @@ import { Download, Play } from "lucide-react"
 import { Button } from "../ui/button"
 import { EmptyState } from "../ui/emptyState"
 import { ResultRow } from "../RunnerDialog"
+import { FlowMetrics } from "./FlowMetrics"
 import { iconOf } from "./FlowNode"
 import { FLOW_RUN_TEXT as TEXT } from "../../lib/flowsText"
 import { EVENT_FAILED } from "../../lib/flows/engine"
 import { RUN_RUNNING, runResults } from "../../lib/flows/flowRunner"
-import { STEP_REQUEST } from "../../lib/flows/model"
 import { isSensitiveName } from "../../lib/sensitiveNames"
 import { cn } from "../../lib/utils"
 
@@ -67,8 +67,9 @@ export function FlowRunPanel({ run, canRun, onRun, onReport, onSelectStep }) {
           {TEXT.report}
         </Button>
       </div>
+      <FlowMetrics metrics={run.metrics} />
       <ul aria-label={TEXT.resultsLabel} className="min-h-0 flex-1 overflow-y-auto [overflow-wrap:anywhere]">
-        {run.entries.map((entry) => (entry.type === STEP_REQUEST
+        {run.entries.map((entry) => (entry.result
           ? <ResultRow key={entry.key} result={entry.result} />
           : <StepEntry key={entry.key} entry={entry} onSelectStep={onSelectStep} />))}
       </ul>

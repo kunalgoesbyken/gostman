@@ -13,6 +13,7 @@ function buildCatalog(requests, folders) {
     name: request.name,
     method: request.method,
     url: request.url,
+    bodyType: request.bodyType,
     path: [...folderChain(folders, request.folderId).map((folder) => folder.name), request.name].join(PATH_SEPARATOR),
   }))
 }

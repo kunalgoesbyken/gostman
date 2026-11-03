@@ -76,11 +76,14 @@ const valueOf = (raw) => {
   return { name, step, source: oneOf(raw.source, VALUE_SOURCES, SOURCE_BODY), path: trimmed(raw.path) }
 }
 
+const inputOf = (raw) => ({ target: trimmed(raw.target), ...valueOf(raw) })
+
 const FIELDS = {
   [STEP_REQUEST]: (raw) => ({
     request: trimmed(raw.request),
     requestId: trimmed(raw.requestId),
     variables: textMap(raw.variables),
+    inputs: listOf(raw.inputs).map(inputOf),
     retry: retryOf(raw.retry),
     onFailure: trimmed(raw.onFailure),
   }),

@@ -13,7 +13,7 @@ const createId = () => `flow-${Date.now().toString(36)}-${Math.random().toString
 export const blankFlow = (name) => normalizeFlow({ id: createId(), name, maxSends: DEFAULT_MAX_SENDS, steps: [] })
 
 const STEP_FIELDS = {
-  [STEP_REQUEST]: () => ({ request: '', requestId: '', variables: {}, retry: { times: 1, delayMs: 0, until: [] }, onFailure: '' }),
+  [STEP_REQUEST]: () => ({ request: '', requestId: '', variables: {}, inputs: [], retry: { times: 1, delayMs: 0, until: [] }, onFailure: '' }),
   [STEP_SET]: () => ({ values: [{ name: '', value: '' }] }),
   [STEP_IF]: () => ({ source: CONDITION_RESPONSE, step: '', match: MATCH_ALL, conditions: [{ ...BLANK_ASSERTION, expression: 'res.status', value: '200' }], then: '', else: '' }),
   [STEP_FOR_EACH]: () => ({ step: '', path: '$.items', as: DEFAULT_ITEM_NAME, indexAs: DEFAULT_INDEX_NAME, steps: [] }),

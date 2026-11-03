@@ -35,11 +35,31 @@ A run stops after 1,000 requests, so a loop with no way out ends with a message 
 
 ![The step panel for Wait until the order is ready: its request Shop/Order status, five attempts 200 ms apart, the Until check res.body.state equals ready, and When it fails, go to Cancel order](../screenshots/flow-step.png)
 
+## Pass values into a request
+
+**Values for this send**, in the panel of a **Send request** step, put values into the request just before it is sent, without changing the saved request. Each row has a target, a name and a value:
+
+| Target | Name | What happens |
+| --- | --- | --- |
+| **Header** | The header name | Replaces the header, whatever its case, or adds it. |
+| **Query parameter** | The parameter name | Replaces the parameter in the URL, or adds it. |
+| **JSON body** | A JSONPath such as `$.customer.id`, `$.items[0].sku` or `$['first name']` | Sets that field of the JSON body and creates the objects on the way. |
+| **Form field** | The field name | Replaces or adds a text field of a form or multipart body; file parts are left alone. |
+| **Variable** | The variable name | Sets a variable for this send only, like **Variables for this send**. |
+
+The value is text with `{{variables}}`, or it comes from the response of a **Send request** step that runs before this one: a JSONPath into its body, one of its headers or its status code, the same choices as in **Set variables**. A value read from a JSON body keeps its type in a JSON body, so a number stays a number and an object stays an object; text is sent as written, with its `{{variables}}` filled in when the request is sent. The canvas shows how many values a step sets.
+
+When a value cannot be read, for example because the path finds nothing, the step fails with the reason and goes to **When it fails, go to** if it has one. A JSON body target needs a body that is valid JSON before variables are filled in: write `"{{id}}"` with quotes in the body, or set the field here instead. The flow will not start while a target does not fit the request, such as a JSON body target on a text body, or a value comes from a step that does not run first.
+
 ## Run a flow
 
 Choose **Run** (or press the Send shortcut, Ctrl+Enter) to run the flow with the active environment. The cards light up as the steps run: a spinner on the step being sent, a green tick when it passed, a red cross when it failed, and an orange arrow when it failed but the flow handled it, by trying again or by going to another step. A step that is tried again shows its attempt, such as `3/5`.
 
 The **Run** tab lists every step that ran, in order. Requests use the same rows as the runner: status, time, checks and, when expanded, the URL that was sent and the response body. Failed **Until** checks are listed with the request, so you see why a step was tried again. **Set variables** rows show the values they set; values of variables whose names look secret, such as `token`, are hidden. **Stop** cancels the request in flight and ends the run, and **Report** saves the run as the same HTML report the runner writes, with the outcome of the flow at the top.
+
+### Run metrics
+
+**Metrics**, at the top of the **Run** tab, shows the total time of the run, the number of requests and the bytes of request bodies sent and of responses received, with the slowest steps: how many times each ran and its total, shortest, longest and average time. A request step counts each attempt; a **Wait** counts its pause; a **For each** counts each item as one pass, timed by the steps inside it. The HTML report has the same numbers under **Flow metrics**, the JSON report has them as `flow.metrics`, and `gostman flow run` prints them in one line, such as `Metrics   12 requests, 3.4 s, 18.0 KB sent, 240.5 KB received`.
 
 Values set by **Set variables** and **For each** stay in the session after the run, like values from Extract rules, so you can send a request by hand with them; they are never saved. The variables of a **Send request** step are removed again after it is sent.
 
@@ -139,6 +159,7 @@ steps:
 | `next` | step | Step to go to next; empty means the step below it, `end` ends the flow as passed. |
 | `request`, `requestId` | request | The saved request, by its `Folder/Name` path and its id. The id is tried first, so renaming a request keeps the flow working; the app fills in both when it saves. |
 | `variables` | request | Values for this send only, as `name: template`. |
+| `inputs` | request | Values put into the request before it is sent: a list of `target` (`header`, `query`, `body`, `form` or `variable`), `name` (the header, parameter or field name, a JSONPath for `body`, or the variable name) and either `value` or `step`, `source` and `path`, as in `values`. |
 | `retry.times`, `retry.delayMs`, `retry.until` | request | Attempts (1 to 50), the wait between them in milliseconds, and extra checks. |
 | `onFailure` | request | Step to go to when the last attempt fails. |
 | `values` | set | A list of `name` with either `value` (text with `{{variables}}`) or `step`, `source` (`body`, `header` or `status`) and `path` (a JSONPath, or the header name). |

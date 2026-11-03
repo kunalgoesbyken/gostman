@@ -11,10 +11,12 @@ import { ScopeMark } from "../ScopeMark"
 import { AssertionEditor } from "../TestsPanel"
 import { VariableInput } from "../VariableInput"
 import { iconOf } from "./FlowNode"
+import { StepInputs } from "./StepInputs"
+import { RequestSteps, SourceSelect, SourceValue } from "./ValueSource"
 import { FLOW_CANVAS_TEXT, FLOW_EDITOR_TEXT as TEXT } from "../../lib/flowsText"
 import {
   CONDITION_RESPONSE, CONDITION_VARIABLES, END_TARGET, MATCH_ALL, MATCH_ANY, MAX_ATTEMPTS, MAX_DELAY_MS, OUTCOME_FAILED, OUTCOME_PASSED,
-  SOURCE_BODY, SOURCE_HEADER, SOURCE_STATUS, STEP_DELAY, STEP_END, STEP_FOR_EACH, STEP_IF, STEP_REQUEST, STEP_SET, loopsAround,
+  STEP_DELAY, STEP_END, STEP_FOR_EACH, STEP_IF, STEP_REQUEST, STEP_SET, loopsAround,
 } from "../../lib/flows/model"
 import { SOURCE_LOOP, SOURCE_SEND } from "../../lib/flows/outputs"
 import { kindText, resolveRequest, stepTitle } from "../../lib/flows/validate"
@@ -22,7 +24,6 @@ import { SCOPE_SESSION } from "../../lib/scripting/scopes"
 import { parseAssertions, serializeAssertions } from "../../lib/scripting/assertions"
 import { cn } from "../../lib/utils"
 
-const SOURCE_TEMPLATE = "template"
 const DEPTH_INDENT = " "
 
 const wholeNumber = (text, lowest, highest) => Math.min(Math.max(Math.trunc(Number(text)) || 0, lowest), highest)
@@ -71,16 +72,6 @@ function TargetSelect({ label, value, emptyLabel, step, index, requests, onChang
   )
 }
 
-function RequestSteps({ value, emptyLabel, index, requests, onChange, label }) {
-  const steps = [...index.values()].filter(({ step }) => step.kind === STEP_REQUEST).map(({ step }) => step)
-  return (
-    <Select value={value} onChange={(event) => onChange(event.target.value)} aria-label={label}>
-      <option value="">{emptyLabel}</option>
-      {steps.map((step) => <option key={step.id} value={step.id}>{stepTitle(step, requests)}</option>)}
-    </Select>
-  )
-}
-
 function NumberInput({ value, lowest, highest, label, onChange }) {
   return (
     <Input
@@ -120,43 +111,15 @@ function VariableRows({ variables, onChange }) {
   )
 }
 
-const VALUE_SOURCES = [SOURCE_TEMPLATE, SOURCE_BODY, SOURCE_HEADER, SOURCE_STATUS]
-
-const valueSource = (value) => (value.step || value.source ? value.source || SOURCE_BODY : SOURCE_TEMPLATE)
-
-function withSource(value, source) {
-  if (source === SOURCE_TEMPLATE) return { name: value.name, value: value.value || "" }
-  return { name: value.name, step: value.step || "", source, path: source === SOURCE_STATUS ? "" : value.path || "" }
-}
-
 function ValueRow({ value, isDraft, index, requests, onChange, onRemove }) {
-  const source = valueSource(value)
   return (
     <div className="flex flex-col gap-1 rounded-md border border-border p-2">
       <div className="grid grid-cols-[minmax(0,1fr)_8.5rem_1.75rem] items-center gap-2">
         <Input value={value.name} placeholder={TEXT.variableName} aria-label={TEXT.variableName} spellCheck={false} onChange={(event) => onChange({ ...value, name: event.target.value })} className="font-mono" />
-        <Select value={source} onChange={(event) => onChange(withSource(value, event.target.value))} aria-label={TEXT.valueSource}>
-          {VALUE_SOURCES.map((option) => <option key={option} value={option}>{TEXT.valueSources[option]}</option>)}
-        </Select>
+        <SourceSelect value={value} onChange={onChange} />
         <IconButton label={TEXT.removeRow} icon={X} onClick={onRemove} className={cn(isDraft && "invisible")} />
       </div>
-      {source === SOURCE_TEMPLATE ? (
-        <VariableInput value={value.value || ""} placeholder={TEXT.templatePlaceholder} aria-label={TEXT.templatePlaceholder} spellCheck={false} onChange={(event) => onChange({ ...value, value: event.target.value })} className="font-mono" />
-      ) : (
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2">
-          <RequestSteps value={value.step || ""} emptyLabel={TEXT.chooseStep} index={index} requests={requests} label={TEXT.fromStep} onChange={(step) => onChange({ ...value, step })} />
-          {source !== SOURCE_STATUS && (
-            <Input
-              value={value.path || ""}
-              placeholder={source === SOURCE_HEADER ? TEXT.headerPlaceholder : TEXT.pathPlaceholder}
-              aria-label={source === SOURCE_HEADER ? TEXT.headerName : TEXT.jsonPath}
-              spellCheck={false}
-              onChange={(event) => onChange({ ...value, path: event.target.value })}
-              className="font-mono"
-            />
-          )}
-        </div>
-      )}
+      <SourceValue value={value} index={index} requests={requests} onChange={onChange} />
     </div>
   )
 }
@@ -183,7 +146,7 @@ function ValueRows({ values, index, requests, onChange }) {
   )
 }
 
-function RequestFields({ step, requests, onPatch, onPickRequest, EditorComponent, targets }) {
+function RequestFields({ step, index, requests, onPatch, onPickRequest, EditorComponent, targets }) {
   const request = resolveRequest(step, requests)
   return (
     <>
@@ -196,6 +159,7 @@ function RequestFields({ step, requests, onPatch, onPickRequest, EditorComponent
         <ScopeNote source={SOURCE_SEND}>{TEXT.sendScope}</ScopeNote>
         <VariableRows variables={step.variables} onChange={(variables) => onPatch({ variables })} />
         <Hint>{TEXT.variablesHint}</Hint>
+        <StepInputs inputs={step.inputs || []} index={index} requests={requests} onChange={(inputs) => onPatch({ inputs })} />
       </Section>
       <Section title={TEXT.retry}>
         <Field label={TEXT.attempts}>

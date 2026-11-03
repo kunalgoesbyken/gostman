@@ -3,6 +3,7 @@ import {
   END_TARGET, MAX_SENDS_CAP, OUTCOME_FAILED, OUTCOME_PASSED, STEP_DELAY, STEP_END, STEP_FOR_EACH, STEP_IF, STEP_REQUEST, STEP_SET,
   indexSteps, loopsAround, normalizeFlow,
 } from './model'
+import { resolveInputs } from './inputs'
 import { describeProblems, resolveRequest, stepTitle, validateFlow } from './validate'
 import {
   asText, evaluateConditions, evaluateUntil, fillTemplate, itemValues, listItems, readResponse, subjectOf,
@@ -97,8 +98,21 @@ function goTo(turn, from, target) {
 
 const continueAfter = (turn, step, target = '') => goTo(turn, step, target || step.next)
 
+function inputsFailed(turn, step, message) {
+  if (step.onFailure) {
+    record(turn, step, EVENT_HANDLED, { summary: message, handledBy: 'failure' })
+    return goTo(turn, step, step.onFailure)
+  }
+  record(turn, step, EVENT_FAILED, { summary: message })
+  return finish(turn, OUTCOME_FAILED, `${TEXT.inputsFailed(stepTitle(step, turn.requests))} ${message}`)
+}
+
+const readInput = (turn) => (input) => readResponse(turn.state.responses[input.step], input, titleOf(turn, input.step))
+
 function sendAction(turn, step) {
   const retry = step.retry
+  const filled = resolveInputs(step.inputs, readInput(turn))
+  if (!filled.ok) return inputsFailed(turn, step, filled.message)
   if (turn.state.sends >= turn.flow.maxSends) {
     return finish(turn, OUTCOME_FAILED, TEXT.budget(turn.state.sends, MAX_SENDS_CAP))
   }
@@ -112,7 +126,8 @@ function sendAction(turn, step) {
     attempt: turn.state.attempt,
     attempts: retry.times,
     delayMs: turn.state.attempt > 1 ? retry.delayMs : 0,
-    variables: step.variables,
+    variables: { ...step.variables, ...filled.variables },
+    inputs: filled.inputs,
   }
   return undefined
 }
