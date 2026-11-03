@@ -249,7 +249,39 @@ func (t *Text) flowLine(report runner.Report) string {
 	if report.Flow.Outcome != runner.FlowPassed {
 		outcome = t.paint(styleRed, report.Flow.Outcome)
 	}
-	return fmt.Sprintf("Flow      %s %s: %s\n", Printable(report.Flow.Name), outcome, Printable(report.Flow.Message))
+	return fmt.Sprintf("Flow      %s %s: %s\n%s", Printable(report.Flow.Name), outcome, Printable(report.Flow.Message), metricsLine(report.Flow.Metrics))
+}
+
+func metricsLine(metrics *runner.FlowMetrics) string {
+	if metrics == nil {
+		return ""
+	}
+	return fmt.Sprintf("Metrics   %s, %s, %s sent, %s received\n", plural(metrics.Sends, "request"), spoken(metrics.TotalMs), sized(metrics.BytesSent), sized(metrics.BytesReceived))
+}
+
+func plural(count int, noun string) string {
+	if count == 1 {
+		return fmt.Sprintf("%d %s", count, noun)
+	}
+	return fmt.Sprintf("%d %ss", count, noun)
+}
+
+func spoken(milliseconds int64) string {
+	if milliseconds < 1000 {
+		return fmt.Sprintf("%d ms", milliseconds)
+	}
+	return fmt.Sprintf("%.1f s", float64(milliseconds)/1000)
+}
+
+func sized(bytes int64) string {
+	switch {
+	case bytes < 1<<10:
+		return fmt.Sprintf("%d B", bytes)
+	case bytes < 1<<20:
+		return fmt.Sprintf("%.1f KB", float64(bytes)/(1<<10))
+	default:
+		return fmt.Sprintf("%.2f MB", float64(bytes)/(1<<20))
+	}
 }
 
 func (t *Text) contractLine(report runner.Report) string {

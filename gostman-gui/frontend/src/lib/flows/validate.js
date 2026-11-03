@@ -1,5 +1,6 @@
 import { FLOW_ENGINE_TEXT as TEXT, FLOW_FIELD_TEXT, FLOW_KIND_TEXT } from '../flowsText'
 import { isActiveAssertion } from '../scripting/assertions'
+import { INPUT_BODY, INPUT_FORM, INPUT_TARGETS, acceptsBody, acceptsForm, bodyPath } from './inputs'
 import {
   CONDITION_RESPONSE, END_TARGET, MAX_FLOW_DEPTH, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_KINDS, STEP_REPEAT, STEP_REQUEST, STEP_SET,
   STEP_SWITCH, casePosition, indexSteps, isCaseField, loopsAround, normalizeFlow, targetsOf, walkSteps,
@@ -113,11 +114,36 @@ function flowProblems(step, scope) {
   return reached === REACH_DEEP ? [TEXT.flowTooDeep(MAX_FLOW_DEPTH)] : []
 }
 
+function requestProblems(step, requests) {
+  if (!step.request && !step.requestId) return [TEXT.noRequest]
+  return resolveRequest(step, requests) ? [] : [TEXT.missingRequest(step.request || step.requestId)]
+}
+
+const runsBefore = (order, from, step) => order.indexOf(from) < order.indexOf(step)
+
+function placeProblems(input, request) {
+  if (input.target === INPUT_BODY && !bodyPath(input.name)) return [TEXT.inputBadPath(input.name)]
+  if (!request) return []
+  if (input.target === INPUT_BODY && !acceptsBody(request.bodyType)) return [TEXT.inputNotJson(input.name)]
+  return input.target === INPUT_FORM && !acceptsForm(request.bodyType) ? [TEXT.inputNotForm(input.name)] : []
+}
+
+function inputProblems(step, index, request, order) {
+  return step.inputs.flatMap((input) => {
+    if (!INPUT_TARGETS.includes(input.target)) return [TEXT.unknownInput(input.target)]
+    if (input.name === '') return [TEXT.noInputName]
+    const own = valueProblems(index, input)
+    if (own.length > 0) return own
+    if (input.step && !runsBefore(order, input.step, step.id)) return [TEXT.notEarlierStep(input.step)]
+    return placeProblems(input, request)
+  })
+}
+
 const KIND_PROBLEMS = {
-  [STEP_REQUEST]: (step, { requests }) => {
-    if (!step.request && !step.requestId) return [TEXT.noRequest]
-    return resolveRequest(step, requests) ? [] : [TEXT.missingRequest(step.request || step.requestId)]
-  },
+  [STEP_REQUEST]: (step, { index, requests }) => [
+    ...requestProblems(step, requests),
+    ...inputProblems(step, index, resolveRequest(step, requests), [...index.keys()]),
+  ],
   [STEP_SET]: (step, { index }) => step.values.flatMap((value) => valueProblems(index, value)),
   [STEP_IF]: (step, { index }) => [
     ...(hasConditions(step.conditions) ? [] : [TEXT.noConditions]),

@@ -94,11 +94,14 @@ const caseOf = (raw) => ({
 
 const innerList = (raw, depth) => (depth < MAX_NESTING ? normalizeList(raw.steps, depth + 1) : [])
 
+const inputOf = (raw) => ({ target: trimmed(raw.target), ...valueOf(raw) })
+
 const FIELDS = {
   [STEP_REQUEST]: (raw) => ({
     request: trimmed(raw.request),
     requestId: trimmed(raw.requestId),
     variables: textMap(raw.variables),
+    inputs: listOf(raw.inputs).map(inputOf),
     retry: retryOf(raw.retry),
     onFailure: trimmed(raw.onFailure),
   }),

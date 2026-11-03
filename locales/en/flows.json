@@ -119,7 +119,17 @@
     "emptyList": "The list is empty, so its steps were skipped.",
     "waited": "Waited {{duration}}.",
     "untilCheck": "until {{name}}",
-    "milliseconds": "{{value}} ms"
+    "milliseconds": "{{value}} ms",
+    "inputsFailed": "{{title}} could not fill in its values for this send.",
+    "unknownInput": "\"{{target}}\" is not a place for a value. Use header, query, body, form or variable.",
+    "noInputName": "Every value for this send needs a name: a header, a query parameter, a JSONPath into the body, a form field or a variable.",
+    "notEarlierStep": "\"{{target}}\" does not run before this step, so its response cannot be used here.",
+    "inputBadPath": "\"{{name}}\" is not a body path this step can write. Write it as $.customer.id, $.items[0].id or $['a name'].",
+    "inputNotJson": "\"{{name}}\" sets a field of the JSON body, but the request's body is not JSON.",
+    "inputNotForm": "\"{{name}}\" sets a form field, but the request's body is not a form.",
+    "inputBodyNotJson": "The request's body is not valid JSON, so \"{{name}}\" could not be set in it. Put quotes around {{example}} in the body, or set the value here instead.",
+    "inputPastEnd_one": "\"{{name}}\" points past the end of a list of {{count}} item.",
+    "inputPastEnd_other": "\"{{name}}\" points past the end of a list of {{count}} items."
   },
   "flowImport": {
     "missingRequests": "Steps of the flow \"{{name}}\" send requests that are not in the import; choose them again before running it."
@@ -191,6 +201,8 @@
     "fromResponse": "{{title}} {{source}}",
     "fromResponsePath": "{{title}} {{source}} {{path}}",
     "noValues": "No values yet",
+    "inputs_one": "Sets {{count}} value for this send",
+    "inputs_other": "Sets {{count}} values for this send",
     "conditionAnd_one": "{{condition}} and {{count}} more",
     "conditionAnd_other": "{{condition}} and {{count}} more",
     "conditionOr_one": "{{condition}} or {{count}} more",
@@ -262,6 +274,24 @@
     "request": "Request",
     "variables": "Variables for this send",
     "variablesHint": "Set only while this step sends, above every other scope. Values can use {{variables}}, such as {{example}} inside For each.",
+    "inputs": "Values for this send",
+    "inputsHint": "Put a value into the request just before it is sent: a header, a query parameter, a field of the JSON body by its JSONPath, a form field or a variable. A value from a response keeps its JSON type in the body; text is sent as written, with its {{variables}} filled in.",
+    "inputTarget": "Target",
+    "inputTargets": {
+      "header": "Header",
+      "query": "Query parameter",
+      "body": "JSON body",
+      "form": "Form field",
+      "variable": "Variable"
+    },
+    "inputName": "Name",
+    "inputPlaceholders": {
+      "header": "Authorization",
+      "query": "page",
+      "body": "$.customer.id",
+      "form": "name",
+      "variable": "token"
+    },
     "variableName": "Name",
     "variableValue": "Value",
     "removeRow": "Remove",
@@ -386,6 +416,22 @@
     "resultsLabel": "Steps that ran",
     "wrote": "Set",
     "hidden": "hidden"
+  },
+  "flowMetrics": {
+    "title": "Metrics",
+    "totalTime": "Total time",
+    "requests": "Requests",
+    "sent": "Sent",
+    "received": "Received",
+    "slowest": "Slowest steps",
+    "columns": {
+      "step": "Step",
+      "count": "Runs",
+      "total": "Total",
+      "min": "Min",
+      "max": "Max",
+      "average": "Avg"
+    }
   },
   "flowScript": {
     "skipped": "Skipped by a script.",

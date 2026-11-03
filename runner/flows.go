@@ -43,13 +43,41 @@ type FlowEvent struct {
 	Writes    map[string]string `json:"writes,omitempty"`
 	Depth     int               `json:"depth,omitempty"`
 	Steps     []FlowEvent       `json:"steps,omitempty"`
+	Index     *int              `json:"index,omitempty"`
 }
 
 type FlowReport struct {
-	Name    string      `json:"name"`
-	Outcome string      `json:"outcome"`
-	Message string      `json:"message"`
-	Steps   []FlowEvent `json:"steps"`
+	Name    string       `json:"name"`
+	Outcome string       `json:"outcome"`
+	Message string       `json:"message"`
+	Steps   []FlowEvent  `json:"steps"`
+	Metrics *FlowMetrics `json:"metrics,omitempty"`
+}
+
+type FlowMetrics struct {
+	TotalMs       int64                  `json:"totalMs"`
+	Sends         int                    `json:"sends"`
+	BytesSent     int64                  `json:"bytesSent"`
+	BytesReceived int64                  `json:"bytesReceived"`
+	Steps         map[string]StepMetrics `json:"steps"`
+}
+
+type StepMetrics struct {
+	Title   string `json:"title,omitempty"`
+	Kind    string `json:"kind,omitempty"`
+	Count   int    `json:"count"`
+	TotalMs int64  `json:"totalMs"`
+	MinMs   int64  `json:"minMs"`
+	MaxMs   int64  `json:"maxMs"`
+}
+
+type flowMoment struct {
+	Events   []FlowEvent `json:"events,omitempty"`
+	Step     string      `json:"step,omitempty"`
+	Ms       int64       `json:"ms"`
+	Sent     int64       `json:"sent"`
+	Received int64       `json:"received"`
+	Send     bool        `json:"send,omitempty"`
 }
 
 type FlowWatch struct {
@@ -69,6 +97,7 @@ type flowAction struct {
 	DelayMs   int64             `json:"delayMs"`
 	Ms        int64             `json:"ms"`
 	Variables map[string]string `json:"variables"`
+	Inputs    json.RawMessage   `json:"inputs"`
 	Outcome   string            `json:"outcome"`
 	Message   string            `json:"message"`
 }
@@ -82,9 +111,16 @@ type flowTurn struct {
 }
 
 type flowRequest struct {
-	ID   string `json:"id"`
-	Path string `json:"path"`
-	Name string `json:"name"`
+	ID       string `json:"id"`
+	Path     string `json:"path"`
+	Name     string `json:"name"`
+	BodyType string `json:"bodyType"`
+}
+
+type filledRequest struct {
+	Ok      bool    `json:"ok"`
+	Request Request `json:"request"`
+	Message string  `json:"message"`
 }
 
 type flowContext struct {
@@ -124,6 +160,9 @@ type flowRun struct {
 	nested     []FlowEvent
 	nestedStep string
 	pending    *Result
+	timeline   []flowMoment
+	owner      *flowRun
+	ownerStep  string
 }
 
 func (s *Session) RunFlow(ctx context.Context, stored Collection, flow workspace.Flow, options Options, watch FlowWatch) (Report, error) {
@@ -138,12 +177,13 @@ func (s *Session) RunFlow(ctx context.Context, stored Collection, flow workspace
 		return Report{}, errors.New(first.Action.Message)
 	}
 	outcome, message := run.drive(ctx, first, err)
+	duration := time.Since(started).Milliseconds()
 	report := Report{
 		Version:     ReportVersion,
 		Environment: s.state.values.environmentNames(),
 		StartedAt:   started.UTC(),
-		DurationMs:  time.Since(started).Milliseconds(),
-		Flow:        &FlowReport{Name: flow.Name, Outcome: outcome, Message: message, Steps: run.steps},
+		DurationMs:  duration,
+		Flow:        &FlowReport{Name: flow.Name, Outcome: outcome, Message: message, Steps: run.steps, Metrics: run.metrics(duration)},
 		Summary:     flowSummary(run.results),
 		Results:     run.results,
 	}
@@ -161,7 +201,7 @@ func newFlowRun(state *session, flows []workspace.Flow, flow workspace.Flow, pla
 	for _, request := range planned.requests {
 		shared.library[request.ID] = request
 		listed := Listed{Request: request, Folder: planned.folderNames[request.FolderID]}
-		shared.catalog = append(shared.catalog, flowRequest{ID: request.ID, Path: listed.QualifiedName(), Name: request.Name})
+		shared.catalog = append(shared.catalog, flowRequest{ID: request.ID, Path: listed.QualifiedName(), Name: request.Name, BodyType: request.BodyType})
 	}
 	return &flowRun{flowShared: shared, flow: flow}
 }
@@ -198,12 +238,51 @@ func (r *flowRun) drive(ctx context.Context, turn flowTurn, err error) (string, 
 	}
 }
 
+func (r *flowRun) metrics(totalMs int64) *FlowMetrics {
+	var metrics FlowMetrics
+	if err := r.session.scripts.Call("flowMetrics", &metrics, r.flow, r.timeline, totalMs); err != nil {
+		return nil
+	}
+	return &metrics
+}
+
+func (r *flowRun) measure(moment flowMoment, began time.Time) {
+	moment.Ms = time.Since(began).Milliseconds()
+	if r.owner != nil {
+		moment.Step = r.ownerStep
+		r.owner.timeline = append(r.owner.timeline, moment)
+		return
+	}
+	r.timeline = append(r.timeline, moment)
+}
+
+func (r *flowRun) child(called workspace.Flow, step string, given map[string]string, sendsLeft *int) *flowRun {
+	child := &flowRun{flowShared: r.flowShared, flow: called, depth: r.depth + 1, given: given, sendsLeft: sendsLeft, owner: r.owner, ownerStep: r.ownerStep}
+	if child.owner == nil {
+		child.owner, child.ownerStep = r, step
+	}
+	return child
+}
+
+func requestBytes(response engine.Response) int64 {
+	if response.Timeline == nil {
+		return 0
+	}
+	var total int64
+	for _, hop := range response.Timeline.Hops {
+		total += hop.RequestBytes
+	}
+	return total
+}
+
 func (r *flowRun) perform(ctx context.Context, action flowAction) flowInput {
 	if action.Kind == flowNested {
 		return r.runNested(ctx, action)
 	}
 	if action.Kind == flowWait {
+		began := time.Now()
 		pause(ctx, time.Duration(action.Ms)*time.Millisecond)
+		r.measure(flowMoment{Step: action.Step}, began)
 		return flowInput{}
 	}
 	if action.DelayMs > 0 {
@@ -240,7 +319,7 @@ func (r *flowRun) runNested(ctx context.Context, action flowAction) flowInput {
 	}
 	maps.Copy(given, action.Variables)
 	left := action.SendsLeft
-	child := &flowRun{flowShared: r.flowShared, flow: called, depth: r.depth + 1, given: given, sendsLeft: &left}
+	child := r.child(called, action.Step, given, &left)
 	if r.watch.Step != nil {
 		r.watch.Step(FlowEvent{Step: action.Step, Kind: flowStepFlow, Title: action.Title, Status: flowEventRunning, Summary: fmt.Sprintf("Runs the flow %q.", called.Name), Depth: r.depth})
 	}
@@ -251,16 +330,45 @@ func (r *flowRun) runNested(ctx context.Context, action flowAction) flowInput {
 	return flowInput{Outcome: outcome, Message: message, Sends: child.sends}
 }
 
-func (r *flowRun) send(ctx context.Context, action flowAction) (Result, engine.Response) {
-	request := r.options.applyTo(r.library[action.RequestID])
-	folder := r.folders[request.FolderID]
-	r.sends++
+func (r *flowRun) filled(request Request, inputs json.RawMessage) (Request, error) {
+	if len(inputs) == 0 || string(inputs) == "null" {
+		return request, nil
+	}
+	var filled filledRequest
+	if err := r.session.scripts.Call("applyInputs", &filled, request, inputs); err != nil {
+		return request, err
+	}
+	if !filled.Ok {
+		return request, errors.New(filled.Message)
+	}
+	filled.Request.Lineage = request.Lineage
+	return filled.Request, nil
+}
+
+func (r *flowRun) exchange(ctx context.Context, request Request, action flowAction) (exchange, error) {
+	began := time.Now()
 	r.session.once = variables{}
 	r.session.once.override(r.given)
 	r.session.once.override(action.Variables)
 	exchanged, err := r.session.execute(ctx, request)
 	r.session.once = nil
 	r.session.common.publish(r.session.scoped(request).plain())
+	if exchanged.skipped == "" {
+		r.measure(flowMoment{Step: action.Step, Sent: requestBytes(exchanged.response), Received: exchanged.response.Size, Send: true}, began)
+	}
+	return exchanged, err
+}
+
+func (r *flowRun) send(ctx context.Context, action flowAction) (Result, engine.Response) {
+	stored := r.library[action.RequestID]
+	folder := r.folders[stored.FolderID]
+	r.sends++
+	request, err := r.filled(stored, action.Inputs)
+	var exchanged exchange
+	if err == nil {
+		request = r.options.applyTo(request)
+		exchanged, err = r.exchange(ctx, request, action)
+	}
 	if err != nil {
 		exchanged.stop(err.Error())
 	}
@@ -277,6 +385,9 @@ func (r *flowRun) send(ctx context.Context, action flowAction) (Result, engine.R
 }
 
 func (r *flowRun) absorb(events []FlowEvent) {
+	if len(events) > 0 && r.owner == nil {
+		r.timeline = append(r.timeline, flowMoment{Events: events})
+	}
 	for _, event := range events {
 		event.Depth = r.depth
 		if event.Kind == flowStepFlow && event.Step == r.nestedStep {

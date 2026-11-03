@@ -6,12 +6,15 @@ import { withRunStreamBudget } from '../runStream'
 import { flowAllowance } from '../scripting/limits'
 import { flowTurnInSandbox, sizeSandboxPool } from '../scripting/sandbox'
 import { isSocketAddress } from '../socketSessions'
+import { timelineHops } from '../timeline'
 import { RUNNER_TEXT } from '../runnerText'
 import { FLOW_ENGINE_TEXT } from '../flowsText'
 import { useAppStore, variableTextFor } from '../../store/appStore'
 import { requestCatalog } from './catalog'
 import { ACTION_DONE, ACTION_FLOW, ACTION_WAIT, EVENT_HANDLED } from './engine'
 import { forgetHistory } from './history'
+import { applyInputs } from './inputs'
+import { emptyMeter, finishMeter, meterEvents, meterTiming, stepIndexOf } from './metrics'
 import { OUTCOME_FAILED, STEP_REQUEST } from './model'
 
 export const RUN_RUNNING = 'running'
@@ -60,6 +63,14 @@ const settledResult = (pending, event) => ({
   hasFailed: pending.hasFailed || (event.checks || []).some((check) => !check.passed),
 })
 
+const sentBytes = (response) => (response?.timeline ? timelineHops(response.timeline).reduce((total, hop) => total + (hop.requestBytes || 0), 0) : 0)
+
+const withDurations = (nodes, steps) => Object.fromEntries(Object.entries(nodes).map(([id, node]) => (
+  steps[id] ? [id, { ...node, durationMs: steps[id].totalMs, lastMs: steps[id].lastMs }] : [id, node]
+)))
+
+const notFilled = (request, message) => ({ ...skipped(request, ''), error: message, hasFailed: true })
+
 let sendSequence = 0
 
 async function decide(job) {
@@ -88,8 +99,18 @@ export function createFlowRunner(execute, cancel) {
     })
   }
 
+  function publish(tabId, run) {
+    patchRun(tabId, (current) => ({ metrics: finishMeter(run.meter, Date.now() - run.began), nodes: withDurations(current.nodes, run.meter.steps) }))
+  }
+
+  function measure(tabId, run, scope, timing) {
+    run.meter = meterTiming(run.meter, run.index, { ...timing, step: scope.root || timing.step })
+    publish(tabId, run)
+  }
+
   function absorb(tabId, run, events, scope) {
     const place = { depth: scope.depth, root: scope.root }
+    if (scope.depth === 0) run.meter = meterEvents(run.meter, run.index, events)
     events.forEach((event) => {
       if (scope.depth === 0) markNode(tabId, event.step, { state: event.status, attempt: event.attempt, attempts: event.attempts, summary: event.summary })
       if (event.kind === STEP_REQUEST && run.pending?.step === event.step) {
@@ -115,13 +136,21 @@ export function createFlowRunner(execute, cancel) {
     run.sends += 1
     const sendId = `flow-${sendSequence}`
     run.sendIds.add(sendId)
+    const filled = applyInputs(request, action.inputs)
+    if (!filled.ok) {
+      run.sendIds.delete(sendId)
+      run.pending = { ...notFilled(request, filled.message), step: action.step, attempt: action.attempt, attempts: action.attempts }
+      return { failed: true }
+    }
     run.giveSession({ ...scope.given, ...action.variables })
-    const outcome = isSocketAddress(request.url, variableTextFor(store(), request))
+    const began = Date.now()
+    const outcome = isSocketAddress(filled.request.url, variableTextFor(store(), request))
       ? { skipped: RUNNER_TEXT.socketSkipped }
-      : await execute(withRunStreamBudget(request), sendId, run.prompts)
+      : await execute(withRunStreamBudget(filled.request), sendId, run.prompts)
+    measure(tabId, run, scope, { step: action.step, ms: Date.now() - began, sent: sentBytes(outcome.response), received: outcome.response?.size || 0, send: !outcome.skipped })
     run.giveSession({})
     run.sendIds.delete(sendId)
-    const result = outcome.skipped ? skipped(request, outcome.skipped) : runResult(request, outcome)
+    const result = outcome.skipped ? skipped(request, outcome.skipped) : runResult(filled.request, outcome)
     run.pending = { ...result, step: action.step, attempt: action.attempt, attempts: action.attempts }
     return { response: outcome.skipped ? undefined : outcome.response, failed: result.hasFailed }
   }
@@ -139,7 +168,9 @@ export function createFlowRunner(execute, cancel) {
     if (action.kind === ACTION_FLOW) return runNested(tabId, run, action, scope)
     if (action.kind !== ACTION_WAIT) return send(tabId, run, action, scope)
     markRunning(tabId, scope, action.step)
+    const began = Date.now()
     await pause(run, action.ms)
+    measure(tabId, run, scope, { step: action.step, ms: Date.now() - began })
     return {}
   }
 
@@ -162,11 +193,14 @@ export function createFlowRunner(execute, cancel) {
 
   async function start(tabId, flow) {
     if (active.has(tabId)) return
-    const run = { isStopped: false, sendIds: new Set(), prompts: rememberPrompts(), giveSession: sessionGiver(store().sessionVariables), pending: null, sends: 0, wake: () => {} }
+    const run = {
+      isStopped: false, sendIds: new Set(), prompts: rememberPrompts(), giveSession: sessionGiver(store().sessionVariables), pending: null, sends: 0, wake: () => {},
+      index: stepIndexOf(flow), meter: emptyMeter(), began: Date.now(),
+    }
     active.set(tabId, run)
     sizeSandboxPool(1)
     useFlowRunStore.setState((state) => ({
-      runs: { ...state.runs, [tabId]: { status: RUN_RUNNING, flowName: flow.name, startedAt: new Date(), finishedAt: null, message: '', nodes: {}, entries: [] } },
+      runs: { ...state.runs, [tabId]: { status: RUN_RUNNING, flowName: flow.name, startedAt: new Date(), finishedAt: null, message: '', nodes: {}, entries: [], metrics: null } },
     }))
     try {
       const done = await drive(tabId, run, flow)
@@ -174,6 +208,7 @@ export function createFlowRunner(execute, cancel) {
     } catch (error) {
       if (!run.isStopped) patchRun(tabId, () => ({ status: 'failed', message: error?.message || String(error), finishedAt: new Date() }))
     } finally {
+      publish(tabId, run)
       if (active.get(tabId) === run) active.delete(tabId)
     }
   }

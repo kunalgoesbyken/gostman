@@ -4,6 +4,7 @@ import {
   END_TARGET, MAX_SENDS_CAP, OUTCOME_FAILED, OUTCOME_PASSED, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_REPEAT,
   STEP_REQUEST, STEP_SET, STEP_SWITCH, indexSteps, loopsAround, normalizeFlow,
 } from './model'
+import { resolveInputs } from './inputs'
 import { caseLabel, describeProblems, resolveFlow, resolveRequest, stepTitle, validateFlow } from './validate'
 import {
   asText, evaluateConditions, evaluateUntil, fillTemplate, itemValues, listItems, readResponse, subjectOf,
@@ -166,8 +167,21 @@ const isOverBudget = (turn) => turn.state.sends >= sendLimit(turn)
 
 const stopForBudget = (turn) => finish(turn, OUTCOME_FAILED, TEXT.budget(turn.state.sends, MAX_SENDS_CAP))
 
+function inputsFailed(turn, step, message) {
+  if (step.onFailure) {
+    record(turn, step, EVENT_HANDLED, { summary: message, handledBy: 'failure' })
+    return goTo(turn, step, step.onFailure)
+  }
+  record(turn, step, EVENT_FAILED, { summary: message })
+  return finish(turn, OUTCOME_FAILED, `${TEXT.inputsFailed(stepTitle(step, turn.requests))} ${message}`)
+}
+
+const readInput = (turn) => (input) => readResponse(turn.state.responses[input.step], input, titleOf(turn, input.step))
+
 function sendAction(turn, step) {
   const retry = step.retry
+  const filled = resolveInputs(step.inputs, readInput(turn))
+  if (!filled.ok) return inputsFailed(turn, step, filled.message)
   if (isOverBudget(turn)) return stopForBudget(turn)
   turn.state.sends += 1
   turn.state.quiet = 0
@@ -179,7 +193,8 @@ function sendAction(turn, step) {
     attempt: turn.state.attempt,
     attempts: retry.times,
     delayMs: turn.state.attempt > 1 ? retry.delayMs : 0,
-    variables: step.variables,
+    variables: { ...step.variables, ...filled.variables },
+    inputs: filled.inputs,
   }
   return undefined
 }

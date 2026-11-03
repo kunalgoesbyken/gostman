@@ -48,6 +48,7 @@ const LINES = {
     return [
       request ? { method: request.method, text: request.path } : { text: step.request || TEXT.noRequest, muted: true },
       ...(step.retry.times > 1 ? [{ text: TEXT.retry(step.retry.times, step.retry.delayMs) }] : []),
+      ...(step.inputs?.length > 0 ? [{ text: TEXT.inputs(step.inputs.length) }] : []),
       ...(until ? [{ text: TEXT.until(until.first, until.more), mono: true }] : []),
     ]
   },

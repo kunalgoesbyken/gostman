@@ -17,7 +17,7 @@ const blankCondition = () => ({ ...BLANK_ASSERTION, expression: 'res.status', va
 export const blankCase = () => ({ label: '', match: MATCH_ALL, conditions: [blankCondition()], target: '' })
 
 const STEP_FIELDS = {
-  [STEP_REQUEST]: () => ({ request: '', requestId: '', variables: {}, retry: { times: 1, delayMs: 0, until: [] }, onFailure: '' }),
+  [STEP_REQUEST]: () => ({ request: '', requestId: '', variables: {}, inputs: [], retry: { times: 1, delayMs: 0, until: [] }, onFailure: '' }),
   [STEP_SET]: () => ({ values: [{ name: '', value: '' }] }),
   [STEP_IF]: () => ({ source: CONDITION_RESPONSE, step: '', match: MATCH_ALL, conditions: [blankCondition()], then: '', else: '' }),
   [STEP_SWITCH]: () => ({ source: CONDITION_RESPONSE, step: '', cases: [blankCase()], else: '' }),

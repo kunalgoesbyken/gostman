@@ -40,6 +40,8 @@ const text = messages('flows', english, (t) => {
       caseName: (position) => t('flowEngine.caseName', { position: position + 1 }),
       caseCheck: (label, name) => t('flowEngine.caseCheck', { label, name }),
       waited: (milliseconds) => t('flowEngine.waited', { duration: t('flowEngine.milliseconds', { value: milliseconds }) }),
+      inputBodyNotJson: (name) => t('flowEngine.inputBodyNotJson', { name, example: braced('variables') }),
+      inputPastEnd: (name, count) => t('flowEngine.inputPastEnd', { name, count }),
     },
     flowCanvas: {
       stepLabel: (position, count, kind, title, state) => (
@@ -67,6 +69,9 @@ const text = messages('flows', english, (t) => {
       get variablesHint() {
         return t('flowEditor.variablesHint', { variables: braced('variables'), example: braced('item.id') })
       },
+      get inputsHint() {
+        return t('flowEditor.inputsHint', { variables: braced('variables') })
+      },
       get templatePlaceholder() {
         return t('flowEditor.templatePlaceholder', { example: braced('variable') })
       },
@@ -93,4 +98,5 @@ export const FLOW_PICKER_TEXT = text.flowPicker
 export const FLOW_EDITOR_TEXT = text.flowEditor
 export const FLOW_VIEW_TEXT = text.flowView
 export const FLOW_RUN_TEXT = text.flowRun
+export const FLOW_METRICS_TEXT = text.flowMetrics
 export const FLOW_SCRIPT_TEXT = text.flowScript

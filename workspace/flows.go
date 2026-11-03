@@ -49,6 +49,15 @@ type FlowCase struct {
 	Target     string      `json:"target,omitempty" yaml:"target,omitempty"`
 }
 
+type FlowInput struct {
+	Target string `json:"target" yaml:"target"`
+	Name   string `json:"name" yaml:"name"`
+	Value  string `json:"value,omitempty" yaml:"value,omitempty"`
+	Step   string `json:"step,omitempty" yaml:"step,omitempty"`
+	Source string `json:"source,omitempty" yaml:"source,omitempty"`
+	Path   string `json:"path,omitempty" yaml:"path,omitempty"`
+}
+
 type FlowStep struct {
 	Id         string            `json:"id" yaml:"id"`
 	Kind       string            `json:"kind" yaml:"kind"`
@@ -61,6 +70,7 @@ type FlowStep struct {
 	Times      int               `json:"times,omitempty" yaml:"times,omitempty"`
 	DelayMs    int64             `json:"delayMs,omitempty" yaml:"delayMs,omitempty"`
 	Variables  map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Inputs     []FlowInput       `json:"inputs,omitempty" yaml:"inputs,omitempty"`
 	Retry      *FlowRetry        `json:"retry,omitempty" yaml:"retry,omitempty"`
 	OnFailure  string            `json:"onFailure,omitempty" yaml:"onFailure,omitempty"`
 	Values     []FlowValue       `json:"values,omitempty" yaml:"values,omitempty"`
