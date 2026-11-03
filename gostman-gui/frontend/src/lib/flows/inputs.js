@@ -142,14 +142,11 @@ export function resolveInputs(inputs, read) {
   return { ok: true, inputs: resolved.filter((input) => !isVariable(input)), variables }
 }
 
-const keepsAsVariable = (row) => row.target === INPUT_VARIABLE && !row.step && !row.source
-
-export const sendRows = (variables, inputs) => [
-  ...Object.entries(variables).map(([name, value]) => ({ target: INPUT_VARIABLE, name, value })),
-  ...inputs,
+export const sendRows = (step) => [
+  ...Object.entries(step.variables).map(([name, value]) => ({ target: INPUT_VARIABLE, name, value })),
+  ...(step.inputs || []),
 ]
 
-export const splitSendRows = (rows) => ({
-  variables: Object.fromEntries(rows.filter(keepsAsVariable).map((row) => [row.name, row.value || ''])),
-  inputs: rows.filter((row) => !keepsAsVariable(row)),
-})
+export const editedSendRows = (rows) => ({ variables: {}, inputs: rows })
+
+export const sentVariableNames = (step) => sendRows(step).filter((row) => row.target === INPUT_VARIABLE).map((row) => row.name)
