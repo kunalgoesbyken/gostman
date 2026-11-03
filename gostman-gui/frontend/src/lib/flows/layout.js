@@ -1,4 +1,4 @@
-import { CONTAINER_KINDS, END_TARGET, STEP_END, STEP_IF, STEP_SWITCH, innerSteps } from './model'
+import { CONTAINER_KINDS, END_TARGET, STEP_END, STEP_IF, STEP_SWITCH, allStepIds, indexSteps, loopsAround, routesOf } from './model'
 
 const NODE_WIDTH = 248
 export const END_NODE = '#end'
@@ -28,39 +28,18 @@ const CORNER = 6
 const SOURCE_SHARE = { then: 0.36, next: 0.5, onFailure: 0.72, else: 0.72 }
 const CASE_SHARE = 0.5
 
-const caseField = (position) => `case:${position}`
+const BRANCHING_KINDS = [STEP_IF, STEP_SWITCH]
 
-const fallbackOf = (step) => step.next || FOLLOW
-
-const OUTS = {
-  [STEP_END]: () => [],
-  [STEP_IF]: (step) => [
-    { field: 'then', target: step.then || fallbackOf(step), implicit: !step.then && !step.next },
-    { field: 'else', target: step.else || fallbackOf(step), implicit: !step.else && !step.next },
-  ],
-  [STEP_SWITCH]: (step) => [
-    ...(step.cases || []).map((kase, position) => ({ field: caseField(position), target: kase.target || fallbackOf(step), implicit: !kase.target && !step.next })),
-    { field: 'else', target: step.else || fallbackOf(step), implicit: !step.else && !step.next },
-  ],
+const isOut = (step, field, target) => {
+  if (BRANCHING_KINDS.includes(step.kind)) return field !== 'next'
+  return field === 'next' || target !== ''
 }
 
-const defaultOuts = (step) => [
-  { field: 'next', target: fallbackOf(step), implicit: !step.next },
-  ...(step.onFailure ? [{ field: 'onFailure', target: step.onFailure, implicit: false }] : []),
-]
-
-const outsOf = (step) => (OUTS[step.kind] || defaultOuts)(step)
-
-const bodyOf = (step) => innerSteps(step) || []
-
-const isContainer = (step) => CONTAINER_KINDS.includes(step.kind)
-
-function allIds(steps, ids = new Set()) {
-  steps.forEach((step) => {
-    ids.add(step.id)
-    allIds(bodyOf(step), ids)
-  })
-  return ids
+function outsOf(step) {
+  if (step.kind === STEP_END) return []
+  return routesOf(step)
+    .filter(([field, target]) => isOut(step, field, target))
+    .map(([field, target]) => ({ field, target: target || step.next || FOLLOW, implicit: !target && !step.next }))
 }
 
 function resolveOut(out, list, position) {
@@ -74,14 +53,33 @@ const unique = (values) => [...new Set(values)]
 
 const targetIdOf = (list, index) => (index < list.length ? list[index].id : END_NODE)
 
+const sameExit = (one, other) => one.source === other.source && one.field === other.field && one.index === other.index
+
+function detachJoin(branch, exit) {
+  branch.joining.filter((inner) => sameExit(inner, exit)).forEach(detach)
+  branch.joining = branch.joining.filter((inner) => !sameExit(inner, exit))
+  branch.exits = branch.exits.filter((outer) => !sameExit(outer, exit))
+}
+
+function detachColumn(column, exit) {
+  column.exits = column.exits.filter((inner) => !sameExit(inner, exit))
+  if (column.exits.length === 0) column.branch.columns = column.branch.columns.filter((other) => other !== column)
+}
+
+function detach(exit) {
+  if (exit.item?.joining) detachJoin(exit.item, exit)
+  if (exit.item?.branch) detachColumn(exit.item, exit)
+}
+
 function skipEdge(ctx, list, exit) {
+  detach(exit)
   if (exit.index < list.length) ctx.edges.push({ from: exit.source, to: list[exit.index].id, field: exit.field })
 }
 
 function nodeBlock(ctx, step, list, position, parent) {
   const block = { type: 'node', step, position, parent, width: NODE_WIDTH, height: ctx.heightOf(step) }
-  if (!isContainer(step)) return block
-  const body = buildSeq(ctx, bodyOf(step), step.id, 0, bodyOf(step).length, { top: true, bottom: true, boxed: true })
+  if (!CONTAINER_KINDS.includes(step.kind)) return block
+  const body = buildSeq(ctx, step.steps, step.id, 0, step.steps.length, { top: true, bottom: true, boxed: true })
   return { ...block, type: 'container', body, nodeHeight: block.height }
 }
 
@@ -203,18 +201,19 @@ function addColumn(ctx, list, branch, group, seqs) {
     group.outs.forEach((out) => skipEdge(ctx, list, { source, field: out.field, index: group.index }))
     return
   }
-  const column = { fields, to: targetIdOf(list, group.index) }
+  const column = { fields, to: targetIdOf(list, group.index), branch }
   column.exits = group.outs.map((out) => ({ source, field: out.field, index: group.index, item: column }))
   branch.columns.push(column)
 }
 
 function branchExits(ctx, list, branch) {
   const leaving = branch.columns.flatMap((column) => (column.seq ? column.seq.exits : column.exits || []))
-  if (branch.join === null) return leaving
-  const joining = leaving.filter((exit) => exit.index === branch.join)
-  leaving.filter((exit) => exit.index !== branch.join).forEach((exit) => skipEdge(ctx, list, exit))
-  branch.joining = joining
-  return joining.map((exit) => ({ ...exit, item: branch }))
+  const continues = (exit) => (branch.join === null ? exit.index >= branch.resume : exit.index === branch.join)
+  leaving.filter((exit) => !continues(exit)).forEach((exit) => skipEdge(ctx, list, exit))
+  const onward = leaving.filter(continues)
+  if (branch.join === null) return onward
+  branch.joining = onward
+  return onward.map((exit) => ({ ...exit, item: branch }))
 }
 
 const ITEM_GAPS = { branch: 0 }
@@ -568,7 +567,7 @@ function shifted(drawing, edges, dx, dy) {
 }
 
 export function layoutFlow(steps, { heightOf }) {
-  const ctx = { heightOf, ids: allIds(steps), edges: [], endNotes: [], terminals: 0 }
+  const ctx = { heightOf, ids: new Set(allStepIds(steps)), edges: [], endNotes: [], terminals: 0 }
   const root = buildSeq(ctx, steps, '', 0, steps.length, { top: true, bottom: true })
   measureSeq(root)
   const start = { width: PILL_WIDTH, height: PILL_HEIGHT }
@@ -615,24 +614,18 @@ export function roundedPath(points, radius = CORNER) {
   return parts.join(' ')
 }
 
-function containersOf(steps, parents = [], found = new Map()) {
-  steps.forEach((step) => {
-    found.set(step.id, parents)
-    containersOf(bodyOf(step), [...parents, step.id], found)
-  })
-  return found
-}
-
 export const pairKey = (from, to) => `${from}>${to}`
 
+const visitedStep = (entry) => (entry.depth > 0 ? entry.root : entry.step)
+
 export function travelled(steps, entries, isFinished) {
-  const parents = containersOf(steps)
-  const visited = entries.map((entry) => entry.step).filter((id, at, all) => id && id !== all[at - 1])
+  const index = indexSteps(steps)
+  const visited = entries.map(visitedStep).filter((id, at, all) => id && id !== all[at - 1])
   const pairs = new Set(visited.length > 0 ? [pairKey(START_NODE, visited[0])] : [])
   visited.slice(1).forEach((to, at) => {
     const from = visited[at]
-    const inside = parents.get(to) || []
-    const left = (parents.get(from) || []).filter((parent) => !inside.includes(parent) && parent !== to)
+    const inside = loopsAround(index, to)
+    const left = loopsAround(index, from).filter((parent) => !inside.includes(parent) && parent !== to)
     pairs.add(pairKey(from, to))
     left.forEach((parent) => pairs.add(pairKey(parent, to)))
   })

@@ -87,13 +87,18 @@ export function fallsThrough(step) {
   return BRANCHING[step.kind]?.(step) ?? true
 }
 
-function jumpLabel(step, field) {
-  if (isCaseField(field)) return caseLabel(step.cases[casePosition(field)], casePosition(field))
-  if (step.kind === STEP_SWITCH && field === 'else') return TEXT.edges.otherwise
-  return TEXT.edges[field]
+function edgeWord(step, field) {
+  if (field === 'next' && step.onFailure) return 'passes'
+  if (field === 'else' && step.kind === STEP_SWITCH) return 'otherwise'
+  return field
 }
 
-const jumpTone = (field) => FIELD_TONES[field] || (isCaseField(field) ? TONE_SUCCESS : TONE_MUTED)
+export function jumpLabel(step, field) {
+  if (isCaseField(field)) return caseLabel(step.cases[casePosition(field)], casePosition(field))
+  return TEXT.edges[edgeWord(step, field)]
+}
+
+export const jumpTone = (field) => FIELD_TONES[field] || (isCaseField(field) ? TONE_SUCCESS : TONE_MUTED)
 
 export function jumpsOf(step) {
   return targetsOf(step).map(([field, to]) => ({ from: step.id, to, field, label: jumpLabel(step, field), toEnd: to === END_TARGET, tone: jumpTone(field) }))

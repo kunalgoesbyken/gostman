@@ -1,41 +1,25 @@
 import { Plus } from "lucide-react"
 import { frameLabelOf } from "./FlowNode"
 import { FLOW_CANVAS_TEXT as TEXT, FLOW_VIEW_TEXT } from "../../lib/flowsText"
-import { jumpsOf } from "../../lib/flows/describe"
+import { TONE_FAILURE, TONE_MUTED, TONE_SUCCESS, jumpLabel, jumpTone } from "../../lib/flows/describe"
 import { END_NODE, START_NODE, pairKey, roundedPath } from "../../lib/flows/layout"
-import { STEP_SWITCH } from "../../lib/flows/model"
-import { caseLabel, stepTitle } from "../../lib/flows/validate"
+import { stepTitle } from "../../lib/flows/validate"
 import { cn } from "../../lib/utils"
 
-const CASE_PREFIX = "case:"
 const ARROW_LENGTH = 6
 const ARROW_SPREAD = 3.5
 const SLOT_RADIUS = 10
 const RETRY_BULGE = 16
 const RETRY_INSET = 12
-const FIELD_TONES = { then: "success", onFailure: "failure" }
 const TONES = {
-  success: { stroke: "stroke-success", fill: "fill-success", text: "text-success" },
-  failure: { stroke: "stroke-destructive", fill: "fill-destructive", text: "text-destructive" },
-  muted: { stroke: "stroke-muted-foreground", fill: "fill-muted-foreground", text: "text-muted-foreground" },
-  taken: { stroke: "stroke-primary", fill: "fill-primary", text: "text-primary" },
+  [TONE_SUCCESS]: { stroke: "stroke-success", fill: "fill-success", text: "text-success" },
+  [TONE_FAILURE]: { stroke: "stroke-destructive", fill: "fill-destructive", text: "text-destructive" },
+  [TONE_MUTED]: { stroke: "stroke-muted-foreground", fill: "fill-muted-foreground", text: "text-muted-foreground" },
 }
+const TAKEN = { stroke: "stroke-primary", fill: "fill-primary" }
 const LABEL_STYLE = { paintOrder: "stroke", stroke: "hsl(var(--background))", strokeWidth: 4, fontSize: 10, letterSpacing: "0.06em" }
 
-const jumpOf = (step, field) => jumpsOf(step).find((jump) => jump.field === field)
-
-const toneOf = (step, field) => TONES[jumpOf(step, field)?.tone || FIELD_TONES[field]] || TONES.muted
-
-function branchLabel(step, field) {
-  if (field.startsWith(CASE_PREFIX)) {
-    const position = Number(field.slice(CASE_PREFIX.length))
-    return caseLabel(step.cases[position], position)
-  }
-  if (field === "else" && step.kind === STEP_SWITCH) return TEXT.edges.otherwise
-  return TEXT.branches[field] || jumpOf(step, field)?.label || field
-}
-
-const sideLabel = (step, field) => jumpOf(step, field)?.label || branchLabel(step, field)
+const toneOf = (field) => TONES[jumpTone(field)]
 
 const arrowAt = (point, pointsLeft) => {
   const back = pointsLeft ? ARROW_LENGTH : -ARROW_LENGTH
@@ -52,13 +36,13 @@ function Wire({ wire, isTaken }) {
       fill="none"
       strokeWidth={strokeWidthOf(isTaken)}
       strokeDasharray={wire.idle ? "3 4" : undefined}
-      className={isTaken ? TONES.taken.stroke : tone}
+      className={isTaken ? TAKEN.stroke : tone}
     />
   )
 }
 
 function Jump({ edge, step, isTaken }) {
-  const tone = isTaken ? TONES.taken : toneOf(step, edge.field)
+  const tone = isTaken ? TAKEN : toneOf(edge.field)
   const [source, , , target] = edge.points
   const isRight = edge.side === "right"
   return (
@@ -66,7 +50,7 @@ function Jump({ edge, step, isTaken }) {
       <path d={roundedPath(edge.points)} fill="none" strokeWidth={strokeWidthOf(isTaken)} />
       <polygon points={arrowAt(target, isRight)} className={tone.fill} stroke="none" />
       <text x={source.x + (isRight ? ARROW_LENGTH : -ARROW_LENGTH)} y={source.y - 4} textAnchor={isRight ? "start" : "end"} className={tone.fill} style={LABEL_STYLE}>
-        {sideLabel(step, edge.field)}
+        {jumpLabel(step, edge.field)}
       </text>
     </g>
   )
@@ -75,9 +59,9 @@ function Jump({ edge, step, isTaken }) {
 function Loop({ loop, isTaken }) {
   const end = loop.points[loop.points.length - 1]
   return (
-    <g className={isTaken ? TONES.taken.stroke : "stroke-muted-foreground/60"}>
+    <g className={isTaken ? TAKEN.stroke : "stroke-muted-foreground/60"}>
       <path d={roundedPath(loop.points)} fill="none" strokeWidth={strokeWidthOf(isTaken)} strokeDasharray="3 3" />
-      <polygon points={arrowAt({ x: end.x - 1, y: end.y }, false)} className={isTaken ? TONES.taken.fill : "fill-muted-foreground/60"} stroke="none" />
+      <polygon points={arrowAt({ x: end.x - 1, y: end.y }, false)} className={isTaken ? TAKEN.fill : "fill-muted-foreground/60"} stroke="none" />
     </g>
   )
 }
@@ -109,7 +93,7 @@ export function Lines({ layout, index, pairs }) {
 }
 
 export function BranchLabel({ label, step }) {
-  const text = label.fields.map((field) => branchLabel(step, field)).join(" · ")
+  const text = label.fields.map((field) => jumpLabel(step, field)).join(" · ")
   return (
     <span
       aria-hidden="true"
@@ -118,7 +102,7 @@ export function BranchLabel({ label, step }) {
       style={{ left: label.x, top: label.y, maxWidth: label.width }}
       className={cn(
         "absolute -translate-x-1/2 -translate-y-1/2 truncate rounded-full border border-border bg-background px-1.5 text-3xs font-semibold uppercase leading-4 tracking-wider",
-        toneOf(step, label.fields[0]).text
+        toneOf(label.fields[0]).text
       )}
     >
       {text}

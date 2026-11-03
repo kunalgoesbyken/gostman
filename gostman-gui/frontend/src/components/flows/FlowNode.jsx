@@ -5,7 +5,7 @@ import {
 import { MethodTag } from "../MethodTag"
 import { ScopeMark } from "../ScopeMark"
 import { FLOW_CANVAS_TEXT as TEXT } from "../../lib/flowsText"
-import { stepLines } from "../../lib/flows/describe"
+import { jumpLabel, stepLines } from "../../lib/flows/describe"
 import { EVENT_FAILED, EVENT_HANDLED, EVENT_PASSED } from "../../lib/flows/engine"
 import { NODE_RUNNING } from "../../lib/flows/flowRunner"
 import {
@@ -137,7 +137,7 @@ export const FlowNode = memo(function FlowNode({ step, box, position, count, con
       <span dir="auto" className="truncate text-xs font-medium" title={title}>{title}</span>
       <Lines step={step} context={context} />
       {endNotes.map((field) => (
-        <span key={field} className="text-2xs text-muted-foreground">{TEXT.toEnd(TEXT.edges[field] || field)}</span>
+        <span key={field} className="text-2xs text-muted-foreground">{TEXT.toEnd(jumpLabel(step, field))}</span>
       ))}
       {isWorthTelling(step, node) && (
         <span dir="auto" className="truncate text-2xs text-muted-foreground" title={node.summary}>{node.summary}</span>

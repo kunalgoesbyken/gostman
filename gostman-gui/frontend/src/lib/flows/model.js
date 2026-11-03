@@ -257,7 +257,9 @@ const fieldTargets = (step) => TARGET_FIELDS.filter((field) => typeof step[field
 
 const caseTargets = (step) => (step.kind === STEP_SWITCH && Array.isArray(step.cases) ? step.cases.map((kase, position) => [caseField(position), kase.target]) : [])
 
-export const targetsOf = (step) => [...caseTargets(step), ...fieldTargets(step)].filter(([, target]) => typeof target === 'string' && target !== '')
+export const routesOf = (step) => [...caseTargets(step), ...fieldTargets(step)]
+
+export const targetsOf = (step) => routesOf(step).filter(([, target]) => typeof target === 'string' && target !== '')
 
 export function retargeted(step, change) {
   const fields = Object.fromEntries(fieldTargets(step).map(([field, target]) => [field, change(target)]))

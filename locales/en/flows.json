@@ -231,6 +231,7 @@
     },
     "edges": {
       "next": "go to",
+      "passes": "passes",
       "onFailure": "fails",
       "then": "true",
       "else": "false",
@@ -263,12 +264,6 @@
       "flow": "Flow",
       "delay": "Wait",
       "end": "End"
-    },
-    "branches": {
-      "next": "passes",
-      "onFailure": "fails",
-      "then": "true",
-      "else": "false"
     },
     "endPill": "End",
     "moreLines_one": "{{count}} more",
