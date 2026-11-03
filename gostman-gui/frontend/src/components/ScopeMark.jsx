@@ -1,4 +1,4 @@
-import { Clock, FolderTree, Globe, Layers, Repeat, Send } from "lucide-react"
+import { Clock, FolderTree, Globe, Layers, Repeat, Send, Workflow } from "lucide-react"
 import { VARIABLE_TEXT } from "../lib/variablesText"
 import { cn } from "../lib/utils"
 
@@ -9,6 +9,7 @@ export const SCOPE_MARKS = {
   global: { icon: Globe, tone: "text-muted-foreground" },
   flowLoop: { icon: Repeat, tone: "text-primary" },
   flowSend: { icon: Send, tone: "text-info" },
+  flowCall: { icon: Workflow, tone: "text-info" },
 }
 
 export const hasScopeMark = (source) => Object.hasOwn(SCOPE_MARKS, source)

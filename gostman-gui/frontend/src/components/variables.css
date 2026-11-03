@@ -70,7 +70,8 @@
   text-decoration-style: dotted;
 }
 
-.gm-var-ok[data-scope="flowSend"] {
+.gm-var-ok[data-scope="flowSend"],
+.gm-var-ok[data-scope="flowCall"] {
   --gm-scope: var(--info);
   text-decoration-style: wavy;
 }

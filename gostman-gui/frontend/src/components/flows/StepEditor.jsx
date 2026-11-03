@@ -21,7 +21,7 @@ import {
   OUTCOME_PASSED, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_REPEAT,
   STEP_REQUEST, STEP_SET, STEP_SWITCH, loopsAround,
 } from "../../lib/flows/model"
-import { SOURCE_LOOP, SOURCE_SEND } from "../../lib/flows/outputs"
+import { SOURCE_CALL, SOURCE_LOOP, SOURCE_SEND } from "../../lib/flows/outputs"
 import { caseLabel, kindText, resolveFlow, resolveRequest, stepTitle } from "../../lib/flows/validate"
 import { SCOPE_SESSION } from "../../lib/scripting/scopes"
 import { isActiveAssertion, parseAssertions, serializeAssertions } from "../../lib/scripting/assertions"
@@ -322,7 +322,7 @@ function FlowFields({ step, flows, onPatch, onPickFlow, onOpenFlow, targets }) {
           {TEXT.openFlow}
         </Button>
         <SectionLabel className="pt-1">{TEXT.flowVariables}</SectionLabel>
-        <ScopeNote source={SOURCE_SEND}>{TEXT.flowScope}</ScopeNote>
+        <ScopeNote source={SOURCE_CALL}>{TEXT.flowScope}</ScopeNote>
         <VariableRows variables={step.variables} onChange={(variables) => onPatch({ variables })} />
         <Hint>{TEXT.flowVariablesHint}</Hint>
       </Section>

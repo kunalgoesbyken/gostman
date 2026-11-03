@@ -5,8 +5,9 @@ import { stepTitle } from './validate'
 
 export const SOURCE_LOOP = 'flowLoop'
 export const SOURCE_SEND = 'flowSend'
+export const SOURCE_CALL = 'flowCall'
 
-const SENDING_KINDS = [STEP_REQUEST, STEP_FLOW]
+const GIVEN_SOURCES = { [STEP_REQUEST]: SOURCE_SEND, [STEP_FLOW]: SOURCE_CALL }
 
 const entry = (name, source, owner) => [name, { value: '', typed: '', secret: false, source, owner }]
 
@@ -21,7 +22,7 @@ function stepOutputs(step, requests, current) {
   const owner = stepTitle(step, requests)
   if (step.kind === STEP_SET) return namedOnly(step.values.map((value) => value.name)).map((name) => entry(name, SCOPE_SESSION, owner))
   if (LOOP_NAMES[step.kind]) return LOOP_NAMES[step.kind](step).map((name) => entry(name, SOURCE_LOOP, owner))
-  if (SENDING_KINDS.includes(step.kind) && step.id === current?.id) return namedOnly(sentVariableNames(step)).map((name) => entry(name, SOURCE_SEND, owner))
+  if (GIVEN_SOURCES[step.kind] && step.id === current?.id) return namedOnly(sentVariableNames(step)).map((name) => entry(name, GIVEN_SOURCES[step.kind], owner))
   return []
 }
 

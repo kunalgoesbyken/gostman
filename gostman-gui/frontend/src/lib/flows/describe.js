@@ -4,7 +4,7 @@ import {
   CONDITION_VARIABLES, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_REPEAT, STEP_REQUEST, STEP_SET,
   STEP_SWITCH, casePosition, isCaseField,
 } from './model'
-import { SOURCE_LOOP, SOURCE_SEND } from './outputs'
+import { SOURCE_CALL, SOURCE_LOOP } from './outputs'
 import { caseLabel, resolveRequest, stepTitle } from './validate'
 import { SCOPE_SESSION } from '../scripting/scopes'
 
@@ -18,6 +18,8 @@ const firstAndMore = (conditions) => {
   const active = conditions.filter(isActiveAssertion)
   return active.length > 0 ? { first: titleOf(active[0]), more: active.length - 1 } : null
 }
+
+const isFilledValue = (value) => [value.name, value.step, value.value, value.path].some(Boolean)
 
 const referenceTitle = (index, id, requests) => (index.get(id) ? stepTitle(index.get(id).step, requests) : id)
 
@@ -53,8 +55,9 @@ const LINES = {
     ]
   },
   [STEP_SET]: (step, { index, requests }) => {
-    if (step.values.length === 0) return [{ text: TEXT.noValues, muted: true }]
-    return step.values.map((value) => ({
+    const values = step.values.filter(isFilledValue)
+    if (values.length === 0) return [{ text: TEXT.noValues, muted: true }]
+    return values.map((value) => ({
       text: TEXT.sets(value.name, value.step ? TEXT.fromResponse(value.source, value.path, referenceTitle(index, value.step, requests)) : TEXT.fromTemplate(value.value)),
       mono: true,
       scope: SCOPE_SESSION,
@@ -69,7 +72,7 @@ const LINES = {
   [STEP_REPEAT]: repeatLines,
   [STEP_FLOW]: (step) => [
     step.flow ? { text: TEXT.runsFlow(step.flow) } : { text: TEXT.noFlow, muted: true },
-    ...Object.keys(step.variables).map((name) => ({ text: TEXT.sets(name, step.variables[name]), mono: true, scope: SOURCE_SEND })),
+    ...Object.keys(step.variables).map((name) => ({ text: TEXT.sets(name, step.variables[name]), mono: true, scope: SOURCE_CALL })),
   ],
   [STEP_DELAY]: (step) => [{ text: TEXT.wait(step.ms) }],
   [STEP_END]: (step) => [{ text: TEXT.outcomes[step.outcome] }, ...(step.message ? [{ text: step.message, muted: true }] : [])],
