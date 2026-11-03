@@ -174,8 +174,8 @@ export function useCanvasView(viewportRef, viewKey, layout, onBackground) {
   const viewport = useViewportSize(viewportRef)
   const [view, setStoredView] = useState(() => views.get(viewKey) || null)
   const [isGliding, setGliding] = useState(false)
-  const latest = useRef({ layout, viewport })
-  latest.current = { layout, viewport }
+  const latest = useRef({ layout, viewport, view })
+  latest.current = { layout, viewport, view }
 
   const setView = useCallback((change, glide = false) => {
     setStoredView((current) => {
@@ -206,11 +206,12 @@ export function useCanvasView(viewportRef, viewKey, layout, onBackground) {
   const resetZoom = useCallback(() => view && zoomBy(1 / view.scale), [view, zoomBy])
 
   const reveal = useCallback((box) => {
-    if (!box || !view || !viewport) return
-    const shiftX = nudge(view.x + box.x * view.scale, box.width * view.scale, viewport.width)
-    const shiftY = nudge(view.y + box.y * view.scale, box.height * view.scale, viewport.height)
-    if (shiftX !== 0 || shiftY !== 0) setView({ ...view, x: view.x + shiftX, y: view.y + shiftY }, true)
-  }, [view, viewport, setView])
+    const { view: current, viewport: room } = latest.current
+    if (!box || !current || !room) return
+    const shiftX = nudge(current.x + box.x * current.scale, box.width * current.scale, room.width)
+    const shiftY = nudge(current.y + box.y * current.scale, box.height * current.scale, room.height)
+    if (shiftX !== 0 || shiftY !== 0) setView({ ...current, x: current.x + shiftX, y: current.y + shiftY }, true)
+  }, [setView])
 
   const onScroll = (event) => {
     const element = event.currentTarget
