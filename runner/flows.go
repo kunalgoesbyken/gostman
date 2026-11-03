@@ -108,6 +108,7 @@ type flowTurn struct {
 	Action   flowAction        `json:"action"`
 	Events   []FlowEvent       `json:"events"`
 	Writes   map[string]string `json:"writes"`
+	Forgets  []string          `json:"forgets"`
 	Problems []json.RawMessage `json:"problems"`
 }
 
@@ -225,7 +226,11 @@ func (r *flowRun) drive(ctx context.Context, turn flowTurn, err error) flowActio
 			return r.halt(err.Error())
 		}
 		r.session.values.remember(turn.Writes)
+		r.session.values.forgetSession(turn.Forgets)
 		for name := range turn.Writes {
+			delete(r.given, name)
+		}
+		for _, name := range turn.Forgets {
 			delete(r.given, name)
 		}
 		r.absorb(turn.Events)

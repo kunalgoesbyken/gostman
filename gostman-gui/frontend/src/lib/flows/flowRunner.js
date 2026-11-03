@@ -16,6 +16,7 @@ import { forgetHistory } from './history'
 import { applyInputs } from './inputs'
 import { emptyMeter, finishMeter, meterEvents, meterTiming, stepIndexOf } from './metrics'
 import { OUTCOME_FAILED, STEP_FLOW, STEP_REQUEST } from './model'
+import { withoutNames } from './values'
 
 export const RUN_RUNNING = 'running'
 export const RUN_STOPPED = 'stopped'
@@ -91,8 +92,6 @@ const sentBytes = (response) => (response?.timeline ? timelineHops(response.time
 const withDurations = (nodes, steps) => Object.fromEntries(Object.entries(nodes).map(([id, node]) => (
   steps[id] ? [id, { ...node, durationMs: steps[id].totalMs }] : [id, node]
 )))
-
-const withoutNames = (values, names) => Object.fromEntries(Object.entries(values).filter(([name]) => !names.includes(name)))
 
 let sendSequence = 0
 
@@ -195,9 +194,9 @@ export function createFlowRunner(execute, cancel) {
   }
 
   function adopt(tabId, run, turn, scope) {
-    const written = Object.keys(turn.writes)
-    if (written.length > 0) store().storeSessionVariables(turn.writes)
-    scope.given = withoutNames(scope.given, written)
+    const changed = [...Object.keys(turn.writes), ...turn.forgets]
+    if (changed.length > 0) store().storeSessionVariables(turn.writes, turn.forgets)
+    scope.given = withoutNames(scope.given, changed)
     absorb(tabId, run, turn.events, scope)
   }
 

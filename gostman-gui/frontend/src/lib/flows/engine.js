@@ -7,7 +7,7 @@ import {
 import { resolveInputs } from './inputs'
 import { caseLabel, describeProblems, resolveFlow, resolveRequest, stepTitle, validateFlow } from './validate'
 import {
-  asText, evaluateConditions, evaluateUntil, fillTemplate, itemValues, listItems, readResponse, subjectOf,
+  asText, evaluateConditions, evaluateUntil, fillTemplate, itemValues, listItems, readResponse, subjectOf, withoutNames,
 } from './values'
 
 export const ACTION_SEND = 'send'
@@ -38,12 +38,13 @@ function createTurn(flow, state, context) {
     sendsLeft: Number.isFinite(context.sendsLeft) ? context.sendsLeft : MAX_SENDS_CAP,
     given: context.variables || {},
     writes: {},
+    forgets: [],
     events: [],
     action: null,
   }
 }
 
-const variablesOf = (turn) => ({ ...turn.given, ...turn.writes })
+const variablesOf = (turn) => ({ ...withoutNames(turn.given, turn.forgets), ...turn.writes })
 
 const titleOfStep = (turn, step) => stepTitle(step, turn.requests, turn.flows)
 
@@ -56,18 +57,44 @@ function record(turn, step, status, details = {}) {
 }
 
 function finish(turn, outcome, message, reason = {}) {
+  leaveLoops(turn, 0)
   turn.state.at = ''
   turn.action = { kind: ACTION_DONE, outcome, message, ...reason }
 }
 
 function write(turn, values) {
   Object.assign(turn.writes, values)
+  turn.forgets = turn.forgets.filter((name) => !Object.hasOwn(values, name))
 }
+
+function forget(turn, name) {
+  delete turn.writes[name]
+  if (!turn.forgets.includes(name)) turn.forgets.push(name)
+}
+
+function shadowOf(turn, name) {
+  const variables = variablesOf(turn)
+  return Object.hasOwn(variables, name) ? { shadowed: variables[name] } : {}
+}
+
+function closeLoop(turn, frame) {
+  const loop = turn.index.get(frame.step).step
+  if (loop.kind !== STEP_REPEAT) return
+  if (Object.hasOwn(frame, 'shadowed')) write(turn, { [loop.indexAs]: frame.shadowed })
+  else forget(turn, loop.indexAs)
+}
+
+function leaveLoops(turn, kept) {
+  turn.state.frames.slice(kept).reverse().forEach((frame) => closeLoop(turn, frame))
+  turn.state.frames = turn.state.frames.slice(0, kept)
+}
+
+const leaveLoop = (turn) => leaveLoops(turn, turn.state.frames.length - 1)
 
 function enter(turn, id) {
   const around = loopsAround(turn.index, id)
   const kept = turn.state.frames.findIndex((frame) => !around.includes(frame.step))
-  if (kept >= 0) turn.state.frames = turn.state.frames.slice(0, kept)
+  if (kept >= 0) leaveLoops(turn, kept)
   turn.state.at = id
   turn.state.attempt = 1
 }
@@ -92,7 +119,7 @@ function beginPass(turn, loop, frame) {
 function endOfItem(turn, loop, frame) {
   frame.index += 1
   if (frame.index < frame.items.length) return bindItem(turn, loop, frame)
-  turn.state.frames.pop()
+  leaveLoop(turn)
   return continueAfter(turn, loop)
 }
 
@@ -101,7 +128,7 @@ const untilOf = (loop) => ({ source: loop.source, step: loop.step, match: loop.m
 const untilChecks = (checks) => checks.map((check) => ({ ...check, name: TEXT.untilCheck(check.name) }))
 
 function repeatExhausted(turn, loop, checks) {
-  turn.state.frames.pop()
+  leaveLoop(turn)
   if (loop.onFailure) {
     record(turn, loop, EVENT_HANDLED, { checks, summary: TEXT.untilNeverRerouted(loop.times, targetTitle(turn, loop.onFailure)), handledBy: 'failure' })
     return goTo(turn, loop, loop.onFailure)
@@ -122,13 +149,13 @@ function endOfPass(turn, loop, frame) {
   const isLast = frame.index + 1 >= frame.count
   if (!loop.until.some(isActiveAssertion)) {
     if (!isLast) return nextPass(turn, loop, frame)
-    turn.state.frames.pop()
+    leaveLoop(turn)
     return continueAfter(turn, loop)
   }
   const result = evaluateConditions(untilOf(loop), conditionSubject(turn, loop), variablesOf(turn))
   const checks = untilChecks(result.checks)
   if (result.passed) {
-    turn.state.frames.pop()
+    leaveLoop(turn)
     record(turn, loop, EVENT_PASSED, { checks, summary: TEXT.untilMet(frame.index + 1) })
     return continueAfter(turn, loop)
   }
@@ -281,7 +308,7 @@ function runForEach(turn, step) {
 }
 
 function runRepeat(turn, step) {
-  const frame = { step: step.id, index: 0, count: step.times }
+  const frame = { step: step.id, index: 0, count: step.times, ...shadowOf(turn, step.indexAs) }
   turn.state.frames.push(frame)
   return beginPass(turn, step, frame)
 }
@@ -333,7 +360,7 @@ function proceed(turn) {
       HANDLERS[step.kind](turn, step)
     }
   }
-  return { state: turn.state, action: turn.action, events: turn.events, writes: turn.writes }
+  return { state: turn.state, action: turn.action, events: turn.events, writes: turn.writes, forgets: turn.forgets }
 }
 
 function judgeAttempt(turn, step, input) {
