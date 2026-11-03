@@ -30,6 +30,10 @@ type App struct {
 	links linkInbox
 
 	frameless bool
+
+	savedWindow    windowState
+	hasSavedWindow bool
+	windowRestore  sync.Once
 }
 
 func NewApp(frameless bool) *App {
@@ -38,6 +42,9 @@ func NewApp(frameless bool) *App {
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	if placesBeforeShow {
+		a.restoreWindow()
+	}
 	startBackups()
 	a.loadNetwork()
 	restoreWorkspace()

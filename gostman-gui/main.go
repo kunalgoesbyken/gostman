@@ -50,11 +50,14 @@ func main() {
 	frameless := opensFrameless()
 	app := NewApp(frameless)
 	theme := savedWindowTheme()
+	app.savedWindow, app.hasSavedWindow = loadWindowState()
+	width, height, startState := startingWindow(app.savedWindow, app.hasSavedWindow)
 
 	err := wails.Run(&options.App{
 		Title:            "Gostman",
-		Width:            1280,
-		Height:           820,
+		Width:            width,
+		Height:           height,
+		WindowStartState: startState,
 		MinWidth:         800,
 		MinHeight:        600,
 		MaxWidth:         maxWindowSide,
@@ -63,6 +66,8 @@ func main() {
 		AssetServer:      &assetserver.Options{Assets: assets, Middleware: isolateSandbox},
 		BackgroundColour: &theme.background,
 		OnStartup:        app.startup,
+		OnDomReady:       app.restoreWindowOnceShown,
+		OnBeforeClose:    app.rememberWindow,
 		OnShutdown:       app.stopServers,
 		Menu:             applicationMenu(),
 		Windows:          windowsOptions(theme),
