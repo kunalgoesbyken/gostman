@@ -240,6 +240,10 @@ jobs:
         run: |
           awk -v heading="## [$VERSION]" 'index($0, heading) == 1 { found = 1; next } found && /^## \[/ { exit } found' CHANGELOG.md > release-notes.md
 
+      - name: Write the checksums the desktop updater verifies
+        working-directory: artifacts
+        run: sha256sum Gostman-* gostman-cli-* > SHA256SUMS
+
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
@@ -249,6 +253,7 @@ jobs:
           files: |
             artifacts/Gostman-*
             artifacts/gostman-cli-*
+            artifacts/SHA256SUMS
           generate_release_notes: true
 
   image:

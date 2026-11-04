@@ -1,0 +1,8 @@
+{
+  "updates": {
+    "checksLabel": "Cerca nuove versioni",
+    "available": "È disponibile la versione {{version}}",
+    "dismiss": "Nascondi fino alla prossima versione",
+    "downloadHint": "Apri le note di rilascio e i download su GitHub"
+  }
+}

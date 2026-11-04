@@ -13,6 +13,7 @@ import { Select } from "./ui/select"
 import { AiSection } from "./preferences/AiSection"
 import { DataSection } from "./preferences/DataSection"
 import { PrivacySection } from "./preferences/PrivacySection"
+import { UpdatesSection } from "./preferences/UpdatesSection"
 import { ChoiceRow, PreferenceRow, optionsOf } from "./preferences/PreferenceRows"
 import { ThemeSection } from "./preferences/ThemeSection"
 import { SidebarViewsGroup } from "./preferences/SidebarViewsGroup"
@@ -30,7 +31,7 @@ import {
   BUILT_IN_TIMEOUT_SECONDS, DENSITIES, EDITOR_FONT_SIZES, FONT_NAME_LENGTH, LANGUAGES, REQUEST_TIMEOUT_SECONDS,
   RESPONSE_LAYOUTS, TAB_PLACEMENTS, TEXT_SCALES, resetPreferences, updatePreferences, usePreferences,
 } from "../lib/preferences"
-import { SECTION_AI, selectPreferencesSection, usePreferencesSection } from "../lib/preferencesSection"
+import { SECTION_AI, SECTION_UPDATES, selectPreferencesSection, usePreferencesSection } from "../lib/preferencesSection"
 import { AUTHOR_LIMIT } from "../lib/notes"
 import { PREFERENCES_TEXT } from "../lib/preferencesText"
 import { TRANSLATE_URL, TRANSLATIONS_ISSUE_URL } from "../lib/siteLinks"
@@ -281,12 +282,13 @@ function LanguageSection({ preferences }) {
   )
 }
 
-const section = (id, render) => ({
+const section = (id, render, shows = () => true) => ({
   id,
   get title() {
     return sections[id]
   },
   render,
+  shows,
 })
 
 const SECTIONS = [
@@ -297,10 +299,13 @@ const SECTIONS = [
   section("language", (context) => <LanguageSection {...context} />),
   section(SECTION_AI, (context) => <AiSection actions={context.ai} />),
   section("privacy", (context) => <PrivacySection {...context} />),
+  section(SECTION_UPDATES, (context) => <UpdatesSection updates={context.updates} />, (context) => Boolean(context.updates)),
   section("data", (context) => <DataSection {...context} />),
 ]
 
-const sectionById = (id) => SECTIONS.find((section) => section.id === id) ?? SECTIONS[0]
+const sectionsFor = (context) => SECTIONS.filter((section) => section.shows(context))
+
+const sectionById = (shown, id) => shown.find((section) => section.id === id) ?? shown[0]
 
 function SectionTab({ section, isSelected, tabId, panelId, onSelect }) {
   const tabRef = useRef(null)
@@ -333,7 +338,8 @@ export function PreferencesDialog({ listFonts, windowFrame, onCommand, backups, 
   const preferences = usePreferences()
   const installedFonts = useInstalledFonts(listFonts)
   const openShortcuts = useAppStore((state) => state.openShortcutsDialog)
-  const selected = sectionById(usePreferencesSection((state) => state.id))
+  const shown = sectionsFor({ updates })
+  const selected = sectionById(shown, usePreferencesSection((state) => state.id))
   const baseId = useId()
   const tabIdOf = (section) => `${baseId}-${section.id}-tab`
   const panelId = `${baseId}-panel`
@@ -352,7 +358,7 @@ export function PreferencesDialog({ listFonts, windowFrame, onCommand, backups, 
           onKeyDown={(event) => moveFocus(event, SECTION_KEYS)}
           className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto p-2 max-sm:flex-row max-sm:overflow-x-auto max-sm:scrollbar-none"
         >
-          {SECTIONS.map((section) => (
+          {shown.map((section) => (
             <SectionTab
               key={section.id}
               section={section}

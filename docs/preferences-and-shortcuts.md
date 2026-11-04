@@ -228,15 +228,34 @@ A workspace folder is plain files, so it is not copied: commit it to Git to keep
 
 In the web version, when the collection has 50 requests or more and nothing was exported as a **Gostman** file for 30 days, the status bar shows **Export a copy**. It opens the export; the × hides it for another 30 days.
 
+### Updates
+
+The desktop app has an **Updates** section; the web version is always current, so it has none. It shows the installed version, when it last looked for a new one and a **Check now** button.
+
+**Check for new versions** is on unless you switch it off. At most once a day, the app reads the latest release from `api.github.com` (through your proxy settings) and, when it is newer, shows it in the status bar. With **Install updates automatically** off, nothing is downloaded until you choose to update.
+
+**Update Gostman**, in the status bar or in this section, downloads the new version from the release on GitHub with a progress bar, and checks it against the `SHA256SUMS` file published with the release. A download that does not match, or a release without a checksum for it, is never installed; the section says why and links to the release page. When it is ready, **Restart to update** asks first, then closes Gostman and opens the new version. Open tabs and unsaved drafts are kept. The × hides the notice until the next version.
+
+**Install updates automatically** is on unless you switch it off; it needs the check, so switching the check off switches it off too. New versions are downloaded and checked in the background, and installed the next time Gostman closes or restarts. The Windows installer needs permission from Windows, so with it Gostman waits for you to choose **Restart now**. Switch it off to decide each time with **Update Gostman**.
+
+| Installed from | How it updates |
+| --- | --- |
+| Windows installer | Runs the new installer silently into the same folder after Gostman closes; Windows asks for permission |
+| Windows portable `.exe` | Replaces the file in place, when its folder can be written |
+| macOS `.app` | Replaces the app with the one in the release's `.zip`, when its folder can be written. A copy opened from the disk image or not yet moved to a folder opens the release page instead |
+| Linux AppImage | Replaces the AppImage file |
+| Linux `.deb` | **Download** opens the new package on GitHub to install with your package manager |
+| Scoop or Homebrew | The section shows the command that updates it: `scoop update gostman` or `brew upgrade --cask gostman` |
+
+**Reset to defaults** leaves both switches as they are.
+
 ### Privacy
 
 **Telemetry** says what the app sends: nothing about you or your use. [What Gostman connects to](getting-started.md#what-gostman-connects-to) lists every network call each part makes.
 
-**Check for new versions** appears in the desktop app and is off until you switch it on. Then, once a day, the app reads the latest release from `api.github.com` (through your proxy settings) and, when it is newer, shows the version in the status bar. Selecting it opens the release notes and downloads on GitHub; the × hides it until the next version. Gostman never downloads or installs anything by itself. The web version is always current, so it has no such setting.
-
 **Send requests through** appears in the web version. **Hosted relay** sends requests through `gostman.com/api/proxy`, which cannot reach `localhost` or private addresses. **Local relay on this computer** sends them through `gostman relay` running on your machine, so they reach local and private addresses and nothing passes through a third party. Enter the address the command prints, such as `http://127.0.0.1:4030`, and press **Test**; when nothing answers, it says so and asks you to check that `gostman relay` is running at that address. While the local relay is chosen, a request fails with a message rather than falling back to the hosted relay when the local one does not answer. See [Local relay for the web app](cli.md#local-relay-for-the-web-app).
 
-**Reset to defaults** leaves both settings as they are.
+**Reset to defaults** leaves the relay setting as it is.
 
 ## Keyboard shortcuts
 

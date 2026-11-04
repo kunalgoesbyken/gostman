@@ -49,6 +49,7 @@ func (a *App) startup(ctx context.Context) {
 	a.loadNetwork()
 	restoreWorkspace()
 	go diskWatch.watch(a.announceDiskChange)
+	go a.restoreUpdate()
 	a.receiveLaunchArguments()
 }
 

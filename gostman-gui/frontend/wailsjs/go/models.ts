@@ -2868,6 +2868,8 @@ export namespace main {
 	    version: string;
 	    url: string;
 	    newer: boolean;
+	    installs: boolean;
+	    download?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Release(source);
@@ -2878,6 +2880,8 @@ export namespace main {
 	        this.version = source["version"];
 	        this.url = source["url"];
 	        this.newer = source["newer"];
+	        this.installs = source["installs"];
+	        this.download = source["download"];
 	    }
 	}
 	export class Request {
@@ -3105,6 +3109,34 @@ export namespace main {
 	    }
 	}
 	
+	export class UpdateState {
+	    phase: string;
+	    version?: string;
+	    received: number;
+	    total: number;
+	    failure?: string;
+	    detail?: string;
+	    method: string;
+	    manager?: string;
+	    asksPermission?: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateState(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.phase = source["phase"];
+	        this.version = source["version"];
+	        this.received = source["received"];
+	        this.total = source["total"];
+	        this.failure = source["failure"];
+	        this.detail = source["detail"];
+	        this.method = source["method"];
+	        this.manager = source["manager"];
+	        this.asksPermission = source["asksPermission"];
+	    }
+	}
 	export class WindowFrame {
 	    adjustable: boolean;
 	    frameless: boolean;
@@ -5429,13 +5461,31 @@ export namespace workspace {
 		    return a;
 		}
 	}
+	export class FlowValue {
+	    name: string;
+	    value?: string;
+	    step?: string;
+	    source?: string;
+	    path?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new FlowValue(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.value = source["value"];
+	        this.step = source["step"];
+	        this.source = source["source"];
+	        this.path = source["path"];
+	    }
+	}
 	export class FlowCheck {
-	    expression?: string;
+	    expression: string;
 	    operator?: string;
 	    value?: string;
 	    enabled?: boolean;
-	    match?: string;
-	    conditions?: FlowCheck[];
 	
 	    static createFrom(source: any = {}) {
 	        return new FlowCheck(source);
@@ -5447,27 +5497,7 @@ export namespace workspace {
 	        this.operator = source["operator"];
 	        this.value = source["value"];
 	        this.enabled = source["enabled"];
-	        this.match = source["match"];
-	        this.conditions = this.convertValues(source["conditions"], FlowCheck);
 	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
 	}
 	export class FlowRetry {
 	    times?: number;
@@ -5550,7 +5580,6 @@ export namespace workspace {
 	    conditions?: FlowCheck[];
 	    until?: FlowCheck[];
 	    cases?: FlowCase[];
-	    timeoutMs?: number;
 	    then?: string;
 	    else?: string;
 	    steps?: FlowStep[];
@@ -5589,7 +5618,6 @@ export namespace workspace {
 	        this.conditions = this.convertValues(source["conditions"], FlowCheck);
 	        this.until = this.convertValues(source["until"], FlowCheck);
 	        this.cases = this.convertValues(source["cases"], FlowCase);
-	        this.timeoutMs = source["timeoutMs"];
 	        this.then = source["then"];
 	        this.else = source["else"];
 	        this.steps = this.convertValues(source["steps"], FlowStep);
@@ -5617,53 +5645,11 @@ export namespace workspace {
 		    return a;
 		}
 	}
-	export class FlowValue {
-	    name: string;
-	    value?: string;
-	    step?: string;
-	    source?: string;
-	    path?: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new FlowValue(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.value = source["value"];
-	        this.step = source["step"];
-	        this.source = source["source"];
-	        this.path = source["path"];
-	    }
-	}
-	export class FlowVariable {
-	    name: string;
-	    type?: string;
-	    value?: string;
-	    input?: boolean;
-	    required?: boolean;
-	
-	    static createFrom(source: any = {}) {
-	        return new FlowVariable(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.type = source["type"];
-	        this.value = source["value"];
-	        this.input = source["input"];
-	        this.required = source["required"];
-	    }
-	}
 	export class Flow {
 	    id: string;
 	    name: string;
 	    description?: string;
 	    maxSends?: number;
-	    variables?: FlowVariable[];
-	    outputs?: FlowValue[];
 	    steps: FlowStep[];
 	
 	    static createFrom(source: any = {}) {
@@ -5676,8 +5662,6 @@ export namespace workspace {
 	        this.name = source["name"];
 	        this.description = source["description"];
 	        this.maxSends = source["maxSends"];
-	        this.variables = this.convertValues(source["variables"], FlowVariable);
-	        this.outputs = this.convertValues(source["outputs"], FlowValue);
 	        this.steps = this.convertValues(source["steps"], FlowStep);
 	    }
 	
@@ -5971,7 +5955,6 @@ export namespace workspace {
 		    return a;
 		}
 	}
-	
 	
 	
 	

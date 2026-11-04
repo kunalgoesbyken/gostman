@@ -1,0 +1,8 @@
+{
+  "updates": {
+    "checksLabel": "检查新版本",
+    "available": "有新版本 {{version}}",
+    "dismiss": "到下一个版本前不再显示",
+    "downloadHint": "在 GitHub 上打开发行说明和下载页面"
+  }
+}

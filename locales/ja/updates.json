@@ -1,0 +1,8 @@
+{
+  "updates": {
+    "checksLabel": "新しいバージョンを確認",
+    "available": "バージョン{{version}}を利用できます",
+    "dismiss": "次のバージョンまで非表示",
+    "downloadHint": "GitHubでリリースノートとダウンロードを開く"
+  }
+}

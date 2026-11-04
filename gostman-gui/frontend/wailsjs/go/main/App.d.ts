@@ -43,6 +43,8 @@ export function CancelAuthorization():Promise<void>;
 
 export function CancelRequest(arg1:string):Promise<void>;
 
+export function CancelUpdate():Promise<void>;
+
 export function CaptureConfig():Promise<capture.Config>;
 
 export function CaptureStatus():Promise<main.CaptureState>;
@@ -78,6 +80,8 @@ export function DiffSpecs(arg1:diff.Query):Promise<diff.Reply>;
 export function DiscoverIssuer(arg1:engine.DiscoveryQuery):Promise<engine.Discovery>;
 
 export function DiscoverMcpAuthorization(arg1:mcpclient.AuthQuery):Promise<mcpclient.AuthPlan>;
+
+export function DownloadUpdate(arg1:string):Promise<main.UpdateState>;
 
 export function DropHeld(arg1:number):Promise<void>;
 
@@ -215,6 +219,8 @@ export function ResetData():Promise<void>;
 
 export function ResolveSecretReferences(arg1:Record<string, secrets.Ref>):Promise<Record<string, string>>;
 
+export function RestartToUpdate():Promise<void>;
+
 export function RestoreBackup(arg1:string):Promise<void>;
 
 export function RevealWorkspace(arg1:string):Promise<void>;
@@ -273,6 +279,8 @@ export function SecretKinds():Promise<Array<secrets.KindInfo>>;
 
 export function SendRequest(arg1:string,arg2:engine.Request):Promise<engine.Response>;
 
+export function SetAutoInstall(arg1:boolean):Promise<void>;
+
 export function SetSecretConnectionEnabled(arg1:string,arg2:boolean):Promise<void>;
 
 export function ShareSiblingOrder():Promise<void>;
@@ -300,6 +308,8 @@ export function TrustWorkspace():Promise<void>;
 export function UnlockSecretConnection(arg1:main.SecretConnection,arg2:string):Promise<Record<string, string>>;
 
 export function UpdateMock(arg1:Array<mock.Source>,arg2:string,arg3:mock.Config):Promise<main.MockState>;
+
+export function UpdateState():Promise<main.UpdateState>;
 
 export function WSClose(arg1:string):Promise<void>;
 

@@ -50,6 +50,10 @@ export function CancelRequest(arg1) {
   return window['go']['main']['App']['CancelRequest'](arg1);
 }
 
+export function CancelUpdate() {
+  return window['go']['main']['App']['CancelUpdate']();
+}
+
 export function CaptureConfig() {
   return window['go']['main']['App']['CaptureConfig']();
 }
@@ -120,6 +124,10 @@ export function DiscoverIssuer(arg1) {
 
 export function DiscoverMcpAuthorization(arg1) {
   return window['go']['main']['App']['DiscoverMcpAuthorization'](arg1);
+}
+
+export function DownloadUpdate(arg1) {
+  return window['go']['main']['App']['DownloadUpdate'](arg1);
 }
 
 export function DropHeld(arg1) {
@@ -394,6 +402,10 @@ export function ResolveSecretReferences(arg1) {
   return window['go']['main']['App']['ResolveSecretReferences'](arg1);
 }
 
+export function RestartToUpdate() {
+  return window['go']['main']['App']['RestartToUpdate']();
+}
+
 export function RestoreBackup(arg1) {
   return window['go']['main']['App']['RestoreBackup'](arg1);
 }
@@ -510,6 +522,10 @@ export function SendRequest(arg1, arg2) {
   return window['go']['main']['App']['SendRequest'](arg1, arg2);
 }
 
+export function SetAutoInstall(arg1) {
+  return window['go']['main']['App']['SetAutoInstall'](arg1);
+}
+
 export function SetSecretConnectionEnabled(arg1, arg2) {
   return window['go']['main']['App']['SetSecretConnectionEnabled'](arg1, arg2);
 }
@@ -564,6 +580,10 @@ export function UnlockSecretConnection(arg1, arg2) {
 
 export function UpdateMock(arg1, arg2, arg3) {
   return window['go']['main']['App']['UpdateMock'](arg1, arg2, arg3);
+}
+
+export function UpdateState() {
+  return window['go']['main']['App']['UpdateState']();
 }
 
 export function WSClose(arg1) {

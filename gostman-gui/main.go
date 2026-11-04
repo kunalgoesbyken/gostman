@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"embed"
 	"log"
 	"net/http"
@@ -46,6 +47,11 @@ func (a *App) showExistingWindow() {
 	wailsruntime.Show(a.ctx)
 }
 
+func (a *App) closeDown(ctx context.Context) {
+	a.stopServers(ctx)
+	a.installOnQuit()
+}
+
 func main() {
 	frameless := opensFrameless()
 	app := NewApp(frameless)
@@ -68,7 +74,7 @@ func main() {
 		OnStartup:        app.startup,
 		OnDomReady:       app.restoreWindowOnceShown,
 		OnBeforeClose:    app.rememberWindow,
-		OnShutdown:       app.stopServers,
+		OnShutdown:       app.closeDown,
 		Menu:             applicationMenu(),
 		Windows:          windowsOptions(theme),
 		Mac:              &mac.Options{OnUrlOpen: app.receiveLink},

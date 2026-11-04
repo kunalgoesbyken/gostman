@@ -1,0 +1,8 @@
+{
+  "updates": {
+    "checksLabel": "Verificare versiuni noi",
+    "available": "Versiunea {{version}} este disponibilă",
+    "dismiss": "Ascundere până la versiunea următoare",
+    "downloadHint": "Deschide notele de lansare și descărcările pe GitHub"
+  }
+}

@@ -2,13 +2,11 @@ import { useState } from "react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { SegmentedControl } from "../ui/segmented"
-import { Switch } from "../ui/switch"
 import { PreferenceRow, optionsOf } from "./PreferenceRows"
 import { openExternal } from "../../lib/about"
 import { WEB_APP_URL } from "../../lib/constants"
 import { PRIVACY_TEXT as TEXT } from "../../lib/privacyText"
 import { RELAY_LOCAL, RELAY_MODES, RelayUnreachableError, relayOrigin, updateRelay, useRelayStore } from "../../lib/relay"
-import { setUpdateChecks, useUpdateStore } from "../../lib/updates"
 import { cn } from "../../lib/utils"
 
 const PRIVACY_DOCS_URL = `${WEB_APP_URL}/docs/getting-started#what-gostman-connects-to`
@@ -19,26 +17,6 @@ const FAILED = "failed"
 const checkFailure = (error) => (
   error instanceof RelayUnreachableError ? TEXT.relayCheckUnreachable(error.origin) : error?.message || String(error)
 )
-
-function updateStatus(state) {
-  if (!state.enabled || state.checkedFor !== __APP_VERSION__) return ""
-  if (state.failed) return TEXT.updatesFailed
-  return state.latest ? TEXT.updatesNewer(state.latest.version) : TEXT.updatesCurrent(__APP_VERSION__)
-}
-
-function UpdateRow() {
-  const enabled = useUpdateStore((state) => state.enabled)
-  const status = useUpdateStore(updateStatus)
-
-  return (
-    <div className="space-y-1">
-      <PreferenceRow label={TEXT.updatesLabel} hint={TEXT.updatesHint}>
-        <Switch checked={enabled} label={TEXT.updatesLabel} onCheckedChange={setUpdateChecks} />
-      </PreferenceRow>
-      {status && <p role="status" className="text-2xs text-muted-foreground">{status}</p>}
-    </div>
-  )
-}
 
 function RelayRows({ relay }) {
   const mode = useRelayStore((state) => state.mode)
@@ -93,7 +71,7 @@ function RelayRows({ relay }) {
   )
 }
 
-export function PrivacySection({ relay, updates }) {
+export function PrivacySection({ relay }) {
   return (
     <>
       <PreferenceRow label={TEXT.telemetryLabel} hint={TEXT.telemetryHint}>
@@ -101,7 +79,6 @@ export function PrivacySection({ relay, updates }) {
           {TEXT.docsLink}
         </a>
       </PreferenceRow>
-      {updates && <UpdateRow />}
       {relay && <RelayRows relay={relay} />}
     </>
   )

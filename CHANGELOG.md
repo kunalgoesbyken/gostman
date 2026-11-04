@@ -8,6 +8,7 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ### Added
 
+- The desktop app updates itself: **Update Gostman** in the status bar downloads the new version, checks it against the release's SHA-256 checksums and installs it on restart. Preferences, Updates has the version and Check now; **Check for new versions** and **Install updates automatically** are on by default and can be switched off there. Copies installed with Scoop, Homebrew or a Linux package keep updating through their package manager.
 - Flows: a **Parallel** step sends requests and runs flows at the same time and goes on when its **Done when** condition holds (each branch is `passed`, `failed`, `cancelled` or `running`, with `.status` and `.ms`), or stops the branches still running after a time limit.
 - Flows: conditions of **If**, **Switch**, **Repeat** and **Parallel** take nested groups that match all or any, four levels deep, with the whole condition written out under them and on the card.
 - Flows: typed flow variables (text, number, true or false, JSON) that live for one run, inputs given by a **Run flow** step, `--var` or the environment, required inputs, and outputs a flow gives back. The **Run** tab shows them while the flow runs, and the JSON report has `flow.variables` and `flow.outputs`.

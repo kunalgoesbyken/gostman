@@ -1,0 +1,13 @@
+{
+  "updates.checksLabel": "Setting that lets the app look for a newer version on GitHub.",
+  "updates.autoLabel": "Setting that downloads and installs new versions without asking each time.",
+  "updates.checkedAt": "{{when}} is a date and time.",
+  "updates.available": "Status bar text. {{version}} is a version number.",
+  "updates.update": "Button that downloads and installs the new version. Gostman is the product name.",
+  "updates.downloading": "Status bar text. {{version}} is a version number, {{percent}} a formatted percentage such as 42%.",
+  "updates.downloadingDetail": "{{received}} and {{total}} are sizes such as 12 MB.",
+  "updates.ready": "Status bar button that restarts the app to finish the update.",
+  "updates.failedHint": "Preferences, Updates are names of the settings page and section.",
+  "updates.manual.scoop": "{{command}} is a terminal command, kept as written.",
+  "updates.manual.homebrew": "{{command}} is a terminal command, kept as written."
+}
