@@ -54,6 +54,35 @@ export const CLI_RUN = {
   ],
 }
 
+export const PULL_REQUEST_COMMENT = {
+  title: "Pull request #482 · Add the export endpoint",
+  label: "A pull request comment from the Gostman GitHub Action listing a failed check",
+  lines: [
+    muted("github-actions commented"),
+    BLANK,
+    plain("Gostman run failed"),
+    muted("orders-api · environment CI · 290 ms"),
+    BLANK,
+    plain("Requests  3 passed, 1 failed"),
+    plain("Checks    6 passed, 1 failed"),
+    BLANK,
+    fail("GET Items/Export items returned 500 Internal Server Error"),
+    muted("  res.status equals 200: The value was 500"),
+  ],
+}
+
+export const SCHEDULED_RUN = {
+  title: "Terminal",
+  label: "Output of gostman run repeating every five minutes against production",
+  lines: [
+    command("gostman run orders-api --env Production --every 5m --notify-env SLACK_WEBHOOK"),
+    pass("2026-11-04 09:00:00  #1  PASS  orders-api: 4 passed, 0 failed, 0 of 7 checks failed, 274ms"),
+    pass("2026-11-04 09:05:00  #2  PASS  orders-api: 4 passed, 0 failed, 0 of 7 checks failed, 281ms"),
+    fail("2026-11-04 09:10:00  #3  FAIL  orders-api: 3 passed, 1 failed, 1 of 7 checks failed, 312ms"),
+    pass("2026-11-04 09:15:00  #4  PASS  orders-api: 4 passed, 0 failed, 0 of 7 checks failed, 269ms"),
+  ],
+}
+
 export const REQUEST_FILE = {
   title: "orders-api/account/current-user.yaml",
   label: "A saved request as a YAML file",

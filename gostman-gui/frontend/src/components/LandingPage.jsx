@@ -13,7 +13,7 @@ import docsShot from "../assets/landing/docs.webp"
 import mockShot from "../assets/landing/mock.webp"
 import testsShot from "../assets/landing/tests.webp"
 
-import { AGENT_SESSION, CLI_RUN, REQUEST_FILE } from "./landing/captures"
+import { AGENT_SESSION, REQUEST_FILE } from "./landing/captures"
 import { TerminalBlock } from "./landing/TerminalBlock"
 import { ProductShowcase } from "./landing/ProductShowcase"
 import { DownloadDropdown } from "./landing/DownloadDropdown"
@@ -34,6 +34,8 @@ import { SectionLabel } from "./landing/SectionLabel"
 import { ImportSources } from "./landing/ImportSources"
 import { StackSection } from "./landing/StackSection"
 import { GlyphWordmark } from "./landing/GlyphWordmark"
+import { ProblemStatement } from "./landing/ProblemStatement"
+import { ShipStages } from "./landing/ShipStages"
 import { ImageZoom } from "./landing/ImageZoom"
 
 const loadMotionFeatures = () => import("../lib/motionFeatures").then((module) => module.default)
@@ -85,17 +87,6 @@ const SPOTLIGHTS = [
     width: 1400,
     height: 761,
     alt: "A request with four assertion rows and a passing test list under the response",
-  },
-  {
-    title: "The same checks in CI, from one binary",
-    description: "gostman run sends every request in a folder with its scripts, variables and cookies, prints what failed and why, and exits non-zero so the pipeline stops. There is no runtime to install.",
-    points: [
-      "Text, JSON and JUnit reports",
-      "Secrets passed from the environment, never stored in the collection",
-      "Linux, macOS and Windows builds on every release",
-    ],
-    capture: CLI_RUN,
-    brands: ["linux", "macos", "windows"],
   },
   {
     title: "A mock server from the responses you saved",
@@ -308,6 +299,7 @@ export function LandingPage({ onGetStarted }) {
 
         <section id="features" className="render-when-visible relative py-24 px-6" aria-labelledby="workflow-heading">
           <div className="mx-auto max-w-6xl">
+            <ProblemStatement />
             <div className="mb-12 max-w-2xl">
               <SectionLabel number="001" label="Workflow" />
               <SplitHeading
@@ -323,6 +315,7 @@ export function LandingPage({ onGetStarted }) {
               {SPOTLIGHTS.map((spotlight, index) => (
                 <Spotlight key={spotlight.title} spotlight={spotlight} isReversed={index % 2 === 1} />
               ))}
+              <ShipStages />
             </div>
           </div>
         </section>
