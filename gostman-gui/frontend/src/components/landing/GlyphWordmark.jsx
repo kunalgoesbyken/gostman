@@ -1,5 +1,5 @@
 import { cn } from "../../lib/utils"
-import { cellHash, glyphAt, joinRuns, toneAt } from "./glyphs"
+import { cellHash, glyphAt, joinRuns } from "./glyphs"
 
 const LETTERS = {
   G: [".###.", "#...#", "#....", "#.###", "#...#", "#...#", ".###."],
@@ -18,23 +18,21 @@ const MARGIN_ROWS = 5
 const COLUMNS = 200
 const NOISE_DENSITY = 30
 const NOISE_TONE = "text-muted-foreground/10"
+const WORD_TONE = "text-primary"
 
 const letterRows = LETTERS.G.map((_, row) => WORD.split("").map((letter) => LETTERS[letter][row]).join("."))
 const WORD_WIDTH = letterRows[0].length * PIXEL_COLUMNS
 const WORD_LEFT = Math.floor((COLUMNS - WORD_WIDTH) / 2)
 const ROWS = letterRows.length * PIXEL_ROWS + MARGIN_ROWS * 2
 
-function litPixel(row, column) {
+function isLit(row, column) {
   const pixelRow = Math.floor((row - MARGIN_ROWS) / PIXEL_ROWS)
   const pixelColumn = Math.floor((column - WORD_LEFT) / PIXEL_COLUMNS)
-  const line = letterRows[pixelRow]
-  if (line?.[pixelColumn] !== "#") return null
-  return { pixelRow, pixelColumn }
+  return letterRows[pixelRow]?.[pixelColumn] === "#"
 }
 
 function cellAt(row, column) {
-  const pixel = litPixel(row, column)
-  if (pixel) return { tone: toneAt(pixel.pixelRow, pixel.pixelColumn), text: glyphAt(row, column) }
+  if (isLit(row, column)) return { tone: WORD_TONE, text: glyphAt(row, column) }
   const isNoise = cellHash(column, row + ROWS) % 100 < NOISE_DENSITY
   return { tone: NOISE_TONE, text: isNoise ? glyphAt(row, column) : " " }
 }

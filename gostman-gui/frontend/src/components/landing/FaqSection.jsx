@@ -2,7 +2,6 @@ import { BrandIcon, BrandStrip } from "../ui/brandIcon"
 import { FAQ } from "./faq"
 import { ChevronDown } from "./icons"
 import { InlineLink } from "./InlineLink"
-import { SectionLabel } from "./SectionLabel"
 import { SplitHeading } from "./SplitHeading"
 import { ISSUES_URL } from "../../lib/siteLinks"
 
@@ -11,7 +10,6 @@ export function FaqSection() {
     <section id="faq" className="render-when-visible relative px-6 py-24" aria-labelledby="faq-heading">
       <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-16">
         <div>
-          <SectionLabel number="004" label="Questions" />
           <SplitHeading
             id="faq-heading"
             text="Questions before you switch"

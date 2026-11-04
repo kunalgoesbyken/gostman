@@ -1,6 +1,5 @@
 import { cn } from "../../lib/utils"
 import { IntegrationHint } from "./IntegrationHint"
-import { SectionLabel } from "./SectionLabel"
 import { SplitHeading } from "./SplitHeading"
 import { StackTile } from "./StackTile"
 import { TILE_COLUMNS, isLowered } from "./stackLayout"
@@ -12,9 +11,6 @@ export function StackSection() {
   return (
     <section className="render-when-visible relative overflow-hidden px-6 py-24" aria-labelledby="stack-heading">
       <div className="mx-auto max-w-6xl text-center">
-        <div className="flex justify-center">
-          <SectionLabel number="005" label="Integrations" />
-        </div>
         <SplitHeading id="stack-heading" text="Works with the tools you already use" className="text-3xl font-semibold tracking-tight md:text-5xl [text-wrap:balance]" />
         <p className="mx-auto mt-5 max-w-xl leading-relaxed text-muted-foreground">
           Import from other clients, read secrets from your vault, run checks in any CI and hand requests to your coding agent.

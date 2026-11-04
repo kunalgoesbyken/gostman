@@ -6,15 +6,8 @@ import { REPOSITORY, REPOSITORY_URL } from "../lib/siteLinks"
 import { docPath } from "../docs/manifest"
 import { useSmoothScroll } from "../lib/landingMotion"
 import { ArrowRight, Download, Globe } from "./landing/icons"
-import { BrandIcon, BrandStrip } from "./ui/brandIcon"
+import { BrandIcon } from "./ui/brandIcon"
 
-import captureShot from "../assets/landing/capture.webp"
-import docsShot from "../assets/landing/docs.webp"
-import mockShot from "../assets/landing/mock.webp"
-import testsShot from "../assets/landing/tests.webp"
-
-import { AgentChatMock } from "./landing/AgentChatMock"
-import { GitDiffMock } from "./landing/GitDiffMock"
 import { ProductShowcase } from "./landing/ProductShowcase"
 import { DownloadDropdown } from "./landing/DownloadDropdown"
 import { DOWNLOADS, downloadFor, groupByOs } from "./landing/downloads"
@@ -23,17 +16,14 @@ import { InstallCommands } from "./landing/InstallCommands"
 import { formatList } from "./landing/content"
 import { Brand } from "./landing/Brand"
 import { NavBar } from "./landing/NavBar"
-import { EditorSection } from "./landing/EditorSection"
+import { FeatureSection } from "./landing/FeatureSection"
 import { SiteFooter } from "./landing/SiteFooter"
 import { SplitHeading } from "./landing/SplitHeading"
 import { ComparisonSection } from "./landing/ComparisonSection"
 import { FaqSection } from "./landing/FaqSection"
-import { SectionLabel } from "./landing/SectionLabel"
 import { ImportSources } from "./landing/ImportSources"
 import { StackSection } from "./landing/StackSection"
 import { GlyphWordmark } from "./landing/GlyphWordmark"
-import { ShipStages } from "./landing/ShipStages"
-import { ImageZoom } from "./landing/ImageZoom"
 
 const loadMotionFeatures = () => import("../lib/motionFeatures").then((module) => module.default)
 
@@ -58,52 +48,6 @@ const AVAILABILITY = `Open source · ${formatList(PLATFORMS)}`
 const introStep = (step) => ({ "--intro-step": step })
 
 const NAV_LINK = cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-2 text-sm hover:bg-muted/50")
-
-const SPOTLIGHTS = [
-  {
-    title: "Requests as files in Git",
-    description: "One YAML file per request, reviewed line by line. Secret values stay in your keychain.",
-    Visual: GitDiffMock,
-  },
-  {
-    title: "Tests on every Send",
-    description: "Checks and scripts run with the request, and the results sit beside the response.",
-    image: testsShot,
-    width: 1400,
-    height: 761,
-    alt: "A request with four assertion rows and a passing test list under the response",
-  },
-  {
-    title: "A mock server from saved responses",
-    description: "Serve your examples locally and build the frontend before the API exists.",
-    image: mockShot,
-    width: 1400,
-    height: 1050,
-    alt: "The mock server dialog running on port 4010, listing each route with the saved example it serves",
-  },
-  {
-    title: "Real traffic, saved as requests",
-    description: "Point your app at Gostman, watch every call arrive and keep the ones you need.",
-    image: captureShot,
-    width: 1400,
-    height: 1000,
-    alt: "The capture dialog listing five forwarded calls with the response of one shown below",
-  },
-  {
-    title: "Share without an account",
-    description: "An encrypted link, or one HTML page of docs, built on your own machine.",
-    image: docsShot,
-    width: 1860,
-    height: 1162,
-    alt: "A generated documentation page with a sidebar of requests and the details of one",
-  },
-  {
-    title: "Your coding agent, same collection",
-    description: "Claude Code, Codex and Cursor call Gostman over MCP and never see your secrets.",
-    Visual: AgentChatMock,
-    brands: ["claude", "openai", "cursor"],
-  },
-]
 
 const isJsonResponse = (response) => response.ok && (response.headers.get("content-type") ?? "").includes("application/json")
 
@@ -168,35 +112,6 @@ function CallToActions({ onGetStarted, className, style }) {
   )
 }
 
-function Spotlight({ spotlight, isReversed }) {
-  return (
-    <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-12">
-      <div className={cn("min-w-0 lg:col-span-4", isReversed && "lg:order-2")}>
-        <SplitHeading as="h3" text={spotlight.title} className="text-2xl md:text-3xl font-semibold tracking-tight [text-wrap:balance]" />
-        <p className="mt-4 leading-relaxed text-muted-foreground">{spotlight.description}</p>
-        <BrandStrip brands={spotlight.brands} className="mt-4" />
-      </div>
-      <div className={cn("reveal-on-scroll min-w-0 lg:col-span-8", isReversed && "lg:order-1")}>
-        {spotlight.Visual ? (
-          <spotlight.Visual />
-        ) : (
-          <ImageZoom src={spotlight.image} alt={spotlight.alt}>
-            <img
-              src={spotlight.image}
-              alt={spotlight.alt}
-              width={spotlight.width}
-              height={spotlight.height}
-              loading="lazy"
-              decoding="async"
-              className="h-auto w-full rounded-lg border border-border/60"
-            />
-          </ImageZoom>
-        )}
-      </div>
-    </div>
-  )
-}
-
 export function LandingPage({ onGetStarted }) {
   const stars = useGitHubStars()
 
@@ -231,7 +146,6 @@ export function LandingPage({ onGetStarted }) {
         </NavBar>
 
         <div className="relative overflow-hidden">
-          <div className="landing-stripes pointer-events-none absolute inset-x-0 top-0 h-[760px]" aria-hidden="true" />
           <section className="relative pt-36 pb-16 px-6">
             <div className="relative max-w-4xl mx-auto">
               <div className="text-center space-y-6">
@@ -253,7 +167,6 @@ export function LandingPage({ onGetStarted }) {
 
           <section className="relative py-16 px-6">
             <div className="landing-glow pointer-events-none absolute inset-x-0 -top-[15%] hidden h-[75%] md:block" aria-hidden="true" />
-            <div className="landing-horizon pointer-events-none absolute left-1/2 top-[30%] hidden h-[160%] w-[150%] -translate-x-1/2 md:block" aria-hidden="true" />
             <div className="relative max-w-5xl mx-auto">
               <ProductShowcase />
               <ImportSources className="mt-20" />
@@ -261,29 +174,7 @@ export function LandingPage({ onGetStarted }) {
           </section>
         </div>
 
-        <section id="features" className="render-when-visible relative py-24 px-6" aria-labelledby="workflow-heading">
-          <div className="mx-auto max-w-6xl">
-            <div className="mb-12 max-w-2xl">
-              <SectionLabel number="001" label="Workflow" />
-              <SplitHeading
-                id="workflow-heading"
-                text="One collection, from the first request to CI"
-                className="text-3xl font-semibold tracking-tight md:text-5xl [text-wrap:balance]"
-              />
-              <p className="mt-5 leading-relaxed text-muted-foreground">
-                Tests, mocks, CI and your coding agent all work from the same files.
-              </p>
-            </div>
-            <div className="space-y-20 lg:space-y-28">
-              {SPOTLIGHTS.map((spotlight, index) => (
-                <Spotlight key={spotlight.title} spotlight={spotlight} isReversed={index % 2 === 1} />
-              ))}
-              <ShipStages />
-            </div>
-          </div>
-        </section>
-
-        <EditorSection />
+        <FeatureSection />
         <ComparisonSection />
         <FaqSection />
         <StackSection />
