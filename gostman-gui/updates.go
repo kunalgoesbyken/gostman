@@ -135,7 +135,7 @@ func (a *App) fetchRelease(ctx context.Context, source updateSource) (githubRele
 	}
 	request.Header.Set("Accept", "application/vnd.github+json")
 	request.Header.Set("User-Agent", "Gostman/"+currentVersion)
-	response, err := source.client(a.policy().Transport(false)).Do(request)
+	response, err := source.client(a.updatePolicy().Transport(false)).Do(request)
 	if err != nil {
 		return githubRelease{}, err
 	}

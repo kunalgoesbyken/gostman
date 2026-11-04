@@ -221,7 +221,7 @@ func (a *App) resolveUpdate(ctx context.Context) (updateTarget, *updateFailure) 
 	if err != nil {
 		return updateTarget{version: updates.snapshot().Version}, failed(failureNetwork, err)
 	}
-	target := updateTarget{version: release.version(), plan: effectiveInstall(), client: source.client(a.policy().Transport(false))}
+	target := updateTarget{version: release.version(), plan: effectiveInstall(), client: source.client(a.updatePolicy().Transport(false))}
 	if !isNewerVersion(target.version, currentVersion) {
 		return target, failed(failureUnsupported, fmt.Errorf(noNewerRelease, target.version, currentVersion))
 	}

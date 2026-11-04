@@ -227,6 +227,20 @@ func (a *App) loadNetwork() {
 	networks.useGlobal(config)
 }
 
+func (s *networkState) own() *engine.Network {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	built, err := engine.NewNetwork(s.global)
+	if err != nil {
+		return nil
+	}
+	return built
+}
+
+func (a *App) updatePolicy() engine.Policy {
+	return engine.Policy{Network: networks.own()}
+}
+
 func (a *App) policy() engine.Policy {
 	network, _ := networks.current()
 	return engine.Policy{Network: network, RevealSecrets: true}
