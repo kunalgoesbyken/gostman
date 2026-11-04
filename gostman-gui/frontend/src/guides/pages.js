@@ -57,8 +57,8 @@ export const guidePages = [
   },
   {
     path: "api-tests-in-ci",
-    title: "Run API tests in CI from a collection | Gostman",
-    description: "gostman run sends every request in a collection with its scripts and checks, prints what failed, writes JUnit, JSON or HTML reports and exits non-zero so the pipeline stops. One binary, no runtime.",
+    title: "Run API tests in CI: a Newman alternative | Gostman",
+    description: "gostman run sends every request in a collection with its scripts and checks, prints what failed, writes JUnit, JSON or HTML reports and exits non-zero so the pipeline stops. A Newman alternative in one binary, with no Node.js.",
     heading: "Run API tests in CI from a collection",
     intro: "The same collection you use in the app runs in a pipeline with one command. gostman run sends every request of a folder or export with its scripts, checks, extraction rules, cookies and OAuth 2 tokens, and needs only the single binary.",
     code: "gostman run orders-api --env CI --var-from-env API_TOKEN --reporter junit --output report.xml",
@@ -76,7 +76,7 @@ export const guidePages = [
       },
       {
         heading: "Starting from a Postman collection",
-        paragraphs: ["Import the collection in the app, save it to a folder, and point gostman run at that folder.", POSTMAN_SCRIPTS_ON_IMPORT],
+        paragraphs: ["If you run Postman collections with Newman today, import the collection in the app, save it to a folder, and point gostman run at that folder. The pipeline then needs only the gostman binary, not Node.js and npm.", POSTMAN_SCRIPTS_ON_IMPORT],
       },
     ],
     links: [{ label: "CI recipes", href: docPath("ci") }, { label: "Command line reference", href: docPath("cli") }],
@@ -178,6 +178,114 @@ export const guidePages = [
       },
     ],
     links: [{ label: "Gostman vs Insomnia", href: docPath("gostman-vs-insomnia") }, { label: "Coming from Insomnia", href: docPath("coming-from-insomnia") }],
+  },
+  {
+    path: "thunder-client-alternative",
+    title: "Thunder Client alternative for VS Code, free | Gostman",
+    description: "Gostman is a free, open source Thunder Client alternative: send requests from VS Code, keep collections as YAML files in Git, and run them in CI. No account and no paid tier.",
+    heading: "A Thunder Client alternative with nothing behind a paid plan",
+    intro: "Gostman sends requests from VS Code like Thunder Client, and keeps the collection as one YAML file per request in your repository, so Git is the sync. The same folder opens in the desktop app and the web app and runs in CI, and every feature is in the free download.",
+    code: "ext install Gostman.gostman",
+    brands: ["vscode", "github", "github-actions"],
+    sections: [
+      {
+        heading: "What you get without paying",
+        items: [
+          "A Send lens above each request file in VS Code, the collection in the Test Explorer and an environment picker in the status bar",
+          "Collections saved in your workspace as plain YAML, with no limit on requests or collections",
+          "Assertions, pre-request and post-response scripts, and a collection runner with CSV or JSON data files",
+          "gostman run for CI, with JUnit, JSON and HTML reports",
+          "A desktop app and a web app for when you are not in the editor, plus a mock server and an MCP server for coding agents",
+        ],
+      },
+      {
+        heading: "Moving over from Thunder Client",
+        paragraphs: [
+          "Export the collection and its environments from Thunder Client and import the files together. Requests, folders and environments come across, and the tests res-code, res-body, res-header and json-query become assertion rows. Other test types and unsupported auth are named in the import summary.",
+        ],
+      },
+      {
+        heading: "Where Thunder Client may suit you better",
+        items: [
+          "A request editor that opens inside VS Code itself; Gostman's extension sends saved requests and shows results, and editing happens in the file or the app",
+          "Teams that already pay for Thunder Client and use its team features",
+        ],
+        links: [{ label: "Thunder Client pricing", href: "https://www.thunderclient.com/pricing" }],
+      },
+    ],
+    links: [{ label: "VS Code extension", href: docPath("vscode") }, { label: "Importing other tools", href: docPath("import-export-and-specs") }],
+  },
+  {
+    path: "hoppscotch-alternative",
+    title: "Hoppscotch alternative: open source, no sign-in | Gostman",
+    description: "Gostman is an open source Hoppscotch alternative for REST, GraphQL, gRPC, WebSocket and MCP. Collections are YAML files in Git, with a CLI for CI, a mock server and no account to sync.",
+    heading: "A Hoppscotch alternative that keeps collections in Git",
+    intro: "Hoppscotch and Gostman are both open source and both run in the browser. Gostman keeps a collection as a folder of YAML files that you commit with your code, so a team shares requests through pull requests rather than a hosted workspace, and the same folder runs in CI.",
+    brands: ["hoppscotch", "github", "docker"],
+    sections: [
+      {
+        heading: "What Gostman adds",
+        items: [
+          "Collections as one YAML file per request, with a Git panel in the desktop app",
+          "gRPC with server reflection or .proto files, and MCP servers, next to REST, GraphQL and WebSocket",
+          "A single gostman binary that runs a collection in CI with JUnit, JSON and HTML reports",
+          "A local mock server, traffic capture, a load test and a secret scanner",
+          "Secret managers such as Vault, AWS, Azure, Google Cloud, 1Password and Bitwarden",
+          "An MCP server so a coding agent can use the same collection",
+        ],
+      },
+      {
+        heading: "Moving over from Hoppscotch",
+        paragraphs: [
+          "Export your collections and environments from Hoppscotch and import them together. Nested folders come across, <<name>> becomes {{name}}, and collection headers and auth become folder settings. pw.* scripts are kept as written and need rewriting, and the import summary lists them.",
+        ],
+      },
+      {
+        heading: "Where Hoppscotch may suit you better",
+        items: [
+          "Live team workspaces that sync through a server, hosted or self-hosted",
+          "Signing in to see the same collections on every device without Git",
+        ],
+        links: [{ label: "Hoppscotch pricing", href: "https://hoppscotch.com/pricing", brand: "hoppscotch" }],
+      },
+    ],
+    links: [{ label: "Importing other tools", href: docPath("import-export-and-specs") }, { label: "Collections and Git", href: docPath("collections-and-git") }],
+  },
+  {
+    path: "yaak-alternative",
+    title: "Yaak alternative: free for work, with a web app and CLI | Gostman",
+    description: "Gostman is a free, MIT-licensed Yaak alternative for REST, GraphQL, gRPC and WebSocket, with a web app, a CLI for CI, a mock server and collections as YAML files in Git. No licence key.",
+    heading: "A Yaak alternative with a web app and a CI runner",
+    intro: "Yaak and Gostman are both desktop API clients that keep requests as files you can put in Git. Gostman adds a web app that needs no install, and a command line that runs the same collection in CI. It is MIT licensed with no licence key, at home or at work.",
+    code: "gostman run ./collection --env CI --reporter junit --output report.xml",
+    brands: ["github", "github-actions", "docker"],
+    sections: [
+      {
+        heading: "What Gostman adds",
+        items: [
+          "A web app in the browser, with no install and no sign-in",
+          "gostman run for CI, with exit codes and JUnit, JSON and HTML reports",
+          "Assertions and scripts on every request, and a collection runner with data files",
+          "A local mock server, traffic capture, a load test and a secret scanner",
+          "MCP requests, and an MCP server so a coding agent can use the same collection",
+        ],
+      },
+      {
+        heading: "Moving over from Yaak",
+        paragraphs: [
+          "Gostman does not read Yaak's own data files yet. Import the OpenAPI spec of the API, or copy each request as curl from Yaak and paste it into Gostman's address bar.",
+        ],
+      },
+      {
+        heading: "Where Yaak may suit you better",
+        items: [
+          "A plugin system for custom auth, template functions and importers",
+          "A small native desktop app if you never need a browser version or a CI runner",
+        ],
+        links: [{ label: "Yaak pricing", href: "https://yaak.app/pricing" }],
+      },
+    ],
+    links: [{ label: "Getting started", href: docPath("getting-started") }, { label: "Command line reference", href: docPath("cli") }],
   },
   {
     path: "online-api-tester",

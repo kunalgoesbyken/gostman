@@ -281,7 +281,7 @@ export function LandingPage({ onGetStarted }) {
             <div className="relative max-w-4xl mx-auto">
               <div className="text-center space-y-6">
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.1] [text-wrap:balance]">
-                  <span className="intro block">The open source API client.</span>
+                  <span className="intro block">Gostman, the open source API client.</span>
                   <span className="intro block mt-2 text-muted-foreground" style={introStep(1)}>No account. No paid tier.</span>
                 </h1>
 
