@@ -2,31 +2,37 @@
   "landing": {
     "rest": {
       "term": "Every protocol",
+      "short": "REST, GraphQL, gRPC, WebSocket, MQTT, SOAP and MCP",
       "page": "protocols",
       "text": "REST, GraphQL with a schema browser, gRPC through reflection or .proto files, WebSocket, Socket.IO, MQTT, SignalR, Server-Sent Events, SOAP, MCP, and on the desktop raw TCP, UDP and NATS, in one window."
     },
     "oauth": {
       "term": "Auth for real APIs",
+      "short": "OAuth 2, AWS SigV4, NTLM, Digest and more",
       "page": "requests-and-responses",
       "text": "Basic, bearer, API key, OAuth 1 and 2 with renewal, Digest, AWS SigV4, NTLM, Akamai EdgeGrid, JWT, ASAP and Hawk."
     },
     "network": {
       "term": "Bodies and transport",
+      "short": "Multipart, files, cookies, proxies, client certificates",
       "page": "requests-and-responses",
       "text": "JSON, XML, form, multipart and file bodies, a cookie jar, proxy and client certificates, and curl commands pasted straight into a request."
     },
     "response-viewer": {
       "term": "Responses",
+      "short": "Previews, timing, and code in 21 languages",
       "page": "requests-and-responses",
       "text": "JSON tree, HTML, image and PDF previews, headers, cookies, size and timing. Download any body, including binary, or copy it as code in 21 targets, including cURL, Python, Go, Java, C#, Swift, Rust and wget."
     },
     "scopes": {
       "term": "Variables done properly",
+      "short": "Five scopes, secrets in your keychain",
       "page": "variables",
       "text": "Secret variables in your OS keychain, plus global, collection, folder and request scopes, dynamic variables and prompts."
     },
     "secret-managers": {
       "term": "Secret managers",
+      "short": "Vault, AWS, Azure, 1Password, Bitwarden",
       "page": "secrets-and-network",
       "text": "Pull values from Vault, AWS, Azure, Google Cloud, 1Password, Bitwarden or KeePassXC at send time.",
       "brands": [
@@ -41,26 +47,31 @@
     },
     "runner": {
       "term": "A runner built for CI",
+      "short": "Data files, schedules, JUnit and HTML reports",
       "page": "runner-load-and-scan",
       "text": "CSV, JSON and XLSX data, snapshot checks, scheduled runs, parallel runs, HTML and JUnit reports, and a CLI that exits non-zero on failure."
     },
     "mock": {
       "term": "Mock server",
+      "short": "Serve examples or an OpenAPI spec locally",
       "page": "workspaces-and-mock",
       "text": "Serve saved examples or an OpenAPI spec locally, with rules and a live request log."
     },
     "git-panel": {
       "term": "A real Git panel",
+      "short": "Diff, commit, push, resolve conflicts",
       "page": "collections-and-git",
       "text": "Diff, commit, push, branches, stash and conflict resolution, in the desktop app."
     },
     "folder-workspace": {
       "term": "Plain files",
+      "short": "Collections as YAML in your repo",
       "page": "collections-and-git",
       "text": "Nested collections, tabs and history, kept as plain YAML files in a folder or in app storage."
     },
     "import": {
       "term": "Import and export",
+      "short": "Postman, Bruno, Insomnia, OpenAPI and 11 more",
       "page": "import-export-and-specs",
       "text": "Import Postman, OpenAPI, Insomnia, HAR, WSDL, Bruno, Hoppscotch, Thunder Client, HTTPie, Hurl, Firecamp, RAML, API Blueprint, .http files and curl commands. Export to Postman, OpenAPI, Markdown, .http files or a backup.",
       "brands": [
@@ -72,6 +83,7 @@
     },
     "agents": {
       "term": "Agent-ready, and in the browser",
+      "short": "An MCP server that redacts secrets",
       "page": "agents",
       "text": "An MCP server with secret redaction and a host allowlist, and a web version with nothing to install."
     }
@@ -81,18 +93,22 @@
       "feature": "Price",
       "gostman": {
         "state": "included",
+        "label": "Free",
         "text": "Free and open source."
       },
       "postman": {
         "state": "partial",
+        "label": "From $9/mo",
         "text": "Free plan; paid from $9 a month."
       },
       "bruno": {
         "state": "partial",
+        "label": "From $6/mo",
         "text": "Free plan; Pro $6, Ultimate $11 a month."
       },
       "insomnia": {
         "state": "partial",
+        "label": "From $12/mo",
         "text": "Free plan; Pro $12, Enterprise $45 a month."
       }
     },
@@ -100,18 +116,22 @@
       "feature": "Git push, data files, vaults",
       "gostman": {
         "state": "included",
+        "label": "Free",
         "text": "All free."
       },
       "postman": {
         "state": "partial",
+        "label": "Enterprise",
         "text": "Shared Vault from Solo; vault integrations on Enterprise."
       },
       "bruno": {
         "state": "partial",
+        "label": "Pro plan",
         "text": "Git push and data files on Pro; secret managers on Ultimate."
       },
       "insomnia": {
         "state": "partial",
+        "label": "Enterprise",
         "text": "Git Sync free for up to 3 users; vaults on Enterprise."
       }
     },
@@ -123,14 +143,17 @@
       },
       "postman": {
         "state": "partial",
+        "label": "Team plan",
         "text": "On the Team plan."
       },
       "bruno": {
         "state": "partial",
+        "label": "File only",
         "text": "Export a file."
       },
       "insomnia": {
         "state": "partial",
+        "label": "Account",
         "text": "Cloud sync with an account, or export a file."
       }
     },
@@ -169,6 +192,7 @@
       },
       "insomnia": {
         "state": "partial",
+        "label": "2 of 3",
         "text": "Socket.IO and MCP."
       }
     },
@@ -180,6 +204,7 @@
       },
       "postman": {
         "state": "partial",
+        "label": "Account",
         "text": "Needs an account."
       },
       "bruno": {

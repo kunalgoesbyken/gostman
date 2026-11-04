@@ -1,7 +1,6 @@
 export const OWNER = "kunalgoesbyken"
 export const REPOSITORY = `${OWNER}/gostman`
 export const REPOSITORY_URL = `https://github.com/${REPOSITORY}`
-export const VSCODE_MARKETPLACE_URL = 'https://marketplace.visualstudio.com/items?itemName=Gostman.gostman'
 export const SPONSOR_URL = `https://github.com/sponsors/${OWNER}`
 export const ISSUES_URL = `${REPOSITORY_URL}/issues`
 export const TRANSLATIONS_ISSUE_URL = `${ISSUES_URL}/15`

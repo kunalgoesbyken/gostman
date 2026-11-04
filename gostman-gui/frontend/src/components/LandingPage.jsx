@@ -13,6 +13,7 @@ import { DownloadDropdown } from "./landing/DownloadDropdown"
 import { DOWNLOADS, downloadFor, groupByOs } from "./landing/downloads"
 import { useBrowserOs } from "../hooks/useBrowserOs"
 import { InstallCommands } from "./landing/InstallCommands"
+import { AgentStart } from "./landing/AgentStart"
 import { formatList } from "./landing/content"
 import { Brand } from "./landing/Brand"
 import { NavBar } from "./landing/NavBar"
@@ -179,7 +180,7 @@ export function LandingPage({ onGetStarted }) {
         <FaqSection />
         <StackSection />
 
-        <section id="download" className="render-when-visible relative pt-24 text-center">
+        <section id="download" className="render-when-visible relative border-t border-border/50 pt-24 text-center">
           <div className="mx-auto max-w-6xl px-6">
             <SplitHeading
               text="Send your first request in a minute"
@@ -191,6 +192,7 @@ export function LandingPage({ onGetStarted }) {
             <CallToActions onGetStarted={onGetStarted} className="mt-8" />
             <p className="mt-6 text-sm text-muted-foreground">{AVAILABILITY}</p>
             <InstallCommands className="relative mx-auto mt-10 max-w-2xl text-left" />
+            <AgentStart className="mt-6" />
           </div>
           <GlyphWordmark className="mt-20" />
         </section>

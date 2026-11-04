@@ -1,5 +1,7 @@
 import { docPath } from "../../docs/manifest"
+import { Sparkles } from "lucide-react"
 import { FEATURES } from "../../lib/featureCatalog"
+import { featureIcon } from "../../lib/featureIcons"
 import { AI_AVAILABLE, AI_FEATURE } from "./content"
 import siteFeatures from "./siteFeatures.json"
 
@@ -11,8 +13,8 @@ const GROUP_TITLES = [
 ]
 
 const rowOf = (feature) => {
-  const { term, page, text, brands } = siteFeatures.landing[feature.id]
-  return { term, href: docPath(page), text, ...(brands && { brands }) }
+  const { term, short, page, text, brands } = siteFeatures.landing[feature.id]
+  return { term, short, icon: featureIcon(feature), href: docPath(page), text, ...(brands && { brands }) }
 }
 
 const rowsOf = (groupId) => FEATURES
@@ -22,7 +24,7 @@ const rowsOf = (groupId) => FEATURES
 
 export const FEATURE_INDEX = GROUP_TITLES.map((group) => ({ ...group, rows: rowsOf(group.id) }))
 
-const AI_ROW = { term: AI_FEATURE.title, href: docPath("ai"), text: AI_FEATURE.description, brands: AI_FEATURE.brands }
+const AI_ROW = { term: AI_FEATURE.title, short: AI_FEATURE.short, icon: Sparkles, href: docPath("ai"), text: AI_FEATURE.description, brands: AI_FEATURE.brands }
 
 export const FEATURE_GROUPS = FEATURE_INDEX.map((group, index) =>
   AI_AVAILABLE && index === FEATURE_INDEX.length - 1 ? { ...group, rows: [...group.rows, AI_ROW] } : group,

@@ -18,3 +18,7 @@ export const COMPARISON_ROWS = FEATURES
   .filter((feature) => feature.compare)
   .sort((first, second) => first.compare - second.compare)
   .map((feature) => siteFeatures.compare[feature.id])
+
+export const GLYPH_STATES = Object.keys(STATES).filter((state) =>
+  COMPARISON_ROWS.some((row) => PRODUCTS.some((product) => !row[product.id].label && row[product.id].state === state)),
+)

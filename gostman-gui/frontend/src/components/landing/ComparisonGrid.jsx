@@ -19,11 +19,21 @@ function ProductHead({ product }) {
   )
 }
 
+const LABEL_TONES = {
+  included: "text-success",
+  partial: "text-muted-foreground",
+  excluded: "text-muted-foreground/70",
+}
+
+function ClaimLabel({ claim }) {
+  return <span aria-hidden="true" className={cn("text-center text-xs font-medium leading-tight", LABEL_TONES[claim.state])}>{claim.label}</span>
+}
+
 function Claim({ product, claim }) {
   return (
     <td title={claim.text} className={cn("px-1 py-3.5", LINE, banded(product))}>
       <span className="flex justify-center">
-        <StatusGlyph state={claim.state} />
+        {claim.label ? <ClaimLabel claim={claim} /> : <StatusGlyph state={claim.state} />}
       </span>
       <span className="sr-only">{claim.text}</span>
     </td>

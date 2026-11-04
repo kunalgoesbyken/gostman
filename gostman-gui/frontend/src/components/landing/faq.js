@@ -8,16 +8,8 @@ export const FAQ = [
     answer: "Yes. Gostman is open source. Every feature is in the download, with no account, no licence key and no seat count.",
   },
   {
-    question: "Will Gostman add a paid tier?",
-    answer: "Gostman has no paid tier, no account and no licence key, and every feature is in the free download. The code is open source, so the published code stays free to use, change and fork whatever happens to the project.",
-  },
-  {
     question: "What happens to my collections if Gostman stops being developed?",
     answer: "They keep working. A folder workspace is plain YAML in your own repository, the desktop app and the command line need no Gostman server, and collections export to Postman, Bruno, OpenAPI, HAR and .http files. The code is open source, so anyone can fork it and carry it on.",
-  },
-  {
-    question: "Where are my collections kept?",
-    answer: "On your machine. The desktop app keeps them in its data folder or in a folder of YAML files you choose, and the web version keeps them in your browser's storage. Nothing is synced to a Gostman server.",
   },
   {
     question: "Where do my secrets and tokens go?",
@@ -31,10 +23,6 @@ export const FAQ = [
     question: "Can I bring my Postman or Bruno collections?",
     answer: "Yes. Import Postman, Bruno (.bru files or the YAML format), Insomnia, OpenAPI, HAR, .http files and curl. Common pm.* and bru.* script calls are rewritten to Gostman's script API. An import only adds data, and it lists any scripts it carries before you accept them.",
     brands: ["postman", "bruno", "insomnia", "openapi"],
-  },
-  {
-    question: "How does a team share a collection?",
-    answer: "Open a folder and commit it with your code: one YAML file per request, reviewed in pull requests like any other change. For a quick hand-off, send an encrypted share link that is built in your window and never uploaded.",
   },
   {
     question: "Can it run in CI?",
