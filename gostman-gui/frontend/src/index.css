@@ -573,6 +573,24 @@
   }
 }
 
+@keyframes terminal-line {
+  from {
+    opacity: 0;
+    transform: translateY(0.25rem);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+  .terminal-wait pre > * {
+    opacity: 0;
+  }
+
+  .terminal-play pre > * {
+    animation: terminal-line 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--line, 0) * 55ms);
+  }
+}
+
 @keyframes hint-in {
   from {
     opacity: 0;

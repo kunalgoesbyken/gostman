@@ -5,25 +5,25 @@ import { CLI_RUN, PULL_REQUEST_COMMENT, SCHEDULED_RUN } from "./captures"
 import { SplitHeading } from "./SplitHeading"
 import { TerminalBlock } from "./TerminalBlock"
 
-const STAGE_KEYS = { selector: "[role=tab]", orientation: ORIENTATION.vertical, activate: true }
+const STAGE_KEYS = { selector: "[role=tab]", orientation: ORIENTATION.both, activate: true }
 
 const STAGES = [
   {
     id: "code",
     title: "While you code",
-    description: "Press Send and the checks run beside the response. Run a folder with gostman run, or let Claude Code, Codex or Cursor run it through MCP before you open a pull request.",
+    description: "Checks run beside every response. Run a folder with gostman run, or let your coding agent run it through MCP.",
     capture: CLI_RUN,
   },
   {
     id: "review",
     title: "On every pull request",
-    description: "The GitHub Action runs the collection with secrets from the job, fails the build on a broken check and keeps one comment on the pull request with what broke. Other pipelines get JUnit, JSON and HTML reports.",
+    description: "The GitHub Action fails the build on a broken check and keeps one comment on the pull request with what broke.",
     capture: PULL_REQUEST_COMMENT,
   },
   {
     id: "production",
     title: "In production",
-    description: "gostman run --every repeats the run on an interval and posts to Slack, Teams or Discord when it starts failing and again when it passes.",
+    description: "gostman run --every repeats the run and posts to Slack, Teams or Discord when it starts failing.",
     capture: SCHEDULED_RUN,
   },
 ]
@@ -31,6 +31,8 @@ const STAGES = [
 const clamp = (value) => Math.min(1, Math.max(0, value))
 const stageAt = (progress) => Math.min(STAGES.length - 1, Math.floor(progress * STAGES.length))
 const middleOf = (index) => (index + 0.5) / STAGES.length
+const fillOf = (progress, index) => clamp(progress * STAGES.length - index)
+const ordinal = (index) => String(index + 1).padStart(2, "0")
 
 function pinnedTravel(track, pin) {
   return {
@@ -75,7 +77,7 @@ function useScrollProgress(trackRef, pinRef) {
   return [progress, goTo]
 }
 
-function StageTab({ stage, isActive, idOf, onSelect }) {
+function StageTab({ stage, index, fill, isActive, idOf, onSelect }) {
   return (
     <button
       type="button"
@@ -85,19 +87,18 @@ function StageTab({ stage, isActive, idOf, onSelect }) {
       aria-controls={idOf("panel", stage.id)}
       tabIndex={isActive ? 0 : -1}
       onClick={onSelect}
-      className="group relative block w-full ps-8 text-start"
+      style={{ "--fill": fill }}
+      className="group relative flex-1 border-border/60 px-4 py-4 text-start transition-colors hover:bg-muted/20 [&:not(:last-child)]:border-e lg:flex-none lg:px-6 lg:py-6 lg:[&:not(:last-child)]:border-b lg:[&:not(:last-child)]:border-e-0"
     >
       <span
         aria-hidden="true"
-        className={cn(
-          "absolute start-0 top-1.5 h-2.5 w-2.5 -translate-x-1/2 border",
-          isActive ? "border-primary bg-primary" : "border-border bg-background group-hover:border-muted-foreground"
-        )}
+        className="absolute inset-x-0 top-0 h-px origin-left scale-x-[var(--fill)] bg-primary lg:inset-x-auto lg:inset-y-0 lg:start-0 lg:h-auto lg:w-px lg:origin-top lg:scale-x-100 lg:scale-y-[var(--fill)]"
       />
-      <span className={cn("block text-lg font-medium", isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground")}>
+      <span className={cn("block font-mono text-xs", isActive ? "text-primary" : "text-muted-foreground/70")}>{ordinal(index)}</span>
+      <span className={cn("mt-1.5 block text-sm font-medium sm:text-base", isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground")}>
         {stage.title}
       </span>
-      <span className={cn("mt-2 block text-sm leading-relaxed", isActive ? "text-muted-foreground" : "text-muted-foreground/70")}>
+      <span className={cn("mt-2 hidden text-sm leading-relaxed lg:block", isActive ? "text-muted-foreground" : "text-muted-foreground/60")}>
         {stage.description}
       </span>
     </button>
@@ -113,46 +114,51 @@ export function ShipStages() {
   const idOf = (part, id) => `${baseId}${part}-${id}`
 
   return (
-    <div ref={trackRef} className="lg:h-[220vh]">
-      <div ref={pinRef} className="grid items-start gap-8 lg:sticky lg:top-24 lg:grid-cols-12 lg:gap-12">
-        <div className="min-w-0 lg:col-span-5">
+    <div ref={trackRef} className="lg:h-[200vh]">
+      <div ref={pinRef} className="lg:sticky lg:top-28">
+        <div className="max-w-2xl">
           <SplitHeading
             as="h3"
             text="The same checks from your editor to production"
             className="text-2xl md:text-3xl font-semibold tracking-tight [text-wrap:balance]"
           />
           <p className="mt-4 leading-relaxed text-muted-foreground">
-            Requests usually live in one tool, tests in another, and CI runs a copy of both. The copy is the one that drifts. Here one collection runs at every stage.
+            Requests live in one tool, tests in another, and CI runs a copy of both. The copy is the one that drifts.
           </p>
+        </div>
+        <div className="reveal-on-scroll mt-8 grid overflow-hidden rounded-xl border border-border/60 bg-muted/10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
           <div
             role="tablist"
-            aria-orientation="vertical"
             aria-label="Where the checks run"
             onKeyDown={(event) => moveFocus(event, STAGE_KEYS)}
-            className="relative mt-8 space-y-8 border-s border-border/70"
+            className="flex border-b border-border/60 lg:flex-col lg:border-b-0 lg:border-e"
           >
-            <span
-              aria-hidden="true"
-              className="absolute -start-px top-0 w-px origin-top bg-primary"
-              style={{ height: "100%", transform: `scaleY(${progress})` }}
-            />
             {STAGES.map((stage, index) => (
-              <StageTab key={stage.id} stage={stage} isActive={index === activeIndex} idOf={idOf} onSelect={() => goTo(middleOf(index))} />
+              <StageTab
+                key={stage.id}
+                stage={stage}
+                index={index}
+                fill={fillOf(progress, index)}
+                isActive={index === activeIndex}
+                idOf={idOf}
+                onSelect={() => goTo(middleOf(index))}
+              />
             ))}
           </div>
-        </div>
-        <div className="reveal-on-scroll grid min-w-0 lg:col-span-7">
-          {STAGES.map((stage, index) => (
-            <div
-              key={stage.id}
-              id={idOf("panel", stage.id)}
-              role="tabpanel"
-              aria-labelledby={idOf("tab", stage.id)}
-              className={cn("min-w-0 [grid-area:1/1] [&>figure]:h-full", index !== activeIndex && "invisible")}
-            >
-              <TerminalBlock {...stage.capture} />
-            </div>
-          ))}
+          <p className="px-4 pt-4 text-sm leading-relaxed text-muted-foreground lg:hidden">{STAGES[activeIndex].description}</p>
+          <div className="grid min-w-0 p-3 sm:p-4">
+            {STAGES.map((stage, index) => (
+              <div
+                key={stage.id}
+                id={idOf("panel", stage.id)}
+                role="tabpanel"
+                aria-labelledby={idOf("tab", stage.id)}
+                className={cn("min-w-0 [grid-area:1/1] [&>figure]:h-full", index !== activeIndex && "invisible")}
+              >
+                <TerminalBlock {...stage.capture} isPlaying={index === activeIndex} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
