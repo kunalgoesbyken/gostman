@@ -98,9 +98,9 @@ run
   --env-file <file>     read KEY=value lines as variables (--var wins); they
                         count as secret for --redact
   --reporter <format[:file]>
-                        text, json, junit or html (default text); with :file
-                        the report goes to that file (repeatable, at most one
-                        without a file, which prints to stdout)
+                        text, json, junit, html or markdown (default text);
+                        with :file the report goes to that file (repeatable,
+                        at most one without a file, which prints to stdout)
   --output <file>       write the report given without a file to this file;
                         when every report goes to a file, the text summary is
                         still printed to stdout

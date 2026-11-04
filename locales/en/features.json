@@ -430,8 +430,13 @@
     },
     "ci": {
       "title": "CI integration",
-      "blurb": "A GitHub Action, a Docker image, recipes for GitLab, Azure Pipelines, CircleCI, Bitbucket and Jenkins, and JUnit and HTML reports.",
+      "blurb": "A GitHub Action, a Docker image, recipes for GitLab, Azure Pipelines, CircleCI, Bitbucket and Jenkins, and JUnit, HTML and Markdown reports.",
       "synonyms": "ci github actions gitlab azure circleci bitbucket jenkins docker pipeline junit"
+    },
+    "ciPrComment": {
+      "title": "Results on the pull request",
+      "blurb": "The GitHub Action writes the counts and every failed check to the job summary, and can keep one comment on the pull request up to date.",
+      "synonyms": "pull request comment pr check job summary markdown report github actions"
     },
     "ciStarters": {
       "title": "CI starters and pre-commit",

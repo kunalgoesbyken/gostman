@@ -46,6 +46,7 @@ echo "::add-mask::$TOKEN"
 | `--reporter junit --output report.xml` | JUnit XML for test dashboards; each request is a test suite whose `system-out` starts with the method and the URL as sent |
 | `--reporter json --output report.json` | machine-readable results; each result has the URL as written (`url`) and as sent (`resolvedUrl`, secrets shown as `{{name}}`) |
 | `--reporter html --output report.html` | one self-contained page, with a filter for failures |
+| `--reporter markdown --output summary.md` | the counts and every failed check as Markdown, for a job summary or a pull request comment |
 
 With `--output`, the report goes to the file and the text summary is still printed.
 
@@ -117,7 +118,34 @@ jobs:
           path: report.xml
 ```
 
-Pin the action to a release tag or a commit once you depend on it. Inputs: `collection`, `version`, `environment`, `folder`, `data`, `reporter`, `output`, `redact`, `bail`, `extra-args`. Outputs: `exit-code`, `report`. The step fails when the exit code is not 0, so use `if: always()` on steps that publish the report.
+Pin the action to a release tag or a commit once you depend on it. Inputs: `collection`, `version`, `environment`, `folder`, `data`, `reporter`, `output`, `redact`, `bail`, `extra-args`, `summary`, `comment`, `github-token`. Outputs: `exit-code`, `report`. The step fails when the exit code is not 0, so use `if: always()` on steps that publish the report.
+
+### Job summary and pull request comment
+
+The action adds the counts and every failed check to the job summary, so a failure can be read on the run page without opening the log. Set `summary: false` to leave it out.
+
+With `comment: true`, a run on a pull request posts the same results as one comment, with a link to the job log. Later runs edit that comment instead of adding new ones; each combination of workflow, job, collection, environment and folder keeps its own. The job needs permission to write to pull requests:
+
+```yaml
+on: pull_request
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: kunalgoesbyken/gostman@main
+        with:
+          collection: api
+          environment: CI
+          comment: true
+```
+
+Pull requests from forks get a read-only token, so the comment is skipped with a warning and the job summary still shows the results. Both need gostman 1.14.0 or later; with `version` set to an older release they are skipped. Names, statuses and check messages appear as written, so keep `redact` on, which is the default.
 
 Without the action:
 
@@ -292,7 +320,7 @@ api-scan:
 
 ## Starter pipelines and pre-commit
 
-`gostman init api --ci github|gitlab|azure|circleci|bitbucket` creates the workspace (as `gostman init` does) and writes a starter pipeline for that service in the current folder, running the workspace with a JUnit report. The files are `.github/workflows/gostman.yml`, `.gitlab-ci.yml`, `azure-pipelines.yml`, `.circleci/config.yml` and `bitbucket-pipelines.yml`. A file that already exists is left as it is and the command says so.
+`gostman init api --ci github|gitlab|azure|circleci|bitbucket` creates the workspace (as `gostman init` does) and writes a starter pipeline for that service in the current folder, running the workspace with a JUnit report; the GitHub one also comments on pull requests. The files are `.github/workflows/gostman.yml`, `.gitlab-ci.yml`, `azure-pipelines.yml`, `.circleci/config.yml` and `bitbucket-pipelines.yml`. A file that already exists is left as it is and the command says so.
 
 The repository root has a [pre-commit](https://pre-commit.com) configuration for the hooks `gostman-lint`, `gostman-scan` and `gostman-run`. They call the `gostman` binary on your `PATH`, so install the CLI first.
 

@@ -95,6 +95,7 @@ export const FEATURES = [
   { id: 'scan', group: 'automation', docs: 'runner-load-and-scan#scan-for-secrets', action: { type: 'dialog', id: 'scan' }, icon: 'shield-alert', palette: true, empty: ['scan'], sample: 'scan', tool: { group: 'test', order: 4 } },
   { id: 'cli', group: 'automation', docs: 'cli', action: { type: 'copy', id: 'cliInit' }, icon: 'terminal', compare: 7 },
   { id: 'ci', group: 'automation', docs: 'ci', icon: 'workflow' },
+  { id: 'ci-pr-comment', group: 'automation', since: '1.14.0', platforms: ['cli'], docs: 'ci#job-summary-and-pull-request-comment', icon: 'workflow' },
   { id: 'ci-starters', group: 'automation', since: '1.9.0', platforms: ['cli'], docs: 'ci#starter-pipelines-and-pre-commit', action: { type: 'copy', id: 'ciInit' }, icon: 'workflow' },
   { id: 'monitors', group: 'automation', since: '1.9.0', docs: 'runner-load-and-scan#monitors', action: { type: 'dialog', id: 'monitors' }, icon: 'activity', palette: true, tool: { group: 'automate', order: 2 } },
   { id: 'agents', group: 'automation', docs: 'agents', icon: 'bot', landing: { group: 'data', order: 4 } },

@@ -9,13 +9,14 @@ import (
 )
 
 const (
-	FormatText  = "text"
-	FormatJSON  = "json"
-	FormatJUnit = "junit"
-	FormatHTML  = "html"
+	FormatText     = "text"
+	FormatJSON     = "json"
+	FormatJUnit    = "junit"
+	FormatHTML     = "html"
+	FormatMarkdown = "markdown"
 )
 
-var Formats = []string{FormatText, FormatJSON, FormatJUnit, FormatHTML}
+var Formats = []string{FormatText, FormatJSON, FormatJUnit, FormatHTML, FormatMarkdown}
 
 type Reporter interface {
 	Request(result runner.Result)
@@ -36,6 +37,8 @@ func New(format string, output io.Writer) (Reporter, error) {
 		return junitReporter{output: output}, nil
 	case FormatHTML:
 		return htmlReporter{output: output}, nil
+	case FormatMarkdown:
+		return markdownReporter{output: output}, nil
 	default:
 		return nil, fmt.Errorf("unknown reporter %q", format)
 	}

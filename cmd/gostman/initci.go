@@ -27,6 +27,10 @@ var ciTemplates = map[string]ciTemplate{
 	"github": {".github/workflows/gostman.yml", `name: Gostman
 on: [push, pull_request]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   api:
     runs-on: ubuntu-latest
@@ -37,6 +41,7 @@ jobs:
           collection: %[1]s
           reporter: junit
           output: report.xml
+          comment: true
       - uses: actions/upload-artifact@v4
         if: always()
         with:

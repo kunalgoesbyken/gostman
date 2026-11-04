@@ -150,7 +150,7 @@ Scripts run in an isolated worker with no network access of their own and stop a
 | `--bail` | `--bail` |
 | `--insecure` | `--insecure` |
 | `--secrets-env-file secrets.env` | `--secrets-env-file secrets.env`, or `--secrets` to use the process environment |
-| `--reporter-junit report.xml --reporter-html report.html` | `--reporter junit:report.xml --reporter html:report.html`, also `json` and `text`, repeatable |
+| `--reporter-junit report.xml --reporter-html report.html` | `--reporter junit:report.xml --reporter html:report.html`, also `json`, `markdown` and `text`, repeatable |
 | `--tags smoke --exclude-tags slow` | `--tags smoke --exclude-tags slow` |
 | `--cacert ca.pem` | `--cacert ca.pem`, added to the system certificates |
 | `--client-cert-config certs.json` | `--client-cert cert.pem --client-key key.pem`, or `--client-cert api.example.com=cert.pem,key.pem` for one host |

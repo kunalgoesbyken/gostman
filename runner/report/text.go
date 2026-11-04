@@ -309,9 +309,7 @@ func (t *Text) coverageLines(report runner.Report) string {
 		return ""
 	}
 	var lines strings.Builder
-	fmt.Fprintf(&lines, "Coverage  %d of %d operations (%.1f%%), %d of %d documented responses (%.1f%%)\n",
-		coverage.Operations.Covered, coverage.Operations.Total, coverage.Operations.Percent,
-		coverage.Responses.Covered, coverage.Responses.Total, coverage.Responses.Percent)
+	fmt.Fprintf(&lines, "Coverage  %s\n", coverageSummary(*coverage))
 	if !t.untested {
 		return lines.String()
 	}
@@ -319,6 +317,12 @@ func (t *Text) coverageLines(report runner.Report) string {
 		lines.WriteString(t.uncoveredLine(item))
 	}
 	return lines.String()
+}
+
+func coverageSummary(coverage runner.Coverage) string {
+	return fmt.Sprintf("%d of %d operations (%.1f%%), %d of %d documented responses (%.1f%%)",
+		coverage.Operations.Covered, coverage.Operations.Total, coverage.Operations.Percent,
+		coverage.Responses.Covered, coverage.Responses.Total, coverage.Responses.Percent)
 }
 
 func (t *Text) uncoveredLine(item runner.CoverageOperation) string {

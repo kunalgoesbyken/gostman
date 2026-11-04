@@ -27,7 +27,7 @@ inputs:
     required: false
     default: ''
   reporter:
-    description: One of text, json, junit or html.
+    description: One of text, json, junit, html or markdown.
     required: false
     default: text
   output:
@@ -46,6 +46,18 @@ inputs:
     description: Further flags for gostman run, separated by spaces. Pass secrets with --var-from-env and the env block of the step.
     required: false
     default: ''
+  summary:
+    description: Add the results and the failed checks to the job summary. Needs gostman 1.14.0 or later.
+    required: false
+    default: 'true'
+  comment:
+    description: On a pull request, post the same results as one comment that later runs update. Needs gostman 1.14.0 or later and the pull-requests write permission.
+    required: false
+    default: 'false'
+  github-token:
+    description: Token used to post the pull request comment.
+    required: false
+    default: ${{ github.token }}
 
 outputs:
   exit-code:
@@ -108,9 +120,19 @@ runs:
         GOSTMAN_REDACT: ${{ inputs.redact }}
         GOSTMAN_BAIL: ${{ inputs.bail }}
         GOSTMAN_EXTRA_ARGS: ${{ inputs.extra-args }}
+        GOSTMAN_PUBLISH: ${{ inputs.summary == 'true' || inputs.comment == 'true' }}
       run: |
         set -uo pipefail
         args=(run "$GOSTMAN_COLLECTION" --reporter "$GOSTMAN_REPORTER")
+        results=""
+        if [ "$GOSTMAN_PUBLISH" = true ]; then
+          if printf '%s\n' 1.14.0 "$(gostman version)" | sort -V -C; then
+            results=$(mktemp "$RUNNER_TEMP/gostman-results.XXXXXX")
+            args+=(--reporter "markdown:$results")
+          else
+            echo "::notice::The job summary and the pull request comment need gostman 1.14.0 or later."
+          fi
+        fi
         [ -n "$GOSTMAN_ENVIRONMENT" ] && args+=(--env "$GOSTMAN_ENVIRONMENT")
         [ -n "$GOSTMAN_FOLDER" ] && args+=(--folder "$GOSTMAN_FOLDER")
         [ -n "$GOSTMAN_DATA" ] && args+=(--data "$GOSTMAN_DATA")
@@ -125,4 +147,43 @@ runs:
         gostman "${args[@]}" || code=$?
         echo "exit-code=$code" >> "$GITHUB_OUTPUT"
         echo "report=$GOSTMAN_OUTPUT" >> "$GITHUB_OUTPUT"
+        echo "results=$results" >> "$GITHUB_OUTPUT"
         exit "$code"
+
+    - name: Publish results
+      if: always() && steps.run.outputs.results != ''
+      shell: bash
+      env:
+        GOSTMAN_RESULTS: ${{ steps.run.outputs.results }}
+        GOSTMAN_SUMMARY: ${{ inputs.summary }}
+        GOSTMAN_COMMENT: ${{ inputs.comment }}
+        GOSTMAN_COMMENT_KEY: ${{ github.workflow }}/${{ github.job }}/${{ inputs.collection }}/${{ inputs.environment }}/${{ inputs.folder }}
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        set -uo pipefail
+        [ -s "$GOSTMAN_RESULTS" ] || exit 0
+        if [ "$GOSTMAN_SUMMARY" = true ]; then
+          cat "$GOSTMAN_RESULTS" >> "$GITHUB_STEP_SUMMARY"
+        fi
+        [ "$GOSTMAN_COMMENT" = true ] || exit 0
+        if ! command -v gh > /dev/null || ! command -v jq > /dev/null; then
+          echo "::warning::The pull request comment needs gh and jq on the runner."
+          exit 0
+        fi
+        pr=$(jq -r '.pull_request.number // empty' "$GITHUB_EVENT_PATH")
+        [ -n "$pr" ] || exit 0
+        marker="<!-- gostman-run $(printf '%s' "$GOSTMAN_COMMENT_KEY" | tr -c 'A-Za-z0-9._/-' '_') -->"
+        body="$GOSTMAN_RESULTS.comment"
+        {
+          echo "$marker"
+          cat "$GOSTMAN_RESULTS"
+          echo
+          echo "[Job log]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)"
+        } > "$body"
+        comments="repos/$GITHUB_REPOSITORY/issues/$pr/comments"
+        existing=$(gh api --paginate "$comments" --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
+        if [ -n "$existing" ]; then
+          gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing" -F "body=@$body" > /dev/null
+        else
+          gh api --method POST "$comments" -F "body=@$body" > /dev/null
+        fi || echo "::warning::Could not comment on pull request #$pr. Give the job the pull-requests: write permission; pull requests from forks get a read-only token."
