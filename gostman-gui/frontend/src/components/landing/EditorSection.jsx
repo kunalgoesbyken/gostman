@@ -3,7 +3,7 @@ import { docPath } from "../../docs/manifest"
 import { VSCODE_MARKETPLACE_URL } from "../../lib/siteLinks"
 import { cn } from "../../lib/utils"
 import { BrandIcon } from "../ui/brandIcon"
-import { AGENT_PROMPT, AGENT_PROMPT_BUTTON, AGENT_PROMPT_NOTE, AGENT_SETUP_TITLE, AGENT_SKILL_COMMAND, MCP_CLIENTS, MCP_TITLE, VSCODE_BUTTON } from "./content"
+import { AGENT_PROMPT, AGENT_PROMPT_BUTTON, AGENT_SETUP_TITLE, AGENT_SKILL_COMMAND, MCP_CLIENTS, MCP_TITLE, VSCODE_BUTTON } from "./content"
 import { useClipboardCopy } from "../../hooks/useClipboardCopy"
 import { Check, Copy } from "./icons"
 import { SectionLabel } from "./SectionLabel"
@@ -68,9 +68,8 @@ function SkillSetup() {
   return (
     <SetupColumn title={AGENT_SETUP_TITLE}>
       <TerminalBlock lines={[{ copy: AGENT_SKILL_COMMAND }]} label="Install the Gostman Agent Skill" />
-      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+      <div className="mt-4">
         <CopyPromptButton />
-        <p className="text-sm text-muted-foreground">{AGENT_PROMPT_NOTE}</p>
       </div>
     </SetupColumn>
   )
@@ -89,9 +88,7 @@ export function EditorSection() {
               className="text-3xl font-semibold tracking-tight md:text-5xl [text-wrap:balance]"
             />
             <p className="mt-5 leading-relaxed text-muted-foreground">
-              Run collections from VS Code, or register the MCP server with your agent. Both use the gostman command line:{" "}
-              <InlineLink href={`${docPath("getting-started")}#install-the-command-line`}>install it</InlineLink>, then read the{" "}
-              <InlineLink href={docPath("agents")}>MCP guide</InlineLink>.
+              Run collections from VS Code, or add the MCP server to your agent. <InlineLink href={docPath("agents")}>Read the MCP guide</InlineLink>.
             </p>
           </div>
           <a href={VSCODE_MARKETPLACE_URL} className={cn(QUIET_BUTTON, "self-start lg:self-auto")}>

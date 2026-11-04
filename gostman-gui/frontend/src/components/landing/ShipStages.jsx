@@ -1,9 +1,10 @@
 import { useEffect, useId, useRef, useState } from "react"
 import { cn } from "../../lib/utils"
 import { ORIENTATION, moveFocus } from "../../lib/rovingFocus"
-import { CLI_RUN, PULL_REQUEST_COMMENT, SCHEDULED_RUN } from "./captures"
+import { PullRequestMock } from "./PullRequestMock"
+import { RunResultsMock } from "./RunResultsMock"
+import { ScheduleMock } from "./ScheduleMock"
 import { SplitHeading } from "./SplitHeading"
-import { TerminalBlock } from "./TerminalBlock"
 
 const STAGE_KEYS = { selector: "[role=tab]", orientation: ORIENTATION.both, activate: true }
 
@@ -12,19 +13,19 @@ const STAGES = [
     id: "code",
     title: "While you code",
     description: "Checks run beside every response. Run a folder with gostman run, or let your coding agent run it through MCP.",
-    capture: CLI_RUN,
+    Visual: RunResultsMock,
   },
   {
     id: "review",
     title: "On every pull request",
     description: "The GitHub Action fails the build on a broken check and keeps one comment on the pull request with what broke.",
-    capture: PULL_REQUEST_COMMENT,
+    Visual: PullRequestMock,
   },
   {
     id: "production",
     title: "In production",
     description: "gostman run --every repeats the run and posts to Slack, Teams or Discord when it starts failing.",
-    capture: SCHEDULED_RUN,
+    Visual: ScheduleMock,
   },
 ]
 
@@ -155,7 +156,7 @@ export function ShipStages() {
                 aria-labelledby={idOf("tab", stage.id)}
                 className={cn("min-w-0 transition-[opacity,visibility] duration-300 ease-out [grid-area:1/1] [&>figure]:h-full", index !== activeIndex && "invisible opacity-0")}
               >
-                <TerminalBlock {...stage.capture} isPlaying={index === activeIndex} />
+                <stage.Visual isPlaying={index === activeIndex} />
               </div>
             ))}
           </div>

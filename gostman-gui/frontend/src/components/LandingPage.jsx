@@ -13,8 +13,8 @@ import docsShot from "../assets/landing/docs.webp"
 import mockShot from "../assets/landing/mock.webp"
 import testsShot from "../assets/landing/tests.webp"
 
-import { AGENT_SESSION, REQUEST_FILE } from "./landing/captures"
-import { TerminalBlock } from "./landing/TerminalBlock"
+import { AgentChatMock } from "./landing/AgentChatMock"
+import { GitDiffMock } from "./landing/GitDiffMock"
 import { ProductShowcase } from "./landing/ProductShowcase"
 import { DownloadDropdown } from "./landing/DownloadDropdown"
 import { DOWNLOADS, downloadFor, groupByOs } from "./landing/downloads"
@@ -24,7 +24,6 @@ import { formatList } from "./landing/content"
 import { Brand } from "./landing/Brand"
 import { NavBar } from "./landing/NavBar"
 import { EditorSection } from "./landing/EditorSection"
-import { PointList } from "./landing/PointList"
 import { SiteFooter } from "./landing/SiteFooter"
 import { SplitHeading } from "./landing/SplitHeading"
 import { ComparisonSection } from "./landing/ComparisonSection"
@@ -62,78 +61,46 @@ const NAV_LINK = cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-2 tex
 
 const SPOTLIGHTS = [
   {
-    title: "A collection you can read in a pull request",
-    description: "Open a folder and every request becomes a small YAML file: one file per request, one directory per folder. Commit it next to the code it tests and review changes line by line. Mark a variable secret and its value stays in your operating system keychain, so only its name is written to the file.",
-    points: [
-      "Values of variables marked secret are never written to the folder",
-      "Tokens, cookies and history never reach the folder either",
-      "Scan for secrets flags a credential typed into a variable before you commit or share",
-      "A cloned folder runs no scripts until you trust it",
-      "The app, the command line and your agent all read the same files",
-    ],
-    capture: REQUEST_FILE,
+    title: "Requests as files in Git",
+    description: "One YAML file per request, reviewed line by line. Secret values stay in your keychain.",
+    Visual: GitDiffMock,
   },
   {
-    title: "Tests that run every time you press Send",
-    description: "Add checks as plain rows, or write a script with test() and expect(). The results sit beside the response, so a broken contract shows up on the request that broke it.",
-    points: [
-      "Checks on status, headers, body and response time",
-      "Pre-request and post-response scripts, run in a sandbox",
-      "A runner in the app for a whole folder at once",
-    ],
+    title: "Tests on every Send",
+    description: "Checks and scripts run with the request, and the results sit beside the response.",
     image: testsShot,
     width: 1400,
     height: 761,
     alt: "A request with four assertion rows and a passing test list under the response",
   },
   {
-    title: "A mock server from the responses you saved",
-    description: "Save any response as an example, then start a local server that answers each route with it. Build the frontend before the API exists, and watch every request it makes arrive in the log.",
-    points: [
-      "Pick which example each route returns while the server runs",
-      "Optional delay and CORS for browser clients",
-      "Also available as gostman mock and to agents over MCP",
-    ],
+    title: "A mock server from saved responses",
+    description: "Serve your examples locally and build the frontend before the API exists.",
     image: mockShot,
     width: 1400,
     height: 1050,
     alt: "The mock server dialog running on port 4010, listing each route with the saved example it serves",
   },
   {
-    title: "Turn real traffic into a collection",
-    description: "Point your app at a local address and Gostman forwards every call to your API while listing each one live. Save any of them as a request, with its response kept as an example. There is no certificate to install.",
-    points: [
-      "Works for any app whose API base URL you can change",
-      "Authorization and cookie headers are never saved",
-      "In the desktop app and as gostman capture",
-    ],
+    title: "Real traffic, saved as requests",
+    description: "Point your app at Gostman, watch every call arrive and keep the ones you need.",
     image: captureShot,
     width: 1400,
     height: 1000,
     alt: "The capture dialog listing five forwarded calls with the response of one shown below",
   },
   {
-    title: "Share it or publish it without an account",
-    description: "Send a folder as an encrypted link or file that is built in your own window and never uploaded, or turn the collection into a single documentation page you can host anywhere.",
-    points: [
-      "Variable values and saved responses stay out unless you include them",
-      "The recipient sees what is inside before importing",
-      "One self-contained HTML file, from the app or gostman docs",
-    ],
+    title: "Share without an account",
+    description: "An encrypted link, or one HTML page of docs, built on your own machine.",
     image: docsShot,
     width: 1860,
     height: 1162,
     alt: "A generated documentation page with a sidebar of requests and the details of one",
   },
   {
-    title: "Hand the same collection to your coding agent",
-    description: "Claude Code, Codex and Cursor can call Gostman through MCP in place of curl. They use the collection you already have, and variable values and credentials are filled in inside Gostman and replaced with their names in everything the agent reads.",
-    points: [
-      "Cookies, tokens and variables carry across calls in a session",
-      "Responses are capped and can be narrowed to the fields that matter",
-      "Agents reach only the hosts your collection already uses, unless you allow more",
-    ],
-    capture: AGENT_SESSION,
+    title: "Your coding agent, same collection",
+    description: "Claude Code, Codex and Cursor call Gostman over MCP and never see your secrets.",
+    Visual: AgentChatMock,
     brands: ["claude", "openai", "cursor"],
   },
 ]
@@ -204,15 +171,14 @@ function CallToActions({ onGetStarted, className, style }) {
 function Spotlight({ spotlight, isReversed }) {
   return (
     <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-12">
-      <div className={cn("min-w-0 lg:col-span-5", isReversed && "lg:order-2")}>
+      <div className={cn("min-w-0 lg:col-span-4", isReversed && "lg:order-2")}>
         <SplitHeading as="h3" text={spotlight.title} className="text-2xl md:text-3xl font-semibold tracking-tight [text-wrap:balance]" />
         <p className="mt-4 leading-relaxed text-muted-foreground">{spotlight.description}</p>
         <BrandStrip brands={spotlight.brands} className="mt-4" />
-        <PointList points={spotlight.points} className="mt-6 space-y-3" />
       </div>
-      <div className={cn("reveal-on-scroll min-w-0 lg:col-span-7", isReversed && "lg:order-1")}>
-        {spotlight.capture ? (
-          <TerminalBlock {...spotlight.capture} />
+      <div className={cn("reveal-on-scroll min-w-0 lg:col-span-8", isReversed && "lg:order-1")}>
+        {spotlight.Visual ? (
+          <spotlight.Visual />
         ) : (
           <ImageZoom src={spotlight.image} alt={spotlight.alt}>
             <img
@@ -305,7 +271,7 @@ export function LandingPage({ onGetStarted }) {
                 className="text-3xl font-semibold tracking-tight md:text-5xl [text-wrap:balance]"
               />
               <p className="mt-5 leading-relaxed text-muted-foreground">
-                Tests, the command line, Git, mocks, captured traffic, sharing and your coding agent all work from the same files.
+                Tests, mocks, CI and your coding agent all work from the same files.
               </p>
             </div>
             <div className="space-y-20 lg:space-y-28">

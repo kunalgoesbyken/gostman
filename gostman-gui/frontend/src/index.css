@@ -573,7 +573,7 @@
   }
 }
 
-@keyframes terminal-line {
+@keyframes mock-line {
   from {
     opacity: 0;
     transform: translateY(0.25rem);
@@ -581,12 +581,12 @@
 }
 
 @media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
-  .terminal-wait pre > * {
+  .mock-wait .mock-line {
     opacity: 0;
   }
 
-  .terminal-play pre > * {
-    animation: terminal-line 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+  .mock-play .mock-line {
+    animation: mock-line 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
     animation-delay: calc(var(--line, 0) * 55ms);
   }
 }

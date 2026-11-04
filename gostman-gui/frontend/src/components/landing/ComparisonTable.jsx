@@ -45,7 +45,7 @@ function Row({ row }) {
 export function ComparisonTable() {
   return (
     <table className="block w-full border-separate border-spacing-0 md:table md:table-fixed">
-      <caption className="mb-4 block text-left md:table-caption text-sm text-muted-foreground">
+      <caption className="sr-only">
         Gostman, Postman, Bruno and Insomnia compared feature by feature.
       </caption>
       <thead className="sr-only md:table-header-group md:not-sr-only">

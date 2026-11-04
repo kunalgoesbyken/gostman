@@ -1,31 +1,8 @@
-import { docPath } from "../../docs/manifest"
 import { STATES } from "./comparisonData"
 import { ComparisonTable } from "./ComparisonTable"
-import { InlineLink } from "./InlineLink"
 import { SectionLabel } from "./SectionLabel"
 import { SplitHeading } from "./SplitHeading"
 import { StatusGlyph } from "./StatusGlyph"
-import { SITE_LANGUAGE } from "./content"
-
-const MIGRATION_GUIDES = [
-  { slug: "coming-from-postman", label: "Coming from Postman" },
-  { slug: "coming-from-bruno", label: "Coming from Bruno" },
-  { slug: "coming-from-insomnia", label: "Coming from Insomnia" },
-]
-
-const guideLabelled = (label) => MIGRATION_GUIDES.find((guide) => guide.label === label)
-
-function MigrationLinks() {
-  const parts = new Intl.ListFormat(SITE_LANGUAGE, { type: "disjunction" }).formatToParts(MIGRATION_GUIDES.map((guide) => guide.label))
-  return parts.map((part, index) => {
-    if (part.type !== "element") return part.value
-    return (
-      <InlineLink key={index} href={docPath(guideLabelled(part.value).slug)}>
-        {part.value}
-      </InlineLink>
-    )
-  })
-}
 
 function Legend() {
   return (
@@ -52,7 +29,7 @@ export function ComparisonSection() {
             className="text-3xl font-semibold tracking-tight md:text-5xl [text-wrap:balance]"
           />
           <p className="mt-5 leading-relaxed text-muted-foreground">
-            From their public pricing and docs, October 2026. Moving from another client? Read <MigrationLinks />.
+            From their public pricing and docs, October 2026.
           </p>
         </div>
 

@@ -1,15 +1,11 @@
-import { useRef } from "react"
 import { Check, Copy } from "./icons"
 import { useClipboardCopy } from "../../hooks/useClipboardCopy"
-import { useSeenOnce } from "../../hooks/useSeenOnce"
 import { cn } from "../../lib/utils"
+import { MockFrame, lineStyle } from "./MockFrame"
 
 const LINE_TONES = {
   command: "text-foreground",
   muted: "text-muted-foreground",
-  pass: "text-success",
-  fail: "text-destructive",
-  key: "text-syntax-key",
 }
 
 function CopyControl({ text, label, className }) {
@@ -33,7 +29,7 @@ function CopyControl({ text, label, className }) {
 
 function CommandLine({ line, style }) {
   return (
-    <span style={style} className="my-0.5 flex items-center gap-2 text-foreground">
+    <span style={style} className="mock-line my-0.5 flex items-center gap-2 text-foreground">
       <span aria-hidden="true" className="select-none text-muted-foreground">$</span>
       <span className="min-w-0 flex-1 whitespace-pre-wrap break-words">{line.copy}</span>
       <CopyControl text={line.copy} label="Copy command" />
@@ -42,27 +38,17 @@ function CommandLine({ line, style }) {
 }
 
 function OutputLine({ line, style }) {
-  return <span style={style} className={cn("block min-h-[1.25em] whitespace-pre-wrap break-words", LINE_TONES[line.tone])}>{line.text}</span>
+  return <span style={style} className={cn("mock-line block min-h-[1.25em] whitespace-pre-wrap break-words", LINE_TONES[line.tone])}>{line.text}</span>
 }
 
-export function TerminalBlock({ title, header, lines, label, copyText, isPlaying = true }) {
-  const figureRef = useRef(null)
-  const isSeen = useSeenOnce(figureRef)
+export function TerminalBlock({ title, header, lines, label, copyText, isPlaying }) {
   return (
-    <figure
-      ref={figureRef}
-      aria-label={label}
-      className={cn("flex flex-col overflow-hidden rounded-lg border border-border/60 bg-background", isSeen ? isPlaying && "terminal-play" : "terminal-wait")}
-    >
-      {(header || title) && <figcaption className="flex h-9 items-center justify-between sm:h-10 border-b border-border/60 pl-4 pr-1.5 font-mono text-xs text-muted-foreground">
-        {header ?? <span className="truncate">{title}</span>}
-        {copyText && <CopyControl text={copyText} label="Copy file" />}
-      </figcaption>}
+    <MockFrame title={title} header={header} label={label} isPlaying={isPlaying} action={copyText && <CopyControl text={copyText} label="Copy file" />}>
       <pre className="flex-1 overflow-x-auto p-2.5 font-mono sm:p-4 text-xs leading-relaxed text-muted-foreground sm:text-[0.8125rem]">
         {lines.map((line, index) => (
-          line.copy ? <CommandLine key={index} line={line} style={{ "--line": index }} /> : <OutputLine key={index} line={line} style={{ "--line": index }} />
+          line.copy ? <CommandLine key={index} line={line} style={lineStyle(index)} /> : <OutputLine key={index} line={line} style={lineStyle(index)} />
         ))}
       </pre>
-    </figure>
+    </MockFrame>
   )
 }

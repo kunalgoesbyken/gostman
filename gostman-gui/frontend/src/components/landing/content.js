@@ -27,7 +27,6 @@ export const MCP_TITLE = "Add the MCP server"
 
 export const AGENT_SETUP_TITLE = "Or let your agent set it up"
 export const AGENT_SKILL_COMMAND = "npx skills add kunalgoesbyken/gostman --skill gostman"
-export const AGENT_PROMPT_NOTE = "Paste it into your agent to install and try Gostman."
 export const AGENT_PROMPT_BUTTON = "Copy setup prompt"
 export const AGENT_PROMPT = [
   "Set up Gostman in this project so you can call and test its APIs without curl.",
