@@ -1,5 +1,7 @@
 import { STATES } from "./comparisonData"
-import { ComparisonTable } from "./ComparisonTable"
+import { docPath } from "../../docs/manifest"
+import { ComparisonGrid } from "./ComparisonGrid"
+import { InlineLink } from "./InlineLink"
 import { SectionLabel } from "./SectionLabel"
 import { SplitHeading } from "./SplitHeading"
 import { StatusGlyph } from "./StatusGlyph"
@@ -34,7 +36,10 @@ export function ComparisonSection() {
         </div>
 
         <Legend />
-        <ComparisonTable />
+        <ComparisonGrid />
+        <p className="mt-6 text-sm text-muted-foreground">
+          <InlineLink href={docPath("free-features")}>Prices and details</InlineLink>
+        </p>
       </div>
     </section>
   )

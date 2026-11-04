@@ -1,6 +1,6 @@
 import { cn } from "../../lib/utils"
-import { BrandIcon } from "../ui/brandIcon"
 import { COMPARISON_ROWS, PRODUCTS } from "./comparisonData"
+import { ProductMark } from "./ProductMark"
 import { StatusGlyph } from "./StatusGlyph"
 
 const BAND = "bg-[linear-gradient(hsl(var(--primary)/0.08),hsl(var(--primary)/0.08))]"
@@ -9,7 +9,7 @@ const HEAD_CELL = "px-4 py-3 text-left text-xs font-medium uppercase tracking-wi
 function ProductName({ product }) {
   return (
     <span className="inline-flex items-center gap-2">
-      <BrandIcon brand={product.id} />
+      <ProductMark product={product} />
       {product.name}
     </span>
   )
