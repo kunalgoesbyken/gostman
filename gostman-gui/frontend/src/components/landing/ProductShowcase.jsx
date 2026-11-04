@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, m } from "framer-motion"
-import { easeSmooth, springLayout } from "../../lib/motion"
+import { easeOutExpo, springLayout } from "../../lib/motion"
 import { cn } from "../../lib/utils"
 import { whenIdle } from "../../lib/idle"
 import { scrollIntoStrip } from "../../lib/scrollIntoStrip"
@@ -149,7 +149,7 @@ export function ProductShowcase() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2, ease: easeSmooth }}
+              transition={{ duration: 0.2, ease: easeOutExpo }}
             >
               <ShowcaseVideo src={active.video} poster={active.poster} label={active.alt} />
             </m.div>

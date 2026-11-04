@@ -2,6 +2,7 @@ import { cn } from "../../lib/utils"
 import { COMPARISON_ROWS, PRODUCTS } from "./comparisonData"
 import { ProductMark } from "./ProductMark"
 import { StatusGlyph } from "./StatusGlyph"
+import { revealStep } from "./revealStep"
 
 const BAND = "bg-primary/[0.08]"
 const LINE = "border-b border-border/40"
@@ -55,8 +56,8 @@ export function ComparisonGrid() {
         </tr>
       </thead>
       <tbody>
-        {COMPARISON_ROWS.map((row) => (
-          <tr key={row.feature}>
+        {COMPARISON_ROWS.map((row, index) => (
+          <tr key={row.feature} className="reveal-on-scroll" style={revealStep(index)}>
             <th scope="row" className={cn("py-3.5 pe-3 text-left text-sm font-medium text-foreground", LINE)}>
               {row.feature}
             </th>

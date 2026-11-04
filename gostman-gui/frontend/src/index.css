@@ -84,6 +84,9 @@
     --font-ui: var(--font-ui-default);
     --font-mono: var(--font-mono-default);
     --font-brand: var(--font-ui-default);
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --enter: 0.6s;
+    --stagger: 70ms;
     --text-scale: 100;
 
     --background: 0 0% 100%;
@@ -591,8 +594,8 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .intro {
-    animation: reveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-delay: calc(var(--intro-step, 0) * 90ms);
+    animation: reveal var(--enter) var(--ease-out) both;
+    animation-delay: calc(var(--intro-step, 0) * var(--stagger));
   }
 }
 
@@ -609,8 +612,85 @@
   }
 
   .mock-play .mock-line {
-    animation: mock-line 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-delay: calc(var(--line, 0) * 55ms);
+    animation: mock-line var(--enter) var(--ease-out) both;
+    animation-delay: calc(var(--line, 0) * var(--stagger));
+  }
+
+  .mock-wait .diff-type {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  .mock-play .diff-strike::after {
+    animation: diff-strike var(--enter) var(--ease-out) both;
+    animation-delay: var(--diff-edit);
+  }
+
+  .mock-play .diff-type {
+    animation: diff-type calc(var(--type-chars) * 22ms) steps(var(--type-chars)) both;
+    animation-delay: calc(var(--diff-edit) + var(--type-step, 0) * 0.5s);
+  }
+
+  .mock-play .diff-count {
+    animation: diff-pop var(--enter) var(--ease-out) both;
+    animation-delay: var(--diff-commit);
+  }
+
+  .mock-play .diff-pending {
+    animation: diff-leave var(--enter) var(--ease-out) both;
+    animation-delay: calc(var(--diff-commit) + 0.5s);
+  }
+
+  .mock-play .diff-done {
+    animation: mock-line var(--enter) var(--ease-out) both;
+    animation-delay: calc(var(--diff-commit) + 0.6s);
+  }
+}
+
+.diff-flow {
+  --diff-edit: 0.9s;
+  --diff-commit: 2.4s;
+}
+
+.diff-strike {
+  @apply relative;
+}
+
+.diff-strike::after {
+  @apply absolute inset-x-0 top-1/2 h-px origin-left bg-current content-[''];
+}
+
+.diff-pending {
+  @apply invisible;
+}
+
+@keyframes diff-strike {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes diff-type {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+
+@keyframes diff-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes diff-leave {
+  from {
+    visibility: visible;
+    opacity: 1;
+  }
+  to {
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-0.25rem);
   }
 }
 
@@ -631,7 +711,8 @@
     .reveal-on-scroll {
       animation: reveal linear both;
       animation-timeline: view();
-      animation-range: entry calc(var(--reveal-step, 0) * 8%) entry calc(60% + var(--reveal-step, 0) * 8%);
+      --reveal-delay: calc(min(var(--reveal-step, 0), 5) * 8%);
+      animation-range: entry var(--reveal-delay) entry calc(60% + var(--reveal-delay));
     }
 
     .split-heading {
