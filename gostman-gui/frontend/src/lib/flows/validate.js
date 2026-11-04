@@ -1,6 +1,6 @@
 import { FLOW_ENGINE_TEXT as TEXT, FLOW_FIELD_TEXT, FLOW_KIND_TEXT } from '../flowsText'
 import { MAX_GROUP_DEPTH, groupDepth, hasActiveCondition } from './conditions'
-import { coerce } from './declared'
+import { coerce, declarationOrder, namedDeclared } from './declared'
 import { INPUT_BODY, INPUT_FORM, INPUT_TARGETS, acceptsBody, acceptsForm, bodyPath } from './inputs'
 import {
   BRANCH_KINDS, CONDITION_RESPONSE, END_TARGET, MAX_FLOW_DEPTH, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_KINDS, STEP_PARALLEL, STEP_REPEAT,
@@ -191,15 +191,23 @@ function stepProblems(step, scope) {
 
 const hasPlaceholder = (template) => template.includes('{{')
 
+const isInput = (declared) => declared.input === true
+
+function loopProblems(flow) {
+  const { looped } = declarationOrder(namedDeclared(flow), isInput)
+  return looped.length > 0 ? [TEXT.variablesLoop(looped)] : []
+}
+
 function declaredProblems(flow) {
   const seen = new Set()
-  return flow.variables.flatMap((declared) => {
+  const problems = flow.variables.flatMap((declared) => {
     if (declared.name === '') return [TEXT.noVariableName]
     if (seen.has(declared.name)) return [TEXT.variableTwice(declared.name)]
     seen.add(declared.name)
     if (declared.required || hasPlaceholder(declared.value) || coerce(declared.value, declared.type).ok) return []
     return [TEXT.notOfType(declared.name, TEXT.typeNames[declared.type], declared.value)]
   })
+  return problems.length > 0 ? problems : loopProblems(flow)
 }
 
 const outputProblems = (flow, index) => flow.outputs.flatMap((output) => valueProblems(index, output))

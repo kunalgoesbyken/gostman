@@ -4,6 +4,17 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Changed
+
+- Desktop updates install only when the release's checksums carry a valid signature from the Gostman release key, so a changed release cannot pass a changed download.
+- Flows: a Parallel step starts its branches from runtimes prepared ahead, and the command line prints each branch's lines together instead of interleaved.
+
+### Fixed
+
+- Flows: starting values can use flow variables declared below them; values that refer to each other are reported.
+- Flows: large numbers in JSON bodies, and in Number and JSON variables put into them, keep every digit.
+- Flows: saving a flow writes a blank condition as `expression: ""` again, as earlier versions did.
+
 ## [1.15.0] - 2026-11-04
 
 ### Added

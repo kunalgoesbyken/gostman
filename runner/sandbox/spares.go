@@ -23,6 +23,10 @@ func spareCount() int {
 	return min(max(runtime.GOMAXPROCS(0)/2, 1), mostSpares)
 }
 
+func Warm() {
+	spares.start.Do(spares.fill)
+}
+
 func (p *sparePool) take() (*machine, error) {
 	p.start.Do(p.fill)
 	next := <-p.ready

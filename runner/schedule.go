@@ -41,7 +41,7 @@ func sequence(count int) []int {
 }
 
 func (s *session) spawn() (*session, error) {
-	scripts, err := sandbox.New()
+	scripts, err := sandbox.Spare()
 	if err != nil {
 		return nil, err
 	}

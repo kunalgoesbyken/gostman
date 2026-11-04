@@ -31,6 +31,7 @@ type branchDone struct {
 	result *Result
 	nested *FlowEvent
 	sends  int
+	held   []flowNote
 }
 
 func (r *flowRun) borrow() (*session, func(), error) {
@@ -61,7 +62,7 @@ func (r *flowRun) branch(worker *session) *flowRun {
 	shared := *r.flowShared
 	shared.session = worker
 	return &flowRun{
-		flowShared: &shared, flow: r.flow, depth: r.depth, given: r.given, sendsLeft: r.sendsLeft, owner: r.home(), concurrent: true,
+		flowShared: &shared, flow: r.flow, depth: r.depth, given: r.given, sendsLeft: r.sendsLeft, owner: r.home(), concurrent: true, held: &[]flowNote{},
 		nested: map[string]*FlowEvent{}, pending: map[string]*Result{},
 	}
 }
@@ -115,7 +116,7 @@ func (r *flowRun) runBranch(ctx context.Context, action flowAction) branchDone {
 		done = runner.sendBranch(ctx, action)
 	}
 	done.input.Ms = time.Since(began).Milliseconds()
-	done.sends = runner.sends
+	done.sends, done.held = runner.sends, *runner.held
 	if ctx.Err() != nil && done.input.State != branchPassed {
 		done.input.State = branchCancelled
 	}
@@ -124,6 +125,13 @@ func (r *flowRun) runBranch(ctx context.Context, action flowAction) branchDone {
 
 func (r *flowRun) keepBranch(done branchDone) {
 	r.sends += done.sends
+	for _, note := range done.held {
+		if note.event != nil {
+			r.notify(*note.event)
+		} else {
+			r.record(*note.result)
+		}
+	}
 	if done.result != nil {
 		r.pending[done.step] = done.result
 	}

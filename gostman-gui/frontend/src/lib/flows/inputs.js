@@ -2,6 +2,7 @@ import { isPlainObject } from '../dataUtils'
 import { FLOW_ENGINE_TEXT as TEXT } from '../flowsText'
 import { foldQueryParams, readParamRows, writeParamRows } from '../queryString'
 import { isBlankRow, isFileRow, parseRows, serializeRows } from '../rows'
+import { parseExact, stringifyExact } from './exactJson'
 import { asText } from './values'
 
 export const INPUT_HEADER = 'header'
@@ -91,21 +92,21 @@ function placeValue(node, segments, value, name) {
 function parsedBody(text) {
   if (text.trim() === '') return { ok: true, value: {} }
   try {
-    return { ok: true, value: JSON.parse(text) }
+    return { ok: true, value: parseExact(text) }
   } catch {
     return { ok: false }
   }
 }
 
-function applyBody(request, { name, value }) {
+function applyBody(request, { name, value, exact }) {
   const segments = bodyPath(name)
   if (!segments) return failure(TEXT.inputBadPath(name))
   if (!acceptsBody(request.bodyType)) return failure(TEXT.inputNotJson(name))
   const body = parsedBody(request.body || '')
   if (!body.ok) return failure(TEXT.inputBodyNotJson(name))
   try {
-    const placed = placeValue(body.value, segments, value, name)
-    return success({ ...request, bodyType: BODY_JSON, body: JSON.stringify(placed, null, JSON_INDENT) })
+    const placed = placeValue(body.value, segments, exact ? parseExact(value) : value, name)
+    return success({ ...request, bodyType: BODY_JSON, body: stringifyExact(placed, JSON_INDENT) })
   } catch (error) {
     return failure(error.message)
   }
@@ -135,7 +136,7 @@ export function resolveInputs(inputs, read) {
   for (const input of inputs || []) {
     const found = input.value !== undefined ? { ok: true, value: input.value } : read(input)
     if (!found.ok) return found
-    resolved.push({ target: input.target, name: input.name, value: resolvedValue(input, found.value) })
+    resolved.push({ target: input.target, name: input.name, value: resolvedValue(input, found.value), ...(input.exact && { exact: true }) })
   }
   const isVariable = (input) => input.target === INPUT_VARIABLE
   const variables = Object.fromEntries(resolved.filter(isVariable).map((input) => [input.name, input.value]))

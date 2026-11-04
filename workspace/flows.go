@@ -1,6 +1,7 @@
 package workspace
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -28,6 +29,33 @@ type FlowCheck struct {
 	Enabled    *bool       `json:"enabled,omitempty" yaml:"enabled,omitempty"`
 	Match      string      `json:"match,omitempty" yaml:"match,omitempty"`
 	Conditions []FlowCheck `json:"conditions,omitempty" yaml:"conditions,omitempty"`
+}
+
+type flowLeaf struct {
+	Expression string `json:"expression" yaml:"expression"`
+	Operator   string `json:"operator,omitempty" yaml:"operator,omitempty"`
+	Value      string `json:"value,omitempty" yaml:"value,omitempty"`
+	Enabled    *bool  `json:"enabled,omitempty" yaml:"enabled,omitempty"`
+}
+
+type flowGroup struct {
+	Match      string      `json:"match,omitempty" yaml:"match,omitempty"`
+	Conditions []FlowCheck `json:"conditions" yaml:"conditions"`
+}
+
+func (c FlowCheck) written() any {
+	if len(c.Conditions) > 0 {
+		return flowGroup{Match: c.Match, Conditions: c.Conditions}
+	}
+	return flowLeaf{Expression: c.Expression, Operator: c.Operator, Value: c.Value, Enabled: c.Enabled}
+}
+
+func (c FlowCheck) MarshalYAML() (any, error) {
+	return c.written(), nil
+}
+
+func (c FlowCheck) MarshalJSON() ([]byte, error) {
+	return json.Marshal(c.written())
 }
 
 type FlowVariable struct {

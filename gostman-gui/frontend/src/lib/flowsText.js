@@ -45,6 +45,7 @@ const text = messages('flows', english, (t) => {
       inputPastEnd: (name, count) => t('flowEngine.inputPastEnd', { name, count }),
       inGroup: (match, name) => t(match === 'any' ? 'flowEngine.inAnyGroup' : 'flowEngine.inAllGroup', { name }),
       notOfType: (name, type, value) => t('flowEngine.notOfType', { name, type, value }),
+      variablesLoop: (names) => t('flowEngine.variablesLoop', { names: formatList(names) }),
       outputFailed: (name, message) => t('flowEngine.outputFailed', { name, message }),
       intoBranch: (field, target) => t('flowEngine.intoBranch', { field, target }),
       branchInputs: (title, message) => t('flowEngine.branchInputs', { title, message }),

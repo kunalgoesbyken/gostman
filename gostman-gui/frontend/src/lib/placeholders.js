@@ -44,4 +44,4 @@ export const fillPlaceholders = (text, valueOf) => fill(text, valueOf, [], { spe
 
 export const substitutePlaceholders = (text, variables) => fillPlaceholders(text, (name) => variables.get(name))
 
-export const placeholderNames = (text) => Array.from(text.matchAll(PLACEHOLDER), ([, name]) => name.trim())
+export const placeholderNames = (text) => Array.from(text.matchAll(new RegExp(PLACEHOLDER)), ([, name]) => name.trim())

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/runner/sandbox"
 	"github.com/kunalgoesbyken/gostman/workspace"
 )
 
@@ -190,6 +191,12 @@ type flowRun struct {
 	timeline   []flowMoment
 	owner      *flowRun
 	concurrent bool
+	held       *[]flowNote
+}
+
+type flowNote struct {
+	event  *FlowEvent
+	result *Result
 }
 
 func (s *Session) RunFlow(ctx context.Context, stored Collection, flow workspace.Flow, options Options, watch FlowWatch) (Report, error) {
@@ -197,6 +204,7 @@ func (s *Session) RunFlow(ctx context.Context, stored Collection, flow workspace
 	if err != nil {
 		return Report{}, err
 	}
+	sandbox.Warm()
 	run := newFlowRun(s.state, stored.Flows, flow, planned, options, watch)
 	started := time.Now()
 	first, err := run.call("flowBegin", run.flow, run.context())
@@ -319,6 +327,10 @@ func (r *flowRun) measure(moment flowMoment, began time.Time) {
 }
 
 func (r *flowRun) notify(event FlowEvent) {
+	if r.held != nil {
+		*r.held = append(*r.held, flowNote{event: &event})
+		return
+	}
 	if r.watch.Step == nil {
 		return
 	}
@@ -329,7 +341,7 @@ func (r *flowRun) notify(event FlowEvent) {
 
 func (r *flowRun) child(called workspace.Flow, given map[string]string, sendsLeft *int) *flowRun {
 	return &flowRun{
-		flowShared: r.flowShared, flow: called, depth: r.depth + 1, given: given, sendsLeft: sendsLeft, owner: r.home(), concurrent: r.concurrent,
+		flowShared: r.flowShared, flow: called, depth: r.depth + 1, given: given, sendsLeft: sendsLeft, owner: r.home(), concurrent: r.concurrent, held: r.held,
 		nested: map[string]*FlowEvent{}, pending: map[string]*Result{},
 	}
 }
@@ -504,6 +516,10 @@ func (r *flowRun) flush(message string) {
 }
 
 func (r *flowRun) record(result Result) {
+	if r.held != nil {
+		*r.held = append(*r.held, flowNote{result: &result})
+		return
+	}
 	r.ledger.mu.Lock()
 	defer r.ledger.mu.Unlock()
 	r.ledger.results = append(r.ledger.results, result)

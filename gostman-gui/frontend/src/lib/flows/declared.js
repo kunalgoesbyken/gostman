@@ -1,4 +1,6 @@
 import { isPlainObject, parseJSON } from '../dataUtils'
+import { placeholderNames } from '../placeholders'
+import { parseExact, stringifyExact } from './exactJson'
 
 export const TYPE_STRING = 'string'
 export const TYPE_NUMBER = 'number'
@@ -27,7 +29,7 @@ export function normalizeDeclared(raw) {
 
 function parsedJson(written) {
   try {
-    return { ok: true, text: JSON.stringify(JSON.parse(written)) }
+    return { ok: true, text: stringifyExact(parseExact(written)) }
   } catch {
     return { ok: false }
   }
@@ -56,6 +58,21 @@ export const coerce = (written, type) => (COERCE[type] ? COERCE[type](text(writt
 export const namedDeclared = (flow) => (flow.variables || []).filter((declared) => declared.name !== '')
 
 export const declaredTypes = (flow) => Object.fromEntries(namedDeclared(flow).map((declared) => [declared.name, declared.type]))
+
+export function declarationOrder(declared, isFixed) {
+  const waiting = new Map(declared.map((entry) => [entry.name, entry]))
+  const waitsFor = (entry) => !isFixed(entry) && placeholderNames(entry.value).some((name) => name !== entry.name && waiting.has(name))
+  const order = []
+  while (waiting.size > 0) {
+    const ready = [...waiting.values()].filter((entry) => !waitsFor(entry))
+    if (ready.length === 0) return { order, looped: [...waiting.keys()] }
+    for (const entry of ready) {
+      order.push(entry)
+      waiting.delete(entry.name)
+    }
+  }
+  return { order, looped: [] }
+}
 
 export const flowInputs = (flow) => namedDeclared(flow).filter((declared) => declared.input)
 

@@ -1,6 +1,6 @@
 import { FLOW_ENGINE_TEXT as TEXT } from '../flowsText'
 import { hasActiveCondition } from './conditions'
-import { TYPE_STRING, coerce, declaredTypes, namedDeclared, typedValue } from './declared'
+import { TYPE_STRING, coerce, declarationOrder, declaredTypes, namedDeclared } from './declared'
 import {
   BRANCH_CANCELLED, BRANCH_FAILED, BRANCH_PASSED, BRANCH_RUNNING, CONDITION_VARIABLES, ELAPSED_FACT, END_TARGET, MAX_SENDS_CAP,
   OUTCOME_FAILED, OUTCOME_PASSED, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_PARALLEL, STEP_REPEAT,
@@ -279,7 +279,7 @@ function typedInput(turn, input) {
   const name = input.target === INPUT_BODY && typeof input.value === 'string' ? soleName(input.value) : ''
   const type = turn.types[name]
   if (!name || !type || type === TYPE_STRING || !Object.hasOwn(turn.state.locals, name)) return input
-  return { ...input, value: typedValue(turn.state.locals[name], type) }
+  return { ...input, value: turn.state.locals[name], exact: true }
 }
 
 const fillInputs = (turn, step) => resolveInputs(step.inputs.map((input) => typedInput(turn, input)), readInput(turn))
@@ -684,13 +684,15 @@ const AFTER_ACTION = {
 }
 
 function declare(turn) {
-  const problems = []
-  for (const declared of namedDeclared(turn.flow)) {
-    const isSupplied = declared.input === true && Object.hasOwn(turn.given, declared.name)
-    if (declared.required && (!isSupplied || asText(turn.given[declared.name]).trim() === '')) {
+  const isSupplied = (declared) => declared.input === true && Object.hasOwn(turn.given, declared.name)
+  const { order, looped } = declarationOrder(namedDeclared(turn.flow), isSupplied)
+  const problems = looped.length > 0 ? [TEXT.variablesLoop(looped)] : []
+  for (const declared of order) {
+    const supplied = isSupplied(declared)
+    if (declared.required && (!supplied || asText(turn.given[declared.name]).trim() === '')) {
       problems.push(TEXT.inputMissing(declared.name))
     } else {
-      const written = isSupplied ? asText(turn.given[declared.name]) : fillTemplate(declared.value, variablesOf(turn))
+      const written = supplied ? asText(turn.given[declared.name]) : fillTemplate(declared.value, variablesOf(turn))
       const typed = coerce(written, declared.type)
       if (typed.ok) turn.state.locals[declared.name] = typed.text
       else problems.push(TEXT.notOfType(declared.name, typeWord(declared.type), written))

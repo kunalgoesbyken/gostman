@@ -37,7 +37,14 @@ type Sandbox struct {
 }
 
 func New() (*Sandbox, error) {
-	shared, err := boot()
+	return around(boot())
+}
+
+func Spare() (*Sandbox, error) {
+	return around(spares.take())
+}
+
+func around(shared *machine, err error) (*Sandbox, error) {
 	if err != nil {
 		return nil, err
 	}

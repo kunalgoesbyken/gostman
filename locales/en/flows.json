@@ -150,6 +150,7 @@
     "inputMissing": "This flow needs a value for {{name}}. Give it in the Run flow step, with --var name=value, or in the active environment.",
     "noVariableName": "A flow variable has no name. Name it, or remove the row.",
     "variableTwice": "Two flow variables are called {{name}}. Rename or remove one.",
+    "variablesLoop": "The starting values of {{names}} refer to each other, so none of them can be worked out. Give one of them a value that does not use the others.",
     "loopHidesVariable": "{{name}} is also a flow variable, so the loop cannot use that name. Rename one of them.",
     "groupsTooDeep": "Groups go at most {{levels}} levels deep. Move the deepest conditions up a level.",
     "emptyParallel": "Add the requests or flows to run inside Parallel.",
