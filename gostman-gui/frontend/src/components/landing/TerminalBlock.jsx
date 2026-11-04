@@ -33,7 +33,7 @@ function CopyControl({ text, label, className }) {
 
 function CommandLine({ line, style }) {
   return (
-    <span style={style} className="-mx-2 my-1 flex items-center gap-2 rounded-md bg-muted/30 py-1 pl-2 pr-1 text-foreground">
+    <span style={style} className="my-0.5 flex items-center gap-2 text-foreground">
       <span aria-hidden="true" className="select-none text-muted-foreground">$</span>
       <span className="min-w-0 flex-1 whitespace-pre-wrap break-words">{line.copy}</span>
       <CopyControl text={line.copy} label="Copy command" />

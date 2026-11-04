@@ -88,11 +88,11 @@ function StageTab({ stage, index, fill, isActive, idOf, onSelect }) {
       tabIndex={isActive ? 0 : -1}
       onClick={onSelect}
       style={{ "--fill": fill }}
-      className="group relative flex-1 border-border/60 px-4 py-4 text-start transition-colors hover:bg-muted/20 active:bg-muted/30 [&:not(:last-child)]:border-e lg:flex-none lg:px-6 lg:py-6 lg:[&:not(:last-child)]:border-b lg:[&:not(:last-child)]:border-e-0"
+      className="group relative flex flex-1 flex-col pb-4 pe-3 text-start lg:flex-none lg:py-5 lg:pe-0 lg:ps-6"
     >
       <span
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-px origin-left scale-x-[var(--fill)] bg-primary lg:inset-x-auto lg:inset-y-0 lg:start-0 lg:h-auto lg:w-px lg:origin-top lg:scale-x-100 lg:scale-y-[var(--fill)]"
+        className="absolute inset-x-0 -bottom-px h-px origin-left scale-x-[var(--fill)] bg-primary lg:inset-x-auto lg:inset-y-0 lg:-start-px lg:h-auto lg:w-px lg:origin-top lg:scale-x-100 lg:scale-y-[var(--fill)]"
       />
       <span className={cn("block font-mono text-xs", isActive ? "text-primary" : "text-muted-foreground/70")}>{ordinal(index)}</span>
       <span className={cn("mt-1.5 block text-sm font-medium sm:text-base", isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground")}>
@@ -126,12 +126,12 @@ export function ShipStages() {
             Requests live in one tool, tests in another, and CI runs a copy of both. The copy is the one that drifts.
           </p>
         </div>
-        <div className="reveal-on-scroll mt-8 grid overflow-hidden rounded-xl border border-border/60 bg-muted/10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        <div className="reveal-on-scroll mt-10 grid gap-6 lg:grid-cols-[minmax(0,4fr)_minmax(0,7fr)] lg:gap-12">
           <div
             role="tablist"
             aria-label="Where the checks run"
             onKeyDown={(event) => moveFocus(event, STAGE_KEYS)}
-            className="flex border-b border-border/60 lg:flex-col lg:border-b-0 lg:border-e"
+            className="flex self-start border-b border-border/60 lg:flex-col lg:border-b-0 lg:border-s"
           >
             {STAGES.map((stage, index) => (
               <StageTab
@@ -145,8 +145,8 @@ export function ShipStages() {
               />
             ))}
           </div>
-          <p className="px-4 pt-4 text-sm leading-relaxed text-muted-foreground lg:hidden">{STAGES[activeIndex].description}</p>
-          <div className="grid min-w-0 p-3 sm:p-4">
+          <p className="text-sm leading-relaxed text-muted-foreground lg:hidden">{STAGES[activeIndex].description}</p>
+          <div className="grid min-w-0">
             {STAGES.map((stage, index) => (
               <div
                 key={stage.id}
