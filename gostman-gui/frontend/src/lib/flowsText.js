@@ -43,6 +43,15 @@ const text = messages('flows', english, (t) => {
       waited: (milliseconds) => t('flowEngine.waited', { duration: t('flowEngine.milliseconds', { value: milliseconds }) }),
       inputBodyNotJson: (name) => t('flowEngine.inputBodyNotJson', { name, example: braced('variables') }),
       inputPastEnd: (name, count) => t('flowEngine.inputPastEnd', { name, count }),
+      inGroup: (match, name) => t(match === 'any' ? 'flowEngine.inAnyGroup' : 'flowEngine.inAllGroup', { name }),
+      notOfType: (name, type, value) => t('flowEngine.notOfType', { name, type, value }),
+      outputFailed: (name, message) => t('flowEngine.outputFailed', { name, message }),
+      intoBranch: (field, target) => t('flowEngine.intoBranch', { field, target }),
+      branchInputs: (title, message) => t('flowEngine.branchInputs', { title, message }),
+      branchFact: (title, timing) => t('flowEngine.branchFact', { title, timing }),
+      branchTook: (state, duration) => t('flowEngine.branchTook', { state, duration }),
+      parallelPassed: (passed, count, duration) => t('flowEngine.parallelPassed', { passed, count, duration }),
+      parallelFailed: (passed, count) => t('flowEngine.parallelFailed', { passed, count }),
     },
     flowCanvas: {
       stepLabel: (position, count, kind, title, state) => (
@@ -63,6 +72,7 @@ const text = messages('flows', english, (t) => {
         delayMs > 0 ? t('flowCanvas.passesApart', { count: times, delay: duration(delayMs) }) : t('flowCanvas.passes', { count: times })
       ),
       wait: (milliseconds) => t('flowCanvas.wait', { duration: duration(milliseconds) }),
+      timeout: (milliseconds) => t('flowCanvas.timeout', { duration: duration(milliseconds) }),
       toEnd: (label) => t('flowCanvas.toEnd', { label }),
       attempt: (attempt, attempts) => t('flowCanvas.attempt', { attempt, attempts }),
     },
@@ -81,6 +91,8 @@ const text = messages('flows', english, (t) => {
       get flowVariablesHint() {
         return t('flowEditor.flowVariablesHint', { variables: braced('variables') })
       },
+      givesBack: (names) => t('flowEditor.givesBack', { names: formatList(names, 'unit') }),
+      factsHint: (states) => t('flowEditor.factsHint', { states: formatList(states, 'disjunction') }),
     },
     flowImport: {
       missingFlowsNamed: (name, flows) => t('flowImport.missingFlowsNamed', { name, flows: formatList(flows.map((flow) => `"${flow}"`)), count: flows.length }),

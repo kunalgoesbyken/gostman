@@ -38,6 +38,10 @@
     },
     "unknown": {
       "label": "Unknown step"
+    },
+    "parallel": {
+      "label": "Parallel",
+      "description": "Send several requests or run several flows at the same time."
     }
   },
   "flowField": {
@@ -77,11 +81,11 @@
     "nothingFound": "Nothing was found at {{path}} in the response of {{title}}.",
     "noHeader": "The response of {{title}} has no {{name}} header.",
     "notAList": "{{path}} in the response of {{title}} is not a list.",
-    "budget_one": "The flow sent {{count}} request, its limit, and was stopped. Give loops a way to end, or raise the limit in the flow settings (at most {{cap}}).",
-    "budget_other": "The flow sent {{count}} requests, its limit, and was stopped. Give loops a way to end, or raise the limit in the flow settings (at most {{cap}}).",
-    "budgetOf_one": "The flow \"{{name}}\" sent {{count}} request, its limit, so the run was stopped. Give its loops a way to end, or raise the limit in the settings of \"{{name}}\" (at most {{cap}}).",
-    "budgetOf_other": "The flow \"{{name}}\" sent {{count}} requests, its limit, so the run was stopped. Give its loops a way to end, or raise the limit in the settings of \"{{name}}\" (at most {{cap}}).",
-    "budgetAbove": "The run reached the request limit of a flow that runs this one, so it was stopped.",
+    "budget_one": "The flow reached its limit of {{count}} request and was stopped. Give loops a way to end, or raise the limit in the flow settings (at most {{cap}}).",
+    "budget_other": "The flow reached its limit of {{count}} requests and was stopped. Give loops a way to end, or raise the limit in the flow settings (at most {{cap}}).",
+    "budgetOf_one": "The flow \"{{name}}\" reached its limit of {{count}} request, so the run was stopped. Give its loops a way to end, or raise the limit in the settings of \"{{name}}\" (at most {{cap}}).",
+    "budgetOf_other": "The flow \"{{name}}\" reached its limit of {{count}} requests, so the run was stopped. Give its loops a way to end, or raise the limit in the settings of \"{{name}}\" (at most {{cap}}).",
+        "budgetAbove": "The run reached the request limit of a flow that runs this one, so it was stopped.",
     "endless_one": "The flow went through {{count}} step without sending a request and was stopped. Check where its steps go next.",
     "endless_other": "The flow went through {{count}} steps without sending a request and was stopped. Check where its steps go next.",
     "timedOut": "Choosing the next step took longer than {{seconds}} s, so the flow was stopped.",
@@ -132,7 +136,46 @@
     "inputNotForm": "\"{{name}}\" sets a form field, but the request's body is not a form.",
     "inputBodyNotJson": "The request's body is not valid JSON, so \"{{name}}\" could not be set in it. Put quotes around {{example}} in the body, or set the value here instead.",
     "inputPastEnd_one": "\"{{name}}\" points past the end of a list of {{count}} item.",
-    "inputPastEnd_other": "\"{{name}}\" points past the end of a list of {{count}} items."
+    "inputPastEnd_other": "\"{{name}}\" points past the end of a list of {{count}} items.",
+    "inAllGroup": "all of: {{name}}",
+    "inAnyGroup": "any of: {{name}}",
+    "typeNames": {
+      "string": "text",
+      "number": "a number",
+      "boolean": "true or false",
+      "json": "JSON"
+    },
+    "notOfType": "{{name}} should be {{type}}, but got \"{{value}}\". Change the value, or the type of {{name}} in the flow settings.",
+    "outputFailed": "The flow passed, but its output {{name}} could not be filled in: {{message}}",
+    "inputMissing": "This flow needs a value for {{name}}. Give it in the Run flow step, with --var name=value, or in the active environment.",
+    "noVariableName": "A flow variable has no name. Name it, or remove the row.",
+    "variableTwice": "Two flow variables are called {{name}}. Rename or remove one.",
+    "loopHidesVariable": "{{name}} is also a flow variable, so the loop cannot use that name. Rename one of them.",
+    "groupsTooDeep": "Groups go at most {{levels}} levels deep. Move the deepest conditions up a level.",
+    "emptyParallel": "Add the requests or flows to run inside Parallel.",
+    "branchKind": "Only Send request and Run flow steps can run inside Parallel.",
+    "branchJump": "A step inside Parallel cannot go to another step; set the paths on the Parallel step.",
+    "branchRetry": "A step inside Parallel is sent once; to try it again, put it in a flow and run that flow here.",
+    "siblingBranch": "\"{{target}}\" runs at the same time as this step, so its response cannot be used here.",
+    "intoBranch": "{{field}} \"{{target}}\", a step inside a Parallel. Go to the Parallel step instead.",
+    "branchInputs": "{{title}}: {{message}}",
+    "branchStates": {
+      "running": "still running",
+      "passed": "passed",
+      "failed": "failed",
+      "cancelled": "stopped"
+    },
+    "branchFact": "{{title}} {{timing}}",
+    "branchTook": "{{state}} in {{duration}}",
+    "branchPassed": "Passed.",
+    "branchFailed": "Failed.",
+    "branchCancelled": "Stopped, because the Parallel step was already done.",
+    "branchTimedOut": "Stopped, because the Parallel step ran out of time.",
+    "parallelPassed_one": "{{passed}} of {{count}} passed; done in {{duration}}.",
+    "parallelPassed_other": "{{passed}} of {{count}} passed; done in {{duration}}.",
+    "parallelFailed_one": "{{passed}} of {{count}} passed, but Done when never became true.",
+    "parallelFailed_other": "{{passed}} of {{count}} passed, but Done when never became true.",
+    "parallelTimedOut": "Still not done after {{duration}}, so the steps still running were stopped."
   },
   "flowImport": {
     "missingRequests": "Steps of the flow \"{{name}}\" send requests that are not in the import; choose them again before running it.",
@@ -281,7 +324,17 @@
     "fit": "Fit the flow in view",
     "showHidden_one": "Show {{count}} hidden step",
     "showHidden_other": "Show {{count}} hidden steps",
-    "actualSize": "Zoom to 100%"
+    "actualSize": "Zoom to 100%",
+    "joiners": {
+      "all": "and",
+      "any": "or"
+    },
+    "parallelBody": "Run at the same time",
+    "together_one": "Runs {{count}} branch",
+    "together_other": "Runs {{count}} branches at the same time",
+    "doneWhen": "done when {{condition}}",
+    "doneWhenAll": "done when all passed",
+    "timeout": "stops after {{duration}}"
   },
   "flowPicker": {
     "title": "Choose a request",
@@ -293,7 +346,8 @@
     "flowSearch": "Search saved flows",
     "noFlowMatch": "No saved flow matches",
     "noFlows": "No other flows yet",
-    "noFlowsHint": "Save another flow first; this step runs a saved flow."
+    "noFlowsHint": "Save another flow first; this step runs a saved flow.",
+    "noCollection": "Not in a collection"
   },
   "flowEditor": {
     "label": "Label",
@@ -403,7 +457,39 @@
     "messagePlaceholder": "Shown in the run summary",
     "sendScope": "Used by this send only, then removed.",
     "sessionScope": "Kept for the rest of the run.",
-    "loopScope": "Available to the steps inside this loop."
+    "loopScope": "Available to the steps inside this loop.",
+    "groupTitle": "Group",
+    "addGroup": "Add group",
+    "removeGroup": "Remove group",
+    "reads": "Reads as:",
+    "typeLabels": {
+      "string": "Text",
+      "number": "Number",
+      "boolean": "True or false",
+      "json": "JSON"
+    },
+    "required": "required",
+    "requiredPlaceholder": "Required",
+    "defaultPlaceholder": "Leave empty for its default",
+    "flowInputs": "Inputs of the flow",
+    "otherVariables": "Other variables for this run",
+    "givesBack": "Gives back {{names}} when it passes.",
+    "branchNote": "Steps inside Parallel run once, at the same time as the others. The Parallel step decides where the flow goes next.",
+    "branches": "Branches",
+    "branchesHint_one": "{{count}} request or flow runs inside. Add more with + in the frame.",
+    "branchesHint_other": "{{count}} requests or flows run at the same time. Add more with + in the frame.",
+    "timeout": "Stop after (ms)",
+    "timeoutHint": "0 waits as long as it takes. When the time is up, the branches still running are stopped.",
+    "doneWhen": "Done when",
+    "doneWhenEmpty": "Without a condition, the step waits for every branch and passes when they all passed.",
+    "factsHint": "Each branch name holds {{states}}; add .status for its HTTP status and .ms for its time.",
+    "branchStateWords": {
+      "passed": "passed",
+      "failed": "failed",
+      "cancelled": "cancelled",
+      "running": "running"
+    },
+    "whenParallelFails": "When it is not done, go to"
   },
   "flowView": {
     "start": "Start",
@@ -430,7 +516,22 @@
     "dockPanel": "Dock the panel",
     "showSettings": "Flow settings",
     "closePanel": "Close the panel",
-    "panelTitle": "Step and run"
+    "panelTitle": "Step and run",
+    "variablesTitle": "Variables",
+    "variablesHint": "Flow variables live for one run: every step can read them, Set variables changes them, and they are gone when the run ends. Mark one as an input to let a Run flow step, --var or the environment give its value.",
+    "variableType": "Type",
+    "initialValue": "Starting value",
+    "initialPlaceholders": {
+      "string": "Starting value",
+      "number": "0",
+      "boolean": "true or false",
+      "json": "{\"key\": \"value\"}"
+    },
+    "isInput": "Input",
+    "isRequired": "Required",
+    "outputsTitle": "Outputs",
+    "outputsHint": "Values this flow gives back when it passes. A Run flow step puts them in its own variables; a run from here keeps them in the session.",
+    "cliTitle": "Command line"
   },
   "flowRun": {
     "idle": "Not run yet",
@@ -447,7 +548,13 @@
     "report": "Report",
     "resultsLabel": "Steps that ran",
     "wrote": "Set",
-    "hidden": "hidden"
+    "hidden": "hidden",
+    "truthTable": "Conditions checked",
+    "checkTrue": "True",
+    "checkFalse": "False",
+    "variables": "Variables",
+    "outputs": "Outputs",
+    "sessionValue": "session"
   },
   "flowMetrics": {
     "title": "Metrics",

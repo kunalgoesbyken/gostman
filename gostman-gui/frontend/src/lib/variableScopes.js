@@ -143,6 +143,7 @@ export function scopeLayers(state, request, referenced = {}) {
     ...folderLayers(state.folders, request?.folderId),
     rowsLayer(request?.vars),
     sessionLayer(state.sessionVariables),
+    ...(request?.flowGiven ? [sessionLayer(request.flowGiven)] : []),
   ]
 }
 

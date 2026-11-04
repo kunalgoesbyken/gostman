@@ -1,7 +1,8 @@
 import { FLOW_CANVAS_TEXT as TEXT } from '../flowsText'
 import { isActiveAssertion, titleOf } from '../scripting/assertions'
+import { activeLeaves, hasActiveCondition, hasGroups, isGroup } from './conditions'
 import {
-  CONDITION_VARIABLES, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_REPEAT, STEP_REQUEST, STEP_SET,
+  CONDITION_VARIABLES, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_PARALLEL, STEP_REPEAT, STEP_REQUEST, STEP_SET,
   STEP_SWITCH, casePosition, isCaseField,
 } from './model'
 import { sendRows } from './inputs'
@@ -16,9 +17,20 @@ export const TONE_MUTED = 'muted'
 const FIELD_TONES = { onFailure: TONE_FAILURE, then: TONE_SUCCESS }
 
 const firstAndMore = (conditions) => {
-  const active = conditions.filter(isActiveAssertion)
+  const active = activeLeaves(conditions)
   return active.length > 0 ? { first: titleOf(active[0]), more: active.length - 1 } : null
 }
+
+function formulaParts(conditions) {
+  return conditions.flatMap((item) => {
+    if (!isGroup(item)) return isActiveAssertion(item) ? [titleOf(item)] : []
+    if (!hasActiveCondition(item.conditions)) return []
+    const inner = formulaParts(item.conditions)
+    return [inner.length > 1 ? `(${inner.join(` ${TEXT.joiners[item.match]} `)})` : inner[0]]
+  })
+}
+
+export const conditionFormula = (match, conditions) => formulaParts(conditions).join(` ${TEXT.joiners[match]} `)
 
 const isFilledValue = (value) => [value.name, value.step, value.value, value.path].some(Boolean)
 
@@ -27,7 +39,7 @@ const referenceTitle = (index, id, requests) => (index.get(id) ? stepTitle(index
 const conditionText = (step, conditions, match) => {
   const condition = firstAndMore(conditions)
   if (!condition) return null
-  const described = TEXT.condition(condition.first, condition.more, match)
+  const described = hasGroups(conditions) ? conditionFormula(match, conditions) : TEXT.condition(condition.first, condition.more, match)
   return step.source === CONDITION_VARIABLES ? TEXT.variablesCondition(described) : described
 }
 
@@ -76,6 +88,14 @@ const LINES = {
     step.flow ? { text: TEXT.runsFlow(step.flow) } : { text: TEXT.noFlow, muted: true },
     ...Object.keys(step.variables).map((name) => ({ text: TEXT.sets(name, step.variables[name]), mono: true, scope: SOURCE_CALL })),
   ],
+  [STEP_PARALLEL]: (step) => {
+    const until = hasActiveCondition(step.until) ? conditionFormula(step.match, step.until) : ''
+    return [
+      { text: TEXT.together(step.steps.length) },
+      until ? { text: TEXT.doneWhen(until), mono: true } : { text: TEXT.doneWhenAll, muted: true },
+      ...(step.timeoutMs > 0 ? [{ text: TEXT.timeout(step.timeoutMs) }] : []),
+    ]
+  },
   [STEP_DELAY]: (step) => [{ text: TEXT.wait(step.ms) }],
   [STEP_END]: (step) => [{ text: TEXT.outcomes[step.outcome] }, ...(step.message ? [{ text: step.message, muted: true }] : [])],
 }

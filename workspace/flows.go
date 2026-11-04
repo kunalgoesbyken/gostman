@@ -19,13 +19,23 @@ const (
 	flowIdPrefix     = "flow-"
 )
 
-var flowKeys = map[string]bool{"id": true, "name": true, "description": true, "maxSends": true, "steps": true}
+var flowKeys = map[string]bool{"id": true, "name": true, "description": true, "maxSends": true, "variables": true, "outputs": true, "steps": true}
 
 type FlowCheck struct {
-	Expression string `json:"expression" yaml:"expression"`
-	Operator   string `json:"operator,omitempty" yaml:"operator,omitempty"`
-	Value      string `json:"value,omitempty" yaml:"value,omitempty"`
-	Enabled    *bool  `json:"enabled,omitempty" yaml:"enabled,omitempty"`
+	Expression string      `json:"expression,omitempty" yaml:"expression,omitempty"`
+	Operator   string      `json:"operator,omitempty" yaml:"operator,omitempty"`
+	Value      string      `json:"value,omitempty" yaml:"value,omitempty"`
+	Enabled    *bool       `json:"enabled,omitempty" yaml:"enabled,omitempty"`
+	Match      string      `json:"match,omitempty" yaml:"match,omitempty"`
+	Conditions []FlowCheck `json:"conditions,omitempty" yaml:"conditions,omitempty"`
+}
+
+type FlowVariable struct {
+	Name     string `json:"name" yaml:"name"`
+	Type     string `json:"type,omitempty" yaml:"type,omitempty"`
+	Value    string `json:"value,omitempty" yaml:"value,omitempty"`
+	Input    bool   `json:"input,omitempty" yaml:"input,omitempty"`
+	Required bool   `json:"required,omitempty" yaml:"required,omitempty"`
 }
 
 type FlowRetry struct {
@@ -83,6 +93,7 @@ type FlowStep struct {
 	Conditions []FlowCheck       `json:"conditions,omitempty" yaml:"conditions,omitempty"`
 	Until      []FlowCheck       `json:"until,omitempty" yaml:"until,omitempty"`
 	Cases      []FlowCase        `json:"cases,omitempty" yaml:"cases,omitempty"`
+	TimeoutMs  int64             `json:"timeoutMs,omitempty" yaml:"timeoutMs,omitempty"`
 	Then       string            `json:"then,omitempty" yaml:"then,omitempty"`
 	Else       string            `json:"else,omitempty" yaml:"else,omitempty"`
 	Steps      []FlowStep        `json:"steps,omitempty" yaml:"steps,omitempty"`
@@ -93,11 +104,13 @@ type FlowStep struct {
 }
 
 type Flow struct {
-	Id          string     `json:"id" yaml:"id"`
-	Name        string     `json:"name" yaml:"name"`
-	Description string     `json:"description,omitempty" yaml:"description,omitempty"`
-	MaxSends    int        `json:"maxSends,omitempty" yaml:"maxSends,omitempty"`
-	Steps       []FlowStep `json:"steps" yaml:"steps"`
+	Id          string         `json:"id" yaml:"id"`
+	Name        string         `json:"name" yaml:"name"`
+	Description string         `json:"description,omitempty" yaml:"description,omitempty"`
+	MaxSends    int            `json:"maxSends,omitempty" yaml:"maxSends,omitempty"`
+	Variables   []FlowVariable `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Outputs     []FlowValue    `json:"outputs,omitempty" yaml:"outputs,omitempty"`
+	Steps       []FlowStep     `json:"steps" yaml:"steps"`
 }
 
 type flowEntry struct {

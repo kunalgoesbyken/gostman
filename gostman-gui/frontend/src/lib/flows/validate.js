@@ -1,9 +1,10 @@
 import { FLOW_ENGINE_TEXT as TEXT, FLOW_FIELD_TEXT, FLOW_KIND_TEXT } from '../flowsText'
-import { isActiveAssertion } from '../scripting/assertions'
+import { MAX_GROUP_DEPTH, groupDepth, hasActiveCondition } from './conditions'
+import { coerce } from './declared'
 import { INPUT_BODY, INPUT_FORM, INPUT_TARGETS, acceptsBody, acceptsForm, bodyPath } from './inputs'
 import {
-  CONDITION_RESPONSE, END_TARGET, MAX_FLOW_DEPTH, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_KINDS, STEP_REPEAT, STEP_REQUEST, STEP_SET,
-  STEP_SWITCH, casePosition, indexSteps, isCaseField, loopsAround, normalizeFlow, targetsOf, walkSteps,
+  BRANCH_KINDS, CONDITION_RESPONSE, END_TARGET, MAX_FLOW_DEPTH, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_KINDS, STEP_PARALLEL, STEP_REPEAT,
+  STEP_REQUEST, STEP_SET, STEP_SWITCH, casePosition, indexSteps, isBranch, isCaseField, loopsAround, normalizeFlow, targetsOf, walkSteps,
 } from './model'
 
 const PATH_SEPARATOR = '/'
@@ -64,7 +65,8 @@ function targetProblems(index, step) {
     if (target === END_TARGET) return []
     if (!index.has(target)) return [TEXT.unknownTarget(fieldText(step, field), target)]
     const isReachable = loopsAround(index, target).every((loop) => around.includes(loop))
-    return isReachable ? [] : [TEXT.intoLoop(fieldText(step, field), target)]
+    if (isReachable) return []
+    return isBranch(index, target) ? [TEXT.intoBranch(fieldText(step, field), target)] : [TEXT.intoLoop(fieldText(step, field), target)]
   })
 }
 
@@ -72,7 +74,7 @@ const referenceProblem = (index, id) => (id && !isRequestStep(index, id) ? [TEXT
 
 const responseReference = (step, index) => (step.source === CONDITION_RESPONSE ? referenceProblem(index, step.step) : [])
 
-const hasConditions = (conditions) => conditions.some(isActiveAssertion)
+const hasConditions = hasActiveCondition
 
 function valueProblems(index, value) {
   if (value.name === '') return [TEXT.noName]
@@ -121,6 +123,8 @@ function requestProblems(step, requests) {
 
 const runsBefore = (order, from, step) => order.indexOf(from) < order.indexOf(step)
 
+const isSibling = (index, first, second) => isBranch(index, first) && index.get(first).parent === index.get(second)?.parent
+
 function placeProblems(input, request) {
   if (input.target === INPUT_BODY && !bodyPath(input.name)) return [TEXT.inputBadPath(input.name)]
   if (!request) return []
@@ -135,6 +139,7 @@ function inputProblems(step, index, request, order) {
     const own = valueProblems(index, input)
     if (own.length > 0) return own
     if (input.step && !runsBefore(order, input.step, step.id)) return [TEXT.notEarlierStep(input.step)]
+    if (input.step && isSibling(index, input.step, step.id)) return [TEXT.siblingBranch(input.step)]
     return placeProblems(input, request)
   })
 }
@@ -163,12 +168,51 @@ const KIND_PROBLEMS = {
     ...(hasConditions(step.until) ? responseReference(step, index) : []),
   ],
   [STEP_FLOW]: flowProblems,
+  [STEP_PARALLEL]: (step) => (step.steps.length > 0 ? [] : [TEXT.emptyParallel]),
+}
+
+const hasRetry = (step) => step.kind === STEP_REQUEST && (step.retry.times > 1 || hasConditions(step.retry.until))
+
+function branchProblems(step, scope) {
+  if (!isBranch(scope.index, step.id)) return []
+  if (!BRANCH_KINDS.includes(step.kind)) return [TEXT.branchKind]
+  return [
+    ...(targetsOf(step).length > 0 ? [TEXT.branchJump] : []),
+    ...(hasRetry(step) ? [TEXT.branchRetry] : []),
+  ]
 }
 
 function stepProblems(step, scope) {
   if (!STEP_KINDS.includes(step.kind)) return [TEXT.unknownKind(step.kind)]
   const own = KIND_PROBLEMS[step.kind]?.(step, scope) ?? []
-  return [...own, ...targetProblems(scope.index, step)]
+  const branch = branchProblems(step, scope)
+  return [...own, ...branch, ...(branch.length > 0 ? [] : targetProblems(scope.index, step))]
+}
+
+const hasPlaceholder = (template) => template.includes('{{')
+
+function declaredProblems(flow) {
+  const seen = new Set()
+  return flow.variables.flatMap((declared) => {
+    if (declared.name === '') return [TEXT.noVariableName]
+    if (seen.has(declared.name)) return [TEXT.variableTwice(declared.name)]
+    seen.add(declared.name)
+    if (declared.required || hasPlaceholder(declared.value) || coerce(declared.value, declared.type).ok) return []
+    return [TEXT.notOfType(declared.name, TEXT.typeNames[declared.type], declared.value)]
+  })
+}
+
+const outputProblems = (flow, index) => flow.outputs.flatMap((output) => valueProblems(index, output))
+
+const conditionListsOf = (step) => [step.conditions, step.until, ...(step.cases || []).map((entry) => entry.conditions)].filter(Array.isArray)
+
+const tooDeep = (step) => conditionListsOf(step).some((conditions) => groupDepth(conditions) > MAX_GROUP_DEPTH)
+
+const loopNamesOf = (step) => [step.as, step.indexAs].filter(Boolean)
+
+function shapeProblems(step, declaredNames) {
+  const hidden = loopNamesOf(step).filter((name) => declaredNames.has(name)).map((name) => TEXT.loopHidesVariable(name))
+  return tooDeep(step) ? [...hidden, TEXT.groupsTooDeep(MAX_GROUP_DEPTH)] : hidden
 }
 
 function flowScope(flow, requests, flows) {
@@ -180,9 +224,11 @@ function flowScope(flow, requests, flows) {
 export function validateFlow(flow, requests, flows = []) {
   if (flow.steps.length === 0) return [{ step: '', message: TEXT.noSteps }]
   const scope = flowScope(flow, requests, flows)
-  const problems = []
+  const problems = [...declaredProblems(flow), ...outputProblems(flow, scope.index)].map((message) => ({ step: '', message }))
+  const declaredNames = new Set(flow.variables.map((declared) => declared.name))
   walkSteps(flow.steps, (step) => {
-    stepProblems(step, scope).forEach((message) => problems.push({ step: step.id, message }))
+    const messages = [...stepProblems(step, scope), ...shapeProblems(step, declaredNames)]
+    messages.forEach((message) => problems.push({ step: step.id, message }))
   })
   return problems
 }

@@ -1,5 +1,9 @@
 import { isPlainObject } from '../dataUtils'
-import { isActiveAssertion, normalizeAssertions } from '../scripting/assertions'
+import { normalizeAssertions } from '../scripting/assertions'
+import { MATCHES, MATCH_ALL, hasActiveCondition, normalizeConditions } from './conditions'
+import { normalizeDeclared } from './declared'
+
+export { MATCHES, MATCH_ALL, MATCH_ANY } from './conditions'
 
 export const STEP_REQUEST = 'request'
 export const STEP_SET = 'set'
@@ -10,8 +14,11 @@ export const STEP_END = 'end'
 export const STEP_SWITCH = 'switch'
 export const STEP_REPEAT = 'repeat'
 export const STEP_FLOW = 'flow'
-export const STEP_KINDS = [STEP_REQUEST, STEP_SET, STEP_IF, STEP_SWITCH, STEP_FOR_EACH, STEP_REPEAT, STEP_FLOW, STEP_DELAY, STEP_END]
-export const CONTAINER_KINDS = [STEP_FOR_EACH, STEP_REPEAT]
+export const STEP_PARALLEL = 'parallel'
+export const STEP_KINDS = [STEP_REQUEST, STEP_SET, STEP_IF, STEP_SWITCH, STEP_FOR_EACH, STEP_REPEAT, STEP_PARALLEL, STEP_FLOW, STEP_DELAY, STEP_END]
+export const LOOP_KINDS = [STEP_FOR_EACH, STEP_REPEAT]
+export const CONTAINER_KINDS = [...LOOP_KINDS, STEP_PARALLEL]
+export const BRANCH_KINDS = [STEP_REQUEST, STEP_FLOW]
 export const innerSteps = (step) => (CONTAINER_KINDS.includes(step.kind) ? step.steps : [])
 
 export const END_TARGET = 'end'
@@ -28,9 +35,12 @@ export const CONDITION_RESPONSE = 'response'
 export const CONDITION_VARIABLES = 'variables'
 export const CONDITION_SOURCES = [CONDITION_RESPONSE, CONDITION_VARIABLES]
 
-export const MATCH_ALL = 'all'
-export const MATCH_ANY = 'any'
-export const MATCHES = [MATCH_ALL, MATCH_ANY]
+export const BRANCH_RUNNING = 'running'
+export const BRANCH_PASSED = 'passed'
+export const BRANCH_FAILED = 'failed'
+export const BRANCH_CANCELLED = 'cancelled'
+export const BRANCH_STATES = [BRANCH_PASSED, BRANCH_FAILED, BRANCH_CANCELLED, BRANCH_RUNNING]
+export const ELAPSED_FACT = 'elapsedMs'
 
 export const TARGET_FIELDS = ['next', 'onFailure', 'then', 'else']
 
@@ -88,7 +98,7 @@ const valueOf = (raw) => {
 const caseOf = (raw) => ({
   label: text(raw.label),
   match: oneOf(raw.match, MATCHES, MATCH_ALL),
-  conditions: normalizeAssertions(raw.conditions),
+  conditions: normalizeConditions(raw.conditions),
   target: trimmed(raw.target),
 })
 
@@ -110,7 +120,7 @@ const FIELDS = {
     source: oneOf(raw.source, CONDITION_SOURCES, CONDITION_RESPONSE),
     step: trimmed(raw.step),
     match: oneOf(raw.match, MATCHES, MATCH_ALL),
-    conditions: normalizeAssertions(raw.conditions),
+    conditions: normalizeConditions(raw.conditions),
     then: trimmed(raw.then),
     else: trimmed(raw.else),
   }),
@@ -128,7 +138,7 @@ const FIELDS = {
     else: trimmed(raw.else),
   }),
   [STEP_REPEAT]: (raw, depth) => {
-    const until = normalizeAssertions(raw.until)
+    const until = normalizeConditions(raw.until)
     return {
       times: whole(raw.times, 1, MAX_PASSES, DEFAULT_PASSES),
       delayMs: whole(raw.delayMs, 0, MAX_DELAY_MS, 0),
@@ -137,10 +147,17 @@ const FIELDS = {
       step: trimmed(raw.step),
       match: oneOf(raw.match, MATCHES, MATCH_ALL),
       until,
-      onFailure: until.some(isActiveAssertion) ? trimmed(raw.onFailure) : '',
+      onFailure: hasActiveCondition(until) ? trimmed(raw.onFailure) : '',
       steps: innerList(raw, depth),
     }
   },
+  [STEP_PARALLEL]: (raw, depth) => ({
+    match: oneOf(raw.match, MATCHES, MATCH_ALL),
+    until: normalizeConditions(raw.until),
+    timeoutMs: whole(raw.timeoutMs, 0, MAX_DELAY_MS, 0),
+    onFailure: trimmed(raw.onFailure),
+    steps: innerList(raw, depth),
+  }),
   [STEP_FLOW]: (raw) => ({
     flow: trimmed(raw.flow),
     flowId: trimmed(raw.flowId),
@@ -214,6 +231,8 @@ export function normalizeFlow(raw) {
     name: text(flow.name),
     description: text(flow.description),
     maxSends: whole(flow.maxSends, 1, MAX_SENDS_CAP, DEFAULT_MAX_SENDS),
+    variables: listOf(flow.variables).map(normalizeDeclared),
+    outputs: listOf(flow.outputs).map(valueOf),
     steps: withUniqueIds(normalizeList(flow.steps, 0)),
   }
 }
@@ -271,6 +290,10 @@ export function retargeted(step, change) {
 }
 
 const VALUE_LISTS = ['values', 'inputs']
+
+export const isBranch = (index, id) => index.get(index.get(id)?.parent)?.step.kind === STEP_PARALLEL
+
+export const branchesOf = (step) => (step.kind === STEP_PARALLEL ? step.steps : [])
 
 const rewiredSource = (source, change) => (source.step ? { ...source, step: change(source.step) } : source)
 

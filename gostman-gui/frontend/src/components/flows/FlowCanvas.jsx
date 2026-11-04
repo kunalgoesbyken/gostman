@@ -8,7 +8,7 @@ import { FLOW_CANVAS_TEXT as TEXT, FLOW_KIND_TEXT } from "../../lib/flowsText"
 import { stepLines } from "../../lib/flows/describe"
 import { NODE_RUNNING, RUN_RUNNING } from "../../lib/flows/flowRunner"
 import { layoutFlow, travelled } from "../../lib/flows/layout"
-import { STEP_KINDS, indexSteps } from "../../lib/flows/model"
+import { BRANCH_KINDS, STEP_KINDS, STEP_PARALLEL, indexSteps } from "../../lib/flows/model"
 import { isRemoveKey } from "../../lib/shortcuts"
 import { cn } from "../../lib/utils"
 
@@ -59,7 +59,9 @@ const nodeElement = (container, id) => container?.querySelector(`[data-step-node
 
 const groupNotes = (endNotes) => endNotes.reduce((notes, { id, field }) => notes.set(id, [...(notes.get(id) || []), field]), new Map())
 
-const kindItems = (onChoose) => STEP_KINDS.map((kind) => ({ id: kind, label: FLOW_KIND_TEXT[kind].label, icon: iconOf(kind), onSelect: () => onChoose(kind) }))
+const kindsFor = (index, place) => (index.get(place?.parent)?.step.kind === STEP_PARALLEL ? BRANCH_KINDS : STEP_KINDS)
+
+const kindItems = (kinds, onChoose) => kinds.map((kind) => ({ id: kind, label: FLOW_KIND_TEXT[kind].label, icon: iconOf(kind), onSelect: () => onChoose(kind) }))
 
 function useNoteHint() {
   const [hint, setHint] = useState(null)
@@ -220,7 +222,7 @@ export function FlowCanvas({ flow, viewKey, context, run, problems, selected, on
         <ContextMenu
           position={menu.position}
           title={TEXT.chooseKind}
-          items={kindItems((kind) => onInsert(menu.place, kind))}
+          items={kindItems(kindsFor(context.index, menu.place), (kind) => onInsert(menu.place, kind))}
           onClose={() => setMenu(null)}
         />
       )}

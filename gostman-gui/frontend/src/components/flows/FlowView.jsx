@@ -1,16 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { AlertTriangle, ChevronRight, PanelRight, PictureInPicture2, Play, Redo2, Save, Settings2, Square, Undo2, Workflow, X } from "lucide-react"
+import { PanelRight, PictureInPicture2, Play, Redo2, Save, Settings2, Square, Undo2, Workflow, X } from "lucide-react"
 import { Button, IconButton } from "../ui/button"
 import { ResizeHandles, WindowGrip } from "../ui/dialog"
-import { Field } from "../ui/field"
 import { Input } from "../ui/input"
-import { PANE_WIDTH, ResizablePane, SPLIT_PANES, SectionLabel } from "../ui/panel"
+import { PANE_WIDTH, ResizablePane, SPLIT_PANES } from "../ui/panel"
 import { EDGE_START } from "../../hooks/usePaneResize"
 import { FLOW_PANE } from "../../lib/layout"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
-import { Textarea } from "../ui/textarea"
 import { FlowCanvas } from "./FlowCanvas"
 import { FlowRunPanel } from "./FlowRunPanel"
+import { FlowSettings } from "./FlowSettings"
 import { FlowPicker, RequestPicker } from "./RequestPicker"
 import { StepEditor } from "./StepEditor"
 import { useFloatingWindow } from "../../hooks/useFloatingWindow"
@@ -22,7 +21,7 @@ import { duplicateStep, insertStep, isFlowDirty, moveStep, newStep, removeStep, 
 import { RUN_RUNNING, useFlowRunStore } from "../../lib/flows/flowRunner"
 import { canRedo, canUndo, recordChange, redoChange, undoChange } from "../../lib/flows/history"
 import { flowVariables } from "../../lib/flows/outputs"
-import { MAX_SENDS_CAP, STEP_FLOW, STEP_REQUEST, indexSteps, normalizeFlow } from "../../lib/flows/model"
+import { STEP_FLOW, STEP_REQUEST, indexSteps, normalizeFlow } from "../../lib/flows/model"
 import { stepTitle, validateFlow } from "../../lib/flows/validate"
 import { hintWithShortcut } from "../../lib/shortcuts"
 import { readStored, writeStored } from "../../lib/storage"
@@ -64,44 +63,6 @@ function groupProblems(problems) {
   const byStep = new Map()
   problems.forEach(({ step, message }) => byStep.set(step, [...(byStep.get(step) || []), message]))
   return byStep
-}
-
-function FlowSettings({ flow, problems, index, requests, flows, onChange, onSelectStep }) {
-  return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3 [overflow-wrap:anywhere]">
-      <SectionLabel>{TEXT.settingsTitle}</SectionLabel>
-      <p className="text-xs text-muted-foreground">{TEXT.selectHint}</p>
-      <Field label={TEXT.description}>
-        <Textarea rows={3} value={flow.description} placeholder={TEXT.descriptionPlaceholder} onChange={(event) => onChange({ ...flow, description: event.target.value }, "description")} className="font-sans" />
-      </Field>
-      <Field label={TEXT.maxSends}>
-        <Input type="number" min={1} max={MAX_SENDS_CAP} value={flow.maxSends} onChange={(event) => onChange({ ...flow, maxSends: event.target.value }, "maxSends")} className="w-28 font-mono" />
-      </Field>
-      <p className="text-2xs text-muted-foreground">{TEXT.maxSendsHint(MAX_SENDS_CAP)}</p>
-      {problems.length > 0 && (
-        <section className="flex flex-col gap-1 rounded-md border border-warning/40 p-2">
-          <p className="flex items-center gap-1.5 text-xs font-medium text-warning">
-            <AlertTriangle aria-hidden="true" className="h-3.5 w-3.5" />
-            {TEXT.problems(problems.length)}
-          </p>
-          <ul className="flex flex-col">
-            {problems.map(({ step, message }, position) => (
-              <li key={position}>
-                <button type="button" disabled={!step} onClick={() => onSelectStep(step)} className="flex w-full items-center gap-1 rounded px-1 py-0.5 text-start text-xs text-foreground enabled:cursor-pointer enabled:hover:bg-accent enabled:hover:underline">
-                  <span className="min-w-0 flex-1">{step && index.get(step) ? `${stepTitle(index.get(step).step, requests, flows)}: ` : ""}{message}</span>
-                  {step && <ChevronRight aria-hidden="true" className="h-3 w-3 shrink-0 text-muted-foreground rtl:rotate-180" />}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-      <div className="flex flex-col gap-1">
-        <p className="text-2xs text-muted-foreground">{TEXT.cliHint}</p>
-        <code className="select-all rounded-md border border-border bg-muted/40 px-2 py-1 font-mono text-2xs text-foreground">{TEXT.cli(flow.name)}</code>
-      </div>
-    </div>
-  )
 }
 
 function PanelControls({ mode, isFloating, onToggle, onSettings }) {
@@ -212,7 +173,7 @@ export function FlowView({ tab, actions, EditorComponent }) {
   const [picker, setPicker] = useState(null)
   const [, setVersion] = useState(0)
   const selectedStep = context.index.get(selected)?.step
-  const stepVariables = useMemo(() => flowVariables(flow.steps, catalog, selectedStep), [flow.steps, catalog, selectedStep])
+  const stepVariables = useMemo(() => flowVariables(flow.steps, catalog, selectedStep, shown.variables, shown.name), [flow.steps, catalog, selectedStep, shown.variables, shown.name])
 
   useEffect(() => {
     if (!isRunning) return

@@ -2743,6 +2743,8 @@ export namespace main {
 	    socketMessages: string;
 	    vars: string;
 	    notes: string;
+	    jsonDepth: string;
+	    defaultView: string;
 	    timestamp: string;
 	    sortOrder: number;
 	    statusCode?: number;
@@ -2784,6 +2786,8 @@ export namespace main {
 	        this.socketMessages = source["socketMessages"];
 	        this.vars = source["vars"];
 	        this.notes = source["notes"];
+	        this.jsonDepth = source["jsonDepth"];
+	        this.defaultView = source["defaultView"];
 	        this.timestamp = source["timestamp"];
 	        this.sortOrder = source["sortOrder"];
 	        this.statusCode = source["statusCode"];
@@ -2907,6 +2911,8 @@ export namespace main {
 	    socketMessages: string;
 	    vars: string;
 	    notes: string;
+	    jsonDepth: string;
+	    defaultView: string;
 	    timestamp: string;
 	    sortOrder: number;
 	
@@ -2946,6 +2952,8 @@ export namespace main {
 	        this.socketMessages = source["socketMessages"];
 	        this.vars = source["vars"];
 	        this.notes = source["notes"];
+	        this.jsonDepth = source["jsonDepth"];
+	        this.defaultView = source["defaultView"];
 	        this.timestamp = source["timestamp"];
 	        this.sortOrder = source["sortOrder"];
 	    }
@@ -4860,6 +4868,7 @@ export namespace openapi {
 	}
 	export class Reply {
 	    error?: string;
+	    hash?: string;
 	    summary?: Summary;
 	    collection?: Collection;
 	    detail?: Detail;
@@ -4873,6 +4882,7 @@ export namespace openapi {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.error = source["error"];
+	        this.hash = source["hash"];
 	        this.summary = this.convertValues(source["summary"], Summary);
 	        this.collection = this.convertValues(source["collection"], Collection);
 	        this.detail = this.convertValues(source["detail"], Detail);
@@ -5383,31 +5393,49 @@ export namespace workspace {
 	        this.text = source["text"];
 	    }
 	}
-	export class FlowValue {
-	    name: string;
-	    value?: string;
-	    step?: string;
-	    source?: string;
-	    path?: string;
+	export class FlowCase {
+	    label?: string;
+	    match?: string;
+	    conditions?: FlowCheck[];
+	    target?: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new FlowValue(source);
+	        return new FlowCase(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.value = source["value"];
-	        this.step = source["step"];
-	        this.source = source["source"];
-	        this.path = source["path"];
+	        this.label = source["label"];
+	        this.match = source["match"];
+	        this.conditions = this.convertValues(source["conditions"], FlowCheck);
+	        this.target = source["target"];
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class FlowCheck {
-	    expression: string;
+	    expression?: string;
 	    operator?: string;
 	    value?: string;
 	    enabled?: boolean;
+	    match?: string;
+	    conditions?: FlowCheck[];
 	
 	    static createFrom(source: any = {}) {
 	        return new FlowCheck(source);
@@ -5419,7 +5447,27 @@ export namespace workspace {
 	        this.operator = source["operator"];
 	        this.value = source["value"];
 	        this.enabled = source["enabled"];
+	        this.match = source["match"];
+	        this.conditions = this.convertValues(source["conditions"], FlowCheck);
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class FlowRetry {
 	    times?: number;
@@ -5455,13 +5503,41 @@ export namespace workspace {
 		    return a;
 		}
 	}
+	export class FlowInput {
+	    target: string;
+	    name: string;
+	    value?: string;
+	    step?: string;
+	    source?: string;
+	    path?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new FlowInput(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.target = source["target"];
+	        this.name = source["name"];
+	        this.value = source["value"];
+	        this.step = source["step"];
+	        this.source = source["source"];
+	        this.path = source["path"];
+	    }
+	}
 	export class FlowStep {
 	    id: string;
 	    kind: string;
 	    label?: string;
+	    note?: string;
 	    request?: string;
 	    requestId?: string;
+	    flow?: string;
+	    flowId?: string;
+	    times?: number;
+	    delayMs?: number;
 	    variables?: Record<string, string>;
+	    inputs?: FlowInput[];
 	    retry?: FlowRetry;
 	    onFailure?: string;
 	    values?: FlowValue[];
@@ -5472,6 +5548,9 @@ export namespace workspace {
 	    indexAs?: string;
 	    match?: string;
 	    conditions?: FlowCheck[];
+	    until?: FlowCheck[];
+	    cases?: FlowCase[];
+	    timeoutMs?: number;
 	    then?: string;
 	    else?: string;
 	    steps?: FlowStep[];
@@ -5489,9 +5568,15 @@ export namespace workspace {
 	        this.id = source["id"];
 	        this.kind = source["kind"];
 	        this.label = source["label"];
+	        this.note = source["note"];
 	        this.request = source["request"];
 	        this.requestId = source["requestId"];
+	        this.flow = source["flow"];
+	        this.flowId = source["flowId"];
+	        this.times = source["times"];
+	        this.delayMs = source["delayMs"];
 	        this.variables = source["variables"];
+	        this.inputs = this.convertValues(source["inputs"], FlowInput);
 	        this.retry = this.convertValues(source["retry"], FlowRetry);
 	        this.onFailure = source["onFailure"];
 	        this.values = this.convertValues(source["values"], FlowValue);
@@ -5502,6 +5587,9 @@ export namespace workspace {
 	        this.indexAs = source["indexAs"];
 	        this.match = source["match"];
 	        this.conditions = this.convertValues(source["conditions"], FlowCheck);
+	        this.until = this.convertValues(source["until"], FlowCheck);
+	        this.cases = this.convertValues(source["cases"], FlowCase);
+	        this.timeoutMs = source["timeoutMs"];
 	        this.then = source["then"];
 	        this.else = source["else"];
 	        this.steps = this.convertValues(source["steps"], FlowStep);
@@ -5529,11 +5617,53 @@ export namespace workspace {
 		    return a;
 		}
 	}
+	export class FlowValue {
+	    name: string;
+	    value?: string;
+	    step?: string;
+	    source?: string;
+	    path?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new FlowValue(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.value = source["value"];
+	        this.step = source["step"];
+	        this.source = source["source"];
+	        this.path = source["path"];
+	    }
+	}
+	export class FlowVariable {
+	    name: string;
+	    type?: string;
+	    value?: string;
+	    input?: boolean;
+	    required?: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new FlowVariable(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.type = source["type"];
+	        this.value = source["value"];
+	        this.input = source["input"];
+	        this.required = source["required"];
+	    }
+	}
 	export class Flow {
 	    id: string;
 	    name: string;
 	    description?: string;
 	    maxSends?: number;
+	    variables?: FlowVariable[];
+	    outputs?: FlowValue[];
 	    steps: FlowStep[];
 	
 	    static createFrom(source: any = {}) {
@@ -5546,6 +5676,8 @@ export namespace workspace {
 	        this.name = source["name"];
 	        this.description = source["description"];
 	        this.maxSends = source["maxSends"];
+	        this.variables = this.convertValues(source["variables"], FlowVariable);
+	        this.outputs = this.convertValues(source["outputs"], FlowValue);
 	        this.steps = this.convertValues(source["steps"], FlowStep);
 	    }
 	
@@ -5728,6 +5860,8 @@ export namespace workspace {
 	    socketMessages: string;
 	    vars: string;
 	    notes: string;
+	    jsonDepth: string;
+	    defaultView: string;
 	    timestamp: string;
 	    sortOrder: number;
 	
@@ -5767,6 +5901,8 @@ export namespace workspace {
 	        this.socketMessages = source["socketMessages"];
 	        this.vars = source["vars"];
 	        this.notes = source["notes"];
+	        this.jsonDepth = source["jsonDepth"];
+	        this.defaultView = source["defaultView"];
 	        this.timestamp = source["timestamp"];
 	        this.sortOrder = source["sortOrder"];
 	    }
@@ -5835,6 +5971,9 @@ export namespace workspace {
 		    return a;
 		}
 	}
+	
+	
+	
 	
 	
 	

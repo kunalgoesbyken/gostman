@@ -4,7 +4,9 @@ import { queryJson } from '../jsonPath'
 import { substitutePlaceholders, variableMap } from '../placeholders'
 import { evaluateAssertionList, isActiveAssertion, titleOf } from '../scripting/assertions'
 import { responseSubject } from '../scripting/subjects'
-import { CONDITION_VARIABLES, MATCH_ANY, SOURCE_HEADER, SOURCE_STATUS } from './model'
+import { MATCH_ANY, isGroup } from './conditions'
+import { typedValue } from './declared'
+import { CONDITION_VARIABLES, SOURCE_HEADER, SOURCE_STATUS } from './model'
 
 const RESPONSE_ROOT = 'res.body'
 
@@ -46,24 +48,37 @@ export function readResponse(subject, { source, path }, title) {
 
 export const fillTemplate = (template, variables) => substitutePlaceholders(template, variableMap(variables))
 
-const typedVariables = (variables) => Object.fromEntries(Object.entries(variables).map(([name, value]) => [name, parseJSON(asText(value), value)]))
+const typedVariables = (variables, types) => Object.fromEntries(Object.entries(variables).map(([name, value]) => [name, typedValue(asText(value), types[name])]))
 
 const quotedName = (name) => `'${name.split('\\').join('\\\\').split("'").join("\\'")}'`
 
 const asVariableCheck = (condition) => ({ ...condition, expression: `${RESPONSE_ROOT}[${quotedName(condition.expression.trim())}]` })
 
-function variableChecks(conditions, variables) {
+function variableChecks(conditions, variables, types) {
   const active = conditions.filter(isActiveAssertion)
-  const results = evaluateAssertionList(active.map(asVariableCheck), { body: typedVariables(variables) }, variables)
+  const results = evaluateAssertionList(active.map(asVariableCheck), { body: typedVariables(variables, types) }, variables)
   return results.map(({ passed, message }, position) => ({ name: titleOf(active[position]), passed, message }))
 }
 
-export function evaluateConditions(step, subject, variables) {
-  const checks = step.source === CONDITION_VARIABLES
-    ? variableChecks(step.conditions, variables)
-    : evaluateAssertionList(step.conditions, subject || {}, variables)
-  const passed = step.match === MATCH_ANY ? checks.some((check) => check.passed) : checks.every((check) => check.passed)
-  return { checks, passed: checks.length > 0 && passed }
+const leafChecks = (source, leaves, subject, variables, types) => (
+  source === CONDITION_VARIABLES ? variableChecks(leaves, variables, types) : evaluateAssertionList(leaves, subject || {}, variables)
+)
+
+const inGroup = (match) => (check) => ({ ...check, name: TEXT.inGroup(match, check.name) })
+
+function judge(match, items, read) {
+  const own = read(items.filter((item) => !isGroup(item)))
+  const groups = items.filter(isGroup).map((group) => judge(group.match, group.conditions, read)).filter((group) => group.counted)
+  const verdicts = [...own.map((check) => check.passed), ...groups.map((group) => group.passed)]
+  const passed = match === MATCH_ANY ? verdicts.some(Boolean) : verdicts.every(Boolean)
+  const nested = groups.flatMap((group) => group.checks.map(inGroup(group.match)))
+  return { match, counted: verdicts.length > 0, passed: verdicts.length > 0 && passed, checks: [...own, ...nested] }
+}
+
+export function evaluateConditions(step, subject, variables, types = {}) {
+  const read = (leaves) => leafChecks(step.source, leaves, subject, variables, types)
+  const { checks, passed } = judge(step.match, step.conditions, read)
+  return { checks, passed }
 }
 
 export const evaluateUntil = (conditions, subject, variables) => evaluateAssertionList(conditions, subject, variables)

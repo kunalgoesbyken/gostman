@@ -38,7 +38,7 @@ export const docSections = [
     docs: [
       { file: "scripting-and-settings.md", label: "Scripts and checks", aliases: { "tests-and-scripts": "checks-and-scripts" }, keywords: ["tests", "assertions"] },
       { file: "runner-load-and-scan.md", label: "Run, load test and scan" },
-      { file: "flows.md", outline: true, keywords: ["workflow", "chain", "retry", "scenario", "branch", "loop"] },
+      { file: "flows.md", outline: true, keywords: ["workflow", "chain", "retry", "scenario", "branch", "loop", "parallel", "concurrent", "inputs", "outputs"] },
       { file: "ci.md", label: "CI", outline: true },
     ],
   },

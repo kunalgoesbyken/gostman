@@ -4,6 +4,15 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.15.0] - 2026-11-04
+
+### Added
+
+- Flows: a **Parallel** step sends requests and runs flows at the same time and goes on when its **Done when** condition holds (each branch is `passed`, `failed`, `cancelled` or `running`, with `.status` and `.ms`), or stops the branches still running after a time limit.
+- Flows: conditions of **If**, **Switch**, **Repeat** and **Parallel** take nested groups that match all or any, four levels deep, with the whole condition written out under them and on the card.
+- Flows: typed flow variables (text, number, true or false, JSON) that live for one run, inputs given by a **Run flow** step, `--var` or the environment, required inputs, and outputs a flow gives back. The **Run** tab shows them while the flow runs, and the JSON report has `flow.variables` and `flow.outputs`.
+- Flows: the request picker groups requests by collection and can be moved and resized; the sections of the step panel and the flow settings fold away.
+
 ## [1.11.4] - 2026-11-03
 
 ### Changed

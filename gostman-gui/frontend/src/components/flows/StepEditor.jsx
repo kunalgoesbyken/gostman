@@ -9,36 +9,31 @@ import { Select } from "../ui/select"
 import { MarkdownField } from "../MarkdownField"
 import { MethodTag } from "../MethodTag"
 import { ScopeMark } from "../ScopeMark"
-import { AssertionEditor } from "../TestsPanel"
 import { VariableInput } from "../VariableInput"
+import { ChecksEditor, ConditionTree } from "./ConditionTree"
 import { iconOf } from "./FlowNode"
+import { PanelSection } from "./PanelSection"
 import { StepInputs } from "./StepInputs"
 import { RequestSteps, SourceSelect, SourceValue } from "./ValueSource"
 import { FLOW_CANVAS_TEXT, FLOW_EDITOR_TEXT as TEXT } from "../../lib/flowsText"
 import { blankCase } from "../../lib/flows/edit"
+import { flowInputs } from "../../lib/flows/declared"
 import {
-  CONDITION_RESPONSE, CONDITION_VARIABLES, END_TARGET, MATCH_ALL, MATCH_ANY, MAX_ATTEMPTS, MAX_DELAY_MS, MAX_PASSES, OUTCOME_FAILED,
-  OUTCOME_PASSED, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_REPEAT,
-  STEP_REQUEST, STEP_SET, STEP_SWITCH, loopsAround,
+  BRANCH_STATES, CONDITION_RESPONSE, CONDITION_VARIABLES, ELAPSED_FACT, END_TARGET, MAX_ATTEMPTS, MAX_DELAY_MS, MAX_PASSES, OUTCOME_FAILED,
+  OUTCOME_PASSED, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_PARALLEL, STEP_REPEAT,
+  STEP_REQUEST, STEP_SET, STEP_SWITCH, isBranch, loopsAround, normalizeFlow,
 } from "../../lib/flows/model"
 import { SOURCE_CALL, SOURCE_LOOP, SOURCE_SEND } from "../../lib/flows/outputs"
 import { caseLabel, kindText, resolveFlow, resolveRequest, stepTitle } from "../../lib/flows/validate"
 import { SCOPE_SESSION } from "../../lib/scripting/scopes"
-import { isActiveAssertion, parseAssertions, serializeAssertions } from "../../lib/scripting/assertions"
+import { hasActiveCondition } from "../../lib/flows/conditions"
 import { cn } from "../../lib/utils"
 
 const DEPTH_INDENT = " "
 
 const wholeNumber = (text, lowest, highest) => Math.min(Math.max(Math.trunc(Number(text)) || 0, lowest), highest)
 
-function Section({ title, children }) {
-  return (
-    <section className="flex flex-col gap-2 border-b border-border px-3 py-3 last:border-b-0">
-      {title && <SectionLabel>{title}</SectionLabel>}
-      {children}
-    </section>
-  )
-}
+const Section = ({ title, id, children }) => <PanelSection id={id || title} title={title}>{children}</PanelSection>
 
 function ScopeNote({ source, children }) {
   return (
@@ -89,14 +84,6 @@ function NumberInput({ value, lowest, highest, label, onChange }) {
   )
 }
 
-function ChecksEditor({ conditions, onChange, EditorComponent }) {
-  return (
-    <div className="-mx-3 [&>div]:p-0 [&>div]:px-3">
-      <AssertionEditor assertions={serializeAssertions(conditions)} onChange={(json) => onChange(parseAssertions(json))} EditorComponent={EditorComponent} />
-    </div>
-  )
-}
-
 function VariableRows({ variables, onChange }) {
   const rows = [...Object.entries(variables), ["", ""]]
   const commit = (next) => onChange(Object.fromEntries(next.filter(([name]) => name.trim() !== "")))
@@ -129,7 +116,7 @@ function ValueRow({ value, isDraft, index, requests, onChange, onRemove }) {
 
 const BLANK_VALUE = { name: "", value: "" }
 
-function ValueRows({ values, index, requests, onChange }) {
+export function ValueRows({ values, index, requests, onChange }) {
   const rows = [...values, BLANK_VALUE]
   const commit = (next) => onChange(next.filter((value) => value.name.trim() !== "" || value.step || value.value || value.source))
   return (
@@ -149,7 +136,7 @@ function ValueRows({ values, index, requests, onChange }) {
   )
 }
 
-function RequestFields({ step, index, requests, onPatch, onPickRequest, EditorComponent, targets }) {
+function RequestFields({ step, index, requests, onPatch, onPickRequest, EditorComponent, targets, inBranch }) {
   const request = resolveRequest(step, requests)
   return (
     <>
@@ -162,7 +149,9 @@ function RequestFields({ step, index, requests, onPatch, onPickRequest, EditorCo
         <ScopeNote source={SOURCE_SEND}>{TEXT.sendScope}</ScopeNote>
         <StepInputs variables={step.variables} inputs={step.inputs || []} index={index} requests={requests} onChange={onPatch} />
       </Section>
-      <Section title={TEXT.retry}>
+      {inBranch ? <BranchNote /> : (
+        <>
+          <Section title={TEXT.retry}>
         <Field label={TEXT.attempts}>
           <NumberInput value={step.retry.times} lowest={1} highest={MAX_ATTEMPTS} label={TEXT.attempts} onChange={(times) => onPatch({ retry: { ...step.retry, times } })} />
         </Field>
@@ -172,12 +161,22 @@ function RequestFields({ step, index, requests, onPatch, onPickRequest, EditorCo
         <SectionLabel className="pt-1">{TEXT.until}</SectionLabel>
         <ChecksEditor conditions={step.retry.until} onChange={(until) => onPatch({ retry: { ...step.retry, until } })} EditorComponent={EditorComponent} />
         <Hint>{TEXT.untilHint}</Hint>
-      </Section>
-      <Section title={TEXT.paths}>
-        {targets("next", TEXT.whenPassed, TEXT.nextStep)}
-        {targets("onFailure", TEXT.whenFailed, TEXT.failFlow)}
-      </Section>
+          </Section>
+          <Section title={TEXT.paths}>
+            {targets("next", TEXT.whenPassed, TEXT.nextStep)}
+            {targets("onFailure", TEXT.whenFailed, TEXT.failFlow)}
+          </Section>
+        </>
+      )}
     </>
+  )
+}
+
+function BranchNote() {
+  return (
+    <Section title={TEXT.paths}>
+      <Hint>{TEXT.branchNote}</Hint>
+    </Section>
   )
 }
 
@@ -195,11 +194,6 @@ function ConditionSource({ step, index, requests, onPatch }) {
   )
 }
 
-function MatchControl({ value, onChange }) {
-  const matches = [MATCH_ALL, MATCH_ANY].map((match) => ({ value: match, label: TEXT.matches[match] }))
-  return <SegmentedControl label={TEXT.match} options={matches} value={value} onChange={onChange} />
-}
-
 const ConditionHint = ({ source }) => <Hint>{source === CONDITION_VARIABLES ? TEXT.variablesConditionHint : TEXT.responseConditionHint}</Hint>
 
 function IfFields({ step, index, requests, onPatch, EditorComponent, targets }) {
@@ -207,8 +201,7 @@ function IfFields({ step, index, requests, onPatch, EditorComponent, targets }) 
     <>
       <Section title={TEXT.check}>
         <ConditionSource step={step} index={index} requests={requests} onPatch={onPatch} />
-        <MatchControl value={step.match} onChange={(match) => onPatch({ match })} />
-        <ChecksEditor conditions={step.conditions} onChange={(conditions) => onPatch({ conditions })} EditorComponent={EditorComponent} />
+        <ConditionTree match={step.match} conditions={step.conditions} onChange={onPatch} EditorComponent={EditorComponent} />
         <ConditionHint source={step.source} />
       </Section>
       <Section title={TEXT.paths}>
@@ -234,8 +227,7 @@ function CaseCard({ step, kase, position, count, index, requests, flows, EditorC
         <IconButton label={TEXT.moveCaseDown} icon={ArrowDown} disabled={position === count - 1} onClick={() => onMove(position + 1)} />
         <IconButton label={TEXT.removeCase} icon={X} onClick={onRemove} />
       </div>
-      <MatchControl value={kase.match} onChange={(match) => onChange({ ...kase, match })} />
-      <ChecksEditor conditions={kase.conditions} onChange={(conditions) => onChange({ ...kase, conditions })} EditorComponent={EditorComponent} />
+      <ConditionTree match={kase.match} conditions={kase.conditions} onChange={(tree) => onChange({ ...kase, ...tree })} EditorComponent={EditorComponent} />
       <TargetSelect label={TEXT.whenMatched} value={kase.target} emptyLabel={TEXT.nextStep} step={step} index={index} requests={requests} flows={flows} onChange={(target) => onChange({ ...kase, target })} />
     </div>
   )
@@ -278,7 +270,7 @@ function SwitchFields({ step, index, requests, flows, onPatch, EditorComponent, 
 }
 
 function RepeatFields({ step, index, requests, onPatch, EditorComponent, targets }) {
-  const hasUntil = step.until.some(isActiveAssertion)
+  const hasUntil = hasActiveCondition(step.until)
   return (
     <>
       <Section title={TEXT.passes}>
@@ -296,8 +288,7 @@ function RepeatFields({ step, index, requests, onPatch, EditorComponent, targets
       </Section>
       <Section title={TEXT.until}>
         <ConditionSource step={step} index={index} requests={requests} onPatch={onPatch} />
-        <MatchControl value={step.match} onChange={(match) => onPatch({ match })} />
-        <ChecksEditor conditions={step.until} onChange={(until) => onPatch({ until })} EditorComponent={EditorComponent} />
+        <ConditionTree match={step.match} conditions={step.until} onChange={({ match, conditions }) => onPatch({ match, until: conditions })} EditorComponent={EditorComponent} />
         <Hint>{TEXT.repeatUntilHint}</Hint>
       </Section>
       <Section title={TEXT.paths}>
@@ -308,7 +299,62 @@ function RepeatFields({ step, index, requests, onPatch, EditorComponent, targets
   )
 }
 
-function FlowFields({ step, flows, onPatch, onPickFlow, onOpenFlow, targets }) {
+function InputRows({ inputs, variables, onChange }) {
+  return (
+    <div className="flex flex-col gap-1">
+      {inputs.map((input) => (
+        <div key={input.name} className="grid grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] items-center gap-2">
+          <span className="flex min-w-0 items-center gap-1 font-mono text-xs">
+            <span className="truncate" title={input.name}>{input.name}</span>
+            <span className="shrink-0 font-sans text-2xs text-muted-foreground">{TEXT.typeLabels[input.type]}</span>
+            {input.required && <span className="shrink-0 font-sans text-2xs text-warning">{TEXT.required}</span>}
+          </span>
+          <VariableInput
+            value={variables[input.name] ?? ""}
+            placeholder={input.required ? TEXT.requiredPlaceholder : input.value || TEXT.defaultPlaceholder}
+            aria-label={input.name}
+            spellCheck={false}
+            onChange={(event) => onChange(input.name, event.target.value)}
+            className="font-mono"
+          />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function withoutKey(values, name) {
+  const kept = { ...values }
+  delete kept[name]
+  return kept
+}
+
+function CalledFlowDetails({ called, step, onPatch }) {
+  const shape = normalizeFlow(called)
+  const inputs = flowInputs(shape)
+  const outputs = shape.outputs.filter((output) => output.name !== "")
+  const inputNames = new Set(inputs.map((input) => input.name))
+  const others = Object.fromEntries(Object.entries(step.variables).filter(([name]) => !inputNames.has(name)))
+  const setInput = (name, value) => onPatch({ variables: value === "" ? withoutKey(step.variables, name) : { ...step.variables, [name]: value } })
+  const setOthers = (next) => onPatch({ variables: { ...Object.fromEntries(Object.entries(step.variables).filter(([name]) => inputNames.has(name))), ...next } })
+  return (
+    <>
+      {inputs.length > 0 && (
+        <>
+          <SectionLabel className="pt-1">{TEXT.flowInputs}</SectionLabel>
+          <InputRows inputs={inputs} variables={step.variables} onChange={setInput} />
+        </>
+      )}
+      <SectionLabel className="pt-1">{inputs.length > 0 ? TEXT.otherVariables : TEXT.flowVariables}</SectionLabel>
+      <ScopeNote source={SOURCE_CALL}>{TEXT.flowScope}</ScopeNote>
+      <VariableRows variables={others} onChange={setOthers} />
+      <Hint>{TEXT.flowVariablesHint}</Hint>
+      {outputs.length > 0 && <Hint>{TEXT.givesBack(outputs.map((output) => output.name))}</Hint>}
+    </>
+  )
+}
+
+function FlowFields({ step, flows, onPatch, onPickFlow, onOpenFlow, targets, inBranch }) {
   const called = resolveFlow(step, flows)
   return (
     <>
@@ -321,14 +367,55 @@ function FlowFields({ step, flows, onPatch, onPickFlow, onOpenFlow, targets }) {
           <ExternalLink />
           {TEXT.openFlow}
         </Button>
-        <SectionLabel className="pt-1">{TEXT.flowVariables}</SectionLabel>
-        <ScopeNote source={SOURCE_CALL}>{TEXT.flowScope}</ScopeNote>
-        <VariableRows variables={step.variables} onChange={(variables) => onPatch({ variables })} />
-        <Hint>{TEXT.flowVariablesHint}</Hint>
+        {called ? <CalledFlowDetails called={called} step={step} onPatch={onPatch} /> : (
+          <>
+            <SectionLabel className="pt-1">{TEXT.flowVariables}</SectionLabel>
+            <ScopeNote source={SOURCE_CALL}>{TEXT.flowScope}</ScopeNote>
+            <VariableRows variables={step.variables} onChange={(variables) => onPatch({ variables })} />
+          </>
+        )}
+      </Section>
+      {inBranch ? <BranchNote /> : (
+        <Section title={TEXT.paths}>
+          {targets("next", TEXT.whenPassed, TEXT.nextStep)}
+          {targets("onFailure", TEXT.whenFailed, TEXT.failFlow)}
+        </Section>
+      )}
+    </>
+  )
+}
+
+function FactNames({ step }) {
+  const names = [...step.steps.flatMap((branch) => [branch.id, `${branch.id}.status`, `${branch.id}.ms`]), ELAPSED_FACT]
+  return (
+    <div className="flex flex-col gap-1 text-2xs text-muted-foreground">
+      <span>{TEXT.factsHint(BRANCH_STATES.map((state) => TEXT.branchStateWords[state]))}</span>
+      <span className="flex flex-wrap gap-1">
+        {names.map((name) => <code key={name} className="rounded border border-border bg-muted/40 px-1 font-mono text-foreground">{name}</code>)}
+      </span>
+    </div>
+  )
+}
+
+function ParallelFields({ step, onPatch, EditorComponent, targets }) {
+  const hasUntil = hasActiveCondition(step.until)
+  return (
+    <>
+      <Section title={TEXT.branches}>
+        <Hint>{TEXT.branchesHint(step.steps.length)}</Hint>
+        <Field label={TEXT.timeout}>
+          <NumberInput value={step.timeoutMs} lowest={0} highest={MAX_DELAY_MS} label={TEXT.timeout} onChange={(timeoutMs) => onPatch({ timeoutMs })} />
+        </Field>
+        <Hint>{TEXT.timeoutHint}</Hint>
+      </Section>
+      <Section title={TEXT.doneWhen}>
+        <ConditionTree match={step.match} conditions={step.until} onChange={({ match, conditions }) => onPatch({ match, until: conditions })} EditorComponent={EditorComponent} />
+        {!hasUntil && <Hint>{TEXT.doneWhenEmpty}</Hint>}
+        <FactNames step={step} />
       </Section>
       <Section title={TEXT.paths}>
         {targets("next", TEXT.whenPassed, TEXT.nextStep)}
-        {targets("onFailure", TEXT.whenFailed, TEXT.failFlow)}
+        {targets("onFailure", TEXT.whenParallelFails, TEXT.failFlow)}
       </Section>
     </>
   )
@@ -404,6 +491,7 @@ const KIND_FIELDS = {
   [STEP_FOR_EACH]: ForEachFields,
   [STEP_REPEAT]: RepeatFields,
   [STEP_FLOW]: FlowFields,
+  [STEP_PARALLEL]: ParallelFields,
   [STEP_DELAY]: DelayFields,
   [STEP_END]: EndFields,
 }
@@ -470,6 +558,7 @@ export function StepEditor({ step, index, requests, flows, problems, onPatch, on
           onOpenFlow={onOpenFlow}
           EditorComponent={EditorComponent}
           targets={targets}
+          inBranch={isBranch(index, step.id)}
         />
       )}
     </div>

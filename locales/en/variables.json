@@ -15,7 +15,8 @@
       "session": "Session",
       "flowLoop": "Loop item",
       "flowSend": "This send only",
-      "flowCall": "Given to the called flow"
+      "flowCall": "Given to the called flow",
+      "flowRun": "Flow variable, for this run"
     }
   }
 }

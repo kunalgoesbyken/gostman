@@ -1,6 +1,6 @@
 # Flows
 
-A flow chains saved requests into a scenario: send one request after another, try a request again until it passes, go to another step when one fails, branch on a response, repeat steps for every item of a list or until a condition passes, run another flow as one step and pass values from one response to the next. You draw it in the app and run it there, from `gostman flow run` or in CI. The definition is a YAML file in the workspace, so it is reviewed and versioned with the requests it uses.
+A flow chains saved requests into a scenario: send one request after another, try a request again until it passes, go to another step when one fails, branch on a response, repeat steps for every item of a list or until a condition passes, send several requests at the same time, run another flow as one step with inputs and outputs, and pass typed values from one response to the next. You draw it in the app and run it there, from `gostman flow run` or in CI. The definition is a YAML file in the workspace, so it is reviewed and versioned with the requests it uses.
 
 Use the [runner](runner-load-and-scan.md#run-requests) to check every request of a folder, in order. Use a flow when the order matters and depends on the answers: a login whose token the next calls need, an order you poll until it is ready, a clean-up that only runs when something failed, or a bug that needs five calls in a precise sequence to show up.
 
@@ -9,8 +9,8 @@ Use the [runner](runner-load-and-scan.md#run-requests) to check every request of
 ## Draw a flow
 
 1. Open the **Flows** tab of the sidebar and choose **New flow**, or **Start from an example** for a small flow that logs in, waits until an order is ready and cancels it when it never is.
-2. Choose **+** between two steps, or at the end of the list, and pick the kind of step. **Send request** opens a search over your saved requests.
-3. Select a step to edit it in the panel on the right (below the canvas on a phone). **Float the panel** turns it into a window over the canvas that you can move and resize; it opens when you select a step and closes with Esc. Every step has a **Note**, written in Markdown, for the reason it is there; the canvas shows it when you hover over the step. Choose **Save** or press Ctrl+S (⌘S on macOS) to keep the flow; a dot on its tab marks unsaved changes, and **Undo** and **Redo** (Ctrl+Z, Ctrl+Y) step back through your edits.
+2. Choose **+** between two steps, or at the end of the list, and pick the kind of step. **Send request** opens a search over your saved requests, grouped by collection; the window can be moved and resized.
+3. Select a step to edit it in the panel on the right (below the canvas on a phone). Its sections fold away with the arrow next to their title, and stay folded the next time. **Float the panel** turns it into a window over the canvas that you can move and resize; it opens when you select a step and closes with Esc. Every step has a **Note**, written in Markdown, for the reason it is there; the canvas shows it when you hover over the step. Choose **Save** or press Ctrl+S (⌘S on macOS) to keep the flow; a dot on its tab marks unsaved changes, and **Undo** and **Redo** (Ctrl+Z, Ctrl+Y) step back through your edits.
 
 Steps run from top to bottom. A line between two cards means the first one continues with the next; a dashed line means it never does, for example after an **End** step. Jumps to other steps are drawn on the right with their reason: **fails** in red, **true** and the cases of a **Switch** in green, **false**, **otherwise** and **go to** in grey. A **Send request** that tries again shows a loop on its left with the number of attempts, and the steps a **For each** or a **Repeat** runs are framed under it.
 
@@ -26,9 +26,12 @@ Drag the background to move around, and zoom with the buttons in the corner, Ctr
 | **Switch** | Checks a list of cases from top to bottom, each with its own label, conditions and step to go to, and goes where the first one that matches says. **When no case matches** chooses where to go otherwise. Like **If**, it reads the latest response, the response of a chosen step, or variables; empty means the next step. |
 | **For each** | Repeats the steps inside it for every item of a list found by a JSONPath in an earlier response. Inside, `{{item}}` is the item as text, `{{item.id}}` one of its fields and `{{index}}` its position from 0; both names can be changed. An empty list skips the steps. |
 | **Repeat** | Runs the steps inside it several times: exactly **Passes** times (1 to 1000), or, with an **Until** condition, until the condition passes after a pass. **Wait between passes** pauses between two passes, and `{{index}}` (the **Pass variable**) holds the number of the pass from 0; it is removed when the loop ends, and a value it hid is set back. When the condition never passes, **When the condition never passes, go to** takes another path; without it the flow fails. |
+| **Parallel** | Sends the requests and runs the flows inside it at the same time, and waits until it is done (see [Run steps at the same time](#run-steps-at-the-same-time)). |
 | **Run flow** | Runs another saved flow as one step, with the same environment and session, and passes when that flow passes. **Variables for this run** set values for the steps of that flow only. **When it fails, go to** takes another path when it fails. **Open flow** opens it in its own tab. |
 | **Wait** | Pauses for a number of milliseconds. |
 | **End** | Stops the flow as passed or failed, with a message for the summary. |
+
+**If**, **Switch**, **Repeat** and **Parallel** take groups of conditions: **Add group** puts a group with its own **Match** (all or any) inside the list, and groups can hold groups, four levels deep. `(A or (B and C)) and D` is a list matching all, holding a group matching any (A, and a group matching all with B and C), and D. Under the conditions, **Reads as** shows the whole condition written out, and the canvas shows it on the card.
 
 Every step except **End** has **Then go to**, which can jump to any step, back to an earlier one to make a loop, or to the end of the flow. A step inside a **For each** or a **Repeat** can only be reached from inside it; go to the **For each** or **Repeat** itself to start the loop again.
 
@@ -39,6 +42,52 @@ Conditions use only the declarative checks, never JavaScript, so a flow by itsel
 A run stops after 1,000 requests, so a loop with no way out ends with a message instead of running forever. Change the limit in the flow settings, up to 10,000. A loop that sends no request at all stops after 10,000 steps.
 
 ![The step panel for Wait until the order is ready: its request Shop/Order status, five attempts 200 ms apart, the Until check res.body.state equals ready, and When it fails, go to Cancel order](../screenshots/flow-step.png)
+
+## Flow variables, inputs and outputs
+
+**Variables**, in the flow settings (shown when no step is selected), declares the variables of the flow. Each has a name, a type (**Text**, **Number**, **True or false** or **JSON**) and a starting value, which can use `{{variables}}`. They live for one run: every step can read them as `{{name}}`, **Set variables** changes them, and they are gone when the run ends, so two runs, or a flow and the flows it runs, never see each other's values. A value that does not fit the type stops the step that wrote it, with the name and the value in the message, and a starting value that does not fit is reported before the run starts. Conditions read them with their type, so a Text variable holding `007` is compared as text, and a **JSON body** value that is only `{{count}}` puts a Number variable in as a number and a JSON variable as an object.
+
+Mark a variable as an **Input** to let its value come from outside: from the **Run flow** step that runs the flow, from `--var name=value` on the command line, or from the active environment. Without one, it keeps its starting value. A **Required** input has no starting value, and a run without it does not start. A **Run flow** step lists the inputs of the flow it runs, with their types, above its other variables.
+
+**Outputs** are the values a flow gives back when it passes: text with `{{variables}}`, or a value from a response, as in **Set variables**. A **Run flow** step puts them in its own variables, typed when it declares a variable with that name, and lists them in the **Run** tab; a run started from the flow itself keeps them in the session, and the JSON report has them as `flow.outputs`.
+
+A request's own script cannot change a flow variable; use **Set variables** for that.
+
+## Run steps at the same time
+
+A **Parallel** step runs the steps framed inside it at the same time: **Send request** steps, each sent once, and **Run flow** steps, for anything longer. The canvas draws them side by side. They cannot go to other steps themselves; the **Parallel** step decides where the flow goes.
+
+**Done when** says when the step has waited long enough, with the same conditions and groups as **If**. Each branch is a variable named after its step id, holding `passed`, `failed`, `cancelled` or `running`, with `.status` for its HTTP status and `.ms` for its time, and `elapsedMs` holds the time since the step started. The condition is checked each time a branch ends; as soon as it holds, the branches still running are stopped and the step passes. Without a condition, the step waits for every branch and passes when they all passed. **Stop after** stops the branches still running when the time is up.
+
+For example, to wait until A passes, or B and C both pass, or A fails with a server error while C is still too slow, with a limit of 15 seconds:
+
+```yaml
+- id: together
+  kind: parallel
+  timeoutMs: 15000
+  match: any
+  until:
+    - expression: a
+      operator: eq
+      value: passed
+    - match: all
+      conditions:
+        - { expression: b, operator: eq, value: passed }
+        - { expression: c, operator: eq, value: passed }
+    - match: all
+      conditions:
+        - { expression: a.status, operator: gte, value: "500" }
+        - { expression: c, operator: eq, value: cancelled }
+  onFailure: give-up
+  steps:
+    - { id: a, kind: request, request: Shop/Reserve }
+    - { id: b, kind: request, request: Shop/Stock }
+    - { id: c, kind: flow, flow: Price check }
+```
+
+When the condition never holds, because every branch ended or the time ran out, the step fails and goes to **When it is not done, go to**, or fails the flow. A branch that failed or was stopped while the step still passed counts as handled, not as a failure. The **Run** tab lists every branch, and under the **Parallel** step the conditions it checked, each marked true or false, with the state and time of every branch. The steps after it read the response of any branch by its step id.
+
+The branches share the session: when two of them set the same variable at the same moment, the last one wins, so give each branch its own names. Each request counts against the request limit.
 
 ## Pass values into a request
 
@@ -65,6 +114,8 @@ The **Run** tab lists every step that ran, in order. Requests use the same rows 
 ### Run metrics
 
 **Metrics**, at the top of the **Run** tab, shows the total time of the run, the number of requests and the bytes of request bodies sent and of responses received, with the slowest steps: how many times each ran and its total, shortest, longest and average time. A request step counts each attempt; a **Wait** counts its pause; a **For each** counts each item and a **Repeat** each pass, timed by the steps inside it (the wait between passes is not a pass); a **Run flow** step counts each run of its flow, from start to end, and the requests of that flow count in the totals. The HTML report has the same numbers under **Flow metrics**, the JSON report has them as `flow.metrics`, and `gostman flow run` prints them in one line, such as `Metrics   12 requests, 3.4 s, 18.0 KB sent, 240.5 KB received`.
+
+**Variables**, between the metrics and the steps, shows the flow variables with their type and current value while the run goes on, and the values the run wrote to the session; the values of names that look secret are hidden. **Outputs** appears when the run ends. The JSON report has the last values as `flow.variables`.
 
 Values set by **Set variables** and **For each** stay in the session after the run, like values from Extract rules, so you can send a request by hand with them; they are never saved. The variables of a **Send request** step are removed again after it is sent.
 
@@ -159,8 +210,10 @@ steps:
 | --- | --- | --- |
 | `name`, `description` | flow | Shown in the app and in reports. Without `name`, the file name is used. |
 | `maxSends` | flow | Request limit of a run, 1 to 10000 (default 1000). |
+| `variables` | flow | Flow variables: a list of `name`, `type` (`string`, `number`, `boolean` or `json`), `value` (the starting value), `input: true` and `required: true`. |
+| `outputs` | flow | Values the flow gives back: a list like `values` of **Set variables**. |
 | `id` | step | Short name other steps use to point at it, unique in the flow. `end` is reserved. |
-| `kind` | step | `request`, `set`, `if`, `switch`, `forEach`, `repeat`, `flow`, `delay` or `end`. |
+| `kind` | step | `request`, `set`, `if`, `switch`, `forEach`, `repeat`, `parallel`, `flow`, `delay` or `end`. |
 | `label` | step | Title on the canvas and in reports. Without it, the request's name, the flow's name or the kind of step is shown. |
 | `note` | step | Markdown shown when you hover over the step on the canvas. |
 | `next` | step | Step to go to next; empty means the step below it, `end` ends the flow as passed. |
@@ -170,10 +223,11 @@ steps:
 | `retry.times`, `retry.delayMs`, `retry.until` | request | Attempts (1 to 50), the wait between them in milliseconds, and extra checks. |
 | `onFailure` | request | Step to go to when the last attempt fails. |
 | `values` | set | A list of `name` with either `value` (text with `{{variables}}`) or `step`, `source` (`body`, `header` or `status`) and `path` (a JSONPath, or the header name). |
-| `source`, `step`, `match`, `conditions`, `then`, `else` | if | `response` (the latest one, or the one of `step`) or `variables` (the expression is a variable name); `all` or `any`; checks written as `expression`, `operator`, `value`, as in a request's assertions. |
+| `source`, `step`, `match`, `conditions`, `then`, `else` | if | `response` (the latest one, or the one of `step`) or `variables` (the expression is a variable name); `all` or `any`; checks written as `expression`, `operator`, `value`, as in a request's assertions; an entry with `match` and its own `conditions` is a group. |
 | `source`, `step`, `cases`, `else` | switch | As for `if`; `cases` is a list of `label`, `match`, `conditions` and `target` (a step id, `end`, or empty for the next step), checked in order; `else` is where to go when none matches. |
 | `step`, `path`, `as`, `indexAs`, `steps` | forEach | The step whose response holds the list, its JSONPath, the names of the item and index variables (`item` and `index`) and the steps to repeat. |
 | `times`, `delayMs`, `indexAs`, `source`, `step`, `match`, `until`, `onFailure`, `steps` | repeat | Passes (1 to 1000, default 3), the wait between them in milliseconds, the name of the pass variable (`index`), the condition checked after each pass (read like the conditions of `if`), the step to go to when it never passes, and the steps to repeat. |
+| `match`, `until`, `timeoutMs`, `onFailure`, `steps` | parallel | How the conditions of **Done when** combine, the conditions, the time limit in milliseconds (0 for none), the step to go to when it is not done, and the `request` and `flow` steps to run at the same time. |
 | `flow`, `flowId`, `variables`, `onFailure` | flow | The flow to run, by its name and its id (the id is tried first; the app fills in both when it saves), values for that run as `name: template`, and the step to go to when it fails. |
 | `ms` | delay | Milliseconds to wait, up to 600000. |
 | `outcome`, `message` | end | `passed` or `failed`, and the message of the summary. |

@@ -628,6 +628,21 @@
       "title": "Flow run metrics",
       "blurb": "Time per step, loop pass and flow, and the bytes sent and received, in the app, reports and the CLI.",
       "synonyms": "metrics timing duration bytes performance stats"
+    },
+    "flowParallel": {
+      "title": "Parallel steps",
+      "blurb": "Send several requests or run several flows at the same time, and go on when a condition on their results holds or a time limit runs out.",
+      "synonyms": "parallel concurrent at the same time race fan out join wait for any wait for all timeout Postman Flows"
+    },
+    "flowConditionGroups": {
+      "title": "Grouped conditions",
+      "blurb": "Combine conditions with and and or in nested groups, such as (A or (B and C)) and D, in one If, Switch, Repeat or Parallel step.",
+      "synonyms": "and or nested groups boolean logic parentheses complex condition truth table"
+    },
+    "flowVariables": {
+      "title": "Flow variables, inputs and outputs",
+      "blurb": "Declare typed variables that live for one run, mark some as inputs, give values back as outputs, and watch them change while the flow runs.",
+      "synonyms": "typed variables number boolean json inputs outputs parameters return values flow scope inspect watch"
     }
   },
   "featureSamples": {
@@ -643,7 +658,7 @@
     "websocketRequest": "WebSocket request",
     "grpcRequest": "gRPC request",
     "mcpRequest": "MCP request",
-    "flowDescription": "Takes a path by the status code, passes a name into a request and repeats a step until a check passes. Every request answers from a saved example, so it runs offline.",
+    "flowDescription": "Sends two requests at the same time, keeps a typed flow variable, takes a path by a grouped condition, passes a name into a request, repeats a step until a check passes and gives a value back. Every request answers from a saved example, so it runs offline.",
     "flowDone": "Done",
     "flowListNote": "Answers with its saved **200 OK** example, so nothing leaves this device.",
     "flowCheckStatus": "Check the status",
@@ -652,6 +667,11 @@
     "flowStopped": "Stopped",
     "flowStoppedMessage": "The list of users did not answer 200 OK.",
     "binaryRequest": "Binary response",
-    "jwtRequest": "JWT request"
+    "jwtRequest": "JWT request",
+    "flowFetchTogether": "Fetch the list and Ada together",
+    "flowFetchNote": "Both requests are sent at the same time; the flow goes on when both passed.",
+    "flowFirstUser": "Ada",
+    "flowKeepName": "Keep her name",
+    "flowCheckNote": "Passes when the status is 200 and the first or the second user is the one kept in `firstName`."
   }
 }

@@ -1,4 +1,4 @@
-import { indexSteps, loopsAround, normalizeFlow } from './model'
+import { LOOP_KINDS, indexSteps, loopsAround, normalizeFlow } from './model'
 
 export const emptyMeter = () => ({ sends: 0, bytesSent: 0, bytesReceived: 0, steps: {}, passes: {}, names: {} })
 
@@ -10,7 +10,7 @@ function tally(steps, id, ms) {
   return { ...steps, [id]: counted }
 }
 
-const isContainer = (index, id) => Array.isArray(index.get(id)?.step.steps)
+const isContainer = (index, id) => LOOP_KINDS.includes(index.get(id)?.step.kind)
 
 const isPass = (index, event) => Number.isInteger(event.index) && isContainer(index, event.step)
 
@@ -39,7 +39,7 @@ function addToPasses(passes, index, id, ms) {
 
 const isTimedStep = (index, id) => index.has(id) && !isContainer(index, id)
 
-export function meterTiming(meter, index, { step, ms, sent = 0, received = 0, send = false }) {
+export function meterTiming(meter, index, { step, ms, sent = 0, received = 0, send = false, concurrent = false }) {
   const measured = Math.max(Math.round(ms), 0)
   return {
     ...meter,
@@ -47,7 +47,7 @@ export function meterTiming(meter, index, { step, ms, sent = 0, received = 0, se
     bytesSent: meter.bytesSent + sent,
     bytesReceived: meter.bytesReceived + received,
     steps: isTimedStep(index, step) ? tally(meter.steps, step, measured) : meter.steps,
-    passes: addToPasses(meter.passes, index, step, measured),
+    passes: concurrent ? meter.passes : addToPasses(meter.passes, index, step, measured),
   }
 }
 

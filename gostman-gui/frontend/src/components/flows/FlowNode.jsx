@@ -1,6 +1,6 @@
 import { memo } from "react"
 import {
-  AlertTriangle, Check, Flag, GitBranch, LoaderCircle, NotebookText, Repeat, Repeat2, RotateCw, Send, Split, Timer, Variable, Workflow, X,
+  AlertTriangle, Check, Columns3, Flag, GitBranch, LoaderCircle, NotebookText, Repeat, Repeat2, RotateCw, Send, Split, Timer, Variable, Workflow, X,
 } from "lucide-react"
 import { MethodTag } from "../MethodTag"
 import { ScopeMark } from "../ScopeMark"
@@ -9,7 +9,7 @@ import { jumpLabel, stepLines } from "../../lib/flows/describe"
 import { EVENT_FAILED, EVENT_HANDLED, EVENT_PASSED } from "../../lib/flows/engine"
 import { NODE_RUNNING } from "../../lib/flows/flowRunner"
 import {
-  OUTCOME_FAILED, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_REPEAT, STEP_REQUEST, STEP_SET, STEP_SWITCH,
+  OUTCOME_FAILED, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_PARALLEL, STEP_REPEAT, STEP_REQUEST, STEP_SET, STEP_SWITCH,
 } from "../../lib/flows/model"
 import { kindText, stepTitle } from "../../lib/flows/validate"
 import { formatMs } from "../../lib/timeline"
@@ -22,6 +22,7 @@ const KIND_LOOKS = {
   [STEP_SWITCH]: { icon: Split, tone: "text-syntax-boolean" },
   [STEP_FOR_EACH]: { icon: Repeat, tone: "text-syntax-number", frame: "loopBody" },
   [STEP_REPEAT]: { icon: Repeat2, tone: "text-syntax-number", frame: "repeatBody" },
+  [STEP_PARALLEL]: { icon: Columns3, tone: "text-syntax-string", frame: "parallelBody" },
   [STEP_FLOW]: { icon: Workflow, tone: "text-primary" },
   [STEP_DELAY]: { icon: Timer, tone: "text-muted-foreground" },
   [STEP_END]: { icon: Flag, tone: "text-success" },
@@ -48,7 +49,7 @@ const STATE_LOOKS = {
 
 export const MAX_LINES = 3
 
-const TOLD_KINDS = [STEP_IF, STEP_SWITCH, STEP_FOR_EACH, STEP_REPEAT]
+const TOLD_KINDS = [STEP_IF, STEP_SWITCH, STEP_FOR_EACH, STEP_REPEAT, STEP_PARALLEL]
 
 const isWorthTelling = (step, node) => (
   node?.summary && node.state !== NODE_RUNNING && (node.state !== EVENT_PASSED || node.attempts > 1 || TOLD_KINDS.includes(step.kind))

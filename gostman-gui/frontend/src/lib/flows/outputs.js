@@ -6,6 +6,7 @@ import { stepTitle } from './validate'
 export const SOURCE_LOOP = 'flowLoop'
 export const SOURCE_SEND = 'flowSend'
 export const SOURCE_CALL = 'flowCall'
+export const SOURCE_RUN = 'flowRun'
 
 const GIVEN_SOURCES = { [STEP_REQUEST]: SOURCE_SEND, [STEP_FLOW]: SOURCE_CALL }
 
@@ -26,8 +27,8 @@ function stepOutputs(step, requests, current) {
   return []
 }
 
-export function flowVariables(steps, requests, current) {
-  const found = []
+export function flowVariables(steps, requests, current, declared = [], owner = '') {
+  const found = declared.filter((variable) => variable.name !== '').map((variable) => entry(variable.name, SOURCE_RUN, owner))
   walkSteps(steps, (step) => found.push(...stepOutputs(step, requests, current)))
   return new Map(found)
 }

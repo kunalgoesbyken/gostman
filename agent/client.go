@@ -164,6 +164,10 @@ func (c *Client) RunFlow(ctx context.Context, stored runner.Collection, flow wor
 		return runner.Report{}, err
 	}
 	c.absorb()
+	if report.Flow != nil {
+		c.learnAll(report.Flow.Variables)
+		c.learnAll(report.Flow.Outputs)
+	}
 	return redact.Clean(c.guard, report)
 }
 

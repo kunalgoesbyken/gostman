@@ -1,7 +1,8 @@
 import { serializeExamples } from './examples'
 import { FEATURE_SAMPLES_TEXT as TEXT } from './featuresText'
 import { normalizeRequest } from './request'
-import { OUTCOME_FAILED, OUTCOME_PASSED, STEP_END, STEP_REPEAT, STEP_REQUEST, STEP_SWITCH, normalizeFlow } from './flows/model'
+import { TYPE_STRING } from './flows/declared'
+import { OUTCOME_FAILED, OUTCOME_PASSED, STEP_END, STEP_PARALLEL, STEP_REPEAT, STEP_REQUEST, STEP_SET, STEP_SWITCH, normalizeFlow } from './flows/model'
 
 export const SAMPLE_HOST = 'sample.gostman.test'
 export const SAMPLE_FOLDER_ID = 'folder-sample-collection'
@@ -84,14 +85,40 @@ export const sampleFlow = () => normalizeFlow({
   id: SAMPLE_FLOW_ID,
   name: TEXT.flowName,
   description: TEXT.flowDescription,
+  variables: [{ name: 'firstName', type: TYPE_STRING, value: '' }],
+  outputs: [{ name: 'createdName', step: 'create-user', source: 'body', path: '$.name' }],
   steps: [
-    { id: 'list-users', kind: STEP_REQUEST, label: TEXT.listUsers, requestId: 'request-sample-list-users', note: TEXT.flowListNote },
+    {
+      id: 'fetch-together',
+      kind: STEP_PARALLEL,
+      label: TEXT.flowFetchTogether,
+      note: TEXT.flowFetchNote,
+      timeoutMs: 10000,
+      steps: [
+        { id: 'list-users', kind: STEP_REQUEST, label: TEXT.listUsers, requestId: 'request-sample-list-users', note: TEXT.flowListNote },
+        { id: 'first-user', kind: STEP_REQUEST, label: TEXT.flowFirstUser, requestId: 'request-sample-get-user' },
+      ],
+    },
+    { id: 'keep-name', kind: STEP_SET, label: TEXT.flowKeepName, values: [{ name: 'firstName', step: 'first-user', source: 'body', path: '$.name' }] },
     {
       id: 'check-status',
       kind: STEP_SWITCH,
       label: TEXT.flowCheckStatus,
+      note: TEXT.flowCheckNote,
       step: 'list-users',
-      cases: [{ label: TEXT.okExample, conditions: [{ expression: 'res.status', operator: 'eq', value: '200' }] }],
+      cases: [{
+        label: TEXT.okExample,
+        conditions: [
+          { expression: 'res.status', operator: 'eq', value: '200' },
+          {
+            match: 'any',
+            conditions: [
+              { expression: 'res.body[0].name', operator: 'eq', value: '{{firstName}}' },
+              { expression: 'res.body[1].name', operator: 'eq', value: '{{firstName}}' },
+            ],
+          },
+        ],
+      }],
       else: 'stopped',
     },
     {

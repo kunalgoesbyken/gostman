@@ -7,15 +7,24 @@ const PATH_SEPARATOR = '/'
 let lastInputs = null
 let lastCatalog = []
 
-function buildCatalog(requests, folders) {
-  return requests.filter((request) => request.id).map((request) => ({
+function catalogEntry(request, folders) {
+  const chain = folderChain(folders, request.folderId)
+  const names = [...chain.map((folder) => folder.name), request.name]
+  return {
     id: request.id,
     name: request.name,
     method: request.method,
     url: request.url,
     bodyType: request.bodyType,
-    path: [...folderChain(folders, request.folderId).map((folder) => folder.name), request.name].join(PATH_SEPARATOR),
-  }))
+    path: names.join(PATH_SEPARATOR),
+    collectionId: chain[0]?.id || '',
+    collection: chain[0]?.name || '',
+    place: (chain.length > 0 ? names.slice(1) : names).join(PATH_SEPARATOR),
+  }
+}
+
+function buildCatalog(requests, folders) {
+  return requests.filter((request) => request.id).map((request) => catalogEntry(request, folders))
 }
 
 export function requestCatalog(requests, folders) {

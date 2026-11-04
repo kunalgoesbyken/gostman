@@ -2,7 +2,7 @@ import { FLOW_TEMPLATE_TEXT } from '../flowsText'
 import { BLANK_ASSERTION } from '../scripting/assertions'
 import {
   CONDITION_RESPONSE, CONTAINER_KINDS, DEFAULT_DELAY_MS, DEFAULT_INDEX_NAME, DEFAULT_ITEM_NAME, DEFAULT_MAX_SENDS, DEFAULT_PASSES, END_TARGET,
-  MATCH_ALL, OUTCOME_FAILED, OUTCOME_PASSED, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_REPEAT, STEP_REQUEST, STEP_SET,
+  MATCH_ALL, OUTCOME_FAILED, OUTCOME_PASSED, STEP_DELAY, STEP_END, STEP_FLOW, STEP_FOR_EACH, STEP_IF, STEP_PARALLEL, STEP_REPEAT, STEP_REQUEST, STEP_SET,
   STEP_SWITCH, allStepIds, compactFlow, indexSteps, innerSteps, mapSteps, normalizeFlow, retargeted, rewiredReads, slugOf, uniqueId,
 } from './model'
 
@@ -12,7 +12,7 @@ const createId = () => `flow-${Date.now().toString(36)}-${Math.random().toString
 
 export const blankFlow = (name) => normalizeFlow({ id: createId(), name, maxSends: DEFAULT_MAX_SENDS, steps: [] })
 
-const blankCondition = () => ({ ...BLANK_ASSERTION, expression: 'res.status', value: '200' })
+export const blankCondition = () => ({ ...BLANK_ASSERTION, expression: 'res.status', value: '200' })
 
 export const blankCase = () => ({ label: '', match: MATCH_ALL, conditions: [blankCondition()], target: '' })
 
@@ -26,6 +26,7 @@ const STEP_FIELDS = {
     times: DEFAULT_PASSES, delayMs: 0, indexAs: DEFAULT_INDEX_NAME, source: CONDITION_RESPONSE, step: '', match: MATCH_ALL, until: [], onFailure: '', steps: [],
   }),
   [STEP_FLOW]: () => ({ flow: '', flowId: '', variables: {}, onFailure: '' }),
+  [STEP_PARALLEL]: () => ({ match: MATCH_ALL, until: [], timeoutMs: 0, onFailure: '', steps: [] }),
   [STEP_DELAY]: () => ({ ms: DEFAULT_DELAY_MS }),
   [STEP_END]: () => ({ outcome: OUTCOME_PASSED, message: '' }),
 }

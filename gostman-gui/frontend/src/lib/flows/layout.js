@@ -1,4 +1,4 @@
-import { CONTAINER_KINDS, END_TARGET, STEP_END, STEP_IF, STEP_SWITCH, allStepIds, indexSteps, loopsAround, routesOf } from './model'
+import { CONTAINER_KINDS, END_TARGET, STEP_END, STEP_IF, STEP_PARALLEL, STEP_SWITCH, allStepIds, indexSteps, loopsAround, routesOf } from './model'
 
 const NODE_WIDTH = 248
 export const END_NODE = '#end'
@@ -76,10 +76,17 @@ function skipEdge(ctx, list, exit) {
   if (exit.index < list.length) ctx.edges.push({ from: exit.source, to: list[exit.index].id, field: exit.field })
 }
 
+function buildLanes(ctx, step) {
+  const items = step.steps.map((branch, position) => nodeBlock(ctx, branch, step.steps, position, step.id))
+  return { type: 'lanes', list: step.steps, parent: step.id, items, exits: [] }
+}
+
 function nodeBlock(ctx, step, list, position, parent) {
   const block = { type: 'node', step, position, parent, width: NODE_WIDTH, height: ctx.heightOf(step) }
   if (!CONTAINER_KINDS.includes(step.kind)) return block
-  const body = buildSeq(ctx, step.steps, step.id, 0, step.steps.length, { top: true, bottom: true, boxed: true })
+  const body = step.kind === STEP_PARALLEL
+    ? buildLanes(ctx, step)
+    : buildSeq(ctx, step.steps, step.id, 0, step.steps.length, { top: true, bottom: true, boxed: true })
   return { ...block, type: 'container', body, nodeHeight: block.height }
 }
 
@@ -230,8 +237,17 @@ function measureSeq(seq) {
   seq.height = seq.items.length === 0 ? GAP : seq.topGap + inner + seq.bottomGap
 }
 
+function measureLanes(lanes) {
+  lanes.items.forEach(measure)
+  const tallest = Math.max(0, ...lanes.items.map((item) => item.height))
+  const spread = lanes.items.reduce((sum, item) => sum + item.width, 0) + COLUMN_GAP * Math.max(0, lanes.items.length - 1)
+  lanes.width = lanes.items.length === 0 ? EMPTY_WIDTH : spread + COLUMN_GAP
+  lanes.height = lanes.items.length === 0 ? GAP : GAP + tallest + GAP
+  lanes.tallest = tallest
+}
+
 function measureContainer(item) {
-  measureSeq(item.body)
+  measure(item.body)
   const frameWidth = item.body.width + FRAME_PAD * 2
   item.frame = { width: Math.max(NODE_WIDTH + FRAME_PAD * 2, frameWidth), height: BODY_INSET + item.body.height + FRAME_FOOT }
   item.width = item.frame.width
@@ -272,6 +288,7 @@ const MEASURES = {
   container: measureContainer,
   branch: measureBranch,
   seq: measureSeq,
+  lanes: measureLanes,
 }
 
 function measure(item) {
@@ -299,7 +316,17 @@ function placeContainer(item, x, y) {
   item.nodeX = centreOf(item) - NODE_WIDTH / 2
   item.frame.x = x
   item.frame.y = y + item.nodeHeight + GAP / 2
-  placeSeq(item.body, centreOf(item) - item.body.width / 2, item.frame.y + BODY_INSET)
+  place(item.body, centreOf(item) - item.body.width / 2, item.frame.y + BODY_INSET)
+}
+
+function placeLanes(lanes, x, y) {
+  lanes.x = x
+  lanes.y = y
+  let left = x
+  lanes.items.forEach((item) => {
+    place(item, left, y + GAP)
+    left += item.width + COLUMN_GAP
+  })
 }
 
 function placeBranch(branch, x, y) {
@@ -321,7 +348,7 @@ function placeLeaf(item, x, y) {
   item.y = y
 }
 
-const PLACES = { node: placeLeaf, terminal: placeLeaf, container: placeContainer, branch: placeBranch }
+const PLACES = { node: placeLeaf, terminal: placeLeaf, container: placeContainer, branch: placeBranch, seq: placeSeq, lanes: placeLanes }
 
 function place(item, x, y) {
   PLACES[item.type](item, x, y)
@@ -407,10 +434,36 @@ function drawItem(drawing, item) {
   if (item.type === 'branch') drawBranch(drawing, item)
 }
 
+function drawLanes(drawing, item) {
+  const { body, step } = item
+  const centre = centreOf(item)
+  const top = item.y + item.nodeHeight
+  if (body.items.length === 0) {
+    wire(drawing, [{ x: centre, y: top }, { x: centre, y: body.y }], [], true)
+    drawing.slots.push({ x: centre, y: body.y + GAP / 2, parent: step.id, position: 0, first: false })
+    return
+  }
+  const forkY = body.y + GAP / 2
+  const joinY = body.y + GAP + body.tallest + GAP / 2
+  wire(drawing, [{ x: centre, y: top }, { x: centre, y: forkY }], body.items.map((lane) => [step.id, lane.step.id]))
+  body.items.forEach((lane) => {
+    const laneCentre = centreOf(lane)
+    wire(drawing, [{ x: centre, y: forkY }, { x: laneCentre, y: forkY }, { x: laneCentre, y: lane.y }], [[step.id, lane.step.id]])
+    drawItem(drawing, lane)
+    wire(drawing, [{ x: laneCentre, y: lane.y + lane.height }, { x: laneCentre, y: joinY }, { x: centre, y: joinY }], [], true)
+  })
+  const last = body.items[body.items.length - 1]
+  drawing.slots.push({ x: last.x + last.width + COLUMN_GAP / 2, y: last.y + Math.min(last.height, PILL_HEIGHT * 2) / 2, parent: step.id, position: body.items.length, first: false })
+}
+
 function drawContainer(drawing, item) {
   const { frame, body, step } = item
   drawing.nodes.push({ id: step.id, x: item.nodeX, y: item.y, width: NODE_WIDTH, height: item.nodeHeight })
   drawing.frames.push({ id: step.id, kind: step.kind, x: frame.x, y: frame.y, width: frame.width, height: frame.height })
+  if (body.type === 'lanes') {
+    drawLanes(drawing, item)
+    return
+  }
   const centre = centreOf(item)
   const firstId = firstIdOf(body)
   wire(drawing, [{ x: centre, y: item.y + item.nodeHeight }, { x: centre, y: firstId ? body.y : frame.y }], firstId ? [[step.id, firstId]] : [], !firstId)
