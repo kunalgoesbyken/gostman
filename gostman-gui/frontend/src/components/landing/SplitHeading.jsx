@@ -19,9 +19,14 @@ export function SplitWords({ text, className }) {
   )
 }
 
-export function SplitHeading({ as: Tag = "h2", id, text, className }) {
+const HEADING_SIZES = {
+  section: "text-3xl md:text-5xl",
+  feature: "text-2xl md:text-3xl",
+}
+
+export function SplitHeading({ as: Tag = "h2", id, text, size = "section" }) {
   return (
-    <Tag id={id} aria-label={text} className={`split-heading ${className}`}>
+    <Tag id={id} aria-label={text} className={`split-heading font-semibold tracking-tight [text-wrap:balance] ${HEADING_SIZES[size]}`}>
       <SplitWords text={text} />
     </Tag>
   )

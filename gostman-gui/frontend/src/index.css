@@ -83,6 +83,7 @@
     --font-mono-default: 'JetBrains Mono', 'Courier New', monospace;
     --font-ui: var(--font-ui-default);
     --font-mono: var(--font-mono-default);
+    --font-brand: var(--font-ui-default);
     --text-scale: 100;
 
     --background: 0 0% 100%;
@@ -255,6 +256,42 @@
       radial-gradient(40% 45% at 50% 60%, hsl(var(--primary) / 0.55), transparent),
       radial-gradient(28% 38% at 22% 62%, hsl(var(--success) / 0.4), transparent),
       radial-gradient(28% 38% at 78% 62%, hsl(var(--info) / 0.45), transparent);
+  }
+
+  .landing-frame {
+    @apply rounded-lg border border-border/60;
+  }
+
+  .landing-eyebrow {
+    @apply font-mono text-xs uppercase tracking-wider text-muted-foreground;
+  }
+
+  .landing-lead {
+    @apply leading-relaxed text-muted-foreground;
+  }
+
+  .landing-gutter {
+    --gutter-line: hsl(var(--border) / 0.6);
+  }
+
+  .landing-surface {
+    background-color: hsl(var(--background));
+  }
+
+  .landing-surface-tinted {
+    background: linear-gradient(hsl(var(--muted) / 0.25), hsl(var(--muted) / 0.25)), hsl(var(--background));
+  }
+
+  @media (min-width: 768px) {
+    .landing-gutter {
+      background:
+        repeating-radial-gradient(circle at 0 50%, transparent 0 15px, var(--gutter-line) 15px 16px) left / 50% 100% no-repeat,
+        repeating-radial-gradient(circle at 100% 50%, transparent 0 15px, var(--gutter-line) 15px 16px) right / 50% 100% no-repeat;
+    }
+
+    .landing-gutter-tinted {
+      background: repeating-linear-gradient(135deg, var(--gutter-line) 0 1px, transparent 1px 11px);
+    }
   }
 
   .stack-fade {
@@ -594,7 +631,7 @@
     .reveal-on-scroll {
       animation: reveal linear both;
       animation-timeline: view();
-      animation-range: entry 0% entry 60%;
+      animation-range: entry calc(var(--reveal-step, 0) * 8%) entry calc(60% + var(--reveal-step, 0) * 8%);
     }
 
     .split-heading {

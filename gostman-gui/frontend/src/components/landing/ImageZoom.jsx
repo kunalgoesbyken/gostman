@@ -30,7 +30,7 @@ export function ImageZoom({ src, alt, onOpen, className, children }) {
         className="m-0 h-dvh max-h-none w-screen max-w-none overflow-auto bg-transparent p-0 backdrop:bg-background"
       >
         <div className="flex min-h-full min-w-max items-center justify-center p-4 sm:min-w-0 sm:p-8">
-          <img src={src} alt={alt} loading="lazy" decoding="async" className="h-auto w-[220vw] max-w-none cursor-zoom-out rounded-lg border border-border/60 sm:max-h-[calc(100dvh-4rem)] sm:w-auto sm:max-w-full" />
+          <img src={src} alt={alt} loading="lazy" decoding="async" className="h-auto w-[220vw] max-w-none landing-frame cursor-zoom-out sm:max-h-[calc(100dvh-4rem)] sm:w-auto sm:max-w-full" />
         </div>
         <button type="button" onClick={close} aria-label="Close" className={cn(CORNER_BUTTON, "fixed right-4 top-4")}>
           <Close className="h-4 w-4" />

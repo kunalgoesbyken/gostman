@@ -1,5 +1,6 @@
 import { SplitHeading } from "./SplitHeading"
 import { FEATURE_GROUPS } from "./featureGroups"
+import { revealStep } from "./revealStep"
 
 function FeatureItem({ row }) {
   const Icon = row.icon
@@ -19,11 +20,11 @@ function FeatureItem({ row }) {
 export function FeatureOverview() {
   return (
     <div>
-      <SplitHeading text="The rest of the toolbox" className="text-2xl font-semibold tracking-tight md:text-3xl [text-wrap:balance]" />
+      <SplitHeading text="The rest of the toolbox" size="feature" />
       <div className="mt-10 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
-        {FEATURE_GROUPS.map((group) => (
-          <section key={group.id} aria-labelledby={`toolbox-${group.id}`} className="border-t border-border/60 pt-4">
-            <h3 id={`toolbox-${group.id}`} className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+        {FEATURE_GROUPS.map((group, index) => (
+          <section key={group.id} aria-labelledby={`toolbox-${group.id}`} className="reveal-on-scroll border-t border-border/60 pt-4" style={revealStep(index)}>
+            <h3 id={`toolbox-${group.id}`} className="landing-eyebrow">
               {group.title}
             </h3>
             <ul className="mt-2">

@@ -3,6 +3,7 @@ import { ComparisonGrid } from "./ComparisonGrid"
 import { LandingBand } from "./LandingBand"
 import { SplitHeading } from "./SplitHeading"
 import { StatusGlyph } from "./StatusGlyph"
+import { revealStep } from "./revealStep"
 
 function Legend() {
   return (
@@ -21,12 +22,8 @@ export function ComparisonSection() {
   return (
     <LandingBand id="compare" labelledBy="comparison-heading" isTinted>
       <div className="mb-12 max-w-2xl">
-        <SplitHeading
-          id="comparison-heading"
-          text="How Gostman compares"
-          className="text-3xl font-semibold tracking-tight md:text-5xl [text-wrap:balance]"
-        />
-        <p className="mt-5 leading-relaxed text-muted-foreground">
+        <SplitHeading id="comparison-heading" text="How Gostman compares" />
+        <p className="landing-lead reveal-on-scroll mt-5" style={revealStep(1)}>
           From their public pricing and docs, October 2026.
         </p>
       </div>

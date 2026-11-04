@@ -7,12 +7,11 @@ import { ImageZoom } from "./ImageZoom"
 import { LandingBand } from "./LandingBand"
 import { SecretFlow } from "./SecretFlow"
 import { SplitHeading } from "./SplitHeading"
-
-const HEADING = "text-2xl font-semibold tracking-tight md:text-3xl [text-wrap:balance]"
+import { revealStep } from "./revealStep"
 
 const shot = (image, width, height, alt) => (
   <ImageZoom src={image} alt={alt}>
-    <img src={image} alt={alt} width={width} height={height} loading="lazy" decoding="async" className="h-auto w-full rounded-lg border border-border/60" />
+    <img src={image} alt={alt} width={width} height={height} loading="lazy" decoding="async" className="landing-frame h-auto w-full" />
   </ImageZoom>
 )
 
@@ -44,9 +43,11 @@ const SCREENSHOT_FEATURES = [
 function FeatureText({ feature }) {
   return (
     <>
-      <SplitHeading text={feature.title} className={HEADING} />
-      <p className="mt-4 max-w-md leading-relaxed text-muted-foreground">{feature.description}</p>
-      <BrandStrip brands={feature.brands} className="mt-5" />
+      <SplitHeading text={feature.title} size="feature" />
+      <p className="landing-lead reveal-on-scroll mt-4 max-w-md" style={revealStep(1)}>{feature.description}</p>
+      <div className="reveal-on-scroll mt-5" style={revealStep(2)}>
+        <BrandStrip brands={feature.brands} />
+      </div>
     </>
   )
 }

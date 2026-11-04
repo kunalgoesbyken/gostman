@@ -25,6 +25,7 @@ import { FaqSection } from "./landing/FaqSection"
 import { ImportSources } from "./landing/ImportSources"
 import { StackSection } from "./landing/StackSection"
 import { GlyphWordmark } from "./landing/GlyphWordmark"
+import { revealStep } from "./landing/revealStep"
 
 const loadMotionFeatures = () => import("../lib/motionFeatures").then((module) => module.default)
 
@@ -182,11 +183,8 @@ export function LandingPage({ onGetStarted }) {
 
         <section id="download" className="render-when-visible relative border-t border-border/50 pt-24 text-center">
           <div className="mx-auto max-w-6xl px-6">
-            <SplitHeading
-              text="Send your first request in a minute"
-              className="text-3xl md:text-5xl font-semibold tracking-tight [text-wrap:balance]"
-            />
-            <p className="mx-auto mt-5 max-w-lg leading-relaxed text-muted-foreground">
+            <SplitHeading text="Send your first request in a minute" />
+            <p className="landing-lead reveal-on-scroll mx-auto mt-5 max-w-lg" style={revealStep(1)}>
               Download the desktop app for Windows, macOS or Linux, or open the web version now. There is nothing to sign up for.
             </p>
             <CallToActions onGetStarted={onGetStarted} className="mt-8" />
