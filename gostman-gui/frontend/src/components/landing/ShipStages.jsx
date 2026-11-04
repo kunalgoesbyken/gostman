@@ -88,7 +88,7 @@ function StageTab({ stage, index, fill, isActive, idOf, onSelect }) {
       tabIndex={isActive ? 0 : -1}
       onClick={onSelect}
       style={{ "--fill": fill }}
-      className="group relative flex-1 border-border/60 px-4 py-4 text-start transition-colors hover:bg-muted/20 [&:not(:last-child)]:border-e lg:flex-none lg:px-6 lg:py-6 lg:[&:not(:last-child)]:border-b lg:[&:not(:last-child)]:border-e-0"
+      className="group relative flex-1 border-border/60 px-4 py-4 text-start transition-colors hover:bg-muted/20 active:bg-muted/30 [&:not(:last-child)]:border-e lg:flex-none lg:px-6 lg:py-6 lg:[&:not(:last-child)]:border-b lg:[&:not(:last-child)]:border-e-0"
     >
       <span
         aria-hidden="true"
@@ -122,7 +122,7 @@ export function ShipStages() {
             text="The same checks from your editor to production"
             className="text-2xl md:text-3xl font-semibold tracking-tight [text-wrap:balance]"
           />
-          <p className="mt-4 leading-relaxed text-muted-foreground">
+          <p className="mt-4 leading-relaxed text-muted-foreground [text-wrap:pretty]">
             Requests live in one tool, tests in another, and CI runs a copy of both. The copy is the one that drifts.
           </p>
         </div>
@@ -153,7 +153,7 @@ export function ShipStages() {
                 id={idOf("panel", stage.id)}
                 role="tabpanel"
                 aria-labelledby={idOf("tab", stage.id)}
-                className={cn("min-w-0 [grid-area:1/1] [&>figure]:h-full", index !== activeIndex && "invisible")}
+                className={cn("min-w-0 transition-[opacity,visibility] duration-300 ease-out [grid-area:1/1] [&>figure]:h-full", index !== activeIndex && "invisible opacity-0")}
               >
                 <TerminalBlock {...stage.capture} isPlaying={index === activeIndex} />
               </div>
