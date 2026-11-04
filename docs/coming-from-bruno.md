@@ -48,6 +48,8 @@ Warnings and skipped items are printed after the counts. Open the new folder in 
 
 Hidden paths, `node_modules` and the folders listed under `ignore` in `bruno.json` (or `extensions.bruno.ignore` in `opencollection.yml`) are left out. The rest of the rules for imports, such as never turning off TLS verification, are in [Import, export and specs](import-export-and-specs.md#what-imports-never-do).
 
+![The Import tab, where you drop a Bruno collection folder or choose files or a folder, pick a format or leave it on detect automatically, and read the summary before anything is added](../screenshots/import.png)
+
 ## What comes across
 
 Both formats carry the same things across.

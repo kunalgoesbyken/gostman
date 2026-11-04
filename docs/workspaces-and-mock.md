@@ -17,6 +17,8 @@ The control next to the logo shows where the collection lives. **Open folder** k
 - The open folder is not part of the app's [automatic backups](preferences-and-shortcuts.md#backups); its history is whatever you commit to Git.
 - A folder you did not create opens with its scripts, OAuth 2.0 settings, local MCP commands and file reads switched off until you choose **Trust this folder**.
 
+![The folder menu next to the logo: This computer, the recent folder, Open folder, Save collection to folder, Clone repository, Git, Reload from disk and Close folder](../screenshots/folder-menu.png)
+
 ## Examples and the mock server (desktop)
 
 Save any response as a named example from the response panel (up to 20 per request, 2 MB each; cookie and authorization headers are not kept). The mock server, opened with **Mock server** at the bottom of the window, serves each request's method and path with one of its examples on `127.0.0.1`.

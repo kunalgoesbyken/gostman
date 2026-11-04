@@ -35,6 +35,8 @@ Checked on 26 October 2026. Plans and limits change often, so read the current [
 - **An agent server built for secrets.** `gostman mcp` replaces secret values with their names in what the agent sees and limits the hosts the agent can call.
 - **Runs a Bruno folder as it is.** `gostman run ./bruno-collection` converts the folder in memory and changes nothing in it. See [Try it on the Bruno folder first](coming-from-bruno.md#try-it-on-the-bruno-folder-first).
 
+![A Gostman collection on disk: a todo-api folder holding one YAML file per request, environments, a flow and a data file, with the first lines of the List todos request file showing its method, URL, extraction rule and checks](../screenshots/term-files.png)
+
 ## Where Bruno is stronger
 
 - **A VS Code extension.** It opens and edits `.bru` files and sends requests from the editor. Gostman's [VS Code extension](vscode.md) runs collections, flows, lints and scans through the CLI, but does not edit requests.

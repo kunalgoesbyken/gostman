@@ -49,6 +49,8 @@ The [VS Code extension](vscode.md) sends a request from its file, runs the colle
 2. Read the response below the request: **Body** in Pretty or Raw, **Headers** and **Cookies**, with the status, time and size beside them.
 3. Press **Save** to keep the request in your collection, or **Code** to copy it as code in one of 21 targets, from cURL and Python to C#, Swift, PowerShell and wget.
 
+![Opening the List todos request, sending it, then reading its three passing checks and the timeline of the exchange](../screenshots/gif-first-request.gif)
+
 Next, the [tutorial](tutorial-first-collection.md) takes about fifteen minutes to turn one request into a tested collection with an environment, chained requests and a run from the command line.
 
 ![Gostman sending a POST request with a JSON body and showing the pretty-printed response](../gostman-gui/frontend/src/assets/landing/rest.webp)
@@ -62,6 +64,18 @@ gostman send GET https://example.com -H 'Accept: text/html'
 ```
 
 The pages on [requests and responses](requests-and-responses.md) and [protocols](protocols.md) cover everything the editor can do.
+
+## Find a feature
+
+Gostman has a lot of features and none of them sits behind a setting. Three places list them:
+
+- **Tools** in the header groups them by job: Build, Test, Automate, Mock and capture, and Share and Git.
+- **Commands** (`Ctrl+K`, or `Cmd+K` on macOS) searches every action by name.
+- **Explore features** is a searchable catalogue of everything Gostman can do. **Try it** opens a feature with sample data and **Learn more** opens its page in these docs.
+
+![The Tools menu open in the header, with Build, Test, Automate, Mock and capture, and Share and Git sections](../screenshots/tools-menu.png)
+
+![Opening Explore features from the command palette and searching it for snapshot and for secrets](../screenshots/gif-explore-features.gif)
 
 ## Where your data is kept
 

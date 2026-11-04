@@ -21,6 +21,8 @@ Your collections do not depend on the project carrying on:
 - **The installed app keeps working.** The desktop app and the command line need no account, no licence server and no Gostman server. Only the web version is served from gostman.com, so keep the desktop app or an export if you rely on it.
 - **Anyone can carry it on.** The MIT licence lets anyone fork the code, build it and publish their own releases.
 
+![A Gostman collection on disk: a todo-api folder holding one YAML file per request, environments, a flow and a data file, with the first lines of the List todos request file showing its method, URL, extraction rule and checks](../screenshots/term-files.png)
+
 ## Reporting a problem
 
 - **Bugs and feature requests:** open an issue on [GitHub](https://github.com/kunalgoesbyken/gostman/issues). Open issues show what is being discussed and worked on.

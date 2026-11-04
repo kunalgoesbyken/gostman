@@ -42,6 +42,8 @@ gostman run shop --env Staging --var-from-env password
 
 Warnings and skipped items are printed after the counts. Secret values are never written to the folder: the import names each secret variable it left empty, and you pass the values to `gostman run` with `--var`, `--var-from-env` (as for `password` above) or `--env-file`. The rules every import follows, such as never turning off TLS verification and never carrying tokens, are in [Import, export and specs](import-export-and-specs.md#what-imports-never-do).
 
+![The Import tab, where you drop a Postman export or choose files or a folder, pick a format or leave it on detect automatically, and read the summary before anything is added](../screenshots/import.png)
+
 ## What comes across
 
 | In Postman | In Gostman |

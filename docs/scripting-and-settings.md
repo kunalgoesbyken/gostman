@@ -87,6 +87,8 @@ test("matches the schema", () => {
 
 Scripts that use Ajv, `const validate = new (require("ajv"))().compile(schema)`, keep working; `validate.errors` has Ajv's fields.
 
+![The Checks tab of a request with assertion rows, and under the response the Checks tab listing each check that passed](../screenshots/checks-tab.png)
+
 ## Packages and the vault
 
 In a trusted workspace folder, `require("@team/utils")` and `pm.require("@team/utils")` load `packages/@team/utils` from the workspace: the file named by `main` in its `package.json`, else `index.js` or `index.json`. A name without a scope, such as `require("helpers")`, loads `packages/helpers`. Files inside a package can `require` each other with `./` paths and can require other packages by name. The bundled modules win over a package of the same name, and a name cannot contain `..`. The `packages/` folder is committed with the rest of the workspace, so the team shares it through Git. Postman's hosted package library is not reachable; copy the package source into the folder.

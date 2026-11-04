@@ -2,6 +2,10 @@
 
 Short recipes for common jobs. Each one lists the steps and links to the reference page with every option. New to Gostman? Start with the [tutorial](tutorial-first-collection.md).
 
+Not sure where a feature is? **Explore features** in the app searches all of them and opens each with sample data.
+
+![Opening Explore features from the command palette and searching it for snapshot and for secrets](../screenshots/gif-explore-features.gif)
+
 ## Move a collection from Postman, Insomnia, Bruno or .http files
 
 In the app, choose **Import** in the header (or on the welcome panel) and drop the export file or folder. From the command line:

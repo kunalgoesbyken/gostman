@@ -92,6 +92,8 @@ The **Monitors** dialog (the status bar, the command palette, **Monitor this fol
 
 `gostman run --every 5m` and `gostman flow run --every 5m` repeat a run until it is stopped, save each run to a local history, and post to a Slack, Teams, Discord or plain webhook when it fails. `gostman history` shows the pass rate and the p50 and p95 duration of each request. See [Scheduled runs](cli.md#scheduled-runs).
 
+![The Run requests dialog running a three-request collection: the selection before the run, then every request passed with its status, time and checks](../screenshots/gif-run-collection.gif)
+
 ## Load test
 
 The Load test dialog sends the current request many times at once and measures how the server responds. Open it with the **Load test** button next to **Code** in the request bar, or with the **Load test this request** command while the request you want to test is the active tab.

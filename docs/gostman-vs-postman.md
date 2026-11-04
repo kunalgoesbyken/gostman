@@ -33,6 +33,8 @@ Checked on 26 October 2026. Plans and limits change often, so read the current [
 - **An agent server built for secrets.** `gostman mcp` lets Claude Code, Codex or Cursor send your requests. Values are filled in inside Gostman and replaced by their names in what the agent sees, and the agent reaches only hosts your own requests use.
 - **No telemetry.** Gostman sends nothing about your use to the project. See [What Gostman connects to](getting-started.md#what-gostman-connects-to).
 
+![A Gostman collection on disk: a todo-api folder holding one YAML file per request, environments, a flow and a data file, with the first lines of the List todos request file showing its method, URL, extraction rule and checks](../screenshots/term-files.png)
+
 ## Where Postman is stronger
 
 - **Team features.** Shared cloud workspaces with roles, SSO and SCIM, and audit logs. Gostman has no accounts, so it has none of these.

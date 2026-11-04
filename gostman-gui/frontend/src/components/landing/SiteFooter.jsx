@@ -1,7 +1,7 @@
 import { Heart } from "lucide-react"
 import { BrandIcon } from "../ui/brandIcon"
 import { WEB_APP_URL } from "../../lib/constants"
-import { SPONSOR_URL } from "../../lib/siteLinks"
+import { ALTERNATIVETO_BADGE_URL, ALTERNATIVETO_URL, SPONSOR_URL } from "../../lib/siteLinks"
 import { Brand } from "./Brand"
 import { FOOTER_COLUMNS } from "./footerLinks"
 
@@ -45,6 +45,14 @@ function AskAssistants() {
   )
 }
 
+function AlternativeToBadge() {
+  return (
+    <a href={ALTERNATIVETO_URL} target="_blank" rel="noopener noreferrer" className="inline-block">
+      <img src={ALTERNATIVETO_BADGE_URL} alt="Gostman | AlternativeTo" width="284" height="54" loading="lazy" className="h-[54px] w-[284px] max-w-full" />
+    </a>
+  )
+}
+
 function FooterColumn({ column }) {
   return (
     <nav aria-label={column.title}>
@@ -68,6 +76,7 @@ export function SiteFooter() {
           <Brand tagline="API client for REST, GraphQL, gRPC and WebSocket" />
           <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">Free and open source. No account, and your collections stay on your machine.</p>
         </div>
+        <AlternativeToBadge />
       </div>
       <div className="mx-auto mt-8 grid max-w-6xl grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
         {FOOTER_COLUMNS.map((column) => (

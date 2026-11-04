@@ -4,6 +4,11 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Changed
+
+- The documentation shows more of the app: clips of a first request, of the Explore features search and of a collection run, a tour of the Tools menu, and terminal screenshots of `gostman run`, `flow run`, `scan` and `mcp` on the command line, CI, tutorial and coding agent pages.
+- The AlternativeTo badge is back in the site footer.
+
 ## [1.15.1] - 2026-11-04
 
 ### Changed

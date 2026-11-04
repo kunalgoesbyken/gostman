@@ -27,6 +27,8 @@ On Windows PowerShell, set the variables with `$env:API_TOKEN = "any-token"` and
 
 `--var-from-env API_TOKEN` reads the shell variable of that name and makes it available as `{{API_TOKEN}}`. Every request passes. When the shell variable is not set, the command stops before sending anything and says so.
 
+![The terminal output of gostman run with both secrets supplied: three requests passed, and the password in the Basic auth URL is shown as the placeholder PASSWORD](../screenshots/term-secrets-run.png)
+
 ## 3. Make a missing secret fail the run
 
 Run the same command without the two `--var-from-env` flags. The requests are still sent, with the text `{{API_TOKEN}}` as the token, because a variable that is not defined is left as written. The example catches that with a post-response script:
@@ -48,6 +50,8 @@ warning: Protected/Check the token: {{API_TOKEN}} is not defined. Define it in a
 **Basic auth** fails the same way for `PASSWORD`.
 
 The command exits with `1`, so a pipeline with a missing secret fails instead of passing against the wrong credentials. Put this check on the collection's settings to cover every request.
+
+![The terminal output when the secrets are not supplied: the post-response checks fail for API_TOKEN and PASSWORD, two warnings say the variables are not defined and the exit code is 1](../screenshots/term-secrets-missing.png)
 
 ## 4. Add the workflow
 

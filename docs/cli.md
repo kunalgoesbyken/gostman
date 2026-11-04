@@ -4,6 +4,8 @@ Each release includes `gostman-cli-<os>-<arch>` archives with a single `gostman`
 
 On macOS the binary is not notarized: run `xattr -d com.apple.quarantine gostman` once.
 
+![gostman run printing one line per request with its method, name, status, time and checks, the resolved URL under it, and a summary](../screenshots/term-run.png)
+
 ## Commands
 
 ```bash
@@ -71,6 +73,8 @@ An environment variable can read its value from HashiCorp Vault (KV 1 and 2), AW
 
 `--reporter text|json|junit|html|markdown`, or `format:file` to write that report to a file. Repeat it to write several reports in one run: `--reporter text --reporter junit:report.xml --reporter html:report.html`. At most one reporter can go without a file, and it prints to stdout; when every report goes to a file, the text summary is printed. `--output file` names the file of the reporter given without one, so `--reporter junit --output report.xml` works as before. `--reporter html:report.html` writes one self-contained page with a summary, every request's timing, checks, request and response, and a filter for failures; response bodies are included, so add `--redact` before sharing it. `--reporter markdown:summary.md` writes the counts and every failed check as Markdown for a CI job summary or a pull request comment. The desktop and web runner dialogs take a data file and a parallel count the same way and can download the same report. Colour is off when `NO_COLOR` is set or the output is not a terminal.
 
+![One run writing a text summary to the terminal, a JUnit file and an HTML report](../screenshots/term-reports.png)
+
 ### Contract checks
 
 `--contract openapi.yaml` (a file or an `http(s)` address) checks every HTTP response of the run against the spec: the status is documented for the operation with the same method and path, the content type is documented for that status, and a JSON body matches the response schema. Each check is reported like any other check, named like `Status 200 is documented for GET /pets/{id}`, with `"kind": "contract"` in the JSON report, so a mismatch fails the run; the text summary adds a Contract line. A response whose path matches no operation gets a warning line instead of checks. Without the flag, runs are unchanged. The app runs the same checks for folders linked to a spec; see [Contract checks](import-export-and-specs.md#contract-checks).
@@ -115,6 +119,8 @@ gostman run orders-api --flow Checkout --env CI
 `flow run` takes every flag of `run` except the ones that choose or repeat requests (`--folder`, `--data`, `--iterations`, `--parallel`, `--only`, `--tags`, `--exclude-tags`, `--bail` and `--delay`, which exit with status 2). `--workspace` names the workspace folder or export file; without it, the current folder is used, or the workspace that holds the flow file. `gostman run <workspace> --flow <name>` does the same. `flow list` prints each flow with its number of steps and id, and `--json` prints them as JSON.
 
 The text report adds a `FLOW` line for every step that sends no request, and a request that failed but that the flow handled, by trying again or going to another step, is printed in yellow with the reason. The steps of a flow run by a **Run flow** step are indented under it. The exit status follows the outcome of the flow, see [Exit codes](#exit-codes); the JSON report adds a `flow` object with the outcome, its message and every step in order, with the steps of a nested flow under the step that ran it. See [Flows](flows.md) for the steps and the file format.
+
+![gostman flow run executing the Check todos flow: a retried request, the steps of a loop, a failed check with the value that was found, and the reason the flow failed](../screenshots/term-flow.png)
 
 ## Scheduled runs
 
@@ -165,6 +171,8 @@ For a flow, 0 means it reached its end or an End step marked passed, and a failu
 
 
 
+![gostman run exiting with 1: the failed check is listed under its request with the value that was found](../screenshots/term-run-failing.png)
+
 ## Load testing
 
 `gostman load` sends one request many times at once and reports throughput, latency percentiles (p50, p90, p95, p99), status codes and error samples. Only target systems you own or have permission to test.
@@ -194,6 +202,8 @@ gostman scan orders-api --fail-on high
 - `--reporter text|json`, `--fail-on high|medium|none` (default `medium`; exit 1 when a finding is at or above it) and `--skip-examples`.
 - It is a heuristic. It can miss a token glued to other characters, a human-chosen password that does not look random, and files outside the collection such as `.env`. A clean scan is not proof that nothing is exposed.
 - The desktop and web apps have a **Scan for secrets** command, the Share tab warns before you create a link or file when something is found, and the Export tab shows a notice.
+
+![gostman scan reporting that it scanned three requests, one folder and two environments and found nothing](../screenshots/term-scan.png)
 
 ## Negative tests
 

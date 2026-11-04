@@ -30,6 +30,8 @@ gostman run store --env Local
 
 `gostman run` does not read Insomnia files directly; import them once. The values of secret rows and of private environments are not written to the folder, so pass them to the run with `--var password=...` or `--var-from-env password`. The rules every import follows, such as never turning off TLS verification and never carrying tokens, are in [Import, export and specs](import-export-and-specs.md#what-imports-never-do).
 
+![The Import tab, where you drop an Insomnia export or choose files or a folder, pick a format or leave it on detect automatically, and read the summary before anything is added](../screenshots/import.png)
+
 ## What comes across
 
 | In Insomnia | In Gostman |

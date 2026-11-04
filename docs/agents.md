@@ -34,6 +34,8 @@ In VS Code, the [VS Code extension](vscode.md) runs collections and flows from t
 
 Tools return JSON both as text and as structured content, describe themselves with read-only and destructive hints, and report progress during `run_folder` (requests done out of the planned total) and `load_test` when the client asks for it. While a request, a run or a load test is going on, `list_requests`, `get_request`, `save_request`, `import_requests`, `lint_spec` and `scan_secrets` still answer; tools that use the session's cookies and variables wait for it to finish.
 
+![The tools gostman mcp offers an agent: list_requests, get_request, send_request, run_folder, last_response, save_request, import_requests, the environment and variable tools, lint_spec, scan_secrets, load_test and the mock server tools](../screenshots/term-mcp-tools.png)
+
 ### A collection as tools
 
 `--expose-tag <tag>` turns every request with that tag into a tool of its own, named after the request, with the request's description as the tool's description. The description ends with the tool's arguments, so a parameter that the description lists but the tool does not take, such as one documented by an OpenAPI import, keeps its saved value. Each `{{variable}}` in the request's address, headers and body becomes a parameter; variables the active environment does not define are required. Secret and credential-named variables and credential headers are never parameters. Values given to a tool apply to that call only, win over every other value with that name (session values included) and must be plain: a value that holds `{{...}}`, reads a file or holds the value of a variable or credential is refused.

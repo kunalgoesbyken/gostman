@@ -23,6 +23,8 @@ Typing the same host into every request makes it hard to point the collection at
 
 Send it again to confirm nothing changed, then press **Save**. See [Variables](variables.md) for every scope and how they override each other.
 
+![List todos with the URL written as {{base_url}}/todos?userId=1, the Mock environment chosen in the header and the 200 OK response with its three checks passing](../screenshots/first-request.png)
+
 ## 3. Group requests in a folder
 
 1. Create a folder named **Todos** with the folder button in the sidebar and drag **List todos** into it.
@@ -45,6 +47,8 @@ A request that returns the wrong data with a `200` status still looks like a suc
 2. Press **Save** and send the request. The response panel's **Checks** tab lists each check as passed or failed.
 
 Change the expected `userId` to `2` and send again to see a failure, then change it back.
+
+![The Checks tab of List todos with three assertion rows: res.status equals 200, res.body is an array and res.body[0].userId equals 1](../screenshots/checks-tab.png)
 
 ## 5. Reuse a value from one response in the next request
 
@@ -78,6 +82,8 @@ For checks that do not fit in one row, such as validating against a JSON Schema 
 
 Choose **Run requests** at the top of the sidebar, then **Run**. The runner sends every request in order, applies the extraction rules and checks, and shows a summary you can download as an HTML report. Requests run top to bottom, so keep **List todos** above **Get one todo**.
 
+![The Run requests dialog: all three requests selected, then the run finished with every request at 3 of 3 checks and the footer reading Ran 3 of 3, 3 passed, 0 failed](../screenshots/gif-run-collection.gif)
+
 ## 8. Keep it as files and run it from the command line
 
 On the desktop app, open the storage menu in the header and choose **Save collection to folder**. Gostman writes one YAML file per request, which you can commit to Git next to your code. Then, with the [command line](cli.md) installed:
@@ -104,6 +110,8 @@ Duration  412ms
 Under each request is the address it was sent to, with the variables filled in.
 
 The command exits with `1` when a request or a check fails, which is what a CI pipeline needs.
+
+![The terminal output of gostman run: three requests passed with their status, time and checks, and a summary of 3 requests and 9 checks passed](../screenshots/term-run.png)
 
 ## 9. Run it once per row of a data file
 
