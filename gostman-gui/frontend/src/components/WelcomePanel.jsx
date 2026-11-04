@@ -1,6 +1,6 @@
 import { ChevronRight, Compass, FolderOpen, FolderPlus, Import, Terminal, X } from "lucide-react"
 import { GettingStartedChecklist, useOnboardingProgress } from "./GettingStarted"
-import { IconButton } from "./ui/button"
+import { Button } from "./ui/button"
 import { DisclosureSummary } from "./ui/disclosure"
 import { focusAddress } from "../lib/panes"
 import { usePreferences } from "../lib/preferences"
@@ -90,7 +90,7 @@ export function WelcomePanel({ actions, onDismiss }) {
             <h2 className="text-sm font-semibold [text-wrap:balance]">{TEXT.title}</h2>
             <p className="text-xs text-muted-foreground">{TEXT.intro}</p>
           </div>
-          <IconButton label={TEXT.dismiss} icon={X} onClick={onDismiss} />
+          <Button variant="ghost" size="sm" title={TEXT.dismiss} onClick={onDismiss} className="text-muted-foreground"><X aria-hidden="true" />{TEXT.skip}</Button>
         </header>
 
         <div className={COLUMNS}>
