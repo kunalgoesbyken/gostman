@@ -98,7 +98,7 @@ function VariableLegend({ entries }) {
 function Step({ id, number, isDone, isNext, onBegin }) {
   const text = TEXT.steps[id]
   return (
-    <li className={cn("flex gap-3 rounded-md px-2 py-2", isNext && "bg-accent")} aria-current={isNext ? "step" : undefined}>
+    <li className={cn("flex gap-3 rounded-md px-2 py-0.5", isNext && "bg-accent py-2")} aria-current={isNext ? "step" : undefined}>
       <StepMarker number={number} isDone={isDone} isNext={isNext} />
       <div className="min-w-0 flex-1">
         <p className={cn("text-xs font-medium leading-5", isDone && "text-muted-foreground")}>
@@ -147,7 +147,7 @@ function Completed() {
 export function GettingStartedChecklist({ progress, onBegin, onHide }) {
   const { steps, doneCount, nextId, isComplete } = progress
   return (
-    <section aria-label={TEXT.title} className="flex flex-col gap-3">
+    <section aria-label={TEXT.title} className="flex flex-col gap-2">
       <div className="flex items-center gap-3">
         <h3 className="text-xs font-semibold">{TEXT.title}</h3>
         <span className="text-xs text-muted-foreground">{TEXT.progress(doneCount, steps.length)}</span>
