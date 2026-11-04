@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/ed25519"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -21,6 +22,7 @@ const (
 	maxReleaseBytes    = 1 << 20
 	releaseUnavailable = "GitHub answered with HTTP %d"
 	checksumsAsset     = "SHA256SUMS"
+	signatureAsset     = checksumsAsset + ".sig"
 	maxRedirects       = 10
 )
 
@@ -52,10 +54,16 @@ type updateSource struct {
 	hosts      []string
 	plainHTTP  bool
 	manualOnly bool
+	key        ed25519.PublicKey
+}
+
+type releaseChecksums struct {
+	sums      githubAsset
+	signature githubAsset
 }
 
 func githubSource(manualOnly bool) updateSource {
-	return updateSource{latest: githubLatest, downloads: githubDownloads, hosts: githubAssetHosts, manualOnly: manualOnly}
+	return updateSource{latest: githubLatest, downloads: githubDownloads, hosts: githubAssetHosts, manualOnly: manualOnly, key: releaseKey()}
 }
 
 func (s updateSource) permits(address string) bool {
@@ -150,14 +158,15 @@ func (a *App) fetchRelease(ctx context.Context, source updateSource) (githubRele
 	return latest, nil
 }
 
-func installableAsset(release githubRelease, source updateSource, plan installPlan) (githubAsset, githubAsset, bool) {
-	if source.manualOnly || !plan.installs() {
-		return githubAsset{}, githubAsset{}, false
+func installableAsset(release githubRelease, source updateSource, plan installPlan) (githubAsset, releaseChecksums, bool) {
+	if source.manualOnly || !plan.installs() || source.key == nil {
+		return githubAsset{}, releaseChecksums{}, false
 	}
 	asset, hasAsset := release.asset(plan.Asset)
 	sums, hasSums := release.asset(checksumsAsset)
-	usable := hasAsset && hasSums && source.permits(asset.URL) && source.permits(sums.URL)
-	return asset, sums, usable
+	signature, hasSignature := release.asset(signatureAsset)
+	usable := hasAsset && hasSums && hasSignature && source.permits(asset.URL) && source.permits(sums.URL) && source.permits(signature.URL)
+	return asset, releaseChecksums{sums: sums, signature: signature}, usable
 }
 
 func (a *App) LatestRelease() (Release, error) {

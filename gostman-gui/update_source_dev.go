@@ -8,7 +8,10 @@ import (
 	"strings"
 )
 
-const updateFeedVariable = "GOSTMAN_UPDATE_FEED"
+const (
+	updateFeedVariable = "GOSTMAN_UPDATE_FEED"
+	updateKeyVariable  = "GOSTMAN_UPDATE_KEY"
+)
 
 func releaseSource() updateSource {
 	feed := strings.TrimSuffix(os.Getenv(updateFeedVariable), "/")
@@ -21,5 +24,6 @@ func releaseSource() updateSource {
 		downloads: feed + "/download/",
 		hosts:     []string{parsed.Host},
 		plainHTTP: parsed.Scheme == "http",
+		key:       parseKey(os.Getenv(updateKeyVariable)),
 	}
 }

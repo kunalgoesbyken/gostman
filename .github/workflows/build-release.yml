@@ -222,10 +222,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out the changelog
+      - name: Check out the changelog and the release key
         uses: actions/checkout@v4
         with:
-          sparse-checkout: CHANGELOG.md
+          sparse-checkout: |
+            CHANGELOG.md
+            gostman-gui/release-key.pub
           sparse-checkout-cone-mode: false
 
       - name: Download all artifacts
@@ -244,6 +246,25 @@ jobs:
         working-directory: artifacts
         run: sha256sum Gostman-* gostman-cli-* > SHA256SUMS
 
+      - name: Sign the checksums with the release key
+        working-directory: artifacts
+        env:
+          RELEASE_SIGNING_KEY: ${{ secrets.RELEASE_SIGNING_KEY }}
+        run: |
+          if [ -z "$RELEASE_SIGNING_KEY" ]; then
+            echo "::error::Set the RELEASE_SIGNING_KEY secret; the desktop app installs only signed releases."
+            exit 1
+          fi
+          key="$RUNNER_TEMP/release-signing-key.pem"
+          trap 'rm -f "$key"' EXIT
+          echo "$RELEASE_SIGNING_KEY" > "$key"
+          derived="$(openssl pkey -in "$key" -pubout -outform DER | tail -c 32 | base64)"
+          if [ "$derived" != "$(tr -d '[:space:]' < ../gostman-gui/release-key.pub)" ]; then
+            echo "::error::RELEASE_SIGNING_KEY does not match gostman-gui/release-key.pub."
+            exit 1
+          fi
+          openssl pkeyutl -sign -inkey "$key" -rawin -in SHA256SUMS -out SHA256SUMS.sig
+
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
@@ -254,6 +275,7 @@ jobs:
             artifacts/Gostman-*
             artifacts/gostman-cli-*
             artifacts/SHA256SUMS
+            artifacts/SHA256SUMS.sig
           generate_release_notes: true
 
   image:

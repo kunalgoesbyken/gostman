@@ -2,7 +2,9 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"context"
+	"crypto/ed25519"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -201,9 +203,10 @@ func (a *App) CancelUpdate() {
 type updateTarget struct {
 	version string
 	asset   githubAsset
-	sums    githubAsset
+	sums    releaseChecksums
 	plan    installPlan
 	client  *http.Client
+	key     ed25519.PublicKey
 }
 
 type updateFailure struct {
@@ -221,7 +224,7 @@ func (a *App) resolveUpdate(ctx context.Context) (updateTarget, *updateFailure) 
 	if err != nil {
 		return updateTarget{version: updates.snapshot().Version}, failed(failureNetwork, err)
 	}
-	target := updateTarget{version: release.version(), plan: effectiveInstall(), client: source.client(a.updatePolicy().Transport(false))}
+	target := updateTarget{version: release.version(), plan: effectiveInstall(), client: source.client(a.updatePolicy().Transport(false)), key: source.key}
 	if !isNewerVersion(target.version, currentVersion) {
 		return target, failed(failureUnsupported, fmt.Errorf(noNewerRelease, target.version, currentVersion))
 	}
@@ -237,7 +240,7 @@ func (a *App) resolveUpdate(ctx context.Context) (updateTarget, *updateFailure) 
 }
 
 func (a *App) stageUpdate(ctx context.Context, target updateTarget) (stagedUpdate, *updateFailure) {
-	expected, err := fetchChecksum(ctx, target.client, target.sums.URL, target.asset.Name)
+	expected, err := fetchChecksum(ctx, target.client, target.sums, target.key, target.asset.Name)
 	if err != nil {
 		return stagedUpdate{}, failed(failureUnverified, err)
 	}
@@ -313,13 +316,28 @@ func fetch(ctx context.Context, client *http.Client, address string) (*http.Resp
 	return response, nil
 }
 
-func fetchChecksum(ctx context.Context, client *http.Client, address, asset string) (string, error) {
+func fetchSmall(ctx context.Context, client *http.Client, address string) ([]byte, error) {
 	response, err := fetch(ctx, client, address)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+	return io.ReadAll(io.LimitReader(response.Body, maxChecksumBytes))
+}
+
+func fetchChecksum(ctx context.Context, client *http.Client, checksums releaseChecksums, key ed25519.PublicKey, asset string) (string, error) {
+	sums, err := fetchSmall(ctx, client, checksums.sums.URL)
 	if err != nil {
 		return "", err
 	}
-	defer response.Body.Close()
-	lines := bufio.NewScanner(io.LimitReader(response.Body, maxChecksumBytes))
+	signature, err := fetchSmall(ctx, client, checksums.signature.URL)
+	if err != nil {
+		return "", err
+	}
+	if err := verifySigned(key, sums, signature); err != nil {
+		return "", err
+	}
+	lines := bufio.NewScanner(bytes.NewReader(sums))
 	for lines.Scan() {
 		if digest, found := checksumFor(lines.Text(), asset); found {
 			return digest, nil
