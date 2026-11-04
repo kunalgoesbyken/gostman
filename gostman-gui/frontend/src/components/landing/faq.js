@@ -5,15 +5,15 @@ export const FAQ = [
   },
   {
     question: "Is Gostman free?",
-    answer: "Yes. Gostman is open source under the MIT licence. Every feature is in the download, with no account, no licence key and no seat count.",
+    answer: "Yes. Gostman is open source. Every feature is in the download, with no account, no licence key and no seat count.",
   },
   {
     question: "Will Gostman add a paid tier?",
-    answer: "Gostman has no paid tier, no account and no licence key, and every feature is in the free download. It is released under the MIT licence, so the published code stays free to use, change and fork whatever happens to the project.",
+    answer: "Gostman has no paid tier, no account and no licence key, and every feature is in the free download. The code is open source, so the published code stays free to use, change and fork whatever happens to the project.",
   },
   {
     question: "What happens to my collections if Gostman stops being developed?",
-    answer: "They keep working. A folder workspace is plain YAML in your own repository, the desktop app and the command line need no Gostman server, and collections export to Postman, Bruno, OpenAPI, HAR and .http files. The MIT licence also lets anyone fork the code and carry it on.",
+    answer: "They keep working. A folder workspace is plain YAML in your own repository, the desktop app and the command line need no Gostman server, and collections export to Postman, Bruno, OpenAPI, HAR and .http files. The code is open source, so anyone can fork it and carry it on.",
   },
   {
     question: "Where are my collections kept?",

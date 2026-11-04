@@ -11,7 +11,7 @@ export function FaqSection() {
     <section id="faq" className="render-when-visible relative px-6 py-24" aria-labelledby="faq-heading">
       <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-16">
         <div>
-          <SectionLabel number="005" label="Questions" />
+          <SectionLabel number="004" label="Questions" />
           <SplitHeading
             id="faq-heading"
             text="Questions before you switch"

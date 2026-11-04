@@ -81,7 +81,7 @@
       "feature": "Price",
       "gostman": {
         "state": "included",
-        "text": "Free. MIT licence."
+        "text": "Free and open source."
       },
       "postman": {
         "state": "partial",

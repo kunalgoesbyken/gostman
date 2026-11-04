@@ -254,9 +254,9 @@ export const guidePages = [
   {
     path: "yaak-alternative",
     title: "Yaak alternative: free for work, with a web app and CLI | Gostman",
-    description: "Gostman is a free, MIT-licensed Yaak alternative for REST, GraphQL, gRPC and WebSocket, with a web app, a CLI for CI, a mock server and collections as YAML files in Git. No licence key.",
+    description: "Gostman is a free, open source Yaak alternative for REST, GraphQL, gRPC and WebSocket, with a web app, a CLI for CI, a mock server and collections as YAML files in Git. No licence key.",
     heading: "A Yaak alternative with a web app and a CI runner",
-    intro: "Yaak and Gostman are both desktop API clients that keep requests as files you can put in Git. Gostman adds a web app that needs no install, and a command line that runs the same collection in CI. It is MIT licensed with no licence key, at home or at work.",
+    intro: "Yaak and Gostman are both desktop API clients that keep requests as files you can put in Git. Gostman adds a web app that needs no install, and a command line that runs the same collection in CI. It is open source with no licence key, at home or at work.",
     code: "gostman run ./collection --env CI --reporter junit --output report.xml",
     brands: ["github", "github-actions", "docker"],
     sections: [

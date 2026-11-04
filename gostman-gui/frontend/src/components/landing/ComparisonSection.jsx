@@ -45,7 +45,7 @@ export function ComparisonSection() {
     <section id="compare" className="render-when-visible relative px-6 py-24" aria-labelledby="comparison-heading">
       <div className="mx-auto max-w-6xl">
         <div className="mb-12 max-w-2xl">
-          <SectionLabel number="004" label="Compare" />
+          <SectionLabel number="003" label="Compare" />
           <SplitHeading
             id="comparison-heading"
             text="How Gostman compares"

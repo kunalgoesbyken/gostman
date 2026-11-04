@@ -1,5 +1,5 @@
 import { docPath } from "../../docs/manifest"
-import { ISSUES_URL, LICENSE_URL, RELEASES_URL, REPOSITORY_URL } from "../../lib/siteLinks"
+import { ISSUES_URL, RELEASES_URL, REPOSITORY_URL } from "../../lib/siteLinks"
 
 const internal = (label, href) => ({ label, href })
 const guide = (path, label) => internal(label, `/${path}`)
@@ -58,7 +58,6 @@ export const FOOTER_COLUMNS = [
       external("Source on GitHub", REPOSITORY_URL, "github"),
       external("Report an issue", ISSUES_URL),
       external("Releases", RELEASES_URL),
-      external("MIT licence", LICENSE_URL),
     ],
   },
 ]

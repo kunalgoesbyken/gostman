@@ -27,14 +27,12 @@ import { EditorSection } from "./landing/EditorSection"
 import { PointList } from "./landing/PointList"
 import { SiteFooter } from "./landing/SiteFooter"
 import { SplitHeading } from "./landing/SplitHeading"
-import { EverythingSection } from "./landing/EverythingSection"
 import { ComparisonSection } from "./landing/ComparisonSection"
 import { FaqSection } from "./landing/FaqSection"
 import { SectionLabel } from "./landing/SectionLabel"
 import { ImportSources } from "./landing/ImportSources"
 import { StackSection } from "./landing/StackSection"
 import { GlyphWordmark } from "./landing/GlyphWordmark"
-import { ProblemStatement } from "./landing/ProblemStatement"
 import { ShipStages } from "./landing/ShipStages"
 import { ImageZoom } from "./landing/ImageZoom"
 
@@ -56,7 +54,7 @@ const SECTION_LINKS = [
 
 const PLATFORMS = [...groupByOs(DOWNLOADS).map((group) => group.name), "the web"]
 
-const AVAILABILITY = `Open source under the MIT licence · ${formatList(PLATFORMS)}`
+const AVAILABILITY = `Open source · ${formatList(PLATFORMS)}`
 
 const introStep = (step) => ({ "--intro-step": step })
 
@@ -299,7 +297,6 @@ export function LandingPage({ onGetStarted }) {
 
         <section id="features" className="render-when-visible relative py-24 px-6" aria-labelledby="workflow-heading">
           <div className="mx-auto max-w-6xl">
-            <ProblemStatement />
             <div className="mb-12 max-w-2xl">
               <SectionLabel number="001" label="Workflow" />
               <SplitHeading
@@ -321,12 +318,11 @@ export function LandingPage({ onGetStarted }) {
         </section>
 
         <EditorSection />
-        <EverythingSection onGetStarted={onGetStarted} />
         <ComparisonSection />
         <FaqSection />
         <StackSection />
 
-        <section className="render-when-visible relative pt-24 text-center">
+        <section id="download" className="render-when-visible relative pt-24 text-center">
           <div className="mx-auto max-w-6xl px-6">
             <SplitHeading
               text="Send your first request in a minute"

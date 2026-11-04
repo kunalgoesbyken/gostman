@@ -1,7 +1,7 @@
 import { Heart } from "lucide-react"
 import { BrandIcon } from "../ui/brandIcon"
 import { WEB_APP_URL } from "../../lib/constants"
-import { ALTERNATIVETO_BADGE_URL, ALTERNATIVETO_URL, LICENSE_URL, SPONSOR_URL } from "../../lib/siteLinks"
+import { ALTERNATIVETO_BADGE_URL, ALTERNATIVETO_URL, SPONSOR_URL } from "../../lib/siteLinks"
 import { Brand } from "./Brand"
 import { FOOTER_COLUMNS } from "./footerLinks"
 
@@ -90,12 +90,6 @@ export function SiteFooter() {
             <Heart className="h-4 w-4" />
           </a>
         </div>
-        <p>
-          Free software under the{" "}
-          <a href={LICENSE_URL} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-foreground">
-            MIT licence
-          </a>
-        </p>
       </div>
     </footer>
   )
