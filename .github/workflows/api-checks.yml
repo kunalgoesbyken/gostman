@@ -1,0 +1,18 @@
+name: API checks
+
+on: pull_request
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  api-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        with:
+          collection: examples/todo-api
+          environment: Public
+          comment: true

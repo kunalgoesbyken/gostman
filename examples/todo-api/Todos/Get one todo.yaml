@@ -13,6 +13,8 @@ assertions:
     value: "{{todo_id}}"
   - expression: res.body.completed
     operator: isBoolean
+  - expression: res.body.dueDate
+    operator: isString
 examples: |
   [
     {
