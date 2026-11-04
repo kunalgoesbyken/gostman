@@ -4,6 +4,8 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.15.1] - 2026-11-04
+
 ### Changed
 
 - Desktop updates install only when the release's checksums carry a valid signature from the Gostman release key, so a changed release cannot pass a changed download.
