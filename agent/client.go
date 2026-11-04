@@ -155,6 +155,7 @@ func (c *Client) RunFlow(ctx context.Context, stored runner.Collection, flow wor
 		},
 		Step: func(event runner.FlowEvent) {
 			c.absorb()
+			c.learnAll(event.Writes)
 			if cleaned, err := redact.Clean(c.guard, event); err == nil && watch.Step != nil {
 				watch.Step(cleaned)
 			}
