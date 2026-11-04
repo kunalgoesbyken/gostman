@@ -61,7 +61,7 @@ inputs:
 
 outputs:
   exit-code:
-    description: Exit code of gostman run. 0 passed, 1 a check, a script or an MCP tool call failed, or the run was interrupted, 2 wrong input, 3 a request got no response: it could not be sent, the connection failed or timed out.
+    description: Exit code of gostman run. 0 passed, 1 a check, a script or an MCP tool call failed, or the run was interrupted, 2 wrong input, 3 a request got no response because it could not be sent, the connection failed or it timed out.
     value: ${{ steps.run.outputs.exit-code }}
   report:
     description: Path of the report file, empty when no output was requested.
@@ -181,7 +181,8 @@ runs:
           echo "[Job log]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)"
         } > "$body"
         comments="repos/$GITHUB_REPOSITORY/issues/$pr/comments"
-        existing=$(gh api --paginate "$comments" --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
+        author=$(gh api user --jq .login 2> /dev/null) || author="github-actions[bot]"
+        existing=$(gh api --paginate "$comments" | jq -r --arg author "$author" --arg marker "$marker" '.[] | select(.user.login == $author and (.body | startswith($marker))) | .id' | head -n 1)
         if [ -n "$existing" ]; then
           gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing" -F "body=@$body" > /dev/null
         else
