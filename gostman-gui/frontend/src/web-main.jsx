@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { startTransition } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import './index.css'
 import WebApp from './WebApp'
@@ -15,13 +15,20 @@ const isLandingRoute = () => normalize(window.location.pathname) === LANDING_ROU
 
 const isPrerenderedLanding = (root) => root.hasChildNodes() && isLandingRoute()
 
+const holdsAppSkeleton = (root) => Boolean(root.firstElementChild?.hasAttribute('data-app-skeleton'))
+
 function mount(root, app) {
   if (isPrerenderedLanding(root)) {
     hydrateRoot(root, app)
     return
   }
-  root.replaceChildren()
-  createRoot(root).render(app)
+  if (!holdsAppSkeleton(root)) {
+    root.replaceChildren()
+    createRoot(root).render(app)
+    return
+  }
+  const client = createRoot(root)
+  startTransition(() => client.render(app))
 }
 
 async function renderApp() {

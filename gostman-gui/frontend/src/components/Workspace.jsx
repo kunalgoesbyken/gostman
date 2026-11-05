@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, lazy, Suspense } from "react"
+import { useCallback, useDeferredValue, useEffect, useMemo, useState, useSyncExternalStore, lazy, Suspense } from "react"
 import { AlertTriangle } from "lucide-react"
 import { installFeatureAccess, releaseFeatureAccess } from "../lib/featureAccess"
 import { Sidebar } from "./Sidebar"
@@ -44,7 +44,7 @@ import { exportableVariables, foldersWithoutSecrets, listWithoutSecrets, without
 import { startSpecWatch } from "../lib/specWatch"
 import { createWorkspaceActions } from "../lib/workspaceActions"
 import { requestCatalog, withReferenceNames } from "../lib/flows/catalog"
-import { whenIdle } from "../lib/idle"
+import { prefetchEditorWhenIdle } from "../lib/routePrefetch"
 import { PANE_ADDRESS, PANE_SIDEBAR, cyclePane, focusAddress, focusPane, watchPaneFocus } from "../lib/panes"
 import { SIDEBAR_TEXT } from "../lib/sidebarText"
 import { DATA_TEXT } from "../lib/dataText"
@@ -595,8 +595,9 @@ function LoadedWorkspace({ backend, onBack }) {
 export function Workspace({ backend, onBack }) {
   const { isHydrated, failure, retry } = useStoredData(backend)
   useDocumentLanguage()
-  useEffect(() => whenIdle(loadCodeEditor), [])
+  const isShown = useDeferredValue(isHydrated)
+  useEffect(() => (isShown ? prefetchEditorWhenIdle(loadCodeEditor) : undefined), [isShown])
   if (failure) return <LoadFailure reason={failure} onRetry={retry} />
-  if (!isHydrated) return <AppSkeleton />
+  if (!isShown) return <AppSkeleton />
   return <LoadedWorkspace backend={backend} onBack={onBack} />
 }

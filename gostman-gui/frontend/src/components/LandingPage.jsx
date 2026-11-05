@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { Suspense, useState, useEffect } from "react"
 import { LazyMotion } from "framer-motion"
 import { Button, buttonVariants } from "./ui/button"
 import { cn } from "../lib/utils"
@@ -26,6 +26,8 @@ import { ImportSources } from "./landing/ImportSources"
 import { StackSection } from "./landing/StackSection"
 import { GlyphWordmark } from "./landing/GlyphWordmark"
 import { revealStep } from "./landing/revealStep"
+import { whenLoadedAndIdle } from "../lib/idle"
+import { prefetchRoutesWhenIdle } from "../lib/routePrefetch"
 
 const loadMotionFeatures = () => import("../lib/motionFeatures").then((module) => module.default)
 
@@ -65,10 +67,15 @@ const useGitHubStars = () => {
 
   useEffect(() => {
     const controller = new AbortController()
-    latestStars(controller.signal)
-      .then((count) => count !== null && setStars(count))
-      .catch(() => {})
-    return () => controller.abort()
+    const cancel = whenLoadedAndIdle(() =>
+      latestStars(controller.signal)
+        .then((count) => count !== null && setStars(count))
+        .catch(() => {})
+    )
+    return () => {
+      cancel()
+      controller.abort()
+    }
   }, [])
 
   return stars
@@ -118,6 +125,7 @@ export function LandingPage({ onGetStarted }) {
   const stars = useGitHubStars()
 
   useSmoothScroll()
+  useEffect(() => prefetchRoutesWhenIdle(), [])
 
   return (
     <LazyMotion features={loadMotionFeatures} strict>
@@ -152,17 +160,17 @@ export function LandingPage({ onGetStarted }) {
             <div className="relative max-w-4xl mx-auto">
               <div className="text-center space-y-6">
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.1] [text-wrap:balance]">
-                  <span className="intro block">Gostman, the open source API client.</span>
-                  <span className="intro block mt-2 text-muted-foreground" style={introStep(1)}>No account. No paid tier.</span>
+                  <span className="block">Gostman, the open source API client.</span>
+                  <span className="block mt-2 text-muted-foreground">No account. No paid tier.</span>
                 </h1>
 
-                <p className="intro text-lg md:text-xl text-muted-foreground/90 max-w-3xl mx-auto leading-relaxed [text-wrap:balance]" style={introStep(2)}>
+                <p className="intro text-lg md:text-xl text-muted-foreground/90 max-w-3xl mx-auto leading-relaxed [text-wrap:balance]">
                   Gostman is a free Postman alternative for REST, GraphQL, gRPC and WebSocket. Collections are YAML files in Git, and secret values stay out of them.
                 </p>
 
-                <CallToActions onGetStarted={onGetStarted} className="intro pt-4" style={introStep(3)} />
+                <CallToActions onGetStarted={onGetStarted} className="intro pt-4" style={introStep(1)} />
 
-                <p className="intro text-sm text-muted-foreground [text-wrap:balance]" style={introStep(3)}>{AVAILABILITY}</p>
+                <p className="intro text-sm text-muted-foreground [text-wrap:balance]" style={introStep(1)}>{AVAILABILITY}</p>
               </div>
             </div>
           </section>
@@ -170,32 +178,46 @@ export function LandingPage({ onGetStarted }) {
           <section className="relative py-16 px-6">
             <div className="landing-glow pointer-events-none absolute inset-x-0 -top-[15%] hidden h-[75%] md:block" aria-hidden="true" />
             <div className="relative max-w-5xl mx-auto">
-              <ProductShowcase />
-              <ImportSources className="mt-20" />
+              <Suspense fallback={null}>
+                <ProductShowcase />
+                <ImportSources className="mt-20" />
+              </Suspense>
             </div>
           </section>
         </div>
 
-        <FeatureSection />
-        <ComparisonSection />
-        <FaqSection />
-        <StackSection />
+        <Suspense fallback={null}>
+          <FeatureSection />
+        </Suspense>
+        <Suspense fallback={null}>
+          <ComparisonSection />
+        </Suspense>
+        <Suspense fallback={null}>
+          <FaqSection />
+        </Suspense>
+        <Suspense fallback={null}>
+          <StackSection />
+        </Suspense>
 
-        <section id="download" className="render-when-visible relative border-t border-border/50 pt-24 text-center">
-          <div className="mx-auto max-w-6xl px-6">
-            <SplitHeading text="Send your first request in a minute" />
-            <p className="landing-lead reveal-on-scroll mx-auto mt-5 max-w-lg" style={revealStep(1)}>
-              Download the desktop app for Windows, macOS or Linux, or open the web version now. There is nothing to sign up for.
-            </p>
-            <CallToActions onGetStarted={onGetStarted} className="mt-8" />
-            <p className="mt-6 text-sm text-muted-foreground">{AVAILABILITY}</p>
-            <InstallCommands className="relative mx-auto mt-10 max-w-2xl text-left" />
-            <AgentStart className="mt-6" />
-          </div>
-          <GlyphWordmark className="mt-20" />
-        </section>
+        <Suspense fallback={null}>
+          <section id="download" className="render-when-visible relative border-t border-border/50 pt-24 text-center">
+            <div className="mx-auto max-w-6xl px-6">
+              <SplitHeading text="Send your first request in a minute" />
+              <p className="landing-lead reveal-on-scroll mx-auto mt-5 max-w-lg" style={revealStep(1)}>
+                Download the desktop app for Windows, macOS or Linux, or open the web version now. There is nothing to sign up for.
+              </p>
+              <CallToActions onGetStarted={onGetStarted} className="mt-8" />
+              <p className="mt-6 text-sm text-muted-foreground">{AVAILABILITY}</p>
+              <InstallCommands className="relative mx-auto mt-10 max-w-2xl text-left" />
+              <AgentStart className="mt-6" />
+            </div>
+            <GlyphWordmark className="mt-20" />
+          </section>
+        </Suspense>
 
-        <SiteFooter />
+        <Suspense fallback={null}>
+          <SiteFooter />
+        </Suspense>
       </div>
     </LazyMotion>
   )

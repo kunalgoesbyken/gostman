@@ -21,6 +21,7 @@ const EMPTY_ROOT = '<div id="root"></div>'
 const IMAGE_FILES = /\.(png|jpe?g|webp|svg|mp4)$/
 const STARS_TIMEOUT_MS = 4000
 export const DOCS_ENTRY = 'docs'
+export const CLIENT_ROUTE = 'web'
 
 export const siteUrl = (process.env.SITE_URL || DEFAULT_SITE_URL).replace(/\/+$/, '')
 
@@ -93,6 +94,16 @@ const faqJsonLd = () => JSON.stringify({
   '@type': 'FAQPage',
   mainEntity: FAQ.map(({ question, answer }) => ({ '@type': 'Question', name: question, acceptedAnswer: { '@type': 'Answer', text: answer } })),
 })
+
+const PRELOADED_FONTS = /^assets\/outfit-latin-(400|600)-normal\.[^.]+\.woff2$/
+
+const fontPreloads = (bundle) =>
+  Object.keys(bundle)
+    .filter((fileName) => PRELOADED_FONTS.test(fileName))
+    .sort()
+    .map((fileName) => `<link rel="preload" as="font" type="font/woff2" crossorigin href="/${fileName}">`)
+
+const withHeadLinks = (html, links) => html.replace('</head>', `${links.join('\n')}\n</head>`)
 
 const withHeadScript = (html, json) => html.replace('</head>', `<script type="application/ld+json">${json}</script>\n</head>`)
 
@@ -180,13 +191,13 @@ async function buildGuideRenderer(bundle) {
   const script = outputFiles.find((file) => file.path.endsWith('.js'))
   const scriptPath = join(outdir, 'render.cjs')
   writeFileSync(scriptPath, script.text)
-  const { renderGuidePage, renderDocsPage, renderLandingMarkup } = createRequire(scriptPath)(scriptPath)
+  const { renderGuidePage, renderDocsPage, renderLandingMarkup, renderAppSkeletonMarkup } = createRequire(scriptPath)(scriptPath)
   rmSync(outdir, { recursive: true, force: true })
 
   const assets = outputFiles
     .filter((file) => file !== script)
     .map((file) => ({ fileName: relative(outdir, file.path).split(sep).join('/'), source: file.contents }))
-  return { renderGuidePage, renderDocsPage, renderLandingMarkup, assets }
+  return { renderGuidePage, renderDocsPage, renderLandingMarkup, renderAppSkeletonMarkup, assets }
 }
 
 export const chunkClosure = (bundle, fileName, seen = new Set()) => {
@@ -221,7 +232,7 @@ export function siteMeta() {
       this.emitFile({ type: 'asset', fileName: 'robots.txt', source: robotsTxt(siteUrl) })
       this.emitFile({ type: 'asset', fileName: CLIENT_METADATA_PATH.slice(1), source: JSON.stringify(clientMetadata(siteUrl), null, 2) })
 
-      const { renderGuidePage, renderDocsPage, renderLandingMarkup, assets } = await buildGuideRenderer(bundle)
+      const { renderGuidePage, renderDocsPage, renderLandingMarkup, renderAppSkeletonMarkup, assets } = await buildGuideRenderer(bundle)
       const docs = loadDocs(DOCS_DIR)
       const stylesheets = stylesheetsOf(bundle)
       const emit = (fileName, source) => this.emitFile({ type: 'asset', fileName, source })
@@ -238,7 +249,11 @@ export function siteMeta() {
       docs.pages.forEach((page) => emit(docOutputFile(page.slug), renderDocsPage(page, shared)))
       const landing = bundle['index.html']
       if (!String(landing.source).includes(EMPTY_ROOT)) this.error('index.html has no empty root element to prerender into')
-      landing.source = withHeadScript(String(landing.source).replace(EMPTY_ROOT, `<div id="root">${renderLandingMarkup()}</div>`), faqJsonLd())
+      const fonts = fontPreloads(bundle)
+      landing.source = withHeadScript(withHeadLinks(String(landing.source).replace(EMPTY_ROOT, `<div id="root">${renderLandingMarkup()}</div>`), fonts), faqJsonLd())
+      const client = bundle[`${CLIENT_ROUTE}/index.html`]
+      if (!client || !String(client.source).includes(EMPTY_ROOT)) this.error(`${CLIENT_ROUTE}/index.html has no empty root element to prerender into`)
+      client.source = String(client.source).replace(EMPTY_ROOT, `<div id="root">${renderAppSkeletonMarkup()}</div>`)
     },
   }
 }

@@ -22,13 +22,13 @@ import { useAppStore } from "../store/appStore"
 import { awaitsRestart, useWindowFrame } from "../hooks/useWindowFrame"
 import { isFontInstalled, sortedFamilies } from "../lib/fonts"
 import { formatNumber, formatPercent } from "../lib/i18n/format"
-import { SYSTEM_LANGUAGE, languageName, resolveLanguage } from "../lib/i18n/languages"
+import { SYSTEM_LANGUAGE, languageChoices, languageName, resolveLanguage } from "../lib/i18n/languages"
 import { switchLanguage } from "../lib/i18n/switchLanguage"
 import { openExternal } from "../lib/about"
 import { ORIENTATION, moveFocus } from "../lib/rovingFocus"
 import { scrollIntoStrip } from "../lib/scrollIntoStrip"
 import {
-  BUILT_IN_TIMEOUT_SECONDS, DENSITIES, EDITOR_FONT_SIZES, FONT_NAME_LENGTH, LANGUAGES, REQUEST_TIMEOUT_SECONDS,
+  BUILT_IN_TIMEOUT_SECONDS, DENSITIES, EDITOR_FONT_SIZES, FONT_NAME_LENGTH, REQUEST_TIMEOUT_SECONDS,
   RESPONSE_LAYOUTS, TAB_PLACEMENTS, TEXT_SCALES, resetPreferences, updatePreferences, usePreferences,
 } from "../lib/preferences"
 import { SECTION_AI, SECTION_UPDATES, selectPreferencesSection, usePreferencesSection } from "../lib/preferencesSection"
@@ -266,7 +266,7 @@ function LanguageSection({ preferences }) {
         <div className="w-56 max-w-full">
           <Select aria-label={fields.language} value={choice} onChange={(event) => setChoice(event.target.value)}>
             <option value={SYSTEM_LANGUAGE}>{PREFERENCES_TEXT.languageSystem({ language: systemName })}</option>
-            {LANGUAGES.map((language) => (
+            {languageChoices().map((language) => (
               <option key={language.value} value={language.value} lang={language.value}>{languageName(language.value)}</option>
             ))}
           </Select>

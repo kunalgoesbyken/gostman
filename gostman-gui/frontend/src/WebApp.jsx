@@ -1,15 +1,22 @@
 import { lazy, Suspense, useCallback, useEffect } from "react"
 import { Analytics } from "@vercel/analytics/react"
-import { LandingPage } from "./components/LandingPage"
+import { AppSkeletonFrame } from "./components/AppSkeletonFrame"
 import { LANDING_ROUTE, normalize, useRoute } from "./hooks/useRoute"
 import { bootLanguage } from "./lib/i18n/boot"
+import { onIdle } from "./lib/idle"
 import { registerServiceWorker } from "./lib/pwa"
 import { preventInputZoom } from "./lib/viewport"
+
+const LandingPage = lazy(() => import("./components/LandingPage").then((module) => ({ default: module.LandingPage })))
 
 const WebWorkspace = lazy(async () => {
   await bootLanguage()
   const [{ Workspace }, { webBackend }] = await Promise.all([import("./components/Workspace"), import("./lib/backend/web")])
-  return { default: (props) => <Workspace backend={webBackend} {...props} /> }
+  function OfflineReadyWorkspace(props) {
+    useEffect(() => onIdle(registerServiceWorker), [])
+    return <Workspace backend={webBackend} {...props} />
+  }
+  return { default: OfflineReadyWorkspace }
 })
 
 function landingVisit(event) {
@@ -27,21 +34,22 @@ function WebApp() {
 
   useEffect(() => {
     if (isLanding) return undefined
-    registerServiceWorker()
     return preventInputZoom()
   }, [isLanding])
 
   if (isLanding) {
     return (
       <>
-        <LandingPage onGetStarted={openClient} />
+        <Suspense fallback={null}>
+          <LandingPage onGetStarted={openClient} />
+        </Suspense>
         <Analytics beforeSend={landingVisit} />
       </>
     )
   }
 
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<AppSkeletonFrame />}>
       <WebWorkspace onBack={openLanding} />
     </Suspense>
   )

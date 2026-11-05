@@ -10,7 +10,7 @@ export const baseLanguage = (language) => language.split('-')[0].toLowerCase()
 
 export const directionOf = (language) => (RTL_LANGUAGES.includes(baseLanguage(language)) ? 'rtl' : 'ltr')
 
-export function languageName(language) {
+function nativeName(language) {
   if (PSEUDO_NAMES[language]) return PSEUDO_NAMES[language]
   if (typeof Intl === 'undefined' || typeof Intl.DisplayNames !== 'function') return language
   try {
@@ -21,21 +21,29 @@ export function languageName(language) {
   }
 }
 
+const knownNames = new Map()
+
+export function languageName(language) {
+  if (!knownNames.has(language)) knownNames.set(language, nativeName(language))
+  return knownNames.get(language)
+}
+
 const byName = (first, second) => languageName(first.value).localeCompare(languageName(second.value))
 
 const entry = ({ value, pseudo }) => ({ value, direction: directionOf(value), pseudo })
 
 const listed = (pseudo) => LANGUAGE_LIST.filter((language) => language.value !== ENGLISH && language.pseudo === pseudo).map(entry).sort(byName)
 
-export const LANGUAGES = [
-  ...LANGUAGE_LIST.filter((language) => language.value === ENGLISH).map(entry),
-  ...listed(false),
-  ...listed(true),
-]
+let sortedLanguages = null
 
-export const LANGUAGE_VALUES = [SYSTEM_LANGUAGE, ...LANGUAGES.map((language) => language.value)]
+export function languageChoices() {
+  sortedLanguages ??= [...LANGUAGE_LIST.filter((language) => language.value === ENGLISH).map(entry), ...listed(false), ...listed(true)]
+  return sortedLanguages
+}
 
-const realLanguages = () => LANGUAGES.filter((language) => !language.pseudo).map((language) => language.value)
+export const LANGUAGE_VALUES = [SYSTEM_LANGUAGE, ...LANGUAGE_LIST.map((language) => language.value)]
+
+const realLanguages = () => LANGUAGE_LIST.filter((language) => !language.pseudo).map((language) => language.value)
 
 function scriptKey(tag) {
   if (typeof Intl === 'undefined' || typeof Intl.Locale !== 'function') return null

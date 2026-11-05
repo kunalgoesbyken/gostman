@@ -4,7 +4,7 @@ import { sanitizeOverrides } from './chords.js'
 import { isHexColor } from './color.js'
 import { isPlainObject, parseJSON } from './dataUtils.js'
 import { FONT_SLOTS, applyFont } from './fonts.js'
-import { LANGUAGES, LANGUAGE_VALUES, SYSTEM_LANGUAGE } from './i18n/languages.js'
+import { LANGUAGE_VALUES, SYSTEM_LANGUAGE } from './i18n/languages.js'
 import { AUTHOR_LIMIT } from './notes.js'
 import { readStored, writeStored } from './storage.js'
 import { normalizeTagColors } from './tagColors.js'
@@ -32,7 +32,6 @@ export const FONT_NAME_LENGTH = 100
 export const DENSITIES = ['comfortable', 'compact']
 export const RESPONSE_LAYOUTS = ['below', 'right']
 export const TAB_PLACEMENTS = ['bar', 'sidebar']
-export { LANGUAGES }
 export const EDITOR_FONT_SIZES = { min: 10, max: 24 }
 export const REQUEST_TIMEOUT_SECONDS = { min: 0, max: 3600 }
 export const BUILT_IN_TIMEOUT_SECONDS = 30

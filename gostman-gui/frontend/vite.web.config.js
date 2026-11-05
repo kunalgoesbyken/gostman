@@ -6,7 +6,8 @@ import { fileURLToPath } from 'url'
 import { createHash } from 'crypto'
 import { readFileSync, writeFileSync } from 'fs'
 import { localesPlugin, isLocaleChunk } from './i18n/plugin.js'
-import { DOCS_ENTRY, chunkClosure, siteDefine, siteMeta } from './site.config.js'
+import { EDITOR_PREFETCH_ID, ROUTE_PREFETCH_ID } from './src/lib/routePrefetch.js'
+import { CLIENT_ROUTE, DOCS_ENTRY, chunkClosure, siteDefine, siteMeta } from './site.config.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -51,30 +52,70 @@ const noindexed = (html) =>
 
 const withLinks = (html, links) => String(html).replace('</head>', `${links.join('\n')}\n</head>`)
 
-function preloadedRoutePage(route, module) {
+const withDeferredLinks = (html, id, links) => withLinks(html, [`<template id="${id}">${links.join('')}</template>`])
+
+const dynamicEntryOf = (chunks, module) => {
   const moduleId = normalizePath(resolve(__dirname, module))
+  return chunks.find((chunk) => chunk.isDynamicEntry && moduleId in chunk.modules)
+}
+
+function chunksBeyondEntry(bundle, module) {
+  const chunks = Object.values(bundle).filter((item) => item.type === 'chunk')
+  const target = dynamicEntryOf(chunks, module)
+  if (!target) return null
+  const loaded = new Set(chunks.filter((chunk) => chunk.isEntry && chunk.name !== DOCS_ENTRY).flatMap((chunk) => [...chunkClosure(bundle, chunk.fileName)]))
+  return [...chunkClosure(bundle, target.fileName)].filter((fileName) => !loaded.has(fileName))
+}
+
+const modulePreload = (fileName) => `<link rel="modulepreload" crossorigin href="/${fileName}">`
+
+const prefetchesOf = (bundle, files) => [
+  ...files.flatMap((fileName) => [...(bundle[fileName].viteMetadata?.importedCss ?? [])]).map((fileName) => `<link rel="prefetch" as="style" href="/${fileName}">`),
+  ...files.map((fileName) => `<link rel="prefetch" as="script" crossorigin href="/${fileName}">`),
+]
+
+function preloadedRoutePage(route, module) {
   return {
     name: 'preloaded-route-page',
     apply: 'build',
     enforce: 'post',
     generateBundle(_options, bundle) {
-      const chunks = Object.values(bundle).filter((item) => item.type === 'chunk')
-      const target = chunks.find((chunk) => chunk.isDynamicEntry && moduleId in chunk.modules)
+      const files = chunksBeyondEntry(bundle, module)
       const page = bundle['index.html']
-      if (!target || !page) return
-      const loaded = new Set(chunks.filter((chunk) => chunk.isEntry && chunk.name !== DOCS_ENTRY).flatMap((chunk) => [...chunkClosure(bundle, chunk.fileName)]))
-      const files = [...chunkClosure(bundle, target.fileName)].filter((fileName) => !loaded.has(fileName))
+      if (!files || !page) return
       const styles = files.flatMap((fileName) => [...(bundle[fileName].viteMetadata?.importedCss ?? [])])
-      const preloads = [
-        ...styles.map((fileName) => `<link rel="stylesheet" href="/${fileName}">`),
-        ...files.map((fileName) => `<link rel="modulepreload" crossorigin href="/${fileName}">`),
-      ]
-      const prefetches = [
-        ...styles.map((fileName) => `<link rel="prefetch" as="style" href="/${fileName}">`),
-        ...files.map((fileName) => `<link rel="prefetch" as="script" crossorigin href="/${fileName}">`),
-      ]
+      const preloads = [...styles.map((fileName) => `<link rel="stylesheet" href="/${fileName}">`), ...files.map(modulePreload)]
       this.emitFile({ type: 'asset', fileName: `${route}/index.html`, source: withLinks(noindexed(page.source), preloads) })
-      page.source = withLinks(page.source, prefetches)
+      page.source = withDeferredLinks(page.source, ROUTE_PREFETCH_ID, prefetchesOf(bundle, files))
+    },
+  }
+}
+
+function prefetchedOnRoute(route, routeModule, module) {
+  return {
+    name: 'prefetched-on-route',
+    apply: 'build',
+    enforce: 'post',
+    generateBundle(_options, bundle) {
+      const files = chunksBeyondEntry(bundle, module)
+      const page = bundle[`${route}/index.html`]
+      if (!files || !page) return
+      const loaded = new Set(chunksBeyondEntry(bundle, routeModule) ?? [])
+      page.source = withDeferredLinks(page.source, EDITOR_PREFETCH_ID, prefetchesOf(bundle, files.filter((fileName) => !loaded.has(fileName))))
+    },
+  }
+}
+
+function preloadedOnLanding(module) {
+  return {
+    name: 'preloaded-on-landing',
+    apply: 'build',
+    enforce: 'post',
+    generateBundle(_options, bundle) {
+      const files = chunksBeyondEntry(bundle, module)
+      const page = bundle['index.html']
+      if (!files || !page) return
+      page.source = withLinks(page.source, files.map(modulePreload))
     },
   }
 }
@@ -140,7 +181,9 @@ export default defineConfig({
     }),
     serveWebEntryInDev('index-web.html'),
     renameHtmlEntry('index-web.html', 'index.html'),
-    preloadedRoutePage('web', 'src/components/Workspace.jsx'),
+    preloadedRoutePage(CLIENT_ROUTE, 'src/components/Workspace.jsx'),
+    prefetchedOnRoute(CLIENT_ROUTE, 'src/components/Workspace.jsx', 'src/components/CodeEditor.jsx'),
+    preloadedOnLanding('src/components/LandingPage.jsx'),
     stampServiceWorker(),
     siteMeta(),
   ],

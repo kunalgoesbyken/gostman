@@ -1,8 +1,10 @@
+import { Suspense } from "react"
 import { renderToStaticMarkup, renderToString } from "react-dom/server"
 import { DocsContent } from "../components/docs/DocsContent"
 import { DocsShell } from "../components/docs/DocsShell"
 import { GuidePage } from "../components/GuidePage"
 import { LandingPage } from "../components/LandingPage"
+import { AppSkeletonFrame } from "../components/AppSkeletonFrame"
 import { SiteFooter } from "../components/landing/SiteFooter"
 import { docPath } from "../docs/manifest"
 
@@ -118,4 +120,11 @@ export function renderDocsPage(page, { siteUrl, stylesheets, scripts, nav, direc
 
 const stayOnPage = () => {}
 
-export const renderLandingMarkup = () => renderToString(<LandingPage onGetStarted={stayOnPage} />)
+export const renderLandingMarkup = () =>
+  renderToString(
+    <Suspense fallback={null}>
+      <LandingPage onGetStarted={stayOnPage} />
+    </Suspense>,
+  )
+
+export const renderAppSkeletonMarkup = () => renderToStaticMarkup(<AppSkeletonFrame />)

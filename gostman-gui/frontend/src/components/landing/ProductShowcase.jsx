@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, m } from "framer-motion"
 import { easeOutExpo, springLayout } from "../../lib/motion"
 import { cn } from "../../lib/utils"
-import { whenIdle } from "../../lib/idle"
+import { whenLoadedAndIdle } from "../../lib/idle"
 import { scrollIntoStrip } from "../../lib/scrollIntoStrip"
 import { ShowcaseVideo } from "./ShowcaseVideo"
 import graphqlVideo from "../../assets/landing/showcase-graphql.mp4"
@@ -103,7 +103,7 @@ const preloadPosters = () => VIEWS.forEach(({ poster }) => {
 export function ProductShowcase() {
   const [activeId, setActiveId] = useState(VIEWS[0].id)
   const active = VIEWS.find((view) => view.id === activeId)
-  useEffect(() => whenIdle(preloadPosters), [])
+  useEffect(() => whenLoadedAndIdle(preloadPosters), [])
 
   const handleKeyDown = (event) => {
     const step = KEY_STEPS[event.key]
