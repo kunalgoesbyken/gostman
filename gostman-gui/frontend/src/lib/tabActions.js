@@ -1,4 +1,3 @@
-import { generateAllSnippets } from './codeGenerator'
 import { isGrpcRequest } from './grpc'
 import { withInheritance } from './inheritance'
 import { isMcpRequest } from './mcp'
@@ -56,6 +55,7 @@ export function createTabActions(backend, attempt, cancelTab, flows, specs) {
     if (!tab || isGrpcRequest(tab.request) || isMcpRequest(tab.request)) throw new Error(TAB_TEXT.noCurl)
     if (!navigator.clipboard) throw new Error(TAB_TEXT.noClipboard)
     const prepared = await backend.prepare(withInheritance(store(), tab.request), variableTextFor(store(), tab.request))
+    const { generateAllSnippets } = await import('./codeGenerator')
     await navigator.clipboard.writeText(generateAllSnippets(prepared).curl)
     store().showNotice(TAB_TEXT.curlCopied)
   })

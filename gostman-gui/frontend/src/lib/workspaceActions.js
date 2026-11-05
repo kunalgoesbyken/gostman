@@ -6,8 +6,6 @@ import {
 import { createCaptureActions } from './captureSession'
 import { createLoadTestActions } from './loadTestSession'
 import { createMonitorActions } from './monitors/monitorSession'
-import { generateAllSnippets } from './codeGenerator'
-import { activeKindsOf, countActiveRequests, fileReadPathsOf, sanitizeImport, withoutActiveRequests } from './importExport'
 import { asSentence } from './dataUtils'
 import { createExampleActions } from './exampleActions'
 import { createImporterClient } from './importerClient'
@@ -36,10 +34,8 @@ import { promptInstall } from './pwa'
 import { SAMPLE_REQUEST } from './welcome'
 import { isRequestDirty } from './requestChanges'
 import { bodyBase64, downloadName, httpStatusOf, mimeType } from './response'
-import { keepingOwnVariables } from './shareContent'
 import { clientUrl } from './sharedLink'
 import { createRunner } from './runner'
-import { createNegativeRunner } from './negativeRun'
 import { environmentsUsed } from './runReport'
 import { REPORT_FORMATS } from './runReportFormats'
 import { coverageOfRun } from './runCoverage'
@@ -78,6 +74,7 @@ const SHARE_TAB = 'share'
 const DESTRUCTIVE = 'destructive'
 
 const store = () => useAppStore.getState()
+const loadImportExport = () => import('./importExport')
 const activeTab = () => selectActiveTab(store())
 const tabById = (tabId) => store().tabs.find((candidate) => candidate.id === tabId)
 const activeVariables = () => selectActiveVariables(store())
@@ -121,7 +118,11 @@ export function createWorkspaceActions(backend) {
   const sockets = createSocketActions(backend)
   const execute = createExecutor(backend)
   const runner = createRunner(backend, execute)
-  const negativeRunner = createNegativeRunner(execute)
+  let negativeRunner = null
+  const runNegative = async (plan, options) => {
+    if (!negativeRunner) negativeRunner = (await import('./negativeRun')).createNegativeRunner(execute)
+    return negativeRunner(plan, options)
+  }
   const examples = createExampleActions(backend)
   const mock = createMockActions(backend)
   const capture = createCaptureActions(backend, mock)
@@ -347,6 +348,7 @@ export function createWorkspaceActions(backend) {
     if (isGrpcRequest(activeTab().request)) throw new Error(TEXT.noGrpcCode)
     if (isMcpRequest(activeTab().request)) throw new Error(TEXT.noMcpCode)
     const prepared = await backend.prepare(withInheritance(store(), activeTab().request), activeVariables())
+    const { generateAllSnippets } = await import('./codeGenerator')
     store().openCodeDialog(generateAllSnippets(prepared))
   })
 
@@ -420,12 +422,12 @@ export function createWorkspaceActions(backend) {
     store().showAlert(TEXT.importComplete, [summary, ...notes].join('\n'), DIALOG_TEXT.ok, warnings.length > 0 ? 'warning' : 'success')
   })
 
-  const leavingOutActive = (data, kinds) => ({
+  const leavingOutActive = (data, kinds, withoutActiveRequests) => ({
     ...withoutActiveRequests(data),
     remarks: [remark(ACTIVE_IMPORT_TEXT.leftOut(kinds)), ...withoutRemarksOn(data.remarks, kinds)],
   })
 
-  const askAboutActive = (data) => new Promise((resolve) => {
+  const askAboutActive = (data, { activeKindsOf, countActiveRequests, fileReadPathsOf, withoutActiveRequests }) => new Promise((resolve) => {
     const kinds = activeKindsOf(data)
     const proceed = (chosen) => async () => {
       await addImported(chosen)
@@ -438,22 +440,27 @@ export function createWorkspaceActions(backend) {
       () => resolve(false),
       'outline',
       ACTIVE_IMPORT_TEXT.withThem(kinds),
-      { text: ACTIVE_IMPORT_TEXT.withoutThem(kinds), run: proceed(leavingOutActive(data, kinds)) },
+      { text: ACTIVE_IMPORT_TEXT.withoutThem(kinds), run: proceed(leavingOutActive(data, kinds, withoutActiveRequests)) },
     )
   })
 
   const addReviewed = async (data) => {
-    if (countActiveRequests(data) > 0) return askAboutActive(data)
+    const importExport = await loadImportExport()
+    if (importExport.countActiveRequests(data) > 0) return askAboutActive(data, importExport)
     await addImported(data)
     return true
   }
 
-  const importData = attempt(TEXT.importFailed, (imported) => {
+  const importData = attempt(TEXT.importFailed, async (imported) => {
+    const { sanitizeImport } = await loadImportExport()
     const existing = { requestIds: idsOf(store().requests), folderIds: idsOf(store().folders), flows: store().flows }
     return addReviewed(sanitizeImport(imported, existing))
   })
 
-  const importShared = (imported) => importData(keepingOwnVariables(imported, store().environments, store().folders))
+  const importShared = async (imported) => {
+    const { keepingOwnVariables } = await import('./shareContent')
+    return importData(keepingOwnVariables(imported, store().environments, store().folders))
+  }
 
   const openapi = createSpecActions({ backend, attempt, addImported: addReviewed })
   const specs = createSpecEditorActions(backend, { attempt, promptForName, openapi, mock })
@@ -482,7 +489,7 @@ export function createWorkspaceActions(backend) {
     const environment = environmentsUsed(state.results, (result) => environmentOf(requests.get(result.id)?.folderId)) || environmentOf(state.folderId) || ''
     const coverage = await runCoverage(state.results)
     const { file, type, build } = REPORT_FORMATS[format]
-    return saveTextFile(file, build(state.results, run, environment, null, coverage), type)
+    return saveTextFile(file, await build(state.results, run, environment, null, coverage), type)
   }
 
   const deleteAllData = attempt(DATA_TEXT.failed, async () => {
@@ -782,7 +789,7 @@ export function createWorkspaceActions(backend) {
     openRunner: (folderId) => store().openRunner(folderId),
     openDependencyGraph: (folderId) => store().openDependencyGraph(folderId),
     openNegative: (folderId) => store().openNegativeDialog(folderId),
-    negative: { run: negativeRunner, close: () => store().closeNegativeDialog() },
+    negative: { run: runNegative, close: () => store().closeNegativeDialog() },
     openFolderSettings: (folderId) => store().openFolderSettings(folderId),
     closeRunner,
     startRun: runner.start,

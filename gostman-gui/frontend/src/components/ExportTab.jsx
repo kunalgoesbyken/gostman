@@ -20,9 +20,9 @@ import {
   exportToGostman,
   exportToMarkdown,
   exportToOpenAPIJSON,
-  exportToOpenAPIYAML,
   exportToPostman,
 } from "../lib/importExport"
+import { exportToOpenAPIYAML } from "../lib/openapiYaml"
 
 const PREVIEW_LIMIT = 20000
 const FILE_BASE_NAME = "gostman-export"

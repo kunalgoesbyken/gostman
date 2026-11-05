@@ -1,4 +1,3 @@
-import YAML from 'js-yaml'
 import { BODY_BINARY, BODY_FORM, BODY_JSON, BODY_MULTIPART, BODY_NONE, BODY_TEXT, BODY_TYPES, BODY_XML, RAW_SOCKET_BODY_TYPES } from './body'
 import { buildCollectionTree, folderDepth, listFolders, MAX_FOLDER_DEPTH, requestsIn, ROOT_ID } from './collectionTree'
 import { SCRIPT_FIELDS, activeKinds, filePathsIn, hasActiveContent, withoutActiveContent } from './activeContent'
@@ -23,8 +22,6 @@ import { AUTH_API_KEY, AUTH_BASIC, AUTH_BEARER, GRAPHQL_METHOD, UNTITLED_REQUEST
 import { HTTP_VERSION_CHOICES, RPC_TRANSPORT_CHOICES, isChoice } from './requestTransports'
 
 export { exportToPostman } from './postmanExport'
-
-export const MAX_FILE_SIZE = 10 * 1024 * 1024
 
 const MAX_NAMES_IN_WARNING = 5
 const MAX_NAME_LENGTH = 200
@@ -189,7 +186,7 @@ function openAPIOperation(request, path, securitySchemes) {
   }
 }
 
-function exportToOpenAPI(requests, options = {}) {
+export function exportToOpenAPI(requests, options = {}) {
   const {
     title = 'Gostman API Collection',
     version = '1.0.0',
@@ -263,16 +260,6 @@ export function exportToOpenAPIJSON(requests, options = {}) {
   return safeStringify(exportToOpenAPI(requests, options))
 }
 
-export function exportToOpenAPIYAML(requests, options = {}) {
-  const spec = exportToOpenAPI(requests, options)
-  return YAML.dump(spec, {
-    indent: 2,
-    lineWidth: -1,
-    noRefs: true,
-    sortKeys: false
-  })
-}
-
 const withoutToken = (request) => ({ ...request, auth: { ...request.auth, oauth2: clearToken(request.auth.oauth2) } })
 
 const withoutScopeToken = (scope) => (scope?.auth?.oauth2 ? { ...scope, auth: { ...scope.auth, oauth2: clearToken(scope.auth.oauth2) } } : scope)
@@ -327,7 +314,8 @@ function importGostman(data) {
   }
 }
 
-function parseYAML(yamlString) {
+async function parseYAML(yamlString) {
+  const { default: YAML } = await import('js-yaml')
   try {
     return YAML.load(yamlString)
   } catch (error) {
@@ -428,10 +416,10 @@ function parseStructuredText(text) {
   }
 }
 
-function detectImportFormat(text) {
+async function detectImportFormat(text) {
   let data
   try {
-    data = parseStructuredText(text)
+    data = await parseStructuredText(text)
   } catch {
     return 'unknown'
   }
@@ -447,7 +435,7 @@ const IMPORT_READERS = new Map([
 const importFailure = (error) => ({ success: false, error })
 
 export async function parseImport(text) {
-  const reader = IMPORT_READERS.get(detectImportFormat(text))
+  const reader = IMPORT_READERS.get(await detectImportFormat(text))
   if (!reader) return importFailure(IMPORT_EXPORT_TEXT.undetected)
   try {
     const result = await reader.read(text)

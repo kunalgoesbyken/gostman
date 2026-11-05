@@ -1,8 +1,8 @@
-import { MAX_FILE_SIZE } from './importExport'
 import { formatBytes } from './byteSize'
 import { IMPORT_TEXT } from './importText'
 import { readZip } from './zipReader'
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024
 const MAX_FILES = 5000
 const MAX_DEPTH = 32
 const IMPORTABLE = new Set(['bru', 'json', 'yml', 'yaml', 'xml', 'wsdl', 'xsd', 'har', 'http', 'rest', 'proto', 'hurl', 'raml', 'apib'])

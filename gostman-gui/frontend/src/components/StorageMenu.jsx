@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef } from "react"
+import { lazy, Suspense, useCallback, useEffect, useRef } from "react"
 import { AlertTriangle, ChevronDown, Folder, HardDrive, ShieldAlert } from "lucide-react"
 import { Button } from "./ui/button"
-import { GitPanel } from "./GitPanel"
+import { DialogPending } from "./ui/dialog"
 import { WorkspaceMenu } from "./WorkspaceMenu"
 import { inlineStart } from "../hooks/direction"
 import { useShortcutLabel } from "../hooks/useShortcuts"
@@ -9,6 +9,9 @@ import { hintWithShortcut } from "../lib/shortcuts"
 import { APP_TEXT } from "../lib/appText"
 import { WORKSPACE_TEXT as TEXT } from "../lib/workspaceText"
 import { useAppStore } from "../store/appStore"
+import { useGitStore } from "../lib/gitSession"
+
+const GitPanel = lazy(() => import("./GitPanel").then((module) => ({ default: module.GitPanel })))
 
 const BUTTON_CLASS = "min-w-0 max-w-[14rem] shrink"
 
@@ -44,6 +47,7 @@ function FolderStorage({ storage }) {
   const isOpen = useAppStore((s) => s.workspaceMenuOpen)
   const setOpen = useAppStore((s) => s.setWorkspaceMenuOpen)
   const isRestricted = useAppStore((s) => s.isRestricted)
+  const isGitOpen = useGitStore((s) => s.isOpen)
   const buttonRef = useRef(null)
   const shortcut = useShortcutLabel("workspaceSwitcher")
   const { refresh } = storage
@@ -80,7 +84,7 @@ function FolderStorage({ storage }) {
         <ChevronDown />
       </Button>
       {rect && <WorkspaceMenu anchor={{ x: inlineStart(rect), y: rect.bottom }} status={status} storage={storage} isRestricted={isRestricted} onClose={closeMenu} />}
-      <GitPanel actions={storage.git} onTrust={storage.confirmTrust} />
+      {isGitOpen && <Suspense fallback={<DialogPending />}><GitPanel actions={storage.git} onTrust={storage.confirmTrust} /></Suspense>}
     </>
   )
 }

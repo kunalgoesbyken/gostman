@@ -4,7 +4,6 @@ import { checksContract, watchesSpec } from './contractCheck'
 import { parseJSON } from './dataUtils'
 import { DIALOG_TEXT } from './dialogText'
 import { compareText } from './i18n/format'
-import { sanitizeImport } from './importExport'
 import { createSpecClient } from './openapiSpec'
 import { normalizeRequest } from './request'
 import { createLink, diffSpec, keptSnapshot, linkEntry, selectedChanges, specPatch, upgradedLink } from './specSync'
@@ -38,6 +37,7 @@ export function createSpecActions({ backend, attempt, addImported }) {
   const client = createSpecClient(backend)
 
   const importSpec = attempt(SPEC_ALERTS.importFailed, async (result) => {
+    const { sanitizeImport } = await import('./importExport')
     const existing = { requestIds: idsOf(store().requests), folderIds: idsOf(store().folders), flows: store().flows }
     const data = sanitizeImport({ ...result, folders: owningRoot(result), variables: sharedVariables(result) }, existing)
     const imported = await addImported(data)

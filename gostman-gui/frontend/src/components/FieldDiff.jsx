@@ -1,7 +1,13 @@
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { GIT_TEXT as TEXT } from "../lib/gitText"
-import { fieldChanges } from "../lib/requestDiff"
 import { cn } from "../lib/utils"
+
+let loadedDiff = null
+
+const loadDiff = () => import("../lib/requestDiff").then((module) => {
+  loadedDiff = module
+  return module
+})
 
 const LINE_TONES = {
   "+": "bg-success/10 text-success",
@@ -18,7 +24,11 @@ const STATUS_TONES = {
 const labelOf = (key) => TEXT.fields[key] ?? key
 
 export function useFieldChanges(before, after) {
-  return useMemo(() => fieldChanges(before, after), [before, after])
+  const [diff, setDiff] = useState(loadedDiff)
+  useEffect(() => {
+    if (!diff) loadDiff().then(setDiff, () => {})
+  }, [diff])
+  return useMemo(() => (diff ? diff.fieldChanges(before, after) : null), [diff, before, after])
 }
 
 export function FieldDiff({ changes }) {

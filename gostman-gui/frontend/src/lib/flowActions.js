@@ -121,7 +121,7 @@ export function createFlowActions(backend, { attempt, execute, promptForName }) 
     const results = runResults(flowRun)
     const timing = { startedAt: flowRun.startedAt, finishedAt: flowRun.finishedAt || new Date(), planned: results.length, iterations: 0, parallel: 1 }
     const flow = { name: flowRun.flowName, outcome: flowRun.status, message: flowRun.message, ...(flowRun.metrics && { metrics: flowRun.metrics }) }
-    const page = buildReportPage(results, timing, findActiveEnvironment(store())?.name || '', flow)
+    const page = await buildReportPage(results, timing, findActiveEnvironment(store())?.name || '', flow)
     await backend.saveFile(reportName(flowRun.flowName), textToBase64(page), REPORT_TYPE)
   })
 

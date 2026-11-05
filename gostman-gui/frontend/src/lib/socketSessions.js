@@ -3,7 +3,6 @@ import { parseVariableMap, placeholderNames, substitutePlaceholders } from './pl
 import { isSentRow, parseRows } from './rows'
 import { withInheritance } from './inheritance'
 import { toHttpURL, toSocketURL } from './socketUrl'
-import { protocolOf } from './realtime/protocols'
 import { SOCKET_SESSIONS_TEXT as TEXT } from './socketSessionsText'
 import { UNRESOLVED_TEXT } from './unresolvedText'
 import { selectActiveVariables, useAppStore } from '../store/appStore'
@@ -200,6 +199,7 @@ export function createSocketActions(backend) {
     const effective = withInheritance(state, { ...request, url: toHttpURL(target.url) })
     const prepared = await backend.prepare(effective, selectActiveVariables(state))
     const preparedHeaders = prepared.headers || []
+    const { protocolOf } = await import('./realtime/protocols')
     const protocol = protocolOf(request)
     const headers = preparedHeaders.map(({ key, value }) => [key, value])
     return {

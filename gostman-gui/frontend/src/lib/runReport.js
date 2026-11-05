@@ -1,5 +1,3 @@
-import template from '../../../../runner/report/report.html?raw'
-
 const PLACEHOLDER = '__GOSTMAN_REPORT__'
 const UNSAFE = ['<', '>', '&', ' ', ' ']
 
@@ -66,4 +64,6 @@ export function reportOf(results, run, environment, flow = null, coverage = null
   }
 }
 
-export const buildReportPage = (...args) => template.replace(PLACEHOLDER, () => embeddable(JSON.stringify(reportOf(...args))))
+const loadTemplate = () => import('../../../../runner/report/report.html?raw').then((module) => module.default)
+
+export const buildReportPage = async (...args) => (await loadTemplate()).replace(PLACEHOLDER, () => embeddable(JSON.stringify(reportOf(...args))))
