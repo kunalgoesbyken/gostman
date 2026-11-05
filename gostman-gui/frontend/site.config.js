@@ -11,6 +11,7 @@ import { loadDocs } from './site-docs.js'
 import { CLIENT_METADATA_PATH, clientMetadata } from './src/lib/mcpClientMetadata.js'
 import { REPOSITORY } from './src/lib/siteLinks.js'
 import { FAQ } from './src/components/landing/faq.js'
+import { DATA_LOCATION_KEY, FIRST_VISIT_ID, FIRST_VISIT_VARIANTS } from './src/lib/firstVisit.js'
 
 const DEFAULT_SITE_URL = 'https://gostman.com'
 const SITE_URL_TOKEN = '__SITE_URL__'
@@ -200,6 +201,66 @@ async function buildGuideRenderer(bundle) {
   return { renderGuidePage, renderDocsPage, renderLandingMarkup, renderAppSkeletonMarkup, assets }
 }
 
+const RAW_IMPORT = /\?raw$/
+const WORKER_IMPORT = /\?worker$/
+
+const browserOnlyImports = {
+  name: 'browser-only-imports',
+  setup(build) {
+    build.onResolve({ filter: /^virtual:gostman-languages$/ }, () => ({ path: 'languages', namespace: 'stand-in' }))
+    build.onResolve({ filter: WORKER_IMPORT }, () => ({ path: 'worker', namespace: 'stand-in' }))
+    build.onResolve({ filter: /\.css$/ }, () => ({ path: 'stylesheet', namespace: 'stand-in' }))
+    build.onResolve({ filter: RAW_IMPORT }, (args) => ({ path: resolve(args.resolveDir, args.path.replace(RAW_IMPORT, '')), namespace: 'raw-text' }))
+    build.onLoad({ filter: /.*/, namespace: 'raw-text' }, (args) => ({ contents: readFileSync(args.path, 'utf8'), loader: 'text' }))
+    build.onLoad({ filter: /^languages$/, namespace: 'stand-in' }, () => ({ contents: "export const LANGUAGE_LIST = [{ value: 'en', pseudo: false }]; export const LOCALE_LOADERS = {}", loader: 'js' }))
+    build.onLoad({ filter: /^worker$/, namespace: 'stand-in' }, () => ({ contents: 'export default class { postMessage() {} terminate() {} addEventListener() {} removeEventListener() {} }', loader: 'js' }))
+    build.onLoad({ filter: /^stylesheet$/, namespace: 'stand-in' }, () => ({ contents: '', loader: 'js' }))
+  },
+}
+
+const FIRST_VISIT_ENTRY = resolve('src/guides/firstVisit.jsx')
+const FIRST_VISIT_WIDTHS = { phone: 412, desktop: 1366 }
+
+async function renderFirstVisit(bundle) {
+  const outdir = mkdtempSync(join(tmpdir(), 'gostman-first-visit-'))
+  try {
+    const { outputFiles } = await build({
+      entryPoints: [FIRST_VISIT_ENTRY],
+      outdir,
+      bundle: true,
+      write: false,
+      platform: 'node',
+      format: 'cjs',
+      jsx: 'automatic',
+      publicPath: '/',
+      assetNames: 'assets/[name]-[hash]',
+      loader: { '.jpg': 'file', '.png': 'file', '.webp': 'file', '.svg': 'file', '.mp4': 'file' },
+      plugins: [bundledImageUrls(bundle), browserOnlyImports],
+      define: { 'process.env.NODE_ENV': '"production"', 'import.meta.env.PROD': 'true', 'import.meta.env.DEV': 'false', ...siteDefine },
+      logLevel: 'silent',
+    })
+    const scriptPath = join(outdir, 'first-visit.cjs')
+    writeFileSync(scriptPath, outputFiles.find((file) => file.path.endsWith('.js')).text)
+    const render = (width) => execFileSync(process.execPath, [scriptPath, String(width)], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
+    return { phone: render(FIRST_VISIT_WIDTHS.phone), desktop: render(FIRST_VISIT_WIDTHS.desktop) }
+  } finally {
+    rmSync(outdir, { recursive: true, force: true })
+  }
+}
+
+const RETURNING_VISIT_CHECK = `(function () {
+  var returning = true
+  try {
+    returning = Boolean(localStorage.getItem('${DATA_LOCATION_KEY}')) || Boolean(location.search) || Boolean(location.hash) || !/^en(-|$)/i.test(navigator.language || '')
+  } catch (error) {}
+  if (!returning) return
+  document.getElementById('${FIRST_VISIT_ID}').remove()
+  document.getElementById('root').hidden = false
+})()`
+
+const firstVisitRoot = (skeleton, { phone, desktop }) =>
+  `<div id="root" hidden>${skeleton}</div><div id="${FIRST_VISIT_ID}" aria-busy="true"><div class="${FIRST_VISIT_VARIANTS.phone}">${phone}</div><div class="${FIRST_VISIT_VARIANTS.desktop}">${desktop}</div></div><script>${RETURNING_VISIT_CHECK}</script>`
+
 export const chunkClosure = (bundle, fileName, seen = new Set()) => {
   if (seen.has(fileName)) return seen
   seen.add(fileName)
@@ -253,7 +314,7 @@ export function siteMeta() {
       landing.source = withHeadScript(withHeadLinks(String(landing.source).replace(EMPTY_ROOT, `<div id="root">${renderLandingMarkup()}</div>`), fonts), faqJsonLd())
       const client = bundle[`${CLIENT_ROUTE}/index.html`]
       if (!client || !String(client.source).includes(EMPTY_ROOT)) this.error(`${CLIENT_ROUTE}/index.html has no empty root element to prerender into`)
-      client.source = String(client.source).replace(EMPTY_ROOT, `<div id="root">${renderAppSkeletonMarkup()}</div>`)
+      client.source = String(client.source).replace(EMPTY_ROOT, firstVisitRoot(renderAppSkeletonMarkup(), await renderFirstVisit(bundle)))
     },
   }
 }

@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/react"
 import { AppSkeletonFrame } from "./components/AppSkeletonFrame"
 import { LANDING_ROUTE, normalize, useRoute } from "./hooks/useRoute"
 import { bootLanguage } from "./lib/i18n/boot"
+import { revealApp } from "./lib/firstVisit"
 import { onIdle } from "./lib/idle"
 import { registerServiceWorker } from "./lib/pwa"
 import { preventInputZoom } from "./lib/viewport"
@@ -14,7 +15,7 @@ const WebWorkspace = lazy(async () => {
   const [{ Workspace }, { webBackend }] = await Promise.all([import("./components/Workspace"), import("./lib/backend/web")])
   function OfflineReadyWorkspace(props) {
     useEffect(() => onIdle(registerServiceWorker), [])
-    return <Workspace backend={webBackend} {...props} />
+    return <Workspace backend={webBackend} onShown={revealApp} {...props} />
   }
   return { default: OfflineReadyWorkspace }
 })

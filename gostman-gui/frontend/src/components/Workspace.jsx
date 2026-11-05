@@ -1,4 +1,4 @@
-import { useCallback, useDeferredValue, useEffect, useMemo, useState, useSyncExternalStore, lazy, Suspense } from "react"
+import { useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useState, useSyncExternalStore, lazy, Suspense } from "react"
 import { AlertTriangle } from "lucide-react"
 import { installFeatureAccess, releaseFeatureAccess } from "../lib/featureAccess"
 import { Sidebar } from "./Sidebar"
@@ -255,7 +255,9 @@ function usePersistence(backend) {
   useAutoSave(collectionSettings, saveCollectionSettings, DATA_SAVE_DELAY_MS)
 }
 
-function LoadedWorkspace({ backend, onBack }) {
+const noLink = () => null
+
+export function LoadedWorkspace({ backend, onBack }) {
   const requests = useAppStore((s) => s.requests)
   const folders = useAppStore((s) => s.folders)
   const flows = useAppStore((s) => s.flows)
@@ -296,8 +298,8 @@ function LoadedWorkspace({ backend, onBack }) {
   const aiDialog = useAiStore((s) => s.dialog !== null)
   const isAiOn = useAiEnabled()
   const isDialogOpen = useAppStore(selectIsDialogOpen) || captureDialogOpen || loadTestDialogOpen || monitorsDialogOpen || aiDialog
-  const sharedLink = useSyncExternalStore(subscribeToSharedLink, pendingSharedLink)
-  const openLink = useSyncExternalStore(subscribeToOpenLink, currentOpenLink)
+  const sharedLink = useSyncExternalStore(subscribeToSharedLink, pendingSharedLink, noLink)
+  const openLink = useSyncExternalStore(subscribeToOpenLink, currentOpenLink, noLink)
 
   const setActiveTab = useAppStore((s) => s.setActiveTab)
   const updateActiveRequest = useAppStore((s) => s.updateActiveRequest)
@@ -592,11 +594,14 @@ function LoadedWorkspace({ backend, onBack }) {
   )
 }
 
-export function Workspace({ backend, onBack }) {
+export function Workspace({ backend, onBack, onShown }) {
   const { isHydrated, failure, retry } = useStoredData(backend)
   useDocumentLanguage()
   const isShown = useDeferredValue(isHydrated)
   useEffect(() => (isShown ? prefetchEditorWhenIdle(loadCodeEditor) : undefined), [isShown])
+  useLayoutEffect(() => {
+    if (isShown || failure) onShown?.()
+  }, [isShown, failure, onShown])
   if (failure) return <LoadFailure reason={failure} onRetry={retry} />
   if (!isShown) return <AppSkeleton />
   return <LoadedWorkspace backend={backend} onBack={onBack} />

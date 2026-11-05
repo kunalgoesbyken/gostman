@@ -1,8 +1,9 @@
 import { DATA_TEXT } from '../dataText'
 import { isStorageFull, localRecords, storageFullError, storageRoom } from '../storage'
 import { READ_ONLY, READ_WRITE, indexedStore, settled } from './indexedStore'
+import { DATA_LOCATION_KEY } from '../firstVisit'
 
-const LOCATION_KEY = 'gostman-data-location'
+const LOCATION_KEY = DATA_LOCATION_KEY
 const IN_DATABASE = 'indexeddb'
 const OPEN_TIMEOUT_MS = 10000
 
