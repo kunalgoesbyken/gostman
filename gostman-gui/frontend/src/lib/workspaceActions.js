@@ -43,7 +43,7 @@ import { coverageOfRun } from './runCoverage'
 import { createSocketActions, isSocketAddress } from './socketSessions'
 import { TESTS_PANEL } from './requestSections'
 import { VIEW_VARIABLES, viewOf } from './requestView'
-import { filledRequest, withoutFormGiven } from './variablesForm'
+import { filledForm, withoutFormGiven } from './variablesForm'
 import { createSpecActions } from './specActions'
 import { createStorageActions } from './storageActions'
 import { createBackupActions } from './backupActions'
@@ -284,7 +284,7 @@ export function createWorkspaceActions(backend) {
       return
     }
     if (tab.pendingId) return
-    const filled = viewOf(tab) === VIEW_VARIABLES ? filledRequest(tab.request, tab.formValues) : null
+    const filled = viewOf(tab) === VIEW_VARIABLES ? filledForm(store(), tab.request, tab.formValues) : null
     if (filled && filled.problems.length > 0) {
       store().markFormAttempt(tab.id)
       return

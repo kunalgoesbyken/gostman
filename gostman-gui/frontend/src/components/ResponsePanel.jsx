@@ -44,7 +44,7 @@ import { RESPONSE_CHECKS_TEXT } from "../lib/checksText"
 import { canSaveAsExample } from "../lib/examples"
 import { trimmedTree } from "../lib/jsonTree"
 import { DEPTH_SETTINGS, depthLabel, depthOfSetting, requestDepth, settingOfDepth } from "../lib/jsonDepth"
-import { chooseDepth, collapseTarget, isExpandedIn, noteToggle, opensBeyondLevel, shownDepth, treeEpoch, useTreeView } from "../lib/jsonTreeView"
+import { chooseDepth, collapseTarget, isExpandedIn, noteToggle, opensBeyondLevel, shownDepth, useTreeEpoch, useTreeView } from "../lib/jsonTreeView"
 import { AUTO_DECODE_BYTES } from "../lib/binary/limits"
 import { LARGE_BODY_CHARS } from "../lib/largeText"
 import { PREVIEW_TEXT, RESPONSE_TEXT } from "../lib/responseText"
@@ -335,7 +335,6 @@ function StatusSummary({ response }) {
   )
 }
 
-
 const tabItem = (value, badge = null, marked = false) => ({
   value,
   label: RESPONSE_TEXT.tabs[value],
@@ -503,7 +502,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
   const treeView = useTreeView(shown)
   const baseDepth = requestDepth(jsonDepth, shown?.protocol === MCP_PROTOCOL)
   const depth = shownDepth(treeView, baseDepth, jsonDepth)
-  const epoch = hasTree && treeView ? treeEpoch(treeView, depth, filtered ? debouncedPath : '') : null
+  const epoch = useTreeEpoch(treeView, depth, filtered ? debouncedPath : '', hasTree)
   const toggleNode = useCallback((nodeEpoch, path, byDefault, expanded) => noteToggle(treeView, nodeEpoch, path, byDefault, expanded), [treeView])
   const tree = useMemo(() => (epoch ? { epoch, onToggle: toggleNode } : null), [epoch, toggleNode])
   const chooseTreeDepth = (next) => chooseDepth(treeView, { depth: next, current: depth, base: baseDepth, setting: jsonDepth })
@@ -668,7 +667,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
             <Notice tone="warning" icon={Scissors}>{RESPONSE_TEXT.truncated(formatBytes(shown.size))}</Notice>
           )}
 
-          {isOpen && <UnresolvedNotice response={shown} />}
+          {isOpen && <UnresolvedNotice response={shown} tabId={tabId} />}
 
           {showsBody && isLarge && formatted.status !== FORMAT_DONE && (
             <LargeBodyNotice size={formatBytes(shown.size)} canFormat={canFormat} formatted={formatted} onFormat={format} />

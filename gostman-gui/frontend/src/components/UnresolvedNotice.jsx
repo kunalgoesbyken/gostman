@@ -1,8 +1,8 @@
 import { useMemo } from "react"
 import { Braces } from "lucide-react"
 import { Notice } from "./ui/panel"
-import { selectActiveTab, useAppStore } from "../store/appStore"
-import { parseRows } from "../lib/rows"
+import { useAppStore } from "../store/appStore"
+import { parseRows, rowName } from "../lib/rows"
 import { VARS_PANEL } from "../lib/requestSections"
 import { UNRESOLVED_TEXT } from "../lib/unresolvedText"
 import { parseExtractors } from "../lib/chaining"
@@ -48,36 +48,46 @@ function SourceHint({ source, isOnly }) {
   )
 }
 
-const switchedOffName = (vars, names) => {
-  const off = parseRows(vars).filter((row) => !row.enabled).map((row) => row.key.trim())
-  return names.find((name) => off.includes(name)) ?? ""
-}
+const switchedOffNames = (vars) => parseRows(vars).filter((row) => !row.enabled).map(rowName)
 
-function SwitchedOffHint({ name, tabId }) {
+function SwitchedOffHint({ names, tabId }) {
   const openEditorPanel = useAppStore((state) => state.openEditorPanel)
   return (
     <>
-      {' '}{UNRESOLVED_TEXT.switchedOff(name)}{' '}
+      {names.map((name) => <span key={name}>{UNRESOLVED_TEXT.switchedOff(name)}{' '}</span>)}
       <button type="button" className={LINK_BUTTON} onClick={() => openEditorPanel(tabId, VARS_PANEL)}>{UNRESOLVED_TEXT.openVars}</button>
     </>
   )
 }
 
-export function UnresolvedNotice({ response }) {
+function UndefinedHint({ names, isFailed, source }) {
   const defineVariable = useAppStore((state) => state.defineVariable)
+  return (
+    <>
+      <UnresolvedNames names={names} isFailed={isFailed} />
+      {source ? <SourceHint source={source} isOnly={names.length === 1} /> : (
+        <button type="button" className={LINK_BUTTON} onClick={() => defineVariable(names[0])}>{UNRESOLVED_TEXT.openEnvironments}</button>
+      )}
+    </>
+  )
+}
+
+export function UnresolvedNotice({ response, tabId }) {
   const requests = useAppStore((state) => state.requests)
-  const tabId = useAppStore((state) => state.activeTabId)
-  const vars = useAppStore((state) => selectActiveTab(state)?.request?.vars)
+  const vars = useAppStore((state) => state.tabs.find((tab) => tab.id === tabId)?.request?.vars)
   const names = response?.unresolved
-  const source = useMemo(() => (hasUnresolved(names) ? findSource(requests, names) : null), [requests, names])
-  const offName = useMemo(() => (hasUnresolved(names) ? switchedOffName(vars, names) : ""), [vars, names])
+  const { offNames, otherNames } = useMemo(() => {
+    const off = switchedOffNames(vars)
+    const listed = hasUnresolved(names) ? names : []
+    return { offNames: listed.filter((name) => off.includes(name)), otherNames: listed.filter((name) => !off.includes(name)) }
+  }, [vars, names])
+  const source = useMemo(() => (otherNames.length > 0 ? findSource(requests, otherNames) : null), [requests, otherNames])
   if (!hasUnresolved(names)) return null
   return (
     <Notice tone="warning" icon={Braces} role="status">
-      <UnresolvedNames names={names} isFailed={Boolean(response.error)} />
-      {offName ? <SwitchedOffHint name={offName} tabId={tabId} /> : source ? <SourceHint source={source} isOnly={names.length === 1} /> : (
-        <button type="button" className={LINK_BUTTON} onClick={() => defineVariable(names[0])}>{UNRESOLVED_TEXT.openEnvironments}</button>
-      )}
+      {otherNames.length > 0 && <UndefinedHint names={otherNames} isFailed={Boolean(response.error)} source={source} />}
+      {otherNames.length > 0 && offNames.length > 0 && ' '}
+      {offNames.length > 0 && <SwitchedOffHint names={offNames} tabId={tabId} />}
     </Notice>
   )
 }

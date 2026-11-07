@@ -1,7 +1,7 @@
 import { isPlainObject, parseJSON } from './dataUtils'
 import { placeholderNames } from './placeholders'
 import { isTypedReference, sentText, typedValue } from './requestVariables'
-import { parseRows } from './rows'
+import { isSentRow, parseRows } from './rows'
 import { connectionDirectory } from './secretOrigins'
 import { chosenEnvironment, variableHolders } from './environmentScope'
 import { PROCESS_PREFIX, PROMPT_PREFIX } from './variableNames'
@@ -102,10 +102,11 @@ const listLayer = (source, variables, meta) => ({
   entries: environmentEntries({ variables, meta }).filter((entry) => entry.enabled),
 })
 
-const rowsLayer = (text) => ({
-  source: 'request',
-  entries: parseRows(text).filter((row) => row.enabled && row.key.trim() !== '').map((row) => ({ name: row.key, value: typedValue(row), text: sentText(row), row })),
-})
+const rowEntries = (rows) => rows.filter(isSentRow).map((row) => ({ name: row.key, value: typedValue(row), text: sentText(row), row }))
+
+const rowsLayer = (text) => ({ source: 'request', entries: rowEntries(parseRows(text)) })
+
+const givenLayer = (rows) => ({ source: 'session', entries: rowEntries(rows) })
 
 const hasTypedReference = (layer) => layer.entries.some((entry) => entry.row && isTypedReference(entry.row))
 
@@ -126,8 +127,6 @@ export const sessionEntries = (values) => (
 )
 
 const sessionLayer = (values) => ({ source: 'session', entries: sessionEntries(values) })
-
-const givenLayer = (values) => ({ source: 'session', entries: Object.entries(values).map(([name, value]) => ({ name, value })) })
 
 const dotEnvLayer = (dotEnv) => ({ source: 'process', entries: dotEnvEntries(dotEnv || {}) })
 
@@ -156,7 +155,7 @@ export function scopeLayers(state, request, referenced = {}) {
     rowsLayer(request?.vars),
     sessionLayer(state.sessionVariables),
     ...(request?.flowGiven ? [sessionLayer(request.flowGiven)] : []),
-    ...(isPlainObject(request?.formGiven) ? [givenLayer(request.formGiven)] : []),
+    ...(Array.isArray(request?.formGiven) ? [givenLayer(request.formGiven)] : []),
   ])
 }
 

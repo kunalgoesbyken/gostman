@@ -4,10 +4,11 @@ import { VariableValueField } from "./VariableValueField"
 import { Button } from "./ui/button"
 import { EmptyState } from "./ui/emptyState"
 import { PanelBody } from "./ui/panel"
-import { PROBLEM_REQUIRED, problemOf, problemText, usesCheckbox, variableName } from "../lib/requestVariables"
-import { formFields, hasFormChanges, hasNamedRows } from "../lib/variablesForm"
+import { PROBLEM_REQUIRED, usesCheckbox, variableName } from "../lib/requestVariables"
+import { filledForm, hasNamedRows } from "../lib/variablesForm"
 import { parseRows } from "../lib/rows"
 import { VARIABLES_VIEW_TEXT as TEXT } from "../lib/variablesPanelText"
+import { useAppStore } from "../store/appStore"
 
 const SUBMIT_KEY = "Enter"
 const INPUT_TAG = "INPUT"
@@ -20,14 +21,13 @@ const submitsForm = (event) => (
   event.key === SUBMIT_KEY && !hasModifier(event) && !event.defaultPrevented && !event.nativeEvent.isComposing && event.target.tagName === INPUT_TAG
 )
 
-function FormField({ row, isRevealed, onChange }) {
+function FormField({ row, problem, isRevealed, onChange }) {
   const id = useId()
   const helpId = `${id}-help`
   const problemId = `${id}-problem`
   const name = variableName(row)
   const help = textOf(row.help)
-  const problem = problemOf(row)
-  const showsProblem = problem !== "" && (problem !== PROBLEM_REQUIRED || isRevealed)
+  const showsProblem = Boolean(problem) && (problem.problem !== PROBLEM_REQUIRED || isRevealed)
   const isBoolean = usesCheckbox(row)
   const describedBy = [help && helpId, showsProblem && problemId].filter(Boolean).join(" ") || undefined
 
@@ -49,7 +49,7 @@ function FormField({ row, isRevealed, onChange }) {
         aria-invalid={showsProblem || undefined}
       />
       {help && <p id={helpId} className="text-2xs text-muted-foreground">{help}</p>}
-      {showsProblem && <p id={problemId} role="alert" className="text-2xs text-destructive">{problemText(row, problem)}</p>}
+      {showsProblem && <p id={problemId} role="alert" className="text-2xs text-destructive">{problem.message}</p>}
     </div>
   )
 }
@@ -79,9 +79,9 @@ export function VariablesView({ tab, onChange, onReset, onSend, onOpenEditor, on
   const formRef = useRef(null)
   const { request, formValues } = tab
   const attempt = tab.formAttempt || 0
+  const state = useAppStore()
   const rows = useMemo(() => parseRows(request.vars), [request.vars])
-  const fields = useMemo(() => formFields(rows, formValues), [rows, formValues])
-  const isChanged = useMemo(() => hasFormChanges(rows, formValues), [rows, formValues])
+  const { fields, problems, isChanged } = useMemo(() => filledForm(state, request, formValues), [state, request, formValues])
 
   useEffect(() => {
     if (attempt > 0) formRef.current?.querySelector('[aria-invalid="true"]')?.focus()
@@ -103,7 +103,7 @@ export function VariablesView({ tab, onChange, onReset, onSend, onOpenEditor, on
     <PanelBody>
       <form ref={formRef} aria-label={TEXT.formLabel} onSubmit={send} onKeyDown={sendOnEnter} className="flex max-w-xl flex-col gap-4">
         {fields.map(({ row, saved, index }) => (
-          <FormField key={index} row={row} isRevealed={attempt > 0} onChange={(patch) => onChange(saved, patch.value)} />
+          <FormField key={index} row={row} problem={problems.find((problem) => problem.key === row.key)} isRevealed={attempt > 0} onChange={(patch) => onChange(saved, patch.value)} />
         ))}
         {isChanged && (
           <div>

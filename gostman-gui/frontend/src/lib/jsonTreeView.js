@@ -1,9 +1,10 @@
-import { useSyncExternalStore } from 'react'
+import { useMemo, useSyncExternalStore } from 'react'
 import { COLLAPSED_DEPTH } from './jsonDepth'
 
 const views = new WeakMap()
 const listeners = new Set()
-let lastEpochId = 0
+const NONE_OPENED = new Map()
+let lastViewId = 0
 
 const subscribe = (listener) => {
   listeners.add(listener)
@@ -15,13 +16,10 @@ function changed(view) {
   listeners.forEach((listener) => listener())
 }
 
-function freshEpoch(depth, source) {
-  lastEpochId += 1
-  return { id: lastEpochId, depth, source, opened: new Map() }
-}
-
 function viewOf(owner) {
-  if (!views.has(owner)) views.set(owner, { version: 0, choice: null, lastLevel: null, epoch: freshEpoch(null, null) })
+  if (views.has(owner)) return views.get(owner)
+  lastViewId += 1
+  views.set(owner, { id: lastViewId, version: 0, generation: 0, choice: null, lastLevel: null, opened: { epochId: '', paths: new Map() } })
   return views.get(owner)
 }
 
@@ -31,36 +29,37 @@ export function useTreeView(owner) {
   return view
 }
 
-export function shownDepth(view, base, setting) {
-  if (!view?.choice) return base
-  if (view.choice.setting !== setting) view.choice = null
-  return view.choice ? view.choice.depth : base
-}
+export const shownDepth = (view, base, setting) => (view?.choice?.setting === setting ? view.choice.depth : base)
 
-export function treeEpoch(view, depth, source) {
-  if (view.epoch.depth !== depth || view.epoch.source !== source) view.epoch = freshEpoch(depth, source)
-  return view.epoch
+export function useTreeEpoch(view, depth, source, isShown) {
+  const generation = view?.generation
+  return useMemo(() => (isShown && view ? { id: `${view.id}:${generation}:${depth}:${source}`, depth, view } : null), [isShown, view, generation, depth, source])
 }
 
 export function chooseDepth(view, { depth, current, base, setting }) {
   if (depth === Infinity && current !== Infinity) view.lastLevel = current
   view.choice = depth === base ? null : { depth, setting }
-  view.epoch = freshEpoch(depth, view.epoch.source)
+  view.generation += 1
   changed(view)
 }
 
 export function noteToggle(view, epoch, path, byDefault, expanded) {
-  if (epoch !== view.epoch) return
-  if (expanded === byDefault) epoch.opened.delete(path)
-  else epoch.opened.set(path, expanded)
+  if (view.opened.epochId !== epoch.id) view.opened = { epochId: epoch.id, paths: new Map() }
+  if (expanded === byDefault) view.opened.paths.delete(path)
+  else view.opened.paths.set(path, expanded)
   changed(view)
 }
 
-export const isExpandedIn = (epoch, path, byDefault) => (epoch.opened.has(path) ? epoch.opened.get(path) : byDefault)
+const openedIn = (epoch) => (epoch.view.opened.epochId === epoch.id ? epoch.view.opened.paths : NONE_OPENED)
+
+export function isExpandedIn(epoch, path, byDefault) {
+  const opened = openedIn(epoch)
+  return opened.has(path) ? opened.get(path) : byDefault
+}
 
 export function opensBeyondLevel(epoch, depth) {
   if (depth === Infinity) return true
-  for (const expanded of epoch.opened.values()) if (expanded) return true
+  for (const expanded of openedIn(epoch).values()) if (expanded) return true
   return false
 }
 

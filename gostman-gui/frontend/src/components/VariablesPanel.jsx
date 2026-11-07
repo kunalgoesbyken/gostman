@@ -11,10 +11,10 @@ import { Input } from "./ui/input"
 import { InfoTip } from "./ui/infoTip"
 import { PanelBody, SectionLabel } from "./ui/panel"
 import { Select } from "./ui/select"
-import { isBlankRow, isSentRow } from "../lib/rows"
+import { isBlankRow, isSentRow, rowName, serializeRows } from "../lib/rows"
 import { updatePreferences, usePreferences } from "../lib/preferences"
 import { BOOLEAN_FALSE, BOOLEAN_TRUE, PROBLEM_REQUIRED, TYPE_BOOLEAN, TYPE_ENUM, TYPE_NONE, VARIABLE_TYPES, keepRowSettings, problemOf, problemText, typeOf, typedValue, usesCheckbox } from "../lib/requestVariables"
-import { isFormField, isShownDespiteHidden } from "../lib/variablesForm"
+import { isFormField, isShownDespiteHidden, problemNames, sentProblems } from "../lib/variablesForm"
 import { KEY_VALUE_TEXT } from "../lib/keyValueText"
 import { REQUEST_TABS_TEXT } from "../lib/requestTabsText"
 import { REQUEST_VARIABLES_TEXT } from "../lib/requestVariablesText"
@@ -53,7 +53,7 @@ function ColumnLabels() {
   )
 }
 
-function FieldOptions({ row, onChange }) {
+function FieldOptions({ row, shownNames, onChange }) {
   const type = typeOf(row)
   return (
     <div className="ms-8 mb-2 mt-1 flex max-w-xl flex-col gap-2 border-s border-border ps-3">
@@ -84,16 +84,16 @@ function FieldOptions({ row, onChange }) {
             <InfoTip text={TEXT.inFormHint} />
           </span>
         </div>
-        {isShownDespiteHidden(row) && <p className="text-2xs text-muted-foreground">{TEXT.shownDespiteHidden}</p>}
+        {isShownDespiteHidden(row, shownNames) && <p className="text-2xs text-muted-foreground">{TEXT.shownDespiteHidden}</p>}
       </fieldset>
     </div>
   )
 }
 
-function FormMark({ row }) {
+function FormMark({ row, shownNames }) {
   if (!isSentRow(row)) return <span />
-  const isShown = isFormField(row)
-  const label = isShownDespiteHidden(row) ? TEXT.markShownDespiteHidden : isShown ? TEXT.markShown : TEXT.markHidden
+  const isShown = isFormField(row, shownNames)
+  const label = isShownDespiteHidden(row, shownNames) ? TEXT.markShownDespiteHidden : isShown ? TEXT.markShown : TEXT.markHidden
   const Icon = isShown ? TextCursorInput : EyeOff
   return (
     <span role="img" aria-label={label} title={label} className="flex items-center justify-center text-muted-foreground">
@@ -112,7 +112,7 @@ function ValueCell({ row, onChange }) {
   )
 }
 
-function VariableRow({ row, isDraft, isOpen, isReplaced, onChange, onRemove, onToggleOptions }) {
+function VariableRow({ row, isDraft, isOpen, isReplaced, shownNames, onChange, onRemove, onToggleOptions }) {
   const problem = problemOf(row)
   const hasTypeProblem = problem !== "" && problem !== PROBLEM_REQUIRED
   return (
@@ -138,7 +138,7 @@ function VariableRow({ row, isDraft, isOpen, isReplaced, onChange, onRemove, onT
           {VARIABLE_TYPES.map((type) => <option key={type || "none"} value={type}>{typeName(type)}</option>)}
         </Select>
         <ValueCell row={row} onChange={onChange} />
-        {isDraft ? <span /> : <FormMark row={row} />}
+        {isDraft ? <span /> : <FormMark row={row} shownNames={shownNames} />}
         <IconButton
           label={TEXT.fieldOptions}
           icon={SlidersHorizontal}
@@ -150,7 +150,7 @@ function VariableRow({ row, isDraft, isOpen, isReplaced, onChange, onRemove, onT
       </div>
       {hasTypeProblem && <p role="alert" className="ms-8 text-2xs text-destructive">{problemText(row, problem)}</p>}
       {isReplaced && <p className="ms-8 text-2xs text-muted-foreground">{TEXT.sessionReplaces}</p>}
-      {isOpen && !isDraft && <FieldOptions row={row} onChange={onChange} />}
+      {isOpen && !isDraft && <FieldOptions row={row} shownNames={shownNames} onChange={onChange} />}
     </>
   )
 }
@@ -158,6 +158,8 @@ function VariableRow({ row, isDraft, isOpen, isReplaced, onChange, onRemove, onT
 function Table({ rows, onChange }) {
   const [openAt, setOpenAt] = useState(NONE_OPEN)
   const sessionVariables = useAppStore((state) => state.sessionVariables)
+  const resolved = useAppStore(selectResolvedVariables)
+  const shownNames = useMemo(() => problemNames(sentProblems({ vars: serializeRows(rows) }, sessionVariables, resolved)), [rows, sessionVariables, resolved])
   const shown = [...rows, draftRow()]
   const commit = (next) => onChange(next.filter((row) => !isEmptyRow(row)))
   const replaceRow = (index, patch) => commit(shown.map((row, at) => (at === index ? { ...row, ...patch } : row)))
@@ -176,7 +178,8 @@ function Table({ rows, onChange }) {
             row={row}
             isDraft={index === rows.length}
             isOpen={openAt === index}
-            isReplaced={isSentRow(row) && Object.hasOwn(sessionVariables || {}, row.key)}
+            isReplaced={isSentRow(row) && Object.hasOwn(sessionVariables || {}, rowName(row))}
+            shownNames={shownNames}
             onChange={(patch) => replaceRow(index, patch)}
             onRemove={() => removeRow(index)}
             onToggleOptions={() => setOpenAt(openAt === index ? NONE_OPEN : index)}

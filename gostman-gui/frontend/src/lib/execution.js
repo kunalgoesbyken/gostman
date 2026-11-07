@@ -23,9 +23,8 @@ import { applyRequestEdits, extractInSandbox, requestSubject, responseSubject, r
 import { acceptedCookies, scriptCookies } from './scripting/scriptCookies'
 import { scriptedRequest } from './scripting/subjects'
 import { rememberResolved } from './resolvedSecrets'
-import { blockedMessage, variableProblems } from './requestVariables'
-import { parseRows } from './rows'
-import { givenNames, withoutGiven, writtenNames } from './variablesForm'
+import { blockedMessage } from './requestVariables'
+import { sentProblems, withoutGiven, writtenNames } from './variablesForm'
 import { SECRETS_TEXT } from './secretsText'
 import { ENTRY_KINDS, exchangeEntry, scriptEntry, secretsEntry, withActivity } from './timeline'
 import { promptNames, referenceTargets, resolveLayers, scopeLayers, usedVariableNames } from './variableScopes'
@@ -172,12 +171,9 @@ const namesInUse = (lineage, request) => (
   runsScripts(lineage, request) ? undefined : usedVariableNames([request, lineage.map(({ settings }) => settings)])
 )
 
-function requestVariableProblems(request, referenced) {
-  const resolved = resolveLayers(scopeLayers(store(), request, referenced))
-  const given = givenNames(request)
-  const overridden = Object.keys(store().sessionVariables).filter((name) => !given.includes(name))
-  return variableProblems(parseRows(request.vars), overridden, (name) => resolved.get(name)?.value)
-}
+const requestVariableProblems = (request, referenced) => (
+  sentProblems(request, store().sessionVariables, referenced && resolveLayers(scopeLayers(store(), request, referenced)))
+)
 
 async function resolveReferences(backend, request, lineage, trace) {
   const targets = referenceTargets(store(), request, namesInUse(lineage, request))
@@ -261,6 +257,8 @@ export function createExecutor(backend) {
     let request = original
     if (store().isRestricted && (hasActiveContent(request) || hasActiveInheritance(lineage))) return stop(request, EXECUTION_TEXT.restricted, RESTRICTED_ERROR)
 
+    const plainProblems = requestVariableProblems(request)
+    if (plainProblems.length > 0) return stop(request, blockedMessage(plainProblems))
     let referenced
     try {
       referenced = await resolveReferences(backend, request, lineage, trace)
