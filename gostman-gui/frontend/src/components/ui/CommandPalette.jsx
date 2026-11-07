@@ -6,7 +6,7 @@ import {
 import { MethodTag } from "../MethodTag"
 import { SectionLabel } from "./panel"
 import { useFocusTrap } from "../../hooks/useFocusTrap"
-import { fuzzyScore } from "../../lib/fuzzy"
+import { searchWords, wordScore, wordsScore } from "../../lib/fuzzy"
 import { PREFERENCES_TEXT } from "../../lib/preferencesText"
 import { featureCommands } from "../../lib/featurePalette"
 import { FEATURES_TEXT } from "../../lib/featuresText"
@@ -107,6 +107,7 @@ const workspaceCommands = (workspaces) => {
 }
 
 const SELECTION_STEPS = { ArrowDown: 1, ArrowUp: -1 }
+const MAX_COMMAND_RESULTS = 24
 const MAX_REQUEST_RESULTS = 12
 const MAX_HISTORY_RESULTS = 6
 const MAX_RECENT_REQUESTS = 30
@@ -142,7 +143,7 @@ const folderPathOf = (folders) => {
   }
 }
 
-const withPlace = (item) => ({ ...item, place: `${item.path} ${item.method} ${item.url}` })
+const withPlace = (item) => ({ ...item, titleKey: item.title.toLowerCase(), placeKey: `${item.path} ${item.method} ${item.url}`.toLowerCase() })
 
 const requestItems = (requests, folders) => {
   const pathOf = folderPathOf(folders)
@@ -170,15 +171,16 @@ const historyItems = (history) => history.map((entry) => withPlace({
 const commandItems = (commands) => commands.map((command) => ({
   ...command,
   kind: KIND_COMMAND,
+  labelKey: command.label.toLowerCase(),
   details: `${command.description} ${command.keywords || ""}`.toLowerCase(),
 }))
 
 const KEYWORD_MATCH = 1
 
-function commandScore(item, needle) {
+function commandScore(item, words) {
   let total = 0
-  for (const word of needle.split(/\s+/).filter(Boolean)) {
-    const label = fuzzyScore(item.label, word)
+  for (const word of words) {
+    const label = wordScore(item.labelKey, word)
     if (label !== null) total += label
     else if (item.details.includes(word)) total += KEYWORD_MATCH
     else return null
@@ -186,32 +188,32 @@ function commandScore(item, needle) {
   return total
 }
 
-const itemScore = (item, needle) => {
-  if (item.kind === KIND_COMMAND) return commandScore(item, needle)
-  const title = fuzzyScore(item.title, needle)
+const itemScore = (item, words) => {
+  if (item.kind === KIND_COMMAND) return commandScore(item, words)
+  const title = wordsScore(item.titleKey, words)
   if (title !== null) return title + NAME_MATCH_BONUS
-  return fuzzyScore(item.place, needle)
+  return wordsScore(item.placeKey, words)
 }
 
-const rank = (items, needle, limit) => items
-  .map((item) => ({ item, score: itemScore(item, needle) }))
+const rank = (items, words, limit) => items
+  .map((item) => ({ item, score: itemScore(item, words) }))
   .filter((entry) => entry.score !== null)
   .sort((first, second) => second.score - first.score)
   .slice(0, limit)
   .map((entry) => entry.item)
 
 function paletteItems({ commands, requests, history, query, mode }) {
-  const needle = query.trim().toLowerCase()
+  const words = searchWords(query)
   const showCommands = mode !== "requests"
-  if (!needle) {
+  if (words.length === 0) {
     return showCommands
       ? commands.filter((command) => !command.onlyWhenSearching)
       : [...requests.slice(0, MAX_RECENT_REQUESTS), ...history.slice(0, MAX_HISTORY_RESULTS)]
   }
   return [
-    ...(showCommands ? rank(commands, needle, commands.length) : []),
-    ...rank(requests, needle, MAX_REQUEST_RESULTS),
-    ...rank(history, needle, MAX_HISTORY_RESULTS),
+    ...(showCommands ? rank(commands, words, MAX_COMMAND_RESULTS) : []),
+    ...rank(requests, words, MAX_REQUEST_RESULTS),
+    ...rank(history, words, MAX_HISTORY_RESULTS),
   ]
 }
 
@@ -221,19 +223,10 @@ const rowClass = (isSelected, extra) => cn(
   isSelected && "bg-accent"
 )
 
-function useScrollWhenSelected(isSelected) {
-  const ref = useRef(null)
-  useEffect(() => {
-    if (isSelected) ref.current?.scrollIntoView({ block: "nearest" })
-  }, [isSelected])
-  return ref
-}
-
 function CommandRow({ id, command, isSelected, onSelect, onHover }) {
   const Icon = command.icon
   const tag = command.tag
   const shortcut = useShortcutLabel(command.shortcutId)
-  const rowRef = useScrollWhenSelected(isSelected)
   return (
     <button
       id={id}
@@ -242,7 +235,6 @@ function CommandRow({ id, command, isSelected, onSelect, onHover }) {
       tabIndex={-1}
       aria-selected={isSelected}
       title={command.label}
-      ref={rowRef}
       onClick={() => onSelect(command)}
       onMouseMove={onHover}
       className={rowClass(isSelected, command.destructive && "text-destructive")}
@@ -263,7 +255,6 @@ function RequestRow({ id, item, isSelected, onSelect, onHover }) {
   const isHistory = item.kind === KIND_HISTORY
   const detail = isHistory ? COMMAND_TEXT.sentEarlier : [item.path, item.url].filter(Boolean).join("  ·  ")
   const Icon = isHistory ? Clock : FileText
-  const rowRef = useScrollWhenSelected(isSelected)
   return (
     <button
       id={id}
@@ -272,7 +263,6 @@ function RequestRow({ id, item, isSelected, onSelect, onHover }) {
       tabIndex={-1}
       aria-selected={isSelected}
       title={isHistory ? item.title : `${item.title}${item.path ? ` (${item.path})` : ""}`}
-      ref={rowRef}
       onClick={() => onSelect(item)}
       onMouseMove={onHover}
       className={rowClass(isSelected)}
@@ -296,6 +286,7 @@ function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspace
   const [selectedIndex, setSelectedIndex] = useState(0)
   const inputRef = useRef(null)
   const dialogRef = useRef(null)
+  const listRef = useRef(null)
   const listId = useId()
   const optionId = (index) => `${listId}-${index}`
   const canInstall = useInstallable()
@@ -336,6 +327,7 @@ function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspace
   const updateQuery = (event) => {
     setQuery(event.target.value)
     setSelectedIndex(0)
+    listRef.current.scrollTop = 0
   }
 
   const handleKeyDown = (event) => {
@@ -352,7 +344,9 @@ function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspace
     const step = SELECTION_STEPS[event.key]
     if (!step) return
     event.preventDefault()
-    setSelectedIndex((index) => (index + step + shown.length) % shown.length)
+    const next = (selectedIndex + step + shown.length) % shown.length
+    setSelectedIndex(next)
+    document.getElementById(optionId(next))?.scrollIntoView({ block: "nearest" })
   }
 
   const isRequestMode = mode === "requests"
@@ -400,7 +394,7 @@ function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspace
           <kbd>{COMMAND_TEXT.escapeKey}</kbd>
         </div>
 
-        <div id={listId} role="listbox" tabIndex={-1} aria-label={COMMAND_TEXT.results} className="min-h-0 flex-1 overflow-y-auto p-1.5">
+        <div ref={listRef} id={listId} role="listbox" tabIndex={-1} aria-label={COMMAND_TEXT.results} className="min-h-0 flex-1 overflow-y-auto p-1.5">
           {shown.length === 0 && <p className="py-6 text-center text-xs text-muted-foreground">{COMMAND_TEXT.nothingMatches}</p>}
           {shown.map((item, index) => {
             const isSelected = index === selectedIndex

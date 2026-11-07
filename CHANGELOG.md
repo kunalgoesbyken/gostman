@@ -4,6 +4,10 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Changed
+
+- Typing in the command palette and in the body editor responds about three times as fast in large collections. A search lists the 24 best-matching commands.
+
 ## [1.15.2] - 2026-11-07
 
 ### Changed

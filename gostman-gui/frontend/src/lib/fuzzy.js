@@ -1,6 +1,6 @@
 const WORD_START = /[\s/\-_.:?&=]/
 
-function wordScore(haystack, needle) {
+export function wordScore(haystack, needle) {
   let score = 0
   let position = 0
   let streak = 0
@@ -15,13 +15,16 @@ function wordScore(haystack, needle) {
   return haystack.includes(needle) ? score + 10 : score
 }
 
-export function fuzzyScore(text, query) {
-  const haystack = text.toLowerCase()
+export const searchWords = (query) => query.toLowerCase().split(/\s+/).filter(Boolean)
+
+export function wordsScore(haystack, words) {
   let total = 0
-  for (const word of query.toLowerCase().split(/\s+/).filter(Boolean)) {
+  for (const word of words) {
     const score = wordScore(haystack, word)
     if (score === null) return null
     total += score
   }
   return total
 }
+
+export const fuzzyScore = (text, query) => wordsScore(text.toLowerCase(), searchWords(query))

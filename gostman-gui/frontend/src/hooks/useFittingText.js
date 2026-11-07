@@ -1,5 +1,7 @@
 import { useLayoutEffect, useState } from "react"
 
+const SEPARATOR = "\n"
+
 let measuringContext = null
 
 const contextFor = (style) => {
@@ -20,11 +22,13 @@ function fittingIndex(element, candidates) {
 
 export function useFittingText(ref, candidates) {
   const [index, setIndex] = useState(0)
+  const key = candidates.join(SEPARATOR)
 
   useLayoutEffect(() => {
     const element = ref.current
     if (!element) return undefined
-    const fit = () => setIndex(fittingIndex(element, candidates))
+    const texts = key.split(SEPARATOR)
+    const fit = () => setIndex(fittingIndex(element, texts))
     fit()
     const observer = new ResizeObserver(fit)
     observer.observe(element)
@@ -33,7 +37,7 @@ export function useFittingText(ref, candidates) {
       observer.disconnect()
       document.fonts?.removeEventListener("loadingdone", fit)
     }
-  }, [ref, candidates])
+  }, [ref, key])
 
   return candidates[index]
 }
