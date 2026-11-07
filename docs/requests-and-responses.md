@@ -183,7 +183,7 @@ The switch at the right of the request name, **Full editor** and **Variables**, 
 ![A request opened in the Variables view with a response below](../screenshots/variables-view.png)
 
 - Each enabled variable of the Vars tab is a field. Open **Field options** on a row to set a label, help text shown under the field, a placeholder, whether a value is required, and whether the variable appears in the Variables view. Choices for the **One of a list** type are written separated by commas.
-- A typed variable gets a matching control: a checkbox for **True or false**, a number box for **Number** and **Whole number**, a drop-down for **One of a list** and a taller box for **JSON**.
+- A typed variable gets a matching control: a checkbox for **True or false**, a drop-down for **One of a list** and a taller box for **JSON**. **Number** and **Whole number** are text boxes that keep exactly what you type, `{{references}}` included, and say under the field when it is not a number. A value that does not fit the control, such as `abc` after switching a row to True or false, stays visible in a text box with its message.
 - Send checks the fields first. A required field that is empty or a value that does not match its type is marked, the first one gets focus, and nothing is sent. The same check runs when a request is sent from the full editor, the runner or the CLI, where the response reads "The request was not sent because of its variables".
 - The choice is kept per tab while the app is open. **Opens in** under Settings sets the view a request opens in, so the author of a request can make it open in the Variables view. It is saved with the request. A WebSocket, Socket.IO or MQTT request has no Variables view.
 

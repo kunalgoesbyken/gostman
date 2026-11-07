@@ -9,14 +9,19 @@
       "json": "JSON",
       "enum": "One of a list"
     },
+    "typeHint": "Any and Text both reach scripts as text. Any means no type was chosen; Text says the value is meant as text. Every type sends the value exactly as written; the type decides what scripts receive and which values are accepted.",
     "problems": {
       "required": "{{name}} needs a value.",
       "number": "{{name}} must be a number.",
       "integer": "{{name}} must be a whole number.",
       "boolean": "{{name}} must be true or false.",
       "json": "{{name}} must be valid JSON.",
-      "enum": "{{name}} must be one of {{choices}}."
+      "enum": "{{name}} must be one of {{choices}}.",
+      "numberComma": "{{name}} must be a number with a dot for decimals and no thousands separator, such as 1.5 or 1500.",
+      "inexact": "{{name}} is a number that a script cannot hold exactly. Use the Text type to keep it as written.",
+      "jsonInexact": "{{name}} contains the number {{number}}, which a script cannot hold exactly. Write it as a string in quotes."
     },
+    "fromReference": "{{problem}} Its value comes from {{written}}.",
     "blocked": "The request was not sent because of its variables.\n{{problems}}"
   }
 }

@@ -1,6 +1,6 @@
 import { isPlainObject, parseJSON } from './dataUtils'
 import { placeholderNames } from './placeholders'
-import { typedValue } from './requestVariables'
+import { isTypedReference, sentText, typedValue } from './requestVariables'
 import { parseRows } from './rows'
 import { connectionDirectory } from './secretOrigins'
 import { chosenEnvironment, variableHolders } from './environmentScope'
@@ -104,8 +104,18 @@ const listLayer = (source, variables, meta) => ({
 
 const rowsLayer = (text) => ({
   source: 'request',
-  entries: parseRows(text).filter((row) => row.enabled && row.key.trim() !== '').map((row) => ({ name: row.key, value: typedValue(row) })),
+  entries: parseRows(text).filter((row) => row.enabled && row.key.trim() !== '').map((row) => ({ name: row.key, value: typedValue(row), text: sentText(row), row })),
 })
+
+const hasTypedReference = (layer) => layer.entries.some((entry) => entry.row && isTypedReference(entry.row))
+
+function withTypedReferences(layers) {
+  if (!layers.some(hasTypedReference)) return layers
+  const resolved = resolveLayers(layers)
+  const valueOf = (name) => resolved.get(name)?.value
+  const typed = (entry) => (entry.row && isTypedReference(entry.row) ? { ...entry, value: typedValue(entry.row, valueOf) } : entry)
+  return layers.map((layer) => (hasTypedReference(layer) ? { ...layer, entries: layer.entries.map(typed) } : layer))
+}
 
 export const dotEnvEntries = (dotEnv) => (
   Object.entries(dotEnv).map(([name, value]) => ({ name: PROCESS_PREFIX + name, value, secret: true, enabled: true }))
@@ -134,7 +144,7 @@ function folderLayers(folders, folderId) {
 export function scopeLayers(state, request, referenced = {}) {
   const activeGlobal = state.isRestricted ? undefined : findById(state.globalEnvironments, state.activeGlobalEnvironmentId)
   const activeEnvironment = chosenEnvironment(state, request?.folderId || '')
-  return [
+  return withTypedReferences([
     dotEnvLayer(state.dotEnv),
     ...(activeGlobal ? environmentLayers('global', state.globalEnvironments, activeGlobal, referenced) : [emptyLayer('global')]),
     listLayer('collection', state.collectionVariables, state.collectionVariablesMeta),
@@ -144,14 +154,14 @@ export function scopeLayers(state, request, referenced = {}) {
     rowsLayer(request?.vars),
     sessionLayer(state.sessionVariables),
     ...(request?.flowGiven ? [sessionLayer(request.flowGiven)] : []),
-  ]
+  ])
 }
 
 export function resolveLayers(layers) {
   const resolved = new Map()
   for (const layer of layers) {
-    for (const { name, value, secret, ref } of layer.entries) {
-      resolved.set(name, { value: asText(value), typed: value, secret: secret === true, source: layer.source, owner: layer.owner, ref })
+    for (const { name, value, text, secret, ref } of layer.entries) {
+      resolved.set(name, { value: text ?? asText(value), typed: value, secret: secret === true, source: layer.source, owner: layer.owner, ref })
     }
   }
   return resolved

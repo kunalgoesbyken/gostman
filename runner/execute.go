@@ -152,6 +152,7 @@ func (s *session) runPreRequest(ctx context.Context, request Request, scripted s
 		return request, false, err
 	}
 	edited.Lineage = request.Lineage
+	edited.typedVars = request.typedVars
 	return edited, true, nil
 }
 
@@ -318,8 +319,9 @@ func (s *session) isSocket(request Request) (bool, error) {
 }
 
 type typedVariables struct {
-	Vars    string `json:"vars"`
-	Message string `json:"message"`
+	Vars    string    `json:"vars"`
+	Typed   variables `json:"typed"`
+	Message string    `json:"message"`
 }
 
 func hasVariableRows(text string) bool {
@@ -332,10 +334,11 @@ func (s *session) withTypedVariables(request Request) (Request, string, error) {
 		return request, "", nil
 	}
 	var typed typedVariables
-	if err := s.scripts.Call("requestVariables", &typed, request.Vars, s.values.overriding(s.once)); err != nil {
+	if err := s.scripts.Call("requestVariables", &typed, request.Vars, s.values.overriding(s.once), s.scoped(request).text()); err != nil {
 		return request, "", err
 	}
 	request.Vars = typed.Vars
+	request.typedVars = typed.Typed
 	return request, typed.Message, nil
 }
 

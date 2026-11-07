@@ -114,7 +114,7 @@ func (v *values) scriptLayers(request Request, once variables) []scriptLayer {
 		{Scope: scopeGlobal, Values: layered(v.globals)},
 		{Scope: scopeCollection, Values: layered(v.collectionLists(request.Lineage)...)},
 		{Scope: scopeEnvironment, Values: layered(environment.inherited, environment.own)},
-		{Values: layered(append(request.folderScopes(), requestScope(request.Vars))...)},
+		{Values: layered(append(request.folderScopes(), request.scriptScope())...)},
 		{Scope: scopeSession, Values: layered(v.session)},
 		{Values: layered(once)},
 	}

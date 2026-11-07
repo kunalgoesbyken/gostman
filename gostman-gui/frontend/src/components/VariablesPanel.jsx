@@ -40,7 +40,10 @@ function ColumnLabels() {
     <div className={cn(ROW_GRID, "h-6", COLUMNS)}>
       <span />
       <SectionLabel>{REQUEST_TABS_TEXT.variableLabel}</SectionLabel>
-      <SectionLabel>{TEXT.type}</SectionLabel>
+      <span className="flex items-center gap-1">
+        <SectionLabel>{TEXT.type}</SectionLabel>
+        <InfoTip text={REQUEST_VARIABLES_TEXT.typeHint} />
+      </span>
       <SectionLabel>{TEXT.value}</SectionLabel>
       <span />
       <span />

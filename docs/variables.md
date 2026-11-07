@@ -21,20 +21,28 @@ Values you give when you start a run or a send win over everything saved in the 
 
 Every variable is text unless you give it a type. In the **Vars** tab of a request, the **Type** column offers:
 
-| Type | Value in scripts | Accepted text |
-| --- | --- | --- |
-| Any (default) and Text | text | anything |
-| Number | a number | a finite decimal number, such as `42`, `-1.5` or `2e3` |
-| Whole number | a number | a number without a fraction |
-| True or false | `true` or `false` | `true` or `false`, in any case; an empty value is `false` |
-| JSON | the parsed object, array or value | valid JSON |
-| One of a list | text | one of the comma-separated choices of the row |
+| Type | Value in scripts | Accepted text | Empty value in scripts |
+| --- | --- | --- | --- |
+| Any (default) and Text | text | anything | `""` |
+| Number | a number | an optional `-`, digits, an optional `.` followed by digits, and an optional exponent: `42`, `-1.5`, `007`, `2e3` | `null` |
+| Whole number | a number | an optional `-` and digits, from -9007199254740991 to 9007199254740991 | `null` |
+| True or false | `true` or `false` | `true` or `false`, in any case | `false` |
+| JSON | the parsed object, array or value | valid JSON whose numbers a script can hold exactly | `null` |
+| One of a list | text | one of the comma-separated choices of the row | `""` |
 
 ![The Vars tab with a whole number, a true or false and a one of a list variable](../screenshots/variables-typed.png)
 
-`env.get("count")`, `pm.variables.get("count")` and `bru.getVar("count")` return the typed value, in the apps and in the CLI. Where a variable is filled into a URL, header or body with `{{count}}`, it is still written as text, as a number or a boolean is written by JavaScript, and a JSON value as compact JSON. An empty value of any type except True or false stays an empty string, so an optional field does not break a script; mark a row **Required** under **Field options** to ask for a value.
+`env.get("count")`, `pm.variables.get("count")` and `bru.getVar("count")` return the typed value, in the apps and in the CLI. The type never changes what is sent: `{{count}}` in a URL, header or body is filled in with the text exactly as you wrote it, so `1.50`, `2e3` and `007` are sent as written. Only an empty True or false is sent as `false`, the value its unticked box shows.
 
-A value that does not match its type, or an empty required value, stops the send before any script runs. The request is not sent, the response says which variable is wrong, and the CLI counts it as a request without a response. Rows that are switched off are not checked. Only request variables have types; environment, collection and global values keep the JSON type they were saved with.
+Any and Text behave the same: the value reaches scripts as text. Any means that no type was chosen, Text says that the value is meant as text.
+
+Numbers are never guessed. A leading `+`, `0x1F`, `.5`, spaces inside the number and a decimal comma are refused: `1,5` is `1.5` in some languages and `1,500` is fifteen hundred in others, so write `1.5` or `1500`. A number that a script cannot hold exactly is refused too rather than rounded: a whole number beyond 9007199254740991 (`2^53 - 1`), a number with more significant digits than a double keeps, or such a number inside a JSON value. Use Text for long IDs and account numbers, or put them in quotes inside JSON.
+
+A typed value may refer to other variables, such as `{{base}}`. The field shows what you wrote, the reference is filled in when the request is sent, and the type applies to the result: a script gets `1.5` for a Number whose value is `{{base}}` when `base` is `1.5`, and the send stops with a message naming the variable when the result does not match its type.
+
+An empty optional Number, Whole number or JSON value reaches scripts as `null`, so `env.get("count") ?? 10` gives a default; Gostman 1.15.1 and earlier gave an empty string. Mark a row **Required** under **Field options** to ask for a value.
+
+A value that does not match its type, or an empty required value, stops the send before any script runs. The request is not sent, the response says which variable is wrong, and the CLI counts it as a request without a response. When you change the type of a row that has a value, the field keeps showing that value next to the message, until you change it. Rows that are switched off are not checked. Only request variables have types; environment, collection and global values keep the JSON type they were saved with.
 
 See [Variables view](requests-and-responses.md#variables-view) to turn a request into a short form of its typed variables.
 

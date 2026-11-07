@@ -4,7 +4,7 @@ import { VariableValueField } from "./VariableValueField"
 import { Button } from "./ui/button"
 import { EmptyState } from "./ui/emptyState"
 import { PanelBody } from "./ui/panel"
-import { PROBLEM_REQUIRED, TYPE_BOOLEAN, isShownInForm, problemOf, problemText, typeOf, variableName } from "../lib/requestVariables"
+import { PROBLEM_REQUIRED, isShownInForm, problemOf, problemText, usesCheckbox, variableName } from "../lib/requestVariables"
 import { parseRows, serializeRows } from "../lib/rows"
 import { VARIABLES_VIEW_TEXT as TEXT } from "../lib/variablesPanelText"
 
@@ -18,7 +18,7 @@ function FormField({ row, isRevealed, onChange }) {
   const help = textOf(row.help)
   const problem = problemOf(row)
   const showsProblem = problem !== "" && (problem !== PROBLEM_REQUIRED || isRevealed)
-  const isBoolean = typeOf(row) === TYPE_BOOLEAN
+  const isBoolean = usesCheckbox(row)
   const describedBy = [help && helpId, showsProblem && problemId].filter(Boolean).join(" ") || undefined
 
   return (

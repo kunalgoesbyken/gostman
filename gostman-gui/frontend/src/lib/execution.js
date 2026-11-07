@@ -23,7 +23,7 @@ import { applyRequestEdits, extractInSandbox, requestSubject, responseSubject, r
 import { acceptedCookies, scriptCookies } from './scripting/scriptCookies'
 import { scriptedRequest } from './scripting/subjects'
 import { rememberResolved } from './resolvedSecrets'
-import { blockedMessage, variableProblems } from './requestVariables'
+import { blockedMessage, isTypedReference, variableProblems } from './requestVariables'
 import { parseRows } from './rows'
 import { SECRETS_TEXT } from './secretsText'
 import { ENTRY_KINDS, exchangeEntry, scriptEntry, secretsEntry, withActivity } from './timeline'
@@ -171,6 +171,13 @@ const namesInUse = (lineage, request) => (
   runsScripts(lineage, request) ? undefined : usedVariableNames([request, lineage.map(({ settings }) => settings)])
 )
 
+function typedReferenceProblems(request, referenced) {
+  const rows = parseRows(request.vars).filter(isTypedReference)
+  if (rows.length === 0) return []
+  const resolved = resolveLayers(scopeLayers(store(), request, referenced))
+  return variableProblems(rows, Object.keys(store().sessionVariables), (name) => resolved.get(name)?.value)
+}
+
 async function resolveReferences(backend, request, lineage, trace) {
   const targets = referenceTargets(store(), request, namesInUse(lineage, request))
   if (Object.keys(targets).length === 0) return {}
@@ -262,6 +269,8 @@ export function createExecutor(backend) {
     } catch (error) {
       return stop(request, error.message)
     }
+    const referenceProblems = typedReferenceProblems(request, referenced)
+    if (referenceProblems.length > 0) return stop(request, blockedMessage(referenceProblems))
     const variablesOf = (candidate, answers) => variablesText(candidate, answers, referenced)
     const context = { send: createScriptSender(backend, trace), trace, referenced, timeoutMs: lineage[0]?.settings.scriptTimeoutMs }
 
