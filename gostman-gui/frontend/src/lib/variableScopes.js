@@ -142,6 +142,10 @@ function folderLayers(folders, folderId) {
   return folderChain(folders, folderId).map((folder) => objectLayer('folder', folder.variables))
 }
 
+const SCOPE_KEYS = ['isRestricted', 'globalEnvironments', 'activeGlobalEnvironmentId', 'environments', 'environmentChoices', 'activeEnvironmentId', 'folders', 'dotEnv', 'collectionVariables', 'collectionVariablesMeta', 'sessionVariables']
+
+export const scopeState = (state) => Object.fromEntries(SCOPE_KEYS.map((key) => [key, state[key]]))
+
 export function scopeLayers(state, request, referenced = {}) {
   const activeGlobal = state.isRestricted ? undefined : findById(state.globalEnvironments, state.activeGlobalEnvironmentId)
   const activeEnvironment = chosenEnvironment(state, request?.folderId || '')

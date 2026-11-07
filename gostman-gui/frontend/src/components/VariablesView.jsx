@@ -8,7 +8,9 @@ import { PROBLEM_REQUIRED, usesCheckbox, variableName } from "../lib/requestVari
 import { filledForm, hasNamedRows } from "../lib/variablesForm"
 import { parseRows } from "../lib/rows"
 import { VARIABLES_VIEW_TEXT as TEXT } from "../lib/variablesPanelText"
+import { useShallow } from "zustand/react/shallow"
 import { useAppStore } from "../store/appStore"
+import { scopeState } from "../lib/variableScopes"
 
 const SUBMIT_KEY = "Enter"
 const INPUT_TAG = "INPUT"
@@ -79,7 +81,7 @@ export function VariablesView({ tab, onChange, onReset, onSend, onOpenEditor, on
   const formRef = useRef(null)
   const { request, formValues } = tab
   const attempt = tab.formAttempt || 0
-  const state = useAppStore()
+  const state = useAppStore(useShallow(scopeState))
   const rows = useMemo(() => parseRows(request.vars), [request.vars])
   const { fields, problems, isChanged } = useMemo(() => filledForm(state, request, formValues), [state, request, formValues])
 
