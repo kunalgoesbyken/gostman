@@ -1,6 +1,6 @@
 import { isPlainObject, parseJSON } from '../dataUtils'
 import { placeholderNames } from '../placeholders'
-import { parseExact, stringifyExact } from './exactJson'
+import { isJsonNumber, parseExact, stringifyExact } from '../exactJson'
 
 export const TYPE_STRING = 'string'
 export const TYPE_NUMBER = 'number'
@@ -35,11 +35,9 @@ function parsedJson(written) {
   }
 }
 
-const DECIMAL = /^-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?$/
-
 function asNumber(written) {
   const trimmed = written.trim()
-  return DECIMAL.test(trimmed) && Number.isFinite(Number(trimmed)) ? { ok: true, text: trimmed } : { ok: false }
+  return isJsonNumber(trimmed) && Number.isFinite(Number(trimmed)) ? { ok: true, text: trimmed } : { ok: false }
 }
 
 function asBoolean(written) {

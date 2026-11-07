@@ -1,5 +1,6 @@
 const WHITESPACE = ' \t\n\r'
 const NUMBER_CHARACTERS = '+-0123456789.eE'
+const JSON_NUMBER = /^-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?$/u
 const LITERALS = { t: ['true', true], f: ['false', false], n: ['null', null] }
 
 export class ExactNumber {
@@ -7,6 +8,8 @@ export class ExactNumber {
     this.text = text
   }
 }
+
+export const isJsonNumber = (text) => JSON_NUMBER.test(text)
 
 function setOwn(holder, key, value) {
   Object.defineProperty(holder, key, { value, enumerable: true, writable: true, configurable: true })
@@ -77,6 +80,11 @@ export function parseExact(text) {
 }
 
 const isObject = (value) => value !== null && typeof value === 'object'
+
+export const exactNumbersIn = (value) => {
+  if (value instanceof ExactNumber) return [value.text]
+  return isObject(value) ? Object.values(value).flatMap(exactNumbersIn) : []
+}
 
 function wrap(open, close, parts, indent, depth) {
   if (parts.length === 0) return `${open}${close}`

@@ -2,7 +2,7 @@ import { isPlainObject } from '../dataUtils'
 import { FLOW_ENGINE_TEXT as TEXT } from '../flowsText'
 import { foldQueryParams, readParamRows, writeParamRows } from '../queryString'
 import { isBlankRow, isFileRow, parseRows, serializeRows } from '../rows'
-import { parseExact, stringifyExact } from './exactJson'
+import { parseExact, stringifyExact } from '../exactJson'
 import { asText } from './values'
 
 export const INPUT_HEADER = 'header'

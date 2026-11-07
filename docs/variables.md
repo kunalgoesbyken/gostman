@@ -24,19 +24,19 @@ Every variable is text unless you give it a type. In the **Vars** tab of a reque
 | Type | Value in scripts | Accepted text | Empty value in scripts |
 | --- | --- | --- | --- |
 | Any (default) and Text | text | anything | `""` |
-| Number | a number | an optional `-`, digits, an optional `.` followed by digits, and an optional exponent: `42`, `-1.5`, `007`, `2e3` | `null` |
-| Whole number | a number | an optional `-` and digits, from -9007199254740991 to 9007199254740991 | `null` |
+| Number | a number | a number written as in JSON: an optional `-`, digits without a leading zero, an optional `.` followed by digits, and an optional exponent: `42`, `-1.5`, `0.25`, `2e3` | `null` |
+| Whole number | a number | an optional `-` and digits without a leading zero, from -9007199254740991 to 9007199254740991 | `null` |
 | True or false | `true` or `false` | `true` or `false`, in any case | `false` |
 | JSON | the parsed object, array or value | valid JSON whose numbers a script can hold exactly | `null` |
 | One of a list | text | one of the comma-separated choices of the row | `""` |
 
 ![The Vars tab with a whole number, a true or false and a one of a list variable](../screenshots/variables-typed.png)
 
-`env.get("count")`, `pm.variables.get("count")` and `bru.getVar("count")` return the typed value, in the apps and in the CLI. The type never changes what is sent: `{{count}}` in a URL, header or body is filled in with the text exactly as you wrote it, so `1.50`, `2e3` and `007` are sent as written. Only an empty True or false is sent as `false`, the value its unticked box shows.
+`env.get("count")`, `pm.variables.get("count")` and `bru.getVar("count")` return the typed value, in the apps and in the CLI. The type never changes what is sent: `{{count}}` in a URL, header or body is filled in with the text exactly as you wrote it, so `1.50` and `2e3` are sent as written. Only an empty True or false is sent as `false`, the value its unticked box shows.
 
 Any and Text behave the same: the value reaches scripts as text. Any means that no type was chosen, Text says that the value is meant as text.
 
-Numbers are never guessed. A leading `+`, `0x1F`, `.5`, spaces inside the number and a decimal comma are refused: `1,5` is `1.5` in some languages and `1,500` is fifteen hundred in others, so write `1.5` or `1500`. A number that a script cannot hold exactly is refused too rather than rounded: a whole number beyond 9007199254740991 (`2^53 - 1`), a number with more significant digits than a double keeps, or such a number inside a JSON value. Use Text for long IDs and account numbers, or put them in quotes inside JSON.
+Numbers are never guessed. A leading `+`, a leading zero such as `007`, `0x1F`, `.5`, spaces inside the number and a decimal comma are refused: `1,5` is `1.5` in some languages and `1,500` is fifteen hundred in others, so write `1.5` or `1500`. A number that a script cannot hold exactly is refused too rather than rounded: a whole number beyond 9007199254740991 (`2^53 - 1`), a number with more significant digits than a double keeps, or such a number inside a JSON value. Use Text for codes, long IDs and account numbers, or put them in quotes inside JSON.
 
 A typed value may refer to other variables, such as `{{base}}`. The field shows what you wrote, the reference is filled in when the request is sent, and the type applies to the result: a script gets `1.5` for a Number whose value is `{{base}}` when `base` is `1.5`, and the send stops with a message naming the variable when the result does not match its type.
 

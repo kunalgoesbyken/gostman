@@ -1,3 +1,4 @@
+import { exactNumbersIn, isJsonNumber, parseExact } from './exactJson'
 import { formatList } from './i18n/format'
 import { fillPlaceholders, parseVariableMap, placeholderNames } from './placeholders'
 import { REQUEST_VARIABLES_TEXT as TEXT } from './requestVariablesText'
@@ -17,21 +18,16 @@ export const BOOLEAN_TRUE = 'true'
 export const BOOLEAN_FALSE = 'false'
 
 export const PROBLEM_REQUIRED = 'required'
-export const PROBLEM_COMMA = 'numberComma'
-export const PROBLEM_INEXACT = 'inexact'
-export const PROBLEM_JSON_INEXACT = 'jsonInexact'
+const PROBLEM_COMMA = 'numberComma'
+const PROBLEM_INEXACT = 'inexact'
+const PROBLEM_JSON_INEXACT = 'jsonInexact'
 
 const CHOICE_SEPARATOR = ','
 const ROW_BASICS = ['key', 'value', 'enabled']
 const BLOCKED_LINE_SEPARATOR = '\n'
 
-const DECIMAL = /^-?\d+(\.\d+)?([eE][+-]?\d+)?$/u
-const WHOLE = /^-?\d+$/u
 const DECIMAL_COMMA = /^-?\d+,\d+$/u
-const JSON_NUMBER = /-?\d+(\.\d+)?([eE][+-]?\d+)?/uy
-const NUMBER_START = /[-\d]/u
-const QUOTE = '"'
-const ESCAPE = '\\'
+const FRACTION_OR_EXPONENT = /[.eE]/u
 
 const accepted = (value) => ({ ok: true, value })
 const rejected = (problem) => ({ ok: false, problem })
@@ -50,48 +46,26 @@ const writtenDigits = (text) => significant(text.split(/[eE]/u)[0])
 
 const heldDigits = (number) => significant(Math.abs(number).toExponential().split('e')[0])
 
-const isPlainInteger = (text) => WHOLE.test(text)
+const isWholeText = (text) => isJsonNumber(text) && !FRACTION_OR_EXPONENT.test(text)
 
-const isExact = (text, number) => (
-  isPlainInteger(text) ? Number.isSafeInteger(number) : Number.isFinite(number) && writtenDigits(text) === heldDigits(number)
-)
+function isExact(text) {
+  const number = Number(text)
+  if (isWholeText(text)) return Number.isSafeInteger(number)
+  return Number.isFinite(number) && writtenDigits(text) === heldDigits(number)
+}
 
 function readNumber(text, isWhole) {
   const written = text.trim()
   if (DECIMAL_COMMA.test(written)) return rejected(PROBLEM_COMMA)
-  if (!(isWhole ? WHOLE : DECIMAL).test(written)) return rejected(isWhole ? TYPE_INTEGER : TYPE_NUMBER)
-  const number = Number(written)
-  return isExact(written, number) ? accepted(number) : rejected(PROBLEM_INEXACT)
+  if (!(isWhole ? isWholeText : isJsonNumber)(written)) return rejected(isWhole ? TYPE_INTEGER : TYPE_NUMBER)
+  return isExact(written) ? accepted(Number(written)) : rejected(PROBLEM_INEXACT)
 }
 
 const isBooleanWord = (text) => [BOOLEAN_TRUE, BOOLEAN_FALSE].includes(text.trim().toLowerCase())
 
 const readBoolean = (text) => (isBooleanWord(text) ? accepted(text.trim().toLowerCase() === BOOLEAN_TRUE) : rejected(TYPE_BOOLEAN))
 
-function afterString(text, start) {
-  let index = start + 1
-  while (index < text.length && text[index] !== QUOTE) index += text[index] === ESCAPE ? 2 : 1
-  return index + 1
-}
-
-export function inexactJsonNumber(text) {
-  let index = 0
-  while (index < text.length) {
-    if (text[index] === QUOTE) {
-      index = afterString(text, index)
-      continue
-    }
-    if (!NUMBER_START.test(text[index])) {
-      index += 1
-      continue
-    }
-    JSON_NUMBER.lastIndex = index
-    const written = JSON_NUMBER.exec(text)?.[0] ?? text[index]
-    if (!isExact(written, Number(written))) return written
-    index += written.length
-  }
-  return ''
-}
+const inexactJsonNumber = (text) => exactNumbersIn(parseExact(text)).find((written) => !isExact(written)) ?? ''
 
 function readJson(text) {
   let parsed
@@ -108,7 +82,7 @@ function readChoice(text, choices) {
   return choices.length === 0 || choices.includes(chosen) ? accepted(chosen) : rejected(TYPE_ENUM)
 }
 
-export const holdsPlaceholder = (text) => placeholderNames(String(text ?? '')).length > 0
+const holdsPlaceholder = (text) => placeholderNames(String(text ?? '')).length > 0
 
 export const isTypedReference = (row) => !isTextType(typeOf(row)) && holdsPlaceholder(row.value)
 
@@ -131,14 +105,16 @@ function readFilled(row, text) {
   return readJson(text)
 }
 
+const isFilledReference = (row, valueOf) => Boolean(valueOf) && isTypedReference(row)
+
 const filledText = (row, valueOf) => {
   const text = String(row.value ?? '')
-  return valueOf && isTypedReference(row) ? fillPlaceholders(text, valueOf) : text
+  return isFilledReference(row, valueOf) ? fillPlaceholders(text, valueOf) : text
 }
 
 const isDeferred = (row, valueOf) => !valueOf && isTypedReference(row)
 
-export function readTyped(row, valueOf) {
+function readTyped(row, valueOf) {
   return isDeferred(row, valueOf) ? accepted(String(row.value)) : readFilled(row, filledText(row, valueOf))
 }
 
@@ -171,10 +147,10 @@ function filledProblemText(row, text, problem) {
 
 export function problemText(row, problem, valueOf) {
   const said = filledProblemText(row, filledText(row, valueOf), problem)
-  return valueOf && isTypedReference(row) ? TEXT.fromReference({ problem: said, written: String(row.value).trim() }) : said
+  return isFilledReference(row, valueOf) ? TEXT.fromReference({ problem: said, written: String(row.value).trim() }) : said
 }
 
-export function variableProblems(rows, overridden = [], valueOf = undefined) {
+export function variableProblems(rows, overridden = [], valueOf) {
   return rows.filter((row) => isSentRow(row) && !overridden.includes(row.key)).flatMap((row) => {
     const problem = problemOf(row, valueOf)
     return problem === '' ? [] : [{ key: row.key, problem, message: problemText(row, problem, valueOf) }]
