@@ -4,6 +4,11 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Changed
+
+- Switching tabs, typing in the address bar, opening the command palette and searching in it respond about twice as fast in large collections, and saving after a folder toggle or a send no longer holds up the click.
+- Pasting a curl command: the documentation lists the browser copies, program names and method rules it reads.
+
 ## [1.15.2] - 2026-11-07
 
 ### Changed

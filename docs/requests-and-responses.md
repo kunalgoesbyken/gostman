@@ -22,7 +22,7 @@ The request bar sits above the request tabs.
 | Request name | A text field that shows "Untitled request" until you name the request. |
 | Protocol | HTTP, GraphQL, gRPC, WebSocket, Server-Sent Events, Socket.IO, MQTT, SOAP, MCP, SignalR, TCP or UDP. Choosing one rewrites the request for it, for example the address scheme and the method. A "Detected" chip appears when the protocol changes because of what you typed or pasted rather than your choice. TCP and UDP can be chosen in the web app, which explains that only the desktop app sends them. |
 | HTTP method | Shown for HTTP, Server-Sent Events and SOAP: GET, POST, PUT, DELETE, PATCH, HEAD or OPTIONS. |
-| Request URL | Accepts `{{variables}}`. Pasting a command that starts with `curl ` fills the request from it, see [Pasting curl commands](#pasting-curl-commands). Press Enter to send. |
+| Request URL | Accepts `{{variables}}`. Pasting a curl command fills the request from it, see [Pasting curl commands](#pasting-curl-commands). Press Enter to send. |
 | Send | Sends the request. While a request is running the button becomes Cancel. |
 | Save | Saves the request. |
 | Code | Opens the code generator. See [Code generation](#code-generation). |
@@ -33,6 +33,10 @@ When the URL is a WebSocket address, the protocol list shows WebSocket (or Graph
 ### Pasting curl commands
 
 A curl command pasted into the address bar fills the method, URL, headers, body, basic auth, cookies and timeout. Options with no counterpart, such as `-o` or `--proxy`, are ignored.
+
+- **Copy as cURL** from Chrome, Edge and Firefox pastes as it was copied, in the bash form and in the Windows (cmd) form with `^` escapes. The command may start with `curl`, `curl.exe` or a path to curl, and may span lines ending in `\`, `^` or a PowerShell backtick.
+- Short flags can be bundled: `-sX GET` and `-LfX POST` read each letter on its own, and every curl option that takes a value is known, so its value never ends up in the URL.
+- The method is the one given with `-X`. Without it, `-d`, `--data*`, `--json` and `-F` make a POST even with an empty value, `-T` a PUT, and `-G` a GET with the data moved into the query.
 
 - `-F name=@path` becomes a Multipart file row that reads the file from disk, keeping `;type=` and `;filename=`, and `-F name=<path` a text row filled from the file. `--form-string` and `--data-raw` keep a leading `@` as text.
 - `-d @path`, `--data-binary @path` and `--json @path` become a body of `{{$file(path)}}`, see [Reading files](variables.md#reading-files).
