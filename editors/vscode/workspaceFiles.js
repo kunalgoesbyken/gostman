@@ -8,6 +8,7 @@ const ENVIRONMENTS = "environments";
 const REFERENCE_SEPARATOR = "/";
 const REQUEST_MARKERS = ["method", "url"];
 const REQUEST_KEYS = ["id", "name", "order", ...REQUEST_MARKERS];
+const DEFAULT_METHOD = "GET";
 
 function isHidden(name) {
   return name.startsWith(".");
@@ -53,12 +54,6 @@ function isRequestText(text) {
   return isRequest(readValues(text, REQUEST_MARKERS));
 }
 
-function belongsTo(root, file) {
-  const relative = path.relative(root, file);
-  if (relative === "" || path.isAbsolute(relative)) return false;
-  return relative.split(path.sep).every((part) => part !== ".." && !isHidden(part));
-}
-
 async function listEnvironments(root) {
   const directory = path.join(root, ENVIRONMENTS);
   const files = (await entriesOf(directory)).filter((entry) => entry.isFile() && !isHidden(entry.name) && isYamlFile(entry.name));
@@ -75,7 +70,8 @@ function requestNode(file, values, folderNames) {
   const name = values.get("name") || stemOf(file);
   const id = values.get("id");
   const qualified = [...folderNames, name].join(REFERENCE_SEPARATOR);
-  return { kind: "request", path: file, name, id, qualified, reference: id || qualified, order: orderOf(values) };
+  const method = (values.get("method") || DEFAULT_METHOD).toUpperCase();
+  return { kind: "request", path: file, name, id, method, qualified, reference: id || qualified, order: orderOf(values) };
 }
 
 async function readRequest(file, folderNames) {
@@ -133,4 +129,4 @@ async function requestReference(root, file) {
   return found?.reference;
 }
 
-module.exports = { listEnvironments, readCollection, requestReference, isRequestText, belongsTo, ENVIRONMENTS, REFERENCE_SEPARATOR };
+module.exports = { listEnvironments, readCollection, requestReference, isRequestText, entriesOf, REFERENCE_SEPARATOR };

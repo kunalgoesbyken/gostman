@@ -19,5 +19,9 @@ const SETTINGS = {
 
 const MANIFEST = "gostman.yaml";
 const YAML_GLOB = "**/*.{yaml,yml}";
+const SEARCH_DEPTH = 4;
+const SEARCH_FOLDER_LIMIT = 5000;
+const SKIPPED_FOLDERS = ["node_modules", "bower_components", "vendor", "__pycache__"];
+const ENVIRONMENT_CHOICES = "gostman.environmentChoices";
 
-module.exports = { COMMANDS, SETTINGS, MANIFEST, YAML_GLOB };
+module.exports = { COMMANDS, SETTINGS, MANIFEST, YAML_GLOB, SEARCH_DEPTH, SEARCH_FOLDER_LIMIT, SKIPPED_FOLDERS, ENVIRONMENT_CHOICES };

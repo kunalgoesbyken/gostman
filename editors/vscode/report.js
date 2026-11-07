@@ -46,4 +46,4 @@ function resultLine(result) {
   return vscode.l10n.t("Passed {0} ({1} ms)", name, duration);
 }
 
-module.exports = { parseReport, parseOutcome, describeCheck, verdict, resultLine };
+module.exports = { parseReport, parseOutcome, verdict, resultLine };

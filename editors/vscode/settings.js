@@ -1,40 +1,36 @@
-const fs = require("fs");
-const path = require("path");
 const vscode = require("vscode");
-const { SETTINGS, MANIFEST } = require("./constants");
+const { SETTINGS, ENVIRONMENT_CHOICES } = require("./constants");
+
+let memory;
 
 function settings() {
   return vscode.workspace.getConfiguration(SETTINGS.section);
 }
 
-function hasManifest(folderPath) {
-  return fs.existsSync(path.join(folderPath, MANIFEST));
+function useMemory(state) {
+  memory = state;
 }
 
-function rootFolder() {
-  const folders = (vscode.workspace.workspaceFolders ?? []).map((folder) => folder.uri.fsPath);
-  return folders.find(hasManifest) ?? folders[0];
+function storedChoices() {
+  return memory?.get(ENVIRONMENT_CHOICES, {}) ?? {};
 }
 
-function rootFor(uri) {
-  const folder = vscode.workspace.getWorkspaceFolder(uri)?.uri.fsPath;
-  return folder && hasManifest(folder) ? folder : undefined;
-}
-
-function requireFolder() {
-  const root = rootFolder();
-  if (root) return root;
-  vscode.window.showWarningMessage(vscode.l10n.t("Open a folder that holds a Gostman collection first."));
-  return undefined;
-}
-
-function selectedEnvironment() {
+function configuredEnvironment() {
   return settings().get(SETTINGS.environment, "").trim();
 }
 
-function environmentArgs() {
-  const name = selectedEnvironment();
+function selectedEnvironment(root) {
+  const stored = storedChoices();
+  return root && Object.hasOwn(stored, root) ? stored[root] : configuredEnvironment();
+}
+
+async function chooseEnvironment(root, name) {
+  await memory.update(ENVIRONMENT_CHOICES, { ...storedChoices(), [root]: name });
+}
+
+function environmentArgs(root) {
+  const name = selectedEnvironment(root);
   return name ? ["--env", name] : [];
 }
 
-module.exports = { settings, rootFolder, rootFor, requireFolder, selectedEnvironment, environmentArgs };
+module.exports = { settings, useMemory, selectedEnvironment, chooseEnvironment, environmentArgs };
