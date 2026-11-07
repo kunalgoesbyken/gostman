@@ -17,6 +17,10 @@ const maxSpreadsheetPart = 64 << 20
 
 const maxSpreadsheetColumns = 16384
 
+const maxSpreadsheetCells = 1 << 22
+
+var errTooManyCells = errors.New("the workbook has too many cells for a data file")
+
 type sheetRef struct {
 	Name string `xml:"name,attr"`
 	ID   string `xml:"http://schemas.openxmlformats.org/officeDocument/2006/relationships id,attr"`
@@ -142,6 +146,7 @@ func decodePart(part *zip.File, into any) error {
 
 func sheetRows(sheet sheetXML, shared sharedStringsXML) ([]Row, error) {
 	var table [][]string
+	cells := 0
 	for _, row := range sheet.Rows {
 		var line []string
 		for _, cell := range row.Cells {
@@ -152,8 +157,12 @@ func sheetRows(sheet sheetXML, shared sharedStringsXML) ([]Row, error) {
 			if column >= maxSpreadsheetColumns {
 				return nil, errors.New("the workbook has a cell beyond the column limit")
 			}
-			for len(line) <= column {
-				line = append(line, "")
+			if column >= len(line) {
+				cells += column + 1 - len(line)
+				if cells > maxSpreadsheetCells {
+					return nil, errTooManyCells
+				}
+				line = append(line, make([]string, column+1-len(line))...)
 			}
 			line[column] = cellText(cell, shared)
 		}
@@ -166,11 +175,12 @@ func sheetRows(sheet sheetXML, shared sharedStringsXML) ([]Row, error) {
 	for index, name := range header {
 		header[index] = strings.TrimSpace(name)
 	}
+	lines := filledLines(table[1:])
+	if namedColumns(header)*len(lines) > maxSpreadsheetCells {
+		return nil, errTooManyCells
+	}
 	var rows []Row
-	for _, line := range table[1:] {
-		if blankLine(line) {
-			continue
-		}
+	for _, line := range lines {
 		row := Row{}
 		for index, name := range header {
 			if name == "" {
@@ -186,6 +196,26 @@ func sheetRows(sheet sheetXML, shared sharedStringsXML) ([]Row, error) {
 		rows = append(rows, row)
 	}
 	return rows, nil
+}
+
+func filledLines(table [][]string) [][]string {
+	var lines [][]string
+	for _, line := range table {
+		if !blankLine(line) {
+			lines = append(lines, line)
+		}
+	}
+	return lines
+}
+
+func namedColumns(header []string) int {
+	count := 0
+	for _, name := range header {
+		if name != "" {
+			count++
+		}
+	}
+	return count
 }
 
 func blankLine(line []string) bool {
@@ -229,6 +259,9 @@ func columnIndex(ref string) int {
 		}
 		index = index*26 + int(character-'A') + 1
 		letters++
+		if index > maxSpreadsheetColumns {
+			return maxSpreadsheetColumns
+		}
 	}
 	if letters == 0 {
 		return -1

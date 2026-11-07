@@ -38,7 +38,7 @@ A data file runs the whole selection once per row.
 
 - A CSV file needs a header row. Quoted fields may contain commas and line breaks, and every value is text.
 - A JSON file must be an array of objects, one object per iteration.
-- An XLSX workbook uses its first sheet. The first row holds the column names, blank rows are skipped, and every value is read as the text stored in the cell, so a date shows as its serial number and a formula as its last saved result.
+- An XLSX workbook uses its first sheet. The first row holds the column names, blank rows are skipped, and every value is read as the text stored in the cell, so a date shows as its serial number and a formula as its last saved result. A workbook may use columns up to XFD (16,384) and about four million cells; a larger one is refused with a message instead of being read.
 - A data file can have at most 10000 rows, and it must have at least one.
 - A row's columns become variables for that iteration and win over request, folder and environment variables with the same name, so a column `id` fills `{{id}}` even in a request whose **Vars** tab sets `id`. The dialog lists the columns a file sets. The values are kept as session values for the run and put back when it ends. `iteration` (starting at 1) and `iterationCount` are set as well, so you can write `{{iteration}}` in a request.
 - With a data file loaded, the dialog shows its name and row count. Select that button to remove the file.
