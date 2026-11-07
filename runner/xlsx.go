@@ -15,6 +15,8 @@ import (
 
 const maxSpreadsheetPart = 64 << 20
 
+const maxSpreadsheetColumns = 16384
+
 type sheetRef struct {
 	Name string `xml:"name,attr"`
 	ID   string `xml:"http://schemas.openxmlformats.org/officeDocument/2006/relationships id,attr"`
@@ -86,7 +88,7 @@ func parseXLSXRows(content []byte) ([]Row, error) {
 	if err := decodePart(sheetPart, &sheet); err != nil {
 		return nil, err
 	}
-	return sheetRows(sheet, shared), nil
+	return sheetRows(sheet, shared)
 }
 
 func firstSheetPath(parts map[string]*zip.File) (string, error) {
@@ -138,7 +140,7 @@ func decodePart(part *zip.File, into any) error {
 	return nil
 }
 
-func sheetRows(sheet sheetXML, shared sharedStringsXML) []Row {
+func sheetRows(sheet sheetXML, shared sharedStringsXML) ([]Row, error) {
 	var table [][]string
 	for _, row := range sheet.Rows {
 		var line []string
@@ -146,6 +148,9 @@ func sheetRows(sheet sheetXML, shared sharedStringsXML) []Row {
 			column := columnIndex(cell.Ref)
 			if column < 0 {
 				column = len(line)
+			}
+			if column >= maxSpreadsheetColumns {
+				return nil, errors.New("the workbook has a cell beyond the column limit")
 			}
 			for len(line) <= column {
 				line = append(line, "")
@@ -155,7 +160,7 @@ func sheetRows(sheet sheetXML, shared sharedStringsXML) []Row {
 		table = append(table, line)
 	}
 	if len(table) == 0 {
-		return nil
+		return nil, nil
 	}
 	header := table[0]
 	for index, name := range header {
@@ -180,7 +185,7 @@ func sheetRows(sheet sheetXML, shared sharedStringsXML) []Row {
 		}
 		rows = append(rows, row)
 	}
-	return rows
+	return rows, nil
 }
 
 func blankLine(line []string) bool {
