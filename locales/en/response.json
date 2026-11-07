@@ -132,7 +132,7 @@
     "treeTrimmed_other": "Showing the start of this tree. {{count}} more values are hidden. Use Raw or the filter to see the rest.",
     "tree": {
       "expandAll": "Expand all",
-      "collapseAll": "Collapse all",
+      "collapseTo": "Collapse to level {{count}}",
       "depth": "Expansion depth",
       "level": "Level {{count}}",
       "allLevels": "All levels",

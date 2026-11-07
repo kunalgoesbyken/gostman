@@ -228,7 +228,7 @@ Each assertion row has a checkbox that turns it on or off, an Expression, a Chec
 | Stream as server-sent events | Streams the response as events. Adds Reconnect when the server closes the stream, Max events (default 10000) and Max seconds (default 300). |
 | Tags | Labels such as `smoke` or `regression`. Type a tag and press Enter or a comma; Backspace in the empty field removes the last one. Tags already used in the collection are suggested. Case is ignored, so `Smoke` and `smoke` are one tag. The runner dialog and `gostman run --tags` use them to run a subset. |
 | Opens in | **Full editor** by default. **Variables view** opens the request showing only its variables, Send and the response. See [Variables view](#variables-view). |
-| Expand JSON responses | How many levels of a JSON response are open when it arrives: **App default** (two levels, three for MCP), Level 1 to Level 4, or All levels. See [Expanding the JSON tree](#expanding-the-json-tree). |
+| Expand JSON responses | How many levels of a JSON response are open when it arrives: **App default** (level 2, or level 3 for MCP; the list shows which), Level 1 to Level 4, or All levels. See [Expanding the JSON tree](#expanding-the-json-tree). |
 | Description | Markdown shown in generated documentation. |
 
 The tab shows only the settings that apply to the request: gRPC and remote MCP requests have Timeout (ms) and Verify TLS certificates, a local `stdio:` MCP server has Timeout (ms), and WebSocket requests have only Tags and Description. A setting you changed stays visible even when it does not apply.
@@ -325,13 +325,13 @@ The Body tab chooses a view from the response type.
 
 While the Pretty view shows a tree, the row of the Body view switch has three controls on the right:
 
-- **Expand all** opens every level; the same button then reads **Collapse all** and closes everything below the first level.
-- The depth list opens the tree to Level 1, 2, 3 or 4, or to All levels. Level 1 shows the top-level keys only.
-- **Open this request at this depth every time** saves the chosen depth with the request. It is the same setting as **Expand JSON responses** under Settings. The button is off when the request already opens at that depth.
+- **Expand all** opens every level. Once the tree shows more than its level, because you expanded all or opened a node by hand, the same button reads **Collapse to level 3** (with your level) and takes the tree back to that level. After **Expand all** it returns to the level you were on before, which is the request's own depth unless you picked another one.
+- The depth list opens the tree to Level 1, 2, 3 or 4, or to All levels. Level 1 shows the top-level keys only. Picking a level closes any nodes you opened or closed by hand.
+- **Open this request at this depth every time** saves the chosen depth with the request. It is the same setting as **Expand JSON responses** under Settings, and changing either one updates the other. The button is off when the request already opens at that depth.
 
 ![The response toolbar with the expand button, the depth list and the remember button](../screenshots/json-tree-depth.png)
 
-A depth chosen in the toolbar lasts until the next response arrives, and then the request's own depth applies again. A request without one uses two levels (three for an MCP response). The controls are not shown for responses that are not a JSON tree, such as a body that is searched, shown as text or larger than 500,000 characters.
+Each request tab keeps its own view of the tree until a new response arrives for that tab: the depth chosen in the toolbar, and the nodes you opened or closed by hand. Switching tabs, searching the body, going to Headers and back, switching between Pretty and Raw, or collapsing the response panel leaves them as they were. A new response opens at the request's own depth again. A request without one uses two levels (three for an MCP response); the Settings tab shows which as **App default (level 2)**. The controls are not shown for responses that are not a JSON tree, such as a body that is searched, shown as text or larger than 500,000 characters.
 
 ### Filter and search
 

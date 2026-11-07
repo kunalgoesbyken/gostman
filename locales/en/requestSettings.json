@@ -23,7 +23,7 @@
     "opensInFull": "Full editor",
     "opensInVariables": "Variables view",
     "jsonDepth": "Expand JSON responses",
-    "jsonDepthDefault": "App default",
+    "jsonDepthDefault": "App default (level {{count}})",
     "tags": "Tags",
     "tagsPlaceholder": "smoke, regression",
     "description": "Description",

@@ -5,11 +5,14 @@ const isContainer = (value) => value !== null && typeof value === 'object'
 
 const remainder = (count, noun) => `${count} more ${noun} not shown`
 
-export function trimTree(value, maxChildren = MAX_TREE_CHILDREN, maxNodes = MAX_TREE_NODES) {
+const pointerStep = (key) => `/${String(key).replaceAll('~', '~0').replaceAll('/', '~1')}`
+
+function trimTree(value, maxChildren = MAX_TREE_CHILDREN, maxNodes = MAX_TREE_NODES) {
   let budget = maxNodes
   let omitted = 0
+  const paths = new WeakMap()
 
-  function visit(node) {
+  function visit(node, path) {
     if (!isContainer(node)) return node
     const isList = Array.isArray(node)
     const entries = isList ? node.map((item, index) => [index, item]) : Object.entries(node)
@@ -17,8 +20,9 @@ export function trimTree(value, maxChildren = MAX_TREE_CHILDREN, maxNodes = MAX_
     const kept = entries.slice(0, allowed)
     budget -= kept.length
     const copy = isList ? [] : {}
+    paths.set(copy, path)
     kept.forEach(([key, item]) => {
-      const trimmed = visit(item)
+      const trimmed = visit(item, path + pointerStep(key))
       if (isList) copy.push(trimmed)
       else copy[key] = trimmed
     })
@@ -31,6 +35,13 @@ export function trimTree(value, maxChildren = MAX_TREE_CHILDREN, maxNodes = MAX_
     return copy
   }
 
-  const trimmed = visit(value)
-  return { value: trimmed, omitted }
+  const trimmed = visit(value, '')
+  return { value: trimmed, omitted, paths }
+}
+
+const trimmedTrees = new WeakMap()
+
+export function trimmedTree(value) {
+  if (!trimmedTrees.has(value)) trimmedTrees.set(value, trimTree(value))
+  return trimmedTrees.get(value)
 }
