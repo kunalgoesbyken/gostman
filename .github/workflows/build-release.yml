@@ -184,7 +184,7 @@ jobs:
           mkdir "$staging"
           cp -R build/bin/Gostman.app "$staging/"
           ln -s /Applications "$staging/Applications"
-          hdiutil create -volname Gostman -srcfolder "$staging" -ov -format UDZO build/bin/Gostman-darwin-universal.dmg
+          hdiutil create -volname Gostman -srcfolder "$staging" -size "$(( $(du -sm "$staging" | cut -f1) * 2 + 64 ))m" -ov -format UDZO build/bin/Gostman-darwin-universal.dmg
           ditto -c -k --keepParent build/bin/Gostman.app build/bin/Gostman-darwin-universal.zip
 
       - name: Build and package the CLI
