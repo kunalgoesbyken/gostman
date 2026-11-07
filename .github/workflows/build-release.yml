@@ -169,9 +169,9 @@ jobs:
         if: matrix.name == 'macos'
         run: |
           df -h /
-          sudo rm -rf "$HOME/Library/Android" /Library/Android "$HOME/Library/Developer/Xcode/iOS DeviceSupport"
-          sudo rm -rf /Library/Developer/CoreSimulator/Volumes /Library/Developer/CoreSimulator/Images /Library/Developer/CoreSimulator/Caches
-          sudo rm -rf "$HOME/.dotnet" /usr/local/share/dotnet
+          sudo rm -rf "$HOME/Library/Android" /Library/Android "$HOME/Library/Developer/Xcode/iOS DeviceSupport" 2>/dev/null || true
+          sudo rm -rf /Library/Developer/CoreSimulator/Volumes /Library/Developer/CoreSimulator/Images /Library/Developer/CoreSimulator/Caches 2>/dev/null || true
+          sudo rm -rf "$HOME/.dotnet" /usr/local/share/dotnet 2>/dev/null || true
           df -h /
 
       - name: Build and package (macOS)
