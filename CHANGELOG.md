@@ -4,9 +4,15 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.15.3] - 2026-11-07
+
 ### Changed
 
 - Typing in the command palette and in the body editor responds about three times as fast in large collections. A search lists the 24 best-matching commands.
+
+### Fixed
+
+- XLSX data files: a cell beyond column XFD, or a workbook with more than about four million cells, is refused with a message instead of exhausting memory. Thanks to @saromanov (#33).
 
 ## [1.15.2] - 2026-11-07
 
