@@ -4,15 +4,12 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
-### Changed
-
-- Switching tabs, typing in the address bar, opening the command palette and searching in it respond about twice as fast in large collections, and saving after a folder toggle or a send no longer holds up the click.
-- Pasting a curl command: the documentation lists the browser copies, program names and method rules it reads.
-
 ## [1.15.2] - 2026-11-07
 
 ### Changed
 
+- Switching tabs, typing in the address bar, opening the command palette and searching in it respond about twice as fast in large collections, and saving after a folder toggle or a send no longer holds up the click.
+- Pasting a curl command: the documentation lists the browser copies, program names and method rules it reads.
 - Variables view: a request is sent with exactly what the full editor would send. A value is sent as typed, an empty field leaves a session value in place, a hidden variable shows up in the form only when it needs a value, and a bad value marks its field instead of sending.
 - Typed request variables: a Number value follows the JSON number grammar (`1.50` and `2e3` are sent as typed, `007` and `1,5` are refused), integers too large to keep exactly are refused rather than rounded, and an empty optional Number, Whole number or JSON variable gives scripts `null`.
 - JSON responses: the tree keeps its depth and the folders you opened or closed per response, through search, Raw and Pretty, and tab switches; the toggle reads **Collapse to level N**.
