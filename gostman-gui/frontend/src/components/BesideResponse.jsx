@@ -15,7 +15,7 @@ export function BesideResponse({ tab, onClose }) {
         <span dir="auto" className="min-w-0 flex-1 truncate text-xs text-foreground">{tabTitle(tab)}</span>
         <IconButton label={SPLIT_TEXT.close} icon={X} onClick={onClose} />
       </Toolbar>
-      <ResponsePanel docked tabId={tab.id} response={tab.response} history={tab.responses} tests={tab.tests} loading={tab.pendingId !== null} />
+      <ResponsePanel docked tabId={tab.id} jsonDepth={tab.request.jsonDepth} response={tab.response} history={tab.responses} tests={tab.tests} loading={tab.pendingId !== null} />
     </section>
   )
 }

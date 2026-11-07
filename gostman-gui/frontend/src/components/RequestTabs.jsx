@@ -26,7 +26,8 @@ import { FOLDER_SETTINGS_TEXT as INHERIT_TEXT } from "../lib/folderSettingsText"
 import { GRAPHQL_METHOD } from "../lib/graphqlSchema"
 import { GRPC_PANEL, isBlankMessage } from "../lib/grpc"
 import { AUTH_INHERIT, countInheritedHeaders, inheritedAuthLayer } from "../lib/inheritance"
-import { MCP_PANEL } from "../lib/mcp"
+import { MCP_PANEL, isMcpRequest } from "../lib/mcp"
+import { appDefaultDepth } from "../lib/jsonDepth"
 import { readParamRows } from "../lib/queryString"
 import {
   AUTH_PANEL, BODY_PANEL, EXTRACT_PANEL, FILES_PANEL, GRAPHQL_PANEL, HEADERS_PANEL, NOTES_PANEL, PARAMS_PANEL, SETTINGS_PANEL, TESTS_PANEL, VARS_PANEL,
@@ -352,6 +353,7 @@ export const RequestTabs = memo(function RequestTabs({
             tags={activeRequest.tags}
             defaultView={activeRequest.defaultView}
             jsonDepth={activeRequest.jsonDepth}
+            defaultDepth={appDefaultDepth(isMcpRequest(activeRequest))}
             showsViews={!isSocket}
             onChange={(next) => onUpdateRequest({ options: next })}
             onDefaultViewChange={(defaultView) => onUpdateRequest({ defaultView })}

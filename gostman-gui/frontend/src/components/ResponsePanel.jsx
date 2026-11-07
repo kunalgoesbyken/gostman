@@ -42,8 +42,9 @@ import { shortcutLabel } from "../lib/platform"
 import { AI_TEXT } from "../lib/aiText"
 import { RESPONSE_CHECKS_TEXT } from "../lib/checksText"
 import { canSaveAsExample } from "../lib/examples"
-import { trimTree } from "../lib/jsonTree"
-import { COLLAPSED_DEPTH, DEPTH_SETTINGS, depthLabel, depthOfSetting, isDepthSetting, settingOfDepth } from "../lib/jsonDepth"
+import { trimmedTree } from "../lib/jsonTree"
+import { DEPTH_SETTINGS, depthLabel, depthOfSetting, requestDepth, settingOfDepth } from "../lib/jsonDepth"
+import { chooseDepth, collapseTarget, isExpandedIn, noteToggle, opensBeyondLevel, shownDepth, treeEpoch, useTreeView } from "../lib/jsonTreeView"
 import { AUTO_DECODE_BYTES } from "../lib/binary/limits"
 import { LARGE_BODY_CHARS } from "../lib/largeText"
 import { PREVIEW_TEXT, RESPONSE_TEXT } from "../lib/responseText"
@@ -61,8 +62,6 @@ import {
   BODY_KINDS, ERROR_TITLES, bodyBytes, bodyKind, dataUrl, isScriptableImage, looksLikeJson, mimeType, parseJsonBody, statusVariant, textBody,
 } from "../lib/response"
 
-const JSON_EXPANDED_DEPTH = 2
-const MCP_EXPANDED_DEPTH = 3
 const TAB_BODY = 'body'
 const TAB_HEADERS = 'headers'
 const TAB_COOKIES = 'cookies'
@@ -220,24 +219,23 @@ function MediaPreview({ response, kind }) {
   )
 }
 
-function PrettyBody({ json, formatted, filtered, highlight, depth }) {
+function PrettyBody({ json, formatted, filtered, highlight, tree }) {
   if (formatted !== null) return <TextBody text={filtered ? filtered.text : formatted} highlight={highlight} />
   const data = filtered ? filtered.value : json
   if (highlight) return <TextBody text={JSON.stringify(data, null, 2)} highlight={highlight} />
-  if (data === null || typeof data !== 'object') return <TextBody text={JSON.stringify(data, null, 2)} />
-  return <JsonTree data={data} depth={depth} />
+  if (data === null || typeof data !== 'object' || !tree) return <TextBody text={JSON.stringify(data, null, 2)} />
+  return <JsonTree data={data} epoch={tree.epoch} onToggle={tree.onToggle} />
 }
 
-function TreeControls({ depth, savedSetting, onChoose, onRemember }) {
-  const isAll = depth === Infinity
+function TreeControls({ depth, savedSetting, isOpenedBeyond, collapseTo, onChoose, onRemember }) {
   const current = settingOfDepth(depth)
   const isRemembered = savedSetting === current
   return (
     <div className="ms-auto flex items-center gap-1">
       <IconButton
-        label={isAll ? RESPONSE_TEXT.tree.collapseAll : RESPONSE_TEXT.tree.expandAll}
-        icon={isAll ? ChevronsDownUp : ChevronsUpDown}
-        onClick={() => onChoose(isAll ? COLLAPSED_DEPTH : Infinity)}
+        label={isOpenedBeyond ? RESPONSE_TEXT.tree.collapseTo(collapseTo) : RESPONSE_TEXT.tree.expandAll}
+        icon={isOpenedBeyond ? ChevronsDownUp : ChevronsUpDown}
+        onClick={() => onChoose(isOpenedBeyond ? collapseTo : Infinity)}
       />
       <Select aria-label={RESPONSE_TEXT.tree.depth} value={current} onChange={(event) => onChoose(depthOfSetting(event.target.value))} className="w-28">
         {DEPTH_SETTINGS.map((setting) => <option key={setting} value={setting}>{depthLabel(setting)}</option>)}
@@ -254,8 +252,13 @@ function TreeControls({ depth, savedSetting, onChoose, onRemember }) {
   )
 }
 
-function JsonTree({ data, depth }) {
-  const { value, omitted } = useMemo(() => trimTree(data), [data])
+const JsonTree = memo(function JsonTree({ data, epoch, onToggle }) {
+  const { value, omitted, paths } = trimmedTree(data)
+  const shouldExpandNode = useCallback((level, node) => isExpandedIn(epoch, paths.get(node), level < epoch.depth), [epoch, paths])
+  const beforeExpandChange = useCallback(({ level, value: node, newExpandValue }) => {
+    onToggle(epoch, paths.get(node), level < epoch.depth, newExpandValue)
+    return true
+  }, [epoch, paths, onToggle])
   return (
     <>
       {omitted > 0 && (
@@ -264,11 +267,11 @@ function JsonTree({ data, depth }) {
         </Notice>
       )}
       <div dir="ltr" className="p-3">
-        <JsonView key={depth} data={value} shouldExpandNode={(level) => level < depth} style={JSON_STYLE} />
+        <JsonView key={epoch.id} data={value} shouldExpandNode={shouldExpandNode} beforeExpandChange={beforeExpandChange} style={JSON_STYLE} />
       </div>
     </>
   )
-}
+})
 
 function HtmlPreview({ response }) {
   const [loadedFor, setLoadedFor] = useState(null)
@@ -287,7 +290,7 @@ function HtmlPreview({ response }) {
   )
 }
 
-function ResponseBody({ response, kind, view, json, formatted, filtered, highlight, binary, depth, onSave }) {
+function ResponseBody({ response, kind, view, json, formatted, filtered, highlight, binary, tree, onSave }) {
   if (kind === BODY_KINDS.EMPTY) {
     return (
       <EmptyState
@@ -299,7 +302,7 @@ function ResponseBody({ response, kind, view, json, formatted, filtered, highlig
   }
   if (view === 'hex' || isFormat(view)) return <BinaryViews response={response} view={view} binary={binary} highlight={highlight} />
   if (kind === BODY_KINDS.BINARY) return <BinaryBody response={response} onSave={onSave} />
-  if (view === 'pretty') return <PrettyBody json={json} formatted={formatted} filtered={filtered} highlight={highlight} depth={depth} />
+  if (view === 'pretty') return <PrettyBody json={json} formatted={formatted} filtered={filtered} highlight={highlight} tree={tree} />
   if (view === 'raw') return <TextBody text={filtered ? filtered.text : response.body} highlight={highlight} />
   if (kind === BODY_KINDS.HTML) return <HtmlPreview response={response} />
   return <MediaPreview response={response} kind={kind} />
@@ -332,7 +335,6 @@ function StatusSummary({ response }) {
   )
 }
 
-const treeDepth = (response) => (response.protocol === MCP_PROTOCOL ? MCP_EXPANDED_DEPTH : JSON_EXPANDED_DEPTH)
 
 const tabItem = (value, badge = null, marked = false) => ({
   value,
@@ -445,7 +447,6 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
   const [selectedView, setSelectedView] = useState(null)
   const [pastAt, setPastAt] = useState(null)
   const [historyMenu, setHistoryMenu] = useState(null)
-  const [depthChoice, setDepthChoice] = useState(null)
   const [isComparing, setIsComparing] = useState(false)
   const [isAddingChecks, setIsAddingChecks] = useState(false)
   const { containerRef, panelShare, isDragging, startDrag, resetHeight, nudgeHeight } = usePanelResize()
@@ -499,7 +500,13 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
   const copyText = isFormat(view) ? binary.text ?? '' : filtered ? filtered.text : text
   const treeValue = view === 'pretty' && formatted.text === null && !highlight ? (filtered ? filtered.value : json) : null
   const hasTree = treeValue !== null && typeof treeValue === 'object'
-  const depth = depthChoice ?? (isDepthSetting(jsonDepth) ? depthOfSetting(jsonDepth) : shown ? treeDepth(shown) : JSON_EXPANDED_DEPTH)
+  const treeView = useTreeView(shown)
+  const baseDepth = requestDepth(jsonDepth, shown?.protocol === MCP_PROTOCOL)
+  const depth = shownDepth(treeView, baseDepth, jsonDepth)
+  const epoch = hasTree && treeView ? treeEpoch(treeView, depth, filtered ? debouncedPath : '') : null
+  const toggleNode = useCallback((nodeEpoch, path, byDefault, expanded) => noteToggle(treeView, nodeEpoch, path, byDefault, expanded), [treeView])
+  const tree = useMemo(() => (epoch ? { epoch, onToggle: toggleNode } : null), [epoch, toggleNode])
+  const chooseTreeDepth = (next) => chooseDepth(treeView, { depth: next, current: depth, base: baseDepth, setting: jsonDepth })
   const rememberDepth = onJsonDepthChange && !past && !docked ? () => onJsonDepthChange(settingOfDepth(depth)) : null
 
   useEffect(() => setActiveTab(TAB_BODY), [tabId])
@@ -510,7 +517,6 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
     setQuery('')
     setFilterPath('')
     setPastAt(null)
-    setDepthChoice(null)
   }, [response])
 
   const revealSearch = useCallback((text) => {
@@ -568,7 +574,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
         filtered={filtered}
         highlight={highlight}
         binary={binary}
-        depth={depth}
+        tree={tree}
         onSave={past ? undefined : onDownload}
       />
     )
@@ -676,7 +682,16 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
                 value={view}
                 onChange={setSelectedView}
               />
-              {hasTree && <TreeControls depth={depth} savedSetting={jsonDepth} onChoose={setDepthChoice} onRemember={rememberDepth} />}
+              {epoch && (
+                <TreeControls
+                  depth={depth}
+                  savedSetting={jsonDepth}
+                  isOpenedBeyond={opensBeyondLevel(epoch, depth)}
+                  collapseTo={collapseTarget(treeView, depth, baseDepth)}
+                  onChoose={chooseTreeDepth}
+                  onRemember={rememberDepth}
+                />
+              )}
             </Toolbar>
           )}
 
