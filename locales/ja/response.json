@@ -131,7 +131,7 @@
     "treeTrimmed_other": "ツリーの先頭部分を表示しています。ほかに{{count}}個の値が非表示です。残りを見るには、Rawまたはフィルターを使ってください。",
     "tree": {
       "expandAll": "すべて展開",
-      "collapseAll": "すべて折りたたむ",
+      "collapseTo": "レベル{{count}}まで折りたたむ",
       "depth": "展開の深さ",
       "level": "レベル{{count}}",
       "allLevels": "すべてのレベル",

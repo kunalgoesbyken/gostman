@@ -20,7 +20,16 @@
     "inheritedHint": "只读。这些变量来自此请求之上的作用域。在此处，上层中同名的变量优先。",
     "inheritedNone": "没有继承的变量。",
     "hiddenValue": "已隐藏",
-    "typeNote": "带类型的变量以该类型传入脚本。在 URL、请求头或请求体中，它仍以文本形式写入。"
+    "typeNote": "带类型的变量以该类型传入脚本。在 URL、请求头或请求体中，它仍以文本形式写入。",
+    "useRow": "使用此变量",
+    "useRowHint": "开启或关闭此变量。关闭的变量不会发送、不会检查，也不会显示在变量视图中。",
+    "offOptions": "此变量已关闭，因此这些选项不起作用：它不会发送、不会检查，也不会显示在变量视图中。请用其所在行开头的复选框将其开启。",
+    "inFormHint": "隐藏的变量仍会以此处设置的值发送，并且仍会被检查。要停止发送，请用其所在行开头的复选框将其关闭。",
+    "shownDespiteHidden": "此变量需要一个值但尚未设置，因此变量视图仍会显示它。在此处为其设置值即可保持隐藏。",
+    "markShown": "在变量视图中显示",
+    "markHidden": "在变量视图中隐藏，仍会发送",
+    "markShownDespiteHidden": "已隐藏，但在设置值之前会显示在变量视图中",
+    "sessionReplaces": "同名的会话值会代替此值发送，但从变量视图发送时除外。"
   },
   "variablesView": {
     "switchLabel": "请求视图",
@@ -30,6 +39,11 @@
     "emptyTitle": "没有要填写的变量",
     "emptyDescription": "在完整编辑器的 Vars 标签页中添加的变量会在这里显示为输入框。",
     "openEditor": "打开完整编辑器",
-    "required": "必填"
+    "required": "必填",
+    "noFieldsTitle": "没有要填写的字段",
+    "noFieldsDescription": "此请求有变量，但它们已关闭或在变量视图中隐藏。请在完整编辑器的 Vars 标签页中更改。",
+    "openVars": "打开 Vars 标签页",
+    "reset": "重置值",
+    "resetHint": "恢复为随请求保存的值"
   }
 }

@@ -131,7 +131,7 @@
     "treeTrimmed_other": "这里只显示树的开头部分，另有 {{count}} 个值被隐藏。请使用“原始”或筛选查看其余内容。",
     "tree": {
       "expandAll": "全部展开",
-      "collapseAll": "全部折叠",
+      "collapseTo": "折叠到第 {{count}} 层",
       "depth": "展开深度",
       "level": "第 {{count}} 层",
       "allLevels": "所有层级",

@@ -10,6 +10,8 @@
     "extractedBy": "{{reference}} è impostata da una regola di estrazione su \"{{request}}\", quindi invia prima quella richiesta.",
     "extractedByOnly": "È impostata da una regola di estrazione su \"{{request}}\", quindi invia prima quella richiesta.",
     "openSource": "Apri \"{{request}}\"",
-    "define": "Aggiungi {{reference}} all'ambiente attivo"
+    "define": "Aggiungi {{reference}} all'ambiente attivo",
+    "switchedOff": "{{reference}} è disattivata nella scheda Var di questa richiesta.",
+    "openVars": "Apri la scheda Var"
   }
 }

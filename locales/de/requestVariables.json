@@ -9,14 +9,19 @@
       "json": "JSON",
       "enum": "Einer aus einer Liste"
     },
+    "typeHint": "Beliebig und Text erreichen Skripte beide als Text. Beliebig bedeutet, dass kein Typ gewählt wurde; Text besagt, dass der Wert als Text gemeint ist. Jeder Typ sendet den Wert genau wie geschrieben; der Typ entscheidet, was Skripte erhalten und welche Werte akzeptiert werden.",
     "problems": {
       "required": "{{name}} benötigt einen Wert.",
       "number": "{{name}} muss eine Zahl sein.",
       "integer": "{{name}} muss eine Ganzzahl sein.",
       "boolean": "{{name}} muss true oder false sein.",
       "json": "{{name}} muss gültiges JSON sein.",
-      "enum": "{{name}} muss einer der Werte {{choices}} sein."
+      "enum": "{{name}} muss einer der Werte {{choices}} sein.",
+      "numberComma": "{{name}} muss eine Zahl mit einem Punkt als Dezimaltrennzeichen und ohne Tausendertrennzeichen sein, zum Beispiel 1.5 oder 1500.",
+      "inexact": "{{name}} ist eine Zahl, die ein Skript nicht exakt speichern kann. Verwenden Sie den Typ Text, um sie wie geschrieben zu behalten.",
+      "jsonInexact": "{{name}} enthält die Zahl {{number}}, die ein Skript nicht exakt speichern kann. Schreiben Sie sie als String in Anführungszeichen."
     },
+    "fromReference": "{{problem}} Der Wert stammt aus {{written}}.",
     "blocked": "Die Anfrage wurde wegen ihrer Variablen nicht gesendet.\n{{problems}}"
   }
 }

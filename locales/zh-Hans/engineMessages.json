@@ -64,5 +64,12 @@
   "proxy": {
     "invalidAddress": "“{{address}}”不是有效的代理地址",
     "unsupportedScheme": "不支持的代理协议“{{scheme}}”，请使用 http、https 或 socks5"
+  },
+  "curl": {
+    "notCurl": "文本不是以 curl 开头",
+    "unclosedQuote": "curl 命令中有未闭合的引号",
+    "needsValue": "{{option}} 需要一个值",
+    "noUrl": "curl 命令中没有 URL",
+    "noUrlAfterOption": "curl 命令中没有 URL。{{option}} 不是 Gostman 认识的 curl 选项，因此其后的 {{value}} 未被读取为 URL；请将 URL 放在 --url 之后"
   }
 }

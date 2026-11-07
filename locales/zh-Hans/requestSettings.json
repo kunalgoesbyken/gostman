@@ -23,7 +23,7 @@
     "opensInFull": "完整编辑器",
     "opensInVariables": "变量视图",
     "jsonDepth": "展开 JSON 响应",
-    "jsonDepthDefault": "应用默认值",
+    "jsonDepthDefault": "应用默认值（第 {{count}} 层）",
     "tags": "标签",
     "tagsPlaceholder": "冒烟测试, 回归测试",
     "description": "描述",

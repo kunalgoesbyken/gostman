@@ -133,7 +133,7 @@
     "treeTrimmed_other": "Se muestra el principio de este árbol. Hay {{count}} valores más ocultos. Usa Sin formato o el filtro para ver el resto.",
     "tree": {
       "expandAll": "Expandir todo",
-      "collapseAll": "Contraer todo",
+      "collapseTo": "Contraer hasta el nivel {{count}}",
       "depth": "Profundidad de expansión",
       "level": "Nivel {{count}}",
       "allLevels": "Todos los niveles",

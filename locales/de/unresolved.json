@@ -8,6 +8,8 @@
     "extractedBy": "{{reference}} wird von einer Extraktionsregel in „{{request}}“ gesetzt, senden Sie diese Anfrage daher zuerst.",
     "extractedByOnly": "Sie wird von einer Extraktionsregel in „{{request}}“ gesetzt, senden Sie diese Anfrage daher zuerst.",
     "openSource": "„{{request}}“ öffnen",
-    "define": "{{reference}} zur aktiven Umgebung hinzufügen"
+    "define": "{{reference}} zur aktiven Umgebung hinzufügen",
+    "switchedOff": "{{reference}} ist im Tab „Vars“ dieser Anfrage ausgeschaltet.",
+    "openVars": "Tab „Vars“ öffnen"
   }
 }

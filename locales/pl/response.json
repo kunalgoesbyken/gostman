@@ -134,7 +134,7 @@
     "treeTrimmed_other": "Pokazano początek tego drzewa. Ukryto jeszcze {{count}} wartości. Użyj widoku Surowy lub filtra, aby zobaczyć resztę.",
     "tree": {
       "expandAll": "Rozwiń wszystko",
-      "collapseAll": "Zwiń wszystko",
+      "collapseTo": "Zwiń do poziomu {{count}}",
       "depth": "Głębokość rozwinięcia",
       "level": "Poziom {{count}}",
       "allLevels": "Wszystkie poziomy",

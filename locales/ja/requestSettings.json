@@ -23,7 +23,7 @@
     "opensInFull": "フルエディター",
     "opensInVariables": "変数ビュー",
     "jsonDepth": "JSONレスポンスの展開",
-    "jsonDepthDefault": "アプリの既定値",
+    "jsonDepthDefault": "アプリの既定値（レベル{{count}}）",
     "tags": "タグ",
     "tagsPlaceholder": "スモーク, 回帰",
     "description": "説明",

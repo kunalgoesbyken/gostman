@@ -133,7 +133,7 @@
     "treeTrimmed_many": "Affichage du début de cet arbre. {{count}} de valeurs de plus sont masquées. Utilisez Brut ou le filtre pour voir le reste.",
     "tree": {
       "expandAll": "Tout déplier",
-      "collapseAll": "Tout replier",
+      "collapseTo": "Replier jusqu’au niveau {{count}}",
       "depth": "Profondeur de dépliage",
       "level": "Niveau {{count}}",
       "allLevels": "Tous les niveaux",

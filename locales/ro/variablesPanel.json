@@ -20,7 +20,16 @@
     "inheritedHint": "Doar pentru citire. Acestea provin din domeniile de deasupra acestei cereri. O variabilă cu același nume de deasupra are prioritate aici.",
     "inheritedNone": "Nu este moștenită nicio variabilă.",
     "hiddenValue": "Ascunsă",
-    "typeNote": "O variabilă cu tip ajunge în scripturi cu acel tip. Într-un URL, antet sau corp este scrisă în continuare ca text."
+    "typeNote": "O variabilă cu tip ajunge în scripturi cu acel tip. Într-un URL, antet sau corp este scrisă în continuare ca text.",
+    "useRow": "Folosire variabilă",
+    "useRowHint": "Activează sau dezactivează variabila. O variabilă dezactivată nu este trimisă, nu este verificată și nu este afișată în vizualizarea Variabile.",
+    "offOptions": "Această variabilă este dezactivată, așa că aceste opțiuni nu au efect: nu este trimisă, nu este verificată și nu este afișată în vizualizarea Variabile. Activați-o cu caseta de bifat de la începutul rândului său.",
+    "inFormHint": "O variabilă ascunsă este trimisă în continuare cu valoarea setată aici și este verificată în continuare. Ca să nu mai fie trimisă, dezactivați-o cu caseta de bifat de la începutul rândului său.",
+    "shownDespiteHidden": "Această variabilă are nevoie de o valoare pe care nu o are, așa că vizualizarea Variabile o afișează oricum. Dați-i aici o valoare ca să rămână ascunsă.",
+    "markShown": "Afișată în vizualizarea Variabile",
+    "markHidden": "Ascunsă în vizualizarea Variabile, dar trimisă",
+    "markShownDespiteHidden": "Ascunsă, dar afișată în vizualizarea Variabile până când are o valoare",
+    "sessionReplaces": "O valoare de sesiune cu acest nume este trimisă în locul acestei valori, cu excepția cazului în care trimiteți din vizualizarea Variabile."
   },
   "variablesView": {
     "switchLabel": "Vizualizarea cererii",
@@ -30,6 +39,11 @@
     "emptyTitle": "Nicio variabilă de completat",
     "emptyDescription": "Variabilele adăugate în fila Vars a editorului complet apar aici ca câmpuri de introducere.",
     "openEditor": "Deschidere editor complet",
-    "required": "Obligatoriu"
+    "required": "Obligatoriu",
+    "noFieldsTitle": "Niciun câmp de completat",
+    "noFieldsDescription": "Această cerere are variabile, dar sunt dezactivate sau ascunse în vizualizarea Variabile. Schimbați acest lucru în fila Vars a editorului complet.",
+    "openVars": "Deschidere filă Vars",
+    "reset": "Resetare valori",
+    "resetHint": "Revenire la valorile salvate cu cererea"
   }
 }

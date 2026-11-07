@@ -10,6 +10,8 @@
     "extractedBy": "{{reference}} este setată de o regulă de extragere din „{{request}}”, deci trimiteți mai întâi acea cerere.",
     "extractedByOnly": "Este setată de o regulă de extragere din „{{request}}”, deci trimiteți mai întâi acea cerere.",
     "openSource": "Deschidere „{{request}}”",
-    "define": "Adăugare {{reference}} în mediul activ"
+    "define": "Adăugare {{reference}} în mediul activ",
+    "switchedOff": "{{reference}} este dezactivată în fila Vars a acestei cereri.",
+    "openVars": "Deschidere filă Vars"
   }
 }

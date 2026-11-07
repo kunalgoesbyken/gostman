@@ -133,7 +133,7 @@
     "treeTrimmed_other": "Viene mostrato l'inizio di questo albero. {{count}} altri valori sono nascosti. Usa Grezzo o il filtro per vedere il resto.",
     "tree": {
       "expandAll": "Espandi tutto",
-      "collapseAll": "Comprimi tutto",
+      "collapseTo": "Comprimi fino al livello {{count}}",
       "depth": "Profondità di espansione",
       "level": "Livello {{count}}",
       "allLevels": "Tutti i livelli",

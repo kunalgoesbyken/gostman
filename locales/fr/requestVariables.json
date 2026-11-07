@@ -9,14 +9,19 @@
       "json": "JSON",
       "enum": "Valeur d’une liste"
     },
+    "typeHint": "Tout et Texte arrivent tous deux dans les scripts sous forme de texte. Tout signifie qu’aucun type n’a été choisi ; Texte indique que la valeur est à prendre comme du texte. Chaque type envoie la valeur exactement telle qu’elle est écrite ; le type détermine ce que reçoivent les scripts et quelles valeurs sont acceptées.",
     "problems": {
       "required": "{{name}} doit avoir une valeur.",
       "number": "{{name}} doit être un nombre.",
       "integer": "{{name}} doit être un nombre entier.",
       "boolean": "{{name}} doit valoir true ou false.",
       "json": "{{name}} doit être du JSON valide.",
-      "enum": "{{name}} doit être l’une des valeurs suivantes : {{choices}}."
+      "enum": "{{name}} doit être l’une des valeurs suivantes : {{choices}}.",
+      "numberComma": "{{name}} doit être un nombre avec un point pour les décimales et sans séparateur de milliers, par exemple 1.5 ou 1500.",
+      "inexact": "{{name}} est un nombre qu’un script ne peut pas représenter exactement. Utilisez le type Texte pour le conserver tel qu’il est écrit.",
+      "jsonInexact": "{{name}} contient le nombre {{number}}, qu’un script ne peut pas représenter exactement. Écrivez-le sous forme de chaîne entre guillemets."
     },
+    "fromReference": "{{problem}} Sa valeur vient de {{written}}.",
     "blocked": "La requête n’a pas été envoyée à cause de ses variables.\n{{problems}}"
   }
 }

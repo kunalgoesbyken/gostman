@@ -20,7 +20,16 @@
     "inheritedHint": "Lecture seule. Elles viennent des portées au-dessus de cette requête. Une variable du même nom définie au-dessus l’emporte ici.",
     "inheritedNone": "Aucune variable n’est héritée.",
     "hiddenValue": "Masquée",
-    "typeNote": "Une variable typée arrive dans les scripts avec ce type. Dans une URL, un en-tête ou un corps, elle reste écrite sous forme de texte."
+    "typeNote": "Une variable typée arrive dans les scripts avec ce type. Dans une URL, un en-tête ou un corps, elle reste écrite sous forme de texte.",
+    "useRow": "Utiliser cette variable",
+    "useRowHint": "Active ou désactive la variable. Une variable désactivée n’est ni envoyée, ni vérifiée, ni affichée dans la vue Variables.",
+    "offOptions": "Cette variable est désactivée, ces options n’ont donc aucun effet : elle n’est ni envoyée, ni vérifiée, ni affichée dans la vue Variables. Activez-la avec la case à cocher au début de sa ligne.",
+    "inFormHint": "Une variable masquée est toujours envoyée avec la valeur définie ici, et toujours vérifiée. Pour ne plus l’envoyer, désactivez-la avec la case à cocher au début de sa ligne.",
+    "shownDespiteHidden": "Cette variable a besoin d’une valeur qu’elle n’a pas, la vue Variables l’affiche donc quand même. Donnez-lui une valeur ici pour qu’elle reste masquée.",
+    "markShown": "Affichée dans la vue Variables",
+    "markHidden": "Masquée dans la vue Variables, toujours envoyée",
+    "markShownDespiteHidden": "Masquée, mais affichée dans la vue Variables tant qu’elle n’a pas de valeur",
+    "sessionReplaces": "Une valeur de session portant ce nom est envoyée à la place de cette valeur, sauf quand vous envoyez depuis la vue Variables."
   },
   "variablesView": {
     "switchLabel": "Vue de la requête",
@@ -30,6 +39,11 @@
     "emptyTitle": "Aucune variable à remplir",
     "emptyDescription": "Les variables ajoutées dans l’onglet Vars de l’éditeur complet apparaissent ici sous forme de champs de saisie.",
     "openEditor": "Ouvrir l’éditeur complet",
-    "required": "Obligatoire"
+    "required": "Obligatoire",
+    "noFieldsTitle": "Aucun champ à remplir",
+    "noFieldsDescription": "Cette requête a des variables, mais elles sont désactivées ou masquées dans la vue Variables. Modifiez cela dans l’onglet Vars de l’éditeur complet.",
+    "openVars": "Ouvrir l’onglet Vars",
+    "reset": "Réinitialiser les valeurs",
+    "resetHint": "Revenir aux valeurs enregistrées avec la requête"
   }
 }

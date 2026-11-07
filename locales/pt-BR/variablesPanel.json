@@ -20,7 +20,16 @@
     "inheritedHint": "Somente leitura. Estas vêm de escopos acima desta requisição. Uma variável com o mesmo nome acima prevalece aqui.",
     "inheritedNone": "Nenhuma variável é herdada.",
     "hiddenValue": "Oculto",
-    "typeNote": "Uma variável tipada chega aos scripts com esse tipo. Dentro de uma URL, cabeçalho ou corpo, ela continua sendo escrita como texto."
+    "typeNote": "Uma variável tipada chega aos scripts com esse tipo. Dentro de uma URL, cabeçalho ou corpo, ela continua sendo escrita como texto.",
+    "useRow": "Usar esta variável",
+    "useRowHint": "Ativa ou desativa a variável. Uma variável desativada não é enviada, não é verificada e não aparece na visualização de variáveis.",
+    "offOptions": "Esta variável está desativada, então estas opções não têm efeito: ela não é enviada, não é verificada e não aparece na visualização de variáveis. Ative-a com a caixa de seleção no início da linha dela.",
+    "inFormHint": "Uma variável oculta continua sendo enviada com o valor definido aqui e continua sendo verificada. Para parar de enviá-la, desative-a com a caixa de seleção no início da linha dela.",
+    "shownDespiteHidden": "Esta variável precisa de um valor que não tem, então a visualização de variáveis a mostra mesmo assim. Dê um valor a ela aqui para mantê-la oculta.",
+    "markShown": "Mostrada na visualização de variáveis",
+    "markHidden": "Oculta na visualização de variáveis, mas enviada",
+    "markShownDespiteHidden": "Oculta, mas mostrada na visualização de variáveis até ter um valor",
+    "sessionReplaces": "Um valor de sessão com este nome é enviado no lugar deste valor, exceto quando você envia pela visualização de variáveis."
   },
   "variablesView": {
     "switchLabel": "Visualização da requisição",
@@ -30,6 +39,11 @@
     "emptyTitle": "Nenhuma variável para preencher",
     "emptyDescription": "As variáveis adicionadas na aba Vars do editor completo aparecem aqui como campos de entrada.",
     "openEditor": "Abrir o editor completo",
-    "required": "Obrigatório"
+    "required": "Obrigatório",
+    "noFieldsTitle": "Nenhum campo para preencher",
+    "noFieldsDescription": "Esta requisição tem variáveis, mas elas estão desativadas ou ocultas na visualização de variáveis. Altere isso na aba Vars do editor completo.",
+    "openVars": "Abrir a aba Vars",
+    "reset": "Redefinir valores",
+    "resetHint": "Voltar aos valores salvos com a requisição"
   }
 }

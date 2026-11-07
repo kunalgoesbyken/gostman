@@ -133,7 +133,7 @@
     "treeTrimmed_other": "Se afișează începutul acestui arbore. Încă {{count}} de valori sunt ascunse. Folosiți Brut sau filtrul pentru a vedea restul.",
     "tree": {
       "expandAll": "Extindere totală",
-      "collapseAll": "Restrângere totală",
+      "collapseTo": "Restrângere până la nivelul {{count}}",
       "depth": "Adâncimea extinderii",
       "level": "Nivelul {{count}}",
       "allLevels": "Toate nivelurile",

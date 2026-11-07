@@ -67,5 +67,12 @@
   "proxy": {
     "invalidAddress": "„{{address}}” nie jest poprawnym adresem proxy",
     "unsupportedScheme": "nieobsługiwany schemat proxy „{{scheme}}”, użyj http, https lub socks5"
+  },
+  "curl": {
+    "notCurl": "tekst nie zaczyna się od curl",
+    "unclosedQuote": "polecenie curl ma niezamknięty cudzysłów",
+    "needsValue": "{{option}} wymaga wartości",
+    "noUrl": "polecenie curl nie zawiera adresu URL",
+    "noUrlAfterOption": "polecenie curl nie zawiera adresu URL. {{option}} nie jest opcją curl znaną Gostmanowi, więc {{value}} po niej nie zostało odczytane jako adres URL; umieść adres URL po --url"
   }
 }

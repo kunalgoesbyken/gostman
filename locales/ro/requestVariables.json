@@ -9,14 +9,19 @@
       "json": "JSON",
       "enum": "Unul dintr-o listă"
     },
+    "typeHint": "Oricare și Text ajung amândouă în scripturi ca text. Oricare înseamnă că nu a fost ales niciun tip; Text arată că valoarea este gândită ca text. Fiecare tip trimite valoarea exact cum este scrisă; tipul decide ce primesc scripturile și ce valori sunt acceptate.",
     "problems": {
       "required": "{{name}} necesită o valoare.",
       "number": "{{name}} trebuie să fie un număr.",
       "integer": "{{name}} trebuie să fie un număr întreg.",
       "boolean": "{{name}} trebuie să fie true sau false.",
       "json": "{{name}} trebuie să fie JSON valid.",
-      "enum": "{{name}} trebuie să fie unul dintre {{choices}}."
+      "enum": "{{name}} trebuie să fie unul dintre {{choices}}.",
+      "numberComma": "{{name}} trebuie să fie un număr cu punct pentru zecimale și fără separator de mii, de exemplu 1.5 sau 1500.",
+      "inexact": "{{name}} este un număr pe care un script nu îl poate reține exact. Folosiți tipul Text pentru a-l păstra așa cum este scris.",
+      "jsonInexact": "{{name}} conține numărul {{number}}, pe care un script nu îl poate reține exact. Scrieți-l ca șir între ghilimele."
     },
+    "fromReference": "{{problem}} Valoarea sa provine din {{written}}.",
     "blocked": "Cererea nu a fost trimisă din cauza variabilelor sale.\n{{problems}}"
   }
 }

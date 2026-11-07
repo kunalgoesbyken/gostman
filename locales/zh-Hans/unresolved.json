@@ -6,6 +6,8 @@
     "extractedBy": "{{reference}} 由“{{request}}”上的提取规则设置，请先发送该请求。",
     "extractedByOnly": "它由“{{request}}”上的提取规则设置，请先发送该请求。",
     "openSource": "打开“{{request}}”",
-    "define": "将 {{reference}} 添加到当前环境"
+    "define": "将 {{reference}} 添加到当前环境",
+    "switchedOff": "{{reference}} 已在此请求的 Vars 标签页中关闭。",
+    "openVars": "打开 Vars 标签页"
   }
 }

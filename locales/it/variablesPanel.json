@@ -20,7 +20,16 @@
     "inheritedHint": "Sola lettura. Provengono dagli ambiti superiori a questa richiesta. Una variabile con lo stesso nome più in alto prevale qui.",
     "inheritedNone": "Nessuna variabile ereditata.",
     "hiddenValue": "Nascosto",
-    "typeNote": "Una variabile tipizzata arriva agli script con quel tipo. In un URL, un header o un corpo viene comunque scritta come testo."
+    "typeNote": "Una variabile tipizzata arriva agli script con quel tipo. In un URL, un header o un corpo viene comunque scritta come testo.",
+    "useRow": "Usa questa variabile",
+    "useRowHint": "Attiva o disattiva la variabile. Una variabile disattivata non viene inviata, non viene controllata e non compare nella vista Variabili.",
+    "offOptions": "Questa variabile è disattivata, quindi queste opzioni non hanno effetto: non viene inviata, non viene controllata e non compare nella vista Variabili. Attivala con la casella di controllo all'inizio della sua riga.",
+    "inFormHint": "Una variabile nascosta viene comunque inviata con il valore impostato qui e viene comunque controllata. Per non inviarla più, disattivala con la casella di controllo all'inizio della sua riga.",
+    "shownDespiteHidden": "Questa variabile richiede un valore che non ha, quindi la vista Variabili la mostra comunque. Assegnale un valore qui per mantenerla nascosta.",
+    "markShown": "Mostrata nella vista Variabili",
+    "markHidden": "Nascosta nella vista Variabili, comunque inviata",
+    "markShownDespiteHidden": "Nascosta, ma mostrata nella vista Variabili finché non ha un valore",
+    "sessionReplaces": "Un valore di sessione con questo nome viene inviato al posto di questo valore, tranne quando invii dalla vista Variabili."
   },
   "variablesView": {
     "switchLabel": "Vista della richiesta",
@@ -30,6 +39,11 @@
     "emptyTitle": "Nessuna variabile da compilare",
     "emptyDescription": "Le variabili aggiunte nella scheda Var dell'editor completo compaiono qui come campi di input.",
     "openEditor": "Apri l'editor completo",
-    "required": "Obbligatorio"
+    "required": "Obbligatorio",
+    "noFieldsTitle": "Nessun campo da compilare",
+    "noFieldsDescription": "Questa richiesta ha delle variabili, ma sono disattivate o nascoste nella vista Variabili. Modificalo nella scheda Var dell'editor completo.",
+    "openVars": "Apri la scheda Var",
+    "reset": "Ripristina i valori",
+    "resetHint": "Torna ai valori salvati con la richiesta"
   }
 }

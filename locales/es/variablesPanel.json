@@ -20,7 +20,16 @@
     "inheritedHint": "Solo lectura. Vienen de ámbitos superiores a esta solicitud. Aquí prevalece una variable con el mismo nombre definida más arriba.",
     "inheritedNone": "No se hereda ninguna variable.",
     "hiddenValue": "Oculto",
-    "typeNote": "Una variable con tipo llega a los scripts con ese tipo. Dentro de una URL, un encabezado o un cuerpo se sigue escribiendo como texto."
+    "typeNote": "Una variable con tipo llega a los scripts con ese tipo. Dentro de una URL, un encabezado o un cuerpo se sigue escribiendo como texto.",
+    "useRow": "Usar esta variable",
+    "useRowHint": "Activa o desactiva la variable. Una variable desactivada no se envía, no se comprueba y no se muestra en la vista de variables.",
+    "offOptions": "Esta variable está desactivada, así que estas opciones no tienen efecto: no se envía, no se comprueba y no se muestra en la vista de variables. Actívala con la casilla al principio de su fila.",
+    "inFormHint": "Una variable oculta se sigue enviando con el valor definido aquí y se sigue comprobando. Para dejar de enviarla, desactívala con la casilla al principio de su fila.",
+    "shownDespiteHidden": "Esta variable necesita un valor que no tiene, así que la vista de variables la muestra de todos modos. Dale un valor aquí para que siga oculta.",
+    "markShown": "Se muestra en la vista de variables",
+    "markHidden": "Oculta en la vista de variables, pero se envía",
+    "markShownDespiteHidden": "Oculta, pero se muestra en la vista de variables hasta que tenga un valor",
+    "sessionReplaces": "Un valor de sesión con este nombre se envía en lugar de este valor, salvo cuando envías desde la vista de variables."
   },
   "variablesView": {
     "switchLabel": "Vista de la solicitud",
@@ -30,6 +39,11 @@
     "emptyTitle": "No hay variables que rellenar",
     "emptyDescription": "Las variables añadidas en la pestaña Vars del editor completo aparecen aquí como campos de entrada.",
     "openEditor": "Abrir el editor completo",
-    "required": "Obligatorio"
+    "required": "Obligatorio",
+    "noFieldsTitle": "No hay campos que rellenar",
+    "noFieldsDescription": "Esta solicitud tiene variables, pero están desactivadas u ocultas en la vista de variables. Cámbialo en la pestaña Vars del editor completo.",
+    "openVars": "Abrir la pestaña Vars",
+    "reset": "Restablecer valores",
+    "resetHint": "Volver a los valores guardados con la solicitud"
   }
 }

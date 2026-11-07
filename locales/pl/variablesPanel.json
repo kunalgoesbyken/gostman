@@ -20,7 +20,16 @@
     "inheritedHint": "Tylko do odczytu. Pochodzą z zakresów powyżej tego żądania. Zmienna o tej samej nazwie zdefiniowana powyżej ma tu pierwszeństwo.",
     "inheritedNone": "Brak dziedziczonych zmiennych.",
     "hiddenValue": "Ukryta",
-    "typeNote": "Zmienna z typem trafia do skryptów jako wartość tego typu. W adresie URL, nagłówku lub treści nadal jest zapisywana jako tekst."
+    "typeNote": "Zmienna z typem trafia do skryptów jako wartość tego typu. W adresie URL, nagłówku lub treści nadal jest zapisywana jako tekst.",
+    "useRow": "Używaj tej zmiennej",
+    "useRowHint": "Włącza lub wyłącza zmienną. Wyłączona zmienna nie jest wysyłana, sprawdzana ani wyświetlana w widoku zmiennych.",
+    "offOptions": "Ta zmienna jest wyłączona, więc te opcje nie mają wpływu: nie jest wysyłana, sprawdzana ani wyświetlana w widoku zmiennych. Włącz ją polem wyboru na początku jej wiersza.",
+    "inFormHint": "Ukryta zmienna jest nadal wysyłana z ustawioną tutaj wartością i nadal sprawdzana. Aby przestać ją wysyłać, wyłącz ją polem wyboru na początku jej wiersza.",
+    "shownDespiteHidden": "Ta zmienna wymaga wartości, której nie ma, więc widok zmiennych i tak ją pokazuje. Nadaj jej tutaj wartość, aby pozostała ukryta.",
+    "markShown": "Wyświetlana w widoku zmiennych",
+    "markHidden": "Ukryta w widoku zmiennych, nadal wysyłana",
+    "markShownDespiteHidden": "Ukryta, ale wyświetlana w widoku zmiennych, dopóki nie ma wartości",
+    "sessionReplaces": "Wartość sesji o tej nazwie jest wysyłana zamiast tej wartości, chyba że wysyłasz z widoku zmiennych."
   },
   "variablesView": {
     "switchLabel": "Widok żądania",
@@ -30,6 +39,11 @@
     "emptyTitle": "Brak zmiennych do wypełnienia",
     "emptyDescription": "Zmienne dodane na karcie Zmienne w pełnym edytorze pojawiają się tutaj jako pola do wypełnienia.",
     "openEditor": "Otwórz pełny edytor",
-    "required": "Wymagane"
+    "required": "Wymagane",
+    "noFieldsTitle": "Brak pól do wypełnienia",
+    "noFieldsDescription": "To żądanie ma zmienne, ale są wyłączone lub ukryte w widoku zmiennych. Zmień to na karcie Zmienne w pełnym edytorze.",
+    "openVars": "Otwórz kartę Zmienne",
+    "reset": "Przywróć wartości",
+    "resetHint": "Wróć do wartości zapisanych z żądaniem"
   }
 }

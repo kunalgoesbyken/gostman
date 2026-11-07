@@ -10,6 +10,8 @@
     "extractedBy": "{{reference}} la establece una regla de extracción de «{{request}}», así que envía primero esa solicitud.",
     "extractedByOnly": "La establece una regla de extracción de «{{request}}», así que envía primero esa solicitud.",
     "openSource": "Abrir «{{request}}»",
-    "define": "Añadir {{reference}} al entorno activo"
+    "define": "Añadir {{reference}} al entorno activo",
+    "switchedOff": "{{reference}} está desactivada en la pestaña Vars de esta solicitud.",
+    "openVars": "Abrir la pestaña Vars"
   }
 }

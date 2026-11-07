@@ -20,7 +20,16 @@
     "inheritedHint": "Schreibgeschützt. Diese stammen aus Bereichen oberhalb dieser Anfrage. Eine weiter oben definierte Variable mit gleichem Namen hat hier Vorrang.",
     "inheritedNone": "Es werden keine Variablen geerbt.",
     "hiddenValue": "Verborgen",
-    "typeNote": "Eine typisierte Variable erreicht Skripte als dieser Typ. In einer URL, einem Header oder einem Body wird sie weiterhin als Text geschrieben."
+    "typeNote": "Eine typisierte Variable erreicht Skripte als dieser Typ. In einer URL, einem Header oder einem Body wird sie weiterhin als Text geschrieben.",
+    "useRow": "Diese Variable verwenden",
+    "useRowHint": "Schaltet die Variable ein oder aus. Eine ausgeschaltete Variable wird nicht gesendet, nicht geprüft und nicht in der Variablenansicht angezeigt.",
+    "offOptions": "Diese Variable ist ausgeschaltet, daher haben diese Optionen keine Wirkung: Sie wird nicht gesendet, nicht geprüft und nicht in der Variablenansicht angezeigt. Schalten Sie sie mit dem Kontrollkästchen am Anfang ihrer Zeile ein.",
+    "inFormHint": "Eine verborgene Variable wird weiterhin mit dem hier gesetzten Wert gesendet und weiterhin geprüft. Um sie nicht mehr zu senden, schalten Sie sie mit dem Kontrollkästchen am Anfang ihrer Zeile aus.",
+    "shownDespiteHidden": "Diese Variable benötigt einen Wert, den sie nicht hat, daher zeigt die Variablenansicht sie trotzdem an. Geben Sie ihr hier einen Wert, damit sie verborgen bleibt.",
+    "markShown": "In der Variablenansicht angezeigt",
+    "markHidden": "In der Variablenansicht verborgen, wird trotzdem gesendet",
+    "markShownDespiteHidden": "Verborgen, aber in der Variablenansicht angezeigt, bis sie einen Wert hat",
+    "sessionReplaces": "Ein Sitzungswert mit diesem Namen wird anstelle dieses Werts gesendet, außer wenn Sie aus der Variablenansicht senden."
   },
   "variablesView": {
     "switchLabel": "Anfrageansicht",
@@ -30,6 +39,11 @@
     "emptyTitle": "Keine Variablen auszufüllen",
     "emptyDescription": "Variablen, die im Tab „Vars“ des vollständigen Editors hinzugefügt werden, erscheinen hier als Eingabefelder.",
     "openEditor": "Vollständigen Editor öffnen",
-    "required": "Erforderlich"
+    "required": "Erforderlich",
+    "noFieldsTitle": "Keine Felder auszufüllen",
+    "noFieldsDescription": "Diese Anfrage hat Variablen, aber sie sind ausgeschaltet oder in der Variablenansicht verborgen. Ändern Sie das im Tab „Vars“ des vollständigen Editors.",
+    "openVars": "Tab „Vars“ öffnen",
+    "reset": "Werte zurücksetzen",
+    "resetHint": "Zu den mit der Anfrage gespeicherten Werten zurückkehren"
   }
 }

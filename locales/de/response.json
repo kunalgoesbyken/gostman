@@ -132,7 +132,7 @@
     "treeTrimmed_other": "Angezeigt wird der Anfang dieses Baums. {{count}} weitere Werte sind ausgeblendet. Nutzen Sie „Roh“ oder den Filter, um den Rest zu sehen.",
     "tree": {
       "expandAll": "Alle aufklappen",
-      "collapseAll": "Alle zuklappen",
+      "collapseTo": "Bis Ebene {{count}} zuklappen",
       "depth": "Aufklapptiefe",
       "level": "Ebene {{count}}",
       "allLevels": "Alle Ebenen",

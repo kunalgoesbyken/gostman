@@ -10,6 +10,8 @@
     "extractedBy": "{{reference}} est définie par une règle d’extraction de « {{request}} » : envoyez d’abord cette requête.",
     "extractedByOnly": "Elle est définie par une règle d’extraction de « {{request}} » : envoyez d’abord cette requête.",
     "openSource": "Ouvrir « {{request}} »",
-    "define": "Ajouter {{reference}} à l’environnement actif"
+    "define": "Ajouter {{reference}} à l’environnement actif",
+    "switchedOff": "{{reference}} est désactivée dans l’onglet Vars de cette requête.",
+    "openVars": "Ouvrir l’onglet Vars"
   }
 }

@@ -66,5 +66,12 @@
   "proxy": {
     "invalidAddress": "„{{address}}” nu este o adresă proxy validă",
     "unsupportedScheme": "schemă proxy neacceptată „{{scheme}}”, folosiți http, https sau socks5"
+  },
+  "curl": {
+    "notCurl": "textul nu începe cu curl",
+    "unclosedQuote": "comanda curl are ghilimele neînchise",
+    "needsValue": "{{option}} necesită o valoare",
+    "noUrl": "comanda curl nu are URL",
+    "noUrlAfterOption": "comanda curl nu are URL. {{option}} nu este o opțiune curl cunoscută de Gostman, așa că {{value}} de după ea nu a fost citit ca URL; puneți URL-ul după --url"
   }
 }

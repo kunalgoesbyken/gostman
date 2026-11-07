@@ -64,5 +64,12 @@
   "proxy": {
     "invalidAddress": "「{{address}}」は有効なプロキシアドレスではありません",
     "unsupportedScheme": "プロキシスキーム「{{scheme}}」には対応していません。http、https、socks5のいずれかを使用してください"
+  },
+  "curl": {
+    "notCurl": "テキストがcurlで始まっていません",
+    "unclosedQuote": "curlコマンドに閉じられていない引用符があります",
+    "needsValue": "{{option}}には値が必要です",
+    "noUrl": "curlコマンドにURLがありません",
+    "noUrlAfterOption": "curlコマンドにURLがありません。{{option}}はGostmanが認識するcurlオプションではないため、その後の{{value}}はURLとして読み取られませんでした。URLは--urlの後に置いてください"
   }
 }

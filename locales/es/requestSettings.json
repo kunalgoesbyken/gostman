@@ -23,7 +23,7 @@
     "opensInFull": "Editor completo",
     "opensInVariables": "Vista de variables",
     "jsonDepth": "Expandir respuestas JSON",
-    "jsonDepthDefault": "Valor predeterminado de la app",
+    "jsonDepthDefault": "Valor predeterminado de la app (nivel {{count}})",
     "tags": "Etiquetas",
     "tagsPlaceholder": "humo, regresión",
     "description": "Descripción",

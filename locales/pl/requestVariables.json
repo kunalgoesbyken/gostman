@@ -9,14 +9,19 @@
       "json": "JSON",
       "enum": "Jedna z listy"
     },
+    "typeHint": "Dowolny i Tekst trafiają do skryptów jako tekst. Dowolny oznacza, że nie wybrano typu; Tekst oznacza, że wartość ma być traktowana jako tekst. Każdy typ wysyła wartość dokładnie tak, jak ją zapisano; typ decyduje o tym, co otrzymują skrypty i jakie wartości są akceptowane.",
     "problems": {
       "required": "{{name}} wymaga wartości.",
       "number": "{{name}} musi być liczbą.",
       "integer": "{{name}} musi być liczbą całkowitą.",
       "boolean": "{{name}} musi mieć wartość true lub false.",
       "json": "{{name}} musi być prawidłowym JSON-em.",
-      "enum": "{{name}} musi być jedną z wartości: {{choices}}."
+      "enum": "{{name}} musi być jedną z wartości: {{choices}}.",
+      "numberComma": "{{name}} musi być liczbą z kropką jako separatorem dziesiętnym i bez separatora tysięcy, na przykład 1.5 lub 1500.",
+      "inexact": "{{name}} jest liczbą, której skrypt nie może przechować dokładnie. Użyj typu Tekst, aby zachować ją w zapisanej postaci.",
+      "jsonInexact": "{{name}} zawiera liczbę {{number}}, której skrypt nie może przechować dokładnie. Zapisz ją jako ciąg znaków w cudzysłowie."
     },
+    "fromReference": "{{problem}} Jej wartość pochodzi z {{written}}.",
     "blocked": "Żądanie nie zostało wysłane z powodu jego zmiennych.\n{{problems}}"
   }
 }

@@ -9,14 +9,19 @@
       "json": "JSON",
       "enum": "列表中的一项"
     },
+    "typeHint": "“任意”和“文本”都以文本形式传给脚本。“任意”表示未选择类型；“文本”表示该值应作为文本使用。无论哪种类型，值都会按原样发送；类型决定脚本收到什么以及接受哪些值。",
     "problems": {
       "required": "{{name}} 需要一个值。",
       "number": "{{name}} 必须是数字。",
       "integer": "{{name}} 必须是整数。",
       "boolean": "{{name}} 必须是 true 或 false。",
       "json": "{{name}} 必须是有效的 JSON。",
-      "enum": "{{name}} 必须是 {{choices}} 之一。"
+      "enum": "{{name}} 必须是 {{choices}} 之一。",
+      "numberComma": "{{name}} 必须是以点作小数分隔符、不含千位分隔符的数字，例如 1.5 或 1500。",
+      "inexact": "{{name}} 是脚本无法精确保存的数字。请使用“文本”类型以按原样保留。",
+      "jsonInexact": "{{name}} 包含数字 {{number}}，脚本无法精确保存它。请将其写成带引号的字符串。"
     },
+    "fromReference": "{{problem}}其值来自 {{written}}。",
     "blocked": "由于变量的问题，请求未发送。\n{{problems}}"
   }
 }

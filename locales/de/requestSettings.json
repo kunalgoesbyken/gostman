@@ -23,7 +23,7 @@
     "opensInFull": "Vollständiger Editor",
     "opensInVariables": "Variablenansicht",
     "jsonDepth": "JSON-Antworten aufklappen",
-    "jsonDepthDefault": "App-Standard",
+    "jsonDepthDefault": "App-Standard (Ebene {{count}})",
     "tags": "Tags",
     "tagsPlaceholder": "smoke, regression",
     "description": "Beschreibung",

@@ -23,7 +23,7 @@
     "opensInFull": "Editorul complet",
     "opensInVariables": "Vizualizarea variabilelor",
     "jsonDepth": "Extindere răspunsuri JSON",
-    "jsonDepthDefault": "Implicit în aplicație",
+    "jsonDepthDefault": "Implicit în aplicație (nivelul {{count}})",
     "tags": "Etichete",
     "tagsPlaceholder": "smoke, regresie",
     "description": "Descriere",

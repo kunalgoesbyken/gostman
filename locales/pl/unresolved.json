@@ -12,6 +12,8 @@
     "extractedBy": "{{reference}} jest ustawiana przez regułę wyodrębniania w „{{request}}”, więc najpierw wyślij to żądanie.",
     "extractedByOnly": "Jest ustawiana przez regułę wyodrębniania w „{{request}}”, więc najpierw wyślij to żądanie.",
     "openSource": "Otwórz „{{request}}”",
-    "define": "Dodaj {{reference}} do aktywnego środowiska"
+    "define": "Dodaj {{reference}} do aktywnego środowiska",
+    "switchedOff": "{{reference}} jest wyłączona na karcie Zmienne tego żądania.",
+    "openVars": "Otwórz kartę Zmienne"
   }
 }

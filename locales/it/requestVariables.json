@@ -9,14 +9,19 @@
       "json": "JSON",
       "enum": "Uno di un elenco"
     },
+    "typeHint": "Qualsiasi e Testo arrivano entrambi agli script come testo. Qualsiasi significa che non è stato scelto alcun tipo; Testo indica che il valore va inteso come testo. Ogni tipo invia il valore esattamente come è scritto; il tipo decide cosa ricevono gli script e quali valori sono accettati.",
     "problems": {
       "required": "{{name}} richiede un valore.",
       "number": "{{name}} deve essere un numero.",
       "integer": "{{name}} deve essere un numero intero.",
       "boolean": "{{name}} deve essere true o false.",
       "json": "{{name}} deve essere un JSON valido.",
-      "enum": "{{name}} deve essere uno tra {{choices}}."
+      "enum": "{{name}} deve essere uno tra {{choices}}.",
+      "numberComma": "{{name}} deve essere un numero con il punto per i decimali e senza separatore delle migliaia, ad esempio 1.5 o 1500.",
+      "inexact": "{{name}} è un numero che uno script non può rappresentare esattamente. Usa il tipo Testo per mantenerlo come è scritto.",
+      "jsonInexact": "{{name}} contiene il numero {{number}}, che uno script non può rappresentare esattamente. Scrivilo come stringa tra virgolette."
     },
+    "fromReference": "{{problem}} Il suo valore viene da {{written}}.",
     "blocked": "La richiesta non è stata inviata a causa delle sue variabili.\n{{problems}}"
   }
 }

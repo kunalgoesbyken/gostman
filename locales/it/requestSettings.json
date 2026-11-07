@@ -23,7 +23,7 @@
     "opensInFull": "Editor completo",
     "opensInVariables": "Vista delle variabili",
     "jsonDepth": "Espandi le risposte JSON",
-    "jsonDepthDefault": "Predefinito dell'app",
+    "jsonDepthDefault": "Predefinito dell'app (livello {{count}})",
     "tags": "Tag",
     "tagsPlaceholder": "smoke, regressione",
     "description": "Descrizione",
